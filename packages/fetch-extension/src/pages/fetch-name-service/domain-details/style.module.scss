@@ -68,11 +68,17 @@
   height: 45px;
   width: 100%;
   cursor: pointer;
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.8;
+    box-shadow: none;
+  }
+  &:hover:enabled {
+    box-shadow: -6px 6px 32px 0px rgba(157, 115, 232, 0.2),
+      6px 6px 32px 0px rgba(243, 95, 73, 0.3);
+  }
 }
-.mint:hover {
-  box-shadow: -6px 6px 32px 0px rgba(157, 115, 232, 0.2),
-    6px 6px 32px 0px rgba(243, 95, 73, 0.3);
-}
+
 .mintName {
   display: flex;
   justify-content: center;
@@ -161,6 +167,7 @@
   top: 67px;
   background-color: rgba(0, 0, 0, 0.7);
   left: 0;
+  z-index: 100;
 }
 
 .imageText {

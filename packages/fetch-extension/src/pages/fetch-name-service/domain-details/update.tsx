@@ -1,5 +1,5 @@
 import { useNotification } from "@components/notification";
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { FNS_CONFIG } from "../../../config.ui.var";
 import { setPrimary, updateDomain } from "../../../name-service/fns-apis";
@@ -9,14 +9,40 @@ interface UpdateProps {
   domainPrice: any;
   domainName: string;
   domainData: any;
+  oldDomainData: any;
   isOwned: boolean;
   isAssigned: boolean;
   isPrimary: boolean;
 }
 
+const deepCompare: (arg1: any, arg2: any) => boolean = (
+  arg1: any,
+  arg2: any
+) => {
+  if (
+    Object.prototype.toString.call(arg1) ===
+    Object.prototype.toString.call(arg2)
+  ) {
+    if (
+      Object.prototype.toString.call(arg1) === "[object Object]" ||
+      Object.prototype.toString.call(arg1) === "[object Array]"
+    ) {
+      if (Object.keys(arg1).length !== Object.keys(arg2).length) {
+        return false;
+      }
+      return Object.keys(arg1).every(function (key) {
+        return deepCompare(arg1[key], arg2[key]);
+      });
+    }
+    return arg1 === arg2;
+  }
+  return false;
+};
+
 export const Update: React.FC<UpdateProps> = ({
   domainName,
   domainData,
+  oldDomainData,
   isOwned,
   isAssigned,
   isPrimary,
@@ -27,8 +53,11 @@ export const Update: React.FC<UpdateProps> = ({
   const navigate = useNavigate();
   const notification = useNotification();
 
+  const [isTxnInProgress, setIsTxnInProgress] = useState(false);
+
   const handleMakePrimary = async () => {
     try {
+      setIsTxnInProgress(true);
       await setPrimary(current.chainId, account, domainName, notification);
       navigate(-1);
     } catch (error) {
@@ -38,6 +67,7 @@ export const Update: React.FC<UpdateProps> = ({
 
   const handleUpdate = async () => {
     try {
+      setIsTxnInProgress(true);
       await updateDomain(
         current.chainId,
         account,
@@ -81,6 +111,7 @@ export const Update: React.FC<UpdateProps> = ({
               ? handleMakePrimary
               : handleClick
           }
+          disabled={isTxnInProgress}
         >
           <span className={style["domainName"]}>Make Primary</span>
         </button>
@@ -91,6 +122,7 @@ export const Update: React.FC<UpdateProps> = ({
           onClick={
             FNS_CONFIG[current.chainId].isEditable ? handleUpdate : handleClick
           }
+          disabled={isTxnInProgress || deepCompare(domainData, oldDomainData)}
         >
           <span className={style["domainName"]}>Update</span>
         </button>

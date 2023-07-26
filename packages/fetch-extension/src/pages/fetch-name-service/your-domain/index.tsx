@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import style from "./style.module.scss";
-import { Link } from "react-router-dom";
 import {
   getDomainsByOwner,
   getPrimaryDomain,
@@ -12,12 +11,16 @@ import { useStore } from "../../../stores";
 import { Badge } from "reactstrap";
 import { TooltipForDomainNames } from "../domain-details";
 import classnames from "classnames";
+import { useNotification } from "@components/notification";
+import { useNavigate } from "react-router";
+import { Link } from "react-router-dom";
 
 export const YourDomain = () => {
   const { accountStore, chainStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
-
+  const notification = useNotification();
+  const navigate = useNavigate();
   const [primaryDomain, setPrimaryDomain]: any = useState(null);
   const [ownedDomains, setOwnedDomains] = useState<string[]>([]);
   const [assignedDomains, setAssignedDomains] = useState<string[]>([]);
@@ -78,6 +81,24 @@ export const YourDomain = () => {
 
     fetchData();
   }, [accountInfo.bech32Address, current.chainId]);
+
+  const copyAddress = useCallback(
+    async (address: string) => {
+      await navigator.clipboard.writeText(address);
+      notification.push({
+        placement: "top-center",
+        type: "success",
+        duration: 2,
+        content: "Domain Copied",
+        canDelete: true,
+        transition: {
+          duration: 0.25,
+        },
+      });
+    },
+    [notification]
+  );
+
   return (
     <div className={style["allDomains"]}>
       {isLoading ? (
@@ -109,14 +130,25 @@ export const YourDomain = () => {
             </div>
           )}
           {allDomains.map((domain: any, index: number) => (
-            <Link
-              to={`/fetch-name-service/domain-details/${domain}`}
+            <div
+              onClick={() =>
+                navigate(`/fetch-name-service/domain-details/${domain}`)
+              }
               className={style["domainCard"]}
               key={index}
             >
               <div className={style["domainDetails"]}>
                 <div className={style["domainInfo"]}>
-                  <TooltipForDomainNames domainName={domain} />
+                  <div style={{ display: "flex", flexDirection: "row" }}>
+                    <TooltipForDomainNames domainName={domain} />
+                    <i
+                      className="fas fa-copy ml-2"
+                      onClick={(e) => {
+                        copyAddress(domain);
+                        e.stopPropagation();
+                      }}
+                    />
+                  </div>
                   <div
                     style={{
                       color: "var(--text-light, #808DA0)",
@@ -174,7 +206,7 @@ export const YourDomain = () => {
                   alt=""
                 />
               </div>
-            </Link>
+            </div>
           ))}
           <Link to={`/fetch-name-service/explore`}>
             <div className={style["addNewbutton"]}>+ Get new domain</div>

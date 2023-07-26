@@ -69,6 +69,7 @@ export const DomainDetails: FunctionComponent = observer(() => {
   const accountInfo = accountStore.getAccount(current.chainId);
   const sender = accountInfo.bech32Address;
   const [domainData, setDomainData] = useState<any>({});
+  const [oldDomainData, setOldDomainData] = useState<any>({});
   const [domainPrice, setDomainPrice] = useState<any>(null);
   const [isMinted, setIsMinted] = useState<any>(null);
   const [isAssigned, setIsAssigned] = useState(false);
@@ -103,6 +104,7 @@ export const DomainDetails: FunctionComponent = observer(() => {
           domainName
         );
         setDomainData(fetchedDomainData.domain_data || {});
+        setOldDomainData(fetchedDomainData.domain_data || {});
         const isDomainMinted = await getDomainStatus(
           current.chainId,
           domainName
@@ -223,9 +225,12 @@ export const DomainDetails: FunctionComponent = observer(() => {
                 borderColor: "transparent",
                 color: "white",
                 textAlign: "center",
+                resize: "none",
               }}
               onDragStart={(e) => e.preventDefault()}
-              placeholder="Description hasn't been set"
+              placeholder={
+                isOwned ? "Click to edit" : "Description hasn't been set"
+              }
               maxLength={255}
               onChange={(e) => {
                 setDomainData({
@@ -253,7 +258,7 @@ export const DomainDetails: FunctionComponent = observer(() => {
                   className={style["values"]}
                   value={domainData[property]}
                   onDragStart={(e) => e.preventDefault()}
-                  placeholder="Not Set"
+                  placeholder={isOwned ? "Click to edit" : "Not Set"}
                   onChange={(e) => {
                     setDomainData({
                       ...domainData,
@@ -274,6 +279,7 @@ export const DomainDetails: FunctionComponent = observer(() => {
               isOwned={isOwned}
               isAssigned={isAssigned}
               isPrimary={isPrimary}
+              oldDomainData={oldDomainData}
             />
           ) : isMinted && !isOwned && !isAssigned ? (
             <BuyOrBid domainName={domainName} />

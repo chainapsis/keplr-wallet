@@ -22,7 +22,7 @@ export const Mint: React.FC<MintProps> = ({ domainPrice, domainName }) => {
   const language = useLanguage();
   const fiatCurrency = language.fiatCurrency;
   const notification = useNotification();
-
+  const [isTxnInProgress, setIsTxnInProgress] = useState(false);
   const [showPopUp, setShowPopUp] = useState(false);
   const [mintingPrice, setmintingPrice] = useState("");
 
@@ -61,6 +61,7 @@ export const Mint: React.FC<MintProps> = ({ domainPrice, domainName }) => {
   };
 
   const handleContinueButtonClick = async () => {
+    setIsTxnInProgress(true);
     try {
       await mintDomain(
         current.chainId,
@@ -125,7 +126,7 @@ export const Mint: React.FC<MintProps> = ({ domainPrice, domainName }) => {
               <button onClick={handleCancelButtonClick}>Cancel</button>
               <button
                 onClick={handleContinueButtonClick}
-                disabled={mintingPrice === "Not Available"}
+                disabled={mintingPrice === "Not Available" || isTxnInProgress}
               >
                 Continue
               </button>
