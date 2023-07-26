@@ -97,10 +97,15 @@ export const Mint: React.FC<MintProps> = ({ domainPrice, domainName }) => {
           color="primary"
           onClick={handleMintButtonClick}
         >
-          MINT
-          <span style={{ color: "purple" }}>
-            <TooltipForDomainNames domainName={domainName} />
-          </span>
+          <div className={style["mintName"]}>
+            MINT
+            <div
+              className={domainName.length > 15 ? "" : style["domainName"]}
+              style={{ color: "purple" }}
+            >
+              <TooltipForDomainNames domainName={domainName} />
+            </div>
+          </div>
         </button>
       </div>
 

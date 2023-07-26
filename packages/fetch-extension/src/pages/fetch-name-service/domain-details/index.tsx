@@ -212,7 +212,24 @@ export const DomainDetails: FunctionComponent = observer(() => {
               {isMinted ? (isOwned ? "OWNED" : "BUY") : "AVAILABLE"}
             </div>
             <div className={style["description"]}>
-              {domainData?.description || "Description hasn't been set"}
+              <input
+                disabled={!isOwned || !FNS_CONFIG[current.chainId].isEditable}
+                value={domainData.description || ""}
+                style={{
+                  width: "225px",
+                  backgroundColor: "transparent",
+                  borderColor: "transparent",
+                  color: "white",
+                }}
+                onDragStart={(e) => e.preventDefault()}
+                placeholder="Description hasn't been set"
+                onChange={(e) => {
+                  setDomainData({
+                    ...domainData,
+                    description: e.target.value,
+                  });
+                }}
+              />{" "}
             </div>
           </div>
           <div className={style["domainInfoGroup"]}>
