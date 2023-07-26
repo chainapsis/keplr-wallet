@@ -136,6 +136,7 @@ export const DomainDetails: FunctionComponent = observer(() => {
         }
         setIsLoading(false);
       } catch (error) {
+        setMessage("Error fetching domain data");
         console.error("Error fetching domain data:", error);
       }
     };
@@ -187,7 +188,10 @@ export const DomainDetails: FunctionComponent = observer(() => {
     >
       {isLoading ? (
         <div className={style["loader"]}>
-          {message} <i className="fas fa-spinner fa-spin ml-2" />
+          {message}{" "}
+          {!message.includes("Error") && (
+            <i className="fas fa-spinner fa-spin ml-2" />
+          )}
         </div>
       ) : (
         <div>
@@ -212,17 +216,19 @@ export const DomainDetails: FunctionComponent = observer(() => {
               {isMinted ? (isOwned ? "OWNED" : "BUY") : "AVAILABLE"}
             </div>
             <div className={style["description"]}>
-              <input
+              <textarea
                 disabled={!isOwned || !FNS_CONFIG[current.chainId].isEditable}
                 value={domainData.description || ""}
                 style={{
-                  width: "225px",
+                  width: "330px",
                   backgroundColor: "transparent",
                   borderColor: "transparent",
                   color: "white",
+                  textAlign: "center",
                 }}
                 onDragStart={(e) => e.preventDefault()}
                 placeholder="Description hasn't been set"
+                maxLength={255}
                 onChange={(e) => {
                   setDomainData({
                     ...domainData,

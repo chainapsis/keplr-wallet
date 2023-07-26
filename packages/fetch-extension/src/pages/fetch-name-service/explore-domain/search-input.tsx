@@ -12,7 +12,7 @@ export const SearchInput = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   const validation = (string: string) => {
-    const invalidCharacters = ["$", "%", "/", "|", "\\", ":", ";", "."];
+    const invalidCharacters = ["#", "$", "%", "/", "|", "\\", ":", ";", "."];
     if (string.split("").some((char) => invalidCharacters.includes(char))) {
       return "Invalid special characters";
     }
