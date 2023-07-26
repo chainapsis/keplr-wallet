@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import style from "./style.module.scss";
 import { useNavigate } from "react-router-dom";
+import searchButton from "@assets/icon/search.png";
+import arrowIcon from "@assets/icon/send-token.png";
 
 export const SearchInput = () => {
   const navigate = useNavigate();
@@ -57,23 +59,27 @@ export const SearchInput = () => {
       <div className={style["searchContainer"]}>
         <input
           type="text"
+          maxLength={64}
           value={searchText}
-          className={style["inputStyle"]}
+          className={style["searchInput"]}
           onChange={handleChange}
           onKeyPress={handleKeyPress}
           placeholder="Search a .FET name"
         />
-        <button
-          className={style["buttonStyle"]}
-          onClick={handleSearch}
-          disabled={searchText.trim() === "" || invalidDomain}
-        >
-          SEARCH
-        </button>
+        <img src={searchButton} className={style["searchIcon"]} alt="" />
       </div>
       {errorMessage && (
         <div className={style["invalidText"]}>{errorMessage}</div>
       )}
+
+      <button
+        className={style["registerButton"]}
+        onClick={handleSearch}
+        disabled={searchText.trim() === "" || invalidDomain}
+      >
+        Register{" "}
+        <img src={arrowIcon} className={style["registerIcon"]} alt="" />
+      </button>
     </React.Fragment>
   );
 };

@@ -191,7 +191,7 @@ export const DomainDetails: FunctionComponent = observer(() => {
             />
             {!domainData.background && (
               <div className={style["imageText"]}>
-                <TooltipForDomainNames domainName={domainName} />
+                <TooltipForDomainNames domainName={domainName.toUpperCase()} />
               </div>
             )}
 

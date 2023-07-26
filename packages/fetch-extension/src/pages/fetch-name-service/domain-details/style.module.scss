@@ -72,7 +72,21 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-
+.unchangedValues {
+  background: transparent;
+  font-size: small;
+  font-weight: bold;
+  background-color: white;
+  color: black;
+  border-radius: 30px;
+  border: none;
+  outline: none;
+  margin: 0;
+  height: 45px;
+  width: 100%;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 //background
 .bgBiurChild {
   top: 981px;

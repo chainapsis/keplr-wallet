@@ -52,11 +52,11 @@ export const formatDomain = (domainName: string): string => {
   const maxLength = 15;
 
   if (domainName.length <= maxLength) {
-    return domainName.toUpperCase();
+    return domainName;
   } else {
     const firstPart = domainName.slice(0, 4);
     const lastPart = domainName.slice(-8);
-    return `${firstPart}...${lastPart}`.toUpperCase();
+    return `${firstPart}...${lastPart}`;
   }
 };
 
