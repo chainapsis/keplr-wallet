@@ -152,7 +152,7 @@ const executeTxn = async (
           placement: "top-center",
           type: "success",
           duration: 2,
-          content: `transaction successful!`,
+          content: `Transaction Successful!`,
           canDelete: true,
           transition: {
             duration: 0.25,
@@ -165,7 +165,7 @@ const executeTxn = async (
           placement: "top-center",
           type: "danger",
           duration: 2,
-          content: `transaction failed!`,
+          content: `Transaction Failed!`,
           canDelete: true,
           transition: {
             duration: 0.25,

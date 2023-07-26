@@ -6,8 +6,8 @@ import { ExploreDomain } from "./explore-domain";
 import { YourDomain } from "./your-domain";
 
 const tabs = [
-  { tabName: "explore", displayName: "EXPLORE" },
-  { tabName: "yourDomain", displayName: "YOUR DOMAIN" },
+  { tabName: "explore", displayName: "Explore" },
+  { tabName: "yourDomain", displayName: "Your Domain" },
 ];
 
 export const FetchnameService = () => {

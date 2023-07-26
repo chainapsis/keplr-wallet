@@ -77,7 +77,7 @@ export const DomainDetails: FunctionComponent = observer(() => {
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState("Loading Domain Info");
   const [showPopup, _setShowPopup] = useState(false);
-  const [activeTab, setActiveTab] = useState("properties");
+  const [activeTab, _setActiveTab] = useState("properties");
 
   useEffect(() => {
     const checkIsAssigned = async () => {
@@ -165,7 +165,9 @@ export const DomainDetails: FunctionComponent = observer(() => {
   }, [accountInfo.txTypeInProgress, current.chainId, domainName, sender]);
 
   const handleTabChange = (tabName: string) => {
-    setActiveTab(tabName);
+    if (tabName === "properties")
+      navigate("/fetch-name-service/domain-details/" + domainName);
+    else window.open("https://www.fetns.domains/domains/" + domainName);
   };
   return (
     <HeaderLayout
@@ -193,94 +195,86 @@ export const DomainDetails: FunctionComponent = observer(() => {
             <i className="fas fa-spinner fa-spin ml-2" />
           )}
         </div>
-      ) : (
-        <div>
-          <Tab
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
+      ) : null}
+      <div>
+        <Tab tabs={tabs} activeTab={activeTab} onTabChange={handleTabChange} />
+        <div className={style["domainIntro"]}>
+          <img
+            style={{ height: "130px" }}
+            src={domainData.background || domainImage}
+            alt="Domain Image"
           />
-          <div className={style["domainIntro"]}>
-            <img
-              style={{ height: "130px" }}
-              src={domainData.background || domainImage}
-              alt="Domain Image"
-            />
-            {!domainData.background && (
-              <div className={style["imageText"]}>
-                <TooltipForDomainNames domainName={domainName.toUpperCase()} />
+          {!domainData.background && (
+            <div className={style["imageText"]}>
+              <TooltipForDomainNames domainName={domainName.toUpperCase()} />
+            </div>
+          )}
+
+          <div className={style["availability"]}>
+            {isMinted ? (isOwned ? "OWNED" : "BUY") : "AVAILABLE"}
+          </div>
+          <div className={style["description"]}>
+            <textarea
+              disabled={!isOwned || !FNS_CONFIG[current.chainId].isEditable}
+              value={domainData.description || ""}
+              style={{
+                width: "330px",
+                backgroundColor: "transparent",
+                borderColor: "transparent",
+                color: "white",
+                textAlign: "center",
+              }}
+              onDragStart={(e) => e.preventDefault()}
+              placeholder="Description hasn't been set"
+              maxLength={255}
+              onChange={(e) => {
+                setDomainData({
+                  ...domainData,
+                  description: e.target.value,
+                });
+              }}
+            />{" "}
+          </div>
+        </div>
+        <div className={style["domainInfoGroup"]}>
+          {Object.keys(domainData)
+            .filter((key: string) => properties.includes(key))
+            .map((property) => (
+              <div className={style["domainInfo"]} key={property}>
+                <div className={style["keys"]}>{property}</div>
+                <input
+                  disabled={!isOwned || !FNS_CONFIG[current.chainId].isEditable}
+                  className={style["values"]}
+                  value={domainData[property]}
+                  onDragStart={(e) => e.preventDefault()}
+                  placeholder="Not Set"
+                  onChange={(e) => {
+                    setDomainData({
+                      ...domainData,
+                      [property]: e.target.value,
+                    });
+                  }}
+                />
               </div>
-            )}
-
-            <div className={style["availability"]}>
-              {isMinted ? (isOwned ? "OWNED" : "BUY") : "AVAILABLE"}
-            </div>
-            <div className={style["description"]}>
-              <textarea
-                disabled={!isOwned || !FNS_CONFIG[current.chainId].isEditable}
-                value={domainData.description || ""}
-                style={{
-                  width: "330px",
-                  backgroundColor: "transparent",
-                  borderColor: "transparent",
-                  color: "white",
-                  textAlign: "center",
-                }}
-                onDragStart={(e) => e.preventDefault()}
-                placeholder="Description hasn't been set"
-                maxLength={255}
-                onChange={(e) => {
-                  setDomainData({
-                    ...domainData,
-                    description: e.target.value,
-                  });
-                }}
-              />{" "}
-            </div>
-          </div>
-          <div className={style["domainInfoGroup"]}>
-            {Object.keys(domainData)
-              .filter((key: string) => properties.includes(key))
-              .map((property) => (
-                <div className={style["domainInfo"]} key={property}>
-                  <div className={style["keys"]}>{property}</div>
-                  <input
-                    disabled={
-                      !isOwned || !FNS_CONFIG[current.chainId].isEditable
-                    }
-                    className={style["values"]}
-                    value={domainData[property]}
-                    onDragStart={(e) => e.preventDefault()}
-                    placeholder="Not Set"
-                    onChange={(e) => {
-                      setDomainData({
-                        ...domainData,
-                        [property]: e.target.value,
-                      });
-                    }}
-                  />
-                </div>
-              ))}
-          </div>
-
-          {!isLoading &&
-            (isOwned || isAssigned ? (
-              <Update
-                domainName={domainName}
-                domainPrice={domainPrice}
-                domainData={domainData}
-                isOwned={isOwned}
-                isAssigned={isAssigned}
-                isPrimary={isPrimary}
-              />
-            ) : isMinted && !isOwned && !isAssigned ? (
-              <BuyOrBid domainName={domainName} />
-            ) : (
-              <Mint domainPrice={domainPrice} domainName={domainName} />
             ))}
         </div>
-      )}
 
+        {!isLoading &&
+          (isOwned || isAssigned ? (
+            <Update
+              domainName={domainName}
+              domainPrice={domainPrice}
+              domainData={domainData}
+              isOwned={isOwned}
+              isAssigned={isAssigned}
+              isPrimary={isPrimary}
+            />
+          ) : isMinted && !isOwned && !isAssigned ? (
+            <BuyOrBid domainName={domainName} />
+          ) : (
+            <Mint domainPrice={domainPrice} domainName={domainName} />
+          ))}
+      </div>
       {showPopup && <MessagePopup message={message} />}
     </HeaderLayout>
   );
