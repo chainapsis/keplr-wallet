@@ -116,12 +116,12 @@ export const YourDomain = () => {
                   }}
                 >
                   {primaryDomain?.domain === domain && (
-                    <Badge className={style["badge"]} color="success" pill>
+                    <Badge className={style["badge"]} color="danger" pill>
                       Primary
                     </Badge>
                   )}
                   {ownedDomains.includes(domain) && (
-                    <Badge className={style["badge"]} color="warning" pill>
+                    <Badge className={style["badge"]} color="success" pill>
                       Owned
                     </Badge>
                   )}

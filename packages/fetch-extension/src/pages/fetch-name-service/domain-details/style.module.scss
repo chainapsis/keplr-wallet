@@ -122,13 +122,17 @@
   color: white;
   font-size: small;
   text-align: center;
-  height: 55%;
-  width: 94%;
+  height: 80vh;
+  width: 100%;
   display: flex;
-  position: fixed;
+  position: absolute;
   align-items: center;
   justify-content: center;
+  top: 67px;
+  background-color: rgba(0, 0, 0, 0.3);
+  left: 0;
 }
+
 .imageText {
   margin-top: 5px;
   color: aliceblue;
