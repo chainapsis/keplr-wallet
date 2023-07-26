@@ -116,17 +116,28 @@ export const YourDomain = () => {
                   }}
                 >
                   {primaryDomain?.domain === domain && (
-                    <Badge className={style["badge"]} color="danger" pill>
+                    <Badge
+                      className={style["badge"]}
+                      style={{ background: "#F9774B" }}
+                    >
                       Primary
                     </Badge>
                   )}
                   {ownedDomains.includes(domain) && (
-                    <Badge className={style["badge"]} color="success" pill>
+                    <Badge
+                      className={style["badge"]}
+                      style={{
+                        background: "var(--indigo-indigo-500, #6360BF)",
+                      }}
+                    >
                       Owned
                     </Badge>
                   )}
                   {assignedDomains.includes(domain) && (
-                    <Badge className={style["badge"]} color="primary" pill>
+                    <Badge
+                      className={style["badge"]}
+                      style={{ border: "1px solid", background: "transparent" }}
+                    >
                       Assigned
                     </Badge>
                   )}

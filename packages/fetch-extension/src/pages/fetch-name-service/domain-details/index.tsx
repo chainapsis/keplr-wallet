@@ -24,6 +24,7 @@ import { MessagePopup } from "./popup";
 import style from "./style.module.scss";
 import { Update } from "./update";
 import { observer } from "mobx-react-lite";
+import { Tab } from "@new-components/tab";
 
 export const TooltipForDomainNames = ({
   domainName,
@@ -46,7 +47,11 @@ export const TooltipForDomainNames = ({
     <div>{formatDomain(domainName)}</div>
   );
 };
-
+const tabs = [
+  { tabName: "properties", displayName: "PROPERTIES" },
+  { tabName: "bids", displayName: "BIDS" },
+  { tabName: "activities", displayName: "ACTIVITIES" },
+];
 const properties = [
   "address",
   "email",
@@ -72,6 +77,7 @@ export const DomainDetails: FunctionComponent = observer(() => {
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState("Loading Domain Info");
   const [showPopup, _setShowPopup] = useState(false);
+  const [activeTab, setActiveTab] = useState("properties");
 
   useEffect(() => {
     const checkIsAssigned = async () => {
@@ -157,6 +163,9 @@ export const DomainDetails: FunctionComponent = observer(() => {
     }
   }, [accountInfo.txTypeInProgress, current.chainId, domainName, sender]);
 
+  const handleTabChange = (tabName: string) => {
+    setActiveTab(tabName);
+  };
   return (
     <HeaderLayout
       showChainName={false}
@@ -182,7 +191,11 @@ export const DomainDetails: FunctionComponent = observer(() => {
         </div>
       ) : (
         <div style={{ fontFamily: "monospace" }}>
-          <div className={style["header"]}>PROPERTIES</div>
+          <Tab
+            tabs={tabs}
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+          />
           <div className={style["domainIntro"]}>
             <img
               style={{ height: "130px" }}

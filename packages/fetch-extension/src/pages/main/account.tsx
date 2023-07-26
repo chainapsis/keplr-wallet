@@ -17,6 +17,7 @@ import { CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB } from "../../config.ui.var";
 import { getPrimaryDomain } from "../../name-service/fns-apis";
 import { useStore } from "../../stores";
 import styleAccount from "./account.module.scss";
+import { TooltipForDomainNames } from "../fetch-name-service/domain-details";
 
 export const AccountView: FunctionComponent = observer(() => {
   const navigate = useNavigate();
@@ -218,7 +219,7 @@ export const AccountView: FunctionComponent = observer(() => {
               onClick={() => navigate("/fetch-name-service/yourDomain")}
             >
               <i className="fas fa-link" />
-              {domain}
+              {TooltipForDomainNames({ domainName: domain })}
             </div>
           ) : (
             <Button
