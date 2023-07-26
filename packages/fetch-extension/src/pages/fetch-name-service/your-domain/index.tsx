@@ -120,6 +120,8 @@ export const YourDomain = () => {
                   <div
                     style={{
                       color: "var(--text-light, #808DA0)",
+                      fontSize: "small",
+                      margin: "10px 0",
                     }}
                   >
                     Minted on{" "}
@@ -155,7 +157,10 @@ export const YourDomain = () => {
                     {assignedDomains.includes(domain) && (
                       <Badge
                         className={style["badge"]}
-                        style={{ border: "1px solid", background: "transparent" }}
+                        style={{
+                          border: "1px solid",
+                          background: "transparent",
+                        }}
                       >
                         Assigned
                       </Badge>
