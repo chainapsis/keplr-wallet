@@ -45,7 +45,6 @@
 
 .buttonStyle {
   font-size: small;
-  font-weight: bold;
   background-color: white;
   color: var(--dark, #25282b);
   border-radius: 30px;
@@ -58,7 +57,6 @@
 }
 
 .gradientContent {
-  font-weight: bold;
   background: linear-gradient(to right, #9075ff, #ff5c30);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -78,7 +76,6 @@
   padding-left: 5px;
   padding-right: 5px;
   margin: 16px 0px;
-  font-weight: bold;
 }
 .moreDetails:hover {
   color: white;

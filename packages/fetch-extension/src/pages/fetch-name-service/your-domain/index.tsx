@@ -100,7 +100,6 @@ export const YourDomain = () => {
                 <div
                   style={{
                     color: "var(--text-light, #808DA0)",
-                    fontWeight: "lighter",
                   }}
                 >
                   Minted on{" "}

@@ -48,9 +48,9 @@ export const TooltipForDomainNames = ({
   );
 };
 const tabs = [
-  { tabName: "properties", displayName: "PROPERTIES" },
-  { tabName: "bids", displayName: "BIDS" },
-  { tabName: "activities", displayName: "ACTIVITIES" },
+  { tabName: "properties", displayName: "Properties" },
+  { tabName: "bids", displayName: "Bids" },
+  { tabName: "activities", displayName: "Activities" },
 ];
 const properties = [
   "address",
@@ -190,7 +190,7 @@ export const DomainDetails: FunctionComponent = observer(() => {
           {message} <i className="fas fa-spinner fa-spin ml-2" />
         </div>
       ) : (
-        <div style={{ fontFamily: "monospace" }}>
+        <div>
           <Tab
             tabs={tabs}
             activeTab={activeTab}

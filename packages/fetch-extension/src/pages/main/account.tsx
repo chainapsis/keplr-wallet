@@ -78,10 +78,11 @@ export const AccountView: FunctionComponent = observer(() => {
         setDomain(domain);
       } catch (error) {
         console.error("Error fetching domains:", error);
+        setDomain(undefined);
       }
       setIsDomainloading(false);
     };
-
+    setDomain(undefined);
     fetchData();
   }, [accountInfo.bech32Address, current.chainId]);
 
@@ -212,7 +213,7 @@ export const AccountView: FunctionComponent = observer(() => {
           <div style={{ flex: 1 }} />
           {isDomainloading ? (
             <i className="fas fa-spinner fa-spin" style={{ margin: "10px" }} />
-          ) : domain ? (
+          ) : !!domain ? (
             <div
               style={{ margin: "10px" }}
               className={styleAccount["address"]}

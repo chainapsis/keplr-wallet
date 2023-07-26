@@ -4,7 +4,7 @@
   justify-content: center;
   margin-top: 10%;
   font-weight: 500;
-  font-family: monospace;
+  font-family: Jost;
 }
 
 .domainCard {
@@ -35,7 +35,6 @@
   display: flex;
   justify-content: space-between;
   color: white;
-  font-weight: bold;
   background: rgba(255, 255, 255, 0.15);
   margin: 12px;
   display: flex;
@@ -64,11 +63,12 @@
   font-size: small;
   text-align: center;
   height: 55%;
-  width: 65%;
+  width: 100%;
   display: flex;
   position: fixed;
   align-items: center;
   justify-content: center;
+  left: 0px;
 }
 .badge {
   display: flex;

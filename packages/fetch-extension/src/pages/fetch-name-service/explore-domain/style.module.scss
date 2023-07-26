@@ -4,6 +4,7 @@
   align-items: center;
   margin: 25px 0px;
   font-size: 25px;
+  font-weight: 300;
 }
 
 .containerStyle {
@@ -24,7 +25,6 @@
   outline: none;
   margin-left: 5%;
   background-color: transparent;
-  font-family: monospace;
 }
 
 .searchContainer {
@@ -106,7 +106,7 @@
   width: 14px;
 }
 .gradientContent {
-  font-weight: bold;
+  font-weight: 300;
   background: linear-gradient(to right, #9075ff, #ff5c30);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
