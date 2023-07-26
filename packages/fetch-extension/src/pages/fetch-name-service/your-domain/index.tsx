@@ -11,6 +11,7 @@ import { parseTimestampToDate } from "@utils/parse-timestamp-to-date";
 import { useStore } from "../../../stores";
 import { Badge } from "reactstrap";
 import { TooltipForDomainNames } from "../domain-details";
+import classnames from "classnames";
 
 export const YourDomain = () => {
   const { accountStore, chainStore } = useStore();
@@ -77,7 +78,6 @@ export const YourDomain = () => {
 
     fetchData();
   }, [accountInfo.bech32Address, current.chainId]);
-
   return (
     <div className={style["allDomains"]}>
       {isLoading ? (
@@ -86,71 +86,95 @@ export const YourDomain = () => {
           <i className="fas fa-spinner fa-spin ml-2" />
         </div>
       ) : allDomains.length === 0 ? (
-        <div className={style["loader"]}>No domains available right now.</div>
+        <div>
+          <div className={style["loader"]}>
+            <div>No domains available right now.</div>
+            <Link
+              className={classnames(
+                style["addNewbutton"],
+                style["emptyAddNewButton"]
+              )}
+              to={`/fetch-name-service/explore`}
+            >
+              + Get new domain
+            </Link>
+          </div>
+        </div>
       ) : (
-        allDomains.map((domain: any, index: number) => (
-          <Link
-            to={`/fetch-name-service/domain-details/${domain}`}
-            className={style["domainCard"]}
-            key={index}
-          >
-            <div className={style["domainDetails"]}>
-              <div className={style["domainInfo"]}>
-                <TooltipForDomainNames domainName={domain} />
-                <div
-                  style={{
-                    color: "var(--text-light, #808DA0)",
-                  }}
-                >
-                  Minted on{" "}
-                  {isMintDateLoaded ? (
-                    mintedOn[domain]
-                  ) : (
-                    <i className="fas fa-spinner fa-spin" />
-                  )}
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                  }}
-                >
-                  {primaryDomain?.domain === domain && (
-                    <Badge
-                      className={style["badge"]}
-                      style={{ background: "#F9774B" }}
-                    >
-                      Primary
-                    </Badge>
-                  )}
-                  {ownedDomains.includes(domain) && (
-                    <Badge
-                      className={style["badge"]}
-                      style={{
-                        background: "var(--indigo-indigo-500, #6360BF)",
-                      }}
-                    >
-                      Owned
-                    </Badge>
-                  )}
-                  {assignedDomains.includes(domain) && (
-                    <Badge
-                      className={style["badge"]}
-                      style={{ border: "1px solid", background: "transparent" }}
-                    >
-                      Assigned
-                    </Badge>
-                  )}
-                </div>
-              </div>
-
-              <img
-                className={style["arrowIcon"]}
-                src={require("@assets/svg/arrow-right-outline.svg")}
-                alt=""
-              />
+        <div>
+          {assignedDomains.length > 0 && !primaryDomain?.domain && (
+            <div className={style["primaryHelp"]}>
+              &#128161; Choose a primary domain from the options below, and it
+              will appear on your dashboard.
             </div>
+          )}
+          {allDomains.map((domain: any, index: number) => (
+            <Link
+              to={`/fetch-name-service/domain-details/${domain}`}
+              className={style["domainCard"]}
+              key={index}
+            >
+              <div className={style["domainDetails"]}>
+                <div className={style["domainInfo"]}>
+                  <TooltipForDomainNames domainName={domain} />
+                  <div
+                    style={{
+                      color: "var(--text-light, #808DA0)",
+                    }}
+                  >
+                    Minted on{" "}
+                    {isMintDateLoaded ? (
+                      mintedOn[domain]
+                    ) : (
+                      <i className="fas fa-spinner fa-spin" />
+                    )}
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                    }}
+                  >
+                    {primaryDomain?.domain === domain && (
+                      <Badge
+                        className={style["badge"]}
+                        style={{ background: "#F9774B" }}
+                      >
+                        Primary
+                      </Badge>
+                    )}
+                    {ownedDomains.includes(domain) && (
+                      <Badge
+                        className={style["badge"]}
+                        style={{
+                          background: "var(--indigo-indigo-500, #6360BF)",
+                        }}
+                      >
+                        Owned
+                      </Badge>
+                    )}
+                    {assignedDomains.includes(domain) && (
+                      <Badge
+                        className={style["badge"]}
+                        style={{ border: "1px solid", background: "transparent" }}
+                      >
+                        Assigned
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+
+                <img
+                  className={style["arrowIcon"]}
+                  src={require("@assets/svg/arrow-right-outline.svg")}
+                  alt=""
+                />
+              </div>
+            </Link>
+          ))}
+          <Link to={`/fetch-name-service/explore`}>
+            <div className={style["addNewbutton"]}>+ Get new domain</div>
           </Link>
-        ))
+        </div>
       )}
     </div>
   );

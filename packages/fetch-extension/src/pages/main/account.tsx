@@ -227,7 +227,7 @@ export const AccountView: FunctionComponent = observer(() => {
               color="primary"
               size="sm"
               style={{ margin: "10px" }}
-              onClick={() => navigate("/fetch-name-service/explore")}
+              onClick={() => navigate("/fetch-name-service/yourDomain")}
             >
               <i className="fas fa-link" /> Link .FET domain
             </Button>

@@ -236,6 +236,12 @@ export const DomainDetails: FunctionComponent = observer(() => {
             />{" "}
           </div>
         </div>
+        {isOwned && !domainData.address && (
+          <div className={style["beneficiaryHelp"]}>
+            &#128161; Assign a beneficiary address to make the domain point to
+            it.
+          </div>
+        )}
         <div className={style["domainInfoGroup"]}>
           {Object.keys(domainData)
             .filter((key: string) => properties.includes(key))

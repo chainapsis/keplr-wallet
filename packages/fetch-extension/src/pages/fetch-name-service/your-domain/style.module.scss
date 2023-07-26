@@ -31,6 +31,30 @@
   margin-top: 10px;
 }
 
+.primaryHelp {
+  font-size: small;
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  margin: -20px 12px 0 12px;
+  padding: 16px;
+}
+
+.addNewbutton {
+  font-size: small;
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 12px;
+  padding: 12px;
+  text-align: center;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.emptyAddNewButton {
+  position: absolute;
+  margin-top: 80px;
+}
+
 .domainDetails {
   display: flex;
   justify-content: space-between;
@@ -48,6 +72,13 @@
   box-shadow: -6px 6px 32px 0px rgba(157, 115, 232, 0.2),
     6px 6px 32px 0px rgba(243, 95, 73, 0.3);
 }
+
+.addNewbutton:hover {
+  box-shadow: -6px 6px 32px 0px rgba(157, 115, 232, 0.2),
+    6px 6px 32px 0px rgba(243, 95, 73, 0.3);
+  color: white;
+}
+
 .domainInfo :hover {
   box-shadow: none;
 }
