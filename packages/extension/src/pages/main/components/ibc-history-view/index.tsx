@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import {
   GetIBCTransferHistories,
@@ -20,11 +20,19 @@ import {
   Subtitle3,
   Subtitle4,
 } from "../../../../components/typography";
-import { XMarkIcon } from "../../../../components/icon";
+import {
+  CheckCircleIcon,
+  LoadingIcon,
+  XMarkIcon,
+} from "../../../../components/icon";
 import { useStore } from "../../../../stores";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { IChainInfoImpl } from "@keplr-wallet/stores";
 import { ChainImageFallback } from "../../../../components/image";
+import { IconProps } from "../../../../components/icon/types";
+import { useSpringValue, animated, easings } from "@react-spring/web";
+import { defaultSpringConfig } from "../../../../styles/spring";
+import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
 
 export const IbcHistoryView: FunctionComponent<{
   isNotReady: boolean;
@@ -34,13 +42,18 @@ export const IbcHistoryView: FunctionComponent<{
     const fn = () => {
       const requester = new InExtensionMessageRequester();
       const msg = new GetIBCTransferHistories();
-      requester.sendMessage(BACKGROUND_PORT, msg).then((histories) => {
-        setHistories(histories);
+      requester.sendMessage(BACKGROUND_PORT, msg).then((newHistories) => {
+        setHistories((histories) => {
+          if (JSON.stringify(histories) !== JSON.stringify(newHistories)) {
+            return newHistories;
+          }
+          return histories;
+        });
       });
     };
 
     fn();
-    const interval = setInterval(fn, 3000);
+    const interval = setInterval(fn, 1000);
 
     return () => {
       clearInterval(interval);
@@ -101,9 +114,22 @@ const IbcHistoryViewItem: FunctionComponent<{
     >
       <YAxis>
         <XAxis alignY="center">
-          {
-            // TODO: Add icon here.
-          }
+          {!historyCompleted ? (
+            <LoadingIcon
+              width="1.25rem"
+              height="1.25rem"
+              color={ColorPalette.white}
+            />
+          ) : (
+            <CheckCircleIcon
+              width="1.25rem"
+              height="1.25rem"
+              color={ColorPalette["green-400"]}
+            />
+          )}
+
+          <Gutter size="0.5rem" />
+
           <Subtitle4
             color={
               theme.mode === "light"
@@ -111,7 +137,9 @@ const IbcHistoryViewItem: FunctionComponent<{
                 : ColorPalette["gray-10"]
             }
           >
-            IBC Transfer in Progress
+            {!historyCompleted
+              ? "IBC Transfer in Progress"
+              : "IBC Transfer Successful"}
           </Subtitle4>
           <div
             style={{
@@ -206,6 +234,24 @@ const IbcHistoryViewItem: FunctionComponent<{
                     key={i}
                     chainInfo={chainInfo}
                     completed={completed}
+                    notCompletedBlink={(() => {
+                      if (completed) {
+                        return false;
+                      }
+
+                      if (i === 0 && !completed) {
+                        return true;
+                      }
+
+                      if (!history.txFulfilled) {
+                        return false;
+                      }
+
+                      const firstNotCompletedIndex =
+                        history.ibcHistory.findIndex((item) => !item.completed);
+
+                      return i - 1 === firstNotCompletedIndex;
+                    })()}
                     isLast={chainIds.length - 1 === i}
                   />
                 );
@@ -214,61 +260,126 @@ const IbcHistoryViewItem: FunctionComponent<{
           </XAxis>
         </Box>
 
-        {!historyCompleted ? (
-          <React.Fragment>
-            <Gutter size="1rem" />
-            <Box
-              height="1px"
-              backgroundColor={
-                theme.mode === "light"
-                  ? ColorPalette["gray-50"]
-                  : ColorPalette["gray-500"]
-              }
+        <VerticalCollapseTransition collapsed={historyCompleted}>
+          <Gutter size="1rem" />
+          <Box
+            height="1px"
+            backgroundColor={
+              theme.mode === "light"
+                ? ColorPalette["gray-50"]
+                : ColorPalette["gray-500"]
+            }
+          />
+          <Gutter size="1rem" />
+
+          <XAxis alignY="center">
+            <Subtitle3>Estimated Duration</Subtitle3>
+            <div
+              style={{
+                flex: 1,
+              }}
             />
-            <Gutter size="1rem" />
+            <Body2>
+              ~
+              {Math.max(
+                history.ibcHistory.filter((h) => !h.completed).length,
+                1
+              )}{" "}
+              min
+            </Body2>
+          </XAxis>
 
-            <XAxis alignY="center">
-              <Subtitle3>Estimated Duration</Subtitle3>
-              <div
-                style={{
-                  flex: 1,
-                }}
-              />
-              <Body2>
-                ~{history.ibcHistory.filter((h) => !h.completed).length} min
-              </Body2>
-            </XAxis>
+          <Gutter size="1rem" />
 
-            <Gutter size="1rem" />
-
-            <Caption2>
-              You may close the extension while the transfer is in progress.
-            </Caption2>
-          </React.Fragment>
-        ) : null}
+          <Caption2>
+            You may close the extension while the transfer is in progress.
+          </Caption2>
+        </VerticalCollapseTransition>
       </YAxis>
     </Box>
   );
 });
 
+const ChainImageFallbackAnimated = animated(ChainImageFallback);
+
 const IbcHistoryViewItemChainImage: FunctionComponent<{
   chainInfo: IChainInfoImpl;
 
   completed: boolean;
+  notCompletedBlink: boolean;
   isLast: boolean;
-}> = ({ chainInfo, completed, isLast }) => {
+}> = ({ chainInfo, completed, notCompletedBlink, isLast }) => {
+  const opacity = useSpringValue(completed ? 1 : 0.33333, {
+    config: defaultSpringConfig,
+  });
+
+  useEffect(() => {
+    if (completed) {
+      opacity.start(1);
+    } else if (notCompletedBlink) {
+      opacity.start({
+        loop: {
+          reverse: true,
+        },
+        from: 0.33333,
+        to: 0.66666,
+        config: {
+          easing: easings.easeOutSine,
+          duration: 600,
+        },
+      });
+    } else {
+      opacity.start(0.33333);
+    }
+  }, [completed, notCompletedBlink, opacity]);
+
   return (
     <XAxis alignY="center">
-      <ChainImageFallback
+      <ChainImageFallbackAnimated
         style={{
           width: "2rem",
           height: "2rem",
-          opacity: completed ? 1 : 0.33333,
+          opacity,
         }}
         src={chainInfo.chainSymbolImageUrl}
         alt="chain image"
       />
-      {!isLast ? <Gutter size="0.25rem" /> : null}
+      {!isLast ? (
+        <React.Fragment>
+          <Gutter size="0.25rem" />
+          <ArrowRightIcon
+            width="0.75rem"
+            height="0.75rem"
+            color={ColorPalette.white}
+          />
+          <Gutter size="0.25rem" />
+        </React.Fragment>
+      ) : null}
     </XAxis>
+  );
+};
+
+export const ArrowRightIcon: FunctionComponent<IconProps> = ({
+  width = "1.5rem",
+  height = "1.5rem",
+  color,
+}) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      fill="none"
+      viewBox="0 0 12 12"
+    >
+      <path
+        fill="none"
+        stroke={color || "currentColor"}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.198"
+        d="M6.75 2.25L10.5 6m0 0L6.75 9.75M10.5 6h-9"
+      />
+    </svg>
   );
 };
