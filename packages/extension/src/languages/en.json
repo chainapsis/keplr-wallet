@@ -107,7 +107,7 @@
   "pages.register.back-up-private-key.title": "Back up private key",
   "pages.register.back-up-private-key.blur-text": "Click here to see private key",
   "pages.register.back-up-private-key.warning-title": "Backup your private key securely.",
-  "pages.register.back-up-private-key.warning-paragraph": "Anyone with your private key can have access to your assets.{br}{br}If you lose an access to your Gmail Account, the only way to recover your wallet is using your private key. Keep this in a safe place.",
+  "pages.register.back-up-private-key.warning-paragraph": "Anyone with your private key can have access to your assets.{br}{br}If you lose access to your Gmail Account, the only way to recover your wallet is using your private key. Keep this in a safe place.",
   "pages.register.back-up-private-key.import-button": "Import",
 
   "pages.register.connect-ledger.title": "Please connect your Hardware wallet",
@@ -462,7 +462,7 @@
   "components.empty-view.text": "No {subject} Yet",
   "components.input.recipient-input.wallet-address-label": "Wallet Address or ICNS",
   "components.input.amount-input.amount-label": "Amount",
-  "components.input.amount-input.max-button": "max",
+  "components.input.amount-input.max-button": "Max",
   "components.input.memo-input.memo-label": "Memo",
   "components.input.fee-control.title": "Transaction Fee",
   "components.input.fee-control.error.insufficient-fee": "Insufficient fee",
