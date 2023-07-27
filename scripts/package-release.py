@@ -5,7 +5,7 @@ import argparse
 import subprocess
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-EXTENSION_ROOT = os.path.join(PROJECT_ROOT, 'packages', 'extension')
+EXTENSION_ROOT = os.path.join(PROJECT_ROOT, 'packages', 'fetch-extension')
 RELEASES_ROOT = os.path.join(PROJECT_ROOT, 'releases')
 
 
