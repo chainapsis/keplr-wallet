@@ -358,9 +358,6 @@
   "page.sign.ethereum.title": "Sign Ethereum",
   "page.sign.ethereum.requested-network": "Requested Network",
 
-  "page.sign.components.messages.agoric.chain-id": "Chain ID: <b>{chainId}</b>",
-  "page.sign.components.messages.agoric.execution-fee": "Execution Fee",
-  "page.sign.components.messages.agoric.owner": "Owner: <b>{owner}</b>",
   "page.sign.components.messages.agoric.wallet-spend-action.execute-offer": "Type: <b>Execute Offer</b>",
   "page.sign.components.messages.agoric.wallet-spend-action.exit-offer": "Type: <b>Exit Offer {offerId}</b>",
   "pages.sign.components.messages.agoric.wallet-spend-action.offer-args": "Offer Args:",

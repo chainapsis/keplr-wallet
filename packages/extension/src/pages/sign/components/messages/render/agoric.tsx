@@ -5,9 +5,9 @@ import { CustomIcon } from "./custom-icon";
 import { Box } from "../../../../../components/box";
 import { useStore } from "../../../../../stores";
 import { observer } from "mobx-react-lite";
-import { makeMarshal } from "../../../utils/unmarshal";
+import { makeMarshal } from "../../../utils/agoric/unmarshal";
 import { LoadingIcon } from "../../../../../components/icon";
-import { displayAmount } from "../../../utils/display-amount";
+import { displayAmount } from "../../../utils/agoric/display-amount";
 import yaml from "js-yaml";
 import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../../styles";
@@ -99,10 +99,22 @@ const DumpRaw: FunctionComponent<{ object: any }> = ({ object }) => {
   );
 };
 
-const SpendActionPretty: FunctionComponent<{
-  vbank: any;
-  spendAction: any;
-}> = ({ vbank, spendAction }) => {
+const WalletSpendActionMessagePretty: FunctionComponent<{
+  chainId: string;
+  value: Value;
+}> = observer(({ chainId, value }) => {
+  const { queriesStore } = useStore();
+  const vbankQuery = queriesStore.get(chainId).agoric.queryVbankAssets;
+
+  if (!vbankQuery.data) {
+    return <LoadingIcon />;
+  }
+
+  const { spend_action: spendActionSerialized } = value;
+  const m = makeMarshal(undefined);
+  const vbank = m.fromCapData(vbankQuery.data);
+  const spendAction = m.fromCapData(JSON.parse(spendActionSerialized));
+
   const brandToInfo = new Map<string, DisplayInfo>(
     vbank.map((entry: any) => [
       entry[1].brand,
@@ -156,7 +168,7 @@ const SpendActionPretty: FunctionComponent<{
 
   return (
     <Box>
-      <Box marginBottom="0.5rem">{typeMessage}</Box>
+      <Box marginY="0.5rem">{typeMessage}</Box>
       {gives.length > 0 && <Box marginBottom="0.5rem">{gives}</Box>}
       {wants.length > 0 && <Box marginBottom="0.5rem">{wants}</Box>}
       {spendAction.offer?.offerArgs && (
@@ -175,54 +187,6 @@ const SpendActionPretty: FunctionComponent<{
           </Box>
         </Box>
       )}
-    </Box>
-  );
-};
-
-const WalletSpendActionMessagePretty: FunctionComponent<{
-  chainId: string;
-  value: Value;
-}> = observer(({ chainId, value }) => {
-  const { owner, spend_action: spendAction } = value;
-  const { queriesStore } = useStore();
-  const vbankQuery = queriesStore.get(chainId).agoric.queryVbankAssets;
-
-  const m = makeMarshal(undefined);
-
-  const spendActionPretty = vbankQuery.data ? (
-    <SpendActionPretty
-      vbank={m.fromCapData(vbankQuery.data as any)}
-      spendAction={m.fromCapData(JSON.parse(spendAction))}
-    />
-  ) : (
-    <LoadingIcon />
-  );
-
-  const chainIdMessage = (
-    <FormattedMessage
-      id="page.sign.components.messages.agoric.chain-id"
-      values={{
-        chainId,
-        b,
-      }}
-    />
-  );
-
-  const ownerMessage = (
-    <FormattedMessage
-      id="page.sign.components.messages.agoric.owner"
-      values={{
-        owner,
-        b,
-      }}
-    />
-  );
-
-  return (
-    <Box>
-      <Box marginY="0.5rem">{chainIdMessage}</Box>
-      <Box marginBottom="0.5rem">{ownerMessage}</Box>
-      {spendActionPretty}
     </Box>
   );
 });
