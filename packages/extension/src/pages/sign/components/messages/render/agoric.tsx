@@ -5,9 +5,12 @@ import { CustomIcon } from "./custom-icon";
 import { Box } from "../../../../../components/box";
 import { useStore } from "../../../../../stores";
 import { observer } from "mobx-react-lite";
-import { makeMarshal } from "../../../../../utils/unmarshal";
+import { makeMarshal } from "../../../utils/unmarshal";
 import { LoadingIcon } from "../../../../../components/icon";
-import { displayAmount } from "../../../../../utils/display-amount";
+import { displayAmount } from "../../../utils/display-amount";
+import yaml from "js-yaml";
+import { useTheme } from "styled-components";
+import { ColorPalette } from "../../../../../styles";
 
 export const AgoricWalletSpendActionMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -43,6 +46,59 @@ type Amount = {
 
 const b = (...chunks: any) => <b>{chunks}</b>;
 
+const SpendActionTypePretty: FunctionComponent<{ action: any }> = ({
+  action,
+}) => {
+  if (action.method === "executeOffer") {
+    return (
+      <FormattedMessage
+        id="page.sign.components.messages.agoric.wallet-spend-action.execute-offer"
+        values={{
+          b,
+        }}
+      />
+    );
+  }
+
+  if (action.method === "tryExitOffer") {
+    return (
+      <FormattedMessage
+        id="page.sign.components.messages.agoric.wallet-spend-action.exit-offer"
+        values={{
+          b,
+          offerId: action.offerId,
+        }}
+      />
+    );
+  }
+
+  return <React.Fragment />;
+};
+
+const DumpRaw: FunctionComponent<{ object: any }> = ({ object }) => {
+  const theme = useTheme();
+
+  return (
+    <pre
+      style={{
+        margin: 0,
+        color:
+          theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-200"],
+      }}
+    >
+      {yaml.dump(
+        JSON.parse(
+          JSON.stringify(object, (_key, value) =>
+            typeof value === "bigint" ? value.toString() : value
+          )
+        )
+      )}
+    </pre>
+  );
+};
+
 const SpendActionPretty: FunctionComponent<{
   vbank: any;
   spendAction: any;
@@ -54,16 +110,9 @@ const SpendActionPretty: FunctionComponent<{
     ])
   );
 
-  const typeMessage = (
-    <FormattedMessage
-      id="page.sign.components.messages.agoric.wallet-spend-action.execute-offer"
-      values={{
-        b,
-      }}
-    />
-  );
+  const typeMessage = <SpendActionTypePretty action={spendAction} />;
 
-  const gives = Object.entries(spendAction.offer.proposal.give ?? {}).map(
+  const gives = Object.entries(spendAction.offer?.proposal?.give ?? {}).map(
     ([kw, amount]) => {
       const brand = brandToInfo.get((amount as Amount).brand);
 
@@ -84,7 +133,7 @@ const SpendActionPretty: FunctionComponent<{
     }
   );
 
-  const wants = Object.entries(spendAction.offer.proposal.want ?? {}).map(
+  const wants = Object.entries(spendAction.offer?.proposal?.want ?? {}).map(
     ([kw, amount]) => {
       const brand = brandToInfo.get((amount as Amount).brand);
 
@@ -108,8 +157,24 @@ const SpendActionPretty: FunctionComponent<{
   return (
     <Box>
       <Box marginBottom="0.5rem">{typeMessage}</Box>
-      <Box marginBottom="0.5rem">{gives}</Box>
-      <Box marginBottom="0.5rem">{wants}</Box>
+      {gives.length > 0 && <Box marginBottom="0.5rem">{gives}</Box>}
+      {wants.length > 0 && <Box marginBottom="0.5rem">{wants}</Box>}
+      {spendAction.offer?.offerArgs && (
+        <Box marginBottom="0.5rem">
+          <FormattedMessage id="pages.sign.components.messages.agoric.wallet-spend-action.offer-args" />
+          <Box marginX="0.5rem">
+            <DumpRaw object={spendAction.offer.offerArgs} />
+          </Box>
+        </Box>
+      )}
+      {spendAction.offer?.invitationSpec && (
+        <Box>
+          <FormattedMessage id="pages.sign.components.messages.agoric.wallet-spend-action.invitation-spec" />
+          <Box marginX="0.5rem">
+            <DumpRaw object={spendAction.offer.invitationSpec} />
+          </Box>
+        </Box>
+      )}
     </Box>
   );
 };
