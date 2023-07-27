@@ -57,12 +57,12 @@ def main():
         sys.exit(1)
 
     # package up up the built extension
-    cmd = ['zip', '-r', output_filename, 'chrome']
+    cmd = ['zip', '-r', output_filename, 'manifest-v2']
     subprocess.check_call(cmd, cwd=os.path.join(EXTENSION_ROOT, 'build'))
 
     # package up firefox extenson
     cmd = ['zip', '-r', firefox_output_filename, '.']
-    subprocess.check_call(cmd, cwd= os.path.join(EXTENSION_ROOT, 'build/firefox'))
+    subprocess.check_call(cmd, cwd= os.path.join(EXTENSION_ROOT, 'build/manifest-v2'))
 
 if __name__ == '__main__':
     main()
