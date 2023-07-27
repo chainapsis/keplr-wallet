@@ -12,6 +12,7 @@ import { Subtitle2 } from "../../../../components/typography";
 import { IIBCChannelConfig } from "@keplr-wallet/hooks";
 import { ChainImageFallback } from "../../../../components/image";
 import { XAxis } from "../../../../components/axis";
+import { useIntl } from "react-intl";
 
 export const IBCTransferSelectDestinationModal: FunctionComponent<{
   chainId: string;
@@ -24,6 +25,7 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
     const { chainStore, skipQueriesStore } = useStore();
 
     const theme = useTheme();
+    const intl = useIntl();
 
     const channels =
       skipQueriesStore.queryIBCPacketForwardingTransfer.getIBCChannels(
@@ -65,7 +67,9 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
 
             setSearch(e.target.value);
           }}
-          placeholder="Search for a chain"
+          placeholder={intl.formatMessage({
+            id: "page.send.amount.ibc-transfer.modal.search-placeholder",
+          })}
         />
 
         <Gutter size="0.75rem" />

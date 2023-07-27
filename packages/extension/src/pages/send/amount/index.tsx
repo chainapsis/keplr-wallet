@@ -443,11 +443,15 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             items={[
               {
                 key: "send",
-                text: "Send",
+                text: intl.formatMessage({
+                  id: "page.send.type.send",
+                }),
               },
               {
                 key: "ibc-transfer",
-                text: "IBC Send",
+                text: intl.formatMessage({
+                  id: "page.send.type.ibc-transfer",
+                }),
               },
             ]}
             onSelect={(key) => {

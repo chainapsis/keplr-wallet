@@ -11,6 +11,7 @@ import { XAxis } from "../../../../components/axis";
 import { ChainImageFallback } from "../../../../components/image";
 import { Gutter } from "../../../../components/gutter";
 import { ArrowRightIcon } from "../../../../components/icon";
+import { useIntl } from "react-intl";
 
 export const DestinationChainView: FunctionComponent<{
   ibcChannelConfig: IIBCChannelConfig;
@@ -19,10 +20,15 @@ export const DestinationChainView: FunctionComponent<{
   const { chainStore } = useStore();
 
   const theme = useTheme();
+  const intl = useIntl();
 
   return (
     <React.Fragment>
-      <Label content="Destination Chain" />
+      <Label
+        content={intl.formatMessage({
+          id: "page.send.amount.ibc-transfer.destination-chain",
+        })}
+      />
       <Box
         minHeight="4.25rem"
         alignY="center"

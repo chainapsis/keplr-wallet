@@ -33,6 +33,7 @@ import { IconProps } from "../../../../components/icon/types";
 import { useSpringValue, animated, easings } from "@react-spring/web";
 import { defaultSpringConfig } from "../../../../styles/spring";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const IbcHistoryView: FunctionComponent<{
   isNotReady: boolean;
@@ -124,6 +125,7 @@ const IbcHistoryViewItem: FunctionComponent<{
   const { chainStore } = useStore();
 
   const theme = useTheme();
+  const intl = useIntl();
 
   const historyCompleted = (() => {
     if (!history.txFulfilled) {
@@ -179,8 +181,12 @@ const IbcHistoryViewItem: FunctionComponent<{
             }
           >
             {!historyCompleted
-              ? "IBC Transfer in Progress"
-              : "IBC Transfer Successful"}
+              ? intl.formatMessage({
+                  id: "page.main.components.ibc-history-view.item.pending",
+                })
+              : intl.formatMessage({
+                  id: "page.main.components.ibc-history-view.item.succeed",
+                })}
           </Subtitle4>
           <div
             style={{
@@ -236,7 +242,16 @@ const IbcHistoryViewItem: FunctionComponent<{
               })
               .join(", ");
 
-            return `Transfer ${assets} from ${sourceChain.chainName} to ${destinationChain.chainName}`;
+            return intl.formatMessage(
+              {
+                id: "page.main.components.ibc-history-view.paragraph",
+              },
+              {
+                assets,
+                sourceChain: sourceChain.chainName,
+                destinationChain: destinationChain.chainName,
+              }
+            );
           })()}
         </Body2>
 
@@ -321,7 +336,7 @@ const IbcHistoryViewItem: FunctionComponent<{
                   : ColorPalette["gray-200"]
               }
             >
-              Estimated Duration
+              <FormattedMessage id="page.main.components.ibc-history-view.estimated-duration" />
             </Subtitle3>
             <div
               style={{
@@ -335,12 +350,15 @@ const IbcHistoryViewItem: FunctionComponent<{
                   : ColorPalette["gray-10"]
               }
             >
-              ~
-              {Math.max(
-                history.ibcHistory.filter((h) => !h.completed).length,
-                1
-              )}{" "}
-              min
+              <FormattedMessage
+                id="page.main.components.ibc-history-view.estimated-duration.value"
+                values={{
+                  minutes: Math.max(
+                    history.ibcHistory.filter((h) => !h.completed).length,
+                    1
+                  ),
+                }}
+              />
             </Body2>
           </XAxis>
 
@@ -353,7 +371,7 @@ const IbcHistoryViewItem: FunctionComponent<{
                 : ColorPalette["gray-200"]
             }
           >
-            You may close the extension while the transfer is in progress.
+            <FormattedMessage id="page.main.components.ibc-history-view.help.can-close-extension" />
           </Caption2>
         </VerticalCollapseTransition>
       </YAxis>
