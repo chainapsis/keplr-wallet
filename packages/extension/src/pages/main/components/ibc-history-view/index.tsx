@@ -37,14 +37,45 @@ import { VerticalCollapseTransition } from "../../../../components/transition/ve
 export const IbcHistoryView: FunctionComponent<{
   isNotReady: boolean;
 }> = observer(({ isNotReady }) => {
+  const { queriesStore } = useStore();
+
   const [histories, setHistories] = useState<IBCTransferHistory[]>([]);
   useLayoutEffectOnce(() => {
+    let count = 0;
+    const alreadyCompletedHistoryMap = new Map<string, boolean>();
+
     const fn = () => {
       const requester = new InExtensionMessageRequester();
       const msg = new GetIBCTransferHistories();
       requester.sendMessage(BACKGROUND_PORT, msg).then((newHistories) => {
         setHistories((histories) => {
           if (JSON.stringify(histories) !== JSON.stringify(newHistories)) {
+            count++;
+
+            // Currently there is no elegant way to automatically refresh when an ibc transfer is complete.
+            // For now, deal with it here
+            const newCompletes = newHistories.filter((history) => {
+              if (alreadyCompletedHistoryMap.get(history.id)) {
+                return false;
+              }
+              return !!(
+                history.txFulfilled &&
+                !history.ibcHistory.some((h) => !h.completed)
+              );
+            });
+            if (count > 1) {
+              // There is no need to refresh balance if first time.
+              for (const newComplete of newCompletes) {
+                queriesStore
+                  .get(newComplete.destinationChainId)
+                  .queryBalances.getQueryBech32Address(newComplete.recipient)
+                  .fetch();
+              }
+            }
+            for (const newComplete of newCompletes) {
+              alreadyCompletedHistoryMap.set(newComplete.id, true);
+            }
+
             return newHistories;
           }
           return histories;
