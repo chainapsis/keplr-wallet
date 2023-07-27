@@ -45,6 +45,7 @@ import { Modal } from "../../../components/modal";
 import {
   DestinationChainView,
   IBCTransferSelectDestinationModal,
+  IBCTransferWarningModal,
 } from "./ibc-transfer";
 import { useIBCChannelConfigQueryString } from "../../../hooks/use-ibc-channel-config-query-string";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
@@ -62,6 +63,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     chainStore,
     queriesStore,
     skipQueriesStore,
+    uiConfigStore,
   } = useStore();
   const addressRef = useRef<HTMLInputElement | null>(null);
 
@@ -83,6 +85,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     isIBCTransferDestinationModalOpen,
     setIsIBCTransferDestinationModalOpen,
   ] = useState(false);
+  const [isIBCTransferWarningModalOpen, setIsIBCTransferWarningModalOpen] =
+    useState(false);
 
   useEffect(() => {
     if (addressRef.current) {
@@ -263,6 +267,127 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     console.log(e);
   }
 
+  const send = async () => {
+    if (!txConfigsValidate.interactionBlocked) {
+      const tx = isIBCTransfer
+        ? accountStore
+            .getAccount(chainId)
+            .cosmos.makePacketForwardIBCTransferTx(
+              sendConfigs.channelConfig.channels,
+              sendConfigs.amountConfig.amount[0].toDec().toString(),
+              sendConfigs.amountConfig.amount[0].currency,
+              sendConfigs.recipientConfig.recipient
+            )
+        : accountStore
+            .getAccount(chainId)
+            .makeSendTokenTx(
+              sendConfigs.amountConfig.amount[0].toDec().toString(),
+              sendConfigs.amountConfig.amount[0].currency,
+              sendConfigs.recipientConfig.recipient
+            );
+
+      try {
+        await tx.send(
+          sendConfigs.feeConfig.toStdFee(),
+          sendConfigs.memoConfig.memo,
+          {
+            preferNoSetFee: true,
+            preferNoSetMemo: true,
+            sendTx: async (chainId, tx, mode) => {
+              let msg: Message<Uint8Array> = new SendTxAndRecordMsg(
+                historyType,
+                chainId,
+                sendConfigs.recipientConfig.chainId,
+                tx,
+                mode,
+                false,
+                sendConfigs.senderConfig.sender,
+                sendConfigs.recipientConfig.recipient,
+                sendConfigs.amountConfig.amount.map((amount) => {
+                  return {
+                    amount: DecUtils.getTenExponentN(
+                      amount.currency.coinDecimals
+                    )
+                      .mul(amount.toDec())
+                      .toString(),
+                    denom: amount.currency.coinMinimalDenom,
+                  };
+                }),
+                sendConfigs.memoConfig.memo
+              );
+              if (isIBCTransfer) {
+                if (msg instanceof SendTxAndRecordMsg) {
+                  msg = msg.withIBCPacketForwarding(
+                    sendConfigs.channelConfig.channels
+                  );
+                } else {
+                  throw new Error("Invalid message type");
+                }
+              }
+              return await new InExtensionMessageRequester().sendMessage(
+                BACKGROUND_PORT,
+                msg
+              );
+            },
+          },
+          {
+            onBroadcasted: () => {
+              chainStore.enableVaultsWithCosmosAddress(
+                sendConfigs.recipientConfig.chainId,
+                sendConfigs.recipientConfig.recipient
+              );
+            },
+            onFulfill: (tx: any) => {
+              if (tx.code != null && tx.code !== 0) {
+                console.log(tx.log ?? tx.raw_log);
+                notification.show(
+                  "failed",
+                  intl.formatMessage({ id: "error.transaction-failed" }),
+                  ""
+                );
+                return;
+              }
+              notification.show(
+                "success",
+                intl.formatMessage({
+                  id: "notification.transaction-success",
+                }),
+                ""
+              );
+            },
+          }
+        );
+
+        if (!isDetachedMode) {
+          navigate("/", {
+            replace: true,
+          });
+        } else {
+          window.close();
+        }
+      } catch (e) {
+        if (e?.message === "Request rejected") {
+          return;
+        }
+
+        console.log(e);
+        notification.show(
+          "failed",
+          intl.formatMessage({ id: "error.transaction-failed" }),
+          ""
+        );
+        if (!isDetachedMode) {
+          navigate("/", {
+            replace: true,
+          });
+        } else {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          window.close();
+        }
+      }
+    }
+  };
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.send.amount.title" })}
@@ -298,123 +423,14 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       onSubmit={async (e) => {
         e.preventDefault();
 
-        if (!txConfigsValidate.interactionBlocked) {
-          const tx = isIBCTransfer
-            ? accountStore
-                .getAccount(chainId)
-                .cosmos.makePacketForwardIBCTransferTx(
-                  sendConfigs.channelConfig.channels,
-                  sendConfigs.amountConfig.amount[0].toDec().toString(),
-                  sendConfigs.amountConfig.amount[0].currency,
-                  sendConfigs.recipientConfig.recipient
-                )
-            : accountStore
-                .getAccount(chainId)
-                .makeSendTokenTx(
-                  sendConfigs.amountConfig.amount[0].toDec().toString(),
-                  sendConfigs.amountConfig.amount[0].currency,
-                  sendConfigs.recipientConfig.recipient
-                );
-
-          try {
-            await tx.send(
-              sendConfigs.feeConfig.toStdFee(),
-              sendConfigs.memoConfig.memo,
-              {
-                preferNoSetFee: true,
-                preferNoSetMemo: true,
-                sendTx: async (chainId, tx, mode) => {
-                  let msg: Message<Uint8Array> = new SendTxAndRecordMsg(
-                    historyType,
-                    chainId,
-                    sendConfigs.recipientConfig.chainId,
-                    tx,
-                    mode,
-                    false,
-                    sendConfigs.senderConfig.sender,
-                    sendConfigs.recipientConfig.recipient,
-                    sendConfigs.amountConfig.amount.map((amount) => {
-                      return {
-                        amount: DecUtils.getTenExponentN(
-                          amount.currency.coinDecimals
-                        )
-                          .mul(amount.toDec())
-                          .toString(),
-                        denom: amount.currency.coinMinimalDenom,
-                      };
-                    }),
-                    sendConfigs.memoConfig.memo
-                  );
-                  if (isIBCTransfer) {
-                    if (msg instanceof SendTxAndRecordMsg) {
-                      msg = msg.withIBCPacketForwarding(
-                        sendConfigs.channelConfig.channels
-                      );
-                    } else {
-                      throw new Error("Invalid message type");
-                    }
-                  }
-                  return await new InExtensionMessageRequester().sendMessage(
-                    BACKGROUND_PORT,
-                    msg
-                  );
-                },
-              },
-              {
-                onBroadcasted: () => {
-                  chainStore.enableVaultsWithCosmosAddress(
-                    sendConfigs.recipientConfig.chainId,
-                    sendConfigs.recipientConfig.recipient
-                  );
-                },
-                onFulfill: (tx: any) => {
-                  if (tx.code != null && tx.code !== 0) {
-                    console.log(tx.log ?? tx.raw_log);
-                    notification.show(
-                      "failed",
-                      intl.formatMessage({ id: "error.transaction-failed" }),
-                      ""
-                    );
-                    return;
-                  }
-                  notification.show(
-                    "success",
-                    intl.formatMessage({
-                      id: "notification.transaction-success",
-                    }),
-                    ""
-                  );
-                },
-              }
-            );
-
-            if (!isDetachedMode) {
-              navigate("/", {
-                replace: true,
-              });
-            } else {
-              window.close();
-            }
-          } catch (e) {
-            if (e?.message === "Request rejected") {
-              return;
-            }
-
-            console.log(e);
-            notification.show(
-              "failed",
-              intl.formatMessage({ id: "error.transaction-failed" }),
-              ""
-            );
-            if (!isDetachedMode) {
-              navigate("/", {
-                replace: true,
-              });
-            } else {
-              await new Promise((resolve) => setTimeout(resolve, 2000));
-              window.close();
-            }
-          }
+        if (
+          isIBCTransfer &&
+          !uiConfigStore.sendPageIBCTransferDoNotShowWarningAgain &&
+          !txConfigsValidate.interactionBlocked
+        ) {
+          setIsIBCTransferWarningModalOpen(true);
+        } else {
+          await send();
         }
       }}
     >
@@ -506,6 +522,23 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         </Stack>
       </Box>
 
+      <Modal
+        isOpen={isIBCTransferWarningModalOpen}
+        align="bottom"
+        close={() => {
+          setIsIBCTransferWarningModalOpen(false);
+        }}
+      >
+        <IBCTransferWarningModal
+          isLoading={
+            accountStore.getAccount(chainId).isSendingMsg ===
+            (!isIBCTransfer ? "send" : "ibcTransfer")
+          }
+          onClick={async () => {
+            await send();
+          }}
+        />
+      </Modal>
       <Modal
         isOpen={isIBCTransferDestinationModalOpen}
         align="bottom"

@@ -23,6 +23,8 @@ export interface UIConfigOptions {
   isDeveloperMode: boolean;
   hideLowBalance: boolean;
 
+  sendPageIBCTransferDoNotShowWarningAgain: boolean;
+
   useWebHIDLedger: boolean;
 }
 
@@ -39,6 +41,8 @@ export class UIConfigStore {
   protected _options: UIConfigOptions = {
     isDeveloperMode: false,
     hideLowBalance: false,
+
+    sendPageIBCTransferDoNotShowWarningAgain: false,
 
     useWebHIDLedger: false,
   };
@@ -160,6 +164,15 @@ export class UIConfigStore {
   @action
   setDeveloperMode(value: boolean) {
     this.options.isDeveloperMode = value;
+  }
+
+  get sendPageIBCTransferDoNotShowWarningAgain(): boolean {
+    return this.options.sendPageIBCTransferDoNotShowWarningAgain;
+  }
+
+  @action
+  setSendPageIBCTransferDoNotShowWarningAgain(value: boolean) {
+    this.options.sendPageIBCTransferDoNotShowWarningAgain = value;
   }
 
   get isHideLowBalance(): boolean {
