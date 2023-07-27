@@ -1,0 +1,69 @@
+@import "../../styles/var";
+
+.menuContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+$menu-icon-size: 18px;
+$menu-icon-gap: 14px;
+
+.menuImg {
+  width: $menu-icon-size;
+
+  cursor: pointer;
+}
+
+.chainListContainer {
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  &:hover {
+    .title {
+      // color: $primary-color;
+    }
+
+    .title-icon {
+      // fill: $primary-color;
+    }
+  }
+}
+
+.titleIconContainer {
+  width: 0;
+  height: 16px;
+}
+
+.titleIcon {
+  width: 16px;
+  height: 16px;
+
+  margin-top: -6px;
+  fill: #8f8f8f;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 400;
+  color: #fff;
+  margin-right: 6px;
+  &.small {
+    font-size: 12px;
+  }
+}
+
+:global(.show) {
+  .chain-list-container {
+    .title {
+      // color: $primary-color;
+    }
+
+    .title-icon {
+      // fill: $primary-color;
+    }
+  }
+}

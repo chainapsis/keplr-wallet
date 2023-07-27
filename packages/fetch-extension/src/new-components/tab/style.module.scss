@@ -1,0 +1,29 @@
+.tabContainer {
+  display: flex;
+  flex-direction: row;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 35px;
+  font-size: small;
+  height: 45px;
+}
+
+.tab {
+  width: 50%;
+  cursor: pointer;
+  font-weight: 500;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tab.active {
+  height: 37px;
+  border-radius: 30px;
+  background-color: white;
+  opacity: 1;
+  color: black;
+  margin: 1%;
+}

@@ -47,3 +47,41 @@ export const formatActivityHash = (address: string) => {
   if (address?.length > 12) return address.substring(0, 10) + "...";
   else return address;
 };
+
+export const formatDomain = (domainName: string): string => {
+  const maxLength = 15;
+
+  if (domainName.length <= maxLength) {
+    return domainName;
+  } else {
+    const firstPart = domainName.slice(0, 4);
+    const lastPart = domainName.slice(-8);
+    return `${firstPart}...${lastPart}`;
+  }
+};
+
+export const shortenMintingNumber = (value: string, decimal = 18) => {
+  const number = Math.abs(parseFloat(value)) / 10 ** decimal;
+  let result = "";
+  if (number >= 1000000) {
+    result = (number / 1000000).toFixed(2) + " M";
+  } else if (number >= 1000) {
+    result = (number / 1000).toFixed(2) + " K";
+  } else if (number >= 1) {
+    result = number.toFixed(2) + " ";
+  } else if (number >= 10 ** -3) {
+    result = (number * 1000).toFixed(2) + " m";
+  } else if (number >= 10 ** -6) {
+    result = (number * 10 ** 6).toFixed(2) + " u";
+  } else if (number >= 10 ** -9) {
+    result = (number * 10 ** 9).toFixed(2) + " n";
+  } else if (number >= 10 ** -12) {
+    result = (number * 10 ** 9).toFixed(3) + " n";
+  } else if (number >= 10 ** -18) {
+    result = (number * 10 ** 18).toFixed(0) + " a";
+  } else {
+    result = number.toFixed(2) + " ";
+  }
+
+  return result;
+};

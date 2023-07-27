@@ -103,6 +103,11 @@
     "axios": "^0.27.2",
     "libsodium": "file:./etc/noop",
     "libsodium-wrappers": "file:./etc/noop",
-    "node-sass": "file:./etc/noop"
+    "node-sass": "file:./etc/noop",
+    "@ethereumjs/common": "2.6.2"
+  },
+  "dependencies": {
+    "@azoyalabs/fns-client": "0.0.3",
+    "@cosmjs/cosmwasm-stargate": "^0.31.0"
   }
 }

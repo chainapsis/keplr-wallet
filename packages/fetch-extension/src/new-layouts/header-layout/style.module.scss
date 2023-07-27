@@ -1,0 +1,56 @@
+@import "../../styles/var";
+
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+  background-color: #1c0032;
+  position: relative;
+}
+
+.innerContainer {
+  padding: 0 $layout-padding $layout-padding;
+  flex: 1;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  font-family: Lexend;
+}
+
+//background
+.bgBiurChild {
+  top: 981px;
+  left: 0;
+  border-radius: 1193.69px;
+  background-color: rgba(96, 57, 251, 0.8);
+  filter: blur(150px);
+  border: 3.8px solid rgba(255, 255, 255, 0.04);
+  box-sizing: border-box;
+  width: 981px;
+  transform: rotate(-90deg);
+  transform-origin: 0 0;
+}
+.bgBiur,
+.bgBiurChild,
+.bgBiurItem {
+  position: absolute;
+  height: 981px;
+  z-index: -1;
+}
+.bgBiurItem {
+  top: 981px;
+  left: 440px;
+  border-radius: 1193.69px;
+  background-color: #f97a51;
+  filter: blur(150px);
+  border: 3.8px solid rgba(255, 255, 255, 0.04);
+  box-sizing: border-box;
+  width: 981px;
+  transform: rotate(-90deg);
+  transform-origin: 0 0;
+}
+.bgBiur {
+  top: -889px;
+  left: -531px;
+  width: 1421px;
+}

@@ -25,6 +25,8 @@ export const ADDITIONAL_INTL_MESSAGES: IntlMessages = {};
 
 export const AUTH_SERVER = "https://auth-attila.sandbox-london-b.fetch-ai.com";
 
+export const FNS_TEST_ADDRESS = "fetch1s84mudgmjfjmkef7ludqnwy0fchh3mf4p4rmll";
+
 export const CHAIN_ID_DORADO = "dorado-1";
 export const CHAIN_ID_FETCHHUB = "fetchhub-4";
 
@@ -164,6 +166,30 @@ export const AGENT_COMMANDS = [
     enabled: true,
   },
 ];
+
+export const FNS_CONFIG: {
+  [key: string]: {
+    network: "mainnet" | "testnet";
+    rpc: string;
+    contractAddress: string;
+    isEditable: boolean;
+  };
+} = {
+  [CHAIN_ID_DORADO]: {
+    network: "testnet",
+    rpc: "https://rpc-dorado.fetch.ai:443",
+    contractAddress:
+      "fetch15hq5u4susv7d064llmupeyevx6hmskkc3p8zvt8rwn0lj02yt72s88skrf",
+    isEditable: true,
+  },
+  [CHAIN_ID_FETCHHUB]: {
+    network: "mainnet",
+    rpc: "https://rpc-fetchhub.fetch.ai:443",
+    contractAddress:
+      "fetch1cj7pfh3aqut6p2ursuqsgceadd2p09cqjklur485sce85tvw3zusy0fpy8",
+    isEditable: true,
+  },
+};
 
 export const TRANSACTION_APPROVED = "Transaction approved";
 export const TRANSACTION_SENT = "Transaction sent";

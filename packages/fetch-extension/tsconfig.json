@@ -7,6 +7,8 @@
     "jsx": "react" /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */,
     "baseUrl": "./",
     "paths": {
+      "@new-components/*": ["src/new-components/*"],
+      "@new-layouts/*": ["src/new-layouts/*"],
       "@components/*": ["src/components/*"],
       "@layouts/*": ["src/layouts/*"],
       "@graphQL/*": ["src/graphQL/*"],
@@ -23,6 +25,6 @@
       "./@types"
     ]
   },
-  "include": ["src/**/*", "window.d.ts"],
+  "include": ["src/**/*", "window.d.ts", "src/import-svg.d.ts"],
   "excluded": ["**/*.wasm"]
 }

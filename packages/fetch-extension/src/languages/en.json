@@ -42,6 +42,7 @@
   "main.menu.address-available": "Address is already available in the Address Book",
   "main.menu.token-list": "Token List",
   "main.menu.activity": "Activity",
+  "main.menu.fetch-name-service": ".FET Domain",
 
   "main.menu.guide": "Guide",
   "main.menu.sign-out": "Sign out",
@@ -402,6 +403,9 @@
   "main.proposals.title": "Proposals",
   "main.proposals.paragraph": "View and vote on proposals",
   "main.proposals.button": "View",
+  "main.fns.title": ".FET Domain",
+  "main.fns.paragraph": "Explore and mint Domains",
+  "main.fns.button": "Explore",
   "proposal.vote.start.time": "Voting Start Time",
   "proposal.vote.end.time": "Voting End Time",
   "proposal.change.vote": "Change Vote",

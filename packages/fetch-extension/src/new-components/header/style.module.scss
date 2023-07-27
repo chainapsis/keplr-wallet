@@ -1,0 +1,31 @@
+.header {
+  padding: 8px 16px;
+  width: 100%;
+  display: flex;
+  position: relative;
+  z-index: 100;
+  background-color: transparent;
+  margin: 12px 0px;
+  font-family: Lexend;
+  &.fixed {
+    position: fixed;
+  }
+}
+
+.header-menu-left {
+  display: flex;
+  align-items: flex-start;
+}
+
+.header-section {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header-menu-right {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 18px;
+}

@@ -1,0 +1,29 @@
+@import "../../styles/var";
+
+.containerInner {
+  display: flex;
+  flex-direction: row;
+
+  height: 48px;
+  justify-content: center;
+  align-items: center;
+
+  .paragraphMain {
+    line-height: 1.35;
+  }
+
+  .paragraphSub {
+    line-height: 1.35;
+    color: #8898aa;
+  }
+
+  .vertical {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .button {
+    min-width: 76px;
+    padding: 6px 10px 4px;
+  }
+}

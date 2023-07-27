@@ -358,7 +358,6 @@ export class CosmosAccountImpl {
           onFulfill?: (tx: any) => void;
         }
   ) {
-    debugger;
     this.base.setTxTypeInProgress(type);
 
     let txHash: Uint8Array;

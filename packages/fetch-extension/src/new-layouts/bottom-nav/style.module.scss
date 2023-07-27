@@ -1,0 +1,53 @@
+.bottomNavContainer {
+  display: flex;
+  justify-content: space-between;
+  gap: 0px;
+  position: sticky;
+  bottom: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.284);
+  filter: drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.1));
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  height: 48px;
+  align-items: center;
+  cursor: pointer;
+  background-color: transparent;
+  color: white;
+  &.active {
+    color: #3b82f6;
+  }
+
+  img {
+    height: 18px;
+    width: 18px;
+    object-fit: contain;
+    path {
+      fill: #fff;
+    }
+  }
+
+  .title {
+    font-size: 12px;
+    font-weight: 600;
+  }
+}
+
+.disabled {
+  cursor: not-allowed;
+}
+
+.bellDot {
+  height: 10px;
+  width: 10px;
+  background-color: #d027e5;
+  margin-left: 8px;
+  border-radius: 50px;
+  position: absolute;
+  right: 215px;
+  top: 5px;
+}

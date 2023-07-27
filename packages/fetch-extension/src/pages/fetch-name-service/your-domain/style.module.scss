@@ -1,0 +1,116 @@
+.allDomains {
+  font-size: 16px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10%;
+  font-weight: 500;
+  font-family: Jost;
+}
+
+.domainCard {
+  color: black;
+}
+
+.margin {
+  margin-top: 2.5%;
+  margin-bottom: 2.5%;
+}
+.arrowIcon {
+  filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(200%)
+    contrast(100%);
+  width: 18px;
+  height: 18px;
+}
+
+.inUse {
+  background: #f9774b;
+  text-align: center;
+  width: 70px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.primaryHelp {
+  font-size: small;
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  margin: -20px 12px 0 12px;
+  padding: 16px;
+}
+
+.addNewbutton {
+  font-size: small;
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 12px;
+  padding: 12px;
+  text-align: center;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.emptyAddNewButton {
+  position: absolute;
+  margin-top: 80px;
+}
+
+.domainDetails {
+  display: flex;
+  justify-content: space-between;
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 12px;
+  display: flex;
+  padding: 16px;
+  align-items: center;
+  gap: 24px;
+  align-self: stretch;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.domainDetails:hover {
+  box-shadow: -6px 6px 32px 0px rgba(157, 115, 232, 0.2),
+    6px 6px 32px 0px rgba(243, 95, 73, 0.3);
+}
+
+.addNewbutton:hover {
+  box-shadow: -6px 6px 32px 0px rgba(157, 115, 232, 0.2),
+    6px 6px 32px 0px rgba(243, 95, 73, 0.3);
+  color: white;
+}
+
+.domainInfo :hover {
+  box-shadow: none;
+}
+.domainDetails :hover {
+  box-shadow: none;
+}
+.domainInfo {
+  display: flex;
+  flex-direction: column;
+}
+.loader {
+  color: white;
+  font-size: small;
+  text-align: center;
+  height: 55%;
+  width: 100%;
+  display: flex;
+  position: fixed;
+  align-items: center;
+  justify-content: center;
+  left: 0px;
+}
+.badge {
+  display: flex;
+  justify-content: center;
+  height: 23px;
+  margin: 3px;
+  color: white;
+  font-size: 10px;
+  line-height: 12px;
+  font-family: "Nunito Sans";
+  border-radius: 4px;
+  width: 68px;
+}

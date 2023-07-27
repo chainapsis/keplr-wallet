@@ -27,6 +27,8 @@ import {
 import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
 import { validateAgentAddress } from "@utils/validate-agent";
+import { CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB } from "../../config.ui.var";
+import { getBeneficiaryAddress } from "../../name-service/fns-apis";
 
 export interface AddressInputProps {
   recipientConfig: IRecipientConfig | IRecipientConfigWithICNS;
@@ -121,6 +123,63 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
         }
       },
     };
+    const [isFNSFecthing, setIsFNSFecthing] = useState(false);
+    const getFETOwner = async (
+      chainId: string,
+      domainName: string
+    ): Promise<string | null | undefined> => {
+      const getBeneficiaryAddressObject = await getBeneficiaryAddress(
+        chainId,
+        domainName
+      );
+      console.log(getBeneficiaryAddressObject);
+      const getAddress = getBeneficiaryAddressObject
+        ? getBeneficiaryAddressObject.address
+        : null;
+      console.log(getAddress);
+      return getAddress;
+    };
+
+    const updateICNSvalue = (value: string) => {
+      if (
+        // If icns is possible and users enters ".", complete bech32 prefix automatically.
+        "isICNSEnabled" in recipientConfig &&
+        recipientConfig.isICNSEnabled &&
+        value.length > 0 &&
+        ![CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB].includes(
+          recipientConfig.chainId
+        ) &&
+        value[value.length - 1] === "." &&
+        numOfCharacter(value, ".") === 1 &&
+        numOfCharacter(recipientConfig.rawRecipient, ".") === 0
+      ) {
+        value = value + recipientConfig.icnsExpectedBech32Prefix;
+      }
+      return value;
+    };
+
+    const updateFNSValue = async (value: string) => {
+      if (
+        [CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB].includes(
+          recipientConfig.chainId
+        ) &&
+        value.length > 5 &&
+        value.endsWith(".fet") &&
+        numOfCharacter(value, ".") === 1
+      ) {
+        setIsFNSFecthing(true);
+
+        recipientConfig.setRawRecipient(value);
+
+        const FETOwner: any = await getFETOwner(recipientConfig.chainId, value);
+        if (FETOwner) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          value = FETOwner;
+        }
+        setIsFNSFecthing(false);
+      }
+      return value;
+    };
 
     return (
       <React.Fragment>
@@ -154,19 +213,15 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
                 styleAddressInput["input"]
               )}
               value={recipientConfig.rawRecipient}
-              onChange={(e) => {
+              onChange={async (e) => {
                 let value = e.target.value;
-                if (
-                  // If icns is possible and users enters ".", complete bech32 prefix automatically.
-                  "isICNSEnabled" in recipientConfig &&
-                  recipientConfig.isICNSEnabled &&
-                  value.length > 0 &&
-                  value[value.length - 1] === "." &&
-                  numOfCharacter(value, ".") === 1 &&
-                  numOfCharacter(recipientConfig.rawRecipient, ".") === 0
-                ) {
-                  value = value + recipientConfig.icnsExpectedBech32Prefix;
-                }
+
+                // If ICNS is availabe and users enters ".", complete postfix automatically.
+                value = updateICNSvalue(value);
+
+                // If FET owner is availabe and users enters ".", complete postfix automatically.
+                value = await updateFNSValue(value);
+
                 recipientConfig.setRawRecipient(value);
                 e.preventDefault();
               }}
@@ -186,6 +241,12 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
               </Button>
             ) : null}
           </InputGroup>
+          {isFNSFecthing ? (
+            <div className={styleAddressInput["infoText"]}>
+              <i className="fa fa-spinner fa-spin fa-fw" /> Fetching owner
+              address
+            </div>
+          ) : null}
           {isICNSfetching ? (
             <FormText>
               <i className="fa fa-spinner fa-spin fa-fw" />
@@ -195,6 +256,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
             <FormText>{recipientConfig.recipient}</FormText>
           ) : null}
           {errorText != null &&
+          !isFNSFecthing &&
           !recipientConfig.rawRecipient.startsWith("agent") ? (
             <div className={styleAddressInput["errorText"]}>{errorText}</div>
           ) : null}

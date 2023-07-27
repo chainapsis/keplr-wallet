@@ -217,7 +217,7 @@ export class CosmwasmAccountImpl {
 
   makeExecuteContractTx(
     // This arg can be used to override the type of sending tx if needed.
-    type: keyof CosmwasmMsgOpts | "unknown" = "executeWasm",
+    type: string | keyof CosmwasmMsgOpts | "unknown" = "executeWasm",
     contractAddress: string,
     // eslint-disable-next-line @typescript-eslint/ban-types
     obj: object,

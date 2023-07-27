@@ -1,8 +1,8 @@
 import React, { FunctionComponent } from "react";
 
-import styleMenu from "./menu.module.scss";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
+import styleMenu from "./menu.module.scss";
 
 import { FormattedMessage } from "react-intl";
 import { useNavigate } from "react-router";

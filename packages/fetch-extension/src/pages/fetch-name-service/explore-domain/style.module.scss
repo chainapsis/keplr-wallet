@@ -1,0 +1,145 @@
+.content {
+  color: white;
+  text-align: center;
+  align-items: center;
+  margin: 25px 0px;
+  font-size: 25px;
+  font-weight: 300;
+}
+
+.containerStyle {
+  display: flex;
+  margin-top: 15%;
+  justify-content: center;
+}
+.arrowIcon {
+  filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(200%)
+    contrast(100%);
+  width: 4%;
+}
+
+.inputStyle {
+  color: white;
+  width: 60%;
+  border: none;
+  outline: none;
+  margin-left: 5%;
+  background-color: transparent;
+}
+
+.searchContainer {
+  display: flex;
+  width: 312px;
+  height: 56px;
+  padding: 0px 16px;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  justify-content: space-between;
+  margin-left: 12px;
+}
+.searchContainer:hover {
+  border-color: #9075ff;
+  box-shadow: -6px 6px 32px 0px rgba(157, 115, 232, 0.2),
+    6px 6px 32px 0px rgba(243, 95, 73, 0.3);
+}
+
+.searchContainer:focus-within {
+  border-color: #9075ff;
+  box-shadow: -6px 6px 32px 0px rgba(157, 115, 232, 0.2),
+    6px 6px 32px 0px rgba(243, 95, 73, 0.3);
+}
+.searchInput {
+  color: #fff;
+  background: transparent;
+  border: none;
+  font-size: 14px;
+}
+.searchInput::placeholder {
+  color: #fff;
+}
+.searchIcon {
+  filter: brightness(0) invert(1);
+  width: 18px;
+  height: 18px;
+}
+.registerButton {
+  display: inline-flex;
+  height: 46px;
+  padding: 24px 32px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  border-radius: 40px;
+  background: #fff;
+  color: #0b1742;
+  font-size: 15px;
+  position: absolute;
+  margin-top: 12px;
+  right: 24px;
+  border: none;
+  cursor: pointer;
+}
+
+.buttonStyle {
+  font-size: small;
+  font-weight: bold;
+  background-color: white;
+  color: var(--dark, #25282b);
+  border-radius: 30px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  gap: 10px;
+  display: flex;
+  padding: 12px 18px;
+}
+.registerButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.registerIcon {
+  position: relative;
+  width: 14px;
+}
+.gradientContent {
+  font-weight: 300;
+  background: linear-gradient(to right, #9075ff, #ff5c30);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hyperlinks {
+  font-size: small;
+  font-weight: lighter;
+  border-bottom: 1px;
+  margin-left: 30%;
+}
+
+.moreDetails {
+  display: flex;
+  justify-content: space-between;
+  color: white;
+  font-size: small;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 16px 0px;
+  font-weight: bold;
+}
+.moreDetails:hover {
+  color: white;
+}
+.border {
+  border: 0.1px solid white;
+  opacity: 0.4;
+}
+.invalidText {
+  width: 320px;
+  color: red;
+  position: fixed;
+  top: 45%;
+  text-align: center;
+  font-size: 14px;
+}

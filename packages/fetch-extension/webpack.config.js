@@ -33,6 +33,8 @@ const envDefaults = {
 const commonResolve = () => ({
   extensions: [".ts", ".tsx", ".js", ".jsx", ".css", ".scss", ".svg", ".wasm"],
   alias: {
+    "@new-components": path.resolve(__dirname, "src/new-components"),
+    "@new-layouts": path.resolve(__dirname, "src/new-layouts"),
     "@components": path.resolve(__dirname, "src/components"),
     "@layouts": path.resolve(__dirname, "src/layouts"),
     "@chatStore": path.resolve(__dirname, "src/stores/chats"),
