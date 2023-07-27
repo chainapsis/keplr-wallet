@@ -239,3 +239,25 @@ export class RemoveIBCTransferHistory extends Message<IBCTransferHistory[]> {
     return RemoveIBCTransferHistory.type();
   }
 }
+
+export class ClearAllIBCTransferHistory extends Message<void> {
+  public static type() {
+    return "clear-all-ibc-transfer-histories";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ClearAllIBCTransferHistory.type();
+  }
+}

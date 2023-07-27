@@ -16,6 +16,7 @@ import {
 import { KVStore } from "@keplr-wallet/common";
 import { IBCTransferHistory, RecentSendHistory } from "./types";
 import { Buffer } from "buffer/";
+import { ChainInfo } from "@keplr-wallet/types";
 
 export class RecentSendHistoryService {
   // Key: {chain_identifier}/{type}
@@ -79,9 +80,11 @@ export class RecentSendHistoryService {
       );
     });
 
-    for (const id of this.recentIBCTransferHistoryMap.keys()) {
-      this.trackIBCPacketForwardingRecursive(id);
+    for (const history of this.getRecentIBCTransferHistories()) {
+      this.trackIBCPacketForwardingRecursive(history.id);
     }
+
+    this.chainsService.addChainRemovedHandler(this.onChainRemoved);
   }
 
   async sendTxAndRecord(
@@ -346,12 +349,39 @@ export class RecentSendHistoryService {
   }
 
   getRecentIBCTransferHistories(): IBCTransferHistory[] {
-    return Array.from(this.recentIBCTransferHistoryMap.values());
+    return Array.from(this.recentIBCTransferHistoryMap.values()).filter(
+      (history) => {
+        if (!this.chainsService.hasChainInfo(history.chainId)) {
+          return false;
+        }
+
+        if (!this.chainsService.hasChainInfo(history.destinationChainId)) {
+          return false;
+        }
+
+        if (
+          history.ibcHistory.some((history) => {
+            return !this.chainsService.hasChainInfo(
+              history.counterpartyChainId
+            );
+          })
+        ) {
+          return false;
+        }
+
+        return true;
+      }
+    );
   }
 
   @action
   removeRecentIBCTransferHistory(id: string): boolean {
     return this.recentIBCTransferHistoryMap.delete(id);
+  }
+
+  @action
+  clearAllRecentIBCTransferHistory(): void {
+    this.recentIBCTransferHistoryMap.clear();
   }
 
   protected getIBCRecvPacketIndexFromTx(
@@ -472,4 +502,44 @@ export class RecentSendHistoryService {
 
     throw new Error("Invalid tx");
   }
+
+  protected readonly onChainRemoved = (chainInfo: ChainInfo) => {
+    const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
+
+    runInAction(() => {
+      const removingIds: string[] = [];
+      for (const history of this.recentIBCTransferHistoryMap.values()) {
+        if (
+          ChainIdHelper.parse(history.chainId).identifier === chainIdentifier
+        ) {
+          removingIds.push(history.id);
+          continue;
+        }
+
+        if (
+          ChainIdHelper.parse(history.destinationChainId).identifier ===
+          chainIdentifier
+        ) {
+          removingIds.push(history.id);
+          continue;
+        }
+
+        if (
+          history.ibcHistory.some((history) => {
+            return (
+              ChainIdHelper.parse(history.counterpartyChainId).identifier ===
+              chainIdentifier
+            );
+          })
+        ) {
+          removingIds.push(history.id);
+          continue;
+        }
+      }
+
+      for (const id of removingIds) {
+        this.recentIBCTransferHistoryMap.delete(id);
+      }
+    });
+  };
 }

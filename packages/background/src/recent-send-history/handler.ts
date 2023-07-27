@@ -11,6 +11,7 @@ import {
   SendTxAndRecordWithIBCPacketForwardingMsg,
   GetIBCTransferHistories,
   RemoveIBCTransferHistory,
+  ClearAllIBCTransferHistory,
 } from "./messages";
 import { RecentSendHistoryService } from "./service";
 
@@ -43,6 +44,11 @@ export const getHandler: (service: RecentSendHistoryService) => Handler = (
         return handleRemoveIBCTransferHistory(service)(
           env,
           msg as RemoveIBCTransferHistory
+        );
+      case ClearAllIBCTransferHistory:
+        return handleClearAllIBCTransferHistory(service)(
+          env,
+          msg as ClearAllIBCTransferHistory
         );
       default:
         throw new KeplrError("tx", 110, "Unknown msg type");
@@ -112,5 +118,13 @@ const handleRemoveIBCTransferHistory: (
   return (_env, msg) => {
     service.removeRecentIBCTransferHistory(msg.id);
     return service.getRecentIBCTransferHistories();
+  };
+};
+
+const handleClearAllIBCTransferHistory: (
+  service: RecentSendHistoryService
+) => InternalHandler<ClearAllIBCTransferHistory> = (service) => {
+  return () => {
+    service.clearAllRecentIBCTransferHistory();
   };
 };
