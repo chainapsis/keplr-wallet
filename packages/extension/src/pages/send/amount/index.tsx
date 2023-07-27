@@ -491,6 +491,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           />
 
           <Styles.Flex1 />
+          <Gutter size="0" />
 
           <FeeControl
             senderConfig={sendConfigs.senderConfig}

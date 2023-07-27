@@ -181,7 +181,7 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
 
         <div style={{ flex: 1 }} />
         <GuideBox
-          color="danger"
+          color="warning"
           title={intl.formatMessage({
             id: "page.ibc-transfer.select-channel.warning-title",
           })}
