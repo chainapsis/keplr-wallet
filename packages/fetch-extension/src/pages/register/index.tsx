@@ -63,15 +63,16 @@ export const BackButton: FunctionComponent<{ onClick: () => void }> = ({
 };
 
 export const RegisterPage: FunctionComponent = observer(() => {
+  const { keyRingStore, uiConfigStore, analyticsStore } = useStore();
+
   useEffect(() => {
+    analyticsStore.logEvent("Register page");
     document.documentElement.setAttribute("data-register-page", "true");
 
     return () => {
       document.documentElement.removeAttribute("data-register-page");
     };
   }, []);
-
-  const { keyRingStore, uiConfigStore } = useStore();
 
   const registerConfig = useRegisterConfig(keyRingStore, [
     ...(AdditionalSignInPrepend ?? []),

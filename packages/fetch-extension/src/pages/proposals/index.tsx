@@ -27,11 +27,13 @@ export const Proposals: FunctionComponent = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const [isLoading, setIsLoading] = useState(false);
-  const { chainStore, accountStore } = useStore();
+  const { chainStore, accountStore, analyticsStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const [proposals, setProposals] = useState<ProposalType[]>([]);
   const reduxProposals = useSelector(useProposals);
   useEffect(() => {
+    analyticsStore.logEvent("Governance Proposal page");
+
     if (reduxProposals.closedProposals.length === 0) {
       setIsLoading(true);
     }
