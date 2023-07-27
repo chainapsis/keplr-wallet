@@ -19,11 +19,14 @@ import { useForm } from "react-hook-form";
 import { Input, PasswordInput } from "@components/form";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { AuthApiKey } from "../../../config.ui";
+import { useStore } from "../../../stores";
 // get from https://dashboard.web3auth.io
 
 export const AuthIntro: FunctionComponent<{
   registerConfig: RegisterConfig;
 }> = observer(({ registerConfig }) => {
+  const { analyticsStore } = useStore();
+
   const [web3auth, setWeb3auth] = useState<Web3Auth | null>(null);
   const isEnvDevelopment = process.env.NODE_ENV !== "production";
   useEffect(() => {
@@ -122,7 +125,12 @@ export const AuthIntro: FunctionComponent<{
               const email = await getUserInfo();
               registerConfig.setEmail(email || "");
               await logout();
-            } catch (e) {}
+            } catch (e) {
+            } finally {
+              analyticsStore.logEvent("Create/Import account started", {
+                registerType: "google",
+              });
+            }
           }}
         >
           <button
