@@ -14,7 +14,10 @@ import { ErrModuleLedgerSign } from "../utils/ledger-types";
 import { Buffer } from "buffer/";
 import { LedgerGuideBox } from "../components/ledger-guide-box";
 import { EthSignType } from "@keplr-wallet/types";
-import { handleEthereumPreSign } from "../utils/handle-eth-sign";
+import {
+  handleEthereumPreSignByKeystone,
+  handleEthereumPreSignByLedger,
+} from "../utils/handle-eth-sign";
 import { FormattedMessage, useIntl } from "react-intl";
 import { KeystoneUR } from "../utils/keystone";
 import { KeystoneSign } from "../components/keystone";
@@ -93,34 +96,32 @@ export const EthereumSigningView: FunctionComponent<{
             interactionData.id
           ) || isLedgerInteracting,
         onClick: async () => {
-          let presignOptions;
-          if (interactionData.data.keyType === "ledger") {
-            setIsLedgerInteracting(true);
-            setLedgerInteractingError(undefined);
-            presignOptions = {
-              useWebHID: uiConfigStore.useWebHIDLedger,
-            };
-          } else if (isKeystone) {
-            setIsKeystoneInteracting(true);
-            presignOptions = {
-              pubKey: Buffer.from(
-                accountStore.getAccount(interactionData.data.chainId).pubKey
-              ).toString("hex"),
-              displayQRCode: async (ur: KeystoneUR) => {
-                setKeystoneUR(ur);
-              },
-              scanQRCode: () =>
-                new Promise<KeystoneUR>((resolve) => {
-                  keystoneScanResolve.current = resolve;
-                }),
-            };
-          }
-
           try {
-            const signature = await handleEthereumPreSign(
-              interactionData,
-              presignOptions
-            );
+            let signature;
+            if (interactionData.data.keyType === "ledger") {
+              setIsLedgerInteracting(true);
+              setLedgerInteractingError(undefined);
+              signature = await handleEthereumPreSignByLedger(interactionData, {
+                useWebHID: uiConfigStore.useWebHIDLedger,
+              });
+            } else if (isKeystone) {
+              setIsKeystoneInteracting(true);
+              signature = await handleEthereumPreSignByKeystone(
+                interactionData,
+                {
+                  pubKey: Buffer.from(
+                    accountStore.getAccount(interactionData.data.chainId).pubKey
+                  ).toString("hex"),
+                  displayQRCode: async (ur: KeystoneUR) => {
+                    setKeystoneUR(ur);
+                  },
+                  scanQRCode: () =>
+                    new Promise<KeystoneUR>((resolve) => {
+                      keystoneScanResolve.current = resolve;
+                    }),
+                }
+              );
+            }
 
             await signEthereumInteractionStore.approveWithProceedNext(
               interactionData.id,

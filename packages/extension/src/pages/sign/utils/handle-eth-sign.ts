@@ -42,98 +42,90 @@ export interface KeystoneOptions {
   scanQRCode: () => Promise<KeystoneUR>;
 }
 
-export type PreSignOptions = LedgerOptions | KeystoneOptions;
-
-export const handleEthereumPreSign = async (
+export const handleEthereumPreSignByLedger = async (
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>,
-  options?: PreSignOptions
+  options?: LedgerOptions
 ): Promise<Uint8Array | undefined> => {
-  switch (interactionData.data.keyType) {
-    case "ledger": {
-      const appData = interactionData.data.keyInsensitive;
-      if (!appData) {
-        throw new Error("Invalid ledger app data");
-      }
-      if (typeof appData !== "object") {
-        throw new Error("Invalid ledger app data");
-      }
-      if (!appData["bip44Path"] || typeof appData["bip44Path"] !== "object") {
-        throw new Error("Invalid ledger app data");
-      }
-
-      const bip44Path = appData["bip44Path"] as {
-        account: number;
-        change: number;
-        addressIndex: number;
-      };
-
-      const publicKey = Buffer.from(
-        (appData["Ethereum"] as any)["pubKey"],
-        "hex"
-      );
-      if (publicKey.length === 0) {
-        throw new Error("Invalid ledger app data");
-      }
-
-      return connectAndSignEthWithLedger(
-        (options as LedgerOptions).useWebHID,
-        publicKey,
-        bip44Path,
-        interactionData.data.message,
-        interactionData.data.signType
-      );
-    }
-    case "keystone": {
-      const keystoneOptions = options as KeystoneOptions;
-      const keystoneSDK = new KeystoneSDK({
-        origin: "Keplr Extension",
-      });
-      const address = interactionData.data.signer;
-      const path = getPathFromPubKey(
-        interactionData.data.keyInsensitive["keys"] as KeystoneKeys,
-        keystoneOptions.pubKey
-      );
-      if (path === null) {
-        throw new Error("Invalid signer");
-      }
-      const random = Buffer.alloc(16);
-      Buffer.from(interactionData.id, "hex").copy(random);
-      const requestId = utils.uuid.v4({
-        random,
-      });
-      const signData = encodeEthMessage(
-        interactionData.data.message,
-        interactionData.data.signType
-      ).toString("hex");
-      const ur = keystoneSDK.eth.generateSignRequest({
-        requestId,
-        signData,
-        dataType: getEthDataTypeFromSignType(
-          interactionData.data.signType,
-          interactionData.data.message
-        ),
-        path,
-        xfp: interactionData.data.keyInsensitive["xfp"] as string,
-        chainId: EthermintChainIdHelper.parse(interactionData.data.chainId)
-          .ethChainId,
-        address,
-      });
-      await keystoneOptions.displayQRCode({
-        type: ur.type,
-        cbor: ur.cbor.toString("hex"),
-      });
-      const scanResult = await keystoneOptions.scanQRCode();
-      const signResult = keystoneSDK.eth.parseSignature(
-        new UR(Buffer.from(scanResult.cbor, "hex"), scanResult.type)
-      );
-      if (signResult.requestId !== requestId) {
-        throw new Error("Invalid request id");
-      }
-      return Buffer.from(signResult.signature, "hex");
-    }
-    default:
-      return;
+  const appData = interactionData.data.keyInsensitive;
+  if (!appData) {
+    throw new Error("Invalid ledger app data");
   }
+  if (typeof appData !== "object") {
+    throw new Error("Invalid ledger app data");
+  }
+  if (!appData["bip44Path"] || typeof appData["bip44Path"] !== "object") {
+    throw new Error("Invalid ledger app data");
+  }
+
+  const bip44Path = appData["bip44Path"] as {
+    account: number;
+    change: number;
+    addressIndex: number;
+  };
+
+  const publicKey = Buffer.from((appData["Ethereum"] as any)["pubKey"], "hex");
+  if (publicKey.length === 0) {
+    throw new Error("Invalid ledger app data");
+  }
+
+  return connectAndSignEthWithLedger(
+    !!options?.useWebHID,
+    publicKey,
+    bip44Path,
+    interactionData.data.message,
+    interactionData.data.signType
+  );
+};
+
+export const handleEthereumPreSignByKeystone = async (
+  interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>,
+  options: KeystoneOptions
+): Promise<Uint8Array | undefined> => {
+  const keystoneSDK = new KeystoneSDK({
+    origin: "Keplr Extension",
+  });
+  const address = interactionData.data.signer;
+  const path = getPathFromPubKey(
+    interactionData.data.keyInsensitive["keys"] as KeystoneKeys,
+    options.pubKey
+  );
+  if (path === null) {
+    throw new Error("Invalid signer");
+  }
+  const random = Buffer.alloc(16);
+  Buffer.from(interactionData.id, "hex").copy(random);
+  const requestId = utils.uuid.v4({
+    random,
+  });
+  const signData = encodeEthMessage(
+    interactionData.data.message,
+    interactionData.data.signType
+  ).toString("hex");
+  const ur = keystoneSDK.eth.generateSignRequest({
+    requestId,
+    signData,
+    dataType: getEthDataTypeFromSignType(
+      interactionData.data.signType,
+      interactionData.data.message
+    ),
+    path,
+    xfp: interactionData.data.keyInsensitive["xfp"] as string,
+    chainId: EthermintChainIdHelper.parse(interactionData.data.chainId)
+      .ethChainId,
+    address,
+  });
+  await options.displayQRCode({
+    type: ur.type,
+    cbor: ur.cbor.toString("hex"),
+  });
+  const scanResult = await options.scanQRCode();
+  const signResult = keystoneSDK.eth.parseSignature(
+    new UR(Buffer.from(scanResult.cbor, "hex"), scanResult.type)
+  );
+  if (signResult.requestId !== requestId) {
+    throw new Error("Invalid request id");
+  }
+  return Buffer.from(signResult.signature, "hex");
 };
 
 export const connectAndSignEthWithLedger = async (

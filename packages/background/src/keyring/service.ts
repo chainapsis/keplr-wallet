@@ -11,7 +11,7 @@ import { ChainInfo } from "@keplr-wallet/types";
 import { Buffer } from "buffer/";
 import * as Legacy from "./legacy";
 import { ChainsUIService } from "../chains-ui";
-import { MultiAccounts } from "@keystonehq/keystone-sdk";
+import { MultiAccounts } from "../keyring-keystone/types";
 
 export class KeyRingService {
   protected _needMigration = false;

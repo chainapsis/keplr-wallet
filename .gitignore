@@ -7,8 +7,6 @@ prod
 .gitsecret/keys/random_seed
 !*.secret
 *.log
-.yalc
-yalc.lock
 
 yarn-error.log
 .yarn/*

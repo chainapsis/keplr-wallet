@@ -17,12 +17,6 @@ import { KeystoneError } from "../../../components/keystone/error";
 export const ScanKeystoneScene: FunctionComponent<{
   name: string;
   password: string;
-
-  // append mode일 경우 위의 name, password는 안쓰인다. 대충 빈 문자열 넣으면 된다.
-  appendModeInfo?: {
-    vaultId: string;
-    afterEnableChains: string[];
-  };
   stepPrevious: number;
   stepTotal: number;
 }> = observer(({ name, password, stepPrevious, stepTotal }) => {

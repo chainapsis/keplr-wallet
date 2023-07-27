@@ -31,9 +31,9 @@ import {
   ShowSensitiveKeyRingDataMsg,
   UnlockKeyRingMsg,
 } from "@keplr-wallet/background";
+import type { MultiAccounts } from "@keplr-wallet/background";
 import { ChainInfo } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { MultiAccounts } from "@keystonehq/keystone-sdk";
 
 export class KeyRingStore {
   @observable

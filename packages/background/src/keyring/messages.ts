@@ -5,7 +5,7 @@ import { ROUTE } from "./constants";
 import { KeyRingStatus, BIP44HDPath, KeyInfo } from "./types";
 import { PlainObject } from "../vault";
 import * as Legacy from "./legacy";
-import { MultiAccounts } from "@keystonehq/keystone-sdk";
+import { MultiAccounts } from "../keyring-keystone/types";
 
 export class GetKeyRingStatusMsg extends Message<{
   status: KeyRingStatus;

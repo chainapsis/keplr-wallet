@@ -41,6 +41,7 @@ export * from "./keyring";
 export * from "./vault";
 export * from "./keyring-cosmos";
 export * from "./keyring-ethereum";
+export * from "./keyring-keystone";
 export * from "./token-scan";
 export * from "./recent-send-history";
 

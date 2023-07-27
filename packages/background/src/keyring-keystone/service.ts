@@ -3,7 +3,7 @@ import { Buffer } from "buffer/";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { ChainInfo } from "@keplr-wallet/types";
 import { KeyRingService } from "../keyring";
-import { MultiAccounts } from "@keystonehq/keystone-sdk";
+import { MultiAccounts } from "./types";
 
 export class KeyRingKeystoneService {
   async init(): Promise<void> {
