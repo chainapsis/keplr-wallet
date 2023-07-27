@@ -229,7 +229,9 @@ export const DomainDetails: FunctionComponent = observer(() => {
               }}
               onDragStart={(e) => e.preventDefault()}
               placeholder={
-                isOwned ? "Click to edit" : "Description hasn't been set"
+                isOwned
+                  ? "Click to edit description"
+                  : "Description hasn't been set"
               }
               maxLength={255}
               onChange={(e) => {

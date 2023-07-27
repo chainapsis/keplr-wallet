@@ -15,7 +15,7 @@ type MintProps = {
 };
 
 export const Mint: React.FC<MintProps> = ({ domainPrice, domainName }) => {
-  const { chainStore, accountStore, priceStore } = useStore();
+  const { chainStore, accountStore, priceStore, analyticsStore } = useStore();
   const current = chainStore.current;
   const account = accountStore.getAccount(current.chainId);
   const navigate = useNavigate();
@@ -57,6 +57,9 @@ export const Mint: React.FC<MintProps> = ({ domainPrice, domainName }) => {
       setmintingPrice("Not Available");
     }
 
+    analyticsStore.logEvent("Domain mint clicked", {
+      chainId: current.chainId,
+    });
     setShowPopUp(true);
   };
 
@@ -81,6 +84,10 @@ export const Mint: React.FC<MintProps> = ({ domainPrice, domainName }) => {
         transition: {
           duration: 0.25,
         },
+      });
+    } finally {
+      analyticsStore.logEvent("Domain mint continue clicked", {
+        chainId: current.chainId,
       });
     }
     navigate(-1);

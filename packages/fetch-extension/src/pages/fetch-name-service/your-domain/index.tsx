@@ -142,7 +142,11 @@ export const YourDomain = () => {
                   <div style={{ display: "flex", flexDirection: "row" }}>
                     <TooltipForDomainNames domainName={domain} />
                     <i
-                      className="fas fa-copy ml-2"
+                      className="fas fa-clone ml-2"
+                      style={{
+                        fontSize: "small",
+                        marginTop: "4px",
+                      }}
                       onClick={(e) => {
                         copyAddress(domain);
                         e.stopPropagation();

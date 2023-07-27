@@ -5,9 +5,12 @@ import classnames from "classnames";
 import { FormattedMessage } from "react-intl";
 import { Button } from "reactstrap";
 import { useNavigate } from "react-router";
+import { useStore } from "../../stores";
 
 export const FNSView: FunctionComponent = () => {
   const navigate = useNavigate();
+  const { chainStore, analyticsStore } = useStore();
+
   return (
     <div className={style["containerInner"]}>
       <div className={style["vertical"]}>
@@ -39,6 +42,9 @@ export const FNSView: FunctionComponent = () => {
         color="primary"
         size="sm"
         onClick={() => {
+          analyticsStore.logEvent("Your domains opened", {
+            chainId: chainStore.current.chainId,
+          });
           navigate("/fetch-name-service/explore");
         }}
       >

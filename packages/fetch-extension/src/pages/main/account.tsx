@@ -21,7 +21,13 @@ import { TooltipForDomainNames } from "../fetch-name-service/domain-details";
 
 export const AccountView: FunctionComponent = observer(() => {
   const navigate = useNavigate();
-  const { accountStore, chainStore, queriesStore, uiConfigStore } = useStore();
+  const {
+    accountStore,
+    chainStore,
+    queriesStore,
+    uiConfigStore,
+    analyticsStore,
+  } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const current = chainStore.current;
   const [domain, setDomain] = useState<string>();
@@ -217,7 +223,12 @@ export const AccountView: FunctionComponent = observer(() => {
             <div
               style={{ margin: "10px" }}
               className={styleAccount["address"]}
-              onClick={() => navigate("/fetch-name-service/yourDomain")}
+              onClick={() => {
+                analyticsStore.logEvent("Your domains opened", {
+                  chainId: current.chainId,
+                });
+                navigate("/fetch-name-service/yourDomain");
+              }}
             >
               <i className="fas fa-link" />
               {TooltipForDomainNames({ domainName: domain })}
@@ -227,7 +238,12 @@ export const AccountView: FunctionComponent = observer(() => {
               color="primary"
               size="sm"
               style={{ margin: "10px" }}
-              onClick={() => navigate("/fetch-name-service/yourDomain")}
+              onClick={() => {
+                analyticsStore.logEvent("Your domains opened", {
+                  chainId: current.chainId,
+                });
+                navigate("/fetch-name-service/yourDomain");
+              }}
             >
               <i className="fas fa-link" /> Link .FET domain
             </Button>
