@@ -29,15 +29,11 @@ export const DestinationChainView: FunctionComponent<{
         backgroundColor={
           theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
         }
-        borderRadius="0.375rem"
+        borderRadius={theme.mode === "light" ? "0.5rem" : "0.375rem"}
         paddingX="1rem"
         paddingY="0.875rem"
-        style={{
-          boxShadow:
-            theme.mode === "light"
-              ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-              : "none",
-        }}
+        borderWidth={theme.mode === "light" ? "1px" : "0"}
+        borderColor={theme.mode === "light" ? ColorPalette["gray-50"] : "none"}
         cursor="pointer"
         onClick={(e) => {
           e.preventDefault();

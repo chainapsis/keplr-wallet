@@ -40,7 +40,7 @@ import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
 import { SendTxAndRecordMsg } from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTxConfigsQueryString } from "../../../hooks/use-tx-config-query-string";
-import { HorizontalRadioGroup } from "../../../components/radio-group";
+import { LayeredHorizontalRadioGroup } from "../../../components/radio-group";
 import { Modal } from "../../../components/modal";
 import {
   DestinationChainView,
@@ -437,7 +437,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             />
           </YAxis>
 
-          <HorizontalRadioGroup
+          <LayeredHorizontalRadioGroup
             size="large"
             selectedKey={isIBCTransfer ? "ibc-transfer" : "send"}
             items={[

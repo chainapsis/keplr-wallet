@@ -87,6 +87,13 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
                 height="4.125rem"
                 alignY="center"
                 paddingX="1rem"
+                hover={{
+                  backgroundColor:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-10"]
+                      : ColorPalette["gray-550"],
+                }}
+                borderRadius="0.375rem"
                 cursor="pointer"
                 onClick={async (e) => {
                   e.preventDefault();

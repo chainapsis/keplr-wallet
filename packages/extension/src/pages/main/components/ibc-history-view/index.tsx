@@ -111,6 +111,12 @@ const IbcHistoryViewItem: FunctionComponent<{
       backgroundColor={
         theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
       }
+      style={{
+        boxShadow:
+          theme.mode === "light"
+            ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+            : "none",
+      }}
     >
       <YAxis>
         <XAxis alignY="center">
@@ -118,7 +124,11 @@ const IbcHistoryViewItem: FunctionComponent<{
             <LoadingIcon
               width="1.25rem"
               height="1.25rem"
-              color={ColorPalette.white}
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-200"]
+                  : ColorPalette.white
+              }
             />
           ) : (
             <CheckCircleIcon
@@ -133,7 +143,7 @@ const IbcHistoryViewItem: FunctionComponent<{
           <Subtitle4
             color={
               theme.mode === "light"
-                ? ColorPalette["gray-700"]
+                ? ColorPalette["gray-600"]
                 : ColorPalette["gray-10"]
             }
           >
@@ -171,7 +181,7 @@ const IbcHistoryViewItem: FunctionComponent<{
         <Body2
           color={
             theme.mode === "light"
-              ? ColorPalette["gray-500"]
+              ? ColorPalette["gray-400"]
               : ColorPalette["gray-100"]
           }
         >
@@ -206,7 +216,7 @@ const IbcHistoryViewItem: FunctionComponent<{
           padding="0.625rem"
           backgroundColor={
             theme.mode === "light"
-              ? ColorPalette["blue-50"]
+              ? ColorPalette["gray-10"]
               : ColorPalette["gray-500"]
           }
         >
@@ -266,20 +276,34 @@ const IbcHistoryViewItem: FunctionComponent<{
             height="1px"
             backgroundColor={
               theme.mode === "light"
-                ? ColorPalette["gray-50"]
+                ? ColorPalette["gray-100"]
                 : ColorPalette["gray-500"]
             }
           />
           <Gutter size="1rem" />
 
           <XAxis alignY="center">
-            <Subtitle3>Estimated Duration</Subtitle3>
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-200"]
+              }
+            >
+              Estimated Duration
+            </Subtitle3>
             <div
               style={{
                 flex: 1,
               }}
             />
-            <Body2>
+            <Body2
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-600"]
+                  : ColorPalette["gray-10"]
+              }
+            >
               ~
               {Math.max(
                 history.ibcHistory.filter((h) => !h.completed).length,
@@ -291,7 +315,13 @@ const IbcHistoryViewItem: FunctionComponent<{
 
           <Gutter size="1rem" />
 
-          <Caption2>
+          <Caption2
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["gray-200"]
+            }
+          >
             You may close the extension while the transfer is in progress.
           </Caption2>
         </VerticalCollapseTransition>
@@ -309,7 +339,9 @@ const IbcHistoryViewItemChainImage: FunctionComponent<{
   notCompletedBlink: boolean;
   isLast: boolean;
 }> = ({ chainInfo, completed, notCompletedBlink, isLast }) => {
-  const opacity = useSpringValue(completed ? 1 : 0.33333, {
+  const theme = useTheme();
+
+  const opacity = useSpringValue(completed ? 1 : 0.3, {
     config: defaultSpringConfig,
   });
 
@@ -321,15 +353,15 @@ const IbcHistoryViewItemChainImage: FunctionComponent<{
         loop: {
           reverse: true,
         },
-        from: 0.33333,
-        to: 0.66666,
+        from: 0.3,
+        to: 0.6,
         config: {
           easing: easings.easeOutSine,
           duration: 600,
         },
       });
     } else {
-      opacity.start(0.33333);
+      opacity.start(0.3);
     }
   }, [completed, notCompletedBlink, opacity]);
 
@@ -347,11 +379,21 @@ const IbcHistoryViewItemChainImage: FunctionComponent<{
       {!isLast ? (
         <React.Fragment>
           <Gutter size="0.25rem" />
-          <ArrowRightIcon
-            width="0.75rem"
-            height="0.75rem"
-            color={ColorPalette.white}
-          />
+          <Box
+            style={{
+              opacity: completed ? 1 : 0.3,
+            }}
+          >
+            <ArrowRightIcon
+              width="0.75rem"
+              height="0.75rem"
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-10"]
+              }
+            />
+          </Box>
           <Gutter size="0.25rem" />
         </React.Fragment>
       ) : null}
