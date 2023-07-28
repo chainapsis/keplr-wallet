@@ -398,40 +398,69 @@ export class RecentSendHistoryService {
       throw new Error("Invalid tx");
     }
 
+    // In injective, events from tendermint rpc is not encoded as base64.
+    // I don't know that this is the difference from tendermint version, or just custom from injective.
+    const compareStringWithBase64OrPlain = (
+      target: string,
+      value: string
+    ): [boolean, boolean] => {
+      if (target === value) {
+        return [true, false];
+      }
+
+      if (target === Buffer.from(value).toString("base64")) {
+        return [true, true];
+      }
+
+      return [false, false];
+    };
+
     const packetEvent = events.find((event: any) => {
       if (event.type !== "recv_packet") {
         return false;
       }
       const sourcePortAttr = event.attributes.find((attr: { key: string }) => {
-        return attr.key === Buffer.from("packet_src_port").toString("base64");
+        return compareStringWithBase64OrPlain(attr.key, "packet_src_port")[0];
       });
       if (!sourcePortAttr) {
         return false;
       }
       const sourceChannelAttr = event.attributes.find(
         (attr: { key: string }) => {
-          return (
-            attr.key === Buffer.from("packet_src_channel").toString("base64")
-          );
+          return compareStringWithBase64OrPlain(
+            attr.key,
+            "packet_src_channel"
+          )[0];
         }
       );
       if (!sourceChannelAttr) {
         return false;
       }
+      let isBase64 = false;
       const sequenceAttr = event.attributes.find((attr: { key: string }) => {
-        return attr.key === Buffer.from("packet_sequence").toString("base64");
+        const c = compareStringWithBase64OrPlain(attr.key, "packet_sequence");
+        isBase64 = c[1];
+        return c[0];
       });
       if (!sequenceAttr) {
         return false;
       }
 
-      return (
-        Buffer.from(sourcePortAttr.value, "base64").toString() ===
-          sourcePortId &&
-        Buffer.from(sourceChannelAttr.value, "base64").toString() ===
-          sourceChannelId &&
-        Buffer.from(sequenceAttr.value, "base64").toString() === sequence
-      );
+      if (isBase64) {
+        return (
+          Buffer.from(sourcePortAttr.value, "base64").toString() ===
+            sourcePortId &&
+          Buffer.from(sourceChannelAttr.value, "base64").toString() ===
+            sourceChannelId &&
+          Buffer.from(sequenceAttr.value, "base64").toString() === sequence
+        );
+      } else {
+        return (
+          sourcePortAttr.value === sourcePortId &&
+          sourceChannelAttr.value === sourceChannelId &&
+          sequenceAttr.value === sequence
+        );
+      }
     });
     if (!packetEvent) {
       throw new Error("Invalid tx");
@@ -458,6 +487,24 @@ export class RecentSendHistoryService {
     if (!Array.isArray(events)) {
       throw new Error("Invalid tx");
     }
+
+    // In injective, events from tendermint rpc is not encoded as base64.
+    // I don't know that this is the difference from tendermint version, or just custom from injective.
+    const compareStringWithBase64OrPlain = (
+      target: string,
+      value: string
+    ): [boolean, boolean] => {
+      if (target === value) {
+        return [true, false];
+      }
+
+      if (target === Buffer.from(value).toString("base64")) {
+        return [true, true];
+      }
+
+      return [false, false];
+    };
+
     events = events.slice(startingEventIndex);
 
     const packetEvent = events.find((event: any) => {
@@ -465,39 +512,58 @@ export class RecentSendHistoryService {
         return false;
       }
       const sourcePortAttr = event.attributes.find((attr: { key: string }) => {
-        return attr.key === Buffer.from("packet_src_port").toString("base64");
+        return compareStringWithBase64OrPlain(attr.key, "packet_src_port")[0];
       });
       if (!sourcePortAttr) {
         return false;
       }
+      let isBase64 = false;
       const sourceChannelAttr = event.attributes.find(
         (attr: { key: string }) => {
-          return (
-            attr.key === Buffer.from("packet_src_channel").toString("base64")
+          const c = compareStringWithBase64OrPlain(
+            attr.key,
+            "packet_src_channel"
           );
+          isBase64 = c[1];
+          return c[0];
         }
       );
       if (!sourceChannelAttr) {
         return false;
       }
-      return (
-        sourcePortAttr.value === Buffer.from(sourcePortId).toString("base64") &&
-        sourceChannelAttr.value ===
-          Buffer.from(sourceChannelId).toString("base64")
-      );
+      if (isBase64) {
+        return (
+          sourcePortAttr.value ===
+            Buffer.from(sourcePortId).toString("base64") &&
+          sourceChannelAttr.value ===
+            Buffer.from(sourceChannelId).toString("base64")
+        );
+      } else {
+        return (
+          sourcePortAttr.value === sourcePortId &&
+          sourceChannelAttr.value === sourceChannelId
+        );
+      }
     });
 
+    let isBase64 = false;
     if (packetEvent) {
       const sequenceAttr = packetEvent.attributes.find(
         (attr: { key: string }) => {
-          return attr.key === Buffer.from("packet_sequence").toString("base64");
+          const c = compareStringWithBase64OrPlain(attr.key, "packet_sequence");
+          isBase64 = c[1];
+          return c[0];
         }
       );
       if (!sequenceAttr) {
         throw new Error("Invalid tx");
       }
 
-      return Buffer.from(sequenceAttr.value, "base64").toString();
+      if (isBase64) {
+        return Buffer.from(sequenceAttr.value, "base64").toString();
+      } else {
+        return sequenceAttr.value;
+      }
     }
 
     throw new Error("Invalid tx");
