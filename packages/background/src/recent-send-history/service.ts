@@ -24,7 +24,9 @@ export class RecentSendHistoryService {
   protected readonly recentSendHistoryMap: Map<string, RecentSendHistory[]> =
     new Map();
 
-  // Key: id
+  @observable
+  protected recentIBCTransferHistorySeq: number = 0;
+  // Key: id (sequence, it should be increased by 1 for each)
   @observable
   protected readonly recentIBCTransferHistoryMap: Map<
     string,
@@ -59,14 +61,33 @@ export class RecentSendHistoryService {
       );
     });
 
+    const recentIBCTransferHistorySeqSaved = await this.kvStore.get<number>(
+      "recentIBCTransferHistorySeq"
+    );
+    if (recentIBCTransferHistorySeqSaved) {
+      runInAction(() => {
+        this.recentIBCTransferHistorySeq = recentIBCTransferHistorySeqSaved;
+      });
+    }
+    autorun(() => {
+      const js = toJS(this.recentIBCTransferHistorySeq);
+      this.kvStore.set<number>("recentIBCTransferHistorySeq", js);
+    });
+
     const recentIBCTransferHistoryMapSaved = await this.kvStore.get<
       Record<string, IBCTransferHistory>
     >("recentIBCTransferHistoryMap");
     if (recentIBCTransferHistoryMapSaved) {
       runInAction(() => {
-        for (const [key, value] of Object.entries(
-          recentIBCTransferHistoryMapSaved
-        )) {
+        let entries = Object.entries(recentIBCTransferHistoryMapSaved);
+        entries = entries.sort(([, a], [, b]) => {
+          // There is no guarantee that the order of the object is same as the order of the last saved.
+          // So we need to sort them.
+          // id is increased by 1 for each.
+          // So we can sort by id.
+          return parseInt(a.id) - parseInt(b.id);
+        });
+        for (const [key, value] of entries) {
           this.recentIBCTransferHistoryMap.set(key, value);
         }
       });
@@ -313,9 +334,7 @@ export class RecentSendHistoryService {
         }[],
     txHash: Uint8Array
   ): string {
-    const bytes = new Uint8Array(10);
-    crypto.getRandomValues(bytes);
-    const id = Buffer.from(bytes).toString("hex");
+    const id = (this.recentIBCTransferHistorySeq++).toString();
 
     const history: IBCTransferHistory = {
       id,
