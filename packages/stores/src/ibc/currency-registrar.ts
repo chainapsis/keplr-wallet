@@ -197,7 +197,7 @@ export class IBCCurrencyRegistrar {
         }
       | undefined;
 
-    let fallbackToCache = false;
+    let fromCache = false;
 
     const cached = this.getCacheIBCDenomData(chainId, hash);
     if (cached) {
@@ -225,6 +225,8 @@ export class IBCCurrencyRegistrar {
             cached.counterpartyChainId
           );
         }
+
+        fromCache = true;
       } else {
         runInAction(() => {
           this.cacheDenomTracePaths.delete(hash);
@@ -298,8 +300,6 @@ export class IBCCurrencyRegistrar {
             originChainId: originChainInfo.chainId,
             timestamp: Date.now(),
           });
-
-          fallbackToCache = true;
         }
       }
     }
@@ -353,7 +353,7 @@ export class IBCCurrencyRegistrar {
               originChainId: originChainInfo.chainId,
               originCurrency: cw20Currency,
             },
-            done: fallbackToCache && !isFetching,
+            done: fromCache && !isFetching,
           };
         }
       } else {
@@ -376,7 +376,7 @@ export class IBCCurrencyRegistrar {
               originChainId: originChainInfo.chainId,
               originCurrency: currency,
             },
-            done: fallbackToCache,
+            done: fromCache,
           };
         }
       }
