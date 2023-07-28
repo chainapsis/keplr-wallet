@@ -8,6 +8,7 @@ import { URType, useAnimatedQRScanner } from "@keystonehq/animated-qr";
 import { GuideBox } from "../../../../components/guide-box";
 import { KeystoneError } from "../../../../components/keystone/error";
 import { KeystoneUR } from "../../utils/keystone";
+import { useTheme } from "styled-components";
 
 export const KeystoneScan: FunctionComponent<{
   onScan: (ur: KeystoneUR) => void;
@@ -15,6 +16,7 @@ export const KeystoneScan: FunctionComponent<{
   const { AnimatedQRScanner, hasPermission, setIsDone } =
     useAnimatedQRScanner();
   const [isErrorOpen, setIsErrorOpen] = useState(false);
+  const theme = useTheme();
 
   const handleScan = (ur: KeystoneUR) => {
     onScan(ur);
@@ -40,14 +42,21 @@ export const KeystoneScan: FunctionComponent<{
       <Box
         style={{
           textAlign: "center",
-          color: ColorPalette["gray-200"],
+          color:
+            theme.mode === "light"
+              ? ColorPalette["gray-300"]
+              : ColorPalette["gray-200"],
         }}
       >
         Scan the QR code displayed on your Keystone device
       </Box>
-      <KeystoneTextIcon height="2.375rem" width="9.75rem" />
+      <KeystoneTextIcon mode={theme.mode} height="2.375rem" width="9.75rem" />
       <Box
-        backgroundColor={ColorPalette["gray-500"]}
+        backgroundColor={
+          theme.mode === "light"
+            ? ColorPalette["gray-50"]
+            : ColorPalette["gray-500"]
+        }
         borderRadius="0.5rem"
         style={{ overflow: "hidden", position: "relative" }}
         width={cameraSize}
@@ -64,7 +73,11 @@ export const KeystoneScan: FunctionComponent<{
           <CameraIcon
             width="2.5rem"
             height="2.5rem"
-            color={ColorPalette["gray-200"]}
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["gray-200"]
+            }
           />
         </Box>
         <AnimatedQRScanner
@@ -86,7 +99,10 @@ export const KeystoneScan: FunctionComponent<{
         <Box
           style={{
             fontSize: "0.75rem",
-            color: ColorPalette["gray-200"],
+            color:
+              theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["gray-200"],
             textAlign: "center",
           }}
           paddingX="0.88rem"

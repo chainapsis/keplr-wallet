@@ -7,6 +7,7 @@ import { ColorPalette } from "../../../../styles";
 import { KeystoneScan } from "./scan";
 import { ArrowLeftIcon } from "../../../../components/icon";
 import { KeystoneUR } from "../../utils/keystone";
+import { useTheme } from "styled-components";
 
 export const KeystoneSign: FunctionComponent<{
   ur?: KeystoneUR;
@@ -15,6 +16,7 @@ export const KeystoneSign: FunctionComponent<{
   onScan: (ur: KeystoneUR) => void;
 }> = ({ ur, isOpen, close, onScan }) => {
   const [step, setStep] = useState("display");
+  const theme = useTheme();
   return (
     <Modal isOpen={isOpen} close={close} align="bottom">
       <HeaderLayout
@@ -37,7 +39,8 @@ export const KeystoneSign: FunctionComponent<{
       >
         <Box
           style={{
-            background: ColorPalette["gray-700"],
+            background:
+              theme.mode === "light" ? "#fbfbff" : ColorPalette["gray-700"],
           }}
         >
           {step === "display" ? (

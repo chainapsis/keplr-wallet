@@ -10,10 +10,9 @@ import { Button } from "../../../components/button";
 import { Stack } from "../../../components/stack";
 import { RegisterH4 } from "../components/typography";
 import { Box } from "../../../components/box";
-import { Image } from "../../../components/image";
 import { FormattedMessage, useIntl } from "react-intl";
 import { InformationPlainIcon, KeystoneIcon } from "../../../components/icon";
-import styled from "styled-components";
+import styled, { DefaultTheme } from "styled-components";
 import { useTheme } from "styled-components";
 
 export const ConnectHardwareWalletScene: FunctionComponent = () => {
@@ -97,19 +96,13 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
           size="large"
           color="secondary"
           left={
-            <Image
-              src={require(theme.mode === "light"
-                ? "../../../public/assets/img/intro-keystone-logo-light.png"
-                : "../../../public/assets/img/intro-keystone-logo.png")}
-              alt={"intro-keystone-logo"}
-              style={{
-                width: "1.5rem",
-                height: "1.5rem",
-              }}
-            />
+            <KeystoneIcon mode={theme.mode} width="1.5rem" height="1.5rem" />
           }
           right={
-            <KeystoneInformationIcon onClick={onKeystoneInformationClick}>
+            <KeystoneInformationIcon
+              theme={theme}
+              onClick={onKeystoneInformationClick}
+            >
               <InformationPlainIcon width="1.125rem" height="1.125rem" />
             </KeystoneInformationIcon>
           }
@@ -158,7 +151,7 @@ const LedgerIcon: FunctionComponent = () => {
   );
 };
 
-const KeystoneInformationIcon = styled.span`
+const KeystoneInformationIcon = styled.span<{ theme?: DefaultTheme }>`
   position: absolute;
   right: 0.75rem;
   padding: 0.5rem;
@@ -166,15 +159,23 @@ const KeystoneInformationIcon = styled.span`
   z-index: 2;
   line-height: 0;
   :hover {
-    background-color: ${ColorPalette["gray-500"]};
+    background-color: ${(props) =>
+      props?.theme.mode === "light"
+        ? ColorPalette["gray-10"]
+        : ColorPalette["gray-500"]};
   }
 `;
 
 const KeystoneInformation: FunctionComponent = () => {
+  const theme = useTheme();
   return (
     <Box
       padding="1.875rem"
-      backgroundColor={ColorPalette["gray-500"]}
+      backgroundColor={
+        theme.mode === "light"
+          ? ColorPalette["gray-10"]
+          : ColorPalette["gray-500"]
+      }
       borderRadius="0.375rem"
     >
       <Stack alignX="center" gutter="1rem">

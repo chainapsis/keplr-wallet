@@ -13,6 +13,7 @@ import { CameraIcon } from "../../../components/icon";
 import { Purpose, useAnimatedQRScanner } from "@keystonehq/animated-qr";
 import { GuideBox } from "../../../components/guide-box";
 import { KeystoneError } from "../../../components/keystone/error";
+import { useTheme } from "styled-components";
 
 export const ScanKeystoneScene: FunctionComponent<{
   name: string;
@@ -24,6 +25,7 @@ export const ScanKeystoneScene: FunctionComponent<{
   const { AnimatedQRScanner, hasPermission, setIsDone } =
     useAnimatedQRScanner();
   const [isErrorOpen, setIsErrorOpen] = useState(false);
+  const theme = useTheme();
 
   const header = useRegisterHeader();
   useSceneEvents({
@@ -67,7 +69,11 @@ export const ScanKeystoneScene: FunctionComponent<{
   return (
     <RegisterSceneBox style={{ alignItems: "center" }}>
       <Box
-        backgroundColor={ColorPalette["gray-500"]}
+        backgroundColor={
+          theme.mode === "light"
+            ? ColorPalette["gray-50"]
+            : ColorPalette["gray-500"]
+        }
         borderRadius="0.5rem"
         style={{ overflow: "hidden", position: "relative" }}
         width="23.5rem"
@@ -100,9 +106,13 @@ export const ScanKeystoneScene: FunctionComponent<{
       </Box>
       {hasPermission ? (
         <Box
-          color={ColorPalette["gray-200"]}
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-300"]
+              : ColorPalette["gray-200"]
+          }
           style={{
-            fontSize: "1.125rem",
+            fontSize: "1rem",
             lineHeight: "1.625rem",
             textAlign: "center",
             marginTop: "2rem",

@@ -5,6 +5,7 @@ import { Body2, Subtitle1 } from "../typography";
 import React from "react";
 import { ColorPalette } from "../../styles";
 import { Button } from "../button";
+import styled, { DefaultTheme, useTheme } from "styled-components";
 
 export const KeystoneError: FunctionComponent<{
   isOpen: boolean;
@@ -12,17 +13,29 @@ export const KeystoneError: FunctionComponent<{
   title: string;
   paragraph: string;
 }> = ({ isOpen, close, title, paragraph }) => {
+  const theme = useTheme();
   return (
     <Modal isOpen={isOpen} close={close} align="center">
       <Box
         width="18.6875rem"
         marginX="auto"
-        backgroundColor={ColorPalette["gray-600"]}
+        backgroundColor={
+          theme.mode === "light"
+            ? ColorPalette["white"]
+            : ColorPalette["gray-600"]
+        }
         padding="1.5rem 1.25rem 1.25rem"
         borderRadius="0.5rem"
       >
         <Subtitle1>{title}</Subtitle1>
-        <Body2 color={ColorPalette["gray-200"]} style={{ marginTop: "0.5rem" }}>
+        <Body2
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-300"]
+              : ColorPalette["gray-200"]
+          }
+          style={{ marginTop: "0.5rem" }}
+        >
           {paragraph}
         </Body2>
         <Box
@@ -35,22 +48,17 @@ export const KeystoneError: FunctionComponent<{
             justifyContent: "flex-end",
           }}
         >
-          <a
+          <Tutorial
             href="https://support.keyst.one/3rd-party-wallets/cosmos-wallets/keplr-extension?utm_source=keplr&utm_medium=moredetails&utm_id=20230419"
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              marginRight: "1.75rem",
-              color: ColorPalette.white,
-              textDecoration: "none",
-              fontSize: "0.875rem",
-            }}
+            theme={theme}
             onClick={(e) => {
               e.stopPropagation();
             }}
           >
             Tutorial
-          </a>
+          </Tutorial>
           <Button
             size="small"
             text="OK"
@@ -62,3 +70,14 @@ export const KeystoneError: FunctionComponent<{
     </Modal>
   );
 };
+
+const Tutorial = styled.a<{ theme?: DefaultTheme }>`
+  margin-right: 1.75rem;
+  color: ${(props) =>
+    props.theme.mode === "light" ? ColorPalette.black : ColorPalette.white};
+  text-decoration: none;
+  font-size: 0.875rem;
+  :hover {
+    color: ${ColorPalette["blue-400"]};
+  }
+`;

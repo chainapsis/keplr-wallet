@@ -6,24 +6,33 @@ import { ColorPalette } from "../../../../styles";
 import { AnimatedQRCode } from "@keystonehq/animated-qr";
 import { Button } from "../../../../components/button";
 import { KeystoneUR } from "../../utils/keystone";
+import { useTheme } from "styled-components";
 
 export const KeystoneDisplay: FunctionComponent<{
   ur?: KeystoneUR;
   onGetSignature: () => void;
 }> = ({ ur, onGetSignature }) => {
+  const theme = useTheme();
   return (
     <Stack gutter="0.75rem" alignX="center">
       <Box
         style={{
           textAlign: "center",
-          color: ColorPalette["gray-200"],
+          color:
+            theme.mode === "light"
+              ? ColorPalette["gray-300"]
+              : ColorPalette["gray-200"],
         }}
       >
         Scan the QR code via your Keystone device
       </Box>
-      <KeystoneTextIcon height="2.375rem" width="9.75rem" />
+      <KeystoneTextIcon mode={theme.mode} height="2.375rem" width="9.75rem" />
       <Box
-        backgroundColor={ColorPalette["gray-500"]}
+        backgroundColor={
+          theme.mode === "light"
+            ? ColorPalette["gray-50"]
+            : ColorPalette["gray-500"]
+        }
         borderRadius="0.5rem"
         style={{ overflow: "hidden", position: "relative", padding: "13px" }}
         width="236px"
@@ -41,7 +50,10 @@ export const KeystoneDisplay: FunctionComponent<{
       <Box
         style={{
           fontSize: "0.75rem",
-          color: ColorPalette["gray-200"],
+          color:
+            theme.mode === "light"
+              ? ColorPalette["gray-300"]
+              : ColorPalette["gray-200"],
           textAlign: "center",
         }}
         paddingX="0.88rem"

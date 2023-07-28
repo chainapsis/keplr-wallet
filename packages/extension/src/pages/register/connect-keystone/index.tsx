@@ -10,6 +10,7 @@ import { Stack } from "../../../components/stack";
 import { Box } from "../../../components/box";
 import { Button } from "../../../components/button";
 import { ColorPalette } from "../../../styles";
+import { useTheme } from "styled-components";
 
 export const ConnectKeystoneScene: FunctionComponent<{
   name: string;
@@ -25,6 +26,10 @@ export const ConnectKeystoneScene: FunctionComponent<{
 }> = observer(({ name, password, stepPrevious, stepTotal }) => {
   const sceneTransition = useSceneTransition();
   const header = useRegisterHeader();
+  const theme = useTheme();
+  const color =
+    theme.mode === "light" ? ColorPalette["black"] : ColorPalette["white"];
+
   useSceneEvents({
     onWillVisible: () => {
       header.setHeader({
@@ -53,11 +58,8 @@ export const ConnectKeystoneScene: FunctionComponent<{
           num="1"
           text={
             <span>
-              Tap “
-              <span style={{ color: ColorPalette.white }}>
-                Connect Software Wallet
-              </span>
-              ” at the bottom left corner on the Keystone device.
+              Tap “<span style={{ color }}>Connect Software Wallet</span>” at
+              the bottom left corner on the Keystone device.
             </span>
           }
         />
@@ -65,8 +67,7 @@ export const ConnectKeystoneScene: FunctionComponent<{
           num="2"
           text={
             <span>
-              Select “
-              <span style={{ color: ColorPalette.white }}>Keplr Wallet</span>”.
+              Select “<span style={{ color }}>Keplr Wallet</span>”.
             </span>
           }
         />
@@ -74,9 +75,8 @@ export const ConnectKeystoneScene: FunctionComponent<{
           num="3"
           text={
             <span>
-              Click on the “
-              <span style={{ color: ColorPalette.white }}>Sync Keystone</span>”
-              button below to scan the QR code displayed on the Keystone device.
+              Click on the “<span style={{ color }}>Sync Keystone</span>” button
+              below to scan the QR code displayed on the Keystone device.
             </span>
           }
         />
@@ -87,7 +87,8 @@ export const ConnectKeystoneScene: FunctionComponent<{
         rel="noopener noreferrer"
         style={{
           marginTop: "2rem",
-          color: ColorPalette.white,
+          color:
+            theme.mode === "light" ? ColorPalette.black : ColorPalette.white,
           textDecoration: "none",
           fontSize: "1rem",
         }}
@@ -107,9 +108,14 @@ const Step: FunctionComponent<{
   num: string;
   text: ReactChild;
 }> = ({ num, text }) => {
+  const theme = useTheme();
   return (
     <Box
-      backgroundColor={ColorPalette["gray-500"]}
+      backgroundColor={
+        theme.mode === "light"
+          ? ColorPalette["gray-10"]
+          : ColorPalette["gray-500"]
+      }
       borderRadius="0.5rem"
       height="6.5rem"
       paddingX="2.06rem"
@@ -131,7 +137,10 @@ const Step: FunctionComponent<{
         style={{
           fontSize: "1rem",
           lineHeight: "1.5rem",
-          color: ColorPalette["gray-200"],
+          color:
+            theme.mode === "light"
+              ? ColorPalette["gray-300"]
+              : ColorPalette["gray-200"],
         }}
       >
         {text}
