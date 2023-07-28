@@ -57,8 +57,13 @@ export class IBCChannelStore {
                 }
 
                 const innerMap = migrationData.get(chainIdentifier.identifier)!;
-                const channel = map[channelId] as Channel;
-                innerMap.set(`${channel.portId}/${channel.channelId}`, channel);
+                const channel = map[channelId];
+                if (channel) {
+                  innerMap.set(
+                    `${channel.portId}/${channel.channelId}`,
+                    channel
+                  );
+                }
               }
             }
           }
@@ -124,6 +129,7 @@ export class IBCChannelStore {
       }
     });
 
+    console.log("IBC channel store initialized");
     runInAction(() => {
       this.isInitialized = true;
     });

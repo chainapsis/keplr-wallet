@@ -222,9 +222,11 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     ibcCurrencyRegistrar.isInitialized,
     priceStore.isInitialized,
     uiConfigStore.isInitialized,
+    uiConfigStore.isDeveloper,
     gravityBridgeCurrencyRegistrar.isInitialized,
     axelarEVMBridgeCurrencyRegistrar.isInitialized,
     accountStore,
+    ibcChannelStore.isInitialized,
   ]);
 
   const isReady: boolean = (() => {
