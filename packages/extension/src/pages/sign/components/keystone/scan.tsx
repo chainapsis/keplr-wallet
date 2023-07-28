@@ -6,7 +6,7 @@ import { ColorPalette } from "../../../../styles";
 import { CameraIcon } from "../../../../components/icon";
 import { URType, useAnimatedQRScanner } from "@keystonehq/animated-qr";
 import { GuideBox } from "../../../../components/guide-box";
-import { KeystoneError } from "../../../../components/keystone/error";
+import { KeystoneErrorModal } from "../../../../components/keystone/error";
 import { KeystoneUR } from "../../utils/keystone";
 import { useTheme } from "styled-components";
 
@@ -119,7 +119,7 @@ export const KeystoneScan: FunctionComponent<{
           />
         </Box>
       )}
-      <KeystoneError
+      <KeystoneErrorModal
         isOpen={isErrorOpen}
         close={handleClose}
         title="Invalid QR code"

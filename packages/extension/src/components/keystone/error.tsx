@@ -7,7 +7,7 @@ import { ColorPalette } from "../../styles";
 import { Button } from "../button";
 import styled, { DefaultTheme, useTheme } from "styled-components";
 
-export const KeystoneError: FunctionComponent<{
+export const KeystoneErrorModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
   title: string;
