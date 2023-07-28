@@ -456,37 +456,44 @@ export const EnableChainsScene: FunctionComponent<{
       if (aHasPriority && !bHasPriority) {
         return -1;
       }
-
       if (!aHasPriority && bHasPriority) {
         return 1;
       }
 
+      const aAddresses = candidateAddressesMap.get(a.chainIdentifier);
+      const bAddresses = candidateAddressesMap.get(b.chainIdentifier);
+
+      if (aAddresses && !bAddresses) {
+        return -1;
+      }
+      if (!aAddresses && bAddresses) {
+        return 1;
+      }
+
       const aBalance = (() => {
-        const addresses = candidateAddressesMap.get(a.chainIdentifier);
-        if (addresses && addresses.length > 0) {
+        if (aAddresses && aAddresses.length > 0) {
           return queriesStore
             .get(a.chainId)
-            .queryBalances.getQueryBech32Address(addresses[0].address).stakable
+            .queryBalances.getQueryBech32Address(aAddresses[0].address).stakable
             .balance;
         }
 
         return new CoinPretty(
           chainStore.getChain(a.chainId).stakeCurrency,
-          "-1"
+          "0"
         );
       })();
       const bBalance = (() => {
-        const addresses = candidateAddressesMap.get(b.chainIdentifier);
-        if (addresses && addresses.length > 0) {
+        if (bAddresses && bAddresses.length > 0) {
           return queriesStore
             .get(b.chainId)
-            .queryBalances.getQueryBech32Address(addresses[0].address).stakable
+            .queryBalances.getQueryBech32Address(bAddresses[0].address).stakable
             .balance;
         }
 
         return new CoinPretty(
           chainStore.getChain(b.chainId).stakeCurrency,
-          "-1"
+          "0"
         );
       })();
 
