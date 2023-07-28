@@ -1,9 +1,46 @@
 import styled, { css } from "styled-components";
 import { Stack } from "../stack";
 import { ColorPalette } from "../../styles";
-import { Body3, Subtitle4 } from "../typography";
-import { GuideBoxProps } from "./types";
+import { GuideBoxColor, GuideBoxProps } from "./types";
 import Color from "color";
+
+export const getTitleColor = (
+  theme: { mode: "dark" | "light" },
+  color: GuideBoxColor | undefined
+) => {
+  switch (color) {
+    case "warning":
+      return theme.mode === "light"
+        ? ColorPalette["orange-400"]
+        : ColorPalette["yellow-400"];
+    case "danger":
+      return theme.mode === "light"
+        ? ColorPalette["red-400"]
+        : ColorPalette["red-300"];
+    default:
+      return theme.mode === "light"
+        ? ColorPalette["gray-500"]
+        : ColorPalette["gray-100"];
+  }
+};
+
+export const getParagraphColor = (
+  theme: { mode: "dark" | "light" },
+  color: GuideBoxColor | undefined
+) => {
+  switch (color) {
+    case "warning":
+      return theme.mode === "light"
+        ? Color(ColorPalette["orange-400"]).alpha(0.7).string()
+        : Color(ColorPalette["yellow-500"]).alpha(0.7).string();
+    case "danger":
+      return theme.mode === "light"
+        ? Color(ColorPalette["red-400"]).alpha(0.7).string()
+        : ColorPalette["red-300"];
+    default:
+      return ColorPalette["gray-300"];
+  }
+};
 
 export const Styles = {
   Container: styled(Stack)<Pick<GuideBoxProps, "color">>`
@@ -17,25 +54,20 @@ export const Styles = {
             background-color: ${(props) =>
               props.theme.mode === "light"
                 ? ColorPalette["orange-50"]
-                : "rgba(210, 156, 17, 0.2);"};
-          }
+                : ColorPalette["yellow-800"]};
+            }
             svg {
-              color: ${(props) =>
-                props.theme.mode === "light"
-                  ? ColorPalette["orange-400"]
-                  : ColorPalette["yellow-400"]};
+              color: ${(props) => getTitleColor(props.theme, "warning")};
             }
           `;
         case "danger":
           return css`
-            background-color: ${Color(ColorPalette["red-400"])
-              .alpha(0.1)
-              .string()};
+            background-color: ${(props) =>
+              props.theme.mode === "light"
+                ? ColorPalette["red-50"]
+                : ColorPalette["red-800"]};
             svg {
-              color: ${(props) =>
-                props.theme.mode === "light"
-                  ? ColorPalette["red-400"]
-                  : ColorPalette["red-300"]};
+              color: ${(props) => getTitleColor(props.theme, "danger")};
             }
           `;
         default:
@@ -45,51 +77,9 @@ export const Styles = {
                 ? ColorPalette["gray-50"]
                 : ColorPalette["gray-600"]};
             svg {
-              color: ${(props) =>
-                props.theme.mode === "light"
-                  ? ColorPalette["gray-500"]
-                  : ColorPalette["gray-100"]};
+              color: ${(props) => getTitleColor(props.theme, "default")};
             }
           `;
-      }
-    }};
-  `,
-  Title: styled(Subtitle4)<Pick<GuideBoxProps, "color">>`
-    color: ${({ color }) => {
-      switch (color) {
-        case "warning":
-          return (props) =>
-            props.theme.mode === "light"
-              ? ColorPalette["orange-400"]
-              : ColorPalette["yellow-400"];
-        case "danger":
-          return (props) =>
-            props.theme.mode === "light"
-              ? ColorPalette["red-400"]
-              : ColorPalette["red-300"];
-        default:
-          return (props) =>
-            props.theme.mode === "light"
-              ? ColorPalette["gray-500"]
-              : ColorPalette["gray-100"];
-      }
-    }};
-  `,
-  Paragraph: styled(Body3)<Pick<GuideBoxProps, "color">>`
-    color: ${({ color }) => {
-      switch (color) {
-        case "warning":
-          return (props) =>
-            props.theme.mode === "light"
-              ? ColorPalette["orange-400"]
-              : ColorPalette["yellow-500"];
-        case "danger":
-          return (props) =>
-            props.theme.mode === "light"
-              ? ColorPalette["red-400"]
-              : ColorPalette["red-300"];
-        default:
-          return ColorPalette["gray-300"];
       }
     }};
   `,
