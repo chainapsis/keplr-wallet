@@ -248,15 +248,23 @@ export class ObservableQueryIbcPfmTransfer {
         }
       }
 
-      return res.sort((a, b) => {
-        // Sort by chain name.
-        return this.chainGetter
-          .getChain(a.destinationChainId)
-          .chainName.trim()
-          .localeCompare(
-            this.chainGetter.getChain(b.destinationChainId).chainName.trim()
-          );
-      });
+      return res
+        .filter((r) => {
+          // In evmos the ibc token is automatically wrapped in erc20 and currently Keplr cannot handle erc20. For now, block sending to evmos
+          if (r.destinationChainId.startsWith("evmos_")) {
+            return false;
+          }
+          return true;
+        })
+        .sort((a, b) => {
+          // Sort by chain name.
+          return this.chainGetter
+            .getChain(a.destinationChainId)
+            .chainName.trim()
+            .localeCompare(
+              this.chainGetter.getChain(b.destinationChainId).chainName.trim()
+            );
+        });
     }
   );
 }
