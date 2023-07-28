@@ -407,6 +407,7 @@
   "page.send.amount.title": "전송",
   "page.send.amount.asset-title": "토큰",
   "page.send.amount.memo-placeholder": "중앙화 거래소로 보낼 때는 필수입니다.",
+  "page.send.amount.ibc-transfer-warning.title": "중앙화 거래소에 IBC 전송을 하지 마세요. 자산을 잃을 수 있습니다.",
 
   "page.main.chart.available": "사용 가능한 자산",
   "page.main.chart.staked": "스테이킹된 자산",

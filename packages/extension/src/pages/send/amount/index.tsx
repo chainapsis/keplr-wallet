@@ -48,6 +48,7 @@ import {
 } from "./ibc-transfer";
 import { useIBCChannelConfigQueryString } from "../../../hooks/use-ibc-channel-config-query-string";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
+import { GuideBox } from "../../../components/guide-box";
 
 const Styles = {
   Flex1: styled.div`
@@ -493,6 +494,17 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               id: "page.send.amount.memo-placeholder",
             })}
           />
+
+          <VerticalCollapseTransition collapsed={!isIBCTransfer}>
+            <GuideBox
+              color="warning"
+              title={intl.formatMessage({
+                id: "page.send.amount.ibc-transfer-warning.title",
+              })}
+            />
+            <Gutter size="0.75rem" />
+          </VerticalCollapseTransition>
+          <Gutter size="0" />
 
           <Styles.Flex1 />
           <Gutter size="0" />
