@@ -16,7 +16,7 @@ export class TendermintTxTracer {
   protected txSubscribes: Map<
     number,
     {
-      hash: Uint8Array;
+      params: Record<string, string | number | boolean>;
       resolver: (data?: unknown) => void;
       rejector: (e: Error) => void;
     }
@@ -27,7 +27,7 @@ export class TendermintTxTracer {
     number,
     {
       method: string;
-      params: unknown[];
+      params: Record<string, string | number | boolean>;
       resolver: (data?: unknown) => void;
       rejector: (e: Error) => void;
     }
@@ -105,7 +105,7 @@ export class TendermintTxTracer {
     }
 
     for (const [id, tx] of this.txSubscribes) {
-      this.sendSubscribeTxRpc(id, tx.hash);
+      this.sendSubscribeTxRpc(id, tx.params);
     }
 
     for (const [id, query] of this.pendingQueries) {
@@ -189,6 +189,12 @@ export class TendermintTxTracer {
     }
   };
 
+  /**
+   * SubscribeBlock receives the handler for the block.
+   * The handelrs shares the subscription of block.
+   * @param handler
+   * @return unsubscriber
+   */
   subscribeBlock(handler: (block: any) => void) {
     this.newBlockSubscribes.push({
       handler,
@@ -197,6 +203,12 @@ export class TendermintTxTracer {
     if (this.newBlockSubscribes.length === 1) {
       this.sendSubscribeBlockRpc();
     }
+
+    return () => {
+      this.newBlockSubscribes = this.newBlockSubscribes.filter(
+        (s) => s.handler !== handler
+      );
+    };
   }
 
   protected sendSubscribeBlockRpc(): void {
@@ -213,17 +225,29 @@ export class TendermintTxTracer {
   }
 
   // Query the tx and subscribe the tx.
-  traceTx(hash: Uint8Array): Promise<any> {
+  traceTx(
+    query: Uint8Array | Record<string, string | number | boolean>
+  ): Promise<any> {
     return new Promise<any>((resolve) => {
       // At first, try to query the tx at the same time of subscribing the tx.
       // But, the querying's error will be ignored.
-      this.queryTx(hash)
-        .then(resolve)
+      this.queryTx(query)
+        .then((result) => {
+          if (query instanceof Uint8Array) {
+            resolve(result);
+            return;
+          }
+
+          if (result?.total_count !== "0") {
+            resolve(result);
+            return;
+          }
+        })
         .catch(() => {
           // noop
         });
 
-      this.subscribeTx(hash).then(resolve);
+      this.subscribeTx(query).then(resolve);
     }).then((tx) => {
       // Occasionally, even if the subscribe tx event occurs, the state through query is not changed yet.
       // Perhaps it is because the block has not been committed yet even though the result of deliverTx in tendermint is complete.
@@ -235,42 +259,115 @@ export class TendermintTxTracer {
     });
   }
 
-  subscribeTx(hash: Uint8Array): Promise<any> {
-    const id = this.createRandomId();
+  subscribeTx(
+    query: Uint8Array | Record<string, string | number | boolean>
+  ): Promise<any> {
+    if (query instanceof Uint8Array) {
+      const id = this.createRandomId();
 
-    return new Promise<unknown>((resolve, reject) => {
-      this.txSubscribes.set(id, {
-        hash,
-        resolver: resolve,
-        rejector: reject,
+      const params = {
+        query: `tm.event='Tx' AND tx.hash='${Buffer.from(query)
+          .toString("hex")
+          .toUpperCase()}'`,
+      };
+
+      return new Promise<unknown>((resolve, reject) => {
+        this.txSubscribes.set(id, {
+          params,
+          resolver: resolve,
+          rejector: reject,
+        });
+
+        this.sendSubscribeTxRpc(id, params);
       });
+    } else {
+      const id = this.createRandomId();
 
-      this.sendSubscribeTxRpc(id, hash);
-    });
+      const params = {
+        query:
+          `tm.event='Tx' and ` +
+          Object.keys(query)
+            .map((key) => {
+              return {
+                key,
+                value: query[key],
+              };
+            })
+            .map((obj) => {
+              return `${obj.key}=${
+                typeof obj.value === "string" ? `'${obj.value}'` : obj.value
+              }`;
+            })
+            .join(" and "),
+        page: "1",
+        per_page: "1",
+        order_by: "desc",
+      };
+
+      return new Promise<unknown>((resolve, reject) => {
+        this.txSubscribes.set(id, {
+          params,
+          resolver: resolve,
+          rejector: reject,
+        });
+
+        this.sendSubscribeTxRpc(id, params);
+      });
+    }
   }
 
-  protected sendSubscribeTxRpc(id: number, hash: Uint8Array): void {
+  protected sendSubscribeTxRpc(
+    id: number,
+    params: Record<string, string | number | boolean>
+  ): void {
     if (this.readyState === WsReadyState.OPEN) {
       this.ws.send(
         JSON.stringify({
           jsonrpc: "2.0",
           method: "subscribe",
-          params: [
-            `tm.event='Tx' AND tx.hash='${Buffer.from(hash)
-              .toString("hex")
-              .toUpperCase()}'`,
-          ],
+          params: params,
           id,
         })
       );
     }
   }
 
-  queryTx(hash: Uint8Array): Promise<any> {
-    return this.query("tx", [Buffer.from(hash).toString("base64"), false]);
+  queryTx(
+    query: Uint8Array | Record<string, string | number | boolean>
+  ): Promise<any> {
+    if (query instanceof Uint8Array) {
+      return this.query("tx", {
+        hash: Buffer.from(query).toString("base64"),
+        prove: false,
+      });
+    } else {
+      const params = {
+        query: Object.keys(query)
+          .map((key) => {
+            return {
+              key,
+              value: query[key],
+            };
+          })
+          .map((obj) => {
+            return `${obj.key}=${
+              typeof obj.value === "string" ? `'${obj.value}'` : obj.value
+            }`;
+          })
+          .join(" and "),
+        page: "1",
+        per_page: "1",
+        order_by: "desc",
+      };
+
+      return this.query("tx_search", params);
+    }
   }
 
-  protected query(method: string, params: unknown[]): Promise<any> {
+  protected query(
+    method: string,
+    params: Record<string, string | number | boolean>
+  ): Promise<any> {
     const id = this.createRandomId();
 
     return new Promise<unknown>((resolve, reject) => {
@@ -285,7 +382,11 @@ export class TendermintTxTracer {
     });
   }
 
-  protected sendQueryRpc(id: number, method: string, params: unknown[]) {
+  protected sendQueryRpc(
+    id: number,
+    method: string,
+    params: Record<string, string | number | boolean>
+  ) {
     if (this.readyState === WsReadyState.OPEN) {
       this.ws.send(
         JSON.stringify({

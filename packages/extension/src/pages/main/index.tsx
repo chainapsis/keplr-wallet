@@ -13,8 +13,6 @@ import {
   Buttons,
   ClaimAll,
   MenuBar,
-  StringToggle,
-  TabStatus,
   CopyAddress,
   CopyAddressModal,
   IBCTransferView,
@@ -44,6 +42,9 @@ import { Skeleton } from "../../components/skeleton";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
 import { useTheme } from "styled-components";
+import { IbcHistoryView } from "./components/ibc-history-view";
+import { LayeredHorizontalRadioGroup } from "../../components/radio-group";
+import { YAxis } from "../../components/axis";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -60,6 +61,8 @@ export const useIsNotReady = () => {
 
   return query.response == null && query.error == null;
 };
+
+type TabStatus = "available" | "staked";
 
 export const MainPage: FunctionComponent = observer(() => {
   const {
@@ -229,11 +232,34 @@ export const MainPage: FunctionComponent = observer(() => {
     >
       <Box paddingX="0.75rem" paddingBottom="1.5rem">
         <Stack gutter="0.75rem">
-          <StringToggle
-            tabStatus={tabStatus}
-            setTabStatus={setTabStatus}
-            isNotReady={isNotReady}
-          />
+          <YAxis alignX="center">
+            <LayeredHorizontalRadioGroup
+              items={[
+                {
+                  key: "available",
+                  text: intl.formatMessage({
+                    id: "page.main.components.string-toggle.available-tab",
+                  }),
+                },
+                {
+                  key: "staked",
+                  text: intl.formatMessage({
+                    id: "page.main.components.string-toggle.staked-tab",
+                  }),
+                },
+              ]}
+              selectedKey={tabStatus}
+              onSelect={(key) => {
+                analyticsStore.logEvent("click_main_tab", {
+                  tabName: key,
+                });
+
+                setTabStatus(key as TabStatus);
+              }}
+              itemMinWidth="5.75rem"
+              isNotReady={isNotReady}
+            />
+          </YAxis>
           <CopyAddress
             onClick={() => {
               analyticsStore.logEvent("click_copyAddress");
@@ -328,6 +354,13 @@ export const MainPage: FunctionComponent = observer(() => {
           ) : null}
 
           <ClaimAll isNotReady={isNotReady} />
+
+          <IbcHistoryView isNotReady={isNotReady} />
+          {/*
+            IbcHistoryView 자체가 list를 그리기 때문에 여기서 gutter를 처리하기는 힘들다.
+            그러므로 IbcHistoryView에서 gutter를 처리하도록 한다.
+          */}
+          <Gutter size="0" />
 
           {tabStatus === "available" && !isNotReady ? (
             <StakeWithKeplrDashboardButton

@@ -13,6 +13,9 @@ import { Button } from "./components/button";
 import { observer } from "mobx-react-lite";
 import { useStore } from "./stores";
 import { useTheme } from "styled-components";
+import { ClearAllIBCTransferHistory } from "@keplr-wallet/background";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 interface State {
   hasError: boolean;
@@ -53,11 +56,34 @@ const ErrorBoundaryView: FunctionComponent = observer(() => {
   const [isLoading, setIsLoading] = useState(false);
 
   const resetStoreQueries = async () => {
-    const storageList = await browser.storage.local.get();
-    const storeQueriesKeys = Object.keys(storageList).filter((key) =>
-      key.startsWith("store_queries/")
-    );
-    await browser.storage.local.remove(storeQueriesKeys);
+    const fn1 = async () => {
+      const prefixes = [
+        "store_queries/",
+        "store_prices/",
+        "store_ibc_curreny_registrar/",
+        "store_gravity_bridge_currency_registrar/",
+        "store_axelar_evm_bridge_currency_registrar/",
+      ];
+
+      const storageList = await browser.storage.local.get();
+      const storeQueriesKeys = Object.keys(storageList).filter((key) => {
+        for (const prefix of prefixes) {
+          if (key.startsWith(prefix)) {
+            return true;
+          }
+        }
+        return false;
+      });
+      await browser.storage.local.remove(storeQueriesKeys);
+    };
+
+    const fn2 = async () => {
+      const msg = new ClearAllIBCTransferHistory();
+      const requester = new InExtensionMessageRequester();
+      await requester.sendMessage(BACKGROUND_PORT, msg);
+    };
+
+    await Promise.allSettled([fn1(), fn2()]);
   };
 
   return (

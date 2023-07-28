@@ -7,6 +7,7 @@ import {
   IRecipientConfig,
   ISenderConfig,
 } from "./types";
+import { IIBCChannelConfig } from "../ibc";
 
 // CONTRACT: Use with `observer`
 export const useTxConfigsValidate = (configs: {
@@ -16,6 +17,7 @@ export const useTxConfigsValidate = (configs: {
   amountConfig?: IBaseAmountConfig;
   feeConfig?: IFeeConfig;
   memoConfig?: IMemoConfig;
+  channelConfig?: IIBCChannelConfig;
   gasSimulator?: IGasSimulator;
 }) => {
   const interactionBlocked = (() => {
@@ -26,6 +28,7 @@ export const useTxConfigsValidate = (configs: {
       configs.amountConfig?.uiProperties.error ||
       configs.feeConfig?.uiProperties.error ||
       configs.memoConfig?.uiProperties.error ||
+      configs.channelConfig?.uiProperties.error ||
       configs.gasSimulator?.uiProperties.error
     ) {
       return true;
@@ -38,6 +41,7 @@ export const useTxConfigsValidate = (configs: {
       configs.amountConfig?.uiProperties.loadingState === "loading-block" ||
       configs.feeConfig?.uiProperties.loadingState === "loading-block" ||
       configs.memoConfig?.uiProperties.loadingState === "loading-block" ||
+      configs.channelConfig?.uiProperties.loadingState === "loading-block" ||
       configs.gasSimulator?.uiProperties.loadingState === "loading-block"
     ) {
       return true;

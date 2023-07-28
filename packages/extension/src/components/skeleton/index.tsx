@@ -1,36 +1,35 @@
 import React, { FunctionComponent } from "react";
 import { ColorPalette } from "../../styles";
-import { Box, BoxProps } from "../box";
+import { Box } from "../box";
 import { ButtonRadius } from "../button";
-import {
-  CopyAddressRadius,
-  StringToggleRadius,
-} from "../../pages/main/components";
+import { CopyAddressRadius } from "../../pages/main/components";
 import { useTheme } from "styled-components";
 
 export interface SkeletonProps {
   isNotReady?: boolean;
-  type?: "default" | "button" | "stringToggle" | "copyAddress" | "circle";
+  type?: "default" | "button" | "copyAddress" | "circle";
   dummyMinWidth?: string;
   // This is for the case that the skeleton's background color.
   layer?: 0 | 1;
 }
 
-export const Skeleton: FunctionComponent<
-  SkeletonProps & Omit<BoxProps, "position">
-> = ({ isNotReady, type = "default", layer = 0, dummyMinWidth, children }) => {
+export const Skeleton: FunctionComponent<SkeletonProps> = ({
+  isNotReady,
+  type = "default",
+  layer = 0,
+  dummyMinWidth,
+  children,
+}) => {
   const theme = useTheme();
 
   const getBorderRadius = () => {
     switch (type) {
       case "button":
         return ButtonRadius;
-      case "stringToggle":
-        return StringToggleRadius;
       case "copyAddress":
         return CopyAddressRadius;
       case "circle":
-        return "50%";
+        return "999999999px";
       default:
         return undefined;
     }

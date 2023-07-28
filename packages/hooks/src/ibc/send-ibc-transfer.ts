@@ -35,13 +35,17 @@ export const useIBCTransferConfig = (
     };
   } = {}
 ) => {
+  const channelConfig = useIBCChannelConfig();
+
   const senderConfig = useSenderConfig(chainGetter, chainId, sender);
 
   const amountConfig = useIBCAmountConfig(
     chainGetter,
     queriesStore,
     chainId,
-    senderConfig
+    senderConfig,
+    channelConfig,
+    true
   );
 
   const memoConfig = useMemoConfig(chainGetter, chainId);
@@ -57,13 +61,72 @@ export const useIBCTransferConfig = (
 
   amountConfig.setFeeConfig(feeConfig);
 
-  const channelConfig = useIBCChannelConfig();
+  const recipientConfig = useIBCRecipientConfig(
+    chainGetter,
+    chainId,
+    channelConfig,
+    options,
+    true
+  );
+
+  return {
+    amountConfig,
+    memoConfig,
+    gasConfig,
+    feeConfig,
+    recipientConfig,
+    channelConfig,
+    senderConfig,
+  };
+};
+
+export const useSendMixedIBCTransferConfig = (
+  chainGetter: ChainGetter,
+  queriesStore: IQueriesStore,
+  chainId: string,
+  sender: string,
+  initialGas: number,
+  isIBCTransfer: boolean,
+  options: {
+    allowHexAddressOnEthermint?: boolean;
+    icns?: {
+      chainId: string;
+      resolverContractAddress: string;
+    };
+  } = {}
+) => {
+  const channelConfig = useIBCChannelConfig(!isIBCTransfer);
+
+  const senderConfig = useSenderConfig(chainGetter, chainId, sender);
+
+  const amountConfig = useIBCAmountConfig(
+    chainGetter,
+    queriesStore,
+    chainId,
+    senderConfig,
+    channelConfig,
+    isIBCTransfer
+  );
+
+  const memoConfig = useMemoConfig(chainGetter, chainId);
+  const gasConfig = useGasConfig(chainGetter, chainId, initialGas);
+  const feeConfig = useFeeConfig(
+    chainGetter,
+    queriesStore,
+    chainId,
+    senderConfig,
+    amountConfig,
+    gasConfig
+  );
+
+  amountConfig.setFeeConfig(feeConfig);
 
   const recipientConfig = useIBCRecipientConfig(
     chainGetter,
     chainId,
     channelConfig,
-    options
+    options,
+    isIBCTransfer
   );
 
   return {
