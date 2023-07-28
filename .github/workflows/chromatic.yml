@@ -2,7 +2,7 @@ name: Chromatic
 on:
   push:
     branches:
-      - 2.0/develop
+      - develop
 
 jobs:
   chromatic:
