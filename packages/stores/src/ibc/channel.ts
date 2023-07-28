@@ -129,7 +129,6 @@ export class IBCChannelStore {
       }
     });
 
-    console.log("IBC channel store initialized");
     runInAction(() => {
       this.isInitialized = true;
     });
