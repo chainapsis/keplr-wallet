@@ -8,11 +8,12 @@ import { Gutter } from "../../../../components/gutter";
 import SimpleBar from "simplebar-react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
-import { Subtitle2 } from "../../../../components/typography";
+import { Subtitle2, Subtitle3 } from "../../../../components/typography";
 import { IIBCChannelConfig } from "@keplr-wallet/hooks";
 import { ChainImageFallback } from "../../../../components/image";
 import { XAxis } from "../../../../components/axis";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
+import { EmptyView } from "../../../../components/empty-view";
 
 export const IBCTransferSelectDestinationModal: FunctionComponent<{
   chainId: string;
@@ -82,6 +83,16 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
             height: "21.5rem",
           }}
         >
+          {filteredChannels.length === 0 ? (
+            <React.Fragment>
+              <Gutter size="6rem" direction="vertical" />
+              <EmptyView>
+                <Subtitle3>
+                  <FormattedMessage id="page.send.amount.ibc-transfer.modal.no-search-data" />
+                </Subtitle3>
+              </EmptyView>
+            </React.Fragment>
+          ) : null}
           {filteredChannels.map((channel) => {
             const chainInfo = chainStore.getChain(channel.destinationChainId);
 
