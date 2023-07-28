@@ -38,7 +38,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 export const IbcHistoryView: FunctionComponent<{
   isNotReady: boolean;
 }> = observer(({ isNotReady }) => {
-  const { queriesStore } = useStore();
+  const { queriesStore, accountStore } = useStore();
 
   const [histories, setHistories] = useState<IBCTransferHistory[]>([]);
   useLayoutEffectOnce(() => {
@@ -92,13 +92,21 @@ export const IbcHistoryView: FunctionComponent<{
     };
   });
 
+  const filteredHistories = histories.filter((history) => {
+    const account = accountStore.getAccount(history.chainId);
+    if (account.bech32Address === history.sender) {
+      return true;
+    }
+    return false;
+  });
+
   if (isNotReady) {
     return null;
   }
 
   return (
     <Stack gutter="0.75rem">
-      {histories.reverse().map((history) => {
+      {filteredHistories.reverse().map((history) => {
         return (
           <IbcHistoryViewItem
             key={history.id}
@@ -113,7 +121,7 @@ export const IbcHistoryView: FunctionComponent<{
           />
         );
       })}
-      {histories.length > 0 ? <Gutter size="0.75rem" /> : null}
+      {filteredHistories.length > 0 ? <Gutter size="0.75rem" /> : null}
     </Stack>
   );
 });
