@@ -94,89 +94,104 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
               </EmptyView>
             </React.Fragment>
           ) : null}
-          {filteredChannels.map((channel) => {
-            const isToOrigin =
-              channel.destinationChainId === channel.originChainId;
+          {filteredChannels
+            .sort((a, b) => {
+              const aIsToOrigin = a.destinationChainId === a.originChainId;
+              const bIsToOrigin = b.destinationChainId === b.originChainId;
 
-            const chainInfo = chainStore.getChain(channel.destinationChainId);
+              if (aIsToOrigin && !bIsToOrigin) {
+                return -1;
+              }
 
-            return (
-              <Box
-                key={chainInfo.chainId}
-                height="4.125rem"
-                alignY="center"
-                paddingX="1rem"
-                hover={{
-                  backgroundColor:
-                    theme.mode === "light"
-                      ? ColorPalette["gray-10"]
-                      : ColorPalette["gray-550"],
-                }}
-                borderRadius="0.375rem"
-                cursor="pointer"
-                onClick={async (e) => {
-                  e.preventDefault();
+              if (!aIsToOrigin && bIsToOrigin) {
+                return 1;
+              }
 
-                  if (channel.channels.length > 0) {
-                    setIsIBCTransfer(true);
-                    ibcChannelConfig.setChannels(channel.channels);
-                    close();
-                  } else {
-                    close();
-                  }
-                }}
-              >
-                <XAxis alignY="center">
-                  <ChainImageFallback
-                    style={{
-                      width: "2rem",
-                      height: "2rem",
-                    }}
-                    src={chainInfo.chainSymbolImageUrl}
-                    alt="chain image"
-                  />
-                  <Gutter size="0.75rem" />
-                  <YAxis>
-                    <Subtitle2
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["gray-600"]
-                          : ColorPalette["gray-10"]
-                      }
-                    >
-                      {chainInfo.chainName}
-                    </Subtitle2>
-                    {isToOrigin ? (
-                      <React.Fragment>
-                        <Gutter size="0.25rem" />
-                        <XAxis alignY="center">
-                          <Body3
-                            color={
-                              theme.mode === "light"
-                                ? ColorPalette["gray-300"]
-                                : ColorPalette["gray-200"]
-                            }
-                          >
-                            <FormattedMessage id="page.send.amount.ibc-transfer.modal.origin-chain" />
-                          </Body3>
+              return 0;
+            })
+            .map((channel) => {
+              const isToOrigin =
+                channel.destinationChainId === channel.originChainId;
+
+              const chainInfo = chainStore.getChain(channel.destinationChainId);
+
+              return (
+                <Box
+                  key={chainInfo.chainId}
+                  height="4.125rem"
+                  alignY="center"
+                  paddingX="1rem"
+                  hover={{
+                    backgroundColor:
+                      theme.mode === "light"
+                        ? ColorPalette["gray-10"]
+                        : ColorPalette["gray-550"],
+                  }}
+                  borderRadius="0.375rem"
+                  cursor="pointer"
+                  onClick={async (e) => {
+                    e.preventDefault();
+
+                    if (channel.channels.length > 0) {
+                      setIsIBCTransfer(true);
+                      ibcChannelConfig.setChannels(channel.channels);
+                      close();
+                    } else {
+                      close();
+                    }
+                  }}
+                >
+                  <XAxis alignY="center">
+                    <ChainImageFallback
+                      style={{
+                        width: "2rem",
+                        height: "2rem",
+                      }}
+                      src={chainInfo.chainSymbolImageUrl}
+                      alt="chain image"
+                    />
+                    <Gutter size="0.75rem" />
+                    <YAxis>
+                      <Subtitle2
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-600"]
+                            : ColorPalette["gray-10"]
+                        }
+                      >
+                        {chainInfo.chainName}
+                      </Subtitle2>
+                      {isToOrigin ? (
+                        <React.Fragment>
                           <Gutter size="0.25rem" />
-                          <HomeIcon
-                            width="1rem"
-                            height="1rem"
-                            color={
-                              theme.mode === "light"
-                                ? ColorPalette["gray-300"]
-                                : ColorPalette["gray-200"]
-                            }
-                          />
-                        </XAxis>
-                      </React.Fragment>
-                    ) : null}
-                  </YAxis>
-                </XAxis>
-              </Box>
-            );
-          })}
+                          <XAxis alignY="center">
+                            <Body3
+                              color={
+                                theme.mode === "light"
+                                  ? ColorPalette["gray-300"]
+                                  : ColorPalette["gray-200"]
+                              }
+                            >
+                              <FormattedMessage id="page.send.amount.ibc-transfer.modal.origin-chain" />
+                            </Body3>
+                            <Gutter size="0.25rem" />
+                            <HomeIcon
+                              width="1rem"
+                              height="1rem"
+                              color={
+                                theme.mode === "light"
+                                  ? ColorPalette["gray-300"]
+                                  : ColorPalette["gray-200"]
+                              }
+                            />
+                          </XAxis>
+                        </React.Fragment>
+                      ) : null}
+                    </YAxis>
+                  </XAxis>
+                </Box>
+              );
+            })}
         </SimpleBar>
       </Box>
     );
