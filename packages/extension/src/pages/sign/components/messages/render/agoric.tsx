@@ -173,18 +173,26 @@ const WalletSpendActionMessagePretty: FunctionComponent<{
       {wants.length > 0 && <Box marginBottom="0.5rem">{wants}</Box>}
       {spendAction.offer?.offerArgs && (
         <Box marginBottom="0.5rem">
-          <FormattedMessage id="pages.sign.components.messages.agoric.wallet-spend-action.offer-args" />
-          <Box marginX="0.5rem">
-            <DumpRaw object={spendAction.offer.offerArgs} />
-          </Box>
+          <details>
+            <summary style={{ cursor: "pointer" }}>
+              <FormattedMessage id="page.sign.components.messages.agoric.wallet-spend-action.offer-args" />
+            </summary>
+            <Box marginX="0.5rem">
+              <DumpRaw object={spendAction.offer.offerArgs} />
+            </Box>
+          </details>
         </Box>
       )}
       {spendAction.offer?.invitationSpec && (
         <Box>
-          <FormattedMessage id="pages.sign.components.messages.agoric.wallet-spend-action.invitation-spec" />
-          <Box marginX="0.5rem">
-            <DumpRaw object={spendAction.offer.invitationSpec} />
-          </Box>
+          <details>
+            <summary style={{ cursor: "pointer" }}>
+              <FormattedMessage id="page.sign.components.messages.agoric.wallet-spend-action.invitation-spec" />
+            </summary>
+            <Box marginX="0.5rem">
+              <DumpRaw object={spendAction.offer.invitationSpec} />
+            </Box>
+          </details>
         </Box>
       )}
     </Box>

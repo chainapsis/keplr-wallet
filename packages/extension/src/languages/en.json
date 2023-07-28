@@ -360,8 +360,8 @@
 
   "page.sign.components.messages.agoric.wallet-spend-action.execute-offer": "Type: <b>Execute Offer</b>",
   "page.sign.components.messages.agoric.wallet-spend-action.exit-offer": "Type: <b>Exit Offer {offerId}</b>",
-  "pages.sign.components.messages.agoric.wallet-spend-action.offer-args": "Offer Args:",
-  "pages.sign.components.messages.agoric.wallet-spend-action.invitation-spec": "Invitation Spec:",
+  "page.sign.components.messages.agoric.wallet-spend-action.offer-args": "Offer Args",
+  "page.sign.components.messages.agoric.wallet-spend-action.invitation-spec": "Invitation Spec",
   "page.sign.components.messages.agoric.wallet-spend-action.give": "Give: <b>{amount}</b>",
   "page.sign.components.messages.agoric.wallet-spend-action.title": "Wallet Spend Action",
   "page.sign.components.messages.agoric.wallet-spend-action.want": "Want: <b>{amount}</b>",
