@@ -37,3 +37,4 @@ export * from "./warning";
 export * from "./document-text";
 export * from "./x-mark";
 export * from "./check-circle";
+export * from "./home";

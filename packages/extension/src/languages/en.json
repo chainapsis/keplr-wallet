@@ -408,6 +408,7 @@
   "page.send.amount.ibc-transfer.destination-chain": "Destination Chain",
   "page.send.amount.ibc-transfer.modal.search-placeholder": "Search for a chain",
   "page.send.amount.ibc-transfer.modal.no-search-data": "No routes found",
+  "page.send.amount.ibc-transfer.modal.origin-chain": "Home Chain",
   "page.send.amount.title": "Send",
   "page.send.amount.asset-title": "Asset",
   "page.send.amount.memo-placeholder": "Required for sending to centralized exchanges",
