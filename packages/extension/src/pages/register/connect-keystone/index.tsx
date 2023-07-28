@@ -11,6 +11,7 @@ import { Box } from "../../../components/box";
 import { Button } from "../../../components/button";
 import { ColorPalette } from "../../../styles";
 import { useTheme } from "styled-components";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const ConnectKeystoneScene: FunctionComponent<{
   name: string;
@@ -21,6 +22,7 @@ export const ConnectKeystoneScene: FunctionComponent<{
   const sceneTransition = useSceneTransition();
   const header = useRegisterHeader();
   const theme = useTheme();
+  const intl = useIntl();
   const color =
     theme.mode === "light" ? ColorPalette["black"] : ColorPalette["white"];
 
@@ -28,7 +30,9 @@ export const ConnectKeystoneScene: FunctionComponent<{
     onWillVisible: () => {
       header.setHeader({
         mode: "step",
-        title: "Please Connect Your Hardware Wallet",
+        title: intl.formatMessage({
+          id: "pages.register.connect-keystone.title",
+        }),
         paragraphs: [],
         stepCurrent: stepPrevious + 1,
         stepTotal: stepTotal,
@@ -45,6 +49,10 @@ export const ConnectKeystoneScene: FunctionComponent<{
     });
   };
 
+  const span = (chunks: React.ReactNode[]) => (
+    <span style={{ color }}>{chunks}</span>
+  );
+
   return (
     <RegisterSceneBox style={{ alignItems: "center" }}>
       <Stack gutter="1.5rem">
@@ -52,8 +60,10 @@ export const ConnectKeystoneScene: FunctionComponent<{
           num="1"
           text={
             <span>
-              Tap “<span style={{ color }}>Connect Software Wallet</span>” at
-              the bottom left corner on the Keystone device.
+              <FormattedMessage
+                id="pages.register.connect-keystone.step-1"
+                values={{ span }}
+              />
             </span>
           }
         />
@@ -61,7 +71,10 @@ export const ConnectKeystoneScene: FunctionComponent<{
           num="2"
           text={
             <span>
-              Select “<span style={{ color }}>Keplr Wallet</span>”.
+              <FormattedMessage
+                id="pages.register.connect-keystone.step-2"
+                values={{ span }}
+              />
             </span>
           }
         />
@@ -69,8 +82,10 @@ export const ConnectKeystoneScene: FunctionComponent<{
           num="3"
           text={
             <span>
-              Click on the “<span style={{ color }}>Sync Keystone</span>” button
-              below to scan the QR code displayed on the Keystone device.
+              <FormattedMessage
+                id="pages.register.connect-keystone.step-3"
+                values={{ span }}
+              />
             </span>
           }
         />
@@ -87,11 +102,13 @@ export const ConnectKeystoneScene: FunctionComponent<{
           fontSize: "1rem",
         }}
       >
-        Click here to view detailed tutorial
+        <FormattedMessage id="pages.register.connect-keystone.click-to-view-tutorial" />
       </a>
       <Button
         onClick={sync}
-        text="Sync Keystone"
+        text={intl.formatMessage({
+          id: "pages.register.connect-keystone.sync",
+        })}
         style={{ width: "22rem", marginTop: "3.5rem" }}
       />
     </RegisterSceneBox>
@@ -125,7 +142,10 @@ const Step: FunctionComponent<{
           marginRight: "3rem",
         }}
       >
-        Step {num}
+        <FormattedMessage
+          id="pages.register.connect-keystone.step-text"
+          values={{ num }}
+        />
       </Box>
       <Box
         style={{

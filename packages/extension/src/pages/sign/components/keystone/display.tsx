@@ -7,12 +7,14 @@ import { AnimatedQRCode } from "@keystonehq/animated-qr";
 import { Button } from "../../../../components/button";
 import { KeystoneUR } from "../../utils/keystone";
 import { useTheme } from "styled-components";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const KeystoneDisplay: FunctionComponent<{
   ur?: KeystoneUR;
   onGetSignature: () => void;
 }> = ({ ur, onGetSignature }) => {
   const theme = useTheme();
+  const intl = useIntl();
   return (
     <Stack gutter="0.75rem" alignX="center">
       <Box
@@ -24,7 +26,7 @@ export const KeystoneDisplay: FunctionComponent<{
               : ColorPalette["gray-200"],
         }}
       >
-        Scan the QR code via your Keystone device
+        <FormattedMessage id="page.sign.keystone.scan-qrcode" />
       </Box>
       <KeystoneTextIcon mode={theme.mode} height="2.375rem" width="9.75rem" />
       <Box
@@ -58,8 +60,7 @@ export const KeystoneDisplay: FunctionComponent<{
         }}
         paddingX="0.88rem"
       >
-        Click on the &apos;Get Signature&apos; button after signing the
-        transaction with your Keystone device.
+        <FormattedMessage id="page.sign.keystone.click-get-signature" />
       </Box>
       <a
         href="https://support.keyst.one/3rd-party-wallets/cosmos-wallets/keplr-extension?utm_source=keplr&utm_medium=sign&utm_id=20230419"
@@ -76,7 +77,12 @@ export const KeystoneDisplay: FunctionComponent<{
         Tutorial
       </a>
       <Box paddingBottom="0.88rem" paddingX="0.88rem" style={{ width: "100%" }}>
-        <Button text="Get Signature" onClick={onGetSignature} />
+        <Button
+          text={intl.formatMessage({
+            id: "page.sign.keystone.get-signature",
+          })}
+          onClick={onGetSignature}
+        />
       </Box>
     </Stack>
   );

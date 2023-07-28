@@ -8,6 +8,7 @@ import { KeystoneScan } from "./scan";
 import { ArrowLeftIcon } from "../../../../components/icon";
 import { KeystoneUR } from "../../utils/keystone";
 import { useTheme } from "styled-components";
+import { useIntl } from "react-intl";
 
 export const KeystoneSign: FunctionComponent<{
   ur?: KeystoneUR;
@@ -17,10 +18,13 @@ export const KeystoneSign: FunctionComponent<{
 }> = ({ ur, isOpen, close, onScan }) => {
   const [step, setStep] = useState("display");
   const theme = useTheme();
+  const intl = useIntl();
   return (
     <Modal isOpen={isOpen} close={close} align="bottom">
       <HeaderLayout
-        title="Scan the QR Code"
+        title={intl.formatMessage({
+          id: "page.sign.keystone.title",
+        })}
         left={
           <Box
             paddingLeft="1rem"

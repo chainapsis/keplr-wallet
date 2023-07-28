@@ -9,6 +9,7 @@ import { GuideBox } from "../../../../components/guide-box";
 import { KeystoneErrorModal } from "../../../../components/keystone/error";
 import { KeystoneUR } from "../../utils/keystone";
 import { useTheme } from "styled-components";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const KeystoneScan: FunctionComponent<{
   onScan: (ur: KeystoneUR) => void;
@@ -17,6 +18,7 @@ export const KeystoneScan: FunctionComponent<{
     useAnimatedQRScanner();
   const [isErrorOpen, setIsErrorOpen] = useState(false);
   const theme = useTheme();
+  const intl = useIntl();
 
   const handleScan = (ur: KeystoneUR) => {
     onScan(ur);
@@ -48,7 +50,7 @@ export const KeystoneScan: FunctionComponent<{
               : ColorPalette["gray-200"],
         }}
       >
-        Scan the QR code displayed on your Keystone device
+        <FormattedMessage id="page.sign.keystone.paragraph-scan" />
       </Box>
       <KeystoneTextIcon mode={theme.mode} height="2.375rem" width="9.75rem" />
       <Box
@@ -108,22 +110,30 @@ export const KeystoneScan: FunctionComponent<{
           paddingX="0.88rem"
           paddingBottom="0.88rem"
         >
-          Position the QR code in front of your camera.
+          <FormattedMessage id="page.sign.keystone.position-qrcode" />
         </Box>
       ) : (
         <Box width="100%" paddingBottom="0.88rem" paddingX="0.88rem">
           <GuideBox
             color="warning"
-            title="No camera permission"
-            paragraph="Please enable your camera permission via [Settings]"
+            title={intl.formatMessage({
+              id: "page.sign.keystone.no-camera-permission",
+            })}
+            paragraph={intl.formatMessage({
+              id: "page.sign.keystone.enable-camera",
+            })}
           />
         </Box>
       )}
       <KeystoneErrorModal
         isOpen={isErrorOpen}
         close={handleClose}
-        title="Invalid QR code"
-        paragraph="Please ensure you have selected a valid QR code from your Keystone device."
+        title={intl.formatMessage({
+          id: "page.sign.keystone.invalid-qrcode",
+        })}
+        paragraph={intl.formatMessage({
+          id: "page.sign.keystone.select-valid-qrcode",
+        })}
       />
     </Stack>
   );

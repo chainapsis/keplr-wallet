@@ -14,6 +14,7 @@ import { Purpose, useAnimatedQRScanner } from "@keystonehq/animated-qr";
 import { GuideBox } from "../../../components/guide-box";
 import { KeystoneErrorModal } from "../../../components/keystone/error";
 import { useTheme } from "styled-components";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const ScanKeystoneScene: FunctionComponent<{
   name: string;
@@ -26,14 +27,21 @@ export const ScanKeystoneScene: FunctionComponent<{
     useAnimatedQRScanner();
   const [isErrorOpen, setIsErrorOpen] = useState(false);
   const theme = useTheme();
+  const intl = useIntl();
 
   const header = useRegisterHeader();
   useSceneEvents({
     onWillVisible: () => {
       header.setHeader({
         mode: "step",
-        title: "Scan the QR Code",
-        paragraphs: ["Scan the QR code displayed on your Keystone device"],
+        title: intl.formatMessage({
+          id: "pages.register.connect-keystone.title-scan",
+        }),
+        paragraphs: [
+          intl.formatMessage({
+            id: "pages.register.connect-keystone.paragraph-scan",
+          }),
+        ],
         stepCurrent: stepPrevious + 1,
         stepTotal: stepTotal,
       });
@@ -118,22 +126,30 @@ export const ScanKeystoneScene: FunctionComponent<{
             marginTop: "2rem",
           }}
         >
-          Position the QR code in front of your camera.
+          <FormattedMessage id="pages.register.connect-keystone.position-qrcode" />
         </Box>
       ) : (
         <Box width="23.5rem" marginTop="2rem">
           <GuideBox
             color="warning"
-            title="No camera permission"
-            paragraph="Please enable your camera permission via [Settings]"
+            title={intl.formatMessage({
+              id: "pages.register.connect-keystone.no-camera-permission",
+            })}
+            paragraph={intl.formatMessage({
+              id: "pages.register.connect-keystone.enable-camera",
+            })}
           />
         </Box>
       )}
       <KeystoneErrorModal
         isOpen={isErrorOpen}
         close={handleClose}
-        title="Invalid QR code"
-        paragraph="Please ensure you have selected a valid QR code from your Keystone device."
+        title={intl.formatMessage({
+          id: "pages.register.connect-keystone.invalid-qrcode",
+        })}
+        paragraph={intl.formatMessage({
+          id: "pages.register.connect-keystone.select-valid-qrcode",
+        })}
       />
     </RegisterSceneBox>
   );

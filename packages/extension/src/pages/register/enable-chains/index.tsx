@@ -586,8 +586,7 @@ export const EnableChainsScene: FunctionComponent<{
               color={ColorPalette["gray-300"]}
               style={{ marginTop: "0.5rem", textAlign: "center" }}
             >
-              Please note that when adding specific chains to your wallet, the
-              ‘Suggest Chain’ feature may not work.
+              <FormattedMessage id="pages.register.connect-keystone.note-suggest-chain" />
             </Subtitle4>
             <Box alignX="center" marginTop="0.5rem">
               <a
@@ -599,7 +598,7 @@ export const EnableChainsScene: FunctionComponent<{
                   textUnderlineOffset: "3px",
                 }}
               >
-                Learn More
+                <FormattedMessage id="pages.register.connect-keystone.learn-more" />
               </a>
             </Box>
           </React.Fragment>
@@ -962,6 +961,7 @@ const ChainItem: FunctionComponent<{
   }) => {
     const { priceStore } = useStore();
     const theme = useTheme();
+    const intl = useIntl();
 
     const price = priceStore.calculatePrice(balance);
 
@@ -1008,7 +1008,11 @@ const ChainItem: FunctionComponent<{
               <Subtitle2>{chainInfo.chainName}</Subtitle2>
               {!isSupported && (
                 <Box marginLeft="0.5rem">
-                  <Tag text="Unsupported" />
+                  <Tag
+                    text={intl.formatMessage({
+                      id: "pages.register.connect-keystone.unsupported",
+                    })}
+                  />
                 </Box>
               )}
             </XAxis>

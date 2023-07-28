@@ -6,6 +6,7 @@ import React from "react";
 import { ColorPalette } from "../../styles";
 import { Button } from "../button";
 import styled, { DefaultTheme, useTheme } from "styled-components";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const KeystoneErrorModal: FunctionComponent<{
   isOpen: boolean;
@@ -14,6 +15,7 @@ export const KeystoneErrorModal: FunctionComponent<{
   paragraph: string;
 }> = ({ isOpen, close, title, paragraph }) => {
   const theme = useTheme();
+  const intl = useIntl();
   return (
     <Modal isOpen={isOpen} close={close} align="center">
       <Box
@@ -57,11 +59,13 @@ export const KeystoneErrorModal: FunctionComponent<{
               e.stopPropagation();
             }}
           >
-            Tutorial
+            <FormattedMessage id="pages.register.connect-keystone.tutorial" />
           </Tutorial>
           <Button
             size="small"
-            text="OK"
+            text={intl.formatMessage({
+              id: "button.ok",
+            })}
             style={{ width: "4.8125rem" }}
             onClick={close}
           />
