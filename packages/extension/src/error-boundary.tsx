@@ -57,10 +57,23 @@ const ErrorBoundaryView: FunctionComponent = observer(() => {
 
   const resetStoreQueries = async () => {
     const fn1 = async () => {
+      const prefixes = [
+        "store_queries/",
+        "store_prices/",
+        "store_ibc_curreny_registrar/",
+        "store_gravity_bridge_currency_registrar/",
+        "store_axelar_evm_bridge_currency_registrar/",
+      ];
+
       const storageList = await browser.storage.local.get();
-      const storeQueriesKeys = Object.keys(storageList).filter((key) =>
-        key.startsWith("store_queries/")
-      );
+      const storeQueriesKeys = Object.keys(storageList).filter((key) => {
+        for (const prefix of prefixes) {
+          if (key.startsWith(prefix)) {
+            return true;
+          }
+        }
+        return false;
+      });
       await browser.storage.local.remove(storeQueriesKeys);
     };
 
