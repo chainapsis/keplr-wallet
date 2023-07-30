@@ -210,6 +210,7 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
               items={chainList}
               selectedItemKey={chainId}
               onSelect={setChainId}
+              allowSearch={true}
             />
           </Box>
 

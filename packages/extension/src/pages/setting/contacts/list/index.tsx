@@ -77,6 +77,7 @@ export const SettingContactsList: FunctionComponent = observer(() => {
                   }
                 );
               }}
+              allowSearch={true}
             />
           </Box>
 

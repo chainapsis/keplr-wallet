@@ -248,23 +248,27 @@ export const AddressBookModal: FunctionComponent<{
                         </React.Fragment>
                       ) : null}
 
-                      <AltTypography>
-                        <FormattedMessage id="components.address-book-modal.other-wallet" />
-                      </AltTypography>
-                      {otherAccounts.map((data, i) => {
-                        return (
-                          <AddressItem
-                            key={i}
-                            name={data.name}
-                            address={data.address}
-                            isShowMemo={false}
-                            onClick={() => {
-                              recipientConfig.setValue(data.address);
-                              close();
-                            }}
-                          />
-                        );
-                      })}
+                      {otherAccounts.length > 0 ? (
+                        <React.Fragment>
+                          <AltTypography>
+                            <FormattedMessage id="components.address-book-modal.other-wallet" />
+                          </AltTypography>
+                          {otherAccounts.map((data, i) => {
+                            return (
+                              <AddressItem
+                                key={i}
+                                name={data.name}
+                                address={data.address}
+                                isShowMemo={false}
+                                onClick={() => {
+                                  recipientConfig.setValue(data.address);
+                                  close();
+                                }}
+                              />
+                            );
+                          })}
+                        </React.Fragment>
+                      ) : null}
                     </React.Fragment>
                   );
                 })()}

@@ -174,6 +174,7 @@ export const SettingGeneralAuthZPage: FunctionComponent = observer(() => {
             items={items}
             selectedItemKey={chainId}
             onSelect={setChainId}
+            allowSearch={true}
           />
         </Box>
 

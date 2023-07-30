@@ -38,6 +38,10 @@ export interface IBCCurrency extends Currency {
   readonly paths: {
     portId: string;
     channelId: string;
+
+    counterpartyChannelId?: string;
+    counterpartyPortId?: string;
+    clientChainId?: string;
   }[];
   /**
    * The chain id that the currency is from.

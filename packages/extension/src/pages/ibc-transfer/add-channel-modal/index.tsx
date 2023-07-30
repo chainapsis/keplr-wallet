@@ -68,6 +68,7 @@ export const IBCAddChannelModal: FunctionComponent<{
             setSelectedChainId(key);
             setError("");
           }}
+          allowSearch={true}
         />
 
         <Gutter size="1.125rem" />
@@ -147,13 +148,13 @@ export const IBCAddChannelModal: FunctionComponent<{
             setError(error);
 
             if (channel && clientState && error === "") {
-              await ibcChannelStore.get(chainId).addChannel({
+              ibcChannelStore.addChannel(chainId, {
                 portId: "transfer",
                 channelId,
                 counterpartyChainId: selectedChainId,
               });
 
-              await ibcChannelStore.get(selectedChainId).addChannel({
+              ibcChannelStore.addChannel(selectedChainId, {
                 portId: channel.data.channel.counterparty.port_id,
                 channelId: channel.data.channel.counterparty.channel_id,
                 counterpartyChainId: chainId,

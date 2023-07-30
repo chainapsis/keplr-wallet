@@ -19,6 +19,11 @@ export const DefaultGasMsgWithdrawRewards = 240000; // Gas per messages.
 export const EthereumEndpoint =
   process.env["KEPLR_EXT_ETHEREUM_ENDPOINT"] || "";
 
+export const TokenContractListURL =
+  "https://opbaqquqruxn7fdsgcncrtfrwa0qxnoj.lambda-url.us-west-2.on.aws/";
+export const TokenContractListRepoURL =
+  "https://github.com/chainapsis/keplr-contract-registry";
+
 export const FiatCurrencies: FiatCurrency[] = [
   {
     currency: "usd",

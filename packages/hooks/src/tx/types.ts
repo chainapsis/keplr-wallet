@@ -98,7 +98,7 @@ export interface IAmountConfig extends IBaseAmountConfig {
 
   currency: AppCurrency;
   setCurrency(currency: AppCurrency | undefined): void;
-  selectableCurrencies: AppCurrency[];
+  canUseCurrency(currency: AppCurrency): boolean;
 
   // Zero means unset.
   fraction: number;

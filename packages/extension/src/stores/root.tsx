@@ -7,6 +7,7 @@ import {
   EthereumEndpoint,
   FiatCurrencies,
   ICNSInfo,
+  TokenContractListURL,
 } from "../config.ui";
 import {
   AccountStore,
@@ -53,6 +54,8 @@ import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { HugeQueriesStore } from "./huge-queries";
 import { ExtensionAnalyticsClient } from "../analytics";
+import { TokenContractsQueries } from "./token-contracts";
+import { SkipQueries } from "./skip/queries";
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
@@ -77,9 +80,11 @@ export class RootStore {
       SecretQueries,
       OsmosisQueries,
       KeplrETCQueries,
-      ICNSQueries
+      ICNSQueries,
+      TokenContractsQueries
     ]
   >;
+  public readonly skipQueriesStore: SkipQueries;
   public readonly accountStore: AccountStore<
     [CosmosAccount, CosmwasmAccount, SecretAccount]
   >;
@@ -148,7 +153,8 @@ export class RootStore {
     );
 
     this.ibcChannelStore = new IBCChannelStore(
-      new ExtensionKVStore("store_ibc_channel")
+      new ExtensionKVStore("store_ibc_channel"),
+      this.chainStore
     );
 
     this.permissionStore = new PermissionStore(
@@ -180,7 +186,14 @@ export class RootStore {
       KeplrETCQueries.use({
         ethereumURL: EthereumEndpoint,
       }),
-      ICNSQueries.use()
+      ICNSQueries.use(),
+      TokenContractsQueries.use({
+        tokenContractListURL: TokenContractListURL,
+      })
+    );
+    this.skipQueriesStore = new SkipQueries(
+      this.queriesStore.sharedContext,
+      this.chainStore
     );
 
     this.accountStore = new AccountStore(

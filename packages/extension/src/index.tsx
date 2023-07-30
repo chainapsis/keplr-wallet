@@ -121,6 +121,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     accountStore,
     keyRingStore,
     ibcCurrencyRegistrar,
+    ibcChannelStore,
     gravityBridgeCurrencyRegistrar,
     axelarEVMBridgeCurrencyRegistrar,
     priceStore,
@@ -197,6 +198,12 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
       return false;
     }
 
+    if (uiConfigStore.isDeveloper) {
+      if (!ibcChannelStore.isInitialized) {
+        return false;
+      }
+    }
+
     if (!gravityBridgeCurrencyRegistrar.isInitialized) {
       return false;
     }
@@ -215,9 +222,11 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     ibcCurrencyRegistrar.isInitialized,
     priceStore.isInitialized,
     uiConfigStore.isInitialized,
+    uiConfigStore.isDeveloper,
     gravityBridgeCurrencyRegistrar.isInitialized,
     axelarEVMBridgeCurrencyRegistrar.isInitialized,
     accountStore,
+    ibcChannelStore.isInitialized,
   ]);
 
   const isReady: boolean = (() => {
