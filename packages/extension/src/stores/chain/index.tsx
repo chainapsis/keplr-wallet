@@ -392,18 +392,6 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   }
 
   @flow
-  *tryUpdateChain(_chainId: string) {
-    // const msg = new TryUpdateChainMsg(chainId);
-    // const result = yield* toGenerator(
-    //   this.requester.sendMessage(BACKGROUND_PORT, msg)
-    // );
-    // if (result.updated) {
-    //   yield this.getChainInfosFromBackground();
-    // }
-    throw new Error("TODO");
-  }
-
-  @flow
   *setChainEndpoints(
     chainId: string,
     rpc: string | undefined,
