@@ -41,6 +41,7 @@ init(
     "https://app.calculated.fi",
     "https://app.dexter.zone",
     "https://app.stayking.zone",
+    "https://trade.levana.finance",
   ],
   ["https://wallet.keplr.app"],
   CommunityChainInfoRepo,

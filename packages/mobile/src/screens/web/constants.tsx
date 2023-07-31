@@ -350,7 +350,25 @@ const StaykingImage: FunctionComponent = () => {
   );
 };
 
+const LevanaImage: FunctionComponent = () => {
+  const smartNavigation = useSmartNavigation();
+
+  return (
+    <WebpageImageButton
+      name="Levana Perps"
+      source={require("../../assets/image/webpage/levana.jpeg")}
+      onPress={() => {
+        smartNavigation.pushSmart("Web.Levana", {});
+      }}
+    />
+  );
+};
+
 export const StaykingItem: Item = {
   key: "Stayking",
   component: StaykingImage,
+};
+export const LevanaItem: Item = {
+  key: "Levana",
+  component: LevanaImage,
 };

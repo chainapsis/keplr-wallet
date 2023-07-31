@@ -14,3 +14,4 @@ export * from "./ion-dao";
 export * from "./calc";
 export * from "./dexter";
 export * from "./stayking";
+export * from "./levana";
