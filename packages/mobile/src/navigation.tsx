@@ -128,6 +128,7 @@ import {
   IONDaoWebpageScreen,
   CalcFiWebpageScreen,
   DexterWebpageScreen,
+  LevanaWebpageScreen,
 } from "./screens/web/webpages";
 import { WebpageScreenScreenOptionsPreset } from "./screens/web/components/webpage-screen";
 import Bugsnag from "@bugsnag/react-native";
@@ -300,6 +301,9 @@ const {
       upperScreenName: "Web",
     },
     "Web.Dexter": {
+      upperScreenName: "Web",
+    },
+    "Web.Levana": {
       upperScreenName: "Web",
     },
   }).withParams<{
@@ -919,6 +923,7 @@ export const WebNavigation: FunctionComponent = () => {
       <Stack.Screen name="Web.IONDao" component={IONDaoWebpageScreen} />
       <Stack.Screen name="Web.Calc" component={CalcFiWebpageScreen} />
       <Stack.Screen name="Web.Dexter" component={DexterWebpageScreen} />
+      <Stack.Screen name="Web.Levana" component={LevanaWebpageScreen} />
     </Stack.Navigator>
   );
 };

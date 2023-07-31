@@ -22,6 +22,7 @@ import {
   IONDaoItem,
   CalcFiItem,
   DexterItem,
+  LevanaItem,
 } from "./constants";
 import { WebpageImageButton } from "./common";
 
@@ -48,6 +49,7 @@ const WebpagesPerLabel: {
       IONDaoItem,
       CalcFiItem,
       DexterItem,
+      LevanaItem,
     ],
   },
   {
@@ -65,6 +67,7 @@ const WebpagesPerLabel: {
       IBCXItem,
       CalcFiItem,
       DexterItem,
+      LevanaItem,
     ],
   },
   {
