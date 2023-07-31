@@ -163,16 +163,17 @@ export class HugeQueriesStore {
           return false;
         }
 
-        const notSmallPrice =
-          this.priceStore
-            .calculatePrice(viewToken.token, "usd")
-            ?.toDec()
-            .gte(new Dec("1")) ?? false;
-
-        if (notSmallPrice) {
-          return true;
+        // If currency has coinGeckoId, hide the low price tokens (under $1)
+        if (viewToken.token.currency.coinGeckoId != null) {
+          return (
+            this.priceStore
+              .calculatePrice(viewToken.token, "usd")
+              ?.toDec()
+              .gte(new Dec("1")) ?? false
+          );
         }
 
+        // Else, hide the low balance tokens (under 0.001)
         return viewToken.token.toDec().gte(new Dec("0.001"));
       });
     }
