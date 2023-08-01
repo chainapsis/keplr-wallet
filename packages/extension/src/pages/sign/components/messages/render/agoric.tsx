@@ -165,11 +165,11 @@ const WalletSpendActionMessagePretty: FunctionComponent<{
 
     return (
       <Box>
-        <Box marginY="0.5rem">{typeMessage}</Box>
-        {gives.length > 0 && <Box marginBottom="0.5rem">{gives}</Box>}
-        {wants.length > 0 && <Box marginBottom="0.5rem">{wants}</Box>}
+        <div>{typeMessage}</div>
+        {gives.length > 0 && <Box marginTop="0.3rem">{gives}</Box>}
+        {wants.length > 0 && <Box marginTop="0.3rem">{wants}</Box>}
         {spendAction.offer?.offerArgs && (
-          <Box marginBottom="0.5rem">
+          <Box marginTop="0.3rem">
             <details>
               <summary style={{ cursor: "pointer" }}>
                 <FormattedMessage id="page.sign.components.messages.agoric.wallet-spend-action.offer-args" />
@@ -181,7 +181,7 @@ const WalletSpendActionMessagePretty: FunctionComponent<{
           </Box>
         )}
         {spendAction.offer?.invitationSpec && (
-          <Box>
+          <Box marginTop="0.3rem">
             <details>
               <summary style={{ cursor: "pointer" }}>
                 <FormattedMessage id="page.sign.components.messages.agoric.wallet-spend-action.invitation-spec" />

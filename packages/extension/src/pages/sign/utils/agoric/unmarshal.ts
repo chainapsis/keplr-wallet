@@ -25,7 +25,11 @@ const objMap = (
   f: { (v: any): any; (arg0: any): any }
 ) => fromEntries(entries(obj).map(([p, v]) => [f(p), f(v)]));
 
-const makeMarshal = (_v2s: any, convertSlotToVal = (s: any) => s) => {
+type Marshal = {
+  fromCapData: ({ body, slots }: { body: any; slots: any }) => any;
+};
+
+const makeMarshal = (_v2s: any, convertSlotToVal = (s: any) => s): Marshal => {
   const fromCapData = ({ body, slots }: { body: any; slots: any }) => {
     const recur = (
       v: string | ArrayLike<unknown> | { [s: string]: unknown } | null
@@ -80,15 +84,8 @@ const makeMarshal = (_v2s: any, convertSlotToVal = (s: any) => s) => {
     return recur(encoding);
   };
 
-  const toCapData = () => {
-    throw Error("not implemented");
-  };
-
   return Object.freeze({
     fromCapData,
-    unserialize: fromCapData,
-    toCapData,
-    serialize: toCapData,
   });
 };
 
