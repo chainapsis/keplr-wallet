@@ -18,7 +18,10 @@ import { LedgerGuideBox } from "../components/ledger-guide-box";
 import { GuideBox } from "../../../components/guide-box";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Image } from "../../../components/image";
-import { useTheme } from "styled-components";
+import styled, { useTheme } from "styled-components";
+
+// Just for using `as` prop. It's not used for styling.
+const StyledPre = styled.pre``;
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
   const { chainStore, signInteractionStore, uiConfigStore } = useStore();
@@ -51,9 +54,15 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     }
     return false;
   })();
-  const content = useMemo(() => {
+  const content: {
+    value: string;
+    isJSON: boolean;
+  } = useMemo(() => {
     if (!signDocWrapper) {
-      return "";
+      return {
+        value: "",
+        isJSON: false,
+      };
     }
 
     if (signDocWrapper.aminoSignDoc.msgs.length !== 1) {
@@ -70,14 +79,23 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
 
       try {
         // In case of json, it is displayed more easily to read.
-        return JSON.stringify(JSON.parse(str), null, 2);
+        return {
+          value: JSON.stringify(JSON.parse(str), null, 2),
+          isJSON: true,
+        };
       } catch {
-        return str;
+        return {
+          value: str,
+          isJSON: false,
+        };
       }
     } else {
-      return msg.value.data as string;
+      return {
+        value: msg.value.data as string,
+        isJSON: false,
+      };
     }
-  }, [intl, isADR36WithString, signDocWrapper]);
+  }, [isADR36WithString, signDocWrapper]);
 
   const isLedgerAndDirect =
     signInteractionStore.waitingData?.data.keyType === "ledger" &&
@@ -261,7 +279,8 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
                 : "none",
           }}
         >
-          <pre
+          <StyledPre
+            as={content.isJSON ? undefined : "div"}
             style={{
               color:
                 theme.mode === "light"
@@ -272,14 +291,14 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
             }}
           >
             {!isViewData
-              ? content
+              ? content.value
               : JSON.stringify(
                   signInteractionStore.waitingData?.data.signDocWrapper
                     .aminoSignDoc,
                   null,
                   2
                 )}
-          </pre>
+          </StyledPre>
         </Box>
 
         <div style={{ flex: 1 }} />
