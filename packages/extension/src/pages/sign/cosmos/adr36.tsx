@@ -18,10 +18,7 @@ import { LedgerGuideBox } from "../components/ledger-guide-box";
 import { GuideBox } from "../../../components/guide-box";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Image } from "../../../components/image";
-import styled, { useTheme } from "styled-components";
-
-// Just for using `as` prop. It's not used for styling.
-const StyledPre = styled.pre``;
+import { useTheme } from "styled-components";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
   const { chainStore, signInteractionStore, uiConfigStore } = useStore();
@@ -279,8 +276,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
                 : "none",
           }}
         >
-          <StyledPre
-            as={content.isJSON ? undefined : "div"}
+          <pre
             style={{
               color:
                 theme.mode === "light"
@@ -288,6 +284,12 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
                   : ColorPalette["gray-10"],
               // Remove normalized style of pre tag
               margin: 0,
+              ...(!content.isJSON
+                ? {
+                    overflowWrap: "anywhere",
+                    whiteSpace: "break-spaces",
+                  }
+                : {}),
             }}
           >
             {!isViewData
@@ -298,7 +300,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
                   null,
                   2
                 )}
-          </StyledPre>
+          </pre>
         </Box>
 
         <div style={{ flex: 1 }} />
