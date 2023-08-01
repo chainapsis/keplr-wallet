@@ -35,6 +35,7 @@ const WebpagesPerLabel: {
     label: "All",
     items: [
       StaykingItem,
+      LevanaItem,
       OsmosisItem,
       StargazeItem,
       WYNDDaoItem,
@@ -51,13 +52,13 @@ const WebpagesPerLabel: {
       IONDaoItem,
       CalcFiItem,
       DexterItem,
-      LevanaItem,
     ],
   },
   {
     label: "Defi",
     items: [
       StaykingItem,
+      LevanaItem,
       OsmosisItem,
       WYNDDaoItem,
       InjectiveItem,
@@ -70,7 +71,6 @@ const WebpagesPerLabel: {
       IBCXItem,
       CalcFiItem,
       DexterItem,
-      LevanaItem,
     ],
   },
   {
