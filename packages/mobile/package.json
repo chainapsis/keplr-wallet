@@ -10,6 +10,7 @@
   "scripts": {
     "clean": "sh ./scripts/clean.sh",
     "android": "yarn build:provider && react-native run-android",
+    "android:release": "yarn build:provider && react-native run-android --variant release",
     "ios": "yarn build:provider && react-native run-ios",
     "android:connect": "adb reverse tcp:8081 tcp:8081",
     "typecheck": "tsc",

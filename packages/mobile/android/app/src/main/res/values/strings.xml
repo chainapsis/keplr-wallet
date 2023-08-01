@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Keplr</string>
+    <string name="app_name">Keplr for Test</string>
     <string moduleConfig="true" name="CodePushDeploymentKey">KIjCGsvIA6HTRxeR5BN0gsemSrsNJfOICquOP</string>
     <string name="appCenterAnalytics_whenToEnableAnalytics" moduleConfig="true" translatable="false">ALWAYS_SEND</string>
     <string name="expo_splash_screen_resize_mode">contain</string>
