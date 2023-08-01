@@ -105,96 +105,100 @@ const WalletSpendActionMessagePretty: FunctionComponent<{
 }> = observer(({ chainId, value }) => {
   const { queriesStore } = useStore();
   const vbankQuery = queriesStore.get(chainId).agoric.queryVbankAssets;
+  const m = makeMarshal(undefined);
 
   if (!vbankQuery.data) {
     return <LoadingIcon />;
   }
 
-  const { spend_action: spendActionSerialized } = value;
-  const m = makeMarshal(undefined);
-  const vbank = m.fromCapData(vbankQuery.data);
-  const spendAction = m.fromCapData(JSON.parse(spendActionSerialized));
+  try {
+    const { spend_action: spendActionSerialized } = value;
+    const vbank = m.fromCapData(vbankQuery.data);
+    const spendAction = m.fromCapData(JSON.parse(spendActionSerialized));
 
-  const brandToInfo = new Map<string, DisplayInfo>(
-    vbank.map((entry: any) => [
-      entry[1].brand,
-      { ...entry[1].displayInfo, petname: entry[1].issuerName },
-    ])
-  );
+    const brandToInfo = new Map<string, DisplayInfo>(
+      vbank.map((entry: any) => [
+        entry[1].brand,
+        { ...entry[1].displayInfo, petname: entry[1].issuerName },
+      ])
+    );
 
-  const typeMessage = <SpendActionTypePretty action={spendAction} />;
+    const typeMessage = <SpendActionTypePretty action={spendAction} />;
 
-  const gives = Object.entries(spendAction.offer?.proposal?.give ?? {}).map(
-    ([kw, amount]) => {
-      const brand = brandToInfo.get((amount as Amount).brand);
+    const formatAmount = (key: string, amount: Amount, id: string) => {
+      const brand = brandToInfo.get(amount.brand);
 
-      const prettyAmount = brand
-        ? displayAmount(brand, (amount as Amount).value)
-        : "";
+      if (!brand) {
+        throw new Error("Missing brand");
+      }
+      const prettyAmount = displayAmount(brand, amount.value);
 
       return (
         <FormattedMessage
-          key={kw}
-          id="page.sign.components.messages.agoric.wallet-spend-action.give"
+          key={key}
+          id={id}
           values={{
             b,
             amount: prettyAmount,
           }}
         />
       );
-    }
-  );
+    };
 
-  const wants = Object.entries(spendAction.offer?.proposal?.want ?? {}).map(
-    ([kw, amount]) => {
-      const brand = brandToInfo.get((amount as Amount).brand);
+    const gives = Object.entries(spendAction.offer?.proposal?.give ?? {}).map(
+      ([kw, amount]) =>
+        formatAmount(
+          kw,
+          amount as Amount,
+          "page.sign.components.messages.agoric.wallet-spend-action.give"
+        )
+    );
 
-      const prettyAmount = brand
-        ? displayAmount(brand, (amount as Amount).value)
-        : "";
+    const wants = Object.entries(spendAction.offer?.proposal?.want ?? {}).map(
+      ([kw, amount]) =>
+        formatAmount(
+          kw,
+          amount as Amount,
+          "page.sign.components.messages.agoric.wallet-spend-action.want"
+        )
+    );
 
-      return (
-        <FormattedMessage
-          key={kw}
-          id="page.sign.components.messages.agoric.wallet-spend-action.want"
-          values={{
-            b,
-            amount: prettyAmount,
-          }}
-        />
-      );
-    }
-  );
-
-  return (
-    <Box>
-      <Box marginY="0.5rem">{typeMessage}</Box>
-      {gives.length > 0 && <Box marginBottom="0.5rem">{gives}</Box>}
-      {wants.length > 0 && <Box marginBottom="0.5rem">{wants}</Box>}
-      {spendAction.offer?.offerArgs && (
-        <Box marginBottom="0.5rem">
-          <details>
-            <summary style={{ cursor: "pointer" }}>
-              <FormattedMessage id="page.sign.components.messages.agoric.wallet-spend-action.offer-args" />
-            </summary>
-            <Box marginX="0.5rem">
-              <DumpRaw object={spendAction.offer.offerArgs} />
-            </Box>
-          </details>
-        </Box>
-      )}
-      {spendAction.offer?.invitationSpec && (
-        <Box>
-          <details>
-            <summary style={{ cursor: "pointer" }}>
-              <FormattedMessage id="page.sign.components.messages.agoric.wallet-spend-action.invitation-spec" />
-            </summary>
-            <Box marginX="0.5rem">
-              <DumpRaw object={spendAction.offer.invitationSpec} />
-            </Box>
-          </details>
-        </Box>
-      )}
-    </Box>
-  );
+    return (
+      <Box>
+        <Box marginY="0.5rem">{typeMessage}</Box>
+        {gives.length > 0 && <Box marginBottom="0.5rem">{gives}</Box>}
+        {wants.length > 0 && <Box marginBottom="0.5rem">{wants}</Box>}
+        {spendAction.offer?.offerArgs && (
+          <Box marginBottom="0.5rem">
+            <details>
+              <summary style={{ cursor: "pointer" }}>
+                <FormattedMessage id="page.sign.components.messages.agoric.wallet-spend-action.offer-args" />
+              </summary>
+              <Box marginX="0.5rem">
+                <DumpRaw object={spendAction.offer.offerArgs} />
+              </Box>
+            </details>
+          </Box>
+        )}
+        {spendAction.offer?.invitationSpec && (
+          <Box>
+            <details>
+              <summary style={{ cursor: "pointer" }}>
+                <FormattedMessage id="page.sign.components.messages.agoric.wallet-spend-action.invitation-spec" />
+              </summary>
+              <Box marginX="0.5rem">
+                <DumpRaw object={spendAction.offer.invitationSpec} />
+              </Box>
+            </details>
+          </Box>
+        )}
+      </Box>
+    );
+  } catch (e) {
+    console.log(
+      "Error rendering wallet spend action, defaulting to yaml view",
+      e
+    );
+    return <DumpRaw object={value} />;
+  }
 });
