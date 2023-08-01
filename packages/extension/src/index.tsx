@@ -77,6 +77,7 @@ import "simplebar-react/dist/simplebar.min.css";
 import { GlobalSimpleBarProvider } from "./hooks/global-simplebar";
 import { AppThemeProvider } from "./theme";
 import { useTheme } from "styled-components";
+import { PageChangeScrollTop } from "./use-page-change-scroll-top";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -258,6 +259,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
 
   return (
     <HashRouter>
+      <PageChangeScrollTop />
       {isReady ? (
         shouldUnlockPage ? (
           <UnlockPage />
