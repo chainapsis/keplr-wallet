@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { IMessageRenderer, IMessageRenderRegistry } from "./types";
 import { Msg } from "@keplr-wallet/types";
-import { AnyWithUnpacked } from "@keplr-wallet/cosmos";
+import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";
 import yaml from "js-yaml";
 import { Buffer } from "buffer/";
 import {
@@ -53,6 +53,13 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
         }
 
         if ("unpacked" in msg) {
+          return yaml.dump({
+            typeUrl: msg.typeUrl || "Unknown",
+            value: msg.unpacked,
+          });
+        }
+
+        if (msg instanceof UnknownMessage) {
           return yaml.dump({
             typeUrl: msg.typeUrl || "Unknown",
             value: Buffer.from(msg.value).toString("base64"),
