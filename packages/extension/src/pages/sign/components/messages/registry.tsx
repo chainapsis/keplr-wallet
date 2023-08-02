@@ -1,9 +1,8 @@
 import React, { FunctionComponent } from "react";
 import { IMessageRenderer, IMessageRenderRegistry } from "./types";
 import { Msg } from "@keplr-wallet/types";
-import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";
+import { AnyWithUnpacked, ProtoCodec } from "@keplr-wallet/cosmos";
 import yaml from "js-yaml";
-import { Buffer } from "buffer/";
 import {
   ClaimRewardsMessage,
   CustomIcon,
@@ -28,6 +27,7 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
 
   render(
     chainId: string,
+    protoCodec: ProtoCodec,
     msg: Msg | AnyWithUnpacked
   ): {
     icon: React.ReactElement;
@@ -36,7 +36,7 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
   } {
     try {
       for (const renderer of this.renderers) {
-        const res = renderer.process(chainId, msg);
+        const res = renderer.process(chainId, msg, protoCodec);
         if (res) {
           return res;
         }
@@ -52,21 +52,7 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
           return yaml.dump(msg);
         }
 
-        if ("unpacked" in msg) {
-          return yaml.dump({
-            typeUrl: msg.typeUrl || "Unknown",
-            value: msg.unpacked,
-          });
-        }
-
-        if (msg instanceof UnknownMessage) {
-          return yaml.dump({
-            typeUrl: msg.typeUrl || "Unknown",
-            value: Buffer.from(msg.value).toString("base64"),
-          });
-        }
-
-        return yaml.dump(msg);
+        return yaml.dump(protoCodec.unpackedAnyToJSONRecursive(msg));
       } catch (e) {
         console.log(e);
         return "Failed to decode the msg";

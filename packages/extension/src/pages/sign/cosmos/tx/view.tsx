@@ -37,6 +37,7 @@ import { GuideBox } from "../../../../components/guide-box";
 import { FormattedMessage, useIntl } from "react-intl";
 import SimpleBar from "simplebar-react";
 import { useTheme } from "styled-components";
+import { defaultProtoCodec } from "@keplr-wallet/cosmos";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -384,7 +385,14 @@ export const CosmosTxView: FunctionComponent<{
                 }}
               >
                 {msgs.map((msg, i) => {
-                  const r = defaultRegistry.render(chainId, msg);
+                  const r = defaultRegistry.render(
+                    chainId,
+                    // XXX: defaultProtoCodec가 msgs를 rendering할때 사용되었다는 엄밀한 보장은 없다.
+                    //      근데 로직상 ProtoSignDocDecoder가 defaultProtoCodec가 아닌 다른 codec을 쓰도록 만들 경우가 사실 없기 때문에
+                    //      일단 이렇게 처리하고 넘어간다.
+                    defaultProtoCodec,
+                    msg
+                  );
 
                   return (
                     <MessageItem
