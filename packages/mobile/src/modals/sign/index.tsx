@@ -22,11 +22,7 @@ import { WCMessageRequester } from "../../stores/wallet-connect/msg-requester";
 import { WCAppLogoAndName } from "../../components/wallet-connect";
 import { renderAminoMessage } from "./amino";
 import { renderDirectMessage } from "./direct";
-import {
-  AnyWithUnpacked,
-  defaultProtoCodec,
-  UnknownMessage,
-} from "@keplr-wallet/cosmos";
+import { AnyWithUnpacked, defaultProtoCodec } from "@keplr-wallet/cosmos";
 import { unescapeHTML } from "@keplr-wallet/common";
 import { WCV2MessageRequester } from "../../stores/wallet-connect-v2/msg-requester";
 import { MsgGrant } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
@@ -156,13 +152,13 @@ export const SignModal: FunctionComponent<{
                     // XXX: defaultProtoCodec가 msgs를 rendering할때 사용되었다는 엄밀한 보장은 없다.
                     //      근데 로직상 ProtoSignDocDecoder가 defaultProtoCodec가 아닌 다른 codec을 쓰도록 만들 경우가 사실 없기 때문에
                     //      일단 이렇게 처리하고 넘어간다.
-                    const unpacked = defaultProtoCodec.unpackAny(
-                      grantMsg.grant.authorization
+                    const factory = defaultProtoCodec.unpackAnyFactory(
+                      grantMsg.grant.authorization.typeUrl
                     );
-                    if (!(unpacked instanceof UnknownMessage)) {
-                      const genericAuth = GenericAuthorization.decode(
-                        unpacked.value
-                      );
+                    if (factory) {
+                      const genericAuth = factory.decode(
+                        grantMsg.grant.authorization.value
+                      ) as GenericAuthorization;
 
                       if (
                         genericAuth.msg === "/cosmos.bank.v1beta1.MsgSend" ||

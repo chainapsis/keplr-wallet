@@ -9,7 +9,7 @@ import { MsgVote } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/tx";
 import { MsgWithdrawDelegatorReward } from "@keplr-wallet/proto-types/cosmos/distribution/v1beta1/tx";
 import { MsgExecuteContract } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
 import { MsgTransfer } from "@keplr-wallet/proto-types/ibc/applications/transfer/v1/tx";
-import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";
+import { AnyWithUnpacked, defaultProtoCodec } from "@keplr-wallet/cosmos";
 import {
   renderMsgBeginRedelegate,
   renderMsgDelegate,
@@ -27,11 +27,9 @@ export function renderDirectMessage(
   msg: AnyWithUnpacked,
   currencies: AppCurrency[]
 ) {
-  try {
-    if (msg instanceof UnknownMessage) {
-      return renderUnknownMessage(msg.toJSON());
-    }
+  const protoCodec = defaultProtoCodec;
 
+  try {
     if ("unpacked" in msg) {
       switch (msg.typeUrl) {
         case "/cosmos.bank.v1beta1.MsgSend": {
@@ -109,6 +107,11 @@ export function renderDirectMessage(
         }
       }
     }
+
+    return renderUnknownMessage({
+      typeUrl: msg.typeUrl || "Unknown",
+      value: protoCodec.unpackedAnyToJSONRecursive(msg),
+    });
   } catch (e) {
     console.log(e);
   }
