@@ -79,7 +79,13 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
           size="large"
           color="secondary"
           left={
-            <KeystoneIcon mode={theme.mode} width="1.5rem" height="1.5rem" />
+            <KeystoneIcon
+              color={
+                theme.mode === "light" ? ColorPalette.black : ColorPalette.white
+              }
+              width="1.5rem"
+              height="1.5rem"
+            />
           }
           onClick={() => {
             sceneTransition.push("name-password-hardware", {

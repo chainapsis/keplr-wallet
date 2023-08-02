@@ -52,7 +52,11 @@ export const KeystoneScan: FunctionComponent<{
       >
         <FormattedMessage id="page.sign.keystone.paragraph-scan" />
       </Box>
-      <KeystoneTextIcon mode={theme.mode} height="2.375rem" width="9.75rem" />
+      <KeystoneTextIcon
+        color={theme.mode === "light" ? ColorPalette.black : ColorPalette.white}
+        height="2.375rem"
+        width="9.75rem"
+      />
       <Box
         backgroundColor={
           theme.mode === "light"
