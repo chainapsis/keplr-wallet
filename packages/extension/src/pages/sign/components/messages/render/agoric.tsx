@@ -11,26 +11,38 @@ import { displayAmount } from "../../../utils/agoric/display-amount";
 import yaml from "js-yaml";
 import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../../styles";
+import { MsgWalletSpendAction } from "@keplr-wallet/proto-types/agoric/swingset/msgs";
 
 export const AgoricWalletSpendActionMessage: IMessageRenderer = {
   process(chainId: string, msg) {
-    if (!("type" in msg && msg.type === "swingset/WalletSpendAction")) return;
+    const d = (() => {
+      if ("type" in msg && msg.type === "swingset/WalletSpendAction") {
+        return msg.value.spend_action;
+      }
 
-    return {
-      icon: <CustomIcon />,
-      title: (
-        <FormattedMessage id="page.sign.components.messages.agoric.wallet-spend-action.title" />
-      ),
-      content: (
-        <WalletSpendActionMessagePretty chainId={chainId} value={msg.value} />
-      ),
-    };
+      if (
+        "unpacked" in msg &&
+        msg.typeUrl === "/agoric.swingset.MsgWalletSpendAction"
+      ) {
+        return (msg.unpacked as MsgWalletSpendAction).spendAction;
+      }
+    })();
+
+    if (d) {
+      return {
+        icon: <CustomIcon />,
+        title: (
+          <FormattedMessage id="page.sign.components.messages.agoric.wallet-spend-action.title" />
+        ),
+        content: (
+          <WalletSpendActionMessagePretty
+            chainId={chainId}
+            spendActionSerialized={d}
+          />
+        ),
+      };
+    }
   },
-};
-
-type Value = {
-  spend_action: string;
-  owner: string;
 };
 
 type DisplayInfo = {
@@ -101,18 +113,20 @@ const DumpRaw: FunctionComponent<{ object: any }> = ({ object }) => {
 
 const WalletSpendActionMessagePretty: FunctionComponent<{
   chainId: string;
-  value: Value;
-}> = observer(({ chainId, value }) => {
+  spendActionSerialized: string;
+}> = observer(({ chainId, spendActionSerialized }) => {
   const { queriesStore } = useStore();
   const vbankQuery = queriesStore.get(chainId).agoric.queryVbankAssets;
   const m = makeMarshal(undefined);
 
-  if (!vbankQuery.data) {
-    return <LoadingIcon />;
-  }
-
   try {
-    const { spend_action: spendActionSerialized } = value;
+    if (vbankQuery.error) {
+      throw new Error(vbankQuery.error.message);
+    }
+
+    if (!vbankQuery.data) {
+      return <LoadingIcon />;
+    }
     const vbank = m.fromCapData(vbankQuery.data);
     const spendAction = m.fromCapData(JSON.parse(spendActionSerialized));
 
@@ -199,6 +213,6 @@ const WalletSpendActionMessagePretty: FunctionComponent<{
       "Error rendering wallet spend action, defaulting to yaml view",
       e
     );
-    return <DumpRaw object={value} />;
+    return <DumpRaw object={spendActionSerialized} />;
   }
 });
