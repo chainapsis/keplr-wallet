@@ -273,7 +273,7 @@ const QRCodeView: FunctionComponent<{
   useEffect(() => {
     (async () => {
       const connector = new WalletConnect({
-        bridge: "https://bridge.walletconnect.org",
+        bridge: "https://wc-bridge.keplr.app",
       });
 
       if (connector.connected) {

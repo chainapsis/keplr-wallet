@@ -51,9 +51,15 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     }
     return false;
   })();
-  const content = useMemo(() => {
+  const content: {
+    value: string;
+    isJSON: boolean;
+  } = useMemo(() => {
     if (!signDocWrapper) {
-      return "";
+      return {
+        value: "",
+        isJSON: false,
+      };
     }
 
     if (signDocWrapper.aminoSignDoc.msgs.length !== 1) {
@@ -70,14 +76,23 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
 
       try {
         // In case of json, it is displayed more easily to read.
-        return JSON.stringify(JSON.parse(str), null, 2);
+        return {
+          value: JSON.stringify(JSON.parse(str), null, 2),
+          isJSON: true,
+        };
       } catch {
-        return str;
+        return {
+          value: str,
+          isJSON: false,
+        };
       }
     } else {
-      return msg.value.data as string;
+      return {
+        value: msg.value.data as string,
+        isJSON: false,
+      };
     }
-  }, [intl, isADR36WithString, signDocWrapper]);
+  }, [isADR36WithString, signDocWrapper]);
 
   const isLedgerAndDirect =
     signInteractionStore.waitingData?.data.keyType === "ledger" &&
@@ -269,10 +284,16 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
                   : ColorPalette["gray-10"],
               // Remove normalized style of pre tag
               margin: 0,
+              ...(!content.isJSON
+                ? {
+                    overflowWrap: "anywhere",
+                    whiteSpace: "break-spaces",
+                  }
+                : {}),
             }}
           >
             {!isViewData
-              ? content
+              ? content.value
               : JSON.stringify(
                   signInteractionStore.waitingData?.data.signDocWrapper
                     .aminoSignDoc,

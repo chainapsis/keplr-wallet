@@ -1340,11 +1340,23 @@ export class CosmosAccountImpl {
       this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
     );
 
-    const msg = {
-      granter: this.base.bech32Address,
-      grantee,
-      msg_type_url: messageType,
-    };
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const msg =
+      chainInfo.chainIdentifier === "osmosis" ||
+      chainInfo.hasFeature("authz-msg-revoke-fixed")
+        ? {
+            type: "cosmos-sdk/MsgRevoke",
+            value: {
+              granter: this.base.bech32Address,
+              grantee,
+              msg_type_url: messageType,
+            },
+          }
+        : {
+            granter: this.base.bech32Address,
+            grantee,
+            msg_type_url: messageType,
+          };
 
     return this.makeTx(
       "revoke",

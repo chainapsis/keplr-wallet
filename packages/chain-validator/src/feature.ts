@@ -20,6 +20,7 @@ export const SupportedChainFeatures = [
   "terra-classic-fee",
   "ibc-go-v7-hot-fix",
   "ibc-pfm",
+  "authz-msg-revoke-fixed",
 ];
 
 /**

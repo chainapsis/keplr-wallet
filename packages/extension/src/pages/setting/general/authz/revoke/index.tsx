@@ -115,11 +115,12 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
       // TODO: Move to config
       let gas = 120000;
 
-      // Gas adjustment is 1.5
+      // Gas adjustment is 2
       // Since there is currently no convenient way to adjust the gas adjustment on the UI,
       // Use high gas adjustment to prevent failure.
+      // XXX: 원래는 1.5였는데 왜인지 모르겠지만 오스모시스에서 시뮬레이션 결과와 실제 소모하는 가스가 많이 다르기 땜시 일단 대충 2로 처리함.
       try {
-        gas = (await tx.simulate()).gasUsed * 1.5;
+        gas = (await tx.simulate()).gasUsed * 2;
       } catch (e) {
         console.log(e);
         return;
