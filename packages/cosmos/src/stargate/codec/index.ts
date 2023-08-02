@@ -7,6 +7,7 @@ import {
   MsgBeginRedelegate,
 } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
 import {
+  MsgExec,
   MsgGrant,
   MsgRevoke,
 } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
@@ -216,3 +217,4 @@ defaultProtoCodec.registerAny(
 );
 // ----- Authz grants -----
 defaultProtoCodec.registerAny("/cosmos.authz.v1beta1.MsgRevoke", MsgRevoke);
+defaultProtoCodec.registerAny("/cosmos.authz.v1beta1.MsgExec", MsgExec);
