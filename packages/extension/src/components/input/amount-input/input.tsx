@@ -9,7 +9,7 @@ import { TextInput } from "../text-input";
 import { useStore } from "../../../stores";
 import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { Box } from "../../box";
-import { Body2, Body3, Button1 } from "../../typography";
+import { Body2, Body3, Button2 } from "../../typography";
 import { ColorPalette } from "../../../styles";
 import { VerticalCollapseTransition } from "../../transition/vertical-collapse";
 import { Columns } from "../../column";
@@ -393,7 +393,7 @@ const MaxButton: FunctionComponent<{
         }
       }}
     >
-      <Button1
+      <Button2
         style={
           language.language === "ko"
             ? {
@@ -403,7 +403,7 @@ const MaxButton: FunctionComponent<{
         }
       >
         <FormattedMessage id="components.input.amount-input.max-button" />
-      </Button1>
+      </Button2>
     </Box>
   );
 });
