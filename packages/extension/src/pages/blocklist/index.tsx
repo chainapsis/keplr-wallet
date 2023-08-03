@@ -6,6 +6,7 @@ import { URLTempAllowMsg } from "@keplr-wallet/background";
 import { Box } from "../../components/box";
 import styled from "styled-components";
 import { ColorPalette, GlobalStyle } from "../../styles";
+import { AppThemeProvider } from "../../theme";
 
 const Styles = {
   Inner: styled.div`
@@ -100,8 +101,10 @@ export const BlocklistPage: FunctionComponent = () => {
 
 ReactDOM.render(
   <React.Fragment>
-    <GlobalStyle />
-    <BlocklistPage />
+    <AppThemeProvider>
+      <GlobalStyle />
+      <BlocklistPage />
+    </AppThemeProvider>
   </React.Fragment>,
   document.getElementById("app")
 );
