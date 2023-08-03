@@ -34,7 +34,10 @@ const Styles = {
     font-weight: 600;
     font-size: 3rem;
     margin: 0;
-    color: ${ColorPalette["gray-10"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-700"]
+        : ColorPalette["gray-10"]};
 
     @media screen and (max-height: 48rem) {
       font-size: 2rem;
@@ -44,7 +47,10 @@ const Styles = {
     font-weight: 400;
     font-size: 1rem;
     margin: 1.75rem 0;
-    color: ${ColorPalette["gray-100"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-300"]
+        : ColorPalette["gray-100"]};
 
     @media screen and (max-height: 48rem) {
       max-width: max(75%, 20rem);
@@ -61,7 +67,13 @@ const Styles = {
     font-size: 16px;
     line-height: 19px;
     letter-spacing: -0.005em;
-    color: ${ColorPalette["gray-50"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-600"]
+        : ColorPalette["gray-50"]};
+
+    display: flex;
+    justify-content: center;
   `,
 };
 
@@ -90,8 +102,15 @@ export const BlocklistPage: FunctionComponent = () => {
             site. To protect the safety of your assets, we recommend you exit
             this website immediately.
           </Styles.Description>
-          <Styles.Link onClick={handleMove}>
-            Continue to {origin} (unsafe)
+          <Styles.Link>
+            <div
+              onClick={handleMove}
+              style={{
+                cursor: "pointer",
+              }}
+            >
+              Continue to {origin} (unsafe)
+            </div>
           </Styles.Link>
         </Box>
       </Styles.Inner>
