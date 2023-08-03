@@ -343,6 +343,7 @@
 
   "page.sign.cosmos.tx.title": "Confirm Transaction",
   "page.sign.cosmos.tx.messages": "Messages",
+  "page.sign.cosmos.tx.authz-send-grant.warning-title": "You are allowing another account to transfer assets from your wallet for the specified period of time. Beware of scammers and approve with caution.",
   "page.sign.cosmos.tx.warning-title": "Incompatible Signing Requested",
   "page.sign.cosmos.tx.warning-paragraph": "Error: SIGN_MODE_DIRECT can’t be signed on Ledger. Contact the web app provider to fix this issue.",
   "page.sign.cosmos.tx.readonly-memo.empty": "(Empty)",

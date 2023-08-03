@@ -1,11 +1,12 @@
 import React from "react";
 import { Msg } from "@keplr-wallet/types";
-import { AnyWithUnpacked } from "@keplr-wallet/cosmos";
+import { AnyWithUnpacked, ProtoCodec } from "@keplr-wallet/cosmos";
 
 export interface IMessageRenderer {
   process(
     chainId: string,
-    msg: Msg | AnyWithUnpacked
+    msg: Msg | AnyWithUnpacked,
+    protoCodec: ProtoCodec
   ):
     | {
         icon: React.ReactElement;
@@ -20,6 +21,7 @@ export interface IMessageRenderRegistry {
 
   render(
     chainId: string,
+    protoCodec: ProtoCodec,
     msg: Msg | AnyWithUnpacked
   ): {
     icon: React.ReactElement;

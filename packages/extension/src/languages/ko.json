@@ -338,6 +338,7 @@
 
   "page.sign.cosmos.tx.title": "트랜잭션 확인",
   "page.sign.cosmos.tx.messages": "메세지",
+  "page.sign.cosmos.tx.authz-send-grant.warning-title": "다른 계정에게 자산 인출 권한을 부여하는 트랜잭션입니다. 신종금융사기 사례가 많으니 유의하시길 바랍니다.",
   "page.sign.cosmos.tx.warning-title": "호환되지 않는 서명이 요청됨",
   "page.sign.cosmos.tx.warning-paragraph": "오류: SIGN_MODE_DIRECT는 렛저에서 서명할 수 없습니다. 이슈 해결을 위해 해당 웹 앱의 관리자에게 연락하시길 바랍니다.",
   "page.sign.cosmos.tx.readonly-memo.empty": "(비어있음)",
