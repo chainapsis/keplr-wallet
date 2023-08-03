@@ -38,6 +38,8 @@ import { FormattedMessage, useIntl } from "react-intl";
 import SimpleBar from "simplebar-react";
 import { useTheme } from "styled-components";
 import { defaultProtoCodec } from "@keplr-wallet/cosmos";
+import { MsgGrant } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
+import { GenericAuthorization } from "@keplr-wallet/stores/build/query/cosmos/authz/types";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -155,6 +157,107 @@ export const CosmosTxView: FunctionComponent<{
       ? signDocHelper.signDocWrapper.aminoSignDoc.msgs
       : signDocHelper.signDocWrapper.protoSignDoc.txMsgs
     : [];
+  const [isSendAuthzGrant, setIsSendAuthzGrant] = useState(false);
+  useEffect(() => {
+    try {
+      const msgs = signDocHelper.signDocWrapper
+        ? signDocHelper.signDocWrapper.mode === "amino"
+          ? signDocHelper.signDocWrapper.aminoSignDoc.msgs
+          : signDocHelper.signDocWrapper.protoSignDoc.txMsgs
+        : [];
+
+      for (const msg of msgs) {
+        const anyMsg = msg as any;
+        if (anyMsg.type == null && anyMsg.grant && anyMsg.grant.authorization) {
+          // cosmos-sdk has bug that amino codec is not applied to authorization properly.
+          // This is the workaround for this bug.
+          if (anyMsg.grant.authorization.msg) {
+            const innerType = anyMsg.grant.authorization.msg;
+            if (
+              innerType === "/cosmos.bank.v1beta1.MsgSend" ||
+              innerType === "/cosmos.bank.v1beta1.MsgMultiSend" ||
+              innerType === "/ibc.applications.transfer.v1.MsgTransfer"
+            ) {
+              setIsSendAuthzGrant(true);
+              return;
+            }
+          } else if (anyMsg.grant.authorization.spend_limit) {
+            // SendAuthorization의 경우 spend_limit를 가진다.
+            // omit 되지 않도록 옵션이 설정되어있기 때문에 비어있더라도 빈 배열을 가지고 있어서 이렇게 확인이 가능하다.
+            // 근데 사실 다른 authorization도 spend_limit를 가질 수 있으므로 이건 좀 위험한 방법이다.
+            // 근데 어차피 버그 버전을 위한거라서 그냥 이렇게 해도 될듯.
+            setIsSendAuthzGrant(true);
+            return;
+          }
+        } else if ("type" in msg) {
+          if (msg.type === "cosmos-sdk/MsgGrant") {
+            if (
+              msg.value.grant.authorization.type ===
+              "cosmos-sdk/GenericAuthorization"
+            ) {
+              const innerType = msg.value.grant.authorization.value.msg;
+              if (
+                innerType === "/cosmos.bank.v1beta1.MsgSend" ||
+                innerType === "/cosmos.bank.v1beta1.MsgMultiSend" ||
+                innerType === "/ibc.applications.transfer.v1.MsgTransfer"
+              ) {
+                setIsSendAuthzGrant(true);
+                return;
+              }
+            } else if (
+              msg.value.grant.authorization.type ===
+              "cosmos-sdk/SendAuthorization"
+            ) {
+              setIsSendAuthzGrant(true);
+              return;
+            }
+          }
+        } else if ("unpacked" in msg) {
+          if (msg.typeUrl === "/cosmos.authz.v1beta1.MsgGrant") {
+            const grantMsg = msg.unpacked as MsgGrant;
+            if (grantMsg.grant && grantMsg.grant.authorization) {
+              if (
+                grantMsg.grant.authorization.typeUrl ===
+                "/cosmos.authz.v1beta1.GenericAuthorization"
+              ) {
+                // XXX: defaultProtoCodec가 msgs를 rendering할때 사용되었다는 엄밀한 보장은 없다.
+                //      근데 로직상 ProtoSignDocDecoder가 defaultProtoCodec가 아닌 다른 codec을 쓰도록 만들 경우가 사실 없기 때문에
+                //      일단 이렇게 처리하고 넘어간다.
+                const factory = defaultProtoCodec.unpackAnyFactory(
+                  grantMsg.grant.authorization.typeUrl
+                );
+                if (factory) {
+                  const genericAuth = factory.decode(
+                    grantMsg.grant.authorization.value
+                  ) as GenericAuthorization;
+
+                  if (
+                    genericAuth.msg === "/cosmos.bank.v1beta1.MsgSend" ||
+                    genericAuth.msg === "/cosmos.bank.v1beta1.MsgMultiSend" ||
+                    genericAuth.msg ===
+                      "/ibc.applications.transfer.v1.MsgTransfer"
+                  ) {
+                    setIsSendAuthzGrant(true);
+                    return;
+                  }
+                }
+              } else if (
+                grantMsg.grant.authorization.typeUrl ===
+                "/cosmos.bank.v1beta1.SendAuthorization"
+              ) {
+                setIsSendAuthzGrant(true);
+                return;
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.log("Failed to check during authz grant send check", e);
+    }
+
+    setIsSendAuthzGrant(false);
+  }, [signDocHelper.signDocWrapper]);
 
   const txConfigsValidate = useTxConfigsValidate({
     senderConfig,
@@ -431,6 +534,18 @@ export const CosmosTxView: FunctionComponent<{
             />
           </Stack>
         </Box>
+
+        {isSendAuthzGrant ? (
+          <React.Fragment>
+            <Gutter size="0.75rem" />
+            <GuideBox
+              color="warning"
+              title={intl.formatMessage({
+                id: "page.sign.cosmos.tx.authz-send-grant.warning-title",
+              })}
+            />
+          </React.Fragment>
+        ) : null}
 
         {isLedgerAndDirect ? (
           <React.Fragment>

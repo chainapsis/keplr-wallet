@@ -1,6 +1,9 @@
 import * as $protobuf from "protobufjs";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
-import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
+import {
+  MsgMultiSend,
+  MsgSend,
+} from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import {
   MsgDelegate,
   MsgUndelegate,
@@ -168,6 +171,10 @@ export class ProtoCodec {
 
 export const defaultProtoCodec = new ProtoCodec();
 defaultProtoCodec.registerAny("/cosmos.bank.v1beta1.MsgSend", MsgSend);
+defaultProtoCodec.registerAny(
+  "/cosmos.bank.v1beta1.MsgMultiSend",
+  MsgMultiSend
+);
 defaultProtoCodec.registerAny(
   "/cosmos.staking.v1beta1.MsgDelegate",
   MsgDelegate
