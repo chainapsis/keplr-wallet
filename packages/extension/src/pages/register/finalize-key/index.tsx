@@ -97,6 +97,15 @@ export const FinalizeKeyScene: FunctionComponent<{
         // Chain store should be initialized before creating the key.
         await chainStore.waitUntilInitialized();
 
+        // background에서의 체인 정보의 변경사항 (keplr-chain-registry로부터의) 등을 sync 해야한다.
+        // 사실 문제가 되는 부분은 유저가 install한 직후이다.
+        // 유저가 install한 직후에 바로 register page를 열도록 background가 짜여져있기 때문에
+        // 이 경우 background에서 chains service가 체인 정보를 업데이트하기 전에 register page가 열린다.
+        // 그 결과 chain image가 제대로 표시되지 않는다.
+        // 또한 background와 체인 정보가 맞지 않을 확률이 높기 때문에 잠재적으로도 문제가 될 수 있다.
+        // 이 문제를 해결하기 위해서 밑의 한줄이 존재한다.
+        await chainStore.updateChainInfosFromBackground();
+
         let vaultId: unknown;
 
         if (mnemonic) {

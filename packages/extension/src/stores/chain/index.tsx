@@ -263,7 +263,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   }
 
   @flow
-  protected *updateChainInfosFromBackground() {
+  *updateChainInfosFromBackground() {
     const msg = new GetChainInfosWithCoreTypesMsg();
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
