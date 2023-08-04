@@ -288,6 +288,8 @@ const KeyringItem: FunctionComponent<{
         }
 
         if (
+          app.length === 1 &&
+          app.includes("Cosmos") &&
           bip44Path.account === 0 &&
           bip44Path.change === 0 &&
           bip44Path.addressIndex === 0

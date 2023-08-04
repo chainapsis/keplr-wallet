@@ -180,7 +180,7 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
                   <Columns sum={1} gutter="1rem">
                     <Button
                       color="secondary"
-                      text="Cosmos App"
+                      text="Cosmos app"
                       isLoading={appIsLoading === "Cosmos"}
                       disabled={!!appIsLoading && appIsLoading !== "Cosmos"}
                       onClick={async () => {
@@ -227,7 +227,7 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
                     />
                     <Button
                       color="secondary"
-                      text="Terra App"
+                      text="Terra app"
                       isLoading={appIsLoading === "Terra"}
                       disabled={!!appIsLoading && appIsLoading !== "Terra"}
                       onClick={async () => {
@@ -274,7 +274,54 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
                     />
                     <Button
                       color="secondary"
-                      text="Ethereum App"
+                      text="Secret app"
+                      isLoading={appIsLoading === "Secret"}
+                      disabled={!!appIsLoading && appIsLoading !== "Secret"}
+                      onClick={async () => {
+                        if (appIsLoading) {
+                          return;
+                        }
+                        setAppIsLoading("Secret");
+
+                        let transport: Transport | undefined = undefined;
+                        try {
+                          transport = uiConfigStore.useWebHIDLedger
+                            ? await TransportWebHID.create()
+                            : await TransportWebUSB.create();
+
+                          let app = new CosmosApp("Secret", transport);
+
+                          if ((await app.getAppInfo()).app_name === "Secret") {
+                            setStatus("success");
+                            return;
+                          }
+
+                          transport = await LedgerUtils.tryAppOpen(
+                            transport,
+                            "Secret"
+                          );
+                          app = new CosmosApp("Secret", transport);
+
+                          if ((await app.getAppInfo()).app_name === "Secret ") {
+                            setStatus("success");
+                            return;
+                          }
+
+                          setStatus("failed");
+                        } catch (e) {
+                          console.log(e);
+
+                          setStatus("failed");
+                        } finally {
+                          transport?.close().catch(console.log);
+
+                          setAppIsLoading("");
+                        }
+                      }}
+                    />
+                    <Button
+                      color="secondary"
+                      text="Ethereum app"
                       isLoading={appIsLoading === "Ethereum"}
                       disabled={!!appIsLoading && appIsLoading !== "Ethereum"}
                       onClick={async () => {
