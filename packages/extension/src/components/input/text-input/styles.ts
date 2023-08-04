@@ -3,29 +3,6 @@ import { ColorPalette } from "../../../styles";
 import { TextInputProps } from "./types";
 import { Caption2 } from "../../typography";
 
-const getTextInputStyleForErrorOrParagraph = (
-  error?: string,
-  paragraph?: string,
-  errorBorder?: boolean
-) => {
-  if (error || errorBorder) {
-    return css`
-      border-color: ${(props) =>
-        props.theme.mode === "light"
-          ? ColorPalette["orange-400"]
-          : ColorPalette["yellow-400"]};
-
-      :focus-visible {
-        border-color: ${ColorPalette["red-200"]};
-      }
-    `;
-  }
-
-  if (paragraph) {
-    return;
-  }
-};
-
 const getSubTextStyleForErrorOrParagraph = (
   error?: string,
   paragraph?: string
@@ -69,45 +46,72 @@ export const Styles = {
       isTextarea?: boolean;
     }
   >`
-    border: 1px solid
-      ${(props) =>
-        props.theme.mode === "light"
+    position: relative;
+    ::after {
+      // Border를 그리기 위해 사용하는 부분임
+      // 이 부분 없이 Container 자체에 border를 그리면
+      // border가 자리를 차지해서 Container의 크기를 늘리게 됨
+      // 이 문제를 해결하기 위해서 이런 트릭을 사용함
+      content: "";
+
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+
+      border-width: 1px;
+      border-style: solid;
+      border-color: ${(props) => {
+        if (props.error || props.errorBorder) {
+          return props.theme.mode === "light"
+            ? ColorPalette["orange-400"]
+            : ColorPalette["yellow-400"];
+        }
+
+        return props.theme.mode === "light"
           ? ColorPalette["gray-100"]
-          : ColorPalette["gray-400"]};
+          : ColorPalette["gray-400"];
+      }};
+      border-radius: 0.5rem;
+
+      pointer-events: none;
+    }
+    :focus-within {
+      ${({ error, errorBorder }) => {
+        if (error || errorBorder) {
+          return css`
+            ::after {
+              border-color: ${(props) =>
+                props.theme.mode === "light"
+                  ? ColorPalette["orange-400"]
+                  : ColorPalette["yellow-400"]};
+            }
+          `;
+        } else {
+          return css`
+            ::after {
+              border-color: ${(props) =>
+                props.theme.mode === "light"
+                  ? ColorPalette["blue-400"]
+                  : ColorPalette["gray-200"]};
+            }
+          `;
+        }
+      }}
+    }
+
     border-radius: 0.5rem;
     background-color: ${(props) =>
       props.theme.mode === "light"
         ? ColorPalette["white"]
         : ColorPalette["gray-700"]};
 
-    :focus-within {
-      ${({ error }) => {
-        if (error) {
-          return css`
-            border-color: ${(props) =>
-              props.theme.mode === "light"
-                ? ColorPalette["orange-400"]
-                : ColorPalette["yellow-400"]};
-          `;
-        } else {
-          return css`
-            border-color: ${(props) =>
-              props.theme.mode === "light"
-                ? ColorPalette["blue-400"]
-                : ColorPalette["gray-200"]};
-          `;
-        }
-      }}
-    }
-
     ${({ disabled }) => {
       if (disabled) {
         return DisableStyle;
       }
     }}
-
-    ${({ error, paragraph, errorBorder }) =>
-      getTextInputStyleForErrorOrParagraph(error, paragraph, errorBorder)}
   `,
   TextInput: styled.input<TextInputProps & { isTextarea?: boolean }>`
     width: 100%;

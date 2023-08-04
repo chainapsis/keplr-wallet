@@ -17,7 +17,7 @@ export const Styles = {
     position: relative;
 
     width: 100%;
-    height: ${({ size }) => (size === "small" ? "2.5rem" : "3.5rem")};
+    height: ${({ size }) => (size === "small" ? "2.5rem" : "3.25rem")};
 
     padding: 0 1rem;
 
