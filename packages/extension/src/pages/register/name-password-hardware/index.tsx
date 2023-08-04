@@ -12,8 +12,9 @@ import { VerticalCollapseTransition } from "../../../components/transition/verti
 import { Button } from "../../../components/button";
 import { Gutter } from "../../../components/gutter";
 import { observer } from "mobx-react-lite";
-import { TextButton } from "../../../components/button-text";
 import { useIntl } from "react-intl";
+import { Dropdown } from "../../../components/dropdown";
+import { Label } from "../../../components/input";
 
 export const RegisterNamePasswordHardwareScene: FunctionComponent<{
   type: string;
@@ -37,6 +38,8 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
 
   const form = useFormNamePassword();
 
+  const [connectTo, setConnectTo] = useState<string>("Cosmos");
+
   const bip44PathState = useBIP44PathState();
   const [isBIP44CardOpen, setIsBIP44CardOpen] = useState(false);
 
@@ -48,7 +51,7 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
             sceneTransition.push("connect-ledger", {
               name: data.name,
               password: data.password,
-              app: "Cosmos",
+              app: connectTo,
               bip44Path: bip44PathState.getPath(),
               stepPrevious: 1,
               stepTotal: 3,
@@ -58,27 +61,30 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
           }
         })}
       >
-        <FormNamePassword
-          {...form}
-          appendButton={
-            <TextButton
-              text={intl.formatMessage({
-                id: "pages.register.name-password-hardware.use-terra-app-button",
-              })}
-              onClick={form.handleSubmit((data) => {
-                sceneTransition.push("connect-ledger", {
-                  name: data.name,
-                  password: data.password,
-                  app: "Terra",
-                  bip44Path: bip44PathState.getPath(),
-                  stepPrevious: 1,
-                  stepTotal: 3,
-                });
-              })}
-            />
-          }
-          autoFocus={true}
-        >
+        <FormNamePassword {...form} autoFocus={true}>
+          <Gutter size="1rem" />
+          <Label content="Connect to" />
+          <Dropdown
+            size="large"
+            selectedItemKey={connectTo}
+            items={[
+              {
+                key: "Cosmos",
+                label: "Cosmos app (Recommended)",
+              },
+              {
+                key: "Terra",
+                label: "Terra app",
+              },
+              {
+                key: "Secret",
+                label: "Secret app",
+              },
+            ]}
+            onSelect={(key) => {
+              setConnectTo(key);
+            }}
+          />
           <Gutter size="1.625rem" />
           <VerticalCollapseTransition width="100%" collapsed={isBIP44CardOpen}>
             <Box alignX="center">
