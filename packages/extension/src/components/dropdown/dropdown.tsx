@@ -83,7 +83,7 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
         size={size}
       >
         <Columns sum={1}>
-          <Box position="relative">
+          <Box position="relative" alignY="center">
             <Box
               position="absolute"
               style={{
