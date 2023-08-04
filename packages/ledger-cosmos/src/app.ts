@@ -43,7 +43,7 @@ export class CosmosApp {
       throw new Error("Transport has not been defined");
     }
 
-    if (app !== "Cosmos" && app !== "Terra") {
+    if (app !== "Cosmos" && app !== "Terra" && app !== "Secret") {
       throw new Error(`Unknown app: ${this.app}`);
     }
   }

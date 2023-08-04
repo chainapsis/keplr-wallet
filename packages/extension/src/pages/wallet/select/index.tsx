@@ -17,6 +17,7 @@ import { Button } from "../../../components/button";
 import styled, { useTheme } from "styled-components";
 import { FloatingDropdown } from "../../../components/dropdown";
 import { useIntl } from "react-intl";
+import { App, AppCoinType } from "@keplr-wallet/ledger-cosmos";
 
 const Styles = {
   Container: styled(Stack)`
@@ -256,27 +257,60 @@ const KeyringItem: FunctionComponent<{
     if (keyInfo.insensitive["bip44Path"]) {
       const bip44Path = keyInfo.insensitive["bip44Path"] as any;
 
-      const isLedgerWithTerra =
-        keyInfo.type === "ledger" && keyInfo.insensitive["Terra"] != null;
       // -1 means it can be multiple coin type.
       let coinType = -1;
       if (keyInfo.type === "ledger") {
-        const isCosmos =
-          keyInfo.insensitive["Cosmos"] != null ||
-          keyInfo.insensitive["Terra"] != null;
-        const isEthereum = keyInfo.insensitive["Ethereum"] != null;
+        const ledgerAppCandidate: (App | "Ethereum")[] = [
+          "Cosmos",
+          "Terra",
+          "Secret",
+          "Ethereum",
+        ];
 
-        if (isCosmos && isEthereum) {
-          coinType = -1;
-        } else if (isCosmos) {
-          coinType = 118;
-        } else if (isEthereum) {
-          coinType = 60;
+        const app: (App | "Ethereum")[] = [];
+        for (const ledgerApp of ledgerAppCandidate) {
+          if (keyInfo.insensitive[ledgerApp] != null) {
+            app.push(ledgerApp);
+          }
         }
+
+        if (app.length === 0 || app.length >= 2) {
+          coinType = -1;
+        } else if (app[0] === "Ethereum") {
+          coinType = 60;
+        } else {
+          const c = AppCoinType[app[0]];
+          if (c != null) {
+            coinType = c;
+          } else {
+            coinType = -1;
+          }
+        }
+
+        if (
+          bip44Path.account === 0 &&
+          bip44Path.change === 0 &&
+          bip44Path.addressIndex === 0
+        ) {
+          return;
+        }
+
+        return `m/44'/${coinType >= 0 ? coinType : "-"}'/${
+          bip44Path.account
+        }'/${bip44Path.change}/${bip44Path.addressIndex}${(() => {
+          if (app.length === 1) {
+            if (app[0] !== "Cosmos" && app[0] !== "Ethereum") {
+              return ` ${intl.formatMessage({
+                id: `page.wallet.keyring-item.bip44-path-${app[0]}-text`,
+              })}`;
+            }
+          }
+
+          return "";
+        })()}`;
       }
 
       if (
-        !isLedgerWithTerra &&
         bip44Path.account === 0 &&
         bip44Path.change === 0 &&
         bip44Path.addressIndex === 0
@@ -286,13 +320,7 @@ const KeyringItem: FunctionComponent<{
 
       return `m/44'/${coinType >= 0 ? coinType : "-"}'/${bip44Path.account}'/${
         bip44Path.change
-      }/${bip44Path.addressIndex}${
-        isLedgerWithTerra
-          ? intl.formatMessage({
-              id: "page.wallet.keyring-item.bip44-path-terra-text",
-            })
-          : ""
-      }`;
+      }/${bip44Path.addressIndex}`;
     }
 
     if (
