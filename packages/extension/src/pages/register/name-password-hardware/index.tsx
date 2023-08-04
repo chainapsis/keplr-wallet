@@ -63,22 +63,33 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
       >
         <FormNamePassword {...form} autoFocus={true}>
           <Gutter size="1rem" />
-          <Label content="Connect to" />
+          <Label
+            content={intl.formatMessage({
+              id: "pages.register.name-password-hardware.connect-to",
+            })}
+          />
           <Dropdown
+            color="text-input"
             size="large"
             selectedItemKey={connectTo}
             items={[
               {
                 key: "Cosmos",
-                label: "Cosmos app (Recommended)",
+                label: intl.formatMessage({
+                  id: "pages.register.name-password-hardware.connect-to-cosmos",
+                }),
               },
               {
                 key: "Terra",
-                label: "Terra app",
+                label: intl.formatMessage({
+                  id: "pages.register.name-password-hardware.connect-to-terra",
+                }),
               },
               {
                 key: "Secret",
-                label: "Secret app",
+                label: intl.formatMessage({
+                  id: "pages.register.name-password-hardware.connect-to-secret",
+                }),
               },
             ]}
             onSelect={(key) => {

@@ -15,6 +15,7 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
   selectedItemKey,
   onSelect,
   size = "small",
+  color = "default",
   label,
   menuContainerMaxHeight,
   allowSearch,
@@ -78,6 +79,7 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
         placeholder={placeholder}
         isOpen={isOpen}
         onClick={() => setIsOpen(!isOpen)}
+        color={color}
         size={size}
       >
         <Columns sum={1}>

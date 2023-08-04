@@ -95,6 +95,10 @@
 
   "pages.register.name-password-hardware.title": "지갑 셋팅하기",
   "pages.register.name-password-hardware.use-terra-app-button": "렛저에서 테라 앱 사용하기",
+  "pages.register.name-password-hardware.connect-to": "연결할 앱 선택",
+  "pages.register.name-password-hardware.connect-to-cosmos": "코스모스 앱 (추천)",
+  "pages.register.name-password-hardware.connect-to-terra": "테라 앱",
+  "pages.register.name-password-hardware.connect-to-secret": "시크릿 앱",
 
   "pages.register.recover-mnemonic.title": "기존 지갑 불러오기",
   "pages.register.recover-mnemonic.paragraph-1": "복구 문구를 통해 지갑을 불러올 수 있습니다. 아무 칸이나 선택해서 전체 복구 문구를 붙여 넣어보세요.",
