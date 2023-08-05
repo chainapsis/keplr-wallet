@@ -3,6 +3,49 @@ import { ChainInfo } from "@keplr-wallet/types";
 
 export const EmbedChainInfos: ChainInfo[] = [
   {
+    evm: {
+      chainId: "60",
+      chainName: "Optimism",
+      jsonRpcProvider: "https://mainnet.optimism.io",
+      nativeCurrency: {
+        coinDenom: "ETH",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://ethereum.org/static/6b935ac0e6194247347855dc3d328e83/6ed5f/eth-diamond-black.webp",
+        coinGeckoId: "ethereum",
+      },
+    },
+    rpc: "",
+    rest: "",
+    chainId: "",
+    chainName: "Dummy",
+    stakeCurrency: {
+      coinDenom: "DUMMY",
+      coinMinimalDenom: "dummy",
+      coinDecimals: 0,
+    },
+    bip44: {
+      coinType: 60,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("dummy"),
+    currencies: [
+      {
+        coinDenom: "DUMMY",
+        coinMinimalDenom: "dummy",
+        coinDecimals: 0,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "DUMMY",
+        coinMinimalDenom: "dummy",
+        coinDecimals: 0,
+      },
+    ],
+    features: ["eth-address-gen", "eth-key-sign"],
+  },
+  {
     rpc: "https://rpc-cosmoshub.keplr.app",
     rest: "https://lcd-cosmoshub.keplr.app",
     chainId: "cosmoshub-4",

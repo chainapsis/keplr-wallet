@@ -55,4 +55,12 @@ export interface IChainInfoImpl<C extends ChainInfo = ChainInfo> {
   readonly walletUrl: string | undefined;
   readonly walletUrlForStaking: string | undefined;
   readonly chainSymbolImageUrl: string | undefined;
+  readonly evm:
+    | {
+        readonly chainId: string;
+        readonly chainName: string;
+        readonly jsonRpcProvider: string;
+        readonly nativeCurrency: AppCurrency;
+      }
+    | undefined;
 }

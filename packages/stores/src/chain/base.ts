@@ -12,6 +12,7 @@ import {
   BIP44,
   ChainInfo,
   Currency,
+  EVMChainInfo,
   FeeCurrency,
 } from "@keplr-wallet/types";
 import { IChainInfoImpl, IChainStore, CurrencyRegistrar } from "./types";
@@ -268,6 +269,10 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
 
   get chainSymbolImageUrl(): string | undefined {
     return this._embedded.chainSymbolImageUrl;
+  }
+
+  get evm(): EVMChainInfo | undefined {
+    return this._embedded.evm;
   }
 
   hasFeature(feature: string): boolean {

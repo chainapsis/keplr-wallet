@@ -217,56 +217,58 @@ export const CopyAddressModal: FunctionComponent<{
         {addresses.map((address) => {
           return (
             <YAxis key={address.chainInfo.chainId}>
-              <ChainAddressItem
-                chainInfo={address.chainInfo}
-                bech32Address={address.bech32Address}
-                isBookmarked={
-                  keyRingStore.selectedKeyInfo
-                    ? uiConfigStore.copyAddressConfig.isBookmarkedChain(
-                        keyRingStore.selectedKeyInfo.id,
-                        address.chainInfo.chainId
-                      )
-                    : false
-                }
-                setBookmarked={(value) => {
-                  if (keyRingStore.selectedKeyInfo) {
-                    if (value) {
-                      uiConfigStore.copyAddressConfig.bookmarkChain(
-                        keyRingStore.selectedKeyInfo.id,
-                        address.chainInfo.chainId
-                      );
-                    } else {
-                      uiConfigStore.copyAddressConfig.unbookmarkChain(
-                        keyRingStore.selectedKeyInfo.id,
-                        address.chainInfo.chainId
-                      );
-
-                      setSortPriorities((priorities) => {
-                        const identifier = ChainIdHelper.parse(
+              {!address.chainInfo.evm && (
+                <ChainAddressItem
+                  chainInfo={address.chainInfo}
+                  bech32Address={address.bech32Address}
+                  isBookmarked={
+                    keyRingStore.selectedKeyInfo
+                      ? uiConfigStore.copyAddressConfig.isBookmarkedChain(
+                          keyRingStore.selectedKeyInfo.id,
                           address.chainInfo.chainId
-                        ).identifier;
-                        const newPriorities = { ...priorities };
-                        if (newPriorities[identifier]) {
-                          delete newPriorities[identifier];
-                        }
-                        return newPriorities;
-                      });
-                    }
+                        )
+                      : false
                   }
-                }}
-                blockInteraction={hasCopied}
-                afterCopied={() => {
-                  analyticsStore.logEvent("click_copyAddress_copy", {
-                    chainId: address.chainInfo.chainId,
-                    chainName: address.chainInfo.chainName,
-                  });
-                  setHasCopied(true);
+                  setBookmarked={(value) => {
+                    if (keyRingStore.selectedKeyInfo) {
+                      if (value) {
+                        uiConfigStore.copyAddressConfig.bookmarkChain(
+                          keyRingStore.selectedKeyInfo.id,
+                          address.chainInfo.chainId
+                        );
+                      } else {
+                        uiConfigStore.copyAddressConfig.unbookmarkChain(
+                          keyRingStore.selectedKeyInfo.id,
+                          address.chainInfo.chainId
+                        );
 
-                  setTimeout(() => {
-                    close();
-                  }, 500);
-                }}
-              />
+                        setSortPriorities((priorities) => {
+                          const identifier = ChainIdHelper.parse(
+                            address.chainInfo.chainId
+                          ).identifier;
+                          const newPriorities = { ...priorities };
+                          if (newPriorities[identifier]) {
+                            delete newPriorities[identifier];
+                          }
+                          return newPriorities;
+                        });
+                      }
+                    }
+                  }}
+                  blockInteraction={hasCopied}
+                  afterCopied={() => {
+                    analyticsStore.logEvent("click_copyAddress_copy", {
+                      chainId: address.chainInfo.chainId,
+                      chainName: address.chainInfo.chainName,
+                    });
+                    setHasCopied(true);
+
+                    setTimeout(() => {
+                      close();
+                    }, 500);
+                  }}
+                />
+              )}
               {address.ethereumAddress ? (
                 <EthereumAddressItem
                   ethereumAddress={address.ethereumAddress}
@@ -493,7 +495,7 @@ export const EthereumAddressItem: FunctionComponent<{
                   : ColorPalette["gray-10"]
               }
             >
-              {chainInfo.chainName}
+              {chainInfo.evm?.chainName ?? chainInfo.chainName}
             </Subtitle3>
 
             <Gutter size="0.25rem" />

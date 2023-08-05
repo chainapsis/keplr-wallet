@@ -2,6 +2,13 @@ import { Currency, AppCurrency, FeeCurrency } from "./currency";
 import { BIP44 } from "./bip44";
 import { Bech32Config } from "./bech32";
 
+export interface EVMChainInfo {
+  readonly chainId: string;
+  readonly chainName: string;
+  readonly jsonRpcProvider: string;
+  readonly nativeCurrency: AppCurrency;
+}
+
 export interface ChainInfo {
   readonly rpc: string;
   readonly rest: string;
@@ -43,6 +50,8 @@ export interface ChainInfo {
   readonly beta?: boolean;
 
   readonly chainSymbolImageUrl?: string;
+
+  readonly evm?: EVMChainInfo;
 }
 
 export type ChainInfoWithoutEndpoints = Omit<
