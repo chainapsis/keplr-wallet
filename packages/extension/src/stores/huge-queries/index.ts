@@ -2,6 +2,7 @@ import { ChainStore } from "../chain";
 import {
   CoinGeckoPriceStore,
   CosmosQueries,
+  EthereumQueries,
   IAccountStore,
   IChainInfoImpl,
   IQueriesStore,
@@ -32,7 +33,9 @@ export class HugeQueriesStore {
 
   constructor(
     protected readonly chainStore: ChainStore,
-    protected readonly queriesStore: IQueriesStore<CosmosQueries>,
+    protected readonly queriesStore: IQueriesStore<
+      CosmosQueries & EthereumQueries
+    >,
     protected readonly accountStore: IAccountStore,
     protected readonly priceStore: CoinGeckoPriceStore
   ) {
@@ -49,9 +52,10 @@ export class HugeQueriesStore {
       if (account.bech32Address === "") {
         continue;
       }
+
       const queries = this.queriesStore.get(chainInfo.chainId);
-      const queryBalance = queries.queryBalances.getQueryBech32Address(
-        account.bech32Address
+      const queryBalance = queries.queryBalances.getBalancesByAddress(
+        chainInfo.evm ? account.ethereumHexAddress : account.bech32Address
       );
 
       const currencies = [chainInfo.stakeCurrency, ...chainInfo.currencies];
@@ -182,6 +186,10 @@ export class HugeQueriesStore {
   get stakables(): ViewToken[] {
     const res: ViewToken[] = [];
     for (const chainInfo of this.chainStore.chainInfosInUI) {
+      if (chainInfo.evm) {
+        continue;
+      }
+
       const key = `${chainInfo.chainIdentifier}/${chainInfo.stakeCurrency.coinMinimalDenom}`;
       const viewToken = this.allKnownBalancesMap.get(key);
       if (viewToken) {
@@ -223,6 +231,10 @@ export class HugeQueriesStore {
   get ibcTokens(): ViewToken[] {
     const res: ViewToken[] = [];
     for (const chainInfo of this.chainStore.chainInfosInUI) {
+      if (chainInfo.evm) {
+        continue;
+      }
+
       for (const currency of chainInfo.currencies) {
         const denomHelper = new DenomHelper(currency.coinMinimalDenom);
         if (
@@ -244,6 +256,9 @@ export class HugeQueriesStore {
   get delegations(): ViewToken[] {
     const res: ViewToken[] = [];
     for (const chainInfo of this.chainStore.chainInfosInUI) {
+      if (chainInfo.evm) {
+        continue;
+      }
       const account = this.accountStore.getAccount(chainInfo.chainId);
       if (account.bech32Address === "") {
         continue;
@@ -275,6 +290,9 @@ export class HugeQueriesStore {
       completeTime: string;
     }[] = [];
     for (const chainInfo of this.chainStore.chainInfosInUI) {
+      if (chainInfo.evm) {
+        continue;
+      }
       const account = this.accountStore.getAccount(chainInfo.chainId);
       if (account.bech32Address === "") {
         continue;

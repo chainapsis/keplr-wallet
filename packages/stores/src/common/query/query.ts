@@ -18,11 +18,14 @@ export type QueryOptions = {
   readonly cacheMaxAge: number;
   // millisec
   readonly fetchingInterval: number;
+  method: "GET" | "POST";
+  body?: Record<string, any>;
 };
 
 export const defaultOptions: QueryOptions = {
   cacheMaxAge: 0,
   fetchingInterval: 0,
+  method: "GET",
 };
 
 export type QueryError<E> = {
@@ -424,7 +427,7 @@ export abstract class ObservableQuery<T = unknown, E = unknown>
         this.queryCanceler.callOrCanceled(
           () => {
             hasStarted = true;
-            return this.fetchResponse(abortController);
+            return this.fetchResponse(abortController, this.options);
           },
           () => {
             if (hasStarted) {
@@ -464,7 +467,7 @@ export abstract class ObservableQuery<T = unknown, E = unknown>
           this.queryCanceler.callOrCanceled(
             () => {
               hasStarted = true;
-              return this.fetchResponse(abortController);
+              return this.fetchResponse(abortController, this.options);
             },
             () => {
               if (hasStarted) {
@@ -762,10 +765,15 @@ export abstract class ObservableQuery<T = unknown, E = unknown>
   }
 
   protected async fetchResponse(
-    abortController: AbortController
+    abortController: AbortController,
+    options?: QueryOptions
   ): Promise<{ headers: any; data: T }> {
     const result = await simpleFetch<T>(this.baseURL, this.url, {
       signal: abortController.signal,
+      ...(options && {
+        method: options.method,
+        body: JSON.stringify(options.body),
+      }),
     });
     return {
       headers: result.headers,

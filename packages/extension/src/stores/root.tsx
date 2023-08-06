@@ -32,6 +32,8 @@ import {
   ICNSQueries,
   PermissionManagerStore,
   SignEthereumInteractionStore,
+  EthereumQueries,
+  EthereumAccount,
 } from "@keplr-wallet/stores";
 import {
   KeplrETCQueries,
@@ -77,11 +79,12 @@ export class RootStore {
       SecretQueries,
       OsmosisQueries,
       KeplrETCQueries,
-      ICNSQueries
+      ICNSQueries,
+      EthereumQueries
     ]
   >;
   public readonly accountStore: AccountStore<
-    [CosmosAccount, CosmwasmAccount, SecretAccount]
+    [CosmosAccount, CosmwasmAccount, SecretAccount, EthereumAccount]
   >;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly hugeQueriesStore: HugeQueriesStore;
@@ -180,7 +183,8 @@ export class RootStore {
       KeplrETCQueries.use({
         ethereumURL: EthereumEndpoint,
       }),
-      ICNSQueries.use()
+      ICNSQueries.use(),
+      EthereumQueries.use()
     );
 
     this.accountStore = new AccountStore(
@@ -310,6 +314,9 @@ export class RootStore {
             };
           }
         },
+      }),
+      EthereumAccount.use({
+        queriesStore: this.queriesStore,
       })
     );
 

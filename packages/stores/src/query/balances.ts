@@ -5,6 +5,7 @@ import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { AppCurrency } from "@keplr-wallet/types";
 import { HasMapStore, IObservableQuery, QuerySharedContext } from "../common";
 import { computedFn } from "mobx-utils";
+import { ObservableQueryEthereumBalanceRegistry } from "./ethereum";
 
 export interface IObservableQueryBalanceImpl extends IObservableQuery {
   balance: CoinPretty;
@@ -15,13 +16,13 @@ export interface BalanceRegistry {
   getBalanceImpl(
     chainId: string,
     chainGetter: ChainGetter,
-    bech32Address: string,
+    address: string,
     minimalDenom: string
   ): IObservableQueryBalanceImpl | undefined;
 }
 
 export class ObservableQueryBalancesImplMap {
-  protected bech32Address: string;
+  protected address: string;
 
   @observable.shallow
   protected balanceImplMap: Map<string, IObservableQueryBalanceImpl> =
@@ -32,11 +33,11 @@ export class ObservableQueryBalancesImplMap {
     protected readonly chainId: string,
     protected readonly chainGetter: ChainGetter,
     protected readonly balanceRegistries: BalanceRegistry[],
-    bech32Address: string
+    address: string
   ) {
     makeObservable(this);
 
-    this.bech32Address = bech32Address;
+    this.address = address;
   }
 
   fetch() {
@@ -46,6 +47,7 @@ export class ObservableQueryBalancesImplMap {
   protected getBalanceInner(
     currency: AppCurrency
   ): IObservableQueryBalanceImpl {
+    const chainInfo = this.chainGetter.getChain(this.chainId);
     let key = currency.coinMinimalDenom;
     // If the currency is secret20, it will be different according to not only the minimal denom but also the viewing key of the currency.
     if ("type" in currency && currency.type === "secret20") {
@@ -55,14 +57,29 @@ export class ObservableQueryBalancesImplMap {
     if (!this.balanceImplMap.has(key)) {
       runInAction(() => {
         let balanceImpl: IObservableQueryBalanceImpl | undefined;
-
         for (const registry of this.balanceRegistries) {
-          balanceImpl = registry.getBalanceImpl(
-            this.chainId,
-            this.chainGetter,
-            this.bech32Address,
-            currency.coinMinimalDenom
-          );
+          // TODO: Should be refactored.
+          if (
+            chainInfo.evm &&
+            registry instanceof ObservableQueryEthereumBalanceRegistry
+          ) {
+            balanceImpl = registry.getBalanceImpl(
+              this.chainId,
+              this.chainGetter,
+              this.address,
+              currency.coinMinimalDenom
+            );
+          } else if (
+            !chainInfo.evm &&
+            !(registry instanceof ObservableQueryEthereumBalanceRegistry)
+          ) {
+            balanceImpl = registry.getBalanceImpl(
+              this.chainId,
+              this.chainGetter,
+              this.address,
+              currency.coinMinimalDenom
+            );
+          }
           if (balanceImpl) {
             break;
           }
@@ -199,13 +216,13 @@ export class ObservableQueryBalances extends HasMapStore<ObservableQueryBalances
     protected readonly chainId: string,
     protected readonly chainGetter: ChainGetter
   ) {
-    super((bech32Address: string) => {
+    super((address: string) => {
       return new ObservableQueryBalancesImplMap(
         this.sharedContext,
         this.chainId,
         this.chainGetter,
         this.balanceRegistries,
-        bech32Address
+        address
       );
     });
   }
@@ -216,5 +233,9 @@ export class ObservableQueryBalances extends HasMapStore<ObservableQueryBalances
 
   getQueryBech32Address(bech32Address: string): ObservableQueryBalancesImplMap {
     return this.get(bech32Address) as ObservableQueryBalancesImplMap;
+  }
+
+  getBalancesByAddress(address: string): ObservableQueryBalancesImplMap {
+    return this.get(address) as ObservableQueryBalancesImplMap;
   }
 }

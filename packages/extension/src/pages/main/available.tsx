@@ -60,6 +60,7 @@ export const AvailableTabView: FunctionComponent<{
   const theme = useTheme();
 
   const allBalances = hugeQueriesStore.getAllBalances(true);
+
   const allBalancesNonZero = useMemo(() => {
     return allBalances.filter((token) => {
       return token.token.toDec().gt(zeroDec);
