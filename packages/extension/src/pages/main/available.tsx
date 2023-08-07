@@ -27,6 +27,7 @@ import { Caption2 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
 import styled, { useTheme } from "styled-components";
+import { DenomHelper } from "@keplr-wallet/common";
 
 const zeroDec = new Dec(0);
 
@@ -54,7 +55,8 @@ export const AvailableTabView: FunctionComponent<{
   // 근데 컴포넌트가 분리되어있는데 이거 하려고 context api 쓰긴 귀찮아서 그냥 prop으로 대충 처리한다.
   onClickGetStarted: () => void;
 }> = observer(({ search, isNotReady, onClickGetStarted }) => {
-  const { hugeQueriesStore, chainStore, uiConfigStore } = useStore();
+  const { hugeQueriesStore, chainStore, accountStore, uiConfigStore } =
+    useStore();
   const navigate = useNavigate();
   const intl = useIntl();
   const theme = useTheme();
@@ -235,6 +237,23 @@ export const AvailableTabView: FunctionComponent<{
                             `/send?chainId=${viewToken.chainInfo.chainId}&coinMinimalDenom=${viewToken.token.currency.coinMinimalDenom}`
                           )
                         }
+                        copyAddress={(() => {
+                          // For only native tokens, show copy address button
+                          if (
+                            new DenomHelper(
+                              viewToken.token.currency.coinMinimalDenom
+                            ).type !== "native" ||
+                            viewToken.token.currency.coinMinimalDenom.startsWith(
+                              "ibc/"
+                            )
+                          ) {
+                            return undefined;
+                          }
+
+                          return accountStore.getAccount(
+                            viewToken.chainInfo.chainId
+                          ).bech32Address;
+                        })()}
                       />
                     ))}
                   />

@@ -288,7 +288,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
             color="faint"
             onClick={() => {
               browser.tabs.create({
-                url: `https://help.keplr.app/faq`,
+                url: `https://help.keplr.app/faq?tab=3&topic=5`,
               });
             }}
             style={{ width: "100%", color: ColorPalette["gray-300"] }}

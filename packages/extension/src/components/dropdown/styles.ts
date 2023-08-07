@@ -9,7 +9,11 @@ export const Styles = {
     position: relative;
   `,
 
-  SelectedContainer: styled.div<{ isOpen: boolean; size: string }>`
+  SelectedContainer: styled.div<{
+    isOpen: boolean;
+    size: string;
+    color: "default" | "text-input";
+  }>`
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -17,7 +21,7 @@ export const Styles = {
     position: relative;
 
     width: 100%;
-    height: ${({ size }) => (size === "small" ? "2.5rem" : "3.5rem")};
+    height: ${({ size }) => (size === "small" ? "2.5rem" : "3.25rem")};
 
     padding: 0 1rem;
 
@@ -27,14 +31,25 @@ export const Styles = {
         : ColorPalette.white};
 
     border: 1px solid
-      ${({ isOpen, theme }) =>
-        isOpen
+      ${({ isOpen, theme, color }) => {
+        if (color === "text-input") {
+          return isOpen
+            ? theme.mode === "light"
+              ? ColorPalette["blue-400"]
+              : ColorPalette["gray-200"]
+            : theme.mode === "light"
+            ? ColorPalette["gray-100"]
+            : ColorPalette["gray-400"];
+        }
+
+        return isOpen
           ? theme.mode === "light"
             ? ColorPalette["gray-300"]
             : ColorPalette["gray-200"]
           : theme.mode === "light"
           ? ColorPalette["gray-100"]
-          : ColorPalette["gray-500"]};
+          : ColorPalette["gray-500"];
+      }};
     border-radius: 0.5rem;
     background-color: ${(props) =>
       props.theme.mode === "light"

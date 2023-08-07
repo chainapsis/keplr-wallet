@@ -175,7 +175,7 @@ export const connectAndSignWithLedger = async (
   },
   signDoc: StdSignDoc
 ): Promise<Uint8Array> => {
-  if (propApp !== "Cosmos" && propApp !== "Terra") {
+  if (propApp !== "Cosmos" && propApp !== "Terra" && propApp !== "Secret") {
     throw new KeplrError(
       ErrModuleLedgerSign,
       ErrCodeUnsupportedApp,

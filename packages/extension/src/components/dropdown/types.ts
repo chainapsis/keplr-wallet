@@ -12,6 +12,7 @@ export interface DropdownProps {
   placeholder?: string;
   className?: string;
   style?: CSSProperties;
+  color?: "default" | "text-input";
   size?: "small" | "large";
   label?: string;
   menuContainerMaxHeight?: string;

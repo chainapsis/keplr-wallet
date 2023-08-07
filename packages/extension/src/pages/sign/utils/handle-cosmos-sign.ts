@@ -54,6 +54,9 @@ export const handleCosmosPreSign = async (
       if (appData["Terra"]) {
         ledgerApp = "Terra";
         publicKey = Buffer.from((appData["Terra"] as any)["pubKey"], "hex");
+      } else if (appData["Secret"]) {
+        ledgerApp = "Secret";
+        publicKey = Buffer.from((appData["Secret"] as any)["pubKey"], "hex");
       } else {
         publicKey = Buffer.from((appData["Cosmos"] as any)["pubKey"], "hex");
       }
