@@ -95,9 +95,9 @@
 
   "pages.register.name-password-hardware.title": "Set Up Your Wallet",
   "pages.register.name-password-hardware.connect-to": "Connect to",
-  "pages.register.name-password-hardware.connect-to-cosmos": "Cosmos App (Recommended)",
-  "pages.register.name-password-hardware.connect-to-terra": "Terra App",
-  "pages.register.name-password-hardware.connect-to-secret": "Secret App",
+  "pages.register.name-password-hardware.connect-to-cosmos": "Cosmos app (Recommended)",
+  "pages.register.name-password-hardware.connect-to-terra": "Terra app",
+  "pages.register.name-password-hardware.connect-to-secret": "Secret app",
 
   "pages.register.recover-mnemonic.title": "Import Existing Wallet",
   "pages.register.recover-mnemonic.paragraph-1": "Enter your recovery phrase here to restore your wallet. Or click on any blank and paste the entire phrase.",
@@ -114,7 +114,7 @@
   "pages.register.back-up-private-key.import-button": "Import",
 
   "pages.register.connect-ledger.title": "Please connect your Hardware wallet",
-  "pages.register.connect-ledger.paragraph": "You need to connect Ethereum app in Ledger software, if you want to add EVM chains(Evmos, Injective) to Keplr",
+  "pages.register.connect-ledger.paragraph": "To use EVM-compatible chains (Injective, Evmos) with Keplr, you'll be prompted to connect to Ethereum app in the next steps.",
   "pages.register.connect-ledger.step-text": "Step {step}",
   "pages.register.connect-ledger.connect-ledger-step-paragraph": "Connect and unlock your Ledger.",
   "pages.register.connect-ledger.open-app-step-paragraph": "Open the {app} app on your Ledger device.",
@@ -307,8 +307,8 @@
   "page.wallet.private-key-title": "Private key",
   "page.wallet.ledger-title": "Ledger",
   "page.wallet.unknown-title": "Unknown",
-  "page.wallet.keyring-item.bip44-path-Terra-text": "(Terra App)",
-  "page.wallet.keyring-item.bip44-path-Secret-text": "(Secret App)",
+  "page.wallet.keyring-item.bip44-path-Terra-text": "(Terra app)",
+  "page.wallet.keyring-item.bip44-path-Secret-text": "(Secret app)",
   "page.wallet.keyring-item.dropdown.change-wallet-name-title": "Change Wallet Name",
   "page.wallet.keyring-item.dropdown.delete-wallet-title": "Delete Wallet",
   "page.wallet.keyring-item.dropdown.view-recovery-path-title": "View Recovery Phrase",
