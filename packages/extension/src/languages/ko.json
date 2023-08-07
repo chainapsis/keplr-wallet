@@ -94,7 +94,6 @@
   "pages.register.name-password.title": "지갑 셋팅하기",
 
   "pages.register.name-password-hardware.title": "지갑 셋팅하기",
-  "pages.register.name-password-hardware.use-terra-app-button": "렛저에서 테라 앱 사용하기",
   "pages.register.name-password-hardware.connect-to": "연결할 앱 선택",
   "pages.register.name-password-hardware.connect-to-cosmos": "코스모스 앱 (추천)",
   "pages.register.name-password-hardware.connect-to-terra": "테라 앱",

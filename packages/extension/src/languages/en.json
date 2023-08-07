@@ -94,11 +94,10 @@
   "pages.register.name-password.title": "Set Up Your Wallet",
 
   "pages.register.name-password-hardware.title": "Set Up Your Wallet",
-  "pages.register.name-password-hardware.use-terra-app-button": "Use Terra Ledger app",
   "pages.register.name-password-hardware.connect-to": "Connect to",
-  "pages.register.name-password-hardware.connect-to-cosmos": "Cosmos app (Recommended)",
-  "pages.register.name-password-hardware.connect-to-terra": "Terra app",
-  "pages.register.name-password-hardware.connect-to-secret": "Secret app",
+  "pages.register.name-password-hardware.connect-to-cosmos": "Cosmos App (Recommended)",
+  "pages.register.name-password-hardware.connect-to-terra": "Terra App",
+  "pages.register.name-password-hardware.connect-to-secret": "Secret App",
 
   "pages.register.recover-mnemonic.title": "Import Existing Wallet",
   "pages.register.recover-mnemonic.paragraph-1": "Enter your recovery phrase here to restore your wallet. Or click on any blank and paste the entire phrase.",
