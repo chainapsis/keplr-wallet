@@ -334,7 +334,7 @@ const MaxButton: FunctionComponent<{
       height="1.625rem"
       alignX="center"
       alignY="center"
-      paddingX="0.4375rem"
+      paddingX="0.5rem"
       color={
         isMax
           ? theme.mode === "light"
