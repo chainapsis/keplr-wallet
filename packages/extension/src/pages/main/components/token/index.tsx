@@ -555,14 +555,19 @@ const CopyAddressButton: FunctionComponent<{
   const animatedOpacity = useSpringValue(0, {
     config: defaultSpringConfig,
   });
+  const lastAnimatedOpacity = useRef(0);
   const animatedWidth = useSpringValue(containerWidthRem, {
     config: defaultSpringConfig,
   });
+  const lastAnimatedWidth = useRef(containerWidthRem);
   const animatedBackgroundColor = useSpringValue(
     getCopyAddressButtonBackgroundColor(theme),
     {
       config: defaultSpringConfig,
     }
+  );
+  const lastAnimatedBackgroundColor = useRef(
+    getCopyAddressButtonBackgroundColor(theme)
   );
 
   const seq = useRef(0);
@@ -603,11 +608,7 @@ const CopyAddressButton: FunctionComponent<{
       if (anims.length > 0) {
         for (const anim of anims) {
           anim.isAnimating = true;
-          const onRest = () => {
-            if (anim.onRest) {
-              anim.onRest();
-            }
-
+          const removeAnim = () => {
             setAnimationStack((prev) => {
               const index = prev.findIndex((a) => a.id === anim.id);
               if (index >= 0) {
@@ -618,19 +619,44 @@ const CopyAddressButton: FunctionComponent<{
               }
             });
           };
+          const onRest = () => {
+            if (anim.onRest) {
+              anim.onRest();
+            }
+
+            removeAnim();
+          };
 
           if (anim.type === "opacity") {
-            animatedOpacity.start(anim.to as number, {
-              onRest: onRest,
-            });
+            const changed = lastAnimatedOpacity.current !== anim.to;
+            if (changed) {
+              animatedOpacity.start(anim.to as number, {
+                onRest: onRest,
+              });
+            } else {
+              removeAnim();
+            }
+            lastAnimatedOpacity.current = anim.to as number;
           } else if (anim.type === "width") {
-            animatedWidth.start(anim.to as number, {
-              onRest: onRest,
-            });
+            const changed = lastAnimatedWidth.current !== anim.to;
+            if (changed) {
+              animatedWidth.start(anim.to as number, {
+                onRest: onRest,
+              });
+            } else {
+              removeAnim();
+            }
+            lastAnimatedWidth.current = anim.to as number;
           } else if (anim.type === "background") {
-            animatedBackgroundColor.start(anim.to as string, {
-              onRest: onRest,
-            });
+            const changed = lastAnimatedBackgroundColor.current !== anim.to;
+            if (changed) {
+              animatedBackgroundColor.start(anim.to as string, {
+                onRest: onRest,
+              });
+            } else {
+              removeAnim();
+            }
+            lastAnimatedBackgroundColor.current = anim.to as string;
           }
         }
 
