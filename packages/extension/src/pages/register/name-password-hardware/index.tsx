@@ -102,29 +102,36 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
             }}
           />
           <Gutter size="1.625rem" />
-          <VerticalCollapseTransition width="100%" collapsed={isBIP44CardOpen}>
-            <Box alignX="center">
-              <Button
-                size="small"
-                color="secondary"
-                text={intl.formatMessage({
-                  id: "button.advanced",
-                })}
-                onClick={() => {
-                  setIsBIP44CardOpen(true);
-                }}
-              />
-            </Box>
-          </VerticalCollapseTransition>
-          <VerticalCollapseTransition collapsed={!isBIP44CardOpen}>
-            <SetBip44PathCard
-              state={bip44PathState}
-              onClose={() => {
-                setIsBIP44CardOpen(false);
-              }}
-            />
-          </VerticalCollapseTransition>
-          <Gutter size="1.25rem" />
+          {type === "ledger" && (
+            <React.Fragment>
+              <VerticalCollapseTransition
+                width="100%"
+                collapsed={isBIP44CardOpen}
+              >
+                <Box alignX="center">
+                  <Button
+                    size="small"
+                    color="secondary"
+                    text={intl.formatMessage({
+                      id: "button.advanced",
+                    })}
+                    onClick={() => {
+                      setIsBIP44CardOpen(true);
+                    }}
+                  />
+                </Box>
+              </VerticalCollapseTransition>
+              <VerticalCollapseTransition collapsed={!isBIP44CardOpen}>
+                <SetBip44PathCard
+                  state={bip44PathState}
+                  onClose={() => {
+                    setIsBIP44CardOpen(false);
+                  }}
+                />
+              </VerticalCollapseTransition>
+              <Gutter size="1.25rem" />
+            </React.Fragment>
+          )}
         </FormNamePassword>
       </form>
     </RegisterSceneBox>
