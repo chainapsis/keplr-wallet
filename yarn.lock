@@ -6978,12 +6978,14 @@ __metadata:
     "@react-native/metro-config": ^0.72.9
     "@tsconfig/react-native": ^3.0.0
     "@types/react-test-renderer": ^18.0.0
+    "@types/setimmediate": ^1
     babel-jest: ^29.2.1
     metro-react-native-babel-preset: 0.76.7
     react: 18.2.0
     react-is: 18.2.0
     react-native: 0.72.3
     react-test-renderer: 18.2.0
+    setimmediate: ^1.0.5
   languageName: unknown
   linkType: soft
 
@@ -11468,6 +11470,13 @@ __metadata:
   version: 7.3.13
   resolution: "@types/semver@npm:7.3.13"
   checksum: 00c0724d54757c2f4bc60b5032fe91cda6410e48689633d5f35ece8a0a66445e3e57fa1d6e07eb780f792e82ac542948ec4d0b76eb3484297b79bd18b8cf1cb0
+  languageName: node
+  linkType: hard
+
+"@types/setimmediate@npm:^1":
+  version: 1.0.2
+  resolution: "@types/setimmediate@npm:1.0.2"
+  checksum: 3e46e71c9e0c60562c531a7eef62dea6a22a73ceac625d6c28977376ec40c5be1609b43c6af342f9e3c41b4788cd466f93dd086f8fa8dc10d6dd9865e54fd601
   languageName: node
   linkType: hard
 
