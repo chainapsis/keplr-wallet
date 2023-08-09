@@ -7429,6 +7429,8 @@ __metadata:
     "@types/text-encoding": ^0
     babel-jest: ^29.2.1
     expo: ^49.0.6
+    expo-crypto: ~12.4.1
+    expo-standard-web-crypto: ^1.6.0
     http-browserify: ^1.7.0
     https-browserify: ^1.0.0
     metro-react-native-babel-preset: 0.76.7
@@ -19640,6 +19642,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-crypto@npm:~12.4.1":
+  version: 12.4.1
+  resolution: "expo-crypto@npm:12.4.1"
+  dependencies:
+    base64-js: ^1.3.0
+  peerDependencies:
+    expo: "*"
+  checksum: 39bf8f29f36ad37d5d19f379d283fb74e2a09e56401f3d9330f874aacd9436649b5369139c8ba438493672f236e9237cd6aa8058da571d249d7ee5e8f50bb32c
+  languageName: node
+  linkType: hard
+
 "expo-file-system@npm:~15.4.0, expo-file-system@npm:~15.4.2":
   version: 15.4.2
   resolution: "expo-file-system@npm:15.4.2"
@@ -19694,6 +19707,18 @@ __metadata:
     compare-versions: ^3.4.0
     invariant: ^2.2.4
   checksum: 9a740ef3203356d080745fb80930cd853bbb5492bd329062dcd96114b884f3c0e3c94e940c1b9e7b93ab2c3ecd4fdf3790312c0f773136c4c858b6cdca085701
+  languageName: node
+  linkType: hard
+
+"expo-standard-web-crypto@npm:^1.6.0":
+  version: 1.7.0
+  resolution: "expo-standard-web-crypto@npm:1.7.0"
+  peerDependencies:
+    expo-crypto: ^12.2.1
+  peerDependenciesMeta:
+    expo-random:
+      optional: true
+  checksum: 9c21d09f4435c388fc888ab76e1c6fe4f415fb77064ccc4979a455be89b36166df688bb4faf74a0df4ce0e65d62b898ae03feafdb243bc2cec4142a33a3e9cb3
   languageName: node
   linkType: hard
 

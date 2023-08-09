@@ -14,6 +14,8 @@
   },
   "dependencies": {
     "expo": "^49.0.6",
+    "expo-crypto": "~12.4.1",
+    "expo-standard-web-crypto": "^1.6.0",
     "http-browserify": "^1.7.0",
     "https-browserify": "^1.0.0",
     "os-browserify": "^0.3.0",

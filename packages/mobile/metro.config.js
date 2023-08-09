@@ -89,7 +89,7 @@ const config = {
     extraNodeModules: {
       crypto: path.resolve(
         __dirname,
-        './node_modules/react-native-crypto-polyfill',
+        './node_modules/expo-standard-web-crypto',
       ),
       buffer: path.resolve(__dirname, '../../node_modules/buffer'),
       stream: path.resolve(__dirname, './node_modules/stream-browserify'),

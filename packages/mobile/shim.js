@@ -5,3 +5,8 @@ Object.assign(global, {
   TextEncoder: TextEncodingPolyfill.TextEncoder,
   TextDecoder: TextEncodingPolyfill.TextDecoder,
 });
+
+import {polyfillWebCrypto} from 'expo-standard-web-crypto';
+
+polyfillWebCrypto();
+// crypto is now globally defined
