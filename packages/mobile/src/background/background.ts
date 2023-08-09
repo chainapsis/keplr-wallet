@@ -1,24 +1,27 @@
 import {BACKGROUND_PORT} from '@keplr-wallet/router';
-import {ContentScriptMessageRequester} from '@keplr-wallet/router-extension';
-import {ExtensionKVStore} from '@keplr-wallet/common';
 import {init} from '@keplr-wallet/background';
 import scrypt from 'scrypt-js';
 import {Buffer} from 'buffer/';
-import {RNEnv, RNRouterBackground} from '../router';
+import {
+  RNEnv,
+  RNMessageRequesterInternalToUI,
+  RNRouterBackground,
+} from '../router';
 import {CommunityChainInfoRepo, EmbedChainInfos} from '../config';
+import {MemoryKVStore} from '@keplr-wallet/common';
 
 const router = new RNRouterBackground(RNEnv.produceEnv);
 
 const {initFn} = init(
   router,
-  (prefix: string) => new ExtensionKVStore(prefix),
-  new ContentScriptMessageRequester(),
+  (prefix: string) => new MemoryKVStore(prefix),
+  new RNMessageRequesterInternalToUI(),
   EmbedChainInfos,
   [],
   [],
   CommunityChainInfoRepo,
   {
-    create: (params: {
+    create: (_params: {
       iconRelativeUrl?: string;
       title: string;
       message: string;
@@ -43,7 +46,7 @@ const {initFn} = init(
       },
     },
     getDisabledChainIdentifiers: async () => {
-      const kvStore = new ExtensionKVStore('store_chain_config');
+      const kvStore = new MemoryKVStore('store_chain_config');
       const legacy = await kvStore.get<{disabledChains: string[]}>(
         'extension_chainInfoInUIConfig',
       );
