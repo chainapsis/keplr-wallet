@@ -13,6 +13,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "expo": "^49.0.6",
     "http-browserify": "^1.7.0",
     "https-browserify": "^1.0.0",
     "os-browserify": "^0.3.0",
