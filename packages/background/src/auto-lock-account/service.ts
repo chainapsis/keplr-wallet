@@ -48,21 +48,22 @@ export class AutoLockAccountService {
       this.kvStore.set<boolean>("lockOnSleep", this.lockOnSleep);
     });
 
-    browser.idle.onStateChanged.addListener((idle) => {
-      this.stateChangedHandler(idle);
-    });
+    // TODO
+    // browser.idle.onStateChanged.addListener((idle) => {
+    //   this.stateChangedHandler(idle);
+    // });
   }
 
-  private stateChangedHandler(newState: browser.idle.IdleState) {
-    if ((newState as any) === "locked") {
-      if (this.autoLockDuration > 0) {
-        this.stopAutoLockTimer();
-        this.lock();
-      } else if (this.lockOnSleep) {
-        this.lock();
-      }
-    }
-  }
+  // private stateChangedHandler(newState: browser.idle.IdleState) {
+  //   if ((newState as any) === "locked") {
+  //     if (this.autoLockDuration > 0) {
+  //       this.stopAutoLockTimer();
+  //       this.lock();
+  //     } else if (this.lockOnSleep) {
+  //       this.lock();
+  //     }
+  //   }
+  // }
 
   startAppStateCheckTimer() {
     this.stopAutoLockTimer();
