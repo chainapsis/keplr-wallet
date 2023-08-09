@@ -51,6 +51,7 @@ const { initFn, keyRingService } = init(
       });
     },
   },
+  "http://keplr-extension-blocklist.s3-website-us-west-2.amazonaws.com/blocklist.html",
   {
     commonCrypto: {
       scrypt: async (

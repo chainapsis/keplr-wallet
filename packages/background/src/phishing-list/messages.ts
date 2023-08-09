@@ -46,6 +46,10 @@ export class URLTempAllowMsg extends Message<void> {
     parseDomain(url.origin);
   }
 
+  override approveExternal(): boolean {
+    return true;
+  }
+
   route(): string {
     return ROUTE;
   }

@@ -209,7 +209,7 @@ module.exports = {
       chunks: ["register"],
     }),
     new HtmlWebpackPlugin({
-      template: "./src/index.html",
+      template: "./src/blocklist.html",
       filename: "blocklist.html",
       chunks: ["blocklist"],
     }),

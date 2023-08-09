@@ -53,6 +53,33 @@ export class CheckURLIsPhishingMsg extends Message<boolean> {
   }
 }
 
+class URLTempAllowMsg extends Message<void> {
+  public static type() {
+    return "url-temp-allow";
+  }
+
+  constructor(public readonly url: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    // validate url
+    new URL(this.url);
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return "phishing-list";
+  }
+
+  type(): string {
+    return URLTempAllowMsg.type();
+  }
+}
+
 export class CheckBadTwitterIdMsg extends Message<boolean> {
   public static type() {
     return "check-bad-twitter-id";
@@ -79,6 +106,9 @@ export class CheckBadTwitterIdMsg extends Message<boolean> {
   }
 }
 
+const blocklistURL =
+  "http://keplr-extension-blocklist.s3-website-us-west-2.amazonaws.com/blocklist.html";
+
 const url = new URL(window.location.href);
 // If host is localhost, no need to check validity of domain.
 if (url.hostname !== "localhost") {
@@ -88,13 +118,60 @@ if (url.hostname !== "localhost") {
       if (r) {
         const origin = window.location.href;
         window.location.replace(
-          browser.runtime.getURL(`/blocklist.html?origin=${origin}`)
+          blocklistURL + `?origin=${encodeURIComponent(origin)}`
         );
       }
     })
     .catch((e) => {
       console.log("Failed to check domain's reliability", e);
     });
+}
+
+try {
+  const _blocklistURL = new URL(blocklistURL);
+  if (url.origin === _blocklistURL.origin) {
+    addEventListener("message", (e) => {
+      try {
+        if (e.origin !== _blocklistURL.origin) {
+          return;
+        }
+        if (e.data.type !== "allow-temp-blocklist-url") {
+          return;
+        }
+        const origin = e.data.origin;
+        const expected =
+          new URLSearchParams(window.location.search).get("origin") || "";
+        if (new URL(origin).href !== new URL(expected).href) {
+          return;
+        }
+
+        new InExtensionMessageRequester()
+          .sendMessage(
+            BACKGROUND_PORT,
+            new URLTempAllowMsg(new URL(origin).href)
+          )
+          .then(() => {
+            window.postMessage(
+              {
+                type: "blocklist-url-temp-allowed",
+                origin,
+              },
+              window.location.origin
+            );
+          })
+          .catch((e) => {
+            console.log(e);
+            // ignore error
+          });
+      } catch (e) {
+        console.log(e);
+        // ignore error
+      }
+    });
+  }
+} catch (e) {
+  // noop
+  console.log(e);
 }
 
 if (url.hostname === "twitter.com") {

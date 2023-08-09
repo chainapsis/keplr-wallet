@@ -28,7 +28,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["injectedScript.bundle.js", "blocklist.html"],
+      "resources": ["injectedScript.bundle.js"],
       "matches": ["<all_urls>"]
     }
   ]
