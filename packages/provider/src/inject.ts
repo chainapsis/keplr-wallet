@@ -372,6 +372,10 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     return await this.requestMethod("sendTx", [chainId, tx, mode]);
   }
 
+  async sendEthereumTx(chainId: string, rawTx: string): Promise<string> {
+    return await this.requestMethod("sendEthereumTx", [chainId, rawTx]);
+  }
+
   async signAmino(
     chainId: string,
     signer: string,

@@ -129,6 +129,7 @@ export interface Keplr {
     data: string | Uint8Array,
     type: EthSignType
   ): Promise<Uint8Array>;
+  sendEthereumTx(chainId: string, rawTx: string): Promise<string>;
 
   getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner;
   getOfflineSignerOnlyAmino(chainId: string): OfflineAminoSigner;

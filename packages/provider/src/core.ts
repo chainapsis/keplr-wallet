@@ -182,6 +182,19 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     );
   }
 
+  async sendEthereumTx(chainId: string, rawTx: string): Promise<string> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "background-tx-ethereum",
+      "send-ethereum-tx-to-background",
+      {
+        chainId,
+        rawTx,
+      }
+    );
+  }
+
   async signAmino(
     chainId: string,
     signer: string,

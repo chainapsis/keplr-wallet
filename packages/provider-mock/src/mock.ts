@@ -168,6 +168,10 @@ export class MockKeplr implements Keplr {
     throw new Error("Not implemented");
   }
 
+  sendEthereumTx(_chainId: string, _rawTx: string): Promise<string> {
+    throw new Error("Not implemented");
+  }
+
   signICNSAdr36(
     _chainId: string,
     _contractAddress: string,

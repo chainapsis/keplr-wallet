@@ -405,6 +405,10 @@ export class KeplrWalletConnectV1 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
+  sendEthereumTx(_chainId: string, _rawTx: string): Promise<string> {
+    throw new Error("Not yet implemented");
+  }
+
   signICNSAdr36(
     _chainId: string,
     _contractAddress: string,
