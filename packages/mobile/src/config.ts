@@ -169,44 +169,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
     features: ["secretwasm", "ibc-go", "ibc-transfer"],
   },
   {
-    rpc: "https://rpc-akash.keplr.app",
-    rest: "https://lcd-akash.keplr.app",
-    chainId: "akashnet-2",
-    chainName: "Akash",
-    stakeCurrency: {
-      coinDenom: "AKT",
-      coinMinimalDenom: "uakt",
-      coinDecimals: 6,
-      coinGeckoId: "akash-network",
-      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/akash.png",
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("akash"),
-    currencies: [
-      {
-        coinDenom: "AKT",
-        coinMinimalDenom: "uakt",
-        coinDecimals: 6,
-        coinGeckoId: "akash-network",
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/akash.png",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "AKT",
-        coinMinimalDenom: "uakt",
-        coinDecimals: 6,
-        coinGeckoId: "akash-network",
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/akash.png",
-      },
-    ],
-    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/akash.png",
-    features: ["ibc-transfer"],
-    hideInUI: true,
-  },
-  {
     rpc: "https://rpc-iov.keplr.app",
     rest: "https://lcd-iov.keplr.app",
     chainId: "iov-mainnet-ibc",
@@ -2394,6 +2356,47 @@ export const EmbedChainInfos: AppChainInfo[] = [
       name: "Mintscan",
       txUrl: "https://www.mintscan.io/likecoin/txs/{txHash}",
     },
+  },
+  {
+    rpc: "https://rpc-akash.keplr.app",
+    rest: "https://lcd-akash.keplr.app",
+    chainId: "akashnet-2",
+    chainName: "Akash",
+    stakeCurrency: {
+      coinDenom: "AKT",
+      coinMinimalDenom: "uakt",
+      coinDecimals: 6,
+      coinGeckoId: "akash-network",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/akash.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("akash"),
+    currencies: [
+      {
+        coinDenom: "AKT",
+        coinMinimalDenom: "uakt",
+        coinDecimals: 6,
+        coinGeckoId: "akash-network",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/akash.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "AKT",
+        coinMinimalDenom: "uakt",
+        coinDecimals: 6,
+        coinGeckoId: "akash-network",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/akash.png",
+      },
+    ],
+    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/akash.png",
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/akash/txs/{txHash}",
+    },
+    features: ["ibc-transfer"],
   },
 ];
 
