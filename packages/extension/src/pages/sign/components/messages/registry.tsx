@@ -4,6 +4,7 @@ import { Msg } from "@keplr-wallet/types";
 import { AnyWithUnpacked, ProtoCodec } from "@keplr-wallet/cosmos";
 import yaml from "js-yaml";
 import {
+  AgoricWalletSpendActionMessage,
   ClaimRewardsMessage,
   CustomIcon,
   DelegateMessage,
@@ -87,6 +88,7 @@ const UnknownMessageContent: FunctionComponent = ({ children }) => {
 };
 
 export const defaultRegistry = new MessageRenderRegistry();
+defaultRegistry.register(AgoricWalletSpendActionMessage);
 defaultRegistry.register(ClaimRewardsMessage);
 defaultRegistry.register(DelegateMessage);
 defaultRegistry.register(ExecuteContractMessage);

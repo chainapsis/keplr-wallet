@@ -363,6 +363,13 @@
   "page.sign.ethereum.title": "Sign Ethereum",
   "page.sign.ethereum.requested-network": "Requested Network",
 
+  "page.sign.components.messages.agoric.wallet-spend-action.execute-offer": "Execute an offer with the following parameters:",
+  "page.sign.components.messages.agoric.wallet-spend-action.exit-offer": "Exit offer with id <b>{offerId}</b>",
+  "page.sign.components.messages.agoric.wallet-spend-action.offer-args": "Offer Args",
+  "page.sign.components.messages.agoric.wallet-spend-action.invitation-spec": "Invitation Spec",
+  "page.sign.components.messages.agoric.wallet-spend-action.give": "Give <b>{amount}</b>",
+  "page.sign.components.messages.agoric.wallet-spend-action.title": "Wallet Spend Action",
+  "page.sign.components.messages.agoric.wallet-spend-action.want": "Want <b>{amount}</b>",
   "page.sign.components.messages.custom.title": "Custom",
   "page.sign.components.messages.claim-rewards.title": "Claim Rewards",
   "page.sign.components.messages.claim-rewards.paragraph": "Claim staking reward from <b>{validator}</b>",
