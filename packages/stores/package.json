@@ -19,6 +19,8 @@
     "@keplr-wallet/provider-mock": "0.12.16"
   },
   "dependencies": {
+    "@ethersproject/transactions": "^5.7.0",
+    "@ethersproject/units": "^5.7.0",
     "@keplr-wallet/background": "0.12.16",
     "@keplr-wallet/common": "0.12.16",
     "@keplr-wallet/cosmos": "0.12.16",
