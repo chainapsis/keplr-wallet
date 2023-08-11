@@ -1,7 +1,8 @@
-import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Message } from "@keplr-wallet/router";
 import { EthSignType } from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
+import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
+import { isAddress } from "@ethersproject/address";
 
 export class RequestSignEthereumMsg extends Message<Uint8Array> {
   public static type() {
@@ -30,8 +31,12 @@ export class RequestSignEthereumMsg extends Message<Uint8Array> {
       throw new Error("sign type not set");
     }
 
-    // Validate bech32 address.
-    Bech32Address.validate(this.signer);
+    const isEVMChainId = Number.isInteger(
+      parseInt(ChainIdHelper.parse(this.chainId).identifier)
+    );
+
+    // Validate signer address.
+    isEVMChainId ? isAddress(this.signer) : Bech32Address.validate(this.signer);
   }
 
   override approveExternal(): boolean {
