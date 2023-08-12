@@ -53,7 +53,11 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
           return yaml.dump(msg);
         }
 
-        return yaml.dump(protoCodec.unpackedAnyToJSONRecursive(msg));
+        if ("typeUrl" in msg) {
+          return yaml.dump(protoCodec.unpackedAnyToJSONRecursive(msg));
+        }
+
+        return yaml.dump(msg);
       } catch (e) {
         console.log(e);
         return "Failed to decode the msg";
