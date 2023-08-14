@@ -5395,8 +5395,7 @@ __metadata:
     lottie-web: ^5.10.2
     os-browserify: ^0.3.0
     process: ^0.11.10
-    qrcode: ^1.4.4
-    qrcode.react: ^1.0.1
+    qrcode.react: ^3.1.0
     query-string: ^6.8.3
     react-hook-form: ^7.43.1
     react-intl: ^6.2.8
@@ -25840,7 +25839,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"qrcode@npm:1.4.4, qrcode@npm:^1.4.4":
+"qrcode.react@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "qrcode.react@npm:3.1.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: 94a2942ecf83f461d869adb20305ae663c6d1abe93ef2c72442b07d756ce70cf6deb6fd588dc5b382b48c6991cfde1dfd5ac9b814c1461e71d5edb2d945e67fc
+  languageName: node
+  linkType: hard
+
+"qrcode@npm:1.4.4":
   version: 1.4.4
   resolution: "qrcode@npm:1.4.4"
   dependencies:
