@@ -45,6 +45,8 @@ export interface BoxProps {
 
   onClick?: MouseEventHandler<HTMLDivElement>;
 
+  onHoverStateChange?: (isHover: boolean) => void;
+
   hover?: {
     color?: string;
     backgroundColor?: string;
