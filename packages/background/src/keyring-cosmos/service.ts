@@ -366,7 +366,7 @@ export class KeyRingCosmosService {
       this.analyticsService.logEventIgnoreError("tx_signed", {
         chainId,
         isInternal: env.isInternalMsg,
-        origin: new URL(browser.runtime.getURL("")).origin,
+        origin,
         signMode: "amino",
         privileged: "withdrawRewards",
       });
@@ -463,7 +463,7 @@ export class KeyRingCosmosService {
       this.analyticsService.logEventIgnoreError("tx_signed", {
         chainId,
         isInternal: env.isInternalMsg,
-        origin: new URL(browser.runtime.getURL("")).origin,
+        origin,
         signMode: "amino",
         privileged: "delegate",
       });
