@@ -160,7 +160,7 @@ export const CopyAddressScene: FunctionComponent<{
               : ColorPalette.white
           }
         >
-          <FormattedMessage id="page.main.components.copy-address-modal.title" />
+          <FormattedMessage id="page.main.components.deposit-modal.title" />
         </Subtitle1>
       </YAxis>
 
@@ -176,7 +176,7 @@ export const CopyAddressScene: FunctionComponent<{
             setSearch(e.target.value);
           }}
           placeholder={intl.formatMessage({
-            id: "page.main.components.copy-address-modal.search-placeholder",
+            id: "page.main.components.deposit-modal.search-placeholder",
           })}
         />
       </Box>
@@ -213,7 +213,7 @@ export const CopyAddressScene: FunctionComponent<{
               color={ColorPalette["gray-300"]}
               style={{ textAlign: "center" }}
             >
-              <FormattedMessage id="page.main.components.copy-address-modal.empty-text" />
+              <FormattedMessage id="page.main.components.deposit-modal.empty-text" />
             </Subtitle3>
           </Box>
         ) : null}
