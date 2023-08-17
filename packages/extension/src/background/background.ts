@@ -51,6 +51,7 @@ const { initFn, keyRingService } = init(
       });
     },
   },
+  "https://blocklist.keplr.app",
   {
     commonCrypto: {
       scrypt: async (

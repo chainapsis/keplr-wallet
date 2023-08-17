@@ -86,7 +86,8 @@ export class PhishingListService {
       readonly fetchingIntervalMs: number;
       readonly retryIntervalMs: number;
       readonly allowTimeoutMs: number;
-    }
+    },
+    public readonly blocklistPageURL: string
   ) {
     this.urlFetcher = new IntervalFetcher(
       {

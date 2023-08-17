@@ -62,6 +62,7 @@ export function init(
     readonly branchName: string;
   },
   notification: Notification,
+  blocklistPageURL: string,
   keyRingMigrations: {
     commonCrypto: KeyRingLegacy.CommonCrypto;
     readonly getDisabledChainIdentifiers: () => Promise<string[]>;
@@ -103,15 +104,18 @@ export function init(
     notification
   );
 
-  const phishingListService = new PhishingList.PhishingListService({
-    blockListUrl:
-      "https://raw.githubusercontent.com/chainapsis/phishing-block-list/main/block-list.txt",
-    twitterListUrl:
-      "https://raw.githubusercontent.com/chainapsis/phishing-block-list/main/twitter-scammer-list.txt",
-    fetchingIntervalMs: 3 * 3600 * 1000, // 3 hours
-    retryIntervalMs: 10 * 60 * 1000, // 10 mins,
-    allowTimeoutMs: 10 * 60 * 1000, // 10 mins,
-  });
+  const phishingListService = new PhishingList.PhishingListService(
+    {
+      blockListUrl:
+        "https://raw.githubusercontent.com/chainapsis/phishing-block-list/main/block-list.txt",
+      twitterListUrl:
+        "https://raw.githubusercontent.com/chainapsis/phishing-block-list/main/twitter-scammer-list.txt",
+      fetchingIntervalMs: 3 * 3600 * 1000, // 3 hours
+      retryIntervalMs: 10 * 60 * 1000, // 10 mins,
+      allowTimeoutMs: 10 * 60 * 1000, // 10 mins,,
+    },
+    blocklistPageURL
+  );
   const analyticsService = new Analytics.AnalyticsService(
     storeCreator("background.analytics"),
     analyticsPrivilegedOrigins
