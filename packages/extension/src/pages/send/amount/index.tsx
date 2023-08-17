@@ -501,12 +501,15 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             memoConfig={sendConfigs.memoConfig}
             permitAddressBookSelfKeyInfo={isIBCTransfer}
             bottom={
-              <VerticalCollapseTransition collapsed={!isIBCRecipientSetAuto}>
+              <VerticalCollapseTransition
+                collapsed={!isIBCRecipientSetAuto}
+                transitionAlign="top"
+              >
                 <Gutter size="0.25rem" />
                 <XAxis>
                   <Gutter size="0.5rem" />
                   <Caption2 color={ColorPalette["platinum-200"]}>
-                    Auto-filled your wallet address
+                    <FormattedMessage id="page.send.amount.ibc-send-recipient-auto-filled" />
                   </Caption2>
                 </XAxis>
               </VerticalCollapseTransition>

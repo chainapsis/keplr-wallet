@@ -409,6 +409,7 @@
   "page.send.amount.ibc-transfer.modal.search-placeholder": "체인 검색",
   "page.send.amount.ibc-transfer.modal.no-search-data": "적절한 경로가 없습니다",
   "page.send.amount.ibc-transfer.modal.origin-chain": "홈 체인",
+  "page.send.amount.ibc-send-recipient-auto-filled": "현재 지갑의 주소가 채워져 있어요",
   "page.send.amount.title": "전송",
   "page.send.amount.asset-title": "토큰",
   "page.send.amount.memo-placeholder": "중앙화 거래소로 보낼 때는 필수입니다.",
