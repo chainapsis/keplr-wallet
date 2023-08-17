@@ -82,6 +82,7 @@ const Styles = {
 // 이 경우 type을 "allow-temp-blocklist-url"로 설정해서 웹페이지에서 content script로 메세지를 보내면 된다.
 // 역으로 content script에서 임시 허가 메세지를 백그라운드로 보내고 난 후에는 웹페이지로 "blocklist-url-temp-allowed" 메세지를 보내준다.
 // 이 메세지를 웹페이지에서 받으면 block됐던 웹사이트로 리다이렉트 시키면 된다.
+// XXX: 참고로 완전히 분리된 웹페이지이기 때문에 extension의 language, theme 세팅을 따르지 않는다...
 export const BlocklistPage: FunctionComponent = () => {
   const origin =
     new URLSearchParams(window.location.search).get("origin") || "";

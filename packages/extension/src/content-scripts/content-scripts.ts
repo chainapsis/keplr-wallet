@@ -106,8 +106,7 @@ export class CheckBadTwitterIdMsg extends Message<boolean> {
   }
 }
 
-const blocklistURL =
-  "http://keplr-extension-blocklist.s3-website-us-west-2.amazonaws.com/blocklist.html";
+const blocklistURL = "https://blocklist.keplr.app";
 
 const url = new URL(window.location.href);
 // If host is localhost, no need to check validity of domain.
