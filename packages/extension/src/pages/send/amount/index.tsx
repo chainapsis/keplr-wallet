@@ -37,7 +37,10 @@ import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
-import { SendTxAndRecordMsg } from "@keplr-wallet/background";
+import {
+  LogAnalyticsEventMsg,
+  SendTxAndRecordMsg,
+} from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTxConfigsQueryString } from "../../../hooks/use-tx-config-query-string";
 import { LayeredHorizontalRadioGroup } from "../../../components/radio-group";
@@ -49,6 +52,7 @@ import {
 import { useIBCChannelConfigQueryString } from "../../../hooks/use-ibc-channel-config-query-string";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
 import { GuideBox } from "../../../components/guide-box";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 const Styles = {
   Flex1: styled.div`
@@ -266,6 +270,22 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     // 의도상 한번 바꾸면 다시 auto fill 값과 같더라도 유저가 수정한걸로 간주한다.
   }, [ibcRecipientAddress, sendConfigs.recipientConfig.value, isIBCTransfer]);
 
+  const [ibcChannelFluent, setIBCChannelFluent] = useState<
+    | {
+        destinationChainId: string;
+        originDenom: string;
+        originChainId: string;
+
+        channels: {
+          portId: string;
+          channelId: string;
+
+          counterpartyChainId: string;
+        }[];
+      }
+    | undefined
+  >(undefined);
+
   const isDetachedMode = searchParams.get("detached") === "true";
 
   const historyType = isIBCTransfer ? "basic-send/ibc" : "basic-send";
@@ -383,6 +403,48 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                     sendConfigs.recipientConfig.chainId,
                     sendConfigs.recipientConfig.recipient
                   );
+
+                  if (isIBCTransfer && ibcChannelFluent != null) {
+                    const pathChainIds = [chainId].concat(
+                      ...ibcChannelFluent.channels.map(
+                        (channel) => channel.counterpartyChainId
+                      )
+                    );
+                    const intermediateChainIds: string[] = [];
+                    if (pathChainIds.length > 2) {
+                      intermediateChainIds.push(...pathChainIds.slice(1, -1));
+                    }
+
+                    const params = {
+                      originDenom: ibcChannelFluent.originDenom,
+                      originChainId: ibcChannelFluent.originChainId,
+                      originChainIdentifier: ChainIdHelper.parse(
+                        ibcChannelFluent.originChainId
+                      ).identifier,
+                      sourceChainId: chainId,
+                      sourceChainIdentifier:
+                        ChainIdHelper.parse(chainId).identifier,
+                      destinationChainId: ibcChannelFluent.destinationChainId,
+                      destinationChainIdentifier: ChainIdHelper.parse(
+                        ibcChannelFluent.destinationChainId
+                      ).identifier,
+                      pathChainIds,
+                      pathChainIdentifiers: pathChainIds.map(
+                        (chainId) => ChainIdHelper.parse(chainId).identifier
+                      ),
+                      intermediateChainIds,
+                      intermediateChainIdentifiers: intermediateChainIds.map(
+                        (chainId) => ChainIdHelper.parse(chainId).identifier
+                      ),
+                      isToOrigin:
+                        ibcChannelFluent.destinationChainId ===
+                        ibcChannelFluent.originChainId,
+                    };
+                    new InExtensionMessageRequester().sendMessage(
+                      BACKGROUND_PORT,
+                      new LogAnalyticsEventMsg("ibc_send", params)
+                    );
+                  }
                 },
                 onFulfill: (tx: any) => {
                   if (tx.code != null && tx.code !== 0) {
@@ -572,6 +634,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             setIsIBCRecipientSetAuto(true);
             setIBCRecipientAddress(address);
           }}
+          setIBCChannelsInfoFluent={setIBCChannelFluent}
           close={() => {
             setIsIBCTransferDestinationModalOpen(false);
           }}

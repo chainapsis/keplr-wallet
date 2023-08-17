@@ -23,8 +23,24 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
   recipientConfig: IRecipientConfig;
   ibcChannelConfig: IIBCChannelConfig;
   setIsIBCTransfer: (value: boolean) => void;
-  setAutomaticRecipient: (address: string) => void;
   close: () => void;
+
+  // 이 컴포넌트는 사실 send page에서만 쓰이기 때문에 사용하는 쪽에서 필요한 로직을 위해서 몇몇 이상한(?) prop을 넘겨준다.
+  // setAutomaticRecipient는 send page에서 recipient가 자동으로 설정되었을때 유저에게 UI를 보여주기 위해서 필요하다.
+  setAutomaticRecipient: (address: string) => void;
+  // setIBCChannelsInfoFluent는 send page에서 analytics로 넘길 정보를 전달하기 위해서 필요하다.
+  setIBCChannelsInfoFluent: (channel: {
+    destinationChainId: string;
+    originDenom: string;
+    originChainId: string;
+
+    channels: {
+      portId: string;
+      channelId: string;
+
+      counterpartyChainId: string;
+    }[];
+  }) => void;
 }> = observer(
   ({
     chainId,
@@ -32,8 +48,9 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
     recipientConfig,
     ibcChannelConfig,
     setIsIBCTransfer,
-    setAutomaticRecipient,
     close,
+    setAutomaticRecipient,
+    setIBCChannelsInfoFluent,
   }) => {
     const { accountStore, chainStore, skipQueriesStore } = useStore();
 
@@ -156,6 +173,7 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
 
                       setIsIBCTransfer(true);
                       ibcChannelConfig.setChannels(channel.channels);
+                      setIBCChannelsInfoFluent(channel);
                       // ledger에서 evmos, injective같은 경우는 유저가 먼저 ethereum app을 init 해놓지 않으면 주소를 가져올 수 없음.
                       // 이런 경우 때문에 채널은 무조건 설정해주고 account는 loaded됐을때만 주소를 설정한다.
                       if (account.walletStatus === WalletStatus.Loaded) {
