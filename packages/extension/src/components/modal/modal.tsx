@@ -21,6 +21,7 @@ export const Modal: FunctionComponent<ModalProps> = ({
   close,
   align,
   onCloseTransitionEnd,
+  forceNotUseSimplebar,
   children,
 }) => {
   const modalRoot = useModalRoot(isOpen);
@@ -83,6 +84,7 @@ export const Modal: FunctionComponent<ModalProps> = ({
             onCloseTransitionEnd();
           }
         }}
+        forceNotUseSimplebar={forceNotUseSimplebar}
       >
         {children}
       </ModalChild>
@@ -97,7 +99,15 @@ const ModalChild: FunctionComponent<{
   align: "center" | "bottom" | "left";
 
   onCloseTransitionEnd: () => void;
-}> = ({ children, align, isOpen, close, onCloseTransitionEnd }) => {
+  forceNotUseSimplebar?: boolean;
+}> = ({
+  children,
+  align,
+  isOpen,
+  close,
+  onCloseTransitionEnd,
+  forceNotUseSimplebar,
+}) => {
   const transition = useSpringValue(0, {
     config: defaultSpringConfig,
   });
@@ -121,7 +131,7 @@ const ModalChild: FunctionComponent<{
     style: React.ComponentProps<typeof AnimatedSimpleBar>["style"],
     children: any
   ) => {
-    if (align === "left") {
+    if (align === "left" || forceNotUseSimplebar) {
       // align left는 사실 sidebar로만 쓰이는데...
       // SimpleBar를 사용하면 height를 결정하기 힘든 문제가 있어서 대충 처리한다
       return (

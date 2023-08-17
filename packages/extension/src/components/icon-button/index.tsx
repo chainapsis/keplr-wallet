@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { ColorPalette } from "../../styles";
 
 export const Styles = {
@@ -7,13 +7,14 @@ export const Styles = {
     padding?: string;
     color?: string;
     hoverColor?: string;
+    disabled?: boolean;
   }>`
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 
-    cursor: pointer;
+    cursor: ${({ disabled }) => (!disabled ? "pointer" : "not-allowed")};
 
     border-radius: 50%;
 
@@ -26,14 +27,20 @@ export const Styles = {
         ? ColorPalette["gray-300"]
         : ColorPalette["gray-50"]};
 
-    :hover {
-      background-color: ${({ hoverColor, theme }) =>
-        hoverColor
-          ? hoverColor
-          : theme.mode === "light"
-          ? ColorPalette["gray-100"]
-          : ColorPalette["gray-550"]};
-    }
+    ${({ disabled, hoverColor }) => {
+      if (!disabled) {
+        return css`
+          :hover {
+            background-color: ${({ theme }) =>
+              hoverColor
+                ? hoverColor
+                : theme.mode === "light"
+                ? ColorPalette["gray-100"]
+                : ColorPalette["gray-550"]};
+          }
+        `;
+      }
+    }}
   `,
 };
 
@@ -42,15 +49,20 @@ export const IconButton: FunctionComponent<{
   padding?: string;
   color?: string;
   hoverColor?: string;
-}> = ({ children, onClick, padding, hoverColor }) => {
+
+  disabled?: boolean;
+}> = ({ children, onClick, padding, hoverColor, disabled }) => {
   return (
     <Styles.Container
       padding={padding}
       hoverColor={hoverColor}
+      disabled={disabled}
       onClick={(e) => {
         e.preventDefault();
 
-        onClick();
+        if (!disabled) {
+          onClick();
+        }
       }}
     >
       {children}
