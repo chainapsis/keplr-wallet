@@ -614,4 +614,15 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
       { defaultName, editable },
     ]);
   }
+
+  async __core__privilageSignAminoWithdrawRewards(
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc
+  ): Promise<AminoSignResponse> {
+    return await this.requestMethod(
+      "__core__privilageSignAminoWithdrawRewards",
+      [chainId, signer, signDoc]
+    );
+  }
 }
