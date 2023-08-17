@@ -29,7 +29,6 @@ export const QRCodeScene: FunctionComponent<{
   return (
     <Box
       paddingTop="1.25rem"
-      paddingBottom="2.65rem"
       paddingX="0.75rem"
       backgroundColor={
         theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]

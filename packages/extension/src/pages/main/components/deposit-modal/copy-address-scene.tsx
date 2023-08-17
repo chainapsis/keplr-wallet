@@ -340,11 +340,26 @@ const CopyAddressItem: FunctionComponent<{
                   setIsBookmarkHover(isHover);
                 }}
                 style={{
-                  color: isBookmarked
-                    ? ColorPalette["blue-400"]
-                    : theme.mode === "light"
-                    ? ColorPalette["gray-100"]
-                    : ColorPalette["gray-300"],
+                  color: (() => {
+                    if (isBookmarked) {
+                      if (!blockInteraction && isBookmarkHover) {
+                        return theme.mode === "light"
+                          ? ColorPalette["blue-300"]
+                          : ColorPalette["blue-500"];
+                      }
+                      return ColorPalette["blue-400"];
+                    }
+
+                    if (!blockInteraction && isBookmarkHover) {
+                      return theme.mode === "light"
+                        ? ColorPalette["gray-200"]
+                        : ColorPalette["gray-400"];
+                    }
+
+                    return theme.mode === "light"
+                      ? ColorPalette["gray-100"]
+                      : ColorPalette["gray-300"];
+                  })(),
                 }}
                 onClick={(e) => {
                   e.preventDefault();
