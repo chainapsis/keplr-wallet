@@ -23,10 +23,10 @@ import {
 import { useNavigate } from "react-router";
 import { AmountInput, RecipientInput } from "../../../components/input";
 import { TokenItem } from "../../main/components";
-import { Subtitle3 } from "../../../components/typography";
+import { Caption2, Subtitle3 } from "../../../components/typography";
 import { Box } from "../../../components/box";
 import { MemoInput } from "../../../components/input/memo-input";
-import { YAxis } from "../../../components/axis";
+import { XAxis, YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
 import { FeeControl } from "../../../components/input/fee-control";
 import { useNotification } from "../../../hooks/notification";
@@ -249,6 +249,22 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     ...sendConfigs,
     gasSimulator,
   });
+
+  // IBC Send일때 auto fill일때는 recipient input에서 paragraph로 auto fill되었다는 것을 알려준다.
+  const [isIBCRecipientSetAuto, setIsIBCRecipientSetAuto] = useState(false);
+  // 유저가 주소를 수정했을때 auto fill이라는 state를 해제하기 위해서 마지막으로 auto fill된 주소를 기억한다.
+  const [ibcRecipientAddress, setIBCRecipientAddress] = useState("");
+
+  useEffect(() => {
+    if (
+      !isIBCTransfer ||
+      sendConfigs.recipientConfig.value !== ibcRecipientAddress
+    ) {
+      setIsIBCRecipientSetAuto(false);
+    }
+    // else 문을 써서 같다면 setAuto를 true로 해주면 안된다.
+    // 의도상 한번 바꾸면 다시 auto fill 값과 같더라도 유저가 수정한걸로 간주한다.
+  }, [ibcRecipientAddress, sendConfigs.recipientConfig.value, isIBCTransfer]);
 
   const isDetachedMode = searchParams.get("detached") === "true";
 
@@ -484,6 +500,17 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             recipientConfig={sendConfigs.recipientConfig}
             memoConfig={sendConfigs.memoConfig}
             permitAddressBookSelfKeyInfo={isIBCTransfer}
+            bottom={
+              <VerticalCollapseTransition collapsed={!isIBCRecipientSetAuto}>
+                <Gutter size="0.25rem" />
+                <XAxis>
+                  <Gutter size="0.5rem" />
+                  <Caption2 color={ColorPalette["platinum-200"]}>
+                    Auto-filled your wallet address
+                  </Caption2>
+                </XAxis>
+              </VerticalCollapseTransition>
+            }
           />
 
           <AmountInput amountConfig={sendConfigs.amountConfig} />
@@ -535,8 +562,13 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         <IBCTransferSelectDestinationModal
           chainId={chainId}
           denom={currency.coinMinimalDenom}
+          recipientConfig={sendConfigs.recipientConfig}
           ibcChannelConfig={sendConfigs.channelConfig}
           setIsIBCTransfer={setIsIBCTransfer}
+          setAutomaticRecipient={(address: string) => {
+            setIsIBCRecipientSetAuto(true);
+            setIBCRecipientAddress(address);
+          }}
           close={() => {
             setIsIBCTransferDestinationModalOpen(false);
           }}

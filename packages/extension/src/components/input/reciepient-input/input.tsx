@@ -31,9 +31,12 @@ export interface RecipientInputWithoutAddressBookProps {
   hideAddressBookButton: true;
 }
 
-export type RecipientInputProps =
+export type RecipientInputProps = (
   | RecipientInputWithAddressBookProps
-  | RecipientInputWithoutAddressBookProps;
+  | RecipientInputWithoutAddressBookProps
+) & {
+  bottom?: React.ReactNode;
+};
 
 function numOfCharacter(str: string, c: string): number {
   return str.split(c).length - 1;
@@ -115,6 +118,7 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
               return recipientConfig.recipient;
             }
           })()}
+          bottom={props.bottom}
           error={(() => {
             const uiProperties = recipientConfig.uiProperties;
 
