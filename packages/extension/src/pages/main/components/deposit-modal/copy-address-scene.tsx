@@ -29,6 +29,7 @@ import {
   useSceneTransition,
 } from "../../../../components/transition";
 import { IChainInfoImpl } from "@keplr-wallet/stores";
+import Color from "color";
 
 export const CopyAddressScene: FunctionComponent<{
   close: () => void;
@@ -218,22 +219,42 @@ export const CopyAddressScene: FunctionComponent<{
         ) : null}
 
         <Box paddingX="0.75rem">
-          {addresses.map((address) => {
-            return (
-              <CopyAddressItem
-                key={
-                  address.chainInfo.chainIdentifier +
-                  address.bech32Address +
-                  (address.ethereumAddress || "")
-                }
-                address={address}
-                close={close}
-                blockInteraction={blockInteraction}
-                setBlockInteraction={setBlockInteraction}
-                setSortPriorities={setSortPriorities}
-              />
-            );
-          })}
+          {addresses
+            .map((address) => {
+              // CopyAddressItem 컴포넌트는 ethereumAddress가 있냐 없냐에 따라서 다르게 동작한다.
+              // ethereumAddress가 있으면 두개의 CopyAddressItem 컴포넌트를 각각 렌더링하기 위해서
+              // ethereumAddress가 있으면 두개의 address로 쪼개서 리턴하고 flat으로 펼져서 렌더링한다.
+              if (address.ethereumAddress) {
+                return [
+                  {
+                    chainInfo: address.chainInfo,
+                    bech32Address: address.bech32Address,
+                  },
+                  {
+                    ...address,
+                  },
+                ];
+              }
+
+              return address;
+            })
+            .flat()
+            .map((address) => {
+              return (
+                <CopyAddressItem
+                  key={
+                    address.chainInfo.chainIdentifier +
+                    address.bech32Address +
+                    (address.ethereumAddress || "")
+                  }
+                  address={address}
+                  close={close}
+                  blockInteraction={blockInteraction}
+                  setBlockInteraction={setBlockInteraction}
+                  setSortPriorities={setSortPriorities}
+                />
+              );
+            })}
         </Box>
       </SimpleBar>
     </Box>
@@ -335,11 +356,17 @@ const CopyAddressItem: FunctionComponent<{
           >
             <XAxis alignY="center">
               <Box
-                cursor={blockInteraction ? undefined : "pointer"}
+                cursor={
+                  blockInteraction || address.ethereumAddress
+                    ? undefined
+                    : "pointer"
+                }
                 onHoverStateChange={(isHover) => {
                   setIsBookmarkHover(isHover);
                 }}
                 style={{
+                  opacity: address.ethereumAddress ? 0 : 1,
+                  pointerEvents: address.ethereumAddress ? "none" : undefined,
                   color: (() => {
                     if (isBookmarked) {
                       if (!blockInteraction && isBookmarkHover) {
@@ -429,7 +456,21 @@ const CopyAddressItem: FunctionComponent<{
                 </Subtitle3>
                 <Gutter size="0.25rem" />
                 <Caption1 color={ColorPalette["gray-300"]}>
-                  {Bech32Address.shortenAddress(address.bech32Address, 20)}
+                  {(() => {
+                    if (address.ethereumAddress) {
+                      return address.ethereumAddress.length === 42
+                        ? `${address.ethereumAddress.slice(
+                            0,
+                            10
+                          )}...${address.ethereumAddress.slice(-8)}`
+                        : address.ethereumAddress;
+                    }
+
+                    return Bech32Address.shortenAddress(
+                      address.bech32Address,
+                      20
+                    );
+                  })()}
                 </Caption1>
               </YAxis>
 
@@ -471,7 +512,7 @@ const CopyAddressItem: FunctionComponent<{
                   ? ColorPalette["gray-50"]
                   : ColorPalette["gray-500"]
               }
-              disabled={hasCopied}
+              disabled={hasCopied || !!address.ethereumAddress}
               onClick={() => {
                 sceneTransition.push("qr-code", {
                   chainId: address.chainInfo.chainId,
@@ -482,11 +523,18 @@ const CopyAddressItem: FunctionComponent<{
               <QRCodeIcon
                 width="1.25rem"
                 height="1.25rem"
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-300"]
-                    : ColorPalette.white
-                }
+                color={(() => {
+                  const color =
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette.white;
+
+                  if (address.ethereumAddress) {
+                    return Color(color).alpha(0.3).toString();
+                  }
+
+                  return color;
+                })()}
               />
             </IconButton>
             <Gutter size="0.75rem" direction="horizontal" />

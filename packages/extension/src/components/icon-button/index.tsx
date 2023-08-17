@@ -14,7 +14,7 @@ export const Styles = {
     align-items: center;
     justify-content: center;
 
-    cursor: ${({ disabled }) => (!disabled ? "pointer" : "auto")};
+    cursor: ${({ disabled }) => (!disabled ? "pointer" : "not-allowed")};
 
     border-radius: 50%;
 
