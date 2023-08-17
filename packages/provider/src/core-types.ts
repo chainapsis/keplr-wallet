@@ -7,4 +7,9 @@ export interface KeplrCoreTypes {
     signer: string,
     signDoc: StdSignDoc
   ): Promise<AminoSignResponse>;
+  __core__privilageSignAminoDelegate(
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc
+  ): Promise<AminoSignResponse>;
 }

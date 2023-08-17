@@ -625,4 +625,16 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
       [chainId, signer, signDoc]
     );
   }
+
+  async __core__privilageSignAminoDelegate(
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc
+  ): Promise<AminoSignResponse> {
+    return await this.requestMethod("__core__privilageSignAminoDelegate", [
+      chainId,
+      signer,
+      signDoc,
+    ]);
+  }
 }

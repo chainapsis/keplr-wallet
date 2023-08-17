@@ -270,7 +270,7 @@ export class PrivilegeCosmosSignAminoWithdrawRewardsMsg extends Message<AminoSig
 
 export class PrivilegeCosmosSignAminoDelegateMsg extends Message<AminoSignResponse> {
   public static type() {
-    return "PrivilegeCosmosSignAminoDelegateMsg";
+    return "PrivilegeCosmosSignAminoDelegate";
   }
 
   constructor(
