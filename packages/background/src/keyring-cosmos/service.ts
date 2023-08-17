@@ -37,7 +37,8 @@ export class KeyRingCosmosService {
     protected readonly keyRingService: KeyRingService,
     protected readonly interactionService: InteractionService,
     protected readonly chainsUIService: ChainsUIService,
-    protected readonly analyticsService: AnalyticsService
+    protected readonly analyticsService: AnalyticsService,
+    protected readonly msgPrivilegedOrigins: string[]
   ) {}
 
   async init() {
@@ -283,11 +284,17 @@ export class KeyRingCosmosService {
   }
 
   async privilegeSignAminoWithdrawRewards(
+    env: Env,
+    origin: string,
     chainId: string,
     signer: string,
     signDoc: StdSignDoc
   ) {
     // TODO: 이 기능은 ledger에서는 사용할 수 없고 어케 이 문제를 해결할지도 아직 명확하지 않음.
+
+    if (!env.isInternalMsg && !this.msgPrivilegedOrigins.includes(origin)) {
+      throw new Error("Permission Rejected");
+    }
 
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
 

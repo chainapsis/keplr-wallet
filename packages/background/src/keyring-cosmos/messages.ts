@@ -255,6 +255,10 @@ export class PrivilegeCosmosSignAminoWithdrawRewardsMsg extends Message<AminoSig
     }
   }
 
+  override approveExternal(): boolean {
+    return true;
+  }
+
   route(): string {
     return ROUTE;
   }

@@ -34,6 +34,7 @@ const { initFn, keyRingService } = init(
   EmbedChainInfos,
   PrivilegedOrigins,
   PrivilegedOrigins,
+  PrivilegedOrigins,
   CommunityChainInfoRepo,
   {
     create: (params: {

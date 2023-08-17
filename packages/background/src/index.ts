@@ -56,6 +56,7 @@ export function init(
   // The origins that are able to pass any permission.
   privilegedOrigins: string[],
   analyticsPrivilegedOrigins: string[],
+  msgPrivilegedOrigins: string[],
   communityChainInfoRepo: {
     readonly organizationName: string;
     readonly repoName: string;
@@ -148,7 +149,8 @@ export function init(
     keyRingV2Service,
     interactionService,
     chainsUIService,
-    analyticsService
+    analyticsService,
+    msgPrivilegedOrigins
   );
   const keyRingEthereumService = new KeyRingEthereum.KeyRingEthereumService(
     chainsService,

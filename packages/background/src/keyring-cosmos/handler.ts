@@ -271,8 +271,10 @@ const handlePrivilegeCosmosSignAminoWithdrawRewardsMsg: (
 ) => InternalHandler<PrivilegeCosmosSignAminoWithdrawRewardsMsg> = (
   service
 ) => {
-  return async (_, msg) => {
+  return async (env, msg) => {
     return await service.privilegeSignAminoWithdrawRewards(
+      env,
+      msg.origin,
       msg.chainId,
       msg.signer,
       msg.signDoc
