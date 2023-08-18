@@ -10,6 +10,7 @@ export type SignInteractionData =
       chainId: string;
       mode: "amino";
       signer: string;
+      pubKey: Uint8Array;
       signDoc: StdSignDoc;
       signOptions: KeplrSignOptions & {
         isADR36WithString?: boolean;
@@ -28,6 +29,7 @@ export type SignInteractionData =
       chainId: string;
       mode: "direct";
       signer: string;
+      pubKey: Uint8Array;
       signDocBytes: Uint8Array;
       signOptions: KeplrSignOptions;
       keyType: string;

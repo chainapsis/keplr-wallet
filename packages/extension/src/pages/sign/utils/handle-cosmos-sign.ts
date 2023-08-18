@@ -7,6 +7,7 @@ import {
   EthermintChainIdHelper,
   SignDocWrapper,
   serializeSignDoc,
+  Bech32Address,
 } from "@keplr-wallet/cosmos";
 import KeystoneSDK, {
   KeystoneCosmosSDK,
@@ -22,8 +23,6 @@ export interface LedgerOptions {
 }
 
 export interface KeystoneOptions {
-  pubKey: string;
-  ethereumHexAddress?: string;
   isEthSigning: boolean;
   displayQRCode: (ur: { type: string; cbor: string }) => Promise<void>;
   scanQRCode: () => Promise<KeystoneUR>;
@@ -110,7 +109,7 @@ export const handleCosmosPreSign = async (
       const address = interactionData.data.signer;
       const path = getPathFromPubKey(
         interactionData.data.keyInsensitive["keys"] as KeystoneKeys,
-        keystoneOptions.pubKey
+        Buffer.from(interactionData.data.pubKey).toString("hex")
       );
       if (path === null) {
         throw new Error("Invalid signer");
@@ -142,10 +141,13 @@ export const handleCosmosPreSign = async (
           account: {
             path,
             xfp,
-            address:
-              typeof keystoneOptions.ethereumHexAddress === "string"
-                ? keystoneOptions.ethereumHexAddress
-                : "",
+            address: (() => {
+              if (isEthSigning) {
+                return Bech32Address.fromBech32(
+                  interactionData.data.signer
+                ).toHex(true);
+              }
+            })(),
           },
         });
       } else {

@@ -92,6 +92,7 @@ export class KeyRingEthereumService {
         origin,
         chainId,
         signer,
+        pubKey: key.pubKey,
         message,
         signType,
         keyType: keyInfo.type,

@@ -58,13 +58,8 @@ import { GenericAuthorization } from "@keplr-wallet/stores/build/query/cosmos/au
 export const CosmosTxView: FunctionComponent<{
   interactionData: NonNullable<SignInteractionStore["waitingData"]>;
 }> = observer(({ interactionData }) => {
-  const {
-    chainStore,
-    accountStore,
-    queriesStore,
-    signInteractionStore,
-    uiConfigStore,
-  } = useStore();
+  const { chainStore, queriesStore, signInteractionStore, uiConfigStore } =
+    useStore();
 
   const intl = useIntl();
   const theme = useTheme();
@@ -315,7 +310,6 @@ export const CosmosTxView: FunctionComponent<{
     Error | undefined
   >(undefined);
 
-  const isKeystone = interactionData.data.keyType === "keystone";
   const [isKeystoneInteracting, setIsKeystoneInteracting] = useState(false);
   const [keystoneUR, setKeystoneUR] = useState<KeystoneUR>();
   const keystoneScanResolve = useRef<(ur: KeystoneUR) => void>();
@@ -334,15 +328,13 @@ export const CosmosTxView: FunctionComponent<{
         presignOptions = {
           useWebHID: uiConfigStore.useWebHIDLedger,
         };
-      } else if (isKeystone) {
+      } else if (interactionData.data.keyType === "keystone") {
         setIsKeystoneInteracting(true);
-        const account = accountStore.getAccount(chainId);
+        const isEthSigning = KeyRingService.isEthermintLike(
+          chainStore.getChain(chainId)
+        );
         presignOptions = {
-          pubKey: Buffer.from(account.pubKey).toString("hex"),
-          ethereumHexAddress: account.ethereumHexAddress,
-          isEthSigning: KeyRingService.isEthermintLike(
-            chainStore.getChain(chainId)
-          ),
+          isEthSigning,
           displayQRCode: async (ur: KeystoneUR) => {
             setKeystoneUR(ur);
           },

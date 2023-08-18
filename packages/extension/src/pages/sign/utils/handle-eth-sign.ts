@@ -37,7 +37,6 @@ export interface LedgerOptions {
 }
 
 export interface KeystoneOptions {
-  pubKey: string;
   displayQRCode: (ur: { type: string; cbor: string }) => Promise<void>;
   scanQRCode: () => Promise<KeystoneUR>;
 }
@@ -87,7 +86,7 @@ export const handleEthereumPreSignByKeystone = async (
   const address = interactionData.data.signer;
   const path = getPathFromPubKey(
     interactionData.data.keyInsensitive["keys"] as KeystoneKeys,
-    options.pubKey
+    Buffer.from(interactionData.data.pubKey).toString("hex")
   );
   if (path === null) {
     throw new Error("Invalid signer");

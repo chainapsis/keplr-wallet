@@ -32,12 +32,8 @@ import { useTheme } from "styled-components";
 export const EthereumSigningView: FunctionComponent<{
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>;
 }> = observer(({ interactionData }) => {
-  const {
-    chainStore,
-    accountStore,
-    uiConfigStore,
-    signEthereumInteractionStore,
-  } = useStore();
+  const { chainStore, uiConfigStore, signEthereumInteractionStore } =
+    useStore();
   const intl = useIntl();
   const theme = useTheme();
 
@@ -71,7 +67,6 @@ export const EthereumSigningView: FunctionComponent<{
     Error | undefined
   >(undefined);
 
-  const isKeystone = interactionData.data.keyType === "keystone";
   const [isKeystoneInteracting, setIsKeystoneInteracting] = useState(false);
   const [keystoneUR, setKeystoneUR] = useState<KeystoneUR>();
   const keystoneScanResolve = useRef<(ur: KeystoneUR) => void>();
@@ -104,14 +99,11 @@ export const EthereumSigningView: FunctionComponent<{
               signature = await handleEthereumPreSignByLedger(interactionData, {
                 useWebHID: uiConfigStore.useWebHIDLedger,
               });
-            } else if (isKeystone) {
+            } else if (interactionData.data.keyType === "keystone") {
               setIsKeystoneInteracting(true);
               signature = await handleEthereumPreSignByKeystone(
                 interactionData,
                 {
-                  pubKey: Buffer.from(
-                    accountStore.getAccount(interactionData.data.chainId).pubKey
-                  ).toString("hex"),
                   displayQRCode: async (ur: KeystoneUR) => {
                     setKeystoneUR(ur);
                   },

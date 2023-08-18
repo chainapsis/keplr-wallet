@@ -21,10 +21,10 @@ import { Image } from "../../../components/image";
 import { KeystoneUR } from "../utils/keystone";
 import { KeystoneSign } from "../components/keystone";
 import { useTheme } from "styled-components";
+import { KeyRingService } from "@keplr-wallet/background";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, signInteractionStore, uiConfigStore } =
-    useStore();
+  const { chainStore, signInteractionStore, uiConfigStore } = useStore();
   const intl = useIntl();
   const theme = useTheme();
 
@@ -106,8 +106,6 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     Error | undefined
   >(undefined);
 
-  const isKeystone =
-    signInteractionStore.waitingData?.data.keyType === "keystone";
   const [isKeystoneInteracting, setIsKeystoneInteracting] = useState(false);
   const [keystoneUR, setKeystoneUR] = useState<KeystoneUR>();
   const keystoneScanResolve = useRef<(ur: KeystoneUR) => void>();
@@ -156,17 +154,17 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
               presignOptions = {
                 useWebHID: uiConfigStore.useWebHIDLedger,
               };
-            } else if (isKeystone) {
+            } else if (
+              signInteractionStore.waitingData.data.keyType === "keystone"
+            ) {
               setIsKeystoneInteracting(true);
+              const isEthSigning = KeyRingService.isEthermintLike(
+                chainStore.getChain(
+                  signInteractionStore.waitingData.data.chainId
+                )
+              );
               presignOptions = {
-                pubKey: Buffer.from(
-                  accountStore.getAccount(
-                    signInteractionStore.waitingData.data.chainId
-                  ).pubKey
-                ).toString("hex"),
-                isEthSigning: chainStore
-                  .getChain(signInteractionStore.waitingData.data.chainId)
-                  .features.includes("eth-key-sign"),
+                isEthSigning,
                 displayQRCode: async (ur: KeystoneUR) => {
                   setKeystoneUR(ur);
                 },
