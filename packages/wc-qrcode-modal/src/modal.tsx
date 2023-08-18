@@ -66,7 +66,7 @@ export const Modal: FunctionComponent<{
         // Save the mobile link.
         saveMobileLinkInfo({
           name: "Keplr",
-          href: "keplrwallet://wcV2",
+          href: `keplrwallet://wcV2?${uri}`,
         });
 
         return `keplrwallet://wcV2?${uri}`;
