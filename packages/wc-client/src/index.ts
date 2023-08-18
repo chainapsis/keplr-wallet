@@ -192,6 +192,33 @@ export class KeplrWalletConnectV2 implements Keplr {
     return response as T;
   }
 
+  protected getNamespaceChainId(): string | undefined {
+    const lastSession = this.getLastSession();
+
+    if (
+      lastSession &&
+      lastSession.namespaces.hasOwnProperty("cosmos") &&
+      lastSession.namespaces["cosmos"].hasOwnProperty("accounts")
+    ) {
+      const splitedAccount =
+        lastSession.namespaces["cosmos"]["accounts"][0].split(":");
+
+      return `${splitedAccount[0]}:${splitedAccount[1]}`;
+    }
+
+    return undefined;
+  }
+
+  protected checkDeepLink() {
+    const mobileLinkInfo = localStorage.getItem(
+      "wallet-connect-v2-mobile-link"
+    );
+
+    if (mobileLinkInfo) {
+      window.location.href = JSON.parse(mobileLinkInfo).href;
+    }
+  }
+
   changeKeyRingName(_opts: {
     defaultName: string;
     editable?: boolean | undefined;
@@ -220,11 +247,17 @@ export class KeplrWalletConnectV2 implements Keplr {
       }
     }
 
+    this.checkDeepLink();
+
     // Request enable from the mobile wallet.
     const topic = this.getCurrentTopic();
+    const chainId = this.getNamespaceChainId();
+    if (!chainId) {
+      throw new Error("No Namespace chain id");
+    }
     const param = {
       topic: topic,
-      chainId: "cosmos:cosmoshub-4",
+      chainId: chainId,
       request: {
         method: "keplr_enable",
         params: {
@@ -418,7 +451,9 @@ export class KeplrWalletConnectV2 implements Keplr {
     signDoc: StdSignDoc,
     signOptions?: KeplrSignOptions
   ): Promise<AminoSignResponse> {
-    const topic = await this.getCurrentTopic();
+    this.checkDeepLink();
+
+    const topic = this.getCurrentTopic();
 
     const param = {
       topic,
