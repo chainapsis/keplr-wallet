@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, useMemo, useRef, useState } from "react";
 import { SignEthereumInteractionStore } from "@keplr-wallet/stores";
 import { Box } from "../../../components/box";
 import { XAxis } from "../../../components/axis";
@@ -14,8 +14,13 @@ import { ErrModuleLedgerSign } from "../utils/ledger-types";
 import { Buffer } from "buffer/";
 import { LedgerGuideBox } from "../components/ledger-guide-box";
 import { EthSignType } from "@keplr-wallet/types";
-import { handleEthereumPreSign } from "../utils/handle-eth-sign";
+import {
+  handleEthereumPreSignByKeystone,
+  handleEthereumPreSignByLedger,
+} from "../utils/handle-eth-sign";
 import { FormattedMessage, useIntl } from "react-intl";
+import { KeystoneUR } from "../utils/keystone";
+import { KeystoneSign } from "../components/keystone";
 import { useTheme } from "styled-components";
 
 /**
@@ -27,8 +32,12 @@ import { useTheme } from "styled-components";
 export const EthereumSigningView: FunctionComponent<{
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>;
 }> = observer(({ interactionData }) => {
-  const { chainStore, uiConfigStore, signEthereumInteractionStore } =
-    useStore();
+  const {
+    chainStore,
+    accountStore,
+    uiConfigStore,
+    signEthereumInteractionStore,
+  } = useStore();
   const intl = useIntl();
   const theme = useTheme();
 
@@ -62,6 +71,11 @@ export const EthereumSigningView: FunctionComponent<{
     Error | undefined
   >(undefined);
 
+  const isKeystone = interactionData.data.keyType === "keystone";
+  const [isKeystoneInteracting, setIsKeystoneInteracting] = useState(false);
+  const [keystoneUR, setKeystoneUR] = useState<KeystoneUR>();
+  const keystoneScanResolve = useRef<(ur: KeystoneUR) => void>();
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.sign.ethereum.title" })}
@@ -82,16 +96,32 @@ export const EthereumSigningView: FunctionComponent<{
             interactionData.id
           ) || isLedgerInteracting,
         onClick: async () => {
-          if (interactionData.data.keyType === "ledger") {
-            setIsLedgerInteracting(true);
-            setLedgerInteractingError(undefined);
-          }
-
           try {
-            const signature = await handleEthereumPreSign(
-              uiConfigStore.useWebHIDLedger,
-              interactionData
-            );
+            let signature;
+            if (interactionData.data.keyType === "ledger") {
+              setIsLedgerInteracting(true);
+              setLedgerInteractingError(undefined);
+              signature = await handleEthereumPreSignByLedger(interactionData, {
+                useWebHID: uiConfigStore.useWebHIDLedger,
+              });
+            } else if (isKeystone) {
+              setIsKeystoneInteracting(true);
+              signature = await handleEthereumPreSignByKeystone(
+                interactionData,
+                {
+                  pubKey: Buffer.from(
+                    accountStore.getAccount(interactionData.data.chainId).pubKey
+                  ).toString("hex"),
+                  displayQRCode: async (ur: KeystoneUR) => {
+                    setKeystoneUR(ur);
+                  },
+                  scanQRCode: () =>
+                    new Promise<KeystoneUR>((resolve) => {
+                      keystoneScanResolve.current = resolve;
+                    }),
+                }
+              );
+            }
 
             await signEthereumInteractionStore.approveWithProceedNext(
               interactionData.id,
@@ -203,6 +233,19 @@ export const EthereumSigningView: FunctionComponent<{
           ledgerInteractingError={ledgerInteractingError}
         />
       </Box>
+      <KeystoneSign
+        ur={keystoneUR}
+        isOpen={isKeystoneInteracting}
+        close={() => {
+          setIsKeystoneInteracting(false);
+        }}
+        onScan={(ur) => {
+          if (keystoneScanResolve.current === undefined) {
+            throw new Error("Keystone Scan Error");
+          }
+          keystoneScanResolve.current(ur);
+        }}
+      />
     </HeaderLayout>
   );
 });

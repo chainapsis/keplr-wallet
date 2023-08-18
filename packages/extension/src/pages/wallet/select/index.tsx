@@ -78,11 +78,18 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
     });
   }, [keyRingStore.keyInfos]);
 
+  const keystoneKeys = useMemo(() => {
+    return keyRingStore.keyInfos.filter((keyInfo) => {
+      return keyInfo.type === "keystone";
+    });
+  }, [keyRingStore.keyInfos]);
+
   const unknownKeys = useMemo(() => {
     const knownKeys = mnemonicKeys
       .concat(ledgerKeys)
       .concat(privateKeyInfos)
-      .concat(socialPrivateKeyInfos);
+      .concat(socialPrivateKeyInfos)
+      .concat(keystoneKeys);
     return keyRingStore.keyInfos.filter((keyInfo) => {
       return !knownKeys.find((k) => k.id === keyInfo.id);
     });
@@ -92,6 +99,7 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
     mnemonicKeys,
     privateKeyInfos,
     socialPrivateKeyInfos,
+    keystoneKeys,
   ]);
 
   const socialPrivateKeyInfoByType: {
@@ -202,6 +210,10 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
               title={intl.formatMessage({ id: "page.wallet.ledger-title" })}
               keyInfos={ledgerKeys}
             />
+          ) : null}
+
+          {keystoneKeys.length > 0 ? (
+            <KeyInfoList title="Keystone" keyInfos={keystoneKeys} />
           ) : null}
 
           {unknownKeys.length > 0 ? (

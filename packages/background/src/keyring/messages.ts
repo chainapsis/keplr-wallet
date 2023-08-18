@@ -5,6 +5,7 @@ import { ROUTE } from "./constants";
 import { KeyRingStatus, BIP44HDPath, KeyInfo } from "./types";
 import { PlainObject } from "../vault";
 import * as Legacy from "./legacy";
+import { MultiAccounts } from "../keyring-keystone/types";
 
 export class GetKeyRingStatusMsg extends Message<{
   status: KeyRingStatus;
@@ -206,6 +207,46 @@ export class NewLedgerKeyMsg extends Message<{
 
   type(): string {
     return NewLedgerKeyMsg.type();
+  }
+}
+
+export class NewKeystoneKeyMsg extends Message<{
+  vaultId: string;
+  status: KeyRingStatus;
+  keyInfos: KeyInfo[];
+}> {
+  public static type() {
+    return "new-keystone-key";
+  }
+
+  constructor(
+    public readonly multiAccounts: MultiAccounts,
+    public readonly name: string,
+    public readonly password?: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.multiAccounts || this.multiAccounts.keys.length === 0) {
+      throw new Error("pub key not set");
+    }
+
+    if (!this.multiAccounts.masterFingerprint) {
+      throw new Error("masterFingerprint not set");
+    }
+
+    if (!this.name) {
+      throw new Error("name not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return NewKeystoneKeyMsg.type();
   }
 }
 

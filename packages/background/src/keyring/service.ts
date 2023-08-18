@@ -11,6 +11,7 @@ import { ChainInfo } from "@keplr-wallet/types";
 import { Buffer } from "buffer/";
 import * as Legacy from "./legacy";
 import { ChainsUIService } from "../chains-ui";
+import { MultiAccounts } from "../keyring-keystone/types";
 
 export class KeyRingService {
   protected _needMigration = false;
@@ -673,6 +674,46 @@ export class KeyRingService {
     return id;
   }
 
+  async createKeystoneKeyRing(
+    multiAccounts: MultiAccounts,
+    name: string,
+    password?: string
+  ): Promise<string> {
+    if (!this.vaultService.isSignedUp) {
+      if (!password) {
+        throw new Error("Must provide password to sign in to vault");
+      }
+
+      await this.vaultService.signUp(password);
+    }
+
+    multiAccounts.keys.forEach((key) => {
+      const result = KeyRingService.parseBIP44Path(key.path);
+      KeyRingService.validateBIP44Path(result.path);
+    });
+
+    const keyRing = this.getKeyRing("keystone");
+    const vaultData = await keyRing.createKeyRingVault(multiAccounts);
+
+    const id = this.vaultService.addVault(
+      "keyRing",
+      {
+        ...vaultData.insensitive,
+        keyRingName: name,
+        keyRingType: keyRing.supportedKeyRingType(),
+      },
+      vaultData.sensitive
+    );
+
+    runInAction(() => {
+      this._selectedVaultId = id;
+    });
+
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "keystore-changed", {});
+
+    return id;
+  }
+
   async createPrivateKeyKeyRing(
     privateKey: Uint8Array,
     meta: PlainObject,
@@ -1157,6 +1198,26 @@ export class KeyRingService {
     }
 
     throw new Error(`Unsupported keyRing ${type}`);
+  }
+
+  static parseBIP44Path(bip44Path: string): {
+    coinType: number;
+    path: BIP44HDPath;
+  } {
+    const metches = RegExp(/^m\/44'\/(\d+)'\/(\d+)'\/(\d+)\/(\d+)$/i).exec(
+      bip44Path
+    );
+    if (!metches) {
+      throw new Error("Invalid BIP44 hd path");
+    }
+    return {
+      coinType: +metches[1],
+      path: {
+        account: +metches[2],
+        change: +metches[3],
+        addressIndex: +metches[4],
+      },
+    };
   }
 
   protected static validateBIP44Path(bip44Path: BIP44HDPath): void {

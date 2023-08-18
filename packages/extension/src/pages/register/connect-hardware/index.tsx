@@ -10,8 +10,8 @@ import { Button } from "../../../components/button";
 import { Stack } from "../../../components/stack";
 import { RegisterH4 } from "../components/typography";
 import { Box } from "../../../components/box";
-import { Image } from "../../../components/image";
 import { FormattedMessage, useIntl } from "react-intl";
+import { KeystoneIcon } from "../../../components/icon";
 import { useTheme } from "styled-components";
 
 export const ConnectHardwareWalletScene: FunctionComponent = () => {
@@ -48,7 +48,7 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
           <FormattedMessage id="pages.register.connect-hardware.content.title" />
         </Box>
       </RegisterH4>
-      <Box alignX="center" paddingY="3.125rem">
+      <Box alignX="center" paddingBottom="3.125rem" paddingTop="3.125rem">
         <img
           src={require("../../../public/assets/img/intro-hardware-wallet.png")}
           style={{
@@ -78,19 +78,20 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
           })}
           size="large"
           color="secondary"
-          disabled={true}
           left={
-            <Image
-              src={require(theme.mode === "light"
-                ? "../../../public/assets/img/intro-keystone-logo-light.png"
-                : "../../../public/assets/img/intro-keystone-logo.png")}
-              alt={"intro-keystone-logo"}
-              style={{
-                width: "1.5rem",
-                height: "1.5rem",
-              }}
+            <KeystoneIcon
+              color={
+                theme.mode === "light" ? ColorPalette.black : ColorPalette.white
+              }
+              width="1.5rem"
+              height="1.5rem"
             />
           }
+          onClick={() => {
+            sceneTransition.push("name-password-hardware", {
+              type: "keystone",
+            });
+          }}
         />
       </Stack>
     </RegisterSceneBox>
