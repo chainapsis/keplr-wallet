@@ -438,6 +438,8 @@ export class WalletConnectV2Store {
           namespaces: newNamespaces,
         });
 
+        const keys = [];
+
         for (const changedInfo of changedInfos) {
           // No need to wait
           signClient.emit({
@@ -449,24 +451,30 @@ export class WalletConnectV2Store {
             chainId: changedInfo.caip10,
           });
 
-          signClient.emit({
-            topic,
-            event: {
-              name: "keplr_accountsChanged",
-              data: {
-                name: changedInfo.key.name,
-                algo: changedInfo.key.algo,
-                pubKey: Buffer.from(changedInfo.key.pubKey).toString("base64"),
-                address: Buffer.from(changedInfo.key.address).toString(
-                  "base64"
-                ),
-                bech32Address: changedInfo.key.bech32Address,
-                isNanoLedger: changedInfo.key.isNanoLedger.toString(),
-              },
-            },
-            chainId: changedInfo.caip10,
+          keys.push({
+            chainId: changedInfo.caip10.replace("cosmos:", ""),
+            ...changedInfo.key,
           });
         }
+
+        signClient.emit({
+          topic,
+          event: {
+            name: "keplr_accountsChanged",
+            data: {
+              keys: JSON.stringify(
+                keys.map((key) => {
+                  return {
+                    ...key,
+                    pubKey: Buffer.from(key.pubKey).toString("base64"),
+                    address: Buffer.from(key.address).toString("base64"),
+                  };
+                })
+              ),
+            },
+          },
+          chainId: changedInfos[0].caip10,
+        });
       }
     }
   }
@@ -563,7 +571,15 @@ export class WalletConnectV2Store {
           },
         },
         sessionProperties: {
-          keys: JSON.stringify(keys),
+          keys: JSON.stringify(
+            keys.map((key) => {
+              return {
+                ...key,
+                pubKey: Buffer.from(key.pubKey).toString("base64"),
+                address: Buffer.from(key.address).toString("base64"),
+              };
+            })
+          ),
         },
       });
 
