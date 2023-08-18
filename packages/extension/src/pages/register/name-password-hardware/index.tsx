@@ -63,47 +63,49 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
               stepPrevious: 1,
               stepTotal: 4,
             });
+          } else {
+            throw new Error(`Invalid type: ${type}`);
           }
         })}
       >
         <FormNamePassword {...form} autoFocus={true}>
-          <Gutter size="1rem" />
-          <Label
-            content={intl.formatMessage({
-              id: "pages.register.name-password-hardware.connect-to",
-            })}
-          />
-          <Dropdown
-            color="text-input"
-            size="large"
-            selectedItemKey={connectTo}
-            items={[
-              {
-                key: "Cosmos",
-                label: intl.formatMessage({
-                  id: "pages.register.name-password-hardware.connect-to-cosmos",
-                }),
-              },
-              {
-                key: "Terra",
-                label: intl.formatMessage({
-                  id: "pages.register.name-password-hardware.connect-to-terra",
-                }),
-              },
-              {
-                key: "Secret",
-                label: intl.formatMessage({
-                  id: "pages.register.name-password-hardware.connect-to-secret",
-                }),
-              },
-            ]}
-            onSelect={(key) => {
-              setConnectTo(key);
-            }}
-          />
-          <Gutter size="1.625rem" />
-          {type === "ledger" && (
+          {type === "ledger" ? (
             <React.Fragment>
+              <Gutter size="1rem" />
+              <Label
+                content={intl.formatMessage({
+                  id: "pages.register.name-password-hardware.connect-to",
+                })}
+              />
+              <Dropdown
+                color="text-input"
+                size="large"
+                selectedItemKey={connectTo}
+                items={[
+                  {
+                    key: "Cosmos",
+                    label: intl.formatMessage({
+                      id: "pages.register.name-password-hardware.connect-to-cosmos",
+                    }),
+                  },
+                  {
+                    key: "Terra",
+                    label: intl.formatMessage({
+                      id: "pages.register.name-password-hardware.connect-to-terra",
+                    }),
+                  },
+                  {
+                    key: "Secret",
+                    label: intl.formatMessage({
+                      id: "pages.register.name-password-hardware.connect-to-secret",
+                    }),
+                  },
+                ]}
+                onSelect={(key) => {
+                  setConnectTo(key);
+                }}
+              />
+              <Gutter size="1.625rem" />
               <VerticalCollapseTransition
                 width="100%"
                 collapsed={isBIP44CardOpen}
@@ -131,7 +133,7 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
               </VerticalCollapseTransition>
               <Gutter size="1.25rem" />
             </React.Fragment>
-          )}
+          ) : undefined}
         </FormNamePassword>
       </form>
     </RegisterSceneBox>

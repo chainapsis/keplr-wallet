@@ -105,6 +105,7 @@ export const ConnectKeystoneScene: FunctionComponent<{
         <FormattedMessage id="pages.register.connect-keystone.click-to-view-tutorial" />
       </a>
       <Button
+        size="large"
         onClick={sync}
         text={intl.formatMessage({
           id: "pages.register.connect-keystone.sync",

@@ -11,8 +11,8 @@ import { Stack } from "../../../components/stack";
 import { RegisterH4 } from "../components/typography";
 import { Box } from "../../../components/box";
 import { FormattedMessage, useIntl } from "react-intl";
-import { KeystoneIcon } from "../../../components/icon";
 import { useTheme } from "styled-components";
+import { Image } from "../../../components/image";
 
 export const ConnectHardwareWalletScene: FunctionComponent = () => {
   const sceneTransition = useSceneTransition();
@@ -79,12 +79,15 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
           size="large"
           color="secondary"
           left={
-            <KeystoneIcon
-              color={
-                theme.mode === "light" ? ColorPalette.black : ColorPalette.white
-              }
-              width="1.5rem"
-              height="1.5rem"
+            <Image
+              src={require(theme.mode === "light"
+                ? "../../../public/assets/img/intro-keystone-logo-light.png"
+                : "../../../public/assets/img/intro-keystone-logo.png")}
+              alt={"intro-keystone-logo"}
+              style={{
+                width: "1.5rem",
+                height: "1.5rem",
+              }}
             />
           }
           onClick={() => {

@@ -5373,6 +5373,7 @@ __metadata:
     aes-js: ^3.1.2
     babel-loader: ^8.2.5
     bip39: ^3.0.2
+    browserify-zlib: ^0.2.0
     buffer: ^6.0.3
     chromatic: ^6.11.4
     classnames: ^2.3.2
@@ -25955,15 +25956,6 @@ __metadata:
   peerDependencies:
     react: ^15.5.3 || ^16.0.0 || ^17.0.0
   checksum: 154a9557d103fa776cd99bc0d2600b862be74872ff965052533bc38ea0606c4d0965b4dd6df93e53f1db86699517a25db2718bbbc08c5d535a90c0d335552e9a
-  languageName: node
-  linkType: hard
-
-"qrcode.react@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "qrcode.react@npm:3.1.0"
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: 94a2942ecf83f461d869adb20305ae663c6d1abe93ef2c72442b07d756ce70cf6deb6fd588dc5b382b48c6991cfde1dfd5ac9b814c1461e71d5edb2d945e67fc
   languageName: node
   linkType: hard
 
