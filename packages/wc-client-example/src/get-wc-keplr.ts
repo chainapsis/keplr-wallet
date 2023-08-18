@@ -1,10 +1,9 @@
-import { Keplr, BroadcastMode } from "@keplr-wallet/types";
-import WalletConnect from "@walletconnect/client";
-import { KeplrQRCodeModalV1 } from "@keplr-wallet/wc-qrcode-modal";
-import { KeplrWalletConnectV1 } from "@keplr-wallet/wc-client";
-import { EmbedChainInfos } from "./config";
-import { Buffer } from "buffer/";
-import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { BroadcastMode, Keplr } from "@keplr-wallet/types";
+import SignClient from "@walletconnect/sign-client";
+import { KeplrQRCodeModalV2 } from "@keplr-wallet/wc-qrcode-modal";
+import Axios from "axios";
+import { EmbedChainInfos } from "@keplr-wallet/extension/src/config";
+import { KeplrWalletConnectV2 } from "@keplr-wallet/wc-client";
 
 let keplr: Keplr | undefined = undefined;
 let promise: Promise<Keplr> | undefined = undefined;
@@ -30,17 +29,12 @@ async function sendTx(
     })(),
   };
 
-  const result = await simpleFetch<any>(
-    EmbedChainInfos.find((chainInfo) => chainInfo.chainId === chainId)!.rest,
-    "/cosmos/tx/v1beta1/txs",
-    {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(params),
-    }
-  );
+  const restInstance = Axios.create({
+    baseURL: EmbedChainInfos.find((chainInfo) => chainInfo.chainId === chainId)!
+      .rest,
+  });
+
+  const result = await restInstance.post("/cosmos/tx/v1beta1/txs", params);
 
   return Buffer.from(result.data["tx_response"].txhash, "hex");
 }
@@ -50,39 +44,37 @@ export function getWCKeplr(): Promise<Keplr> {
     return Promise.resolve(keplr);
   }
 
-  const fn = () => {
-    const connector = new WalletConnect({
-      bridge: "https://bridge.walletconnect.org", // Required
-      signingMethods: [
-        "keplr_enable_wallet_connect_v1",
-        "keplr_sign_amino_wallet_connect_v1",
-      ],
-      qrcodeModal: new KeplrQRCodeModalV1(),
+  const fn = async () => {
+    const signClient = await SignClient.init({
+      // If do you have your own project id, you can set it.
+      projectId: "8d611785b5b4298436793509ca6198df",
+      metadata: {
+        name: "WC Test Dapp",
+        description: "WC Test Dapp",
+        url: "http://localhost:1234/",
+        icons: [
+          "https://raw.githubusercontent.com/chainapsis/keplr-wallet/master/packages/extension/src/public/assets/logo-256.png",
+        ],
+      },
     });
 
-    // Check if connection is already established
-    if (!connector.connected) {
-      // create new session
-      connector.createSession();
+    if (signClient.session.getAll().length <= 0) {
+      const modal = new KeplrQRCodeModalV2(signClient);
 
-      return new Promise<Keplr>((resolve, reject) => {
-        connector.on("connect", (error) => {
-          if (error) {
-            reject(error);
-          } else {
-            keplr = new KeplrWalletConnectV1(connector, {
-              sendTx,
-            });
-            resolve(keplr);
-          }
-        });
+      // You can pass the chain ids that you want to connect to the modal.
+      const sessionProperties = await modal.connect(["cosmoshub-4"]);
+
+      keplr = new KeplrWalletConnectV2(signClient, {
+        sendTx,
+        sessionProperties,
       });
     } else {
-      keplr = new KeplrWalletConnectV1(connector, {
+      keplr = new KeplrWalletConnectV2(signClient, {
         sendTx,
       });
-      return Promise.resolve(keplr);
     }
+
+    return Promise.resolve(keplr);
   };
 
   if (!promise) {
