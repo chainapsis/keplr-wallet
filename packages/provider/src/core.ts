@@ -517,4 +517,40 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       }
     );
   }
+
+  async __core__privilageSignAminoWithdrawRewards(
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc
+  ): Promise<AminoSignResponse> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-cosmos",
+      "PrivilegeCosmosSignAminoWithdrawRewards",
+      {
+        chainId,
+        signer,
+        signDoc,
+      }
+    );
+  }
+
+  async __core__privilageSignAminoDelegate(
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc
+  ): Promise<AminoSignResponse> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-cosmos",
+      "PrivilegeCosmosSignAminoDelegate",
+      {
+        chainId,
+        signer,
+        signDoc,
+      }
+    );
+  }
 }

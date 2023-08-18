@@ -18,6 +18,7 @@ import {
   RequestSignEIP712CosmosTxMsg_v0,
   RequestICNSAdr36SignaturesMsg,
   EnableVaultsWithCosmosAddressMsg,
+  PrivilegeCosmosSignAminoDelegateMsg,
 } from "./messages";
 import { KeyRingCosmosService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
@@ -71,6 +72,11 @@ export const getHandler: (
         return handlePrivilegeCosmosSignAminoWithdrawRewardsMsg(service)(
           env,
           msg as PrivilegeCosmosSignAminoWithdrawRewardsMsg
+        );
+      case PrivilegeCosmosSignAminoDelegateMsg:
+        return handlePrivilegeCosmosSignAminoDelegateMsg(service)(
+          env,
+          msg as PrivilegeCosmosSignAminoDelegateMsg
         );
       case GetCosmosKeysForEachVaultSettledMsg:
         return handleGetCosmosKeysForEachVaultSettledMsg(service)(
@@ -271,8 +277,24 @@ const handlePrivilegeCosmosSignAminoWithdrawRewardsMsg: (
 ) => InternalHandler<PrivilegeCosmosSignAminoWithdrawRewardsMsg> = (
   service
 ) => {
-  return async (_, msg) => {
+  return async (env, msg) => {
     return await service.privilegeSignAminoWithdrawRewards(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.signer,
+      msg.signDoc
+    );
+  };
+};
+
+const handlePrivilegeCosmosSignAminoDelegateMsg: (
+  service: KeyRingCosmosService
+) => InternalHandler<PrivilegeCosmosSignAminoDelegateMsg> = (service) => {
+  return async (env, msg) => {
+    return await service.privilegeSignAminoDelegate(
+      env,
+      msg.origin,
       msg.chainId,
       msg.signer,
       msg.signDoc

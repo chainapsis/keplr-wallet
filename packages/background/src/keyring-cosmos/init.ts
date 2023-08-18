@@ -13,6 +13,7 @@ import {
   RequestSignEIP712CosmosTxMsg_v0,
   RequestICNSAdr36SignaturesMsg,
   EnableVaultsWithCosmosAddressMsg,
+  PrivilegeCosmosSignAminoDelegateMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -31,6 +32,7 @@ export function init(
   router.registerMessage(VerifyCosmosSignAminoADR36Msg);
   router.registerMessage(ComputeNotFinalizedMnemonicKeyAddressesMsg);
   router.registerMessage(PrivilegeCosmosSignAminoWithdrawRewardsMsg);
+  router.registerMessage(PrivilegeCosmosSignAminoDelegateMsg);
   router.registerMessage(GetCosmosKeysForEachVaultSettledMsg);
   router.registerMessage(RequestSignEIP712CosmosTxMsg_v0);
   router.registerMessage(RequestICNSAdr36SignaturesMsg);
