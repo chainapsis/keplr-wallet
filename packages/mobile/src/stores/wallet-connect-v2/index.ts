@@ -16,6 +16,7 @@ import { KVStore } from "@keplr-wallet/common";
 import Long from "long";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { AppState, Linking } from "react-native";
+import { Key } from "@keplr-wallet/types";
 
 function noop(fn: () => void): void {
   fn();
@@ -400,7 +401,7 @@ export class WalletConnectV2Store {
         },
       };
 
-      const changedInfos: { caip10: string; account: string }[] = [];
+      const changedInfos: { caip10: string; account: string; key: Key }[] = [];
 
       const randomId = await this.getRandomIdByTopic(topic);
       if (randomId) {
@@ -424,6 +425,7 @@ export class WalletConnectV2Store {
               changedInfos.push({
                 caip10: `cosmos:${chainInfo.chainId}`,
                 account,
+                key,
               });
             }
           }
@@ -443,6 +445,24 @@ export class WalletConnectV2Store {
             event: {
               name: "accountsChanged",
               data: [changedInfo.account],
+            },
+            chainId: changedInfo.caip10,
+          });
+
+          signClient.emit({
+            topic,
+            event: {
+              name: "keplr_accountsChanged",
+              data: {
+                name: changedInfo.key.name,
+                algo: changedInfo.key.algo,
+                pubKey: Buffer.from(changedInfo.key.pubKey).toString("base64"),
+                address: Buffer.from(changedInfo.key.address).toString(
+                  "base64"
+                ),
+                bech32Address: changedInfo.key.bech32Address,
+                isNanoLedger: changedInfo.key.isNanoLedger.toString(),
+              },
             },
             chainId: changedInfo.caip10,
           });
@@ -526,8 +546,10 @@ export class WalletConnectV2Store {
       await keplr.enable(chainIds);
 
       const accounts: string[] = [];
+      const keys = [];
       for (const chainId of chainIds) {
         const key = await keplr.getKey(chainId);
+        keys.push({ chainId, ...key });
         accounts.push(`cosmos:${chainId}:${key.bech32Address}`);
       }
 
@@ -539,6 +561,9 @@ export class WalletConnectV2Store {
             methods: CosmosMethods,
             events: CosmosEvents,
           },
+        },
+        sessionProperties: {
+          keys: JSON.stringify(keys),
         },
       });
 
@@ -634,9 +659,10 @@ export class WalletConnectV2Store {
         }
         case "cosmos_signAmino": {
           const res = await keplr.signAmino(
-            chainId,
+            params.chainId,
             params.signerAddress,
-            params.signDoc
+            params.signDoc,
+            params.signOptions
           );
           await signClient.respond({
             topic,
@@ -695,6 +721,37 @@ export class WalletConnectV2Store {
                 bech32Address: res.bech32Address,
                 isNanoLedger: res.isNanoLedger,
               },
+            },
+          });
+          break;
+        }
+        case "keplr_signAmino": {
+          const res = await keplr.signAmino(
+            params.chainId,
+            params.signer,
+            params.signDoc,
+            params.signOptions
+          );
+          await signClient.respond({
+            topic,
+            response: {
+              id,
+              jsonrpc: "2.0",
+              result: {
+                ...res,
+              },
+            },
+          });
+          break;
+        }
+        case "keplr_enable": {
+          await keplr.enable(params.chainId);
+          await signClient.respond({
+            topic,
+            response: {
+              id,
+              jsonrpc: "2.0",
+              result: {},
             },
           });
           break;
