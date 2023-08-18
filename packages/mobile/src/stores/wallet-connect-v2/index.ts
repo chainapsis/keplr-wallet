@@ -659,7 +659,7 @@ export class WalletConnectV2Store {
         }
         case "cosmos_signAmino": {
           const res = await keplr.signAmino(
-            params.chainId,
+            chainId,
             params.signerAddress,
             params.signDoc,
             params.signOptions
