@@ -61,17 +61,14 @@ export class KeplrWalletConnectV2 implements Keplr {
     }
   ) {
     if (options.sessionProperties) {
-      this.handleSessionProperties(options.sessionProperties);
+      this.saveKeys(options.sessionProperties);
     }
 
     signClient.on("session_event", (event) => {
       if (event.params.event.name === "keplr_accountsChanged") {
-        const chainId = event.params.chainId.replace("cosmos:", "");
-        const paramData = event.params.event.data;
+        this.saveKeys(event.params.event.data);
 
-        const key = this.convertToKeplrGetKeyWalletConnectV2Response(paramData);
-
-        this.saveLastSeenKey(chainId, key);
+        window.dispatchEvent(new Event("keplr_keystorechange"));
       }
     });
 
@@ -80,9 +77,7 @@ export class KeplrWalletConnectV2 implements Keplr {
     });
   }
 
-  protected handleSessionProperties(
-    sessionProperty: ProposalTypes.SessionProperties
-  ) {
+  protected saveKeys(sessionProperty: ProposalTypes.SessionProperties) {
     if (sessionProperty.hasOwnProperty("keys")) {
       const keys = JSON.parse(sessionProperty["keys"]);
 
@@ -200,10 +195,10 @@ export class KeplrWalletConnectV2 implements Keplr {
       lastSession.namespaces.hasOwnProperty("cosmos") &&
       lastSession.namespaces["cosmos"].hasOwnProperty("accounts")
     ) {
-      const splitedAccount =
+      const splitAccount =
         lastSession.namespaces["cosmos"]["accounts"][0].split(":");
 
-      return `${splitedAccount[0]}:${splitedAccount[1]}`;
+      return `${splitAccount[0]}:${splitAccount[1]}`;
     }
 
     return undefined;
