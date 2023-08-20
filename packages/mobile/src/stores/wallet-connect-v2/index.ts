@@ -16,6 +16,7 @@ import { KVStore } from "@keplr-wallet/common";
 import Long from "long";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { AppState, Linking } from "react-native";
+import { Key } from "@keplr-wallet/types";
 
 function noop(fn: () => void): void {
   fn();
@@ -400,7 +401,7 @@ export class WalletConnectV2Store {
         },
       };
 
-      const changedInfos: { caip10: string; account: string }[] = [];
+      const changedInfos: { caip10: string; account: string; key: Key }[] = [];
 
       const randomId = await this.getRandomIdByTopic(topic);
       if (randomId) {
@@ -424,6 +425,7 @@ export class WalletConnectV2Store {
               changedInfos.push({
                 caip10: `cosmos:${chainInfo.chainId}`,
                 account,
+                key,
               });
             }
           }
@@ -436,6 +438,8 @@ export class WalletConnectV2Store {
           namespaces: newNamespaces,
         });
 
+        const keys = [];
+
         for (const changedInfo of changedInfos) {
           // No need to wait
           signClient.emit({
@@ -446,7 +450,31 @@ export class WalletConnectV2Store {
             },
             chainId: changedInfo.caip10,
           });
+
+          keys.push({
+            chainId: changedInfo.caip10.replace("cosmos:", ""),
+            ...changedInfo.key,
+          });
         }
+
+        signClient.emit({
+          topic,
+          event: {
+            name: "keplr_accountsChanged",
+            data: {
+              keys: JSON.stringify(
+                keys.map((key) => {
+                  return {
+                    ...key,
+                    pubKey: Buffer.from(key.pubKey).toString("base64"),
+                    address: Buffer.from(key.address).toString("base64"),
+                  };
+                })
+              ),
+            },
+          },
+          chainId: changedInfos[0].caip10,
+        });
       }
     }
   }
@@ -526,8 +554,10 @@ export class WalletConnectV2Store {
       await keplr.enable(chainIds);
 
       const accounts: string[] = [];
+      const keys = [];
       for (const chainId of chainIds) {
         const key = await keplr.getKey(chainId);
+        keys.push({ chainId, ...key });
         accounts.push(`cosmos:${chainId}:${key.bech32Address}`);
       }
 
@@ -539,6 +569,17 @@ export class WalletConnectV2Store {
             methods: CosmosMethods,
             events: CosmosEvents,
           },
+        },
+        sessionProperties: {
+          keys: JSON.stringify(
+            keys.map((key) => {
+              return {
+                ...key,
+                pubKey: Buffer.from(key.pubKey).toString("base64"),
+                address: Buffer.from(key.address).toString("base64"),
+              };
+            })
+          ),
         },
       });
 
@@ -636,7 +677,8 @@ export class WalletConnectV2Store {
           const res = await keplr.signAmino(
             chainId,
             params.signerAddress,
-            params.signDoc
+            params.signDoc,
+            params.signOptions
           );
           await signClient.respond({
             topic,
@@ -695,6 +737,37 @@ export class WalletConnectV2Store {
                 bech32Address: res.bech32Address,
                 isNanoLedger: res.isNanoLedger,
               },
+            },
+          });
+          break;
+        }
+        case "keplr_signAmino": {
+          const res = await keplr.signAmino(
+            params.chainId,
+            params.signer,
+            params.signDoc,
+            params.signOptions
+          );
+          await signClient.respond({
+            topic,
+            response: {
+              id,
+              jsonrpc: "2.0",
+              result: {
+                ...res,
+              },
+            },
+          });
+          break;
+        }
+        case "keplr_enable": {
+          await keplr.enable(params.chainId);
+          await signClient.respond({
+            topic,
+            response: {
+              id,
+              jsonrpc: "2.0",
+              result: {},
             },
           });
           break;
