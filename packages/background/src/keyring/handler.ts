@@ -8,7 +8,7 @@ import {
 import {
   ChangeKeyRingNameMsg,
   DeleteKeyRingMsg,
-  FinalizeMnemonicKeyCoinTypeMsg,
+  FinalizeKeyCoinTypeMsg,
   GetKeyRingStatusMsg,
   GetKeyRingStatusOnlyMsg,
   LockKeyRingMsg,
@@ -48,10 +48,10 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleLockKeyRingMsg(service)(env, msg as LockKeyRingMsg);
       case UnlockKeyRingMsg:
         return handleUnlockKeyRingMsg(service)(env, msg as UnlockKeyRingMsg);
-      case FinalizeMnemonicKeyCoinTypeMsg:
-        return handleFinalizeMnemonicKeyCoinTypeMsg(service)(
+      case FinalizeKeyCoinTypeMsg:
+        return handleFinalizeKeyCoinTypeMsg(service)(
           env,
-          msg as FinalizeMnemonicKeyCoinTypeMsg
+          msg as FinalizeKeyCoinTypeMsg
         );
       case NewMnemonicKeyMsg:
         return handleNewMnemonicKeyMsg(service)(env, msg as NewMnemonicKeyMsg);
@@ -165,11 +165,11 @@ const handleUnlockKeyRingMsg: (
   };
 };
 
-const handleFinalizeMnemonicKeyCoinTypeMsg: (
+const handleFinalizeKeyCoinTypeMsg: (
   service: KeyRingService
-) => InternalHandler<FinalizeMnemonicKeyCoinTypeMsg> = (service) => {
+) => InternalHandler<FinalizeKeyCoinTypeMsg> = (service) => {
   return (_, msg) => {
-    service.finalizeMnemonicKeyCoinType(msg.id, msg.chainId, msg.coinType);
+    service.finalizeKeyCoinType(msg.id, msg.chainId, msg.coinType);
     return {
       status: service.keyRingStatus,
       keyInfos: service.getKeyInfos(),

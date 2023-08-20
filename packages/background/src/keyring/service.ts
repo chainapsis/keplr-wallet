@@ -206,7 +206,7 @@ export class KeyRingService {
                 ];
               if (
                 coinType != null &&
-                this.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo.chainId)
+                this.needKeyCoinTypeFinalize(vaultId, chainInfo.chainId)
               ) {
                 if (
                   chainInfo.bip44.coinType === coinType ||
@@ -214,7 +214,7 @@ export class KeyRingService {
                     (path) => path.coinType === coinType
                   )
                 ) {
-                  this.finalizeMnemonicKeyCoinType(
+                  this.finalizeKeyCoinType(
                     vaultId,
                     chainInfo.chainId,
                     coinType
@@ -248,9 +248,7 @@ export class KeyRingService {
               continue;
             }
 
-            if (
-              !this.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo.chainId)
-            ) {
+            if (!this.needKeyCoinTypeFinalize(vaultId, chainInfo.chainId)) {
               this.migrations.chainsUIService.enableChain(
                 vaultId,
                 chainInfo.chainId
@@ -518,7 +516,7 @@ export class KeyRingService {
     return vaults[0].id;
   }
 
-  finalizeMnemonicKeyCoinType(
+  finalizeKeyCoinType(
     vaultId: string,
     chainId: string,
     coinType: number
@@ -543,8 +541,11 @@ export class KeyRingService {
       throw new Error("Vault is null");
     }
 
-    if (vault.insensitive["keyRingType"] !== "mnemonic") {
-      throw new Error("Key is not from mnemonic");
+    if (
+      vault.insensitive["keyRingType"] !== "mnemonic" &&
+      vault.insensitive["keyRingType"] !== "keystone"
+    ) {
+      throw new Error("Key is not needed to be finalized");
     }
 
     const coinTypeTag = `keyRing-${
@@ -560,7 +561,7 @@ export class KeyRingService {
     });
   }
 
-  needMnemonicKeyCoinTypeFinalize(vaultId: string, chainId: string): boolean {
+  needKeyCoinTypeFinalize(vaultId: string, chainId: string): boolean {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
     }
@@ -570,7 +571,10 @@ export class KeyRingService {
       throw new Error("Vault is null");
     }
 
-    if (vault.insensitive["keyRingType"] !== "mnemonic") {
+    if (
+      vault.insensitive["keyRingType"] !== "mnemonic" &&
+      vault.insensitive["keyRingType"] !== "keystone"
+    ) {
       return false;
     }
 
@@ -944,8 +948,11 @@ export class KeyRingService {
       throw new Error("Vault is null");
     }
 
-    if (vault.insensitive["keyRingType"] !== "mnemonic") {
-      throw new Error("Key is not from mnemonic");
+    if (
+      vault.insensitive["keyRingType"] !== "mnemonic" &&
+      vault.insensitive["keyRingType"] !== "keystone"
+    ) {
+      throw new Error("Key is not needed to be finalized");
     }
 
     const coinTypeTag = `keyRing-${
@@ -1000,8 +1007,8 @@ export class KeyRingService {
       chainInfo
     );
 
-    if (this.needMnemonicKeyCoinTypeFinalize(vault.id, chainId)) {
-      this.finalizeMnemonicKeyCoinType(vault.id, chainId, coinType);
+    if (this.needKeyCoinTypeFinalize(vault.id, chainId)) {
+      this.finalizeKeyCoinType(vault.id, chainId, coinType);
     }
 
     return signature;

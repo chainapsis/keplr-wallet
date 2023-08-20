@@ -85,12 +85,12 @@ export class SelectKeyRingMsg extends Message<{
   }
 }
 
-export class FinalizeMnemonicKeyCoinTypeMsg extends Message<{
+export class FinalizeKeyCoinTypeMsg extends Message<{
   status: KeyRingStatus;
   keyInfos: KeyInfo[];
 }> {
   public static type() {
-    return "finalize-mnemonic-key-coin-type";
+    return "finalize-key-coin-type";
   }
 
   constructor(
@@ -116,7 +116,7 @@ export class FinalizeMnemonicKeyCoinTypeMsg extends Message<{
   }
 
   type(): string {
-    return FinalizeMnemonicKeyCoinTypeMsg.type();
+    return FinalizeKeyCoinTypeMsg.type();
   }
 }
 

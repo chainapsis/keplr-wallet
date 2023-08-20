@@ -85,7 +85,7 @@ export const SelectDerivationPathScene: FunctionComponent<{
   >([]);
   useEffect(() => {
     keyRingStore
-      .computeNotFinalizedMnemonicKeyAddresses(vaultId, chainId)
+      .computeNotFinalizedKeyAddresses(vaultId, chainId)
       .then((res) => {
         setCandidates(res);
 
@@ -186,14 +186,12 @@ export const SelectDerivationPathScene: FunctionComponent<{
             })}
             size="large"
             disabled={
-              !keyRingStore.needMnemonicKeyCoinTypeFinalize(
-                vaultId,
-                chainInfo
-              ) || selectedCoinType < 0
+              !keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo) ||
+              selectedCoinType < 0
             }
             onClick={async () => {
               if (selectedCoinType > 0) {
-                await keyRingStore.finalizeMnemonicKeyCoinType(
+                await keyRingStore.finalizeKeyCoinType(
                   vaultId,
                   chainId,
                   selectedCoinType

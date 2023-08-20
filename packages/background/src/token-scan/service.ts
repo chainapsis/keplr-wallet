@@ -235,11 +235,9 @@ export class TokenScanService {
       value: string;
       coinType?: number;
     }[] = await (async () => {
-      if (
-        this.keyRingService.needMnemonicKeyCoinTypeFinalize(vaultId, chainId)
-      ) {
+      if (this.keyRingService.needKeyCoinTypeFinalize(vaultId, chainId)) {
         return (
-          await this.keyRingCosmosService.computeNotFinalizedMnemonicKeyAddresses(
+          await this.keyRingCosmosService.computeNotFinalizedKeyAddresses(
             vaultId,
             chainId
           )

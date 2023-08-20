@@ -409,14 +409,14 @@ export class VerifyCosmosSignAminoADR36Msg extends Message<boolean> {
   }
 }
 
-export class ComputeNotFinalizedMnemonicKeyAddressesMsg extends Message<
+export class ComputeNotFinalizedKeyAddressesMsg extends Message<
   {
     coinType: number;
     bech32Address: string;
   }[]
 > {
   public static type() {
-    return "compute-not-finalized-mnemonic-key-addresses";
+    return "compute-not-finalized-key-addresses";
   }
 
   constructor(public readonly id: string, public readonly chainId: string) {
@@ -438,7 +438,7 @@ export class ComputeNotFinalizedMnemonicKeyAddressesMsg extends Message<
   }
 
   type(): string {
-    return ComputeNotFinalizedMnemonicKeyAddressesMsg.type();
+    return ComputeNotFinalizedKeyAddressesMsg.type();
   }
 }
 

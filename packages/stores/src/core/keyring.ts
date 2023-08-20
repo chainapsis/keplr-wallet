@@ -14,9 +14,9 @@ import {
   ChangeKeyRingNameMsg,
   ChangeUserPasswordMsg,
   CheckLegacyKeyRingPasswordMsg,
-  ComputeNotFinalizedMnemonicKeyAddressesMsg,
+  ComputeNotFinalizedKeyAddressesMsg,
   DeleteKeyRingMsg,
-  FinalizeMnemonicKeyCoinTypeMsg,
+  FinalizeKeyCoinTypeMsg,
   GetKeyRingStatusMsg,
   GetKeyRingStatusOnlyMsg,
   KeyInfo,
@@ -140,16 +140,13 @@ export class KeyRingStore {
     this.eventDispatcher.dispatchEvent("keplr_keystorechange");
   }
 
-  needMnemonicKeyCoinTypeFinalize(
-    vaultId: string,
-    chainInfo: ChainInfo
-  ): boolean {
+  needKeyCoinTypeFinalize(vaultId: string, chainInfo: ChainInfo): boolean {
     const keyInfo = this.keyInfos.find((keyInfo) => keyInfo.id === vaultId);
     if (!keyInfo) {
       return false;
     }
 
-    if (keyInfo.type !== "mnemonic") {
+    if (keyInfo.type !== "mnemonic" && keyInfo.type !== "keystone") {
       return false;
     }
 
@@ -160,7 +157,7 @@ export class KeyRingStore {
     return keyInfo.insensitive[coinTypeTag] == null;
   }
 
-  async computeNotFinalizedMnemonicKeyAddresses(
+  async computeNotFinalizedKeyAddresses(
     vaultId: string,
     chainId: string
   ): Promise<
@@ -169,10 +166,7 @@ export class KeyRingStore {
       bech32Address: string;
     }[]
   > {
-    const msg = new ComputeNotFinalizedMnemonicKeyAddressesMsg(
-      vaultId,
-      chainId
-    );
+    const msg = new ComputeNotFinalizedKeyAddressesMsg(vaultId, chainId);
 
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
@@ -183,12 +177,8 @@ export class KeyRingStore {
   }
 
   @flow
-  *finalizeMnemonicKeyCoinType(
-    vaultId: string,
-    chainId: string,
-    coinType: number
-  ) {
-    const msg = new FinalizeMnemonicKeyCoinTypeMsg(vaultId, chainId, coinType);
+  *finalizeKeyCoinType(vaultId: string, chainId: string, coinType: number) {
+    const msg = new FinalizeKeyCoinTypeMsg(vaultId, chainId, coinType);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );

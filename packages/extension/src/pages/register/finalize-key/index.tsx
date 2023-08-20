@@ -151,15 +151,12 @@ export const FinalizeKeyScene: FunctionComponent<{
           // If mnemonic is fresh, there is no way that additional coin type account has value to select.
           if (mnemonic) {
             if (
-              keyRingStore.needMnemonicKeyCoinTypeFinalize(
-                vaultId,
-                chainInfo
-              ) &&
+              keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo) &&
               mnemonic?.isFresh
             ) {
               promises.push(
                 (async () => {
-                  await keyRingStore.finalizeMnemonicKeyCoinType(
+                  await keyRingStore.finalizeKeyCoinType(
                     vaultId,
                     chainInfo.chainId,
                     chainInfo.bip44.coinType
@@ -182,17 +179,13 @@ export const FinalizeKeyScene: FunctionComponent<{
 
         promises = [];
         for (const chainInfo of chainStore.chainInfos) {
-          if (
-            mnemonic &&
-            keyRingStore.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo)
-          ) {
+          if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
             promises.push(
               (async () => {
-                const res =
-                  await keyRingStore.computeNotFinalizedMnemonicKeyAddresses(
-                    vaultId,
-                    chainInfo.chainId
-                  );
+                const res = await keyRingStore.computeNotFinalizedKeyAddresses(
+                  vaultId,
+                  chainInfo.chainId
+                );
 
                 candidateAddresses.push({
                   chainId: chainInfo.chainId,

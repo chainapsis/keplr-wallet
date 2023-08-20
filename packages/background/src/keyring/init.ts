@@ -3,7 +3,7 @@ import { KeyRingService } from "./service";
 import {
   GetKeyRingStatusMsg,
   GetKeyRingStatusOnlyMsg,
-  FinalizeMnemonicKeyCoinTypeMsg,
+  FinalizeKeyCoinTypeMsg,
   NewMnemonicKeyMsg,
   NewLedgerKeyMsg,
   NewPrivateKeyKeyMsg,
@@ -27,7 +27,7 @@ export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(GetKeyRingStatusMsg);
   router.registerMessage(GetKeyRingStatusOnlyMsg);
   router.registerMessage(SelectKeyRingMsg);
-  router.registerMessage(FinalizeMnemonicKeyCoinTypeMsg);
+  router.registerMessage(FinalizeKeyCoinTypeMsg);
   router.registerMessage(NewMnemonicKeyMsg);
   router.registerMessage(NewLedgerKeyMsg);
   router.registerMessage(NewKeystoneKeyMsg);

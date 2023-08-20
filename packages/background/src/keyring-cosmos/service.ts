@@ -90,7 +90,7 @@ export class KeyRingCosmosService {
     };
   }
 
-  async computeNotFinalizedMnemonicKeyAddresses(
+  async computeNotFinalizedKeyAddresses(
     vaultId: string,
     chainId: string
   ): Promise<
@@ -114,12 +114,17 @@ export class KeyRingCosmosService {
     }[] = [];
 
     for (const coinType of coinTypes) {
-      const pubKey =
-        await this.keyRingService.getPubKeyWithNotFinalizedCoinType(
+      let pubKey: PubKeySecp256k1;
+      try {
+        pubKey = await this.keyRingService.getPubKeyWithNotFinalizedCoinType(
           chainId,
           vaultId,
           coinType
         );
+      } catch (e) {
+        console.log(e);
+        continue;
+      }
 
       const address = (() => {
         if (isEthermintLike) {
@@ -1128,10 +1133,7 @@ Salt: ${salt}`;
     for (const keyInfo of keyInfos) {
       if (
         !this.chainsUIService.isEnabled(keyInfo.id, chainId) &&
-        (!this.keyRingService.needMnemonicKeyCoinTypeFinalize(
-          keyInfo.id,
-          chainId
-        ) ||
+        (!this.keyRingService.needKeyCoinTypeFinalize(keyInfo.id, chainId) ||
           (chainInfo.alternativeBIP44s ?? []).length === 0)
       ) {
         let key: Key;
@@ -1143,12 +1145,9 @@ Salt: ${salt}`;
         }
         if (key.bech32Address === bech32Address) {
           if (
-            this.keyRingService.needMnemonicKeyCoinTypeFinalize(
-              keyInfo.id,
-              chainId
-            )
+            this.keyRingService.needKeyCoinTypeFinalize(keyInfo.id, chainId)
           ) {
-            this.keyRingService.finalizeMnemonicKeyCoinType(
+            this.keyRingService.finalizeKeyCoinType(
               keyInfo.id,
               chainId,
               chainInfo.bip44.coinType
