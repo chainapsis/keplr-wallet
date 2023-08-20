@@ -1,7 +1,6 @@
 import { PlainObject, Vault } from "../vault";
 import { Buffer } from "buffer/";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
-import { ChainInfo } from "@keplr-wallet/types";
 import { KeyRingService } from "../keyring";
 import { MultiAccounts } from "./types";
 
@@ -37,11 +36,7 @@ export class KeyRingKeystoneService {
     });
   }
 
-  getPubKey(
-    vault: Vault,
-    coinType: number,
-    _chainInfo: ChainInfo
-  ): PubKeySecp256k1 {
+  getPubKey(vault: Vault, coinType: number): PubKeySecp256k1 {
     let bytes;
     if (vault.insensitive["keys"]) {
       const path = Object.keys(vault.insensitive["keys"]).find((path) => {
