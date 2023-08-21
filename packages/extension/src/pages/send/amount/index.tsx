@@ -23,10 +23,10 @@ import {
 import { useNavigate } from "react-router";
 import { AmountInput, RecipientInput } from "../../../components/input";
 import { TokenItem } from "../../main/components";
-import { Subtitle3 } from "../../../components/typography";
+import { Caption2, Subtitle3 } from "../../../components/typography";
 import { Box } from "../../../components/box";
 import { MemoInput } from "../../../components/input/memo-input";
-import { YAxis } from "../../../components/axis";
+import { XAxis, YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
 import { FeeControl } from "../../../components/input/fee-control";
 import { useNotification } from "../../../hooks/notification";
@@ -37,7 +37,10 @@ import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
-import { SendTxAndRecordMsg } from "@keplr-wallet/background";
+import {
+  LogAnalyticsEventMsg,
+  SendTxAndRecordMsg,
+} from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTxConfigsQueryString } from "../../../hooks/use-tx-config-query-string";
 import { LayeredHorizontalRadioGroup } from "../../../components/radio-group";
@@ -49,6 +52,7 @@ import {
 import { useIBCChannelConfigQueryString } from "../../../hooks/use-ibc-channel-config-query-string";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
 import { GuideBox } from "../../../components/guide-box";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 const Styles = {
   Flex1: styled.div`
@@ -250,6 +254,38 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     gasSimulator,
   });
 
+  // IBC Send일때 auto fill일때는 recipient input에서 paragraph로 auto fill되었다는 것을 알려준다.
+  const [isIBCRecipientSetAuto, setIsIBCRecipientSetAuto] = useState(false);
+  // 유저가 주소를 수정했을때 auto fill이라는 state를 해제하기 위해서 마지막으로 auto fill된 주소를 기억한다.
+  const [ibcRecipientAddress, setIBCRecipientAddress] = useState("");
+
+  useEffect(() => {
+    if (
+      !isIBCTransfer ||
+      sendConfigs.recipientConfig.value !== ibcRecipientAddress
+    ) {
+      setIsIBCRecipientSetAuto(false);
+    }
+    // else 문을 써서 같다면 setAuto를 true로 해주면 안된다.
+    // 의도상 한번 바꾸면 다시 auto fill 값과 같더라도 유저가 수정한걸로 간주한다.
+  }, [ibcRecipientAddress, sendConfigs.recipientConfig.value, isIBCTransfer]);
+
+  const [ibcChannelFluent, setIBCChannelFluent] = useState<
+    | {
+        destinationChainId: string;
+        originDenom: string;
+        originChainId: string;
+
+        channels: {
+          portId: string;
+          channelId: string;
+
+          counterpartyChainId: string;
+        }[];
+      }
+    | undefined
+  >(undefined);
+
   const isDetachedMode = searchParams.get("detached") === "true";
 
   const historyType = isIBCTransfer ? "basic-send/ibc" : "basic-send";
@@ -367,6 +403,48 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                     sendConfigs.recipientConfig.chainId,
                     sendConfigs.recipientConfig.recipient
                   );
+
+                  if (isIBCTransfer && ibcChannelFluent != null) {
+                    const pathChainIds = [chainId].concat(
+                      ...ibcChannelFluent.channels.map(
+                        (channel) => channel.counterpartyChainId
+                      )
+                    );
+                    const intermediateChainIds: string[] = [];
+                    if (pathChainIds.length > 2) {
+                      intermediateChainIds.push(...pathChainIds.slice(1, -1));
+                    }
+
+                    const params = {
+                      originDenom: ibcChannelFluent.originDenom,
+                      originChainId: ibcChannelFluent.originChainId,
+                      originChainIdentifier: ChainIdHelper.parse(
+                        ibcChannelFluent.originChainId
+                      ).identifier,
+                      sourceChainId: chainId,
+                      sourceChainIdentifier:
+                        ChainIdHelper.parse(chainId).identifier,
+                      destinationChainId: ibcChannelFluent.destinationChainId,
+                      destinationChainIdentifier: ChainIdHelper.parse(
+                        ibcChannelFluent.destinationChainId
+                      ).identifier,
+                      pathChainIds,
+                      pathChainIdentifiers: pathChainIds.map(
+                        (chainId) => ChainIdHelper.parse(chainId).identifier
+                      ),
+                      intermediateChainIds,
+                      intermediateChainIdentifiers: intermediateChainIds.map(
+                        (chainId) => ChainIdHelper.parse(chainId).identifier
+                      ),
+                      isToOrigin:
+                        ibcChannelFluent.destinationChainId ===
+                        ibcChannelFluent.originChainId,
+                    };
+                    new InExtensionMessageRequester().sendMessage(
+                      BACKGROUND_PORT,
+                      new LogAnalyticsEventMsg("ibc_send", params)
+                    );
+                  }
                 },
                 onFulfill: (tx: any) => {
                   if (tx.code != null && tx.code !== 0) {
@@ -484,15 +562,36 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             recipientConfig={sendConfigs.recipientConfig}
             memoConfig={sendConfigs.memoConfig}
             permitAddressBookSelfKeyInfo={isIBCTransfer}
+            bottom={
+              <VerticalCollapseTransition
+                collapsed={!isIBCRecipientSetAuto}
+                transitionAlign="top"
+              >
+                <Gutter size="0.25rem" />
+                <XAxis>
+                  <Gutter size="0.5rem" />
+                  <Caption2 color={ColorPalette["platinum-200"]}>
+                    <FormattedMessage id="page.send.amount.ibc-send-recipient-auto-filled" />
+                  </Caption2>
+                </XAxis>
+              </VerticalCollapseTransition>
+            }
           />
 
           <AmountInput amountConfig={sendConfigs.amountConfig} />
 
           <MemoInput
             memoConfig={sendConfigs.memoConfig}
-            placeholder={intl.formatMessage({
-              id: "page.send.amount.memo-placeholder",
-            })}
+            placeholder={
+              // IBC Send일때는 어차피 밑에서 cex로 보내지 말라고 경고가 뜬다.
+              // 근데 memo의 placeholder는 cex로 보낼때 메모를 꼭 확인하라고 하니 서로 모순이라 이상하다.
+              // 그래서 IBC Send일때는 memo의 placeholder를 없앤다.
+              isIBCTransfer
+                ? undefined
+                : intl.formatMessage({
+                    id: "page.send.amount.memo-placeholder",
+                  })
+            }
           />
 
           <VerticalCollapseTransition collapsed={!isIBCTransfer}>
@@ -528,8 +627,14 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         <IBCTransferSelectDestinationModal
           chainId={chainId}
           denom={currency.coinMinimalDenom}
+          recipientConfig={sendConfigs.recipientConfig}
           ibcChannelConfig={sendConfigs.channelConfig}
           setIsIBCTransfer={setIsIBCTransfer}
+          setAutomaticRecipient={(address: string) => {
+            setIsIBCRecipientSetAuto(true);
+            setIBCRecipientAddress(address);
+          }}
+          setIBCChannelsInfoFluent={setIBCChannelFluent}
           close={() => {
             setIsIBCTransferDestinationModalOpen(false);
           }}

@@ -1,0 +1,139 @@
+syntax = "proto3";
+package agoric.swingset;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/Agoric/agoric-sdk/golang/cosmos/x/swingset/types";
+
+// Transactions.
+service Msg {
+  // Install a JavaScript sources bundle on the chain's SwingSet controller.
+  rpc InstallBundle(MsgInstallBundle) returns (MsgInstallBundleResponse);
+  // Send inbound messages.
+  rpc DeliverInbound(MsgDeliverInbound) returns (MsgDeliverInboundResponse);
+  // Perform a low-privilege wallet action.
+  rpc WalletAction(MsgWalletAction) returns (MsgWalletActionResponse);
+  // Perform a wallet action that spends assets.
+  rpc WalletSpendAction(MsgWalletSpendAction) returns (MsgWalletSpendActionResponse);
+  // Provision a new endpoint.
+  rpc Provision(MsgProvision) returns (MsgProvisionResponse);
+}
+
+// MsgDeliverInbound defines an SDK message for delivering an eventual send
+message MsgDeliverInbound {
+    option (gogoproto.equal) = false;
+
+    repeated string messages = 1 [
+        (gogoproto.jsontag)    = "messages",
+        (gogoproto.moretags)   = "yaml:\"messages\""
+    ];
+    repeated uint64 nums = 2 [
+        (gogoproto.jsontag)    = "nums",
+        (gogoproto.moretags)   = "yaml:\"nums\""
+    ];
+    uint64 ack = 3 [
+        (gogoproto.jsontag)    = "ack",
+        (gogoproto.moretags)   = "yaml:\"ack\""
+    ];
+    bytes submitter = 4 [
+        (gogoproto.casttype)   = "github.com/cosmos/cosmos-sdk/types.AccAddress",
+        (gogoproto.jsontag)    = "submitter",
+        (gogoproto.moretags)   = "yaml:\"submitter\""
+    ];
+}
+
+// MsgDeliverInboundResponse is an empty reply.
+message MsgDeliverInboundResponse {}
+
+// MsgWalletAction defines an SDK message for the on-chain wallet to perform an
+// action that *does not* spend any assets (other than gas fees/stamps).  This
+// message type is typically protected by feegrant budgets.
+message MsgWalletAction {
+    option (gogoproto.equal) = false;
+
+    bytes owner = 1 [
+        (gogoproto.casttype)   = "github.com/cosmos/cosmos-sdk/types.AccAddress",
+        (gogoproto.jsontag)    = "owner",
+        (gogoproto.moretags)   = "yaml:\"owner\""
+    ];
+
+    // The action to perform, as JSON-stringified marshalled data.
+    string action = 2;
+}
+
+// MsgWalletActionResponse is an empty reply.
+message MsgWalletActionResponse {}
+
+// MsgWalletSpendAction defines an SDK message for the on-chain wallet to
+// perform an action that *does spend the owner's assets.*  This message type is
+// typically protected by explicit confirmation by the user.
+message MsgWalletSpendAction {
+    option (gogoproto.equal) = false;
+
+    bytes owner = 1 [
+        (gogoproto.casttype)   = "github.com/cosmos/cosmos-sdk/types.AccAddress",
+        (gogoproto.jsontag)    = "owner",
+        (gogoproto.moretags)   = "yaml:\"owner\""
+    ];
+
+    // The action to perform, as JSON-stringified marshalled data.
+    string spend_action = 2;
+}
+
+// MsgWalletSpendActionResponse is an empty reply.
+message MsgWalletSpendActionResponse {}
+
+// MsgProvision defines an SDK message for provisioning a client to the chain
+message MsgProvision {
+    option (gogoproto.equal) = false;
+
+    string nickname = 1 [
+        (gogoproto.jsontag)    = "nickname",
+        (gogoproto.moretags)   = "yaml:\"nickname\""
+    ];
+    bytes address = 2 [
+        (gogoproto.casttype)   = "github.com/cosmos/cosmos-sdk/types.AccAddress",
+        (gogoproto.jsontag)    = "address",
+        (gogoproto.moretags)   = "yaml:\"address\""
+    ];
+    repeated string power_flags = 3 [
+        (gogoproto.customname) = "PowerFlags",
+        (gogoproto.jsontag)    = "powerFlags",
+        (gogoproto.moretags)   = "yaml:\"powerFlags\""
+    ];
+    bytes submitter = 4 [
+        (gogoproto.casttype)   = "github.com/cosmos/cosmos-sdk/types.AccAddress",
+        (gogoproto.jsontag)    = "submitter",
+        (gogoproto.moretags)   = "yaml:\"submitter\""
+    ];
+}
+
+// MsgProvisionResponse is an empty reply.
+message MsgProvisionResponse {}
+
+// MsgInstallBundle carries a signed bundle to SwingSet.
+message MsgInstallBundle {
+    string bundle = 1 [
+        (gogoproto.jsontag)    = "bundle",
+        (gogoproto.moretags)   = "yaml:\"bundle\""
+    ];
+    bytes submitter = 2 [
+        (gogoproto.casttype)   = "github.com/cosmos/cosmos-sdk/types.AccAddress",
+        (gogoproto.jsontag)    = "submitter",
+        (gogoproto.moretags)   = "yaml:\"submitter\""
+    ];
+    // Either bundle or compressed_bundle will be set.
+    // Default compression algorithm is gzip.
+    bytes compressed_bundle = 3 [
+        (gogoproto.jsontag)    = "compressedBundle",
+        (gogoproto.moretags)   = "yaml:\"compressedBundle\""
+    ];
+    // Size in bytes of uncompression of compressed_bundle.
+    int64 uncompressed_size = 4 [
+        (gogoproto.jsontag) = "uncompressedSize"
+    ];
+}
+
+// MsgInstallBundleResponse is an empty acknowledgement that an install bundle
+// message has been queued for the SwingSet kernel's consideration.
+message MsgInstallBundleResponse {}

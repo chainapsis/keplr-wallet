@@ -179,8 +179,11 @@ export class RecipientConfig
     }
 
     if (this._allowHexAddressOnEthermint) {
+      const chainInfo = this.chainInfo;
       const hasEthereumAddress =
-        this.chainInfo.features?.includes("eth-address-gen");
+        chainInfo.bip44.coinType === 60 ||
+        !!chainInfo.features?.includes("eth-address-gen") ||
+        !!chainInfo.features?.includes("eth-key-sign");
       if (hasEthereumAddress && rawRecipient.startsWith("0x")) {
         try {
           if (isAddress(rawRecipient)) {
@@ -252,8 +255,11 @@ export class RecipientConfig
     }
 
     if (this._allowHexAddressOnEthermint) {
+      const chainInfo = this.chainInfo;
       const hasEthereumAddress =
-        this.chainInfo.features?.includes("eth-address-gen");
+        chainInfo.bip44.coinType === 60 ||
+        !!chainInfo.features?.includes("eth-address-gen") ||
+        !!chainInfo.features?.includes("eth-key-sign");
       if (hasEthereumAddress && rawRecipient.startsWith("0x")) {
         try {
           if (isAddress(rawRecipient)) {

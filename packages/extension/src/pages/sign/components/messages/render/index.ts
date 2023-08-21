@@ -1,3 +1,4 @@
+export * from "./agoric";
 export * from "./claim-rewards";
 export * from "./delegate";
 export * from "./execute-contract";

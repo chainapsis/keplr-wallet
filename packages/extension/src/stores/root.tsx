@@ -33,6 +33,7 @@ import {
   ICNSQueries,
   PermissionManagerStore,
   SignEthereumInteractionStore,
+  AgoricQueries,
 } from "@keplr-wallet/stores";
 import {
   KeplrETCQueries,
@@ -75,6 +76,7 @@ export class RootStore {
 
   public readonly queriesStore: QueriesStore<
     [
+      AgoricQueries,
       CosmosQueries,
       CosmwasmQueries,
       SecretQueries,
@@ -177,6 +179,7 @@ export class RootStore {
       {
         responseDebounceMs: 75,
       },
+      AgoricQueries.use(),
       CosmosQueries.use(),
       CosmwasmQueries.use(),
       SecretQueries.use({

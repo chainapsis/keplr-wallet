@@ -14,14 +14,15 @@ import {
   ChangeKeyRingNameMsg,
   ChangeUserPasswordMsg,
   CheckLegacyKeyRingPasswordMsg,
-  ComputeNotFinalizedMnemonicKeyAddressesMsg,
+  ComputeNotFinalizedKeyAddressesMsg,
   DeleteKeyRingMsg,
-  FinalizeMnemonicKeyCoinTypeMsg,
+  FinalizeKeyCoinTypeMsg,
   GetKeyRingStatusMsg,
   GetKeyRingStatusOnlyMsg,
   KeyInfo,
   KeyRingStatus,
   LockKeyRingMsg,
+  NewKeystoneKeyMsg,
   NewLedgerKeyMsg,
   NewMnemonicKeyMsg,
   NewPrivateKeyKeyMsg,
@@ -30,6 +31,7 @@ import {
   ShowSensitiveKeyRingDataMsg,
   UnlockKeyRingMsg,
 } from "@keplr-wallet/background";
+import type { MultiAccounts } from "@keplr-wallet/background";
 import { ChainInfo } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
@@ -138,16 +140,13 @@ export class KeyRingStore {
     this.eventDispatcher.dispatchEvent("keplr_keystorechange");
   }
 
-  needMnemonicKeyCoinTypeFinalize(
-    vaultId: string,
-    chainInfo: ChainInfo
-  ): boolean {
+  needKeyCoinTypeFinalize(vaultId: string, chainInfo: ChainInfo): boolean {
     const keyInfo = this.keyInfos.find((keyInfo) => keyInfo.id === vaultId);
     if (!keyInfo) {
       return false;
     }
 
-    if (keyInfo.type !== "mnemonic") {
+    if (keyInfo.type !== "mnemonic" && keyInfo.type !== "keystone") {
       return false;
     }
 
@@ -158,7 +157,7 @@ export class KeyRingStore {
     return keyInfo.insensitive[coinTypeTag] == null;
   }
 
-  async computeNotFinalizedMnemonicKeyAddresses(
+  async computeNotFinalizedKeyAddresses(
     vaultId: string,
     chainId: string
   ): Promise<
@@ -167,10 +166,7 @@ export class KeyRingStore {
       bech32Address: string;
     }[]
   > {
-    const msg = new ComputeNotFinalizedMnemonicKeyAddressesMsg(
-      vaultId,
-      chainId
-    );
+    const msg = new ComputeNotFinalizedKeyAddressesMsg(vaultId, chainId);
 
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
@@ -181,12 +177,8 @@ export class KeyRingStore {
   }
 
   @flow
-  *finalizeMnemonicKeyCoinType(
-    vaultId: string,
-    chainId: string,
-    coinType: number
-  ) {
-    const msg = new FinalizeMnemonicKeyCoinTypeMsg(vaultId, chainId, coinType);
+  *finalizeKeyCoinType(vaultId: string, chainId: string, coinType: number) {
+    const msg = new FinalizeKeyCoinTypeMsg(vaultId, chainId, coinType);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -245,6 +237,24 @@ export class KeyRingStore {
     this._keyInfos = result.keyInfos;
 
     this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+  }
+
+  @flow
+  *newKeystoneKey(
+    multiAccounts: MultiAccounts,
+    name: string,
+    password: string | undefined
+  ) {
+    const msg = new NewKeystoneKeyMsg(multiAccounts, name, password);
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+
+    return result.vaultId;
   }
 
   @flow

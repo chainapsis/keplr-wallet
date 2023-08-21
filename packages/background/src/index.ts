@@ -17,6 +17,7 @@ import * as Vault from "./vault/internal";
 import * as KeyRingV2 from "./keyring/internal";
 import * as KeyRingMnemonic from "./keyring-mnemonic/internal";
 import * as KeyRingLedger from "./keyring-ledger/internal";
+import * as KeyRingKeystone from "./keyring-keystone/internal";
 import * as KeyRingPrivateKey from "./keyring-private-key/internal";
 import * as KeyRingCosmos from "./keyring-cosmos/internal";
 import * as KeyRingEthereum from "./keyring-ethereum/internal";
@@ -40,6 +41,7 @@ export * from "./keyring";
 export * from "./vault";
 export * from "./keyring-cosmos";
 export * from "./keyring-ethereum";
+export * from "./keyring-keystone";
 export * from "./token-scan";
 export * from "./recent-send-history";
 
@@ -56,16 +58,19 @@ export function init(
   // The origins that are able to pass any permission.
   privilegedOrigins: string[],
   analyticsPrivilegedOrigins: string[],
+  msgPrivilegedOrigins: string[],
   communityChainInfoRepo: {
     readonly organizationName: string;
     readonly repoName: string;
     readonly branchName: string;
   },
   notification: Notification,
+  blocklistPageURL: string,
   keyRingMigrations: {
     commonCrypto: KeyRingLegacy.CommonCrypto;
     readonly getDisabledChainIdentifiers: () => Promise<string[]>;
-  }
+  },
+  afterInitFn?: (service: Chains.ChainsService) => void | Promise<void>
 ): {
   initFn: () => Promise<void>;
   keyRingService: KeyRingV2.KeyRingService;
@@ -82,7 +87,8 @@ export function init(
     },
     embedChainInfos,
     communityChainInfoRepo,
-    interactionService
+    interactionService,
+    afterInitFn
   );
 
   const tokenCW20Service = new TokenCW20.TokenCW20Service(
@@ -103,15 +109,18 @@ export function init(
     notification
   );
 
-  const phishingListService = new PhishingList.PhishingListService({
-    blockListUrl:
-      "https://raw.githubusercontent.com/chainapsis/phishing-block-list/main/block-list.txt",
-    twitterListUrl:
-      "https://raw.githubusercontent.com/chainapsis/phishing-block-list/main/twitter-scammer-list.txt",
-    fetchingIntervalMs: 3 * 3600 * 1000, // 3 hours
-    retryIntervalMs: 10 * 60 * 1000, // 10 mins,
-    allowTimeoutMs: 10 * 60 * 1000, // 10 mins,
-  });
+  const phishingListService = new PhishingList.PhishingListService(
+    {
+      blockListUrl:
+        "https://raw.githubusercontent.com/chainapsis/phishing-block-list/main/block-list.txt",
+      twitterListUrl:
+        "https://raw.githubusercontent.com/chainapsis/phishing-block-list/main/twitter-scammer-list.txt",
+      fetchingIntervalMs: 3 * 3600 * 1000, // 3 hours
+      retryIntervalMs: 10 * 60 * 1000, // 10 mins,
+      allowTimeoutMs: 10 * 60 * 1000, // 10 mins,,
+    },
+    blocklistPageURL
+  );
   const analyticsService = new Analytics.AnalyticsService(
     storeCreator("background.analytics"),
     analyticsPrivilegedOrigins
@@ -141,6 +150,7 @@ export function init(
       new KeyRingMnemonic.KeyRingMnemonicService(vaultService),
       new KeyRingLedger.KeyRingLedgerService(),
       new KeyRingPrivateKey.KeyRingPrivateKeyService(vaultService),
+      new KeyRingKeystone.KeyRingKeystoneService(),
     ]
   );
   const keyRingCosmosService = new KeyRingCosmos.KeyRingCosmosService(
@@ -148,7 +158,8 @@ export function init(
     keyRingV2Service,
     interactionService,
     chainsUIService,
-    analyticsService
+    analyticsService,
+    msgPrivilegedOrigins
   );
   const keyRingEthereumService = new KeyRingEthereum.KeyRingEthereumService(
     chainsService,
@@ -254,6 +265,8 @@ export function init(
       await tokenScanService.init();
 
       await recentSendHistoryService.init();
+
+      await chainsService.afterInit();
     },
     keyRingService: keyRingV2Service,
   };

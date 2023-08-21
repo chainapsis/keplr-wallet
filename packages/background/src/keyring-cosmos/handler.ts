@@ -12,12 +12,13 @@ import {
   RequestCosmosSignDirectMsg,
   RequestCosmosSignAminoADR36Msg,
   VerifyCosmosSignAminoADR36Msg,
-  ComputeNotFinalizedMnemonicKeyAddressesMsg,
+  ComputeNotFinalizedKeyAddressesMsg,
   PrivilegeCosmosSignAminoWithdrawRewardsMsg,
   GetCosmosKeysForEachVaultSettledMsg,
   RequestSignEIP712CosmosTxMsg_v0,
   RequestICNSAdr36SignaturesMsg,
   EnableVaultsWithCosmosAddressMsg,
+  PrivilegeCosmosSignAminoDelegateMsg,
 } from "./messages";
 import { KeyRingCosmosService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
@@ -62,15 +63,20 @@ export const getHandler: (
           service,
           permissionInteractionService
         )(env, msg as VerifyCosmosSignAminoADR36Msg);
-      case ComputeNotFinalizedMnemonicKeyAddressesMsg:
-        return handleComputeNotFinalizedMnemonicKeyAddressesMsg(service)(
+      case ComputeNotFinalizedKeyAddressesMsg:
+        return handleComputeNotFinalizedKeyAddressesMsg(service)(
           env,
-          msg as ComputeNotFinalizedMnemonicKeyAddressesMsg
+          msg as ComputeNotFinalizedKeyAddressesMsg
         );
       case PrivilegeCosmosSignAminoWithdrawRewardsMsg:
         return handlePrivilegeCosmosSignAminoWithdrawRewardsMsg(service)(
           env,
           msg as PrivilegeCosmosSignAminoWithdrawRewardsMsg
+        );
+      case PrivilegeCosmosSignAminoDelegateMsg:
+        return handlePrivilegeCosmosSignAminoDelegateMsg(service)(
+          env,
+          msg as PrivilegeCosmosSignAminoDelegateMsg
         );
       case GetCosmosKeysForEachVaultSettledMsg:
         return handleGetCosmosKeysForEachVaultSettledMsg(service)(
@@ -253,16 +259,11 @@ const handleVerifyCosmosSignAminoADR36Msg: (
   };
 };
 
-const handleComputeNotFinalizedMnemonicKeyAddressesMsg: (
+const handleComputeNotFinalizedKeyAddressesMsg: (
   service: KeyRingCosmosService
-) => InternalHandler<ComputeNotFinalizedMnemonicKeyAddressesMsg> = (
-  service
-) => {
+) => InternalHandler<ComputeNotFinalizedKeyAddressesMsg> = (service) => {
   return async (_, msg) => {
-    return await service.computeNotFinalizedMnemonicKeyAddresses(
-      msg.id,
-      msg.chainId
-    );
+    return await service.computeNotFinalizedKeyAddresses(msg.id, msg.chainId);
   };
 };
 
@@ -271,8 +272,24 @@ const handlePrivilegeCosmosSignAminoWithdrawRewardsMsg: (
 ) => InternalHandler<PrivilegeCosmosSignAminoWithdrawRewardsMsg> = (
   service
 ) => {
-  return async (_, msg) => {
+  return async (env, msg) => {
     return await service.privilegeSignAminoWithdrawRewards(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.signer,
+      msg.signDoc
+    );
+  };
+};
+
+const handlePrivilegeCosmosSignAminoDelegateMsg: (
+  service: KeyRingCosmosService
+) => InternalHandler<PrivilegeCosmosSignAminoDelegateMsg> = (service) => {
+  return async (env, msg) => {
+    return await service.privilegeSignAminoDelegate(
+      env,
+      msg.origin,
       msg.chainId,
       msg.signer,
       msg.signDoc

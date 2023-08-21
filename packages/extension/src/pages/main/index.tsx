@@ -14,7 +14,6 @@ import {
   ClaimAll,
   MenuBar,
   CopyAddress,
-  CopyAddressModal,
   IBCTransferView,
   BuyCryptoModal,
   StakeWithKeplrDashboardButton,
@@ -45,6 +44,7 @@ import { useTheme } from "styled-components";
 import { IbcHistoryView } from "./components/ibc-history-view";
 import { LayeredHorizontalRadioGroup } from "../../components/radio-group";
 import { YAxis } from "../../components/axis";
+import { DepositModal } from "./components/deposit-modal";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -141,7 +141,7 @@ export const MainPage: FunctionComponent = observer(() => {
       : 0;
 
   const [isOpenMenu, setIsOpenMenu] = React.useState(false);
-  const [isOpenCopyAddress, setIsOpenCopyAddress] = React.useState(false);
+  const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
 
   const searchRef = useRef<HTMLInputElement | null>(null);
@@ -263,7 +263,7 @@ export const MainPage: FunctionComponent = observer(() => {
           <CopyAddress
             onClick={() => {
               analyticsStore.logEvent("click_copyAddress");
-              setIsOpenCopyAddress(true);
+              setIsOpenDepositModal(true);
             }}
             isNotReady={isNotReady}
           />
@@ -324,7 +324,7 @@ export const MainPage: FunctionComponent = observer(() => {
           {tabStatus === "available" ? (
             <Buttons
               onClickDeposit={() => {
-                setIsOpenCopyAddress(true);
+                setIsOpenDepositModal(true);
                 analyticsStore.logEvent("click_deposit");
               }}
               onClickBuy={() => setIsOpenBuy(true)}
@@ -434,7 +434,7 @@ export const MainPage: FunctionComponent = observer(() => {
               search={search}
               isNotReady={isNotReady}
               onClickGetStarted={() => {
-                setIsOpenCopyAddress(true);
+                setIsOpenDepositModal(true);
               }}
             />
           ) : (
@@ -458,11 +458,13 @@ export const MainPage: FunctionComponent = observer(() => {
       </Modal>
 
       <Modal
-        isOpen={isOpenCopyAddress}
+        isOpen={isOpenDepositModal}
         align="bottom"
-        close={() => setIsOpenCopyAddress(false)}
+        close={() => setIsOpenDepositModal(false)}
+        /* Simplebar를 사용하면 트랜지션이 덜덜 떨리는 문제가 있다... */
+        forceNotUseSimplebar={true}
       >
-        <CopyAddressModal close={() => setIsOpenCopyAddress(false)} />
+        <DepositModal close={() => setIsOpenDepositModal(false)} />
       </Modal>
 
       <Modal

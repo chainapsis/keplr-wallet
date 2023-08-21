@@ -91,6 +91,7 @@ function setOutputHash(root, hash) {
     const thirdPartyProtoPath = path.join(baseDirPath, "third_party/proto");
 
     const inputs = [
+      "agoric/swingset/msgs.proto",
       "cosmos/authz/v1beta1/tx.proto",
       "cosmos/base/v1beta1/coin.proto",
       "cosmos/bank/v1beta1/bank.proto",

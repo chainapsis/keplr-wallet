@@ -210,6 +210,10 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       keyRingStore.selectedKeyInfo &&
       keyRingStore.selectedKeyInfo.type === "ledger";
 
+    const isKeystone =
+      keyRingStore.selectedKeyInfo &&
+      keyRingStore.selectedKeyInfo.type === "keystone";
+
     const claimAll = () => {
       analyticsStore.logEvent("click_claimAll");
 
@@ -217,7 +221,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         setIsExpanded(true);
       }
 
-      if (isLedger) {
+      if (isLedger || isKeystone) {
         // Ledger에서 현실적으로 이 기능을 처리해주기 난감하다.
         // disable하기보다는 일단 눌렀을때 expand를 시켜주고 아무것도 하지 않는다.
         return;
@@ -502,7 +506,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                  ledger일 경우 특수한 행동을 하진 못하고 그냥 collapse를 펼치기만 한다.
                  특수한 기능이 없다는 것을 암시하기 위해서 ledger일때는 일반 버튼으로 처리한다.
                */}
-              {isLedger ? (
+              {isLedger || isKeystone ? (
                 <Button
                   text={intl.formatMessage({
                     id: "page.main.components.claim-all.button",
