@@ -25,7 +25,7 @@ import { Env } from "@keplr-wallet/router";
 import { SuggestChainInfoMsg } from "./messages";
 
 type ChainRemovedHandler = (chainInfo: ChainInfo) => void;
-type ChainSuggestedHandler = (chainInfo: ChainInfo) => void;
+type ChainSuggestedHandler = (chainInfo: ChainInfo) => void | Promise<void>;
 type UpdatedChainInfo = Pick<ChainInfo, "chainId" | "features">;
 
 export class ChainsService {
@@ -98,7 +98,7 @@ export class ChainsService {
         });
 
         for (const chainInfo of filtered) {
-          this.addSuggestedChainInfo(chainInfo, true);
+          await this.addSuggestedChainInfo(chainInfo, true);
         }
 
         const chainInfos = this.embedChainInfos.concat(filtered);
@@ -519,12 +519,11 @@ export class ChainsService {
     );
   }
 
-  @action
-  addSuggestedChainInfo(
+  async addSuggestedChainInfo(
     chainInfo: ChainInfoWithSuggestedOptions,
     // Used for migration
     notInvokeHandlers?: boolean
-  ): void {
+  ): Promise<void> {
     const i = this.suggestedChainInfos.findIndex(
       (c) =>
         ChainIdHelper.parse(c.chainId).identifier ===
@@ -533,13 +532,15 @@ export class ChainsService {
     if (i < 0) {
       const newChainInfos = this.suggestedChainInfos.slice();
       newChainInfos.push(chainInfo);
-      this.suggestedChainInfos = newChainInfos;
+      runInAction(() => {
+        this.suggestedChainInfos = newChainInfos;
+      });
 
       if (!notInvokeHandlers) {
         const updated = this.mergeChainInfosWithDynamics([chainInfo])[0];
 
         for (const handler of this.onChainSuggestedHandlers) {
-          handler(updated);
+          await handler(updated);
         }
       }
     } else {
