@@ -2,6 +2,7 @@ import { ChainsService } from "../chains";
 import { KeyRingService } from "../keyring";
 import {
   AminoSignResponse,
+  ChainInfo,
   DirectSignResponse,
   KeplrSignOptions,
   Key,
@@ -43,6 +44,34 @@ export class KeyRingCosmosService {
 
   async init() {
     // TODO: ?
+
+    this.chainsService.addChainSuggestedHandler(
+      this.onChainSuggested.bind(this)
+    );
+  }
+
+  async onChainSuggested(chainInfo: ChainInfo): Promise<void> {
+    if (this.keyRingService.keyRingStatus !== "unlocked") {
+      return;
+    }
+
+    for (const vault of this.keyRingService.getKeyRingVaults()) {
+      if (
+        this.keyRingService.needKeyCoinTypeFinalize(vault.id, chainInfo.chainId)
+      ) {
+        const candidates = await this.computeNotFinalizedKeyAddresses(
+          vault.id,
+          chainInfo.chainId
+        );
+        if (candidates.length === 1) {
+          this.keyRingService.finalizeKeyCoinType(
+            vault.id,
+            chainInfo.chainId,
+            candidates[0].coinType
+          );
+        }
+      }
+    }
   }
 
   async getKeySelected(chainId: string): Promise<Key> {
