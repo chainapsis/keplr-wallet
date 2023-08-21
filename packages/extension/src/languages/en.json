@@ -137,8 +137,6 @@
   "pages.register.connect-keystone.invalid-qrcode": "Invalid QR code",
   "pages.register.connect-keystone.select-valid-qrcode": "Please ensure you have selected a valid QR code from your Keystone device.",
   "pages.register.connect-keystone.tutorial": "Tutorial",
-  "pages.register.connect-keystone.note-suggest-chain": "Please note that when adding specific chains to your wallet, the ‘Non-Native Chain’ feature may not work.",
-  "pages.register.connect-keystone.learn-more": "Learn More",
   "pages.register.connect-keystone.unsupported": "Unsupported",
 
   "pages.register.enable-chains.title": "Select Chains",

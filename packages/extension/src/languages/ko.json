@@ -137,8 +137,6 @@
   "pages.register.connect-keystone.invalid-qrcode": "QR 코드가 유효하지 않습니다.",
   "pages.register.connect-keystone.select-valid-qrcode": "키스톤 장치에서 유효한 QR 코드를 선택했는지 확인해주세요.",
   "pages.register.connect-keystone.tutorial": "튜토리얼",
-  "pages.register.connect-keystone.note-suggest-chain": "알림: 선택형 체인의 경우 키스톤 지갑을 사용하실 수 없습니다.",
-  "pages.register.connect-keystone.learn-more": "더 알아보기",
   "pages.register.connect-keystone.unsupported": "미지원",
 
   "pages.register.enable-chains.title": "체인 선택하기",
