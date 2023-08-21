@@ -183,7 +183,13 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
           <Styles.HeaderLeft>{left}</Styles.HeaderLeft>
         ) : null}
         <Styles.HeaderTitle>
-          <Skeleton isNotReady={isNotReady} dummyMinWidth="6.25rem">
+          <Skeleton
+            isNotReady={isNotReady}
+            dummyMinWidth="6.25rem"
+            /* 보통 문자열을 사용하는데 알파벳 j 같은 경우는 요소의 크기보다 밑이나 왼쪽으로 약간 삐져나온다. 이 부분도 안보이게 하기 위해서 약간 더 크게 스켈레톤을 그린다 */
+            horizontalBleed="0.15rem"
+            verticalBleed="0.15rem"
+          >
             <Subtitle1>{title}</Subtitle1>
           </Skeleton>
         </Styles.HeaderTitle>
