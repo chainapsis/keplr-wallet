@@ -67,7 +67,8 @@ export function init(
   keyRingMigrations: {
     commonCrypto: KeyRingLegacy.CommonCrypto;
     readonly getDisabledChainIdentifiers: () => Promise<string[]>;
-  }
+  },
+  afterInitFn?: (service: Chains.ChainsService) => void | Promise<void>
 ): {
   initFn: () => Promise<void>;
   keyRingService: KeyRingV2.KeyRingService;
@@ -84,7 +85,8 @@ export function init(
     },
     embedChainInfos,
     communityChainInfoRepo,
-    interactionService
+    interactionService,
+    afterInitFn
   );
 
   const tokenCW20Service = new TokenCW20.TokenCW20Service(
@@ -260,6 +262,8 @@ export function init(
       await tokenScanService.init();
 
       await recentSendHistoryService.init();
+
+      await chainsService.afterInit();
     },
     keyRingService: keyRingV2Service,
   };

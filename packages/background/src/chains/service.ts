@@ -11,6 +11,7 @@ import {
   makeObservable,
   observable,
   runInAction,
+  toJS,
 } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainInfoWithCoreTypes, ChainInfoWithSuggestedOptions } from "./types";
@@ -65,7 +66,10 @@ export class ChainsService {
       readonly repoName: string;
       readonly branchName: string;
     },
-    protected readonly interactionService: InteractionService
+    protected readonly interactionService: InteractionService,
+    protected readonly afterInitFn:
+      | ((service: ChainsService) => void | Promise<void>)
+      | undefined
   ) {
     this.updatedChainInfoKVStore = new PrefixKVStore(
       kvStore,
@@ -226,6 +230,22 @@ export class ChainsService {
         this.endpointsKVStore.set("endpoints", this.endpoints);
       });
     }
+  }
+
+  /**
+   * 이 서비스 자체를 포함한 다른 모든 서비스들이 init된 이후에 실행된다. (message를 받을 수 있는 상태 직전)
+   * 모든 서비스가 init이 된 이후에 실행될 추가적인 로직을 여기에 작성할 수 있다.
+   */
+  async afterInit(): Promise<void> {
+    if (this.afterInitFn) {
+      await this.afterInitFn(this);
+    }
+
+    // 그냥 미래에 필요할지도 몰라서...
+    await this.kvStore.set(
+      "last_embed_chain_infos",
+      toJS(this.embedChainInfos)
+    );
   }
 
   getChainInfos = computedFn(
