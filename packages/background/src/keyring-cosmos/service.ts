@@ -55,22 +55,35 @@ export class KeyRingCosmosService {
       return;
     }
 
-    for (const vault of this.keyRingService.getKeyRingVaults()) {
-      if (
-        this.keyRingService.needKeyCoinTypeFinalize(vault.id, chainInfo.chainId)
-      ) {
-        const candidates = await this.computeNotFinalizedKeyAddresses(
-          vault.id,
-          chainInfo.chainId
-        );
-        if (candidates.length === 1) {
-          this.keyRingService.finalizeKeyCoinType(
-            vault.id,
-            chainInfo.chainId,
-            candidates[0].coinType
+    try {
+      const selectedVaultId = this.keyRingService.selectedVaultId;
+      if (selectedVaultId) {
+        // In general, since getKey is called on the webpage immediately after the suggest chain,
+        // if we can select the coin type at this point, select it.
+        // (In fact, the only thing this function is useful for now is keystone.
+        //  If a suggested chain has a coin type which is not supported on keystone and requires a coin type other than 118, it is immediately set to 118)
+        if (
+          this.keyRingService.needKeyCoinTypeFinalize(
+            selectedVaultId,
+            chainInfo.chainId
+          )
+        ) {
+          const candidates = await this.computeNotFinalizedKeyAddresses(
+            selectedVaultId,
+            chainInfo.chainId
           );
+          if (candidates.length === 1) {
+            this.keyRingService.finalizeKeyCoinType(
+              selectedVaultId,
+              chainInfo.chainId,
+              candidates[0].coinType
+            );
+          }
         }
       }
+    } catch (e) {
+      console.log(e);
+      // Ignore error
     }
   }
 
