@@ -11,6 +11,7 @@ import { ChainInfo } from "@keplr-wallet/types";
 import { Buffer } from "buffer/";
 import * as Legacy from "./legacy";
 import { ChainsUIService } from "../chains-ui";
+import { MultiAccounts } from "../keyring-keystone";
 
 export class KeyRingService {
   protected _needMigration = false;
@@ -205,7 +206,7 @@ export class KeyRingService {
                 ];
               if (
                 coinType != null &&
-                this.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo.chainId)
+                this.needKeyCoinTypeFinalize(vaultId, chainInfo.chainId)
               ) {
                 if (
                   chainInfo.bip44.coinType === coinType ||
@@ -213,7 +214,7 @@ export class KeyRingService {
                     (path) => path.coinType === coinType
                   )
                 ) {
-                  this.finalizeMnemonicKeyCoinType(
+                  this.finalizeKeyCoinType(
                     vaultId,
                     chainInfo.chainId,
                     coinType
@@ -247,9 +248,7 @@ export class KeyRingService {
               continue;
             }
 
-            if (
-              !this.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo.chainId)
-            ) {
+            if (!this.needKeyCoinTypeFinalize(vaultId, chainInfo.chainId)) {
               this.migrations.chainsUIService.enableChain(
                 vaultId,
                 chainInfo.chainId
@@ -517,7 +516,7 @@ export class KeyRingService {
     return vaults[0].id;
   }
 
-  finalizeMnemonicKeyCoinType(
+  finalizeKeyCoinType(
     vaultId: string,
     chainId: string,
     coinType: number
@@ -542,8 +541,11 @@ export class KeyRingService {
       throw new Error("Vault is null");
     }
 
-    if (vault.insensitive["keyRingType"] !== "mnemonic") {
-      throw new Error("Key is not from mnemonic");
+    if (
+      vault.insensitive["keyRingType"] !== "mnemonic" &&
+      vault.insensitive["keyRingType"] !== "keystone"
+    ) {
+      throw new Error("Key is not needed to be finalized");
     }
 
     const coinTypeTag = `keyRing-${
@@ -559,7 +561,7 @@ export class KeyRingService {
     });
   }
 
-  needMnemonicKeyCoinTypeFinalize(vaultId: string, chainId: string): boolean {
+  needKeyCoinTypeFinalize(vaultId: string, chainId: string): boolean {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
     }
@@ -569,7 +571,10 @@ export class KeyRingService {
       throw new Error("Vault is null");
     }
 
-    if (vault.insensitive["keyRingType"] !== "mnemonic") {
+    if (
+      vault.insensitive["keyRingType"] !== "mnemonic" &&
+      vault.insensitive["keyRingType"] !== "keystone"
+    ) {
       return false;
     }
 
@@ -658,6 +663,62 @@ export class KeyRingService {
       "keyRing",
       {
         ...vaultData.insensitive,
+        keyRingName: name,
+        keyRingType: keyRing.supportedKeyRingType(),
+      },
+      vaultData.sensitive
+    );
+
+    runInAction(() => {
+      this._selectedVaultId = id;
+    });
+
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "keystore-changed", {});
+
+    return id;
+  }
+
+  async createKeystoneKeyRing(
+    multiAccounts: MultiAccounts,
+    name: string,
+    password?: string
+  ): Promise<string> {
+    if (!this.vaultService.isSignedUp) {
+      if (!password) {
+        throw new Error("Must provide password to sign in to vault");
+      }
+
+      await this.vaultService.signUp(password);
+    }
+
+    multiAccounts.keys.forEach((key) => {
+      const result = KeyRingService.parseBIP44Path(key.path);
+      KeyRingService.validateBIP44Path(result.path);
+    });
+
+    const keyRing = this.getKeyRing("keystone");
+    const vaultData = await keyRing.createKeyRingVault(multiAccounts);
+
+    // Finalize coin type if only one coin type exists.
+    const coinTypes: Record<string, number | undefined> = {};
+    const chainInfos = this.chainsService.getChainInfos();
+    for (const chainInfo of chainInfos) {
+      if (
+        !chainInfo.alternativeBIP44s ||
+        chainInfo.alternativeBIP44s.length === 0
+      ) {
+        const coinTypeTag = `keyRing-${
+          ChainIdHelper.parse(chainInfo.chainId).identifier
+        }-coinType`;
+        coinTypes[coinTypeTag] = chainInfo.bip44.coinType;
+      }
+    }
+
+    const id = this.vaultService.addVault(
+      "keyRing",
+      {
+        ...vaultData.insensitive,
+        ...coinTypes,
         keyRingName: name,
         keyRingType: keyRing.supportedKeyRingType(),
       },
@@ -903,8 +964,11 @@ export class KeyRingService {
       throw new Error("Vault is null");
     }
 
-    if (vault.insensitive["keyRingType"] !== "mnemonic") {
-      throw new Error("Key is not from mnemonic");
+    if (
+      vault.insensitive["keyRingType"] !== "mnemonic" &&
+      vault.insensitive["keyRingType"] !== "keystone"
+    ) {
+      throw new Error("Key is not needed to be finalized");
     }
 
     const coinTypeTag = `keyRing-${
@@ -959,8 +1023,8 @@ export class KeyRingService {
       chainInfo
     );
 
-    if (this.needMnemonicKeyCoinTypeFinalize(vault.id, chainId)) {
-      this.finalizeMnemonicKeyCoinType(vault.id, chainId, coinType);
+    if (this.needKeyCoinTypeFinalize(vault.id, chainId)) {
+      this.finalizeKeyCoinType(vault.id, chainId, coinType);
     }
 
     return signature;
@@ -1157,6 +1221,26 @@ export class KeyRingService {
     }
 
     throw new Error(`Unsupported keyRing ${type}`);
+  }
+
+  static parseBIP44Path(bip44Path: string): {
+    coinType: number;
+    path: BIP44HDPath;
+  } {
+    const metches = RegExp(/^m\/44'\/(\d+)'\/(\d+)'\/(\d+)\/(\d+)$/i).exec(
+      bip44Path
+    );
+    if (!metches) {
+      throw new Error("Invalid BIP44 hd path");
+    }
+    return {
+      coinType: +metches[1],
+      path: {
+        account: +metches[2],
+        change: +metches[3],
+        addressIndex: +metches[4],
+      },
+    };
   }
 
   protected static validateBIP44Path(bip44Path: BIP44HDPath): void {

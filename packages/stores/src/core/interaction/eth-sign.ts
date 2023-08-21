@@ -7,6 +7,7 @@ export type SignEthereumInteractionData = {
   origin: string;
   chainId: string;
   signer: string;
+  pubKey: Uint8Array;
   message: Uint8Array;
   signType: EthSignType;
   keyType: string;

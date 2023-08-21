@@ -3,7 +3,7 @@ import { KeyRingService } from "./service";
 import {
   GetKeyRingStatusMsg,
   GetKeyRingStatusOnlyMsg,
-  FinalizeMnemonicKeyCoinTypeMsg,
+  FinalizeKeyCoinTypeMsg,
   NewMnemonicKeyMsg,
   NewLedgerKeyMsg,
   NewPrivateKeyKeyMsg,
@@ -18,6 +18,7 @@ import {
   ChangeKeyRingNameInteractiveMsg,
   ExportKeyRingDataMsg,
   CheckLegacyKeyRingPasswordMsg,
+  NewKeystoneKeyMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -26,9 +27,10 @@ export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(GetKeyRingStatusMsg);
   router.registerMessage(GetKeyRingStatusOnlyMsg);
   router.registerMessage(SelectKeyRingMsg);
-  router.registerMessage(FinalizeMnemonicKeyCoinTypeMsg);
+  router.registerMessage(FinalizeKeyCoinTypeMsg);
   router.registerMessage(NewMnemonicKeyMsg);
   router.registerMessage(NewLedgerKeyMsg);
+  router.registerMessage(NewKeystoneKeyMsg);
   router.registerMessage(NewPrivateKeyKeyMsg);
   router.registerMessage(AppendLedgerKeyAppMsg);
   router.registerMessage(LockKeyRingMsg);

@@ -10,9 +10,9 @@ import { Button } from "../../../components/button";
 import { Stack } from "../../../components/stack";
 import { RegisterH4 } from "../components/typography";
 import { Box } from "../../../components/box";
-import { Image } from "../../../components/image";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
+import { Image } from "../../../components/image";
 
 export const ConnectHardwareWalletScene: FunctionComponent = () => {
   const sceneTransition = useSceneTransition();
@@ -48,7 +48,7 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
           <FormattedMessage id="pages.register.connect-hardware.content.title" />
         </Box>
       </RegisterH4>
-      <Box alignX="center" paddingY="3.125rem">
+      <Box alignX="center" paddingBottom="3.125rem" paddingTop="3.125rem">
         <img
           src={require("../../../public/assets/img/intro-hardware-wallet.png")}
           style={{
@@ -78,7 +78,6 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
           })}
           size="large"
           color="secondary"
-          disabled={true}
           left={
             <Image
               src={require(theme.mode === "light"
@@ -91,6 +90,11 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
               }}
             />
           }
+          onClick={() => {
+            sceneTransition.push("name-password-hardware", {
+              type: "keystone",
+            });
+          }}
         />
       </Stack>
     </RegisterSceneBox>

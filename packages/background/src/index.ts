@@ -17,6 +17,7 @@ import * as Vault from "./vault/internal";
 import * as KeyRingV2 from "./keyring/internal";
 import * as KeyRingMnemonic from "./keyring-mnemonic/internal";
 import * as KeyRingLedger from "./keyring-ledger/internal";
+import * as KeyRingKeystone from "./keyring-keystone/internal";
 import * as KeyRingPrivateKey from "./keyring-private-key/internal";
 import * as KeyRingCosmos from "./keyring-cosmos/internal";
 import * as KeyRingEthereum from "./keyring-ethereum/internal";
@@ -40,6 +41,7 @@ export * from "./keyring";
 export * from "./vault";
 export * from "./keyring-cosmos";
 export * from "./keyring-ethereum";
+export * from "./keyring-keystone";
 export * from "./token-scan";
 export * from "./recent-send-history";
 
@@ -148,6 +150,7 @@ export function init(
       new KeyRingMnemonic.KeyRingMnemonicService(vaultService),
       new KeyRingLedger.KeyRingLedgerService(),
       new KeyRingPrivateKey.KeyRingPrivateKeyService(vaultService),
+      new KeyRingKeystone.KeyRingKeystoneService(),
     ]
   );
   const keyRingCosmosService = new KeyRingCosmos.KeyRingCosmosService(
