@@ -536,8 +536,10 @@ export class ChainsService {
       this.suggestedChainInfos = newChainInfos;
 
       if (!notInvokeHandlers) {
+        const updated = this.mergeChainInfosWithDynamics([chainInfo])[0];
+
         for (const handler of this.onChainSuggestedHandlers) {
-          handler(chainInfo);
+          handler(updated);
         }
       }
     } else {
@@ -572,8 +574,9 @@ export class ChainsService {
     this.suggestedChainInfos = [];
 
     for (const chainInfo of prev) {
+      const updated = this.mergeChainInfosWithDynamics([chainInfo])[0];
       for (const handler of this.onChainRemovedHandlers) {
-        handler(chainInfo);
+        handler(updated);
       }
     }
   }
@@ -877,8 +880,10 @@ export class ChainsService {
       this.endpoints = newEndpoints;
     }
 
+    const updated = this.mergeChainInfosWithDynamics([chainInfo])[0];
+
     for (const handler of this.onChainRemovedHandlers) {
-      handler(chainInfo);
+      handler(updated);
     }
   }
 
