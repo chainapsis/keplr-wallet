@@ -47,5 +47,6 @@ export interface ChainsResponse {
   chains: {
     chain_id: string;
     pfm_enabled: boolean;
+    supports_memos?: boolean;
   }[];
 }

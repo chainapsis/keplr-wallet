@@ -198,20 +198,22 @@ export class ObservableQueryIbcPfmTransfer {
                 // (If channel is only one, no need to check packet forwarding because it is direct transfer)
                 if (channels.length > 1) {
                   if (
-                    !this.chainGetter.getChain(chainId).hasFeature("ibc-go")
+                    !this.chainGetter.getChain(chainId).hasFeature("ibc-go") ||
+                    !this.queryChains.isSupportsMemos(chainId)
                   ) {
                     pfmPossibility = false;
                   }
 
-                  // XXX: ibc transfer에서 memo field를 지원하는지는 체크해야하는데...
-                  //      이게 마땅한 방법이 없다. 최소한의 경우로 ibc-go feature가 있는지만 체크한다.
                   if (pfmPossibility) {
                     for (let i = 0; i < channels.length - 1; i++) {
                       const channel = channels[i];
                       if (
                         !this.chainGetter
                           .getChain(channel.counterpartyChainId)
-                          .hasFeature("ibc-go")
+                          .hasFeature("ibc-go") ||
+                        !this.queryChains.isSupportsMemos(
+                          channel.counterpartyChainId
+                        )
                       ) {
                         pfmPossibility = false;
                         break;
