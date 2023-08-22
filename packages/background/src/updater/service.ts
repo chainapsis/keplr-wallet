@@ -183,6 +183,15 @@ export class ChainUpdaterService {
           feeCurrencies,
         };
 
+        if (ChainIdHelper.parse(chainInfo.chainId).identifier === "mocha") {
+          chainInfo = {
+            ...chainInfo,
+            // XXX: 모바일에서 체인 이름이 너무 길면 제대로 안나오는 문제로...
+            //      일단 대충 처리
+            chainName: "Celestia Testnet",
+          };
+        }
+
         const fetchedChainIdentifier = ChainIdHelper.parse(chainInfo.chainId)
           .identifier;
         if (chainIdentifier !== fetchedChainIdentifier) {
