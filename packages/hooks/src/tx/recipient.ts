@@ -230,6 +230,19 @@ export class RecipientConfig
       }
     }
 
+    const isEvm = this.chainInfo.features?.includes("evm");
+
+    if (isEvm) {
+      try {
+        if (isAddress(rawRecipient)) {
+          return;
+        }
+      } catch (e) {
+        return e;
+      }
+      return new InvalidHexError("Invalid hex address for chain");
+    }
+
     if (this._allowHexAddressOnEthermint) {
       const hasEthereumAddress =
         this.chainInfo.features?.includes("eth-address-gen");

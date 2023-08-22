@@ -7,3 +7,4 @@ export * from "./cosmwasm";
 export * from "./secret-wasm";
 export * from "./osmosis";
 export * from "./icns";
+export * from "./evm";

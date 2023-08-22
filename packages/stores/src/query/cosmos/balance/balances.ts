@@ -131,7 +131,10 @@ export class ObservableQueryCosmosBalanceRegistry implements BalanceRegistry {
     minimalDenom: string
   ): ObservableQueryBalanceInner | undefined {
     const denomHelper = new DenomHelper(minimalDenom);
-    if (denomHelper.type !== "native") {
+    const isEvm =
+      chainGetter.getChain(chainId).features?.includes("evm") ?? false;
+
+    if (denomHelper.type !== "native" || isEvm) {
       return;
     }
 

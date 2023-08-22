@@ -73,13 +73,16 @@ const EmptyState = ({
   const { chainStore, accountStore } = useStore();
   // const [pubKey, setPubKey] = useState("");
   const [isDepositOpen, setIsDepositOpen] = useState(false);
-  const [bech32Address, setBech32Address] = useState("");
+  const [address, setAddress] = useState("");
   const [walletStatus, setWalletStatus] = useState<WalletStatus>();
   // const [loading, setLoading] = useState(true);
   useEffect(() => {
+    const isEvm = chainStore.current.features?.includes("evm") ?? false;
     const accountInfo = accountStore.getAccount(chainId);
     setWalletStatus(accountInfo.walletStatus);
-    setBech32Address(accountInfo.bech32Address);
+    setAddress(
+      isEvm ? accountInfo.ethereumHexAddress : accountInfo.bech32Address
+    );
   }, [chainId, accountStore, chainStore]);
 
   // TODO(!!!): Commented out this code, seems like the handling here needs a bit
@@ -125,7 +128,7 @@ const EmptyState = ({
     <div className={styleAsset["emptyState"]}>
       <DepositModal
         chainName={chainName}
-        bech32Address={bech32Address}
+        address={address}
         isDepositOpen={isDepositOpen}
         setIsDepositOpen={setIsDepositOpen}
       />
@@ -138,7 +141,7 @@ const EmptyState = ({
       <button
         onClick={async (e) => {
           e.preventDefault();
-          await copyAddress(bech32Address);
+          await copyAddress(address);
           setIsDepositOpen(true);
         }}
       >
@@ -208,6 +211,8 @@ export const AssetView: FunctionComponent = observer(() => {
   const hasUSDC = chainStore.current.currencies.find(
     (currency: AppCurrency) => currency.coinMinimalDenom === "uusdc"
   );
+
+  const isEvm = chainStore.current.features?.includes("evm") ?? false;
 
   const stakable = (() => {
     if (isNoble && hasUSDC) {
@@ -296,6 +301,17 @@ export const AssetView: FunctionComponent = observer(() => {
                 ? totalPrice.toString()
                 : total.shrink(true).trim(true).maxDecimals(6).toString()}
             </div>
+            {isEvm && totalPrice && (
+              <div
+                // className={styleAsset["big"]}
+                style={{
+                  marginTop: "-20px",
+                  // marginBottom: "20px",
+                }}
+              >
+                {stakable.shrink(true).maxDecimals(6).toString()}
+              </div>
+            )}
             <div className={styleAsset["indicatorIcon"]}>
               <Fragment>
                 {balanceStakableQuery.isFetching ? (
@@ -318,41 +334,14 @@ export const AssetView: FunctionComponent = observer(() => {
               </Fragment>
             </div>
           </div>
-          <ProgressBar width={300} data={data} />
+          {!isEvm && <ProgressBar width={300} data={data} />}
         </div>
-        <div className={styleAsset["legendContainer"]}>
-          <div className={styleAsset["legend"]}>
-            <div className={styleAsset["label"]} style={{ color: "#3B82F6" }}>
-              <FormattedMessage id="main.account.chart.available-balance" />
-            </div>
-            <div style={{ minWidth: "16px" }} />
-            <div
-              className={styleAsset["value"]}
-              style={{
-                color: "#525f7f",
-              }}
-            >
-              {stakable.shrink(true).maxDecimals(6).toString()}
-            </div>
-          </div>
-          <div className={styleAsset["legend"]}>
-            <div className={styleAsset["label"]} style={{ color: "#11cdef" }}>
-              <FormattedMessage id="main.account.chart.staked-balance" />
-            </div>
-            <div style={{ minWidth: "16px" }} />
-            <div
-              className={styleAsset["value"]}
-              style={{
-                color: "#525f7f",
-              }}
-            >
-              {stakedSum.shrink(true).maxDecimals(6).toString()}
-            </div>
-          </div>
-          {isNoble && hasUSDC ? null : (
+
+        {!isEvm && (
+          <div className={styleAsset["legendContainer"]}>
             <div className={styleAsset["legend"]}>
-              <div className={styleAsset["label"]} style={{ color: "#D43BF6" }}>
-                <FormattedMessage id="main.account.chart.reward-balance" />
+              <div className={styleAsset["label"]} style={{ color: "#3B82F6" }}>
+                <FormattedMessage id="main.account.chart.available-balance" />
               </div>
               <div style={{ minWidth: "16px" }} />
               <div
@@ -361,11 +350,44 @@ export const AssetView: FunctionComponent = observer(() => {
                   color: "#525f7f",
                 }}
               >
-                {stakableReward.shrink(true).maxDecimals(6).toString()}
+                {stakable.shrink(true).maxDecimals(6).toString()}
               </div>
             </div>
-          )}
-        </div>
+            <div className={styleAsset["legend"]}>
+              <div className={styleAsset["label"]} style={{ color: "#11cdef" }}>
+                <FormattedMessage id="main.account.chart.staked-balance" />
+              </div>
+              <div style={{ minWidth: "16px" }} />
+              <div
+                className={styleAsset["value"]}
+                style={{
+                  color: "#525f7f",
+                }}
+              >
+                {stakedSum.shrink(true).maxDecimals(6).toString()}
+              </div>
+            </div>
+            {isNoble && hasUSDC ? null : (
+              <div className={styleAsset["legend"]}>
+                <div
+                  className={styleAsset["label"]}
+                  style={{ color: "#D43BF6" }}
+                >
+                  <FormattedMessage id="main.account.chart.reward-balance" />
+                </div>
+                <div style={{ minWidth: "16px" }} />
+                <div
+                  className={styleAsset["value"]}
+                  style={{
+                    color: "#525f7f",
+                  }}
+                >
+                  {stakableReward.shrink(true).maxDecimals(6).toString()}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
       <TxButtonView />
       <hr className={styleAsset["hr"]} />

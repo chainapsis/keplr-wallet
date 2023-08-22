@@ -9,7 +9,11 @@ import { useStore } from "../../../../stores";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useNotification } from "@components/notification";
 import { useConfirm } from "@components/confirm";
-import { CW20Currency, Secret20Currency } from "@keplr-wallet/types";
+import {
+  CW20Currency,
+  Erc20Currency,
+  Secret20Currency,
+} from "@keplr-wallet/types";
 import { useIntl } from "react-intl";
 import { ToolTip } from "@components/tooltip";
 
@@ -29,7 +33,7 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
     if (isSecretWasm) {
       return "type" in currency && currency.type === "secret20";
     } else {
-      return "type" in currency && currency.type === "cw20";
+      return "type" in currency && ["cw20", "erc20"].includes(currency.type);
     }
   });
 
@@ -64,7 +68,10 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
     >
       <div className={style["container"]}>
         {appCurrencies.map((currency) => {
-          const cosmwasmToken = currency as CW20Currency | Secret20Currency;
+          const cosmwasmToken = currency as
+            | CW20Currency
+            | Secret20Currency
+            | Erc20Currency;
 
           const icons: React.ReactElement[] = [];
 
@@ -155,30 +162,31 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
           );
            */
 
-          icons.push(
-            <i
-              key="trash"
-              className="fas fa-trash-alt"
-              style={{
-                cursor: "pointer",
-              }}
-              onClick={async (e) => {
-                e.preventDefault();
+          cosmwasmToken.coinDenom !== "FET" &&
+            icons.push(
+              <i
+                key="trash"
+                className="fas fa-trash-alt"
+                style={{
+                  cursor: "pointer",
+                }}
+                onClick={async (e) => {
+                  e.preventDefault();
 
-                if (
-                  await confirm.confirm({
-                    paragraph: intl.formatMessage({
-                      id: "setting.token.manage.confirm.remove-token",
-                    }),
-                  })
-                ) {
-                  await tokensStore
-                    .getTokensOf(chainStore.current.chainId)
-                    .removeToken(cosmwasmToken);
-                }
-              }}
-            />
-          );
+                  if (
+                    await confirm.confirm({
+                      paragraph: intl.formatMessage({
+                        id: "setting.token.manage.confirm.remove-token",
+                      }),
+                    })
+                  ) {
+                    await tokensStore
+                      .getTokensOf(chainStore.current.chainId)
+                      .removeToken(cosmwasmToken);
+                  }
+                }}
+              />
+            );
 
           return (
             <PageButton
@@ -189,7 +197,8 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
               title={cosmwasmToken.coinDenom}
               paragraph={Bech32Address.shortenAddress(
                 cosmwasmToken.contractAddress,
-                30
+                30,
+                cosmwasmToken.type === "erc20"
               )}
               icons={icons}
             />

@@ -284,6 +284,13 @@ export class ChainsService {
   ): Promise<{ address: boolean; signing: boolean }> {
     const chainInfo = await this.getChainInfo(chainId);
 
+    if (chainInfo.features?.includes("evm")) {
+      return {
+        address: true,
+        signing: true,
+      };
+    }
+
     return {
       address: chainInfo.features?.includes("eth-address-gen") ?? false,
       signing: chainInfo.features?.includes("eth-key-sign") ?? false,

@@ -1,5 +1,7 @@
 import {
   CosmosQueriesImpl,
+  CosmwasmQueriesImpl,
+  EvmQueriesImpl,
   IQueriesStore,
   OsmosisQueries,
 } from "@keplr-wallet/stores";
@@ -13,5 +15,9 @@ export type QueriesStore = IQueriesStore<
       KeplrETCQueriesImpl,
       "queryTerraClassicTaxRate" | "queryTerraClassicTaxCaps"
     >;
+  } & {
+    evm?: Pick<EvmQueriesImpl, "queryEthGasFees" | "queryNativeFetBridge">;
+  } & {
+    cosmwasm?: Pick<CosmwasmQueriesImpl, "queryNativeFetBridge">;
   }
 >;

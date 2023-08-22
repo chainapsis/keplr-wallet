@@ -39,6 +39,8 @@ export const TxButtonView: FunctionComponent = observer(() => {
     accountInfo.bech32Address
   );
 
+  const isEvm = chainStore.current.features?.includes("evm") ?? false;
+
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
 
   const [sendTooltipOpen, setSendTooltipOpen] = useState(false);
@@ -158,87 +160,91 @@ export const TxButtonView: FunctionComponent = observer(() => {
         />
         <FormattedMessage id="main.account.button.send" />
       </Button>
-      <Button
-        className={styleTxButton["button"]}
-        style={
-          !accountInfo.isReadyToSendMsgs ||
-          !isRewardExist ||
-          !chainStore.current.walletUrlForStaking
-            ? {
-                opacity: 0.5,
-                pointerEvents: "none",
-              }
-            : { opacity: 1, pointerEvents: "auto" }
-        }
-        outline
-        color="primary"
-        onClick={withdrawAllRewards}
-        data-loading={accountInfo.isSendingMsg === "withdrawRewards"}
-        onMouseEnter={() => {
-          setIsActiveReward(true);
-        }}
-        onMouseLeave={() => {
-          setIsActiveReward(false);
-        }}
-      >
-        <img
-          src={isActiveReward ? activeReward : reward}
-          alt=""
-          style={{
-            marginRight: "5px",
-            height: "18px",
-          }}
-        />
-        <FormattedMessage id="main.stake.button.claim-rewards" />
-      </Button>
-      <Link
-        to={
-          isStakableInApp
-            ? "/validators"
-            : chainStore.current.walletUrlForStaking || ""
-        }
-        target={!isStakableInApp ? "_blank" : ""}
-        style={
-          !isStakableExist || !chainStore.current.walletUrlForStaking
-            ? {
-                opacity: 0.5,
-                pointerEvents: "none",
-              }
-            : { opacity: 1, pointerEvents: "auto" }
-        }
-        onClick={(e) => {
-          if (!isStakableExist || !chainStore.current.walletUrlForStaking) {
-            e.preventDefault();
-          } else {
-            analyticsStore.logEvent("Stake button clicked", {
-              chainId: chainStore.current.chainId,
-              chainName: chainStore.current.chainName,
-            });
-          }
-        }}
-      >
+      {!isEvm && (
         <Button
           className={styleTxButton["button"]}
-          color="primary"
+          style={
+            !accountInfo.isReadyToSendMsgs ||
+            !isRewardExist ||
+            !chainStore.current.walletUrlForStaking
+              ? {
+                  opacity: 0.5,
+                  pointerEvents: "none",
+                }
+              : { opacity: 1, pointerEvents: "auto" }
+          }
           outline
+          color="primary"
+          onClick={withdrawAllRewards}
+          data-loading={accountInfo.isSendingMsg === "withdrawRewards"}
           onMouseEnter={() => {
-            setIsActiveStake(true);
+            setIsActiveReward(true);
           }}
           onMouseLeave={() => {
-            setIsActiveStake(false);
+            setIsActiveReward(false);
           }}
         >
           <img
-            src={isActiveStake ? activeStake : stake}
+            src={isActiveReward ? activeReward : reward}
             alt=""
             style={{
               marginRight: "5px",
-              height: "15px",
+              height: "18px",
             }}
           />
-          <FormattedMessage id="main.stake.button.stake" />
+          <FormattedMessage id="main.stake.button.claim-rewards" />
         </Button>
-      </Link>
+      )}
+      {!isEvm && (
+        <Link
+          to={
+            isStakableInApp
+              ? "/validators"
+              : chainStore.current.walletUrlForStaking || ""
+          }
+          target={!isStakableInApp ? "_blank" : ""}
+          style={
+            !isStakableExist || !chainStore.current.walletUrlForStaking
+              ? {
+                  opacity: 0.5,
+                  pointerEvents: "none",
+                }
+              : { opacity: 1, pointerEvents: "auto" }
+          }
+          onClick={(e) => {
+            if (!isStakableExist || !chainStore.current.walletUrlForStaking) {
+              e.preventDefault();
+            } else {
+              analyticsStore.logEvent("Stake button clicked", {
+                chainId: chainStore.current.chainId,
+                chainName: chainStore.current.chainName,
+              });
+            }
+          }}
+        >
+          <Button
+            className={styleTxButton["button"]}
+            color="primary"
+            outline
+            onMouseEnter={() => {
+              setIsActiveStake(true);
+            }}
+            onMouseLeave={() => {
+              setIsActiveStake(false);
+            }}
+          >
+            <img
+              src={isActiveStake ? activeStake : stake}
+              alt=""
+              style={{
+                marginRight: "5px",
+                height: "15px",
+              }}
+            />
+            <FormattedMessage id="main.stake.button.stake" />
+          </Button>
+        </Link>
+      )}
       {!hasAssets ? (
         <Tooltip
           placement="bottom"
@@ -266,7 +272,9 @@ export const TxButtonView: FunctionComponent = observer(() => {
       >
         <DepositModal
           chainName={chainStore.current.chainName}
-          bech32Address={accountInfo.bech32Address}
+          address={
+            isEvm ? accountInfo.ethereumHexAddress : accountInfo.bech32Address
+          }
           isDepositOpen={isDepositModalOpen}
           setIsDepositOpen={setIsDepositModalOpen}
         />

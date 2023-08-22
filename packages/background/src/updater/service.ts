@@ -49,6 +49,20 @@ export class ChainUpdaterService {
 
           return features;
         })(),
+        currencies: (() => {
+          const currencies = chainInfo.currencies ?? [];
+          const currencyMinimalDenoms = currencies.map(
+            (c) => c.coinMinimalDenom
+          );
+
+          for (const f of updatedChainInfo.currencies ?? []) {
+            if (!currencyMinimalDenoms.includes(f.coinMinimalDenom)) {
+              currencies.push(f);
+            }
+          }
+
+          return currencies;
+        })(),
         beta: origin.beta,
       };
     }
@@ -72,6 +86,24 @@ export class ChainUpdaterService {
             }
 
             return features;
+          })(),
+          currencies: (() => {
+            if (!local.currencies) {
+              return chainInfo.currencies;
+            }
+
+            const currencies = chainInfo.currencies ?? [];
+            const currencyMinimalDenoms = currencies.map(
+              (c) => c.coinMinimalDenom
+            );
+
+            for (const curr of local.currencies) {
+              if (!currencyMinimalDenoms.includes(curr.coinMinimalDenom)) {
+                currencies.push(curr);
+              }
+            }
+
+            return currencies;
           })(),
         },
       };

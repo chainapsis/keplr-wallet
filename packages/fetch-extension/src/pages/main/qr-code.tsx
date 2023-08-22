@@ -7,17 +7,17 @@ const QrCode = require("qrcode");
 
 export const DepositModal: FunctionComponent<{
   chainName: string;
-  bech32Address: string;
+  address: string;
   isDepositOpen: boolean;
   setIsDepositOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}> = ({ chainName, bech32Address, isDepositOpen, setIsDepositOpen }) => {
+}> = ({ chainName, address, isDepositOpen, setIsDepositOpen }) => {
   const qrCodeRef = useCallback(
     (node) => {
-      if (node !== null && bech32Address) {
-        QrCode.toCanvas(node, bech32Address);
+      if (node !== null && address) {
+        QrCode.toCanvas(node, address);
       }
     },
-    [bech32Address]
+    [address]
   );
 
   return (
@@ -54,7 +54,7 @@ export const DepositModal: FunctionComponent<{
             overflowWrap: "anywhere",
           }}
         >
-          {bech32Address}
+          {address}
         </div>
         <div
           style={{

@@ -298,6 +298,23 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       );
     }
 
+    if (this.chainId === "1") {
+      const ethereumFees = this.queriesStore.get(this.chainId).evm
+        ?.queryEthGasFees.fees;
+
+      if (ethereumFees) {
+        const gasPrice = new Dec(ethereumFees[feeType].toString());
+        const feeAmount = gasPrice
+          .mul(new Dec(this.gasConfig.gas))
+          .mul(new Dec("1000000000"));
+
+        return {
+          denom: feeCurrency.coinMinimalDenom,
+          amount: feeAmount.roundUp().toString(),
+        };
+      }
+    }
+
     if (
       this.chainInfo.features &&
       this.chainInfo.features.includes("osmosis-txfees") &&
@@ -440,6 +457,19 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     const fee = this.getFeePrimitive();
     if (!fee) {
       return undefined;
+    }
+
+    if (this.chainId === "1") {
+      const ethereumFeesQuery = this.queriesStore.get(this.chainId).evm
+        ?.queryEthGasFees;
+
+      if (
+        ethereumFeesQuery?.error ||
+        !ethereumFeesQuery?.fees ||
+        ethereumFeesQuery.isFetching
+      ) {
+        return new NotLoadedFeeError(`Gas Fee is loading`);
+      }
     }
 
     if (

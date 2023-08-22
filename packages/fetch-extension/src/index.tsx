@@ -102,6 +102,7 @@ import { ProposalDetail } from "./pages/proposals/proposal-detail";
 import { PropsalVoteStatus } from "./pages/proposals/proposal-vote-status";
 import { FetchnameService } from "./pages/fetch-name-service";
 import { DomainDetails } from "./pages/fetch-name-service/domain-details";
+import { BridgePage } from "./pages/bridge";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -209,6 +210,7 @@ ReactDOM.render(
                         path="/ibc-transfer"
                         element={<IBCTransferPage />}
                       />
+                      <Route path="/bridge" element={<BridgePage />} />
                       <Route path="/setting" element={<SettingPage />} />
                       <Route
                         path="/keystone/import-pubkey"

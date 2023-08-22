@@ -19,6 +19,11 @@
     "@keplr-wallet/provider-mock": "0.12.12"
   },
   "dependencies": {
+    "@ethersproject/abi": "^5.7.0",
+    "@ethersproject/abstract-provider": "^5.7.0",
+    "@ethersproject/address": "^5.7.0",
+    "@ethersproject/bignumber": "^5.7.0",
+    "@ethersproject/providers": "^5.7.2",
     "@keplr-wallet/background": "0.12.12",
     "@keplr-wallet/common": "0.12.12",
     "@keplr-wallet/cosmos": "0.12.12",

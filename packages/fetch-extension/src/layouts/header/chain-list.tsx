@@ -123,14 +123,24 @@ export const ChainList: FunctionComponent = observer(() => {
   const intl = useIntl();
 
   const mainChainList = chainStore.chainInfosInUI.filter(
-    (chainInfo) => !chainInfo.beta
+    (chainInfo) => !chainInfo.beta && !chainInfo.features?.includes("evm")
   );
+
+  const evmChainList = chainStore.chainInfosInUI.filter((chainInfo) =>
+    chainInfo.features?.includes("evm")
+  );
+
   const betaChainList = chainStore.chainInfosInUI.filter(
     (chainInfo) => chainInfo.beta
   );
 
   return (
     <div className={style["chainListContainer"]}>
+      {evmChainList.length > 0 ? <Divider> Evm </Divider> : null}
+      {evmChainList.map((chainInfo) => (
+        <ChainElement key={chainInfo.chainId} chainInfo={chainInfo.raw} />
+      ))}
+      <Divider> Cosmos </Divider>
       {mainChainList.map((chainInfo) => (
         <ChainElement key={chainInfo.chainId} chainInfo={chainInfo.raw} />
       ))}

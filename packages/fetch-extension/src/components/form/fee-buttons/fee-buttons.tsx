@@ -16,7 +16,6 @@ import {
   DropdownToggle,
   FormFeedback,
   FormGroup,
-  FormText,
   Label,
 } from "reactstrap";
 
@@ -384,26 +383,32 @@ export const FeeButtonsInner: FunctionComponent<
             <div className={styleFeeButtons["title"]}>
               {feeSelectLabels.low}
             </div>
-            {lowFeePrice ? (
-              <div
-                className={classnames(styleFeeButtons["fiat"], {
-                  "text-muted": feeConfig.feeType !== "low",
-                })}
-              >
-                {lowFeePrice.trim(true).toString()}
+            {isFeeLoading ? (
+              <i className="fa fa-spinner fa-spin fa-fw" />
+            ) : (
+              <div>
+                {lowFeePrice ? (
+                  <div
+                    className={classnames(styleFeeButtons["fiat"], {
+                      "text-muted": feeConfig.feeType !== "low",
+                    })}
+                  >
+                    {lowFeePrice.trim(true).toString()}
+                  </div>
+                ) : null}
+                <div
+                  className={classnames(styleFeeButtons["coin"], {
+                    "text-muted": feeConfig.feeType !== "low",
+                  })}
+                >
+                  {
+                    // Hide ibc metadata because there is no space to display the ibc metadata.
+                    // Generally, user can distinguish the ibc metadata because the ibc metadata should be shown in the fee currency selector.
+                    lowFee.hideIBCMetadata(true).trim(true).toMetricPrefix()
+                  }
+                </div>
               </div>
-            ) : null}
-            <div
-              className={classnames(styleFeeButtons["coin"], {
-                "text-muted": feeConfig.feeType !== "low",
-              })}
-            >
-              {
-                // Hide ibc metadata because there is no space to display the ibc metadata.
-                // Generally, user can distinguish the ibc metadata because the ibc metadata should be shown in the fee currency selector.
-                lowFee.hideIBCMetadata(true).trim(true).toMetricPrefix()
-              }
-            </div>
+            )}
           </Button>
           <Button
             type="button"
@@ -417,22 +422,28 @@ export const FeeButtonsInner: FunctionComponent<
             <div className={styleFeeButtons["title"]}>
               {feeSelectLabels.average}
             </div>
-            {averageFeePrice ? (
-              <div
-                className={classnames(styleFeeButtons["fiat"], {
-                  "text-muted": feeConfig.feeType !== "average",
-                })}
-              >
-                {averageFeePrice.toString()}
+            {isFeeLoading ? (
+              <i className="fa fa-spinner fa-spin fa-fw" />
+            ) : (
+              <div>
+                {averageFeePrice ? (
+                  <div
+                    className={classnames(styleFeeButtons["fiat"], {
+                      "text-muted": feeConfig.feeType !== "average",
+                    })}
+                  >
+                    {averageFeePrice.toString()}
+                  </div>
+                ) : null}
+                <div
+                  className={classnames(styleFeeButtons["coin"], {
+                    "text-muted": feeConfig.feeType !== "average",
+                  })}
+                >
+                  {averageFee.hideIBCMetadata(true).trim(true).toMetricPrefix()}
+                </div>
               </div>
-            ) : null}
-            <div
-              className={classnames(styleFeeButtons["coin"], {
-                "text-muted": feeConfig.feeType !== "average",
-              })}
-            >
-              {averageFee.hideIBCMetadata(true).trim(true).toMetricPrefix()}
-            </div>
+            )}
           </Button>
           <Button
             type="button"
@@ -446,29 +457,35 @@ export const FeeButtonsInner: FunctionComponent<
             <div className={styleFeeButtons["title"]}>
               {feeSelectLabels.high}
             </div>
-            {highFeePrice ? (
-              <div
-                className={classnames(styleFeeButtons["fiat"], {
-                  "text-muted": feeConfig.feeType !== "high",
-                })}
-              >
-                {highFeePrice.toString()}
+            {isFeeLoading ? (
+              <i className="fa fa-spinner fa-spin fa-fw" />
+            ) : (
+              <div>
+                {highFeePrice ? (
+                  <div
+                    className={classnames(styleFeeButtons["fiat"], {
+                      "text-muted": feeConfig.feeType !== "high",
+                    })}
+                  >
+                    {highFeePrice.toString()}
+                  </div>
+                ) : null}
+                <div
+                  className={classnames(styleFeeButtons["coin"], {
+                    "text-muted": feeConfig.feeType !== "high",
+                  })}
+                >
+                  {highFee.hideIBCMetadata(true).trim(true).toMetricPrefix()}
+                </div>
               </div>
-            ) : null}
-            <div
-              className={classnames(styleFeeButtons["coin"], {
-                "text-muted": feeConfig.feeType !== "high",
-              })}
-            >
-              {highFee.hideIBCMetadata(true).trim(true).toMetricPrefix()}
-            </div>
+            )}
           </Button>
         </ButtonGroup>
-        {isFeeLoading ? (
+        {/* {isFeeLoading ? (
           <FormText>
             <i className="fa fa-spinner fa-spin fa-fw" />
           </FormText>
-        ) : null}
+        ) : null} */}
         {errorText != null ? (
           <FormFeedback style={{ display: "block", position: "relative" }}>
             {errorText}

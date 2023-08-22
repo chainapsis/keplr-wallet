@@ -34,12 +34,19 @@ export const ADR36SignDocDetailsTab: FunctionComponent<{
 
     if (isADR36WithString) {
       const str = Buffer.from(msg.value.data, "base64").toString();
-
       try {
         // In case of json, it is displayed more easily to read.
         return JSON.stringify(JSON.parse(str), null, 2);
       } catch {
         return str;
+      }
+    } else if (ethSignType === EthSignType.TRANSACTION) {
+      try {
+        const decoder = new TextDecoder();
+        const str = decoder.decode(Buffer.from(msg.value.data, "base64"));
+        return JSON.stringify(JSON.parse(str), null, 2);
+      } catch {
+        return msg.value.data;
       }
     } else {
       return msg.value.data as string;

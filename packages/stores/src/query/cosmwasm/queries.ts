@@ -4,6 +4,7 @@ import { KVStore } from "@keplr-wallet/common";
 import { ObservableQueryCw20ContractInfo } from "./cw20-contract-info";
 import { DeepReadonly } from "utility-types";
 import { ObservableQueryCw20BalanceRegistry } from "./cw20-balance";
+import { ObservableQueryNativeFetCosmosBridge } from "./native-fet-bridge";
 
 export interface CosmwasmQueries {
   cosmwasm: CosmwasmQueriesImpl;
@@ -36,6 +37,7 @@ export const CosmwasmQueries = {
 
 export class CosmwasmQueriesImpl {
   public readonly querycw20ContractInfo: DeepReadonly<ObservableQueryCw20ContractInfo>;
+  public readonly queryNativeFetBridge: DeepReadonly<ObservableQueryNativeFetCosmosBridge>;
 
   constructor(
     base: QueriesSetBase,
@@ -50,6 +52,11 @@ export class CosmwasmQueriesImpl {
     this.querycw20ContractInfo = new ObservableQueryCw20ContractInfo(
       kvStore,
       chainId,
+      chainGetter
+    );
+
+    this.queryNativeFetBridge = new ObservableQueryNativeFetCosmosBridge(
+      kvStore,
       chainGetter
     );
   }

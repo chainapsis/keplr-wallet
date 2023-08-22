@@ -94,23 +94,41 @@ const TokenView: FunctionComponent<{
   return (
     <div className={styleToken["tokenContainer"]}>
       <div className={styleToken["tokenImg"]}>
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            borderRadius: "100000px",
-            backgroundColor,
+        {balance.currency.coinImageUrl ? (
+          <div>
+            <img
+              src={balance.currency.coinImageUrl}
+              alt={name}
+              style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: "100000px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                fontSize: "16px",
+              }}
+            />
+          </div>
+        ) : (
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              borderRadius: "100000px",
+              backgroundColor,
 
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
 
-            color: "#FFFFFF",
-            fontSize: "16px",
-          }}
-        >
-          {name.length > 0 ? name[0] : "?"}
-        </div>
+              color: "#FFFFFF",
+              fontSize: "16px",
+            }}
+          >
+            {name.length > 0 ? name[0] : "?"}
+          </div>
+        )}
       </div>
       <div className={styleToken["tokenName"]}>
         <ToolTip trigger="hover" tooltip={name}>

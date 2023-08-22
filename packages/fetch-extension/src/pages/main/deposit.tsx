@@ -1,5 +1,6 @@
 import React, { useState, FunctionComponent, useCallback } from "react";
 import { Button } from "reactstrap";
+import { useNavigate } from "react-router";
 
 import styleDeposit from "./deposit.module.scss";
 import classnames from "classnames";
@@ -16,7 +17,7 @@ import { BuyModalContent } from "./asset";
 
 export const DepositView: FunctionComponent = observer(() => {
   const { accountStore, chainStore } = useStore();
-
+  const navigate = useNavigate();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const [isDepositOpen, setIsDepositOpen] = useState(false);
 
@@ -48,12 +49,16 @@ export const DepositView: FunctionComponent = observer(() => {
   const { isBuySupportChain, buySupportServiceInfos } = useBuy();
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
 
+  const isEvm = chainStore.current.features?.includes("evm") ?? false;
+
   return (
     <div>
       <div className={styleDeposit["containerInner"]}>
         <DepositModal
           chainName={chainStore.current.chainName}
-          bech32Address={accountInfo.bech32Address}
+          address={
+            isEvm ? accountInfo.ethereumHexAddress : accountInfo.bech32Address
+          }
           isDepositOpen={isDepositOpen}
           setIsDepositOpen={setIsDepositOpen}
         />
@@ -95,6 +100,50 @@ export const DepositView: FunctionComponent = observer(() => {
           <FormattedMessage id="main.account.button.deposit" />
         </Button>
       </div>
+
+      {["fetchhub-4", "1"].includes(chainStore.current.chainId) && (
+        <div>
+          <hr className={styleDeposit["hr"]} />
+          <div className={styleDeposit["containerInner"]}>
+            <div className={styleDeposit["vertical"]}>
+              <p
+                className={classnames(
+                  "h4",
+                  "my-0",
+                  "font-weight-normal",
+                  styleDeposit["paragraphMain"]
+                )}
+              >
+                Bridge FET
+              </p>
+              <p
+                className={classnames(
+                  "h5",
+                  "my-0",
+                  "font-weight-normal",
+                  styleDeposit["paragraphSub"]
+                )}
+              >
+                {chainStore.current.chainId === "fetchhub-4"
+                  ? "Bridge Native FET to ERC20 FET on ethereum"
+                  : "Bridge ERC20 FET to Native FET on Fetch Network"}
+              </p>
+            </div>
+            <div style={{ flex: 1 }} />
+            <Button
+              className={styleDeposit["button"]}
+              color="primary"
+              size="sm"
+              onClick={async (e) => {
+                e.preventDefault();
+                navigate("/bridge");
+              }}
+            >
+              Bridge
+            </Button>
+          </div>
+        </div>
+      )}
 
       {(chainStore.current.chainId == "fetchhub-4" || isBuySupportChain) && (
         <div>

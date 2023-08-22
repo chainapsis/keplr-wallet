@@ -4,18 +4,22 @@ import { Buffer } from "buffer/";
 import { getAddress as getEthAddress } from "@ethersproject/address";
 
 export class Bech32Address {
-  static shortenAddress(bech32: string, maxCharacters: number): string {
+  static shortenAddress(
+    bech32: string,
+    maxCharacters: number,
+    isEvm?: boolean
+  ): string {
     if (maxCharacters >= bech32.length) {
       return bech32;
     }
 
-    const i = bech32.indexOf("1");
+    const i = isEvm ? 2 : bech32.indexOf("1");
     const prefix = bech32.slice(0, i);
     const address = bech32.slice(i + 1);
 
     maxCharacters -= prefix.length;
     maxCharacters -= 3; // For "..."
-    maxCharacters -= 1; // For "1"
+    maxCharacters -= isEvm ? 0 : 1; // For "1"
 
     if (maxCharacters <= 0) {
       return "";
@@ -33,7 +37,7 @@ export class Bech32Address {
       }
     }
 
-    return prefix + "1" + former + "..." + latter;
+    return prefix + (isEvm ? "" : "1") + former + "..." + latter;
   }
 
   static fromBech32(bech32Address: string, prefix?: string): Bech32Address {

@@ -102,153 +102,172 @@ export const SettingEndpointsPage: FunctionComponent = observer(() => {
             </DropdownMenu>
           </ButtonDropdown>
           <div style={{ flex: 1 }} />
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-            }}
-          >
-            <Button
-              color="primary"
-              size="sm"
-              onClick={async (e) => {
-                e.preventDefault();
-
-                setIsLoading(true);
-
-                try {
-                  await chainStore.resetChainEndpoints(selectedChainId);
-
-                  const chainInfo = chainStore.getChain(selectedChainId);
-                  setValue("rpc", chainInfo.rpc);
-                  setValue("lcd", chainInfo.rest);
-
-                  // To avoid confusion when the user returns to the main page, select the chain if the rpc/lcd endpoints have changed.
-                  chainStore.selectChain(selectedChainId);
-                } catch (e) {
-                  console.log(e);
-                } finally {
-                  setIsLoading(false);
-                }
+          {selectedChainId !== "1" && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
               }}
             >
-              <FormattedMessage id="setting.endpoints.button.reset" />
-            </Button>
-          </div>
-        </div>
-        <form
-          className={style["formContainer"]}
-          onSubmit={handleSubmit(async (data) => {
-            setIsLoading(true);
+              <Button
+                color="primary"
+                size="sm"
+                onClick={async (e) => {
+                  e.preventDefault();
 
-            let rpcConnSuccess = false;
-            try {
+                  setIsLoading(true);
+
+                  try {
+                    await chainStore.resetChainEndpoints(selectedChainId);
+
+                    const chainInfo = chainStore.getChain(selectedChainId);
+                    setValue("rpc", chainInfo.rpc);
+                    setValue("lcd", chainInfo.rest);
+
+                    // To avoid confusion when the user returns to the main page, select the chain if the rpc/lcd endpoints have changed.
+                    chainStore.selectChain(selectedChainId);
+                  } catch (e) {
+                    console.log(e);
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }}
+              >
+                <FormattedMessage id="setting.endpoints.button.reset" />
+              </Button>
+            </div>
+          )}
+        </div>
+        {selectedChainId === "1" ? (
+          <div style={{ padding: "20px", textAlign: "center" }}>
+            <img
+              src={require("../../../public/assets/img/icons8-lock.svg")}
+              alt="locked"
+              style={{ height: "60px" }}
+            />
+            <p style={{ marginTop: "20px" }}>
+              Cannot edit endpoint node for this network.
+            </p>
+          </div>
+        ) : (
+          <form
+            className={style["formContainer"]}
+            onSubmit={handleSubmit(async (data) => {
+              setIsLoading(true);
+
+              let rpcConnSuccess = false;
               try {
-                await checkRPCConnectivity(selectedChainId, data.rpc);
-                rpcConnSuccess = true;
-                await checkRestConnectivity(selectedChainId, data.lcd);
-              } catch (e) {
-                if (
-                  // In the case of this error, the chain version is different.
-                  // It gives a warning and handles it if the user wants.
-                  e instanceof DifferentChainVersionError
-                ) {
+                try {
+                  await checkRPCConnectivity(selectedChainId, data.rpc);
+                  rpcConnSuccess = true;
+                  await checkRestConnectivity(selectedChainId, data.lcd);
+                } catch (e) {
                   if (
-                    !(await confirm.confirm({
-                      paragraph: `The ${
-                        rpcConnSuccess ? "LCD" : "RPC"
-                      } endpoint of the node might have different version with the registered chain. Do you want to proceed?`,
-                    }))
+                    // In the case of this error, the chain version is different.
+                    // It gives a warning and handles it if the user wants.
+                    e instanceof DifferentChainVersionError
                   ) {
+                    if (
+                      !(await confirm.confirm({
+                        paragraph: `The ${
+                          rpcConnSuccess ? "LCD" : "RPC"
+                        } endpoint of the node might have different version with the registered chain. Do you want to proceed?`,
+                      }))
+                    ) {
+                      return;
+                    }
+                  } else {
+                    notification.push({
+                      type: "warning",
+                      placement: "top-center",
+                      duration: 5,
+                      content: e.message,
+                      canDelete: true,
+                      transition: {
+                        duration: 0.25,
+                      },
+                    });
                     return;
                   }
-                } else {
-                  notification.push({
-                    type: "warning",
-                    placement: "top-center",
-                    duration: 5,
-                    content: e.message,
-                    canDelete: true,
-                    transition: {
-                      duration: 0.25,
-                    },
-                  });
-                  return;
                 }
+
+                chainStore.setChainEndpoints(
+                  selectedChainId,
+                  data.rpc,
+                  data.lcd
+                );
+
+                // To avoid confusion when the user returns to the main page, select the chain if the rpc/lcd endpoints have changed.
+                chainStore.selectChain(selectedChainId);
+
+                navigate("/");
+              } catch (e) {
+                notification.push({
+                  type: "warning",
+                  placement: "top-center",
+                  duration: 5,
+                  content: `Unknown error: ${e.message}`,
+                  canDelete: true,
+                  transition: {
+                    duration: 0.25,
+                  },
+                });
+              } finally {
+                setIsLoading(false);
               }
-
-              chainStore.setChainEndpoints(selectedChainId, data.rpc, data.lcd);
-
-              // To avoid confusion when the user returns to the main page, select the chain if the rpc/lcd endpoints have changed.
-              chainStore.selectChain(selectedChainId);
-
-              navigate("/");
-            } catch (e) {
-              notification.push({
-                type: "warning",
-                placement: "top-center",
-                duration: 5,
-                content: `Unknown error: ${e.message}`,
-                canDelete: true,
-                transition: {
-                  duration: 0.25,
-                },
-              });
-            } finally {
-              setIsLoading(false);
-            }
-          })}
-        >
-          <Input
-            label="RPC"
-            error={errors.rpc && errors.rpc.message}
-            {...register("rpc", {
-              required: "RPC endpoint is required",
-              validate: (value: string) => {
-                try {
-                  const url = new URL(value);
-                  if (url.protocol !== "http:" && url.protocol !== "https:") {
-                    return `Unsupported protocol: ${url.protocol}`;
-                  }
-                } catch {
-                  return "Invalid url";
-                }
-              },
             })}
-          />
-          <Input
-            label="LCD"
-            error={errors.lcd && errors.lcd.message}
-            {...register("lcd", {
-              required: "LCD endpoint is required",
-              validate: (value: string) => {
-                try {
-                  const url = new URL(value);
-                  if (url.protocol !== "http:" && url.protocol !== "https:") {
-                    return `Unsupported protocol: ${url.protocol}`;
-                  }
-                } catch {
-                  return "Invalid url";
-                }
-              },
-            })}
-          />
-          <div style={{ flex: 1 }} />
-          <AlertExperimentalFeature />
-          <Button
-            type="submit"
-            color="primary"
-            block
-            data-loading={isLoading}
-            disabled={
-              chainStore.getChain(selectedChainId).rpc === watch("rpc") &&
-              chainStore.getChain(selectedChainId).rest === watch("lcd")
-            }
           >
-            <FormattedMessage id="setting.endpoints.button.confirm" />
-          </Button>
-        </form>
+            <Input
+              label="RPC"
+              error={errors.rpc && errors.rpc.message}
+              {...register("rpc", {
+                required: "RPC endpoint is required",
+                validate: (value: string) => {
+                  try {
+                    const url = new URL(value);
+                    if (url.protocol !== "http:" && url.protocol !== "https:") {
+                      return `Unsupported protocol: ${url.protocol}`;
+                    }
+                  } catch {
+                    return "Invalid url";
+                  }
+                },
+              })}
+            />
+            <Input
+              label="LCD"
+              error={errors.lcd && errors.lcd.message}
+              {...register("lcd", {
+                required: "LCD endpoint is required",
+                validate: (value: string) => {
+                  try {
+                    const url = new URL(value);
+                    if (url.protocol !== "http:" && url.protocol !== "https:") {
+                      return `Unsupported protocol: ${url.protocol}`;
+                    }
+                  } catch {
+                    return "Invalid url";
+                  }
+                },
+              })}
+            />
+            <div style={{ flex: 1 }} />
+            <AlertExperimentalFeature />
+            <Button
+              type="submit"
+              color="primary"
+              block
+              data-loading={isLoading}
+              disabled={
+                chainStore.getChain(selectedChainId).rpc === watch("rpc") &&
+                chainStore.getChain(selectedChainId).rest === watch("lcd")
+              }
+            >
+              <FormattedMessage id="setting.endpoints.button.confirm" />
+            </Button>
+          </form>
+        )}
       </div>
     </HeaderLayout>
   );

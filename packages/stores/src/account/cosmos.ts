@@ -184,8 +184,10 @@ export class CosmosAccountImpl {
     recipient: string
   ) {
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-
-    if (denomHelper.type === "native") {
+    const isEvm =
+      this.chainGetter.getChain(this.chainId).features?.includes("evm") ??
+      false;
+    if (denomHelper.type === "native" && !isEvm) {
       const actualAmount = (() => {
         let dec = new Dec(amount);
         dec = dec.mul(DecUtils.getPrecisionDec(currency.coinDecimals));

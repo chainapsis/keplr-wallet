@@ -10,10 +10,15 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { useForm } from "react-hook-form";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { CW20Currency, Secret20Currency } from "@keplr-wallet/types";
+import {
+  CW20Currency,
+  Erc20Currency,
+  Secret20Currency,
+} from "@keplr-wallet/types";
 import { useInteractionInfo } from "@keplr-wallet/hooks";
 import { useLoadingIndicator } from "@components/loading-indicator";
 import { useNotification } from "@components/notification";
+import { isAddress } from "@ethersproject/address";
 
 interface FormData {
   contractAddress: string;
@@ -69,7 +74,11 @@ export const AddTokenPage: FunctionComponent = observer(() => {
     ) != null;
 
   const queries = queriesStore.get(chainStore.current.chainId);
-  const query = isSecret20
+
+  const isEvm = chainStore.current.features?.includes("evm") ?? false;
+  const query = isEvm
+    ? queries.evm.queryErc20Metadata
+    : isSecret20
     ? queries.secret.querySecret20ContractInfo
     : queries.cosmwasm.querycw20ContractInfo;
   const queryContractInfo = query.getQueryContract(contractAddress);
@@ -102,6 +111,30 @@ export const AddTokenPage: FunctionComponent = observer(() => {
     });
   };
 
+  const currencyAlreadyAdded = chainStore.current.currencies.find(
+    (currency) => {
+      return (
+        "contractAddress" in currency &&
+        currency.contractAddress.toLowerCase() === contractAddress.toLowerCase()
+      );
+    }
+  )
+    ? "Currency already added"
+    : undefined;
+
+  const queryError =
+    contractAddress.length &&
+    (form.formState.errors.contractAddress
+      ? form.formState.errors.contractAddress.message
+      : tokenInfo == null
+      ? (queryContractInfo.error?.data as any)?.error ||
+        queryContractInfo.error?.message
+      : undefined)
+      ? "Invalid address"
+      : undefined;
+
+  const isError = currencyAlreadyAdded || queryError;
+
   return (
     <HeaderLayout
       showChainName={false}
@@ -126,8 +159,8 @@ export const AddTokenPage: FunctionComponent = observer(() => {
             tokenInfo.symbol
           ) {
             if (!isSecret20) {
-              const currency: CW20Currency = {
-                type: "cw20",
+              const currency: CW20Currency | Erc20Currency = {
+                type: isEvm ? "erc20" : "cw20",
                 contractAddress: data.contractAddress,
                 coinMinimalDenom: tokenInfo.name,
                 coinDenom: tokenInfo.symbol,
@@ -236,6 +269,10 @@ export const AddTokenPage: FunctionComponent = observer(() => {
             required: "Contract address is required",
             validate: (value: string): string | undefined => {
               try {
+                if (isEvm) {
+                  return isAddress(value) ? undefined : "Invalid Address";
+                }
+
                 Bech32Address.validate(
                   value,
                   chainStore.current.bech32Config.bech32PrefixAccAddr
@@ -245,14 +282,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
               }
             },
           })}
-          error={
-            form.formState.errors.contractAddress
-              ? form.formState.errors.contractAddress.message
-              : tokenInfo == null
-              ? (queryContractInfo.error?.data as any)?.error ||
-                queryContractInfo.error?.message
-              : undefined
-          }
+          error={isError}
           text={
             queryContractInfo.isFetching && contractAddress.length ? (
               <i className="fas fa-spinner fa-spin" />
@@ -324,7 +354,11 @@ export const AddTokenPage: FunctionComponent = observer(() => {
         <Button
           type="submit"
           color="primary"
-          disabled={tokenInfo == null || !accountInfo.isReadyToSendMsgs}
+          disabled={
+            isError !== undefined ||
+            tokenInfo == null ||
+            !accountInfo.isReadyToSendMsgs
+          }
           data-loading={accountInfo.isSendingMsg === "createSecret20ViewingKey"}
         >
           <FormattedMessage id="setting.token.add.button.submit" />

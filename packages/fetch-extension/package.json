@@ -24,6 +24,8 @@
     "@cosmjs/encoding": "^0.28.13",
     "@cosmjs/proto-signing": "^0.28.13",
     "@cosmjs/stargate": "^0.28.13",
+    "@ethersproject/address": "^5.7.0",
+    "@ethersproject/bignumber": "^5.7.0",
     "@ethersproject/transactions": "^5.7.0",
     "@fetchai/eth-migration": "^0.8.8",
     "@fetchai/wallet-types": "^0.1.1",

@@ -1,0 +1,71 @@
+/// To add bottom space for send button
+// .form-container {
+//   height: 100%;
+// }
+
+.formInnerContainer {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chainSelector {
+  width: 100%;
+  height: 46px;
+
+  button {
+    width: 100%;
+  }
+
+  :global(.dropdown-menu.show) {
+    width: 100%;
+  }
+}
+
+.alert {
+  display: flex;
+  border: solid 1px #9092b6;
+  background-color: #ffffff;
+  color: #32325d;
+
+  i {
+    font-size: 24px;
+    margin-right: 8px;
+  }
+
+  h1 {
+    font-size: 16px;
+    font-weight: bold;
+    color: #32325d;
+    margin-bottom: 4px;
+  }
+
+  p {
+    font-size: 14px;
+    line-height: 1.57;
+    margin: 0;
+  }
+}
+
+.bridgeLimit {
+  padding: 10px;
+  text-align: center;
+  background-color: rgb(223, 223, 223);
+  margin-bottom: 20px;
+}
+
+.loaderScreen {
+  text-align: center;
+  position: relative;
+  top: 45%;
+}
+
+.addressSelector {
+  overflow-wrap: anywhere;
+  font-size: small;
+  margin-top: -15px;
+  margin-bottom: 15px;
+  cursor: pointer;
+  text-decoration: underline;
+  color: #555555;
+}

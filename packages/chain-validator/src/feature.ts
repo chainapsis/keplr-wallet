@@ -7,6 +7,7 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 export const SupportedChainFeatures = [
   "stargate",
   "cosmwasm",
+  "evm",
   "wasmd_0.24+",
   "secretwasm",
   "ibc-transfer",
