@@ -15,10 +15,10 @@ const Schema = Joi.object<ChainsResponse>({
     Joi.object({
       chain_id: Joi.string(),
       pfm_enabled: Joi.boolean(),
-      supports_memos: Joi.boolean(),
+      supports_memo: Joi.boolean(),
     }).unknown(true)
   ),
-});
+}).unknown(true);
 
 export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
   constructor(
@@ -52,7 +52,7 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
   get chains(): {
     chainInfo: IChainInfoImpl;
     pfmEnabled: boolean;
-    supportsMemos: boolean;
+    supportsMemo: boolean;
   }[] {
     if (!this.response) {
       return [];
@@ -66,7 +66,7 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
         return {
           chainInfo: this.chainGetter.getChain(chain.chain_id),
           pfmEnabled: chain.pfm_enabled,
-          supportsMemos: chain.supports_memos ?? false,
+          supportsMemo: chain.supports_memo ?? false,
         };
       });
   }
@@ -85,7 +85,7 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
     return chain.pfmEnabled;
   });
 
-  isSupportsMemos = computedFn((chainId: string): boolean => {
+  isSupportsMemo = computedFn((chainId: string): boolean => {
     const chain = this.chains.find((chain) => {
       return (
         chain.chainInfo.chainIdentifier ===
@@ -96,6 +96,6 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
       return false;
     }
 
-    return chain.supportsMemos;
+    return chain.supportsMemo;
   });
 }

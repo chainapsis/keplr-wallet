@@ -78,6 +78,7 @@ import { GlobalSimpleBarProvider } from "./hooks/global-simplebar";
 import { AppThemeProvider } from "./theme";
 import { useTheme } from "styled-components";
 import { PageChangeScrollTop } from "./use-page-change-scroll-top";
+import { IBCSwapPage } from "./pages/ibc-swap";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -268,6 +269,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             <Route path="/unlock" element={<UnlockPage />} />
             <Route path="/" element={<MainPage />} />
             <Route path="/send" element={<SendAmountPage />} />
+            <Route path="/ibc-swap" element={<IBCSwapPage />} />
             <Route
               path="/send/select-asset"
               element={<SendSelectAssetPage />}

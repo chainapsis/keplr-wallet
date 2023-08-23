@@ -199,7 +199,7 @@ export class ObservableQueryIbcPfmTransfer {
                 if (channels.length > 1) {
                   if (
                     !this.chainGetter.getChain(chainId).hasFeature("ibc-go") ||
-                    !this.queryChains.isSupportsMemos(chainId)
+                    !this.queryChains.isSupportsMemo(chainId)
                   ) {
                     pfmPossibility = false;
                   }
@@ -211,7 +211,7 @@ export class ObservableQueryIbcPfmTransfer {
                         !this.chainGetter
                           .getChain(channel.counterpartyChainId)
                           .hasFeature("ibc-go") ||
-                        !this.queryChains.isSupportsMemos(
+                        !this.queryChains.isSupportsMemo(
                           channel.counterpartyChainId
                         )
                       ) {
