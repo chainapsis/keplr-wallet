@@ -2398,53 +2398,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
     },
     features: ["ibc-transfer"],
   },
-  {
-    rpc: "https://rpc-celestia-testnet-mocha.keplr.app",
-    rest: "https://lcd-celestia-testnet-mocha.keplr.app",
-    chainId: "mocha-3",
-    chainName: "Celestia Testnet",
-    chainSymbolImageUrl:
-      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/mocha/chain.png",
-    stakeCurrency: {
-      coinDenom: "TIA",
-      coinMinimalDenom: "utia",
-      coinDecimals: 6,
-      coinGeckoId: "celestia",
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: {
-      bech32PrefixAccAddr: "celestia",
-      bech32PrefixAccPub: "celestiapub",
-      bech32PrefixValAddr: "celestiavaloper",
-      bech32PrefixValPub: "celestiavaloperpub",
-      bech32PrefixConsAddr: "celestiavalcons",
-      bech32PrefixConsPub: "celestiavalconspub",
-    },
-    currencies: [
-      {
-        coinDenom: "TIA",
-        coinMinimalDenom: "utia",
-        coinDecimals: 6,
-        coinGeckoId: "celestia",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "TIA",
-        coinMinimalDenom: "utia",
-        coinDecimals: 6,
-        coinGeckoId: "celestia",
-        gasPriceStep: {
-          low: 0.1,
-          average: 0.25,
-          high: 0.4,
-        },
-      },
-    ],
-    features: [],
-  },
 ];
 
 export const LegacyAmplitudeApiKey =
