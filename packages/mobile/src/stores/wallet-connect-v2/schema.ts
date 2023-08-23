@@ -6,6 +6,7 @@ export const CosmosMethods = [
   "cosmos_signAmino",
   "keplr_getKey",
   "keplr_signAmino",
+  "keplr_signDirect",
   "keplr_enable",
 ];
 // https://docs.walletconnect.com/2.0/javascript/web3wallet/wallet-usage#emit-session-events

@@ -760,6 +760,36 @@ export class WalletConnectV2Store {
           });
           break;
         }
+        case "keplr_signDirect": {
+          const res = await keplr.signDirect(params.chainId, params.signer, {
+            bodyBytes: Buffer.from(params.signDoc.bodyBytes, "base64"),
+            authInfoBytes: Buffer.from(params.signDoc.authInfoBytes, "base64"),
+            chainId: params.signDoc.chainId,
+            accountNumber: Long.fromString(params.signDoc.accountNumber),
+          });
+
+          await signClient.respond({
+            topic,
+            response: {
+              id,
+              jsonrpc: "2.0",
+              result: {
+                signature: res.signature,
+                signed: {
+                  bodyBytes: Buffer.from(res.signed.bodyBytes).toString(
+                    "base64"
+                  ),
+                  authInfoBytes: Buffer.from(res.signed.authInfoBytes).toString(
+                    "base64"
+                  ),
+                  chainId: res.signed.chainId,
+                  accountNumber: res.signed.accountNumber.toString(),
+                },
+              },
+            },
+          });
+          break;
+        }
         case "keplr_enable": {
           await keplr.enable(params.chainId);
           await signClient.respond({
