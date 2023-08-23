@@ -25,6 +25,7 @@ import {
 } from "@keplr-wallet/provider";
 import { Buffer } from "buffer/";
 import { ProposalTypes, SessionTypes } from "@walletconnect/types";
+import Long from "long";
 
 interface RequestParams {
   topic: string;
@@ -187,7 +188,7 @@ export class KeplrWalletConnectV2 implements Keplr {
     return response as T;
   }
 
-  protected getNamespaceChainId(): string | undefined {
+  protected getNamespaceChainId(): string {
     const lastSession = this.getLastSession();
 
     if (
@@ -201,7 +202,7 @@ export class KeplrWalletConnectV2 implements Keplr {
       return `${splitAccount[0]}:${splitAccount[1]}`;
     }
 
-    return undefined;
+    return "cosmos:cosmoshub-4";
   }
 
   protected checkDeepLink() {
@@ -252,7 +253,7 @@ export class KeplrWalletConnectV2 implements Keplr {
     }
     const param = {
       topic: topic,
-      chainId: chainId,
+      chainId: this.getNamespaceChainId(),
       request: {
         method: "keplr_enable",
         params: {
@@ -352,9 +353,9 @@ export class KeplrWalletConnectV2 implements Keplr {
       return {
         algo: lastSeenKey.algo,
         bech32Address: lastSeenKey.bech32Address,
-        address: Buffer.from(lastSeenKey.address),
+        address: Buffer.from(lastSeenKey.address, "base64"),
         name: lastSeenKey.name,
-        pubKey: Buffer.from(lastSeenKey.pubKey),
+        pubKey: Buffer.from(lastSeenKey.pubKey, "base64"),
         isNanoLedger: lastSeenKey.isNanoLedger,
         isKeystone: false,
       };
@@ -369,9 +370,15 @@ export class KeplrWalletConnectV2 implements Keplr {
         return {
           algo: lastSession.sessionProperties["algo"],
           bech32Address: lastSession.sessionProperties["bech32Address"],
-          address: Buffer.from(lastSession.sessionProperties["address"]),
+          address: Buffer.from(
+            lastSession.sessionProperties["address"],
+            "base64"
+          ),
           name: lastSession.sessionProperties["name"],
-          pubKey: Buffer.from(lastSession.sessionProperties["pubKey"]),
+          pubKey: Buffer.from(
+            lastSession.sessionProperties["pubKey"],
+            "base64"
+          ),
           isNanoLedger:
             lastSession.sessionProperties["isNanoLedger"] === "true",
           isKeystone: false,
@@ -383,7 +390,7 @@ export class KeplrWalletConnectV2 implements Keplr {
     const topic = await this.getCurrentTopic();
     const param = {
       topic,
-      chainId: `cosmos:${chainId}`,
+      chainId: this.getNamespaceChainId(),
       request: {
         method: "keplr_getKey",
         params: {
@@ -392,7 +399,21 @@ export class KeplrWalletConnectV2 implements Keplr {
       },
     };
 
-    return await this.sendCustomRequest<Key>(param);
+    const response = await this.sendCustomRequest<{
+      name: string;
+      algo: string;
+      pubKey: string;
+      address: string;
+      bech32Address: string;
+      isNanoLedger: boolean;
+    }>(param);
+
+    return {
+      ...response,
+      pubKey: Buffer.from(response.pubKey, "base64"),
+      address: Buffer.from(response.address, "base64"),
+      isKeystone: false,
+    };
   }
 
   async getKeysSettled(chainIds: string[]): Promise<SettledResponses<Key>> {
@@ -452,7 +473,7 @@ export class KeplrWalletConnectV2 implements Keplr {
 
     const param = {
       topic,
-      chainId: "cosmos:cosmoshub-4",
+      chainId: this.getNamespaceChainId(),
       request: {
         method: "keplr_signAmino",
         params: {
@@ -475,18 +496,71 @@ export class KeplrWalletConnectV2 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  signDirect(
-    _chainId: string,
-    _signer: string,
-    _signDoc: {
+  async signDirect(
+    chainId: string,
+    signer: string,
+    signDoc: {
       bodyBytes?: Uint8Array | null;
       authInfoBytes?: Uint8Array | null;
       chainId?: string | null;
       accountNumber?: Long | null;
     },
-    _signOptions?: KeplrSignOptions
+    signOptions?: KeplrSignOptions
   ): Promise<DirectSignResponse> {
-    throw new Error("Not yet implemented");
+    this.checkDeepLink();
+
+    const topic = this.getCurrentTopic();
+
+    const param = {
+      topic,
+      chainId: this.getNamespaceChainId(),
+      request: {
+        method: "keplr_signDirect",
+        params: {
+          chainId,
+          signer,
+          signDoc: {
+            chainId: signDoc.chainId,
+            accountNumber: signDoc.accountNumber?.toString(),
+            bodyBytes: signDoc.bodyBytes
+              ? Buffer.from(signDoc.bodyBytes).toString("base64")
+              : null,
+            authInfoBytes: signDoc.authInfoBytes
+              ? Buffer.from(signDoc.authInfoBytes).toString("base64")
+              : null,
+          },
+          signOptions: signOptions,
+        },
+      },
+    };
+
+    const response = await this.sendCustomRequest<{
+      readonly signed: {
+        bodyBytes?: string | null;
+        authInfoBytes?: string | null;
+        chainId?: string | null;
+        accountNumber?: string | null;
+      };
+      readonly signature: StdSignature;
+    }>(param);
+
+    const data: DirectSignResponse = {
+      signature: response.signature,
+      signed: {
+        chainId: response.signed.chainId ?? "",
+        accountNumber: response.signed.accountNumber
+          ? Long.fromString(response.signed.accountNumber)
+          : new Long(0),
+        bodyBytes: response.signed.bodyBytes
+          ? Buffer.from(response.signed.bodyBytes, "base64")
+          : new Uint8Array([]),
+        authInfoBytes: response.signed.authInfoBytes
+          ? Buffer.from(response.signed.authInfoBytes, "base64")
+          : new Uint8Array([]),
+      },
+    };
+
+    return data;
   }
 
   signEthereum(

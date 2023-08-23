@@ -22,6 +22,7 @@
     "@walletconnect/sign-client": "2.5.2",
     "@walletconnect/types": "2.5.2",
     "buffer": "^6.0.3",
-    "deepmerge": "^4.2.2"
+    "deepmerge": "^4.2.2",
+    "long": "^3 || ^4 || ^5"
   }
 }
