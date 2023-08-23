@@ -29,7 +29,22 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
   const intl = useIntl();
   const theme = useTheme();
   const [searchParams] = useSearchParams();
+
+  /*
+    navigate(
+      `/send/select-asset?isIBCTransfer=true&navigateTo=${encodeURIComponent(
+        "/ibc-transfer?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
+      )}`
+    );
+    같은 형태로 써야함...
+   */
+  const paramNavigateTo = searchParams.get("navigateTo");
+  const paramNavigateReplace = searchParams.get("navigateReplace");
   const paramIsIBCTransfer = searchParams.get("isIBCTransfer");
+
+  console.log("paramNavigateTo", paramNavigateTo);
+  console.log("paramNavigateReplace", paramNavigateReplace);
+  console.log("paramIsIBCTransfer", paramIsIBCTransfer);
 
   const [search, setSearch] = useState("");
   const [hideIBCToken, setHideIBCToken] = useState(false);
@@ -116,14 +131,20 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
               viewToken={viewToken}
               key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
               onClick={() => {
-                if (paramIsIBCTransfer === "true") {
+                if (paramNavigateTo) {
                   navigate(
-                    `/ibc-transfer?chainId=${viewToken.chainInfo.chainId}&coinMinimalDenom=${viewToken.token.currency.coinMinimalDenom}`
+                    paramNavigateTo
+                      .replace("{chainId}", viewToken.chainInfo.chainId)
+                      .replace(
+                        "{coinMinimalDenom}",
+                        viewToken.token.currency.coinMinimalDenom
+                      ),
+                    {
+                      replace: paramNavigateReplace === "true",
+                    }
                   );
                 } else {
-                  navigate(
-                    `/send?chainId=${viewToken.chainInfo.chainId}&coinMinimalDenom=${viewToken.token.currency.coinMinimalDenom}`
-                  );
+                  console.error("Empty navigateTo param");
                 }
               }}
             />
