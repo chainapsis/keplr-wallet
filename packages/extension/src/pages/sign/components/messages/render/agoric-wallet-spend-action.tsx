@@ -12,6 +12,7 @@ import yaml from "js-yaml";
 import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../../styles";
 import { MsgWalletSpendAction } from "@keplr-wallet/proto-types/agoric/swingset/msgs";
+import type { CopyBag } from "../../../utils/agoric/display-amount";
 
 export const AgoricWalletSpendActionMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -45,15 +46,9 @@ export const AgoricWalletSpendActionMessage: IMessageRenderer = {
   },
 };
 
-type DisplayInfo = {
-  assetKind: string;
-  decimalPlaces: number;
-  petname: string;
-};
-
 type Amount = {
   brand: string;
-  value: bigint | Array<any>;
+  value: bigint | Array<any> | CopyBag;
 };
 
 const b = (...chunks: any) => <b>{chunks}</b>;
@@ -103,7 +98,7 @@ const DumpRaw: FunctionComponent<{ object: any }> = ({ object }) => {
       {yaml.dump(
         JSON.parse(
           JSON.stringify(object, (_key, value) =>
-            typeof value === "bigint" ? value.toString() : value
+            typeof value === "bigint" ? "+" + value.toString() : value
           )
         )
       )}
@@ -111,25 +106,25 @@ const DumpRaw: FunctionComponent<{ object: any }> = ({ object }) => {
   );
 };
 
+type DisplayInfo = {
+  assetKind: string;
+  decimalPlaces: number;
+  petname: string;
+};
+
+const errorFetchInProgress = "fetch in progress";
+
 const WalletSpendActionMessagePretty: FunctionComponent<{
   chainId: string;
   spendActionSerialized: string;
 }> = observer(({ chainId, spendActionSerialized }) => {
   const { queriesStore } = useStore();
   const vbankQuery = queriesStore.get(chainId).agoric.queryVbankAssets;
+  const brandsQuery = queriesStore.get(chainId).agoric.queryBrands;
   const m = makeMarshal(undefined);
 
   try {
-    if (vbankQuery.error) {
-      throw new Error(vbankQuery.error.message);
-    }
-
-    if (!vbankQuery.data) {
-      return <LoadingIcon />;
-    }
-    const vbank = m.fromCapData(vbankQuery.data);
-    const spendAction = m.fromCapData(JSON.parse(spendActionSerialized));
-
+    const vbank = vbankQuery.data ? m.fromCapData(vbankQuery.data) : [];
     const brandToInfo = new Map<string, DisplayInfo>(
       vbank.map((entry: any) => [
         entry[1].brand,
@@ -137,25 +132,92 @@ const WalletSpendActionMessagePretty: FunctionComponent<{
       ])
     );
 
+    const spendAction = m.fromCapData(JSON.parse(spendActionSerialized));
     const typeMessage = <SpendActionTypePretty action={spendAction} />;
 
     const formatAmount = (key: string, amount: Amount, id: string) => {
-      const brand = brandToInfo.get(amount.brand);
+      const getDisplayInfoFromBoardAux = () => {
+        const boardAuxQuery = queriesStore
+          .get(chainId)
+          .agoric.queryBoardAux.getBoardAux(amount.brand);
 
-      if (!brand) {
-        throw new Error("Missing brand");
-      }
-      const prettyAmount = displayAmount(brand, amount.value);
+        if (brandsQuery.error) {
+          throw new Error(brandsQuery.error.message);
+        }
+        if (boardAuxQuery.error) {
+          throw new Error(boardAuxQuery.error.message);
+        }
+        if (!(brandsQuery.data && boardAuxQuery.data)) {
+          throw new Error(errorFetchInProgress);
+        }
+
+        const boardAux = m.fromCapData(boardAuxQuery.data);
+        const brands = m.fromCapData(brandsQuery.data);
+
+        const petname = brands
+          .find(
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            ([_petname, boardId]: [string, string]) => boardId === amount.brand
+          )
+          ?.at(0);
+
+        if (!petname) {
+          throw new Error("Brand petname not found");
+        }
+
+        const { assetKind, decimalPlaces } = boardAux.displayInfo;
+
+        return { petname, assetKind, decimalPlaces };
+      };
+
+      const { petname, assetKind, decimalPlaces } = (() => {
+        const vbankInfo = brandToInfo.get(amount.brand);
+        if (vbankInfo) {
+          return vbankInfo;
+        } else {
+          try {
+            return getDisplayInfoFromBoardAux();
+          } catch (e) {
+            if (e.msg === errorFetchInProgress) {
+              throw e;
+            } else if (vbankQuery.error) {
+              throw vbankQuery.error;
+            } else if (!vbankQuery.data) {
+              throw new Error(errorFetchInProgress);
+            } else {
+              throw e;
+            }
+          }
+        }
+      })();
+
+      const prettyAmount = displayAmount(
+        {
+          petname,
+          assetKind,
+          decimalPlaces,
+        },
+        amount.value
+      );
 
       return (
-        <FormattedMessage
-          key={key}
-          id={id}
-          values={{
-            b,
-            amount: prettyAmount,
-          }}
-        />
+        <React.Fragment key={key}>
+          <FormattedMessage id={id} />
+          {assetKind === "nat" ? (
+            <b>{prettyAmount}</b>
+          ) : (
+            <details>
+              <summary style={{ cursor: "pointer" }}>
+                <b>{prettyAmount}</b>
+              </summary>
+              <Box marginX="0.5rem">
+                <DumpRaw
+                  object={(amount.value as CopyBag).payload ?? amount.value}
+                />
+              </Box>
+            </details>
+          )}
+        </React.Fragment>
       );
     };
 
@@ -209,6 +271,9 @@ const WalletSpendActionMessagePretty: FunctionComponent<{
       </Box>
     );
   } catch (e) {
+    if (e.message == errorFetchInProgress) {
+      return <LoadingIcon />;
+    }
     console.log(
       "Error rendering wallet spend action, defaulting to yaml view",
       e
