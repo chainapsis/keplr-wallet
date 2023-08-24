@@ -790,6 +790,27 @@ export class WalletConnectV2Store {
           });
           break;
         }
+        case "keplr_signArbitrary": {
+          const res = await keplr.signArbitrary(
+            params.chainId,
+            params.signer,
+            params.type === "string"
+              ? params.data
+              : Buffer.from(params.data, "base64")
+          );
+
+          await signClient.respond({
+            topic,
+            response: {
+              id,
+              jsonrpc: "2.0",
+              result: {
+                ...res,
+              },
+            },
+          });
+          break;
+        }
         case "keplr_enable": {
           await keplr.enable(params.chainId);
           await signClient.respond({
