@@ -21,6 +21,7 @@ export class KeplrQRCodeModalV2 {
             "keplr_getKey",
             "keplr_signAmino",
             "keplr_signDirect",
+            "keplr_signArbitrary",
             "keplr_enable",
           ],
           chains: [...chainIds.map((chainId) => `cosmos:${chainId}`)],

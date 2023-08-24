@@ -489,11 +489,29 @@ export class KeplrWalletConnectV2 implements Keplr {
   }
 
   signArbitrary(
-    _chainId: string,
-    _signer: string,
-    _data: string | Uint8Array
+    chainId: string,
+    signer: string,
+    data: string | Uint8Array
   ): Promise<StdSignature> {
-    throw new Error("Not yet implemented");
+    const topic = this.getCurrentTopic();
+
+    const param = {
+      topic,
+      chainId: this.getNamespaceChainId(),
+      request: {
+        method: "keplr_signArbitrary",
+        params: {
+          chainId,
+          signer,
+          type: typeof data === "string" ? "string" : "Uint8Array",
+          data:
+            typeof data === "string"
+              ? data
+              : Buffer.from(data).toString("base64"),
+        },
+      },
+    };
+    return this.sendCustomRequest<StdSignature>(param);
   }
 
   async signDirect(
