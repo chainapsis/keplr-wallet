@@ -76,22 +76,21 @@ export const ADR36SignModal: FunctionComponent<{
     }, [isADR36WithString, signDocWrapper]);
 
     return (
-      <CardModal title="Confirm Transaction">
-        <View style={style.flatten(["margin-bottom-16"])}>
-          <Text style={style.flatten(["margin-bottom-3"])}>
-            <Text style={style.flatten(["subtitle3", "color-text-middle"])}>
-              Messages
-            </Text>
+      <CardModal>
+        <View
+          style={style.flatten([
+            "flex-row",
+            "items-center",
+            "margin-bottom-16",
+          ])}
+        >
+          <Text style={style.flatten(["h4", "color-text-highest"])}>
+            Prove Ownership
           </Text>
-          <View
-            style={style.flatten([
-              "border-radius-8",
-              "border-width-1",
-              "border-color-gray-50",
-              "dark:border-color-platinum-400",
-              "overflow-hidden",
-            ])}
-          >
+        </View>
+
+        <View style={style.flatten(["margin-bottom-16"])}>
+          <View style={style.flatten(["border-radius-8", "overflow-hidden"])}>
             <ScrollView
               style={style.flatten([
                 "max-height-214",
@@ -101,10 +100,61 @@ export const ADR36SignModal: FunctionComponent<{
               persistentScrollbar={true}
               indicatorStyle={style.theme === "dark" ? "white" : "black"}
             >
-              <Text>{content.value}</Text>
+              <Text
+                style={style.flatten([
+                  "body2",
+                  "color-text-middle",
+                  "padding-16",
+                ])}
+              >
+                {content.value}
+              </Text>
             </ScrollView>
           </View>
         </View>
+
+        {signInteractionStore.waitingData ? (
+          <View style={style.flatten(["margin-bottom-16"])}>
+            <View
+              style={style.flatten([
+                "flex",
+                "flex-row",
+                "items-center",
+                "justify-center",
+                "border-radius-8",
+                "background-color-white",
+                "dark:background-color-platinum-500",
+              ])}
+            >
+              <Text
+                style={style.flatten([
+                  "body2",
+                  "color-text-middle",
+                  "padding-16",
+                ])}
+              >
+                Requested Network
+              </Text>
+
+              <View style={style.flatten(["flex-1"])} />
+
+              <Text
+                style={style.flatten([
+                  "body2",
+                  "color-text-high",
+                  "padding-16",
+                ])}
+              >
+                {
+                  chainStore.getChain(
+                    signInteractionStore.waitingData.data.chainId
+                  ).chainName
+                }
+              </Text>
+            </View>
+          </View>
+        ) : null}
+
         <Button
           text="Approve"
           size="large"
