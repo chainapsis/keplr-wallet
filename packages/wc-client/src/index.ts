@@ -493,6 +493,8 @@ export class KeplrWalletConnectV2 implements Keplr {
     signer: string,
     data: string | Uint8Array
   ): Promise<StdSignature> {
+    this.checkDeepLink();
+
     const topic = this.getCurrentTopic();
 
     const param = {
