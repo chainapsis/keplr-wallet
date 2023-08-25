@@ -27,7 +27,6 @@ init(
     "https://www.stargaze.zone",
     "https://app.umee.cc",
     "https://junoswap.com",
-    "https://frontier.osmosis.zone",
     "https://daodao.zone",
     "https://app.regen.network",
     "https://app.stride.zone",

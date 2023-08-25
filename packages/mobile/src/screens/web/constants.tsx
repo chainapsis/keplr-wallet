@@ -106,41 +106,6 @@ export const InjectiveItem: Item = {
   component: InjectiveImage,
 };
 
-export const OsmosisFrontierImage: FunctionComponent = () => {
-  const smartNavigation = useSmartNavigation();
-  const style = useStyle();
-
-  return (
-    <WebpageImageButton
-      name="Osmosis"
-      source={require("../../assets/image/webpage/osmosis-frontier.png")}
-      nameContainerStyle={style.flatten(["flex-row"])}
-      nameAppend={
-        <View style={style.flatten(["justify-end"])}>
-          <Image
-            source={require("../../assets/image/webpage/osmosis-frontier-text.png")}
-            style={{
-              width: 52.8,
-              height: 18,
-              marginLeft: 8,
-              marginBottom: 7,
-            }}
-            fadeDuration={0}
-          />
-        </View>
-      }
-      onPress={() => {
-        smartNavigation.pushSmart("Web.OsmosisFrontier", {});
-      }}
-    />
-  );
-};
-
-export const OsmosisFrontierItem: Item = {
-  key: "osmosis-frontier",
-  component: OsmosisFrontierImage,
-};
-
 const MarsImage: FunctionComponent = () => {
   const smartNavigation = useSmartNavigation();
 
