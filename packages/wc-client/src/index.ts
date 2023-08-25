@@ -139,10 +139,10 @@ export class KeplrWalletConnectV2 implements Keplr {
     return `${this.storeKey}/${topic}-key`;
   }
 
-  protected async getLastSeenKey(
+  protected getLastSeenKey(
     chainId: string
-  ): Promise<KeplrGetKeyWalletConnectV2Response | undefined> {
-    const saved = await this.getAllLastSeenKey();
+  ): KeplrGetKeyWalletConnectV2Response | undefined {
+    const saved = this.getAllLastSeenKey();
 
     if (!saved) {
       return undefined;
@@ -348,7 +348,7 @@ export class KeplrWalletConnectV2 implements Keplr {
 
   async getKey(chainId: string): Promise<Key> {
     // Check public key from local storage.
-    const lastSeenKey = await this.getLastSeenKey(chainId);
+    const lastSeenKey = this.getLastSeenKey(chainId);
     if (lastSeenKey) {
       return {
         algo: lastSeenKey.algo,
@@ -387,7 +387,7 @@ export class KeplrWalletConnectV2 implements Keplr {
     }
 
     // Request `get_key` from the mobile wallet.
-    const topic = await this.getCurrentTopic();
+    const topic = this.getCurrentTopic();
     const param = {
       topic,
       chainId: this.getNamespaceChainId(),
@@ -564,7 +564,7 @@ export class KeplrWalletConnectV2 implements Keplr {
       readonly signature: StdSignature;
     }>(param);
 
-    const data: DirectSignResponse = {
+    return {
       signature: response.signature,
       signed: {
         chainId: response.signed.chainId ?? "",
@@ -579,8 +579,6 @@ export class KeplrWalletConnectV2 implements Keplr {
           : new Uint8Array([]),
       },
     };
-
-    return data;
   }
 
   signEthereum(
