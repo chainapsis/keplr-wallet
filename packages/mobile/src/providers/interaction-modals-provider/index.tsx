@@ -11,6 +11,7 @@ import { LoadingScreenModal } from "../loading-screen/modal";
 import { KeyRingStatus } from "@keplr-wallet/background";
 import { AddTokenModal } from "../../modals/add-token";
 import { WCV2MessageRequester } from "../../stores/wallet-connect-v2/msg-requester";
+import { ADR36SignModal } from "../../modals/sign/adr36";
 
 export const InteractionModalsProivder: FunctionComponent = observer(
   ({ children }) => {
@@ -144,8 +145,16 @@ export const InteractionModalsProivder: FunctionComponent = observer(
 
           return null;
         })}
-        {signInteractionStore.waitingData ? (
+        {signInteractionStore.waitingData &&
+        !signInteractionStore.waitingData.data.signDocWrapper.isADR36SignDoc ? (
           <SignModal
+            isOpen={true}
+            close={() => signInteractionStore.rejectAll()}
+          />
+        ) : null}
+        {signInteractionStore.waitingData &&
+        signInteractionStore.waitingData.data.signDocWrapper.isADR36SignDoc ? (
+          <ADR36SignModal
             isOpen={true}
             close={() => signInteractionStore.rejectAll()}
           />
