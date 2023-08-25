@@ -3,9 +3,18 @@ import SignClient from "@walletconnect/sign-client";
 import { KeplrQRCodeModalV2 } from "@keplr-wallet/wc-qrcode-modal";
 import { KeplrWalletConnectV2 } from "@keplr-wallet/wc-client";
 import { EmbedChainInfos } from "./config";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 let keplr: Keplr | undefined = undefined;
 let promise: Promise<Keplr> | undefined = undefined;
+
+type sendResponse = {
+  tx_response: {
+    txhash?: string;
+    code?: number;
+    raw_log?: string;
+  };
+};
 
 async function sendTx(
   chainId: string,
@@ -31,13 +40,26 @@ async function sendTx(
     (chainInfo) => chainInfo.chainId === chainId
   )?.rest;
 
-  const response = await fetch(`${baseUrl}/cosmos/tx/v1beta1/txs`, {
-    method: "POST",
-    body: JSON.stringify(params),
-  });
+  const response = await simpleFetch<sendResponse>(
+    `${baseUrl}/cosmos/tx/v1beta1/txs`,
+    {
+      method: "POST",
+      body: JSON.stringify(params),
+    }
+  );
 
-  const result = await response.json();
-  return Buffer.from(result["tx_response"].txhash, "hex");
+  if (
+    response.data.tx_response.code != null &&
+    response.data.tx_response.code !== 0
+  ) {
+    throw new Error(response.data.tx_response["raw_log"]);
+  }
+
+  if (response.data.tx_response.txhash == null) {
+    throw new Error("Invalid response");
+  }
+
+  return Buffer.from(response.data.tx_response.txhash, "hex");
 }
 
 export function getWCKeplr(): Promise<Keplr> {

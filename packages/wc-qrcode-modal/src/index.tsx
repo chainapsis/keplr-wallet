@@ -16,6 +16,7 @@ export class KeplrQRCodeModalV2 {
       requiredNamespaces: {
         cosmos: {
           methods: [
+            "cosmos_getAccounts",
             "cosmos_signDirect",
             "cosmos_signAmino",
             "keplr_getKey",
