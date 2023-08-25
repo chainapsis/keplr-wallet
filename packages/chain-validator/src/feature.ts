@@ -18,6 +18,7 @@ export const SupportedChainFeatures = [
   "axelar-evm-bridge",
   "osmosis-txfees",
   "terra-classic-fee",
+  "authz-msg-revoke-fixed",
 ];
 
 /**
