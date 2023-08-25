@@ -2404,12 +2404,14 @@ export const EmbedChainInfos: AppChainInfo[] = [
     chainId: "mocha-3",
     chainName: "Celestia Testnet",
     chainSymbolImageUrl:
-      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/mocha/chain.png",
+      "https://asset-icons.s3.us-west-2.amazonaws.com/white/celestia.png",
     stakeCurrency: {
       coinDenom: "TIA",
       coinMinimalDenom: "utia",
       coinDecimals: 6,
       coinGeckoId: "celestia",
+      coinImageUrl:
+        "https://asset-icons.s3.us-west-2.amazonaws.com/white/celestia.png",
     },
     bip44: {
       coinType: 118,
@@ -2428,6 +2430,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "utia",
         coinDecimals: 6,
         coinGeckoId: "celestia",
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/celestia.png",
       },
     ],
     feeCurrencies: [
@@ -2436,6 +2440,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "utia",
         coinDecimals: 6,
         coinGeckoId: "celestia",
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/celestia.png",
         gasPriceStep: {
           low: 0.1,
           average: 0.25,
