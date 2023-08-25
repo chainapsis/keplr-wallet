@@ -5646,11 +5646,12 @@ __metadata:
   dependencies:
     "@keplr-wallet/provider": 0.12.21
     "@keplr-wallet/types": 0.12.21
-    "@walletconnect/sign-client": 2.5.2
-    "@walletconnect/types": 2.5.2
     buffer: ^6.0.3
     deepmerge: ^4.2.2
     long: ^3 || ^4 || ^5
+  peerDependencies:
+    "@walletconnect/sign-client": ^2
+    "@walletconnect/types": ^2
   languageName: unknown
   linkType: soft
 
@@ -5658,11 +5659,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/wc-qrcode-modal@workspace:packages/wc-qrcode-modal"
   dependencies:
-    "@walletconnect/sign-client": 2.5.2
-    "@walletconnect/types": 2.5.2
     detect-browser: ^5.3.0
     qrcode.react: ^3.1.0
   peerDependencies:
+    "@walletconnect/sign-client": ^2
+    "@walletconnect/types": ^2
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
   languageName: unknown
