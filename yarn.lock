@@ -7437,9 +7437,9 @@ __metadata:
     http-browserify: ^1.7.0
     https-browserify: ^1.0.0
     metro-react-native-babel-preset: 0.76.7
-    mobx: ^6.1.7
-    mobx-react-lite: ^3.2.0
-    mobx-utils: ^6.0.3
+    mobx: ^6.10.0
+    mobx-react-lite: ^3.4.3
+    mobx-utils: ^6.0.8
     os-browserify: ^0.3.0
     path-browserify: ^1.0.1
     react: 18.2.0
@@ -24583,9 +24583,9 @@ __metadata:
     jest: ^29.4.3
     lerna: ^3.22.1
     lint-staged: ^10.5.4
-    mobx: ^6.1.7
-    mobx-react-lite: ^3.2.0
-    mobx-utils: ^6.0.3
+    mobx: ^6.10.0
+    mobx-react-lite: ^3.4.3
+    mobx-utils: ^6.0.8
     node-gyp: ^9.3.1
     pre-commit: ^1.2.2
     prettier: ^2.8.4
@@ -27211,34 +27211,34 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mobx-react-lite@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "mobx-react-lite@npm:3.2.0"
+"mobx-react-lite@npm:^3.4.3":
+  version: 3.4.3
+  resolution: "mobx-react-lite@npm:3.4.3"
   peerDependencies:
     mobx: ^6.1.0
-    react: ^16.8.0 || ^17
+    react: ^16.8.0 || ^17 || ^18
   peerDependenciesMeta:
     react-dom:
       optional: true
     react-native:
       optional: true
-  checksum: 595b5fcb9e9999d9b1d68200f27b0da073eddf1965df75a9cdd447e5c710b9486f684110c1b5f75830c485879203375d5fc4c1194cf219d8cdbfd0fa1d3694e0
+  checksum: 60a2580eb9a0b9988fc76959d7299f018733dc33cacaa73c45500953006d4d45e738d9ae39ccfc767ac19a75656dbc028d833282c848fbc67d8d18a2bcb5c262
   languageName: node
   linkType: hard
 
-"mobx-utils@npm:^6.0.3":
-  version: 6.0.3
-  resolution: "mobx-utils@npm:6.0.3"
+"mobx-utils@npm:^6.0.8":
+  version: 6.0.8
+  resolution: "mobx-utils@npm:6.0.8"
   peerDependencies:
     mobx: ^6.0.0
-  checksum: c759212c71711a1c94ef9fec758734a5959e1a227d470caad95dad200a36792464cc785d4ddff93d09851da5074d06bc56447bba5ee2446eff20dbe464b51588
+  checksum: 3cab9a858d6b19b2f5c4d5c39fcef7c171fe37c2b5e9f899e0988b475521e0ad0d52af290c04bcb694d8974f8bfac3ca6ee3340a0aeadd9efd770cfee3f44e4e
   languageName: node
   linkType: hard
 
-"mobx@npm:^6.1.7":
-  version: 6.1.7
-  resolution: "mobx@npm:6.1.7"
-  checksum: c6cd7fedf4ce4fa058c3173ba1f24b5c2a52d8a0792ae23a5d0618ee9c9ef95f9262aef622de51b2f836184a2b212ace95f8f5c27aafd137492bd2b44880c91f
+"mobx@npm:^6.10.0":
+  version: 6.10.0
+  resolution: "mobx@npm:6.10.0"
+  checksum: 8279d5a978d845664fb1830ce1e7f3fcebd5809bd9be6f2cac9b190e07cf6f16b09581107cc2d1ff7097e979da758fefd9ac68db76c814b8e783e59d0b8e418c
   languageName: node
   linkType: hard
 
