@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, {
+  FunctionComponent,
+  PropsWithChildren,
+  useEffect,
+  useState,
+} from "react";
 
 import { createRootStore, RootStore } from "./root";
 import { getKeplrFromWindow } from "@keplr-wallet/stores";
@@ -10,7 +15,9 @@ interface KeplrCoreTypes {
 
 const storeContext = React.createContext<RootStore | null>(null);
 
-export const StoreProvider: FunctionComponent = ({ children }) => {
+export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
+  children,
+}) => {
   const [stores] = useState(() => createRootStore());
 
   useEffect(() => {

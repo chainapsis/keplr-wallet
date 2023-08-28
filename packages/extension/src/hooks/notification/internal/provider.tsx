@@ -1,5 +1,6 @@
 import React, {
   FunctionComponent,
+  PropsWithChildren,
   useEffect,
   useMemo,
   useRef,
@@ -14,7 +15,9 @@ import { Body3, Subtitle4 } from "../../../components/typography";
 import { Gutter } from "../../../components/gutter";
 import { useTheme } from "styled-components";
 
-export const NotificationProvider: FunctionComponent = ({ children }) => {
+export const NotificationProvider: FunctionComponent<PropsWithChildren> = ({
+  children,
+}) => {
   const [notifications, setNotifications] = useState<
     {
       id: string;

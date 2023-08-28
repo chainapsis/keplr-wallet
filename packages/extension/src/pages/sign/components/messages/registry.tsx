@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, PropsWithChildren } from "react";
 import { IMessageRenderer, IMessageRenderRegistry } from "./types";
 import { Msg } from "@keplr-wallet/types";
 import { AnyWithUnpacked, ProtoCodec } from "@keplr-wallet/cosmos";
@@ -69,7 +69,9 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
   }
 }
 
-const UnknownMessageContent: FunctionComponent = ({ children }) => {
+const UnknownMessageContent: FunctionComponent<PropsWithChildren> = ({
+  children,
+}) => {
   const theme = useTheme();
   return (
     <pre

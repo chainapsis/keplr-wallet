@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, PropsWithChildren } from "react";
 import styled from "styled-components";
 import { ColorPalette } from "../../styles";
 
@@ -37,12 +37,14 @@ export const Styles = {
   `,
 };
 
-export const IconButton: FunctionComponent<{
-  onClick: () => void;
-  padding?: string;
-  color?: string;
-  hoverColor?: string;
-}> = ({ children, onClick, padding, hoverColor }) => {
+export const IconButton: FunctionComponent<
+  PropsWithChildren<{
+    onClick: () => void;
+    padding?: string;
+    color?: string;
+    hoverColor?: string;
+  }>
+> = ({ children, onClick, padding, hoverColor }) => {
   return (
     <Styles.Container
       padding={padding}

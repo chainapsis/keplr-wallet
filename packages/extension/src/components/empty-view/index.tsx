@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, PropsWithChildren } from "react";
 import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../styles";
 import { Subtitle3 } from "../typography";
@@ -19,10 +19,9 @@ const Styles = {
   `,
 };
 
-export const EmptyView: FunctionComponent<{ subject?: string }> = ({
-  subject,
-  children,
-}) => {
+export const EmptyView: FunctionComponent<
+  PropsWithChildren<{ subject?: string }>
+> = ({ subject, children }) => {
   const theme = useTheme();
 
   return (

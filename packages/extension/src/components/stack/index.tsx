@@ -1,4 +1,9 @@
-import React, { FunctionComponent, Children, isValidElement } from "react";
+import React, {
+  FunctionComponent,
+  Children,
+  isValidElement,
+  PropsWithChildren,
+} from "react";
 import { Gutter } from "../gutter";
 import styled from "styled-components";
 import { flattenFragment } from "../../utils";
@@ -28,7 +33,7 @@ const Styles = {
   `,
 };
 
-export const Stack: FunctionComponent<StackProps> = ({
+export const Stack: FunctionComponent<PropsWithChildren<StackProps>> = ({
   children,
   gutter,
   ...otherProps

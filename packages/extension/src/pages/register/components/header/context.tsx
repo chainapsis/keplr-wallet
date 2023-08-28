@@ -1,12 +1,11 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, PropsWithChildren, useState } from "react";
 import { Header, HeaderContext } from "./types";
 
 const storeContext = React.createContext<HeaderContext | null>(null);
 
-export const RegisterHeaderProvider: FunctionComponent<HeaderContext> = ({
-  children,
-  ...props
-}) => {
+export const RegisterHeaderProvider: FunctionComponent<
+  PropsWithChildren<HeaderContext>
+> = ({ children, ...props }) => {
   return (
     <storeContext.Provider value={props}>{children}</storeContext.Provider>
   );

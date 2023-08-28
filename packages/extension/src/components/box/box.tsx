@@ -1,8 +1,8 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, PropsWithChildren } from "react";
 import { Styles } from "./styles";
 import { BoxProps } from "./types";
 
-export const Box: FunctionComponent<BoxProps> = ({
+export const Box: FunctionComponent<PropsWithChildren<BoxProps>> = ({
   children,
   style,
   className,

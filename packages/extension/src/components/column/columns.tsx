@@ -1,4 +1,9 @@
-import React, { Children, FunctionComponent, isValidElement } from "react";
+import React, {
+  Children,
+  FunctionComponent,
+  isValidElement,
+  PropsWithChildren,
+} from "react";
 import { ColumnsProps } from "./types";
 import styled from "styled-components";
 import { flattenFragment } from "../../utils";
@@ -22,7 +27,7 @@ const Styles = {
   `,
 };
 
-export const Columns: FunctionComponent<ColumnsProps> = ({
+export const Columns: FunctionComponent<PropsWithChildren<ColumnsProps>> = ({
   children,
   sum,
   columnAlign,

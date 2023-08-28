@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useRef, useState } from "react";
+import React, {
+  FunctionComponent,
+  PropsWithChildren,
+  useRef,
+  useState,
+} from "react";
 import {
   arrow,
   FloatingArrow,
@@ -13,13 +18,15 @@ import { Caption2 } from "../typography";
 import { autoPlacement, shift } from "@floating-ui/react-dom";
 import { useTheme } from "styled-components";
 
-export const Tooltip: FunctionComponent<{
-  enabled?: boolean;
-  content?: string | React.ReactElement;
-  isAlwaysOpen?: boolean;
+export const Tooltip: FunctionComponent<
+  PropsWithChildren<{
+    enabled?: boolean;
+    content?: string | React.ReactElement;
+    isAlwaysOpen?: boolean;
 
-  allowedPlacements?: ("top" | "bottom" | "left" | "right")[];
-}> = ({
+    allowedPlacements?: ("top" | "bottom" | "left" | "right")[];
+  }>
+> = ({
   enabled,
   content,
   isAlwaysOpen = false,

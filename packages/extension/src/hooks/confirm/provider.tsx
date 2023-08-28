@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useMemo, useRef, useState } from "react";
+import React, {
+  FunctionComponent,
+  PropsWithChildren,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { ConfirmContext } from "./internal";
 import { Modal } from "../../components/modal";
 import { XAxis, YAxis } from "../../components/axis";
@@ -11,7 +17,9 @@ import { FormattedMessage } from "react-intl";
 import { useTheme } from "styled-components";
 import { TextButton } from "../../components/button-text";
 
-export const ConfirmProvider: FunctionComponent = ({ children }) => {
+export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
+  children,
+}) => {
   const theme = useTheme();
   const [confirms, setConfirms] = useState<
     {

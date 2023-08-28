@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, PropsWithChildren } from "react";
 import { ColumnProps } from "./types";
 import styled from "styled-components";
 
@@ -8,7 +8,7 @@ const Styles = {
   `,
 };
 
-export const Column: FunctionComponent<ColumnProps> = ({
+export const Column: FunctionComponent<PropsWithChildren<ColumnProps>> = ({
   children,
   weight,
 }) => {
