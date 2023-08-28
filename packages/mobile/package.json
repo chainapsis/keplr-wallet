@@ -12,6 +12,7 @@
     "lint-fix": "eslint . --fix .js,.jsx,.ts,.tsx && prettier --write .",
     "typecheck": "tsc --noEmit",
     "start": "react-native start",
+    "start:reset": "react-native start --reset-cache",
     "test": "jest"
   },
   "dependencies": {
