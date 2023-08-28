@@ -18,6 +18,7 @@ import {
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {StoreProvider, useStore} from './src/stores';
 import {observer} from 'mobx-react-lite';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 
 const Test: FunctionComponent = observer(() => {
   const {queriesStore} = useStore();
@@ -41,15 +42,17 @@ function App(): JSX.Element {
   };
 
   return (
-    <StoreProvider>
-      <SafeAreaView style={backgroundStyle}>
-        <StatusBar
-          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={backgroundStyle.backgroundColor}
-        />
-        <Test />
-      </SafeAreaView>
-    </StoreProvider>
+    <GestureHandlerRootView style={{flex: 1}}>
+      <StoreProvider>
+        <SafeAreaView style={backgroundStyle}>
+          <StatusBar
+            barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+            backgroundColor={backgroundStyle.backgroundColor}
+          />
+          <Test />
+        </SafeAreaView>
+      </StoreProvider>
+    </GestureHandlerRootView>
   );
 }
 
