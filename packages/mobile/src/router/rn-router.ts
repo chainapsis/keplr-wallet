@@ -10,7 +10,7 @@ import EventEmitter from 'eventemitter3';
 
 export class RNRouterBase extends Router {
   constructor(
-    protected readonly envProducer: EnvProducer,
+    envProducer: EnvProducer,
     protected readonly eventEmitter: EventEmitter,
   ) {
     super(envProducer);
@@ -69,7 +69,7 @@ export class RNRouterBase extends Router {
 export class RNRouterBackground extends RNRouterBase {
   public static readonly EventEmitter: EventEmitter = new EventEmitter();
 
-  constructor(protected readonly envProducer: EnvProducer) {
+  constructor(envProducer: EnvProducer) {
     super(envProducer, RNRouterBackground.EventEmitter);
   }
 }
@@ -77,7 +77,7 @@ export class RNRouterBackground extends RNRouterBase {
 export class RNRouterUI extends RNRouterBase {
   public static readonly EventEmitter: EventEmitter = new EventEmitter();
 
-  constructor(protected readonly envProducer: EnvProducer) {
+  constructor(envProducer: EnvProducer) {
     super(envProducer, RNRouterUI.EventEmitter);
   }
 }

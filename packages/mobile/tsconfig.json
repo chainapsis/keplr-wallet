@@ -1,6 +1,12 @@
 {
   "extends": "@tsconfig/react-native/tsconfig.json",
   "compilerOptions": {
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "experimentalDecorators": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": true
   }
 }

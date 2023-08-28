@@ -9,6 +9,7 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "lint-test": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "typecheck": "tsc --noEmit",
     "start": "react-native start",
     "test": "jest"
   },
