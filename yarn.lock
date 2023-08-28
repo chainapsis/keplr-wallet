@@ -7202,10 +7202,11 @@ __metadata:
     joi: ^17.5.0
     long: ^4.0.0
     miscreant: 0.3.2
-    mobx: ^6.1.7
-    mobx-utils: ^6.0.3
     pbkdf2: ^3.1.2
     utility-types: ^3.10.0
+  peerDependencies:
+    mobx: ^6
+    mobx-utils: ^6
   languageName: unknown
   linkType: soft
 
@@ -7229,7 +7230,8 @@ __metadata:
     "@keplr-wallet/types": 0.12.20
     buffer: ^6.0.3
     delay: ^4.4.0
-    mobx: ^6.1.7
+  peerDependencies:
+    mobx: ^6
   languageName: unknown
   linkType: soft
 
@@ -7536,9 +7538,10 @@ __metadata:
     "@keplr-wallet/stores": 0.12.20
     "@keplr-wallet/types": 0.12.20
     "@keplr-wallet/unit": 0.12.20
-    mobx: ^6.1.7
-    mobx-utils: ^6.0.3
     utility-types: ^3.10.0
+  peerDependencies:
+    mobx: ^6
+    mobx-utils: ^6
   languageName: unknown
   linkType: soft
 
@@ -7560,10 +7563,11 @@ __metadata:
     deepmerge: ^4.2.2
     eventemitter3: ^4.0.7
     long: ^4.0.0
-    mobx: ^6.1.7
-    mobx-utils: ^6.0.3
     p-queue: ^6.6.2
     utility-types: ^3.10.0
+  peerDependencies:
+    mobx: ^6
+    mobx-utils: ^6
   languageName: unknown
   linkType: soft
 
