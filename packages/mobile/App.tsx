@@ -6,12 +6,13 @@
  */
 
 import React, {FunctionComponent} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {Text, View} from 'react-native';
 
 import {StoreProvider, useStore} from './src/stores';
 import {observer} from 'mobx-react-lite';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {NavigationContainer} from '@react-navigation/native';
+import {StyleProvider, useStyle} from './src/styles';
 
 const Test: FunctionComponent = observer(() => {
   const {queriesStore} = useStore();
@@ -20,8 +21,10 @@ const Test: FunctionComponent = observer(() => {
     'cosmos1vv6hruquzpty4xpks9znkw8gys5x4nsnqw9f4k',
   ).balances;
 
+  const style = useStyle();
+
   return (
-    <View style={styles.sectionContainer}>
+    <View style={style.flatten(['flex-1', 'padding-top-16', 'padding-x-16'])}>
       <Text>{balance.map(bal => bal.balance.toString()).join(', ')}</Text>
     </View>
   );
@@ -30,32 +33,15 @@ const Test: FunctionComponent = observer(() => {
 function App(): JSX.Element {
   return (
     <GestureHandlerRootView style={{flex: 1}}>
-      <StoreProvider>
-        <NavigationContainer>
-          <Test />
-        </NavigationContainer>
-      </StoreProvider>
+      <StyleProvider>
+        <StoreProvider>
+          <NavigationContainer>
+            <Test />
+          </NavigationContainer>
+        </StoreProvider>
+      </StyleProvider>
     </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;
