@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.19.3",
+    "@react-native-community/blur": "^4.3.2",
     "@react-navigation/native": "^6.1.7",
     "buffer": "^6.0.3",
     "expo": "^49.0.6",
