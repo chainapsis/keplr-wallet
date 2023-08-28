@@ -13,7 +13,7 @@ import {
   SignInteractionStore,
   CosmosQueries,
 } from '@keplr-wallet/stores';
-import {MemoryKVStore} from '@keplr-wallet/common';
+import {AsyncKVStore} from '../common';
 import {RNEnv, RNRouterUI, RNMessageRequesterInternal} from '../router';
 import {APP_PORT} from '@keplr-wallet/router';
 import EventEmitter from 'eventemitter3';
@@ -63,7 +63,7 @@ export class RootStore {
     );
 
     this.queriesStore = new QueriesStore(
-      new MemoryKVStore('store_queries'),
+      new AsyncKVStore('store_queries'),
       this.chainStore,
       {
         responseDebounceMs: 75,

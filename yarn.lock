@@ -7423,6 +7423,7 @@ __metadata:
     "@babel/core": ^7.20.0
     "@babel/preset-env": ^7.20.0
     "@babel/runtime": ^7.20.0
+    "@react-native-async-storage/async-storage": ^1.19.3
     "@react-native/eslint-config": ^0.72.2
     "@react-native/metro-config": ^0.72.9
     "@tsconfig/react-native": ^3.0.0
@@ -7442,6 +7443,7 @@ __metadata:
     mobx-utils: ^6.0.8
     os-browserify: ^0.3.0
     path-browserify: ^1.0.1
+    pod-install: ^0.1.39
     react: 18.2.0
     react-native: 0.72.3
     react-native-url-polyfill: ^2.0.0
@@ -9374,6 +9376,17 @@ __metadata:
   version: 1.1.0
   resolution: "@protobufjs/utf8@npm:1.1.0"
   checksum: f9bf3163d13aaa3b6f5e6fbf37a116e094ea021c0e1f2a7ccd0e12a29e2ce08dafba4e8b36e13f8ed7397e1591610ce880ed1289af4d66cf4ace8a36a9557278
+  languageName: node
+  linkType: hard
+
+"@react-native-async-storage/async-storage@npm:^1.19.3":
+  version: 1.19.3
+  resolution: "@react-native-async-storage/async-storage@npm:1.19.3"
+  dependencies:
+    merge-options: ^3.0.4
+  peerDependencies:
+    react-native: ^0.0.0-0 || 0.60 - 0.72 || 1000.0.0
+  checksum: d849e5c8bb08d2130d95cc246749dae820cc1996b6b31defa063a1b67070524d72aed5a0e57ce2fafe3c3726712c09a5a3babaed1358182060ce7cfd8bd2c1a3
   languageName: node
   linkType: hard
 
@@ -23051,7 +23064,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-plain-obj@npm:^2.0.0":
+"is-plain-obj@npm:^2.0.0, is-plain-obj@npm:^2.1.0":
   version: 2.1.0
   resolution: "is-plain-obj@npm:2.1.0"
   checksum: cec9100678b0a9fe0248a81743041ed990c2d4c99f893d935545cfbc42876cbe86d207f3b895700c690ad2fa520e568c44afc1605044b535a7820c1d40e38daa
@@ -25962,6 +25975,15 @@ __metadata:
   version: 1.0.1
   resolution: "merge-descriptors@npm:1.0.1"
   checksum: 5abc259d2ae25bb06d19ce2b94a21632583c74e2a9109ee1ba7fd147aa7362b380d971e0251069f8b3eb7d48c21ac839e21fa177b335e82c76ec172e30c31a26
+  languageName: node
+  linkType: hard
+
+"merge-options@npm:^3.0.4":
+  version: 3.0.4
+  resolution: "merge-options@npm:3.0.4"
+  dependencies:
+    is-plain-obj: ^2.1.0
+  checksum: d86ddb3dd6e85d558dbf25dc944f3527b6bacb944db3fdda6e84a3f59c4e4b85231095f58b835758b9a57708342dee0f8de0dffa352974a48221487fe9f4584f
   languageName: node
   linkType: hard
 
@@ -29326,6 +29348,15 @@ __metadata:
   dependencies:
     ts-pnp: ^1.1.6
   checksum: 0606a63db96400b07f182300168298da9518727a843f9e10cf5045d2a102a4be06bb18c73dc481281e3e0f1ed8d04ef0d285a342b6dcd0eff1340e28e5d2328d
+  languageName: node
+  linkType: hard
+
+"pod-install@npm:^0.1.39":
+  version: 0.1.39
+  resolution: "pod-install@npm:0.1.39"
+  bin:
+    pod-install: build/index.js
+  checksum: 200302341847251d4db25f950d15367f6f45f5358d87b18bf01054094f02b2572d007f73c8020b1565dd3e6b23f861965f9bad434873d3c8e834be0e7124fa3e
   languageName: node
   linkType: hard
 

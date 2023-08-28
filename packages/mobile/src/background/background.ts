@@ -8,13 +8,13 @@ import {
   RNRouterBackground,
 } from '../router';
 import {CommunityChainInfoRepo, EmbedChainInfos} from '../config';
-import {MemoryKVStore} from '@keplr-wallet/common';
+import {AsyncKVStore} from '../common';
 
 const router = new RNRouterBackground(RNEnv.produceEnv);
 
 const {initFn} = init(
   router,
-  (prefix: string) => new MemoryKVStore(prefix),
+  (prefix: string) => new AsyncKVStore(prefix),
   new RNMessageRequesterInternalToUI(),
   EmbedChainInfos,
   [],
@@ -46,7 +46,7 @@ const {initFn} = init(
       },
     },
     getDisabledChainIdentifiers: async () => {
-      const kvStore = new MemoryKVStore('store_chain_config');
+      const kvStore = new AsyncKVStore('store_chain_config');
       const legacy = await kvStore.get<{disabledChains: string[]}>(
         'extension_chainInfoInUIConfig',
       );
