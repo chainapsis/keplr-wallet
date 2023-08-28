@@ -8,7 +8,8 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "lint-test": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint-test": "eslint . --ext .js,.jsx,.ts,.tsx && prettier --check .",
+    "lint-fix": "eslint . --fix .js,.jsx,.ts,.tsx && prettier --write .",
     "typecheck": "tsc --noEmit",
     "start": "react-native start",
     "test": "jest"
