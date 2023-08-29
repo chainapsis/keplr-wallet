@@ -6,38 +6,32 @@
  */
 
 import React, {FunctionComponent} from 'react';
-import {Text, View} from 'react-native';
 
-import {StoreProvider, useStore} from './src/stores';
-import {observer} from 'mobx-react-lite';
+import {StoreProvider} from './src/stores';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import {NavigationContainer} from '@react-navigation/native';
 import {StyleProvider, useStyle} from './src/styles';
+import {AppNavigation} from './src/navigation';
+import {StatusBar} from 'react-native';
 
-const Test: FunctionComponent = observer(() => {
-  const {queriesStore} = useStore();
-  const queries = queriesStore.get('cosmoshub');
-  const balance = queries.queryBalances.getQueryBech32Address(
-    'cosmos1vv6hruquzpty4xpks9znkw8gys5x4nsnqw9f4k',
-  ).balances;
-
+const ThemeStatusBar: FunctionComponent = () => {
   const style = useStyle();
 
   return (
-    <View style={style.flatten(['flex-1', 'padding-top-16', 'padding-x-16'])}>
-      <Text>{balance.map(bal => bal.balance.toString()).join(', ')}</Text>
-    </View>
+    <StatusBar
+      translucent={true}
+      backgroundColor="#FFFFFF00"
+      barStyle={style.get('status-bar-style')}
+    />
   );
-});
+};
 
 function App(): JSX.Element {
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <StyleProvider>
+        <ThemeStatusBar />
         <StoreProvider>
-          <NavigationContainer>
-            <Test />
-          </NavigationContainer>
+          <AppNavigation />
         </StoreProvider>
       </StyleProvider>
     </GestureHandlerRootView>
