@@ -43,6 +43,7 @@ import { useTheme } from "styled-components";
 import { defaultProtoCodec } from "@keplr-wallet/cosmos";
 import { MsgGrant } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
 import { GenericAuthorization } from "@keplr-wallet/stores/build/query/cosmos/authz/types";
+import { Checkbox } from "../../../../components/checkbox";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -261,6 +262,7 @@ export const CosmosTxView: FunctionComponent<{
 
     setIsSendAuthzGrant(false);
   }, [signDocHelper.signDocWrapper]);
+  const [isSendAuthzGrantChecked, setIsSendAuthzGrantChecked] = useState(false);
 
   const txConfigsValidate = useTxConfigsValidate({
     senderConfig,
@@ -317,7 +319,8 @@ export const CosmosTxView: FunctionComponent<{
   const buttonDisabled =
     txConfigsValidate.interactionBlocked ||
     !signDocHelper.signDocWrapper ||
-    isLedgerAndDirect;
+    isLedgerAndDirect ||
+    (isSendAuthzGrant && !isSendAuthzGrantChecked);
 
   const approve = async () => {
     if (signDocHelper.signDocWrapper) {
@@ -569,6 +572,16 @@ export const CosmosTxView: FunctionComponent<{
               title={intl.formatMessage({
                 id: "page.sign.cosmos.tx.authz-send-grant.warning-title",
               })}
+              titleRight={
+                <Box marginLeft="1rem">
+                  <Checkbox
+                    checked={isSendAuthzGrantChecked}
+                    onChange={(checked) => {
+                      setIsSendAuthzGrantChecked(checked);
+                    }}
+                  />
+                </Box>
+              }
             />
           </React.Fragment>
         ) : null}

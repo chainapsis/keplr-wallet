@@ -11,6 +11,7 @@ export const GuideBox: FunctionComponent<GuideBoxProps> = ({
   title,
   paragraph,
   color = "default",
+  titleRight,
   bottom,
 }) => {
   const theme = useTheme();
@@ -22,6 +23,7 @@ export const GuideBox: FunctionComponent<GuideBoxProps> = ({
         <Column weight={1}>
           <Subtitle4 color={getTitleColor(theme, color)}>{title}</Subtitle4>
         </Column>
+        {titleRight}
       </Columns>
       {paragraph ? (
         <Body3 color={getParagraphColor(theme, color)}>{paragraph}</Body3>
