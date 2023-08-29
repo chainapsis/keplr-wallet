@@ -10,13 +10,15 @@ import { KeystoneErrorModal } from "../../../../components/keystone/error";
 import { KeystoneUR } from "../../utils/keystone";
 import { useTheme } from "styled-components";
 import { FormattedMessage, useIntl } from "react-intl";
+import { Progress } from "../../../../components/progress";
 
 export const KeystoneScan: FunctionComponent<{
   onScan: (ur: KeystoneUR) => void;
 }> = ({ onScan }) => {
-  const { AnimatedQRScanner, hasPermission, setIsDone } =
+  const { AnimatedQRScanner, hasPermission, setIsDone, isDone } =
     useAnimatedQRScanner();
   const [isErrorOpen, setIsErrorOpen] = useState(false);
+  const [progress, setProgress] = useState(0);
   const theme = useTheme();
   const intl = useIntl();
 
@@ -29,9 +31,14 @@ export const KeystoneScan: FunctionComponent<{
     setIsErrorOpen(true);
   };
 
+  const handleProcess = (progress: number) => {
+    setProgress(progress);
+  };
+
   const handleClose = () => {
     setIsErrorOpen(false);
     setIsDone(false);
+    setProgress(0);
   };
 
   const cameraSize = useMemo(
@@ -52,11 +59,7 @@ export const KeystoneScan: FunctionComponent<{
       >
         <FormattedMessage id="page.sign.keystone.paragraph-scan" />
       </Box>
-      <KeystoneTextIcon
-        color={theme.mode === "light" ? ColorPalette.black : ColorPalette.white}
-        height="2.375rem"
-        width="9.75rem"
-      />
+      <KeystoneTextIcon color={theme.mode} height="2.375rem" width="9.75rem" />
       <Box
         backgroundColor={
           theme.mode === "light"
@@ -94,6 +97,7 @@ export const KeystoneScan: FunctionComponent<{
           ]}
           handleScan={handleScan}
           handleError={handleError}
+          onProgress={handleProcess}
           options={{
             width: cameraSize,
             height: cameraSize,
@@ -101,6 +105,7 @@ export const KeystoneScan: FunctionComponent<{
           }}
         />
       </Box>
+      <Progress percent={isDone ? 100 : progress} />
       {hasPermission ? (
         <Box
           style={{

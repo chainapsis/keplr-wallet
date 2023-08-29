@@ -15,6 +15,7 @@ import { GuideBox } from "../../../components/guide-box";
 import { KeystoneErrorModal } from "../../../components/keystone/error";
 import { useTheme } from "styled-components";
 import { FormattedMessage, useIntl } from "react-intl";
+import { Progress } from "../../../components/progress";
 
 export const ScanKeystoneScene: FunctionComponent<{
   name: string;
@@ -23,9 +24,10 @@ export const ScanKeystoneScene: FunctionComponent<{
   stepTotal: number;
 }> = observer(({ name, password, stepPrevious, stepTotal }) => {
   const sceneTransition = useSceneTransition();
-  const { AnimatedQRScanner, hasPermission, setIsDone } =
+  const { AnimatedQRScanner, hasPermission, setIsDone, isDone } =
     useAnimatedQRScanner();
   const [isErrorOpen, setIsErrorOpen] = useState(false);
+  const [progress, setProgress] = useState(0);
   const theme = useTheme();
   const intl = useIntl();
 
@@ -72,6 +74,11 @@ export const ScanKeystoneScene: FunctionComponent<{
   const handleClose = () => {
     setIsErrorOpen(false);
     setIsDone(false);
+    setProgress(0);
+  };
+
+  const handleProcess = (progress: number) => {
+    setProgress(progress);
   };
 
   return (
@@ -105,6 +112,7 @@ export const ScanKeystoneScene: FunctionComponent<{
           purpose={Purpose.COSMOS_SYNC}
           handleScan={handleScan}
           handleError={handleError}
+          onProgress={handleProcess}
           options={{
             width: "23.5rem",
             height: "23.5rem",
@@ -112,6 +120,9 @@ export const ScanKeystoneScene: FunctionComponent<{
           }}
         />
       </Box>
+      <div style={{ marginTop: "1.25rem" }}>
+        <Progress percent={isDone ? 100 : progress} />
+      </div>
       {hasPermission ? (
         <Box
           color={
