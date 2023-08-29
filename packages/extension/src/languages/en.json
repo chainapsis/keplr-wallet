@@ -503,7 +503,7 @@
   "page.main.components.menu-bar.add-token-title": "Add Token",
   "page.main.components.menu-bar.setting-title": "Settings",
   "page.main.components.menu-bar.lock-wallet-title": "Lock Wallet",
-  "page.main.components.menu-bar.go-to-keplr-chain-registry": "Go to Keplr Chain Registry",
+  "page.main.components.menu-bar.go-to-keplr-chain-registry": "Add More Chains",
   "page.main.components.deposit-modal.title": "Copy Address",
   "page.main.components.deposit-modal.search-placeholder": "Search for a chain",
   "page.main.components.deposit-modal.empty-text": "To use an address on certain chain, you may need to first visit the \"Manage Chain Visibility\" in the side menu and make the chain visible on your wallet.",
