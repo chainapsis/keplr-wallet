@@ -132,6 +132,7 @@ import {
 } from "./screens/web/webpages";
 import { WebpageScreenScreenOptionsPreset } from "./screens/web/components/webpage-screen";
 import Bugsnag from "@bugsnag/react-native";
+import { SettingManageConnectionsScreen } from "./screens/setting/screens/connections";
 
 const {
   SmartNavigatorProvider,
@@ -233,6 +234,9 @@ const {
     },
     "Setting.ManageTokens": {
       upperScreenName: "Others",
+    },
+    "Setting.ManageConnections": {
+      upperScreenName: "Settings",
     },
     AddressBook: {
       upperScreenName: "AddressBooks",
@@ -831,6 +835,14 @@ export const SettingStackScreen: FunctionComponent = () => {
         }}
         name="Setting.Version"
         component={KeplrVersionScreen}
+      />
+      <Stack.Screen
+        options={{
+          ...HeaderOnSecondaryScreenOptionsPreset,
+          title: "Manage Connections",
+        }}
+        name="Setting.ManageConnections"
+        component={SettingManageConnectionsScreen}
       />
     </Stack.Navigator>
   );

@@ -71,6 +71,13 @@ export const SettingScreen: FunctionComponent = observer(() => {
           topBorder={!canShowPrivateData(keyRingStore.keyRingType)}
         />
       ) : null}
+      <SettingItem
+        label="Manage Connections"
+        right={<RightArrow />}
+        onPress={() => {
+          smartNavigation.navigateSmart("Setting.ManageConnections", {});
+        }}
+      />
       <SettingSectionTitle title="Others" />
       <SettingItem
         label="Keplr version"
