@@ -7,8 +7,8 @@ import {
 } from "@keplr-wallet/stores";
 import { IndexedDBKVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
-import { getWCKeplr } from "../get-wc-keplr";
 import { EmbedChainInfos } from "../config";
+import { getWCKeplr } from "../get-wc-keplr";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -22,12 +22,16 @@ export class RootStore {
     this.queriesStore = new QueriesStore(
       new IndexedDBKVStore("store_queries"),
       this.chainStore,
+      {
+        responseDebounceMs: 75,
+      },
       CosmosQueries.use()
     );
 
     this.accountStore = new AccountStore(
       window,
       this.chainStore,
+      getWCKeplr,
       () => {
         return {
           suggestChain: false,
