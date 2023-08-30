@@ -210,9 +210,13 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           senderConfig={ibcSwapConfigs.senderConfig}
           amountConfig={ibcSwapConfigs.amountConfig}
         />
+        <Gutter size="0.75rem" />
         <SwapFeeInfo
           senderConfig={ibcSwapConfigs.senderConfig}
+          amountConfig={ibcSwapConfigs.amountConfig}
+          gasConfig={ibcSwapConfigs.gasConfig}
           feeConfig={ibcSwapConfigs.feeConfig}
+          gasSimulator={gasSimulator}
         />
       </Box>
     </HeaderLayout>

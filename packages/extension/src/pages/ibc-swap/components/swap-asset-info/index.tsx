@@ -11,6 +11,7 @@ import { ColorPalette } from "../../../../styles";
 import { ChainImageFallback } from "../../../../components/image";
 import { AppCurrency } from "@keplr-wallet/types";
 import { IBCSwapAmountConfig } from "../../../../hooks/ibc-swap";
+import { useNavigate } from "react-router";
 
 const Styles = {
   TextInput: styled.input`
@@ -43,8 +44,10 @@ export const SwapAssetInfo: FunctionComponent<{
 
   senderConfig: ISenderConfig;
   amountConfig: IBCSwapAmountConfig;
-}> = observer(({ type, amountConfig }) => {
-  const { chainStore } = useStore();
+}> = observer(({ type, senderConfig, amountConfig }) => {
+  const { chainStore, queriesStore } = useStore();
+
+  const navigate = useNavigate();
 
   const fromChainInfo = chainStore.getChain(amountConfig.chainId);
   const fromCurrency: AppCurrency | undefined = (() => {
@@ -67,12 +70,42 @@ export const SwapAssetInfo: FunctionComponent<{
     >
       <XAxis alignY="center">
         <Gutter size="0.25rem" />
-        <Subtitle3>{type === "from" ? "From" : "To"}</Subtitle3>
+        <Subtitle3 color={ColorPalette["gray-200"]}>
+          {type === "from" ? "From" : "To"}
+        </Subtitle3>
         <div
           style={{
             flex: 1,
           }}
         />
+        {type === "from" ? (
+          <Box
+            cursor="pointer"
+            onClick={(e) => {
+              e.preventDefault();
+
+              amountConfig.setFraction(1);
+            }}
+          >
+            <Body3 color={ColorPalette["gray-200"]}>{`Max: ${(() => {
+              const bal = queriesStore
+                .get(senderConfig.chainId)
+                .queryBalances.getQueryBech32Address(senderConfig.sender)
+                .getBalance(amountConfig.currency);
+
+              if (!bal) {
+                return `0 ${amountConfig.currency.coinDenom}`;
+              }
+
+              return bal.balance
+                .maxDecimals(6)
+                .trim(true)
+                .shrink(true)
+                .inequalitySymbol(true)
+                .toString();
+            })()}`}</Body3>
+          </Box>
+        ) : null}
       </XAxis>
 
       <Gutter size="0.75rem" />
@@ -90,6 +123,7 @@ export const SwapAssetInfo: FunctionComponent<{
                   .hideDenom(true)
                   .toString()
           }
+          placeholder="0"
           type={type === "from" ? "number" : undefined}
           onChange={(e) => {
             e.preventDefault();
@@ -108,6 +142,20 @@ export const SwapAssetInfo: FunctionComponent<{
           paddingY="0.5rem"
           borderRadius="99999999px"
           backgroundColor={ColorPalette["gray-500"]}
+          cursor="pointer"
+          onClick={(e) => {
+            e.preventDefault();
+
+            if (type === "from") {
+              navigate(
+                `/send/select-asset?isIBCSwap=true&navigateReplace=true&navigateTo=${encodeURIComponent(
+                  "/ibc-swap?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
+                )}`
+              );
+            } else {
+              console.log("TODO");
+            }
+          }}
         >
           <XAxis alignY="center">
             {(() => {
@@ -124,7 +172,15 @@ export const SwapAssetInfo: FunctionComponent<{
                     alt={currency?.coinDenom || "coinDenom"}
                   />
                   <Gutter size="0.5rem" />
-                  <Subtitle2>{currency?.coinDenom || "Unknown"}</Subtitle2>
+                  <Subtitle2 color={ColorPalette["gray-10"]}>
+                    {currency?.coinDenom || "Unknown"}
+                  </Subtitle2>
+                  <Gutter size="0.25rem" />
+                  <AllowLowIcon
+                    width="1rem"
+                    height="1rem"
+                    color={ColorPalette["gray-200"]}
+                  />
                 </React.Fragment>
               );
             })()}
@@ -142,7 +198,7 @@ export const SwapAssetInfo: FunctionComponent<{
             flex: 1,
           }}
         />
-        <Body3>{`on ${(() => {
+        <Body3 color={ColorPalette["gray-300"]}>{`on ${(() => {
           const chainInfo = type === "from" ? fromChainInfo : toChainInfo;
           const currency = type === "from" ? fromCurrency : outCurrency;
 
@@ -163,3 +219,25 @@ export const SwapAssetInfo: FunctionComponent<{
     </Box>
   );
 });
+
+const AllowLowIcon: FunctionComponent<{
+  width: string;
+  height: string;
+  color: string;
+}> = ({ width, height, color }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      fill="none"
+      stroke="none"
+      viewBox="0 0 16 16"
+    >
+      <path
+        fill={color || "currentColor"}
+        d="M8.632 11.188a.8.8 0 01-1.263 0L3.404 6.091A.8.8 0 014.036 4.8h7.928a.8.8 0 01.632 1.291l-3.964 5.097z"
+      />
+    </svg>
+  );
+};

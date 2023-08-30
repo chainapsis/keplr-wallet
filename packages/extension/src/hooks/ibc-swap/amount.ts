@@ -1,4 +1,4 @@
-import { AmountConfig, ISenderConfig } from "@keplr-wallet/hooks";
+import { AmountConfig, ISenderConfig, UIProperties } from "@keplr-wallet/hooks";
 import { AppCurrency } from "@keplr-wallet/types";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import {
@@ -12,7 +12,7 @@ import {
 // TODO: 이거 import path 문제 해결하기
 import { QueriesStore } from "@keplr-wallet/hooks/build/tx/internal";
 import { useState } from "react";
-import { action, makeObservable, observable } from "mobx";
+import { action, makeObservable, observable, override } from "mobx";
 import { SkipQueries } from "../../stores/skip";
 import { ObservableQueryIBCSwapInner } from "../../stores/skip/ibc-swap";
 
@@ -97,7 +97,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
     }
   }
 
-  isFetching(): boolean {
+  get isFetching(): boolean {
     const queryIBCSwap = this.getQueryIBCSwap();
     if (queryIBCSwap) {
       return queryIBCSwap.getQueryRoute().isFetching;
@@ -248,6 +248,38 @@ export class IBCSwapAmountConfig extends AmountConfig {
         msg.funds.map((fund) => fund.toCoin())
       );
     }
+  }
+
+  @override
+  override get uiProperties(): UIProperties {
+    const prev = super.uiProperties;
+    if (prev.error || prev.loadingState) {
+      return prev;
+    }
+
+    const queryIBCSwap = this.getQueryIBCSwap();
+    if (!queryIBCSwap) {
+      return {
+        ...prev,
+        error: new Error("Query IBC Swap is not initialized"),
+      };
+    }
+
+    if (queryIBCSwap.getQueryRoute().isFetching) {
+      return {
+        ...prev,
+        loadingState: "loading-block",
+      };
+    }
+
+    if (queryIBCSwap.getQueryRoute().response?.data.does_swap === false) {
+      return {
+        ...prev,
+        error: new Error("In and out currency is same"),
+      };
+    }
+
+    return {};
   }
 
   protected getQueryIBCSwap(): ObservableQueryIBCSwapInner | undefined {

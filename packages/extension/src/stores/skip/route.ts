@@ -58,7 +58,7 @@ const Schema = Joi.object<RouteResponse>({
   swap_venue: Joi.object({
     name: Joi.string().required(),
     chain_id: Joi.string().required(),
-  }).required(),
+  }),
   txs_required: Joi.number().required(),
 }).unknown(true);
 
