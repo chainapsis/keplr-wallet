@@ -18,6 +18,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
   const Stack = createNativeStackNavigator();
   const style = useStyle();
+
   return (
     <SafeAreaProvider>
       <NavigationContainer
@@ -28,9 +29,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
               ? 'Locked'
               : keyRingStore.status === 'unlocked'
               ? 'Home'
-              : keyRingStore.status === 'empty'
-              ? 'Register'
-              : ''
+              : 'Register'
           }>
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Unlocked" component={LockedScreen} />
