@@ -13,7 +13,13 @@ import {RegisterScreen} from './screen/register';
 import {HomeScreen} from './screen/home';
 import {LockedScreen} from './screen/locked';
 
-const Stack = createNativeStackNavigator();
+export type RootStackParamList = {
+  Home: undefined;
+  Register: undefined;
+  Locked: undefined;
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 //TODO 이후 상태가 not-loaded일때 스플레시 스크린화면 처리 필요
 export const AppNavigation: FunctionComponent = observer(() => {
