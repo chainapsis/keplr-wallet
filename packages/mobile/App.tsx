@@ -12,6 +12,7 @@ import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {StyleProvider, useStyle} from './src/styles';
 import {AppNavigation} from './src/navigation';
 import {StatusBar} from 'react-native';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
 
 const ThemeStatusBar: FunctionComponent = () => {
   const style = useStyle();
@@ -29,10 +30,12 @@ function App(): JSX.Element {
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <StyleProvider>
-        <ThemeStatusBar />
-        <StoreProvider>
-          <AppNavigation />
-        </StoreProvider>
+        <SafeAreaProvider>
+          <ThemeStatusBar />
+          <StoreProvider>
+            <AppNavigation />
+          </StoreProvider>
+        </SafeAreaProvider>
       </StyleProvider>
     </GestureHandlerRootView>
   );
