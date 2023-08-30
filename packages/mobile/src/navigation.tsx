@@ -14,6 +14,7 @@ import {RegisterScreen} from './screen/register';
 import {HomeScreen} from './screen/home';
 import {LockedScreen} from './screen/locked';
 
+//TODO 이후 상태가 not-loaded일때 스플레시 스크린화면 처리 필요
 export const AppNavigation: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
   const Stack = createNativeStackNavigator();
@@ -29,11 +30,14 @@ export const AppNavigation: FunctionComponent = observer(() => {
               ? 'Locked'
               : keyRingStore.status === 'unlocked'
               ? 'Home'
-              : 'Register'
+              : keyRingStore.status === 'empty'
+              ? 'Register'
+              : 'Splash'
           }>
           <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Unlocked" component={LockedScreen} />
+          <Stack.Screen name="Locked" component={LockedScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen name="Splash" component={RegisterScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
