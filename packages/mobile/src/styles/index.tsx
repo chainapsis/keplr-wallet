@@ -270,7 +270,7 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
           ],
         },
 
-        'status-bar-style': 'dark-content' as StatusBarStyle,
+        'status-bar-style': 'light-content' as StatusBarStyle,
 
         'header-on-gradient-screen': {
           blurOnIOS: {
@@ -626,7 +626,7 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
             ],
           },
 
-          'status-bar-style': 'light-content' as StatusBarStyle,
+          'status-bar-style': 'dark-content' as StatusBarStyle,
 
           'header-on-gradient-screen': {
             blurOnIOS: {
