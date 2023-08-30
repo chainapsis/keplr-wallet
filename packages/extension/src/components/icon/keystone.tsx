@@ -26,8 +26,8 @@ export const KeystoneIcon: FunctionComponent<IconProps> = ({
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path d="m120 100h240l-160 340h-120z" fill={color1} />
-      <path d="m520 540h-240l160-340h120z" fill={color2} />
+      <path d="m120 100h240l-160 340h-120z" fill={color1 || "currentColor"} />
+      <path d="m520 540h-240l160-340h120z" fill={color2 || "currentColor"} />
     </svg>
   );
 };

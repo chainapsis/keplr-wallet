@@ -26,9 +26,9 @@ export const KeystoneTextIcon: FunctionComponent<IconProps> = ({
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path d="m48 40h96l-64 136h-48z" fill={color1} />
-      <path d="m208 216h-96l64-136h48z" fill={color2} />
-      <g fill={color1}>
+      <path d="m48 40h96l-64 136h-48z" fill={color1 || "currentColor"} />
+      <path d="m208 216h-96l64-136h48z" fill={color2 || "currentColor"} />
+      <g fill={color1 || "currentColor"}>
         <path d="m916 80h34.323l29.677 59.863v-59.863h20v96h-20v-20h-14.323l-29.677-59.8624v79.8624h-20z" />
         <path d="m784 80h-80v16h30v80h20v-80h30z" />
         <path d="m1096 80h-52v16h-20v80h72v-16h-52v-24h44v-16h-44v-24h52z" />
