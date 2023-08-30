@@ -29,7 +29,7 @@ export const SettingManageConnectionsScreen: FunctionComponent = observer(
 
     return (
       <PageWithScrollViewInBottomTabView backgroundMode="tertiary">
-        {chainStore.chainInfosInUI.map((chainInfo) => {
+        {chainStore.chainInfos.map((chainInfo) => {
           const basicAccessInfo = permissionStore.getBasicAccessInfo(
             chainInfo.chainId
           );

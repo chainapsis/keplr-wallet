@@ -49,7 +49,7 @@ export class Secret20ViewingKeyPermissionInnerStore {
   }
 
   @flow
-  protected *refreshOrigins() {
+  *refreshOrigins() {
     this._origins = yield* toGenerator(
       this.requester.sendMessage(
         BACKGROUND_PORT,
@@ -106,7 +106,7 @@ export class BasicAccessPermissionInnerStore {
   }
 
   @flow
-  protected *refreshOrigins() {
+  *refreshOrigins() {
     this._origins = yield* toGenerator(
       this.requester.sendMessage(
         BACKGROUND_PORT,
@@ -250,7 +250,23 @@ export class PermissionStore extends HasMapStore<
   *approve(id: string) {
     this._isLoading = true;
     try {
+      const waitingData = this.waitingDatas;
       yield this.interactionStore.approve(INTERACTION_TYPE_PERMISSION, id, {});
+
+      for (const data of waitingData) {
+        if (isBasicAccessPermissionType(data.data.type)) {
+          for (const chainId of data.data.chainIds) {
+            yield this.getBasicAccessInfo(chainId).refreshOrigins();
+          }
+        } else {
+          for (const chainId of data.data.chainIds) {
+            yield this.getSecret20ViewingKeyAccessInfo(
+              chainId,
+              splitSecret20ViewingKeyPermissionType(data.data.type)
+            ).refreshOrigins();
+          }
+        }
+      }
     } finally {
       this._isLoading = false;
     }
