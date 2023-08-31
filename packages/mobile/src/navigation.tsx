@@ -29,7 +29,6 @@ export const AppNavigation: FunctionComponent = observer(() => {
   if (keyRingStore.status === 'not-loaded') {
     return null;
   }
-
   return (
     <NavigationContainer
       theme={style.theme === 'light' ? DefaultTheme : DarkTheme}>
