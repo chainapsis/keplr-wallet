@@ -11,7 +11,6 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../navigation';
 import {useNavigation, StackActions} from '@react-navigation/native';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require('bip39');
 
 interface FormData {
@@ -71,7 +70,7 @@ export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
     const style = useStyle();
     const status = keyRingStore.status;
 
-    const hasPassword = status === 'empty';
+    const isNeedPassword = status === 'empty';
 
     const {
       control,
@@ -90,7 +89,7 @@ export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
         addressIndex: 0,
       };
 
-      if (status === 'empty') {
+      if (isNeedPassword) {
         await keyRingStore.newMnemonicKey(
           trimmedMnemonic,
           defaultBIP44,
@@ -144,6 +143,7 @@ export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
                     return 'Invalid mnemonic';
                   }
                 }
+
                 if (validatePrivateKey(str)) {
                   return 'Invalid privateKey';
                 }
@@ -192,7 +192,7 @@ export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
                   ref={ref}
                   error={errors.name?.message}
                   onSubmitEditing={() => {
-                    if (keyRingStore.status !== 'empty') {
+                    if (!isNeedPassword) {
                       submit();
                       return;
                     }
@@ -203,7 +203,7 @@ export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
             }}
           />
 
-          {hasPassword && (
+          {isNeedPassword && (
             <React.Fragment>
               <Controller
                 control={control}

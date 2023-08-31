@@ -34,7 +34,10 @@ export const LockedScreen: FunctionComponent = observer(() => {
         <TextInput
           label="password"
           value={password}
-          onChangeText={setPassword}
+          onChangeText={value => {
+            setPassword(value);
+            setIsFailed(false);
+          }}
           secureTextEntry={true}
           returnKeyType="done"
           onSubmitEditing={() => {
