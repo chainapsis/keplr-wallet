@@ -56,7 +56,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { HugeQueriesStore } from "./huge-queries";
 import { ExtensionAnalyticsClient } from "../analytics";
 import { TokenContractsQueries } from "./token-contracts";
-import { SkipQueries } from "./skip/queries";
+import { SkipQueries } from "./skip";
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;

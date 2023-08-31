@@ -222,6 +222,7 @@ export const SwapFeeInfo: FunctionComponent<{
                       .trim(true)
                       .shrink(true)
                       .inequalitySymbol(true)
+                      .hideIBCMetadata(true)
                       .toString()}
                   </Body3>
                 );
@@ -281,6 +282,7 @@ export const SwapFeeInfo: FunctionComponent<{
                   .trim(true)
                   .shrink(true)
                   .inequalitySymbol(true)
+                  .hideIBCMetadata(true)
                   .toString()
               )
               .join(", ")}

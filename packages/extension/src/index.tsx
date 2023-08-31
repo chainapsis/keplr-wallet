@@ -266,6 +266,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
   return (
     <HashRouter>
       <BottomTabsRouteProvider
+        forceHideBottomTabs={shouldUnlockPage}
         tabs={[
           {
             pathname: "/",

@@ -18,6 +18,7 @@ import { ChainStore } from "../chain";
 import { AddressBookConfig } from "./address-book";
 import { MessageRequester } from "@keplr-wallet/router";
 import manifest from "../../manifest.v2.json";
+import { IBCSwapConfig } from "./ibc-swap";
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
@@ -31,6 +32,7 @@ export class UIConfigStore {
 
   public readonly copyAddressConfig: CopyAddressConfig;
   public readonly addressBookConfig: AddressBookConfig;
+  public readonly ibcSwapConfig: IBCSwapConfig;
 
   @observable
   protected _isInitialized: boolean = false;
@@ -83,6 +85,7 @@ export class UIConfigStore {
       chainStore,
       keyRingStore
     );
+    this.ibcSwapConfig = new IBCSwapConfig(kvStores.kvStore, chainStore);
 
     this._isBeta = navigator.userAgent.includes("Firefox");
     this._platform = navigator.userAgent.includes("Firefox")
@@ -134,6 +137,7 @@ export class UIConfigStore {
     await Promise.all([
       this.copyAddressConfig.init(),
       this.addressBookConfig.init(),
+      this.ibcSwapConfig.init(),
     ]);
 
     runInAction(() => {

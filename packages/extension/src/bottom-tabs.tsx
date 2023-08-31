@@ -11,14 +11,16 @@ export const BottomTabsRouteProvider: FunctionComponent<{
     pathname: string;
     icon: React.ReactNode;
   }[];
-}> = ({ children, tabs }) => {
+
+  forceHideBottomTabs?: boolean;
+}> = ({ children, tabs, forceHideBottomTabs }) => {
   const location = useLocation();
 
   const theme = useTheme();
 
-  const shouldBottomTabsShown = tabs.find(
-    (tab) => tab.pathname === location.pathname
-  );
+  const shouldBottomTabsShown =
+    !forceHideBottomTabs &&
+    tabs.find((tab) => tab.pathname === location.pathname);
 
   return (
     <div

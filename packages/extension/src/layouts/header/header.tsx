@@ -96,20 +96,31 @@ const Styles = {
   `,
   ContentContainer: styled.div<{
     layoutHeight: number;
+    additionalPaddingBottom?: string;
     bottomPadding: string;
     fixedHeight: boolean;
   }>`
     padding-top: 3.75rem;
-    padding-bottom: ${({ bottomPadding }) => bottomPadding};
+    padding-bottom: ${({ bottomPadding, additionalPaddingBottom }) => {
+      if (additionalPaddingBottom && additionalPaddingBottom !== "0") {
+        return `calc(${bottomPadding} + ${additionalPaddingBottom})`;
+      }
+      return bottomPadding;
+    }};
 
-    ${({ layoutHeight, fixedHeight }) => {
+    ${({ layoutHeight, fixedHeight, additionalPaddingBottom }) => {
       if (!fixedHeight) {
         return css`
           // min-height: ${layoutHeight}rem;
         `;
       } else {
         return css`
-          height: ${layoutHeight}rem;
+          height: ${(() => {
+            if (additionalPaddingBottom && additionalPaddingBottom !== "0") {
+              return `calc(${layoutHeight}rem - ${additionalPaddingBottom})`;
+            }
+            return `${layoutHeight}rem`;
+          })()};
         `;
       }
     }};
@@ -192,13 +203,9 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
 
       <Styles.ContentContainer
         layoutHeight={height}
+        additionalPaddingBottom={additionalPaddingBottom}
         fixedHeight={fixedHeight || false}
-        bottomPadding={(() => {
-          if (additionalPaddingBottom && additionalPaddingBottom !== "0") {
-            return `calc(${bottomPadding} + ${additionalPaddingBottom})`;
-          }
-          return bottomPadding;
-        })()}
+        bottomPadding={bottomPadding}
       >
         {children}
       </Styles.ContentContainer>

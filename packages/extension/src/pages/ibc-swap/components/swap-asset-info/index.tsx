@@ -12,6 +12,7 @@ import { ChainImageFallback } from "../../../../components/image";
 import { AppCurrency } from "@keplr-wallet/types";
 import { IBCSwapAmountConfig } from "../../../../hooks/ibc-swap";
 import { useNavigate } from "react-router";
+import { useSearchParams } from "react-router-dom";
 
 const Styles = {
   TextInput: styled.input`
@@ -48,6 +49,7 @@ export const SwapAssetInfo: FunctionComponent<{
   const { chainStore, queriesStore } = useStore();
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const fromChainInfo = chainStore.getChain(amountConfig.chainId);
   const fromCurrency: AppCurrency | undefined = (() => {
@@ -147,9 +149,28 @@ export const SwapAssetInfo: FunctionComponent<{
             e.preventDefault();
 
             if (type === "from") {
+              const outChainId = searchParams.get("outChainId");
+              const outCoinMinimalDenom = searchParams.get(
+                "outCoinMinimalDenom"
+              );
               navigate(
                 `/send/select-asset?isIBCSwap=true&navigateReplace=true&navigateTo=${encodeURIComponent(
-                  "/ibc-swap?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
+                  `/ibc-swap?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}${(() => {
+                    let q = "";
+                    if (outChainId) {
+                      q += `outChainId=${outChainId}`;
+                    }
+                    if (outCoinMinimalDenom) {
+                      if (q.length > 0) {
+                        q += "&";
+                      }
+                      q += `outCoinMinimalDenom=${outCoinMinimalDenom}`;
+                    }
+                    if (q.length > 0) {
+                      q = `&${q}`;
+                    }
+                    return q;
+                  })()}`
                 )}`
               );
             } else {
