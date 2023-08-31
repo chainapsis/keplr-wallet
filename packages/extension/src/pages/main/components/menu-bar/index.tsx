@@ -115,14 +115,6 @@ export const MenuBar: FunctionComponent<{
         <Styles.MenuItem onClick={() => navigate("/setting/token/list")}>
           <FormattedMessage id="page.main.components.menu-bar.add-token-title" />
         </Styles.MenuItem>
-
-        <Styles.MenuItem
-          onClick={() => {
-            navigate("/setting");
-          }}
-        >
-          <FormattedMessage id="page.main.components.menu-bar.setting-title" />
-        </Styles.MenuItem>
       </Stack>
 
       <Styles.Flex1 />

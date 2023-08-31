@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../layouts/header";
 import { Box } from "../../components/box";
@@ -15,6 +15,7 @@ import { useGasSimulator, useTxConfigsValidate } from "@keplr-wallet/hooks";
 import { useNotification } from "../../hooks/notification";
 import { useIntl } from "react-intl";
 import { SwapFeeBps } from "../../config.ui";
+import { BottomTabsHeightRem } from "../../bottom-tabs";
 
 export const IBCSwapPage: FunctionComponent = observer(() => {
   const { chainStore, queriesStore, accountStore, skipQueriesStore } =
@@ -30,16 +31,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   const coinMinimalDenom =
     initialCoinMinimalDenom ||
     chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
-
-  useEffect(() => {
-    if (!initialChainId || !initialCoinMinimalDenom) {
-      navigate(
-        `/send/select-asset?isIBCSwap=true&navigateReplace=true&navigateTo=${encodeURIComponent(
-          "/ibc-swap?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
-        )}`
-      );
-    }
-  }, [navigate, initialChainId, initialCoinMinimalDenom]);
 
   const currency = chainStore
     .getChain(chainId)
@@ -106,6 +97,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
+      additionalPaddingBottom={BottomTabsHeightRem}
       title="IBC Swap"
       bottomButton={{
         disabled: txConfigsValidate.interactionBlocked,

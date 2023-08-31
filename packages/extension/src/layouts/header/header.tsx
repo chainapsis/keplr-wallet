@@ -114,16 +114,6 @@ const Styles = {
       }
     }};
   `,
-  BottomContainer: styled.div`
-    height: 4.75rem;
-
-    background-color: ${ColorPalette["gray-700"]};
-
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-  `,
 };
 
 export const HeaderLayout: FunctionComponent<HeaderProps> = ({
@@ -135,6 +125,7 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
   onSubmit,
   children,
   isNotReady,
+  additionalPaddingBottom,
 }) => {
   const [height, setHeight] = React.useState(() => pxToRem(600));
   const lastSetHeight = useRef(-1);
@@ -202,7 +193,12 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
       <Styles.ContentContainer
         layoutHeight={height}
         fixedHeight={fixedHeight || false}
-        bottomPadding={bottomPadding}
+        bottomPadding={(() => {
+          if (additionalPaddingBottom && additionalPaddingBottom !== "0") {
+            return `calc(${bottomPadding} + ${additionalPaddingBottom})`;
+          }
+          return bottomPadding;
+        })()}
       >
         {children}
       </Styles.ContentContainer>
@@ -214,7 +210,7 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
           style={{
             left: 0,
             right: 0,
-            bottom: 0,
+            bottom: additionalPaddingBottom || "0",
           }}
         >
           {(() => {

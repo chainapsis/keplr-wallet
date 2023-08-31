@@ -1,6 +1,5 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
-import { BackButton } from "../../layouts/header/components";
 import { HeaderLayout } from "../../layouts/header";
 import { Stack } from "../../components/stack";
 import { PageButton } from "./components";
@@ -19,10 +18,7 @@ export const SettingPage: FunctionComponent = observer(() => {
   const intl = useIntl();
 
   return (
-    <HeaderLayout
-      title={intl.formatMessage({ id: "page.setting.title" })}
-      left={<BackButton />}
-    >
+    <HeaderLayout title={intl.formatMessage({ id: "page.setting.title" })}>
       <Box padding="0.75rem" paddingTop="0">
         <Stack gutter="0.5rem">
           <PageButton
