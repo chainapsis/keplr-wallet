@@ -42,15 +42,35 @@ module.exports = {
       auto: false,
       nav: [
         {
-          title: "API",
+          title: "Getting Started",
           children: [
             {
-              title: "Keplr API",
+              title: "Getting Started",
+              directory: true,
+              path: "/getting-started",
+            },
+          ],
+        },
+        {
+          title: "Keplr APIs",
+          children: [
+            {
+              title: "Keplr APIs",
               directory: true,
               path: "/api",
             },
           ],
         },
+        {
+          title: "Using Cosmos Singing Libraries",
+          children: [
+            {
+              title: "Using Cosmos Signing Libraries",
+              directory: true,
+              path: "/signing-lib",
+            },
+          ],
+        }
       ],
     },
   },
