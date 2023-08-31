@@ -1,7 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent, useState} from 'react';
 import {View} from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useStore} from '../../stores';
 import {TextInput} from '../../components/input';
 import {Button} from '../../components/button';
@@ -9,7 +8,6 @@ import {StackActions, useNavigation} from '@react-navigation/native';
 
 export const LockedScreen: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
-  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const [isFailed, setIsFailed] = useState(false);
   const [password, setPassword] = useState('');
@@ -27,10 +25,7 @@ export const LockedScreen: FunctionComponent = observer(() => {
 
   return (
     <React.Fragment>
-      <View
-        style={{
-          paddingTop: insets.top,
-        }}>
+      <View>
         <TextInput
           label="password"
           value={password}

@@ -1,7 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent} from 'react';
 import {View} from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useStyle} from '../../styles';
 import {TextInput} from '../../components/input/input';
 import {Button} from '../../components/button';
@@ -65,7 +64,6 @@ interface RegisterScreenProps {
 export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
   () => {
     const navigation = useNavigation();
-    const insets = useSafeAreaInsets();
     const {keyRingStore} = useStore();
     const style = useStyle();
     const status = keyRingStore.status;
@@ -115,10 +113,7 @@ export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
 
     return (
       <React.Fragment>
-        <View
-          style={{
-            paddingTop: insets.top,
-          }}>
+        <View>
           <Controller
             control={control}
             name="mnemonic"
@@ -130,13 +125,6 @@ export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
                 if (!isPrivateKey(str)) {
                   if (str.split(' ').length < 12) {
                     return 'Too short mnemonic';
-                  }
-
-                  if (
-                    str.split(' ').length > 12 &&
-                    str.split(' ').length < 24
-                  ) {
-                    return 'Too short mnemonic (24words)';
                   }
 
                   if (!bip39.validateMnemonic(str)) {
