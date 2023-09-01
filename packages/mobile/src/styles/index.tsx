@@ -92,6 +92,7 @@ export const DarkThemeTextColors = {
 
 export const BackgroundColors = {
   card: 'rgba(255, 255, 255, 0.95)',
+  'background-default': ColorPalette['gray-700'],
   'background-secondary': ColorPalette['gray-10'],
   // The background tertiary has a color that is distinct with the inputs.
   // Used in card modal or screen where input exists.
