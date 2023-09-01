@@ -7,6 +7,8 @@ import { useWebViewState } from "../context";
 import Svg, { Path } from "react-native-svg";
 import { RectButton } from "../../../../components/rect-button";
 import { useSmartNavigation } from "../../../../navigation";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../../stores";
 
 const ArrowLeftIcon: FunctionComponent<{
   size: number;
@@ -59,6 +61,22 @@ const RefreshIcon: FunctionComponent<{
   );
 };
 
+const StarIcon: FunctionComponent<{ size: number; color: string }> = ({
+  size = 32,
+  color,
+}) => {
+  return (
+    <Svg width={size} height={size} fill="none" viewBox="0 0 32 32">
+      <Path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M14.3841 4.28107C14.9819 2.84381 17.0179 2.84381 17.6157 4.28107L20.3917 10.9554L27.5972 11.533C29.1488 11.6574 29.778 13.5938 28.5958 14.6065L23.106 19.3091L24.7832 26.3404C25.1444 27.8545 23.4972 29.0513 22.1688 28.2399L15.9999 24.4719L9.83105 28.2399C8.50263 29.0513 6.85544 27.8545 7.21661 26.3404L8.89384 19.3091L3.40404 14.6065C2.22185 13.5938 2.85102 11.6574 4.40267 11.533L11.6081 10.9554L14.3841 4.28107Z"
+        fill={color}
+      />
+    </Svg>
+  );
+};
+
 const HomeIcon: FunctionComponent<{
   size: number;
   color: string;
@@ -74,8 +92,9 @@ const HomeIcon: FunctionComponent<{
   );
 };
 
-export const OnScreenWebpageScreenHeader: FunctionComponent = () => {
+export const OnScreenWebpageScreenHeader: FunctionComponent = observer(() => {
   const style = useStyle();
+  const { favoriteStore } = useStore();
 
   const safeAreaInsets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
@@ -84,6 +103,11 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = () => {
   const smartNavigation = useSmartNavigation();
 
   const webViewState = useWebViewState();
+
+  const title = webViewState.name
+    .replace("https://", "")
+    .replace("http://", "")
+    .replace("www.", "");
 
   return (
     <View
@@ -132,7 +156,7 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = () => {
           <Text
             style={style.flatten(["h4", "color-text-middle", "margin-right-8"])}
           >
-            {webViewState.name}
+            {title.length > 15 ? `${title.substring(0, 15)}...` : title}
           </Text>
           <RefreshIcon
             size={20}
@@ -208,6 +232,33 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = () => {
           </RectButton>
           <View style={style.get("flex-1")} />
           <RectButton
+            style={style.flatten(["border-radius-4", "padding-4"])}
+            rippleColor={
+              style.flatten(["color-blue-50", "dark:color-platinum-300"]).color
+            }
+            onPress={() => {
+              if (favoriteStore.isSaved(webViewState.url)) {
+                favoriteStore.removeUrl(webViewState.url);
+              } else {
+                favoriteStore.addUrl(webViewState.url);
+              }
+            }}
+          >
+            <StarIcon
+              size={32}
+              color={
+                style.flatten([
+                  favoriteStore.isSaved(webViewState.url)
+                    ? "color-blue-400"
+                    : "color-gray-100",
+                  favoriteStore.isSaved(webViewState.url)
+                    ? "dark:color-blue-400"
+                    : "dark:color-platinum-300",
+                ]).color
+              }
+            />
+          </RectButton>
+          <RectButton
             style={style.flatten([
               "border-radius-4",
               "padding-4",
@@ -232,4 +283,4 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = () => {
       </View>
     </View>
   );
-};
+});

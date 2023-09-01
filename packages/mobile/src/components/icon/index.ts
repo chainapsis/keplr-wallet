@@ -16,3 +16,4 @@ export * from "./refresh";
 export * from "./unconnect";
 export * from "./google";
 export * from "./apple";
+export * from "./globe";
