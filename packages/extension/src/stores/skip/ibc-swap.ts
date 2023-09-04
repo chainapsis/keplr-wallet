@@ -1,4 +1,9 @@
-import { ChainGetter, HasMapStore, IChainStore } from "@keplr-wallet/stores";
+import {
+  ChainGetter,
+  HasMapStore,
+  IChainInfoImpl,
+  IChainStore,
+} from "@keplr-wallet/stores";
 import { Currency, IBCCurrency } from "@keplr-wallet/types";
 import { ObservableQueryAssets } from "./assets";
 import { computed, makeObservable } from "mobx";
@@ -190,5 +195,71 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     }
 
     return res;
+  }
+
+  @computed
+  get swapDestinationCurrencies(): {
+    chainInfo: IChainInfoImpl;
+    currencies: (Currency | IBCCurrency)[];
+  }[] {
+    const swapChainInfo = this.chainStore.getChain(this.swapVenue.chainId);
+
+    const queryAssets = this.queryAssets.getAssets(swapChainInfo.chainId);
+    const assets = queryAssets.assets;
+
+    // Key is chain identifier
+    const res = new Map<
+      string,
+      {
+        chainInfo: IChainInfoImpl;
+        currencies: (Currency | IBCCurrency)[];
+      }
+    >();
+
+    const getMap = (chainId: string) => {
+      const chainIdentifier = this.chainStore.getChain(chainId).chainIdentifier;
+      let inner = res.get(chainIdentifier);
+      if (!inner) {
+        inner = {
+          chainInfo: this.chainStore.getChain(chainId),
+          currencies: [],
+        };
+        res.set(chainIdentifier, inner);
+      }
+
+      return inner;
+    };
+
+    for (const asset of assets) {
+      const chainId = asset.chainId;
+
+      const currency = this.chainStore
+        .getChain(chainId)
+        .findCurrency(asset.denom);
+
+      if (currency) {
+        // If ibc currency is well known.
+        if (
+          "originCurrency" in currency &&
+          currency.originCurrency &&
+          "originChainId" in currency &&
+          currency.originChainId &&
+          // XXX: multi-hop ibc currency는 나중에 생각해본다...
+          currency.paths.length === 1
+        ) {
+          // 일단 현재는 복잡한 케이스는 생각하지 않는다.
+          // 오스모시스를 거쳐서 오기 때문에 ibc 모듈만 있다면 자산을 받을 수 있다.
+          const originCurrency = currency.originCurrency;
+          const inner = getMap(currency.originChainId);
+          inner.currencies.push(originCurrency);
+        } else if (!("paths" in currency)) {
+          // if currency is not ibc currency
+          const inner = getMap(chainId);
+          inner.currencies.push(currency);
+        }
+      }
+    }
+
+    return Array.from(res.values());
   }
 }

@@ -153,6 +153,8 @@ export const SwapAssetInfo: FunctionComponent<{
               const outCoinMinimalDenom = searchParams.get(
                 "outCoinMinimalDenom"
               );
+              // from에 대한 currency를 선택하고 나면 이미 input 값의 의미(?) 자체가 크게 변했기 때문에
+              // 다른 state는 유지할 필요가 없다. query string을 단순하게 to에 대한 currency만 유지한다.
               navigate(
                 `/send/select-asset?isIBCSwap=true&navigateReplace=true&navigateTo=${encodeURIComponent(
                   `/ibc-swap?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}${(() => {
@@ -174,7 +176,22 @@ export const SwapAssetInfo: FunctionComponent<{
                 )}`
               );
             } else {
-              console.log("TODO");
+              // to에 대한 currency를 선택할 때 from에서 선택한 currency와 다른 state들은 여전히 유지시켜야한다.
+              // 그러므로 query string을 최대한 유지한다.
+              const qs = Object.fromEntries(searchParams.entries());
+              delete qs["outChainId"];
+              delete qs["outCoinMinimalDenom"];
+              navigate(
+                `/send/select-asset?isIBCSwapDestination=true&navigateReplace=true&navigateTo=${encodeURIComponent(
+                  `/ibc-swap?outChainId={chainId}&outCoinMinimalDenom={coinMinimalDenom}${(() => {
+                    let q = "";
+                    for (const [key, value] of Object.entries(qs)) {
+                      q += `&${key}=${value}`;
+                    }
+                    return q;
+                  })()}`
+                )}`
+              );
             }
           }}
         >

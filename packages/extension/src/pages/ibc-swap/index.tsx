@@ -111,8 +111,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       }
 
       const tx = ibcSwapConfigs.amountConfig.getTxIfReady(
-        // simulation 자체는 쉽게 통과시키기 위해서 슬리피지를 100으로 설정한다.
-        100,
+        // simulation 자체는 쉽게 통과시키기 위해서 슬리피지를 50으로 설정한다.
+        50,
         SwapFeeBps.receiver
       );
       if (!tx) {
