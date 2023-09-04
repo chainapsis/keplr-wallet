@@ -57,6 +57,54 @@ export const EmbedChainInfos: AppChainInfo[] = [
       txUrl: 'https://www.mintscan.io/cosmos/txs/{txHash}',
     },
   },
+  {
+    rpc: 'https://rpc-osmosis.keplr.app',
+    rest: 'https://lcd-osmosis.keplr.app',
+    chainId: 'osmosis-1',
+    chainName: 'Osmosis',
+    stakeCurrency: {
+      coinDenom: 'OSMO',
+      coinMinimalDenom: 'uosmo',
+      coinDecimals: 6,
+      coinGeckoId: 'osmosis',
+    },
+    bip44: {coinType: 118},
+    bech32Config: Bech32Address.defaultBech32Config('osmo'),
+    currencies: [
+      {
+        coinDenom: 'OSMO',
+        coinMinimalDenom: 'uosmo',
+        coinDecimals: 6,
+        coinGeckoId: 'osmosis',
+      },
+      {
+        coinDenom: 'ION',
+        coinMinimalDenom: 'uion',
+        coinDecimals: 6,
+        coinGeckoId: 'ion',
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: 'OSMO',
+        coinMinimalDenom: 'uosmo',
+        coinDecimals: 6,
+        coinGeckoId: 'osmosis',
+        gasPriceStep: {
+          low: 0,
+          average: 0.025,
+          high: 0.04,
+        },
+      },
+    ],
+    features: [
+      'ibc-transfer',
+      'ibc-go',
+      'cosmwasm',
+      'wasmd_0.24+',
+      'osmosis-txfees',
+    ],
+  },
 ];
 
 export const CommunityChainInfoRepo = {

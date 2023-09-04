@@ -1,7 +1,6 @@
 import {CommunityChainInfoRepo, EmbedChainInfos} from '../config';
 
 import {
-  ChainStore,
   AccountStore,
   ChainSuggestStore,
   CosmosAccount,
@@ -12,23 +11,45 @@ import {
   QueriesStore,
   SignInteractionStore,
   CosmosQueries,
+  CoinGeckoPriceStore,
+  CosmwasmQueries,
+  SecretQueries,
+  OsmosisQueries,
+  ICNSQueries,
+  SecretAccount,
 } from '@keplr-wallet/stores';
 import {AsyncKVStore} from '../common';
 import {RNEnv, RNRouterUI, RNMessageRequesterInternal} from '../router';
 import {APP_PORT} from '@keplr-wallet/router';
 import EventEmitter from 'eventemitter3';
+import {HugeQueriesStore} from './huge-queries';
+import {ChainStore} from './chain';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
   public readonly chainStore: ChainStore;
+
+  public readonly hugeQueriesStore: HugeQueriesStore;
+  public readonly priceStore: CoinGeckoPriceStore;
 
   public readonly interactionStore: InteractionStore;
   public readonly permissionStore: PermissionStore;
   public readonly signInteractionStore: SignInteractionStore;
   public readonly chainSuggestStore: ChainSuggestStore;
 
-  public readonly queriesStore: QueriesStore<[CosmosQueries]>;
-  public readonly accountStore: AccountStore<[CosmosAccount]>;
+  public readonly queriesStore: QueriesStore<
+    [
+      // AgoricQueries,
+      CosmosQueries,
+      CosmwasmQueries,
+      SecretQueries,
+      OsmosisQueries,
+      // KeplrETCQueries,
+      ICNSQueries,
+      // TokenContractsQueries,
+    ]
+  >;
+  public readonly accountStore: AccountStore<[CosmosAccount, SecretAccount]>;
 
   constructor() {
     const router = new RNRouterUI(RNEnv.produceEnv);
@@ -50,7 +71,11 @@ export class RootStore {
       new RNMessageRequesterInternal(),
     );
 
-    this.chainStore = new ChainStore(EmbedChainInfos);
+    this.chainStore = new ChainStore(
+      EmbedChainInfos,
+      this.keyRingStore,
+      new RNMessageRequesterInternal(),
+    );
 
     this.permissionStore = new PermissionStore(
       this.interactionStore,
@@ -62,6 +87,7 @@ export class RootStore {
       CommunityChainInfoRepo,
     );
 
+    //FIXME - @keplr-wallet/stores를 최신 버전으로 업데이트를 해야함
     this.queriesStore = new QueriesStore(
       new AsyncKVStore('store_queries'),
       this.chainStore,
@@ -69,6 +95,19 @@ export class RootStore {
         responseDebounceMs: 75,
       },
       CosmosQueries.use(),
+      // // AgoricQueries.use(),
+      CosmwasmQueries.use(),
+      SecretQueries.use({
+        apiGetter: getKeplrFromWindow,
+      }),
+      OsmosisQueries.use(),
+      // KeplrETCQueries.use({
+      //   ethereumURL: EthereumEndpoint,
+      // }),
+      ICNSQueries.use(),
+      // TokenContractsQueries.use({
+      //   tokenContractListURL: TokenContractListURL,
+      // }),
     );
 
     this.accountStore = new AccountStore(
@@ -186,6 +225,91 @@ export class RootStore {
           }
         },
       }),
+      SecretAccount.use({
+        queriesStore: this.queriesStore,
+        msgOptsCreator: chainId => {
+          if (chainId.startsWith('secret-')) {
+            return {
+              send: {
+                secret20: {
+                  gas: 175000,
+                },
+              },
+              createSecret20ViewingKey: {
+                gas: 175000,
+              },
+            };
+          }
+        },
+      }),
+    );
+
+    this.priceStore = new CoinGeckoPriceStore(
+      new AsyncKVStore('store_prices'),
+      {
+        usd: {
+          currency: 'usd',
+          symbol: '$',
+          maxDecimals: 2,
+          locale: 'en-US',
+        },
+        eur: {
+          currency: 'eur',
+          symbol: '€',
+          maxDecimals: 2,
+          locale: 'de-DE',
+        },
+        gbp: {
+          currency: 'gbp',
+          symbol: '£',
+          maxDecimals: 2,
+          locale: 'en-GB',
+        },
+        cad: {
+          currency: 'cad',
+          symbol: 'CA$',
+          maxDecimals: 2,
+          locale: 'en-CA',
+        },
+        rub: {
+          currency: 'rub',
+          symbol: '₽',
+          maxDecimals: 0,
+          locale: 'ru',
+        },
+        krw: {
+          currency: 'krw',
+          symbol: '₩',
+          maxDecimals: 0,
+          locale: 'ko-KR',
+        },
+        hkd: {
+          currency: 'hkd',
+          symbol: 'HK$',
+          maxDecimals: 1,
+          locale: 'en-HK',
+        },
+        cny: {
+          currency: 'cny',
+          symbol: '¥',
+          maxDecimals: 1,
+          locale: 'zh-CN',
+        },
+        jpy: {
+          currency: 'jpy',
+          symbol: '¥',
+          maxDecimals: 0,
+          locale: 'ja-JP',
+        },
+      },
+      'usd',
+    );
+
+    this.hugeQueriesStore = new HugeQueriesStore(
+      this.chainStore,
+      this.queriesStore,
+      this.accountStore,
+      this.priceStore,
     );
 
     router.listen(APP_PORT);
