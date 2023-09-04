@@ -149,7 +149,7 @@ const EmptyIcon: FunctionComponent<{ size: number; color: string }> = ({
 
 export const WebScreen: FunctionComponent = observer(() => {
   const style = useStyle();
-  const { favoriteStore } = useStore();
+  const { favoriteWebpageStore } = useStore();
 
   const safeAreaInsets = useSafeAreaInsets();
 
@@ -191,7 +191,7 @@ export const WebScreen: FunctionComponent = observer(() => {
           setURIError("");
         }}
         onSubmitEditing={() => {
-          if (validURL(uri)) {
+          if (validURL(uri) || uri.includes("localhost")) {
             setURIError("");
             smartNavigation.pushSmart("Web.Custom", { url: uri });
             setURI("");
@@ -199,13 +199,16 @@ export const WebScreen: FunctionComponent = observer(() => {
             setURIError("Invalid URL");
           }
         }}
+        autoCorrect={false}
+        autoCapitalize="none"
+        autoCompleteType="off"
       />
 
       <React.Fragment>
         <RectButton
           style={style.flatten(["flex-row", "items-center"])}
           onPress={() => {
-            if (favoriteStore.urls.length > 2) {
+            if (favoriteWebpageStore.urls.length > 2) {
               setIsFavorite(!isFavorite);
             }
           }}
@@ -219,6 +222,18 @@ export const WebScreen: FunctionComponent = observer(() => {
             ])}
           >
             Favorite
+          </Text>
+
+          <Text
+            style={style.flatten([
+              "subtitle2",
+              "margin-right-4",
+              "color-blue-400",
+            ])}
+          >
+            {favoriteWebpageStore.urls.length > 0
+              ? favoriteWebpageStore.urls.length
+              : ""}
           </Text>
 
           <View>
@@ -246,8 +261,8 @@ export const WebScreen: FunctionComponent = observer(() => {
           </View>
         </RectButton>
 
-        {favoriteStore.urls.length > 0 ? (
-          favoriteStore.urls
+        {favoriteWebpageStore.urls.length > 0 ? (
+          favoriteWebpageStore.urls
             .filter((_, index) => (isFavorite ? true : index < 2))
             .map((url) => {
               return (
@@ -288,9 +303,9 @@ export const WebScreen: FunctionComponent = observer(() => {
                   </Text>
                   <View style={style.flatten(["flex-1"])} />
                   <TouchableOpacity
-                    style={style.flatten(["padding-left-8", "padding-y-12"])}
+                    style={style.flatten(["padding-12"])}
                     onPress={() => {
-                      favoriteStore.removeUrl(url);
+                      favoriteWebpageStore.removeUrl(url);
                     }}
                   >
                     <TrashCanIcon
