@@ -250,19 +250,19 @@ export class PermissionStore extends HasMapStore<
   *approve(id: string) {
     this._isLoading = true;
     try {
-      const waitingData = this.waitingDatas;
       yield this.interactionStore.approve(INTERACTION_TYPE_PERMISSION, id, {});
 
-      for (const data of waitingData) {
-        if (isBasicAccessPermissionType(data.data.type)) {
-          for (const chainId of data.data.chainIds) {
+      const waitingData = this.waitingDatas.find((data) => data.id === id);
+      if (waitingData) {
+        if (isBasicAccessPermissionType(waitingData.data.type)) {
+          for (const chainId of waitingData.data.chainIds) {
             yield this.getBasicAccessInfo(chainId).refreshOrigins();
           }
         } else {
-          for (const chainId of data.data.chainIds) {
+          for (const chainId of waitingData.data.chainIds) {
             yield this.getSecret20ViewingKeyAccessInfo(
               chainId,
-              splitSecret20ViewingKeyPermissionType(data.data.type)
+              splitSecret20ViewingKeyPermissionType(waitingData.data.type)
             ).refreshOrigins();
           }
         }
