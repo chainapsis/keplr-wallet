@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { WebpageScreen } from "../components/webpage-screen";
 import { RouteProp, useRoute } from "@react-navigation/native";
+import { experimentalSuggestChainOrigins } from "../constants";
 
 export const CustomWebpageScreen: FunctionComponent = () => {
   const route = useRoute<
@@ -23,5 +24,18 @@ export const CustomWebpageScreen: FunctionComponent = () => {
       ? route.params.url
       : `https://${route.params.url}`;
 
-  return <WebpageScreen name={uri} source={{ uri }} />;
+  const enableSuggestChain = experimentalSuggestChainOrigins.some(
+    (origin) => origin === uri
+  );
+
+  return (
+    <WebpageScreen
+      name={uri}
+      source={{ uri }}
+      allowsInlineMediaPlayback={true}
+      experimentalOptions={{
+        enableSuggestChain,
+      }}
+    />
+  );
 };
