@@ -139,23 +139,28 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   const [isSlippageModalOpen, setIsSlippageModalOpen] = useState(false);
 
   useEffect(() => {
-    setSearchParams((prev) => {
-      if (ibcSwapConfigs.amountConfig.outChainId) {
-        prev.set("outChainId", ibcSwapConfigs.amountConfig.outChainId);
-      } else {
-        prev.delete("outChainId");
-      }
-      if (ibcSwapConfigs.amountConfig.outCurrency.coinMinimalDenom) {
-        prev.set(
-          "outCoinMinimalDenom",
-          ibcSwapConfigs.amountConfig.outCurrency.coinMinimalDenom
-        );
-      } else {
-        prev.delete("outCoinMinimalDenom");
-      }
+    setSearchParams(
+      (prev) => {
+        if (ibcSwapConfigs.amountConfig.outChainId) {
+          prev.set("outChainId", ibcSwapConfigs.amountConfig.outChainId);
+        } else {
+          prev.delete("outChainId");
+        }
+        if (ibcSwapConfigs.amountConfig.outCurrency.coinMinimalDenom) {
+          prev.set(
+            "outCoinMinimalDenom",
+            ibcSwapConfigs.amountConfig.outCurrency.coinMinimalDenom
+          );
+        } else {
+          prev.delete("outCoinMinimalDenom");
+        }
 
-      return prev;
-    });
+        return prev;
+      },
+      {
+        replace: true,
+      }
+    );
   }, [
     ibcSwapConfigs.amountConfig.outChainId,
     ibcSwapConfigs.amountConfig.outCurrency.coinMinimalDenom,
