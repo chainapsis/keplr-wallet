@@ -182,7 +182,15 @@ export const SwapAssetInfo: FunctionComponent<{
               delete qs["outChainId"];
               delete qs["outCoinMinimalDenom"];
               navigate(
-                `/send/select-asset?isIBCSwapDestination=true&navigateReplace=true&navigateTo=${encodeURIComponent(
+                `/ibc-swap/select-destination?${(() => {
+                  if (amountConfig.amount.length === 1) {
+                    return `excludeKey=${encodeURIComponent(
+                      `${amountConfig.chainInfo.chainIdentifier}/${amountConfig.amount[0].currency.coinMinimalDenom}`
+                    )}&`;
+                  }
+
+                  return "";
+                })()}navigateReplace=true&navigateTo=${encodeURIComponent(
                   `/ibc-swap?outChainId={chainId}&outCoinMinimalDenom={coinMinimalDenom}${(() => {
                     let q = "";
                     for (const [key, value] of Object.entries(qs)) {

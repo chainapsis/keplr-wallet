@@ -197,11 +197,15 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     return res;
   }
 
+  // Key is chain identifier
   @computed
-  get swapDestinationCurrencies(): {
-    chainInfo: IChainInfoImpl;
-    currencies: (Currency | IBCCurrency)[];
-  }[] {
+  get swapDestinationCurrenciesMap(): Map<
+    string,
+    {
+      chainInfo: IChainInfoImpl;
+      currencies: Currency[];
+    }
+  > {
     const swapChainInfo = this.chainStore.getChain(this.swapVenue.chainId);
 
     const queryAssets = this.queryAssets.getAssets(swapChainInfo.chainId);
@@ -212,7 +216,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       string,
       {
         chainInfo: IChainInfoImpl;
-        currencies: (Currency | IBCCurrency)[];
+        currencies: Currency[];
       }
     >();
 
@@ -260,6 +264,14 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       }
     }
 
-    return Array.from(res.values());
+    return res;
+  }
+
+  @computed
+  get swapDestinationCurrencies(): {
+    chainInfo: IChainInfoImpl;
+    currencies: Currency[];
+  }[] {
+    return Array.from(this.swapDestinationCurrenciesMap.values());
   }
 }

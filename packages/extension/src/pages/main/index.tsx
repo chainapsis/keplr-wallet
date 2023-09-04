@@ -17,7 +17,6 @@ import {
 } from "./components";
 import { Stack } from "../../components/stack";
 import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
-import { ChainInfo } from "@keplr-wallet/types";
 import { ArrowTopRightOnSquareIcon } from "../../components/icon";
 import { Box } from "../../components/box";
 import { Modal } from "../../components/modal";
@@ -30,7 +29,7 @@ import { StakedTabView } from "./staked";
 import { SearchTextInput } from "../../components/input";
 import { useSpringValue } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
-import { QueryError } from "@keplr-wallet/stores";
+import { IChainInfoImpl, QueryError } from "@keplr-wallet/stores";
 import { Skeleton } from "../../components/skeleton";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
@@ -43,7 +42,7 @@ import { MainHeaderLayout } from "./layouts/header";
 
 export interface ViewToken {
   token: CoinPretty;
-  chainInfo: ChainInfo;
+  chainInfo: IChainInfoImpl;
   isFetching: boolean;
   error: QueryError<any> | undefined;
 }

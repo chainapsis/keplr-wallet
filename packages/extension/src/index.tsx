@@ -84,6 +84,7 @@ import {
   BottomTabsRouteProvider,
   BottomTabSwapIcon,
 } from "./bottom-tabs";
+import { IBCSwapDestinationSelectAssetPage } from "./pages/ibc-swap/select-asset";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -295,6 +296,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               <Route
                 path="/send/select-asset"
                 element={<SendSelectAssetPage />}
+              />
+              <Route
+                path="/ibc-swap/select-destination"
+                element={<IBCSwapDestinationSelectAssetPage />}
               />
               <Route path="/setting" element={<SettingPage />} />
               <Route path="/setting/general" element={<SettingGeneralPage />} />
