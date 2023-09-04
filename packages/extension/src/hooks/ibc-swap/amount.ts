@@ -272,6 +272,14 @@ export class IBCSwapAmountConfig extends AmountConfig {
       };
     }
 
+    const routeError = queryIBCSwap.getQueryRoute().error;
+    if (routeError) {
+      return {
+        ...prev,
+        error: new Error(routeError.message),
+      };
+    }
+
     if (queryIBCSwap.getQueryRoute().response?.data.does_swap === false) {
       return {
         ...prev,
