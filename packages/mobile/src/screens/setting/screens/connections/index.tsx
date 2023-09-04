@@ -6,11 +6,13 @@ import { Text, View } from "react-native";
 import { useStyle } from "../../../../styles";
 import { GlobeIcon, TrashCanIcon } from "../../../../components/icon";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { WCV2MessageRequester } from "../../../../stores/wallet-connect-v2/msg-requester";
+import { WCMessageRequester } from "../../../../stores/wallet-connect/msg-requester";
 
 export const SettingManageConnectionsScreen: FunctionComponent = observer(
   () => {
     const style = useStyle();
-    const { chainStore, permissionStore } = useStore();
+    const { chainStore, permissionStore, walletConnectStore } = useStore();
 
     return (
       <PageWithScrollViewInBottomTabView backgroundMode="tertiary">
@@ -20,6 +22,23 @@ export const SettingManageConnectionsScreen: FunctionComponent = observer(
           );
 
           if (basicAccessInfo.origins.length === 0) {
+            return null;
+          }
+
+          if (WCV2MessageRequester.isVirtualURL(basicAccessInfo.origins[0])) {
+            return null;
+          }
+
+          if (
+            WCMessageRequester.isVirtualSessionURL(
+              basicAccessInfo.origins[0]
+            ) &&
+            walletConnectStore.getSession(
+              WCMessageRequester.getSessionIdFromVirtualURL(
+                basicAccessInfo.origins[0]
+              )
+            )
+          ) {
             return null;
           }
 
