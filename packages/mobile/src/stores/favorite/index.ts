@@ -1,7 +1,7 @@
 import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { action, flow, makeObservable, observable } from "mobx";
 
-export class FavoriteStore {
+export class FavoriteWebpageStore {
   @observable
   protected _urls: string[] = [];
 

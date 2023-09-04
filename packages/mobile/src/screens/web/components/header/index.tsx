@@ -94,7 +94,7 @@ const HomeIcon: FunctionComponent<{
 
 export const OnScreenWebpageScreenHeader: FunctionComponent = observer(() => {
   const style = useStyle();
-  const { favoriteStore } = useStore();
+  const { favoriteWebpageStore } = useStore();
 
   const safeAreaInsets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
@@ -237,10 +237,10 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = observer(() => {
               style.flatten(["color-blue-50", "dark:color-platinum-300"]).color
             }
             onPress={() => {
-              if (favoriteStore.isSaved(webViewState.url)) {
-                favoriteStore.removeUrl(webViewState.url);
+              if (favoriteWebpageStore.isSaved(webViewState.url)) {
+                favoriteWebpageStore.removeUrl(webViewState.url);
               } else {
-                favoriteStore.addUrl(webViewState.url);
+                favoriteWebpageStore.addUrl(webViewState.url);
               }
             }}
           >
@@ -248,10 +248,10 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = observer(() => {
               size={32}
               color={
                 style.flatten([
-                  favoriteStore.isSaved(webViewState.url)
+                  favoriteWebpageStore.isSaved(webViewState.url)
                     ? "color-blue-400"
                     : "color-gray-100",
-                  favoriteStore.isSaved(webViewState.url)
+                  favoriteWebpageStore.isSaved(webViewState.url)
                     ? "dark:color-blue-400"
                     : "dark:color-platinum-300",
                 ]).color
