@@ -28,7 +28,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
       for (const chainInfo of chainStore.chainInfos) {
         // If mnemonic is fresh, there is no way that additional coin type account has value to select.
-        console.log(chainInfo.chainId);
         promises.push(
           (async () => {
             await keyRingStore.finalizeMnemonicKeyCoinType(
@@ -100,8 +99,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
       }
 
       await Promise.allSettled(promises);
-
-      console.log(candidateAddresses);
 
       //NOTE - 전체 체인 enable 하는 과정
       const enabledChainIdentifiers: string[] =
@@ -177,8 +174,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
     return result;
   }, [hugeQueriesStore.allKnownBalances]);
 
-  console.log(availableTotalPrice?.toString());
-
   return (
     <React.Fragment>
       <PageWithScrollView backgroundMode={'default'}>
@@ -190,125 +185,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
               'font-medium',
               'h1',
             ])}>
-            test
-          </Text>
-          <Text
-            style={style.flatten([
-              'color-white',
-              'font-extrabold',
-              'font-medium',
-              'h1',
-            ])}>
-            test
-          </Text>
-          <Text
-            style={style.flatten([
-              'color-white',
-              'font-extrabold',
-              'font-medium',
-              'h1',
-            ])}>
-            test
-          </Text>
-          <Text
-            style={style.flatten([
-              'color-white',
-              'font-extrabold',
-              'font-medium',
-              'h1',
-            ])}>
-            test
-          </Text>
-          <Text
-            style={style.flatten([
-              'color-white',
-              'font-extrabold',
-              'font-medium',
-              'h1',
-            ])}>
-            test
-          </Text>
-          <Text
-            style={style.flatten([
-              'color-white',
-              'font-extrabold',
-              'font-medium',
-              'h1',
-            ])}>
-            test
-          </Text>
-          <Text
-            style={style.flatten([
-              'color-white',
-              'font-extrabold',
-              'font-medium',
-              'h1',
-            ])}>
-            test
-          </Text>
-          <Text
-            style={style.flatten([
-              'color-white',
-              'font-extrabold',
-              'font-medium',
-              'h1',
-            ])}>
-            test
-          </Text>
-
-          <Text
-            style={style.flatten([
-              'color-white',
-              'font-extrabold',
-              'font-medium',
-              'h1',
-            ])}>
-            test
-          </Text>
-          <Text
-            style={style.flatten([
-              'color-white',
-              'font-extrabold',
-              'font-medium',
-              'h1',
-            ])}>
-            test
-          </Text>
-          <Text
-            style={style.flatten([
-              'color-white',
-              'font-extrabold',
-              'font-medium',
-              'h1',
-            ])}>
-            test
-          </Text>
-          <Text
-            style={style.flatten([
-              'color-red-100',
-              'font-extrabold',
-              'font-medium',
-              'h1',
-            ])}>
-            test
-          </Text>
-          <Text
-            style={style.flatten([
-              'color-red-100',
-              'font-extrabold',
-              'font-medium',
-              'h1',
-            ])}>
-            test
-          </Text>
-          <Text
-            style={style.flatten([
-              'color-red-100',
-              'font-extrabold',
-              'font-medium',
-              'h1',
-            ])}>
-            test
+            {availableTotalPrice?.toString()}
           </Text>
         </View>
       </PageWithScrollView>
