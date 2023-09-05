@@ -21,6 +21,7 @@ export const MainHeaderLayout: FunctionComponent<
     | "fixedHeight"
     | "additionalPaddingBottom"
     | "onSubmit"
+    | "headerContainerStyle"
   >
 > = observer((props) => {
   const { children, ...otherProps } = props;

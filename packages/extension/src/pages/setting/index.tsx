@@ -1,6 +1,5 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
-import { HeaderLayout } from "../../layouts/header";
 import { Stack } from "../../components/stack";
 import { PageButton } from "./components";
 import {
@@ -12,13 +11,14 @@ import {
 import { useNavigate } from "react-router";
 import { Box } from "../../components/box";
 import { useIntl } from "react-intl";
+import { MainHeaderLayout } from "../main/layouts/header";
 
 export const SettingPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
   const intl = useIntl();
 
   return (
-    <HeaderLayout title={intl.formatMessage({ id: "page.setting.title" })}>
+    <MainHeaderLayout>
       <Box padding="0.75rem" paddingTop="0">
         <Stack gutter="0.5rem">
           <PageButton
@@ -65,6 +65,6 @@ export const SettingPage: FunctionComponent = observer(() => {
           />
         </Stack>
       </Box>
-    </HeaderLayout>
+    </MainHeaderLayout>
   );
 });

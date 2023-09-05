@@ -4,6 +4,7 @@ import {
   IFeeConfig,
   IGasConfig,
   IGasSimulator,
+  InsufficientFeeError,
   ISenderConfig,
 } from "@keplr-wallet/hooks";
 import { autorun } from "mobx";
@@ -14,11 +15,13 @@ import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
 import { Gutter } from "../../../../components/gutter";
 import { XAxis, YAxis } from "../../../../components/axis";
-import { Body3, Subtitle4 } from "../../../../components/typography";
+import { Body3, Caption2, Subtitle4 } from "../../../../components/typography";
 import { Tooltip } from "../../../../components/tooltip";
 import { LoadingIcon } from "../../../../components/icon";
 import { TransactionFeeModal } from "../../../../components/input/fee-control/modal";
 import { Modal } from "../../../../components/modal";
+import { useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const SwapFeeInfo: FunctionComponent<{
   senderConfig: ISenderConfig;
@@ -29,6 +32,8 @@ export const SwapFeeInfo: FunctionComponent<{
 }> = observer(
   ({ senderConfig, amountConfig, gasConfig, feeConfig, gasSimulator }) => {
     const { queriesStore, chainStore, priceStore } = useStore();
+
+    const theme = useTheme();
 
     useLayoutEffect(() => {
       if (
@@ -133,33 +138,177 @@ export const SwapFeeInfo: FunctionComponent<{
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    return (
-      <Box
-        padding="1rem"
-        backgroundColor={ColorPalette["gray-600"]}
-        borderRadius="0.375rem"
-      >
-        {feeConfig.fees.length > 0 ? (
-          <XAxis alignY="center">
-            <Box
-              cursor="pointer"
-              onClick={(e) => {
-                e.preventDefault();
+    const intl = useIntl();
 
-                setIsModalOpen(true);
-              }}
-            >
-              <Subtitle4
-                style={{
-                  textDecoration: "underline",
+    const error = (() => {
+      if (feeConfig.uiProperties.error) {
+        if (feeConfig.uiProperties.error instanceof InsufficientFeeError) {
+          return intl.formatMessage({
+            id: "components.input.fee-control.error.insufficient-fee",
+          });
+        }
+
+        return (
+          feeConfig.uiProperties.error.message ||
+          feeConfig.uiProperties.error.toString()
+        );
+      }
+
+      if (feeConfig.uiProperties.warning) {
+        return (
+          feeConfig.uiProperties.warning.message ||
+          feeConfig.uiProperties.warning.toString()
+        );
+      }
+
+      if (gasConfig.uiProperties.error) {
+        return (
+          gasConfig.uiProperties.error.message ||
+          gasConfig.uiProperties.error.toString()
+        );
+      }
+
+      if (gasConfig.uiProperties.warning) {
+        return (
+          gasConfig.uiProperties.warning.message ||
+          gasConfig.uiProperties.warning.toString()
+        );
+      }
+    })();
+
+    return (
+      <React.Fragment>
+        <Box
+          padding="1rem"
+          backgroundColor={ColorPalette["gray-600"]}
+          borderRadius="0.375rem"
+          borderWidth={"1px"}
+          borderColor={
+            error != null
+              ? theme.mode === "light"
+                ? ColorPalette["orange-400"]
+                : ColorPalette["yellow-400"]
+              : "transparent"
+          }
+        >
+          {feeConfig.fees.length > 0 ? (
+            <XAxis alignY="center">
+              <Box
+                cursor="pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+
+                  setIsModalOpen(true);
                 }}
-                color={ColorPalette["gray-200"]}
               >
-                Transaction Fee
-              </Subtitle4>
-            </Box>
-            {feeConfig.uiProperties.loadingState ||
-            gasSimulator.uiProperties.loadingState ? (
+                <Subtitle4
+                  style={{
+                    textDecoration: "underline",
+                  }}
+                  color={ColorPalette["gray-200"]}
+                >
+                  Transaction Fee
+                </Subtitle4>
+              </Box>
+              {feeConfig.uiProperties.loadingState ||
+              gasSimulator.uiProperties.loadingState ? (
+                <Box
+                  height="1px"
+                  alignX="center"
+                  alignY="center"
+                  marginLeft="0.2rem"
+                >
+                  {/* 로딩 아이콘이 부모의 height에 영향을 끼치지 않게 하기 위한 트릭 구조임 */}
+                  <Box width="1rem" height="1rem">
+                    <LoadingIcon
+                      width="1rem"
+                      height="1rem"
+                      color={ColorPalette["gray-100"]}
+                    />
+                  </Box>
+                </Box>
+              ) : null}
+
+              <div
+                style={{
+                  flex: 1,
+                }}
+              />
+
+              <Body3>
+                {(() => {
+                  let totalPrice: PricePretty | undefined;
+                  if (feeConfig.fees.length > 0) {
+                    const fee = feeConfig.fees[0];
+                    const price = priceStore.calculatePrice(fee);
+                    if (price) {
+                      if (totalPrice) {
+                        totalPrice = totalPrice.add(price);
+                      } else {
+                        totalPrice = price;
+                      }
+                    } else {
+                      return "-";
+                    }
+                  }
+
+                  if (totalPrice) {
+                    return totalPrice.toString();
+                  }
+                  return "-";
+                })()}
+              </Body3>
+
+              <Gutter size="0.25rem" />
+              <Body3 color={ColorPalette["gray-100"]}>=</Body3>
+              <Gutter size="0.25rem" />
+              <YAxis>
+                {feeConfig.fees.map((fee) => {
+                  return (
+                    <Body3
+                      color={ColorPalette["gray-100"]}
+                      key={fee.currency.coinMinimalDenom}
+                    >
+                      {fee
+                        .maxDecimals(6)
+                        .trim(true)
+                        .shrink(true)
+                        .inequalitySymbol(true)
+                        .hideIBCMetadata(true)
+                        .toString()}
+                    </Body3>
+                  );
+                })}
+              </YAxis>
+            </XAxis>
+          ) : null}
+
+          <Gutter size="0.62rem" />
+
+          <XAxis alignY="center">
+            <Subtitle4 color={ColorPalette["gray-300"]}>
+              Keplr Swap Fee
+            </Subtitle4>
+            <Gutter size="0.2rem" />
+            <Tooltip
+              content={`TODO: ${(() => {
+                const feeRatioPretty = new IntPretty(
+                  amountConfig.swapFeeBps
+                ).moveDecimalPointLeft(2);
+                return feeRatioPretty
+                  .trim(true)
+                  .maxDecimals(4)
+                  .inequalitySymbol(true)
+                  .toString();
+              })()}%`}
+            >
+              <InfoIcon
+                width="1rem"
+                height="1rem"
+                color={ColorPalette["gray-400"]}
+              />
+            </Tooltip>
+            {amountConfig.isFetching ? (
               <Box
                 height="1px"
                 alignX="center"
@@ -177,132 +326,55 @@ export const SwapFeeInfo: FunctionComponent<{
               </Box>
             ) : null}
 
-            <div
-              style={{
-                flex: 1,
-              }}
-            />
+            <div style={{ flex: 1 }} />
 
-            <Body3>
-              {(() => {
-                let totalPrice: PricePretty | undefined;
-                if (feeConfig.fees.length > 0) {
-                  const fee = feeConfig.fees[0];
-                  const price = priceStore.calculatePrice(fee);
-                  if (price) {
-                    if (totalPrice) {
-                      totalPrice = totalPrice.add(price);
-                    } else {
-                      totalPrice = price;
-                    }
-                  } else {
-                    return "-";
-                  }
-                }
-
-                if (totalPrice) {
-                  return totalPrice.toString();
-                }
-                return "-";
-              })()}
-            </Body3>
-
-            <Gutter size="0.25rem" />
-            <Body3 color={ColorPalette["gray-100"]}>=</Body3>
-            <Gutter size="0.25rem" />
-            <YAxis>
-              {feeConfig.fees.map((fee) => {
-                return (
-                  <Body3
-                    color={ColorPalette["gray-100"]}
-                    key={fee.currency.coinMinimalDenom}
-                  >
-                    {fee
-                      .maxDecimals(6)
-                      .trim(true)
-                      .shrink(true)
-                      .inequalitySymbol(true)
-                      .hideIBCMetadata(true)
-                      .toString()}
-                  </Body3>
-                );
-              })}
-            </YAxis>
+            <Subtitle4 color={ColorPalette["gray-300"]}>
+              {amountConfig.swapFee
+                .map((fee) =>
+                  fee
+                    .maxDecimals(6)
+                    .trim(true)
+                    .shrink(true)
+                    .inequalitySymbol(true)
+                    .hideIBCMetadata(true)
+                    .toString()
+                )
+                .join(", ")}
+            </Subtitle4>
           </XAxis>
-        ) : null}
 
-        <Gutter size="0.62rem" />
-
-        <XAxis alignY="center">
-          <Subtitle4 color={ColorPalette["gray-300"]}>Keplr Swap Fee</Subtitle4>
-          <Gutter size="0.2rem" />
-          <Tooltip
-            content={`TODO: ${(() => {
-              const feeRatioPretty = new IntPretty(
-                amountConfig.swapFeeBps
-              ).moveDecimalPointLeft(2);
-              return feeRatioPretty
-                .trim(true)
-                .maxDecimals(4)
-                .inequalitySymbol(true)
-                .toString();
-            })()}%`}
-          >
-            <InfoIcon
-              width="1rem"
-              height="1rem"
-              color={ColorPalette["gray-400"]}
-            />
-          </Tooltip>
-          {amountConfig.isFetching ? (
-            <Box
-              height="1px"
-              alignX="center"
-              alignY="center"
-              marginLeft="0.2rem"
-            >
-              {/* 로딩 아이콘이 부모의 height에 영향을 끼치지 않게 하기 위한 트릭 구조임 */}
-              <Box width="1rem" height="1rem">
-                <LoadingIcon
-                  width="1rem"
-                  height="1rem"
-                  color={ColorPalette["gray-100"]}
-                />
-              </Box>
-            </Box>
-          ) : null}
-
-          <div style={{ flex: 1 }} />
-
-          <Subtitle4 color={ColorPalette["gray-300"]}>
-            {amountConfig.swapFee
-              .map((fee) =>
-                fee
-                  .maxDecimals(6)
-                  .trim(true)
-                  .shrink(true)
-                  .inequalitySymbol(true)
-                  .hideIBCMetadata(true)
-                  .toString()
-              )
-              .join(", ")}
-          </Subtitle4>
-        </XAxis>
-
-        <Modal
-          isOpen={isModalOpen}
-          align="bottom"
-          close={() => setIsModalOpen(false)}
-        >
-          <TransactionFeeModal
+          <Modal
+            isOpen={isModalOpen}
+            align="bottom"
             close={() => setIsModalOpen(false)}
-            senderConfig={senderConfig}
-            feeConfig={feeConfig}
-            gasConfig={gasConfig}
-            gasSimulator={gasSimulator}
-          />
-        </Modal>
-      </Box>
+          >
+            <TransactionFeeModal
+              close={() => setIsModalOpen(false)}
+              senderConfig={senderConfig}
+              feeConfig={feeConfig}
+              gasConfig={gasConfig}
+              gasSimulator={gasSimulator}
+            />
+          </Modal>
+        </Box>
+
+        {error != null ? (
+          <React.Fragment>
+            <Gutter size="0.25rem" />
+            <Box marginLeft="0.25rem">
+              <Caption2
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["orange-400"]
+                    : ColorPalette["yellow-400"]
+                }
+              >
+                {error}
+              </Caption2>
+            </Box>
+          </React.Fragment>
+        ) : null}
+      </React.Fragment>
     );
   }
 );

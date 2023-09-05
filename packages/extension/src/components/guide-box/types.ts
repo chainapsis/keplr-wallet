@@ -7,4 +7,6 @@ export interface GuideBoxProps {
   paragraph?: string | React.ReactNode;
   bottom?: React.ReactNode;
   color?: GuideBoxColor;
+
+  hideInformationIcon?: boolean;
 }

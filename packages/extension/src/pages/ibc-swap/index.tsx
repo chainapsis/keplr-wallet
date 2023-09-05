@@ -1,15 +1,25 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import { observer } from "mobx-react-lite";
 import { Box } from "../../components/box";
 import { useStore } from "../../stores";
 import { useNavigate } from "react-router";
-import { useIBCSwapConfig } from "../../hooks/ibc-swap";
+import { IBCSwapAmountConfig, useIBCSwapConfig } from "../../hooks/ibc-swap";
 import { SwapAssetInfo } from "./components/swap-asset-info";
 import { SwapFeeInfo } from "./components/swap-fee-info";
 import { Gutter } from "../../components/gutter";
 import { ColorPalette } from "../../styles";
 import { ExtensionKVStore } from "@keplr-wallet/common";
-import { useGasSimulator, useTxConfigsValidate } from "@keplr-wallet/hooks";
+import {
+  EmptyAmountError,
+  useGasSimulator,
+  useTxConfigsValidate,
+  ZeroAmountError,
+} from "@keplr-wallet/hooks";
 import { useNotification } from "../../hooks/notification";
 import { useIntl } from "react-intl";
 import { SwapFeeBps } from "../../config.ui";
@@ -20,6 +30,10 @@ import { MainHeaderLayout } from "../main/layouts/header";
 import { XAxis } from "../../components/axis";
 import { H4 } from "../../components/typography";
 import { SlippageModal } from "./components/slippage-modal";
+import { useTheme } from "styled-components";
+import { GuideBox } from "../../components/guide-box";
+import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
+import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
 
 export const IBCSwapPage: FunctionComponent = observer(() => {
   const {
@@ -29,6 +43,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     skipQueriesStore,
     uiConfigStore,
   } = useStore();
+
+  const theme = useTheme();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -196,13 +212,20 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   return (
     <MainHeaderLayout
       additionalPaddingBottom={BottomTabsHeightRem}
-      fixedHeight={true}
       bottomButton={{
         disabled: interactionBlocked,
         text: "Next",
         color: "primary",
         size: "large",
         isLoading: accountStore.getAccount(inChainId).isSendingMsg === "TODO",
+      }}
+      headerContainerStyle={{
+        borderBottomStyle: "solid",
+        borderBottomWidth: "1px",
+        borderBottomColor:
+          theme.mode === "light"
+            ? ColorPalette["gray-100"]
+            : ColorPalette["gray-500"],
       }}
       onSubmit={async (e) => {
         e.preventDefault();
@@ -264,7 +287,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         }
       }}
     >
-      <Box padding="0.75rem">
+      <Box padding="0.75rem" paddingBottom="0">
         <Box paddingX="0.5rem">
           <XAxis alignY="center">
             <H4 color={ColorPalette["white"]}>Swap</H4>
@@ -331,6 +354,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           feeConfig={ibcSwapConfigs.feeConfig}
           gasSimulator={gasSimulator}
         />
+
+        <WarningGuideBox amountConfig={ibcSwapConfigs.amountConfig} />
       </Box>
 
       <SlippageModal
@@ -344,6 +369,82 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         setIsOpen={setIsSlippageModalOpen}
       />
     </MainHeaderLayout>
+  );
+});
+
+const WarningGuideBox: FunctionComponent<{
+  amountConfig: IBCSwapAmountConfig;
+}> = observer(({ amountConfig }) => {
+  const error: string | undefined = (() => {
+    const uiProperties = amountConfig.uiProperties;
+
+    const err = uiProperties.error || uiProperties.warning;
+
+    if (err instanceof EmptyAmountError) {
+      return;
+    }
+
+    if (err instanceof ZeroAmountError) {
+      return;
+    }
+
+    if (err) {
+      return err.message || err.toString();
+    }
+
+    const queryError = amountConfig.getQueryIBCSwap()?.getQueryRoute()?.error;
+    if (queryError) {
+      return queryError.message || queryError.toString();
+    }
+  })();
+
+  // Collapse됐을때는 이미 error가 없어졌기 때문이다.
+  // 그러면 트랜지션 중에 이미 내용은 사라져있기 때문에
+  // 이 문제를 해결하기 위해서 마지막 오류를 기억해야 한다.
+  const [lastError, setLastError] = useState("");
+  useLayoutEffect(() => {
+    if (error != null) {
+      setLastError(error);
+    }
+  }, [error]);
+
+  const collapsed = error == null;
+
+  const globalSimpleBar = useGlobarSimpleBar();
+  useEffect(() => {
+    if (!collapsed) {
+      const timeoutId = setTimeout(() => {
+        const el = globalSimpleBar.ref.current?.getScrollElement();
+        if (el) {
+          // 오류 메세지가 가장 밑에 있는 관계로 유저가 잘 못볼수도 있기 때문에
+          // 트랜지션 종료 이후에 스크롤을 맨 밑으로 내린다.
+          // 어차피 높이는 대충 정해져있기 때문에 대충 큰 값을 넣으면 가장 밑으로 스크롤 된다.
+          el.scrollTo({
+            top: 1000,
+            behavior: "smooth",
+          });
+        }
+      }, 300);
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
+  }, [collapsed, globalSimpleBar.ref]);
+
+  return (
+    <React.Fragment>
+      {/* 별 차이는 없기는한데 gutter와 실제 컴포넌트의 트랜지션을 분리하는게 아주 약간 더 자연스러움 */}
+      <VerticalCollapseTransition collapsed={collapsed}>
+        <Gutter size="0.75rem" />
+      </VerticalCollapseTransition>
+      <VerticalCollapseTransition collapsed={collapsed}>
+        <GuideBox
+          color="warning"
+          title={error || lastError}
+          hideInformationIcon={true}
+        />
+      </VerticalCollapseTransition>
+    </React.Fragment>
   );
 });
 

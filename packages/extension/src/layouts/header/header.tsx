@@ -101,12 +101,7 @@ const Styles = {
     fixedHeight: boolean;
   }>`
     padding-top: 3.75rem;
-    padding-bottom: ${({ bottomPadding, additionalPaddingBottom }) => {
-      if (additionalPaddingBottom && additionalPaddingBottom !== "0") {
-        return `calc(${bottomPadding} + ${additionalPaddingBottom})`;
-      }
-      return bottomPadding;
-    }};
+    padding-bottom: ${({ bottomPadding }) => bottomPadding};
 
     ${({ layoutHeight, fixedHeight, additionalPaddingBottom }) => {
       if (!fixedHeight) {
@@ -137,6 +132,7 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
   children,
   isNotReady,
   additionalPaddingBottom,
+  headerContainerStyle,
 }) => {
   const [height, setHeight] = React.useState(() => pxToRem(600));
   const lastSetHeight = useRef(-1);
@@ -180,7 +176,7 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
 
   return (
     <Styles.Container as={onSubmit ? "form" : undefined} onSubmit={onSubmit}>
-      <Styles.HeaderContainer>
+      <Styles.HeaderContainer style={headerContainerStyle}>
         {left && !isNotReady ? (
           <Styles.HeaderLeft>{left}</Styles.HeaderLeft>
         ) : null}

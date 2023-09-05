@@ -187,6 +187,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
               originCurrency
             );
           }
+
+          // osmosis 자체에 있는 ibc currency도 넣어준다.
+          getMap(chainId).set(currency.coinMinimalDenom, currency);
         } else if (!("paths" in currency)) {
           // if currency is not ibc currency
           getMap(chainId).set(currency.coinMinimalDenom, currency);

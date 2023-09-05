@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
 import { XAxis, YAxis } from "../../../../components/axis";
-import { Subtitle2, Subtitle3 } from "../../../../components/typography";
+import { Body2, Subtitle2, Subtitle3 } from "../../../../components/typography";
 import { Gutter } from "../../../../components/gutter";
 import { HorizontalRadioGroup } from "../../../../components/radio-group";
 import { Toggle } from "../../../../components/toggle";
@@ -72,6 +72,7 @@ export const SlippageModal: FunctionComponent<{
 
           <Gutter size="1.25rem" />
           <XAxis alignY="center">
+            <Gutter size="0.5rem" />
             <Subtitle3 color={ColorPalette["gray-100"]}>
               Custom Slippage
             </Subtitle3>
@@ -106,6 +107,7 @@ export const SlippageModal: FunctionComponent<{
               type="number"
               errorBorder={!uiConfigStore.ibcSwapConfig.slippageIsValid}
               value={uiConfigStore.ibcSwapConfig.slippage}
+              right={<Body2 color={ColorPalette["gray-300"]}>%</Body2>}
               onChange={(e) => {
                 e.preventDefault();
 

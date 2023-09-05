@@ -18,4 +18,6 @@ export interface HeaderProps {
 
   onSubmit?: React.FormEventHandler<HTMLFormElement>;
   isNotReady?: boolean;
+
+  headerContainerStyle?: React.CSSProperties;
 }
