@@ -6,24 +6,40 @@ import {
   InvalidNumberAmountError,
   NegativeAmountError,
   ZeroAmountError,
-  useUndelegateTxConfig,
+  useRedelegateTxConfig,
 } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { useIntl } from "react-intl";
 import { useNavigate } from "react-router";
-import { Button, FormGroup, Input, Label } from "reactstrap";
+import {
+  Button,
+  ButtonDropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+  FormGroup,
+  Input,
+  Label,
+} from "reactstrap";
 import { useStore } from "../../stores";
 import style from "./style.module.scss";
+import { Staking } from "@keplr-wallet/stores";
+import { CoinPretty } from "@keplr-wallet/unit";
 
-export const Unstake: FunctionComponent<{
+export const Transfer: FunctionComponent<{
   validatorAddress: string;
-}> = observer(({ validatorAddress }) => {
+  validatorsList: Staking.Validator[];
+  balance: CoinPretty;
+}> = observer(({ validatorAddress, validatorsList, balance }) => {
   const navigate = useNavigate();
   const { chainStore, accountStore, queriesStore } = useStore();
   const account = accountStore.getAccount(chainStore.current.chainId);
-
-  const sendConfigs = useUndelegateTxConfig(
+  const [selectedValidator, setSelectedValidator] = useState<Staking.Validator>(
+    validatorsList[0]
+  );
+  const [showDropdown, setShowDropdown] = useState(false);
+  const sendConfigs = useRedelegateTxConfig(
     chainStore,
     queriesStore,
     accountStore,
@@ -35,11 +51,6 @@ export const Unstake: FunctionComponent<{
 
   const intl = useIntl();
   const error = amountConfig.error;
-
-  const balance = queriesStore
-    .get(amountConfig.chainId)
-    .cosmos.queryDelegations.getQueryBech32Address(amountConfig.sender)
-    .getDelegationTo(validatorAddress);
 
   const errorText: string | undefined = useMemo(() => {
     if (error) {
@@ -100,11 +111,14 @@ export const Unstake: FunctionComponent<{
       });
     },
   };
-
   const stakeClicked = async () => {
     try {
       await account.cosmos
-        .makeUndelegateTx(amountConfig.amount, validatorAddress)
+        .makeBeginRedelegateTx(
+          amountConfig.amount,
+          validatorAddress,
+          selectedValidator.operator_address
+        )
         .send(feeConfig.toStdFee(), memoConfig.memo, undefined, txnResult);
     } catch (e) {
       notification.push({
@@ -125,7 +139,53 @@ export const Unstake: FunctionComponent<{
   return (
     <React.Fragment>
       <FormGroup style={{ borderRadius: "0%", marginBottom: "2px" }}>
-        <Label className="form-control-label" style={{ width: "100%" }}>
+        <Label className="form-control-label" style={{ marginTop: "10px" }}>
+          Select Validator
+        </Label>
+        <ButtonDropdown
+          isOpen={showDropdown}
+          toggle={() => setShowDropdown((value) => !value)}
+          style={{ float: "right" }}
+        >
+          <DropdownToggle
+            className={style["dropdown"]}
+            caret
+            style={{ boxShadow: "none", paddingRight: "0px" }}
+          >
+            <span
+              style={{
+                width: "175px",
+                wordBreak: "break-all",
+                overflow: "hidden",
+                display: "inline-flex",
+                justifyContent: "space-around",
+              }}
+            >
+              {selectedValidator.description.moniker}
+            </span>
+          </DropdownToggle>
+
+          <DropdownMenu>
+            <div style={{ height: "400px", overflowY: "scroll" }}>
+              {validatorsList.map((validator) => {
+                return (
+                  <DropdownItem
+                    key={validator.operator_address}
+                    onClick={() => {
+                      setSelectedValidator(validator);
+                    }}
+                  >
+                    {validator.description.moniker}
+                  </DropdownItem>
+                );
+              })}
+            </div>
+          </DropdownMenu>
+        </ButtonDropdown>
+        <Label
+          className="form-control-label"
+          style={{ width: "100%", marginTop: "10px" }}
+        >
           <div
             className={style["balance"]}
             onClick={(e) => {
@@ -151,9 +211,7 @@ export const Unstake: FunctionComponent<{
         {errorText != null ? (
           <div className={style["errorText"]}>{errorText}</div>
         ) : null}
-        <Label className="form-control-label" style={{ fontSize: "12px" }}>
-          Your tokens will go through a 21-day unstaking process
-        </Label>
+
         <Button
           type="submit"
           color="primary"
@@ -170,7 +228,7 @@ export const Unstake: FunctionComponent<{
               height: "15px",
             }}
           />
-          Unstake
+          Transfer
         </Button>
       </FormGroup>
     </React.Fragment>

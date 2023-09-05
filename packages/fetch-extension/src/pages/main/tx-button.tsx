@@ -199,7 +199,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
         <Link
           to={
             isStakableInApp
-              ? "/validators"
+              ? "/validators/validator"
               : chainStore.current.walletUrlForStaking || ""
           }
           target={!isStakableInApp ? "_blank" : ""}
@@ -232,6 +232,9 @@ export const TxButtonView: FunctionComponent = observer(() => {
             onMouseLeave={() => {
               setIsActiveStake(false);
             }}
+            data-loading={["undelegate", "redelegate", "delegate"].includes(
+              accountInfo.txTypeInProgress
+            )}
           >
             <img
               src={isActiveStake ? activeStake : stake}

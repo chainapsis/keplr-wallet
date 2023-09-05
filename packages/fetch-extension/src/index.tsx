@@ -376,7 +376,10 @@ ReactDOM.render(
                         path="/setting/chat/readRecipt"
                         element={<ReadRecipt />}
                       />
-                      <Route path="/validators" element={<ValidatorList />} />
+                      <Route
+                        path="/validators/:operation"
+                        element={<ValidatorList />}
+                      />
                       <Route
                         path="/validators/:validator_address/:operation"
                         element={<Validator />}

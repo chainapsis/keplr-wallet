@@ -81,6 +81,17 @@
   animation: pathRect 2s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
 }
 
+.tabList {
+  display: flex;
+  flex-direction: row;
+}
+
+.tab {
+  width: 50%;
+  text-align: center;
+  cursor: pointer;
+}
+
 @keyframes pathRect {
   25% {
     stroke-dashoffset: 64;

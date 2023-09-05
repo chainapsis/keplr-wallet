@@ -1,13 +1,20 @@
+import { Staking } from "@keplr-wallet/stores";
 import { HeaderLayout } from "@layouts/header-layout";
+import { observer } from "mobx-react-lite";
 import React, { FunctionComponent, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router";
-import style from "./style.module.scss";
-import { Staking } from "@keplr-wallet/stores";
 import { useStore } from "../../stores";
-import { ValidatorDetails } from "./validator-details";
-import { observer } from "mobx-react-lite";
 import { Stake } from "./stake";
+import style from "./style.module.scss";
+import { Transfer } from "./transfer";
 import { Unstake } from "./unstake";
+import { ValidatorDetails } from "./validator-details";
+
+enum ValidatorOperation {
+  STAKE = "stake",
+  UNSTAKE = "unstake",
+  TRANSFER = "transfer",
+}
 
 export const Validator: FunctionComponent = observer(() => {
   const navigate = useNavigate();
@@ -60,8 +67,8 @@ export const Validator: FunctionComponent = observer(() => {
     <HeaderLayout
       showChainName={false}
       canChangeChainInfo={false}
-      alternativeTitle={operation == "stake" ? "Stake" : "Unstake"}
-      onBackButton={() => navigate("/validators")}
+      alternativeTitle={operation.toLocaleUpperCase()}
+      onBackButton={() => navigate(-1)}
     >
       <div className={style["stakeContainer"]}>
         {validator && (
@@ -86,8 +93,12 @@ export const Validator: FunctionComponent = observer(() => {
             <div
               className={style["tab"]}
               style={{
-                borderBottom: operation == "stake" ? "2px solid #D43BF6" : "",
-                color: operation == "stake" ? "#D43BF6" : "#000000",
+                borderBottom:
+                  operation == ValidatorOperation.STAKE
+                    ? "2px solid #D43BF6"
+                    : "",
+                color:
+                  operation == ValidatorOperation.STAKE ? "#D43BF6" : "#000000",
               }}
               onClick={() => navigate(`/validators/${validatorAddress}/stake`)}
             >
@@ -97,8 +108,14 @@ export const Validator: FunctionComponent = observer(() => {
             <div
               className={style["tab"]}
               style={{
-                borderBottom: operation == "unstake" ? "2px solid #3B82F6" : "",
-                color: operation == "unstake" ? "#3B82F6" : "#000000",
+                borderBottom:
+                  operation == ValidatorOperation.UNSTAKE
+                    ? "2px solid #3B82F6"
+                    : "",
+                color:
+                  operation == ValidatorOperation.UNSTAKE
+                    ? "#3B82F6"
+                    : "#000000",
               }}
               onClick={() =>
                 navigate(`/validators/${validatorAddress}/unstake`)
@@ -106,11 +123,43 @@ export const Validator: FunctionComponent = observer(() => {
             >
               Unstake
             </div>
+            <div
+              className={style["tab"]}
+              style={{
+                borderBottom:
+                  operation == ValidatorOperation.TRANSFER
+                    ? "2px solid #D43BF6"
+                    : "",
+                color:
+                  operation == ValidatorOperation.TRANSFER
+                    ? "#D43BF6"
+                    : "#000000",
+              }}
+              onClick={() =>
+                navigate(`/validators/${validatorAddress}/transfer`)
+              }
+            >
+              Transfer
+            </div>
           </div>
-          {operation == "stake" ? (
+          {operation == ValidatorOperation.STAKE && (
             <Stake validatorAddress={validatorAddress} />
-          ) : (
+          )}
+          {operation == ValidatorOperation.UNSTAKE && (
             <Unstake validatorAddress={validatorAddress} />
+          )}
+          {operation == ValidatorOperation.TRANSFER && (
+            <Transfer
+              validatorAddress={validatorAddress}
+              balance={amount}
+              validatorsList={[
+                ...bondedValidators.validators,
+                ...unbondedValidators.validators,
+                ...unbondingValidators.validators,
+              ].filter(
+                (validator) => validator.operator_address != validatorAddress
+              )}
+            />
           )}
         </div>
       </div>

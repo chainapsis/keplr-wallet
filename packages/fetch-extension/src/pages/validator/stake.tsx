@@ -77,42 +77,41 @@ export const Stake: FunctionComponent<{ validatorAddress: string }> = observer(
     }, [intl, error]);
 
     const notification = useNotification();
+
+    const txnResult = {
+      onBroadcasted: () => {
+        notification.push({
+          type: "primary",
+          placement: "top-center",
+          duration: 2,
+          content: `Transaction broadcasted`,
+          canDelete: true,
+          transition: {
+            duration: 0.25,
+          },
+        });
+      },
+      onFulfill: (tx: any) => {
+        const istxnSuccess = tx.code ? false : true;
+        notification.push({
+          type: istxnSuccess ? "success" : "danger",
+          placement: "top-center",
+          duration: 5,
+          content: istxnSuccess
+            ? `Transaction Completed`
+            : `Transaction Failed: ${tx.log}`,
+          canDelete: true,
+          transition: {
+            duration: 0.25,
+          },
+        });
+      },
+    };
     const stakeClicked = async () => {
       try {
-        await account.cosmos.sendDelegateMsg(
-          amountConfig.amount,
-          validatorAddress,
-          memoConfig.memo,
-          feeConfig.toStdFee(),
-          undefined,
-          {
-            onBroadcasted: () => {
-              notification.push({
-                type: "primary",
-                placement: "top-center",
-                duration: 2,
-                content: `Transaction broadcasted`,
-                canDelete: true,
-                transition: {
-                  duration: 0.25,
-                },
-              });
-            },
-            onFulfill: () => {
-              notification.push({
-                type: "success",
-                placement: "top-center",
-                duration: 5,
-                content: `Transaction Completed`,
-                canDelete: true,
-                transition: {
-                  duration: 0.25,
-                },
-              });
-              navigate("/stake-complete/" + validatorAddress);
-            },
-          }
-        );
+        await account.cosmos
+          .makeDelegateTx(amountConfig.amount, validatorAddress)
+          .send(feeConfig.toStdFee(), memoConfig.memo, undefined, txnResult);
       } catch (e) {
         notification.push({
           type: "danger",
@@ -124,6 +123,7 @@ export const Stake: FunctionComponent<{ validatorAddress: string }> = observer(
             duration: 0.25,
           },
         });
+      } finally {
         navigate("/", { replace: true });
       }
     };

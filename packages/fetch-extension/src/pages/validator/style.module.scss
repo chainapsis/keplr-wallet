@@ -112,6 +112,10 @@
   animation: pathRect 2s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
 }
 
+.dropdown:hover {
+  background: aliceblue !important;
+}
+
 @keyframes pathRect {
   25% {
     stroke-dashoffset: 64;

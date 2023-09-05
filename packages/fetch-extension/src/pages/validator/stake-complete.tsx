@@ -73,7 +73,7 @@ export const StakeComplete: FunctionComponent = observer(() => {
       <Button
         color="primary"
         block
-        onClick={() => navigate("/validators")}
+        onClick={() => navigate(`/validators/validator`)}
         style={{ marginLeft: "0px" }}
       >
         <img
