@@ -34,6 +34,7 @@ import { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
+import { Dec } from "@keplr-wallet/unit";
 
 export const IBCSwapPage: FunctionComponent = observer(() => {
   const {
@@ -182,6 +183,17 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     ibcSwapConfigs.amountConfig.outCurrency.coinMinimalDenom,
     setSearchParams,
   ]);
+
+  const tempSwitchAmount = searchParams.get("tempSwitchAmount");
+  useEffect(() => {
+    if (tempSwitchAmount != null) {
+      ibcSwapConfigs.amountConfig.setValue(tempSwitchAmount);
+      setSearchParams((prev) => {
+        prev.delete("tempSwitchAmount");
+        return prev;
+      });
+    }
+  }, [ibcSwapConfigs.amountConfig, setSearchParams, tempSwitchAmount]);
 
   // 10초마다 자동 refresh
   const queryIBCSwap = ibcSwapConfigs.amountConfig.getQueryIBCSwap();
@@ -335,8 +347,60 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               backgroundColor={ColorPalette["gray-500"]}
               borderRadius="999999px"
               cursor="pointer"
+              onClick={(e) => {
+                e.preventDefault();
+
+                const chainId = ibcSwapConfigs.amountConfig.chainId;
+                const currency = ibcSwapConfigs.amountConfig.currency;
+                const outChainId = ibcSwapConfigs.amountConfig.outChainId;
+                const outCurrency = ibcSwapConfigs.amountConfig.outCurrency;
+
+                setSearchParams(
+                  (prev) => {
+                    // state 처리가 난해해서 그냥 query string으로 해결한다.
+                    prev.set("chainId", outChainId);
+                    prev.set("coinMinimalDenom", outCurrency.coinMinimalDenom);
+                    prev.set("outChainId", chainId);
+                    prev.set("outCoinMinimalDenom", currency.coinMinimalDenom);
+
+                    // 같은 페이지 내에서의 변경이기 때문에 "initialAmount"는 사용할 수 없음.
+                    // 하지만 여기서 amountConfig의 value를 바로 바꾼다고 해도
+                    // query string에 의한 변화는 다음 렌더링에 적용되고
+                    // currency가 변할때 value가 초기화되기 때문에 여기서 바꿀 순 없음...
+                    // 일단 다음 rendering에서 setValue가 처리되어야하는데
+                    // 다음 rendering에 로직을 넣는게 react에서는 힘들기 때문에
+                    // 임시 query string field로 처리함
+                    // 이 field는 다음 rendering에서 사용되고 바로 삭제됨.
+                    if (
+                      ibcSwapConfigs.amountConfig.outAmount
+                        .toDec()
+                        .gt(new Dec(0))
+                    ) {
+                      prev.set(
+                        "tempSwitchAmount",
+                        ibcSwapConfigs.amountConfig.outAmount
+                          .hideDenom(true)
+                          .locale(false)
+                          .inequalitySymbol(false)
+                          .toString()
+                      );
+                    } else {
+                      prev.set("tempSwitchAmount", "");
+                    }
+
+                    return prev;
+                  },
+                  {
+                    replace: true,
+                  }
+                );
+              }}
             >
-              test
+              <ArrowsUpDownIcon
+                width="1.5rem"
+                height="1.5rem"
+                color={ColorPalette["gray-10"]}
+              />
             </Box>
           </div>
         </Box>
@@ -466,6 +530,29 @@ const SettingIcon: FunctionComponent<{
         fill={color || "currentColor"}
         fillRule="evenodd"
         d="M15.84 9.804A1 1 0 0116.82 9h2.36a1 1 0 01.98.804l.331 1.652a6.993 6.993 0 011.929 1.115l1.598-.54a1 1 0 011.186.447l1.18 2.044a1 1 0 01-.205 1.251l-1.267 1.114a7.046 7.046 0 010 2.226l1.267 1.114a1 1 0 01.206 1.25l-1.18 2.045a1 1 0 01-1.187.447l-1.598-.54a6.993 6.993 0 01-1.929 1.115l-.33 1.652a1 1 0 01-.98.804H16.82a1 1 0 01-.98-.804l-.331-1.652a6.993 6.993 0 01-1.929-1.115l-1.598.54a1 1 0 01-1.186-.447l-1.18-2.044a1 1 0 01.205-1.251l1.267-1.114a7.046 7.046 0 010-2.226l-1.267-1.114a1 1 0 01-.206-1.25l1.18-2.045a1 1 0 011.187-.447l1.598.54a6.993 6.993 0 011.929-1.115l.33-1.652zM18 21a3 3 0 100-6 3 3 0 000 6z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+};
+
+const ArrowsUpDownIcon: FunctionComponent<{
+  width: string;
+  height: string;
+  color: string;
+}> = ({ width, height, color }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <path
+        fill={color || "currentColor"}
+        fillRule="evenodd"
+        d="M2.688 8.16a.9.9 0 001.272-.048l2.34-2.52V15.9a.9.9 0 101.8 0V5.592l2.34 2.52a.9.9 0 001.32-1.224l-3.9-4.2a.9.9 0 00-1.32 0l-3.9 4.2a.9.9 0 00.048 1.272zm9.6 7.68a.9.9 0 00-.047 1.272l3.9 4.2a.9.9 0 001.319 0l3.9-4.2a.9.9 0 00-1.32-1.224l-2.34 2.52V8.1a.9.9 0 10-1.8 0v10.308l-2.34-2.52a.9.9 0 00-1.272-.047z"
         clipRule="evenodd"
       />
     </svg>
