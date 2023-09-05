@@ -290,7 +290,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
     return {};
   }
 
-  protected getQueryIBCSwap(): ObservableQueryIBCSwapInner | undefined {
+  getQueryIBCSwap(): ObservableQueryIBCSwapInner | undefined {
     if (this.amount.length === 0) {
       return;
     }

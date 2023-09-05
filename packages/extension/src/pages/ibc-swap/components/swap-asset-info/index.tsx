@@ -13,6 +13,7 @@ import { AppCurrency } from "@keplr-wallet/types";
 import { IBCSwapAmountConfig } from "../../../../hooks/ibc-swap";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
+import { LoadingIcon } from "../../../../components/icon";
 
 const Styles = {
   TextInput: styled.input`
@@ -75,6 +76,29 @@ export const SwapAssetInfo: FunctionComponent<{
         <Subtitle3 color={ColorPalette["gray-200"]}>
           {type === "from" ? "From" : "To"}
         </Subtitle3>
+        {(() => {
+          if (type === "to") {
+            if (amountConfig.isFetching) {
+              /* 로딩 아이콘이 부모의 height에 영향을 끼치지 않게 하기 위한 트릭 구조임 */
+              return (
+                <Box
+                  height="1px"
+                  alignX="center"
+                  alignY="center"
+                  marginLeft="0.25rem"
+                >
+                  <Box width="1rem" height="1rem">
+                    <LoadingIcon
+                      width="1rem"
+                      height="1rem"
+                      color={ColorPalette["gray-300"]}
+                    />
+                  </Box>
+                </Box>
+              );
+            }
+          }
+        })()}
         <div
           style={{
             flex: 1,

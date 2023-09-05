@@ -167,6 +167,28 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     setSearchParams,
   ]);
 
+  // 10초마다 자동 refresh
+  const queryIBCSwap = ibcSwapConfigs.amountConfig.getQueryIBCSwap();
+  const queryRoute = queryIBCSwap?.getQueryRoute();
+  useEffect(() => {
+    if (queryRoute && !queryRoute.isFetching) {
+      const timeoutId = setTimeout(() => {
+        if (!queryRoute.isFetching) {
+          queryRoute.fetch();
+        }
+      }, 10000);
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
+    // eslint가 자동으로 추천해주는 deps를 쓰면 안된다.
+    // queryRoute는 amountConfig에서 필요할때마다 reference가 바뀌므로 deps에 넣는다.
+    // queryRoute.isFetching는 현재 fetch중인지 아닌지를 알려주는 값이므로 deps에 꼭 넣어야한다.
+    // queryRoute는 input이 같으면 reference가 같으므로 eslint에서 추천하는대로 queryRoute만 deps에 넣으면
+    // queryRoute.isFetching이 무시되기 때문에 수동으로 넣어줌
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryRoute, queryRoute?.isFetching]);
+
   const interactionBlocked =
     txConfigsValidate.interactionBlocked ||
     !uiConfigStore.ibcSwapConfig.slippageIsValid;
