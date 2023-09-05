@@ -143,14 +143,11 @@ export const EnableChainsScene: FunctionComponent<{
 
           const promises: Promise<unknown>[] = [];
           for (const chainInfo of chainStore.chainInfos) {
-            if (
-              keyType === "mnemonic" &&
-              keyRingStore.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo)
-            ) {
+            if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
               promises.push(
                 (async () => {
                   const res =
-                    await keyRingStore.computeNotFinalizedMnemonicKeyAddresses(
+                    await keyRingStore.computeNotFinalizedKeyAddresses(
                       vaultId,
                       chainInfo.chainId
                     );
@@ -223,12 +220,10 @@ export const EnableChainsScene: FunctionComponent<{
           const queries = queriesStore.get(candidateAddress.chainId);
           const chainInfo = chainStore.getChain(candidateAddress.chainId);
 
-          if (
-            keyRingStore.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo)
-          ) {
+          if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
             if (candidateAddress.bech32Addresses.length === 1) {
               // finalize-key scene을 통하지 않고도 이 scene으로 들어올 수 있는 경우가 있기 때문에...
-              keyRingStore.finalizeMnemonicKeyCoinType(
+              keyRingStore.finalizeKeyCoinType(
                 vaultId,
                 candidateAddress.chainId,
                 candidateAddress.bech32Addresses[0].coinType
@@ -285,12 +280,12 @@ export const EnableChainsScene: FunctionComponent<{
                   !sceneMovedToSelectDerivation.current
                 ) {
                   console.log(
-                    "Finalize mnemonic key coin type",
+                    "Finalize key coin type",
                     vaultId,
                     chainInfo.chainId,
                     mainAddress.coinType
                   );
-                  keyRingStore.finalizeMnemonicKeyCoinType(
+                  keyRingStore.finalizeKeyCoinType(
                     vaultId,
                     chainInfo.chainId,
                     mainAddress.coinType
@@ -755,12 +750,7 @@ export const EnableChainsScene: FunctionComponent<{
               for (let i = 0; i < enables.length; i++) {
                 const enable = enables[i];
                 const chainInfo = chainStore.getChain(enable);
-                if (
-                  keyRingStore.needMnemonicKeyCoinTypeFinalize(
-                    vaultId,
-                    chainInfo
-                  )
-                ) {
+                if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
                   // Remove enable from enables
                   enables.splice(i, 1);
                   i--;

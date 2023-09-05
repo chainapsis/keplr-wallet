@@ -40,6 +40,11 @@ const handleURLTempAllow: (
   service: PhishingListService
 ) => InternalHandler<URLTempAllowMsg> =
   (service: PhishingListService) => (_, msg) => {
+    const blocklistPageURL = new URL(msg.origin);
+    if (blocklistPageURL.origin !== new URL(service.blocklistPageURL).origin) {
+      throw new Error("Permission rejected");
+    }
+
     service.allowUrlTemp(msg.url);
   };
 

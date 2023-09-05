@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/wc-qrcode-modal",
-  "version": "0.12.20",
+  "version": "0.12.22-rc.0",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -15,11 +15,12 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@walletconnect/browser-utils": "^1.6.5",
-    "@walletconnect/types": "^1.6.5",
-    "qrcode.react": "^1.0.1"
+    "detect-browser": "^5.3.0",
+    "qrcode.react": "^3.1.0"
   },
   "peerDependencies": {
+    "@walletconnect/sign-client": "^2",
+    "@walletconnect/types": "^2",
     "react": "^16.8.0 || ^17 || ^18",
     "react-dom": "^16.8.0 || ^17 || ^18"
   }

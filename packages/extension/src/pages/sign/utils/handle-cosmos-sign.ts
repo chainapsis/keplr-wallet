@@ -1,15 +1,39 @@
-import { Buffer } from "buffer/";
 import {
   connectAndSignEIP712WithLedger,
   connectAndSignWithLedger,
 } from "./cosmos-ledger-sign";
 import { SignInteractionStore } from "@keplr-wallet/stores";
-import { SignDocWrapper } from "@keplr-wallet/cosmos";
+import {
+  EthermintChainIdHelper,
+  SignDocWrapper,
+  serializeSignDoc,
+  Bech32Address,
+} from "@keplr-wallet/cosmos";
+import KeystoneSDK, {
+  KeystoneCosmosSDK,
+  KeystoneEvmSDK,
+  UR,
+  utils,
+} from "@keystonehq/keystone-sdk";
+import { KeystoneKeys, KeystoneUR, getPathFromPubKey } from "./keystone";
+import { PlainObject } from "@keplr-wallet/background";
+
+export interface LedgerOptions {
+  useWebHID: boolean;
+}
+
+export interface KeystoneOptions {
+  isEthSigning: boolean;
+  displayQRCode: (ur: { type: string; cbor: string }) => Promise<void>;
+  scanQRCode: () => Promise<KeystoneUR>;
+}
+
+export type PreSignOptions = LedgerOptions | KeystoneOptions;
 
 export const handleCosmosPreSign = async (
-  useWebHID: boolean,
   interactionData: NonNullable<SignInteractionStore["waitingData"]>,
-  signDocWrapper: SignDocWrapper
+  signDocWrapper: SignDocWrapper,
+  options?: PreSignOptions
 ): Promise<Uint8Array | undefined> => {
   switch (interactionData.data.keyType) {
     case "ledger": {
@@ -40,7 +64,7 @@ export const handleCosmosPreSign = async (
         }
 
         return await connectAndSignEIP712WithLedger(
-          useWebHID,
+          (options as LedgerOptions).useWebHID,
           publicKey,
           bip44Path,
           signDocWrapper.aminoSignDoc,
@@ -70,12 +94,104 @@ export const handleCosmosPreSign = async (
       }
 
       return await connectAndSignWithLedger(
-        useWebHID,
+        (options as LedgerOptions).useWebHID,
         ledgerApp,
         publicKey,
         bip44Path,
         signDocWrapper.aminoSignDoc
       );
+    }
+    case "keystone": {
+      const keystoneOptions = options as KeystoneOptions;
+      const keystoneSDK = new KeystoneSDK({
+        origin: "Keplr Extension",
+      });
+      const address = interactionData.data.signer;
+      const path = getPathFromPubKey(
+        interactionData.data.keyInsensitive["keys"] as KeystoneKeys,
+        Buffer.from(interactionData.data.pubKey).toString("hex")
+      );
+      if (path === null) {
+        throw new Error("Invalid signer");
+      }
+      const random = Buffer.alloc(16);
+      Buffer.from(interactionData.id, "hex").copy(random);
+      const requestId = utils.uuid.v4({
+        random,
+      });
+      const isEthSigning = (options as KeystoneOptions).isEthSigning;
+      let ur;
+      const signData = Buffer.from(
+        signDocWrapper.mode === "direct"
+          ? signDocWrapper.protoSignDoc.toBytes()
+          : serializeSignDoc(signDocWrapper.aminoSignDoc)
+      ).toString("hex");
+      const xfp = interactionData.data.keyInsensitive["xfp"] as string;
+      if (isEthSigning) {
+        ur = keystoneSDK.evm.generateSignRequest({
+          requestId,
+          signData,
+          dataType: {
+            amino: KeystoneEvmSDK.DataType.cosmosAmino,
+            direct: KeystoneEvmSDK.DataType.cosmosDirect,
+          }[signDocWrapper.mode],
+          customChainIdentifier: EthermintChainIdHelper.parse(
+            interactionData.data.chainId
+          ).ethChainId,
+          account: {
+            path,
+            xfp,
+            address: (() => {
+              if (isEthSigning) {
+                return Bech32Address.fromBech32(
+                  interactionData.data.signer
+                ).toHex(true);
+              }
+            })(),
+          },
+        });
+      } else {
+        ur = keystoneSDK.cosmos.generateSignRequest({
+          requestId,
+          signData,
+          dataType: {
+            amino: KeystoneCosmosSDK.DataType.amino,
+            direct: KeystoneCosmosSDK.DataType.direct,
+          }[signDocWrapper.mode],
+          accounts: [
+            {
+              path,
+              xfp,
+              address,
+            },
+          ],
+        });
+      }
+      await keystoneOptions.displayQRCode({
+        type: ur.type,
+        cbor: ur.cbor.toString("hex"),
+      });
+      const scanResult = await keystoneOptions.scanQRCode();
+      const signResult = keystoneSDK[
+        isEthSigning ? "evm" : "cosmos"
+      ].parseSignature(
+        new UR(Buffer.from(scanResult.cbor, "hex"), scanResult.type)
+      );
+      if (signResult.requestId !== requestId) {
+        throw new Error("Invalid request id");
+      }
+      if (
+        "publicKey" in signResult &&
+        signResult.publicKey !==
+          (
+            (interactionData.data.keyInsensitive["keys"] as PlainObject)[
+              path
+            ] as PlainObject
+          )["pubKey"]
+      ) {
+        throw new Error("Invalid public key");
+      }
+      return Buffer.from(signResult.signature, "hex");
     }
     default:
       return;

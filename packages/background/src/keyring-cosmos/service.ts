@@ -2,6 +2,7 @@ import { ChainsService } from "../chains";
 import { KeyRingService } from "../keyring";
 import {
   AminoSignResponse,
+  ChainInfo,
   DirectSignResponse,
   KeplrSignOptions,
   Key,
@@ -37,11 +38,53 @@ export class KeyRingCosmosService {
     protected readonly keyRingService: KeyRingService,
     protected readonly interactionService: InteractionService,
     protected readonly chainsUIService: ChainsUIService,
-    protected readonly analyticsService: AnalyticsService
+    protected readonly analyticsService: AnalyticsService,
+    protected readonly msgPrivilegedOrigins: string[]
   ) {}
 
   async init() {
     // TODO: ?
+
+    this.chainsService.addChainSuggestedHandler(
+      this.onChainSuggested.bind(this)
+    );
+  }
+
+  async onChainSuggested(chainInfo: ChainInfo): Promise<void> {
+    if (this.keyRingService.keyRingStatus !== "unlocked") {
+      return;
+    }
+
+    try {
+      const selectedVaultId = this.keyRingService.selectedVaultId;
+      if (selectedVaultId) {
+        // In general, since getKey is called on the webpage immediately after the suggest chain,
+        // if we can select the coin type at this point, select it.
+        // (In fact, the only thing this function is useful for now is keystone.
+        //  If a suggested chain has a coin type which is not supported on keystone and requires a coin type other than 118, it is immediately set to 118)
+        if (
+          this.keyRingService.needKeyCoinTypeFinalize(
+            selectedVaultId,
+            chainInfo.chainId
+          )
+        ) {
+          const candidates = await this.computeNotFinalizedKeyAddresses(
+            selectedVaultId,
+            chainInfo.chainId
+          );
+          if (candidates.length === 1) {
+            this.keyRingService.finalizeKeyCoinType(
+              selectedVaultId,
+              chainInfo.chainId,
+              candidates[0].coinType
+            );
+          }
+        }
+      }
+    } catch (e) {
+      console.log(e);
+      // Ignore error
+    }
   }
 
   async getKeySelected(chainId: string): Promise<Key> {
@@ -85,12 +128,11 @@ export class KeyRingCosmosService {
         chainInfo.bech32Config.bech32PrefixAccAddr
       ),
       isNanoLedger: keyInfo.type === "ledger",
-      // TODO
-      isKeystone: false,
+      isKeystone: keyInfo.type === "keystone",
     };
   }
 
-  async computeNotFinalizedMnemonicKeyAddresses(
+  async computeNotFinalizedKeyAddresses(
     vaultId: string,
     chainId: string
   ): Promise<
@@ -114,12 +156,17 @@ export class KeyRingCosmosService {
     }[] = [];
 
     for (const coinType of coinTypes) {
-      const pubKey =
-        await this.keyRingService.getPubKeyWithNotFinalizedCoinType(
+      let pubKey: PubKeySecp256k1;
+      try {
+        pubKey = await this.keyRingService.getPubKeyWithNotFinalizedCoinType(
           chainId,
           vaultId,
           coinType
         );
+      } catch (e) {
+        console.log(e);
+        continue;
+      }
 
       const address = (() => {
         if (isEthermintLike) {
@@ -232,6 +279,7 @@ export class KeyRingCosmosService {
         mode: "amino",
         signDoc,
         signer,
+        pubKey: key.pubKey,
         signOptions,
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
@@ -246,9 +294,9 @@ export class KeyRingCosmosService {
 
         let signature: Uint8Array;
 
-        if (keyInfo.type === "ledger") {
+        if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
           if (!res.signature || res.signature.length === 0) {
-            throw new Error("Frontend should provide signature if ledger");
+            throw new Error("Frontend should provide signature");
           }
           signature = res.signature;
         } else {
@@ -283,11 +331,17 @@ export class KeyRingCosmosService {
   }
 
   async privilegeSignAminoWithdrawRewards(
+    env: Env,
+    origin: string,
     chainId: string,
     signer: string,
     signDoc: StdSignDoc
   ) {
     // TODO: 이 기능은 ledger에서는 사용할 수 없고 어케 이 문제를 해결할지도 아직 명확하지 않음.
+
+    if (!env.isInternalMsg && !this.msgPrivilegedOrigins.includes(origin)) {
+      throw new Error("Permission Rejected");
+    }
 
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
 
@@ -358,11 +412,107 @@ export class KeyRingCosmosService {
 
       this.analyticsService.logEventIgnoreError("tx_signed", {
         chainId,
-        isInternal: true,
-        // TODO
-        // origin: new URL(browser.runtime.getURL("")).origin,
+        isInternal: env.isInternalMsg,
+        origin,
         signMode: "amino",
         privileged: "withdrawRewards",
+      });
+
+      return {
+        signed: signDoc,
+        signature: encodeSecp256k1Signature(key.pubKey, signature),
+      };
+    } finally {
+      this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
+    }
+  }
+
+  async privilegeSignAminoDelegate(
+    env: Env,
+    origin: string,
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc
+  ) {
+    // TODO: 이 기능은 ledger에서는 사용할 수 없고 어케 이 문제를 해결할지도 아직 명확하지 않음.
+
+    if (!env.isInternalMsg && !this.msgPrivilegedOrigins.includes(origin)) {
+      throw new Error("Permission Rejected");
+    }
+
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+
+    const vaultId = this.keyRingService.selectedVaultId;
+
+    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+
+    const keyInfo = this.keyRingService.getKeyInfo(vaultId);
+    if (!keyInfo) {
+      throw new Error("Null key info");
+    }
+
+    if (isEthermintLike && keyInfo.type === "ledger") {
+      KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+        chainId
+      );
+    }
+
+    signDoc = {
+      ...signDoc,
+      memo: escapeHTML(signDoc.memo),
+    };
+
+    signDoc = trimAminoSignDoc(signDoc);
+    signDoc = sortObjectByKey(signDoc);
+
+    const key = await this.getKey(vaultId, chainId);
+    const bech32Prefix =
+      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
+        .bech32PrefixAccAddr;
+    const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
+    if (signer !== bech32Address) {
+      throw new Error("Signer mismatched");
+    }
+
+    const isADR36SignDoc = checkAndValidateADR36AminoSignDoc(
+      signDoc,
+      bech32Prefix
+    );
+    if (isADR36SignDoc) {
+      throw new Error("Can't use ADR-36 sign doc");
+    }
+
+    if (!signDoc.msgs || signDoc.msgs.length === 0) {
+      throw new Error("No msgs");
+    }
+
+    for (const msg of signDoc.msgs) {
+      // Some chains modify types for obscure reasons. For now, treat it like this:
+      const i = msg.type.indexOf("/");
+      if (i < 0) {
+        throw new Error("Invalid msg type");
+      }
+      const action = msg.type.slice(i + 1);
+      if (action !== "MsgDelegate") {
+        throw new Error("Invalid msg type");
+      }
+    }
+
+    try {
+      const _sig = await this.keyRingService.sign(
+        chainId,
+        vaultId,
+        serializeSignDoc(signDoc),
+        isEthermintLike ? "keccak256" : "sha256"
+      );
+      const signature = new Uint8Array([..._sig.r, ..._sig.s]);
+
+      this.analyticsService.logEventIgnoreError("tx_signed", {
+        chainId,
+        isInternal: env.isInternalMsg,
+        origin,
+        signMode: "amino",
+        privileged: "delegate",
       });
 
       return {
@@ -442,6 +592,7 @@ export class KeyRingCosmosService {
         mode: "amino",
         signDoc,
         signer,
+        pubKey: key.pubKey,
         signOptions,
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
@@ -455,9 +606,9 @@ export class KeyRingCosmosService {
 
         let signature: Uint8Array;
 
-        if (keyInfo.type === "ledger") {
+        if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
           if (!res.signature || res.signature.length === 0) {
-            throw new Error("Frontend should provide signature if ledger");
+            throw new Error("Frontend should provide signature");
           }
           signature = res.signature;
         } else {
@@ -533,6 +684,7 @@ export class KeyRingCosmosService {
         mode: "direct",
         signDocBytes: SignDoc.encode(signDoc).finish(),
         signer,
+        pubKey: key.pubKey,
         signOptions,
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
@@ -544,9 +696,9 @@ export class KeyRingCosmosService {
         let signature: Uint8Array;
 
         // XXX: 참고로 어차피 현재 ledger app이 direct signing을 지원하지 않는다. 그냥 일단 처리해놓은 것.
-        if (keyInfo.type === "ledger") {
+        if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
           if (!res.signature || res.signature.length === 0) {
-            throw new Error("Frontend should provide signature if ledger");
+            throw new Error("Frontend should provide signature");
           }
           signature = res.signature;
         } else {
@@ -740,6 +892,7 @@ export class KeyRingCosmosService {
         mode: "amino",
         signDoc,
         signer,
+        pubKey: key.pubKey,
         signOptions,
         eip712,
         keyType: keyInfo.type,
@@ -754,7 +907,7 @@ export class KeyRingCosmosService {
         };
 
         if (!res.signature || res.signature.length === 0) {
-          throw new Error("Frontend should provide signature if ledger");
+          throw new Error("Frontend should provide signature");
         }
 
         const msgTypes = newSignDoc.msgs
@@ -1022,10 +1175,7 @@ Salt: ${salt}`;
     for (const keyInfo of keyInfos) {
       if (
         !this.chainsUIService.isEnabled(keyInfo.id, chainId) &&
-        (!this.keyRingService.needMnemonicKeyCoinTypeFinalize(
-          keyInfo.id,
-          chainId
-        ) ||
+        (!this.keyRingService.needKeyCoinTypeFinalize(keyInfo.id, chainId) ||
           (chainInfo.alternativeBIP44s ?? []).length === 0)
       ) {
         let key: Key;
@@ -1037,12 +1187,9 @@ Salt: ${salt}`;
         }
         if (key.bech32Address === bech32Address) {
           if (
-            this.keyRingService.needMnemonicKeyCoinTypeFinalize(
-              keyInfo.id,
-              chainId
-            )
+            this.keyRingService.needKeyCoinTypeFinalize(keyInfo.id, chainId)
           ) {
-            this.keyRingService.finalizeMnemonicKeyCoinType(
+            this.keyRingService.finalizeKeyCoinType(
               keyInfo.id,
               chainId,
               chainInfo.bip44.coinType

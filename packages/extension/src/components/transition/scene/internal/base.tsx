@@ -410,7 +410,7 @@ const SceneComponent: FunctionComponent<
   targetOpacity,
   onAnimEnd,
   transitionAlign,
-  transitionMode = "a-axis",
+  transitionMode = "x-axis",
   sceneWidth,
 }) => {
   const eventsRef = useRef<SceneEvents | null>(null);
@@ -509,6 +509,9 @@ const SceneComponent: FunctionComponent<
             } else {
               if (transitionAlign === "center") {
                 return "50%";
+              }
+              if (transitionAlign === "bottom") {
+                return "auto";
               }
               return "0";
             }

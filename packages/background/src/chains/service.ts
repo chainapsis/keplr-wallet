@@ -11,6 +11,7 @@ import {
   makeObservable,
   observable,
   runInAction,
+  toJS,
 } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainInfoWithCoreTypes, ChainInfoWithSuggestedOptions } from "./types";
@@ -25,7 +26,7 @@ import { Env } from "@keplr-wallet/router";
 import { SuggestChainInfoMsg } from "./messages";
 
 type ChainRemovedHandler = (chainInfo: ChainInfo) => void;
-type ChainSuggestedHandler = (chainInfo: ChainInfo) => void;
+type ChainSuggestedHandler = (chainInfo: ChainInfo) => void | Promise<void>;
 type UpdatedChainInfo = Pick<ChainInfo, "chainId" | "features">;
 
 export class ChainsService {
@@ -65,7 +66,10 @@ export class ChainsService {
       readonly repoName: string;
       readonly branchName: string;
     },
-    protected readonly interactionService: InteractionService
+    protected readonly interactionService: InteractionService,
+    protected readonly afterInitFn:
+      | ((service: ChainsService) => void | Promise<void>)
+      | undefined
   ) {
     this.updatedChainInfoKVStore = new PrefixKVStore(
       kvStore,
@@ -98,7 +102,7 @@ export class ChainsService {
         });
 
         for (const chainInfo of filtered) {
-          this.addSuggestedChainInfo(chainInfo, true);
+          await this.addSuggestedChainInfo(chainInfo, true);
         }
 
         const chainInfos = this.embedChainInfos.concat(filtered);
@@ -226,6 +230,22 @@ export class ChainsService {
         this.endpointsKVStore.set("endpoints", this.endpoints);
       });
     }
+  }
+
+  /**
+   * 이 서비스 자체를 포함한 다른 모든 서비스들이 init된 이후에 실행된다. (message를 받을 수 있는 상태 직전)
+   * 모든 서비스가 init이 된 이후에 실행될 추가적인 로직을 여기에 작성할 수 있다.
+   */
+  async afterInit(): Promise<void> {
+    if (this.afterInitFn) {
+      await this.afterInitFn(this);
+    }
+
+    // 그냥 미래에 필요할지도 몰라서...
+    await this.kvStore.set(
+      "last_embed_chain_infos",
+      toJS(this.embedChainInfos)
+    );
   }
 
   getChainInfos = computedFn(
@@ -519,12 +539,11 @@ export class ChainsService {
     );
   }
 
-  @action
-  addSuggestedChainInfo(
+  async addSuggestedChainInfo(
     chainInfo: ChainInfoWithSuggestedOptions,
     // Used for migration
     notInvokeHandlers?: boolean
-  ): void {
+  ): Promise<void> {
     const i = this.suggestedChainInfos.findIndex(
       (c) =>
         ChainIdHelper.parse(c.chainId).identifier ===
@@ -533,11 +552,15 @@ export class ChainsService {
     if (i < 0) {
       const newChainInfos = this.suggestedChainInfos.slice();
       newChainInfos.push(chainInfo);
-      this.suggestedChainInfos = newChainInfos;
+      runInAction(() => {
+        this.suggestedChainInfos = newChainInfos;
+      });
 
       if (!notInvokeHandlers) {
+        const updated = this.mergeChainInfosWithDynamics([chainInfo])[0];
+
         for (const handler of this.onChainSuggestedHandlers) {
-          handler(chainInfo);
+          await handler(updated);
         }
       }
     } else {
@@ -572,8 +595,9 @@ export class ChainsService {
     this.suggestedChainInfos = [];
 
     for (const chainInfo of prev) {
+      const updated = this.mergeChainInfosWithDynamics([chainInfo])[0];
       for (const handler of this.onChainRemovedHandlers) {
-        handler(chainInfo);
+        handler(updated);
       }
     }
   }
@@ -877,8 +901,10 @@ export class ChainsService {
       this.endpoints = newEndpoints;
     }
 
+    const updated = this.mergeChainInfosWithDynamics([chainInfo])[0];
+
     for (const handler of this.onChainRemovedHandlers) {
-      handler(chainInfo);
+      handler(updated);
     }
   }
 

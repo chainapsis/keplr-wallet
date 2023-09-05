@@ -2297,6 +2297,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
   },
 ];
 
+// The origins that are able to pass any permission that external webpages can have.
+export const PrivilegedOrigins: string[] = [
+  'https://wallet.keplr.app',
+  'https://validator.keplr.app',
+  'https://chains.keplr.app',
+];
+
 export const CommunityChainInfoRepo = {
   organizationName: 'chainapsis',
   repoName: 'keplr-chain-registry',

@@ -18,6 +18,7 @@ import AnimCreating from "../../../public/assets/lottie/register/creating.json";
 import AnimCreatingLight from "../../../public/assets/lottie/register/creating-light.json";
 import lottie from "lottie-web";
 import { PlainObject } from "@keplr-wallet/background";
+import { MultiAccounts } from "@keystonehq/keystone-sdk";
 import { useTheme } from "styled-components";
 
 /**
@@ -52,6 +53,7 @@ export const FinalizeKeyScene: FunctionComponent<{
       addressIndex: number;
     };
   };
+  keystone?: MultiAccounts;
   stepPrevious: number;
   stepTotal: number;
 }> = observer(
@@ -61,6 +63,7 @@ export const FinalizeKeyScene: FunctionComponent<{
     mnemonic,
     privateKey,
     ledger,
+    keystone,
     stepPrevious,
     stepTotal,
   }) => {
@@ -130,6 +133,8 @@ export const FinalizeKeyScene: FunctionComponent<{
             name,
             password
           );
+        } else if (keystone) {
+          vaultId = await keyRingStore.newKeystoneKey(keystone, name, password);
         } else {
           throw new Error("Invalid props");
         }
@@ -146,15 +151,12 @@ export const FinalizeKeyScene: FunctionComponent<{
           // If mnemonic is fresh, there is no way that additional coin type account has value to select.
           if (mnemonic) {
             if (
-              keyRingStore.needMnemonicKeyCoinTypeFinalize(
-                vaultId,
-                chainInfo
-              ) &&
+              keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo) &&
               mnemonic?.isFresh
             ) {
               promises.push(
                 (async () => {
-                  await keyRingStore.finalizeMnemonicKeyCoinType(
+                  await keyRingStore.finalizeKeyCoinType(
                     vaultId,
                     chainInfo.chainId,
                     chainInfo.bip44.coinType
@@ -177,17 +179,13 @@ export const FinalizeKeyScene: FunctionComponent<{
 
         promises = [];
         for (const chainInfo of chainStore.chainInfos) {
-          if (
-            mnemonic &&
-            keyRingStore.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo)
-          ) {
+          if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
             promises.push(
               (async () => {
-                const res =
-                  await keyRingStore.computeNotFinalizedMnemonicKeyAddresses(
-                    vaultId,
-                    chainInfo.chainId
-                  );
+                const res = await keyRingStore.computeNotFinalizedKeyAddresses(
+                  vaultId,
+                  chainInfo.chainId
+                );
 
                 candidateAddresses.push({
                   chainId: chainInfo.chainId,

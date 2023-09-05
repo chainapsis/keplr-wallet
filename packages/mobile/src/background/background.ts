@@ -7,7 +7,11 @@ import {
   RNMessageRequesterInternalToUI,
   RNRouterBackground,
 } from '../router';
-import {CommunityChainInfoRepo, EmbedChainInfos} from '../config';
+import {
+  CommunityChainInfoRepo,
+  EmbedChainInfos,
+  PrivilegedOrigins,
+} from '../config';
 import {AsyncKVStore} from '../common';
 
 const router = new RNRouterBackground(RNEnv.produceEnv);
@@ -17,8 +21,9 @@ const {initFn} = init(
   (prefix: string) => new AsyncKVStore(prefix),
   new RNMessageRequesterInternalToUI(),
   EmbedChainInfos,
-  [],
-  [],
+  PrivilegedOrigins,
+  PrivilegedOrigins,
+  PrivilegedOrigins,
   CommunityChainInfoRepo,
   {
     create: (_params: {
@@ -29,6 +34,7 @@ const {initFn} = init(
       // TODO: or noop
     },
   },
+  'https://blocklist.keplr.app',
   {
     commonCrypto: {
       scrypt: async (

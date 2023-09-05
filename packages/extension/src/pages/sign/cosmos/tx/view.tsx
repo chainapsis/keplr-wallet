@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { SignInteractionStore } from "@keplr-wallet/stores";
 import { Box } from "../../../../components/box";
 import { Column, Columns } from "../../../../components/column";
@@ -36,10 +36,14 @@ import { Gutter } from "../../../../components/gutter";
 import { GuideBox } from "../../../../components/guide-box";
 import { FormattedMessage, useIntl } from "react-intl";
 import SimpleBar from "simplebar-react";
+import { KeystoneSign } from "../../components/keystone";
+import { KeystoneUR } from "../../utils/keystone";
+import { KeyRingService } from "@keplr-wallet/background";
 import { useTheme } from "styled-components";
 import { defaultProtoCodec } from "@keplr-wallet/cosmos";
 import { MsgGrant } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
 import { GenericAuthorization } from "@keplr-wallet/stores/build/query/cosmos/authz/types";
+import { Checkbox } from "../../../../components/checkbox";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -258,6 +262,7 @@ export const CosmosTxView: FunctionComponent<{
 
     setIsSendAuthzGrant(false);
   }, [signDocHelper.signDocWrapper]);
+  const [isSendAuthzGrantChecked, setIsSendAuthzGrantChecked] = useState(false);
 
   const txConfigsValidate = useTxConfigsValidate({
     senderConfig,
@@ -307,23 +312,47 @@ export const CosmosTxView: FunctionComponent<{
     Error | undefined
   >(undefined);
 
+  const [isKeystoneInteracting, setIsKeystoneInteracting] = useState(false);
+  const [keystoneUR, setKeystoneUR] = useState<KeystoneUR>();
+  const keystoneScanResolve = useRef<(ur: KeystoneUR) => void>();
+
   const buttonDisabled =
     txConfigsValidate.interactionBlocked ||
     !signDocHelper.signDocWrapper ||
-    isLedgerAndDirect;
+    isLedgerAndDirect ||
+    (isSendAuthzGrant && !isSendAuthzGrantChecked);
 
   const approve = async () => {
     if (signDocHelper.signDocWrapper) {
+      let presignOptions;
       if (interactionData.data.keyType === "ledger") {
         setIsLedgerInteracting(true);
         setLedgerInteractingError(undefined);
+        presignOptions = {
+          useWebHID: uiConfigStore.useWebHIDLedger,
+        };
+      } else if (interactionData.data.keyType === "keystone") {
+        setIsKeystoneInteracting(true);
+        const isEthSigning = KeyRingService.isEthermintLike(
+          chainStore.getChain(chainId)
+        );
+        presignOptions = {
+          isEthSigning,
+          displayQRCode: async (ur: KeystoneUR) => {
+            setKeystoneUR(ur);
+          },
+          scanQRCode: () =>
+            new Promise<KeystoneUR>((resolve) => {
+              keystoneScanResolve.current = resolve;
+            }),
+        };
       }
 
       try {
         const signature = await handleCosmosPreSign(
-          uiConfigStore.useWebHIDLedger,
           interactionData,
-          signDocHelper.signDocWrapper
+          signDocHelper.signDocWrapper,
+          presignOptions
         );
 
         await signInteractionStore.approveWithProceedNext(
@@ -543,6 +572,16 @@ export const CosmosTxView: FunctionComponent<{
               title={intl.formatMessage({
                 id: "page.sign.cosmos.tx.authz-send-grant.warning-title",
               })}
+              titleRight={
+                <Box marginLeft="1rem">
+                  <Checkbox
+                    checked={isSendAuthzGrantChecked}
+                    onChange={(checked) => {
+                      setIsSendAuthzGrantChecked(checked);
+                    }}
+                  />
+                </Box>
+              }
             />
           </React.Fragment>
         ) : null}
@@ -573,6 +612,19 @@ export const CosmosTxView: FunctionComponent<{
           ledgerInteractingError={ledgerInteractingError}
         />
       </Box>
+      <KeystoneSign
+        ur={keystoneUR}
+        isOpen={isKeystoneInteracting}
+        close={() => {
+          setIsKeystoneInteracting(false);
+        }}
+        onScan={(ur) => {
+          if (keystoneScanResolve.current === undefined) {
+            throw new Error("Keystone Scan Error");
+          }
+          keystoneScanResolve.current(ur);
+        }}
+      />
     </HeaderLayout>
   );
 });

@@ -85,7 +85,7 @@ export const TokenFoundModal: FunctionComponent<{
 
     for (const enable of enables) {
       if (
-        keyRingStore.needMnemonicKeyCoinTypeFinalize(
+        keyRingStore.needKeyCoinTypeFinalize(
           keyRingStore.selectedKeyInfo.id,
           chainStore.getChain(enable)
         )
@@ -104,7 +104,7 @@ export const TokenFoundModal: FunctionComponent<{
           tokenScan.infos.length === 1 &&
           tokenScan.infos[0].coinType != null
         ) {
-          await keyRingStore.finalizeMnemonicKeyCoinType(
+          await keyRingStore.finalizeKeyCoinType(
             keyRingStore.selectedKeyInfo.id,
             enable,
             tokenScan.infos[0].coinType

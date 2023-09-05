@@ -92,15 +92,16 @@ export class KeyRingEthereumService {
         origin,
         chainId,
         signer,
+        pubKey: key.pubKey,
         message,
         signType,
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
       },
       async (res: { signature?: Uint8Array }) => {
-        if (keyInfo.type === "ledger") {
+        if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
           if (!res.signature || res.signature.length === 0) {
-            throw new Error("Frontend should provide signature if ledger");
+            throw new Error("Frontend should provide signature");
           }
           return res.signature;
         } else {

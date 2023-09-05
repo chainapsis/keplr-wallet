@@ -4,6 +4,7 @@ import { Msg } from "@keplr-wallet/types";
 import { AnyWithUnpacked, ProtoCodec } from "@keplr-wallet/cosmos";
 import yaml from "js-yaml";
 import {
+  AgoricWalletSpendActionMessage,
   ClaimRewardsMessage,
   CustomIcon,
   DelegateMessage,
@@ -52,7 +53,11 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
           return yaml.dump(msg);
         }
 
-        return yaml.dump(protoCodec.unpackedAnyToJSONRecursive(msg));
+        if ("typeUrl" in msg) {
+          return yaml.dump(protoCodec.unpackedAnyToJSONRecursive(msg));
+        }
+
+        return yaml.dump(msg);
       } catch (e) {
         console.log(e);
         return "Failed to decode the msg";
@@ -89,6 +94,7 @@ const UnknownMessageContent: FunctionComponent<PropsWithChildren> = ({
 };
 
 export const defaultRegistry = new MessageRenderRegistry();
+defaultRegistry.register(AgoricWalletSpendActionMessage);
 defaultRegistry.register(ClaimRewardsMessage);
 defaultRegistry.register(DelegateMessage);
 defaultRegistry.register(ExecuteContractMessage);

@@ -286,10 +286,11 @@ export class AccountSetBase {
   }
 
   get hasEthereumHexAddress(): boolean {
+    const chainInfo = this.chainGetter.getChain(this.chainId);
     return (
-      this.chainGetter
-        .getChain(this.chainId)
-        .features?.includes("eth-address-gen") ?? false
+      chainInfo.bip44.coinType === 60 ||
+      !!chainInfo.features?.includes("eth-address-gen") ||
+      !!chainInfo.features?.includes("eth-key-sign")
     );
   }
 

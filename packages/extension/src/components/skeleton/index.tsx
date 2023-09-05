@@ -11,6 +11,9 @@ export interface SkeletonProps {
   dummyMinWidth?: string;
   // This is for the case that the skeleton's background color.
   layer?: 0 | 1;
+
+  horizontalBleed?: string;
+  verticalBleed?: string;
 }
 
 export const Skeleton: FunctionComponent<PropsWithChildren<SkeletonProps>> = ({
@@ -18,6 +21,8 @@ export const Skeleton: FunctionComponent<PropsWithChildren<SkeletonProps>> = ({
   type = "default",
   layer = 0,
   dummyMinWidth,
+  horizontalBleed,
+  verticalBleed,
   children,
 }) => {
   const theme = useTheme();
@@ -51,7 +56,23 @@ export const Skeleton: FunctionComponent<PropsWithChildren<SkeletonProps>> = ({
           }
           zIndex={1000}
           borderRadius={getBorderRadius()}
-          style={{ top: 0, bottom: 0, left: 0, right: 0 }}
+          style={(() => {
+            let top = "0";
+            let bottom = "0";
+            if (verticalBleed) {
+              top = "-" + verticalBleed;
+              bottom = "-" + verticalBleed;
+            }
+
+            let left = "0";
+            let right = "0";
+            if (horizontalBleed) {
+              left = "-" + horizontalBleed;
+              right = "-" + horizontalBleed;
+            }
+
+            return { top, bottom, left, right };
+          })()}
         />
       ) : null}
 
