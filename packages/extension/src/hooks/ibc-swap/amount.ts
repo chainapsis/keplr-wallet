@@ -287,7 +287,9 @@ export class IBCSwapAmountConfig extends AmountConfig {
       };
     }
 
-    return {};
+    return {
+      ...prev,
+    };
   }
 
   getQueryIBCSwap(): ObservableQueryIBCSwapInner | undefined {
