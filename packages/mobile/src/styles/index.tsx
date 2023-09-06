@@ -198,23 +198,21 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
           ...getPlatformFontWeight('400'),
         },
         'text-button1': {
-          fontSize: 18,
-          lineHeight: 20,
+          fontSize: 16,
           letterSpacing: 0.2,
-          ...getPlatformFontWeight('600'),
+          ...getPlatformFontWeight('500'),
         },
         'text-button2': {
-          fontSize: 16,
-          lineHeight: 19,
+          fontSize: 14,
           letterSpacing: 0.2,
-          ...getPlatformFontWeight('600'),
+          ...getPlatformFontWeight('500'),
         },
         'text-button3': {
           fontSize: 14,
           lineHeight: 18,
           letterSpacing: 0.2,
           textTransform: 'capitalize' as EnumTextTransform,
-          ...getPlatformFontWeight('600'),
+          ...getPlatformFontWeight('500'),
         },
         'text-caption1': {
           fontSize: 13,
@@ -477,8 +475,9 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         '400': 400,
         '600': 600,
 
-        'button-small': 38,
-        'button-default': 48,
+        'button-extra-small': 32,
+        'button-small': 36,
+        'button-medium': 44,
         'button-large': 52,
         'governance-card-body-placeholder': 130,
 
