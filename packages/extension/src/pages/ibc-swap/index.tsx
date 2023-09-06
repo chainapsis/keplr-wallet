@@ -254,6 +254,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryRoute, queryRoute?.isFetching]);
 
+  // 기능상 의미는 없고 이 페이지에서 select asset page로의 전환시 UI flash를 막기 위해서 필요한 값들을 prefetch하는 용도
+  noop(skipQueriesStore.queryIBCSwap.swapCurrenciesMap);
+  noop(skipQueriesStore.queryIBCSwap.swapDestinationCurrenciesMap);
+
   const interactionBlocked =
     txConfigsValidate.interactionBlocked ||
     !uiConfigStore.ibcSwapConfig.slippageIsValid;
@@ -658,4 +662,8 @@ const ArrowsUpDownIcon: FunctionComponent<{
       />
     </svg>
   );
+};
+
+const noop = (..._args: any[]) => {
+  // noop
 };
