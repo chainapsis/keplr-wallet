@@ -2,11 +2,14 @@ import React, {FunctionComponent, ReactElement, isValidElement} from 'react';
 import {useStyle} from '../../styles';
 import {Text, StyleSheet, TextStyle, View, ViewStyle} from 'react-native';
 import {RectButton} from '../rect-button';
+import {SVGLoadingIcon} from '../spinner';
+
+type ButtonColorType = 'primary' | 'secondary' | 'danger';
 
 export const Button: FunctionComponent<{
-  color?: 'primary' | 'danger';
-  mode?: 'fill' | 'light' | 'outline' | 'text';
-  size?: 'default' | 'small' | 'large';
+  color?: ButtonColorType;
+  mode?: 'fill' | 'outline';
+  size?: 'extra-small' | 'small' | 'medium' | 'large';
   text: string;
   leftIcon?: ReactElement | ((color: string) => ReactElement);
   rightIcon?: ReactElement | ((color: string) => ReactElement);
@@ -38,47 +41,30 @@ export const Button: FunctionComponent<{
   underlayColor: propUnderlayColor,
 }) => {
   const style = useStyle();
+  const baseColor = ((color: ButtonColorType) => {
+    switch (color) {
+      case 'danger':
+        return 'red';
+      case 'primary':
+        return 'blue';
+      default:
+        return 'gray';
+    }
+  })(color);
 
   const backgroundColorDefinitions: string[] = (() => {
-    const baseColor = color === 'primary' ? 'blue' : 'red';
-
     switch (mode) {
       case 'fill':
-        if (disabled) {
-          if (color === 'primary') {
+        switch (color) {
+          case 'danger':
+            return [`background-color-${baseColor}-300@30%`];
+          case 'primary':
             return [
-              `background-color-${baseColor}-200`,
-              `dark:background-color-${baseColor}-600`,
+              `background-color-${baseColor}-400`,
+              `light:background-color-${baseColor}-50`,
             ];
-          } else {
-            return [
-              `background-color-${baseColor}-100`,
-              `dark:background-color-${baseColor}-700`,
-            ];
-          }
-        } else {
-          return [`background-color-${baseColor}-400`];
-        }
-      case 'light':
-        if (disabled) {
-          if (color === 'primary') {
-            return [
-              `background-color-${baseColor}-50`,
-              'dark:background-color-platinum-500',
-            ];
-          } else {
-            return [
-              `background-color-${baseColor}-100`,
-              `dark:background-color-${baseColor}-700`,
-            ];
-          }
-        } else {
-          return [
-            `background-color-${baseColor}-100`,
-            color === 'primary'
-              ? 'dark:background-color-platinum-400'
-              : `dark:background-color-${baseColor}-600`,
-          ];
+          default:
+            return [`background-color-${baseColor}-400`];
         }
       case 'outline':
         return ['background-color-transparent'];
@@ -86,71 +72,36 @@ export const Button: FunctionComponent<{
         return ['background-color-transparent'];
     }
   })();
-
   const textDefinition = (() => {
     switch (size) {
       case 'large':
         return 'text-button1';
-      case 'small':
-        return 'text-button3';
+
       default:
         return 'text-button2';
     }
   })();
 
   const textColorDefinition: string[] = (() => {
-    const baseColor = color === 'primary' ? 'blue' : 'red';
-
     switch (mode) {
       case 'fill':
         if (disabled) {
-          if (color === 'primary') {
-            return ['color-white', 'dark:color-platinum-200'];
-          } else {
-            return [`color-${baseColor}-200`, `light:color-${baseColor}-500`];
-          }
+          return ['color-white@50%'];
         }
-
-        if (color === 'primary') {
-          return ['color-white', `light:color-${baseColor}-50`];
-        } else {
-          return ['color-white'];
+        switch (color) {
+          case 'danger':
+            return ['color-red-400'];
+          case 'primary':
+            return ['color-white', 'light:color-blue-400'];
+          default:
+            return ['color-white'];
         }
-      case 'light':
-        if (disabled) {
-          if (color === 'primary') {
-            return [`color-${baseColor}-200`, 'dark:color-platinum-200'];
-          } else {
-            return [`color-${baseColor}-200`, `dark:color-${baseColor}-500`];
-          }
-        }
-
-        return [
-          `color-${baseColor}-400`,
-          color === 'primary'
-            ? 'dark:color-platinum-10'
-            : `dark:color-${baseColor}-50`,
-        ];
       case 'outline':
         if (disabled) {
           return [`color-${baseColor}-200`, `dark:color-${baseColor}-600`];
         }
 
         return [`color-${baseColor}-400`];
-      case 'text':
-        if (disabled) {
-          if (color === 'primary') {
-            return ['color-gray-200', 'dark:color-platinum-300'];
-          } else {
-            return [`color-${baseColor}-200`, `dark:color-${baseColor}-600`];
-          }
-        }
-
-        if (color === 'primary') {
-          return [`color-${baseColor}-400`, 'dark:color-platinum-50'];
-        } else {
-          return [`color-${baseColor}-400`, `dark:color-${baseColor}-300`];
-        }
     }
   })();
 
@@ -158,74 +109,14 @@ export const Button: FunctionComponent<{
     if (propRippleColor) {
       return propRippleColor;
     }
-
-    const baseColor = color === 'primary' ? 'blue' : 'red';
-
-    switch (mode) {
-      case 'fill':
-        return style.get(`color-${baseColor}-500` as any).color;
-      case 'light':
-        if (color === 'primary') {
-          return (
-            style.flatten([
-              `color-${baseColor}-200`,
-              'dark:color-platinum-600',
-            ] as any) as any
-          ).color;
-        }
-        return style.get(`color-${baseColor}-200` as any).color;
-      default:
-        if (color === 'primary') {
-          return (
-            style.flatten([
-              `color-${baseColor}-100`,
-              'dark:color-platinum-300',
-            ] as any) as any
-          ).color;
-        }
-        return (
-          style.flatten([
-            `color-${baseColor}-100`,
-            `dark:color-${baseColor}-600`,
-          ] as any) as any
-        ).color;
-    }
+    return style.get('color-gray-500').color;
   })();
 
   const underlayColor = (() => {
     if (propUnderlayColor) {
       return propUnderlayColor;
     }
-
-    if (mode === 'text' || mode === 'outline') {
-      const baseColor = color === 'primary' ? 'blue' : 'red';
-
-      if (color === 'primary') {
-        return (
-          style.flatten([
-            `color-${baseColor}-200`,
-            'light:color-platinum-300',
-          ] as any) as any
-        ).color;
-      }
-      return (
-        style.flatten([
-          `color-${baseColor}-200`,
-          `light:color-${baseColor}-600`,
-        ] as any) as any
-      ).color;
-    }
-
-    if (mode === 'light' && color === 'primary') {
-      return style.flatten(['color-gray-200', 'light:color-platinum-600'])
-        .color;
-    }
-
-    if (color === 'primary') {
-      return style.get('color-platinum-600').color;
-    } else {
-      return style.get('color-platinum-500').color;
-    }
+    return style.get('color-gray-500').color;
   })();
 
   const outlineBorderDefinition: string[] = (() => {
@@ -254,6 +145,7 @@ export const Button: FunctionComponent<{
             `height-button-${size}` as any,
             'border-radius-8',
             'overflow-hidden',
+            'relative',
           ],
           [
             mode === 'outline' && 'border-width-1',
@@ -262,77 +154,89 @@ export const Button: FunctionComponent<{
         ),
         containerStyle,
       ])}>
-      <RectButton
-        style={StyleSheet.flatten([
-          style.flatten([
-            'flex-row',
-            'justify-center',
-            'items-center',
-            'height-full',
-            'padding-x-8',
-          ]),
-          buttonStyle,
-        ])}
-        onPress={onPress}
-        enabled={!loading && !disabled}
-        rippleColor={rippleColor}
-        underlayColor={underlayColor}
-        activeOpacity={propUnderlayColor ? 1 : color === 'primary' ? 0.3 : 0.2}>
-        <View
-          style={style.flatten(
-            ['height-1', 'justify-center'],
-            [loading && 'opacity-transparent'],
-          )}>
-          <View>
-            {typeof leftIcon === 'function' &&
-              leftIcon(
-                (style.flatten(textColorDefinition as any) as any).color,
-              )}
-            {isValidElement(leftIcon) ||
-            !leftIcon ||
-            !(typeof leftIcon === 'function')
-              ? leftIcon
-              : leftIcon(
-                  (style.flatten(textColorDefinition as any) as any).color,
-                )}
-          </View>
-        </View>
-        <Text
+      <View
+        style={
+          disabled &&
+          style.flatten(['background-color-gray-600@50%', 'absolute-fill'])
+        }>
+        <RectButton
           style={StyleSheet.flatten([
-            style.flatten(
-              [textDefinition, 'text-center', ...(textColorDefinition as any)],
-              [loading && 'opacity-transparent'],
-            ),
-            textStyle,
-          ])}>
-          {text}
-        </Text>
-        <View
-          style={style.flatten(
-            ['height-1', 'justify-center'],
-            [loading && 'opacity-transparent'],
-          )}>
-          <View>
-            {isValidElement(rightIcon) ||
-            !rightIcon ||
-            !(typeof rightIcon === 'function')
-              ? rightIcon
-              : rightIcon(
-                  (style.flatten(textColorDefinition as any) as any).color,
-                )}
-          </View>
-        </View>
-        {loading ? (
-          <View
-            style={style.flatten([
-              'absolute-fill',
+            style.flatten([
+              'flex-row',
               'justify-center',
               'items-center',
-            ])}>
-            loading
+              'height-full',
+              'padding-x-8',
+            ]),
+            buttonStyle,
+          ])}
+          onPress={onPress}
+          enabled={!loading && !disabled}
+          rippleColor={rippleColor}
+          underlayColor={underlayColor}
+          activeOpacity={
+            propUnderlayColor ? 1 : color === 'primary' ? 0.3 : 0.2
+          }>
+          <View
+            style={style.flatten(
+              ['height-1', 'justify-center', 'margin-right-4'],
+              [loading && 'opacity-transparent'],
+            )}>
+            <View>
+              {typeof leftIcon === 'function' &&
+                leftIcon(
+                  (style.flatten(textColorDefinition as any) as any).color,
+                )}
+              {isValidElement(leftIcon) ||
+              !leftIcon ||
+              !(typeof leftIcon === 'function')
+                ? leftIcon
+                : leftIcon(
+                    (style.flatten(textColorDefinition as any) as any).color,
+                  )}
+            </View>
           </View>
-        ) : null}
-      </RectButton>
+          <Text
+            style={StyleSheet.flatten([
+              style.flatten(
+                [
+                  textDefinition,
+                  'text-center',
+                  ...(textColorDefinition as any),
+                ],
+                [loading && 'opacity-transparent'],
+              ),
+              textStyle,
+            ])}>
+            {text}
+          </Text>
+          <View
+            style={style.flatten(
+              ['height-1', 'justify-center', 'margin-left-4'],
+              [loading && 'opacity-transparent'],
+            )}>
+            <View>
+              {isValidElement(rightIcon) ||
+              !rightIcon ||
+              !(typeof rightIcon === 'function')
+                ? rightIcon
+                : rightIcon(
+                    (style.flatten(textColorDefinition as any) as any).color,
+                  )}
+            </View>
+          </View>
+          {loading ? (
+            <View
+              style={style.flatten([
+                'absolute-fill',
+                'justify-center',
+                'items-center',
+              ])}>
+              <SVGLoadingIcon color="white" size={16} />
+            </View>
+          ) : null}
+        </RectButton>
+      </View>
     </View>
   );
 };
