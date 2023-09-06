@@ -98,7 +98,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     inChainId,
     accountStore.getAccount(inChainId).bech32Address,
     // TODO: config로 빼기
-    300000,
+    200000,
     outChainId,
     outCurrency,
     SwapFeeBps.value
@@ -112,7 +112,42 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     inChainId,
     ibcSwapConfigs.gasConfig,
     ibcSwapConfigs.feeConfig,
-    "native",
+    (() => {
+      // simulation 할때 예상되는 gas에 따라서 밑의 값을 설정해야한다.
+      // 근데 이걸 엄밀히 정하기는 어렵다
+      // 추정을해보면 당연히 destination token에 따라서 값이 다를 수 있다.
+      // 또한 트랜잭션이 ibc transfer인지 cosmwasm execute인지에 따라서 다를 수 있다.
+      // ibc transfer일 경우는 차이는 memo의 길이일 뿐인데 이건 gas에 그다지 영향을 미치지 않기 때문에 gas adjustment로 충분하다.
+      // swap일 경우 (osmosis에서 실행될 경우) swpa이 몇번 필요한지에 따라 영향을 미칠 것이다.
+      let type = "default";
+
+      // swap일 경우 웬만하면 swap 한번으로 충분할 확률이 높다.
+      // 이 가정에 따라서 첫로드시에 gas를 restore하기 위해서 오스모시스 위에서 발생할 경우
+      // 일단 swap-1로 설정한다.
+      if (
+        ibcSwapConfigs.amountConfig.chainInfo.chainIdentifier ===
+        chainStore.getChain(skipQueriesStore.queryIBCSwap.swapVenue.chainId)
+          .chainIdentifier
+      ) {
+        type = `swap-1`;
+      }
+
+      const queryRoute = ibcSwapConfigs.amountConfig
+        .getQueryIBCSwap()
+        ?.getQueryRoute();
+      if (queryRoute && queryRoute.response) {
+        if (queryRoute.response.data.operations.length > 0) {
+          const firstOperation = queryRoute.response.data.operations[0];
+          if ("swap" in firstOperation) {
+            if ("swap_in" in firstOperation.swap) {
+              type = `swap-${firstOperation.swap.swap_in.swap_operations.length}`;
+            }
+          }
+        }
+      }
+
+      return `${ibcSwapConfigs.amountConfig.outChainId}/${ibcSwapConfigs.amountConfig.outCurrency.coinMinimalDenom}/${type}`;
+    })(),
     () => {
       if (!ibcSwapConfigs.amountConfig.currency) {
         throw new Error("Send currency not set");
