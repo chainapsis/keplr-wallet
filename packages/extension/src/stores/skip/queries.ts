@@ -59,6 +59,7 @@ export class SkipQueries {
       this.queryChains,
       this.queryRoute,
       this.queryMsgsDirect,
+      this.queryIBCPacketForwardingTransfer,
       SwapVenue
     );
   }

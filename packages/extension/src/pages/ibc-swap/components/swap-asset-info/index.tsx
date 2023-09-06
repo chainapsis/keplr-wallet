@@ -617,38 +617,14 @@ const SelectDestinationChainModal: FunctionComponent<{
   const searchRef = useFocusOnMount<HTMLInputElement>();
   const [search, setSearch] = useState("");
 
-  const originOutChainId = (() => {
-    if (
-      "originChainId" in amountConfig.outCurrency &&
-      amountConfig.outCurrency.originChainId
-    ) {
-      return amountConfig.outCurrency.originChainId;
-    }
-    return amountConfig.outChainId;
-  })();
-  const originOutCurrency = (() => {
-    if (
-      "originCurrency" in amountConfig.outCurrency &&
-      amountConfig.outCurrency.originCurrency
-    ) {
-      return amountConfig.outCurrency.originCurrency;
-    }
-    return amountConfig.outCurrency;
-  })();
-
   const channels: {
-    destinationChainId: string;
+    chainId: string;
     denom: string;
-  }[] = [
-    {
-      destinationChainId: originOutChainId,
-      denom: originOutCurrency.coinMinimalDenom,
-    },
-    ...skipQueriesStore.queryIBCPacketForwardingTransfer.getIBCChannels(
-      originOutChainId,
-      originOutCurrency.coinMinimalDenom
-    ),
-  ];
+  }[] =
+    skipQueriesStore.queryIBCSwap.getSwapDestinationCurrencyAlternativeChains(
+      chainStore.getChain(amountConfig.outChainId),
+      amountConfig.outCurrency
+    );
 
   const filteredChannels = (() => {
     const trim = search.trim().toLowerCase();
@@ -657,7 +633,7 @@ const SelectDestinationChainModal: FunctionComponent<{
     }
 
     return channels.filter((channel) => {
-      return `on ${channel.destinationChainId}`.toLowerCase().includes(trim);
+      return `on ${channel.chainId}`.toLowerCase().includes(trim);
     });
   })();
 
@@ -698,10 +674,7 @@ const SelectDestinationChainModal: FunctionComponent<{
       >
         {filteredChannels.map((channel) => {
           return (
-            <Box
-              key={channel.destinationChainId + "/" + channel.denom}
-              paddingX="0.75rem"
-            >
+            <Box key={channel.chainId + "/" + channel.denom} paddingX="0.75rem">
               <Box
                 cursor="pointer"
                 paddingX="1rem"
@@ -729,10 +702,7 @@ const SelectDestinationChainModal: FunctionComponent<{
                   //     .getChain(channel.destinationChainId)
                   //     .forceFindCurrency(channel.denom)
                   // );
-                  onDestinationChainSelect(
-                    channel.destinationChainId,
-                    channel.denom
-                  );
+                  onDestinationChainSelect(channel.chainId, channel.denom);
 
                   close();
                 }}
@@ -744,16 +714,13 @@ const SelectDestinationChainModal: FunctionComponent<{
                       height: "2rem",
                     }}
                     src={
-                      chainStore.getChain(channel.destinationChainId)
-                        .chainSymbolImageUrl
+                      chainStore.getChain(channel.chainId).chainSymbolImageUrl
                     }
-                    alt={
-                      chainStore.getChain(channel.destinationChainId).chainName
-                    }
+                    alt={chainStore.getChain(channel.chainId).chainName}
                   />
                   <Gutter size="0.75rem" />
                   <Subtitle2 color={ColorPalette["gray-10"]}>{`on ${
-                    chainStore.getChain(channel.destinationChainId).chainName
+                    chainStore.getChain(channel.chainId).chainName
                   }`}</Subtitle2>
                 </XAxis>
               </Box>
