@@ -1,7 +1,11 @@
-import React, {FunctionComponent, ReactElement, isValidElement} from 'react';
+import React, {
+  FunctionComponent,
+  ReactElement,
+  isValidElement,
+  useState,
+} from 'react';
 import {useStyle} from '../../styles';
-import {Text, StyleSheet, TextStyle, View} from 'react-native';
-import {RectButton} from '../rect-button';
+import {Text, StyleSheet, TextStyle, View, Pressable} from 'react-native';
 
 type ButtonColorType = 'faint' | 'default';
 
@@ -22,53 +26,45 @@ export const TextButton: FunctionComponent<{
   textStyle,
 }) => {
   const style = useStyle();
+  const [isPressIn, setIsPressIn] = useState(false);
 
-  const textColorDefinition: string[] = (() => {
+  const textColorDefinition: string = (() => {
     switch (color) {
       case 'faint':
         if (disabled) {
-          return ['color-gray-300'];
+          return 'color-gray-300';
         }
-        return ['color-gray-200'];
+        return 'color-gray-200';
       default:
         if (disabled) {
-          return ['color-gray-300'];
+          return 'color-gray-300';
         }
-        return ['color-white'];
+        return 'color-white';
     }
   })();
 
   return (
-    <View
-      style={StyleSheet.flatten([
-        style.flatten([
-          'height-button-extra-small',
-          'border-radius-8',
-          'overflow-hidden',
-          'relative',
-          'text-button3',
-          'color-white',
-        ]),
-      ])}>
-      <RectButton
+    <View>
+      <Pressable
+        disabled={disabled}
         style={StyleSheet.flatten([
           style.flatten([
             'flex-row',
             'justify-center',
             'items-center',
-            'height-full',
             'padding-x-8',
+            isPressIn ? 'color-gray-300' : (textColorDefinition as any),
           ]),
         ])}
-        isTextMode={true}
         onPress={onPress}
-        enabled={!disabled}>
+        onPressOut={() => setIsPressIn(false)}
+        onPressIn={() => setIsPressIn(true)}>
         <Text
           style={StyleSheet.flatten([
             style.flatten([
               'text-center',
               'text-button2',
-              ...(textColorDefinition as any),
+              isPressIn ? 'color-gray-300' : (textColorDefinition as any),
             ]),
             textStyle,
           ])}>
@@ -79,18 +75,19 @@ export const TextButton: FunctionComponent<{
             'height-1',
             'justify-center',
             'margin-left-4',
+            isPressIn ? 'color-gray-300' : 'color-red-400',
           ])}>
-          <View>
-            {isValidElement(rightIcon) ||
-            !rightIcon ||
-            !(typeof rightIcon === 'function')
-              ? rightIcon
-              : rightIcon(
-                  (style.flatten(textColorDefinition as any) as any).color,
-                )}
-          </View>
+          {isValidElement(rightIcon) ||
+          !rightIcon ||
+          !(typeof rightIcon === 'function')
+            ? rightIcon
+            : rightIcon(
+                isPressIn
+                  ? style.get('color-gray-300').color
+                  : style.get(textColorDefinition as any).color,
+              )}
         </View>
-      </RectButton>
+      </Pressable>
     </View>
   );
 };
