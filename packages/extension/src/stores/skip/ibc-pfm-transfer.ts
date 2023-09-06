@@ -217,24 +217,16 @@ export class ObservableQueryIbcPfmTransfer {
                           .hasFeature("ibc-go") ||
                         !this.queryChains.isSupportsMemo(
                           channel.counterpartyChainId
-                        )
+                        ) ||
+                        !this.queryChains.isPFMEnabled(
+                          channel.counterpartyChainId
+                        ) ||
+                        !this.chainGetter
+                          .getChain(channel.counterpartyChainId)
+                          .hasFeature("ibc-pfm")
                       ) {
                         pfmPossibility = false;
                         break;
-                      }
-
-                      if (i >= 1) {
-                        if (
-                          !this.queryChains.isPFMEnabled(
-                            channel.counterpartyChainId
-                          ) ||
-                          !this.chainGetter
-                            .getChain(channel.counterpartyChainId)
-                            .hasFeature("ibc-pfm")
-                        ) {
-                          pfmPossibility = false;
-                          break;
-                        }
                       }
                     }
                   }
