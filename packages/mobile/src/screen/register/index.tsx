@@ -259,14 +259,8 @@ export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
               />
             </React.Fragment>
           )}
-          <View
-            style={style.flatten([
-              'height-button-default',
-              'border-radius-8',
-              'background-color-blue-400',
-            ])}>
-            <Button text="Next" size="large" onPress={submit} />
-          </View>
+
+          <Button text="Next" size="large" onPress={submit} />
         </View>
       </React.Fragment>
     );
