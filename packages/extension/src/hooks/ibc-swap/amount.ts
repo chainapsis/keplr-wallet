@@ -6,11 +6,10 @@ import {
   CosmosAccount,
   CosmwasmAccount,
   IAccountStoreWithInjects,
+  IQueriesStore,
   MakeTxResponse,
   WalletStatus,
 } from "@keplr-wallet/stores";
-// TODO: 이거 import path 문제 해결하기
-import { QueriesStore } from "@keplr-wallet/hooks/build/tx/internal";
 import { useState } from "react";
 import { action, makeObservable, observable, override } from "mobx";
 import { SkipQueries } from "../../stores/skip";
@@ -26,7 +25,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   constructor(
     chainGetter: ChainGetter,
-    queriesStore: QueriesStore,
+    queriesStore: IQueriesStore,
     protected readonly accountStore: IAccountStoreWithInjects<
       [CosmosAccount, CosmwasmAccount]
     >,
@@ -368,7 +367,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
 export const useIBCSwapAmountConfig = (
   chainGetter: ChainGetter,
-  queriesStore: QueriesStore,
+  queriesStore: IQueriesStore,
   accountStore: IAccountStoreWithInjects<[CosmosAccount, CosmwasmAccount]>,
   skipQueries: SkipQueries,
   chainId: string,
