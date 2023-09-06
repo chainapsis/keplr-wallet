@@ -4,7 +4,7 @@ import {
   IChainInfoImpl,
   IChainStore,
 } from "@keplr-wallet/stores";
-import { Currency, IBCCurrency } from "@keplr-wallet/types";
+import { AppCurrency, Currency } from "@keplr-wallet/types";
 import { ObservableQueryAssets } from "./assets";
 import { computed, makeObservable } from "mobx";
 import { ObservableQueryChains } from "./chains";
@@ -126,10 +126,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     return this.get(str);
   }
 
-  isSwappableCurrency(
-    chainId: string,
-    currency: Currency | IBCCurrency
-  ): boolean {
+  isSwappableCurrency(chainId: string, currency: AppCurrency): boolean {
     const chainIdentifier = this.chainStore.getChain(chainId).chainIdentifier;
     return (
       this.swapCurrenciesMap.has(chainIdentifier) &&
@@ -141,19 +138,19 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
 
   // Key: chain identifier, inner key: coin minimal denom
   @computed
-  get swapCurrenciesMap(): Map<string, Map<string, Currency | IBCCurrency>> {
+  get swapCurrenciesMap(): Map<string, Map<string, AppCurrency>> {
     const swapChainInfo = this.chainStore.getChain(this.swapVenue.chainId);
 
     const queryAssets = this.queryAssets.getAssets(swapChainInfo.chainId);
     const assets = queryAssets.assets;
 
-    const res = new Map<string, Map<string, Currency | IBCCurrency>>();
+    const res = new Map<string, Map<string, AppCurrency>>();
 
     const getMap = (chainId: string) => {
       const chainIdentifier = this.chainStore.getChain(chainId).chainIdentifier;
       let innerMap = res.get(chainIdentifier);
       if (!innerMap) {
-        innerMap = new Map<string, Currency | IBCCurrency>();
+        innerMap = new Map<string, AppCurrency>();
         res.set(chainIdentifier, innerMap);
       }
 

@@ -3,7 +3,7 @@ import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { ChainStore } from "../chain";
 import { computedFn } from "mobx-utils";
 import { IChainInfoImpl } from "@keplr-wallet/stores";
-import { Currency, IBCCurrency } from "@keplr-wallet/types";
+import { AppCurrency } from "@keplr-wallet/types";
 
 export class IBCSwapConfig {
   protected readonly kvStore: KVStore;
@@ -103,7 +103,7 @@ export class IBCSwapConfig {
     this._lastAmountInChainId = chainId;
   }
 
-  getAmountInCurrency = computedFn((): Currency | IBCCurrency => {
+  getAmountInCurrency = computedFn((): AppCurrency => {
     if (this._lastAmountInMinimalDenom) {
       const currency = this.getAmountInChainInfo().findCurrency(
         this._lastAmountInMinimalDenom
@@ -161,7 +161,7 @@ export class IBCSwapConfig {
     this._lastAmountOutChainId = chainId;
   }
 
-  getAmountOutCurrency = computedFn((): Currency | IBCCurrency => {
+  getAmountOutCurrency = computedFn((): AppCurrency => {
     if (this._lastAmountOutMinimalDenom) {
       const currency = this.getAmountOutChainInfo().findCurrency(
         this._lastAmountOutMinimalDenom
