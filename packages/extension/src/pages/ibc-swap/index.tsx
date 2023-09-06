@@ -35,6 +35,7 @@ import { GuideBox } from "../../components/guide-box";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
 import { Dec } from "@keplr-wallet/unit";
+import { MakeTxResponse } from "@keplr-wallet/stores";
 
 export const IBCSwapPage: FunctionComponent = observer(() => {
   const {
@@ -221,6 +222,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     txConfigsValidate.interactionBlocked ||
     !uiConfigStore.ibcSwapConfig.slippageIsValid;
 
+  const [calculatingTxError, setCalculatingTxError] = useState<
+    Error | undefined
+  >();
+
   return (
     <MainHeaderLayout
       additionalPaddingBottom={BottomTabsHeightRem}
@@ -243,10 +248,18 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         e.preventDefault();
 
         if (!interactionBlocked) {
-          const tx = await ibcSwapConfigs.amountConfig.getTx(
-            uiConfigStore.ibcSwapConfig.slippageNum,
-            SwapFeeBps.receiver
-          );
+          let tx: MakeTxResponse;
+
+          try {
+            tx = await ibcSwapConfigs.amountConfig.getTx(
+              uiConfigStore.ibcSwapConfig.slippageNum,
+              SwapFeeBps.receiver
+            );
+          } catch (e) {
+            setCalculatingTxError(e);
+            return;
+          }
+          setCalculatingTxError(undefined);
 
           try {
             await tx.send(
@@ -254,7 +267,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               ibcSwapConfigs.memoConfig.memo,
               {
                 preferNoSetFee: true,
-                preferNoSetMemo: true,
+                preferNoSetMemo: false,
               },
               {
                 onFulfill: (tx: any) => {
@@ -433,7 +446,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           gasSimulator={gasSimulator}
         />
 
-        <WarningGuideBox amountConfig={ibcSwapConfigs.amountConfig} />
+        <WarningGuideBox
+          amountConfig={ibcSwapConfigs.amountConfig}
+          forceError={calculatingTxError}
+        />
       </Box>
 
       <SlippageModal
@@ -452,8 +468,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
 const WarningGuideBox: FunctionComponent<{
   amountConfig: IBCSwapAmountConfig;
-}> = observer(({ amountConfig }) => {
+
+  forceError?: Error;
+}> = observer(({ amountConfig, forceError }) => {
   const error: string | undefined = (() => {
+    if (forceError) {
+      return forceError.message || forceError.toString();
+    }
+
     const uiProperties = amountConfig.uiProperties;
 
     const err = uiProperties.error || uiProperties.warning;
