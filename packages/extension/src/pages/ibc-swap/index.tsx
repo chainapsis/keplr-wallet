@@ -409,6 +409,20 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           type="to"
           senderConfig={ibcSwapConfigs.senderConfig}
           amountConfig={ibcSwapConfigs.amountConfig}
+          onDestinationChainSelect={(chainId, coinMinimalDenom) => {
+            setSearchParams(
+              (prev) => {
+                // state 처리가 난해해서 그냥 query string으로 해결한다.
+                prev.set("outChainId", chainId);
+                prev.set("outCoinMinimalDenom", coinMinimalDenom);
+
+                return prev;
+              },
+              {
+                replace: true,
+              }
+            );
+          }}
         />
         <Gutter size="0.75rem" />
         <SwapFeeInfo

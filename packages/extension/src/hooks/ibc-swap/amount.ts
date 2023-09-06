@@ -119,30 +119,59 @@ export class IBCSwapAmountConfig extends AmountConfig {
     const swapAccount = this.accountStore.getAccount(
       queryIBCSwap.swapVenue.chainId
     );
-    const destinationAccount = this.accountStore.getAccount(this.outChainId);
+    const destinationChainIds = (() => {
+      const res: string[] = [];
+      // 일단 destination은 기본적으로 osmosis에서 ibc currency의 origin chain의 원본 currency를 거쳐서 이동한다고 가정한다.
+      // 현재는 UI에서 이 가정을 만족시킨다
+      if ("paths" in this.outCurrency) {
+        const reverse = this.outCurrency.paths.reverse();
+        for (const path of reverse) {
+          if (path.clientChainId) {
+            res.push(path.clientChainId);
+          }
+        }
+      }
+
+      res.push(this.outChainId);
+      return res;
+    })();
     if (sourceAccount.walletStatus === WalletStatus.NotInit) {
       await sourceAccount.init();
     }
     if (swapAccount.walletStatus === WalletStatus.NotInit) {
       await swapAccount.init();
     }
-    if (destinationAccount.walletStatus === WalletStatus.NotInit) {
-      await destinationAccount.init();
+    for (const destinationChainId of destinationChainIds) {
+      const destinationAccount =
+        this.accountStore.getAccount(destinationChainId);
+      if (destinationAccount.walletStatus === WalletStatus.NotInit) {
+        await destinationAccount.init();
+      }
     }
+
     if (!sourceAccount.bech32Address) {
       throw new Error("Source account is not set");
     }
     if (!swapAccount.bech32Address) {
       throw new Error("Swap account is not set");
     }
-    if (!destinationAccount.bech32Address) {
-      throw new Error("Destination account is not set");
+    for (const destinationChainId of destinationChainIds) {
+      const destinationAccount =
+        this.accountStore.getAccount(destinationChainId);
+      if (!destinationAccount.bech32Address) {
+        throw new Error("Destination account is not set");
+      }
     }
 
     chainIdsToAddresses[this.chainId] = sourceAccount.bech32Address;
     chainIdsToAddresses[queryIBCSwap.swapVenue.chainId] =
       swapAccount.bech32Address;
-    chainIdsToAddresses[this.outChainId] = destinationAccount.bech32Address;
+    for (const destinationChainId of destinationChainIds) {
+      const destinationAccount =
+        this.accountStore.getAccount(destinationChainId);
+      chainIdsToAddresses[destinationChainId] =
+        destinationAccount.bech32Address;
+    }
 
     const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
       chainIdsToAddresses,
@@ -192,30 +221,60 @@ export class IBCSwapAmountConfig extends AmountConfig {
     const swapAccount = this.accountStore.getAccount(
       queryIBCSwap.swapVenue.chainId
     );
-    const destinationAccount = this.accountStore.getAccount(this.outChainId);
+    const destinationChainIds = (() => {
+      const res: string[] = [];
+      // 일단 destination은 기본적으로 osmosis에서 ibc currency의 origin chain의 원본 currency를 거쳐서 이동한다고 가정한다.
+      // 현재는 UI에서 이 가정을 만족시킨다
+      if ("paths" in this.outCurrency) {
+        const reverse = this.outCurrency.paths.reverse();
+        for (const path of reverse) {
+          if (path.clientChainId) {
+            res.push(path.clientChainId);
+          }
+        }
+      }
+
+      res.push(this.outChainId);
+      return res;
+    })();
+
     if (sourceAccount.walletStatus === WalletStatus.NotInit) {
       sourceAccount.init();
     }
     if (swapAccount.walletStatus === WalletStatus.NotInit) {
       swapAccount.init();
     }
-    if (destinationAccount.walletStatus === WalletStatus.NotInit) {
-      destinationAccount.init();
+    for (const destinationChainId of destinationChainIds) {
+      const destinationAccount =
+        this.accountStore.getAccount(destinationChainId);
+      if (destinationAccount.walletStatus === WalletStatus.NotInit) {
+        destinationAccount.init();
+      }
     }
+
     if (!sourceAccount.bech32Address) {
       return;
     }
     if (!swapAccount.bech32Address) {
       return;
     }
-    if (!destinationAccount.bech32Address) {
-      return;
+    for (const destinationChainId of destinationChainIds) {
+      const destinationAccount =
+        this.accountStore.getAccount(destinationChainId);
+      if (!destinationAccount.bech32Address) {
+        return;
+      }
     }
 
     chainIdsToAddresses[this.chainId] = sourceAccount.bech32Address;
     chainIdsToAddresses[queryIBCSwap.swapVenue.chainId] =
       swapAccount.bech32Address;
-    chainIdsToAddresses[this.outChainId] = destinationAccount.bech32Address;
+    for (const destinationChainId of destinationChainIds) {
+      const destinationAccount =
+        this.accountStore.getAccount(destinationChainId);
+      chainIdsToAddresses[destinationChainId] =
+        destinationAccount.bech32Address;
+    }
 
     const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
       chainIdsToAddresses,

@@ -26,6 +26,8 @@ export class ObservableQueryIbcPfmTransfer {
 
         counterpartyChainId: string;
       }[];
+
+      denom: string;
     }[] => {
       if (!this.chainGetter.hasChain(chainId)) {
         return [];
@@ -55,6 +57,8 @@ export class ObservableQueryIbcPfmTransfer {
 
           counterpartyChainId: string;
         }[];
+
+        denom: string;
       }[] = [];
 
       for (const assetChainId of Object.keys(assetsFromSource)) {
@@ -242,6 +246,7 @@ export class ObservableQueryIbcPfmTransfer {
                     originDenom: asset.originDenom,
                     originChainId: asset.originChainId,
                     channels: channels,
+                    denom: asset.denom,
                   });
                 }
               }
