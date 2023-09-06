@@ -44,6 +44,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     accountStore,
     skipQueriesStore,
     uiConfigStore,
+    keyRingStore,
   } = useStore();
 
   const theme = useTheme();
@@ -270,6 +271,35 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 preferNoSetMemo: false,
               },
               {
+                onBroadcasted: () => {
+                  if (
+                    !chainStore.isEnabledChain(
+                      ibcSwapConfigs.amountConfig.outChainId
+                    )
+                  ) {
+                    chainStore.enableChainInfoInUI(
+                      ibcSwapConfigs.amountConfig.outChainId
+                    );
+
+                    if (keyRingStore.selectedKeyInfo) {
+                      const outChainInfo = chainStore.getChain(
+                        ibcSwapConfigs.amountConfig.outChainId
+                      );
+                      if (
+                        keyRingStore.needKeyCoinTypeFinalize(
+                          keyRingStore.selectedKeyInfo.id,
+                          outChainInfo
+                        )
+                      ) {
+                        keyRingStore.finalizeKeyCoinType(
+                          keyRingStore.selectedKeyInfo.id,
+                          outChainInfo.chainId,
+                          outChainInfo.bip44.coinType
+                        );
+                      }
+                    }
+                  }
+                },
                 onFulfill: (tx: any) => {
                   if (tx.code != null && tx.code !== 0) {
                     console.log(tx.log ?? tx.raw_log);
