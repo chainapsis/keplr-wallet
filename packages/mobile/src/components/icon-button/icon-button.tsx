@@ -1,0 +1,128 @@
+import React, {FunctionComponent, ReactElement, isValidElement} from 'react';
+import {useStyle} from '../../styles';
+import {Text, StyleSheet, TextStyle, View, ViewStyle} from 'react-native';
+import {RectButton} from '../rect-button';
+
+export const IconButton: FunctionComponent<{
+  text?: string;
+  icon: ReactElement | ((color: string) => ReactElement);
+  path?: 'left' | 'right';
+  disabled?: boolean;
+  onPress?: () => void;
+  hasBackgroundColor?: boolean;
+  hasRipple?: boolean;
+
+  textStyle?: TextStyle;
+  style?: ViewStyle;
+  iconStyle?: ViewStyle;
+
+  rippleColor?: string;
+  underlayColor?: string;
+}> = ({
+  text,
+  icon,
+  disabled = false,
+  path = 'right',
+  onPress,
+  textStyle,
+  style: containerStyle,
+  iconStyle,
+
+  hasBackgroundColor,
+  hasRipple,
+  rippleColor: propRippleColor,
+  underlayColor: propUnderlayColor,
+}) => {
+  const style = useStyle();
+
+  const rippleColor = (() => {
+    if (!hasRipple) {
+      return undefined;
+    }
+    if (propRippleColor) {
+      return propRippleColor;
+    }
+    return style.get('color-gray-500').color;
+  })();
+
+  const underlayColor = (() => {
+    if (!hasRipple) {
+      return undefined;
+    }
+    if (propUnderlayColor) {
+      return propUnderlayColor;
+    }
+    return style.get('color-gray-500').color;
+  })();
+
+  const backgroundColor = 'background-color-gray-600';
+  const defaultTextColor = 'color-gray-300';
+
+  return (
+    <View
+      style={StyleSheet.flatten([
+        style.flatten(
+          [
+            'height-button-extra-small',
+            'border-radius-8',
+            'overflow-hidden',
+            'relative',
+            'text-button3',
+            'color-white',
+          ],
+          [hasBackgroundColor && backgroundColor],
+        ),
+        containerStyle,
+      ])}>
+      <RectButton
+        style={StyleSheet.flatten([
+          style.flatten([
+            'flex-row',
+            'justify-center',
+            'items-center',
+            'height-full',
+            'padding-x-8',
+          ]),
+        ])}
+        onPress={onPress}
+        enabled={!disabled}
+        rippleColor={rippleColor}
+        underlayColor={underlayColor}
+        activeOpacity={0.3}
+        isTextMode={!hasRipple}>
+        {path === 'left' ? (
+          <View
+            style={style.flatten([
+              'height-1',
+              'justify-center',
+              'margin-right-4',
+            ])}>
+            <View>
+              {isValidElement(icon) || !icon || !(typeof icon === 'function')
+                ? icon
+                : icon('text-white')}
+            </View>
+          </View>
+        ) : null}
+        <Text
+          style={StyleSheet.flatten([
+            style.flatten(['text-center', 'text-button2', defaultTextColor]),
+            textStyle,
+          ])}>
+          {text}
+        </Text>
+        {path === 'right' ? (
+          <View
+            style={StyleSheet.flatten([
+              style.flatten(['height-1', 'justify-center', 'margin-left-4']),
+              iconStyle,
+            ])}>
+            {isValidElement(icon) || !icon || !(typeof icon === 'function')
+              ? icon
+              : icon(defaultTextColor)}
+          </View>
+        ) : null}
+      </RectButton>
+    </View>
+  );
+};
