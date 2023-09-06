@@ -50,7 +50,7 @@ export class ErrorBoundary extends Component<
 }
 
 const ErrorBoundaryView: FunctionComponent = observer(() => {
-  const { chainStore } = useStore();
+  const { chainStore, uiConfigStore } = useStore();
   const theme = useTheme();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -83,7 +83,11 @@ const ErrorBoundaryView: FunctionComponent = observer(() => {
       await requester.sendMessage(BACKGROUND_PORT, msg);
     };
 
-    await Promise.allSettled([fn1(), fn2()]);
+    const fn3 = async () => {
+      await uiConfigStore.removeStatesWhenErrorOccurredDuringRending();
+    };
+
+    await Promise.allSettled([fn1(), fn2(), fn3()]);
   };
 
   return (

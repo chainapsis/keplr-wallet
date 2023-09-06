@@ -219,4 +219,8 @@ export class UIConfigStore {
   get icnsInfo() {
     return this._icnsInfo;
   }
+
+  async removeStatesWhenErrorOccurredDuringRending() {
+    await this.ibcSwapConfig.removeStatesWhenErrorOccurredDuringRending();
+  }
 }
