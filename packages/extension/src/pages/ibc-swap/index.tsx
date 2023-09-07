@@ -458,12 +458,16 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   ? ColorPalette.white
                   : ColorPalette["gray-500"]
               }
+              hover={{
+                backgroundColor:
+                  theme.mode === "light"
+                    ? ColorPalette["gray-10"]
+                    : ColorPalette["gray-550"],
+              }}
               borderRadius="999999px"
               borderWidth="1px"
               borderColor={
-                theme.mode === "light"
-                  ? ColorPalette["gray-50"]
-                  : ColorPalette["gray-500"]
+                theme.mode === "light" ? ColorPalette["gray-50"] : "transparent"
               }
               cursor="pointer"
               onClick={(e) => {
