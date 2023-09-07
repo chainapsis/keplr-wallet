@@ -1,12 +1,15 @@
 import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent, useMemo} from 'react';
-import {Text, View} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 import {useStyle} from '../../styles';
 import {PageWithScrollView} from '../../components/page';
 import {useStore} from '../../stores';
 import {PricePretty} from '@keplr-wallet/unit';
 import {useEffectOnce} from '../../hooks';
 import {WalletStatus} from '@keplr-wallet/stores';
+import {Button} from '../../components/button';
+import {IconButton} from '../../components/icon-button';
+import {CopyOutlineIcon} from '../../components/icon/copy-outline';
 
 export const HomeScreen: FunctionComponent = observer(() => {
   const style = useStyle();
@@ -178,6 +181,21 @@ export const HomeScreen: FunctionComponent = observer(() => {
     <React.Fragment>
       <PageWithScrollView backgroundMode={'default'}>
         <View>
+          <View
+            style={style.flatten(['flex-row', 'justify-center', 'width-full'])}>
+            <IconButton
+              hasBackgroundColor={true}
+              hasRipple={true}
+              text="copy address"
+              containerStyle={style.flatten([
+                'border-radius-16',
+                'width-160',
+                'height-20',
+                'margin-top-4',
+              ])}
+              icon={color => <CopyOutlineIcon color={color} size={16} />}
+            />
+          </View>
           <Text
             style={style.flatten([
               'color-white',
@@ -187,6 +205,27 @@ export const HomeScreen: FunctionComponent = observer(() => {
             ])}>
             {availableTotalPrice?.toString()}
           </Text>
+          <View
+            style={StyleSheet.flatten([
+              style.flatten(['flex-row', 'justify-between', 'gap-10']),
+            ])}>
+            <Button
+              text="Deposit"
+              color="secondary"
+              containerStyle={style.flatten(['flex-1'])}
+            />
+            <Button
+              text="Buy"
+              color="secondary"
+              containerStyle={style.flatten(['flex-1'])}
+            />
+            <Button text="Send" containerStyle={style.flatten(['flex-1'])} />
+          </View>
+
+          {/* TODO checkbox를 추가해야함 */}
+          <View style={style.flatten(['flex-row', 'justify-end'])}>
+            <IconButton text="Hide Low Balance" icon={<Text></Text>} />
+          </View>
         </View>
       </PageWithScrollView>
     </React.Fragment>
