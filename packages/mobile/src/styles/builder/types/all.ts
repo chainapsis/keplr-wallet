@@ -9,6 +9,7 @@ import {StaticTextStyles, StyleBuilderTextDefinitions} from './text';
 import {StaticStylesDefinitions} from './common';
 import {StyleBuilderSizeDefinitions} from './size';
 import {StyledDimension} from './dimension';
+import {StyleBuilderGapDefinitions} from './gap';
 
 export const StaticStyles = {
   ...StaticLayouts,
@@ -27,6 +28,7 @@ export type StyleBuilderDefinitions<
   BorderWidths extends Record<string, number>,
   BorderRadiuses extends Record<string, number>,
   Opacities extends Record<string, number>,
+  Gaps extends Record<string, number>,
 > = StaticStylesDefinitions<Custom> &
   StyleBuilderLayoutDefinitions &
   StyleBuilderColorDefinitions<Colors> &
@@ -35,5 +37,6 @@ export type StyleBuilderDefinitions<
   StyleBuilderMarginDefinitions<MarginSizes> &
   StyleBuilderBorderDefinitions<BorderWidths, BorderRadiuses> &
   StyleBuilderOpacityDefinitions<Opacities> &
+  StyleBuilderGapDefinitions<Gaps> &
   StyleBuilderImageDefinitions &
   StyleBuilderTextDefinitions;

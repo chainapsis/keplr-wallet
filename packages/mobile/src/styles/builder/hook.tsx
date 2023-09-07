@@ -20,6 +20,7 @@ const createStyleContext = <
   BorderWidths extends Record<string, number>,
   BorderRadiuses extends Record<string, number>,
   Opacities extends Record<string, number>,
+  Gaps extends Record<string, number>,
 >() =>
   createContext<
     | {
@@ -33,7 +34,8 @@ const createStyleContext = <
           MarginSizes,
           BorderWidths,
           BorderRadiuses,
-          Opacities
+          Opacities,
+          Gaps
         >;
         isInitializing: boolean;
         isAutomatic: boolean;
@@ -54,6 +56,7 @@ export const createStyleProvider = <
   BorderWidths extends Record<string, number>,
   BorderRadiuses extends Record<string, number>,
   Opacities extends Record<string, number>,
+  Gaps extends Record<string, number>,
 >(
   config: {
     themes: Themes;
@@ -66,6 +69,7 @@ export const createStyleProvider = <
     borderWidths: BorderWidths;
     borderRadiuses: BorderRadiuses;
     opacities: Opacities;
+    gaps: Gaps;
   },
   themeConfigs?: {
     [K in Themes[number]]?: DeepPartial<{
@@ -78,6 +82,7 @@ export const createStyleProvider = <
       borderWidths: BorderWidths;
       borderRadiuses: BorderRadiuses;
       opacities: Opacities;
+      gaps: Gaps;
     }>;
   },
 ): {
@@ -92,7 +97,8 @@ export const createStyleProvider = <
     MarginSizes,
     BorderWidths,
     BorderRadiuses,
-    Opacities
+    Opacities,
+    Gaps
   >;
   useStyleThemeController: () => {
     isInitializing: boolean;
@@ -111,7 +117,8 @@ export const createStyleProvider = <
     MarginSizes,
     BorderWidths,
     BorderRadiuses,
-    Opacities
+    Opacities,
+    Gaps
   >();
 
   return {
