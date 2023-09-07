@@ -15,7 +15,6 @@ export const IconButton: FunctionComponent<{
   containerStyle?: ViewStyle;
   textStyle?: TextStyle;
   style?: ViewStyle;
-  iconStyle?: ViewStyle;
 
   rippleColor?: string;
   underlayColor?: string;
@@ -27,7 +26,6 @@ export const IconButton: FunctionComponent<{
   onPress,
   textStyle,
   style: buttonStyle,
-  iconStyle,
   containerStyle,
   hasBackgroundColor,
   hasRipple,
@@ -109,7 +107,6 @@ export const IconButton: FunctionComponent<{
           <View
             style={StyleSheet.flatten([
               style.flatten(['height-1', 'justify-center', 'margin-left-4']),
-              iconStyle,
             ])}>
             {isValidElement(icon) || !icon || !(typeof icon === 'function')
               ? icon
