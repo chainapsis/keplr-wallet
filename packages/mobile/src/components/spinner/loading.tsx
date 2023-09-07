@@ -3,7 +3,7 @@ import Svg, {Circle, G} from 'react-native-svg';
 // import Animated from 'react-native-reanimated';
 // import {useSpinAnimated} from './hooks';
 
-//TODO 이후 애니메이션 추가해야함
+//TODO 이후에 애니메이션 추가해야함 hooks.ts 파일이랑  index.ts 파일도 함께 수정해야함
 export const SVGLoadingIcon: FunctionComponent<{
   color: string;
   size: number;

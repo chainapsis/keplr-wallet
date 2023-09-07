@@ -27,7 +27,7 @@ export const Button: FunctionComponent<{
 }> = ({
   color = 'primary',
   mode = 'fill',
-  size = 'default',
+  size = 'medium',
   text,
   leftIcon,
   rightIcon,
@@ -123,8 +123,6 @@ export const Button: FunctionComponent<{
     if (mode !== 'outline') {
       return [];
     }
-
-    const baseColor = color === 'primary' ? 'blue' : 'red';
 
     if (disabled) {
       return [

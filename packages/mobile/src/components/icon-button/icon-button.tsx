@@ -12,6 +12,7 @@ export const IconButton: FunctionComponent<{
   hasBackgroundColor?: boolean;
   hasRipple?: boolean;
 
+  containerStyle?: ViewStyle;
   textStyle?: TextStyle;
   style?: ViewStyle;
   iconStyle?: ViewStyle;
@@ -25,9 +26,9 @@ export const IconButton: FunctionComponent<{
   path = 'right',
   onPress,
   textStyle,
-  style: containerStyle,
+  style: buttonStyle,
   iconStyle,
-
+  containerStyle,
   hasBackgroundColor,
   hasRipple,
   rippleColor: propRippleColor,
@@ -62,14 +63,7 @@ export const IconButton: FunctionComponent<{
     <View
       style={StyleSheet.flatten([
         style.flatten(
-          [
-            'height-button-extra-small',
-            'border-radius-8',
-            'overflow-hidden',
-            'relative',
-            'text-button3',
-            'color-white',
-          ],
+          ['height-button-extra-small', 'border-radius-8', 'color-white'],
           [hasBackgroundColor && backgroundColor],
         ),
         containerStyle,
@@ -81,8 +75,8 @@ export const IconButton: FunctionComponent<{
             'justify-center',
             'items-center',
             'height-full',
-            'padding-x-8',
           ]),
+          buttonStyle,
         ])}
         onPress={onPress}
         enabled={!disabled}
@@ -100,7 +94,7 @@ export const IconButton: FunctionComponent<{
             <View>
               {isValidElement(icon) || !icon || !(typeof icon === 'function')
                 ? icon
-                : icon('text-white')}
+                : icon(style.get(defaultTextColor).color)}
             </View>
           </View>
         ) : null}
@@ -119,7 +113,7 @@ export const IconButton: FunctionComponent<{
             ])}>
             {isValidElement(icon) || !icon || !(typeof icon === 'function')
               ? icon
-              : icon(defaultTextColor)}
+              : icon(style.get(defaultTextColor).color)}
           </View>
         ) : null}
       </RectButton>
