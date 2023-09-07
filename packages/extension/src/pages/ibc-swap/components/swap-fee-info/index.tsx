@@ -205,9 +205,19 @@ export const SwapFeeInfo: FunctionComponent<{
       <React.Fragment>
         <Box
           padding="1rem"
-          backgroundColor={ColorPalette["gray-600"]}
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette.white
+              : ColorPalette["gray-600"]
+          }
+          style={{
+            boxShadow:
+              theme.mode === "light"
+                ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+                : undefined,
+          }}
           borderRadius="0.375rem"
-          borderWidth={"1px"}
+          borderWidth="1px"
           borderColor={
             error != null
               ? theme.mode === "light"
@@ -230,7 +240,11 @@ export const SwapFeeInfo: FunctionComponent<{
                   style={{
                     textDecoration: "underline",
                   }}
-                  color={ColorPalette["gray-200"]}
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-400"]
+                      : ColorPalette["gray-200"]
+                  }
                 >
                   Transaction Fee
                 </Subtitle4>
@@ -248,7 +262,11 @@ export const SwapFeeInfo: FunctionComponent<{
                     <LoadingIcon
                       width="1rem"
                       height="1rem"
-                      color={ColorPalette["gray-100"]}
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-200"]
+                          : ColorPalette["gray-300"]
+                      }
                     />
                   </Box>
                 </Box>
@@ -260,7 +278,13 @@ export const SwapFeeInfo: FunctionComponent<{
                 }}
               />
 
-              <Body3>
+              <Body3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-300"]
+                }
+              >
                 {(() => {
                   let totalPrice: PricePretty | undefined;
                   if (feeConfig.fees.length > 0) {
@@ -285,13 +309,25 @@ export const SwapFeeInfo: FunctionComponent<{
               </Body3>
 
               <Gutter size="0.25rem" />
-              <Body3 color={ColorPalette["gray-100"]}>=</Body3>
+              <Body3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-600"]
+                    : ColorPalette["gray-100"]
+                }
+              >
+                =
+              </Body3>
               <Gutter size="0.25rem" />
               <YAxis>
                 {feeConfig.fees.map((fee) => {
                   return (
                     <Body3
-                      color={ColorPalette["gray-100"]}
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-600"]
+                          : ColorPalette["gray-100"]
+                      }
                       key={fee.currency.coinMinimalDenom}
                     >
                       {fee
@@ -311,7 +347,13 @@ export const SwapFeeInfo: FunctionComponent<{
           <Gutter size="0.62rem" />
 
           <XAxis alignY="center">
-            <Subtitle4 color={ColorPalette["gray-300"]}>
+            <Subtitle4
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-300"]
+              }
+            >
               Keplr Swap Fee
             </Subtitle4>
             <Gutter size="0.2rem" />
@@ -330,7 +372,11 @@ export const SwapFeeInfo: FunctionComponent<{
               <InfoIcon
                 width="1rem"
                 height="1rem"
-                color={ColorPalette["gray-400"]}
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-200"]
+                    : ColorPalette["gray-400"]
+                }
               />
             </Tooltip>
             {amountConfig.isFetching ? (
@@ -345,7 +391,11 @@ export const SwapFeeInfo: FunctionComponent<{
                   <LoadingIcon
                     width="1rem"
                     height="1rem"
-                    color={ColorPalette["gray-100"]}
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-200"]
+                        : ColorPalette["gray-300"]
+                    }
                   />
                 </Box>
               </Box>
@@ -353,7 +403,13 @@ export const SwapFeeInfo: FunctionComponent<{
 
             <div style={{ flex: 1 }} />
 
-            <Subtitle4 color={ColorPalette["gray-300"]}>
+            <Subtitle4
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-300"]
+              }
+            >
               {amountConfig.swapFee
                 .map((fee) =>
                   fee

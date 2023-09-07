@@ -6,12 +6,11 @@ import { Box } from "../../../../components/box";
 import { XAxis } from "../../../../components/axis";
 import { Gutter } from "../../../../components/gutter";
 import {
-  Body2,
   Body3,
+  H3,
   Subtitle1,
   Subtitle2,
   Subtitle3,
-  Subtitle4,
 } from "../../../../components/typography";
 import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
@@ -41,6 +40,18 @@ const Styles = {
     padding: 0;
     border: 0;
 
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-700"]
+        : ColorPalette.white};
+
+    ::placeholder {
+      color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-200"]
+          : ColorPalette["gray-300"]};
+    }
+
     // Remove normalized css properties
     outline: none;
 
@@ -68,6 +79,8 @@ export const SwapAssetInfo: FunctionComponent<{
 }> = observer(
   ({ type, senderConfig, amountConfig, onDestinationChainSelect }) => {
     const { chainStore, queriesStore, priceStore } = useStore();
+
+    const theme = useTheme();
 
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -114,12 +127,26 @@ export const SwapAssetInfo: FunctionComponent<{
       <Box
         padding="1rem"
         paddingBottom="0.75rem"
-        backgroundColor={ColorPalette["gray-600"]}
+        backgroundColor={
+          theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
+        }
         borderRadius="0.375rem"
+        style={{
+          boxShadow:
+            theme.mode === "light"
+              ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+              : undefined,
+        }}
       >
         <XAxis alignY="center">
           <Gutter size="0.25rem" />
-          <Subtitle3 color={ColorPalette["gray-200"]}>
+          <Subtitle3
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["gray-200"]
+            }
+          >
             {type === "from" ? "From" : "To"}
           </Subtitle3>
           {(() => {
@@ -137,7 +164,11 @@ export const SwapAssetInfo: FunctionComponent<{
                       <LoadingIcon
                         width="1rem"
                         height="1rem"
-                        color={ColorPalette["gray-300"]}
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-200"]
+                            : ColorPalette["gray-300"]
+                        }
                       />
                     </Box>
                   </Box>
@@ -159,7 +190,13 @@ export const SwapAssetInfo: FunctionComponent<{
                 amountConfig.setFraction(1);
               }}
             >
-              <Body3 color={ColorPalette["gray-200"]}>{`Max: ${(() => {
+              <Body3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-200"]
+                }
+              >{`Max: ${(() => {
                 const bal = queriesStore
                   .get(senderConfig.chainId)
                   .queryBalances.getQueryBech32Address(senderConfig.sender)
@@ -285,9 +322,20 @@ export const SwapAssetInfo: FunctionComponent<{
           <Box
             paddingLeft="0.62rem"
             paddingRight="0.75rem"
-            paddingY="0.5rem"
+            height="2.25rem"
+            alignY="center"
             borderRadius="99999999px"
-            backgroundColor={ColorPalette["gray-500"]}
+            backgroundColor={
+              theme.mode === "light"
+                ? ColorPalette.white
+                : ColorPalette["gray-500"]
+            }
+            borderWidth="1px"
+            borderColor={
+              theme.mode === "light"
+                ? ColorPalette["gray-100"]
+                : ColorPalette["gray-500"]
+            }
             cursor="pointer"
             onClick={(e) => {
               e.preventDefault();
@@ -362,7 +410,13 @@ export const SwapAssetInfo: FunctionComponent<{
                       alt={currency?.coinDenom || "coinDenom"}
                     />
                     <Gutter size="0.5rem" />
-                    <Subtitle2 color={ColorPalette["gray-10"]}>
+                    <Subtitle2
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-600"]
+                          : ColorPalette["gray-10"]
+                      }
+                    >
                       {(() => {
                         if (currency) {
                           if (
@@ -382,7 +436,11 @@ export const SwapAssetInfo: FunctionComponent<{
                     <AllowLowIcon
                       width="1rem"
                       height="1rem"
-                      color={ColorPalette["gray-200"]}
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-500"]
+                          : ColorPalette["gray-200"]
+                      }
                     />
                   </React.Fragment>
                 );
@@ -427,10 +485,20 @@ export const SwapAssetInfo: FunctionComponent<{
                     <SwitchPriceBaseIcon
                       width="1.25rem"
                       height="1.25rem"
-                      color={ColorPalette["gray-300"]}
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-400"]
+                          : ColorPalette["gray-300"]
+                      }
                     />
                     <Gutter size="0.15rem" />
-                    <Body3 color={ColorPalette["gray-300"]}>
+                    <Body3
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-400"]
+                          : ColorPalette["gray-300"]
+                      }
+                    >
                       {(() => {
                         if (isPriceBased) {
                           return amountConfig.amount[0]
@@ -447,41 +515,6 @@ export const SwapAssetInfo: FunctionComponent<{
                   </XAxis>
                 </Box>
               );
-            } else {
-              if (amountConfig.amount.length === 1) {
-                const amount = amountConfig.amount[0];
-                const outAmount = amountConfig.outAmount;
-                if (outAmount.toDec().gt(new Dec(0))) {
-                  const outAmountRatio = outAmount.quo(amount);
-                  const outAmountRatioPrice =
-                    priceStore.calculatePrice(outAmountRatio);
-                  // 1stIBCX = 5.6OSMO ($12.53)
-                  return (
-                    <Subtitle4 color={ColorPalette["gray-300"]}>
-                      {`${new CoinPretty(
-                        amount.currency,
-                        DecUtils.getTenExponentN(amount.currency.coinDecimals)
-                      )
-                        .separator("")
-                        .trim(true)
-                        .hideIBCMetadata(true)
-                        .toString()} = ${outAmountRatio
-                        .separator("")
-                        .shrink(true)
-                        .trim(true)
-                        .maxDecimals(3)
-                        .inequalitySymbol(true)
-                        .hideIBCMetadata(true)
-                        .toString()}${(() => {
-                        if (outAmountRatioPrice) {
-                          return ` (${outAmountRatioPrice.toString()})`;
-                        }
-                        return "";
-                      })()}`}
-                    </Subtitle4>
-                  );
-                }
-              }
             }
           })()}
           <div
@@ -509,7 +542,11 @@ export const SwapAssetInfo: FunctionComponent<{
                     <CogIcon
                       width="0.875rem"
                       height="0.875rem"
-                      color={ColorPalette["gray-400"]}
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-200"]
+                          : ColorPalette["gray-400"]
+                      }
                     />
                   </Box>
                 </React.Fragment>
@@ -569,18 +606,16 @@ const PriceSymbol: FunctionComponent<{
   // 부모의 width를 결정하기 위해서 opacity: 0인 mock text를 넣어야 함.
   return (
     <Box position="relative" alignY="center" marginRight="0.35rem">
-      <Body2
+      <H3
         color={
-          theme.mode === "light"
-            ? ColorPalette["gray-400"]
-            : ColorPalette["gray-50"]
+          theme.mode === "light" ? ColorPalette["gray-700"] : ColorPalette.white
         }
         style={{
           opacity: 0,
         }}
       >
         {fiatCurrency.symbol}
-      </Body2>
+      </H3>
       <Box position="absolute" width="100%">
         <VerticalCollapseTransition
           transitionAlign="center"
@@ -590,15 +625,15 @@ const PriceSymbol: FunctionComponent<{
           }}
           onTransitionEnd={onTransitionEnd}
         >
-          <Body2
+          <H3
             color={
               theme.mode === "light"
-                ? ColorPalette["gray-400"]
-                : ColorPalette["gray-50"]
+                ? ColorPalette["gray-700"]
+                : ColorPalette.white
             }
           >
             {fiatCurrency.symbol}
-          </Body2>
+          </H3>
         </VerticalCollapseTransition>
       </Box>
     </Box>
@@ -646,7 +681,15 @@ const SelectDestinationChainModal: FunctionComponent<{
     >
       <XAxis>
         <Gutter size="1.25rem" />
-        <Subtitle1>Select Destination Chain</Subtitle1>
+        <Subtitle1
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-700"]
+              : ColorPalette.white
+          }
+        >
+          Select Destination Chain
+        </Subtitle1>
       </XAxis>
 
       <Gutter size="0.75rem" />
@@ -719,7 +762,13 @@ const SelectDestinationChainModal: FunctionComponent<{
                     alt={chainStore.getChain(channel.chainId).chainName}
                   />
                   <Gutter size="0.75rem" />
-                  <Subtitle2 color={ColorPalette["gray-10"]}>{`on ${
+                  <Subtitle2
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-700"]
+                        : ColorPalette["gray-10"]
+                    }
+                  >{`on ${
                     chainStore.getChain(channel.chainId).chainName
                   }`}</Subtitle2>
                 </XAxis>

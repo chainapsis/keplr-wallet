@@ -399,7 +399,15 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       <Box padding="0.75rem" paddingBottom="0">
         <Box paddingX="0.5rem">
           <XAxis alignY="center">
-            <H4 color={ColorPalette["white"]}>Swap</H4>
+            <H4
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["white"]
+              }
+            >
+              Swap
+            </H4>
             <div style={{ flex: 1 }} />
             <Box
               cursor="pointer"
@@ -412,7 +420,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               <SettingIcon
                 width="2rem"
                 height="2rem"
-                color={ColorPalette["white"]}
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-10"]
+                }
               />
             </Box>
           </XAxis>
@@ -441,8 +453,18 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               height="2.25rem"
               alignX="center"
               alignY="center"
-              backgroundColor={ColorPalette["gray-500"]}
+              backgroundColor={
+                theme.mode === "light"
+                  ? ColorPalette.white
+                  : ColorPalette["gray-500"]
+              }
               borderRadius="999999px"
+              borderWidth="1px"
+              borderColor={
+                theme.mode === "light"
+                  ? ColorPalette["gray-50"]
+                  : ColorPalette["gray-500"]
+              }
               cursor="pointer"
               onClick={(e) => {
                 e.preventDefault();
@@ -496,7 +518,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               <ArrowsUpDownIcon
                 width="1.5rem"
                 height="1.5rem"
-                color={ColorPalette["gray-10"]}
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-400"]
+                    : ColorPalette["gray-10"]
+                }
               />
             </Box>
           </div>

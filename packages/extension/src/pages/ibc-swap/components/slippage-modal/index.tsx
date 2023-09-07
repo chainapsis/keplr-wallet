@@ -11,12 +11,15 @@ import { TextInput } from "../../../../components/input";
 import { Modal } from "../../../../components/modal";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
+import { useTheme } from "styled-components";
 
 export const SlippageModal: FunctionComponent<{
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }> = observer(({ isOpen, setIsOpen }) => {
   const { uiConfigStore } = useStore();
+
+  const theme = useTheme();
 
   const selectables = ["0.1", "0.5", "1.0"];
 
@@ -33,21 +36,67 @@ export const SlippageModal: FunctionComponent<{
       <YAxis alignX="center">
         <Box
           borderRadius="1.25rem"
-          backgroundColor={ColorPalette["gray-600"]}
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette.white
+              : ColorPalette["gray-600"]
+          }
           padding="1.25rem"
           width="95%"
           maxWidth="18.75rem"
         >
           <XAxis alignY="center">
-            <Subtitle2 color={ColorPalette["white"]}>Settings</Subtitle2>
+            <Subtitle2
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["white"]
+              }
+            >
+              Settings
+            </Subtitle2>
             <div style={{ flex: 1 }} />
+            <Box
+              width="1.5rem"
+              height="1.5rem"
+              cursor={
+                uiConfigStore.ibcSwapConfig.slippageIsValid
+                  ? "pointer"
+                  : undefined
+              }
+              onClick={(e) => {
+                e.preventDefault();
+
+                if (uiConfigStore.ibcSwapConfig.slippageIsValid) {
+                  setIsOpen(false);
+                }
+              }}
+            >
+              {uiConfigStore.ibcSwapConfig.slippageIsValid ? (
+                <CloseIcon
+                  width="1.5rem"
+                  height="1.5rem"
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-200"]
+                      : ColorPalette["gray-300"]
+                  }
+                />
+              ) : null}
+            </Box>
           </XAxis>
 
           <Gutter size="1.75rem" />
 
           <XAxis alignY="center">
             <Gutter size="0.5rem" />
-            <Subtitle3 color={ColorPalette["gray-100"]}>
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-500"]
+                  : ColorPalette["gray-100"]
+              }
+            >
               Slippage Tolerance
             </Subtitle3>
           </XAxis>
@@ -73,7 +122,13 @@ export const SlippageModal: FunctionComponent<{
           <Gutter size="1.25rem" />
           <XAxis alignY="center">
             <Gutter size="0.5rem" />
-            <Subtitle3 color={ColorPalette["gray-100"]}>
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-500"]
+                  : ColorPalette["gray-100"]
+              }
+            >
               Custom Slippage
             </Subtitle3>
             <Gutter size="0.5rem" />
@@ -133,3 +188,28 @@ export const SlippageModal: FunctionComponent<{
     </Modal>
   );
 });
+
+const CloseIcon: FunctionComponent<{
+  width: string;
+  height: string;
+  color: string;
+}> = ({ width, height, color }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      fill="none"
+      stroke="none"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke={color || "currentColor"}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2.5"
+        d="M6 18L18 6M6 6l12 12"
+      />
+    </svg>
+  );
+};
