@@ -469,7 +469,7 @@ export const SwapAssetInfo: FunctionComponent<{
                         .separator("")
                         .shrink(true)
                         .trim(true)
-                        .maxDecimals(4)
+                        .maxDecimals(3)
                         .inequalitySymbol(true)
                         .hideIBCMetadata(true)
                         .toString()}${(() => {
