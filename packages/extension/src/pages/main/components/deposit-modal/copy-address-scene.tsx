@@ -339,7 +339,9 @@ const CopyAddressItem: FunctionComponent<{
             onClick={async (e) => {
               e.preventDefault();
 
-              await navigator.clipboard.writeText(address.bech32Address);
+              await navigator.clipboard.writeText(
+                address.ethereumAddress || address.bech32Address
+              );
               setHasCopied(true);
               setBlockInteraction(true);
 

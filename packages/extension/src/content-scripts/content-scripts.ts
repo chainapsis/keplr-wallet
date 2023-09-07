@@ -173,7 +173,7 @@ try {
   console.log(e);
 }
 
-if (url.hostname === "twitter.com") {
+if (url.hostname === "twitter.com" || url.hostname === "x.com") {
   if (typeof MutationObserver !== "undefined") {
     let previousUrl: string = "";
     const observer = new MutationObserver(() => {
