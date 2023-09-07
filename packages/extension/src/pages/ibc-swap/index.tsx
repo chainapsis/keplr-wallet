@@ -36,6 +36,7 @@ import { VerticalCollapseTransition } from "../../components/transition/vertical
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
 import { Dec } from "@keplr-wallet/unit";
 import { MakeTxResponse } from "@keplr-wallet/stores";
+import { autorun } from "mobx";
 
 export const IBCSwapPage: FunctionComponent = observer(() => {
   const {
@@ -45,6 +46,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     skipQueriesStore,
     uiConfigStore,
     keyRingStore,
+    hugeQueriesStore,
   } = useStore();
 
   const theme = useTheme();
@@ -254,15 +256,42 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryRoute, queryRoute?.isFetching]);
 
-  // 기능상 의미는 없고 이 페이지에서 select asset page로의 전환시 UI flash를 막기 위해서 필요한 값들을 prefetch하는 용도
-  noop(skipQueriesStore.queryIBCSwap.swapCurrenciesMap);
-  noop(skipQueriesStore.queryIBCSwap.swapDestinationCurrenciesMap);
-  noop(
-    skipQueriesStore.queryIBCSwap.getSwapDestinationCurrencyAlternativeChains(
-      chainStore.getChain(ibcSwapConfigs.amountConfig.outChainId),
-      ibcSwapConfigs.amountConfig.outCurrency
-    )
-  );
+  // ------ 기능상 의미는 없고 이 페이지에서 select asset page로의 전환시 UI flash를 막기 위해서 필요한 값들을 prefetch하는 용도
+  useEffect(() => {
+    const disposal = autorun(() => {
+      noop(hugeQueriesStore.getAllBalances(true));
+      noop(skipQueriesStore.queryIBCSwap.swapCurrenciesMap);
+      noop(skipQueriesStore.queryIBCSwap.swapDestinationCurrenciesMap);
+    });
+
+    return () => {
+      if (disposal) {
+        disposal();
+      }
+    };
+  }, [hugeQueriesStore, skipQueriesStore.queryIBCSwap]);
+  useEffect(() => {
+    const disposal = autorun(() => {
+      noop(
+        skipQueriesStore.queryIBCSwap.getSwapDestinationCurrencyAlternativeChains(
+          chainStore.getChain(ibcSwapConfigs.amountConfig.outChainId),
+          ibcSwapConfigs.amountConfig.outCurrency
+        )
+      );
+    });
+
+    return () => {
+      if (disposal) {
+        disposal();
+      }
+    };
+  }, [
+    chainStore,
+    ibcSwapConfigs.amountConfig.outChainId,
+    ibcSwapConfigs.amountConfig.outCurrency,
+    skipQueriesStore.queryIBCSwap,
+  ]);
+  // ------
 
   const interactionBlocked =
     txConfigsValidate.interactionBlocked ||
