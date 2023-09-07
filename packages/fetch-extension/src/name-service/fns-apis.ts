@@ -44,14 +44,6 @@ export const getDomainPrice = async (chainId: string, domain: string) => {
   return domainPrice;
 };
 
-export const getDomainsByOwner = async (chainId: string, address: string) => {
-  const queryClient = await createFNSClient(chainId);
-  const { domains } = await queryClient.getAllDomainsOwnedBy({
-    owner: address,
-  });
-  return { domains };
-};
-
 export const getDomainsByBeneficiery = async (
   chainId: string,
   address: string
@@ -147,12 +139,14 @@ const executeTxn = async (
     {},
     {
       onFulfill: (tx: any) => {
-        console.log(tx);
+        const istxnSuccess = tx.code ? false : true;
         notification.push({
+          type: istxnSuccess ? "success" : "danger",
           placement: "top-center",
-          type: "success",
-          duration: 2,
-          content: `Transaction Successful!`,
+          duration: 5,
+          content: istxnSuccess
+            ? `Transaction Completed`
+            : `Transaction Failed`,
           canDelete: true,
           transition: {
             duration: 0.25,

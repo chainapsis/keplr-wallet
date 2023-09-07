@@ -49,8 +49,8 @@ export const Mint: React.FC<MintProps> = ({ domainPrice, domainName }) => {
   };
 
   const handleMintButtonClick = async () => {
-    if (domainPrice.result.Success) {
-      const priceDenom = domainPrice.result.Success.pricing;
+    if (domainPrice) {
+      const priceDenom = domainPrice;
       const amount = getAmount(priceDenom);
       setmintingPrice(amount);
     } else {
@@ -70,7 +70,7 @@ export const Mint: React.FC<MintProps> = ({ domainPrice, domainName }) => {
         current.chainId,
         account,
         domainName,
-        domainPrice.result.Success.pricing,
+        domainPrice,
         notification
       );
     } catch (error) {
@@ -132,6 +132,7 @@ export const Mint: React.FC<MintProps> = ({ domainPrice, domainName }) => {
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <button onClick={handleCancelButtonClick}>Cancel</button>
               <button
+                className={style["continue"]}
                 onClick={handleContinueButtonClick}
                 disabled={mintingPrice === "Not Available" || isTxnInProgress}
               >

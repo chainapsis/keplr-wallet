@@ -23,7 +23,7 @@ export const FetchnameService = () => {
       canChangeChainInfo={false}
       alternativeTitle={"Fetch Name Server"}
       onBackButton={() => {
-        navigate("/");
+        navigate("/more");
       }}
       showBottomMenu={true}
     >

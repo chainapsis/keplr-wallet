@@ -18,13 +18,15 @@
   border-bottom: 1px solid gray;
   padding: 20px 8px;
 }
-
 .beneficiaryHelp {
   font-size: small;
   color: white;
   background: rgba(255, 255, 255, 0.15);
   margin: 0 12px;
   padding: 16px;
+  display: flex;
+  text-align: center;
+  justify-content: center;
 }
 
 .domainInfoGroup {
@@ -70,7 +72,6 @@
   cursor: pointer;
   &:disabled {
     cursor: not-allowed;
-    opacity: 0.8;
     box-shadow: none;
   }
   &:hover:enabled {
@@ -167,7 +168,7 @@
   top: 67px;
   background-color: rgba(0, 0, 0, 0.7);
   left: 0;
-  z-index: 100;
+  z-index: 300;
 }
 
 .imageText {
@@ -238,12 +239,19 @@
     border: 1px solid rgba(255, 255, 255, 0.4);
   }
   button:hover:enabled {
-    border-color: #9075ff;
     box-shadow: -6px 6px 32px 0px rgba(157, 115, 232, 0.2),
       6px 6px 32px 0px rgba(243, 95, 73, 0.3);
   }
   button:disabled {
     cursor: not-allowed;
+  }
+  .continue {
+    color: black;
+    background-color: lightgreen;
+    border-color: transparent;
+  }
+  .continue:hover:enabled {
+    box-shadow: -6px 6px 32px 0px lightgreen;
   }
 }
 

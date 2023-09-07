@@ -17,6 +17,8 @@ export const SearchInput = () => {
       return "Invalid special characters";
     }
     if (string.length > 64) return "Character limit exceeded (Max : 64 chars)";
+    if (string.length > 0 && string.length < 3)
+      return "Domain name is too short";
     if (string.includes(" ")) {
       return "Domain Name Cannot have spaces";
     }
@@ -32,7 +34,11 @@ export const SearchInput = () => {
   }
 
   const handleSearch = () => {
-    if (searchText.trim() !== "" && !invalidDomain) {
+    if (
+      searchText.trim() !== "" &&
+      searchText.trim().length > 2 &&
+      !invalidDomain
+    ) {
       const processedText = processString(searchText);
       setSearchText("");
       navigate(`/fetch-name-service/domain-details/${processedText}`);
@@ -75,7 +81,11 @@ export const SearchInput = () => {
       <button
         className={style["registerButton"]}
         onClick={handleSearch}
-        disabled={searchText.trim() === "" || invalidDomain}
+        disabled={
+          searchText.trim() === "" ||
+          searchText.trim().length < 3 ||
+          invalidDomain
+        }
       >
         Register{" "}
         <img src={arrowIcon} className={style["registerIcon"]} alt="" />

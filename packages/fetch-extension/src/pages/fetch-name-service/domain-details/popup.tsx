@@ -10,7 +10,7 @@ export const MessagePopup = ({
 }) => {
   return (
     <React.Fragment>
-      <div className={style["popupCard"]}>
+      <div style={{ top: "-100px" }} className={style["popupCard"]}>
         <div className={style["errorText"]}>
           <h3 style={{ color: "white" }}>{message}</h3>
         </div>

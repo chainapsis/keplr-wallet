@@ -1,5 +1,3 @@
-import allMintedDomainImage from "@assets/icon/all-minted-domain.png";
-import collectionsImage from "@assets/icon/collections.png";
 import React from "react";
 import { SearchInput } from "./search-input";
 import style from "./style.module.scss";
@@ -13,21 +11,18 @@ export const ExploreDomain = () => {
         </div>
       </div>
       <SearchInput />
-      <div
-        style={{
-          position: "absolute",
-          bottom: "47px",
-          width: 320,
-          right: "21px",
-        }}
-      >
+      <div className={style["bottomContent"]}>
         <a
           href="https://www.fetns.domains/market"
           target="_blank"
           rel="noreferrer"
           className={style["moreDetails"]}
         >
-          <img src={allMintedDomainImage} alt="" draggable={false} />
+          <img
+            src={require("@assets/svg/All minted domains.svg")}
+            alt=""
+            draggable={false}
+          />
           <img
             className={style["arrowIcon"]}
             src={require("@assets/svg/arrow-right-outline.svg")}
@@ -42,7 +37,11 @@ export const ExploreDomain = () => {
           rel="noreferrer"
           className={style["moreDetails"]}
         >
-          <img src={collectionsImage} alt="" draggable={false} />
+          <img
+            src={require("@assets/svg/collections.svg")}
+            alt=""
+            draggable={false}
+          />
           <img
             className={style["arrowIcon"]}
             src={require("@assets/svg/arrow-right-outline.svg")}

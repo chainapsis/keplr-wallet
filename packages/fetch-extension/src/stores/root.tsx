@@ -38,6 +38,7 @@ import {
   ICNSInteractionStore,
   ICNSQueries,
   GeneralPermissionStore,
+  FNSQueries,
   EthereumAccount,
 } from "@keplr-wallet/stores";
 import {
@@ -85,6 +86,7 @@ export class RootStore {
       OsmosisQueries,
       KeplrETCQueries,
       ICNSQueries,
+      FNSQueries,
       EvmQueries
     ]
   >;
@@ -210,6 +212,7 @@ export class RootStore {
         ethereumURL: EthereumEndpoint,
       }),
       ICNSQueries.use(),
+      FNSQueries.use(),
       EvmQueries.use()
     );
 

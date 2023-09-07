@@ -5,6 +5,7 @@ import { FNS_CONFIG } from "../../../config.ui.var";
 import { setPrimary, updateDomain } from "../../../name-service/fns-apis";
 import { useStore } from "../../../stores";
 import style from "./style.module.scss";
+import { ToolTip } from "@components/tooltip";
 interface UpdateProps {
   domainPrice: any;
   domainName: string;
@@ -54,6 +55,13 @@ export const Update: React.FC<UpdateProps> = ({
   const notification = useNotification();
 
   const [isTxnInProgress, setIsTxnInProgress] = useState(false);
+
+  const parsedDomainData = Object.fromEntries(
+    Object.entries(domainData).map(([key, value]: [any, any]) => [
+      key,
+      value === "" ? null : value,
+    ])
+  );
 
   const handleMakePrimary = async () => {
     try {
@@ -117,15 +125,41 @@ export const Update: React.FC<UpdateProps> = ({
         </button>
       )}
       {isOwned && (
-        <button
-          className={style["mint"]}
-          onClick={
-            FNS_CONFIG[current.chainId].isEditable ? handleUpdate : handleClick
-          }
-          disabled={isTxnInProgress || deepCompare(domainData, oldDomainData)}
-        >
-          <span className={style["domainName"]}>Update</span>
-        </button>
+        <span className={style["mint"]}>
+          {deepCompare(parsedDomainData, oldDomainData) ? (
+            <ToolTip
+              tooltip="Update is disabled since data hasn't changed."
+              trigger="hover"
+              options={{
+                placement: "top",
+              }}
+            >
+              <button
+                className={style["mint"]}
+                onClick={
+                  FNS_CONFIG[current.chainId].isEditable
+                    ? handleUpdate
+                    : handleClick
+                }
+                disabled={deepCompare(parsedDomainData, oldDomainData)}
+              >
+                <span className={style["domainName"]}>Update</span>
+              </button>
+            </ToolTip>
+          ) : (
+            <button
+              className={style["mint"]}
+              onClick={
+                FNS_CONFIG[current.chainId].isEditable
+                  ? handleUpdate
+                  : handleClick
+              }
+              disabled={isTxnInProgress}
+            >
+              <span className={style["domainName"]}>Update</span>
+            </button>
+          )}
+        </span>
       )}
     </div>
   );
