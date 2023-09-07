@@ -266,6 +266,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     Error | undefined
   >();
 
+  const [isTxLoading, setIsTxLoading] = useState(false);
+
   return (
     <MainHeaderLayout
       additionalPaddingBottom={BottomTabsHeightRem}
@@ -274,7 +276,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         text: "Next",
         color: "primary",
         size: "large",
-        isLoading: accountStore.getAccount(inChainId).isSendingMsg === "TODO",
+        isLoading:
+          isTxLoading ||
+          accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap",
       }}
       headerContainerStyle={{
         borderBottomStyle: "solid",
@@ -288,6 +292,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         e.preventDefault();
 
         if (!interactionBlocked) {
+          setIsTxLoading(true);
+
           let tx: MakeTxResponse;
 
           try {
@@ -297,6 +303,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             );
           } catch (e) {
             setCalculatingTxError(e);
+            setIsTxLoading(false);
             return;
           }
           setCalculatingTxError(undefined);
@@ -377,6 +384,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             navigate("/", {
               replace: true,
             });
+          } finally {
+            setIsTxLoading(false);
           }
         }
       }}

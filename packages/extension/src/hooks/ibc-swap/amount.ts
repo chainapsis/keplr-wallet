@@ -286,7 +286,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
     }
 
     if (msg.type === "MsgTransfer") {
-      return sourceAccount.cosmos.makeIBCTransferTx(
+      const tx = sourceAccount.cosmos.makeIBCTransferTx(
         {
           portId: msg.sourcePort,
           channelId: msg.sourceChannel,
@@ -297,14 +297,17 @@ export class IBCSwapAmountConfig extends AmountConfig {
         msg.receiver,
         msg.memo
       );
+      tx.ui.overrideType("ibc-swap");
+      return tx;
     } else if (msg.type === "MsgExecuteContract") {
-      return sourceAccount.cosmwasm.makeExecuteContractTx(
-        // TODO: 흠... 일단 "unknown"을 어케 처리해야하는데... + 로 위에 makeIBCTransferTx에서도 type을 같이 처리해야함...
+      const tx = sourceAccount.cosmwasm.makeExecuteContractTx(
         "unknown",
         msg.contract,
         msg.msg,
         msg.funds.map((fund) => fund.toCoin())
       );
+      tx.ui.overrideType("ibc-swap");
+      return tx;
     }
   }
 
