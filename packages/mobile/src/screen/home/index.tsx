@@ -9,7 +9,6 @@ import {useEffectOnce} from '../../hooks';
 import {WalletStatus} from '@keplr-wallet/stores';
 import {Button} from '../../components/button';
 import {IconButton} from '../../components/icon-button';
-import {CopyOutlineIcon} from '../../components/icon/copy-outline';
 
 export const HomeScreen: FunctionComponent = observer(() => {
   const style = useStyle();
@@ -181,21 +180,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
     <React.Fragment>
       <PageWithScrollView backgroundMode={'default'}>
         <View>
-          <View
-            style={style.flatten(['flex-row', 'justify-center', 'width-full'])}>
-            <IconButton
-              hasBackgroundColor={true}
-              hasRipple={true}
-              text="copy address"
-              containerStyle={style.flatten([
-                'border-radius-16',
-                'width-160',
-                'height-20',
-                'margin-top-4',
-              ])}
-              icon={color => <CopyOutlineIcon color={color} size={16} />}
-            />
-          </View>
           <Text
             style={style.flatten([
               'color-white',
@@ -211,15 +195,21 @@ export const HomeScreen: FunctionComponent = observer(() => {
             ])}>
             <Button
               text="Deposit"
+              size="large"
               color="secondary"
               containerStyle={style.flatten(['flex-1'])}
             />
             <Button
               text="Buy"
+              size="large"
               color="secondary"
               containerStyle={style.flatten(['flex-1'])}
             />
-            <Button text="Send" containerStyle={style.flatten(['flex-1'])} />
+            <Button
+              text="Send"
+              size="large"
+              containerStyle={style.flatten(['flex-1'])}
+            />
           </View>
 
           {/* TODO checkbox를 추가해야함 */}
