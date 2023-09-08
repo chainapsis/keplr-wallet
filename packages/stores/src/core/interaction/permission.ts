@@ -250,9 +250,11 @@ export class PermissionStore extends HasMapStore<
   *approve(id: string) {
     this._isLoading = true;
     try {
+      // approve를 하면 this.waitingDatas에서 해당 데이터가 사라지기 때문에, 미리 메모리에 값을 저장.
+      const waitingData = this.waitingDatas.find((data) => data.id === id);
+
       yield this.interactionStore.approve(INTERACTION_TYPE_PERMISSION, id, {});
 
-      const waitingData = this.waitingDatas.find((data) => data.id === id);
       if (waitingData) {
         if (isBasicAccessPermissionType(waitingData.data.type)) {
           for (const chainId of waitingData.data.chainIds) {
