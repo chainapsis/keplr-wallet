@@ -290,10 +290,13 @@ export const WebScreen: FunctionComponent = observer(() => {
                     />
                   </View>
                   <Text
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
                     style={style.flatten([
                       "subtitle3",
                       "color-platinum-400",
                       "dark:color-platinum-50",
+                      "flex-1",
                     ])}
                   >
                     {url
@@ -301,7 +304,6 @@ export const WebScreen: FunctionComponent = observer(() => {
                       .replace("http://", "")
                       .replace("www.", "")}
                   </Text>
-                  <View style={style.flatten(["flex-1"])} />
                   <TouchableOpacity
                     style={style.flatten(["padding-12"])}
                     onPress={() => {

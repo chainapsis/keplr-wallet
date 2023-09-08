@@ -104,11 +104,6 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = observer(() => {
 
   const webViewState = useWebViewState();
 
-  const title = webViewState.name
-    .replace("https://", "")
-    .replace("http://", "")
-    .replace("www.", "");
-
   return (
     <View
       style={StyleSheet.flatten([
@@ -146,6 +141,8 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = observer(() => {
             "padding-left-12",
             "padding-right-10",
             "padding-y-5",
+            "margin-left-102",
+            "margin-right-102",
           ])}
           onPress={() => {
             if (webViewState.webView) {
@@ -154,9 +151,11 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = observer(() => {
           }}
         >
           <Text
-            style={style.flatten(["h4", "color-text-middle", "margin-right-8"])}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={style.flatten(["h4", "color-text-middle"])}
           >
-            {title.length > 15 ? `${title.substring(0, 15)}...` : title}
+            {webViewState.name}
           </Text>
           <RefreshIcon
             size={20}

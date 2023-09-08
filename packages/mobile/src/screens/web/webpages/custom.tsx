@@ -24,18 +24,26 @@ export const CustomWebpageScreen: FunctionComponent = () => {
       ? route.params.url
       : `https://${route.params.url}`;
 
-  const enableSuggestChain = experimentalSuggestChainOrigins.some(
-    (origin) => origin === uri
-  );
+  try {
+    const url = new URL(uri);
 
-  return (
-    <WebpageScreen
-      name={uri}
-      source={{ uri }}
-      allowsInlineMediaPlayback={true}
-      experimentalOptions={{
-        enableSuggestChain,
-      }}
-    />
-  );
+    const enableSuggestChain = experimentalSuggestChainOrigins.some(
+      (origin) => origin === url.origin
+    );
+
+    return (
+      <WebpageScreen
+        name={uri}
+        source={{ uri: url.href }}
+        allowsInlineMediaPlayback={true}
+        experimentalOptions={{
+          enableSuggestChain,
+        }}
+      />
+    );
+  } catch (e) {
+    console.error(e.message);
+
+    return null;
+  }
 };
