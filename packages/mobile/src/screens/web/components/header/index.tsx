@@ -142,7 +142,7 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = observer(() => {
             "padding-right-10",
             "padding-y-5",
             "margin-left-102",
-            "margin-right-102",
+            "margin-right-110",
           ])}
           onPress={() => {
             if (webViewState.webView) {

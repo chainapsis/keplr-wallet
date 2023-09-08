@@ -22,7 +22,7 @@ init(
   (prefix: string) => new AsyncKVStore(prefix),
   new RNMessageRequesterInternalToUI(),
   EmbedChainInfos,
-  ["https://wallet.keplr.app/"],
+  ["https://wallet.keplr.app"],
   ["https://wallet.keplr.app"],
   CommunityChainInfoRepo,
   {
