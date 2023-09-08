@@ -44,6 +44,10 @@ describe('Test style builder', () => {
       '10': 0.1,
       '100': 1,
     },
+    gaps: {
+      '1': 1,
+      '4': 4,
+    },
   });
 
   test('Test Kebab case definition', () => {
@@ -110,6 +114,9 @@ describe('Test style builder', () => {
           '10': 0.1,
           '100': 1,
         },
+        gaps: {
+          '1': 10,
+        },
       });
     }).toThrow();
 
@@ -151,6 +158,9 @@ describe('Test style builder', () => {
         opacities: {
           '10': 0.1,
           '100': 1,
+        },
+        gaps: {
+          '7': 7,
         },
       });
     }).toThrow();
@@ -663,6 +673,15 @@ describe('Test style builder', () => {
     });
   });
 
+  test('Test gap size', () => {
+    expect(builder.get('gap-1')).toStrictEqual({
+      gap: 1,
+    });
+    expect(builder.get('gap-4')).toStrictEqual({
+      gap: 4,
+    });
+  });
+
   test('Test Text static style', () => {
     expect(builder.get('italic')).toStrictEqual({
       fontStyle: 'italic',
@@ -764,6 +783,9 @@ describe('Test style builder', () => {
         opacities: {
           '10': 0.1,
           '100': 1,
+        },
+        gaps: {
+          '1': 1,
         },
       },
       {

@@ -433,7 +433,6 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         '292': 292,
         '300': 300,
 
-        'card-gap': 12,
         'page-pad': 20,
       },
       heights: {
@@ -481,7 +480,6 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         'button-large': 52,
         'governance-card-body-placeholder': 130,
 
-        'card-gap': 12,
         'page-pad': 20,
       },
       paddingSizes: {
@@ -521,7 +519,6 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         'card-horizontal': 20,
         'card-vertical': 20,
         'card-vertical-half': 10,
-        'card-gap': 12,
       },
       marginSizes: {
         '0': 0,
@@ -565,7 +562,6 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         page: 20,
         'card-horizontal': 20,
         'card-vertical': 20,
-        'card-gap': 12,
       },
       borderWidths: {
         '0': 0,

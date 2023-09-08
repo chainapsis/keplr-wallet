@@ -98,6 +98,7 @@ export class StyleBuilder<
     solid: true,
     dotted: true,
     dashed: true,
+    gap: true,
   };
 
   static readonly checkReservedWord = (config: Record<string, any>) => {
