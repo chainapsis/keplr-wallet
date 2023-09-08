@@ -58,7 +58,7 @@ html[data-register-page="true"] {
 
     .logoInnerContainer {
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
 
       &.justify-center {
         justify-content: center;
@@ -69,7 +69,8 @@ html[data-register-page="true"] {
       }
 
       .logo {
-        height: 100px;
+        width: 200px;
+        margin-left: 218px;
       }
 
       .logoInnerContainer {
