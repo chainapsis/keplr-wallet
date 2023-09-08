@@ -110,89 +110,84 @@ export const Button: FunctionComponent<{
         ]),
         containerStyle,
       ])}>
-      <View
-        style={
-          disabled &&
-          style.flatten(['background-color-gray-600@50%', 'absolute-fill'])
-        }>
-        <RectButton
-          style={StyleSheet.flatten([
-            style.flatten([
-              'flex-row',
-              'justify-center',
-              'items-center',
-              'height-full',
-              'padding-x-8',
-            ]),
-            buttonStyle,
-          ])}
-          onPress={onPress}
-          enabled={!loading && !disabled}
-          rippleColor={rippleColor}
-          underlayColor={underlayColor}
-          activeOpacity={
-            propUnderlayColor ? 1 : color === 'primary' ? 0.3 : 0.2
-          }>
-          <View
-            style={style.flatten(
-              ['height-1', 'justify-center', 'margin-right-4'],
-              [loading && 'opacity-transparent'],
-            )}>
-            <View>
-              {typeof leftIcon === 'function' &&
-                leftIcon(
+      <RectButton
+        style={StyleSheet.flatten([
+          style.flatten([
+            'flex-row',
+            'justify-center',
+            'items-center',
+            'height-full',
+            'padding-x-8',
+          ]),
+          buttonStyle,
+        ])}
+        onPress={onPress}
+        enabled={!loading && !disabled}
+        rippleColor={rippleColor}
+        underlayColor={underlayColor}
+        activeOpacity={propUnderlayColor ? 1 : color === 'primary' ? 0.3 : 0.2}>
+        <View
+          style={style.flatten(
+            ['height-1', 'justify-center', 'margin-right-4'],
+            [loading && 'opacity-transparent'],
+          )}>
+          <View>
+            {typeof leftIcon === 'function' &&
+              leftIcon(
+                (style.flatten(textColorDefinition as any) as any).color,
+              )}
+            {isValidElement(leftIcon) ||
+            !leftIcon ||
+            !(typeof leftIcon === 'function')
+              ? leftIcon
+              : leftIcon(
                   (style.flatten(textColorDefinition as any) as any).color,
                 )}
-              {isValidElement(leftIcon) ||
-              !leftIcon ||
-              !(typeof leftIcon === 'function')
-                ? leftIcon
-                : leftIcon(
-                    (style.flatten(textColorDefinition as any) as any).color,
-                  )}
-            </View>
           </View>
-          <Text
-            style={StyleSheet.flatten([
-              style.flatten(
-                [
-                  textDefinition,
-                  'text-center',
-                  ...(textColorDefinition as any),
-                ],
-                [loading && 'opacity-transparent'],
-              ),
-              textStyle,
-            ])}>
-            {text}
-          </Text>
-          <View
-            style={style.flatten(
-              ['height-1', 'justify-center', 'margin-left-4'],
+        </View>
+        <Text
+          style={StyleSheet.flatten([
+            style.flatten(
+              [textDefinition, 'text-center', ...(textColorDefinition as any)],
               [loading && 'opacity-transparent'],
-            )}>
-            <View>
-              {isValidElement(rightIcon) ||
-              !rightIcon ||
-              !(typeof rightIcon === 'function')
-                ? rightIcon
-                : rightIcon(
-                    (style.flatten(textColorDefinition as any) as any).color,
-                  )}
-            </View>
+            ),
+            textStyle,
+          ])}>
+          {text}
+        </Text>
+        <View
+          style={style.flatten(
+            ['height-1', 'justify-center', 'margin-left-4'],
+            [loading && 'opacity-transparent'],
+          )}>
+          <View>
+            {isValidElement(rightIcon) ||
+            !rightIcon ||
+            !(typeof rightIcon === 'function')
+              ? rightIcon
+              : rightIcon(
+                  (style.flatten(textColorDefinition as any) as any).color,
+                )}
           </View>
-          {loading ? (
-            <View
-              style={style.flatten([
-                'absolute-fill',
-                'justify-center',
-                'items-center',
-              ])}>
-              <SVGLoadingIcon color="white" size={16} />
-            </View>
-          ) : null}
-        </RectButton>
-      </View>
+        </View>
+        {loading ? (
+          <View
+            style={style.flatten([
+              'absolute-fill',
+              'justify-center',
+              'items-center',
+            ])}>
+            <SVGLoadingIcon color="white" size={16} />
+          </View>
+        ) : null}
+      </RectButton>
+      <View
+        pointerEvents="none"
+        style={style.flatten(
+          ['absolute-fill'],
+          [disabled && 'background-color-gray-600@50%'],
+        )}
+      />
     </View>
   );
 };
