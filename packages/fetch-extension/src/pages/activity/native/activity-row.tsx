@@ -16,6 +16,7 @@ const getActivityIcon = (type: string): string => {
       return sendIcon;
     case "/cosmos.staking.v1beta1.MsgDelegate":
     case "/cosmos.staking.v1beta1.MsgUndelegate":
+    case "/cosmos.staking.v1beta1.MsgBeginRedelegate":
       return stakeIcon;
     case "contract":
       return contractIcon;
@@ -34,6 +35,7 @@ const getHash = (node: any): any => {
     case "/cosmwasm.wasm.v1.MsgExecuteContract":
     case "/cosmos.authz.v1beta1.MsgRevoke":
     case "/ibc.applications.transfer.v1.MsgTransfer":
+    case "/cosmos.staking.v1beta1.MsgBeginRedelegate":
       return formatActivityHash(node.transaction.id) || null;
     case "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward":
       return formatActivityHash(JSON.parse(json).validatorAddress) || null;
@@ -114,6 +116,9 @@ export const ActivityRow = ({ node }: { node: any }) => {
     let verb = "Spent";
 
     switch (typeUrl) {
+      case "/cosmos.staking.v1beta1.MsgBeginRedelegate":
+        verb = "Redelegated";
+        break;
       case "/cosmos.bank.v1beta1.MsgSend":
         verb = isAmountDeducted ? "Send" : "Received";
         break;

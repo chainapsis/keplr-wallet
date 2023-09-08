@@ -17,6 +17,10 @@ const options = [
     label: "Unstaked Funds",
   },
   {
+    value: "/cosmos.staking.v1beta1.MsgBeginRedelegate",
+    label: "Redelegate Funds",
+  },
+  {
     value:
       "/cosmos.authz.v1beta1.MsgExec,/cosmwasm.wasm.v1.MsgExecuteContract,/cosmos.authz.v1beta1.MsgRevoke",
     label: "Contract Interactions",
