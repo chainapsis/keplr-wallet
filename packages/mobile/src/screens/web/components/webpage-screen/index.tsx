@@ -305,7 +305,8 @@ export const WebpageScreen: FunctionComponent<
 
   const sourceCode = useInjectedSourceCode();
 
-  const { name, forceDarkOn, ...restProps } = props;
+  const { forceDarkOn, ...restProps } = props;
+  const [title, setTitle] = useState("");
 
   return (
     <PageWithViewInBottomTabView
@@ -315,7 +316,7 @@ export const WebpageScreen: FunctionComponent<
       <WebViewStateContext.Provider
         value={{
           webView: webviewRef.current,
-          name: name,
+          name: title,
           url: currentURL,
           canGoBack,
           canGoForward,
@@ -358,6 +359,9 @@ export const WebpageScreen: FunctionComponent<
             }
             return forceDarkOn;
           })()}
+          onLoad={(event) => {
+            setTitle(event.nativeEvent.title);
+          }}
           {...restProps}
         />
       ) : null}

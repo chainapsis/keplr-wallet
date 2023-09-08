@@ -49,7 +49,7 @@ export class Secret20ViewingKeyPermissionInnerStore {
   }
 
   @flow
-  protected *refreshOrigins() {
+  *refreshOrigins() {
     this._origins = yield* toGenerator(
       this.requester.sendMessage(
         BACKGROUND_PORT,
@@ -106,7 +106,7 @@ export class BasicAccessPermissionInnerStore {
   }
 
   @flow
-  protected *refreshOrigins() {
+  *refreshOrigins() {
     this._origins = yield* toGenerator(
       this.requester.sendMessage(
         BACKGROUND_PORT,
@@ -250,7 +250,25 @@ export class PermissionStore extends HasMapStore<
   *approve(id: string) {
     this._isLoading = true;
     try {
+      // approve를 하면 this.waitingDatas에서 해당 데이터가 사라지기 때문에, 미리 메모리에 값을 저장.
+      const waitingData = this.waitingDatas.find((data) => data.id === id);
+
       yield this.interactionStore.approve(INTERACTION_TYPE_PERMISSION, id, {});
+
+      if (waitingData) {
+        if (isBasicAccessPermissionType(waitingData.data.type)) {
+          for (const chainId of waitingData.data.chainIds) {
+            yield this.getBasicAccessInfo(chainId).refreshOrigins();
+          }
+        } else {
+          for (const chainId of waitingData.data.chainIds) {
+            yield this.getSecret20ViewingKeyAccessInfo(
+              chainId,
+              splitSecret20ViewingKeyPermissionType(waitingData.data.type)
+            ).refreshOrigins();
+          }
+        }
+      }
     } finally {
       this._isLoading = false;
     }
