@@ -32,7 +32,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
         // If mnemonic is fresh, there is no way that additional coin type account has value to select.
         promises.push(
           (async () => {
-            await keyRingStore.finalizeMnemonicKeyCoinType(
+            await keyRingStore.finalizeKeyCoinType(
               vaultId,
               chainInfo.chainId,
               chainInfo.bip44.coinType,
