@@ -9,7 +9,6 @@ export const CalcFiWebpageScreen: FunctionComponent = () => {
         uri:
           "https://app.calculated.fi/create-strategy/dca-in/assets/?chain=Osmosis&utm_source=kplr",
       }}
-      originWhitelist={["https://app.calculated.fi"]}
     />
   );
 };

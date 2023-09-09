@@ -6,7 +6,6 @@ export const MarsWebpageScreen: FunctionComponent = () => {
     <WebpageScreen
       name="Mars Hub"
       source={{ uri: "https://osmosis.marsprotocol.io" }}
-      originWhitelist={["https://osmosis.marsprotocol.io"]}
       experimentalOptions={{
         enableSuggestChain: true,
       }}

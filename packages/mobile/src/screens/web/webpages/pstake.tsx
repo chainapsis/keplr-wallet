@@ -6,7 +6,6 @@ export const PStakeWebpageScreen: FunctionComponent = () => {
     <WebpageScreen
       name="pSTAKE"
       source={{ uri: "https://cosmos.pstake.finance" }}
-      originWhitelist={["https://cosmos.pstake.finance"]}
     />
   );
 };
