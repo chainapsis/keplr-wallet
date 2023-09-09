@@ -6,9 +6,6 @@ export const OsmosisWebpageScreen: FunctionComponent = () => {
     <WebpageScreen
       name="Osmosis"
       source={{ uri: "https://app.osmosis.zone" }}
-      experimentalOptions={{
-        enableSuggestChain: true,
-      }}
     />
   );
 };
@@ -18,9 +15,6 @@ export const OsmosisFrontierWebpageScreen: FunctionComponent = () => {
     <WebpageScreen
       name="Osmosis"
       source={{ uri: "https://frontier.osmosis.zone" }}
-      experimentalOptions={{
-        enableSuggestChain: true,
-      }}
     />
   );
 };

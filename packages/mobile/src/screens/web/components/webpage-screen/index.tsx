@@ -21,7 +21,6 @@ import { URL } from "react-native-url-polyfill";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { AppCurrency, ChainInfo, KeplrMode } from "@keplr-wallet/types";
-import { MessageRequester } from "@keplr-wallet/router";
 import { autorun } from "mobx";
 import { Mutable } from "utility-types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
@@ -36,11 +35,20 @@ import { ChainGetter } from "@keplr-wallet/stores";
 // It's not an graceful solution. However, since it is a structural problem, we choose a solution that can solve it right away.
 // TODO: Solve this problem by structural way and remove the class below.
 class SuggestChainReceiverKeplr extends Keplr {
+  static ALLOWED_ORIGINS: string[] = [
+    "https://wallet.keplr.app",
+    "https://hub.injective.network",
+    "https://osmosis.marsprotocol.io",
+    "https://app.osmosis.zone",
+    "https://frontier.osmosis.zone",
+    "https://app.wynddao.com",
+  ];
+
   constructor(
     protected readonly chainGetter: ChainGetter,
     version: string,
     mode: KeplrMode,
-    requester: MessageRequester,
+    protected readonly requester: RNMessageRequesterExternal,
     protected readonly suggestChainReceiver: (
       chainInfo: ChainInfo
     ) => Promise<void> | void
@@ -54,6 +62,16 @@ class SuggestChainReceiverKeplr extends Keplr {
       await super.experimentalSuggestChain(chainInfo);
       await this.suggestChainReceiver(chainInfo);
       return;
+    }
+
+    const { origin } = this.requester.getSender();
+    const allowed =
+      SuggestChainReceiverKeplr.ALLOWED_ORIGINS.find(
+        (o) => new URL(o).origin === origin
+      ) != null;
+
+    if (!allowed) {
+      throw new Error("Suggest chain not yet supported on mobile");
     }
 
     // deep copy
@@ -136,9 +154,6 @@ export const useInjectedSourceCode = () => {
 export const WebpageScreen: FunctionComponent<
   React.ComponentProps<typeof WebView> & {
     name: string;
-    experimentalOptions?: Partial<{
-      enableSuggestChain: boolean;
-    }>;
   }
 > = observer((props) => {
   const { chainStore, chainSuggestStore, keyRingStore } = useStore();
@@ -159,60 +174,19 @@ export const WebpageScreen: FunctionComponent<
   //      However, due to the current UI design, multiple `WebpageScreen` components cannot exist at the same time.
   //      Therefore, for now, we will postpone the solution of this issue.
   const waitingSuggestedChainInfo = chainSuggestStore.waitingSuggestedChainInfo;
-  const enableSuggestChain = !!props.experimentalOptions?.enableSuggestChain;
   useEffect(() => {
     if (waitingSuggestedChainInfo) {
-      if (enableSuggestChain) {
+      const allowed =
+        SuggestChainReceiverKeplr.ALLOWED_ORIGINS.find(
+          (o) => new URL(o).origin === waitingSuggestedChainInfo.data.origin
+        ) != null;
+      if (allowed) {
         chainSuggestStore.approve(waitingSuggestedChainInfo.data.chainInfo);
       } else {
         chainSuggestStore.reject();
       }
     }
-  }, [chainSuggestStore, enableSuggestChain, waitingSuggestedChainInfo]);
-
-  // TODO: Set the version properly.
-  const [keplr] = useState(
-    () =>
-      new SuggestChainReceiverKeplr(
-        chainStore,
-        "0.12.20",
-        "core",
-        new RNMessageRequesterExternal(() => {
-          if (!webviewRef.current) {
-            throw new Error("Webview not initialized yet");
-          }
-
-          if (!currentURL) {
-            throw new Error("Current URL is empty");
-          }
-
-          return {
-            url: currentURL,
-            origin: new URL(currentURL).origin,
-          };
-        }),
-        // Check the comments on `SuggestChainReceiverKeplr`
-        async (chainInfo) => {
-          if (chainStore.hasChain(chainInfo.chainId)) {
-            return;
-          }
-
-          return new Promise<void>((resolve) => {
-            const disposer = autorun(() => {
-              if (chainStore.hasChain(chainInfo.chainId)) {
-                resolve();
-
-                if (disposer) {
-                  disposer();
-                }
-              } else {
-                chainStore.getChainInfosFromBackground();
-              }
-            });
-          });
-        }
-      )
-  );
+  }, [chainSuggestStore, waitingSuggestedChainInfo]);
 
   const [eventEmitter] = useState(() => new EventEmitter());
   const onMessage = useCallback(
@@ -224,7 +198,43 @@ export const WebpageScreen: FunctionComponent<
 
   useEffect(() => {
     RNInjectedKeplr.startProxy(
-      keplr,
+      (e) => {
+        return new SuggestChainReceiverKeplr(
+          chainStore,
+          "0.12.20",
+          "core",
+          new RNMessageRequesterExternal(() => {
+            if (!e.url) {
+              throw new Error("url is empty");
+            }
+
+            return {
+              url: e.url,
+              origin: new URL(e.url).origin,
+            };
+          }),
+          // Check the comments on `SuggestChainReceiverKeplr`
+          async (chainInfo) => {
+            if (chainStore.hasChain(chainInfo.chainId)) {
+              return;
+            }
+
+            return new Promise<void>((resolve) => {
+              const disposer = autorun(() => {
+                if (chainStore.hasChain(chainInfo.chainId)) {
+                  resolve();
+
+                  if (disposer) {
+                    disposer();
+                  }
+                } else {
+                  chainStore.getChainInfosFromBackground();
+                }
+              });
+            });
+          }
+        );
+      },
       {
         addMessageListener: (fn) => {
           eventEmitter.addListener("message", fn);
@@ -242,7 +252,7 @@ export const WebpageScreen: FunctionComponent<
       },
       RNInjectedKeplr.parseWebviewMessage
     );
-  }, [eventEmitter, keplr]);
+  }, [chainStore, eventEmitter]);
 
   useEffect(() => {
     const keyStoreChangedListener = () => {

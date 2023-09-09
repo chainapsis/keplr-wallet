@@ -354,10 +354,3 @@ export const LevanaItem: Item = {
   key: "Levana",
   component: LevanaImage,
 };
-
-export const experimentalSuggestChainOrigins = [
-  "https://hub.injective.network",
-  "https://osmosis.marsprotocol.io",
-  "https://app.osmosis.zone",
-  "https://app.wynddao.com",
-];
