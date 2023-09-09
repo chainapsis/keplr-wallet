@@ -1,23 +1,33 @@
 import * as $protobuf from "protobufjs";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
-import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
+import {
+  MsgMultiSend,
+  MsgSend,
+} from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import {
   MsgDelegate,
   MsgUndelegate,
   MsgBeginRedelegate,
 } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
 import {
+  MsgExec,
   MsgGrant,
   MsgRevoke,
 } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
 import { MsgVote } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/tx";
-import { MsgWithdrawDelegatorReward } from "@keplr-wallet/proto-types/cosmos/distribution/v1beta1/tx";
+import {
+  MsgSetWithdrawAddress,
+  MsgWithdrawDelegatorReward,
+} from "@keplr-wallet/proto-types/cosmos/distribution/v1beta1/tx";
 import {
   MsgExecuteContract,
   MsgInstantiateContract,
 } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
 import { MsgTransfer } from "@keplr-wallet/proto-types/ibc/applications/transfer/v1/tx";
 import { UnknownMessage } from "./unknown";
+import { GenericAuthorization } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/authz";
+import { StakeAuthorization } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/authz";
+import { SendAuthorization } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/authz";
 
 export * from "./unknown";
 
@@ -64,6 +74,10 @@ export class ProtoCodec {
 export const defaultProtoCodec = new ProtoCodec();
 defaultProtoCodec.registerAny("/cosmos.bank.v1beta1.MsgSend", MsgSend);
 defaultProtoCodec.registerAny(
+  "/cosmos.bank.v1beta1.MsgMultiSend",
+  MsgMultiSend
+);
+defaultProtoCodec.registerAny(
   "/cosmos.staking.v1beta1.MsgDelegate",
   MsgDelegate
 );
@@ -88,9 +102,29 @@ defaultProtoCodec.registerAny(
   MsgWithdrawDelegatorReward
 );
 defaultProtoCodec.registerAny(
+  "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
+  MsgSetWithdrawAddress
+);
+defaultProtoCodec.registerAny(
   "/ibc.applications.transfer.v1.MsgTransfer",
   MsgTransfer
 );
 defaultProtoCodec.registerAny("/cosmos.gov.v1beta1.MsgVote", MsgVote);
 defaultProtoCodec.registerAny("/cosmos.authz.v1beta1.MsgGrant", MsgGrant);
 defaultProtoCodec.registerAny("/cosmos.authz.v1beta1.MsgRevoke", MsgRevoke);
+defaultProtoCodec.registerAny("/cosmos.authz.v1beta1.MsgExec", MsgExec);
+
+// ----- Authz grants -----
+defaultProtoCodec.registerAny(
+  "/cosmos.authz.v1beta1.GenericAuthorization",
+  GenericAuthorization
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.StakeAuthorization",
+  StakeAuthorization
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.bank.v1beta1.SendAuthorization",
+  SendAuthorization
+);
+// ----- Authz grants -----
