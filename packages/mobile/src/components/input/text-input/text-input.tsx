@@ -6,7 +6,7 @@ import React, {
   useState,
 } from 'react';
 import {TextInputProps} from './types';
-import {useStyle} from '../../styles';
+import {useStyle} from '../../../styles';
 import {
   StyleSheet,
   Text,
@@ -14,9 +14,9 @@ import {
   TextInputProps as NativeTextInputProps,
   View,
 } from 'react-native';
-import {Label} from './label';
-import {Box} from '../box';
-import {Column, Columns} from '../column';
+import {Label} from '../label';
+import {Box} from '../../box';
+import {Column, Columns} from '../../column';
 
 // eslint-disable-next-line react/display-name
 export const TextInput = forwardRef<
