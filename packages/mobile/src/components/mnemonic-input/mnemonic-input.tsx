@@ -9,8 +9,9 @@ import {
   ViewStyle,
 } from 'react-native';
 import {useStyle} from '../../styles';
+import {Label} from '../input/label';
 
-export const TextInput = React.forwardRef<
+export const MnemonicInput = React.forwardRef<
   NativeTextInput,
   React.ComponentProps<typeof NativeTextInput> & {
     labelStyle?: TextStyle;
@@ -20,8 +21,7 @@ export const TextInput = React.forwardRef<
 
     label?: string;
     error?: string;
-
-    paragraph?: React.ReactNode;
+    paragraph?: string;
 
     topInInputContainer?: React.ReactNode;
     bottomInInputContainer?: React.ReactNode;
@@ -34,15 +34,12 @@ export const TextInput = React.forwardRef<
 
   const {
     style: propsStyle,
-    labelStyle,
     containerStyle,
     inputContainerStyle,
-    errorLabelStyle,
     label,
     error,
     paragraph,
     topInInputContainer,
-    bottomInInputContainer,
     inputLeft,
     inputRight,
     onBlur,
@@ -58,27 +55,17 @@ export const TextInput = React.forwardRef<
         style.flatten(['padding-bottom-28']),
         containerStyle,
       ])}>
-      {label ? (
-        <Text
-          style={StyleSheet.flatten([
-            style.flatten(['subtitle3', 'color-text-label', 'margin-bottom-3']),
-            labelStyle,
-          ])}>
-          {label}
-        </Text>
-      ) : null}
+      {label ? <Label content={label} /> : null}
       <View
         style={StyleSheet.flatten([
           style.flatten(
             [
-              'background-color-white',
+              'background-color-gray-600',
               'light:background-color-platinum-700',
               'padding-x-11',
               'padding-y-12',
               'border-radius-6',
               'border-width-1',
-              'border-color-gray-100@20%',
-              'light:border-color-platinum-600@50%',
             ],
             [
               // The order is important.
@@ -99,6 +86,8 @@ export const TextInput = React.forwardRef<
         <View style={style.flatten(['flex-row', 'items-center'])}>
           {inputLeft}
           <NativeTextInput
+            multiline={true}
+            numberOfLines={4}
             placeholderTextColor={
               props.placeholderTextColor ??
               style.flatten(
@@ -110,10 +99,11 @@ export const TextInput = React.forwardRef<
               style.flatten(
                 [
                   'padding-0',
-                  'body2-in-text-input',
-                  'color-gray-600',
+                  'body2',
+                  'color-white',
                   'light:color-platinum-50',
                   'flex-1',
+                  'min-height-104',
                 ],
                 [
                   !(props.editable ?? true) && 'color-gray-300',
@@ -128,6 +118,9 @@ export const TextInput = React.forwardRef<
                   height: style.get('body2-in-text-input')?.lineHeight,
                 },
               }),
+              {
+                textAlignVertical: 'top',
+              },
               propsStyle,
             ])}
             onFocus={e => {
@@ -149,47 +142,33 @@ export const TextInput = React.forwardRef<
           />
           {inputRight}
         </View>
-        {bottomInInputContainer}
       </View>
-      {paragraph && !error ? (
-        typeof paragraph === 'string' ? (
-          <View>
-            <Text
-              style={StyleSheet.flatten([
-                style.flatten([
-                  'absolute',
-                  'text-caption2',
-                  'color-blue-400',
-                  'light:color-blue-300',
-                  'margin-top-2',
-                  'margin-left-4',
-                ]),
-                errorLabelStyle,
-              ])}>
-              {paragraph}
-            </Text>
-          </View>
-        ) : (
-          paragraph
-        )
-      ) : null}
-      {error ? (
-        <View>
-          <Text
-            style={StyleSheet.flatten([
-              style.flatten([
-                'absolute',
-                'text-caption2',
-                'color-red-400',
-                'margin-top-2',
-                'margin-left-4',
-              ]),
-              errorLabelStyle,
-            ])}>
-            {error}
-          </Text>
-        </View>
+      {error || paragraph ? (
+        <Text
+          style={StyleSheet.flatten([
+            style.flatten([
+              'text-caption2',
+              'margin-top-4',
+              'margin-left-8',
+              ...(getSubTextStyleForErrorOrParagraph(error, paragraph) as any),
+            ]),
+          ])}>
+          {error || paragraph}
+        </Text>
       ) : null}
     </View>
   );
 });
+
+const getSubTextStyleForErrorOrParagraph = (
+  error?: string,
+  paragraph?: string,
+) => {
+  if (error) {
+    return ['color-yellow-400'] as const;
+  }
+
+  if (paragraph) {
+    return ['color-platinum-200'] as const;
+  }
+};

@@ -37,6 +37,8 @@ export const TextInput = forwardRef<
       isLoading,
       disabled,
       autoComplete,
+      onFocus,
+      onBlur,
       ...props
     },
     ref,
@@ -116,11 +118,19 @@ export const TextInput = forwardRef<
                   ]),
                   inputStyle,
                 ])}
-                onFocus={() => {
+                onFocus={e => {
                   setIsFocus(true);
+
+                  if (onFocus) {
+                    onFocus(e);
+                  }
                 }}
-                onBlur={() => {
+                onBlur={e => {
                   setIsFocus(false);
+
+                  if (onBlur) {
+                    onBlur(e);
+                  }
                 }}
                 placeholderTextColor={style.get('color-gray-400').color}
                 ref={ref}
@@ -141,8 +151,7 @@ export const TextInput = forwardRef<
           </Columns>
         </View>
 
-        {bottom}
-
+        <Box marginLeft={8}>{bottom}</Box>
         {error || paragraph ? (
           <Text
             style={StyleSheet.flatten([
