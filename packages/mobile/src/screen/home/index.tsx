@@ -9,6 +9,9 @@ import {useEffectOnce} from '../../hooks';
 import {WalletStatus} from '@keplr-wallet/stores';
 import {Button} from '../../components/button';
 import {IconButton} from '../../components/icon-button';
+import {SearchIcon} from '../../components/icon/search';
+import {TextInput} from '../../components/input';
+import {Gutter} from '../../components/gutter';
 
 export const HomeScreen: FunctionComponent = observer(() => {
   const style = useStyle();
@@ -32,7 +35,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
         // If mnemonic is fresh, there is no way that additional coin type account has value to select.
         promises.push(
           (async () => {
-            await keyRingStore.finalizeMnemonicKeyCoinType(
+            await keyRingStore.finalizeKeyCoinType(
               vaultId,
               chainInfo.chainId,
               chainInfo.bip44.coinType,
@@ -211,6 +214,12 @@ export const HomeScreen: FunctionComponent = observer(() => {
               containerStyle={style.flatten(['flex-1'])}
             />
           </View>
+          <Gutter size={12} />
+          <TextInput
+            left={color => <SearchIcon size={20} color={color} />}
+            isLoading={true}
+            placeholder="Search for asset or chain"
+          />
 
           {/* TODO checkbox를 추가해야함 */}
           <View style={style.flatten(['flex-row', 'justify-end'])}>
