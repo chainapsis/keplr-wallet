@@ -56,6 +56,11 @@ function setOutputHash(root, hash) {
 
     const outDir = path.join(__dirname, "../src");
     $.verbose = false;
+
+    if(fs.existsSync(outDir)) {
+      fs.rmdirSync(outDir, { recursive: true });
+    }
+
     await $`mkdir -p ${outDir}`;
     $.verbose = true;
 
@@ -138,32 +143,9 @@ function setOutputHash(root, hash) {
     // Remove used tsconfig.json
     await $`rm ${packageRoot}/tsconfig.json`;
 
-    // Move javascript output to proto-types package
-    const buildOutDir = path.join(packageRoot, "proto-types-gen/build");
-
-    // Remove previous output if exist
-    const previous = glob.sync(`${packageRoot}/**/*.+(ts|js|cjs|mjs|map)`);
-    for (const path of previous) {
-      if (
-        !path.includes("/proto-types-gen/") &&
-        !path.includes("/node_modules/")
-      ) {
-        await $`rm -f ${path}`;
-      }
-    }
-
-    const fresh = glob.sync(`${buildOutDir}/**/*.+(ts|js|cjs|mjs|map)`);
-    for (const p of fresh) {
-      const targetPath = path.join(
-        packageRoot,
-        p.replace(buildOutDir + "/", "")
-      );
-      await $`mkdir -p ${path.join(targetPath, "..")} && cp ${p} ${targetPath}`;
-    }
-
     $.verbose = true;
 
-    const outputHash = await calculateOutputHash(packageRoot);
+    const outputHash = await calculateOutputHash(outDir);
     console.log("Output hash is", outputHash);
     if (lastOutputHash && lastOutputHash !== outputHash) {
       throw new Error("Output is different");
