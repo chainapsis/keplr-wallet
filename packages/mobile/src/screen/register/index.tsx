@@ -2,7 +2,7 @@ import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent} from 'react';
 import {View} from 'react-native';
 import {useStyle} from '../../styles';
-import {TextInput} from '../../components/input/input';
+import {TextInput} from '../../components/text-input/input';
 import {Button} from '../../components/button';
 import {useStore} from '../../stores';
 import {Controller, useForm} from 'react-hook-form';

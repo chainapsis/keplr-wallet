@@ -2,7 +2,7 @@ import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent, useState} from 'react';
 import {View} from 'react-native';
 import {useStore} from '../../stores';
-import {TextInput} from '../../components/input';
+import {TextInput} from '../../components/text-input';
 import {Button} from '../../components/button';
 import {StackActions, useNavigation} from '@react-navigation/native';
 
