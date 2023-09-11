@@ -57,6 +57,24 @@ export const ColorPalette = {
   // purple 500~700 not exist yet. But, can be added in the future.
   'purple-800': '#0A0314',
 
+  'orange-50': '#FFF6F1',
+  'orange-100': '#FFE3D3',
+  'orange-200': '#FFAD80',
+  'orange-300': '#FC8441',
+  'orange-400': '#FA6410',
+  'orange-500': '#D7560E',
+  'orange-600': '#8F3A0A',
+  'orange-700': '#58270B',
+  'orange-800': '#2D1609',
+
+  'yellow-50': '#F8F2E3',
+  'yellow-100': '#F2E6C7',
+  'yellow-200': '#EDD18A',
+  'yellow-300': '#EBBF50',
+  'yellow-400': '#F0B622',
+  'yellow-500': '#D29C11',
+  'yellow-800': '#2F2611',
+
   white: '#FFFFFF',
 
   'gray-10': '#F8F9FC',

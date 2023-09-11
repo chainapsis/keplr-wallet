@@ -148,7 +148,7 @@ export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
                   onBlur={onBlur}
                   returnKeyType="next"
                   style={
-                    (style.flatten(['h6', 'color-text-middle']),
+                    (style.flatten(['h5', 'color-text-middle']),
                     {
                       minHeight: 20 * 4,
                       textAlignVertical: 'top',
