@@ -1,27 +1,28 @@
 import React, {FunctionComponent} from 'react';
 import {useStyle} from '../../../styles';
-import {StyleSheet, Text, View, ViewStyle} from 'react-native';
+import {Text} from 'react-native';
 import {SVGLoadingIcon} from '../../spinner';
+import {Columns} from '../../column';
 
 export const Label: FunctionComponent<{
   content: string;
   isLoading?: boolean;
-  style?: ViewStyle;
-}> = ({content, isLoading, style: containerStyle}) => {
+}> = ({content, isLoading}) => {
   const style = useStyle();
   return (
-    <View
-      style={StyleSheet.flatten([
-        style.flatten(['flex-row', 'items-center', 'gap-4']),
-        containerStyle,
-      ])}>
+    <Columns sum={1} gutter={4} alignY="center">
       <Text
-        style={style.flatten(['margin-left-8', 'subtitle3', 'color-gray-100'])}>
+        style={style.flatten([
+          'margin-left-8',
+          'margin-bottom-6',
+          'subtitle3',
+          'color-gray-100',
+        ])}>
         {content}
       </Text>
       {isLoading ? (
         <SVGLoadingIcon size={16} color={style.get('color-gray-300').color} />
       ) : null}
-    </View>
+    </Columns>
   );
 };

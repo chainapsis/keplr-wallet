@@ -58,9 +58,10 @@ export const TextInput = forwardRef<
 
     const disableStyle = [
       'background-color-gray-600',
-      'border-color-gray-400',
+      'border-color-gray-300',
     ] as const;
-    const iconColor = ['color-gray-400'];
+
+    const iconColor = 'color-gray-400';
 
     return (
       <View style={StyleSheet.flatten([containerStyle])}>
@@ -107,7 +108,12 @@ export const TextInput = forwardRef<
                 editable={!disabled}
                 selectTextOnFocus={!disabled}
                 style={StyleSheet.flatten([
-                  style.flatten(['color-white', 'padding-12']),
+                  style.flatten([
+                    'color-white',
+                    'padding-x-12',
+                    'body2',
+                    'height-52',
+                  ]),
                   inputStyle,
                 ])}
                 onFocus={() => {
