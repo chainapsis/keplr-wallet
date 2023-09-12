@@ -251,6 +251,9 @@ export class RecentSendHistoryService {
             history.txFulfilled = true;
             if (tx.code != null && tx.code !== 0) {
               history.txError = tx.log || tx.raw_log || "Unknown error";
+
+              // TODO: In this case, it is not currently displayed in the UI. So, delete it for now.
+              this.removeRecentIBCHistory(id);
             } else {
               if (
                 history.ibcHistory.length === 0 &&
@@ -300,13 +303,10 @@ export class RecentSendHistoryService {
           targetChannel.counterpartyChainId
         );
         if (chainInfo) {
-          // recv_packet 받는 체인에서 패킷 처리에 실패하면 이벤트에 기록되지 않는 것 같음.
-          // 특정 체인의 버그인지 아닌지는 모르겠지만
-          // 일단 write_acknowledgement는 무조건 쓰여지기 때문에 write_acknowledgement를 사용한다.
           const queryEvents: any = {
-            "write_acknowledgement.packet_src_port": targetChannel.portId,
-            "write_acknowledgement.packet_src_channel": targetChannel.channelId,
-            "write_acknowledgement.packet_sequence": targetChannel.sequence,
+            "recv_packet.packet_src_port": targetChannel.portId,
+            "recv_packet.packet_src_channel": targetChannel.channelId,
+            "recv_packet.packet_sequence": targetChannel.sequence,
           };
 
           const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
@@ -331,7 +331,7 @@ export class RecentSendHistoryService {
                       targetChannel.sequence!
                     );
 
-                    if (ack) {
+                    if (ack && ack.length > 0) {
                       const str = Buffer.from(ack);
                       try {
                         const decoded = JSON.parse(str.toString());
@@ -339,8 +339,7 @@ export class RecentSendHistoryService {
                           // XXX: {key: 'packet_ack', value: '{"error":"ABCI code: 6: error handling packet: see events for details"}'}
                           //      오류가 있을 경우 이딴식으로 오류가 나오기 때문에 뭐 유저에게 보여줄 방법이 없다...
                           targetChannel.error = "Packet processing failed";
-                          // TODO: 되감기를 추적한다.
-                          // this.trackIBCPacketForwardingRecursive(id);
+                          this.trackIBCPacketForwardingRecursive(id);
                           break;
                         }
                       } catch (e) {
@@ -560,7 +559,7 @@ export class RecentSendHistoryService {
     sourcePortId: string,
     sourceChannelId: string,
     sequence: string
-  ): Uint8Array {
+  ): Uint8Array | undefined {
     const events = tx.events;
     if (!events) {
       throw new Error("Invalid tx");
@@ -634,7 +633,7 @@ export class RecentSendHistoryService {
       }
     });
     if (!packetEvent) {
-      throw new Error("Invalid tx");
+      return;
     }
 
     let isBase64 = false;
@@ -652,7 +651,7 @@ export class RecentSendHistoryService {
       }
     }
 
-    throw new Error("Invalid tx");
+    return;
   }
 
   protected getIBCSwapResAmountFromTx(

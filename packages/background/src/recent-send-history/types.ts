@@ -45,6 +45,7 @@ export type IBCHistory = {
 
         completed: boolean;
         error?: string;
+        rewound?: boolean;
       }[];
 } & (IBCTransferHistory | IBCSwapHistory);
 
