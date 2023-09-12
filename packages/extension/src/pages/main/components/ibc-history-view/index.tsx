@@ -1,9 +1,9 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import {
-  GetIBCTransferHistories,
-  IBCTransferHistory,
-  RemoveIBCTransferHistory,
+  GetIBCHistoriesMsg,
+  IBCHistory,
+  RemoveIBCHistoryMsg,
 } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
@@ -40,14 +40,14 @@ export const IbcHistoryView: FunctionComponent<{
 }> = observer(({ isNotReady }) => {
   const { queriesStore, accountStore } = useStore();
 
-  const [histories, setHistories] = useState<IBCTransferHistory[]>([]);
+  const [histories, setHistories] = useState<IBCHistory[]>([]);
   useLayoutEffectOnce(() => {
     let count = 0;
     const alreadyCompletedHistoryMap = new Map<string, boolean>();
 
     const fn = () => {
       const requester = new InExtensionMessageRequester();
-      const msg = new GetIBCTransferHistories();
+      const msg = new GetIBCHistoriesMsg();
       requester.sendMessage(BACKGROUND_PORT, msg).then((newHistories) => {
         setHistories((histories) => {
           if (JSON.stringify(histories) !== JSON.stringify(newHistories)) {
@@ -67,10 +67,22 @@ export const IbcHistoryView: FunctionComponent<{
             if (count > 1) {
               // There is no need to refresh balance if first time.
               for (const newComplete of newCompletes) {
-                queriesStore
-                  .get(newComplete.destinationChainId)
-                  .queryBalances.getQueryBech32Address(newComplete.recipient)
-                  .fetch();
+                // If IBC transfer
+                if ("recipient" in newComplete) {
+                  queriesStore
+                    .get(newComplete.destinationChainId)
+                    .queryBalances.getQueryBech32Address(newComplete.recipient)
+                    .fetch();
+                } else {
+                  // If IBC swap
+                  queriesStore
+                    .get(newComplete.destinationChainId)
+                    .queryBalances.getQueryBech32Address(
+                      accountStore.getAccount(newComplete.destinationChainId)
+                        .bech32Address
+                    )
+                    .fetch();
+                }
               }
             }
             for (const newComplete of newCompletes) {
@@ -113,7 +125,7 @@ export const IbcHistoryView: FunctionComponent<{
             history={history}
             removeHistory={(id) => {
               const requester = new InExtensionMessageRequester();
-              const msg = new RemoveIBCTransferHistory(id);
+              const msg = new RemoveIBCHistoryMsg(id);
               requester.sendMessage(BACKGROUND_PORT, msg).then((histories) => {
                 setHistories(histories);
               });
@@ -127,7 +139,7 @@ export const IbcHistoryView: FunctionComponent<{
 });
 
 const IbcHistoryViewItem: FunctionComponent<{
-  history: IBCTransferHistory;
+  history: IBCHistory;
   removeHistory: (id: string) => void;
 }> = observer(({ history, removeHistory }) => {
   const { chainStore } = useStore();

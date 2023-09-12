@@ -14,7 +14,7 @@ import {
   toJS,
 } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
-import { IBCTransferHistory, RecentSendHistory } from "./types";
+import { IBCHistory, RecentSendHistory } from "./types";
 import { Buffer } from "buffer/";
 import { ChainInfo } from "@keplr-wallet/types";
 
@@ -25,13 +25,10 @@ export class RecentSendHistoryService {
     new Map();
 
   @observable
-  protected recentIBCTransferHistorySeq: number = 0;
+  protected recentIBCHistorySeq: number = 0;
   // Key: id (sequence, it should be increased by 1 for each)
   @observable
-  protected readonly recentIBCTransferHistoryMap: Map<
-    string,
-    IBCTransferHistory
-  > = new Map();
+  protected readonly recentIBCHistoryMap: Map<string, IBCHistory> = new Map();
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -61,25 +58,29 @@ export class RecentSendHistoryService {
       );
     });
 
-    const recentIBCTransferHistorySeqSaved = await this.kvStore.get<number>(
+    // 밑의 storage의 key들이 ibc transfer를 포함하는데
+    // 이 이유는 이전에 transfer history만 지원되었을때
+    // key를 그렇게 정했었기 때문이다
+    // 이전 버전과의 호환성을 위해서 key는 그대로 냅뒀다.
+    const recentIBCHistorySeqSaved = await this.kvStore.get<number>(
       "recentIBCTransferHistorySeq"
     );
-    if (recentIBCTransferHistorySeqSaved) {
+    if (recentIBCHistorySeqSaved) {
       runInAction(() => {
-        this.recentIBCTransferHistorySeq = recentIBCTransferHistorySeqSaved;
+        this.recentIBCHistorySeq = recentIBCHistorySeqSaved;
       });
     }
     autorun(() => {
-      const js = toJS(this.recentIBCTransferHistorySeq);
+      const js = toJS(this.recentIBCHistorySeq);
       this.kvStore.set<number>("recentIBCTransferHistorySeq", js);
     });
 
-    const recentIBCTransferHistoryMapSaved = await this.kvStore.get<
-      Record<string, IBCTransferHistory>
+    const recentIBCHistoryMapSaved = await this.kvStore.get<
+      Record<string, IBCHistory>
     >("recentIBCTransferHistoryMap");
-    if (recentIBCTransferHistoryMapSaved) {
+    if (recentIBCHistoryMapSaved) {
       runInAction(() => {
-        let entries = Object.entries(recentIBCTransferHistoryMapSaved);
+        let entries = Object.entries(recentIBCHistoryMapSaved);
         entries = entries.sort(([, a], [, b]) => {
           // There is no guarantee that the order of the object is same as the order of the last saved.
           // So we need to sort them.
@@ -88,20 +89,20 @@ export class RecentSendHistoryService {
           return parseInt(a.id) - parseInt(b.id);
         });
         for (const [key, value] of entries) {
-          this.recentIBCTransferHistoryMap.set(key, value);
+          this.recentIBCHistoryMap.set(key, value);
         }
       });
     }
     autorun(() => {
-      const js = toJS(this.recentIBCTransferHistoryMap);
+      const js = toJS(this.recentIBCHistoryMap);
       const obj = Object.fromEntries(js);
-      this.kvStore.set<Record<string, IBCTransferHistory>>(
+      this.kvStore.set<Record<string, IBCHistory>>(
         "recentIBCTransferHistoryMap",
         obj
       );
     });
 
-    for (const history of this.getRecentIBCTransferHistories()) {
+    for (const history of this.getRecentIBCHistories()) {
       this.trackIBCPacketForwardingRecursive(history.id);
     }
 
@@ -177,8 +178,60 @@ export class RecentSendHistoryService {
     return txHash;
   }
 
+  async sendTxAndRecordIBCSwap(
+    swapType: "amount-in" | "amount-out",
+    sourceChainId: string,
+    destinationChainId: string,
+    tx: unknown,
+    mode: "async" | "sync" | "block",
+    silent: boolean,
+    sender: string,
+    amount: {
+      amount: string;
+      denom: string;
+    }[],
+    memo: string,
+    ibcChannels:
+      | {
+          portId: string;
+          channelId: string;
+          counterpartyChainId: string;
+        }[]
+      | undefined
+  ): Promise<Uint8Array> {
+    const sourceChainInfo =
+      this.chainsService.getChainInfoOrThrow(sourceChainId);
+    Bech32Address.validate(
+      sender,
+      sourceChainInfo.bech32Config.bech32PrefixAccAddr
+    );
+
+    this.chainsService.getChainInfoOrThrow(destinationChainId);
+
+    const txHash = await this.txService.sendTx(sourceChainId, tx, mode, {
+      silent,
+    });
+
+    if (ibcChannels && ibcChannels.length > 0) {
+      const id = this.addRecentIBCSwapHistory(
+        swapType,
+        sourceChainId,
+        destinationChainId,
+        sender,
+        amount,
+        memo,
+        ibcChannels,
+        txHash
+      );
+
+      this.trackIBCPacketForwardingRecursive(id);
+    }
+
+    return txHash;
+  }
+
   trackIBCPacketForwardingRecursive(id: string) {
-    const history = this.getRecentIBCTransferHistory(id);
+    const history = this.getRecentIBCHistory(id);
     if (!history) {
       return;
     }
@@ -199,7 +252,7 @@ export class RecentSendHistoryService {
               history.txError = tx.log || tx.raw_log || "Unknown error";
 
               // TODO: In this case, it is not currently displayed in the UI. So, delete it for now.
-              this.removeRecentIBCTransferHistory(id);
+              this.removeRecentIBCHistory(id);
             } else {
               if (history.ibcHistory.length > 0) {
                 const firstChannel = history.ibcHistory[0];
@@ -334,9 +387,9 @@ export class RecentSendHistoryService {
         }[],
     txHash: Uint8Array
   ): string {
-    const id = (this.recentIBCTransferHistorySeq++).toString();
+    const id = (this.recentIBCHistorySeq++).toString();
 
-    const history: IBCTransferHistory = {
+    const history: IBCHistory = {
       id,
       chainId,
       destinationChainId,
@@ -358,49 +411,93 @@ export class RecentSendHistoryService {
       txHash: Buffer.from(txHash).toString("hex"),
     };
 
-    this.recentIBCTransferHistoryMap.set(id, history);
+    this.recentIBCHistoryMap.set(id, history);
 
     return id;
   }
 
-  getRecentIBCTransferHistory(id: string): IBCTransferHistory | undefined {
-    return this.recentIBCTransferHistoryMap.get(id);
+  @action
+  addRecentIBCSwapHistory(
+    swapType: "amount-in" | "amount-out",
+    chainId: string,
+    destinationChainId: string,
+    sender: string,
+    amount: {
+      amount: string;
+      denom: string;
+    }[],
+    memo: string,
+    ibcChannels:
+      | {
+          portId: string;
+          channelId: string;
+          counterpartyChainId: string;
+        }[],
+    txHash: Uint8Array
+  ): string {
+    const id = (this.recentIBCHistorySeq++).toString();
+
+    const history: IBCHistory = {
+      id,
+      swapType,
+      chainId,
+      destinationChainId,
+      timestamp: Date.now(),
+      sender,
+      amount,
+      memo,
+
+      ibcHistory: ibcChannels.map((channel) => {
+        return {
+          portId: channel.portId,
+          channelId: channel.channelId,
+          counterpartyChainId: channel.counterpartyChainId,
+
+          completed: false,
+        };
+      }),
+      txHash: Buffer.from(txHash).toString("hex"),
+    };
+
+    this.recentIBCHistoryMap.set(id, history);
+
+    return id;
   }
 
-  getRecentIBCTransferHistories(): IBCTransferHistory[] {
-    return Array.from(this.recentIBCTransferHistoryMap.values()).filter(
-      (history) => {
-        if (!this.chainsService.hasChainInfo(history.chainId)) {
-          return false;
-        }
+  getRecentIBCHistory(id: string): IBCHistory | undefined {
+    return this.recentIBCHistoryMap.get(id);
+  }
 
-        if (!this.chainsService.hasChainInfo(history.destinationChainId)) {
-          return false;
-        }
-
-        if (
-          history.ibcHistory.some((history) => {
-            return !this.chainsService.hasChainInfo(
-              history.counterpartyChainId
-            );
-          })
-        ) {
-          return false;
-        }
-
-        return true;
+  getRecentIBCHistories(): IBCHistory[] {
+    return Array.from(this.recentIBCHistoryMap.values()).filter((history) => {
+      if (!this.chainsService.hasChainInfo(history.chainId)) {
+        return false;
       }
-    );
+
+      if (!this.chainsService.hasChainInfo(history.destinationChainId)) {
+        return false;
+      }
+
+      if (
+        history.ibcHistory.some((history) => {
+          return !this.chainsService.hasChainInfo(history.counterpartyChainId);
+        })
+      ) {
+        return false;
+      }
+
+      return true;
+    });
   }
 
   @action
-  removeRecentIBCTransferHistory(id: string): boolean {
-    return this.recentIBCTransferHistoryMap.delete(id);
+  removeRecentIBCHistory(id: string): boolean {
+    return this.recentIBCHistoryMap.delete(id);
   }
 
   @action
-  clearAllRecentIBCTransferHistory(): void {
-    this.recentIBCTransferHistoryMap.clear();
+  clearAllRecentIBCHistory(): void {
+    this.recentIBCHistoryMap.clear();
   }
 
   protected getIBCRecvPacketIndexFromTx(
@@ -593,7 +690,7 @@ export class RecentSendHistoryService {
 
     runInAction(() => {
       const removingIds: string[] = [];
-      for (const history of this.recentIBCTransferHistoryMap.values()) {
+      for (const history of this.recentIBCHistoryMap.values()) {
         if (
           ChainIdHelper.parse(history.chainId).identifier === chainIdentifier
         ) {
@@ -623,7 +720,7 @@ export class RecentSendHistoryService {
       }
 
       for (const id of removingIds) {
-        this.recentIBCTransferHistoryMap.delete(id);
+        this.recentIBCHistoryMap.delete(id);
       }
     });
   };

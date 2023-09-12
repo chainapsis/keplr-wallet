@@ -34,9 +34,12 @@ import { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
-import { Dec } from "@keplr-wallet/unit";
+import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { MakeTxResponse } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
+import { SendTxAndRecordWithIBCSwapMsg } from "@keplr-wallet/background";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 export const IBCSwapPage: FunctionComponent = observer(() => {
   const {
@@ -331,11 +334,59 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
           let tx: MakeTxResponse;
 
+          const queryRoute = ibcSwapConfigs.amountConfig
+            .getQueryIBCSwap()!
+            .getQueryRoute();
+          const channels: {
+            portId: string;
+            channelId: string;
+            counterpartyChainId: string;
+          }[] = [];
+
           try {
-            tx = await ibcSwapConfigs.amountConfig.getTx(
-              uiConfigStore.ibcSwapConfig.slippageNum,
-              SwapFeeBps.receiver
-            );
+            const [_tx] = await Promise.all([
+              ibcSwapConfigs.amountConfig.getTx(
+                uiConfigStore.ibcSwapConfig.slippageNum,
+                SwapFeeBps.receiver
+              ),
+              // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.
+              // /msgs_direct로도 얻을 순 있지만 따로 데이터를 해석해야되기 때문에 좀 힘들다...
+              // 엄밀히 말하면 각각의 엔드포인트이기 때문에 약간의 시간차 등으로 서로 일치하지 않는 값이 올수도 있다.
+              // 근데 현실에서는 그런 일 안 일어날듯 그냥 그런 문제는 무시하고 진행한다.
+              queryRoute.waitFreshResponse(),
+            ]);
+
+            if (!queryRoute.response) {
+              throw new Error("queryRoute.response is undefined");
+            }
+            for (const operation of queryRoute.response.data.operations) {
+              if ("transfer" in operation) {
+                const queryClientState = queriesStore
+                  .get(operation.transfer.chain_id)
+                  .cosmos.queryIBCClientState.getClientState(
+                    operation.transfer.port,
+                    operation.transfer.channel
+                  );
+
+                await queryClientState.waitResponse();
+                if (!queryClientState.response) {
+                  throw new Error("queryClientState.response is undefined");
+                }
+                if (!queryClientState.clientChainId) {
+                  throw new Error(
+                    "queryClientState.clientChainId is undefined"
+                  );
+                }
+
+                channels.push({
+                  portId: operation.transfer.port,
+                  channelId: operation.transfer.channel,
+                  counterpartyChainId: queryClientState.clientChainId,
+                });
+              }
+            }
+
+            tx = _tx;
           } catch (e) {
             setCalculatingTxError(e);
             setIsTxLoading(false);
@@ -350,6 +401,35 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               {
                 preferNoSetFee: true,
                 preferNoSetMemo: false,
+
+                sendTx: async (chainId, tx, mode) => {
+                  const msg = new SendTxAndRecordWithIBCSwapMsg(
+                    "amount-in",
+                    chainId,
+                    outChainId,
+                    tx,
+                    channels,
+                    mode,
+                    false,
+                    ibcSwapConfigs.senderConfig.sender,
+                    ibcSwapConfigs.amountConfig.amount.map((amount) => {
+                      return {
+                        amount: DecUtils.getTenExponentN(
+                          amount.currency.coinDecimals
+                        )
+                          .mul(amount.toDec())
+                          .toString(),
+                        denom: amount.currency.coinMinimalDenom,
+                      };
+                    }),
+                    ibcSwapConfigs.memoConfig.memo
+                  );
+
+                  return await new InExtensionMessageRequester().sendMessage(
+                    BACKGROUND_PORT,
+                    msg
+                  );
+                },
               },
               {
                 onBroadcasted: () => {

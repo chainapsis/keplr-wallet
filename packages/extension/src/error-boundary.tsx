@@ -13,7 +13,7 @@ import { Button } from "./components/button";
 import { observer } from "mobx-react-lite";
 import { useStore } from "./stores";
 import { useTheme } from "styled-components";
-import { ClearAllIBCTransferHistory } from "@keplr-wallet/background";
+import { ClearAllIBCHistoryMsg } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
@@ -78,7 +78,7 @@ const ErrorBoundaryView: FunctionComponent = observer(() => {
     };
 
     const fn2 = async () => {
-      const msg = new ClearAllIBCTransferHistory();
+      const msg = new ClearAllIBCHistoryMsg();
       const requester = new InExtensionMessageRequester();
       await requester.sendMessage(BACKGROUND_PORT, msg);
     };
