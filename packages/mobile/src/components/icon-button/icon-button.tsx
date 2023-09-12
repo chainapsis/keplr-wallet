@@ -83,12 +83,7 @@ export const IconButton: FunctionComponent<{
         activeOpacity={0.3}
         isTextMode={!hasRipple}>
         {path === 'left' ? (
-          <View
-            style={style.flatten([
-              'height-1',
-              'justify-center',
-              'margin-right-4',
-            ])}>
+          <View style={style.flatten(['justify-center', 'margin-right-4'])}>
             <View>
               {isValidElement(icon) || !icon || !(typeof icon === 'function')
                 ? icon
@@ -106,7 +101,7 @@ export const IconButton: FunctionComponent<{
         {path === 'right' ? (
           <View
             style={StyleSheet.flatten([
-              style.flatten(['height-1', 'justify-center', 'margin-left-4']),
+              style.flatten(['justify-center', 'margin-left-4']),
             ])}>
             {isValidElement(icon) || !icon || !(typeof icon === 'function')
               ? icon

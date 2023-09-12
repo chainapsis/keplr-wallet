@@ -44,50 +44,48 @@ export const TextButton: FunctionComponent<{
   })();
 
   return (
-    <View>
-      <Pressable
-        disabled={disabled}
+    <Pressable
+      disabled={disabled}
+      style={StyleSheet.flatten([
+        style.flatten([
+          'flex-row',
+          'justify-center',
+          'items-center',
+          'padding-x-8',
+          isPressIn ? 'color-gray-300' : (textColorDefinition as any),
+        ]),
+      ])}
+      onPress={onPress}
+      onPressOut={() => setIsPressIn(false)}
+      onPressIn={() => setIsPressIn(true)}>
+      <Text
         style={StyleSheet.flatten([
           style.flatten([
-            'flex-row',
-            'justify-center',
-            'items-center',
-            'padding-x-8',
+            'text-center',
+            'text-button2',
             isPressIn ? 'color-gray-300' : (textColorDefinition as any),
           ]),
-        ])}
-        onPress={onPress}
-        onPressOut={() => setIsPressIn(false)}
-        onPressIn={() => setIsPressIn(true)}>
-        <Text
-          style={StyleSheet.flatten([
-            style.flatten([
-              'text-center',
-              'text-button2',
-              isPressIn ? 'color-gray-300' : (textColorDefinition as any),
-            ]),
-            textStyle,
-          ])}>
-          {text}
-        </Text>
-        <View
-          style={style.flatten([
-            'height-1',
-            'justify-center',
-            'margin-left-4',
-            isPressIn ? 'color-gray-300' : 'color-red-400',
-          ])}>
-          {isValidElement(rightIcon) ||
-          !rightIcon ||
-          !(typeof rightIcon === 'function')
-            ? rightIcon
-            : rightIcon(
-                isPressIn
-                  ? style.get('color-gray-300').color
-                  : style.get(textColorDefinition as any).color,
-              )}
-        </View>
-      </Pressable>
-    </View>
+          textStyle,
+        ])}>
+        {text}
+      </Text>
+      <View
+        style={style.flatten([
+          'height-1',
+          'justify-center',
+          'margin-left-4',
+          isPressIn ? 'color-gray-300' : 'color-red-400',
+        ])}>
+        {isValidElement(rightIcon) ||
+        !rightIcon ||
+        !(typeof rightIcon === 'function')
+          ? rightIcon
+          : rightIcon(
+              isPressIn
+                ? style.get('color-gray-300').color
+                : style.get(textColorDefinition as any).color,
+            )}
+      </View>
+    </Pressable>
   );
 };
