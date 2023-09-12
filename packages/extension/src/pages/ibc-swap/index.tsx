@@ -35,7 +35,7 @@ import { GuideBox } from "../../components/guide-box";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
-import { MakeTxResponse } from "@keplr-wallet/stores";
+import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
 import { SendTxAndRecordWithIBCSwapMsg } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
@@ -395,7 +395,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               lastChainId = channels[channels.length - 1].counterpartyChainId;
             }
             const receiverAccount = accountStore.getAccount(lastChainId);
-            await receiverAccount.init();
+            if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
+              await receiverAccount.init();
+            }
             if (!receiverAccount.bech32Address) {
               throw new Error("receiverAccount.bech32Address is undefined");
             }
