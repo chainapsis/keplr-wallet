@@ -342,6 +342,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             channelId: string;
             counterpartyChainId: string;
           }[] = [];
+          let swapChannelIndex: number = -1;
+          let swapReceiver: string = "";
 
           try {
             const [_tx] = await Promise.all([
@@ -383,8 +385,21 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   channelId: operation.transfer.channel,
                   counterpartyChainId: queryClientState.clientChainId,
                 });
+              } else if ("swap" in operation) {
+                swapChannelIndex = channels.length - 1;
               }
             }
+
+            let lastChainId = inChainId;
+            if (channels.length > 0) {
+              lastChainId = channels[channels.length - 1].counterpartyChainId;
+            }
+            const receiverAccount = accountStore.getAccount(lastChainId);
+            await receiverAccount.init();
+            if (!receiverAccount.bech32Address) {
+              throw new Error("receiverAccount.bech32Address is undefined");
+            }
+            swapReceiver = receiverAccount.bech32Address;
 
             tx = _tx;
           } catch (e) {
@@ -409,6 +424,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     outChainId,
                     tx,
                     channels,
+                    swapChannelIndex,
+                    swapReceiver,
                     mode,
                     false,
                     ibcSwapConfigs.senderConfig.sender,

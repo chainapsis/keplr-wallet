@@ -209,6 +209,8 @@ export class SendTxAndRecordWithIBCSwapMsg extends Message<Uint8Array> {
       channelId: string;
       counterpartyChainId: string;
     }[],
+    public readonly swapChannelIndex: number,
+    public readonly swapReceiver: string,
     public readonly mode: "async" | "sync" | "block",
     public readonly silent: boolean,
     public readonly sender: string,
@@ -238,9 +240,10 @@ export class SendTxAndRecordWithIBCSwapMsg extends Message<Uint8Array> {
       throw new Error("tx is empty");
     }
 
-    if (this.channels.length === 0) {
-      throw new Error("channels is empty");
-    }
+    // XXX: swap chain 안에서만 이루어지는 경우 ibc channel이 필요 없을 수도 있음
+    // if (this.channels.length === 0) {
+    //   throw new Error("channels is empty");
+    // }
 
     if (
       !this.mode ||

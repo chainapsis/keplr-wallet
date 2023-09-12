@@ -54,6 +54,8 @@ export interface IBCTransferHistory {
 
 export interface IBCSwapHistory {
   swapType: "amount-in" | "amount-out";
+  swapChannelIndex: number;
+  swapReceiver: string;
 
   resAmount?: {
     amount: string;

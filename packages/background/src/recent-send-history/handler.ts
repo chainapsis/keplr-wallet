@@ -124,7 +124,9 @@ const handleSendTxAndRecordWithIBCSwapMsg: (
       msg.sender,
       msg.amount,
       msg.memo,
-      msg.channels
+      msg.channels,
+      msg.swapChannelIndex,
+      msg.swapReceiver
     );
   };
 };

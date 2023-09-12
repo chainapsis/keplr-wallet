@@ -196,8 +196,9 @@ export class RecentSendHistoryService {
           portId: string;
           channelId: string;
           counterpartyChainId: string;
-        }[]
-      | undefined
+        }[],
+    swapChannelIndex: number,
+    swapReceiver: string
   ): Promise<Uint8Array> {
     const sourceChainInfo =
       this.chainsService.getChainInfoOrThrow(sourceChainId);
@@ -212,20 +213,20 @@ export class RecentSendHistoryService {
       silent,
     });
 
-    if (ibcChannels && ibcChannels.length > 0) {
-      const id = this.addRecentIBCSwapHistory(
-        swapType,
-        sourceChainId,
-        destinationChainId,
-        sender,
-        amount,
-        memo,
-        ibcChannels,
-        txHash
-      );
+    const id = this.addRecentIBCSwapHistory(
+      swapType,
+      sourceChainId,
+      destinationChainId,
+      sender,
+      amount,
+      memo,
+      ibcChannels,
+      swapChannelIndex,
+      swapReceiver,
+      txHash
+    );
 
-      this.trackIBCPacketForwardingRecursive(id);
-    }
+    this.trackIBCPacketForwardingRecursive(id);
 
     return txHash;
   }
@@ -250,10 +251,21 @@ export class RecentSendHistoryService {
             history.txFulfilled = true;
             if (tx.code != null && tx.code !== 0) {
               history.txError = tx.log || tx.raw_log || "Unknown error";
-
-              // TODO: In this case, it is not currently displayed in the UI. So, delete it for now.
-              this.removeRecentIBCHistory(id);
             } else {
+              if (
+                history.ibcHistory.length === 0 &&
+                "swapReceiver" in history
+              ) {
+                const resAmount = this.getIBCSwapResAmountFromTx(
+                  tx,
+                  history.swapReceiver
+                );
+
+                if (resAmount.length > 0) {
+                  history.resAmount = resAmount;
+                }
+              }
+
               if (history.ibcHistory.length > 0) {
                 const firstChannel = history.ibcHistory[0];
 
@@ -288,16 +300,14 @@ export class RecentSendHistoryService {
           targetChannel.counterpartyChainId
         );
         if (chainInfo) {
+          // recv_packet 받는 체인에서 패킷 처리에 실패하면 이벤트에 기록되지 않는 것 같음.
+          // 특정 체인의 버그인지 아닌지는 모르겠지만
+          // 일단 write_acknowledgement는 무조건 쓰여지기 때문에 write_acknowledgement를 사용한다.
           const queryEvents: any = {
-            "recv_packet.packet_src_port": targetChannel.portId,
-            "recv_packet.packet_src_channel": targetChannel.channelId,
-            "recv_packet.packet_sequence": targetChannel.sequence,
+            "write_acknowledgement.packet_src_port": targetChannel.portId,
+            "write_acknowledgement.packet_src_channel": targetChannel.channelId,
+            "write_acknowledgement.packet_sequence": targetChannel.sequence,
           };
-          if (nextChannel) {
-            queryEvents["send_packet.packet_src_port"] = nextChannel.portId;
-            queryEvents["send_packet.packet_src_channel"] =
-              nextChannel.channelId;
-          }
 
           const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
           txTracer.traceTx(queryEvents).then((res) => {
@@ -312,18 +322,59 @@ export class RecentSendHistoryService {
               runInAction(() => {
                 targetChannel.completed = true;
 
-                if (nextChannel) {
-                  for (const tx of txs) {
-                    try {
-                      // Because a tx can contain multiple messages, it's hard to know exactly which event we want.
-                      // But logically, the send_packet event closest to the recv_packet event is the event we want.
-                      const index = this.getIBCRecvPacketIndexFromTx(
+                for (const tx of txs) {
+                  try {
+                    const ack = this.getIBCWriteAcknowledgementAckFromTx(
+                      tx,
+                      targetChannel.portId,
+                      targetChannel.channelId,
+                      targetChannel.sequence!
+                    );
+
+                    if (ack) {
+                      const str = Buffer.from(ack);
+                      try {
+                        const decoded = JSON.parse(str.toString());
+                        if (decoded.error) {
+                          // XXX: {key: 'packet_ack', value: '{"error":"ABCI code: 6: error handling packet: see events for details"}'}
+                          //      오류가 있을 경우 이딴식으로 오류가 나오기 때문에 뭐 유저에게 보여줄 방법이 없다...
+                          targetChannel.error = "Packet processing failed";
+                          // TODO: 되감기를 추적한다.
+                          // this.trackIBCPacketForwardingRecursive(id);
+                          break;
+                        }
+                      } catch (e) {
+                        // decode가 실패한 경우 사실 방법이 없다.
+                        // 일단 packet이 성공했다고 치고 진행한다.
+                        console.log(e);
+                      }
+                    }
+
+                    // Because a tx can contain multiple messages, it's hard to know exactly which event we want.
+                    // But logically, the events closest to the recv_packet event is the events we want.
+                    const index = this.getIBCRecvPacketIndexFromTx(
+                      tx,
+                      targetChannel.portId,
+                      targetChannel.channelId,
+                      targetChannel.sequence!
+                    );
+
+                    if ("swapReceiver" in history && !nextChannel) {
+                      const res: {
+                        amount: string;
+                        denom: string;
+                      }[] = this.getIBCSwapResAmountFromTx(
                         tx,
-                        targetChannel.portId,
-                        targetChannel.channelId,
-                        targetChannel.sequence!
+                        history.swapReceiver,
+                        index
                       );
 
+                      if (res.length > 0) {
+                        history.resAmount = res;
+                      }
+                    }
+
+                    if (nextChannel) {
                       nextChannel.sequence = this.getIBCPacketSequenceFromTx(
                         tx,
                         nextChannel.portId,
@@ -332,9 +383,9 @@ export class RecentSendHistoryService {
                       );
                       this.trackIBCPacketForwardingRecursive(id);
                       break;
-                    } catch {
-                      // noop
                     }
+                  } catch {
+                    // noop
                   }
                 }
               });
@@ -433,6 +484,8 @@ export class RecentSendHistoryService {
           channelId: string;
           counterpartyChainId: string;
         }[],
+    swapChannelIndex: number,
+    swapReceiver: string,
     txHash: Uint8Array
   ): string {
     const id = (this.recentIBCHistorySeq++).toString();
@@ -456,6 +509,8 @@ export class RecentSendHistoryService {
           completed: false,
         };
       }),
+      swapChannelIndex,
+      swapReceiver,
       txHash: Buffer.from(txHash).toString("hex"),
     };
 
@@ -498,6 +553,195 @@ export class RecentSendHistoryService {
   @action
   clearAllRecentIBCHistory(): void {
     this.recentIBCHistoryMap.clear();
+  }
+
+  protected getIBCWriteAcknowledgementAckFromTx(
+    tx: any,
+    sourcePortId: string,
+    sourceChannelId: string,
+    sequence: string
+  ): Uint8Array {
+    const events = tx.events;
+    if (!events) {
+      throw new Error("Invalid tx");
+    }
+    if (!Array.isArray(events)) {
+      throw new Error("Invalid tx");
+    }
+
+    // In injective, events from tendermint rpc is not encoded as base64.
+    // I don't know that this is the difference from tendermint version, or just custom from injective.
+    const compareStringWithBase64OrPlain = (
+      target: string,
+      value: string
+    ): [boolean, boolean] => {
+      if (target === value) {
+        return [true, false];
+      }
+
+      if (target === Buffer.from(value).toString("base64")) {
+        return [true, true];
+      }
+
+      return [false, false];
+    };
+
+    const packetEvent = events.find((event: any) => {
+      if (event.type !== "write_acknowledgement") {
+        return false;
+      }
+      const sourcePortAttr = event.attributes.find((attr: { key: string }) => {
+        return compareStringWithBase64OrPlain(attr.key, "packet_src_port")[0];
+      });
+      if (!sourcePortAttr) {
+        return false;
+      }
+      const sourceChannelAttr = event.attributes.find(
+        (attr: { key: string }) => {
+          return compareStringWithBase64OrPlain(
+            attr.key,
+            "packet_src_channel"
+          )[0];
+        }
+      );
+      if (!sourceChannelAttr) {
+        return false;
+      }
+      let isBase64 = false;
+      const sequenceAttr = event.attributes.find((attr: { key: string }) => {
+        const c = compareStringWithBase64OrPlain(attr.key, "packet_sequence");
+        isBase64 = c[1];
+        return c[0];
+      });
+      if (!sequenceAttr) {
+        return false;
+      }
+
+      if (isBase64) {
+        return (
+          Buffer.from(sourcePortAttr.value, "base64").toString() ===
+            sourcePortId &&
+          Buffer.from(sourceChannelAttr.value, "base64").toString() ===
+            sourceChannelId &&
+          Buffer.from(sequenceAttr.value, "base64").toString() === sequence
+        );
+      } else {
+        return (
+          sourcePortAttr.value === sourcePortId &&
+          sourceChannelAttr.value === sourceChannelId &&
+          sequenceAttr.value === sequence
+        );
+      }
+    });
+    if (!packetEvent) {
+      throw new Error("Invalid tx");
+    }
+
+    let isBase64 = false;
+    const ackAttr = packetEvent.attributes.find((attr: { key: string }) => {
+      const r = compareStringWithBase64OrPlain(attr.key, "packet_ack");
+      isBase64 = r[1];
+      return r[0];
+    });
+
+    if (ackAttr) {
+      if (isBase64) {
+        return Buffer.from(ackAttr.value, "base64");
+      } else {
+        return Buffer.from(ackAttr.value);
+      }
+    }
+
+    throw new Error("Invalid tx");
+  }
+
+  protected getIBCSwapResAmountFromTx(
+    tx: any,
+    receiver: string,
+    startEventsIndex: number = 0,
+    endEventsIndex: number = -1
+  ): {
+    amount: string;
+    denom: string;
+  }[] {
+    // Skip의 contract에서 편리하게 쓸 events를 발생시켜주지 않는 것 같다.
+    // 그래서 엄밀하게 여기서 멀 하기가 힘들다.
+    // 적당한 추론으로 99%의 케이스에서는 문제가 없는 방법을 시도한다...
+    const events = tx.events.slice(
+      startEventsIndex,
+      endEventsIndex >= 0 ? endEventsIndex : undefined
+    ) as {
+      type: string;
+      attributes: {
+        key: string;
+        value: string;
+      }[];
+    }[];
+
+    // In injective, events from tendermint rpc is not encoded as base64.
+    // I don't know that this is the difference from tendermint version, or just custom from injective.
+    const compareStringWithBase64OrPlain = (
+      target: string,
+      value: string
+    ): [boolean, boolean] => {
+      if (target === value) {
+        return [true, false];
+      }
+
+      if (target === Buffer.from(value).toString("base64")) {
+        return [true, true];
+      }
+
+      return [false, false];
+    };
+
+    // 일단 마지막으로 받은 events가 tx의 결과에 가장 가까이 있을 것이다...
+    // 단순하게 그냥 마지막 coin_received를 찾는다.
+    const receiveEvent = events.reverse().find((event) => {
+      if (event.type === "coin_received") {
+        const attr = event.attributes.find((attr) => {
+          return (
+            compareStringWithBase64OrPlain(attr.key, "receiver")[0] &&
+            compareStringWithBase64OrPlain(attr.value, receiver)[0]
+          );
+        });
+
+        if (attr) {
+          return true;
+        }
+      }
+
+      return false;
+    });
+
+    if (receiveEvent) {
+      let isBase64 = false;
+      const amountAttr = receiveEvent.attributes.find((attr) => {
+        const c = compareStringWithBase64OrPlain(attr.key, "amount");
+        isBase64 = c[1];
+        return c[0];
+      });
+      if (amountAttr) {
+        const amount = isBase64
+          ? Buffer.from(amountAttr.value, "base64").toString()
+          : amountAttr.value;
+        const split = amount.split(/^([0-9]+)(\s)*([a-zA-Z][a-zA-Z0-9/-]*)$/);
+
+        // 이 if 문을 만족 못하면 이미 망한건데... 머 따로 오류 처리할 마땅한 방법이 없으니 일단 패스...
+        if (split.length === 5) {
+          const amount = split[1];
+          const denom = split[3];
+          return [
+            {
+              denom,
+              amount,
+            },
+          ];
+        }
+      }
+    }
+
+    return [];
   }
 
   protected getIBCRecvPacketIndexFromTx(
