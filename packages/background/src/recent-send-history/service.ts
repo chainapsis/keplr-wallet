@@ -237,7 +237,70 @@ export class RecentSendHistoryService {
       return;
     }
 
-    if (!history.txFulfilled) {
+    const needRewind = (() => {
+      if (!history.txFulfilled) {
+        return false;
+      }
+
+      if (history.ibcHistory.length === 0) {
+        return false;
+      }
+
+      return history.ibcHistory.find((h) => h.error != null) != null;
+    })();
+
+    if (needRewind) {
+      const lastRewoundChannelIndex = history.ibcHistory.findIndex((h) => {
+        if (h.rewound) {
+          return true;
+        }
+      });
+      const targetChannel = (() => {
+        if (lastRewoundChannelIndex >= 0) {
+          if (lastRewoundChannelIndex === 0) {
+            return undefined;
+          }
+
+          return history.ibcHistory[lastRewoundChannelIndex - 1];
+        }
+        return history.ibcHistory.find((h) => h.error != null);
+      })();
+
+      if (targetChannel && targetChannel.sequence) {
+        const prevChainInfo = (() => {
+          const targetChannelIndex = history.ibcHistory.findIndex(
+            (h) => h === targetChannel
+          );
+          if (targetChannelIndex < 0) {
+            return undefined;
+          }
+          if (targetChannelIndex === 0) {
+            return this.chainsService.getChainInfo(history.chainId);
+          }
+          return this.chainsService.getChainInfo(
+            history.ibcHistory[targetChannelIndex - 1].counterpartyChainId
+          );
+        })();
+        if (prevChainInfo) {
+          const txTracer = new TendermintTxTracer(
+            prevChainInfo.rpc,
+            "/websocket"
+          );
+          txTracer
+            .traceTx({
+              "acknowledge_packet.packet_src_port": targetChannel.portId,
+              "acknowledge_packet.packet_src_channel": targetChannel.channelId,
+              "acknowledge_packet.packet_sequence": targetChannel.sequence,
+            })
+            .then(() => {
+              runInAction(() => {
+                targetChannel.rewound = true;
+              });
+              this.trackIBCPacketForwardingRecursive(id);
+            });
+        }
+      }
+    } else if (!history.txFulfilled) {
       const chainId = history.chainId;
       const chainInfo = this.chainsService.getChainInfo(chainId);
       const txHash = Buffer.from(history.txHash, "hex");
@@ -253,6 +316,7 @@ export class RecentSendHistoryService {
               history.txError = tx.log || tx.raw_log || "Unknown error";
 
               // TODO: In this case, it is not currently displayed in the UI. So, delete it for now.
+              //       어차피 tx 자체의 실패는 notification으로 알 수 있기 때문에 여기서 지우더라도 유저는 실패를 인지할 수 있다.
               this.removeRecentIBCHistory(id);
             } else {
               if (
