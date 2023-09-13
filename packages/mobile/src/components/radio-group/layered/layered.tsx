@@ -26,11 +26,12 @@ export const LayeredHorizontalRadioGroup: FunctionComponent<
 }) => {
   const style = useStyle();
 
+  const itemStyle = getRadioItemStyle({
+    itemMinWidth,
+    size,
+  });
   const containerStyle = (() => {
     let containerStyle: ViewStyle = {};
-    containerStyle.backgroundColor = style.get(
-      'background-color-gray-600',
-    ).backgroundColor;
 
     if (!isNotReady) {
       containerStyle = {
@@ -72,17 +73,32 @@ export const LayeredHorizontalRadioGroup: FunctionComponent<
     <Skeleton type="circle" isNotReady={isNotReady}>
       <View
         style={StyleSheet.flatten([
-          style.flatten(['flex-row', 'items-center', 'justify-center']),
+          style.flatten([
+            'flex-row',
+            'items-center',
+            'justify-center',
+            'background-color-gray-600',
+          ]),
           containerStyleProp,
           containerStyle,
         ])}>
         {items.map(item => {
           const selected = item.key === selectedKey;
-          const itemStyle = getRadioItemStyle({
-            selected,
-            itemMinWidth,
-            size,
-          });
+          const textStyle = (() => {
+            switch (size) {
+              case 'large':
+                if (selected) {
+                  return ['subtitle3', 'color-white'];
+                }
+                return ['body2', 'color-gray-300'];
+              default:
+                if (selected) {
+                  return ['text-caption1', 'color-white'];
+                }
+                return ['text-caption2', 'color-gray-300'];
+            }
+          })();
+
           return (
             <Pressable
               style={StyleSheet.flatten([
@@ -101,12 +117,7 @@ export const LayeredHorizontalRadioGroup: FunctionComponent<
                 e.preventDefault();
                 onSelect(item.key);
               }}>
-              <Text
-                style={style.flatten(
-                  selected
-                    ? ['subtitle3', 'color-white']
-                    : ['body2', 'color-gray-300'],
-                )}>
+              <Text style={style.flatten([...(textStyle as any)])}>
                 {item.text}
               </Text>
             </Pressable>
@@ -118,12 +129,10 @@ export const LayeredHorizontalRadioGroup: FunctionComponent<
 };
 
 interface GetRadioItemStyleProps {
-  selected: boolean;
   size?: 'default' | 'large';
   itemMinWidth?: DimensionValue;
 }
 const getRadioItemStyle = ({
-  selected,
   size = 'default',
   itemMinWidth,
 }: GetRadioItemStyleProps) => {
@@ -151,12 +160,6 @@ const getRadioItemStyle = ({
       };
       break;
     }
-  }
-
-  if (selected) {
-    style = {...style};
-  } else {
-    style = {...style};
   }
 
   return style;

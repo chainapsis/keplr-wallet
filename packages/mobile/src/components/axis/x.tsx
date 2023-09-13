@@ -22,7 +22,8 @@ export const XAxis: FunctionComponent<PropsWithChildren<XAxisProps>> = ({
   })();
 
   return (
-    <View style={style.flatten(['flex-row', alignItems as any])}>
+    <View
+      style={style.flatten(['flex-row'], [alignItems && (alignItems as any)])}>
       {children}
     </View>
   );

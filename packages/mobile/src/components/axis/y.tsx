@@ -23,11 +23,10 @@ export const YAxis: FunctionComponent<PropsWithChildren<YAxisProps>> = ({
 
   return (
     <View
-      style={style.flatten([
-        'flex-column',
-        'justify-center',
-        alignItems as any,
-      ])}>
+      style={style.flatten(
+        ['flex-column'],
+        [alignItems && (alignItems as any)],
+      )}>
       {children}
     </View>
   );
