@@ -52,6 +52,7 @@ const shouldNohoistLibs = [
   'mobx-utils',
   'mobx-react-lite',
   'buffer',
+  '@gorhom',
 ];
 
 /**
