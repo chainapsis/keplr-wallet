@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent, useMemo, useState} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {Text, View} from 'react-native';
 import {useStyle} from '../../styles';
 import {PageWithScrollView} from '../../components/page';
 import {useStore} from '../../stores';
@@ -13,6 +13,12 @@ import {TextInput} from '../../components/input';
 import {Gutter} from '../../components/gutter';
 import {Checkbox} from '../../components/checkbox';
 import {IconButton} from '../../components/icon-button';
+import {LayeredHorizontalRadioGroup} from '../../components/radio-group';
+import {YAxis} from '../../components/axis';
+import {Stack} from '../../components/stack';
+import {Columns} from '../../components/column';
+
+type TabStatus = 'available' | 'staked';
 
 export const HomeScreen: FunctionComponent = observer(() => {
   const style = useStyle();
@@ -25,6 +31,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
   } = useStore();
 
   const [isHide, setIsHide] = useState(false);
+  const [tabStatus, setTabStatus] = React.useState<TabStatus>('available');
 
   //TODO 임시로직 나중에 제거 해야함
   useEffectOnce(() => {
@@ -185,7 +192,27 @@ export const HomeScreen: FunctionComponent = observer(() => {
   return (
     <React.Fragment>
       <PageWithScrollView backgroundMode={'default'}>
-        <View>
+        <Stack gutter={10}>
+          <YAxis alignX="center">
+            <LayeredHorizontalRadioGroup
+              selectedKey={tabStatus}
+              items={[
+                {
+                  key: 'available',
+                  text: 'available',
+                },
+                {
+                  key: 'staked',
+                  text: 'staked',
+                },
+              ]}
+              onSelect={key => {
+                setTabStatus(key as TabStatus);
+              }}
+              itemMinWidth={92}
+            />
+          </YAxis>
+
           <Text
             style={style.flatten([
               'color-white',
@@ -195,10 +222,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
             ])}>
             {availableTotalPrice?.toString()}
           </Text>
-          <View
-            style={StyleSheet.flatten([
-              style.flatten(['flex-row', 'justify-between', 'gap-10']),
-            ])}>
+          <Columns sum={1} gutter={10}>
             <Button
               text="Deposit"
               size="large"
@@ -216,7 +240,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
               size="large"
               containerStyle={style.flatten(['flex-1'])}
             />
-          </View>
+          </Columns>
           <Gutter size={12} />
           <TextInput
             left={color => <SearchIcon size={20} color={color} />}
@@ -225,18 +249,16 @@ export const HomeScreen: FunctionComponent = observer(() => {
           />
 
           {/* TODO 이후 extension과 같이 CollapsibleList 컴포넌트로 변경해야됨 */}
-          <View>
-            <View style={style.flatten(['flex-row', 'justify-end', 'gap-4'])}>
-              <IconButton
-                text="Hide Low Balance"
-                onPress={() => {
-                  setIsHide(!isHide);
-                }}
-                icon={<Checkbox checked={isHide} />}
-              />
-            </View>
+          <View style={style.flatten(['flex-row', 'justify-end', 'gap-4'])}>
+            <IconButton
+              text="Hide Low Balance"
+              onPress={() => {
+                setIsHide(!isHide);
+              }}
+              icon={<Checkbox checked={isHide} />}
+            />
           </View>
-        </View>
+        </Stack>
       </PageWithScrollView>
     </React.Fragment>
   );
