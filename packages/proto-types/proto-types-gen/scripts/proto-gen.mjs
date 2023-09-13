@@ -3,7 +3,6 @@
 import "zx/globals";
 import fs from "fs";
 import FolderHash from "folder-hash";
-import glob from "glob";
 
 async function calculateOutputHash(root) {
   const dirCandidates = fs.readdirSync(root, {
@@ -57,7 +56,7 @@ function setOutputHash(root, hash) {
     const outDir = path.join(__dirname, "../src");
     $.verbose = false;
 
-    if(fs.existsSync(outDir)) {
+    if (fs.existsSync(outDir)) {
       fs.rmdirSync(outDir, { recursive: true });
     }
 

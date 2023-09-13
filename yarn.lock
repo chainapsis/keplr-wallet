@@ -5494,7 +5494,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/proto-types@workspace:packages/proto-types"
   dependencies:
-    glob: ^7.2.0
     long: ^4.0.0
     protobufjs: ^6.11.2
     ts-proto: ^1.106.2
@@ -18153,7 +18152,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:7.2.0, glob@npm:^7.2.0":
+"glob@npm:7.2.0":
   version: 7.2.0
   resolution: "glob@npm:7.2.0"
   dependencies:
