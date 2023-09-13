@@ -103,7 +103,7 @@ export const LayeredHorizontalRadioGroup: FunctionComponent<
             <Pressable
               style={StyleSheet.flatten([
                 style.flatten(
-                  ['relative', 'flex-row', 'items-center', 'justify-center'],
+                  ['flex-row', 'items-center', 'justify-center'],
                   [
                     selected
                       ? 'background-color-gray-400'
