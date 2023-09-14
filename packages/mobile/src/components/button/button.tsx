@@ -24,12 +24,12 @@ export const Button: FunctionComponent<{
   rippleColor?: string;
   underlayColor?: string;
 }> = ({
-  color = 'primary',
+  color,
   size = 'medium',
   text,
   leftIcon,
   rightIcon,
-  loading = false,
+  loading = true,
   disabled = false,
   onPress,
   containerStyle,
@@ -39,14 +39,15 @@ export const Button: FunctionComponent<{
   underlayColor: propUnderlayColor,
 }) => {
   const style = useStyle();
-  const baseColor = ((color: ButtonColorType) => {
+  const baseColor = ((color?: ButtonColorType) => {
     switch (color) {
       case 'danger':
         return 'red';
-      case 'primary':
-        return 'blue';
-      default:
+      case 'secondary':
         return 'gray';
+      //default는 기본적으로 primary 색상으로 적용
+      default:
+        return 'blue';
     }
   })(color);
 
@@ -54,33 +55,46 @@ export const Button: FunctionComponent<{
     switch (color) {
       case 'danger':
         return [`background-color-${baseColor}-300@30%`];
-      case 'primary':
+      case 'secondary':
+        return [`background-color-${baseColor}-400`];
+      //default는 기본적으로 primary 색상으로 적용
+      default:
         return [
           `background-color-${baseColor}-400`,
           `light:background-color-${baseColor}-50`,
         ];
-      default:
-        return [`background-color-${baseColor}-400`];
     }
   })();
   const textDefinition = (() => {
     switch (size) {
       case 'large':
         return 'text-button1';
-
+      //사이즈가 large 아닌경우 다 text-button2 적용됨
       default:
         return 'text-button2';
     }
   })();
-
   const textColorDefinition: string[] = (() => {
     switch (color) {
       case 'danger':
         return ['color-red-400'];
       case 'primary':
         return ['color-white', 'light:color-blue-400'];
+      //default는 기본적으로 primary 색상으로 적용 primary랑 secondary는 같은 색이라서 해당 색으로 적용
       default:
         return ['color-white'];
+    }
+  })();
+
+  const iconColorDefinition = (() => {
+    switch (color) {
+      case 'danger':
+        return 'color-red-400';
+      case 'secondary':
+        return 'color-gray-200';
+      //default는 기본적으로 primary 색상으로 적용
+      default:
+        return 'color-blue-200';
     }
   })();
 
@@ -177,7 +191,10 @@ export const Button: FunctionComponent<{
               'justify-center',
               'items-center',
             ])}>
-            <SVGLoadingIcon color="white" size={16} />
+            <SVGLoadingIcon
+              color={style.get(iconColorDefinition).color}
+              size={16}
+            />
           </View>
         ) : null}
       </RectButton>
