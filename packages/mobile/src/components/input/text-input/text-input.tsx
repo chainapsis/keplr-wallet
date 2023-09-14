@@ -110,12 +110,12 @@ export const TextInput = forwardRef<
                 editable={!disabled}
                 selectTextOnFocus={!disabled}
                 style={StyleSheet.flatten([
-                  style.flatten([
-                    'color-white',
-                    'padding-x-12',
-                    'body2',
-                    'height-52',
-                  ]),
+                  style.flatten(
+                    ['color-white', 'body2', 'height-52'],
+                    left
+                      ? ['padding-left-4', 'padding-right-16']
+                      : ['padding-x-16'],
+                  ),
                   inputStyle,
                 ])}
                 onFocus={e => {
