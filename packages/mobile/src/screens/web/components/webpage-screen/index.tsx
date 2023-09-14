@@ -42,6 +42,7 @@ class SuggestChainReceiverKeplr extends Keplr {
     "https://app.osmosis.zone",
     "https://frontier.osmosis.zone",
     "https://app.wynddao.com",
+    "https://wallet.agoric.app",
   ];
 
   constructor(

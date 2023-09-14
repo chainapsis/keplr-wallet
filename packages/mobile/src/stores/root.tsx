@@ -24,6 +24,7 @@ import {
   ChainSuggestStore,
   ICNSQueries,
   OsmosisQueries,
+  AgoricQueries,
 } from "@keplr-wallet/stores";
 import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
@@ -60,6 +61,7 @@ export class RootStore {
 
   public readonly queriesStore: QueriesStore<
     [
+      AgoricQueries,
       CosmosQueries,
       CosmwasmQueries,
       SecretQueries,
@@ -158,6 +160,7 @@ export class RootStore {
       // https://github.com/chainapsis/keplr-wallet/issues/318
       new AsyncKVStore("store_queries_fix3"),
       this.chainStore,
+      AgoricQueries.use(),
       CosmosQueries.use(),
       CosmwasmQueries.use(),
       SecretQueries.use({
