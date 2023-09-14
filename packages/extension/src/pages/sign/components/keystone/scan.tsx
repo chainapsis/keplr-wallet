@@ -10,7 +10,7 @@ import { KeystoneErrorModal } from "../../../../components/keystone/error";
 import { KeystoneUR } from "../../utils/keystone";
 import { useTheme } from "styled-components";
 import { FormattedMessage, useIntl } from "react-intl";
-import { Progress } from "../../../../components/progress";
+import { Progress } from "../../../../components/keystone/progress";
 
 export const KeystoneScan: FunctionComponent<{
   onScan: (ur: KeystoneUR) => void;

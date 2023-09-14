@@ -15,7 +15,7 @@ import { GuideBox } from "../../../components/guide-box";
 import { KeystoneErrorModal } from "../../../components/keystone/error";
 import { useTheme } from "styled-components";
 import { FormattedMessage, useIntl } from "react-intl";
-import { Progress } from "../../../components/progress";
+import { Progress } from "../../../components/keystone/progress";
 
 export const ScanKeystoneScene: FunctionComponent<{
   name: string;
