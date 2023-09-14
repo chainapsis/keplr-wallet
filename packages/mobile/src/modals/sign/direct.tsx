@@ -7,6 +7,10 @@ import {
 } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
 import { MsgVote } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/tx";
 import { MsgWithdrawDelegatorReward } from "@keplr-wallet/proto-types/cosmos/distribution/v1beta1/tx";
+import {
+  MsgProvision,
+  MsgWalletSpendAction,
+} from "@keplr-wallet/proto-types/agoric/swingset/msgs";
 import { MsgExecuteContract } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
 import { MsgTransfer } from "@keplr-wallet/proto-types/ibc/applications/transfer/v1/tx";
 import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";
@@ -22,10 +26,13 @@ import {
   renderUnknownMessage,
 } from "./messages";
 import { Buffer } from "buffer/";
+import { renderMsgProvisionSmartWallet } from "./agoric/msg-provision";
+import { renderMsgWalletSpendAction } from "./agoric/msg-wallet-spend-action";
 
 export function renderDirectMessage(
   msg: AnyWithUnpacked,
-  currencies: AppCurrency[]
+  currencies: AppCurrency[],
+  chainId: string
 ) {
   try {
     if (msg instanceof UnknownMessage) {
@@ -34,6 +41,20 @@ export function renderDirectMessage(
 
     if ("unpacked" in msg) {
       switch (msg.typeUrl) {
+        case "/agoric.swingset.MsgWalletSpendAction": {
+          const walletSpendActionMsg = msg.unpacked as MsgWalletSpendAction;
+          return renderMsgWalletSpendAction(
+            chainId,
+            walletSpendActionMsg.spendAction
+          );
+        }
+        case "/agoric.swingset.MsgProvision": {
+          const provisionMsg = msg.unpacked as MsgProvision;
+          if (!provisionMsg.powerFlags?.includes("SMART_WALLET")) {
+            break;
+          }
+          return renderMsgProvisionSmartWallet(provisionMsg.address.toString());
+        }
         case "/cosmos.bank.v1beta1.MsgSend": {
           const sendMsg = msg.unpacked as MsgSend;
           return renderMsgSend(currencies, sendMsg.amount, sendMsg.toAddress);

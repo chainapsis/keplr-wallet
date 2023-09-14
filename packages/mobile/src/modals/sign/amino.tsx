@@ -25,6 +25,14 @@ import {
   renderMsgExecuteContract,
 } from "./messages";
 import { AppCurrency } from "@keplr-wallet/types";
+import {
+  MsgProvisionSmartWallet,
+  renderMsgProvisionSmartWallet,
+} from "./agoric/msg-provision";
+import {
+  MsgWalletSpendAction,
+  renderMsgWalletSpendAction,
+} from "./agoric/msg-wallet-spend-action";
 
 export function renderAminoMessage(
   msgOpts: {
@@ -39,7 +47,8 @@ export function renderAminoMessage(
     };
   },
   msg: MessageObj,
-  currencies: AppCurrency[]
+  currencies: AppCurrency[],
+  chainId: string
 ): {
   title: string;
   content: React.ReactElement;
@@ -114,6 +123,16 @@ export function renderAminoMessage(
       value.contract,
       value.msg
     );
+  }
+
+  if (msg.type === "swingset/WalletSpendAction") {
+    const value = msg.value as MsgWalletSpendAction["value"];
+    return renderMsgWalletSpendAction(chainId, value.spend_action);
+  }
+
+  if (msg.type === "swingset/Provision") {
+    const value = msg.value as MsgProvisionSmartWallet["value"];
+    return renderMsgProvisionSmartWallet(value.address);
   }
 
   /*

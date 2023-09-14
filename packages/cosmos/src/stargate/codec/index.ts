@@ -1,5 +1,9 @@
 import * as $protobuf from "protobufjs";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
+import {
+  MsgWalletSpendAction,
+  MsgProvision,
+} from "@keplr-wallet/proto-types/agoric/swingset/msgs";
 import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import {
   MsgDelegate,
@@ -62,6 +66,11 @@ export class ProtoCodec {
 }
 
 export const defaultProtoCodec = new ProtoCodec();
+defaultProtoCodec.registerAny(
+  "/agoric.swingset.MsgWalletSpendAction",
+  MsgWalletSpendAction
+);
+defaultProtoCodec.registerAny("/agoric.swingset.MsgProvision", MsgProvision);
 defaultProtoCodec.registerAny("/cosmos.bank.v1beta1.MsgSend", MsgSend);
 defaultProtoCodec.registerAny(
   "/cosmos.staking.v1beta1.MsgDelegate",

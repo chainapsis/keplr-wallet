@@ -360,4 +360,5 @@ export const experimentalSuggestChainOrigins = [
   "https://osmosis.marsprotocol.io",
   "https://app.osmosis.zone",
   "https://app.wynddao.com",
+  "https://64f978c872cc7a4243d3c8b9--dancing-cendol-66d789.netlify.app",
 ];
