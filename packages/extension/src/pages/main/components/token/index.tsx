@@ -201,6 +201,11 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
           tooltip: (() => {
             const start = currency.coinDenom.indexOf("(");
             const end = currency.coinDenom.lastIndexOf(")");
+
+            if (start < 0 || end < 0) {
+              return "Unknown";
+            }
+
             return currency.coinDenom.slice(start + 1, end);
           })(),
         };
