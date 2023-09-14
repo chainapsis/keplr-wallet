@@ -35,15 +35,23 @@ type Amount = {
 const SpendActionTypePretty: FunctionComponent<{ action: any }> = ({
   action,
 }) => {
+  const style = useStyle();
+
   if (action.method === "executeOffer") {
-    return <Text>Execute an offer with the following parameters:</Text>;
+    return (
+      <Text style={style.get("color-text-low")}>
+        Execute an offer with the following parameters:
+      </Text>
+    );
   }
 
   if (action.method === "tryExitOffer") {
     return (
-      <Text>
+      <Text style={style.get("color-text-low")}>
         Exit offer with id{" "}
-        <Text style={{ fontWeight: "bold" }}>{action.offerId}</Text>
+        <Text style={style.flatten(["font-bold", "color-text-low"])}>
+          {action.offerId}
+        </Text>
       </Text>
     );
   }
@@ -52,8 +60,10 @@ const SpendActionTypePretty: FunctionComponent<{ action: any }> = ({
 };
 
 const DumpRaw: FunctionComponent<{ object: any }> = ({ object }) => {
+  const style = useStyle();
+
   return (
-    <Text>
+    <Text style={style.flatten(["color-text-low"])}>
       {yaml.dump(
         JSON.parse(
           JSON.stringify(object, (_key, value) =>
@@ -162,12 +172,16 @@ const WalletSpendActionMessagePretty: FunctionComponent<{
 
       return (
         <View key={key}>
-          <Text>{entryType}</Text>
+          <Text style={style.get("color-text-low")}>{entryType}</Text>
           {assetKind === "nat" ? (
-            <Text style={{ fontWeight: "bold" }}>{prettyAmount}</Text>
+            <Text style={style.flatten(["font-bold", "color-text-low"])}>
+              {prettyAmount}
+            </Text>
           ) : (
             <View>
-              <Text style={{ fontWeight: "bold" }}>{prettyAmount}</Text>
+              <Text style={style.flatten(["font-bold", "color-text-low"])}>
+                {prettyAmount}
+              </Text>
               <View style={style.get("margin-left-6")}>
                 <DumpRaw
                   object={(amount.value as CopyBag).payload ?? amount.value}
@@ -198,15 +212,15 @@ const WalletSpendActionMessagePretty: FunctionComponent<{
         )}
         {spendAction.offer?.offerArgs && (
           <View>
-            <Text style={{ fontWeight: "bold" }}>Offer Args</Text>
+            <Text style={style.get("color-text-low")}>Offer Args</Text>
             <View style={style.get("margin-left-6")}>
               <DumpRaw object={spendAction.offer.offerArgs} />
             </View>
           </View>
         )}
         {spendAction.offer?.invitationSpec && (
-          <View>
-            <Text style={{ fontWeight: "bold" }}>Invitation Spec:</Text>
+          <View style={style.get("margin-top-4")}>
+            <Text style={style.get("color-text-low")}>Invitation Spec:</Text>
             <View style={style.get("margin-left-6")}>
               <DumpRaw object={spendAction.offer.invitationSpec} />
             </View>
