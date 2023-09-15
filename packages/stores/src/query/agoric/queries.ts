@@ -2,6 +2,8 @@ import { QueriesSetBase } from "../queries";
 import { ChainGetter } from "../../chain";
 import { DeepReadonly } from "utility-types";
 import { QuerySharedContext } from "../../common";
+import { ObservableQueryBoardAux } from "./board-aux";
+import { ObservableQueryBrands } from "./brands";
 import { ObservableQueryVbankAssets } from "./vbank-assets";
 
 export interface AgoricQueries {
@@ -34,6 +36,8 @@ export const AgoricQueries = {
 };
 
 export class AgoricQueriesImpl {
+  public readonly queryBoardAux: DeepReadonly<ObservableQueryBoardAux>;
+  public readonly queryBrands: DeepReadonly<ObservableQueryBrands>;
   public readonly queryVbankAssets: DeepReadonly<ObservableQueryVbankAssets>;
 
   constructor(
@@ -42,6 +46,16 @@ export class AgoricQueriesImpl {
     chainId: string,
     chainGetter: ChainGetter
   ) {
+    this.queryBoardAux = new ObservableQueryBoardAux(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
+    this.queryBrands = new ObservableQueryBrands(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
     this.queryVbankAssets = new ObservableQueryVbankAssets(
       sharedContext,
       chainId,

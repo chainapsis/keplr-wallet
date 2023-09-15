@@ -61,6 +61,8 @@ const makeMarshal = (_v2s: any, convertSlotToVal = (s: any) => s): Marshal => {
                   return Infinity;
                 case "#NaN":
                   return Infinity;
+                case "#tag":
+                  return v;
                 default:
                   throw RangeError(`Unexpected constant ${v}`);
               }

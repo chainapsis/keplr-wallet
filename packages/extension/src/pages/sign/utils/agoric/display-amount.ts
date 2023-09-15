@@ -1,8 +1,10 @@
 import { CoinPretty } from "@keplr-wallet/unit";
 
+export type CopyBag = { payload: Array<[any, bigint]> };
+
 export const displayAmount = (
   displayInfo: { assetKind: string; decimalPlaces: number; petname: string },
-  value: bigint | Array<any>
+  value: bigint | Array<any> | { payload: Array<[any, bigint]> }
 ) => {
   if (displayInfo.assetKind === "nat") {
     const prettyAmount = new CoinPretty(
@@ -16,5 +18,16 @@ export const displayAmount = (
     return prettyAmount.trim(true).toString();
   }
 
-  return `${(value as Array<any>).length} ${displayInfo.petname}`;
+  if (displayInfo.assetKind === "set") {
+    return `${(value as Array<any>).length} ${displayInfo.petname}`;
+  }
+
+  if (displayInfo.assetKind === "copyBag") {
+    const itemCount = (value as CopyBag).payload.reduce(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      (total, [_item, count]) => total + count,
+      BigInt(0)
+    );
+    return `${itemCount} ${displayInfo.petname}`;
+  }
 };
