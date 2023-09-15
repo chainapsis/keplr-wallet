@@ -12,7 +12,7 @@ import { RegisterH4 } from "../components/typography";
 import { Box } from "../../../components/box";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
-import { Image } from "../../../components/image";
+import { KeystoneIcon } from "../../../components/icon/keystone";
 
 export const ConnectHardwareWalletScene: FunctionComponent = () => {
   const sceneTransition = useSceneTransition();
@@ -78,18 +78,7 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
           })}
           size="large"
           color="secondary"
-          left={
-            <Image
-              src={require(theme.mode === "light"
-                ? "../../../public/assets/img/intro-keystone-logo-light.png"
-                : "../../../public/assets/img/intro-keystone-logo.png")}
-              alt={"intro-keystone-logo"}
-              style={{
-                width: "1.5rem",
-                height: "1.5rem",
-              }}
-            />
-          }
+          left={<KeystoneIcon color={theme.mode} />}
           onClick={() => {
             sceneTransition.push("name-password-hardware", {
               type: "keystone",

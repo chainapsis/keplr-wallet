@@ -1,5 +1,8 @@
 import * as $protobuf from "protobufjs";
-import { MsgWalletSpendAction } from "@keplr-wallet/proto-types/agoric/swingset/msgs";
+import {
+  MsgProvision,
+  MsgWalletSpendAction,
+} from "@keplr-wallet/proto-types/agoric/swingset/msgs";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
 import {
   MsgMultiSend,
@@ -175,6 +178,7 @@ defaultProtoCodec.registerAny(
   "/agoric.swingset.MsgWalletSpendAction",
   MsgWalletSpendAction
 );
+defaultProtoCodec.registerAny("/agoric.swingset.MsgProvision", MsgProvision);
 defaultProtoCodec.registerAny("/cosmos.bank.v1beta1.MsgSend", MsgSend);
 defaultProtoCodec.registerAny(
   "/cosmos.bank.v1beta1.MsgMultiSend",

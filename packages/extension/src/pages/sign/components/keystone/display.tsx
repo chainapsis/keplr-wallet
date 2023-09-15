@@ -28,11 +28,7 @@ export const KeystoneDisplay: FunctionComponent<{
       >
         <FormattedMessage id="page.sign.keystone.scan-qrcode" />
       </Box>
-      <KeystoneTextIcon
-        color={theme.mode === "light" ? ColorPalette.black : ColorPalette.white}
-        height="2.375rem"
-        width="9.75rem"
-      />
+      <KeystoneTextIcon color={theme.mode} height="2.375rem" width="9.75rem" />
       <Box
         backgroundColor={
           theme.mode === "light"
