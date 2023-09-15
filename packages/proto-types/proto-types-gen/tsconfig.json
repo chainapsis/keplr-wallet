@@ -2,10 +2,11 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "outDir": "proto-types-gen/build",
+    "outDir": ".",
     "declaration": true,
     "rootDir": "proto-types-gen/src"
   },
+  "exclude": [],
   "include": [
     "proto-types-gen/src/**/*"
   ]
