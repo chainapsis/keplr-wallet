@@ -5364,7 +5364,7 @@ __metadata:
     "@keplr-wallet/stores-etc": 0.12.23
     "@keplr-wallet/types": 0.12.23
     "@keplr-wallet/unit": 0.12.23
-    "@keystonehq/animated-qr": ^0.8.5
+    "@keystonehq/animated-qr": ^0.8.6
     "@keystonehq/keystone-sdk": ^0.2.3
     "@ledgerhq/devices": ^6.20.0
     "@react-spring/web": ^9.6.1
@@ -5669,9 +5669,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keystonehq/animated-qr@npm:^0.8.5":
-  version: 0.8.5
-  resolution: "@keystonehq/animated-qr@npm:0.8.5"
+"@keystonehq/animated-qr@npm:^0.8.6":
+  version: 0.8.6
+  resolution: "@keystonehq/animated-qr@npm:0.8.6"
   dependencies:
     "@keystonehq/ur-decoder": ^0.12.2
     "@ngraveio/bc-ur": ^1.1.6
@@ -5681,7 +5681,7 @@ __metadata:
   peerDependencies:
     react: ">= 16.8"
     react-dom: ">= 16.8"
-  checksum: 2b70c0f26d453d3d04f41b4215974170c40ee48ca435d0ba9947cbeaba86e7f1295a2e8fad5fdf76a80e37348f1a947c7a88081cc5835b0db9a0a3f077fab5c0
+  checksum: 30d04a4540bdf720f7f1aee95403a28e6dceade8a92ae7621d9ed10763d3f49a236f81803c1d8dcca2e6bb86978df0a7ad880658fe7b84f1d8b3ef2ce93fab59
   languageName: node
   linkType: hard
 
