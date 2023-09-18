@@ -81,7 +81,7 @@ export const IconButton: FunctionComponent<{
         rippleColor={rippleColor}
         underlayColor={underlayColor}
         activeOpacity={0.3}
-        isTextMode={!hasRipple}>
+        disableRippleAndUnderlay={!hasRipple}>
         {path === 'left' ? (
           <View
             style={style.flatten([

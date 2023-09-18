@@ -1,8 +1,8 @@
 import {createStyleProvider} from './builder';
 import {EnumTextTransform, EnumTextDecorationLine} from './builder/types';
 import {Platform, StatusBarStyle} from 'react-native';
-import {getPlatformFontWeight} from './builder/utils';
 import {BlurViewProps} from '@react-native-community/blur';
+import {FontWeightNumbers} from './builder/uilts';
 
 export const ColorPalette = {
   'blue-10': '#F6F8FF',
@@ -142,98 +142,99 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
       custom: {
         'mobile-h1': {
           fontSize: 36,
-          fontFamily: 'inter',
-          ...getPlatformFontWeight('700'),
+          fontFamily: 'Inter-Bold',
+          fontWeight: '700' as FontWeightNumbers,
         },
         'mobile-h2': {
           fontSize: 30,
-          fontFamily: 'inter',
-          ...getPlatformFontWeight('700'),
+          fontFamily: 'Inter-Bold',
+          fontWeight: '700' as FontWeightNumbers,
         },
         h1: {
           fontSize: 24,
-          fontFamily: 'inter',
-          ...getPlatformFontWeight('700'),
+          fontFamily: 'Inter-Bold',
+          fontWeight: '700' as FontWeightNumbers,
         },
         h2: {
           fontSize: 22,
-          fontFamily: 'inter',
-          ...getPlatformFontWeight('700'),
+          fontFamily: 'Inter-Bold',
+          fontWeight: '700' as FontWeightNumbers,
         },
         h3: {
           fontSize: 20,
-          fontFamily: 'inter',
-          ...getPlatformFontWeight('600'),
+          fontFamily: 'Inter-SemiBold',
+          fontWeight: '600' as FontWeightNumbers,
         },
         h4: {
           fontSize: 18,
-          fontFamily: 'inter',
-          ...getPlatformFontWeight('600'),
+          fontFamily: 'Inter-SemiBold',
+          fontWeight: '600' as FontWeightNumbers,
         },
         h5: {
           fontSize: 14,
-          fontFamily: 'inter',
-          ...getPlatformFontWeight('600'),
+          fontFamily: 'Inter-SemiBold',
+          fontWeight: '600' as FontWeightNumbers,
         },
         subtitle1: {
           fontSize: 16,
-          fontFamily: 'inter',
-          ...getPlatformFontWeight('600'),
+          fontFamily: 'Inter-SemiBold',
+          fontWeight: '600' as FontWeightNumbers,
         },
         subtitle2: {
           fontSize: 16,
-          fontFamily: 'inter',
-          ...getPlatformFontWeight('500'),
+          fontFamily: 'Inter-Medium',
+          fontWeight: '500' as FontWeightNumbers,
         },
         subtitle3: {
           fontSize: 14,
-          fontFamily: 'inter',
-          ...getPlatformFontWeight('500'),
+          fontFamily: 'Inter-Medium',
+          fontWeight: '500' as FontWeightNumbers,
         },
         subtitle4: {
           fontSize: 13,
-          fontFamily: 'inter',
-          ...getPlatformFontWeight('500'),
+          fontFamily: 'Inter-Medium',
+          fontWeight: '500' as FontWeightNumbers,
         },
         body1: {
           fontSize: 16,
-          fontFamily: 'inter',
-          ...getPlatformFontWeight('400'),
+          fontFamily: 'Inter-Regular',
+          fontWeight: '400' as FontWeightNumbers,
         },
         body2: {
           fontSize: 14,
-          fontFamily: 'inter',
-          ...getPlatformFontWeight('400'),
+          fontFamily: 'Inter-Regular',
+          fontWeight: '400' as FontWeightNumbers,
         },
         body3: {
           fontSize: 13,
-          fontFamily: 'inter',
-          ...getPlatformFontWeight('400'),
+          fontFamily: 'Inter-Regular',
+          fontWeight: '400' as FontWeightNumbers,
         },
         'text-button1': {
           fontSize: 16,
-          fontFamily: 'inter',
-          ...getPlatformFontWeight('500'),
+          fontFamily: 'Inter-Medium',
+          fontWeight: '500' as FontWeightNumbers,
         },
         'text-button2': {
           fontSize: 14,
-          fontFamily: 'inter',
-          ...getPlatformFontWeight('500'),
+          fontFamily: 'Inter-Medium',
+          fontWeight: '500' as FontWeightNumbers,
         },
         'text-caption1': {
           fontSize: 12,
-          fontFamily: 'inter',
-          ...getPlatformFontWeight('500'),
+          fontFamily: 'Inter-Medium',
+          fontWeight: '500' as FontWeightNumbers,
         },
         'text-caption2': {
           fontSize: 12,
-          fontFamily: 'inter',
-          ...getPlatformFontWeight('400'),
+          fontFamily: 'Inter-Regular',
+          fontWeight: '400' as FontWeightNumbers,
         },
         'text-overline': {
           fontSize: 11,
           textTransform: 'uppercase' as EnumTextTransform,
-          ...getPlatformFontWeight('400'),
+          fontFamily: 'Inter-Regular',
+          fontWeight: '400' as FontWeightNumbers,
         },
         'text-underline': {
           textDecorationLine: 'underline' as EnumTextDecorationLine,
@@ -248,13 +249,15 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
             letterSpacing: 0.25,
             paddingTop: 1.5,
             paddingBottom: 1.5,
-            ...getPlatformFontWeight('400'),
+            fontFamily: 'Inter-Regular',
+            fontWeight: '400' as FontWeightNumbers,
           },
           android: {
             fontSize: 16,
             lineHeight: 22,
             letterSpacing: 0.25,
-            ...getPlatformFontWeight('400'),
+            fontFamily: 'Inter-Regular',
+            fontWeight: '400' as FontWeightNumbers,
           },
         }),
         'background-gradient': {
@@ -436,7 +439,6 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         '292': 292,
         '300': 300,
 
-        'card-gap': 12,
         'page-pad': 20,
       },
       heights: {
@@ -485,7 +487,6 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         'button-large': 52,
         'governance-card-body-placeholder': 130,
 
-        'card-gap': 12,
         'page-pad': 20,
       },
       paddingSizes: {
@@ -525,7 +526,6 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         'card-horizontal': 20,
         'card-vertical': 20,
         'card-vertical-half': 10,
-        'card-gap': 12,
       },
       marginSizes: {
         '0': 0,
@@ -569,7 +569,6 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         page: 20,
         'card-horizontal': 20,
         'card-vertical': 20,
-        'card-gap': 12,
       },
       borderWidths: {
         '0': 0,

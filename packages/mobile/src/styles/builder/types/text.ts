@@ -1,11 +1,10 @@
+import {FontWeightNumbers} from '../uilts';
 import {
   EnumFontStyle,
   EnumTextAlign,
   EnumTextTransform,
   StaticStylesDefinitions,
 } from './common';
-import {getPlatformFontWeight} from '../utils';
-
 export const StaticTextStyles = {
   italic: {
     fontStyle: 'italic' as EnumFontStyle,
@@ -13,15 +12,42 @@ export const StaticTextStyles = {
   'not-italic': {
     fontStyle: 'normal' as EnumFontStyle,
   },
-  'font-thin': getPlatformFontWeight('100'),
-  'font-extralight': getPlatformFontWeight('200'),
-  'font-light': getPlatformFontWeight('300'),
-  'font-normal': getPlatformFontWeight('400'),
-  'font-medium': getPlatformFontWeight('500'),
-  'font-semibold': getPlatformFontWeight('600'),
-  'font-bold': getPlatformFontWeight('700'),
-  'font-extrabold': getPlatformFontWeight('800'),
-  'font-black': getPlatformFontWeight('900'),
+  'font-thin': {
+    fontWeight: '100' as FontWeightNumbers,
+    fontFamily: 'Inter-Thin',
+  },
+  'font-extralight': {
+    fontWeight: '200' as FontWeightNumbers,
+    fontFamily: 'Inter-SemiLight',
+  },
+  'font-light': {
+    fontWeight: '300' as FontWeightNumbers,
+    fontFamily: 'Inter-Light',
+  },
+  'font-normal': {
+    fontWeight: '400' as FontWeightNumbers,
+    fontFamily: 'Inter-Regular',
+  },
+  'font-medium': {
+    fontWeight: '500' as FontWeightNumbers,
+    fontFamily: 'Inter-Medium',
+  },
+  'font-semibold': {
+    fontWeight: '600' as FontWeightNumbers,
+    fontFamily: 'Inter-SemiBold',
+  },
+  'font-bold': {
+    fontWeight: '700' as FontWeightNumbers,
+    fontFamily: 'Inter-Bold',
+  },
+  'font-extrabold': {
+    fontWeight: '800' as FontWeightNumbers,
+    fontFamily: 'Inter-ExtraBold',
+  },
+  'font-black': {
+    fontWeight: '900' as FontWeightNumbers,
+    fontFamily: 'Inter-Black',
+  },
   uppercase: {
     textTransform: 'uppercase' as EnumTextTransform,
   },

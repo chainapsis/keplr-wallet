@@ -1,7 +1,8 @@
 // import {useMemo, useState} from 'react';
 // import Animated, {Clock, EasingNode} from 'react-native-reanimated';
 
-// export const useSpinAnimated = (enabled: boolean) => {
+//TODO - 이후 spinner 애니메이션 추가 해야함
+export const useSpinAnimated = () => {};
 //   const [spinClock] = useState(() => new Clock());
 //   const [spinClockState] = useState(() => {
 //     return {

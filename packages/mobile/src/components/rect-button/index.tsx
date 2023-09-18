@@ -18,7 +18,7 @@ import {useStyle} from '../../styles';
 export const RectButton: FunctionComponent<
   RectButtonProps & {
     style?: ViewStyle;
-    isTextMode?: boolean;
+    disableRippleAndUnderlay?: boolean;
   }
 > = props => {
   const style = useStyle();
@@ -29,7 +29,7 @@ export const RectButton: FunctionComponent<
     rippleColor,
     underlayColor,
     activeOpacity,
-    isTextMode,
+    disableRippleAndUnderlay,
     ...rest
   } = props;
 
@@ -62,7 +62,7 @@ export const RectButton: FunctionComponent<
     flexWrap,
     backgroundColor,
     ...restStyle
-  } = propStyle ?? {};
+  } = (propStyle as ViewStyle) ?? {};
 
   return (
     <View
@@ -99,12 +99,12 @@ export const RectButton: FunctionComponent<
       <NativeRectButton
         style={restStyle}
         rippleColor={
-          isTextMode
+          disableRippleAndUnderlay
             ? undefined
             : rippleColor || style.get('color-rect-button-default-ripple').color
         }
         underlayColor={
-          isTextMode
+          disableRippleAndUnderlay
             ? undefined
             : underlayColor ||
               style.get('color-rect-button-default-underlay').color
