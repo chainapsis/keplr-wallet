@@ -1,14 +1,16 @@
 import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent} from 'react';
 import {View} from 'react-native';
-import {useStyle} from '../../styles';
-import {TextInput} from '../../components/input/input';
 import {Button} from '../../components/button';
 import {useStore} from '../../stores';
 import {Controller, useForm} from 'react-hook-form';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../navigation';
 import {useNavigation, StackActions} from '@react-navigation/native';
+import {TextInput} from '../../components/input';
+import {MnemonicInput} from '../../components/mnemonic-input';
+import {Gutter} from '../../components/gutter';
+import {useStyle} from '../../styles';
 
 const bip39 = require('bip39');
 
@@ -65,9 +67,8 @@ export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
   () => {
     const navigation = useNavigation();
     const {keyRingStore} = useStore();
-    const style = useStyle();
     const status = keyRingStore.status;
-
+    const style = useStyle();
     const isNeedPassword = status === 'empty';
 
     const {
@@ -139,10 +140,8 @@ export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
             }}
             render={({field: {value, onChange, onBlur, ref}}) => {
               return (
-                <TextInput
+                <MnemonicInput
                   label="Mnemonic seed"
-                  multiline={true}
-                  numberOfLines={4}
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
@@ -173,7 +172,6 @@ export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
               return (
                 <TextInput
                   label="Wallet nickname"
-                  style={style.flatten(['color-text-middle'])}
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
@@ -259,6 +257,8 @@ export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
               />
             </React.Fragment>
           )}
+
+          <Gutter size={12} />
 
           <Button text="Next" size="large" onPress={submit} />
         </View>

@@ -1,13 +1,9 @@
 import React, {FunctionComponent} from 'react';
 import Svg, {Path, Rect} from 'react-native-svg';
-
-export interface IconProps {
-  size: number;
-  color?: string;
-}
+import {IconProps} from './types';
 
 export const CopyOutlineIcon: FunctionComponent<IconProps> = ({
-  size,
+  size = 16,
   color,
 }) => {
   return (
