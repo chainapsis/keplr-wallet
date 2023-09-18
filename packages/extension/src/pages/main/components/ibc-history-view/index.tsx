@@ -156,6 +156,17 @@ const IbcHistoryViewItem: FunctionComponent<{
       return !ibcHistory.completed;
     });
   })();
+  const failedChannelIndex = (() => {
+    return history.ibcHistory.findIndex((h) => h.error != null);
+  })();
+  const failedChannel = (() => {
+    if (failedChannelIndex >= 0) {
+      return history.ibcHistory[failedChannelIndex];
+    }
+  })();
+  const lastRewoundChannelIndex = (() => {
+    return history.ibcHistory.findIndex((h) => h.rewound);
+  })();
 
   return (
     <Box
@@ -304,13 +315,37 @@ const IbcHistoryViewItem: FunctionComponent<{
                   return history.ibcHistory[i - 1].completed;
                 })();
 
+                const error = (() => {
+                  if (i === 0) {
+                    return history.txError != null;
+                  }
+
+                  return history.ibcHistory[i - 1].error != null;
+                })();
+
                 return (
                   // 일부분 순환하는 경우도 이론적으로 가능은 하기 때문에 chain id를 key로 사용하지 않음.
                   <IbcHistoryViewItemChainImage
                     key={i}
                     chainInfo={chainInfo}
-                    completed={completed}
+                    completed={(() => {
+                      if (failedChannel) {
+                        if (lastRewoundChannelIndex >= 0) {
+                          return i >= lastRewoundChannelIndex && completed;
+                        }
+                        return false;
+                      }
+
+                      return completed;
+                    })()}
                     notCompletedBlink={(() => {
+                      if (failedChannel) {
+                        if (lastRewoundChannelIndex >= 0) {
+                          return i === lastRewoundChannelIndex;
+                        }
+                        return i === failedChannelIndex;
+                      }
+
                       if (completed) {
                         return false;
                       }
@@ -328,6 +363,14 @@ const IbcHistoryViewItem: FunctionComponent<{
 
                       return i - 1 === firstNotCompletedIndex;
                     })()}
+                    arrowDirection={(() => {
+                      if (!failedChannel) {
+                        return "right";
+                      }
+
+                      return i <= failedChannelIndex ? "left" : "hide";
+                    })()}
+                    error={error}
                     isLast={chainIds.length - 1 === i}
                   />
                 );
@@ -374,7 +417,19 @@ const IbcHistoryViewItem: FunctionComponent<{
                 id="page.main.components.ibc-history-view.estimated-duration.value"
                 values={{
                   minutes: Math.max(
-                    history.ibcHistory.filter((h) => !h.completed).length,
+                    (() => {
+                      if (failedChannel) {
+                        return (
+                          history.ibcHistory.length -
+                          failedChannelIndex -
+                          history.ibcHistory.filter((h) => h.rewound).length -
+                          1
+                        );
+                      }
+
+                      return history.ibcHistory.filter((h) => !h.completed)
+                        .length;
+                    })(),
                     1
                   ),
                 }}
@@ -407,15 +462,38 @@ const IbcHistoryViewItemChainImage: FunctionComponent<{
   completed: boolean;
   notCompletedBlink: boolean;
   isLast: boolean;
-}> = ({ chainInfo, completed, notCompletedBlink, isLast }) => {
+
+  // 원래 fail에 대해서 처리 안하다가 나중에 추가되면서
+  // prop이 괴상해졌다...
+  // TODO: 나중에 시간나면 다시 정리한다
+  error: boolean;
+  arrowDirection: "left" | "right" | "hide";
+}> = ({
+  chainInfo,
+  completed,
+  notCompletedBlink,
+  isLast,
+  error,
+  arrowDirection,
+}) => {
   const theme = useTheme();
 
-  const opacity = useSpringValue(completed ? 1 : 0.3, {
-    config: defaultSpringConfig,
-  });
+  const opacity = useSpringValue(
+    (() => {
+      if (error) {
+        return 0.3;
+      }
+      return completed ? 1 : 0.3;
+    })(),
+    {
+      config: defaultSpringConfig,
+    }
+  );
 
   useEffect(() => {
-    if (completed) {
+    if (error) {
+      opacity.start(0.3);
+    } else if (completed) {
       opacity.start(1);
     } else if (notCompletedBlink) {
       opacity.start({
@@ -432,25 +510,57 @@ const IbcHistoryViewItemChainImage: FunctionComponent<{
     } else {
       opacity.start(0.3);
     }
-  }, [completed, notCompletedBlink, opacity]);
+  }, [completed, error, notCompletedBlink, opacity]);
 
   return (
     <XAxis alignY="center">
-      <ChainImageFallbackAnimated
-        style={{
-          width: "2rem",
-          height: "2rem",
-          opacity,
-        }}
-        src={chainInfo.chainSymbolImageUrl}
-        alt="chain image"
-      />
+      <Box position="relative">
+        <ChainImageFallbackAnimated
+          style={{
+            width: "2rem",
+            height: "2rem",
+            opacity,
+          }}
+          src={chainInfo.chainSymbolImageUrl}
+          alt="chain image"
+        />
+        {error ? (
+          <Box
+            position="absolute"
+            style={{
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+            }}
+            alignX="center"
+            alignY="center"
+          >
+            <ErrorIcon
+              width="1.25rem"
+              height="1.25rem"
+              color={ColorPalette["yellow-400"]}
+            />
+          </Box>
+        ) : null}
+      </Box>
       {!isLast ? (
         <React.Fragment>
           <Gutter size="0.25rem" />
           <Box
             style={{
               opacity: completed ? 1 : 0.3,
+              ...(() => {
+                if (arrowDirection === "left") {
+                  return {
+                    transform: "rotate(180deg)",
+                  };
+                } else if (arrowDirection === "hide") {
+                  return {
+                    opacity: 0,
+                  };
+                }
+              })(),
             }}
           >
             <ArrowRightIcon
@@ -470,7 +580,7 @@ const IbcHistoryViewItemChainImage: FunctionComponent<{
   );
 };
 
-export const ArrowRightIcon: FunctionComponent<IconProps> = ({
+const ArrowRightIcon: FunctionComponent<IconProps> = ({
   width = "1.5rem",
   height = "1.5rem",
   color,
@@ -490,6 +600,30 @@ export const ArrowRightIcon: FunctionComponent<IconProps> = ({
         strokeLinejoin="round"
         strokeWidth="1.198"
         d="M6.75 2.25L10.5 6m0 0L6.75 9.75M10.5 6h-9"
+      />
+    </svg>
+  );
+};
+
+const ErrorIcon: FunctionComponent<IconProps> = ({
+  width = "1.5rem",
+  height = "1.5rem",
+  color,
+}) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      fill="none"
+      stroke="none"
+      viewBox="0 0 20 20"
+    >
+      <path
+        fill={color || "currentColor"}
+        fillRule="evenodd"
+        d="M1.875 10a8.125 8.125 0 1116.25 0 8.125 8.125 0 01-16.25 0zM10 6.875c.345 0 .625.28.625.625v3.125a.625.625 0 11-1.25 0V7.5c0-.345.28-.625.625-.625zm0 6.875a.625.625 0 100-1.25.625.625 0 000 1.25z"
+        clipRule="evenodd"
       />
     </svg>
   );
