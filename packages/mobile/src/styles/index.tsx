@@ -198,23 +198,21 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
           ...getPlatformFontWeight('400'),
         },
         'text-button1': {
-          fontSize: 18,
-          lineHeight: 20,
+          fontSize: 16,
           letterSpacing: 0.2,
-          ...getPlatformFontWeight('600'),
+          ...getPlatformFontWeight('500'),
         },
         'text-button2': {
-          fontSize: 16,
-          lineHeight: 19,
+          fontSize: 14,
           letterSpacing: 0.2,
-          ...getPlatformFontWeight('600'),
+          ...getPlatformFontWeight('500'),
         },
         'text-button3': {
           fontSize: 14,
           lineHeight: 18,
           letterSpacing: 0.2,
           textTransform: 'capitalize' as EnumTextTransform,
-          ...getPlatformFontWeight('600'),
+          ...getPlatformFontWeight('500'),
         },
         'text-caption1': {
           fontSize: 13,
@@ -435,7 +433,6 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         '292': 292,
         '300': 300,
 
-        'card-gap': 12,
         'page-pad': 20,
       },
       heights: {
@@ -477,12 +474,12 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         '400': 400,
         '600': 600,
 
-        'button-small': 38,
-        'button-default': 48,
+        'button-extra-small': 32,
+        'button-small': 36,
+        'button-medium': 44,
         'button-large': 52,
         'governance-card-body-placeholder': 130,
 
-        'card-gap': 12,
         'page-pad': 20,
       },
       paddingSizes: {
@@ -522,7 +519,6 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         'card-horizontal': 20,
         'card-vertical': 20,
         'card-vertical-half': 10,
-        'card-gap': 12,
       },
       marginSizes: {
         '0': 0,
@@ -566,7 +562,6 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         page: 20,
         'card-horizontal': 20,
         'card-vertical': 20,
-        'card-gap': 12,
       },
       borderWidths: {
         '0': 0,
@@ -608,6 +603,32 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         '100': 1,
 
         'blurred-tabbar': 0.6,
+      },
+      gaps: {
+        '1': 1,
+        '4': 4,
+        '8': 8,
+        '10': 10,
+        '12': 12,
+        '16': 16,
+        '20': 20,
+        '24': 24,
+        '32': 32,
+        '34': 34,
+        '36': 36,
+        '38': 38,
+        '40': 40,
+        '44': 44,
+        '54': 54,
+        '56': 56,
+        '58': 58,
+        '72': 72,
+        '80': 80,
+        '122': 122,
+        '160': 160,
+        '240': 240,
+        '292': 292,
+        '300': 300,
       },
     },
     {

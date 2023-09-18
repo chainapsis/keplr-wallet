@@ -2,11 +2,13 @@ import React, {FunctionComponent, ReactElement, isValidElement} from 'react';
 import {useStyle} from '../../styles';
 import {Text, StyleSheet, TextStyle, View, ViewStyle} from 'react-native';
 import {RectButton} from '../rect-button';
+import {SVGLoadingIcon} from '../spinner';
+
+type ButtonColorType = 'primary' | 'secondary' | 'danger';
 
 export const Button: FunctionComponent<{
-  color?: 'primary' | 'danger';
-  mode?: 'fill' | 'light' | 'outline' | 'text';
-  size?: 'default' | 'small' | 'large';
+  color?: ButtonColorType;
+  size?: 'extra-small' | 'small' | 'medium' | 'large';
   text: string;
   leftIcon?: ReactElement | ((color: string) => ReactElement);
   rightIcon?: ReactElement | ((color: string) => ReactElement);
@@ -22,13 +24,12 @@ export const Button: FunctionComponent<{
   rippleColor?: string;
   underlayColor?: string;
 }> = ({
-  color = 'primary',
-  mode = 'fill',
-  size = 'default',
+  color,
+  size = 'medium',
   text,
   leftIcon,
   rightIcon,
-  loading = false,
+  loading = true,
   disabled = false,
   onPress,
   containerStyle,
@@ -38,119 +39,62 @@ export const Button: FunctionComponent<{
   underlayColor: propUnderlayColor,
 }) => {
   const style = useStyle();
+  const baseColor = ((color?: ButtonColorType) => {
+    switch (color) {
+      case 'danger':
+        return 'red';
+      case 'secondary':
+        return 'gray';
+      //default는 기본적으로 primary 색상으로 적용
+      default:
+        return 'blue';
+    }
+  })(color);
 
   const backgroundColorDefinitions: string[] = (() => {
-    const baseColor = color === 'primary' ? 'blue' : 'red';
-
-    switch (mode) {
-      case 'fill':
-        if (disabled) {
-          if (color === 'primary') {
-            return [
-              `background-color-${baseColor}-200`,
-              `dark:background-color-${baseColor}-600`,
-            ];
-          } else {
-            return [
-              `background-color-${baseColor}-100`,
-              `dark:background-color-${baseColor}-700`,
-            ];
-          }
-        } else {
-          return [`background-color-${baseColor}-400`];
-        }
-      case 'light':
-        if (disabled) {
-          if (color === 'primary') {
-            return [
-              `background-color-${baseColor}-50`,
-              'dark:background-color-platinum-500',
-            ];
-          } else {
-            return [
-              `background-color-${baseColor}-100`,
-              `dark:background-color-${baseColor}-700`,
-            ];
-          }
-        } else {
-          return [
-            `background-color-${baseColor}-100`,
-            color === 'primary'
-              ? 'dark:background-color-platinum-400'
-              : `dark:background-color-${baseColor}-600`,
-          ];
-        }
-      case 'outline':
-        return ['background-color-transparent'];
+    switch (color) {
+      case 'danger':
+        return [`background-color-${baseColor}-300@30%`];
+      case 'secondary':
+        return [`background-color-${baseColor}-400`];
+      //default는 기본적으로 primary 색상으로 적용
       default:
-        return ['background-color-transparent'];
+        return [
+          `background-color-${baseColor}-400`,
+          `light:background-color-${baseColor}-50`,
+        ];
     }
   })();
-
   const textDefinition = (() => {
     switch (size) {
       case 'large':
         return 'text-button1';
-      case 'small':
-        return 'text-button3';
+      //사이즈가 large 아닌경우 다 text-button2 적용됨
       default:
         return 'text-button2';
     }
   })();
-
   const textColorDefinition: string[] = (() => {
-    const baseColor = color === 'primary' ? 'blue' : 'red';
+    switch (color) {
+      case 'danger':
+        return ['color-red-400'];
+      case 'primary':
+        return ['color-white', 'light:color-blue-400'];
+      //default는 기본적으로 primary 색상으로 적용 primary랑 secondary는 같은 색이라서 해당 색으로 적용
+      default:
+        return ['color-white'];
+    }
+  })();
 
-    switch (mode) {
-      case 'fill':
-        if (disabled) {
-          if (color === 'primary') {
-            return ['color-white', 'dark:color-platinum-200'];
-          } else {
-            return [`color-${baseColor}-200`, `light:color-${baseColor}-500`];
-          }
-        }
-
-        if (color === 'primary') {
-          return ['color-white', `light:color-${baseColor}-50`];
-        } else {
-          return ['color-white'];
-        }
-      case 'light':
-        if (disabled) {
-          if (color === 'primary') {
-            return [`color-${baseColor}-200`, 'dark:color-platinum-200'];
-          } else {
-            return [`color-${baseColor}-200`, `dark:color-${baseColor}-500`];
-          }
-        }
-
-        return [
-          `color-${baseColor}-400`,
-          color === 'primary'
-            ? 'dark:color-platinum-10'
-            : `dark:color-${baseColor}-50`,
-        ];
-      case 'outline':
-        if (disabled) {
-          return [`color-${baseColor}-200`, `dark:color-${baseColor}-600`];
-        }
-
-        return [`color-${baseColor}-400`];
-      case 'text':
-        if (disabled) {
-          if (color === 'primary') {
-            return ['color-gray-200', 'dark:color-platinum-300'];
-          } else {
-            return [`color-${baseColor}-200`, `dark:color-${baseColor}-600`];
-          }
-        }
-
-        if (color === 'primary') {
-          return [`color-${baseColor}-400`, 'dark:color-platinum-50'];
-        } else {
-          return [`color-${baseColor}-400`, `dark:color-${baseColor}-300`];
-        }
+  const iconColorDefinition = (() => {
+    switch (color) {
+      case 'danger':
+        return 'color-red-400';
+      case 'secondary':
+        return 'color-gray-200';
+      //default는 기본적으로 primary 색상으로 적용
+      default:
+        return 'color-blue-200';
     }
   })();
 
@@ -158,108 +102,26 @@ export const Button: FunctionComponent<{
     if (propRippleColor) {
       return propRippleColor;
     }
-
-    const baseColor = color === 'primary' ? 'blue' : 'red';
-
-    switch (mode) {
-      case 'fill':
-        return style.get(`color-${baseColor}-500` as any).color;
-      case 'light':
-        if (color === 'primary') {
-          return (
-            style.flatten([
-              `color-${baseColor}-200`,
-              'dark:color-platinum-600',
-            ] as any) as any
-          ).color;
-        }
-        return style.get(`color-${baseColor}-200` as any).color;
-      default:
-        if (color === 'primary') {
-          return (
-            style.flatten([
-              `color-${baseColor}-100`,
-              'dark:color-platinum-300',
-            ] as any) as any
-          ).color;
-        }
-        return (
-          style.flatten([
-            `color-${baseColor}-100`,
-            `dark:color-${baseColor}-600`,
-          ] as any) as any
-        ).color;
-    }
+    return style.get('color-gray-500').color;
   })();
 
   const underlayColor = (() => {
     if (propUnderlayColor) {
       return propUnderlayColor;
     }
-
-    if (mode === 'text' || mode === 'outline') {
-      const baseColor = color === 'primary' ? 'blue' : 'red';
-
-      if (color === 'primary') {
-        return (
-          style.flatten([
-            `color-${baseColor}-200`,
-            'light:color-platinum-300',
-          ] as any) as any
-        ).color;
-      }
-      return (
-        style.flatten([
-          `color-${baseColor}-200`,
-          `light:color-${baseColor}-600`,
-        ] as any) as any
-      ).color;
-    }
-
-    if (mode === 'light' && color === 'primary') {
-      return style.flatten(['color-gray-200', 'light:color-platinum-600'])
-        .color;
-    }
-
-    if (color === 'primary') {
-      return style.get('color-platinum-600').color;
-    } else {
-      return style.get('color-platinum-500').color;
-    }
-  })();
-
-  const outlineBorderDefinition: string[] = (() => {
-    if (mode !== 'outline') {
-      return [];
-    }
-
-    const baseColor = color === 'primary' ? 'blue' : 'red';
-
-    if (disabled) {
-      return [
-        `border-color-${baseColor}-200`,
-        `dark:border-color-${baseColor}-600`,
-      ];
-    }
-
-    return [`border-color-${baseColor}-400`];
+    return style.get('color-gray-500').color;
   })();
 
   return (
     <View
       style={StyleSheet.flatten([
-        style.flatten(
-          [
-            ...(backgroundColorDefinitions as any),
-            `height-button-${size}` as any,
-            'border-radius-8',
-            'overflow-hidden',
-          ],
-          [
-            mode === 'outline' && 'border-width-1',
-            ...(outlineBorderDefinition as any),
-          ],
-        ),
+        style.flatten([
+          ...(backgroundColorDefinitions as any),
+          `height-button-${size}` as any,
+          'border-radius-8',
+          'overflow-hidden',
+          'relative',
+        ]),
         containerStyle,
       ])}>
       <RectButton
@@ -280,7 +142,7 @@ export const Button: FunctionComponent<{
         activeOpacity={propUnderlayColor ? 1 : color === 'primary' ? 0.3 : 0.2}>
         <View
           style={style.flatten(
-            ['height-1', 'justify-center'],
+            ['height-1', 'justify-center', 'margin-right-4'],
             [loading && 'opacity-transparent'],
           )}>
           <View>
@@ -309,7 +171,7 @@ export const Button: FunctionComponent<{
         </Text>
         <View
           style={style.flatten(
-            ['height-1', 'justify-center'],
+            ['height-1', 'justify-center', 'margin-left-4'],
             [loading && 'opacity-transparent'],
           )}>
           <View>
@@ -329,10 +191,20 @@ export const Button: FunctionComponent<{
               'justify-center',
               'items-center',
             ])}>
-            loading
+            <SVGLoadingIcon
+              color={style.get(iconColorDefinition).color}
+              size={16}
+            />
           </View>
         ) : null}
       </RectButton>
+      <View
+        pointerEvents="none"
+        style={style.flatten(
+          ['absolute-fill'],
+          [disabled && 'background-color-gray-600@50%'],
+        )}
+      />
     </View>
   );
 };

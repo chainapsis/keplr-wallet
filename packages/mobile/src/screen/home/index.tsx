@@ -1,12 +1,14 @@
 import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent, useMemo} from 'react';
-import {Text, View} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 import {useStyle} from '../../styles';
 import {PageWithScrollView} from '../../components/page';
 import {useStore} from '../../stores';
 import {PricePretty} from '@keplr-wallet/unit';
 import {useEffectOnce} from '../../hooks';
 import {WalletStatus} from '@keplr-wallet/stores';
+import {Button} from '../../components/button';
+import {IconButton} from '../../components/icon-button';
 
 export const HomeScreen: FunctionComponent = observer(() => {
   const style = useStyle();
@@ -30,7 +32,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
         // If mnemonic is fresh, there is no way that additional coin type account has value to select.
         promises.push(
           (async () => {
-            await keyRingStore.finalizeMnemonicKeyCoinType(
+            await keyRingStore.finalizeKeyCoinType(
               vaultId,
               chainInfo.chainId,
               chainInfo.bip44.coinType,
@@ -187,6 +189,33 @@ export const HomeScreen: FunctionComponent = observer(() => {
             ])}>
             {availableTotalPrice?.toString()}
           </Text>
+          <View
+            style={StyleSheet.flatten([
+              style.flatten(['flex-row', 'justify-between', 'gap-10']),
+            ])}>
+            <Button
+              text="Deposit"
+              size="large"
+              color="secondary"
+              containerStyle={style.flatten(['flex-1'])}
+            />
+            <Button
+              text="Buy"
+              size="large"
+              color="secondary"
+              containerStyle={style.flatten(['flex-1'])}
+            />
+            <Button
+              text="Send"
+              size="large"
+              containerStyle={style.flatten(['flex-1'])}
+            />
+          </View>
+
+          {/* TODO checkbox를 추가해야함 */}
+          <View style={style.flatten(['flex-row', 'justify-end'])}>
+            <IconButton text="Hide Low Balance" icon={<Text></Text>} />
+          </View>
         </View>
       </PageWithScrollView>
     </React.Fragment>

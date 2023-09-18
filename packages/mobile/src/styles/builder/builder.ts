@@ -74,6 +74,7 @@ export class StyleBuilder<
   BorderWidths extends Record<string, number>,
   BorderRadiuses extends Record<string, number>,
   Opacities extends Record<string, number>,
+  Gaps extends Record<string, number>,
 > {
   protected static readonly ReservedWords: {
     [word: string]: boolean | undefined;
@@ -97,6 +98,7 @@ export class StyleBuilder<
     solid: true,
     dotted: true,
     dashed: true,
+    gap: true,
   };
 
   static readonly checkReservedWord = (config: Record<string, any>) => {
@@ -128,6 +130,7 @@ export class StyleBuilder<
     borderWidths: BorderWidths;
     borderRadiuses: BorderRadiuses;
     opacities: Opacities;
+    gaps: Gaps;
   };
   protected currentStaticStyles: Record<string, unknown>;
 
@@ -147,6 +150,7 @@ export class StyleBuilder<
       borderWidths: BorderWidths;
       borderRadiuses: BorderRadiuses;
       opacities: Opacities;
+      gaps: Gaps;
     },
     protected readonly themeConfigs?: {
       [K in Themes[number]]?: DeepPartial<{
@@ -159,6 +163,7 @@ export class StyleBuilder<
         borderWidths: BorderWidths;
         borderRadiuses: BorderRadiuses;
         opacities: Opacities;
+        gaps: Gaps;
       }>;
     },
   ) {
@@ -172,6 +177,7 @@ export class StyleBuilder<
       StyleBuilder.checkReservedWord(config.borderWidths);
       StyleBuilder.checkReservedWord(config.borderRadiuses);
       StyleBuilder.checkReservedWord(config.opacities);
+      StyleBuilder.checkReservedWord(config.gaps);
 
       if (themeConfigs) {
         for (const theme of Object.keys(themeConfigs)) {
@@ -185,6 +191,7 @@ export class StyleBuilder<
             StyleBuilder.checkReservedWord(themeConfig.borderWidths ?? {});
             StyleBuilder.checkReservedWord(themeConfig.borderRadiuses ?? {});
             StyleBuilder.checkReservedWord(themeConfig.opacities ?? {});
+            StyleBuilder.checkReservedWord(themeConfig.gaps ?? {});
           }
         }
       }
@@ -239,7 +246,8 @@ export class StyleBuilder<
         MarginSizes,
         BorderWidths,
         BorderRadiuses,
-        Opacities
+        Opacities,
+        Gaps
       >
     >,
     K extends keyof D,
@@ -257,7 +265,8 @@ export class StyleBuilder<
         MarginSizes,
         BorderWidths,
         BorderRadiuses,
-        Opacities
+        Opacities,
+        Gaps
       >
     >,
     K extends keyof D,
@@ -279,7 +288,8 @@ export class StyleBuilder<
         MarginSizes,
         BorderWidths,
         BorderRadiuses,
-        Opacities
+        Opacities,
+        Gaps
       >
     >,
     K extends keyof D,
@@ -357,7 +367,8 @@ export class StyleBuilder<
         MarginSizes,
         BorderWidths,
         BorderRadiuses,
-        Opacities
+        Opacities,
+        Gaps
       >
     >,
     K extends keyof D,
@@ -392,6 +403,10 @@ export class StyleBuilder<
       case 'width':
         return {
           width: this.currentConfig.widths[segment.flush()],
+        };
+      case 'gap':
+        return {
+          gap: this.currentConfig.gaps[segment.flush()],
         };
       case 'height':
         return {

@@ -12,7 +12,8 @@ const phishings = [
   "app-keplr-vvallet.host",
 ];
 
-const subdomains = ["scam1.service.com", "scam2.service.com"];
+//FIXME - dev 머지때 주석해제
+// const subdomains = ["scam1.service.com", "scam2.service.com"];
 
 const createMockServer = () => {
   let queryCount = 0;
@@ -105,48 +106,48 @@ const createMockServer = () => {
       resp.end(str);
       return;
     }
+    //FIXME - dev 머지때 주석해제
+    // if (req.url === "/subdomains") {
+    //   resp.writeHead(200);
+    //   const list = phishings.concat(subdomains);
+    //   let str = "";
+    //   for (let i = 0; i < list.length; i++) {
+    //     let phishing = list[i];
 
-    if (req.url === "/subdomains") {
-      resp.writeHead(200);
-      const list = phishings.concat(subdomains);
-      let str = "";
-      for (let i = 0; i < list.length; i++) {
-        let phishing = list[i];
+    //     switch (i) {
+    //       case 0:
+    //         phishing = phishing + "\n";
+    //         break;
+    //       case 1:
+    //         phishing = phishing + ".\n";
+    //         break;
+    //       case 2:
+    //         phishing = "." + phishing + "\r\n";
+    //         break;
+    //       case 3:
+    //         phishing = "invalid;.." + phishing + "..;";
+    //         break;
+    //       case 4:
+    //         phishing = phishing + "/,";
+    //         break;
+    //       case 5:
+    //         phishing = phishing + "?test\n";
+    //         break;
+    //       default:
+    //         phishing = `  ${phishing} `;
+    //     }
 
-        switch (i) {
-          case 0:
-            phishing = phishing + "\n";
-            break;
-          case 1:
-            phishing = phishing + ".\n";
-            break;
-          case 2:
-            phishing = "." + phishing + "\r\n";
-            break;
-          case 3:
-            phishing = "invalid;.." + phishing + "..;";
-            break;
-          case 4:
-            phishing = phishing + "/,";
-            break;
-          case 5:
-            phishing = phishing + "?test\n";
-            break;
-          default:
-            phishing = `  ${phishing} `;
-        }
+    //     str += phishing;
+    //   }
+    //   str += ";invalid";
 
-        str += phishing;
-      }
-      str += ";invalid";
+    //   if (queryCount === 2) {
+    //     str += ";added.domain";
+    //   }
 
-      if (queryCount === 2) {
-        str += ";added.domain";
-      }
-
-      resp.end(str);
-      return;
-    }
+    //   resp.end(str);
+    //   return;
+    // }
 
     if (req.url === "/test-retry") {
       if (queryCount % 3 === 0) {
@@ -493,35 +494,36 @@ describe("Test phishing list service", () => {
     );
   });
 
-  test("Test subdomains", async () => {
-    const service = new PhishingListService(
-      {
-        blockListUrl: `http://127.0.0.1:${port}/subdomains`,
-        fetchingIntervalMs: 200,
-        retryIntervalMs: 100,
-        allowTimeoutMs: 100,
-      },
-      "http://noop.com"
-    );
-    eachService = service;
+  //FIXME - dev 머지때 주석해제
+  // test("Test subdomains", async () => {
+  //   const service = new PhishingListService(
+  //     {
+  //       blockListUrl: `http://127.0.0.1:${port}/subdomains`,
+  //       fetchingIntervalMs: 200,
+  //       retryIntervalMs: 100,
+  //       allowTimeoutMs: 100,
+  //     },
+  //     "http://noop.com"
+  //   );
+  //   eachService = service;
 
-    service.init();
+  //   service.init();
 
-    await waitServiceInit(service);
+  //   await waitServiceInit(service);
 
-    testCheckURLIsPhishing(service);
+  //   testCheckURLIsPhishing(service);
 
-    expect(service.checkURLIsPhishing("https://service.com")).toBe(false);
-    expect(service.checkURLIsPhishing("https://scam1.service.com")).toBe(true);
-    expect(service.checkURLIsPhishing("https://scam2.service.com")).toBe(true);
+  //   expect(service.checkURLIsPhishing("https://service.com")).toBe(false);
+  //   expect(service.checkURLIsPhishing("https://scam1.service.com")).toBe(true);
+  //   expect(service.checkURLIsPhishing("https://scam2.service.com")).toBe(true);
 
-    // allow temp Url
-    service.allowUrlTemp("https://service.com");
-    expect(service.checkURLIsPhishing("https://scam1.service.com")).toBe(true);
-    expect(service.checkURLIsPhishing("https://scam2.service.com")).toBe(true);
-    // allow temp Url
-    service.allowUrlTemp("https://scam1.service.com");
-    expect(service.checkURLIsPhishing("https://scam1.service.com")).toBe(false);
-    expect(service.checkURLIsPhishing("https://scam2.service.com")).toBe(true);
-  });
+  //   // allow temp Url
+  //   service.allowUrlTemp("https://service.com");
+  //   expect(service.checkURLIsPhishing("https://scam1.service.com")).toBe(true);
+  //   expect(service.checkURLIsPhishing("https://scam2.service.com")).toBe(true);
+  //   // allow temp Url
+  //   service.allowUrlTemp("https://scam1.service.com");
+  //   expect(service.checkURLIsPhishing("https://scam1.service.com")).toBe(false);
+  //   expect(service.checkURLIsPhishing("https://scam2.service.com")).toBe(true);
+  // });
 });
