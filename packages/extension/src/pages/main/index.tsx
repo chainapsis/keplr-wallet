@@ -124,7 +124,9 @@ export const MainPage: FunctionComponent = observer(() => {
       setSearch("");
 
       if (searchRef.current) {
-        searchRef.current.focus();
+        searchRef.current.focus({
+          preventScroll: true,
+        });
       }
     }
   }, [tabStatus, isNotReady]);
