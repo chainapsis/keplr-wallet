@@ -15,7 +15,7 @@ export const Columns: FunctionComponent<PropsWithChildren<ColumnsProps>> = ({
   children,
   sum,
   columnAlign,
-  alignY = 'center',
+  alignY,
   gutter,
 }) => {
   const array = Children.toArray(flattenFragment(children));
@@ -32,19 +32,21 @@ export const Columns: FunctionComponent<PropsWithChildren<ColumnsProps>> = ({
   });
 
   const remainingWeight = Math.max(sum - columnWeightSum, 0);
-  const align = (() => {
+  const alignItems = (() => {
     switch (alignY) {
       case 'top':
-        return 'start';
+        return 'items-start';
       case 'bottom':
-        return 'end';
+        return 'items-end';
       case 'center':
-        return 'center';
+        return 'items-center';
+      default:
     }
   })();
 
   return (
-    <View style={style.flatten(['flex-row', `items-${align}` as any])}>
+    <View
+      style={style.flatten(['flex-row'], [alignItems && (alignItems as any)])}>
       {remainingWeight > 0
         ? (() => {
             if (columnAlign === 'right') {
