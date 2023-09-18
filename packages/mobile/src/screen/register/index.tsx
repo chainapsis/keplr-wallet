@@ -10,6 +10,7 @@ import {useNavigation, StackActions} from '@react-navigation/native';
 import {TextInput} from '../../components/input';
 import {MnemonicInput} from '../../components/mnemonic-input';
 import {Gutter} from '../../components/gutter';
+import {useStyle} from '../../styles';
 
 const bip39 = require('bip39');
 
@@ -67,7 +68,7 @@ export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
     const navigation = useNavigation();
     const {keyRingStore} = useStore();
     const status = keyRingStore.status;
-
+    const style = useStyle();
     const isNeedPassword = status === 'empty';
 
     const {
@@ -152,7 +153,6 @@ export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
                       textAlignVertical: 'top',
                     })
                   }
-
                   onSubmitEditing={() => {
                     setFocus('name');
                   }}
