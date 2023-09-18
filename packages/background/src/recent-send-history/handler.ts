@@ -125,6 +125,7 @@ const handleSendTxAndRecordWithIBCSwapMsg: (
       msg.amount,
       msg.memo,
       msg.channels,
+      msg.destinationAsset,
       msg.swapChannelIndex,
       msg.swapReceiver
     );

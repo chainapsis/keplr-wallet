@@ -16,6 +16,7 @@ import { ColorPalette } from "../../../../styles";
 import { XAxis, YAxis } from "../../../../components/axis";
 import {
   Body2,
+  Caption1,
   Caption2,
   Subtitle3,
   Subtitle4,
@@ -147,6 +148,8 @@ const IbcHistoryViewItem: FunctionComponent<{
   const theme = useTheme();
   const intl = useIntl();
 
+  const isIBCSwap = "swapType" in history;
+
   const historyCompleted = (() => {
     if (!history.txFulfilled) {
       return false;
@@ -184,23 +187,43 @@ const IbcHistoryViewItem: FunctionComponent<{
     >
       <YAxis>
         <XAxis alignY="center">
-          {!historyCompleted ? (
-            <LoadingIcon
-              width="1.25rem"
-              height="1.25rem"
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-200"]
-                  : ColorPalette.white
-              }
-            />
-          ) : (
-            <CheckCircleIcon
-              width="1.25rem"
-              height="1.25rem"
-              color={ColorPalette["green-400"]}
-            />
-          )}
+          {(() => {
+            if (history.ibcHistory.find((h) => h.error != null)) {
+              return (
+                <ErrorIcon
+                  width="1.25rem"
+                  height="1.25rem"
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["orange-400"]
+                      : ColorPalette["yellow-400"]
+                  }
+                />
+              );
+            }
+
+            if (!historyCompleted) {
+              return (
+                <LoadingIcon
+                  width="1.25rem"
+                  height="1.25rem"
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-200"]
+                      : ColorPalette.white
+                  }
+                />
+              );
+            }
+
+            return (
+              <CheckCircleIcon
+                width="1.25rem"
+                height="1.25rem"
+                color={ColorPalette["green-400"]}
+              />
+            );
+          })()}
 
           <Gutter size="0.5rem" />
 
@@ -213,10 +236,14 @@ const IbcHistoryViewItem: FunctionComponent<{
           >
             {!historyCompleted
               ? intl.formatMessage({
-                  id: "page.main.components.ibc-history-view.item.pending",
+                  id: isIBCSwap
+                    ? "page.main.components.ibc-history-view.ibc-swap.item.pending"
+                    : "page.main.components.ibc-history-view.item.pending",
                 })
               : intl.formatMessage({
-                  id: "page.main.components.ibc-history-view.item.succeed",
+                  id: isIBCSwap
+                    ? "page.main.components.ibc-history-view.ibc-swap.item.succeed"
+                    : "page.main.components.ibc-history-view.item.succeed",
                 })}
           </Subtitle4>
           <div
@@ -258,6 +285,72 @@ const IbcHistoryViewItem: FunctionComponent<{
             const destinationChain = chainStore.getChain(
               history.destinationChainId
             );
+
+            if ("swapType" in history) {
+              if (historyCompleted) {
+                const chainId = history.destinationChainId;
+                const chainInfo = chainStore.getChain(chainId);
+                const assets = (() => {
+                  if (
+                    history.resAmount.length !==
+                    history.ibcHistory.length + 1
+                  ) {
+                    return "Unknown";
+                  }
+
+                  return history.resAmount[history.ibcHistory.length]
+                    .map((amount) => {
+                      return new CoinPretty(
+                        chainInfo.forceFindCurrency(amount.denom),
+                        amount.amount
+                      )
+                        .hideIBCMetadata(true)
+                        .shrink(true)
+                        .maxDecimals(6)
+                        .inequalitySymbol(true)
+                        .trim(true)
+                        .toString();
+                    })
+                    .join(", ");
+                })();
+
+                return intl.formatMessage(
+                  {
+                    id: "page.main.components.ibc-history-view.ibc-swap.succeed.paragraph",
+                  },
+                  {
+                    assets,
+                  }
+                );
+              }
+
+              const assets = history.amount
+                .map((amount) => {
+                  const currency = sourceChain.forceFindCurrency(amount.denom);
+                  const pretty = new CoinPretty(currency, amount.amount);
+                  return pretty
+                    .hideIBCMetadata(true)
+                    .shrink(true)
+                    .maxDecimals(6)
+                    .inequalitySymbol(true)
+                    .trim(true)
+                    .toString();
+                })
+                .join(", ");
+
+              return intl.formatMessage(
+                {
+                  id: "page.main.components.ibc-history-view.ibc-swap.paragraph",
+                },
+                {
+                  assets,
+                  destinationDenom: chainStore
+                    .getChain(history.destinationAsset.chainId)
+                    .forceFindCurrency(history.destinationAsset.denom)
+                    .coinDenom,
+                }
+              );
+            }
 
             const assets = history.amount
               .map((amount) => {
@@ -379,6 +472,41 @@ const IbcHistoryViewItem: FunctionComponent<{
           </XAxis>
         </Box>
 
+        <VerticalCollapseTransition collapsed={!failedChannel}>
+          <Gutter size="0.5rem" />
+          <Caption1
+            color={
+              theme.mode === "light"
+                ? ColorPalette["orange-400"]
+                : ColorPalette["yellow-400"]
+            }
+          >
+            <FormattedMessage
+              id={(() => {
+                let complete = false;
+                const errorIndex = history.ibcHistory.findIndex(
+                  (h) => h.error != null
+                );
+                if (errorIndex >= 0) {
+                  complete = !history.ibcHistory
+                    .slice(0, errorIndex + 1)
+                    .find((h) => !h.rewound);
+                }
+
+                if (isIBCSwap) {
+                  return complete
+                    ? "page.main.components.ibc-history-view.ibc-swap.failed.complete"
+                    : "page.main.components.ibc-history-view.ibc-swap.failed.in-progress";
+                }
+
+                return complete
+                  ? "page.main.components.ibc-history-view.failed.complete"
+                  : "page.main.components.ibc-history-view.failed.in-progress";
+              })()}
+            />
+          </Caption1>
+        </VerticalCollapseTransition>
+
         <VerticalCollapseTransition collapsed={historyCompleted}>
           <Gutter size="1rem" />
           <Box
@@ -446,7 +574,13 @@ const IbcHistoryViewItem: FunctionComponent<{
                 : ColorPalette["gray-200"]
             }
           >
-            <FormattedMessage id="page.main.components.ibc-history-view.help.can-close-extension" />
+            <FormattedMessage
+              id={
+                isIBCSwap
+                  ? "page.main.components.ibc-history-view.ibc-swap.help.can-close-extension"
+                  : "page.main.components.ibc-history-view.help.can-close-extension"
+              }
+            />
           </Caption2>
         </VerticalCollapseTransition>
       </YAxis>
@@ -539,7 +673,11 @@ const IbcHistoryViewItemChainImage: FunctionComponent<{
             <ErrorIcon
               width="1.25rem"
               height="1.25rem"
-              color={ColorPalette["yellow-400"]}
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["orange-400"]
+                  : ColorPalette["yellow-400"]
+              }
             />
           </Box>
         ) : null}

@@ -209,8 +209,12 @@ export class SendTxAndRecordWithIBCSwapMsg extends Message<Uint8Array> {
       channelId: string;
       counterpartyChainId: string;
     }[],
+    public readonly destinationAsset: {
+      chainId: string;
+      denom: string;
+    },
     public readonly swapChannelIndex: number,
-    public readonly swapReceiver: string,
+    public readonly swapReceiver: string[],
     public readonly mode: "async" | "sync" | "block",
     public readonly silent: boolean,
     public readonly sender: string,

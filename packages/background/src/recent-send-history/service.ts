@@ -197,8 +197,12 @@ export class RecentSendHistoryService {
           channelId: string;
           counterpartyChainId: string;
         }[],
+    destinationAsset: {
+      chainId: string;
+      denom: string;
+    },
     swapChannelIndex: number,
-    swapReceiver: string
+    swapReceiver: string[]
   ): Promise<Uint8Array> {
     const sourceChainInfo =
       this.chainsService.getChainInfoOrThrow(sourceChainId);
@@ -221,6 +225,7 @@ export class RecentSendHistoryService {
       amount,
       memo,
       ibcChannels,
+      destinationAsset,
       swapChannelIndex,
       swapReceiver,
       txHash
@@ -319,18 +324,13 @@ export class RecentSendHistoryService {
               //       어차피 tx 자체의 실패는 notification으로 알 수 있기 때문에 여기서 지우더라도 유저는 실패를 인지할 수 있다.
               this.removeRecentIBCHistory(id);
             } else {
-              if (
-                history.ibcHistory.length === 0 &&
-                "swapReceiver" in history
-              ) {
+              if ("swapReceiver" in history) {
                 const resAmount = this.getIBCSwapResAmountFromTx(
                   tx,
-                  history.swapReceiver
+                  history.swapReceiver[0]
                 );
 
-                if (resAmount.length > 0) {
-                  history.resAmount = resAmount;
-                }
+                history.resAmount.push(resAmount);
               }
 
               if (history.ibcHistory.length > 0) {
@@ -422,19 +422,17 @@ export class RecentSendHistoryService {
                       targetChannel.sequence!
                     );
 
-                    if ("swapReceiver" in history && !nextChannel) {
+                    if ("swapReceiver" in history) {
                       const res: {
                         amount: string;
                         denom: string;
                       }[] = this.getIBCSwapResAmountFromTx(
                         tx,
-                        history.swapReceiver,
+                        history.swapReceiver[targetChannelIndex + 1],
                         index
                       );
 
-                      if (res.length > 0) {
-                        history.resAmount = res;
-                      }
+                      history.resAmount.push(res);
                     }
 
                     if (nextChannel) {
@@ -547,8 +545,12 @@ export class RecentSendHistoryService {
           channelId: string;
           counterpartyChainId: string;
         }[],
+    destinationAsset: {
+      chainId: string;
+      denom: string;
+    },
     swapChannelIndex: number,
-    swapReceiver: string,
+    swapReceiver: string[],
     txHash: Uint8Array
   ): string {
     const id = (this.recentIBCHistorySeq++).toString();
@@ -572,8 +574,10 @@ export class RecentSendHistoryService {
           completed: false,
         };
       }),
+      destinationAsset,
       swapChannelIndex,
       swapReceiver,
+      resAmount: [],
       txHash: Buffer.from(txHash).toString("hex"),
     };
 

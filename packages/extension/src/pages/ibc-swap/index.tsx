@@ -343,7 +343,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             counterpartyChainId: string;
           }[] = [];
           let swapChannelIndex: number = -1;
-          let swapReceiver: string = "";
+          const swapReceiver: string[] = [];
 
           try {
             const [_tx] = await Promise.all([
@@ -390,18 +390,20 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               }
             }
 
-            let lastChainId = inChainId;
-            if (channels.length > 0) {
-              lastChainId = channels[channels.length - 1].counterpartyChainId;
+            const receiverChainIds = [inChainId];
+            for (const channel of channels) {
+              receiverChainIds.push(channel.counterpartyChainId);
             }
-            const receiverAccount = accountStore.getAccount(lastChainId);
-            if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
-              await receiverAccount.init();
+            for (const receiverChainId of receiverChainIds) {
+              const receiverAccount = accountStore.getAccount(receiverChainId);
+              if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
+                await receiverAccount.init();
+              }
+              if (!receiverAccount.bech32Address) {
+                throw new Error("receiverAccount.bech32Address is undefined");
+              }
+              swapReceiver.push(receiverAccount.bech32Address);
             }
-            if (!receiverAccount.bech32Address) {
-              throw new Error("receiverAccount.bech32Address is undefined");
-            }
-            swapReceiver = receiverAccount.bech32Address;
 
             tx = _tx;
           } catch (e) {
@@ -426,6 +428,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     outChainId,
                     tx,
                     channels,
+                    {
+                      chainId: outChainId,
+                      denom: outCurrency.coinMinimalDenom,
+                    },
                     swapChannelIndex,
                     swapReceiver,
                     mode,
