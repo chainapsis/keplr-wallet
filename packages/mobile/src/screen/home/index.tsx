@@ -37,10 +37,8 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
   const [isHide, setIsHide] = useState(false);
   const [tabStatus, setTabStatus] = React.useState<TabStatus>('available');
-
   const buyModalRef = useRef<BottomSheetModal>(null);
   const copyAddressModalRef = useRef<BottomSheetModal>(null);
-  const snapPoints = useMemo(() => ['70%'], []);
 
   //TODO 임시로직 나중에 제거 해야함
   useEffectOnce(() => {
@@ -223,7 +221,12 @@ export const HomeScreen: FunctionComponent = observer(() => {
               itemMinWidth={92}
             />
           </YAxis>
-
+          <TextButton
+            text="copy address"
+            onPress={() => {
+              copyAddressModalRef.current?.present();
+            }}
+          />
           <Text
             style={style.flatten([
               'color-white',
@@ -272,15 +275,9 @@ export const HomeScreen: FunctionComponent = observer(() => {
               icon={<Checkbox checked={isHide} />}
             />
           </View>
-          <TextButton
-            text="test"
-            onPress={() => {
-              copyAddressModalRef.current?.present();
-            }}
-          />
         </Stack>
       </PageWithScrollView>
-      <Modal ref={copyAddressModalRef} snapPoints={snapPoints}>
+      <Modal ref={copyAddressModalRef} snapPoints={['60%']}>
         <DepositModal />
       </Modal>
       <Modal ref={buyModalRef} snapPoints={['50%']}>

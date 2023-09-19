@@ -53,7 +53,7 @@ const CopyAddressScene = observer(() => {
   const nav = useNavigation<NavigationProp<DepositModalNav>>();
   useFocusEffect(
     useCallback(() => {
-      bottom.snapToPosition('70%');
+      bottom.snapToPosition('60%');
     }, [bottom]),
   );
 
@@ -87,7 +87,7 @@ const QRScene = observer(
     const bottom = useBottomSheet();
     const {chainStore} = useStore();
     const chainInfo = chainStore.getChain(route.params?.chainId);
-    bottom.snapToPosition('30%');
+    bottom.snapToPosition('40%');
     const style = useStyle();
     const nav = useNavigation();
 
