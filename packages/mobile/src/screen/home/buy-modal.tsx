@@ -11,8 +11,8 @@ import {ChainInfo} from '@keplr-wallet/types';
 import {BaseModal, BaseModalHeader} from '../../components/modal';
 import {useStyle} from '../../styles';
 import {useBottomSheet} from '@gorhom/bottom-sheet';
-import {Box} from '../../components/box';
 
+//TODO home 스크린 만들면서 구현해야됨
 export const BuyModal = () => {
   return (
     <BaseModal
@@ -191,8 +191,6 @@ const ServiceItem: FunctionComponent<{
 
         close();
       }}>
-      <Box></Box>
-
       <Text>{serviceInfo.serviceName}</Text>
     </Pressable>
   );
