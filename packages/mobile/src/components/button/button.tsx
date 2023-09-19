@@ -29,7 +29,7 @@ export const Button: FunctionComponent<{
   text,
   leftIcon,
   rightIcon,
-  loading = true,
+  loading = false,
   disabled = false,
   onPress,
   containerStyle,
