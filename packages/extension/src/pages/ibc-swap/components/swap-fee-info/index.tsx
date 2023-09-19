@@ -358,7 +358,7 @@ export const SwapFeeInfo: FunctionComponent<{
             </Subtitle4>
             <Gutter size="0.2rem" />
             <Tooltip
-              content={`TODO: ${(() => {
+              content={`${(() => {
                 const feeRatioPretty = new IntPretty(
                   amountConfig.swapFeeBps
                 ).moveDecimalPointLeft(2);

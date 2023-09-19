@@ -344,10 +344,20 @@ const IbcHistoryViewItem: FunctionComponent<{
                 },
                 {
                   assets,
-                  destinationDenom: chainStore
-                    .getChain(history.destinationAsset.chainId)
-                    .forceFindCurrency(history.destinationAsset.denom)
-                    .coinDenom,
+                  destinationDenom: (() => {
+                    const currency = chainStore
+                      .getChain(history.destinationAsset.chainId)
+                      .forceFindCurrency(history.destinationAsset.denom);
+
+                    if (
+                      "originCurrency" in currency &&
+                      currency.originCurrency
+                    ) {
+                      return currency.originCurrency.coinDenom;
+                    }
+
+                    return currency.coinDenom;
+                  })(),
                 }
               );
             }
