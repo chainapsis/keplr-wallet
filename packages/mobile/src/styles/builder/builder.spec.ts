@@ -701,11 +701,23 @@ describe('Test style builder', () => {
       'font-extrabold',
       'font-black',
     ];
+    const weightFonts = [
+      'Inter-Thin',
+      'Inter-SemiLight',
+      'Inter-Light',
+      'Inter-Regular',
+      'Inter-Medium',
+      'Inter-SemiBold',
+      'Inter-Bold',
+      'Inter-ExtraBold',
+      'Inter-Black',
+    ];
 
     for (let i = 0; i < weights.length; i++) {
       const weight = weights[i];
       expect(builder.get(weight as any)).toStrictEqual({
         fontWeight: ((i + 1) * 100).toString(),
+        fontFamily: weightFonts[i],
       });
     }
 
