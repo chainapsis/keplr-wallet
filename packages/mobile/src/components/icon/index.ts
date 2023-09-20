@@ -4,3 +4,6 @@ export * from './check';
 export * from './left-arrow';
 export * from './qr-scan';
 export * from './menu';
+export * from './browser';
+export * from './setting';
+export * from './wallet';
