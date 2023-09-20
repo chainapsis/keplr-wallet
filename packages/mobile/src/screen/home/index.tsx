@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import React, {FunctionComponent, useMemo, useState} from 'react';
+import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
 import {Text, View} from 'react-native';
 import {useStyle} from '../../styles';
 import {PageWithScrollView} from '../../components/page';
@@ -17,6 +17,11 @@ import {LayeredHorizontalRadioGroup} from '../../components/radio-group';
 import {YAxis} from '../../components/axis';
 import {Stack} from '../../components/stack';
 import {Columns} from '../../components/column';
+import {BottomSheetModal} from '@gorhom/bottom-sheet';
+import {Modal} from '../../components/modal/modal';
+import {TextButton} from '../../components/text-button';
+import {DepositModal} from './deposit-modal';
+import {BuyModal} from './buy-modal';
 
 type TabStatus = 'available' | 'staked';
 
@@ -32,6 +37,8 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
   const [isHide, setIsHide] = useState(false);
   const [tabStatus, setTabStatus] = React.useState<TabStatus>('available');
+  const buyModalRef = useRef<BottomSheetModal>(null);
+  const copyAddressModalRef = useRef<BottomSheetModal>(null);
 
   //TODO 임시로직 나중에 제거 해야함
   useEffectOnce(() => {
@@ -45,11 +52,13 @@ export const HomeScreen: FunctionComponent = observer(() => {
         // If mnemonic is fresh, there is no way that additional coin type account has value to select.
         promises.push(
           (async () => {
-            await keyRingStore.finalizeKeyCoinType(
-              vaultId,
-              chainInfo.chainId,
-              chainInfo.bip44.coinType,
-            );
+            if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
+              await keyRingStore.finalizeKeyCoinType(
+                vaultId,
+                chainInfo.chainId,
+                chainInfo.bip44.coinType,
+              );
+            }
           })(),
         );
       }
@@ -212,7 +221,12 @@ export const HomeScreen: FunctionComponent = observer(() => {
               itemMinWidth={92}
             />
           </YAxis>
-
+          <TextButton
+            text="copy address"
+            onPress={() => {
+              copyAddressModalRef.current?.present();
+            }}
+          />
           <Text
             style={style.flatten([
               'color-white',
@@ -234,6 +248,9 @@ export const HomeScreen: FunctionComponent = observer(() => {
               size="large"
               color="secondary"
               containerStyle={style.flatten(['flex-1'])}
+              onPress={() => {
+                buyModalRef.current?.present();
+              }}
             />
             <Button
               text="Send"
@@ -260,6 +277,12 @@ export const HomeScreen: FunctionComponent = observer(() => {
           </View>
         </Stack>
       </PageWithScrollView>
+      <Modal ref={copyAddressModalRef} snapPoints={['60%']}>
+        <DepositModal />
+      </Modal>
+      <Modal ref={buyModalRef} snapPoints={['50%']}>
+        <BuyModal />
+      </Modal>
     </React.Fragment>
   );
 });
