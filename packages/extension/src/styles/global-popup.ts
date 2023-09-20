@@ -22,6 +22,9 @@ export const GlobalPopupStyle = createGlobalStyle`
 
     margin-left: auto;
     margin-right: auto;
+    
+    // 스크롤은 simplebar가 모두 처리한다고 가정하고 설정된것임. 주의할 것.
+    overflow: hidden;
   }
   
   body {

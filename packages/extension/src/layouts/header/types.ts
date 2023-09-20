@@ -14,6 +14,10 @@ export interface HeaderProps {
 
   fixedHeight?: boolean;
 
+  additionalPaddingBottom?: string;
+
   onSubmit?: React.FormEventHandler<HTMLFormElement>;
   isNotReady?: boolean;
+
+  headerContainerStyle?: React.CSSProperties;
 }

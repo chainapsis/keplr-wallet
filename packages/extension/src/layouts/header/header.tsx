@@ -96,33 +96,29 @@ const Styles = {
   `,
   ContentContainer: styled.div<{
     layoutHeight: number;
+    additionalPaddingBottom?: string;
     bottomPadding: string;
     fixedHeight: boolean;
   }>`
     padding-top: 3.75rem;
     padding-bottom: ${({ bottomPadding }) => bottomPadding};
 
-    ${({ layoutHeight, fixedHeight }) => {
+    ${({ layoutHeight, fixedHeight, additionalPaddingBottom }) => {
       if (!fixedHeight) {
         return css`
           // min-height: ${layoutHeight}rem;
         `;
       } else {
         return css`
-          height: ${layoutHeight}rem;
+          height: ${(() => {
+            if (additionalPaddingBottom && additionalPaddingBottom !== "0") {
+              return `calc(${layoutHeight}rem - ${additionalPaddingBottom})`;
+            }
+            return `${layoutHeight}rem`;
+          })()};
         `;
       }
     }};
-  `,
-  BottomContainer: styled.div`
-    height: 4.75rem;
-
-    background-color: ${ColorPalette["gray-700"]};
-
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
   `,
 };
 
@@ -135,6 +131,8 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
   onSubmit,
   children,
   isNotReady,
+  additionalPaddingBottom,
+  headerContainerStyle,
 }) => {
   const [height, setHeight] = React.useState(() => pxToRem(600));
   const lastSetHeight = useRef(-1);
@@ -178,7 +176,7 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
 
   return (
     <Styles.Container as={onSubmit ? "form" : undefined} onSubmit={onSubmit}>
-      <Styles.HeaderContainer>
+      <Styles.HeaderContainer style={headerContainerStyle}>
         {left && !isNotReady ? (
           <Styles.HeaderLeft>{left}</Styles.HeaderLeft>
         ) : null}
@@ -201,6 +199,7 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
 
       <Styles.ContentContainer
         layoutHeight={height}
+        additionalPaddingBottom={additionalPaddingBottom}
         fixedHeight={fixedHeight || false}
         bottomPadding={bottomPadding}
       >
@@ -214,7 +213,7 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
           style={{
             left: 0,
             right: 0,
-            bottom: 0,
+            bottom: additionalPaddingBottom || "0",
           }}
         >
           {(() => {
