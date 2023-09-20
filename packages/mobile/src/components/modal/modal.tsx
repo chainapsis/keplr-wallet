@@ -4,7 +4,6 @@ import {
   BottomSheetBackgroundProps,
   BottomSheetModal,
   BottomSheetModalProps,
-  BottomSheetModalProvider,
 } from '@gorhom/bottom-sheet';
 import React, {
   forwardRef,
@@ -54,18 +53,16 @@ export const Modal = forwardRef<
   );
 
   return (
-    <BottomSheetModalProvider>
-      <BottomSheetModal
-        ref={ref}
-        index={0}
-        snapPoints={snapPoints}
-        backdropComponent={renderBackdrop}
-        enablePanDownToClose={true}
-        backgroundComponent={CustomBackground}
-        {...props}>
-        {children}
-      </BottomSheetModal>
-    </BottomSheetModalProvider>
+    <BottomSheetModal
+      ref={ref}
+      index={0}
+      snapPoints={snapPoints}
+      backdropComponent={renderBackdrop}
+      enablePanDownToClose={true}
+      backgroundComponent={CustomBackground}
+      {...props}>
+      {children}
+    </BottomSheetModal>
   );
 });
 
