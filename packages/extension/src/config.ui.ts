@@ -156,5 +156,5 @@ export const SwapVenue: {
 };
 export const SwapFeeBps = {
   value: 75,
-  receiver: "osmo1xs55snr6lxsalaqrwc63cxlmgn437zzvnemwat",
+  receiver: "osmo1my4tk420gjmhggqwvvha6ey9390gqwfree2p4u",
 };
