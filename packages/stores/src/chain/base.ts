@@ -50,12 +50,8 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
    * 이미 등록되어 있거나 등록을 시도 중이면 아무 행동도 하지 않는.
    * 예를들어 네이티브 balance 쿼리에서 모르는 denom이 나오거나
    * IBC denom의 등록을 요청할 때 쓸 수 있다.
-   * XXX: `autorun`이 `action` 안에서 실행되면 autorun의 callback parameter가 next tick에 실행되는 것으로 보인다.
-   *      하지만 의도상 currency를 바로 알아낼 수 있으면 다음 re-renderding 없이 바로 currency를 반환해야되기 때문에
-   *      autorun의 callback parameter는 즉시실행되어야한다.
-   *      이런 이유로 이 메소드는 `@action` decorator를 사용하지 않았다.
-   *      observable state를 바꿀때는 수동으로 `runInAction()`을 사용할 것...
    */
+  @action
   addUnknownDenoms(...coinMinimalDenoms: string[]) {
     for (const coinMinimalDenom of coinMinimalDenoms) {
       if (this.unknownDenomMap.get(coinMinimalDenom)) {
@@ -66,9 +62,7 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
         continue;
       }
 
-      runInAction(() => {
-        this.unknownDenoms.push(coinMinimalDenom);
-      });
+      this.unknownDenoms.push(coinMinimalDenom);
 
       const disposer = autorun(() => {
         const generator = this.currencyRegistry.getCurrencyRegistrar(
