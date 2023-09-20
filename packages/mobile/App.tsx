@@ -13,6 +13,7 @@ import {StyleProvider, useStyle} from './src/styles';
 import {AppNavigation} from './src/navigation';
 import {StatusBar} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 
 const ThemeStatusBar: FunctionComponent = () => {
   const style = useStyle();
@@ -33,7 +34,9 @@ function App(): JSX.Element {
         <SafeAreaProvider>
           <ThemeStatusBar />
           <StoreProvider>
-            <AppNavigation />
+            <BottomSheetModalProvider>
+              <AppNavigation />
+            </BottomSheetModalProvider>
           </StoreProvider>
         </SafeAreaProvider>
       </StyleProvider>
