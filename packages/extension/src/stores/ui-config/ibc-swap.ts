@@ -163,12 +163,9 @@ export class IBCSwapConfig {
 
   getAmountOutCurrency = computedFn((): AppCurrency => {
     if (this._lastAmountOutMinimalDenom) {
-      const currency = this.getAmountOutChainInfo().findCurrency(
+      return this.getAmountOutChainInfo().forceFindCurrency(
         this._lastAmountOutMinimalDenom
       );
-      if (currency) {
-        return currency;
-      }
     }
 
     return this.getAmountOutChainInfo().currencies[0];

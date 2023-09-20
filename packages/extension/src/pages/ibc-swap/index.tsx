@@ -296,9 +296,15 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   ]);
   // ------
 
+  const outCurrencyFetched =
+    chainStore
+      .getChain(outChainId)
+      .findCurrency(outCurrency.coinMinimalDenom) != null;
+
   const interactionBlocked =
     txConfigsValidate.interactionBlocked ||
-    !uiConfigStore.ibcSwapConfig.slippageIsValid;
+    !uiConfigStore.ibcSwapConfig.slippageIsValid ||
+    !outCurrencyFetched;
 
   const [calculatingTxError, setCalculatingTxError] = useState<
     Error | undefined

@@ -403,6 +403,26 @@ export const SwapAssetInfo: FunctionComponent<{
               {(() => {
                 const currency = type === "from" ? fromCurrency : outCurrency;
 
+                if (type === "to") {
+                  if (
+                    chainStore
+                      .getChain(amountConfig.outChainId)
+                      .findCurrency(outCurrency.coinMinimalDenom) == null
+                  ) {
+                    return (
+                      <LoadingIcon
+                        width="1rem"
+                        height="1rem"
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-500"]
+                            : ColorPalette["gray-200"]
+                        }
+                      />
+                    );
+                  }
+                }
+
                 return (
                   <React.Fragment>
                     <ChainImageFallback
