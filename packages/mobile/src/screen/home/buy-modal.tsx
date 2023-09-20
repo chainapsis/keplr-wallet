@@ -163,7 +163,7 @@ const BuyCryptoScene = observer(() => {
   });
 
   return (
-    <View style={style.flatten(['background-color-gray-600', 'height-full'])}>
+    <View style={style.flatten(['height-full'])}>
       <BaseModalHeader title="Buy" />
       {buySupportServiceInfos.map(serviceInfo => {
         return (

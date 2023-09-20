@@ -58,7 +58,7 @@ const CopyAddressScene = observer(() => {
   );
 
   return (
-    <View style={style.flatten(['background-color-gray-600', 'height-full'])}>
+    <View style={style.flatten(['height-full'])}>
       <BaseModalHeader title="Copy Address" />
       <BottomSheetScrollView>
         <View>
@@ -92,7 +92,7 @@ const QRScene = observer(
     const nav = useNavigation();
 
     return (
-      <View style={style.flatten(['background-color-gray-600', 'height-full'])}>
+      <View style={style.flatten(['height-full'])}>
         <Columns sum={2}>
           <IconButton
             onPress={() => {

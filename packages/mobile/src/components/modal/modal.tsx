@@ -42,7 +42,6 @@ export const Modal = forwardRef<
   BottomSheetModal,
   PropsWithChildren<ModalProps & BottomSheetModalProps & BaseModalProps>
 >(({children, snapPoints = ['50%'], ...props}, ref) => {
-  const style = useStyle();
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
       <BottomSheetBackdrop
@@ -63,12 +62,6 @@ export const Modal = forwardRef<
         backdropComponent={renderBackdrop}
         enablePanDownToClose={true}
         backgroundComponent={CustomBackground}
-        //안드로이드 일때 바텀모달 핸들의 보더가 남아있는 버그가 있어서 그위에 스타일 입힘
-        handleStyle={style.flatten([
-          'border-width-1',
-          'border-color-gray-600',
-          'height-1',
-        ])}
         {...props}>
         {children}
       </BottomSheetModal>
@@ -91,10 +84,15 @@ export const BaseModal = ({
   initialRouteName,
   screenList,
 }: BaseModalProps) => {
+  const style = useStyle();
   return (
     <NavigationContainer independent={true}>
       <BottomSheetStack.Navigator
         screenOptions={{
+          contentStyle: style.flatten([
+            'background-color-gray-600',
+            'light:background-color-gray-600',
+          ]),
           ...screenOptions,
         }}
         initialRouteName={initialRouteName}>
@@ -131,7 +129,7 @@ export const BaseModalHeader = ({
   return (
     <View
       style={StyleSheet.flatten([
-        style.flatten(['background-color-gray-600', 'padding-bottom-12']),
+        style.flatten(['padding-bottom-12']),
         headerStyle,
       ])}>
       <Text
