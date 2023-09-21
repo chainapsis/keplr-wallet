@@ -22,6 +22,8 @@ import {
   CalcFiItem,
   DexterItem,
   LevanaItem,
+  QuasarItem,
+  LikerLandItem,
 } from "./constants";
 import { WebpageImageButton } from "./common";
 import { TextInput } from "../../components/input";
@@ -56,6 +58,8 @@ const WebpagesPerLabel: {
       CalcFiItem,
       DexterItem,
       LevanaItem,
+      QuasarItem,
+      LikerLandItem,
     ],
   },
   {
@@ -73,11 +77,12 @@ const WebpagesPerLabel: {
       CalcFiItem,
       DexterItem,
       LevanaItem,
+      QuasarItem,
     ],
   },
   {
     label: "NFT",
-    items: [StargazeItem],
+    items: [StargazeItem, LikerLandItem],
   },
   {
     label: "DAO",

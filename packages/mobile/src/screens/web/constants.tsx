@@ -354,3 +354,41 @@ export const LevanaItem: Item = {
   key: "Levana",
   component: LevanaImage,
 };
+
+const QuasarImage: FunctionComponent = () => {
+  const smartNavigation = useSmartNavigation();
+
+  return (
+    <WebpageImageButton
+      name="Quasar"
+      source={require("../../assets/image/webpage/quasar.png")}
+      onPress={() => {
+        smartNavigation.pushSmart("Web.Quasar", {});
+      }}
+    />
+  );
+};
+
+export const QuasarItem: Item = {
+  key: "Quasar",
+  component: QuasarImage,
+};
+
+const LikerLandImage: FunctionComponent = () => {
+  const smartNavigation = useSmartNavigation();
+
+  return (
+    <WebpageImageButton
+      name="Liker Land"
+      source={require("../../assets/image/webpage/likerland.png")}
+      onPress={() => {
+        smartNavigation.pushSmart("Web.LikerLand", {});
+      }}
+    />
+  );
+};
+
+export const LikerLandItem: Item = {
+  key: "LikerLand",
+  component: LikerLandImage,
+};
