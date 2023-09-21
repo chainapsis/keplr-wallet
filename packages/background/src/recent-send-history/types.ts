@@ -17,13 +17,14 @@ export interface RecentSendHistory {
     | undefined;
 }
 
-export type IBCHistory = {
+export interface IBCTransferHistory {
   id: string;
+
   chainId: string;
   destinationChainId: string;
   timestamp: number;
   sender: string;
-
+  recipient: string;
   amount: {
     amount: string;
     denom: string;
@@ -45,26 +46,5 @@ export type IBCHistory = {
 
         completed: boolean;
         error?: string;
-        rewound?: boolean;
       }[];
-} & (IBCTransferHistory | IBCSwapHistory);
-
-export interface IBCTransferHistory {
-  recipient: string;
-}
-
-export interface IBCSwapHistory {
-  swapType: "amount-in" | "amount-out";
-  swapChannelIndex: number;
-  swapReceiver: string[];
-
-  destinationAsset: {
-    chainId: string;
-    denom: string;
-  };
-
-  resAmount: {
-    amount: string;
-    denom: string;
-  }[][];
 }

@@ -782,7 +782,7 @@ export class CosmosAccountImpl {
   }
 
   makeTx(
-    defaultType: string | "unknown",
+    type: string | "unknown",
     msgs: ProtoMsgsOrWithAminoMsgs | (() => Promise<ProtoMsgsOrWithAminoMsgs>),
     preOnTxEvents?:
       | ((tx: any) => void)
@@ -792,8 +792,6 @@ export class CosmosAccountImpl {
           onFulfill?: (tx: any) => void;
         }
   ): MakeTxResponse {
-    let type = defaultType;
-
     const simulate = async (
       fee: Partial<Omit<StdFee, "gas">> = {},
       memo: string = ""
@@ -860,12 +858,6 @@ export class CosmosAccountImpl {
     };
 
     return {
-      ui: {
-        type: () => type,
-        overrideType: (paramType: string) => {
-          type = paramType;
-        },
-      },
       msgs: async (): Promise<ProtoMsgsOrWithAminoMsgs> => {
         if (typeof msgs === "function") {
           msgs = await msgs();

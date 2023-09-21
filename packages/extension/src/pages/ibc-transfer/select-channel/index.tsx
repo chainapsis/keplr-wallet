@@ -108,13 +108,7 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
                 error: queryBalance?.error,
               }}
               forChange
-              onClick={() => {
-                navigate(
-                  `/send/select-asset?isIBCTransfer=true&navigateReplace=true&navigateTo=${encodeURIComponent(
-                    "/ibc-transfer?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
-                  )}`
-                );
-              }}
+              onClick={() => navigate(`/send/select-asset?isIBCTransfer=true`)}
             />
           </Stack>
 

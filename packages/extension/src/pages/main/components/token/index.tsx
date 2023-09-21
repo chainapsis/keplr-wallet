@@ -154,9 +154,6 @@ interface TokenItemProps {
 
   // If this prop is provided, the copied button will be shown.
   copyAddress?: string;
-
-  // swap destination select 페이지에서 balance 숨기기 위한 옵션
-  hideBalance?: boolean;
 }
 
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
@@ -168,7 +165,6 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     isNotReady,
     altSentence,
     copyAddress,
-    hideBalance,
   }) => {
     const { priceStore } = useStore();
     const navigate = useNavigate();
@@ -381,28 +377,26 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
 
           <Columns sum={1} gutter="0.25rem" alignY="center">
             <Stack gutter="0.25rem" alignX="right">
-              {!hideBalance ? (
-                <Skeleton
-                  layer={1}
-                  isNotReady={isNotReady}
-                  dummyMinWidth="3.25rem"
+              <Skeleton
+                layer={1}
+                isNotReady={isNotReady}
+                dummyMinWidth="3.25rem"
+              >
+                <Subtitle3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-700"]
+                      : ColorPalette["gray-10"]
+                  }
                 >
-                  <Subtitle3
-                    color={
-                      theme.mode === "light"
-                        ? ColorPalette["gray-700"]
-                        : ColorPalette["gray-10"]
-                    }
-                  >
-                    {viewToken.token
-                      .hideDenom(true)
-                      .maxDecimals(6)
-                      .inequalitySymbol(true)
-                      .shrink(true)
-                      .toString()}
-                  </Subtitle3>
-                </Skeleton>
-              ) : null}
+                  {viewToken.token
+                    .hideDenom(true)
+                    .maxDecimals(6)
+                    .inequalitySymbol(true)
+                    .shrink(true)
+                    .toString()}
+                </Subtitle3>
+              </Skeleton>
               <Skeleton
                 layer={1}
                 isNotReady={isNotReady}
@@ -438,13 +432,6 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 ) : (
                   <Subtitle3 color={ColorPalette["gray-300"]}>
                     {(() => {
-                      // XXX: 이 부분에서 hide balance가 true더라도
-                      //      isNotReady 상태에서 스켈레톤이 여전히 보이는 문제가 있긴한데...
-                      //      어차피 이 prop을 쓰는 때는 한정되어있고 지금은 문제가 안되니 이 문제는 패스한다.
-                      if (hideBalance) {
-                        return "";
-                      }
-
                       if (altSentence) {
                         return altSentence;
                       }

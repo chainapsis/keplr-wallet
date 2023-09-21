@@ -24,24 +24,12 @@ const Styles = {
 };
 
 export const SendSelectAssetPage: FunctionComponent = observer(() => {
-  const { hugeQueriesStore, skipQueriesStore } = useStore();
+  const { hugeQueriesStore } = useStore();
   const navigate = useNavigate();
   const intl = useIntl();
   const theme = useTheme();
   const [searchParams] = useSearchParams();
-
-  /*
-    navigate(
-      `/send/select-asset?isIBCTransfer=true&navigateTo=${encodeURIComponent(
-        "/ibc-transfer?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
-      )}`
-    );
-    같은 형태로 써야함...
-   */
-  const paramNavigateTo = searchParams.get("navigateTo");
-  const paramNavigateReplace = searchParams.get("navigateReplace");
-  const paramIsIBCTransfer = searchParams.get("isIBCTransfer") === "true";
-  const paramIsIBCSwap = searchParams.get("isIBCSwap") === "true";
+  const paramIsIBCTransfer = searchParams.get("isIBCTransfer");
 
   const [search, setSearch] = useState("");
   const [hideIBCToken, setHideIBCToken] = useState(false);
@@ -50,7 +38,7 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
 
   const tokens = hugeQueriesStore.getAllBalances(!hideIBCToken);
 
-  const _filteredTokens = useMemo(() => {
+  const filteredTokens = useMemo(() => {
     const zeroDec = new Dec(0);
     const newTokens = tokens.filter((token) => {
       return token.token.toDec().gt(zeroDec);
@@ -81,18 +69,6 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
 
     return filtered;
   }, [paramIsIBCTransfer, search, tokens]);
-
-  const filteredTokens = _filteredTokens.filter((token) => {
-    if (paramIsIBCSwap) {
-      // skipQueriesStore.queryIBCSwap.isSwappableCurrency는 useMemo 안에 들어가면 observation이 안되서 따로 빼야한다...
-      return skipQueriesStore.queryIBCSwap.isSwappableCurrency(
-        token.chainInfo.chainId,
-        token.token.currency
-      );
-    }
-
-    return true;
-  });
 
   return (
     <HeaderLayout
@@ -140,20 +116,14 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
               viewToken={viewToken}
               key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
               onClick={() => {
-                if (paramNavigateTo) {
+                if (paramIsIBCTransfer === "true") {
                   navigate(
-                    paramNavigateTo
-                      .replace("{chainId}", viewToken.chainInfo.chainId)
-                      .replace(
-                        "{coinMinimalDenom}",
-                        viewToken.token.currency.coinMinimalDenom
-                      ),
-                    {
-                      replace: paramNavigateReplace === "true",
-                    }
+                    `/ibc-transfer?chainId=${viewToken.chainInfo.chainId}&coinMinimalDenom=${viewToken.token.currency.coinMinimalDenom}`
                   );
                 } else {
-                  console.error("Empty navigateTo param");
+                  navigate(
+                    `/send?chainId=${viewToken.chainInfo.chainId}&coinMinimalDenom=${viewToken.token.currency.coinMinimalDenom}`
+                  );
                 }
               }}
             />

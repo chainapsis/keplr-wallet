@@ -7,9 +7,12 @@ import React, {
 } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
+import { HeaderLayout } from "../../layouts/header";
+import { ProfileButton } from "../../layouts/header/components";
 import {
   Buttons,
   ClaimAll,
+  MenuBar,
   CopyAddress,
   IBCTransferView,
   BuyCryptoModal,
@@ -17,7 +20,8 @@ import {
 } from "./components";
 import { Stack } from "../../components/stack";
 import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
-import { ArrowTopRightOnSquareIcon } from "../../components/icon";
+import { ChainInfo } from "@keplr-wallet/types";
+import { ArrowTopRightOnSquareIcon, MenuIcon } from "../../components/icon";
 import { Box } from "../../components/box";
 import { Modal } from "../../components/modal";
 import { DualChart } from "./components/chart";
@@ -29,7 +33,10 @@ import { StakedTabView } from "./staked";
 import { SearchTextInput } from "../../components/input";
 import { useSpringValue } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
-import { IChainInfoImpl, QueryError } from "@keplr-wallet/stores";
+import { Columns } from "../../components/column";
+import { Tooltip } from "../../components/tooltip";
+import { Image } from "../../components/image";
+import { QueryError } from "@keplr-wallet/stores";
 import { Skeleton } from "../../components/skeleton";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
@@ -38,11 +45,10 @@ import { IbcHistoryView } from "./components/ibc-history-view";
 import { LayeredHorizontalRadioGroup } from "../../components/radio-group";
 import { YAxis } from "../../components/axis";
 import { DepositModal } from "./components/deposit-modal";
-import { MainHeaderLayout } from "./layouts/header";
 
 export interface ViewToken {
   token: CoinPretty;
-  chainInfo: IChainInfoImpl;
+  chainInfo: ChainInfo;
   isFetching: boolean;
   error: QueryError<any> | undefined;
 }
@@ -59,13 +65,36 @@ export const useIsNotReady = () => {
 type TabStatus = "available" | "staked";
 
 export const MainPage: FunctionComponent = observer(() => {
-  const { analyticsStore, hugeQueriesStore, uiConfigStore } = useStore();
+  const {
+    analyticsStore,
+    keyRingStore,
+    hugeQueriesStore,
+    uiConfigStore,
+    chainStore,
+    accountStore,
+    queriesStore,
+  } = useStore();
 
   const isNotReady = useIsNotReady();
   const intl = useIntl();
   const theme = useTheme();
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
+
+  const icnsPrimaryName = (() => {
+    if (
+      uiConfigStore.icnsInfo &&
+      chainStore.hasChain(uiConfigStore.icnsInfo.chainId)
+    ) {
+      const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
+      const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
+        uiConfigStore.icnsInfo.resolverContractAddress,
+        accountStore.getAccount(uiConfigStore.icnsInfo.chainId).bech32Address
+      );
+
+      return icnsQuery.primaryName.split(".")[0];
+    }
+  })();
 
   const availableTotalPrice = useMemo(() => {
     let result: PricePretty | undefined;
@@ -111,6 +140,7 @@ export const MainPage: FunctionComponent = observer(() => {
       ? Number.parseFloat(stakedTotalPrice.toDec().toString())
       : 0;
 
+  const [isOpenMenu, setIsOpenMenu] = React.useState(false);
   const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
 
@@ -124,9 +154,7 @@ export const MainPage: FunctionComponent = observer(() => {
       setSearch("");
 
       if (searchRef.current) {
-        searchRef.current.focus({
-          preventScroll: true,
-        });
+        searchRef.current.focus();
       }
     }
   }, [tabStatus, isNotReady]);
@@ -160,7 +188,48 @@ export const MainPage: FunctionComponent = observer(() => {
   const globalSimpleBar = useGlobarSimpleBar();
 
   return (
-    <MainHeaderLayout isNotReady={isNotReady}>
+    <HeaderLayout
+      isNotReady={isNotReady}
+      title={(() => {
+        const name = keyRingStore.selectedKeyInfo?.name || "Keplr Account";
+
+        if (icnsPrimaryName !== "") {
+          return (
+            <Columns sum={1} alignY="center" gutter="0.25rem">
+              <Box>{name}</Box>
+
+              <Tooltip
+                content={
+                  <div style={{ whiteSpace: "nowrap" }}>
+                    ICNS : {icnsPrimaryName}
+                  </div>
+                }
+              >
+                <Image
+                  alt="icns-icon"
+                  src={require(theme.mode === "light"
+                    ? "../../public/assets/img/icns-icon-light.png"
+                    : "../../public/assets/img/icns-icon.png")}
+                  style={{ width: "1rem", height: "1rem" }}
+                />
+              </Tooltip>
+            </Columns>
+          );
+        }
+
+        return name;
+      })()}
+      left={
+        <Box
+          paddingLeft="1rem"
+          onClick={() => setIsOpenMenu(true)}
+          cursor="pointer"
+        >
+          <MenuIcon />
+        </Box>
+      }
+      right={<ProfileButton />}
+    >
       <Box paddingX="0.75rem" paddingBottom="1.5rem">
         <Stack gutter="0.75rem">
           <YAxis alignX="center">
@@ -381,6 +450,14 @@ export const MainPage: FunctionComponent = observer(() => {
       </Box>
 
       <Modal
+        isOpen={isOpenMenu}
+        align="left"
+        close={() => setIsOpenMenu(false)}
+      >
+        <MenuBar close={() => setIsOpenMenu(false)} />
+      </Modal>
+
+      <Modal
         isOpen={isOpenDepositModal}
         align="bottom"
         close={() => setIsOpenDepositModal(false)}
@@ -397,6 +474,6 @@ export const MainPage: FunctionComponent = observer(() => {
       >
         <BuyCryptoModal close={() => setIsOpenBuy(false)} />
       </Modal>
-    </MainHeaderLayout>
+    </HeaderLayout>
   );
 });

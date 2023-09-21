@@ -6,21 +6,13 @@ import {
 } from "../common";
 import { ChainGetter } from "../chain";
 import { AccountSetBase, AccountSetBaseSuper, AccountSetOpts } from "./base";
-import { UnionToIntersection } from "utility-types";
+import { DeepReadonly, UnionToIntersection } from "utility-types";
 import { AccountSharedContext } from "./context";
 import { Keplr } from "@keplr-wallet/types";
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export interface IAccountStore<T extends IObject = {}> {
-  getAccount(chainId: string): AccountSetBase & T;
-  hasAccount(chainId: string): boolean;
-}
-
-export interface IAccountStoreWithInjects<Injects extends Array<IObject>> {
-  getAccount(
-    chainId: string
-  ): AccountSetBase & UnionToIntersection<Injects[number]>;
-  hasAccount(chainId: string): boolean;
+  getAccount(chainId: string): DeepReadonly<AccountSetBase & T>;
 }
 
 export class AccountStore<

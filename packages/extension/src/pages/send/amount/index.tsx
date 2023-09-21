@@ -97,11 +97,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   useEffect(() => {
     if (!initialChainId || !initialCoinMinimalDenom) {
-      navigate(
-        `/send/select-asset?navigateReplace=true&navigateTo=${encodeURIComponent(
-          "/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
-        )}`
-      );
+      navigate("/send/select-asset");
     }
   }, [navigate, initialChainId, initialCoinMinimalDenom]);
 
@@ -516,13 +512,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 error: balance?.error,
               }}
               forChange
-              onClick={() => {
-                navigate(
-                  `/send/select-asset?navigateReplace=true&navigateTo=${encodeURIComponent(
-                    "/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
-                  )}`
-                );
-              }}
+              onClick={() => navigate("/send/select-asset")}
             />
           </YAxis>
 

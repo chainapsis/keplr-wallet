@@ -12,7 +12,6 @@ import { Button2, H3 } from "../../../../components/typography";
 import { XAxis } from "../../../../components/axis";
 import { Bleed } from "../../../../components/bleed";
 import { FormattedMessage } from "react-intl";
-import { useLocation } from "react-router-dom";
 
 const Styles = {
   MenuItem: styled(H3)`
@@ -32,8 +31,6 @@ export const MenuBar: FunctionComponent<{
   close: () => void;
 }> = observer(({ close }) => {
   const { analyticsStore, keyRingStore } = useStore();
-
-  const location = useLocation();
 
   const theme = useTheme();
   const navigate = useNavigate();
@@ -119,15 +116,13 @@ export const MenuBar: FunctionComponent<{
           <FormattedMessage id="page.main.components.menu-bar.add-token-title" />
         </Styles.MenuItem>
 
-        {location.pathname !== "/setting" ? (
-          <Styles.MenuItem
-            onClick={() => {
-              navigate("/setting");
-            }}
-          >
-            <FormattedMessage id="page.main.components.menu-bar.setting-title" />
-          </Styles.MenuItem>
-        ) : null}
+        <Styles.MenuItem
+          onClick={() => {
+            navigate("/setting");
+          }}
+        >
+          <FormattedMessage id="page.main.components.menu-bar.setting-title" />
+        </Styles.MenuItem>
       </Stack>
 
       <Styles.Flex1 />

@@ -3,10 +3,9 @@ import {
   GetRecentSendHistoriesMsg,
   SendTxAndRecordMsg,
   SendTxAndRecordWithIBCPacketForwardingMsg,
-  SendTxAndRecordWithIBCSwapMsg,
-  GetIBCHistoriesMsg,
-  RemoveIBCHistoryMsg,
-  ClearAllIBCHistoryMsg,
+  GetIBCTransferHistories,
+  RemoveIBCTransferHistory,
+  ClearAllIBCTransferHistory,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -16,10 +15,9 @@ export function init(router: Router, service: RecentSendHistoryService): void {
   router.registerMessage(GetRecentSendHistoriesMsg);
   router.registerMessage(SendTxAndRecordMsg);
   router.registerMessage(SendTxAndRecordWithIBCPacketForwardingMsg);
-  router.registerMessage(SendTxAndRecordWithIBCSwapMsg);
-  router.registerMessage(GetIBCHistoriesMsg);
-  router.registerMessage(RemoveIBCHistoryMsg);
-  router.registerMessage(ClearAllIBCHistoryMsg);
+  router.registerMessage(GetIBCTransferHistories);
+  router.registerMessage(RemoveIBCTransferHistory);
+  router.registerMessage(ClearAllIBCTransferHistory);
 
   router.addHandler(ROUTE, getHandler(service));
 }

@@ -13,16 +13,13 @@ export const GuideBox: FunctionComponent<GuideBoxProps> = ({
   color = "default",
   titleRight,
   bottom,
-  hideInformationIcon,
 }) => {
   const theme = useTheme();
 
   return (
     <Styles.Container gutter="0.5rem" color={color}>
       <Columns sum={1} alignY="center" gutter="0.375rem">
-        {!hideInformationIcon ? (
-          <InformationIcon width="1.25rem" height="1.25rem" />
-        ) : null}
+        <InformationIcon width="1.25rem" height="1.25rem" />
         <Column weight={1}>
           <Subtitle4 color={getTitleColor(theme, color)}>{title}</Subtitle4>
         </Column>

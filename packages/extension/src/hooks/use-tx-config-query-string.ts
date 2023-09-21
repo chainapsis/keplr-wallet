@@ -15,7 +15,7 @@ export const useTxConfigsQueryString = (
   chainId: string,
   configs: {
     amountConfig: IAmountConfig;
-    recipientConfig?: IRecipientConfig;
+    recipientConfig: IRecipientConfig;
     memoConfig: IMemoConfig;
     feeConfig: IFeeConfig;
     gasConfig: IGasConfig;
@@ -47,7 +47,7 @@ export const useTxConfigsQueryString = (
     }
     const initialRecipient = searchParams.get("initialRecipient");
     if (initialRecipient) {
-      configs.recipientConfig?.setValue(initialRecipient);
+      configs.recipientConfig.setValue(initialRecipient);
     }
     const initialMemo = searchParams.get("initialMemo");
     if (initialMemo) {
@@ -83,10 +83,7 @@ export const useTxConfigsQueryString = (
   useEffect(() => {
     setSearchParams(
       (prev) => {
-        if (
-          configs.recipientConfig &&
-          configs.recipientConfig.value.trim().length > 0
-        ) {
+        if (configs.recipientConfig.value.trim().length > 0) {
           prev.set("initialRecipient", configs.recipientConfig.value);
         } else {
           prev.delete("initialRecipient");
@@ -152,7 +149,7 @@ export const useTxConfigsQueryString = (
     configs.gasSimulator.enabled,
     configs.gasSimulator.gasAdjustment,
     configs.memoConfig.value,
-    configs.recipientConfig?.value,
+    configs.recipientConfig.value,
     setSearchParams,
   ]);
 };

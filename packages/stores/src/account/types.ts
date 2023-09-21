@@ -35,10 +35,6 @@ export interface KeplrSignOptionsWithAltSignMethods extends KeplrSignOptions {
 }
 
 export interface MakeTxResponse {
-  ui: {
-    type(): string;
-    overrideType(type: string): void;
-  };
   msgs(): Promise<ProtoMsgsOrWithAminoMsgs>;
   simulate(
     fee?: Partial<Omit<StdFee, "gas">>,
