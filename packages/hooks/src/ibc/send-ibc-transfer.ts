@@ -93,6 +93,7 @@ export const useSendMixedIBCTransferConfig = (
       chainId: string;
       resolverContractAddress: string;
     };
+    computeTerraClassicTax?: boolean;
   } = {}
 ) => {
   const channelConfig = useIBCChannelConfig(!isIBCTransfer);
@@ -116,7 +117,12 @@ export const useSendMixedIBCTransferConfig = (
     chainId,
     senderConfig,
     amountConfig,
-    gasConfig
+    gasConfig,
+    {
+      computeTerraClassicTax: isIBCTransfer
+        ? false
+        : options.computeTerraClassicTax,
+    }
   );
 
   amountConfig.setFeeConfig(feeConfig);
