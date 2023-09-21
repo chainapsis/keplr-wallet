@@ -5,6 +5,7 @@ import {useStore} from '../../stores';
 import {Button} from '../../components/button';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import {TextInput} from '../../components/input';
+import {useSetFocusedScreen} from '../../components/page/utils';
 
 export const LockedScreen: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
@@ -12,6 +13,7 @@ export const LockedScreen: FunctionComponent = observer(() => {
   const [isFailed, setIsFailed] = useState(false);
   const [password, setPassword] = useState('');
 
+  useSetFocusedScreen();
   const doUnlock = async () => {
     try {
       await keyRingStore.unlock(password);
@@ -22,7 +24,6 @@ export const LockedScreen: FunctionComponent = observer(() => {
       setIsFailed(true);
     }
   };
-
   return (
     <React.Fragment>
       <View>
