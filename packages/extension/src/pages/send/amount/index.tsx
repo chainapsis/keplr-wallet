@@ -126,6 +126,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         .getChain(chainId)
         .chainId.startsWith("injective"),
       icns: ICNSInfo,
+      computeTerraClassicTax: true,
     }
   );
 

@@ -38,6 +38,7 @@ import Color from "color";
 import { SpecialButton } from "../../../../components/special-button";
 import { Gutter } from "../../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
+import { ChainImageFallback } from "../../../../components/image";
 
 const Styles = {
   Container: styled.div<{ isNotReady?: boolean }>`
@@ -721,9 +722,12 @@ const ClaimTokenItem: FunctionComponent<{
     <Box padding="1rem">
       <Columns sum={1} alignY="center">
         {viewToken.token.currency.coinImageUrl && (
-          <img
-            width="32px"
-            height="32px"
+          <ChainImageFallback
+            style={{
+              width: "2rem",
+              height: "2rem",
+            }}
+            alt={viewToken.token.currency.coinDenom}
             src={viewToken.token.currency.coinImageUrl}
           />
         )}
