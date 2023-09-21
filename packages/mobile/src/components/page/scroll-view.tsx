@@ -12,6 +12,7 @@ import {
 import {useStyle} from '../../styles';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {BackgroundMode, ScreenBackground} from './background';
+import {useSetFocusedScreen} from './utils';
 
 const AnimatedKeyboardAwareScrollView = Animated.createAnimatedComponent(
   KeyboardAwareScrollView,
@@ -29,6 +30,7 @@ export const PageWithScrollView = forwardRef<
     }
   >
 >((props, ref) => {
+  useSetFocusedScreen();
   const style = useStyle();
 
   const {
