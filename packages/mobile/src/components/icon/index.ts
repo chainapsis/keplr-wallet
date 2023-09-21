@@ -7,3 +7,4 @@ export * from './menu';
 export * from './browser';
 export * from './setting';
 export * from './wallet';
+export * from './close';
