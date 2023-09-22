@@ -15,7 +15,7 @@ import {
 } from "../../../../components/icon";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
-import { Dec, Int, PricePretty } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, Int, PricePretty } from "@keplr-wallet/unit";
 import {
   AminoSignResponse,
   BroadcastMode,
@@ -271,13 +271,36 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
               // Since there is currently no convenient way to adjust the gas adjustment on the UI,
               // Use high gas adjustment to prevent failure.
               const gasEstimated = new Dec(simulated.gasUsed * 1.5).truncate();
-              const fee = {
+              let fee = {
                 denom: feeCurrency.coinMinimalDenom,
                 amount: new Dec(feeCurrency.gasPriceStep?.average ?? 0.025)
                   .mul(new Dec(gasEstimated))
                   .roundUp()
                   .toString(),
               };
+
+              // coingecko로부터 캐시가 있거나 response를 최소한 한번은 받았다는 걸 보장한다.
+              await priceStore.waitResponse();
+              // USD 기준으로 average fee가 0.2달러를 넘으면 low로 설정해서 보낸다.
+              const averageFeePrice = priceStore.calculatePrice(
+                new CoinPretty(feeCurrency, fee.amount),
+                "usd"
+              );
+              if (
+                averageFeePrice &&
+                averageFeePrice.toDec().gte(new Dec(0.2))
+              ) {
+                fee = {
+                  denom: feeCurrency.coinMinimalDenom,
+                  amount: new Dec(feeCurrency.gasPriceStep?.low ?? 0.025)
+                    .mul(new Dec(gasEstimated))
+                    .roundUp()
+                    .toString(),
+                };
+                console.log(
+                  `(${chainId}) Choose low gas price because average fee price is greater or equal than 0.2 USD`
+                );
+              }
 
               const balance = queries.queryBalances
                 .getQueryBech32Address(account.bech32Address)
