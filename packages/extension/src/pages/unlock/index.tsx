@@ -19,6 +19,7 @@ import { XAxis } from "../../components/axis";
 import { autorun } from "mobx";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
+import { Buffer } from "buffer/";
 
 export const UnlockPage: FunctionComponent = observer(() => {
   const { keyRingStore, interactionStore } = useStore();
@@ -94,11 +95,21 @@ export const UnlockPage: FunctionComponent = observer(() => {
     }
   }, [animLoading]);
 
+  // post message를 쓸때 browser.extension.getViews()를 쓰는데 자기 자신을 제외하는 옵션은 없는 것 같음.
+  // 그냥 대충 각 view가 고유의 id를 가상으로 가지게 해서 처리한다.
+  const [viewPostMessageId] = useState(() => {
+    const bytes = new Uint8Array(10);
+    crypto.getRandomValues(bytes);
+    return Buffer.from(bytes).toString("hex");
+  });
+
   const tryUnlock = async (password: string) => {
     try {
       setIsLoading(true);
 
       await keyRingStore.unlock(password);
+
+      let closeWindowAfterProceedNext = false;
 
       if (interactionInfo.interaction) {
         // Approve all waiting interaction for the enabling key ring.
@@ -112,11 +123,27 @@ export const UnlockPage: FunctionComponent = observer(() => {
               !interactionInfo.interactionInternal
             ) {
               if (!proceedNext) {
-                window.close();
+                closeWindowAfterProceedNext = true;
               }
             }
           }
         );
+      }
+
+      for (const view of browser.extension.getViews()) {
+        view.postMessage(
+          {
+            type: "__keplr_unlocked_from_view",
+            viewId: viewPostMessageId,
+            interaction: interactionInfo.interaction,
+            interactionInternal: interactionInfo.interactionInternal,
+          },
+          new URL(browser.extension.getURL("/")).origin
+        );
+      }
+
+      if (closeWindowAfterProceedNext) {
+        window.close();
       }
 
       setError(undefined);
@@ -131,6 +158,78 @@ export const UnlockPage: FunctionComponent = observer(() => {
       setIsLoading(false);
     }
   };
+
+  // view가 여러개일때 (예를들어 extension popup의 unlock 창과 외부 요청에 의해 unlock window가 열린 상태일때
+  // 한 곳에서 unlock이 완료되면 다른 view에서도 적절하게 처리해준다.
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === "__keplr_unlocked_from_view") {
+        if (e.data.viewId !== viewPostMessageId) {
+          const isFromInteraction = e.data.interaction;
+          if (isFromInteraction == null) {
+            return;
+          }
+          if (interactionInfo.interaction) {
+            if (isFromInteraction) {
+              // interaction이면 다른 view에서 위의 tryUnlock()에 의해서
+              // 이미 interaction은 다 approve 처리가 됐을 것이다.
+              // XXX: 현재로서는 어차피 keplr가 다른 종류의 interaction이 동시에 오면 제대로 처리 못한다...
+              //      일단 다른 종류의 interaction이 오는 경우 중에 제대로 된 use case는 없기 때문에
+              //      이 문제는 당장은 해결하지 않는다.
+              //      어차피 다음 다른 종류의 interaction은 제대로 처리될 수 없으므로 그냥 창을 닫는다.
+              if (interactionInfo.interactionInternal) {
+                window.close();
+              } else {
+                keyRingStore.refreshKeyRingStatus();
+              }
+            } else {
+              // Approve all waiting interaction for the enabling key ring.
+              const interactions = interactionStore.getAllData("unlock");
+              (async () => {
+                try {
+                  interactionStore.approveWithProceedNextV2(
+                    interactions.map((interaction) => interaction.id),
+                    {},
+                    (proceedNext) => {
+                      if (!interactionInfo.interactionInternal) {
+                        if (!proceedNext) {
+                          window.close();
+                        }
+                      } else {
+                        keyRingStore.refreshKeyRingStatus();
+                      }
+                    }
+                  );
+                } catch (e) {
+                  console.log(e);
+
+                  if (!interactionInfo.interactionInternal) {
+                    window.close();
+                  } else {
+                    keyRingStore.refreshKeyRingStatus();
+                  }
+                }
+              })();
+            }
+          } else {
+            keyRingStore.refreshKeyRingStatus();
+          }
+        }
+      }
+    };
+
+    window.addEventListener("message", handler);
+
+    return () => {
+      window.removeEventListener("message", handler);
+    };
+  }, [
+    interactionInfo.interaction,
+    interactionInfo.interactionInternal,
+    interactionStore,
+    keyRingStore,
+    viewPostMessageId,
+  ]);
 
   return (
     <Box height="100vh" paddingX="1.5rem">
