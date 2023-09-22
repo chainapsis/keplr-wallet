@@ -8,7 +8,7 @@ import {useStore} from '../../stores';
 import {Box} from '../box';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {HeaderBackButtonIcon} from './icon/back';
-import {StackHeaderLeftButtonProps} from '@react-navigation/stack';
+import {HeaderBackButtonProps} from '@react-navigation/native-stack/lib/typescript/src/types';
 
 const HomeScreenHeaderLeft: FunctionComponent = () => {
   const style = useStyle();
@@ -58,8 +58,7 @@ export const HomeScreenHeader = observer(() => {
           'border-color-gray-600',
         ]),
         {
-          height: insect.top + 48,
-          paddingTop: insect.top,
+          paddingTop: insect.top + 10,
         },
       ])}>
       <View
@@ -141,7 +140,7 @@ const DefaultScreenHeaderTitle: FunctionComponent<PropsWithChildren> = ({
   );
 };
 const DefaultScreenHeaderLeft: FunctionComponent<
-  StackHeaderLeftButtonProps
+  HeaderBackButtonProps
 > = props => {
   const style = useStyle();
   const nav = useNavigation();
@@ -167,6 +166,8 @@ const DefaultScreenHeaderLeft: FunctionComponent<
 
 export const defaultHeaderOptions = {
   headerTitle: DefaultScreenHeaderTitle,
+  headerTitleAlign: 'center' as 'center' | 'left',
+  headerBackVisible: false,
   headerStyle: {
     backgroundColor: ColorPalette['gray-700'],
   },

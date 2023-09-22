@@ -5,6 +5,7 @@ import {
   TabActions,
   useNavigation,
   StackActions,
+  DrawerActions,
 } from '@react-navigation/native';
 import {Pressable, StyleSheet, Text} from 'react-native';
 import {useStyle} from '../../styles';
@@ -19,6 +20,10 @@ export const DrawerContent: FunctionComponent = observer(() => {
 
   const handleLock = () => {
     navigation.dispatch(StackActions.replace('Locked'));
+  };
+
+  const drawerClose = () => {
+    navigation.dispatch(DrawerActions.closeDrawer());
   };
 
   return (
@@ -51,11 +56,12 @@ export const DrawerContent: FunctionComponent = observer(() => {
             <Text style={style.flatten(['h3', 'color-white'])}>Add Token</Text>
           </Pressable>
           <Pressable
-            onPress={() =>
+            onPress={() => {
+              drawerClose();
               navigation.dispatch({
                 ...TabActions.jumpTo('Settings'),
-              })
-            }>
+              });
+            }}>
             <Text style={style.flatten(['h3', 'color-white'])}>Settings</Text>
           </Pressable>
         </Stack>

@@ -17,20 +17,13 @@ import {LockedScreen} from './screen/locked';
 import {RegisterEnableChainScreen} from './screen/register/enable-chain';
 import {createDrawerNavigator, useDrawerStatus} from '@react-navigation/drawer';
 import {DrawerContent} from './components/drawer';
-
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {
   FocusedScreenProvider,
   useFocusedScreen,
 } from './provider/focused-screen';
-import {SettingIcon} from './components/icon/setting';
-import {BrowserIcon} from './components/icon/browser';
-import {WalletIcon} from './components/icon/wallet';
-
-import {
-  HomeScreenHeader,
-  defaultHeaderOptions,
-} from './components/pageHeader/header';
+import {WalletIcon, BrowserIcon, SettingIcon} from './components/icon';
+import {HomeScreenHeader, defaultHeaderOptions} from './components/pageHeader';
 
 export type RootStackParamList = {
   Home: undefined;
