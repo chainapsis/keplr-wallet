@@ -2,23 +2,26 @@ import React, {FunctionComponent} from 'react';
 import {observer} from 'mobx-react-lite';
 import {DrawerContentScrollView} from '@react-navigation/drawer';
 import {
-  TabActions,
   useNavigation,
   StackActions,
   DrawerActions,
 } from '@react-navigation/native';
-import {Pressable, StyleSheet, Text} from 'react-native';
+import {Pressable, Text} from 'react-native';
 import {useStyle} from '../../styles';
 import {Box} from '../box';
 
 import {Stack} from '../stack';
+import {useStore} from '../../stores';
 
 export const DrawerContent: FunctionComponent = observer(() => {
+  const {keyRingStore} = useStore();
   const navigation = useNavigation();
 
   const style = useStyle();
 
   const handleLock = () => {
+    keyRingStore.lock();
+    drawerClose();
     navigation.dispatch(StackActions.replace('Locked'));
   };
 
@@ -28,15 +31,19 @@ export const DrawerContent: FunctionComponent = observer(() => {
 
   return (
     <DrawerContentScrollView
-      contentContainerStyle={StyleSheet.flatten([
+      contentContainerStyle={[
         style.flatten([
           'height-full',
           'flex-column',
           'justify-between',
           'padding-x-20',
         ]),
-        {paddingTop: 58, paddingBottom: 58, paddingLeft: 20},
-      ])}>
+      ]}
+      style={{
+        paddingTop: 58,
+        paddingBottom: 58,
+        paddingLeft: 20,
+      }}>
       <Stack gutter={32}>
         <Pressable>
           <Text style={style.flatten(['h3', 'color-white'])}>
@@ -54,15 +61,6 @@ export const DrawerContent: FunctionComponent = observer(() => {
           </Pressable>
           <Pressable>
             <Text style={style.flatten(['h3', 'color-white'])}>Add Token</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              drawerClose();
-              navigation.dispatch({
-                ...TabActions.jumpTo('Settings'),
-              });
-            }}>
-            <Text style={style.flatten(['h3', 'color-white'])}>Settings</Text>
           </Pressable>
         </Stack>
       </Stack>
