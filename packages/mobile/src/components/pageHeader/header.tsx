@@ -58,7 +58,7 @@ export const HomeScreenHeader = observer(() => {
           'border-color-gray-600',
         ]),
         {
-          paddingTop: insect.top + 10,
+          paddingTop: insect.top,
         },
       ])}>
       <View
@@ -88,48 +88,12 @@ export const HomeScreenHeader = observer(() => {
   );
 });
 
-// const DefaultScreenHeader: FunctionComponent<NativeStackHeaderProps> = ({
-//   route,
-//   options,
-// }) => {
-//   const title = getHeaderTitle(options, route.name);
-//   const style = useStyle();
-//   const insect = useSafeAreaInsets();
-//   return (
-//     <View
-//       style={StyleSheet.flatten([
-//         style.flatten([
-//           'text-center',
-//           'flex-column',
-//           'justify-center',
-//           'padding-bottom-18',
-//           'background-color-background-default',
-//           'border-width-bottom-1',
-//           'border-color-gray-600',
-//         ]),
-//         {
-//           height: insect.top + 64,
-//           paddingTop: insect.top,
-//         },
-//         options.headerStyle,
-//       ])}>
-//       <Text
-//         style={StyleSheet.flatten([
-//           style.flatten(['h4', 'color-white', 'text-center']),
-//           options.headerStyle,
-//         ])}>
-//         {title}
-//       </Text>
-//     </View>
-//   );
-// };
-
 const DefaultScreenHeaderTitle: FunctionComponent<PropsWithChildren> = ({
   children,
 }) => {
   const style = useStyle();
   return (
-    <View style={StyleSheet.flatten([style.flatten(['padding-bottom-18'])])}>
+    <View>
       <Text
         style={StyleSheet.flatten([
           style.flatten(['h4', 'color-white', 'text-center']),
