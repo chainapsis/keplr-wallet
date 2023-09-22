@@ -537,18 +537,23 @@ export const GovernanceVoteModal: FunctionComponent<{
           text="Vote"
           size="large"
           disabled={vote === "Unspecified" || !account.isReadyToSendMsgs}
-          loading={isSendingTx || account.isSendingMsg === "govVote"}
+          loading={
+            isSendingTx ||
+            account.isSendingMsg === "govVote" ||
+            account.isSendingMsg === "govV1Vote"
+          }
           onPress={async () => {
             if (vote !== "Unspecified" && account.isReadyToSendMsgs) {
               const tx = GovernanceV1ChainIdentifiers.includes(chainIdentifier)
                 ? account.cosmos.makeGovV1VoteTx(proposalId, vote)
                 : account.cosmos.makeGovVoteTx(proposalId, vote);
 
+              console.log("tx", tx);
               setIsSendingTx(true);
 
               try {
                 let gas = GovernanceV1ChainIdentifiers.includes(chainIdentifier)
-                  ? account.cosmos.msgOpts.govVoteV1.gas
+                  ? account.cosmos.msgOpts.govV1Vote.gas
                   : account.cosmos.msgOpts.govVote.gas;
 
                 // Gas adjustment is 1.5
@@ -557,13 +562,10 @@ export const GovernanceVoteModal: FunctionComponent<{
                 try {
                   gas = (await tx.simulate()).gasUsed * 1.5;
                 } catch (e) {
-                  console.log("simulation error", e.message);
                   // Some chain with older version of cosmos sdk (below @0.43 version) can't handle the simulation.
                   // Therefore, the failure is expected. If the simulation fails, simply use the default value.
                   console.log(e);
                 }
-
-                console.log("gas", gas.toString());
 
                 await tx.send(
                   { amount: [], gas: gas.toString() },
@@ -585,7 +587,6 @@ export const GovernanceVoteModal: FunctionComponent<{
                 );
                 close();
               } catch (e) {
-                console.log("error", e.message);
                 if (e?.message === "Request rejected") {
                   return;
                 }

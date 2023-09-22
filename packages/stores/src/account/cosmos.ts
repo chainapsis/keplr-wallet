@@ -1844,7 +1844,6 @@ export class CosmosAccountImpl {
         option: voteOption,
         proposal_id: proposalId,
         voter: this.base.bech32Address,
-        metadata: Buffer.from(""),
       },
     };
 
