@@ -26,6 +26,7 @@ import { useSmartNavigation } from "../../navigation";
 import MarkdownIt from "markdown-it";
 import { MemoizedHtmlRender } from "./internal/markdown";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { GovernanceV1ChainIdentifiers } from "../../config";
 
 export const TallyVoteInfoView: FunctionComponent<{
   vote: "yes" | "no" | "abstain" | "noWithVeto";
@@ -104,10 +105,14 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
 
   const style = useStyle();
 
+  const chainIdentifier = ChainIdHelper.parse(chainStore.current.chainId)
+    .identifier;
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
 
-  const proposal = queries.cosmos.queryGovernance.getProposal(proposalId);
+  const proposal = GovernanceV1ChainIdentifiers.includes(chainIdentifier)
+    ? queries.cosmos.queryGovernanceV1.getProposal(proposalId)
+    : queries.cosmos.queryGovernance.getProposal(proposalId);
 
   const voted = (() => {
     if (!proposal) {
@@ -119,10 +124,11 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
       return undefined;
     }
 
-    return queries.cosmos.queryProposalVote.getVote(
-      proposal.id,
-      account.bech32Address
-    ).vote;
+    const voteQuery = GovernanceV1ChainIdentifiers.includes(chainIdentifier)
+      ? queries.cosmos.queryProposalVoteV1
+      : queries.cosmos.queryProposalVote;
+
+    return voteQuery.getVote(proposal.id, account.bech32Address).vote;
   })();
 
   const proposalDescription = proposal?.description;
@@ -368,10 +374,14 @@ export const GovernanceVoteModal: FunctionComponent<{
       analyticsStore,
     } = useStore();
 
+    const chainIdentifier = ChainIdHelper.parse(chainStore.current.chainId)
+      .identifier;
     const account = accountStore.getAccount(chainStore.current.chainId);
     const queries = queriesStore.get(chainStore.current.chainId);
 
-    const proposal = queries.cosmos.queryGovernance.getProposal(proposalId);
+    const proposal = GovernanceV1ChainIdentifiers.includes(chainIdentifier)
+      ? queries.cosmos.queryGovernanceV1.getProposal(proposalId)
+      : queries.cosmos.queryGovernance.getProposal(proposalId);
 
     const style = useStyle();
 
@@ -530,12 +540,16 @@ export const GovernanceVoteModal: FunctionComponent<{
           loading={isSendingTx || account.isSendingMsg === "govVote"}
           onPress={async () => {
             if (vote !== "Unspecified" && account.isReadyToSendMsgs) {
-              const tx = account.cosmos.makeGovVoteTx(proposalId, vote);
+              const tx = GovernanceV1ChainIdentifiers.includes(chainIdentifier)
+                ? account.cosmos.makeGovV1VoteTx(proposalId, vote)
+                : account.cosmos.makeGovVoteTx(proposalId, vote);
 
               setIsSendingTx(true);
 
               try {
-                let gas = account.cosmos.msgOpts.govVote.gas;
+                let gas = GovernanceV1ChainIdentifiers.includes(chainIdentifier)
+                  ? account.cosmos.msgOpts.govVoteV1.gas
+                  : account.cosmos.msgOpts.govVote.gas;
 
                 // Gas adjustment is 1.5
                 // Since there is currently no convenient way to adjust the gas adjustment on the UI,
@@ -543,10 +557,13 @@ export const GovernanceVoteModal: FunctionComponent<{
                 try {
                   gas = (await tx.simulate()).gasUsed * 1.5;
                 } catch (e) {
+                  console.log("simulation error", e.message);
                   // Some chain with older version of cosmos sdk (below @0.43 version) can't handle the simulation.
                   // Therefore, the failure is expected. If the simulation fails, simply use the default value.
                   console.log(e);
                 }
+
+                console.log("gas", gas.toString());
 
                 await tx.send(
                   { amount: [], gas: gas.toString() },
@@ -568,6 +585,7 @@ export const GovernanceVoteModal: FunctionComponent<{
                 );
                 close();
               } catch (e) {
+                console.log("error", e.message);
                 if (e?.message === "Request rejected") {
                   return;
                 }
@@ -604,10 +622,14 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
 
   const proposalId = route.params.proposalId;
 
+  const chainIdentifier = ChainIdHelper.parse(chainStore.current.chainId)
+    .identifier;
   const queries = queriesStore.get(chainStore.current.chainId);
   const account = accountStore.getAccount(chainStore.current.chainId);
 
-  const proposal = queries.cosmos.queryGovernance.getProposal(proposalId);
+  const proposal = GovernanceV1ChainIdentifiers.includes(chainIdentifier)
+    ? queries.cosmos.queryGovernanceV1.getProposal(proposalId)
+    : queries.cosmos.queryGovernance.getProposal(proposalId);
 
   const voteEnabled =
     proposal?.proposalStatus === Governance.ProposalStatus.VOTING_PERIOD;

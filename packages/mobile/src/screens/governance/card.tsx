@@ -2,7 +2,11 @@ import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useStyle } from "../../styles";
-import { Governance, ObservableQueryProposal } from "@keplr-wallet/stores";
+import {
+  Governance,
+  ObservableQueryProposal,
+  ObservableQueryProposalV1,
+} from "@keplr-wallet/stores";
 import { Chip } from "../../components/chip";
 import { CardBody } from "../../components/card";
 import { Text, View } from "react-native";
@@ -11,6 +15,8 @@ import { useIntl } from "react-intl";
 import { dateToLocalString } from "./utils";
 import { useSmartNavigation } from "../../navigation";
 import { RectButton } from "../../components/rect-button";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { GovernanceV1ChainIdentifiers } from "../../config";
 
 export const GovernanceProposalStatusChip: FunctionComponent<{
   status: Governance.ProposalStatus;
@@ -42,11 +48,22 @@ export const GovernanceCardBody: FunctionComponent<{
 
   const intl = useIntl();
 
+  const chainIdentifier = ChainIdHelper.parse(chainStore.current.chainId)
+    .identifier;
   const queries = queriesStore.get(chainStore.current.chainId);
-  const queryGovernance = queries.cosmos.queryGovernance;
+
+  const queryGovernance = GovernanceV1ChainIdentifiers.includes(chainIdentifier)
+    ? queries.cosmos.queryGovernanceV1
+    : queries.cosmos.queryGovernance;
   const proposal = queryGovernance.getProposal(proposalId);
 
-  const renderProposalDateString = (proposal: ObservableQueryProposal) => {
+  const renderProposalDateString = (
+    proposal: ObservableQueryProposal | ObservableQueryProposalV1 | undefined
+  ) => {
+    if (!proposal) {
+      return "";
+    }
+
     switch (proposal.proposalStatus) {
       case Governance.ProposalStatus.DEPOSIT_PERIOD:
         return `Voting ends: ${dateToLocalString(

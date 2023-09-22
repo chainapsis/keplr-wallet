@@ -4,8 +4,14 @@ import { ViewStyle } from "react-native";
 import { observer } from "mobx-react-lite";
 import { GovernanceCardBody } from "../governance";
 import { useStore } from "../../stores";
-import { ObservableQueryProposal, Governance } from "@keplr-wallet/stores";
+import {
+  ObservableQueryProposal,
+  Governance,
+  ObservableQueryProposalV1,
+} from "@keplr-wallet/stores";
 import { useSmartNavigation } from "../../navigation";
+import { GovernanceV1ChainIdentifiers } from "../../config";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export const GovernanceCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -14,8 +20,14 @@ export const GovernanceCard: FunctionComponent<{
 
   const queries = queriesStore.get(chainStore.current.chainId);
 
-  const allProposals = queries.cosmos.queryGovernance.proposals.filter(
-    (proposal) =>
+  const chainIdentifier = ChainIdHelper.parse(chainStore.current.chainId)
+    .identifier;
+  const proposalQuery = GovernanceV1ChainIdentifiers.includes(chainIdentifier)
+    ? queries.cosmos.queryGovernanceV1.proposals
+    : queries.cosmos.queryGovernance.proposals;
+
+  const allProposals = proposalQuery.filter(
+    (proposal: ObservableQueryProposal | ObservableQueryProposalV1) =>
       !scamProposalStore.isScamProposal(chainStore.current.chainId, proposal.id)
   );
 
@@ -24,18 +36,18 @@ export const GovernanceCard: FunctionComponent<{
   // If, there are no proposals on voting period,
   // just show the recent proposal with taking precedence to the non deposit period proposal.
   const showingProposals = useMemo(() => {
-    let result: ObservableQueryProposal[] = [];
+    let result: (ObservableQueryProposal | ObservableQueryProposalV1)[] = [];
     if (allProposals.length > 0) {
       result = result.concat(
         allProposals.filter(
-          (proposal) =>
+          (proposal: ObservableQueryProposal | ObservableQueryProposalV1) =>
             proposal.proposalStatus === Governance.ProposalStatus.VOTING_PERIOD
         )
       );
 
       if (result.length === 0) {
         const nonDepositPeriodProposals = allProposals.filter(
-          (proposal) =>
+          (proposal: ObservableQueryProposal | ObservableQueryProposalV1) =>
             proposal.proposalStatus !== Governance.ProposalStatus.DEPOSIT_PERIOD
         );
         if (nonDepositPeriodProposals.length > 0) {

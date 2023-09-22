@@ -2468,3 +2468,5 @@ export const CommunityChainInfoRepo = {
   repoName: "keplr-chain-registry",
   branchName: "main",
 };
+
+export const GovernanceV1ChainIdentifiers = ["kyve"];

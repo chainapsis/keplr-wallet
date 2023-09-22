@@ -151,7 +151,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
       {!(
         chainStore.current.chainId.startsWith("quicksilver") ||
-        chainStore.current.chainId.startsWith("kyve") ||
         chainStore.current.chainId.startsWith("neutron")
       ) ? (
         <GovernanceCard
