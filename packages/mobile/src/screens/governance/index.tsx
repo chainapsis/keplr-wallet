@@ -17,31 +17,41 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
   const { chainStore, queriesStore, scamProposalStore } = useStore();
 
   const style = useStyle();
-
-  const chainIdentifier = ChainIdHelper.parse(chainStore.current.chainId)
-    .identifier;
   const queries = queriesStore.get(chainStore.current.chainId);
 
   const sections = useMemo(() => {
-    const proposals = (GovernanceV1ChainIdentifiers.includes(chainIdentifier)
+    const isGovernanceV1 = GovernanceV1ChainIdentifiers.includes(
+      ChainIdHelper.parse(chainStore.current.chainId).identifier
+    );
+
+    // proposalQuery 의 형식은 _DeepReadonlyArray<ObservableQueryProposal> | _DeepReadonlyArray<ObservableQueryProposalV1>이다
+    // _DeepReadonlyArray를 유니온 한 타입은 filter를 사용했을 때 타입이 제대로 유추되지 않는다. any로 추론된다.
+    const proposals = (isGovernanceV1
       ? queries.cosmos.queryGovernanceV1.proposals
       : queries.cosmos.queryGovernance.proposals
-    ).filter(
-      (proposal: ObservableQueryProposal | ObservableQueryProposalV1) =>
-        !scamProposalStore.isScamProposal(
-          chainStore.current.chainId,
-          proposal.id
-        )
-    );
+    )
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      .filter(
+        (proposal: ObservableQueryProposal | ObservableQueryProposalV1) =>
+          !scamProposalStore.isScamProposal(
+            chainStore.current.chainId,
+            proposal.id
+          )
+      );
 
     return [
       {
         data: proposals.filter(
-          (p) => p.proposalStatus !== ProposalStatus.DEPOSIT_PERIOD
+          (p: ObservableQueryProposal | ObservableQueryProposalV1) =>
+            p.proposalStatus !== ProposalStatus.DEPOSIT_PERIOD
         ),
       },
     ];
-  }, [queries.cosmos.queryGovernance.proposals]);
+  }, [
+    queries.cosmos.queryGovernance.proposals,
+    queries.cosmos.queryGovernanceV1.proposals,
+  ]);
 
   return (
     <PageWithSectionList

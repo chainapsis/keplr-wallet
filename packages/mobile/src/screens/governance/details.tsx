@@ -105,12 +105,13 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
 
   const style = useStyle();
 
-  const chainIdentifier = ChainIdHelper.parse(chainStore.current.chainId)
-    .identifier;
+  const isGovernanceV1 = GovernanceV1ChainIdentifiers.includes(
+    ChainIdHelper.parse(chainStore.current.chainId).identifier
+  );
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
 
-  const proposal = GovernanceV1ChainIdentifiers.includes(chainIdentifier)
+  const proposal = isGovernanceV1
     ? queries.cosmos.queryGovernanceV1.getProposal(proposalId)
     : queries.cosmos.queryGovernance.getProposal(proposalId);
 
@@ -124,7 +125,7 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
       return undefined;
     }
 
-    const voteQuery = GovernanceV1ChainIdentifiers.includes(chainIdentifier)
+    const voteQuery = isGovernanceV1
       ? queries.cosmos.queryProposalVoteV1
       : queries.cosmos.queryProposalVote;
 
@@ -374,12 +375,13 @@ export const GovernanceVoteModal: FunctionComponent<{
       analyticsStore,
     } = useStore();
 
-    const chainIdentifier = ChainIdHelper.parse(chainStore.current.chainId)
-      .identifier;
+    const isGovernanceV1 = GovernanceV1ChainIdentifiers.includes(
+      ChainIdHelper.parse(chainStore.current.chainId).identifier
+    );
     const account = accountStore.getAccount(chainStore.current.chainId);
     const queries = queriesStore.get(chainStore.current.chainId);
 
-    const proposal = GovernanceV1ChainIdentifiers.includes(chainIdentifier)
+    const proposal = isGovernanceV1
       ? queries.cosmos.queryGovernanceV1.getProposal(proposalId)
       : queries.cosmos.queryGovernance.getProposal(proposalId);
 
@@ -544,7 +546,7 @@ export const GovernanceVoteModal: FunctionComponent<{
           }
           onPress={async () => {
             if (vote !== "Unspecified" && account.isReadyToSendMsgs) {
-              const tx = GovernanceV1ChainIdentifiers.includes(chainIdentifier)
+              const tx = isGovernanceV1
                 ? account.cosmos.makeGovV1VoteTx(proposalId, vote)
                 : account.cosmos.makeGovVoteTx(proposalId, vote);
 
@@ -552,7 +554,7 @@ export const GovernanceVoteModal: FunctionComponent<{
               setIsSendingTx(true);
 
               try {
-                let gas = GovernanceV1ChainIdentifiers.includes(chainIdentifier)
+                let gas = isGovernanceV1
                   ? account.cosmos.msgOpts.govV1Vote.gas
                   : account.cosmos.msgOpts.govVote.gas;
 
@@ -623,12 +625,13 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
 
   const proposalId = route.params.proposalId;
 
-  const chainIdentifier = ChainIdHelper.parse(chainStore.current.chainId)
-    .identifier;
+  const isGovernanceV1 = GovernanceV1ChainIdentifiers.includes(
+    ChainIdHelper.parse(chainStore.current.chainId).identifier
+  );
   const queries = queriesStore.get(chainStore.current.chainId);
   const account = accountStore.getAccount(chainStore.current.chainId);
 
-  const proposal = GovernanceV1ChainIdentifiers.includes(chainIdentifier)
+  const proposal = isGovernanceV1
     ? queries.cosmos.queryGovernanceV1.getProposal(proposalId)
     : queries.cosmos.queryGovernance.getProposal(proposalId);
 

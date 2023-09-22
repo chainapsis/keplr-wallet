@@ -20,12 +20,17 @@ export const GovernanceCard: FunctionComponent<{
 
   const queries = queriesStore.get(chainStore.current.chainId);
 
-  const chainIdentifier = ChainIdHelper.parse(chainStore.current.chainId)
-    .identifier;
-  const proposalQuery = GovernanceV1ChainIdentifiers.includes(chainIdentifier)
+  const isGovernanceV1 = GovernanceV1ChainIdentifiers.includes(
+    ChainIdHelper.parse(chainStore.current.chainId).identifier
+  );
+  const proposalQuery = isGovernanceV1
     ? queries.cosmos.queryGovernanceV1.proposals
     : queries.cosmos.queryGovernance.proposals;
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  // proposalQuery 의 형식은 _DeepReadonlyArray<ObservableQueryProposal> | _DeepReadonlyArray<ObservableQueryProposalV1>이다
+  // _DeepReadonlyArray를 유니온 한 타입은 filter를 사용했을 때 타입이 제대로 유추되지 않는다. any로 추론된다.
   const allProposals = proposalQuery.filter(
     (proposal: ObservableQueryProposal | ObservableQueryProposalV1) =>
       !scamProposalStore.isScamProposal(chainStore.current.chainId, proposal.id)

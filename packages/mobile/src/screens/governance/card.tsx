@@ -48,11 +48,12 @@ export const GovernanceCardBody: FunctionComponent<{
 
   const intl = useIntl();
 
-  const chainIdentifier = ChainIdHelper.parse(chainStore.current.chainId)
-    .identifier;
+  const isGovernanceV1 = GovernanceV1ChainIdentifiers.includes(
+    ChainIdHelper.parse(chainStore.current.chainId).identifier
+  );
   const queries = queriesStore.get(chainStore.current.chainId);
 
-  const queryGovernance = GovernanceV1ChainIdentifiers.includes(chainIdentifier)
+  const queryGovernance = isGovernanceV1
     ? queries.cosmos.queryGovernanceV1
     : queries.cosmos.queryGovernance;
   const proposal = queryGovernance.getProposal(proposalId);
