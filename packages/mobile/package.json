@@ -22,7 +22,7 @@
     "@react-navigation/bottom-tabs": "^6.5.8",
     "@react-navigation/drawer": "^6.6.3",
     "@react-navigation/native": "^6.1.7",
-    "@react-navigation/native-stack": "^6.9.13",
+    "@react-navigation/native-stack": "^6.1.7",
     "buffer": "^6.0.3",
     "expo": "^49.0.6",
     "expo-crypto": "~12.4.1",
