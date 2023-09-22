@@ -10,7 +10,10 @@ import {
 } from '@react-navigation/native';
 import {useStyle} from './styles';
 import React from 'react';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {
+  NativeStackNavigationProp,
+  createNativeStackNavigator,
+} from '@react-navigation/native-stack';
 import {RegisterScreen} from './screen/register';
 import {HomeScreen} from './screen/home';
 import {LockedScreen} from './screen/locked';
@@ -23,7 +26,10 @@ import {
   useFocusedScreen,
 } from './provider/focused-screen';
 import {WalletIcon, BrowserIcon, SettingIcon} from './components/icon';
+
 import {HomeScreenHeader, defaultHeaderOptions} from './components/pageHeader';
+import {SettingScreen} from './screen/setting';
+import {SettingGeneralScreen} from './screen/setting/screens/general';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -31,9 +37,10 @@ export type RootStackParamList = {
   'Register.Intro': undefined;
   'Register.EnableChain': undefined;
   'Setting.Intro': undefined;
-  'Setting.Second': undefined;
+  'Setting.General': undefined;
   Locked: undefined;
 };
+export type StackNavProp = NativeStackNavigationProp<RootStackParamList>;
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Drawer = createDrawerNavigator();
@@ -143,14 +150,14 @@ const SettingNavigation = () => {
           title: 'Setting',
           ...defaultHeaderOptions,
         }}
-        component={LockedScreen}
+        component={SettingScreen}
       />
       <Stack.Screen
-        name="Setting.Second"
+        name="Setting.General"
         options={{
           ...defaultHeaderOptions,
         }}
-        component={RegisterScreen}
+        component={SettingGeneralScreen}
       />
     </Stack.Navigator>
   );
