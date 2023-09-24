@@ -46,7 +46,7 @@ const createStyleContext = <
   >(undefined);
 
 export const createStyleProvider = <
-  Themes extends readonly ['light'],
+  Themes extends readonly ['dark'],
   Custom extends Record<string, unknown>,
   Colors extends Record<string, string>,
   Widths extends Record<string, StyledDimension>,
@@ -133,7 +133,7 @@ export const createStyleProvider = <
             builder,
             isInitializing: false,
             isAutomatic: false,
-            theme: builder.theme === 'light' ? 'light' : 'dark',
+            theme: builder.theme === 'dark' ? 'dark' : 'light',
             setTheme: theme => {
               console.log(`TODO: setTheme (${theme})`);
             },
@@ -144,12 +144,16 @@ export const createStyleProvider = <
     },
     useStyle: () => {
       const state = useContext(context);
-      if (!state) throw new Error('You probably forgot to use StyleProvider');
+      if (!state) {
+        throw new Error('You probably forgot to use StyleProvider');
+      }
       return state.builder;
     },
     useStyleThemeController: () => {
       const state = useContext(context);
-      if (!state) throw new Error('You probably forgot to use StyleProvider');
+      if (!state) {
+        throw new Error('You probably forgot to use StyleProvider');
+      }
       return state;
     },
   };

@@ -8,7 +8,7 @@ import {PricePretty} from '@keplr-wallet/unit';
 import {useEffectOnce} from '../../hooks';
 import {WalletStatus} from '@keplr-wallet/stores';
 import {Button} from '../../components/button';
-import {SearchIcon} from '../../components/icon/search';
+import {SearchIcon} from '../../components/icon';
 import {TextInput} from '../../components/input';
 import {Gutter} from '../../components/gutter';
 import {Checkbox} from '../../components/checkbox';
@@ -18,10 +18,11 @@ import {YAxis} from '../../components/axis';
 import {Stack} from '../../components/stack';
 import {Columns} from '../../components/column';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
-import {Modal} from '../../components/modal/modal';
+import {Modal} from '../../components/modal';
 import {TextButton} from '../../components/text-button';
 import {DepositModal} from './deposit-modal';
 import {BuyModal} from './buy-modal';
+import {StackActions, useNavigation} from '@react-navigation/native';
 
 type TabStatus = 'available' | 'staked';
 
@@ -35,6 +36,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
     queriesStore,
   } = useStore();
 
+  const navigation = useNavigation();
   const [isHide, setIsHide] = useState(false);
   const [tabStatus, setTabStatus] = React.useState<TabStatus>('available');
   const buyModalRef = useRef<BottomSheetModal>(null);
@@ -256,6 +258,11 @@ export const HomeScreen: FunctionComponent = observer(() => {
               text="Send"
               size="large"
               containerStyle={style.flatten(['flex-1'])}
+              onPress={() => {
+                navigation.dispatch({
+                  ...StackActions.push('Send'),
+                });
+              }}
             />
           </Columns>
           <Gutter size={12} />

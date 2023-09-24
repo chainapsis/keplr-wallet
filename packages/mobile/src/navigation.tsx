@@ -13,12 +13,14 @@ import {RegisterScreen} from './screen/register';
 import {HomeScreen} from './screen/home';
 import {LockedScreen} from './screen/locked';
 import {RegisterEnableChainScreen} from './screen/register/enable-chain';
+import {SendScreen} from './screen/send/select-asset';
 
 export type RootStackParamList = {
   Home: undefined;
   Register: undefined;
   'Register.Intro': undefined;
   'Register.EnableChain': undefined;
+  Send: undefined;
   Locked: undefined;
 };
 
@@ -53,7 +55,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
   }
   return (
     <NavigationContainer
-      theme={style.theme === 'light' ? DefaultTheme : DarkTheme}>
+      theme={style.theme === 'dark' ? DefaultTheme : DarkTheme}>
       <Stack.Navigator
         initialRouteName={(() => {
           switch (keyRingStore.status) {
@@ -70,6 +72,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Locked" component={LockedScreen} />
         <Stack.Screen name="Register" component={RegisterNavigation} />
+        <Stack.Screen name="Send" component={SendScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
