@@ -550,7 +550,6 @@ export const GovernanceVoteModal: FunctionComponent<{
                 ? account.cosmos.makeGovV1VoteTx(proposalId, vote)
                 : account.cosmos.makeGovVoteTx(proposalId, vote);
 
-              console.log("tx", tx);
               setIsSendingTx(true);
 
               try {
