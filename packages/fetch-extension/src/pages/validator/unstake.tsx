@@ -20,7 +20,7 @@ export const Unstake: FunctionComponent<{
   validatorAddress: string;
 }> = observer(({ validatorAddress }) => {
   const navigate = useNavigate();
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
   const account = accountStore.getAccount(chainStore.current.chainId);
 
   const sendConfigs = useUndelegateTxConfig(
@@ -82,6 +82,11 @@ export const Unstake: FunctionComponent<{
         transition: {
           duration: 0.25,
         },
+      });
+
+      analyticsStore.logEvent("Unstake tx broadcasted", {
+        chainId: chainStore.current.chainId,
+        chainName: chainStore.current.chainName,
       });
     },
     onFulfill: (tx: any) => {

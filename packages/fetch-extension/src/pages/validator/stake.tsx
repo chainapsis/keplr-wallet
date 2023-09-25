@@ -20,7 +20,8 @@ import style from "./style.module.scss";
 export const Stake: FunctionComponent<{ validatorAddress: string }> = observer(
   ({ validatorAddress }) => {
     const navigate = useNavigate();
-    const { chainStore, accountStore, queriesStore } = useStore();
+    const { chainStore, accountStore, queriesStore, analyticsStore } =
+      useStore();
     const account = accountStore.getAccount(chainStore.current.chainId);
 
     const sendConfigs = useDelegateTxConfig(
@@ -89,6 +90,11 @@ export const Stake: FunctionComponent<{ validatorAddress: string }> = observer(
           transition: {
             duration: 0.25,
           },
+        });
+
+        analyticsStore.logEvent("Stake tx broadcasted", {
+          chainId: chainStore.current.chainId,
+          chainName: chainStore.current.chainName,
         });
       },
       onFulfill: (tx: any) => {

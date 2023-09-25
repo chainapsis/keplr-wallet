@@ -33,7 +33,7 @@ export const Transfer: FunctionComponent<{
   balance: CoinPretty;
 }> = observer(({ validatorAddress, validatorsList, balance }) => {
   const navigate = useNavigate();
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
   const account = accountStore.getAccount(chainStore.current.chainId);
   const [selectedValidator, setSelectedValidator] = useState<Staking.Validator>(
     validatorsList[0]
@@ -93,6 +93,11 @@ export const Transfer: FunctionComponent<{
         transition: {
           duration: 0.25,
         },
+      });
+
+      analyticsStore.logEvent("Redelegate tx broadcasted", {
+        chainId: chainStore.current.chainId,
+        chainName: chainStore.current.chainName,
       });
     },
     onFulfill: (tx: any) => {
