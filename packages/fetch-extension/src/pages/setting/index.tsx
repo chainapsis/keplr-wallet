@@ -142,7 +142,6 @@ export const SettingPage: FunctionComponent = observer(() => {
           title={intl.formatMessage({
             id: "setting.export-to-mobile",
           })}
-          style={{ display: "none" }}
           onClick={() => {
             navigate("/setting/export-to-mobile");
           }}

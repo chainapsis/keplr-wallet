@@ -146,7 +146,7 @@ export const DepositView: FunctionComponent = observer(() => {
       )}
 
       {(chainStore.current.chainId == "fetchhub-4" || isBuySupportChain) && (
-        <div>
+        <div style={{ display: "none" }}>
           <hr className={styleDeposit["hr"]} />
 
           <div className={styleDeposit["containerInner"]}>

@@ -152,6 +152,7 @@ const EmptyState = ({
       {chainId == "fetchhub-4" && (
         <button
           className={styleAsset["buyButton"]}
+          style={{ display: "none" }}
           onClick={(e) => {
             e.preventDefault();
             if (chainId == "fetchhub-4") {
