@@ -27,6 +27,7 @@ import { Modal } from "../../../../components/modal";
 import SimpleBar from "simplebar-react";
 import { SearchTextInput } from "../../../../components/input";
 import { useFocusOnMount } from "../../../../hooks/use-focus-on-mount";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   TextInput: styled.input`
@@ -123,6 +124,8 @@ export const SwapAssetInfo: FunctionComponent<{
     const [isSelectDestinationModalOpen, setIsSelectDestinationModalOpen] =
       useState(false);
 
+    const intl = useIntl();
+
     return (
       <Box
         padding="1rem"
@@ -147,7 +150,13 @@ export const SwapAssetInfo: FunctionComponent<{
                 : ColorPalette["gray-200"]
             }
           >
-            {type === "from" ? "From" : "To"}
+            {type === "from"
+              ? intl.formatMessage({
+                  id: "page.ibc-swap.components.swap-asset-info.from",
+                })
+              : intl.formatMessage({
+                  id: "page.ibc-swap.components.swap-asset-info.to",
+                })}
           </Subtitle3>
           {(() => {
             if (type === "to") {
@@ -196,24 +205,35 @@ export const SwapAssetInfo: FunctionComponent<{
                     ? ColorPalette["gray-300"]
                     : ColorPalette["gray-200"]
                 }
-              >{`Max: ${(() => {
-                const bal = queriesStore
-                  .get(senderConfig.chainId)
-                  .queryBalances.getQueryBech32Address(senderConfig.sender)
-                  .getBalance(amountConfig.currency);
+              >
+                {intl.formatMessage(
+                  {
+                    id: "page.ibc-swap.components.swap-asset-info.max-asset",
+                  },
+                  {
+                    asset: (() => {
+                      const bal = queriesStore
+                        .get(senderConfig.chainId)
+                        .queryBalances.getQueryBech32Address(
+                          senderConfig.sender
+                        )
+                        .getBalance(amountConfig.currency);
 
-                if (!bal) {
-                  return `0 ${amountConfig.currency.coinDenom}`;
-                }
+                      if (!bal) {
+                        return `0 ${amountConfig.currency.coinDenom}`;
+                      }
 
-                return bal.balance
-                  .maxDecimals(6)
-                  .trim(true)
-                  .shrink(true)
-                  .inequalitySymbol(true)
-                  .hideIBCMetadata(true)
-                  .toString();
-              })()}`}</Body3>
+                      return bal.balance
+                        .maxDecimals(6)
+                        .trim(true)
+                        .shrink(true)
+                        .inequalitySymbol(true)
+                        .hideIBCMetadata(true)
+                        .toString();
+                    })(),
+                  }
+                )}
+              </Body3>
             </Box>
           ) : null}
         </XAxis>
@@ -546,10 +566,20 @@ export const SwapAssetInfo: FunctionComponent<{
               flex: 1,
             }}
           />
-          <Body3 color={ColorPalette["gray-300"]}>{`on ${(() => {
-            const chainInfo = type === "from" ? fromChainInfo : toChainInfo;
-            return chainInfo.chainName;
-          })()}`}</Body3>
+          <Body3 color={ColorPalette["gray-300"]}>
+            {intl.formatMessage(
+              {
+                id: "page.ibc-swap.components.swap-asset-info.on-chain-name",
+              },
+              {
+                chainName: (() => {
+                  const chainInfo =
+                    type === "from" ? fromChainInfo : toChainInfo;
+                  return chainInfo.chainName;
+                })(),
+              }
+            )}
+          </Body3>
           {(() => {
             if (type === "to") {
               return (
@@ -692,9 +722,14 @@ const SelectDestinationChainModal: FunctionComponent<{
     }
 
     return channels.filter((channel) => {
-      return `on ${channel.chainId}`.toLowerCase().includes(trim);
+      return chainStore
+        .getChain(channel.chainId)
+        .chainName.toLowerCase()
+        .includes(trim);
     });
   })();
+
+  const intl = useIntl();
 
   return (
     <Box
@@ -712,7 +747,7 @@ const SelectDestinationChainModal: FunctionComponent<{
               : ColorPalette.white
           }
         >
-          Select Destination Chain
+          <FormattedMessage id="page.ibc-swap.components.swap-asset-info.modal.select-destination-chain.title" />
         </Subtitle1>
       </XAxis>
 
@@ -720,7 +755,9 @@ const SelectDestinationChainModal: FunctionComponent<{
       <Box paddingX="0.75rem">
         <SearchTextInput
           ref={searchRef}
-          placeholder="Search for a chain"
+          placeholder={intl.formatMessage({
+            id: "page.ibc-swap.components.swap-asset-info.modal.search.placeholder",
+          })}
           value={search}
           onChange={(e) => {
             e.preventDefault();
@@ -792,9 +829,9 @@ const SelectDestinationChainModal: FunctionComponent<{
                         ? ColorPalette["gray-700"]
                         : ColorPalette["gray-10"]
                     }
-                  >{`on ${
-                    chainStore.getChain(channel.chainId).chainName
-                  }`}</Subtitle2>
+                  >
+                    {chainStore.getChain(channel.chainId).chainName}
+                  </Subtitle2>
                 </XAxis>
               </Box>
             </Box>

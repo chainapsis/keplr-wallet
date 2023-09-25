@@ -12,6 +12,7 @@ import { Modal } from "../../../../components/modal";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { useTheme } from "styled-components";
+import { FormattedMessage } from "react-intl";
 
 export const SlippageModal: FunctionComponent<{
   isOpen: boolean;
@@ -53,7 +54,7 @@ export const SlippageModal: FunctionComponent<{
                   : ColorPalette["white"]
               }
             >
-              Settings
+              <FormattedMessage id="page.ibc-swap.components.slippage-modal.title" />
             </Subtitle2>
             <div style={{ flex: 1 }} />
             <Box
@@ -97,7 +98,7 @@ export const SlippageModal: FunctionComponent<{
                   : ColorPalette["gray-100"]
               }
             >
-              Slippage Tolerance
+              <FormattedMessage id="page.ibc-swap.components.slippage-modal.label.slippage-tolerance" />
             </Subtitle3>
           </XAxis>
 
@@ -129,7 +130,7 @@ export const SlippageModal: FunctionComponent<{
                   : ColorPalette["gray-100"]
               }
             >
-              Custom Slippage
+              <FormattedMessage id="page.ibc-swap.components.slippage-modal.label.slippage-custom" />
             </Subtitle3>
             <Gutter size="0.5rem" />
             <Toggle

@@ -21,7 +21,7 @@ import {
   ZeroAmountError,
 } from "@keplr-wallet/hooks";
 import { useNotification } from "../../hooks/notification";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { SwapFeeBps } from "../../config.ui";
 import { BottomTabsHeightRem } from "../../bottom-tabs";
 import { useSearchParams } from "react-router-dom";
@@ -317,7 +317,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       additionalPaddingBottom={BottomTabsHeightRem}
       bottomButton={{
         disabled: interactionBlocked,
-        text: "Next",
+        text: intl.formatMessage({
+          id: "page.ibc-swap.button.next",
+        }),
         color: "primary",
         size: "large",
         isLoading:
@@ -546,7 +548,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   : ColorPalette["white"]
               }
             >
-              Swap
+              <FormattedMessage id="page.ibc-swap.title.swap" />
             </H4>
             <div style={{ flex: 1 }} />
             <Box
