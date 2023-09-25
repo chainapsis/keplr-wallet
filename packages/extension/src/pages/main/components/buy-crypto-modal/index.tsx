@@ -180,6 +180,13 @@ export const BuyCryptoModal: FunctionComponent<{
                 Object.values(serviceInfo.buySupportCoinDenomsByChainId).flat()
               ),
             ],
+            ...(buySupportDefaultChainInfo && {
+              onRevCurrency:
+                serviceInfo.buySupportCoinDenomsByChainId[
+                  buySupportDefaultChainInfo.chainId
+                ]?.[0] ?? "USDC",
+              network: buySupportDefaultChainInfo.chainName.toUpperCase(),
+            }),
           };
         default:
           return;
