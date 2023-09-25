@@ -94,6 +94,11 @@ export function renderAminoMessage(
     return renderMsgVote(value.proposal_id, value.option);
   }
 
+  if (msg.type === msgOpts.cosmos.msgOpts.govV1Vote.type) {
+    const value = msg.value as MsgVote["value"];
+    return renderMsgVote(value.proposal_id, value.option);
+  }
+
   if (msg.type === msgOpts.cosmwasm.msgOpts.executeWasm.type) {
     const value = msg.value as MsgExecuteContract["value"];
     return renderMsgExecuteContract(

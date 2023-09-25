@@ -15,6 +15,7 @@ import {
   MsgRevoke,
 } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
 import { MsgVote } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/tx";
+import { MsgVote as MsgVoteV1 } from "@keplr-wallet/proto-types/cosmos/gov/v1/tx";
 import {
   MsgSetWithdrawAddress,
   MsgWithdrawDelegatorReward,
@@ -209,6 +210,7 @@ defaultProtoCodec.registerAny(
   MsgTransfer
 );
 defaultProtoCodec.registerAny("/cosmos.gov.v1beta1.MsgVote", MsgVote);
+defaultProtoCodec.registerAny("/cosmos.gov.v1.MsgVote", MsgVoteV1);
 defaultProtoCodec.registerAny("/cosmos.authz.v1beta1.MsgGrant", MsgGrant);
 // ----- Authz grants -----
 defaultProtoCodec.registerAny(
