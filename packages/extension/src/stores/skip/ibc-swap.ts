@@ -177,22 +177,28 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           // XXX: multi-hop ibc currency는 나중에 생각해본다...
           currency.paths.length === 1
         ) {
-          const originChainId = currency.originChainId;
-          if (this.queryChains.isSupportsMemo(originChainId)) {
-            // 기본적으로 해당 체인이 ibc transfer에서 memo를 지원하지 않으면 osmosis에서 pfm을 쓸 수 없기 때문에
-            // 해당 체인의 ibc currency를 넣지 않는다.
-            const originCurrency = currency.originCurrency;
-            getMap(currency.originChainId).set(
-              originCurrency.coinMinimalDenom,
-              originCurrency
-            );
-          }
+          // 현재 CW20같은 얘들은 처리할 수 없다.
+          if (!("type" in currency.originCurrency)) {
+            const originChainId = currency.originChainId;
+            if (this.queryChains.isSupportsMemo(originChainId)) {
+              // 기본적으로 해당 체인이 ibc transfer에서 memo를 지원하지 않으면 osmosis에서 pfm을 쓸 수 없기 때문에
+              // 해당 체인의 ibc currency를 넣지 않는다.
+              const originCurrency = currency.originCurrency;
+              getMap(currency.originChainId).set(
+                originCurrency.coinMinimalDenom,
+                originCurrency
+              );
+            }
 
-          // osmosis 자체에 있는 ibc currency도 넣어준다.
-          getMap(chainId).set(currency.coinMinimalDenom, currency);
+            // osmosis 자체에 있는 ibc currency도 넣어준다.
+            getMap(chainId).set(currency.coinMinimalDenom, currency);
+          }
         } else if (!("paths" in currency)) {
-          // if currency is not ibc currency
-          getMap(chainId).set(currency.coinMinimalDenom, currency);
+          // 현재 CW20같은 얘들은 처리할 수 없다.
+          if (!("type" in currency)) {
+            // if currency is not ibc currency
+            getMap(chainId).set(currency.coinMinimalDenom, currency);
+          }
         }
       }
     }
@@ -254,15 +260,21 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           // XXX: multi-hop ibc currency는 나중에 생각해본다...
           currency.paths.length === 1
         ) {
-          // 일단 현재는 복잡한 케이스는 생각하지 않는다.
-          // 오스모시스를 거쳐서 오기 때문에 ibc 모듈만 있다면 자산을 받을 수 있다.
-          const originCurrency = currency.originCurrency;
-          const inner = getMap(currency.originChainId);
-          inner.currencies.push(originCurrency);
+          // 현재 CW20같은 얘들은 처리할 수 없다.
+          if (!("type" in currency.originCurrency)) {
+            // 일단 현재는 복잡한 케이스는 생각하지 않는다.
+            // 오스모시스를 거쳐서 오기 때문에 ibc 모듈만 있다면 자산을 받을 수 있다.
+            const originCurrency = currency.originCurrency;
+            const inner = getMap(currency.originChainId);
+            inner.currencies.push(originCurrency);
+          }
         } else if (!("paths" in currency)) {
-          // if currency is not ibc currency
-          const inner = getMap(chainId);
-          inner.currencies.push(currency);
+          // 현재 CW20같은 얘들은 처리할 수 없다.
+          if (!("type" in currency)) {
+            // if currency is not ibc currency
+            const inner = getMap(chainId);
+            inner.currencies.push(currency);
+          }
         }
       }
     }
