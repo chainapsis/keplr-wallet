@@ -26,6 +26,7 @@ import { useSmartNavigation } from "../../navigation";
 import MarkdownIt from "markdown-it";
 import { MemoizedHtmlRender } from "./internal/markdown";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { GovernanceV1ChainIdentifiers } from "../../config";
 
 export const TallyVoteInfoView: FunctionComponent<{
   vote: "yes" | "no" | "abstain" | "noWithVeto";
@@ -104,10 +105,15 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
 
   const style = useStyle();
 
+  const isGovernanceV1 = GovernanceV1ChainIdentifiers.includes(
+    ChainIdHelper.parse(chainStore.current.chainId).identifier
+  );
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
 
-  const proposal = queries.cosmos.queryGovernance.getProposal(proposalId);
+  const proposal = isGovernanceV1
+    ? queries.cosmos.queryGovernanceV1.getProposal(proposalId)
+    : queries.cosmos.queryGovernance.getProposal(proposalId);
 
   const voted = (() => {
     if (!proposal) {
@@ -119,10 +125,11 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
       return undefined;
     }
 
-    return queries.cosmos.queryProposalVote.getVote(
-      proposal.id,
-      account.bech32Address
-    ).vote;
+    const voteQuery = isGovernanceV1
+      ? queries.cosmos.queryProposalVoteV1
+      : queries.cosmos.queryProposalVote;
+
+    return voteQuery.getVote(proposal.id, account.bech32Address).vote;
   })();
 
   const proposalDescription = proposal?.description;
@@ -368,10 +375,15 @@ export const GovernanceVoteModal: FunctionComponent<{
       analyticsStore,
     } = useStore();
 
+    const isGovernanceV1 = GovernanceV1ChainIdentifiers.includes(
+      ChainIdHelper.parse(chainStore.current.chainId).identifier
+    );
     const account = accountStore.getAccount(chainStore.current.chainId);
     const queries = queriesStore.get(chainStore.current.chainId);
 
-    const proposal = queries.cosmos.queryGovernance.getProposal(proposalId);
+    const proposal = isGovernanceV1
+      ? queries.cosmos.queryGovernanceV1.getProposal(proposalId)
+      : queries.cosmos.queryGovernance.getProposal(proposalId);
 
     const style = useStyle();
 
@@ -527,15 +539,23 @@ export const GovernanceVoteModal: FunctionComponent<{
           text="Vote"
           size="large"
           disabled={vote === "Unspecified" || !account.isReadyToSendMsgs}
-          loading={isSendingTx || account.isSendingMsg === "govVote"}
+          loading={
+            isSendingTx ||
+            account.isSendingMsg === "govVote" ||
+            account.isSendingMsg === "govV1Vote"
+          }
           onPress={async () => {
             if (vote !== "Unspecified" && account.isReadyToSendMsgs) {
-              const tx = account.cosmos.makeGovVoteTx(proposalId, vote);
+              const tx = isGovernanceV1
+                ? account.cosmos.makeGovV1VoteTx(proposalId, vote)
+                : account.cosmos.makeGovVoteTx(proposalId, vote);
 
               setIsSendingTx(true);
 
               try {
-                let gas = account.cosmos.msgOpts.govVote.gas;
+                let gas = isGovernanceV1
+                  ? account.cosmos.msgOpts.govV1Vote.gas
+                  : account.cosmos.msgOpts.govVote.gas;
 
                 // Gas adjustment is 1.5
                 // Since there is currently no convenient way to adjust the gas adjustment on the UI,
@@ -604,10 +624,15 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
 
   const proposalId = route.params.proposalId;
 
+  const isGovernanceV1 = GovernanceV1ChainIdentifiers.includes(
+    ChainIdHelper.parse(chainStore.current.chainId).identifier
+  );
   const queries = queriesStore.get(chainStore.current.chainId);
   const account = accountStore.getAccount(chainStore.current.chainId);
 
-  const proposal = queries.cosmos.queryGovernance.getProposal(proposalId);
+  const proposal = isGovernanceV1
+    ? queries.cosmos.queryGovernanceV1.getProposal(proposalId)
+    : queries.cosmos.queryGovernance.getProposal(proposalId);
 
   const voteEnabled =
     proposal?.proposalStatus === Governance.ProposalStatus.VOTING_PERIOD;

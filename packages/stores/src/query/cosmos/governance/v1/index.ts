@@ -1,6 +1,5 @@
+export * from "./types";
+export * from "./params";
 export * from "./proposals";
 export * from "./proposal";
-export * from "./params";
 export * from "./vote";
-
-export * from "./v1";
