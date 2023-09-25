@@ -67,7 +67,7 @@ export const MainTabNavigationWithDrawer: FunctionComponent = () => {
   return (
     <Drawer.Navigator
       screenOptions={{
-        drawerType: 'slide',
+        drawerType: 'front',
         overlayColor: style.flatten(['color-gray-700@50%']).color,
         gestureHandlerProps: {
           hitSlop: {},

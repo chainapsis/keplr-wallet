@@ -93,14 +93,17 @@ const DefaultScreenHeaderTitle: FunctionComponent<PropsWithChildren> = ({
 }) => {
   const style = useStyle();
   return (
-    <View>
-      <Text
-        style={StyleSheet.flatten([
-          style.flatten(['h4', 'color-white', 'text-center']),
-        ])}>
-        {children}
-      </Text>
-    </View>
+    <Text
+      style={StyleSheet.flatten([
+        style.flatten([
+          'h4',
+          'color-white',
+          'text-center',
+          'padding-bottom-18',
+        ]),
+      ])}>
+      {children}
+    </Text>
   );
 };
 const DefaultScreenHeaderLeft: FunctionComponent<
