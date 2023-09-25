@@ -511,6 +511,7 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         '25.5': 25.5,
         '26': 26,
         '28': 28,
+        '30': 30,
         '31': 31,
         '32': 32,
         '36': 36,
