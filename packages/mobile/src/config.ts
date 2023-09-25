@@ -545,7 +545,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
     bip44: {
       coinType: 118,
     },
-    bech32Config: Bech32Address.defaultBech32Config("certik"),
+    bech32Config: Bech32Address.defaultBech32Config("shentu"),
     currencies: [
       {
         coinDenom: "CTK",
