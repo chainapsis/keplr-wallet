@@ -10,7 +10,7 @@ import { observer } from "mobx-react-lite";
 export const StakeComplete: FunctionComponent = observer(() => {
   const navigate = useNavigate();
   const validatorAddress = useLocation().pathname.split("/")[2];
-
+  const validatorTab = localStorage.getItem("validatorTab");
   const { chainStore, queriesStore } = useStore();
   const queries = queriesStore.get(chainStore.current.chainId);
 
@@ -73,7 +73,7 @@ export const StakeComplete: FunctionComponent = observer(() => {
       <Button
         color="primary"
         block
-        onClick={() => navigate(`/validators/validator`)}
+        onClick={() => navigate(`/validators/${validatorTab}`)}
         style={{ marginLeft: "0px" }}
       >
         <img

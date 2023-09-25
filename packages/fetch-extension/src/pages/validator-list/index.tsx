@@ -12,7 +12,7 @@ import { ValidatorsList } from "./validators";
 
 type ValidatorData = Staking.Validator & { amount: CoinPretty };
 
-enum ValidatorOperation {
+export enum ValidatorOperation {
   VALIDATOR = "validator",
   MY_STAKE = "myStake",
 }
@@ -101,9 +101,10 @@ export const ValidatorList: FunctionComponent = observer(() => {
             color:
               operation == ValidatorOperation.VALIDATOR ? "#D43BF6" : "#000000",
           }}
-          onClick={() =>
-            navigate(`/validators/${ValidatorOperation.VALIDATOR}`)
-          }
+          onClick={() => {
+            localStorage.setItem("validatorTab", ValidatorOperation.VALIDATOR);
+            navigate(`/validators/${ValidatorOperation.VALIDATOR}`);
+          }}
         >
           Validators
         </div>
@@ -118,7 +119,10 @@ export const ValidatorList: FunctionComponent = observer(() => {
             color:
               operation == ValidatorOperation.MY_STAKE ? "#3B82F6" : "#000000",
           }}
-          onClick={() => navigate(`/validators/${ValidatorOperation.MY_STAKE}`)}
+          onClick={() => {
+            localStorage.setItem("validatorTab", ValidatorOperation.MY_STAKE);
+            navigate(`/validators/${ValidatorOperation.MY_STAKE}`);
+          }}
         >
           My Stake
         </div>

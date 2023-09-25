@@ -9,6 +9,7 @@ import style from "./style.module.scss";
 import { Transfer } from "./transfer";
 import { Unstake } from "./unstake";
 import { ValidatorDetails } from "./validator-details";
+import { Dec } from "@keplr-wallet/unit";
 
 enum ValidatorOperation {
   STAKE = "stake",
@@ -21,7 +22,7 @@ export const Validator: FunctionComponent = observer(() => {
   const location = useLocation();
   const validatorAddress = location.pathname.split("/")[2];
   const operation = location.pathname.split("/")[3];
-
+  const validatorTab = localStorage.getItem("validatorTab") || "validator";
   const { chainStore, accountStore, queriesStore } = useStore();
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -39,7 +40,10 @@ export const Validator: FunctionComponent = observer(() => {
     queries.cosmos.queryDelegations.getQueryBech32Address(
       account.bech32Address
     );
-  const { validator, amount } = useMemo(() => {
+  const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
+    account.bech32Address
+  );
+  const { validator, amount, rewards } = useMemo(() => {
     const amount = queryDelegations.getDelegationTo(validatorAddress);
     const validator =
       bondedValidators.getValidator(validatorAddress) ||
@@ -49,10 +53,11 @@ export const Validator: FunctionComponent = observer(() => {
       bondedValidators.getValidatorThumbnail(validatorAddress) ||
       unbondingValidators.getValidatorThumbnail(validatorAddress) ||
       unbondedValidators.getValidatorThumbnail(validatorAddress);
-
+    const rewards = queryRewards.getRewardsOf(validatorAddress);
     return {
       validator,
       thumbnail,
+      rewards,
       amount: amount,
     };
   }, [
@@ -61,20 +66,29 @@ export const Validator: FunctionComponent = observer(() => {
     bondedValidators,
     unbondingValidators,
     unbondedValidators,
+    queryRewards,
   ]);
-
+  const inflation = queries.cosmos.queryInflation;
+  const { inflation: ARR, isFetching } = inflation;
+  const validatorCom: any = parseFloat(
+    validator?.commission.commission_rates.rate || "0"
+  );
+  const APR = ARR.mul(new Dec(1 - validatorCom));
   return (
     <HeaderLayout
       showChainName={false}
       canChangeChainInfo={false}
       alternativeTitle={operation.toLocaleUpperCase()}
-      onBackButton={() => navigate(-1)}
+      onBackButton={() => navigate(`/validators/${validatorTab}`)}
     >
       <div className={style["stakeContainer"]}>
         {validator && (
           <ValidatorDetails
             chainID={chainStore.current.chainId}
             validator={validator}
+            isFetching={isFetching}
+            APR={APR}
+            rewards={rewards}
           />
         )}
         <div>
@@ -139,7 +153,7 @@ export const Validator: FunctionComponent = observer(() => {
                 navigate(`/validators/${validatorAddress}/transfer`)
               }
             >
-              Transfer
+              Redelegate
             </div>
           </div>
           {operation == ValidatorOperation.STAKE && (

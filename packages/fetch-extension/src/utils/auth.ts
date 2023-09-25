@@ -166,7 +166,6 @@ export const updateMessageFeedback = async (
       Buffer.from(JSON.stringify({ rating, msg_id: messageId }))
     );
     const session = generateUUID();
-    console.log(session);
     const request = {
       version: 1,
       sender: "user16n6nwpyg7glp2swpre6zmvcp9tm2qjnthq25wt72l5yxzrqq0ucq0nte05", // Hardcode this

@@ -306,7 +306,7 @@ export const SendPage: FunctionComponent = observer(() => {
                 },
                 {
                   onBroadcastFailed: (e: any) => {
-                    console.log("Hello", e);
+                    console.log(e);
                   },
                   onBroadcasted: () => {
                     analyticsStore.logEvent("Send token tx broadcasted", {

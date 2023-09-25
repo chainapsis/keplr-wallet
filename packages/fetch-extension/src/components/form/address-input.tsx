@@ -132,11 +132,9 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
         chainId,
         domainName
       );
-      console.log(getBeneficiaryAddressObject);
       const getAddress = getBeneficiaryAddressObject
         ? getBeneficiaryAddressObject.address
         : null;
-      console.log(getAddress);
       return getAddress;
     };
 
