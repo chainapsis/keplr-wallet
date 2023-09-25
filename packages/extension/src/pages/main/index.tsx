@@ -1,6 +1,7 @@
 import React, {
   FunctionComponent,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -58,12 +59,20 @@ export const useIsNotReady = () => {
 
 type TabStatus = "available" | "staked";
 
-export const MainPage: FunctionComponent = observer(() => {
+export const MainPage: FunctionComponent<{
+  setIsNotReady: (isNotReady: boolean) => void;
+}> = observer(({ setIsNotReady }) => {
   const { analyticsStore, hugeQueriesStore, uiConfigStore } = useStore();
 
   const isNotReady = useIsNotReady();
   const intl = useIntl();
   const theme = useTheme();
+
+  const setIsNotReadyRef = useRef(setIsNotReady);
+  setIsNotReadyRef.current = setIsNotReady;
+  useLayoutEffect(() => {
+    setIsNotReadyRef.current(isNotReady);
+  }, [isNotReady]);
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
 

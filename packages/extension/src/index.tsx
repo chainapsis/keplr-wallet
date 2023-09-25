@@ -264,9 +264,12 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
 
   const shouldUnlockPage = keyRingStore.status === "locked" && !isURLUnlockPage;
 
+  const [mainPageIsNotReady, setMainPageIsNotReady] = useState(false);
+
   return (
     <HashRouter>
       <BottomTabsRouteProvider
+        isNotReady={!isReady || mainPageIsNotReady}
         forceHideBottomTabs={shouldUnlockPage}
         tabs={[
           {
@@ -290,7 +293,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
           ) : (
             <Routes>
               <Route path="/unlock" element={<UnlockPage />} />
-              <Route path="/" element={<MainPage />} />
+              <Route
+                path="/"
+                element={<MainPage setIsNotReady={setMainPageIsNotReady} />}
+              />
               <Route path="/send" element={<SendAmountPage />} />
               <Route path="/ibc-swap" element={<IBCSwapPage />} />
               <Route

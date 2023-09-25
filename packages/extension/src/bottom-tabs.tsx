@@ -7,13 +7,15 @@ import { useTheme } from "styled-components";
 export const BottomTabsHeightRem = "3.75rem";
 
 export const BottomTabsRouteProvider: FunctionComponent<{
+  isNotReady: boolean;
+
   tabs: {
     pathname: string;
     icon: React.ReactNode;
   }[];
 
   forceHideBottomTabs?: boolean;
-}> = ({ children, tabs, forceHideBottomTabs }) => {
+}> = ({ children, isNotReady, tabs, forceHideBottomTabs }) => {
   const location = useLocation();
 
   const theme = useTheme();
@@ -68,6 +70,7 @@ export const BottomTabsRouteProvider: FunctionComponent<{
               <Link to={tab.pathname} key={i}>
                 <div
                   style={{
+                    opacity: isNotReady ? 0 : 1,
                     color: (() => {
                       if (theme.mode === "light") {
                         return isActive
