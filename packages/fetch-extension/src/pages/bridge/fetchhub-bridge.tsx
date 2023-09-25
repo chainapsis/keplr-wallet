@@ -164,9 +164,7 @@ export const FetchhubBridge: FunctionComponent<{
       </div>
       <div className={style["formInnerContainer"]}>
         <AddressInput
-          label={intl.formatMessage({
-            id: "send.input.recipient",
-          })}
+          label={"Recipient (Ethereum address)"}
           recipientConfig={nativeBridgeConfig.recipientConfig}
           // memoConfig={nativeBridgeConfig.memoConfig}
           // ibcChannelConfig={nativeBridgeConfig.channelConfig}

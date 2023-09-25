@@ -153,9 +153,7 @@ export const Configure: FunctionComponent<{
         </div>
         <div className={style["formInnerContainer"]}>
           <AddressInput
-            label={intl.formatMessage({
-              id: "send.input.recipient",
-            })}
+            label="Recipient (Fetchhub address)"
             recipientConfig={recipientConfig}
             disableAddressBook
             value={""}

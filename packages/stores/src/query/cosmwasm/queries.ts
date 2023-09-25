@@ -5,6 +5,8 @@ import { ObservableQueryCw20ContractInfo } from "./cw20-contract-info";
 import { DeepReadonly } from "utility-types";
 import { ObservableQueryCw20BalanceRegistry } from "./cw20-balance";
 import { ObservableQueryNativeFetCosmosBridge } from "./native-fet-bridge";
+import { ObservableQueryBridgeHistory } from "./bridge-history";
+import { ObservableQueryBridgeReverseSwapHash } from "./bridge-reverse-swap-hash";
 
 export interface CosmwasmQueries {
   cosmwasm: CosmwasmQueriesImpl;
@@ -38,6 +40,8 @@ export const CosmwasmQueries = {
 export class CosmwasmQueriesImpl {
   public readonly querycw20ContractInfo: DeepReadonly<ObservableQueryCw20ContractInfo>;
   public readonly queryNativeFetBridge: DeepReadonly<ObservableQueryNativeFetCosmosBridge>;
+  public readonly queryBridgeHistory: DeepReadonly<ObservableQueryBridgeHistory>;
+  public readonly queryBridgeReverseSwapHash: DeepReadonly<ObservableQueryBridgeReverseSwapHash>;
 
   constructor(
     base: QueriesSetBase,
@@ -58,6 +62,18 @@ export class CosmwasmQueriesImpl {
     this.queryNativeFetBridge = new ObservableQueryNativeFetCosmosBridge(
       kvStore,
       chainGetter
+    );
+
+    this.queryBridgeHistory = new ObservableQueryBridgeHistory(
+      kvStore,
+      chainGetter,
+      this.queryNativeFetBridge
+    );
+
+    this.queryBridgeReverseSwapHash = new ObservableQueryBridgeReverseSwapHash(
+      kvStore,
+      chainGetter,
+      this.queryNativeFetBridge
     );
   }
 }

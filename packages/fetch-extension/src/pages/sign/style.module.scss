@@ -46,7 +46,6 @@
 .tabContainer {
   height: 342px;
   overflow: auto;
-  flex: 1;
   display: flex;
   flex-direction: column;
 
@@ -61,4 +60,6 @@
   font-size: 12px;
   overflow: visible;
   background: transparent;
+  word-wrap: break-word;
+  white-space: pre-wrap;
 }

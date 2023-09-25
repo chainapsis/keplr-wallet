@@ -283,7 +283,6 @@ export const SendPage: FunctionComponent = observer(() => {
       <form
         className={style["formContainer"]}
         onSubmit={async (e) => {
-          debugger;
           e.preventDefault();
 
           if (accountInfo.isReadyToSendMsgs && txStateIsValid) {

@@ -282,7 +282,10 @@ export const SignPage: FunctionComponent = observer(() => {
               })}
             >
               {tab === Tab.Data ? (
-                <DataTab signDocHelper={signDocHelper} />
+                <DataTab
+                  signDocHelper={signDocHelper}
+                  ethSignType={ethSignType}
+                />
               ) : null}
               {tab === Tab.Details ? (
                 signDocHelper.signDocWrapper?.isADR36SignDoc ? (

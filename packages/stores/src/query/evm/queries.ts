@@ -10,6 +10,8 @@ import {
 import { ObservableQueryErc20BalanceRegistry } from "./erc20-balance";
 import { ObservableQueryNativeFetEthBrige } from "./native-fet-bridge";
 import { ObservableQueryGasFees } from "./eth-gas-fees";
+import { ObservableQueryBridgeHistory } from "./bridge-history";
+import { ObservableQueryBridgeReverseSwapHash } from "./bridge-reverse-swap-hash";
 
 export interface EvmQueries {
   evm: EvmQueriesImpl;
@@ -40,6 +42,8 @@ export class EvmQueriesImpl {
   public readonly queryNativeFetBridge: DeepReadonly<ObservableQueryNativeFetEthBrige>;
   public readonly queryERC20Allowance: DeepReadonly<ObservableQueryERC20Allowance>;
   public readonly queryEthGasFees: DeepReadonly<ObservableQueryGasFees>;
+  public readonly queryBridgeHistory: DeepReadonly<ObservableQueryBridgeHistory>;
+  public readonly queryBridgeReverseSwapHash: DeepReadonly<ObservableQueryBridgeReverseSwapHash>;
 
   constructor(
     base: QueriesSetBase,
@@ -73,5 +77,18 @@ export class EvmQueriesImpl {
     );
 
     this.queryEthGasFees = new ObservableQueryGasFees(kvStore);
+
+    this.queryBridgeHistory = new ObservableQueryBridgeHistory(
+      kvStore,
+      chainId,
+      chainGetter,
+      this.queryNativeFetBridge
+    );
+
+    this.queryBridgeReverseSwapHash = new ObservableQueryBridgeReverseSwapHash(
+      kvStore,
+      chainGetter,
+      this.queryNativeFetBridge
+    );
   }
 }

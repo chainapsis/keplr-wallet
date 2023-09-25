@@ -18,3 +18,10 @@ export type CoinPrimitive = {
   denom: string;
   amount: string;
 };
+
+export interface BridgeHistory {
+  to: string;
+  amount: string;
+  transactionHash: string | null;
+  swapId: string;
+}

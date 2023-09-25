@@ -30,3 +30,11 @@ export interface EthGasFeeInfo {
   average: string;
   high: string;
 }
+
+export interface NativeBridgeLogResponse {
+  address: string;
+  data: string;
+  removed: boolean;
+  topics: string[];
+  transactionHash: string | null;
+}

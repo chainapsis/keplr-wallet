@@ -4,7 +4,7 @@ import style from "./ledger-app-modal.module.scss";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
-import { BACKGROUND_PORT, KeplrError } from "@keplr-wallet/router";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import {
   InitNonDefaultLedgerAppMsg,
   LedgerApp,
@@ -33,14 +33,10 @@ export const LedgerAppModal: FunctionComponent = observer(() => {
   const isOpen = (() => {
     if (
       accountInfo.rejectionReason &&
-      accountInfo.rejectionReason instanceof KeplrError
+      accountInfo.rejectionReason.message ===
+        "No Ethereum public key. Initialize Ethereum app on Ledger by selecting the chain in the extension"
     ) {
-      if (
-        accountInfo.rejectionReason.module === "keyring" &&
-        accountInfo.rejectionReason.code === 901
-      ) {
-        return true;
-      }
+      return true;
     }
 
     return false;

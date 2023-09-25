@@ -100,7 +100,6 @@ export class EthereumAccountImpl {
       }
 
       return this.makeEthereumTx("send", {
-        from: this.base.ethereumHexAddress,
         to: recipient,
         value: actualAmount,
       });
@@ -108,7 +107,6 @@ export class EthereumAccountImpl {
       return this.makeEthereumTx(
         "send",
         {
-          from: this.base.ethereumHexAddress,
           to: denomHelper.contractAddress,
           data: erc20MetadataInterface.encodeFunctionData("transfer", [
             recipient,
@@ -187,7 +185,7 @@ export class EthereumAccountImpl {
       jsonrpc: "2.0",
       id: "1",
       method: "eth_estimateGas",
-      params: [params],
+      params: [{ from: this.base.ethereumHexAddress, ...params }],
     });
 
     if (result.data.error && result.data.error.message) {
@@ -350,7 +348,6 @@ export class EthereumAccountImpl {
     return this.makeEthereumTx(
       "approval",
       {
-        from: this.base.ethereumHexAddress,
         to: new DenomHelper(currency.coinMinimalDenom).contractAddress,
         data: erc20MetadataInterface.encodeFunctionData("approve", [
           spender,
@@ -385,7 +382,6 @@ export class EthereumAccountImpl {
     return this.makeEthereumTx(
       "nativeBridgeSend",
       {
-        from: this.base.ethereumHexAddress,
         to: this.queries.evm.queryNativeFetBridge.nativeBridgeAddress,
         data: nativeFetBridgeInterface.encodeFunctionData("swap", [
           actualAmount,

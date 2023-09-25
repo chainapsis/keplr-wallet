@@ -5,7 +5,7 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { CoinUtils, Coin } from "@keplr-wallet/unit";
 import { IntlShape, FormattedMessage, useIntl } from "react-intl";
 import { Currency } from "@keplr-wallet/types";
-import { Button, Badge } from "reactstrap";
+import { Button, Badge, Label } from "reactstrap";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import yaml from "js-yaml";
@@ -20,6 +20,7 @@ import {
   StakeAuthorization,
 } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/authz";
 import { SendAuthorization } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/authz";
+import { UnsignedTransaction } from "@ethersproject/transactions";
 
 export interface MessageObj {
   readonly type: string;
@@ -180,7 +181,8 @@ export function renderMsgSend(
   currencies: Currency[],
   intl: IntlShape,
   amount: CoinPrimitive[],
-  toAddress: string
+  toAddress: string,
+  isEvm?: boolean
 ) {
   const receives: CoinPrimitive[] = [];
   for (const coinPrimitive of amount) {
@@ -203,7 +205,7 @@ export function renderMsgSend(
         id="sign.list.message.cosmos-sdk/MsgSend.content"
         values={{
           b: (...chunks: any[]) => <b>{chunks}</b>,
-          recipient: Bech32Address.shortenAddress(toAddress, 20),
+          recipient: Bech32Address.shortenAddress(toAddress, 20, isEvm),
           amount: receives
             .map((coin) => {
               return `${coin.amount} ${coin.denom}`;
@@ -452,6 +454,50 @@ export function renderMsgInstantiateContract(
         />
         <br />
         <WasmExecutionMsgView msg={initMsg} />
+      </React.Fragment>
+    ),
+  };
+}
+
+export function renderMsgEvmExecuteContract(
+  intl: IntlShape,
+  sent: CoinPrimitive | undefined,
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  txnParams: UnsignedTransaction
+) {
+  return {
+    icon: "fas fa-cog",
+    title: intl.formatMessage({
+      id: "sign.list.message.wasm/MsgExecuteContract.title",
+    }),
+    content: (
+      <React.Fragment>
+        <FormattedMessage
+          id="sign.list.message.wasm/MsgExecuteContract.content"
+          values={{
+            b: (...chunks: any[]) => <b>{chunks}</b>,
+            br: <br />,
+            address: Bech32Address.shortenAddress(txnParams.to ?? "", 26, true),
+            ["only-sent-exist"]: (...chunks: any[]) => (sent ? chunks : ""),
+            sent: sent ? `${sent.amount} ${sent.denom}` : "",
+          }}
+        />
+        <Label
+          for="sign-value"
+          className="form-control-label"
+          style={{ marginTop: "8px", marginBottom: "0" }}
+        >
+          Transaction Data:
+        </Label>
+        <pre
+          style={{
+            width: "280px",
+            whiteSpace: "pre-wrap",
+            wordWrap: "break-word",
+          }}
+        >
+          {txnParams.data?.toString()}
+        </pre>
       </React.Fragment>
     ),
   };
