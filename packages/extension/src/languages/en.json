@@ -360,6 +360,7 @@
 
   "page.ibc-swap.title.swap": "Swap",
   "page.ibc-swap.button.next": "Next",
+  "page.ibc-swap.error.no-route-found": "No routes found for this swap",
   "page.ibc-swap.components.swap-asset-info.from": "From",
   "page.ibc-swap.components.swap-asset-info.to": "To",
   "page.ibc-swap.components.swap-asset-info.max-asset": "Max: {asset}",
