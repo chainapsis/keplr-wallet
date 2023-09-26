@@ -8,3 +8,6 @@ export * from './browser';
 export * from './setting';
 export * from './wallet';
 export * from './close';
+export * from './star';
+export * from './qr-code';
+export * from './check-toggle';
