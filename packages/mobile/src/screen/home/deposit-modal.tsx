@@ -1,28 +1,23 @@
-import {
-  NavigationProp,
-  RouteProp,
-  useNavigation,
-} from '@react-navigation/native';
+import {RouteProp, useNavigation} from '@react-navigation/native';
 import {observer} from 'mobx-react-lite';
-import React, {useCallback} from 'react';
+import React from 'react';
 import {Text, View} from 'react-native';
-import {Button} from '../../components/button';
-import {useBottomSheet, BottomSheetScrollView} from '@gorhom/bottom-sheet';
-import {useFocusEffect} from '@react-navigation/native';
+import {useBottomSheet} from '@gorhom/bottom-sheet';
 import {useStyle} from '../../styles';
 import {useStore} from '../../stores';
 import {Column, Columns} from '../../components/column';
 import {IconButton} from '../../components/icon-button';
 import {ArrowLeftIcon} from '../../components/icon/left-arrow';
 import {Box} from '../../components/box';
-import {BaseModal, BaseModalHeader} from '../../components/modal/modal';
+import {BaseModal} from '../../components/modal/modal';
+import {CopyAddressScene} from './components/copy-address-scene';
 
 interface QRSeneProps {
   chainId: string;
   chainName: string;
   bech32Address: string;
 }
-type DepositModalNav = {
+export type DepositModalNav = {
   List: undefined;
   QR: QRSeneProps;
 };
@@ -36,7 +31,7 @@ export const DepositModal = () => {
       }}
       initialRouteName="List"
       screenList={[
-        {routeName: 'List', scene: CopyAddressScene},
+        {routeName: 'List', scene: () => <CopyAddressScene />},
         {
           routeName: 'QR',
           scene: QRScene,
@@ -45,39 +40,6 @@ export const DepositModal = () => {
     />
   );
 };
-
-//TODO 이후 재대로된 모달을 구현 해야함
-const CopyAddressScene = observer(() => {
-  const bottom = useBottomSheet();
-  const style = useStyle();
-  const nav = useNavigation<NavigationProp<DepositModalNav>>();
-  useFocusEffect(
-    useCallback(() => {
-      bottom.snapToPosition('60%');
-    }, [bottom]),
-  );
-
-  return (
-    <View style={style.flatten(['height-full'])}>
-      <BaseModalHeader title="Copy Address" />
-      <BottomSheetScrollView>
-        <View>
-          <Text>test1</Text>
-          <Button
-            text="To osmosis"
-            onPress={() => {
-              nav.navigate('QR', {
-                chainId: 'osmosis-1',
-                bech32Address: '',
-                chainName: 'osmosis',
-              });
-            }}
-          />
-        </View>
-      </BottomSheetScrollView>
-    </View>
-  );
-});
 
 //TODO 이후 qr화면을 보여줘야 됨
 //NOTE - navigation에서 기본으로 제공해주는 뒤로가기 버튼으로 할때는 뒤로 간뒤 넓어지는 애니메이션이 진행되는데
