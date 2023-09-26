@@ -164,6 +164,14 @@ export const CosmosTxView: FunctionComponent<{
   const [isSendAuthzGrant, setIsSendAuthzGrant] = useState(false);
   useEffect(() => {
     try {
+      if (
+        // 라이크코인의 요청으로 일단 얘는 스킵...
+        interactionData.data.origin === "https://liker.land" ||
+        interactionData.data.origin === "https://app.like.co"
+      ) {
+        return;
+      }
+
       const msgs = signDocHelper.signDocWrapper
         ? signDocHelper.signDocWrapper.mode === "amino"
           ? signDocHelper.signDocWrapper.aminoSignDoc.msgs
@@ -261,7 +269,7 @@ export const CosmosTxView: FunctionComponent<{
     }
 
     setIsSendAuthzGrant(false);
-  }, [signDocHelper.signDocWrapper]);
+  }, [interactionData.data.origin, signDocHelper.signDocWrapper]);
   const [isSendAuthzGrantChecked, setIsSendAuthzGrantChecked] = useState(false);
 
   const txConfigsValidate = useTxConfigsValidate({

@@ -63,14 +63,9 @@ export class KeyRingStore {
   }
 
   async init(): Promise<void> {
-    const msg = new GetKeyRingStatusMsg();
-    const result = await this.requester.sendMessage(BACKGROUND_PORT, msg);
-    runInAction(() => {
-      this._status = result.status;
-      this._keyInfos = result.keyInfos;
-      this._needMigration = result.needMigration;
-      this._isMigrating = result.isMigrating;
+    await this.refreshKeyRingStatus();
 
+    runInAction(() => {
       this._isInitialized = true;
     });
   }
@@ -126,6 +121,18 @@ export class KeyRingStore {
 
   get isEmpty(): boolean {
     return this._status === "empty";
+  }
+
+  @flow
+  *refreshKeyRingStatus() {
+    const msg = new GetKeyRingStatusMsg();
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+    this._needMigration = result.needMigration;
+    this._isMigrating = result.isMigrating;
   }
 
   @flow
