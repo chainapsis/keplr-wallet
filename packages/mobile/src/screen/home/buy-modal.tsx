@@ -48,7 +48,6 @@ const BuyCryptoScene = observer(() => {
       const response = await simpleFetch<{list: FiatOnRampServiceInfo[]}>(
         'https://raw.githubusercontent.com/chainapsis/keplr-fiat-on-off-ramp-registry/main/fiat-on-off-ramp-list.json',
       );
-      console.log(response.data.list);
 
       setFiatOnRampServiceInfos(response.data.list);
     })();
