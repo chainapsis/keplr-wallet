@@ -109,6 +109,7 @@ export class InteractionStore implements InteractionForegroundHandler {
     afterFn: (proceedNext: boolean) => void | Promise<void>,
     options: {
       preDelay?: number;
+      postDelay?: number;
     } = {}
   ) {
     if (typeof ids === "string") {
@@ -144,7 +145,9 @@ export class InteractionStore implements InteractionForegroundHandler {
 
     yield Promise.all(promises);
 
-    yield this.delay(50);
+    if (options.postDelay == null || options.postDelay > 0) {
+      yield this.delay(options.postDelay ?? 50);
+    }
     yield afterFn(this.hasOtherData(ids));
     this.removeData(ids);
   }
