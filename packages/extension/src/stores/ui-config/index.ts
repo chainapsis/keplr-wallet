@@ -60,6 +60,9 @@ export class UIConfigStore {
   @observable
   protected _fiatCurrency: string = "usd";
 
+  @observable
+  protected _needShowIBCSwapFeatureAdded: boolean = true;
+
   constructor(
     protected readonly kvStores: {
       kvStore: KVStore;
@@ -105,8 +108,7 @@ export class UIConfigStore {
 
   protected async init() {
     // Set the last version to the kv store.
-    // At present, this is not used at all.
-    // For the future, this can be used to show the changelog.
+    // This can be used to show the changelog.
     await this.kvStore.set("lastVersion", manifest.version);
 
     {
@@ -133,6 +135,21 @@ export class UIConfigStore {
         this.kvStore.set("options", toJS(this._options));
       });
     }
+
+    // {
+    //   const saved = await this.kvStore.get<boolean>(
+    //     "needShowIBCSwapFeatureAdded"
+    //   );
+    //   if (saved === true) {
+    //     this._needShowIBCSwapFeatureAdded = saved;
+    //   }
+    //   autorun(() => {
+    //     this.kvStore.set(
+    //       "needShowIBCSwapFeatureAdded",
+    //       this._needShowIBCSwapFeatureAdded
+    //     );
+    //   });
+    // }
 
     await Promise.all([
       this.copyAddressConfig.init(),
@@ -222,5 +239,14 @@ export class UIConfigStore {
 
   async removeStatesWhenErrorOccurredDuringRending() {
     await this.ibcSwapConfig.removeStatesWhenErrorOccurredDuringRending();
+  }
+
+  get needShowIBCSwapFeatureAdded(): boolean {
+    return this._needShowIBCSwapFeatureAdded;
+  }
+
+  @action
+  setNeedShowIBCSwapFeatureAdded(value: boolean) {
+    this._needShowIBCSwapFeatureAdded = value;
   }
 }

@@ -545,6 +545,10 @@
   "page.ledger-grant.title": "Allow Browser to Connect to Ledger",
   "page.ledger-grant.paragraph": "You need to reapprove connection to your Ledger. Select the appropriate app, and after successfully connecting with your Ledger device, close this page and retry your previous transaction (signing).",
 
+  "new-feature.ibc-swap.title": "✨ Swap is Here!",
+  "new-feature.ibc-swap.paragraph": "Swap tokens between different chains with a simple click. Give it a try!",
+  "new-feature.ibc-swap.button": "Got it!",
+
   "components.empty-view.text": "No {subject} Yet",
   "components.input.recipient-input.wallet-address-label": "Wallet Address or ICNS",
   "components.input.amount-input.amount-label": "Amount",

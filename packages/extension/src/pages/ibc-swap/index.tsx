@@ -57,6 +57,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     priceStore,
   } = useStore();
 
+  useLayoutEffect(() => {
+    // 더 이상 new feature 소개가 안뜨도록 만든다.
+    uiConfigStore.setNeedShowIBCSwapFeatureAdded(false);
+  }, [uiConfigStore]);
+
   const theme = useTheme();
 
   const [searchParams, setSearchParams] = useSearchParams();
