@@ -20,6 +20,7 @@ export const Tooltip: FunctionComponent<{
 
   allowedPlacements?: ("top" | "bottom" | "left" | "right")[];
 
+  contentClassName?: string;
   backgroundColor?: string;
   hideBorder?: boolean;
   borderColor?: string;
@@ -29,6 +30,7 @@ export const Tooltip: FunctionComponent<{
   content,
   isAlwaysOpen = false,
   allowedPlacements,
+  contentClassName,
   backgroundColor: propBackgroundColor,
   hideBorder,
   borderColor: propBorderColor,
@@ -102,6 +104,7 @@ export const Tooltip: FunctionComponent<{
       </div>
       {content && (isAlwaysOpen || ((enabled == null || enabled) && isOpen)) ? (
         <div
+          className={contentClassName}
           ref={refs.setFloating}
           style={{
             position: strategy,
