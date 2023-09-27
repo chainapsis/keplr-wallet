@@ -37,9 +37,13 @@ import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
-import { SendTxAndRecordWithIBCSwapMsg } from "@keplr-wallet/background";
+import {
+  LogAnalyticsEventMsg,
+  SendTxAndRecordWithIBCSwapMsg,
+} from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export const IBCSwapPage: FunctionComponent = observer(() => {
   const {
@@ -50,6 +54,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     uiConfigStore,
     keyRingStore,
     hugeQueriesStore,
+    priceStore,
   } = useStore();
 
   const theme = useTheme();
@@ -493,6 +498,118 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       }
                     }
                   }
+
+                  const params: Record<
+                    string,
+                    number | string | boolean | number[] | string[] | undefined
+                  > = {
+                    inChainId: inChainId,
+                    inChainIdentifier:
+                      ChainIdHelper.parse(inChainId).identifier,
+                    inCurrencyMinimalDenom: inCurrency.coinMinimalDenom,
+                    inCurrencyDenom: inCurrency.coinDenom,
+                    inCurrencyCommonMinimalDenom: inCurrency.coinMinimalDenom,
+                    inCurrencyCommonDenom: inCurrency.coinDenom,
+                    outChainId: outChainId,
+                    outChainIdentifier:
+                      ChainIdHelper.parse(outChainId).identifier,
+                    outCurrencyMinimalDenom: outCurrency.coinMinimalDenom,
+                    outCurrencyDenom: outCurrency.coinDenom,
+                    outCurrencyCommonMinimalDenom: outCurrency.coinMinimalDenom,
+                    outCurrencyCommonDenom: outCurrency.coinDenom,
+                  };
+                  if (
+                    "originChainId" in inCurrency &&
+                    inCurrency.originChainId
+                  ) {
+                    const originChainId = inCurrency.originChainId;
+                    params["inOriginChainId"] = originChainId;
+                    params["inOriginChainIdentifier"] =
+                      ChainIdHelper.parse(originChainId).identifier;
+
+                    params["inToDifferentChain"] = true;
+                  }
+                  if (
+                    "originCurrency" in inCurrency &&
+                    inCurrency.originCurrency
+                  ) {
+                    params["inCurrencyCommonMinimalDenom"] =
+                      inCurrency.originCurrency.coinMinimalDenom;
+                    params["inCurrencyCommonDenom"] =
+                      inCurrency.originCurrency.coinDenom;
+                  }
+                  if (
+                    "originChainId" in outCurrency &&
+                    outCurrency.originChainId
+                  ) {
+                    const originChainId = outCurrency.originChainId;
+                    params["outOriginChainId"] = originChainId;
+                    params["outOriginChainIdentifier"] =
+                      ChainIdHelper.parse(originChainId).identifier;
+
+                    params["outToDifferentChain"] = true;
+                  }
+                  if (
+                    "originCurrency" in outCurrency &&
+                    outCurrency.originCurrency
+                  ) {
+                    params["outCurrencyCommonMinimalDenom"] =
+                      outCurrency.originCurrency.coinMinimalDenom;
+                    params["outCurrencyCommonDenom"] =
+                      outCurrency.originCurrency.coinDenom;
+                  }
+                  const getSwapRangeStr = (amount: { toDec: () => Dec }) => {
+                    const swapRanges = [
+                      1, 10, 100, 1000, 10000, 100000, 1000000, 10000000,
+                      100000000, 1000000000,
+                    ];
+                    let res = "unknown";
+                    for (let i = 0; i < swapRanges.length; i++) {
+                      const range = swapRanges[i];
+                      const beforeRange = i > 0 ? swapRanges[i - 1] : 0;
+                      if (
+                        amount.toDec().lte(new Dec(range)) &&
+                        amount.toDec().gt(new Dec(beforeRange))
+                      ) {
+                        res = `${beforeRange}~${range}`;
+                        break;
+                      }
+
+                      if (i === swapRanges.length - 1) {
+                        res = `${range}~`;
+                      }
+                    }
+                    return res;
+                  };
+                  params["inRange"] = getSwapRangeStr(
+                    ibcSwapConfigs.amountConfig.amount[0]
+                  );
+                  params["outRange"] = getSwapRangeStr(
+                    ibcSwapConfigs.amountConfig.outAmount
+                  );
+
+                  // UI 상에서 in currency의 가격은 in input에서 표시되고
+                  // out currency의 가격은 swap fee에서 표시된다.
+                  // price store에서 usd는 무조건 쿼리하므로 in, out currency의 usd는 보장된다.
+                  const inCurrencyPrice = priceStore.calculatePrice(
+                    ibcSwapConfigs.amountConfig.amount[0],
+                    "usd"
+                  );
+                  if (inCurrencyPrice) {
+                    params["inFiatRange"] = getSwapRangeStr(inCurrencyPrice);
+                  }
+                  const outCurrencyPrice = priceStore.calculatePrice(
+                    ibcSwapConfigs.amountConfig.outAmount,
+                    "usd"
+                  );
+                  if (outCurrencyPrice) {
+                    params["outFiatRange"] = getSwapRangeStr(outCurrencyPrice);
+                  }
+
+                  new InExtensionMessageRequester().sendMessage(
+                    BACKGROUND_PORT,
+                    new LogAnalyticsEventMsg("ibc_swap", params)
+                  );
                 },
                 onFulfill: (tx: any) => {
                   if (tx.code != null && tx.code !== 0) {
