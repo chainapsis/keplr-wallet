@@ -63,6 +63,18 @@ export class ObservableQueryProposalV1 extends ObservableChainQuery<ProposalTall
     }
 
     if (this.raw.messages.length === 0) {
+      if (this.raw.metadata) {
+        try {
+          const metadata = JSON.parse(this.raw.metadata);
+          if (metadata.title) {
+            return metadata.title;
+          }
+        } catch (e) {
+          console.log(e);
+          // noop
+        }
+      }
+
       return "No Title";
     }
 
@@ -86,11 +98,27 @@ export class ObservableQueryProposalV1 extends ObservableChainQuery<ProposalTall
       return this.raw.summary;
     }
 
+    if (this.raw.messages.length === 0) {
+      if (this.raw.metadata) {
+        try {
+          const metadata = JSON.parse(this.raw.metadata);
+          if (metadata.summary) {
+            return metadata.summary;
+          }
+        } catch (e) {
+          console.log(e);
+          // noop
+        }
+      }
+
+      return "Unknown";
+    }
+
     if (this.raw.messages[0].content?.description) {
       return this.raw.messages[0].content.description;
     }
 
-    return "";
+    return JSON.stringify(this.raw.messages[0], null, 2);
   }
 
   @computed

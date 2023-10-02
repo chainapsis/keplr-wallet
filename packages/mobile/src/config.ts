@@ -2469,4 +2469,4 @@ export const CommunityChainInfoRepo = {
   branchName: "main",
 };
 
-export const GovernanceV1ChainIdentifiers = ["kyve"];
+export const GovernanceV1ChainIdentifiers = ["kyve", "mars"];
