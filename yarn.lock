@@ -5362,6 +5362,7 @@ __metadata:
     "@keplr-wallet/simple-fetch": 0.12.27
     "@keplr-wallet/stores": 0.12.27
     "@keplr-wallet/stores-etc": 0.12.27
+    "@keplr-wallet/stores-eth": 0.12.27
     "@keplr-wallet/types": 0.12.27
     "@keplr-wallet/unit": 0.12.27
     "@keystonehq/animated-qr": ^0.8.6
@@ -5568,6 +5569,21 @@ __metadata:
     "@keplr-wallet/stores": 0.12.27
     "@keplr-wallet/types": 0.12.27
     "@keplr-wallet/unit": 0.12.27
+    mobx: ^6.1.7
+    mobx-utils: ^6.0.3
+    utility-types: ^3.10.0
+  languageName: unknown
+  linkType: soft
+
+"@keplr-wallet/stores-eth@0.12.27, @keplr-wallet/stores-eth@workspace:packages/stores-eth":
+  version: 0.0.0-use.local
+  resolution: "@keplr-wallet/stores-eth@workspace:packages/stores-eth"
+  dependencies:
+    "@keplr-wallet/common": 0.12.27
+    "@keplr-wallet/stores": 0.12.27
+    "@keplr-wallet/types": 0.12.27
+    "@keplr-wallet/unit": 0.12.27
+    big-integer: ^1.6.48
     mobx: ^6.1.7
     mobx-utils: ^6.0.3
     utility-types: ^3.10.0
