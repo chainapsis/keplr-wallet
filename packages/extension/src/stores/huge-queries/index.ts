@@ -50,9 +50,11 @@ export class HugeQueriesStore {
         continue;
       }
       const queries = this.queriesStore.get(chainInfo.chainId);
-      const queryBalance = queries.queryBalances.getQueryBech32Address(
-        account.bech32Address
-      );
+      const queryBalance = !!chainInfo.evm
+        ? queries.queryBalances.getQueryEthereumHexAddress(
+            account.ethereumHexAddress
+          )
+        : queries.queryBalances.getQueryBech32Address(account.bech32Address);
 
       const currencies = [chainInfo.stakeCurrency, ...chainInfo.currencies];
       for (const currency of currencies) {

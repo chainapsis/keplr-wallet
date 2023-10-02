@@ -40,6 +40,7 @@ import {
   GravityBridgeCurrencyRegistrar,
   AxelarEVMBridgeCurrencyRegistrar,
 } from "@keplr-wallet/stores-etc";
+import { EthereumQueries } from "@keplr-wallet/stores-eth";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
   ContentScriptEnv,
@@ -83,7 +84,8 @@ export class RootStore {
       OsmosisQueries,
       KeplrETCQueries,
       ICNSQueries,
-      TokenContractsQueries
+      TokenContractsQueries,
+      EthereumQueries
     ]
   >;
   public readonly skipQueriesStore: SkipQueries;
@@ -192,7 +194,8 @@ export class RootStore {
       ICNSQueries.use(),
       TokenContractsQueries.use({
         tokenContractListURL: TokenContractListURL,
-      })
+      }),
+      EthereumQueries.use()
     );
     this.skipQueriesStore = new SkipQueries(
       this.queriesStore.sharedContext,
