@@ -131,6 +131,7 @@ import {
   LevanaWebpageScreen,
   QuasarWebpageScreen,
   LikerWebpageScreen,
+  KreadWebpageScreen,
 } from "./screens/web/webpages";
 import { WebpageScreenScreenOptionsPreset } from "./screens/web/components/webpage-screen";
 import Bugsnag from "@bugsnag/react-native";
@@ -320,6 +321,9 @@ const {
       upperScreenName: "Web",
     },
     "Web.LikerLand": {
+      upperScreenName: "Web",
+    },
+    "Web.Kread": {
       upperScreenName: "Web",
     },
   }).withParams<{
@@ -954,6 +958,7 @@ export const WebNavigation: FunctionComponent = () => {
       <Stack.Screen name="Web.Levana" component={LevanaWebpageScreen} />
       <Stack.Screen name="Web.Quasar" component={QuasarWebpageScreen} />
       <Stack.Screen name="Web.LikerLand" component={LikerWebpageScreen} />
+      <Stack.Screen name="Web.Kread" component={KreadWebpageScreen} />
     </Stack.Navigator>
   );
 };

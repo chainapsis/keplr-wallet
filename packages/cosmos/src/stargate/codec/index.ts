@@ -30,6 +30,10 @@ import { GenericAuthorization } from "@keplr-wallet/proto-types/cosmos/authz/v1b
 import { StakeAuthorization } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/authz";
 import { SendAuthorization } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/authz";
 import { Buffer } from "buffer/";
+import {
+  MsgProvision,
+  MsgWalletSpendAction,
+} from "@keplr-wallet/proto-types/agoric/swingset/msgs";
 
 export * from "./unknown";
 
@@ -172,6 +176,11 @@ export class ProtoCodec {
 }
 
 export const defaultProtoCodec = new ProtoCodec();
+defaultProtoCodec.registerAny(
+  "/agoric.swingset.MsgWalletSpendAction",
+  MsgWalletSpendAction
+);
+defaultProtoCodec.registerAny("/agoric.swingset.MsgProvision", MsgProvision);
 defaultProtoCodec.registerAny("/cosmos.bank.v1beta1.MsgSend", MsgSend);
 defaultProtoCodec.registerAny(
   "/cosmos.bank.v1beta1.MsgMultiSend",

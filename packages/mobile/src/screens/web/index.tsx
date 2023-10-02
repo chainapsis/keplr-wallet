@@ -24,6 +24,7 @@ import {
   LevanaItem,
   QuasarItem,
   LikerLandItem,
+  KreadItem,
 } from "./constants";
 import { WebpageImageButton } from "./common";
 import { TextInput } from "../../components/input";
@@ -60,6 +61,7 @@ const WebpagesPerLabel: {
       LevanaItem,
       QuasarItem,
       LikerLandItem,
+      KreadItem,
     ],
   },
   {
@@ -86,7 +88,7 @@ const WebpagesPerLabel: {
   },
   {
     label: "DAO",
-    items: [DaoDaoItem, IONDaoItem],
+    items: [DaoDaoItem, IONDaoItem, KreadItem],
   },
   {
     label: "Refi",
@@ -356,7 +358,7 @@ export const WebScreen: FunctionComponent = observer(() => {
         )}
       </React.Fragment>
 
-      {Platform.OS === "android" ? (
+      {Platform.OS !== "ios" ? (
         <React.Fragment>
           <Text
             style={style.flatten([

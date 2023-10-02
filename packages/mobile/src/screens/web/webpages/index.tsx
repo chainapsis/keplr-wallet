@@ -16,3 +16,4 @@ export * from "./dexter";
 export * from "./levana";
 export * from "./quasar";
 export * from "./liker";
+export * from "./kread";

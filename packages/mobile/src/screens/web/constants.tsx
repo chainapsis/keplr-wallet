@@ -392,3 +392,22 @@ export const LikerLandItem: Item = {
   key: "LikerLand",
   component: LikerLandImage,
 };
+
+const KreadImage: FunctionComponent = () => {
+  const smartNavigation = useSmartNavigation();
+
+  return (
+    <WebpageImageButton
+      name="KREAd"
+      source={require("../../assets/image/webpage/kread.png")}
+      onPress={() => {
+        smartNavigation.pushSmart("Web.Kread", {});
+      }}
+    />
+  );
+};
+
+export const KreadItem: Item = {
+  key: "Kread",
+  component: KreadImage,
+};
