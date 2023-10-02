@@ -1265,7 +1265,6 @@ export class KeyRingService {
 
   static isEthermintLike(chainInfo: ChainInfo): boolean {
     return (
-      chainInfo.bip44.coinType === 60 ||
       !!chainInfo.features?.includes("eth-address-gen") ||
       !!chainInfo.features?.includes("eth-key-sign")
     );
