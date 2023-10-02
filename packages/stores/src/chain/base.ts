@@ -270,6 +270,10 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
     return this._embedded.chainSymbolImageUrl;
   }
 
+  get evm(): { chainId: number; rpc: string } | undefined {
+    return this._embedded.evm;
+  }
+
   hasFeature(feature: string): boolean {
     return !!(
       this._embedded.features && this._embedded.features.includes(feature)

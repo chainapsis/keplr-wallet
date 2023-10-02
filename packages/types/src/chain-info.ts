@@ -43,6 +43,11 @@ export interface ChainInfo {
   readonly beta?: boolean;
 
   readonly chainSymbolImageUrl?: string;
+
+  readonly evm?: {
+    chainId: number;
+    rpc: string;
+  };
 }
 
 export type ChainInfoWithoutEndpoints = Omit<
