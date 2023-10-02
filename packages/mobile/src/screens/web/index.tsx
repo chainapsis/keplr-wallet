@@ -84,11 +84,11 @@ const WebpagesPerLabel: {
   },
   {
     label: "NFT",
-    items: [StargazeItem, LikerLandItem],
+    items: [StargazeItem, LikerLandItem, KreadItem],
   },
   {
     label: "DAO",
-    items: [DaoDaoItem, IONDaoItem, KreadItem],
+    items: [DaoDaoItem, IONDaoItem],
   },
   {
     label: "Refi",
