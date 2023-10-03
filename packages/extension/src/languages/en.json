@@ -358,6 +358,22 @@
   "page.ibc-transfer.add-channel-modal.channel-id-label": "Source Channel Id",
   "page.ibc-transfer.add-channel-modal.channel-id-placeholder": "Source Channel ID",
 
+  "page.ibc-swap.title.swap": "Swap",
+  "page.ibc-swap.button.next": "Next",
+  "page.ibc-swap.error.no-route-found": "No routes found for this swap",
+  "page.ibc-swap.components.swap-asset-info.from": "From",
+  "page.ibc-swap.components.swap-asset-info.to": "To",
+  "page.ibc-swap.components.swap-asset-info.max-asset": "Max: {asset}",
+  "page.ibc-swap.components.swap-asset-info.on-chain-name": "On {chainName}",
+  "page.ibc-swap.components.swap-asset-info.modal.select-destination-chain.title": "Select Destination Chain",
+  "page.ibc-swap.components.swap-asset-info.modal.search.placeholder": "Search for a chain",
+  "page.ibc-swap.components.swap-fee-info.button.transaction-fee": "Transaction Fee",
+  "page.ibc-swap.components.swap-fee-info.button.service-fee": "Keplr Swap Fee",
+  "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph": "Launch Event: swap with 0% Keplr fee for the first month",
+  "page.ibc-swap.components.slippage-modal.title": "Slippage Settings",
+  "page.ibc-swap.components.slippage-modal.label.slippage-tolerance": "Slippage Tolerance",
+  "page.ibc-swap.components.slippage-modal.label.slippage-custom": "Custom Slippage",
+
   "page.permission.unknown-permission": "Unknown permission",
   "page.permission.requesting-connection-title": "Requesting Connection",
   "page.permission.paragraph": "By approving this request, the website will:{br}• Get the list of all chain on your Keplr Wallet",
@@ -481,8 +497,8 @@
 
   "page.main.components.ibc-history-view.item.pending": "IBC Transfer in Progress",
   "page.main.components.ibc-history-view.item.succeed": "IBC Transfer Successful",
-  "page.main.components.ibc-history-view.ibc-swap.item.pending": "IBC Swap in Progress",
-  "page.main.components.ibc-history-view.ibc-swap.item.succeed": "IBC Swap Successful",
+  "page.main.components.ibc-history-view.ibc-swap.item.pending": "Swap in Progress",
+  "page.main.components.ibc-history-view.ibc-swap.item.succeed": "Swap Successful",
   "page.main.components.ibc-history-view.paragraph": "Transfer {assets} from {sourceChain} to {destinationChain}",
   "page.main.components.ibc-history-view.ibc-swap.paragraph": "Swapping {assets} to {destinationDenom}",
   "page.main.components.ibc-history-view.ibc-swap.succeed.paragraph": "You received {assets}",
@@ -528,6 +544,10 @@
 
   "page.ledger-grant.title": "Allow Browser to Connect to Ledger",
   "page.ledger-grant.paragraph": "You need to reapprove connection to your Ledger. Select the appropriate app, and after successfully connecting with your Ledger device, close this page and retry your previous transaction (signing).",
+
+  "new-feature.ibc-swap.title": "✨ Swap is Here!",
+  "new-feature.ibc-swap.paragraph": "Swap tokens between different chains with a simple click. Give it a try!",
+  "new-feature.ibc-swap.button": "Got it!",
 
   "components.empty-view.text": "No {subject} Yet",
   "components.input.recipient-input.wallet-address-label": "Wallet Address or ICNS",

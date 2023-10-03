@@ -21,7 +21,7 @@ import {
   ZeroAmountError,
 } from "@keplr-wallet/hooks";
 import { useNotification } from "../../hooks/notification";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { SwapFeeBps } from "../../config.ui";
 import { BottomTabsHeightRem } from "../../bottom-tabs";
 import { useSearchParams } from "react-router-dom";
@@ -37,9 +37,13 @@ import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
-import { SendTxAndRecordWithIBCSwapMsg } from "@keplr-wallet/background";
+import {
+  LogAnalyticsEventMsg,
+  SendTxAndRecordWithIBCSwapMsg,
+} from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export const IBCSwapPage: FunctionComponent = observer(() => {
   const {
@@ -50,7 +54,13 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     uiConfigStore,
     keyRingStore,
     hugeQueriesStore,
+    priceStore,
   } = useStore();
+
+  useLayoutEffect(() => {
+    // 더 이상 new feature 소개가 안뜨도록 만든다.
+    uiConfigStore.setNeedShowIBCSwapFeatureAdded(false);
+  }, [uiConfigStore]);
 
   const theme = useTheme();
 
@@ -317,7 +327,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       additionalPaddingBottom={BottomTabsHeightRem}
       bottomButton={{
         disabled: interactionBlocked,
-        text: "Next",
+        text: intl.formatMessage({
+          id: "page.ibc-swap.button.next",
+        }),
         color: "primary",
         size: "large",
         isLoading:
@@ -491,6 +503,118 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       }
                     }
                   }
+
+                  const params: Record<
+                    string,
+                    number | string | boolean | number[] | string[] | undefined
+                  > = {
+                    inChainId: inChainId,
+                    inChainIdentifier:
+                      ChainIdHelper.parse(inChainId).identifier,
+                    inCurrencyMinimalDenom: inCurrency.coinMinimalDenom,
+                    inCurrencyDenom: inCurrency.coinDenom,
+                    inCurrencyCommonMinimalDenom: inCurrency.coinMinimalDenom,
+                    inCurrencyCommonDenom: inCurrency.coinDenom,
+                    outChainId: outChainId,
+                    outChainIdentifier:
+                      ChainIdHelper.parse(outChainId).identifier,
+                    outCurrencyMinimalDenom: outCurrency.coinMinimalDenom,
+                    outCurrencyDenom: outCurrency.coinDenom,
+                    outCurrencyCommonMinimalDenom: outCurrency.coinMinimalDenom,
+                    outCurrencyCommonDenom: outCurrency.coinDenom,
+                  };
+                  if (
+                    "originChainId" in inCurrency &&
+                    inCurrency.originChainId
+                  ) {
+                    const originChainId = inCurrency.originChainId;
+                    params["inOriginChainId"] = originChainId;
+                    params["inOriginChainIdentifier"] =
+                      ChainIdHelper.parse(originChainId).identifier;
+
+                    params["inToDifferentChain"] = true;
+                  }
+                  if (
+                    "originCurrency" in inCurrency &&
+                    inCurrency.originCurrency
+                  ) {
+                    params["inCurrencyCommonMinimalDenom"] =
+                      inCurrency.originCurrency.coinMinimalDenom;
+                    params["inCurrencyCommonDenom"] =
+                      inCurrency.originCurrency.coinDenom;
+                  }
+                  if (
+                    "originChainId" in outCurrency &&
+                    outCurrency.originChainId
+                  ) {
+                    const originChainId = outCurrency.originChainId;
+                    params["outOriginChainId"] = originChainId;
+                    params["outOriginChainIdentifier"] =
+                      ChainIdHelper.parse(originChainId).identifier;
+
+                    params["outToDifferentChain"] = true;
+                  }
+                  if (
+                    "originCurrency" in outCurrency &&
+                    outCurrency.originCurrency
+                  ) {
+                    params["outCurrencyCommonMinimalDenom"] =
+                      outCurrency.originCurrency.coinMinimalDenom;
+                    params["outCurrencyCommonDenom"] =
+                      outCurrency.originCurrency.coinDenom;
+                  }
+                  const getSwapRangeStr = (amount: { toDec: () => Dec }) => {
+                    const swapRanges = [
+                      1, 10, 100, 1000, 10000, 100000, 1000000, 10000000,
+                      100000000, 1000000000,
+                    ];
+                    let res = "unknown";
+                    for (let i = 0; i < swapRanges.length; i++) {
+                      const range = swapRanges[i];
+                      const beforeRange = i > 0 ? swapRanges[i - 1] : 0;
+                      if (
+                        amount.toDec().lte(new Dec(range)) &&
+                        amount.toDec().gt(new Dec(beforeRange))
+                      ) {
+                        res = `${beforeRange}~${range}`;
+                        break;
+                      }
+
+                      if (i === swapRanges.length - 1) {
+                        res = `${range}~`;
+                      }
+                    }
+                    return res;
+                  };
+                  params["inRange"] = getSwapRangeStr(
+                    ibcSwapConfigs.amountConfig.amount[0]
+                  );
+                  params["outRange"] = getSwapRangeStr(
+                    ibcSwapConfigs.amountConfig.outAmount
+                  );
+
+                  // UI 상에서 in currency의 가격은 in input에서 표시되고
+                  // out currency의 가격은 swap fee에서 표시된다.
+                  // price store에서 usd는 무조건 쿼리하므로 in, out currency의 usd는 보장된다.
+                  const inCurrencyPrice = priceStore.calculatePrice(
+                    ibcSwapConfigs.amountConfig.amount[0],
+                    "usd"
+                  );
+                  if (inCurrencyPrice) {
+                    params["inFiatRange"] = getSwapRangeStr(inCurrencyPrice);
+                  }
+                  const outCurrencyPrice = priceStore.calculatePrice(
+                    ibcSwapConfigs.amountConfig.outAmount,
+                    "usd"
+                  );
+                  if (outCurrencyPrice) {
+                    params["outFiatRange"] = getSwapRangeStr(outCurrencyPrice);
+                  }
+
+                  new InExtensionMessageRequester().sendMessage(
+                    BACKGROUND_PORT,
+                    new LogAnalyticsEventMsg("ibc_swap", params)
+                  );
                 },
                 onFulfill: (tx: any) => {
                   if (tx.code != null && tx.code !== 0) {
@@ -546,7 +670,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   : ColorPalette["white"]
               }
             >
-              Swap
+              <FormattedMessage id="page.ibc-swap.title.swap" />
             </H4>
             <div style={{ flex: 1 }} />
             <Box
@@ -785,6 +909,8 @@ const WarningGuideBox: FunctionComponent<{
     }
   }, [collapsed, globalSimpleBar.ref]);
 
+  const intl = useIntl();
+
   return (
     <React.Fragment>
       {/* 별 차이는 없기는한데 gutter와 실제 컴포넌트의 트랜지션을 분리하는게 아주 약간 더 자연스러움 */}
@@ -794,7 +920,20 @@ const WarningGuideBox: FunctionComponent<{
       <VerticalCollapseTransition collapsed={collapsed}>
         <GuideBox
           color="warning"
-          title={error || lastError}
+          title={(() => {
+            const err = error || lastError;
+
+            if (
+              err &&
+              err === "could not find a path to execute the requested swap"
+            ) {
+              return intl.formatMessage({
+                id: "page.ibc-swap.error.no-route-found",
+              });
+            }
+
+            return err;
+          })()}
           hideInformationIcon={true}
         />
       </VerticalCollapseTransition>

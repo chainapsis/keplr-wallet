@@ -20,7 +20,7 @@ import { Tooltip } from "../../../../components/tooltip";
 import { LoadingIcon } from "../../../../components/icon";
 import { TransactionFeeModal } from "../../../../components/input/fee-control/modal";
 import { Modal } from "../../../../components/modal";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 
 export const SwapFeeInfo: FunctionComponent<{
@@ -246,7 +246,7 @@ export const SwapFeeInfo: FunctionComponent<{
                       : ColorPalette["gray-200"]
                   }
                 >
-                  Transaction Fee
+                  <FormattedMessage id="page.ibc-swap.components.swap-fee-info.button.transaction-fee" />
                 </Subtitle4>
               </Box>
               {feeConfig.uiProperties.loadingState ||
@@ -350,32 +350,39 @@ export const SwapFeeInfo: FunctionComponent<{
             <Subtitle4
               color={
                 theme.mode === "light"
-                  ? ColorPalette["gray-300"]
-                  : ColorPalette["gray-300"]
+                  ? ColorPalette["blue-400"]
+                  : ColorPalette["blue-200"]
               }
             >
-              Keplr Swap Fee
+              <FormattedMessage id="page.ibc-swap.components.swap-fee-info.button.service-fee" />
             </Subtitle4>
             <Gutter size="0.2rem" />
             <Tooltip
-              content={`${(() => {
-                const feeRatioPretty = new IntPretty(
-                  amountConfig.swapFeeBps
-                ).moveDecimalPointLeft(2);
-                return feeRatioPretty
-                  .trim(true)
-                  .maxDecimals(4)
-                  .inequalitySymbol(true)
-                  .toString();
-              })()}%`}
+              content={intl.formatMessage(
+                {
+                  id: "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph",
+                },
+                {
+                  rate: (() => {
+                    const feeRatioPretty = new IntPretty(
+                      amountConfig.swapFeeBps
+                    ).moveDecimalPointLeft(2);
+                    return feeRatioPretty
+                      .trim(true)
+                      .maxDecimals(4)
+                      .inequalitySymbol(true)
+                      .toString();
+                  })(),
+                }
+              )}
             >
               <InfoIcon
                 width="1rem"
                 height="1rem"
                 color={
                   theme.mode === "light"
-                    ? ColorPalette["gray-200"]
-                    : ColorPalette["gray-400"]
+                    ? ColorPalette["blue-400"]
+                    : ColorPalette["blue-200"]
                 }
               />
             </Tooltip>

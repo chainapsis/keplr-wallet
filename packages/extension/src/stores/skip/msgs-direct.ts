@@ -177,12 +177,15 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
           amount_in: this.amountInAmount,
           chain_ids_to_addresses: this.chainIdsToAddresses,
           slippage_tolerance_percent: this.slippageTolerancePercent.toString(),
-          affiliates: [
-            {
-              basis_points_fee: this.affiliateFeeBps.toString(),
-              address: this.affiliateFeeReceiver,
-            },
-          ],
+          affiliates:
+            this.affiliateFeeBps > 0
+              ? [
+                  {
+                    basis_points_fee: this.affiliateFeeBps.toString(),
+                    address: this.affiliateFeeReceiver,
+                  },
+                ]
+              : [],
           swap_venue: {
             name: this.swapVenue.name,
             chain_id: this.swapVenue.chainId,

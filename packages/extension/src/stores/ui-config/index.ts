@@ -19,6 +19,7 @@ import { AddressBookConfig } from "./address-book";
 import { MessageRequester } from "@keplr-wallet/router";
 import manifest from "../../manifest.v2.json";
 import { IBCSwapConfig } from "./ibc-swap";
+import semver from "semver";
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
@@ -59,6 +60,9 @@ export class UIConfigStore {
 
   @observable
   protected _fiatCurrency: string = "usd";
+
+  @observable
+  protected _needShowIBCSwapFeatureAdded: boolean = false;
 
   constructor(
     protected readonly kvStores: {
@@ -105,9 +109,21 @@ export class UIConfigStore {
 
   protected async init() {
     // Set the last version to the kv store.
-    // At present, this is not used at all.
-    // For the future, this can be used to show the changelog.
-    await this.kvStore.set("lastVersion", manifest.version);
+    // This can be used to show the changelog.
+    {
+      const lastVersion = await this.kvStore.get<string>("lastVersion");
+      if (lastVersion) {
+        try {
+          if (semver.lte(lastVersion, "0.12.28")) {
+            this._needShowIBCSwapFeatureAdded = true;
+          }
+        } catch (e) {
+          console.log(e);
+        }
+      }
+
+      await this.kvStore.set("lastVersion", manifest.version);
+    }
 
     {
       const saved = await this.kvStore.get<string>("fiatCurrency");
@@ -131,6 +147,21 @@ export class UIConfigStore {
 
       autorun(() => {
         this.kvStore.set("options", toJS(this._options));
+      });
+    }
+
+    {
+      const saved = await this.kvStore.get<boolean>(
+        "needShowIBCSwapFeatureAdded"
+      );
+      if (saved === true) {
+        this._needShowIBCSwapFeatureAdded = saved;
+      }
+      autorun(() => {
+        this.kvStore.set(
+          "needShowIBCSwapFeatureAdded",
+          this._needShowIBCSwapFeatureAdded
+        );
       });
     }
 
@@ -222,5 +253,14 @@ export class UIConfigStore {
 
   async removeStatesWhenErrorOccurredDuringRending() {
     await this.ibcSwapConfig.removeStatesWhenErrorOccurredDuringRending();
+  }
+
+  get needShowIBCSwapFeatureAdded(): boolean {
+    return this._needShowIBCSwapFeatureAdded;
+  }
+
+  @action
+  setNeedShowIBCSwapFeatureAdded(value: boolean) {
+    this._needShowIBCSwapFeatureAdded = value;
   }
 }
