@@ -26,7 +26,7 @@ const Schema = Joi.object<AssetsFromSourceResponse>({
         ),
       }).unknown(true)
     ),
-});
+}).unknown(true);
 
 export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<AssetsFromSourceResponse> {
   constructor(

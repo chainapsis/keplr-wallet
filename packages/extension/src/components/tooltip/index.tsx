@@ -19,11 +19,22 @@ export const Tooltip: FunctionComponent<{
   isAlwaysOpen?: boolean;
 
   allowedPlacements?: ("top" | "bottom" | "left" | "right")[];
+
+  contentClassName?: string;
+  backgroundColor?: string;
+  hideBorder?: boolean;
+  borderColor?: string;
+  filter?: string;
 }> = ({
   enabled,
   content,
   isAlwaysOpen = false,
   allowedPlacements,
+  contentClassName,
+  backgroundColor: propBackgroundColor,
+  hideBorder,
+  borderColor: propBorderColor,
+  filter,
   children,
 }) => {
   const [_isOpen, setIsOpen] = useState(false);
@@ -64,6 +75,18 @@ export const Tooltip: FunctionComponent<{
 
   const theme = useTheme();
 
+  const backgroundColor =
+    propBackgroundColor ||
+    (theme.mode === "light"
+      ? ColorPalette["gray-400"]
+      : ColorPalette["gray-500"]);
+
+  const borderColor =
+    propBorderColor ||
+    (theme.mode === "light"
+      ? ColorPalette["gray-400"]
+      : ColorPalette["gray-400"]);
+
   return (
     <React.Fragment>
       <div
@@ -81,26 +104,22 @@ export const Tooltip: FunctionComponent<{
       </div>
       {content && (isAlwaysOpen || ((enabled == null || enabled) && isOpen)) ? (
         <div
+          className={contentClassName}
           ref={refs.setFloating}
           style={{
             position: strategy,
             top: y ?? 0,
             left: x ?? 0,
 
-            backgroundColor:
-              theme.mode === "light"
-                ? ColorPalette["gray-400"]
-                : ColorPalette["gray-500"],
+            backgroundColor,
             padding: "0.625rem",
             borderRadius: "0.375rem",
 
             borderStyle: "solid",
             borderWidth: "1px",
-            borderColor:
-              theme.mode === "light"
-                ? ColorPalette["gray-400"]
-                : ColorPalette["gray-400"],
+            borderColor: hideBorder ? backgroundColor : borderColor,
 
+            filter,
             zIndex: 9999999,
           }}
           {...getFloatingProps()}
@@ -108,12 +127,8 @@ export const Tooltip: FunctionComponent<{
           <FloatingArrow
             ref={arrowRef}
             context={context}
-            fill={
-              theme.mode === "light"
-                ? ColorPalette["gray-400"]
-                : ColorPalette["gray-500"]
-            }
-            stroke={ColorPalette["gray-400"]}
+            fill={backgroundColor}
+            stroke={hideBorder ? backgroundColor : borderColor}
             strokeWidth={1}
           />
           <Caption2

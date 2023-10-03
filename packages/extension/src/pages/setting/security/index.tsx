@@ -26,7 +26,7 @@ export const SettingSecurityPage: FunctionComponent = () => {
       left={<BackButton />}
     >
       <Box padding="0.75rem" paddingTop="0">
-        <Stack gutter="1rem">
+        <Stack gutter="0.5rem">
           <PageButton
             title={intl.formatMessage({
               id: "page.setting.security.connected-websites-title",
