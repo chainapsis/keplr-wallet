@@ -21,7 +21,6 @@ export interface AssetsResponse {
             denom: string;
             chain_id: string;
             origin_denom: string;
-            origin_chain_id: string;
           }[];
         }
       | undefined;

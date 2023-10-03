@@ -17,7 +17,6 @@ const Schema = Joi.object<AssetsResponse>({
           denom: Joi.string().required(),
           chain_id: Joi.string().required(),
           origin_denom: Joi.string().required(),
-          origin_chain_id: Joi.string().required(),
         }).unknown(true)
       ),
     }).unknown(true)
@@ -45,7 +44,6 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
     denom: string;
     chainId: string;
     originDenom: string;
-    originChainId: string;
   }[] {
     if (
       !this.response ||
@@ -68,21 +66,16 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
         denom: string;
         chainId: string;
         originDenom: string;
-        originChainId: string;
       }[] = [];
 
       for (const asset of assetsInResponse.assets) {
-        if (
-          this.chainGetter.hasChain(asset.chain_id) &&
-          this.chainGetter.hasChain(asset.origin_chain_id)
-        ) {
+        if (this.chainGetter.hasChain(asset.chain_id)) {
           // IBC asset일 경우 그냥 넣는다.
           if (asset.denom.startsWith("ibc/")) {
             res.push({
               denom: asset.denom,
               chainId: asset.chain_id,
               originDenom: asset.origin_denom,
-              originChainId: asset.origin_chain_id,
             });
             // IBC asset이 아니라면 알고있는 currency만 넣는다.
           } else if (chainInfo.findCurrency(asset.denom)) {
@@ -90,7 +83,6 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
               denom: asset.denom,
               chainId: asset.chain_id,
               originDenom: asset.origin_denom,
-              originChainId: asset.origin_chain_id,
             });
           }
         }
