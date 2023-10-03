@@ -350,8 +350,8 @@ export const SwapFeeInfo: FunctionComponent<{
             <Subtitle4
               color={
                 theme.mode === "light"
-                  ? ColorPalette["gray-300"]
-                  : ColorPalette["gray-300"]
+                  ? ColorPalette["blue-400"]
+                  : ColorPalette["blue-200"]
               }
             >
               <FormattedMessage id="page.ibc-swap.components.swap-fee-info.button.service-fee" />
@@ -381,8 +381,8 @@ export const SwapFeeInfo: FunctionComponent<{
                 height="1rem"
                 color={
                   theme.mode === "light"
-                    ? ColorPalette["gray-200"]
-                    : ColorPalette["gray-400"]
+                    ? ColorPalette["blue-400"]
+                    : ColorPalette["blue-200"]
                 }
               />
             </Tooltip>
