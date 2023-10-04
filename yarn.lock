@@ -3983,7 +3983,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/abi@npm:^5.5.0":
+"@ethersproject/abi@npm:^5.5.0, @ethersproject/abi@npm:^5.7.0":
   version: 5.7.0
   resolution: "@ethersproject/abi@npm:5.7.0"
   dependencies:
@@ -5579,6 +5579,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/stores-eth@workspace:packages/stores-eth"
   dependencies:
+    "@ethersproject/abi": ^5.7.0
     "@keplr-wallet/common": 0.12.27
     "@keplr-wallet/stores": 0.12.27
     "@keplr-wallet/types": 0.12.27

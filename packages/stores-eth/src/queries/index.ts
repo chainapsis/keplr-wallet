@@ -4,6 +4,7 @@ import {
   QuerySharedContext,
 } from "@keplr-wallet/stores";
 import { ObservableQueryEthAccountBalanceRegistry } from "./balance";
+import { ObservableQueryEthereumERC20BalanceRegistry } from "./erc20-balance";
 
 export interface EthereumQueries {
   ethereum: EthereumQueriesImpl;
@@ -43,6 +44,9 @@ export class EthereumQueriesImpl {
   ) {
     base.queryBalances.addBalanceRegistry(
       new ObservableQueryEthAccountBalanceRegistry(sharedContext)
+    );
+    base.queryBalances.addBalanceRegistry(
+      new ObservableQueryEthereumERC20BalanceRegistry(sharedContext)
     );
   }
 }

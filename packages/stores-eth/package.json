@@ -16,6 +16,7 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
+    "@ethersproject/abi": "^5.7.0",
     "@keplr-wallet/common": "0.12.27",
     "@keplr-wallet/stores": "0.12.27",
     "@keplr-wallet/types": "0.12.27",
