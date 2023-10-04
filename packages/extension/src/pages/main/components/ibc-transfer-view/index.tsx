@@ -76,7 +76,11 @@ export const IBCTransferView: FunctionComponent = () => {
           size="small"
           onClick={() => {
             analyticsStore.logEvent("click_ibcTransfer");
-            navigate("/send/select-asset?isIBCTransfer=true");
+            navigate(
+              `/send/select-asset?isIBCTransfer=true&navigateTo=${encodeURIComponent(
+                "/ibc-transfer?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
+              )}`
+            );
           }}
         />
       </Columns>
