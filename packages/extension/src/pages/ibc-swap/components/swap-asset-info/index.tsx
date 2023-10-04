@@ -550,6 +550,7 @@ export const SwapAssetInfo: FunctionComponent<{
                             .maxDecimals(6)
                             .inequalitySymbol(true)
                             .shrink(true)
+                            .hideIBCMetadata(true)
                             .toString();
                         } else {
                           return price.toString();
