@@ -290,6 +290,8 @@ export class KeyRingStore {
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
     this._status = result.status;
+
+    this.eventDispatcher.dispatchEvent("keplr_keystorelock");
   }
 
   @flow
@@ -307,6 +309,8 @@ export class KeyRingStore {
       this._keyInfos = result.keyInfos;
 
       this._needMigration = false;
+
+      this.eventDispatcher.dispatchEvent("keplr_keystoreunlock");
     } finally {
       // Set the flag to false even if the migration is failed.
       this._isMigrating = false;
