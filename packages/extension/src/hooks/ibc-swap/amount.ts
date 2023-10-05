@@ -113,27 +113,18 @@ export class IBCSwapAmountConfig extends AmountConfig {
       throw new Error("Query IBC Swap is not initialized");
     }
 
+    await queryIBCSwap.getQueryRoute().waitFreshResponse();
+    const queryRouteResponse = queryIBCSwap.getQueryRoute().response;
+    if (!queryRouteResponse) {
+      throw new Error("Failed to fetch route");
+    }
+
     const chainIdsToAddresses: Record<string, string> = {};
     const sourceAccount = this.accountStore.getAccount(this.chainId);
     const swapAccount = this.accountStore.getAccount(
       queryIBCSwap.swapVenue.chainId
     );
-    const destinationChainIds = (() => {
-      const res: string[] = [];
-      // 일단 destination은 기본적으로 osmosis에서 ibc currency의 origin chain의 원본 currency를 거쳐서 이동한다고 가정한다.
-      // 현재는 UI에서 이 가정을 만족시킨다
-      if ("paths" in this.outCurrency) {
-        const reverse = this.outCurrency.paths.reverse();
-        for (const path of reverse) {
-          if (path.clientChainId) {
-            res.push(path.clientChainId);
-          }
-        }
-      }
-
-      res.push(this.outChainId);
-      return res;
-    })();
+    const destinationChainIds = queryRouteResponse.data.chain_ids;
     if (sourceAccount.walletStatus === WalletStatus.NotInit) {
       await sourceAccount.init();
     }
@@ -215,27 +206,17 @@ export class IBCSwapAmountConfig extends AmountConfig {
       return;
     }
 
+    const queryRouteResponse = queryIBCSwap.getQueryRoute().response;
+    if (!queryRouteResponse) {
+      return;
+    }
+
     const chainIdsToAddresses: Record<string, string> = {};
     const sourceAccount = this.accountStore.getAccount(this.chainId);
     const swapAccount = this.accountStore.getAccount(
       queryIBCSwap.swapVenue.chainId
     );
-    const destinationChainIds = (() => {
-      const res: string[] = [];
-      // 일단 destination은 기본적으로 osmosis에서 ibc currency의 origin chain의 원본 currency를 거쳐서 이동한다고 가정한다.
-      // 현재는 UI에서 이 가정을 만족시킨다
-      if ("paths" in this.outCurrency) {
-        const reverse = this.outCurrency.paths.reverse();
-        for (const path of reverse) {
-          if (path.clientChainId) {
-            res.push(path.clientChainId);
-          }
-        }
-      }
-
-      res.push(this.outChainId);
-      return res;
-    })();
+    const destinationChainIds = queryRouteResponse.data.chain_ids;
 
     if (sourceAccount.walletStatus === WalletStatus.NotInit) {
       sourceAccount.init();
@@ -290,7 +271,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
         {
           portId: msg.sourcePort,
           channelId: msg.sourceChannel,
-          counterpartyChainId: queryIBCSwap.swapVenue.chainId,
+          counterpartyChainId: msg.counterpartyChainId,
         },
         this.amount[0].toDec().toString(),
         this.amount[0].currency,

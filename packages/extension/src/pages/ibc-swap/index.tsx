@@ -372,7 +372,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               // /msgs_direct로도 얻을 순 있지만 따로 데이터를 해석해야되기 때문에 좀 힘들다...
               // 엄밀히 말하면 각각의 엔드포인트이기 때문에 약간의 시간차 등으로 서로 일치하지 않는 값이 올수도 있다.
               // 근데 현실에서는 그런 일 안 일어날듯 그냥 그런 문제는 무시하고 진행한다.
-              queryRoute.waitFreshResponse(),
+              // queryRoute.waitFreshResponse(),
+              // 인데 사실 ibcSwapConfigs.amountConfig.getTx에서 queryRoute.waitFreshResponse()를 하도록 나중에 바껴서...
+              // 굳이 중복할 필요가 없어짐
             ]);
 
             if (!queryRoute.response) {
