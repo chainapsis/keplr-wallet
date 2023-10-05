@@ -273,7 +273,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   useEffect(() => {
     const disposal = autorun(() => {
       noop(hugeQueriesStore.getAllBalances(true));
-      noop(skipQueriesStore.queryIBCSwap.swapCurrenciesMap);
       noop(skipQueriesStore.queryIBCSwap.swapDestinationCurrenciesMap);
     });
 

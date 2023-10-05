@@ -16,6 +16,8 @@ import {
 } from "./msgs-direct";
 import { computedFn } from "mobx-utils";
 import { ObservableQueryIbcPfmTransfer } from "./ibc-pfm-transfer";
+import { ObservableQueryAssetsFromSource } from "./assets-from-source";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class ObservableQueryIBCSwapInner {
   constructor(
@@ -82,6 +84,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
   constructor(
     protected readonly chainStore: IChainStore,
     protected readonly queryAssets: ObservableQueryAssets,
+    protected readonly queryAssetsFromSource: ObservableQueryAssetsFromSource,
     protected readonly queryChains: ObservableQueryChains,
     protected readonly queryRoute: ObservableQueryRoute,
     protected readonly queryMsgsDirect: ObservableQueryMsgsDirect,
@@ -130,80 +133,208 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
   }
 
   isSwappableCurrency(chainId: string, currency: AppCurrency): boolean {
-    const chainIdentifier = this.chainStore.getChain(chainId).chainIdentifier;
-    return (
-      this.swapCurrenciesMap.has(chainIdentifier) &&
-      this.swapCurrenciesMap
-        .get(chainIdentifier)!
-        .has(currency.coinMinimalDenom)
-    );
-  }
-
-  // Key: chain identifier, inner key: coin minimal denom
-  @computed
-  get swapCurrenciesMap(): Map<string, Map<string, AppCurrency>> {
-    const swapChainInfo = this.chainStore.getChain(this.swapVenue.chainId);
-
-    const queryAssets = this.queryAssets.getAssets(swapChainInfo.chainId);
-    const assets = queryAssets.assets;
-
-    const res = new Map<string, Map<string, AppCurrency>>();
-
-    const getMap = (chainId: string) => {
-      const chainIdentifier = this.chainStore.getChain(chainId).chainIdentifier;
-      let innerMap = res.get(chainIdentifier);
-      if (!innerMap) {
-        innerMap = new Map<string, AppCurrency>();
-        res.set(chainIdentifier, innerMap);
+    if ("paths" in currency) {
+      if (!currency.originChainId || !currency.originCurrency) {
+        return false;
       }
 
-      return innerMap;
-    };
+      // CW20같은 얘들은 현재 처리 불가능
+      if ("type" in currency.originCurrency) {
+        return false;
+      }
 
-    for (const asset of assets) {
-      const chainId = asset.chainId;
+      // osmosis 위에 있는 ibc 토큰은 그냥 통과시킨다.
+      if (
+        ChainIdHelper.parse(chainId).identifier ===
+        this.chainStore.getChain(this.swapVenue.chainId).chainIdentifier
+      ) {
+        return true;
+      }
 
-      const currency = this.chainStore
-        .getChain(chainId)
-        .findCurrency(asset.denom);
+      const assetsFromSource = this.queryAssetsFromSource.getSourceAsset(
+        chainId,
+        currency.coinMinimalDenom
+      ).assetsFromSource;
 
-      if (currency) {
-        // If ibc currency is well known.
+      if (!assetsFromSource) {
+        return false;
+      }
+
+      const swapVenueChainId = this.chainStore.getChain(
+        this.swapVenue.chainId
+      ).chainId;
+
+      const assets = assetsFromSource[swapVenueChainId];
+
+      if (!assets) {
+        return false;
+      }
+
+      // TODO: 미래에는 assets가 두개 이상이 될수도 있다고 한다.
+      //       근데 지금은 한개로만 고정되어 있다고 한다...
+      //       나중에 두개 이상의 경우가 생기면 다시 생각해보자...
+      if (assets.assets.length > 0) {
+        const asset = assets.assets[0];
         if (
-          "originCurrency" in currency &&
-          currency.originCurrency &&
-          "originChainId" in currency &&
-          currency.originChainId &&
-          // XXX: multi-hop ibc currency는 나중에 생각해본다...
-          currency.paths.length === 1
+          asset.chainId === swapVenueChainId &&
+          asset.denom === currency.coinMinimalDenom &&
+          this.chainStore.hasChain(asset.chainId) &&
+          this.chainStore.hasChain(asset.originChainId)
         ) {
-          // 현재 CW20같은 얘들은 처리할 수 없다.
-          if (!("type" in currency.originCurrency)) {
-            const originChainId = currency.originChainId;
-            if (this.queryChains.isSupportsMemo(originChainId)) {
-              // 기본적으로 해당 체인이 ibc transfer에서 memo를 지원하지 않으면 osmosis에서 pfm을 쓸 수 없기 때문에
-              // 해당 체인의 ibc currency를 넣지 않는다.
-              const originCurrency = currency.originCurrency;
-              getMap(currency.originChainId).set(
-                originCurrency.coinMinimalDenom,
-                originCurrency
+          const channels: {
+            portId: string;
+            channelId: string;
+
+            counterpartyChainId: string;
+          }[] = [];
+
+          if (
+            ChainIdHelper.parse(currency.originChainId).identifier !==
+            ChainIdHelper.parse(asset.originChainId).identifier
+          ) {
+            return false;
+          }
+
+          const destinationCurrency = this.chainStore
+            .getChain(asset.chainId)
+            .findCurrency(asset.denom);
+
+          if (!destinationCurrency) {
+            return false;
+          }
+
+          if (
+            currency.paths.length === 0 ||
+            currency.paths.some((path) => {
+              return (
+                !path.portId ||
+                !path.channelId ||
+                !path.counterpartyPortId ||
+                !path.counterpartyChannelId ||
+                !path.clientChainId ||
+                !this.chainStore.hasChain(path.clientChainId)
               );
+            })
+          ) {
+            return false;
+          }
+
+          const lastPath = currency.paths[currency.paths.length - 1];
+          if (
+            !lastPath.clientChainId ||
+            ChainIdHelper.parse(lastPath.clientChainId).identifier !==
+              ChainIdHelper.parse(asset.originChainId).identifier
+          ) {
+            return false;
+          }
+
+          // Path to the origin chain
+          channels.push(
+            ...currency.paths.map((path) => {
+              return {
+                portId: path.portId!,
+                channelId: path.channelId!,
+                counterpartyChainId: path.clientChainId!,
+              };
+            })
+          );
+
+          if ("paths" in destinationCurrency) {
+            if (
+              !destinationCurrency.originChainId ||
+              !destinationCurrency.originCurrency ||
+              !this.chainStore.hasChain(destinationCurrency.originChainId)
+            ) {
+              return false;
             }
 
-            // osmosis 자체에 있는 ibc currency도 넣어준다.
-            getMap(chainId).set(currency.coinMinimalDenom, currency);
+            if (
+              ChainIdHelper.parse(destinationCurrency.originChainId)
+                .identifier !==
+              ChainIdHelper.parse(asset.originChainId).identifier
+            ) {
+              return false;
+            }
+
+            if (
+              destinationCurrency.paths.length === 0 ||
+              destinationCurrency.paths.some((path) => {
+                return (
+                  !path.portId ||
+                  !path.channelId ||
+                  !path.counterpartyPortId ||
+                  !path.counterpartyChannelId ||
+                  !path.clientChainId ||
+                  !this.chainStore.hasChain(path.clientChainId)
+                );
+              })
+            ) {
+              return false;
+            }
+
+            const reversedPaths = destinationCurrency.paths.reverse();
+            for (let i = 0; i < reversedPaths.length; i++) {
+              const reversedPath = reversedPaths[i];
+              channels.push({
+                portId: reversedPath.counterpartyPortId!,
+                channelId: reversedPath.counterpartyChannelId!,
+                counterpartyChainId:
+                  reversedPaths.length > i + 1
+                    ? reversedPaths[i + 1].clientChainId!
+                    : asset.chainId,
+              });
+            }
           }
-        } else if (!("paths" in currency)) {
-          // 현재 CW20같은 얘들은 처리할 수 없다.
-          if (!("type" in currency)) {
-            // if currency is not ibc currency
-            getMap(chainId).set(currency.coinMinimalDenom, currency);
+
+          let pfmPossibility = true;
+          if (channels.length > 0) {
+            // Only push if it is possible to transfer via packet forwarding.
+            // (If channel is only one, no need to check packet forwarding because it is direct transfer)
+            if (channels.length > 1) {
+              if (
+                !this.chainStore.getChain(chainId).hasFeature("ibc-go") ||
+                !this.queryChains.isSupportsMemo(chainId)
+              ) {
+                pfmPossibility = false;
+              }
+
+              if (pfmPossibility) {
+                for (let i = 0; i < channels.length - 1; i++) {
+                  const channel = channels[i];
+                  if (
+                    !this.chainStore
+                      .getChain(channel.counterpartyChainId)
+                      .hasFeature("ibc-go") ||
+                    !this.queryChains.isSupportsMemo(
+                      channel.counterpartyChainId
+                    ) ||
+                    !this.queryChains.isPFMEnabled(
+                      channel.counterpartyChainId
+                    ) ||
+                    !this.chainStore
+                      .getChain(channel.counterpartyChainId)
+                      .hasFeature("ibc-pfm")
+                  ) {
+                    pfmPossibility = false;
+                    break;
+                  }
+                }
+              }
+            }
+
+            if (pfmPossibility) {
+              return true;
+            }
           }
         }
       }
+    } else {
+      // 현재 CW20같은 얘들은 처리할 수 없다.
+      if (!("type" in currency)) {
+        return this.queryChains.isSupportsMemo(chainId);
+      }
     }
-
-    return res;
+    return false;
   }
 
   // Key is chain identifier
@@ -257,7 +388,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           currency.originCurrency &&
           "originChainId" in currency &&
           currency.originChainId &&
-          // XXX: multi-hop ibc currency는 나중에 생각해본다...
+          // XXX: multi-hop ibc currency는 getSwapDestinationCurrencyAlternativeChains에서 처리한다.
           currency.paths.length === 1
         ) {
           // 현재 CW20같은 얘들은 처리할 수 없다.
