@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package ibc.core.channel.v1;
 
-option go_package = "github.com/cosmos/ibc-go/v2/modules/core/04-channel/types";
+option go_package = "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types";
 
 import "ibc/core/client/v1/client.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
@@ -97,6 +97,12 @@ service Query {
   rpc NextSequenceReceive(QueryNextSequenceReceiveRequest) returns (QueryNextSequenceReceiveResponse) {
     option (google.api.http).get = "/ibc/core/channel/v1/channels/{channel_id}/"
                                    "ports/{port_id}/next_sequence";
+  }
+
+  // NextSequenceSend returns the next send sequence for a given channel.
+  rpc NextSequenceSend(QueryNextSequenceSendRequest) returns (QueryNextSequenceSendResponse) {
+    option (google.api.http).get = "/ibc/core/channel/v1/channels/{channel_id}/"
+                                   "ports/{port_id}/next_sequence_send";
   }
 }
 
@@ -369,6 +375,26 @@ message QueryNextSequenceReceiveRequest {
 message QueryNextSequenceReceiveResponse {
   // next sequence receive number
   uint64 next_sequence_receive = 1;
+  // merkle proof of existence
+  bytes proof = 2;
+  // height at which the proof was retrieved
+  ibc.core.client.v1.Height proof_height = 3 [(gogoproto.nullable) = false];
+}
+
+// QueryNextSequenceSendRequest is the request type for the
+// Query/QueryNextSequenceSend RPC method
+message QueryNextSequenceSendRequest {
+  // port unique identifier
+  string port_id = 1;
+  // channel unique identifier
+  string channel_id = 2;
+}
+
+// QueryNextSequenceSendResponse is the request type for the
+// Query/QueryNextSequenceSend RPC method
+message QueryNextSequenceSendResponse {
+  // next sequence send number
+  uint64 next_sequence_send = 1;
   // merkle proof of existence
   bytes proof = 2;
   // height at which the proof was retrieved

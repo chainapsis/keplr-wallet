@@ -113,6 +113,8 @@ function setOutputHash(root, hash) {
       "cosmos/base/abci/v1beta1/abci.proto",
       "cosmwasm/wasm/v1/tx.proto",
       "ibc/applications/transfer/v1/tx.proto",
+      "ibc/applications/fee/v1/fee.proto",
+      "ibc/applications/fee/v1/tx.proto",
       "secret/compute/v1beta1/msg.proto",
       "ethermint/types/v1/web3.proto",
     ];
