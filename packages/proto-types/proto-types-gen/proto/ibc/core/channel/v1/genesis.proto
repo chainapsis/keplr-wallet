@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package ibc.core.channel.v1;
 
-option go_package = "github.com/cosmos/ibc-go/v2/modules/core/04-channel/types";
+option go_package = "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types";
 
 import "gogoproto/gogo.proto";
 import "ibc/core/channel/v1/channel.proto";
@@ -13,20 +13,17 @@ message GenesisState {
   repeated PacketState       acknowledgements = 2 [(gogoproto.nullable) = false];
   repeated PacketState       commitments      = 3 [(gogoproto.nullable) = false];
   repeated PacketState       receipts         = 4 [(gogoproto.nullable) = false];
-  repeated PacketSequence    send_sequences   = 5
-      [(gogoproto.nullable) = false, (gogoproto.moretags) = "yaml:\"send_sequences\""];
-  repeated PacketSequence recv_sequences = 6
-      [(gogoproto.nullable) = false, (gogoproto.moretags) = "yaml:\"recv_sequences\""];
-  repeated PacketSequence ack_sequences = 7
-      [(gogoproto.nullable) = false, (gogoproto.moretags) = "yaml:\"ack_sequences\""];
+  repeated PacketSequence    send_sequences   = 5 [(gogoproto.nullable) = false];
+  repeated PacketSequence    recv_sequences   = 6 [(gogoproto.nullable) = false];
+  repeated PacketSequence    ack_sequences    = 7 [(gogoproto.nullable) = false];
   // the sequence for the next generated channel identifier
-  uint64 next_channel_sequence = 8 [(gogoproto.moretags) = "yaml:\"next_channel_sequence\""];
+  uint64 next_channel_sequence = 8;
 }
 
 // PacketSequence defines the genesis type necessary to retrieve and store
 // next send and receive sequences.
 message PacketSequence {
-  string port_id    = 1 [(gogoproto.moretags) = "yaml:\"port_id\""];
-  string channel_id = 2 [(gogoproto.moretags) = "yaml:\"channel_id\""];
+  string port_id    = 1;
+  string channel_id = 2;
   uint64 sequence   = 3;
 }

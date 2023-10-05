@@ -28,6 +28,12 @@ import {
   MsgInstantiateContract,
 } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
 import { MsgTransfer } from "@keplr-wallet/proto-types/ibc/applications/transfer/v1/tx";
+import {
+  MsgPayPacketFee,
+  MsgPayPacketFeeAsync,
+  MsgRegisterPayee,
+  MsgRegisterCounterpartyPayee,
+} from "@keplr-wallet/proto-types/ibc/applications/fee/v1/tx";
 import { UnknownMessage } from "./unknown";
 import { GenericAuthorization } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/authz";
 import { StakeAuthorization } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/authz";
@@ -215,6 +221,22 @@ defaultProtoCodec.registerAny(
 defaultProtoCodec.registerAny(
   "/ibc.applications.transfer.v1.MsgTransfer",
   MsgTransfer
+);
+defaultProtoCodec.registerAny(
+  "/ibc.applications.fee.v1.MsgPayPacketFee",
+  MsgPayPacketFee
+);
+defaultProtoCodec.registerAny(
+  "/ibc.applications.fee.v1.MsgPayPacketFeeAsync",
+  MsgPayPacketFeeAsync
+);
+defaultProtoCodec.registerAny(
+  "/ibc.applications.fee.v1.MsgRegisterPayee",
+  MsgRegisterPayee
+);
+defaultProtoCodec.registerAny(
+  "/ibc.applications.fee.v1.MsgRegisterCounterpartyPayee",
+  MsgRegisterCounterpartyPayee
 );
 defaultProtoCodec.registerAny("/cosmos.gov.v1beta1.MsgVote", MsgVote);
 defaultProtoCodec.registerAny("/cosmos.authz.v1beta1.MsgGrant", MsgGrant);

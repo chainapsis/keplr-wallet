@@ -381,7 +381,9 @@ export class RecentSendHistoryService {
               return;
             }
 
-            const txs = res.txs || [res];
+            const txs = res.txs
+              ? res.txs.map((res: any) => res.tx_result || res)
+              : [res];
             if (txs && Array.isArray(txs)) {
               runInAction(() => {
                 targetChannel.completed = true;

@@ -54,6 +54,7 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
         receiver: string;
         sourcePort: string;
         sourceChannel: string;
+        counterpartyChainId: string;
         timeoutTimestamp: number;
         token: CoinPretty;
         memo: string;
@@ -103,11 +104,16 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
     } else if (
       msg.msg_type_url === "/ibc.applications.transfer.v1.MsgTransfer"
     ) {
+      if (msg.path.length < 2) {
+        return;
+      }
+
       return {
         type: "MsgTransfer",
         receiver: chainMsg.receiver,
         sourcePort: chainMsg.source_port,
         sourceChannel: chainMsg.source_channel,
+        counterpartyChainId: msg.path[1],
         timeoutTimestamp: chainMsg.timeout_timestamp,
         token: new CoinPretty(
           this.chainGetter
