@@ -104,6 +104,24 @@ export class IBCSwapAmountConfig extends AmountConfig {
     return false;
   }
 
+  get type(): "swap" | "transfer" | "not-ready" {
+    const queryIBCSwap = this.getQueryIBCSwap();
+    if (!queryIBCSwap) {
+      return "not-ready";
+    }
+
+    const res = queryIBCSwap.getQueryRoute().response;
+    if (!res) {
+      return "not-ready";
+    }
+
+    if (res.data.does_swap === false) {
+      return "transfer";
+    }
+
+    return "swap";
+  }
+
   async getTx(
     slippageTolerancePercent: number,
     affiliateFeeReceiver: string
@@ -322,7 +340,13 @@ export class IBCSwapAmountConfig extends AmountConfig {
       };
     }
 
-    if (queryIBCSwap.getQueryRoute().response?.data.does_swap === false) {
+    if (
+      this.amount.length > 0 &&
+      this.amount[0].currency.coinMinimalDenom ===
+        this.outAmount.currency.coinMinimalDenom &&
+      this.chainGetter.getChain(this.chainId).chainIdentifier ===
+        this.chainGetter.getChain(this.outChainId).chainIdentifier
+    ) {
       return {
         ...prev,
         error: new Error("In and out currency is same"),

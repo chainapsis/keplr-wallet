@@ -39,10 +39,11 @@ import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
 import {
   LogAnalyticsEventMsg,
+  SendTxAndRecordMsg,
   SendTxAndRecordWithIBCSwapMsg,
 } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
-import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export const IBCSwapPage: FunctionComponent = observer(() => {
@@ -441,38 +442,66 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 preferNoSetMemo: false,
 
                 sendTx: async (chainId, tx, mode) => {
-                  const msg = new SendTxAndRecordWithIBCSwapMsg(
-                    "amount-in",
-                    chainId,
-                    outChainId,
-                    tx,
-                    channels,
-                    {
-                      chainId: outChainId,
-                      denom: outCurrency.coinMinimalDenom,
-                    },
-                    swapChannelIndex,
-                    swapReceiver,
-                    mode,
-                    false,
-                    ibcSwapConfigs.senderConfig.sender,
-                    ibcSwapConfigs.amountConfig.amount.map((amount) => {
-                      return {
-                        amount: DecUtils.getTenExponentN(
-                          amount.currency.coinDecimals
-                        )
-                          .mul(amount.toDec())
-                          .toString(),
-                        denom: amount.currency.coinMinimalDenom,
-                      };
-                    }),
-                    ibcSwapConfigs.memoConfig.memo
-                  );
+                  if (ibcSwapConfigs.amountConfig.type === "transfer") {
+                    const msg: Message<Uint8Array> = new SendTxAndRecordMsg(
+                      "ibc-swap/ibc-transfer",
+                      chainId,
+                      outChainId,
+                      tx,
+                      mode,
+                      false,
+                      ibcSwapConfigs.senderConfig.sender,
+                      accountStore.getAccount(outChainId).bech32Address,
+                      ibcSwapConfigs.amountConfig.amount.map((amount) => {
+                        return {
+                          amount: DecUtils.getTenExponentN(
+                            amount.currency.coinDecimals
+                          )
+                            .mul(amount.toDec())
+                            .toString(),
+                          denom: amount.currency.coinMinimalDenom,
+                        };
+                      }),
+                      ibcSwapConfigs.memoConfig.memo
+                    ).withIBCPacketForwarding(channels);
+                    return await new InExtensionMessageRequester().sendMessage(
+                      BACKGROUND_PORT,
+                      msg
+                    );
+                  } else {
+                    const msg = new SendTxAndRecordWithIBCSwapMsg(
+                      "amount-in",
+                      chainId,
+                      outChainId,
+                      tx,
+                      channels,
+                      {
+                        chainId: outChainId,
+                        denom: outCurrency.coinMinimalDenom,
+                      },
+                      swapChannelIndex,
+                      swapReceiver,
+                      mode,
+                      false,
+                      ibcSwapConfigs.senderConfig.sender,
+                      ibcSwapConfigs.amountConfig.amount.map((amount) => {
+                        return {
+                          amount: DecUtils.getTenExponentN(
+                            amount.currency.coinDecimals
+                          )
+                            .mul(amount.toDec())
+                            .toString(),
+                          denom: amount.currency.coinMinimalDenom,
+                        };
+                      }),
+                      ibcSwapConfigs.memoConfig.memo
+                    );
 
-                  return await new InExtensionMessageRequester().sendMessage(
-                    BACKGROUND_PORT,
-                    msg
-                  );
+                    return await new InExtensionMessageRequester().sendMessage(
+                      BACKGROUND_PORT,
+                      msg
+                    );
+                  }
                 },
               },
               {
@@ -523,6 +552,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     outCurrencyDenom: outCurrency.coinDenom,
                     outCurrencyCommonMinimalDenom: outCurrency.coinMinimalDenom,
                     outCurrencyCommonDenom: outCurrency.coinDenom,
+                    swapType: ibcSwapConfigs.amountConfig.type,
                   };
                   if (
                     "originChainId" in inCurrency &&
