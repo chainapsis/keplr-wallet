@@ -64,11 +64,13 @@ export const NetworkErrorView: FunctionComponent = observer(() => {
     };
   }, [networkIsConnected]);
 
-  const isNeutron = chainStore.current.chainId.startsWith("neutron");
+  const shouldHideStakeCurrency =
+    chainStore.current.chainId.startsWith("neutron") ||
+    chainStore.current.stakeCurrency.coinMinimalDenom === "ustake";
   useEffect(() => {
     if (networkIsConnected) {
       const error = (() => {
-        if (isNeutron) {
+        if (shouldHideStakeCurrency) {
           return queryStakable.error;
         }
 
@@ -99,7 +101,7 @@ export const NetworkErrorView: FunctionComponent = observer(() => {
     queryDelegated.error,
     queryUnbonding.error,
     networkIsConnected,
-    isNeutron,
+    shouldHideStakeCurrency,
   ]);
 
   const [isRefreshing, setIsRefreshing] = useState(false);

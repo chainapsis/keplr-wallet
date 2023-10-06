@@ -160,9 +160,28 @@ export class ChainUpdaterService {
         );
 
         let stakeCurrency = chainInfo.stakeCurrency;
+        if (!stakeCurrency) {
+          // XXX: extension과의 관리의 차이로 인해서 이상한 부분이 생겨버림.
+          //      repo로 부터 받아오는 chain info는 stake currency가 nullable이지만,
+          //      지금 모바일 코드 상으로는 이를 처리하기 어렵기 때문에
+          //      임시로 stake currency가 없으면 STAKE를 넣어줌.
+          stakeCurrency = {
+            coinDenom: "STAKE",
+            coinMinimalDenom: "ustake",
+            coinDecimals: 6,
+          };
+          if (!currencies.find((c) => c.coinMinimalDenom === "ustake")) {
+            currencies.push({
+              coinDenom: "STAKE",
+              coinMinimalDenom: "ustake",
+              coinDecimals: 6,
+              coinImageUrl: undefined,
+            });
+          }
+        }
         if (
           originChainInfo.stakeCurrency.coinMinimalDenom ===
-          chainInfo.stakeCurrency.coinMinimalDenom
+          stakeCurrency.coinMinimalDenom
         ) {
           stakeCurrency = {
             ...stakeCurrency,

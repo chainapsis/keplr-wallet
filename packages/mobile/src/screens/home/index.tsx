@@ -126,6 +126,10 @@ export const HomeScreen: FunctionComponent = observer(() => {
     setRefreshing(false);
   }, [accountStore, chainStore, priceStore, queriesStore, scamProposalStore]);
 
+  const shouldHideStakeCurrency =
+    chainStore.current.chainId.startsWith("neutron") ||
+    chainStore.current.stakeCurrency.coinMinimalDenom === "ustake";
+
   return (
     <PageWithScrollViewInBottomTabView
       backgroundMode="gradient"
@@ -138,12 +142,12 @@ export const HomeScreen: FunctionComponent = observer(() => {
       <AccountCard containerStyle={style.flatten(["margin-y-card-gap"])} />
       {/* There is a reason to use TokensCardRenderIfTokenExists. Check the comments on TokensCardRenderIfTokenExists */}
       <TokensCardRenderIfTokenExists />
-      {!chainStore.current.chainId.startsWith("neutron") ? (
+      {!shouldHideStakeCurrency ? (
         <MyRewardCard
           containerStyle={style.flatten(["margin-bottom-card-gap"])}
         />
       ) : null}
-      {!chainStore.current.chainId.startsWith("neutron") ? (
+      {!shouldHideStakeCurrency ? (
         <StakingInfoCard
           containerStyle={style.flatten(["margin-bottom-card-gap"])}
         />
