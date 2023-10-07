@@ -177,7 +177,6 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         const asset = assets.assets[0];
         if (
           asset.chainId === swapVenueChainId &&
-          asset.denom === currency.coinMinimalDenom &&
           this.chainStore.hasChain(asset.chainId) &&
           this.chainStore.hasChain(asset.originChainId)
         ) {
