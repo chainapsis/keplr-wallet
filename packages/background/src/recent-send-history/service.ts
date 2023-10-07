@@ -13,7 +13,7 @@ import {
   runInAction,
   toJS,
 } from "mobx";
-import { KVStore } from "@keplr-wallet/common";
+import { KVStore, retry } from "@keplr-wallet/common";
 import { IBCHistory, RecentSendHistory } from "./types";
 import { Buffer } from "buffer/";
 import { ChainInfo } from "@keplr-wallet/types";
@@ -236,9 +236,54 @@ export class RecentSendHistoryService {
     return txHash;
   }
 
-  trackIBCPacketForwardingRecursive(id: string) {
+  trackIBCPacketForwardingRecursive(id: string): void {
+    retry(
+      () => {
+        return new Promise<void>((resolve, reject) => {
+          this.trackIBCPacketForwardingRecursiveInternal(
+            id,
+            () => {
+              resolve();
+            },
+            () => {
+              // reject if ws closed before fulfilled
+              // 하지만 로직상 fulfill 되기 전에 ws가 닫히는게 되기 때문에
+              // delay를 좀 준다.
+              // 현재 trackIBCPacketForwardingRecursiveInternal에 ws close 이후에는 동기적인 로직밖에 없으므로
+              // 문제될게 없다.
+              setTimeout(() => {
+                reject();
+              }, 500);
+            },
+            () => {
+              // reject if ws error occurred before fulfilled
+              reject();
+            }
+          );
+        });
+      },
+      {
+        maxRetries: 10,
+        waitMsAfterError: 10 * 1000, // 10sec
+        maxWaitMsAfterError: 5 * 60 * 1000, // 5min
+      }
+    );
+  }
+
+  // ibc packet forwarding을 위한 recursive function이면서
+  // 실패시 retry를 수행하기 위해서 분리되어 있음
+  // trackIBCPacketForwardingRecursive도 참고
+  // trackIBCPacketForwardingRecursive의 주석을 보면 알겠지만
+  // tx tracer가 close된 이후에는 동기적인 로직만 있어야함.
+  protected trackIBCPacketForwardingRecursiveInternal = (
+    id: string,
+    onFulfill: () => void,
+    onClose: () => void,
+    onError: () => void
+  ): void => {
     const history = this.getRecentIBCHistory(id);
     if (!history) {
+      onFulfill();
       return;
     }
 
@@ -291,6 +336,8 @@ export class RecentSendHistoryService {
             prevChainInfo.rpc,
             "/websocket"
           );
+          txTracer.addEventListener("close", onClose);
+          txTracer.addEventListener("error", onError);
           txTracer
             .traceTx({
               "acknowledge_packet.packet_src_port": targetChannel.portId,
@@ -301,6 +348,7 @@ export class RecentSendHistoryService {
               runInAction(() => {
                 targetChannel.rewound = true;
               });
+              onFulfill();
               this.trackIBCPacketForwardingRecursive(id);
             });
         }
@@ -312,6 +360,8 @@ export class RecentSendHistoryService {
 
       if (chainInfo) {
         const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
+        txTracer.addEventListener("close", onClose);
+        txTracer.addEventListener("error", onError);
         txTracer.traceTx(txHash).then((tx) => {
           txTracer.close();
 
@@ -342,6 +392,7 @@ export class RecentSendHistoryService {
                   firstChannel.channelId
                 );
 
+                onFulfill();
                 this.trackIBCPacketForwardingRecursive(id);
               }
             }
@@ -374,6 +425,8 @@ export class RecentSendHistoryService {
           };
 
           const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
+          txTracer.addEventListener("close", onClose);
+          txTracer.addEventListener("error", onError);
           txTracer.traceTx(queryEvents).then((res) => {
             txTracer.close();
 
@@ -405,6 +458,7 @@ export class RecentSendHistoryService {
                           // XXX: {key: 'packet_ack', value: '{"error":"ABCI code: 6: error handling packet: see events for details"}'}
                           //      오류가 있을 경우 이딴식으로 오류가 나오기 때문에 뭐 유저에게 보여줄 방법이 없다...
                           targetChannel.error = "Packet processing failed";
+                          onFulfill();
                           this.trackIBCPacketForwardingRecursive(id);
                           break;
                         }
@@ -444,6 +498,7 @@ export class RecentSendHistoryService {
                         nextChannel.channelId,
                         index
                       );
+                      onFulfill();
                       this.trackIBCPacketForwardingRecursive(id);
                       break;
                     }
@@ -457,7 +512,7 @@ export class RecentSendHistoryService {
         }
       }
     }
-  }
+  };
 
   getRecentSendHistories(chainId: string, type: string): RecentSendHistory[] {
     const key = `${ChainIdHelper.parse(chainId).identifier}/${type}`;

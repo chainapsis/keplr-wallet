@@ -9,7 +9,7 @@ export enum WsReadyState {
 
 export interface TxEventMap {
   close: (e: CloseEvent) => void;
-  error: (e: ErrorEvent) => void;
+  error: (e: Event) => void;
   message: (e: MessageEvent) => void;
   open: (e: Event) => void;
 }
