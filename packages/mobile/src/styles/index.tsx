@@ -84,6 +84,7 @@ export const ColorPalette = {
   'gray-300': '#9A9AA2',
   'gray-400': '#64646D',
   'gray-500': '#37373E',
+  'gray-550': '#242428',
   'gray-600': '#1E1E24',
   'gray-700': '#09090A',
 
@@ -409,6 +410,8 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
 
           // Belows are for the loading spinner props and may not be used as styles.
           'loading-spinner': '#BABAC1',
+          'skeleton-layer-0': '#ECEBF1',
+          'skeleton-layer-1': '#F9F9FC',
         },
       },
       widths: {
@@ -511,6 +514,7 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         '25.5': 25.5,
         '26': 26,
         '28': 28,
+        '30': 30,
         '31': 31,
         '32': 32,
         '36': 36,

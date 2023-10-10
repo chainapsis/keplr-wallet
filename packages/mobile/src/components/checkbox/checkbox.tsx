@@ -6,7 +6,7 @@ import {useStyle} from '../../styles';
 
 interface CheckboxProps {
   size?: 'small' | 'large';
-  onPress?: (e: GestureResponderEvent) => void;
+  onPress?: (e: GestureResponderEvent, checked: boolean) => void;
   checked: boolean;
 }
 
@@ -50,7 +50,7 @@ export const Checkbox: FunctionComponent<CheckboxProps> = ({
       )}
       onPress={e => {
         if (onPress) {
-          onPress(e);
+          onPress(e, !checked);
         }
       }}>
       {checked ? <CheckIcon color="white" size={iconSize} /> : null}
