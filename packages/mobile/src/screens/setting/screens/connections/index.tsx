@@ -91,6 +91,7 @@ export const SettingManageConnectionsScreen: FunctionComponent = observer(
                       </View>
                       <Text
                         style={style.flatten([
+                          "flex-1",
                           "subtitle3",
                           "color-platinum-400",
                           "dark:color-platinum-50",
@@ -98,8 +99,6 @@ export const SettingManageConnectionsScreen: FunctionComponent = observer(
                       >
                         {origin}
                       </Text>
-
-                      <View style={style.flatten(["flex-1"])} />
 
                       <TouchableOpacity
                         style={style.flatten([
