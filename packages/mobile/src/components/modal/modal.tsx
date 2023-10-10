@@ -19,7 +19,8 @@ import {
   createNativeStackNavigator,
 } from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
-import {StyleSheet, Text, TextStyle, View, ViewStyle} from 'react-native';
+import {StyleSheet, Text, TextStyle, ViewStyle} from 'react-native';
+import {Box} from '../box';
 
 const CustomBackground: FunctionComponent<BottomSheetBackgroundProps> = ({
   style,
@@ -124,11 +125,7 @@ export const BaseModalHeader = ({
   const style = useStyle();
 
   return (
-    <View
-      style={StyleSheet.flatten([
-        style.flatten(['padding-bottom-12']),
-        headerStyle,
-      ])}>
+    <Box paddingBottom={12} style={StyleSheet.flatten([headerStyle])}>
       <Text
         style={StyleSheet.flatten([
           style.flatten(['color-white', 'text-center', 'subtitle1']),
@@ -136,6 +133,6 @@ export const BaseModalHeader = ({
         ])}>
         {title}
       </Text>
-    </View>
+    </Box>
   );
 };

@@ -1,7 +1,7 @@
 import React, {FunctionComponent, PropsWithChildren} from 'react';
 import {YAxisProps} from './types';
 import {useStyle} from '../../styles';
-import {View} from 'react-native';
+import {Box} from '../box';
 
 export const YAxis: FunctionComponent<PropsWithChildren<YAxisProps>> = ({
   children,
@@ -22,12 +22,8 @@ export const YAxis: FunctionComponent<PropsWithChildren<YAxisProps>> = ({
   })();
 
   return (
-    <View
-      style={style.flatten(
-        ['flex-column'],
-        [alignItems && (alignItems as any)],
-      )}>
+    <Box style={style.flatten([], [alignItems && (alignItems as any)])}>
       {children}
-    </View>
+    </Box>
   );
 };

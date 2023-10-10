@@ -1,17 +1,19 @@
 import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent, useState} from 'react';
-import {View} from 'react-native';
 import {useStore} from '../../stores';
 import {Button} from '../../components/button';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import {TextInput} from '../../components/input';
 import {useSetFocusedScreen} from '../../components/page/utils';
+import {Box} from '../../components/box';
+import {useStyle} from '../../styles';
 
 export const LockedScreen: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
   const navigation = useNavigation();
   const [isFailed, setIsFailed] = useState(false);
   const [password, setPassword] = useState('');
+  const style = useStyle();
 
   useSetFocusedScreen();
   const doUnlock = async () => {
@@ -26,7 +28,9 @@ export const LockedScreen: FunctionComponent = observer(() => {
   };
   return (
     <React.Fragment>
-      <View>
+      <Box
+        height={'100%'}
+        backgroundColor={style.get('color-background-default').color}>
         <TextInput
           label="password"
           value={password}
@@ -42,7 +46,7 @@ export const LockedScreen: FunctionComponent = observer(() => {
           error={isFailed ? 'Invalid Password' : undefined}
         />
         <Button text="unlock" size="large" onPress={doUnlock} />
-      </View>
+      </Box>
     </React.Fragment>
   );
 });

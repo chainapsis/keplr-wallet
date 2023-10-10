@@ -5,7 +5,7 @@ import {
 } from '@react-navigation/native';
 import {observer} from 'mobx-react-lite';
 import React, {useCallback} from 'react';
-import {Text, View} from 'react-native';
+import {Text} from 'react-native';
 import {Button} from '../../components/button';
 import {useBottomSheet, BottomSheetScrollView} from '@gorhom/bottom-sheet';
 import {useFocusEffect} from '@react-navigation/native';
@@ -58,10 +58,10 @@ const CopyAddressScene = observer(() => {
   );
 
   return (
-    <View style={style.flatten(['height-full'])}>
+    <Box style={style.flatten(['height-full'])}>
       <BaseModalHeader title="Copy Address" />
       <BottomSheetScrollView>
-        <View>
+        <Box>
           <Text>test1</Text>
           <Button
             text="To osmosis"
@@ -73,9 +73,9 @@ const CopyAddressScene = observer(() => {
               });
             }}
           />
-        </View>
+        </Box>
       </BottomSheetScrollView>
-    </View>
+    </Box>
   );
 });
 
@@ -92,7 +92,7 @@ const QRScene = observer(
     const nav = useNavigation();
 
     return (
-      <View style={style.flatten(['height-full'])}>
+      <Box style={style.flatten(['height-full'])}>
         <Columns sum={2}>
           <IconButton
             onPress={() => {
@@ -107,7 +107,7 @@ const QRScene = observer(
           <Box width={16} height={16} />
         </Columns>
         <Text>{chainInfo.chainName}</Text>
-      </View>
+      </Box>
     );
   },
 );
