@@ -138,20 +138,18 @@ export const AvailableTabView: FunctionComponent<{
   return (
     <React.Fragment>
       {isNotReady ? (
-        <React.Fragment>
-          <TokenItem
-            viewToken={{
-              token: new CoinPretty(
-                chainStore.chainInfos[0].stakeCurrency,
-                new Dec(0),
-              ),
-              chainInfo: chainStore.chainInfos[0],
-              isFetching: false,
-              error: undefined,
-            }}
-            isNotReady={isNotReady}
-          />
-        </React.Fragment>
+        <TokenItem
+          viewToken={{
+            token: new CoinPretty(
+              chainStore.chainInfos[0].stakeCurrency,
+              new Dec(0),
+            ),
+            chainInfo: chainStore.chainInfos[0],
+            isFetching: false,
+            error: undefined,
+          }}
+          isNotReady={isNotReady}
+        />
       ) : (
         <React.Fragment>
           <Stack gutter={8}>
