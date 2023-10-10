@@ -16,7 +16,7 @@ import {Columns} from '../../components/column';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {Modal} from '../../components/modal';
 import {TextButton} from '../../components/text-button';
-import {DepositModal} from './deposit-modal';
+import {DepositModal} from './components/deposit-modal/deposit-modal';
 import {BuyModal} from './buy-modal';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import {SearchTextInput} from '../../components/input/search-text-input';

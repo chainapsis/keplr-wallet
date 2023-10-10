@@ -167,6 +167,7 @@ const SettingNavigation = () => {
 export const AppNavigation: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
   const style = useStyle();
+  style.setTheme('dark');
 
   if (keyRingStore.status === 'not-loaded') {
     return null;

@@ -2,29 +2,34 @@ import React, {FunctionComponent, useCallback, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 
 import {Bech32Address, ChainIdHelper} from '@keplr-wallet/cosmos';
+import * as Clipboard from 'expo-clipboard';
 
 import {IChainInfoImpl} from '@keplr-wallet/stores';
 import Color from 'color';
-import {useStore} from '../../../stores';
-import {Box} from '../../../components/box';
-import {useStyle} from '../../../styles';
-import {XAxis, YAxis} from '../../../components/axis';
-import {Image, Text, View} from 'react-native';
-import {Gutter} from '../../../components/gutter';
-import {TextInput} from '../../../components/input';
-import {CopyOutlineIcon, SearchIcon, StarIcon} from '../../../components/icon';
+import {useStore} from '../../../../stores';
+import {Box} from '../../../../components/box';
+import {useStyle} from '../../../../styles';
+import {XAxis, YAxis} from '../../../../components/axis';
+import {Image, Pressable, Text, View} from 'react-native';
+import {Gutter} from '../../../../components/gutter';
+import {TextInput} from '../../../../components/input';
+import {
+  CopyOutlineIcon,
+  SearchIcon,
+  StarIcon,
+} from '../../../../components/icon';
 import {BottomSheetScrollView, useBottomSheet} from '@gorhom/bottom-sheet';
-import {BaseModalHeader} from '../../../components/modal';
-import {ChainImageFallback} from '../../../components/image';
-import {CheckToggleIcon} from '../../../components/icon/check-toggle';
-import {IconButton} from '../../../components/icon-button';
+import {BaseModalHeader} from '../../../../components/modal';
+import {ChainImageFallback} from '../../../../components/image';
+import {CheckToggleIcon} from '../../../../components/icon/check-toggle';
+import {IconButton} from '../../../../components/icon-button';
 import {
   NavigationProp,
   useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
-import {DepositModalNav} from '../deposit-modal';
-import {QRCodeIcon} from '../../../components/icon/qr-code';
+import {DepositModalNav} from './deposit-modal';
+import {QRCodeIcon} from '../../../../components/icon/qr-code';
 
 export const CopyAddressScene: FunctionComponent = observer(() => {
   const {chainStore, accountStore, keyRingStore, uiConfigStore} = useStore();
@@ -160,7 +165,7 @@ export const CopyAddressScene: FunctionComponent = observer(() => {
             paddingTop={49.6}
             paddingBottom={51.2}>
             <Image
-              source={require('../../../public/assets/img/copy-address-no-search-result.png')}
+              source={require('../../../../public/assets/img/copy-address-no-search-result.png')}
               style={{
                 width: 140,
                 height: 160,
@@ -262,37 +267,24 @@ const CopyAddressItem: FunctionComponent<{
     // 클릭 영역 문제로 레이아웃이 복잡해졌다.
     // 알아서 잘 해결하자
     return (
-      <Box height={64} borderRadius={6} alignY="center">
+      <Box height={64} borderRadius={6} alignY="center" width={'100%'}>
         <XAxis alignY="center">
-          <Box
-            height={64}
-            borderRadius={6}
-            alignY="center"
-            backgroundColor={(() => {
-              if (blockInteraction) {
-                return;
-              }
-
-              if (isBookmarkPress) {
-                return;
-              }
-
-              if (isCopyContainerPress) {
-                return style.get('color-gray-500@50%').color;
-              }
-
-              return;
-            })()}
-            paddingLeft={16}
+          <Pressable
             style={{
               flex: 1,
             }}
-            onClick={async e => {
+            onPressIn={() => setIsCopyContainerPress(true)}
+            onPressOut={() => setIsCopyContainerPress(false)}
+            onPress={async e => {
               e.preventDefault();
 
               // await navigator.clipboard.writeText(
               //   address.ethereumAddress || address.bech32Address,
               // );
+              await Clipboard.setStringAsync(
+                address.ethereumAddress || address.bech32Address,
+              );
+
               setHasCopied(true);
               setBlockInteraction(true);
 
@@ -306,145 +298,159 @@ const CopyAddressItem: FunctionComponent<{
                 bottomSheet.close();
               }, 500);
             }}>
-            <XAxis alignY="center">
-              <Box
-                cursor={
-                  blockInteraction || address.ethereumAddress
-                    ? undefined
-                    : 'pointer'
+            <Box
+              height={64}
+              borderRadius={6}
+              alignY="center"
+              backgroundColor={(() => {
+                if (blockInteraction) {
+                  return;
                 }
-                onClick={e => {
-                  e.preventDefault();
-                  // 컨테이너로의 전파를 막아야함
-                  e.stopPropagation();
 
-                  if (blockInteraction) {
-                    return;
-                  }
+                if (isBookmarkPress) {
+                  return;
+                }
 
-                  const newIsBookmarked = !isBookmarked;
+                if (isCopyContainerPress) {
+                  return style.get('color-gray-500@50%').color;
+                }
 
-                  // analyticsStore.logEvent('click_favoriteChain', {
-                  //   chainId: address.chainInfo.chainId,
-                  //   chainName: address.chainInfo.chainName,
-                  //   isFavorite: newIsBookmarked,
-                  // });
+                return;
+              })()}
+              paddingLeft={16}>
+              <XAxis alignY="center">
+                <Pressable
+                  onPressIn={() => setIsBookmarkPress(true)}
+                  onPressOut={() => setIsBookmarkPress(false)}
+                  pointerEvents={address.ethereumAddress ? 'none' : undefined}
+                  onPress={e => {
+                    e.preventDefault();
+                    // 컨테이너로의 전파를 막아야함
+                    e.stopPropagation();
 
-                  if (keyRingStore.selectedKeyInfo) {
-                    if (newIsBookmarked) {
-                      uiConfigStore.copyAddressConfig.bookmarkChain(
-                        keyRingStore.selectedKeyInfo.id,
-                        address.chainInfo.chainId,
-                      );
-                    } else {
-                      uiConfigStore.copyAddressConfig.unbookmarkChain(
-                        keyRingStore.selectedKeyInfo.id,
-                        address.chainInfo.chainId,
-                      );
+                    if (blockInteraction) {
+                      return;
+                    }
 
-                      setSortPriorities(priorities => {
-                        const identifier = ChainIdHelper.parse(
+                    const newIsBookmarked = !isBookmarked;
+                    //NOTE analytics관련 로직 필요하면 참고해서 추가
+                    // analyticsStore.logEvent('click_favoriteChain', {
+                    //   chainId: address.chainInfo.chainId,
+                    //   chainName: address.chainInfo.chainName,
+                    //   isFavorite: newIsBookmarked,
+                    // });
+
+                    if (keyRingStore.selectedKeyInfo) {
+                      if (newIsBookmarked) {
+                        uiConfigStore.copyAddressConfig.bookmarkChain(
+                          keyRingStore.selectedKeyInfo.id,
                           address.chainInfo.chainId,
-                        ).identifier;
-                        const newPriorities = {...priorities};
-                        if (newPriorities[identifier]) {
-                          delete newPriorities[identifier];
-                        }
-                        return newPriorities;
-                      });
-                    }
-                  }
-                }}>
-                <StarIcon
-                  size={20}
-                  style={{
-                    opacity: address.ethereumAddress ? 0 : 1,
-                  }}
-                  color={(() => {
-                    if (isBookmarked) {
-                      if (!blockInteraction && isBookmarkPress) {
-                        return style.get('color-blue-500').color;
+                        );
+                      } else {
+                        uiConfigStore.copyAddressConfig.unbookmarkChain(
+                          keyRingStore.selectedKeyInfo.id,
+                          address.chainInfo.chainId,
+                        );
+
+                        setSortPriorities(priorities => {
+                          const identifier = ChainIdHelper.parse(
+                            address.chainInfo.chainId,
+                          ).identifier;
+                          const newPriorities = {...priorities};
+                          if (newPriorities[identifier]) {
+                            delete newPriorities[identifier];
+                          }
+                          return newPriorities;
+                        });
                       }
-                      return style.get('color-blue-400').color;
                     }
+                  }}>
+                  <Box>
+                    <StarIcon
+                      size={20}
+                      style={{
+                        opacity: address.ethereumAddress ? 0 : 1,
+                      }}
+                      color={(() => {
+                        if (isBookmarked) {
+                          if (!blockInteraction && isBookmarkPress) {
+                            return style.get('color-blue-500').color;
+                          }
+                          return style.get('color-blue-400').color;
+                        }
 
-                    if (!blockInteraction && isBookmarkPress) {
-                      return style.get('color-gray-400').color;
-                    }
+                        if (!blockInteraction && isBookmarkPress) {
+                          return style.get('color-gray-400').color;
+                        }
 
-                    return style.get('color-gray-300').color;
-                  })()}
+                        return style.get('color-gray-300').color;
+                      })()}
+                    />
+                  </Box>
+                </Pressable>
+                <Gutter size={8} />
+
+                <ChainImageFallback
+                  alt={address.chainInfo.chainName}
+                  src={address.chainInfo.chainSymbolImageUrl}
+                  style={{
+                    width: 32,
+                    height: 32,
+                  }}
                 />
-              </Box>
-              <Gutter size={8} />
+                <Gutter size={8} />
+                <YAxis>
+                  <Text style={style.flatten(['subtitle3', 'color-gray-10'])}>
+                    {address.chainInfo.chainName}
+                  </Text>
+                  <Gutter size={4} />
+                  <Text
+                    style={style.flatten(['text-caption1', 'color-gray-300'])}>
+                    {(() => {
+                      if (address.ethereumAddress) {
+                        return address.ethereumAddress.length === 42
+                          ? `${address.ethereumAddress.slice(
+                              0,
+                              10,
+                            )}...${address.ethereumAddress.slice(-8)}`
+                          : address.ethereumAddress;
+                      }
 
-              <ChainImageFallback
-                alt={address.chainInfo.chainName}
-                src={address.chainInfo.chainSymbolImageUrl}
-                style={{
-                  width: 32,
-                  height: 32,
-                }}
-              />
-              <Gutter size={8} />
-              <YAxis>
-                <Text style={style.flatten(['subtitle3', 'color-gray-10'])}>
-                  {address.chainInfo.chainName}
-                </Text>
-                <Gutter size={4} />
-                <Text
-                  style={style.flatten(['text-caption1', 'color-gray-300'])}>
-                  {(() => {
-                    if (address.ethereumAddress) {
-                      return address.ethereumAddress.length === 42
-                        ? `${address.ethereumAddress.slice(
-                            0,
-                            10,
-                          )}...${address.ethereumAddress.slice(-8)}`
-                        : address.ethereumAddress;
-                    }
+                      return Bech32Address.shortenAddress(
+                        address.bech32Address,
+                        20,
+                      );
+                    })()}
+                  </Text>
+                </YAxis>
 
-                    return Bech32Address.shortenAddress(
-                      address.bech32Address,
-                      20,
-                    );
-                  })()}
-                </Text>
-              </YAxis>
+                <View
+                  style={{
+                    flex: 1,
+                  }}
+                />
 
-              <View
-                style={{
-                  flex: 1,
-                }}
-              />
-
-              <Box padding={8} alignX="center" alignY="center">
-                {hasCopied ? (
-                  <CheckToggleIcon
-                    size={20}
-                    color={style.get('color-green-400').color}
-                  />
-                ) : (
-                  <CopyOutlineIcon
-                    size={20}
-                    color={style.get('color-white').color}
-                  />
-                )}
-              </Box>
-              <Gutter size={8} />
-            </XAxis>
-          </Box>
-
+                <Box padding={8} alignX="center" alignY="center">
+                  {hasCopied ? (
+                    <CheckToggleIcon
+                      size={20}
+                      color={style.get('color-green-400').color}
+                    />
+                  ) : (
+                    <CopyOutlineIcon
+                      size={20}
+                      color={style.get('color-white').color}
+                    />
+                  )}
+                </Box>
+                <Gutter size={8} />
+              </XAxis>
+            </Box>
+          </Pressable>
           <Gutter size={6.08} />
           <XAxis alignY="center">
             <IconButton
               style={style.flatten(['padding-8'])}
-              // padding="0.5rem"
-              // hoverColor={
-              //   theme.mode === 'light'
-              //     ? ColorPalette['gray-50']
-              //     : ColorPalette['gray-500']
-              // }
               disabled={hasCopied || !!address.ethereumAddress}
               onPress={() => {
                 nav.navigate('QR', {
