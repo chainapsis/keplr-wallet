@@ -249,7 +249,9 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         );
 
         const validatorAddresses =
-          queryRewards.getDescendingPendingRewardValidatorAddresses(8);
+          queryRewards.getDescendingPendingRewardValidatorAddresses(
+            account.isNanoLedger ? 5 : 8
+          );
 
         if (validatorAddresses.length === 0) {
           continue;
@@ -662,7 +664,9 @@ const ClaimTokenItem: FunctionComponent<{
     );
 
     const validatorAddresses =
-      queryRewards.getDescendingPendingRewardValidatorAddresses(8);
+      queryRewards.getDescendingPendingRewardValidatorAddresses(
+        account.isNanoLedger ? 5 : 8
+      );
 
     if (validatorAddresses.length === 0) {
       return;
