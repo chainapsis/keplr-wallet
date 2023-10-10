@@ -19,7 +19,6 @@
     "@keplr-wallet/provider-mock": "0.12.31"
   },
   "dependencies": {
-    "@keplr-wallet/background": "0.12.31",
     "@keplr-wallet/common": "0.12.31",
     "@keplr-wallet/cosmos": "0.12.31",
     "@keplr-wallet/crypto": "0.12.31",
