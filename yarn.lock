@@ -7570,6 +7570,7 @@ __metadata:
     babel-jest: ^29.2.1
     buffer: ^6.0.3
     expo: ^49.0.6
+    expo-clipboard: ~4.3.1
     expo-crypto: ~12.4.1
     expo-standard-web-crypto: ^1.6.0
     http-browserify: ^1.7.0
@@ -20541,6 +20542,15 @@ __metadata:
     path-browserify: ^1.0.0
     url-parse: ^1.5.9
   checksum: 02607b67b8b53e47825ded6ca52eee47ae957cdc4b1501cdc0373bbd50ccfef605ba8a05a07ee88225622c7dc6054dfe1b64f03b21f09aaea7e1b4bf132d3ad7
+  languageName: node
+  linkType: hard
+
+"expo-clipboard@npm:~4.3.1":
+  version: 4.3.1
+  resolution: "expo-clipboard@npm:4.3.1"
+  peerDependencies:
+    expo: "*"
+  checksum: f0b40f5b4122259705ef8ef009b4a1c6ec47543cc31744e9be41899b1c5cfd8deee5c7b9df013b4fa0c94352c287528636d02dc56d53296f4600bcef02fc3dad
   languageName: node
   linkType: hard
 
