@@ -27,7 +27,6 @@ import {
   useFocusedScreen,
 } from './provider/focused-screen';
 import {WalletIcon, BrowserIcon, SettingIcon} from './components/icon';
-
 import {HomeScreenHeader, defaultHeaderOptions} from './components/pageHeader';
 import {SettingScreen} from './screen/setting';
 import {SettingGeneralScreen} from './screen/setting/screens/general';
@@ -175,7 +174,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
   return (
     <FocusedScreenProvider>
       <NavigationContainer
-        theme={style.theme === 'light' ? DefaultTheme : DarkTheme}>
+        theme={style.theme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack.Navigator
           initialRouteName={(() => {
             switch (keyRingStore.status) {
@@ -208,12 +207,12 @@ export const AppNavigation: FunctionComponent = observer(() => {
             }}
             component={RegisterNavigation}
           />
-          <Stack.Screen 
+          <Stack.Screen
             name="Send"
             options={{
               ...defaultHeaderOptions,
             }}
-            component={SendScreen} 
+            component={SendScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

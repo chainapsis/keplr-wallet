@@ -8,8 +8,6 @@ import {CoinPretty, PricePretty} from '@keplr-wallet/unit';
 import {useEffectOnce} from '../../hooks';
 import {QueryError, WalletStatus} from '@keplr-wallet/stores';
 import {Button} from '../../components/button';
-import {SearchIcon} from '../../components/icon';
-import {TextInput} from '../../components/input';
 import {Gutter} from '../../components/gutter';
 import {LayeredHorizontalRadioGroup} from '../../components/radio-group';
 import {YAxis} from '../../components/axis';
@@ -57,7 +55,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
   } = useStore();
 
   const navigation = useNavigation();
-  const [isHide, setIsHide] = useState(false);
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>('available');
   const buyModalRef = useRef<BottomSheetModal>(null);
