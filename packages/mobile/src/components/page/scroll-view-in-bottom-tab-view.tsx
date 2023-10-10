@@ -3,6 +3,7 @@ import {PageWithScrollView} from './scroll-view';
 import {ScrollViewProps, ScrollView, StyleSheet, ViewStyle} from 'react-native';
 import {useBottomTabBarHeight} from '@react-navigation/bottom-tabs';
 import {BackgroundMode} from './background';
+import {useSetFocusedScreen} from './utils';
 
 export const PageWithScrollViewInBottomTabView = React.forwardRef<
   ScrollView,
@@ -15,6 +16,8 @@ export const PageWithScrollViewInBottomTabView = React.forwardRef<
     }
   >
 >((props, ref) => {
+  useSetFocusedScreen();
+
   const bottomTabBarHeight = useBottomTabBarHeight();
 
   const {style, ...rest} = props;
