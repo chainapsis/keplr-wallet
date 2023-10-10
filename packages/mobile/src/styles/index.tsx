@@ -139,7 +139,7 @@ export const ProfileColors = {
 export const {StyleProvider, useStyle, useStyleThemeController} =
   createStyleProvider(
     {
-      themes: ['light'] as const,
+      themes: ['dark'] as const,
       custom: {
         'mobile-h1': {
           fontSize: 36,
@@ -643,7 +643,7 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
       },
     },
     {
-      light: {
+      dark: {
         custom: {
           'background-gradient': {
             degree: 90,

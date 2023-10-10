@@ -7584,6 +7584,7 @@ __metadata:
     react: 18.2.0
     react-hook-form: ^7.45.4
     react-native: 0.72.3
+    react-native-fast-image: ^8.6.3
     react-native-gesture-handler: ^2.12.1
     react-native-keyboard-aware-scroll-view: ^0.9.5
     react-native-reanimated: ^3.4.2
@@ -31959,6 +31960,16 @@ __metadata:
   version: 1.1.0
   resolution: "react-merge-refs@npm:1.1.0"
   checksum: 90884352999002d868ab9f1bcfe3222fb0f2178ed629f1da7e98e5a9b02a2c96b4aa72800db92aabd69d2483211b4be57a2088e89a11a0b660e7ada744d4ddf7
+  languageName: node
+  linkType: hard
+
+"react-native-fast-image@npm:^8.6.3":
+  version: 8.6.3
+  resolution: "react-native-fast-image@npm:8.6.3"
+  peerDependencies:
+    react: ^17 || ^18
+    react-native: ">=0.60.0"
+  checksum: 29289cb6b2eae0983c8922b22e2d9de3be07322bb7991c5def19f95eadefaedb0e308ff0b38cc1d0444e8bd4fe94a7621a99a2d3d9298100bcb60b3144677234
   languageName: node
   linkType: hard
 

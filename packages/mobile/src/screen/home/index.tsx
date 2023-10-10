@@ -14,10 +14,11 @@ import {YAxis} from '../../components/axis';
 import {Stack} from '../../components/stack';
 import {Columns} from '../../components/column';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
-import {Modal} from '../../components/modal/modal';
+import {Modal} from '../../components/modal';
 import {TextButton} from '../../components/text-button';
 import {DepositModal} from './deposit-modal';
 import {BuyModal} from './buy-modal';
+import {StackActions, useNavigation} from '@react-navigation/native';
 import {SearchTextInput} from '../../components/input/search-text-input';
 import {AvailableTabView} from './available';
 import {ChainInfo} from '@keplr-wallet/types';
@@ -52,6 +53,8 @@ export const HomeScreen: FunctionComponent = observer(() => {
     keyRingStore,
     queriesStore,
   } = useStore();
+
+  const navigation = useNavigation();
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>('available');
   const buyModalRef = useRef<BottomSheetModal>(null);
@@ -273,6 +276,11 @@ export const HomeScreen: FunctionComponent = observer(() => {
               text="Send"
               size="large"
               containerStyle={style.flatten(['flex-1'])}
+              onPress={() => {
+                navigation.dispatch({
+                  ...StackActions.push('Send'),
+                });
+              }}
             />
           </Columns>
           <Gutter size={12} />

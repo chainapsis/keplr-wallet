@@ -18,6 +18,7 @@ import {RegisterScreen} from './screen/register';
 import {HomeScreen} from './screen/home';
 import {LockedScreen} from './screen/locked';
 import {RegisterEnableChainScreen} from './screen/register/enable-chain';
+import {SendScreen} from './screen/send/select-asset';
 import {createDrawerNavigator, useDrawerStatus} from '@react-navigation/drawer';
 import {DrawerContent} from './components/drawer';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -26,16 +27,15 @@ import {
   useFocusedScreen,
 } from './provider/focused-screen';
 import {WalletIcon, BrowserIcon, SettingIcon} from './components/icon';
-
 import {HomeScreenHeader, defaultHeaderOptions} from './components/pageHeader';
 import {SettingScreen} from './screen/setting';
 import {SettingGeneralScreen} from './screen/setting/screens/general';
-
 export type RootStackParamList = {
   Home: undefined;
   Register: undefined;
   'Register.Intro': undefined;
   'Register.EnableChain': undefined;
+  Send: undefined;
   'Setting.Intro': undefined;
   'Setting.General': undefined;
   Locked: undefined;
@@ -174,7 +174,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
   return (
     <FocusedScreenProvider>
       <NavigationContainer
-        theme={style.theme === 'light' ? DefaultTheme : DarkTheme}>
+        theme={style.theme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack.Navigator
           initialRouteName={(() => {
             switch (keyRingStore.status) {
@@ -206,6 +206,13 @@ export const AppNavigation: FunctionComponent = observer(() => {
               ...defaultHeaderOptions,
             }}
             component={RegisterNavigation}
+          />
+          <Stack.Screen
+            name="Send"
+            options={{
+              ...defaultHeaderOptions,
+            }}
+            component={SendScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

@@ -17,6 +17,8 @@ import {
   OsmosisQueries,
   ICNSQueries,
   SecretAccount,
+  IBCChannelStore,
+  IBCCurrencyRegistrar,
 } from '@keplr-wallet/stores';
 import {AsyncKVStore} from '../common';
 import {RNEnv, RNRouterUI, RNMessageRequesterInternal} from '../router';
@@ -24,10 +26,17 @@ import {APP_PORT} from '@keplr-wallet/router';
 import EventEmitter from 'eventemitter3';
 import {HugeQueriesStore} from './huge-queries';
 import {ChainStore} from './chain';
+import {
+  CoinGeckoAPIEndPoint,
+  CoinGeckoGetPrice,
+  FiatCurrencies,
+} from '@keplr-wallet/extension/src/config.ui';
+import {FiatCurrency} from '@keplr-wallet/types';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
   public readonly chainStore: ChainStore;
+  public readonly ibcChannelStore: IBCChannelStore;
 
   public readonly hugeQueriesStore: HugeQueriesStore;
   public readonly priceStore: CoinGeckoPriceStore;
@@ -50,6 +59,8 @@ export class RootStore {
     ]
   >;
   public readonly accountStore: AccountStore<[CosmosAccount, SecretAccount]>;
+
+  public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
 
   constructor() {
     const router = new RNRouterUI(RNEnv.produceEnv);
@@ -75,6 +86,11 @@ export class RootStore {
       EmbedChainInfos,
       this.keyRingStore,
       new RNMessageRequesterInternal(),
+    );
+
+    this.ibcChannelStore = new IBCChannelStore(
+      new AsyncKVStore('store_ibc_channel'),
+      this.chainStore,
     );
 
     this.permissionStore = new PermissionStore(
@@ -246,63 +262,17 @@ export class RootStore {
 
     this.priceStore = new CoinGeckoPriceStore(
       new AsyncKVStore('store_prices'),
-      {
-        usd: {
-          currency: 'usd',
-          symbol: '$',
-          maxDecimals: 2,
-          locale: 'en-US',
-        },
-        eur: {
-          currency: 'eur',
-          symbol: '€',
-          maxDecimals: 2,
-          locale: 'de-DE',
-        },
-        gbp: {
-          currency: 'gbp',
-          symbol: '£',
-          maxDecimals: 2,
-          locale: 'en-GB',
-        },
-        cad: {
-          currency: 'cad',
-          symbol: 'CA$',
-          maxDecimals: 2,
-          locale: 'en-CA',
-        },
-        rub: {
-          currency: 'rub',
-          symbol: '₽',
-          maxDecimals: 0,
-          locale: 'ru',
-        },
-        krw: {
-          currency: 'krw',
-          symbol: '₩',
-          maxDecimals: 0,
-          locale: 'ko-KR',
-        },
-        hkd: {
-          currency: 'hkd',
-          symbol: 'HK$',
-          maxDecimals: 1,
-          locale: 'en-HK',
-        },
-        cny: {
-          currency: 'cny',
-          symbol: '¥',
-          maxDecimals: 1,
-          locale: 'zh-CN',
-        },
-        jpy: {
-          currency: 'jpy',
-          symbol: '¥',
-          maxDecimals: 0,
-          locale: 'ja-JP',
-        },
-      },
+      FiatCurrencies.reduce<{
+        [vsCurrency: string]: FiatCurrency;
+      }>((obj, fiat) => {
+        obj[fiat.currency] = fiat;
+        return obj;
+      }, {}),
       'usd',
+      {
+        baseURL: CoinGeckoAPIEndPoint,
+        uri: CoinGeckoGetPrice,
+      },
     );
 
     this.hugeQueriesStore = new HugeQueriesStore(
@@ -310,6 +280,14 @@ export class RootStore {
       this.queriesStore,
       this.accountStore,
       this.priceStore,
+    );
+
+    this.ibcCurrencyRegistrar = new IBCCurrencyRegistrar(
+      new AsyncKVStore('store_ibc_curreny_registrar'),
+      24 * 3600 * 1000,
+      this.chainStore,
+      this.accountStore,
+      this.queriesStore,
     );
 
     router.listen(APP_PORT);
