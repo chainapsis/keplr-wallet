@@ -7,10 +7,10 @@ import {
   InsufficientFeeError,
   ISenderConfig,
 } from "@keplr-wallet/hooks";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../styles";
 import { Column, Columns } from "../../column";
-import { Caption1, Subtitle3, Subtitle4 } from "../../typography";
+import { Caption2, Subtitle3, Subtitle4 } from "../../typography";
 import { ArrowRightIcon, LoadingIcon, SettingIcon } from "../../icon";
 import { Stack } from "../../stack";
 import { Modal } from "../../modal";
@@ -87,6 +87,7 @@ export const FeeControl: FunctionComponent<{
     const { analyticsStore, queriesStore, priceStore, chainStore } = useStore();
 
     const intl = useIntl();
+    const theme = useTheme();
 
     useLayoutEffect(() => {
       if (disableAutomaticFeeSet) {
@@ -311,7 +312,13 @@ export const FeeControl: FunctionComponent<{
         <VerticalResizeTransition transitionAlign="top">
           {feeConfig.uiProperties.error || feeConfig.uiProperties.warning ? (
             <Box marginTop="4px">
-              <Caption1 color={ColorPalette["yellow-400"]}>
+              <Caption2
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["orange-400"]
+                    : ColorPalette["yellow-400"]
+                }
+              >
                 {(() => {
                   if (feeConfig.uiProperties.error) {
                     if (
@@ -350,7 +357,7 @@ export const FeeControl: FunctionComponent<{
                     );
                   }
                 })()}
-              </Caption1>
+              </Caption2>
             </Box>
           ) : null}
         </VerticalResizeTransition>
