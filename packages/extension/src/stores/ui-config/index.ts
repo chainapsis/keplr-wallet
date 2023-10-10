@@ -11,7 +11,8 @@ import {
   toJS,
 } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
-import { CoinGeckoPriceStore, KeyRingStore } from "@keplr-wallet/stores";
+import { CoinGeckoPriceStore } from "@keplr-wallet/stores";
+import { KeyRingStore } from "@keplr-wallet/stores-core";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { CopyAddressConfig } from "./copy-address";
 import { ChainStore } from "../chain";

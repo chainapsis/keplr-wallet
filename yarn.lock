@@ -5361,6 +5361,7 @@ __metadata:
     "@keplr-wallet/router-extension": 0.12.31
     "@keplr-wallet/simple-fetch": 0.12.31
     "@keplr-wallet/stores": 0.12.31
+    "@keplr-wallet/stores-core": 0.12.31
     "@keplr-wallet/stores-etc": 0.12.31
     "@keplr-wallet/types": 0.12.31
     "@keplr-wallet/unit": 0.12.31
@@ -5560,6 +5561,23 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@keplr-wallet/stores-core@0.12.31, @keplr-wallet/stores-core@workspace:packages/stores-core":
+  version: 0.0.0-use.local
+  resolution: "@keplr-wallet/stores-core@workspace:packages/stores-core"
+  dependencies:
+    "@keplr-wallet/background": 0.12.31
+    "@keplr-wallet/common": 0.12.31
+    "@keplr-wallet/cosmos": 0.12.31
+    "@keplr-wallet/router": 0.12.31
+    "@keplr-wallet/simple-fetch": 0.12.31
+    "@keplr-wallet/stores": 0.12.31
+    "@keplr-wallet/types": 0.12.31
+    buffer: ^6.0.3
+    mobx: ^6.1.7
+    mobx-utils: ^6.0.3
+  languageName: unknown
+  linkType: soft
+
 "@keplr-wallet/stores-etc@0.12.31, @keplr-wallet/stores-etc@workspace:packages/stores-etc":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/stores-etc@workspace:packages/stores-etc"
@@ -5586,7 +5604,6 @@ __metadata:
     "@keplr-wallet/crypto": 0.12.31
     "@keplr-wallet/proto-types": 0.12.31
     "@keplr-wallet/provider-mock": 0.12.31
-    "@keplr-wallet/router": 0.12.31
     "@keplr-wallet/simple-fetch": 0.12.31
     "@keplr-wallet/types": 0.12.31
     "@keplr-wallet/unit": 0.12.31

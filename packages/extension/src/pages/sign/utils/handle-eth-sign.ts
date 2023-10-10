@@ -1,4 +1,4 @@
-import { SignEthereumInteractionStore } from "@keplr-wallet/stores";
+import { SignEthereumInteractionStore } from "@keplr-wallet/stores-core";
 import { EthSignType } from "@keplr-wallet/types";
 import Transport from "@ledgerhq/hw-transport";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";

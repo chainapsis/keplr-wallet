@@ -7,11 +7,10 @@ import {
 } from "@keplr-wallet/background";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { AppCurrency } from "@keplr-wallet/types";
-import { IChainStore } from "../chain";
+import { IChainStore, IAccountStore } from "@keplr-wallet/stores";
 import { InteractionStore } from "./interaction";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
-import { IAccountStore } from "../account";
 import { KeyRingStore } from "./keyring";
 
 export class TokensStore {

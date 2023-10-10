@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
-import { SignInteractionStore } from "@keplr-wallet/stores";
+import { SignInteractionStore } from "@keplr-wallet/stores-core";
 import { Box } from "../../../../components/box";
 import { Column, Columns } from "../../../../components/column";
 import { XAxis } from "../../../../components/axis";

@@ -40,6 +40,7 @@
     "@keplr-wallet/router-extension": "0.12.31",
     "@keplr-wallet/simple-fetch": "0.12.31",
     "@keplr-wallet/stores": "0.12.31",
+    "@keplr-wallet/stores-core": "0.12.31",
     "@keplr-wallet/stores-etc": "0.12.31",
     "@keplr-wallet/types": "0.12.31",
     "@keplr-wallet/unit": "0.12.31",
