@@ -280,7 +280,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
       <Modal ref={copyAddressModalRef} snapPoints={['60%']}>
         <DepositModal />
       </Modal>
-      <Modal ref={buyModalRef} snapPoints={['50%']}>
+      <Modal ref={buyModalRef} snapPoints={['32%']}>
         <BuyModal />
       </Modal>
     </React.Fragment>
