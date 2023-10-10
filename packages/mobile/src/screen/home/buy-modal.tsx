@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent, useEffect, useState} from 'react';
-import {Pressable, Text, View} from 'react-native';
+import {Linking, Text, View} from 'react-native';
 import {
   FiatOnRampServiceInfo,
   FiatOnRampServiceInfos,
@@ -11,8 +11,12 @@ import {ChainInfo} from '@keplr-wallet/types';
 import {BaseModal, BaseModalHeader} from '../../components/modal';
 import {useStyle} from '../../styles';
 import {useBottomSheet} from '@gorhom/bottom-sheet';
+import {RectButton} from 'react-native-gesture-handler';
+import {Box} from '../../components/box';
+import {TransakSvg} from '../../components/icon/fiat/transak';
+import {KadoSvg} from '../../components/icon/fiat/kado';
+import {MoonpaySvg} from '../../components/icon/fiat/moonpay';
 
-//TODO home 스크린 만들면서 구현해야됨
 export const BuyModal = () => {
   return (
     <BaseModal
@@ -145,6 +149,13 @@ const BuyCryptoScene = observer(() => {
                 Object.values(serviceInfo.buySupportCoinDenomsByChainId).flat(),
               ),
             ],
+            ...(buySupportDefaultChainInfo && {
+              onRevCurrency:
+                serviceInfo.buySupportCoinDenomsByChainId[
+                  buySupportDefaultChainInfo.chainId
+                ]?.[0] ?? 'USDC',
+              network: buySupportDefaultChainInfo.chainName.toUpperCase(),
+            }),
           };
         default:
           return;
@@ -163,8 +174,16 @@ const BuyCryptoScene = observer(() => {
   });
 
   return (
-    <View style={style.flatten(['height-full'])}>
-      <BaseModalHeader title="Buy" />
+    <View
+      style={style.flatten([
+        'height-full',
+        'flex-column',
+        'gap-12',
+
+        'padding-x-12',
+        'padding-bottom-12',
+      ])}>
+      <BaseModalHeader title="Buy Crypto" />
       {buySupportServiceInfos.map(serviceInfo => {
         return (
           <ServiceItem
@@ -182,16 +201,46 @@ const ServiceItem: FunctionComponent<{
   serviceInfo: FiatOnRampServiceInfo & {buyUrl?: string};
   close: () => void;
 }> = ({serviceInfo, close}) => {
-  return (
-    <Pressable
-      onPress={async () => {
-        await browser.tabs.create({
-          url: serviceInfo.buyUrl,
-        });
+  const style = useStyle();
 
-        close();
-      }}>
-      <Text>{serviceInfo.serviceName}</Text>
-    </Pressable>
+  return (
+    <View style={style.flatten(['border-radius-3', 'overflow-hidden'])}>
+      <RectButton
+        style={style.flatten([
+          'flex-row',
+          'items-center',
+          'justify-center',
+          'padding-y-8',
+          'background-color-gray-500',
+          'gap-4',
+        ])}
+        rippleColor={style.get('color-gray-400@50%').color}
+        underlayColor={style.get('color-gray-400@50%').color}
+        activeOpacity={0.3}
+        onPress={async () => {
+          if (serviceInfo.buyUrl) {
+            Linking.openURL(serviceInfo.buyUrl);
+          }
+
+          close();
+        }}>
+        <Box>
+          {(() => {
+            if (serviceInfo.serviceId === 'moonpay') {
+              return <MoonpaySvg />;
+            }
+            if (serviceInfo.serviceId === 'kado') {
+              return <KadoSvg />;
+            }
+            if (serviceInfo.serviceId === 'transak') {
+              return <TransakSvg />;
+            }
+          })()}
+        </Box>
+        <Text style={style.flatten(['color-gray-10', 'subtitle1'])}>
+          {serviceInfo.serviceName}
+        </Text>
+      </RectButton>
+    </View>
   );
 };

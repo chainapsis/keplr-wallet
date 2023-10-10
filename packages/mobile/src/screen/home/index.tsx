@@ -1,18 +1,14 @@
 import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
-import {Text, View} from 'react-native';
+import {Text, TextInput as NativeTextInput} from 'react-native';
 import {useStyle} from '../../styles';
 import {PageWithScrollView} from '../../components/page';
 import {useStore} from '../../stores';
-import {PricePretty} from '@keplr-wallet/unit';
+import {CoinPretty, PricePretty} from '@keplr-wallet/unit';
 import {useEffectOnce} from '../../hooks';
-import {WalletStatus} from '@keplr-wallet/stores';
+import {QueryError, WalletStatus} from '@keplr-wallet/stores';
 import {Button} from '../../components/button';
-import {SearchIcon} from '../../components/icon/search';
-import {TextInput} from '../../components/input';
 import {Gutter} from '../../components/gutter';
-import {Checkbox} from '../../components/checkbox';
-import {IconButton} from '../../components/icon-button';
 import {LayeredHorizontalRadioGroup} from '../../components/radio-group';
 import {YAxis} from '../../components/axis';
 import {Stack} from '../../components/stack';
@@ -22,11 +18,33 @@ import {Modal} from '../../components/modal/modal';
 import {TextButton} from '../../components/text-button';
 import {DepositModal} from './deposit-modal';
 import {BuyModal} from './buy-modal';
+import {SearchTextInput} from '../../components/input/search-text-input';
+import {AvailableTabView} from './available';
+import {ChainInfo} from '@keplr-wallet/types';
+
+export interface ViewToken {
+  token: CoinPretty;
+  chainInfo: ChainInfo;
+  isFetching: boolean;
+  error: QueryError<any> | undefined;
+}
 
 type TabStatus = 'available' | 'staked';
 
+export const useIsNotReady = () => {
+  const {chainStore, queriesStore} = useStore();
+  const query = queriesStore.get(chainStore.chainInfos[0].chainId).cosmos
+    .queryRPCStatus;
+  return query.response == null && query.error == null;
+};
+
 export const HomeScreen: FunctionComponent = observer(() => {
   const style = useStyle();
+  const searchRef = useRef<NativeTextInput | null>(null);
+  const [search, setSearch] = useState('');
+
+  const isNotReady = useIsNotReady();
+
   const {
     hugeQueriesStore,
     chainStore,
@@ -35,12 +53,11 @@ export const HomeScreen: FunctionComponent = observer(() => {
     queriesStore,
   } = useStore();
 
-  const [isHide, setIsHide] = useState(false);
   const [tabStatus, setTabStatus] = React.useState<TabStatus>('available');
   const buyModalRef = useRef<BottomSheetModal>(null);
   const copyAddressModalRef = useRef<BottomSheetModal>(null);
 
-  //TODO 임시로직 나중에 제거 해야함
+  // TODO 임시로직 나중에 제거 해야함
   useEffectOnce(() => {
     (async () => {
       await chainStore.waitUntilInitialized();
@@ -174,10 +191,10 @@ export const HomeScreen: FunctionComponent = observer(() => {
       await Promise.all([
         (async () => {
           if (enabledChainIdentifiers.length > 0) {
-            await chainStore.enableChainInfoInUIWithVaultId(
-              vaultId,
-              ...enabledChainIdentifiers,
-            );
+            // await chainStore.enableChainInfoInUIWithVaultId(
+            //   vaultId,
+            //   ...enabledChainIdentifiers,
+            // );
           }
         })(),
       ]);
@@ -259,28 +276,38 @@ export const HomeScreen: FunctionComponent = observer(() => {
             />
           </Columns>
           <Gutter size={12} />
-          <TextInput
-            left={color => <SearchIcon size={20} color={color} />}
-            isLoading={true}
-            placeholder="Search for asset or chain"
-          />
+          {!isNotReady ? (
+            <Stack gutter={12}>
+              {tabStatus === 'available' ? (
+                <SearchTextInput
+                  ref={searchRef}
+                  value={search}
+                  onChange={e => {
+                    e.preventDefault();
+                    setSearch(e.nativeEvent.text);
+                  }}
+                  placeholder="Search for asset or chain (i.e. ATOM, Cosmos)"
+                />
+              ) : null}
+            </Stack>
+          ) : null}
 
-          {/* TODO 이후 extension과 같이 CollapsibleList 컴포넌트로 변경해야됨 */}
-          <View style={style.flatten(['flex-row', 'justify-end', 'gap-4'])}>
-            <IconButton
-              text="Hide Low Balance"
-              onPress={() => {
-                setIsHide(!isHide);
+          {tabStatus === 'available' ? (
+            <AvailableTabView
+              search={search}
+              isNotReady={isNotReady}
+              onClickGetStarted={() => {
+                copyAddressModalRef.current?.present();
               }}
-              icon={<Checkbox checked={isHide} />}
             />
-          </View>
+          ) : null}
         </Stack>
       </PageWithScrollView>
+
       <Modal ref={copyAddressModalRef} snapPoints={['60%']}>
         <DepositModal />
       </Modal>
-      <Modal ref={buyModalRef} snapPoints={['50%']}>
+      <Modal ref={buyModalRef} snapPoints={['32%']}>
         <BuyModal />
       </Modal>
     </React.Fragment>

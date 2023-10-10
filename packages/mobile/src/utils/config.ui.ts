@@ -123,6 +123,15 @@ export const FiatOnRampServiceInfos: FiatOnRampServiceInfo[] = [
     },
   },
   {
+    serviceId: 'moonpay',
+    serviceName: 'Moonpay',
+    buyOrigin: 'https://buy.moonpay.com',
+    buySupportCoinDenomsByChainId: {
+      'cosmoshub-4': ['ATOM'],
+      'kava_2222-10': ['KAVA'],
+    },
+  },
+  {
     serviceId: 'transak',
     serviceName: 'Transak',
     buyOrigin: 'https://global.transak.com',
@@ -131,15 +140,6 @@ export const FiatOnRampServiceInfos: FiatOnRampServiceInfo[] = [
       'cosmoshub-4': ['ATOM'],
       'secret-4': ['SCRT'],
       'injective-1': ['INJ'],
-    },
-  },
-  {
-    serviceId: 'moonpay',
-    serviceName: 'Moonpay',
-    buyOrigin: 'https://buy.moonpay.com',
-    buySupportCoinDenomsByChainId: {
-      'cosmoshub-4': ['ATOM'],
-      'kava_2222-10': ['KAVA'],
     },
   },
 ];
