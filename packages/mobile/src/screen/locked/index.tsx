@@ -1,11 +1,11 @@
 import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent, useState} from 'react';
-import {View} from 'react-native';
 import {useStore} from '../../stores';
 import {Button} from '../../components/button';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import {TextInput} from '../../components/input';
 import {useSetFocusedScreen} from '../../components/page/utils';
+import {Box} from '../../components/box';
 
 export const LockedScreen: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
@@ -26,7 +26,7 @@ export const LockedScreen: FunctionComponent = observer(() => {
   };
   return (
     <React.Fragment>
-      <View>
+      <Box>
         <TextInput
           label="password"
           value={password}
@@ -42,7 +42,7 @@ export const LockedScreen: FunctionComponent = observer(() => {
           error={isFailed ? 'Invalid Password' : undefined}
         />
         <Button text="unlock" size="large" onPress={doUnlock} />
-      </View>
+      </Box>
     </React.Fragment>
   );
 });

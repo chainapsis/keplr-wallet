@@ -1,7 +1,8 @@
 import React, {FunctionComponent, ReactElement, isValidElement} from 'react';
 import {useStyle} from '../../styles';
-import {Text, StyleSheet, TextStyle, View, ViewStyle} from 'react-native';
+import {Text, StyleSheet, TextStyle, ViewStyle} from 'react-native';
 import {RectButton} from '../rect-button';
+import {Box} from '../box';
 
 export const IconButton: FunctionComponent<{
   text?: string;
@@ -58,10 +59,11 @@ export const IconButton: FunctionComponent<{
   const defaultTextColor = 'color-gray-300';
 
   return (
-    <View
+    <Box
+      borderRadius={8}
       style={StyleSheet.flatten([
         style.flatten(
-          ['height-button-extra-small', 'border-radius-8', 'color-white'],
+          ['height-button-extra-small', 'color-white'],
           [hasBackgroundColor && backgroundColor],
         ),
         containerStyle,
@@ -83,13 +85,13 @@ export const IconButton: FunctionComponent<{
         activeOpacity={0.3}
         disableRippleAndUnderlay={!hasRipple}>
         {path === 'left' ? (
-          <View style={style.flatten(['justify-center', 'margin-right-4'])}>
-            <View>
+          <Box marginRight={4} alignY="center">
+            <Box>
               {isValidElement(icon) || !icon || !(typeof icon === 'function')
                 ? icon
                 : icon(style.get(defaultTextColor).color)}
-            </View>
-          </View>
+            </Box>
+          </Box>
         ) : null}
         <Text
           style={StyleSheet.flatten([
@@ -99,16 +101,13 @@ export const IconButton: FunctionComponent<{
           {text}
         </Text>
         {path === 'right' ? (
-          <View
-            style={StyleSheet.flatten([
-              style.flatten(['justify-center', 'margin-left-4']),
-            ])}>
+          <Box marginLeft={4} alignY="center">
             {isValidElement(icon) || !icon || !(typeof icon === 'function')
               ? icon
               : icon(style.get(defaultTextColor).color)}
-          </View>
+          </Box>
         ) : null}
       </RectButton>
-    </View>
+    </Box>
   );
 };

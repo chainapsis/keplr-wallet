@@ -5,7 +5,7 @@ import {Box} from '../box';
 import {useStyle} from '../../styles';
 import {Columns} from '../column';
 import {Gutter} from '../gutter';
-import {Text, View} from 'react-native';
+import {Text} from 'react-native';
 import {ArrowDownIcon} from '../icon/arrow-down';
 import {ArrowUpIcon} from '../icon/arrow-up';
 import {TextButton} from '../text-button';
@@ -44,10 +44,10 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
       <Stack gutter={8}>{alwaysShown}</Stack>
 
       {!isCollapsed ? (
-        <View>
+        <Box>
           <Gutter size={8} />
           <Stack gutter={8}>{hidden}</Stack>
-        </View>
+        </Box>
       ) : null}
       {hidden.length > 0 ? (
         <Box>

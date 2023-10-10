@@ -12,7 +12,6 @@ import {
   Text,
   TextInput as NativeTextInput,
   TextInputProps as NativeTextInputProps,
-  View,
 } from 'react-native';
 import {Label} from '../label';
 import {Box} from '../../box';
@@ -66,19 +65,19 @@ export const TextInput = forwardRef<
     const iconColor = 'color-gray-400';
 
     return (
-      <View style={StyleSheet.flatten([containerStyle])}>
+      <Box style={StyleSheet.flatten([containerStyle])}>
         <Columns sum={1} alignY="center">
           {label ? <Label content={label} isLoading={isLoading} /> : null}
           <Column weight={1} />
           {rightLabel ? <Box>{rightLabel}</Box> : null}
         </Columns>
 
-        <View
+        <Box
+          borderWidth={1}
+          borderRadius={8}
+          position="relative"
           style={style.flatten(
             [
-              'relative',
-              'border-width-1',
-              'border-radius-8',
               'background-color-gray-700',
               'light:background-color-gray-700',
               ...inputBorderColor,
@@ -93,15 +92,9 @@ export const TextInput = forwardRef<
              */}
             <MockBox show={!!left}>
               <Box alignY="center" marginLeft={16}>
-                <View>
-                  <Box>
-                    {isValidElement(left) ||
-                    !left ||
-                    !(typeof left === 'function')
-                      ? left
-                      : left(style.get(iconColor as any).color)}
-                  </Box>
-                </View>
+                {isValidElement(left) || !left || !(typeof left === 'function')
+                  ? left
+                  : left(style.get(iconColor as any).color)}
               </Box>
             </MockBox>
 
@@ -149,7 +142,7 @@ export const TextInput = forwardRef<
               </Box>
             </MockBox>
           </Columns>
-        </View>
+        </Box>
 
         <Box marginLeft={8}>{bottom}</Box>
         {error || paragraph ? (
@@ -168,7 +161,7 @@ export const TextInput = forwardRef<
             {error || paragraph}
           </Text>
         ) : null}
-      </View>
+      </Box>
     );
   },
 );

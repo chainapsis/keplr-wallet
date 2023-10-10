@@ -3,6 +3,7 @@ import {useStyle} from '../../styles';
 import {Text, StyleSheet, TextStyle, View, ViewStyle} from 'react-native';
 import {RectButton} from '../rect-button';
 import {SVGLoadingIcon} from '../spinner';
+import {Box} from '../box';
 
 type ButtonColorType = 'primary' | 'secondary' | 'danger';
 
@@ -113,14 +114,14 @@ export const Button: FunctionComponent<{
   })();
 
   return (
-    <View
+    <Box
+      borderRadius={8}
+      position="relative"
       style={StyleSheet.flatten([
         style.flatten([
           ...(backgroundColorDefinitions as any),
           `height-button-${size}` as any,
-          'border-radius-8',
           'overflow-hidden',
-          'relative',
         ]),
         containerStyle,
       ])}>
@@ -140,12 +141,12 @@ export const Button: FunctionComponent<{
         rippleColor={rippleColor}
         underlayColor={underlayColor}
         activeOpacity={propUnderlayColor ? 1 : color === 'primary' ? 0.3 : 0.2}>
-        <View
-          style={style.flatten(
-            ['height-1', 'justify-center', 'margin-right-4'],
-            [loading && 'opacity-transparent'],
-          )}>
-          <View>
+        <Box
+          height={1}
+          marginRight={4}
+          alignY="center"
+          style={style.flatten([], [loading && 'opacity-transparent'])}>
+          <Box>
             {typeof leftIcon === 'function' &&
               leftIcon(
                 (style.flatten(textColorDefinition as any) as any).color,
@@ -157,8 +158,8 @@ export const Button: FunctionComponent<{
               : leftIcon(
                   (style.flatten(textColorDefinition as any) as any).color,
                 )}
-          </View>
-        </View>
+          </Box>
+        </Box>
         <Text
           style={StyleSheet.flatten([
             style.flatten(
@@ -169,12 +170,12 @@ export const Button: FunctionComponent<{
           ])}>
           {text}
         </Text>
-        <View
-          style={style.flatten(
-            ['height-1', 'justify-center', 'margin-left-4'],
-            [loading && 'opacity-transparent'],
-          )}>
-          <View>
+        <Box
+          height={1}
+          marginLeft={4}
+          alignY="center"
+          style={style.flatten([], [loading && 'opacity-transparent'])}>
+          <Box>
             {isValidElement(rightIcon) ||
             !rightIcon ||
             !(typeof rightIcon === 'function')
@@ -182,8 +183,8 @@ export const Button: FunctionComponent<{
               : rightIcon(
                   (style.flatten(textColorDefinition as any) as any).color,
                 )}
-          </View>
-        </View>
+          </Box>
+        </Box>
         {loading ? (
           <View
             style={style.flatten([
@@ -205,6 +206,6 @@ export const Button: FunctionComponent<{
           [disabled && 'background-color-gray-600@50%'],
         )}
       />
-    </View>
+    </Box>
   );
 };

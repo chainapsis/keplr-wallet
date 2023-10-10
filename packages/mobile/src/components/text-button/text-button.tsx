@@ -5,7 +5,8 @@ import React, {
   useState,
 } from 'react';
 import {useStyle} from '../../styles';
-import {Text, StyleSheet, TextStyle, View, Pressable} from 'react-native';
+import {Text, StyleSheet, TextStyle, Pressable} from 'react-native';
+import {Box} from '../box';
 
 type ButtonColorType = 'faint' | 'default';
 
@@ -69,13 +70,7 @@ export const TextButton: FunctionComponent<{
         ])}>
         {text}
       </Text>
-      <View
-        style={style.flatten([
-          'height-1',
-          'justify-center',
-          'margin-left-4',
-          isPressIn ? 'color-gray-300' : 'color-red-400',
-        ])}>
+      <Box height={1} marginLeft={4} alignY="center">
         {isValidElement(rightIcon) ||
         !rightIcon ||
         !(typeof rightIcon === 'function')
@@ -85,7 +80,7 @@ export const TextButton: FunctionComponent<{
                 ? style.get('color-gray-300').color
                 : style.get(textColorDefinition as any).color,
             )}
-      </View>
+      </Box>
     </Pressable>
   );
 };

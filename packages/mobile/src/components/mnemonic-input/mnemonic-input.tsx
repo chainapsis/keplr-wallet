@@ -5,11 +5,12 @@ import {
   Text,
   TextInput as NativeTextInput,
   TextStyle,
-  View,
   ViewStyle,
 } from 'react-native';
 import {useStyle} from '../../styles';
 import {Label} from '../input/label';
+import {Box} from '../box';
+import {XAxis} from '../axis';
 
 export const MnemonicInput = React.forwardRef<
   NativeTextInput,
@@ -50,22 +51,18 @@ export const MnemonicInput = React.forwardRef<
   const style = useStyle();
 
   return (
-    <View
-      style={StyleSheet.flatten([
-        style.flatten(['padding-bottom-28']),
-        containerStyle,
-      ])}>
+    <Box paddingBottom={28} style={StyleSheet.flatten([containerStyle])}>
       {label ? <Label content={label} /> : null}
-      <View
+      <Box
+        paddingX={11}
+        paddingY={12}
+        borderRadius={6}
+        borderWidth={1}
         style={StyleSheet.flatten([
           style.flatten(
             [
               'background-color-gray-600',
               'light:background-color-platinum-700',
-              'padding-x-11',
-              'padding-y-12',
-              'border-radius-6',
-              'border-width-1',
             ],
             [
               // The order is important.
@@ -83,66 +80,68 @@ export const MnemonicInput = React.forwardRef<
           inputContainerStyle,
         ])}>
         {topInInputContainer}
-        <View style={style.flatten(['flex-row', 'items-center'])}>
-          {inputLeft}
-          <NativeTextInput
-            multiline={true}
-            numberOfLines={4}
-            placeholderTextColor={
-              props.placeholderTextColor ??
-              style.flatten(
-                ['color-gray-300', 'light:color-platinum-500'],
-                [!(props.editable ?? true) && 'light:color-platinum-200'],
-              ).color
-            }
-            style={StyleSheet.flatten([
-              style.flatten(
-                [
-                  'padding-0',
-                  'body2',
-                  'color-white',
-                  'light:color-platinum-50',
-                  'flex-1',
-                  'min-height-104',
-                ],
-                [
-                  !(props.editable ?? true) && 'color-gray-300',
-                  !(props.editable ?? true) && 'light:color-platinum-200',
-                ],
-              ),
-              Platform.select({
-                ios: {},
-                android: {
-                  // On android, the text input's height does not equals to the line height by strange.
-                  // To fix this problem, set the height explicitly.
-                  height: style.get('body2-in-text-input')?.lineHeight,
+        <Box>
+          <XAxis alignY="center">
+            {inputLeft}
+            <NativeTextInput
+              multiline={true}
+              numberOfLines={4}
+              placeholderTextColor={
+                props.placeholderTextColor ??
+                style.flatten(
+                  ['color-gray-300', 'light:color-platinum-500'],
+                  [!(props.editable ?? true) && 'light:color-platinum-200'],
+                ).color
+              }
+              style={StyleSheet.flatten([
+                style.flatten(
+                  [
+                    'padding-0',
+                    'body2',
+                    'color-white',
+                    'light:color-platinum-50',
+                    'flex-1',
+                    'min-height-104',
+                  ],
+                  [
+                    !(props.editable ?? true) && 'color-gray-300',
+                    !(props.editable ?? true) && 'light:color-platinum-200',
+                  ],
+                ),
+                Platform.select({
+                  ios: {},
+                  android: {
+                    // On android, the text input's height does not equals to the line height by strange.
+                    // To fix this problem, set the height explicitly.
+                    height: style.get('body2-in-text-input')?.lineHeight,
+                  },
+                }),
+                {
+                  textAlignVertical: 'top',
                 },
-              }),
-              {
-                textAlignVertical: 'top',
-              },
-              propsStyle,
-            ])}
-            onFocus={e => {
-              setIsFocused(true);
+                propsStyle,
+              ])}
+              onFocus={e => {
+                setIsFocused(true);
 
-              if (onFocus) {
-                onFocus(e);
-              }
-            }}
-            onBlur={e => {
-              setIsFocused(false);
+                if (onFocus) {
+                  onFocus(e);
+                }
+              }}
+              onBlur={e => {
+                setIsFocused(false);
 
-              if (onBlur) {
-                onBlur(e);
-              }
-            }}
-            {...restProps}
-            ref={ref}
-          />
-          {inputRight}
-        </View>
-      </View>
+                if (onBlur) {
+                  onBlur(e);
+                }
+              }}
+              {...restProps}
+              ref={ref}
+            />
+            {inputRight}
+          </XAxis>
+        </Box>
+      </Box>
       {error || paragraph ? (
         <Text
           style={StyleSheet.flatten([
@@ -156,7 +155,7 @@ export const MnemonicInput = React.forwardRef<
           {error || paragraph}
         </Text>
       ) : null}
-    </View>
+    </Box>
   );
 });
 

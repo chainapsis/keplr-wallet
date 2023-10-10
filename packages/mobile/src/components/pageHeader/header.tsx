@@ -1,7 +1,7 @@
 import React, {FunctionComponent, PropsWithChildren} from 'react';
 import {ColorPalette, useStyle} from '../../styles';
 import {DrawerActions, useNavigation} from '@react-navigation/native';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {Pressable, StyleSheet, Text} from 'react-native';
 import {MenuIcon, QRScanIcon} from '../icon';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../stores';
@@ -9,6 +9,7 @@ import {Box} from '../box';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {HeaderBackButtonIcon} from './icon/back';
 import {HeaderBackButtonProps} from '@react-navigation/native-stack/lib/typescript/src/types';
+import {Column, Columns} from '../column';
 
 const HomeScreenHeaderLeft: FunctionComponent = () => {
   const style = useStyle();
@@ -54,36 +55,36 @@ export const HomeScreenHeader = observer(() => {
           'padding-bottom-18',
           'padding-x-20',
           'background-color-gray-700',
-          'border-width-bottom-1',
-          'border-color-gray-600',
         ]),
         {
           paddingTop: insect.top,
         },
       ])}>
-      <View
-        style={StyleSheet.flatten([
-          style.flatten(['flex-row', 'justify-between', 'width-full']),
-        ])}>
-        <HomeScreenHeaderLeft />
-        <Box>
-          <Text
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            style={StyleSheet.flatten([
-              style.flatten([
-                'color-white',
-                'h4',
-                'width-160',
-                'overflow-scroll',
-                'text-center',
-              ]),
-            ])}>
-            {keyRingStore.selectedKeyInfo?.name || 'Keplr Account'}
-          </Text>
-        </Box>
-        <HomeScreenHeaderRight />
-      </View>
+      <Box style={StyleSheet.flatten([style.flatten(['width-full'])])}>
+        <Columns sum={2}>
+          <HomeScreenHeaderLeft />
+          <Column weight={1} />
+          <Box>
+            <Text
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={StyleSheet.flatten([
+                style.flatten([
+                  'color-white',
+                  'h4',
+                  'width-160',
+                  'overflow-scroll',
+                  'text-center',
+                ]),
+              ])}>
+              {keyRingStore.selectedKeyInfo?.name || 'Keplr Account'}
+            </Text>
+          </Box>
+          <Column weight={1} />
+
+          <HomeScreenHeaderRight />
+        </Columns>
+      </Box>
     </Box>
   );
 });

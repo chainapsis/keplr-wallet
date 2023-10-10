@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent, useEffect, useState} from 'react';
-import {Linking, Text, View} from 'react-native';
+import {Linking, Text} from 'react-native';
 import {
   FiatOnRampServiceInfo,
   FiatOnRampServiceInfos,
@@ -174,15 +174,10 @@ const BuyCryptoScene = observer(() => {
   });
 
   return (
-    <View
-      style={style.flatten([
-        'height-full',
-        'flex-column',
-        'gap-12',
-
-        'padding-x-12',
-        'padding-bottom-12',
-      ])}>
+    <Box
+      paddingX={12}
+      paddingBottom={12}
+      style={style.flatten(['height-full', 'gap-12'])}>
       <BaseModalHeader title="Buy Crypto" />
       {buySupportServiceInfos.map(serviceInfo => {
         return (
@@ -193,7 +188,7 @@ const BuyCryptoScene = observer(() => {
           />
         );
       })}
-    </View>
+    </Box>
   );
 });
 
@@ -204,7 +199,7 @@ const ServiceItem: FunctionComponent<{
   const style = useStyle();
 
   return (
-    <View style={style.flatten(['border-radius-3', 'overflow-hidden'])}>
+    <Box borderRadius={3} style={style.flatten(['overflow-hidden'])}>
       <RectButton
         style={style.flatten([
           'flex-row',
@@ -241,6 +236,6 @@ const ServiceItem: FunctionComponent<{
           {serviceInfo.serviceName}
         </Text>
       </RectButton>
-    </View>
+    </Box>
   );
 };

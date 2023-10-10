@@ -50,6 +50,7 @@ export const Box: FunctionComponent<PropsWithChildren<BoxProps>> = ({
     borderRadius,
     borderColor,
     borderStyle: borderWidth ? 'solid' : undefined,
+    borderWidth: borderWidth,
 
     padding,
     paddingTop: paddingTop || paddingY,
