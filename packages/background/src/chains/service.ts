@@ -797,6 +797,11 @@ export class ChainsService {
           newChainInfo = {
             ...newChainInfo,
             ...repoChainInfo,
+            // stakeCurrency는 nullable하며 repo로부터 업데이트 되었을때
+            // repo에서 stakeCurrency가 없다면 명시적으로 지워져야한다.
+            stakeCurrency: repoChainInfo.stakeCurrency
+              ? repoChainInfo.stakeCurrency
+              : undefined,
             walletUrlForStaking:
               repoChainInfo.walletUrlForStaking ||
               newChainInfo.walletUrlForStaking,

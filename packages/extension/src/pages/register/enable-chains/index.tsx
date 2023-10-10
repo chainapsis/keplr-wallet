@@ -329,11 +329,11 @@ export const EnableChainsScene: FunctionComponent<{
           for (const bech32Address of candidateAddress.bech32Addresses) {
             // Check that the account has some assets or delegations.
             // If so, enable it by default
-            const queryBalance = queries.queryBalances.getQueryBech32Address(
-              bech32Address.address
-            ).stakable;
+            const queryBalance = queries.queryBalances
+              .getQueryBech32Address(bech32Address.address)
+              .getBalance(chainInfo.stakeCurrency || chainInfo.currencies[0]);
 
-            if (queryBalance.response?.data) {
+            if (queryBalance?.response?.data) {
               // A bit tricky. The stake coin is currently only native, and in this case,
               // we can check whether the asset exists or not by checking the response.
               const data = queryBalance.response.data as any;
@@ -433,7 +433,7 @@ export const EnableChainsScene: FunctionComponent<{
             chainInfo.chainName
               .toLowerCase()
               .includes(trimSearch.toLowerCase()) ||
-            chainInfo.stakeCurrency.coinDenom
+            (chainInfo.stakeCurrency || chainInfo.currencies[0]).coinDenom
               .toLowerCase()
               .includes(trimSearch.toLowerCase())
           );
@@ -458,29 +458,37 @@ export const EnableChainsScene: FunctionComponent<{
 
       const aBalance = (() => {
         const addresses = candidateAddressesMap.get(a.chainIdentifier);
+        const chainInfo = chainStore.getChain(a.chainId);
         if (addresses && addresses.length > 0) {
-          return queriesStore
+          const queryBal = queriesStore
             .get(a.chainId)
-            .queryBalances.getQueryBech32Address(addresses[0].address).stakable
-            .balance;
+            .queryBalances.getQueryBech32Address(addresses[0].address)
+            .getBalance(chainInfo.stakeCurrency || chainInfo.currencies[0]);
+          if (queryBal) {
+            return queryBal.balance;
+          }
         }
 
         return new CoinPretty(
-          chainStore.getChain(a.chainId).stakeCurrency,
+          chainInfo.stakeCurrency || chainInfo.currencies[0],
           "0"
         );
       })();
       const bBalance = (() => {
         const addresses = candidateAddressesMap.get(b.chainIdentifier);
+        const chainInfo = chainStore.getChain(b.chainId);
         if (addresses && addresses.length > 0) {
-          return queriesStore
+          const queryBal = queriesStore
             .get(b.chainId)
-            .queryBalances.getQueryBech32Address(addresses[0].address).stakable
-            .balance;
+            .queryBalances.getQueryBech32Address(addresses[0].address)
+            .getBalance(chainInfo.stakeCurrency || chainInfo.currencies[0]);
+          if (queryBal) {
+            return queryBal.balance;
+          }
         }
 
         return new CoinPretty(
-          chainStore.getChain(b.chainId).stakeCurrency,
+          chainInfo.stakeCurrency || chainInfo.currencies[0],
           "0"
         );
       })();
@@ -578,9 +586,17 @@ export const EnableChainsScene: FunctionComponent<{
 
               const queries = queriesStore.get(chainInfo.chainId);
 
-              const balance = queries.queryBalances.getQueryBech32Address(
-                account.bech32Address
-              ).stakable.balance;
+              const balance = (() => {
+                const currency =
+                  chainInfo.stakeCurrency || chainInfo.currencies[0];
+                const queryBal = queries.queryBalances
+                  .getQueryBech32Address(account.bech32Address)
+                  .getBalance(currency);
+                if (queryBal) {
+                  return queryBal.balance;
+                }
+                return new CoinPretty(currency, "0");
+              })();
 
               const enabled =
                 enabledChainIdentifierMap.get(chainInfo.chainIdentifier) ||
@@ -628,7 +644,9 @@ export const EnableChainsScene: FunctionComponent<{
                     chainInfo.chainName
                       .toLowerCase()
                       .includes(trimSearch.toLowerCase()) ||
-                    chainInfo.stakeCurrency.coinDenom
+                    (
+                      chainInfo.stakeCurrency || chainInfo.currencies[0]
+                    ).coinDenom
                       .toLowerCase()
                       .includes(trimSearch.toLowerCase())
                   );

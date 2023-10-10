@@ -218,7 +218,7 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
     }
   }
 
-  get stakeCurrency(): Currency {
+  get stakeCurrency(): Currency | undefined {
     return this._embedded.stakeCurrency;
   }
 
