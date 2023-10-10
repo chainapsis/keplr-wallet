@@ -269,7 +269,8 @@ export const SignModal: FunctionComponent<{
           const { title, content, scrollViewHorizontal } = renderAminoMessage(
             account,
             msg,
-            chainInfo.currencies
+            chainInfo.currencies,
+            chainId
           );
 
           return (
@@ -308,7 +309,8 @@ export const SignModal: FunctionComponent<{
           const chainInfo = chainStore.getChain(chainId);
           const { title, content } = renderDirectMessage(
             msg,
-            chainInfo.currencies
+            chainInfo.currencies,
+            chainId
           );
 
           return (
