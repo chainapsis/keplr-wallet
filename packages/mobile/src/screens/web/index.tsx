@@ -26,34 +26,6 @@ const validURL = (uri: string) => {
   return pattern.test(uri);
 };
 
-const ArrowDownIcon: FunctionComponent<{ size: number; color: string }> = ({
-  size = 20,
-  color,
-}) => {
-  return (
-    <Svg width={size} height={size} fill="none" viewBox="0 0 20 20">
-      <Path
-        d="M10.7894 13.9851C10.389 14.4999 9.61101 14.4999 9.21065 13.9851L4.25529 7.61394C3.7444 6.95708 4.21249 6 5.04464 6H14.9554C15.7875 6 16.2556 6.95708 15.7447 7.61394L10.7894 13.9851Z"
-        fill={color}
-      />
-    </Svg>
-  );
-};
-
-const ArrowUpIcon: FunctionComponent<{ size: number; color: string }> = ({
-  size = 20,
-  color,
-}) => {
-  return (
-    <Svg width={size} height={size} fill="none" viewBox="0 0 20 20">
-      <Path
-        d="M9.21065 6.01488C9.61101 5.50013 10.389 5.50014 10.7894 6.01488L15.7447 12.3861C16.2556 13.0429 15.7875 14 14.9554 14L5.04464 14C4.21249 14 3.7444 13.0429 4.25529 12.3861L9.21065 6.01488Z"
-        fill={color}
-      />
-    </Svg>
-  );
-};
-
 const EmptyIcon: FunctionComponent<{ size: number; color: string }> = ({
   size = 72,
   color,
@@ -82,7 +54,6 @@ export const WebScreen: FunctionComponent = observer(() => {
 
   const [uri, setURI] = useState("");
   const [uriError, setURIError] = useState("");
-  const [isFavorite, setIsFavorite] = useState(false);
 
   return (
     <PageWithScrollViewInBottomTabView
@@ -155,13 +126,8 @@ export const WebScreen: FunctionComponent = observer(() => {
         </View>
       </View>
 
-      <RectButton
-        style={style.flatten(["flex-row", "items-center"])}
-        onPress={() => {
-          if (favoriteWebpageStore.urls.length > 2) {
-            setIsFavorite(!isFavorite);
-          }
-        }}
+      <View
+        style={style.flatten(["flex-row", "items-center", "margin-bottom-12"])}
       >
         <Text
           style={style.flatten([
@@ -181,91 +147,67 @@ export const WebScreen: FunctionComponent = observer(() => {
             "color-blue-400",
           ])}
         >
-          {favoriteWebpageStore.urls.length > 0
-            ? favoriteWebpageStore.urls.length
-            : ""}
+          {favoriteWebpageStore.urls.length}
         </Text>
-
-        <View>
-          {isFavorite ? (
-            <ArrowUpIcon
-              size={20}
-              color={
-                style.flatten(["color-platinum-300", "dark:color-platinum-200"])
-                  .color
-              }
-            />
-          ) : (
-            <ArrowDownIcon
-              size={20}
-              color={
-                style.flatten(["color-platinum-300", "dark:color-platinum-200"])
-                  .color
-              }
-            />
-          )}
-        </View>
-      </RectButton>
+      </View>
 
       {favoriteWebpageStore.urls.length > 0 ? (
-        favoriteWebpageStore.urls
-          .filter((_, index) => (isFavorite ? true : index < 2))
-          .map((url) => {
-            return (
-              <RectButton
-                key={url}
+        favoriteWebpageStore.urls.map((url) => {
+          return (
+            <RectButton
+              key={url}
+              style={style.flatten([
+                "flex-row",
+                "items-center",
+                "padding-x-16",
+                "padding-y-20",
+                "margin-bottom-12",
+                "border-radius-8",
+                "background-color-white",
+                "dark:background-color-platinum-600",
+              ])}
+              onPress={() => {
+                smartNavigation.pushSmart("Web.Custom", { url });
+              }}
+            >
+              <View style={style.flatten(["margin-right-16"])}>
+                <GlobeIcon
+                  size={24}
+                  color={style.flatten(["color-blue-400"]).color}
+                />
+              </View>
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
                 style={style.flatten([
-                  "flex-row",
-                  "items-center",
-                  "padding-x-16",
-                  "padding-y-20",
-                  "margin-top-12",
-                  "border-radius-8",
-                  "background-color-white",
-                  "dark:background-color-platinum-600",
+                  "subtitle3",
+                  "color-platinum-400",
+                  "dark:color-platinum-50",
+                  "flex-1",
                 ])}
+              >
+                {url
+                  .replace("https://", "")
+                  .replace("http://", "")
+                  .replace("www.", "")}
+              </Text>
+              <TouchableOpacity
+                style={style.flatten(["padding-12"])}
                 onPress={() => {
-                  smartNavigation.pushSmart("Web.Custom", { url });
+                  favoriteWebpageStore.removeUrl(url);
                 }}
               >
-                <View style={style.flatten(["margin-right-16"])}>
-                  <GlobeIcon
-                    size={24}
-                    color={style.flatten(["color-blue-400"]).color}
-                  />
-                </View>
-                <Text
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                  style={style.flatten([
-                    "subtitle3",
-                    "color-platinum-400",
-                    "dark:color-platinum-50",
-                    "flex-1",
-                  ])}
-                >
-                  {url
-                    .replace("https://", "")
-                    .replace("http://", "")
-                    .replace("www.", "")}
-                </Text>
-                <TouchableOpacity
-                  style={style.flatten(["padding-12"])}
-                  onPress={() => {
-                    favoriteWebpageStore.removeUrl(url);
-                  }}
-                >
-                  <TrashCanIcon
-                    color={
-                      style.flatten(["color-gray-100", "dark:color-gray-200"])
-                        .color
-                    }
-                    size={24}
-                  />
-                </TouchableOpacity>
-              </RectButton>
-            );
-          })
+                <TrashCanIcon
+                  color={
+                    style.flatten(["color-gray-100", "dark:color-gray-200"])
+                      .color
+                  }
+                  size={24}
+                />
+              </TouchableOpacity>
+            </RectButton>
+          );
+        })
       ) : (
         <View
           style={style.flatten([
