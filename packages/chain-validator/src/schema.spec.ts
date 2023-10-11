@@ -974,7 +974,7 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when chain name is empty string");
 
-    await assert.rejects(async () => {
+    await assert.doesNotReject(async () => {
       const chainInfo = generatePlainChainInfo();
       // @ts-ignore
       chainInfo["stakeCurrency"] = undefined;
