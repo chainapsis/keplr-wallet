@@ -1,11 +1,8 @@
-//NOTE - navigation에서 기본으로 제공해주는 뒤로가기 버튼으로 할때는 뒤로 간뒤 넓어지는 애니메이션이 진행되는데
-// 커스텀 버튼을 만들어서 goBack을 실행하면 뒤로 가면서 애니메이션이 실행되서 일단 이렇게 진행
 import {RouteProp, useNavigation} from '@react-navigation/native';
 import {observer} from 'mobx-react-lite';
 import React from 'react';
 import {DepositModalNav} from './deposit-modal';
 import {useBottomSheet} from '@gorhom/bottom-sheet';
-import {useStore} from '@keplr-wallet/extension/src/stores';
 import {useStyle} from '../../../../styles';
 import {Box} from '../../../../components/box';
 import {Column, Columns} from '../../../../components/column';
@@ -16,7 +13,10 @@ import {ChainImageFallback} from '../../../../components/image';
 import {YAxis} from '../../../../components/axis';
 import QRCode from 'react-native-qrcode-svg';
 import {Text} from 'react-native';
+import {useStore} from '../../../../stores';
 
+//NOTE - navigation에서 기본으로 제공해주는 뒤로가기 버튼으로 할때는 뒤로 간뒤 넓어지는 애니메이션이 진행되는데
+// 커스텀 버튼을 만들어서 goBack을 실행하면 뒤로 가면서 애니메이션이 실행되서 일단 이렇게 진행
 export const QRScene = observer(
   ({route}: {route: RouteProp<DepositModalNav, 'QR'>}) => {
     const bottom = useBottomSheet();

@@ -1,9 +1,7 @@
 import React from 'react';
-
 import {BaseModal} from '../../../../components/modal/modal';
 import {CopyAddressScene} from './copy-address-scene';
 import {QRScene} from './qr-scene';
-import {RouteProp} from '@react-navigation/native';
 
 interface QRSeneProps {
   chainId: string;
@@ -15,11 +13,6 @@ export type DepositModalNav = {
   QR: QRSeneProps;
 };
 
-const CopyAddressSceneFunc = () => <CopyAddressScene />;
-const QRSceneFunc = (route: RouteProp<DepositModalNav, 'QR'>) => (
-  <QRScene route={route} />
-);
-
 export const DepositModal = () => {
   return (
     <BaseModal
@@ -29,10 +22,10 @@ export const DepositModal = () => {
       }}
       initialRouteName="List"
       screenList={[
-        {routeName: 'List', scene: CopyAddressSceneFunc},
+        {routeName: 'List', scene: CopyAddressScene},
         {
           routeName: 'QR',
-          scene: QRSceneFunc,
+          scene: QRScene,
         },
       ]}
     />
