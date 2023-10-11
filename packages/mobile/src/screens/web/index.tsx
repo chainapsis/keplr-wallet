@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useState } from "react";
 import { PageWithScrollViewInBottomTabView } from "../../components/page";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Dimensions, Image, StyleSheet, Text, View } from "react-native";
 import { useStyle } from "../../styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TextInput } from "../../components/input";
@@ -11,6 +11,7 @@ import { GlobeIcon, TrashCanIcon } from "../../components/icon";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Svg, { Path } from "react-native-svg";
 import { RectButton } from "../../components/rect-button";
+import { RectButton as NativeRectButton } from "react-native-gesture-handler";
 
 const validURL = (uri: string) => {
   const pattern = new RegExp(
@@ -123,165 +124,176 @@ export const WebScreen: FunctionComponent = observer(() => {
         autoCompleteType="off"
       />
 
-      <RectButton
-        key={dAppPageUrl}
-        style={style.flatten(["margin-bottom-12", "border-radius-8"])}
-        onPress={() => {
-          smartNavigation.pushSmart("Web.Custom", { url: dAppPageUrl });
-        }}
+      <View
+        style={style.flatten([
+          "relative",
+          "margin-bottom-12",
+          "border-radius-8",
+          "overflow-hidden",
+        ])}
       >
         <Image
           source={require("../../assets/image/webpage/dapp-banner.png")}
-          resizeMode="contain"
-          style={style.flatten(["width-full", "height-80"])}
-        />
-      </RectButton>
-
-      <React.Fragment>
-        <RectButton
-          style={style.flatten(["flex-row", "items-center"])}
-          onPress={() => {
-            if (favoriteWebpageStore.urls.length > 2) {
-              setIsFavorite(!isFavorite);
-            }
+          style={{
+            width: Dimensions.get("screen").width - 40,
+            height: (Dimensions.get("screen").width - 40) / 4.7925,
           }}
+          fadeDuration={0}
+        />
+        <View style={style.flatten(["absolute-fill", "flex"])}>
+          <NativeRectButton
+            style={style.flatten(["flex-1"])}
+            rippleColor={style.get("color-rect-button-default-ripple").color}
+            underlayColor={
+              style.get("color-rect-button-default-underlay").color
+            }
+            activeOpacity={0.2}
+            onPress={() => {
+              smartNavigation.pushSmart("Web.Custom", { url: dAppPageUrl });
+            }}
+          />
+        </View>
+      </View>
+
+      <RectButton
+        style={style.flatten(["flex-row", "items-center"])}
+        onPress={() => {
+          if (favoriteWebpageStore.urls.length > 2) {
+            setIsFavorite(!isFavorite);
+          }
+        }}
+      >
+        <Text
+          style={style.flatten([
+            "body3",
+            "margin-right-4",
+            "color-platinum-300",
+            "dark:color-platinum-200",
+          ])}
         >
-          <Text
-            style={style.flatten([
-              "body3",
-              "margin-right-4",
-              "color-platinum-300",
-              "dark:color-platinum-200",
-            ])}
-          >
-            Favorite
-          </Text>
+          Favorite
+        </Text>
 
-          <Text
-            style={style.flatten([
-              "subtitle2",
-              "margin-right-4",
-              "color-blue-400",
-            ])}
-          >
-            {favoriteWebpageStore.urls.length > 0
-              ? favoriteWebpageStore.urls.length
-              : ""}
-          </Text>
+        <Text
+          style={style.flatten([
+            "subtitle2",
+            "margin-right-4",
+            "color-blue-400",
+          ])}
+        >
+          {favoriteWebpageStore.urls.length > 0
+            ? favoriteWebpageStore.urls.length
+            : ""}
+        </Text>
 
-          <View>
-            {isFavorite ? (
-              <ArrowUpIcon
-                size={20}
-                color={
-                  style.flatten([
-                    "color-platinum-300",
-                    "dark:color-platinum-200",
-                  ]).color
-                }
-              />
-            ) : (
-              <ArrowDownIcon
-                size={20}
-                color={
-                  style.flatten([
-                    "color-platinum-300",
-                    "dark:color-platinum-200",
-                  ]).color
-                }
-              />
-            )}
-          </View>
-        </RectButton>
-
-        {favoriteWebpageStore.urls.length > 0 ? (
-          favoriteWebpageStore.urls
-            .filter((_, index) => (isFavorite ? true : index < 2))
-            .map((url) => {
-              return (
-                <RectButton
-                  key={url}
-                  style={style.flatten([
-                    "flex-row",
-                    "items-center",
-                    "padding-x-16",
-                    "padding-y-20",
-                    "margin-top-12",
-                    "border-radius-8",
-                    "background-color-white",
-                    "dark:background-color-platinum-600",
-                  ])}
-                  onPress={() => {
-                    smartNavigation.pushSmart("Web.Custom", { url });
-                  }}
-                >
-                  <View style={style.flatten(["margin-right-16"])}>
-                    <GlobeIcon
-                      size={24}
-                      color={style.flatten(["color-blue-400"]).color}
-                    />
-                  </View>
-                  <Text
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                    style={style.flatten([
-                      "subtitle3",
-                      "color-platinum-400",
-                      "dark:color-platinum-50",
-                      "flex-1",
-                    ])}
-                  >
-                    {url
-                      .replace("https://", "")
-                      .replace("http://", "")
-                      .replace("www.", "")}
-                  </Text>
-                  <TouchableOpacity
-                    style={style.flatten(["padding-12"])}
-                    onPress={() => {
-                      favoriteWebpageStore.removeUrl(url);
-                    }}
-                  >
-                    <TrashCanIcon
-                      color={
-                        style.flatten(["color-gray-100", "dark:color-gray-200"])
-                          .color
-                      }
-                      size={24}
-                    />
-                  </TouchableOpacity>
-                </RectButton>
-              );
-            })
-        ) : (
-          <View
-            style={style.flatten([
-              "flex-column",
-              "items-center",
-              "margin-top-16",
-              "padding-20",
-            ])}
-          >
-            <EmptyIcon
-              size={72}
+        <View>
+          {isFavorite ? (
+            <ArrowUpIcon
+              size={20}
               color={
-                style.flatten(["color-gray-200", "dark:color-gray-400"]).color
+                style.flatten(["color-platinum-300", "dark:color-platinum-200"])
+                  .color
               }
             />
+          ) : (
+            <ArrowDownIcon
+              size={20}
+              color={
+                style.flatten(["color-platinum-300", "dark:color-platinum-200"])
+                  .color
+              }
+            />
+          )}
+        </View>
+      </RectButton>
 
-            <Text
-              style={style.flatten([
-                "subtitle3",
-                "color-gray-200",
-                "dark:color-gray-400",
-                "margin-top-12",
-              ])}
-            >
-              No Favorites Yet
-            </Text>
-          </View>
-        )}
-      </React.Fragment>
+      {favoriteWebpageStore.urls.length > 0 ? (
+        favoriteWebpageStore.urls
+          .filter((_, index) => (isFavorite ? true : index < 2))
+          .map((url) => {
+            return (
+              <RectButton
+                key={url}
+                style={style.flatten([
+                  "flex-row",
+                  "items-center",
+                  "padding-x-16",
+                  "padding-y-20",
+                  "margin-top-12",
+                  "border-radius-8",
+                  "background-color-white",
+                  "dark:background-color-platinum-600",
+                ])}
+                onPress={() => {
+                  smartNavigation.pushSmart("Web.Custom", { url });
+                }}
+              >
+                <View style={style.flatten(["margin-right-16"])}>
+                  <GlobeIcon
+                    size={24}
+                    color={style.flatten(["color-blue-400"]).color}
+                  />
+                </View>
+                <Text
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={style.flatten([
+                    "subtitle3",
+                    "color-platinum-400",
+                    "dark:color-platinum-50",
+                    "flex-1",
+                  ])}
+                >
+                  {url
+                    .replace("https://", "")
+                    .replace("http://", "")
+                    .replace("www.", "")}
+                </Text>
+                <TouchableOpacity
+                  style={style.flatten(["padding-12"])}
+                  onPress={() => {
+                    favoriteWebpageStore.removeUrl(url);
+                  }}
+                >
+                  <TrashCanIcon
+                    color={
+                      style.flatten(["color-gray-100", "dark:color-gray-200"])
+                        .color
+                    }
+                    size={24}
+                  />
+                </TouchableOpacity>
+              </RectButton>
+            );
+          })
+      ) : (
+        <View
+          style={style.flatten([
+            "flex-column",
+            "items-center",
+            "margin-top-16",
+            "padding-20",
+          ])}
+        >
+          <EmptyIcon
+            size={72}
+            color={
+              style.flatten(["color-gray-200", "dark:color-gray-400"]).color
+            }
+          />
+
+          <Text
+            style={style.flatten([
+              "subtitle3",
+              "color-gray-200",
+              "dark:color-gray-400",
+              "margin-top-12",
+            ])}
+          >
+            No Favorites Yet
+          </Text>
+        </View>
+      )}
     </PageWithScrollViewInBottomTabView>
   );
 });
