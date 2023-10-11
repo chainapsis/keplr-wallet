@@ -20,10 +20,6 @@ import {MoonpaySvg} from '../../components/icon/fiat/moonpay';
 export const BuyModal = () => {
   return (
     <BaseModal
-      screenOptions={{
-        title: '',
-        headerBackTitle: '',
-      }}
       initialRouteName="List"
       screenList={[
         {

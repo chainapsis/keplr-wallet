@@ -77,7 +77,10 @@ interface BaseModalProps {
   }[];
 }
 export const BaseModal = ({
-  screenOptions,
+  screenOptions = {
+    title: '',
+    headerBackTitle: '',
+  },
   initialRouteName,
   screenList,
 }: BaseModalProps) => {

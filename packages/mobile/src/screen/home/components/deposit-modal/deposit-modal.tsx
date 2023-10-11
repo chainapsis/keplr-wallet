@@ -16,10 +16,6 @@ export type DepositModalNav = {
 export const DepositModal = () => {
   return (
     <BaseModal
-      screenOptions={{
-        title: '',
-        headerBackTitle: '',
-      }}
       initialRouteName="List"
       screenList={[
         {routeName: 'List', scene: CopyAddressScene},
