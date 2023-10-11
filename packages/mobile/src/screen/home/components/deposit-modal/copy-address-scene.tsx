@@ -258,7 +258,6 @@ const CopyAddressItem: FunctionComponent<{
         )
       : false;
 
-    //hover 대신 pressIn event로 할 에정
     const [isCopyContainerPress, setIsCopyContainerPress] = useState(false);
     const [isBookmarkPress, setIsBookmarkPress] = useState(false);
 
@@ -276,9 +275,6 @@ const CopyAddressItem: FunctionComponent<{
             onPress={async e => {
               e.preventDefault();
 
-              // await navigator.clipboard.writeText(
-              //   address.ethereumAddress || address.bech32Address,
-              // );
               await Clipboard.setStringAsync(
                 address.ethereumAddress || address.bech32Address,
               );
@@ -286,6 +282,7 @@ const CopyAddressItem: FunctionComponent<{
               setHasCopied(true);
               setBlockInteraction(true);
 
+              //NOTE analytics관련 로직 필요하면 참고해서 추가
               // analyticsStore.logEvent('click_copyAddress_copy', {
               //   chainId: address.chainInfo.chainId,
               //   chainName: address.chainInfo.chainName,

@@ -262,6 +262,9 @@ export const HomeScreen: FunctionComponent = observer(() => {
               size="large"
               color="secondary"
               containerStyle={style.flatten(['flex-1'])}
+              onPress={() => {
+                copyAddressModalRef.current?.present();
+              }}
             />
             <Button
               text="Buy"
