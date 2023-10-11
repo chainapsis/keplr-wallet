@@ -22,6 +22,7 @@ import {SearchTextInput} from '../../components/input/search-text-input';
 import {AvailableTabView} from './available';
 import {ChainInfo} from '@keplr-wallet/types';
 import {StakedTabView} from './staked';
+import {ClaimAll} from './components/claim-all';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -137,6 +138,8 @@ export const HomeScreen: FunctionComponent = observer(() => {
             />
           </Columns>
           <Gutter size={12} />
+          <ClaimAll isNotReady={isNotReady} />
+
           {!isNotReady ? (
             <Stack gutter={12}>
               {tabStatus === 'available' ? (
