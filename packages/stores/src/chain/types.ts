@@ -41,7 +41,7 @@ export interface IChainInfoImpl<C extends ChainInfo = ChainInfo> {
   readonly embedded: C;
   readonly chainId: string;
   readonly chainIdentifier: string;
-  readonly stakeCurrency: Currency;
+  readonly stakeCurrency: Currency | undefined;
   readonly currencies: AppCurrency[];
   readonly alternativeBIP44s: BIP44[] | undefined;
   readonly bech32Config: Bech32Config;

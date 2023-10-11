@@ -54,15 +54,21 @@ export class HugeQueriesStore {
         account.bech32Address
       );
 
-      const currencies = [chainInfo.stakeCurrency, ...chainInfo.currencies];
+      const currencies = [...chainInfo.currencies];
+      if (chainInfo.stakeCurrency) {
+        currencies.push(chainInfo.stakeCurrency);
+      }
       for (const currency of currencies) {
         const key = `${chainInfo.chainIdentifier}/${currency.coinMinimalDenom}`;
         if (!map.has(key)) {
           if (
-            chainInfo.stakeCurrency.coinMinimalDenom ===
+            chainInfo.stakeCurrency?.coinMinimalDenom ===
             currency.coinMinimalDenom
           ) {
-            const balance = queryBalance.stakable.balance;
+            const balance = queryBalance.stakable?.balance;
+            if (!balance) {
+              continue;
+            }
             // If the balance is zero, don't show it.
             // 다시 제로 일때 보여주기 위해서 아래코드를 주석처리함
             // if (balance.toDec().equals(HugeQueriesStore.zeroDec)) {
@@ -183,6 +189,9 @@ export class HugeQueriesStore {
   get stakables(): ViewToken[] {
     const res: ViewToken[] = [];
     for (const chainInfo of this.chainStore.chainInfosInUI) {
+      if (!chainInfo.stakeCurrency) {
+        continue;
+      }
       const key = `${chainInfo.chainIdentifier}/${chainInfo.stakeCurrency.coinMinimalDenom}`;
       const viewToken = this.allKnownBalancesMap.get(key);
       if (viewToken) {
@@ -198,7 +207,8 @@ export class HugeQueriesStore {
     for (const chainInfo of this.chainStore.chainInfosInUI) {
       for (const currency of chainInfo.currencies) {
         if (
-          currency.coinMinimalDenom === chainInfo.stakeCurrency.coinMinimalDenom
+          currency.coinMinimalDenom ===
+          chainInfo.stakeCurrency?.coinMinimalDenom
         ) {
           continue;
         }
@@ -255,6 +265,10 @@ export class HugeQueriesStore {
           account.bech32Address
         );
 
+      if (!queryDelegation.total) {
+        continue;
+      }
+
       res.push({
         chainInfo,
         token: queryDelegation.total,
@@ -288,6 +302,9 @@ export class HugeQueriesStore {
 
       for (const unbonding of queryUnbonding.unbondings) {
         for (const entry of unbonding.entries) {
+          if (!chainInfo.stakeCurrency) {
+            continue;
+          }
           const balance = new CoinPretty(
             chainInfo.stakeCurrency,
             entry.balance

@@ -110,6 +110,13 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
     makeObservable(this);
   }
 
+  protected override canFetch(): boolean {
+    if (!this.chainGetter.getChain(this.chainId).stakeCurrency) {
+      return false;
+    }
+    return super.canFetch();
+  }
+
   @computed
   get validators(): Validator[] {
     if (!this.response) {
@@ -182,6 +189,10 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
 
       const chainInfo = this.chainGetter.getChain(this.chainId);
       const stakeCurrency = chainInfo.stakeCurrency;
+
+      if (!stakeCurrency) {
+        return;
+      }
 
       const power = new Dec(validator.tokens).truncate();
 

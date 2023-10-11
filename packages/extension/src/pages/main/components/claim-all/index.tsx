@@ -143,49 +143,55 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       return state;
     };
 
-    const viewTokens: ViewToken[] = chainStore.chainInfosInUI
-      .map((chainInfo) => {
+    const viewTokens: ViewToken[] = (() => {
+      const res: ViewToken[] = [];
+      for (const chainInfo of chainStore.chainInfosInUI) {
         const chainId = chainInfo.chainId;
         const accountAddress = accountStore.getAccount(chainId).bech32Address;
         const queries = queriesStore.get(chainId);
         const queryRewards =
           queries.cosmos.queryRewards.getQueryBech32Address(accountAddress);
 
-        return {
-          token: queryRewards.stakableReward,
-          chainInfo,
-          isFetching: queryRewards.isFetching,
-          error: queryRewards.error,
-        };
-      })
-      .filter((viewToken) => viewToken.token.toDec().gt(zeroDec))
-      .sort((a, b) => {
-        const aPrice = priceStore.calculatePrice(a.token)?.toDec() ?? zeroDec;
-        const bPrice = priceStore.calculatePrice(b.token)?.toDec() ?? zeroDec;
-
-        if (aPrice.equals(bPrice)) {
-          return 0;
+        if (queryRewards.stakableReward) {
+          res.push({
+            token: queryRewards.stakableReward,
+            chainInfo,
+            isFetching: queryRewards.isFetching,
+            error: queryRewards.error,
+          });
         }
-        return aPrice.gt(bPrice) ? -1 : 1;
-      })
-      .sort((a, b) => {
-        const aHasError =
-          getClaimAllEachState(a.chainInfo.chainId).failedReason != null;
-        const bHasError =
-          getClaimAllEachState(b.chainInfo.chainId).failedReason != null;
+      }
 
-        if (aHasError || bHasError) {
-          if (aHasError && bHasError) {
+      return res
+        .filter((viewToken) => viewToken.token.toDec().gt(zeroDec))
+        .sort((a, b) => {
+          const aPrice = priceStore.calculatePrice(a.token)?.toDec() ?? zeroDec;
+          const bPrice = priceStore.calculatePrice(b.token)?.toDec() ?? zeroDec;
+
+          if (aPrice.equals(bPrice)) {
             return 0;
-          } else if (aHasError) {
-            return 1;
-          } else {
-            return -1;
           }
-        }
+          return aPrice.gt(bPrice) ? -1 : 1;
+        })
+        .sort((a, b) => {
+          const aHasError =
+            getClaimAllEachState(a.chainInfo.chainId).failedReason != null;
+          const bHasError =
+            getClaimAllEachState(b.chainInfo.chainId).failedReason != null;
 
-        return 0;
-      });
+          if (aHasError || bHasError) {
+            if (aHasError && bHasError) {
+              return 0;
+            } else if (aHasError) {
+              return 1;
+            } else {
+              return -1;
+            }
+          }
+
+          return 0;
+        });
+    })();
 
     const totalPrice = (() => {
       const fiatCurrency = priceStore.getFiatCurrency(
@@ -243,7 +249,9 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         );
 
         const validatorAddresses =
-          queryRewards.getDescendingPendingRewardValidatorAddresses(8);
+          queryRewards.getDescendingPendingRewardValidatorAddresses(
+            account.isNanoLedger ? 5 : 8
+          );
 
         if (validatorAddresses.length === 0) {
           continue;
@@ -261,7 +269,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
           // (Normally, user has stake currency because it is used for staking)
           const feeCurrency = chainInfo.feeCurrencies.find(
             (cur) =>
-              cur.coinMinimalDenom === chainInfo.stakeCurrency.coinMinimalDenom
+              cur.coinMinimalDenom === chainInfo.stakeCurrency?.coinMinimalDenom
           );
           if (feeCurrency) {
             try {
@@ -337,6 +345,9 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
               }
 
               const stakableReward = queryRewards.stakableReward;
+              if (!stakableReward) {
+                return;
+              }
               if (
                 new Dec(stakableReward.toCoin().amount).lte(new Dec(fee.amount))
               ) {
@@ -653,7 +664,9 @@ const ClaimTokenItem: FunctionComponent<{
     );
 
     const validatorAddresses =
-      queryRewards.getDescendingPendingRewardValidatorAddresses(8);
+      queryRewards.getDescendingPendingRewardValidatorAddresses(
+        account.isNanoLedger ? 5 : 8
+      );
 
     if (validatorAddresses.length === 0) {
       return;

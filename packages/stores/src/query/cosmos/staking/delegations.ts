@@ -31,12 +31,19 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delega
 
   protected override canFetch(): boolean {
     // If bech32 address is empty, it will always fail, so don't need to fetch it.
-    return this.bech32Address.length > 0;
+    return (
+      this.bech32Address.length > 0 ||
+      this.chainGetter.getChain(this.chainId).stakeCurrency != null
+    );
   }
 
   @computed
-  get total(): CoinPretty {
+  get total(): CoinPretty | undefined {
     const stakeCurrency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+
+    if (!stakeCurrency) {
+      return;
+    }
 
     if (!this.response) {
       return new CoinPretty(stakeCurrency, new Int(0)).ready(false);
@@ -63,6 +70,10 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delega
     }
 
     const stakeCurrency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+
+    if (!stakeCurrency) {
+      return [];
+    }
 
     const result = [];
 
@@ -92,12 +103,16 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delega
   }
 
   readonly getDelegationTo = computedFn(
-    (validatorAddress: string): CoinPretty => {
+    (validatorAddress: string): CoinPretty | undefined => {
       const delegations = this.delegations;
 
       const stakeCurrency = this.chainGetter.getChain(
         this.chainId
       ).stakeCurrency;
+
+      if (!stakeCurrency) {
+        return;
+      }
 
       if (!this.response) {
         return new CoinPretty(stakeCurrency, new Int(0)).ready(false);

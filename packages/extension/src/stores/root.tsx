@@ -11,7 +11,6 @@ import {
 } from "../config.ui";
 import {
   AccountStore,
-  ChainSuggestStore,
   CoinGeckoPriceStore,
   CosmosAccount,
   CosmosQueries,
@@ -21,20 +20,23 @@ import {
   getKeplrFromWindow,
   IBCChannelStore,
   IBCCurrencyRegistrar,
-  InteractionStore,
-  KeyRingStore,
-  PermissionStore,
   QueriesStore,
   SecretAccount,
   SecretQueries,
+  ICNSQueries,
+  AgoricQueries,
+} from "@keplr-wallet/stores";
+import {
+  ChainSuggestStore,
+  InteractionStore,
+  KeyRingStore,
+  PermissionStore,
   SignInteractionStore,
   TokensStore,
   ICNSInteractionStore,
-  ICNSQueries,
   PermissionManagerStore,
   SignEthereumInteractionStore,
-  AgoricQueries,
-} from "@keplr-wallet/stores";
+} from "@keplr-wallet/stores-core";
 import {
   KeplrETCQueries,
   GravityBridgeCurrencyRegistrar,

@@ -9,7 +9,7 @@ import {
   GetRecentSendHistoriesMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
-import { KeyRingStore } from "@keplr-wallet/stores";
+import { KeyRingStore } from "@keplr-wallet/stores-core";
 
 export interface AddressBookData {
   name: string;
