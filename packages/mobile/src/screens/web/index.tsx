@@ -1,32 +1,8 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { PageWithScrollViewInBottomTabView } from "../../components/page";
-import { Platform, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { useStyle } from "../../styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LabelSelector } from "./components/label-selector";
-import {
-  DaoDaoItem,
-  InjectiveItem,
-  Item,
-  MarsItem,
-  OsmosisItem,
-  RegenItem,
-  StargazeItem,
-  StrideItem,
-  UmeeItem,
-  WYNDDaoItem,
-  PStakeItem,
-  StreamSwapItem,
-  IBCXItem,
-  IONDaoItem,
-  CalcFiItem,
-  DexterItem,
-  LevanaItem,
-  QuasarItem,
-  LikerLandItem,
-  KreadItem,
-} from "./constants";
-import { WebpageImageButton } from "./common";
 import { TextInput } from "../../components/input";
 import { useSmartNavigation } from "../../navigation";
 import { observer } from "mobx-react-lite";
@@ -35,66 +11,6 @@ import { GlobeIcon, TrashCanIcon } from "../../components/icon";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Svg, { Path } from "react-native-svg";
 import { RectButton } from "../../components/rect-button";
-
-const WebpagesPerLabel: {
-  label: string;
-  items: Item[];
-}[] = [
-  {
-    label: "All",
-    items: [
-      OsmosisItem,
-      StargazeItem,
-      WYNDDaoItem,
-      DaoDaoItem,
-      InjectiveItem,
-      MarsItem,
-      UmeeItem,
-      StrideItem,
-      PStakeItem,
-      RegenItem,
-      StreamSwapItem,
-      IBCXItem,
-      IONDaoItem,
-      CalcFiItem,
-      DexterItem,
-      LevanaItem,
-      QuasarItem,
-      LikerLandItem,
-      KreadItem,
-    ],
-  },
-  {
-    label: "Defi",
-    items: [
-      OsmosisItem,
-      WYNDDaoItem,
-      InjectiveItem,
-      MarsItem,
-      UmeeItem,
-      StrideItem,
-      PStakeItem,
-      StreamSwapItem,
-      IBCXItem,
-      CalcFiItem,
-      DexterItem,
-      LevanaItem,
-      QuasarItem,
-    ],
-  },
-  {
-    label: "NFT",
-    items: [StargazeItem, LikerLandItem, KreadItem],
-  },
-  {
-    label: "DAO",
-    items: [DaoDaoItem, IONDaoItem],
-  },
-  {
-    label: "Refi",
-    items: [RegenItem],
-  },
-];
 
 const validURL = (uri: string) => {
   const pattern = new RegExp(
@@ -158,17 +74,10 @@ export const WebScreen: FunctionComponent = observer(() => {
   const style = useStyle();
   const { favoriteWebpageStore } = useStore();
 
+  const dAppPageUrl = "https://explore.keplr.app";
   const safeAreaInsets = useSafeAreaInsets();
 
-  const [selectedLabelKey, setSelectedLabelKey] = useState(
-    WebpagesPerLabel[0].label
-  );
-
   const smartNavigation = useSmartNavigation();
-
-  const webpages = useMemo(() => {
-    return WebpagesPerLabel.find((label) => label.label === selectedLabelKey)!;
-  }, [selectedLabelKey]);
 
   const [uri, setURI] = useState("");
   const [uriError, setURIError] = useState("");
@@ -193,6 +102,9 @@ export const WebScreen: FunctionComponent = observer(() => {
         value={uri}
         error={uriError}
         placeholder="Search or type URL"
+        placeholderTextColor={
+          style.flatten(["color-gray-200", "dark:color-platinum-300"]).color
+        }
         onChangeText={(text) => {
           setURI(text);
           setURIError("");
@@ -210,6 +122,20 @@ export const WebScreen: FunctionComponent = observer(() => {
         autoCapitalize="none"
         autoCompleteType="off"
       />
+
+      <RectButton
+        key={dAppPageUrl}
+        style={style.flatten(["margin-bottom-12", "border-radius-8"])}
+        onPress={() => {
+          smartNavigation.pushSmart("Web.Custom", { url: dAppPageUrl });
+        }}
+      >
+        <Image
+          source={require("../../assets/image/webpage/dapp-banner.png")}
+          resizeMode="contain"
+          style={style.flatten(["width-full", "height-80"])}
+        />
+      </RectButton>
 
       <React.Fragment>
         <RectButton
@@ -278,9 +204,8 @@ export const WebScreen: FunctionComponent = observer(() => {
                   style={style.flatten([
                     "flex-row",
                     "items-center",
-                    "padding-x-20",
-                    "padding-top-16",
-                    "padding-bottom-20",
+                    "padding-x-16",
+                    "padding-y-20",
                     "margin-top-12",
                     "border-radius-8",
                     "background-color-white",
@@ -357,49 +282,6 @@ export const WebScreen: FunctionComponent = observer(() => {
           </View>
         )}
       </React.Fragment>
-
-      {Platform.OS !== "ios" ? (
-        <React.Fragment>
-          <Text
-            style={style.flatten([
-              "h1",
-              "color-text-high",
-              "margin-top-38",
-              "margin-bottom-20",
-            ])}
-          >
-            Discover Apps
-          </Text>
-          <LabelSelector
-            selectedKey={selectedLabelKey}
-            labels={WebpagesPerLabel.map((label) => {
-              return {
-                key: label.label,
-                label: label.label,
-              };
-            })}
-            onLabelSelect={setSelectedLabelKey}
-          />
-          {webpages.items.map((item) => {
-            return <item.component key={item.key} />;
-          })}
-          <WebpageImageButton
-            overrideInner={
-              <View style={style.flatten(["flex-1", "items-center"])}>
-                <Text
-                  style={style.flatten([
-                    "h4",
-                    "color-gray-200",
-                    "dark:color-platinum-300",
-                  ])}
-                >
-                  Coming soon
-                </Text>
-              </View>
-            }
-          />
-        </React.Fragment>
-      ) : null}
     </PageWithScrollViewInBottomTabView>
   );
 });
