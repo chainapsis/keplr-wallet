@@ -10,7 +10,7 @@ import {useStore} from '../../../../stores';
 import {Box} from '../../../../components/box';
 import {useStyle} from '../../../../styles';
 import {XAxis, YAxis} from '../../../../components/axis';
-import {FlatList, Image, Pressable, Text, View} from 'react-native';
+import {Image, Pressable, Text, View} from 'react-native';
 import {Gutter} from '../../../../components/gutter';
 import {TextInput} from '../../../../components/input';
 import {
@@ -18,7 +18,7 @@ import {
   SearchIcon,
   StarIcon,
 } from '../../../../components/icon';
-import {useBottomSheet} from '@gorhom/bottom-sheet';
+import {BottomSheetScrollView, useBottomSheet} from '@gorhom/bottom-sheet';
 import {BaseModalHeader} from '../../../../components/modal';
 import {ChainImageFallback} from '../../../../components/image';
 import {CheckToggleIcon} from '../../../../components/icon/check-toggle';
@@ -155,40 +155,39 @@ export const CopyAddressScene: FunctionComponent = observer(() => {
       </Box>
 
       <Gutter size={12} />
+      <BottomSheetScrollView>
+        {addresses.length === 0 ? (
+          <Box
+            alignX="center"
+            alignY="center"
+            paddingX={26}
+            paddingTop={49.6}
+            paddingBottom={51.2}>
+            <Image
+              source={require('../../../../public/assets/img/copy-address-no-search-result.png')}
+              style={{
+                width: 140,
+                height: 160,
+              }}
+              alt="copy-address-no-search-result-image"
+            />
+            <Gutter size={12} />
 
-      {addresses.length === 0 ? (
-        <Box
-          alignX="center"
-          alignY="center"
-          paddingX={26}
-          paddingTop={49.6}
-          paddingBottom={51.2}>
-          <Image
-            source={require('../../../../public/assets/img/copy-address-no-search-result.png')}
-            style={{
-              width: 140,
-              height: 160,
-            }}
-            alt="copy-address-no-search-result-image"
-          />
-          <Gutter size={12} />
+            <Text
+              style={style.flatten([
+                'subtitle3',
+                'color-gray-300',
+                'text-center',
+              ])}>
+              To use an address on certain chain, you may need to first visit
+              the "Manage Chain Visibility" in the side menu and make the chain
+              visible on your wallet.
+            </Text>
+          </Box>
+        ) : null}
 
-          <Text
-            style={style.flatten([
-              'subtitle3',
-              'color-gray-300',
-              'text-center',
-            ])}>
-            To use an address on certain chain, you may need to first visit the
-            \"Manage Chain Visibility\" in the side menu and make the chain
-            visible on your wallet.
-          </Text>
-        </Box>
-      ) : null}
-
-      <Box paddingX={12}>
-        <FlatList
-          data={addresses
+        <Box paddingX={12}>
+          {addresses
             .map(address => {
               // CopyAddressItem 컴포넌트는 ethereumAddress가 있냐 없냐에 따라서 다르게 동작한다.
               // ethereumAddress가 있으면 두개의 CopyAddressItem 컴포넌트를 각각 렌더링하기 위해서
@@ -207,22 +206,24 @@ export const CopyAddressScene: FunctionComponent = observer(() => {
 
               return address;
             })
-            .flat()}
-          keyExtractor={address =>
-            address.chainInfo.chainIdentifier +
-            address.bech32Address +
-            (address.ethereumAddress || '')
-          }
-          renderItem={({item}) => (
-            <CopyAddressItem
-              address={item}
-              blockInteraction={blockInteraction}
-              setBlockInteraction={setBlockInteraction}
-              setSortPriorities={setSortPriorities}
-            />
-          )}
-        />
-      </Box>
+            .flat()
+            .map(address => {
+              return (
+                <CopyAddressItem
+                  key={
+                    address.chainInfo.chainIdentifier +
+                    address.bech32Address +
+                    (address.ethereumAddress || '')
+                  }
+                  address={address}
+                  blockInteraction={blockInteraction}
+                  setBlockInteraction={setBlockInteraction}
+                  setSortPriorities={setSortPriorities}
+                />
+              );
+            })}
+        </Box>
+      </BottomSheetScrollView>
     </Box>
   );
 });
