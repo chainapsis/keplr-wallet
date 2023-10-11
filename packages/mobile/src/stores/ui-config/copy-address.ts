@@ -96,29 +96,34 @@ export class CopyAddressConfig {
     },
   );
 
+  //NOTE mobx가 strict-mode일때는 action내에서만 상태를 변경해야 되므로 일단 runInAction처리를 함
   bookmarkChain(vaultId: string, chainId: string): void {
-    const chainIdentifiers = this.vaultToConfigMap.get(vaultId);
-    if (!chainIdentifiers) {
-      this.vaultToConfigMap.set(vaultId, [
-        ChainIdHelper.parse(chainId).identifier,
-      ]);
-      return;
-    }
-    if (!chainIdentifiers.includes(ChainIdHelper.parse(chainId).identifier)) {
-      chainIdentifiers.push(ChainIdHelper.parse(chainId).identifier);
-    }
+    runInAction(() => {
+      const chainIdentifiers = this.vaultToConfigMap.get(vaultId);
+      if (!chainIdentifiers) {
+        this.vaultToConfigMap.set(vaultId, [
+          ChainIdHelper.parse(chainId).identifier,
+        ]);
+        return;
+      }
+      if (!chainIdentifiers.includes(ChainIdHelper.parse(chainId).identifier)) {
+        chainIdentifiers.push(ChainIdHelper.parse(chainId).identifier);
+      }
+    });
   }
 
   unbookmarkChain(vaultId: string, chainId: string): void {
-    const chainIdentifiers = this.vaultToConfigMap.get(vaultId);
-    if (!chainIdentifiers) {
-      return;
-    }
-    const index = chainIdentifiers.indexOf(
-      ChainIdHelper.parse(chainId).identifier,
-    );
-    if (index >= 0) {
-      chainIdentifiers.splice(index, 1);
-    }
+    runInAction(() => {
+      const chainIdentifiers = this.vaultToConfigMap.get(vaultId);
+      if (!chainIdentifiers) {
+        return;
+      }
+      const index = chainIdentifiers.indexOf(
+        ChainIdHelper.parse(chainId).identifier,
+      );
+      if (index >= 0) {
+        chainIdentifiers.splice(index, 1);
+      }
+    });
   }
 }
