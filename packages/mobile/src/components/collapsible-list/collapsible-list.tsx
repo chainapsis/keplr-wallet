@@ -53,6 +53,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
         <Box>
           <Gutter size={12} />
           <TextButton
+            containerStyle={style.flatten(['padding-y-12'])}
             text={
               isCollapsed ? `View ${hidden.length} more tokens` : 'Collapse'
             }
@@ -73,6 +74,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
               setIsCollapsed(!isCollapsed);
             }}
           />
+          <Gutter size={12} />
         </Box>
       ) : null}
     </Stack>
