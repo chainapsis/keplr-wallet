@@ -94,7 +94,7 @@ export const PageWithScrollView = forwardRef<
           {...restProps}
         />
         <View
-          style={style.flatten(['absolute', 'width-full', 'height-full'])}
+          style={style.flatten(['absolute-fill', 'width-full', 'height-full'])}
           pointerEvents="box-none">
           {fixed}
         </View>

@@ -15,7 +15,7 @@ export interface BoxProps {
   color?: string;
   backgroundColor?: string;
   borderRadius?: AnimatableNumericValue;
-  borderWidth?: string;
+  borderWidth?: number;
   borderColor?: string;
   padding?: DimensionValue;
   paddingX?: DimensionValue;

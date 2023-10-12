@@ -8,7 +8,7 @@ import {Box} from '../../components/box';
 import {ChainIdHelper} from '@keplr-wallet/cosmos';
 import {EmptyView} from '../../components/empty-view';
 import {YAxis} from '../../components/axis';
-import {Image, Pressable, Text} from 'react-native';
+import {Pressable, Text} from 'react-native';
 import {MainEmptyView} from './components/empty-view';
 import {useStyle} from '../../styles';
 import {TokenItem, TokenTitleView} from './components/token';
@@ -19,6 +19,7 @@ import {TokenFoundModal} from './components/token-found-modal';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {LookingForChains} from './components/looking-for-chains';
 import {Gutter} from '../../components/gutter';
+import FastImage from 'react-native-fast-image';
 
 const zeroDec = new Dec(0);
 
@@ -239,10 +240,9 @@ export const AvailableTabView: FunctionComponent<{
           ) : isFirstTime ? (
             <MainEmptyView
               image={
-                <Image
+                <FastImage
                   style={{width: 100, height: 100}}
                   source={require('../../public/assets/img/main-empty-balance.png')}
-                  alt="empty balance image"
                 />
               }
               paragraph="Gear up yourself by topping up your wallet!"

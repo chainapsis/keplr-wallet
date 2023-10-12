@@ -18,6 +18,8 @@ import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 const ThemeStatusBar: FunctionComponent = () => {
   const style = useStyle();
 
+  style.setTheme('dark');
+
   return (
     <StatusBar
       translucent={true}
