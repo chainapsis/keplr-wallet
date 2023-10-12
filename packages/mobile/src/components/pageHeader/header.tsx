@@ -1,6 +1,10 @@
 import React, {FunctionComponent, PropsWithChildren} from 'react';
 import {ColorPalette, useStyle} from '../../styles';
-import {DrawerActions, useNavigation} from '@react-navigation/native';
+import {
+  DrawerActions,
+  StackActions,
+  useNavigation,
+} from '@react-navigation/native';
 import {Pressable, StyleSheet, Text} from 'react-native';
 import {MenuIcon, QRScanIcon} from '../icon';
 import {observer} from 'mobx-react-lite';
@@ -10,6 +14,8 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {HeaderBackButtonIcon} from './icon/back';
 import {HeaderBackButtonProps} from '@react-navigation/native-stack/lib/typescript/src/types';
 import {Column, Columns} from '../column';
+import {ArrowDownFillIcon} from '../icon/arrow-donw-fill';
+import {IconButton} from '../icon-button';
 
 const HomeScreenHeaderLeft: FunctionComponent = () => {
   const style = useStyle();
@@ -46,6 +52,7 @@ export const HomeScreenHeader = observer(() => {
   const {keyRingStore} = useStore();
   const style = useStyle();
   const insect = useSafeAreaInsets();
+  const navigation = useNavigation();
 
   return (
     <Box
@@ -64,7 +71,7 @@ export const HomeScreenHeader = observer(() => {
         <Columns sum={2}>
           <HomeScreenHeaderLeft />
           <Column weight={1} />
-          <Box>
+          <Columns sum={1} alignY="center">
             <Text
               numberOfLines={1}
               ellipsizeMode="tail"
@@ -72,14 +79,26 @@ export const HomeScreenHeader = observer(() => {
                 style.flatten([
                   'color-white',
                   'h4',
-                  'width-160',
+                  'max-width-160',
                   'overflow-scroll',
                   'text-center',
                 ]),
               ])}>
               {keyRingStore.selectedKeyInfo?.name || 'Keplr Account'}
             </Text>
-          </Box>
+            <IconButton
+              hasRipple={true}
+              icon={
+                <ArrowDownFillIcon
+                  size={20}
+                  color={style.get('color-gray-200').color}
+                />
+              }
+              onPress={() => {
+                navigation.dispatch(StackActions.push('SelectWallet'));
+              }}
+            />
+          </Columns>
           <Column weight={1} />
 
           <HomeScreenHeaderRight />
