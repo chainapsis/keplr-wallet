@@ -1,5 +1,6 @@
 import React, {
   FunctionComponent,
+  PropsWithChildren,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -16,7 +17,7 @@ import SimpleBar from "simplebar-react";
 
 const AnimatedSimpleBar = animated(SimpleBar);
 
-export const Modal: FunctionComponent<ModalProps> = ({
+export const Modal: FunctionComponent<PropsWithChildren<ModalProps>> = ({
   isOpen,
   close,
   align,
@@ -93,14 +94,16 @@ export const Modal: FunctionComponent<ModalProps> = ({
   );
 };
 
-const ModalChild: FunctionComponent<{
-  isOpen: boolean;
-  close: () => void;
-  align: "center" | "bottom" | "left";
+const ModalChild: FunctionComponent<
+  PropsWithChildren<{
+    isOpen: boolean;
+    close: () => void;
+    align: "center" | "bottom" | "left";
 
-  onCloseTransitionEnd: () => void;
-  forceNotUseSimplebar?: boolean;
-}> = ({
+    onCloseTransitionEnd: () => void;
+    forceNotUseSimplebar?: boolean;
+  }>
+> = ({
   children,
   align,
   isOpen,

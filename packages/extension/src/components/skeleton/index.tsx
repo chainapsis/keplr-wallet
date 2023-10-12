@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, PropsWithChildren } from "react";
 import { ColorPalette } from "../../styles";
 import { Box } from "../box";
 import { ButtonRadius } from "../button";
@@ -16,7 +16,7 @@ export interface SkeletonProps {
   verticalBleed?: string;
 }
 
-export const Skeleton: FunctionComponent<SkeletonProps> = ({
+export const Skeleton: FunctionComponent<PropsWithChildren<SkeletonProps>> = ({
   isNotReady,
   type = "default",
   layer = 0,

@@ -8,6 +8,7 @@ import React, {
   useCallback,
   useMemo,
   Ref,
+  PropsWithChildren,
 } from "react";
 import { VerticalResizeTransition } from "../../vertical-size";
 import { animated, SpringValue, to, useSpringValue } from "@react-spring/web";
@@ -384,20 +385,22 @@ export const SceneTransitionBaseInner: FunctionComponent<
   );
 };
 
-const SceneComponent: FunctionComponent<{
-  top: boolean;
-  animTop: SpringValue<boolean>;
-  index: number;
-  initialX: number;
-  targetX: number;
-  initialOpacity: number;
-  targetOpacity: number;
-  onAnimEnd?: () => void;
-  transitionAlign?: "top" | "bottom" | "center";
-  transitionMode?: "x-axis" | "opacity";
+const SceneComponent: FunctionComponent<
+  PropsWithChildren<{
+    top: boolean;
+    animTop: SpringValue<boolean>;
+    index: number;
+    initialX: number;
+    targetX: number;
+    initialOpacity: number;
+    targetOpacity: number;
+    onAnimEnd?: () => void;
+    transitionAlign?: "top" | "bottom" | "center";
+    transitionMode?: "x-axis" | "opacity";
 
-  sceneWidth?: string | SpringValue<string>;
-}> = ({
+    sceneWidth?: string | SpringValue<string>;
+  }>
+> = ({
   children,
   animTop,
   index,

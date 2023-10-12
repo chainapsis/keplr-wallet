@@ -1,5 +1,6 @@
 import React, {
   FunctionComponent,
+  PropsWithChildren,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -21,11 +22,13 @@ import {
 import { defaultSpringConfig } from "../../../styles/spring";
 
 export const VerticalCollapseTransition: FunctionComponent<
-  VerticalCollapseTransitionProps & {
-    onTransitionEnd?: () => void;
+  PropsWithChildren<
+    VerticalCollapseTransitionProps & {
+      onTransitionEnd?: () => void;
 
-    onResize?: (height: number) => void;
-  }
+      onResize?: (height: number) => void;
+    }
+  >
 > = ({
   children,
   collapsed,

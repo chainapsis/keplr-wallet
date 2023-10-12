@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, PropsWithChildren } from "react";
 import { XAxisProps } from "./types";
 import styled from "styled-components";
 
@@ -20,7 +20,7 @@ const Styles = {
   `,
 };
 
-export const XAxis: FunctionComponent<XAxisProps> = ({
+export const XAxis: FunctionComponent<PropsWithChildren<XAxisProps>> = ({
   children,
   ...props
 }) => {

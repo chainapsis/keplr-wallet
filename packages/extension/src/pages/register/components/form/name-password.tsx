@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useRef } from "react";
+import React, { FunctionComponent, PropsWithChildren, useRef } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { TextInput } from "../../../../components/input";
 import { Gutter } from "../../../../components/gutter";
@@ -30,10 +30,12 @@ export const useFormNamePassword = () => {
 };
 
 export const FormNamePassword: FunctionComponent<
-  UseFormReturn<FormDataNamePassword> & {
-    appendButton?: React.ReactNode;
-    autoFocus?: boolean;
-  }
+  PropsWithChildren<
+    UseFormReturn<FormDataNamePassword> & {
+      appendButton?: React.ReactNode;
+      autoFocus?: boolean;
+    }
+  >
 > = observer(
   ({ children, register, formState, getValues, appendButton, autoFocus }) => {
     const { keyRingStore } = useStore();

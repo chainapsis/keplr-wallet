@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, PropsWithChildren } from "react";
 import { YAxisProps } from "./types";
 import styled from "styled-components";
 
@@ -19,7 +19,7 @@ const Styles = {
   `,
 };
 
-export const YAxis: FunctionComponent<YAxisProps> = ({
+export const YAxis: FunctionComponent<PropsWithChildren<YAxisProps>> = ({
   children,
   ...props
 }) => {

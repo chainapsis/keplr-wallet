@@ -1,5 +1,6 @@
 import React, {
   FunctionComponent,
+  PropsWithChildren,
   useLayoutEffect,
   useMemo,
   useState,
@@ -77,10 +78,12 @@ export class SceneElementDescendantRegistry extends DescendantRegistryBase {
   }
 }
 
-export const SceneDescendantRegistryWrap: FunctionComponent<{
-  parentRegistry: SceneDescendantRegistry;
-  sceneId: string;
-}> = ({ sceneId, parentRegistry, children }) => {
+export const SceneDescendantRegistryWrap: FunctionComponent<
+  PropsWithChildren<{
+    parentRegistry: SceneDescendantRegistry;
+    sceneId: string;
+  }>
+> = ({ sceneId, parentRegistry, children }) => {
   const [registry] = useState(
     () => new SceneElementDescendantRegistry(sceneId)
   );

@@ -2,6 +2,7 @@ import React, {
   Component,
   ErrorInfo,
   FunctionComponent,
+  PropsWithChildren,
   useState,
 } from "react";
 import { Box } from "./components/box";
@@ -21,12 +22,7 @@ interface State {
   hasError: boolean;
 }
 
-export class ErrorBoundary extends Component<
-  {
-    // noop
-  },
-  State
-> {
+export class ErrorBoundary extends Component<PropsWithChildren, State> {
   public override state: State = {
     hasError: false,
   };

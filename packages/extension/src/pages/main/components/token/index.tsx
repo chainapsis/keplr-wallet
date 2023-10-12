@@ -1,5 +1,6 @@
 import React, {
   FunctionComponent,
+  PropsWithChildren,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -497,9 +498,11 @@ setTimeout(() => {
   initialOnLoad = true;
 }, 1000);
 
-const DelayedLoadingRender: FunctionComponent<{
-  isFetching: boolean;
-}> = ({ isFetching, children }) => {
+const DelayedLoadingRender: FunctionComponent<
+  PropsWithChildren<{
+    isFetching: boolean;
+  }>
+> = ({ isFetching, children }) => {
   const [show, setShow] = useState(false);
 
   useLayoutEffect(() => {
