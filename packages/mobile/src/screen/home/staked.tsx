@@ -7,16 +7,12 @@ import {Stack} from '../../components/stack';
 import {useStore} from '../../stores';
 import {TokenItem, TokenTitleView} from './components/token';
 import {MainEmptyView} from './components/empty-view';
-import {TextButton} from '../../components/text-button';
-import {ArrowRightSolidIcon} from '../../components/icon/arrow-right-solid';
-import {useStyle} from '../../styles';
 import FastImage from 'react-native-fast-image';
 import {useIntl} from 'react-intl';
 
 export const StakedTabView: FunctionComponent = observer(() => {
   const {hugeQueriesStore} = useStore();
   const intl = useIntl();
-  const style = useStyle();
   const delegations: ViewToken[] = useMemo(
     () =>
       hugeQueriesStore.delegations.filter(token => {
@@ -154,24 +150,6 @@ export const StakedTabView: FunctionComponent = observer(() => {
           paragraph={intl.formatMessage({
             id: 'page.main.staked.empty-view-paragraph',
           })}
-          button={
-            <TextButton
-              text={intl.formatMessage({
-                id: 'page.main.staked.go-to-dashboard-button',
-              })}
-              rightIcon={
-                <ArrowRightSolidIcon
-                  size={18}
-                  color={style.get('color-gray-10').color}
-                />
-              }
-              onPress={async () => {
-                await browser.tabs.create({
-                  url: 'https://wallet.keplr.app/?modal=staking',
-                });
-              }}
-            />
-          }
         />
       ) : null}
     </React.Fragment>
