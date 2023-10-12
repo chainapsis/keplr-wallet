@@ -61,6 +61,7 @@ const ErrorBoundaryView: FunctionComponent = observer(() => {
         "store_queries/",
         "store_prices/",
         "store_ibc_curreny_registrar/",
+        "store_lsm_currency_registrar/",
         "store_gravity_bridge_currency_registrar/",
         "store_axelar_evm_bridge_currency_registrar/",
       ];

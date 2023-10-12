@@ -146,16 +146,29 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
 
   readonly getValidatorThumbnail = computedFn(
     (operatorAddress: string): string => {
+      const query = this.getQueryValidatorThumbnail(operatorAddress);
+      if (!query) {
+        return "";
+      }
+
+      return query.thumbnail;
+    }
+  );
+
+  readonly getQueryValidatorThumbnail = computedFn(
+    (
+      operatorAddress: string
+    ): ObservableQueryValidatorThumbnail | undefined => {
       const validators = this.validators;
       const validator = validators.find(
         (val) => val.operator_address === operatorAddress
       );
       if (!validator) {
-        return "";
+        return;
       }
 
       if (!validator.description.identity) {
-        return "";
+        return;
       }
 
       const identity = validator.description.identity;
@@ -170,7 +183,7 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
       }
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      return this.thumbnailMap.get(identity)!.thumbnail;
+      return this.thumbnailMap.get(identity)!;
     }
   );
 
