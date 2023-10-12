@@ -60,6 +60,7 @@ export const RegisterNavigation: FunctionComponent = () => {
   );
 };
 
+const DrawerContentFunc = () => <DrawerContent />;
 export const MainTabNavigationWithDrawer: FunctionComponent = () => {
   const style = useStyle();
 
@@ -75,12 +76,13 @@ export const MainTabNavigationWithDrawer: FunctionComponent = () => {
         swipeEnabled: focused.name === 'Home',
         headerShown: false,
       }}
-      drawerContent={() => <DrawerContent />}>
+      drawerContent={DrawerContentFunc}>
       <Drawer.Screen name="MainTab" component={MainTabNavigation} />
     </Drawer.Navigator>
   );
 };
 
+const HomeScreenHeaderFunc = () => <HomeScreenHeader />;
 export const MainTabNavigation: FunctionComponent = () => {
   const style = useStyle();
 
@@ -127,7 +129,7 @@ export const MainTabNavigation: FunctionComponent = () => {
       <Tab.Screen
         name="Home"
         options={{
-          header: () => <HomeScreenHeader />,
+          header: HomeScreenHeaderFunc,
         }}
         component={HomeScreen}
       />
@@ -167,6 +169,7 @@ const SettingNavigation = () => {
 export const AppNavigation: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
   const style = useStyle();
+  style.setTheme('dark');
 
   if (keyRingStore.status === 'not-loaded') {
     return null;

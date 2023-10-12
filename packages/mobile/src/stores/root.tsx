@@ -32,6 +32,8 @@ import {
   FiatCurrencies,
 } from '@keplr-wallet/extension/src/config.ui';
 import {FiatCurrency} from '@keplr-wallet/types';
+import {UIConfigStore} from './ui-config';
+import {ICNSInfo} from '../utils/config.ui';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
@@ -59,6 +61,7 @@ export class RootStore {
     ]
   >;
   public readonly accountStore: AccountStore<[CosmosAccount, SecretAccount]>;
+  public readonly uiConfigStore: UIConfigStore;
 
   public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
 
@@ -288,6 +291,18 @@ export class RootStore {
       this.chainStore,
       this.accountStore,
       this.queriesStore,
+    );
+
+    this.uiConfigStore = new UIConfigStore(
+      {
+        kvStore: new AsyncKVStore('store_ui_config'),
+        addressBookKVStore: new AsyncKVStore('address-book'),
+      },
+      new RNMessageRequesterInternal(),
+      this.chainStore,
+      this.keyRingStore,
+      this.priceStore,
+      ICNSInfo,
     );
 
     router.listen(APP_PORT);

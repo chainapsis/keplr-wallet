@@ -78,7 +78,10 @@ interface BaseModalProps {
   }[];
 }
 export const BaseModal = ({
-  screenOptions,
+  screenOptions = {
+    title: '',
+    headerBackTitle: '',
+  },
   initialRouteName,
   screenList,
 }: BaseModalProps) => {
@@ -87,10 +90,7 @@ export const BaseModal = ({
     <NavigationContainer independent={true}>
       <BottomSheetStack.Navigator
         screenOptions={{
-          contentStyle: style.flatten([
-            'background-color-gray-600',
-            'light:background-color-gray-600',
-          ]),
+          contentStyle: style.flatten(['background-color-gray-600']),
           ...screenOptions,
         }}
         initialRouteName={initialRouteName}>
