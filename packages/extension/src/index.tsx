@@ -129,6 +129,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     accountStore,
     keyRingStore,
     ibcCurrencyRegistrar,
+    lsmCurrencyRegistrar,
     ibcChannelStore,
     gravityBridgeCurrencyRegistrar,
     axelarEVMBridgeCurrencyRegistrar,
@@ -195,6 +196,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     }
 
     if (!ibcCurrencyRegistrar.isInitialized) {
+      return false;
+    }
+
+    if (!lsmCurrencyRegistrar.isInitialized) {
       return false;
     }
 
