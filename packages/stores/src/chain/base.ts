@@ -372,4 +372,9 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
   registerCurrencyRegistrar(registrar: CurrencyRegistrar): void {
     this.currencyRegistrars.push(registrar);
   }
+
+  isEvmChain(chainId: string): boolean {
+    const chainInfo = this.getChain(chainId);
+    return chainInfo.evm !== undefined;
+  }
 }

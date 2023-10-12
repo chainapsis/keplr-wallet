@@ -50,7 +50,7 @@ export class HugeQueriesStore {
         continue;
       }
       const queries = this.queriesStore.get(chainInfo.chainId);
-      const queryBalance = !!chainInfo.evm
+      const queryBalance = this.chainStore.isEvmChain(chainInfo.chainId)
         ? queries.queryBalances.getQueryEthereumHexAddress(
             account.ethereumHexAddress
           )
