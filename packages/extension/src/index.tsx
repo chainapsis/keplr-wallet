@@ -233,6 +233,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     chainStore.chainInfos,
     isURLUnlockPage,
     ibcCurrencyRegistrar.isInitialized,
+    lsmCurrencyRegistrar.isInitialized,
     priceStore.isInitialized,
     uiConfigStore.isInitialized,
     uiConfigStore.isDeveloper,
