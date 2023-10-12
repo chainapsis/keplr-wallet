@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import { TextInput } from "../text-input";
 import { observer } from "mobx-react-lite";
 import {
@@ -42,8 +42,9 @@ function numOfCharacter(str: string, c: string): number {
   return str.split(c).length - 1;
 }
 
-export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
-  (props, ref) => {
+export const RecipientInput = observer(
+  // eslint-disable-next-line react/display-name
+  forwardRef<HTMLInputElement, RecipientInputProps>((props, ref) => {
     const { analyticsStore } = useStore();
     const intl = useIntl();
     const theme = useTheme();
@@ -146,8 +147,5 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
         ) : null}
       </Box>
     );
-  },
-  {
-    forwardRef: true,
-  }
+  })
 );
