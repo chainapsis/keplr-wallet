@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, PropsWithChildren } from "react";
 import { Columns } from "../../../components/column";
 import { Box } from "../../../components/box";
 import { Tooltip } from "../../../components/tooltip";
@@ -14,14 +14,16 @@ import { MenuBar } from "../components";
 import { HeaderProps } from "../../../layouts/header/types";
 
 export const MainHeaderLayout: FunctionComponent<
-  Pick<
-    HeaderProps,
-    | "isNotReady"
-    | "bottomButton"
-    | "fixedHeight"
-    | "additionalPaddingBottom"
-    | "onSubmit"
-    | "headerContainerStyle"
+  PropsWithChildren<
+    Pick<
+      HeaderProps,
+      | "isNotReady"
+      | "bottomButton"
+      | "fixedHeight"
+      | "additionalPaddingBottom"
+      | "onSubmit"
+      | "headerContainerStyle"
+    >
   >
 > = observer((props) => {
   const { children, ...otherProps } = props;

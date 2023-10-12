@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, PropsWithChildren } from "react";
 import { GlobalSimpleBarProvider } from "./hooks/global-simplebar";
 import { Link, useLocation } from "react-router-dom";
 import { ColorPalette } from "./styles";
@@ -36,16 +36,18 @@ const BottomTabsGlobalStyleTransitions = createGlobalStyle`
 
 export const BottomTabsHeightRem = "3.75rem";
 
-export const BottomTabsRouteProvider: FunctionComponent<{
-  isNotReady: boolean;
+export const BottomTabsRouteProvider: FunctionComponent<
+  PropsWithChildren<{
+    isNotReady: boolean;
 
-  tabs: {
-    pathname: string;
-    icon: React.ReactNode;
-  }[];
+    tabs: {
+      pathname: string;
+      icon: React.ReactNode;
+    }[];
 
-  forceHideBottomTabs?: boolean;
-}> = observer(({ children, isNotReady, tabs, forceHideBottomTabs }) => {
+    forceHideBottomTabs?: boolean;
+  }>
+> = observer(({ children, isNotReady, tabs, forceHideBottomTabs }) => {
   const { uiConfigStore } = useStore();
 
   const location = useLocation();
