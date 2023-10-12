@@ -2,14 +2,9 @@ import {CommunityChainInfoRepo, EmbedChainInfos} from '../config';
 
 import {
   AccountStore,
-  ChainSuggestStore,
   CosmosAccount,
   getKeplrFromWindow,
-  InteractionStore,
-  KeyRingStore,
-  PermissionStore,
   QueriesStore,
-  SignInteractionStore,
   CosmosQueries,
   CoinGeckoPriceStore,
   CosmwasmQueries,
@@ -20,6 +15,13 @@ import {
   IBCChannelStore,
   IBCCurrencyRegistrar,
 } from '@keplr-wallet/stores';
+import {
+  ChainSuggestStore,
+  InteractionStore,
+  KeyRingStore,
+  PermissionStore,
+  SignInteractionStore,
+} from '@keplr-wallet/stores-core';
 import {AsyncKVStore} from '../common';
 import {RNEnv, RNRouterUI, RNMessageRequesterInternal} from '../router';
 import {APP_PORT} from '@keplr-wallet/router';
