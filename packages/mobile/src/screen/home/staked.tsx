@@ -35,7 +35,6 @@ export const StakedTabView: FunctionComponent = observer(() => {
 
           return {
             viewToken: unbonding.viewToken,
-            // altSentence: intl.formatRelativeTime(1, 'day'),
             altSentence: intl.formatRelativeTime(
               relativeTime.value,
               relativeTime.unit,
@@ -100,6 +99,7 @@ export const StakedTabView: FunctionComponent = observer(() => {
                       disabled={
                         !viewToken.viewToken.chainInfo.walletUrlForStaking
                       }
+                      //TODO 이후 stake 탭으로 이동 기능 구현해야함
                       // onClick={() => {
                       //   if (viewToken.viewToken.chainInfo.walletUrlForStaking) {
                       //     browser.tabs.create({
@@ -118,13 +118,14 @@ export const StakedTabView: FunctionComponent = observer(() => {
                     viewToken={viewToken}
                     key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                     disabled={!viewToken.chainInfo.walletUrlForStaking}
-                    onClick={() => {
-                      if (viewToken.chainInfo.walletUrlForStaking) {
-                        browser.tabs.create({
-                          url: viewToken.chainInfo.walletUrlForStaking,
-                        });
-                      }
-                    }}
+                    //TODO 이후 stake 탭으로 이동 기능 구현해야함
+                    // onClick={() => {
+                    //   if (viewToken.chainInfo.walletUrlForStaking) {
+                    //     browser.tabs.create({
+                    //       url: viewToken.chainInfo.walletUrlForStaking,
+                    //     });
+                    //   }
+                    // }}
                   />
                 );
               })}
