@@ -6,6 +6,7 @@
     "hoistingLimits": "workspaces"
   },
   "scripts": {
+    "clean": "sh ./scripts/clean.sh",
     "android": "react-native run-android",
     "ios": "npx pod-install && react-native run-ios",
     "lint-test": "eslint . --ext .js,.jsx,.ts,.tsx && prettier --check .",
