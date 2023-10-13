@@ -60,21 +60,14 @@ export const MnemonicInput = React.forwardRef<
         borderWidth={1}
         style={StyleSheet.flatten([
           style.flatten(
-            [
-              'background-color-gray-600',
-              'light:background-color-platinum-700',
-            ],
+            ['background-color-gray-600'],
             [
               // The order is important.
               // The border color has different priority according to state.
               // The more in front, the lower the priority.
               isFocused ? 'border-color-blue-400' : undefined,
-              isFocused ? 'light:border-color-platinum-100' : undefined,
               error ? 'border-color-red-200' : undefined,
-              error ? 'light:border-color-red-400' : undefined,
               !(props.editable ?? true) && 'background-color-gray-50',
-              !(props.editable ?? true) &&
-                'light:background-color-platinum-500',
             ],
           ),
           inputContainerStyle,
@@ -88,10 +81,7 @@ export const MnemonicInput = React.forwardRef<
               numberOfLines={4}
               placeholderTextColor={
                 props.placeholderTextColor ??
-                style.flatten(
-                  ['color-gray-300', 'light:color-platinum-500'],
-                  [!(props.editable ?? true) && 'light:color-platinum-200'],
-                ).color
+                style.flatten(['color-gray-300']).color
               }
               style={StyleSheet.flatten([
                 style.flatten(
@@ -99,14 +89,10 @@ export const MnemonicInput = React.forwardRef<
                     'padding-0',
                     'body2',
                     'color-white',
-                    'light:color-platinum-50',
                     'flex-1',
                     'min-height-104',
                   ],
-                  [
-                    !(props.editable ?? true) && 'color-gray-300',
-                    !(props.editable ?? true) && 'light:color-platinum-200',
-                  ],
+                  [!(props.editable ?? true) && 'color-gray-300'],
                 ),
                 Platform.select({
                   ios: {},
