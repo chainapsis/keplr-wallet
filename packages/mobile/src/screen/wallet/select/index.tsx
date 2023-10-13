@@ -14,10 +14,12 @@ import {Button} from '../../../components/button';
 import {App, AppCoinType} from '@keplr-wallet/ledger-cosmos';
 import {PageWithScrollView} from '../../../components/page';
 import {StyleSheet, Text} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {StackActions, useNavigation} from '@react-navigation/native';
+import {RectButton} from '../../../components/rect-button';
 
 export const WalletSelectScreen: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
+  const navigation = useNavigation();
   // const intl = useIntl();
 
   const mnemonicKeys = useMemo(() => {
@@ -134,17 +136,15 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView backgroundMode={'default'}>
-      <Box padding={12}>
-        <Box position="absolute" style={{top: 74, right: 12}}>
+      <Box padding={12} position="relative">
+        <Box position="absolute" style={{top: 0, right: 12, zIndex: 1000}}>
           <Button
             // text={intl.formatMessage({id: 'page.wallet.add-wallet-button'})}
             text={'Add Wallet'}
             size="extra-small"
             color="secondary"
             onPress={async () => {
-              await browser.tabs.create({
-                url: '/register.html',
-              });
+              navigation.dispatch(StackActions.push('Register'));
             }}
           />
         </Box>
@@ -389,69 +389,68 @@ const KeyringItem: FunctionComponent<{
   const isSelected = keyRingStore.selectedKeyInfo?.id === keyInfo.id;
 
   return (
-    <Box
-      padding={16}
-      minHeight={74}
-      borderRadius={6}
-      alignY="center"
-      onClick={async () => {
+    <RectButton
+      onPress={async () => {
         if (isSelected) {
           return;
         }
-
         await keyRingStore.selectKeyRing(keyInfo.id);
         await chainStore.waitSyncedEnabledChains();
-
         navigate.goBack();
-      }}
-      style={StyleSheet.flatten([
-        style.flatten(['background-color-gray-600']),
-        isSelected &&
-          style.flatten([
-            'border-width-1',
-            'border-color-gray-200',
-            'border-solid',
-          ]),
-      ])}>
-      <Columns sum={1} alignY="center">
-        <YAxis>
-          <XAxis alignY="center">
-            {isSelected ? (
+      }}>
+      <Box
+        padding={16}
+        minHeight={74}
+        borderRadius={6}
+        alignY="center"
+        style={StyleSheet.flatten([
+          style.flatten(['background-color-gray-600']),
+          isSelected &&
+            style.flatten([
+              'border-width-1',
+              'border-color-gray-200',
+              'border-solid',
+            ]),
+        ])}>
+        <Columns sum={1} alignY="center">
+          <YAxis>
+            <XAxis alignY="center">
+              {isSelected ? (
+                <React.Fragment>
+                  <CheckIcon
+                    size={20}
+                    color={style.get('color-gray-200').color}
+                  />
+                  <Gutter size={4} />
+                </React.Fragment>
+              ) : null}
+              <Text
+                style={style.flatten([
+                  'subtitle2',
+                  'dark:color-gray-700',
+                  'color-gray-10',
+                ])}>
+                {keyInfo.name}
+              </Text>
+            </XAxis>
+            {paragraph ? (
               <React.Fragment>
-                <CheckIcon
-                  size={20}
-                  color={style.get('color-gray-200').color}
-                />
-                <Gutter size={4} />
+                <Gutter size={6} />
+                <Text style={style.flatten(['body2', 'color-gray-300'])}>
+                  {paragraph}
+                </Text>
               </React.Fragment>
             ) : null}
-            <Text
-              style={style.flatten([
-                'subtitle2',
-                'dark:color-gray-700',
-                'color-gray-10',
-              ])}>
-              {keyInfo.name}
-            </Text>
-          </XAxis>
-          {paragraph ? (
-            <React.Fragment>
-              <Gutter size={6} />
-              <Text style={style.flatten(['body2', 'color-gray-300'])}>
-                {paragraph}
-              </Text>
-            </React.Fragment>
-          ) : null}
-        </YAxis>
-        <Column weight={1} />
-        <XAxis alignY="center">
-          <Box
-            cursor="pointer"
-            onClick={e => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}>
-            {/* <FloatingDropdown
+          </YAxis>
+          <Column weight={1} />
+          <XAxis alignY="center">
+            <Box
+              cursor="pointer"
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}>
+              {/* <FloatingDropdown
               isOpen={isMenuOpen}
               close={() => setIsMenuOpen(false)}
               items={dropdownItems}>
@@ -469,9 +468,10 @@ const KeyringItem: FunctionComponent<{
                 />
               </Box>
             </FloatingDropdown> */}
-          </Box>
-        </XAxis>
-      </Columns>
-    </Box>
+            </Box>
+          </XAxis>
+        </Columns>
+      </Box>
+    </RectButton>
   );
 });
