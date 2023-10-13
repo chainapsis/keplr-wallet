@@ -1,0 +1,148 @@
+syntax = "proto3";
+package stride.stakeibc;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "stride/stakeibc/params.proto";
+import "stride/stakeibc/validator.proto";
+import "stride/stakeibc/host_zone.proto";
+import "stride/stakeibc/epoch_tracker.proto";
+import "stride/stakeibc/address_unbonding.proto";
+
+option go_package = "github.com/Stride-Labs/stride/v15/x/stakeibc/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Parameters queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/Stridelabs/stride/stakeibc/params";
+  }
+  // Queries a Validator by host zone.
+  rpc Validators(QueryGetValidatorsRequest)
+      returns (QueryGetValidatorsResponse) {
+    option (google.api.http).get =
+        "/Stride-Labs/stride/stakeibc/validators/{chain_id}";
+  }
+  // Queries a HostZone by id.
+  rpc HostZone(QueryGetHostZoneRequest) returns (QueryGetHostZoneResponse) {
+    option (google.api.http).get =
+        "/Stride-Labs/stride/stakeibc/host_zone/{chain_id}";
+  }
+
+  // Queries a list of HostZone items.
+  rpc HostZoneAll(QueryAllHostZoneRequest) returns (QueryAllHostZoneResponse) {
+    option (google.api.http).get = "/Stride-Labs/stride/stakeibc/host_zone";
+  }
+
+  // Queries a list of ModuleAddress items.
+  rpc ModuleAddress(QueryModuleAddressRequest)
+      returns (QueryModuleAddressResponse) {
+    option (google.api.http).get =
+        "/Stride-Labs/stride/stakeibc/module_address/{name}";
+  }
+  // QueryInterchainAccountFromAddress returns the interchain account for given
+  // owner address on a given connection pair
+  rpc InterchainAccountFromAddress(QueryInterchainAccountFromAddressRequest)
+      returns (QueryInterchainAccountFromAddressResponse);
+
+  // Queries a EpochTracker by index.
+  rpc EpochTracker(QueryGetEpochTrackerRequest)
+      returns (QueryGetEpochTrackerResponse) {
+    option (google.api.http).get =
+        "/Stride-Labs/stride/stakeibc/epoch_tracker/{epoch_identifier}";
+  }
+
+  // Queries a list of EpochTracker items.
+  rpc EpochTrackerAll(QueryAllEpochTrackerRequest)
+      returns (QueryAllEpochTrackerResponse) {
+    option (google.api.http).get = "/Stride-Labs/stride/stakeibc/epoch_tracker";
+  }
+
+  // Queries the next packet sequence for one for a given channel
+  rpc NextPacketSequence(QueryGetNextPacketSequenceRequest)
+      returns (QueryGetNextPacketSequenceResponse) {
+    option (google.api.http).get =
+        "/Stride-Labs/stride/stakeibc/next_packet_sequence/{channel_id}/"
+        "{port_id}";
+  }
+
+  // Queries an address's unbondings
+  rpc AddressUnbondings(QueryAddressUnbondings)
+      returns (QueryAddressUnbondingsResponse) {
+    option (google.api.http).get =
+        "/Stride-Labs/stride/stakeibc/unbondings/{address}";
+  }
+}
+
+// QueryInterchainAccountFromAddressRequest is the request type for the
+// Query/InterchainAccountAddress RPC
+message QueryInterchainAccountFromAddressRequest {
+  string owner = 1;
+  string connection_id = 2 [ (gogoproto.moretags) = "yaml:\"connection_id\"" ];
+}
+
+// QueryInterchainAccountFromAddressResponse the response type for the
+// Query/InterchainAccountAddress RPC
+message QueryInterchainAccountFromAddressResponse {
+  string interchain_account_address = 1
+      [ (gogoproto.moretags) = "yaml:\"interchain_account_address\"" ];
+}
+
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  Params params = 1 [ (gogoproto.nullable) = false ];
+}
+
+message QueryGetValidatorsRequest { string chain_id = 1; }
+
+message QueryGetValidatorsResponse { repeated Validator validators = 1; }
+
+message QueryGetHostZoneRequest { string chain_id = 1; }
+
+message QueryGetHostZoneResponse {
+  HostZone host_zone = 1 [ (gogoproto.nullable) = false ];
+}
+
+message QueryAllHostZoneRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryAllHostZoneResponse {
+  repeated HostZone host_zone = 1 [ (gogoproto.nullable) = false ];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryModuleAddressRequest { string name = 1; }
+
+message QueryModuleAddressResponse { string addr = 1; }
+
+message QueryGetEpochTrackerRequest { string epoch_identifier = 1; }
+
+message QueryGetEpochTrackerResponse {
+  EpochTracker epoch_tracker = 1 [ (gogoproto.nullable) = false ];
+}
+
+message QueryAllEpochTrackerRequest {}
+
+message QueryAllEpochTrackerResponse {
+  repeated EpochTracker epoch_tracker = 1 [ (gogoproto.nullable) = false ];
+}
+
+message QueryGetNextPacketSequenceRequest {
+  string channel_id = 1;
+  string port_id = 2;
+}
+
+message QueryGetNextPacketSequenceResponse { uint64 sequence = 1; }
+
+message QueryAddressUnbondings { string address = 1; }
+
+message QueryAddressUnbondingsResponse {
+  repeated AddressUnbonding address_unbondings = 1
+      [ (gogoproto.nullable) = false ];
+}

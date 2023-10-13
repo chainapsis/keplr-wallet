@@ -1,0 +1,19 @@
+syntax = "proto3";
+package stride.stakeibc;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/Stride-Labs/stride/v15/x/stakeibc/types";
+
+message AddressUnbonding {
+  string address = 1;
+  string receiver = 2;
+  string unbonding_estimated_time = 3;
+  string amount = 4 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
+  string denom = 5;
+  bool claim_is_pending = 8;
+  uint64 epoch_number = 9;
+}
