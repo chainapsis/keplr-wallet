@@ -31,6 +31,9 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
   @observable.shallow
   protected registeredCurrencies: AppCurrency[] = [];
 
+  @observable.shallow
+  protected registrationInProgressCurrencyMap: Map<string, boolean> = new Map();
+
   constructor(
     embedded: C,
     protected readonly currencyRegistry: {
@@ -71,8 +74,15 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
         );
         if (generator) {
           const currency = generator.value;
-          if (currency) {
-            runInAction(() => {
+          runInAction(() => {
+            if (!generator.done) {
+              this.registrationInProgressCurrencyMap.set(
+                coinMinimalDenom,
+                true
+              );
+            }
+
+            if (currency) {
               const index = this.unknownDenoms.findIndex(
                 (denom) => denom === currency.coinMinimalDenom
               );
@@ -81,8 +91,12 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
               }
 
               this.addOrReplaceCurrency(currency);
-            });
-          }
+            }
+
+            if (generator.done) {
+              this.registrationInProgressCurrencyMap.delete(coinMinimalDenom);
+            }
+          });
 
           if (generator.done) {
             if (disposer) {
@@ -90,6 +104,12 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
             }
           }
         } else {
+          if (this.registrationInProgressCurrencyMap.get(coinMinimalDenom)) {
+            runInAction(() => {
+              this.registrationInProgressCurrencyMap.delete(coinMinimalDenom);
+            });
+          }
+
           if (disposer) {
             disposer();
           }
@@ -279,6 +299,12 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
   @action
   setEmbeddedChainInfo(embedded: C) {
     this._embedded = embedded;
+  }
+
+  isCurrencyRegistrationInProgress(coinMinimalDenom: string): boolean {
+    return (
+      this.registrationInProgressCurrencyMap.get(coinMinimalDenom) || false
+    );
   }
 }
 
