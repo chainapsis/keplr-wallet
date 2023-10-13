@@ -12,6 +12,14 @@ import {
   MsgDelegate,
   MsgUndelegate,
   MsgBeginRedelegate,
+  MsgUnbondValidator,
+  MsgCancelUnbondingDelegation,
+  MsgTokenizeShares,
+  MsgRedeemTokensForShares,
+  MsgTransferTokenizeShareRecord,
+  MsgDisableTokenizeShares,
+  MsgEnableTokenizeShares,
+  MsgValidatorBond,
 } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
 import {
   MsgExec,
@@ -201,6 +209,38 @@ defaultProtoCodec.registerAny(
 defaultProtoCodec.registerAny(
   "/cosmos.staking.v1beta1.MsgBeginRedelegate",
   MsgBeginRedelegate
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgUnbondValidator",
+  MsgUnbondValidator
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgCancelUnbondingDelegation",
+  MsgCancelUnbondingDelegation
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgTokenizeShares",
+  MsgTokenizeShares
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgRedeemTokensForShares",
+  MsgRedeemTokensForShares
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgTransferTokenizeShareRecord",
+  MsgTransferTokenizeShareRecord
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgDisableTokenizeShares",
+  MsgDisableTokenizeShares
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgEnableTokenizeShares",
+  MsgEnableTokenizeShares
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgValidatorBond",
+  MsgValidatorBond
 );
 defaultProtoCodec.registerAny(
   "/cosmwasm.wasm.v1.MsgExecuteContract",
