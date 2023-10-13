@@ -1,0 +1,17 @@
+syntax = "proto3";
+package stride.stakeibc;
+
+// this line is used by starport scaffolding # proto/packet/import
+
+option go_package = "github.com/Stride-Labs/stride/v15/x/stakeibc/types";
+
+message StakeibcPacketData {
+  oneof packet {
+    NoData no_data = 1;
+    // this line is used by starport scaffolding # ibc/packet/proto/field
+  }
+}
+
+message NoData {}
+
+// this line is used by starport scaffolding # ibc/packet/proto/message

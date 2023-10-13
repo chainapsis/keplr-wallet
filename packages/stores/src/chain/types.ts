@@ -38,6 +38,7 @@ export interface IChainInfoImpl<C extends ChainInfo = ChainInfo> {
   hasFeature(feature: string): boolean;
   removeCurrencies(...coinMinimalDenoms: string[]): void;
   addCurrencies(...currencies: AppCurrency[]): void;
+  isCurrencyRegistrationInProgress(coinMinimalDenom: string): boolean;
   readonly embedded: C;
   readonly chainId: string;
   readonly chainIdentifier: string;
