@@ -60,21 +60,6 @@ export class LSMCurrencyRegistrar {
     });
   }
 
-  protected async saveCacheWithoutReaction(
-    chainId: string,
-    coinMinimalDenom: string,
-    data: LSMDenomCacheData
-  ) {
-    const key = `cache-lsm-denom-data`;
-    const js = toJS(this.lsmDenomCacheData);
-    js.set(
-      `${ChainIdHelper.parse(chainId).identifier}/${coinMinimalDenom}`,
-      data
-    );
-    const obj = Object.fromEntries(js);
-    this.kvStore.set<Record<string, LSMDenomCacheData>>(key, obj);
-  }
-
   protected lsmCurrencyRegistrar(
     chainId: string,
     coinMinimalDenom: string
@@ -131,6 +116,7 @@ export class LSMCurrencyRegistrar {
           moniker: string | undefined;
           thumbnail: string | undefined;
           isFetching: boolean;
+          fromCache: boolean;
         }
       | undefined = (() => {
       const cache = this.lsmDenomCacheData.get(
@@ -142,6 +128,7 @@ export class LSMCurrencyRegistrar {
           moniker: cache.moniker,
           thumbnail: cache.thumbnail,
           isFetching: false,
+          fromCache: true,
         };
       }
 
@@ -164,6 +151,7 @@ export class LSMCurrencyRegistrar {
                 : undefined,
             isFetching:
               query.isFetching || (thumbnail ? thumbnail.isFetching : false),
+            fromCache: false,
           };
         }
 
@@ -180,11 +168,16 @@ export class LSMCurrencyRegistrar {
       };
     }
 
-    if (!validator.isFetching) {
-      this.saveCacheWithoutReaction(chainId, coinMinimalDenom, {
-        moniker: validator.moniker,
-        thumbnail: validator.thumbnail,
-        timestamp: Date.now(),
+    if (!validator.fromCache && !validator.isFetching) {
+      runInAction(() => {
+        this.lsmDenomCacheData.set(
+          `${ChainIdHelper.parse(chainId).identifier}/${coinMinimalDenom}`,
+          {
+            moniker: validator.moniker,
+            thumbnail: validator.thumbnail,
+            timestamp: Date.now(),
+          }
+        );
       });
     }
 
