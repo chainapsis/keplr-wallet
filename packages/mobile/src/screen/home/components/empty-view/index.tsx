@@ -9,7 +9,7 @@ interface MainEmptyViewProps {
   image: React.ReactNode;
   title: string;
   paragraph: string;
-  button: React.ReactNode;
+  button?: React.ReactNode;
 }
 
 export const MainEmptyView: FunctionComponent<MainEmptyViewProps> = ({
@@ -35,8 +35,12 @@ export const MainEmptyView: FunctionComponent<MainEmptyViewProps> = ({
           {paragraph}
         </Text>
 
-        <Gutter size={12} />
-        {button}
+        {button ? (
+          <React.Fragment>
+            <Gutter size={12} />
+            {button}
+          </React.Fragment>
+        ) : null}
       </Stack>
     </Box>
   );

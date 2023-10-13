@@ -17,6 +17,11 @@
     "test": "jest"
   },
   "dependencies": {
+    "@formatjs/intl-getcanonicallocales": "^2.2.1",
+    "@formatjs/intl-locale": "^3.3.4",
+    "@formatjs/intl-numberformat": "^8.7.2",
+    "@formatjs/intl-pluralrules": "^5.2.6",
+    "@formatjs/intl-relativetimeformat": "^11.2.6",
     "@gorhom/bottom-sheet": "^4.5.0",
     "@react-native-async-storage/async-storage": "^1.19.3",
     "@react-native-community/blur": "^4.3.2",
@@ -38,6 +43,7 @@
     "path-browserify": "^1.0.1",
     "react": "18.2.0",
     "react-hook-form": "^7.45.4",
+    "react-intl": "^6.2.8",
     "react-native": "0.72.3",
     "react-native-fast-image": "^8.6.3",
     "react-native-gesture-handler": "^2.12.1",

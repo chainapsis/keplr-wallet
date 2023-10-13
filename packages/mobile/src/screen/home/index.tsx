@@ -21,6 +21,7 @@ import {StackActions, useNavigation} from '@react-navigation/native';
 import {SearchTextInput} from '../../components/input/search-text-input';
 import {AvailableTabView} from './available';
 import {ChainInfo} from '@keplr-wallet/types';
+import {StakedTabView} from './staked';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -160,7 +161,9 @@ export const HomeScreen: FunctionComponent = observer(() => {
                 copyAddressModalRef.current?.present();
               }}
             />
-          ) : null}
+          ) : (
+            <StakedTabView />
+          )}
         </Stack>
       </PageWithScrollView>
 
