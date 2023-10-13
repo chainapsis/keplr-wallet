@@ -34,6 +34,9 @@ const {initFn} = init(
       // TODO: or noop
     },
   },
+  () => {
+    // TODO
+  },
   'https://blocklist.keplr.app',
   {
     commonCrypto: {
