@@ -17,7 +17,6 @@ import {Label} from '../label';
 import {Box} from '../../box';
 import {Column, Columns} from '../../column';
 
-// eslint-disable-next-line react/display-name
 export const TextInput = forwardRef<
   NativeTextInput,
   TextInputProps & NativeTextInputProps
@@ -77,11 +76,7 @@ export const TextInput = forwardRef<
           borderRadius={8}
           position="relative"
           style={style.flatten(
-            [
-              'background-color-gray-700',
-              'light:background-color-gray-700',
-              ...inputBorderColor,
-            ],
+            ['background-color-gray-700', ...inputBorderColor],
             [...(disabled ? disableStyle : [])],
           )}>
           <Columns sum={1}>
