@@ -1,7 +1,6 @@
 import React, {FunctionComponent, useMemo} from 'react';
 import {observer} from 'mobx-react-lite';
 import {Pressable, StyleSheet, Text} from 'react-native';
-import {ViewToken} from '@keplr-wallet/extension/src/pages/main';
 import {useStyle} from '../../styles';
 import {Column, Columns} from '../column';
 import {useStore} from '../../stores';
@@ -10,6 +9,15 @@ import FastImage from 'react-native-fast-image';
 import {Gutter} from '../gutter';
 import {XAxis} from '../axis';
 import {Tag} from '../tag';
+import {CoinPretty} from '@keplr-wallet/unit';
+import {IChainInfoImpl, QueryError} from '@keplr-wallet/stores';
+
+export interface ViewToken {
+  token: CoinPretty;
+  chainInfo: IChainInfoImpl;
+  isFetching: boolean;
+  error: QueryError<any> | undefined;
+}
 
 interface TokenItemProps {
   viewToken: ViewToken;

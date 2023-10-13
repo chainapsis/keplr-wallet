@@ -28,14 +28,14 @@ import {APP_PORT} from '@keplr-wallet/router';
 import EventEmitter from 'eventemitter3';
 import {HugeQueriesStore} from './huge-queries';
 import {ChainStore} from './chain';
+import {FiatCurrency} from '@keplr-wallet/types';
+import {UIConfigStore} from './ui-config';
 import {
+  ICNSInfo,
   CoinGeckoAPIEndPoint,
   CoinGeckoGetPrice,
   FiatCurrencies,
-} from '@keplr-wallet/extension/src/config.ui';
-import {FiatCurrency} from '@keplr-wallet/types';
-import {UIConfigStore} from './ui-config';
-import {ICNSInfo} from '../utils/config.ui';
+} from '../utils/config.ui';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;

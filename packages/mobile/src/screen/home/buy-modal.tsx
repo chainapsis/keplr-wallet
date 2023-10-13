@@ -93,16 +93,19 @@ const BuyCryptoScene = observer(() => {
                 buySupportChainAccounts.reduce(
                   (acc, cur) => ({
                     ...acc,
-                    [cur.chainInfo.stakeCurrency.coinDenom.toLowerCase()]:
-                      cur.bech32Address,
+                    [(
+                      cur.chainInfo.stakeCurrency || cur.chainInfo.currencies[0]
+                    ).coinDenom.toLowerCase()]: cur.bech32Address,
                   }),
                   {},
                 ),
               ),
             ),
             ...(buySupportDefaultChainInfo && {
-              defaultCurrencyCode:
-                buySupportDefaultChainInfo.stakeCurrency.coinDenom.toLowerCase(),
+              defaultCurrencyCode: (
+                buySupportDefaultChainInfo.stakeCurrency ||
+                buySupportDefaultChainInfo.currencies[0]
+              ).coinDenom.toLowerCase(),
             }),
           };
         case 'transak':
@@ -115,7 +118,9 @@ const BuyCryptoScene = observer(() => {
                 coins: buySupportChainAccounts.reduce(
                   (acc, cur) => ({
                     ...acc,
-                    [cur.chainInfo.stakeCurrency.coinDenom]: {
+                    [(
+                      cur.chainInfo.stakeCurrency || cur.chainInfo.currencies[0]
+                    ).coinDenom]: {
                       address: cur.bech32Address,
                     },
                   }),
@@ -125,12 +130,18 @@ const BuyCryptoScene = observer(() => {
             ),
             cryptoCurrencyList: buySupportChainAccounts
               .map(
-                chainAccount => chainAccount.chainInfo.stakeCurrency.coinDenom,
+                chainAccount =>
+                  (
+                    chainAccount.chainInfo.stakeCurrency ||
+                    chainAccount.chainInfo.currencies[0]
+                  ).coinDenom,
               )
               .join(','),
             ...(buySupportDefaultChainInfo && {
-              defaultCryptoCurrency:
-                buySupportDefaultChainInfo.stakeCurrency.coinDenom,
+              defaultCryptoCurrency: (
+                buySupportDefaultChainInfo.stakeCurrency ||
+                buySupportDefaultChainInfo.currencies[0]
+              ).coinDenom,
             }),
           };
         case 'kado':

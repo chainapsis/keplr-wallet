@@ -88,9 +88,7 @@ export const PageWithScrollView = forwardRef<
             propStyle,
           ])}
           keyboardOpeningTime={0}
-          indicatorStyle={
-            indicatorStyle ?? style.theme === 'light' ? 'black' : 'white'
-          }
+          indicatorStyle={indicatorStyle || 'white'}
           {...restProps}
         />
         <View

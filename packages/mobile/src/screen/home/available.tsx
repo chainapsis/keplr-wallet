@@ -91,8 +91,9 @@ export const AvailableTabView: FunctionComponent<{
       );
 
       const hasStakeCurrency =
+        chainInfo.stakeCurrency &&
         chainInfo.stakeCurrency.coinDenom.replace(/ /gi, '').toLowerCase() ===
-        replacedSearchValue;
+          replacedSearchValue;
 
       return hasChainName || hasCurrency || hasStakeCurrency;
     });
@@ -142,7 +143,7 @@ export const AvailableTabView: FunctionComponent<{
         <TokenItem
           viewToken={{
             token: new CoinPretty(
-              chainStore.chainInfos[0].stakeCurrency,
+              chainStore.chainInfos[0].currencies[0],
               new Dec(0),
             ),
             chainInfo: chainStore.chainInfos[0],

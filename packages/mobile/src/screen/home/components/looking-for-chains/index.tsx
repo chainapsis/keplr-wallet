@@ -70,7 +70,8 @@ export const LookingForChainItem: FunctionComponent<{
           <Gutter size={4} />
 
           <Text style={style.flatten(['color-gray-300@60%'])}>
-            {chainInfo.stakeCurrency.coinDenom}
+            {chainInfo.stakeCurrency?.coinDenom ||
+              chainInfo.currencies[0].coinDenom}
           </Text>
         </YAxis>
 

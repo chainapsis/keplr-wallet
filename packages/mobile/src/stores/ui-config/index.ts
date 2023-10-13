@@ -11,7 +11,8 @@ import {
   toJS,
 } from 'mobx';
 import {KVStore} from '@keplr-wallet/common';
-import {CoinGeckoPriceStore, KeyRingStore} from '@keplr-wallet/stores';
+import {CoinGeckoPriceStore} from '@keplr-wallet/stores';
+import {KeyRingStore} from '@keplr-wallet/stores-core';
 import {FiatCurrency} from '@keplr-wallet/types';
 import {CopyAddressConfig} from './copy-address';
 import {ChainStore} from '../chain';
@@ -161,11 +162,13 @@ export class UIConfigStore {
   }
 
   get useWebHIDLedger(): boolean {
-    if (!window.navigator.hid) {
-      return false;
-    }
-
-    return this.options.useWebHIDLedger;
+    // TODO: 이 getter/setter는 그냥 삭제될 확률이 높음
+    return false;
+    // if (!window.navigator.hid) {
+    //   return false;
+    // }
+    //
+    // return this.options.useWebHIDLedger;
   }
 
   @action

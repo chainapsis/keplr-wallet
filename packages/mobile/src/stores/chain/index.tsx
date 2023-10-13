@@ -10,8 +10,8 @@ import {
 import {
   ChainStore as BaseChainStore,
   IChainInfoImpl,
-  KeyRingStore,
 } from '@keplr-wallet/stores';
+import {KeyRingStore} from '@keplr-wallet/stores-core';
 
 import {ChainInfo} from '@keplr-wallet/types';
 import {

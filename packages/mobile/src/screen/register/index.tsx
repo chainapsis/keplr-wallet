@@ -66,7 +66,7 @@ interface RegisterScreenProps {
 export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
   () => {
     const navigation = useNavigation();
-    const {keyRingStore} = useStore();
+    const {keyRingStore, chainStore} = useStore();
     const status = keyRingStore.status;
     const style = useStyle();
     const isNeedPassword = status === 'empty';
@@ -88,25 +88,36 @@ export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
         addressIndex: 0,
       };
 
-      if (isNeedPassword) {
-        await keyRingStore.newMnemonicKey(
-          trimmedMnemonic,
-          defaultBIP44,
-          name,
-          password,
-        );
-        navigation.dispatch({
-          ...StackActions.replace('Home'),
-        });
-        return;
-      }
-
       await keyRingStore.newMnemonicKey(
         trimmedMnemonic,
         defaultBIP44,
         name,
-        undefined,
+        password,
       );
+
+      // TODO: 일단 현재 enable chain을 할 방법이 없으니 모든 체인을 enable 시킨다.
+      if (keyRingStore.selectedKeyInfo) {
+        for (const chainInfo of chainStore.chainInfos) {
+          if (
+            keyRingStore.needKeyCoinTypeFinalize(
+              keyRingStore.selectedKeyInfo.id,
+              chainInfo,
+            )
+          ) {
+            await keyRingStore.finalizeKeyCoinType(
+              keyRingStore.selectedKeyInfo.id,
+              chainInfo.chainId,
+              chainInfo.bip44.coinType,
+            );
+          }
+        }
+
+        await chainStore.enableChainInfoInUIWithVaultId(
+          keyRingStore.selectedKeyInfo.id,
+          ...chainStore.chainInfos.map(chainInfo => chainInfo.chainId),
+        );
+      }
+
       navigation.dispatch({
         ...StackActions.replace('Home'),
       });
