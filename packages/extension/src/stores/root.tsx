@@ -40,7 +40,10 @@ import {
   GravityBridgeCurrencyRegistrar,
   AxelarEVMBridgeCurrencyRegistrar,
 } from "@keplr-wallet/stores-etc";
-import { EthereumQueries } from "@keplr-wallet/stores-eth";
+import {
+  EthereumQueries,
+  EthereumAccountStore,
+} from "@keplr-wallet/stores-eth";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
   ContentScriptEnv,
@@ -92,6 +95,7 @@ export class RootStore {
   public readonly accountStore: AccountStore<
     [CosmosAccount, CosmwasmAccount, SecretAccount]
   >;
+  public readonly ethereumAccountStore: EthereumAccountStore;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly hugeQueriesStore: HugeQueriesStore;
 
@@ -330,6 +334,11 @@ export class RootStore {
           }
         },
       })
+    );
+
+    this.ethereumAccountStore = new EthereumAccountStore(
+      this.chainStore,
+      this.queriesStore
     );
 
     this.priceStore = new CoinGeckoPriceStore(
