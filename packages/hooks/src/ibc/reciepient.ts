@@ -59,7 +59,7 @@ export const useIBCRecipientConfig = (
   chainId: string,
   channelConfig: IIBCChannelConfig,
   options: {
-    allowHexAddressOnEthermint?: boolean;
+    allowHexAddressToBech32Address?: boolean;
     icns?: {
       chainId: string;
       resolverContractAddress: string;
@@ -72,7 +72,9 @@ export const useIBCRecipientConfig = (
       new IBCRecipientConfig(chainGetter, chainId, channelConfig, isIBCTransfer)
   );
   config.setChain(chainId);
-  config.setAllowHexAddressOnEthermint(options.allowHexAddressOnEthermint);
+  config.setAllowHexAddressToBech32Address(
+    options.allowHexAddressToBech32Address
+  );
   config.setICNS(options.icns);
   config.setIsIBCTransfer(isIBCTransfer);
 

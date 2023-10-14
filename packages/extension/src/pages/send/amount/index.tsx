@@ -64,6 +64,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const {
     analyticsStore,
     accountStore,
+    ethereumAccountStore,
     chainStore,
     queriesStore,
     skipQueriesStore,
@@ -79,6 +80,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const initialCoinMinimalDenom = searchParams.get("coinMinimalDenom");
 
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
+  const chainInfo = chainStore.getChain(chainId);
   const coinMinimalDenom =
     initialCoinMinimalDenom ||
     chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
@@ -102,16 +104,15 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   }, [navigate, initialChainId, initialCoinMinimalDenom]);
 
   const account = accountStore.getAccount(chainId);
-  const sender = account.bech32Address;
+  const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
 
-  const currency = chainStore
-    .getChain(chainId)
-    .forceFindCurrency(coinMinimalDenom);
-
-  const balance = queriesStore
-    .get(chainId)
-    .queryBalances.getQueryBech32Address(sender)
-    .getBalance(currency);
+  const queryBalances = queriesStore.get(chainId).queryBalances;
+  const sender = chainStore.isEvmChain(chainId)
+    ? account.ethereumHexAddress
+    : account.bech32Address;
+  const balance = chainStore.isEvmChain(chainId)
+    ? queryBalances.getQueryEthereumHexAddress(sender).getBalance(currency)
+    : queryBalances.getQueryBech32Address(sender).getBalance(currency);
 
   const sendConfigs = useSendMixedIBCTransferConfig(
     chainStore,
@@ -122,9 +123,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     300000,
     isIBCTransfer,
     {
-      allowHexAddressOnEthermint: !chainStore
-        .getChain(chainId)
-        .chainId.startsWith("injective"),
+      allowHexAddressToBech32Address:
+        !chainStore.getChain(chainId).chainId.startsWith("injective") &&
+        !chainInfo.evm,
       icns: ICNSInfo,
       computeTerraClassicTax: true,
     }
@@ -171,6 +172,15 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         ) {
           throw new Error("Not ready to simulate tx");
         }
+      }
+
+      if (chainStore.isEvmChain(chainId)) {
+        return {
+          simulate: () =>
+            ethereumAccountStore.getAccount(chainId).simulateGas({
+              to: sendConfigs.recipientConfig.recipient,
+            }),
+        };
       }
 
       // Prefer not to use the gas config or fee config,

@@ -38,7 +38,7 @@ export class RecipientConfig
   protected _value: string = "";
 
   @observable
-  protected _allowHexAddressOnEthermint: boolean | undefined = undefined;
+  protected _allowHexAddressToBech32Address: boolean | undefined = undefined;
 
   @observable
   protected _bech32Prefix: string | undefined = undefined;
@@ -178,24 +178,23 @@ export class RecipientConfig
       }
     }
 
-    if (this._allowHexAddressOnEthermint) {
-      const chainInfo = this.chainInfo;
-      const hasEthereumAddress =
-        chainInfo.bip44.coinType === 60 ||
-        !!chainInfo.features?.includes("eth-address-gen") ||
-        !!chainInfo.features?.includes("eth-key-sign");
-      if (hasEthereumAddress && rawRecipient.startsWith("0x")) {
-        try {
-          if (isAddress(rawRecipient)) {
-            const buf = Buffer.from(
-              rawRecipient.replace("0x", "").toLowerCase(),
-              "hex"
-            );
-            return new Bech32Address(buf).toBech32(this.bech32Prefix);
-          }
-        } catch {
-          return "";
+    const chainInfo = this.chainInfo;
+    const hasEthereumAddress =
+      chainInfo.bip44.coinType === 60 ||
+      !!chainInfo.features?.includes("eth-address-gen") ||
+      !!chainInfo.features?.includes("eth-key-sign") ||
+      chainInfo.evm !== undefined;
+
+    if (hasEthereumAddress && rawRecipient.startsWith("0x")) {
+      try {
+        if (isAddress(rawRecipient)) {
+          return this._allowHexAddressToBech32Address
+            ? new Bech32Address(
+                Buffer.from(rawRecipient.replace("0x", "").toLowerCase(), "hex")
+              ).toBech32(this.bech32Prefix)
+            : rawRecipient;
         }
+      } catch {
         return "";
       }
     }
@@ -204,8 +203,8 @@ export class RecipientConfig
   }
 
   @action
-  setAllowHexAddressOnEthermint(value: boolean | undefined) {
-    this._allowHexAddressOnEthermint = value;
+  setAllowHexAddressToBech32Address(value: boolean | undefined) {
+    this._allowHexAddressToBech32Address = value;
   }
 
   @computed
@@ -254,26 +253,25 @@ export class RecipientConfig
       }
     }
 
-    if (this._allowHexAddressOnEthermint) {
-      const chainInfo = this.chainInfo;
-      const hasEthereumAddress =
-        chainInfo.bip44.coinType === 60 ||
-        !!chainInfo.features?.includes("eth-address-gen") ||
-        !!chainInfo.features?.includes("eth-key-sign");
-      if (hasEthereumAddress && rawRecipient.startsWith("0x")) {
-        try {
-          if (isAddress(rawRecipient)) {
-            return {};
-          } else {
-            return {
-              error: new InvalidHexError("Invalid hex address for chain"),
-            };
-          }
-        } catch (e) {
+    const chainInfo = this.chainInfo;
+    const hasEthereumAddress =
+      chainInfo.bip44.coinType === 60 ||
+      !!chainInfo.features?.includes("eth-address-gen") ||
+      !!chainInfo.features?.includes("eth-key-sign") ||
+      chainInfo.evm !== undefined;
+    if (hasEthereumAddress && rawRecipient.startsWith("0x")) {
+      try {
+        if (isAddress(rawRecipient)) {
+          return {};
+        } else {
           return {
-            error: e,
+            error: new InvalidHexError("Invalid hex address for chain"),
           };
         }
+      } catch (e) {
+        return {
+          error: e,
+        };
       }
     }
 
@@ -303,7 +301,7 @@ export const useRecipientConfig = (
   chainGetter: ChainGetter,
   chainId: string,
   options: {
-    allowHexAddressOnEthermint?: boolean;
+    allowHexAddressToBech32Address?: boolean;
     icns?: {
       chainId: string;
       resolverContractAddress: string;
@@ -312,7 +310,9 @@ export const useRecipientConfig = (
 ) => {
   const [config] = useState(() => new RecipientConfig(chainGetter, chainId));
   config.setChain(chainId);
-  config.setAllowHexAddressOnEthermint(options.allowHexAddressOnEthermint);
+  config.setAllowHexAddressToBech32Address(
+    options.allowHexAddressToBech32Address
+  );
   config.setICNS(options.icns);
 
   return config;

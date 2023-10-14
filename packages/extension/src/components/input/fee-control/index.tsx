@@ -134,9 +134,13 @@ export const FeeControl: FunctionComponent<{
           feeConfig.selectableFeeCurrencies.length > 1 &&
           feeConfig.fees.length > 0
         ) {
-          const queryBalances = queriesStore
-            .get(feeConfig.chainId)
-            .queryBalances.getQueryBech32Address(senderConfig.sender);
+          const queryBalances = chainStore.isEvmChain(feeConfig.chainId)
+            ? queriesStore
+                .get(feeConfig.chainId)
+                .queryBalances.getQueryEthereumHexAddress(senderConfig.sender)
+            : queriesStore
+                .get(feeConfig.chainId)
+                .queryBalances.getQueryBech32Address(senderConfig.sender);
 
           const currentFeeCurrency = feeConfig.fees[0].currency;
           const currentFeeCurrencyBal =
