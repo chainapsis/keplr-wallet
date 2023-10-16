@@ -131,7 +131,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
               containerStyle={style.flatten(['flex-1'])}
               onPress={() => {
                 navigation.dispatch({
-                  ...StackActions.push('Send'),
+                  ...StackActions.push('Send.SelectAsset'),
                 });
               }}
             />

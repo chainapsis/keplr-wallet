@@ -4,13 +4,13 @@ import {Pressable, StyleSheet, Text} from 'react-native';
 import {useStyle} from '../../styles';
 import {Column, Columns} from '../column';
 import {useStore} from '../../stores';
-import {Stack} from '../stack';
 import FastImage from 'react-native-fast-image';
 import {Gutter} from '../gutter';
 import {XAxis} from '../axis';
 import {Tag} from '../tag';
 import {CoinPretty} from '@keplr-wallet/unit';
 import {IChainInfoImpl, QueryError} from '@keplr-wallet/stores';
+import {Box} from '../box';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -28,7 +28,7 @@ interface TokenItemProps {
 }
 
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
-  ({viewToken}) => {
+  ({viewToken, onClick, disabled}) => {
     const style = useStyle();
 
     const {priceStore} = useStore();
@@ -51,6 +51,8 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
 
     return (
       <Pressable
+        onPress={onClick}
+        disabled={disabled}
         style={StyleSheet.flatten([
           style.flatten([
             'padding-16',
@@ -61,22 +63,21 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         <Columns sum={1} alignY="center">
           <FastImage
             style={style.flatten(['width-32', 'height-32'])}
-            source={{uri: viewToken.token.currency.coinImageUrl}}
+            source={
+              viewToken.token.currency.coinImageUrl
+                ? {uri: viewToken.token.currency.coinImageUrl}
+                : require('../../public/assets/img/chain-icon-alt.png')
+            }
             resizeMode={FastImage.resizeMode.contain}
           />
 
           <Gutter size={12} />
 
-          <Stack>
+          <Box style={style.flatten(['flex-column', 'flex-shrink-1'])}>
             <XAxis>
               <Text
-                numberOfLines={1}
                 style={{
-                  ...style.flatten([
-                    'color-gray-10',
-                    'subtitle2',
-                    'flex-shrink-1',
-                  ]),
+                  ...style.flatten(['color-gray-10', 'subtitle2']),
                 }}>
                 {coinDenom}
               </Text>
@@ -88,11 +89,11 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
             <Text style={style.flatten(['color-gray-300', 'body3'])}>
               {viewToken.chainInfo.chainName}
             </Text>
-          </Stack>
+          </Box>
 
           <Column weight={1} />
 
-          <Stack>
+          <Box style={style.flatten(['flex-column', 'flex-shrink-1'])}>
             <Text style={style.flatten(['color-gray-10', 'subtitle1'])}>
               {viewToken.token
                 .hideDenom(true)
@@ -107,7 +108,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 ? pricePretty.inequalitySymbol(true).toString()
                 : '-'}
             </Text>
-          </Stack>
+          </Box>
         </Columns>
       </Pressable>
     );

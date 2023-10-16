@@ -101,7 +101,7 @@ export const IconButton: FunctionComponent<{
           {text}
         </Text>
         {path === 'right' ? (
-          <Box marginLeft={4} alignY="center">
+          <Box marginLeft={4} alignX="center" alignY="center">
             {isValidElement(icon) || !icon || !(typeof icon === 'function')
               ? icon
               : icon(style.get(defaultTextColor).color)}

@@ -18,7 +18,7 @@ import {RegisterScreen} from './screen/register';
 import {HomeScreen} from './screen/home';
 import {LockedScreen} from './screen/locked';
 import {RegisterEnableChainScreen} from './screen/register/enable-chain';
-import {SendScreen} from './screen/send/select-asset';
+import {SendSelectAssetScreen} from './screen/send/select-asset';
 import {createDrawerNavigator, useDrawerStatus} from '@react-navigation/drawer';
 import {DrawerContent} from './components/drawer';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -30,12 +30,14 @@ import {WalletIcon, BrowserIcon, SettingIcon} from './components/icon';
 import {HomeScreenHeader, defaultHeaderOptions} from './components/pageHeader';
 import {SettingScreen} from './screen/setting';
 import {SettingGeneralScreen} from './screen/setting/screens/general';
+import {SendAmountScreen} from './screen/send/amount';
 export type RootStackParamList = {
   Home: undefined;
   Register: undefined;
   'Register.Intro': undefined;
   'Register.EnableChain': undefined;
   Send: undefined;
+  'Send.SelectAsset': undefined;
   'Setting.Intro': undefined;
   'Setting.General': undefined;
   Locked: undefined;
@@ -215,7 +217,15 @@ export const AppNavigation: FunctionComponent = observer(() => {
             options={{
               ...defaultHeaderOptions,
             }}
-            component={SendScreen}
+            component={SendAmountScreen}
+          />
+          <Stack.Screen
+            name="Send.SelectAsset"
+            options={{
+              ...defaultHeaderOptions,
+              headerTitle: 'Send',
+            }}
+            component={SendSelectAssetScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>
