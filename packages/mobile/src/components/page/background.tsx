@@ -2,7 +2,7 @@ import React, {FunctionComponent} from 'react';
 import {View} from 'react-native';
 import {useStyle} from '../../styles';
 
-export type BackgroundMode = 'secondary' | 'tertiary' | 'default' | null;
+export type BackgroundMode = 'secondary' | 'default' | null;
 
 export const ScreenBackground: FunctionComponent<{
   backgroundMode: BackgroundMode;
@@ -18,15 +18,7 @@ export const ScreenBackground: FunctionComponent<{
         top: -100,
         bottom: -100,
       }}>
-      {backgroundMode === 'default' ? (
-        <View
-          style={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: style.get('color-background-default').color,
-          }}
-        />
-      ) : backgroundMode === 'secondary' ? (
+      {backgroundMode === 'secondary' ? (
         <View
           style={{
             width: '100%',
@@ -39,7 +31,7 @@ export const ScreenBackground: FunctionComponent<{
           style={{
             width: '100%',
             height: '100%',
-            backgroundColor: style.get('color-background-tertiary').color,
+            backgroundColor: style.get('color-background-default').color,
           }}
         />
       )}
