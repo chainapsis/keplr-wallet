@@ -5,6 +5,9 @@ import {
 } from "@keplr-wallet/stores";
 import { ObservableQueryEthAccountBalanceRegistry } from "./balance";
 import { ObservableQueryEthereumERC20BalanceRegistry } from "./erc20-balance";
+import { DeepReadonly } from "utility-types";
+import { ObservableQueryEthereumBlock } from "./block";
+import { ObservableQueryEthereumFeeHistory } from "./fee-histroy";
 
 export interface EthereumQueries {
   ethereum: EthereumQueriesImpl;
@@ -36,6 +39,9 @@ export const EthereumQueries = {
 };
 
 export class EthereumQueriesImpl {
+  public readonly queryEthereumBlock: DeepReadonly<ObservableQueryEthereumBlock>;
+  public readonly queryEthereumFeeHistory: DeepReadonly<ObservableQueryEthereumFeeHistory>;
+
   constructor(
     base: QueriesSetBase,
     sharedContext: QuerySharedContext,
@@ -47,6 +53,18 @@ export class EthereumQueriesImpl {
     );
     base.queryBalances.addBalanceRegistry(
       new ObservableQueryEthereumERC20BalanceRegistry(sharedContext)
+    );
+
+    this.queryEthereumBlock = new ObservableQueryEthereumBlock(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
+
+    this.queryEthereumFeeHistory = new ObservableQueryEthereumFeeHistory(
+      sharedContext,
+      chainId,
+      chainGetter
     );
   }
 }
