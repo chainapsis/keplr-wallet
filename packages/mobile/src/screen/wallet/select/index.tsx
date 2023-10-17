@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useMemo} from 'react';
+import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {KeyInfo} from '@keplr-wallet/background';
 import {useStore} from '../../../stores';
@@ -13,14 +13,31 @@ import {Button} from '../../../components/button';
 // import {useIntl} from 'react-intl';
 import {App, AppCoinType} from '@keplr-wallet/ledger-cosmos';
 import {PageWithScrollView} from '../../../components/page';
-import {StyleSheet, Text} from 'react-native';
+import {Pressable, StyleSheet, Text} from 'react-native';
 import {StackActions, useNavigation} from '@react-navigation/native';
-import {RectButton} from '../../../components/rect-button';
+import {useIntl} from 'react-intl';
+import {Modal} from '../../../components/modal';
+import {BottomSheetModal, BottomSheetView} from '@gorhom/bottom-sheet';
+import {EllipsisIcon} from '../../../components/icon/ellipsis';
+import {StackNavProp} from '../../../navigation';
+
+interface DropdownItem {
+  key: string;
+  label: string;
+  onSelect: () => any;
+}
 
 export const WalletSelectScreen: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
   const navigation = useNavigation();
-  // const intl = useIntl();
+  const intl = useIntl();
+  const style = useStyle();
+  const menuModalRef = useRef<BottomSheetModal>(null);
+  const menuModalRef2 = useRef<BottomSheetModal>(null);
+
+  const [modalDropdownItems, setModalDropdownItems] = useState<DropdownItem[]>(
+    [],
+  );
 
   const mnemonicKeys = useMemo(() => {
     return keyRingStore.keyInfos.filter(keyInfo => {
@@ -151,11 +168,12 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
         <Stack gutter={20}>
           {mnemonicKeys.length > 0 ? (
             <KeyInfoList
-              // title={intl.formatMessage({
-              //   id: 'page.wallet.recovery-phrase-title',
-              // })}
-              title={'Recovery Phrase'}
+              title={intl.formatMessage({
+                id: 'page.wallet.recovery-phrase-title',
+              })}
               keyInfos={mnemonicKeys}
+              setModalDropdownItems={setModalDropdownItems}
+              openModal={() => menuModalRef.current?.present()}
             />
           ) : null}
 
@@ -163,49 +181,95 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
             return (
               <KeyInfoList
                 key={info.type}
-                // title={intl.formatMessage(
-                //   {id: 'page.wallet.connect-with-social-account-title'},
-                title={`Connected with ${
-                  info.type.length > 0
-                    ? info.type[0].toUpperCase() + info.type.slice(1)
-                    : info.type
-                } Account`}
+                title={intl.formatMessage(
+                  {id: 'page.wallet.connect-with-social-account-title'},
+                  {
+                    social:
+                      info.type.length > 0
+                        ? info.type[0].toUpperCase() + info.type.slice(1)
+                        : info.type,
+                  },
+                )}
                 keyInfos={info.keyInfos}
+                setModalDropdownItems={setModalDropdownItems}
+                openModal={() => menuModalRef.current?.present()}
               />
             );
           })}
 
           {privateKeyInfos.length > 0 ? (
             <KeyInfoList
-              title={'Private key'}
-              // title={intl.formatMessage({
-              //   id: 'page.wallet.private-key-title',
-              // })}
+              title={intl.formatMessage({
+                id: 'page.wallet.private-key-title',
+              })}
               keyInfos={privateKeyInfos}
+              setModalDropdownItems={setModalDropdownItems}
+              openModal={() => menuModalRef.current?.present()}
             />
           ) : null}
 
           {ledgerKeys.length > 0 ? (
             <KeyInfoList
-              // title={intl.formatMessage({id: 'page.wallet.ledger-title'})}
-              title={'Ledger'}
+              title={intl.formatMessage({id: 'page.wallet.ledger-title'})}
               keyInfos={ledgerKeys}
+              setModalDropdownItems={setModalDropdownItems}
+              openModal={() => menuModalRef.current?.present()}
             />
           ) : null}
 
           {keystoneKeys.length > 0 ? (
-            <KeyInfoList title="Keystone" keyInfos={keystoneKeys} />
+            <KeyInfoList
+              title="Keystone"
+              keyInfos={keystoneKeys}
+              setModalDropdownItems={setModalDropdownItems}
+              openModal={() => menuModalRef.current?.present()}
+            />
           ) : null}
 
           {unknownKeys.length > 0 ? (
             <KeyInfoList
-              // title={intl.formatMessage({id: 'page.wallet.unknown-title'})}
-              title={'Unknown'}
+              title={intl.formatMessage({id: 'page.wallet.unknown-title'})}
               keyInfos={unknownKeys}
+              setModalDropdownItems={setModalDropdownItems}
+              openModal={() => menuModalRef.current?.present()}
             />
           ) : null}
         </Stack>
       </Box>
+      <Modal ref={menuModalRef} isDetachedModal={true} snapPoints={[202]}>
+        <BottomSheetView>
+          {modalDropdownItems.map((item, i) => (
+            <Pressable
+              key={item.key}
+              onPress={() => {
+                item.onSelect();
+                menuModalRef.current?.dismiss();
+              }}>
+              <Box
+                height={68}
+                alignX="center"
+                alignY="center"
+                style={style.flatten(
+                  ['border-width-bottom-1', 'border-color-gray-500'],
+                  [i === 2 && 'border-width-bottom-0'], //마지막 요소는 아래 보더 스타일 제가하기 위해서
+                )}>
+                <Text style={style.flatten(['body1', 'color-text-highest'])}>
+                  {item.label}
+                </Text>
+              </Box>
+            </Pressable>
+          ))}
+        </BottomSheetView>
+      </Modal>
+      <Modal ref={menuModalRef2} isDetachedModal={true} snapPoints={[202]}>
+        <BottomSheetView>
+          {modalDropdownItems.map(item => (
+            <Pressable key={item.key}>
+              <Text>test2</Text>
+            </Pressable>
+          ))}
+        </BottomSheetView>
+      </Modal>
     </PageWithScrollView>
   );
 });
@@ -213,7 +277,9 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
 const KeyInfoList: FunctionComponent<{
   title: string;
   keyInfos: KeyInfo[];
-}> = observer(({title, keyInfos}) => {
+  setModalDropdownItems: React.Dispatch<React.SetStateAction<DropdownItem[]>>;
+  openModal: () => void;
+}> = observer(({title, keyInfos, setModalDropdownItems, openModal}) => {
   const style = useStyle();
   return (
     <Box>
@@ -229,7 +295,14 @@ const KeyInfoList: FunctionComponent<{
         <Gutter size={8} />
         <Stack gutter={8}>
           {keyInfos.map(keyInfo => {
-            return <KeyringItem key={keyInfo.id} keyInfo={keyInfo} />;
+            return (
+              <KeyringItem
+                setModalDropdownItems={setModalDropdownItems}
+                key={keyInfo.id}
+                keyInfo={keyInfo}
+                openModal={openModal}
+              />
+            );
           })}
         </Stack>
       </YAxis>
@@ -239,12 +312,12 @@ const KeyInfoList: FunctionComponent<{
 
 const KeyringItem: FunctionComponent<{
   keyInfo: KeyInfo;
-}> = observer(({keyInfo}) => {
+  setModalDropdownItems: React.Dispatch<React.SetStateAction<DropdownItem[]>>;
+  openModal: () => void;
+}> = observer(({keyInfo, setModalDropdownItems, openModal}) => {
   const {chainStore, keyRingStore} = useStore();
-
-  const navigate = useNavigation();
-
-  // const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const intl = useIntl();
+  const navigate = useNavigation<StackNavProp>();
 
   const style = useStyle();
 
@@ -297,10 +370,9 @@ const KeyringItem: FunctionComponent<{
         }'/${bip44Path.change}/${bip44Path.addressIndex}${(() => {
           if (app.length === 1) {
             if (app[0] !== 'Cosmos' && app[0] !== 'Ethereum') {
-              // return ` ${intl.formatMessage({
-              //   id: `page.wallet.keyring-item.bip44-path-${app[0]}-text`,
-              // })}`;
-              return `tes1`;
+              return ` ${intl.formatMessage({
+                id: `page.wallet.keyring-item.bip44-path-${app[0]}-text`,
+              })}`;
             }
           }
 
@@ -339,57 +411,64 @@ const KeyringItem: FunctionComponent<{
         return web3Auth['email'];
       }
     }
-    // }, [intl, keyInfo.insensitive, keyInfo.type]);
-  }, [keyInfo.insensitive, keyInfo.type]);
+  }, [intl, keyInfo.insensitive, keyInfo.type]);
 
-  // const dropdownItems = (() => {
-  //   const defaults = [
-  //     {
-  //       key: 'change-wallet-name',
-  //       label: intl.formatMessage({
-  //         id: 'page.wallet.keyring-item.dropdown.change-wallet-name-title',
-  //       }),
-  //       onSelect: () => navigate(`/wallet/change-name?id=${keyInfo.id}`),
-  //     },
-  //     {
-  //       key: 'delete-wallet',
-  //       label: intl.formatMessage({
-  //         id: 'page.wallet.keyring-item.dropdown.delete-wallet-title',
-  //       }),
-  //       onSelect: () => navigate(`/wallet/delete?id=${keyInfo.id}`),
-  //     },
-  //   ];
+  const dropdownItems = (() => {
+    const defaults = [
+      {
+        key: 'change-wallet-name',
+        label: intl.formatMessage({
+          id: 'page.wallet.keyring-item.dropdown.change-wallet-name-title',
+        }),
+        onSelect: () =>
+          navigate.navigate('SelectWallet.ChangeName', {id: keyInfo.id}),
+      },
+      {
+        key: 'delete-wallet',
+        label: intl.formatMessage({
+          id: 'page.wallet.keyring-item.dropdown.delete-wallet-title',
+        }),
+        onSelect: () =>
+          navigate.navigate('SelectWallet.Delete', {id: keyInfo.id}),
+      },
+    ];
 
-  //   switch (keyInfo.type) {
-  //     case 'mnemonic': {
-  //       defaults.unshift({
-  //         key: 'view-recovery-phrase',
-  //         label: intl.formatMessage({
-  //           id: 'page.wallet.keyring-item.dropdown.view-recovery-path-title',
-  //         }),
-  //         onSelect: () => navigate(`/wallet/show-sensitive?id=${keyInfo.id}`),
-  //       });
-  //       break;
-  //     }
-  //     case 'private-key': {
-  //       defaults.unshift({
-  //         key: 'view-recovery-phrase',
-  //         label: intl.formatMessage({
-  //           id: 'page.wallet.keyring-item.dropdown.view-private-key-title',
-  //         }),
-  //         onSelect: () => navigate(`/wallet/show-sensitive?id=${keyInfo.id}`),
-  //       });
-  //       break;
-  //     }
-  //   }
+    switch (keyInfo.type) {
+      case 'mnemonic': {
+        defaults.unshift({
+          key: 'view-recovery-phrase',
+          label: intl.formatMessage({
+            id: 'page.wallet.keyring-item.dropdown.view-recovery-path-title',
+          }),
+          onSelect: () =>
+            navigate.navigate('SelectWallet.ViewRecoveryPhrase', {
+              id: keyInfo.id,
+            }),
+        });
+        break;
+      }
+      case 'private-key': {
+        defaults.unshift({
+          key: 'view-recovery-phrase',
+          label: intl.formatMessage({
+            id: 'page.wallet.keyring-item.dropdown.view-private-key-title',
+          }),
+          onSelect: () =>
+            navigate.navigate('SelectWallet.ViewRecoveryPhrase', {
+              id: keyInfo.id,
+            }),
+        });
+        break;
+      }
+    }
 
-  //   return defaults;
-  // })();
+    return defaults;
+  })();
 
   const isSelected = keyRingStore.selectedKeyInfo?.id === keyInfo.id;
 
   return (
-    <RectButton
+    <Pressable
       onPress={async () => {
         if (isSelected) {
           return;
@@ -450,28 +529,22 @@ const KeyringItem: FunctionComponent<{
                 e.preventDefault();
                 e.stopPropagation();
               }}>
-              {/* <FloatingDropdown
-              isOpen={isMenuOpen}
-              close={() => setIsMenuOpen(false)}
-              items={dropdownItems}>
-              <Box
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                style={{color: ColorPalette['gray-10']}}>
+              <Pressable
+                onPress={e => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setModalDropdownItems(dropdownItems);
+                  openModal();
+                }}>
                 <EllipsisIcon
-                  width="1.5rem"
-                  height="1.5rem"
-                  color={
-                    theme.mode === 'light'
-                      ? ColorPalette['gray-200']
-                      : ColorPalette['gray-10']
-                  }
+                  size={24}
+                  color={style.get('color-gray-10').color}
                 />
-              </Box>
-            </FloatingDropdown> */}
+              </Pressable>
             </Box>
           </XAxis>
         </Columns>
       </Box>
-    </RectButton>
+    </Pressable>
   );
 });

@@ -178,7 +178,30 @@ const SelectWalletNavigation = () => {
         name="SelectWallet.Intro"
         options={{
           title: 'Select Wallet',
-
+          ...defaultHeaderOptions,
+        }}
+        component={WalletSelectScreen}
+      />
+      <Stack.Screen
+        name="SelectWallet.Delete"
+        options={{
+          title: 'Select Wallet',
+          ...defaultHeaderOptions,
+        }}
+        component={WalletSelectScreen}
+      />
+      <Stack.Screen
+        name="SelectWallet.ChangeName"
+        options={{
+          title: 'Select Wallet',
+          ...defaultHeaderOptions,
+        }}
+        component={WalletSelectScreen}
+      />
+      <Stack.Screen
+        name="SelectWallet.ViewRecoveryPhrase"
+        options={{
+          title: 'Select Wallet',
           ...defaultHeaderOptions,
         }}
         component={WalletSelectScreen}
