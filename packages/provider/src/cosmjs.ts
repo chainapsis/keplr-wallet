@@ -7,12 +7,14 @@ import {
   StdSignDoc,
   DirectSignResponse,
   SignDoc,
+  KeplrSignOptions,
 } from "@keplr-wallet/types";
 
 export class CosmJSOfflineSignerOnlyAmino implements OfflineAminoSigner {
   constructor(
     protected readonly chainId: string,
-    protected readonly keplr: Keplr
+    protected readonly keplr: Keplr,
+    protected readonly signOptions?: KeplrSignOptions
   ) {}
 
   async getAccounts(): Promise<AccountData[]> {
@@ -42,10 +44,15 @@ export class CosmJSOfflineSignerOnlyAmino implements OfflineAminoSigner {
       throw new Error("Unknown signer address");
     }
 
-    return await this.keplr.signAmino(this.chainId, signerAddress, signDoc);
+    return await this.keplr.signAmino(
+      this.chainId,
+      signerAddress,
+      signDoc,
+      this.signOptions
+    );
   }
 
-  // Fallback function for the legacy cosmjs implementation before the staragte.
+  // Fallback function for the legacy cosmjs implementation before the stargate.
   async sign(
     signerAddress: string,
     signDoc: StdSignDoc
@@ -58,8 +65,8 @@ export class CosmJSOfflineSigner
   extends CosmJSOfflineSignerOnlyAmino
   implements OfflineAminoSigner, OfflineDirectSigner
 {
-  constructor(chainId: string, keplr: Keplr) {
-    super(chainId, keplr);
+  constructor(chainId: string, keplr: Keplr, signOptions?: KeplrSignOptions) {
+    super(chainId, keplr, signOptions);
   }
 
   async signDirect(
@@ -76,6 +83,11 @@ export class CosmJSOfflineSigner
       throw new Error("Unknown signer address");
     }
 
-    return await this.keplr.signDirect(this.chainId, signerAddress, signDoc);
+    return await this.keplr.signDirect(
+      this.chainId,
+      signerAddress,
+      signDoc,
+      this.signOptions
+    );
   }
 }

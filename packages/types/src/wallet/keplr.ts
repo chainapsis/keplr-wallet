@@ -130,10 +130,17 @@ export interface Keplr {
     type: EthSignType
   ): Promise<Uint8Array>;
 
-  getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner;
-  getOfflineSignerOnlyAmino(chainId: string): OfflineAminoSigner;
+  getOfflineSigner(
+    chainId: string,
+    signOptions?: KeplrSignOptions
+  ): OfflineAminoSigner & OfflineDirectSigner;
+  getOfflineSignerOnlyAmino(
+    chainId: string,
+    signOptions?: KeplrSignOptions
+  ): OfflineAminoSigner;
   getOfflineSignerAuto(
-    chainId: string
+    chainId: string,
+    signOptions?: KeplrSignOptions
   ): Promise<OfflineAminoSigner | OfflineDirectSigner>;
 
   suggestToken(
