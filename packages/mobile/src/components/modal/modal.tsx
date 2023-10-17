@@ -1,7 +1,6 @@
 import {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
-  BottomSheetBackgroundProps,
   BottomSheetModal,
   BottomSheetModalProps,
 } from '@gorhom/bottom-sheet';
@@ -10,10 +9,9 @@ import React, {
   FunctionComponent,
   PropsWithChildren,
   useCallback,
-  useMemo,
 } from 'react';
-import {ColorPalette, useStyle} from '../../styles';
-import Animated, {useAnimatedStyle} from 'react-native-reanimated';
+import {useStyle} from '../../styles';
+
 import {
   NativeStackNavigationOptions,
   createNativeStackNavigator,
@@ -22,26 +20,15 @@ import {NavigationContainer} from '@react-navigation/native';
 import {StyleSheet, Text, TextStyle, ViewStyle} from 'react-native';
 import {Box} from '../box';
 
-const CustomBackground: FunctionComponent<BottomSheetBackgroundProps> = ({
-  style,
-}) => {
-  const containerAnimatedStyle = useAnimatedStyle(() => ({
-    backgroundColor: ColorPalette['gray-600'],
-  }));
-  const containerStyle = useMemo(
-    () => [style, containerAnimatedStyle],
-    [style, containerAnimatedStyle],
-  );
-
-  return <Animated.View pointerEvents="none" style={containerStyle} />;
-};
-
-interface ModalProps {}
+interface ModalProps {
+  isDetachedModal?: boolean;
+}
 
 export const Modal = forwardRef<
   BottomSheetModal,
   PropsWithChildren<ModalProps & BottomSheetModalProps & BaseModalProps>
->(({children, snapPoints = ['50%'], ...props}, ref) => {
+>(({children, snapPoints = ['50%'], isDetachedModal, ...props}, ref) => {
+  const style = useStyle();
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
       <BottomSheetBackdrop
@@ -60,7 +47,23 @@ export const Modal = forwardRef<
       snapPoints={snapPoints}
       backdropComponent={renderBackdrop}
       enablePanDownToClose={true}
-      backgroundComponent={CustomBackground}
+      backgroundStyle={style.flatten(
+        ['background-color-gray-600'],
+        [isDetachedModal ? 'border-radius-8' : 'border-radius-0'],
+      )}
+      {...(() =>
+        isDetachedModal
+          ? {
+              detached: true,
+              bottomInset: 25,
+              style: style.flatten([
+                'margin-x-24',
+                'border-width-1',
+                'border-radius-8',
+                'border-color-gray-500',
+              ]),
+            }
+          : {})()}
       {...props}>
       {children}
     </BottomSheetModal>
