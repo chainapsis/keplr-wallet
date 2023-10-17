@@ -62,6 +62,7 @@ export const Modal = forwardRef<
                 'border-radius-8',
                 'border-color-gray-500',
               ]),
+              handleComponent: null,
             }
           : {})()}
       {...props}>
