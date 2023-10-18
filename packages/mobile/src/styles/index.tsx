@@ -100,14 +100,14 @@ export const ColorPalette = {
 };
 
 export const TextColors = {
-  'text-highest': ColorPalette['black'],
+  'text-high': ColorPalette['black'],
   'text-middle': ColorPalette['gray-200'],
   'text-low': ColorPalette['gray-300'],
   'label-default': ColorPalette['gray-100'],
 };
 
 export const DarkThemeTextColors = {
-  'text-highest': ColorPalette['white'],
+  'text-high': ColorPalette['white'],
   'text-middle': ColorPalette['gray-200'],
   'text-low': ColorPalette['gray-300'],
   'label-default': ColorPalette['gray-100'],
