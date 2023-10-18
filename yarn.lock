@@ -5465,6 +5465,7 @@ __metadata:
     "@keplr-wallet/simple-fetch": 0.12.27
     "@keplr-wallet/stores": 0.12.27
     "@keplr-wallet/stores-etc": 0.12.27
+    "@keplr-wallet/stores-eth": 0.12.27
     "@keplr-wallet/types": 0.12.27
     "@keplr-wallet/unit": 0.12.27
     buffer: ^6.0.3
