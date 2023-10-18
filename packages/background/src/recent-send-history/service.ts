@@ -299,7 +299,10 @@ export class RecentSendHistoryService {
       return history.ibcHistory.find((h) => h.error != null) != null;
     })();
 
-    if (needRewind) {
+    if (
+      needRewind &&
+      !history.ibcHistory.find((h) => h.rewoundButNextRewindingBlocked)
+    ) {
       const lastRewoundChannelIndex = history.ibcHistory.findIndex((h) => {
         if (h.rewound) {
           return true;
@@ -315,6 +318,11 @@ export class RecentSendHistoryService {
         }
         return history.ibcHistory.find((h) => h.error != null);
       })();
+      const isSwapTargetChannel =
+        targetChannel &&
+        "swapChannelIndex" in history &&
+        history.ibcHistory.indexOf(targetChannel) ===
+          history.swapChannelIndex + 1;
 
       if (targetChannel && targetChannel.sequence) {
         const prevChainInfo = (() => {
@@ -344,8 +352,44 @@ export class RecentSendHistoryService {
               "acknowledge_packet.packet_src_channel": targetChannel.channelId,
               "acknowledge_packet.packet_sequence": targetChannel.sequence,
             })
-            .then(() => {
+            .then((res: any) => {
+              if (!res) {
+                return;
+              }
+
               runInAction(() => {
+                if (isSwapTargetChannel) {
+                  const txs = res.txs
+                    ? res.txs.map((res: any) => res.tx_result || res)
+                    : [res.tx_result || res];
+                  if (txs && Array.isArray(txs)) {
+                    for (const tx of txs) {
+                      if (targetChannel.sequence && "swapReceiver" in history) {
+                        const index =
+                          this.getIBCAcknowledgementPacketIndexFromTx(
+                            tx,
+                            targetChannel.portId,
+                            targetChannel.channelId,
+                            targetChannel.sequence
+                          );
+                        if (index >= 0) {
+                          const refunded = this.getIBCSwapResAmountFromTx(
+                            tx,
+                            history.swapReceiver[history.swapChannelIndex + 1],
+                            index
+                          );
+                          history.swapRefundInfo = {
+                            chainId: prevChainInfo.chainId,
+                            amount: refunded,
+                          };
+
+                          targetChannel.rewoundButNextRewindingBlocked = true;
+                          break;
+                        }
+                      }
+                    }
+                  }
+                }
                 targetChannel.rewound = true;
               });
               onFulfill();
@@ -866,6 +910,96 @@ export class RecentSendHistoryService {
     }
 
     return [];
+  }
+
+  protected getIBCAcknowledgementPacketIndexFromTx(
+    tx: any,
+    sourcePortId: string,
+    sourceChannelId: string,
+    sequence: string
+  ): number {
+    const events = tx.events;
+    if (!events) {
+      throw new Error("Invalid tx");
+    }
+    if (!Array.isArray(events)) {
+      throw new Error("Invalid tx");
+    }
+
+    // In injective, events from tendermint rpc is not encoded as base64.
+    // I don't know that this is the difference from tendermint version, or just custom from injective.
+    const compareStringWithBase64OrPlain = (
+      target: string,
+      value: string
+    ): [boolean, boolean] => {
+      if (target === value) {
+        return [true, false];
+      }
+
+      if (target === Buffer.from(value).toString("base64")) {
+        return [true, true];
+      }
+
+      return [false, false];
+    };
+
+    const packetEvent = events.find((event: any) => {
+      if (event.type !== "acknowledge_packet") {
+        return false;
+      }
+      const sourcePortAttr = event.attributes.find((attr: { key: string }) => {
+        return compareStringWithBase64OrPlain(attr.key, "packet_src_port")[0];
+      });
+      if (!sourcePortAttr) {
+        return false;
+      }
+      const sourceChannelAttr = event.attributes.find(
+        (attr: { key: string }) => {
+          return compareStringWithBase64OrPlain(
+            attr.key,
+            "packet_src_channel"
+          )[0];
+        }
+      );
+      if (!sourceChannelAttr) {
+        return false;
+      }
+      let isBase64 = false;
+      const sequenceAttr = event.attributes.find((attr: { key: string }) => {
+        const c = compareStringWithBase64OrPlain(attr.key, "packet_sequence");
+        isBase64 = c[1];
+        return c[0];
+      });
+      if (!sequenceAttr) {
+        return false;
+      }
+
+      if (isBase64) {
+        return (
+          Buffer.from(sourcePortAttr.value, "base64").toString() ===
+            sourcePortId &&
+          Buffer.from(sourceChannelAttr.value, "base64").toString() ===
+            sourceChannelId &&
+          Buffer.from(sequenceAttr.value, "base64").toString() === sequence
+        );
+      } else {
+        return (
+          sourcePortAttr.value === sourcePortId &&
+          sourceChannelAttr.value === sourceChannelId &&
+          sequenceAttr.value === sequence
+        );
+      }
+    });
+    if (!packetEvent) {
+      throw new Error("Invalid tx");
+    }
+
+    const index = events.indexOf(packetEvent);
+    if (index < 0) {
+      throw new Error("Invalid tx");
+    }
+
+    return index;
   }
 
   protected getIBCRecvPacketIndexFromTx(
