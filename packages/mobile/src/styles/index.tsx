@@ -101,18 +101,16 @@ export const ColorPalette = {
 
 export const TextColors = {
   'text-highest': ColorPalette['black'],
-  'text-high': ColorPalette['platinum-700'],
-  'text-middle': ColorPalette['platinum-400'],
+  'text-middle': ColorPalette['gray-200'],
   'text-low': ColorPalette['gray-300'],
-  'text-label': ColorPalette['platinum-300'],
+  'label-default': ColorPalette['gray-100'],
 };
 
 export const DarkThemeTextColors = {
   'text-highest': ColorPalette['white'],
-  'text-high': ColorPalette['platinum-50'],
-  'text-middle': ColorPalette['platinum-100'],
-  'text-low': ColorPalette['platinum-200'],
-  'text-label': ColorPalette['platinum-100'],
+  'text-middle': ColorPalette['gray-200'],
+  'text-low': ColorPalette['gray-300'],
+  'label-default': ColorPalette['gray-100'],
 };
 
 export const BackgroundColors = {
