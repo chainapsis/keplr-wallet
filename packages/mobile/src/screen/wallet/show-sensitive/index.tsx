@@ -12,8 +12,10 @@ import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
 import {Button} from '../../../components/button';
 import LottieView from 'lottie-react-native';
-import {Text} from 'react-native';
-import {Column} from '../../../components/column';
+import {Pressable, Text} from 'react-native';
+import {Column, Columns} from '../../../components/column';
+import {CheckIcon} from '../../../components/icon';
+import * as Clipboard from 'expo-clipboard';
 
 interface FormData {
   password: string;
@@ -30,6 +32,7 @@ export const WalletShowSensitiveScreen: FunctionComponent = observer(() => {
     >();
   const vaultId = route.params.id;
   const style = useStyle();
+  const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
     const keyInfo = keyRingStore.keyInfos.find(
@@ -124,6 +127,37 @@ export const WalletShowSensitiveScreen: FunctionComponent = observer(() => {
               ])}>
               {sensitive}
             </Text>
+            <Column weight={1} />
+            <Box alignX="center">
+              <Pressable
+                onPress={() => {
+                  Clipboard.setStringAsync(sensitive).then(() =>
+                    setIsCopied(true),
+                  );
+                  setTimeout(() => {
+                    setIsCopied(false);
+                  }, 3000);
+                }}>
+                <Columns sum={1} alignY="center">
+                  <Text
+                    style={style.flatten(['text-button1', 'color-text-high'])}>
+                    Copy to clipboard
+                  </Text>
+                  {isCopied ? (
+                    <Box marginLeft={8}>
+                      <CheckIcon
+                        size={20}
+                        color={
+                          isCopied
+                            ? style.get('color-green-400').color
+                            : style.get('color-text-high').color
+                        }
+                      />
+                    </Box>
+                  ) : null}
+                </Columns>
+              </Pressable>
+            </Box>
           </Box>
         )}
         <Column weight={1} />
