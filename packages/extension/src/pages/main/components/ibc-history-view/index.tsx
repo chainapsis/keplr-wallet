@@ -735,13 +735,11 @@ const IbcHistoryViewItemChainImage: FunctionComponent<{
     <XAxis alignY="center">
       <Box position="relative">
         <ChainImageFallbackAnimated
+          chainInfo={chainInfo}
+          size="2rem"
           style={{
-            width: "2rem",
-            height: "2rem",
             opacity,
           }}
-          src={chainInfo.chainSymbolImageUrl}
-          alt="chain image"
         />
         {error ? (
           <Box
