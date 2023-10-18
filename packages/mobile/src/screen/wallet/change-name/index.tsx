@@ -11,6 +11,7 @@ import {useStyle} from '../../../styles';
 import {Button} from '../../../components/button';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList} from '../../../navigation';
+import {Gutter} from '../../../components/gutter';
 
 interface FormData {
   name: string;
@@ -98,7 +99,8 @@ export const WalletChangeNameScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView backgroundMode={'default'}>
-      {/* <HeaderLayout
+      {/* 뒤로가기 버튼을 아래 상황일때 안보여줘야함
+       <HeaderLayout
         left={
           <BackButton
             hidden={
@@ -107,19 +109,6 @@ export const WalletChangeNameScreen: FunctionComponent = observer(() => {
             }
           />
         }
-        bottomButton={{
-          text: intl.formatMessage({id: 'button.save'}),
-          color: 'secondary',
-          size: 'large',
-          type: 'submit',
-          isLoading: (() => {
-            // if (!interactionInfo.interaction) {
-            //   return false;
-            // }
-
-            return interactionStore.isObsoleteInteraction(interactionData?.id);
-          })(),
-        }}
  > */}
       <Box height={'100%'} padding={12}>
         <Box style={style.flatten(['gap-12'])}>
@@ -130,14 +119,6 @@ export const WalletChangeNameScreen: FunctionComponent = observer(() => {
             disabled
             value={walletName?.name}
           />
-          {/* <TextInput
-            label={intl.formatMessage({
-              id: 'page.wallet.change-name.new-name-input-label',
-            })}
-            error={errors.name && errors.name.message}
-            // disabled={notEditable}
-            {...register('name', {required: true})}
-          /> */}
           <Controller
             control={control}
             rules={{required: ''}}
@@ -166,6 +147,7 @@ export const WalletChangeNameScreen: FunctionComponent = observer(() => {
             }}
           />
         </Box>
+        <Gutter size={12} />
         <Button
           text={intl.formatMessage({id: 'button.save'})}
           color="secondary"
@@ -174,7 +156,6 @@ export const WalletChangeNameScreen: FunctionComponent = observer(() => {
             // if (!interactionInfo.interaction) {
             //   return false;
             // }
-
             return interactionStore.isObsoleteInteraction(interactionData?.id);
           })()}
           onPress={submit}

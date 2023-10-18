@@ -253,7 +253,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
                   ['border-width-bottom-1', 'border-color-gray-500'],
                   [i === 2 && 'border-width-bottom-0'], //마지막 요소는 아래 보더 스타일 제가하기 위해서
                 )}>
-                <Text style={style.flatten(['body1', 'color-text-highest'])}>
+                <Text style={style.flatten(['body1', 'color-text-high'])}>
                   {item.label}
                 </Text>
               </Box>
