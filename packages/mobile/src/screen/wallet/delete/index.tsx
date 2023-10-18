@@ -63,7 +63,6 @@ export const WalletDeleteScreen: FunctionComponent = observer(() => {
   return (
     <PageWithScrollView
       backgroundMode={'default'}
-      style={style.flatten(['height-full'])}
       contentContainerStyle={style.flatten(['flex-grow-1'])}>
       <Box style={style.flatten(['height-full'])}>
         <Box>

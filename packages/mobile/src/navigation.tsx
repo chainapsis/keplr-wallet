@@ -32,6 +32,9 @@ import {SettingScreen} from './screen/setting';
 import {SettingGeneralScreen} from './screen/setting/screens/general';
 import {WalletSelectScreen} from './screen/wallet';
 import {WalletDeleteScreen} from './screen/wallet/delete';
+import {WalletShowSensitiveScreen} from './screen/wallet/show-sensitive';
+import {useIntl} from 'react-intl';
+import {WalletChangeNameScreen} from './screen/wallet/change-name';
 export type RootStackParamList = {
   Home: undefined;
   Register: undefined;
@@ -173,12 +176,13 @@ const SettingNavigation = () => {
 };
 
 const SelectWalletNavigation = () => {
+  const intl = useIntl();
   return (
     <Stack.Navigator initialRouteName="SelectWallet.Intro">
       <Stack.Screen
         name="SelectWallet.Intro"
         options={{
-          title: 'Select Wallet',
+          title: intl.formatMessage({id: 'page.wallet.title'}),
           ...defaultHeaderOptions,
         }}
         component={WalletSelectScreen}
@@ -186,7 +190,9 @@ const SelectWalletNavigation = () => {
       <Stack.Screen
         name="SelectWallet.Delete"
         options={{
-          title: 'Delete Wallet',
+          title: intl.formatMessage({
+            id: 'page.wallet.keyring-item.dropdown.delete-wallet-title',
+          }),
           ...defaultHeaderOptions,
         }}
         component={WalletDeleteScreen}
@@ -194,18 +200,19 @@ const SelectWalletNavigation = () => {
       <Stack.Screen
         name="SelectWallet.ChangeName"
         options={{
-          title: 'Select Wallet',
+          title: intl.formatMessage({
+            id: 'page.wallet.keyring-item.dropdown.change-wallet-name-title',
+          }),
           ...defaultHeaderOptions,
         }}
-        component={WalletSelectScreen}
+        component={WalletChangeNameScreen}
       />
       <Stack.Screen
         name="SelectWallet.ViewRecoveryPhrase"
         options={{
-          title: 'Select Wallet',
           ...defaultHeaderOptions,
         }}
-        component={WalletSelectScreen}
+        component={WalletShowSensitiveScreen}
       />
     </Stack.Navigator>
   );
