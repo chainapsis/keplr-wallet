@@ -427,6 +427,7 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         '72': 72,
         '80': 80,
         '122': 122,
+        '136': 136,
         '160': 160,
         '240': 240,
         '292': 292,
@@ -470,6 +471,7 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         '104': 104,
         '116': 116,
         '122': 122,
+        '136': 136,
         '214': 214,
         '400': 400,
         '600': 600,
@@ -588,6 +590,7 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         '12': 12,
         '16': 16,
         '32': 32,
+        '40': 40,
         '64': 64,
       },
       opacities: {
