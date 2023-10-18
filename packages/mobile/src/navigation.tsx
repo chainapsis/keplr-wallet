@@ -31,6 +31,7 @@ import {HomeScreenHeader, defaultHeaderOptions} from './components/pageHeader';
 import {SettingScreen} from './screen/setting';
 import {SettingGeneralScreen} from './screen/setting/screens/general';
 import {WalletSelectScreen} from './screen/wallet';
+import {WalletDeleteScreen} from './screen/wallet/delete';
 export type RootStackParamList = {
   Home: undefined;
   Register: undefined;
@@ -185,10 +186,10 @@ const SelectWalletNavigation = () => {
       <Stack.Screen
         name="SelectWallet.Delete"
         options={{
-          title: 'Select Wallet',
+          title: 'Delete Wallet',
           ...defaultHeaderOptions,
         }}
-        component={WalletSelectScreen}
+        component={WalletDeleteScreen}
       />
       <Stack.Screen
         name="SelectWallet.ChangeName"
