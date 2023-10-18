@@ -10,7 +10,6 @@ import {Stack} from '../../../components/stack';
 import {Column, Columns} from '../../../components/column';
 import {CheckIcon} from '../../../components/icon';
 import {Button} from '../../../components/button';
-// import {useIntl} from 'react-intl';
 import {App, AppCoinType} from '@keplr-wallet/ledger-cosmos';
 import {PageWithScrollView} from '../../../components/page';
 import {Pressable, StyleSheet, Text} from 'react-native';
@@ -154,10 +153,9 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
   return (
     <PageWithScrollView backgroundMode={'default'}>
       <Box padding={12} position="relative">
-        <Box position="absolute" style={{top: 0, right: 12, zIndex: 1000}}>
+        <Box position="absolute" style={{top: 14, right: 12, zIndex: 1000}}>
           <Button
-            // text={intl.formatMessage({id: 'page.wallet.add-wallet-button'})}
-            text={'Add Wallet'}
+            text={intl.formatMessage({id: 'page.wallet.add-wallet-button'})}
             size="extra-small"
             color="secondary"
             onPress={async () => {
@@ -165,6 +163,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
             }}
           />
         </Box>
+        <Gutter size={16} />
         <Stack gutter={20}>
           {mnemonicKeys.length > 0 ? (
             <KeyInfoList
