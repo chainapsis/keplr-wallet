@@ -14,7 +14,11 @@ import {
 } from "../../../../components/typography";
 import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
-import { ChainImageFallback } from "../../../../components/image";
+import {
+  ChainImageFallback,
+  CurrencyImageFallback,
+  RawImageFallback,
+} from "../../../../components/image";
 import { AppCurrency } from "@keplr-wallet/types";
 import { IBCSwapAmountConfig } from "../../../../hooks/ibc-swap";
 import { useNavigate } from "react-router";
@@ -445,14 +449,19 @@ export const SwapAssetInfo: FunctionComponent<{
 
                 return (
                   <React.Fragment>
-                    <ChainImageFallback
-                      style={{
-                        width: "1.25rem",
-                        height: "1.25rem",
-                      }}
-                      src={currency?.coinImageUrl}
-                      alt={currency?.coinDenom || "coinDenom"}
-                    />
+                    {/* Currency가 없을 경우엔 대충 fallback 이미지로 처리한다 */}
+                    {!currency ? (
+                      <RawImageFallback
+                        src={undefined}
+                        alt="empty"
+                        size="1.25rem"
+                      />
+                    ) : (
+                      <CurrencyImageFallback
+                        currency={currency}
+                        size="1.25rem"
+                      />
+                    )}
                     <Gutter size="0.5rem" />
                     <Subtitle2
                       color={
@@ -814,14 +823,8 @@ const SelectDestinationChainModal: FunctionComponent<{
               >
                 <XAxis alignY="center">
                   <ChainImageFallback
-                    style={{
-                      width: "2rem",
-                      height: "2rem",
-                    }}
-                    src={
-                      chainStore.getChain(channel.chainId).chainSymbolImageUrl
-                    }
-                    alt={chainStore.getChain(channel.chainId).chainName}
+                    chainInfo={chainStore.getChain(channel.chainId)}
+                    size="2rem"
                   />
                   <Gutter size="0.75rem" />
                   <Subtitle2

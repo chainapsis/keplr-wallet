@@ -60,14 +60,7 @@ export const QRCodeScene: FunctionComponent<{
 
           <Column weight={1} />
 
-          <ChainImageFallback
-            style={{
-              width: "2rem",
-              height: "2rem",
-            }}
-            src={chainInfo.chainSymbolImageUrl}
-            alt={chainInfo.chainName}
-          />
+          <ChainImageFallback chainInfo={chainInfo} size="2rem" />
           <Gutter size="0.5rem" />
           <Subtitle2>{chainInfo.chainName}</Subtitle2>
 

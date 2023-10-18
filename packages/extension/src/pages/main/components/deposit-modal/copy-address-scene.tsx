@@ -437,14 +437,7 @@ const CopyAddressItem: FunctionComponent<{
               </Box>
               <Gutter size="0.5rem" />
 
-              <ChainImageFallback
-                alt={address.chainInfo.chainName}
-                src={address.chainInfo.chainSymbolImageUrl}
-                style={{
-                  width: "2rem",
-                  height: "2rem",
-                }}
-              />
+              <ChainImageFallback chainInfo={address.chainInfo} size="2rem" />
               <Gutter size="0.5rem" />
               <YAxis>
                 <Subtitle3

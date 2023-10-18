@@ -27,7 +27,7 @@ import {
   QuestionIcon,
 } from "../../../../components/icon";
 import styled, { css, useTheme } from "styled-components";
-import { ChainImageFallback } from "../../../../components/image";
+import { CurrencyImageFallback } from "../../../../components/image";
 import { Tooltip } from "../../../../components/tooltip";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Tag } from "../../../../components/tag";
@@ -267,13 +267,9 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
       >
         <Columns sum={1} gutter="0.5rem" alignY="center">
           <Skeleton type="circle" layer={1} isNotReady={isNotReady}>
-            <ChainImageFallback
-              style={{
-                width: "2rem",
-                height: "2rem",
-              }}
-              src={viewToken.token.currency.coinImageUrl}
-              alt={viewToken.token.currency.coinDenom}
+            <CurrencyImageFallback
+              currency={viewToken.token.currency}
+              size="2rem"
             />
           </Skeleton>
 
