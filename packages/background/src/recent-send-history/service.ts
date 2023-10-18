@@ -16,7 +16,9 @@ import {
 import { KVStore, retry } from "@keplr-wallet/common";
 import { IBCHistory, RecentSendHistory } from "./types";
 import { Buffer } from "buffer/";
-import { ChainInfo } from "@keplr-wallet/types";
+import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
+import { Notification } from "../tx";
+import { CoinPretty } from "@keplr-wallet/unit";
 
 export class RecentSendHistoryService {
   // Key: {chain_identifier}/{type}
@@ -33,7 +35,8 @@ export class RecentSendHistoryService {
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly chainsService: ChainsService,
-    protected readonly txService: BackgroundTxService
+    protected readonly txService: BackgroundTxService,
+    protected readonly notification: Notification
   ) {
     makeObservable(this);
   }
@@ -129,7 +132,10 @@ export class RecentSendHistoryService {
           channelId: string;
           counterpartyChainId: string;
         }[]
-      | undefined
+      | undefined,
+    notificationInfo: {
+      currencies: AppCurrency[];
+    }
   ): Promise<Uint8Array> {
     const sourceChainInfo =
       this.chainsService.getChainInfoOrThrow(sourceChainId);
@@ -169,6 +175,7 @@ export class RecentSendHistoryService {
         amount,
         memo,
         ibcChannels,
+        notificationInfo,
         txHash
       );
 
@@ -202,7 +209,10 @@ export class RecentSendHistoryService {
       denom: string;
     },
     swapChannelIndex: number,
-    swapReceiver: string[]
+    swapReceiver: string[],
+    notificationInfo: {
+      currencies: AppCurrency[];
+    }
   ): Promise<Uint8Array> {
     const sourceChainInfo =
       this.chainsService.getChainInfoOrThrow(sourceChainId);
@@ -228,6 +238,7 @@ export class RecentSendHistoryService {
       destinationAsset,
       swapChannelIndex,
       swapReceiver,
+      notificationInfo,
       txHash
     );
 
@@ -522,29 +533,121 @@ export class RecentSendHistoryService {
                       targetChannel.sequence!
                     );
 
-                    if ("swapReceiver" in history) {
-                      const res: {
-                        amount: string;
-                        denom: string;
-                      }[] = this.getIBCSwapResAmountFromTx(
-                        tx,
-                        history.swapReceiver[targetChannelIndex + 1],
-                        index
-                      );
+                    if (index >= 0) {
+                      if ("swapReceiver" in history) {
+                        const res: {
+                          amount: string;
+                          denom: string;
+                        }[] = this.getIBCSwapResAmountFromTx(
+                          tx,
+                          history.swapReceiver[targetChannelIndex + 1],
+                          index
+                        );
 
-                      history.resAmount.push(res);
-                    }
+                        history.resAmount.push(res);
+                      }
 
-                    if (nextChannel) {
-                      nextChannel.sequence = this.getIBCPacketSequenceFromTx(
-                        tx,
-                        nextChannel.portId,
-                        nextChannel.channelId,
-                        index
-                      );
-                      onFulfill();
-                      this.trackIBCPacketForwardingRecursive(id);
-                      break;
+                      if (nextChannel) {
+                        nextChannel.sequence = this.getIBCPacketSequenceFromTx(
+                          tx,
+                          nextChannel.portId,
+                          nextChannel.channelId,
+                          index
+                        );
+                        onFulfill();
+                        this.trackIBCPacketForwardingRecursive(id);
+                        break;
+                      } else {
+                        console.log("!!!", toJS(history));
+                        // Packet received to destination chain.
+                        if (history.notificationInfo && !history.notified) {
+                          runInAction(() => {
+                            history.notified = true;
+                          });
+
+                          const chainInfo = this.chainsService.getChainInfo(
+                            history.destinationChainId
+                          );
+                          if (chainInfo) {
+                            if ("swapType" in history) {
+                              if (history.resAmount.length > 0) {
+                                const amount =
+                                  history.resAmount[
+                                    history.resAmount.length - 1
+                                  ];
+                                const assetsText = amount
+                                  .filter((amt) =>
+                                    history.notificationInfo!.currencies.find(
+                                      (cur) =>
+                                        cur.coinMinimalDenom === amt.denom
+                                    )
+                                  )
+                                  .map((amt) => {
+                                    const currency =
+                                      history.notificationInfo!.currencies.find(
+                                        (cur) =>
+                                          cur.coinMinimalDenom === amt.denom
+                                      );
+                                    return new CoinPretty(currency!, amt.amount)
+                                      .hideIBCMetadata(true)
+                                      .shrink(true)
+                                      .maxDecimals(6)
+                                      .inequalitySymbol(true)
+                                      .trim(true)
+                                      .toString();
+                                  });
+                                if (assetsText.length > 0) {
+                                  // Notify user
+                                  this.notification.create({
+                                    iconRelativeUrl: "assets/logo-256.png",
+                                    title: "IBC Swap Succeeded",
+                                    message: `${assetsText.join(
+                                      ", "
+                                    )} received on ${chainInfo.chainName}`,
+                                  });
+                                }
+                              }
+                            } else {
+                              console.log(
+                                toJS(history.amount),
+                                toJS(history.notificationInfo)
+                              );
+                              const assetsText = history.amount
+                                .filter((amt) =>
+                                  history.notificationInfo!.currencies.find(
+                                    (cur) => cur.coinMinimalDenom === amt.denom
+                                  )
+                                )
+                                .map((amt) => {
+                                  const currency =
+                                    history.notificationInfo!.currencies.find(
+                                      (cur) =>
+                                        cur.coinMinimalDenom === amt.denom
+                                    );
+                                  return new CoinPretty(currency!, amt.amount)
+                                    .hideIBCMetadata(true)
+                                    .shrink(true)
+                                    .maxDecimals(6)
+                                    .inequalitySymbol(true)
+                                    .trim(true)
+                                    .toString();
+                                });
+                              if (assetsText.length > 0) {
+                                // Notify user
+                                this.notification.create({
+                                  iconRelativeUrl: "assets/logo-256.png",
+                                  title: "IBC Transfer Succeeded",
+                                  message: `${assetsText.join(", ")} sent to ${
+                                    chainInfo.chainName
+                                  }`,
+                                });
+                              }
+                            }
+                          }
+                        }
+                        onFulfill();
+                        break;
+                      }
                     }
                   } catch {
                     // noop
@@ -598,6 +701,9 @@ export class RecentSendHistoryService {
           channelId: string;
           counterpartyChainId: string;
         }[],
+    notificationInfo: {
+      currencies: AppCurrency[];
+    },
     txHash: Uint8Array
   ): string {
     const id = (this.recentIBCHistorySeq++).toString();
@@ -621,6 +727,7 @@ export class RecentSendHistoryService {
           completed: false,
         };
       }),
+      notificationInfo,
       txHash: Buffer.from(txHash).toString("hex"),
     };
 
@@ -652,6 +759,9 @@ export class RecentSendHistoryService {
     },
     swapChannelIndex: number,
     swapReceiver: string[],
+    notificationInfo: {
+      currencies: AppCurrency[];
+    },
     txHash: Uint8Array
   ): string {
     const id = (this.recentIBCHistorySeq++).toString();
@@ -679,6 +789,7 @@ export class RecentSendHistoryService {
       swapChannelIndex,
       swapReceiver,
       resAmount: [],
+      notificationInfo,
       txHash: Buffer.from(txHash).toString("hex"),
     };
 
