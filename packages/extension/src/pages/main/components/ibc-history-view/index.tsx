@@ -155,6 +155,10 @@ const IbcHistoryViewItem: FunctionComponent<{
       return false;
     }
 
+    if (history.ibcHistory.some((h) => h.error != null)) {
+      return false;
+    }
+
     return !history.ibcHistory.some((ibcHistory) => {
       return !ibcHistory.completed;
     });
@@ -188,7 +192,7 @@ const IbcHistoryViewItem: FunctionComponent<{
       <YAxis>
         <XAxis alignY="center">
           {(() => {
-            if (history.ibcHistory.find((h) => h.error != null)) {
+            if (failedChannelIndex >= 0) {
               return (
                 <ErrorIcon
                   width="1.25rem"
@@ -234,17 +238,37 @@ const IbcHistoryViewItem: FunctionComponent<{
                 : ColorPalette["gray-10"]
             }
           >
-            {!historyCompleted
-              ? intl.formatMessage({
-                  id: isIBCSwap
-                    ? "page.main.components.ibc-history-view.ibc-swap.item.pending"
-                    : "page.main.components.ibc-history-view.item.pending",
-                })
-              : intl.formatMessage({
-                  id: isIBCSwap
-                    ? "page.main.components.ibc-history-view.ibc-swap.item.succeed"
-                    : "page.main.components.ibc-history-view.item.succeed",
-                })}
+            {(() => {
+              if (failedChannelIndex >= 0) {
+                if (
+                  !history.ibcHistory
+                    .slice(0, failedChannelIndex + 1)
+                    .some((h) => !h.rewound) ||
+                  history.ibcHistory
+                    .slice(0, failedChannelIndex + 1)
+                    .some((h) => h.rewoundButNextRewindingBlocked)
+                ) {
+                  return intl.formatMessage({
+                    id: "page.main.components.ibc-history-view.ibc-swap.item.refund.succeed",
+                  });
+                }
+                return intl.formatMessage({
+                  id: "page.main.components.ibc-history-view.ibc-swap.item.refund.pending",
+                });
+              }
+
+              return !historyCompleted
+                ? intl.formatMessage({
+                    id: isIBCSwap
+                      ? "page.main.components.ibc-history-view.ibc-swap.item.pending"
+                      : "page.main.components.ibc-history-view.item.pending",
+                  })
+                : intl.formatMessage({
+                    id: isIBCSwap
+                      ? "page.main.components.ibc-history-view.ibc-swap.item.succeed"
+                      : "page.main.components.ibc-history-view.item.succeed",
+                  });
+            })()}
           </Subtitle4>
           <div
             style={{
@@ -287,7 +311,7 @@ const IbcHistoryViewItem: FunctionComponent<{
             );
 
             if ("swapType" in history) {
-              if (historyCompleted) {
+              if (historyCompleted && failedChannelIndex < 0) {
                 const chainId = history.destinationChainId;
                 const chainInfo = chainStore.getChain(chainId);
                 const assets = (() => {
@@ -494,16 +518,46 @@ const IbcHistoryViewItem: FunctionComponent<{
             <FormattedMessage
               id={(() => {
                 let complete = false;
-                const errorIndex = history.ibcHistory.findIndex(
-                  (h) => h.error != null
-                );
-                if (errorIndex >= 0) {
-                  complete = !history.ibcHistory
-                    .slice(0, errorIndex + 1)
-                    .find((h) => !h.rewound);
+                if (failedChannelIndex >= 0) {
+                  complete =
+                    !history.ibcHistory
+                      .slice(0, failedChannelIndex + 1)
+                      .find((h) => !h.rewound) ||
+                    history.ibcHistory.find(
+                      (h) => h.rewoundButNextRewindingBlocked
+                    ) != null;
                 }
 
                 if (isIBCSwap) {
+                  if ("swapRefundInfo" in history && history.swapRefundInfo) {
+                    return intl.formatMessage(
+                      {
+                        id: "page.main.components.ibc-history-view.ibc-swap.failed.after-swap.complete",
+                      },
+                      {
+                        chain: chainStore.getChain(
+                          history.swapRefundInfo.chainId
+                        ).chainName,
+                        assets: history.swapRefundInfo.amount
+                          .map((amount) => {
+                            return new CoinPretty(
+                              chainStore
+                                .getChain(history.swapRefundInfo!.chainId)
+                                .forceFindCurrency(amount.denom),
+                              amount.amount
+                            )
+                              .hideIBCMetadata(true)
+                              .shrink(true)
+                              .maxDecimals(6)
+                              .inequalitySymbol(true)
+                              .trim(true)
+                              .toString();
+                          })
+                          .join(", "),
+                      }
+                    );
+                  }
+
                   return complete
                     ? "page.main.components.ibc-history-view.ibc-swap.failed.complete"
                     : "page.main.components.ibc-history-view.ibc-swap.failed.in-progress";
@@ -517,7 +571,28 @@ const IbcHistoryViewItem: FunctionComponent<{
           </Caption1>
         </VerticalCollapseTransition>
 
-        <VerticalCollapseTransition collapsed={historyCompleted}>
+        <VerticalCollapseTransition
+          collapsed={(() => {
+            if (historyCompleted) {
+              return true;
+            }
+
+            if (failedChannelIndex >= 0) {
+              if (
+                !history.ibcHistory
+                  .slice(0, failedChannelIndex + 1)
+                  .some((h) => !h.rewound) ||
+                history.ibcHistory
+                  .slice(0, failedChannelIndex + 1)
+                  .some((h) => h.rewoundButNextRewindingBlocked)
+              ) {
+                return true;
+              }
+            }
+
+            return false;
+          })()}
+        >
           <Gutter size="1rem" />
           <Box
             height="1px"

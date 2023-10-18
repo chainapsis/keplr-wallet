@@ -390,7 +390,10 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                   if (isIBCTransfer) {
                     if (msg instanceof SendTxAndRecordMsg) {
                       msg = msg.withIBCPacketForwarding(
-                        sendConfigs.channelConfig.channels
+                        sendConfigs.channelConfig.channels,
+                        {
+                          currencies: chainStore.getChain(chainId).currencies,
+                        }
                       );
                     } else {
                       throw new Error("Invalid message type");
