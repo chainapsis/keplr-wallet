@@ -759,6 +759,7 @@ const ClaimTokenItem: FunctionComponent<{
       <Columns sum={1} alignY="center">
         {viewToken.token.currency.coinImageUrl && (
           <CurrencyImageFallback
+            chainInfo={viewToken.chainInfo}
             currency={viewToken.token.currency}
             size="2rem"
           />

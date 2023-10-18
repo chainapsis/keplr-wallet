@@ -391,6 +391,7 @@ const FoundTokenView: FunctionComponent<{
     <Columns sum={1} gutter="0.5rem" alignY="center">
       <Box width="1.75rem" height="1.75rem">
         <CurrencyImageFallback
+          chainInfo={chainStore.getChain(chainId)}
           currency={asset.currency}
           size="1.75rem"
           alt="Token Found Modal Token Image"

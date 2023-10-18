@@ -1,5 +1,7 @@
 import React, { FunctionComponent, useLayoutEffect, useState } from "react";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../stores";
 
 /**
  * 그냥 이미지 컴포넌트인데 오류 났을때 대체 이미지를 보여주는 기능이 있음
@@ -78,45 +80,123 @@ export const ChainImageFallback: FunctionComponent<
   const { style, size, chainInfo, ...otherProps } = props;
 
   return (
-    <Image
-      src={chainInfo.chainSymbolImageUrl}
-      alt={chainInfo.chainName}
-      {...otherProps}
-      defaultSrc={require("../../public/assets/img/chain-icon-alt.png")}
+    <div
       style={{
-        borderRadius: "1000000px",
         position: "relative",
         width: size,
         height: size,
-        ...style,
       }}
-    />
+    >
+      <Image
+        src={chainInfo.chainSymbolImageUrl}
+        alt={chainInfo.chainName}
+        {...otherProps}
+        defaultSrc={require("../../public/assets/img/chain-icon-alt.png")}
+        style={{
+          borderRadius: "1000000px",
+          width: size,
+          height: size,
+          ...style,
+        }}
+      />
+    </div>
   );
 };
 
 export const CurrencyImageFallback: FunctionComponent<
   Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "alt"> & {
+    chainInfo: ChainInfo;
     currency: AppCurrency;
 
     size: string;
     alt?: string;
   }
-> = (props) => {
-  const { style, size, currency, ...otherProps } = props;
+> = observer((props) => {
+  const { chainStore } = useStore();
+
+  const { style, size, currency, chainInfo, ...otherProps } = props;
 
   return (
-    <Image
-      src={currency.coinImageUrl}
-      alt={currency.coinDenom}
-      {...otherProps}
-      defaultSrc={require("../../public/assets/img/chain-icon-alt.png")}
+    <div
       style={{
-        borderRadius: "1000000px",
         position: "relative",
         width: size,
         height: size,
-        ...style,
       }}
-    />
+    >
+      <Image
+        src={currency.coinImageUrl}
+        alt={currency.coinDenom}
+        {...otherProps}
+        defaultSrc={require("../../public/assets/img/chain-icon-alt.png")}
+        style={{
+          borderRadius: "1000000px",
+          width: size,
+          height: size,
+          ...style,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
+        }}
+      >
+        {(() => {
+          let isAxelarBridged = false;
+          const axelarChainIdentifier = "axelar-dojo";
+
+          if ("paths" in currency) {
+            if (
+              "originChainId" in currency &&
+              currency.originChainId &&
+              "originCurrency" in currency &&
+              currency.originCurrency
+            ) {
+              if (
+                chainStore.hasChain(currency.originChainId) &&
+                chainStore.getChain(currency.originChainId).chainIdentifier ===
+                  axelarChainIdentifier &&
+                currency.originCurrency.coinMinimalDenom !== "uaxl"
+              ) {
+                isAxelarBridged = true;
+              }
+            }
+          } else {
+            if (
+              chainStore.getChain(chainInfo.chainId).chainIdentifier ===
+                axelarChainIdentifier &&
+              currency.coinMinimalDenom !== "uaxl"
+            ) {
+              isAxelarBridged = true;
+            }
+          }
+
+          if (isAxelarBridged && chainStore.hasChain(axelarChainIdentifier)) {
+            const axlCurrency = chainStore
+              .getChain(axelarChainIdentifier)
+              .findCurrency("uaxl");
+
+            if (axlCurrency && axlCurrency.coinImageUrl) {
+              return (
+                <Image
+                  alt="axelar bridged token"
+                  src={axlCurrency.coinImageUrl}
+                  style={{
+                    borderRadius: "1000000px",
+                    width: "100%",
+                    height: "100%",
+                    transform: "scale(0.55) translate(60%, 55%)",
+                  }}
+                />
+              );
+            }
+          }
+        })()}
+      </div>
+    </div>
   );
-};
+});

@@ -458,6 +458,9 @@ export const SwapAssetInfo: FunctionComponent<{
                       />
                     ) : (
                       <CurrencyImageFallback
+                        chainInfo={
+                          type === "from" ? fromChainInfo : toChainInfo
+                        }
                         currency={currency}
                         size="1.25rem"
                       />
