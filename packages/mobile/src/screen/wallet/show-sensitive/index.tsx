@@ -209,7 +209,7 @@ export const WalletShowSensitiveScreen: FunctionComponent = observer(() => {
               })}
               size="large"
               onPress={() => {
-                navigate.replace('Home');
+                navigate.reset({routes: [{name: 'Home'}]});
               }}
             />
           )}
