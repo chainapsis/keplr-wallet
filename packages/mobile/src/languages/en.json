@@ -337,7 +337,7 @@
   "page.wallet.delete.warning-title": "Alert",
   "page.wallet.delete.warning-paragraph": "Make sure that you’ve backed up your recovery phrase and private key.",
   "page.wallet.delete.warning-link-text": "Back Up My Wallet",
-  "page.wallet.delete.paragraph": "After deletion, you will be required to import your wallet to restore\n  your access to it.",
+  "page.wallet.delete.paragraph": "After deletion, you will be required to import your wallet to restore your access to it.",
   "page.wallet.delete.password-input-label": "Password",
 
   "page.wallet.show-sensitive.paragraph": "Please type in your password to proceed",

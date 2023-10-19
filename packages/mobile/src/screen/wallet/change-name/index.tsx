@@ -11,7 +11,7 @@ import {useStyle} from '../../../styles';
 import {Button} from '../../../components/button';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList} from '../../../navigation';
-import {Gutter} from '../../../components/gutter';
+import {Column} from '../../../components/column';
 
 interface FormData {
   name: string;
@@ -98,7 +98,9 @@ export const WalletChangeNameScreen: FunctionComponent = observer(() => {
   });
 
   return (
-    <PageWithScrollView backgroundMode={'default'}>
+    <PageWithScrollView
+      backgroundMode={'default'}
+      contentContainerStyle={style.flatten(['flex-grow-1'])}>
       {/* 뒤로가기 버튼을 아래 상황일때 안보여줘야함
        <HeaderLayout
         left={
@@ -147,7 +149,7 @@ export const WalletChangeNameScreen: FunctionComponent = observer(() => {
             }}
           />
         </Box>
-        <Gutter size={12} />
+        <Column weight={1} />
         <Button
           text={intl.formatMessage({id: 'button.save'})}
           color="secondary"

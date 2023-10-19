@@ -426,6 +426,7 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         '58': 58,
         '72': 72,
         '80': 80,
+        '116': 116,
         '122': 122,
         '136': 136,
         '160': 160,

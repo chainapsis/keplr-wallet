@@ -8,10 +8,10 @@ import {FormattedMessage, useIntl} from 'react-intl';
 import {Button} from '../../../components/button';
 import {Box} from '../../../components/box';
 import {Gutter} from '../../../components/gutter';
-import {Text} from 'react-native';
+import {Pressable, Text} from 'react-native';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
-import {RootStackParamList} from '../../../navigation';
+import {RootStackParamList, StackNavProp} from '../../../navigation';
 import {GuideBox} from '../../../components/guide-box';
 import {Column} from '../../../components/column';
 import {PageWithScrollView} from '../../../components/page';
@@ -23,7 +23,7 @@ interface FormData {
 export const WalletDeleteScreen: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
 
-  const navigate = useNavigation();
+  const navigate = useNavigation<StackNavProp>();
   const intl = useIntl();
   const style = useStyle();
   const route =
@@ -64,7 +64,7 @@ export const WalletDeleteScreen: FunctionComponent = observer(() => {
     <PageWithScrollView
       backgroundMode={'default'}
       contentContainerStyle={style.flatten(['flex-grow-1'])}>
-      <Box style={style.flatten(['height-full'])}>
+      <Box padding={12} style={style.flatten(['height-full'])}>
         <Box>
           {(() => {
             const keyInfo = keyRingStore.keyInfos.find(
@@ -85,14 +85,21 @@ export const WalletDeleteScreen: FunctionComponent = observer(() => {
                     id: 'page.wallet.delete.warning-paragraph',
                   })}
                   bottom={
-                    <Text
-                      style={style.flatten([
-                        'text-underline',
-                        'color-yellow-400',
-                        'subtitle4',
-                      ])}>
-                      <FormattedMessage id="page.wallet.delete.warning-link-text" />
-                    </Text>
+                    <Pressable
+                      onPress={() => {
+                        navigate.navigate('SelectWallet.ViewRecoveryPhrase', {
+                          id: vaultId,
+                        });
+                      }}>
+                      <Text
+                        style={style.flatten([
+                          'text-underline',
+                          'color-yellow-400',
+                          'subtitle4',
+                        ])}>
+                        <FormattedMessage id="page.wallet.delete.warning-link-text" />
+                      </Text>
+                    </Pressable>
                   }
                 />
               );
@@ -100,16 +107,19 @@ export const WalletDeleteScreen: FunctionComponent = observer(() => {
 
             return null;
           })()}
-          <LottieView
-            source={require('../../../public/assets/lottie/wallet/delete.json')}
-            loop
-            autoPlay
-            style={style.flatten(['width-full', 'height-116'])}
-          />
+          <Box alignX="center">
+            <LottieView
+              source={require('../../../public/assets/lottie/wallet/delete.json')}
+              loop
+              autoPlay
+              style={style.flatten(['width-116', 'height-116'])}
+            />
+          </Box>
+          <Gutter size={22} />
           <Text
             style={style.flatten([
               'subtitle3',
-              'color-gray-300',
+              'color-text-middle',
               'text-center',
               'padding-x-8',
             ])}>
@@ -142,7 +152,7 @@ export const WalletDeleteScreen: FunctionComponent = observer(() => {
               );
             }}
           />
-          <Gutter size={12} />
+          <Gutter size={28} />
           <Button
             text={intl.formatMessage({id: 'button.confirm'})}
             color="secondary"
