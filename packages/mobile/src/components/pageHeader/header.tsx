@@ -1,4 +1,4 @@
-import React, {FunctionComponent, PropsWithChildren} from 'react';
+import React, {FunctionComponent, PropsWithChildren, useState} from 'react';
 import {ColorPalette, useStyle} from '../../styles';
 import {
   DrawerActions,
@@ -15,7 +15,6 @@ import {HeaderBackButtonIcon} from './icon/back';
 import {HeaderBackButtonProps} from '@react-navigation/native-stack/lib/typescript/src/types';
 import {Column, Columns} from '../column';
 import {ArrowDownFillIcon} from '../icon/arrow-donw-fill';
-import {IconButton} from '../icon-button';
 
 const HomeScreenHeaderLeft: FunctionComponent = () => {
   const style = useStyle();
@@ -26,7 +25,8 @@ const HomeScreenHeaderLeft: FunctionComponent = () => {
     <Pressable
       onPress={() => {
         navigation.dispatch(DrawerActions.toggleDrawer());
-      }}>
+      }}
+      style={style.flatten(['margin-y-14'])}>
       <MenuIcon size={28} color={style.flatten(['color-gray-10']).color} />
     </Pressable>
   );
@@ -42,7 +42,8 @@ const HomeScreenHeaderRight: FunctionComponent = () => {
       onPress={() => {
         //TODO 이후 qr촬영 페이지로 넘겨야 함
         // navigation.navigate('');
-      }}>
+      }}
+      style={style.flatten(['margin-y-14'])}>
       <QRScanIcon size={28} color={style.flatten(['color-gray-10']).color} />
     </Pressable>
   );
@@ -53,16 +54,13 @@ export const HomeScreenHeader = observer(() => {
   const style = useStyle();
   const insect = useSafeAreaInsets();
   const navigation = useNavigation();
+  const [isPress, setInsPress] = useState(false);
 
   return (
     <Box
       alignY="center"
       style={StyleSheet.flatten([
-        style.flatten([
-          'padding-bottom-18',
-          'padding-x-20',
-          'background-color-gray-700',
-        ]),
+        style.flatten(['padding-x-20', 'background-color-gray-700']),
         {
           paddingTop: insect.top,
         },
@@ -71,34 +69,37 @@ export const HomeScreenHeader = observer(() => {
         <Columns sum={2}>
           <HomeScreenHeaderLeft />
           <Column weight={1} />
-          <Columns sum={1} alignY="center">
-            <Text
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              style={StyleSheet.flatten([
-                style.flatten([
-                  'color-white',
-                  'h4',
-                  'max-width-160',
-                  'overflow-scroll',
-                  'text-center',
-                ]),
-              ])}>
-              {keyRingStore.selectedKeyInfo?.name || 'Keplr Account'}
-            </Text>
-            <IconButton
-              hasRipple={true}
-              icon={
-                <ArrowDownFillIcon
-                  size={20}
-                  color={style.get('color-gray-200').color}
-                />
-              }
-              onPress={() => {
-                navigation.dispatch(StackActions.push('SelectWallet'));
-              }}
-            />
-          </Columns>
+          <Pressable
+            onPressIn={() => setInsPress(true)}
+            onPressOut={() => setInsPress(false)}
+            onPress={() => {
+              navigation.dispatch(StackActions.push('SelectWallet'));
+            }}
+            style={style.flatten(
+              ['border-radius-6', 'padding-x-16', 'margin-y-4', 'padding-y-14'],
+              [isPress && 'background-color-gray-600'],
+            )}>
+            <Columns sum={1} alignY="center" gutter={6}>
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={StyleSheet.flatten([
+                  style.flatten([
+                    'color-white',
+                    'h4',
+                    'max-width-160',
+                    'overflow-scroll',
+                    'text-center',
+                  ]),
+                ])}>
+                {keyRingStore.selectedKeyInfo?.name || 'Keplr Account'}
+              </Text>
+              <ArrowDownFillIcon
+                size={20}
+                color={style.get('color-gray-200').color}
+              />
+            </Columns>
+          </Pressable>
           <Column weight={1} />
 
           <HomeScreenHeaderRight />
