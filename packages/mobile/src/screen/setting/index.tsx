@@ -58,7 +58,7 @@ export const SettingScreen: FunctionComponent = () => {
                 color={style.get('color-text-low').color}
               />
             }
-            onClick={() => navigate.navigate('Setting.General')}
+            onClick={() => navigate.navigate('Setting.Advanced')}
           />
 
           <PageButton
@@ -77,7 +77,7 @@ export const SettingScreen: FunctionComponent = () => {
                 color={style.get('color-text-low').color}
               />
             }
-            onClick={() => navigate.navigate('Setting.General')}
+            onClick={() => navigate.navigate('Setting.SecurityAndPrivacy')}
           />
 
           <PageButton
@@ -93,7 +93,7 @@ export const SettingScreen: FunctionComponent = () => {
                 color={style.get('color-text-low').color}
               />
             }
-            onClick={() => navigate.navigate('Setting.General')}
+            onClick={() => navigate.navigate('Setting.ManageTokenList')}
           />
         </Stack>
       </Box>
