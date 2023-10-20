@@ -7665,6 +7665,7 @@ __metadata:
     expo-standard-web-crypto: ^1.6.0
     http-browserify: ^1.7.0
     https-browserify: ^1.0.0
+    lottie-react-native: ^6.3.1
     metro-react-native-babel-preset: 0.76.7
     mobx: ^6.10.0
     mobx-react-lite: ^3.4.3
@@ -26294,6 +26295,20 @@ __metadata:
   bin:
     loose-envify: cli.js
   checksum: 6517e24e0cad87ec9888f500c5b5947032cdfe6ef65e1c1936a0c48a524b81e65542c9c3edc91c97d5bddc806ee2a985dbc79be89215d613b1de5db6d1cfe6f4
+  languageName: node
+  linkType: hard
+
+"lottie-react-native@npm:^6.3.1":
+  version: 6.3.1
+  resolution: "lottie-react-native@npm:6.3.1"
+  peerDependencies:
+    react: "*"
+    react-native: ">=0.46"
+    react-native-windows: ">=0.63.x"
+  peerDependenciesMeta:
+    react-native-windows:
+      optional: true
+  checksum: c4e5f2326bf68585d443cc88d34a0440b04006a8202c363aa25c3925ab62e6e24fe5bc841f67020e0f86eb2c4ecf7a9b39a2e9fb846c52425a75f70d09fe906d
   languageName: node
   linkType: hard
 

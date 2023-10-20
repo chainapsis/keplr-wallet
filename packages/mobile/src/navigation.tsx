@@ -30,6 +30,11 @@ import {WalletIcon, BrowserIcon, SettingIcon} from './components/icon';
 import {HomeScreenHeader, defaultHeaderOptions} from './components/pageHeader';
 import {SettingScreen} from './screen/setting';
 import {SettingGeneralScreen} from './screen/setting/screens/general';
+import {WalletSelectScreen} from './screen/wallet';
+import {WalletDeleteScreen} from './screen/wallet/delete';
+import {WalletShowSensitiveScreen} from './screen/wallet/show-sensitive';
+import {useIntl} from 'react-intl';
+import {WalletChangeNameScreen} from './screen/wallet/change-name';
 export type RootStackParamList = {
   Home: undefined;
   Register: undefined;
@@ -39,6 +44,11 @@ export type RootStackParamList = {
   'Setting.Intro': undefined;
   'Setting.General': undefined;
   Locked: undefined;
+  SelectWallet: undefined;
+  'SelectWallet.Intro': undefined;
+  'SelectWallet.Delete': {id: string};
+  'SelectWallet.ChangeName': {id: string};
+  'SelectWallet.ViewRecoveryPhrase': {id: string};
 };
 export type StackNavProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -165,6 +175,49 @@ const SettingNavigation = () => {
   );
 };
 
+const SelectWalletNavigation = () => {
+  const intl = useIntl();
+  return (
+    <Stack.Navigator initialRouteName="SelectWallet.Intro">
+      <Stack.Screen
+        name="SelectWallet.Intro"
+        options={{
+          title: intl.formatMessage({id: 'page.wallet.title'}),
+          ...defaultHeaderOptions,
+        }}
+        component={WalletSelectScreen}
+      />
+      <Stack.Screen
+        name="SelectWallet.Delete"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.wallet.keyring-item.dropdown.delete-wallet-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={WalletDeleteScreen}
+      />
+      <Stack.Screen
+        name="SelectWallet.ChangeName"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.wallet.keyring-item.dropdown.change-wallet-name-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={WalletChangeNameScreen}
+      />
+      <Stack.Screen
+        name="SelectWallet.ViewRecoveryPhrase"
+        options={{
+          ...defaultHeaderOptions,
+        }}
+        component={WalletShowSensitiveScreen}
+      />
+    </Stack.Navigator>
+  );
+};
+
 //TODO 이후 상태가 not-loaded일때 스플레시 스크린화면 처리 필요
 export const AppNavigation: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
@@ -216,6 +269,11 @@ export const AppNavigation: FunctionComponent = observer(() => {
               ...defaultHeaderOptions,
             }}
             component={SendScreen}
+          />
+          <Stack.Screen
+            name="SelectWallet"
+            options={{headerShown: false}}
+            component={SelectWalletNavigation}
           />
         </Stack.Navigator>
       </NavigationContainer>
