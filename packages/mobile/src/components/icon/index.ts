@@ -11,3 +11,5 @@ export * from './close';
 export * from './star';
 export * from './qr-code';
 export * from './check-toggle';
+export * from './rocket-launch';
+export * from './key';
