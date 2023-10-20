@@ -32,6 +32,7 @@ import {ArrowDownIcon} from '../../../../components/icon/arrow-down';
 import {ArrowUpIcon} from '../../../../components/icon/arrow-up';
 import {WarningIcon} from '../../../../components/icon/warning';
 import {useNavigation, StackActions} from '@react-navigation/native';
+import {SpecialButton} from '../../../../components/special-button';
 
 // XXX: 좀 이상하긴 한데 상위/하위 컴포넌트가 state를 공유하기 쉽게하려고 이렇게 한다...
 class ClaimAllEachState {
@@ -87,17 +88,20 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
         const queryRewards =
           queries.cosmos.queryRewards.getQueryBech32Address(accountAddress);
 
+        //밑에서 filter로 token이 undefined경우는 거르기때문에 ! 사용
         return {
-          token: queryRewards.stakableReward,
+          token: queryRewards.stakableReward!,
           chainInfo,
           isFetching: queryRewards.isFetching,
           error: queryRewards.error,
         };
       })
-      .filter(viewToken => viewToken.token.toDec().gt(zeroDec))
+      .filter(
+        viewToken => !!viewToken.token && viewToken.token.toDec().gt(zeroDec),
+      )
       .sort((a, b) => {
-        const aPrice = priceStore.calculatePrice(a.token)?.toDec() ?? zeroDec;
-        const bPrice = priceStore.calculatePrice(b.token)?.toDec() ?? zeroDec;
+        const aPrice = priceStore.calculatePrice(a.token!)?.toDec() ?? zeroDec;
+        const bPrice = priceStore.calculatePrice(b.token!)?.toDec() ?? zeroDec;
 
         if (aPrice.equals(bPrice)) {
           return 0;
@@ -197,7 +201,8 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
           // (Normally, user has stake currency because it is used for staking)
           const feeCurrency = chainInfo.feeCurrencies.find(
             cur =>
-              cur.coinMinimalDenom === chainInfo.stakeCurrency.coinMinimalDenom,
+              cur.coinMinimalDenom ===
+              chainInfo.stakeCurrency?.coinMinimalDenom,
           );
           if (feeCurrency) {
             try {
@@ -266,6 +271,7 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
 
               const stakableReward = queryRewards.stakableReward;
               if (
+                stakableReward &&
                 new Dec(stakableReward.toCoin().amount).lte(new Dec(fee.amount))
               ) {
                 console.log(
@@ -455,14 +461,25 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
                   onPress={claimAll}
                 />
               ) : (
-                <Button
-                  text={'Claim All'}
-                  size="small"
-                  loading={claimAllIsLoading}
-                  disabled={claimAllDisabled}
-                  onPress={claimAll}
-                />
+                // <Button
+                //   text={'Claim All'}
+                //   size="small"
+
+                //   loading={claimAllIsLoading}
+                //   disabled={claimAllDisabled}
+                //   onPress={claimAll}
+                // />
                 //FIXME 만들어야 함
+                <SpecialButton width={91} size="small" text="Claim All" />
+                // <RectButton
+                //   // text={'Claim All'}
+
+                //   size="small"
+                //   loading={claimAllIsLoading}
+                //   disabled={claimAllDisabled}
+                //   onPress={claimAll}>
+                //   <Text>Claim All</Text>
+                // </RectButton>
                 // <SpecialButton
                 //   text={intl.formatMessage({
                 //     id: 'page.main.components.claim-all.button',
