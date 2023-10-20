@@ -20,6 +20,7 @@ import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {LookingForChains} from './components/looking-for-chains';
 import {Gutter} from '../../components/gutter';
 import FastImage from 'react-native-fast-image';
+import {InformationModal} from './infoModal';
 
 const zeroDec = new Dec(0);
 
@@ -35,6 +36,7 @@ export const AvailableTabView: FunctionComponent<{
   const style = useStyle();
   // const navigate = useNavigate();
   const tokenFoundModalRef = useRef<BottomSheetModal>(null);
+  const infoModalRef = useRef<BottomSheetModal>(null);
 
   const allBalances = hugeQueriesStore.getAllBalances(true);
   const allBalancesNonZero = useMemo(() => {
@@ -164,6 +166,7 @@ export const AvailableTabView: FunctionComponent<{
                   key={title}
                   title={
                     <TokenTitleView
+                      onOpenModal={() => infoModalRef.current?.present()}
                       title={title}
                       right={
                         hasLowBalanceTokens ? (
@@ -273,6 +276,9 @@ export const AvailableTabView: FunctionComponent<{
       )}
       <Modal ref={tokenFoundModalRef} snapPoints={['60%']}>
         <TokenFoundModal />
+      </Modal>
+      <Modal ref={infoModalRef} enableDynamicSizing={true}>
+        <InformationModal />
       </Modal>
     </React.Fragment>
   );
