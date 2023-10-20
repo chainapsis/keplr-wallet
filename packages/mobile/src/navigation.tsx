@@ -38,6 +38,7 @@ import {
 } from './screen/wallet';
 import {useIntl} from 'react-intl';
 import {SendAmountScreen} from './screen/send/amount';
+import {SettingManageTokenListScreen} from './screen/setting/screens/manage-token-list/general';
 export type RootStackParamList = {
   Home: undefined;
   Register: undefined;
@@ -46,7 +47,28 @@ export type RootStackParamList = {
   Send: undefined;
   'Send.SelectAsset': undefined;
   'Setting.Intro': undefined;
+
   'Setting.General': undefined;
+  'Setting.General.Intro': undefined;
+  'Setting.General.Lang': undefined;
+  'Setting.General.Currency': undefined;
+  'Setting.General.Contacts': undefined;
+  'Setting.General.Theme': undefined;
+  'Setting.General.ManageAuthz': undefined;
+  'Setting.General.WC': undefined;
+  'Setting.General.ManageNonActiveChains': undefined;
+  'Setting.General.ManageChainVisibility': undefined;
+
+  'Setting.Advanced': undefined;
+  'Setting.Advanced.Intro': undefined;
+  'Setting.Advanced.ChangeEndpoints': undefined;
+
+  'Setting.SecurityAndPrivacy': undefined;
+  'Setting.SecurityAndPrivacy.Intro': undefined;
+  'Setting.SecurityAndPrivacy.ChangePassword': undefined;
+
+  'Setting.ManageTokenList': undefined;
+
   Locked: undefined;
   SelectWallet: undefined;
   'SelectWallet.Intro': undefined;
@@ -158,12 +180,15 @@ export const MainTabNavigation: FunctionComponent = () => {
 };
 
 const SettingNavigation = () => {
+  const intl = useIntl();
   return (
     <Stack.Navigator initialRouteName="Setting.Intro">
       <Stack.Screen
         name="Setting.Intro"
         options={{
-          title: 'Setting',
+          title: intl.formatMessage({
+            id: 'page.setting.title',
+          }),
           ...defaultHeaderOptions,
         }}
         component={SettingScreen}
@@ -171,6 +196,175 @@ const SettingNavigation = () => {
       <Stack.Screen
         name="Setting.General"
         options={{
+          headerShown: false,
+          ...defaultHeaderOptions,
+        }}
+        component={SettingGeneralNavigation}
+      />
+      <Stack.Screen
+        name="Setting.Advanced"
+        options={{
+          headerShown: false,
+          ...defaultHeaderOptions,
+        }}
+        component={SettingAdvancedNavigation}
+      />
+      <Stack.Screen
+        name="Setting.SecurityAndPrivacy"
+        options={{
+          headerShown: false,
+          ...defaultHeaderOptions,
+        }}
+        component={SettingSecurityAndPrivacyNavigation}
+      />
+      <Stack.Screen
+        name="Setting.ManageTokenList"
+        options={{
+          headerShown: false,
+          ...defaultHeaderOptions,
+        }}
+        component={SettingManageTokenListScreen}
+      />
+    </Stack.Navigator>
+  );
+};
+
+const SettingGeneralNavigation = () => {
+  const intl = useIntl();
+  return (
+    <Stack.Navigator initialRouteName="Setting.General">
+      <Stack.Screen
+        name="Setting.General.Intro"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.setting.general-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={SettingGeneralScreen}
+      />
+      <Stack.Screen
+        name="Setting.General.Lang"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.setting.general.language-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={SettingGeneralScreen}
+      />
+      <Stack.Screen
+        name="Setting.General.Currency"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.setting.general.currency-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={SettingGeneralScreen}
+      />
+      <Stack.Screen
+        name="Setting.General.Contacts"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.setting.general.contacts-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={SettingGeneralScreen}
+      />
+      <Stack.Screen
+        name="Setting.General.Theme"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.setting.general.theme-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={SettingGeneralScreen}
+      />
+      <Stack.Screen
+        name="Setting.General.ManageAuthz"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.setting.general.manage-authz-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={SettingGeneralScreen}
+      />
+      <Stack.Screen
+        name="Setting.General.ManageNonActiveChains"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.setting.general.manage-non-native-chains-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={SettingGeneralScreen}
+      />
+      <Stack.Screen
+        name="Setting.General.ManageChainVisibility"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.setting.general.manage-chain-visibility-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={SettingGeneralScreen}
+      />
+    </Stack.Navigator>
+  );
+};
+
+const SettingAdvancedNavigation = () => {
+  const intl = useIntl();
+  return (
+    <Stack.Navigator initialRouteName="Setting.Advanced">
+      <Stack.Screen
+        name="Setting.Advanced.Intro"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.setting.advanced-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={SettingScreen}
+      />
+      <Stack.Screen
+        name="Setting.Advanced.ChangeEndpoints"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.setting.advanced.change-endpoints-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={SettingGeneralScreen}
+      />
+    </Stack.Navigator>
+  );
+};
+
+const SettingSecurityAndPrivacyNavigation = () => {
+  const intl = useIntl();
+  return (
+    <Stack.Navigator initialRouteName="Setting.SecurityAndPrivacy.Intro">
+      <Stack.Screen
+        name="Setting.SecurityAndPrivacy.Intro"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.setting.security-privacy-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={SettingScreen}
+      />
+      <Stack.Screen
+        name="Setting.SecurityAndPrivacy.ChangePassword"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.setting.security.change-password-title',
+          }),
           ...defaultHeaderOptions,
         }}
         component={SettingGeneralScreen}
