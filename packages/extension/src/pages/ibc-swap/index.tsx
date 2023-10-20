@@ -463,7 +463,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         };
                       }),
                       ibcSwapConfigs.memoConfig.memo
-                    ).withIBCPacketForwarding(channels);
+                    ).withIBCPacketForwarding(channels, {
+                      currencies: chainStore.getChain(chainId).currencies,
+                    });
                     return await new InExtensionMessageRequester().sendMessage(
                       BACKGROUND_PORT,
                       msg
@@ -494,7 +496,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           denom: amount.currency.coinMinimalDenom,
                         };
                       }),
-                      ibcSwapConfigs.memoConfig.memo
+                      ibcSwapConfigs.memoConfig.memo,
+                      {
+                        currencies: chainStore.getChain(outChainId).currencies,
+                      }
                     );
 
                     return await new InExtensionMessageRequester().sendMessage(

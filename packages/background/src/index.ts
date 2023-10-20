@@ -203,7 +203,8 @@ export function init(
     new RecentSendHistory.RecentSendHistoryService(
       storeCreator("recent-send-history"),
       chainsService,
-      backgroundTxService
+      backgroundTxService,
+      notification
     );
 
   Interaction.init(router, interactionService);

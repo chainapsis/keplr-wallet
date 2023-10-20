@@ -16,7 +16,9 @@ import {
 import { KVStore, retry } from "@keplr-wallet/common";
 import { IBCHistory, RecentSendHistory } from "./types";
 import { Buffer } from "buffer/";
-import { ChainInfo } from "@keplr-wallet/types";
+import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
+import { Notification } from "../tx";
+import { CoinPretty } from "@keplr-wallet/unit";
 
 export class RecentSendHistoryService {
   // Key: {chain_identifier}/{type}
@@ -33,7 +35,8 @@ export class RecentSendHistoryService {
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly chainsService: ChainsService,
-    protected readonly txService: BackgroundTxService
+    protected readonly txService: BackgroundTxService,
+    protected readonly notification: Notification
   ) {
     makeObservable(this);
   }
@@ -129,7 +132,10 @@ export class RecentSendHistoryService {
           channelId: string;
           counterpartyChainId: string;
         }[]
-      | undefined
+      | undefined,
+    notificationInfo: {
+      currencies: AppCurrency[];
+    }
   ): Promise<Uint8Array> {
     const sourceChainInfo =
       this.chainsService.getChainInfoOrThrow(sourceChainId);
@@ -169,6 +175,7 @@ export class RecentSendHistoryService {
         amount,
         memo,
         ibcChannels,
+        notificationInfo,
         txHash
       );
 
@@ -202,7 +209,10 @@ export class RecentSendHistoryService {
       denom: string;
     },
     swapChannelIndex: number,
-    swapReceiver: string[]
+    swapReceiver: string[],
+    notificationInfo: {
+      currencies: AppCurrency[];
+    }
   ): Promise<Uint8Array> {
     const sourceChainInfo =
       this.chainsService.getChainInfoOrThrow(sourceChainId);
@@ -228,6 +238,7 @@ export class RecentSendHistoryService {
       destinationAsset,
       swapChannelIndex,
       swapReceiver,
+      notificationInfo,
       txHash
     );
 
@@ -299,7 +310,10 @@ export class RecentSendHistoryService {
       return history.ibcHistory.find((h) => h.error != null) != null;
     })();
 
-    if (needRewind) {
+    if (
+      needRewind &&
+      !history.ibcHistory.find((h) => h.rewoundButNextRewindingBlocked)
+    ) {
       const lastRewoundChannelIndex = history.ibcHistory.findIndex((h) => {
         if (h.rewound) {
           return true;
@@ -315,6 +329,11 @@ export class RecentSendHistoryService {
         }
         return history.ibcHistory.find((h) => h.error != null);
       })();
+      const isSwapTargetChannel =
+        targetChannel &&
+        "swapChannelIndex" in history &&
+        history.ibcHistory.indexOf(targetChannel) ===
+          history.swapChannelIndex + 1;
 
       if (targetChannel && targetChannel.sequence) {
         const prevChainInfo = (() => {
@@ -344,8 +363,44 @@ export class RecentSendHistoryService {
               "acknowledge_packet.packet_src_channel": targetChannel.channelId,
               "acknowledge_packet.packet_sequence": targetChannel.sequence,
             })
-            .then(() => {
+            .then((res: any) => {
+              if (!res) {
+                return;
+              }
+
               runInAction(() => {
+                if (isSwapTargetChannel) {
+                  const txs = res.txs
+                    ? res.txs.map((res: any) => res.tx_result || res)
+                    : [res.tx_result || res];
+                  if (txs && Array.isArray(txs)) {
+                    for (const tx of txs) {
+                      if (targetChannel.sequence && "swapReceiver" in history) {
+                        const index =
+                          this.getIBCAcknowledgementPacketIndexFromTx(
+                            tx,
+                            targetChannel.portId,
+                            targetChannel.channelId,
+                            targetChannel.sequence
+                          );
+                        if (index >= 0) {
+                          const refunded = this.getIBCSwapResAmountFromTx(
+                            tx,
+                            history.swapReceiver[history.swapChannelIndex + 1],
+                            index
+                          );
+                          history.swapRefundInfo = {
+                            chainId: prevChainInfo.chainId,
+                            amount: refunded,
+                          };
+
+                          targetChannel.rewoundButNextRewindingBlocked = true;
+                          break;
+                        }
+                      }
+                    }
+                  }
+                }
                 targetChannel.rewound = true;
               });
               onFulfill();
@@ -478,29 +533,121 @@ export class RecentSendHistoryService {
                       targetChannel.sequence!
                     );
 
-                    if ("swapReceiver" in history) {
-                      const res: {
-                        amount: string;
-                        denom: string;
-                      }[] = this.getIBCSwapResAmountFromTx(
-                        tx,
-                        history.swapReceiver[targetChannelIndex + 1],
-                        index
-                      );
+                    if (index >= 0) {
+                      if ("swapReceiver" in history) {
+                        const res: {
+                          amount: string;
+                          denom: string;
+                        }[] = this.getIBCSwapResAmountFromTx(
+                          tx,
+                          history.swapReceiver[targetChannelIndex + 1],
+                          index
+                        );
 
-                      history.resAmount.push(res);
-                    }
+                        history.resAmount.push(res);
+                      }
 
-                    if (nextChannel) {
-                      nextChannel.sequence = this.getIBCPacketSequenceFromTx(
-                        tx,
-                        nextChannel.portId,
-                        nextChannel.channelId,
-                        index
-                      );
-                      onFulfill();
-                      this.trackIBCPacketForwardingRecursive(id);
-                      break;
+                      if (nextChannel) {
+                        nextChannel.sequence = this.getIBCPacketSequenceFromTx(
+                          tx,
+                          nextChannel.portId,
+                          nextChannel.channelId,
+                          index
+                        );
+                        onFulfill();
+                        this.trackIBCPacketForwardingRecursive(id);
+                        break;
+                      } else {
+                        console.log("!!!", toJS(history));
+                        // Packet received to destination chain.
+                        if (history.notificationInfo && !history.notified) {
+                          runInAction(() => {
+                            history.notified = true;
+                          });
+
+                          const chainInfo = this.chainsService.getChainInfo(
+                            history.destinationChainId
+                          );
+                          if (chainInfo) {
+                            if ("swapType" in history) {
+                              if (history.resAmount.length > 0) {
+                                const amount =
+                                  history.resAmount[
+                                    history.resAmount.length - 1
+                                  ];
+                                const assetsText = amount
+                                  .filter((amt) =>
+                                    history.notificationInfo!.currencies.find(
+                                      (cur) =>
+                                        cur.coinMinimalDenom === amt.denom
+                                    )
+                                  )
+                                  .map((amt) => {
+                                    const currency =
+                                      history.notificationInfo!.currencies.find(
+                                        (cur) =>
+                                          cur.coinMinimalDenom === amt.denom
+                                      );
+                                    return new CoinPretty(currency!, amt.amount)
+                                      .hideIBCMetadata(true)
+                                      .shrink(true)
+                                      .maxDecimals(6)
+                                      .inequalitySymbol(true)
+                                      .trim(true)
+                                      .toString();
+                                  });
+                                if (assetsText.length > 0) {
+                                  // Notify user
+                                  this.notification.create({
+                                    iconRelativeUrl: "assets/logo-256.png",
+                                    title: "IBC Swap Succeeded",
+                                    message: `${assetsText.join(
+                                      ", "
+                                    )} received on ${chainInfo.chainName}`,
+                                  });
+                                }
+                              }
+                            } else {
+                              console.log(
+                                toJS(history.amount),
+                                toJS(history.notificationInfo)
+                              );
+                              const assetsText = history.amount
+                                .filter((amt) =>
+                                  history.notificationInfo!.currencies.find(
+                                    (cur) => cur.coinMinimalDenom === amt.denom
+                                  )
+                                )
+                                .map((amt) => {
+                                  const currency =
+                                    history.notificationInfo!.currencies.find(
+                                      (cur) =>
+                                        cur.coinMinimalDenom === amt.denom
+                                    );
+                                  return new CoinPretty(currency!, amt.amount)
+                                    .hideIBCMetadata(true)
+                                    .shrink(true)
+                                    .maxDecimals(6)
+                                    .inequalitySymbol(true)
+                                    .trim(true)
+                                    .toString();
+                                });
+                              if (assetsText.length > 0) {
+                                // Notify user
+                                this.notification.create({
+                                  iconRelativeUrl: "assets/logo-256.png",
+                                  title: "IBC Transfer Succeeded",
+                                  message: `${assetsText.join(", ")} sent to ${
+                                    chainInfo.chainName
+                                  }`,
+                                });
+                              }
+                            }
+                          }
+                        }
+                        onFulfill();
+                        break;
+                      }
                     }
                   } catch {
                     // noop
@@ -554,6 +701,9 @@ export class RecentSendHistoryService {
           channelId: string;
           counterpartyChainId: string;
         }[],
+    notificationInfo: {
+      currencies: AppCurrency[];
+    },
     txHash: Uint8Array
   ): string {
     const id = (this.recentIBCHistorySeq++).toString();
@@ -577,6 +727,7 @@ export class RecentSendHistoryService {
           completed: false,
         };
       }),
+      notificationInfo,
       txHash: Buffer.from(txHash).toString("hex"),
     };
 
@@ -608,6 +759,9 @@ export class RecentSendHistoryService {
     },
     swapChannelIndex: number,
     swapReceiver: string[],
+    notificationInfo: {
+      currencies: AppCurrency[];
+    },
     txHash: Uint8Array
   ): string {
     const id = (this.recentIBCHistorySeq++).toString();
@@ -635,6 +789,7 @@ export class RecentSendHistoryService {
       swapChannelIndex,
       swapReceiver,
       resAmount: [],
+      notificationInfo,
       txHash: Buffer.from(txHash).toString("hex"),
     };
 
@@ -866,6 +1021,96 @@ export class RecentSendHistoryService {
     }
 
     return [];
+  }
+
+  protected getIBCAcknowledgementPacketIndexFromTx(
+    tx: any,
+    sourcePortId: string,
+    sourceChannelId: string,
+    sequence: string
+  ): number {
+    const events = tx.events;
+    if (!events) {
+      throw new Error("Invalid tx");
+    }
+    if (!Array.isArray(events)) {
+      throw new Error("Invalid tx");
+    }
+
+    // In injective, events from tendermint rpc is not encoded as base64.
+    // I don't know that this is the difference from tendermint version, or just custom from injective.
+    const compareStringWithBase64OrPlain = (
+      target: string,
+      value: string
+    ): [boolean, boolean] => {
+      if (target === value) {
+        return [true, false];
+      }
+
+      if (target === Buffer.from(value).toString("base64")) {
+        return [true, true];
+      }
+
+      return [false, false];
+    };
+
+    const packetEvent = events.find((event: any) => {
+      if (event.type !== "acknowledge_packet") {
+        return false;
+      }
+      const sourcePortAttr = event.attributes.find((attr: { key: string }) => {
+        return compareStringWithBase64OrPlain(attr.key, "packet_src_port")[0];
+      });
+      if (!sourcePortAttr) {
+        return false;
+      }
+      const sourceChannelAttr = event.attributes.find(
+        (attr: { key: string }) => {
+          return compareStringWithBase64OrPlain(
+            attr.key,
+            "packet_src_channel"
+          )[0];
+        }
+      );
+      if (!sourceChannelAttr) {
+        return false;
+      }
+      let isBase64 = false;
+      const sequenceAttr = event.attributes.find((attr: { key: string }) => {
+        const c = compareStringWithBase64OrPlain(attr.key, "packet_sequence");
+        isBase64 = c[1];
+        return c[0];
+      });
+      if (!sequenceAttr) {
+        return false;
+      }
+
+      if (isBase64) {
+        return (
+          Buffer.from(sourcePortAttr.value, "base64").toString() ===
+            sourcePortId &&
+          Buffer.from(sourceChannelAttr.value, "base64").toString() ===
+            sourceChannelId &&
+          Buffer.from(sequenceAttr.value, "base64").toString() === sequence
+        );
+      } else {
+        return (
+          sourcePortAttr.value === sourcePortId &&
+          sourceChannelAttr.value === sourceChannelId &&
+          sequenceAttr.value === sequence
+        );
+      }
+    });
+    if (!packetEvent) {
+      throw new Error("Invalid tx");
+    }
+
+    const index = events.indexOf(packetEvent);
+    if (index < 0) {
+      throw new Error("Invalid tx");
+    }
+
+    return index;
   }
 
   protected getIBCRecvPacketIndexFromTx(
