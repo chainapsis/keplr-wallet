@@ -39,10 +39,12 @@ import {
 import {useIntl} from 'react-intl';
 import {SendAmountScreen} from './screen/send/amount';
 import {
-  SettingGeneralFiatPage,
+  SettingGeneralFiatScreen,
   SettingGeneralScreen,
   SettingManageTokenListScreen,
 } from './screen/setting/screens';
+import {SettingContactsListScreen} from './screen/setting/screens/contacts/list';
+import {SettingContactsAddScreen} from './screen/setting/screens/contacts/add';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -57,7 +59,9 @@ export type RootStackParamList = {
   'Setting.General.Intro': undefined;
   'Setting.General.Lang': undefined;
   'Setting.General.Currency': undefined;
-  'Setting.General.Contacts': undefined;
+  'Setting.General.ContactList': {chainId?: string};
+  'Setting.General.ContactAdd': {chainId: string; editIndex?: number};
+
   'Setting.General.Theme': undefined;
   'Setting.General.ManageAuthz': undefined;
   'Setting.General.WC': undefined;
@@ -266,17 +270,27 @@ const SettingGeneralNavigation = () => {
           }),
           ...defaultHeaderOptions,
         }}
-        component={SettingGeneralFiatPage}
+        component={SettingGeneralFiatScreen}
       />
       <Stack.Screen
-        name="Setting.General.Contacts"
+        name="Setting.General.ContactList"
         options={{
           title: intl.formatMessage({
             id: 'page.setting.general.contacts-title',
           }),
           ...defaultHeaderOptions,
         }}
-        component={SettingGeneralScreen}
+        component={SettingContactsListScreen}
+      />
+      <Stack.Screen
+        name="Setting.General.ContactAdd"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.setting.general.contacts-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={SettingContactsAddScreen}
       />
       <Stack.Screen
         name="Setting.General.Theme"

@@ -9,7 +9,7 @@ import {StackNavProp} from '../../../../../navigation';
 import {useStyle} from '../../../../../styles';
 import {PageWithScrollView} from '../../../../../components/page';
 
-export const SettingGeneralFiatPage: FunctionComponent = observer(() => {
+export const SettingGeneralFiatScreen: FunctionComponent = observer(() => {
   const {uiConfigStore} = useStore();
   const navigate = useNavigation<StackNavProp>();
   const style = useStyle();

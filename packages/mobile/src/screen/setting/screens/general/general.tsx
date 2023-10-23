@@ -62,7 +62,11 @@ export const SettingGeneralScreen: FunctionComponent = observer(() => {
                 color={style.get('color-text-low').color}
               />
             }
-            onClick={() => navigate.navigate('Setting.General.Contacts')}
+            onClick={() =>
+              navigate.navigate('Setting.General.ContactList', {
+                chainId: undefined,
+              })
+            }
           />
 
           <PageButton
