@@ -1,5 +1,5 @@
 import React, {FunctionComponent} from 'react';
-import {Pressable, Text, ViewStyle} from 'react-native';
+import {Text, ViewStyle} from 'react-native';
 import {useStyle} from '../../styles';
 import {Box} from '../box';
 import {Label} from '../input/label';
@@ -63,45 +63,41 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
     <Box position="relative">
       {label ? <Label content={label} /> : null}
 
-      <Pressable onPress={() => setIsOpen(true)}>
-        <Box
-          position="relative"
-          alignY={'center'}
-          height={size === 'small' ? 44 : 52}
-          backgroundColor={style.get('color-gray-700').color}
-          paddingX={16}
-          paddingY={10}
-          borderRadius={8}
-          borderWidth={1}
-          borderColor={
-            color === 'text-input'
-              ? isOpen
-                ? style.get('color-gray-200').color
-                : style.get('color-gray-400').color
-              : isOpen
+      <Box
+        position="relative"
+        alignY={'center'}
+        height={size === 'small' ? 44 : 52}
+        backgroundColor={style.get('color-gray-700').color}
+        paddingX={16}
+        paddingY={10}
+        borderRadius={8}
+        borderWidth={1}
+        borderColor={
+          color === 'text-input'
+            ? isOpen
               ? style.get('color-gray-200').color
-              : style.get('color-gray-500').color
-          }>
-          <Columns sum={1}>
-            <Text
-              style={style.flatten([
-                selectedItemKey ? 'color-gray-50' : 'color-gray-300',
-                isOpen && allowSearch ? 'display-none' : 'opacity-100',
-                'flex-1',
-              ])}>
-              {selectedItemKey
-                ? items.find(item => item.key === selectedItemKey)?.label ??
-                  placeholder
-                : placeholder}
-            </Text>
+              : style.get('color-gray-400').color
+            : isOpen
+            ? style.get('color-gray-200').color
+            : style.get('color-gray-500').color
+        }
+        onClick={() => setIsOpen(true)}>
+        <Columns sum={1}>
+          <Text
+            style={style.flatten([
+              selectedItemKey ? 'color-gray-50' : 'color-gray-300',
+              isOpen && allowSearch ? 'display-none' : 'opacity-100',
+              'flex-1',
+            ])}>
+            {selectedItemKey
+              ? items.find(item => item.key === selectedItemKey)?.label ??
+                placeholder
+              : placeholder}
+          </Text>
 
-            <ArrowDownFillIcon
-              size={24}
-              color={style.get('color-white').color}
-            />
-          </Columns>
-        </Box>
-      </Pressable>
+          <ArrowDownFillIcon size={24} color={style.get('color-white').color} />
+        </Columns>
+      </Box>
 
       <Box
         position="absolute"
