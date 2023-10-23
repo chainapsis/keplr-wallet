@@ -29,7 +29,7 @@ import {
 import {WalletIcon, BrowserIcon, SettingIcon} from './components/icon';
 import {HomeScreenHeader, defaultHeaderOptions} from './components/pageHeader';
 import {SettingScreen} from './screen/setting';
-import {SettingGeneralScreen} from './screen/setting/screens/general';
+
 import {
   WalletSelectScreen,
   WalletDeleteScreen,
@@ -38,8 +38,12 @@ import {
 } from './screen/wallet';
 import {useIntl} from 'react-intl';
 import {SendAmountScreen} from './screen/send/amount';
-import {SettingManageTokenListScreen} from './screen/setting/screens/manage-token-list/general';
-import {SettingGeneralFiatPage} from './screen/setting/screens/general/fiat';
+import {
+  SettingGeneralFiatPage,
+  SettingGeneralScreen,
+  SettingManageTokenListScreen,
+} from './screen/setting/screens';
+
 export type RootStackParamList = {
   Home: undefined;
   Register: undefined;
