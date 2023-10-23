@@ -4,14 +4,16 @@ import {
   IRecipientConfig,
   IRecipientConfigWithICNS,
 } from '@keplr-wallet/hooks';
-import React from 'react';
+import React, {useRef} from 'react';
 import {observer} from 'mobx-react-lite';
-import {Box} from '../../box';
 import {TextInput} from '../text-input/text-input';
 import {IconButton} from '../../icon-button';
 import {useStyle} from '../../../styles';
 import {UserIcon} from '../../icon/user';
 import {useIntl} from 'react-intl';
+import {Modal} from '../../modal';
+import {BottomSheetModal, BottomSheetScrollView} from '@gorhom/bottom-sheet';
+import {AddressBookModal} from './address-book-modal';
 
 export interface RecipientInputWithAddressBookProps {
   historyType: string;
@@ -44,9 +46,7 @@ export const RecipientInput = observer<RecipientInputProps>(props => {
 
   const intl = useIntl();
   const style = useStyle();
-
-  const [isAddressBookModalOpen, setIsAddressBookModalOpen] =
-    React.useState(false);
+  const addressBookModalRef = useRef<BottomSheetModal>(null);
 
   const isICNSName: boolean = (() => {
     if ('isICNSName' in recipientConfig) {
@@ -63,7 +63,7 @@ export const RecipientInput = observer<RecipientInputProps>(props => {
   })();
 
   return (
-    <Box>
+    <React.Fragment>
       <TextInput
         label={intl.formatMessage({
           id: 'components.input.recipient-input.wallet-address-label',
@@ -92,7 +92,13 @@ export const RecipientInput = observer<RecipientInputProps>(props => {
                 <UserIcon size={24} color={style.get('color-gray-10').color} />
               }
               hasRipple={true}
-              style={style.flatten(['border-radius-64'])}
+              rippleColor={style.get('color-gray-500').color}
+              underlayColor={style.get('color-gray-500').color}
+              containerStyle={style.flatten(['width-24', 'height-24'])}
+              style={style.flatten(['padding-4', 'border-radius-64'])}
+              onPress={() => {
+                addressBookModalRef.current?.present();
+              }}
             />
           ) : null
         }
@@ -117,6 +123,19 @@ export const RecipientInput = observer<RecipientInputProps>(props => {
           }
         })()}
       />
-    </Box>
+
+      {memoConfig ? (
+        <Modal ref={addressBookModalRef} snapPoints={['40%', '70%']}>
+          <BottomSheetScrollView>
+            <AddressBookModal
+              historyType={props.historyType}
+              recipientConfig={recipientConfig}
+              memoConfig={memoConfig}
+              permitSelfKeyInfo={props.permitAddressBookSelfKeyInfo}
+            />
+          </BottomSheetScrollView>
+        </Modal>
+      ) : null}
+    </React.Fragment>
   );
 });

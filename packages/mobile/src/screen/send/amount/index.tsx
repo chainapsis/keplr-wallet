@@ -174,6 +174,7 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
               isFetching: balance?.isFetching ?? false,
               error: balance?.error,
             }}
+            forChange={true}
           />
         </Box>
 

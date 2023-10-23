@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useLayoutEffect} from 'react';
+import React, {FunctionComponent, useLayoutEffect, useRef} from 'react';
 import {
   IFeeConfig,
   IGasConfig,
@@ -17,6 +17,9 @@ import {useStyle} from '../../../styles';
 import {Gutter} from '../../gutter';
 import {IconButton} from '../../icon-button';
 import {AdjustmentsHorizontalIcon} from '../../icon/adjustments-horizontal';
+import {Modal} from '../../modal';
+import {TransactionFeeModal} from './transaction-fee-modal';
+import {BottomSheetModal, BottomSheetView} from '@gorhom/bottom-sheet';
 
 export const FeeControl: FunctionComponent<{
   senderConfig: ISenderConfig;
@@ -35,6 +38,8 @@ export const FeeControl: FunctionComponent<{
   }) => {
     const {queriesStore, priceStore, chainStore} = useStore();
     const style = useStyle();
+
+    const transactionFeeModalRef = useRef<BottomSheetModal>(null);
 
     useLayoutEffect(() => {
       if (disableAutomaticFeeSet) {
@@ -164,7 +169,9 @@ export const FeeControl: FunctionComponent<{
 
           {feeConfig.fees.map(fee => {
             return (
-              <Text style={style.flatten(['body2', 'color-white'])}>
+              <Text
+                key={fee.currency.coinMinimalDenom}
+                style={style.flatten(['body2', 'color-white'])}>
                 {fee
                   .maxDecimals(6)
                   .inequalitySymbol(true)
@@ -214,15 +221,25 @@ export const FeeControl: FunctionComponent<{
                 color={style.get('color-white').color}
               />
             }
-            containerStyle={style.flatten([
-              'width-32',
-              'height-32',
-              'border-radius-64',
-              'padding-right-4',
-              'background-color-gray-500',
-            ])}
+            hasRipple={true}
+            style={style.flatten(['border-radius-64'])}
+            containerStyle={style.flatten(['width-32', 'height-32'])}
+            onPress={() => {
+              transactionFeeModalRef.current?.present();
+            }}
           />
         </Columns>
+
+        <Modal ref={transactionFeeModalRef} snapPoints={['60%']}>
+          <BottomSheetView>
+            <TransactionFeeModal
+              senderConfig={senderConfig}
+              feeConfig={feeConfig}
+              gasConfig={gasConfig}
+              gasSimulator={gasSimulator}
+            />
+          </BottomSheetView>
+        </Modal>
       </Box>
     );
   },

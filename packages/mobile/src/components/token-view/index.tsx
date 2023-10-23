@@ -11,6 +11,7 @@ import {Tag} from '../tag';
 import {CoinPretty} from '@keplr-wallet/unit';
 import {IChainInfoImpl, QueryError} from '@keplr-wallet/stores';
 import {Box} from '../box';
+import {ArrowRightIcon} from '../icon/arrow-right';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -28,7 +29,7 @@ interface TokenItemProps {
 }
 
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
-  ({viewToken, onClick, disabled}) => {
+  ({viewToken, onClick, disabled, forChange}) => {
     const style = useStyle();
 
     const {priceStore} = useStore();
@@ -93,7 +94,12 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
 
           <Column weight={1} />
 
-          <Box style={style.flatten(['flex-column', 'flex-shrink-1'])}>
+          <Box
+            style={style.flatten([
+              'flex-column',
+              'flex-shrink-1',
+              'items-end',
+            ])}>
             <Text style={style.flatten(['color-gray-10', 'subtitle1'])}>
               {viewToken.token
                 .hideDenom(true)
@@ -109,6 +115,17 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 : '-'}
             </Text>
           </Box>
+
+          <Gutter size={4} />
+
+          {forChange ? (
+            <Box>
+              <ArrowRightIcon
+                size={24}
+                color={style.get('color-gray-300').color}
+              />
+            </Box>
+          ) : null}
         </Columns>
       </Pressable>
     );

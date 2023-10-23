@@ -29,8 +29,6 @@ export const AmountInput: FunctionComponent<{
   const {chainStore, priceStore} = useStore();
   const intl = useIntl();
 
-  console.log('amountConfig.fraction', amountConfig.fraction);
-
   const price = (() => {
     return priceStore.calculatePrice(amountConfig.amount[0]);
   })();
@@ -198,8 +196,6 @@ const PriceSymbol: FunctionComponent<{
     return null;
   }
 
-  console.log('show', show);
-
   return (
     <React.Fragment>
       {show ? (
@@ -219,21 +215,36 @@ const BottomPriceButton: FunctionComponent<{
 }> = ({text, onClick}) => {
   const style = useStyle();
 
+  const [isPressed, setIsPressed] = useState(false);
+
   return (
     <Box alignX="left" marginTop={8} marginLeft={8}>
-      <Pressable onPress={onClick}>
+      <Pressable
+        onPress={onClick}
+        onPressIn={() => {
+          setIsPressed(true);
+        }}
+        onPressOut={() => setIsPressed(false)}>
         <Box cursor="pointer">
           <Columns sum={1} alignY="center">
             <Svg width={20} height={20} fill="none" viewBox="0 0 20 20">
               <Path
-                fill={style.get('color-gray-300').color}
+                fill={
+                  isPressed
+                    ? style.get('color-gray-300').color
+                    : style.get('color-gray-200').color
+                }
                 fillRule="evenodd"
                 d="M13.2 2.24a.75.75 0 00.04 1.06l2.1 1.95H6.75a.75.75 0 000 1.5h8.59l-2.1 1.95a.75.75 0 101.02 1.1l3.5-3.25a.75.75 0 000-1.1l-3.5-3.25a.75.75 0 00-1.06.04zm-6.4 8a.75.75 0 00-1.06-.04l-3.5 3.25a.75.75 0 000 1.1l3.5 3.25a.75.75 0 101.02-1.1l-2.1-1.95h8.59a.75.75 0 000-1.5H4.66l2.1-1.95a.75.75 0 00.04-1.06z"
                 clipRule="evenodd"
               />
             </Svg>
 
-            <Text style={style.flatten(['color-gray-300', 'margin-left-4'])}>
+            <Text
+              style={style.flatten([
+                isPressed ? 'color-gray-300' : 'color-gray-200',
+                'margin-left-4',
+              ])}>
               {text}
             </Text>
           </Columns>
@@ -249,8 +260,14 @@ const MaxButton: FunctionComponent<{
   const isMax = amountConfig.fraction === 1;
   const style = useStyle();
 
+  const [isPressed, setIsPressed] = useState(false);
+
   return (
     <Pressable
+      onPressIn={() => {
+        setIsPressed(true);
+      }}
+      onPressOut={() => setIsPressed(false)}
       onPress={() => {
         if (amountConfig.fraction > 0) {
           amountConfig.setFraction(0);
@@ -262,19 +279,23 @@ const MaxButton: FunctionComponent<{
         cursor="pointer"
         alignX="center"
         alignY="center"
-        paddingX={8}
-        paddingY={4}
+        paddingX={10}
+        paddingY={6}
         backgroundColor={
           isMax
             ? style.get('color-gray-500').color
-            : style.get('color-gray-550').color
+            : isPressed
+            ? style.get('color-gray-550').color
+            : style.get('color-gray-500').color
         }
         borderRadius={4}
         borderWidth={1}
         borderColor={
           isMax
-            ? style.get('color-gray-400').color
-            : style.get('color-gray-550').color
+            ? isPressed
+              ? style.get('color-gray-400').color
+              : style.get('color-gray-300').color
+            : undefined
         }>
         <Text
           style={style.flatten([
