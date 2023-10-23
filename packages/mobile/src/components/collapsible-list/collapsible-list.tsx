@@ -35,7 +35,9 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
           e.preventDefault();
         }}>
         <Columns sum={1} alignY="center">
-          <Text style={style.flatten(['color-gray-50'])}>{items.length}</Text>
+          <Text style={style.flatten(['subtitle3', 'color-text-high'])}>
+            {items.length}
+          </Text>
           <Gutter size={4} />
           {title}
         </Columns>

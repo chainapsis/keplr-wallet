@@ -71,7 +71,9 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
   return (
     <React.Fragment>
-      <PageWithScrollView backgroundMode={'default'}>
+      <PageWithScrollView
+        backgroundMode={'default'}
+        style={style.flatten(['padding-x-12'])}>
         <Stack gutter={10}>
           <YAxis alignX="center">
             <LayeredHorizontalRadioGroup

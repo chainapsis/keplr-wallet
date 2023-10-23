@@ -35,26 +35,31 @@ export const TokenTitleView: FunctionComponent<{
 }> = ({title, right, onOpenModal}) => {
   const style = useStyle();
   return (
-    <Columns sum={1} alignY="center">
-      <Pressable
-        onPress={() => {
-          onOpenModal();
-        }}>
-        <Columns alignY="center" sum={1} gutter={4}>
-          <Text style={style.flatten(['color-text-low'])}>{title}</Text>
-          <InformationOutlinedIcon
-            size={20}
-            color={style.get('color-text-low').color}
-          />
-        </Columns>
-      </Pressable>
-      {right ? (
-        <React.Fragment>
-          <Column weight={1} />
-          {right}
-        </React.Fragment>
-      ) : null}
-    </Columns>
+    <Box
+      style={{
+        flex: 1,
+      }}>
+      <Columns sum={1} alignY="center">
+        <Pressable
+          onPress={() => {
+            onOpenModal();
+          }}>
+          <Columns alignY="center" sum={1} gutter={4}>
+            <Text style={style.flatten(['color-text-low'])}>{title}</Text>
+            <InformationOutlinedIcon
+              size={20}
+              color={style.get('color-text-low').color}
+            />
+          </Columns>
+        </Pressable>
+        {right ? (
+          <React.Fragment>
+            <Column weight={1} />
+            {right}
+          </React.Fragment>
+        ) : null}
+      </Columns>
+    </Box>
   );
 };
 
