@@ -39,6 +39,7 @@ import {
 import {useIntl} from 'react-intl';
 import {SendAmountScreen} from './screen/send/amount';
 import {SettingManageTokenListScreen} from './screen/setting/screens/manage-token-list/general';
+import {SettingGeneralFiatPage} from './screen/setting/screens/general/fiat';
 export type RootStackParamList = {
   Home: undefined;
   Register: undefined;
@@ -261,7 +262,7 @@ const SettingGeneralNavigation = () => {
           }),
           ...defaultHeaderOptions,
         }}
-        component={SettingGeneralScreen}
+        component={SettingGeneralFiatPage}
       />
       <Stack.Screen
         name="Setting.General.Contacts"
