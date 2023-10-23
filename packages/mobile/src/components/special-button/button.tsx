@@ -2,7 +2,7 @@ import React, {FunctionComponent} from 'react';
 import {SpecialButtonProps} from './types';
 import {Box} from '../box';
 import {ColorPalette, useStyle} from '../../styles';
-import {Pressable, StyleSheet, Text} from 'react-native';
+import {Pressable, StyleSheet, Text, View} from 'react-native';
 import {SVGLoadingIcon} from '../spinner';
 import Animated, {
   interpolateColor,
@@ -23,7 +23,7 @@ const hoverScale = 1.03;
 
 export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
   size = 'small',
-  onClick,
+  onPress,
   left,
   text,
   right,
@@ -86,8 +86,8 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
             return;
           }
 
-          if (onClick) {
-            onClick();
+          if (onPress) {
+            onPress();
           }
         }}
         onPressIn={() => {
@@ -127,9 +127,14 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
               </Box>
             ) : null}
             {isLoading ? (
-              <Box alignX="center" position="absolute">
-                <SVGLoadingIcon size={16} color="white" />
-              </Box>
+              <View
+                style={style.flatten([
+                  'absolute-fill',
+                  'justify-center',
+                  'items-center',
+                ])}>
+                <SVGLoadingIcon color={'white'} size={16} />
+              </View>
             ) : null}
             {!isLoading && textOverrideIcon ? (
               <Box alignX="center" position="absolute">
@@ -137,11 +142,13 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
               </Box>
             ) : null}
             <Text
-              style={style.flatten([
-                textSizeDefinition,
-                'text-center',
-                'color-text-high',
-              ])}>
+              style={style.flatten(
+                [textSizeDefinition, 'text-center', 'color-text-high'],
+                [
+                  isLoading && 'opacity-transparent',
+                  !!textOverrideIcon && 'opacity-transparent',
+                ],
+              )}>
               {text || ''}
             </Text>
             {right ? (

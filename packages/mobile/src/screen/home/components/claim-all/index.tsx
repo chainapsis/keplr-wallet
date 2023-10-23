@@ -469,26 +469,14 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
                 //   disabled={claimAllDisabled}
                 //   onPress={claimAll}
                 // />
-                //FIXME 만들어야 함
-                <SpecialButton width={91} size="small" text="Claim All" />
-                // <RectButton
-                //   // text={'Claim All'}
-
-                //   size="small"
-                //   loading={claimAllIsLoading}
-                //   disabled={claimAllDisabled}
-                //   onPress={claimAll}>
-                //   <Text>Claim All</Text>
-                // </RectButton>
-                // <SpecialButton
-                //   text={intl.formatMessage({
-                //     id: 'page.main.components.claim-all.button',
-                //   })}
-                //   size="small"
-                //   isLoading={claimAllIsLoading}
-                //   disabled={claimAllDisabled}
-                //   onClick={claimAll}
-                // />
+                <SpecialButton
+                  width={91}
+                  size="small"
+                  text="Claim All"
+                  disabled={claimAllDisabled}
+                  isLoading={claimAllIsLoading}
+                  onPress={claimAll}
+                />
               )}
             </Skeleton>
           </Columns>

@@ -7,7 +7,7 @@ export interface SpecialButtonProps {
   text?: string;
   right?: React.ReactNode;
   disabled?: boolean;
-  onClick?: () => void;
+  onPress?: () => void;
   isLoading?: boolean;
   textOverrideIcon?: React.ReactNode;
 }
