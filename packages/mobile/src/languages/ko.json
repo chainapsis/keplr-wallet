@@ -540,7 +540,7 @@
   "components.input.amount-input.amount-label": "수량",
   "components.input.amount-input.max-button": "최대",
   "components.input.memo-input.memo-label": "메모",
-  "components.input.fee-control.title": "트랜잭션 수수료",
+  "components.input.fee-control.title": "트랜잭션 수수료: ",
   "components.input.fee-control.error.insufficient-fee": "수수료가 부족합니다.",
   "components.input.fee-control.modal.title": "수수료 옵션",
   "components.input.fee-control.modal.fee-title": "수수료",
