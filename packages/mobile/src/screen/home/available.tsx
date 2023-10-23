@@ -21,6 +21,7 @@ import {LookingForChains} from './components/looking-for-chains';
 import {Gutter} from '../../components/gutter';
 import FastImage from 'react-native-fast-image';
 import {InformationModal} from './infoModal';
+import {StackActions, useNavigation} from '@react-navigation/native';
 
 const zeroDec = new Dec(0);
 
@@ -116,6 +117,8 @@ export const AvailableTabView: FunctionComponent<{
     },
   ];
 
+  const navigation = useNavigation();
+
   const numFoundToken = useMemo(() => {
     if (chainStore.tokenScans.length === 0) {
       return 0;
@@ -204,11 +207,15 @@ export const AvailableTabView: FunctionComponent<{
                     <TokenItem
                       viewToken={viewToken}
                       key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-                      // onClick={() =>
-                      //   navigate(
-                      //     `/send?chainId=${viewToken.chainInfo.chainId}&coinMinimalDenom=${viewToken.token.currency.coinMinimalDenom}`,
-                      //   )
-                      // }
+                      onClick={() => {
+                        navigation.dispatch({
+                          ...StackActions.push('Send', {
+                            chainId: viewToken.chainInfo.chainId,
+                            coinMinimalDenom:
+                              viewToken.token.currency.coinMinimalDenom,
+                          }),
+                        });
+                      }}
                     />
                   ))}
                 />

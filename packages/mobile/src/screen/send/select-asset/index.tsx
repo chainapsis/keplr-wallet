@@ -11,9 +11,11 @@ import {Column, Columns} from '../../../components/column';
 import {FlatList, Pressable, Text} from 'react-native';
 import {Checkbox} from '../../../components/checkbox';
 import {Box} from '../../../components/box';
+import {StackActions, useNavigation} from '@react-navigation/native';
 
-export const SendScreen: FunctionComponent = observer(() => {
+export const SendSelectAssetScreen: FunctionComponent = observer(() => {
   const style = useStyle();
+  const navigation = useNavigation();
 
   const {hugeQueriesStore} = useStore();
 
@@ -90,7 +92,19 @@ export const SendScreen: FunctionComponent = observer(() => {
           </React.Fragment>
         }
         data={filteredTokens}
-        renderItem={({item}) => <TokenItem viewToken={item} />}
+        renderItem={({item}) => (
+          <TokenItem
+            viewToken={item}
+            onClick={() => {
+              navigation.dispatch({
+                ...StackActions.push('Send', {
+                  chainId: item.chainInfo.chainId,
+                  coinMinimalDenom: item.token.currency.coinMinimalDenom,
+                }),
+              });
+            }}
+          />
+        )}
         keyExtractor={item =>
           `${item.chainInfo.chainId}-${item.token.currency.coinMinimalDenom}`
         }
