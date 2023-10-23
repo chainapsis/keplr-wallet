@@ -22,6 +22,7 @@ import {Pressable, Text} from 'react-native';
 import {useStyle} from '../../../../../styles';
 import {PageWithScrollView} from '../../../../../components/page';
 import {AddressItem} from '../../../components/setting-address-item';
+import {useConfirm} from '../../../../../hooks/confirm';
 
 interface DropdownItem {
   key: string;
@@ -44,7 +45,7 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
   // const paramChainId = searchParams.get('chainId');
   const paramChainId = route.params?.chainId;
   const chainId = paramChainId || chainStore.chainInfos[0].chainId;
-  // const confirm = useConfirm();
+  const confirm = useConfirm();
 
   useLayoutEffect(() => {
     if (!paramChainId) {
@@ -132,21 +133,21 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
                         id: 'page.setting.contacts.list.dropdown.delete-contact-label',
                       }),
                       onSelect: async () => {
-                        // if (
-                        //   await confirm.confirm(
-                        //     intl.formatMessage({
-                        //       id: 'page.setting.contacts.list.dropdown.delete-contact-confirm-title',
-                        //     }),
-                        //     intl.formatMessage({
-                        //       id: 'page.setting.contacts.list.dropdown.delete-contact-confirm-paragraph',
-                        //     }),
-                        //   )
-                        // ) {
-                        //   uiConfigStore.addressBookConfig.removeAddressBookAt(
-                        //     chainId,
-                        //     i,
-                        //   );
-                        // }
+                        if (
+                          await confirm.confirm(
+                            intl.formatMessage({
+                              id: 'page.setting.contacts.list.dropdown.delete-contact-confirm-title',
+                            }),
+                            intl.formatMessage({
+                              id: 'page.setting.contacts.list.dropdown.delete-contact-confirm-paragraph',
+                            }),
+                          )
+                        ) {
+                          uiConfigStore.addressBookConfig.removeAddressBookAt(
+                            chainId,
+                            i,
+                          );
+                        }
                       },
                     },
                   ]);
