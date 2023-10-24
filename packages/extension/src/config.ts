@@ -2492,6 +2492,43 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: [],
   },
+  {
+    rpc: "https://rpc-dydx.keplr.app",
+    rest: "https://lcd-dydx.keplr.app",
+    chainId: "dydx-mainnet-1",
+    chainName: "dYdX",
+    stakeCurrency: {
+      coinDenom: "DYDX",
+      coinDecimals: 18,
+      coinMinimalDenom: "adydx",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "dydx",
+      bech32PrefixAccPub: "dydxpub",
+      bech32PrefixValAddr: "dydxvaloper",
+      bech32PrefixValPub: "dydxvaloperpub",
+      bech32PrefixConsAddr: "dydxvalcons",
+      bech32PrefixConsPub: "dydxvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "DYDX",
+        coinDecimals: 18,
+        coinMinimalDenom: "adydx",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "DYDX",
+        coinDecimals: 18,
+        coinMinimalDenom: "adydx",
+      },
+    ],
+    features: [],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
