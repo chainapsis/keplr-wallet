@@ -1,8 +1,20 @@
 import React, {FunctionComponent, PropsWithChildren} from 'react';
 import {BoxProps} from './types';
-import {StyleSheet, View, ViewStyle} from 'react-native';
+import {Pressable, StyleSheet, View, ViewStyle} from 'react-native';
 
-export const Box: FunctionComponent<PropsWithChildren<BoxProps>> = ({
+export const Box: FunctionComponent<PropsWithChildren<BoxProps>> = props => {
+  if (props.onClick) {
+    return (
+      <Pressable onPress={props.onClick}>
+        <BoxInner {...props} />
+      </Pressable>
+    );
+  }
+
+  return <BoxInner {...props} />;
+};
+
+const BoxInner: FunctionComponent<PropsWithChildren<BoxProps>> = ({
   children,
   style,
   alignX,
