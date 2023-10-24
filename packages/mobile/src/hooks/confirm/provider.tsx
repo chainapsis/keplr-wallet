@@ -70,10 +70,7 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
         };
       }, [])}>
       {children}
-      <Modal
-        isConfirmModal={true}
-        ref={confirmModalRef}
-        enableDynamicSizing={true}>
+      <Modal isConfirmModal={true} ref={confirmModalRef} snapPoints={[165]}>
         <BottomSheetView>
           <YAxis alignX="center">
             <Box
