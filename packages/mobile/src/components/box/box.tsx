@@ -2,19 +2,7 @@ import React, {FunctionComponent, PropsWithChildren} from 'react';
 import {BoxProps} from './types';
 import {Pressable, StyleSheet, View, ViewStyle} from 'react-native';
 
-export const Box: FunctionComponent<PropsWithChildren<BoxProps>> = props => {
-  if (props.onClick) {
-    return (
-      <Pressable onPress={props.onClick}>
-        <BoxInner {...props} />
-      </Pressable>
-    );
-  }
-
-  return <BoxInner {...props} />;
-};
-
-const BoxInner: FunctionComponent<PropsWithChildren<BoxProps>> = ({
+export const Box: FunctionComponent<PropsWithChildren<BoxProps>> = ({
   children,
   style,
   alignX,
@@ -45,6 +33,7 @@ const BoxInner: FunctionComponent<PropsWithChildren<BoxProps>> = ({
   paddingY,
   position,
   zIndex,
+  onClick,
 }) => {
   const boxStyle: ViewStyle = {
     display: 'flex',
@@ -100,6 +89,16 @@ const BoxInner: FunctionComponent<PropsWithChildren<BoxProps>> = ({
       }
     })(),
   };
+
+  if (onClick) {
+    return (
+      <Pressable
+        onPress={onClick}
+        style={StyleSheet.flatten([boxStyle, style])}>
+        {children}
+      </Pressable>
+    );
+  }
 
   return <View style={StyleSheet.flatten([boxStyle, style])}>{children}</View>;
 };
