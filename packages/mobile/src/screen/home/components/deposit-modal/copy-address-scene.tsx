@@ -265,7 +265,7 @@ const CopyAddressItem: FunctionComponent<{
     // 클릭 영역 문제로 레이아웃이 복잡해졌다.
     // 알아서 잘 해결하자
     return (
-      <Box height={64} borderRadius={6} alignY="center" width={'100%'}>
+      <Box height={74} borderRadius={6} alignY="center" width={'100%'}>
         <XAxis alignY="center">
           <Pressable
             style={{
@@ -295,7 +295,7 @@ const CopyAddressItem: FunctionComponent<{
               }, 500);
             }}>
             <Box
-              height={64}
+              height={74}
               borderRadius={6}
               alignY="center"
               backgroundColor={(() => {
