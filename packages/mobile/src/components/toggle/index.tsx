@@ -4,16 +4,20 @@ import {useStyle} from '../../styles';
 import {Path, Svg} from 'react-native-svg';
 import {IconProps} from '../icon/types';
 
+type ToggleSize = 'small' | 'medium';
+
 interface ToggleProps {
   isOpen: boolean;
   setIsOpen?: (isOpen: boolean) => void;
   disabled?: boolean;
+  size?: ToggleSize;
 }
 
 export const Toggle: FunctionComponent<ToggleProps> = ({
   isOpen,
   setIsOpen,
   disabled,
+  size,
 }) => {
   const style = useStyle();
 
@@ -21,9 +25,9 @@ export const Toggle: FunctionComponent<ToggleProps> = ({
     <Box
       alignX={isOpen ? 'right' : 'left'}
       alignY="center"
-      width={52}
-      height={32}
-      padding={isOpen ? 4 : 8}
+      width={size === 'small' ? 36 : 52}
+      height={size === 'small' ? 22 : 32}
+      padding={isOpen ? (size === 'small' ? 3 : 4) : size === 'small' ? 6 : 8}
       borderRadius={16}
       backgroundColor={
         disabled
@@ -37,8 +41,12 @@ export const Toggle: FunctionComponent<ToggleProps> = ({
         alignX="center"
         alignY="center"
         borderRadius={12}
-        width={isOpen ? 24 : 16}
-        height={isOpen ? 24 : 16}
+        width={
+          isOpen ? (size === 'small' ? 16 : 24) : size === 'small' ? 12 : 16
+        }
+        height={
+          isOpen ? (size === 'small' ? 16 : 24) : size === 'small' ? 12 : 16
+        }
         backgroundColor={
           disabled
             ? style.get('color-gray-300').color
@@ -49,7 +57,7 @@ export const Toggle: FunctionComponent<ToggleProps> = ({
         style={{opacity: disabled ? 0.4 : undefined}}>
         {isOpen ? (
           <CheckToggleIcon
-            size={16}
+            size={size === 'small' ? 12 : 16}
             color={
               disabled
                 ? style.get('color-gray-200').color
