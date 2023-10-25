@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export interface Confirm {
   confirm: (
@@ -6,6 +6,6 @@ export interface Confirm {
     paragraph: string | React.ReactNode,
     options?: {
       forceYes?: boolean;
-    }
+    },
   ) => Promise<boolean>;
 }
