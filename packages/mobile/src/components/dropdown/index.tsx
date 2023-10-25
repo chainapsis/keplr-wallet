@@ -161,12 +161,7 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
                   closeDropdown={() => setIsOpen(!isOpen)}
                 />
               )}
-              ItemSeparatorComponent={() => (
-                <Box
-                  borderColor={style.get('color-gray-500').color}
-                  borderWidth={0.5}
-                />
-              )}
+              ItemSeparatorComponent={Divder}
             />
           ) : (
             <FlatList
@@ -179,12 +174,19 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
                   closeDropdown={() => setIsOpen(!isOpen)}
                 />
               )}
+              ItemSeparatorComponent={Divder}
             />
           )}
         </Box>
       </Box>
     </Box>
   );
+};
+
+const Divder = () => {
+  const style = useStyle();
+
+  return <Box height={1} backgroundColor={style.get('color-gray-500').color} />;
 };
 
 const DropdownItem: FunctionComponent<{
