@@ -10,7 +10,6 @@ import {Stack} from '../../../../../components/stack';
 import {useStyle} from '../../../../../styles';
 import {useStore} from '../../../../../stores';
 import {Column, Columns} from '../../../../../components/column';
-// import {Dropdown} from '../../../../components/dropdown';
 import {Box} from '../../../../../components/box';
 import {Button} from '../../../../../components/button';
 import {autorun} from 'mobx';
@@ -30,8 +29,9 @@ import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../../../navigation';
 import {Modal} from '../../../../../components/modal';
 import {BottomSheetModal, BottomSheetView} from '@gorhom/bottom-sheet';
+import {Dropdown} from '../../../../../components/dropdown';
 
-interface DropdownItem {
+interface MenuModalItems {
   key: string;
   label: string;
   isChecked?: boolean;
@@ -45,7 +45,7 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
   const navigate = useNavigation<StackNavProp>();
   const style = useStyle();
   const menuModalRef = useRef<BottomSheetModal>(null);
-  const [dropdownItems, setModalDropdownItems] = useState<DropdownItem[]>([
+  const [menuModalItems, setMenuModalItems] = useState<MenuModalItems[]>([
     {
       key: 'change-contact-label',
       label: intl.formatMessage({
@@ -112,12 +112,12 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
           </Text>
           <Columns sum={1} alignY="center">
             <Box width={208}>
-              {/* <Dropdown
-              items={items}
-              selectedItemKey={chainId}
-              onSelect={setChainId}
-              allowSearch={true}
-            /> */}
+              <Dropdown
+                items={items}
+                selectedItemKey={chainId}
+                onSelect={setChainId}
+                allowSearch={true}
+              />
             </Box>
 
             <Column weight={1} />
@@ -151,7 +151,7 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
                   chainId={chainId}
                   tokenInfo={token}
                   modalOpen={() => menuModalRef.current?.present()}
-                  setDropdownItems={setModalDropdownItems}
+                  setMenuModalItems={setMenuModalItems}
                 />
               );
             })
@@ -162,9 +162,9 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
         isDetachedModal={true}
         ref={menuModalRef}
         //NOTE DynamicSizing로 하면 detached가 안되서 각 item높이를 갯수만큼 곱해서 설정함
-        snapPoints={[68 * dropdownItems.length]}>
+        snapPoints={[68 * menuModalItems.length]}>
         <BottomSheetView>
-          {dropdownItems.map((item, i) => (
+          {menuModalItems.map((item, i) => (
             <Box
               key={item.key}
               height={68}
@@ -172,7 +172,7 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
               alignY="center"
               style={style.flatten(
                 ['border-width-bottom-1', 'border-color-gray-500'],
-                [i === dropdownItems.length - 1 && 'border-width-bottom-0'], //마지막 요소는 아래 보더 스타일 제가하기 위해서
+                [i === menuModalItems.length - 1 && 'border-width-bottom-0'], //마지막 요소는 아래 보더 스타일 제가하기 위해서
               )}
               onClick={() => {
                 item.onSelect();
@@ -197,8 +197,8 @@ const TokenItem: FunctionComponent<{
   chainId: string;
   tokenInfo: TokenInfo;
   modalOpen: () => void;
-  setDropdownItems: React.Dispatch<React.SetStateAction<DropdownItem[]>>;
-}> = observer(({chainId, tokenInfo, modalOpen, setDropdownItems}) => {
+  setMenuModalItems: React.Dispatch<React.SetStateAction<MenuModalItems[]>>;
+}> = observer(({chainId, tokenInfo, modalOpen, setMenuModalItems}) => {
   const {tokensStore} = useStore();
   // const notification = useNotification();
   const intl = useIntl();
@@ -296,11 +296,11 @@ const TokenItem: FunctionComponent<{
                 },
               ];
 
-              const dropdownItems = isSecret20
+              const menuModalItems = isSecret20
                 ? [secretMenu, ...commonMenuItems]
                 : commonMenuItems;
 
-              setDropdownItems(dropdownItems);
+              setMenuModalItems(menuModalItems);
               modalOpen();
             }}
           />

@@ -5,7 +5,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-// import {useConfirm} from '../../../../hooks/confirm';
 import {useIntl} from 'react-intl';
 import {useStore} from '../../../../../stores';
 import {Gutter} from '../../../../../components/gutter';
@@ -23,6 +22,7 @@ import {useStyle} from '../../../../../styles';
 import {PageWithScrollView} from '../../../../../components/page';
 import {AddressItem} from '../../../components/setting-address-item';
 import {useConfirm} from '../../../../../hooks/confirm';
+import {Dropdown} from '../../../../../components/dropdown';
 
 interface DropdownItem {
   key: string;
@@ -50,22 +50,15 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
   useLayoutEffect(() => {
     if (!paramChainId) {
       navigate.setParams({chainId: chainStore.chainInfos[0].chainId});
-      // setSearchParams(
-      //   {chainId: chainStore.chainInfos[0].chainId},
-      //   {
-      //     replace: true,
-      //   },
-      // );
     }
   }, [chainStore.chainInfos, navigate, paramChainId]);
 
-  //TODO dropdown 완료 되면 dropdown 추가 해야함
-  // const items = chainStore.chainInfos.map(chainInfo => {
-  //   return {
-  //     key: chainInfo.chainId,
-  //     label: chainInfo.chainName,
-  //   };
-  // });
+  const items = chainStore.chainInfos.map(chainInfo => {
+    return {
+      key: chainInfo.chainId,
+      label: chainInfo.chainName,
+    };
+  });
 
   const addresses = uiConfigStore.addressBookConfig.getAddressBook(chainId);
 
@@ -75,19 +68,14 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
       style={style.flatten(['padding-12'])}>
       <Columns sum={1} alignY="center">
         <Box width={208}>
-          {/* <Dropdown
+          <Dropdown
             items={items}
             selectedItemKey={chainId}
             onSelect={key => {
-              setSearchParams(
-                {chainId: key},
-                {
-                  replace: true,
-                },
-              );
+              navigate.setParams({chainId: key});
             }}
             allowSearch={true}
-          /> */}
+          />
         </Box>
 
         <Column weight={1} />
