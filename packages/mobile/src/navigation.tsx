@@ -41,10 +41,11 @@ import {SendAmountScreen} from './screen/send/amount';
 import {
   SettingGeneralFiatScreen,
   SettingGeneralScreen,
-  SettingManageTokenListScreen,
 } from './screen/setting/screens';
 import {SettingContactsListScreen} from './screen/setting/screens/contacts/list';
 import {SettingContactsAddScreen} from './screen/setting/screens/contacts/add';
+import {SettingTokenListScreen} from './screen/setting/screens/token/manage';
+import {SettingTokenAddScreen} from './screen/setting/screens/token/add';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -77,6 +78,7 @@ export type RootStackParamList = {
   'Setting.SecurityAndPrivacy.ChangePassword': undefined;
 
   'Setting.ManageTokenList': undefined;
+  'Setting.ManageTokenList.Add': {chainId?: string; contractAddress?: string};
 
   Locked: undefined;
   SelectWallet: undefined;
@@ -229,10 +231,20 @@ const SettingNavigation = () => {
       <Stack.Screen
         name="Setting.ManageTokenList"
         options={{
-          headerShown: false,
+          title: intl.formatMessage({
+            id: 'page.setting.manage-token-list-title',
+          }),
           ...defaultHeaderOptions,
         }}
-        component={SettingManageTokenListScreen}
+        component={SettingTokenListScreen}
+      />
+      <Stack.Screen
+        name="Setting.ManageTokenList.Add"
+        options={{
+          title: intl.formatMessage({id: 'page.setting.token.add.title'}),
+          ...defaultHeaderOptions,
+        }}
+        component={SettingTokenAddScreen}
       />
     </Stack.Navigator>
   );

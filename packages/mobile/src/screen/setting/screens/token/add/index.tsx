@@ -6,30 +6,30 @@ import React, {
   useState,
 } from 'react';
 import {observer} from 'mobx-react-lite';
-import {Stack} from '../../../../components/stack';
-import {TextInput} from '../../../../components/input';
-import {useStore} from '../../../../stores';
-import {Box} from '../../../../components/box';
+import {Stack} from '../../../../../components/stack';
+import {TextInput} from '../../../../../components/input';
+import {useStore} from '../../../../../stores';
+import {Box} from '../../../../../components/box';
 import {autorun} from 'mobx';
 import {AppCurrency} from '@keplr-wallet/types';
 // import {useInteractionInfo} from '../../../../hooks';
-import {useStyle} from '../../../../styles';
-import {Column, Columns} from '../../../../components/column';
-import {Toggle} from '../../../../components/toggle';
+import {useStyle} from '../../../../../styles';
+import {Column, Columns} from '../../../../../components/column';
+import {Toggle} from '../../../../../components/toggle';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {Bech32Address} from '@keplr-wallet/cosmos';
 // import {ContractAddressBookModal} from '../../../../components/contract-address-book-modal';
-import {IconButton} from '../../../../components/icon-button';
-import {MenuIcon} from '../../../../components/icon';
+import {IconButton} from '../../../../../components/icon-button';
+import {MenuIcon} from '../../../../../components/icon';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-import {RootStackParamList, StackNavProp} from '../../../../navigation';
-import {PageWithScrollView} from '../../../../components/page';
-import {ContractAddressBookModal} from '../../components/contract-address-book-modal';
+import {RootStackParamList, StackNavProp} from '../../../../../navigation';
+import {PageWithScrollView} from '../../../../../components/page';
+import {ContractAddressBookModal} from '../../../components/contract-address-book-modal';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {Text} from 'react-native';
 import {Controller, useForm} from 'react-hook-form';
-import {Button} from '../../../../components/button';
-import {Gutter} from '../../../../components/gutter';
+import {Button} from '../../../../../components/button';
+import {Gutter} from '../../../../../components/gutter';
 
 // const Styles = {
 //   Container: styled(Stack)`
@@ -184,7 +184,6 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
   };
 
   const submit = handleSubmit(async data => {
-    console.log('info', queryContract.tokenInfo);
     if (queryContract.tokenInfo) {
       let currency: AppCurrency;
 
