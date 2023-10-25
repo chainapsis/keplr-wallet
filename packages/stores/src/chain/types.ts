@@ -34,6 +34,7 @@ export interface IChainInfoImpl<C extends ChainInfo = ChainInfo> {
       | string
       | ((coinMinimalDenom: string) => boolean | null | undefined)
   ): AppCurrency | undefined;
+  findCurrencyAsync(coinMinimalDenom: string): Promise<AppCurrency | undefined>;
   forceFindCurrency(coinMinimalDenom: string): AppCurrency;
   hasFeature(feature: string): boolean;
   removeCurrencies(...coinMinimalDenoms: string[]): void;
