@@ -1,7 +1,12 @@
 import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent, useEffect, useMemo} from 'react';
 import {PageWithScrollView} from '../../../components/page';
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {
+  RouteProp,
+  StackActions,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {useStore} from '../../../stores';
 import {useGasSimulator, useSendTxConfig} from '@keplr-wallet/hooks';
 import {ICNSInfo} from '../../../utils/config.ui';
@@ -175,6 +180,11 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
               error: balance?.error,
             }}
             forChange={true}
+            onClick={() => {
+              navigation.dispatch({
+                ...StackActions.replace('Send.SelectAsset'),
+              });
+            }}
           />
         </Box>
 
