@@ -238,25 +238,23 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
       <Modal ref={menuModalRef} isDetachedModal={true} snapPoints={[202]}>
         <BottomSheetView>
           {modalDropdownItems.map((item, i) => (
-            <Pressable
+            <Box
               key={item.key}
-              onPress={() => {
+              height={68}
+              alignX="center"
+              alignY="center"
+              style={style.flatten(
+                ['border-width-bottom-1', 'border-color-gray-500'],
+                [i === 2 && 'border-width-bottom-0'], //마지막 요소는 아래 보더 스타일 제가하기 위해서
+              )}
+              onClick={() => {
                 item.onSelect();
                 menuModalRef.current?.dismiss();
               }}>
-              <Box
-                height={68}
-                alignX="center"
-                alignY="center"
-                style={style.flatten(
-                  ['border-width-bottom-1', 'border-color-gray-500'],
-                  [i === 2 && 'border-width-bottom-0'], //마지막 요소는 아래 보더 스타일 제가하기 위해서
-                )}>
-                <Text style={style.flatten(['body1', 'color-text-high'])}>
-                  {item.label}
-                </Text>
-              </Box>
-            </Pressable>
+              <Text style={style.flatten(['body1', 'color-text-high'])}>
+                {item.label}
+              </Text>
+            </Box>
           ))}
         </BottomSheetView>
       </Modal>
@@ -467,8 +465,21 @@ const KeyringItem: FunctionComponent<{
   const isSelected = keyRingStore.selectedKeyInfo?.id === keyInfo.id;
 
   return (
-    <Pressable
-      onPress={async () => {
+    <Box
+      padding={16}
+      minHeight={74}
+      borderRadius={6}
+      alignY="center"
+      style={StyleSheet.flatten([
+        style.flatten(['background-color-gray-600']),
+        isSelected &&
+          style.flatten([
+            'border-width-1',
+            'border-color-gray-200',
+            'border-solid',
+          ]),
+      ])}
+      onClick={async () => {
         if (isSelected) {
           return;
         }
@@ -476,74 +487,50 @@ const KeyringItem: FunctionComponent<{
         await chainStore.waitSyncedEnabledChains();
         navigate.goBack();
       }}>
-      <Box
-        padding={16}
-        minHeight={74}
-        borderRadius={6}
-        alignY="center"
-        style={StyleSheet.flatten([
-          style.flatten(['background-color-gray-600']),
-          isSelected &&
-            style.flatten([
-              'border-width-1',
-              'border-color-gray-200',
-              'border-solid',
-            ]),
-        ])}>
-        <Columns sum={1} alignY="center">
-          <YAxis>
-            <XAxis alignY="center">
-              {isSelected ? (
-                <React.Fragment>
-                  <CheckIcon
-                    size={20}
-                    color={style.get('color-gray-200').color}
-                  />
-                  <Gutter size={4} />
-                </React.Fragment>
-              ) : null}
-              <Text
-                style={style.flatten([
-                  'subtitle2',
-                  'dark:color-gray-700',
-                  'color-gray-10',
-                ])}>
-                {keyInfo.name}
-              </Text>
-            </XAxis>
-            {paragraph ? (
+      <Columns sum={1} alignY="center">
+        <YAxis>
+          <XAxis alignY="center">
+            {isSelected ? (
               <React.Fragment>
-                <Gutter size={6} />
-                <Text style={style.flatten(['body2', 'color-gray-300'])}>
-                  {paragraph}
-                </Text>
+                <CheckIcon
+                  size={20}
+                  color={style.get('color-gray-200').color}
+                />
+                <Gutter size={4} />
               </React.Fragment>
             ) : null}
-          </YAxis>
-          <Column weight={1} />
-          <XAxis alignY="center">
-            <Box
-              cursor="pointer"
-              onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}>
-              <Pressable
-                onPress={e => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  setModalDropdownItems(dropdownItems);
-                  openModal();
-                }}>
-                <EllipsisIcon
-                  size={24}
-                  color={style.get('color-gray-10').color}
-                />
-              </Pressable>
-            </Box>
+            <Text
+              style={style.flatten([
+                'subtitle2',
+                'dark:color-gray-700',
+                'color-gray-10',
+              ])}>
+              {keyInfo.name}
+            </Text>
           </XAxis>
-        </Columns>
-      </Box>
-    </Pressable>
+          {paragraph ? (
+            <React.Fragment>
+              <Gutter size={6} />
+              <Text style={style.flatten(['body2', 'color-gray-300'])}>
+                {paragraph}
+              </Text>
+            </React.Fragment>
+          ) : null}
+        </YAxis>
+        <Column weight={1} />
+        <XAxis alignY="center">
+          <Box
+            cursor="pointer"
+            onClick={e => {
+              e.stopPropagation();
+              e.preventDefault();
+              setModalDropdownItems(dropdownItems);
+              openModal();
+            }}>
+            <EllipsisIcon size={24} color={style.get('color-gray-10').color} />
+          </Box>
+        </XAxis>
+      </Columns>
+    </Box>
   );
 });

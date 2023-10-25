@@ -1,5 +1,5 @@
-import React, {FunctionComponent} from 'react';
-import {Pressable, Text, ViewStyle} from 'react-native';
+import React, {FunctionComponent, useEffect, useRef} from 'react';
+import {FlatList, Text, TextInput, ViewStyle} from 'react-native';
 import {useStyle} from '../../styles';
 import {Box} from '../box';
 import {Label} from '../input/label';
@@ -22,9 +22,8 @@ export interface DropdownProps {
   color?: 'default' | 'text-input';
   size?: 'small' | 'large';
   label?: string;
-  menuContainerMaxHeight?: string;
-
   allowSearch?: boolean;
+  isModal?: boolean;
 }
 
 export const Dropdown: FunctionComponent<DropdownProps> = ({
@@ -32,14 +31,27 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
   label,
   placeholder,
   selectedItemKey,
+  onSelect,
   color,
   size,
   allowSearch,
+  isModal,
 }) => {
   const style = useStyle();
   const [isOpen, setIsOpen] = React.useState(false);
+  const searchInputRef = useRef<TextInput>(null);
 
   const [searchText, setSearchText] = React.useState('');
+
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchText('');
+    } else {
+      if (allowSearch) {
+        searchInputRef.current?.focus();
+      }
+    }
+  }, [allowSearch, isOpen]);
 
   const filteredItems = React.useMemo(() => {
     return items.filter(item => {
@@ -60,29 +72,53 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
   }, [allowSearch, items, searchText]);
 
   return (
-    <Box position="relative">
+    <Box zIndex={1}>
       {label ? <Label content={label} /> : null}
 
-      <Pressable onPress={() => setIsOpen(true)}>
-        <Box
-          position="relative"
-          alignY={'center'}
-          height={size === 'small' ? 44 : 52}
-          backgroundColor={style.get('color-gray-700').color}
-          paddingX={16}
-          paddingY={10}
-          borderRadius={8}
-          borderWidth={1}
-          borderColor={
-            color === 'text-input'
-              ? isOpen
-                ? style.get('color-gray-200').color
-                : style.get('color-gray-400').color
-              : isOpen
+      <Box
+        alignY="center"
+        height={size === 'small' ? 44 : 52}
+        backgroundColor={style.get('color-gray-700').color}
+        paddingX={16}
+        paddingY={10}
+        borderRadius={8}
+        borderWidth={1}
+        borderColor={
+          color === 'text-input'
+            ? isOpen
               ? style.get('color-gray-200').color
-              : style.get('color-gray-500').color
-          }>
-          <Columns sum={1}>
+              : style.get('color-gray-400').color
+            : isOpen
+            ? style.get('color-gray-200').color
+            : style.get('color-gray-500').color
+        }
+        onClick={() => setIsOpen(!isOpen)}>
+        <Columns sum={1}>
+          <Box style={{flex: 1}}>
+            <Box
+              position="absolute"
+              style={{
+                opacity: !isOpen || !allowSearch ? 0 : 1,
+                pointerEvents: !isOpen || !allowSearch ? 'none' : 'auto',
+              }}>
+              <TextInput
+                ref={searchInputRef}
+                value={searchText}
+                onChangeText={text => {
+                  setSearchText(text);
+                }}
+                selectionColor={style.get('color-gray-50').color}
+                style={{
+                  padding: 0,
+                  borderWidth: 1,
+                  backgroundColor: style.get('color-red-400').color,
+                  color: selectedItemKey
+                    ? style.get('color-gray-50').color
+                    : style.get('color-gray-300').color,
+                }}
+              />
+            </Box>
+
             <Text
               style={style.flatten([
                 selectedItemKey ? 'color-gray-50' : 'color-gray-300',
@@ -94,41 +130,84 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
                   placeholder
                 : placeholder}
             </Text>
+          </Box>
 
-            <ArrowDownFillIcon
-              size={24}
-              color={style.get('color-white').color}
-            />
-          </Columns>
-        </Box>
-      </Pressable>
-
-      <Box
-        position="absolute"
-        borderColor={style.get('color-red-500').color}
-        borderWidth={1}
-        borderRadius={6}
-        height={200}
-        style={style.flatten([
-          'flex-1',
-          'width-full',
-          'overflow-hidden',
-          'margin-top-82',
-          isOpen && filteredItems.length > 0 ? 'flex' : 'display-none',
-        ])}>
-        <BottomSheetFlatList
-          data={filteredItems}
-          keyExtractor={item => item.key}
-          renderItem={({item}) => (
-            <Box
-              alignX="center"
-              height={52}
-              backgroundColor={style.get('color-gray-500').color}>
-              <Text style={style.flatten(['color-red-400'])}>{item.label}</Text>
-            </Box>
-          )}
-        />
+          <ArrowDownFillIcon size={24} color={style.get('color-white').color} />
+        </Columns>
       </Box>
+
+      <Box>
+        <Box
+          position="absolute"
+          backgroundColor={style.get('color-gray-600').color}
+          borderColor={style.get('color-gray-500').color}
+          borderWidth={1}
+          borderRadius={6}
+          height={items.length > 5 ? 200 : items.length * 52}
+          style={style.flatten([
+            'flex-1',
+            'width-full',
+            'overflow-hidden',
+            isOpen && filteredItems.length > 0 ? 'flex' : 'display-none',
+          ])}>
+          {isModal ? (
+            <BottomSheetFlatList
+              data={filteredItems}
+              keyExtractor={item => item.key}
+              renderItem={({item}) => (
+                <DropdownItem
+                  item={item}
+                  onSelect={onSelect}
+                  closeDropdown={() => setIsOpen(!isOpen)}
+                />
+              )}
+              ItemSeparatorComponent={Divider}
+            />
+          ) : (
+            <FlatList
+              data={filteredItems}
+              keyExtractor={item => item.key}
+              renderItem={({item}) => (
+                <DropdownItem
+                  item={item}
+                  onSelect={onSelect}
+                  closeDropdown={() => setIsOpen(!isOpen)}
+                />
+              )}
+              ItemSeparatorComponent={Divider}
+            />
+          )}
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+const Divider = () => {
+  const style = useStyle();
+
+  return <Box height={1} backgroundColor={style.get('color-gray-500').color} />;
+};
+
+const DropdownItem: FunctionComponent<{
+  item: DropdownItemProps;
+  onSelect: (key: string) => void;
+  closeDropdown: () => void;
+}> = ({item, onSelect, closeDropdown}) => {
+  const style = useStyle();
+
+  return (
+    <Box
+      alignY="center"
+      height={52}
+      paddingX={24}
+      paddingY={15}
+      backgroundColor={style.get('color-gray-600').color}
+      onClick={() => {
+        onSelect(item.key);
+        closeDropdown();
+      }}>
+      <Text style={style.flatten(['color-text-high'])}>{item.label}</Text>
     </Box>
   );
 };

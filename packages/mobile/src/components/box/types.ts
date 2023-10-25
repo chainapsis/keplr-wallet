@@ -1,5 +1,5 @@
-import {MouseEventHandler} from 'react';
 import {AnimatableNumericValue, DimensionValue, ViewStyle} from 'react-native';
+import {GestureResponderEvent} from 'react-native/Libraries/Types/CoreEventTypes';
 
 export type BoxAlignX = 'left' | 'right' | 'center';
 export type BoxAlignY = 'top' | 'bottom' | 'center';
@@ -41,5 +41,5 @@ export interface BoxProps {
 
   style?: ViewStyle;
 
-  onClick?: MouseEventHandler<HTMLDivElement>;
+  onClick?: (event: GestureResponderEvent) => void;
 }

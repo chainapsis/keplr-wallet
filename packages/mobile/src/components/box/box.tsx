@@ -1,6 +1,6 @@
 import React, {FunctionComponent, PropsWithChildren} from 'react';
 import {BoxProps} from './types';
-import {StyleSheet, View, ViewStyle} from 'react-native';
+import {Pressable, StyleSheet, View, ViewStyle} from 'react-native';
 
 export const Box: FunctionComponent<PropsWithChildren<BoxProps>> = ({
   children,
@@ -33,6 +33,7 @@ export const Box: FunctionComponent<PropsWithChildren<BoxProps>> = ({
   paddingY,
   position,
   zIndex,
+  onClick,
 }) => {
   const boxStyle: ViewStyle = {
     display: 'flex',
@@ -88,6 +89,16 @@ export const Box: FunctionComponent<PropsWithChildren<BoxProps>> = ({
       }
     })(),
   };
+
+  if (onClick) {
+    return (
+      <Pressable
+        onPress={onClick}
+        style={StyleSheet.flatten([boxStyle, style])}>
+        {children}
+      </Pressable>
+    );
+  }
 
   return <View style={StyleSheet.flatten([boxStyle, style])}>{children}</View>;
 };
