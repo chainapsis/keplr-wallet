@@ -1,6 +1,15 @@
-import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
+import React, {
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {observer} from 'mobx-react-lite';
-import {KeyInfo} from '@keplr-wallet/background';
+import {
+  GetCosmosKeysForEachVaultSettledMsg,
+  KeyInfo,
+} from '@keplr-wallet/background';
 import {useStore} from '../../../stores';
 import {Box} from '../../../components/box';
 import {XAxis, YAxis} from '../../../components/axis';
@@ -20,6 +29,8 @@ import {BottomSheetModal, BottomSheetView} from '@gorhom/bottom-sheet';
 import {EllipsisIcon} from '../../../components/icon/ellipsis';
 import {StackNavProp} from '../../../navigation';
 import FastImage from 'react-native-fast-image';
+import {BACKGROUND_PORT} from '@keplr-wallet/router';
+import {RNMessageRequesterInternal} from '../../../router';
 
 interface ModalMenuItem {
   key: string;
@@ -277,22 +288,42 @@ const KeyInfoList: FunctionComponent<{
   openModal: () => void;
 }> = observer(({title, keyInfos, setModalMenuItems, openModal}) => {
   const style = useStyle();
-  const {uiConfigStore, chainStore, accountStore, queriesStore} = useStore();
+  const {uiConfigStore, chainStore, queriesStore} = useStore();
+  const [keyInfosWithIcns, setKeyInfosWithIcns] = useState<
+    (KeyInfo & {bech32Address?: string})[]
+  >([]);
 
-  const icnsPrimaryName = (() => {
-    if (
-      uiConfigStore.icnsInfo &&
-      chainStore.hasChain(uiConfigStore.icnsInfo.chainId)
-    ) {
-      const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
-      const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
-        uiConfigStore.icnsInfo.resolverContractAddress,
-        accountStore.getAccount(uiConfigStore.icnsInfo.chainId).bech32Address,
-      );
+  useEffect(() => {
+    (async () => {
+      if (
+        uiConfigStore.icnsInfo &&
+        chainStore.hasChain(uiConfigStore.icnsInfo.chainId)
+      ) {
+        const msg = new GetCosmosKeysForEachVaultSettledMsg(
+          uiConfigStore.icnsInfo.chainId,
+          keyInfos.map(item => item.id),
+        );
+        const result = await new RNMessageRequesterInternal().sendMessage(
+          BACKGROUND_PORT,
+          msg,
+        );
+        const infos = result.map((item, i) => {
+          if (item.status === 'fulfilled') {
+            return {
+              ...keyInfos[i],
+              bech32Address: item.value.bech32Address,
+            } as KeyInfo & {
+              bech32Address?: string;
+            };
+          }
+          return keyInfos[i];
+        });
 
-      return icnsQuery.primaryName.split('.')[0];
-    }
-  })();
+        setKeyInfosWithIcns(infos);
+      }
+    })();
+  }, [chainStore, keyInfos, queriesStore, uiConfigStore.icnsInfo]);
+
   return (
     <Box>
       <YAxis>
@@ -306,14 +337,14 @@ const KeyInfoList: FunctionComponent<{
         </Text>
         <Gutter size={8} />
         <Stack gutter={8}>
-          {keyInfos.map(keyInfo => {
+          {keyInfosWithIcns.map(keyInfo => {
             return (
               <KeyringItem
                 setModalMenuItems={setModalMenuItems}
                 key={keyInfo.id}
                 keyInfo={keyInfo}
                 openModal={openModal}
-                icnsPrimaryName={icnsPrimaryName}
+                bech32Address={keyInfo.bech32Address}
               />
             );
           })}
@@ -327,13 +358,28 @@ const KeyringItem: FunctionComponent<{
   keyInfo: KeyInfo;
   setModalMenuItems: React.Dispatch<React.SetStateAction<ModalMenuItem[]>>;
   openModal: () => void;
-  icnsPrimaryName?: string;
-}> = observer(({keyInfo, setModalMenuItems, openModal, icnsPrimaryName}) => {
-  const {chainStore, keyRingStore} = useStore();
+  bech32Address?: string;
+}> = observer(({keyInfo, setModalMenuItems, openModal, bech32Address}) => {
+  const {chainStore, keyRingStore, uiConfigStore, queriesStore} = useStore();
   const intl = useIntl();
   const navigate = useNavigation<StackNavProp>();
 
   const style = useStyle();
+
+  const icnsPrimaryName = (() => {
+    if (
+      uiConfigStore.icnsInfo &&
+      chainStore.hasChain(uiConfigStore.icnsInfo.chainId) &&
+      bech32Address
+    ) {
+      const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
+      const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
+        uiConfigStore.icnsInfo.resolverContractAddress,
+        bech32Address,
+      );
+      return icnsQuery.primaryName.split('.')[0];
+    }
+  })();
 
   const paragraph = useMemo(() => {
     if (keyInfo.insensitive['bip44Path']) {
@@ -476,6 +522,17 @@ const KeyringItem: FunctionComponent<{
       }
     }
 
+    if (icnsPrimaryName) {
+      defaults.push({
+        key: 'copy-icns-name',
+        label: icnsPrimaryName,
+        onSelect: () =>
+          navigate.navigate('SelectWallet.ViewRecoveryPhrase', {
+            id: keyInfo.id,
+          }),
+      });
+    }
+
     return defaults;
   })();
 
@@ -523,38 +580,17 @@ const KeyringItem: FunctionComponent<{
                   'dark:color-gray-700',
                   'color-gray-10',
                 ]),
-                {maxWidth: '60%'},
+                {maxWidth: '80%'},
               ])}>
               {keyInfo.name}
             </Text>
             {icnsPrimaryName ? (
               <React.Fragment>
-                <Gutter size={4} />
-                <Box
-                  paddingY={6}
-                  paddingLeft={6}
-                  paddingRight={30}
-                  borderRadius={87}
-                  borderWidth={1}
-                  borderColor={style.get('color-gray-450').color}
-                  backgroundColor={style.get('color-gray-500').color}
-                  style={{
-                    maxWidth: '40%',
-                  }}>
-                  <Columns sum={1} gutter={4}>
-                    <FastImage
-                      source={require('../../../public/assets/img/icns-icon.png')}
-                      style={style.flatten(['width-16', 'height-16'])}
-                    />
-                    <Text
-                      numberOfLines={1}
-                      style={StyleSheet.flatten([
-                        style.flatten(['text-caption2', 'color-text-middle']),
-                      ])}>
-                      {icnsPrimaryName}
-                    </Text>
-                  </Columns>
-                </Box>
+                <Gutter size={8} />
+                <FastImage
+                  source={require('../../../public/assets/img/icns-icon.png')}
+                  style={style.flatten(['width-16', 'height-16'])}
+                />
               </React.Fragment>
             ) : null}
           </XAxis>
