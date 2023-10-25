@@ -95,8 +95,26 @@ export const TransactionFeeModal: FunctionComponent<{
             };
           })}
         selectedItemKey={feeConfig.fees[0]?.currency.coinMinimalDenom}
-        onSelect={() => {}}
+        onSelect={key => {
+          const currency = feeConfig.selectableFeeCurrencies.find(
+            cur => cur.coinMinimalDenom === key,
+          );
+          if (currency) {
+            if (feeConfig.type !== 'manual') {
+              feeConfig.setFee({
+                type: feeConfig.type,
+                currency: currency,
+              });
+            } else {
+              feeConfig.setFee({
+                type: 'average',
+                currency: currency,
+              });
+            }
+          }
+        }}
         size="large"
+        isModal={true}
       />
 
       <Gutter size={12} />
