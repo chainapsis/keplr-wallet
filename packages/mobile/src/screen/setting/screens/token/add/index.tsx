@@ -18,7 +18,6 @@ import {Column, Columns} from '../../../../../components/column';
 import {Toggle} from '../../../../../components/toggle';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {Bech32Address} from '@keplr-wallet/cosmos';
-// import {ContractAddressBookModal} from '../../../../components/contract-address-book-modal';
 import {IconButton} from '../../../../../components/icon-button';
 import {MenuIcon} from '../../../../../components/icon';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
@@ -30,12 +29,6 @@ import {Text} from 'react-native';
 import {Controller, useForm} from 'react-hook-form';
 import {Button} from '../../../../../components/button';
 import {Gutter} from '../../../../../components/gutter';
-
-// const Styles = {
-//   Container: styled(Stack)`
-//     padding: 0 0.75rem;
-//   `,
-// };
 
 interface FormData {
   contractAddress: string;
