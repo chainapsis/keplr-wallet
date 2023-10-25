@@ -30,6 +30,8 @@ import {StackNavProp} from '../../../../../navigation';
 import {Modal} from '../../../../../components/modal';
 import {BottomSheetModal, BottomSheetView} from '@gorhom/bottom-sheet';
 import {Dropdown} from '../../../../../components/dropdown';
+import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
+import {CheckCircleIcon} from '../../../../../components/icon/check-circle';
 
 interface MenuModalItems {
   key: string;
@@ -66,7 +68,7 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
 
   const [chainId, setChainId] = useState<string>(() => {
     if (supportedChainInfos.length > 0) {
-      return supportedChainInfos[1].chainId;
+      return supportedChainInfos[5].chainId;
     } else {
       return chainStore.chainInfos[0].chainId;
     }
@@ -158,40 +160,80 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
           )}
         </Stack>
       </Box>
-      <Modal
-        isDetachedModal={true}
-        ref={menuModalRef}
-        //NOTE DynamicSizing로 하면 detached가 안되서 각 item높이를 갯수만큼 곱해서 설정함
-        snapPoints={[68 * menuModalItems.length]}>
-        <BottomSheetView>
-          {menuModalItems.map((item, i) => (
-            <Box
-              key={item.key}
-              height={68}
-              alignX="center"
-              alignY="center"
-              style={style.flatten(
-                ['border-width-bottom-1', 'border-color-gray-500'],
-                [i === menuModalItems.length - 1 && 'border-width-bottom-0'], //마지막 요소는 아래 보더 스타일 제가하기 위해서
-              )}
-              onClick={() => {
-                item.onSelect();
-                menuModalRef.current?.dismiss();
-              }}>
-              <Text
-                style={style.flatten(
-                  ['body1', 'color-text-high'],
-                  [item.isChecked && 'color-red-200'],
-                )}>
-                {item.label}
-              </Text>
-            </Box>
-          ))}
-        </BottomSheetView>
-      </Modal>
+      <MenuModal modalRef={menuModalRef} menuModalItems={menuModalItems} />
     </React.Fragment>
   );
 });
+
+interface MenuModalProps {
+  modalRef: React.RefObject<BottomSheetModalMethods>;
+  menuModalItems: MenuModalItems[];
+}
+const MenuModal: FunctionComponent<MenuModalProps> = ({
+  menuModalItems,
+  modalRef,
+}) => {
+  //NOTE  modal unmounted 될시 clear하기 위해서 timerId 저장
+  const timerIdsRef = useRef<any[]>([]);
+
+  const style = useStyle();
+  return (
+    <Modal
+      isDetachedModal={true}
+      ref={modalRef}
+      onDismiss={() => {
+        timerIdsRef.current.map(id => clearTimeout(id));
+        timerIdsRef.current = [];
+      }}
+      //NOTE DynamicSizing로 하면 detached가 안되서 각 item높이를 갯수만큼 곱해서 설정함
+      snapPoints={[68 * menuModalItems.length]}>
+      <BottomSheetView>
+        {menuModalItems.map((item, i) => (
+          <Box
+            key={item.key}
+            height={68}
+            alignX="center"
+            alignY="center"
+            style={style.flatten(
+              ['border-width-bottom-1', 'border-color-gray-500'],
+              [i === menuModalItems.length - 1 && 'border-width-bottom-0'], //마지막 요소는 아래 보더 스타일 제가하기 위해서
+            )}
+            onClick={() => {
+              item.onSelect();
+              if (
+                item.key === 'copy-address' ||
+                item.key === 'copy-viewing-key'
+              ) {
+                timerIdsRef.current.push(
+                  setTimeout(() => {
+                    modalRef.current?.dismiss();
+                  }, 1500),
+                );
+                return;
+              }
+              modalRef.current?.dismiss();
+            }}>
+            <Columns sum={1} alignY="center" gutter={4}>
+              <Text
+                style={style.flatten(
+                  ['body1', 'color-text-high'],
+                  [item.isChecked && 'color-green-400'],
+                )}>
+                {item.label}
+              </Text>
+              {item.isChecked ? (
+                <CheckCircleIcon
+                  size={20}
+                  color={style.get('color-green-400').color}
+                />
+              ) : null}
+            </Columns>
+          </Box>
+        ))}
+      </BottomSheetView>
+    </Modal>
+  );
+};
 
 const TokenItem: FunctionComponent<{
   chainId: string;
@@ -251,11 +293,23 @@ const TokenItem: FunctionComponent<{
                 label: intl.formatMessage({
                   id: 'page.setting.token.manage.token-view.copy-viewing-key-tooltip',
                 }),
+                isChecked: false,
                 onSelect: async () => {
                   if (
                     'type' in tokenInfo.currency &&
                     tokenInfo.currency.type === 'secret20'
                   ) {
+                    setMenuModalItems(prev =>
+                      prev.map(item =>
+                        item.key === 'copy-viewing-key'
+                          ? {
+                              ...item,
+                              isChecked: true,
+                              label: 'Copied to Clipboard',
+                            }
+                          : item,
+                      ),
+                    );
                     await Clipboard.setStringAsync(
                       tokenInfo.currency.viewingKey,
                     );
@@ -268,10 +322,22 @@ const TokenItem: FunctionComponent<{
                   label: intl.formatMessage({
                     id: 'page.setting.token.manage.token-view.copy-contract-address-tooltip',
                   }),
+                  isChecked: false,
                   onSelect: async () => {
                     if ('contractAddress' in tokenInfo.currency) {
                       await Clipboard.setStringAsync(
                         tokenInfo.currency.contractAddress,
+                      );
+                      setMenuModalItems(prev =>
+                        prev.map(item =>
+                          item.key === 'copy-address'
+                            ? {
+                                ...item,
+                                isChecked: true,
+                                label: 'Copied to Clipboard',
+                              }
+                            : item,
+                        ),
                       );
                     }
                   },
