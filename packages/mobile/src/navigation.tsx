@@ -64,7 +64,6 @@ export type RootStackParamList = {
   'Setting.General.ContactAdd': {chainId: string; editIndex?: number};
 
   'Setting.General.Theme': undefined;
-  'Setting.General.ManageAuthz': undefined;
   'Setting.General.WC': undefined;
   'Setting.General.ManageNonActiveChains': undefined;
   'Setting.General.ManageChainVisibility': undefined;
@@ -309,16 +308,6 @@ const SettingGeneralNavigation = () => {
         options={{
           title: intl.formatMessage({
             id: 'page.setting.general.theme-title',
-          }),
-          ...defaultHeaderOptions,
-        }}
-        component={SettingGeneralScreen}
-      />
-      <Stack.Screen
-        name="Setting.General.ManageAuthz"
-        options={{
-          title: intl.formatMessage({
-            id: 'page.setting.general.manage-authz-title',
           }),
           ...defaultHeaderOptions,
         }}
