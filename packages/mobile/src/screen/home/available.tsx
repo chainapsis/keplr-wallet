@@ -184,6 +184,7 @@ export const AvailableTabView: FunctionComponent<{
                             </Text>
                             <Gutter size={4} />
                             <Toggle
+                              size="small"
                               isOpen={uiConfigStore.isHideLowBalance}
                               setIsOpen={() => {
                                 uiConfigStore.setHideLowBalance(
