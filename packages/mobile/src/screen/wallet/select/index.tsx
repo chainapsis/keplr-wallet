@@ -17,7 +17,7 @@ import {useStyle} from '../../../styles';
 import {Gutter} from '../../../components/gutter';
 import {Stack} from '../../../components/stack';
 import {Column, Columns} from '../../../components/column';
-import {CheckIcon} from '../../../components/icon';
+import {CheckIcon, CopyOutlineIcon} from '../../../components/icon';
 import {Button} from '../../../components/button';
 import {App, AppCoinType} from '@keplr-wallet/ledger-cosmos';
 import {PageWithScrollView} from '../../../components/page';
@@ -31,11 +31,16 @@ import {StackNavProp} from '../../../navigation';
 import FastImage from 'react-native-fast-image';
 import {BACKGROUND_PORT} from '@keplr-wallet/router';
 import {RNMessageRequesterInternal} from '../../../router';
+import {CheckCircleIcon} from '../../../components/icon/check-circle';
+import * as Clipboard from 'expo-clipboard';
 
 interface ModalMenuItem {
   key: string;
   label: string;
+  isClicked?: boolean;
   onSelect: () => any;
+  left?: React.ReactNode;
+  right?: React.ReactNode;
 }
 
 export const WalletSelectScreen: FunctionComponent = observer(() => {
@@ -44,7 +49,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
   const style = useStyle();
   const menuModalRef = useRef<BottomSheetModal>(null);
-  const menuModalRef2 = useRef<BottomSheetModal>(null);
+  const timerRef = useRef<any>(null);
 
   const [modalMenuItems, setModalMenuItems] = useState<ModalMenuItem[]>([]);
 
@@ -245,7 +250,14 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
           ) : null}
         </Stack>
       </Box>
-      <Modal ref={menuModalRef} isDetachedModal={true} snapPoints={[202]}>
+      {/* NOTE icns이름 복사후 아이콘변경 및 모달을 닫아야해서 onDismiss 사용 및 컴포넌트가 좀 복잡해짐 */}
+      <Modal
+        ref={menuModalRef}
+        isDetachedModal={true}
+        snapPoints={[modalMenuItems.length * 68]}
+        onDismiss={() => {
+          clearTimeout(timerRef.current);
+        }}>
         <BottomSheetView>
           {modalMenuItems.map((item, i) => (
             <Box
@@ -255,25 +267,37 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
               alignY="center"
               style={style.flatten(
                 ['border-width-bottom-1', 'border-color-gray-500'],
-                [i === 2 && 'border-width-bottom-0'], //마지막 요소는 아래 보더 스타일 제가하기 위해서
+                [i === modalMenuItems.length - 1 && 'border-width-bottom-0'], //마지막 요소는 아래 보더 스타일 제가하기 위해서
               )}
               onClick={() => {
                 item.onSelect();
+                if (item.key === 'copy-icns-name') {
+                  timerRef.current = setTimeout(() => {
+                    menuModalRef.current?.dismiss();
+                  }, 1500);
+                  return;
+                }
                 menuModalRef.current?.dismiss();
               }}>
-              <Text style={style.flatten(['body1', 'color-text-high'])}>
-                {item.label}
-              </Text>
+              <Columns sum={1} alignY="center" gutter={8}>
+                {item.left && !item.isClicked ? item.left : null}
+                <Text
+                  numberOfLines={1}
+                  style={style.flatten(
+                    ['body1', 'color-text-high'],
+                    [item.isClicked && 'color-green-400'],
+                  )}>
+                  {item.label}
+                </Text>
+                {item.right && !item.isClicked ? item.right : null}
+                {item.isClicked ? (
+                  <CheckCircleIcon
+                    size={18}
+                    color={style.get('color-green-400').color}
+                  />
+                ) : null}
+              </Columns>
             </Box>
-          ))}
-        </BottomSheetView>
-      </Modal>
-      <Modal ref={menuModalRef2} isDetachedModal={true} snapPoints={[202]}>
-        <BottomSheetView>
-          {modalMenuItems.map(item => (
-            <Pressable key={item.key}>
-              <Text>test2</Text>
-            </Pressable>
           ))}
         </BottomSheetView>
       </Modal>
@@ -474,7 +498,7 @@ const KeyringItem: FunctionComponent<{
   }, [intl, keyInfo.insensitive, keyInfo.type]);
 
   const dropdownItems = (() => {
-    const defaults = [
+    const defaults: ModalMenuItem[] = [
       {
         key: 'change-wallet-name',
         label: intl.formatMessage({
@@ -523,13 +547,32 @@ const KeyringItem: FunctionComponent<{
     }
 
     if (icnsPrimaryName) {
-      defaults.push({
+      defaults.unshift({
         key: 'copy-icns-name',
         label: icnsPrimaryName,
-        onSelect: () =>
-          navigate.navigate('SelectWallet.ViewRecoveryPhrase', {
-            id: keyInfo.id,
-          }),
+        isClicked: false,
+        left: (
+          <FastImage
+            source={require('../../../public/assets/img/icns-icon.png')}
+            style={style.flatten(['width-16', 'height-16'])}
+          />
+        ),
+        right: (
+          <CopyOutlineIcon
+            size={20}
+            color={style.get('color-text-low').color}
+          />
+        ),
+        onSelect: async () => {
+          await Clipboard.setStringAsync(icnsPrimaryName);
+          setModalMenuItems(prev =>
+            prev.map(item =>
+              item.key === 'copy-icns-name'
+                ? {...item, isClicked: true, label: 'Copied to clipboard'}
+                : item,
+            ),
+          );
+        },
       });
     }
 
