@@ -19,8 +19,9 @@ import {Modal} from '../../../components/modal';
 import {BottomSheetModal, BottomSheetView} from '@gorhom/bottom-sheet';
 import {EllipsisIcon} from '../../../components/icon/ellipsis';
 import {StackNavProp} from '../../../navigation';
+import FastImage from 'react-native-fast-image';
 
-interface DropdownItem {
+interface ModalMenuItem {
   key: string;
   label: string;
   onSelect: () => any;
@@ -34,9 +35,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
   const menuModalRef = useRef<BottomSheetModal>(null);
   const menuModalRef2 = useRef<BottomSheetModal>(null);
 
-  const [modalDropdownItems, setModalDropdownItems] = useState<DropdownItem[]>(
-    [],
-  );
+  const [modalMenuItems, setModalMenuItems] = useState<ModalMenuItem[]>([]);
 
   const mnemonicKeys = useMemo(() => {
     return keyRingStore.keyInfos.filter(keyInfo => {
@@ -171,7 +170,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
                 id: 'page.wallet.recovery-phrase-title',
               })}
               keyInfos={mnemonicKeys}
-              setModalDropdownItems={setModalDropdownItems}
+              setModalMenuItems={setModalMenuItems}
               openModal={() => menuModalRef.current?.present()}
             />
           ) : null}
@@ -190,7 +189,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
                   },
                 )}
                 keyInfos={info.keyInfos}
-                setModalDropdownItems={setModalDropdownItems}
+                setModalMenuItems={setModalMenuItems}
                 openModal={() => menuModalRef.current?.present()}
               />
             );
@@ -202,7 +201,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
                 id: 'page.wallet.private-key-title',
               })}
               keyInfos={privateKeyInfos}
-              setModalDropdownItems={setModalDropdownItems}
+              setModalMenuItems={setModalMenuItems}
               openModal={() => menuModalRef.current?.present()}
             />
           ) : null}
@@ -211,7 +210,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
             <KeyInfoList
               title={intl.formatMessage({id: 'page.wallet.ledger-title'})}
               keyInfos={ledgerKeys}
-              setModalDropdownItems={setModalDropdownItems}
+              setModalMenuItems={setModalMenuItems}
               openModal={() => menuModalRef.current?.present()}
             />
           ) : null}
@@ -220,7 +219,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
             <KeyInfoList
               title="Keystone"
               keyInfos={keystoneKeys}
-              setModalDropdownItems={setModalDropdownItems}
+              setModalMenuItems={setModalMenuItems}
               openModal={() => menuModalRef.current?.present()}
             />
           ) : null}
@@ -229,7 +228,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
             <KeyInfoList
               title={intl.formatMessage({id: 'page.wallet.unknown-title'})}
               keyInfos={unknownKeys}
-              setModalDropdownItems={setModalDropdownItems}
+              setModalMenuItems={setModalMenuItems}
               openModal={() => menuModalRef.current?.present()}
             />
           ) : null}
@@ -237,7 +236,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
       </Box>
       <Modal ref={menuModalRef} isDetachedModal={true} snapPoints={[202]}>
         <BottomSheetView>
-          {modalDropdownItems.map((item, i) => (
+          {modalMenuItems.map((item, i) => (
             <Box
               key={item.key}
               height={68}
@@ -260,7 +259,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
       </Modal>
       <Modal ref={menuModalRef2} isDetachedModal={true} snapPoints={[202]}>
         <BottomSheetView>
-          {modalDropdownItems.map(item => (
+          {modalMenuItems.map(item => (
             <Pressable key={item.key}>
               <Text>test2</Text>
             </Pressable>
@@ -274,10 +273,26 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
 const KeyInfoList: FunctionComponent<{
   title: string;
   keyInfos: KeyInfo[];
-  setModalDropdownItems: React.Dispatch<React.SetStateAction<DropdownItem[]>>;
+  setModalMenuItems: React.Dispatch<React.SetStateAction<ModalMenuItem[]>>;
   openModal: () => void;
-}> = observer(({title, keyInfos, setModalDropdownItems, openModal}) => {
+}> = observer(({title, keyInfos, setModalMenuItems, openModal}) => {
   const style = useStyle();
+  const {uiConfigStore, chainStore, accountStore, queriesStore} = useStore();
+
+  const icnsPrimaryName = (() => {
+    if (
+      uiConfigStore.icnsInfo &&
+      chainStore.hasChain(uiConfigStore.icnsInfo.chainId)
+    ) {
+      const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
+      const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
+        uiConfigStore.icnsInfo.resolverContractAddress,
+        accountStore.getAccount(uiConfigStore.icnsInfo.chainId).bech32Address,
+      );
+
+      return icnsQuery.primaryName.split('.')[0];
+    }
+  })();
   return (
     <Box>
       <YAxis>
@@ -294,10 +309,11 @@ const KeyInfoList: FunctionComponent<{
           {keyInfos.map(keyInfo => {
             return (
               <KeyringItem
-                setModalDropdownItems={setModalDropdownItems}
+                setModalMenuItems={setModalMenuItems}
                 key={keyInfo.id}
                 keyInfo={keyInfo}
                 openModal={openModal}
+                icnsPrimaryName={icnsPrimaryName}
               />
             );
           })}
@@ -309,9 +325,10 @@ const KeyInfoList: FunctionComponent<{
 
 const KeyringItem: FunctionComponent<{
   keyInfo: KeyInfo;
-  setModalDropdownItems: React.Dispatch<React.SetStateAction<DropdownItem[]>>;
+  setModalMenuItems: React.Dispatch<React.SetStateAction<ModalMenuItem[]>>;
   openModal: () => void;
-}> = observer(({keyInfo, setModalDropdownItems, openModal}) => {
+  icnsPrimaryName?: string;
+}> = observer(({keyInfo, setModalMenuItems, openModal, icnsPrimaryName}) => {
   const {chainStore, keyRingStore} = useStore();
   const intl = useIntl();
   const navigate = useNavigation<StackNavProp>();
@@ -463,7 +480,6 @@ const KeyringItem: FunctionComponent<{
   })();
 
   const isSelected = keyRingStore.selectedKeyInfo?.id === keyInfo.id;
-
   return (
     <Box
       padding={16}
@@ -488,7 +504,7 @@ const KeyringItem: FunctionComponent<{
         navigate.goBack();
       }}>
       <Columns sum={1} alignY="center">
-        <YAxis>
+        <Box width={'85%'}>
           <XAxis alignY="center">
             {isSelected ? (
               <React.Fragment>
@@ -500,36 +516,65 @@ const KeyringItem: FunctionComponent<{
               </React.Fragment>
             ) : null}
             <Text
-              style={style.flatten([
-                'subtitle2',
-                'dark:color-gray-700',
-                'color-gray-10',
+              numberOfLines={1}
+              style={StyleSheet.flatten([
+                style.flatten([
+                  'subtitle2',
+                  'dark:color-gray-700',
+                  'color-gray-10',
+                ]),
+                {maxWidth: '60%'},
               ])}>
               {keyInfo.name}
             </Text>
+            {icnsPrimaryName ? (
+              <React.Fragment>
+                <Gutter size={4} />
+                <Box
+                  paddingY={6}
+                  paddingLeft={6}
+                  paddingRight={30}
+                  borderRadius={87}
+                  borderWidth={1}
+                  borderColor={style.get('color-gray-450').color}
+                  backgroundColor={style.get('color-gray-500').color}
+                  style={{
+                    maxWidth: '40%',
+                  }}>
+                  <Columns sum={1} gutter={4}>
+                    <FastImage
+                      source={require('../../../public/assets/img/icns-icon.png')}
+                      style={style.flatten(['width-16', 'height-16'])}
+                    />
+                    <Text
+                      numberOfLines={1}
+                      style={StyleSheet.flatten([
+                        style.flatten(['text-caption2', 'color-text-middle']),
+                      ])}>
+                      {icnsPrimaryName}
+                    </Text>
+                  </Columns>
+                </Box>
+              </React.Fragment>
+            ) : null}
           </XAxis>
           {paragraph ? (
             <React.Fragment>
-              <Gutter size={6} />
-              <Text style={style.flatten(['body2', 'color-gray-300'])}>
-                {paragraph}
-              </Text>
+              <CheckIcon size={20} color={style.get('color-gray-200').color} />
+              <Gutter size={4} />
             </React.Fragment>
           ) : null}
-        </YAxis>
+        </Box>
         <Column weight={1} />
-        <XAxis alignY="center">
-          <Box
-            cursor="pointer"
-            onClick={e => {
-              e.stopPropagation();
-              e.preventDefault();
-              setModalDropdownItems(dropdownItems);
-              openModal();
-            }}>
-            <EllipsisIcon size={24} color={style.get('color-gray-10').color} />
-          </Box>
-        </XAxis>
+        <Pressable
+          onPress={e => {
+            e.stopPropagation();
+            e.preventDefault();
+            setModalMenuItems(dropdownItems);
+            openModal();
+          }}>
+          <EllipsisIcon size={24} color={style.get('color-gray-10').color} />
+        </Pressable>
       </Columns>
     </Box>
   );
