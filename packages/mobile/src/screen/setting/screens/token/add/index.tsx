@@ -29,6 +29,8 @@ import {Text} from 'react-native';
 import {Controller, useForm} from 'react-hook-form';
 import {Button} from '../../../../../components/button';
 import {Gutter} from '../../../../../components/gutter';
+import {SelectModalTri} from '../../../components/chain-select-modal ';
+import {Modal} from '../../../../../components/modal';
 
 interface FormData {
   contractAddress: string;
@@ -65,7 +67,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
       );
     });
   }, [chainStore.chainInfos]);
-  const [chainId] = useState<string>(() => {
+  const [chainId, setChainId] = useState<string>(() => {
     if (paramChainId) {
       return paramChainId;
     }
@@ -120,13 +122,12 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
   const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] =
     useState(false);
 
-  //TODO dropdown 완성되면 사용해서 드롭다운 구현
-  // const items = supportedChainInfos.map(chainInfo => {
-  //   return {
-  //     key: chainInfo.chainId,
-  //     label: chainInfo.chainName,
-  //   };
-  // });
+  const items = supportedChainInfos.map(chainInfo => {
+    return {
+      key: chainInfo.chainId,
+      label: chainInfo.chainName,
+    };
+  });
 
   const contractAddress = watch('contractAddress').trim();
   const queryContract = (() => {
@@ -253,6 +254,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
       // }
     }
   });
+
   return (
     <PageWithScrollView
       backgroundMode={'default'}
@@ -260,16 +262,13 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
       <Box paddingX={12} height={'100%'}>
         <Stack gutter={16}>
           {/* TODO dropdown 컴포넌트 이후 작업 */}
-          {/* {!interactionInfo.interaction ? (
-            <Box width="13rem">
-              <Dropdown
-                items={items}
-                selectedItemKey={chainId}
-                onSelect={setChainId}
-                allowSearch={true}
-              />
-            </Box>
-          ) : null} */}
+          {/* {!interactionInfo.interaction ? ( */}
+          <SelectModalTri
+            items={items}
+            selectedItemKey={chainId}
+            title="Select Chain"
+            onSelect={item => setChainId(item.key)}
+          />
           <Controller
             name="contractAddress"
             control={control}
@@ -412,14 +411,27 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
           onPress={submit}
         />
       </Box>
-      <ContractAddressBookModal
-        modalRef={contractModalRef}
-        chainId={chainId}
-        onSelect={(address: string) => {
-          setValue('contractAddress', address);
-          contractModalRef.current?.dismiss();
+      <Modal ref={contractModalRef} snapPoints={['80%']}>
+        <ContractAddressBookModal
+          chainId={chainId}
+          onSelect={(address: string) => {
+            setValue('contractAddress', address);
+            contractModalRef.current?.dismiss();
+          }}
+        />
+      </Modal>
+
+      {/* <SelectModal
+        modalRef={selectChainModalRef}
+        items={items}
+        // isOpen={isOpen}
+        title="select chain"
+        onSelect={item => {
+          setChainId(item.key);
+          // selectChainModalRef.current?.dismiss();
+          // setIsOpen(false);
         }}
-      />
+      /> */}
     </PageWithScrollView>
   );
 });
