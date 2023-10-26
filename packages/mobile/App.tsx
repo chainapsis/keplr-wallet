@@ -26,6 +26,7 @@ import '@formatjs/intl-numberformat/polyfill';
 import '@formatjs/intl-numberformat/locale-data/en';
 import '@formatjs/intl-relativetimeformat/polyfill';
 import '@formatjs/intl-relativetimeformat/locale-data/en'; // locale-data for en
+import {ConfirmProvider} from './src/hooks/confirm';
 
 const ThemeStatusBar: FunctionComponent = () => {
   const style = useStyle();
@@ -50,7 +51,9 @@ function App(): JSX.Element {
           <StoreProvider>
             <AppIntlProvider>
               <BottomSheetModalProvider>
-                <AppNavigation />
+                <ConfirmProvider>
+                  <AppNavigation />
+                </ConfirmProvider>
               </BottomSheetModalProvider>
             </AppIntlProvider>
           </StoreProvider>

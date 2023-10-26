@@ -429,6 +429,7 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         '136': 136,
         '160': 160,
         '240': 240,
+        '268': 268,
         '292': 292,
         '300': 300,
 

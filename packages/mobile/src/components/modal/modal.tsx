@@ -22,54 +22,72 @@ import {Box} from '../box';
 
 interface ModalProps {
   isDetachedModal?: boolean;
+  isConfirmModal?: boolean;
 }
 
 export const Modal = forwardRef<
   BottomSheetModal,
   PropsWithChildren<ModalProps & BottomSheetModalProps & BaseModalProps>
->(({children, snapPoints = ['50%'], isDetachedModal, ...props}, ref) => {
-  const style = useStyle();
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop
-        {...props}
-        disappearsOnIndex={-1}
-        appearsOnIndex={0}
-      />
-    ),
-    [],
-  );
+>(
+  (
+    {children, snapPoints = ['50%'], isDetachedModal, isConfirmModal, ...props},
+    ref,
+  ) => {
+    const style = useStyle();
+    const renderBackdrop = useCallback(
+      (props: BottomSheetBackdropProps) => (
+        <BottomSheetBackdrop
+          {...props}
+          disappearsOnIndex={-1}
+          appearsOnIndex={0}
+        />
+      ),
+      [],
+    );
 
-  return (
-    <BottomSheetModal
-      ref={ref}
-      index={0}
-      snapPoints={snapPoints}
-      backdropComponent={renderBackdrop}
-      enablePanDownToClose={true}
-      backgroundStyle={style.flatten(
-        ['background-color-gray-600'],
-        [isDetachedModal ? 'border-radius-8' : 'border-radius-0'],
-      )}
-      {...(() =>
-        isDetachedModal
-          ? {
-              detached: true,
-              bottomInset: 25,
-              style: style.flatten([
-                'margin-x-24',
-                'border-width-1',
-                'border-radius-8',
-                'border-color-gray-500',
-              ]),
-              handleComponent: null,
-            }
-          : {})()}
-      {...props}>
-      {children}
-    </BottomSheetModal>
-  );
-});
+    return (
+      <BottomSheetModal
+        ref={ref}
+        index={0}
+        snapPoints={snapPoints}
+        backdropComponent={renderBackdrop}
+        enablePanDownToClose={true}
+        backgroundStyle={style.flatten(
+          ['background-color-gray-600'],
+          [isDetachedModal ? 'border-radius-8' : 'border-radius-0'],
+        )}
+        {...(() =>
+          isDetachedModal
+            ? {
+                detached: true,
+                bottomInset: 25,
+                style: style.flatten([
+                  'margin-x-24',
+                  'border-width-1',
+                  'border-radius-8',
+                  'border-color-gray-500',
+                ]),
+                handleComponent: null,
+              }
+            : isConfirmModal
+            ? {
+                detached: true,
+                bottomInset: 340,
+                style: style.flatten([
+                  'margin-x-24',
+                  'border-width-1',
+                  'border-radius-8',
+                  'border-color-gray-500',
+                ]),
+                handleComponent: null,
+              }
+            : {})()}
+        {...props}>
+        {children}
+      </BottomSheetModal>
+    );
+  },
+);
 
 const BottomSheetStack = createNativeStackNavigator();
 interface BaseModalProps {

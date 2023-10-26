@@ -21,6 +21,7 @@ import {
   KeyRingStore,
   PermissionStore,
   SignInteractionStore,
+  TokensStore,
 } from '@keplr-wallet/stores-core';
 import {AsyncKVStore} from '../common';
 import {RNEnv, RNRouterUI, RNMessageRequesterInternal} from '../router';
@@ -35,7 +36,9 @@ import {
   CoinGeckoAPIEndPoint,
   CoinGeckoGetPrice,
   FiatCurrencies,
+  TokenContractListURL,
 } from '../utils/config.ui';
+import {TokenContractsQueries} from './token-contracts';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
@@ -44,6 +47,7 @@ export class RootStore {
 
   public readonly hugeQueriesStore: HugeQueriesStore;
   public readonly priceStore: CoinGeckoPriceStore;
+  public readonly tokensStore: TokensStore;
 
   public readonly interactionStore: InteractionStore;
   public readonly permissionStore: PermissionStore;
@@ -59,7 +63,7 @@ export class RootStore {
       OsmosisQueries,
       // KeplrETCQueries,
       ICNSQueries,
-      // TokenContractsQueries,
+      TokenContractsQueries,
     ]
   >;
   public readonly accountStore: AccountStore<[CosmosAccount, SecretAccount]>;
@@ -126,9 +130,9 @@ export class RootStore {
       //   ethereumURL: EthereumEndpoint,
       // }),
       ICNSQueries.use(),
-      // TokenContractsQueries.use({
-      //   tokenContractListURL: TokenContractListURL,
-      // }),
+      TokenContractsQueries.use({
+        tokenContractListURL: TokenContractListURL,
+      }),
     );
 
     this.accountStore = new AccountStore(
@@ -305,6 +309,19 @@ export class RootStore {
       this.keyRingStore,
       this.priceStore,
       ICNSInfo,
+    );
+
+    this.tokensStore = new TokensStore(
+      {
+        addEventListener: (type: string, fn: () => void) => {
+          eventEmitter.addListener(type, fn);
+        },
+      },
+      new RNMessageRequesterInternal(),
+      this.chainStore,
+      this.accountStore,
+      this.keyRingStore,
+      this.interactionStore,
     );
 
     router.listen(APP_PORT);

@@ -1,7 +1,7 @@
 import React, {FunctionComponent} from 'react';
 import {Text, View} from 'react-native';
 
-export const SettingGeneralScreen: FunctionComponent = () => {
+export const SettingManageTokenListScreen: FunctionComponent = () => {
   return (
     <React.Fragment>
       <View>
