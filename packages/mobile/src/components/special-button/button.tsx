@@ -1,11 +1,12 @@
-import React, {FunctionComponent} from 'react';
+import React, {FunctionComponent, useState} from 'react';
 import {SpecialButtonProps} from './types';
 import {Box} from '../box';
 import {ColorPalette, useStyle} from '../../styles';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {Platform, Pressable, StyleSheet, Text, View} from 'react-native';
 import {SVGLoadingIcon} from '../spinner';
 import Animated, {
   interpolateColor,
+  runOnJS,
   useAnimatedProps,
   useSharedValue,
   withSpring,
@@ -34,6 +35,23 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
 }) => {
   const style = useStyle();
   const height = style.get(`height-button-${size}`).height as number;
+  const widthSize = useSharedValue(width);
+  const heightSize = useSharedValue(height);
+  const colorsValue = useSharedValue(0);
+
+  const [colors, setColors] = useState<string[]>([
+    interpolateColor(
+      colorsValue.value,
+      [0, 1],
+      [gradient1DefaultColor, gradient2DefaultColor],
+    ),
+    interpolateColor(
+      colorsValue.value,
+      [0, 1],
+      [gradient1HoverColor, gradient2HoverColor],
+    ),
+  ]);
+
   const textSizeDefinition = (() => {
     switch (size) {
       case 'large':
@@ -43,11 +61,12 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
         return 'text-button2';
     }
   })();
-  const widthSize = useSharedValue(width);
-  const heightSize = useSharedValue(height);
 
-  const colorsValue = useSharedValue(0);
   const animatedProps = useAnimatedProps(() => {
+    if (Platform.OS === 'android') {
+      return {colors: []};
+    }
+
     return {
       colors: [
         interpolateColor(
@@ -96,14 +115,24 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
           }
           widthSize.value = withSpring(width * hoverScale);
           heightSize.value = withSpring(height * hoverScale);
-          colorsValue.value = withTiming(1, {duration: 100});
+          //NOTE android에서는 애니메이션을 걸었을때 내부버그가 생겨서 일단 에니메이션 없이 색상만 변경 하게 수정함
+          if (Platform.OS === 'android') {
+            runOnJS(setColors)([gradient1HoverColor, gradient2HoverColor]);
+          } else {
+            colorsValue.value = withTiming(1, {duration: 100});
+          }
         }}
         onPressOut={() => {
           widthSize.value = withSpring(width);
           heightSize.value = withSpring(height);
-          colorsValue.value = withTiming(0, {duration: 100});
+          if (Platform.OS === 'android') {
+            runOnJS(setColors)([gradient1DefaultColor, gradient2DefaultColor]);
+          } else {
+            colorsValue.value = withTiming(0, {duration: 100});
+          }
         }}>
         {/* NOTE 공식문서상 호환되는 타입인데 계속 에러가 떠서 일단 any를 사용함 */}
+
         <AnimatedLinearGradient
           start={{x: 0, y: 0}}
           end={{x: 0.84, y: 0}}
@@ -115,18 +144,7 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
             },
           ])}
           animatedProps={animatedProps}
-          colors={[
-            interpolateColor(
-              colorsValue.value,
-              [0, 1],
-              [gradient1DefaultColor, gradient2DefaultColor],
-            ),
-            interpolateColor(
-              colorsValue.value,
-              [0, 1],
-              [gradient1HoverColor, gradient2HoverColor],
-            ),
-          ]}>
+          colors={colors}>
           <Box alignY="center" height={'100%'}>
             {left ? (
               <Box
