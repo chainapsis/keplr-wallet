@@ -461,14 +461,6 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
                   onPress={claimAll}
                 />
               ) : (
-                // <Button
-                //   text={'Claim All'}
-                //   size="small"
-
-                //   loading={claimAllIsLoading}
-                //   disabled={claimAllDisabled}
-                //   onPress={claimAll}
-                // />
                 <SpecialButton
                   width={91}
                   size="small"
@@ -644,7 +636,6 @@ const ClaimTokenItem: FunctionComponent<{
         return;
       }
 
-      console.log(e);
       //TODO 이후 notification 로직 구현후 적용
       // notification.show(
       //   'failed',
