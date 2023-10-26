@@ -115,7 +115,18 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
             },
           ])}
           animatedProps={animatedProps}
-          colors={[]}>
+          colors={[
+            interpolateColor(
+              colorsValue.value,
+              [0, 1],
+              [gradient1DefaultColor, gradient2DefaultColor],
+            ),
+            interpolateColor(
+              colorsValue.value,
+              [0, 1],
+              [gradient1HoverColor, gradient2HoverColor],
+            ),
+          ]}>
           <Box alignY="center" height={'100%'}>
             {left ? (
               <Box
@@ -163,6 +174,13 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
           </Box>
         </AnimatedLinearGradient>
       </Pressable>
+      <View
+        pointerEvents="none"
+        style={style.flatten(
+          ['absolute-fill'],
+          [disabled && 'background-color-gray-600@50%'],
+        )}
+      />
     </Box>
   );
 };

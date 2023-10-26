@@ -475,6 +475,7 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
         </Box>
 
         <Pressable
+          disabled={claimAllDisabled}
           onPressIn={() => setIsPressingExpandButton(true)}
           onPressOut={() => setIsPressingExpandButton(false)}
           onPress={() => {
