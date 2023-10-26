@@ -1,6 +1,15 @@
-import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
+import React, {
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {observer} from 'mobx-react-lite';
-import {KeyInfo} from '@keplr-wallet/background';
+import {
+  GetCosmosKeysForEachVaultSettledMsg,
+  KeyInfo,
+} from '@keplr-wallet/background';
 import {useStore} from '../../../stores';
 import {Box} from '../../../components/box';
 import {XAxis, YAxis} from '../../../components/axis';
@@ -8,7 +17,7 @@ import {useStyle} from '../../../styles';
 import {Gutter} from '../../../components/gutter';
 import {Stack} from '../../../components/stack';
 import {Column, Columns} from '../../../components/column';
-import {CheckIcon} from '../../../components/icon';
+import {CheckIcon, CopyOutlineIcon} from '../../../components/icon';
 import {Button} from '../../../components/button';
 import {App, AppCoinType} from '@keplr-wallet/ledger-cosmos';
 import {PageWithScrollView} from '../../../components/page';
@@ -19,11 +28,19 @@ import {Modal} from '../../../components/modal';
 import {BottomSheetModal, BottomSheetView} from '@gorhom/bottom-sheet';
 import {EllipsisIcon} from '../../../components/icon/ellipsis';
 import {StackNavProp} from '../../../navigation';
+import FastImage from 'react-native-fast-image';
+import {BACKGROUND_PORT} from '@keplr-wallet/router';
+import {RNMessageRequesterInternal} from '../../../router';
+import {CheckCircleIcon} from '../../../components/icon/check-circle';
+import * as Clipboard from 'expo-clipboard';
 
-interface DropdownItem {
+interface ModalMenuItem {
   key: string;
   label: string;
+  isClicked?: boolean;
   onSelect: () => any;
+  left?: React.ReactNode;
+  right?: React.ReactNode;
 }
 
 export const WalletSelectScreen: FunctionComponent = observer(() => {
@@ -32,11 +49,9 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
   const style = useStyle();
   const menuModalRef = useRef<BottomSheetModal>(null);
-  const menuModalRef2 = useRef<BottomSheetModal>(null);
+  const timerRef = useRef<any>(null);
 
-  const [modalDropdownItems, setModalDropdownItems] = useState<DropdownItem[]>(
-    [],
-  );
+  const [modalMenuItems, setModalMenuItems] = useState<ModalMenuItem[]>([]);
 
   const mnemonicKeys = useMemo(() => {
     return keyRingStore.keyInfos.filter(keyInfo => {
@@ -171,7 +186,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
                 id: 'page.wallet.recovery-phrase-title',
               })}
               keyInfos={mnemonicKeys}
-              setModalDropdownItems={setModalDropdownItems}
+              setModalMenuItems={setModalMenuItems}
               openModal={() => menuModalRef.current?.present()}
             />
           ) : null}
@@ -190,7 +205,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
                   },
                 )}
                 keyInfos={info.keyInfos}
-                setModalDropdownItems={setModalDropdownItems}
+                setModalMenuItems={setModalMenuItems}
                 openModal={() => menuModalRef.current?.present()}
               />
             );
@@ -202,7 +217,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
                 id: 'page.wallet.private-key-title',
               })}
               keyInfos={privateKeyInfos}
-              setModalDropdownItems={setModalDropdownItems}
+              setModalMenuItems={setModalMenuItems}
               openModal={() => menuModalRef.current?.present()}
             />
           ) : null}
@@ -211,7 +226,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
             <KeyInfoList
               title={intl.formatMessage({id: 'page.wallet.ledger-title'})}
               keyInfos={ledgerKeys}
-              setModalDropdownItems={setModalDropdownItems}
+              setModalMenuItems={setModalMenuItems}
               openModal={() => menuModalRef.current?.present()}
             />
           ) : null}
@@ -220,7 +235,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
             <KeyInfoList
               title="Keystone"
               keyInfos={keystoneKeys}
-              setModalDropdownItems={setModalDropdownItems}
+              setModalMenuItems={setModalMenuItems}
               openModal={() => menuModalRef.current?.present()}
             />
           ) : null}
@@ -229,15 +244,22 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
             <KeyInfoList
               title={intl.formatMessage({id: 'page.wallet.unknown-title'})}
               keyInfos={unknownKeys}
-              setModalDropdownItems={setModalDropdownItems}
+              setModalMenuItems={setModalMenuItems}
               openModal={() => menuModalRef.current?.present()}
             />
           ) : null}
         </Stack>
       </Box>
-      <Modal ref={menuModalRef} isDetachedModal={true} snapPoints={[202]}>
+      {/* NOTE icns이름 복사후 아이콘변경 및 모달을 닫아야해서 onDismiss 사용 및 컴포넌트가 좀 복잡해짐 */}
+      <Modal
+        ref={menuModalRef}
+        isDetachedModal={true}
+        snapPoints={[modalMenuItems.length * 68]}
+        onDismiss={() => {
+          clearTimeout(timerRef.current);
+        }}>
         <BottomSheetView>
-          {modalDropdownItems.map((item, i) => (
+          {modalMenuItems.map((item, i) => (
             <Box
               key={item.key}
               height={68}
@@ -245,25 +267,37 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
               alignY="center"
               style={style.flatten(
                 ['border-width-bottom-1', 'border-color-gray-500'],
-                [i === 2 && 'border-width-bottom-0'], //마지막 요소는 아래 보더 스타일 제가하기 위해서
+                [i === modalMenuItems.length - 1 && 'border-width-bottom-0'], //마지막 요소는 아래 보더 스타일 제가하기 위해서
               )}
               onClick={() => {
                 item.onSelect();
+                if (item.key === 'copy-icns-name') {
+                  timerRef.current = setTimeout(() => {
+                    menuModalRef.current?.dismiss();
+                  }, 1500);
+                  return;
+                }
                 menuModalRef.current?.dismiss();
               }}>
-              <Text style={style.flatten(['body1', 'color-text-high'])}>
-                {item.label}
-              </Text>
+              <Columns sum={1} alignY="center" gutter={8}>
+                {item.left && !item.isClicked ? item.left : null}
+                <Text
+                  numberOfLines={1}
+                  style={style.flatten(
+                    ['body1', 'color-text-high'],
+                    [item.isClicked && 'color-green-400'],
+                  )}>
+                  {item.label}
+                </Text>
+                {item.right && !item.isClicked ? item.right : null}
+                {item.isClicked ? (
+                  <CheckCircleIcon
+                    size={18}
+                    color={style.get('color-green-400').color}
+                  />
+                ) : null}
+              </Columns>
             </Box>
-          ))}
-        </BottomSheetView>
-      </Modal>
-      <Modal ref={menuModalRef2} isDetachedModal={true} snapPoints={[202]}>
-        <BottomSheetView>
-          {modalDropdownItems.map(item => (
-            <Pressable key={item.key}>
-              <Text>test2</Text>
-            </Pressable>
           ))}
         </BottomSheetView>
       </Modal>
@@ -274,10 +308,46 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
 const KeyInfoList: FunctionComponent<{
   title: string;
   keyInfos: KeyInfo[];
-  setModalDropdownItems: React.Dispatch<React.SetStateAction<DropdownItem[]>>;
+  setModalMenuItems: React.Dispatch<React.SetStateAction<ModalMenuItem[]>>;
   openModal: () => void;
-}> = observer(({title, keyInfos, setModalDropdownItems, openModal}) => {
+}> = observer(({title, keyInfos, setModalMenuItems, openModal}) => {
   const style = useStyle();
+  const {uiConfigStore, chainStore, queriesStore} = useStore();
+  const [keyInfosWithIcns, setKeyInfosWithIcns] = useState<
+    (KeyInfo & {bech32Address?: string})[]
+  >([]);
+
+  useEffect(() => {
+    (async () => {
+      if (
+        uiConfigStore.icnsInfo &&
+        chainStore.hasChain(uiConfigStore.icnsInfo.chainId)
+      ) {
+        const msg = new GetCosmosKeysForEachVaultSettledMsg(
+          uiConfigStore.icnsInfo.chainId,
+          keyInfos.map(item => item.id),
+        );
+        const result = await new RNMessageRequesterInternal().sendMessage(
+          BACKGROUND_PORT,
+          msg,
+        );
+        const infos = result.map((item, i) => {
+          if (item.status === 'fulfilled') {
+            return {
+              ...keyInfos[i],
+              bech32Address: item.value.bech32Address,
+            } as KeyInfo & {
+              bech32Address?: string;
+            };
+          }
+          return keyInfos[i];
+        });
+
+        setKeyInfosWithIcns(infos);
+      }
+    })();
+  }, [chainStore, keyInfos, queriesStore, uiConfigStore.icnsInfo]);
+
   return (
     <Box>
       <YAxis>
@@ -291,13 +361,14 @@ const KeyInfoList: FunctionComponent<{
         </Text>
         <Gutter size={8} />
         <Stack gutter={8}>
-          {keyInfos.map(keyInfo => {
+          {keyInfosWithIcns.map(keyInfo => {
             return (
               <KeyringItem
-                setModalDropdownItems={setModalDropdownItems}
+                setModalMenuItems={setModalMenuItems}
                 key={keyInfo.id}
                 keyInfo={keyInfo}
                 openModal={openModal}
+                bech32Address={keyInfo.bech32Address}
               />
             );
           })}
@@ -309,14 +380,30 @@ const KeyInfoList: FunctionComponent<{
 
 const KeyringItem: FunctionComponent<{
   keyInfo: KeyInfo;
-  setModalDropdownItems: React.Dispatch<React.SetStateAction<DropdownItem[]>>;
+  setModalMenuItems: React.Dispatch<React.SetStateAction<ModalMenuItem[]>>;
   openModal: () => void;
-}> = observer(({keyInfo, setModalDropdownItems, openModal}) => {
-  const {chainStore, keyRingStore} = useStore();
+  bech32Address?: string;
+}> = observer(({keyInfo, setModalMenuItems, openModal, bech32Address}) => {
+  const {chainStore, keyRingStore, uiConfigStore, queriesStore} = useStore();
   const intl = useIntl();
   const navigate = useNavigation<StackNavProp>();
 
   const style = useStyle();
+
+  const icnsPrimaryName = (() => {
+    if (
+      uiConfigStore.icnsInfo &&
+      chainStore.hasChain(uiConfigStore.icnsInfo.chainId) &&
+      bech32Address
+    ) {
+      const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
+      const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
+        uiConfigStore.icnsInfo.resolverContractAddress,
+        bech32Address,
+      );
+      return icnsQuery.primaryName.split('.')[0];
+    }
+  })();
 
   const paragraph = useMemo(() => {
     if (keyInfo.insensitive['bip44Path']) {
@@ -411,7 +498,7 @@ const KeyringItem: FunctionComponent<{
   }, [intl, keyInfo.insensitive, keyInfo.type]);
 
   const dropdownItems = (() => {
-    const defaults = [
+    const defaults: ModalMenuItem[] = [
       {
         key: 'change-wallet-name',
         label: intl.formatMessage({
@@ -459,11 +546,40 @@ const KeyringItem: FunctionComponent<{
       }
     }
 
+    if (icnsPrimaryName) {
+      defaults.unshift({
+        key: 'copy-icns-name',
+        label: icnsPrimaryName,
+        isClicked: false,
+        left: (
+          <FastImage
+            source={require('../../../public/assets/img/icns-icon.png')}
+            style={style.flatten(['width-16', 'height-16'])}
+          />
+        ),
+        right: (
+          <CopyOutlineIcon
+            size={20}
+            color={style.get('color-text-low').color}
+          />
+        ),
+        onSelect: async () => {
+          await Clipboard.setStringAsync(icnsPrimaryName);
+          setModalMenuItems(prev =>
+            prev.map(item =>
+              item.key === 'copy-icns-name'
+                ? {...item, isClicked: true, label: 'Copied to clipboard'}
+                : item,
+            ),
+          );
+        },
+      });
+    }
+
     return defaults;
   })();
 
   const isSelected = keyRingStore.selectedKeyInfo?.id === keyInfo.id;
-
   return (
     <Box
       padding={16}
@@ -488,7 +604,7 @@ const KeyringItem: FunctionComponent<{
         navigate.goBack();
       }}>
       <Columns sum={1} alignY="center">
-        <YAxis>
+        <Box width={'85%'}>
           <XAxis alignY="center">
             {isSelected ? (
               <React.Fragment>
@@ -500,36 +616,44 @@ const KeyringItem: FunctionComponent<{
               </React.Fragment>
             ) : null}
             <Text
-              style={style.flatten([
-                'subtitle2',
-                'dark:color-gray-700',
-                'color-gray-10',
+              numberOfLines={1}
+              style={StyleSheet.flatten([
+                style.flatten([
+                  'subtitle2',
+                  'dark:color-gray-700',
+                  'color-gray-10',
+                ]),
+                {maxWidth: '80%'},
               ])}>
               {keyInfo.name}
             </Text>
+            {icnsPrimaryName ? (
+              <React.Fragment>
+                <Gutter size={8} />
+                <FastImage
+                  source={require('../../../public/assets/img/icns-icon.png')}
+                  style={style.flatten(['width-16', 'height-16'])}
+                />
+              </React.Fragment>
+            ) : null}
           </XAxis>
           {paragraph ? (
             <React.Fragment>
-              <Gutter size={6} />
-              <Text style={style.flatten(['body2', 'color-gray-300'])}>
-                {paragraph}
-              </Text>
+              <CheckIcon size={20} color={style.get('color-gray-200').color} />
+              <Gutter size={4} />
             </React.Fragment>
           ) : null}
-        </YAxis>
+        </Box>
         <Column weight={1} />
-        <XAxis alignY="center">
-          <Box
-            cursor="pointer"
-            onClick={e => {
-              e.stopPropagation();
-              e.preventDefault();
-              setModalDropdownItems(dropdownItems);
-              openModal();
-            }}>
-            <EllipsisIcon size={24} color={style.get('color-gray-10').color} />
-          </Box>
-        </XAxis>
+        <Pressable
+          onPress={e => {
+            e.stopPropagation();
+            e.preventDefault();
+            setModalMenuItems(dropdownItems);
+            openModal();
+          }}>
+          <EllipsisIcon size={24} color={style.get('color-gray-10').color} />
+        </Pressable>
       </Columns>
     </Box>
   );

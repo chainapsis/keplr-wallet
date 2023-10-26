@@ -5,7 +5,7 @@ import React, {
   useState,
 } from 'react';
 import {useStyle} from '../../styles';
-import {Text, StyleSheet, TextStyle, Pressable} from 'react-native';
+import {Text, StyleSheet, TextStyle, Pressable, ViewStyle} from 'react-native';
 import {Box} from '../box';
 
 type ButtonColorType = 'faint' | 'default';
@@ -18,6 +18,7 @@ export const TextButton: FunctionComponent<{
   onPress?: () => void;
   textStyle?: TextStyle;
   textButtonSize?: number;
+  containerStyle?: ViewStyle;
 }> = ({
   color = 'default',
   text,
@@ -25,6 +26,7 @@ export const TextButton: FunctionComponent<{
   disabled = false,
   onPress,
   textStyle,
+  containerStyle,
 }) => {
   const style = useStyle();
   const [isPressIn, setIsPressIn] = useState(false);
@@ -55,6 +57,7 @@ export const TextButton: FunctionComponent<{
           'padding-x-8',
           isPressIn ? 'color-gray-300' : (textColorDefinition as any),
         ]),
+        containerStyle,
       ])}
       onPress={onPress}
       onPressOut={() => setIsPressIn(false)}

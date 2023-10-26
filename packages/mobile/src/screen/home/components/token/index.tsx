@@ -19,19 +19,20 @@ import {Skeleton} from '../../../../components/skeleton';
 import {WrongViewingKeyError} from '@keplr-wallet/stores';
 // import {useNavigate} from 'react-router';
 // import {Secret20Currency} from '@keplr-wallet/types';
-import {StyleSheet, Text, ViewStyle} from 'react-native';
+import {Pressable, StyleSheet, Text, ViewStyle} from 'react-native';
 import {ViewToken} from '../../index';
 import {RectButton} from '../../../../components/rect-button';
 import {Tag} from '../../../../components/tag';
 import {SVGLoadingIcon} from '../../../../components/spinner';
 import {Path, Svg} from 'react-native-svg';
 import {ArrowRightIcon} from '../../../../components/icon/arrow-right';
+import {InformationOutlinedIcon} from '../../../../components/icon/information-outlined';
 
 export const TokenTitleView: FunctionComponent<{
   title: string;
-  // tooltip?: string | React.ReactElement;
+  onOpenModal: () => void;
   right?: React.ReactElement;
-}> = ({title, right}) => {
+}> = ({title, right, onOpenModal}) => {
   const style = useStyle();
   return (
     <Box
@@ -39,22 +40,18 @@ export const TokenTitleView: FunctionComponent<{
         flex: 1,
       }}>
       <Columns sum={1} alignY="center">
-        <Text style={style.flatten(['color-gray-200'])}>{title}</Text>
-        {/* {tooltip ? (
-          <Box marginLeft="0.25rem">
-            <Tooltip content={tooltip}>
-              <QuestionIcon
-                width="1rem"
-                height="1rem"
-                color={
-                  theme.mode === 'light'
-                    ? ColorPalette['gray-200']
-                    : ColorPalette['gray-300']
-                }
-              />
-            </Tooltip>
-          </Box>
-        ) : null} */}
+        <Pressable
+          onPress={() => {
+            onOpenModal();
+          }}>
+          <Columns alignY="center" sum={1} gutter={4}>
+            <Text style={style.flatten(['color-text-low'])}>{title}</Text>
+            <InformationOutlinedIcon
+              size={20}
+              color={style.get('color-text-low').color}
+            />
+          </Columns>
+        </Pressable>
         {right ? (
           <React.Fragment>
             <Column weight={1} />

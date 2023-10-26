@@ -24,6 +24,8 @@ export const Button: FunctionComponent<{
 
   rippleColor?: string;
   underlayColor?: string;
+
+  textOverrideIcon?: React.ReactNode;
 }> = ({
   color,
   size = 'medium',
@@ -38,6 +40,7 @@ export const Button: FunctionComponent<{
   textStyle,
   rippleColor: propRippleColor,
   underlayColor: propUnderlayColor,
+  textOverrideIcon,
 }) => {
   const style = useStyle();
   const baseColor = ((color?: ButtonColorType) => {
@@ -164,7 +167,10 @@ export const Button: FunctionComponent<{
           style={StyleSheet.flatten([
             style.flatten(
               [textDefinition, 'text-center', ...(textColorDefinition as any)],
-              [loading && 'opacity-transparent'],
+              [
+                loading && 'opacity-transparent',
+                !!textOverrideIcon && 'opacity-transparent',
+              ],
             ),
             textStyle,
           ])}>
@@ -197,6 +203,14 @@ export const Button: FunctionComponent<{
               size={16}
             />
           </View>
+        ) : null}
+        {!loading && textOverrideIcon ? (
+          <Box
+            alignX="center"
+            alignY="center"
+            style={style.flatten(['absolute-fill'])}>
+            {textOverrideIcon}
+          </Box>
         ) : null}
       </RectButton>
       <View

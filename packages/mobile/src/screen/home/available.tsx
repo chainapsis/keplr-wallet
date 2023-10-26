@@ -20,7 +20,10 @@ import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {LookingForChains} from './components/looking-for-chains';
 import {Gutter} from '../../components/gutter';
 import FastImage from 'react-native-fast-image';
+import {InformationModal} from './infoModal';
 import {StackActions, useNavigation} from '@react-navigation/native';
+import {FormattedMessage} from 'react-intl';
+import {Toggle} from '../../components/toggle';
 
 const zeroDec = new Dec(0);
 
@@ -32,10 +35,11 @@ export const AvailableTabView: FunctionComponent<{
   // 근데 컴포넌트가 분리되어있는데 이거 하려고 context api 쓰긴 귀찮아서 그냥 prop으로 대충 처리한다.
   onClickGetStarted?: () => void;
 }> = observer(({search, isNotReady, onClickGetStarted}) => {
-  const {hugeQueriesStore, chainStore} = useStore();
+  const {hugeQueriesStore, chainStore, uiConfigStore} = useStore();
   const style = useStyle();
   // const navigate = useNavigate();
   const tokenFoundModalRef = useRef<BottomSheetModal>(null);
+  const infoModalRef = useRef<BottomSheetModal>(null);
 
   const allBalances = hugeQueriesStore.getAllBalances(true);
   const allBalancesNonZero = useMemo(() => {
@@ -61,14 +65,13 @@ export const AvailableTabView: FunctionComponent<{
 
   const hasLowBalanceTokens =
     hugeQueriesStore.filterLowBalanceTokens(allBalances).length > 0;
-  // const lowBalanceFilteredAllBalancesSearchFiltered =
-  //   hugeQueriesStore.filterLowBalanceTokens(_allBalancesSearchFiltered);
+  const lowBalanceFilteredAllBalancesSearchFiltered =
+    hugeQueriesStore.filterLowBalanceTokens(_allBalancesSearchFiltered);
 
-  //NOTE ui config 추가 되면 추가 하기
-  // const allBalancesSearchFiltered =
-  //   uiConfigStore.isHideLowBalance && hasLowBalanceTokens
-  //     ? lowBalanceFilteredAllBalancesSearchFiltered
-  //     : _allBalancesSearchFiltered;
+  const allBalancesSearchFiltered =
+    uiConfigStore.isHideLowBalance && hasLowBalanceTokens
+      ? lowBalanceFilteredAllBalancesSearchFiltered
+      : _allBalancesSearchFiltered;
 
   const lookingForChains = (() => {
     return chainStore.chainInfos.filter(chainInfo => {
@@ -108,7 +111,7 @@ export const AvailableTabView: FunctionComponent<{
   }[] = [
     {
       title: 'Available Balance',
-      balance: _allBalancesSearchFiltered,
+      balance: allBalancesSearchFiltered,
       lenAlwaysShown: 10,
       tooltip:
         'The amount of your assets that are available for use or transfer immediately, except for those that are currently staked or locked in LP pools.',
@@ -167,33 +170,28 @@ export const AvailableTabView: FunctionComponent<{
                   key={title}
                   title={
                     <TokenTitleView
+                      onOpenModal={() => infoModalRef.current?.present()}
                       title={title}
                       right={
                         hasLowBalanceTokens ? (
                           <React.Fragment>
-                            {/* TODO 해당영역에 뷰옵션을 보여주는 버튼이 생길수도 있으니 해서 일단 구현안함 */}
-                            {/* <Caption2
-                              style={{cursor: 'pointer'}}
-                              onClick={() => {
-                                uiConfigStore.setHideLowBalance(
-                                  !uiConfigStore.isHideLowBalance,
-                                );
-                              }}
-                              color={ColorPalette['gray-300']}>
+                            <Text
+                              style={style.flatten([
+                                'text-caption2',
+                                'color-gray-300',
+                              ])}>
                               <FormattedMessage id="page.main.available.hide-low-balance" />
-                            </Caption2>
-
-                            <Gutter size="0.25rem" />
-
-                            <Checkbox
-                              size="extra-small"
-                              checked={uiConfigStore.isHideLowBalance}
-                              onChange={() => {
+                            </Text>
+                            <Gutter size={4} />
+                            <Toggle
+                              size="small"
+                              isOpen={uiConfigStore.isHideLowBalance}
+                              setIsOpen={() => {
                                 uiConfigStore.setHideLowBalance(
                                   !uiConfigStore.isHideLowBalance,
                                 );
                               }}
-                            /> */}
+                            />
                           </React.Fragment>
                         ) : undefined
                       }
@@ -280,6 +278,9 @@ export const AvailableTabView: FunctionComponent<{
       )}
       <Modal ref={tokenFoundModalRef} snapPoints={['60%']}>
         <TokenFoundModal />
+      </Modal>
+      <Modal ref={infoModalRef} enableDynamicSizing={true}>
+        <InformationModal />
       </Modal>
     </React.Fragment>
   );

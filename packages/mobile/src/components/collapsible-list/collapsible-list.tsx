@@ -35,7 +35,9 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
           e.preventDefault();
         }}>
         <Columns sum={1} alignY="center">
-          <Text style={style.flatten(['color-gray-50'])}>{items.length}</Text>
+          <Text style={style.flatten(['subtitle3', 'color-text-high'])}>
+            {items.length}
+          </Text>
           <Gutter size={4} />
           {title}
         </Columns>
@@ -53,6 +55,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
         <Box>
           <Gutter size={12} />
           <TextButton
+            containerStyle={style.flatten(['padding-y-12'])}
             text={
               isCollapsed ? `View ${hidden.length} more tokens` : 'Collapse'
             }
@@ -73,6 +76,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
               setIsCollapsed(!isCollapsed);
             }}
           />
+          <Gutter size={12} />
         </Box>
       ) : null}
     </Stack>

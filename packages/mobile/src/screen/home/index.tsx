@@ -14,7 +14,6 @@ import {Stack} from '../../components/stack';
 import {Columns} from '../../components/column';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {Modal} from '../../components/modal';
-import {TextButton} from '../../components/text-button';
 import {DepositModal} from './components/deposit-modal/deposit-modal';
 import {BuyModal} from './buy-modal';
 import {StackActions, useNavigation} from '@react-navigation/native';
@@ -22,6 +21,8 @@ import {SearchTextInput} from '../../components/input/search-text-input';
 import {AvailableTabView} from './available';
 import {ChainInfo} from '@keplr-wallet/types';
 import {StakedTabView} from './staked';
+import {ClaimAll} from './components/claim-all';
+import {Box} from '../../components/box';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -70,7 +71,9 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
   return (
     <React.Fragment>
-      <PageWithScrollView backgroundMode={'default'}>
+      <PageWithScrollView
+        backgroundMode={'default'}
+        style={style.flatten(['padding-x-12'])}>
         <Stack gutter={10}>
           <YAxis alignX="center">
             <LayeredHorizontalRadioGroup
@@ -91,21 +94,21 @@ export const HomeScreen: FunctionComponent = observer(() => {
               itemMinWidth={92}
             />
           </YAxis>
-          <TextButton
-            text="copy address"
-            onPress={() => {
-              copyAddressModalRef.current?.present();
-            }}
-          />
-          <Text
-            style={style.flatten([
-              'color-white',
-              'font-extrabold',
-              'font-medium',
-              'h1',
-            ])}>
-            {availableTotalPrice?.toString()}
-          </Text>
+          <Box height={168} alignX="center" alignY="center">
+            <Text
+              style={style.flatten([
+                'color-text-low',
+                'font-extrabold',
+                'font-medium',
+                'h4',
+              ])}>
+              Total Available
+            </Text>
+            <Gutter size={10} />
+            <Text style={style.flatten(['color-text-high', 'mobile-h2'])}>
+              {availableTotalPrice?.toString()}
+            </Text>
+          </Box>
           <Columns sum={1} gutter={10}>
             <Button
               text="Deposit"
@@ -137,6 +140,8 @@ export const HomeScreen: FunctionComponent = observer(() => {
             />
           </Columns>
           <Gutter size={12} />
+          <ClaimAll isNotReady={isNotReady} />
+
           {!isNotReady ? (
             <Stack gutter={12}>
               {tabStatus === 'available' ? (
@@ -170,7 +175,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
       <Modal ref={copyAddressModalRef} snapPoints={['60%']}>
         <DepositModal />
       </Modal>
-      <Modal ref={buyModalRef} snapPoints={['32%']}>
+      <Modal ref={buyModalRef} snapPoints={['50%']}>
         <BuyModal />
       </Modal>
     </React.Fragment>
