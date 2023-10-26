@@ -1,6 +1,5 @@
 import React, {FunctionComponent, useState} from 'react';
 import {observer} from 'mobx-react-lite';
-// import {useFocusOnMount} from '../../hooks/use-focus-on-mount';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStore} from '../../../../stores';
 import {useFocusOnMount} from '../../../../hooks/use-focus-on-mount';
@@ -8,9 +7,7 @@ import {Linking, Text, TextInput} from 'react-native';
 import {SearchTextInput} from '../../../../components/input/search-text-input';
 import {Gutter} from '../../../../components/gutter';
 import {useStyle} from '../../../../styles';
-import {Modal} from '../../../../components/modal';
 import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
-import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
 import {Box} from '../../../../components/box';
 import {EmptyView} from '../../../../components/empty-view';
 import {ContractAddressItem} from '../contract-item';
@@ -18,10 +15,9 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {TokenContractListRepoURL} from '../../../../utils/config.ui';
 
 export const ContractAddressBookModal: FunctionComponent<{
-  modalRef: React.RefObject<BottomSheetModalMethods>;
   chainId: string;
   onSelect: (address: string) => void;
-}> = observer(({modalRef, chainId, onSelect}) => {
+}> = observer(({chainId, onSelect}) => {
   const {queriesStore} = useStore();
   const style = useStyle();
   const contracts =
@@ -41,7 +37,7 @@ export const ContractAddressBookModal: FunctionComponent<{
     : contracts;
 
   return (
-    <Modal ref={modalRef} snapPoints={['80%']}>
+    <React.Fragment>
       <Box paddingTop={0} paddingRight={12} paddingBottom={0} paddingLeft={12}>
         <Text
           style={style.flatten([
@@ -153,6 +149,6 @@ export const ContractAddressBookModal: FunctionComponent<{
           />
         </Text>
       </Box>
-    </Modal>
+    </React.Fragment>
   );
 });
