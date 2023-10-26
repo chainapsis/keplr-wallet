@@ -13,11 +13,12 @@ export const InformationModal = () => {
       style={style.flatten(['padding-x-12', 'padding-bottom-20'])}>
       <Box>
         <Box paddingBottom={20} paddingTop={12} paddingX={8}>
-          <Columns sum={1}>
+          <Columns sum={1} gutter={10} alignY="center">
             <InformationOutlinedIcon
               size={20}
               color={style.get('color-text-low').color}
             />
+
             <Text style={style.flatten(['h4', 'color-text-high'])}>
               Available Balance
             </Text>
