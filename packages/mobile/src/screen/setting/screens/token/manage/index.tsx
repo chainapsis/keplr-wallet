@@ -29,9 +29,12 @@ import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../../../navigation';
 import {Modal} from '../../../../../components/modal';
 import {BottomSheetModal, BottomSheetView} from '@gorhom/bottom-sheet';
-import {Dropdown} from '../../../../../components/dropdown';
 import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
 import {CheckCircleIcon} from '../../../../../components/icon/check-circle';
+import {
+  SelectModal,
+  SelectModalCommonButton,
+} from '../../../components/chain-select-modal ';
 
 interface MenuModalItems {
   key: string;
@@ -47,6 +50,8 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
   const navigate = useNavigation<StackNavProp>();
   const style = useStyle();
   const menuModalRef = useRef<BottomSheetModal>(null);
+  const selectChainModalRef = useRef<BottomSheetModal>(null);
+
   const [menuModalItems, setMenuModalItems] = useState<MenuModalItems[]>([
     {
       key: 'change-contact-label',
@@ -94,6 +99,7 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
     return {
       key: chainInfo.chainId,
       label: chainInfo.chainName,
+      imageUrl: chainInfo.chainSymbolImageUrl,
     };
   });
 
@@ -101,7 +107,7 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
 
   return (
     <React.Fragment>
-      <Box paddingX={12}>
+      <Box paddingX={12} paddingTop={6}>
         <Stack gutter={8}>
           <Text
             style={style.flatten([
@@ -114,11 +120,13 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
           </Text>
           <Columns sum={1} alignY="center">
             <Box width={208}>
-              <Dropdown
+              <SelectModalCommonButton
                 items={items}
                 selectedItemKey={chainId}
-                onSelect={setChainId}
-                allowSearch={true}
+                placeholder="Search by chain name"
+                onPress={() => {
+                  selectChainModalRef.current?.present();
+                }}
               />
             </Box>
 
@@ -161,6 +169,16 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
         </Stack>
       </Box>
       <MenuModal modalRef={menuModalRef} menuModalItems={menuModalItems} />
+      <Modal ref={selectChainModalRef}>
+        <SelectModal
+          onSelect={item => {
+            setChainId(item.key);
+            selectChainModalRef.current?.dismiss();
+          }}
+          items={items}
+          title="Select Chain"
+        />
+      </Modal>
     </React.Fragment>
   );
 });
