@@ -29,7 +29,10 @@ import {Text} from 'react-native';
 import {Controller, useForm} from 'react-hook-form';
 import {Button} from '../../../../../components/button';
 import {Gutter} from '../../../../../components/gutter';
-import {SelectModalTri} from '../../../components/chain-select-modal ';
+import {
+  SelectModal,
+  SelectModalCommonButton,
+} from '../../../components/chain-select-modal ';
 import {Modal} from '../../../../../components/modal';
 
 interface FormData {
@@ -48,6 +51,8 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
     useRoute<RouteProp<RootStackParamList, 'Setting.ManageTokenList.Add'>>();
   const paramChainId = route.params.chainId;
   const contractModalRef = useRef<BottomSheetModal>(null);
+  const selectChainModalRef = useRef<BottomSheetModal>(null);
+
   const style = useStyle();
 
   const {setValue, handleSubmit, control, formState, watch} = useForm<FormData>(
@@ -126,6 +131,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
     return {
       key: chainInfo.chainId,
       label: chainInfo.chainName,
+      imageUrl: chainInfo.chainSymbolImageUrl,
     };
   });
 
@@ -259,16 +265,18 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
     <PageWithScrollView
       backgroundMode={'default'}
       contentContainerStyle={style.flatten(['flex-grow-1'])}>
-      <Box paddingX={12} height={'100%'}>
+      <Box paddingX={12} paddingTop={12} height={'100%'}>
         <Stack gutter={16}>
           {/* TODO dropdown 컴포넌트 이후 작업 */}
           {/* {!interactionInfo.interaction ? ( */}
-          <SelectModalTri
-            items={items}
-            selectedItemKey={chainId}
-            title="Select Chain"
-            onSelect={item => setChainId(item.key)}
-          />
+          <Box width={208}>
+            <SelectModalCommonButton
+              items={items}
+              selectedItemKey={chainId}
+              placeholder="Search by chain name"
+              onPress={() => selectChainModalRef.current?.present()}
+            />
+          </Box>
           <Controller
             name="contractAddress"
             control={control}
@@ -411,7 +419,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
           onPress={submit}
         />
       </Box>
-      <Modal ref={contractModalRef} snapPoints={['80%']}>
+      <Modal ref={contractModalRef} snapPoints={['90%']}>
         <ContractAddressBookModal
           chainId={chainId}
           onSelect={(address: string) => {
@@ -420,18 +428,16 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
           }}
         />
       </Modal>
-
-      {/* <SelectModal
-        modalRef={selectChainModalRef}
-        items={items}
-        // isOpen={isOpen}
-        title="select chain"
-        onSelect={item => {
-          setChainId(item.key);
-          // selectChainModalRef.current?.dismiss();
-          // setIsOpen(false);
-        }}
-      /> */}
+      <Modal ref={selectChainModalRef}>
+        <SelectModal
+          items={items}
+          title="Select Chain"
+          onSelect={item => {
+            selectChainModalRef.current?.dismiss();
+            setChainId(item.key);
+          }}
+        />
+      </Modal>
     </PageWithScrollView>
   );
 });

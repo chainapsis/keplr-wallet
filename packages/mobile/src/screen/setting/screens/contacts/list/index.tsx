@@ -22,7 +22,10 @@ import {useStyle} from '../../../../../styles';
 import {PageWithScrollView} from '../../../../../components/page';
 import {AddressItem} from '../../../components/setting-address-item';
 import {useConfirm} from '../../../../../hooks/confirm';
-import {Dropdown} from '../../../../../components/dropdown';
+import {
+  SelectModal,
+  SelectModalCommonButton,
+} from '../../../components/chain-select-modal ';
 
 interface DropdownItem {
   key: string;
@@ -40,6 +43,8 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
     [],
   );
   const menuModalRef = useRef<BottomSheetModal>(null);
+  const selectChainModalRef = useRef<BottomSheetModal>(null);
+
   const style = useStyle();
   // Handle "chainId" state by search params to persist the state between page changes.
   // const paramChainId = searchParams.get('chainId');
@@ -68,13 +73,13 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
       style={style.flatten(['padding-12'])}>
       <Columns sum={1} alignY="center">
         <Box width={208}>
-          <Dropdown
+          <SelectModalCommonButton
             items={items}
             selectedItemKey={chainId}
-            onSelect={key => {
-              navigate.setParams({chainId: key});
+            placeholder="Search by chain name"
+            onPress={() => {
+              selectChainModalRef.current?.present();
             }}
-            allowSearch={true}
           />
         </Box>
 
@@ -180,6 +185,17 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
             </Pressable>
           ))}
         </BottomSheetView>
+      </Modal>
+
+      <Modal ref={selectChainModalRef} snapPoints={['90%']}>
+        <SelectModal
+          onSelect={item => {
+            navigate.setParams({chainId: item.key});
+            selectChainModalRef.current?.dismiss();
+          }}
+          items={items}
+          title="Select Chain"
+        />
       </Modal>
     </PageWithScrollView>
   );
