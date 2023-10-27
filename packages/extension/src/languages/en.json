@@ -545,6 +545,10 @@
   "page.main.components.token-found-modal.add-chains": "Add Chains",
   "page.main.components.token-item.copy-address.copied": "Copied",
 
+  "page.main.layouts.header.new-chain.title": "✨ {chains} Now Integrated!",
+  "page.main.layouts.header.new-chain.paragraph": "To show the chains and their assets on this account, visit \"Manage Chain Visibility\".",
+  "page.main.layouts.header.new-chain.button": "Got it!",
+
   "page.ledger-grant.title": "Allow Browser to Connect to Ledger",
   "page.ledger-grant.paragraph": "You need to reapprove connection to your Ledger. Select the appropriate app, and after successfully connecting with your Ledger device, close this page and retry your previous transaction (signing).",
 

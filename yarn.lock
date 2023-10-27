@@ -5387,6 +5387,7 @@ __metadata:
     "@types/react-is": ^16.7.2
     "@types/resize-observer-browser": ^0.1.7
     "@types/secp256k1": ^4.0.1
+    "@types/semver": ^7
     "@types/sha.js": ^2.4.0
     "@types/styled-components": ^5.1.26
     "@walletconnect/client": ^1.6.4
@@ -5422,6 +5423,7 @@ __metadata:
     react-router-dom: ^6.8.1
     scrypt-js: ^3.0.1
     secp256k1: ^5.0.0
+    semver: ^7.5.4
     serialize-javascript: ">=3.1.0"
     setimmediate: ^1.0.5
     sha.js: ^2.4.11
@@ -9939,6 +9941,13 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: f89b71360e3fe5a02f649746832fc7af4c5c5b8f85897a2e74d5df40f2e02e4c3b8cca5c7c9b92282870bf03724ce142f817d5d07f5acf2f1c5769ab7403e65a
+  languageName: node
+  linkType: hard
+
+"@types/semver@npm:^7":
+  version: 7.5.4
+  resolution: "@types/semver@npm:7.5.4"
+  checksum: 120c0189f6fec5f2d12d0d71ac8a4cfa952dc17fa3d842e8afddb82bba8828a4052f8799c1653e2b47ae1977435f38e8985658fde971905ce5afb8e23ee97ecf
   languageName: node
   linkType: hard
 
@@ -29057,6 +29066,17 @@ __metadata:
   bin:
     semver: bin/semver.js
   checksum: ba9c7cbbf2b7884696523450a61fee1a09930d888b7a8d7579025ad93d459b2d1949ee5bbfeb188b2be5f4ac163544c5e98491ad6152df34154feebc2cc337c1
+  languageName: node
+  linkType: hard
+
+"semver@npm:^7.5.4":
+  version: 7.5.4
+  resolution: "semver@npm:7.5.4"
+  dependencies:
+    lru-cache: ^6.0.0
+  bin:
+    semver: bin/semver.js
+  checksum: 12d8ad952fa353b0995bf180cdac205a4068b759a140e5d3c608317098b3575ac2f1e09182206bf2eb26120e1c0ed8fb92c48c592f6099680de56bb071423ca3
   languageName: node
   linkType: hard
 
