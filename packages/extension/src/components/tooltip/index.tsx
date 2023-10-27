@@ -19,20 +19,11 @@ export const Tooltip: FunctionComponent<{
   isAlwaysOpen?: boolean;
 
   allowedPlacements?: ("top" | "bottom" | "left" | "right")[];
-
-  backgroundColor?: string;
-  hideBorder?: boolean;
-  borderColor?: string;
-  filter?: string;
 }> = ({
   enabled,
   content,
   isAlwaysOpen = false,
   allowedPlacements,
-  backgroundColor: propBackgroundColor,
-  hideBorder,
-  borderColor: propBorderColor,
-  filter,
   children,
 }) => {
   const [_isOpen, setIsOpen] = useState(false);
@@ -73,18 +64,6 @@ export const Tooltip: FunctionComponent<{
 
   const theme = useTheme();
 
-  const backgroundColor =
-    propBackgroundColor ||
-    (theme.mode === "light"
-      ? ColorPalette["gray-400"]
-      : ColorPalette["gray-500"]);
-
-  const borderColor =
-    propBorderColor ||
-    (theme.mode === "light"
-      ? ColorPalette["gray-400"]
-      : ColorPalette["gray-400"]);
-
   return (
     <React.Fragment>
       <div
@@ -108,15 +87,20 @@ export const Tooltip: FunctionComponent<{
             top: y ?? 0,
             left: x ?? 0,
 
-            backgroundColor,
+            backgroundColor:
+              theme.mode === "light"
+                ? ColorPalette["gray-400"]
+                : ColorPalette["gray-500"],
             padding: "0.625rem",
             borderRadius: "0.375rem",
 
             borderStyle: "solid",
             borderWidth: "1px",
-            borderColor: hideBorder ? backgroundColor : borderColor,
+            borderColor:
+              theme.mode === "light"
+                ? ColorPalette["gray-400"]
+                : ColorPalette["gray-400"],
 
-            filter,
             zIndex: 9999999,
           }}
           {...getFloatingProps()}
@@ -124,8 +108,12 @@ export const Tooltip: FunctionComponent<{
           <FloatingArrow
             ref={arrowRef}
             context={context}
-            fill={backgroundColor}
-            stroke={hideBorder ? backgroundColor : borderColor}
+            fill={
+              theme.mode === "light"
+                ? ColorPalette["gray-400"]
+                : ColorPalette["gray-500"]
+            }
+            stroke={ColorPalette["gray-400"]}
             strokeWidth={1}
           />
           <Caption2
