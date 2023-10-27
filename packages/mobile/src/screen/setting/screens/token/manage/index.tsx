@@ -185,6 +185,7 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
           }}
           items={items}
           title="Select Chain"
+          placeholder="Search by chain name"
         />
       </Modal>
     </React.Fragment>

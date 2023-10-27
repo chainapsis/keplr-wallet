@@ -200,6 +200,7 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
             selectChainModalRef.current?.dismiss();
             setIsOpenChainSelectModal(false);
           }}
+          placeholder="Search by chain name"
           items={items}
           title="Select Chain"
         />
