@@ -20,7 +20,7 @@ import { AddressBookConfig } from "./address-book";
 import { MessageRequester } from "@keplr-wallet/router";
 import manifest from "../../manifest.v2.json";
 import { IBCSwapConfig } from "./ibc-swap";
-import semver from "semver";
+import { NewChainSuggestionConfig } from "./new-chain";
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
@@ -35,6 +35,7 @@ export class UIConfigStore {
   public readonly copyAddressConfig: CopyAddressConfig;
   public readonly addressBookConfig: AddressBookConfig;
   public readonly ibcSwapConfig: IBCSwapConfig;
+  public readonly newChainSuggestionConfig: NewChainSuggestionConfig;
 
   @observable
   protected _isInitialized: boolean = false;
@@ -50,6 +51,9 @@ export class UIConfigStore {
   protected _isBeta: boolean;
   protected _platform: "chrome" | "firefox" = "chrome";
 
+  protected _installedVersion: string = "";
+  protected _currentVersion: string = "";
+
   // Struct is required for compatibility with recipient config hook
   @observable.struct
   protected _icnsInfo:
@@ -61,9 +65,6 @@ export class UIConfigStore {
 
   @observable
   protected _fiatCurrency: string = "usd";
-
-  @observable
-  protected _needShowIBCSwapFeatureAdded: boolean = false;
 
   constructor(
     protected readonly kvStores: {
@@ -91,6 +92,10 @@ export class UIConfigStore {
       keyRingStore
     );
     this.ibcSwapConfig = new IBCSwapConfig(kvStores.kvStore, chainStore);
+    this.newChainSuggestionConfig = new NewChainSuggestionConfig(
+      kvStores.kvStore,
+      chainStore
+    );
 
     this._isBeta = navigator.userAgent.includes("Firefox");
     this._platform = navigator.userAgent.includes("Firefox")
@@ -109,21 +114,28 @@ export class UIConfigStore {
   }
 
   protected async init() {
-    // Set the last version to the kv store.
-    // This can be used to show the changelog.
     {
+      this._currentVersion = manifest.version;
+
+      const installedVersion = await this.kvStore.get<string>(
+        "installedVersion"
+      );
       const lastVersion = await this.kvStore.get<string>("lastVersion");
-      if (lastVersion) {
-        try {
-          if (semver.lte(lastVersion, "0.12.28")) {
-            this._needShowIBCSwapFeatureAdded = true;
-          }
-        } catch (e) {
-          console.log(e);
+      if (!installedVersion) {
+        if (lastVersion) {
+          // installedVersion은 처음부터 존재했던게 아니라 중간에 추가되었기 때문에 정확하게 알 수 없다.
+          // 유저가 실제로 install 했던 버전이거나 installedVersion이 추가되기 직전에 유저가 마지막으로 사용했던 버전을 나타낸다.
+          await this.kvStore.set("installedVersion", lastVersion);
+          this._installedVersion = lastVersion;
+        } else {
+          await this.kvStore.set("installedVersion", this._currentVersion);
+          this._installedVersion = this._currentVersion;
         }
+      } else {
+        this._installedVersion = installedVersion;
       }
 
-      await this.kvStore.set("lastVersion", manifest.version);
+      await this.kvStore.set("lastVersion", this._currentVersion);
     }
 
     {
@@ -151,25 +163,14 @@ export class UIConfigStore {
       });
     }
 
-    {
-      const saved = await this.kvStore.get<boolean>(
-        "needShowIBCSwapFeatureAdded"
-      );
-      if (saved === true) {
-        this._needShowIBCSwapFeatureAdded = saved;
-      }
-      autorun(() => {
-        this.kvStore.set(
-          "needShowIBCSwapFeatureAdded",
-          this._needShowIBCSwapFeatureAdded
-        );
-      });
-    }
-
     await Promise.all([
       this.copyAddressConfig.init(),
       this.addressBookConfig.init(),
       this.ibcSwapConfig.init(),
+      this.newChainSuggestionConfig.init(
+        this._installedVersion,
+        this._currentVersion
+      ),
     ]);
 
     runInAction(() => {
@@ -253,15 +254,7 @@ export class UIConfigStore {
   }
 
   async removeStatesWhenErrorOccurredDuringRending() {
-    await this.ibcSwapConfig.removeStatesWhenErrorOccurredDuringRending();
-  }
-
-  get needShowIBCSwapFeatureAdded(): boolean {
-    return this._needShowIBCSwapFeatureAdded;
-  }
-
-  @action
-  setNeedShowIBCSwapFeatureAdded(value: boolean) {
-    this._needShowIBCSwapFeatureAdded = value;
+    await this.ibcSwapConfig.removeStatesWhenErrorOccurredDuringRendering();
+    await this.newChainSuggestionConfig.removeStatesWhenErrorOccurredDuringRendering();
   }
 }
