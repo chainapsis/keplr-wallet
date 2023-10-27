@@ -558,7 +558,6 @@ export class RecentSendHistoryService {
                         this.trackIBCPacketForwardingRecursive(id);
                         break;
                       } else {
-                        console.log("!!!", toJS(history));
                         // Packet received to destination chain.
                         if (history.notificationInfo && !history.notified) {
                           runInAction(() => {
@@ -608,10 +607,6 @@ export class RecentSendHistoryService {
                                 }
                               }
                             } else {
-                              console.log(
-                                toJS(history.amount),
-                                toJS(history.notificationInfo)
-                              );
                               const assetsText = history.amount
                                 .filter((amt) =>
                                   history.notificationInfo!.currencies.find(
