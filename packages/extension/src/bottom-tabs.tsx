@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 import { GlobalSimpleBarProvider } from "./hooks/global-simplebar";
 import { Link, useLocation } from "react-router-dom";
 import { ColorPalette } from "./styles";
-import { createGlobalStyle, useTheme } from "styled-components";
+import { useTheme } from "styled-components";
 import { Tooltip } from "./components/tooltip";
 import { Box } from "./components/box";
 import { Button } from "./components/button";
@@ -13,26 +13,6 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "./stores";
 import { useNavigate } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
-
-// ibc swap을 써보라는 tooltip에 대해서 animation을 넣고싶은데
-// 이거하려고 react-spring을 쓰긴 빡세고
-// css로 하려는데 tooltip component 내부에 넣기도 빡세고 해서
-// 그냥 global css로 처리한다.
-const BottomTabsGlobalStyleTransitions = createGlobalStyle`
-  .__bottom_tabs__ibc_swap__floating-ui__tooltip__content__fadeInUp-enter {
-    animation: __bottom_tabs__ibc_swap__floating-ui__tooltip__content__fadeInUp 0.6s cubic-bezier(0.33, 1, 0.68, 1);
-  }
-  @keyframes __bottom_tabs__ibc_swap__floating-ui__tooltip__content__fadeInUp {
-    0%{
-      transform:translate(0, 100%);
-      opacity: 0;
-    } 
-    100%{
-      transform:translate(0, 0);
-      opacity: 1;
-    }
-  }
-`;
 
 export const BottomTabsHeightRem = "3.75rem";
 
@@ -77,7 +57,6 @@ export const BottomTabsRouteProvider: FunctionComponent<{
           {children}
         </GlobalSimpleBarProvider>
       </div>
-      <BottomTabsGlobalStyleTransitions />
       {shouldBottomTabsShown ? (
         <div
           style={{
@@ -105,7 +84,6 @@ export const BottomTabsRouteProvider: FunctionComponent<{
             return (
               <Tooltip
                 key={i}
-                contentClassName="__bottom_tabs__ibc_swap__floating-ui__tooltip__content__fadeInUp-enter"
                 content={
                   <Box width="17rem" padding="0.375rem">
                     <YAxis>
