@@ -28,7 +28,6 @@ export const SelectModalCommonButton: FunctionComponent<{
   onPress: () => void;
 }> = observer(({items, placeholder, selectedItemKey, isOpenModal, onPress}) => {
   const style = useStyle();
-  console.log(isOpenModal);
   return (
     <React.Fragment>
       <Box
