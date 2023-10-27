@@ -4,7 +4,7 @@ import {
   ChainIdHelper,
   TendermintTxTracer,
 } from "@keplr-wallet/cosmos";
-import { BackgroundTxService } from "../tx";
+import { BackgroundTxService, Notification } from "../tx";
 import {
   action,
   autorun,
@@ -17,7 +17,6 @@ import { KVStore, retry } from "@keplr-wallet/common";
 import { IBCHistory, RecentSendHistory } from "./types";
 import { Buffer } from "buffer/";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
-import { Notification } from "../tx";
 import { CoinPretty } from "@keplr-wallet/unit";
 
 export class RecentSendHistoryService {
@@ -1097,15 +1096,10 @@ export class RecentSendHistoryService {
       }
     });
     if (!packetEvent) {
-      throw new Error("Invalid tx");
+      return -1;
     }
 
-    const index = events.indexOf(packetEvent);
-    if (index < 0) {
-      throw new Error("Invalid tx");
-    }
-
-    return index;
+    return events.indexOf(packetEvent);
   }
 
   protected getIBCRecvPacketIndexFromTx(
@@ -1187,15 +1181,10 @@ export class RecentSendHistoryService {
       }
     });
     if (!packetEvent) {
-      throw new Error("Invalid tx");
+      return -1;
     }
 
-    const index = events.indexOf(packetEvent);
-    if (index < 0) {
-      throw new Error("Invalid tx");
-    }
-
-    return index;
+    return events.indexOf(packetEvent);
   }
 
   protected getIBCPacketSequenceFromTx(
