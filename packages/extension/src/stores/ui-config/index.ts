@@ -20,7 +20,6 @@ import { AddressBookConfig } from "./address-book";
 import { MessageRequester } from "@keplr-wallet/router";
 import manifest from "../../manifest.v2.json";
 import { IBCSwapConfig } from "./ibc-swap";
-import semver from "semver";
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
@@ -63,7 +62,7 @@ export class UIConfigStore {
   protected _fiatCurrency: string = "usd";
 
   @observable
-  protected _needShowIBCSwapFeatureAdded: boolean = false;
+  protected _needShowIBCSwapFeatureAdded: boolean = true;
 
   constructor(
     protected readonly kvStores: {
@@ -111,20 +110,7 @@ export class UIConfigStore {
   protected async init() {
     // Set the last version to the kv store.
     // This can be used to show the changelog.
-    {
-      const lastVersion = await this.kvStore.get<string>("lastVersion");
-      if (lastVersion) {
-        try {
-          if (semver.lte(lastVersion, "0.12.28")) {
-            this._needShowIBCSwapFeatureAdded = true;
-          }
-        } catch (e) {
-          console.log(e);
-        }
-      }
-
-      await this.kvStore.set("lastVersion", manifest.version);
-    }
+    await this.kvStore.set("lastVersion", manifest.version);
 
     {
       const saved = await this.kvStore.get<string>("fiatCurrency");
@@ -151,20 +137,20 @@ export class UIConfigStore {
       });
     }
 
-    {
-      const saved = await this.kvStore.get<boolean>(
-        "needShowIBCSwapFeatureAdded"
-      );
-      if (saved === true) {
-        this._needShowIBCSwapFeatureAdded = saved;
-      }
-      autorun(() => {
-        this.kvStore.set(
-          "needShowIBCSwapFeatureAdded",
-          this._needShowIBCSwapFeatureAdded
-        );
-      });
-    }
+    // {
+    //   const saved = await this.kvStore.get<boolean>(
+    //     "needShowIBCSwapFeatureAdded"
+    //   );
+    //   if (saved === true) {
+    //     this._needShowIBCSwapFeatureAdded = saved;
+    //   }
+    //   autorun(() => {
+    //     this.kvStore.set(
+    //       "needShowIBCSwapFeatureAdded",
+    //       this._needShowIBCSwapFeatureAdded
+    //     );
+    //   });
+    // }
 
     await Promise.all([
       this.copyAddressConfig.init(),
