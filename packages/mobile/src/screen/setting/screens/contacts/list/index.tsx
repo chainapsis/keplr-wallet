@@ -42,6 +42,8 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
   const [modalDropdownItems, setModalDropdownItems] = useState<DropdownItem[]>(
     [],
   );
+  const [isOpenChainSelectModal, setIsOpenChainSelectModal] = useState(false);
+
   const menuModalRef = useRef<BottomSheetModal>(null);
   const selectChainModalRef = useRef<BottomSheetModal>(null);
 
@@ -77,8 +79,10 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
             items={items}
             selectedItemKey={chainId}
             placeholder="Search by chain name"
+            isOpenModal={isOpenChainSelectModal}
             onPress={() => {
               selectChainModalRef.current?.present();
+              setIsOpenChainSelectModal(true);
             }}
           />
         </Box>
@@ -187,11 +191,14 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
         </BottomSheetView>
       </Modal>
 
-      <Modal ref={selectChainModalRef} snapPoints={['90%']}>
+      <Modal
+        ref={selectChainModalRef}
+        onDismiss={() => setIsOpenChainSelectModal(false)}>
         <SelectModal
           onSelect={item => {
             navigate.setParams({chainId: item.key});
             selectChainModalRef.current?.dismiss();
+            setIsOpenChainSelectModal(false);
           }}
           items={items}
           title="Select Chain"

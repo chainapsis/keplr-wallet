@@ -52,6 +52,7 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
   const menuModalRef = useRef<BottomSheetModal>(null);
   const selectChainModalRef = useRef<BottomSheetModal>(null);
 
+  const [isOpenChainSelectModal, setIsOpenChainSelectModal] = useState(false);
   const [menuModalItems, setMenuModalItems] = useState<MenuModalItems[]>([
     {
       key: 'change-contact-label',
@@ -123,9 +124,11 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
               <SelectModalCommonButton
                 items={items}
                 selectedItemKey={chainId}
+                isOpenModal={isOpenChainSelectModal}
                 placeholder="Search by chain name"
                 onPress={() => {
                   selectChainModalRef.current?.present();
+                  setIsOpenChainSelectModal(true);
                 }}
               />
             </Box>
@@ -169,11 +172,16 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
         </Stack>
       </Box>
       <MenuModal modalRef={menuModalRef} menuModalItems={menuModalItems} />
-      <Modal ref={selectChainModalRef}>
+      <Modal
+        ref={selectChainModalRef}
+        onDismiss={() => {
+          setIsOpenChainSelectModal(false);
+        }}>
         <SelectModal
           onSelect={item => {
             setChainId(item.key);
             selectChainModalRef.current?.dismiss();
+            setIsOpenChainSelectModal(false);
           }}
           items={items}
           title="Select Chain"

@@ -24,10 +24,11 @@ export const SelectModalCommonButton: FunctionComponent<{
   items: SelectModalItem[];
   placeholder?: string;
   selectedItemKey?: string;
+  isOpenModal?: boolean;
   onPress: () => void;
-}> = observer(({items, placeholder, selectedItemKey, onPress}) => {
+}> = observer(({items, placeholder, selectedItemKey, isOpenModal, onPress}) => {
   const style = useStyle();
-
+  console.log(isOpenModal);
   return (
     <React.Fragment>
       <Box
@@ -38,7 +39,11 @@ export const SelectModalCommonButton: FunctionComponent<{
         paddingY={10}
         borderRadius={8}
         borderWidth={1}
-        borderColor={style.get('color-gray-500').color}
+        borderColor={
+          isOpenModal
+            ? style.get('color-gray-400').color
+            : style.get('color-gray-500').color
+        }
         onClick={onPress}>
         <Columns sum={1} alignY="center">
           <Text
