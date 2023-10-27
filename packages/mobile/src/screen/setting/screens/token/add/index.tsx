@@ -53,6 +53,8 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
   const contractModalRef = useRef<BottomSheetModal>(null);
   const selectChainModalRef = useRef<BottomSheetModal>(null);
 
+  const [isOpenChainSelectModal, setIsOpenChainSelectModal] = useState(false);
+
   const style = useStyle();
 
   const {setValue, handleSubmit, control, formState, watch} = useForm<FormData>(
@@ -274,7 +276,11 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
               items={items}
               selectedItemKey={chainId}
               placeholder="Search by chain name"
-              onPress={() => selectChainModalRef.current?.present()}
+              isOpenModal={isOpenChainSelectModal}
+              onPress={() => {
+                selectChainModalRef.current?.present();
+                setIsOpenChainSelectModal(true);
+              }}
             />
           </Box>
           <Controller
@@ -428,13 +434,16 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
           }}
         />
       </Modal>
-      <Modal ref={selectChainModalRef}>
+      <Modal
+        ref={selectChainModalRef}
+        onDismiss={() => setIsOpenChainSelectModal(false)}>
         <SelectModal
           items={items}
           title="Select Chain"
           onSelect={item => {
             selectChainModalRef.current?.dismiss();
             setChainId(item.key);
+            setIsOpenChainSelectModal(false);
           }}
         />
       </Modal>
