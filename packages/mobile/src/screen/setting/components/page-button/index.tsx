@@ -2,7 +2,7 @@ import React, {FunctionComponent, useState} from 'react';
 import {Column, Columns} from '../../../../components/column';
 import {Box} from '../../../../components/box';
 import {Stack} from '../../../../components/stack';
-import {Pressable, Text} from 'react-native';
+import {Pressable, StyleSheet, Text} from 'react-native';
 import {useStyle} from '../../../../styles';
 
 export interface PageButtonProps {
@@ -54,7 +54,11 @@ export const PageButton: FunctionComponent<PageButtonProps> = ({
                 </Text>
               </Columns>
               {paragraph ? (
-                <Text style={style.flatten(['color-text-low', 'width-268'])}>
+                <Text
+                  style={StyleSheet.flatten([
+                    style.flatten(['color-text-low']),
+                    {width: '90%'},
+                  ])}>
                   {paragraph}
                 </Text>
               ) : null}
