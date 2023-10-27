@@ -425,7 +425,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
           onPress={submit}
         />
       </Box>
-      <Modal ref={contractModalRef} snapPoints={['90%']}>
+      <Modal ref={contractModalRef}>
         <ContractAddressBookModal
           chainId={chainId}
           onSelect={(address: string) => {
@@ -440,6 +440,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
         <SelectModal
           items={items}
           title="Select Chain"
+          placeholder="Search by chain name"
           onSelect={item => {
             selectChainModalRef.current?.dismiss();
             setChainId(item.key);
