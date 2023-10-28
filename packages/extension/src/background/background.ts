@@ -80,66 +80,8 @@ const { initFn, keyRingService } = init(
       return legacy.disabledChains ?? [];
     },
   },
-  async (service) => {
-    const kvStore = new ExtensionKVStore("store_chains_service_after_init");
-    const celestiaTestnetMochaAdded = await kvStore.get(
-      "__celestia_testnet_mocha_added_v0.12.21"
-    );
-    try {
-      if (!celestiaTestnetMochaAdded) {
-        await service.addSuggestedChainInfo({
-          rpc: "https://rpc-celestia-testnet-mocha.keplr.app",
-          rest: "https://lcd-celestia-testnet-mocha.keplr.app",
-          chainId: "mocha-3",
-          chainName: "Celestia Mocha Testnet",
-          chainSymbolImageUrl:
-            "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/mocha/chain.png",
-          stakeCurrency: {
-            coinDenom: "TIA",
-            coinMinimalDenom: "utia",
-            coinDecimals: 6,
-          },
-          bip44: {
-            coinType: 118,
-          },
-          bech32Config: {
-            bech32PrefixAccAddr: "celestia",
-            bech32PrefixAccPub: "celestiapub",
-            bech32PrefixValAddr: "celestiavaloper",
-            bech32PrefixValPub: "celestiavaloperpub",
-            bech32PrefixConsAddr: "celestiavalcons",
-            bech32PrefixConsPub: "celestiavalconspub",
-          },
-          currencies: [
-            {
-              coinDenom: "TIA",
-              coinMinimalDenom: "utia",
-              coinDecimals: 6,
-            },
-          ],
-          feeCurrencies: [
-            {
-              coinDenom: "TIA",
-              coinMinimalDenom: "utia",
-              coinDecimals: 6,
-              gasPriceStep: {
-                low: 0.1,
-                average: 0.25,
-                high: 0.4,
-              },
-            },
-          ],
-          features: [],
-        });
-      }
-    } catch (e) {
-      console.log(e);
-      // Ignore error
-    }
-
-    if (!celestiaTestnetMochaAdded) {
-      await kvStore.set("__celestia_testnet_mocha_added_v0.12.21", true);
-    }
+  async () => {
+    // noop yet
   }
 );
 

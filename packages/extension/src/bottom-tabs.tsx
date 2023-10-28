@@ -2,37 +2,7 @@ import React, { FunctionComponent } from "react";
 import { GlobalSimpleBarProvider } from "./hooks/global-simplebar";
 import { Link, useLocation } from "react-router-dom";
 import { ColorPalette } from "./styles";
-import { createGlobalStyle, useTheme } from "styled-components";
-import { Tooltip } from "./components/tooltip";
-import { Box } from "./components/box";
-import { Button } from "./components/button";
-import { YAxis } from "./components/axis";
-import { Body2, Subtitle3 } from "./components/typography";
-import { Gutter } from "./components/gutter";
-import { observer } from "mobx-react-lite";
-import { useStore } from "./stores";
-import { useNavigate } from "react-router";
-import { FormattedMessage, useIntl } from "react-intl";
-
-// ibc swap을 써보라는 tooltip에 대해서 animation을 넣고싶은데
-// 이거하려고 react-spring을 쓰긴 빡세고
-// css로 하려는데 tooltip component 내부에 넣기도 빡세고 해서
-// 그냥 global css로 처리한다.
-const BottomTabsGlobalStyleTransitions = createGlobalStyle`
-  .__bottom_tabs__ibc_swap__floating-ui__tooltip__content__fadeInUp-enter {
-    animation: __bottom_tabs__ibc_swap__floating-ui__tooltip__content__fadeInUp 0.6s cubic-bezier(0.33, 1, 0.68, 1);
-  }
-  @keyframes __bottom_tabs__ibc_swap__floating-ui__tooltip__content__fadeInUp {
-    0%{
-      transform:translate(0, 100%);
-      opacity: 0;
-    } 
-    100%{
-      transform:translate(0, 0);
-      opacity: 1;
-    }
-  }
-`;
+import { useTheme } from "styled-components";
 
 export const BottomTabsHeightRem = "3.75rem";
 
@@ -45,15 +15,10 @@ export const BottomTabsRouteProvider: FunctionComponent<{
   }[];
 
   forceHideBottomTabs?: boolean;
-}> = observer(({ children, isNotReady, tabs, forceHideBottomTabs }) => {
-  const { uiConfigStore } = useStore();
-
+}> = ({ children, isNotReady, tabs, forceHideBottomTabs }) => {
   const location = useLocation();
-  const navigate = useNavigate();
 
   const theme = useTheme();
-
-  const intl = useIntl();
 
   const shouldBottomTabsShown =
     !forceHideBottomTabs &&
@@ -77,7 +42,6 @@ export const BottomTabsRouteProvider: FunctionComponent<{
           {children}
         </GlobalSimpleBarProvider>
       </div>
-      <BottomTabsGlobalStyleTransitions />
       {shouldBottomTabsShown ? (
         <div
           style={{
@@ -103,97 +67,33 @@ export const BottomTabsRouteProvider: FunctionComponent<{
             const isActive = tab.pathname === location.pathname;
 
             return (
-              <Tooltip
-                key={i}
-                contentClassName="__bottom_tabs__ibc_swap__floating-ui__tooltip__content__fadeInUp-enter"
-                content={
-                  <Box width="17rem" padding="0.375rem">
-                    <YAxis>
-                      <Subtitle3
-                        color={
-                          theme.mode === "light"
-                            ? ColorPalette["gray-700"]
-                            : ColorPalette["white"]
-                        }
-                      >
-                        <FormattedMessage id="new-feature.ibc-swap.title" />
-                      </Subtitle3>
-                      <Gutter size="0.75rem" />
-                      <Body2
-                        color={
-                          theme.mode === "light"
-                            ? ColorPalette["gray-300"]
-                            : ColorPalette["gray-200"]
-                        }
-                      >
-                        <FormattedMessage id="new-feature.ibc-swap.paragraph" />
-                      </Body2>
-                      <Gutter size="0.75rem" />
-                      <YAxis alignX="right">
-                        <Button
-                          size="small"
-                          color="secondary"
-                          text={intl.formatMessage({
-                            id: "new-feature.ibc-swap.button",
-                          })}
-                          onClick={() => {
-                            navigate("/ibc-swap");
-                          }}
-                        />
-                      </YAxis>
-                    </YAxis>
-                  </Box>
-                }
-                backgroundColor={
-                  theme.mode === "light"
-                    ? ColorPalette["white"]
-                    : ColorPalette["gray-500"]
-                }
-                hideBorder={theme.mode === "light"}
-                filter={
-                  theme.mode === "light"
-                    ? "drop-shadow(0px 1px 10px rgba(43, 39, 55, 0.20))"
-                    : undefined
-                }
-                enabled={
-                  uiConfigStore.needShowIBCSwapFeatureAdded &&
-                  !isNotReady &&
-                  tab.pathname === "/ibc-swap"
-                }
-                isAlwaysOpen={
-                  uiConfigStore.needShowIBCSwapFeatureAdded &&
-                  !isNotReady &&
-                  tab.pathname === "/ibc-swap"
-                }
-              >
-                <Link to={tab.pathname}>
-                  <div
-                    style={{
-                      opacity: isNotReady ? 0 : 1,
-                      color: (() => {
-                        if (theme.mode === "light") {
-                          return isActive
-                            ? ColorPalette["blue-400"]
-                            : ColorPalette["gray-100"];
-                        }
-
+              <Link to={tab.pathname} key={i}>
+                <div
+                  style={{
+                    opacity: isNotReady ? 0 : 1,
+                    color: (() => {
+                      if (theme.mode === "light") {
                         return isActive
-                          ? ColorPalette["gray-100"]
-                          : ColorPalette["gray-400"];
-                      })(),
-                    }}
-                  >
-                    {tab.icon}
-                  </div>
-                </Link>
-              </Tooltip>
+                          ? ColorPalette["blue-400"]
+                          : ColorPalette["gray-100"];
+                      }
+
+                      return isActive
+                        ? ColorPalette["gray-100"]
+                        : ColorPalette["gray-400"];
+                    })(),
+                  }}
+                >
+                  {tab.icon}
+                </div>
+              </Link>
             );
           })}
         </div>
       ) : null}
     </div>
   );
-});
+};
 
 export const BottomTabHomeIcon: FunctionComponent<{
   width: string;

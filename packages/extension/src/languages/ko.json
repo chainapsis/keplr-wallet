@@ -364,7 +364,7 @@
   "page.ibc-swap.components.swap-asset-info.modal.search.placeholder": "체인 검색",
   "page.ibc-swap.components.swap-fee-info.button.transaction-fee": "트랜잭션 수수료",
   "page.ibc-swap.components.swap-fee-info.button.service-fee": "케플러 수수료",
-  "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph": "런칭 이벤트: 첫달동안 케플러 서비스 수수료 0%로 운영됩니다.",
+  "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph": "런칭 이벤트: 2023년 말까지 케플러 서비스 수수료 0%로 운영됩니다.",
   "page.ibc-swap.components.slippage-modal.title": "슬리피지 설정",
   "page.ibc-swap.components.slippage-modal.label.slippage-tolerance": "슬리피지 허용치",
   "page.ibc-swap.components.slippage-modal.label.slippage-custom": "커스텀 설정",
@@ -522,7 +522,7 @@
   "page.main.components.menu-bar.go-to-keplr-chain-registry": "더 많은 체인 추가하기",
   "page.main.components.deposit-modal.title": "주소 복사",
   "page.main.components.deposit-modal.search-placeholder": "체인 검색",
-  "page.main.components.deposit-modal.empty-text": "특정 체인의 주소를 사용하기 위해선 먼저 사이드바 메뉴의  \"체인 표시\"를 방문하여 해당 체인을 지갑에 표시하도록 설정해야 합니다.",
+  "page.main.components.deposit-modal.empty-text": "특정 체인의 주소를 사용하기 위해선 먼저 사이드바 메뉴의  <link>\"체인 표시\"</link>를 방문하여 해당 체인을 지갑에 표시하도록 설정해야 합니다.",
   "page.main.components.buy-crypto-modal.title": "암호화폐 구매",
   "page.main.components.looking-for-chains.title": "체인을 찾으시나요?",
   "page.main.components.looking-for-chains.enable-button": "체인 표시하기",
@@ -531,12 +531,12 @@
   "page.main.components.token-found-modal.add-chains": "체인 추가",
   "page.main.components.token-item.copy-address.copied": "복사됨",
 
+  "page.main.layouts.header.new-chain.title": "{chains} 체인이 추가되었습니다!",
+  "page.main.layouts.header.new-chain.paragraph": "\"체인 표시\"에서 신규 체인을 활성화하면 이 계정에서 사용할 수 있습니다.",
+  "page.main.layouts.header.new-chain.button": "좋아요!",
+
   "page.ledger-grant.title": "렛저와 브라우저 간의 연결을 재허용합니다",
   "page.ledger-grant.paragraph": "렛저의 연결 권한을 다시 허용해보는 절차입니다. 먼저, 렛저 장치에서 올바른 앱을 선택하여 연 뒤 장치의 연결을 다시 시도해보세요. 연결이 완료되면 기존 화면으로 돌아가 수행하려던 트랜잭션을 다시 시도해볼 수 있습니다.",
-
-  "new-feature.ibc-swap.title": "✨ 토큰 교환이 생겼어요!",
-  "new-feature.ibc-swap.paragraph": "체인 내 혹은 체인간 다양한 토큰을 서로 교환할 수 있어요. 한번 사용해보세요!",
-  "new-feature.ibc-swap.button": "좋아요!",
 
   "components.empty-view.text": "{subject} 데이터가 없습니다.",
   "components.input.recipient-input.wallet-address-label": "지갑 주소 혹은 ICNS",

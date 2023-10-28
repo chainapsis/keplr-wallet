@@ -369,7 +369,7 @@
   "page.ibc-swap.components.swap-asset-info.modal.search.placeholder": "Search for a chain",
   "page.ibc-swap.components.swap-fee-info.button.transaction-fee": "Transaction Fee",
   "page.ibc-swap.components.swap-fee-info.button.service-fee": "Keplr Swap Fee",
-  "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph": "Launch Event: Swap with 0% Keplr fee for the first month",
+  "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph": "Launch Event: Swap with 0% Keplr fee until the end of the year 2023",
   "page.ibc-swap.components.slippage-modal.title": "Slippage Settings",
   "page.ibc-swap.components.slippage-modal.label.slippage-tolerance": "Slippage Tolerance",
   "page.ibc-swap.components.slippage-modal.label.slippage-custom": "Custom Slippage",
@@ -536,7 +536,7 @@
   "page.main.components.menu-bar.go-to-keplr-chain-registry": "Add More Chains",
   "page.main.components.deposit-modal.title": "Copy Address",
   "page.main.components.deposit-modal.search-placeholder": "Search for a chain",
-  "page.main.components.deposit-modal.empty-text": "To use an address on certain chain, you may need to first visit the \"Manage Chain Visibility\" in the side menu and make the chain visible on your wallet.",
+  "page.main.components.deposit-modal.empty-text": "To use an address on certain chain, you may need to first visit the <link>\"Manage Chain Visibility\"</link> in the side menu and make the chain visible on your wallet.",
   "page.main.components.buy-crypto-modal.title": "Buy Crypto",
   "page.main.components.looking-for-chains.title": "Looking for a chain?",
   "page.main.components.looking-for-chains.enable-button": "Manage",
@@ -545,12 +545,12 @@
   "page.main.components.token-found-modal.add-chains": "Add Chains",
   "page.main.components.token-item.copy-address.copied": "Copied",
 
+  "page.main.layouts.header.new-chain.title": "✨ {chains} Now Integrated!",
+  "page.main.layouts.header.new-chain.paragraph": "To show the chains and their assets on this account, visit \"Manage Chain Visibility\".",
+  "page.main.layouts.header.new-chain.button": "Got it!",
+
   "page.ledger-grant.title": "Allow Browser to Connect to Ledger",
   "page.ledger-grant.paragraph": "You need to reapprove connection to your Ledger. Select the appropriate app, and after successfully connecting with your Ledger device, close this page and retry your previous transaction (signing).",
-
-  "new-feature.ibc-swap.title": "✨ Swap is Here!",
-  "new-feature.ibc-swap.paragraph": "Swap tokens between different chains with a simple click. Give it a try!",
-  "new-feature.ibc-swap.button": "Got it!",
 
   "components.empty-view.text": "No {subject} Yet",
   "components.input.recipient-input.wallet-address-label": "Wallet Address or ICNS",
