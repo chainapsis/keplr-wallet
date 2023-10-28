@@ -34,7 +34,13 @@ import Color from "color";
 export const CopyAddressScene: FunctionComponent<{
   close: () => void;
 }> = observer(({ close }) => {
-  const { chainStore, accountStore, keyRingStore, uiConfigStore } = useStore();
+  const {
+    chainStore,
+    accountStore,
+    keyRingStore,
+    uiConfigStore,
+    analyticsStore,
+  } = useStore();
 
   const intl = useIntl();
   const theme = useTheme();
@@ -213,7 +219,38 @@ export const CopyAddressScene: FunctionComponent<{
               color={ColorPalette["gray-300"]}
               style={{ textAlign: "center" }}
             >
-              <FormattedMessage id="page.main.components.deposit-modal.empty-text" />
+              <FormattedMessage
+                id="page.main.components.deposit-modal.empty-text"
+                values={{
+                  link: (chunks) => (
+                    <Subtitle3
+                      as="a"
+                      style={{
+                        cursor: "pointer",
+                        textDecoration: "underline",
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+
+                        if (keyRingStore.selectedKeyInfo) {
+                          analyticsStore.logEvent(
+                            "click_menu_manageChainVisibility"
+                          );
+                          browser.tabs
+                            .create({
+                              url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true`,
+                            })
+                            .then(() => {
+                              window.close();
+                            });
+                        }
+                      }}
+                    >
+                      {chunks}
+                    </Subtitle3>
+                  ),
+                }}
+              />
             </Subtitle3>
           </Box>
         ) : null}
