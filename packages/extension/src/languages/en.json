@@ -369,7 +369,7 @@
   "page.ibc-swap.components.swap-asset-info.modal.search.placeholder": "Search for a chain",
   "page.ibc-swap.components.swap-fee-info.button.transaction-fee": "Transaction Fee",
   "page.ibc-swap.components.swap-fee-info.button.service-fee": "Keplr Swap Fee",
-  "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph": "Launch Event: Swap with 0% Keplr fee for the first month",
+  "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph": "Launch Event: Swap with 0% Keplr fee until the end of the year 2023",
   "page.ibc-swap.components.slippage-modal.title": "Slippage Settings",
   "page.ibc-swap.components.slippage-modal.label.slippage-tolerance": "Slippage Tolerance",
   "page.ibc-swap.components.slippage-modal.label.slippage-custom": "Custom Slippage",
