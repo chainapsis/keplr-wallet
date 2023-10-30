@@ -46,6 +46,7 @@ import {SettingContactsListScreen} from './screen/setting/screens/contacts/list'
 import {SettingContactsAddScreen} from './screen/setting/screens/contacts/add';
 import {SettingTokenListScreen} from './screen/setting/screens/token/manage';
 import {SettingTokenAddScreen} from './screen/setting/screens/token/add';
+import {SettingSecurityAndPrivacyScreen} from './screen/setting/screens/security/security';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -67,10 +68,6 @@ export type RootStackParamList = {
   'Setting.General.WC': undefined;
   'Setting.General.ManageNonActiveChains': undefined;
   'Setting.General.ManageChainVisibility': undefined;
-
-  'Setting.Advanced': undefined;
-  'Setting.Advanced.Intro': undefined;
-  'Setting.Advanced.ChangeEndpoints': undefined;
 
   'Setting.SecurityAndPrivacy': undefined;
   'Setting.SecurityAndPrivacy.Intro': undefined;
@@ -212,14 +209,6 @@ const SettingNavigation = () => {
         component={SettingGeneralNavigation}
       />
       <Stack.Screen
-        name="Setting.Advanced"
-        options={{
-          headerShown: false,
-          ...defaultHeaderOptions,
-        }}
-        component={SettingAdvancedNavigation}
-      />
-      <Stack.Screen
         name="Setting.SecurityAndPrivacy"
         options={{
           headerShown: false,
@@ -337,34 +326,6 @@ const SettingGeneralNavigation = () => {
   );
 };
 
-const SettingAdvancedNavigation = () => {
-  const intl = useIntl();
-  return (
-    <Stack.Navigator initialRouteName="Setting.Advanced">
-      <Stack.Screen
-        name="Setting.Advanced.Intro"
-        options={{
-          title: intl.formatMessage({
-            id: 'page.setting.advanced-title',
-          }),
-          ...defaultHeaderOptions,
-        }}
-        component={SettingScreen}
-      />
-      <Stack.Screen
-        name="Setting.Advanced.ChangeEndpoints"
-        options={{
-          title: intl.formatMessage({
-            id: 'page.setting.advanced.change-endpoints-title',
-          }),
-          ...defaultHeaderOptions,
-        }}
-        component={SettingGeneralScreen}
-      />
-    </Stack.Navigator>
-  );
-};
-
 const SettingSecurityAndPrivacyNavigation = () => {
   const intl = useIntl();
   return (
@@ -377,7 +338,7 @@ const SettingSecurityAndPrivacyNavigation = () => {
           }),
           ...defaultHeaderOptions,
         }}
-        component={SettingScreen}
+        component={SettingSecurityAndPrivacyScreen}
       />
       <Stack.Screen
         name="Setting.SecurityAndPrivacy.ChangePassword"
