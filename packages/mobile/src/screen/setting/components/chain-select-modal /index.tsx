@@ -1,10 +1,10 @@
 import React, {FunctionComponent, useEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {useIntl} from 'react-intl';
-import {Text} from 'react-native';
+import {Platform, Text} from 'react-native';
 import {Gutter} from '../../../../components/gutter';
 import {useStyle} from '../../../../styles';
-import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
+import {BottomSheetFlatList, useBottomSheet} from '@gorhom/bottom-sheet';
 import {Box} from '../../../../components/box';
 import {RectButton} from '../../../../components/rect-button';
 import {Column, Columns} from '../../../../components/column';
@@ -13,6 +13,7 @@ import {TextButton} from '../../../../components/text-button';
 import {ArrowDownFillIcon} from '../../../../components/icon/arrow-donw-fill';
 import {BottomSheetSearchTextInput} from '../../../../components/input/bottom-sheet-search-input';
 import {TextInput} from 'react-native-gesture-handler';
+import {SearchTextInput} from '../../../../components/input/search-text-input';
 
 export interface SelectModalItem {
   key: string;
@@ -73,6 +74,7 @@ export const SelectModal: FunctionComponent<{
   const [search, setSearch] = useState('');
   const searchRef = useRef<TextInput>(null);
   const intl = useIntl();
+  const bottom = useBottomSheet();
 
   useEffect(() => {
     searchRef.current?.focus();
@@ -103,15 +105,31 @@ export const SelectModal: FunctionComponent<{
           {title}
         </Text>
         <Gutter size={12} />
-        <BottomSheetSearchTextInput
-          ref={searchRef}
-          value={search}
-          onChange={e => {
-            e.preventDefault();
-            setSearch(e.nativeEvent.text);
-          }}
-          placeholder={placeholder}
-        />
+        {Platform.OS === 'android' ? (
+          <SearchTextInput
+            ref={searchRef}
+            value={search}
+            onChange={e => {
+              e.preventDefault();
+              setSearch(e.nativeEvent.text);
+            }}
+            placeholder={placeholder}
+          />
+        ) : (
+          <BottomSheetSearchTextInput
+            ref={searchRef}
+            value={search}
+            onChange={e => {
+              e.preventDefault();
+              setSearch(e.nativeEvent.text);
+            }}
+            placeholder={placeholder}
+            onSubmitEditing={() => {
+              bottom.snapToIndex(0);
+            }}
+          />
+        )}
+
         <Gutter size={12} />
       </Box>
       <BottomSheetFlatList
