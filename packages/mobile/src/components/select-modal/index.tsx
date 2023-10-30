@@ -2,18 +2,18 @@ import React, {FunctionComponent, useEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {useIntl} from 'react-intl';
 import {Platform, Text} from 'react-native';
-import {Gutter} from '../../../../components/gutter';
-import {useStyle} from '../../../../styles';
+import {Gutter} from '../gutter';
+import {useStyle} from '../../styles';
 import {BottomSheetFlatList, useBottomSheet} from '@gorhom/bottom-sheet';
-import {Box} from '../../../../components/box';
-import {RectButton} from '../../../../components/rect-button';
-import {Column, Columns} from '../../../../components/column';
-import {ChainImageFallback} from '../../../../components/image';
-import {TextButton} from '../../../../components/text-button';
-import {ArrowDownFillIcon} from '../../../../components/icon/arrow-donw-fill';
-import {BottomSheetSearchTextInput} from '../../../../components/input/bottom-sheet-search-input';
+import {Box} from '../box';
+import {RectButton} from '../rect-button';
+import {Column, Columns} from '../column';
+import {ChainImageFallback} from '../image';
+import {TextButton} from '../text-button';
+import {ArrowDownFillIcon} from '../icon/arrow-donw-fill';
+import {BottomSheetSearchTextInput} from '../input/bottom-sheet-search-input';
 import {TextInput} from 'react-native-gesture-handler';
-import {SearchTextInput} from '../../../../components/input/search-text-input';
+import {SearchTextInput} from '../input/search-text-input';
 
 export interface SelectModalItem {
   key: string;

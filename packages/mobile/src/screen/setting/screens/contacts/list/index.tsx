@@ -25,7 +25,7 @@ import {useConfirm} from '../../../../../hooks/confirm';
 import {
   SelectModal,
   SelectModalCommonButton,
-} from '../../../components/chain-select-modal ';
+} from '../../../../../components/select-modal';
 
 interface DropdownItem {
   key: string;

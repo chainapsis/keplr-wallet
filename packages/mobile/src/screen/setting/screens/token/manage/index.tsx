@@ -34,7 +34,7 @@ import {CheckCircleIcon} from '../../../../../components/icon/check-circle';
 import {
   SelectModal,
   SelectModalCommonButton,
-} from '../../../components/chain-select-modal ';
+} from '../../../../../components/select-modal';
 
 interface MenuModalItems {
   key: string;

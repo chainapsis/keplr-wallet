@@ -32,7 +32,7 @@ import {Gutter} from '../../../../../components/gutter';
 import {
   SelectModal,
   SelectModalCommonButton,
-} from '../../../components/chain-select-modal ';
+} from '../../../../../components/select-modal';
 import {Modal} from '../../../../../components/modal';
 
 interface FormData {
