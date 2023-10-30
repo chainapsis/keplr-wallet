@@ -7,7 +7,7 @@ import {Column, Columns} from '../../column';
 import {SearchIcon} from '../../icon';
 import {TextInput} from 'react-native-gesture-handler';
 
-interface WrapBottomSheetTextInputProps {
+interface BottomSheetTextInputProps {
   value: string;
   inputStyle?: TextStyle;
   placeholder?: string;
@@ -19,7 +19,7 @@ const LeftIcon = (color: string) => <SearchIcon color={color} size={20} />;
 
 export const BottomSheetSearchTextInput = forwardRef<
   TextInput,
-  WrapBottomSheetTextInputProps & TextInputProps
+  BottomSheetTextInputProps & TextInputProps
 >(
   (
     {
