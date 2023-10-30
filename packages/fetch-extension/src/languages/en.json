@@ -97,6 +97,8 @@
   "setting.export-to-mobile.input.password.error.required": "Password is required",
   "setting.export-to-mobile.input.password.error.invalid": "Invalid password",
   "setting.export-to-mobile.button.confirm": "Confirm",
+  "setting.export-to-mobile.qr-code-view.session-expired": "Session expired",
+  "setting.export-to-mobile.qr-code-view.expired": "Expired",
 
   "setting.chat": "Chat",
 

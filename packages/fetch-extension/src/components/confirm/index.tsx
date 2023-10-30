@@ -19,6 +19,7 @@ export interface ConfirmOptions {
 
   yes?: string;
   no?: string;
+  hideNoButton?: boolean;
 }
 
 const ConfirmContext = createContext<
@@ -105,6 +106,7 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
             }
             yes={currentConfirm?.yes}
             no={currentConfirm?.no}
+            hideNoButton={currentConfirm?.hideNoButton}
             onConfirm={currentConfirm?.resolve}
             onReject={currentConfirm?.reject}
           />
