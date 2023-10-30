@@ -25,7 +25,7 @@ import {RootStackParamList, StackNavProp} from '../../../../../navigation';
 import {PageWithScrollView} from '../../../../../components/page';
 import {ContractAddressBookModal} from '../../../components/contract-address-book-modal';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
-import {Text} from 'react-native';
+import {Platform, Text} from 'react-native';
 import {Controller, useForm} from 'react-hook-form';
 import {Button} from '../../../../../components/button';
 import {Gutter} from '../../../../../components/gutter';

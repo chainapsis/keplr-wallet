@@ -84,19 +84,6 @@ export const SettingGeneralScreen: FunctionComponent = observer(() => {
 
           <PageButton
             title={intl.formatMessage({
-              id: 'page.setting.general.manage-authz-title',
-            })}
-            endIcon={
-              <ArrowRightIcon
-                size={24}
-                color={style.get('color-text-low').color}
-              />
-            }
-            onClick={() => navigate.navigate('Setting.General.ManageAuthz')}
-          />
-
-          <PageButton
-            title={intl.formatMessage({
               id: 'page.setting.general.manage-non-native-chains-title',
             })}
             paragraph={intl.formatMessage({
