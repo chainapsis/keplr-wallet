@@ -49,6 +49,7 @@ import {SettingTokenAddScreen} from './screen/setting/screens/token/add';
 import {SettingSecurityAndPrivacyScreen} from './screen/setting/screens/security/security';
 import {SettingSecurityChangePasswordScreen} from './screen/setting/screens/security/change-password';
 import {SettingSecurityPermissionScreen} from './screen/setting/screens/security/permission';
+import {SettingGeneralLanguageScreen} from './screen/setting/screens/general/language';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -263,7 +264,7 @@ const SettingGeneralNavigation = () => {
           }),
           ...defaultHeaderOptions,
         }}
-        component={SettingGeneralScreen}
+        component={SettingGeneralLanguageScreen}
       />
       <Stack.Screen
         name="Setting.General.Currency"
