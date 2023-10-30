@@ -47,6 +47,7 @@ import {SettingContactsAddScreen} from './screen/setting/screens/contacts/add';
 import {SettingTokenListScreen} from './screen/setting/screens/token/manage';
 import {SettingTokenAddScreen} from './screen/setting/screens/token/add';
 import {SettingSecurityAndPrivacyScreen} from './screen/setting/screens/security/security';
+import {SettingSecurityChangePasswordScreen} from './screen/setting/screens/security/change-password';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -71,6 +72,7 @@ export type RootStackParamList = {
 
   'Setting.SecurityAndPrivacy': undefined;
   'Setting.SecurityAndPrivacy.Intro': undefined;
+  'Setting.SecurityAndPrivacy.Permission': undefined;
   'Setting.SecurityAndPrivacy.ChangePassword': undefined;
 
   'Setting.ManageTokenList': undefined;
@@ -341,6 +343,16 @@ const SettingSecurityAndPrivacyNavigation = () => {
         component={SettingSecurityAndPrivacyScreen}
       />
       <Stack.Screen
+        name="Setting.SecurityAndPrivacy.Permission"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.setting.security.change-password-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={SettingSecurityChangePasswordScreen}
+      />
+      <Stack.Screen
         name="Setting.SecurityAndPrivacy.ChangePassword"
         options={{
           title: intl.formatMessage({
@@ -348,7 +360,7 @@ const SettingSecurityAndPrivacyNavigation = () => {
           }),
           ...defaultHeaderOptions,
         }}
-        component={SettingGeneralScreen}
+        component={SettingSecurityChangePasswordScreen}
       />
     </Stack.Navigator>
   );

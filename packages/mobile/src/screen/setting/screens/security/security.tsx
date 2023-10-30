@@ -7,7 +7,6 @@ import {ArrowRightIcon} from '../../../../components/icon/arrow-right';
 import {useStyle} from '../../../../styles';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../../navigation';
-import {useStore} from '../../../../stores';
 import {observer} from 'mobx-react-lite';
 import {Toggle} from '../../../../components/toggle';
 
@@ -16,7 +15,6 @@ export const SettingSecurityAndPrivacyScreen: FunctionComponent = observer(
     const intl = useIntl();
     const style = useStyle();
     const navigate = useNavigation<StackNavProp>();
-    const {uiConfigStore} = useStore();
 
     return (
       <React.Fragment>
@@ -35,23 +33,9 @@ export const SettingSecurityAndPrivacyScreen: FunctionComponent = observer(
                   color={style.get('color-text-low').color}
                 />
               }
-              onClick={() => navigate.navigate('Setting.General.Lang')}
-            />
-
-            <PageButton
-              title={intl.formatMessage({
-                id: 'page.setting.security.auto-lock-title',
-              })}
-              paragraph={(() => {
-                return uiConfigStore.fiatCurrency.currency.toUpperCase();
-              })()}
-              endIcon={
-                <ArrowRightIcon
-                  size={24}
-                  color={style.get('color-text-low').color}
-                />
+              onClick={() =>
+                navigate.navigate('Setting.SecurityAndPrivacy.Permission')
               }
-              onClick={() => navigate.navigate('Setting.General.Currency')}
             />
 
             <PageButton
@@ -65,9 +49,7 @@ export const SettingSecurityAndPrivacyScreen: FunctionComponent = observer(
                 />
               }
               onClick={() =>
-                navigate.navigate('Setting.General.ContactList', {
-                  chainId: undefined,
-                })
+                navigate.navigate('Setting.SecurityAndPrivacy.ChangePassword')
               }
             />
 
@@ -85,7 +67,6 @@ export const SettingSecurityAndPrivacyScreen: FunctionComponent = observer(
                     isOpen={false}
                     // isOpen={!disableAnalytics}
                     setIsOpen={() => {
-                      console.log('test');
                       // const disableAnalytics =
                       //   localStorage.getItem('disable-analytics') === 'true';
                       // new InExtensionMessageRequester()
