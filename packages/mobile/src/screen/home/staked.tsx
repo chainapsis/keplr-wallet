@@ -64,7 +64,7 @@ export const StakedTabView: FunctionComponent = observer(() => {
           altSentence: string;
         }[];
     lenAlwaysShown: number;
-    tooltip?: string;
+    paragraph: string;
   }[] = [
     {
       title: intl.formatMessage({
@@ -72,7 +72,7 @@ export const StakedTabView: FunctionComponent = observer(() => {
       }),
       balance: delegations,
       lenAlwaysShown: 5,
-      tooltip: intl.formatMessage({
+      paragraph: intl.formatMessage({
         id: 'page.main.staked.staked-balance-tooltip',
       }),
     },
@@ -82,7 +82,7 @@ export const StakedTabView: FunctionComponent = observer(() => {
       }),
       balance: unbondings,
       lenAlwaysShown: 3,
-      tooltip: intl.formatMessage({
+      paragraph: intl.formatMessage({
         id: 'page.main.staked.unstaking-balance-tooltip',
       }),
     },
@@ -91,7 +91,7 @@ export const StakedTabView: FunctionComponent = observer(() => {
   return (
     <React.Fragment>
       <Stack gutter={8}>
-        {TokenViewData.map(({title, balance, lenAlwaysShown, tooltip}) => {
+        {TokenViewData.map(({title, balance, lenAlwaysShown, paragraph}) => {
           if (balance.length === 0) {
             return null;
           }
@@ -103,7 +103,7 @@ export const StakedTabView: FunctionComponent = observer(() => {
                 <TokenTitleView
                   title={title}
                   onOpenModal={() => {
-                    setInfoModalState({title, paragraph: tooltip || ''});
+                    setInfoModalState({title, paragraph});
                     infoModalRef.current?.present();
                   }}
                 />
