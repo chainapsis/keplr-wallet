@@ -2398,6 +2398,60 @@ export const EmbedChainInfos: AppChainInfo[] = [
     },
     features: ["ibc-transfer"],
   },
+  {
+    rpc: "https://rpc-dydx.keplr.app",
+    rest: "https://lcd-dydx.keplr.app",
+    chainId: "dydx-mainnet-1",
+    chainName: "dYdX",
+    stakeCurrency: {
+      coinDenom: "DYDX",
+      coinDecimals: 18,
+      coinMinimalDenom: "adydx",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/dydx.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("dydx"),
+    currencies: [
+      {
+        coinDenom: "DYDX",
+        coinDecimals: 18,
+        coinMinimalDenom: "adydx",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/dydx.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "DYDX",
+        coinDecimals: 18,
+        coinMinimalDenom: "adydx",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/dydx.png",
+        gasPriceStep: {
+          low: 12500000000,
+          average: 12500000000,
+          high: 20000000000,
+        },
+      },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom:
+          "ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.025,
+          average: 0.025,
+          high: 0.03,
+        },
+      },
+    ],
+    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/dydx.png",
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/dydx/txs/{txHash}",
+    },
+    features: [],
+  },
 ];
 
 export const LegacyAmplitudeApiKey =
