@@ -78,55 +78,16 @@ export const ContractAddressBookModal: FunctionComponent<{
           );
         }}
         ListEmptyComponent={
-          <React.Fragment>
-            <Box alignX="center" alignY="center">
-              <Gutter size={50} />
-              <EmptyView>
-                <Text style={style.flatten(['subtitle3'])}>
-                  <FormattedMessage id="page.setting.token.add.contract-address-book-modal.no-search-data" />
-                </Text>
-              </EmptyView>
-            </Box>
-          </React.Fragment>
+          <Box alignX="center" alignY="center">
+            <Gutter size={50} />
+            <EmptyView>
+              <Text style={style.flatten(['subtitle3'])}>
+                <FormattedMessage id="page.setting.token.add.contract-address-book-modal.no-search-data" />
+              </Text>
+            </EmptyView>
+          </Box>
         }
       />
-
-      {/* <BottomSheetView> */}
-
-      {/* </BottomSheetView> */}
-
-      {/* <SimpleBar
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            overflowY: 'auto',
-            height: '21.5rem',
-          }}>
-          {contracts.length === 0 ? (
-            <React.Fragment>
-              <Gutter size={120} direction="vertical" />
-              <EmptyView>
-                <Text style={style.flatten(['subtitle3'])}>
-                  <FormattedMessage id="page.setting.token.add.contract-address-book-modal.no-search-data" />
-                </Text>
-              </EmptyView>
-            </React.Fragment>
-          ) : (
-            <React.Fragment>
-              {filtered.map((contract, index) => (
-                <ContractAddressItem
-                  key={index}
-                  name={contract.metadata.name}
-                  address={contract.contractAddress}
-                  imageUrl={contract.imageUrl}
-                  afterSelect={address => {
-                    onSelect(address);
-                  }}
-                />
-              ))}
-            </React.Fragment>
-          )}
-        </SimpleBar> */}
 
       <Box
         alignX="center"
