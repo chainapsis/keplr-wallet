@@ -120,6 +120,53 @@ export const EmbedChainInfos: AppChainInfo[] = [
     },
   },
   {
+    rpc: "https://rpc-celestia.keplr.app",
+    rest: "https://lcd-celestia.keplr.app",
+    chainId: "celestia",
+    chainName: "Celestia",
+    stakeCurrency: {
+      coinDecimals: 6,
+      coinDenom: "TIA",
+      coinGeckoId: "celestia",
+      coinMinimalDenom: "utia",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/celestia.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("celestia"),
+    currencies: [
+      {
+        coinDecimals: 6,
+        coinDenom: "TIA",
+        coinGeckoId: "celestia",
+        coinMinimalDenom: "utia",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/celestia.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDecimals: 6,
+        coinDenom: "TIA",
+        coinGeckoId: "celestia",
+        coinMinimalDenom: "utia",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/celestia.png",
+        gasPriceStep: {
+          low: 0.1,
+          average: 0.2,
+          high: 0.4,
+        },
+      },
+    ],
+    features: [],
+    chainSymbolImageUrl:
+      "https://dhj8dql1kzq2v.cloudfront.net/white/celestia.png",
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/celestia/txs/{txHash}",
+    },
+  },
+  {
     rpc: "https://rpc-secret.keplr.app",
     rest: "https://lcd-secret.keplr.app",
     chainId: "secret-4",
