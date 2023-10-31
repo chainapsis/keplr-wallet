@@ -200,7 +200,6 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
         <SelectModal
           onSelect={item => {
             navigate.setParams({chainId: item.key});
-            selectChainModalRef.current?.dismiss();
             setIsOpenChainSelectModal(false);
           }}
           placeholder="Search by chain name"

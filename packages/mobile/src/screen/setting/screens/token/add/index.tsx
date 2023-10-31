@@ -445,7 +445,6 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
           title="Select Chain"
           placeholder="Search by chain name"
           onSelect={item => {
-            selectChainModalRef.current?.dismiss();
             setChainId(item.key);
             setIsOpenChainSelectModal(false);
           }}
