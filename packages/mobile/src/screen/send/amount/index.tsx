@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import React, {FunctionComponent, useEffect, useMemo} from 'react';
+import React, {FunctionComponent, useEffect, useMemo, useRef} from 'react';
 import {PageWithScrollView} from '../../../components/page';
 import {
   RouteProp,
@@ -8,12 +8,16 @@ import {
   useRoute,
 } from '@react-navigation/native';
 import {useStore} from '../../../stores';
-import {useGasSimulator, useSendTxConfig} from '@keplr-wallet/hooks';
+import {
+  useGasSimulator,
+  useSendTxConfig,
+  useTxConfigsValidate,
+} from '@keplr-wallet/hooks';
 import {ICNSInfo} from '../../../utils/config.ui';
 import {DenomHelper} from '@keplr-wallet/common';
 import {AsyncKVStore} from '../../../common';
 import {TokenItem} from '../../../components/token-view';
-import {CoinPretty} from '@keplr-wallet/unit';
+import {CoinPretty, DecUtils} from '@keplr-wallet/unit';
 import {Label} from '../../../components/input/label';
 import {RecipientInput} from '../../../components/input/reciepient-input';
 import {AmountInput} from '../../../components/input/amount-input';
@@ -25,6 +29,10 @@ import {useStyle} from '../../../styles';
 import {Button} from '../../../components/button';
 import {FeeControl} from '../../../components/input/fee-control';
 import {Gutter} from '../../../components/gutter';
+import {BACKGROUND_PORT, Message} from '@keplr-wallet/router';
+import {SendTxAndRecordMsg} from '@keplr-wallet/background';
+import {TextInput} from 'react-native';
+import {RNMessageRequesterInternal} from '../../../router';
 
 export const SendAmountScreen: FunctionComponent = observer(() => {
   const {chainStore, accountStore, queriesStore} = useStore();
@@ -37,6 +45,7 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation();
   const intl = useIntl();
   const style = useStyle();
+  const addressRef = useRef<TextInput>(null);
 
   const initialChainId = route.params['chainId'];
   const initialCoinMinimalDenom = route.params['coinMinimalDenom'];
@@ -45,6 +54,10 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
   const coinMinimalDenom =
     initialCoinMinimalDenom ||
     chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
+
+  useEffect(() => {
+    addressRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     if (!initialChainId || !initialCoinMinimalDenom) {
@@ -164,6 +177,13 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
     }
   }, [gasSimulator, sendConfigs.amountConfig.currency, sendConfigs.gasConfig]);
 
+  const txConfigsValidate = useTxConfigsValidate({
+    ...sendConfigs,
+    gasSimulator,
+  });
+
+  const historyType = 'basic-send';
+
   return (
     <PageWithScrollView
       backgroundMode={'default'}
@@ -189,7 +209,8 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
         </Box>
 
         <RecipientInput
-          historyType="basic-send"
+          ref={addressRef}
+          historyType={historyType}
           recipientConfig={sendConfigs.recipientConfig}
           memoConfig={sendConfigs.memoConfig}
         />
@@ -215,7 +236,79 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
 
       <Gutter size={16} />
 
-      <Button text={'Next'} size={'large'} />
+      <Button
+        text={'Next'}
+        size={'large'}
+        loading={accountStore.getAccount(chainId).isSendingMsg === 'send'}
+        onPress={async () => {
+          if (!txConfigsValidate.interactionBlocked) {
+            const tx = accountStore
+              .getAccount(chainId)
+              .makeSendTokenTx(
+                sendConfigs.amountConfig.amount[0].toDec().toString(),
+                sendConfigs.amountConfig.amount[0].currency,
+                sendConfigs.recipientConfig.recipient,
+              );
+
+            try {
+              await tx.send(
+                sendConfigs.feeConfig.toStdFee(),
+                sendConfigs.memoConfig.memo,
+                {
+                  preferNoSetFee: true,
+                  preferNoSetMemo: true,
+                  sendTx: async (chainId, tx, mode) => {
+                    let msg: Message<Uint8Array> = new SendTxAndRecordMsg(
+                      historyType,
+                      chainId,
+                      sendConfigs.recipientConfig.chainId,
+                      tx,
+                      mode,
+                      false,
+                      sendConfigs.senderConfig.sender,
+                      sendConfigs.recipientConfig.recipient,
+                      sendConfigs.amountConfig.amount.map(amount => {
+                        return {
+                          amount: DecUtils.getTenExponentN(
+                            amount.currency.coinDecimals,
+                          )
+                            .mul(amount.toDec())
+                            .toString(),
+                          denom: amount.currency.coinMinimalDenom,
+                        };
+                      }),
+                      sendConfigs.memoConfig.memo,
+                    );
+                    return await new RNMessageRequesterInternal().sendMessage(
+                      BACKGROUND_PORT,
+                      msg,
+                    );
+                  },
+                },
+                {
+                  onBroadcasted: () => {
+                    chainStore.enableVaultsWithCosmosAddress(
+                      sendConfigs.recipientConfig.chainId,
+                      sendConfigs.recipientConfig.recipient,
+                    );
+
+                    console.log('onBroadcasted');
+                  },
+                  onFulfill: (tx: any) => {
+                    if (tx.code != null && tx.code !== 0) {
+                      console.log(tx);
+                    }
+                  },
+                },
+              );
+            } catch (e) {
+              if (e?.message === 'Request rejected') {
+                return;
+              }
+            }
+          }
+        }}
+      />
     </PageWithScrollView>
   );
 });
