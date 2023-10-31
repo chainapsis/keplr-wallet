@@ -114,10 +114,8 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
             paddingY={24}
             marginX={16}
             borderRadius={8}
-            onClick={e => {
-              e.stopPropagation();
-              e.preventDefault();
-            }}>
+            //Box를 Pressble 컴포넌트화 하기 위해서 작성한 onClick 함수
+            onClick={() => {}}>
             <YAxis>
               {confirm?.title ? (
                 <React.Fragment>
