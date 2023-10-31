@@ -239,6 +239,7 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
       <Button
         text={'Next'}
         size={'large'}
+        disabled={txConfigsValidate.interactionBlocked}
         loading={accountStore.getAccount(chainId).isSendingMsg === 'send'}
         onPress={async () => {
           if (!txConfigsValidate.interactionBlocked) {
