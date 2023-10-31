@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useMemo} from 'react';
+import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
 import {CollapsibleList} from '../../components/collapsible-list';
 import {Dec} from '@keplr-wallet/unit';
 import {ViewToken} from './index';
@@ -9,6 +9,12 @@ import {TokenItem, TokenTitleView} from './components/token';
 import {MainEmptyView} from './components/empty-view';
 import FastImage from 'react-native-fast-image';
 import {useIntl} from 'react-intl';
+import {Modal} from '../../components/modal';
+import {
+  InformationModal,
+  InformationModalProps,
+} from '../../components/modal/infoModal';
+import {BottomSheetModal} from '@gorhom/bottom-sheet';
 
 export const StakedTabView: FunctionComponent = observer(() => {
   const {hugeQueriesStore} = useStore();
@@ -20,6 +26,11 @@ export const StakedTabView: FunctionComponent = observer(() => {
       }),
     [hugeQueriesStore.delegations],
   );
+  const infoModalRef = useRef<BottomSheetModal>(null);
+  const [infoModalState, setInfoModalState] = useState<InformationModalProps>({
+    title: '',
+    paragraph: '',
+  });
 
   const unbondings: {
     viewToken: ViewToken;
@@ -53,7 +64,7 @@ export const StakedTabView: FunctionComponent = observer(() => {
           altSentence: string;
         }[];
     lenAlwaysShown: number;
-    tooltip?: string | React.ReactElement;
+    paragraph: string;
   }[] = [
     {
       title: intl.formatMessage({
@@ -61,7 +72,7 @@ export const StakedTabView: FunctionComponent = observer(() => {
       }),
       balance: delegations,
       lenAlwaysShown: 5,
-      tooltip: intl.formatMessage({
+      paragraph: intl.formatMessage({
         id: 'page.main.staked.staked-balance-tooltip',
       }),
     },
@@ -71,7 +82,7 @@ export const StakedTabView: FunctionComponent = observer(() => {
       }),
       balance: unbondings,
       lenAlwaysShown: 3,
-      tooltip: intl.formatMessage({
+      paragraph: intl.formatMessage({
         id: 'page.main.staked.unstaking-balance-tooltip',
       }),
     },
@@ -80,7 +91,7 @@ export const StakedTabView: FunctionComponent = observer(() => {
   return (
     <React.Fragment>
       <Stack gutter={8}>
-        {TokenViewData.map(({title, balance, lenAlwaysShown}) => {
+        {TokenViewData.map(({title, balance, lenAlwaysShown, paragraph}) => {
           if (balance.length === 0) {
             return null;
           }
@@ -88,7 +99,15 @@ export const StakedTabView: FunctionComponent = observer(() => {
           return (
             <CollapsibleList
               key={title}
-              title={<TokenTitleView title={title} />}
+              title={
+                <TokenTitleView
+                  title={title}
+                  onOpenModal={() => {
+                    setInfoModalState({title, paragraph});
+                    infoModalRef.current?.present();
+                  }}
+                />
+              }
               lenAlwaysShown={lenAlwaysShown}
               items={balance.map(viewToken => {
                 if ('altSentence' in viewToken) {
@@ -153,6 +172,13 @@ export const StakedTabView: FunctionComponent = observer(() => {
           })}
         />
       ) : null}
+
+      <Modal ref={infoModalRef} enableDynamicSizing={true} snapPoints={['90%']}>
+        <InformationModal
+          title={infoModalState?.title}
+          paragraph={infoModalState?.paragraph}
+        />
+      </Modal>
     </React.Fragment>
   );
 });
