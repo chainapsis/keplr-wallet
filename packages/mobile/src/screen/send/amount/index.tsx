@@ -291,8 +291,6 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
                       sendConfigs.recipientConfig.chainId,
                       sendConfigs.recipientConfig.recipient,
                     );
-
-                    console.log('onBroadcasted');
                   },
                   onFulfill: (tx: any) => {
                     if (tx.code != null && tx.code !== 0) {
