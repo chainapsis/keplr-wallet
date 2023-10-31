@@ -439,6 +439,8 @@ export const SignModal: FunctionComponent<{
           onPress={approve}
           disabled={buttonDisabled}
         />
+
+        <Gutter size={24} />
       </BottomSheetView>
     </Modal>
   );
