@@ -425,12 +425,15 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
           onPress={submit}
         />
       </Box>
-      <Modal ref={contractModalRef}>
+      <Modal
+        ref={contractModalRef}
+        //NOTE BottomSheetTextInput가 안드로이드일때 올바르게 동작 하지 않고
+        //같은 50% 일때 키보드가 있을시 모달 크기가 작아서 안드로이드 일때만 70% 으로 설정
+        snapPoints={Platform.OS === 'android' ? ['70%'] : ['50%']}>
         <ContractAddressBookModal
           chainId={chainId}
           onSelect={(address: string) => {
             setValue('contractAddress', address);
-            contractModalRef.current?.dismiss();
           }}
         />
       </Modal>
