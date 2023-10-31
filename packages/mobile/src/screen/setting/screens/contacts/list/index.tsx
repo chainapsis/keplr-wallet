@@ -64,6 +64,7 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
     return {
       key: chainInfo.chainId,
       label: chainInfo.chainName,
+      imageUrl: chainInfo.chainSymbolImageUrl,
     };
   });
 
