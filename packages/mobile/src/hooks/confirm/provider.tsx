@@ -114,7 +114,10 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
             paddingY={24}
             marginX={16}
             borderRadius={8}
-            onClick={() => {}}>
+            onClick={e => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}>
             <YAxis>
               {confirm?.title ? (
                 <React.Fragment>

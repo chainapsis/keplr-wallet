@@ -117,6 +117,7 @@ export const Button: FunctionComponent<{
     <Box
       borderRadius={8}
       position="relative"
+      onClick={onPress}
       style={StyleSheet.flatten([
         style.flatten([
           ...(backgroundColorDefinitions as any),
@@ -136,7 +137,6 @@ export const Button: FunctionComponent<{
           ]),
           buttonStyle,
         ])}
-        onPress={onPress}
         enabled={!loading && !disabled}
         rippleColor={rippleColor}
         underlayColor={underlayColor}
