@@ -370,7 +370,7 @@ export const SignModal: FunctionComponent<{
             backgroundColor={style.get('color-gray-500').color}
             borderRadius={6}>
             <FlatList
-              data={msgs}
+              data={[...msgs]}
               renderItem={({item, index}) => {
                 const r = defaultRegistry.render(
                   chainId,
