@@ -276,7 +276,7 @@ export const AvailableTabView: FunctionComponent<{
       <Modal ref={tokenFoundModalRef} snapPoints={['60%']}>
         <TokenFoundModal />
       </Modal>
-      <Modal ref={infoModalRef} enableDynamicSizing={true}>
+      <Modal ref={infoModalRef} enableDynamicSizing={true} snapPoints={['90%']}>
         <InformationModal
           title="Available Balance"
           paragraph="The amount of your assets that are available for use or transfer

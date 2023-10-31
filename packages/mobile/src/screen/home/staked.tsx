@@ -173,7 +173,7 @@ export const StakedTabView: FunctionComponent = observer(() => {
         />
       ) : null}
 
-      <Modal ref={infoModalRef} enableDynamicSizing={true}>
+      <Modal ref={infoModalRef} enableDynamicSizing={true} snapPoints={['90%']}>
         <InformationModal
           title={infoModalState?.title}
           paragraph={infoModalState?.paragraph}
