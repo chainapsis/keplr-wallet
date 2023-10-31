@@ -24,6 +24,7 @@ import {
   checkRPCConnectivity,
   DifferentChainVersionError,
 } from "@keplr-wallet/chain-validator";
+import axios from "axios";
 
 interface FormData {
   rpc: string;
@@ -63,6 +64,8 @@ export const SettingEndpointsPage: FunctionComponent = observer(() => {
   }, [chainStore, selectedChainId, setValue]);
 
   const [isLoading, setIsLoading] = useState(false);
+  const selectedChainInfo = chainStore.getChain(selectedChainId);
+  const isEvm = selectedChainInfo.features?.includes("evm");
 
   return (
     <HeaderLayout
@@ -155,13 +158,38 @@ export const SettingEndpointsPage: FunctionComponent = observer(() => {
             className={style["formContainer"]}
             onSubmit={handleSubmit(async (data) => {
               setIsLoading(true);
-
               let rpcConnSuccess = false;
               try {
                 try {
-                  await checkRPCConnectivity(selectedChainId, data.rpc);
-                  rpcConnSuccess = true;
-                  await checkRestConnectivity(selectedChainId, data.lcd);
+                  if (isEvm) {
+                    const response = await axios.post(
+                      data.rpc,
+                      {
+                        jsonrpc: "2.0",
+                        id: 1,
+                        method: "eth_chainId",
+                        params: [],
+                      },
+                      { timeout: 5000 }
+                    );
+
+                    if (response.status !== 200 || !response.data.result) {
+                      throw new Error(
+                        "The rpc seems to be invalid. Please recheck the RPC url provided"
+                      );
+                    }
+
+                    const chainId = parseInt(response.data.result, 16);
+                    if (selectedChainId !== chainId.toString()) {
+                      throw new Error(
+                        "The rpc seems to be invalid. Please recheck the RPC url provided"
+                      );
+                    }
+                  } else {
+                    await checkRPCConnectivity(selectedChainId, data.rpc);
+                    rpcConnSuccess = true;
+                    await checkRestConnectivity(selectedChainId, data.lcd);
+                  }
                 } catch (e) {
                   if (
                     // In the case of this error, the chain version is different.
@@ -235,23 +263,28 @@ export const SettingEndpointsPage: FunctionComponent = observer(() => {
                 },
               })}
             />
-            <Input
-              label="LCD"
-              error={errors.lcd && errors.lcd.message}
-              {...register("lcd", {
-                required: "LCD endpoint is required",
-                validate: (value: string) => {
-                  try {
-                    const url = new URL(value);
-                    if (url.protocol !== "http:" && url.protocol !== "https:") {
-                      return `Unsupported protocol: ${url.protocol}`;
+            {!isEvm && (
+              <Input
+                label="LCD"
+                error={errors.lcd && errors.lcd.message}
+                {...register("lcd", {
+                  required: "LCD endpoint is required",
+                  validate: (value: string) => {
+                    try {
+                      const url = new URL(value);
+                      if (
+                        url.protocol !== "http:" &&
+                        url.protocol !== "https:"
+                      ) {
+                        return `Unsupported protocol: ${url.protocol}`;
+                      }
+                    } catch {
+                      return "Invalid url";
                     }
-                  } catch {
-                    return "Invalid url";
-                  }
-                },
-              })}
-            />
+                  },
+                })}
+              />
+            )}
             <div style={{ flex: 1 }} />
             <AlertExperimentalFeature />
             <Button

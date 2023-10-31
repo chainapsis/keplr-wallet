@@ -62,7 +62,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://mainnet.infura.io/v3/f40158f0c03842f5a18e409ffe09192c/",
     chainId: "1",
     chainName: "Ethereum",
-
+    explorerUrl: "https://etherscan.io",
     stakeCurrency: {
       coinDenom: "ETH",
       coinMinimalDenom: "eth",
@@ -114,7 +114,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://bsc-dataseed.binance.org/",
     chainId: "56",
     chainName: "Binance Smart Chain",
-
+    explorerUrl: "https://bscscan.com",
     stakeCurrency: {
       coinDenom: "BNB",
       coinMinimalDenom: "bnb",

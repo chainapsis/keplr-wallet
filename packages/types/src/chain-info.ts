@@ -62,6 +62,8 @@ export interface ChainInfo {
   readonly beta?: boolean;
 
   readonly chainSymbolImageUrl?: string;
+
+  readonly explorerUrl?: string;
 }
 
 export type ChainInfoWithoutEndpoints = Omit<

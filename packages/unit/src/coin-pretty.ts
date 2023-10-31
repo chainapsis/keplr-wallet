@@ -293,7 +293,7 @@ export class CoinPretty {
     return this.intPretty.toStringWithSymbols("", `${separator}${denom}`);
   }
 
-  toMetricPrefix(): string {
+  toMetricPrefix(isEvm?: boolean): string {
     let [, afterPoint] = this.intPretty.toString().split(".");
 
     if (!afterPoint) {
@@ -320,7 +320,7 @@ export class CoinPretty {
       separator = "";
     }
 
-    const { remainder, prefix } = toMetric(afterPoint.length);
+    const { remainder, prefix } = toMetric(afterPoint.length, isEvm);
     const numberPart = remainder
       ? Number(afterPoint) / Math.pow(10, remainder)
       : Number(afterPoint);

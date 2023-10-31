@@ -6,6 +6,7 @@ import { useNavigate } from "react-router";
 import { useStore } from "../../../stores";
 import style from "../style.module.scss";
 import { PageButton } from "../page-button";
+import { Button } from "reactstrap";
 
 const ChainItem: FunctionComponent<{
   chainName: string;
@@ -47,6 +48,17 @@ export const ChainActivePage: FunctionComponent = observer(() => {
         navigate(-1);
       }}
     >
+      <Button
+        text="Add New Evm Chain"
+        color="primary"
+        size="medium"
+        style={{ width: "100%" }}
+        onClick={() => {
+          navigate("/setting/addEvmChain");
+        }}
+      >
+        Add New Evm Chain
+      </Button>
       <div className={style["container"]}>
         {chainStore.chainInfosWithUIConfig.map((chainInfoUI) => (
           <ChainItem

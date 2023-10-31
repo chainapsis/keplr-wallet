@@ -8,29 +8,7 @@ import {
 } from "../../common";
 import { EthBridgeStatus } from "./types";
 import { BigNumber } from "@ethersproject/bignumber";
-
-export class ObservableQueryLatestBlock extends ObservableJsonRPCQuery<string> {
-  constructor(kvStore: KVStore, ethereumURL: string) {
-    const instance = Axios.create({
-      ...{
-        baseURL: ethereumURL,
-      },
-    });
-
-    super(kvStore, instance, "", "eth_blockNumber", []);
-
-    makeObservable(this);
-  }
-
-  @computed
-  get data(): string | undefined {
-    if (!this.response || !this.response.data) {
-      return undefined;
-    }
-
-    return BigNumber.from(this.response.data).toString();
-  }
-}
+import { ObservableQueryLatestBlock } from "./block";
 
 export class ObservableQueryByFunction extends ObservableJsonRPCQuery<string> {
   constructor(
@@ -147,7 +125,8 @@ export class ObservableQueryNativeFetEthBrige {
     );
     this._queryLatestBlock = new ObservableQueryLatestBlock(
       kvStore,
-      ethereumURL
+      "1",
+      chainGetter
     );
   }
 
@@ -192,7 +171,7 @@ export class ObservableQueryNativeFetEthBrige {
   }
 
   get latestBlock(): string | undefined {
-    return this._queryLatestBlock.data?.toString();
+    return this._queryLatestBlock.block?.toString();
   }
 
   get paused(): boolean | undefined {

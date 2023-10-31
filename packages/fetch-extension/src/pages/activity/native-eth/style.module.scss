@@ -1,0 +1,32 @@
+.activityRow {
+  color: #808da0;
+  font-size: small;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.activityRow:hover {
+  background: #f0f0f0;
+}
+
+.container {
+  padding: 16px;
+  background-color: #ffffff;
+  margin: 0px -12px;
+}
+
+.title {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 20px;
+  padding-bottom: 16px;
+}
+
+.activityCol {
+  font-size: small;
+  display: flex;
+  align-items: center;
+  margin: 3px;
+}

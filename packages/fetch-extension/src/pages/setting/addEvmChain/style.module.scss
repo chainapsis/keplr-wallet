@@ -1,0 +1,21 @@
+@import "../../../styles/var";
+
+.container {
+  display: flex;
+  flex-direction: column;
+
+  input:read-only {
+    box-shadow: none !important;
+    background: transparent;
+    padding: 0;
+    height: 20px;
+  }
+}
+
+.formGroup {
+  margin-bottom: 2.5rem;
+}
+
+.info {
+  color: green;
+}

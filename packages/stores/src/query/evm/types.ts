@@ -19,6 +19,7 @@ export interface EthBridgeStatus {
 export interface EtherscanGasFeeResponse {
   status: string;
   result: {
+    suggestBaseFee: string | undefined;
     SafeGasPrice: string;
     ProposeGasPrice: string;
     FastGasPrice: string;
@@ -26,6 +27,7 @@ export interface EtherscanGasFeeResponse {
 }
 
 export interface EthGasFeeInfo {
+  base: string | undefined;
   low: string;
   average: string;
   high: string;

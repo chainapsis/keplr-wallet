@@ -15,6 +15,7 @@ import {
   TryUpdateChainMsg,
   SetChainEndpointsMsg,
   ResetChainEndpointsMsg,
+  SuggestChainInfoMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
@@ -229,6 +230,14 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     );
 
     this.setChainInfos(chainInfos);
+  }
+
+  @flow
+  *addEVMChainInfo(chainInfo: ChainInfo) {
+    const msg = new SuggestChainInfoMsg(chainInfo);
+    yield* toGenerator(this.requester.sendMessage(BACKGROUND_PORT, msg));
+
+    yield this.getChainInfosFromBackground();
   }
 
   @flow

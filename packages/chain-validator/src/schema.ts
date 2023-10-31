@@ -173,6 +173,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   stakeCurrency: CurrencySchema.required(),
   walletUrl: Joi.string().uri(),
   walletUrlForStaking: Joi.string().uri(),
+  explorerUrl: Joi.string().uri(),
   bip44: SuggestingBIP44Schema.required(),
   alternativeBIP44s: Joi.array()
     .items(SuggestingBIP44Schema)

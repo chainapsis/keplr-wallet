@@ -23,21 +23,24 @@ export function integerStringToUSLocaleString(numberStr: string): string {
   return chunks.reverse().join(",");
 }
 
-type ToMetric = (deep: number) => { remainder: number; prefix: string };
-export const toMetric: ToMetric = (deep) => {
+type ToMetric = (
+  deep: number,
+  isEvm?: boolean
+) => { remainder: number; prefix: string };
+export const toMetric: ToMetric = (deep, isEvm = false) => {
   switch (true) {
     case deep >= 18:
-      return { remainder: deep - 18, prefix: "atto" };
+      return { remainder: deep - 18, prefix: !isEvm ? "atto" : "wei" };
     case deep >= 15:
-      return { remainder: deep - 15, prefix: "femto" };
+      return { remainder: deep - 15, prefix: !isEvm ? "femto" : "kwei" };
     case deep >= 12:
-      return { remainder: deep - 12, prefix: "pico" };
+      return { remainder: deep - 12, prefix: !isEvm ? "pico" : "mwei" };
     case deep >= 9:
-      return { remainder: deep - 9, prefix: "nano" };
+      return { remainder: deep - 9, prefix: !isEvm ? "nano" : "gwei" };
     case deep >= 6:
-      return { remainder: deep - 6, prefix: "micro" };
+      return { remainder: deep - 6, prefix: !isEvm ? "micro" : "twei" };
     case deep >= 3:
-      return { remainder: deep - 3, prefix: "milli" };
+      return { remainder: deep - 3, prefix: !isEvm ? "milli" : "pwei" };
   }
 
   return { remainder: 0, prefix: "" };

@@ -19,7 +19,7 @@ export const LatestBlock: FunctionComponent<{
       setBlockIsLoading(false);
     };
     setInterval(() => initialize(), 5000);
-  }, []);
+  }, [chainStore]);
 
   return (
     <div className={style["block"]}>

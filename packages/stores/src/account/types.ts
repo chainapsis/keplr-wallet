@@ -76,3 +76,11 @@ export interface MakeTxResponse {
         }
   ): Promise<void>;
 }
+
+export interface ITxn {
+  hash: string;
+  type: "ContractInteraction" | "Send" | "Bridge" | "Approve";
+  status: "pending" | "success" | "failed";
+  amount: string;
+  symbol: string;
+}

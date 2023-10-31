@@ -281,6 +281,10 @@ export class ChainInfoInner<C extends ChainInfo = ChainInfo>
   get govUrl(): string | undefined {
     return this.raw.govUrl;
   }
+
+  get explorerUrl(): string | undefined {
+    return this.raw.explorerUrl;
+  }
 }
 
 export type ChainInfoOverrider<C extends ChainInfo = ChainInfo> = (

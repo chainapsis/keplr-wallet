@@ -37,8 +37,7 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delega
   @computed
   get total(): CoinPretty {
     const stakeCurrency = this.chainGetter.getChain(this.chainId).stakeCurrency;
-
-    if (!this.response) {
+    if (!this.response || !this.response.data) {
       return new CoinPretty(stakeCurrency, new Int(0)).ready(false);
     }
 
@@ -55,7 +54,7 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delega
     validatorAddress: string;
     balance: CoinPretty;
   }[] {
-    if (!this.response) {
+    if (!this.response || !this.response.data) {
       return [];
     }
 
@@ -78,7 +77,7 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delega
 
   @computed
   get delegations(): Delegation[] {
-    if (!this.response) {
+    if (!this.response || !this.response.data) {
       return [];
     }
 
@@ -93,7 +92,7 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delega
         this.chainId
       ).stakeCurrency;
 
-      if (!this.response) {
+      if (!this.response || !this.response.data) {
         return new CoinPretty(stakeCurrency, new Int(0)).ready(false);
       }
 

@@ -175,7 +175,9 @@ export const MainPage: FunctionComponent = observer(() => {
         </Card>
       )}
 
-      {queryAuthZGrants.response?.data.grants.length ? (
+      {queryAuthZGrants.response &&
+      queryAuthZGrants.response.data &&
+      queryAuthZGrants.response.data.grants.length ? (
         <Card className={classnames(style["card"], "shadow")}>
           <CardBody>
             <AuthZView grants={queryAuthZGrants.response.data.grants} />

@@ -121,6 +121,7 @@ const Divider: FunctionComponent = (props) => {
 export const ChainList: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
   const intl = useIntl();
+  const navigate = useNavigate();
 
   const mainChainList = chainStore.chainInfosInUI.filter(
     (chainInfo) => !chainInfo.beta && !chainInfo.features?.includes("evm")
@@ -140,6 +141,21 @@ export const ChainList: FunctionComponent = observer(() => {
       {evmChainList.map((chainInfo) => (
         <ChainElement key={chainInfo.chainId} chainInfo={chainInfo.raw} />
       ))}
+      <Divider />
+      <a
+        href="#"
+        onClick={(e) => {
+          e.preventDefault();
+          navigate("/setting/addEvmChain");
+        }}
+        target="_blank"
+        rel="noopener noreferrer"
+        // style={{ display: "none" }}
+      >
+        <div className={classnames(style["chainName"], style["addChain"])}>
+          <div>+ Add custom EVM network</div>
+        </div>
+      </a>
       <Divider> Cosmos </Divider>
       {mainChainList.map((chainInfo) => (
         <ChainElement key={chainInfo.chainId} chainInfo={chainInfo.raw} />

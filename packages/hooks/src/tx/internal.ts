@@ -16,7 +16,10 @@ export type QueriesStore = IQueriesStore<
       "queryTerraClassicTaxRate" | "queryTerraClassicTaxCaps"
     >;
   } & {
-    evm?: Pick<EvmQueriesImpl, "queryEthGasFees" | "queryNativeFetBridge">;
+    evm?: Pick<
+      EvmQueriesImpl,
+      "queryEthGasFees" | "queryNativeFetBridge" | "queryGasPrice"
+    >;
   } & {
     cosmwasm?: Pick<CosmwasmQueriesImpl, "queryNativeFetBridge">;
   }

@@ -164,14 +164,14 @@ const ActivityTab = () => {
   const current = chainStore.current;
   const [activityTooltip, setActivityTooltip] = useState("");
   const [activityDisabled, setActivityDisabled] = useState(false);
-
+  const isEvm = current.features?.includes("evm") ?? false;
   useEffect(() => {
     if (keyRingStore.keyRingType === "ledger") {
       setActivityTooltip("Coming soon for ledger");
       setActivityDisabled(true);
       return;
     }
-    if (![CHAIN_ID_FETCHHUB].includes(current.chainId)) {
+    if (![CHAIN_ID_FETCHHUB].includes(current.chainId) && !isEvm) {
       setActivityTooltip("Feature not available on this network");
       setActivityDisabled(true);
     } else {

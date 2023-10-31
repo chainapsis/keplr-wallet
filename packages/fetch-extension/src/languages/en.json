@@ -239,7 +239,7 @@
   "register.welcome.content": "Open the extension and sign in to begin your interchain journey.",
   "register.welcome.button.done": "Done",
 
-  "chain.suggested.title": "Add {chainName} to Keplr",
+  "chain.suggested.title": "Add {chainName}",
   "chain.suggested.tooltip": "Chain info being added is from this web",
   "chain.suggested.developer.checkbox": "Use this as the preferred code string and override info registered on the community repo",
   "chain.suggested.paragraph": "<b>{host}</b> would like to add blockchain <b>{chainId}</b> to Fetch Wallet.",

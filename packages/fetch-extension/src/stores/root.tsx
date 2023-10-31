@@ -163,6 +163,8 @@ export class RootStore {
       ObservableQueryBase.experimentalDeferInitialQueryController
     );
 
+    // this.transactionStore = new
+
     this.keyRingStore = new KeyRingStore(
       {
         dispatchEvent: (type: string) => {

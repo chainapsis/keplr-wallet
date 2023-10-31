@@ -104,6 +104,7 @@ import { FetchnameService } from "./pages/fetch-name-service";
 import { DomainDetails } from "./pages/fetch-name-service/domain-details";
 import { BridgePage } from "./pages/bridge";
 import { BridgeHistoryView } from "./pages/bridge/bridge-history";
+import { AddEvmChain } from "./pages/setting/addEvmChain";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -401,6 +402,10 @@ ReactDOM.render(
                       <Route
                         path="/proposal-vote-status/:votedOn/:id"
                         element={<PropsalVoteStatus />}
+                      />
+                      <Route
+                        path="/setting/addEvmChain"
+                        element={<AddEvmChain />}
                       />
                       <Route path="*" element={<StateRenderer />} />
                     </Routes>

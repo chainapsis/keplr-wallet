@@ -304,7 +304,10 @@ export const FeeButtonsInner: FunctionComponent<
       }
     }, [feeConfig, feeConfig.feeCurrency, feeConfig.fee]);
 
+    const { chainStore } = useStore();
+
     const intl = useIntl();
+    const isEvm = chainStore.current.features?.includes("evm") ?? false;
 
     const [inputId] = useState(() => {
       const bytes = new Uint8Array(4);
@@ -370,6 +373,7 @@ export const FeeButtonsInner: FunctionComponent<
             {label}
           </Label>
         ) : null}
+
         <ButtonGroup id={inputId} className={styleFeeButtons["buttons"]}>
           <Button
             type="button"
@@ -404,7 +408,10 @@ export const FeeButtonsInner: FunctionComponent<
                   {
                     // Hide ibc metadata because there is no space to display the ibc metadata.
                     // Generally, user can distinguish the ibc metadata because the ibc metadata should be shown in the fee currency selector.
-                    lowFee.hideIBCMetadata(true).trim(true).toMetricPrefix()
+                    lowFee
+                      .hideIBCMetadata(true)
+                      .trim(true)
+                      .toMetricPrefix(isEvm)
                   }
                 </div>
               </div>
@@ -440,7 +447,10 @@ export const FeeButtonsInner: FunctionComponent<
                     "text-muted": feeConfig.feeType !== "average",
                   })}
                 >
-                  {averageFee.hideIBCMetadata(true).trim(true).toMetricPrefix()}
+                  {averageFee
+                    .hideIBCMetadata(true)
+                    .trim(true)
+                    .toMetricPrefix(isEvm)}
                 </div>
               </div>
             )}
@@ -475,7 +485,10 @@ export const FeeButtonsInner: FunctionComponent<
                     "text-muted": feeConfig.feeType !== "high",
                   })}
                 >
-                  {highFee.hideIBCMetadata(true).trim(true).toMetricPrefix()}
+                  {highFee
+                    .hideIBCMetadata(true)
+                    .trim(true)
+                    .toMetricPrefix(isEvm)}
                 </div>
               </div>
             )}

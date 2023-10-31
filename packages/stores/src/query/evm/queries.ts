@@ -12,6 +12,8 @@ import { ObservableQueryNativeFetEthBrige } from "./native-fet-bridge";
 import { ObservableQueryGasFees } from "./eth-gas-fees";
 import { ObservableQueryBridgeHistory } from "./bridge-history";
 import { ObservableQueryBridgeReverseSwapHash } from "./bridge-reverse-swap-hash";
+import { ObservableQueryEvmGasPrice } from "./evm-gas-fees";
+import { ObservableQueryLatestBlock } from "./block";
 
 export interface EvmQueries {
   evm: EvmQueriesImpl;
@@ -44,6 +46,8 @@ export class EvmQueriesImpl {
   public readonly queryEthGasFees: DeepReadonly<ObservableQueryGasFees>;
   public readonly queryBridgeHistory: DeepReadonly<ObservableQueryBridgeHistory>;
   public readonly queryBridgeReverseSwapHash: DeepReadonly<ObservableQueryBridgeReverseSwapHash>;
+  public readonly queryGasPrice: DeepReadonly<ObservableQueryEvmGasPrice>;
+  public readonly queryLatestBlock: DeepReadonly<ObservableQueryLatestBlock>;
 
   constructor(
     base: QueriesSetBase,
@@ -89,6 +93,18 @@ export class EvmQueriesImpl {
       kvStore,
       chainGetter,
       this.queryNativeFetBridge
+    );
+
+    this.queryGasPrice = new ObservableQueryEvmGasPrice(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+
+    this.queryLatestBlock = new ObservableQueryLatestBlock(
+      kvStore,
+      chainId,
+      chainGetter
     );
   }
 }

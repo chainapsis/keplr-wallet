@@ -36,6 +36,7 @@ export class ObservableQueryGasFees extends ObservableQuery<EtherscanGasFeeRespo
       low: this.low,
       average: this.average,
       high: this.high,
+      base: this.base,
     };
   }
 
@@ -64,5 +65,14 @@ export class ObservableQueryGasFees extends ObservableQuery<EtherscanGasFeeRespo
     }
 
     return this.response.data.result.FastGasPrice;
+  }
+
+  @computed
+  get base(): string | undefined {
+    if (!this.response || !this.response.data || !this.response.data.result) {
+      return undefined;
+    }
+
+    return this.response.data.result.suggestBaseFee;
   }
 }
