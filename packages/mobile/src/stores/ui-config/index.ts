@@ -123,7 +123,9 @@ export class UIConfigStore {
       const saved = await this.kvStore.get<LanguageOptions>(
         'app_language_options',
       );
-      this.selectLanguageOptions(saved || {language: 'en', isAutomatic: true});
+      this.selectLanguageOptions(
+        saved?.language ? saved : {language: 'en', isAutomatic: true},
+      );
       autorun(() => {
         this.kvStore.set('app_language_options', this._languageOptions);
       });

@@ -11,6 +11,7 @@ import MessagesEn from './en.json';
 import MessagesKo from './ko.json';
 import {useStore} from '../stores';
 import {observer} from 'mobx-react-lite';
+import {I18nManager, Platform, Settings} from 'react-native';
 
 export type IntlMessage = Record<string, string>;
 export type IntlMessages = {
@@ -43,6 +44,20 @@ const defaultLangMap: Record<string, string> = {
 
 const initLanguage = (): string => {
   let language = 'en';
+
+  if (Platform.OS === 'ios') {
+    const settings = Settings.get('AppleLocale');
+    const locale: string = settings || settings?.[0];
+    if (locale) {
+      language = locale.split('-')[0];
+    }
+  } else {
+    const locale = I18nManager.getConstants().localeIdentifier;
+    if (locale) {
+      language = locale.split('_')[0];
+    }
+  }
+
   if (!defaultLangMap[language]) {
     return 'en';
   }
@@ -68,14 +83,19 @@ export const AppIntlProvider: FunctionComponent<PropsWithChildren> = observer(
     const isAutomatic = uiConfigStore.languageIsAutomatic;
 
     const [messages, setMessages] = useState(
-      uiConfigStore.languageIsAutomatic
+      isAutomatic
         ? getMessages(initLanguage())
         : getMessages(uiConfigStore.language),
     );
-
     useLayoutEffect(() => {
+      if (isAutomatic) {
+        uiConfigStore.selectLanguageOptions({
+          language: initLanguage(),
+          isAutomatic,
+        });
+      }
       setMessages(getMessages(language));
-    }, [language]);
+    }, [isAutomatic, language, uiConfigStore]);
 
     const clearLanguage = () => {
       const language = initLanguage();

@@ -7,6 +7,7 @@ import {TextInput} from '../../components/input';
 import {useSetFocusedScreen} from '../../components/page/utils';
 import {Box} from '../../components/box';
 import {useStyle} from '../../styles';
+import {useIntl} from 'react-intl';
 
 export const LockedScreen: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
@@ -14,6 +15,7 @@ export const LockedScreen: FunctionComponent = observer(() => {
   const [isFailed, setIsFailed] = useState(false);
   const [password, setPassword] = useState('');
   const style = useStyle();
+  const intl = useIntl();
 
   useSetFocusedScreen();
   const doUnlock = async () => {
@@ -45,7 +47,11 @@ export const LockedScreen: FunctionComponent = observer(() => {
           }}
           error={isFailed ? 'Invalid Password' : undefined}
         />
-        <Button text="unlock" size="large" onPress={doUnlock} />
+        <Button
+          text={intl.formatMessage({id: 'page.unlock.unlock-button'})}
+          size="large"
+          onPress={doUnlock}
+        />
       </Box>
     </React.Fragment>
   );
