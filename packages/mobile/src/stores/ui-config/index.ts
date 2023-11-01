@@ -26,7 +26,7 @@ export interface UIConfigOptions {
   useWebHIDLedger: boolean;
 }
 
-export interface LanguageOptions {
+export interface LanguageOption {
   language: string;
   isAutomatic: boolean;
 }
@@ -51,7 +51,7 @@ export class UIConfigStore {
   protected _platform: 'mobile' = 'mobile';
 
   @observable
-  protected _languageOptions: LanguageOptions = {
+  protected _languageOptions: LanguageOption = {
     language: 'en',
     isAutomatic: true,
   };
@@ -120,7 +120,7 @@ export class UIConfigStore {
     }
 
     {
-      const saved = await this.kvStore.get<LanguageOptions>(
+      const saved = await this.kvStore.get<LanguageOption>(
         'app_language_options',
       );
       this.selectLanguageOptions(
@@ -231,7 +231,7 @@ export class UIConfigStore {
   }
 
   @action
-  selectLanguageOptions(value: LanguageOptions) {
+  selectLanguageOptions(value: LanguageOption) {
     this._languageOptions = value;
   }
 
