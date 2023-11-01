@@ -1,7 +1,7 @@
 import React, {FunctionComponent, useEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {useIntl} from 'react-intl';
-import {Platform, Text} from 'react-native';
+import {EmitterSubscription, Keyboard, Platform, Text} from 'react-native';
 import {Gutter} from '../gutter';
 import {useStyle} from '../../styles';
 import {BottomSheetFlatList, useBottomSheet} from '@gorhom/bottom-sheet';
@@ -78,6 +78,27 @@ export const SelectModal: FunctionComponent<{
     searchRef.current?.focus();
   }, [searchRef]);
 
+  //NOTE - https://github.com/gorhom/react-native-bottom-sheet/issues/1072
+  // android에서 키보드가 열렸을때 modal을 close 트리거 할 경우
+  // 키보드가 먼저 사라지면서 bottomSheet높이가 다시 설정되고 리렌더링 되는 버그가 있음
+  // 그래서 setTimeout으로 키보드를 먼저 닫은뒤 bottomSheet을 닫도록 설정함
+  useEffect(() => {
+    let keyboardDidHideListener: EmitterSubscription;
+    if (Platform.OS === 'android') {
+      keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+        setTimeout(() => {
+          bottom.close();
+        }, 0);
+      });
+    }
+
+    return () => {
+      if (Platform.OS === 'android') {
+        keyboardDidHideListener.remove();
+      }
+    };
+  }, [bottom]);
+
   const filtered = search
     ? items.filter(item => {
         const trimmedSearchText = search.trim();
@@ -141,6 +162,19 @@ export const SelectModal: FunctionComponent<{
               style={style.flatten(['background-color-gray-600'])}
               onPress={async () => {
                 onSelect(item);
+                //NOTE - https://github.com/gorhom/react-native-bottom-sheet/issues/1072
+                // android에서 키보드가 열렸을때 modal을 close 트리거 할 경우
+                // 키보드가 먼저 사라지면서 bottomSheet높이가 다시 설정되고 리렌더링 되는 버그가 있음
+                // 그래서 setTimeout으로 키보드를 먼저 닫은뒤 bottomSheet을 닫도록 설정함
+                if (Platform.OS === 'android') {
+                  if (Keyboard.isVisible()) {
+                    Keyboard.dismiss();
+                    return;
+                  }
+                  bottom.close();
+                  return;
+                }
+                bottom.close();
               }}>
               <Box
                 paddingY={14}

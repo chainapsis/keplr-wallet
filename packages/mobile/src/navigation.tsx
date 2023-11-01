@@ -14,7 +14,6 @@ import {
   NativeStackNavigationProp,
   createNativeStackNavigator,
 } from '@react-navigation/native-stack';
-import {RegisterScreen} from './screen/register';
 import {HomeScreen} from './screen/home';
 import {LockedScreen} from './screen/locked';
 import {RegisterEnableChainScreen} from './screen/register/enable-chain';
@@ -49,6 +48,7 @@ import {SettingTokenAddScreen} from './screen/setting/screens/token/add';
 import {SettingSecurityAndPrivacyScreen} from './screen/setting/screens/security/security';
 import {SettingSecurityChangePasswordScreen} from './screen/setting/screens/security/change-password';
 import {SettingSecurityPermissionScreen} from './screen/setting/screens/security/permission';
+import {RegisterIntroScreen} from './screen/register/intro';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -97,7 +97,7 @@ export const RegisterNavigation: FunctionComponent = () => {
     <Stack.Navigator
       initialRouteName="Register.Intro"
       screenOptions={{headerShown: false}}>
-      <Stack.Screen name="Register.Intro" component={RegisterScreen} />
+      <Stack.Screen name="Register.Intro" component={RegisterIntroScreen} />
       <Stack.Screen
         name="Register.EnableChain"
         component={RegisterEnableChainScreen}
@@ -451,7 +451,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
           <Stack.Screen
             name="Register"
             options={{
-              ...defaultHeaderOptions,
+              headerShown: false,
             }}
             component={RegisterNavigation}
           />

@@ -183,7 +183,6 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
         <SelectModal
           onSelect={item => {
             setChainId(item.key);
-            selectChainModalRef.current?.dismiss();
             setIsOpenChainSelectModal(false);
           }}
           items={items}

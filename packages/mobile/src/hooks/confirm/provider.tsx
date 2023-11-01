@@ -103,7 +103,9 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
           style={style.flatten(['flex-1'])}
           alignX="center"
           alignY="center"
-          onClick={() => closeModal()}>
+          onClick={() => {
+            closeModal();
+          }}>
           <Box
             backgroundColor={
               style.get('background-color-gray-600').backgroundColor
@@ -111,7 +113,9 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
             paddingX={20}
             paddingY={24}
             marginX={16}
-            borderRadius={8}>
+            borderRadius={8}
+            //Box를 Pressble 컴포넌트화 하기 위해서 작성한 onClick 함수
+            onClick={() => {}}>
             <YAxis>
               {confirm?.title ? (
                 <React.Fragment>
@@ -149,8 +153,8 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
                       id: 'hooks.confirm.yes-button',
                     })}
                     onPress={() => {
-                      confirm?.resolver(true);
                       closeModal();
+                      confirm?.resolver(true);
                     }}
                   />
                 </XAxis>

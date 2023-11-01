@@ -53,59 +53,60 @@ export const BottomSheetSearchTextInput = forwardRef<
     const iconColor = 'color-gray-400';
 
     return (
-      <Box style={StyleSheet.flatten([containerStyle])}>
-        <Box
-          borderWidth={1}
-          borderRadius={8}
-          position="relative"
-          style={style.flatten(
+      <Box
+        borderWidth={1}
+        borderRadius={8}
+        position="relative"
+        style={StyleSheet.flatten([
+          style.flatten(
             ['background-color-gray-700', ...inputBorderColor],
             [...(disabled ? disableStyle : [])],
-          )}>
-          <Columns sum={1}>
-            <Box alignY="center" marginLeft={16}>
-              {left
-                ? isValidElement(left) || !left || !(typeof left === 'function')
-                  ? left
-                  : left(style.get(iconColor as any).color)
-                : LeftIcon(style.get(iconColor as any).color)}
-            </Box>
+          ),
+          containerStyle,
+        ])}>
+        <Columns sum={1}>
+          <Box alignY="center" marginLeft={16}>
+            {left
+              ? isValidElement(left) || !left || !(typeof left === 'function')
+                ? left
+                : left(style.get(iconColor as any).color)
+              : LeftIcon(style.get(iconColor as any).color)}
+          </Box>
 
-            <Column weight={1}>
-              <LibTextInput
-                ref={ref}
-                value={value}
-                placeholder={placeholder}
-                style={StyleSheet.flatten([
-                  style.flatten([
-                    'color-white',
-                    'body2',
-                    'height-52',
-                    'padding-left-4',
-                    'padding-right-16',
-                  ]),
-                  inputStyle,
-                ])}
-                onFocus={e => {
-                  setIsFocus(true);
+          <Column weight={1}>
+            <LibTextInput
+              ref={ref}
+              value={value}
+              placeholder={placeholder}
+              style={StyleSheet.flatten([
+                style.flatten([
+                  'color-white',
+                  'body2',
+                  'height-52',
+                  'padding-left-4',
+                  'padding-right-16',
+                ]),
+                inputStyle,
+              ])}
+              onFocus={e => {
+                setIsFocus(true);
 
-                  if (onFocus) {
-                    onFocus(e);
-                  }
-                }}
-                onBlur={e => {
-                  setIsFocus(false);
+                if (onFocus) {
+                  onFocus(e);
+                }
+              }}
+              onBlur={e => {
+                setIsFocus(false);
 
-                  if (onBlur) {
-                    onBlur(e);
-                  }
-                }}
-                placeholderTextColor={style.get('color-gray-400').color}
-                {...props}
-              />
-            </Column>
-          </Columns>
-        </Box>
+                if (onBlur) {
+                  onBlur(e);
+                }
+              }}
+              placeholderTextColor={style.get('color-gray-400').color}
+              {...props}
+            />
+          </Column>
+        </Columns>
       </Box>
     );
   },
