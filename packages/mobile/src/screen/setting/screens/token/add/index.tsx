@@ -18,7 +18,6 @@ import {Column, Columns} from '../../../../../components/column';
 import {Toggle} from '../../../../../components/toggle';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {Bech32Address} from '@keplr-wallet/cosmos';
-// import {ContractAddressBookModal} from '../../../../components/contract-address-book-modal';
 import {IconButton} from '../../../../../components/icon-button';
 import {MenuIcon} from '../../../../../components/icon';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
@@ -26,16 +25,15 @@ import {RootStackParamList, StackNavProp} from '../../../../../navigation';
 import {PageWithScrollView} from '../../../../../components/page';
 import {ContractAddressBookModal} from '../../../components/contract-address-book-modal';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
-import {Text} from 'react-native';
+import {Platform, Text} from 'react-native';
 import {Controller, useForm} from 'react-hook-form';
 import {Button} from '../../../../../components/button';
 import {Gutter} from '../../../../../components/gutter';
-
-// const Styles = {
-//   Container: styled(Stack)`
-//     padding: 0 0.75rem;
-//   `,
-// };
+import {
+  SelectModal,
+  SelectModalCommonButton,
+} from '../../../../../components/select-modal';
+import {Modal} from '../../../../../components/modal';
 
 interface FormData {
   contractAddress: string;
@@ -53,6 +51,10 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
     useRoute<RouteProp<RootStackParamList, 'Setting.ManageTokenList.Add'>>();
   const paramChainId = route.params.chainId;
   const contractModalRef = useRef<BottomSheetModal>(null);
+  const selectChainModalRef = useRef<BottomSheetModal>(null);
+
+  const [isOpenChainSelectModal, setIsOpenChainSelectModal] = useState(false);
+
   const style = useStyle();
 
   const {setValue, handleSubmit, control, formState, watch} = useForm<FormData>(
@@ -72,7 +74,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
       );
     });
   }, [chainStore.chainInfos]);
-  const [chainId] = useState<string>(() => {
+  const [chainId, setChainId] = useState<string>(() => {
     if (paramChainId) {
       return paramChainId;
     }
@@ -127,13 +129,13 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
   const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] =
     useState(false);
 
-  //TODO dropdown 완성되면 사용해서 드롭다운 구현
-  // const items = supportedChainInfos.map(chainInfo => {
-  //   return {
-  //     key: chainInfo.chainId,
-  //     label: chainInfo.chainName,
-  //   };
-  // });
+  const items = supportedChainInfos.map(chainInfo => {
+    return {
+      key: chainInfo.chainId,
+      label: chainInfo.chainName,
+      imageUrl: chainInfo.chainSymbolImageUrl,
+    };
+  });
 
   const contractAddress = watch('contractAddress').trim();
   const queryContract = (() => {
@@ -260,23 +262,27 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
       // }
     }
   });
+
   return (
     <PageWithScrollView
       backgroundMode={'default'}
       contentContainerStyle={style.flatten(['flex-grow-1'])}>
-      <Box paddingX={12} height={'100%'}>
+      <Box paddingX={12} paddingTop={12} height={'100%'}>
         <Stack gutter={16}>
           {/* TODO dropdown 컴포넌트 이후 작업 */}
-          {/* {!interactionInfo.interaction ? (
-            <Box width="13rem">
-              <Dropdown
-                items={items}
-                selectedItemKey={chainId}
-                onSelect={setChainId}
-                allowSearch={true}
-              />
-            </Box>
-          ) : null} */}
+          {/* {!interactionInfo.interaction ? ( */}
+          <Box width={208}>
+            <SelectModalCommonButton
+              items={items}
+              selectedItemKey={chainId}
+              placeholder="Search by chain name"
+              isOpenModal={isOpenChainSelectModal}
+              onPress={() => {
+                selectChainModalRef.current?.present();
+                setIsOpenChainSelectModal(true);
+              }}
+            />
+          </Box>
           <Controller
             name="contractAddress"
             control={control}
@@ -419,14 +425,34 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
           onPress={submit}
         />
       </Box>
-      <ContractAddressBookModal
-        modalRef={contractModalRef}
-        chainId={chainId}
-        onSelect={(address: string) => {
-          setValue('contractAddress', address);
-          contractModalRef.current?.dismiss();
-        }}
-      />
+      <Modal
+        ref={contractModalRef}
+        //NOTE BottomSheetTextInput가 안드로이드일때 올바르게 동작 하지 않고
+        //같은 50% 일때 키보드가 있을시 모달 크기가 작아서 안드로이드 일때만 70% 으로 설정
+        snapPoints={Platform.OS === 'android' ? ['70%'] : ['50%']}>
+        <ContractAddressBookModal
+          chainId={chainId}
+          onSelect={(address: string) => {
+            setValue('contractAddress', address);
+          }}
+        />
+      </Modal>
+      <Modal
+        ref={selectChainModalRef}
+        onDismiss={() => setIsOpenChainSelectModal(false)}
+        //NOTE BottomSheetTextInput가 안드로이드일때 올바르게 동작 하지 않고
+        //같은 50% 일때 키보드가 있을시 모달 크기가 작아서 안드로이드 일때만 70% 으로 설정
+        snapPoints={Platform.OS === 'android' ? ['70%'] : ['50%']}>
+        <SelectModal
+          items={items}
+          title="Select Chain"
+          placeholder="Search by chain name"
+          onSelect={item => {
+            setChainId(item.key);
+            setIsOpenChainSelectModal(false);
+          }}
+        />
+      </Modal>
     </PageWithScrollView>
   );
 });

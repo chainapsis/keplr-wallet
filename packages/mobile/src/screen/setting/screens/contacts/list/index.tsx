@@ -17,12 +17,15 @@ import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../../../navigation';
 import {Modal} from '../../../../../components/modal';
 import {BottomSheetModal, BottomSheetView} from '@gorhom/bottom-sheet';
-import {Pressable, Text} from 'react-native';
+import {Platform, Pressable, Text} from 'react-native';
 import {useStyle} from '../../../../../styles';
 import {PageWithScrollView} from '../../../../../components/page';
 import {AddressItem} from '../../../components/setting-address-item';
 import {useConfirm} from '../../../../../hooks/confirm';
-import {Dropdown} from '../../../../../components/dropdown';
+import {
+  SelectModal,
+  SelectModalCommonButton,
+} from '../../../../../components/select-modal';
 
 interface DropdownItem {
   key: string;
@@ -39,7 +42,11 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
   const [modalDropdownItems, setModalDropdownItems] = useState<DropdownItem[]>(
     [],
   );
+  const [isOpenChainSelectModal, setIsOpenChainSelectModal] = useState(false);
+
   const menuModalRef = useRef<BottomSheetModal>(null);
+  const selectChainModalRef = useRef<BottomSheetModal>(null);
+
   const style = useStyle();
   // Handle "chainId" state by search params to persist the state between page changes.
   // const paramChainId = searchParams.get('chainId');
@@ -68,13 +75,15 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
       style={style.flatten(['padding-12'])}>
       <Columns sum={1} alignY="center">
         <Box width={208}>
-          <Dropdown
+          <SelectModalCommonButton
             items={items}
             selectedItemKey={chainId}
-            onSelect={key => {
-              navigate.setParams({chainId: key});
+            placeholder="Search by chain name"
+            isOpenModal={isOpenChainSelectModal}
+            onPress={() => {
+              selectChainModalRef.current?.present();
+              setIsOpenChainSelectModal(true);
             }}
-            allowSearch={true}
           />
         </Box>
 
@@ -180,6 +189,23 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
             </Pressable>
           ))}
         </BottomSheetView>
+      </Modal>
+
+      <Modal
+        ref={selectChainModalRef}
+        onDismiss={() => setIsOpenChainSelectModal(false)}
+        //NOTE BottomSheetTextInput가 안드로이드일때 올바르게 동작 하지 않고
+        //같은 50% 일때 키보드가 있을시 모달 크기가 작아서 안드로이드 일때만 70% 으로 설정
+        snapPoints={Platform.OS === 'android' ? ['70%'] : ['50%']}>
+        <SelectModal
+          onSelect={item => {
+            navigate.setParams({chainId: item.key});
+            setIsOpenChainSelectModal(false);
+          }}
+          placeholder="Search by chain name"
+          items={items}
+          title="Select Chain"
+        />
       </Modal>
     </PageWithScrollView>
   );
