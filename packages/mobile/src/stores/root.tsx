@@ -19,6 +19,7 @@ import {
   ChainSuggestStore,
   InteractionStore,
   KeyRingStore,
+  PermissionManagerStore,
   PermissionStore,
   SignInteractionStore,
   TokensStore,
@@ -44,6 +45,8 @@ export class RootStore {
   public readonly keyRingStore: KeyRingStore;
   public readonly chainStore: ChainStore;
   public readonly ibcChannelStore: IBCChannelStore;
+
+  public readonly permissionManagerStore: PermissionManagerStore;
 
   public readonly hugeQueriesStore: HugeQueriesStore;
   public readonly priceStore: CoinGeckoPriceStore;
@@ -79,6 +82,10 @@ export class RootStore {
     // Order is important.
     this.interactionStore = new InteractionStore(
       router,
+      new RNMessageRequesterInternal(),
+    );
+
+    this.permissionManagerStore = new PermissionManagerStore(
       new RNMessageRequesterInternal(),
     );
 

@@ -9,7 +9,7 @@ import {useIntl} from 'react-intl';
 import {Box} from '../../components/box';
 import {Gutter} from '../../components/gutter';
 import {Stack} from '../../components/stack';
-import {RocketLaunchIcon, SettingIcon} from '../../components/icon';
+import {SettingIcon} from '../../components/icon';
 import {KeyIcon} from '../../components/icon/key';
 
 export const SettingScreen: FunctionComponent = () => {
@@ -39,26 +39,6 @@ export const SettingScreen: FunctionComponent = () => {
               />
             }
             onClick={() => navigate.navigate('Setting.General')}
-          />
-
-          <PageButton
-            title={intl.formatMessage({id: 'page.setting.advanced-title'})}
-            paragraph={intl.formatMessage({
-              id: 'page.setting.advanced-paragraph',
-            })}
-            titleIcon={
-              <RocketLaunchIcon
-                size={16}
-                color={style.get('color-text-high').color}
-              />
-            }
-            endIcon={
-              <ArrowRightIcon
-                size={24}
-                color={style.get('color-text-low').color}
-              />
-            }
-            onClick={() => navigate.navigate('Setting.Advanced')}
           />
 
           <PageButton
