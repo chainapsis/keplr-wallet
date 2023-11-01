@@ -7,8 +7,6 @@ import {useStore} from '../../../../../stores';
 import {Box} from '../../../../../components/box';
 import {Stack} from '../../../../../components/stack';
 import {TextInput} from '../../../../../components/input';
-import {Text} from 'react-native';
-import {useStyle} from '../../../../../styles';
 import {Gutter} from '../../../../../components/gutter';
 import {StackNavProp} from '../../../../../navigation';
 import {Button} from '../../../../../components/button';
@@ -25,7 +23,6 @@ export const SettingSecurityChangePasswordScreen: FunctionComponent = observer(
     const {keyRingStore} = useStore();
     const intl = useIntl();
     const navigate = useNavigation<StackNavProp>();
-    const style = useStyle();
     const [isLoading, setIsLoading] = useState(false);
 
     const {
@@ -65,7 +62,7 @@ export const SettingSecurityChangePasswordScreen: FunctionComponent = observer(
     });
     return (
       <Box paddingX={12} paddingTop={12} height={'100%'} paddingBottom={28}>
-        <Text
+        {/* <Text
           style={style.flatten([
             'body2',
             'color-text-middle',
@@ -75,7 +72,7 @@ export const SettingSecurityChangePasswordScreen: FunctionComponent = observer(
           The password is for Keplr extension itself, not for each account.
           Therefore, you will need to type in the same password for unlocking
           the extension for different accounts.
-        </Text>
+        </Text> */}
         <Gutter size={25} />
         <Stack gutter={16}>
           <Controller
