@@ -62,17 +62,6 @@ export const SettingSecurityChangePasswordScreen: FunctionComponent = observer(
     });
     return (
       <Box paddingX={12} paddingTop={12} height={'100%'} paddingBottom={28}>
-        {/* <Text
-          style={style.flatten([
-            'body2',
-            'color-text-middle',
-            'padding-x-12',
-            'text-center',
-          ])}>
-          The password is for Keplr extension itself, not for each account.
-          Therefore, you will need to type in the same password for unlocking
-          the extension for different accounts.
-        </Text> */}
         <Gutter size={25} />
         <Stack gutter={16}>
           <Controller
