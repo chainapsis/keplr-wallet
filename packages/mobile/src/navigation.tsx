@@ -67,7 +67,6 @@ export type RootStackParamList = {
   'Setting.General.ContactList': {chainId?: string};
   'Setting.General.ContactAdd': {chainId: string; editIndex?: number};
 
-  'Setting.General.Theme': undefined;
   'Setting.General.WC': undefined;
   'Setting.General.ManageNonActiveChains': undefined;
   'Setting.General.ManageChainVisibility': undefined;
@@ -295,16 +294,6 @@ const SettingGeneralNavigation = () => {
           ...defaultHeaderOptions,
         }}
         component={SettingContactsAddScreen}
-      />
-      <Stack.Screen
-        name="Setting.General.Theme"
-        options={{
-          title: intl.formatMessage({
-            id: 'page.setting.general.theme-title',
-          }),
-          ...defaultHeaderOptions,
-        }}
-        component={SettingGeneralScreen}
       />
       <Stack.Screen
         name="Setting.General.ManageNonActiveChains"
