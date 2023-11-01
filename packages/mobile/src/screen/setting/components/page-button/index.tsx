@@ -49,15 +49,19 @@ export const PageButton: FunctionComponent<PageButtonProps> = ({
             <Stack gutter={6}>
               <Columns sum={1} gutter={6} alignY="center">
                 {titleIcon ? <Box>{titleIcon}</Box> : null}
-                <Text style={style.flatten(['color-text-high', 'subtitle2'])}>
+                <Text
+                  style={style.flatten([
+                    'color-text-high',
+                    'subtitle2',
+                    'padding-right-20',
+                  ])}>
                   {title}
                 </Text>
               </Columns>
               {paragraph ? (
                 <Text
                   style={StyleSheet.flatten([
-                    style.flatten(['color-text-low']),
-                    {width: '90%'},
+                    style.flatten(['color-text-low', 'padding-right-20']),
                   ])}>
                   {paragraph}
                 </Text>

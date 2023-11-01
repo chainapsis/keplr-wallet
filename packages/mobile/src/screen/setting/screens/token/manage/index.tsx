@@ -74,7 +74,7 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
 
   const [chainId, setChainId] = useState<string>(() => {
     if (supportedChainInfos.length > 0) {
-      return supportedChainInfos[5].chainId;
+      return supportedChainInfos[0].chainId;
     } else {
       return chainStore.chainInfos[0].chainId;
     }

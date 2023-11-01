@@ -78,16 +78,14 @@ export const ContractAddressBookModal: FunctionComponent<{
           );
         }}
         ListEmptyComponent={
-          <React.Fragment>
-            <Box alignX="center" alignY="center">
-              <Gutter size={50} />
-              <EmptyView>
-                <Text style={style.flatten(['subtitle3'])}>
-                  <FormattedMessage id="page.setting.token.add.contract-address-book-modal.no-search-data" />
-                </Text>
-              </EmptyView>
-            </Box>
-          </React.Fragment>
+          <Box alignX="center" alignY="center">
+            <Gutter size={50} />
+            <EmptyView>
+              <Text style={style.flatten(['subtitle3'])}>
+                <FormattedMessage id="page.setting.token.add.contract-address-book-modal.no-search-data" />
+              </Text>
+            </EmptyView>
+          </Box>
         }
       />
 
