@@ -39,7 +39,6 @@ interface Language {
 const defaultLangMap: Record<string, string> = {
   ko: 'ko',
   en: 'en',
-  en_US: 'en',
 };
 
 const initLanguage = (): string => {
@@ -75,7 +74,6 @@ export const useLanguage = (): Language => {
   return lang;
 };
 
-//TODO - 일단 최소만한 구현해놓음 이후 한글어 지원할때 익스텐션 코드보고 구현필요함
 export const AppIntlProvider: FunctionComponent<PropsWithChildren> = observer(
   ({children}) => {
     const {uiConfigStore} = useStore();
