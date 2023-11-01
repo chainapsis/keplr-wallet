@@ -27,6 +27,7 @@ import '@formatjs/intl-numberformat/locale-data/en';
 import '@formatjs/intl-relativetimeformat/polyfill';
 import '@formatjs/intl-relativetimeformat/locale-data/en'; // locale-data for en
 import {ConfirmProvider} from './src/hooks/confirm';
+import {InteractionModalsProvider} from './src/provider/interaction-modals-provider';
 
 const ThemeStatusBar: FunctionComponent = () => {
   const style = useStyle();
@@ -52,7 +53,9 @@ function App(): JSX.Element {
             <AppIntlProvider>
               <BottomSheetModalProvider>
                 <ConfirmProvider>
-                  <AppNavigation />
+                  <InteractionModalsProvider>
+                    <AppNavigation />
+                  </InteractionModalsProvider>
                 </ConfirmProvider>
               </BottomSheetModalProvider>
             </AppIntlProvider>
