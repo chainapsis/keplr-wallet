@@ -9,9 +9,11 @@ import {Text, StyleSheet, TextStyle, Pressable, ViewStyle} from 'react-native';
 import {Box} from '../box';
 
 type ButtonColorType = 'faint' | 'default';
+export type ButtonSize = 'small' | 'large';
 
 export const TextButton: FunctionComponent<{
   color?: ButtonColorType;
+  size?: ButtonSize;
   text: string;
   rightIcon?: ReactElement | ((color: string) => ReactElement);
   disabled?: boolean;
@@ -21,6 +23,7 @@ export const TextButton: FunctionComponent<{
   containerStyle?: ViewStyle;
 }> = ({
   color = 'default',
+  size,
   text,
   rightIcon,
   disabled = false,
@@ -66,7 +69,7 @@ export const TextButton: FunctionComponent<{
         style={StyleSheet.flatten([
           style.flatten([
             'text-center',
-            'text-button2',
+            size === 'large' ? 'text-button1' : 'text-button2',
             isPressIn ? 'color-gray-300' : (textColorDefinition as any),
           ]),
           textStyle,
