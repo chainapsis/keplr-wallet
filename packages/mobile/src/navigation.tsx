@@ -91,7 +91,7 @@ export type RootStackParamList = {
   Stake: NavigatorScreenParams<StakeNavigation>;
 };
 
-type StakeNavigation = {
+export type StakeNavigation = {
   'Stake.Dashboard': {chainId: string};
   'Stake.Staking': {chainId: string};
   'Stake.ValidateList': {chainId: string};
