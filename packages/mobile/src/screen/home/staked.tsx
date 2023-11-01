@@ -15,10 +15,13 @@ import {
   InformationModalProps,
 } from '../../components/modal/infoModal';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavProp} from '../../navigation';
 
 export const StakedTabView: FunctionComponent = observer(() => {
   const {hugeQueriesStore} = useStore();
   const intl = useIntl();
+  const navigate = useNavigation<StackNavProp>();
   const delegations: ViewToken[] = useMemo(
     () =>
       hugeQueriesStore.delegations.filter(token => {
@@ -118,15 +121,14 @@ export const StakedTabView: FunctionComponent = observer(() => {
                       disabled={
                         !viewToken.viewToken.chainInfo.walletUrlForStaking
                       }
-                      //TODO 이후 stake 탭으로 이동 기능 구현해야함
-                      // onClick={() => {
-                      //   if (viewToken.viewToken.chainInfo.walletUrlForStaking) {
-                      //     browser.tabs.create({
-                      //       url: viewToken.viewToken.chainInfo
-                      //         .walletUrlForStaking,
-                      //     });
-                      //   }
-                      // }}
+                      onClick={() => {
+                        navigate.navigate('Stake', {
+                          screen: 'Stake.Dashboard',
+                          params: {
+                            chainId: viewToken.viewToken.chainInfo.chainId,
+                          },
+                        });
+                      }}
                       altSentence={viewToken.altSentence}
                     />
                   );
@@ -137,14 +139,12 @@ export const StakedTabView: FunctionComponent = observer(() => {
                     viewToken={viewToken}
                     key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                     disabled={!viewToken.chainInfo.walletUrlForStaking}
-                    //TODO 이후 stake 탭으로 이동 기능 구현해야함
-                    // onClick={() => {
-                    //   if (viewToken.chainInfo.walletUrlForStaking) {
-                    //     browser.tabs.create({
-                    //       url: viewToken.chainInfo.walletUrlForStaking,
-                    //     });
-                    //   }
-                    // }}
+                    onClick={() => {
+                      navigate.navigate('Stake', {
+                        screen: 'Stake.Dashboard',
+                        params: {chainId: viewToken.chainInfo.chainId},
+                      });
+                    }}
                   />
                 );
               })}

@@ -6,6 +6,7 @@ import {
   DefaultTheme,
   DrawerActions,
   NavigationContainer,
+  NavigatorScreenParams,
   useNavigation,
 } from '@react-navigation/native';
 import {useStyle} from './styles';
@@ -49,6 +50,7 @@ import {SettingSecurityAndPrivacyScreen} from './screen/setting/screens/security
 import {SettingSecurityChangePasswordScreen} from './screen/setting/screens/security/change-password';
 import {SettingSecurityPermissionScreen} from './screen/setting/screens/security/permission';
 import {RegisterIntroScreen} from './screen/register/intro';
+import {StakingDashboardScreen} from './screen/staking/dashboard';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -85,12 +87,23 @@ export type RootStackParamList = {
   'SelectWallet.Delete': {id: string};
   'SelectWallet.ChangeName': {id: string};
   'SelectWallet.ViewRecoveryPhrase': {id: string};
+
+  Stake: NavigatorScreenParams<StakeNavigation>;
 };
+
+type StakeNavigation = {
+  'Stake.Dashboard': {chainId: string};
+  'Stake.Staking': {chainId: string};
+  'Stake.ValidateList': {chainId: string};
+  'Stake.ValidateDetail': {chainId: string; validatorAddress: string};
+};
+
 export type StackNavProp = NativeStackNavigationProp<RootStackParamList>;
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
+const StakeStack = createNativeStackNavigator<StakeNavigation>();
 
 export const RegisterNavigation: FunctionComponent = () => {
   return (
@@ -410,6 +423,52 @@ const SelectWalletNavigation = () => {
   );
 };
 
+const StakeNavigation = () => {
+  const intl = useIntl();
+  return (
+    <StakeStack.Navigator>
+      <StakeStack.Screen
+        name="Stake.Dashboard"
+        options={{
+          title: '',
+          ...defaultHeaderOptions,
+        }}
+        component={StakingDashboardScreen}
+      />
+      <StakeStack.Screen
+        name="Stake.Staking"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.wallet.keyring-item.dropdown.delete-wallet-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={WalletDeleteScreen}
+      />
+      <StakeStack.Screen
+        name="Stake.ValidateDetail"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.wallet.keyring-item.dropdown.delete-wallet-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={WalletDeleteScreen}
+      />
+      <StakeStack.Screen
+        name="Stake.ValidateList"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.wallet.keyring-item.dropdown.change-wallet-name-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={WalletChangeNameScreen}
+      />
+    </StakeStack.Navigator>
+  );
+};
+
 //TODO 이후 상태가 not-loaded일때 스플레시 스크린화면 처리 필요
 export const AppNavigation: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
@@ -474,6 +533,11 @@ export const AppNavigation: FunctionComponent = observer(() => {
             name="SelectWallet"
             options={{headerShown: false}}
             component={SelectWalletNavigation}
+          />
+          <Stack.Screen
+            name="Stake"
+            options={{headerShown: false}}
+            component={StakeNavigation}
           />
         </Stack.Navigator>
       </NavigationContainer>
