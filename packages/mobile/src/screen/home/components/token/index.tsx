@@ -30,7 +30,7 @@ import {InformationOutlinedIcon} from '../../../../components/icon/information-o
 
 export const TokenTitleView: FunctionComponent<{
   title: string;
-  onOpenModal: () => void;
+  onOpenModal?: () => void;
   right?: React.ReactElement;
 }> = ({title, right, onOpenModal}) => {
   const style = useStyle();
@@ -42,7 +42,9 @@ export const TokenTitleView: FunctionComponent<{
       <Columns sum={1} alignY="center">
         <Pressable
           onPress={() => {
-            onOpenModal();
+            if (onOpenModal) {
+              onOpenModal();
+            }
           }}>
           <Columns alignY="center" sum={1} gutter={4}>
             <Text style={style.flatten(['color-text-low'])}>{title}</Text>

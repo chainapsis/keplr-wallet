@@ -14,6 +14,7 @@ import {CloseIcon} from '../../../../../components/icon';
 import {ArrowDownIcon} from '../../../../../components/icon/arrow-down';
 import {ArrowUpIcon} from '../../../../../components/icon/arrow-up';
 import {TreeIcon} from '../../../../../components/icon/tree';
+import {PageWithScrollView} from '../../../../../components/page';
 
 export const SettingSecurityPermissionScreen: FunctionComponent = observer(
   () => {
@@ -24,48 +25,52 @@ export const SettingSecurityPermissionScreen: FunctionComponent = observer(
     const [search, setSearch] = useState('');
 
     return (
-      <Box padding={12}>
-        <Stack gutter={8}>
-          <SearchTextInput
-            placeholder={intl.formatMessage({
-              id: 'page.setting.security.permission.search-placeholder',
-            })}
-            value={search}
-            onChange={e => {
-              e.preventDefault();
-              setSearch(e.nativeEvent.text);
-            }}
-          />
-          <Box paddingTop={4} alignX="right">
-            <Button
-              text={intl.formatMessage({
-                id: 'page.setting.security.permission.disconnect-all-button',
+      <PageWithScrollView backgroundMode={'default'}>
+        <Box padding={12}>
+          <Stack gutter={8}>
+            <SearchTextInput
+              placeholder={intl.formatMessage({
+                id: 'page.setting.security.permission.search-placeholder',
               })}
-              color="secondary"
-              size="extra-small"
-              disabled={
-                Object.entries(permissionManagerStore.permissionData).length ===
-                0
-              }
-              onPress={async () => {
-                await permissionManagerStore.clearAllPermissions();
+              value={search}
+              onChange={e => {
+                e.preventDefault();
+                setSearch(e.nativeEvent.text);
               }}
             />
-          </Box>
-          {Object.entries(permissionManagerStore.permissionData)
-            .filter(([origin]) => {
-              const trim = search.trim();
-              if (trim.length === 0) {
-                return true;
-              }
+            <Box paddingTop={4} alignX="right">
+              <Button
+                text={intl.formatMessage({
+                  id: 'page.setting.security.permission.disconnect-all-button',
+                })}
+                color="secondary"
+                size="extra-small"
+                disabled={
+                  Object.entries(permissionManagerStore.permissionData)
+                    .length === 0
+                }
+                onPress={async () => {
+                  await permissionManagerStore.clearAllPermissions();
+                }}
+              />
+            </Box>
+            {Object.entries(permissionManagerStore.permissionData)
+              .filter(([origin]) => {
+                const trim = search.trim();
+                if (trim.length === 0) {
+                  return true;
+                }
 
-              return origin.toLowerCase().includes(trim.toLowerCase());
-            })
-            .map(([origin, value]) => {
-              return <OriginView key={origin} origin={origin} value={value} />;
-            })}
-        </Stack>
-      </Box>
+                return origin.toLowerCase().includes(trim.toLowerCase());
+              })
+              .map(([origin, value]) => {
+                return (
+                  <OriginView key={origin} origin={origin} value={value} />
+                );
+              })}
+          </Stack>
+        </Box>
+      </PageWithScrollView>
     );
   },
 );

@@ -20,10 +20,10 @@ import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {LookingForChains} from './components/looking-for-chains';
 import {Gutter} from '../../components/gutter';
 import FastImage from 'react-native-fast-image';
-import {InformationModal} from './infoModal';
 import {StackActions, useNavigation} from '@react-navigation/native';
-import {FormattedMessage} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {Toggle} from '../../components/toggle';
+import {InformationModal} from '../../components/modal/infoModal';
 
 const zeroDec = new Dec(0);
 
@@ -40,6 +40,7 @@ export const AvailableTabView: FunctionComponent<{
   // const navigate = useNavigate();
   const tokenFoundModalRef = useRef<BottomSheetModal>(null);
   const infoModalRef = useRef<BottomSheetModal>(null);
+  const intl = useIntl();
 
   const allBalances = hugeQueriesStore.getAllBalances(true);
   const allBalancesNonZero = useMemo(() => {
@@ -107,14 +108,11 @@ export const AvailableTabView: FunctionComponent<{
     title: string;
     balance: ViewToken[];
     lenAlwaysShown: number;
-    tooltip?: string | React.ReactElement;
   }[] = [
     {
       title: 'Available Balance',
       balance: allBalancesSearchFiltered,
       lenAlwaysShown: 10,
-      tooltip:
-        'The amount of your assets that are available for use or transfer immediately, except for those that are currently staked or locked in LP pools.',
     },
   ];
 
@@ -279,8 +277,15 @@ export const AvailableTabView: FunctionComponent<{
       <Modal ref={tokenFoundModalRef} snapPoints={['60%']}>
         <TokenFoundModal />
       </Modal>
-      <Modal ref={infoModalRef} enableDynamicSizing={true}>
-        <InformationModal />
+      <Modal ref={infoModalRef} enableDynamicSizing={true} snapPoints={['90%']}>
+        <InformationModal
+          title={intl.formatMessage({
+            id: 'page.main.available.available-balance-title',
+          })}
+          paragraph={intl.formatMessage({
+            id: 'page.main.available.available-balance-tooltip',
+          })}
+        />
       </Modal>
     </React.Fragment>
   );
