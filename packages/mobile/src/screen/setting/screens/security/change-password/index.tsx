@@ -7,7 +7,6 @@ import {useStore} from '../../../../../stores';
 import {Box} from '../../../../../components/box';
 import {Stack} from '../../../../../components/stack';
 import {TextInput} from '../../../../../components/input';
-import {Gutter} from '../../../../../components/gutter';
 import {StackNavProp} from '../../../../../navigation';
 import {Button} from '../../../../../components/button';
 import {Column} from '../../../../../components/column';
@@ -62,7 +61,6 @@ export const SettingSecurityChangePasswordScreen: FunctionComponent = observer(
     });
     return (
       <Box paddingX={12} paddingTop={12} height={'100%'} paddingBottom={28}>
-        <Gutter size={25} />
         <Stack gutter={16}>
           <Controller
             name="password"
