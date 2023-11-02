@@ -116,19 +116,25 @@ export const AddEvmChain: FunctionComponent = () => {
             {
               coinDenom: symbol,
               coinMinimalDenom: symbol,
-              coinDecimals: chainData.nativeCurrency.decimals,
+              coinDecimals: chainData.nativeCurrency
+                ? chainData.nativeCurrency.decimals
+                : 0,
             },
           ],
           stakeCurrency: {
             coinDenom: symbol,
             coinMinimalDenom: symbol,
-            coinDecimals: chainData.nativeCurrency.decimals,
+            coinDecimals: chainData.nativeCurrency
+              ? chainData.nativeCurrency.decimals
+              : 0,
           },
           feeCurrencies: [
             {
               coinDenom: symbol,
               coinMinimalDenom: symbol,
-              coinDecimals: chainData.nativeCurrency.decimals,
+              coinDecimals: chainData.nativeCurrency
+                ? chainData.nativeCurrency.decimals
+                : 0,
               gasPriceStep: {
                 low: 10000000000,
                 average: 10000000000,
@@ -141,7 +147,10 @@ export const AddEvmChain: FunctionComponent = () => {
           chainId: chainId.toString(),
           chainName: chainData.name,
           bech32Config: Bech32Address.defaultBech32Config(symbol.toLowerCase()),
-          explorerUrl: chainData.explorers[0].url,
+          explorerUrl:
+            chainData.explorers && chainData.explorers.length > 0
+              ? chainData.explorers[0].url
+              : undefined,
         });
       } else {
         setInfo(

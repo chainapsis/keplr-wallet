@@ -194,3 +194,8 @@ export const TRANSACTION_APPROVED = "Transaction approved";
 export const TRANSACTION_SENT = "Transaction sent";
 export const TRANSACTION_SIGNED = "Transaction signed";
 export const TRANSACTION_FAILED = "Transaction failed";
+
+export const AXL_BRIDGE_EVM_TRNSX_FEE = {
+  gas: "2730000",
+  amount: [{ denom: "eth", amount: "4000000000000000" }],
+};

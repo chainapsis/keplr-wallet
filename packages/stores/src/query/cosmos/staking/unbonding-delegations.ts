@@ -37,7 +37,11 @@ export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQue
   get total(): CoinPretty {
     const stakeCurrency = this.chainGetter.getChain(this.chainId).stakeCurrency;
 
-    if (!this.response || !this.response.data) {
+    if (
+      !this.response ||
+      !this.response.data ||
+      !this.response.data.unbonding_responses
+    ) {
       return new CoinPretty(stakeCurrency, new Int(0)).ready(false);
     }
 
@@ -86,7 +90,11 @@ export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQue
 
   @computed
   get unbondings(): UnbondingDelegation[] {
-    if (!this.response || !this.response.data) {
+    if (
+      !this.response ||
+      !this.response.data ||
+      !this.response.data.unbonding_responses
+    ) {
       return [];
     }
 

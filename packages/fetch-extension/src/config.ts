@@ -6,7 +6,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpc: "https://rpc-fetchhub.fetch-ai.com",
     rest: "https://rest-fetchhub.fetch-ai.com",
     chainId: "fetchhub-4",
-    chainName: "FetchHub",
+    chainName: "fetch",
     stakeCurrency: {
       coinDenom: "FET",
       coinMinimalDenom: "afet",
@@ -159,6 +159,56 @@ export const EmbedChainInfos: ChainInfo[] = [
     // govUrl: "https://bnbstation.azoyalabs.com/mainnet/governance/",
   },
   {
+    rpc: "https://goerli.infura.io/v3/f40158f0c03842f5a18e409ffe09192c",
+    rest: "https://goerli.infura.io/v3/f40158f0c03842f5a18e409ffe09192c/",
+    chainId: "5",
+    chainName: "ethereum-2",
+
+    stakeCurrency: {
+      coinDenom: "ETH",
+      coinMinimalDenom: "eth",
+      coinDecimals: 18,
+      coinGeckoId: "ethereum",
+    },
+    bip44: {
+      coinType: 60,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("fetch"),
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "eth",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+      },
+      // {
+      //   coinDenom: "FET",
+      //   coinMinimalDenom:
+      //     "erc20:0xaea46A60368A7bD060eec7DF8CBa43b7EF41Ad85:Fetch.ai",
+      //   coinDecimals: 18,
+      //   coinGeckoId: "fetch-ai",
+      //   contractAddress: "0xaea46A60368A7bD060eec7DF8CBa43b7EF41Ad85",
+      //   type: "erc20",
+      //   coinImageUrl:
+      //     "https://assets.coingecko.com/coins/images/5681/thumb/Fetch.jpg?1572098136",
+      // },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "eth",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        gasPriceStep: {
+          low: 40000000000,
+          average: 40000000000,
+          high: 40000000000,
+        },
+      },
+    ],
+    features: ["evm"],
+  },
+  {
     rpc: "https://rpc-cosmoshub.keplr.app",
     rest: "https://lcd-cosmoshub.keplr.app",
     chainId: "cosmoshub-4",
@@ -214,6 +264,62 @@ export const EmbedChainInfos: ChainInfo[] = [
       process.env.NODE_ENV === "production"
         ? "https://app.osmosis.zone"
         : "https://app.osmosis.zone",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/osmosis"
+        : "http://localhost:8080/chains/osmosis",
+    bip44: { coinType: 118 },
+    bech32Config: Bech32Address.defaultBech32Config("osmo"),
+    currencies: [
+      {
+        coinDenom: "OSMO",
+        coinMinimalDenom: "uosmo",
+        coinDecimals: 6,
+        coinGeckoId: "osmosis",
+      },
+      {
+        coinDenom: "ION",
+        coinMinimalDenom: "uion",
+        coinDecimals: 6,
+        coinGeckoId: "ion",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "OSMO",
+        coinMinimalDenom: "uosmo",
+        coinDecimals: 6,
+        coinGeckoId: "osmosis",
+        gasPriceStep: {
+          low: 0,
+          average: 0.025,
+          high: 0.04,
+        },
+      },
+    ],
+    features: [
+      "ibc-transfer",
+      "ibc-go",
+      "cosmwasm",
+      "wasmd_0.24+",
+      "osmosis-txfees",
+    ],
+  },
+  {
+    rpc: "https://rpc.osmotest5.osmosis.zone",
+    rest: "https://lcd.osmotest5.osmosis.zone/",
+    chainId: "osmo-test-5",
+    chainName: "Osmosis testnet",
+    stakeCurrency: {
+      coinDenom: "OSMO",
+      coinMinimalDenom: "uosmo",
+      coinDecimals: 6,
+      coinGeckoId: "osmosis",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://rpc.osmotest5.osmosis.zone"
+        : "https://rpc.osmotest5.osmosis.zone",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
         ? "https://wallet.keplr.app/chains/osmosis"

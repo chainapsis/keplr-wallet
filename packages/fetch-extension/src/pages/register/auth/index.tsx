@@ -37,7 +37,7 @@ export const AuthIntro: FunctionComponent<{
           chainNamespace: CHAIN_NAMESPACES.OTHER,
           chainId: "fetchhub-4",
           rpcTarget: "https://rpc-fetchhub.fetch-ai.com",
-          displayName: "FetchHub",
+          displayName: "fetch",
           blockExplorer: "https://explore.fetch.ai/",
           ticker: "FET",
           tickerName: "Fetch Token",

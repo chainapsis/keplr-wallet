@@ -1,0 +1,50 @@
+.feeContainer {
+  padding: 10px;
+  font-size: small;
+  color: #525f7f;
+}
+.entries {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+}
+.errorText {
+  color: red;
+  font-size: small;
+  margin-top: -21px;
+}
+
+.loader {
+  color: white;
+  font-size: small;
+  text-align: center;
+  height: 80vh;
+  width: 100%;
+  display: flex;
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+  top: 67px;
+  background-color: rgba(0, 0, 0, 0.7);
+  left: 0;
+  z-index: 300;
+}
+.label {
+  color: #525f7f;
+  font-size: 14px;
+  font-weight: 600;
+}
+.chain-container {
+  display: flex;
+  justify-content: space-between;
+  height: 48px;
+  margin: 20px 0px 30px;
+}
+.dropdown-toggle {
+  background-color: #e9ecef;
+  border-color: #e9ecef;
+}
+.dropdown-toggle:hover {
+  background-color: #e9ecef;
+  border-color: #e9ecef;
+}

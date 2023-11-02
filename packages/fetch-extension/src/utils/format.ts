@@ -85,3 +85,19 @@ export const shortenMintingNumber = (value: string, decimal = 18) => {
 
   return result;
 };
+
+export const formatAmount = (amount: string) => {
+  const suffixes: string[] = ["", "K", "M", "B", "T"];
+  let suffixIndex: number = 0;
+  let amountNumber: number = parseInt(amount.split(" ")[0]);
+  while (amountNumber >= 1000 && suffixIndex < suffixes.length - 1) {
+    amountNumber /= 1000;
+    suffixIndex++;
+  }
+  const formattedAmount: string =
+    amountNumber.toFixed(2) +
+    suffixes[suffixIndex] +
+    " " +
+    amount.split(" ")[1];
+  return formattedAmount;
+};

@@ -131,10 +131,6 @@ export const ChainList: FunctionComponent = observer(() => {
     chainInfo.features?.includes("evm")
   );
 
-  const betaChainList = chainStore.chainInfosInUI.filter(
-    (chainInfo) => chainInfo.beta
-  );
-
   return (
     <div className={style["chainListContainer"]}>
       {evmChainList.length > 0 ? <Divider> Evm </Divider> : null}
@@ -160,10 +156,10 @@ export const ChainList: FunctionComponent = observer(() => {
       {mainChainList.map((chainInfo) => (
         <ChainElement key={chainInfo.chainId} chainInfo={chainInfo.raw} />
       ))}
-      {betaChainList.length > 0 ? <Divider>Beta support</Divider> : null}
+      {/* {betaChainList.length > 0 ? <Divider>Beta support</Divider> : null}
       {betaChainList.map((chainInfo) => (
         <ChainElement key={chainInfo.chainId} chainInfo={chainInfo.raw} />
-      ))}
+      ))} */}
 
       {/* <Divider /> */}
       <a

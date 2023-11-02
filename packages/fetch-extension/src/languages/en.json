@@ -39,6 +39,7 @@
 
   "main.menu.settings": "Settings",
   "main.menu.address-book": "Address Book",
+  "main.menu.axl-bridge": "Axelar Bridge",
   "main.menu.address-available": "Address is already available in the Address Book",
   "main.menu.token-list": "Token List",
   "main.menu.activity": "Activity",
@@ -408,6 +409,10 @@
   "main.fns.title": ".FET Domain",
   "main.fns.paragraph": "Explore and mint Domains",
   "main.fns.button": "Explore",
+  "main.axl.title": "Axelar Bridge",
+  "main.axl.paragraph": " Bridge between EVM and Cosmos chains",
+  "main.axl.button": "Transfer",
+
   "proposal.vote.start.time": "Voting Start Time",
   "proposal.vote.end.time": "Voting End Time",
   "proposal.change.vote": "Change Vote",

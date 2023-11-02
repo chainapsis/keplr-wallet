@@ -177,6 +177,7 @@ export const MainPage: FunctionComponent = observer(() => {
 
       {queryAuthZGrants.response &&
       queryAuthZGrants.response.data &&
+      queryAuthZGrants.response.data.grants &&
       queryAuthZGrants.response.data.grants.length ? (
         <Card className={classnames(style["card"], "shadow")}>
           <CardBody>

@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import React, { FunctionComponent } from "react";
 
 import { observer } from "mobx-react-lite";
@@ -9,9 +10,7 @@ import { useNavigate } from "react-router";
 
 export const Menu: FunctionComponent = observer(() => {
   const { chainStore, keyRingStore, analyticsStore } = useStore();
-
   const navigate = useNavigate();
-
   return (
     <div className={styleMenu["container"]}>
       <div
@@ -25,6 +24,7 @@ export const Menu: FunctionComponent = observer(() => {
       >
         <FormattedMessage id="main.menu.address-book" />
       </div>
+
       <div
         className={styleMenu["item"]}
         onClick={() => {
