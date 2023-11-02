@@ -19,6 +19,7 @@ import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../navigation';
 import {SelectStakingChainModal} from './stakeing-chain-select-modal';
 import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
+import {useGetAllApr} from '../../hooks/useApr';
 
 const zeroDec = new Dec(0);
 
@@ -28,6 +29,7 @@ export const StakedTabView: FunctionComponent<{
   const {hugeQueriesStore} = useStore();
   const intl = useIntl();
   const navigate = useNavigation<StackNavProp>();
+  const aprList = useGetAllApr(hugeQueriesStore.stakables);
   const delegations: ViewToken[] = useMemo(
     () =>
       hugeQueriesStore.delegations.filter(token => {
@@ -111,7 +113,7 @@ export const StakedTabView: FunctionComponent<{
           if (balance.length === 0) {
             return null;
           }
-
+          const isDelegation = title === TokenViewData[0].title;
           return (
             <CollapsibleList
               key={title}
@@ -129,6 +131,15 @@ export const StakedTabView: FunctionComponent<{
                 if ('altSentence' in viewToken) {
                   return (
                     <TokenItem
+                      apr={
+                        isDelegation
+                          ? aprList.filter(
+                              ({chainId}) =>
+                                chainId ===
+                                viewToken.viewToken.chainInfo.chainId,
+                            )[0]?.apr
+                          : undefined
+                      }
                       viewToken={viewToken.viewToken}
                       key={`${viewToken.viewToken.chainInfo.chainId}-${viewToken.viewToken.token.currency.coinMinimalDenom}`}
                       disabled={
@@ -149,6 +160,14 @@ export const StakedTabView: FunctionComponent<{
 
                 return (
                   <TokenItem
+                    apr={
+                      isDelegation
+                        ? aprList.filter(
+                            ({chainId}) =>
+                              chainId === viewToken.chainInfo.chainId,
+                          )[0]?.apr
+                        : undefined
+                    }
                     viewToken={viewToken}
                     key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                     disabled={!viewToken.chainInfo.walletUrlForStaking}
@@ -196,6 +215,7 @@ export const StakedTabView: FunctionComponent<{
       <Modal ref={SelectStakingChainModalRef}>
         <SelectStakingChainModal
           onSelect={() => {}}
+          aprList={aprList}
           items={allBalancesNonZero.map(token => ({
             key: token.chainInfo.chainId,
             viewToken: token,
