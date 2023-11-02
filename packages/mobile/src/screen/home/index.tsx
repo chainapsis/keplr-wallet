@@ -54,6 +54,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>('available');
   const buyModalRef = useRef<BottomSheetModal>(null);
+  const SelectStakingChainModalRef = useRef<BottomSheetModal>(null);
   const copyAddressModalRef = useRef<BottomSheetModal>(null);
 
   const availableTotalPrice = useMemo(() => {
@@ -158,6 +159,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
                 containerStyle={style.flatten(['flex-1'])}
                 onPress={() => {
                   //TODO - 체인 선택 모달을 띄워줘야함
+                  SelectStakingChainModalRef.current?.present();
                 }}
               />
             </Columns>
@@ -191,7 +193,9 @@ export const HomeScreen: FunctionComponent = observer(() => {
               }}
             />
           ) : (
-            <StakedTabView />
+            <StakedTabView
+              SelectStakingChainModalRef={SelectStakingChainModalRef}
+            />
           )}
         </Stack>
       </PageWithScrollView>

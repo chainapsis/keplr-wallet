@@ -124,6 +124,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
               );
               return (
                 <ValidatorItem
+                  key={del.delegation.validator_address}
                   chainId={chainId}
                   imageUrl={thumbnail}
                   address={del.delegation.validator_address}

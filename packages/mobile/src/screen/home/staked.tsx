@@ -17,8 +17,14 @@ import {
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../navigation';
+import {SelectStakingChainModal} from './stakeing-chain-select-modal';
+import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
 
-export const StakedTabView: FunctionComponent = observer(() => {
+const zeroDec = new Dec(0);
+
+export const StakedTabView: FunctionComponent<{
+  SelectStakingChainModalRef: React.RefObject<BottomSheetModalMethods>;
+}> = observer(({SelectStakingChainModalRef}) => {
   const {hugeQueriesStore} = useStore();
   const intl = useIntl();
   const navigate = useNavigation<StackNavProp>();
@@ -30,6 +36,7 @@ export const StakedTabView: FunctionComponent = observer(() => {
     [hugeQueriesStore.delegations],
   );
   const infoModalRef = useRef<BottomSheetModal>(null);
+
   const [infoModalState, setInfoModalState] = useState<InformationModalProps>({
     title: '',
     paragraph: '',
@@ -90,6 +97,12 @@ export const StakedTabView: FunctionComponent = observer(() => {
       }),
     },
   ];
+  const allBalances = hugeQueriesStore.stakables;
+  const allBalancesNonZero = useMemo(() => {
+    return allBalances.filter(token => {
+      return token.token.toDec().gt(zeroDec) && token.chainInfo.stakeCurrency;
+    });
+  }, [allBalances]);
 
   return (
     <React.Fragment>
@@ -177,6 +190,16 @@ export const StakedTabView: FunctionComponent = observer(() => {
         <InformationModal
           title={infoModalState?.title}
           paragraph={infoModalState?.paragraph}
+        />
+      </Modal>
+
+      <Modal ref={SelectStakingChainModalRef}>
+        <SelectStakingChainModal
+          onSelect={() => {}}
+          items={allBalancesNonZero.map(token => ({
+            key: token.chainInfo.chainId,
+            viewToken: token,
+          }))}
         />
       </Modal>
     </React.Fragment>
