@@ -19,7 +19,7 @@ import {Bech32Address} from '@keplr-wallet/cosmos';
 import {useConfirm} from '../../../../../hooks/confirm';
 
 import {FormattedMessage, useIntl} from 'react-intl';
-import {Platform, Text} from 'react-native';
+import {FlatList, Platform, Text} from 'react-native';
 import {Gutter} from '../../../../../components/gutter';
 import {IconButton} from '../../../../../components/icon-button';
 
@@ -108,46 +108,64 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
 
   return (
     <React.Fragment>
-      <Box paddingX={12} paddingTop={6}>
-        <Stack gutter={8}>
-          <Text
-            style={style.flatten([
-              'body2',
-              'color-text-middle',
-              'text-center',
-              'margin-bottom-12',
-            ])}>
-            <FormattedMessage id="page.setting.token.manage.paragraph" />
-          </Text>
-          <Columns sum={1} alignY="center">
-            <Box width={208}>
-              <SelectModalCommonButton
-                items={items}
-                selectedItemKey={chainId}
-                isOpenModal={isOpenChainSelectModal}
-                placeholder="Search by chain name"
-                onPress={() => {
-                  selectChainModalRef.current?.present();
-                  setIsOpenChainSelectModal(true);
-                }}
+      <Box paddingX={12} paddingTop={6} style={style.flatten(['flex-grow-1'])}>
+        <FlatList
+          data={tokens}
+          ListHeaderComponent={
+            <Stack gutter={8}>
+              <Text
+                style={style.flatten([
+                  'body2',
+                  'color-text-middle',
+                  'text-center',
+                  'margin-bottom-12',
+                ])}>
+                <FormattedMessage id="page.setting.token.manage.paragraph" />
+              </Text>
+              <Columns sum={1} alignY="center">
+                <Box width={208}>
+                  <SelectModalCommonButton
+                    items={items}
+                    selectedItemKey={chainId}
+                    isOpenModal={isOpenChainSelectModal}
+                    placeholder="Search by chain name"
+                    onPress={() => {
+                      selectChainModalRef.current?.present();
+                      setIsOpenChainSelectModal(true);
+                    }}
+                  />
+                </Box>
+
+                <Column weight={1} />
+
+                <Button
+                  color="secondary"
+                  size="extra-small"
+                  text={intl.formatMessage({
+                    id: 'page.setting.token.manage.add-token-button',
+                  })}
+                  onPress={() =>
+                    navigate.navigate('Setting.ManageTokenList.Add', {
+                      chainId,
+                    })
+                  }
+                />
+              </Columns>
+              <Gutter size={12} />
+            </Stack>
+          }
+          renderItem={({item: token}) => {
+            return (
+              <TokenItem
+                key={token.currency.coinMinimalDenom}
+                chainId={chainId}
+                tokenInfo={token}
+                modalOpen={() => menuModalRef.current?.present()}
+                setMenuModalItems={setMenuModalItems}
               />
-            </Box>
-
-            <Column weight={1} />
-
-            <Button
-              color="secondary"
-              size="extra-small"
-              text={intl.formatMessage({
-                id: 'page.setting.token.manage.add-token-button',
-              })}
-              onPress={() =>
-                navigate.navigate('Setting.ManageTokenList.Add', {chainId})
-              }
-            />
-          </Columns>
-
-          {tokens.length === 0 ? (
+            );
+          }}
+          ListEmptyComponent={
             <React.Fragment>
               <Gutter size={120} direction="vertical" />
               <EmptyView
@@ -156,20 +174,9 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
                 })}
               />
             </React.Fragment>
-          ) : (
-            tokens.map(token => {
-              return (
-                <TokenItem
-                  key={token.currency.coinMinimalDenom}
-                  chainId={chainId}
-                  tokenInfo={token}
-                  modalOpen={() => menuModalRef.current?.present()}
-                  setMenuModalItems={setMenuModalItems}
-                />
-              );
-            })
-          )}
-        </Stack>
+          }
+          ItemSeparatorComponent={() => <Gutter size={8} />}
+        />
       </Box>
       <MenuModal modalRef={menuModalRef} menuModalItems={menuModalItems} />
       <Modal

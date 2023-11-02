@@ -48,6 +48,7 @@ import {SettingTokenAddScreen} from './screen/setting/screens/token/add';
 import {SettingSecurityAndPrivacyScreen} from './screen/setting/screens/security/security';
 import {SettingSecurityChangePasswordScreen} from './screen/setting/screens/security/change-password';
 import {SettingSecurityPermissionScreen} from './screen/setting/screens/security/permission';
+import {SettingGeneralLanguageScreen} from './screen/setting/screens/general/language';
 import {RegisterIntroScreen} from './screen/register/intro';
 
 export type RootStackParamList = {
@@ -66,7 +67,6 @@ export type RootStackParamList = {
   'Setting.General.ContactList': {chainId?: string};
   'Setting.General.ContactAdd': {chainId: string; editIndex?: number};
 
-  'Setting.General.Theme': undefined;
   'Setting.General.WC': undefined;
   'Setting.General.ManageNonActiveChains': undefined;
   'Setting.General.ManageChainVisibility': undefined;
@@ -263,7 +263,7 @@ const SettingGeneralNavigation = () => {
           }),
           ...defaultHeaderOptions,
         }}
-        component={SettingGeneralScreen}
+        component={SettingGeneralLanguageScreen}
       />
       <Stack.Screen
         name="Setting.General.Currency"
@@ -294,16 +294,6 @@ const SettingGeneralNavigation = () => {
           ...defaultHeaderOptions,
         }}
         component={SettingContactsAddScreen}
-      />
-      <Stack.Screen
-        name="Setting.General.Theme"
-        options={{
-          title: intl.formatMessage({
-            id: 'page.setting.general.theme-title',
-          }),
-          ...defaultHeaderOptions,
-        }}
-        component={SettingGeneralScreen}
       />
       <Stack.Screen
         name="Setting.General.ManageNonActiveChains"

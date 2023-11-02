@@ -26,6 +26,11 @@ export interface UIConfigOptions {
   useWebHIDLedger: boolean;
 }
 
+export interface LanguageOption {
+  language: string;
+  isAutomatic: boolean;
+}
+
 export class UIConfigStore {
   protected readonly kvStore: KVStore;
 
@@ -44,6 +49,12 @@ export class UIConfigStore {
   };
 
   protected _platform: 'mobile' = 'mobile';
+
+  @observable
+  protected _languageOptions: LanguageOption = {
+    language: 'en',
+    isAutomatic: true,
+  };
 
   // Struct is required for compatibility with recipient config hook
   @observable.struct
@@ -105,6 +116,18 @@ export class UIConfigStore {
       this.selectFiatCurrency(saved || 'usd');
       autorun(() => {
         this.kvStore.set('fiatCurrency', this._fiatCurrency);
+      });
+    }
+
+    {
+      const saved = await this.kvStore.get<LanguageOption>(
+        'app_language_options',
+      );
+      this.selectLanguageOptions(
+        saved?.language ? saved : {language: 'en', isAutomatic: true},
+      );
+      autorun(() => {
+        this.kvStore.set('app_language_options', this._languageOptions);
       });
     }
 
@@ -197,7 +220,19 @@ export class UIConfigStore {
   @action
   selectFiatCurrency(value: string) {
     this._fiatCurrency = value;
-    this.priceStore.setDefaultVsCurrency(value);
+  }
+
+  get language(): string {
+    return this._languageOptions.language;
+  }
+
+  get languageIsAutomatic(): boolean {
+    return this._languageOptions.isAutomatic;
+  }
+
+  @action
+  selectLanguageOptions(value: LanguageOption) {
+    this._languageOptions = value;
   }
 
   get supportedFiatCurrencies() {

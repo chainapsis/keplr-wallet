@@ -9,6 +9,9 @@ import React, {
 import {IntlProvider} from 'react-intl';
 import MessagesEn from './en.json';
 import MessagesKo from './ko.json';
+import {useStore} from '../stores';
+import {observer} from 'mobx-react-lite';
+import {I18nManager, Platform, Settings} from 'react-native';
 
 export type IntlMessage = Record<string, string>;
 export type IntlMessages = {
@@ -39,7 +42,20 @@ const defaultLangMap: Record<string, string> = {
 };
 
 const initLanguage = (): string => {
-  const language = 'en';
+  let language = 'en';
+
+  if (Platform.OS === 'ios') {
+    const settings = Settings.get('AppleLocale');
+    const locale: string = settings || settings?.[0];
+    if (locale) {
+      language = locale.split('-')[0];
+    }
+  } else {
+    const locale = I18nManager.getConstants().localeIdentifier;
+    if (locale) {
+      language = locale.split('_')[0];
+    }
+  }
 
   if (!defaultLangMap[language]) {
     return 'en';
@@ -58,53 +74,59 @@ export const useLanguage = (): Language => {
   return lang;
 };
 
-//TODO - 일단 최소만한 구현해놓음 이후 한글어 지원할때 익스텐션 코드보고 구현필요함
-export const AppIntlProvider: FunctionComponent<PropsWithChildren> = ({
-  children,
-}) => {
-  const [language, _setLanguage] = useState<string>(() => initLanguage());
-  const [messages, setMessages] = useState(getMessages(language));
+export const AppIntlProvider: FunctionComponent<PropsWithChildren> = observer(
+  ({children}) => {
+    const {uiConfigStore} = useStore();
+    const language = uiConfigStore.language;
+    const isAutomatic = uiConfigStore.languageIsAutomatic;
 
-  const [automatic, setAutomatic] = useState(false);
+    const [messages, setMessages] = useState(
+      isAutomatic
+        ? getMessages(initLanguage())
+        : getMessages(uiConfigStore.language),
+    );
+    useLayoutEffect(() => {
+      if (isAutomatic) {
+        uiConfigStore.selectLanguageOptions({
+          language: initLanguage(),
+          isAutomatic,
+        });
+      }
+      setMessages(getMessages(language));
+    }, [isAutomatic, language, uiConfigStore]);
 
-  useLayoutEffect(() => {
-    setMessages(getMessages(language));
-  }, [language]);
+    const clearLanguage = () => {
+      const language = initLanguage();
+      uiConfigStore.selectLanguageOptions({language, isAutomatic: true});
+    };
 
-  const clearLanguage = () => {
-    // localStorage.removeItem('language');
-    _setLanguage(initLanguage());
-    setAutomatic(true);
-  };
+    const setLanguage = (language: string) => {
+      uiConfigStore.selectLanguageOptions({language, isAutomatic: false});
+    };
 
-  const setLanguage = (language: string) => {
-    // localStorage.setItem('language', language);
-    _setLanguage(language);
-    setAutomatic(false);
-  };
+    const getLanguageFullName = (language: string) => {
+      switch (language) {
+        case 'ko':
+          return '한국어';
+        default:
+          return 'English';
+      }
+    };
 
-  const getLanguageFullName = (language: string) => {
-    switch (language) {
-      case 'ko':
-        return '한국어';
-      default:
-        return 'English';
-    }
-  };
-
-  return (
-    <LanguageContext.Provider
-      value={{
-        language,
-        getLanguageFullName,
-        languageFullName: getLanguageFullName(language),
-        setLanguage,
-        automatic,
-        clearLanguage,
-      }}>
-      <IntlProvider locale={language} messages={messages} key={language}>
-        {children}
-      </IntlProvider>
-    </LanguageContext.Provider>
-  );
-};
+    return (
+      <LanguageContext.Provider
+        value={{
+          language,
+          getLanguageFullName,
+          languageFullName: getLanguageFullName(language),
+          setLanguage,
+          automatic: isAutomatic,
+          clearLanguage,
+        }}>
+        <IntlProvider locale={language} messages={messages}>
+          {children}
+        </IntlProvider>
+      </LanguageContext.Provider>
+    );
+  },
+);
