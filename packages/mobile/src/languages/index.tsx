@@ -123,7 +123,7 @@ export const AppIntlProvider: FunctionComponent<PropsWithChildren> = observer(
           automatic: isAutomatic,
           clearLanguage,
         }}>
-        <IntlProvider locale={language} messages={messages} key={language}>
+        <IntlProvider locale={language} messages={messages}>
           {children}
         </IntlProvider>
       </LanguageContext.Provider>
