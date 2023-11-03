@@ -394,6 +394,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       ) {
         const queryOsmosis = this.queriesStore.get(this.chainId).osmosis;
         if (queryOsmosis) {
+          const remoteBaseFeeStep = this.queriesStore.simpleQuery.queryGet<{
+            low?: number;
+            average?: number;
+            high?: number;
+          }>(
+            "https://base-fee-step.s3.us-west-2.amazonaws.com/osmosis-base-fee-beta.json"
+          );
+
           const baseDenom = queryOsmosis.queryTxFeesBaseDenom.baseDenom;
           let baseFeeCurrency =
             this.selectableFeeCurrencies.find(
@@ -402,15 +410,33 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
           const baseFee = queryOsmosis.queryBaseFee.baseFee;
           if (baseFee) {
-            const low =
-              baseFeeCurrency.gasPriceStep?.low ?? DefaultGasPriceStep.low;
+            const low = remoteBaseFeeStep.response?.data.low
+              ? parseFloat(
+                  baseFee
+                    .mul(new Dec(remoteBaseFeeStep.response.data.low))
+                    .toString(8)
+                )
+              : baseFeeCurrency.gasPriceStep?.low ?? DefaultGasPriceStep.low;
             const average = Math.max(
               low,
-              parseFloat(baseFee.mul(new Dec(1.1)).toString(8))
+              remoteBaseFeeStep.response?.data.average
+                ? parseFloat(
+                    baseFee
+                      .mul(new Dec(remoteBaseFeeStep.response.data.average))
+                      .toString(8)
+                  )
+                : baseFeeCurrency.gasPriceStep?.average ??
+                    DefaultGasPriceStep.average
             );
             const high = Math.max(
               average,
-              parseFloat(baseFee.mul(new Dec(1.3)).toString(8))
+              remoteBaseFeeStep.response?.data.high
+                ? parseFloat(
+                    baseFee
+                      .mul(new Dec(remoteBaseFeeStep.response.data.high))
+                      .toString(8)
+                  )
+                : baseFeeCurrency.gasPriceStep?.high ?? DefaultGasPriceStep.high
             );
 
             baseFeeCurrency = {
