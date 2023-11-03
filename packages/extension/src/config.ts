@@ -97,6 +97,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       "cosmwasm",
       "wasmd_0.24+",
       "osmosis-txfees",
+      "osmosis-base-fee-beta",
     ],
   },
   {
@@ -2571,5 +2572,5 @@ export const PrivilegedOrigins: string[] = [
 export const CommunityChainInfoRepo = {
   organizationName: "chainapsis",
   repoName: "keplr-chain-registry",
-  branchName: "main",
+  branchName: "Thunnini/osmosis-base-fee-test",
 };
