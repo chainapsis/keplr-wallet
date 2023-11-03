@@ -5,6 +5,7 @@ import { ObservableQueryTxFeesFeeTokens } from "./txfees/fee-tokens";
 import { ObservableQueryTxFeesSpotPriceByDenom } from "./txfees/spot-price-by-denom";
 import { ObservableQueryTxFeesBaseDenom } from "./txfees/base-denom";
 import { QuerySharedContext } from "../../common";
+import { ObservableQueryBaseFee } from "./base-fee";
 
 export interface OsmosisQueries {
   osmosis: OsmosisQueriesImpl;
@@ -40,6 +41,8 @@ export class OsmosisQueriesImpl {
   public readonly queryTxFeesSpotPriceByDenom: DeepReadonly<ObservableQueryTxFeesSpotPriceByDenom>;
   public readonly queryTxFeesBaseDenom: DeepReadonly<ObservableQueryTxFeesBaseDenom>;
 
+  public readonly queryBaseFee: DeepReadonly<ObservableQueryBaseFee>;
+
   constructor(
     _: QueriesSetBase,
     sharedContext: QuerySharedContext,
@@ -58,6 +61,12 @@ export class OsmosisQueriesImpl {
         chainGetter
       );
     this.queryTxFeesBaseDenom = new ObservableQueryTxFeesBaseDenom(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
+
+    this.queryBaseFee = new ObservableQueryBaseFee(
       sharedContext,
       chainId,
       chainGetter

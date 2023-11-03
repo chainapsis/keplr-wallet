@@ -690,6 +690,8 @@ const ClaimTokenItem: FunctionComponent<{
       console.log(e);
     }
 
+    // TODO: gas price step이 고정되어있지 않은 경우에 대해서 처리 해야함 ex) osmosis-base-fee-beta
+
     try {
       await tx.send(
         {
