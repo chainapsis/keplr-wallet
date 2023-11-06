@@ -93,10 +93,18 @@ export const MainPage: FunctionComponent<{
     }
     return result;
   }, [hugeQueriesStore.allKnownBalances]);
-  const availableChartWeight =
-    availableTotalPrice && !isNotReady
+  const availableChartWeight = (() => {
+    if (!isNotReady && uiConfigStore.isPrivacyMode) {
+      if (tabStatus === "available") {
+        return 1;
+      }
+      return 0;
+    }
+
+    return availableTotalPrice && !isNotReady
       ? Number.parseFloat(availableTotalPrice.toDec().toString())
       : 0;
+  })();
   const stakedTotalPrice = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.delegations) {
@@ -119,10 +127,18 @@ export const MainPage: FunctionComponent<{
     }
     return result;
   }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings]);
-  const stakedChartWeight =
-    stakedTotalPrice && !isNotReady
+  const stakedChartWeight = (() => {
+    if (!isNotReady && uiConfigStore.isPrivacyMode) {
+      if (tabStatus === "staked") {
+        return 1;
+      }
+      return 0;
+    }
+
+    return stakedTotalPrice && !isNotReady
       ? Number.parseFloat(stakedTotalPrice.toDec().toString())
       : 0;
+  })();
 
   const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
