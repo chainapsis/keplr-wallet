@@ -252,7 +252,7 @@ export const MainPage: FunctionComponent<{
                 }}
               >
                 <Skeleton isNotReady={isNotReady}>
-                  <Box position="relative" alignY="center">
+                  <Box alignY="center" alignX="center">
                     <XAxis>
                       <Subtitle3
                         style={{
@@ -274,32 +274,39 @@ export const MainPage: FunctionComponent<{
                           ),
                         }}
                       />
-                    </XAxis>
-                    <Styles.PrivacyModeButton
-                      as={animated.div}
-                      style={{
-                        position: "absolute",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "center",
-                        right: 0,
-                        cursor: "pointer",
-                        opacity: animatedPrivacyModeHover.to((v) =>
-                          Math.max(0, (v - 0.3) * (10 / 3))
-                        ),
-                      }}
-                      onClick={(e) => {
-                        e.preventDefault();
+                      <div
+                        style={{
+                          position: "relative",
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Styles.PrivacyModeButton
+                          as={animated.div}
+                          style={{
+                            position: "absolute",
+                            right: 0,
+                            cursor: "pointer",
+                            opacity: animatedPrivacyModeHover.to((v) =>
+                              Math.max(0, (v - 0.3) * (10 / 3))
+                            ),
+                            marginTop: "2px",
+                          }}
+                          onClick={(e) => {
+                            e.preventDefault();
 
-                        uiConfigStore.toggleIsPrivacyMode();
-                      }}
-                    >
-                      {uiConfigStore.isPrivacyMode ? (
-                        <EyeSlashIcon width="1rem" height="1rem" />
-                      ) : (
-                        <EyeIcon width="1rem" height="1rem" />
-                      )}
-                    </Styles.PrivacyModeButton>
+                            uiConfigStore.toggleIsPrivacyMode();
+                          }}
+                        >
+                          {uiConfigStore.isPrivacyMode ? (
+                            <EyeSlashIcon width="1rem" height="1rem" />
+                          ) : (
+                            <EyeIcon width="1rem" height="1rem" />
+                          )}
+                        </Styles.PrivacyModeButton>
+                      </div>
+                    </XAxis>
                   </Box>
                 </Skeleton>
                 <Gutter size="0.5rem" />
