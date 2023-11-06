@@ -26,7 +26,11 @@ import {
   useFocusedScreen,
 } from './provider/focused-screen';
 import {WalletIcon, BrowserIcon, SettingIcon} from './components/icon';
-import {HomeScreenHeader, defaultHeaderOptions} from './components/pageHeader';
+import {
+  HomeScreenHeader,
+  ManageSuggestChainHeaderRight,
+  defaultHeaderOptions,
+} from './components/pageHeader';
 import {SettingScreen} from './screen/setting';
 
 import {
@@ -50,6 +54,7 @@ import {SettingSecurityChangePasswordScreen} from './screen/setting/screens/secu
 import {SettingSecurityPermissionScreen} from './screen/setting/screens/security/permission';
 import {SettingGeneralLanguageScreen} from './screen/setting/screens/general/language';
 import {RegisterIntroScreen} from './screen/register/intro';
+import {SettingGeneralManageSuggestChainScreen} from './screen/setting/screens/general/mamange-suggest-chain';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -301,9 +306,10 @@ const SettingGeneralNavigation = () => {
           title: intl.formatMessage({
             id: 'page.setting.general.manage-non-native-chains-title',
           }),
+          headerRight: ManageSuggestChainHeaderRight,
           ...defaultHeaderOptions,
         }}
-        component={SettingGeneralScreen}
+        component={SettingGeneralManageSuggestChainScreen}
       />
       <Stack.Screen
         name="Setting.General.ManageChainVisibility"
