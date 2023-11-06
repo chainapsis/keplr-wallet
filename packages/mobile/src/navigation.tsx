@@ -50,11 +50,16 @@ import {SettingSecurityChangePasswordScreen} from './screen/setting/screens/secu
 import {SettingSecurityPermissionScreen} from './screen/setting/screens/security/permission';
 import {SettingGeneralLanguageScreen} from './screen/setting/screens/general/language';
 import {RegisterIntroScreen} from './screen/register/intro';
+import {RegisterIntroNewUserScreen} from './screen/register/intro-new-user';
+import {registerHeaderOptions} from './components/pageHeader/header-register';
+import {RegisterIntroExistingUserScene} from './screen/register/intro-existing-user';
 
 export type RootStackParamList = {
   Home: undefined;
   Register: undefined;
   'Register.Intro': undefined;
+  'Register.Intro.NewUser': undefined;
+  'Register.Intro.ExistingUser': undefined;
   'Register.EnableChain': undefined;
   Send: undefined;
   'Send.SelectAsset': undefined;
@@ -96,8 +101,24 @@ export const RegisterNavigation: FunctionComponent = () => {
   return (
     <Stack.Navigator
       initialRouteName="Register.Intro"
-      screenOptions={{headerShown: false}}>
-      <Stack.Screen name="Register.Intro" component={RegisterIntroScreen} />
+      screenOptions={{
+        ...registerHeaderOptions,
+      }}>
+      <Stack.Screen
+        name="Register.Intro"
+        component={RegisterIntroScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Register.Intro.NewUser"
+        component={RegisterIntroNewUserScreen}
+      />
+      <Stack.Screen
+        name="Register.Intro.ExistingUser"
+        component={RegisterIntroExistingUserScene}
+      />
       <Stack.Screen
         name="Register.EnableChain"
         component={RegisterEnableChainScreen}

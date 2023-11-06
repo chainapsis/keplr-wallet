@@ -7,17 +7,17 @@ import {Text} from 'react-native';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {Button} from '../../../components/button';
 import {TextButton} from '../../../components/text-button';
+import {StackActions, useNavigation} from '@react-navigation/native';
 
 export const RegisterIntroScreen: FunctionComponent = () => {
   const intl = useIntl();
   const style = useStyle();
+  const navigation = useNavigation();
 
   return (
     <Box height="100%" alignY="center" alignX="center">
       <LottieView
         source={require('../../../public/assets/lottie/wallet/logo.json')}
-        loop
-        autoPlay
         style={{width: 200, height: 155}}
       />
 
@@ -35,6 +35,9 @@ export const RegisterIntroScreen: FunctionComponent = () => {
             id: 'pages.register.intro.create-wallet-button',
           })}
           size="large"
+          onPress={() => {
+            navigation.dispatch(StackActions.push('Register.Intro.NewUser'));
+          }}
         />
 
         <Gutter size={16} />
@@ -45,6 +48,11 @@ export const RegisterIntroScreen: FunctionComponent = () => {
           })}
           size="large"
           color="secondary"
+          onPress={() => {
+            navigation.dispatch(
+              StackActions.push('Register.Intro.ExistingUser'),
+            );
+          }}
         />
 
         <Gutter size={20} />

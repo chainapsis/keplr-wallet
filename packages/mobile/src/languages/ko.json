@@ -61,11 +61,11 @@
   "pages.register.intro-new-user.more-convenience-text": "편의성 높음",
 
   "pages.register.intro-existing-user.title": "다시 만나서 반가워요!",
-  "pages.register.intro-existing-user.paragraph": "기다리고 있었어요. 🫶",
+  "pages.register.intro-existing-user.paragraph": "기다리고 있었어요. \uD83E\uDD70",
   "pages.register.intro-existing-user.recovery-title": "복구 문구 또는 프라이빗키 사용하기",
   "pages.register.intro-existing-user.recovery-paragraph": "기존의 12/24 단어의 복구 문구나 프라이빗키를 사용합니다. 다른 지갑 서비스 제공자들의 지갑 또한 불러올 수 있습니다.",
   "pages.register.intro-existing-user.recovery-button": "복구 문구 또는 프라이빗키 사용하기",
-  "pages.register.intro-existing-user.social-recovery-title": "Google 계정 사용하기",
+  "pages.register.intro-existing-user.social-recovery-title": "Apple 또는 Google 계정 사용하기",
   "pages.register.intro-existing-user.social-recovery-paragraph": "기존 케플러 지갑에서 사용했던 구글 계정으로 연결해주세요.",
   "pages.register.intro-existing-user.social-recovery-google-button": "Google 계정 연결하기",
 
