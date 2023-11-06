@@ -178,7 +178,10 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         return {
           simulate: () =>
             ethereumAccountStore.getAccount(chainId).simulateGas({
-              to: sendConfigs.recipientConfig.recipient,
+              currency: sendConfigs.amountConfig.amount[0].currency,
+              amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
+              // 아직 recipient를 모르기 때문에 임의로 내 주소를 넣는다.
+              to: sender,
             }),
         };
       }
