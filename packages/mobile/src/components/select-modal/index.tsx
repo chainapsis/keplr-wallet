@@ -10,7 +10,7 @@ import {RectButton} from '../rect-button';
 import {Column, Columns} from '../column';
 import {ChainImageFallback} from '../image';
 import {TextButton} from '../text-button';
-import {ArrowDownFillIcon} from '../icon/arrow-donw-fill';
+import {ArrowDownFillIcon} from '../icon/arrow-down-fill';
 import {BottomSheetSearchTextInput} from '../input/bottom-sheet-search-input';
 import {TextInput} from 'react-native-gesture-handler';
 import {SearchTextInput} from '../input/search-text-input';
