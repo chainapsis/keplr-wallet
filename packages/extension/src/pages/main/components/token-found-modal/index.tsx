@@ -384,7 +384,7 @@ const FoundTokenView: FunctionComponent<{
   chainId: string;
   asset: TokenScan["infos"][0]["assets"][0];
 }> = observer(({ chainId, asset }) => {
-  const { chainStore } = useStore();
+  const { chainStore, uiConfigStore } = useStore();
   const theme = useTheme();
 
   return (
@@ -421,17 +421,20 @@ const FoundTokenView: FunctionComponent<{
             : ColorPalette["gray-50"]
         }
       >
-        {new CoinPretty(
-          chainStore
-            .getChain(chainId)
-            .forceFindCurrency(asset.currency.coinMinimalDenom),
-          asset.amount
-        )
-          .shrink(true)
-          .trim(true)
-          .maxDecimals(6)
-          .inequalitySymbol(true)
-          .toString()}
+        {uiConfigStore.hideStringIfPrivacyMode(
+          new CoinPretty(
+            chainStore
+              .getChain(chainId)
+              .forceFindCurrency(asset.currency.coinMinimalDenom),
+            asset.amount
+          )
+            .shrink(true)
+            .trim(true)
+            .maxDecimals(6)
+            .inequalitySymbol(true)
+            .toString(),
+          2
+        )}
       </Subtitle3>
     </Columns>
   );

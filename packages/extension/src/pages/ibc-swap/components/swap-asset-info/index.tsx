@@ -83,7 +83,7 @@ export const SwapAssetInfo: FunctionComponent<{
   ) => void;
 }> = observer(
   ({ type, senderConfig, amountConfig, onDestinationChainSelect }) => {
-    const { chainStore, queriesStore, priceStore } = useStore();
+    const { chainStore, queriesStore, priceStore, uiConfigStore } = useStore();
 
     const theme = useTheme();
 
@@ -227,13 +227,16 @@ export const SwapAssetInfo: FunctionComponent<{
                         return `0 ${amountConfig.currency.coinDenom}`;
                       }
 
-                      return bal.balance
-                        .maxDecimals(6)
-                        .trim(true)
-                        .shrink(true)
-                        .inequalitySymbol(true)
-                        .hideIBCMetadata(true)
-                        .toString();
+                      return uiConfigStore.hideStringIfPrivacyMode(
+                        bal.balance
+                          .maxDecimals(6)
+                          .trim(true)
+                          .shrink(true)
+                          .inequalitySymbol(true)
+                          .hideIBCMetadata(true)
+                          .toString(),
+                        2
+                      );
                     })(),
                   }
                 )}

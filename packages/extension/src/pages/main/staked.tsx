@@ -12,7 +12,7 @@ import { ColorPalette } from "../../styles";
 import { useIntl } from "react-intl";
 
 export const StakedTabView: FunctionComponent = observer(() => {
-  const { hugeQueriesStore } = useStore();
+  const { hugeQueriesStore, uiConfigStore } = useStore();
 
   const intl = useIntl();
 
@@ -91,6 +91,7 @@ export const StakedTabView: FunctionComponent = observer(() => {
           return (
             <CollapsibleList
               key={title}
+              hideNumInTitle={uiConfigStore.isPrivacyMode}
               title={<TokenTitleView title={title} tooltip={tooltip} />}
               lenAlwaysShown={lenAlwaysShown}
               items={balance.map((viewToken) => {
