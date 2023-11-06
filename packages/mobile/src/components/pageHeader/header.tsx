@@ -11,10 +11,11 @@ import {observer} from 'mobx-react-lite';
 import {useStore} from '../../stores';
 import {Box} from '../box';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {HeaderBackButtonIcon} from './icon/back';
 import {HeaderBackButtonProps} from '@react-navigation/native-stack/lib/typescript/src/types';
 import {Column, Columns} from '../column';
-import {ArrowDownFillIcon} from '../icon/arrow-donw-fill';
+import {PlusIcon} from '../icon/plus';
+import {ArrowDownFillIcon} from '../icon/arrow-down-fill';
+import {HeaderBackButtonIcon} from './icon/back';
 
 const HomeScreenHeaderLeft: FunctionComponent = () => {
   const style = useStyle();
@@ -164,4 +165,19 @@ export const defaultHeaderOptions = {
     borderTopColor: ColorPalette['gray-600'],
   },
   headerLeft: (props: any) => <DefaultScreenHeaderLeft {...props} />,
+};
+
+export const ManageSuggestChainHeaderRight = (props: any) => {
+  const style = useStyle();
+  return (
+    <Box
+      paddingRight={16}
+      paddingBottom={18}
+      onClick={() => {
+        //TODO - suggest chain으로 이동하는 네비게이션
+      }}
+      {...props}>
+      <PlusIcon size={28} color={style.get('color-gray-300').color} />
+    </Box>
+  );
 };
