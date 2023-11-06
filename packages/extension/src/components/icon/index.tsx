@@ -41,3 +41,5 @@ export * from "./x-mark";
 export * from "./check-circle";
 export * from "./home";
 export * from "./qr-code";
+export * from "./eye";
+export * from "./eye-slash";

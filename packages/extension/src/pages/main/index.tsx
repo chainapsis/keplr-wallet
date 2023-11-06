@@ -18,7 +18,11 @@ import {
 } from "./components";
 import { Stack } from "../../components/stack";
 import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
-import { ArrowTopRightOnSquareIcon } from "../../components/icon";
+import {
+  ArrowTopRightOnSquareIcon,
+  EyeIcon,
+  EyeSlashIcon,
+} from "../../components/icon";
 import { Box } from "../../components/box";
 import { Modal } from "../../components/modal";
 import { DualChart } from "./components/chart";
@@ -28,7 +32,7 @@ import { ColorPalette } from "../../styles";
 import { AvailableTabView } from "./available";
 import { StakedTabView } from "./staked";
 import { SearchTextInput } from "../../components/input";
-import { useSpringValue } from "@react-spring/web";
+import { animated, useSpringValue } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
 import { IChainInfoImpl, QueryError } from "@keplr-wallet/stores";
 import { Skeleton } from "../../components/skeleton";
@@ -37,7 +41,7 @@ import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
 import { useTheme } from "styled-components";
 import { IbcHistoryView } from "./components/ibc-history-view";
 import { LayeredHorizontalRadioGroup } from "../../components/radio-group";
-import { YAxis } from "../../components/axis";
+import { XAxis, YAxis } from "../../components/axis";
 import { DepositModal } from "./components/deposit-modal";
 import { MainHeaderLayout } from "./layouts/header";
 
@@ -168,6 +172,10 @@ export const MainPage: FunctionComponent<{
   });
   const globalSimpleBar = useGlobarSimpleBar();
 
+  const animatedPrivacyModeHover = useSpringValue(0, {
+    config: defaultSpringConfig,
+  });
+
   return (
     <MainHeaderLayout isNotReady={isNotReady}>
       <Box paddingX="0.75rem" paddingBottom="1.5rem">
@@ -233,32 +241,94 @@ export const MainPage: FunctionComponent<{
               }}
             >
               <Gutter size="2rem" />
-              <Skeleton isNotReady={isNotReady}>
-                <Subtitle3
-                  style={{
-                    color: ColorPalette["gray-300"],
-                  }}
-                >
-                  {tabStatus === "available"
-                    ? intl.formatMessage({ id: "page.main.chart.available" })
-                    : intl.formatMessage({ id: "page.main.chart.staked" })}
-                </Subtitle3>
-              </Skeleton>
-              <Gutter size="0.5rem" />
-              <Skeleton isNotReady={isNotReady} dummyMinWidth="8.125rem">
-                <H1
-                  style={{
-                    color:
-                      theme.mode === "light"
-                        ? ColorPalette["gray-700"]
-                        : ColorPalette["gray-10"],
-                  }}
-                >
-                  {tabStatus === "available"
-                    ? availableTotalPrice?.toString() || "-"
-                    : stakedTotalPrice?.toString() || "-"}
-                </H1>
-              </Skeleton>
+              <Box
+                alignX={isNotReady ? "center" : undefined}
+                onHoverStateChange={(isHover) => {
+                  if (!isNotReady) {
+                    animatedPrivacyModeHover.start(isHover ? 1 : 0);
+                  } else {
+                    animatedPrivacyModeHover.set(0);
+                  }
+                }}
+              >
+                <Skeleton isNotReady={isNotReady}>
+                  <Box position="relative" alignY="center">
+                    <XAxis>
+                      <Subtitle3
+                        style={{
+                          color: ColorPalette["gray-300"],
+                        }}
+                      >
+                        {tabStatus === "available"
+                          ? intl.formatMessage({
+                              id: "page.main.chart.available",
+                            })
+                          : intl.formatMessage({
+                              id: "page.main.chart.staked",
+                            })}
+                      </Subtitle3>
+                      <animated.div
+                        style={{
+                          width: animatedPrivacyModeHover.to(
+                            (v) => `${v * 1.25}rem`
+                          ),
+                        }}
+                      />
+                    </XAxis>
+                    <animated.div
+                      style={{
+                        position: "absolute",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        right: 0,
+                        cursor: "pointer",
+                        opacity: animatedPrivacyModeHover.to((v) =>
+                          Math.max(0, (v - 0.3) * (10 / 3))
+                        ),
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+
+                        uiConfigStore.toggleIsPrivacyMode();
+                      }}
+                    >
+                      {uiConfigStore.isPrivacyMode ? (
+                        <EyeSlashIcon
+                          width="1rem"
+                          height="1rem"
+                          color={ColorPalette["gray-400"]}
+                        />
+                      ) : (
+                        <EyeIcon
+                          width="1rem"
+                          height="1rem"
+                          color={ColorPalette["gray-400"]}
+                        />
+                      )}
+                    </animated.div>
+                  </Box>
+                </Skeleton>
+                <Gutter size="0.5rem" />
+                <Skeleton isNotReady={isNotReady} dummyMinWidth="8.125rem">
+                  <H1
+                    style={{
+                      color:
+                        theme.mode === "light"
+                          ? ColorPalette["gray-700"]
+                          : ColorPalette["gray-10"],
+                      textAlign: "center",
+                    }}
+                  >
+                    {uiConfigStore.hideStringIfPrivacyMode(
+                      tabStatus === "available"
+                        ? availableTotalPrice?.toString() || "-"
+                        : stakedTotalPrice?.toString() || "-",
+                      4
+                    )}
+                  </H1>
+                </Skeleton>
+              </Box>
             </Box>
           </Box>
           {tabStatus === "available" ? (
