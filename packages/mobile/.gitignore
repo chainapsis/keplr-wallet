@@ -66,3 +66,5 @@ yarn-error.log
 /coverage
 
 .watchman-cookie-*
+
+injected-provider.bundle.js
