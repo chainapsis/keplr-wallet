@@ -8,6 +8,7 @@ import {
   QueriesSetBase,
 } from "../query";
 import { DenomHelper, KVStore, toGenerator } from "@keplr-wallet/common";
+import { ObservableSimpleQuery } from "../query/simple";
 
 type CacheIBCDenomData = {
   denomTrace: {
@@ -374,10 +375,12 @@ export class IBCCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
     },
     protected readonly queriesStore: {
       get(chainId: string): QueriesSetBase & CosmosQueries;
+      simpleQuery: ObservableSimpleQuery;
     },
     protected readonly cosmwasmQueriesStore:
       | {
           get(chainId: string): QueriesSetBase & CosmwasmQueries;
+          simpleQuery: ObservableSimpleQuery;
         }
       | undefined,
     protected readonly coinDenomGenerator: (

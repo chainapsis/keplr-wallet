@@ -8,6 +8,7 @@ import {
   mergeStores,
   ChainedFunctionifyTuple,
 } from "../common";
+import { ObservableSimpleQuery } from "./simple";
 
 export interface QueriesSetBase {
   readonly queryBalances: DeepReadonly<ObservableQueryBalances>;
@@ -26,6 +27,8 @@ export const createQueriesSetBase = (
 // eslint-disable-next-line @typescript-eslint/ban-types
 export interface IQueriesStore<T extends IObject = {}> {
   get(chainId: string): DeepReadonly<QueriesSetBase & T>;
+
+  simpleQuery: ObservableSimpleQuery;
 }
 
 export class QueriesStore<Injects extends Array<IObject>> {
@@ -44,6 +47,8 @@ export class QueriesStore<Injects extends Array<IObject>> {
     Injects
   >;
 
+  public readonly simpleQuery: ObservableSimpleQuery;
+
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly chainGetter: ChainGetter,
@@ -57,6 +62,8 @@ export class QueriesStore<Injects extends Array<IObject>> {
     >
   ) {
     this.queriesCreators = queriesCreators;
+
+    this.simpleQuery = new ObservableSimpleQuery(kvStore);
 
     makeObservable(this);
   }

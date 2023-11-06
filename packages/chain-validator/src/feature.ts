@@ -19,6 +19,7 @@ export const SupportedChainFeatures = [
   "osmosis-txfees",
   "terra-classic-fee",
   "authz-msg-revoke-fixed",
+  "osmosis-base-fee-beta",
 ];
 
 /**

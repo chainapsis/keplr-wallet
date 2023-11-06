@@ -298,6 +298,79 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       );
     }
 
+    const queryOsmosis = this.queriesStore.get(this.chainId).osmosis;
+    let osmosisFeeCurrency: FeeCurrency | undefined = undefined;
+    if (
+      this.chainInfo.features &&
+      this.chainInfo.features.includes("osmosis-base-fee-beta") &&
+      queryOsmosis &&
+      queryOsmosis.queryTxFeesBaseDenom.baseDenom
+    ) {
+      const remoteBaseFeeStep = this.queriesStore.simpleQuery.queryGet<{
+        low?: number;
+        average?: number;
+        high?: number;
+      }>(
+        "https://base-fee-step.s3.us-west-2.amazonaws.com/osmosis-base-fee-beta.json"
+      );
+      const baseDenom = queryOsmosis.queryTxFeesBaseDenom.baseDenom;
+      const baseFeeCurrency =
+        this.feeCurrencies.find((c) => c.coinMinimalDenom === baseDenom) ||
+        this.chainInfo.feeCurrencies[0];
+
+      const queryBaseFee = this.queriesStore.simpleQuery.queryGet<{
+        base_fee: string;
+      }>(
+        (() => {
+          let baseURL = this.chainInfo.rest;
+          if (baseURL.endsWith("/")) {
+            baseURL = baseURL.slice(0, baseURL.length - 1);
+          }
+          return baseURL + "/osmosis/txfees/v1beta1/cur_eip_base_fee";
+        })()
+      );
+      if (queryBaseFee.response) {
+        const baseFee = new Dec(queryBaseFee.response.data.base_fee);
+        const low = remoteBaseFeeStep.response?.data.low
+          ? parseFloat(
+              baseFee
+                .mul(new Dec(remoteBaseFeeStep.response.data.low))
+                .toString(8)
+            )
+          : baseFeeCurrency.gasPriceStep?.low ?? DefaultGasPriceStep.low;
+        const average = Math.max(
+          low,
+          remoteBaseFeeStep.response?.data.average
+            ? parseFloat(
+                baseFee
+                  .mul(new Dec(remoteBaseFeeStep.response.data.average))
+                  .toString(8)
+              )
+            : baseFeeCurrency.gasPriceStep?.average ??
+                DefaultGasPriceStep.average
+        );
+        const high = Math.max(
+          average,
+          remoteBaseFeeStep.response?.data.high
+            ? parseFloat(
+                baseFee
+                  .mul(new Dec(remoteBaseFeeStep.response.data.high))
+                  .toString(8)
+              )
+            : baseFeeCurrency.gasPriceStep?.high ?? DefaultGasPriceStep.high
+        );
+
+        osmosisFeeCurrency = {
+          ...baseFeeCurrency,
+          gasPriceStep: {
+            low,
+            average,
+            high,
+          },
+        };
+      }
+    }
+
     if (
       this.chainInfo.features &&
       this.chainInfo.features.includes("osmosis-txfees") &&
@@ -309,7 +382,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         )
     ) {
       const gasPriceStep =
-        this.feeCurrencies[0].gasPriceStep ?? DefaultGasPriceStep;
+        osmosisFeeCurrency?.gasPriceStep ?? DefaultGasPriceStep;
 
       const gasPrice = new Dec(gasPriceStep[feeType].toString());
       let feeAmount = gasPrice.mul(new Dec(this.gasConfig.gas));
@@ -440,6 +513,32 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     const fee = this.getFeePrimitive();
     if (!fee) {
       return undefined;
+    }
+
+    if (
+      this.chainInfo.features &&
+      this.chainInfo.features.includes("osmosis-base-fee-beta")
+    ) {
+      if (
+        !this.queriesStore.get(this.chainId).osmosis?.queryTxFeesBaseDenom
+          .baseDenom
+      ) {
+        return new Error("Failed to fetch base denom");
+      }
+
+      const baseFee = this.queriesStore.simpleQuery.queryGet(
+        (() => {
+          let baseURL = this.chainInfo.rest;
+          if (baseURL.endsWith("/")) {
+            baseURL = baseURL.slice(0, baseURL.length - 1);
+          }
+          return baseURL + "/osmosis/txfees/v1beta1/cur_eip_base_fee";
+        })()
+      );
+
+      if (baseFee.error) {
+        return new Error("Failed to fetch base fee");
+      }
     }
 
     if (
