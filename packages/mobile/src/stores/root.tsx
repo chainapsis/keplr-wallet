@@ -40,6 +40,7 @@ import {
   TokenContractListURL,
 } from '../utils/config.ui';
 import {TokenContractsQueries} from './token-contracts';
+import {AprQueries} from './aprs';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
@@ -67,6 +68,7 @@ export class RootStore {
       // KeplrETCQueries,
       ICNSQueries,
       TokenContractsQueries,
+      AprQueries,
     ]
   >;
   public readonly accountStore: AccountStore<[CosmosAccount, SecretAccount]>;
@@ -139,6 +141,10 @@ export class RootStore {
       ICNSQueries.use(),
       TokenContractsQueries.use({
         tokenContractListURL: TokenContractListURL,
+      }),
+      AprQueries.use({
+        aprBaseUrl:
+          'https://pjld2aanw3elvteui4gwyxgx4m0ceweg.lambda-url.us-west-2.on.aws',
       }),
     );
 

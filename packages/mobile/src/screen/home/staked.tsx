@@ -19,17 +19,19 @@ import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../navigation';
 import {SelectStakingChainModal} from './stakeing-chain-select-modal';
 import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
-import {useGetAllApr} from '../../hooks/useApr';
 
 const zeroDec = new Dec(0);
 
 export const StakedTabView: FunctionComponent<{
   SelectStakingChainModalRef: React.RefObject<BottomSheetModalMethods>;
 }> = observer(({SelectStakingChainModalRef}) => {
-  const {hugeQueriesStore} = useStore();
+  const {hugeQueriesStore, queriesStore} = useStore();
   const intl = useIntl();
   const navigate = useNavigation<StackNavProp>();
-  const aprList = useGetAllApr(hugeQueriesStore.stakables);
+  const aprList = hugeQueriesStore.stakables.map(viewToken => {
+    return queriesStore.get(viewToken.chainInfo.chainId).apr.queryApr.apr;
+  });
+
   const delegations: ViewToken[] = useMemo(
     () =>
       hugeQueriesStore.delegations.filter(token => {
