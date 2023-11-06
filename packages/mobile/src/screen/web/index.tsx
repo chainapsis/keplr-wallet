@@ -17,7 +17,7 @@ export const WebScreen: FunctionComponent = observer(() => {
   // const dAppPageUrl = 'https://explore.keplr.app';
   const safeAreaInsets = useSafeAreaInsets();
 
-  const [uri, setURI] = useState('app.osmosis.zone');
+  const [uri, setURI] = useState('');
   const [uriError, setURIError] = useState('');
 
   return (
