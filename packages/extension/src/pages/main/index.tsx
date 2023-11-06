@@ -38,7 +38,7 @@ import { IChainInfoImpl, QueryError } from "@keplr-wallet/stores";
 import { Skeleton } from "../../components/skeleton";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
-import { useTheme } from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { IbcHistoryView } from "./components/ibc-history-view";
 import { LayeredHorizontalRadioGroup } from "../../components/radio-group";
 import { XAxis, YAxis } from "../../components/axis";
@@ -275,7 +275,8 @@ export const MainPage: FunctionComponent<{
                         }}
                       />
                     </XAxis>
-                    <animated.div
+                    <Styles.PrivacyModeButton
+                      as={animated.div}
                       style={{
                         position: "absolute",
                         display: "flex",
@@ -294,19 +295,11 @@ export const MainPage: FunctionComponent<{
                       }}
                     >
                       {uiConfigStore.isPrivacyMode ? (
-                        <EyeSlashIcon
-                          width="1rem"
-                          height="1rem"
-                          color={ColorPalette["gray-400"]}
-                        />
+                        <EyeSlashIcon width="1rem" height="1rem" />
                       ) : (
-                        <EyeIcon
-                          width="1rem"
-                          height="1rem"
-                          color={ColorPalette["gray-400"]}
-                        />
+                        <EyeIcon width="1rem" height="1rem" />
                       )}
-                    </animated.div>
+                    </Styles.PrivacyModeButton>
                   </Box>
                 </Skeleton>
                 <Gutter size="0.5rem" />
@@ -479,3 +472,20 @@ export const MainPage: FunctionComponent<{
     </MainHeaderLayout>
   );
 });
+
+const Styles = {
+  // hover style을 쉽게 넣으려고 그냥 styled-component로 만들었다.
+  PrivacyModeButton: styled.div`
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-300"]
+        : ColorPalette["gray-400"]};
+
+    &:hover {
+      color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-200"]
+          : ColorPalette["gray-300"]};
+    }
+  `,
+};
