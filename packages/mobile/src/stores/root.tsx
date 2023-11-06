@@ -1,4 +1,4 @@
-import {CommunityChainInfoRepo, EmbedChainInfos} from '../config';
+import {APR_API_URL, CommunityChainInfoRepo, EmbedChainInfos} from '../config';
 
 import {
   AccountStore,
@@ -143,8 +143,7 @@ export class RootStore {
         tokenContractListURL: TokenContractListURL,
       }),
       AprQueries.use({
-        aprBaseUrl:
-          'https://pjld2aanw3elvteui4gwyxgx4m0ceweg.lambda-url.us-west-2.on.aws',
+        aprBaseUrl: APR_API_URL,
       }),
     );
 
