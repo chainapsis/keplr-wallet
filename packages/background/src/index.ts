@@ -7,6 +7,7 @@ import * as ChainsUI from "./chains-ui/internal";
 import * as ChainsUpdate from "./chains-update/internal";
 import * as SecretWasm from "./secret-wasm/internal";
 import * as BackgroundTx from "./tx/internal";
+import * as BackgroundTxEthereum from "./tx-ethereum/internal";
 import * as TokenCW20 from "./token-cw20/internal";
 import * as Interaction from "./interaction/internal";
 import * as Permission from "./permission/internal";
@@ -108,6 +109,12 @@ export function init(
     chainsService,
     notification
   );
+
+  const backgroundTxEthereumService =
+    new BackgroundTxEthereum.BackgroundTxEthereumService(
+      chainsService,
+      notification
+    );
 
   const phishingListService = new PhishingList.PhishingListService(
     {
@@ -215,6 +222,11 @@ export function init(
     permissionInteractiveService
   );
   BackgroundTx.init(router, backgroundTxService, permissionInteractiveService);
+  BackgroundTxEthereum.init(
+    router,
+    backgroundTxEthereumService,
+    permissionInteractiveService
+  );
   PhishingList.init(router, phishingListService);
   AutoLocker.init(router, autoLockAccountService);
   Analytics.init(router, analyticsService);
@@ -255,6 +267,7 @@ export function init(
       await tokenCW20Service.init();
 
       await backgroundTxService.init();
+      await backgroundTxEthereumService.init();
       await phishingListService.init();
       await autoLockAccountService.init();
       await analyticsService.init();
