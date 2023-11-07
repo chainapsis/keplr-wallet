@@ -49,13 +49,23 @@ import {SettingTokenAddScreen} from './screen/setting/screens/token/add';
 import {SettingSecurityAndPrivacyScreen} from './screen/setting/screens/security/security';
 import {SettingSecurityChangePasswordScreen} from './screen/setting/screens/security/change-password';
 import {SettingSecurityPermissionScreen} from './screen/setting/screens/security/permission';
+import {SettingGeneralLanguageScreen} from './screen/setting/screens/general/language';
 import {RegisterIntroScreen} from './screen/register/intro';
 import {StakingDashboardScreen} from './screen/staking/dashboard';
+import {RegisterIntroNewUserScreen} from './screen/register/intro-new-user';
+import {registerHeaderOptions} from './components/pageHeader/header-register';
+import {RegisterIntroExistingUserScene} from './screen/register/intro-existing-user';
+import {RegisterScreen} from './screen/register';
+import {WebScreen} from './screen/web';
+import {WebpageScreen} from './screen/web/webpage';
 
 export type RootStackParamList = {
   Home: undefined;
   Register: undefined;
+  'Register.Temp': undefined;
   'Register.Intro': undefined;
+  'Register.Intro.NewUser': undefined;
+  'Register.Intro.ExistingUser': undefined;
   'Register.EnableChain': undefined;
   Send: undefined;
   'Send.SelectAsset': undefined;
@@ -68,7 +78,6 @@ export type RootStackParamList = {
   'Setting.General.ContactList': {chainId?: string};
   'Setting.General.ContactAdd': {chainId: string; editIndex?: number};
 
-  'Setting.General.Theme': undefined;
   'Setting.General.WC': undefined;
   'Setting.General.ManageNonActiveChains': undefined;
   'Setting.General.ManageChainVisibility': undefined;
@@ -89,6 +98,7 @@ export type RootStackParamList = {
   'SelectWallet.ViewRecoveryPhrase': {id: string};
 
   Stake: NavigatorScreenParams<StakeNavigation>;
+  Web: {url: string};
 };
 
 export type StakeNavigation = {
@@ -109,8 +119,25 @@ export const RegisterNavigation: FunctionComponent = () => {
   return (
     <Stack.Navigator
       initialRouteName="Register.Intro"
-      screenOptions={{headerShown: false}}>
-      <Stack.Screen name="Register.Intro" component={RegisterIntroScreen} />
+      screenOptions={{
+        ...registerHeaderOptions,
+      }}>
+      <Stack.Screen name="Register.Temp" component={RegisterScreen} />
+      <Stack.Screen
+        name="Register.Intro"
+        component={RegisterIntroScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Register.Intro.NewUser"
+        component={RegisterIntroNewUserScreen}
+      />
+      <Stack.Screen
+        name="Register.Intro.ExistingUser"
+        component={RegisterIntroExistingUserScene}
+      />
       <Stack.Screen
         name="Register.EnableChain"
         component={RegisterEnableChainScreen}
@@ -192,7 +219,11 @@ export const MainTabNavigation: FunctionComponent = () => {
         }}
         component={HomeScreen}
       />
-      <Tab.Screen name="Web" component={LockedScreen} />
+      <Tab.Screen
+        name="Web"
+        options={{headerShown: false}}
+        component={WebScreen}
+      />
       <Tab.Screen
         name="Settings"
         options={{headerShown: false}}
@@ -276,7 +307,7 @@ const SettingGeneralNavigation = () => {
           }),
           ...defaultHeaderOptions,
         }}
-        component={SettingGeneralScreen}
+        component={SettingGeneralLanguageScreen}
       />
       <Stack.Screen
         name="Setting.General.Currency"
@@ -307,16 +338,6 @@ const SettingGeneralNavigation = () => {
           ...defaultHeaderOptions,
         }}
         component={SettingContactsAddScreen}
-      />
-      <Stack.Screen
-        name="Setting.General.Theme"
-        options={{
-          title: intl.formatMessage({
-            id: 'page.setting.general.theme-title',
-          }),
-          ...defaultHeaderOptions,
-        }}
-        component={SettingGeneralScreen}
       />
       <Stack.Screen
         name="Setting.General.ManageNonActiveChains"
@@ -539,6 +560,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
             options={{headerShown: false}}
             component={StakeNavigation}
           />
+          <Stack.Screen name={'Web'} component={WebpageScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </FocusedScreenProvider>

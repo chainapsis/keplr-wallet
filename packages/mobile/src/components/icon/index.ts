@@ -14,3 +14,7 @@ export * from './qr-code';
 export * from './check-toggle';
 export * from './rocket-launch';
 export * from './key';
+export * from './shield';
+export * from './bolt';
+export * from './apple';
+export * from './google';

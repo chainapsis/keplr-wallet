@@ -43,7 +43,6 @@ export const SettingContactsAddScreen: FunctionComponent = observer(() => {
   // Param "chainId" is required.
   const paramChainId = route.params.chainId;
   const paramEditIndex = route.params.editIndex;
-  console.log(paramChainId, paramEditIndex);
 
   useEffect(() => {
     if (labelRef.current) {
