@@ -338,7 +338,7 @@ export class RootStore {
 
     this.ethereumAccountStore = new EthereumAccountStore(
       this.chainStore,
-      this.queriesStore
+      getKeplrFromWindow
     );
 
     this.priceStore = new CoinGeckoPriceStore(
