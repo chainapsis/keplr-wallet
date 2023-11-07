@@ -36,7 +36,8 @@ export const RegisterIntroNewUserScreen: FunctionComponent = () => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerTitle: Header,
+      // eslint-disable-next-line react/no-unstable-nested-components
+      headerTitle: () => <Header />,
     });
   }, [navigation]);
 

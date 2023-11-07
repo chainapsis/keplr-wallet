@@ -53,10 +53,12 @@ import {RegisterIntroScreen} from './screen/register/intro';
 import {RegisterIntroNewUserScreen} from './screen/register/intro-new-user';
 import {registerHeaderOptions} from './components/pageHeader/header-register';
 import {RegisterIntroExistingUserScene} from './screen/register/intro-existing-user';
+import {RegisterScreen} from './screen/register';
 
 export type RootStackParamList = {
   Home: undefined;
   Register: undefined;
+  'Register.Temp': undefined;
   'Register.Intro': undefined;
   'Register.Intro.NewUser': undefined;
   'Register.Intro.ExistingUser': undefined;
@@ -104,6 +106,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       screenOptions={{
         ...registerHeaderOptions,
       }}>
+      <Stack.Screen name="Register.Temp" component={RegisterScreen} />
       <Stack.Screen
         name="Register.Intro"
         component={RegisterIntroScreen}

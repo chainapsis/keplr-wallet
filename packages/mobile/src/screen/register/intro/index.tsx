@@ -63,6 +63,9 @@ export const RegisterIntroScreen: FunctionComponent = () => {
           text={intl.formatMessage({
             id: 'pages.register.intro.connect-hardware-wallet-button',
           })}
+          onPress={() => {
+            navigation.dispatch(StackActions.push('Register.Temp'));
+          }}
         />
       </Box>
     </Box>
