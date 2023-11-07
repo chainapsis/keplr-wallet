@@ -38,7 +38,7 @@ export const Chip: FunctionComponent<{
         return ['color-white'];
       case 'light':
         if (color === 'primary') {
-          return [`color-${baseColor}-400`, `dark:color-white`];
+          return [`color-${baseColor}-400`, 'dark:color-white'];
         } else {
           return [`color-${baseColor}-400`, `dark:color-${baseColor}-200`];
         }
