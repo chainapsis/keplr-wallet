@@ -268,62 +268,58 @@ export const MainPage: FunctionComponent<{
                 }}
               >
                 <Skeleton isNotReady={isNotReady}>
-                  <Box alignY="center" alignX="center">
-                    <XAxis>
-                      <Subtitle3
+                  <XAxis alignY="center">
+                    <Subtitle3
+                      style={{
+                        color: ColorPalette["gray-300"],
+                      }}
+                    >
+                      {tabStatus === "available"
+                        ? intl.formatMessage({
+                            id: "page.main.chart.available",
+                          })
+                        : intl.formatMessage({
+                            id: "page.main.chart.staked",
+                          })}
+                    </Subtitle3>
+                    <animated.div
+                      style={{
+                        position: "relative",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        height: "1px",
+                        overflowX: "clip",
+                        width: animatedPrivacyModeHover.to(
+                          (v) => `${v * 1.25}rem`
+                        ),
+                      }}
+                    >
+                      <Styles.PrivacyModeButton
+                        as={animated.div}
                         style={{
-                          color: ColorPalette["gray-300"],
-                        }}
-                      >
-                        {tabStatus === "available"
-                          ? intl.formatMessage({
-                              id: "page.main.chart.available",
-                            })
-                          : intl.formatMessage({
-                              id: "page.main.chart.staked",
-                            })}
-                      </Subtitle3>
-                      <animated.div
-                        style={{
-                          width: animatedPrivacyModeHover.to(
-                            (v) => `${v * 1.25}rem`
+                          position: "absolute",
+                          right: 0,
+                          cursor: "pointer",
+                          opacity: animatedPrivacyModeHover.to((v) =>
+                            Math.max(0, (v - 0.3) * (10 / 3))
                           ),
+                          marginTop: "2px",
                         }}
-                      />
-                      <div
-                        style={{
-                          position: "relative",
-                          display: "flex",
-                          flexDirection: "column",
-                          justifyContent: "center",
+                        onClick={(e) => {
+                          e.preventDefault();
+
+                          uiConfigStore.toggleIsPrivacyMode();
                         }}
                       >
-                        <Styles.PrivacyModeButton
-                          as={animated.div}
-                          style={{
-                            position: "absolute",
-                            right: 0,
-                            cursor: "pointer",
-                            opacity: animatedPrivacyModeHover.to((v) =>
-                              Math.max(0, (v - 0.3) * (10 / 3))
-                            ),
-                            marginTop: "2px",
-                          }}
-                          onClick={(e) => {
-                            e.preventDefault();
-
-                            uiConfigStore.toggleIsPrivacyMode();
-                          }}
-                        >
-                          {uiConfigStore.isPrivacyMode ? (
-                            <EyeSlashIcon width="1rem" height="1rem" />
-                          ) : (
-                            <EyeIcon width="1rem" height="1rem" />
-                          )}
-                        </Styles.PrivacyModeButton>
-                      </div>
-                    </XAxis>
-                  </Box>
+                        {uiConfigStore.isPrivacyMode ? (
+                          <EyeSlashIcon width="1rem" height="1rem" />
+                        ) : (
+                          <EyeIcon width="1rem" height="1rem" />
+                        )}
+                      </Styles.PrivacyModeButton>
+                    </animated.div>
+                  </XAxis>
                 </Skeleton>
                 <Gutter size="0.5rem" />
                 <Skeleton isNotReady={isNotReady} dummyMinWidth="8.125rem">
