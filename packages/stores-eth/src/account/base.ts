@@ -1,11 +1,12 @@
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { ChainGetter } from "@keplr-wallet/stores";
-import { AppCurrency, Keplr } from "@keplr-wallet/types";
+import { AppCurrency, EthSignType, Keplr } from "@keplr-wallet/types";
 import { DenomHelper } from "@keplr-wallet/common";
 import { erc20ContractInterface } from "../constants";
 import { parseUnits } from "@ethersproject/units";
 import {
   UnsignedTransaction,
+  serialize,
   TransactionTypes,
 } from "@ethersproject/transactions";
 
@@ -124,5 +125,29 @@ export class EthereumAccountBase {
     };
 
     return tx;
+  }
+
+  async sendEthereumTx(sender: string, unsignedTx: UnsignedTransaction) {
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    if (!chainInfo.evm) {
+      throw new Error("No EVM chain info provided");
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const keplr = (await this.getKeplr())!;
+    const signEthereum = keplr.signEthereum.bind(keplr);
+    const signature = await signEthereum(
+      this.chainId,
+      sender,
+      JSON.stringify(unsignedTx),
+      EthSignType.TRANSACTION
+    );
+
+    const rawTransaction = serialize(unsignedTx, signature);
+
+    const sendTx = keplr.sendEthereumTx.bind(keplr);
+    const result = await sendTx(this.chainId, rawTransaction);
+
+    return result;
   }
 }
