@@ -2,6 +2,7 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Message } from "@keplr-wallet/router";
 import { EthSignType } from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
+import { isAddress as isEthereumHexAddress } from "@ethersproject/address";
 
 export class RequestSignEthereumMsg extends Message<Uint8Array> {
   public static type() {
@@ -30,8 +31,12 @@ export class RequestSignEthereumMsg extends Message<Uint8Array> {
       throw new Error("sign type not set");
     }
 
-    // Validate bech32 address.
-    Bech32Address.validate(this.signer);
+    // Validate signer address.
+    try {
+      Bech32Address.validate(this.signer);
+    } catch {
+      isEthereumHexAddress(this.signer);
+    }
   }
 
   override approveExternal(): boolean {

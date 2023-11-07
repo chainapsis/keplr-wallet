@@ -4500,6 +4500,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ethersproject/units@npm:^5.7.0":
+  version: 5.7.0
+  resolution: "@ethersproject/units@npm:5.7.0"
+  dependencies:
+    "@ethersproject/bignumber": ^5.7.0
+    "@ethersproject/constants": ^5.7.0
+    "@ethersproject/logger": ^5.7.0
+  checksum: 304714f848cd32e57df31bf545f7ad35c2a72adae957198b28cbc62166daa929322a07bff6e9c9ac4577ab6aa0de0546b065ed1b2d20b19e25748b7d475cb0fc
+  languageName: node
+  linkType: hard
+
 "@ethersproject/wallet@npm:^5.7.0":
   version: 5.7.0
   resolution: "@ethersproject/wallet@npm:5.7.0"
@@ -5237,6 +5248,7 @@ __metadata:
   dependencies:
     "@ethereumjs/common": ^2.6.5
     "@ethereumjs/tx": ^3.5.2
+    "@ethersproject/address": ^5.7.0
     "@ethersproject/hash": ^5.7.0
     "@ethersproject/transactions": ^5.7.0
     "@ethersproject/wallet": ^5.7.0
@@ -5582,6 +5594,7 @@ __metadata:
   dependencies:
     "@ethersproject/abi": ^5.7.0
     "@ethersproject/transactions": ^5.7.0
+    "@ethersproject/units": ^5.7.0
     "@keplr-wallet/common": 0.12.27
     "@keplr-wallet/simple-fetch": 0.12.27
     "@keplr-wallet/stores": 0.12.27
