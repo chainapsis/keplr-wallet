@@ -27,10 +27,21 @@ export const StakedTabView: FunctionComponent<{
 }> = observer(({SelectStakingChainModalRef}) => {
   const {hugeQueriesStore, queriesStore} = useStore();
   const intl = useIntl();
+
+  const stakablesTokenList = hugeQueriesStore.stakables;
+  const stakablesTokenNonZeroList = useMemo(() => {
+    return stakablesTokenList.filter(token => {
+      return token.token.toDec().gt(zeroDec) && token.chainInfo.stakeCurrency;
+    });
+  }, [stakablesTokenList]);
+
   const navigate = useNavigation<StackNavProp>();
-  const aprList = hugeQueriesStore.stakables.map(viewToken => {
-    return queriesStore.get(viewToken.chainInfo.chainId).apr.queryApr.apr;
-  });
+
+  const aprList = useMemo(() => {
+    return stakablesTokenList.map(viewToken => {
+      return queriesStore.get(viewToken.chainInfo.chainId).apr.queryApr.apr;
+    });
+  }, [stakablesTokenList, queriesStore]);
 
   const delegations: ViewToken[] = useMemo(
     () =>
@@ -101,12 +112,6 @@ export const StakedTabView: FunctionComponent<{
       }),
     },
   ];
-  const allBalances = hugeQueriesStore.stakables;
-  const allBalancesNonZero = useMemo(() => {
-    return allBalances.filter(token => {
-      return token.token.toDec().gt(zeroDec) && token.chainInfo.stakeCurrency;
-    });
-  }, [allBalances]);
 
   return (
     <React.Fragment>
@@ -115,6 +120,7 @@ export const StakedTabView: FunctionComponent<{
           if (balance.length === 0) {
             return null;
           }
+          //NOTE delegation 일때만 apr을 보여줘야 하기 때문에 해당 변수 설정
           const isDelegation = title === TokenViewData[0].title;
           return (
             <CollapsibleList
@@ -218,7 +224,7 @@ export const StakedTabView: FunctionComponent<{
         <SelectStakingChainModal
           onSelect={() => {}}
           aprList={aprList}
-          items={allBalancesNonZero.map(token => ({
+          items={stakablesTokenNonZeroList.map(token => ({
             key: token.chainInfo.chainId,
             viewToken: token,
           }))}

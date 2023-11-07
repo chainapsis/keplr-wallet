@@ -15,9 +15,9 @@ import {ChainImageFallback} from '../../../components/image';
 import {ViewToken} from '..';
 import {useStore} from '../../../stores';
 import {Stack} from '../../../components/stack';
-import {formatAprString} from '../../../utils';
 import {IntPretty} from '@keplr-wallet/unit';
-import {AprItem} from '../../../hooks/useApr';
+import {formatAprString} from '../utils';
+import {AprItem} from '../../../stores/aprs';
 
 export interface SelectStakingChainModalItem {
   key: string;

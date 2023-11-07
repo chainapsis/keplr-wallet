@@ -28,7 +28,7 @@ import {Path, Svg} from 'react-native-svg';
 import {ArrowRightIcon} from '../../../../components/icon/arrow-right';
 import {InformationOutlinedIcon} from '../../../../components/icon/information-outlined';
 import {IntPretty} from '@keplr-wallet/unit';
-import {formatAprString} from '../../../../utils';
+import {formatAprString} from '../../utils';
 
 export const TokenTitleView: FunctionComponent<{
   title: string;
