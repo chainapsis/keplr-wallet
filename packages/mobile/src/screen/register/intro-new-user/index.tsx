@@ -36,7 +36,7 @@ export const RegisterIntroNewUserScreen: FunctionComponent = () => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerTitle: () => <Header />,
+      headerTitle: Header,
     });
   }, [navigation]);
 
