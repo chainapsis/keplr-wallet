@@ -77,12 +77,19 @@ export const SwapAssetInfo: FunctionComponent<{
   senderConfig: ISenderConfig;
   amountConfig: IBCSwapAmountConfig;
 
+  forceShowPrice?: boolean;
   onDestinationChainSelect?: (
     chainId: string,
     coinMinimalDenom: string
   ) => void;
 }> = observer(
-  ({ type, senderConfig, amountConfig, onDestinationChainSelect }) => {
+  ({
+    type,
+    senderConfig,
+    amountConfig,
+    forceShowPrice,
+    onDestinationChainSelect,
+  }) => {
     const { chainStore, queriesStore, priceStore, uiConfigStore } = useStore();
 
     const theme = useTheme();
@@ -512,16 +519,20 @@ export const SwapAssetInfo: FunctionComponent<{
 
         <XAxis alignY="center">
           {(() => {
-            if (type === "from") {
+            if (type === "from" || forceShowPrice) {
               if (!price) {
                 return null;
               }
 
               return (
                 <Box
-                  cursor="pointer"
+                  cursor={type === "from" ? "pointer" : undefined}
                   onClick={(e) => {
                     e.preventDefault();
+
+                    if (type !== "from") {
+                      return;
+                    }
 
                     if (!isPriceBased) {
                       if (price.toDec().lte(new Dec(0))) {
@@ -541,16 +552,20 @@ export const SwapAssetInfo: FunctionComponent<{
                   }}
                 >
                   <XAxis alignY="center">
-                    <SwitchPriceBaseIcon
-                      width="1.25rem"
-                      height="1.25rem"
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["gray-400"]
-                          : ColorPalette["gray-300"]
-                      }
-                    />
-                    <Gutter size="0.15rem" />
+                    {type === "from" ? (
+                      <React.Fragment>
+                        <SwitchPriceBaseIcon
+                          width="1.25rem"
+                          height="1.25rem"
+                          color={
+                            theme.mode === "light"
+                              ? ColorPalette["gray-400"]
+                              : ColorPalette["gray-300"]
+                          }
+                        />
+                        <Gutter size="0.15rem" />
+                      </React.Fragment>
+                    ) : null}
                     <Body3
                       color={
                         theme.mode === "light"
