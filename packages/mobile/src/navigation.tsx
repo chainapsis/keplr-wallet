@@ -58,6 +58,8 @@ import {RegisterIntroExistingUserScene} from './screen/register/intro-existing-u
 import {RegisterScreen} from './screen/register';
 import {WebScreen} from './screen/web';
 import {WebpageScreen} from './screen/web/webpage';
+import {GovernanceListScreen} from './screen/governance/list';
+import {GovernanceScreen} from './screen/governance';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -99,6 +101,7 @@ export type RootStackParamList = {
 
   Stake: NavigatorScreenParams<StakeNavigation>;
   Web: {url: string};
+  Governance: NavigatorScreenParams<GovernanceNavigation>;
 };
 
 export type StakeNavigation = {
@@ -108,12 +111,18 @@ export type StakeNavigation = {
   'Stake.ValidateDetail': {chainId: string; validatorAddress: string};
 };
 
+export type GovernanceNavigation = {
+  'Governance.intro': undefined;
+  'Governance.list': {chainId: string};
+};
+
 export type StackNavProp = NativeStackNavigationProp<RootStackParamList>;
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 const StakeStack = createNativeStackNavigator<StakeNavigation>();
+const GovernanceStack = createNativeStackNavigator<GovernanceNavigation>();
 
 export const RegisterNavigation: FunctionComponent = () => {
   return (
@@ -489,6 +498,31 @@ const StakeNavigation = () => {
     </StakeStack.Navigator>
   );
 };
+const GovernanceNavigation = () => {
+  const intl = useIntl();
+  return (
+    <GovernanceStack.Navigator>
+      <GovernanceStack.Screen
+        name="Governance.intro"
+        options={{
+          title: '투표할 프로포절이 있는 체인들',
+          ...defaultHeaderOptions,
+        }}
+        component={GovernanceScreen}
+      />
+      <GovernanceStack.Screen
+        name="Governance.list"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.wallet.keyring-item.dropdown.delete-wallet-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={GovernanceListScreen}
+      />
+    </GovernanceStack.Navigator>
+  );
+};
 
 //TODO 이후 상태가 not-loaded일때 스플레시 스크린화면 처리 필요
 export const AppNavigation: FunctionComponent = observer(() => {
@@ -561,6 +595,11 @@ export const AppNavigation: FunctionComponent = observer(() => {
             component={StakeNavigation}
           />
           <Stack.Screen name={'Web'} component={WebpageScreen} />
+          <Stack.Screen
+            name="Governance"
+            options={{headerShown: false}}
+            component={GovernanceNavigation}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </FocusedScreenProvider>

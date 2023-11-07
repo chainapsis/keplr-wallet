@@ -41,6 +41,8 @@ import {
 } from '../utils/config.ui';
 import {TokenContractsQueries} from './token-contracts';
 import {AprQueries} from './aprs';
+import {CosmosGovernanceQueries} from './governance/quries';
+import {CosmosGovernanceQueriesV1} from './governance/v1/quries';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
@@ -69,6 +71,8 @@ export class RootStore {
       ICNSQueries,
       TokenContractsQueries,
       AprQueries,
+      CosmosGovernanceQueries,
+      CosmosGovernanceQueriesV1,
     ]
   >;
   public readonly accountStore: AccountStore<[CosmosAccount, SecretAccount]>;
@@ -145,6 +149,8 @@ export class RootStore {
       AprQueries.use({
         aprBaseUrl: APR_API_URL,
       }),
+      CosmosGovernanceQueries.use(),
+      CosmosGovernanceQueriesV1.use(),
     );
 
     this.accountStore = new AccountStore(
