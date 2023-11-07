@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "build",
+    "rootDir": "src",
+
+    "skipLibCheck": true,
+    "declaration": false,
+    "sourceMap": false
+  },
+  "files": ["src/injected/index.ts"],
+  "exclude": ["node_modules"]
+}

@@ -50,6 +50,8 @@ import {SettingSecurityChangePasswordScreen} from './screen/setting/screens/secu
 import {SettingSecurityPermissionScreen} from './screen/setting/screens/security/permission';
 import {SettingGeneralLanguageScreen} from './screen/setting/screens/general/language';
 import {RegisterIntroScreen} from './screen/register/intro';
+import {WebScreen} from './screen/web';
+import {WebpageScreen} from './screen/web/webpage';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -85,6 +87,8 @@ export type RootStackParamList = {
   'SelectWallet.Delete': {id: string};
   'SelectWallet.ChangeName': {id: string};
   'SelectWallet.ViewRecoveryPhrase': {id: string};
+
+  Web: {url: string};
 };
 export type StackNavProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -179,7 +183,11 @@ export const MainTabNavigation: FunctionComponent = () => {
         }}
         component={HomeScreen}
       />
-      <Tab.Screen name="Web" component={LockedScreen} />
+      <Tab.Screen
+        name="Web"
+        options={{headerShown: false}}
+        component={WebScreen}
+      />
       <Tab.Screen
         name="Settings"
         options={{headerShown: false}}
@@ -465,6 +473,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
             options={{headerShown: false}}
             component={SelectWalletNavigation}
           />
+          <Stack.Screen name={'Web'} component={WebpageScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </FocusedScreenProvider>
