@@ -23,6 +23,7 @@ import {ChainInfo} from '@keplr-wallet/types';
 import {StakedTabView} from './staked';
 import {ClaimAll} from './components/claim-all';
 import {Box} from '../../components/box';
+import {StackNavProp} from '../../navigation';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -49,10 +50,11 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
   const {hugeQueriesStore} = useStore();
 
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavProp>();
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>('available');
   const buyModalRef = useRef<BottomSheetModal>(null);
+  const SelectStakingChainModalRef = useRef<BottomSheetModal>(null);
   const copyAddressModalRef = useRef<BottomSheetModal>(null);
 
   const availableTotalPrice = useMemo(() => {
@@ -109,36 +111,60 @@ export const HomeScreen: FunctionComponent = observer(() => {
               {availableTotalPrice?.toString()}
             </Text>
           </Box>
-          <Columns sum={1} gutter={10}>
-            <Button
-              text="Deposit"
-              size="large"
-              color="secondary"
-              containerStyle={style.flatten(['flex-1'])}
-              onPress={() => {
-                copyAddressModalRef.current?.present();
-              }}
-            />
-            <Button
-              text="Buy"
-              size="large"
-              color="secondary"
-              containerStyle={style.flatten(['flex-1'])}
-              onPress={() => {
-                buyModalRef.current?.present();
-              }}
-            />
-            <Button
-              text="Send"
-              size="large"
-              containerStyle={style.flatten(['flex-1'])}
-              onPress={() => {
-                navigation.dispatch({
-                  ...StackActions.push('Send.SelectAsset'),
-                });
-              }}
-            />
-          </Columns>
+          {tabStatus === 'available' ? (
+            <Columns sum={1} gutter={10}>
+              <Button
+                text="Deposit"
+                size="large"
+                color="secondary"
+                containerStyle={style.flatten(['flex-1'])}
+                onPress={() => {
+                  copyAddressModalRef.current?.present();
+                }}
+              />
+              <Button
+                text="Buy"
+                size="large"
+                color="secondary"
+                containerStyle={style.flatten(['flex-1'])}
+                onPress={() => {
+                  buyModalRef.current?.present();
+                }}
+              />
+              <Button
+                text="Send"
+                size="large"
+                containerStyle={style.flatten(['flex-1'])}
+                onPress={() => {
+                  navigation.dispatch({
+                    ...StackActions.push('Send.SelectAsset'),
+                  });
+                }}
+              />
+            </Columns>
+          ) : (
+            <Columns sum={1} gutter={10}>
+              <Button
+                text="Vote"
+                size="large"
+                color="secondary"
+                containerStyle={style.flatten(['flex-1'])}
+                onPress={() => {
+                  //TODO - 거버넌스 페이지로 이동
+                }}
+              />
+              <Button
+                text="Stake"
+                size="large"
+                containerStyle={style.flatten(['flex-1'])}
+                onPress={() => {
+                  //TODO - 체인 선택 모달을 띄워줘야함
+                  SelectStakingChainModalRef.current?.present();
+                }}
+              />
+            </Columns>
+          )}
+
           <Gutter size={12} />
           <ClaimAll isNotReady={isNotReady} />
 
@@ -167,7 +193,9 @@ export const HomeScreen: FunctionComponent = observer(() => {
               }}
             />
           ) : (
-            <StakedTabView />
+            <StakedTabView
+              SelectStakingChainModalRef={SelectStakingChainModalRef}
+            />
           )}
         </Stack>
       </PageWithScrollView>

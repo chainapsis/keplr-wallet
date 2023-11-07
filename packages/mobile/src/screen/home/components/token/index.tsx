@@ -27,6 +27,8 @@ import {SVGLoadingIcon} from '../../../../components/spinner';
 import {Path, Svg} from 'react-native-svg';
 import {ArrowRightIcon} from '../../../../components/icon/arrow-right';
 import {InformationOutlinedIcon} from '../../../../components/icon/information-outlined';
+import {IntPretty} from '@keplr-wallet/unit';
+import {formatAprString} from '../../utils';
 
 export const TokenTitleView: FunctionComponent<{
   title: string;
@@ -71,12 +73,12 @@ interface TokenItemProps {
   disabled?: boolean;
   forChange?: boolean;
   isNotReady?: boolean;
-
+  apr?: IntPretty;
   // For remaining unbonding time.
   altSentence?: string | React.ReactElement;
 }
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
-  ({viewToken, onClick, disabled, forChange, isNotReady, altSentence}) => {
+  ({viewToken, onClick, disabled, forChange, isNotReady, apr, altSentence}) => {
     const {priceStore} = useStore();
     const style = useStyle();
 
@@ -243,7 +245,9 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
               <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth={72}>
                 <Text
                   style={style.flatten(['color-gray-300', 'text-caption1'])}>
-                  {isIBC
+                  {apr
+                    ? `APR ${formatAprString(apr, 2)}%`
+                    : isIBC
                     ? `on ${viewToken.chainInfo.chainName}`
                     : viewToken.chainInfo.chainName}
                 </Text>

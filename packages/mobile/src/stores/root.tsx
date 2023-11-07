@@ -1,4 +1,4 @@
-import {CommunityChainInfoRepo, EmbedChainInfos} from '../config';
+import {APR_API_URL, CommunityChainInfoRepo, EmbedChainInfos} from '../config';
 
 import {
   AccountStore,
@@ -40,6 +40,7 @@ import {
   TokenContractListURL,
 } from '../utils/config.ui';
 import {TokenContractsQueries} from './token-contracts';
+import {AprQueries} from './aprs';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
@@ -67,6 +68,7 @@ export class RootStore {
       // KeplrETCQueries,
       ICNSQueries,
       TokenContractsQueries,
+      AprQueries,
     ]
   >;
   public readonly accountStore: AccountStore<[CosmosAccount, SecretAccount]>;
@@ -139,6 +141,9 @@ export class RootStore {
       ICNSQueries.use(),
       TokenContractsQueries.use({
         tokenContractListURL: TokenContractListURL,
+      }),
+      AprQueries.use({
+        aprBaseUrl: APR_API_URL,
       }),
     );
 
