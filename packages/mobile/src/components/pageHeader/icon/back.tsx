@@ -15,11 +15,11 @@ export const HeaderBackButtonIcon: FunctionComponent<{
   return (
     <Svg width={size} height={size} fill="none" viewBox="0 0 28 28">
       <Path
-        stroke={color}
+        d="M18.375 23.25L9.625 14.5L18.375 5.75"
+        stroke={color || 'currentColor'}
+        strokeWidth="2.91667"
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth="2"
-        d="M13.344 21.875L5.469 14l7.875-7.875M6.563 14H22.53"
       />
     </Svg>
   );
