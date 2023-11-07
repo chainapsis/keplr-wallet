@@ -637,4 +637,8 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
       signDoc,
     ]);
   }
+
+  async sendEthereumTx(chainId: string, rawTx: string): Promise<string> {
+    return await this.requestMethod("sendEthereumTx", [chainId, rawTx]);
+  }
 }

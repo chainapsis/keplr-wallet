@@ -324,4 +324,8 @@ export class MockKeplr implements Keplr {
   }): Promise<string> {
     throw new Error("Not yet implemented");
   }
+
+  sendEthereumTx(_chainId: string, _rawTx: string): Promise<string> {
+    throw new Error("Not implemented");
+  }
 }
