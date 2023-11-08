@@ -58,6 +58,7 @@ import {RegisterIntroExistingUserScene} from './screen/register/intro-existing-u
 import {RegisterScreen} from './screen/register';
 import {WebScreen} from './screen/web';
 import {WebpageScreen} from './screen/web/webpage';
+import {NewMnemonicScreen} from './screen/register/new-mnemonic';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -65,6 +66,7 @@ export type RootStackParamList = {
   'Register.Temp': undefined;
   'Register.Intro': undefined;
   'Register.Intro.NewUser': undefined;
+  'Register.NewMnemonic': undefined;
   'Register.Intro.ExistingUser': undefined;
   'Register.EnableChain': undefined;
   Send: undefined;
@@ -138,6 +140,8 @@ export const RegisterNavigation: FunctionComponent = () => {
         name="Register.Intro.ExistingUser"
         component={RegisterIntroExistingUserScene}
       />
+      <Stack.Screen name="Register.NewMnemonic" component={NewMnemonicScreen} />
+
       <Stack.Screen
         name="Register.EnableChain"
         component={RegisterEnableChainScreen}

@@ -77,6 +77,9 @@ export const RegisterIntroNewUserScreen: FunctionComponent = () => {
             id: 'pages.register.intro-new-user.new-recovery-path-button',
           })}
           size="large"
+          onPress={() => {
+            navigation.dispatch(StackActions.replace('Register.NewMnemonic'));
+          }}
         />
 
         <Gutter size={20} />
