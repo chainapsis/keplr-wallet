@@ -431,4 +431,65 @@ describe("Test vault service", () => {
       sensitive: "sensitive",
     });
   });
+
+  it("test re-sign up after clear all", async () => {
+    await initAndEnsureSignUp(service);
+
+    const id = service.addVault(
+      "test",
+      {
+        insensitive: "insensitive",
+      },
+      {
+        sensitive: "sensitive",
+      }
+    );
+
+    await service.clearAll("password");
+
+    expect(service.isSignedUp).toBe(false);
+    expect(service.isLocked).toBe(true);
+
+    await service.signUp("new-password");
+    await expect(service.checkUserPassword("password")).rejects.toThrow();
+    await service.checkUserPassword("new-password");
+
+    const id2 = service.addVault(
+      "test2",
+      {
+        insensitive: "insensitive",
+      },
+      {
+        sensitive: "sensitive",
+      }
+    );
+
+    expect(service.getVault("test", id)).toBeUndefined();
+    await expect(service.getVault("test2", id2)?.insensitive).toStrictEqual({
+      insensitive: "insensitive",
+    });
+    expect(
+      service.decrypt(service.getVault("test2", id2)!.sensitive)
+    ).toStrictEqual({
+      sensitive: "sensitive",
+    });
+
+    const restored = new VaultService(kvStore);
+    await restored.init();
+
+    await testUnlock(restored, "new-password");
+
+    await expect(restored.checkUserPassword("password")).rejects.toThrow();
+    await restored.checkUserPassword("new-password");
+
+    expect(restored.getVault("test", id)).toBeUndefined();
+    await expect(restored.getVault("test2", id2)?.insensitive).toStrictEqual({
+      insensitive: "insensitive",
+    });
+    expect(
+      restored.decrypt(restored.getVault("test2", id2)!.sensitive)
+    ).toStrictEqual({
+      sensitive: "sensitive",
+    });
+  });
 });
