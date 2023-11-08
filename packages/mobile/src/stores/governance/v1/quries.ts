@@ -42,7 +42,6 @@ export class CosmosGovernanceQueriesImpl {
     chainId: string,
     chainGetter: ChainGetter,
   ) {
-    //실행할때 뭔 돌리고 그뒤에서 다시 넣으면 안되나?
     this.queryGovernance = new ObservableQueryGovernanceV1(
       sharedContext,
       chainId,
