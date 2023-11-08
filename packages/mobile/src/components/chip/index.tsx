@@ -17,15 +17,9 @@ export const Chip: FunctionComponent<{
         return [`background-color-${baseColor}-400`];
       case 'light':
         if (color === 'primary') {
-          return [
-            `background-color-${baseColor}-100`,
-            'dark:background-color-platinum-500',
-          ];
+          return [`background-color-${baseColor}-100`];
         } else {
-          return [
-            `background-color-${baseColor}-100`,
-            `dark:background-color-${baseColor}-700`,
-          ];
+          return [`background-color-${baseColor}-100`];
         }
       case 'outline':
         return ['background-color-transparent'];
@@ -38,9 +32,9 @@ export const Chip: FunctionComponent<{
         return ['color-white'];
       case 'light':
         if (color === 'primary') {
-          return [`color-${baseColor}-400`, 'dark:color-white'];
+          return [`color-${baseColor}-400`];
         } else {
-          return [`color-${baseColor}-400`, `dark:color-${baseColor}-200`];
+          return [`color-${baseColor}-400`];
         }
       case 'outline':
         return [`color-${baseColor}-400`];
