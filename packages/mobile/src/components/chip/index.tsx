@@ -3,40 +3,34 @@ import {useStyle} from '../../styles';
 import {Text, View} from 'react-native';
 
 export const Chip: FunctionComponent<{
-  color?: 'primary' | 'danger';
+  color?: 'success' | 'danger';
   mode?: 'fill' | 'light' | 'outline';
-  text: string;
-}> = ({color = 'primary', mode = 'fill', text}) => {
+  text: string | React.ReactNode;
+}> = ({color, mode = 'fill', text}) => {
   const style = useStyle();
 
-  const baseColor = color === 'primary' ? 'blue' : 'red';
+  const baseColor = color === 'success' ? 'green' : 'red';
 
   const backgroundColorDefinition = (() => {
     switch (mode) {
       case 'fill':
-        return [`background-color-${baseColor}-400`];
+        return ['background-color-gray-500'];
       case 'light':
-        if (color === 'primary') {
-          return [`background-color-${baseColor}-100`];
-        } else {
-          return [`background-color-${baseColor}-100`];
-        }
+        return ['background-color-gray-400'];
       case 'outline':
         return ['background-color-transparent'];
     }
   })();
 
   const textColorDefinition = (() => {
-    switch (mode) {
-      case 'fill':
-        return ['color-white'];
-      case 'light':
-        if (color === 'primary') {
-          return [`color-${baseColor}-400`];
-        } else {
-          return [`color-${baseColor}-400`];
-        }
-      case 'outline':
+    if (!color) {
+      return mode === 'light' ? ['color-text-high'] : ['color-text-low'];
+    }
+
+    switch (color) {
+      case 'success':
+        return [`color-${baseColor}-400`];
+      case 'danger':
         return [`color-${baseColor}-400`];
     }
   })();
@@ -61,6 +55,7 @@ export const Chip: FunctionComponent<{
         style={style.flatten([
           'text-overline',
           'text-center',
+          'text-caption1',
           ...(textColorDefinition as any),
         ])}>
         {text}
