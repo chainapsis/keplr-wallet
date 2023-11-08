@@ -348,6 +348,18 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       }
     };
   });
+  useEffectOnce(() => {
+    // 10초마다 price 자동 refresh
+    const intervalId = setInterval(() => {
+      if (priceStore.isInitialized && !priceStore.isFetching) {
+        priceStore.fetch();
+      }
+    }, 1000 * 10);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  });
 
   const outCurrencyFetched =
     chainStore
