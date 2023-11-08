@@ -46,6 +46,10 @@ export const WalletDeleteScreen: FunctionComponent = observer(() => {
     try {
       if (vaultId) {
         await keyRingStore.deleteKeyRing(vaultId, data.password);
+        if (keyRingStore.isEmpty) {
+          navigate.reset({routes: [{name: 'Register'}]});
+          return;
+        }
         navigate.goBack();
       }
     } catch (e) {
