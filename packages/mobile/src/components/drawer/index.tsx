@@ -1,28 +1,35 @@
 import React, {FunctionComponent} from 'react';
 import {observer} from 'mobx-react-lite';
 import {DrawerContentScrollView} from '@react-navigation/drawer';
-import {
-  useNavigation,
-  StackActions,
-  DrawerActions,
-} from '@react-navigation/native';
+import {useNavigation, DrawerActions} from '@react-navigation/native';
 import {Pressable, Text} from 'react-native';
 import {useStyle} from '../../styles';
 import {Box} from '../box';
 
 import {Stack} from '../stack';
 import {useStore} from '../../stores';
+import {StackNavProp} from '../../navigation';
 
 export const DrawerContent: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavProp>();
 
   const style = useStyle();
 
   const handleLock = () => {
     keyRingStore.lock();
     drawerClose();
-    navigation.dispatch(StackActions.replace('Locked'));
+    navigation.reset({routes: [{name: 'Locked'}]});
+  };
+
+  const onClickAddTokens = () => {
+    drawerClose();
+    navigation.navigate('Setting.ManageTokenList.Add', {chainId: undefined});
+  };
+
+  const onClickContacts = () => {
+    drawerClose();
+    navigation.navigate('Setting.General.ContactList', {chainId: undefined});
   };
 
   const drawerClose = () => {
@@ -56,10 +63,10 @@ export const DrawerContent: FunctionComponent = observer(() => {
           backgroundColor={style.get('color-gray-400').color}
         />
         <Stack gutter={36}>
-          <Pressable>
+          <Pressable onPress={onClickContacts}>
             <Text style={style.flatten(['h3', 'color-white'])}>Contacts</Text>
           </Pressable>
-          <Pressable>
+          <Pressable onPress={onClickAddTokens}>
             <Text style={style.flatten(['h3', 'color-white'])}>Add Token</Text>
           </Pressable>
         </Stack>
