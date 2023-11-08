@@ -17,7 +17,7 @@ export class ObservableSimpleQuery extends ObservableQueryMap<ObservableQuery> {
   constructor(protected readonly sharedContext: QuerySharedContext) {
     super((key: string) => {
       const { baseURL, url } = JSON.parse(key);
-      return new ObservableSimpleQueryImpl(sharedContext, baseURL, url);
+      return new ObservableSimpleQueryImpl(sharedContext, baseURL, url || "");
     });
   }
 
