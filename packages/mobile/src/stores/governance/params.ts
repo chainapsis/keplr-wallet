@@ -15,7 +15,7 @@ export class ObservableQueryGovParamTally extends ObservableChainQuery<GovParams
       sharedContext,
       chainId,
       chainGetter,
-      `/cosmos/gov/v1beta1/params/tallying`,
+      '/cosmos/gov/v1beta1/params/tallying',
     );
   }
 }
@@ -30,7 +30,7 @@ export class ObservableQueryGovParamVoting extends ObservableChainQuery<GovParam
       sharedContext,
       chainId,
       chainGetter,
-      `/cosmos/gov/v1beta1/params/voting`,
+      '/cosmos/gov/v1beta1/params/voting',
     );
   }
 }
@@ -45,7 +45,7 @@ export class ObservableQueryGovParamDeposit extends ObservableChainQuery<GovPara
       sharedContext,
       chainId,
       chainGetter,
-      `/cosmos/gov/v1beta1/params/deposit`,
+      '/cosmos/gov/v1beta1/params/deposit',
     );
   }
 }
