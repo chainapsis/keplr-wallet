@@ -45,6 +45,7 @@ import {
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { useEffectOnce } from "../../hooks/use-effect-once";
 
 export const IBCSwapPage: FunctionComponent = observer(() => {
   const {
@@ -300,6 +301,65 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     skipQueriesStore.queryIBCSwap,
   ]);
   // ------
+
+  const [isHighPriceImpact, setIsHighPriceImpact] = useState(false);
+  useEffectOnce(() => {
+    const disposal = autorun(() => {
+      if (ibcSwapConfigs.amountConfig.amount.length > 0) {
+        const amt = ibcSwapConfigs.amountConfig.amount[0];
+        // priceStore.calculatePrice를 여기서 먼저 실행하는건 의도적인 행동임.
+        // 유저가 amount를 입력하기 전에 미리 fecth를 해놓기 위해서임.
+        const inPrice = priceStore.calculatePrice(amt, "usd");
+        const outPrice = priceStore.calculatePrice(
+          ibcSwapConfigs.amountConfig.outAmount,
+          "usd"
+        );
+        if (amt.toDec().gt(new Dec(0))) {
+          if (
+            inPrice &&
+            // in price가 아주 낮으면 오히려 price impact가 높아진다.
+            // 근데 이 경우는 전혀 치명적인 자산 상의 문제가 생기지 않으므로 0달러가 아니라 1달러가 넘어야 체크한다.
+            inPrice.toDec().gt(new Dec(1)) &&
+            outPrice &&
+            outPrice.toDec().gt(new Dec(0))
+          ) {
+            if (inPrice.toDec().gt(outPrice.toDec())) {
+              const priceImpact = inPrice
+                .toDec()
+                .sub(outPrice.toDec())
+                .quo(inPrice.toDec())
+                .mul(new Dec(100));
+              // price impact가 2.5% 이상이면 경고
+              if (priceImpact.gt(new Dec(2.5))) {
+                setIsHighPriceImpact(true);
+                return;
+              }
+            }
+          }
+        }
+      }
+
+      setIsHighPriceImpact(false);
+    });
+
+    return () => {
+      if (disposal) {
+        disposal();
+      }
+    };
+  });
+  useEffectOnce(() => {
+    // 10초마다 price 자동 refresh
+    const intervalId = setInterval(() => {
+      if (priceStore.isInitialized && !priceStore.isFetching) {
+        priceStore.fetch();
+      }
+    }, 1000 * 10);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  });
 
   const outCurrencyFetched =
     chainStore
@@ -835,6 +895,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           type="to"
           senderConfig={ibcSwapConfigs.senderConfig}
           amountConfig={ibcSwapConfigs.amountConfig}
+          forceShowPrice={isHighPriceImpact}
           onDestinationChainSelect={(chainId, coinMinimalDenom) => {
             setSearchParams(
               (prev) => {
@@ -862,6 +923,15 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         <WarningGuideBox
           amountConfig={ibcSwapConfigs.amountConfig}
           forceError={calculatingTxError}
+          forceWarning={(() => {
+            if (isHighPriceImpact) {
+              return new Error(
+                intl.formatMessage({
+                  id: "page.ibc-swap.warning.high-price-impact",
+                })
+              );
+            }
+          })()}
         />
       </Box>
 
@@ -883,7 +953,8 @@ const WarningGuideBox: FunctionComponent<{
   amountConfig: IBCSwapAmountConfig;
 
   forceError?: Error;
-}> = observer(({ amountConfig, forceError }) => {
+  forceWarning?: Error;
+}> = observer(({ amountConfig, forceError, forceWarning }) => {
   const error: string | undefined = (() => {
     if (forceError) {
       return forceError.message || forceError.toString();
@@ -908,6 +979,10 @@ const WarningGuideBox: FunctionComponent<{
     const queryError = amountConfig.getQueryIBCSwap()?.getQueryRoute()?.error;
     if (queryError) {
       return queryError.message || queryError.toString();
+    }
+
+    if (forceWarning) {
+      return forceWarning.message || forceWarning.toString();
     }
   })();
 

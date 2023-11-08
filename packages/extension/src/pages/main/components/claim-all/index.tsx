@@ -125,6 +125,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       queriesStore,
       priceStore,
       keyRingStore,
+      uiConfigStore,
     } = useStore();
     const intl = useIntl();
     const theme = useTheme();
@@ -528,7 +529,10 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                           : ColorPalette["gray-10"],
                     }}
                   >
-                    {totalPrice ? totalPrice.separator(" ").toString() : "?"}
+                    {uiConfigStore.hideStringIfPrivacyMode(
+                      totalPrice ? totalPrice.separator(" ").toString() : "?",
+                      3
+                    )}
                   </Subtitle2>
                 </Skeleton>
               </YAxis>
@@ -633,7 +637,8 @@ const ClaimTokenItem: FunctionComponent<{
 
   itemsLength: number;
 }> = observer(({ viewToken, state, itemsLength }) => {
-  const { analyticsStore, accountStore, queriesStore } = useStore();
+  const { analyticsStore, accountStore, queriesStore, uiConfigStore } =
+    useStore();
 
   const intl = useIntl();
   const theme = useTheme();
@@ -789,12 +794,15 @@ const ClaimTokenItem: FunctionComponent<{
                     : ColorPalette["gray-10"],
               }}
             >
-              {viewToken.token
-                .maxDecimals(6)
-                .shrink(true)
-                .inequalitySymbol(true)
-                .hideDenom(true)
-                .toString()}
+              {uiConfigStore.hideStringIfPrivacyMode(
+                viewToken.token
+                  .maxDecimals(6)
+                  .shrink(true)
+                  .inequalitySymbol(true)
+                  .hideDenom(true)
+                  .toString(),
+                2
+              )}
             </Subtitle2>
           </Stack>
         </Column>

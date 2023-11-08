@@ -897,6 +897,11 @@ export class KeyRingService {
       );
     }
 
+    if (this.getKeyRingVaults().length === 0) {
+      // After deleting all keyring, sign out from the vault.
+      await this.vaultService.clearAll(password);
+    }
+
     return wasSelected;
   }
 

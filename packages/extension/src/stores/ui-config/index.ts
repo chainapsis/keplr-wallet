@@ -25,6 +25,7 @@ import { NewChainSuggestionConfig } from "./new-chain";
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
   hideLowBalance: boolean;
+  isPrivacyMode: boolean;
 
   useWebHIDLedger: boolean;
 }
@@ -44,6 +45,7 @@ export class UIConfigStore {
   protected _options: UIConfigOptions = {
     isDeveloperMode: false,
     hideLowBalance: false,
+    isPrivacyMode: false,
 
     useWebHIDLedger: false,
   };
@@ -219,6 +221,27 @@ export class UIConfigStore {
   @action
   setUseWebHIDLedger(value: boolean) {
     this.options.useWebHIDLedger = value;
+  }
+
+  get isPrivacyMode(): boolean {
+    return this.options.isPrivacyMode;
+  }
+
+  @action
+  setIsPrivacyMode(value: boolean) {
+    this.options.isPrivacyMode = value;
+  }
+
+  @action
+  toggleIsPrivacyMode() {
+    this.options.isPrivacyMode = !this.options.isPrivacyMode;
+  }
+
+  hideStringIfPrivacyMode(str: string, numStars: number): string {
+    if (this.isPrivacyMode) {
+      return "*".repeat(numStars);
+    }
+    return str;
   }
 
   @computed

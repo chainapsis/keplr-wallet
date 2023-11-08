@@ -18,7 +18,11 @@ import {
 } from "./components";
 import { Stack } from "../../components/stack";
 import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
-import { ArrowTopRightOnSquareIcon } from "../../components/icon";
+import {
+  ArrowTopRightOnSquareIcon,
+  EyeIcon,
+  EyeSlashIcon,
+} from "../../components/icon";
 import { Box } from "../../components/box";
 import { Modal } from "../../components/modal";
 import { DualChart } from "./components/chart";
@@ -28,16 +32,16 @@ import { ColorPalette } from "../../styles";
 import { AvailableTabView } from "./available";
 import { StakedTabView } from "./staked";
 import { SearchTextInput } from "../../components/input";
-import { useSpringValue } from "@react-spring/web";
+import { animated, useSpringValue } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
 import { IChainInfoImpl, QueryError } from "@keplr-wallet/stores";
 import { Skeleton } from "../../components/skeleton";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
-import { useTheme } from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { IbcHistoryView } from "./components/ibc-history-view";
 import { LayeredHorizontalRadioGroup } from "../../components/radio-group";
-import { YAxis } from "../../components/axis";
+import { XAxis, YAxis } from "../../components/axis";
 import { DepositModal } from "./components/deposit-modal";
 import { MainHeaderLayout } from "./layouts/header";
 
@@ -89,10 +93,18 @@ export const MainPage: FunctionComponent<{
     }
     return result;
   }, [hugeQueriesStore.allKnownBalances]);
-  const availableChartWeight =
-    availableTotalPrice && !isNotReady
+  const availableChartWeight = (() => {
+    if (!isNotReady && uiConfigStore.isPrivacyMode) {
+      if (tabStatus === "available") {
+        return 1;
+      }
+      return 0;
+    }
+
+    return availableTotalPrice && !isNotReady
       ? Number.parseFloat(availableTotalPrice.toDec().toString())
       : 0;
+  })();
   const stakedTotalPrice = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.delegations) {
@@ -115,10 +127,18 @@ export const MainPage: FunctionComponent<{
     }
     return result;
   }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings]);
-  const stakedChartWeight =
-    stakedTotalPrice && !isNotReady
+  const stakedChartWeight = (() => {
+    if (!isNotReady && uiConfigStore.isPrivacyMode) {
+      if (tabStatus === "staked") {
+        return 1;
+      }
+      return 0;
+    }
+
+    return stakedTotalPrice && !isNotReady
       ? Number.parseFloat(stakedTotalPrice.toDec().toString())
       : 0;
+  })();
 
   const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
@@ -167,6 +187,10 @@ export const MainPage: FunctionComponent<{
     config: defaultSpringConfig,
   });
   const globalSimpleBar = useGlobarSimpleBar();
+
+  const animatedPrivacyModeHover = useSpringValue(0, {
+    config: defaultSpringConfig,
+  });
 
   return (
     <MainHeaderLayout isNotReady={isNotReady}>
@@ -233,32 +257,90 @@ export const MainPage: FunctionComponent<{
               }}
             >
               <Gutter size="2rem" />
-              <Skeleton isNotReady={isNotReady}>
-                <Subtitle3
-                  style={{
-                    color: ColorPalette["gray-300"],
-                  }}
-                >
-                  {tabStatus === "available"
-                    ? intl.formatMessage({ id: "page.main.chart.available" })
-                    : intl.formatMessage({ id: "page.main.chart.staked" })}
-                </Subtitle3>
-              </Skeleton>
-              <Gutter size="0.5rem" />
-              <Skeleton isNotReady={isNotReady} dummyMinWidth="8.125rem">
-                <H1
-                  style={{
-                    color:
-                      theme.mode === "light"
-                        ? ColorPalette["gray-700"]
-                        : ColorPalette["gray-10"],
-                  }}
-                >
-                  {tabStatus === "available"
-                    ? availableTotalPrice?.toString() || "-"
-                    : stakedTotalPrice?.toString() || "-"}
-                </H1>
-              </Skeleton>
+              <Box
+                alignX={isNotReady ? "center" : undefined}
+                onHoverStateChange={(isHover) => {
+                  if (!isNotReady) {
+                    animatedPrivacyModeHover.start(isHover ? 1 : 0);
+                  } else {
+                    animatedPrivacyModeHover.set(0);
+                  }
+                }}
+              >
+                <Skeleton isNotReady={isNotReady}>
+                  <XAxis alignY="center">
+                    <Subtitle3
+                      style={{
+                        color: ColorPalette["gray-300"],
+                      }}
+                    >
+                      {tabStatus === "available"
+                        ? intl.formatMessage({
+                            id: "page.main.chart.available",
+                          })
+                        : intl.formatMessage({
+                            id: "page.main.chart.staked",
+                          })}
+                    </Subtitle3>
+                    <animated.div
+                      style={{
+                        position: "relative",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        height: "1px",
+                        overflowX: "clip",
+                        width: animatedPrivacyModeHover.to(
+                          (v) => `${v * 1.25}rem`
+                        ),
+                      }}
+                    >
+                      <Styles.PrivacyModeButton
+                        as={animated.div}
+                        style={{
+                          position: "absolute",
+                          right: 0,
+                          cursor: "pointer",
+                          opacity: animatedPrivacyModeHover.to((v) =>
+                            Math.max(0, (v - 0.3) * (10 / 3))
+                          ),
+                          marginTop: "2px",
+                        }}
+                        onClick={(e) => {
+                          e.preventDefault();
+
+                          uiConfigStore.toggleIsPrivacyMode();
+                        }}
+                      >
+                        {uiConfigStore.isPrivacyMode ? (
+                          <EyeSlashIcon width="1rem" height="1rem" />
+                        ) : (
+                          <EyeIcon width="1rem" height="1rem" />
+                        )}
+                      </Styles.PrivacyModeButton>
+                    </animated.div>
+                  </XAxis>
+                </Skeleton>
+                <Gutter size="0.5rem" />
+                <Skeleton isNotReady={isNotReady} dummyMinWidth="8.125rem">
+                  <H1
+                    style={{
+                      color:
+                        theme.mode === "light"
+                          ? ColorPalette["gray-700"]
+                          : ColorPalette["gray-10"],
+                      textAlign: "center",
+                    }}
+                  >
+                    {uiConfigStore.hideStringIfPrivacyMode(
+                      tabStatus === "available"
+                        ? availableTotalPrice?.toString() || "-"
+                        : stakedTotalPrice?.toString() || "-",
+                      4
+                    )}
+                  </H1>
+                </Skeleton>
+              </Box>
             </Box>
           </Box>
           {tabStatus === "available" ? (
@@ -409,3 +491,20 @@ export const MainPage: FunctionComponent<{
     </MainHeaderLayout>
   );
 });
+
+const Styles = {
+  // hover style을 쉽게 넣으려고 그냥 styled-component로 만들었다.
+  PrivacyModeButton: styled.div`
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-300"]
+        : ColorPalette["gray-400"]};
+
+    &:hover {
+      color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-200"]
+          : ColorPalette["gray-300"]};
+    }
+  `,
+};
