@@ -179,7 +179,7 @@ export const GovernanceCardBody: FunctionComponent<{
                 {renderProposalDateString(proposal)}
                 {}
               </Text>
-
+              <Column weight={1} />
               {proposalRelativeEndTimeString ? (
                 <Text
                   style={style.flatten(['text-caption1', 'color-text-middle'])}>
