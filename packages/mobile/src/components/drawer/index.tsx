@@ -24,12 +24,12 @@ export const DrawerContent: FunctionComponent = observer(() => {
 
   const onClickAddTokens = () => {
     drawerClose();
-    navigation.navigate('Setting.ManageTokenList.Add', {chainId: undefined});
+    navigation.navigate('Setting.ManageTokenList.Add');
   };
 
   const onClickContacts = () => {
     drawerClose();
-    navigation.navigate('Setting.General.ContactList', {chainId: undefined});
+    navigation.navigate('Setting.General.ContactList');
   };
 
   const drawerClose = () => {

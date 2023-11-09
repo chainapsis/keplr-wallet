@@ -75,7 +75,7 @@ export type RootStackParamList = {
   'Setting.General.Intro': undefined;
   'Setting.General.Lang': undefined;
   'Setting.General.Currency': undefined;
-  'Setting.General.ContactList': {chainId?: string};
+  'Setting.General.ContactList': {chainId?: string} | undefined;
   'Setting.General.ContactAdd': {chainId: string; editIndex?: number};
   'Setting.General.WC': undefined;
   'Setting.General.ManageNonActiveChains': undefined;
@@ -87,7 +87,9 @@ export type RootStackParamList = {
   'Setting.SecurityAndPrivacy.ChangePassword': undefined;
 
   'Setting.ManageTokenList': undefined;
-  'Setting.ManageTokenList.Add': {chainId?: string; contractAddress?: string};
+  'Setting.ManageTokenList.Add':
+    | {chainId?: string; contractAddress?: string}
+    | undefined;
 
   Locked: undefined;
   SelectWallet: undefined;
