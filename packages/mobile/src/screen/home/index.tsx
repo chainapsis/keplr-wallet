@@ -151,6 +151,9 @@ export const HomeScreen: FunctionComponent = observer(() => {
                 containerStyle={style.flatten(['flex-1'])}
                 onPress={() => {
                   //TODO - 거버넌스 페이지로 이동
+                  navigation.navigate('Governance', {
+                    screen: 'Governance.intro',
+                  });
                 }}
               />
               <Button
