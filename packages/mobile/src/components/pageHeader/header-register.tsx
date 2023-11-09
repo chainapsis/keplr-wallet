@@ -1,4 +1,4 @@
-import React, {FunctionComponent, PropsWithChildren} from 'react';
+import React, {FunctionComponent} from 'react';
 import {useStyle} from '../../styles';
 import {StatusBar, Pressable, Text, SafeAreaView} from 'react-native';
 import {Gutter} from '../gutter';
