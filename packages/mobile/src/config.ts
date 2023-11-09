@@ -13,6 +13,7 @@ export interface AppChainInfo extends ChainInfo {
     readonly name: string;
     readonly txUrl: string;
   };
+  readonly walletUrlForGovernance?: string;
 }
 
 export const EmbedChainInfos: AppChainInfo[] = [
@@ -28,6 +29,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinGeckoId: 'cosmos',
       coinImageUrl: 'https://dhj8dql1kzq2v.cloudfront.net/white/atom.png',
     },
+    walletUrlForGovernance:
+      'https://wallet.keplr.app/chains/cosmos-hub/proposals',
     bip44: {
       coinType: 118,
     },
@@ -68,6 +71,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'osmosis',
     },
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/osmosis/proposals',
     bip44: {coinType: 118},
     bech32Config: Bech32Address.defaultBech32Config('osmo'),
     currencies: [
@@ -116,6 +120,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'secret',
     },
+    walletUrlForGovernance:
+      'https://wallet.keplr.app/chains/secret-network/proposals',
     bip44: {
       coinType: 529,
     },
@@ -159,6 +165,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'akash-network',
     },
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/akash/proposals',
     bip44: {
       coinType: 118,
     },
@@ -191,6 +198,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinMinimalDenom: 'umars',
       coinDecimals: 6,
     },
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/mars/proposals',
     bip44: {
       coinType: 118,
     },
@@ -232,6 +240,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 8,
       coinGeckoId: 'crypto-com-chain',
     },
+    walletUrlForGovernance:
+      'https://wallet.keplr.app/chains/crypto-org/proposals',
     bip44: {
       coinType: 394,
     },
@@ -277,6 +287,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'starname',
     },
+    walletUrlForGovernance:
+      'https://wallet.keplr.app/chains/starname/proposals',
     bip44: {
       coinType: 234,
     },
@@ -315,6 +327,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 18,
       coinGeckoId: 'sifchain',
     },
+    walletUrlForGovernance:
+      'https://wallet.keplr.app/chains/sifchain/proposals',
     bip44: {
       coinType: 118,
     },
@@ -773,6 +787,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'certik',
     },
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/shentu/proposals',
     bip44: {
       coinType: 118,
     },
@@ -806,6 +821,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'iris-network',
     },
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/irisnet/proposals',
     bip44: {
       coinType: 118,
     },
@@ -856,6 +872,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'regen',
     },
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/regen/proposals',
     bip44: {
       coinType: 118,
     },
@@ -894,7 +911,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'persistence',
     },
-
+    walletUrlForGovernance:
+      'https://wallet.keplr.app/chains/persistence/proposals',
     bip44: {
       coinType: 118,
     },
@@ -943,6 +961,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'sentinel',
     },
+    walletUrlForGovernance:
+      'https://wallet.keplr.app/chains/sentinel/proposals',
     bip44: {
       coinType: 118,
     },
@@ -980,6 +1000,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinMinimalDenom: 'uixo',
       coinDecimals: 6,
     },
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/ixo/proposals',
     bip44: {
       coinType: 118,
     },
@@ -1011,6 +1032,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'e-money',
     },
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/e-money/proposals',
     bip44: {
       coinType: 118,
     },
@@ -1126,6 +1148,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'agoric',
     },
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/agoric/proposals',
     bip44: {
       coinType: 564,
     },
@@ -1178,6 +1201,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinMinimalDenom: 'boot',
       coinDecimals: 0,
     },
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/bostrom/proposals',
     bip44: {
       coinType: 118,
     },
@@ -1234,6 +1258,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'juno-network',
     },
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/juno/proposals',
     bip44: {
       coinType: 118,
     },
@@ -1283,6 +1308,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'stargaze',
     },
+    walletUrlForGovernance:
+      'https://wallet.keplr.app/chains/stargaze/proposals',
     bip44: {
       coinType: 118,
     },
@@ -1316,6 +1343,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'axelar',
     },
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/axelar/proposals',
     bip44: {
       coinType: 118,
     },
@@ -1462,7 +1490,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'sommelier',
     },
-
+    walletUrlForGovernance:
+      'https://wallet.keplr.app/chains/sommelier/proposals',
     bip44: {
       coinType: 118,
     },
@@ -1495,7 +1524,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinMinimalDenom: 'uumee',
       coinDecimals: 6,
     },
-
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/umee/proposals',
     bip44: {
       coinType: 118,
     },
@@ -1531,6 +1560,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinMinimalDenom: 'ugraviton',
       coinDecimals: 6,
     },
+    walletUrlForGovernance:
+      'https://wallet.keplr.app/chains/gravity-bridge/proposals',
     bip44: {
       coinType: 118,
     },
@@ -1617,7 +1648,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'stride',
     },
-
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/stride/proposals',
     bip44: {
       coinType: 118,
     },
@@ -1676,7 +1707,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 18,
       coinGeckoId: 'evmos',
     },
-
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/evmos/proposals',
     bip44: {
       coinType: 60,
     },
@@ -1715,6 +1746,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 18,
       coinGeckoId: 'injective-protocol',
     },
+    walletUrlForGovernance:
+      'https://wallet.keplr.app/chains/injective/proposals',
     bip44: {
       coinType: 60,
     },
@@ -1753,6 +1786,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'kava',
     },
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/kava/proposals',
     bip44: {coinType: 459},
     alternativeBIP44s: [{coinType: 118}],
     bech32Config: Bech32Address.defaultBech32Config('kava'),
@@ -1825,6 +1859,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinMinimalDenom: 'uqck',
       coinDecimals: 6,
     },
+    walletUrlForGovernance:
+      'https://wallet.keplr.app/chains/quicksilver/proposals',
     bip44: {
       coinType: 118,
     },
@@ -1868,6 +1904,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'terra-luna-2',
     },
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/terra/proposals',
     bip44: {
       coinType: 330,
     },
@@ -1974,6 +2011,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinMinimalDenom: 'uqsr',
       coinDecimals: 6,
     },
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/quasar/proposals',
+
     bip44: {
       coinType: 118,
     },
@@ -2092,6 +2131,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinMinimalDenom: 'uflix',
       coinDecimals: 6,
     },
+    walletUrlForGovernance:
+      'https://wallet.keplr.app/chains/omniflix/proposals',
     bip44: {
       coinType: 118,
     },
@@ -2134,6 +2175,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinMinimalDenom: 'ukyve',
       coinDecimals: 6,
     },
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/kyve/proposals',
     bip44: {
       coinType: 118,
     },
@@ -2218,6 +2260,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinMinimalDenom: 'ulore',
       coinDecimals: 6,
     },
+    walletUrlForGovernance: 'https://wallet.keplr.app/chains/gitopia/proposals',
     bip44: {
       coinType: 118,
     },
@@ -2261,6 +2304,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 9,
       coinGeckoId: 'likecoin',
     },
+    walletUrlForGovernance:
+      'https://wallet.keplr.app/chains/likecoin/proposals',
     bip44: {
       coinType: 118,
     },
@@ -2312,3 +2357,18 @@ export const CommunityChainInfoRepo = {
 
 export const APR_API_URL =
   'https://pjld2aanw3elvteui4gwyxgx4m0ceweg.lambda-url.us-west-2.on.aws';
+
+export const GovernanceV1ChainIdentifiers = [
+  'kyve',
+  'mars',
+  'juno',
+  'kava',
+  'evmos',
+  'inj',
+  'quick',
+  'gitopia',
+  'persistence',
+  'celestia',
+  'dydx',
+  'like',
+];
