@@ -53,7 +53,6 @@ import {SettingGeneralLanguageScreen} from './screen/setting/screens/general/lan
 import {RegisterIntroScreen} from './screen/register/intro';
 import {StakingDashboardScreen} from './screen/staking/dashboard';
 import {RegisterIntroNewUserScreen} from './screen/register/intro-new-user';
-import {registerHeaderOptions} from './components/pageHeader/header-register';
 import {RegisterIntroExistingUserScene} from './screen/register/intro-existing-user';
 import {RegisterScreen} from './screen/register';
 import {WebScreen} from './screen/web';
@@ -122,16 +121,10 @@ export const RegisterNavigation: FunctionComponent = () => {
     <Stack.Navigator
       initialRouteName="Register.Intro"
       screenOptions={{
-        ...registerHeaderOptions,
+        headerShown: false,
       }}>
       <Stack.Screen name="Register.Temp" component={RegisterScreen} />
-      <Stack.Screen
-        name="Register.Intro"
-        component={RegisterIntroScreen}
-        options={{
-          headerShown: false,
-        }}
-      />
+      <Stack.Screen name="Register.Intro" component={RegisterIntroScreen} />
       <Stack.Screen
         name="Register.Intro.NewUser"
         component={RegisterIntroNewUserScreen}

@@ -1,55 +1,28 @@
-import React, {
-  FunctionComponent,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from 'react';
+import React, {FunctionComponent, useEffect, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {useIntl} from 'react-intl';
-import {RegisterHeader} from '../../../components/pageHeader/header-register';
 import {useStyle} from '../../../styles';
-import {useNavigation} from '@react-navigation/native';
 import {Box} from '../../../components/box';
-import {Text, View} from 'react-native';
+import {ScrollView, Text, View} from 'react-native';
 import {HorizontalRadioGroup} from '../../../components/radio-group';
 import {Mnemonic} from '@keplr-wallet/crypto';
 import * as Crypto from 'expo-crypto';
 import * as Clipboard from 'expo-clipboard';
-import {PageWithScrollView} from '../../../components/page';
 import {TextButton} from '../../../components/text-button';
 import {Gutter} from '../../../components/gutter';
 import {Button} from '../../../components/button';
 import {WarningBox} from '../../../components/guide-box';
 import LottieView from 'lottie-react-native';
+import {RegisterContainer} from '../components';
 
 type WordsType = '12words' | '24words';
-
-const Header: FunctionComponent = () => {
-  const intl = useIntl();
-
-  return (
-    <RegisterHeader
-      title={intl.formatMessage({
-        id: 'pages.register.new-mnemonic.title',
-      })}
-      paragraph={'Step 1/3'}
-    />
-  );
-};
 
 export const NewMnemonicScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
   const style = useStyle();
-  const navigation = useNavigation();
 
   const [words, setWords] = useState<string[]>([]);
   const [wordsType, setWordsType] = useState<WordsType>('12words');
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTitle: () => <Header />,
-    });
-  }, [navigation]);
 
   useEffect(() => {
     const rng = (array: any) => {
@@ -66,11 +39,20 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
   }, [wordsType]);
 
   return (
-    <React.Fragment>
-      <PageWithScrollView
-        backgroundMode={'default'}
-        containerStyle={style.flatten(['border-width-top-0'])}
-        style={style.flatten(['padding-x-20'])}>
+    <RegisterContainer
+      title={intl.formatMessage({
+        id: 'pages.register.new-mnemonic.title',
+      })}
+      paragraph={'Step 1/3'}
+      bottom={
+        <Button
+          text={intl.formatMessage({
+            id: 'button.next',
+          })}
+          size="large"
+        />
+      }>
+      <ScrollView style={style.flatten(['padding-x-20'])}>
         <HorizontalRadioGroup
           size="large"
           selectedKey={wordsType}
@@ -106,7 +88,7 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
               'justify-center',
             ])}>
             {words.map((word, index) => (
-              <MnemonicTag key={word} index={index} word={word} />
+              <MnemonicTag key={index} index={index} word={word} />
             ))}
           </View>
 
@@ -136,17 +118,8 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
             id: 'pages.register.new-mnemonic.back-up-warning-box-paragraph',
           })}
         />
-      </PageWithScrollView>
-
-      <Box padding={20}>
-        <Button
-          text={intl.formatMessage({
-            id: 'button.next',
-          })}
-          size="large"
-        />
-      </Box>
-    </React.Fragment>
+      </ScrollView>
+    </RegisterContainer>
   );
 });
 
