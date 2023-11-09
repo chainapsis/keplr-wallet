@@ -14,6 +14,7 @@ import {
   SecretAccount,
   IBCChannelStore,
   IBCCurrencyRegistrar,
+  QuerySharedContext,
 } from '@keplr-wallet/stores';
 import {
   ChainSuggestStore,
@@ -43,6 +44,7 @@ import {TokenContractsQueries} from './token-contracts';
 import {AprQueries} from './aprs';
 import {CosmosGovernanceQueries} from './governance/quries';
 import {CosmosGovernanceQueriesV1} from './governance/v1/quries';
+import {ScamProposalStore} from './scam-proposal';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
@@ -79,7 +81,7 @@ export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
 
   public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
-
+  public readonly scamProposalStore: ScamProposalStore;
   constructor() {
     const router = new RNRouterUI(RNEnv.produceEnv);
 
@@ -340,6 +342,12 @@ export class RootStore {
       this.accountStore,
       this.keyRingStore,
       this.interactionStore,
+    );
+
+    this.scamProposalStore = new ScamProposalStore(
+      new QuerySharedContext(new AsyncKVStore('store_scam_proposal'), {
+        responseDebounceMs: 100,
+      }),
     );
 
     router.listen(APP_PORT);

@@ -27,7 +27,7 @@ import {ChainIdHelper} from '@keplr-wallet/cosmos';
 
 export const GovernanceScreen: FunctionComponent = observer(() => {
   const style = useStyle();
-  const {hugeQueriesStore, queriesStore} = useStore();
+  const {hugeQueriesStore, queriesStore, scamProposalStore} = useStore();
   const selectChainModalRef = useRef<BottomSheetModal>(null);
   const navigation = useNavigation<StackNavProp>();
   const ChainListHasUrl = EmbedChainInfos.filter(
@@ -41,7 +41,6 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
       }),
     [hugeQueriesStore.delegations],
   );
-
   const modalItems: SelectModalItem[] = useMemo(() => {
     return hugeQueriesStore.stakables
       .filter(viewToken =>
@@ -83,7 +82,14 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
               .get(delegation.chainInfo.chainId)
               .governanceV1.queryGovernance.getQueryGovernance({
                 status: 'PROPOSAL_STATUS_VOTING_PERIOD',
-              }).proposals.length,
+              })
+              .proposals.filter(
+                proposal =>
+                  !scamProposalStore.isScamProposal(
+                    delegation.chainInfo.chainId,
+                    proposal.id,
+                  ),
+              ).length,
             chainId: delegation.chainInfo.chainId,
             imageUrl: delegation.chainInfo.chainSymbolImageUrl,
             chainName: delegation.chainInfo.chainName,
@@ -94,7 +100,14 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
               .get(delegation.chainInfo.chainId)
               .governance.queryGovernance.getQueryGovernance({
                 status: 'PROPOSAL_STATUS_VOTING_PERIOD',
-              }).proposals.length,
+              })
+              .proposals.filter(
+                proposal =>
+                  !scamProposalStore.isScamProposal(
+                    delegation.chainInfo.chainId,
+                    proposal.id,
+                  ),
+              ).length,
             chainId: delegation.chainInfo.chainId,
             imageUrl: delegation.chainInfo.chainSymbolImageUrl,
             chainName: delegation.chainInfo.chainName,

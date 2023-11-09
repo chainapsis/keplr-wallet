@@ -10,7 +10,7 @@ import {GovernanceV1ChainIdentifiers} from '../../../config';
 import {ChainIdHelper} from '@keplr-wallet/cosmos';
 
 export const GovernanceListScreen: FunctionComponent = observer(() => {
-  const {queriesStore} = useStore();
+  const {queriesStore, scamProposalStore} = useStore();
 
   // const style = useStyle();
   const route = useRoute<RouteProp<GovernanceNavigation, 'Governance.list'>>();
@@ -45,7 +45,9 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
 
     isGovV1SupportedRef.current = false;
     return governance.getQueryGovernance().proposals;
-  })();
+  })().filter(
+    proposal => !scamProposalStore.isScamProposal(chainId, proposal.id),
+  );
 
   const sections = useMemo(() => {
     // .filter(
