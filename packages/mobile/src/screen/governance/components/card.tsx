@@ -42,14 +42,13 @@ export const GovernanceProposalStatusChip: FunctionComponent<{
 export const GovernanceCardBody: FunctionComponent<{
   proposalId: string;
   chainId: string;
-  isV1: boolean;
-}> = observer(({proposalId, chainId, isV1}) => {
+  isGovV1Supported: boolean;
+}> = observer(({proposalId, chainId, isGovV1Supported}) => {
   const {queriesStore} = useStore();
 
   const style = useStyle();
   // const intl = useIntl();
-  // const queries = queriesStore.get(chainStore.current.chainId);
-  const queryGovernance = isV1
+  const queryGovernance = isGovV1Supported
     ? queriesStore
         .get(chainId)
         .governanceV1.queryGovernance.getQueryGovernance()

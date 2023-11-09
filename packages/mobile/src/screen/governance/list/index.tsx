@@ -6,34 +6,45 @@ import {FlatList} from 'react-native';
 import {GovernanceCardBody} from '../components/card';
 import {useStore} from '../../../stores';
 import {ProposalStatus} from '../../../stores/governance/types';
+import {GovernanceV1ChainIdentifiers} from '../../../config';
+import {ChainIdHelper} from '@keplr-wallet/cosmos';
 
 export const GovernanceListScreen: FunctionComponent = observer(() => {
   const {queriesStore} = useStore();
 
   // const style = useStyle();
   const route = useRoute<RouteProp<GovernanceNavigation, 'Governance.list'>>();
-  const {chainId} = route.params;
+  const {chainId, isGovV1Supported} = route.params;
   const governanceV1 = queriesStore
     .get(chainId)
     .governanceV1.queryGovernance.getQueryGovernance();
   const governance = queriesStore.get(chainId).governance.queryGovernance;
-  const isV1 = useRef(true);
+  const isGovV1SupportedRef = useRef(isGovV1Supported || false);
 
   const proposals = (() => {
+    //NOTE staking한 체인의 경우 이전페이지에서 isGovV1Supported를 이미 구했기때문에 바로 proposal를 호출
+    if (typeof isGovV1Supported === 'boolean') {
+      if (isGovV1Supported) {
+        return governanceV1.proposals;
+      }
+      return governance.getQueryGovernance().proposals;
+    }
+
     if (governanceV1.isFetching) {
       return [];
     }
     if (
-      !governanceV1.isFetching &&
+      GovernanceV1ChainIdentifiers.includes(
+        ChainIdHelper.parse(chainId).identifier,
+      ) ||
       !((governanceV1.error?.data as any)?.code === 12)
     ) {
-      isV1.current = true;
+      isGovV1SupportedRef.current = true;
       return governanceV1.proposals;
     }
-    isV1.current = false;
-    return governance.getQueryGovernance({
-      status: 'PROPOSAL_STATUS_VOTING_PERIOD',
-    }).proposals;
+
+    isGovV1SupportedRef.current = false;
+    return governance.getQueryGovernance().proposals;
   })();
 
   const sections = useMemo(() => {
@@ -56,7 +67,7 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
       renderItem={({item}) => {
         return (
           <GovernanceCardBody
-            isV1={isV1.current}
+            isGovV1Supported={isGovV1SupportedRef.current}
             chainId={chainId}
             proposalId={item.id}
           />

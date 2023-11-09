@@ -113,7 +113,7 @@ export type StakeNavigation = {
 
 export type GovernanceNavigation = {
   'Governance.intro': undefined;
-  'Governance.list': {chainId: string};
+  'Governance.list': {chainId: string; isGovV1Supported?: boolean};
 };
 
 export type StackNavProp = NativeStackNavigationProp<RootStackParamList>;
