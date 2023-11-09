@@ -58,6 +58,8 @@ import {RegisterScreen} from './screen/register';
 import {WebScreen} from './screen/web';
 import {WebpageScreen} from './screen/web/webpage';
 import {NewMnemonicScreen} from './screen/register/new-mnemonic';
+import {GovernanceListScreen} from './screen/governance/list';
+import {GovernanceScreen} from './screen/governance';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -76,9 +78,8 @@ export type RootStackParamList = {
   'Setting.General.Intro': undefined;
   'Setting.General.Lang': undefined;
   'Setting.General.Currency': undefined;
-  'Setting.General.ContactList': {chainId?: string};
+  'Setting.General.ContactList': {chainId?: string} | undefined;
   'Setting.General.ContactAdd': {chainId: string; editIndex?: number};
-
   'Setting.General.WC': undefined;
   'Setting.General.ManageNonActiveChains': undefined;
   'Setting.General.ManageChainVisibility': undefined;
@@ -89,7 +90,9 @@ export type RootStackParamList = {
   'Setting.SecurityAndPrivacy.ChangePassword': undefined;
 
   'Setting.ManageTokenList': undefined;
-  'Setting.ManageTokenList.Add': {chainId?: string; contractAddress?: string};
+  'Setting.ManageTokenList.Add':
+    | {chainId?: string; contractAddress?: string}
+    | undefined;
 
   Locked: undefined;
   SelectWallet: undefined;
@@ -100,6 +103,7 @@ export type RootStackParamList = {
 
   Stake: NavigatorScreenParams<StakeNavigation>;
   Web: {url: string};
+  Governance: NavigatorScreenParams<GovernanceNavigation>;
 };
 
 export type StakeNavigation = {
@@ -109,12 +113,18 @@ export type StakeNavigation = {
   'Stake.ValidateDetail': {chainId: string; validatorAddress: string};
 };
 
+export type GovernanceNavigation = {
+  'Governance.intro': undefined;
+  'Governance.list': {chainId: string};
+};
+
 export type StackNavProp = NativeStackNavigationProp<RootStackParamList>;
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 const StakeStack = createNativeStackNavigator<StakeNavigation>();
+const GovernanceStack = createNativeStackNavigator<GovernanceNavigation>();
 
 export const RegisterNavigation: FunctionComponent = () => {
   return (
@@ -486,11 +496,37 @@ const StakeNavigation = () => {
     </StakeStack.Navigator>
   );
 };
+const GovernanceNavigation = () => {
+  const intl = useIntl();
+  return (
+    <GovernanceStack.Navigator>
+      <GovernanceStack.Screen
+        name="Governance.intro"
+        options={{
+          title: '투표할 프로포절이 있는 체인들',
+          ...defaultHeaderOptions,
+        }}
+        component={GovernanceScreen}
+      />
+      <GovernanceStack.Screen
+        name="Governance.list"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.wallet.keyring-item.dropdown.delete-wallet-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={GovernanceListScreen}
+      />
+    </GovernanceStack.Navigator>
+  );
+};
 
 //TODO 이후 상태가 not-loaded일때 스플레시 스크린화면 처리 필요
 export const AppNavigation: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
   const style = useStyle();
+  const intl = useIntl();
   style.setTheme('dark');
 
   if (keyRingStore.status === 'not-loaded') {
@@ -558,6 +594,40 @@ export const AppNavigation: FunctionComponent = observer(() => {
             component={StakeNavigation}
           />
           <Stack.Screen name={'Web'} component={WebpageScreen} />
+          {/*NOTE 사이드바를 통해서 세팅으로 이동시 뒤로가기때 다시 메인으로 오기 위해서 해당 route들은 최상위에도 올렸습니다*/}
+          <Stack.Screen
+            name="Setting.ManageTokenList.Add"
+            options={{
+              title: intl.formatMessage({id: 'page.setting.token.add.title'}),
+              ...defaultHeaderOptions,
+            }}
+            component={SettingTokenAddScreen}
+          />
+          <Stack.Screen
+            name="Setting.General.ContactList"
+            options={{
+              title: intl.formatMessage({
+                id: 'page.setting.general.contacts-title',
+              }),
+              ...defaultHeaderOptions,
+            }}
+            component={SettingContactsListScreen}
+          />
+          <Stack.Screen
+            name="Setting.General.ContactAdd"
+            options={{
+              title: intl.formatMessage({
+                id: 'page.setting.general.contacts-title',
+              }),
+              ...defaultHeaderOptions,
+            }}
+            component={SettingContactsAddScreen}
+          />
+          <Stack.Screen
+            name="Governance"
+            options={{headerShown: false}}
+            component={GovernanceNavigation}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </FocusedScreenProvider>

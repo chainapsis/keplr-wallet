@@ -49,7 +49,9 @@ export const TokenTitleView: FunctionComponent<{
             }
           }}>
           <Columns alignY="center" sum={1} gutter={4}>
-            <Text style={style.flatten(['color-text-low'])}>{title}</Text>
+            <Text style={style.flatten(['color-text-low', 'subtitle3'])}>
+              {title}
+            </Text>
             <InformationOutlinedIcon
               size={20}
               color={style.get('color-text-low').color}
