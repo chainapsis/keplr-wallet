@@ -2,11 +2,9 @@ import React, {FunctionComponent, useMemo, useRef} from 'react';
 import {observer} from 'mobx-react-lite';
 import {useStyle} from '../../styles';
 import {PageWithScrollView} from '../../components/page';
-import {Platform, Text} from 'react-native';
+import {Platform, StyleSheet, Text, ViewStyle} from 'react-native';
 import {useStore} from '../../stores';
 import {Dec} from '@keplr-wallet/unit';
-import {Box} from '../../components/box';
-import FastImage from 'react-native-fast-image';
 import {ViewToken} from '../../components/token-view';
 import {Gutter} from '../../components/gutter';
 import {useNavigation} from '@react-navigation/native';
@@ -19,10 +17,15 @@ import {
   GovSelectChainModal,
   SelectModalItem,
 } from './components/select-modal-gov';
+import {RectButton} from '../../components/rect-button';
+import {Column, Columns} from '../../components/column';
+import {ChainImageFallback} from '../../components/image';
+import {Stack} from '../../components/stack';
+import {XAxis} from '../../components/axis';
 
 export const GovernanceScreen: FunctionComponent = observer(() => {
   const style = useStyle();
-  const {hugeQueriesStore} = useStore();
+  const {hugeQueriesStore, queriesStore} = useStore();
   const selectChainModalRef = useRef<BottomSheetModal>(null);
   const navigation = useNavigation<StackNavProp>();
   const delegations: ViewToken[] = useMemo(
@@ -32,6 +35,7 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
       }),
     [hugeQueriesStore.delegations],
   );
+
   const modalItems: SelectModalItem[] = useMemo(() => {
     return hugeQueriesStore.stakables.map(viewToken => {
       return {
@@ -41,8 +45,43 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
       } as SelectModalItem;
     });
   }, [hugeQueriesStore.stakables]);
+
+  const viewItems = delegations.map(delegation => {
+    const isV1 = !queriesStore
+      .get(delegation.chainInfo.chainId)
+      .governanceV1.queryGovernance.getQueryGovernance({
+        status: 'PROPOSAL_STATUS_VOTING_PERIOD',
+      }).error?.data;
+
+    return isV1
+      ? {
+          isV1,
+          proposalLen: queriesStore
+            .get(delegation.chainInfo.chainId)
+            .governanceV1.queryGovernance.getQueryGovernance({
+              status: 'PROPOSAL_STATUS_VOTING_PERIOD',
+            }).proposals.length,
+          chainId: delegation.chainInfo.chainId,
+          imageUrl: delegation.chainInfo.chainSymbolImageUrl,
+          chainName: delegation.chainInfo.chainName,
+        }
+      : {
+          isV1,
+          proposalLen: queriesStore
+            .get(delegation.chainInfo.chainId)
+            .governance.queryGovernance.getQueryGovernance({
+              status: 'PROPOSAL_STATUS_VOTING_PERIOD',
+            }).proposals.length,
+          chainId: delegation.chainInfo.chainId,
+          imageUrl: delegation.chainInfo.chainSymbolImageUrl,
+          chainName: delegation.chainInfo.chainName,
+        };
+  });
+
   return (
-    <PageWithScrollView backgroundMode={'default'}>
+    <PageWithScrollView
+      backgroundMode={'default'}
+      style={style.flatten(['padding-x-12'])}>
       <TextButton
         text="전체 체인의 프로포절들 보기"
         size="large"
@@ -56,23 +95,21 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
         }
       />
       <Gutter size={12} />
-      {delegations.map(token => {
+      {viewItems.map(item => {
         return (
-          <React.Fragment key={token.chainInfo.chainId}>
-            <Box
-              padding={16}
-              backgroundColor={style.get('color-gray-600').color}
-              onClick={() =>
+          <React.Fragment key={item.chainId}>
+            <ChainItem
+              chainName={item.chainName}
+              imageUrl={item.imageUrl}
+              proposalLen={item.proposalLen}
+              key={item.chainId}
+              onClick={() => {
                 navigation.navigate('Governance', {
                   screen: 'Governance.list',
-                  params: {chainId: token.chainInfo.chainId},
-                })
-              }>
-              <FastImage source={{uri: token.chainInfo.chainSymbolImageUrl}} />
-              <Text style={style.flatten(['h4', 'color-text-high'])}>
-                {token.chainInfo.chainName}
-              </Text>
-            </Box>
+                  params: {chainId: item.chainId},
+                });
+              }}
+            />
             <Gutter size={12} />
           </React.Fragment>
         );
@@ -95,3 +132,76 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
     </PageWithScrollView>
   );
 });
+
+interface ChainItemProps {
+  onClick?: () => void;
+  imageUrl?: string;
+  chainName: string;
+  proposalLen: number;
+}
+export const ChainItem: FunctionComponent<ChainItemProps> = observer(
+  ({chainName, imageUrl, proposalLen, onClick}) => {
+    const style = useStyle();
+
+    const containerStyle: ViewStyle = {
+      backgroundColor: style.get('color-gray-600').color,
+      paddingVertical: 18,
+      paddingLeft: 16,
+      paddingRight: 8,
+      borderRadius: 6,
+    };
+
+    return (
+      <RectButton
+        style={StyleSheet.flatten([containerStyle])}
+        rippleColor={style.get('color-gray-550').color}
+        underlayColor={style.get('color-gray-550').color}
+        activeOpacity={1}
+        onPress={() => {
+          if (onClick) {
+            onClick();
+          }
+        }}>
+        <Columns sum={1} gutter={8} alignY="center">
+          <ChainImageFallback
+            style={{
+              width: 32,
+              height: 32,
+            }}
+            src={imageUrl}
+            alt={chainName}
+          />
+
+          <Gutter size={12} />
+
+          <XAxis alignY="center">
+            <Text
+              style={style.flatten([
+                'flex-row',
+                'flex-wrap',
+                'subtitle3',
+                'color-text-high',
+              ])}>
+              {chainName}
+            </Text>
+          </XAxis>
+
+          <Column weight={1} />
+
+          <Columns sum={1} gutter={2} alignY="center">
+            <Stack gutter={2} alignX="right">
+              <Text style={style.flatten(['body2', 'color-text-low'])}>
+                {proposalLen} Proposals
+              </Text>
+            </Stack>
+
+            <ArrowRightIcon
+              size={24}
+              color={style.get('color-text-low').color}
+            />
+          </Columns>
+        </Columns>
+      </RectButton>
+    );
+  },
+);
