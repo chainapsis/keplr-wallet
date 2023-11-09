@@ -50,10 +50,13 @@ export const GovernanceCardBody: FunctionComponent<{
   // const intl = useIntl();
   // const queries = queriesStore.get(chainStore.current.chainId);
   const queryGovernance = isV1
-    ? queriesStore.get(chainId).governanceV1.queryGovernance
-    : queriesStore.get(chainId).governance.queryGovernance;
+    ? queriesStore
+        .get(chainId)
+        .governanceV1.queryGovernance.getQueryGovernance()
+    : queriesStore.get(chainId).governance.queryGovernance.getQueryGovernance();
   const proposal = queryGovernance.getProposal(proposalId);
   const intl = useIntl();
+
   const renderProposalDateString = (
     proposal: ObservableQueryProposal | ObservableQueryProposalV1,
   ) => {

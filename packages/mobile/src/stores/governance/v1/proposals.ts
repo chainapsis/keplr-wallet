@@ -12,11 +12,70 @@ import {ObservableQueryProposalV1} from './proposal';
 import {
   ChainGetter,
   ObservableChainQuery,
+  ObservableChainQueryMap,
   ObservableQueryStakingPool,
   QuerySharedContext,
 } from '@keplr-wallet/stores';
+import {GovQueryParams} from '../types';
 
-export class ObservableQueryGovernanceV1 extends ObservableChainQuery<GovV1Proposals> {
+export class ObservableQueryGovernanceV1 extends ObservableChainQueryMap<GovV1Proposals> {
+  constructor(
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter,
+    protected readonly _queryPool: ObservableQueryStakingPool,
+  ) {
+    super(
+      sharedContext,
+      chainId,
+      chainGetter,
+      // TODO: Handle pagination
+      (params?: string) => {
+        return new ObservableQueryGovernanceV1Inner(
+          this.sharedContext,
+          this.chainId,
+          this.chainGetter,
+          _queryPool,
+          params,
+        );
+      },
+    );
+    makeObservable(this);
+  }
+  getQueryGovernance(
+    params?: GovQueryParams,
+  ): ObservableQueryGovernanceV1Inner {
+    const queryParams = params
+      ? Object.entries(params)
+          .map(([key, value]) => {
+            if (key === 'status') {
+              if (value === 'PROPOSAL_STATUS_UNSPECIFIED') {
+                return 'proposal_status=0';
+              }
+              if (value === 'PROPOSAL_STATUS_DEPOSIT_PERIOD') {
+                return 'proposal_status=1';
+              }
+              if (value === 'PROPOSAL_STATUS_VOTING_PERIOD') {
+                return 'proposal_status=2';
+              }
+              if (value === 'PROPOSAL_STATUS_PASSED') {
+                return 'proposal_status=3';
+              }
+              if (value === 'PROPOSAL_STATUS_REJECTED') {
+                return 'proposal_status=4';
+              }
+              if (value === 'PROPOSAL_STATUS_FAILED') {
+                return 'proposal_status=5';
+              }
+            }
+          })
+          .join('&')
+      : '';
+    return this.get(queryParams) as ObservableQueryGovernanceV1Inner;
+  }
+}
+
+export class ObservableQueryGovernanceV1Inner extends ObservableChainQuery<GovV1Proposals> {
   @observable.ref
   protected paramDeposit?: ObservableQueryGovV1ParamDeposit = undefined;
   @observable.ref
@@ -29,13 +88,14 @@ export class ObservableQueryGovernanceV1 extends ObservableChainQuery<GovV1Propo
     chainId: string,
     chainGetter: ChainGetter,
     protected readonly _queryPool: ObservableQueryStakingPool,
+    params?: string,
   ) {
     super(
       sharedContext,
       chainId,
       chainGetter,
       // TODO: Handle pagination
-      '/cosmos/gov/v1/proposals?pagination.limit=3000',
+      `/cosmos/gov/v1/proposals?pagination.limit=3000&${params}`,
     );
     makeObservable(this);
   }

@@ -62,6 +62,10 @@ export type GovProposals = {
   // pagination: {}
 };
 
+export type GovQueryParams = {
+  status?: Proposal['status'];
+};
+
 export type GovParamsDeposit = {
   deposit_params: {
     min_deposit: [

@@ -13,7 +13,9 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
   // const style = useStyle();
   const route = useRoute<RouteProp<GovernanceNavigation, 'Governance.list'>>();
   const {chainId} = route.params;
-  const governanceV1 = queriesStore.get(chainId).governanceV1.queryGovernance;
+  const governanceV1 = queriesStore
+    .get(chainId)
+    .governanceV1.queryGovernance.getQueryGovernance();
   const governance = queriesStore.get(chainId).governance.queryGovernance;
   const isV1 = useRef(true);
 
@@ -29,7 +31,9 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
       return governanceV1.proposals;
     }
     isV1.current = false;
-    return governance.proposals;
+    return governance.getQueryGovernance({
+      status: 'PROPOSAL_STATUS_VOTING_PERIOD',
+    }).proposals;
   })();
 
   const sections = useMemo(() => {
