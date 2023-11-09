@@ -68,7 +68,7 @@ export const GuideBox: FunctionComponent<GuideBoxProps> = ({
         {paragraph ? (
           <Text
             style={StyleSheet.flatten([
-              style.flatten(['body3']),
+              style.flatten(['body2']),
               {color: paragraphColor},
             ])}>
             {paragraph}
