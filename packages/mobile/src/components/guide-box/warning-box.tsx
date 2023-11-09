@@ -29,7 +29,7 @@ export const WarningBox: FunctionComponent<Omit<GuideBoxProps, 'color'>> = ({
           {titleRight}
         </Columns>
         {paragraph ? (
-          <Text style={style.flatten(['body3', 'color-white'])}>
+          <Text style={style.flatten(['body2', 'color-white'])}>
             {paragraph}
           </Text>
         ) : null}
