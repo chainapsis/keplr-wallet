@@ -77,9 +77,8 @@ export type RootStackParamList = {
   'Setting.General.Intro': undefined;
   'Setting.General.Lang': undefined;
   'Setting.General.Currency': undefined;
-  'Setting.General.ContactList': {chainId?: string};
+  'Setting.General.ContactList': {chainId?: string} | undefined;
   'Setting.General.ContactAdd': {chainId: string; editIndex?: number};
-
   'Setting.General.WC': undefined;
   'Setting.General.ManageNonActiveChains': undefined;
   'Setting.General.ManageChainVisibility': undefined;
@@ -90,7 +89,9 @@ export type RootStackParamList = {
   'Setting.SecurityAndPrivacy.ChangePassword': undefined;
 
   'Setting.ManageTokenList': undefined;
-  'Setting.ManageTokenList.Add': {chainId?: string; contractAddress?: string};
+  'Setting.ManageTokenList.Add':
+    | {chainId?: string; contractAddress?: string}
+    | undefined;
 
   Locked: undefined;
   SelectWallet: undefined;
@@ -528,6 +529,7 @@ const GovernanceNavigation = () => {
 export const AppNavigation: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
   const style = useStyle();
+  const intl = useIntl();
   style.setTheme('dark');
 
   if (keyRingStore.status === 'not-loaded') {
@@ -595,6 +597,35 @@ export const AppNavigation: FunctionComponent = observer(() => {
             component={StakeNavigation}
           />
           <Stack.Screen name={'Web'} component={WebpageScreen} />
+          {/*NOTE 사이드바를 통해서 세팅으로 이동시 뒤로가기때 다시 메인으로 오기 위해서 해당 route들은 최상위에도 올렸습니다*/}
+          <Stack.Screen
+            name="Setting.ManageTokenList.Add"
+            options={{
+              title: intl.formatMessage({id: 'page.setting.token.add.title'}),
+              ...defaultHeaderOptions,
+            }}
+            component={SettingTokenAddScreen}
+          />
+          <Stack.Screen
+            name="Setting.General.ContactList"
+            options={{
+              title: intl.formatMessage({
+                id: 'page.setting.general.contacts-title',
+              }),
+              ...defaultHeaderOptions,
+            }}
+            component={SettingContactsListScreen}
+          />
+          <Stack.Screen
+            name="Setting.General.ContactAdd"
+            options={{
+              title: intl.formatMessage({
+                id: 'page.setting.general.contacts-title',
+              }),
+              ...defaultHeaderOptions,
+            }}
+            component={SettingContactsAddScreen}
+          />
           <Stack.Screen
             name="Governance"
             options={{headerShown: false}}

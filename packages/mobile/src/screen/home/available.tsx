@@ -175,7 +175,7 @@ export const AvailableTabView: FunctionComponent<{
                           <React.Fragment>
                             <Text
                               style={style.flatten([
-                                'text-caption2',
+                                'body2',
                                 'color-gray-300',
                               ])}>
                               <FormattedMessage id="page.main.available.hide-low-balance" />

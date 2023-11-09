@@ -49,7 +49,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
   // const notification = useNotification();
   const route =
     useRoute<RouteProp<RootStackParamList, 'Setting.ManageTokenList.Add'>>();
-  const paramChainId = route.params.chainId;
+  const paramChainId = route.params?.chainId;
   const contractModalRef = useRef<BottomSheetModal>(null);
   const selectChainModalRef = useRef<BottomSheetModal>(null);
 
@@ -60,7 +60,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
   const {setValue, handleSubmit, control, formState, watch} = useForm<FormData>(
     {
       defaultValues: {
-        contractAddress: route.params.contractAddress || '',
+        contractAddress: route.params?.contractAddress || '',
         viewingKey: '',
       },
     },
