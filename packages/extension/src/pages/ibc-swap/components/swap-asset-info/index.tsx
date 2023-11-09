@@ -520,8 +520,13 @@ export const SwapAssetInfo: FunctionComponent<{
         <XAxis alignY="center">
           {(() => {
             if (type === "from" || forceShowPrice) {
-              if (!price) {
+              if (type === "from" && !price) {
                 return null;
+              }
+              if (type === "to") {
+                if (!priceStore.calculatePrice(amountConfig.outAmount)) {
+                  return null;
+                }
               }
 
               return (
@@ -535,13 +540,13 @@ export const SwapAssetInfo: FunctionComponent<{
                     }
 
                     if (!isPriceBased) {
-                      if (price.toDec().lte(new Dec(0))) {
+                      if (price!.toDec().lte(new Dec(0))) {
                         setPriceValue("");
                       } else {
                         setPriceValue(
-                          price
+                          price!
                             .toDec()
-                            .toString(price.options.maxDecimals)
+                            .toString(price!.options.maxDecimals)
                             .toString()
                         );
                       }
@@ -583,7 +588,17 @@ export const SwapAssetInfo: FunctionComponent<{
                             .hideIBCMetadata(true)
                             .toString();
                         } else {
-                          return price.toString();
+                          if (type === "from") {
+                            return price!.toString();
+                          } else {
+                            const p = priceStore.calculatePrice(
+                              amountConfig.outAmount
+                            );
+                            if (!p) {
+                              return null;
+                            }
+                            return p.toString();
+                          }
                         }
                       })()}
                     </Body3>

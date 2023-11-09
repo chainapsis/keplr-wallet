@@ -53,8 +53,9 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
    * 이미 등록되어 있거나 등록을 시도 중이면 아무 행동도 하지 않는.
    * 예를들어 네이티브 balance 쿼리에서 모르는 denom이 나오거나
    * IBC denom의 등록을 요청할 때 쓸 수 있다.
+   * action 안에서는 autorun이 immediate로 실행되지 않으므로, 일단 @action 데코레이터는 사용하지 않는다.
+   * 하지만 이 메소드를 action 안에서 호출하면 여전히 immediate로 실행되지 않으므로, 이 경우도 고려해야한다.
    */
-  @action
   addUnknownDenoms(...coinMinimalDenoms: string[]) {
     for (const coinMinimalDenom of coinMinimalDenoms) {
       if (this.unknownDenomMap.get(coinMinimalDenom)) {
@@ -65,7 +66,10 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
         continue;
       }
 
-      this.unknownDenoms.push(coinMinimalDenom);
+      runInAction(() => {
+        this.unknownDenoms.push(coinMinimalDenom);
+        this.registrationInProgressCurrencyMap.set(coinMinimalDenom, true);
+      });
 
       const disposer = autorun(() => {
         const generator = this.currencyRegistry.getCurrencyRegistrar(
@@ -200,6 +204,29 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
     if (this.currencyMap.has(coinMinimalDenom)) {
       return this.currencyMap.get(coinMinimalDenom);
     }
+  }
+
+  findCurrencyAsync(
+    coinMinimalDenom: string
+  ): Promise<AppCurrency | undefined> {
+    if (this.currencyMap.has(coinMinimalDenom)) {
+      return Promise.resolve(this.currencyMap.get(coinMinimalDenom));
+    }
+    this.addUnknownDenoms(coinMinimalDenom);
+
+    return new Promise((resolve) => {
+      const disposal = autorun(() => {
+        const registration =
+          this.registrationInProgressCurrencyMap.get(coinMinimalDenom);
+        if (!registration) {
+          if (disposal) {
+            disposal();
+          }
+
+          resolve(this.currencyMap.get(coinMinimalDenom));
+        }
+      });
+    });
   }
 
   /**
