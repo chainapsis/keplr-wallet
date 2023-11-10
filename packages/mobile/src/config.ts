@@ -2369,6 +2369,6 @@ export const GovernanceV1ChainIdentifiers = [
   'gitopia',
   'core',
   'celestia',
-  'dydx',
+  'dydx-mainnet',
   'likecoin-mainnet',
 ];

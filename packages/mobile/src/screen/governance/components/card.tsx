@@ -49,7 +49,7 @@ export const GovernanceCardBody: FunctionComponent<{
   const {queriesStore, accountStore} = useStore();
 
   const style = useStyle();
-  // const intl = useIntl();
+  const intl = useIntl();
   const queryGovernance = isGovV1Supported
     ? queriesStore.get(chainId).governanceV1
     : queriesStore.get(chainId).governance;
@@ -63,8 +63,6 @@ export const GovernanceCardBody: FunctionComponent<{
         accountStore.getAccount(chainId).bech32Address,
       ).vote !== 'Unspecified'
     : false;
-
-  const intl = useIntl();
 
   const renderProposalDateString = (
     proposal: ObservableQueryProposal | ObservableQueryProposalV1,

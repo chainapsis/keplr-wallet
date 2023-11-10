@@ -2,59 +2,58 @@ import React, {FunctionComponent, useMemo, useRef} from 'react';
 import {observer} from 'mobx-react-lite';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import {GovernanceNavigation} from '../../../navigation';
-import {FlatList} from 'react-native';
+import {FlatList, Text} from 'react-native';
 import {GovernanceCardBody} from '../components/card';
 import {useStore} from '../../../stores';
 import {ProposalStatus} from '../../../stores/governance/types';
 import {GovernanceV1ChainIdentifiers} from '../../../config';
 import {ChainIdHelper} from '@keplr-wallet/cosmos';
 import {Gutter} from '../../../components/gutter';
+import {EmptyView} from '../../../components/empty-view';
+import {FormattedMessage} from 'react-intl';
 
 export const GovernanceListScreen: FunctionComponent = observer(() => {
   const {queriesStore, scamProposalStore} = useStore();
 
-  // const style = useStyle();
   const route = useRoute<RouteProp<GovernanceNavigation, 'Governance.list'>>();
   const {chainId, isGovV1Supported} = route.params;
   const governanceV1 = queriesStore
     .get(chainId)
     .governanceV1.queryGovernance.getQueryGovernance();
-  const governanceLegacy = queriesStore.get(chainId).governance.queryGovernance;
+  const governanceLegacy = queriesStore
+    .get(chainId)
+    .governance.queryGovernance.getQueryGovernance();
   const isGovV1SupportedRef = useRef(isGovV1Supported || false);
 
-  const proposals = (() => {
-    //NOTE staking한 체인의 경우 이전페이지에서 isGovV1Supported를 이미 구했기때문에 바로 proposal를 호출
+  const governance = (() => {
     if (typeof isGovV1Supported === 'boolean') {
       if (isGovV1Supported) {
-        return governanceV1.proposals;
+        return governanceV1;
       }
-      return governanceLegacy.getQueryGovernance().proposals;
+      return governanceLegacy;
     }
 
-    if (governanceV1.isFetching) {
-      return [];
-    }
     if (
-      GovernanceV1ChainIdentifiers.includes(
+      !governanceV1.isFetching &&
+      (GovernanceV1ChainIdentifiers.includes(
         ChainIdHelper.parse(chainId).identifier,
       ) ||
-      !((governanceV1.error?.data as any)?.code === 12)
+        !((governanceV1.error?.data as any)?.code === 12))
     ) {
       isGovV1SupportedRef.current = true;
-      return governanceV1.proposals;
+      return governanceV1;
     }
 
-    isGovV1SupportedRef.current = false;
-    return governanceLegacy.getQueryGovernance().proposals;
+    return governanceLegacy;
   })();
 
   const sections = useMemo(() => {
-    return proposals.filter(
+    return governance.proposals.filter(
       p =>
         p.proposalStatus !== ProposalStatus.DEPOSIT_PERIOD &&
         !scamProposalStore.isScamProposal(chainId, p.id),
     );
-  }, [chainId, proposals, scamProposalStore]);
+  }, [chainId, governance.proposals, scamProposalStore]);
 
   return (
     <FlatList
@@ -75,6 +74,18 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
         );
       }}
       ItemSeparatorComponent={() => <Gutter size={12} />}
+      ListEmptyComponent={
+        governance.isFetching ? null : (
+          <React.Fragment>
+            <Gutter size={138} />
+            <EmptyView>
+              <Text>
+                <FormattedMessage id="page.governance.proposal-list.empty-text" />
+              </Text>
+            </EmptyView>
+          </React.Fragment>
+        )
+      }
     />
   );
 });
