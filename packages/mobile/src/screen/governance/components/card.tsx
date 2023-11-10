@@ -2,8 +2,6 @@ import React, {FunctionComponent, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 
 import {Text, View} from 'react-native';
-// import {LoadingSpinner} from '../../components/spinner';
-// import {useStore} from '../../../stores';
 import {useStyle} from '../../../styles';
 import {Box} from '../../../components/box';
 import {SVGLoadingIcon} from '../../../components/spinner';
@@ -19,8 +17,9 @@ import {ObservableQueryProposalV1} from '../../../stores/governance/v1';
 import {Chip} from '../../../components/chip';
 import {CheckCircleIcon} from '../../../components/icon';
 import {Gutter} from '../../../components/gutter';
-// import {dateToLocalString} from '../utils';
-// import {useIntl} from 'react-intl';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavProp} from '../../../navigation';
+import {DASHBOARD_URL} from '../../../config';
 
 export const GovernanceProposalStatusChip: FunctionComponent<{
   status: ProposalStatus;
@@ -46,7 +45,7 @@ export const GovernanceCardBody: FunctionComponent<{
   chainId: string;
   isGovV1Supported: boolean;
 }> = observer(({proposalId, chainId, isGovV1Supported}) => {
-  const {queriesStore, accountStore} = useStore();
+  const {queriesStore, accountStore, chainStore} = useStore();
 
   const style = useStyle();
   const intl = useIntl();
@@ -56,6 +55,7 @@ export const GovernanceCardBody: FunctionComponent<{
   const proposal = queryGovernance.queryGovernance
     .getQueryGovernance()
     .getProposal(proposalId);
+  const navigation = useNavigation<StackNavProp>();
 
   const voted = proposal?.id
     ? queryGovernance.queryVotes.getVote(
@@ -167,7 +167,19 @@ export const GovernanceCardBody: FunctionComponent<{
         <RectButton
           style={style.flatten(['padding-16'])}
           onPress={() => {
-            //TODO 웹으로 이동
+            //NOTE cronose pos 같은 공백이 있는 체인이름 대시보드애서
+            // cronose-pos으로 연결해서 공백이 있는경우 -으로 join 함
+            const url = `${DASHBOARD_URL}/chains/${chainStore
+              .getChain(chainId)
+              .chainName.toLowerCase()
+              .split(' ')
+              .join('-')}/proposals/${[proposal.id]}`;
+
+            if (url) {
+              navigation.navigate('Web', {
+                url,
+              });
+            }
           }}>
           <Stack gutter={9}>
             <Columns sum={1}>

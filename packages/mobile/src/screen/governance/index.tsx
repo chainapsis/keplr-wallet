@@ -22,7 +22,10 @@ import {Column, Columns} from '../../components/column';
 import {ChainImageFallback} from '../../components/image';
 import {Stack} from '../../components/stack';
 import {XAxis} from '../../components/axis';
-import {EmbedChainInfos, GovernanceV1ChainIdentifiers} from '../../config';
+import {
+  GovernanceV1ChainIdentifiers,
+  NoDashboardLinkIdentifiers,
+} from '../../config';
 import {ChainIdHelper} from '@keplr-wallet/cosmos';
 
 export const GovernanceScreen: FunctionComponent = observer(() => {
@@ -30,9 +33,6 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
   const {hugeQueriesStore, queriesStore, scamProposalStore} = useStore();
   const selectChainModalRef = useRef<BottomSheetModal>(null);
   const navigation = useNavigation<StackNavProp>();
-  const ChainListHasUrl = EmbedChainInfos.filter(
-    chainInfo => chainInfo.walletUrlForGovernance,
-  ).map(chainInfo => chainInfo.chainId);
 
   const delegations: ViewToken[] = useMemo(
     () =>
@@ -43,8 +43,11 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
   );
   const modalItems: SelectModalItem[] = useMemo(() => {
     return hugeQueriesStore.stakables
-      .filter(viewToken =>
-        ChainListHasUrl.includes(viewToken.chainInfo.chainId),
+      .filter(
+        viewToken =>
+          !NoDashboardLinkIdentifiers.includes(
+            ChainIdHelper.parse(viewToken.chainInfo.chainId).identifier,
+          ),
       )
       .map(viewToken => {
         return {
@@ -53,10 +56,15 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
           imageUrl: viewToken.chainInfo.chainSymbolImageUrl,
         } as SelectModalItem;
       });
-  }, [ChainListHasUrl, hugeQueriesStore.stakables]);
+  }, [hugeQueriesStore.stakables]);
 
   const viewItems = delegations
-    .filter(viewToken => ChainListHasUrl.includes(viewToken.chainInfo.chainId))
+    .filter(
+      viewToken =>
+        !NoDashboardLinkIdentifiers.includes(
+          ChainIdHelper.parse(viewToken.chainInfo.chainId).identifier,
+        ),
+    )
     .map(delegation => {
       const isGovV1Supported =
         GovernanceV1ChainIdentifiers.includes(
