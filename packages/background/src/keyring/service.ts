@@ -863,7 +863,6 @@ export class KeyRingService {
     );
   }
 
-  @action
   async deleteKeyRing(vaultId: string, password: string) {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
@@ -881,12 +880,14 @@ export class KeyRingService {
     this.vaultService.removeVault("keyRing", vaultId);
 
     if (wasSelected) {
-      const keyInfos = this.getKeyInfos();
-      if (keyInfos.length > 0) {
-        this._selectedVaultId = keyInfos[0].id;
-      } else {
-        this._selectedVaultId = undefined;
-      }
+      runInAction(() => {
+        const keyInfos = this.getKeyInfos();
+        if (keyInfos.length > 0) {
+          this._selectedVaultId = keyInfos[0].id;
+        } else {
+          this._selectedVaultId = undefined;
+        }
+      });
     }
 
     if (wasSelected) {
