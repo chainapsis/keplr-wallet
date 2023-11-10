@@ -2323,5 +2323,9 @@ export const GovernanceV1ChainIdentifiers = [
   'likecoin-mainnet',
 ];
 
-export const NoDashboardLinkIdentifiers = ['columbus', 'tgrade-mainnet'];
+export const NoDashboardLinkIdentifiers = [
+  'columbus',
+  'tgrade-mainnet',
+  'emoney',
+];
 export const DASHBOARD_URL = 'https://wallet.keplr.app';
