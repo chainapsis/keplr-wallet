@@ -171,7 +171,12 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
           onSelect={({key}) => {
             navigation.navigate('Governance', {
               screen: 'Governance.list',
-              params: {chainId: key},
+              params: {
+                chainId: key,
+                isGovV1Supported: viewItems.find(viewItem => {
+                  return viewItem.chainId === key;
+                })?.isGovV1Supported,
+              },
             });
           }}
         />
