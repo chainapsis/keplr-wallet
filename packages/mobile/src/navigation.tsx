@@ -499,7 +499,6 @@ const StakeNavigation = () => {
   );
 };
 const GovernanceNavigation = () => {
-  const intl = useIntl();
   return (
     <GovernanceStack.Navigator>
       <GovernanceStack.Screen
@@ -513,9 +512,7 @@ const GovernanceNavigation = () => {
       <GovernanceStack.Screen
         name="Governance.list"
         options={{
-          title: intl.formatMessage({
-            id: 'page.wallet.keyring-item.dropdown.delete-wallet-title',
-          }),
+          title: 'Proposals',
           ...defaultHeaderOptions,
         }}
         component={GovernanceListScreen}

@@ -8,6 +8,7 @@ import {useStore} from '../../../stores';
 import {ProposalStatus} from '../../../stores/governance/types';
 import {GovernanceV1ChainIdentifiers} from '../../../config';
 import {ChainIdHelper} from '@keplr-wallet/cosmos';
+import {Gutter} from '../../../components/gutter';
 
 export const GovernanceListScreen: FunctionComponent = observer(() => {
   const {queriesStore, scamProposalStore} = useStore();
@@ -18,7 +19,7 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
   const governanceV1 = queriesStore
     .get(chainId)
     .governanceV1.queryGovernance.getQueryGovernance();
-  const governance = queriesStore.get(chainId).governance.queryGovernance;
+  const governanceLegacy = queriesStore.get(chainId).governance.queryGovernance;
   const isGovV1SupportedRef = useRef(isGovV1Supported || false);
 
   const proposals = (() => {
@@ -27,7 +28,7 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
       if (isGovV1Supported) {
         return governanceV1.proposals;
       }
-      return governance.getQueryGovernance().proposals;
+      return governanceLegacy.getQueryGovernance().proposals;
     }
 
     if (governanceV1.isFetching) {
@@ -44,28 +45,26 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
     }
 
     isGovV1SupportedRef.current = false;
-    return governance.getQueryGovernance().proposals;
-  })().filter(
-    proposal => !scamProposalStore.isScamProposal(chainId, proposal.id),
-  );
+    return governanceLegacy.getQueryGovernance().proposals;
+  })();
 
   const sections = useMemo(() => {
-    // .filter(
-    //   proposal =>
-    //     !scamProposalStore.isScamProposal(
-    //       chainStore.current.chainId,
-    //       proposal.id,
-    //     ),
-    // );
-
     return proposals.filter(
-      p => p.proposalStatus !== ProposalStatus.DEPOSIT_PERIOD,
+      p =>
+        p.proposalStatus !== ProposalStatus.DEPOSIT_PERIOD &&
+        !scamProposalStore.isScamProposal(chainId, p.id),
     );
-  }, [proposals]);
+  }, [chainId, proposals, scamProposalStore]);
 
   return (
     <FlatList
       data={sections}
+      ListHeaderComponent={
+        <React.Fragment>
+          <Gutter size={12} />
+          {/* TODO 나중에 show spam proposal 토글넣어야함 */}
+        </React.Fragment>
+      }
       renderItem={({item}) => {
         return (
           <GovernanceCardBody
@@ -75,6 +74,7 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
           />
         );
       }}
+      ItemSeparatorComponent={() => <Gutter size={12} />}
     />
   );
 });

@@ -17,6 +17,8 @@ import {dateToLocalString} from '../utils';
 import {ObservableQueryProposal} from '../../../stores/governance';
 import {ObservableQueryProposalV1} from '../../../stores/governance/v1';
 import {Chip} from '../../../components/chip';
+import {CheckCircleIcon} from '../../../components/icon';
+import {Gutter} from '../../../components/gutter';
 // import {dateToLocalString} from '../utils';
 // import {useIntl} from 'react-intl';
 
@@ -44,16 +46,24 @@ export const GovernanceCardBody: FunctionComponent<{
   chainId: string;
   isGovV1Supported: boolean;
 }> = observer(({proposalId, chainId, isGovV1Supported}) => {
-  const {queriesStore} = useStore();
+  const {queriesStore, accountStore} = useStore();
 
   const style = useStyle();
   // const intl = useIntl();
   const queryGovernance = isGovV1Supported
-    ? queriesStore
-        .get(chainId)
-        .governanceV1.queryGovernance.getQueryGovernance()
-    : queriesStore.get(chainId).governance.queryGovernance.getQueryGovernance();
-  const proposal = queryGovernance.getProposal(proposalId);
+    ? queriesStore.get(chainId).governanceV1
+    : queriesStore.get(chainId).governance;
+  const proposal = queryGovernance.queryGovernance
+    .getQueryGovernance()
+    .getProposal(proposalId);
+
+  const voted = proposal?.id
+    ? queryGovernance.queryVotes.getVote(
+        proposal?.id,
+        accountStore.getAccount(chainId).bech32Address,
+      ).vote !== 'Unspecified'
+    : false;
+
   const intl = useIntl();
 
   const renderProposalDateString = (
@@ -167,6 +177,30 @@ export const GovernanceCardBody: FunctionComponent<{
                 {proposal.id}
               </Text>
               <Column weight={1} />
+              {voted ? (
+                <React.Fragment>
+                  <Chip
+                    text={
+                      <Box alignX="center" alignY="center">
+                        <Columns sum={1} gutter={2}>
+                          <Text
+                            style={style.flatten([
+                              'color-text-middle',
+                              'text-caption1',
+                            ])}>
+                            Voted
+                          </Text>
+                          <CheckCircleIcon
+                            size={16}
+                            color={style.get('color-text-middle').color}
+                          />
+                        </Columns>
+                      </Box>
+                    }
+                  />
+                  <Gutter size={4} />
+                </React.Fragment>
+              ) : null}
               <GovernanceProposalStatusChip status={proposal.proposalStatus} />
             </Columns>
 

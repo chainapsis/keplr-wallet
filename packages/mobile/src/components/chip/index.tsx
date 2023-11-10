@@ -51,15 +51,19 @@ export const Chip: FunctionComponent<{
           mode === 'outline' && (`border-color-${baseColor}-400` as any),
         ],
       )}>
-      <Text
-        style={style.flatten([
-          'text-overline',
-          'text-center',
-          'text-caption1',
-          ...(textColorDefinition as any),
-        ])}>
-        {text}
-      </Text>
+      {typeof text === 'string' ? (
+        <Text
+          style={style.flatten([
+            'text-overline',
+            'text-center',
+            'text-caption1',
+            ...(textColorDefinition as any),
+          ])}>
+          {text}
+        </Text>
+      ) : (
+        text
+      )}
     </View>
   );
 };
