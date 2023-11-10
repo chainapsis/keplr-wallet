@@ -17,6 +17,7 @@ import { AddressItem } from "../address-item";
 import SimpleBar from "simplebar-react";
 import styled, { useTheme } from "styled-components";
 import { FormattedMessage, useIntl } from "react-intl";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 
 type Type = "recent" | "contacts" | "accounts";
 
@@ -46,7 +47,8 @@ export const AddressBookModal: FunctionComponent<{
     memoConfig,
     permitSelfKeyInfo,
   }) => {
-    const { analyticsStore, uiConfigStore, keyRingStore } = useStore();
+    const { analyticsStore, uiConfigStore, keyRingStore, chainStore } =
+      useStore();
     const intl = useIntl();
     const theme = useTheme();
 
@@ -124,16 +126,31 @@ export const AddressBookModal: FunctionComponent<{
             });
         }
         case "accounts": {
-          return accounts.map((account) => {
+          return accounts.reduce<
+            { name: string; address: string; isSelf: boolean }[]
+          >((acc, account) => {
             const isSelf = keyRingStore.selectedKeyInfo?.id === account.vaultId;
 
-            return {
+            acc.push({
               name: account.name,
               address: account.bech32Address,
-
               isSelf,
-            };
-          });
+            });
+
+            const chainInfo = chainStore.getChain(recipientConfig.chainId);
+            const isEvmChain = chainInfo.evm !== undefined;
+            if (isEvmChain) {
+              acc.push({
+                name: account.name,
+                address: Bech32Address.fromBech32(account.bech32Address).toHex(
+                  true
+                ),
+                isSelf,
+              });
+            }
+
+            return acc;
+          }, []);
         }
         default: {
           return [];
