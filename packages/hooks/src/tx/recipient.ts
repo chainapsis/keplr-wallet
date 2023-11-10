@@ -254,11 +254,12 @@ export class RecipientConfig
     }
 
     const chainInfo = this.chainInfo;
+    const isEvmChain = this.chainInfo.evm !== undefined;
     const hasEthereumAddress =
       chainInfo.bip44.coinType === 60 ||
       !!chainInfo.features?.includes("eth-address-gen") ||
       !!chainInfo.features?.includes("eth-key-sign") ||
-      chainInfo.evm !== undefined;
+      isEvmChain;
     if (hasEthereumAddress && rawRecipient.startsWith("0x")) {
       try {
         if (isAddress(rawRecipient)) {

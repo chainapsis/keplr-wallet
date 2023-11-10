@@ -104,13 +104,15 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   }, [navigate, initialChainId, initialCoinMinimalDenom]);
 
   const account = accountStore.getAccount(chainId);
+  const ethereumAccount = ethereumAccountStore.getAccount(chainId);
+  const isEvmChain = chainStore.isEvmChain(chainId);
   const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
 
   const queryBalances = queriesStore.get(chainId).queryBalances;
-  const sender = chainStore.isEvmChain(chainId)
+  const sender = isEvmChain
     ? account.ethereumHexAddress
     : account.bech32Address;
-  const balance = chainStore.isEvmChain(chainId)
+  const balance = isEvmChain
     ? queryBalances.getQueryEthereumHexAddress(sender).getBalance(currency)
     : queryBalances.getQueryBech32Address(sender).getBalance(currency);
 
@@ -125,7 +127,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     {
       allowHexAddressToBech32Address:
         !chainStore.getChain(chainId).chainId.startsWith("injective") &&
-        !chainInfo.evm,
+        !isEvmChain,
       icns: ICNSInfo,
       computeTerraClassicTax: true,
     }
@@ -174,14 +176,14 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         }
       }
 
-      if (chainStore.isEvmChain(chainId)) {
+      if (isEvmChain) {
         return {
           simulate: () =>
-            ethereumAccountStore.getAccount(chainId).simulateGas({
+            ethereumAccount.simulateGas({
               currency: sendConfigs.amountConfig.amount[0].currency,
               amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
-              // 아직 recipient를 모르기 때문에 임의로 내 주소를 넣는다.
-              to: sender,
+              sender,
+              recipient: sendConfigs.recipientConfig.recipient,
             }),
         };
       }
@@ -350,136 +352,156 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         e.preventDefault();
 
         if (!txConfigsValidate.interactionBlocked) {
-          const tx = isIBCTransfer
-            ? accountStore
-                .getAccount(chainId)
-                .cosmos.makePacketForwardIBCTransferTx(
-                  sendConfigs.channelConfig.channels,
-                  sendConfigs.amountConfig.amount[0].toDec().toString(),
-                  sendConfigs.amountConfig.amount[0].currency,
-                  sendConfigs.recipientConfig.recipient
-                )
-            : accountStore
-                .getAccount(chainId)
-                .makeSendTokenTx(
-                  sendConfigs.amountConfig.amount[0].toDec().toString(),
-                  sendConfigs.amountConfig.amount[0].currency,
-                  sendConfigs.recipientConfig.recipient
+          try {
+            if (isEvmChain && sendConfigs.feeConfig.type !== "manual") {
+              const { maxFeePerGas, maxPriorityFeePerGas } =
+                sendConfigs.feeConfig.getEIP1559TxFees(
+                  sendConfigs.feeConfig.type
                 );
 
-          try {
-            await tx.send(
-              sendConfigs.feeConfig.toStdFee(),
-              sendConfigs.memoConfig.memo,
-              {
-                preferNoSetFee: true,
-                preferNoSetMemo: true,
-                sendTx: async (chainId, tx, mode) => {
-                  let msg: Message<Uint8Array> = new SendTxAndRecordMsg(
-                    historyType,
-                    chainId,
-                    sendConfigs.recipientConfig.chainId,
-                    tx,
-                    mode,
-                    false,
-                    sendConfigs.senderConfig.sender,
-                    sendConfigs.recipientConfig.recipient,
-                    sendConfigs.amountConfig.amount.map((amount) => {
-                      return {
-                        amount: DecUtils.getTenExponentN(
-                          amount.currency.coinDecimals
-                        )
-                          .mul(amount.toDec())
-                          .toString(),
-                        denom: amount.currency.coinMinimalDenom,
-                      };
-                    }),
-                    sendConfigs.memoConfig.memo
-                  );
-                  if (isIBCTransfer) {
-                    if (msg instanceof SendTxAndRecordMsg) {
-                      msg = msg.withIBCPacketForwarding(
-                        sendConfigs.channelConfig.channels
-                      );
-                    } else {
-                      throw new Error("Invalid message type");
-                    }
-                  }
-                  return await new InExtensionMessageRequester().sendMessage(
-                    BACKGROUND_PORT,
-                    msg
-                  );
-                },
-              },
-              {
-                onBroadcasted: () => {
-                  chainStore.enableVaultsWithCosmosAddress(
-                    sendConfigs.recipientConfig.chainId,
-                    sendConfigs.recipientConfig.recipient
-                  );
-
-                  if (isIBCTransfer && ibcChannelFluent != null) {
-                    const pathChainIds = [chainId].concat(
-                      ...ibcChannelFluent.channels.map(
-                        (channel) => channel.counterpartyChainId
-                      )
+              const unsignedTx = await ethereumAccount.makeSendTokenTx({
+                currency: sendConfigs.amountConfig.amount[0].currency,
+                amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
+                from: sender,
+                to: sendConfigs.recipientConfig.recipient,
+                gasLimit: sendConfigs.gasConfig.gas,
+                maxFeePerGas: maxFeePerGas.toString(),
+                maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+              });
+              await ethereumAccountStore
+                .getAccount(chainId)
+                .sendEthereumTx(sender, unsignedTx);
+            } else {
+              const tx = isIBCTransfer
+                ? accountStore
+                    .getAccount(chainId)
+                    .cosmos.makePacketForwardIBCTransferTx(
+                      sendConfigs.channelConfig.channels,
+                      sendConfigs.amountConfig.amount[0].toDec().toString(),
+                      sendConfigs.amountConfig.amount[0].currency,
+                      sendConfigs.recipientConfig.recipient
+                    )
+                : accountStore
+                    .getAccount(chainId)
+                    .makeSendTokenTx(
+                      sendConfigs.amountConfig.amount[0].toDec().toString(),
+                      sendConfigs.amountConfig.amount[0].currency,
+                      sendConfigs.recipientConfig.recipient
                     );
-                    const intermediateChainIds: string[] = [];
-                    if (pathChainIds.length > 2) {
-                      intermediateChainIds.push(...pathChainIds.slice(1, -1));
-                    }
 
-                    const params = {
-                      originDenom: ibcChannelFluent.originDenom,
-                      originChainId: ibcChannelFluent.originChainId,
-                      originChainIdentifier: ChainIdHelper.parse(
-                        ibcChannelFluent.originChainId
-                      ).identifier,
-                      sourceChainId: chainId,
-                      sourceChainIdentifier:
-                        ChainIdHelper.parse(chainId).identifier,
-                      destinationChainId: ibcChannelFluent.destinationChainId,
-                      destinationChainIdentifier: ChainIdHelper.parse(
-                        ibcChannelFluent.destinationChainId
-                      ).identifier,
-                      pathChainIds,
-                      pathChainIdentifiers: pathChainIds.map(
-                        (chainId) => ChainIdHelper.parse(chainId).identifier
-                      ),
-                      intermediateChainIds,
-                      intermediateChainIdentifiers: intermediateChainIds.map(
-                        (chainId) => ChainIdHelper.parse(chainId).identifier
-                      ),
-                      isToOrigin:
-                        ibcChannelFluent.destinationChainId ===
-                        ibcChannelFluent.originChainId,
-                    };
-                    new InExtensionMessageRequester().sendMessage(
+              await tx.send(
+                sendConfigs.feeConfig.toStdFee(),
+                sendConfigs.memoConfig.memo,
+                {
+                  preferNoSetFee: true,
+                  preferNoSetMemo: true,
+                  sendTx: async (chainId, tx, mode) => {
+                    let msg: Message<Uint8Array> = new SendTxAndRecordMsg(
+                      historyType,
+                      chainId,
+                      sendConfigs.recipientConfig.chainId,
+                      tx,
+                      mode,
+                      false,
+                      sendConfigs.senderConfig.sender,
+                      sendConfigs.recipientConfig.recipient,
+                      sendConfigs.amountConfig.amount.map((amount) => {
+                        return {
+                          amount: DecUtils.getTenExponentN(
+                            amount.currency.coinDecimals
+                          )
+                            .mul(amount.toDec())
+                            .toString(),
+                          denom: amount.currency.coinMinimalDenom,
+                        };
+                      }),
+                      sendConfigs.memoConfig.memo
+                    );
+                    if (isIBCTransfer) {
+                      if (msg instanceof SendTxAndRecordMsg) {
+                        msg = msg.withIBCPacketForwarding(
+                          sendConfigs.channelConfig.channels
+                        );
+                      } else {
+                        throw new Error("Invalid message type");
+                      }
+                    }
+                    return await new InExtensionMessageRequester().sendMessage(
                       BACKGROUND_PORT,
-                      new LogAnalyticsEventMsg("ibc_send", params)
+                      msg
                     );
-                  }
+                  },
                 },
-                onFulfill: (tx: any) => {
-                  if (tx.code != null && tx.code !== 0) {
-                    console.log(tx.log ?? tx.raw_log);
+                {
+                  onBroadcasted: () => {
+                    chainStore.enableVaultsWithCosmosAddress(
+                      sendConfigs.recipientConfig.chainId,
+                      sendConfigs.recipientConfig.recipient
+                    );
+
+                    if (isIBCTransfer && ibcChannelFluent != null) {
+                      const pathChainIds = [chainId].concat(
+                        ...ibcChannelFluent.channels.map(
+                          (channel) => channel.counterpartyChainId
+                        )
+                      );
+                      const intermediateChainIds: string[] = [];
+                      if (pathChainIds.length > 2) {
+                        intermediateChainIds.push(...pathChainIds.slice(1, -1));
+                      }
+
+                      const params = {
+                        originDenom: ibcChannelFluent.originDenom,
+                        originChainId: ibcChannelFluent.originChainId,
+                        originChainIdentifier: ChainIdHelper.parse(
+                          ibcChannelFluent.originChainId
+                        ).identifier,
+                        sourceChainId: chainId,
+                        sourceChainIdentifier:
+                          ChainIdHelper.parse(chainId).identifier,
+                        destinationChainId: ibcChannelFluent.destinationChainId,
+                        destinationChainIdentifier: ChainIdHelper.parse(
+                          ibcChannelFluent.destinationChainId
+                        ).identifier,
+                        pathChainIds,
+                        pathChainIdentifiers: pathChainIds.map(
+                          (chainId) => ChainIdHelper.parse(chainId).identifier
+                        ),
+                        intermediateChainIds,
+                        intermediateChainIdentifiers: intermediateChainIds.map(
+                          (chainId) => ChainIdHelper.parse(chainId).identifier
+                        ),
+                        isToOrigin:
+                          ibcChannelFluent.destinationChainId ===
+                          ibcChannelFluent.originChainId,
+                      };
+                      new InExtensionMessageRequester().sendMessage(
+                        BACKGROUND_PORT,
+                        new LogAnalyticsEventMsg("ibc_send", params)
+                      );
+                    }
+                  },
+                  onFulfill: (tx: any) => {
+                    if (tx.code != null && tx.code !== 0) {
+                      console.log(tx.log ?? tx.raw_log);
+                      notification.show(
+                        "failed",
+                        intl.formatMessage({ id: "error.transaction-failed" }),
+                        ""
+                      );
+                      return;
+                    }
                     notification.show(
-                      "failed",
-                      intl.formatMessage({ id: "error.transaction-failed" }),
+                      "success",
+                      intl.formatMessage({
+                        id: "notification.transaction-success",
+                      }),
                       ""
                     );
-                    return;
-                  }
-                  notification.show(
-                    "success",
-                    intl.formatMessage({
-                      id: "notification.transaction-success",
-                    }),
-                    ""
-                  );
-                },
-              }
-            );
+                  },
+                }
+              );
+            }
 
             if (!isDetachedMode) {
               navigate("/", {
