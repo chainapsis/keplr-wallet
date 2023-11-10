@@ -488,52 +488,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       }
 
       if (this.canEIP1559TxFeesAndReady()) {
-        const ethereumQueries = this.queriesStore.get(this.chainId).ethereum;
-        const feeHistory =
-          ethereumQueries?.queryEthereumFeeHistory.getQueryByFeeHistoryParams(
-            ETH_FEE_HISTRORY_BLOCK_COUNT,
-            ETH_FEE_HISTORY_NEWEST_BLOCK,
-            ETH_FEE_HISTORY_REWARD_PERCENTILES
-          ).feeHistory;
-        if (feeHistory) {
-          const latestBaseFeePerGas = parseInt(
-            feeHistory.baseFeePerGas?.[feeHistory.baseFeePerGas.length - 1] ??
-              "0"
-          );
-          const baseFeePerGas = new Dec(latestBaseFeePerGas).mul(
-            ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType].baseFeePercentageMultiplier
-          );
-          const priorityFeesPerGas = feeHistory.reward?.map(
-            (priorityFeeByRewardPercentileIndex) =>
-              priorityFeeByRewardPercentileIndex[
-                ETH_FEE_HISTORY_REWARD_PERCENTILES.findIndex(
-                  (percentile) =>
-                    percentile ===
-                    ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType].percentile
-                )
-              ]
-          );
-          const medianOfPriorityFeesPerGas =
-            priorityFeesPerGas?.sort((a, b) => parseInt(a) - parseInt(b))?.[
-              Math.floor((priorityFeesPerGas.length - 1) / 2)
-            ] ?? "0";
-          const adjustedMaxPriorityFeePerGas = new Dec(
-            parseInt(medianOfPriorityFeesPerGas)
-          ).mul(
-            ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType]
-              .priorityFeePercentageMultiplier
-          );
-          const maxPriorityFeePerGas = adjustedMaxPriorityFeePerGas.gt(
-            ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType]
-              .minSuggestedMaxPriorityFeePerGas
-          )
-            ? adjustedMaxPriorityFeePerGas
-            : ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType]
-                .minSuggestedMaxPriorityFeePerGas;
-          const maxFeePerGas = baseFeePerGas.add(maxPriorityFeePerGas);
+        const { maxFeePerGas } = this.getEIP1559TxFees(feeType);
 
-          return maxFeePerGas;
-        }
+        return maxFeePerGas;
       }
 
       // TODO: Handle terra classic fee
@@ -561,6 +518,62 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return gasPrice;
     }
   );
+
+  readonly getEIP1559TxFees = computedFn((feeType: FeeType) => {
+    if (this.canEIP1559TxFeesAndReady()) {
+      const ethereumQueries = this.queriesStore.get(this.chainId).ethereum;
+      const feeHistory =
+        ethereumQueries?.queryEthereumFeeHistory.getQueryByFeeHistoryParams(
+          ETH_FEE_HISTRORY_BLOCK_COUNT,
+          ETH_FEE_HISTORY_NEWEST_BLOCK,
+          ETH_FEE_HISTORY_REWARD_PERCENTILES
+        ).feeHistory;
+      if (feeHistory) {
+        const latestBaseFeePerGas = parseInt(
+          feeHistory.baseFeePerGas?.[feeHistory.baseFeePerGas.length - 1] ?? "0"
+        );
+        const baseFeePerGas = new Dec(latestBaseFeePerGas).mul(
+          ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType].baseFeePercentageMultiplier
+        );
+        const priorityFeesPerGas = feeHistory.reward?.map(
+          (priorityFeeByRewardPercentileIndex) =>
+            priorityFeeByRewardPercentileIndex[
+              ETH_FEE_HISTORY_REWARD_PERCENTILES.findIndex(
+                (percentile) =>
+                  percentile ===
+                  ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType].percentile
+              )
+            ]
+        );
+        const medianOfPriorityFeesPerGas =
+          priorityFeesPerGas?.sort((a, b) => parseInt(a) - parseInt(b))?.[
+            Math.floor((priorityFeesPerGas.length - 1) / 2)
+          ] ?? "0";
+        const adjustedMaxPriorityFeePerGas = new Dec(
+          parseInt(medianOfPriorityFeesPerGas)
+        ).mul(
+          ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType].priorityFeePercentageMultiplier
+        );
+        const maxPriorityFeePerGas = adjustedMaxPriorityFeePerGas.gt(
+          ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType].minSuggestedMaxPriorityFeePerGas
+        )
+          ? adjustedMaxPriorityFeePerGas
+          : ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType]
+              .minSuggestedMaxPriorityFeePerGas;
+        const maxFeePerGas = baseFeePerGas.add(maxPriorityFeePerGas);
+
+        return {
+          maxPriorityFeePerGas,
+          maxFeePerGas,
+        };
+      }
+    }
+
+    return {
+      maxPriorityFeePerGas: new Dec(0),
+      maxFeePerGas: new Dec(0),
+    };
+  });
 
   @computed
   get uiProperties(): UIProperties {
