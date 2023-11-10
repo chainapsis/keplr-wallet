@@ -9,6 +9,7 @@ import {
   serialize,
   TransactionTypes,
 } from "@ethersproject/transactions";
+import { isAddress as isEthereumHexAddress } from "@ethersproject/address";
 
 export class EthereumAccountBase {
   constructor(
@@ -20,16 +21,25 @@ export class EthereumAccountBase {
   async simulateGas({
     currency,
     amount,
-    to,
+    sender,
+    recipient,
   }: {
     currency: AppCurrency;
     amount: string;
-    to: string;
+    sender: string;
+    recipient: string;
   }) {
     const chainInfo = this.chainGetter.getChain(this.chainId);
     if (!chainInfo.evm) {
       throw new Error("No EVM chain info provided");
     }
+
+    if (!isEthereumHexAddress(sender)) {
+      throw new Error("Invalid sender address");
+    }
+
+    // If the recipient address is invalid, the sender address will be used as the recipient for gas estimating gas.
+    const tempRecipient = isEthereumHexAddress(recipient) ? recipient : sender;
 
     const parsedAmount = parseUnits(amount, currency.coinDecimals);
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
@@ -37,14 +47,18 @@ export class EthereumAccountBase {
     const unsignedTx =
       denomHelper.type === "erc20"
         ? {
+            from: sender,
             to: denomHelper.contractAddress,
             data: erc20ContractInterface.encodeFunctionData("transfer", [
-              to,
-              parsedAmount.toHexString(),
+              tempRecipient,
+              parsedAmount.toString(),
             ]),
+            value: "0x0",
           }
         : {
-            to,
+            from: sender,
+            to: tempRecipient,
+            value: parsedAmount.toHexString(),
           };
 
     const estimateGasResponse = await simpleFetch<{
