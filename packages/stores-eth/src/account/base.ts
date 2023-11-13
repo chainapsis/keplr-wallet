@@ -66,7 +66,7 @@ export class EthereumAccountBase {
         : {
             from: sender,
             to: tempRecipient,
-            value: parsedAmount.toHexString(),
+            value: parsedAmount.isZero() ? "0x0" : parsedAmount.toHexString(),
           };
 
     const estimateGasResponse = await simpleFetch<{
@@ -142,7 +142,7 @@ export class EthereumAccountBase {
           }
         : {
             to,
-            value: parsedAmount.toHexString(),
+            value: parsedAmount.isZero() ? "0x0" : parsedAmount.toHexString(),
           }),
     };
 
