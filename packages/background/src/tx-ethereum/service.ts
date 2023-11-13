@@ -2,6 +2,9 @@ import { ChainsService } from "../chains";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Notification } from "../tx/types";
 import { KeyRingEthereumService } from "../keyring-ethereum";
+import { EthTxReceipt, EthTxStatus } from "@keplr-wallet/types";
+
+const TX_RECIEPT_POLLING_INTERVAL = 1000;
 
 export class BackgroundTxEthereumService {
   constructor(
@@ -18,7 +21,7 @@ export class BackgroundTxEthereumService {
     rawTx: string,
     options: {
       silent?: boolean;
-      onFulfill?: (tx: any) => void;
+      onFulfill?: (txReceipt: EthTxReceipt) => void;
     }
   ): Promise<string> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
@@ -37,10 +40,9 @@ export class BackgroundTxEthereumService {
     }
 
     try {
-      const response = await simpleFetch<{
-        id: number;
-        jsonrpc: string;
-        result: string;
+      const sendRawTransactionResponse = await simpleFetch<{
+        result?: string;
+        error?: Error;
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       }>(chainInfo.evm!.rpc, "", {
         method: "POST",
@@ -55,18 +57,61 @@ export class BackgroundTxEthereumService {
         }),
       });
 
-      const txHash = response.data.result;
-
-      if (!options.silent) {
-        BackgroundTxEthereumService.processTxResultNotification(
-          this.notification,
-          txHash
+      const txHash = sendRawTransactionResponse.data.result;
+      if (!txHash) {
+        throw (
+          sendRawTransactionResponse.data.error ??
+          new Error("No tx hash responed")
         );
       }
 
+      const checkTxFulfilled = async () => {
+        const txRecieptResponse = await simpleFetch<{
+          result: EthTxReceipt | null;
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          error?: Error;
+        }>(chainInfo.evm!.rpc, {
+          method: "POST",
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            method: "eth_getTransactionReceipt",
+            params: [txHash],
+            id: 1,
+          }),
+        });
+
+        if (txRecieptResponse.data.error) {
+          console.error(txRecieptResponse.data.error);
+          clearInterval(intervalId);
+        }
+
+        const txReceipt = txRecieptResponse.data.result;
+        if (txReceipt) {
+          clearInterval(intervalId);
+          if (txReceipt.status === EthTxStatus.Success) {
+            options.onFulfill?.(txReceipt);
+
+            if (!options.silent) {
+              BackgroundTxEthereumService.processTxResultNotification(
+                this.notification
+              );
+            }
+          } else {
+            BackgroundTxEthereumService.processTxErrorNotification(
+              this.notification,
+              new Error("Tx failed on chain")
+            );
+          }
+        }
+      };
+      const intervalId = setInterval(
+        checkTxFulfilled,
+        TX_RECIEPT_POLLING_INTERVAL
+      );
+
       return txHash;
     } catch (e) {
-      console.log(e);
+      console.error(e);
       if (!options.silent) {
         BackgroundTxEthereumService.processTxErrorNotification(
           this.notification,
@@ -77,10 +122,7 @@ export class BackgroundTxEthereumService {
     }
   }
 
-  private static processTxResultNotification(
-    notification: Notification,
-    txHash: string
-  ): void {
+  private static processTxResultNotification(notification: Notification): void {
     try {
       notification.create({
         iconRelativeUrl: "assets/logo-256.png",
@@ -88,7 +130,6 @@ export class BackgroundTxEthereumService {
         // TODO: Let users know the tx id?
         message: "Congratulations!",
       });
-      console.log("tx", txHash);
     } catch (e) {
       BackgroundTxEthereumService.processTxErrorNotification(notification, e);
     }
@@ -98,7 +139,6 @@ export class BackgroundTxEthereumService {
     notification: Notification,
     e: Error
   ): void {
-    console.log(e);
     const message = e.message;
 
     notification.create({

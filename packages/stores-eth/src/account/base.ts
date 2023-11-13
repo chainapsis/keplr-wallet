@@ -1,6 +1,12 @@
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { ChainGetter } from "@keplr-wallet/stores";
-import { AppCurrency, EthSignType, Keplr } from "@keplr-wallet/types";
+import {
+  AppCurrency,
+  EthSignType,
+  EthTxReceipt,
+  EthTxStatus,
+  Keplr,
+} from "@keplr-wallet/types";
 import { DenomHelper } from "@keplr-wallet/common";
 import { erc20ContractInterface } from "../constants";
 import { parseUnits } from "@ethersproject/units";
@@ -10,6 +16,8 @@ import {
   TransactionTypes,
 } from "@ethersproject/transactions";
 import { isAddress as isEthereumHexAddress } from "@ethersproject/address";
+
+const TX_RECIEPT_POLLING_INTERVAL = 1000;
 
 export class EthereumAccountBase {
   constructor(
@@ -141,27 +149,85 @@ export class EthereumAccountBase {
     return tx;
   }
 
-  async sendEthereumTx(sender: string, unsignedTx: UnsignedTransaction) {
+  async sendEthereumTx(
+    sender: string,
+    unsignedTx: UnsignedTransaction,
+    onTxEvents?: {
+      onBroadcastFailed?: (e?: Error) => void;
+      onBroadcasted?: (txHash: string) => void;
+      onFulfill?: (txReceipt: EthTxReceipt) => void;
+    }
+  ) {
     const chainInfo = this.chainGetter.getChain(this.chainId);
     if (!chainInfo.evm) {
       throw new Error("No EVM chain info provided");
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const keplr = (await this.getKeplr())!;
-    const signEthereum = keplr.signEthereum.bind(keplr);
-    const signature = await signEthereum(
-      this.chainId,
-      sender,
-      JSON.stringify(unsignedTx),
-      EthSignType.TRANSACTION
-    );
+    let txHash: string;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const keplr = (await this.getKeplr())!;
+      const signEthereum = keplr.signEthereum.bind(keplr);
+      const signature = await signEthereum(
+        this.chainId,
+        sender,
+        JSON.stringify(unsignedTx),
+        EthSignType.TRANSACTION
+      );
 
-    const rawTransaction = serialize(unsignedTx, signature);
+      const rawTransaction = serialize(unsignedTx, signature);
 
-    const sendTx = keplr.sendEthereumTx.bind(keplr);
-    const result = await sendTx(this.chainId, rawTransaction);
+      const sendTx = keplr.sendEthereumTx.bind(keplr);
+      txHash = await sendTx(this.chainId, rawTransaction);
+      if (!txHash) {
+        throw new Error("No tx hash responed");
+      }
 
-    return result;
+      if (onTxEvents?.onBroadcasted) {
+        onTxEvents.onBroadcasted(txHash);
+      }
+
+      const checkTxFulfilled = async () => {
+        const txRecieptResponse = await simpleFetch<{
+          result: EthTxReceipt | null;
+          error?: Error;
+        }>(chainInfo.evm!.rpc, {
+          method: "POST",
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            method: "eth_getTransactionReceipt",
+            params: [txHash],
+            id: 1,
+          }),
+        });
+
+        if (txRecieptResponse.data.error) {
+          console.error(txRecieptResponse.data.error);
+          clearInterval(intervalId);
+        }
+
+        const txReceipt = txRecieptResponse.data.result;
+        if (txReceipt) {
+          clearInterval(intervalId);
+          if (txReceipt.status === EthTxStatus.Success) {
+            onTxEvents?.onFulfill?.(txReceipt);
+          } else {
+            onTxEvents?.onBroadcastFailed?.(new Error("Tx failed on chain"));
+          }
+        }
+      };
+      const intervalId = setInterval(
+        checkTxFulfilled,
+        TX_RECIEPT_POLLING_INTERVAL
+      );
+
+      return txHash;
+    } catch (e) {
+      if (onTxEvents?.onBroadcastFailed) {
+        onTxEvents.onBroadcastFailed(e);
+      }
+
+      throw e;
+    }
   }
 }

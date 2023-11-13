@@ -370,7 +370,17 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               });
               await ethereumAccountStore
                 .getAccount(chainId)
-                .sendEthereumTx(sender, unsignedTx);
+                .sendEthereumTx(sender, unsignedTx, {
+                  onFulfill: () => {
+                    notification.show(
+                      "success",
+                      intl.formatMessage({
+                        id: "notification.transaction-success",
+                      }),
+                      ""
+                    );
+                  },
+                });
             } else {
               const tx = isIBCTransfer
                 ? accountStore
