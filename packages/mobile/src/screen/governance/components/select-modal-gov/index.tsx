@@ -67,7 +67,7 @@ export const GovSelectChainModal: FunctionComponent<{
 
   return (
     <React.Fragment>
-      <Box paddingRight={12} paddingLeft={12}>
+      <Box paddingX={12}>
         <Gutter size={12} />
         {Platform.OS === 'android' ? (
           <SearchTextInput

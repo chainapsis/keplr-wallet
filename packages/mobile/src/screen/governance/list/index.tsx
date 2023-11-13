@@ -11,10 +11,11 @@ import {ChainIdHelper} from '@keplr-wallet/cosmos';
 import {Gutter} from '../../../components/gutter';
 import {EmptyView} from '../../../components/empty-view';
 import {FormattedMessage} from 'react-intl';
+import {useStyle} from '../../../styles';
 
 export const GovernanceListScreen: FunctionComponent = observer(() => {
   const {queriesStore, scamProposalStore} = useStore();
-
+  const style = useStyle();
   const route = useRoute<RouteProp<GovernanceNavigation, 'Governance.list'>>();
   const {chainId, isGovV1Supported} = route.params;
   const governanceV1 = queriesStore
@@ -57,6 +58,7 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
   return (
     <FlatList
       data={proposals}
+      style={style.flatten(['padding-x-12'])}
       ListHeaderComponent={
         <React.Fragment>
           <Gutter size={12} />

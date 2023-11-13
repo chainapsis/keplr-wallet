@@ -69,7 +69,7 @@ export const ContractAddressBookModal: FunctionComponent<{
 
   return (
     <React.Fragment>
-      <Box paddingRight={12} paddingLeft={12}>
+      <Box paddingX={12}>
         <Text
           style={style.flatten([
             'text-center',
