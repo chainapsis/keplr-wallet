@@ -9,11 +9,9 @@ import {RectButton} from '../../../components/rect-button';
 import {Stack} from '../../../components/stack';
 import {Column, Columns} from '../../../components/column';
 import {useStore} from '../../../stores';
-import {ProposalStatus} from '../../../stores/governance/types';
+import {ProposalStatus, ViewProposal} from '../../../stores/governance/types';
 import {useIntl} from 'react-intl';
 import {dateToLocalString} from '../utils';
-import {ObservableQueryProposal} from '../../../stores/governance';
-import {ObservableQueryProposalV1} from '../../../stores/governance/v1';
 import {Chip} from '../../../components/chip';
 import {CheckCircleIcon} from '../../../components/icon';
 import {Gutter} from '../../../components/gutter';
@@ -41,32 +39,31 @@ export const GovernanceProposalStatusChip: FunctionComponent<{
 };
 
 export const GovernanceCardBody: FunctionComponent<{
-  proposalId: string;
+  proposal: ViewProposal;
   chainId: string;
-  isGovV1Supported: boolean;
-}> = observer(({proposalId, chainId, isGovV1Supported}) => {
-  const {queriesStore, accountStore, chainStore} = useStore();
+  isGovV1Supported?: boolean;
+}> = observer(({proposal, chainId, isGovV1Supported}) => {
+  const {chainStore, queriesStore, accountStore} = useStore();
 
   const style = useStyle();
   const intl = useIntl();
-  const queryGovernance = isGovV1Supported
-    ? queriesStore.get(chainId).governanceV1
-    : queriesStore.get(chainId).governance;
-  const proposal = queryGovernance.queryGovernance
-    .getQueryGovernance()
-    .getProposal(proposalId);
+  const vote = isGovV1Supported
+    ? queriesStore
+        .get(chainId)
+        .governanceV1.queryVotes.getVote(
+          proposal.id,
+          accountStore.getAccount(chainId).bech32Address,
+        ).vote
+    : queriesStore
+        .get(chainId)
+        .governance.queryVotes.getVote(
+          proposal.id,
+          accountStore.getAccount(chainId).bech32Address,
+        ).vote;
   const navigation = useNavigation<StackNavProp>();
+  const voted = vote !== 'Unspecified';
 
-  const voted = proposal?.id
-    ? queryGovernance.queryVotes.getVote(
-        proposal?.id,
-        accountStore.getAccount(chainId).bech32Address,
-      ).vote !== 'Unspecified'
-    : false;
-
-  const renderProposalDateString = (
-    proposal: ObservableQueryProposal | ObservableQueryProposalV1,
-  ) => {
+  const renderProposalDateString = (proposal: ViewProposal) => {
     switch (proposal.proposalStatus) {
       case ProposalStatus.DEPOSIT_PERIOD:
         return `Voting ends: ${dateToLocalString(

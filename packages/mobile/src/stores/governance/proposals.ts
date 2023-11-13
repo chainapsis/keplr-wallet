@@ -1,4 +1,4 @@
-import {GovProposals, GovQueryParams} from './types';
+import {GovProposals, GovQueryParams, ViewProposal} from './types';
 import {computed, makeObservable, observable, runInAction} from 'mobx';
 import {
   ObservableQueryGovParamDeposit,
@@ -155,7 +155,7 @@ export class ObservableQueryGovernanceInner extends ObservableChainQuery<GovProp
   }
 
   @computed
-  get proposals(): DeepReadonly<ObservableQueryProposal[]> {
+  get proposals(): ViewProposal[] {
     if (!this.response) {
       return [];
     }
@@ -174,12 +174,18 @@ export class ObservableQueryGovernanceInner extends ObservableChainQuery<GovProp
       );
     }
 
-    return result.reverse();
+    return result.reverse().map(proposal => {
+      return {
+        raw: proposal.raw,
+        proposalStatus: proposal.proposalStatus,
+        id: proposal.id,
+        title: proposal.title,
+        description: proposal.description,
+      };
+    });
   }
 
-  readonly getProposal = computedFn(
-    (id: string): DeepReadonly<ObservableQueryProposal> | undefined => {
-      return this.proposals.find(proposal => proposal.id === id);
-    },
-  );
+  readonly getProposal = computedFn((id: string): ViewProposal | undefined => {
+    return this.proposals.find(proposal => proposal.id === id);
+  });
 }

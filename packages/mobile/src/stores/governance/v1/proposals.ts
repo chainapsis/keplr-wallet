@@ -16,7 +16,7 @@ import {
   ObservableQueryStakingPool,
   QuerySharedContext,
 } from '@keplr-wallet/stores';
-import {GovQueryParams} from '../types';
+import {GovQueryParams, ViewProposal} from '../types';
 
 export class ObservableQueryGovernanceV1 extends ObservableChainQueryMap<GovV1Proposals> {
   constructor(
@@ -165,7 +165,7 @@ export class ObservableQueryGovernanceV1Inner extends ObservableChainQuery<GovV1
   }
 
   @computed
-  get proposals(): DeepReadonly<ObservableQueryProposalV1[]> {
+  get proposals(): ViewProposal[] {
     if (!this.response) {
       return [];
     }
@@ -184,12 +184,18 @@ export class ObservableQueryGovernanceV1Inner extends ObservableChainQuery<GovV1
       );
     }
 
-    return result.reverse();
+    return result.reverse().map(proposal => {
+      return {
+        raw: proposal.raw,
+        proposalStatus: proposal.proposalStatus,
+        id: proposal.id,
+        title: proposal.title,
+        description: proposal.description,
+      };
+    });
   }
 
-  readonly getProposal = computedFn(
-    (id: string): DeepReadonly<ObservableQueryProposalV1> | undefined => {
-      return this.proposals.find(proposal => proposal.id === id);
-    },
-  );
+  readonly getProposal = computedFn((id: string): ViewProposal | undefined => {
+    return this.proposals.find(proposal => proposal.id === id);
+  });
 }

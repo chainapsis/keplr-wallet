@@ -46,8 +46,7 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
 
     return governanceLegacy;
   })();
-
-  const sections = useMemo(() => {
+  const proposals = useMemo(() => {
     return governance.proposals.filter(
       p =>
         p.proposalStatus !== ProposalStatus.DEPOSIT_PERIOD &&
@@ -57,19 +56,20 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
 
   return (
     <FlatList
-      data={sections}
+      data={proposals}
       ListHeaderComponent={
         <React.Fragment>
           <Gutter size={12} />
           {/* TODO 나중에 show spam proposal 토글넣어야함 */}
         </React.Fragment>
       }
+      keyExtractor={proposal => proposal.id}
       renderItem={({item}) => {
         return (
           <GovernanceCardBody
-            isGovV1Supported={isGovV1SupportedRef.current}
             chainId={chainId}
-            proposalId={item.id}
+            proposal={item}
+            isGovV1Supported={isGovV1Supported}
           />
         );
       }}
