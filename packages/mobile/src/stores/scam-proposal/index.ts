@@ -1,5 +1,6 @@
 import {ChainIdHelper} from '@keplr-wallet/cosmos';
 import {ObservableQuery, QuerySharedContext} from '@keplr-wallet/stores';
+import {SCAMPORPOSAL_API_URL} from '../../config';
 
 type ScamProposal = Record<string, string[] | undefined>;
 
@@ -10,8 +11,7 @@ export class ScamProposalStore extends ObservableQuery<ScamProposal> {
       readonly baseURL?: string;
     } = {},
   ) {
-    const instance =
-      options.baseURL || 'https://phishing-block-list-chainapsis.vercel.app';
+    const instance = options.baseURL || SCAMPORPOSAL_API_URL;
 
     super(sharedContext, instance, '/api/scam-proposal');
   }

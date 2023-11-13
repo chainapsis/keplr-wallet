@@ -2308,6 +2308,9 @@ export const CommunityChainInfoRepo = {
 export const APR_API_URL =
   'https://pjld2aanw3elvteui4gwyxgx4m0ceweg.lambda-url.us-west-2.on.aws';
 
+export const SCAMPORPOSAL_API_URL =
+  'https://phishing-block-list-chainapsis.vercel.app';
+
 export const GovernanceV1ChainIdentifiers = [
   'kyve',
   'mars',
