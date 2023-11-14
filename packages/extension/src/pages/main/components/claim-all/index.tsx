@@ -39,6 +39,7 @@ import { SpecialButton } from "../../../../components/special-button";
 import { Gutter } from "../../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
 import { CurrencyImageFallback } from "../../../../components/image";
+import { DefaultGasPriceStep } from "@keplr-wallet/hooks";
 
 const Styles = {
   Container: styled.div<{ isNotReady?: boolean }>`
@@ -270,6 +271,61 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
             (cur) =>
               cur.coinMinimalDenom === chainInfo.stakeCurrency?.coinMinimalDenom
           );
+
+          if (chainInfo.hasFeature("osmosis-base-fee-beta") && feeCurrency) {
+            const queryBaseFee = queriesStore.get(chainInfo.chainId).osmosis
+              .queryBaseFee;
+            const queryRemoteBaseFeeStep = queriesStore.simpleQuery.queryGet<{
+              low?: number;
+              average?: number;
+              high?: number;
+            }>(
+              "https://base-fee-step.s3.us-west-2.amazonaws.com/osmosis-base-fee-beta.json"
+            );
+
+            await queryBaseFee.waitFreshResponse();
+            await queryRemoteBaseFeeStep.waitFreshResponse();
+
+            const baseFee = queryBaseFee.baseFee;
+            const remoteBaseFeeStep = queryRemoteBaseFeeStep.response;
+            if (baseFee) {
+              const low = remoteBaseFeeStep?.data.low
+                ? parseFloat(
+                    baseFee.mul(new Dec(remoteBaseFeeStep.data.low)).toString(8)
+                  )
+                : feeCurrency.gasPriceStep?.low ?? DefaultGasPriceStep.low;
+              const average = Math.max(
+                low,
+                remoteBaseFeeStep?.data.average
+                  ? parseFloat(
+                      baseFee
+                        .mul(new Dec(remoteBaseFeeStep.data.average))
+                        .toString(8)
+                    )
+                  : feeCurrency.gasPriceStep?.average ??
+                      DefaultGasPriceStep.average
+              );
+              const high = Math.max(
+                average,
+                remoteBaseFeeStep?.data.high
+                  ? parseFloat(
+                      baseFee
+                        .mul(new Dec(remoteBaseFeeStep.data.high))
+                        .toString(8)
+                    )
+                  : feeCurrency.gasPriceStep?.high ?? DefaultGasPriceStep.high
+              );
+
+              feeCurrency = {
+                ...feeCurrency,
+                gasPriceStep: {
+                  low,
+                  average,
+                  high,
+                },
+              };
+            }
+          }
 
           if (!feeCurrency) {
             let prev:
