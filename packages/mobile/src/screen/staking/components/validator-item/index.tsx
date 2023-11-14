@@ -9,6 +9,7 @@ import {Gutter} from '../../../../components/gutter';
 import FastImage from 'react-native-fast-image';
 import {CoinPretty, PricePretty} from '@keplr-wallet/unit';
 import {Stack} from '../../../../components/stack';
+import {ArrowRightIcon} from '../../../../components/icon/arrow-right';
 
 export const ValidatorItem: FunctionComponent<{
   name: string;
@@ -32,7 +33,7 @@ export const ValidatorItem: FunctionComponent<{
         // e.preventDefault();
         afterSelect(address, chainId);
       }}>
-      <Box padding={16} borderRadius={6}>
+      <Box paddingLeft={16} paddingRight={8} paddingY={18} borderRadius={6}>
         <Columns sum={1} alignY="center" gutter={8}>
           <Box>
             <FastImage
@@ -66,6 +67,8 @@ export const ValidatorItem: FunctionComponent<{
               </Text>
             ) : null}
           </Stack>
+          <Gutter size={4} />
+          <ArrowRightIcon size={24} color={style.get('color-gray-400').color} />
         </Columns>
       </Box>
     </RectButton>
