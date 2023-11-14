@@ -289,7 +289,8 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                   .getBalance(currency);
                 if (balance && balance.balance.toDec().gt(new Dec(0))) {
                   const price = await priceStore.waitCalculatePrice(
-                    balance.balance
+                    balance.balance,
+                    "usd"
                   );
 
                   if (!prev) {
@@ -419,21 +420,23 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                       feeCurrencyFetched.coinGeckoId
                     ) {
                       const rewardPrice = await priceStore.waitCalculatePrice(
-                        stakableReward
+                        stakableReward,
+                        "usd"
                       );
                       const feePrice = await priceStore.waitCalculatePrice(
-                        new CoinPretty(feeCurrencyFetched, fee.amount)
+                        new CoinPretty(feeCurrencyFetched, fee.amount),
+                        "usd"
                       );
                       if (
                         rewardPrice &&
-                        rewardPrice.toDec().lt(new Dec(0)) &&
+                        rewardPrice.toDec().gt(new Dec(0)) &&
                         feePrice &&
-                        feePrice.toDec().lt(new Dec(0))
+                        feePrice.toDec().gt(new Dec(0))
                       ) {
                         if (
                           rewardPrice
                             .toDec()
-                            .mul(new Dec(1.5))
+                            .mul(new Dec(1.2))
                             .lte(feePrice.toDec())
                         ) {
                           return true;
