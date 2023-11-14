@@ -266,12 +266,62 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
           account.cosmos.makeWithdrawDelegationRewardTx(validatorAddresses);
 
         (async () => {
-          // At present, only assume that user can pay the fee with the stake currency.
-          // (Normally, user has stake currency because it is used for staking)
-          const feeCurrency = chainInfo.feeCurrencies.find(
+          let feeCurrency = chainInfo.feeCurrencies.find(
             (cur) =>
               cur.coinMinimalDenom === chainInfo.stakeCurrency?.coinMinimalDenom
           );
+
+          if (!feeCurrency) {
+            let prev:
+              | {
+                  balance: CoinPretty;
+                  price: PricePretty | undefined;
+                }
+              | undefined;
+
+            for (const chainFeeCurrency of chainInfo.feeCurrencies) {
+              const currency = await chainInfo.findCurrencyAsync(
+                chainFeeCurrency.coinMinimalDenom
+              );
+              if (currency) {
+                const balance = queries.queryBalances
+                  .getQueryBech32Address(account.bech32Address)
+                  .getBalance(currency);
+                if (balance && balance.balance.toDec().gt(new Dec(0))) {
+                  const price = await priceStore.waitCalculatePrice(
+                    balance.balance
+                  );
+
+                  if (!prev) {
+                    feeCurrency = currency;
+                    prev = {
+                      balance: balance.balance,
+                      price,
+                    };
+                  } else {
+                    if (!prev.price) {
+                      if (prev.balance.toDec().lt(balance.balance.toDec())) {
+                        feeCurrency = currency;
+                        prev = {
+                          balance: balance.balance,
+                          price,
+                        };
+                      }
+                    } else if (price) {
+                      if (prev.price.toDec().lt(price.toDec())) {
+                        feeCurrency = currency;
+                        prev = {
+                          balance: balance.balance,
+                          price,
+                        };
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+
           if (feeCurrency) {
             try {
               const simulated = await tx.simulate();
@@ -288,10 +338,8 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                   .toString(),
               };
 
-              // coingecko로부터 캐시가 있거나 response를 최소한 한번은 받았다는 걸 보장한다.
-              await priceStore.waitResponse();
               // USD 기준으로 average fee가 0.2달러를 넘으면 low로 설정해서 보낸다.
-              const averageFeePrice = priceStore.calculatePrice(
+              const averageFeePrice = await priceStore.waitCalculatePrice(
                 new CoinPretty(feeCurrency, fee.amount),
                 "usd"
               );
@@ -311,13 +359,23 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                 );
               }
 
+              // Ensure fee currency fetched before querying balance
+              const feeCurrencyFetched = await chainInfo.findCurrencyAsync(
+                feeCurrency.coinMinimalDenom
+              );
+              if (!feeCurrencyFetched) {
+                state.setFailedReason(
+                  new Error(
+                    intl.formatMessage({
+                      id: "error.can-not-find-balance-for-fee-currency",
+                    })
+                  )
+                );
+                return;
+              }
               const balance = queries.queryBalances
                 .getQueryBech32Address(account.bech32Address)
-                .balances.find(
-                  (bal) =>
-                    bal.currency.coinMinimalDenom ===
-                    feeCurrency.coinMinimalDenom
-                );
+                .getBalance(feeCurrencyFetched);
 
               if (!balance) {
                 state.setFailedReason(
@@ -350,7 +408,42 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                 return;
               }
               if (
-                new Dec(stakableReward.toCoin().amount).lte(new Dec(fee.amount))
+                (stakableReward.toCoin().denom === fee.denom &&
+                  new Dec(stakableReward.toCoin().amount).lte(
+                    new Dec(fee.amount)
+                  )) ||
+                (await (async () => {
+                  if (stakableReward.toCoin().denom !== fee.denom) {
+                    if (
+                      stakableReward.currency.coinGeckoId &&
+                      feeCurrencyFetched.coinGeckoId
+                    ) {
+                      const rewardPrice = await priceStore.waitCalculatePrice(
+                        stakableReward
+                      );
+                      const feePrice = await priceStore.waitCalculatePrice(
+                        new CoinPretty(feeCurrencyFetched, fee.amount)
+                      );
+                      if (
+                        rewardPrice &&
+                        rewardPrice.toDec().lt(new Dec(0)) &&
+                        feePrice &&
+                        feePrice.toDec().lt(new Dec(0))
+                      ) {
+                        if (
+                          rewardPrice
+                            .toDec()
+                            .mul(new Dec(1.5))
+                            .lte(feePrice.toDec())
+                        ) {
+                          return true;
+                        }
+                      }
+                    }
+                  }
+
+                  return false;
+                })())
               ) {
                 console.log(
                   `(${chainId}) Skip claim rewards. Fee: ${fee.amount}${
@@ -454,7 +547,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
             state.setFailedReason(
               new Error(
                 intl.formatMessage({
-                  id: "error.can-not-pay-for-fee-by-stake-currency",
+                  id: "error.can-not-find-fee-for-claim-all",
                 })
               )
             );

@@ -20,7 +20,7 @@
   "error.not-enough-balance-to-pay-fee": "Not enough balance to pay fee",
   "error.claimable-reward-is-smaller-than-the-required-fee": "Your claimable reward is smaller than the required fee.",
   "error.outdated-cosmos-sdk": "Not supported: outdated version of cosmos-sdk",
-  "error.can-not-pay-for-fee-by-stake-currency": "Can't pay for fee by stake currency",
+  "error.can-not-find-fee-for-claim-all": "Can't find fee currency to pay",
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
