@@ -17,7 +17,7 @@ import {
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../navigation';
-import {SelectStakingChainModal} from './stakeing-chain-select-modal';
+import {SelectStakingChainModal} from './components/stakeing-chain-select-modal';
 import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
 
 const zeroDec = new Dec(0);
@@ -36,7 +36,6 @@ export const StakedTabView: FunctionComponent<{
   }, [stakablesTokenList]);
 
   const navigate = useNavigation<StackNavProp>();
-
   const aprList = useMemo(() => {
     return stakablesTokenList.map(viewToken => {
       return queriesStore.get(viewToken.chainInfo.chainId).apr.queryApr.apr;
@@ -122,6 +121,7 @@ export const StakedTabView: FunctionComponent<{
           }
           //NOTE delegation 일때만 apr을 보여줘야 하기 때문에 해당 변수 설정
           const isDelegation = title === TokenViewData[0].title;
+
           return (
             <CollapsibleList
               key={title}
@@ -139,14 +139,12 @@ export const StakedTabView: FunctionComponent<{
                 if ('altSentence' in viewToken) {
                   return (
                     <TokenItem
+                      hasApr={isDelegation ? true : false}
                       apr={
-                        isDelegation
-                          ? aprList.filter(
-                              ({chainId}) =>
-                                chainId ===
-                                viewToken.viewToken.chainInfo.chainId,
-                            )[0]?.apr
-                          : undefined
+                        aprList.filter(
+                          ({chainId}) =>
+                            chainId === viewToken.viewToken.chainInfo.chainId,
+                        )[0]?.apr
                       }
                       viewToken={viewToken.viewToken}
                       key={`${viewToken.viewToken.chainInfo.chainId}-${viewToken.viewToken.token.currency.coinMinimalDenom}`}
@@ -168,13 +166,11 @@ export const StakedTabView: FunctionComponent<{
 
                 return (
                   <TokenItem
+                    hasApr={isDelegation ? true : false}
                     apr={
-                      isDelegation
-                        ? aprList.filter(
-                            ({chainId}) =>
-                              chainId === viewToken.chainInfo.chainId,
-                          )[0]?.apr
-                        : undefined
+                      aprList.filter(
+                        ({chainId}) => chainId === viewToken.chainInfo.chainId,
+                      )[0]?.apr
                     }
                     viewToken={viewToken}
                     key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
