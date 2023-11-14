@@ -18,6 +18,7 @@ import {Stack} from '../../../../components/stack';
 import {IntPretty} from '@keplr-wallet/unit';
 import {formatAprString} from '../../utils';
 import {AprItem} from '../../../../stores/aprs';
+import {ArrowRightIcon} from '../../../../components/icon/arrow-right';
 
 export interface SelectStakingChainModalItem {
   key: string;
@@ -168,6 +169,7 @@ const TokenItem: FunctionComponent<{
       }}>
       <Box
         padding={16}
+        paddingRight={8}
         borderRadius={6}
         height={74}
         alignY="center"
@@ -207,6 +209,8 @@ const TokenItem: FunctionComponent<{
                 : '-'}
             </Text>
           </Stack>
+          <Gutter size={4} />
+          <ArrowRightIcon size={24} color={style.get('color-gray-400').color} />
         </Columns>
       </Box>
     </RectButton>
