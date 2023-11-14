@@ -65,6 +65,7 @@ export class ChainsService {
       readonly organizationName: string;
       readonly repoName: string;
       readonly branchName: string;
+      readonly alternativeURL?: string;
     },
     protected readonly interactionService: InteractionService,
     protected readonly afterInitFn:
@@ -352,8 +353,12 @@ export class ChainsService {
     const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
 
     const res = await simpleFetch<ChainInfo>(
-      `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/${this.communityChainInfoRepo.branchName}`,
-      `/cosmos/${chainIdentifier}.json`
+      this.communityChainInfoRepo.alternativeURL
+        ? this.communityChainInfoRepo.alternativeURL.replace(
+            "{chain_identifier}",
+            chainIdentifier
+          )
+        : `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/${this.communityChainInfoRepo.branchName}/cosmos/${chainIdentifier}.json`
     );
     let chainInfo: ChainInfo = res.data;
 

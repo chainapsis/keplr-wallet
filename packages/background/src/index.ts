@@ -63,6 +63,7 @@ export function init(
     readonly organizationName: string;
     readonly repoName: string;
     readonly branchName: string;
+    readonly alternativeURL?: string;
   },
   notification: Notification,
   blocklistPageURL: string,

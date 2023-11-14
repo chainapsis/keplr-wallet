@@ -20,7 +20,7 @@
   "error.not-enough-balance-to-pay-fee": "수수료를 지불할 잔액이 부족합니다.",
   "error.claimable-reward-is-smaller-than-the-required-fee": "받을 리워드가 지불할 수수료보다 적습니다.",
   "error.outdated-cosmos-sdk": "cosmos-sdk 버전이 오래되서 지원되지 않습니다.",
-  "error.can-not-pay-for-fee-by-stake-currency": "스테이킹 토큰으로는 수수료를 지불할 수 없습니다.",
+  "error.can-not-find-fee-for-claim-all": "수수료로 지불할 통화를 찾을 수 없습니다.",
 
   "pages.register.components.header.intro-title": "내 손 안의 인터체인",
   "pages.register.components.header.header-step.title": "단계",

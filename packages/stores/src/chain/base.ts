@@ -2,6 +2,7 @@ import {
   action,
   autorun,
   computed,
+  IReactionDisposer,
   makeObservable,
   observable,
   runInAction,
@@ -71,7 +72,23 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
         this.registrationInProgressCurrencyMap.set(coinMinimalDenom, true);
       });
 
+      let i = 0;
       const disposer = autorun(() => {
+        i++;
+        const dispose = () => {
+          if (i === 1) {
+            setTimeout(() => {
+              if (disposer) {
+                disposer();
+              }
+            }, 1);
+          } else {
+            if (disposer) {
+              disposer();
+            }
+          }
+        };
+
         const generator = this.currencyRegistry.getCurrencyRegistrar(
           this.chainId,
           coinMinimalDenom
@@ -103,9 +120,7 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
           });
 
           if (generator.done) {
-            if (disposer) {
-              disposer();
-            }
+            dispose();
           }
         } else {
           if (this.registrationInProgressCurrencyMap.get(coinMinimalDenom)) {
@@ -114,9 +129,7 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
             });
           }
 
-          if (disposer) {
-            disposer();
-          }
+          dispose();
         }
       });
     }
@@ -214,18 +227,20 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
     }
     this.addUnknownDenoms(coinMinimalDenom);
 
-    return new Promise((resolve) => {
-      const disposal = autorun(() => {
+    let disposal: IReactionDisposer | undefined;
+
+    return new Promise<AppCurrency | undefined>((resolve) => {
+      disposal = autorun(() => {
         const registration =
           this.registrationInProgressCurrencyMap.get(coinMinimalDenom);
         if (!registration) {
-          if (disposal) {
-            disposal();
-          }
-
           resolve(this.currencyMap.get(coinMinimalDenom));
         }
       });
+    }).finally(() => {
+      if (disposal) {
+        disposal();
+      }
     });
   }
 

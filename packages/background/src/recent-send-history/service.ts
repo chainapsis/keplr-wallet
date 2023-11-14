@@ -363,6 +363,8 @@ export class RecentSendHistoryService {
               "acknowledge_packet.packet_sequence": targetChannel.sequence,
             })
             .then((res: any) => {
+              txTracer.close();
+
               if (!res) {
                 return;
               }
