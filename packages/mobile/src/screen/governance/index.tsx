@@ -78,6 +78,7 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
                 .get(delegation.chainInfo.chainId)
                 .governanceV1.queryGovernance.getQueryGovernance({
                   status: 'PROPOSAL_STATUS_VOTING_PERIOD',
+                  'pagination.limit': 3000,
                 }).error?.data as {code: number}
             )?.code === 12
           )
@@ -90,6 +91,7 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
               .get(delegation.chainInfo.chainId)
               .governanceV1.queryGovernance.getQueryGovernance({
                 status: 'PROPOSAL_STATUS_VOTING_PERIOD',
+                'pagination.limit': 3000,
               })
               .proposals.filter(
                 proposal =>

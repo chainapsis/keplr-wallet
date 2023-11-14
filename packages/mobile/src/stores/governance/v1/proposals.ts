@@ -68,10 +68,36 @@ export class ObservableQueryGovernanceV1 extends ObservableChainQueryMap<GovV1Pr
                 return 'proposal_status=5';
               }
             }
+            return `${key}=${value}`;
           })
           .join('&')
       : '';
     return this.get(queryParams) as ObservableQueryGovernanceV1Inner;
+  }
+
+  //TODO 이방식으로 하면 거버넌스 쿼리는 사용안 하는 description도 가져와서
+  //용량이 너무 커지는 문제가 있음 해서 나중에 거버넌스만 캐싱을 하지 않는 로직을 추가해야함
+  getQueryGovernanceWithPage(params: {page: number; perPageNumber: number}): {
+    firstFetching?: boolean;
+    proposals: ViewProposal[];
+  } {
+    const list = Array.from({length: params.page + 1}, (_, i) => {
+      return `pagination.offset=${
+        i * 20
+      }&pagination.reverse=true&pagination.limit=${params.perPageNumber}`;
+    });
+
+    return {
+      firstFetching: (this.get(list[0]) as ObservableQueryGovernanceV1Inner)
+        .isFetching,
+      proposals: [
+        ...list.flatMap(param => {
+          return (
+            this.get(param) as ObservableQueryGovernanceV1Inner
+          ).proposals.sort((a, b) => Number(b.id) - Number(a.id));
+        }),
+      ],
+    };
   }
 }
 
@@ -95,7 +121,7 @@ export class ObservableQueryGovernanceV1Inner extends ObservableChainQuery<GovV1
       chainId,
       chainGetter,
       // TODO: Handle pagination
-      `/cosmos/gov/v1/proposals?pagination.limit=3000&${params}`,
+      `/cosmos/gov/v1/proposals?${params}`,
     );
     makeObservable(this);
   }

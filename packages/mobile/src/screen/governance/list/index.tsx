@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useMemo, useRef} from 'react';
+import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import {GovernanceNavigation} from '../../../navigation';
@@ -13,17 +13,19 @@ import {EmptyView} from '../../../components/empty-view';
 import {FormattedMessage} from 'react-intl';
 import {useStyle} from '../../../styles';
 
+const DEFAULT_PARAMS = {
+  'pagination.offset': 0,
+  'pagination.limit': 20,
+};
+
 export const GovernanceListScreen: FunctionComponent = observer(() => {
   const {queriesStore, scamProposalStore} = useStore();
   const style = useStyle();
   const route = useRoute<RouteProp<GovernanceNavigation, 'Governance.list'>>();
+  const [params, setParams] = useState({page: 0, perPageNumber: 20});
   const {chainId, isGovV1Supported} = route.params;
-  const governanceV1 = queriesStore
-    .get(chainId)
-    .governanceV1.queryGovernance.getQueryGovernance();
-  const governanceLegacy = queriesStore
-    .get(chainId)
-    .governance.queryGovernance.getQueryGovernance();
+  const governanceV1 = queriesStore.get(chainId).governanceV1.queryGovernance;
+  const governanceLegacy = queriesStore.get(chainId).governance.queryGovernance;
   const isGovV1SupportedRef = useRef(isGovV1Supported || false);
 
   const governance = (() => {
@@ -35,11 +37,14 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
     }
 
     if (
-      !governanceV1.isFetching &&
+      !governanceV1.getQueryGovernance(DEFAULT_PARAMS).isFetching &&
       (GovernanceV1ChainIdentifiers.includes(
         ChainIdHelper.parse(chainId).identifier,
       ) ||
-        !((governanceV1.error?.data as any)?.code === 12))
+        !(
+          (governanceV1.getQueryGovernance(DEFAULT_PARAMS).error?.data as any)
+            ?.code === 12
+        ))
     ) {
       isGovV1SupportedRef.current = true;
       return governanceV1;
@@ -47,17 +52,27 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
 
     return governanceLegacy;
   })();
-  const proposals = useMemo(() => {
-    return governance.proposals.filter(
+
+  const {proposals, firstFetching} =
+    governance.getQueryGovernanceWithPage(params);
+  const sections = useMemo(() => {
+    return proposals.filter(
       p =>
         p.proposalStatus !== ProposalStatus.DEPOSIT_PERIOD &&
         !scamProposalStore.isScamProposal(chainId, p.id),
     );
-  }, [chainId, governance.proposals, scamProposalStore]);
+  }, [chainId, scamProposalStore, proposals]);
+
+  const loadMore = (page: number) => {
+    setParams({
+      page: page + 1,
+      perPageNumber: 20,
+    });
+  };
 
   return (
     <FlatList
-      data={proposals}
+      data={sections}
       style={style.flatten(['padding-x-12'])}
       ListHeaderComponent={
         <React.Fragment>
@@ -76,8 +91,10 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
         );
       }}
       ItemSeparatorComponent={() => <Gutter size={12} />}
+      onEndReached={() => loadMore(Math.floor(sections.length / 20))}
+      onEndReachedThreshold={1}
       ListEmptyComponent={
-        governance.isFetching ? null : (
+        firstFetching ? null : (
           <React.Fragment>
             <Gutter size={138} />
             <EmptyView>

@@ -67,6 +67,9 @@ export type GovProposals = {
 
 export type GovQueryParams = {
   status?: Proposal['status'];
+  'pagination.offset'?: number;
+  'pagination.limit'?: number;
+  'pagination.reverse'?: boolean;
 };
 
 export type GovParamsDeposit = {
