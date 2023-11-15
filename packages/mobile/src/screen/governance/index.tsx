@@ -122,7 +122,8 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
             imageUrl: delegation.chainInfo.chainSymbolImageUrl,
             chainName: delegation.chainInfo.chainName,
           };
-    });
+    })
+    .filter(viewItem => viewItem.proposalLen !== 0);
 
   return (
     <PageWithScrollView
