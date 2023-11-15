@@ -41,7 +41,7 @@ export class BIP44PathState {
     text = text.trim();
 
     if (text !== '') {
-      const num = parseInt(text);
+      const num = parseInt(text, 10);
       if (Number.isNaN(num) || num < 0 || num > 1) {
         return;
       }
