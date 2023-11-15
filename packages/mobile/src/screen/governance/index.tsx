@@ -123,7 +123,7 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
             chainName: delegation.chainInfo.chainName,
           };
     })
-    .filter(viewItem => viewItem.proposalLen);
+    .filter(viewItem => viewItem.proposalLen !== 0);
 
   return (
     <PageWithScrollView
