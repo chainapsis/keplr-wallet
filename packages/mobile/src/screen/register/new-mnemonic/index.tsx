@@ -14,12 +14,15 @@ import {Button} from '../../../components/button';
 import {WarningBox} from '../../../components/guide-box';
 import LottieView from 'lottie-react-native';
 import {RegisterContainer} from '../components';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {RootStackParamList} from '../../../navigation';
 
 type WordsType = '12words' | '24words';
 
 export const NewMnemonicScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
   const style = useStyle();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const [words, setWords] = useState<string[]>([]);
   const [wordsType, setWordsType] = useState<WordsType>('12words');
@@ -50,6 +53,13 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
             id: 'button.next',
           })}
           size="large"
+          onPress={() => {
+            navigation.navigate('Register.VerifyMnemonic', {
+              mnemonic: words.join(' '),
+              stepPrevious: 1,
+              stepTotal: 3,
+            });
+          }}
         />
       }>
       <ScrollView style={style.flatten(['padding-x-20'])}>
