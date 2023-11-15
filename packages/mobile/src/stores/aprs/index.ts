@@ -7,6 +7,7 @@ import {DeepReadonly} from 'utility-types';
 import {AprItem, AprItemInner} from './types';
 import {ChainIdHelper} from '@keplr-wallet/cosmos';
 import {Dec, IntPretty} from '@keplr-wallet/unit';
+import {computed} from 'mobx';
 
 export interface AprQueries {
   apr: AprQueriesImpl;
@@ -57,6 +58,7 @@ class ObservableQueryApr extends ObservableQuery<AprItemInner> {
     this._chainId = chainId;
   }
 
+  @computed
   get apr(): AprItem {
     if (!this.response || !this.response.data || !this.response.data.apr) {
       return {chainId: this._chainId};

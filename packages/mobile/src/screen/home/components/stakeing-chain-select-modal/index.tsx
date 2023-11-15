@@ -3,21 +3,22 @@ import {observer} from 'mobx-react-lite';
 import {EmitterSubscription, Keyboard, Platform, Text} from 'react-native';
 
 import {BottomSheetFlatList, useBottomSheet} from '@gorhom/bottom-sheet';
-import {useStyle} from '../../../styles';
+import {useStyle} from '../../../../styles';
 import {TextInput} from 'react-native-gesture-handler';
-import {Gutter} from '../../../components/gutter';
-import {SearchTextInput} from '../../../components/input/search-text-input';
-import {BottomSheetSearchTextInput} from '../../../components/input/bottom-sheet-search-input';
-import {Box} from '../../../components/box';
-import {RectButton} from '../../../components/rect-button';
-import {Column, Columns} from '../../../components/column';
-import {ChainImageFallback} from '../../../components/image';
-import {ViewToken} from '..';
-import {useStore} from '../../../stores';
-import {Stack} from '../../../components/stack';
+import {Gutter} from '../../../../components/gutter';
+import {SearchTextInput} from '../../../../components/input/search-text-input';
+import {BottomSheetSearchTextInput} from '../../../../components/input/bottom-sheet-search-input';
+import {Box} from '../../../../components/box';
+import {RectButton} from '../../../../components/rect-button';
+import {Column, Columns} from '../../../../components/column';
+import {ChainImageFallback} from '../../../../components/image';
+import {ViewToken} from '../..';
+import {useStore} from '../../../../stores';
+import {Stack} from '../../../../components/stack';
 import {IntPretty} from '@keplr-wallet/unit';
-import {formatAprString} from '../utils';
-import {AprItem} from '../../../stores/aprs';
+import {formatAprString} from '../../utils';
+import {AprItem} from '../../../../stores/aprs';
+import {ArrowRightIcon} from '../../../../components/icon/arrow-right';
 
 export interface SelectStakingChainModalItem {
   key: string;
@@ -168,6 +169,7 @@ const TokenItem: FunctionComponent<{
       }}>
       <Box
         padding={16}
+        paddingRight={8}
         borderRadius={6}
         height={74}
         alignY="center"
@@ -207,6 +209,8 @@ const TokenItem: FunctionComponent<{
                 : '-'}
             </Text>
           </Stack>
+          <Gutter size={4} />
+          <ArrowRightIcon size={24} color={style.get('color-gray-400').color} />
         </Columns>
       </Box>
     </RectButton>

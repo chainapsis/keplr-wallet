@@ -73,17 +73,16 @@ interface TokenItemProps {
   viewToken: ViewToken;
   onClick?: () => void;
   disabled?: boolean;
-  forChange?: boolean;
   isNotReady?: boolean;
   apr?: IntPretty;
+  hasApr?: boolean;
   // For remaining unbonding time.
   altSentence?: string | React.ReactElement;
 }
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
-  ({viewToken, onClick, disabled, forChange, isNotReady, apr, altSentence}) => {
+  ({viewToken, onClick, disabled, isNotReady, apr, altSentence, hasApr}) => {
     const {priceStore} = useStore();
     const style = useStyle();
-
     const pricePretty = priceStore.calculatePrice(viewToken.token);
 
     const isIBC = useMemo(() => {
@@ -125,10 +124,10 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
 
     const containerStyle: ViewStyle = {
       backgroundColor: style.get('color-gray-600').color,
-      paddingTop: forChange ? 14 : 16,
-      paddingBottom: forChange ? 4 : 16,
-      paddingLeft: forChange ? 14 : 14,
-      paddingRight: forChange ? 16 : 14,
+      paddingTop: 16,
+      paddingBottom: 16,
+      paddingLeft: 16,
+      paddingRight: 8,
       borderRadius: 6,
     };
 
@@ -247,7 +246,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
               <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth={72}>
                 <Text
                   style={style.flatten(['color-gray-300', 'text-caption1'])}>
-                  {apr
+                  {hasApr
                     ? `APR ${formatAprString(apr, 2)}%`
                     : isIBC
                     ? `on ${viewToken.chainInfo.chainName}`
@@ -310,13 +309,11 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 )}
               </Skeleton>
             </Stack>
-
-            {forChange ? (
-              <ArrowRightIcon
-                size={24}
-                color={style.get('color-gray-300').color}
-              />
-            ) : null}
+            <Gutter size={4} />
+            <ArrowRightIcon
+              size={24}
+              color={style.get('color-gray-400').color}
+            />
           </Columns>
         </Columns>
       </RectButton>
