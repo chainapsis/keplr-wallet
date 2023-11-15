@@ -6,6 +6,7 @@ import {
 } from '@keplr-wallet/stores';
 import {DeepReadonly} from 'utility-types';
 import {ObservableQueryGovernance} from './proposals';
+import {ObservableQueryProposalVote} from './vote';
 
 export interface CosmosGovernanceQueries {
   governance: CosmosGovernanceQueriesImpl;
@@ -37,6 +38,7 @@ export const CosmosGovernanceQueries = {
 
 export class CosmosGovernanceQueriesImpl {
   public readonly queryGovernance: DeepReadonly<ObservableQueryGovernance>;
+  public readonly queryVotes: DeepReadonly<ObservableQueryProposalVote>;
 
   constructor(
     sharedContext: QuerySharedContext,
@@ -48,6 +50,12 @@ export class CosmosGovernanceQueriesImpl {
       chainId,
       chainGetter,
       new ObservableQueryStakingPool(sharedContext, chainId, chainGetter),
+    );
+
+    this.queryVotes = new ObservableQueryProposalVote(
+      sharedContext,
+      chainId,
+      chainGetter,
     );
   }
 }

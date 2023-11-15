@@ -1,19 +1,16 @@
 import React, {FunctionComponent, useEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
-import {useIntl} from 'react-intl';
 import {EmitterSubscription, Keyboard, Platform, Text} from 'react-native';
-import {Gutter} from '../gutter';
-import {useStyle} from '../../styles';
 import {BottomSheetFlatList, useBottomSheet} from '@gorhom/bottom-sheet';
-import {Box} from '../box';
-import {RectButton} from '../rect-button';
-import {Column, Columns} from '../column';
-import {ChainImageFallback} from '../image';
-import {TextButton} from '../text-button';
-import {ArrowDownFillIcon} from '../icon/arrow-donw-fill';
-import {BottomSheetSearchTextInput} from '../input/bottom-sheet-search-input';
 import {TextInput} from 'react-native-gesture-handler';
-import {SearchTextInput} from '../input/search-text-input';
+import {useStyle} from '../../../../styles';
+import {BottomSheetSearchTextInput} from '../../../../components/input/bottom-sheet-search-input';
+import {SearchTextInput} from '../../../../components/input/search-text-input';
+import {Gutter} from '../../../../components/gutter';
+import {Box} from '../../../../components/box';
+import {RectButton} from '../../../../components/rect-button';
+import {Column, Columns} from '../../../../components/column';
+import {ChainImageFallback} from '../../../../components/image';
 
 export interface SelectModalItem {
   key: string;
@@ -21,57 +18,14 @@ export interface SelectModalItem {
   imageUrl?: string;
 }
 
-export const SelectModalCommonButton: FunctionComponent<{
-  items: SelectModalItem[];
-  placeholder?: string;
-  selectedItemKey?: string;
-  isOpenModal?: boolean;
-  onPress: () => void;
-}> = observer(({items, placeholder, selectedItemKey, isOpenModal, onPress}) => {
-  const style = useStyle();
-  return (
-    <Box
-      alignY="center"
-      height={52}
-      backgroundColor={style.get('color-gray-700').color}
-      paddingX={16}
-      paddingY={10}
-      borderRadius={8}
-      borderWidth={1}
-      borderColor={
-        isOpenModal
-          ? style.get('color-gray-400').color
-          : style.get('color-gray-500').color
-      }
-      onClick={onPress}>
-      <Columns sum={1} alignY="center">
-        <Text
-          style={style.flatten([
-            selectedItemKey ? 'color-gray-50' : 'color-gray-300',
-            'flex-1',
-          ])}>
-          {selectedItemKey
-            ? items.find(item => item.key === selectedItemKey)?.label ??
-              placeholder
-            : ''}
-        </Text>
-
-        <ArrowDownFillIcon size={24} color={style.get('color-white').color} />
-      </Columns>
-    </Box>
-  );
-});
-
-export const SelectModal: FunctionComponent<{
-  title: string;
+export const GovSelectChainModal: FunctionComponent<{
   items: SelectModalItem[];
   placeholder?: string;
   onSelect: (item: SelectModalItem) => void;
-}> = observer(({items, title, placeholder, onSelect}) => {
+}> = observer(({items, placeholder, onSelect}) => {
   const style = useStyle();
   const [search, setSearch] = useState('');
   const searchRef = useRef<TextInput>(null);
-  const intl = useIntl();
   const bottom = useBottomSheet();
 
   useEffect(() => {
@@ -114,15 +68,6 @@ export const SelectModal: FunctionComponent<{
   return (
     <React.Fragment>
       <Box paddingX={12}>
-        <Text
-          style={style.flatten([
-            'text-center',
-            'subtitle1',
-            'color-text-high',
-            'padding-8',
-          ])}>
-          {title}
-        </Text>
         <Gutter size={12} />
         {Platform.OS === 'android' ? (
           <SearchTextInput
@@ -198,12 +143,7 @@ export const SelectModal: FunctionComponent<{
                   <Text style={style.flatten(['subtitle3', 'color-text-high'])}>
                     {item.label}
                   </Text>
-                  <Column weight={2} />
-                  <TextButton
-                    text={intl.formatMessage({
-                      id: 'page.setting.token.add.contract-item.select-button',
-                    })}
-                  />
+                  <Column weight={1} />
                 </Columns>
               </Box>
             </RectButton>

@@ -88,7 +88,7 @@ export const WalletShowSensitiveScreen: FunctionComponent = observer(() => {
       backgroundMode={'default'}
       style={style.flatten(['height-full'])}
       contentContainerStyle={style.flatten(['flex-grow-1'])}>
-      <Box padding={12} paddingTop={8} paddingBottom={0} height="100%">
+      <Box padding={12} paddingTop={8} height="100%">
         {sensitive === '' ? (
           <Box alignX="center" alignY="center" style={{flex: 1}}>
             <LottieView

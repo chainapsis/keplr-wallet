@@ -2,8 +2,6 @@ import React, {FunctionComponent, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 
 import {Text, View} from 'react-native';
-// import {LoadingSpinner} from '../../components/spinner';
-// import {useStore} from '../../../stores';
 import {useStyle} from '../../../styles';
 import {Box} from '../../../components/box';
 import {SVGLoadingIcon} from '../../../components/spinner';
@@ -11,14 +9,15 @@ import {RectButton} from '../../../components/rect-button';
 import {Stack} from '../../../components/stack';
 import {Column, Columns} from '../../../components/column';
 import {useStore} from '../../../stores';
-import {ProposalStatus} from '../../../stores/governance/types';
+import {ProposalStatus, ViewProposal} from '../../../stores/governance/types';
 import {useIntl} from 'react-intl';
 import {dateToLocalString} from '../utils';
-import {ObservableQueryProposal} from '../../../stores/governance';
-import {ObservableQueryProposalV1} from '../../../stores/governance/v1';
 import {Chip} from '../../../components/chip';
-// import {dateToLocalString} from '../utils';
-// import {useIntl} from 'react-intl';
+import {CheckCircleIcon} from '../../../components/icon';
+import {Gutter} from '../../../components/gutter';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavProp} from '../../../navigation';
+import {DASHBOARD_URL} from '../../../config';
 
 export const GovernanceProposalStatusChip: FunctionComponent<{
   status: ProposalStatus;
@@ -40,23 +39,31 @@ export const GovernanceProposalStatusChip: FunctionComponent<{
 };
 
 export const GovernanceCardBody: FunctionComponent<{
-  proposalId: string;
+  proposal: ViewProposal;
   chainId: string;
-  isV1: boolean;
-}> = observer(({proposalId, chainId, isV1}) => {
-  const {queriesStore} = useStore();
+  isGovV1Supported?: boolean;
+}> = observer(({proposal, chainId, isGovV1Supported}) => {
+  const {chainStore, queriesStore, accountStore} = useStore();
 
   const style = useStyle();
-  // const intl = useIntl();
-  // const queries = queriesStore.get(chainStore.current.chainId);
-  const queryGovernance = isV1
-    ? queriesStore.get(chainId).governanceV1.queryGovernance
-    : queriesStore.get(chainId).governance.queryGovernance;
-  const proposal = queryGovernance.getProposal(proposalId);
   const intl = useIntl();
-  const renderProposalDateString = (
-    proposal: ObservableQueryProposal | ObservableQueryProposalV1,
-  ) => {
+  const vote = isGovV1Supported
+    ? queriesStore
+        .get(chainId)
+        .governanceV1.queryVotes.getVote(
+          proposal.id,
+          accountStore.getAccount(chainId).bech32Address,
+        ).vote
+    : queriesStore
+        .get(chainId)
+        .governance.queryVotes.getVote(
+          proposal.id,
+          accountStore.getAccount(chainId).bech32Address,
+        ).vote;
+  const navigation = useNavigation<StackNavProp>();
+  const voted = vote !== 'Unspecified';
+
+  const renderProposalDateString = (proposal: ViewProposal) => {
     switch (proposal.proposalStatus) {
       case ProposalStatus.DEPOSIT_PERIOD:
         return `Voting ends: ${dateToLocalString(
@@ -157,7 +164,19 @@ export const GovernanceCardBody: FunctionComponent<{
         <RectButton
           style={style.flatten(['padding-16'])}
           onPress={() => {
-            //TODO 웹으로 이동
+            //NOTE cronose pos 같은 공백이 있는 체인이름 대시보드애서
+            // cronose-pos으로 연결해서 공백이 있는경우 -으로 join 함
+            const url = `${DASHBOARD_URL}/chains/${chainStore
+              .getChain(chainId)
+              .chainName.toLowerCase()
+              .split(' ')
+              .join('-')}/proposals/${[proposal.id]}`;
+
+            if (url) {
+              navigation.navigate('Web', {
+                url,
+              });
+            }
           }}>
           <Stack gutter={9}>
             <Columns sum={1}>
@@ -165,6 +184,30 @@ export const GovernanceCardBody: FunctionComponent<{
                 {proposal.id}
               </Text>
               <Column weight={1} />
+              {voted ? (
+                <React.Fragment>
+                  <Chip
+                    text={
+                      <Box alignX="center" alignY="center">
+                        <Columns sum={1} gutter={2}>
+                          <Text
+                            style={style.flatten([
+                              'color-text-middle',
+                              'text-caption1',
+                            ])}>
+                            Voted
+                          </Text>
+                          <CheckCircleIcon
+                            size={16}
+                            color={style.get('color-text-middle').color}
+                          />
+                        </Columns>
+                      </Box>
+                    }
+                  />
+                  <Gutter size={4} />
+                </React.Fragment>
+              ) : null}
               <GovernanceProposalStatusChip status={proposal.proposalStatus} />
             </Columns>
 
@@ -179,7 +222,7 @@ export const GovernanceCardBody: FunctionComponent<{
                 {renderProposalDateString(proposal)}
                 {}
               </Text>
-
+              <Column weight={1} />
               {proposalRelativeEndTimeString ? (
                 <Text
                   style={style.flatten(['text-caption1', 'color-text-middle'])}>

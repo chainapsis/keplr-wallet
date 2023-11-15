@@ -115,7 +115,7 @@ export type StakeNavigation = {
 
 export type GovernanceNavigation = {
   'Governance.intro': undefined;
-  'Governance.list': {chainId: string};
+  'Governance.list': {chainId: string; isGovV1Supported?: boolean};
 };
 
 export type StackNavProp = NativeStackNavigationProp<RootStackParamList>;
@@ -497,7 +497,6 @@ const StakeNavigation = () => {
   );
 };
 const GovernanceNavigation = () => {
-  const intl = useIntl();
   return (
     <GovernanceStack.Navigator>
       <GovernanceStack.Screen
@@ -511,9 +510,7 @@ const GovernanceNavigation = () => {
       <GovernanceStack.Screen
         name="Governance.list"
         options={{
-          title: intl.formatMessage({
-            id: 'page.wallet.keyring-item.dropdown.delete-wallet-title',
-          }),
+          title: 'Proposals',
           ...defaultHeaderOptions,
         }}
         component={GovernanceListScreen}
