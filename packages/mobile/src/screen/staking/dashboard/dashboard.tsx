@@ -12,6 +12,12 @@ import {useStyle} from '../../../styles';
 import {Box} from '../../../components/box';
 import {CollapsibleList} from '../../../components/collapsible-list';
 import {TokenTitleView} from '../../home/components/token';
+import {Column, Columns} from '../../../components/column';
+import {StakingIcon} from '../../../components/icon/stacking';
+import {Gutter} from '../../../components/gutter';
+import {YAxis} from '../../../components/axis';
+import {Button} from '../../../components/button';
+import LinearGradient from 'react-native-linear-gradient';
 
 export const StakingDashboardScreen: FunctionComponent = observer(() => {
   const {accountStore, queriesStore, priceStore} = useStore();
@@ -19,6 +25,12 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.Dashboard'>>();
   // const style = useStyle();
   const {chainId} = route.params;
+  const stakbleToken = queriesStore
+    .get(chainId)
+    .queryBalances.getQueryBech32Address(
+      accountStore.getAccount(chainId).bech32Address,
+    ).stakable?.balance;
+
   const account = accountStore.getAccount(chainId);
   const queries = queriesStore.get(chainId);
 
@@ -90,6 +102,49 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
           {totalStakedPrice?.inequalitySymbol(true).toString()}
         </Text>
       </Box>
+      <Box
+        padding={16}
+        borderRadius={8}
+        marginBottom={12}
+        backgroundColor={style.get('color-gray-600').color}>
+        <Columns sum={1} alignY="center" gutter={8}>
+          <Columns sum={1} gutter={12} alignY="center">
+            <LinearGradient
+              colors={['rgba(113,196,255,0.4)', 'rgba(211,120,254,0.4)']}
+              style={style.flatten([
+                'border-radius-64',
+                'width-36',
+                'height-36',
+              ])}>
+              <Box alignX="center" alignY="center" width={36} height={36}>
+                <StakingIcon size={18} color={style.get('color-white').color} />
+              </Box>
+            </LinearGradient>
+
+            <YAxis>
+              <Text style={style.flatten(['subtitle4', 'color-text-low'])}>
+                Available for Staking
+              </Text>
+              <Gutter size={4} />
+              <Text
+                numberOfLines={1}
+                style={style.flatten(['subtitle2', 'color-text-high'])}>
+                {stakbleToken
+                  ?.maxDecimals(6)
+                  .inequalitySymbol(true)
+                  .shrink(true)
+                  .toString()}
+              </Text>
+            </YAxis>
+          </Columns>
+          <Column weight={1} />
+          <Button
+            style={style.flatten(['padding-x-16', 'padding-y-8'])}
+            text="Stake"
+            size="small"
+          />
+        </Columns>
+      </Box>
 
       {ValidatorViewData.map(({title, balance, lenAlwaysShown}) => {
         if (balance.length === 0) {
@@ -98,7 +153,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
         return (
           <CollapsibleList
             key={title}
-            title={<TokenTitleView onOpenModal={() => {}} title={title} />}
+            title={<TokenTitleView title={title} />}
             lenAlwaysShown={lenAlwaysShown}
             items={balance.map(del => {
               const validator = validatorsMap.get(
