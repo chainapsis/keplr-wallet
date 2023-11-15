@@ -13,14 +13,16 @@ export const RegisterContainer: FunctionComponent<
   const style = useStyle();
 
   return (
-    <React.Fragment>
+    <Box height="100%">
       <RegisterHeader title={title} paragraph={paragraph} />
 
       {children}
 
+      <Box style={{flex: 1}} />
+
       <Box padding={20} backgroundColor={style.get('color-gray-700').color}>
         {bottom}
       </Box>
-    </React.Fragment>
+    </Box>
   );
 };

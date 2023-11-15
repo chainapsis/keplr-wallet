@@ -53,11 +53,12 @@ import {SettingGeneralLanguageScreen} from './screen/setting/screens/general/lan
 import {RegisterIntroScreen} from './screen/register/intro';
 import {StakingDashboardScreen} from './screen/staking/dashboard';
 import {RegisterIntroNewUserScreen} from './screen/register/intro-new-user';
+import {NewMnemonicScreen} from './screen/register/new-mnemonic';
+import {VerifyMnemonicScreen} from './screen/register/verify-mnemonic';
 import {RegisterIntroExistingUserScene} from './screen/register/intro-existing-user';
 import {RegisterScreen} from './screen/register';
 import {WebScreen} from './screen/web';
 import {WebpageScreen} from './screen/web/webpage';
-import {NewMnemonicScreen} from './screen/register/new-mnemonic';
 import {GovernanceListScreen} from './screen/governance/list';
 import {GovernanceScreen} from './screen/governance';
 
@@ -68,6 +69,11 @@ export type RootStackParamList = {
   'Register.Intro': undefined;
   'Register.Intro.NewUser': undefined;
   'Register.NewMnemonic': undefined;
+  'Register.VerifyMnemonic': {
+    mnemonic?: string;
+    stepPrevious: number;
+    stepTotal: number;
+  };
   'Register.Intro.ExistingUser': undefined;
   'Register.EnableChain': undefined;
   Send: undefined;
@@ -144,6 +150,11 @@ export const RegisterNavigation: FunctionComponent = () => {
         component={RegisterIntroExistingUserScene}
       />
       <Stack.Screen name="Register.NewMnemonic" component={NewMnemonicScreen} />
+
+      <Stack.Screen
+        name="Register.VerifyMnemonic"
+        component={VerifyMnemonicScreen}
+      />
 
       <Stack.Screen
         name="Register.EnableChain"
