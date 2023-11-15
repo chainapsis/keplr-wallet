@@ -894,7 +894,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'persistence',
     },
-
     bip44: {
       coinType: 118,
     },
@@ -1462,7 +1461,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'sommelier',
     },
-
     bip44: {
       coinType: 118,
     },
@@ -1495,7 +1493,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinMinimalDenom: 'uumee',
       coinDecimals: 6,
     },
-
     bip44: {
       coinType: 118,
     },
@@ -1617,7 +1614,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'stride',
     },
-
     bip44: {
       coinType: 118,
     },
@@ -1676,7 +1672,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 18,
       coinGeckoId: 'evmos',
     },
-
     bip44: {
       coinType: 60,
     },
@@ -2312,3 +2307,28 @@ export const CommunityChainInfoRepo = {
 
 export const APR_API_URL =
   'https://pjld2aanw3elvteui4gwyxgx4m0ceweg.lambda-url.us-west-2.on.aws';
+
+export const SCAMPORPOSAL_API_URL =
+  'https://phishing-block-list-chainapsis.vercel.app';
+
+export const GovernanceV1ChainIdentifiers = [
+  'kyve',
+  'mars',
+  'juno',
+  'kava_2222',
+  'evmos_9001',
+  'injective',
+  'quicksilver',
+  'gitopia',
+  'core',
+  'celestia',
+  'dydx-mainnet',
+  'likecoin-mainnet',
+];
+
+export const NoDashboardLinkIdentifiers = [
+  'columbus',
+  'tgrade-mainnet',
+  'emoney',
+];
+export const DASHBOARD_URL = 'https://wallet.keplr.app';
