@@ -52,10 +52,12 @@ export const TokenTitleView: FunctionComponent<{
             <Text style={style.flatten(['color-text-low', 'subtitle3'])}>
               {title}
             </Text>
-            <InformationOutlinedIcon
-              size={20}
-              color={style.get('color-text-low').color}
-            />
+            {onOpenModal ? (
+              <InformationOutlinedIcon
+                size={20}
+                color={style.get('color-text-low').color}
+              />
+            ) : null}
           </Columns>
         </Pressable>
         {right ? (
