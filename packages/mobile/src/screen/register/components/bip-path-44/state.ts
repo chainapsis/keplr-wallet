@@ -56,7 +56,7 @@ export class BIP44PathState {
   }
 
   protected validatePositiveOrZeroText(text: string): number {
-    const num = parseInt(text);
+    const num = parseInt(text, 10);
     if (Number.isNaN(num)) {
       return -1;
     }
@@ -133,9 +133,9 @@ export class BIP44PathState {
     }
 
     return {
-      account: parseInt(this.accountText),
-      change: parseInt(this.changeText),
-      addressIndex: parseInt(this.addressIndexText),
+      account: parseInt(this.accountText, 10),
+      change: parseInt(this.changeText, 10),
+      addressIndex: parseInt(this.addressIndexText, 10),
     };
   }
 }
