@@ -368,6 +368,22 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             high,
           },
         };
+
+        if (
+          osmosisFeeCurrency.coinMinimalDenom ===
+            queryOsmosis.queryTxFeesBaseDenom.baseDenom &&
+          osmosisFeeCurrency.gasPriceStep
+        ) {
+          const gasPrice = new Dec(
+            osmosisFeeCurrency["gasPriceStep"][feeType].toString()
+          );
+          const feeAmount = gasPrice.mul(new Dec(this.gasConfig.gas));
+
+          return {
+            denom: osmosisFeeCurrency.coinMinimalDenom,
+            amount: feeAmount.roundUp().toString(),
+          };
+        }
       }
     }
 
