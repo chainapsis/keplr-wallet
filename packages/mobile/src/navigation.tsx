@@ -61,6 +61,8 @@ import {WebScreen} from './screen/web';
 import {WebpageScreen} from './screen/web/webpage';
 import {GovernanceListScreen} from './screen/governance/list';
 import {GovernanceScreen} from './screen/governance';
+import {FinalizeKeyScreen} from './screen/register/finalize-key';
+import {PlainObject} from '@keplr-wallet/background';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -70,11 +72,41 @@ export type RootStackParamList = {
   'Register.Intro.NewUser': undefined;
   'Register.NewMnemonic': undefined;
   'Register.VerifyMnemonic': {
-    mnemonic?: string;
+    mnemonic: string;
     stepPrevious: number;
     stepTotal: number;
   };
   'Register.Intro.ExistingUser': undefined;
+  'Register.FinalizeKey': {
+    name: string;
+    password: string;
+    stepPrevious: number;
+    stepTotal: number;
+    mnemonic?: {
+      value: string;
+      // If mnemonic is not recovered, but newly generated,
+      // it should be set to true.
+      isFresh?: boolean;
+      bip44Path: {
+        account: number;
+        change: number;
+        addressIndex: number;
+      };
+    };
+    privateKey?: {
+      value: Uint8Array;
+      meta: PlainObject;
+    };
+    ledger?: {
+      pubKey: Uint8Array;
+      app: string;
+      bip44Path: {
+        account: number;
+        change: number;
+        addressIndex: number;
+      };
+    };
+  };
   'Register.EnableChain': undefined;
   Send: undefined;
   'Send.SelectAsset': undefined;
@@ -155,6 +187,8 @@ export const RegisterNavigation: FunctionComponent = () => {
         name="Register.VerifyMnemonic"
         component={VerifyMnemonicScreen}
       />
+
+      <Stack.Screen name="Register.FinalizeKey" component={FinalizeKeyScreen} />
 
       <Stack.Screen
         name="Register.EnableChain"
