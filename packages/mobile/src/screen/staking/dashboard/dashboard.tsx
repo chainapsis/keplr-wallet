@@ -121,7 +121,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
           coin: balance,
           imageUrl: thumbnail,
           name: validator.description.moniker,
-          validatorAddress: unbonding.validator_address,
+          validatorAddress: validator.operator_address,
           subString: intl.formatRelativeTime(
             relativeTime.value,
             relativeTime.unit,
@@ -155,7 +155,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
         coin: amount,
         imageUrl: thumbnail,
         name: validator.description.moniker,
-        validatorAddress: delegation.delegation.validator_address,
+        validatorAddress: validator.operator_address,
         subString: amount
           ? priceStore.calculatePrice(amount)?.inequalitySymbol(true).toString()
           : undefined,
@@ -166,17 +166,17 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
 
   const ValidatorViewData: {
     title: string;
-    balance: ViewValidator[];
+    validators: ViewValidator[];
     lenAlwaysShown: number;
   }[] = [
     {
       title: 'Staked Balance',
-      balance: delegations,
+      validators: delegations,
       lenAlwaysShown: 4,
     },
     {
       title: 'Unstaking Balance',
-      balance: unbondings,
+      validators: unbondings,
       lenAlwaysShown: 4,
     },
   ];
@@ -264,8 +264,8 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
         </Columns>
       </Box>
 
-      {ValidatorViewData.map(({title, balance, lenAlwaysShown}) => {
-        if (balance.length === 0) {
+      {ValidatorViewData.map(({title, validators, lenAlwaysShown}) => {
+        if (validators.length === 0) {
           return null;
         }
         return (
@@ -274,18 +274,17 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
             <CollapsibleList
               title={<TokenTitleView title={title} />}
               lenAlwaysShown={lenAlwaysShown}
-              items={balance.map(del => {
+              items={validators.map(validator => {
                 return (
                   <ValidatorItem
                     viewValidator={{
-                      coin: del.coin,
-                      imageUrl: del.imageUrl,
-                      name: del.name,
-                      validatorAddress: del.validatorAddress,
-                      subString: del.subString,
+                      coin: validator.coin,
+                      imageUrl: validator.imageUrl,
+                      name: validator.name,
+                      validatorAddress: validator.validatorAddress,
+                      subString: validator.subString,
                     }}
-                    key={del.validatorAddress + del.subString}
-                    chainId={chainId}
+                    key={validator.validatorAddress + validator.subString}
                     afterSelect={() => {
                       navigation.navigate('Stake', {
                         screen: 'Stake.ValidateList',

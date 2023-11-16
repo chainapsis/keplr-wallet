@@ -21,14 +21,13 @@ export interface ViewValidator {
 
 export const ValidatorItem: FunctionComponent<{
   viewValidator: ViewValidator;
-  chainId: string;
   isNotReady?: boolean;
   isDelegation?: boolean;
   subStringStyle?: TextStyle;
   coinTextStyle?: TextStyle;
   warning?: boolean;
-  afterSelect: (address: string, chainId: string) => void;
-}> = ({viewValidator, chainId, afterSelect}) => {
+  afterSelect: () => void;
+}> = ({viewValidator, afterSelect}) => {
   const style = useStyle();
 
   return (
@@ -38,8 +37,7 @@ export const ValidatorItem: FunctionComponent<{
       style={style.flatten(['border-radius-6', 'background-color-gray-600'])}
       activeOpacity={0.5}
       onPress={async () => {
-        // e.preventDefault();
-        afterSelect(viewValidator.validatorAddress, chainId);
+        afterSelect();
       }}>
       <Box paddingLeft={16} paddingRight={8} paddingY={16} borderRadius={6}>
         <Columns sum={1} alignY="center" gutter={8}>
