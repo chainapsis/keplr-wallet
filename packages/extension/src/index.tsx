@@ -125,6 +125,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     ibcChannelStore,
     gravityBridgeCurrencyRegistrar,
     axelarEVMBridgeCurrencyRegistrar,
+    evmChainERC20CurrencyRegistrar,
     priceStore,
     uiConfigStore,
   } = useStore();
@@ -213,6 +214,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
       return false;
     }
 
+    if (!evmChainERC20CurrencyRegistrar.isInitialized) {
+      return false;
+    }
+
     return true;
   }, [
     keyRingStore.status,
@@ -226,6 +231,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     uiConfigStore.isDeveloper,
     gravityBridgeCurrencyRegistrar.isInitialized,
     axelarEVMBridgeCurrencyRegistrar.isInitialized,
+    evmChainERC20CurrencyRegistrar.isInitialized,
     accountStore,
     ibcChannelStore.isInitialized,
   ]);
