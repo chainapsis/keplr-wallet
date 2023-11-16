@@ -7,7 +7,7 @@ import {useStore} from '../../../stores';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import {StakeNavigation} from '../../../navigation';
 import {Staking} from '@keplr-wallet/stores';
-import {ValidatorItem} from '../components/validator-item';
+import {ValidatorItem, ViewValidator} from '../components/validator-item';
 import {useStyle} from '../../../styles';
 import {Box} from '../../../components/box';
 import {CollapsibleList} from '../../../components/collapsible-list';
@@ -18,11 +18,15 @@ import {Gutter} from '../../../components/gutter';
 import {YAxis} from '../../../components/axis';
 import {Button} from '../../../components/button';
 import LinearGradient from 'react-native-linear-gradient';
+import {CoinPretty} from '@keplr-wallet/unit';
+import {formatRelativeTime} from '../../../utils/format';
+import {useIntl} from 'react-intl';
 
 export const StakingDashboardScreen: FunctionComponent = observer(() => {
-  const {accountStore, queriesStore, priceStore} = useStore();
+  const {accountStore, queriesStore, priceStore, chainStore} = useStore();
   const style = useStyle();
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.Dashboard'>>();
+  const intl = useIntl();
   // const style = useStyle();
   const {chainId} = route.params;
   const stakbleToken = queriesStore
@@ -33,6 +37,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
 
   const account = accountStore.getAccount(chainId);
   const queries = queriesStore.get(chainId);
+  const chainInfo = chainStore.getChain(chainId);
 
   const staked = queries.cosmos.queryDelegations.getQueryBech32Address(
     account.bech32Address,
@@ -40,12 +45,6 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
   const totalStakedPrice = staked
     ? priceStore.calculatePrice(staked)
     : undefined;
-
-  const queryDelegations =
-    queries.cosmos.queryDelegations.getQueryBech32Address(
-      account.bech32Address,
-    );
-  const delegations = queryDelegations.delegations;
 
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
     Staking.BondStatus.Bonded,
@@ -77,14 +76,115 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
     return map;
   }, [validators]);
 
+  const queryDelegations =
+    queries.cosmos.queryDelegations.getQueryBech32Address(
+      account.bech32Address,
+    );
+  const queryUnbondings =
+    queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
+      account.bech32Address,
+    );
+
+  const unbondings: ViewValidator[] = useMemo(() => {
+    const res = [];
+    for (const unbonding of queryUnbondings.unbondings) {
+      for (const entry of unbonding.entries) {
+        if (!chainInfo.stakeCurrency) {
+          continue;
+        }
+        if (!chainInfo.stakeCurrency) {
+          continue;
+        }
+        const validator = validatorsMap.get(unbonding.validator_address);
+        if (!validator) {
+          continue;
+        }
+
+        const thumbnail =
+          bondedValidators.getValidatorThumbnail(validator.operator_address) ||
+          unbondingValidators.getValidatorThumbnail(
+            validator.operator_address,
+          ) ||
+          unbondedValidators.getValidatorThumbnail(validator.operator_address);
+
+        const balance = new CoinPretty(chainInfo.stakeCurrency, entry.balance);
+        const relativeTime = formatRelativeTime(entry.completion_time);
+
+        res.push({
+          coin: balance,
+          imageUrl: thumbnail,
+          name: validator.description.moniker,
+          validatorAddress: unbonding.validator_address,
+          subString: intl.formatRelativeTime(
+            relativeTime.value,
+            relativeTime.unit,
+          ),
+        });
+      }
+    }
+    return res;
+  }, [
+    bondedValidators,
+    chainInfo.stakeCurrency,
+    intl,
+    queryUnbondings.unbondings,
+    unbondedValidators,
+    unbondingValidators,
+    validatorsMap,
+  ]);
+
+  const delegations: ViewValidator[] = useMemo(() => {
+    const res: ViewValidator[] = [];
+    for (let delegation of queryDelegations.delegations) {
+      const validator = validatorsMap.get(
+        delegation.delegation.validator_address,
+      );
+      if (!validator) {
+        continue;
+      }
+
+      const thumbnail =
+        bondedValidators.getValidatorThumbnail(validator.operator_address) ||
+        unbondingValidators.getValidatorThumbnail(validator.operator_address) ||
+        unbondedValidators.getValidatorThumbnail(validator.operator_address);
+
+      const amount = queryDelegations.getDelegationTo(
+        validator.operator_address,
+      );
+
+      res.push({
+        coin: amount,
+        imageUrl: thumbnail,
+        name: validator.description.moniker,
+        validatorAddress: delegation.delegation.validator_address,
+        subString: amount
+          ? priceStore.calculatePrice(amount)?.inequalitySymbol(true).toString()
+          : undefined,
+      });
+    }
+    return res;
+  }, [
+    bondedValidators,
+    priceStore,
+    queryDelegations,
+    unbondedValidators,
+    unbondingValidators,
+    validatorsMap,
+  ]);
+
   const ValidatorViewData: {
     title: string;
-    balance: Staking.Delegation[];
+    balance: ViewValidator[];
     lenAlwaysShown: number;
   }[] = [
     {
       title: 'Staked Balance',
       balance: delegations,
+      lenAlwaysShown: 4,
+    },
+    {
+      title: 'Unstaking Balance',
+      balance: unbondings,
       lenAlwaysShown: 4,
     },
   ];
@@ -105,7 +205,6 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
       <Box
         padding={16}
         borderRadius={8}
-        marginBottom={12}
         backgroundColor={style.get('color-gray-600').color}>
         <Columns sum={1} alignY="center" gutter={8}>
           <Columns sum={1} gutter={12} alignY="center">
@@ -151,48 +250,31 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
           return null;
         }
         return (
-          <CollapsibleList
-            key={title}
-            title={<TokenTitleView title={title} />}
-            lenAlwaysShown={lenAlwaysShown}
-            items={balance.map(del => {
-              const validator = validatorsMap.get(
-                del.delegation.validator_address,
-              );
-              if (!validator) {
-                return null;
-              }
-
-              const thumbnail =
-                bondedValidators.getValidatorThumbnail(
-                  validator.operator_address,
-                ) ||
-                unbondingValidators.getValidatorThumbnail(
-                  validator.operator_address,
-                ) ||
-                unbondedValidators.getValidatorThumbnail(
-                  validator.operator_address,
+          <React.Fragment key={title}>
+            <Gutter size={12} />
+            <CollapsibleList
+              title={<TokenTitleView title={title} />}
+              lenAlwaysShown={lenAlwaysShown}
+              items={balance.map(del => {
+                return (
+                  <ValidatorItem
+                    viewValidator={{
+                      coin: del.coin,
+                      imageUrl: del.imageUrl,
+                      name: del.name,
+                      validatorAddress: del.validatorAddress,
+                      subString: del.subString,
+                    }}
+                    key={del.validatorAddress + del.subString}
+                    chainId={chainId}
+                    afterSelect={() => {
+                      console.log('click');
+                    }}
+                  />
                 );
-
-              const amount = queryDelegations.getDelegationTo(
-                validator.operator_address,
-              );
-              return (
-                <ValidatorItem
-                  key={del.delegation.validator_address}
-                  chainId={chainId}
-                  imageUrl={thumbnail}
-                  address={del.delegation.validator_address}
-                  name={validator.description.moniker || ''}
-                  coin={amount}
-                  price={amount ? priceStore.calculatePrice(amount) : undefined}
-                  afterSelect={() => {
-                    console.log('click');
-                  }}
-                />
-              );
-            })}
-          />
+              })}
+            />
+          </React.Fragment>
         );
       })}
     </PageWithScrollView>
