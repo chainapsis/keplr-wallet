@@ -300,7 +300,10 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
                     key={del.validatorAddress + del.subString}
                     chainId={chainId}
                     afterSelect={() => {
-                      console.log('click');
+                      navigation.navigate('Stake', {
+                        screen: 'Stake.ValidateList',
+                        params: {chainId},
+                      });
                     }}
                   />
                 );

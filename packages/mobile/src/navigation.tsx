@@ -60,6 +60,7 @@ import {WebpageScreen} from './screen/web/webpage';
 import {NewMnemonicScreen} from './screen/register/new-mnemonic';
 import {GovernanceListScreen} from './screen/governance/list';
 import {GovernanceScreen} from './screen/governance';
+import {ValidatorListScreen} from './screen/staking/vlidator-list';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -481,14 +482,6 @@ const StakeNavigation = () => {
   return (
     <StakeStack.Navigator>
       <StakeStack.Screen
-        name="Stake.Dashboard"
-        options={{
-          title: '',
-          ...defaultHeaderOptions,
-        }}
-        component={StakingDashboardScreen}
-      />
-      <StakeStack.Screen
         name="Stake.Staking"
         options={{
           title: intl.formatMessage({
@@ -516,7 +509,7 @@ const StakeNavigation = () => {
           }),
           ...defaultHeaderOptions,
         }}
-        component={WalletChangeNameScreen}
+        component={ValidatorListScreen}
       />
     </StakeStack.Navigator>
   );
