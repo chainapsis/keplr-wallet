@@ -20,6 +20,7 @@ import {Controller, useForm} from 'react-hook-form';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {Modal} from '../../../components/modal';
 import {Bip44PathModal, useBIP44PathState} from '../components/bip-path-44';
+import {useStore} from '../../../stores';
 
 export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -46,6 +47,10 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
       confirmPassword: '',
     },
   });
+
+  //Todo: Component로 빼야함
+  const {keyRingStore} = useStore();
+  const needPassword = keyRingStore.keyInfos.length === 0;
 
   const [inputs, setInputs] = useState<Record<number, string | undefined>>({});
   const [validatingStarted, setValidatingStarted] = useState<boolean>(false);
@@ -205,73 +210,77 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
           name={'name'}
         />
 
-        <Gutter size={16} />
+        {needPassword ? (
+          <React.Fragment>
+            <Gutter size={16} />
 
-        <Controller
-          control={control}
-          rules={{
-            required: 'Password is required',
-            validate: (password: string): string | undefined => {
-              if (password.length < 8) {
-                return intl.formatMessage({
-                  id: 'pages.register.components.form.name-password.short-password-error',
-                });
-              }
-            },
-          }}
-          render={({field: {onChange, onBlur, value}}) => {
-            return (
-              <TextInput
-                label={intl.formatMessage({
-                  id: 'pages.register.components.form.name-password.password-label',
-                })}
-                placeholder={intl.formatMessage({
-                  id: 'pages.register.components.form.name-password.password-placeholder',
-                })}
-                secureTextEntry={true}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                value={value}
-                error={errors.password?.message}
-              />
-            );
-          }}
-          name={'password'}
-        />
+            <Controller
+              control={control}
+              rules={{
+                required: 'Password is required',
+                validate: (password: string): string | undefined => {
+                  if (password.length < 8) {
+                    return intl.formatMessage({
+                      id: 'pages.register.components.form.name-password.short-password-error',
+                    });
+                  }
+                },
+              }}
+              render={({field: {onChange, onBlur, value}}) => {
+                return (
+                  <TextInput
+                    label={intl.formatMessage({
+                      id: 'pages.register.components.form.name-password.password-label',
+                    })}
+                    placeholder={intl.formatMessage({
+                      id: 'pages.register.components.form.name-password.password-placeholder',
+                    })}
+                    secureTextEntry={true}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    value={value}
+                    error={errors.password?.message}
+                  />
+                );
+              }}
+              name={'password'}
+            />
 
-        <Gutter size={16} />
+            <Gutter size={16} />
 
-        <Controller
-          control={control}
-          rules={{
-            required: 'Password confirm is required',
-            validate: (confirmPassword: string): string | undefined => {
-              if (confirmPassword !== getValues('password')) {
-                return intl.formatMessage({
-                  id: 'pages.register.components.form.name-password.password-not-match-error',
-                });
-              }
-            },
-          }}
-          render={({field: {onChange, onBlur, value}}) => {
-            return (
-              <TextInput
-                label={intl.formatMessage({
-                  id: 'pages.register.components.form.name-password.confirm-password-label',
-                })}
-                placeholder={intl.formatMessage({
-                  id: 'pages.register.components.form.name-password.confirm-password-placeholder',
-                })}
-                secureTextEntry={true}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                value={value}
-                error={errors.confirmPassword?.message}
-              />
-            );
-          }}
-          name={'confirmPassword'}
-        />
+            <Controller
+              control={control}
+              rules={{
+                required: 'Password confirm is required',
+                validate: (confirmPassword: string): string | undefined => {
+                  if (confirmPassword !== getValues('password')) {
+                    return intl.formatMessage({
+                      id: 'pages.register.components.form.name-password.password-not-match-error',
+                    });
+                  }
+                },
+              }}
+              render={({field: {onChange, onBlur, value}}) => {
+                return (
+                  <TextInput
+                    label={intl.formatMessage({
+                      id: 'pages.register.components.form.name-password.confirm-password-label',
+                    })}
+                    placeholder={intl.formatMessage({
+                      id: 'pages.register.components.form.name-password.confirm-password-placeholder',
+                    })}
+                    secureTextEntry={true}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    value={value}
+                    error={errors.confirmPassword?.message}
+                  />
+                );
+              }}
+              name={'confirmPassword'}
+            />
+          </React.Fragment>
+        ) : null}
 
         <Gutter size={16} />
 
