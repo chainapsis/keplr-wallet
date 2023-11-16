@@ -92,7 +92,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
       account.bech32Address,
     );
 
-  const unbondings: ViewValidator[] = useMemo(() => {
+  const unbondings: ViewValidator[] = (() => {
     const res = [];
     for (const unbonding of queryUnbondings.unbondings) {
       for (const entry of unbonding.entries) {
@@ -130,17 +130,9 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
       }
     }
     return res;
-  }, [
-    bondedValidators,
-    chainInfo.stakeCurrency,
-    intl,
-    queryUnbondings.unbondings,
-    unbondedValidators,
-    unbondingValidators,
-    validatorsMap,
-  ]);
+  })();
 
-  const delegations: ViewValidator[] = useMemo(() => {
+  const delegations: ViewValidator[] = (() => {
     const res: ViewValidator[] = [];
     for (let delegation of queryDelegations.delegations) {
       const validator = validatorsMap.get(
@@ -170,14 +162,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
       });
     }
     return res;
-  }, [
-    bondedValidators,
-    priceStore,
-    queryDelegations,
-    unbondedValidators,
-    unbondingValidators,
-    validatorsMap,
-  ]);
+  })();
 
   const ValidatorViewData: {
     title: string;
@@ -197,7 +182,9 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
   ];
 
   return (
-    <PageWithScrollView backgroundMode="default">
+    <PageWithScrollView
+      backgroundMode="default"
+      style={style.flatten(['padding-x-12'])}>
       <Box alignX="center" alignY="center" marginTop={21} marginBottom={35}>
         <Box
           borderRadius={16}
