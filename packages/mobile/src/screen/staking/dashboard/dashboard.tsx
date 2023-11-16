@@ -1,11 +1,11 @@
-import React, {FunctionComponent, useMemo} from 'react';
+import React, {FunctionComponent, useEffect, useMemo, useRef} from 'react';
 import {PageWithScrollView} from '../../../components/page';
 
 import {observer} from 'mobx-react-lite';
 import {Text} from 'react-native';
 import {useStore} from '../../../stores';
-import {RouteProp, useRoute} from '@react-navigation/native';
-import {StakeNavigation} from '../../../navigation';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {StackNavProp, StakeNavigation} from '../../../navigation';
 import {Staking} from '@keplr-wallet/stores';
 import {ValidatorItem, ViewValidator} from '../components/validator-item';
 import {useStyle} from '../../../styles';
@@ -21,13 +21,20 @@ import LinearGradient from 'react-native-linear-gradient';
 import {CoinPretty} from '@keplr-wallet/unit';
 import {formatRelativeTime} from '../../../utils/format';
 import {useIntl} from 'react-intl';
+import {formatAprString} from '../../home/utils';
+import {InformationOutlinedIcon} from '../../../components/icon/information-outlined';
+import {Modal} from '../../../components/modal';
+import {InformationModal} from '../../../components/modal/infoModal';
+import {BottomSheetModal} from '@gorhom/bottom-sheet';
 
 export const StakingDashboardScreen: FunctionComponent = observer(() => {
   const {accountStore, queriesStore, priceStore, chainStore} = useStore();
   const style = useStyle();
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.Dashboard'>>();
+  const navigation = useNavigation<StackNavProp>();
+  const infoModalRef = useRef<BottomSheetModal>(null);
+
   const intl = useIntl();
-  // const style = useStyle();
   const {chainId} = route.params;
   const stakbleToken = queriesStore
     .get(chainId)
@@ -39,13 +46,13 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
   const queries = queriesStore.get(chainId);
   const chainInfo = chainStore.getChain(chainId);
 
+  useEffect(() => {
+    navigation.setOptions({title: `Staking on ${chainInfo.chainName}`});
+  }, [chainInfo.chainName, navigation]);
+
   const staked = queries.cosmos.queryDelegations.getQueryBech32Address(
     account.bech32Address,
   ).total;
-  const totalStakedPrice = staked
-    ? priceStore.calculatePrice(staked)
-    : undefined;
-
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
     Staking.BondStatus.Bonded,
   );
@@ -191,17 +198,42 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView backgroundMode="default">
-      <Box
-        alignX="center"
-        padding={20}
-        style={style.flatten(['margin-left-16'])}>
-        <Text style={style.flatten(['h5', 'color-text-high'])}>
+      <Box alignX="center" alignY="center" marginTop={21} marginBottom={35}>
+        <Box
+          borderRadius={16}
+          backgroundColor={style.get('color-gray-600').color}
+          paddingX={12}
+          paddingY={6}>
+          <Text style={style.flatten(['body3', 'color-text-middle'])}>
+            {`APR ${formatAprString(
+              queriesStore.get(chainId).apr.queryApr.apr.apr,
+              2,
+            )}%`}
+          </Text>
+        </Box>
+        <Gutter size={21} />
+        <Box
+          onClick={() => {
+            infoModalRef.current?.present();
+          }}>
+          <Columns sum={1} gutter={4} alignY="center">
+            <Text style={style.flatten(['subtitle3', 'color-text-low'])}>
+              Total staked
+            </Text>
+
+            <InformationOutlinedIcon
+              size={20}
+              color={style.get('color-gray-400').color}
+            />
+          </Columns>
+        </Box>
+
+        <Gutter size={6} />
+        <Text style={style.flatten(['h1', 'color-text-high'])}>
           {staked?.maxDecimals(6).trim(true).shrink(true).toString()}
         </Text>
-        <Text style={style.flatten(['h5', 'color-text-high'])}>
-          {totalStakedPrice?.inequalitySymbol(true).toString()}
-        </Text>
       </Box>
+
       <Box
         padding={16}
         borderRadius={8}
@@ -277,6 +309,12 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
           </React.Fragment>
         );
       })}
+      <Modal ref={infoModalRef} enableDynamicSizing={true}>
+        <InformationModal
+          title="Total staked"
+          paragraph="The total of staked and unstaking amounts"
+        />
+      </Modal>
     </PageWithScrollView>
   );
 });
