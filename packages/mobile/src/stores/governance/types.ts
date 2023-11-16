@@ -1,3 +1,6 @@
+import {DeepReadonly} from 'utility-types';
+import {ProposalV1} from './v1';
+
 // This is not the type for result of query.
 export enum ProposalStatus {
   UNSPECIFIED,
@@ -62,6 +65,13 @@ export type GovProposals = {
   // pagination: {}
 };
 
+export type GovQueryParams = {
+  status?: Proposal['status'];
+  'pagination.offset'?: number;
+  'pagination.limit'?: number;
+  'pagination.reverse'?: boolean;
+};
+
 export type GovParamsDeposit = {
   deposit_params: {
     min_deposit: [
@@ -116,4 +126,12 @@ export type ProposalVoter = {
       },
     ];
   };
+};
+
+export type ViewProposal = {
+  raw: DeepReadonly<Proposal | ProposalV1>;
+  proposalStatus: ProposalStatus;
+  id: string;
+  title: string;
+  description: string;
 };

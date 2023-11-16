@@ -1,7 +1,7 @@
 import {ProposalTallyV1, ProposalV1} from './types';
 import {makeObservable} from 'mobx';
 import {DeepReadonly} from 'utility-types';
-import {ObservableQueryGovernanceV1} from './proposals';
+import {ObservableQueryGovernanceV1Inner} from './proposals';
 import {
   ChainGetter,
   ObservableChainQuery,
@@ -15,7 +15,7 @@ export class ObservableQueryProposalV1 extends ObservableChainQuery<ProposalTall
     chainId: string,
     chainGetter: ChainGetter,
     protected readonly _raw: ProposalV1,
-    protected readonly governance: ObservableQueryGovernanceV1,
+    protected readonly governance: ObservableQueryGovernanceV1Inner,
   ) {
     super(
       sharedContext,

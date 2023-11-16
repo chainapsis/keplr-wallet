@@ -53,14 +53,17 @@ import {SettingGeneralLanguageScreen} from './screen/setting/screens/general/lan
 import {RegisterIntroScreen} from './screen/register/intro';
 import {StakingDashboardScreen} from './screen/staking/dashboard';
 import {RegisterIntroNewUserScreen} from './screen/register/intro-new-user';
+import {NewMnemonicScreen} from './screen/register/new-mnemonic';
+import {VerifyMnemonicScreen} from './screen/register/verify-mnemonic';
 import {RegisterIntroExistingUserScene} from './screen/register/intro-existing-user';
 import {RegisterScreen} from './screen/register';
 import {WebScreen} from './screen/web';
 import {WebpageScreen} from './screen/web/webpage';
-import {NewMnemonicScreen} from './screen/register/new-mnemonic';
 import {GovernanceListScreen} from './screen/governance/list';
 import {GovernanceScreen} from './screen/governance';
 import {ValidatorListScreen} from './screen/staking/vlidator-list';
+import {FinalizeKeyScreen} from './screen/register/finalize-key';
+import {PlainObject} from '@keplr-wallet/background';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -72,7 +75,42 @@ export type RootStackParamList = {
   'Register.Intro': undefined;
   'Register.Intro.NewUser': undefined;
   'Register.NewMnemonic': undefined;
+  'Register.VerifyMnemonic': {
+    mnemonic: string;
+    stepPrevious: number;
+    stepTotal: number;
+  };
   'Register.Intro.ExistingUser': undefined;
+  'Register.FinalizeKey': {
+    name: string;
+    password: string;
+    stepPrevious: number;
+    stepTotal: number;
+    mnemonic?: {
+      value: string;
+      // If mnemonic is not recovered, but newly generated,
+      // it should be set to true.
+      isFresh?: boolean;
+      bip44Path: {
+        account: number;
+        change: number;
+        addressIndex: number;
+      };
+    };
+    privateKey?: {
+      value: Uint8Array;
+      meta: PlainObject;
+    };
+    ledger?: {
+      pubKey: Uint8Array;
+      app: string;
+      bip44Path: {
+        account: number;
+        change: number;
+        addressIndex: number;
+      };
+    };
+  };
   'Register.EnableChain': undefined;
   Send: undefined;
   'Send.SelectAsset': undefined;
@@ -119,7 +157,7 @@ export type StakeNavigation = {
 
 export type GovernanceNavigation = {
   'Governance.intro': undefined;
-  'Governance.list': {chainId: string};
+  'Governance.list': {chainId: string; isGovV1Supported?: boolean};
 };
 
 export type StackNavProp = NativeStackNavigationProp<RootStackParamList>;
@@ -148,6 +186,13 @@ export const RegisterNavigation: FunctionComponent = () => {
         component={RegisterIntroExistingUserScene}
       />
       <Stack.Screen name="Register.NewMnemonic" component={NewMnemonicScreen} />
+
+      <Stack.Screen
+        name="Register.VerifyMnemonic"
+        component={VerifyMnemonicScreen}
+      />
+
+      <Stack.Screen name="Register.FinalizeKey" component={FinalizeKeyScreen} />
 
       <Stack.Screen
         name="Register.EnableChain"
@@ -515,7 +560,6 @@ const StakeNavigation = () => {
   );
 };
 const GovernanceNavigation = () => {
-  const intl = useIntl();
   return (
     <GovernanceStack.Navigator>
       <GovernanceStack.Screen
@@ -529,9 +573,7 @@ const GovernanceNavigation = () => {
       <GovernanceStack.Screen
         name="Governance.list"
         options={{
-          title: intl.formatMessage({
-            id: 'page.wallet.keyring-item.dropdown.delete-wallet-title',
-          }),
+          title: 'Proposals',
           ...defaultHeaderOptions,
         }}
         component={GovernanceListScreen}

@@ -37,11 +37,9 @@ export const StakedTabView: FunctionComponent<{
   }, [stakablesTokenList]);
 
   const navigate = useNavigation<StackNavProp>();
-  const aprList = useMemo(() => {
-    return stakablesTokenList.map(viewToken => {
-      return queriesStore.get(viewToken.chainInfo.chainId).apr.queryApr.apr;
-    });
-  }, [stakablesTokenList, queriesStore]);
+  const aprList = stakablesTokenList.map(
+    viewToken => queriesStore.get(viewToken.chainInfo.chainId).apr.queryApr.apr,
+  );
 
   const delegations: ViewToken[] = useMemo(
     () =>
