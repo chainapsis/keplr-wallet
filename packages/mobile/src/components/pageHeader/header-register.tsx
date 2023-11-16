@@ -9,7 +9,8 @@ import {Box} from '../box';
 export const RegisterHeader: FunctionComponent<{
   title: string;
   paragraph?: string;
-}> = ({title, paragraph}) => {
+  hideBackButton?: boolean;
+}> = ({title, paragraph, hideBackButton}) => {
   const style = useStyle();
   const statusBarHeight = StatusBar.currentHeight;
 
@@ -32,7 +33,7 @@ export const RegisterHeader: FunctionComponent<{
           </React.Fragment>
         ) : null}
 
-        <HeaderBackButton />
+        {hideBackButton ? null : <HeaderBackButton />}
       </Box>
     </SafeAreaView>
   );
