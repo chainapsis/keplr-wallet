@@ -177,9 +177,8 @@ export const StakedTabView: FunctionComponent<{
                     key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                     disabled={!viewToken.chainInfo.walletUrlForStaking}
                     onClick={() => {
-                      navigate.navigate('Stake', {
-                        screen: 'Stake.Dashboard',
-                        params: {chainId: viewToken.chainInfo.chainId},
+                      navigate.navigate('Home.Stake.Dashboard', {
+                        chainId: viewToken.chainInfo.chainId,
                       });
                     }}
                   />
