@@ -1,7 +1,12 @@
 import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {ScrollView, Text} from 'react-native';
-import {RouteProp, useRoute} from '@react-navigation/native';
+import {
+  NavigationProp,
+  RouteProp,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {RootStackParamList} from '../../../navigation';
 import {RegisterContainer} from '../components';
 import {FormattedMessage, useIntl} from 'react-intl';
@@ -22,6 +27,8 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
   const route =
     useRoute<RouteProp<RootStackParamList, 'Register.VerifyMnemonic'>>();
   const modalRef = useRef<BottomSheetModal>(null);
+
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const {
     control,
@@ -93,7 +100,17 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
 
   const onSubmit = handleSubmit(data => {
     if (validate()) {
-      console.log('data', data);
+      navigation.navigate('Register.FinalizeKey', {
+        name: data.name,
+        password: data.password,
+        stepPrevious: route.params.stepPrevious + 1,
+        stepTotal: route.params.stepTotal,
+        mnemonic: {
+          value: route.params.mnemonic,
+          bip44Path: bip44PathState.getPath(),
+          isFresh: true,
+        },
+      });
     }
   });
 
