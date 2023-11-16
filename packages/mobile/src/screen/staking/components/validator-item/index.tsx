@@ -44,13 +44,9 @@ export const ValidatorItem: FunctionComponent<{
       <Box paddingLeft={16} paddingRight={8} paddingY={16} borderRadius={6}>
         <Columns sum={1} alignY="center" gutter={8}>
           <Box>
-            <FastImage
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 9999,
-              }}
-              source={{uri: viewValidator.imageUrl}}
+            <ValidatorImage
+              imageUrl={viewValidator.imageUrl}
+              name={viewValidator.name}
             />
           </Box>
           <Gutter size={12} />
@@ -87,5 +83,41 @@ export const ValidatorItem: FunctionComponent<{
         </Columns>
       </Box>
     </RectButton>
+  );
+};
+
+const ValidatorImage = ({
+  imageUrl,
+  name,
+}: {
+  imageUrl?: string;
+  name?: string;
+}) => {
+  const style = useStyle();
+  return (
+    <React.Fragment>
+      {imageUrl ? (
+        <FastImage
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 9999,
+          }}
+          source={{uri: imageUrl}}
+        />
+      ) : (
+        <Box
+          width={32}
+          height={32}
+          borderRadius={999}
+          alignX="center"
+          alignY="center"
+          backgroundColor={style.get('color-gray-450').color}>
+          <Text style={style.flatten(['subtitle2', 'color-text-high'])}>
+            {name ? name[0].toUpperCase() : null}
+          </Text>
+        </Box>
+      )}
+    </React.Fragment>
   );
 };
