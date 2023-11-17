@@ -281,9 +281,9 @@ export const MainTabNavigation: FunctionComponent = () => {
       <Tab.Screen
         name="Home"
         options={{
-          headerShown: false,
+          header: HomeScreenHeaderFunc,
         }}
-        component={HomeNavigation}
+        component={HomeScreen}
       />
       <Tab.Screen
         name="Web"
@@ -296,28 +296,6 @@ export const MainTabNavigation: FunctionComponent = () => {
         component={SettingNavigation}
       />
     </Tab.Navigator>
-  );
-};
-
-const HomeNavigation = () => {
-  return (
-    <Stack.Navigator initialRouteName="Setting.Intro">
-      <Stack.Screen
-        name="Setting.Intro"
-        options={{
-          header: HomeScreenHeaderFunc,
-        }}
-        component={HomeScreen}
-      />
-      <Stack.Screen
-        name="Home.Stake.Dashboard"
-        options={{
-          title: '',
-          ...defaultHeaderOptions,
-        }}
-        component={StakingDashboardScreen}
-      />
-    </Stack.Navigator>
   );
 };
 
@@ -536,6 +514,14 @@ const StakeNavigation = () => {
   const intl = useIntl();
   return (
     <StakeStack.Navigator>
+      <StakeStack.Screen
+        name="Stake.Dashboard"
+        options={{
+          title: '',
+          ...defaultHeaderOptions,
+        }}
+        component={StakingDashboardScreen}
+      />
       <StakeStack.Screen
         name="Stake.Staking"
         options={{
