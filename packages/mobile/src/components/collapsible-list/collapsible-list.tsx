@@ -13,6 +13,7 @@ import {TextButton} from '../text-button';
 export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
   title,
   items,
+  hideLength,
   lenAlwaysShown,
 }) => {
   if (!lenAlwaysShown || lenAlwaysShown < 0) {
@@ -35,9 +36,11 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
           e.preventDefault();
         }}>
         <Columns sum={1} alignY="center">
-          <Text style={style.flatten(['subtitle3', 'color-text-high'])}>
-            {items.length}
-          </Text>
+          {!hideLength ? (
+            <Text style={style.flatten(['subtitle3', 'color-text-high'])}>
+              {items.length}
+            </Text>
+          ) : null}
           <Gutter size={4} />
           {title}
         </Columns>

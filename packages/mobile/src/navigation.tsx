@@ -60,12 +60,16 @@ import {WebScreen} from './screen/web';
 import {WebpageScreen} from './screen/web/webpage';
 import {GovernanceListScreen} from './screen/governance/list';
 import {GovernanceScreen} from './screen/governance';
+import {ValidatorListScreen} from './screen/staking/vlidator-list';
 import {FinalizeKeyScreen} from './screen/register/finalize-key';
 import {PlainObject} from '@keplr-wallet/background';
 import {EnableChainsScreen} from './screen/register/enable-chains';
 
 export type RootStackParamList = {
   Home: undefined;
+  'Home.Main': undefined;
+  'Home.Stake.Dashboard': {chainId: string};
+
   Register: undefined;
   'Register.Temp': undefined;
   'Register.Intro': undefined;
@@ -277,9 +281,9 @@ export const MainTabNavigation: FunctionComponent = () => {
       <Tab.Screen
         name="Home"
         options={{
-          header: HomeScreenHeaderFunc,
+          headerShown: false,
         }}
-        component={HomeScreen}
+        component={HomeNavigation}
       />
       <Tab.Screen
         name="Web"
@@ -292,6 +296,28 @@ export const MainTabNavigation: FunctionComponent = () => {
         component={SettingNavigation}
       />
     </Tab.Navigator>
+  );
+};
+
+const HomeNavigation = () => {
+  return (
+    <Stack.Navigator initialRouteName="Setting.Intro">
+      <Stack.Screen
+        name="Setting.Intro"
+        options={{
+          header: HomeScreenHeaderFunc,
+        }}
+        component={HomeScreen}
+      />
+      <Stack.Screen
+        name="Home.Stake.Dashboard"
+        options={{
+          title: '',
+          ...defaultHeaderOptions,
+        }}
+        component={StakingDashboardScreen}
+      />
+    </Stack.Navigator>
   );
 };
 
@@ -511,14 +537,6 @@ const StakeNavigation = () => {
   return (
     <StakeStack.Navigator>
       <StakeStack.Screen
-        name="Stake.Dashboard"
-        options={{
-          title: '',
-          ...defaultHeaderOptions,
-        }}
-        component={StakingDashboardScreen}
-      />
-      <StakeStack.Screen
         name="Stake.Staking"
         options={{
           title: intl.formatMessage({
@@ -546,7 +564,7 @@ const StakeNavigation = () => {
           }),
           ...defaultHeaderOptions,
         }}
-        component={WalletChangeNameScreen}
+        component={ValidatorListScreen}
       />
     </StakeStack.Navigator>
   );

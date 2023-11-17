@@ -19,6 +19,7 @@ import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../navigation';
 import {SelectStakingChainModal} from './components/stakeing-chain-select-modal';
 import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
+import {formatRelativeTime} from '../../utils/format';
 
 const zeroDec = new Dec(0);
 
@@ -150,11 +151,8 @@ export const StakedTabView: FunctionComponent<{
                         !viewToken.viewToken.chainInfo.walletUrlForStaking
                       }
                       onClick={() => {
-                        navigate.navigate('Stake', {
-                          screen: 'Stake.Dashboard',
-                          params: {
-                            chainId: viewToken.viewToken.chainInfo.chainId,
-                          },
+                        navigate.navigate('Home.Stake.Dashboard', {
+                          chainId: viewToken.viewToken.chainInfo.chainId,
                         });
                       }}
                       altSentence={viewToken.altSentence}
@@ -174,9 +172,8 @@ export const StakedTabView: FunctionComponent<{
                     key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                     disabled={!viewToken.chainInfo.walletUrlForStaking}
                     onClick={() => {
-                      navigate.navigate('Stake', {
-                        screen: 'Stake.Dashboard',
-                        params: {chainId: viewToken.chainInfo.chainId},
+                      navigate.navigate('Home.Stake.Dashboard', {
+                        chainId: viewToken.chainInfo.chainId,
                       });
                     }}
                   />
@@ -227,47 +224,3 @@ export const StakedTabView: FunctionComponent<{
     </React.Fragment>
   );
 });
-
-function formatRelativeTime(time: string): {
-  unit: 'minute' | 'hour' | 'day';
-  value: number;
-} {
-  const remaining = new Date(time).getTime() - Date.now();
-  if (remaining <= 0) {
-    return {
-      unit: 'minute',
-      value: 1,
-    };
-  }
-
-  const remainingSeconds = remaining / 1000;
-  const remainingMinutes = remainingSeconds / 60;
-  if (remainingMinutes < 1) {
-    return {
-      unit: 'minute',
-      value: 1,
-    };
-  }
-
-  const remainingHours = remainingMinutes / 60;
-  const remainingDays = remainingHours / 24;
-
-  if (remainingDays >= 1) {
-    return {
-      unit: 'day',
-      value: Math.ceil(remainingDays),
-    };
-  }
-
-  if (remainingHours >= 1) {
-    return {
-      unit: 'hour',
-      value: Math.ceil(remainingHours),
-    };
-  }
-
-  return {
-    unit: 'minute',
-    value: Math.ceil(remainingMinutes),
-  };
-}
