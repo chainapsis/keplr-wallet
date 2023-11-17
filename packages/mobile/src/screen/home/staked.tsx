@@ -151,8 +151,11 @@ export const StakedTabView: FunctionComponent<{
                         !viewToken.viewToken.chainInfo.walletUrlForStaking
                       }
                       onClick={() => {
-                        navigate.navigate('Home.Stake.Dashboard', {
-                          chainId: viewToken.viewToken.chainInfo.chainId,
+                        navigate.navigate('Stake', {
+                          screen: 'Stake.Dashboard',
+                          params: {
+                            chainId: viewToken.viewToken.chainInfo.chainId,
+                          },
                         });
                       }}
                       altSentence={viewToken.altSentence}
@@ -172,8 +175,11 @@ export const StakedTabView: FunctionComponent<{
                     key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                     disabled={!viewToken.chainInfo.walletUrlForStaking}
                     onClick={() => {
-                      navigate.navigate('Home.Stake.Dashboard', {
-                        chainId: viewToken.chainInfo.chainId,
+                      navigate.navigate('Stake', {
+                        screen: 'Stake.Dashboard',
+                        params: {
+                          chainId: viewToken.chainInfo.chainId,
+                        },
                       });
                     }}
                   />
