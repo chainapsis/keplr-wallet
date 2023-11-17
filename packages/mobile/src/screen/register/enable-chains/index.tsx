@@ -46,7 +46,7 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
 
   const {
     vaultId,
-    candidateAddresses: propCandiateAddresses,
+    candidateAddresses: propCandidateAddresses,
     isFresh,
     skipWelcome,
     initialSearchValue,
@@ -64,7 +64,7 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
         address: string;
       }[];
     }[]
-  >(propCandiateAddresses ?? []);
+  >(propCandidateAddresses ?? []);
 
   const keyType = useMemo(() => {
     const keyInfo = keyRingStore.keyInfos.find(
