@@ -99,9 +99,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
         if (!chainInfo.stakeCurrency) {
           continue;
         }
-        if (!chainInfo.stakeCurrency) {
-          continue;
-        }
+
         const validator = validatorsMap.get(unbonding.validator_address);
         if (!validator) {
           continue;
@@ -273,6 +271,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
             <Gutter size={12} />
             <CollapsibleList
               title={<TokenTitleView title={title} />}
+              hideLength={true}
               lenAlwaysShown={lenAlwaysShown}
               items={validators.map(validator => {
                 return (

@@ -5,8 +5,8 @@ import LottieView from 'lottie-react-native';
 import {useStore} from '../../../stores';
 import {WalletStatus} from '@keplr-wallet/stores';
 import {useEffectOnce} from '../../../hooks';
-import {RouteProp, useRoute} from '@react-navigation/native';
-import {RootStackParamList} from '../../../navigation';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {RootStackParamList, StackNavProp} from '../../../navigation';
 
 export const FinalizeKeyScreen: FunctionComponent = observer(() => {
   const {chainStore, accountStore, queriesStore, keyRingStore} = useStore();
@@ -21,6 +21,7 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
     stepPrevious,
     stepTotal,
   } = route.params;
+  const navigation = useNavigation<StackNavProp>();
 
   // Effects depends on below state and these should be called once if length > 0.
   // Thus, you should set below state only once.
@@ -225,11 +226,27 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
       isAnimEnded
     ) {
       onceRef.current = true;
+
+      navigation.reset({
+        routes: [
+          {
+            name: 'Register.EnableChain',
+            params: {
+              vaultId,
+              candidateAddresses,
+              isFresh: mnemonic?.isFresh ?? false,
+              stepPrevious: stepPrevious,
+              stepTotal: stepTotal,
+            },
+          },
+        ],
+      });
     }
   }, [
     candidateAddresses,
     isAnimEnded,
     mnemonic?.isFresh,
+    navigation,
     stepPrevious,
     stepTotal,
     vaultId,
