@@ -178,7 +178,10 @@ export class MockKeplr implements Keplr {
     throw new Error("Not implemented");
   }
 
-  getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner {
+  getOfflineSigner(
+    chainId: string,
+    _?: KeplrSignOptions
+  ): OfflineAminoSigner & OfflineDirectSigner {
     return new CosmJSOfflineSigner(chainId, this);
   }
 
@@ -287,12 +290,16 @@ export class MockKeplr implements Keplr {
   }
 
   getOfflineSignerAuto(
-    _chainId: string
+    _chainId: string,
+    _?: KeplrSignOptions
   ): Promise<OfflineAminoSigner | OfflineDirectSigner> {
     throw new Error("Not implemented");
   }
 
-  getOfflineSignerOnlyAmino(chainId: string): OfflineAminoSigner {
+  getOfflineSignerOnlyAmino(
+    chainId: string,
+    _?: KeplrSignOptions
+  ): OfflineAminoSigner {
     return new CosmJSOfflineSignerOnlyAmino(chainId, this);
   }
 

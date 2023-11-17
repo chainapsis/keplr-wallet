@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useMemo, useRef, useState } from "react";
-import { SignEthereumInteractionStore } from "@keplr-wallet/stores";
+import { SignEthereumInteractionStore } from "@keplr-wallet/stores-core";
 import { Box } from "../../../components/box";
 import { XAxis } from "../../../components/axis";
 import { Body2, Body3, H5 } from "../../../components/typography";
@@ -195,11 +195,8 @@ export const EthereumSigningView: FunctionComponent<{
             </Body3>
             <Gutter direction="horizontal" size="0.5rem" />
             <ChainImageFallback
-              style={{
-                width: "1.25rem",
-                height: "1.25rem",
-              }}
-              src={chainInfo.chainSymbolImageUrl}
+              size="1.25rem"
+              chainInfo={chainInfo}
               alt={chainInfo.chainName}
             />
           </XAxis>

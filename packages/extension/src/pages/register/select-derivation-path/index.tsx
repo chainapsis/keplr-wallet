@@ -29,6 +29,8 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useNavigate } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
+import { AppCurrency } from "@keplr-wallet/types";
+import { CoinPretty } from "@keplr-wallet/unit";
 
 export const SelectDerivationPathScene: FunctionComponent<{
   // 한 scene 당 하나의 chain id만 다룬다.
@@ -95,6 +97,8 @@ export const SelectDerivationPathScene: FunctionComponent<{
       });
   }, [chainId, keyRingStore, vaultId]);
 
+  const currency = chainInfo.stakeCurrency || chainInfo.currencies[0];
+
   return (
     <RegisterSceneBox>
       <YAxis alignX="center">
@@ -131,10 +135,7 @@ export const SelectDerivationPathScene: FunctionComponent<{
         >
           <Columns sum={1} gutter="0.5rem">
             <Box width="2.75rem" height="2.75rem">
-              <ChainImageFallback
-                alt="chain-image"
-                src={chainInfo.chainSymbolImageUrl}
-              />
+              <ChainImageFallback chainInfo={chainInfo} size="2.75rem" />
             </Box>
 
             <Stack gutter="0.25rem">
@@ -154,7 +155,7 @@ export const SelectDerivationPathScene: FunctionComponent<{
                     : ColorPalette["gray-200"]
                 }
               >
-                {chainInfo.stakeCurrency.coinDenom}
+                {currency.coinDenom}
               </Body2>
             </Stack>
           </Columns>
@@ -169,6 +170,7 @@ export const SelectDerivationPathScene: FunctionComponent<{
               chainId={chainId}
               coinType={candidate.coinType}
               bech32Address={candidate.bech32Address}
+              currency={currency}
               isSelected={selectedCoinType === candidate.coinType}
               onClick={() => {
                 setSelectedCoinType(candidate.coinType);
@@ -233,124 +235,135 @@ const PathItem: FunctionComponent<{
   isSelected: boolean;
   coinType: number;
   bech32Address: string;
+  currency: AppCurrency;
 
   onClick: () => void;
-}> = observer(({ chainId, isSelected, coinType, bech32Address, onClick }) => {
-  const { queriesStore } = useStore();
+}> = observer(
+  ({ chainId, isSelected, coinType, bech32Address, currency, onClick }) => {
+    const { queriesStore } = useStore();
 
-  const queries = queriesStore.get(chainId);
+    const queries = queriesStore.get(chainId);
 
-  const theme = useTheme();
+    const theme = useTheme();
 
-  return (
-    <Styles.ItemContainer
-      isSelected={isSelected}
-      onClick={(e) => {
-        e.preventDefault();
+    return (
+      <Styles.ItemContainer
+        isSelected={isSelected}
+        onClick={(e) => {
+          e.preventDefault();
 
-        onClick();
-      }}
-    >
-      <Stack gutter="1rem">
-        <Columns sum={1} alignY="center" gutter="1rem">
+          onClick();
+        }}
+      >
+        <Stack gutter="1rem">
+          <Columns sum={1} alignY="center" gutter="1rem">
+            <Box
+              padding="0.5rem"
+              style={{
+                color:
+                  theme.mode === "light"
+                    ? ColorPalette["gray-600"]
+                    : ColorPalette["gray-10"],
+              }}
+            >
+              <WalletIcon width="1.25rem" height="1.25rem" />
+            </Box>
+
+            <Stack gutter="0.25rem">
+              <H5>m/44’/{coinType}’</H5>
+              <Body2
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-400"]
+                    : ColorPalette["gray-200"]
+                }
+              >
+                {Bech32Address.shortenAddress(bech32Address, 24)}
+              </Body2>
+            </Stack>
+          </Columns>
+
           <Box
-            padding="0.5rem"
             style={{
-              color:
+              border: `1px solid ${
                 theme.mode === "light"
-                  ? ColorPalette["gray-600"]
-                  : ColorPalette["gray-10"],
+                  ? ColorPalette["gray-100"]
+                  : ColorPalette["gray-400"]
+              }`,
             }}
-          >
-            <WalletIcon width="1.25rem" height="1.25rem" />
-          </Box>
+          />
 
           <Stack gutter="0.25rem">
-            <H5>m/44’/{coinType}’</H5>
-            <Body2
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-400"]
-                  : ColorPalette["gray-200"]
-              }
-            >
-              {Bech32Address.shortenAddress(bech32Address, 24)}
-            </Body2>
+            <Columns sum={1} alignY="center">
+              <Subtitle3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-500"]
+                    : ColorPalette["gray-50"]
+                }
+              >
+                <FormattedMessage id="pages.register.select-derivation-path.path-item.balance" />
+              </Subtitle3>
+              <Column weight={1}>
+                <YAxis alignX="right">
+                  <Subtitle3
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-500"]
+                        : ColorPalette["gray-50"]
+                    }
+                  >
+                    {(() => {
+                      const queryBal = queries.queryBalances
+                        .getQueryBech32Address(bech32Address)
+                        .getBalance(currency);
+
+                      if (queryBal) {
+                        return queryBal.balance;
+                      }
+                      return new CoinPretty(currency, "0");
+                    })()
+                      .trim(true)
+                      .maxDecimals(6)
+                      .inequalitySymbol(true)
+                      .shrink(true)
+                      .toString()}
+                  </Subtitle3>
+                </YAxis>
+              </Column>
+            </Columns>
+
+            <Columns sum={1} alignY="center">
+              <Subtitle3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-500"]
+                    : ColorPalette["gray-50"]
+                }
+              >
+                <FormattedMessage id="pages.register.select-derivation-path.path-item.previous-txs" />
+              </Subtitle3>
+              <Column weight={1}>
+                <YAxis alignX="right">
+                  <Subtitle3
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-500"]
+                        : ColorPalette["gray-50"]
+                    }
+                  >
+                    {
+                      queries.cosmos.queryAccount.getQueryBech32Address(
+                        bech32Address
+                      ).sequence
+                    }
+                  </Subtitle3>
+                </YAxis>
+              </Column>
+            </Columns>
           </Stack>
-        </Columns>
-
-        <Box
-          style={{
-            border: `1px solid ${
-              theme.mode === "light"
-                ? ColorPalette["gray-100"]
-                : ColorPalette["gray-400"]
-            }`,
-          }}
-        />
-
-        <Stack gutter="0.25rem">
-          <Columns sum={1} alignY="center">
-            <Subtitle3
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-500"]
-                  : ColorPalette["gray-50"]
-              }
-            >
-              <FormattedMessage id="pages.register.select-derivation-path.path-item.balance" />
-            </Subtitle3>
-            <Column weight={1}>
-              <YAxis alignX="right">
-                <Subtitle3
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-500"]
-                      : ColorPalette["gray-50"]
-                  }
-                >
-                  {queries.queryBalances
-                    .getQueryBech32Address(bech32Address)
-                    .stakable.balance.trim(true)
-                    .maxDecimals(6)
-                    .inequalitySymbol(true)
-                    .shrink(true)
-                    .toString()}
-                </Subtitle3>
-              </YAxis>
-            </Column>
-          </Columns>
-
-          <Columns sum={1} alignY="center">
-            <Subtitle3
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-500"]
-                  : ColorPalette["gray-50"]
-              }
-            >
-              <FormattedMessage id="pages.register.select-derivation-path.path-item.previous-txs" />
-            </Subtitle3>
-            <Column weight={1}>
-              <YAxis alignX="right">
-                <Subtitle3
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-500"]
-                      : ColorPalette["gray-50"]
-                  }
-                >
-                  {
-                    queries.cosmos.queryAccount.getQueryBech32Address(
-                      bech32Address
-                    ).sequence
-                  }
-                </Subtitle3>
-              </YAxis>
-            </Column>
-          </Columns>
         </Stack>
-      </Stack>
-    </Styles.ItemContainer>
-  );
-});
+      </Styles.ItemContainer>
+    );
+  }
+);

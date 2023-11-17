@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package ibc.core.channel.v1;
 
-option go_package = "github.com/cosmos/ibc-go/v2/modules/core/04-channel/types";
+option go_package = "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types";
 
 import "gogoproto/gogo.proto";
 import "ibc/core/client/v1/client.proto";
@@ -21,7 +21,7 @@ message Channel {
   Counterparty counterparty = 3 [(gogoproto.nullable) = false];
   // list of connection identifiers, in order, along which packets sent on
   // this channel will travel
-  repeated string connection_hops = 4 [(gogoproto.moretags) = "yaml:\"connection_hops\""];
+  repeated string connection_hops = 4;
   // opaque channel version, which is agreed upon during the handshake
   string version = 5;
 }
@@ -39,7 +39,7 @@ message IdentifiedChannel {
   Counterparty counterparty = 3 [(gogoproto.nullable) = false];
   // list of connection identifiers, in order, along which packets sent on
   // this channel will travel
-  repeated string connection_hops = 4 [(gogoproto.moretags) = "yaml:\"connection_hops\""];
+  repeated string connection_hops = 4;
   // opaque channel version, which is agreed upon during the handshake
   string version = 5;
   // port identifier
@@ -85,9 +85,9 @@ message Counterparty {
   option (gogoproto.goproto_getters) = false;
 
   // port on the counterparty chain which owns the other end of the channel.
-  string port_id = 1 [(gogoproto.moretags) = "yaml:\"port_id\""];
+  string port_id = 1;
   // channel end on the counterparty chain
-  string channel_id = 2 [(gogoproto.moretags) = "yaml:\"channel_id\""];
+  string channel_id = 2;
 }
 
 // Packet defines a type that carries data across different chains through IBC
@@ -99,20 +99,19 @@ message Packet {
   // with a later sequence number.
   uint64 sequence = 1;
   // identifies the port on the sending chain.
-  string source_port = 2 [(gogoproto.moretags) = "yaml:\"source_port\""];
+  string source_port = 2;
   // identifies the channel end on the sending chain.
-  string source_channel = 3 [(gogoproto.moretags) = "yaml:\"source_channel\""];
+  string source_channel = 3;
   // identifies the port on the receiving chain.
-  string destination_port = 4 [(gogoproto.moretags) = "yaml:\"destination_port\""];
+  string destination_port = 4;
   // identifies the channel end on the receiving chain.
-  string destination_channel = 5 [(gogoproto.moretags) = "yaml:\"destination_channel\""];
+  string destination_channel = 5;
   // actual opaque bytes transferred directly to the application module
   bytes data = 6;
   // block height after which the packet times out
-  ibc.core.client.v1.Height timeout_height = 7
-      [(gogoproto.moretags) = "yaml:\"timeout_height\"", (gogoproto.nullable) = false];
+  ibc.core.client.v1.Height timeout_height = 7 [(gogoproto.nullable) = false];
   // block timestamp (in nanoseconds) after which the packet times out
-  uint64 timeout_timestamp = 8 [(gogoproto.moretags) = "yaml:\"timeout_timestamp\""];
+  uint64 timeout_timestamp = 8;
 }
 
 // PacketState defines the generic type necessary to retrieve and store
@@ -123,13 +122,27 @@ message PacketState {
   option (gogoproto.goproto_getters) = false;
 
   // channel port identifier.
-  string port_id = 1 [(gogoproto.moretags) = "yaml:\"port_id\""];
+  string port_id = 1;
   // channel unique identifier.
-  string channel_id = 2 [(gogoproto.moretags) = "yaml:\"channel_id\""];
+  string channel_id = 2;
   // packet sequence.
   uint64 sequence = 3;
   // embedded data that represents packet state.
   bytes data = 4;
+}
+
+// PacketId is an identifer for a unique Packet
+// Source chains refer to packets by source port/channel
+// Destination chains refer to packets by destination port/channel
+message PacketId {
+  option (gogoproto.goproto_getters) = false;
+
+  // channel port identifier
+  string port_id = 1;
+  // channel unique identifier
+  string channel_id = 2;
+  // packet sequence
+  uint64 sequence = 3;
 }
 
 // Acknowledgement is the recommended acknowledgement format to be used by
@@ -145,4 +158,14 @@ message Acknowledgement {
     bytes  result = 21;
     string error  = 22;
   }
+}
+
+// Timeout defines an execution deadline structure for 04-channel handlers.
+// This includes packet lifecycle handlers as well as the upgrade handshake handlers.
+// A valid Timeout contains either one or both of a timestamp and block height (sequence).
+message Timeout {
+  // block height after which the packet or upgrade times out
+  ibc.core.client.v1.Height height = 1 [(gogoproto.nullable) = false];
+  // block timestamp (in nanoseconds) after which the packet or upgrade times out
+  uint64 timestamp = 2;
 }

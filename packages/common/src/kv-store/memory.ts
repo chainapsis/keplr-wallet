@@ -4,8 +4,10 @@ import { KVStoreProvider } from "./interface";
 class MemoryKVStoreProvider implements KVStoreProvider {
   private store: { [key: string]: any } = {};
 
-  get() {
-    return Promise.resolve(this.store);
+  get(key: string) {
+    return Promise.resolve({
+      [key]: this.store[key],
+    });
   }
 
   set(items: { [key: string]: any }) {

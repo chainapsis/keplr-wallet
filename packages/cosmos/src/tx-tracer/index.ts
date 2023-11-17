@@ -48,6 +48,7 @@ export class TendermintTxTracer {
     this.ws.onopen = this.onOpen;
     this.ws.onmessage = this.onMessage;
     this.ws.onclose = this.onClose;
+    this.ws.onerror = this.onError;
   }
 
   protected getWsEndpoint(): string {
@@ -187,6 +188,13 @@ export class TendermintTxTracer {
     for (const listener of this.listeners.close ?? []) {
       listener(e);
     }
+  };
+
+  protected readonly onError = (e: Event) => {
+    for (const listener of this.listeners.error ?? []) {
+      listener(e);
+    }
+    this.close();
   };
 
   /**

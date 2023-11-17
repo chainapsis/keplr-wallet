@@ -117,9 +117,14 @@ export class ChainsUpdateService {
 
     let updated1 = false;
     if (!chainInfo.updateFromRepoDisabled) {
-      updated1 = await this.chainsService.tryUpdateChainInfoFromRepo(
-        chainIdentifier
-      );
+      try {
+        updated1 = await this.chainsService.tryUpdateChainInfoFromRepo(
+          chainIdentifier
+        );
+      } catch (e) {
+        console.log(e);
+        // Ignore error to proceed to tryUpdateChainInfoFromRpcOrRest if it fails.
+      }
     }
 
     const updated2 = await this.chainsService.tryUpdateChainInfoFromRpcOrRest(

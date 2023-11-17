@@ -88,11 +88,15 @@ export class AnalyticsService {
         v2: true,
       })
     ).toString("base64");
-    await simpleFetch(KEPLR_EXT_ANALYTICS_API_URL, `/log?msg=${loggingMsg}`, {
-      headers: {
-        Authorization: KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN,
-      },
-    });
+    await simpleFetch(
+      KEPLR_EXT_ANALYTICS_API_URL,
+      `/log?msg=${encodeURIComponent(loggingMsg)}`,
+      {
+        headers: {
+          Authorization: KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN,
+        },
+      }
+    );
   }
 
   logEventIgnoreError(

@@ -187,7 +187,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
               const interactions = interactionStore.getAllData("unlock");
               (async () => {
                 try {
-                  interactionStore.approveWithProceedNextV2(
+                  await interactionStore.approveWithProceedNextV2(
                     interactions.map((interaction) => interaction.id),
                     {},
                     (proceedNext) => {
@@ -198,6 +198,16 @@ export const UnlockPage: FunctionComponent = observer(() => {
                       } else {
                         keyRingStore.refreshKeyRingStatus();
                       }
+                    },
+                    {
+                      // XXX: popup UI 본체에서 unlock이 되었을 경우
+                      //      interaction data가 빠른 시간 안에 전달되지 않아서 proceedNext가 무조건 false로 처리되는 문제가 있다.
+                      //      popup UI 에서 unlock되면 바로 main page로 가면서
+                      //      background에 popup UI가 많은 요청을 하기 때문에
+                      //      background에서 바빠서 빠르게 interaction data를 처리하지 못하는 것 같다.
+                      //      이 문제로 인해서 일단 popup UI에서 unlock이 되었을 경우에는
+                      //      unlock interaction이 이후의 interaction을 기다리지 않고 바로 닫히도록 만든다.
+                      postDelay: 0,
                     }
                   );
                 } catch (e) {

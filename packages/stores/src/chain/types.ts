@@ -34,14 +34,16 @@ export interface IChainInfoImpl<C extends ChainInfo = ChainInfo> {
       | string
       | ((coinMinimalDenom: string) => boolean | null | undefined)
   ): AppCurrency | undefined;
+  findCurrencyAsync(coinMinimalDenom: string): Promise<AppCurrency | undefined>;
   forceFindCurrency(coinMinimalDenom: string): AppCurrency;
   hasFeature(feature: string): boolean;
   removeCurrencies(...coinMinimalDenoms: string[]): void;
   addCurrencies(...currencies: AppCurrency[]): void;
+  isCurrencyRegistrationInProgress(coinMinimalDenom: string): boolean;
   readonly embedded: C;
   readonly chainId: string;
   readonly chainIdentifier: string;
-  readonly stakeCurrency: Currency;
+  readonly stakeCurrency: Currency | undefined;
   readonly currencies: AppCurrency[];
   readonly alternativeBIP44s: BIP44[] | undefined;
   readonly bech32Config: Bech32Config;

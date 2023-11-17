@@ -12,6 +12,14 @@ import {
   MsgDelegate,
   MsgUndelegate,
   MsgBeginRedelegate,
+  MsgUnbondValidator,
+  MsgCancelUnbondingDelegation,
+  MsgTokenizeShares,
+  MsgRedeemTokensForShares,
+  MsgTransferTokenizeShareRecord,
+  MsgDisableTokenizeShares,
+  MsgEnableTokenizeShares,
+  MsgValidatorBond,
 } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
 import {
   MsgExec,
@@ -28,10 +36,33 @@ import {
   MsgInstantiateContract,
 } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
 import { MsgTransfer } from "@keplr-wallet/proto-types/ibc/applications/transfer/v1/tx";
+import {
+  MsgPayPacketFee,
+  MsgPayPacketFeeAsync,
+  MsgRegisterPayee,
+  MsgRegisterCounterpartyPayee,
+} from "@keplr-wallet/proto-types/ibc/applications/fee/v1/tx";
 import { UnknownMessage } from "./unknown";
 import { GenericAuthorization } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/authz";
 import { StakeAuthorization } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/authz";
 import { SendAuthorization } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/authz";
+import {
+  MsgLiquidStake,
+  MsgLSMLiquidStake,
+  MsgRedeemStake,
+  MsgRegisterHostZone,
+  MsgClaimUndelegatedTokens,
+  MsgRebalanceValidators,
+  MsgAddValidators,
+  MsgChangeValidatorWeight,
+  MsgDeleteValidator,
+  MsgRestoreInterchainAccount,
+  MsgUpdateValidatorSharesExchRate,
+  MsgCalibrateDelegation,
+  MsgClearBalance,
+  MsgUndelegateHost,
+  MsgUpdateInnerRedemptionRateBounds,
+} from "@keplr-wallet/proto-types/stride/stakeibc/tx";
 import { Buffer } from "buffer/";
 
 export * from "./unknown";
@@ -197,6 +228,38 @@ defaultProtoCodec.registerAny(
   MsgBeginRedelegate
 );
 defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgUnbondValidator",
+  MsgUnbondValidator
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgCancelUnbondingDelegation",
+  MsgCancelUnbondingDelegation
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgTokenizeShares",
+  MsgTokenizeShares
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgRedeemTokensForShares",
+  MsgRedeemTokensForShares
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgTransferTokenizeShareRecord",
+  MsgTransferTokenizeShareRecord
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgDisableTokenizeShares",
+  MsgDisableTokenizeShares
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgEnableTokenizeShares",
+  MsgEnableTokenizeShares
+);
+defaultProtoCodec.registerAny(
+  "/cosmos.staking.v1beta1.MsgValidatorBond",
+  MsgValidatorBond
+);
+defaultProtoCodec.registerAny(
   "/cosmwasm.wasm.v1.MsgExecuteContract",
   MsgExecuteContract
 );
@@ -216,6 +279,22 @@ defaultProtoCodec.registerAny(
   "/ibc.applications.transfer.v1.MsgTransfer",
   MsgTransfer
 );
+defaultProtoCodec.registerAny(
+  "/ibc.applications.fee.v1.MsgPayPacketFee",
+  MsgPayPacketFee
+);
+defaultProtoCodec.registerAny(
+  "/ibc.applications.fee.v1.MsgPayPacketFeeAsync",
+  MsgPayPacketFeeAsync
+);
+defaultProtoCodec.registerAny(
+  "/ibc.applications.fee.v1.MsgRegisterPayee",
+  MsgRegisterPayee
+);
+defaultProtoCodec.registerAny(
+  "/ibc.applications.fee.v1.MsgRegisterCounterpartyPayee",
+  MsgRegisterCounterpartyPayee
+);
 defaultProtoCodec.registerAny("/cosmos.gov.v1beta1.MsgVote", MsgVote);
 defaultProtoCodec.registerAny("/cosmos.authz.v1beta1.MsgGrant", MsgGrant);
 // ----- Authz grants -----
@@ -234,3 +313,65 @@ defaultProtoCodec.registerAny(
 // ----- Authz grants -----
 defaultProtoCodec.registerAny("/cosmos.authz.v1beta1.MsgRevoke", MsgRevoke);
 defaultProtoCodec.registerAny("/cosmos.authz.v1beta1.MsgExec", MsgExec);
+
+// Stride
+defaultProtoCodec.registerAny(
+  "/stride.stakeibc.MsgLiquidStake",
+  MsgLiquidStake
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakeibc.MsgLSMLiquidStake",
+  MsgLSMLiquidStake
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakeibc.MsgRedeemStake",
+  MsgRedeemStake
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakeibc.MsgRegisterHostZone",
+  MsgRegisterHostZone
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakeibc.MsgClaimUndelegatedTokens",
+  MsgClaimUndelegatedTokens
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakeibc.MsgRebalanceValidators",
+  MsgRebalanceValidators
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakeibc.MsgAddValidators",
+  MsgAddValidators
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakeibc.MsgChangeValidatorWeight",
+  MsgChangeValidatorWeight
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakeibc.MsgDeleteValidator",
+  MsgDeleteValidator
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakeibc.MsgRestoreInterchainAccount",
+  MsgRestoreInterchainAccount
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakeibc.MsgUpdateValidatorSharesExchRate",
+  MsgUpdateValidatorSharesExchRate
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakeibc.MsgCalibrateDelegation",
+  MsgCalibrateDelegation
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakeibc.MsgClearBalance",
+  MsgClearBalance
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakeibc.MsgUndelegateHost",
+  MsgUndelegateHost
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakeibc.MsgUpdateInnerRedemptionRateBounds",
+  MsgUpdateInnerRedemptionRateBounds
+);

@@ -35,6 +35,9 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
   }
 
   protected override canFetch(): boolean {
+    if (!this.chainGetter.getChain(this.chainId).stakeCurrency) {
+      return false;
+    }
     // If bech32 address is empty, it will always fail, so don't need to fetch it.
     return this.bech32Address.length > 0;
   }
@@ -105,12 +108,17 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
   );
 
   @computed
-  get stakableReward(): CoinPretty {
+  get stakableReward(): CoinPretty | undefined {
     const chainInfo = this.chainGetter.getChain(this.chainId);
+
+    if (!chainInfo.stakeCurrency) {
+      return;
+    }
 
     const r = this.rewards.find((r) => {
       return (
-        r.currency.coinMinimalDenom === chainInfo.stakeCurrency.coinMinimalDenom
+        r.currency.coinMinimalDenom ===
+        chainInfo.stakeCurrency?.coinMinimalDenom
       );
     });
 
@@ -118,14 +126,18 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
   }
 
   readonly getStakableRewardOf = computedFn(
-    (validatorAddress: string): CoinPretty => {
+    (validatorAddress: string): CoinPretty | undefined => {
       const chainInfo = this.chainGetter.getChain(this.chainId);
+
+      if (!chainInfo.stakeCurrency) {
+        return;
+      }
 
       const valRewards = this.getRewardsOf(validatorAddress);
       const r = valRewards.find((r) => {
         return (
           r.currency.coinMinimalDenom ===
-          chainInfo.stakeCurrency.coinMinimalDenom
+          chainInfo.stakeCurrency?.coinMinimalDenom
         );
       });
 
@@ -139,7 +151,8 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
 
     return this.rewards.filter((r) => {
       return (
-        r.currency.coinMinimalDenom !== chainInfo.stakeCurrency.coinMinimalDenom
+        r.currency.coinMinimalDenom !==
+        chainInfo.stakeCurrency?.coinMinimalDenom
       );
     });
   }
@@ -149,7 +162,8 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
       return this.getRewardsOf(validatorAddress).filter((r) => {
         return (
           r.currency.coinMinimalDenom !==
-          this.chainGetter.getChain(this.chainId).stakeCurrency.coinMinimalDenom
+          this.chainGetter.getChain(this.chainId).stakeCurrency
+            ?.coinMinimalDenom
         );
       });
     }
@@ -190,15 +204,19 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
 
       const chainInfo = this.chainGetter.getChain(this.chainId);
 
+      if (!chainInfo.stakeCurrency) {
+        return [];
+      }
+
       const rewards = this.response.data.rewards?.slice() ?? [];
       rewards.sort((reward1, reward2) => {
         const amount1 = StoreUtils.getBalanceFromCurrency(
-          chainInfo.stakeCurrency,
+          chainInfo.stakeCurrency!,
           reward1.reward ?? []
         );
 
         const amount2 = StoreUtils.getBalanceFromCurrency(
-          chainInfo.stakeCurrency,
+          chainInfo.stakeCurrency!,
           reward2.reward ?? []
         );
 

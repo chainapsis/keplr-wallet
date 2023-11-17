@@ -35,6 +35,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
   title,
   items,
   lenAlwaysShown,
+  hideNumInTitle,
 }) => {
   if (!lenAlwaysShown || lenAlwaysShown < 0) {
     lenAlwaysShown = items.length;
@@ -66,7 +67,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
                   : ColorPalette["gray-50"],
             }}
           >
-            {items.length}
+            {hideNumInTitle ? "**" : items.length}
           </Subtitle4>
 
           <Gutter size="0.25rem" />

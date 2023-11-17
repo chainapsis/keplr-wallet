@@ -31,8 +31,6 @@ import {
   MsgUndelegate,
 } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
 import { MsgWithdrawDelegatorReward } from "@keplr-wallet/proto-types/cosmos/distribution/v1beta1/tx";
-import { MsgVote } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/tx";
-import { VoteOption } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/gov";
 import {
   BaseAccount,
   Bech32Address,
@@ -782,7 +780,7 @@ export class CosmosAccountImpl {
   }
 
   makeTx(
-    type: string | "unknown",
+    defaultType: string | "unknown",
     msgs: ProtoMsgsOrWithAminoMsgs | (() => Promise<ProtoMsgsOrWithAminoMsgs>),
     preOnTxEvents?:
       | ((tx: any) => void)
@@ -792,6 +790,8 @@ export class CosmosAccountImpl {
           onFulfill?: (tx: any) => void;
         }
   ): MakeTxResponse {
+    let type = defaultType;
+
     const simulate = async (
       fee: Partial<Omit<StdFee, "gas">> = {},
       memo: string = ""
@@ -858,6 +858,12 @@ export class CosmosAccountImpl {
     };
 
     return {
+      ui: {
+        type: () => type,
+        overrideType: (paramType: string) => {
+          type = paramType;
+        },
+      },
       msgs: async (): Promise<ProtoMsgsOrWithAminoMsgs> => {
         if (typeof msgs === "function") {
           msgs = await msgs();
@@ -1390,6 +1396,10 @@ export class CosmosAccountImpl {
 
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
 
+    if (!currency) {
+      throw new Error("Stake currency is null");
+    }
+
     let dec = new Dec(amount);
     dec = dec.mulTruncate(DecUtils.getPrecisionDec(currency.coinDecimals));
 
@@ -1471,6 +1481,10 @@ export class CosmosAccountImpl {
   ) {
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
 
+    if (!currency) {
+      throw new Error("Stake currency is null");
+    }
+
     let dec = new Dec(amount);
     dec = dec.mulTruncate(DecUtils.getPrecisionDec(currency.coinDecimals));
 
@@ -1531,6 +1545,10 @@ export class CosmosAccountImpl {
     );
 
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+
+    if (!currency) {
+      throw new Error("Stake currency is null");
+    }
 
     let dec = new Dec(amount);
     dec = dec.mulTruncate(DecUtils.getPrecisionDec(currency.coinDecimals));
@@ -1608,6 +1626,10 @@ export class CosmosAccountImpl {
     );
 
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+
+    if (!currency) {
+      throw new Error("Stake currency is null");
+    }
 
     let dec = new Dec(amount);
     dec = dec.mulTruncate(DecUtils.getPrecisionDec(currency.coinDecimals));
@@ -1714,87 +1736,6 @@ export class CosmosAccountImpl {
           this.queries.cosmos.queryRewards
             .getQueryBech32Address(this.base.bech32Address)
             .fetch();
-        }
-      }
-    );
-  }
-
-  makeGovVoteTx(
-    proposalId: string,
-    option: "Yes" | "No" | "Abstain" | "NoWithVeto"
-  ) {
-    const voteOption = (() => {
-      switch (option) {
-        case "Yes":
-          return 1;
-        case "Abstain":
-          return 2;
-        case "No":
-          return 3;
-        case "NoWithVeto":
-          return 4;
-      }
-    })();
-
-    const msg = {
-      type: this.msgOpts.govVote.type,
-      value: {
-        option: voteOption,
-        proposal_id: proposalId,
-        voter: this.base.bech32Address,
-      },
-    };
-
-    return this.makeTx(
-      "govVote",
-      {
-        aminoMsgs: [msg],
-        protoMsgs: [
-          {
-            typeUrl: "/cosmos.gov.v1beta1.MsgVote",
-            value: MsgVote.encode({
-              proposalId: msg.value.proposal_id,
-              voter: msg.value.voter,
-              option: (() => {
-                switch (msg.value.option) {
-                  case 1:
-                    return VoteOption.VOTE_OPTION_YES;
-                  case 2:
-                    return VoteOption.VOTE_OPTION_ABSTAIN;
-                  case 3:
-                    return VoteOption.VOTE_OPTION_NO;
-                  case 4:
-                    return VoteOption.VOTE_OPTION_NO_WITH_VETO;
-                  default:
-                    return VoteOption.VOTE_OPTION_UNSPECIFIED;
-                }
-              })(),
-            }).finish(),
-          },
-        ],
-        rlpTypes: {
-          MsgValue: [
-            { name: "proposal_id", type: "uint64" },
-            { name: "voter", type: "string" },
-            { name: "option", type: "int32" },
-          ],
-        },
-      },
-      (tx) => {
-        if (tx.code == null || tx.code === 0) {
-          // After succeeding to vote, refresh the proposal.
-          const proposal = this.queries.cosmos.queryGovernance.proposals.find(
-            (proposal) => proposal.id === proposalId
-          );
-          if (proposal) {
-            proposal.fetch();
-          }
-
-          const vote = this.queries.cosmos.queryProposalVote.getVote(
-            proposalId,
-            this.base.bech32Address
-          );
-          vote.fetch();
         }
       }
     );

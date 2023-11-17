@@ -389,6 +389,46 @@ export class VaultService {
     }
   }
 
+  async clearAll(userPassword: string): Promise<void> {
+    await this.checkUserPassword(userPassword);
+
+    const prevVaults: {
+      type: string;
+      id: string;
+    }[] = [];
+    for (const [type, vaults] of this.vaultMap.entries()) {
+      for (const vault of vaults) {
+        prevVaults.push({
+          type,
+          id: vault.id,
+        });
+      }
+    }
+
+    runInAction(() => {
+      this.vaultMap = new Map();
+
+      this._isSignedUp = false;
+
+      this.password = new Uint8Array();
+      this.decryptedCache = new Map();
+
+      this.aesCounter = new Uint8Array();
+    });
+
+    await Promise.all([
+      this.kvStore.set("passwordCipher", null),
+      this.kvStore.set("userPasswordMac", null),
+      this.kvStore.set("aesCounterCipher", null),
+    ]);
+
+    for (const prev of prevVaults) {
+      for (const handler of this.onVaultRemovedHandlers) {
+        handler(prev.type, prev.id);
+      }
+    }
+  }
+
   protected static pbkdf2(
     salt: Uint8Array,
     data: Uint8Array

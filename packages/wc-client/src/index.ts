@@ -424,22 +424,29 @@ export class KeplrWalletConnectV2 implements Keplr {
     return await Promise.allSettled(paramArray);
   }
 
-  getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner {
-    return new CosmJSOfflineSigner(chainId, this);
+  getOfflineSigner(
+    chainId: string,
+    signOptions?: KeplrSignOptions
+  ): OfflineAminoSigner & OfflineDirectSigner {
+    return new CosmJSOfflineSigner(chainId, this, signOptions);
   }
 
   async getOfflineSignerAuto(
-    chainId: string
+    chainId: string,
+    signOptions?: KeplrSignOptions
   ): Promise<OfflineAminoSigner | OfflineDirectSigner> {
     const key = await this.getKey(chainId);
     if (key.isNanoLedger) {
-      return new CosmJSOfflineSignerOnlyAmino(chainId, this);
+      return new CosmJSOfflineSignerOnlyAmino(chainId, this, signOptions);
     }
-    return new CosmJSOfflineSigner(chainId, this);
+    return new CosmJSOfflineSigner(chainId, this, signOptions);
   }
 
-  getOfflineSignerOnlyAmino(chainId: string): OfflineAminoSigner {
-    return new CosmJSOfflineSignerOnlyAmino(chainId, this);
+  getOfflineSignerOnlyAmino(
+    chainId: string,
+    signOptions?: KeplrSignOptions
+  ): OfflineAminoSigner {
+    return new CosmJSOfflineSignerOnlyAmino(chainId, this, signOptions);
   }
 
   getSecret20ViewingKey(

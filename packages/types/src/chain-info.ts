@@ -16,7 +16,7 @@ export interface ChainInfo {
    * This indicates the type of coin that can be used for stake.
    * You can get actual currency information from Currencies.
    */
-  readonly stakeCurrency: Currency;
+  readonly stakeCurrency?: Currency;
   readonly walletUrl?: string;
   readonly walletUrlForStaking?: string;
   readonly bip44: BIP44;

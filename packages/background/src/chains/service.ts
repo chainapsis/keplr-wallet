@@ -65,6 +65,7 @@ export class ChainsService {
       readonly organizationName: string;
       readonly repoName: string;
       readonly branchName: string;
+      readonly alternativeURL?: string;
     },
     protected readonly interactionService: InteractionService,
     protected readonly afterInitFn:
@@ -352,8 +353,12 @@ export class ChainsService {
     const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
 
     const res = await simpleFetch<ChainInfo>(
-      `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/${this.communityChainInfoRepo.branchName}`,
-      `/cosmos/${chainIdentifier}.json`
+      this.communityChainInfoRepo.alternativeURL
+        ? this.communityChainInfoRepo.alternativeURL.replace(
+            "{chain_identifier}",
+            chainIdentifier
+          )
+        : `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/${this.communityChainInfoRepo.branchName}/cosmos/${chainIdentifier}.json`
     );
     let chainInfo: ChainInfo = res.data;
 
@@ -797,6 +802,11 @@ export class ChainsService {
           newChainInfo = {
             ...newChainInfo,
             ...repoChainInfo,
+            // stakeCurrency는 nullable하며 repo로부터 업데이트 되었을때
+            // repo에서 stakeCurrency가 없다면 명시적으로 지워져야한다.
+            stakeCurrency: repoChainInfo.stakeCurrency
+              ? repoChainInfo.stakeCurrency
+              : undefined,
             walletUrlForStaking:
               repoChainInfo.walletUrlForStaking ||
               newChainInfo.walletUrlForStaking,

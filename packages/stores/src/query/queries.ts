@@ -9,6 +9,7 @@ import {
 } from "../common";
 import { ChainGetter } from "../chain";
 import { KVStore, MultiGet } from "@keplr-wallet/common";
+import { ObservableSimpleQuery } from "./simple";
 
 export interface QueriesSetBase {
   readonly queryBalances: DeepReadonly<ObservableQueryBalances>;
@@ -31,6 +32,8 @@ export const createQueriesSetBase = (
 // eslint-disable-next-line @typescript-eslint/ban-types
 export interface IQueriesStore<T extends IObject = {}> {
   get(chainId: string): DeepReadonly<QueriesSetBase & T>;
+
+  simpleQuery: ObservableSimpleQuery;
 }
 
 export class QueriesStore<Injects extends Array<IObject>> {
@@ -51,6 +54,8 @@ export class QueriesStore<Injects extends Array<IObject>> {
 
   public readonly sharedContext: QuerySharedContext;
 
+  public readonly simpleQuery: ObservableSimpleQuery;
+
   constructor(
     protected readonly kvStore: KVStore | (KVStore & MultiGet),
     protected readonly chainGetter: ChainGetter,
@@ -70,6 +75,8 @@ export class QueriesStore<Injects extends Array<IObject>> {
       responseDebounceMs: this.options.responseDebounceMs ?? 0,
     });
     this.queriesCreators = queriesCreators;
+
+    this.simpleQuery = new ObservableSimpleQuery(this.sharedContext);
 
     makeObservable(this);
   }

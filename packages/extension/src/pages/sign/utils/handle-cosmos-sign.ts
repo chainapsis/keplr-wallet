@@ -2,7 +2,7 @@ import {
   connectAndSignEIP712WithLedger,
   connectAndSignWithLedger,
 } from "./cosmos-ledger-sign";
-import { SignInteractionStore } from "@keplr-wallet/stores";
+import { SignInteractionStore } from "@keplr-wallet/stores-core";
 import {
   EthermintChainIdHelper,
   SignDocWrapper,

@@ -11,7 +11,6 @@ import {
 } from "../config.ui";
 import {
   AccountStore,
-  ChainSuggestStore,
   CoinGeckoPriceStore,
   CosmosAccount,
   CosmosQueries,
@@ -21,20 +20,24 @@ import {
   getKeplrFromWindow,
   IBCChannelStore,
   IBCCurrencyRegistrar,
-  InteractionStore,
-  KeyRingStore,
-  PermissionStore,
   QueriesStore,
   SecretAccount,
   SecretQueries,
+  ICNSQueries,
+  AgoricQueries,
+  LSMCurrencyRegistrar,
+} from "@keplr-wallet/stores";
+import {
+  ChainSuggestStore,
+  InteractionStore,
+  KeyRingStore,
+  PermissionStore,
   SignInteractionStore,
   TokensStore,
   ICNSInteractionStore,
-  ICNSQueries,
   PermissionManagerStore,
   SignEthereumInteractionStore,
-  AgoricQueries,
-} from "@keplr-wallet/stores";
+} from "@keplr-wallet/stores-core";
 import {
   KeplrETCQueries,
   GravityBridgeCurrencyRegistrar,
@@ -61,7 +64,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { HugeQueriesStore } from "./huge-queries";
 import { ExtensionAnalyticsClient } from "../analytics";
 import { TokenContractsQueries } from "./token-contracts";
-import { SkipQueries } from "./skip/queries";
+import { SkipQueries } from "./skip";
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
@@ -103,6 +106,7 @@ export class RootStore {
   public readonly tokensStore: TokensStore;
 
   public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
+  public readonly lsmCurrencyRegistrar: LSMCurrencyRegistrar;
   public readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegistrar;
   public readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar;
   public readonly evmChainERC20CurrencyRegistrar: EVMChainERC20CurrencyRegistrar;
@@ -391,6 +395,12 @@ export class RootStore {
       24 * 3600 * 1000,
       this.chainStore,
       this.accountStore,
+      this.queriesStore
+    );
+    this.lsmCurrencyRegistrar = new LSMCurrencyRegistrar(
+      new ExtensionKVStore("store_lsm_currency_registrar"),
+      24 * 3600 * 1000,
+      this.chainStore,
       this.queriesStore
     );
     this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegistrar(

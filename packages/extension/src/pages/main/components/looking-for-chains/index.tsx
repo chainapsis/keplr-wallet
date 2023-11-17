@@ -60,13 +60,11 @@ export const LookingForChainItem: FunctionComponent<{
     >
       <Columns sum={1} gutter="0.5rem" alignY="center">
         <ChainImageFallback
+          size="2rem"
+          chainInfo={chainInfo}
           style={{
-            width: "2rem",
-            height: "2rem",
             opacity: "0.6",
           }}
-          src={chainInfo.chainSymbolImageUrl}
-          alt={`${chainInfo.chainSymbolImageUrl} ${chainInfo.chainName}`}
         />
 
         <Gutter size="0.75rem" />
@@ -87,7 +85,8 @@ export const LookingForChainItem: FunctionComponent<{
           <Gutter size="0.25rem" />
 
           <Body3 color={Color(ColorPalette["gray-300"]).alpha(0.6).string()}>
-            {chainInfo.stakeCurrency.coinDenom}
+            {chainInfo.stakeCurrency?.coinDenom ||
+              chainInfo.currencies[0].coinDenom}
           </Body3>
         </YAxis>
 

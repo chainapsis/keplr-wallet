@@ -245,9 +245,20 @@ export const FinalizeKeyScene: FunctionComponent<{
                   .waitFreshResponse()
               );
               promises.push(
-                queries.queryBalances
-                  .getQueryBech32Address(bech32Address.address)
-                  .stakable.waitFreshResponse()
+                (async () => {
+                  const chainInfo = chainStore.getChain(
+                    candidateAddress.chainId
+                  );
+                  const bal = queries.queryBalances
+                    .getQueryBech32Address(bech32Address.address)
+                    .getBalance(
+                      chainInfo.stakeCurrency || chainInfo.currencies[0]
+                    );
+
+                  if (bal) {
+                    await bal.waitFreshResponse();
+                  }
+                })()
               );
               promises.push(
                 queries.cosmos.queryDelegations

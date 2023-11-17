@@ -96,33 +96,42 @@ const Styles = {
   `,
   ContentContainer: styled.div<{
     layoutHeight: number;
+    additionalPaddingBottom?: string;
     bottomPadding: string;
     fixedHeight: boolean;
   }>`
     padding-top: 3.75rem;
     padding-bottom: ${({ bottomPadding }) => bottomPadding};
 
-    ${({ layoutHeight, fixedHeight }) => {
+    ${({ layoutHeight, fixedHeight, additionalPaddingBottom }) => {
       if (!fixedHeight) {
         return css`
           // min-height: ${layoutHeight}rem;
         `;
       } else {
         return css`
-          height: ${layoutHeight}rem;
+          height: ${(() => {
+            if (additionalPaddingBottom && additionalPaddingBottom !== "0") {
+              return `calc(${layoutHeight}rem - ${additionalPaddingBottom})`;
+            }
+            return `${layoutHeight}rem`;
+          })()};
         `;
       }
     }};
   `,
-  BottomContainer: styled.div`
-    height: 4.75rem;
+  BottomButtonMockBackplate: styled.div`
+    background: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["light-gradient"]
+        : ColorPalette["gray-700"]};
 
-    background-color: ${ColorPalette["gray-700"]};
-
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    body[data-white-background="true"] && {
+      background: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["white"]
+          : ColorPalette["gray-700"]};
+    }
   `,
 };
 
@@ -135,6 +144,8 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
   onSubmit,
   children,
   isNotReady,
+  additionalPaddingBottom,
+  headerContainerStyle,
 }) => {
   const [height, setHeight] = React.useState(() => pxToRem(600));
   const lastSetHeight = useRef(-1);
@@ -178,7 +189,7 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
 
   return (
     <Styles.Container as={onSubmit ? "form" : undefined} onSubmit={onSubmit}>
-      <Styles.HeaderContainer>
+      <Styles.HeaderContainer style={headerContainerStyle}>
         {left && !isNotReady ? (
           <Styles.HeaderLeft>{left}</Styles.HeaderLeft>
         ) : null}
@@ -201,6 +212,7 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
 
       <Styles.ContentContainer
         layoutHeight={height}
+        additionalPaddingBottom={additionalPaddingBottom}
         fixedHeight={fixedHeight || false}
         bottomPadding={bottomPadding}
       >
@@ -214,9 +226,26 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
           style={{
             left: 0,
             right: 0,
-            bottom: 0,
+            bottom: additionalPaddingBottom || "0",
           }}
         >
+          {/*
+            scroll이 생겼을때 버튼 뒤로 UI가 보이는걸 대충 방지한다.
+            버튼들이 border radius를 가지고 있는데 이부분만 남기고 나머지만 안보여줄 효과적인 방법은 없다.
+            일단 border radius를 감안해서 약간 height를 적게 줘서 mock backplate를 만든다.
+            나중에 UI 상에서 문제가 된다면 따로 prop등을 임시로 사용해서 조절해야한다...
+          */}
+          {bottomPadding !== "0" ? (
+            <Styles.BottomButtonMockBackplate
+              style={{
+                position: "absolute",
+                height: `calc(${bottomPadding} - ${bottomButtonPaddingRem}rem - 0.375rem)`,
+                bottom: 0,
+                left: 0,
+                right: 0,
+              }}
+            />
+          ) : null}
           {(() => {
             if (bottomButton.isSpecial) {
               // isSpecial is not used.

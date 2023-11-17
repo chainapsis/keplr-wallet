@@ -307,7 +307,7 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
     forceSetUrl: boolean = false
   ) {
     const coinIdsUpdated = this._coinIds.add(...coinIds);
-    const vsCurrenciesUpdated = this._vsCurrencies.add(...vsCurrencies);
+    const vsCurrenciesUpdated = this._vsCurrencies.add(...vsCurrencies, "usd");
 
     if (coinIdsUpdated || vsCurrenciesUpdated || forceSetUrl) {
       const url = `${this._optionUri}?ids=${this._coinIds.values.join(
@@ -372,6 +372,123 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
     }
 
     const price = this.getPrice(coin.currency.coinGeckoId, vsCurrrency);
+    if (price === undefined) {
+      return new PricePretty(fiatCurrency, new Int(0)).ready(false);
+    }
+
+    const dec = coin.toDec();
+    const priceDec = new Dec(price.toString());
+
+    return new PricePretty(fiatCurrency, dec.mul(priceDec));
+  }
+
+  async waitPrice(
+    coinId: string,
+    vsCurrency?: string
+  ): Promise<number | undefined> {
+    if (!vsCurrency) {
+      vsCurrency = this.defaultVsCurrency;
+    }
+
+    if (!this.supportedVsCurrencies[vsCurrency]) {
+      return Promise.resolve(undefined);
+    }
+
+    if (this.response?.data[coinId] && this.response.data[coinId][vsCurrency]) {
+      return Promise.resolve(this.response.data[coinId][vsCurrency]);
+    }
+
+    this.updateURL([coinId], [vsCurrency]);
+
+    await this.waitResponse();
+
+    const coinPrices = this.response?.data[coinId];
+    if (!coinPrices) {
+      return undefined;
+    }
+    return coinPrices[vsCurrency];
+  }
+
+  async waitFreshPrice(
+    coinId: string,
+    vsCurrency?: string
+  ): Promise<number | undefined> {
+    if (!vsCurrency) {
+      vsCurrency = this.defaultVsCurrency;
+    }
+
+    if (!this.supportedVsCurrencies[vsCurrency]) {
+      return Promise.resolve(undefined);
+    }
+
+    this.updateURL([coinId], [vsCurrency]);
+
+    await this.waitFreshResponse();
+
+    const coinPrices = this.response?.data[coinId];
+    if (!coinPrices) {
+      return undefined;
+    }
+    return coinPrices[vsCurrency];
+  }
+
+  async waitCalculatePrice(
+    coin: CoinPretty,
+    vsCurrrency?: string
+  ): Promise<PricePretty | undefined> {
+    if (!coin.currency.coinGeckoId) {
+      return undefined;
+    }
+
+    if (!vsCurrrency) {
+      vsCurrrency = this.defaultVsCurrency;
+    }
+
+    const fiatCurrency = this.supportedVsCurrencies[vsCurrrency];
+    if (!fiatCurrency) {
+      return undefined;
+    }
+
+    if (coin.toDec().isZero()) {
+      return new PricePretty(fiatCurrency, 0);
+    }
+
+    const price = await this.waitPrice(coin.currency.coinGeckoId, vsCurrrency);
+    if (price === undefined) {
+      return new PricePretty(fiatCurrency, new Int(0)).ready(false);
+    }
+
+    const dec = coin.toDec();
+    const priceDec = new Dec(price.toString());
+
+    return new PricePretty(fiatCurrency, dec.mul(priceDec));
+  }
+
+  async waitFreshCalculatePrice(
+    coin: CoinPretty,
+    vsCurrrency?: string
+  ): Promise<PricePretty | undefined> {
+    if (!coin.currency.coinGeckoId) {
+      return undefined;
+    }
+
+    if (!vsCurrrency) {
+      vsCurrrency = this.defaultVsCurrency;
+    }
+
+    const fiatCurrency = this.supportedVsCurrencies[vsCurrrency];
+    if (!fiatCurrency) {
+      return undefined;
+    }
+
+    if (coin.toDec().isZero()) {
+      return new PricePretty(fiatCurrency, 0);
+    }
+
+    const price = await this.waitFreshPrice(
+      coin.currency.coinGeckoId,
+      vsCurrrency
+    );
     if (price === undefined) {
       return new PricePretty(fiatCurrency, new Int(0)).ready(false);
     }

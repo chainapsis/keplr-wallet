@@ -26,6 +26,8 @@ export class ObservableQueryIbcPfmTransfer {
 
         counterpartyChainId: string;
       }[];
+
+      denom: string;
     }[] => {
       if (!this.chainGetter.hasChain(chainId)) {
         return [];
@@ -55,6 +57,8 @@ export class ObservableQueryIbcPfmTransfer {
 
           counterpartyChainId: string;
         }[];
+
+        denom: string;
       }[] = [];
 
       for (const assetChainId of Object.keys(assetsFromSource)) {
@@ -198,37 +202,31 @@ export class ObservableQueryIbcPfmTransfer {
                 // (If channel is only one, no need to check packet forwarding because it is direct transfer)
                 if (channels.length > 1) {
                   if (
-                    !this.chainGetter.getChain(chainId).hasFeature("ibc-go")
+                    !this.chainGetter.getChain(chainId).hasFeature("ibc-go") ||
+                    !this.queryChains.isSupportsMemo(chainId)
                   ) {
                     pfmPossibility = false;
                   }
 
-                  // XXX: ibc transfer에서 memo field를 지원하는지는 체크해야하는데...
-                  //      이게 마땅한 방법이 없다. 최소한의 경우로 ibc-go feature가 있는지만 체크한다.
                   if (pfmPossibility) {
                     for (let i = 0; i < channels.length - 1; i++) {
                       const channel = channels[i];
                       if (
                         !this.chainGetter
                           .getChain(channel.counterpartyChainId)
-                          .hasFeature("ibc-go")
+                          .hasFeature("ibc-go") ||
+                        !this.queryChains.isSupportsMemo(
+                          channel.counterpartyChainId
+                        ) ||
+                        !this.queryChains.isPFMEnabled(
+                          channel.counterpartyChainId
+                        ) ||
+                        !this.chainGetter
+                          .getChain(channel.counterpartyChainId)
+                          .hasFeature("ibc-pfm")
                       ) {
                         pfmPossibility = false;
                         break;
-                      }
-
-                      if (i >= 1) {
-                        if (
-                          !this.queryChains.isPFMEnabled(
-                            channel.counterpartyChainId
-                          ) ||
-                          !this.chainGetter
-                            .getChain(channel.counterpartyChainId)
-                            .hasFeature("ibc-pfm")
-                        ) {
-                          pfmPossibility = false;
-                          break;
-                        }
                       }
                     }
                   }
@@ -240,6 +238,7 @@ export class ObservableQueryIbcPfmTransfer {
                     originDenom: asset.originDenom,
                     originChainId: asset.originChainId,
                     channels: channels,
+                    denom: asset.denom,
                   });
                 }
               }

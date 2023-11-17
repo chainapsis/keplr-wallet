@@ -9,9 +9,10 @@ import {
   GetRecentSendHistoriesMsg,
   SendTxAndRecordMsg,
   SendTxAndRecordWithIBCPacketForwardingMsg,
-  GetIBCTransferHistories,
-  RemoveIBCTransferHistory,
-  ClearAllIBCTransferHistory,
+  SendTxAndRecordWithIBCSwapMsg,
+  GetIBCHistoriesMsg,
+  RemoveIBCHistoryMsg,
+  ClearAllIBCHistoryMsg,
 } from "./messages";
 import { RecentSendHistoryService } from "./service";
 
@@ -35,20 +36,25 @@ export const getHandler: (service: RecentSendHistoryService) => Handler = (
           env,
           msg as SendTxAndRecordWithIBCPacketForwardingMsg
         );
-      case GetIBCTransferHistories:
-        return handleGetIBCTransferHistories(service)(
+      case SendTxAndRecordWithIBCSwapMsg:
+        return handleSendTxAndRecordWithIBCSwapMsg(service)(
           env,
-          msg as GetIBCTransferHistories
+          msg as SendTxAndRecordWithIBCSwapMsg
         );
-      case RemoveIBCTransferHistory:
-        return handleRemoveIBCTransferHistory(service)(
+      case GetIBCHistoriesMsg:
+        return handleGetIBCHistoriesMsg(service)(
           env,
-          msg as RemoveIBCTransferHistory
+          msg as GetIBCHistoriesMsg
         );
-      case ClearAllIBCTransferHistory:
-        return handleClearAllIBCTransferHistory(service)(
+      case RemoveIBCHistoryMsg:
+        return handleRemoveIBCHistoryMsg(service)(
           env,
-          msg as ClearAllIBCTransferHistory
+          msg as RemoveIBCHistoryMsg
+        );
+      case ClearAllIBCHistoryMsg:
+        return handleClearAllIBCHistoryMsg(service)(
+          env,
+          msg as ClearAllIBCHistoryMsg
         );
       default:
         throw new KeplrError("tx", 110, "Unknown msg type");
@@ -79,7 +85,10 @@ const handleSendTxAndRecordMsg: (
       msg.recipient,
       msg.amount,
       msg.memo,
-      undefined
+      undefined,
+      {
+        currencies: [],
+      }
     );
   };
 };
@@ -99,32 +108,56 @@ const handleSendTxAndRecordWithIBCPacketForwardingMsg: (
       msg.recipient,
       msg.amount,
       msg.memo,
-      msg.channels
+      msg.channels,
+      msg.notificationInfo
     );
   };
 };
 
-const handleGetIBCTransferHistories: (
+const handleSendTxAndRecordWithIBCSwapMsg: (
   service: RecentSendHistoryService
-) => InternalHandler<GetIBCTransferHistories> = (service) => {
+) => InternalHandler<SendTxAndRecordWithIBCSwapMsg> = (service) => {
+  return async (_env, msg) => {
+    return await service.sendTxAndRecordIBCSwap(
+      msg.swapType,
+      msg.sourceChainId,
+      msg.destinationChainId,
+      msg.tx,
+      msg.mode,
+      msg.silent,
+      msg.sender,
+      msg.amount,
+      msg.memo,
+      msg.channels,
+      msg.destinationAsset,
+      msg.swapChannelIndex,
+      msg.swapReceiver,
+      msg.notificationInfo
+    );
+  };
+};
+
+const handleGetIBCHistoriesMsg: (
+  service: RecentSendHistoryService
+) => InternalHandler<GetIBCHistoriesMsg> = (service) => {
   return (_env, _msg) => {
-    return service.getRecentIBCTransferHistories();
+    return service.getRecentIBCHistories();
   };
 };
 
-const handleRemoveIBCTransferHistory: (
+const handleRemoveIBCHistoryMsg: (
   service: RecentSendHistoryService
-) => InternalHandler<RemoveIBCTransferHistory> = (service) => {
+) => InternalHandler<RemoveIBCHistoryMsg> = (service) => {
   return (_env, msg) => {
-    service.removeRecentIBCTransferHistory(msg.id);
-    return service.getRecentIBCTransferHistories();
+    service.removeRecentIBCHistory(msg.id);
+    return service.getRecentIBCHistories();
   };
 };
 
-const handleClearAllIBCTransferHistory: (
+const handleClearAllIBCHistoryMsg: (
   service: RecentSendHistoryService
-) => InternalHandler<ClearAllIBCTransferHistory> = (service) => {
+) => InternalHandler<ClearAllIBCHistoryMsg> = (service) => {
   return () => {
-    service.clearAllRecentIBCTransferHistory();
+    service.clearAllRecentIBCHistory();
   };
 };

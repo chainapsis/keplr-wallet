@@ -10,8 +10,8 @@ import {
 import {
   ChainStore as BaseChainStore,
   IChainInfoImpl,
-  KeyRingStore,
 } from "@keplr-wallet/stores";
+import { KeyRingStore } from "@keplr-wallet/stores-core";
 
 import { ChainInfo } from "@keplr-wallet/types";
 import {
@@ -237,7 +237,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     yield this.keyRingStore.waitUntilInitialized();
 
     yield Promise.all([
-      this.updateChainInfosFromBackground(),
+      // this.updateChainInfosFromBackground(),
       this.updateEnabledChainIdentifiersFromBackground(),
     ]);
 

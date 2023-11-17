@@ -1863,8 +1863,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
       {
         coinDenom: "WEVMOS",
-        coinMinimalDenom:
-          "erc20:0xD4949664cD82660AaE99bEdc034a0deA8A0bd517:WEVMOS",
+        coinMinimalDenom: "erc20:0xD4949664cD82660AaE99bEdc034a0deA8A0bd517",
         coinDecimals: 18,
         contractAddress: "0xD4949664cD82660AaE99bEdc034a0deA8A0bd517",
       },
@@ -1885,7 +1884,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
     evm: {
       chainId: 9001,
-      rpc: "https://eth.bd.evmos.org:8545",
+      rpc: "https://evmos-evm.publicnode.com",
     },
   },
   {
@@ -2503,6 +2502,73 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: [],
   },
+  {
+    rpc: "https://rpc-dydx.keplr.app",
+    rest: "https://lcd-dydx.keplr.app",
+    chainId: "dydx-mainnet-1",
+    chainName: "dYdX",
+    stakeCurrency: {
+      coinDenom: "DYDX",
+      coinDecimals: 18,
+      coinMinimalDenom: "adydx",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "dydx",
+      bech32PrefixAccPub: "dydxpub",
+      bech32PrefixValAddr: "dydxvaloper",
+      bech32PrefixValPub: "dydxvaloperpub",
+      bech32PrefixConsAddr: "dydxvalcons",
+      bech32PrefixConsPub: "dydxvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "DYDX",
+        coinDecimals: 18,
+        coinMinimalDenom: "adydx",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "DYDX",
+        coinDecimals: 18,
+        coinMinimalDenom: "adydx",
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://rpc-celestia.keplr.app",
+    rest: "https://lcd-celestia.keplr.app",
+    chainId: "celestia",
+    chainName: "Celestia",
+    stakeCurrency: {
+      coinDenom: "TIA",
+      coinDecimals: 6,
+      coinMinimalDenom: "utia",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("celestia"),
+    currencies: [
+      {
+        coinDenom: "TIA",
+        coinDecimals: 6,
+        coinMinimalDenom: "utia",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "TIA",
+        coinDecimals: 6,
+        coinMinimalDenom: "utia",
+      },
+    ],
+    features: [],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
@@ -2516,4 +2582,7 @@ export const CommunityChainInfoRepo = {
   organizationName: "chainapsis",
   repoName: "keplr-chain-registry",
   branchName: "main",
+  alternativeURL: process.env["KEPLR_EXT_CHAIN_REGISTRY_URL"]
+    ? process.env["KEPLR_EXT_CHAIN_REGISTRY_URL"]
+    : undefined,
 };

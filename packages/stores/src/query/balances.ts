@@ -74,8 +74,11 @@ export class ObservableQueryBalancesImplMap {
   }
 
   @computed
-  get stakable(): IObservableQueryBalanceImpl {
+  get stakable(): IObservableQueryBalanceImpl | undefined {
     const chainInfo = this.chainGetter.getChain(this.chainId);
+    if (!chainInfo.stakeCurrency) {
+      return undefined;
+    }
 
     return this.getBalanceInner(chainInfo.stakeCurrency);
   }
@@ -132,7 +135,7 @@ export class ObservableQueryBalancesImplMap {
         new DenomHelper(bal.currency.coinMinimalDenom).type === "native" &&
         bal.balance.toDec().gt(new Dec(0)) &&
         bal.currency.coinMinimalDenom !==
-          chainInfo.stakeCurrency.coinMinimalDenom
+          chainInfo.stakeCurrency?.coinMinimalDenom
     );
   }
 
@@ -141,7 +144,8 @@ export class ObservableQueryBalancesImplMap {
     const chainInfo = this.chainGetter.getChain(this.chainId);
 
     const currencies = chainInfo.currencies.filter(
-      (cur) => cur.coinMinimalDenom !== chainInfo.stakeCurrency.coinMinimalDenom
+      (cur) =>
+        cur.coinMinimalDenom !== chainInfo.stakeCurrency?.coinMinimalDenom
     );
 
     const result = [];

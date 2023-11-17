@@ -29,13 +29,20 @@ export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQue
   }
 
   protected override canFetch(): boolean {
+    if (!this.chainGetter.getChain(this.chainId).stakeCurrency) {
+      return false;
+    }
     // If bech32 address is empty, it will always fail, so don't need to fetch it.
     return this.bech32Address.length > 0;
   }
 
   @computed
-  get total(): CoinPretty {
+  get total(): CoinPretty | undefined {
     const stakeCurrency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+
+    if (!stakeCurrency) {
+      return;
+    }
 
     if (!this.response) {
       return new CoinPretty(stakeCurrency, new Int(0)).ready(false);
@@ -66,6 +73,10 @@ export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQue
     const unbondings = this.unbondings;
 
     const stakeCurrency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+
+    if (!stakeCurrency) {
+      return [];
+    }
 
     const result = [];
     for (const unbonding of unbondings) {

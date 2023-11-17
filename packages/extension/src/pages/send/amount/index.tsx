@@ -99,7 +99,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   useEffect(() => {
     if (!initialChainId || !initialCoinMinimalDenom) {
-      navigate("/send/select-asset");
+      navigate(
+        `/send/select-asset?navigateReplace=true&navigateTo=${encodeURIComponent(
+          "/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
+        )}`
+      );
     }
   }, [navigate, initialChainId, initialCoinMinimalDenom]);
 
@@ -398,7 +402,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                       sendConfigs.amountConfig.amount[0].currency,
                       sendConfigs.recipientConfig.recipient
                     );
-
               await tx.send(
                 sendConfigs.feeConfig.toStdFee(),
                 sendConfigs.memoConfig.memo,
@@ -430,7 +433,10 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                     if (isIBCTransfer) {
                       if (msg instanceof SendTxAndRecordMsg) {
                         msg = msg.withIBCPacketForwarding(
-                          sendConfigs.channelConfig.channels
+                          sendConfigs.channelConfig.channels,
+                          {
+                            currencies: chainStore.getChain(chainId).currencies,
+                          }
                         );
                       } else {
                         throw new Error("Invalid message type");
@@ -558,7 +564,13 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 error: balance?.error,
               }}
               forChange
-              onClick={() => navigate("/send/select-asset")}
+              onClick={() => {
+                navigate(
+                  `/send/select-asset?navigateReplace=true&navigateTo=${encodeURIComponent(
+                    "/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
+                  )}`
+                );
+              }}
             />
           </YAxis>
 

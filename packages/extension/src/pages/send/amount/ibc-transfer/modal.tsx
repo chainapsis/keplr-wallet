@@ -187,14 +187,7 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
                   }}
                 >
                   <XAxis alignY="center">
-                    <ChainImageFallback
-                      style={{
-                        width: "2rem",
-                        height: "2rem",
-                      }}
-                      src={chainInfo.chainSymbolImageUrl}
-                      alt="chain image"
-                    />
+                    <ChainImageFallback chainInfo={chainInfo} size="2rem" />
                     <Gutter size="0.75rem" />
                     <YAxis>
                       <Subtitle2

@@ -64,6 +64,7 @@ export function init(
     readonly organizationName: string;
     readonly repoName: string;
     readonly branchName: string;
+    readonly alternativeURL?: string;
   },
   notification: Notification,
   blocklistPageURL: string,
@@ -210,7 +211,8 @@ export function init(
     new RecentSendHistory.RecentSendHistoryService(
       storeCreator("recent-send-history"),
       chainsService,
-      backgroundTxService
+      backgroundTxService,
+      notification
     );
 
   Interaction.init(router, interactionService);

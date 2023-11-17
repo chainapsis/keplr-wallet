@@ -5,4 +5,7 @@ export interface CollapsibleListProps {
   items: React.ReactNode[];
 
   lenAlwaysShown?: number;
+
+  // privacy mode를 위해서 대충 추가됨
+  hideNumInTitle?: boolean;
 }

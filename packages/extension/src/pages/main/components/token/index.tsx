@@ -27,7 +27,7 @@ import {
   QuestionIcon,
 } from "../../../../components/icon";
 import styled, { css, useTheme } from "styled-components";
-import { ChainImageFallback } from "../../../../components/image";
+import { CurrencyImageFallback } from "../../../../components/image";
 import { Tooltip } from "../../../../components/tooltip";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Tag } from "../../../../components/tag";
@@ -154,6 +154,9 @@ interface TokenItemProps {
 
   // If this prop is provided, the copied button will be shown.
   copyAddress?: string;
+
+  // swap destination select 페이지에서 balance 숨기기 위한 옵션
+  hideBalance?: boolean;
 }
 
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
@@ -165,8 +168,9 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     isNotReady,
     altSentence,
     copyAddress,
+    hideBalance,
   }) => {
-    const { priceStore } = useStore();
+    const { priceStore, uiConfigStore } = useStore();
     const navigate = useNavigate();
     const intl = useIntl();
     const theme = useTheme();
@@ -263,13 +267,10 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
       >
         <Columns sum={1} gutter="0.5rem" alignY="center">
           <Skeleton type="circle" layer={1} isNotReady={isNotReady}>
-            <ChainImageFallback
-              style={{
-                width: "2rem",
-                height: "2rem",
-              }}
-              src={viewToken.token.currency.coinImageUrl}
-              alt={viewToken.token.currency.coinDenom}
+            <CurrencyImageFallback
+              chainInfo={viewToken.chainInfo}
+              currency={viewToken.token.currency}
+              size="2rem"
             />
           </Skeleton>
 
@@ -338,7 +339,10 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                         });
                       }
 
-                      return viewToken.error.message;
+                      return (
+                        viewToken.error.message ||
+                        "Failed to query response from endpoint. Check again in a few minutes."
+                      );
                     })()}
                   >
                     <ErrorIcon size="1rem" />
@@ -377,26 +381,31 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
 
           <Columns sum={1} gutter="0.25rem" alignY="center">
             <Stack gutter="0.25rem" alignX="right">
-              <Skeleton
-                layer={1}
-                isNotReady={isNotReady}
-                dummyMinWidth="3.25rem"
-              >
-                <Subtitle3
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-700"]
-                      : ColorPalette["gray-10"]
-                  }
+              {!hideBalance ? (
+                <Skeleton
+                  layer={1}
+                  isNotReady={isNotReady}
+                  dummyMinWidth="3.25rem"
                 >
-                  {viewToken.token
-                    .hideDenom(true)
-                    .maxDecimals(6)
-                    .inequalitySymbol(true)
-                    .shrink(true)
-                    .toString()}
-                </Subtitle3>
-              </Skeleton>
+                  <Subtitle3
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-700"]
+                        : ColorPalette["gray-10"]
+                    }
+                  >
+                    {uiConfigStore.hideStringIfPrivacyMode(
+                      viewToken.token
+                        .hideDenom(true)
+                        .maxDecimals(6)
+                        .inequalitySymbol(true)
+                        .shrink(true)
+                        .toString(),
+                      2
+                    )}
+                  </Subtitle3>
+                </Skeleton>
+              ) : null}
               <Skeleton
                 layer={1}
                 isNotReady={isNotReady}
@@ -432,13 +441,23 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 ) : (
                   <Subtitle3 color={ColorPalette["gray-300"]}>
                     {(() => {
+                      // XXX: 이 부분에서 hide balance가 true더라도
+                      //      isNotReady 상태에서 스켈레톤이 여전히 보이는 문제가 있긴한데...
+                      //      어차피 이 prop을 쓰는 때는 한정되어있고 지금은 문제가 안되니 이 문제는 패스한다.
+                      if (hideBalance) {
+                        return "";
+                      }
+
                       if (altSentence) {
                         return altSentence;
                       }
 
-                      return pricePretty
-                        ? pricePretty.inequalitySymbol(true).toString()
-                        : "-";
+                      return uiConfigStore.hideStringIfPrivacyMode(
+                        pricePretty
+                          ? pricePretty.inequalitySymbol(true).toString()
+                          : "-",
+                        2
+                      );
                     })()}
                   </Subtitle3>
                 )}

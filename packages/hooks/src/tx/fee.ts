@@ -450,20 +450,77 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   readonly getGasPriceForFeeCurrency = computedFn(
     (feeCurrency: FeeCurrency, feeType: FeeType): Dec => {
-      if (this.canOsmosisTxFeesAndReady()) {
+      if (
+        this.chainInfo.hasFeature("osmosis-base-fee-beta") ||
+        this.canOsmosisTxFeesAndReady()
+      ) {
         const queryOsmosis = this.queriesStore.get(this.chainId).osmosis;
         if (queryOsmosis) {
           const baseDenom = queryOsmosis.queryTxFeesBaseDenom.baseDenom;
-          if (
-            feeCurrency.coinMinimalDenom !== baseDenom &&
-            queryOsmosis.queryTxFeesFeeTokens.isTxFeeToken(
-              feeCurrency.coinMinimalDenom
-            )
-          ) {
-            const baseFeeCurrency = this.chainInfo.feeCurrencies.find(
-              (cur) => cur.coinMinimalDenom === baseDenom
+          let baseFeeCurrency =
+            this.selectableFeeCurrencies.find(
+              (c) => c.coinMinimalDenom === baseDenom
+            ) || this.chainInfo.feeCurrencies[0];
+
+          if (this.chainInfo.hasFeature("osmosis-base-fee-beta")) {
+            const remoteBaseFeeStep = this.queriesStore.simpleQuery.queryGet<{
+              low?: number;
+              average?: number;
+              high?: number;
+            }>(
+              "https://base-fee-step.s3.us-west-2.amazonaws.com/osmosis-base-fee-beta.json"
             );
-            if (baseFeeCurrency) {
+
+            const baseFee = queryOsmosis.queryBaseFee.baseFee;
+            if (baseFee) {
+              const low = remoteBaseFeeStep.response?.data.low
+                ? parseFloat(
+                    baseFee
+                      .mul(new Dec(remoteBaseFeeStep.response.data.low))
+                      .toString(8)
+                  )
+                : baseFeeCurrency.gasPriceStep?.low ?? DefaultGasPriceStep.low;
+              const average = Math.max(
+                low,
+                remoteBaseFeeStep.response?.data.average
+                  ? parseFloat(
+                      baseFee
+                        .mul(new Dec(remoteBaseFeeStep.response.data.average))
+                        .toString(8)
+                    )
+                  : baseFeeCurrency.gasPriceStep?.average ??
+                      DefaultGasPriceStep.average
+              );
+              const high = Math.max(
+                average,
+                remoteBaseFeeStep.response?.data.high
+                  ? parseFloat(
+                      baseFee
+                        .mul(new Dec(remoteBaseFeeStep.response.data.high))
+                        .toString(8)
+                    )
+                  : baseFeeCurrency.gasPriceStep?.high ??
+                      DefaultGasPriceStep.high
+              );
+
+              baseFeeCurrency = {
+                ...baseFeeCurrency,
+                gasPriceStep: {
+                  low,
+                  average,
+                  high,
+                },
+              };
+            }
+          }
+
+          if (this.canOsmosisTxFeesAndReady()) {
+            if (
+              feeCurrency.coinMinimalDenom !== baseDenom &&
+              queryOsmosis.queryTxFeesFeeTokens.isTxFeeToken(
+                feeCurrency.coinMinimalDenom
+              )
+            ) {
               const baseGasPriceStep =
                 baseFeeCurrency.gasPriceStep ?? DefaultGasPriceStep;
 
@@ -484,6 +541,12 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
               }
             }
           }
+
+          if (
+            feeCurrency.coinMinimalDenom === baseFeeCurrency.coinMinimalDenom
+          ) {
+            return this.populateGasPriceStep(baseFeeCurrency, feeType);
+          }
         }
       }
 
@@ -495,27 +558,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
       // TODO: Handle terra classic fee
 
-      const gasPriceStep = feeCurrency.gasPriceStep ?? DefaultGasPriceStep;
-      let gasPrice = new Dec(0);
-      switch (feeType) {
-        case "low": {
-          gasPrice = new Dec(gasPriceStep.low);
-          break;
-        }
-        case "average": {
-          gasPrice = new Dec(gasPriceStep.average);
-          break;
-        }
-        case "high": {
-          gasPrice = new Dec(gasPriceStep.high);
-          break;
-        }
-        default: {
-          throw new Error(`Unknown fee type: ${feeType}`);
-        }
-      }
-
-      return gasPrice;
+      return this.populateGasPriceStep(feeCurrency, feeType);
     }
   );
 
@@ -575,6 +618,33 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     };
   });
 
+  protected populateGasPriceStep(
+    feeCurrency: FeeCurrency,
+    feeType: FeeType
+  ): Dec {
+    const gasPriceStep = feeCurrency.gasPriceStep ?? DefaultGasPriceStep;
+    let gasPrice = new Dec(0);
+    switch (feeType) {
+      case "low": {
+        gasPrice = new Dec(gasPriceStep.low);
+        break;
+      }
+      case "average": {
+        gasPrice = new Dec(gasPriceStep.average);
+        break;
+      }
+      case "high": {
+        gasPrice = new Dec(gasPriceStep.high);
+        break;
+      }
+      default: {
+        throw new Error(`Unknown fee type: ${feeType}`);
+      }
+    }
+
+    return gasPrice;
+  }
+
   @computed
   get uiProperties(): UIProperties {
     if (this.disableBalanceCheck) {
@@ -623,6 +693,29 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             loadingState: etcQueries.queryTerraClassicTaxCaps.isFetching
               ? "loading-block"
               : undefined,
+          };
+        }
+      }
+    }
+
+    if (this.chainInfo.hasFeature("osmosis-base-fee-beta")) {
+      const queryOsmosis = this.queriesStore.get(this.chainId).osmosis;
+      if (queryOsmosis) {
+        const queryBaseFee = queryOsmosis.queryBaseFee;
+        const baseFee = queryBaseFee.baseFee;
+        if (!baseFee) {
+          return {
+            loadingState: "loading-block",
+          };
+        }
+        if (queryBaseFee.isFetching) {
+          return {
+            loadingState: "loading",
+          };
+        }
+        if (queryBaseFee.error) {
+          return {
+            warning: new Error("Failed to fetch base fee"),
           };
         }
       }
