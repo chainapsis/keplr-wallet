@@ -1,4 +1,4 @@
-import React, {forwardRef} from 'react';
+import React, {forwardRef, useEffect, useState} from 'react';
 import {SearchIcon} from '../../icon';
 import {TextInput} from '../index';
 import {TextInput as NativeTextInput} from 'react-native';
@@ -21,3 +21,44 @@ export const SearchTextInput = forwardRef<
 >((props, ref) => {
   return <TextInput {...props} ref={ref} left={LeftIcon} />;
 });
+
+export const DebounceSearchTextInput = forwardRef<
+  NativeTextInput,
+  Pick<React.ComponentProps<typeof TextInput>, 'ref' | 'placeholder'> & {
+    handleSearchWord: (debouncedText: string) => void;
+    delay: number;
+  }
+>((props, ref) => {
+  const [searchWord, setSearchWord] = useState<string>('');
+  const {delay, handleSearchWord} = props;
+  const debouncedSearchWord = useDebounce(searchWord, delay);
+
+  useEffect(() => {
+    handleSearchWord(debouncedSearchWord);
+  }, [debouncedSearchWord, handleSearchWord]);
+
+  return (
+    <TextInput
+      value={searchWord}
+      onChangeText={e => setSearchWord(e)}
+      {...props}
+      ref={ref}
+      left={LeftIcon}
+    />
+  );
+});
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+  return debouncedValue;
+}
