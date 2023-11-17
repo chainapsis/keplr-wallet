@@ -17,7 +17,6 @@ import {
 } from '@react-navigation/native-stack';
 import {HomeScreen} from './screen/home';
 import {LockedScreen} from './screen/locked';
-import {RegisterEnableChainScreen} from './screen/register/enable-chain';
 import {SendSelectAssetScreen} from './screen/send/select-asset';
 import {createDrawerNavigator, useDrawerStatus} from '@react-navigation/drawer';
 import {DrawerContent} from './components/drawer';
@@ -63,6 +62,7 @@ import {GovernanceListScreen} from './screen/governance/list';
 import {GovernanceScreen} from './screen/governance';
 import {FinalizeKeyScreen} from './screen/register/finalize-key';
 import {PlainObject} from '@keplr-wallet/background';
+import {EnableChainsScreen} from './screen/register/enable-chains';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -107,7 +107,22 @@ export type RootStackParamList = {
       };
     };
   };
-  'Register.EnableChain': undefined;
+  'Register.EnableChain': {
+    vaultId: string;
+    candidateAddresses?: {
+      chainId: string;
+      bech32Addresses: {
+        coinType: number;
+        address: string;
+      }[];
+    }[];
+    isFresh?: boolean;
+    skipWelcome?: boolean;
+    initialSearchValue?: string;
+    fallbackEthereumLedgerApp?: boolean;
+    stepPrevious?: number;
+    stepTotal?: number;
+  };
   Send: undefined;
   'Send.SelectAsset': undefined;
   'Setting.Intro': undefined;
@@ -189,11 +204,6 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
 
       <Stack.Screen name="Register.FinalizeKey" component={FinalizeKeyScreen} />
-
-      <Stack.Screen
-        name="Register.EnableChain"
-        component={RegisterEnableChainScreen}
-      />
     </Stack.Navigator>
   );
 };
@@ -636,6 +646,14 @@ export const AppNavigation: FunctionComponent = observer(() => {
             component={StakeNavigation}
           />
           <Stack.Screen name={'Web'} component={WebpageScreen} />
+
+          {/*NOTE Register와 Home을 통해서 이동하여 route를 최상위에도 올렸습니다*/}
+          <Stack.Screen
+            name="Register.EnableChain"
+            options={{headerShown: false}}
+            component={EnableChainsScreen}
+          />
+
           {/*NOTE 사이드바를 통해서 세팅으로 이동시 뒤로가기때 다시 메인으로 오기 위해서 해당 route들은 최상위에도 올렸습니다*/}
           <Stack.Screen
             name="Setting.ManageTokenList.Add"

@@ -7,17 +7,13 @@ import {Text} from 'react-native';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {Button} from '../../../components/button';
 import {TextButton} from '../../../components/text-button';
-import {
-  NavigationProp,
-  StackActions,
-  useNavigation,
-} from '@react-navigation/native';
-import {RootStackParamList} from '../../../navigation';
+import {StackActions, useNavigation} from '@react-navigation/native';
+import {StackNavProp} from '../../../navigation';
 
 export const RegisterIntroScreen: FunctionComponent = () => {
   const intl = useIntl();
   const style = useStyle();
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<StackNavProp>();
 
   return (
     <Box height="100%" alignY="center" alignX="center">

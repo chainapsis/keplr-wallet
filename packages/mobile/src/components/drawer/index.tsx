@@ -22,6 +22,17 @@ export const DrawerContent: FunctionComponent = observer(() => {
     navigation.reset({routes: [{name: 'Locked'}]});
   };
 
+  const onClickManageChains = () => {
+    drawerClose();
+
+    if (keyRingStore.selectedKeyInfo) {
+      navigation.navigate('Register.EnableChain', {
+        vaultId: keyRingStore.selectedKeyInfo.id,
+        skipWelcome: true,
+      });
+    }
+  };
+
   const onClickAddTokens = () => {
     drawerClose();
     navigation.navigate('Setting.ManageTokenList.Add');
@@ -52,7 +63,7 @@ export const DrawerContent: FunctionComponent = observer(() => {
         paddingLeft: 20,
       }}>
       <Stack gutter={32}>
-        <Pressable>
+        <Pressable onPress={onClickManageChains}>
           <Text style={style.flatten(['h3', 'color-white'])}>
             Manage Chain Visibility
           </Text>
