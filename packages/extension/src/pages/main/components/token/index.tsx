@@ -339,7 +339,10 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                         });
                       }
 
-                      return viewToken.error.message;
+                      return (
+                        viewToken.error.message ||
+                        "Failed to query response from endpoint. Check again in a few minutes."
+                      );
                     })()}
                   >
                     <ErrorIcon size="1rem" />
