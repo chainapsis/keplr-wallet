@@ -62,7 +62,7 @@ export class SignEthereumInteractionStore {
   }
 
   async rejectAll() {
-    await this.interactionStore.rejectAll("request-sign-cosmos");
+    await this.interactionStore.rejectAll("request-sign-ethereum");
   }
 
   isObsoleteInteraction(id: string | undefined): boolean {
