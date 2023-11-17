@@ -151,11 +151,8 @@ export const StakedTabView: FunctionComponent<{
                         !viewToken.viewToken.chainInfo.walletUrlForStaking
                       }
                       onClick={() => {
-                        navigate.navigate('Stake', {
-                          screen: 'Stake.Dashboard',
-                          params: {
-                            chainId: viewToken.viewToken.chainInfo.chainId,
-                          },
+                        navigate.navigate('Home.Stake.Dashboard', {
+                          chainId: viewToken.viewToken.chainInfo.chainId,
                         });
                       }}
                       altSentence={viewToken.altSentence}
