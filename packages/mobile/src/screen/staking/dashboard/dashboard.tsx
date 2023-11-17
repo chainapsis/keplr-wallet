@@ -99,9 +99,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
         if (!chainInfo.stakeCurrency) {
           continue;
         }
-        if (!chainInfo.stakeCurrency) {
-          continue;
-        }
+
         const validator = validatorsMap.get(unbonding.validator_address);
         if (!validator) {
           continue;
