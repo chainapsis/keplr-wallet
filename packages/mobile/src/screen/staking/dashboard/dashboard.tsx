@@ -273,6 +273,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
             <Gutter size={12} />
             <CollapsibleList
               title={<TokenTitleView title={title} />}
+              hideLength={true}
               lenAlwaysShown={lenAlwaysShown}
               items={validators.map(validator => {
                 return (
