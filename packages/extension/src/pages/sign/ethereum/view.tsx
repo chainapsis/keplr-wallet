@@ -26,7 +26,7 @@ import SimpleBar from "simplebar-react";
 import { Column, Columns } from "../../../components/column";
 import { ViewDataButton } from "../components/view-data-button";
 import { UnsignedTransaction } from "@ethersproject/transactions";
-import { EthSendTxPretty } from "../components/eth-sign-data";
+import { defaultRegistry } from "../components/eth-tx/registry";
 import { ChainImageFallback } from "../../../components/image";
 import { Gutter } from "../../../components/gutter";
 
@@ -280,14 +280,14 @@ export const EthereumSigningView: FunctionComponent<{
                         : ColorPalette["gray-100"]
                     }
                   >
-                    <EthSendTxPretty
-                      chainId={interactionData.data.chainId}
-                      unsignedTx={
+                    {
+                      defaultRegistry.render(
+                        interactionData.data.chainId,
                         JSON.parse(
                           Buffer.from(interactionData.data.message).toString()
                         ) as UnsignedTransaction
-                      }
-                    />
+                      ).content
+                    }
                   </Body2>
                 </Box>
               )}
