@@ -14,13 +14,8 @@ import {FormattedMessage, useIntl} from 'react-intl';
 import {TextInput} from '../../../components/input';
 import {SearchIcon} from '../../../components/icon';
 import {Gutter} from '../../../components/gutter';
-import {
-  NavigationProp,
-  RouteProp,
-  useNavigation,
-  useRoute,
-} from '@react-navigation/native';
-import {RootStackParamList} from '../../../navigation';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {RootStackParamList, StackNavProp} from '../../../navigation';
 import {useStore} from '../../../stores';
 import {useEffectOnce} from '../../../hooks';
 import {WalletStatus} from '@keplr-wallet/stores';
@@ -39,7 +34,7 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
   const route =
     useRoute<RouteProp<RootStackParamList, 'Register.EnableChain'>>();
 
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<StackNavProp>();
 
   const {accountStore, chainStore, keyRingStore, priceStore, queriesStore} =
     useStore();

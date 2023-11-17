@@ -1,13 +1,8 @@
 import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {ScrollView, Text} from 'react-native';
-import {
-  NavigationProp,
-  RouteProp,
-  useNavigation,
-  useRoute,
-} from '@react-navigation/native';
-import {RootStackParamList} from '../../../navigation';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {RootStackParamList, StackNavProp} from '../../../navigation';
 import {RegisterContainer} from '../components';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStyle} from '../../../styles';
@@ -29,7 +24,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
     useRoute<RouteProp<RootStackParamList, 'Register.VerifyMnemonic'>>();
   const modalRef = useRef<BottomSheetModal>(null);
 
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<StackNavProp>();
 
   const {
     control,

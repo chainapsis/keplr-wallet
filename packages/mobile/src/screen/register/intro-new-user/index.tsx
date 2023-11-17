@@ -6,11 +6,7 @@ import {Gutter} from '../../../components/gutter';
 import {XAxis} from '../../../components/axis';
 import {Button} from '../../../components/button';
 import {TextButton} from '../../../components/text-button';
-import {
-  NavigationProp,
-  StackActions,
-  useNavigation,
-} from '@react-navigation/native';
+import {StackActions, useNavigation} from '@react-navigation/native';
 import {OptionContainer, RegisterContainer} from '../components';
 import {
   AppleIcon,
@@ -19,12 +15,12 @@ import {
   ShieldIcon,
 } from '../../../components/icon';
 import {Box} from '../../../components/box';
-import {RootStackParamList} from '../../../navigation';
+import {StackNavProp} from '../../../navigation';
 
 export const RegisterIntroNewUserScreen: FunctionComponent = () => {
   const intl = useIntl();
   const style = useStyle();
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<StackNavProp>();
 
   return (
     <RegisterContainer
