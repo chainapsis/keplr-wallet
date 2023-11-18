@@ -312,7 +312,10 @@ export class RootStore {
           locale: "ja-JP",
         },
       },
-      "usd"
+      "usd",
+      {
+        baseURL: process.env.COINGECKO_API_BASE_URL,
+      }
     );
 
     this.tokensStore = new TokensStore(
