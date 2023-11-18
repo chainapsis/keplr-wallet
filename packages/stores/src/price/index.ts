@@ -183,7 +183,7 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
       baseURL: options.baseURL || "https://api.coingecko.com/api/v3",
     });
 
-    super(kvStore, instance, "/simple/price");
+    super(kvStore, instance, "/v1/price");
 
     this.isInitialized = false;
 
