@@ -314,7 +314,7 @@ export class RootStore {
       },
       "usd",
       {
-        baseURL: process.env.COINGECKO_API_BASE_URL,
+        baseURL: process.env["COINGECKO_API_BASE_URL"],
       }
     );
 
