@@ -34,7 +34,7 @@ import { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
-import { Dec, DecUtils } from "@keplr-wallet/unit";
+import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
 import {
@@ -659,27 +659,19 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       return "0";
                     }
 
-                    const swapRanges = [
-                      1, 10, 100, 1000, 10000, 100000, 1000000, 10000000,
-                      100000000, 1000000000,
-                    ];
-                    let res = "unknown";
-                    for (let i = 0; i < swapRanges.length; i++) {
-                      const range = swapRanges[i];
-                      const beforeRange = i > 0 ? swapRanges[i - 1] : 0;
-                      if (
-                        amount.toDec().lte(new Dec(range)) &&
-                        amount.toDec().gt(new Dec(beforeRange))
-                      ) {
-                        res = `${beforeRange}~${range}`;
-                        break;
-                      }
-
-                      if (i === swapRanges.length - 1) {
-                        res = `${range}~`;
-                      }
+                    if (amount.toDec().lt(new Dec(100))) {
+                      const n = amount.toDec().quo(new Dec(10)).truncate();
+                      return `${n.mul(new Int(10)).toString()}~${n
+                        .add(new Int(1))
+                        .mul(new Int(10))
+                        .toString()}`;
+                    } else {
+                      const n = amount.toDec().quo(new Dec(100)).truncate();
+                      return `${n.mul(new Int(100)).toString()}~${n
+                        .add(new Int(1))
+                        .mul(new Int(100))
+                        .toString()}`;
                     }
-                    return res;
                   };
                   params["inRange"] = getSwapRangeStr(
                     ibcSwapConfigs.amountConfig.amount[0]
