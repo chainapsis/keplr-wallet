@@ -358,7 +358,7 @@ export class RecentSendHistoryService {
           txTracer.addEventListener("error", onError);
           txTracer
             .traceTx({
-              "acknowledge_packet.packet_src_port": targetChannel.portId,
+              // "acknowledge_packet.packet_src_port": targetChannel.portId,
               "acknowledge_packet.packet_src_channel": targetChannel.channelId,
               "acknowledge_packet.packet_sequence": targetChannel.sequence,
             })
@@ -475,7 +475,7 @@ export class RecentSendHistoryService {
         );
         if (chainInfo) {
           const queryEvents: any = {
-            "recv_packet.packet_src_port": targetChannel.portId,
+            // "recv_packet.packet_src_port": targetChannel.portId,
             "recv_packet.packet_src_channel": targetChannel.channelId,
             "recv_packet.packet_sequence": targetChannel.sequence,
           };
