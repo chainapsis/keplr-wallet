@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import React, {FunctionComponent, useState} from 'react';
+import React, {FunctionComponent, useCallback, useState} from 'react';
 import {useStore} from '../../stores';
 import {Button} from '../../components/button';
 import {StackActions, useNavigation} from '@react-navigation/native';
@@ -8,16 +8,31 @@ import {useSetFocusedScreen} from '../../components/page/utils';
 import {Box} from '../../components/box';
 import {useStyle} from '../../styles';
 import {useIntl} from 'react-intl';
+import {Gutter} from '../../components/gutter';
 
 export const LockedScreen: FunctionComponent = observer(() => {
-  const {keyRingStore} = useStore();
+  const {keyRingStore, keychainStore} = useStore();
+
+  const intl = useIntl();
+  const style = useStyle();
   const navigation = useNavigation();
+
   const [isFailed, setIsFailed] = useState(false);
   const [password, setPassword] = useState('');
-  const style = useStyle();
-  const intl = useIntl();
 
   useSetFocusedScreen();
+
+  const tryBiometric = useCallback(async () => {
+    try {
+      await keychainStore.tryUnlockWithBiometry();
+      navigation.dispatch({
+        ...StackActions.replace('Home'),
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  }, [keychainStore]);
+
   const doUnlock = async () => {
     try {
       await keyRingStore.unlock(password);
@@ -52,6 +67,12 @@ export const LockedScreen: FunctionComponent = observer(() => {
           size="large"
           onPress={doUnlock}
         />
+
+        <Gutter size={20} />
+
+        {keychainStore.isBiometryOn ? (
+          <Button text="Use Biometric Authentication" onPress={tryBiometric} />
+        ) : null}
       </Box>
     </React.Fragment>
   );
