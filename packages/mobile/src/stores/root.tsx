@@ -45,6 +45,7 @@ import {AprQueries} from './aprs';
 import {CosmosGovernanceQueries} from './governance/quries';
 import {CosmosGovernanceQueriesV1} from './governance/v1/quries';
 import {ScamProposalStore} from './scam-proposal';
+import {KeychainStore} from './keychain';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
@@ -82,6 +83,8 @@ export class RootStore {
 
   public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
   public readonly scamProposalStore: ScamProposalStore;
+
+  public readonly keychainStore: KeychainStore;
   constructor() {
     const router = new RNRouterUI(RNEnv.produceEnv);
 
@@ -348,6 +351,11 @@ export class RootStore {
       new QuerySharedContext(new AsyncKVStore('store_scam_proposal'), {
         responseDebounceMs: 100,
       }),
+    );
+
+    this.keychainStore = new KeychainStore(
+      new AsyncKVStore('store_keychain'),
+      this.keyRingStore,
     );
 
     router.listen(APP_PORT);

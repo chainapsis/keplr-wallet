@@ -160,6 +160,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
                 <Gutter size={16} />
 
                 <TextInput
+                  autoCapitalize="none"
                   containerStyle={{width: 120}}
                   onChangeText={text => {
                     setInputs({

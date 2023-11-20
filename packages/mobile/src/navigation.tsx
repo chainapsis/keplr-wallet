@@ -64,6 +64,7 @@ import {ValidatorListScreen} from './screen/staking/vlidator-list';
 import {FinalizeKeyScreen} from './screen/register/finalize-key';
 import {PlainObject} from '@keplr-wallet/background';
 import {EnableChainsScreen} from './screen/register/enable-chains';
+import {WelcomeScreen} from './screen/register/welcome';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -126,6 +127,10 @@ export type RootStackParamList = {
     fallbackEthereumLedgerApp?: boolean;
     stepPrevious?: number;
     stepTotal?: number;
+    password?: string;
+  };
+  'Register.Welcome': {
+    password?: string;
   };
   Send: undefined;
   'Send.SelectAsset': undefined;
@@ -656,6 +661,12 @@ export const AppNavigation: FunctionComponent = observer(() => {
             name="Register.EnableChain"
             options={{headerShown: false}}
             component={EnableChainsScreen}
+          />
+
+          <Stack.Screen
+            name="Register.Welcome"
+            options={{headerShown: false}}
+            component={WelcomeScreen}
           />
 
           {/*NOTE 사이드바를 통해서 세팅으로 이동시 뒤로가기때 다시 메인으로 오기 위해서 해당 route들은 최상위에도 올렸습니다*/}

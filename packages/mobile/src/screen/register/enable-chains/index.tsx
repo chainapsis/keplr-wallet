@@ -48,6 +48,7 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
     fallbackEthereumLedgerApp,
     stepPrevious,
     stepTotal,
+    password,
   } = route.params;
 
   const [search, setSearch] = useState<string>(initialSearchValue ?? '');
@@ -466,10 +467,11 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
 
   const replaceToWelcomePage = () => {
     if (skipWelcome) {
-      navigation.goBack();
-    } else {
-      // Todo: Welcome 페이지로 이동
       navigation.reset({routes: [{name: 'Home'}]});
+    } else {
+      navigation.reset({
+        routes: [{name: 'Register.Welcome', params: {password}}],
+      });
     }
   };
 
