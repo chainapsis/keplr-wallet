@@ -2,8 +2,8 @@ import React, {FunctionComponent, useMemo, useState} from 'react';
 
 import {observer} from 'mobx-react-lite';
 import {FlatList} from 'react-native';
-import {StakeNavigation} from '../../../navigation';
-import {RouteProp, useRoute} from '@react-navigation/native';
+import {StackNavProp, StakeNavigation} from '../../../navigation';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {useStore} from '../../../stores';
 import {Staking} from '@keplr-wallet/stores';
 import {ValidatorInfo} from '../type';
@@ -23,6 +23,8 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
   const [filterOption, setFilterOption] = useState<FilterOption>('Voting');
   const [search, setSearch] = useState('');
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.ValidateList'>>();
+  const navigation = useNavigation<StackNavProp>();
+
   const {chainId} = route.params;
   const queries = queriesStore.get(chainId);
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
@@ -97,7 +99,12 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
             filterOption={filterOption}
             chainId={chainId}
             validatorAddress={validator.operator_address}
-            afterSelect={() => {}}
+            afterSelect={() => {
+              navigation.navigate('Stake', {
+                screen: 'Stake.ValidateDetail',
+                params: {chainId, validatorAddress: validator.operator_address},
+              });
+            }}
           />
         );
       }}
