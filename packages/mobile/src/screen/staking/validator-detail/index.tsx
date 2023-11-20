@@ -10,6 +10,7 @@ import {GuideBox} from '../../../components/guide-box';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import {StakeNavigation} from '../../../navigation';
 import {UnbondingCard} from './unbonding-card';
+import {DelegatedCard} from './delegated-card';
 
 export const ValidatorDetailScreen: FunctionComponent = observer(() => {
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.ValidateDetail'>>();
@@ -22,8 +23,9 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
       style={style.flatten(['padding-x-12'])}>
       <Stack gutter={12}>
         <GuideBox title="te" color="warning" />
+        <DelegatedCard chainId={chainId} validatorAddress={validatorAddress} />
+        <UnbondingCard chainId={chainId} validatorAddress={validatorAddress} />
       </Stack>
-      <UnbondingCard chainId={chainId} validatorAddress={validatorAddress} />
     </PageWithScrollView>
   );
 });
