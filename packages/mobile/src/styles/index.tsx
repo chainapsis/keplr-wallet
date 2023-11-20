@@ -75,7 +75,7 @@ export const ColorPalette = {
   'yellow-200': '#EDD18A',
   'yellow-300': '#EBBF50',
   'yellow-400': '#F0B622',
-  'yellow-500': '#FF6BB8',
+  'yellow-500': '#D29C11',
   'yellow-600': '#A67B0C',
   'yellow-700': '#705512',
   'yellow-800': '#2F2611',
