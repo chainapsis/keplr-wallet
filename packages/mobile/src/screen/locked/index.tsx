@@ -31,7 +31,7 @@ export const LockedScreen: FunctionComponent = observer(() => {
     } catch (e) {
       console.log(e);
     }
-  }, [keychainStore]);
+  }, [keychainStore, navigation]);
 
   const doUnlock = async () => {
     try {
