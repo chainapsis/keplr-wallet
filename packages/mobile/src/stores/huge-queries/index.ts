@@ -38,7 +38,12 @@ interface ViewToken {
 export class HugeQueriesStore {
   protected static zeroDec = new Dec(0);
 
-  protected binarySort: BinarySortArray<ViewToken>;
+  protected balanceBinarySort: BinarySortArray<ViewToken>;
+  protected delegationBinarySort: BinarySortArray<ViewToken>;
+  protected unbondingBinarySort: BinarySortArray<{
+    viewToken: ViewToken;
+    completeTime: string;
+  }>;
 
   constructor(
     protected readonly chainStore: ChainStore,
@@ -46,28 +51,50 @@ export class HugeQueriesStore {
     protected readonly accountStore: IAccountStore,
     protected readonly priceStore: CoinGeckoPriceStore,
   ) {
-    let disposal: (() => void) | undefined;
-    this.binarySort = new BinarySortArray<ViewToken>(
-      (a, b) => {
-        const aPrice = a.price?.toDec() ?? HugeQueriesStore.zeroDec;
-        const bPrice = b.price?.toDec() ?? HugeQueriesStore.zeroDec;
-
-        if (aPrice.equals(bPrice)) {
-          return 0;
-        } else if (aPrice.gt(bPrice)) {
-          return -1;
-        } else {
-          return 1;
-        }
-      },
+    let balanceDisposal: (() => void) | undefined;
+    this.balanceBinarySort = new BinarySortArray<ViewToken>(
+      this.sortByPrice,
       () => {
-        disposal = autorun(() => {
+        balanceDisposal = autorun(() => {
           this.updateBalances();
         });
       },
       () => {
-        if (disposal) {
-          disposal();
+        if (balanceDisposal) {
+          balanceDisposal();
+        }
+      },
+    );
+    let delegationDisposal: (() => void) | undefined;
+    this.delegationBinarySort = new BinarySortArray<ViewToken>(
+      this.sortByPrice,
+      () => {
+        delegationDisposal = autorun(() => {
+          this.updateDelegations();
+        });
+      },
+      () => {
+        if (delegationDisposal) {
+          delegationDisposal();
+        }
+      },
+    );
+    let unbondingDisposal: (() => void) | undefined;
+    this.unbondingBinarySort = new BinarySortArray<{
+      viewToken: ViewToken;
+      completeTime: string;
+    }>(
+      (a, b) => {
+        return this.sortByPrice(a.viewToken, b.viewToken);
+      },
+      () => {
+        unbondingDisposal = autorun(() => {
+          this.updateUnbondings();
+        });
+      },
+      () => {
+        if (unbondingDisposal) {
+          unbondingDisposal();
         }
       },
     );
@@ -76,7 +103,7 @@ export class HugeQueriesStore {
   @action
   protected updateBalances() {
     const keysUsed = new Map<string, boolean>();
-    const prevKeyMap = new Map(this.binarySort.indexForKeyMap());
+    const prevKeyMap = new Map(this.balanceBinarySort.indexForKeyMap());
 
     for (const chainInfo of this.chainStore.chainInfosInUI) {
       const account = this.accountStore.getAccount(chainInfo.chainId);
@@ -112,7 +139,7 @@ export class HugeQueriesStore {
 
             keysUsed.set(key, true);
             prevKeyMap.delete(key);
-            this.binarySort.pushAndSort(key, {
+            this.balanceBinarySort.pushAndSort(key, {
               chainInfo,
               token: balance,
               price: currency.coinGeckoId
@@ -134,7 +161,7 @@ export class HugeQueriesStore {
 
               keysUsed.set(key, true);
               prevKeyMap.delete(key);
-              this.binarySort.pushAndSort(key, {
+              this.balanceBinarySort.pushAndSort(key, {
                 chainInfo,
                 token: balance.balance,
                 price: currency.coinGeckoId
@@ -150,13 +177,13 @@ export class HugeQueriesStore {
     }
 
     for (const removedKey of prevKeyMap.keys()) {
-      this.binarySort.remove(removedKey);
+      this.balanceBinarySort.remove(removedKey);
     }
   }
 
   @computed
   get allKnownBalances(): ReadonlyArray<ViewToken> {
-    return this.binarySort.arr;
+    return this.balanceBinarySort.arr;
   }
 
   getAllBalances = computedFn(
@@ -177,7 +204,7 @@ export class HugeQueriesStore {
           keys.set(key, true);
         }
       }
-      return this.binarySort.arr.filter(viewToken => {
+      return this.balanceBinarySort.arr.filter(viewToken => {
         const key = viewToken[BinarySortArray.SymbolKey];
         return keys.get(key);
       });
@@ -221,7 +248,7 @@ export class HugeQueriesStore {
       const key = `${chainInfo.chainIdentifier}/${chainInfo.stakeCurrency.coinMinimalDenom}`;
       keys.set(key, true);
     }
-    return this.binarySort.arr.filter(viewToken => {
+    return this.balanceBinarySort.arr.filter(viewToken => {
       const key = viewToken[BinarySortArray.SymbolKey];
       return keys.get(key);
     });
@@ -250,7 +277,7 @@ export class HugeQueriesStore {
         keys.set(key, true);
       }
     }
-    return this.binarySort.arr.filter(viewToken => {
+    return this.balanceBinarySort.arr.filter(viewToken => {
       const key = viewToken[BinarySortArray.SymbolKey];
       return keys.get(key);
     });
@@ -271,15 +298,16 @@ export class HugeQueriesStore {
         }
       }
     }
-    return this.binarySort.arr.filter(viewToken => {
+    return this.balanceBinarySort.arr.filter(viewToken => {
       const key = viewToken[BinarySortArray.SymbolKey];
       return keys.get(key);
     });
   }
 
-  @computed
-  get delegations(): ViewToken[] {
-    const res: ViewToken[] = [];
+  @action
+  protected updateDelegations(): void {
+    const prevKeyMap = new Map(this.delegationBinarySort.indexForKeyMap());
+
     for (const chainInfo of this.chainStore.chainInfosInUI) {
       const account = this.accountStore.getAccount(chainInfo.chainId);
       if (account.bech32Address === '') {
@@ -294,7 +322,9 @@ export class HugeQueriesStore {
         continue;
       }
 
-      res.push({
+      const key = `${chainInfo.chainId}/${account.bech32Address}`;
+      prevKeyMap.delete(key);
+      this.delegationBinarySort.pushAndSort(key, {
         chainInfo,
         token: queryDelegation.total,
         price: this.priceStore.calculatePrice(queryDelegation.total),
@@ -302,20 +332,21 @@ export class HugeQueriesStore {
         error: queryDelegation.error,
       });
     }
-    return res;
-    // TODO
-    // return res.sort(this.sortByPrice);
+
+    for (const removedKey of prevKeyMap.keys()) {
+      this.delegationBinarySort.remove(removedKey);
+    }
   }
 
   @computed
-  get unbondings(): {
-    viewToken: ViewToken;
-    completeTime: string;
-  }[] {
-    const res: {
-      viewToken: ViewToken;
-      completeTime: string;
-    }[] = [];
+  get delegations(): ReadonlyArray<ViewToken> {
+    return this.delegationBinarySort.arr;
+  }
+
+  @action
+  protected updateUnbondings(): void {
+    const prevKeyMap = new Map(this.unbondingBinarySort.indexForKeyMap());
+
     for (const chainInfo of this.chainStore.chainInfosInUI) {
       const account = this.accountStore.getAccount(chainInfo.chainId);
       if (account.bech32Address === '') {
@@ -327,7 +358,8 @@ export class HugeQueriesStore {
           account.bech32Address,
         );
 
-      for (const unbonding of queryUnbonding.unbondings) {
+      for (let i = 0; i < queryUnbonding.unbondings.length; i++) {
+        const unbonding = queryUnbonding.unbondings[i];
         for (const entry of unbonding.entries) {
           if (!chainInfo.stakeCurrency) {
             continue;
@@ -336,7 +368,10 @@ export class HugeQueriesStore {
             chainInfo.stakeCurrency,
             entry.balance,
           );
-          res.push({
+
+          const key = `${chainInfo.chainId}/${account.bech32Address}/${i}`;
+          prevKeyMap.delete(key);
+          this.unbondingBinarySort.pushAndSort(key, {
             viewToken: {
               chainInfo,
               token: balance,
@@ -349,7 +384,31 @@ export class HugeQueriesStore {
         }
       }
     }
-    return res;
+
+    for (const removedKey of prevKeyMap.keys()) {
+      this.unbondingBinarySort.remove(removedKey);
+    }
+  }
+
+  @computed
+  get unbondings(): ReadonlyArray<{
+    viewToken: ViewToken;
+    completeTime: string;
+  }> {
+    return this.unbondingBinarySort.arr;
+  }
+
+  protected sortByPrice(a: ViewToken, b: ViewToken): number {
+    const aPrice = a.price?.toDec() ?? HugeQueriesStore.zeroDec;
+    const bPrice = b.price?.toDec() ?? HugeQueriesStore.zeroDec;
+
+    if (aPrice.equals(bPrice)) {
+      return 0;
+    } else if (aPrice.gt(bPrice)) {
+      return -1;
+    } else {
+      return 1;
+    }
   }
 }
 
