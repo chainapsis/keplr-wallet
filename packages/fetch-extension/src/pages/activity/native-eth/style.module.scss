@@ -6,7 +6,7 @@
   cursor: pointer;
 }
 
-.activityRow:hover {
+.activityContainer:hover {
   background: #f0f0f0;
 }
 
@@ -29,4 +29,28 @@
   display: flex;
   align-items: center;
   margin: 3px;
+  color: #808da0;
+}
+
+.buttonRow {
+  color: #808da0;
+  font-size: small;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  width: 50%;
+}
+
+.buttonCol {
+  font-size: small;
+  display: flex;
+  align-items: center;
+  margin: 3px;
+  width: 50%;
+}
+
+.activityContainer {
+  padding: 10px;
+  border-top: grey solid 0.5px;
+  cursor: pointer;
 }

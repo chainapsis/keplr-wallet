@@ -40,6 +40,7 @@
     "mobx": "^6.1.7",
     "mobx-utils": "^6.0.3",
     "p-queue": "^6.6.2",
-    "utility-types": "^3.10.0"
+    "utility-types": "^3.10.0",
+    "web3": "^4.2.2"
   }
 }

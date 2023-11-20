@@ -11,6 +11,7 @@ import deepmerge from "deepmerge";
 import { CosmosAccount } from "./cosmos";
 import { txEventsWithPreOnFulfill } from "./utils";
 import { Bech32Address } from "@keplr-wallet/cosmos";
+import w3 from "web3";
 
 export interface CosmwasmAccount {
   cosmwasm: CosmwasmAccountImpl;
@@ -327,11 +328,13 @@ export class CosmwasmAccountImpl {
       return dec.truncate().toString();
     })();
 
+    const csRecipient = w3.utils.toChecksumAddress(recipient);
+
     return this.makeExecuteContractTx(
       "nativeBridgeSend",
       this.queries.cosmwasm.queryNativeFetBridge.nativeBridgeAddress,
       {
-        swap: { destination: recipient },
+        swap: { destination: csRecipient },
       },
       [
         {

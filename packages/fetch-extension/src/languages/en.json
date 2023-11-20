@@ -291,7 +291,8 @@
   "send.input.gas": "Gas",
   "send.input-button.balance": "Balance",
   "send.button.send": "Send",
-
+  "send.button.speedup": "Speed up",
+  "send.button.cancel": "Cancel",
   "ibc.transfer.next": "Next",
   "ibc.transfer.submit": "Submit",
 
