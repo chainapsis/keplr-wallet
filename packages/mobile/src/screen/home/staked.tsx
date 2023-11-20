@@ -219,7 +219,14 @@ export const StakedTabView: FunctionComponent<{
 
       <Modal ref={SelectStakingChainModalRef}>
         <SelectStakingChainModal
-          onSelect={() => {}}
+          onSelect={stakingChainModalItem => {
+            navigate.navigate('Stake', {
+              screen: 'Stake.ValidateList',
+              params: {
+                chainId: stakingChainModalItem.viewToken.chainInfo.chainId,
+              },
+            });
+          }}
           aprList={aprList}
           items={stakablesTokenNonZeroList.map(token => ({
             key: token.chainInfo.chainId,

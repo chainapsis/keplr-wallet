@@ -18,3 +18,4 @@ export * from './shield';
 export * from './bolt';
 export * from './apple';
 export * from './google';
+export * from './arrow-down-up';

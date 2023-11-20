@@ -105,19 +105,11 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
           continue;
         }
 
-        const thumbnail =
-          bondedValidators.getValidatorThumbnail(validator.operator_address) ||
-          unbondingValidators.getValidatorThumbnail(
-            validator.operator_address,
-          ) ||
-          unbondedValidators.getValidatorThumbnail(validator.operator_address);
-
         const balance = new CoinPretty(chainInfo.stakeCurrency, entry.balance);
         const relativeTime = formatRelativeTime(entry.completion_time);
 
         res.push({
           coin: balance,
-          imageUrl: thumbnail,
           name: validator.description.moniker,
           validatorAddress: validator.operator_address,
           subString: intl.formatRelativeTime(
@@ -140,18 +132,12 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
         continue;
       }
 
-      const thumbnail =
-        bondedValidators.getValidatorThumbnail(validator.operator_address) ||
-        unbondingValidators.getValidatorThumbnail(validator.operator_address) ||
-        unbondedValidators.getValidatorThumbnail(validator.operator_address);
-
       const amount = queryDelegations.getDelegationTo(
         validator.operator_address,
       );
 
       res.push({
         coin: amount,
-        imageUrl: thumbnail,
         name: validator.description.moniker,
         validatorAddress: validator.operator_address,
         subString: amount
@@ -258,6 +244,12 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
             style={style.flatten(['padding-x-16', 'padding-y-8'])}
             text="Stake"
             size="small"
+            onPress={() => {
+              navigation.navigate('Stake', {
+                screen: 'Stake.ValidateList',
+                params: {chainId},
+              });
+            }}
           />
         </Columns>
       </Box>
@@ -276,20 +268,15 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
               items={validators.map(validator => {
                 return (
                   <ValidatorItem
+                    chainId={chainId}
                     viewValidator={{
                       coin: validator.coin,
-                      imageUrl: validator.imageUrl,
                       name: validator.name,
                       validatorAddress: validator.validatorAddress,
                       subString: validator.subString,
                     }}
                     key={validator.validatorAddress + validator.subString}
-                    afterSelect={() => {
-                      navigation.navigate('Stake', {
-                        screen: 'Stake.ValidateList',
-                        params: {chainId},
-                      });
-                    }}
+                    afterSelect={() => {}}
                   />
                 );
               })}
