@@ -83,7 +83,7 @@ export type RootStackParamList = {
     stepTotal: number;
   };
   'Register.Intro.ExistingUser': undefined;
-  'Register.Intro.RecoverMnemonic': undefined;
+  'Register.RecoverMnemonic': undefined;
   'Register.FinalizeKey': {
     name: string;
     password: string;
@@ -215,7 +215,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
 
       <Stack.Screen
-        name="Register.Intro.RecoverMnemonic"
+        name="Register.RecoverMnemonic"
         component={RecoverMnemonicScreen}
       />
 

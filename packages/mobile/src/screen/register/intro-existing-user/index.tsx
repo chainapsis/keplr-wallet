@@ -43,7 +43,7 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
             color="secondary"
             size="large"
             onPress={() => {
-              navigation.navigate('Register.Intro.RecoverMnemonic');
+              navigation.navigate('Register.RecoverMnemonic');
             }}
           />
 
