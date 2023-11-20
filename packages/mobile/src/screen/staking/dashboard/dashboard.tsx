@@ -244,6 +244,12 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
             style={style.flatten(['padding-x-16', 'padding-y-8'])}
             text="Stake"
             size="small"
+            onPress={() => {
+              navigation.navigate('Stake', {
+                screen: 'Stake.ValidateList',
+                params: {chainId},
+              });
+            }}
           />
         </Columns>
       </Box>
@@ -270,12 +276,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
                       subString: validator.subString,
                     }}
                     key={validator.validatorAddress + validator.subString}
-                    afterSelect={() => {
-                      navigation.navigate('Stake', {
-                        screen: 'Stake.ValidateList',
-                        params: {chainId},
-                      });
-                    }}
+                    afterSelect={() => {}}
                   />
                 );
               })}
