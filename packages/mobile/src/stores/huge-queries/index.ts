@@ -415,7 +415,7 @@ export class HugeQueriesStore {
 class BinarySortArray<T> {
   static readonly SymbolKey = Symbol('__key');
 
-  @observable.shallow
+  @observable.ref
   protected _arr: (T & {
     [BinarySortArray.SymbolKey]: string;
   })[] = [];
@@ -458,6 +458,8 @@ class BinarySortArray<T> {
     if (this._arr.length === 0) {
       this._arr.push(v);
       this.indexForKey.set(key, 0);
+      // Update reference
+      this._arr = this._arr.slice();
       return false;
     }
 
@@ -478,6 +480,8 @@ class BinarySortArray<T> {
 
       if (b) {
         this._arr[prevIndex] = v;
+        // Update reference
+        this._arr = this._arr.slice();
         return true;
       }
     }
@@ -528,6 +532,8 @@ class BinarySortArray<T> {
         this._arr.splice(prevIndex, 1);
       }
       this._arr.unshift(v);
+      // Update reference
+      this._arr = this._arr.slice();
       this.indexForKey.set(key, 0);
     } else if (mid >= this._arr.length) {
       if (prevIndex != null) {
@@ -539,6 +545,8 @@ class BinarySortArray<T> {
         this._arr.splice(prevIndex, 1);
       }
       this._arr.push(v);
+      // Update reference
+      this._arr = this._arr.slice();
       this.indexForKey.set(key, this._arr.length - 1);
     } else {
       if (prevIndex != null && prevIndex >= 0) {
@@ -575,6 +583,8 @@ class BinarySortArray<T> {
       } else {
         this._arr.splice(mid, 0, v);
       }
+      // Update reference
+      this._arr = this._arr.slice();
       this.indexForKey.set(key, mid);
     }
 
