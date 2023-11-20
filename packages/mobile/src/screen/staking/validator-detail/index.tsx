@@ -42,15 +42,44 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
     chainInfo.stakeCurrency || chainInfo.feeCurrencies[0],
     new Dec(validatorInfo?.delegator_shares || 0),
   );
+
+  const isCommissionHigh =
+    Number(validatorInfo?.commission.commission_rates.rate) >= 0.2;
+  const isTop10Validator = validatorInfo?.rank
+    ? validatorInfo.rank <= 10
+    : false;
+
   return (
     <PageWithScrollView
       backgroundMode="default"
       style={style.flatten(['padding-x-12', 'padding-y-12'])}>
       <Stack gutter={12}>
-        <GuideBox
-          title={validatorInfo?.rank.toString() || ''}
-          color="warning"
-        />
+        {isCommissionHigh ? (
+          <GuideBox
+            title={`Commission ${new RatePretty(
+              validatorInfo?.commission.commission_rates.rate || 0,
+            )
+              .maxDecimals(2)
+              .toString()}`}
+            paragraph={
+              <Text style={style.flatten(['body2', 'color-yellow-500'])}>
+                This validator is currently charging
+                <Text style={style.flatten(['font-bold'])}> very high </Text>
+                commissions. Consider staking to other validators with lower
+                commissions to increaser your rewards.
+              </Text>
+            }
+            color="warning"
+          />
+        ) : null}
+        {isTop10Validator ? (
+          <GuideBox
+            title="You are staking to top 10 validator"
+            paragraph="To improve decentralization, please consider staking to other validators"
+            color="default"
+          />
+        ) : null}
+
         {validatorInfo ? (
           <Box
             paddingX={16}
