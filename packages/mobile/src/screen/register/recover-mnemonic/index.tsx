@@ -200,52 +200,77 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
           }}
           render={({field: {onChange, onBlur, value}}) => {
             return (
-              <Box>
-                <NativeTextInput
-                  returnKeyType="next"
-                  multiline={true}
-                  numberOfLines={6}
-                  textAlignVertical="top"
-                  placeholder="Type your recovery phrase or private key"
-                  placeholderTextColor={style.get('color-gray-300').color}
-                  autoCorrect={false}
-                  autoCapitalize="none"
-                  underlineColorAndroid="transparent"
-                  style={{
-                    color: style.get('color-text-high').color,
-                    padding: 16,
-                    borderRadius: 8,
-                    backgroundColor: style.get('color-gray-600').color,
-                  }}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                />
-
+              <React.Fragment>
                 <Box
-                  paddingRight={9}
-                  paddingBottom={16}
-                  style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    right: 0,
-                  }}>
-                  <TextButton
-                    text={'Paste'}
-                    size="large"
-                    onPress={async () => {
-                      const text = await Clipboard.getStringAsync();
-                      if (text) {
-                        setValue('recoveryPhrase', text, {
-                          shouldValidate: true,
-                        });
-
-                        setFocus('name');
-                      }
+                  borderWidth={
+                    errors.recoveryPhrase && errors.recoveryPhrase?.message
+                      ? 1
+                      : 0
+                  }
+                  borderColor={
+                    errors.recoveryPhrase && errors.recoveryPhrase?.message
+                      ? style.get('color-yellow-400').color
+                      : undefined
+                  }
+                  backgroundColor={style.get('color-gray-600').color}
+                  padding={16}
+                  borderRadius={8}>
+                  <NativeTextInput
+                    returnKeyType="next"
+                    multiline={true}
+                    numberOfLines={6}
+                    textAlignVertical="top"
+                    placeholder="Type your recovery phrase or private key"
+                    placeholderTextColor={style.get('color-gray-300').color}
+                    autoCorrect={false}
+                    autoCapitalize="none"
+                    underlineColorAndroid="transparent"
+                    style={{
+                      minHeight: 120,
+                      color: style.get('color-text-high').color,
                     }}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    value={value}
                   />
+
+                  <Box
+                    paddingRight={9}
+                    paddingBottom={16}
+                    style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      right: 0,
+                    }}>
+                    <TextButton
+                      text={'Paste'}
+                      size="large"
+                      onPress={async () => {
+                        const text = await Clipboard.getStringAsync();
+                        if (text) {
+                          setValue('recoveryPhrase', text, {
+                            shouldValidate: true,
+                          });
+
+                          setFocus('name');
+                        }
+                      }}
+                    />
+                  </Box>
                 </Box>
-              </Box>
+
+                {errors.recoveryPhrase && errors.recoveryPhrase?.message ? (
+                  <Text
+                    style={style.flatten([
+                      'text-caption2',
+                      'color-yellow-400',
+                      'padding-top-4',
+                      'padding-left-6',
+                    ])}>
+                    {errors.recoveryPhrase?.message}
+                  </Text>
+                ) : null}
+              </React.Fragment>
             );
           }}
           name="recoveryPhrase"
