@@ -66,6 +66,7 @@ import {PlainObject} from '@keplr-wallet/background';
 import {EnableChainsScreen} from './screen/register/enable-chains';
 import {RecoverMnemonicScreen} from './screen/register/recover-mnemonic';
 import {WelcomeScreen} from './screen/register/welcome';
+import {SelectDerivationPathScreen} from './screen/register/select-derivation-path';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -130,6 +131,13 @@ export type RootStackParamList = {
     stepPrevious?: number;
     stepTotal?: number;
     password?: string;
+  };
+  'Register.SelectDerivationPath': {
+    chainIds: string[];
+    vaultId: string;
+    totalCount: number;
+    password?: string;
+    skipWelcome?: boolean;
   };
   'Register.Welcome': {
     password?: string;
@@ -672,6 +680,12 @@ export const AppNavigation: FunctionComponent = observer(() => {
             name="Register.Welcome"
             options={{headerShown: false}}
             component={WelcomeScreen}
+          />
+
+          <Stack.Screen
+            name="Register.SelectDerivationPath"
+            options={{headerShown: false}}
+            component={SelectDerivationPathScreen}
           />
 
           {/*NOTE 사이드바를 통해서 세팅으로 이동시 뒤로가기때 다시 메인으로 오기 위해서 해당 route들은 최상위에도 올렸습니다*/}
