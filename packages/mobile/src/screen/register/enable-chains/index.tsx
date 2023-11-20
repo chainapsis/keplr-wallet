@@ -671,7 +671,20 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
 
             if (needFinalizeCoinType.length > 0) {
               sceneMovedToSelectDerivation.current = true;
-              // Todo: Select Derivation Paht 페이지로 이동
+              navigation.reset({
+                routes: [
+                  {
+                    name: 'Register.SelectDerivationPath',
+                    params: {
+                      vaultId,
+                      chainIds: needFinalizeCoinType,
+                      totalCount: needFinalizeCoinType.length,
+                      password,
+                      skipWelcome,
+                    },
+                  },
+                ],
+              });
             } else {
               // 어차피 bip44 coin type selection과 ethereum ledger app이 동시에 필요한 경우는 없다.
               // (ledger에서는 coin type이 app당 할당되기 때문에...)
