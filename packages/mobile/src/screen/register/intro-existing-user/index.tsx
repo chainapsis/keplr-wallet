@@ -7,10 +7,13 @@ import {Button} from '../../../components/button';
 import {OptionContainer, RegisterContainer} from '../components';
 import {AppleIcon, GoogleIcon} from '../../../components/icon';
 import {Box} from '../../../components/box';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavProp} from '../../../navigation';
 
 export const RegisterIntroExistingUserScene: FunctionComponent = () => {
   const intl = useIntl();
   const style = useStyle();
+  const navigation = useNavigation<StackNavProp>();
 
   return (
     <RegisterContainer
@@ -39,6 +42,9 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
             })}
             color="secondary"
             size="large"
+            onPress={() => {
+              navigation.navigate('Register.Intro.RecoverMnemonic');
+            }}
           />
 
           <Gutter size={20} />

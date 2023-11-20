@@ -64,6 +64,7 @@ import {ValidatorListScreen} from './screen/staking/vlidator-list';
 import {FinalizeKeyScreen} from './screen/register/finalize-key';
 import {PlainObject} from '@keplr-wallet/background';
 import {EnableChainsScreen} from './screen/register/enable-chains';
+import {RecoverMnemonicScreen} from './screen/register/recover-mnemonic';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -81,6 +82,7 @@ export type RootStackParamList = {
     stepTotal: number;
   };
   'Register.Intro.ExistingUser': undefined;
+  'Register.Intro.RecoverMnemonic': undefined;
   'Register.FinalizeKey': {
     name: string;
     password: string;
@@ -205,6 +207,11 @@ export const RegisterNavigation: FunctionComponent = () => {
       <Stack.Screen
         name="Register.VerifyMnemonic"
         component={VerifyMnemonicScreen}
+      />
+
+      <Stack.Screen
+        name="Register.Intro.RecoverMnemonic"
+        component={RecoverMnemonicScreen}
       />
 
       <Stack.Screen name="Register.FinalizeKey" component={FinalizeKeyScreen} />
