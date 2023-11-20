@@ -32,7 +32,7 @@
     "@react-navigation/native-stack": "^6.1.7",
     "buffer": "^6.0.3",
     "expo": "^49.0.6",
-    "expo-clipboard": "~4.3.1",
+    "expo-clipboard": "^4.5.0",
     "expo-crypto": "~12.4.1",
     "expo-standard-web-crypto": "^1.6.0",
     "http-browserify": "^1.7.0",
