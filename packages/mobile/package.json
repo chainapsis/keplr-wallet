@@ -8,9 +8,11 @@
   "scripts": {
     "clean": "sh ./scripts/clean.sh",
     "android": "react-native run-android",
+    "android:production": "react-native run-android --mode Release",
     "android:connect": "adb reverse tcp:8081 tcp:8081",
     "build:provider": "tsc --project tsconfig.provider.json && browserify -p tinyify build/injected/index.js -o build/injected/injected-provider.bundle.js && cp -rf build/injected/injected-provider.bundle.js android/app/src/main/assets/.",
     "ios": "npx pod-install && react-native run-ios",
+    "ios:production": "npx pod-install && react-native run-ios --mode Release",
     "lint-test": "eslint . --ext .js,.jsx,.ts,.tsx && prettier --check .",
     "lint-fix": "eslint . --fix .js,.jsx,.ts,.tsx && prettier --write .",
     "typecheck": "tsc --noEmit",
