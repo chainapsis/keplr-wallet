@@ -5,16 +5,15 @@ import {RectButton} from '../../../../components/rect-button';
 import {Column, Columns} from '../../../../components/column';
 import {Text} from 'react-native';
 import {Gutter} from '../../../../components/gutter';
-import FastImage from 'react-native-fast-image';
 import {CoinPretty, Dec, RatePretty} from '@keplr-wallet/unit';
 import {Stack} from '../../../../components/stack';
 import {ArrowRightIcon} from '../../../../components/icon/arrow-right';
-import {StakingIcon} from '../../../../components/icon/stacking';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../../../stores';
 import {Staking} from '@keplr-wallet/stores';
 import {FilterOption} from '../../validator-list';
 import {InformationIcon} from '../../../../components/icon/information';
+import {ValidatorImage} from '../validator-image';
 
 export interface ViewValidator {
   coin?: CoinPretty;
@@ -176,7 +175,7 @@ export const ValidatorListItem: FunctionComponent<{
             'background-color-gray-600',
           ])}
           activeOpacity={0.5}
-          onPress={async () => {
+          onPress={() => {
             afterSelect();
           }}>
           <Box paddingLeft={16} paddingRight={8} paddingY={16} borderRadius={6}>
@@ -248,96 +247,3 @@ export const ValidatorListItem: FunctionComponent<{
     </React.Fragment>
   );
 });
-
-const ValidatorImage = ({
-  imageUrl,
-  name,
-  isDelegation,
-}: {
-  imageUrl?: string;
-  isDelegation?: boolean;
-  name?: string;
-}) => {
-  const style = useStyle();
-  return (
-    <React.Fragment>
-      {imageUrl ? (
-        isDelegation ? (
-          <Box>
-            <FastImage
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 9999,
-              }}
-              source={{uri: imageUrl}}
-            />
-            <Box
-              position="absolute"
-              width={16}
-              height={16}
-              borderRadius={16}
-              backgroundColor={style.get('color-gray-400').color}
-              alignX="center"
-              alignY="center"
-              style={{bottom: -3, right: -3}}>
-              <StakingIcon
-                size={9.6}
-                color={style.get('color-green-300').color}
-              />
-            </Box>
-          </Box>
-        ) : (
-          <FastImage
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 9999,
-            }}
-            source={{uri: imageUrl}}
-          />
-        )
-      ) : isDelegation ? (
-        <Box>
-          <Box
-            width={32}
-            height={32}
-            borderRadius={999}
-            alignX="center"
-            alignY="center"
-            backgroundColor={style.get('color-gray-450').color}>
-            <Text style={style.flatten(['subtitle2', 'color-text-high'])}>
-              {name ? name[0].toUpperCase() : null}
-            </Text>
-          </Box>
-          <Box
-            position="absolute"
-            width={16}
-            height={16}
-            borderRadius={16}
-            backgroundColor={style.get('color-gray-400').color}
-            alignX="center"
-            alignY="center"
-            style={{bottom: -3, right: -3}}>
-            <StakingIcon
-              size={9.6}
-              color={style.get('color-green-300').color}
-            />
-          </Box>
-        </Box>
-      ) : (
-        <Box
-          width={32}
-          height={32}
-          borderRadius={999}
-          alignX="center"
-          alignY="center"
-          backgroundColor={style.get('color-gray-450').color}>
-          <Text style={style.flatten(['subtitle2', 'color-text-high'])}>
-            {name ? name[0].toUpperCase() : null}
-          </Text>
-        </Box>
-      )}
-    </React.Fragment>
-  );
-};
