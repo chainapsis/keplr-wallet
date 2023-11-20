@@ -8,8 +8,8 @@ import { CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB } from "../../../config.ui.var";
 import styleValidators from "./validators.module.scss";
 
 export const URL: { [key in string]: string } = {
-  [CHAIN_ID_DORADO]: "https://fetchstation.azoyalabs.com/dorado/validators",
-  [CHAIN_ID_FETCHHUB]: "https://fetchstation.azoyalabs.com/mainnet/validators",
+  [CHAIN_ID_DORADO]: "https://explore-dorado.fetch.ai/validators",
+  [CHAIN_ID_FETCHHUB]: "https://www.mintscan.io/fetchai/validators",
 };
 
 export const MyValidatorCard = ({

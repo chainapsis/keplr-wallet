@@ -149,10 +149,7 @@ export const ActivityRow = ({ node }: { node: any }) => {
   const { typeUrl } = node.transaction.messages.nodes[0];
   return (
     <a
-      href={
-        "https://fetchstation.azoyalabs.com/mainnet/explorer/transactions/" +
-        node.transaction.id
-      }
+      href={`https://www.mintscan.io/fetchai/tx/${node.transaction.id}`}
       target="_blank"
       rel="noreferrer"
     >

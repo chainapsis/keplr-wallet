@@ -18,8 +18,7 @@ export const proposalOptions = {
   ProposalFailed: "PROPOSAL_STATUS_FAILED",
 };
 
-const FETCHSTATION_TXN_URL =
-  "https://fetchstation.azoyalabs.com/mainnet/explorer/transactions/";
+const FETCHSTATION_TXN_URL = "https://www.mintscan.io/fetchai/tx/";
 const ETHERSCAN_TXN_URL = "https://etherscan.io/tx/";
 
 export const BridgeHistoryView: FunctionComponent = observer(() => {

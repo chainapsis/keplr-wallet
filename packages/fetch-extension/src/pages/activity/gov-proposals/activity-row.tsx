@@ -43,9 +43,7 @@ export const ActivityRow = ({ node }: { node: any }) => {
   const { status, id } = node.transaction;
   return (
     <a
-      href={
-        "https://fetchstation.azoyalabs.com/mainnet/explorer/transactions/" + id
-      }
+      href={`https://www.mintscan.io/fetchai/tx/${id}`}
       target="_blank"
       rel="noreferrer"
     >

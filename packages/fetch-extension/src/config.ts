@@ -55,7 +55,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["cosmwasm"],
     walletUrlForStaking: "https://browse-fetchhub.fetch.ai/validators",
-    govUrl: "https://fetchstation.azoyalabs.com/mainnet/governance/",
+    govUrl: "https://www.mintscan.io/fetchai/proposals/",
   },
   {
     rpc: "https://mainnet.infura.io/v3/f40158f0c03842f5a18e409ffe09192c",
@@ -2695,7 +2695,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["cosmwasm"],
     walletUrlForStaking: "https://browse-dorado.fetch.ai/validators",
-    govUrl: "https://fetchstation.azoyalabs.com/dorado/governance/",
+    govUrl: "https://explore-dorado.fetch.ai/proposals/",
   },
 ];
 
