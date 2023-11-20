@@ -60,7 +60,7 @@ import {WebScreen} from './screen/web';
 import {WebpageScreen} from './screen/web/webpage';
 import {GovernanceListScreen} from './screen/governance/list';
 import {GovernanceScreen} from './screen/governance';
-import {ValidatorListScreen} from './screen/staking/vlidator-list';
+import {ValidatorListScreen} from './screen/staking/validator-list';
 import {FinalizeKeyScreen} from './screen/register/finalize-key';
 import {PlainObject} from '@keplr-wallet/background';
 import {EnableChainsScreen} from './screen/register/enable-chains';
@@ -559,9 +559,7 @@ const StakeNavigation = () => {
       <StakeStack.Screen
         name="Stake.ValidateList"
         options={{
-          title: intl.formatMessage({
-            id: 'page.wallet.keyring-item.dropdown.change-wallet-name-title',
-          }),
+          title: 'All Active Validators',
           ...defaultHeaderOptions,
         }}
         component={ValidatorListScreen}

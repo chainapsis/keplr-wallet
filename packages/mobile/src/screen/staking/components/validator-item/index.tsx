@@ -13,7 +13,8 @@ import {StakingIcon} from '../../../../components/icon/stacking';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../../../stores';
 import {Staking} from '@keplr-wallet/stores';
-import {FilterOption} from '../../vlidator-list';
+import {FilterOption} from '../../validator-list';
+import {InformationIcon} from '../../../../components/icon/information';
 
 export interface ViewValidator {
   coin?: CoinPretty;
@@ -111,22 +112,23 @@ export const ValidatorListItem: FunctionComponent<{
     queries.cosmos.queryDelegations.getQueryBech32Address(
       accountStore.getAccount(chainId).bech32Address,
     ).delegations;
+  const validator = bondedValidators.getValidator(validatorAddress);
 
   const chainInfo = chainStore.getChain(chainId);
   const viewValidator: ViewValidator | undefined = (() => {
-    const val = bondedValidators.getValidator(validatorAddress);
-    if (!val) {
+    if (!validator) {
       return undefined;
     }
 
     const coin = new CoinPretty(
       chainInfo.stakeCurrency || chainInfo.feeCurrencies[0],
-      new Dec(val.delegator_shares),
+      new Dec(validator.delegator_shares),
     );
+
     if (filterOption === 'Voting') {
       return {
-        name: val.description.moniker,
-        validatorAddress: val.operator_address,
+        name: validator.description.moniker,
+        validatorAddress: validator.operator_address,
         coin,
         subString:
           bondedToken?.toCoin().amount === '0'
@@ -137,26 +139,31 @@ export const ValidatorListItem: FunctionComponent<{
                 .maxDecimals(2)
                 .toString(),
         isDelegation: !!delegationsValidator.find(
-          del => del.delegation.validator_address === val.operator_address,
+          del =>
+            del.delegation.validator_address === validator.operator_address,
         ),
       };
     }
 
     if (filterOption === 'Commission') {
       return {
-        name: val.description.moniker,
-        validatorAddress: val.operator_address,
-        subString: new RatePretty(val.commission.commission_rates.rate)
+        name: validator.description.moniker,
+        validatorAddress: validator.operator_address,
+        subString: new RatePretty(validator.commission.commission_rates.rate)
           .maxDecimals(2)
           .toString(),
         isDelegation: !!delegationsValidator.find(
-          del => del.delegation.delegator_address === val.operator_address,
+          del =>
+            del.delegation.validator_address === validator.operator_address,
         ),
       };
     }
   })();
   const style = useStyle();
   const thumbnail = bondedValidators.getValidatorThumbnail(validatorAddress);
+  const isWarning =
+    Number(validator?.commission.commission_rates.rate) >= 0.2 &&
+    filterOption === 'Commission';
 
   return (
     <React.Fragment>
@@ -183,11 +190,19 @@ export const ValidatorListItem: FunctionComponent<{
               </Box>
               <Gutter size={12} />
               <Column weight={6}>
-                <Text
-                  numberOfLines={1}
-                  style={style.flatten(['subtitle2', 'color-text-high'])}>
-                  {viewValidator.name}
-                </Text>
+                <Columns sum={1} gutter={4} alignY="center">
+                  {isWarning ? (
+                    <InformationIcon
+                      size={16}
+                      color={style.get('color-yellow-400').color}
+                    />
+                  ) : null}
+                  <Text
+                    numberOfLines={1}
+                    style={style.flatten(['subtitle2', 'color-text-high'])}>
+                    {viewValidator.name}
+                  </Text>
+                </Columns>
                 <Gutter size={4} />
               </Column>
               <Column weight={1} />
@@ -203,8 +218,19 @@ export const ValidatorListItem: FunctionComponent<{
                 ) : null}
 
                 {viewValidator.subString ? (
-                  <Columns sum={1}>
-                    <Text style={style.flatten(['body2', 'color-text-low'])}>
+                  <Columns sum={1} alignY="center" gutter={4}>
+                    {isWarning ? (
+                      <InformationIcon
+                        size={16}
+                        color={style.get('color-yellow-400').color}
+                      />
+                    ) : null}
+                    <Text
+                      style={style.flatten([
+                        'body2',
+                        'color-text-low',
+                        isWarning ? 'color-yellow-400' : 'color-text-low',
+                      ])}>
                       {viewValidator.subString}
                     </Text>
                   </Columns>

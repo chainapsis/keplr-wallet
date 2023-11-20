@@ -14,6 +14,7 @@ import {useStyle} from '../../../styles';
 import {Gutter} from '../../../components/gutter';
 import {ArrowDownUpIcon} from '../../../components/icon';
 import {TextButton} from '../../../components/text-button';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 export type FilterOption = 'Commission' | 'Voting';
 export const ValidatorListScreen: FunctionComponent = observer(() => {
@@ -27,6 +28,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
     Staking.BondStatus.Bonded,
   );
+  const insect = useSafeAreaInsets();
 
   const activeValidators: ValidatorInfo[] = bondedValidators.validators
     .sort((a, b) => Number(b.tokens) - Number(a.tokens))
@@ -50,9 +52,12 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
     }
     return [];
   }, [activeValidators, filterOption, search]);
-
   return (
     <FlatList
+      style={{
+        paddingHorizontal: 12,
+        marginBottom: insect.bottom,
+      }}
       ListHeaderComponent={
         <Box marginTop={12}>
           <DebounceSearchTextInput
