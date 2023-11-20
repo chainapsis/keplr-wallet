@@ -7699,7 +7699,7 @@ __metadata:
     browserify: ^17.0.0
     buffer: ^6.0.3
     expo: ^49.0.6
-    expo-clipboard: ^4.5.0
+    expo-clipboard: ~4.3.1
     expo-crypto: ~12.4.1
     expo-standard-web-crypto: ^1.6.0
     http-browserify: ^1.7.0
@@ -21166,12 +21166,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-clipboard@npm:^4.5.0":
-  version: 4.8.0
-  resolution: "expo-clipboard@npm:4.8.0"
+"expo-clipboard@npm:~4.3.1":
+  version: 4.3.1
+  resolution: "expo-clipboard@npm:4.3.1"
   peerDependencies:
     expo: "*"
-  checksum: 64de23b722ba31a63312fc56078d57062b0bd08ed85ef9039fef58f3d30f4c3f4ea43c6c069a097ba80f8446c1fd8ca29c5d908bf95d487c8797ccfed5d9e954
+  checksum: f0b40f5b4122259705ef8ef009b4a1c6ec47543cc31744e9be41899b1c5cfd8deee5c7b9df013b4fa0c94352c287528636d02dc56d53296f4600bcef02fc3dad
   languageName: node
   linkType: hard
 
