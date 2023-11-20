@@ -585,3 +585,27 @@ export class CheckLegacyKeyRingPasswordMsg extends Message<void> {
     return CheckLegacyKeyRingPasswordMsg.type();
   }
 }
+
+export class CheckPasswordMsg extends Message<boolean> {
+  public static type() {
+    return "check-keyring-password";
+  }
+
+  constructor(public readonly password: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return CheckPasswordMsg.type();
+  }
+}
