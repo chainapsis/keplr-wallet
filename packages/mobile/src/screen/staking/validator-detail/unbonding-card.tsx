@@ -107,6 +107,7 @@ export const UnbondingCard: FunctionComponent<{
                     {remainingText}
                   </Text>
                 </Columns>
+                <Gutter size={8} />
                 <View>
                   <ProgressBar progress={progress} />
                 </View>

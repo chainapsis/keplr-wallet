@@ -45,7 +45,7 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
   return (
     <PageWithScrollView
       backgroundMode="default"
-      style={style.flatten(['padding-x-12'])}>
+      style={style.flatten(['padding-x-12', 'padding-y-12'])}>
       <Stack gutter={12}>
         <GuideBox
           title={validatorInfo?.rank.toString() || ''}
