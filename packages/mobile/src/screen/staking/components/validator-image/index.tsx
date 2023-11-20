@@ -8,11 +8,13 @@ import {Text} from 'react-native';
 export const ValidatorImage = ({
   imageUrl,
   name,
+  size,
   isDelegation,
 }: {
   imageUrl?: string;
   isDelegation?: boolean;
   name?: string;
+  size?: number;
 }) => {
   const style = useStyle();
   return (
@@ -22,8 +24,8 @@ export const ValidatorImage = ({
           <Box>
             <FastImage
               style={{
-                width: 32,
-                height: 32,
+                width: size || 32,
+                height: size || 32,
                 borderRadius: 9999,
               }}
               source={{uri: imageUrl}}
@@ -46,8 +48,8 @@ export const ValidatorImage = ({
         ) : (
           <FastImage
             style={{
-              width: 32,
-              height: 32,
+              width: size || 32,
+              height: size || 32,
               borderRadius: 9999,
             }}
             source={{uri: imageUrl}}
@@ -56,8 +58,8 @@ export const ValidatorImage = ({
       ) : isDelegation ? (
         <Box>
           <Box
-            width={32}
-            height={32}
+            width={size || 32}
+            height={size || 32}
             borderRadius={999}
             alignX="center"
             alignY="center"
@@ -83,8 +85,8 @@ export const ValidatorImage = ({
         </Box>
       ) : (
         <Box
-          width={32}
-          height={32}
+          width={size || 32}
+          height={size || 32}
           borderRadius={999}
           alignX="center"
           alignY="center"

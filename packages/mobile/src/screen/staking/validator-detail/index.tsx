@@ -11,18 +11,112 @@ import {RouteProp, useRoute} from '@react-navigation/native';
 import {StakeNavigation} from '../../../navigation';
 import {UnbondingCard} from './unbonding-card';
 import {DelegatedCard} from './delegated-card';
+import {useStore} from '../../../stores';
+import {Staking} from '@keplr-wallet/stores';
+import {Box} from '../../../components/box';
+import {Column, Columns} from '../../../components/column';
+import {ValidatorImage} from '../components/validator-image';
+import {Text} from 'react-native';
+import {CoinPretty, Dec, RatePretty} from '@keplr-wallet/unit';
+import {Button} from '../../../components/button';
 
 export const ValidatorDetailScreen: FunctionComponent = observer(() => {
+  const {queriesStore, chainStore} = useStore();
+
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.ValidateDetail'>>();
   const style = useStyle();
   const {validatorAddress, chainId} = route.params;
+  const queries = queriesStore.get(chainId);
+  const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
+    Staking.BondStatus.Bonded,
+  );
 
+  const validatorInfo = bondedValidators.validators
+    .sort((a, b) => Number(b.tokens) - Number(a.tokens))
+    .map((validator, i) => ({...validator, rank: i + 1}))
+    .find(val => val.operator_address === validatorAddress);
+
+  const thumbnail = bondedValidators.getValidatorThumbnail(validatorAddress);
+  const chainInfo = chainStore.getChain(chainId);
+  const token = new CoinPretty(
+    chainInfo.stakeCurrency || chainInfo.feeCurrencies[0],
+    new Dec(validatorInfo?.delegator_shares || 0),
+  );
   return (
     <PageWithScrollView
       backgroundMode="default"
       style={style.flatten(['padding-x-12'])}>
       <Stack gutter={12}>
-        <GuideBox title="te" color="warning" />
+        <GuideBox
+          title={validatorInfo?.rank.toString() || ''}
+          color="warning"
+        />
+        {validatorInfo ? (
+          <Box
+            paddingX={16}
+            paddingY={20}
+            backgroundColor={style.get('color-gray-600').color}
+            borderRadius={6}>
+            <Stack gutter={20}>
+              <Columns sum={1} alignY="center" gutter={12}>
+                <ValidatorImage
+                  size={40}
+                  imageUrl={thumbnail}
+                  name={validatorInfo?.description.moniker}
+                />
+                <Text style={style.flatten(['subtitle2', 'color-text-high'])}>
+                  {validatorInfo.description.moniker}
+                </Text>
+              </Columns>
+              <Columns sum={1}>
+                <Column weight={1}>
+                  <Stack gutter={8}>
+                    <Text
+                      style={style.flatten([
+                        'subtitle3',
+                        'color-label-default',
+                      ])}>
+                      Commission
+                    </Text>
+                    <Text style={style.flatten(['body3', 'color-text-middle'])}>
+                      {new RatePretty(
+                        validatorInfo.commission.commission_rates.rate,
+                      )
+                        .maxDecimals(2)
+                        .toString()}
+                    </Text>
+                  </Stack>
+                </Column>
+
+                <Column weight={1}>
+                  <Stack gutter={8}>
+                    <Text
+                      style={style.flatten([
+                        'subtitle3',
+                        'color-label-default',
+                      ])}>
+                      Voting power
+                    </Text>
+                    <Text style={style.flatten(['body3', 'color-text-middle'])}>
+                      {token.maxDecimals(10).trim(true).shrink(true).toString()}
+                    </Text>
+                  </Stack>
+                </Column>
+              </Columns>
+              <Stack gutter={8}>
+                <Text
+                  style={style.flatten(['subtitle3', 'color-label-default'])}>
+                  Description
+                </Text>
+                <Text style={style.flatten(['body3', 'color-text-middle'])}>
+                  {validatorInfo.description.details}
+                </Text>
+              </Stack>
+              <Button size="large" text="Stake" onPress={() => {}} />
+            </Stack>
+          </Box>
+        ) : null}
+
         <DelegatedCard chainId={chainId} validatorAddress={validatorAddress} />
         <UnbondingCard chainId={chainId} validatorAddress={validatorAddress} />
       </Stack>
