@@ -7,7 +7,13 @@ import React, {
 } from 'react';
 import {observer} from 'mobx-react-lite';
 import {Box} from '../../../components/box';
-import {FlatList, StyleSheet, Text} from 'react-native';
+import {
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+} from 'react-native';
 import {useStyle} from '../../../styles';
 import {RegisterHeader} from '../../../components/pageHeader/header-register';
 import {FormattedMessage, useIntl} from 'react-intl';
@@ -476,7 +482,9 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
   };
 
   return (
-    <React.Fragment>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{flex: 1}}>
       <RegisterHeader
         title={intl.formatMessage({
           id: 'pages.register.enable-chains.title',
@@ -697,7 +705,7 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
           }}
         />
       </Box>
-    </React.Fragment>
+    </KeyboardAvoidingView>
   );
 });
 

@@ -3,7 +3,7 @@ import {observer} from 'mobx-react-lite';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {RegisterHeader} from '../../../components/pageHeader/header-register';
 import {Box} from '../../../components/box';
-import {StyleSheet, Text} from 'react-native';
+import {KeyboardAvoidingView, Platform, StyleSheet, Text} from 'react-native';
 import {useStyle} from '../../../styles';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
@@ -55,7 +55,9 @@ export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
   const currency = chainInfo.stakeCurrency || chainInfo.currencies[0];
 
   return (
-    <Box style={{flex: 1}}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{flex: 1}}>
       <RegisterHeader
         title={intl.formatMessage({
           id: 'pages.register.select-derivation-path.title',
@@ -178,7 +180,7 @@ export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
           }}
         />
       </Box>
-    </Box>
+    </KeyboardAvoidingView>
   );
 });
 
