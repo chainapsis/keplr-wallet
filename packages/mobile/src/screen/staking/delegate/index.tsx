@@ -11,7 +11,6 @@ import {
 import {ICNSInfo} from '../../../utils/config.ui';
 import {DenomHelper} from '@keplr-wallet/common';
 import {AsyncKVStore} from '../../../common';
-import {DecUtils} from '@keplr-wallet/unit';
 import {AmountInput} from '../../../components/input/amount-input';
 import {MemoInput} from '../../../components/input/memo-input';
 import {Stack} from '../../../components/stack';
@@ -20,12 +19,10 @@ import {useStyle} from '../../../styles';
 import {Button} from '../../../components/button';
 import {FeeControl} from '../../../components/input/fee-control';
 import {Gutter} from '../../../components/gutter';
-import {BACKGROUND_PORT, Message} from '@keplr-wallet/router';
-import {SendTxAndRecordMsg} from '@keplr-wallet/background';
 import {TextInput} from 'react-native';
-import {RNMessageRequesterInternal} from '../../../router';
 import {StakeNavigation} from '../../../navigation';
 import {ValidatorCard} from '../components/validator-card';
+import {GuideBox} from '../../../components/guide-box';
 
 export const SignDelegateScreen: FunctionComponent = observer(() => {
   const {chainStore, accountStore, queriesStore} = useStore();
@@ -41,7 +38,7 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
   const coinMinimalDenom =
     initialCoinMinimalDenom ||
     chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
-
+  const queries = queriesStore.get(chainId);
   useEffect(() => {
     addressRef.current?.focus();
   }, []);
@@ -54,10 +51,12 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
 
   const account = accountStore.getAccount(chainId);
   const sender = account.bech32Address;
+  const unbondingPeriodDay = queries.cosmos.queryStakingParams.response
+    ? queries.cosmos.queryStakingParams.unbondingTimeSec / (3600 * 24)
+    : 21;
+  const chainInfo = chainStore.getChain(chainId);
 
-  const currency = chainStore
-    .getChain(chainId)
-    .forceFindCurrency(coinMinimalDenom);
+  const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
 
   const sendConfigs = useSendTxConfig(
     chainStore,
@@ -76,6 +75,17 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
   );
 
   sendConfigs.amountConfig.setCurrency(currency);
+
+  useEffect(() => {
+    sendConfigs.recipientConfig.setBech32Prefix(
+      chainInfo.bech32Config.bech32PrefixValAddr,
+    );
+    sendConfigs.recipientConfig.setValue(validatorAddress);
+  }, [
+    chainInfo.bech32Config.bech32PrefixValAddr,
+    sendConfigs.recipientConfig,
+    validatorAddress,
+  ]);
 
   const gasSimulatorKey = useMemo(() => {
     if (sendConfigs.amountConfig.currency) {
@@ -127,10 +137,9 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
         throw new Error('Simulating secret wasm not supported');
       }
 
-      return account.makeSendTokenTx(
+      return account.cosmos.makeDelegateTx(
         sendConfigs.amountConfig.amount[0].toDec().toString(),
-        sendConfigs.amountConfig.amount[0].currency,
-        sendConfigs.recipientConfig.recipient,
+        validatorAddress,
       );
     },
   );
@@ -161,8 +170,6 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
     gasSimulator,
   });
 
-  const historyType = 'basic-send';
-
   return (
     <PageWithScrollView
       backgroundMode={'default'}
@@ -173,6 +180,12 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
         <AmountInput amountConfig={sendConfigs.amountConfig} />
         <MemoInput memoConfig={sendConfigs.memoConfig} />
       </Stack>
+      <Gutter size={16} />
+      <GuideBox
+        color="danger"
+        title={`Staking will lock your funds for ${unbondingPeriodDay} days`}
+        paragraph="You will need to unstake in order for your staked assets to be liquid again.This process will take 14 days to complete."
+      />
 
       <Box style={style.flatten(['flex-1'])} />
 
@@ -192,13 +205,10 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
         loading={accountStore.getAccount(chainId).isSendingMsg === 'send'}
         onPress={async () => {
           if (!txConfigsValidate.interactionBlocked) {
-            const tx = accountStore
-              .getAccount(chainId)
-              .makeSendTokenTx(
-                sendConfigs.amountConfig.amount[0].toDec().toString(),
-                sendConfigs.amountConfig.amount[0].currency,
-                sendConfigs.recipientConfig.recipient,
-              );
+            const tx = account.cosmos.makeDelegateTx(
+              sendConfigs.amountConfig.amount[0].toDec().toString(),
+              sendConfigs.recipientConfig.recipient,
+            );
 
             try {
               await tx.send(
@@ -207,41 +217,8 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
                 {
                   preferNoSetFee: true,
                   preferNoSetMemo: true,
-                  sendTx: async (chainId, tx, mode) => {
-                    let msg: Message<Uint8Array> = new SendTxAndRecordMsg(
-                      historyType,
-                      chainId,
-                      sendConfigs.recipientConfig.chainId,
-                      tx,
-                      mode,
-                      false,
-                      sendConfigs.senderConfig.sender,
-                      sendConfigs.recipientConfig.recipient,
-                      sendConfigs.amountConfig.amount.map(amount => {
-                        return {
-                          amount: DecUtils.getTenExponentN(
-                            amount.currency.coinDecimals,
-                          )
-                            .mul(amount.toDec())
-                            .toString(),
-                          denom: amount.currency.coinMinimalDenom,
-                        };
-                      }),
-                      sendConfigs.memoConfig.memo,
-                    );
-                    return await new RNMessageRequesterInternal().sendMessage(
-                      BACKGROUND_PORT,
-                      msg,
-                    );
-                  },
                 },
                 {
-                  onBroadcasted: () => {
-                    chainStore.enableVaultsWithCosmosAddress(
-                      sendConfigs.recipientConfig.chainId,
-                      sendConfigs.recipientConfig.recipient,
-                    );
-                  },
                   onFulfill: (tx: any) => {
                     if (tx.code != null && tx.code !== 0) {
                       console.log(tx);
