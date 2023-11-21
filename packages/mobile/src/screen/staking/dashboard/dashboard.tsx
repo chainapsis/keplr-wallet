@@ -276,7 +276,15 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
                       subString: validator.subString,
                     }}
                     key={validator.validatorAddress + validator.subString}
-                    afterSelect={() => {}}
+                    afterSelect={() => {
+                      navigation.navigate('Stake', {
+                        screen: 'Stake.ValidateDetail',
+                        params: {
+                          chainId,
+                          validatorAddress: validator.validatorAddress,
+                        },
+                      });
+                    }}
                   />
                 );
               })}

@@ -2,11 +2,10 @@ import React, {FunctionComponent, useMemo, useState} from 'react';
 
 import {observer} from 'mobx-react-lite';
 import {FlatList} from 'react-native';
-import {StakeNavigation} from '../../../navigation';
-import {RouteProp, useRoute} from '@react-navigation/native';
+import {StackNavProp, StakeNavigation} from '../../../navigation';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {useStore} from '../../../stores';
 import {Staking} from '@keplr-wallet/stores';
-import {ValidatorInfo} from '../type';
 import {Box} from '../../../components/box';
 import {DebounceSearchTextInput} from '../../../components/input/search-text-input';
 import {ValidatorListItem} from '../components/validator-item';
@@ -23,6 +22,8 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
   const [filterOption, setFilterOption] = useState<FilterOption>('Voting');
   const [search, setSearch] = useState('');
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.ValidateList'>>();
+  const navigation = useNavigation<StackNavProp>();
+
   const {chainId} = route.params;
   const queries = queriesStore.get(chainId);
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
@@ -30,18 +31,16 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
   );
   const insect = useSafeAreaInsets();
 
-  const activeValidators: ValidatorInfo[] = bondedValidators.validators
-    .sort((a, b) => Number(b.tokens) - Number(a.tokens))
-    .map((validator, i) => ({...validator, rank: i + 1}));
-
   const filteredValidators = useMemo(() => {
     const _search = search.trim().toLowerCase();
-    const _filteredValidators = activeValidators.filter(val => {
+    const _filteredValidators = bondedValidators.validators.filter(val => {
       return val.description.moniker?.toLocaleLowerCase().includes(_search);
     });
 
     if (filterOption === 'Voting') {
-      return _filteredValidators;
+      return _filteredValidators.sort(
+        (a, b) => Number(b.tokens) - Number(a.tokens),
+      );
     }
     if (filterOption === 'Commission') {
       return _filteredValidators.sort(
@@ -51,7 +50,8 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
       );
     }
     return [];
-  }, [activeValidators, filterOption, search]);
+  }, [bondedValidators.validators, filterOption, search]);
+
   return (
     <FlatList
       style={{
@@ -97,7 +97,12 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
             filterOption={filterOption}
             chainId={chainId}
             validatorAddress={validator.operator_address}
-            afterSelect={() => {}}
+            afterSelect={() => {
+              navigation.navigate('Stake', {
+                screen: 'Stake.ValidateDetail',
+                params: {chainId, validatorAddress: validator.operator_address},
+              });
+            }}
           />
         );
       }}

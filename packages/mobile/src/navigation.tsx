@@ -66,6 +66,7 @@ import {PlainObject} from '@keplr-wallet/background';
 import {EnableChainsScreen} from './screen/register/enable-chains';
 import {RecoverMnemonicScreen} from './screen/register/recover-mnemonic';
 import {WelcomeScreen} from './screen/register/welcome';
+import {ValidatorDetailScreen} from './screen/staking/validator-detail';
 import {SelectDerivationPathScreen} from './screen/register/select-derivation-path';
 
 export type RootStackParamList = {
@@ -555,12 +556,10 @@ const StakeNavigation = () => {
       <StakeStack.Screen
         name="Stake.ValidateDetail"
         options={{
-          title: intl.formatMessage({
-            id: 'page.wallet.keyring-item.dropdown.delete-wallet-title',
-          }),
+          title: 'Validator Detail Page',
           ...defaultHeaderOptions,
         }}
-        component={WalletDeleteScreen}
+        component={ValidatorDetailScreen}
       />
       <StakeStack.Screen
         name="Stake.ValidateList"
