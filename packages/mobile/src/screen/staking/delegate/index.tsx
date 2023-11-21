@@ -5,10 +5,9 @@ import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {useStore} from '../../../stores';
 import {
   useGasSimulator,
-  useSendTxConfig,
+  useDelegateTxConfig,
   useTxConfigsValidate,
 } from '@keplr-wallet/hooks';
-import {ICNSInfo} from '../../../utils/config.ui';
 import {DenomHelper} from '@keplr-wallet/common';
 import {AsyncKVStore} from '../../../common';
 import {AmountInput} from '../../../components/input/amount-input';
@@ -20,14 +19,14 @@ import {Button} from '../../../components/button';
 import {FeeControl} from '../../../components/input/fee-control';
 import {Gutter} from '../../../components/gutter';
 import {TextInput} from 'react-native';
-import {StakeNavigation} from '../../../navigation';
+import {StackNavProp, StakeNavigation} from '../../../navigation';
 import {ValidatorCard} from '../components/validator-card';
 import {GuideBox} from '../../../components/guide-box';
 
 export const SignDelegateScreen: FunctionComponent = observer(() => {
   const {chainStore, accountStore, queriesStore} = useStore();
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.Delegate'>>();
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavProp>();
   const style = useStyle();
   const addressRef = useRef<TextInput>(null);
   const initialChainId = route.params['chainId'];
@@ -58,20 +57,13 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
 
   const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
 
-  const sendConfigs = useSendTxConfig(
+  const sendConfigs = useDelegateTxConfig(
     chainStore,
     queriesStore,
     chainId,
     sender,
-    // TODO: 이 값을 config 밑으로 빼자
     300000,
-    {
-      allowHexAddressOnEthermint: !chainStore
-        .getChain(chainId)
-        .chainId.startsWith('injective'),
-      icns: ICNSInfo,
-      computeTerraClassicTax: true,
-    },
+    // TODO: 이 값을 config 밑으로 빼자
   );
 
   sendConfigs.amountConfig.setCurrency(currency);
@@ -223,6 +215,9 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
                     if (tx.code != null && tx.code !== 0) {
                       console.log(tx);
                     }
+                  },
+                  onBroadcasted: () => {
+                    navigation.reset({routes: [{name: 'Home'}]});
                   },
                 },
               );
