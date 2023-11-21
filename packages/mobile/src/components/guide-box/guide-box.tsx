@@ -41,7 +41,7 @@ export const GuideBox: FunctionComponent<GuideBoxProps> = ({
       case 'warning':
         return style.get('color-yellow-800').color;
       case 'danger':
-        return style.get('color-red-200').color;
+        return style.get('color-red-800').color;
       default:
         return style.get('color-gray-600').color;
     }
