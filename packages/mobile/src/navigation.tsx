@@ -177,7 +177,6 @@ export type StakeNavigation = {
   'Stake.ValidateDetail': {chainId: string; validatorAddress: string};
   'Stake.Delegate': {
     chainId: string;
-    coinMinimalDenom: string;
     validatorAddress: string;
   };
 };

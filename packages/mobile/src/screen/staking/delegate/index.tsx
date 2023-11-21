@@ -30,54 +30,35 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
   const style = useStyle();
   const addressRef = useRef<TextInput>(null);
   const initialChainId = route.params['chainId'];
-  const initialCoinMinimalDenom = route.params['coinMinimalDenom'];
   const {validatorAddress} = route.params;
 
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
-  const coinMinimalDenom =
-    initialCoinMinimalDenom ||
-    chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
+
   const queries = queriesStore.get(chainId);
   useEffect(() => {
     addressRef.current?.focus();
   }, []);
 
   useEffect(() => {
-    if (!initialChainId || !initialCoinMinimalDenom) {
+    if (!initialChainId) {
       navigation.goBack();
     }
-  }, [navigation, initialChainId, initialCoinMinimalDenom]);
+  }, [navigation, initialChainId]);
 
   const account = accountStore.getAccount(chainId);
   const sender = account.bech32Address;
   const unbondingPeriodDay = queries.cosmos.queryStakingParams.response
     ? queries.cosmos.queryStakingParams.unbondingTimeSec / (3600 * 24)
     : 21;
-  const chainInfo = chainStore.getChain(chainId);
-
-  const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
 
   const sendConfigs = useDelegateTxConfig(
     chainStore,
     queriesStore,
     chainId,
     sender,
-    300000,
-    // TODO: 이 값을 config 밑으로 빼자
-  );
-
-  sendConfigs.amountConfig.setCurrency(currency);
-
-  useEffect(() => {
-    sendConfigs.recipientConfig.setBech32Prefix(
-      chainInfo.bech32Config.bech32PrefixValAddr,
-    );
-    sendConfigs.recipientConfig.setValue(validatorAddress);
-  }, [
-    chainInfo.bech32Config.bech32PrefixValAddr,
-    sendConfigs.recipientConfig,
     validatorAddress,
-  ]);
+    300000,
+  );
 
   const gasSimulatorKey = useMemo(() => {
     if (sendConfigs.amountConfig.currency) {

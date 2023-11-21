@@ -150,7 +150,6 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
                     screen: 'Stake.Delegate',
                     params: {
                       chainId,
-                      coinMinimalDenom: token.currency.coinMinimalDenom,
                       validatorAddress: validatorInfo.operator_address,
                     },
                   });
