@@ -80,6 +80,7 @@
     "@types/setimmediate": "^1",
     "@types/text-encoding": "^0",
     "babel-jest": "^29.2.1",
+    "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "browserify": "^17.0.0",
     "metro-react-native-babel-preset": "0.76.7",
     "pod-install": "^0.1.39",

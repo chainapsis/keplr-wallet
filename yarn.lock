@@ -7696,6 +7696,7 @@ __metadata:
     "@types/setimmediate": ^1
     "@types/text-encoding": ^0
     babel-jest: ^29.2.1
+    babel-plugin-transform-inline-environment-variables: ^0.4.4
     browserify: ^17.0.0
     buffer: ^6.0.3
     expo: ^49.0.6
@@ -15444,6 +15445,13 @@ __metadata:
   dependencies:
     "@babel/plugin-syntax-flow": ^7.12.1
   checksum: fd52aef54448e01948a9d1cca0c8f87d064970c8682458962b7a222c372704bc2ce26ae8109e0ab2566e7ea5106856460f04c1a5ed794ab3bcd2f42cae1d9845
+  languageName: node
+  linkType: hard
+
+"babel-plugin-transform-inline-environment-variables@npm:^0.4.4":
+  version: 0.4.4
+  resolution: "babel-plugin-transform-inline-environment-variables@npm:0.4.4"
+  checksum: fa361287411301237fd8ce332aff4f8e8ccb8db30e87a2ddc7224c8bf7cd792eda47aca24dc2e09e70bce4c027bc8cbe22f4999056be37a25d2472945df21ef5
   languageName: node
   linkType: hard
 
