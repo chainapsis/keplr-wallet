@@ -660,16 +660,14 @@ const ClaimTokenItem: FunctionComponent<{
   return (
     <Box padding={16}>
       <Columns sum={1} alignY="center">
-        {viewToken.token.currency.coinImageUrl && (
-          <ChainImageFallback
-            style={{
-              width: 32,
-              height: 32,
-            }}
-            alt={viewToken.token.currency.coinDenom}
-            src={viewToken.token.currency.coinImageUrl}
-          />
-        )}
+        <ChainImageFallback
+          style={{
+            width: 32,
+            height: 32,
+          }}
+          alt={viewToken.token.currency.coinDenom}
+          src={viewToken.token.currency.coinImageUrl}
+        />
 
         <Gutter size={12} />
 
