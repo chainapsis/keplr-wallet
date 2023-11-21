@@ -44,6 +44,7 @@ export class HugeQueriesStore {
     viewToken: ViewToken;
     completeTime: string;
   }>;
+  protected claimableRewardsBinarySort: BinarySortArray<ViewToken>;
 
   constructor(
     protected readonly chainStore: ChainStore,
@@ -95,6 +96,20 @@ export class HugeQueriesStore {
       () => {
         if (unbondingDisposal) {
           unbondingDisposal();
+        }
+      },
+    );
+    let claimableRewardsDisposal: (() => void) | undefined;
+    this.claimableRewardsBinarySort = new BinarySortArray<ViewToken>(
+      this.sortByPrice,
+      () => {
+        claimableRewardsDisposal = autorun(() => {
+          this.updateClaimableRewards();
+        });
+      },
+      () => {
+        if (claimableRewardsDisposal) {
+          claimableRewardsDisposal();
         }
       },
     );
@@ -396,6 +411,48 @@ export class HugeQueriesStore {
     completeTime: string;
   }> {
     return this.unbondingBinarySort.arr;
+  }
+
+  @action
+  protected updateClaimableRewards(): void {
+    const prevKeyMap = new Map(
+      this.claimableRewardsBinarySort.indexForKeyMap(),
+    );
+
+    for (const chainInfo of this.chainStore.chainInfosInUI) {
+      const account = this.accountStore.getAccount(chainInfo.chainId);
+      if (account.bech32Address === '') {
+        continue;
+      }
+      const queries = this.queriesStore.get(chainInfo.chainId);
+      const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
+        account.bech32Address,
+      );
+
+      if (
+        queryRewards.stakableReward &&
+        queryRewards.stakableReward.toDec().gt(new Dec(0))
+      ) {
+        const key = `${chainInfo.chainId}/${account.bech32Address}`;
+        prevKeyMap.delete(key);
+        this.claimableRewardsBinarySort.pushAndSort(key, {
+          chainInfo,
+          token: queryRewards.stakableReward,
+          price: this.priceStore.calculatePrice(queryRewards.stakableReward),
+          isFetching: queryRewards.isFetching,
+          error: queryRewards.error,
+        });
+      }
+    }
+
+    for (const removedKey of prevKeyMap.keys()) {
+      this.claimableRewardsBinarySort.remove(removedKey);
+    }
+  }
+
+  @computed
+  get claimableRewards(): ReadonlyArray<ViewToken> {
+    return this.claimableRewardsBinarySort.arr;
   }
 
   protected sortByPrice(a: ViewToken, b: ViewToken): number {

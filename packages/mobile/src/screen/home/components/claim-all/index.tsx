@@ -3,7 +3,7 @@ import {Column, Columns} from '../../../../components/column';
 import {Button} from '../../../../components/button';
 import {Stack} from '../../../../components/stack';
 import {Box} from '../../../../components/box';
-import {VerticalCollapseTransition} from '../../../../components/transition/vertical-collapse';
+import {VerticalCollapseTransition} from '../../../../components/transition';
 import {ColorPalette, useStyle} from '../../../../styles';
 import {ViewToken} from '../../index';
 
@@ -58,12 +58,16 @@ class ClaimAllEachState {
   }
 }
 
-const zeroDec = new Dec(0);
-
 export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
   ({isNotReady}) => {
-    const {chainStore, accountStore, queriesStore, priceStore, keyRingStore} =
-      useStore();
+    const {
+      chainStore,
+      accountStore,
+      queriesStore,
+      priceStore,
+      keyRingStore,
+      hugeQueriesStore,
+    } = useStore();
     const style = useStyle();
     const [isExpanded, setIsExpanded] = useState(false);
     const [isPressingExpandButton, setIsPressingExpandButton] = useState(false);
@@ -80,34 +84,8 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
       return state;
     };
 
-    const viewTokens: ViewToken[] = chainStore.chainInfosInUI
-      .map(chainInfo => {
-        const chainId = chainInfo.chainId;
-        const accountAddress = accountStore.getAccount(chainId).bech32Address;
-        const queries = queriesStore.get(chainId);
-        const queryRewards =
-          queries.cosmos.queryRewards.getQueryBech32Address(accountAddress);
-
-        //밑에서 filter로 token이 undefined경우는 거르기때문에 ! 사용
-        return {
-          token: queryRewards.stakableReward!,
-          chainInfo,
-          isFetching: queryRewards.isFetching,
-          error: queryRewards.error,
-        };
-      })
-      .filter(
-        viewToken => !!viewToken.token && viewToken.token.toDec().gt(zeroDec),
-      )
-      .sort((a, b) => {
-        const aPrice = priceStore.calculatePrice(a.token!)?.toDec() ?? zeroDec;
-        const bPrice = priceStore.calculatePrice(b.token!)?.toDec() ?? zeroDec;
-
-        if (aPrice.equals(bPrice)) {
-          return 0;
-        }
-        return aPrice.gt(bPrice) ? -1 : 1;
-      })
+    const viewTokens: ViewToken[] = hugeQueriesStore.claimableRewards
+      .slice()
       .sort((a, b) => {
         const aHasError =
           getClaimAllEachState(a.chainInfo.chainId).failedReason != null;
@@ -660,16 +638,14 @@ const ClaimTokenItem: FunctionComponent<{
   return (
     <Box padding={16}>
       <Columns sum={1} alignY="center">
-        {viewToken.token.currency.coinImageUrl && (
-          <ChainImageFallback
-            style={{
-              width: 32,
-              height: 32,
-            }}
-            alt={viewToken.token.currency.coinDenom}
-            src={viewToken.token.currency.coinImageUrl}
-          />
-        )}
+        <ChainImageFallback
+          style={{
+            width: 32,
+            height: 32,
+          }}
+          alt={viewToken.token.currency.coinDenom}
+          src={viewToken.token.currency.coinImageUrl}
+        />
 
         <Gutter size={12} />
 
