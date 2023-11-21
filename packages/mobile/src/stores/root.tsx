@@ -39,7 +39,7 @@ import {
   CoinGeckoGetPrice,
   FiatCurrencies,
   TokenContractListURL,
-} from '../utils/config.ui';
+} from '../config.ui';
 import {TokenContractsQueries} from './token-contracts';
 import {AprQueries} from './aprs';
 import {CosmosGovernanceQueries} from './governance/quries';

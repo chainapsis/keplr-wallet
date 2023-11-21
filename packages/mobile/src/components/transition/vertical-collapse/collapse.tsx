@@ -1,14 +1,57 @@
-import React, {FunctionComponent, PropsWithChildren} from 'react';
-import {Box} from '../../box';
+import React, {
+  FunctionComponent,
+  PropsWithChildren,
+  useEffect,
+  useRef,
+} from 'react';
 import {VerticalCollapseTransitionProps} from './types';
+import Reanimated, {useSharedValue, withSpring} from 'react-native-reanimated';
+import {VerticalResizeContainer} from '../internal';
+import {defaultSpringConfig} from '../../../styles/spring';
 
-//TODO 이후 익스텐션 코드를 참고해서 애니메이션을 구현해야함
 export const VerticalCollapseTransition: FunctionComponent<
   PropsWithChildren<
     VerticalCollapseTransitionProps & {
       onTransitionEnd?: () => void;
     }
   >
-> = ({children, collapsed}) => {
-  return <Box>{!collapsed && children}</Box>;
+> = ({children, collapsed, width, transitionAlign, onTransitionEnd}) => {
+  const onTransitionEndRef = useRef(onTransitionEnd);
+  onTransitionEndRef.current = onTransitionEnd;
+
+  const heightPx = useSharedValue(collapsed ? 0 : -1);
+
+  const lastHeight = useRef(collapsed ? 0 : -1);
+
+  const opacity = useSharedValue(collapsed ? 0.1 : 1);
+
+  useEffect(() => {
+    if (collapsed) {
+      heightPx.value = withSpring(0, defaultSpringConfig);
+      opacity.value = withSpring(0.1, defaultSpringConfig);
+    } else {
+      heightPx.value = withSpring(lastHeight.current, defaultSpringConfig);
+      opacity.value = withSpring(1, defaultSpringConfig);
+    }
+  }, [collapsed, heightPx, opacity]);
+
+  return (
+    <VerticalResizeContainer
+      onHeightChange={height => {
+        lastHeight.current = height;
+        if (!collapsed) {
+          heightPx.value = height;
+        }
+      }}
+      heightPx={heightPx}
+      width={width}
+      transitionAlign={transitionAlign}>
+      <Reanimated.View
+        style={{
+          opacity,
+        }}>
+        {children}
+      </Reanimated.View>
+    </VerticalResizeContainer>
+  );
 };
