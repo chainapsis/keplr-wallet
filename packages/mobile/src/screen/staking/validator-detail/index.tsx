@@ -7,8 +7,8 @@ import {useStyle} from '../../../styles';
 import {PageWithScrollView} from '../../../components/page';
 import {Stack} from '../../../components/stack';
 import {GuideBox} from '../../../components/guide-box';
-import {RouteProp, useRoute} from '@react-navigation/native';
-import {StakeNavigation} from '../../../navigation';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {StackNavProp, StakeNavigation} from '../../../navigation';
 import {UnbondingCard} from './unbonding-card';
 import {DelegatedCard} from './delegated-card';
 import {useStore} from '../../../stores';
@@ -24,6 +24,7 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
   const {queriesStore, chainStore} = useStore();
 
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.ValidateDetail'>>();
+  const navigation = useNavigation<StackNavProp>();
   const style = useStyle();
   const {validatorAddress, chainId} = route.params;
   const queries = queriesStore.get(chainId);
@@ -141,7 +142,20 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
                   {validatorInfo.description.details}
                 </Text>
               </Stack>
-              <Button size="large" text="Stake" onPress={() => {}} />
+              <Button
+                size="large"
+                text="Stake"
+                onPress={() => {
+                  navigation.navigate('Stake', {
+                    screen: 'Stake.Delegate',
+                    params: {
+                      chainId,
+                      coinMinimalDenom: token.currency.coinMinimalDenom,
+                      validatorAddress: validatorInfo.operator_address,
+                    },
+                  });
+                }}
+              />
             </Stack>
           </Box>
         ) : null}

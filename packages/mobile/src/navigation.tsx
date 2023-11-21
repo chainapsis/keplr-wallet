@@ -66,6 +66,7 @@ import {PlainObject} from '@keplr-wallet/background';
 import {EnableChainsScreen} from './screen/register/enable-chains';
 import {WelcomeScreen} from './screen/register/welcome';
 import {ValidatorDetailScreen} from './screen/staking/validator-detail';
+import {SignDelegateScreen} from './screen/staking/delegate';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -174,6 +175,11 @@ export type StakeNavigation = {
   'Stake.Staking': {chainId: string};
   'Stake.ValidateList': {chainId: string};
   'Stake.ValidateDetail': {chainId: string; validatorAddress: string};
+  'Stake.Delegate': {
+    chainId: string;
+    coinMinimalDenom: string;
+    validatorAddress: string;
+  };
 };
 
 export type GovernanceNavigation = {
@@ -517,7 +523,6 @@ const SelectWalletNavigation = () => {
 };
 
 const StakeNavigation = () => {
-  const intl = useIntl();
   return (
     <StakeStack.Navigator>
       <StakeStack.Screen
@@ -527,16 +532,6 @@ const StakeNavigation = () => {
           ...defaultHeaderOptions,
         }}
         component={StakingDashboardScreen}
-      />
-      <StakeStack.Screen
-        name="Stake.Staking"
-        options={{
-          title: intl.formatMessage({
-            id: 'page.wallet.keyring-item.dropdown.delete-wallet-title',
-          }),
-          ...defaultHeaderOptions,
-        }}
-        component={WalletDeleteScreen}
       />
       <StakeStack.Screen
         name="Stake.ValidateDetail"
@@ -553,6 +548,14 @@ const StakeNavigation = () => {
           ...defaultHeaderOptions,
         }}
         component={ValidatorListScreen}
+      />
+      <StakeStack.Screen
+        name="Stake.Delegate"
+        options={{
+          title: 'Stake',
+          ...defaultHeaderOptions,
+        }}
+        component={SignDelegateScreen}
       />
     </StakeStack.Navigator>
   );
