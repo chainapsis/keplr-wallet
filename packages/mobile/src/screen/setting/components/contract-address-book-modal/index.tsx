@@ -18,7 +18,7 @@ import {Box} from '../../../../components/box';
 import {EmptyView} from '../../../../components/empty-view';
 import {ContractAddressItem} from '../contract-item';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {TokenContractListRepoURL} from '../../../../utils/config.ui';
+import {TokenContractListRepoURL} from '../../../../config.ui';
 import {BottomSheetSearchTextInput} from '../../../../components/input/bottom-sheet-search-input';
 import {TextInput} from 'react-native-gesture-handler';
 

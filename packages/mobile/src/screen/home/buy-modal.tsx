@@ -1,10 +1,7 @@
 import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent, useEffect, useState} from 'react';
 import {Linking, Text} from 'react-native';
-import {
-  FiatOnRampServiceInfo,
-  FiatOnRampServiceInfos,
-} from '../../utils/config.ui';
+import {FiatOnRampServiceInfo, FiatOnRampServiceInfos} from '../../config.ui';
 import {simpleFetch} from '@keplr-wallet/simple-fetch';
 import {useStore} from '../../stores';
 import {ChainInfo} from '@keplr-wallet/types';
