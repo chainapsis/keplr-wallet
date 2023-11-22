@@ -7,6 +7,7 @@ import {FormattedMessage} from 'react-intl';
 import {CustomIcon, UnknownMessageContent} from './custom-message';
 import {ClaimRewardsMessage} from './claim-rewards';
 import {SendMessage} from './send';
+import {DelegateMessage} from './delegate';
 
 export class MessageRenderRegistry implements IMessageRenderRegistry {
   protected renderers: IMessageRenderer[] = [];
@@ -66,3 +67,4 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
 export const defaultRegistry = new MessageRenderRegistry();
 defaultRegistry.register(ClaimRewardsMessage);
 defaultRegistry.register(SendMessage);
+defaultRegistry.register(DelegateMessage);
