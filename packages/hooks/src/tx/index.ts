@@ -12,3 +12,4 @@ export * from "./gas-simulator";
 export * from "./validate";
 export * from "./delegate-tx";
 export * from "./undelegate-tx";
+export * from "./redelegate-tx";
