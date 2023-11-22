@@ -157,7 +157,7 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
       <GuideBox
         color="danger"
         title={`Staking will lock your funds for ${unbondingPeriodDay} days`}
-        paragraph="You will need to unstake in order for your staked assets to be liquid again.This process will take 14 days to complete."
+        paragraph={`You will need to unstake in order for your staked assets to be liquid again.This process will take ${unbondingPeriodDay} days to complete.`}
       />
 
       <Box style={style.flatten(['flex-1'])} />
