@@ -95,7 +95,6 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
         return "0";
       }
 
-      console.log("amount3", result.toDec());
       if (result.toDec().lte(new Dec(0))) {
         return "0";
       }

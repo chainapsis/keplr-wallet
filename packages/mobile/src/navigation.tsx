@@ -72,6 +72,7 @@ import {
   ValidatorDetailScreen,
   ValidatorListScreen,
 } from './screen/staking';
+import {SignRedelegateScreen} from './screen/staking/redelegate';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -186,13 +187,26 @@ export type RootStackParamList = {
 export type StakeNavigation = {
   'Stake.Dashboard': {chainId: string};
   'Stake.Staking': {chainId: string};
-  'Stake.ValidateList': {chainId: string};
-  'Stake.ValidateDetail': {chainId: string; validatorAddress: string};
+  'Stake.ValidateList': {
+    chainId: string;
+    validatorSelector?: (
+      validatorAddress: string,
+      validatorName: string,
+    ) => void;
+  };
+  'Stake.ValidateDetail': {
+    chainId: string;
+    validatorAddress: string;
+  };
   'Stake.Delegate': {
     chainId: string;
     validatorAddress: string;
   };
   'Stake.Undelegate': {
+    chainId: string;
+    validatorAddress: string;
+  };
+  'Stake.Redelegate': {
     chainId: string;
     validatorAddress: string;
   };
@@ -585,6 +599,14 @@ const StakeNavigation = () => {
           ...defaultHeaderOptions,
         }}
         component={SignUndelegateScreen}
+      />
+      <StakeStack.Screen
+        name="Stake.Redelegate"
+        options={{
+          title: 'Switch Validator',
+          ...defaultHeaderOptions,
+        }}
+        component={SignRedelegateScreen}
       />
     </StakeStack.Navigator>
   );

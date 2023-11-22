@@ -77,7 +77,15 @@ export const DelegatedCard: FunctionComponent<{
             text="Switch Validator"
             containerStyle={style.flatten(['flex-1'])}
             size="large"
-            onPress={() => {}}
+            onPress={() => {
+              navigation.navigate('Stake', {
+                screen: 'Stake.Redelegate',
+                params: {
+                  chainId,
+                  validatorAddress,
+                },
+              });
+            }}
           />
           <Button
             containerStyle={style.flatten(['flex-1'])}
