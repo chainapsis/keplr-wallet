@@ -8,5 +8,14 @@ module.exports = {
         legacy: true,
       },
     ],
+    [
+      'transform-inline-environment-variables',
+      {
+        include: [
+          'KEPLR_EXT_COINGECKO_ENDPOINT',
+          'KEPLR_EXT_COINGECKO_GETPRICE',
+        ],
+      },
+    ],
   ],
 };

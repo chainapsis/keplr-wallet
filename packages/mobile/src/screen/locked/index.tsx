@@ -9,9 +9,11 @@ import {Box} from '../../components/box';
 import {useStyle} from '../../styles';
 import {useIntl} from 'react-intl';
 import {Gutter} from '../../components/gutter';
+import {WalletStatus} from '@keplr-wallet/stores';
+import {autorun} from 'mobx';
 
 export const LockedScreen: FunctionComponent = observer(() => {
-  const {keyRingStore, keychainStore} = useStore();
+  const {keyRingStore, keychainStore, accountStore, chainStore} = useStore();
 
   const intl = useIntl();
   const style = useStyle();
@@ -22,20 +24,49 @@ export const LockedScreen: FunctionComponent = observer(() => {
 
   useSetFocusedScreen();
 
+  const waitAccountInit = useCallback(async () => {
+    if (keyRingStore.status === 'unlocked') {
+      for (const chainInfo of chainStore.chainInfos) {
+        const account = accountStore.getAccount(chainInfo.chainId);
+        if (account.walletStatus === WalletStatus.NotInit) {
+          account.init();
+        }
+      }
+
+      await new Promise<void>(resolve => {
+        const disposal = autorun(() => {
+          // account init은 동시에 발생했을때 debounce가 되므로
+          // 첫번째꺼 하나만 확인해도 된다.
+          if (
+            accountStore.getAccount(chainStore.chainInfos[0].chainId)
+              .bech32Address
+          ) {
+            resolve();
+            if (disposal) {
+              disposal();
+            }
+          }
+        });
+      });
+    }
+  }, [accountStore, chainStore, keyRingStore]);
+
   const tryBiometric = useCallback(async () => {
     try {
       await keychainStore.tryUnlockWithBiometry();
+      await waitAccountInit();
       navigation.dispatch({
         ...StackActions.replace('Home'),
       });
     } catch (e) {
       console.log(e);
     }
-  }, [keychainStore, navigation]);
+  }, [keychainStore, navigation, waitAccountInit]);
 
   const doUnlock = async () => {
     try {
       await keyRingStore.unlock(password);
+      await waitAccountInit();
       navigation.dispatch({
         ...StackActions.replace('Home'),
       });

@@ -13,7 +13,7 @@ import {
   useSendTxConfig,
   useTxConfigsValidate,
 } from '@keplr-wallet/hooks';
-import {ICNSInfo} from '../../../utils/config.ui';
+import {ICNSInfo} from '../../../config.ui';
 import {DenomHelper} from '@keplr-wallet/common';
 import {AsyncKVStore} from '../../../common';
 import {TokenItem} from '../../../components/token-view';
