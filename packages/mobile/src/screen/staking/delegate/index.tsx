@@ -87,9 +87,8 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
     sendConfigs.feeConfig,
     gasSimulatorKey,
     () => {
-      return account.makeSendTokenTx(
+      return account.cosmos.makeDelegateTx(
         sendConfigs.amountConfig.amount[0].toDec().toString(),
-        sendConfigs.amountConfig.amount[0].currency,
         sendConfigs.recipientConfig.recipient,
       );
     },

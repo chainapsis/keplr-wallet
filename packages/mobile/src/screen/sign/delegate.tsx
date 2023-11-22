@@ -69,7 +69,7 @@ const DelegateMessagePretty: FunctionComponent<{
     .get(chainId)
     .cosmos.queryValidators.getQueryStatus(Staking.BondStatus.Bonded)
     .getValidator(validatorAddress)?.description.moniker;
-  console.log(moniker, coinpretty.trim(true).toString());
+
   return (
     <React.Fragment>
       <FormattedMessage
