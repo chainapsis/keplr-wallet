@@ -7,12 +7,15 @@ import {Button} from '../../../components/button';
 import {Box} from '../../../components/box';
 import {Gutter} from '../../../components/gutter';
 import {Column, Columns} from '../../../components/column';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavProp} from '../../../navigation';
 
 export const DelegatedCard: FunctionComponent<{
   chainId: string;
   validatorAddress: string;
 }> = observer(({validatorAddress, chainId}) => {
   const {queriesStore, accountStore} = useStore();
+  const navigation = useNavigation<StackNavProp>();
 
   const account = accountStore.getAccount(chainId);
   const queries = queriesStore.get(chainId);
@@ -80,7 +83,15 @@ export const DelegatedCard: FunctionComponent<{
             containerStyle={style.flatten(['flex-1'])}
             text="Unstake"
             size="large"
-            onPress={() => {}}
+            onPress={() => {
+              navigation.navigate('Stake', {
+                screen: 'Stake.Undelegate',
+                params: {
+                  chainId,
+                  validatorAddress,
+                },
+              });
+            }}
           />
         </Columns>
       </Box>

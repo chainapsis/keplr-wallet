@@ -60,15 +60,18 @@ import {WebScreen} from './screen/web';
 import {WebpageScreen} from './screen/web/webpage';
 import {GovernanceListScreen} from './screen/governance/list';
 import {GovernanceScreen} from './screen/governance';
-import {ValidatorListScreen} from './screen/staking/validator-list';
 import {FinalizeKeyScreen} from './screen/register/finalize-key';
 import {PlainObject} from '@keplr-wallet/background';
 import {EnableChainsScreen} from './screen/register/enable-chains';
 import {RecoverMnemonicScreen} from './screen/register/recover-mnemonic';
 import {WelcomeScreen} from './screen/register/welcome';
-import {ValidatorDetailScreen} from './screen/staking/validator-detail';
-import {SignDelegateScreen} from './screen/staking/delegate';
 import {SelectDerivationPathScreen} from './screen/register/select-derivation-path';
+import {
+  SignDelegateScreen,
+  SignUndelegateScreen,
+  ValidatorDetailScreen,
+  ValidatorListScreen,
+} from './screen/staking';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -186,6 +189,10 @@ export type StakeNavigation = {
   'Stake.ValidateList': {chainId: string};
   'Stake.ValidateDetail': {chainId: string; validatorAddress: string};
   'Stake.Delegate': {
+    chainId: string;
+    validatorAddress: string;
+  };
+  'Stake.Undelegate': {
     chainId: string;
     validatorAddress: string;
   };
@@ -570,6 +577,14 @@ const StakeNavigation = () => {
           ...defaultHeaderOptions,
         }}
         component={SignDelegateScreen}
+      />
+      <StakeStack.Screen
+        name="Stake.Undelegate"
+        options={{
+          title: 'Unstake',
+          ...defaultHeaderOptions,
+        }}
+        component={SignUndelegateScreen}
       />
     </StakeStack.Navigator>
   );
