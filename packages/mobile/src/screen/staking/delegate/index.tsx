@@ -87,56 +87,13 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
     sendConfigs.feeConfig,
     gasSimulatorKey,
     () => {
-      if (!sendConfigs.amountConfig.currency) {
-        throw new Error('Send currency not set');
-      }
-
-      // Prefer not to use the gas config or fee config,
-      // because gas simulator can change the gas config and fee config from the result of reaction,
-      // and it can make repeated reaction.
-      if (
-        sendConfigs.amountConfig.uiProperties.loadingState ===
-          'loading-block' ||
-        sendConfigs.amountConfig.uiProperties.error != null
-      ) {
-        throw new Error('Not ready to simulate tx');
-      }
-
-      const denomHelper = new DenomHelper(
-        sendConfigs.amountConfig.currency.coinMinimalDenom,
-      );
-      // I don't know why, but simulation does not work for secret20
-      if (denomHelper.type === 'secret20') {
-        throw new Error('Simulating secret wasm not supported');
-      }
-
-      return account.cosmos.makeDelegateTx(
+      return account.makeSendTokenTx(
         sendConfigs.amountConfig.amount[0].toDec().toString(),
-        validatorAddress,
+        sendConfigs.amountConfig.amount[0].currency,
+        sendConfigs.recipientConfig.recipient,
       );
     },
   );
-
-  useEffect(() => {
-    // To simulate secretwasm, we need to include the signature in the tx.
-    // With the current structure, this approach is not possible.
-    if (
-      sendConfigs.amountConfig.currency &&
-      new DenomHelper(sendConfigs.amountConfig.currency.coinMinimalDenom)
-        .type === 'secret20'
-    ) {
-      gasSimulator.forceDisable(
-        new Error('Simulating secret20 is not supported'),
-      );
-      sendConfigs.gasConfig.setValue(
-        // TODO: 이 값을 config 밑으로 빼자
-        250000,
-      );
-    } else {
-      gasSimulator.forceDisable(false);
-      gasSimulator.setEnabled(true);
-    }
-  }, [gasSimulator, sendConfigs.amountConfig.currency, sendConfigs.gasConfig]);
 
   const txConfigsValidate = useTxConfigsValidate({
     ...sendConfigs,
