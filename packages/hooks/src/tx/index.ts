@@ -11,3 +11,4 @@ export * from "./chain";
 export * from "./gas-simulator";
 export * from "./validate";
 export * from "./delegate-tx";
+export * from "./undelegate-tx";
