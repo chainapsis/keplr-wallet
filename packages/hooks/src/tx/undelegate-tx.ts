@@ -18,7 +18,6 @@ export const useUndelegateTxConfig = (
   initialGas: number
 ) => {
   const senderConfig = useSenderConfig(chainGetter, chainId, sender);
-
   const amountConfig = useStakedAmountConfig(
     chainGetter,
     queriesStore,

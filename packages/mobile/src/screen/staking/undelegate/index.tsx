@@ -101,32 +101,9 @@ export const SignUndelegateScreen: FunctionComponent = observer(() => {
     sendConfigs.feeConfig,
     gasSimulatorKey,
     () => {
-      if (!sendConfigs.amountConfig.currency) {
-        throw new Error('Send currency not set');
-      }
-
-      // Prefer not to use the gas config or fee config,
-      // because gas simulator can change the gas config and fee config from the result of reaction,
-      // and it can make repeated reaction.
-      if (
-        sendConfigs.amountConfig.uiProperties.loadingState ===
-          'loading-block' ||
-        sendConfigs.amountConfig.uiProperties.error != null
-      ) {
-        throw new Error('Not ready to simulate tx');
-      }
-
-      const denomHelper = new DenomHelper(
-        sendConfigs.amountConfig.currency.coinMinimalDenom,
-      );
-      // I don't know why, but simulation does not work for secret20
-      if (denomHelper.type === 'secret20') {
-        throw new Error('Simulating secret wasm not supported');
-      }
-
-      return account.cosmos.makeDelegateTx(
+      return account.cosmos.makeUndelegateTx(
         sendConfigs.amountConfig.amount[0].toDec().toString(),
-        validatorAddress,
+        sendConfigs.recipientConfig.recipient,
       );
     },
   );
@@ -235,7 +212,7 @@ export const SignUndelegateScreen: FunctionComponent = observer(() => {
         loading={accountStore.getAccount(chainId).isSendingMsg === 'send'}
         onPress={async () => {
           if (!txConfigsValidate.interactionBlocked) {
-            const tx = account.cosmos.makeDelegateTx(
+            const tx = account.cosmos.makeUndelegateTx(
               sendConfigs.amountConfig.amount[0].toDec().toString(),
               sendConfigs.recipientConfig.recipient,
             );
