@@ -9,11 +9,13 @@ import {Text} from 'react-native';
 import {ArrowDownIcon} from '../icon/arrow-down';
 import {ArrowUpIcon} from '../icon/arrow-up';
 import {TextButton} from '../text-button';
+import {useIntl} from 'react-intl';
 
 export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
   title,
   items,
   hideLength,
+  itemKind,
   lenAlwaysShown,
 }) => {
   if (!lenAlwaysShown || lenAlwaysShown < 0) {
@@ -21,6 +23,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
   }
 
   const style = useStyle();
+  const intl = useIntl();
 
   const [isCollapsed, setIsCollapsed] = useState(true);
 
@@ -60,7 +63,14 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
           <TextButton
             containerStyle={style.flatten(['padding-y-12'])}
             text={
-              isCollapsed ? `View ${hidden.length} more tokens` : 'Collapse'
+              isCollapsed
+                ? intl.formatMessage(
+                    {id: `components.collapsible-list.view-more-${itemKind}`},
+                    {remain: hidden.length},
+                  )
+                : intl.formatMessage({
+                    id: 'components.collapsible-list.collapse',
+                  })
             }
             rightIcon={
               isCollapsed ? (

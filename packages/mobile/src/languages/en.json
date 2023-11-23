@@ -582,6 +582,7 @@
   "components.address-item.empty-memo": "(Empty Memo)",
 
   "components.collapsible-list.view-more-tokens": "View {remain} more tokens",
+  "components.collapsible-list.view-more-validators": "View {remain} more validators",
   "components.collapsible-list.collapse": "Collapse",
 
   "button.confirm": "Confirm",
