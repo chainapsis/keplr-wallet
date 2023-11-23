@@ -153,15 +153,15 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
                       console.log(tx);
                     }
                   },
-                  onBroadcasted: () => {
-                    navigation.reset({routes: [{name: 'Home'}]});
-                  },
+                  onBroadcasted: () => {},
                 },
               );
+              navigation.reset({routes: [{name: 'Home'}]});
             } catch (e) {
               if (e?.message === 'Request rejected') {
                 return;
               }
+              navigation.reset({routes: [{name: 'Home'}]});
             }
           }
         }}
