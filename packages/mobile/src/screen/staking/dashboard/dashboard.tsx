@@ -19,7 +19,7 @@ import {YAxis} from '../../../components/axis';
 import {Button} from '../../../components/button';
 import LinearGradient from 'react-native-linear-gradient';
 import {CoinPretty} from '@keplr-wallet/unit';
-import {formatRelativeTime} from '../../../utils/format';
+import {formatRelativeTimeString} from '../../../utils/format';
 import {useIntl} from 'react-intl';
 import {formatAprString} from '../../home/utils';
 import {InformationOutlinedIcon} from '../../../components/icon/information-outlined';
@@ -106,16 +106,12 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
         }
 
         const balance = new CoinPretty(chainInfo.stakeCurrency, entry.balance);
-        const relativeTime = formatRelativeTime(entry.completion_time);
 
         res.push({
           coin: balance,
           name: validator.description.moniker,
           validatorAddress: validator.operator_address,
-          subString: intl.formatRelativeTime(
-            relativeTime.value,
-            relativeTime.unit,
-          ),
+          subString: formatRelativeTimeString(intl, entry.completion_time),
         });
       }
     }

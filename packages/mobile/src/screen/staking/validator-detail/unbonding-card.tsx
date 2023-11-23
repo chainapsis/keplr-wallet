@@ -9,6 +9,7 @@ import {Box} from '../../../components/box';
 import {Gutter} from '../../../components/gutter';
 import {Stack} from '../../../components/stack';
 import {Column, Columns} from '../../../components/column';
+import {formatRelativeTimeString} from '../../../utils/format';
 
 export const UnbondingCard: FunctionComponent<{
   validatorAddress: string;
@@ -48,36 +49,10 @@ export const UnbondingCard: FunctionComponent<{
         backgroundColor={style.get('color-gray-600').color}>
         <Stack gutter={24}>
           {unbonding.entries.map((entry, i) => {
-            const remainingText = (() => {
-              const current = new Date().getTime();
-
-              const relativeEndTime =
-                (new Date(entry.completionTime).getTime() - current) / 1000;
-              const relativeEndTimeDays = Math.floor(
-                relativeEndTime / (3600 * 24),
-              );
-              const relativeEndTimeHours = Math.ceil(relativeEndTime / 3600);
-
-              if (relativeEndTimeDays) {
-                return (
-                  intl
-                    .formatRelativeTime(relativeEndTimeDays, 'days', {
-                      numeric: 'always',
-                    })
-                    .replace('in ', '') + ' left'
-                );
-              } else if (relativeEndTimeHours) {
-                return (
-                  intl
-                    .formatRelativeTime(relativeEndTimeHours, 'hours', {
-                      numeric: 'always',
-                    })
-                    .replace('in ', '') + ' left'
-                );
-              }
-
-              return '';
-            })();
+            const remainingText = formatRelativeTimeString(
+              intl,
+              entry.completionTime,
+            );
             const progress = (() => {
               const currentTime = new Date().getTime();
               const endTime = new Date(entry.completionTime).getTime();
