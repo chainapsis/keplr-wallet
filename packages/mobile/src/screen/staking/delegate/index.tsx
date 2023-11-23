@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import React, {FunctionComponent, useEffect, useMemo, useRef} from 'react';
+import React, {FunctionComponent, useEffect, useRef} from 'react';
 import {PageWithScrollView} from '../../../components/page';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {useStore} from '../../../stores';
@@ -8,7 +8,6 @@ import {
   useDelegateTxConfig,
   useTxConfigsValidate,
 } from '@keplr-wallet/hooks';
-import {DenomHelper} from '@keplr-wallet/common';
 import {AsyncKVStore} from '../../../common';
 import {AmountInput} from '../../../components/input/amount-input';
 import {MemoInput} from '../../../components/input/memo-input';
@@ -60,32 +59,13 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
     300000,
   );
 
-  const gasSimulatorKey = useMemo(() => {
-    if (sendConfigs.amountConfig.currency) {
-      const denomHelper = new DenomHelper(
-        sendConfigs.amountConfig.currency.coinMinimalDenom,
-      );
-
-      if (denomHelper.type !== 'native') {
-        if (denomHelper.type === 'cw20') {
-          // Probably, the gas can be different per cw20 according to how the contract implemented.
-          return `${denomHelper.type}/${denomHelper.contractAddress}`;
-        }
-
-        return denomHelper.type;
-      }
-    }
-
-    return 'native';
-  }, [sendConfigs.amountConfig.currency]);
-
   const gasSimulator = useGasSimulator(
     new AsyncKVStore('gas-simulator.screen.stake.delegate/delegate'),
     chainStore,
     chainId,
     sendConfigs.gasConfig,
     sendConfigs.feeConfig,
-    gasSimulatorKey,
+    'native',
     () => {
       return account.cosmos.makeDelegateTx(
         sendConfigs.amountConfig.amount[0].toDec().toString(),

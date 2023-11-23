@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import React, {FunctionComponent, useEffect, useMemo, useRef} from 'react';
+import React, {FunctionComponent, useEffect, useRef} from 'react';
 import {PageWithScrollView} from '../../../components/page';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {useStore} from '../../../stores';
@@ -8,7 +8,6 @@ import {
   useTxConfigsValidate,
   useUndelegateTxConfig,
 } from '@keplr-wallet/hooks';
-import {DenomHelper} from '@keplr-wallet/common';
 import {AsyncKVStore} from '../../../common';
 import {AmountInput} from '../../../components/input/amount-input';
 import {MemoInput} from '../../../components/input/memo-input';
@@ -74,32 +73,13 @@ export const SignUndelegateScreen: FunctionComponent = observer(() => {
     validatorAddress,
   ]);
 
-  const gasSimulatorKey = useMemo(() => {
-    if (sendConfigs.amountConfig.currency) {
-      const denomHelper = new DenomHelper(
-        sendConfigs.amountConfig.currency.coinMinimalDenom,
-      );
-
-      if (denomHelper.type !== 'native') {
-        if (denomHelper.type === 'cw20') {
-          // Probably, the gas can be different per cw20 according to how the contract implemented.
-          return `${denomHelper.type}/${denomHelper.contractAddress}`;
-        }
-
-        return denomHelper.type;
-      }
-    }
-
-    return 'native';
-  }, [sendConfigs.amountConfig.currency]);
-
   const gasSimulator = useGasSimulator(
-    new AsyncKVStore('gas-simulator.screen.stake.delegate/delegate'),
+    new AsyncKVStore('gas-simulator.screen.stake.undelegate/undelegate'),
     chainStore,
     chainId,
     sendConfigs.gasConfig,
     sendConfigs.feeConfig,
-    gasSimulatorKey,
+    'native',
     () => {
       return account.cosmos.makeUndelegateTx(
         sendConfigs.amountConfig.amount[0].toDec().toString(),
@@ -107,27 +87,6 @@ export const SignUndelegateScreen: FunctionComponent = observer(() => {
       );
     },
   );
-
-  useEffect(() => {
-    // To simulate secretwasm, we need to include the signature in the tx.
-    // With the current structure, this approach is not possible.
-    if (
-      sendConfigs.amountConfig.currency &&
-      new DenomHelper(sendConfigs.amountConfig.currency.coinMinimalDenom)
-        .type === 'secret20'
-    ) {
-      gasSimulator.forceDisable(
-        new Error('Simulating secret20 is not supported'),
-      );
-      sendConfigs.gasConfig.setValue(
-        // TODO: 이 값을 config 밑으로 빼자
-        250000,
-      );
-    } else {
-      gasSimulator.forceDisable(false);
-      gasSimulator.setEnabled(true);
-    }
-  }, [gasSimulator, sendConfigs.amountConfig.currency, sendConfigs.gasConfig]);
 
   const txConfigsValidate = useTxConfigsValidate({
     ...sendConfigs,
