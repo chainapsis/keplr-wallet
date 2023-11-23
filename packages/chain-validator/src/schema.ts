@@ -208,6 +208,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
       return value;
     }),
   chainSymbolImageUrl: Joi.string().uri(),
+  isTestnet: Joi.boolean(),
 }).custom((value: ChainInfo) => {
   if (
     value.alternativeBIP44s?.find(

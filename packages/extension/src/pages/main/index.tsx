@@ -27,7 +27,7 @@ import { Box } from "../../components/box";
 import { Modal } from "../../components/modal";
 import { DualChart } from "./components/chart";
 import { Gutter } from "../../components/gutter";
-import { H1, Subtitle3 } from "../../components/typography";
+import { Caption2, H1, Subtitle3 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
 import { AvailableTabView } from "./available";
 import { StakedTabView } from "./staked";
@@ -44,6 +44,8 @@ import { LayeredHorizontalRadioGroup } from "../../components/radio-group";
 import { XAxis, YAxis } from "../../components/axis";
 import { DepositModal } from "./components/deposit-modal";
 import { MainHeaderLayout } from "./layouts/header";
+import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
+import { HeaderHeight } from "../../layouts/header";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -66,7 +68,8 @@ type TabStatus = "available" | "staked";
 export const MainPage: FunctionComponent<{
   setIsNotReady: (isNotReady: boolean) => void;
 }> = observer(({ setIsNotReady }) => {
-  const { analyticsStore, hugeQueriesStore, uiConfigStore } = useStore();
+  const { analyticsStore, hugeQueriesStore, uiConfigStore, chainStore } =
+    useStore();
 
   const isNotReady = useIsNotReady();
   const intl = useIntl();
@@ -195,6 +198,24 @@ export const MainPage: FunctionComponent<{
   return (
     <MainHeaderLayout isNotReady={isNotReady}>
       <Box paddingX="0.75rem" paddingBottom="1.5rem">
+        {/* 얘는 테스트넷 모드일때 위에 top padding 효과를 주기 위해서 존재함 */}
+        <VerticalCollapseTransition collapsed={!chainStore.isTestnetMode}>
+          <TestnetModeBanner opacity={0} />
+        </VerticalCollapseTransition>
+        {/* 테스트넷 모드일때 배너(?)를 띄어줌 */}
+        <div
+          style={{
+            position: "fixed",
+            top: HeaderHeight,
+            left: 0,
+            right: 0,
+            zIndex: 1000,
+          }}
+        >
+          <VerticalCollapseTransition collapsed={!chainStore.isTestnetMode}>
+            <TestnetModeBanner />
+          </VerticalCollapseTransition>
+        </div>
         <Stack gutter="0.75rem">
           <YAxis alignX="center">
             <LayeredHorizontalRadioGroup
@@ -507,4 +528,27 @@ const Styles = {
           : ColorPalette["gray-300"]};
     }
   `,
+};
+
+const TestnetModeBanner: FunctionComponent<{
+  opacity?: number;
+}> = ({ opacity }) => {
+  const theme = useTheme();
+
+  return (
+    <Box
+      backgroundColor={theme.mode === "light" ? "#D5E0FF" : "#1A2646"}
+      alignX="center"
+      alignY="center"
+      paddingY="0.45rem"
+      marginBottom="0.65rem"
+      style={{
+        opacity,
+      }}
+    >
+      <Caption2 color={theme.mode === "light" ? "#0533D4" : "#AABBF9"}>
+        This is Testnet Mode
+      </Caption2>
+    </Box>
+  );
 };

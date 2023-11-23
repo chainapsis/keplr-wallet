@@ -332,6 +332,10 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
     return this._embedded.chainSymbolImageUrl;
   }
 
+  get isTestnet(): boolean | undefined {
+    return this._embedded.isTestnet;
+  }
+
   hasFeature(feature: string): boolean {
     return !!(
       this._embedded.features && this._embedded.features.includes(feature)

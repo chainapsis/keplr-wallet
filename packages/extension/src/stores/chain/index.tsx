@@ -1,4 +1,5 @@
 import {
+  action,
   autorun,
   computed,
   flow,
@@ -33,7 +34,7 @@ import {
   TryUpdateEnabledChainInfosMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
-import { toGenerator } from "@keplr-wallet/common";
+import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
@@ -48,7 +49,11 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @observable.ref
   protected _tokenScans: TokenScan[] = [];
 
+  @observable
+  protected _isTestnetMode: boolean = false;
+
   constructor(
+    protected readonly kvStore: KVStore,
     protected readonly embedChainInfos: ChainInfo[],
     protected readonly keyRingStore: KeyRingStore,
     protected readonly requester: MessageRequester
@@ -158,6 +163,10 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @computed
   get chainInfosInUI() {
+    if (this.isTestnetMode) {
+      return this.chainInfos.filter((chainInfo) => chainInfo.isTestnet);
+    }
+
     return this.chainInfos.filter((chainInfo) => {
       const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
       return this.enabledChainIdentifiesMap.get(chainIdentifier);
@@ -233,6 +242,19 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @flow
   protected *init() {
     this._isInitializing = true;
+
+    {
+      const saved = yield* toGenerator(
+        this.kvStore.get<boolean>("isTestnetMode")
+      );
+      if (saved) {
+        this._isTestnetMode = true;
+      }
+
+      autorun(() => {
+        this.kvStore.set<boolean>("isTestnetMode", this._isTestnetMode);
+      });
+    }
 
     yield this.keyRingStore.waitUntilInitialized();
 
@@ -425,5 +447,19 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   async clearAllChainEndpoints() {
     const msg = new ClearAllChainEndpointsMsg();
     await this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  @computed
+  get isTestnetExisted(): boolean {
+    return this.chainInfos.some((chainInfo) => chainInfo.isTestnet);
+  }
+
+  get isTestnetMode(): boolean {
+    return this.isTestnetExisted && this._isTestnetMode;
+  }
+
+  @action
+  setIsTestnetMode(isTestnetMode: boolean) {
+    this._isTestnetMode = isTestnetMode;
   }
 }

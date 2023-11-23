@@ -153,6 +153,7 @@ export class RootStore {
     );
 
     this.chainStore = new ChainStore(
+      new ExtensionKVStore("store_chain_ui"),
       EmbedChainInfos,
       this.keyRingStore,
       new InExtensionMessageRequester()

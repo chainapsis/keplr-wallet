@@ -31,7 +31,7 @@ const Styles = {
 export const MenuBar: FunctionComponent<{
   close: () => void;
 }> = observer(({ close }) => {
-  const { analyticsStore, keyRingStore } = useStore();
+  const { analyticsStore, keyRingStore, chainStore } = useStore();
 
   const location = useLocation();
 
@@ -131,6 +131,18 @@ export const MenuBar: FunctionComponent<{
       </Stack>
 
       <Styles.Flex1 />
+
+      {chainStore.isTestnetExisted ? (
+        <Styles.MenuItem
+          onClick={(e) => {
+            e.preventDefault();
+
+            chainStore.setIsTestnetMode(!chainStore.isTestnetMode);
+          }}
+        >
+          {chainStore.isTestnetMode ? "Testnet" : "Mainnet"}
+        </Styles.MenuItem>
+      ) : null}
 
       <Styles.MenuItem
         onClick={(e) => {
