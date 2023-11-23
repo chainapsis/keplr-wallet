@@ -375,7 +375,8 @@ export class HugeQueriesStore {
 
       for (let i = 0; i < queryUnbonding.unbondings.length; i++) {
         const unbonding = queryUnbonding.unbondings[i];
-        for (const entry of unbonding.entries) {
+        for (let j = 0; j < unbonding.entries.length; j++) {
+          const entry = unbonding.entries[j];
           if (!chainInfo.stakeCurrency) {
             continue;
           }
@@ -384,7 +385,7 @@ export class HugeQueriesStore {
             entry.balance,
           );
 
-          const key = `${chainInfo.chainId}/${account.bech32Address}/${i}`;
+          const key = `${chainInfo.chainId}/${account.bech32Address}/${i}/${j}`;
           prevKeyMap.delete(key);
           this.unbondingBinarySort.pushAndSort(key, {
             viewToken: {
