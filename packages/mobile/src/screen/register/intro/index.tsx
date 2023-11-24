@@ -7,7 +7,7 @@ import {Text} from 'react-native';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {Button} from '../../../components/button';
 import {TextButton} from '../../../components/text-button';
-import {StackActions, useNavigation} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../navigation';
 
 export const RegisterIntroScreen: FunctionComponent = () => {
@@ -63,7 +63,7 @@ export const RegisterIntroScreen: FunctionComponent = () => {
             id: 'pages.register.intro.connect-hardware-wallet-button',
           })}
           onPress={() => {
-            navigation.dispatch(StackActions.push('Register.Temp'));
+            navigation.navigate('Register.Intro.ConnectHardware');
           }}
         />
       </Box>
