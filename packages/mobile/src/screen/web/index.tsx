@@ -19,7 +19,6 @@ import {EmptyView} from '../../components/empty-view';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {RectButton as NativeRectButton} from 'react-native-gesture-handler';
 
-// TODO: 디자인 반영해서 적용
 export const WebScreen: FunctionComponent = observer(() => {
   const {favoriteWebpageStore} = useStore();
   const style = useStyle();
