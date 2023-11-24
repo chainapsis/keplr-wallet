@@ -175,6 +175,7 @@ export const GovernanceCardBody: FunctionComponent<{
             if (url) {
               navigation.navigate('Web', {
                 url,
+                isExternal: true,
               });
             }
           }}>
