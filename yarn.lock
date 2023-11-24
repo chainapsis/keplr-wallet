@@ -7683,6 +7683,8 @@ __metadata:
     "@formatjs/intl-pluralrules": ^5.2.6
     "@formatjs/intl-relativetimeformat": ^11.2.6
     "@gorhom/bottom-sheet": ^4.5.0
+    "@ledgerhq/hw-app-eth": ^6.29.3
+    "@ledgerhq/react-native-hw-transport-ble": =6.20.0
     "@react-native-async-storage/async-storage": ^1.19.3
     "@react-native-community/blur": ^4.3.2
     "@react-native/eslint-config": ^0.72.2
@@ -7717,12 +7719,15 @@ __metadata:
     react-hook-form: ^7.45.4
     react-intl: ^6.2.8
     react-native: 0.72.3
+    react-native-ble-plx: ^2.0.3
+    react-native-device-info: ^10.11.0
     react-native-fast-image: ^8.6.3
     react-native-fs: ^2.20.0
     react-native-gesture-handler: ^2.12.1
     react-native-keyboard-aware-scroll-view: ^0.9.5
     react-native-keychain: ^8.1.2
     react-native-linear-gradient: ^2.8.3
+    react-native-permissions: ^3.10.1
     react-native-qrcode-svg: ^6.2.0
     react-native-reanimated: ^3.4.2
     react-native-safe-area-context: ^4.7.1
@@ -8285,6 +8290,22 @@ __metadata:
   version: 6.10.1-nightly.0
   resolution: "@ledgerhq/logs@npm:6.10.1-nightly.0"
   checksum: 5a56908136adcefefb6b15ff335dad2fdf120933e94fb34633dc7460388481cff93493fee1e31b4b5646b1f620cd7ae1d3cb0d4e7270ec161eb16a17fa8a7fac
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/react-native-hw-transport-ble@npm:=6.20.0":
+  version: 6.20.0
+  resolution: "@ledgerhq/react-native-hw-transport-ble@npm:6.20.0"
+  dependencies:
+    "@ledgerhq/devices": ^6.20.0
+    "@ledgerhq/errors": ^6.10.0
+    "@ledgerhq/hw-transport": ^6.20.0
+    "@ledgerhq/logs": ^6.10.0
+    invariant: ^2.2.4
+    react-native-ble-plx: 2.0.3
+    rxjs: 6
+    uuid: ^3.4.0
+  checksum: f28410488b13f367f33a76701c18e9b3d08b772f7e5c26b3d37517c822a845fa6b4823acb376b59d313ffff6381a73a86a39db6dc4eb35e8c5ac57f2bd1e81f6
   languageName: node
   linkType: hard
 
@@ -32889,6 +32910,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-ble-plx@npm:2.0.3, react-native-ble-plx@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "react-native-ble-plx@npm:2.0.3"
+  checksum: 84dba90a18feadb578fb5ffeec0d4d02ea7e8e1315bd66939d7aa9f26e22c57e898672a745bb11749beabfb5c1c06bc5c30371147404d2422f9486ac04e1d9ae
+  languageName: node
+  linkType: hard
+
+"react-native-device-info@npm:^10.11.0":
+  version: 10.11.0
+  resolution: "react-native-device-info@npm:10.11.0"
+  peerDependencies:
+    react-native: "*"
+  checksum: 3f2de34df4e95e87291673fe69b09d3b96f9088177a8dadd92eccec86549cea63ca08ab82f120d4150eb0302ac721ad8a5e4b3a8136c9f54f0212e4c055762b0
+  languageName: node
+  linkType: hard
+
 "react-native-fast-image@npm:^8.6.3":
   version: 8.6.3
   resolution: "react-native-fast-image@npm:8.6.3"
@@ -32966,6 +33003,20 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: f980d324e551bbc475c6406bdc5250a08242020cbe653412fa169bbdf51e28a502e225de105b4d696d6a1a1b733d44782469020f4936d8b3ce0e2c78e51cf58f
+  languageName: node
+  linkType: hard
+
+"react-native-permissions@npm:^3.10.1":
+  version: 3.10.1
+  resolution: "react-native-permissions@npm:3.10.1"
+  peerDependencies:
+    react: ">=16.13.1"
+    react-native: ">=0.63.3"
+    react-native-windows: ">=0.62.0"
+  peerDependenciesMeta:
+    react-native-windows:
+      optional: true
+  checksum: 86ea43e34f41a77d85c1af2c4a4ff241dd7cb08a3f62a2ba6c8b8bbb8b03cdf4452609cd388ff7b3785086ad3ce95d45c5e6feca1af3ea2a544aafcfec28d0e1
   languageName: node
   linkType: hard
 
