@@ -176,7 +176,8 @@ export type RootStackParamList = {
   'SelectWallet.ViewRecoveryPhrase': {id: string};
 
   Stake: NavigatorScreenParams<StakeNavigation>;
-  Web: {url: string};
+  Web: {url: string; isExternal: true};
+  WebTab: NavigatorScreenParams<WebStackNavigation>;
   Governance: NavigatorScreenParams<GovernanceNavigation>;
 };
 
@@ -196,6 +197,11 @@ export type GovernanceNavigation = {
   'Governance.list': {chainId: string; isGovV1Supported?: boolean};
 };
 
+export type WebStackNavigation = {
+  'Web.Intro': undefined;
+  'Web.WebPage': {url: string};
+};
+
 export type StackNavProp = NativeStackNavigationProp<RootStackParamList>;
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -203,6 +209,7 @@ const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 const StakeStack = createNativeStackNavigator<StakeNavigation>();
 const GovernanceStack = createNativeStackNavigator<GovernanceNavigation>();
+const WebStack = createNativeStackNavigator<WebStackNavigation>();
 
 export const RegisterNavigation: FunctionComponent = () => {
   return (
@@ -286,7 +293,7 @@ export const MainTabNavigation: FunctionComponent = () => {
           switch (route.name) {
             case 'Home':
               return <WalletIcon size={size} color={color} />;
-            case 'Web':
+            case 'WebTab':
               return <BrowserIcon size={size} color={color} />;
             case 'Settings':
               return <SettingIcon size={size} color={color} />;
@@ -312,9 +319,9 @@ export const MainTabNavigation: FunctionComponent = () => {
         component={HomeScreen}
       />
       <Tab.Screen
-        name="Web"
+        name="WebTab"
         options={{headerShown: false}}
-        component={WebScreen}
+        component={WebNavigation}
       />
       <Tab.Screen
         name="Settings"
@@ -322,6 +329,25 @@ export const MainTabNavigation: FunctionComponent = () => {
         component={SettingNavigation}
       />
     </Tab.Navigator>
+  );
+};
+
+const WebNavigation = () => {
+  return (
+    <WebStack.Navigator initialRouteName="Web.Intro">
+      <WebStack.Screen
+        name="Web.Intro"
+        options={{
+          headerShown: false,
+        }}
+        component={WebScreen}
+      />
+      <WebStack.Screen
+        name="Web.WebPage"
+        options={{headerShown: false}}
+        component={WebpageScreen}
+      />
+    </WebStack.Navigator>
   );
 };
 
@@ -668,7 +694,11 @@ export const AppNavigation: FunctionComponent = observer(() => {
             options={{headerShown: false}}
             component={StakeNavigation}
           />
-          <Stack.Screen name={'Web'} component={WebpageScreen} />
+          <Stack.Screen
+            name={'Web'}
+            options={{headerShown: false}}
+            component={WebpageScreen}
+          />
 
           {/*NOTE Register와 Home을 통해서 이동하여 route를 최상위에도 올렸습니다*/}
           <Stack.Screen
