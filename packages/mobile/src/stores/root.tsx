@@ -46,6 +46,7 @@ import {CosmosGovernanceQueries} from './governance/quries';
 import {CosmosGovernanceQueriesV1} from './governance/v1/quries';
 import {ScamProposalStore} from './scam-proposal';
 import {KeychainStore} from './keychain';
+import {FavoriteWebpageStore} from './favorite';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
@@ -62,6 +63,8 @@ export class RootStore {
   public readonly permissionStore: PermissionStore;
   public readonly signInteractionStore: SignInteractionStore;
   public readonly chainSuggestStore: ChainSuggestStore;
+
+  public readonly favoriteWebpageStore: FavoriteWebpageStore;
 
   public readonly queriesStore: QueriesStore<
     [
@@ -356,6 +359,10 @@ export class RootStore {
     this.keychainStore = new KeychainStore(
       new AsyncKVStore('store_keychain'),
       this.keyRingStore,
+    );
+
+    this.favoriteWebpageStore = new FavoriteWebpageStore(
+      new AsyncKVStore('store_favorite_url'),
     );
 
     router.listen(APP_PORT);
