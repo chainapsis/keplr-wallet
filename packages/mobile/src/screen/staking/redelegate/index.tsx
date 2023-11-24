@@ -19,7 +19,11 @@ import {FeeControl} from '../../../components/input/fee-control';
 import {Gutter} from '../../../components/gutter';
 import {LogBox, Text} from 'react-native';
 import {StackNavProp, StakeNavigation} from '../../../navigation';
-import {ValidatorItem} from '../components/validator-item';
+import {Staking} from '@keplr-wallet/stores';
+import {Column, Columns} from '../../../components/column';
+import {ValidatorImage} from '../components/validator-image';
+import {ArrowRightIcon} from '../../../components/icon/arrow-right';
+import {RectButton} from '../../../components/rect-button';
 
 //NOTE https://reactnavigation.org/docs/troubleshooting/#i-get-the-warning-non-serializable-values-were-found-in-the-navigation-state
 //해당 경고가 있으나 state persistence, deep linking를 해당 페이지에서 사용하지 않기 때문에 해당 경고를 무시함
@@ -94,12 +98,18 @@ export const SignRedelegateScreen: FunctionComponent = observer(() => {
       style={style.flatten(['padding-x-12', 'padding-top-12'])}>
       <Stack gutter={16}>
         <Box>
-          <Text>Switch to</Text>
+          <Text
+            style={style.flatten([
+              'subtitle3',
+              'color-label-default',
+              'padding-left-8',
+              'margin-bottom-6',
+            ])}>
+            Switch to
+          </Text>
           <ValidatorItem
-            viewValidator={{
-              validatorAddress: dstValidatorInfo.address,
-              name: dstValidatorInfo.name,
-            }}
+            validatorAddress={dstValidatorInfo.address}
+            validatorName={dstValidatorInfo.name}
             chainId={chainId}
             afterSelect={() => {
               navigation.navigate('Stake', {
@@ -174,5 +184,72 @@ export const SignRedelegateScreen: FunctionComponent = observer(() => {
         }}
       />
     </PageWithScrollView>
+  );
+});
+
+export const ValidatorItem: FunctionComponent<{
+  validatorAddress?: string;
+  validatorName: string;
+  isNotReady?: boolean;
+  chainId: string;
+  afterSelect: () => void;
+}> = observer(({chainId, validatorAddress, validatorName, afterSelect}) => {
+  const {queriesStore} = useStore();
+  const queries = queriesStore.get(chainId);
+  const style = useStyle();
+  const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
+    Staking.BondStatus.Bonded,
+  );
+
+  return (
+    <RectButton
+      underlayColor={style.get('color-gray-550').color}
+      rippleColor={style.get('color-gray-550').color}
+      style={style.flatten(['border-radius-6', 'background-color-gray-600'])}
+      activeOpacity={0.5}
+      onPress={async () => {
+        afterSelect();
+      }}>
+      <Box
+        paddingLeft={16}
+        paddingRight={8}
+        paddingY={16}
+        borderRadius={6}
+        height={74}
+        alignY="center">
+        <Columns sum={1} alignY="center" gutter={8}>
+          <Box>
+            {validatorAddress ? (
+              <ValidatorImage
+                imageUrl={bondedValidators.getValidatorThumbnail(
+                  validatorAddress,
+                )}
+                name={validatorName}
+              />
+            ) : null}
+          </Box>
+          <Gutter size={12} />
+          <Column weight={6}>
+            {validatorName ? (
+              <Text
+                numberOfLines={1}
+                style={style.flatten(['subtitle2', 'color-text-high'])}>
+                {validatorName}
+              </Text>
+            ) : (
+              <Text
+                numberOfLines={1}
+                style={style.flatten(['subtitle2', 'color-text-middle'])}>
+                Select Validator
+              </Text>
+            )}
+            <Gutter size={4} />
+          </Column>
+          <Column weight={1} />
+          <Gutter size={4} />
+          <ArrowRightIcon size={24} color={style.get('color-gray-400').color} />
+        </Columns>
+      </Box>
+    </RectButton>
   );
 });
