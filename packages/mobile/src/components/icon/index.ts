@@ -19,3 +19,7 @@ export * from './bolt';
 export * from './apple';
 export * from './google';
 export * from './arrow-down-up';
+export * from './ledger';
+export * from './terra';
+export * from './cosmos';
+export * from './ethereum';
