@@ -136,12 +136,12 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
                   onBroadcasted: () => {},
                 },
               );
-              navigation.reset({routes: [{name: 'Home'}]});
+              //TODO Sign진행 페이지로 라우팅 해야함
             } catch (e) {
               if (e?.message === 'Request rejected') {
                 return;
               }
-              navigation.reset({routes: [{name: 'Home'}]});
+              //TODO Sign진행 페이지로 라우팅 해야함
             }
           }
         }}
