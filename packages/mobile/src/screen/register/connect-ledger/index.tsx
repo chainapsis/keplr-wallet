@@ -79,7 +79,16 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
         }
       }
     })();
-  }, [route.params, publicKey, step, navigation]);
+  }, [
+    route.params,
+    publicKey,
+    step,
+    navigation,
+    appendModeInfo,
+    keyRingStore,
+    app,
+    chainStore,
+  ]);
 
   return (
     <RegisterContainer
