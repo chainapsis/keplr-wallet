@@ -115,7 +115,7 @@ export const WebpageScreen: FunctionComponent = observer(() => {
         <WebView
           source={{uri}}
           ref={webviewRef}
-          userAgent={`KeplrWalletMobile/${DeviceInfo.getVersion()}`}
+          applicationNameForUserAgent={`KeplrWalletMobile/${DeviceInfo.getVersion()}`}
           injectedJavaScriptBeforeContentLoaded={sourceCode}
           onMessage={onMessage}
           onNavigationStateChange={e => {
