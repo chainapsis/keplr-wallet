@@ -12,9 +12,9 @@ import {
 import {useStyle} from './styles';
 import React from 'react';
 import {
-  NativeStackNavigationProp,
-  createNativeStackNavigator,
-} from '@react-navigation/native-stack';
+  createStackNavigator,
+  StackNavigationProp,
+} from '@react-navigation/stack';
 import {HomeScreen} from './screen/home';
 import {LockedScreen} from './screen/locked';
 import {SendSelectAssetScreen} from './screen/send/select-asset';
@@ -202,14 +202,14 @@ export type WebStackNavigation = {
   'Web.WebPage': {url: string};
 };
 
-export type StackNavProp = NativeStackNavigationProp<RootStackParamList>;
+export type StackNavProp = StackNavigationProp<RootStackParamList>;
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+const Stack = createStackNavigator<RootStackParamList>();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
-const StakeStack = createNativeStackNavigator<StakeNavigation>();
-const GovernanceStack = createNativeStackNavigator<GovernanceNavigation>();
-const WebStack = createNativeStackNavigator<WebStackNavigation>();
+const StakeStack = createStackNavigator<StakeNavigation>();
+const GovernanceStack = createStackNavigator<GovernanceNavigation>();
+const WebStack = createStackNavigator<WebStackNavigation>();
 
 export const RegisterNavigation: FunctionComponent = () => {
   return (
