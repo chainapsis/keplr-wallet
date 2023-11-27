@@ -119,6 +119,7 @@ export const StakedTabView: FunctionComponent<{
           return (
             <CollapsibleList
               key={title}
+              itemKind="tokens"
               title={
                 <TokenTitleView
                   title={title}

@@ -5,8 +5,8 @@ import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {useStore} from '../../../stores';
 import {
   useGasSimulator,
-  useDelegateTxConfig,
   useTxConfigsValidate,
+  useUndelegateTxConfig,
 } from '@keplr-wallet/hooks';
 import {AsyncKVStore} from '../../../common';
 import {AmountInput} from '../../../components/input/amount-input';
@@ -17,14 +17,15 @@ import {useStyle} from '../../../styles';
 import {Button} from '../../../components/button';
 import {FeeControl} from '../../../components/input/fee-control';
 import {Gutter} from '../../../components/gutter';
-import {TextInput} from 'react-native';
+import {Text, TextInput} from 'react-native';
 import {StackNavProp, StakeNavigation} from '../../../navigation';
 import {ValidatorCard} from '../components/validator-card';
 import {GuideBox} from '../../../components/guide-box';
+import {XAxis} from '../../../components/axis';
 
-export const SignDelegateScreen: FunctionComponent = observer(() => {
+export const SignUndelegateScreen: FunctionComponent = observer(() => {
   const {chainStore, accountStore, queriesStore} = useStore();
-  const route = useRoute<RouteProp<StakeNavigation, 'Stake.Delegate'>>();
+  const route = useRoute<RouteProp<StakeNavigation, 'Stake.Undelegate'>>();
   const navigation = useNavigation<StackNavProp>();
   const style = useStyle();
   const addressRef = useRef<TextInput>(null);
@@ -49,8 +50,9 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
   const unbondingPeriodDay = queries.cosmos.queryStakingParams.response
     ? queries.cosmos.queryStakingParams.unbondingTimeSec / (3600 * 24)
     : 21;
+  const chainInfo = chainStore.getChain(chainId);
 
-  const sendConfigs = useDelegateTxConfig(
+  const sendConfigs = useUndelegateTxConfig(
     chainStore,
     queriesStore,
     chainId,
@@ -58,16 +60,28 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
     validatorAddress,
     300000,
   );
+  sendConfigs.amountConfig.setCurrency(chainInfo.stakeCurrency);
+
+  useEffect(() => {
+    sendConfigs.recipientConfig.setBech32Prefix(
+      chainInfo.bech32Config.bech32PrefixValAddr,
+    );
+    sendConfigs.recipientConfig.setValue(validatorAddress);
+  }, [
+    chainInfo.bech32Config.bech32PrefixValAddr,
+    sendConfigs.recipientConfig,
+    validatorAddress,
+  ]);
 
   const gasSimulator = useGasSimulator(
-    new AsyncKVStore('gas-simulator.screen.stake.delegate/delegate'),
+    new AsyncKVStore('gas-simulator.screen.stake.undelegate/undelegate'),
     chainStore,
     chainId,
     sendConfigs.gasConfig,
     sendConfigs.feeConfig,
     'native',
     () => {
-      return account.cosmos.makeDelegateTx(
+      return account.cosmos.makeUndelegateTx(
         sendConfigs.amountConfig.amount[0].toDec().toString(),
         sendConfigs.recipientConfig.recipient,
       );
@@ -91,9 +105,52 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
       </Stack>
       <Gutter size={16} />
       <GuideBox
-        color="danger"
-        title={`Staking will lock your funds for ${unbondingPeriodDay} days`}
-        paragraph={`You will need to unstake in order for your staked assets to be liquid again.This process will take ${unbondingPeriodDay} days to complete.`}
+        color="warning"
+        title="Once the unstaking period begins you will:"
+        paragraph={
+          <Box paddingX={6}>
+            <XAxis>
+              <Text
+                style={style.flatten([
+                  'body2',
+                  'margin-right-4',
+                  'color-yellow-500',
+                ])}>
+                •
+              </Text>
+              <Text style={style.flatten(['body2', 'color-yellow-500'])}>
+                NOT recieve staking rewards
+              </Text>
+            </XAxis>
+            <XAxis>
+              <Text
+                style={style.flatten([
+                  'body2',
+                  'margin-right-4',
+                  'color-yellow-500',
+                ])}>
+                •
+              </Text>
+              <Text style={style.flatten(['body2', 'color-yellow-500'])}>
+                {`need to wait ${unbondingPeriodDay} days for the amount to be liquid`}
+              </Text>
+            </XAxis>
+            <XAxis>
+              <Text
+                style={style.flatten([
+                  'body2',
+                  'margin-right-4',
+                  'color-yellow-500',
+                ])}>
+                •
+              </Text>
+              <Text style={style.flatten(['body2', 'color-yellow-500'])}>
+                But you will be able to cancel the unstaking process anytime, as
+                this chain currently supports the function
+              </Text>
+            </XAxis>
+          </Box>
+        }
       />
 
       <Box style={style.flatten(['flex-1'])} />
@@ -114,7 +171,7 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
         loading={accountStore.getAccount(chainId).isSendingMsg === 'send'}
         onPress={async () => {
           if (!txConfigsValidate.interactionBlocked) {
-            const tx = account.cosmos.makeDelegateTx(
+            const tx = account.cosmos.makeUndelegateTx(
               sendConfigs.amountConfig.amount[0].toDec().toString(),
               sendConfigs.recipientConfig.recipient,
             );

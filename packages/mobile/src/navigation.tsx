@@ -60,18 +60,22 @@ import {WebScreen} from './screen/web';
 import {WebpageScreen} from './screen/web/webpage';
 import {GovernanceListScreen} from './screen/governance/list';
 import {GovernanceScreen} from './screen/governance';
-import {ValidatorListScreen} from './screen/staking/validator-list';
 import {FinalizeKeyScreen} from './screen/register/finalize-key';
 import {PlainObject} from '@keplr-wallet/background';
 import {EnableChainsScreen} from './screen/register/enable-chains';
 import {RecoverMnemonicScreen} from './screen/register/recover-mnemonic';
 import {WelcomeScreen} from './screen/register/welcome';
-import {ValidatorDetailScreen} from './screen/staking/validator-detail';
-import {SignDelegateScreen} from './screen/staking/delegate';
 import {SelectDerivationPathScreen} from './screen/register/select-derivation-path';
 import {ConnectHardwareWalletScreen} from './screen/register/connect-hardware';
 import {ConnectLedgerScreen} from './screen/register/connect-ledger';
 import {App} from '@keplr-wallet/ledger-cosmos';
+import {
+  SignDelegateScreen,
+  SignUndelegateScreen,
+  ValidatorDetailScreen,
+  ValidatorListScreen,
+} from './screen/staking';
+import {SignRedelegateScreen} from './screen/staking/redelegate';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -205,9 +209,26 @@ export type RootStackParamList = {
 export type StakeNavigation = {
   'Stake.Dashboard': {chainId: string};
   'Stake.Staking': {chainId: string};
-  'Stake.ValidateList': {chainId: string};
-  'Stake.ValidateDetail': {chainId: string; validatorAddress: string};
+  'Stake.ValidateList': {
+    chainId: string;
+    validatorSelector?: (
+      validatorAddress: string,
+      validatorName: string,
+    ) => void;
+  };
+  'Stake.ValidateDetail': {
+    chainId: string;
+    validatorAddress: string;
+  };
   'Stake.Delegate': {
+    chainId: string;
+    validatorAddress: string;
+  };
+  'Stake.Undelegate': {
+    chainId: string;
+    validatorAddress: string;
+  };
+  'Stake.Redelegate': {
     chainId: string;
     validatorAddress: string;
   };
@@ -622,6 +643,22 @@ const StakeNavigation = () => {
           ...defaultHeaderOptions,
         }}
         component={SignDelegateScreen}
+      />
+      <StakeStack.Screen
+        name="Stake.Undelegate"
+        options={{
+          title: 'Unstake',
+          ...defaultHeaderOptions,
+        }}
+        component={SignUndelegateScreen}
+      />
+      <StakeStack.Screen
+        name="Stake.Redelegate"
+        options={{
+          title: 'Switch Validator',
+          ...defaultHeaderOptions,
+        }}
+        component={SignRedelegateScreen}
       />
     </StakeStack.Navigator>
   );
