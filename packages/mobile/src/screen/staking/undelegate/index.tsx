@@ -198,12 +198,10 @@ export const SignUndelegateScreen: FunctionComponent = observer(() => {
                   },
                 },
               );
-              //TODO Sign진행 페이지로 라우팅 해야함
             } catch (e) {
               if (e?.message === 'Request rejected') {
                 return;
               }
-              //TODO Sign진행 페이지로 라우팅 해야함
             }
           }
         }}
