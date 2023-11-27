@@ -1,8 +1,23 @@
 import {createStyleProvider} from './builder';
 import {EnumTextTransform, EnumTextDecorationLine} from './builder/types';
-import {Platform, StatusBarStyle} from 'react-native';
+import {PixelRatio, Platform, StatusBarStyle} from 'react-native';
 import {BlurViewProps} from '@react-native-community/blur';
 import {FontWeightNumbers} from './builder/uilts';
+
+function handleImageHighRes(image: any, highResImage: any): any {
+  if (PixelRatio.get() >= 2) {
+    // In order to ignore the error of eslint without a comment, it simply accepts a function.
+    if (typeof highResImage === 'function') {
+      highResImage = highResImage();
+    }
+    return highResImage;
+  }
+  // In order to ignore the error of eslint without a comment, it simply accepts a function.
+  if (typeof image === 'function') {
+    image = image();
+  }
+  return image;
+}
 
 export const ColorPalette = {
   'blue-10': '#F6F8FF',
@@ -149,6 +164,11 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         },
         'mobile-h2': {
           fontSize: 30,
+          fontFamily: 'Inter-Bold',
+          fontWeight: '700' as FontWeightNumbers,
+        },
+        'mobile-h3': {
+          fontSize: 28,
           fontFamily: 'Inter-Bold',
           fontWeight: '700' as FontWeightNumbers,
         },
@@ -340,7 +360,6 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
             },
           ],
         },
-
         'tx-result-screen-pending-gradient-background': {
           degree: 168,
           stops: [
@@ -353,6 +372,12 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
               color: '#FFFFFF',
             },
           ],
+          fallbackAndroidImage: handleImageHighRes(
+            () =>
+              require('../public/assets/img/gradients/tx-result-screen-pending.png'),
+            () =>
+              require('../public/assets/img/gradients/tx-result-screen-pending-3x.png'),
+          ),
         },
 
         'tx-result-screen-success-gradient-background': {
@@ -367,6 +392,12 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
               color: '#FFFFFF',
             },
           ],
+          fallbackAndroidImage: handleImageHighRes(
+            () =>
+              require('../public/assets/img/gradients/tx-result-screen-success.png'),
+            () =>
+              require('../public/assets/img/gradients/tx-result-screen-success-3x.png'),
+          ),
         },
 
         'tx-result-screen-failed-gradient-background': {
@@ -381,6 +412,12 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
               color: '#FFFFFF',
             },
           ],
+          fallbackAndroidImage: handleImageHighRes(
+            () =>
+              require('../public/assets/img/gradients/tx-result-screen-failed.png'),
+            () =>
+              require('../public/assets/img/gradients/tx-result-screen-failed-3x.png'),
+          ),
         },
       },
       colors: {
@@ -729,6 +766,12 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
                 color: '#030E21',
               },
             ],
+            fallbackAndroidImage: handleImageHighRes(
+              () =>
+                require('../public/assets/img/gradients/tx-result-screen-pending-dark.png'),
+              () =>
+                require('../public/assets/img/gradients/tx-result-screen-pending-dark-3x.png'),
+            ),
           },
 
           'tx-result-screen-success-gradient-background': {
@@ -743,6 +786,12 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
                 color: '#021213',
               },
             ],
+            fallbackAndroidImage: handleImageHighRes(
+              () =>
+                require('../public/assets/img/gradients/tx-result-screen-success-dark.png'),
+              () =>
+                require('../public/assets/img/gradients/tx-result-screen-success-dark-3x.png'),
+            ),
           },
 
           'tx-result-screen-failed-gradient-background': {
@@ -757,6 +806,12 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
                 color: '#0C0101',
               },
             ],
+            fallbackAndroidImage: handleImageHighRes(
+              () =>
+                require('../public/assets/img/gradients/tx-result-screen-failed-dark.png'),
+              () =>
+                require('../public/assets/img/gradients/tx-result-screen-failed-dark-3x.png'),
+            ),
           },
         },
         colors: {
