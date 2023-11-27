@@ -172,7 +172,12 @@ export const SignRedelegateScreen: FunctionComponent = observer(() => {
                       console.log(tx);
                     }
                   },
-                  onBroadcasted: () => {},
+                  onBroadcasted: txHash => {
+                    navigation.navigate('TxPending', {
+                      chainId,
+                      txHash: Buffer.from(txHash).toString('hex'),
+                    });
+                  },
                 },
               );
               //TODO Sign진행 페이지로 라우팅 해야함
