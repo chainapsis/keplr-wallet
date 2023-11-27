@@ -1,7 +1,7 @@
-import React, {FunctionComponent, useEffect} from 'react';
+import React, {FunctionComponent, useEffect, useRef} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {observer} from 'mobx-react-lite';
-import {Text, View, Animated, StyleSheet} from 'react-native';
+import {Text, View, StyleSheet} from 'react-native';
 import {Button} from '../../components/button';
 import {useStyle} from '../../styles';
 import LottieView from 'lottie-react-native';
@@ -12,11 +12,33 @@ import {ArrowRightIcon} from '../../components/icon/arrow-right';
 import {StackNavProp} from '../../navigation';
 import {EmbedChainInfos} from '../../config';
 import {TextButton} from '../../components/text-button';
+import Animated, {
+  useAnimatedProps,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 const AnimatedLottieView = Animated.createAnimatedComponent(LottieView);
 
 export const TxSuccessResultScreen: FunctionComponent = observer(() => {
-  const [successAnimProgress] = React.useState(new Animated.Value(0));
+  const successAnimProgress = useSharedValue(0);
+  const animationRef = useRef<LottieView>(null);
+  const animatedProps = useAnimatedProps(() => {
+    return {
+      progress: successAnimProgress.value,
+    };
+  });
+
+  useEffect(() => {
+    const animateLottie = () => {
+      animationRef.current?.play();
+      successAnimProgress.value = withTiming(1, {duration: 1000});
+    };
+
+    const timeoutId = setTimeout(animateLottie, 200);
+    return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const route = useRoute<
     RouteProp<
@@ -40,20 +62,6 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
   const style = useStyle();
   const navigation = useNavigation<StackNavProp>();
 
-  useEffect(() => {
-    const animateLottie = () => {
-      Animated.timing(successAnimProgress, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: false,
-      }).start();
-    };
-
-    const timeoutId = setTimeout(animateLottie, 200);
-
-    return () => clearTimeout(timeoutId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
   return (
     <Box style={style.flatten(['flex-grow-1', 'items-center'])}>
       <View style={style.flatten(['absolute-fill'])}>
@@ -94,9 +102,10 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
                 color: style.flatten(['color-green-400']).color,
               },
             ]}
-            autoPlay
-            progress={successAnimProgress}
-            style={{width: 160, height: 160}}
+            ref={animationRef}
+            animatedProps={animatedProps}
+            loop={false}
+            style={{width: 150, height: 150}}
           />
         </View>
       </View>
@@ -145,7 +154,7 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
             size="large"
             text="Done"
             onPress={() => {
-              navigation.navigate('Home');
+              navigation.replace('Home');
             }}
           />
         </View>
