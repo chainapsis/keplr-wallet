@@ -76,6 +76,11 @@ import {
   ValidatorListScreen,
 } from './screen/staking';
 import {SignRedelegateScreen} from './screen/staking/redelegate';
+import {
+  TxFailedResultScreen,
+  TxPendingResultScreen,
+  TxSuccessResultScreen,
+} from './screen/tx-result';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -204,6 +209,19 @@ export type RootStackParamList = {
   Web: {url: string; isExternal: true};
   WebTab: NavigatorScreenParams<WebStackNavigation>;
   Governance: NavigatorScreenParams<GovernanceNavigation>;
+
+  TxPending: {
+    chainId: string;
+    txHash: string;
+  };
+  TxSuccess: {
+    chainId: string;
+    txHash: string;
+  };
+  TxFail: {
+    chainId: string;
+    txHash: string;
+  };
 };
 
 export type StakeNavigation = {
@@ -821,6 +839,21 @@ export const AppNavigation: FunctionComponent = observer(() => {
             name="Governance"
             options={{headerShown: false}}
             component={GovernanceNavigation}
+          />
+          <Stack.Screen
+            name="TxPending"
+            options={{headerShown: false}}
+            component={TxPendingResultScreen}
+          />
+          <Stack.Screen
+            name="TxSuccess"
+            options={{headerShown: false}}
+            component={TxSuccessResultScreen}
+          />
+          <Stack.Screen
+            name="TxFail"
+            options={{headerShown: false}}
+            component={TxFailedResultScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>
