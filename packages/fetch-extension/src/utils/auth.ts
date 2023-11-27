@@ -36,7 +36,6 @@ declare global {
 const signArbitrary = async (
   chainId: string,
   addr: string,
-  pubKey: string,
   data: string,
   requester: any // TODO(!!!): Update types
 ) => {
@@ -68,11 +67,7 @@ const signArbitrary = async (
     new SignMessagingPayload(chainId, toBase64(serializeSignDoc(signDoc)))
   );
 
-  return {
-    signature,
-    public_key: pubKey,
-    signed_bytes: toBase64(serializeSignDoc(signDoc)),
-  };
+  return signature;
 };
 
 export const getJWT = async (chainId: string, url: string) => {
@@ -98,38 +93,63 @@ export const getJWT = async (chainId: string, url: string) => {
   );
   const request = {
     address: addr,
-    public_key: pubKey.publicKey,
+    client_id: "fetch-wallet",
   };
 
-  const r1 = await axios.post(`${url}/request_token`, request, config);
+  const r1 = await axios.post(
+    `${url}/auth/login/wallet/challenge`,
+    request,
+    config
+  );
 
   if (r1.status !== 200) throw new RequestError(r1.statusText);
 
-  let loginRequest = undefined;
+  let signature = undefined;
 
   try {
-    loginRequest = await signArbitrary(
+    signature = await signArbitrary(
       chainId,
       addr,
-      pubKey.publicKey,
-      r1.data.payload,
+      r1.data.challenge,
       requester
     );
   } catch (err: any) {
     throw new RejectError(err.toString());
   }
 
-  if (loginRequest === undefined) {
+  if (signature === undefined) {
     return undefined;
   }
 
-  const r2 = await axios.post(`${url}/login`, loginRequest, config);
+  const loginRequest = {
+    address: addr,
+    public_key: {
+      value: toBase64(fromHex(pubKey.publicKey)),
+      type: "tendermint/PubKeySecp256k1",
+    },
+    nonce: r1.data.nonce,
+    challenge: r1.data.challenge,
+    signature: signature,
+    client_id: "fetch-wallet",
+    scope: "",
+  };
+
+  const r2 = await axios.post(
+    `${url}/auth/login/wallet/verify`,
+    loginRequest,
+    config
+  );
 
   if (r2.status !== 200) {
-    throw new RequestError(r1.statusText);
+    throw new RequestError(r2.statusText);
   }
 
-  return r2.data.token;
+  const r3 = await axios.post(`${url}/tokens`, r2.data, config);
+  if (r3.status !== 200) {
+    throw new RequestError(r3.statusText);
+  }
+
+  return r3.data.access_token;
 };
 function generateUUID() {
   // Public Domain/MIT
