@@ -136,9 +136,9 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
           <Button
             containerStyle={style.flatten(['flex-1'])}
             size="large"
-            text="Confirm"
+            text="Done"
             onPress={() => {
-              navigation.replace('Home');
+              navigation.navigate('Home');
             }}
           />
         </View>

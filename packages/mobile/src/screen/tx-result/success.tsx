@@ -154,7 +154,7 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
             size="large"
             text="Done"
             onPress={() => {
-              navigation.replace('Home');
+              navigation.navigate('Home');
             }}
           />
         </View>
