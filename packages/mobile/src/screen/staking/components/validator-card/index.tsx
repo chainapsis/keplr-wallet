@@ -46,7 +46,11 @@ export const ValidatorCard: FunctionComponent<{
           'border-color-gray-500',
         ])}>
         <Columns sum={1} gutter={16} alignY="center">
-          <ValidatorImage size={40} imageUrl={thumbnail} />
+          <ValidatorImage
+            size={40}
+            imageUrl={thumbnail}
+            name={validatorInfo?.description.moniker}
+          />
           <Text style={style.flatten(['subtitle2', 'color-platinum-100'])}>
             {validatorInfo?.description.moniker}
           </Text>

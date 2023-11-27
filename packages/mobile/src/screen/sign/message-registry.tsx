@@ -8,6 +8,8 @@ import {CustomIcon, UnknownMessageContent} from './custom-message';
 import {ClaimRewardsMessage} from './claim-rewards';
 import {SendMessage} from './send';
 import {DelegateMessage} from './delegate';
+import {UndelegateMessage} from './undelegate';
+import {RedelegateMessage} from './redelegate';
 
 export class MessageRenderRegistry implements IMessageRenderRegistry {
   protected renderers: IMessageRenderer[] = [];
@@ -68,3 +70,5 @@ export const defaultRegistry = new MessageRenderRegistry();
 defaultRegistry.register(ClaimRewardsMessage);
 defaultRegistry.register(SendMessage);
 defaultRegistry.register(DelegateMessage);
+defaultRegistry.register(UndelegateMessage);
+defaultRegistry.register(RedelegateMessage);

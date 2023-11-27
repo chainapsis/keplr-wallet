@@ -71,6 +71,29 @@ export const HomeScreen: FunctionComponent = observer(() => {
     return result;
   }, [hugeQueriesStore.allKnownBalances]);
 
+  const stakedTotalPrice = useMemo(() => {
+    let result: PricePretty | undefined;
+    for (const bal of hugeQueriesStore.delegations) {
+      if (bal.price) {
+        if (!result) {
+          result = bal.price;
+        } else {
+          result = result.add(bal.price);
+        }
+      }
+    }
+    for (const bal of hugeQueriesStore.unbondings) {
+      if (bal.viewToken.price) {
+        if (!result) {
+          result = bal.viewToken.price;
+        } else {
+          result = result.add(bal.viewToken.price);
+        }
+      }
+    }
+    return result;
+  }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings]);
+
   return (
     <React.Fragment>
       <PageWithScrollView
@@ -104,11 +127,13 @@ export const HomeScreen: FunctionComponent = observer(() => {
                 'font-medium',
                 'h4',
               ])}>
-              Total Available
+              {tabStatus === 'available' ? 'Total Available' : 'Total Staked'}
             </Text>
             <Gutter size={10} />
             <Text style={style.flatten(['color-text-high', 'mobile-h2'])}>
-              {availableTotalPrice?.toString()}
+              {tabStatus === 'available'
+                ? availableTotalPrice?.toString() || '-'
+                : stakedTotalPrice?.toString() || '-'}
             </Text>
           </Box>
           {tabStatus === 'available' ? (

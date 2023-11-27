@@ -568,6 +568,7 @@
   "components.address-item.empty-memo": "(메모없음)",
 
   "components.collapsible-list.view-more-tokens": "{remain}개의 토큰 더보기",
+  "components.collapsible-list.view-more-validators": "{remain}개의 벨리데이터 더보기",
   "components.collapsible-list.collapse": "접기",
 
   "button.confirm": "확인",

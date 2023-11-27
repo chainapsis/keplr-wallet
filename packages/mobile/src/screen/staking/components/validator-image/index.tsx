@@ -17,6 +17,8 @@ export const ValidatorImage = ({
   size?: number;
 }) => {
   const style = useStyle();
+  const nameFirstCharacter = name?.trim() ? Array.from(name)[0] : null;
+
   return (
     <React.Fragment>
       {imageUrl ? (
@@ -67,7 +69,7 @@ export const ValidatorImage = ({
             alignY="center"
             backgroundColor={style.get('color-gray-450').color}>
             <Text style={style.flatten(['subtitle2', 'color-text-high'])}>
-              {name ? name[0].toUpperCase() : null}
+              {nameFirstCharacter}
             </Text>
           </Box>
           <Box
@@ -94,7 +96,7 @@ export const ValidatorImage = ({
           alignY="center"
           backgroundColor={style.get('color-gray-450').color}>
           <Text style={style.flatten(['subtitle2', 'color-text-high'])}>
-            {name ? name[0].toUpperCase() : null}
+            {nameFirstCharacter}
           </Text>
         </Box>
       )}

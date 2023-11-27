@@ -25,7 +25,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.ValidateList'>>();
   const navigation = useNavigation<StackNavProp>();
 
-  const {chainId} = route.params;
+  const {chainId, validatorSelector} = route.params;
   const queries = queriesStore.get(chainId);
 
   const delegationsValidatorSet = useMemo(() => {
@@ -73,6 +73,14 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
           bondedToken={queries.cosmos.queryPool.bondedTokens}
           isDelegation={delegationsValidatorSet.has(validator.operator_address)}
           afterSelect={() => {
+            if (validatorSelector) {
+              validatorSelector(
+                validator.operator_address,
+                validator.description?.moniker || validator.operator_address,
+              );
+              navigation.goBack();
+              return;
+            }
             navigation.navigate('Stake', {
               screen: 'Stake.ValidateDetail',
               params: {chainId, validatorAddress: validator.operator_address},
@@ -87,6 +95,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
       filterOption,
       navigation,
       queries.cosmos.queryPool.bondedTokens,
+      validatorSelector,
     ],
   );
   return (

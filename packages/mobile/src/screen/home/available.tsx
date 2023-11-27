@@ -166,6 +166,7 @@ export const AvailableTabView: FunctionComponent<{
               return (
                 <CollapsibleList
                   key={title}
+                  itemKind="validators"
                   title={
                     <TokenTitleView
                       onOpenModal={() => infoModalRef.current?.present()}
