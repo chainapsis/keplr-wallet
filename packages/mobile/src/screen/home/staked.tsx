@@ -19,7 +19,7 @@ import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../navigation';
 import {SelectStakingChainModal} from './components/stakeing-chain-select-modal';
 import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
-import {formatRelativeTime} from '../../utils/format';
+import {formatRelativeTimeString} from '../../utils/format';
 
 const zeroDec = new Dec(0);
 
@@ -65,14 +65,9 @@ export const StakedTabView: FunctionComponent<{
           return unbonding.viewToken.token.toDec().gt(new Dec(0));
         })
         .map(unbonding => {
-          const relativeTime = formatRelativeTime(unbonding.completeTime);
-
           return {
             viewToken: unbonding.viewToken,
-            altSentence: intl.formatRelativeTime(
-              relativeTime.value,
-              relativeTime.unit,
-            ),
+            altSentence: formatRelativeTimeString(intl, unbonding.completeTime),
           };
         }),
     [hugeQueriesStore.unbondings, intl],

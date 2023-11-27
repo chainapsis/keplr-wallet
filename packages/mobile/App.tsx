@@ -31,6 +31,7 @@ import '@formatjs/intl-relativetimeformat/locale-data/en';
 import '@formatjs/intl-relativetimeformat/locale-data/ko'; // locale-data for en
 import {ConfirmProvider} from './src/hooks/confirm';
 import {InteractionModalsProvider} from './src/provider/interaction-modals-provider';
+import {LoadingIconAnimationProvider} from './src/provider/loading-icon-animation';
 
 const ThemeStatusBar: FunctionComponent = () => {
   const style = useStyle();
@@ -49,22 +50,24 @@ const ThemeStatusBar: FunctionComponent = () => {
 function App(): JSX.Element {
   return (
     <GestureHandlerRootView style={{flex: 1}}>
-      <StyleProvider>
-        <SafeAreaProvider>
-          <ThemeStatusBar />
-          <StoreProvider>
-            <AppIntlProvider>
-              <BottomSheetModalProvider>
-                <ConfirmProvider>
-                  <InteractionModalsProvider>
-                    <AppNavigation />
-                  </InteractionModalsProvider>
-                </ConfirmProvider>
-              </BottomSheetModalProvider>
-            </AppIntlProvider>
-          </StoreProvider>
-        </SafeAreaProvider>
-      </StyleProvider>
+      <LoadingIconAnimationProvider>
+        <StyleProvider>
+          <SafeAreaProvider>
+            <ThemeStatusBar />
+            <StoreProvider>
+              <AppIntlProvider>
+                <BottomSheetModalProvider>
+                  <ConfirmProvider>
+                    <InteractionModalsProvider>
+                      <AppNavigation />
+                    </InteractionModalsProvider>
+                  </ConfirmProvider>
+                </BottomSheetModalProvider>
+              </AppIntlProvider>
+            </StoreProvider>
+          </SafeAreaProvider>
+        </StyleProvider>
+      </LoadingIconAnimationProvider>
     </GestureHandlerRootView>
   );
 }

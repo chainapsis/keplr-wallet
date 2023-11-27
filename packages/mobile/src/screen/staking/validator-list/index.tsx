@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useMemo, useState} from 'react';
+import React, {FunctionComponent, useCallback, useMemo, useState} from 'react';
 
 import {observer} from 'mobx-react-lite';
 import {FlatList} from 'react-native';
@@ -14,10 +14,11 @@ import {Gutter} from '../../../components/gutter';
 import {ArrowDownUpIcon} from '../../../components/icon';
 import {TextButton} from '../../../components/text-button';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {ValidatorInfo} from '../type';
 
 export type FilterOption = 'Commission' | 'Voting';
 export const ValidatorListScreen: FunctionComponent = observer(() => {
-  const {queriesStore} = useStore();
+  const {queriesStore, accountStore} = useStore();
   const style = useStyle();
   const [filterOption, setFilterOption] = useState<FilterOption>('Voting');
   const [search, setSearch] = useState('');
@@ -26,6 +27,14 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
 
   const {chainId, validatorSelector} = route.params;
   const queries = queriesStore.get(chainId);
+
+  const delegationsValidatorSet = useMemo(() => {
+    return new Set(
+      queries.cosmos.queryDelegations
+        .getQueryBech32Address(accountStore.getAccount(chainId).bech32Address)
+        .delegations.map(del => del.delegation.validator_address),
+    );
+  }, [accountStore, chainId, queries.cosmos.queryDelegations]);
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
     Staking.BondStatus.Bonded,
   );
@@ -52,6 +61,43 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
     return [];
   }, [bondedValidators.validators, filterOption, search]);
 
+  const renderItem = useCallback(
+    ({item: validator}: {item: ValidatorInfo}) => {
+      return (
+        <ValidatorListItem
+          key={validator.operator_address}
+          filterOption={filterOption}
+          chainId={chainId}
+          validatorAddress={validator.operator_address}
+          validator={validator}
+          bondedToken={queries.cosmos.queryPool.bondedTokens}
+          isDelegation={delegationsValidatorSet.has(validator.operator_address)}
+          afterSelect={() => {
+            if (validatorSelector) {
+              validatorSelector(
+                validator.operator_address,
+                validator.description?.moniker || validator.operator_address,
+              );
+              navigation.goBack();
+              return;
+            }
+            navigation.navigate('Stake', {
+              screen: 'Stake.ValidateDetail',
+              params: {chainId, validatorAddress: validator.operator_address},
+            });
+          }}
+        />
+      );
+    },
+    [
+      chainId,
+      delegationsValidatorSet,
+      filterOption,
+      navigation,
+      queries.cosmos.queryPool.bondedTokens,
+      validatorSelector,
+    ],
+  );
   return (
     <FlatList
       style={{
@@ -88,32 +134,11 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
           </Box>
         </Box>
       }
-      keyExtractor={item => item.consensus_pubkey.key}
+      keyExtractor={item => item.operator_address}
       data={filteredValidators}
       ItemSeparatorComponent={() => <Gutter size={8} />}
-      renderItem={({item: validator}) => {
-        return (
-          <ValidatorListItem
-            filterOption={filterOption}
-            chainId={chainId}
-            validatorAddress={validator.operator_address}
-            afterSelect={() => {
-              if (validatorSelector) {
-                validatorSelector(
-                  validator.operator_address,
-                  validator.description?.moniker || validator.operator_address,
-                );
-                navigation.goBack();
-                return;
-              }
-              navigation.navigate('Stake', {
-                screen: 'Stake.ValidateDetail',
-                params: {chainId, validatorAddress: validator.operator_address},
-              });
-            }}
-          />
-        );
-      }}
+      renderItem={renderItem}
+      windowSize={33}
     />
   );
 });

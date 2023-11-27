@@ -28,7 +28,8 @@ export const ValidatorImage = ({
                 height: size || 32,
                 borderRadius: 9999,
               }}
-              source={{uri: imageUrl}}
+              source={{uri: imageUrl, cache: FastImage.cacheControl.web}}
+              resizeMode={FastImage.resizeMode.contain}
             />
             <Box
               position="absolute"
@@ -52,7 +53,8 @@ export const ValidatorImage = ({
               height: size || 32,
               borderRadius: 9999,
             }}
-            source={{uri: imageUrl}}
+            source={{uri: imageUrl, cache: FastImage.cacheControl.web}}
+            resizeMode={FastImage.resizeMode.contain}
           />
         )
       ) : isDelegation ? (

@@ -1,3 +1,5 @@
+import {FormatRelativeTimeOptions, IntlShape} from 'react-intl';
+
 export function formatRelativeTime(time: string): {
   unit: 'minute' | 'hour' | 'day';
   value: number;
@@ -40,4 +42,14 @@ export function formatRelativeTime(time: string): {
     unit: 'minute',
     value: Math.ceil(remainingMinutes),
   };
+}
+
+export function formatRelativeTimeString(
+  intl: IntlShape,
+  dateStr: string,
+  opts?: FormatRelativeTimeOptions,
+): string {
+  const {unit, value} = formatRelativeTime(dateStr);
+  const result = intl.formatRelativeTime(value, unit, opts);
+  return result.includes('in') ? result.replace('in ', '') + ' left' : result;
 }

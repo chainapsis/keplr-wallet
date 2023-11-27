@@ -19,3 +19,5 @@ export * from './bolt';
 export * from './apple';
 export * from './google';
 export * from './arrow-down-up';
+export * from './trash-can';
+export * from './globe';

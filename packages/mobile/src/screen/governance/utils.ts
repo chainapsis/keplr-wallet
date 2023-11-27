@@ -11,7 +11,12 @@ export const dateToLocalString = (intl: IntlShape, dateStr: string) => {
 
   return intl
     .formatDate(dateStr, {
-      // format: 'en',
+      day: 'numeric',
+      month: 'short',
+      hour: 'numeric',
+      minute: '2-digit',
+      hourCycle: 'h24',
+      timeZoneName: 'short',
       year: isYearDifferent ? 'numeric' : undefined,
     })
     .replace('GMT', 'UTC');

@@ -16,6 +16,10 @@ import {RNInjectedKeplr} from '../../injected/injected-provider';
 import {useStore} from '../../stores';
 import {Keplr} from '@keplr-wallet/provider';
 import {RNMessageRequesterExternal} from '../../router';
+import {OnScreenWebpageScreenHeader} from './components/header';
+import {Gutter} from '../../components/gutter';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {RootStackParamList} from '../../navigation';
 
 export const useInjectedSourceCode = () => {
   const [code, setCode] = useState<string | undefined>();
@@ -38,18 +42,8 @@ export const WebpageScreen: FunctionComponent = observer(() => {
   const {chainStore} = useStore();
 
   const webviewRef = useRef<WebView | null>(null);
-  const route = useRoute<
-    RouteProp<
-      Record<
-        string,
-        {
-          url: string;
-        }
-      >,
-      string
-    >
-  >();
-
+  const route = useRoute<RouteProp<RootStackParamList, 'Web'>>();
+  const insect = useSafeAreaInsets();
   const [title, setTitle] = useState('');
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoForward, setCanGoForward] = useState(false);
@@ -61,6 +55,7 @@ export const WebpageScreen: FunctionComponent = observer(() => {
     route.params.url.startsWith('https://')
       ? route.params.url
       : `https://${route.params.url}`;
+  const {isExternal} = route.params;
 
   const [currentURL, setCurrentURL] = useState(uri);
 
@@ -112,8 +107,9 @@ export const WebpageScreen: FunctionComponent = observer(() => {
           url: currentURL,
           canGoBack,
           canGoForward,
-        }}
-      />
+        }}>
+        <OnScreenWebpageScreenHeader />
+      </WebViewStateContext.Provider>
       {sourceCode ? (
         <WebView
           source={{uri}}
@@ -145,6 +141,7 @@ export const WebpageScreen: FunctionComponent = observer(() => {
           }}
         />
       ) : null}
+      {isExternal ? <Gutter size={insect.bottom} /> : null}
     </React.Fragment>
   );
 });
