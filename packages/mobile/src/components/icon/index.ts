@@ -23,3 +23,5 @@ export * from './ledger';
 export * from './terra';
 export * from './cosmos';
 export * from './ethereum';
+export * from './trash-can';
+export * from './globe';
