@@ -50,7 +50,7 @@ export const WebScreen: FunctionComponent = observer(() => {
         returnKeyType="go"
         value={uri}
         error={uriError}
-        placeholder="Search for a chain"
+        placeholder="Search or type URL"
         placeholderTextColor={style.flatten(['color-gray-300']).color}
         onChangeText={text => {
           setURI(text);
