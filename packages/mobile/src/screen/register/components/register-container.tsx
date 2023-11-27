@@ -24,9 +24,7 @@ export const RegisterContainer: FunctionComponent<
         hideBackButton={hideBackButton}
       />
 
-      {children}
-
-      <Box style={{flex: 1}} />
+      <Box style={{flex: 1}}>{children}</Box>
 
       <Box padding={20} backgroundColor={style.get('color-gray-700').color}>
         {bottom}
