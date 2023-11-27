@@ -9,19 +9,22 @@ export const RegisterContainer: FunctionComponent<
     title: string;
     paragraph?: string;
     bottom?: React.ReactNode;
+    hideBackButton?: boolean;
   }>
-> = ({title, paragraph, children, bottom}) => {
+> = ({title, paragraph, children, bottom, hideBackButton}) => {
   const style = useStyle();
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{flex: 1}}>
-      <RegisterHeader title={title} paragraph={paragraph} />
+      <RegisterHeader
+        title={title}
+        paragraph={paragraph}
+        hideBackButton={hideBackButton}
+      />
 
-      {children}
-
-      <Box style={{flex: 1}} />
+      <Box style={{flex: 1}}>{children}</Box>
 
       <Box padding={20} backgroundColor={style.get('color-gray-700').color}>
         {bottom}
