@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useState} from 'react';
+import React, {FunctionComponent} from 'react';
 import {observer} from 'mobx-react-lite';
 
 import {Text, View} from 'react-native';
@@ -18,6 +18,7 @@ import {Gutter} from '../../../components/gutter';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../navigation';
 import {DASHBOARD_URL} from '../../../config';
+import {formatRelativeTimeString} from '../../../utils/format';
 
 export const GovernanceProposalStatusChip: FunctionComponent<{
   status: ProposalStatus;
@@ -82,8 +83,6 @@ export const GovernanceCardBody: FunctionComponent<{
     }
   };
 
-  const [current] = useState(() => new Date().getTime());
-
   // Relative time is not between the end time and actual current time.
   // Relative time is between the end time and "the time that the component is mounted."
   const proposalRelativeEndTimeString = (() => {
@@ -93,61 +92,14 @@ export const GovernanceCardBody: FunctionComponent<{
 
     switch (proposal.proposalStatus) {
       case ProposalStatus.DEPOSIT_PERIOD:
-        const relativeDepositEndTime =
-          (new Date(proposal.raw.deposit_end_time).getTime() - current) / 1000;
-        const relativeDepositEndTimeDays = Math.floor(
-          relativeDepositEndTime / (3600 * 24),
-        );
-        const relativeDepositEndTimeHours = Math.ceil(
-          relativeDepositEndTime / 3600,
-        );
+        return formatRelativeTimeString(intl, proposal.raw.deposit_end_time, {
+          numeric: 'always',
+        });
 
-        if (relativeDepositEndTimeDays) {
-          return (
-            intl
-              .formatRelativeTime(relativeDepositEndTimeDays, 'days', {
-                numeric: 'always',
-              })
-              .replace('in ', '') + ' left'
-          );
-        } else if (relativeDepositEndTimeHours) {
-          return (
-            intl
-              .formatRelativeTime(relativeDepositEndTimeHours, 'hours', {
-                numeric: 'always',
-              })
-              .replace('in ', '') + ' left'
-          );
-        }
-        return '';
       case ProposalStatus.VOTING_PERIOD:
-        const relativeVotingEndTime =
-          (new Date(proposal.raw.voting_end_time).getTime() - current) / 1000;
-        const relativeVotingEndTimeDays = Math.floor(
-          relativeVotingEndTime / (3600 * 24),
-        );
-        const relativeVotingEndTimeHours = Math.ceil(
-          relativeVotingEndTime / 3600,
-        );
-
-        if (relativeVotingEndTimeDays) {
-          return (
-            intl
-              .formatRelativeTime(relativeVotingEndTimeDays, 'days', {
-                numeric: 'always',
-              })
-              .replace('in ', '') + ' left'
-          );
-        } else if (relativeVotingEndTimeHours) {
-          return (
-            intl
-              .formatRelativeTime(relativeVotingEndTimeHours, 'hours', {
-                numeric: 'always',
-              })
-              .replace('in ', '') + ' left'
-          );
-        }
-        return '';
+        return formatRelativeTimeString(intl, proposal.raw.voting_end_time, {
+          numeric: 'always',
+        });
       case ProposalStatus.FAILED:
       case ProposalStatus.PASSED:
       case ProposalStatus.REJECTED:
