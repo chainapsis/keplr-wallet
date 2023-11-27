@@ -81,6 +81,16 @@ import {
   TxPendingResultScreen,
   TxSuccessResultScreen,
 } from './screen/tx-result';
+import {ConnectHardwareWalletScreen} from './screen/register/connect-hardware';
+import {ConnectLedgerScreen} from './screen/register/connect-ledger';
+import {App} from '@keplr-wallet/ledger-cosmos';
+import {
+  SignDelegateScreen,
+  SignUndelegateScreen,
+  ValidatorDetailScreen,
+  ValidatorListScreen,
+} from './screen/staking';
+import {SignRedelegateScreen} from './screen/staking/redelegate';
 
 export type RootStackParamList = {
   Home: undefined;
