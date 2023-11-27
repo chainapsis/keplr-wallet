@@ -33,6 +33,7 @@ import {XAxis, YAxis} from '../../../components/axis';
 import FastImage from 'react-native-fast-image';
 import {Checkbox} from '../../../components/checkbox';
 import {Button} from '../../../components/button';
+import {RectButton} from '../../../components/rect-button';
 
 export const EnableChainsScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -459,17 +460,16 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
     return numSelected;
   }, [chainStore.chainInfos, enabledChainIdentifiers]);
 
-  // Todo: Ledger 등록 후 제작
-  // const enabledChainIdentifiersInPage = useMemo(() => {
-  //   return enabledChainIdentifiers.filter(chainIdentifier =>
-  //     chainInfos.some(
-  //       chainInfo => chainIdentifier === chainInfo.chainIdentifier,
-  //     ),
-  //   );
-  // }, [enabledChainIdentifiers, chainInfos]);
-  //
-  // const [preSelectedChainIdentifiers, setPreSelectedChainIdentifiers] =
-  //   useState<string[]>([]);
+  const enabledChainIdentifiersInPage = useMemo(() => {
+    return enabledChainIdentifiers.filter(chainIdentifier =>
+      chainInfos.some(
+        chainInfo => chainIdentifier === chainInfo.chainIdentifier,
+      ),
+    );
+  }, [enabledChainIdentifiers, chainInfos]);
+
+  const [preSelectedChainIdentifiers, setPreSelectedChainIdentifiers] =
+    useState<string[]>([]);
 
   const replaceToWelcomePage = () => {
     if (skipWelcome) {
@@ -520,12 +520,56 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
 
         <Gutter size={16} />
 
-        <Text style={style.flatten(['subtitle3', 'color-text-high'])}>
-          <FormattedMessage
-            id="pages.register.enable-chains.chain-selected-count"
-            values={{numSelected}}
-          />
-        </Text>
+        <XAxis alignY="center">
+          <Text
+            style={style.flatten(['subtitle3', 'color-text-high', 'flex-1'])}>
+            <FormattedMessage
+              id="pages.register.enable-chains.chain-selected-count"
+              values={{numSelected}}
+            />
+          </Text>
+
+          <RectButton
+            onPress={() => {
+              if (chainInfos.length === enabledChainIdentifiersInPage.length) {
+                if (preSelectedChainIdentifiers.length > 0) {
+                  setEnabledChainIdentifiers(preSelectedChainIdentifiers);
+                } else {
+                  if (chainInfos.length > 0) {
+                    setEnabledChainIdentifiers([chainInfos[0].chainIdentifier]);
+                  }
+                }
+              } else {
+                setPreSelectedChainIdentifiers([...enabledChainIdentifiers]);
+                const newEnabledChainIdentifiers: string[] =
+                  enabledChainIdentifiers.slice();
+                for (const chainInfo of chainInfos) {
+                  if (
+                    !newEnabledChainIdentifiers.includes(
+                      chainInfo.chainIdentifier,
+                    )
+                  ) {
+                    newEnabledChainIdentifiers.push(chainInfo.chainIdentifier);
+                  }
+                }
+                setEnabledChainIdentifiers(newEnabledChainIdentifiers);
+              }
+            }}>
+            <XAxis alignY="center">
+              <Text style={style.flatten(['body2', 'color-gray-300'])}>
+                <FormattedMessage id="text-button.select-all" />
+              </Text>
+
+              <Gutter size={4} />
+
+              <Checkbox
+                checked={
+                  chainInfos.length === enabledChainIdentifiersInPage.length
+                }
+              />
+            </XAxis>
+          </RectButton>
+        </XAxis>
 
         <Gutter size={16} />
 
