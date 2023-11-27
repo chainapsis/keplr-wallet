@@ -24,6 +24,7 @@ import {Column, Columns} from '../../../components/column';
 import {ValidatorImage} from '../components/validator-image';
 import {ArrowRightIcon} from '../../../components/icon/arrow-right';
 import {RectButton} from '../../../components/rect-button';
+import {ValidatorCard} from '../components/validator-card';
 
 //NOTE https://reactnavigation.org/docs/troubleshooting/#i-get-the-warning-non-serializable-values-were-found-in-the-navigation-state
 //해당 경고가 있으나 state persistence, deep linking를 해당 페이지에서 사용하지 않기 때문에 해당 경고를 무시함
@@ -97,6 +98,7 @@ export const SignRedelegateScreen: FunctionComponent = observer(() => {
       contentContainerStyle={style.get('flex-grow-1')}
       style={style.flatten(['padding-x-12', 'padding-top-12'])}>
       <Stack gutter={16}>
+        <ValidatorCard validatorAddress={validatorAddress} chainId={chainId} />
         <Box>
           <Text
             style={style.flatten([
