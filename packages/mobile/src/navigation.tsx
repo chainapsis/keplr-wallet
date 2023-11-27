@@ -14,6 +14,7 @@ import React from 'react';
 import {
   createStackNavigator,
   StackNavigationProp,
+  TransitionPresets,
 } from '@react-navigation/stack';
 import {HomeScreen} from './screen/home';
 import {LockedScreen} from './screen/locked';
@@ -216,6 +217,7 @@ export const RegisterNavigation: FunctionComponent = () => {
     <Stack.Navigator
       initialRouteName="Register.Intro"
       screenOptions={{
+        ...TransitionPresets.SlideFromRightIOS,
         headerShown: false,
       }}>
       <Stack.Screen name="Register.Temp" component={RegisterScreen} />
@@ -334,7 +336,9 @@ export const MainTabNavigation: FunctionComponent = () => {
 
 const WebNavigation = () => {
   return (
-    <WebStack.Navigator initialRouteName="Web.Intro">
+    <WebStack.Navigator
+      initialRouteName="Web.Intro"
+      screenOptions={{...TransitionPresets.SlideFromRightIOS}}>
       <WebStack.Screen
         name="Web.Intro"
         options={{
@@ -354,7 +358,9 @@ const WebNavigation = () => {
 const SettingNavigation = () => {
   const intl = useIntl();
   return (
-    <Stack.Navigator initialRouteName="Setting.Intro">
+    <Stack.Navigator
+      initialRouteName="Setting.Intro"
+      screenOptions={{...TransitionPresets.SlideFromRightIOS}}>
       <Stack.Screen
         name="Setting.Intro"
         options={{
@@ -406,7 +412,9 @@ const SettingNavigation = () => {
 const SettingGeneralNavigation = () => {
   const intl = useIntl();
   return (
-    <Stack.Navigator initialRouteName="Setting.General">
+    <Stack.Navigator
+      initialRouteName="Setting.General"
+      screenOptions={{...TransitionPresets.SlideFromRightIOS}}>
       <Stack.Screen
         name="Setting.General.Intro"
         options={{
@@ -484,7 +492,9 @@ const SettingGeneralNavigation = () => {
 const SettingSecurityAndPrivacyNavigation = () => {
   const intl = useIntl();
   return (
-    <Stack.Navigator initialRouteName="Setting.SecurityAndPrivacy.Intro">
+    <Stack.Navigator
+      initialRouteName="Setting.SecurityAndPrivacy.Intro"
+      screenOptions={{...TransitionPresets.SlideFromRightIOS}}>
       <Stack.Screen
         name="Setting.SecurityAndPrivacy.Intro"
         options={{
@@ -522,7 +532,9 @@ const SettingSecurityAndPrivacyNavigation = () => {
 const SelectWalletNavigation = () => {
   const intl = useIntl();
   return (
-    <Stack.Navigator initialRouteName="SelectWallet.Intro">
+    <Stack.Navigator
+      initialRouteName="SelectWallet.Intro"
+      screenOptions={{...TransitionPresets.SlideFromRightIOS}}>
       <Stack.Screen
         name="SelectWallet.Intro"
         options={{
@@ -564,7 +576,8 @@ const SelectWalletNavigation = () => {
 
 const StakeNavigation = () => {
   return (
-    <StakeStack.Navigator>
+    <StakeStack.Navigator
+      screenOptions={{...TransitionPresets.SlideFromRightIOS}}>
       <StakeStack.Screen
         name="Stake.Dashboard"
         options={{
@@ -602,7 +615,8 @@ const StakeNavigation = () => {
 };
 const GovernanceNavigation = () => {
   return (
-    <GovernanceStack.Navigator>
+    <GovernanceStack.Navigator
+      screenOptions={{...TransitionPresets.SlideFromRightIOS}}>
       <GovernanceStack.Screen
         name="Governance.intro"
         options={{
@@ -649,7 +663,8 @@ export const AppNavigation: FunctionComponent = observer(() => {
               default:
                 throw new Error('Unknown status');
             }
-          })()}>
+          })()}
+          screenOptions={{...TransitionPresets.SlideFromRightIOS}}>
           <Stack.Screen
             name="Home"
             options={{headerShown: false}}

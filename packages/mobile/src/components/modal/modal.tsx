@@ -14,6 +14,7 @@ import {useStyle} from '../../styles';
 import {
   createStackNavigator,
   StackNavigationOptions,
+  TransitionPresets,
 } from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
 import {StyleSheet, Text, TextStyle, ViewStyle} from 'react-native';
@@ -111,6 +112,7 @@ export const BaseModal = ({
     <NavigationContainer independent={true}>
       <BottomSheetStack.Navigator
         screenOptions={{
+          ...TransitionPresets.SlideFromRightIOS,
           cardStyle: style.flatten(['background-color-gray-600']),
           ...screenOptions,
         }}
