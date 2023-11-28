@@ -5,7 +5,7 @@ import {Bech32Address} from '@keplr-wallet/cosmos';
 import {useStyle} from '../../../../styles';
 import {Box} from '../../../../components/box';
 import {Column, Columns} from '../../../../components/column';
-import {XAxis, YAxis} from '../../../../components/axis';
+import {XAxis} from '../../../../components/axis';
 import {Gutter} from '../../../../components/gutter';
 import {UserIcon} from '../../../../components/icon/user';
 import {EllipsisIcon} from '../../../../components/icon/ellipsis';
@@ -44,7 +44,7 @@ export const AddressItem: FunctionComponent<{
       borderColor={highlight ? style.get('color-gray-400').color : undefined}
       onClick={onClick}>
       <Columns sum={1} alignY="center">
-        <YAxis>
+        <Box maxWidth={'90%'}>
           {timestamp ? (
             <React.Fragment>
               <Text style={style.flatten(['h5', 'color-white'])}>
@@ -93,7 +93,7 @@ export const AddressItem: FunctionComponent<{
               )}
             </XAxis>
           ) : null}
-        </YAxis>
+        </Box>
         {onPressMenuButton ? (
           <React.Fragment>
             <Column weight={1} />
