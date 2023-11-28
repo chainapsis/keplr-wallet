@@ -76,6 +76,7 @@ import {
   ValidatorListScreen,
 } from './screen/staking';
 import {SignRedelegateScreen} from './screen/staking/redelegate';
+import {SettingGeneralDeleteSuggestChainScreen} from './screen/setting/screens/general/delete-suggest-chain';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -512,7 +513,7 @@ const SettingGeneralNavigation = () => {
           }),
           ...defaultHeaderOptions,
         }}
-        component={SettingGeneralScreen}
+        component={SettingGeneralDeleteSuggestChainScreen}
       />
       <Stack.Screen
         name="Setting.General.ManageChainVisibility"

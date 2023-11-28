@@ -237,7 +237,7 @@
   "page.setting.general.link-keplr-mobile.qr-code-view.paragraph": "Scan the QR code to sync with Keplr Mobile. The process may take several minutes.",
   "page.setting.general.link-keplr-mobile.qr-code-view.expired": "Expired",
 
-  "page.setting.general.delete-suggest-chain.empty-text": "Hmm.. Nothing Here!",
+  "page.setting.general.delete-suggest-chain.empty-text": "No suggest chains added yet",
   "page.setting.general.delete-suggest-chain.chain-item.tooltip-text": "The infrastructure and setting of this chain is not configured by Keplr team. Please reach out to the chain or website team for technical support.",
 
   "page.setting.security.connected-websites-title": "Connected Websites",

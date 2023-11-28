@@ -92,6 +92,7 @@ export const ColorPalette = {
   'gray-500': '#2E2E32',
   'gray-550': '#242428',
   'gray-600': '#1D1D1F',
+  'gray-650': '#151517',
   'gray-700': '#09090A',
 
   black: '#020202',
@@ -115,6 +116,7 @@ export const DarkThemeTextColors = {
 
 export const BackgroundColors = {
   card: 'rgba(255, 255, 255, 0.95)',
+  'card-default': ColorPalette['gray-650'],
   'background-default': ColorPalette['gray-700'],
   'background-secondary': ColorPalette['gray-10'],
 };
@@ -122,6 +124,7 @@ export const BackgroundColors = {
 export const DarkThemeBackgroundColors = {
   // Platinum600 95%
   card: 'rgba(18, 25, 36, 0.95)',
+  'card-default': ColorPalette['gray-650'],
   'background-secondary': ColorPalette['platinum-700'],
   'background-tertiary': ColorPalette['platinum-600'],
 };
