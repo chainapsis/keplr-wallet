@@ -62,7 +62,7 @@ export const Modal = forwardRef<
                 detached: true,
                 bottomInset: 25,
                 style: style.flatten([
-                  'margin-x-24',
+                  'margin-x-12',
                   'border-width-1',
                   'border-radius-8',
                   'border-color-gray-500',
