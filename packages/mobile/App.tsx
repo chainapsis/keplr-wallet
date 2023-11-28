@@ -57,15 +57,15 @@ function App(): JSX.Element {
             <ThemeStatusBar />
             <StoreProvider>
               <AppIntlProvider>
-                <BottomSheetModalProvider>
-                  <NotificationProvider>
+                <NotificationProvider>
+                  <BottomSheetModalProvider>
                     <ConfirmProvider>
                       <InteractionModalsProvider>
                         <AppNavigation />
                       </InteractionModalsProvider>
                     </ConfirmProvider>
-                  </NotificationProvider>
-                </BottomSheetModalProvider>
+                  </BottomSheetModalProvider>
+                </NotificationProvider>
               </AppIntlProvider>
             </StoreProvider>
           </SafeAreaProvider>
