@@ -33,6 +33,7 @@ import {BACKGROUND_PORT, Message} from '@keplr-wallet/router';
 import {SendTxAndRecordMsg} from '@keplr-wallet/background';
 import {TextInput} from 'react-native';
 import {RNMessageRequesterInternal} from '../../../router';
+import {StackNavProp} from '../../../navigation';
 
 export const SendAmountScreen: FunctionComponent = observer(() => {
   const {chainStore, accountStore, queriesStore} = useStore();
@@ -42,7 +43,7 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
       coinMinimalDenom?: string;
     };
   }> = useRoute();
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavProp>();
   const intl = useIntl();
   const style = useStyle();
   const addressRef = useRef<TextInput>(null);
@@ -287,11 +288,15 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
                   },
                 },
                 {
-                  onBroadcasted: () => {
+                  onBroadcasted: txHash => {
                     chainStore.enableVaultsWithCosmosAddress(
                       sendConfigs.recipientConfig.chainId,
                       sendConfigs.recipientConfig.recipient,
                     );
+                    navigation.navigate('TxPending', {
+                      chainId,
+                      txHash: Buffer.from(txHash).toString('hex'),
+                    });
                   },
                   onFulfill: (tx: any) => {
                     if (tx.code != null && tx.code !== 0) {
