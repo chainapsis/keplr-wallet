@@ -13,6 +13,7 @@ import {
   Platform,
   StyleSheet,
   Text,
+  View,
 } from 'react-native';
 import {useStyle} from '../../../styles';
 import {RegisterHeader} from '../../../components/pageHeader/header-register';
@@ -34,6 +35,7 @@ import FastImage from 'react-native-fast-image';
 import {Checkbox} from '../../../components/checkbox';
 import {Button} from '../../../components/button';
 import {RectButton} from '../../../components/rect-button';
+import {Tag} from '../../../components/tag';
 
 export const EnableChainsScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -503,9 +505,7 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
           ])}>
           <FormattedMessage id="pages.register.enable-chains.paragraph" />
         </Text>
-
         <Gutter size={16} />
-
         <TextInput
           left={color => <SearchIcon size={20} color={color} />}
           value={search}
@@ -572,7 +572,6 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
         </XAxis>
 
         <Gutter size={16} />
-
         <Box
           width="100%"
           borderRadius={6}
@@ -633,11 +632,48 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
               );
             }}
             ItemSeparatorComponent={Divider}
+            ListFooterComponent={() => {
+              return (
+                <React.Fragment>
+                  {!fallbackEthereumLedgerApp &&
+                    keyType === 'ledger' &&
+                    chainStore.chainInfos
+                      .filter(chainInfo => {
+                        const trimSearch = search.trim();
+                        return (
+                          chainInfo.chainName
+                            .toLowerCase()
+                            .includes(trimSearch.toLowerCase()) ||
+                          (
+                            chainInfo.stakeCurrency || chainInfo.currencies[0]
+                          ).coinDenom
+                            .toLowerCase()
+                            .includes(trimSearch.toLowerCase())
+                        );
+                      })
+                      .map(chainInfo => {
+                        const isEthermintLike =
+                          chainInfo.bip44.coinType === 60 ||
+                          !!chainInfo.features?.includes('eth-address-gen') ||
+                          !!chainInfo.features?.includes('eth-key-sign');
+
+                        if (isEthermintLike) {
+                          return (
+                            <NextStepEvmChainItem
+                              key={chainInfo.chainId}
+                              chainInfo={chainInfo}
+                            />
+                          );
+                        }
+
+                        return null;
+                      })}
+                </React.Fragment>
+              );
+            }}
           />
         </Box>
-
         <Gutter size={16} />
-
         <Button
           text={intl.formatMessage({
             id: 'button.save',
@@ -741,7 +777,62 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
               // 어차피 bip44 coin type selection과 ethereum ledger app이 동시에 필요한 경우는 없다.
               // (ledger에서는 coin type이 app당 할당되기 때문에...)
               if (keyType === 'ledger') {
-                // Todo: Ledger 로직 추가
+                if (!fallbackEthereumLedgerApp) {
+                  navigation.navigate('Register.EnableChain', {
+                    vaultId,
+                    candidateAddresses: [],
+                    isFresh: false,
+                    skipWelcome,
+                    fallbackEthereumLedgerApp: true,
+                    stepPrevious: stepPrevious,
+                    stepTotal: stepTotal,
+                  });
+                } else if (ledgerEthereumAppNeeds.length > 0) {
+                  const keyInfo = keyRingStore.keyInfos.find(
+                    keyInfo => keyInfo.id === vaultId,
+                  );
+                  if (!keyInfo) {
+                    throw new Error('KeyInfo not found');
+                  }
+                  if (keyInfo.insensitive['Ethereum']) {
+                    await chainStore.enableChainInfoInUI(
+                      ...ledgerEthereumAppNeeds,
+                    );
+                    replaceToWelcomePage();
+                  } else {
+                    const bip44Path = keyInfo.insensitive['bip44Path'];
+                    if (!bip44Path) {
+                      throw new Error('bip44Path not found');
+                    }
+
+                    navigation.reset({
+                      routes: [{name: 'Register.Welcome', params: {password}}],
+                    });
+
+                    navigation.reset({
+                      routes: [
+                        {
+                          name: 'Register.ConnectLedger',
+                          params: {
+                            name: '',
+                            password: '',
+                            app: 'Ethereum',
+                            bip44Path,
+
+                            appendModeInfo: {
+                              vaultId,
+                              afterEnableChains: ledgerEthereumAppNeeds,
+                            },
+                            stepPrevious: stepPrevious,
+                            stepTotal: stepTotal,
+                          },
+                        },
+                      ],
+                    });
+                  }
+                } else {
+                  replaceToWelcomePage();
+                }
               } else {
                 replaceToWelcomePage();
               }
@@ -832,4 +923,49 @@ const Divider = () => {
   const style = useStyle();
 
   return <Box height={1} backgroundColor={style.get('color-gray-500').color} />;
+};
+
+const NextStepEvmChainItem: FunctionComponent<{
+  chainInfo: ChainInfo;
+}> = ({chainInfo}) => {
+  const style = useStyle();
+
+  return (
+    <Box
+      paddingX={16}
+      paddingY={14}
+      backgroundColor={style.get('color-gray-500').color}
+      style={{opacity: 0.5, flex: 1}}>
+      <XAxis alignY="center">
+        <FastImage
+          style={style.flatten(['width-40', 'height-40', 'border-radius-40'])}
+          source={
+            chainInfo.chainSymbolImageUrl
+              ? {uri: chainInfo.chainSymbolImageUrl}
+              : require('../../../public/assets/img/chain-icon-alt.png')
+          }
+          resizeMode={FastImage.resizeMode.contain}
+        />
+
+        <Gutter size={8} />
+
+        <View style={{flexDirection: 'column', flex: 1}}>
+          <XAxis>
+            <Text style={style.flatten(['subtitle2', 'color-white'])}>
+              {chainInfo.chainName}
+            </Text>
+
+            <Gutter size={4} />
+
+            <Tag text="EVM" />
+          </XAxis>
+
+          <Text
+            style={style.flatten(['subtitle3', 'color-gray-300', 'flex-1'])}>
+            <FormattedMessage id="pages.register.enable-chains.guide.can-select-evm-next-step" />
+          </Text>
+        </View>
+      </XAxis>
+    </Box>
+  );
 };
