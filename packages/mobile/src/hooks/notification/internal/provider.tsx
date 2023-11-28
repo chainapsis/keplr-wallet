@@ -12,6 +12,9 @@ import {Box} from '../../../components/box';
 import {useStyle} from '../../../styles';
 import {Gutter} from '../../../components/gutter';
 import {Text, View} from 'react-native';
+import {Column, Columns} from '../../../components/column';
+import {CloseIcon} from '../../../components/icon';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 export const NotificationProvider: FunctionComponent<PropsWithChildren> = ({
   children,
@@ -20,8 +23,7 @@ export const NotificationProvider: FunctionComponent<PropsWithChildren> = ({
     {
       id: string;
       detached: boolean;
-
-      mode: 'success' | 'failed' | 'plain';
+      mode: 'success' | 'failed';
       title: string;
       paragraph: string;
     }[]
@@ -35,7 +37,7 @@ export const NotificationProvider: FunctionComponent<PropsWithChildren> = ({
       });
     }
   };
-
+  const insects = useSafeAreaInsets();
   const hideFn = (id: string) => {
     setNotifications(prev => {
       const newNotifications = prev.slice();
@@ -53,7 +55,7 @@ export const NotificationProvider: FunctionComponent<PropsWithChildren> = ({
 
   const seqRef = useRef(0);
   const showFn: (
-    mode: 'success' | 'failed' | 'plain',
+    mode: 'success' | 'failed',
     title: string,
     paragraph: string,
   ) => string = (mode, title, paragraph) => {
@@ -65,7 +67,6 @@ export const NotificationProvider: FunctionComponent<PropsWithChildren> = ({
       {
         id,
         detached: false,
-
         mode,
         title,
         paragraph,
@@ -94,7 +95,7 @@ export const NotificationProvider: FunctionComponent<PropsWithChildren> = ({
         <View
           style={{
             position: 'absolute',
-            top: 0,
+            top: insects.top,
             bottom: 0,
             left: 0,
             right: 0,
@@ -115,6 +116,9 @@ export const NotificationProvider: FunctionComponent<PropsWithChildren> = ({
                     onTransitionEnd={() => {
                       clearDetached(notification.id);
                     }}
+                    onClickClose={() => {
+                      hideFn(notification.id);
+                    }}
                   />
                 );
               })}
@@ -128,12 +132,13 @@ export const NotificationProvider: FunctionComponent<PropsWithChildren> = ({
 const NotificationView: FunctionComponent<{
   detached: boolean;
 
-  mode: 'success' | 'failed' | 'plain';
+  mode: 'success' | 'failed';
   title: string;
   paragraph: string;
 
   onTransitionEnd: () => void;
-}> = ({detached, mode, title, paragraph, onTransitionEnd}) => {
+  onClickClose: () => void;
+}> = ({detached, mode, title, paragraph, onTransitionEnd, onClickClose}) => {
   const [visible, setVisible] = useState(false);
   const style = useStyle();
 
@@ -163,31 +168,25 @@ const NotificationView: FunctionComponent<{
   const backgroundColor = (() => {
     switch (mode) {
       case 'success':
-        return style.get('color-green-700').color;
+        return style.get('color-green-800').color;
       case 'failed':
-        return '#705512';
-      default:
-        return style.get('color-gray-500').color;
+        return style.get('color-yellow-800').color;
     }
   })();
   const titleColor = (() => {
     switch (mode) {
       case 'success':
-        return 'color-white';
+        return 'color-green-400';
       case 'failed':
-        return 'color-white';
-      default:
-        return 'color-white';
+        return 'color-yellow-400';
     }
   })();
   const paragraphColor = (() => {
     switch (mode) {
       case 'success':
-        return 'color-white';
+        return 'color-green-400';
       case 'failed':
-        return 'color-white';
-      default:
-        return 'color-white';
+        return 'color-yellow-400';
     }
   })();
 
@@ -206,17 +205,25 @@ const NotificationView: FunctionComponent<{
           style={{
             pointerEvents: 'auto',
           }}>
-          <Text style={style.flatten(['subtitle4', titleColor as any])}>
-            {title}
-          </Text>
-          {paragraph ? (
-            <React.Fragment>
-              <Gutter size={6} />
-              <Text style={style.flatten(['body3', paragraphColor as any])}>
-                {paragraph}
+          <Columns sum={1}>
+            <Box alignY="center">
+              <Text style={style.flatten(['subtitle4', titleColor as any])}>
+                {title}
               </Text>
-            </React.Fragment>
-          ) : null}
+              {paragraph ? (
+                <React.Fragment>
+                  <Gutter size={6} />
+                  <Text style={style.flatten(['body3', paragraphColor as any])}>
+                    {paragraph}
+                  </Text>
+                </React.Fragment>
+              ) : null}
+            </Box>
+            <Column weight={1} />
+            <Box onClick={onClickClose}>
+              <CloseIcon size={24} color={style.get(titleColor).color} />
+            </Box>
+          </Columns>
         </Box>
       </Box>
     </VerticalCollapseTransition>
