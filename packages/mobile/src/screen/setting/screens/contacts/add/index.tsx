@@ -11,12 +11,13 @@ import {MemoInput} from '../../../../../components/input/memo-input';
 import {RecipientInput} from '../../../../../components/input/reciepient-input';
 import {TextInput} from '../../../../../components/input';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-import {Box} from '../../../../../components/box';
 import {Stack} from '../../../../../components/stack';
 import {RootStackParamList} from '../../../../../navigation';
 import {Button} from '../../../../../components/button';
 import {Column} from '../../../../../components/column';
 import {TextInput as NativeTextInput} from 'react-native';
+import {PageWithScrollView} from '../../../../../components/page';
+import {useStyle} from '../../../../../styles';
 
 export const SettingContactsAddScreen: FunctionComponent = observer(() => {
   const {chainStore, uiConfigStore} = useStore();
@@ -25,6 +26,7 @@ export const SettingContactsAddScreen: FunctionComponent = observer(() => {
   const route =
     useRoute<RouteProp<RootStackParamList, 'Setting.General.ContactAdd'>>();
   const intl = useIntl();
+  const style = useStyle();
 
   const [chainId, setChainId] = useState(chainStore.chainInfosInUI[0].chainId);
   // If edit mode, this will be equal or greater than 0.
@@ -99,6 +101,9 @@ export const SettingContactsAddScreen: FunctionComponent = observer(() => {
   });
 
   const handleSubmit = () => {
+    if (txConfigsValidate.interactionBlocked || name === '') {
+      return;
+    }
     if (editIndex < 0) {
       uiConfigStore.addressBookConfig.addAddressBook(chainId, {
         name,
@@ -116,7 +121,13 @@ export const SettingContactsAddScreen: FunctionComponent = observer(() => {
     navigate.goBack();
   };
   return (
-    <Box height={'100%'} padding={12}>
+    <PageWithScrollView
+      backgroundMode="default"
+      contentContainerStyle={style.flatten([
+        'flex-grow-1',
+        'padding-x-12',
+        'padding-y-8',
+      ])}>
       <Stack gutter={16}>
         <TextInput
           label={intl.formatMessage({
@@ -156,6 +167,6 @@ export const SettingContactsAddScreen: FunctionComponent = observer(() => {
         disabled={txConfigsValidate.interactionBlocked || name === ''}
         onPress={() => handleSubmit()}
       />
-    </Box>
+    </PageWithScrollView>
   );
 });
