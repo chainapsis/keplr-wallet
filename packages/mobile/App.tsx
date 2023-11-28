@@ -32,6 +32,7 @@ import '@formatjs/intl-relativetimeformat/locale-data/ko'; // locale-data for en
 import {ConfirmProvider} from './src/hooks/confirm';
 import {InteractionModalsProvider} from './src/provider/interaction-modals-provider';
 import {LoadingIconAnimationProvider} from './src/provider/loading-icon-animation';
+import {NotificationProvider} from './src/hooks/notification';
 
 const ThemeStatusBar: FunctionComponent = () => {
   const style = useStyle();
@@ -57,11 +58,13 @@ function App(): JSX.Element {
             <StoreProvider>
               <AppIntlProvider>
                 <BottomSheetModalProvider>
-                  <ConfirmProvider>
-                    <InteractionModalsProvider>
-                      <AppNavigation />
-                    </InteractionModalsProvider>
-                  </ConfirmProvider>
+                  <NotificationProvider>
+                    <ConfirmProvider>
+                      <InteractionModalsProvider>
+                        <AppNavigation />
+                      </InteractionModalsProvider>
+                    </ConfirmProvider>
+                  </NotificationProvider>
                 </BottomSheetModalProvider>
               </AppIntlProvider>
             </StoreProvider>
