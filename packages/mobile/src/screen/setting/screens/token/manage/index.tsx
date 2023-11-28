@@ -118,7 +118,7 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
                   'body2',
                   'color-text-middle',
                   'text-center',
-                  'margin-bottom-12',
+                  'margin-bottom-14',
                 ])}>
                 <FormattedMessage id="page.setting.token.manage.paragraph" />
               </Text>
