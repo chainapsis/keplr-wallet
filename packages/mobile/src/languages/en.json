@@ -244,6 +244,9 @@
   "page.setting.security.connected-websites-paragraph": "Websites that can view your address and make requests for signing",
   "page.setting.security.auto-lock-title": "Auto-Lock",
   "page.setting.security.change-password-title": "Change Password",
+  "page.setting.security.bio-authentication-title": "Use biometric authentication",
+  "page.setting.security.enable-bio-authentication-title": "Enable Biometric Authentication",
+  "page.setting.security.disable-bio-authentication-title": "Disable Biometric Authentication",
   "page.setting.security.analytics-title": "Share anonymous data",
   "page.setting.security.analytics-paragraph": "Help us improve the performance and quality of Keplr",
 
@@ -259,6 +262,9 @@
   "page.setting.security.change-password.current-password-label": "Current Keplr Password",
   "page.setting.security.change-password.new-password-label": "New Keplr Password",
   "page.setting.security.change-password.confirm-password-label": "Confirm New Keplr Password",
+
+  "page.setting.security.bio-authentication.password-label": "password",
+  "page.setting.security.bio-authentication.guide-text": "Enter your password to continue.",
 
   "page.setting.token.manage.paragraph": "Only for the tokens that can be added manually via contract addresses",
   "page.setting.token.manage.add-token-button": "Add Token",

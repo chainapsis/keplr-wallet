@@ -244,6 +244,9 @@
   "page.setting.security.connected-websites-paragraph": "이 웹사이트들은 당신의 지갑 주소를 조회하고, 서명을 요청할 수 있습니다.",
   "page.setting.security.auto-lock-title": "자동 잠금 타이머",
   "page.setting.security.change-password-title": "비밀번호 변경",
+  "page.setting.security.bio-authentication-title": "Use biometric authentication",
+  "page.setting.security.enable-bio-authentication-title": "Enable Biometric Authentication",
+  "page.setting.security.disable-bio-authentication-title": "Disable Biometric Authentication",
   "page.setting.security.analytics-title": "익명화된 데이터 공유 허용",
   "page.setting.security.analytics-paragraph": "유저의 데이터가 익명화되어 케플러 팀에게 공유됩니다. 이는 케플러의 품질 향상과 사용자 경험 개선을 위해 사용됩니다.",
 
@@ -259,6 +262,9 @@
   "page.setting.security.change-password.current-password-label": "현재 비밀번호",
   "page.setting.security.change-password.new-password-label": "새로운 비밀번호",
   "page.setting.security.change-password.confirm-password-label": "비밀번호 확인",
+
+  "page.setting.security.bio-authentication.password-label": "password",
+  "page.setting.security.bio-authentication.guide-text": "Enter your password to continue.",
 
   "page.setting.token.manage.paragraph": "컨트랙트 주소로 직접 추가할 수 있는 토큰만 여기서 관리할 수 있습니다.",
   "page.setting.token.manage.add-token-button": "토큰 추가",
