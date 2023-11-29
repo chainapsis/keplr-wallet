@@ -74,7 +74,9 @@ export const SettingSecurityAndPrivacyScreen: FunctionComponent = observer(
                       try {
                         await keychainStore.turnOffBiometry();
                       } catch (error) {
-                        console.error(error);
+                        navigate.navigate(
+                          'Setting.SecurityAndPrivacy.BioAuthentication',
+                        );
                       }
                     }}
                   />

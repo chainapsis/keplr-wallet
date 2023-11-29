@@ -53,6 +53,8 @@ export const SettingSecurityBio: FunctionComponent = observer(() => {
     try {
       if (keychainStore.isBiometryOn) {
         keychainStore.turnOffBiometryWithPassword(data.password);
+        navigation.goBack();
+        return;
       }
       await keychainStore.turnOnBiometry(data.password);
       navigation.goBack();
