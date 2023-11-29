@@ -100,6 +100,20 @@ export const SettingGeneralScreen: FunctionComponent = observer(() => {
               navigate.navigate('Setting.General.ManageChainVisibility')
             }
           />
+          <PageButton
+            title={intl.formatMessage({
+              id: 'page.setting.general.version-title',
+            })}
+            endIcon={
+              <ArrowRightIcon
+                size={24}
+                color={style.get('color-text-low').color}
+              />
+            }
+            onClick={() => {
+              navigate.navigate('Setting.General.Version');
+            }}
+          />
         </Stack>
       </Box>
     </React.Fragment>
