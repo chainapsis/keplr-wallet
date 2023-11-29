@@ -8,6 +8,7 @@ import React, {
   forwardRef,
   FunctionComponent,
   PropsWithChildren,
+  RefObject,
   useCallback,
 } from 'react';
 import {useStyle} from '../../styles';
@@ -19,6 +20,7 @@ import {
 import {NavigationContainer} from '@react-navigation/native';
 import {StyleSheet, Text, TextStyle, ViewStyle} from 'react-native';
 import {Box} from '../box';
+import {useBottomSheetBackHandler} from './hooks/useBottomSheetBackHandler';
 
 interface ModalProps {
   isDetachedModal?: boolean;
@@ -34,6 +36,9 @@ export const Modal = forwardRef<
     ref,
   ) => {
     const style = useStyle();
+    const {handleSheetPositionChange} = useBottomSheetBackHandler(
+      ref as RefObject<BottomSheetModal>,
+    );
     const renderBackdrop = useCallback(
       (props: BottomSheetBackdropProps) => (
         <BottomSheetBackdrop
@@ -49,6 +54,7 @@ export const Modal = forwardRef<
       <BottomSheetModal
         ref={ref}
         index={0}
+        onChange={handleSheetPositionChange}
         snapPoints={snapPoints}
         backdropComponent={renderBackdrop}
         enablePanDownToClose={true}
