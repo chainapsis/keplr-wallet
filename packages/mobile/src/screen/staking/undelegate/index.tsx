@@ -22,6 +22,8 @@ import {StackNavProp, StakeNavigation} from '../../../navigation';
 import {ValidatorCard} from '../components/validator-card';
 import {GuideBox} from '../../../components/guide-box';
 import {XAxis} from '../../../components/axis';
+import {useNotification} from '../../../hooks/notification';
+import {useIntl} from 'react-intl';
 
 export const SignUndelegateScreen: FunctionComponent = observer(() => {
   const {chainStore, accountStore, queriesStore} = useStore();
@@ -31,6 +33,8 @@ export const SignUndelegateScreen: FunctionComponent = observer(() => {
   const addressRef = useRef<TextInput>(null);
   const initialChainId = route.params['chainId'];
   const {validatorAddress} = route.params;
+  const notification = useNotification();
+  const intl = useIntl();
 
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
 
@@ -188,7 +192,19 @@ export const SignUndelegateScreen: FunctionComponent = observer(() => {
                   onFulfill: (tx: any) => {
                     if (tx.code != null && tx.code !== 0) {
                       console.log(tx);
+                      notification.show(
+                        'failed',
+                        intl.formatMessage({id: 'error.transaction-failed'}),
+                      );
+                      return;
                     }
+
+                    notification.show(
+                      'success',
+                      intl.formatMessage({
+                        id: 'notification.transaction-success',
+                      }),
+                    );
                   },
                   onBroadcasted: txHash => {
                     navigation.navigate('TxPending', {
@@ -200,6 +216,10 @@ export const SignUndelegateScreen: FunctionComponent = observer(() => {
               );
             } catch (e) {
               if (e?.message === 'Request rejected') {
+                notification.show(
+                  'failed',
+                  intl.formatMessage({id: 'error.transaction-failed'}),
+                );
                 return;
               }
             }

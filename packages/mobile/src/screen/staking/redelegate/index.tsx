@@ -25,6 +25,8 @@ import {ValidatorImage} from '../components/validator-image';
 import {ArrowRightIcon} from '../../../components/icon/arrow-right';
 import {RectButton} from '../../../components/rect-button';
 import {ValidatorCard} from '../components/validator-card';
+import {useNotification} from '../../../hooks/notification';
+import {useIntl} from 'react-intl';
 
 //NOTE https://reactnavigation.org/docs/troubleshooting/#i-get-the-warning-non-serializable-values-were-found-in-the-navigation-state
 //해당 경고가 있으나 state persistence, deep linking를 해당 페이지에서 사용하지 않기 때문에 해당 경고를 무시함
@@ -39,6 +41,8 @@ export const SignRedelegateScreen: FunctionComponent = observer(() => {
   const style = useStyle();
   const initialChainId = route.params['chainId'];
   const {validatorAddress} = route.params;
+  const notification = useNotification();
+  const intl = useIntl();
 
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
 
@@ -170,7 +174,19 @@ export const SignRedelegateScreen: FunctionComponent = observer(() => {
                   onFulfill: (tx: any) => {
                     if (tx.code != null && tx.code !== 0) {
                       console.log(tx);
+                      notification.show(
+                        'failed',
+                        intl.formatMessage({id: 'error.transaction-failed'}),
+                      );
+                      return;
                     }
+
+                    notification.show(
+                      'success',
+                      intl.formatMessage({
+                        id: 'notification.transaction-success',
+                      }),
+                    );
                   },
                   onBroadcasted: txHash => {
                     navigation.navigate('TxPending', {
@@ -182,6 +198,10 @@ export const SignRedelegateScreen: FunctionComponent = observer(() => {
               );
             } catch (e) {
               if (e?.message === 'Request rejected') {
+                notification.show(
+                  'failed',
+                  intl.formatMessage({id: 'error.transaction-failed'}),
+                );
                 return;
               }
             }
