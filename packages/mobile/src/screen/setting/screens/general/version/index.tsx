@@ -111,7 +111,7 @@ export const SettingItem: FunctionComponent<{
       backgroundColor={style.get('color-card-default').color}
       padding={14}
       borderRadius={6}>
-      <Text style={style.flatten(['subtitle4', 'color-text-low'])}>
+      <Text style={style.flatten(['subtitle4', 'color-text-middle'])}>
         {label}
       </Text>
       <Gutter size={4} />
