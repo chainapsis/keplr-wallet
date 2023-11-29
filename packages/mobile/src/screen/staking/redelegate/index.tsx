@@ -177,7 +177,6 @@ export const SignRedelegateScreen: FunctionComponent = observer(() => {
                       notification.show(
                         'failed',
                         intl.formatMessage({id: 'error.transaction-failed'}),
-                        '',
                       );
                       return;
                     }
@@ -187,7 +186,6 @@ export const SignRedelegateScreen: FunctionComponent = observer(() => {
                       intl.formatMessage({
                         id: 'notification.transaction-success',
                       }),
-                      '',
                     );
                   },
                   onBroadcasted: txHash => {
@@ -203,7 +201,6 @@ export const SignRedelegateScreen: FunctionComponent = observer(() => {
                 notification.show(
                   'failed',
                   intl.formatMessage({id: 'error.transaction-failed'}),
-                  '',
                 );
                 return;
               }
