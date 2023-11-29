@@ -306,7 +306,6 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
                       notification.show(
                         'failed',
                         intl.formatMessage({id: 'error.transaction-failed'}),
-                        '',
                       );
                       return;
                     }
@@ -316,7 +315,6 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
                       intl.formatMessage({
                         id: 'notification.transaction-success',
                       }),
-                      '',
                     );
                   },
                 },
@@ -326,7 +324,6 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
                 notification.show(
                   'failed',
                   intl.formatMessage({id: 'error.transaction-failed'}),
-                  '',
                 );
                 return;
               }

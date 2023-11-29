@@ -91,40 +91,38 @@ export const NotificationProvider: FunctionComponent<PropsWithChildren> = ({
         };
       }, [])}>
       {children}
-      <React.Fragment>
-        <View
-          style={{
-            position: 'absolute',
-            top: insects.top,
-            bottom: 0,
-            left: 0,
-            right: 0,
-          }}
-          pointerEvents="box-none">
-          <React.Fragment>
-            {notifications
-              .slice()
-              .reverse()
-              .map(notification => {
-                return (
-                  <NotificationView
-                    key={notification.id}
-                    mode={notification.mode}
-                    title={notification.title}
-                    paragraph={notification.paragraph}
-                    detached={notification.detached}
-                    onTransitionEnd={() => {
-                      clearDetached(notification.id);
-                    }}
-                    onClickClose={() => {
-                      hideFn(notification.id);
-                    }}
-                  />
-                );
-              })}
-          </React.Fragment>
-        </View>
-      </React.Fragment>
+      <View
+        style={{
+          position: 'absolute',
+          top: insects.top,
+          bottom: 0,
+          left: 0,
+          right: 0,
+        }}
+        pointerEvents="box-none">
+        <React.Fragment>
+          {notifications
+            .slice()
+            .reverse()
+            .map(notification => {
+              return (
+                <NotificationView
+                  key={notification.id}
+                  mode={notification.mode}
+                  title={notification.title}
+                  paragraph={notification.paragraph}
+                  detached={notification.detached}
+                  onTransitionEnd={() => {
+                    clearDetached(notification.id);
+                  }}
+                  onClickClose={() => {
+                    hideFn(notification.id);
+                  }}
+                />
+              );
+            })}
+        </React.Fragment>
+      </View>
     </NotificationContext.Provider>
   );
 };
@@ -134,7 +132,7 @@ const NotificationView: FunctionComponent<{
 
   mode: 'success' | 'failed';
   title: string;
-  paragraph: string;
+  paragraph?: string;
 
   onTransitionEnd: () => void;
   onClickClose: () => void;
@@ -197,34 +195,31 @@ const NotificationView: FunctionComponent<{
       onResize={() => {
         setResizeInit(true);
       }}>
-      <Box padding={12} paddingBottom={0}>
-        <Box
-          padding={18}
-          backgroundColor={backgroundColor}
-          borderRadius={8}
-          style={{
-            pointerEvents: 'auto',
-          }}>
-          <Columns sum={1}>
-            <Box alignY="center">
-              <Text style={style.flatten(['subtitle4', titleColor as any])}>
-                {title}
-              </Text>
-              {paragraph ? (
-                <React.Fragment>
-                  <Gutter size={6} />
-                  <Text style={style.flatten(['body3', paragraphColor as any])}>
-                    {paragraph}
-                  </Text>
-                </React.Fragment>
-              ) : null}
-            </Box>
-            <Column weight={1} />
-            <Box onClick={onClickClose}>
-              <CloseIcon size={24} color={style.get(titleColor).color} />
-            </Box>
-          </Columns>
-        </Box>
+      <Box
+        padding={18}
+        marginX={12}
+        marginTop={5}
+        backgroundColor={backgroundColor}
+        borderRadius={8}>
+        <Columns sum={1}>
+          <Box alignY="center">
+            <Text style={style.flatten(['subtitle4', titleColor as any])}>
+              {title}
+            </Text>
+            {paragraph ? (
+              <React.Fragment>
+                <Gutter size={6} />
+                <Text style={style.flatten(['body3', paragraphColor as any])}>
+                  {paragraph}
+                </Text>
+              </React.Fragment>
+            ) : null}
+          </Box>
+          <Column weight={1} />
+          <Box onClick={onClickClose}>
+            <CloseIcon size={24} color={style.get(titleColor).color} />
+          </Box>
+        </Columns>
       </Box>
     </VerticalCollapseTransition>
   );
