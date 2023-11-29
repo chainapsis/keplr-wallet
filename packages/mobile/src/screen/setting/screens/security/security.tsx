@@ -9,12 +9,14 @@ import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../../navigation';
 import {observer} from 'mobx-react-lite';
 import {Toggle} from '../../../../components/toggle';
+import {useStore} from '../../../../stores';
 
 export const SettingSecurityAndPrivacyScreen: FunctionComponent = observer(
   () => {
     const intl = useIntl();
     const style = useStyle();
     const navigate = useNavigation<StackNavProp>();
+    const {keychainStore} = useStore();
 
     return (
       <React.Fragment>
@@ -53,6 +55,32 @@ export const SettingSecurityAndPrivacyScreen: FunctionComponent = observer(
               }
             />
 
+            <PageButton
+              title={intl.formatMessage({
+                id: 'page.setting.security.bio-authentication-title',
+              })}
+              endIcon={
+                <Box marginLeft={8}>
+                  <Toggle
+                    isOpen={keychainStore.isBiometryOn}
+                    setIsOpen={async () => {
+                      if (!keychainStore.isBiometryOn) {
+                        navigate.navigate(
+                          'Setting.SecurityAndPrivacy.BioAuthentication',
+                        );
+                        return;
+                      }
+
+                      try {
+                        await keychainStore.turnOffBiometry();
+                      } catch (error) {
+                        console.error(error);
+                      }
+                    }}
+                  />
+                </Box>
+              }
+            />
             <PageButton
               title={intl.formatMessage({
                 id: 'page.setting.security.analytics-title',

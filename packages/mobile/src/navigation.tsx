@@ -77,6 +77,7 @@ import {
 } from './screen/staking';
 import {SignRedelegateScreen} from './screen/staking/redelegate';
 import {SettingGeneralDeleteSuggestChainScreen} from './screen/setting/screens/general/delete-suggest-chain';
+import {SettingSecurityBio} from './screen/setting/screens/security/bio-authentication';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -188,6 +189,7 @@ export type RootStackParamList = {
   'Setting.SecurityAndPrivacy.Intro': undefined;
   'Setting.SecurityAndPrivacy.Permission': undefined;
   'Setting.SecurityAndPrivacy.ChangePassword': undefined;
+  'Setting.SecurityAndPrivacy.BioAuthentication': undefined;
 
   'Setting.ManageTokenList': undefined;
   'Setting.ManageTokenList.Add':
@@ -562,6 +564,16 @@ const SettingSecurityAndPrivacyNavigation = () => {
           ...defaultHeaderOptions,
         }}
         component={SettingSecurityChangePasswordScreen}
+      />
+      <Stack.Screen
+        name="Setting.SecurityAndPrivacy.BioAuthentication"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.setting.security.enable-bio-authentication-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={SettingSecurityBio}
       />
     </Stack.Navigator>
   );

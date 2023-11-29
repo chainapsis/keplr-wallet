@@ -16,7 +16,7 @@ export const SettingGeneralScreen: FunctionComponent = observer(() => {
   const language = useLanguage();
   const style = useStyle();
   const navigate = useNavigation<StackNavProp>();
-  const {uiConfigStore} = useStore();
+  const {uiConfigStore, keyRingStore} = useStore();
 
   return (
     <React.Fragment>
@@ -96,9 +96,14 @@ export const SettingGeneralScreen: FunctionComponent = observer(() => {
                 color={style.get('color-text-low').color}
               />
             }
-            onClick={() =>
-              navigate.navigate('Setting.General.ManageChainVisibility')
-            }
+            onClick={() => {
+              if (keyRingStore.selectedKeyInfo?.id) {
+                navigate.navigate('Register.EnableChain', {
+                  vaultId: keyRingStore.selectedKeyInfo?.id,
+                  skipWelcome: true,
+                });
+              }
+            }}
           />
         </Stack>
       </Box>
