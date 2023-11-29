@@ -13,9 +13,17 @@ export const VerticalCollapseTransition: FunctionComponent<
   PropsWithChildren<
     VerticalCollapseTransitionProps & {
       onTransitionEnd?: () => void;
+      onResize?: (height: number) => void;
     }
   >
-> = ({children, collapsed, width, transitionAlign, onTransitionEnd}) => {
+> = ({
+  children,
+  collapsed,
+  width,
+  transitionAlign,
+  onTransitionEnd,
+  onResize,
+}) => {
   const onTransitionEndRef = useRef(onTransitionEnd);
   onTransitionEndRef.current = onTransitionEnd;
 
@@ -41,6 +49,10 @@ export const VerticalCollapseTransition: FunctionComponent<
         lastHeight.current = height;
         if (!collapsed) {
           heightPx.value = height;
+        }
+
+        if (onResize) {
+          onResize(height);
         }
       }}
       heightPx={heightPx}

@@ -20,6 +20,7 @@ import {OnScreenWebpageScreenHeader} from './components/header';
 import {Gutter} from '../../components/gutter';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {RootStackParamList} from '../../navigation';
+import DeviceInfo from 'react-native-device-info';
 
 export const useInjectedSourceCode = () => {
   const [code, setCode] = useState<string | undefined>();
@@ -114,6 +115,7 @@ export const WebpageScreen: FunctionComponent = observer(() => {
         <WebView
           source={{uri}}
           ref={webviewRef}
+          applicationNameForUserAgent={`KeplrWalletMobile/${DeviceInfo.getVersion()}`}
           injectedJavaScriptBeforeContentLoaded={sourceCode}
           onMessage={onMessage}
           onNavigationStateChange={e => {

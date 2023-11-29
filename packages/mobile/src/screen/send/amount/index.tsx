@@ -33,6 +33,8 @@ import {BACKGROUND_PORT, Message} from '@keplr-wallet/router';
 import {SendTxAndRecordMsg} from '@keplr-wallet/background';
 import {TextInput} from 'react-native';
 import {RNMessageRequesterInternal} from '../../../router';
+import {StackNavProp} from '../../../navigation';
+import {useNotification} from '../../../hooks/notification';
 
 export const SendAmountScreen: FunctionComponent = observer(() => {
   const {chainStore, accountStore, queriesStore} = useStore();
@@ -42,10 +44,11 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
       coinMinimalDenom?: string;
     };
   }> = useRoute();
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavProp>();
   const intl = useIntl();
   const style = useStyle();
   const addressRef = useRef<TextInput>(null);
+  const notification = useNotification();
 
   const initialChainId = route.params['chainId'];
   const initialCoinMinimalDenom = route.params['coinMinimalDenom'];
@@ -287,21 +290,41 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
                   },
                 },
                 {
-                  onBroadcasted: () => {
+                  onBroadcasted: txHash => {
                     chainStore.enableVaultsWithCosmosAddress(
                       sendConfigs.recipientConfig.chainId,
                       sendConfigs.recipientConfig.recipient,
                     );
+                    navigation.navigate('TxPending', {
+                      chainId,
+                      txHash: Buffer.from(txHash).toString('hex'),
+                    });
                   },
                   onFulfill: (tx: any) => {
                     if (tx.code != null && tx.code !== 0) {
                       console.log(tx);
+                      notification.show(
+                        'failed',
+                        intl.formatMessage({id: 'error.transaction-failed'}),
+                      );
+                      return;
                     }
+
+                    notification.show(
+                      'success',
+                      intl.formatMessage({
+                        id: 'notification.transaction-success',
+                      }),
+                    );
                   },
                 },
               );
             } catch (e) {
               if (e?.message === 'Request rejected') {
+                notification.show(
+                  'failed',
+                  intl.formatMessage({id: 'error.transaction-failed'}),
+                );
                 return;
               }
             }

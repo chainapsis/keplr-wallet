@@ -61,15 +61,27 @@ import {WebScreen} from './screen/web';
 import {WebpageScreen} from './screen/web/webpage';
 import {GovernanceListScreen} from './screen/governance/list';
 import {GovernanceScreen} from './screen/governance';
-import {ValidatorListScreen} from './screen/staking/validator-list';
 import {FinalizeKeyScreen} from './screen/register/finalize-key';
 import {PlainObject} from '@keplr-wallet/background';
 import {EnableChainsScreen} from './screen/register/enable-chains';
 import {RecoverMnemonicScreen} from './screen/register/recover-mnemonic';
 import {WelcomeScreen} from './screen/register/welcome';
-import {ValidatorDetailScreen} from './screen/staking/validator-detail';
-import {SignDelegateScreen} from './screen/staking/delegate';
 import {SelectDerivationPathScreen} from './screen/register/select-derivation-path';
+import {ConnectHardwareWalletScreen} from './screen/register/connect-hardware';
+import {ConnectLedgerScreen} from './screen/register/connect-ledger';
+import {App} from '@keplr-wallet/ledger-cosmos';
+import {
+  SignDelegateScreen,
+  SignUndelegateScreen,
+  ValidatorDetailScreen,
+  ValidatorListScreen,
+} from './screen/staking';
+import {SignRedelegateScreen} from './screen/staking/redelegate';
+import {
+  TxFailedResultScreen,
+  TxPendingResultScreen,
+  TxSuccessResultScreen,
+} from './screen/tx-result';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -80,6 +92,7 @@ export type RootStackParamList = {
   'Register.Temp': undefined;
   'Register.Intro': undefined;
   'Register.Intro.NewUser': undefined;
+  'Register.Intro.ConnectHardware': undefined;
   'Register.NewMnemonic': undefined;
   'Register.VerifyMnemonic': {
     mnemonic: string;
@@ -88,6 +101,23 @@ export type RootStackParamList = {
   };
   'Register.Intro.ExistingUser': undefined;
   'Register.RecoverMnemonic': undefined;
+  'Register.ConnectLedger': {
+    name: string;
+    password: string;
+    stepPrevious: number;
+    stepTotal: number;
+    bip44Path: {
+      account: number;
+      change: number;
+      addressIndex: number;
+    };
+    app: App | 'Ethereum';
+    // append mode일 경우 위의 name, password는 안쓰인다. 대충 빈 문자열 넣으면 된다.
+    appendModeInfo?: {
+      vaultId: string;
+      afterEnableChains: string[];
+    };
+  };
   'Register.FinalizeKey': {
     name: string;
     password: string;
@@ -180,14 +210,44 @@ export type RootStackParamList = {
   Web: {url: string; isExternal: true};
   WebTab: NavigatorScreenParams<WebStackNavigation>;
   Governance: NavigatorScreenParams<GovernanceNavigation>;
+
+  TxPending: {
+    chainId: string;
+    txHash: string;
+  };
+  TxSuccess: {
+    chainId: string;
+    txHash: string;
+  };
+  TxFail: {
+    chainId: string;
+    txHash: string;
+  };
 };
 
 export type StakeNavigation = {
   'Stake.Dashboard': {chainId: string};
   'Stake.Staking': {chainId: string};
-  'Stake.ValidateList': {chainId: string};
-  'Stake.ValidateDetail': {chainId: string; validatorAddress: string};
+  'Stake.ValidateList': {
+    chainId: string;
+    validatorSelector?: (
+      validatorAddress: string,
+      validatorName: string,
+    ) => void;
+  };
+  'Stake.ValidateDetail': {
+    chainId: string;
+    validatorAddress: string;
+  };
   'Stake.Delegate': {
+    chainId: string;
+    validatorAddress: string;
+  };
+  'Stake.Undelegate': {
+    chainId: string;
+    validatorAddress: string;
+  };
+  'Stake.Redelegate': {
     chainId: string;
     validatorAddress: string;
   };
@@ -243,6 +303,11 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
 
       <Stack.Screen name="Register.FinalizeKey" component={FinalizeKeyScreen} />
+
+      <Stack.Screen
+        name="Register.Intro.ConnectHardware"
+        component={ConnectHardwareWalletScreen}
+      />
     </Stack.Navigator>
   );
 };
@@ -610,6 +675,22 @@ const StakeNavigation = () => {
         }}
         component={SignDelegateScreen}
       />
+      <StakeStack.Screen
+        name="Stake.Undelegate"
+        options={{
+          title: 'Unstake',
+          ...defaultHeaderOptions,
+        }}
+        component={SignUndelegateScreen}
+      />
+      <StakeStack.Screen
+        name="Stake.Redelegate"
+        options={{
+          title: 'Switch Validator',
+          ...defaultHeaderOptions,
+        }}
+        component={SignRedelegateScreen}
+      />
     </StakeStack.Navigator>
   );
 };
@@ -734,6 +815,12 @@ export const AppNavigation: FunctionComponent = observer(() => {
             component={SelectDerivationPathScreen}
           />
 
+          <Stack.Screen
+            name="Register.ConnectLedger"
+            options={{headerShown: false}}
+            component={ConnectLedgerScreen}
+          />
+
           {/*NOTE 사이드바를 통해서 세팅으로 이동시 뒤로가기때 다시 메인으로 오기 위해서 해당 route들은 최상위에도 올렸습니다*/}
           <Stack.Screen
             name="Setting.ManageTokenList.Add"
@@ -767,6 +854,21 @@ export const AppNavigation: FunctionComponent = observer(() => {
             name="Governance"
             options={{headerShown: false}}
             component={GovernanceNavigation}
+          />
+          <Stack.Screen
+            name="TxPending"
+            options={{headerShown: false}}
+            component={TxPendingResultScreen}
+          />
+          <Stack.Screen
+            name="TxSuccess"
+            options={{headerShown: false}}
+            component={TxSuccessResultScreen}
+          />
+          <Stack.Screen
+            name="TxFail"
+            options={{headerShown: false}}
+            component={TxFailedResultScreen}
           />
         </Stack.Navigator>
       </NavigationContainer>

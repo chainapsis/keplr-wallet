@@ -7683,6 +7683,8 @@ __metadata:
     "@formatjs/intl-pluralrules": ^5.2.6
     "@formatjs/intl-relativetimeformat": ^11.2.6
     "@gorhom/bottom-sheet": ^4.5.0
+    "@ledgerhq/hw-app-eth": ^6.29.3
+    "@ledgerhq/react-native-hw-transport-ble": =6.20.0
     "@react-native-async-storage/async-storage": ^1.19.3
     "@react-native-community/blur": ^4.3.2
     "@react-native/eslint-config": ^0.72.2
@@ -7705,6 +7707,7 @@ __metadata:
     expo-clipboard: ~4.3.1
     expo-crypto: ~12.4.1
     expo-standard-web-crypto: ^1.6.0
+    expo-web-browser: ~12.3.2
     http-browserify: ^1.7.0
     https-browserify: ^1.0.0
     lottie-react-native: ^6.3.1
@@ -7719,12 +7722,15 @@ __metadata:
     react-hook-form: ^7.45.4
     react-intl: ^6.2.8
     react-native: 0.72.3
+    react-native-ble-plx: ^2.0.3
+    react-native-device-info: ^10.11.0
     react-native-fast-image: ^8.6.3
     react-native-fs: ^2.20.0
     react-native-gesture-handler: ^2.12.1
     react-native-keyboard-aware-scroll-view: ^0.9.5
     react-native-keychain: ^8.1.2
     react-native-linear-gradient: ^2.8.3
+    react-native-permissions: ^3.10.1
     react-native-qrcode-svg: ^6.2.0
     react-native-reanimated: ^3.4.2
     react-native-safe-area-context: ^4.7.1
@@ -8287,6 +8293,22 @@ __metadata:
   version: 6.10.1-nightly.0
   resolution: "@ledgerhq/logs@npm:6.10.1-nightly.0"
   checksum: 5a56908136adcefefb6b15ff335dad2fdf120933e94fb34633dc7460388481cff93493fee1e31b4b5646b1f620cd7ae1d3cb0d4e7270ec161eb16a17fa8a7fac
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/react-native-hw-transport-ble@npm:=6.20.0":
+  version: 6.20.0
+  resolution: "@ledgerhq/react-native-hw-transport-ble@npm:6.20.0"
+  dependencies:
+    "@ledgerhq/devices": ^6.20.0
+    "@ledgerhq/errors": ^6.10.0
+    "@ledgerhq/hw-transport": ^6.20.0
+    "@ledgerhq/logs": ^6.10.0
+    invariant: ^2.2.4
+    react-native-ble-plx: 2.0.3
+    rxjs: 6
+    uuid: ^3.4.0
+  checksum: f28410488b13f367f33a76701c18e9b3d08b772f7e5c26b3d37517c822a845fa6b4823acb376b59d313ffff6381a73a86a39db6dc4eb35e8c5ac57f2bd1e81f6
   languageName: node
   linkType: hard
 
@@ -17702,6 +17724,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"compare-urls@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "compare-urls@npm:2.0.0"
+  dependencies:
+    normalize-url: ^2.0.1
+  checksum: 706a305fcbafac63e3e3dafe71283b2fbef05ed18f64636e13bf201cdca164ff16463a7004023535497828f69b822ce44c3b43fcaa0e99d8976b26b1f326595c
+  languageName: node
+  linkType: hard
+
 "compare-versions@npm:^3.4.0":
   version: 3.6.0
   resolution: "compare-versions@npm:3.6.0"
@@ -21289,6 +21320,18 @@ __metadata:
     expo-random:
       optional: true
   checksum: 9c21d09f4435c388fc888ab76e1c6fe4f415fb77064ccc4979a455be89b36166df688bb4faf74a0df4ce0e65d62b898ae03feafdb243bc2cec4142a33a3e9cb3
+  languageName: node
+  linkType: hard
+
+"expo-web-browser@npm:~12.3.2":
+  version: 12.3.2
+  resolution: "expo-web-browser@npm:12.3.2"
+  dependencies:
+    compare-urls: ^2.0.0
+    url: ^0.11.0
+  peerDependencies:
+    expo: "*"
+  checksum: 2ebf97510b33ca1fa4fc5062dc5ac927b36a6111a51168d732cf5790802d93fda159daf90fdc6fa6fadd9c3367c3e33e39ce9fa9a04421ea774d3f9aec901f4a
   languageName: node
   linkType: hard
 
@@ -29719,6 +29762,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"normalize-url@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "normalize-url@npm:2.0.1"
+  dependencies:
+    prepend-http: ^2.0.0
+    query-string: ^5.0.1
+    sort-keys: ^2.0.0
+  checksum: 30e337ee03fc7f360c7d2b966438657fabd2628925cc58bffc893982fe4d2c59b397ae664fa2c319cd83565af73eee88906e80bc5eec91bc32b601920e770d75
+  languageName: node
+  linkType: hard
+
 "normalize-url@npm:^3.0.0, normalize-url@npm:^3.3.0":
   version: 3.3.0
   resolution: "normalize-url@npm:3.3.0"
@@ -32040,6 +32094,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"prepend-http@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "prepend-http@npm:2.0.0"
+  checksum: 7694a9525405447662c1ffd352fcb41b6410c705b739b6f4e3a3e21cf5fdede8377890088e8934436b8b17ba55365a615f153960f30877bf0d0392f9e93503ea
+  languageName: node
+  linkType: hard
+
 "prettier-linter-helpers@npm:^1.0.0":
   version: 1.0.0
   resolution: "prettier-linter-helpers@npm:1.0.0"
@@ -32585,6 +32646,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"query-string@npm:^5.0.1":
+  version: 5.1.1
+  resolution: "query-string@npm:5.1.1"
+  dependencies:
+    decode-uri-component: ^0.2.0
+    object-assign: ^4.1.0
+    strict-uri-encode: ^1.0.0
+  checksum: 4ac760d9778d413ef5f94f030ed14b1a07a1708dd13fd3bc54f8b9ef7b425942c7577f30de0bf5a7d227ee65a9a0350dfa3a43d1d266880882fb7ce4c434a4dd
+  languageName: node
+  linkType: hard
+
 "query-string@npm:^6.8.3":
   version: 6.13.7
   resolution: "query-string@npm:6.13.7"
@@ -32905,6 +32977,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-ble-plx@npm:2.0.3, react-native-ble-plx@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "react-native-ble-plx@npm:2.0.3"
+  checksum: 84dba90a18feadb578fb5ffeec0d4d02ea7e8e1315bd66939d7aa9f26e22c57e898672a745bb11749beabfb5c1c06bc5c30371147404d2422f9486ac04e1d9ae
+  languageName: node
+  linkType: hard
+
+"react-native-device-info@npm:^10.11.0":
+  version: 10.11.0
+  resolution: "react-native-device-info@npm:10.11.0"
+  peerDependencies:
+    react-native: "*"
+  checksum: 3f2de34df4e95e87291673fe69b09d3b96f9088177a8dadd92eccec86549cea63ca08ab82f120d4150eb0302ac721ad8a5e4b3a8136c9f54f0212e4c055762b0
+  languageName: node
+  linkType: hard
+
 "react-native-fast-image@npm:^8.6.3":
   version: 8.6.3
   resolution: "react-native-fast-image@npm:8.6.3"
@@ -32982,6 +33070,20 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: f980d324e551bbc475c6406bdc5250a08242020cbe653412fa169bbdf51e28a502e225de105b4d696d6a1a1b733d44782469020f4936d8b3ce0e2c78e51cf58f
+  languageName: node
+  linkType: hard
+
+"react-native-permissions@npm:^3.10.1":
+  version: 3.10.1
+  resolution: "react-native-permissions@npm:3.10.1"
+  peerDependencies:
+    react: ">=16.13.1"
+    react-native: ">=0.63.3"
+    react-native-windows: ">=0.62.0"
+  peerDependenciesMeta:
+    react-native-windows:
+      optional: true
+  checksum: 86ea43e34f41a77d85c1af2c4a4ff241dd7cb08a3f62a2ba6c8b8bbb8b03cdf4452609cd388ff7b3785086ad3ce95d45c5e6feca1af3ea2a544aafcfec28d0e1
   languageName: node
   linkType: hard
 
@@ -36620,6 +36722,13 @@ __metadata:
     inherits: ^2.0.1
     readable-stream: ^2.0.2
   checksum: 7bb3563961450e69183baa04272e042bdd7df44f6d75bf1cce0d6a628efd2d4b0a0d2a290bed0674ea7719c87e6cf6bf7406ca1d17413abf1484430d36d65580
+  languageName: node
+  linkType: hard
+
+"strict-uri-encode@npm:^1.0.0":
+  version: 1.1.0
+  resolution: "strict-uri-encode@npm:1.1.0"
+  checksum: 9466d371f7b36768d43f7803f26137657559e4c8b0161fb9e320efb8edba3ae22f8e99d4b0d91da023b05a13f62ec5412c3f4f764b5788fac11d1fea93720bb3
   languageName: node
   linkType: hard
 
