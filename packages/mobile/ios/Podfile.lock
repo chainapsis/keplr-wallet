@@ -870,15 +870,15 @@ SPEC CHECKSUMS:
   Flipper-PeerTalk: 116d8f857dc6ef55c7a5a75ea3ceaafe878aadc9
   FlipperKit: 2efad7007d6745a3f95e4034d547be637f89d3f6
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
-  glog: 791fe035093b84822da7f0870421a25839ca7870
-  hermes-engine: 5f58e278bb53b1b034d0f5b15d6766a5fcff0e3e
+  glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
+  hermes-engine: 10fbd3f62405c41ea07e71973ea61e1878d07322
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   libwebp: 33dc822fbbf4503668d09f7885bbfedc76c45e96
   lottie-ios: 25e7b2675dad5c3ddad369ac9baab03560c5bfdd
   lottie-react-native: c9f1db4f4124dcce9f8159e65d8dc6e8bcb11fb4
   MultiplatformBleAdapter: 5a6a897b006764392f9cef785e4360f54fb9477d
   OpenSSL-Universal: ebc357f1e6bc71fa463ccb2fe676756aff50e88c
-  RCT-Folly: 85766c3226c7ec638f05ad7cb3cf6a268d6c4241
+  RCT-Folly: 424b8c9a7a0b9ab2886ffe9c3b041ef628fd4fb1
   RCTRequired: a2faf4bad4e438ca37b2040cb8f7799baa065c18
   RCTTypeSafety: cb09f3e4747b6d18331a15eb05271de7441ca0b3
   React: 13109005b5353095c052f26af37413340ccf7a5d
