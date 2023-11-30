@@ -43,7 +43,7 @@ export const ContractAddressItem: FunctionComponent<{
             <Text
               numberOfLines={1}
               style={style.flatten(['subtitle3', 'color-text-high'])}>
-              {name}asdf
+              {name}
             </Text>
             <Gutter size={4} />
             <Text
