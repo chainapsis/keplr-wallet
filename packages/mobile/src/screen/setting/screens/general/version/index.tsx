@@ -69,7 +69,7 @@ export const SettingGeneralVersionScreen: FunctionComponent = observer(() => {
   return (
     <PageWithScrollView
       backgroundMode="default"
-      contentContainerStyle={style.flatten(['padding-x-12'])}>
+      contentContainerStyle={style.flatten(['padding-x-12', 'padding-top-8'])}>
       <Stack gutter={8}>
         <Text style={style.flatten(['subtitle3', 'color-text-low'])}>App</Text>
         <SettingItem label="App Version" paragraph={appVersion} />
