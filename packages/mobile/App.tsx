@@ -55,11 +55,11 @@ function App(): JSX.Element {
       <LoadingIconAnimationProvider>
         <StyleProvider>
           <SafeAreaProvider>
-            <ModalBaseProvider>
-              <ThemeStatusBar />
-              <StoreProvider>
-                <AppIntlProvider>
-                  <NotificationProvider>
+            <ThemeStatusBar />
+            <StoreProvider>
+              <AppIntlProvider>
+                <NotificationProvider>
+                  <ModalBaseProvider>
                     <BottomSheetModalProvider>
                       <ConfirmProvider>
                         <InteractionModalsProvider>
@@ -67,10 +67,10 @@ function App(): JSX.Element {
                         </InteractionModalsProvider>
                       </ConfirmProvider>
                     </BottomSheetModalProvider>
-                  </NotificationProvider>
-                </AppIntlProvider>
-              </StoreProvider>
-            </ModalBaseProvider>
+                  </ModalBaseProvider>
+                </NotificationProvider>
+              </AppIntlProvider>
+            </StoreProvider>
           </SafeAreaProvider>
         </StyleProvider>
       </LoadingIconAnimationProvider>

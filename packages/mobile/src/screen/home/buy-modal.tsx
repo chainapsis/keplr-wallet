@@ -1,13 +1,11 @@
 import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent, useEffect, useState} from 'react';
-import {Text} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
 import {FiatOnRampServiceInfo, FiatOnRampServiceInfos} from '../../config.ui';
 import {simpleFetch} from '@keplr-wallet/simple-fetch';
 import {useStore} from '../../stores';
 import {ChainInfo} from '@keplr-wallet/types';
-import {BaseModalHeader} from '../../components/modal';
 import {useStyle} from '../../styles';
-import {useBottomSheet} from '@gorhom/bottom-sheet';
 import {RectButton} from 'react-native-gesture-handler';
 import {Box} from '../../components/box';
 import {TransakSvg} from '../../components/icon/fiat/transak';
@@ -15,16 +13,21 @@ import {KadoSvg} from '../../components/icon/fiat/kado';
 import {MoonpaySvg} from '../../components/icon/fiat/moonpay';
 import {Gutter} from '../../components/gutter';
 import {Button} from '../../components/button';
+import {registerCardModal} from '../../components/modal/card';
 import {StackNavProp} from '../../navigation';
 
-export const BuyModal: FunctionComponent<{navigation: StackNavProp}> = observer(
-  ({navigation}) => {
+export const BuyModal = registerCardModal(
+  observer<{
+    navigation: StackNavProp;
+
+    isOpen: boolean;
+    setIsOpen: (isOpen: boolean) => void;
+  }>(({setIsOpen, navigation}) => {
     const {accountStore, chainStore} = useStore();
     const style = useStyle();
     const [fiatOnRampServiceInfos, setFiatOnRampServiceInfos] = useState(
       FiatOnRampServiceInfos,
     );
-    const bottom = useBottomSheet();
     useEffect(() => {
       (async () => {
         const response = await simpleFetch<{list: FiatOnRampServiceInfo[]}>(
@@ -172,19 +175,27 @@ export const BuyModal: FunctionComponent<{navigation: StackNavProp}> = observer(
     });
 
     return (
-      <Box
-        paddingX={12}
-        paddingBottom={12}
-        style={style.flatten(['height-full', 'gap-12'])}>
-        <BaseModalHeader title="Buy Crypto" />
+      <Box paddingX={12} paddingBottom={12}>
+        <Box paddingY={8}>
+          <Text
+            style={StyleSheet.flatten([
+              style.flatten(['color-white', 'text-center', 'h4']),
+            ])}>
+            Buy Crypto
+          </Text>
+        </Box>
+        <Gutter size={12} />
         {buySupportServiceInfos.map(serviceInfo => {
           return (
-            <ServiceItem
-              navigation={navigation}
-              key={serviceInfo.serviceId}
-              serviceInfo={serviceInfo}
-              close={() => bottom.close()}
-            />
+            <React.Fragment>
+              <ServiceItem
+                key={serviceInfo.serviceId}
+                navigation={navigation}
+                serviceInfo={serviceInfo}
+                close={() => setIsOpen(false)}
+              />
+              <Gutter size={12} />
+            </React.Fragment>
           );
         })}
         <Gutter size={8} />
@@ -192,18 +203,19 @@ export const BuyModal: FunctionComponent<{navigation: StackNavProp}> = observer(
           size="large"
           color="secondary"
           text="Cancel"
-          onPress={() => bottom.close()}
+          onPress={() => setIsOpen(false)}
         />
       </Box>
     );
-  },
+  }),
 );
 
 const ServiceItem: FunctionComponent<{
   navigation: StackNavProp;
+
   serviceInfo: FiatOnRampServiceInfo & {buyUrl?: string};
   close: () => void;
-}> = ({serviceInfo, navigation, close}) => {
+}> = ({navigation, serviceInfo, close}) => {
   const style = useStyle();
 
   return (
