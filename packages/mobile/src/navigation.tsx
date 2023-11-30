@@ -81,6 +81,7 @@ import {
   TxPendingResultScreen,
   TxSuccessResultScreen,
 } from './screen/tx-result';
+import {SettingGeneralVersionScreen} from './screen/setting/screens/general/version';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -187,6 +188,7 @@ export type RootStackParamList = {
   'Setting.General.WC': undefined;
   'Setting.General.ManageNonActiveChains': undefined;
   'Setting.General.ManageChainVisibility': undefined;
+  'Setting.General.Version': undefined;
 
   'Setting.SecurityAndPrivacy': undefined;
   'Setting.SecurityAndPrivacy.Intro': undefined;
@@ -541,6 +543,16 @@ const SettingGeneralNavigation = () => {
           ...defaultHeaderOptions,
         }}
         component={SettingGeneralScreen}
+      />
+      <Stack.Screen
+        name="Setting.General.Version"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.setting.general.version-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={SettingGeneralVersionScreen}
       />
     </Stack.Navigator>
   );

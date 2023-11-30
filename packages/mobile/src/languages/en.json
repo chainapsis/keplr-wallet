@@ -208,6 +208,7 @@
   "page.setting.general.manage-non-native-chains-paragraph": "Add or remove non-native chains operated by external parties",
   "page.setting.general.manage-chain-visibility-title": "Manage Chain Visibility",
   "page.setting.general.manage-chain-visibility-paragraph": "Select chains (and their assets) to be displayed on your current account",
+  "page.setting.general.version-title": "Keplr Version",
 
   "page.setting.general.language.automatic-title": "Automatic (Browser default)",
 

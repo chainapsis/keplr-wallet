@@ -208,6 +208,7 @@
   "page.setting.general.manage-non-native-chains-paragraph": "외부에서 관리되는 체인들 연결 추가/삭제하기",
   "page.setting.general.manage-chain-visibility-title": "체인 표시",
   "page.setting.general.manage-chain-visibility-paragraph": "현재 계정에 표시될 체인(해당 체인의 자산 포함)을 선택해주세요.",
+  "page.setting.general.version-title": "Keplr Version",
 
   "page.setting.general.language.automatic-title": "자동 (브라우저 언어)",
 
