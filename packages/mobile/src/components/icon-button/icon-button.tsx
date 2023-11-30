@@ -11,7 +11,6 @@ export const IconButton: FunctionComponent<{
   disabled?: boolean;
   onPress?: () => void;
   hasBackgroundColor?: boolean;
-  hasRipple?: boolean;
 
   containerStyle?: ViewStyle;
   textStyle?: TextStyle;
@@ -19,6 +18,7 @@ export const IconButton: FunctionComponent<{
 
   rippleColor?: string;
   underlayColor?: string;
+  activeOpacity?: number;
 }> = ({
   text,
   icon,
@@ -29,30 +29,24 @@ export const IconButton: FunctionComponent<{
   style: buttonStyle,
   containerStyle,
   hasBackgroundColor,
-  hasRipple,
   rippleColor: propRippleColor,
   underlayColor: propUnderlayColor,
+  activeOpacity = 0.3,
 }) => {
   const style = useStyle();
 
   const rippleColor = (() => {
-    if (!hasRipple) {
-      return undefined;
-    }
     if (propRippleColor) {
       return propRippleColor;
     }
-    return style.get('color-gray-500').color;
+    return style.get('color-gray-550').color;
   })();
 
   const underlayColor = (() => {
-    if (!hasRipple) {
-      return undefined;
-    }
     if (propUnderlayColor) {
       return propUnderlayColor;
     }
-    return style.get('color-gray-500').color;
+    return style.get('color-gray-550').color;
   })();
 
   const backgroundColor = 'background-color-gray-600';
@@ -75,6 +69,8 @@ export const IconButton: FunctionComponent<{
             'justify-center',
             'items-center',
             'height-full',
+            'border-radius-32',
+            'padding-6',
           ]),
           buttonStyle,
         ])}
@@ -82,8 +78,7 @@ export const IconButton: FunctionComponent<{
         enabled={!disabled}
         rippleColor={rippleColor}
         underlayColor={underlayColor}
-        activeOpacity={0.3}
-        disableRippleAndUnderlay={!hasRipple}>
+        activeOpacity={activeOpacity}>
         {path === 'left' ? (
           <Box marginRight={4} alignY="center">
             <Box>

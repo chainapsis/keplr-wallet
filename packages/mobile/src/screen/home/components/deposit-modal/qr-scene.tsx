@@ -35,6 +35,7 @@ export const QRScene = observer(() => {
             nav.goBack();
           }}
           icon={color => <ArrowLeftIcon color={color} size={24} />}
+          containerStyle={style.flatten(['width-32', 'height-32'])}
         />
         <Column weight={1} />
         <ChainImageFallback

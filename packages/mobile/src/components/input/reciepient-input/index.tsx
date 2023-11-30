@@ -97,7 +97,6 @@ export const RecipientInput = observer(
                     color={style.get('color-gray-10').color}
                   />
                 }
-                hasRipple={true}
                 rippleColor={style.get('color-gray-500').color}
                 underlayColor={style.get('color-gray-500').color}
                 containerStyle={style.flatten(['width-24', 'height-24'])}

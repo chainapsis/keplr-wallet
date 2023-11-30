@@ -221,7 +221,6 @@ export const FeeControl: FunctionComponent<{
                 color={style.get('color-white').color}
               />
             }
-            hasRipple={true}
             style={style.flatten(['border-radius-64'])}
             containerStyle={style.flatten(['width-32', 'height-32'])}
             onPress={() => {
