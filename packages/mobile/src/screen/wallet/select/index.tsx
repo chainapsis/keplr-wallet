@@ -639,8 +639,9 @@ const KeyringItem: FunctionComponent<{
           </XAxis>
           {paragraph ? (
             <React.Fragment>
-              <CheckIcon size={20} color={style.get('color-gray-200').color} />
-              <Gutter size={4} />
+              <Text style={style.flatten(['body2', 'color-gray-300'])}>
+                {paragraph}
+              </Text>
             </React.Fragment>
           ) : null}
         </Box>
