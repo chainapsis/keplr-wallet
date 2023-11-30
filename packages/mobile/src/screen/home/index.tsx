@@ -98,7 +98,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
     <React.Fragment>
       <PageWithScrollView
         backgroundMode={'default'}
-        style={style.flatten(['padding-x-12'])}>
+        style={style.flatten(['padding-x-12', 'padding-top-8'])}>
         <Stack gutter={10}>
           <YAxis alignX="center">
             <LayeredHorizontalRadioGroup
@@ -195,21 +195,20 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
           <Gutter size={12} />
           <ClaimAll isNotReady={isNotReady} />
+          <Gutter size={12} />
 
           {!isNotReady ? (
-            <Stack gutter={12}>
-              {tabStatus === 'available' ? (
-                <SearchTextInput
-                  ref={searchRef}
-                  value={search}
-                  onChange={e => {
-                    e.preventDefault();
-                    setSearch(e.nativeEvent.text);
-                  }}
-                  placeholder="Search for asset or chain (i.e. ATOM, Cosmos)"
-                />
-              ) : null}
-            </Stack>
+            tabStatus === 'available' ? (
+              <SearchTextInput
+                ref={searchRef}
+                value={search}
+                onChange={e => {
+                  e.preventDefault();
+                  setSearch(e.nativeEvent.text);
+                }}
+                placeholder="Search for asset or chain (i.e. ATOM, Cosmos)"
+              />
+            ) : null
           ) : null}
 
           {tabStatus === 'available' ? (
