@@ -8,6 +8,7 @@ export * from "./send";
 export * from "./transfer";
 export * from "./undelegate";
 export * from "./vote";
+export * from "./pay-packet-fee";
 
 export * from "./wasm-message-view";
 export * from "./custom-icon";
