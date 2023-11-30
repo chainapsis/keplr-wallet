@@ -232,7 +232,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
         <DepositModal />
       </Modal>
       <Modal ref={buyModalRef} snapPoints={['50%']}>
-        <BuyModal />
+        <BuyModal navigation={navigation} />
       </Modal>
     </React.Fragment>
   );
