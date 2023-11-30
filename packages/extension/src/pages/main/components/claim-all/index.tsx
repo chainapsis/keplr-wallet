@@ -154,13 +154,29 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         const queryRewards =
           queries.cosmos.queryRewards.getQueryBech32Address(accountAddress);
 
-        if (queryRewards.stakableReward) {
-          res.push({
-            token: queryRewards.stakableReward,
-            chainInfo,
-            isFetching: queryRewards.isFetching,
-            error: queryRewards.error,
-          });
+        const targetDenom = (() => {
+          if (chainInfo.chainIdentifier === "dydx-mainnet") {
+            return "ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5";
+          }
+
+          return chainInfo.stakeCurrency?.coinMinimalDenom;
+        })();
+
+        if (targetDenom) {
+          const currency = chainInfo.findCurrency(targetDenom);
+          if (currency) {
+            const reward = queryRewards.rewards.find(
+              (r) => r.currency.coinMinimalDenom === targetDenom
+            );
+            if (reward) {
+              res.push({
+                token: reward,
+                chainInfo,
+                isFetching: queryRewards.isFetching,
+                error: queryRewards.error,
+              });
+            }
+          }
         }
       }
 
@@ -460,23 +476,19 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                 return;
               }
 
-              const stakableReward = queryRewards.stakableReward;
-              if (!stakableReward) {
-                return;
-              }
               if (
-                (stakableReward.toCoin().denom === fee.denom &&
-                  new Dec(stakableReward.toCoin().amount).lte(
+                (viewToken.token.toCoin().denom === fee.denom &&
+                  new Dec(viewToken.token.toCoin().amount).lte(
                     new Dec(fee.amount)
                   )) ||
                 (await (async () => {
-                  if (stakableReward.toCoin().denom !== fee.denom) {
+                  if (viewToken.token.toCoin().denom !== fee.denom) {
                     if (
-                      stakableReward.currency.coinGeckoId &&
+                      viewToken.token.currency.coinGeckoId &&
                       feeCurrencyFetched.coinGeckoId
                     ) {
                       const rewardPrice = await priceStore.waitCalculatePrice(
-                        stakableReward,
+                        viewToken.token,
                         "usd"
                       );
                       const feePrice = await priceStore.waitCalculatePrice(
@@ -508,8 +520,8 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                   `(${chainId}) Skip claim rewards. Fee: ${fee.amount}${
                     fee.denom
                   } is greater than stakable reward: ${
-                    stakableReward.toCoin().amount
-                  }${stakableReward.toCoin().denom}`
+                    viewToken.token.toCoin().amount
+                  }${viewToken.token.toCoin().denom}`
                 );
                 state.setFailedReason(
                   new Error(
@@ -936,7 +948,17 @@ const ClaimTokenItem: FunctionComponent<{
                     : ColorPalette["gray-300"],
               }}
             >
-              {viewToken.token.currency.coinDenom}
+              {(() => {
+                if ("paths" in viewToken.token.currency) {
+                  const originDenom =
+                    viewToken.token.currency.originCurrency?.coinDenom;
+                  if (originDenom) {
+                    return `${originDenom} (${viewToken.chainInfo.chainName})`;
+                  }
+                }
+
+                return viewToken.token.currency.coinDenom;
+              })()}
             </Subtitle3>
             <Subtitle2
               style={{
