@@ -133,6 +133,7 @@ const TokenFoundScene = observer(() => {
   return (
     <Box padding={12} paddingTop={1} height={'100%'}>
       <BaseModalHeader title={`${numFoundToken} New Token(s) Found`} />
+      <Gutter size={12} />
       <BottomSheetScrollView>
         <Stack gutter={12}>
           {chainStore.tokenScans.map(tokenScan => {

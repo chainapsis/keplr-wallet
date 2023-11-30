@@ -126,6 +126,7 @@ export const AddressBookModal: FunctionComponent<{
           title={intl.formatMessage({
             id: 'components.address-book-modal.title',
           })}
+          titleStyle={{paddingBottom: 6}}
         />
 
         <YAxis alignX="left">
