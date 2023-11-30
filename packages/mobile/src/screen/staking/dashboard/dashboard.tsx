@@ -50,9 +50,18 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
     navigation.setOptions({title: `Staking on ${chainInfo.chainName}`});
   }, [chainInfo.chainName, navigation]);
 
-  const staked = queries.cosmos.queryDelegations.getQueryBech32Address(
+  const totalUnbonding =
+    queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
+      account.bech32Address,
+    ).total;
+  const totalDelegation = queries.cosmos.queryDelegations.getQueryBech32Address(
     account.bech32Address,
   ).total;
+
+  const totalStaked = totalUnbonding
+    ? totalDelegation?.add(totalUnbonding)
+    : totalDelegation;
+
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
     Staking.BondStatus.Bonded,
   );
@@ -197,7 +206,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
 
         <Gutter size={6} />
         <Text style={style.flatten(['h1', 'color-text-high'])}>
-          {staked?.maxDecimals(6).trim(true).shrink(true).toString()}
+          {totalStaked?.maxDecimals(6).trim(true).shrink(true).toString()}
         </Text>
       </Box>
 
