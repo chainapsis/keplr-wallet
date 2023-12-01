@@ -7692,8 +7692,9 @@ __metadata:
     "@react-navigation/bottom-tabs": ^6.5.8
     "@react-navigation/drawer": ^6.6.3
     "@react-navigation/native": ^6.1.7
-    "@react-navigation/native-stack": ^6.1.7
+    "@react-navigation/stack": ^6.3.20
     "@tsconfig/react-native": ^3.0.0
+    "@types/color": ^3.0.3
     "@types/react-test-renderer": ^18.0.0
     "@types/setimmediate": ^1
     "@types/text-encoding": ^0
@@ -7701,6 +7702,7 @@ __metadata:
     babel-plugin-transform-inline-environment-variables: ^0.4.4
     browserify: ^17.0.0
     buffer: ^6.0.3
+    color: ^4.2.3
     expo: ^49.0.6
     expo-clipboard: ~4.3.1
     expo-crypto: ~12.4.1
@@ -10169,19 +10171,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/native-stack@npm:^6.1.7":
-  version: 6.9.13
-  resolution: "@react-navigation/native-stack@npm:6.9.13"
-  dependencies:
-    "@react-navigation/elements": ^1.3.18
-    warn-once: ^0.1.0
+"@react-navigation/elements@npm:^1.3.21":
+  version: 1.3.21
+  resolution: "@react-navigation/elements@npm:1.3.21"
   peerDependencies:
     "@react-navigation/native": ^6.0.0
     react: "*"
     react-native: "*"
     react-native-safe-area-context: ">= 3.0.0"
-    react-native-screens: ">= 3.0.0"
-  checksum: 10d1f2ef4f1f2f4543f77b9c378dd3b49ee3c20e6e9d15b1b3ce3489d46c634411f6bc4c3cda379e47e7f3a669fb765c99954229479cd20aff5fae800e886574
+  checksum: 1bcff98e755a8a946570ba2d09b07b4038aa558e68dda7f93c89dfa6b37ead53a9da9adb1bd6c17ec4f1d1af36a24bd910b9c678c2c928d2ecea87dca080dc39
   languageName: node
   linkType: hard
 
@@ -10206,6 +10204,24 @@ __metadata:
   dependencies:
     nanoid: ^3.1.23
   checksum: 3a3392ce095d6a2bd2aad69856f513b35774f943a3dc73d8ffb75127de6773203e3264188d87058bdea4c0c9a7d43ed28d0cbf3a1f1cdc086df3ee255d8e1e27
+  languageName: node
+  linkType: hard
+
+"@react-navigation/stack@npm:^6.3.20":
+  version: 6.3.20
+  resolution: "@react-navigation/stack@npm:6.3.20"
+  dependencies:
+    "@react-navigation/elements": ^1.3.21
+    color: ^4.2.3
+    warn-once: ^0.1.0
+  peerDependencies:
+    "@react-navigation/native": ^6.0.0
+    react: "*"
+    react-native: "*"
+    react-native-gesture-handler: ">= 1.0.0"
+    react-native-safe-area-context: ">= 3.0.0"
+    react-native-screens: ">= 3.0.0"
+  checksum: ce4b4d74003ac70afa6b01c66acffcfe34925506283968dcfd1547208374c5c7561957c0eae0f93604f4d3fcb2ff9a4ed7d8ca17abc20a109339b363a02b72b3
   languageName: node
   linkType: hard
 
