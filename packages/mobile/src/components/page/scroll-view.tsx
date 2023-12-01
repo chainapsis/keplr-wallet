@@ -51,7 +51,7 @@ export const PageWithScrollView = forwardRef<
       <ContainerElement
         style={StyleSheet.flatten([
           style.flatten(
-            ['flex-1', 'border-width-top-1', 'border-color-gray-600'],
+            ['flex-1'],
             /*
              In android, overflow of container view is hidden by default.
              That's why even if you make overflow visible to the scroll view's style, it will behave like hidden unless you change the overflow property of this container view.
