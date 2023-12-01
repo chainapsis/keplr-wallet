@@ -96,7 +96,7 @@ export const HomeScreenHeader = observer(() => {
               </Text>
               <ArrowDownFillIcon
                 size={20}
-                color={style.get('color-gray-200').color}
+                color={style.get('color-gray-400').color}
               />
             </Columns>
           </Pressable>
