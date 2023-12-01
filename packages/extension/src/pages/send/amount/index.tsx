@@ -432,6 +432,14 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                       denom:
                         sendConfigs.amountConfig.amount[0].currency
                           .coinMinimalDenom,
+                      commonDenom: (() => {
+                        const currency =
+                          sendConfigs.amountConfig.amount[0].currency;
+                        if ("paths" in currency && currency.originCurrency) {
+                          return currency.originCurrency.coinDenom;
+                        }
+                        return currency.coinDenom;
+                      })(),
                       chainId: sendConfigs.recipientConfig.chainId,
                       chainIdentifier: ChainIdHelper.parse(
                         sendConfigs.recipientConfig.chainId
@@ -474,6 +482,15 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                       | undefined
                     > = {
                       originDenom: ibcChannelFluent.originDenom,
+                      originCommonDenom: (() => {
+                        const currency = chainStore
+                          .getChain(ibcChannelFluent.originChainId)
+                          .forceFindCurrency(ibcChannelFluent.originDenom);
+                        if ("paths" in currency && currency.originCurrency) {
+                          return currency.originCurrency.coinDenom;
+                        }
+                        return currency.coinDenom;
+                      })(),
                       originChainId: ibcChannelFluent.originChainId,
                       originChainIdentifier: ChainIdHelper.parse(
                         ibcChannelFluent.originChainId
