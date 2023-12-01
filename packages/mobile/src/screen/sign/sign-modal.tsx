@@ -326,10 +326,12 @@ export const SignModal: FunctionComponent<{
           () => {},
         );
       }}>
-      <BottomSheetView style={style.flatten(['padding-12'])}>
+      <BottomSheetView style={style.flatten(['padding-12', 'padding-top-0'])}>
         <BaseModalHeader
           title={intl.formatMessage({id: 'page.sign.cosmos.tx.title'})}
+          titleStyle={style.flatten(['h3'])}
         />
+        <Gutter size={24} />
 
         <Columns sum={1} alignY="center">
           <Text style={style.flatten(['h5', 'color-blue-400'])}>

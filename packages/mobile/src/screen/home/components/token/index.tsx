@@ -55,7 +55,7 @@ export const TokenTitleView: FunctionComponent<{
             {onOpenModal ? (
               <InformationOutlinedIcon
                 size={20}
-                color={style.get('color-text-low').color}
+                color={style.get('color-gray-400').color}
               />
             ) : null}
           </Columns>

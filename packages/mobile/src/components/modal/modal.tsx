@@ -153,10 +153,13 @@ export const BaseModalHeader = ({
   const style = useStyle();
 
   return (
-    <Box paddingBottom={12} style={StyleSheet.flatten([headerStyle])}>
+    <Box
+      paddingTop={10}
+      paddingBottom={8}
+      style={StyleSheet.flatten([headerStyle])}>
       <Text
         style={StyleSheet.flatten([
-          style.flatten(['color-white', 'text-center', 'subtitle1']),
+          style.flatten(['color-white', 'text-center', 'h4']),
           titleStyle,
         ])}>
         {title}
