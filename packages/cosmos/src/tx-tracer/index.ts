@@ -258,7 +258,7 @@ export class TendermintTxTracer {
 
       (async () => {
         // We don't know why yet. For some unknown reason, there is a problem where Tendermint does not give value through subscribe forever.
-        // First not, as a simple solution, send tx_search periodically as well.
+        // For now, as a simple solution, send tx_search periodically as well.
         while (true) {
           if (
             resolved ||
