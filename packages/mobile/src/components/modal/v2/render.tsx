@@ -387,7 +387,11 @@ const ModalRenderImpl: FunctionComponent<{
               layoutHeightShared.value = e.nativeEvent.layout.height;
             }}>
             {modalState.options.container
-              ? React.createElement(modalState.options.container, {}, el)
+              ? React.createElement(
+                  modalState.options.container,
+                  modalState.options.containerProps,
+                  el,
+                )
               : el}
           </View>
         </Reanimated.View>

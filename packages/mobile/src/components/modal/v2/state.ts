@@ -5,6 +5,7 @@ export interface ModalOptions {
   align?: 'top' | 'center' | 'bottom';
 
   container?: React.ElementType;
+  containerProps?: any;
 }
 
 export class ModalState {

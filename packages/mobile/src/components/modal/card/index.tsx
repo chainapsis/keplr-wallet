@@ -15,21 +15,31 @@ import {useStyle} from '../../../styles';
 
 export const registerCardModal: <P>(
   element: React.ElementType<P>,
+  options?: {
+    disabledSafeArea?: boolean;
+  },
 ) => FunctionComponent<
   P & {
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
   }
-> = element => {
+> = (element, options = {}) => {
   return registerModal(element, {
     align: 'bottom',
     container: CardModalBase,
+    containerProps: {
+      options,
+    },
   });
 };
 
-export const CardModalBase: FunctionComponent<PropsWithChildren> = ({
-  children,
-}) => {
+export const CardModalBase: FunctionComponent<
+  PropsWithChildren<{
+    options?: {
+      disabledSafeArea?: boolean;
+    };
+  }>
+> = ({children, options}) => {
   const safeAreaInsets = useSafeAreaInsets();
 
   const style = useStyle();
@@ -171,8 +181,11 @@ export const CardModalBase: FunctionComponent<PropsWithChildren> = ({
   const innerContainerStyle = useAnimatedStyle(() => {
     return {
       paddingBottom:
-        Math.max(safeAreaInsets.bottom - keyboard.height.value, 0) +
-        keyboard.height.value,
+        Math.max(
+          (options?.disabledSafeArea ? 0 : safeAreaInsets.bottom) -
+            keyboard.height.value,
+          0,
+        ) + keyboard.height.value,
 
       backgroundColor: backgroundColor,
     };
