@@ -51,7 +51,6 @@ import {SettingSecurityChangePasswordScreen} from './screen/setting/screens/secu
 import {SettingSecurityPermissionScreen} from './screen/setting/screens/security/permission';
 import {SettingGeneralLanguageScreen} from './screen/setting/screens/general/language';
 import {RegisterIntroScreen} from './screen/register/intro';
-import {StakingDashboardScreen} from './screen/staking/dashboard';
 import {RegisterIntroNewUserScreen} from './screen/register/intro-new-user';
 import {NewMnemonicScreen} from './screen/register/new-mnemonic';
 import {VerifyMnemonicScreen} from './screen/register/verify-mnemonic';
@@ -75,6 +74,7 @@ import {
   SignUndelegateScreen,
   ValidatorDetailScreen,
   ValidatorListScreen,
+  StakingDashboardScreen,
 } from './screen/staking';
 import {SignRedelegateScreen} from './screen/staking/redelegate';
 import {SettingGeneralDeleteSuggestChainScreen} from './screen/setting/screens/general/delete-suggest-chain';
@@ -85,11 +85,14 @@ import {
   TxSuccessResultScreen,
 } from './screen/tx-result';
 import {SettingGeneralVersionScreen} from './screen/setting/screens/general/version';
+import {CameraScreen} from './screen/camera';
+import {SettingGeneralManageWalletConnectScreen} from './screen/setting/screens/general/wallet-connect';
 
 export type RootStackParamList = {
   Home: undefined;
   'Home.Main': undefined;
   'Home.Stake.Dashboard': {chainId: string};
+  Camera: undefined;
 
   Register: undefined;
   'Register.Temp': undefined;
@@ -192,6 +195,7 @@ export type RootStackParamList = {
   'Setting.General.ManageNonActiveChains': undefined;
   'Setting.General.ManageChainVisibility': undefined;
   'Setting.General.Version': undefined;
+  'Setting.General.ManageWalletConnect': undefined;
 
   'Setting.SecurityAndPrivacy': undefined;
   'Setting.SecurityAndPrivacy.Intro': undefined;
@@ -565,6 +569,14 @@ const SettingGeneralNavigation = () => {
         }}
         component={SettingGeneralVersionScreen}
       />
+      <Stack.Screen
+        name="Setting.General.ManageWalletConnect"
+        options={{
+          title: 'Manage Wallet Connect',
+          ...defaultHeaderOptions,
+        }}
+        component={SettingGeneralManageWalletConnectScreen}
+      />
     </Stack.Navigator>
   );
 };
@@ -844,6 +856,12 @@ export const AppNavigation: FunctionComponent = observer(() => {
             name="Register.ConnectLedger"
             options={{headerShown: false}}
             component={ConnectLedgerScreen}
+          />
+
+          <Stack.Screen
+            name="Camera"
+            options={{headerShown: false}}
+            component={CameraScreen}
           />
 
           {/*NOTE 사이드바를 통해서 세팅으로 이동시 뒤로가기때 다시 메인으로 오기 위해서 해당 route들은 최상위에도 올렸습니다*/}
