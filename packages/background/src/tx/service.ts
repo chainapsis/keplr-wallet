@@ -3,6 +3,7 @@ import { TendermintTxTracer } from "@keplr-wallet/cosmos";
 import { Notification } from "./types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Buffer } from "buffer/";
+import { retry } from "@keplr-wallet/common";
 
 interface CosmosSdkError {
   codespace: string;
@@ -90,21 +91,52 @@ export class BackgroundTxService {
 
       const txHash = Buffer.from(txResponse.txhash, "hex");
 
-      const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
-      txTracer.traceTx(txHash).then((tx) => {
-        txTracer.close();
+      // 이 기능은 tx commit일때 notification을 띄울 뿐이다.
+      // 실제 로직 처리와는 관계가 없어야하기 때문에 여기서 await을 하면 안된다!!
+      retry(
+        () => {
+          return new Promise<void>((resolve, reject) => {
+            const txTracer = new TendermintTxTracer(
+              chainInfo.rpc,
+              "/websocket"
+            );
+            txTracer.addEventListener("close", () => {
+              // reject if ws closed before fulfilled
+              // 하지만 로직상 fulfill 되기 전에 ws가 닫히는게 되기 때문에
+              // delay를 좀 준다.
+              // trace 이후 로직은 동기적인 로직밖에 없기 때문에 문제될 게 없다.
+              // 문제될게 없다.
+              setTimeout(() => {
+                reject();
+              }, 500);
+            });
+            txTracer.addEventListener("error", () => {
+              reject();
+            });
+            txTracer.traceTx(txHash).then((tx) => {
+              txTracer.close();
 
-        if (options.onFulfill) {
-          options.onFulfill(tx);
-        }
+              if (options.onFulfill) {
+                options.onFulfill(tx);
+              }
 
-        if (!options.silent) {
-          BackgroundTxService.processTxResultNotification(
-            this.notification,
-            tx
-          );
+              if (!options.silent) {
+                BackgroundTxService.processTxResultNotification(
+                  this.notification,
+                  tx
+                );
+              }
+
+              resolve();
+            });
+          });
+        },
+        {
+          maxRetries: 10,
+          waitMsAfterError: 10 * 1000, // 10sec
+          maxWaitMsAfterError: 5 * 60 * 1000, // 5min
         }
-      });
+      );
 
       return txHash;
     } catch (e) {

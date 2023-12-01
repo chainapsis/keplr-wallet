@@ -12,6 +12,7 @@ import { Buffer } from "buffer/";
 import * as Legacy from "./legacy";
 import { ChainsUIService } from "../chains-ui";
 import { MultiAccounts } from "../keyring-keystone";
+import { AnalyticsService } from "../analytics";
 
 export class KeyRingService {
   protected _needMigration = false;
@@ -31,6 +32,7 @@ export class KeyRingService {
     protected readonly chainsService: ChainsService,
     protected readonly interactionService: InteractionService,
     protected readonly vaultService: VaultService,
+    protected readonly analyticsService: AnalyticsService,
     protected readonly keyRings: KeyRing[]
   ) {
     makeObservable(this);
@@ -63,6 +65,34 @@ export class KeyRingService {
       } else {
         this.kvStore.set<string>("selectedVaultId", null);
       }
+    });
+
+    autorun(() => {
+      const vaults = this.getKeyRingVaults();
+      const numPerTypes: Record<string, number> = {};
+      for (const vault of vaults) {
+        let type = vault.insensitive["keyRingType"] as string;
+        if (type === "private-key") {
+          const meta = vault.insensitive["keyRingMeta"] as PlainObject;
+          if (meta["web3Auth"] && (meta["web3Auth"] as any)["type"]) {
+            type = "web3_auth_" + (meta["web3Auth"] as any)["type"];
+          }
+        }
+
+        if (type) {
+          type = "keyring_" + type + "_num";
+
+          if (!numPerTypes[type]) {
+            numPerTypes[type] = 0;
+          }
+          numPerTypes[type] += 1;
+        }
+      }
+
+      this.analyticsService.logEvent("user_properties", {
+        keyring_num: vaults.length,
+        ...numPerTypes,
+      });
     });
   }
 

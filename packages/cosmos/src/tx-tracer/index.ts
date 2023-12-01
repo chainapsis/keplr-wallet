@@ -236,6 +236,7 @@ export class TendermintTxTracer {
   traceTx(
     query: Uint8Array | Record<string, string | number | boolean>
   ): Promise<any> {
+    let resolved = false;
     return new Promise<any>((resolve) => {
       // At first, try to query the tx at the same time of subscribing the tx.
       // But, the querying's error will be ignored.
@@ -255,8 +256,41 @@ export class TendermintTxTracer {
           // noop
         });
 
+      (async () => {
+        // We don't know why yet. For some unknown reason, there is a problem where Tendermint does not give value through subscribe forever.
+        // For now, as a simple solution, send tx_search periodically as well.
+        while (true) {
+          if (
+            resolved ||
+            this.readyState === WsReadyState.CLOSED ||
+            this.readyState === WsReadyState.CLOSING
+          ) {
+            break;
+          }
+
+          await new Promise((resolve) => setTimeout(resolve, 10000));
+
+          this.queryTx(query)
+            .then((result) => {
+              if (query instanceof Uint8Array) {
+                resolve(result);
+                return;
+              }
+
+              if (result?.total_count !== "0") {
+                resolve(result);
+                return;
+              }
+            })
+            .catch(() => {
+              // noop
+            });
+        }
+      })();
+
       this.subscribeTx(query).then(resolve);
     }).then((tx) => {
+      resolved = true;
       // Occasionally, even if the subscribe tx event occurs, the state through query is not changed yet.
       // Perhaps it is because the block has not been committed yet even though the result of deliverTx in tendermint is complete.
       // This method is usually used to reflect the state change through query when tx is completed.

@@ -53,6 +53,7 @@ import { useIBCChannelConfigQueryString } from "../../../hooks/use-ibc-channel-c
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
 import { GuideBox } from "../../../components/guide-box";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { amountToAmbiguousAverage } from "../../../utils";
 
 const Styles = {
   Flex1: styled.div`
@@ -67,6 +68,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     chainStore,
     queriesStore,
     skipQueriesStore,
+    priceStore,
   } = useStore();
   const addressRef = useRef<HTMLInputElement | null>(null);
 
@@ -406,13 +408,55 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 },
               },
               {
-                onBroadcasted: () => {
+                onBroadcasted: async () => {
                   chainStore.enableVaultsWithCosmosAddress(
                     sendConfigs.recipientConfig.chainId,
                     sendConfigs.recipientConfig.recipient
                   );
 
-                  if (isIBCTransfer && ibcChannelFluent != null) {
+                  if (!isIBCTransfer) {
+                    const inCurrencyPrice = await priceStore.waitCalculatePrice(
+                      sendConfigs.amountConfig.amount[0],
+                      "usd"
+                    );
+
+                    const params: Record<
+                      string,
+                      | number
+                      | string
+                      | boolean
+                      | number[]
+                      | string[]
+                      | undefined
+                    > = {
+                      denom:
+                        sendConfigs.amountConfig.amount[0].currency
+                          .coinMinimalDenom,
+                      commonDenom: (() => {
+                        const currency =
+                          sendConfigs.amountConfig.amount[0].currency;
+                        if ("paths" in currency && currency.originCurrency) {
+                          return currency.originCurrency.coinDenom;
+                        }
+                        return currency.coinDenom;
+                      })(),
+                      chainId: sendConfigs.recipientConfig.chainId,
+                      chainIdentifier: ChainIdHelper.parse(
+                        sendConfigs.recipientConfig.chainId
+                      ).identifier,
+                      inAvg: amountToAmbiguousAverage(
+                        sendConfigs.amountConfig.amount[0]
+                      ),
+                    };
+                    if (inCurrencyPrice) {
+                      params["inFiatAvg"] =
+                        amountToAmbiguousAverage(inCurrencyPrice);
+                    }
+                    new InExtensionMessageRequester().sendMessage(
+                      BACKGROUND_PORT,
+                      new LogAnalyticsEventMsg("send", params)
+                    );
+                  } else if (ibcChannelFluent != null) {
                     const pathChainIds = [chainId].concat(
                       ...ibcChannelFluent.channels.map(
                         (channel) => channel.counterpartyChainId
@@ -423,8 +467,30 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                       intermediateChainIds.push(...pathChainIds.slice(1, -1));
                     }
 
-                    const params = {
+                    const inCurrencyPrice = await priceStore.waitCalculatePrice(
+                      sendConfigs.amountConfig.amount[0],
+                      "usd"
+                    );
+
+                    const params: Record<
+                      string,
+                      | number
+                      | string
+                      | boolean
+                      | number[]
+                      | string[]
+                      | undefined
+                    > = {
                       originDenom: ibcChannelFluent.originDenom,
+                      originCommonDenom: (() => {
+                        const currency = chainStore
+                          .getChain(ibcChannelFluent.originChainId)
+                          .forceFindCurrency(ibcChannelFluent.originDenom);
+                        if ("paths" in currency && currency.originCurrency) {
+                          return currency.originCurrency.coinDenom;
+                        }
+                        return currency.coinDenom;
+                      })(),
                       originChainId: ibcChannelFluent.originChainId,
                       originChainIdentifier: ChainIdHelper.parse(
                         ibcChannelFluent.originChainId
@@ -447,7 +513,14 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                       isToOrigin:
                         ibcChannelFluent.destinationChainId ===
                         ibcChannelFluent.originChainId,
+                      inAvg: amountToAmbiguousAverage(
+                        sendConfigs.amountConfig.amount[0]
+                      ),
                     };
+                    if (inCurrencyPrice) {
+                      params["inFiatAvg"] =
+                        amountToAmbiguousAverage(inCurrencyPrice);
+                    }
                     new InExtensionMessageRequester().sendMessage(
                       BACKGROUND_PORT,
                       new LogAnalyticsEventMsg("ibc_send", params)

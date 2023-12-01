@@ -34,7 +34,7 @@ import { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
-import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
+import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
 import {
@@ -46,6 +46,7 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { useEffectOnce } from "../../hooks/use-effect-once";
+import { amountToAmbiguousAverage, amountToAmbiguousString } from "../../utils";
 
 export const IBCSwapPage: FunctionComponent = observer(() => {
   const {
@@ -654,29 +655,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     params["outCurrencyCommonDenom"] =
                       outCurrency.originCurrency.coinDenom;
                   }
-                  const getSwapRangeStr = (amount: { toDec: () => Dec }) => {
-                    if (amount.toDec().lte(new Dec(0))) {
-                      return "0";
-                    }
-
-                    if (amount.toDec().lt(new Dec(100))) {
-                      const n = amount.toDec().quo(new Dec(10)).truncate();
-                      return `${n.mul(new Int(10)).toString()}~${n
-                        .add(new Int(1))
-                        .mul(new Int(10))
-                        .toString()}`;
-                    } else {
-                      const n = amount.toDec().quo(new Dec(100)).truncate();
-                      return `${n.mul(new Int(100)).toString()}~${n
-                        .add(new Int(1))
-                        .mul(new Int(100))
-                        .toString()}`;
-                    }
-                  };
-                  params["inRange"] = getSwapRangeStr(
+                  params["inRange"] = amountToAmbiguousString(
                     ibcSwapConfigs.amountConfig.amount[0]
                   );
-                  params["outRange"] = getSwapRangeStr(
+                  params["outRange"] = amountToAmbiguousString(
                     ibcSwapConfigs.amountConfig.outAmount
                   );
 
@@ -688,14 +670,20 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     "usd"
                   );
                   if (inCurrencyPrice) {
-                    params["inFiatRange"] = getSwapRangeStr(inCurrencyPrice);
+                    params["inFiatRange"] =
+                      amountToAmbiguousString(inCurrencyPrice);
+                    params["inFiatAvg"] =
+                      amountToAmbiguousAverage(inCurrencyPrice);
                   }
                   const outCurrencyPrice = priceStore.calculatePrice(
                     ibcSwapConfigs.amountConfig.outAmount,
                     "usd"
                   );
                   if (outCurrencyPrice) {
-                    params["outFiatRange"] = getSwapRangeStr(outCurrencyPrice);
+                    params["outFiatRange"] =
+                      amountToAmbiguousString(outCurrencyPrice);
+                    params["outFiatAvg"] =
+                      amountToAmbiguousAverage(outCurrencyPrice);
                   }
 
                   new InExtensionMessageRequester().sendMessage(
