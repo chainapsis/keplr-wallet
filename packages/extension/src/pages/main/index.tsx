@@ -44,6 +44,10 @@ import { LayeredHorizontalRadioGroup } from "../../components/radio-group";
 import { XAxis, YAxis } from "../../components/axis";
 import { DepositModal } from "./components/deposit-modal";
 import { MainHeaderLayout } from "./layouts/header";
+import { amountToAmbiguousAverage } from "../../utils";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { LogAnalyticsEventMsg } from "@keplr-wallet/background";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -139,6 +143,33 @@ export const MainPage: FunctionComponent<{
       ? Number.parseFloat(stakedTotalPrice.toDec().toString())
       : 0;
   })();
+
+  const lastTotalAvailableAmbiguousAvg = useRef(-1);
+  const lastTotalStakedAmbiguousAvg = useRef(-1);
+  useEffect(() => {
+    if (!isNotReady) {
+      const totalAvailableAmbiguousAvg = availableTotalPrice
+        ? amountToAmbiguousAverage(availableTotalPrice)
+        : 0;
+      const totalStakedAmbiguousAvg = stakedTotalPrice
+        ? amountToAmbiguousAverage(stakedTotalPrice)
+        : 0;
+      if (
+        lastTotalAvailableAmbiguousAvg.current !== totalAvailableAmbiguousAvg ||
+        lastTotalStakedAmbiguousAvg.current !== totalStakedAmbiguousAvg
+      ) {
+        new InExtensionMessageRequester().sendMessage(
+          BACKGROUND_PORT,
+          new LogAnalyticsEventMsg("user_properties", {
+            totalAvailableFiatAvg: totalAvailableAmbiguousAvg,
+            totalStakedFiatAvg: totalStakedAmbiguousAvg,
+          })
+        );
+      }
+      lastTotalAvailableAmbiguousAvg.current = totalAvailableAmbiguousAvg;
+      lastTotalStakedAmbiguousAvg.current = totalStakedAmbiguousAvg;
+    }
+  }, [availableTotalPrice, isNotReady, stakedTotalPrice]);
 
   const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);

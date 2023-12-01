@@ -151,6 +151,7 @@ export function init(
     chainsService,
     interactionService,
     vaultService,
+    analyticsService,
     [
       new KeyRingMnemonic.KeyRingMnemonicService(vaultService),
       new KeyRingLedger.KeyRingLedgerService(),
@@ -250,6 +251,8 @@ export function init(
 
   return {
     initFn: async () => {
+      await analyticsService.init();
+
       await chainsService.init();
       await vaultService.init();
       await chainsUIService.init();
@@ -263,7 +266,6 @@ export function init(
       await backgroundTxService.init();
       await phishingListService.init();
       await autoLockAccountService.init();
-      await analyticsService.init();
       await permissionInteractiveService.init();
 
       await secretWasmService.init();
