@@ -117,6 +117,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
                 setTabStatus(key as TabStatus);
               }}
               itemMinWidth={92}
+              size="large"
             />
           </YAxis>
           <Box height={168} alignX="center" alignY="center">
