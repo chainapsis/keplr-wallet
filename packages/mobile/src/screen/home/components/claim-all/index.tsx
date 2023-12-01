@@ -464,7 +464,7 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
           <Box
             alignX="center"
             style={style.flatten(
-              [],
+              ['padding-10'],
               [isPressingExpandButton && 'background-color-gray-500@50%'],
             )}>
             <Box
