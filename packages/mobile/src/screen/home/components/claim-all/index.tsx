@@ -433,15 +433,14 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
               {isLedger || isKeystone ? (
                 <Button
                   text={'Claim All'}
-                  size="small"
+                  size="medium"
                   loading={claimAllIsLoading}
                   disabled={claimAllDisabled}
                   onPress={claimAll}
                 />
               ) : (
                 <SpecialButton
-                  width={91}
-                  size="small"
+                  size="medium"
                   text="Claim All"
                   disabled={claimAllDisabled}
                   isLoading={claimAllIsLoading}
