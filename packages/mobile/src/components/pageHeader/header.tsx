@@ -159,9 +159,5 @@ export const defaultHeaderOptions = {
   headerStyle: {
     backgroundColor: ColorPalette['gray-700'],
   },
-  contentStyle: {
-    borderTopWidth: 1,
-    borderTopColor: ColorPalette['gray-600'],
-  },
   headerLeft: (props: any) => <DefaultScreenHeaderLeft {...props} />,
 };
