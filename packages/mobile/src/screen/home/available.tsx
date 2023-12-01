@@ -174,13 +174,20 @@ export const AvailableTabView: FunctionComponent<{
                       right={
                         hasLowBalanceTokens ? (
                           <React.Fragment>
-                            <Text
-                              style={style.flatten([
-                                'body2',
-                                'color-gray-300',
-                              ])}>
-                              <FormattedMessage id="page.main.available.hide-low-balance" />
-                            </Text>
+                            <Pressable
+                              onPress={() => {
+                                uiConfigStore.setHideLowBalance(
+                                  !uiConfigStore.isHideLowBalance,
+                                );
+                              }}>
+                              <Text
+                                style={style.flatten([
+                                  'body2',
+                                  'color-gray-300',
+                                ])}>
+                                <FormattedMessage id="page.main.available.hide-low-balance" />
+                              </Text>
+                            </Pressable>
                             <Gutter size={4} />
                             <Toggle
                               size="small"
@@ -190,6 +197,16 @@ export const AvailableTabView: FunctionComponent<{
                                   !uiConfigStore.isHideLowBalance,
                                 );
                               }}
+                              containerStyle={style.flatten(
+                                !uiConfigStore.isHideLowBalance
+                                  ? [
+                                      'background-color-transparent',
+                                      'border-width-2',
+                                      'border-color-gray-500',
+                                      'padding-4',
+                                    ]
+                                  : [],
+                              )}
                             />
                           </React.Fragment>
                         ) : undefined

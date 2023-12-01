@@ -3,6 +3,7 @@ import {Box} from '../box';
 import {useStyle} from '../../styles';
 import {Path, Svg} from 'react-native-svg';
 import {IconProps} from '../icon/types';
+import {ViewStyle} from 'react-native';
 
 type ToggleSize = 'small' | 'medium';
 
@@ -11,6 +12,7 @@ interface ToggleProps {
   setIsOpen?: (isOpen: boolean) => void;
   disabled?: boolean;
   size?: ToggleSize;
+  containerStyle?: ViewStyle;
 }
 
 export const Toggle: FunctionComponent<ToggleProps> = ({
@@ -18,6 +20,7 @@ export const Toggle: FunctionComponent<ToggleProps> = ({
   setIsOpen,
   disabled,
   size,
+  containerStyle,
 }) => {
   const style = useStyle();
 
@@ -36,7 +39,8 @@ export const Toggle: FunctionComponent<ToggleProps> = ({
           ? style.get('color-blue-400').color
           : style.get('color-gray-400').color
       }
-      onClick={() => (setIsOpen && !disabled ? setIsOpen(!isOpen) : null)}>
+      onClick={() => (setIsOpen && !disabled ? setIsOpen(!isOpen) : null)}
+      style={containerStyle}>
       <Box
         alignX="center"
         alignY="center"
