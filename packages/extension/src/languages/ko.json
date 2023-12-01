@@ -202,8 +202,8 @@
   "page.setting.general.theme-title": "테마",
   "page.setting.general.manage-authz-title": "AuthZ 관리",
   "page.setting.general.link-kpelr-mobile-title": "케플러 모바일과 연결하기",
-  "page.setting.general.manage-non-native-chains-title": "선택형 체인 관리",
-  "page.setting.general.manage-non-native-chains-paragraph": "외부에서 관리되는 체인들 연결 추가/삭제하기",
+  "page.setting.general.manage-non-native-chains-title": "선택형 체인 추가 및 삭제",
+  "page.setting.general.manage-non-native-chains-paragraph": "선택형 체인들은 먼저 케플러 익스텐션에 추가해야 \"체인 표시\" 기능에서 사용할 수 있습니다.",
   "page.setting.general.manage-chain-visibility-title": "체인 표시",
   "page.setting.general.manage-chain-visibility-paragraph": "현재 계정에 표시될 체인(해당 체인의 자산 포함)을 선택해주세요.",
 
