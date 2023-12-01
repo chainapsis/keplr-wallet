@@ -48,6 +48,7 @@ export * from "./recent-send-history";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
 import { Notification } from "./tx";
+import { ChainInfoWithCoreTypes } from "./chains";
 
 export function init(
   router: Router,
@@ -71,7 +72,10 @@ export function init(
     commonCrypto: KeyRingLegacy.CommonCrypto;
     readonly getDisabledChainIdentifiers: () => Promise<string[]>;
   },
-  afterInitFn?: (service: Chains.ChainsService) => void | Promise<void>
+  afterInitFn?: (
+    service: Chains.ChainsService,
+    lastEmbedChainInfos: ChainInfoWithCoreTypes[]
+  ) => void | Promise<void>
 ): {
   initFn: () => Promise<void>;
   keyRingService: KeyRingV2.KeyRingService;

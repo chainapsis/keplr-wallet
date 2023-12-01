@@ -16,6 +16,7 @@ import { ExtensionKVStore } from "@keplr-wallet/common";
 import { init } from "@keplr-wallet/background";
 import scrypt from "scrypt-js";
 import { Buffer } from "buffer/";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 
 import {
   CommunityChainInfoRepo,
@@ -80,8 +81,216 @@ const { initFn, keyRingService } = init(
       return legacy.disabledChains ?? [];
     },
   },
-  async () => {
-    // noop yet
+  async (chainsService, lastEmbedChainInfos) => {
+    if (lastEmbedChainInfos.find((c) => c.chainId === "ixo-4")) {
+      await chainsService.addSuggestedChainInfo({
+        rpc: "https://rpc-ixo.keplr.app",
+        rest: "https://lcd-ixo.keplr.app",
+        chainId: "ixo-4",
+        chainName: "ixo",
+        stakeCurrency: {
+          coinDenom: "IXO",
+          coinMinimalDenom: "uixo",
+          coinDecimals: 6,
+        },
+        walletUrl:
+          process.env.NODE_ENV === "production"
+            ? "https://wallet.keplr.app/chains/ixo"
+            : "http://localhost:8080/chains/ixo",
+        walletUrlForStaking:
+          process.env.NODE_ENV === "production"
+            ? "https://wallet.keplr.app/chains/ixo"
+            : "http://localhost:8080/chains/ixo",
+        bip44: {
+          coinType: 118,
+        },
+        bech32Config: Bech32Address.defaultBech32Config("ixo"),
+        currencies: [
+          {
+            coinDenom: "IXO",
+            coinMinimalDenom: "uixo",
+            coinDecimals: 6,
+          },
+        ],
+        feeCurrencies: [
+          {
+            coinDenom: "IXO",
+            coinMinimalDenom: "uixo",
+            coinDecimals: 6,
+          },
+        ],
+        features: ["ibc-transfer"],
+      });
+      await chainsService.addSuggestedChainInfo({
+        rpc: "https://rpc-iov.keplr.app",
+        rest: "https://lcd-iov.keplr.app",
+        chainId: "iov-mainnet-ibc",
+        chainName: "Starname",
+        stakeCurrency: {
+          coinDenom: "IOV",
+          coinMinimalDenom: "uiov",
+          coinDecimals: 6,
+          coinGeckoId: "starname",
+        },
+        walletUrl:
+          process.env.NODE_ENV === "production"
+            ? "https://wallet.keplr.app/chains/starname"
+            : "http://localhost:8080/chains/starname",
+        walletUrlForStaking:
+          process.env.NODE_ENV === "production"
+            ? "https://wallet.keplr.app/chains/starname"
+            : "http://localhost:8080/chains/starname",
+        bip44: {
+          coinType: 234,
+        },
+        bech32Config: Bech32Address.defaultBech32Config("star"),
+        currencies: [
+          {
+            coinDenom: "IOV",
+            coinMinimalDenom: "uiov",
+            coinDecimals: 6,
+            coinGeckoId: "starname",
+          },
+        ],
+        feeCurrencies: [
+          {
+            coinDenom: "IOV",
+            coinMinimalDenom: "uiov",
+            coinDecimals: 6,
+            coinGeckoId: "starname",
+            gasPriceStep: {
+              low: 1,
+              average: 2,
+              high: 3,
+            },
+          },
+        ],
+        features: ["ibc-transfer"],
+      });
+      await chainsService.addSuggestedChainInfo({
+        rpc: "https://rpc-emoney.keplr.app",
+        rest: "https://lcd-emoney.keplr.app",
+        chainId: "emoney-3",
+        chainName: "e-Money",
+        stakeCurrency: {
+          coinDenom: "NGM",
+          coinMinimalDenom: "ungm",
+          coinDecimals: 6,
+          coinGeckoId: "e-money",
+        },
+        walletUrl:
+          process.env.NODE_ENV === "production"
+            ? "https://wallet.keplr.app/chains/e-money"
+            : "http://localhost:8080/chains/e-money",
+        walletUrlForStaking:
+          process.env.NODE_ENV === "production"
+            ? "https://wallet.keplr.app/chains/e-money"
+            : "http://localhost:8080/chains/e-money",
+        bip44: {
+          coinType: 118,
+        },
+        bech32Config: Bech32Address.defaultBech32Config("emoney"),
+        currencies: [
+          {
+            coinDenom: "NGM",
+            coinMinimalDenom: "ungm",
+            coinDecimals: 6,
+            coinGeckoId: "e-money",
+          },
+          {
+            coinDenom: "EEUR",
+            coinMinimalDenom: "eeur",
+            coinDecimals: 6,
+            coinGeckoId: "e-money-eur",
+          },
+          {
+            coinDenom: "EDKK",
+            coinMinimalDenom: "edkk",
+            coinDecimals: 6,
+          },
+          {
+            coinDenom: "ESEK",
+            coinMinimalDenom: "esek",
+            coinDecimals: 6,
+          },
+          {
+            coinDenom: "ENOK",
+            coinMinimalDenom: "enok",
+            coinDecimals: 6,
+          },
+          {
+            coinDenom: "ECHF",
+            coinMinimalDenom: "echf",
+            coinDecimals: 6,
+          },
+        ],
+        feeCurrencies: [
+          {
+            coinDenom: "NGM",
+            coinMinimalDenom: "ungm",
+            coinDecimals: 6,
+            coinGeckoId: "e-money",
+            gasPriceStep: {
+              low: 1,
+              average: 1,
+              high: 1,
+            },
+          },
+          {
+            coinDenom: "EEUR",
+            coinMinimalDenom: "eeur",
+            coinDecimals: 6,
+            coinGeckoId: "e-money-eur",
+            gasPriceStep: {
+              low: 1,
+              average: 1,
+              high: 1,
+            },
+          },
+          {
+            coinDenom: "ECHF",
+            coinMinimalDenom: "echf",
+            coinDecimals: 6,
+            gasPriceStep: {
+              low: 1,
+              average: 1,
+              high: 1,
+            },
+          },
+          {
+            coinDenom: "ESEK",
+            coinMinimalDenom: "esek",
+            coinDecimals: 6,
+            gasPriceStep: {
+              low: 1,
+              average: 1,
+              high: 1,
+            },
+          },
+          {
+            coinDenom: "ENOK",
+            coinMinimalDenom: "enok",
+            coinDecimals: 6,
+            gasPriceStep: {
+              low: 1,
+              average: 1,
+              high: 1,
+            },
+          },
+          {
+            coinDenom: "EDKK",
+            coinMinimalDenom: "edkk",
+            coinDecimals: 6,
+            gasPriceStep: {
+              low: 1,
+              average: 1,
+              high: 1,
+            },
+          },
+        ],
+        features: ["ibc-transfer"],
+      });
+    }
   }
 );
 
