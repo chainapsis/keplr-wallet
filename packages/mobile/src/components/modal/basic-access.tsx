@@ -1,60 +1,52 @@
-import React, {FunctionComponent, useMemo, useRef} from 'react';
+import React, {useMemo} from 'react';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../stores';
 import {useStyle} from '../../styles';
-import {BaseModalHeader, Modal} from './modal';
-import {BottomSheetModal, BottomSheetView} from '@gorhom/bottom-sheet';
-import {useEffectOnce} from '../../hooks';
+import {BaseModalHeader} from './modal';
 import {useIntl} from 'react-intl';
 import {Text} from 'react-native';
 import {XAxis} from '../axis';
 import {Button} from '../button';
 import {Gutter} from '../gutter';
+import {Box} from '../box';
+import {registerCardModal} from './card';
 
-export const BasicAccessModal: FunctionComponent = observer(() => {
-  const intl = useIntl();
-  const style = useStyle();
-  const {permissionStore} = useStore();
+export const BasicAccessModal = registerCardModal(
+  observer<{
+    isOpen: boolean;
+    setIsOpen: (isOpen: boolean) => void;
+  }>(() => {
+    const intl = useIntl();
+    const style = useStyle();
+    const {permissionStore} = useStore();
 
-  const modalRef = useRef<BottomSheetModal>(null);
-  useEffectOnce(() => {
-    modalRef.current?.present();
-  });
+    const waitingPermission =
+      permissionStore.waitingPermissionDatas.length > 0
+        ? permissionStore.waitingPermissionDatas[0]
+        : undefined;
 
-  const waitingPermission =
-    permissionStore.waitingPermissionDatas.length > 0
-      ? permissionStore.waitingPermissionDatas[0]
-      : undefined;
+    const host = useMemo(() => {
+      if (waitingPermission) {
+        return waitingPermission.data.origins
+          .map(origin => {
+            return new URL(origin).host;
+          })
+          .join(', ');
+      } else {
+        return '';
+      }
+    }, [waitingPermission]);
 
-  const host = useMemo(() => {
-    if (waitingPermission) {
-      return waitingPermission.data.origins
-        .map(origin => {
-          return new URL(origin).host;
-        })
-        .join(', ');
-    } else {
-      return '';
-    }
-  }, [waitingPermission]);
+    const chainIds = useMemo(() => {
+      if (!waitingPermission) {
+        return '';
+      }
 
-  const chainIds = useMemo(() => {
-    if (!waitingPermission) {
-      return '';
-    }
+      return waitingPermission.data.chainIds.join(', ');
+    }, [waitingPermission]);
 
-    return waitingPermission.data.chainIds.join(', ');
-  }, [waitingPermission]);
-
-  return (
-    <Modal
-      ref={modalRef}
-      snapPoints={['50%']}
-      enableDynamicSizing={true}
-      onDismiss={async () => {
-        await permissionStore.rejectPermissionAll();
-      }}>
-      <BottomSheetView style={style.flatten(['padding-12'])}>
+    return (
+      <Box paddingX={12} paddingBottom={12}>
         <BaseModalHeader
           title={intl.formatMessage({
             id: 'page.permission.requesting-connection-title',
@@ -94,7 +86,7 @@ export const BasicAccessModal: FunctionComponent = observer(() => {
             }}
           />
         </XAxis>
-      </BottomSheetView>
-    </Modal>
-  );
-});
+      </Box>
+    );
+  }),
+);

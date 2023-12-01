@@ -14,6 +14,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {HeaderBackButtonIcon} from './icon/back';
 import {Column, Columns} from '../column';
 import {ArrowDownFillIcon} from '../icon/arrow-donw-fill';
+import {StackNavProp} from '../../navigation';
 
 const HomeScreenHeaderLeft: FunctionComponent = () => {
   const style = useStyle();
@@ -34,13 +35,12 @@ const HomeScreenHeaderLeft: FunctionComponent = () => {
 const HomeScreenHeaderRight: FunctionComponent = () => {
   const style = useStyle();
 
-  // const navigation = useNavigation();
+  const navigation = useNavigation<StackNavProp>();
 
   return (
     <Pressable
       onPress={() => {
-        //TODO 이후 qr촬영 페이지로 넘겨야 함
-        // navigation.navigate('');
+        navigation.navigate('Camera');
       }}
       style={style.flatten(['margin-y-14'])}>
       <QRScanIcon size={28} color={style.flatten(['color-gray-10']).color} />

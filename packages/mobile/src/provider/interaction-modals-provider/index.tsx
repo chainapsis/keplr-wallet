@@ -1,14 +1,27 @@
-import React, {FunctionComponent, PropsWithChildren} from 'react';
+import React, {FunctionComponent, PropsWithChildren, useEffect} from 'react';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../stores';
 import {SignModal} from '../../screen/sign/sign-modal';
 import {BasicAccessModal} from '../../components/modal/basic-access';
 import {SuggestChainModal} from '../../components/modal/suggest-chain';
+import {BackHandler, Platform} from 'react-native';
+import {WCMessageRequester} from '../../stores/wallet-connect/msg-requester';
+import {WalletConnectAccessModal} from '../../components/modal/wallet-connect-access';
 
 export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
   observer(({children}) => {
-    const {signInteractionStore, permissionStore, chainSuggestStore} =
-      useStore();
+    const {
+      signInteractionStore,
+      permissionStore,
+      chainSuggestStore,
+      walletConnectStore,
+    } = useStore();
+
+    useEffect(() => {
+      if (walletConnectStore.needGoBackToBrowser && Platform.OS === 'android') {
+        BackHandler.exitApp();
+      }
+    }, [walletConnectStore.needGoBackToBrowser]);
 
     return (
       <React.Fragment>
@@ -19,7 +32,31 @@ export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
 
         {permissionStore.waitingPermissionDatas &&
           permissionStore.waitingPermissionDatas.map(data => {
-            return <BasicAccessModal key={data.id} />;
+            if (data.data.origins.length === 1) {
+              if (WCMessageRequester.isVirtualURL(data.data.origins[0])) {
+                return (
+                  <WalletConnectAccessModal
+                    isOpen={true}
+                    setIsOpen={async () =>
+                      await permissionStore.rejectPermissionAll()
+                    }
+                    key={data.id}
+                    id={data.id}
+                    data={data.data}
+                  />
+                );
+              }
+            }
+
+            return (
+              <BasicAccessModal
+                isOpen={true}
+                setIsOpen={async () =>
+                  await permissionStore.rejectPermissionAll()
+                }
+                key={data.id}
+              />
+            );
           })}
 
         {chainSuggestStore.waitingSuggestedChainInfo ? (
