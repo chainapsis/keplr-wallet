@@ -23,11 +23,29 @@ import {formatRelativeTimeString} from '../../../utils/format';
 export const GovernanceProposalStatusChip: FunctionComponent<{
   status: ProposalStatus;
 }> = ({status}) => {
+  const style = useStyle();
   switch (status) {
-    case ProposalStatus.DEPOSIT_PERIOD:
-      return <Chip text="Deposit period" />;
     case ProposalStatus.VOTING_PERIOD:
-      return <Chip text="Voting period" mode="light" />;
+      return (
+        <Chip
+          text={
+            <Columns sum={1} gutter={4} alignY="center" columnAlign="center">
+              <Text style={style.flatten(['color-text-high', 'text-caption1'])}>
+                Voting period
+              </Text>
+              <Box
+                alignX="center"
+                alignY="center"
+                width={6}
+                height={6}
+                borderRadius={64}
+                backgroundColor={style.get('color-blue-300').color}
+              />
+            </Columns>
+          }
+        />
+      );
+
     case ProposalStatus.PASSED:
       return <Chip text="Passed" color="success" />;
     case ProposalStatus.REJECTED:
@@ -62,7 +80,7 @@ export const GovernanceCardBody: FunctionComponent<{
           accountStore.getAccount(chainId).bech32Address,
         ).vote;
   const navigation = useNavigation<StackNavProp>();
-  const voted = vote !== 'Unspecified';
+  const isVoted = vote !== 'Unspecified';
 
   const renderProposalDateString = (proposal: ViewProposal) => {
     switch (proposal.proposalStatus) {
@@ -137,9 +155,12 @@ export const GovernanceCardBody: FunctionComponent<{
                 {proposal.id}
               </Text>
               <Column weight={1} />
-              {voted ? (
+              {isVoted ? (
                 <React.Fragment>
                   <Chip
+                    backgroundStyle={style.flatten([
+                      'background-color-gray-400',
+                    ])}
                     text={
                       <Box alignX="center" alignY="center">
                         <Columns sum={1} gutter={2}>

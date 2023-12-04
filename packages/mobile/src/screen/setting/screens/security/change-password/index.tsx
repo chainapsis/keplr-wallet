@@ -60,7 +60,7 @@ export const SettingSecurityChangePasswordScreen: FunctionComponent = observer(
       }
     });
     return (
-      <Box paddingX={12} paddingTop={12} height={'100%'} paddingBottom={28}>
+      <Box paddingX={12} paddingTop={8} height={'100%'} paddingBottom={23}>
         <Stack gutter={16}>
           <Controller
             name="password"

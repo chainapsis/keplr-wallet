@@ -17,7 +17,7 @@ export const SettingGeneralFiatScreen: FunctionComponent = observer(() => {
   return (
     <PageWithScrollView
       backgroundMode="default"
-      style={style.flatten(['padding-x-12', 'padding-bottom-12'])}>
+      contentContainerStyle={style.flatten(['padding-x-12', 'padding-y-8'])}>
       <Stack gutter={8}>
         {Object.entries(uiConfigStore.supportedFiatCurrencies).map(
           ([fiat, fiatCurrency]) => {

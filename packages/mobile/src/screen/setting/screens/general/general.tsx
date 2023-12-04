@@ -20,7 +20,7 @@ export const SettingGeneralScreen: FunctionComponent = observer(() => {
 
   return (
     <React.Fragment>
-      <Box padding={12} paddingTop={0}>
+      <Box paddingX={12} paddingY={8}>
         <Stack gutter={8}>
           <PageButton
             title={intl.formatMessage({

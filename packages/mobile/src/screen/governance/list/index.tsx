@@ -2,7 +2,7 @@ import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import {GovernanceNavigation} from '../../../navigation';
-import {FlatList, Text} from 'react-native';
+import {FlatList, StyleSheet, Text} from 'react-native';
 import {GovernanceCardBody} from '../components/card';
 import {useStore} from '../../../stores';
 import {ProposalStatus} from '../../../stores/governance/types';
@@ -12,6 +12,7 @@ import {Gutter} from '../../../components/gutter';
 import {EmptyView} from '../../../components/empty-view';
 import {FormattedMessage} from 'react-intl';
 import {useStyle} from '../../../styles';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 const DEFAULT_PARAMS = {
   'pagination.offset': 0,
@@ -27,6 +28,8 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
   const governanceV1 = queriesStore.get(chainId).governanceV1.queryGovernance;
   const governanceLegacy = queriesStore.get(chainId).governance.queryGovernance;
   const isGovV1SupportedRef = useRef(isGovV1Supported || false);
+
+  const insects = useSafeAreaInsets();
 
   const governance = (() => {
     if (typeof isGovV1Supported === 'boolean') {
@@ -73,7 +76,10 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
   return (
     <FlatList
       data={sections}
-      style={style.flatten(['padding-x-12'])}
+      style={StyleSheet.flatten([
+        style.flatten(['padding-x-12']),
+        {marginBottom: insects.bottom},
+      ])}
       ListHeaderComponent={
         <React.Fragment>
           <Gutter size={12} />

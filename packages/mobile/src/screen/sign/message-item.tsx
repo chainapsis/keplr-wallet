@@ -23,9 +23,7 @@ export const MessageItem: FunctionComponent<{
         <Box style={{flexShrink: 1}}>
           <Text style={style.flatten(['color-text-high', 'h5'])}>{title}</Text>
           <Gutter size={2} />
-          <Text style={style.flatten(['color-text-middle', 'body3'])}>
-            {content}
-          </Text>
+          <Box>{content}</Box>
         </Box>
       </Columns>
     </Box>
