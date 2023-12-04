@@ -10,6 +10,8 @@ import {SendMessage} from './send';
 import {DelegateMessage} from './delegate';
 import {UndelegateMessage} from './undelegate';
 import {RedelegateMessage} from './redelegate';
+import {VoteMessage} from './renders/vote';
+import {ExecuteContractMessage} from './renders/execute-contract';
 
 export class MessageRenderRegistry implements IMessageRenderRegistry {
   protected renderers: IMessageRenderer[] = [];
@@ -72,3 +74,5 @@ defaultRegistry.register(SendMessage);
 defaultRegistry.register(DelegateMessage);
 defaultRegistry.register(UndelegateMessage);
 defaultRegistry.register(RedelegateMessage);
+defaultRegistry.register(VoteMessage);
+defaultRegistry.register(ExecuteContractMessage);
