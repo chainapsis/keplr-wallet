@@ -131,7 +131,7 @@ export const SettingSecurityBio: FunctionComponent = observer(() => {
           onPress={submit}
         />
       </Stack>
-      <Gutter size={24} />
+      <Gutter size={19} />
     </PageWithScrollView>
   );
 });

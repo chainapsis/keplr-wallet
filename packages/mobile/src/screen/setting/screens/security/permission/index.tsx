@@ -26,7 +26,7 @@ export const SettingSecurityPermissionScreen: FunctionComponent = observer(
 
     return (
       <PageWithScrollView backgroundMode={'default'}>
-        <Box padding={12}>
+        <Box paddingX={12} paddingY={8}>
           <Stack gutter={8}>
             <SearchTextInput
               placeholder={intl.formatMessage({
