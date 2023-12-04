@@ -39,7 +39,6 @@ const ThemeStatusBar: FunctionComponent = () => {
   const style = useStyle();
 
   style.setTheme('dark');
-
   return (
     <StatusBar
       translucent={true}
