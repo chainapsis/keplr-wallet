@@ -25,7 +25,7 @@ export const SettingGeneralDeleteSuggestChainScreen: FunctionComponent =
     const style = useStyle();
 
     return (
-      <Box paddingX={12} paddingTop={8} style={style.flatten(['flex-grow-1'])}>
+      <Box paddingX={12} paddingY={8} style={style.flatten(['flex-grow-1'])}>
         <FlatList
           data={suggestedChains}
           ListHeaderComponent={() => {

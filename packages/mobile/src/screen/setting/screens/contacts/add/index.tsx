@@ -15,7 +15,7 @@ import {Stack} from '../../../../../components/stack';
 import {RootStackParamList} from '../../../../../navigation';
 import {Button} from '../../../../../components/button';
 import {Column} from '../../../../../components/column';
-import {TextInput as NativeTextInput} from 'react-native';
+import {TextInput as NativeTextInput, StyleSheet} from 'react-native';
 import {PageWithScrollView} from '../../../../../components/page';
 import {useStyle} from '../../../../../styles';
 
@@ -123,10 +123,9 @@ export const SettingContactsAddScreen: FunctionComponent = observer(() => {
   return (
     <PageWithScrollView
       backgroundMode="default"
-      contentContainerStyle={style.flatten([
-        'flex-grow-1',
-        'padding-x-12',
-        'padding-y-8',
+      contentContainerStyle={StyleSheet.flatten([
+        style.flatten(['flex-grow-1', 'padding-x-12', 'padding-top-8']),
+        {paddingBottom: 23},
       ])}>
       <Stack gutter={16}>
         <TextInput

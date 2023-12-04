@@ -17,7 +17,7 @@ export const SettingGeneralLanguageScreen: FunctionComponent = observer(() => {
   const style = useStyle();
 
   return (
-    <Box paddingX={12} paddingBottom={12}>
+    <Box paddingX={12} paddingTop={8}>
       <Stack gutter={8}>
         <PageButton
           title={intl.formatMessage({
