@@ -187,9 +187,8 @@ export const BuyModal = registerCardModal(
         <Gutter size={12} />
         {buySupportServiceInfos.map(serviceInfo => {
           return (
-            <React.Fragment>
+            <React.Fragment key={serviceInfo.serviceId}>
               <ServiceItem
-                key={serviceInfo.serviceId}
                 navigation={navigation}
                 serviceInfo={serviceInfo}
                 close={() => setIsOpen(false)}
