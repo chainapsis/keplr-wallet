@@ -22,6 +22,19 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>None</string>
+			<key>CFBundleURLName</key>
+			<string>com.chainapsis.keplrwallet-test</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>keplrwallet</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
@@ -37,14 +50,16 @@
 			</dict>
 		</dict>
 	</dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
-	<key>NSFaceIDUsageDescription</key>
-	<string>App uses Face ID to unlock wallet</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>App uses bluetooth to find, connect and communicate with Ledger Nano devices</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>App uses bluetooth to find, connect and communicate with Ledger Nano devices</string>
+	<key>NSCameraUsageDescription</key>
+	<string>App uses camera to scan address, extension, and WalletConnect QR code</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>App uses Face ID to unlock wallet</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string></string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Inter-Black.ttf</string>

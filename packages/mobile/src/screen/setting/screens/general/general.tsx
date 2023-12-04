@@ -66,6 +66,19 @@ export const SettingGeneralScreen: FunctionComponent = observer(() => {
           />
 
           <PageButton
+            title="Manage Wallet Connect"
+            endIcon={
+              <ArrowRightIcon
+                size={24}
+                color={style.get('color-text-low').color}
+              />
+            }
+            onClick={() =>
+              navigate.navigate('Setting.General.ManageWalletConnect')
+            }
+          />
+
+          <PageButton
             title={intl.formatMessage({
               id: 'page.setting.general.manage-non-native-chains-title',
             })}

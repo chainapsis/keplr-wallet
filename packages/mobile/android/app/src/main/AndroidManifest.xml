@@ -11,6 +11,8 @@
     <uses-permission-sdk-23 android:name="android.permission.ACCESS_COARSE_LOCATION" tools:node="remove"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
+    <uses-permission android:name="android.permission.CAMERA"/>
+
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
 
     <application
@@ -31,6 +33,14 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
+
+      <intent-filter>
+          <action android:name="android.intent.action.VIEW"/>
+          <category android:name="android.intent.category.DEFAULT"/>
+          <category android:name="android.intent.category.BROWSABLE"/>
+          <data android:scheme="keplrwallet" android:host="wcV1"/>
+          <data android:scheme="keplrwallet" android:host="wcV2"/>
+      </intent-filter>
       </activity>
     </application>
 </manifest>

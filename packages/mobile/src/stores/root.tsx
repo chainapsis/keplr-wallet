@@ -47,6 +47,7 @@ import {CosmosGovernanceQueriesV1} from './governance/v1/quries';
 import {ScamProposalStore} from './scam-proposal';
 import {KeychainStore} from './keychain';
 import {FavoriteWebpageStore} from './favorite';
+import {WalletConnectStore} from './wallet-connect';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
@@ -88,6 +89,8 @@ export class RootStore {
   public readonly scamProposalStore: ScamProposalStore;
 
   public readonly keychainStore: KeychainStore;
+  public readonly walletConnectStore: WalletConnectStore;
+
   constructor() {
     const router = new RNRouterUI(RNEnv.produceEnv);
 
@@ -363,6 +366,22 @@ export class RootStore {
 
     this.favoriteWebpageStore = new FavoriteWebpageStore(
       new AsyncKVStore('store_favorite_url'),
+    );
+
+    this.walletConnectStore = new WalletConnectStore(
+      new AsyncKVStore('store_wallet_connect_v2'),
+      {
+        addEventListener: (type: string, fn: () => void) => {
+          eventEmitter.addListener(type, fn);
+        },
+        removeEventListener: (type: string, fn: () => void) => {
+          eventEmitter.removeListener(type, fn);
+        },
+      },
+      this.chainStore,
+      this.keyRingStore,
+      this.permissionStore,
+      this.permissionManagerStore,
     );
 
     router.listen(APP_PORT);
