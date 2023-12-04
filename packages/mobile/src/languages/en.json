@@ -386,6 +386,8 @@
   "page.permission.unknown-permission": "Unknown permission",
   "page.permission.requesting-connection-title": "Requesting Connection",
   "page.permission.paragraph": "By approving this request, the website will:{br}• Get the list of all chain on your Keplr Wallet",
+  "page.permission.guide-title": "By approving this request, the website will",
+  "page.permission.guide-paragraph": "• Get the list of all chain on your Keplr Wallet",
 
   "page.sign.cosmos.tx.title": "Confirm Transaction",
   "page.sign.cosmos.tx.messages": "Messages",
