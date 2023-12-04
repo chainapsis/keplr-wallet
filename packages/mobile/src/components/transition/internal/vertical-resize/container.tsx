@@ -1,6 +1,8 @@
 import React, {FunctionComponent, PropsWithChildren} from 'react';
 import Reanimated, {
+  measure,
   SharedValue,
+  useAnimatedRef,
   useAnimatedStyle,
 } from 'react-native-reanimated';
 import {DimensionValue} from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
@@ -16,6 +18,8 @@ export const VerticalResizeContainer: FunctionComponent<
 > = ({children, heightPx, onHeightChange, width, transitionAlign}) => {
   const onHeightChangeRef = React.useRef(onHeightChange);
   onHeightChangeRef.current = onHeightChange;
+
+  const innerContainerRef = useAnimatedRef<Reanimated.View>();
 
   const containerStyle = useAnimatedStyle(() => {
     return {
@@ -71,10 +75,17 @@ export const VerticalResizeContainer: FunctionComponent<
           return;
         }
 
+        // XXX: translateY: "-50%"여야한다. 근데 react native가 이걸 지원하지 않는다.
+        //      일단 대충 height의 절반만큼 올리는 것으로 대체한다.
+        //      될 것 같은데 사실 실제 되는지 확인 안해봤다.
+        if (_WORKLET) {
+          const measured = measure(innerContainerRef);
+          if (measured !== null) {
+            return [{translateY: -measured.height / 2}];
+          }
+        }
+
         if (transitionAlign === 'center') {
-          // XXX: translateY: "-50%"여야한다. 근데 react native가 이걸 지원하지 않는다.
-          //      일단 대충 height의 절반만큼 올리는 것으로 대체한다.
-          //      될 것 같은데 사실 실제 되는지 확인 안해봤다.
           return [{translateY: -heightPx.value / 2}];
         }
 
@@ -89,6 +100,7 @@ export const VerticalResizeContainer: FunctionComponent<
   return (
     <Reanimated.View style={containerStyle}>
       <Reanimated.View
+        ref={innerContainerRef}
         style={innerStyle}
         onLayout={e => {
           onHeightChangeRef.current(e.nativeEvent.layout.height);
