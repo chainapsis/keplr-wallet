@@ -10,6 +10,7 @@ import {IMessageRenderer} from './types';
 import {useStore} from '../../stores';
 import FastImage from 'react-native-fast-image';
 import {Text} from 'react-native';
+import {useStyle} from '../../styles';
 
 export const RedelegateMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -67,7 +68,7 @@ const RedelegateMessagePretty: FunctionComponent<{
   amount: Coin;
 }> = observer(({chainId, validatorSrcAddress, validatorDstAddress, amount}) => {
   const {chainStore, queriesStore} = useStore();
-
+  const style = useStyle();
   const currency = chainStore.getChain(chainId).forceFindCurrency(amount.denom);
   const coinPretty = new CoinPretty(currency, amount.amount);
 
@@ -83,20 +84,23 @@ const RedelegateMessagePretty: FunctionComponent<{
 
   return (
     <React.Fragment>
-      <FormattedMessage
-        id="page.sign.components.messages.redelegate.paragraph"
-        values={{
-          coin: coinPretty.trim(true).toString(),
-          from:
-            srcMoniker || Bech32Address.shortenAddress(validatorSrcAddress, 28),
-          to:
-            sdstMoniker ||
-            Bech32Address.shortenAddress(validatorDstAddress, 28),
-          b: (...chunks: any) => (
-            <Text style={{fontWeight: 'bold'}}>{chunks}</Text>
-          ),
-        }}
-      />
+      <Text style={style.flatten(['body3', 'color-text-middle'])}>
+        <FormattedMessage
+          id="page.sign.components.messages.redelegate.paragraph"
+          values={{
+            coin: coinPretty.trim(true).toString(),
+            from:
+              srcMoniker ||
+              Bech32Address.shortenAddress(validatorSrcAddress, 28),
+            to:
+              sdstMoniker ||
+              Bech32Address.shortenAddress(validatorDstAddress, 28),
+            b: (...chunks: any) => (
+              <Text style={{fontWeight: 'bold'}}>{chunks}</Text>
+            ),
+          }}
+        />
+      </Text>
     </React.Fragment>
   );
 });

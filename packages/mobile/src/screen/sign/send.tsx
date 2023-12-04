@@ -9,6 +9,7 @@ import FastImage from 'react-native-fast-image';
 import {FormattedMessage} from 'react-intl';
 import {useStore} from '../../stores';
 import {Text} from 'react-native';
+import {useStyle} from '../../styles';
 
 export const SendMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -59,6 +60,7 @@ const SendMessagePretty: FunctionComponent<{
   toAddress: string;
 }> = observer(({chainId, amount, toAddress}) => {
   const {chainStore} = useStore();
+  const style = useStyle();
   const coins = amount.map(coin => {
     const currency = chainStore.getChain(chainId).forceFindCurrency(coin.denom);
 
@@ -66,7 +68,7 @@ const SendMessagePretty: FunctionComponent<{
   });
 
   return (
-    <React.Fragment>
+    <Text style={style.flatten(['body3', 'color-text-middle'])}>
       <FormattedMessage
         id="page.sign.components.messages.send.paragraph"
         values={{
@@ -82,6 +84,6 @@ const SendMessagePretty: FunctionComponent<{
           br: '\n',
         }}
       />
-    </React.Fragment>
+    </Text>
   );
 });

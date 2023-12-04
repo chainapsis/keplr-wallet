@@ -1,6 +1,7 @@
 import React, {FunctionComponent, PropsWithChildren} from 'react';
 import FastImage from 'react-native-fast-image';
 import {Text} from 'react-native';
+import {useStyle} from '../../styles';
 
 export const CustomIcon: FunctionComponent = () => {
   return (
@@ -14,5 +15,11 @@ export const CustomIcon: FunctionComponent = () => {
 export const UnknownMessageContent: FunctionComponent<PropsWithChildren> = ({
   children,
 }) => {
-  return <Text>{children}</Text>;
+  const style = useStyle();
+
+  return (
+    <Text style={style.flatten(['body3', 'color-text-middle'])}>
+      {children}
+    </Text>
+  );
 };

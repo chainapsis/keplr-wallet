@@ -10,6 +10,7 @@ import {IMessageRenderer} from './types';
 import FastImage from 'react-native-fast-image';
 import {useStore} from '../../stores';
 import {Text} from 'react-native';
+import {useStyle} from '../../styles';
 
 export const UndelegateMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -61,6 +62,7 @@ const UndelegateMessagePretty: FunctionComponent<{
   amount: Coin;
 }> = observer(({chainId, validatorAddress, amount}) => {
   const {chainStore, queriesStore} = useStore();
+  const style = useStyle();
 
   const currency = chainStore.getChain(chainId).forceFindCurrency(amount.denom);
   const coinPretty = new CoinPretty(currency, amount.amount);
@@ -71,7 +73,7 @@ const UndelegateMessagePretty: FunctionComponent<{
     .getValidator(validatorAddress)?.description.moniker;
 
   return (
-    <React.Fragment>
+    <Text style={style.flatten(['body3', 'color-text-middle'])}>
       <FormattedMessage
         id="page.sign.components.messages.undelegate.paragraph"
         values={{
@@ -83,6 +85,6 @@ const UndelegateMessagePretty: FunctionComponent<{
           br: '\n',
         }}
       />
-    </React.Fragment>
+    </Text>
   );
 });
