@@ -7,7 +7,6 @@ import {ArrowRightIcon} from '../../components/icon/arrow-right';
 import {useStyle} from '../../styles';
 import {useIntl} from 'react-intl';
 import {Box} from '../../components/box';
-import {Gutter} from '../../components/gutter';
 import {Stack} from '../../components/stack';
 import {SettingIcon} from '../../components/icon';
 import {KeyIcon} from '../../components/icon/key';
@@ -18,8 +17,7 @@ export const SettingScreen: FunctionComponent = () => {
   const intl = useIntl();
   return (
     <PageWithScrollView backgroundMode={'default'}>
-      <Box padding={12} paddingTop={0}>
-        <Gutter size={8} />
+      <Box paddingX={12} paddingTop={8}>
         <Stack gutter={8}>
           <PageButton
             title={intl.formatMessage({id: 'page.setting.general-title'})}
