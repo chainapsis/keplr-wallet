@@ -50,7 +50,6 @@ export const SettingGeneralFiatScreen: FunctionComponent = observer(() => {
           },
         )}
       </Stack>
-      {/* <Gutter size={16} /> */}
     </PageWithScrollView>
   );
 });
