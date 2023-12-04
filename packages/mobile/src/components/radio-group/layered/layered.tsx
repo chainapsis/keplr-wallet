@@ -145,7 +145,7 @@ const getRadioItemStyle = ({
     case 'large': {
       style = {
         ...style,
-        height: 33,
+        height: 32,
         borderRadius: 16.5,
         paddingHorizontal: 10,
       };

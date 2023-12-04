@@ -15,12 +15,15 @@ import Animated, {
 import LinearGradient from 'react-native-linear-gradient';
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
+const AnimatedView = Animated.createAnimatedComponent(View);
 
 const gradient1DefaultColor = ColorPalette['blue-400'];
 const gradient1HoverColor = '#2C4BE2';
 const gradient2DefaultColor = ColorPalette['blue-400'];
 const gradient2HoverColor = '#7A59FF';
 const hoverScale = 1.03;
+const defaultBoxShadowColor = '#2723F700';
+const pressedBoxShadowColor = '#2723F7FF';
 
 export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
   size = 'small',
@@ -31,12 +34,13 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
   isLoading,
   disabled,
   textOverrideIcon,
-  width,
 }) => {
   const style = useStyle();
   const height = style.get(`height-button-${size}`).height as number;
-  const widthSize = useSharedValue(width);
-  const heightSize = useSharedValue(height);
+  const shadowColor = useSharedValue(defaultBoxShadowColor);
+  const shadowRadius = useSharedValue(0);
+  const elevation = useSharedValue(0);
+  const scaleSize = useSharedValue(1);
   const colorsValue = useSharedValue(0);
 
   const [colors, setColors] = useState<string[]>([
@@ -84,11 +88,26 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
   });
 
   return (
-    <Box
-      borderRadius={8}
-      alignY="center"
+    <AnimatedView
       style={StyleSheet.flatten([
-        style.flatten([`height-button-${size}` as any, 'overflow-hidden']),
+        style.flatten([
+          `height-button-${size}` as any,
+          'background-color-blue-400',
+          'border-radius-8',
+        ]),
+        {
+          ...Platform.select({
+            ios: {
+              shadowOffset: {width: 0, height: 0},
+              shadowOpacity: 0.2,
+              shadowRadius: shadowRadius,
+            },
+            android: {
+              elevation: elevation,
+            },
+          }),
+          shadowColor: shadowColor,
+        },
       ])}>
       <Pressable
         style={StyleSheet.flatten([
@@ -113,8 +132,11 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
           if (isLoading) {
             return;
           }
-          widthSize.value = withSpring(width * hoverScale);
-          heightSize.value = withSpring(height * hoverScale);
+          scaleSize.value = withSpring(hoverScale);
+          shadowRadius.value = withSpring(11);
+          shadowColor.value = pressedBoxShadowColor;
+          elevation.value = withSpring(11);
+
           //NOTE android에서는 애니메이션을 걸었을때 내부버그가 생겨서 일단 에니메이션 없이 색상만 변경 하게 수정함
           if (Platform.OS === 'android') {
             runOnJS(setColors)([gradient1HoverColor, gradient2HoverColor]);
@@ -123,8 +145,11 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
           }
         }}
         onPressOut={() => {
-          widthSize.value = withSpring(width);
-          heightSize.value = withSpring(height);
+          scaleSize.value = withSpring(1);
+          shadowRadius.value = withSpring(0);
+          shadowColor.value = defaultBoxShadowColor;
+          elevation.value = withSpring(0);
+
           if (Platform.OS === 'android') {
             runOnJS(setColors)([gradient1DefaultColor, gradient2DefaultColor]);
           } else {
@@ -132,20 +157,19 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
           }
         }}>
         {/* NOTE 공식문서상 호환되는 타입인데 계속 에러가 떠서 일단 any를 사용함 */}
-
         <AnimatedLinearGradient
           start={{x: 0, y: 0}}
           end={{x: 0.84, y: 0}}
           style={StyleSheet.flatten([
-            style.flatten(['padding-x-8']),
+            style.flatten(['padding-x-8', 'border-radius-8']),
             {
-              width: widthSize as any,
-              height: heightSize as any,
+              transform: [{scale: scaleSize as any}],
+              height,
             },
           ])}
           animatedProps={animatedProps}
           colors={colors}>
-          <Box alignY="center" height={'100%'}>
+          <Box alignY="center" height={'100%'} paddingX={8}>
             {left ? (
               <Box
                 marginRight={4}
@@ -199,6 +223,6 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
           [disabled && 'background-color-gray-600@50%'],
         )}
       />
-    </Box>
+    </AnimatedView>
   );
 };

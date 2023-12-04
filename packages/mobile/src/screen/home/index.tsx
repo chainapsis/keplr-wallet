@@ -97,7 +97,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
   return (
     <PageWithScrollView
       backgroundMode={'default'}
-      style={style.flatten(['padding-x-12'])}>
+      style={style.flatten(['padding-x-12', 'padding-top-8'])}>
       <Stack gutter={10}>
         <YAxis alignX="center">
           <LayeredHorizontalRadioGroup
@@ -116,6 +116,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
               setTabStatus(key as TabStatus);
             }}
             itemMinWidth={92}
+            size="large"
           />
         </YAxis>
         <Box height={168} alignX="center" alignY="center">
@@ -194,6 +195,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
         <Gutter size={12} />
         <ClaimAll isNotReady={isNotReady} />
+        <Gutter size={12} />
 
         {!isNotReady ? (
           <Stack gutter={12}>

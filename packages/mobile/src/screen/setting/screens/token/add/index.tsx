@@ -311,7 +311,6 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
                 // readOnly={interactionInfo.interaction}
                 right={
                   <IconButton
-                    hasRipple={true}
                     rippleColor={style.get('color-gray-500').color}
                     underlayColor={style.get('color-gray-500').color}
                     icon={

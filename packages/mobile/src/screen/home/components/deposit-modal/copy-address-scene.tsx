@@ -455,6 +455,8 @@ const CopyAddressItem: FunctionComponent<{
                   chainName: address.chainInfo.chainName,
                 });
               }}
+              containerStyle={style.flatten(['width-36', 'height-36'])}
+              activeOpacity={1}
               icon={
                 <QRCodeIcon
                   size={20}

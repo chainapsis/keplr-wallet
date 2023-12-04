@@ -95,7 +95,7 @@ export const HomeScreenHeader = observer(() => {
               </Text>
               <ArrowDownFillIcon
                 size={20}
-                color={style.get('color-gray-200').color}
+                color={style.get('color-gray-400').color}
               />
             </Columns>
           </Pressable>
@@ -156,10 +156,6 @@ export const defaultHeaderOptions = {
   headerBackVisible: false,
   headerStyle: {
     backgroundColor: ColorPalette['gray-700'],
-  },
-  contentStyle: {
-    borderTopWidth: 1,
-    borderTopColor: ColorPalette['gray-600'],
   },
   headerLeft: (props: any) => <DefaultScreenHeaderLeft {...props} />,
 };
