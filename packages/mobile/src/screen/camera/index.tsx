@@ -69,7 +69,6 @@ export const CameraScreen: FunctionComponent = observer(() => {
           try {
             if (data.startsWith('wc:')) {
               if (data.includes('@2')) {
-                console.log('walletconnect v2');
                 await walletConnectStore.pair(data);
               }
 
