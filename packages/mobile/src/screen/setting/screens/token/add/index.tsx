@@ -34,6 +34,7 @@ import {
   SelectModalCommonButton,
 } from '../../../../../components/select-modal';
 import {Modal} from '../../../../../components/modal';
+import {useNotification} from '../../../../../hooks/notification';
 
 interface FormData {
   contractAddress: string;
@@ -52,6 +53,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
   const paramChainId = route.params?.chainId;
   const contractModalRef = useRef<BottomSheetModal>(null);
   const selectChainModalRef = useRef<BottomSheetModal>(null);
+  const notification = useNotification();
 
   const [isOpenChainSelectModal, setIsOpenChainSelectModal] = useState(false);
 
@@ -197,18 +199,15 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
             blockRejectAll.current = true;
             viewingKey = await createViewingKey();
           } catch (e) {
-            //TODO 토스트 작성해야함
-            // notification.show(
-            //   'failed',
-            //   intl.formatMessage({
-            //     id: 'error.failed-to-create-viewing-key',
-            //   }),
-            //   e.message || e.toString(),
-            // );
+            notification.show(
+              'failed',
+              intl.formatMessage({
+                id: 'error.failed-to-create-viewing-key',
+              }),
+              e.message || e.toString(),
+            );
 
             await new Promise(resolve => setTimeout(resolve, 2000));
-
-            // window.close();
             return;
           }
         }
