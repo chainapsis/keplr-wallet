@@ -12,11 +12,11 @@ import React, {
   useCallback,
 } from 'react';
 import {useStyle} from '../../styles';
-
 import {
-  NativeStackNavigationOptions,
-  createNativeStackNavigator,
-} from '@react-navigation/native-stack';
+  createStackNavigator,
+  StackNavigationOptions,
+  TransitionPresets,
+} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
 import {StyleSheet, Text, TextStyle, ViewStyle} from 'react-native';
 import {Box} from '../box';
@@ -95,12 +95,12 @@ export const Modal = forwardRef<
   },
 );
 
-const BottomSheetStack = createNativeStackNavigator();
+const BottomSheetStack = createStackNavigator();
 interface BaseModalProps {
-  screenOptions?: NativeStackNavigationOptions;
+  screenOptions?: StackNavigationOptions;
   initialRouteName?: string;
   screenList?: {
-    options?: NativeStackNavigationOptions;
+    options?: StackNavigationOptions;
     routeName: string;
     scene: FunctionComponent<any>; //모든 타입의 컴포넌트를 받기위해서 any사용
   }[];
@@ -118,7 +118,8 @@ export const BaseModal = ({
     <NavigationContainer independent={true}>
       <BottomSheetStack.Navigator
         screenOptions={{
-          contentStyle: style.flatten(['background-color-gray-600']),
+          ...TransitionPresets.SlideFromRightIOS,
+          cardStyle: style.flatten(['background-color-gray-600']),
           ...screenOptions,
         }}
         initialRouteName={initialRouteName}>
@@ -153,10 +154,13 @@ export const BaseModalHeader = ({
   const style = useStyle();
 
   return (
-    <Box paddingBottom={12} style={StyleSheet.flatten([headerStyle])}>
+    <Box
+      paddingTop={10}
+      paddingBottom={8}
+      style={StyleSheet.flatten([headerStyle])}>
       <Text
         style={StyleSheet.flatten([
-          style.flatten(['color-white', 'text-center', 'subtitle1']),
+          style.flatten(['color-white', 'text-center', 'h4']),
           titleStyle,
         ])}>
         {title}

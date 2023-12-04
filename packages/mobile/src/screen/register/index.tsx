@@ -4,8 +4,6 @@ import {View} from 'react-native';
 import {Button} from '../../components/button';
 import {useStore} from '../../stores';
 import {Controller, useForm} from 'react-hook-form';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../navigation';
 import {useNavigation, StackActions} from '@react-navigation/native';
 import {TextInput} from '../../components/input';
 import {MnemonicInput} from '../../components/mnemonic-input';
@@ -60,220 +58,215 @@ function validatePrivateKey(value: string): boolean {
   return false;
 }
 
-interface RegisterScreenProps {
-  navigation: NativeStackNavigationProp<RootStackParamList, 'Register'>;
-}
-export const RegisterScreen: FunctionComponent<RegisterScreenProps> = observer(
-  () => {
-    const navigation = useNavigation();
-    const {keyRingStore, chainStore} = useStore();
-    const status = keyRingStore.status;
-    const style = useStyle();
-    const isNeedPassword = status === 'empty';
+export const RegisterScreen: FunctionComponent = observer(() => {
+  const navigation = useNavigation();
+  const {keyRingStore, chainStore} = useStore();
+  const status = keyRingStore.status;
+  const style = useStyle();
+  const isNeedPassword = status === 'empty';
 
-    const {
-      control,
-      formState: {errors},
-      handleSubmit,
-      setFocus,
-      getValues,
-    } = useForm<FormData>();
+  const {
+    control,
+    formState: {errors},
+    handleSubmit,
+    setFocus,
+    getValues,
+  } = useForm<FormData>();
 
-    const submit = handleSubmit(async data => {
-      const {mnemonic, name, password} = data;
-      const trimmedMnemonic = trimMnemonicOrStr(mnemonic);
-      const defaultBIP44 = {
-        account: 0,
-        change: 0,
-        addressIndex: 0,
-      };
+  const submit = handleSubmit(async data => {
+    const {mnemonic, name, password} = data;
+    const trimmedMnemonic = trimMnemonicOrStr(mnemonic);
+    const defaultBIP44 = {
+      account: 0,
+      change: 0,
+      addressIndex: 0,
+    };
 
-      await keyRingStore.newMnemonicKey(
-        trimmedMnemonic,
-        defaultBIP44,
-        name,
-        password,
-      );
+    await keyRingStore.newMnemonicKey(
+      trimmedMnemonic,
+      defaultBIP44,
+      name,
+      password,
+    );
 
-      // TODO: 일단 현재 enable chain을 할 방법이 없으니 모든 체인을 enable 시킨다.
-      if (keyRingStore.selectedKeyInfo) {
-        for (const chainInfo of chainStore.chainInfos) {
-          if (
-            keyRingStore.needKeyCoinTypeFinalize(
-              keyRingStore.selectedKeyInfo.id,
-              chainInfo,
-            )
-          ) {
-            await keyRingStore.finalizeKeyCoinType(
-              keyRingStore.selectedKeyInfo.id,
-              chainInfo.chainId,
-              chainInfo.bip44.coinType,
-            );
-          }
+    // TODO: 일단 현재 enable chain을 할 방법이 없으니 모든 체인을 enable 시킨다.
+    if (keyRingStore.selectedKeyInfo) {
+      for (const chainInfo of chainStore.chainInfos) {
+        if (
+          keyRingStore.needKeyCoinTypeFinalize(
+            keyRingStore.selectedKeyInfo.id,
+            chainInfo,
+          )
+        ) {
+          await keyRingStore.finalizeKeyCoinType(
+            keyRingStore.selectedKeyInfo.id,
+            chainInfo.chainId,
+            chainInfo.bip44.coinType,
+          );
         }
-
-        await chainStore.enableChainInfoInUIWithVaultId(
-          keyRingStore.selectedKeyInfo.id,
-          ...chainStore.chainInfos.map(chainInfo => chainInfo.chainId),
-        );
       }
 
-      navigation.dispatch({
-        ...StackActions.replace('Home'),
-      });
+      await chainStore.enableChainInfoInUIWithVaultId(
+        keyRingStore.selectedKeyInfo.id,
+        ...chainStore.chainInfos.map(chainInfo => chainInfo.chainId),
+      );
+    }
+
+    navigation.dispatch({
+      ...StackActions.replace('Home'),
     });
+  });
 
-    return (
-      <React.Fragment>
-        <View>
-          <Controller
-            control={control}
-            name="mnemonic"
-            defaultValue=""
-            rules={{
-              required: 'Mnemonic is required',
-              validate: (value: string) => {
-                const str = trimMnemonicOrStr(value);
-                if (!isPrivateKey(str)) {
-                  if (str.split(' ').length < 12) {
-                    return 'Too short mnemonic';
-                  }
-
-                  if (!bip39.validateMnemonic(str)) {
-                    return 'Invalid mnemonic';
-                  }
+  return (
+    <React.Fragment>
+      <View>
+        <Controller
+          control={control}
+          name="mnemonic"
+          defaultValue=""
+          rules={{
+            required: 'Mnemonic is required',
+            validate: (value: string) => {
+              const str = trimMnemonicOrStr(value);
+              if (!isPrivateKey(str)) {
+                if (str.split(' ').length < 12) {
+                  return 'Too short mnemonic';
                 }
 
-                if (validatePrivateKey(str)) {
-                  return 'Invalid privateKey';
+                if (!bip39.validateMnemonic(str)) {
+                  return 'Invalid mnemonic';
                 }
-              },
-            }}
-            render={({field: {value, onChange, onBlur, ref}}) => {
-              return (
-                <MnemonicInput
-                  label="Mnemonic seed"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  returnKeyType="next"
-                  style={
-                    (style.flatten(['h5', 'color-text-middle']),
-                    {
-                      minHeight: 20 * 4,
-                      textAlignVertical: 'top',
-                    })
-                  }
-                  onSubmitEditing={() => {
-                    setFocus('name');
-                  }}
-                  error={errors.mnemonic?.message}
-                  ref={ref}
-                />
-              );
-            }}
-          />
+              }
 
-          <Controller
-            control={control}
-            rules={{required: 'Name is required'}}
-            name="name"
-            defaultValue=""
-            render={({field: {value, onChange, onBlur, ref}}) => {
-              return (
-                <TextInput
-                  label="Wallet nickname"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  ref={ref}
-                  error={errors.name?.message}
-                  onSubmitEditing={() => {
-                    if (!isNeedPassword) {
+              if (validatePrivateKey(str)) {
+                return 'Invalid privateKey';
+              }
+            },
+          }}
+          render={({field: {value, onChange, onBlur, ref}}) => {
+            return (
+              <MnemonicInput
+                label="Mnemonic seed"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                returnKeyType="next"
+                style={
+                  (style.flatten(['h5', 'color-text-middle']),
+                  {
+                    minHeight: 20 * 4,
+                    textAlignVertical: 'top',
+                  })
+                }
+                onSubmitEditing={() => {
+                  setFocus('name');
+                }}
+                error={errors.mnemonic?.message}
+                ref={ref}
+              />
+            );
+          }}
+        />
+
+        <Controller
+          control={control}
+          rules={{required: 'Name is required'}}
+          name="name"
+          defaultValue=""
+          render={({field: {value, onChange, onBlur, ref}}) => {
+            return (
+              <TextInput
+                label="Wallet nickname"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                ref={ref}
+                error={errors.name?.message}
+                onSubmitEditing={() => {
+                  if (!isNeedPassword) {
+                    submit();
+                    return;
+                  }
+                  setFocus('password');
+                }}
+              />
+            );
+          }}
+        />
+
+        {isNeedPassword && (
+          <React.Fragment>
+            <Controller
+              control={control}
+              rules={{
+                required: 'Password is required',
+                validate: (value: string) => {
+                  if (value.length < 8) {
+                    return 'Password must be longer than 8 characters';
+                  }
+                },
+              }}
+              name="password"
+              defaultValue=""
+              render={({field: {value, onChange, onBlur, ref}}) => {
+                return (
+                  <TextInput
+                    label="Create Keplr Password"
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    ref={ref}
+                    value={value}
+                    error={errors.password?.message}
+                    returnKeyType="next"
+                    secureTextEntry={true}
+                    onSubmitEditing={() => {
+                      setFocus('confirmPassword');
+                    }}
+                  />
+                );
+              }}
+            />
+            <Controller
+              control={control}
+              name="confirmPassword"
+              defaultValue=""
+              rules={{
+                required: 'Password is required',
+                validate: (value: string) => {
+                  if (value.length < 8) {
+                    return 'Password must be longer than 8 characters';
+                  }
+
+                  if (getValues('password') !== value) {
+                    return "Password doesn't match";
+                  }
+                },
+              }}
+              render={({field: {value, onChange, onBlur, ref}}) => {
+                return (
+                  <TextInput
+                    label="Confirm Keplr Password"
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    ref={ref}
+                    value={value}
+                    error={errors.confirmPassword?.message}
+                    returnKeyType="done"
+                    secureTextEntry={true}
+                    onSubmitEditing={() => {
                       submit();
-                      return;
-                    }
-                    setFocus('password');
-                  }}
-                />
-              );
-            }}
-          />
+                    }}
+                  />
+                );
+              }}
+            />
+          </React.Fragment>
+        )}
 
-          {isNeedPassword && (
-            <React.Fragment>
-              <Controller
-                control={control}
-                rules={{
-                  required: 'Password is required',
-                  validate: (value: string) => {
-                    if (value.length < 8) {
-                      return 'Password must be longer than 8 characters';
-                    }
-                  },
-                }}
-                name="password"
-                defaultValue=""
-                render={({field: {value, onChange, onBlur, ref}}) => {
-                  return (
-                    <TextInput
-                      label="Create Keplr Password"
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      ref={ref}
-                      value={value}
-                      error={errors.password?.message}
-                      returnKeyType="next"
-                      secureTextEntry={true}
-                      onSubmitEditing={() => {
-                        setFocus('confirmPassword');
-                      }}
-                    />
-                  );
-                }}
-              />
-              <Controller
-                control={control}
-                name="confirmPassword"
-                defaultValue=""
-                rules={{
-                  required: 'Password is required',
-                  validate: (value: string) => {
-                    if (value.length < 8) {
-                      return 'Password must be longer than 8 characters';
-                    }
+        <Gutter size={12} />
 
-                    if (getValues('password') !== value) {
-                      return "Password doesn't match";
-                    }
-                  },
-                }}
-                render={({field: {value, onChange, onBlur, ref}}) => {
-                  return (
-                    <TextInput
-                      label="Confirm Keplr Password"
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      ref={ref}
-                      value={value}
-                      error={errors.confirmPassword?.message}
-                      returnKeyType="done"
-                      secureTextEntry={true}
-                      onSubmitEditing={() => {
-                        submit();
-                      }}
-                    />
-                  );
-                }}
-              />
-            </React.Fragment>
-          )}
-
-          <Gutter size={12} />
-
-          <Button text="Next" size="large" onPress={submit} />
-        </View>
-      </React.Fragment>
-    );
-  },
-);
+        <Button text="Next" size="large" onPress={submit} />
+      </View>
+    </React.Fragment>
+  );
+});

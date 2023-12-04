@@ -54,7 +54,7 @@ export const TransactionFeeModal: FunctionComponent<{
   })();
 
   return (
-    <Box padding={12}>
+    <Box paddingX={12} paddingBottom={12}>
       <BaseModalHeader
         title={intl.formatMessage({
           id: 'components.input.fee-control.modal.title',
@@ -62,6 +62,7 @@ export const TransactionFeeModal: FunctionComponent<{
         titleStyle={style.flatten(['h4', 'text-left'])}
       />
 
+      <Gutter size={12} />
       <Label
         content={intl.formatMessage({
           id: 'components.input.fee-control.modal.fee-title',

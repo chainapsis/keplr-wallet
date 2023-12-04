@@ -12,7 +12,6 @@ import {useStore} from '../../stores';
 import {Box} from '../box';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {HeaderBackButtonIcon} from './icon/back';
-import {HeaderBackButtonProps} from '@react-navigation/native-stack/lib/typescript/src/types';
 import {Column, Columns} from '../column';
 import {ArrowDownFillIcon} from '../icon/arrow-donw-fill';
 
@@ -127,14 +126,13 @@ const DefaultScreenHeaderTitle: FunctionComponent<PropsWithChildren> = ({
     </Text>
   );
 };
-const DefaultScreenHeaderLeft: FunctionComponent<
-  HeaderBackButtonProps
-> = props => {
+const DefaultScreenHeaderLeft: FunctionComponent = () => {
   const style = useStyle();
   const nav = useNavigation();
+
   return (
     <React.Fragment>
-      {props.canGoBack ? (
+      {nav.canGoBack() ? (
         <Pressable
           onPress={() => {
             if (nav.canGoBack()) {

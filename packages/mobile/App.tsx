@@ -33,6 +33,7 @@ import {ConfirmProvider} from './src/hooks/confirm';
 import {InteractionModalsProvider} from './src/provider/interaction-modals-provider';
 import {LoadingIconAnimationProvider} from './src/provider/loading-icon-animation';
 import {NotificationProvider} from './src/hooks/notification';
+import {ModalBaseProvider} from './src/components/modal/v2/provider';
 
 const ThemeStatusBar: FunctionComponent = () => {
   const style = useStyle();
@@ -58,13 +59,15 @@ function App(): JSX.Element {
             <StoreProvider>
               <AppIntlProvider>
                 <NotificationProvider>
-                  <BottomSheetModalProvider>
-                    <ConfirmProvider>
-                      <InteractionModalsProvider>
-                        <AppNavigation />
-                      </InteractionModalsProvider>
-                    </ConfirmProvider>
-                  </BottomSheetModalProvider>
+                  <ModalBaseProvider>
+                    <BottomSheetModalProvider>
+                      <ConfirmProvider>
+                        <InteractionModalsProvider>
+                          <AppNavigation />
+                        </InteractionModalsProvider>
+                      </ConfirmProvider>
+                    </BottomSheetModalProvider>
+                  </ModalBaseProvider>
                 </NotificationProvider>
               </AppIntlProvider>
             </StoreProvider>

@@ -17,7 +17,6 @@ import {useSetFocusedScreen} from './utils';
 const AnimatedKeyboardAwareScrollView = Animated.createAnimatedComponent(
   KeyboardAwareScrollView,
 );
-
 export const PageWithScrollView = forwardRef<
   ScrollView,
   React.PropsWithChildren<
@@ -88,6 +87,7 @@ export const PageWithScrollView = forwardRef<
             propStyle,
           ])}
           keyboardOpeningTime={0}
+          enableOnAndroid={true}
           indicatorStyle={indicatorStyle || 'white'}
           {...restProps}
         />

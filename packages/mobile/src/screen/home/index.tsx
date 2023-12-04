@@ -53,7 +53,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation<StackNavProp>();
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>('available');
-  const buyModalRef = useRef<BottomSheetModal>(null);
+  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const SelectStakingChainModalRef = useRef<BottomSheetModal>(null);
   const copyAddressModalRef = useRef<BottomSheetModal>(null);
 
@@ -95,111 +95,111 @@ export const HomeScreen: FunctionComponent = observer(() => {
   }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings]);
 
   return (
-    <React.Fragment>
-      <PageWithScrollView
-        backgroundMode={'default'}
-        style={style.flatten(['padding-x-12', 'padding-top-8'])}>
-        <Stack gutter={10}>
-          <YAxis alignX="center">
-            <LayeredHorizontalRadioGroup
-              selectedKey={tabStatus}
-              items={[
-                {
-                  key: 'available',
-                  text: 'available',
-                },
-                {
-                  key: 'staked',
-                  text: 'staked',
-                },
-              ]}
-              onSelect={key => {
-                setTabStatus(key as TabStatus);
-              }}
-              itemMinWidth={92}
+    <PageWithScrollView
+      backgroundMode={'default'}
+      style={style.flatten(['padding-x-12', 'padding-top-8'])}>
+      <Stack gutter={10}>
+        <YAxis alignX="center">
+          <LayeredHorizontalRadioGroup
+            selectedKey={tabStatus}
+            items={[
+              {
+                key: 'available',
+                text: 'available',
+              },
+              {
+                key: 'staked',
+                text: 'staked',
+              },
+            ]}
+            onSelect={key => {
+              setTabStatus(key as TabStatus);
+            }}
+            itemMinWidth={92}
+            size="large"
+          />
+        </YAxis>
+        <Box height={168} alignX="center" alignY="center">
+          <Text
+            style={style.flatten([
+              'color-text-low',
+              'font-extrabold',
+              'font-medium',
+              'h4',
+            ])}>
+            {tabStatus === 'available' ? 'Total Available' : 'Total Staked'}
+          </Text>
+          <Gutter size={10} />
+          <Text style={style.flatten(['color-text-high', 'mobile-h2'])}>
+            {tabStatus === 'available'
+              ? availableTotalPrice?.toString() || '-'
+              : stakedTotalPrice?.toString() || '-'}
+          </Text>
+        </Box>
+        {tabStatus === 'available' ? (
+          <Columns sum={1} gutter={10}>
+            <Button
+              text="Deposit"
               size="large"
+              color="secondary"
+              containerStyle={style.flatten(['flex-1'])}
+              onPress={() => {
+                copyAddressModalRef.current?.present();
+              }}
             />
-          </YAxis>
-          <Box height={168} alignX="center" alignY="center">
-            <Text
-              style={style.flatten([
-                'color-text-low',
-                'font-extrabold',
-                'font-medium',
-                'h4',
-              ])}>
-              {tabStatus === 'available' ? 'Total Available' : 'Total Staked'}
-            </Text>
-            <Gutter size={10} />
-            <Text style={style.flatten(['color-text-high', 'mobile-h2'])}>
-              {tabStatus === 'available'
-                ? availableTotalPrice?.toString() || '-'
-                : stakedTotalPrice?.toString() || '-'}
-            </Text>
-          </Box>
-          {tabStatus === 'available' ? (
-            <Columns sum={1} gutter={10}>
-              <Button
-                text="Deposit"
-                size="large"
-                color="secondary"
-                containerStyle={style.flatten(['flex-1'])}
-                onPress={() => {
-                  copyAddressModalRef.current?.present();
-                }}
-              />
-              <Button
-                text="Buy"
-                size="large"
-                color="secondary"
-                containerStyle={style.flatten(['flex-1'])}
-                onPress={() => {
-                  buyModalRef.current?.present();
-                }}
-              />
-              <Button
-                text="Send"
-                size="large"
-                containerStyle={style.flatten(['flex-1'])}
-                onPress={() => {
-                  navigation.dispatch({
-                    ...StackActions.push('Send.SelectAsset'),
-                  });
-                }}
-              />
-            </Columns>
-          ) : (
-            <Columns sum={1} gutter={10}>
-              <Button
-                text="Vote"
-                size="large"
-                color="secondary"
-                containerStyle={style.flatten(['flex-1'])}
-                onPress={() => {
-                  //TODO - 거버넌스 페이지로 이동
-                  navigation.navigate('Governance', {
-                    screen: 'Governance.intro',
-                  });
-                }}
-              />
-              <Button
-                text="Stake"
-                size="large"
-                containerStyle={style.flatten(['flex-1'])}
-                onPress={() => {
-                  //TODO - 체인 선택 모달을 띄워줘야함
-                  SelectStakingChainModalRef.current?.present();
-                }}
-              />
-            </Columns>
-          )}
+            <Button
+              text="Buy"
+              size="large"
+              color="secondary"
+              containerStyle={style.flatten(['flex-1'])}
+              onPress={() => {
+                setIsBuyModalOpen(true);
+              }}
+            />
+            <Button
+              text="Send"
+              size="large"
+              containerStyle={style.flatten(['flex-1'])}
+              onPress={() => {
+                navigation.dispatch({
+                  ...StackActions.push('Send.SelectAsset'),
+                });
+              }}
+            />
+          </Columns>
+        ) : (
+          <Columns sum={1} gutter={10}>
+            <Button
+              text="Vote"
+              size="large"
+              color="secondary"
+              containerStyle={style.flatten(['flex-1'])}
+              onPress={() => {
+                //TODO - 거버넌스 페이지로 이동
+                navigation.navigate('Governance', {
+                  screen: 'Governance.intro',
+                });
+              }}
+            />
+            <Button
+              text="Stake"
+              size="large"
+              containerStyle={style.flatten(['flex-1'])}
+              onPress={() => {
+                //TODO - 체인 선택 모달을 띄워줘야함
+                SelectStakingChainModalRef.current?.present();
+              }}
+            />
+          </Columns>
+        )}
 
-          <Gutter size={12} />
-          <ClaimAll isNotReady={isNotReady} />
-          <Gutter size={12} />
+        <Gutter size={12} />
+        <ClaimAll isNotReady={isNotReady} />
+        <Gutter size={12} />
 
-          {!isNotReady ? (
-            tabStatus === 'available' ? (
+        {!isNotReady ? (
+          <Stack gutter={12}>
+            {tabStatus === 'available' ? (
               <SearchTextInput
                 ref={searchRef}
                 value={search}
@@ -209,31 +209,33 @@ export const HomeScreen: FunctionComponent = observer(() => {
                 }}
                 placeholder="Search for asset or chain (i.e. ATOM, Cosmos)"
               />
-            ) : null
-          ) : null}
+            ) : null}
+          </Stack>
+        ) : null}
 
-          {tabStatus === 'available' ? (
-            <AvailableTabView
-              search={search}
-              isNotReady={isNotReady}
-              onClickGetStarted={() => {
-                copyAddressModalRef.current?.present();
-              }}
-            />
-          ) : (
-            <StakedTabView
-              SelectStakingChainModalRef={SelectStakingChainModalRef}
-            />
-          )}
-        </Stack>
-      </PageWithScrollView>
+        {tabStatus === 'available' ? (
+          <AvailableTabView
+            search={search}
+            isNotReady={isNotReady}
+            onClickGetStarted={() => {
+              copyAddressModalRef.current?.present();
+            }}
+          />
+        ) : (
+          <StakedTabView
+            SelectStakingChainModalRef={SelectStakingChainModalRef}
+          />
+        )}
+      </Stack>
 
       <Modal ref={copyAddressModalRef} snapPoints={['60%']}>
         <DepositModal />
       </Modal>
-      <Modal ref={buyModalRef} snapPoints={['50%']}>
-        <BuyModal navigation={navigation} />
-      </Modal>
-    </React.Fragment>
+      <BuyModal
+        navigation={navigation}
+        isOpen={isBuyModalOpen}
+        setIsOpen={setIsBuyModalOpen}
+      />
+    </PageWithScrollView>
   );
 });
