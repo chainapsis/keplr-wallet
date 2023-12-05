@@ -9,7 +9,7 @@ import {Gutter} from '../gutter';
 import {registerCardModal} from './card';
 import {Box} from '../box';
 import FastImage from 'react-native-fast-image';
-import {Text} from 'react-native';
+import {Pressable, Text} from 'react-native';
 import Svg, {Circle, Path} from 'react-native-svg';
 import {Chip} from '../chip';
 import {ChainInfo} from '@keplr-wallet/types';
@@ -17,6 +17,8 @@ import {InteractionWaitingData} from '@keplr-wallet/background';
 import {ScrollView} from 'react-native-gesture-handler';
 import {GuideBox} from '../guide-box';
 import {Skeleton} from '../skeleton';
+import {RectButton} from '../rect-button';
+import * as WebBrowser from 'expo-web-browser';
 
 export const SuggestChainModal = registerCardModal(
   observer(() => {
@@ -92,11 +94,21 @@ const SuggestChainPageImpl: FunctionComponent<{
               isNotReady={false}
               origin={waitingData.data.origin}
               chainInfo={communityChainInfo}
+              communityChainInfoUrl={chainSuggestStore.getCommunityChainInfoUrl(
+                communityChainInfo.chainId,
+              )}
             />
           );
         }
 
-        return <RawInfo waitingData={waitingData} />;
+        return (
+          <RawInfo
+            waitingData={waitingData}
+            communityChainInfoRepoUrl={
+              chainSuggestStore.communityChainInfoRepoUrl
+            }
+          />
+        );
       })()}
       <XAxis>
         <Button
@@ -124,7 +136,8 @@ const CommunityInfo: FunctionComponent<{
   isNotReady: boolean;
   origin: string;
   chainInfo: ChainInfo;
-}> = ({origin, chainInfo, isNotReady}) => {
+  communityChainInfoUrl?: string;
+}> = ({origin, chainInfo, isNotReady, communityChainInfoUrl}) => {
   const style = useStyle();
 
   return (
@@ -182,19 +195,27 @@ const CommunityInfo: FunctionComponent<{
       <Gutter size={16} />
 
       <Skeleton isNotReady={isNotReady}>
-        <Chip
-          text={
-            <XAxis alignY="center">
-              <Text style={style.flatten(['body3', 'color-text-high'])}>
-                <FormattedMessage id="page.suggest-chain.community-info-view.community-driven-chip" />
-              </Text>
+        <RectButton
+          style={style.flatten(['border-radius-32'])}
+          onPress={() => {
+            if (communityChainInfoUrl) {
+              WebBrowser.openBrowserAsync(communityChainInfoUrl);
+            }
+          }}>
+          <Chip
+            text={
+              <XAxis alignY="center">
+                <Text style={style.flatten(['body3', 'color-text-high'])}>
+                  <FormattedMessage id="page.suggest-chain.community-info-view.community-driven-chip" />
+                </Text>
 
-              <Gutter size={4} />
+                <Gutter size={4} />
 
-              <GithubIcon />
-            </XAxis>
-          }
-        />
+                <GithubIcon />
+              </XAxis>
+            }
+          />
+        </RectButton>
       </Skeleton>
 
       <Gutter size={16} />
@@ -225,7 +246,8 @@ const RawInfo: FunctionComponent<{
     chainInfo: ChainInfo;
     origin: string;
   }>;
-}> = ({waitingData}) => {
+  communityChainInfoRepoUrl: string;
+}> = ({waitingData, communityChainInfoRepoUrl}) => {
   const intl = useIntl();
   const style = useStyle();
   const chainInfo = waitingData.data.chainInfo;
@@ -266,6 +288,21 @@ const RawInfo: FunctionComponent<{
         paragraph={intl.formatMessage({
           id: 'page.suggest-chain.raw-info-view.guide-paragraph',
         })}
+        bottom={
+          <Pressable
+            onPress={() => {
+              WebBrowser.openBrowserAsync(communityChainInfoRepoUrl);
+            }}>
+            <Text
+              style={style.flatten([
+                'text-underline',
+                'color-gray-100',
+                'subtitle4',
+              ])}>
+              <FormattedMessage id="page.suggest-chain.raw-info-view.chain-registry-link-text" />
+            </Text>
+          </Pressable>
+        }
       />
 
       <Gutter size={16} />
