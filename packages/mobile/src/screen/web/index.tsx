@@ -14,7 +14,7 @@ import {useStore} from '../../stores';
 import {RectButton} from '../../components/rect-button';
 import {GlobeIcon} from '../../components/icon/globe';
 import {Box} from '../../components/box';
-import {TrashCanIcon} from '../../components/icon';
+import {CloseIcon} from '../../components/icon';
 import {EmptyView} from '../../components/empty-view';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {RectButton as NativeRectButton} from 'react-native-gesture-handler';
@@ -176,7 +176,7 @@ export const WebScreen: FunctionComponent = observer(() => {
                 onPress={() => {
                   favoriteWebpageStore.removeUrl(url);
                 }}>
-                <TrashCanIcon
+                <CloseIcon
                   color={style.get('color-text-low').color}
                   size={24}
                 />
