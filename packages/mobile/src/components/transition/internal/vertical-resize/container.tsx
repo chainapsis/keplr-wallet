@@ -75,17 +75,17 @@ export const VerticalResizeContainer: FunctionComponent<
           return;
         }
 
-        // XXX: translateY: "-50%"여야한다. 근데 react native가 이걸 지원하지 않는다.
-        //      일단 대충 height의 절반만큼 올리는 것으로 대체한다.
-        //      될 것 같은데 사실 실제 되는지 확인 안해봤다.
-        if (_WORKLET) {
-          const measured = measure(innerContainerRef);
-          if (measured !== null) {
-            return [{translateY: -measured.height / 2}];
-          }
-        }
-
         if (transitionAlign === 'center') {
+          // XXX: translateY: "-50%"여야한다. 근데 react native가 이걸 지원하지 않는다.
+          //      일단 대충 height의 절반만큼 올리는 것으로 대체한다.
+          //      될 것 같은데 사실 실제 되는지 확인 안해봤다.
+          if (_WORKLET) {
+            const measured = measure(innerContainerRef);
+            if (measured) {
+              return [{translateY: -measured.height / 2}];
+            }
+          }
+
           return [{translateY: -heightPx.value / 2}];
         }
 
@@ -102,6 +102,7 @@ export const VerticalResizeContainer: FunctionComponent<
       <Reanimated.View
         ref={innerContainerRef}
         style={innerStyle}
+        collapsable={false}
         onLayout={e => {
           onHeightChangeRef.current(e.nativeEvent.layout.height);
         }}>
