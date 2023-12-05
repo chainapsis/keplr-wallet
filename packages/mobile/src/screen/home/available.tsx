@@ -39,7 +39,7 @@ export const AvailableTabView: FunctionComponent<{
   const style = useStyle();
   // const navigate = useNavigate();
   const tokenFoundModalRef = useRef<BottomSheetModal>(null);
-  const infoModalRef = useRef<BottomSheetModal>(null);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const intl = useIntl();
 
   const allBalances = hugeQueriesStore.getAllBalances(true);
@@ -169,7 +169,7 @@ export const AvailableTabView: FunctionComponent<{
                   itemKind="tokens"
                   title={
                     <TokenTitleView
-                      onOpenModal={() => infoModalRef.current?.present()}
+                      onOpenModal={() => setIsInfoModalOpen(true)}
                       title={title}
                       right={
                         hasLowBalanceTokens ? (
@@ -295,16 +295,16 @@ export const AvailableTabView: FunctionComponent<{
       <Modal ref={tokenFoundModalRef} snapPoints={['60%']}>
         <TokenFoundModal />
       </Modal>
-      <Modal ref={infoModalRef} enableDynamicSizing={true} snapPoints={['90%']}>
-        <InformationModal
-          title={intl.formatMessage({
-            id: 'page.main.available.available-balance-title',
-          })}
-          paragraph={intl.formatMessage({
-            id: 'page.main.available.available-balance-tooltip',
-          })}
-        />
-      </Modal>
+      <InformationModal
+        isOpen={isInfoModalOpen}
+        setIsOpen={setIsInfoModalOpen}
+        title={intl.formatMessage({
+          id: 'page.main.available.available-balance-title',
+        })}
+        paragraph={intl.formatMessage({
+          id: 'page.main.available.available-balance-tooltip',
+        })}
+      />
     </React.Fragment>
   );
 });
