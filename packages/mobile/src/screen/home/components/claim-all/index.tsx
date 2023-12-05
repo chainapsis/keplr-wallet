@@ -397,7 +397,7 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
       <Box
         borderRadius={6}
         paddingTop={12}
-        style={style.flatten(['dark:background-color-gray-600'])}>
+        style={style.flatten(['background-color-card-default'])}>
         <Box paddingX={16} paddingBottom={4}>
           <Columns sum={1} alignY="center">
             <Stack gutter={8}>
@@ -411,12 +411,7 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
 
               <YAxis alignX="left">
                 <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth={82}>
-                  <Text
-                    style={style.flatten([
-                      'subtitle2',
-                      'dark:color-gray-700',
-                      'color-gray-10',
-                    ])}>
+                  <Text style={style.flatten(['subtitle2', 'color-text-high'])}>
                     {totalPrice ? totalPrice.separator(' ').toString() : '?'}
                   </Text>
                 </Skeleton>
