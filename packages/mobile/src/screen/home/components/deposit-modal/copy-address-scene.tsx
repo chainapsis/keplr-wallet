@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useCallback, useState} from 'react';
+import React, {FunctionComponent, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 
 import {Bech32Address, ChainIdHelper} from '@keplr-wallet/cosmos';
@@ -11,6 +11,7 @@ import {Box} from '../../../../components/box';
 import {useStyle} from '../../../../styles';
 import {XAxis, YAxis} from '../../../../components/axis';
 import {Image, Pressable, Text, View} from 'react-native';
+import {ScrollView} from 'react-native-gesture-handler';
 import {Gutter} from '../../../../components/gutter';
 import {TextInput} from '../../../../components/input';
 import {
@@ -18,31 +19,18 @@ import {
   SearchIcon,
   StarIcon,
 } from '../../../../components/icon';
-import {BottomSheetScrollView, useBottomSheet} from '@gorhom/bottom-sheet';
 import {BaseModalHeader} from '../../../../components/modal';
 import {ChainImageFallback} from '../../../../components/image';
-import {CheckToggleIcon} from '../../../../components/icon/check-toggle';
+import {CheckToggleIcon, QRCodeIcon} from '../../../../components/icon';
 import {IconButton} from '../../../../components/icon-button';
-import {
-  NavigationProp,
-  useFocusEffect,
-  useNavigation,
-} from '@react-navigation/native';
-import {DepositModalNav} from './deposit-modal';
-import {QRCodeIcon} from '../../../../components/icon/qr-code';
 
-export const CopyAddressScene: FunctionComponent = observer(() => {
+export const CopyAddressScene: FunctionComponent<{
+  setIsOpen: (isOpen: boolean) => void;
+  setCurrentScene: (scene: string) => void;
+}> = observer(({setIsOpen, setCurrentScene}) => {
   const {chainStore, accountStore, keyRingStore, uiConfigStore} = useStore();
   const [search, setSearch] = useState('');
   const style = useStyle();
-
-  //NOTE qr 창에 갔다가 올아올때는 다시 모달의 사이즈를 키워줘야 함
-  const bottom = useBottomSheet();
-  useFocusEffect(
-    useCallback(() => {
-      bottom.snapToPosition('60%');
-    }, [bottom]),
-  );
 
   // 북마크된 체인과 sorting을 위한 state는 분리되어있다.
   // 이걸 분리하지 않고 북마크된 체인은 무조건 올린다고 가정하면
@@ -138,7 +126,7 @@ export const CopyAddressScene: FunctionComponent = observer(() => {
   const [blockInteraction, setBlockInteraction] = useState(false);
 
   return (
-    <Box height={'100%'} backgroundColor={style.get('color-gray-600').color}>
+    <Box backgroundColor={style.get('color-gray-600').color}>
       <BaseModalHeader title="Copy Address" />
       <Gutter size={12} />
       <Box paddingX={12}>
@@ -155,7 +143,7 @@ export const CopyAddressScene: FunctionComponent = observer(() => {
       </Box>
 
       <Gutter size={12} />
-      <BottomSheetScrollView>
+      <ScrollView style={style.flatten(['height-400'])}>
         {addresses.length === 0 ? (
           <Box
             alignX="center"
@@ -219,16 +207,21 @@ export const CopyAddressScene: FunctionComponent = observer(() => {
                   blockInteraction={blockInteraction}
                   setBlockInteraction={setBlockInteraction}
                   setSortPriorities={setSortPriorities}
+                  setIsOpen={setIsOpen}
+                  setCurrentScene={setCurrentScene}
                 />
               );
             })}
         </Box>
-      </BottomSheetScrollView>
+      </ScrollView>
     </Box>
   );
 });
 
 const CopyAddressItem: FunctionComponent<{
+  setIsOpen: (isOpen: boolean) => void;
+  setCurrentScene: (scene: string) => void;
+
   address: {
     chainInfo: IChainInfoImpl;
     bech32Address: string;
@@ -243,10 +236,15 @@ const CopyAddressItem: FunctionComponent<{
     ) => Record<string, true | undefined>,
   ) => void;
 }> = observer(
-  ({address, blockInteraction, setBlockInteraction, setSortPriorities}) => {
+  ({
+    setIsOpen,
+    setCurrentScene,
+    address,
+    blockInteraction,
+    setBlockInteraction,
+    setSortPriorities,
+  }) => {
     const {keyRingStore, uiConfigStore} = useStore();
-    const nav = useNavigation<NavigationProp<DepositModalNav>>();
-    const bottomSheet = useBottomSheet();
 
     const style = useStyle();
 
@@ -291,8 +289,8 @@ const CopyAddressItem: FunctionComponent<{
               setHasCopied(true);
 
               setTimeout(() => {
-                bottomSheet.close();
-              }, 500);
+                setIsOpen(false);
+              }, 300);
             }}>
             <Box
               height={74}
@@ -449,11 +447,7 @@ const CopyAddressItem: FunctionComponent<{
               style={style.flatten(['padding-8'])}
               disabled={hasCopied || !!address.ethereumAddress}
               onPress={() => {
-                nav.navigate('QR', {
-                  chainId: address.chainInfo.chainId,
-                  bech32Address: address.bech32Address,
-                  chainName: address.chainInfo.chainName,
-                });
+                setCurrentScene('QR');
               }}
               containerStyle={style.flatten(['width-36', 'height-36'])}
               activeOpacity={1}

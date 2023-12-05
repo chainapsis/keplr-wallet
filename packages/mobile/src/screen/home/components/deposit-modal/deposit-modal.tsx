@@ -1,29 +1,35 @@
-import React from 'react';
-import {BaseModal} from '../../../../components/modal/modal';
+import React, {useState} from 'react';
 import {CopyAddressScene} from './copy-address-scene';
 import {QRScene} from './qr-scene';
+import {registerCardModal} from '../../../../components/modal/card';
+import {HorizontalSimpleScene} from '../../../../components/transition';
 
-interface QRSeneProps {
-  chainId: string;
-  chainName: string;
-  bech32Address: string;
-}
-export type DepositModalNav = {
-  List: undefined;
-  QR: QRSeneProps;
-};
+export const DepositModal = registerCardModal<{
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}>(({isOpen, setIsOpen}) => {
+  const [currentScene, setCurrentScene] = useState('List');
 
-export const DepositModal = () => {
   return (
-    <BaseModal
-      initialRouteName="List"
-      screenList={[
-        {routeName: 'List', scene: CopyAddressScene},
+    <HorizontalSimpleScene
+      scenes={[
         {
-          routeName: 'QR',
-          scene: QRScene,
+          key: 'List',
+          element: CopyAddressScene,
+        },
+        {
+          key: 'QR',
+          element: QRScene,
         },
       ]}
+      transitionAlign="bottom"
+      currentSceneKey={currentScene}
+      sharedProps={{
+        isOpen,
+        setIsOpen,
+        currentScene,
+        setCurrentScene,
+      }}
     />
   );
-};
+});

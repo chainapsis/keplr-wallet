@@ -1,10 +1,9 @@
 import React, {FunctionComponent, useEffect, useState} from 'react';
 import Reanimated, {
-  useAnimatedRef,
+  useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  measure,
 } from 'react-native-reanimated';
 import {defaultSpringConfig} from '../../../styles/spring';
 
@@ -74,14 +73,79 @@ export const HorizontalSimpleScene: FunctionComponent<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [leftScene, currentSceneKey]);
 
-  const containerRef = useAnimatedRef<Reanimated.View>();
-  const leftContainerRef = useAnimatedRef<Reanimated.View>();
-  const rightContainerRef = useAnimatedRef<Reanimated.View>();
+  const sharedInfoValue = useSharedValue<
+    | {isTransition: boolean} & (
+        | {
+            isReadyToMeasure: false;
+            leftMeasured: null;
+            rightMeasured: null;
+          }
+        | {
+            isReadyToMeasure: true;
+            leftMeasured: {
+              width: number;
+              height: number;
+            };
+            rightMeasured: {
+              width: number;
+              height: number;
+            };
+          }
+      )
+  >({
+    isTransition: false,
+    isReadyToMeasure: false,
+    leftMeasured: null,
+    rightMeasured: null,
+  });
+
+  const leftMeasuredTemp = useSharedValue<{
+    width: number;
+    height: number;
+  } | null>(null);
+  const rightMeasuredTemp = useSharedValue<{
+    width: number;
+    height: number;
+  } | null>(null);
+
+  useAnimatedReaction(
+    () => {
+      // 여기서 별 기능은 없고 일종의 deps 역할이라고 할 수 있다...
+      return [
+        leftSceneProgress.value,
+        rightSceneProgress.value,
+        leftMeasuredTemp.value,
+        rightMeasuredTemp.value,
+      ];
+    },
+    () => {
+      const isTransition =
+        leftSceneProgress.value % 1 !== 0 || rightSceneProgress.value % 1 !== 0;
+
+      const leftMeasured = leftMeasuredTemp.value;
+      const rightMeasured = rightMeasuredTemp.value;
+
+      if (leftMeasured != null && rightMeasured != null) {
+        sharedInfoValue.value = {
+          isTransition,
+          isReadyToMeasure: true,
+          leftMeasured,
+          rightMeasured,
+        };
+      } else {
+        sharedInfoValue.value = {
+          isTransition,
+          isReadyToMeasure: false,
+          leftMeasured: null,
+          rightMeasured: null,
+        };
+      }
+
+      return {};
+    },
+  );
 
   const containerStyle = useAnimatedStyle(() => {
-    const isTransition =
-      leftSceneProgress.value % 1 !== 0 || rightSceneProgress.value % 1 !== 0;
-
     const defaultStyle = {
       position: 'relative' as const,
       overflow: 'hidden' as const,
@@ -90,11 +154,13 @@ export const HorizontalSimpleScene: FunctionComponent<{
       flexShrink: 0,
     };
 
-    if (_WORKLET && isTransition) {
-      const leftMeasured = measure(leftContainerRef);
-      const rightMeasured = measure(rightContainerRef);
-      const leftHeight = leftMeasured ? leftMeasured.height : 0;
-      const rightHeight = rightMeasured ? rightMeasured.height : 0;
+    if (
+      _WORKLET &&
+      sharedInfoValue.value.isTransition &&
+      sharedInfoValue.value.isReadyToMeasure
+    ) {
+      const leftHeight = sharedInfoValue.value.leftMeasured.height;
+      const rightHeight = sharedInfoValue.value.rightMeasured.height;
       return {
         ...defaultStyle,
         height: leftBecomeMain.value
@@ -111,136 +177,148 @@ export const HorizontalSimpleScene: FunctionComponent<{
   });
 
   const leftContainerStyle = useAnimatedStyle(() => {
-    const isTransition =
-      leftSceneProgress.value % 1 !== 0 || rightSceneProgress.value % 1 !== 0;
-
     const defaultStyle =
-      isTransition || leftSceneProgress.value !== 0
+      sharedInfoValue.value.isReadyToMeasure &&
+      (sharedInfoValue.value.isTransition || leftSceneProgress.value !== 0)
         ? {
             position: 'absolute' as const,
             top: 0,
             left: 0,
             right: 0,
+            bottom: 'auto' as const,
           }
         : {
             position: 'relative' as const,
             top: 'auto' as const,
             left: 'auto' as const,
             right: 'auto' as const,
+            bottom: 'auto' as const,
           };
 
-    if (_WORKLET) {
-      const measured = measure(leftContainerRef);
-      if (measured) {
-        return {
-          ...defaultStyle,
-          top: (() => {
-            if (transitionAlign === 'bottom') {
-              return 'auto';
-            }
-
-            if (transitionAlign === 'center') {
-              return '50%';
-            }
-
-            return 0;
-          })(),
-          bottom: (() => {
-            if (transitionAlign === 'bottom') {
-              return 0;
-            }
-
+    if (_WORKLET && sharedInfoValue.value.isReadyToMeasure) {
+      return {
+        ...defaultStyle,
+        top: (() => {
+          if (transitionAlign === 'bottom') {
             return 'auto';
-          })(),
-          transform: [
-            {
-              translateX: leftSceneProgress.value * measured.width,
-            },
-            {
-              translateY: (() => {
-                if (transitionAlign === 'center') {
-                  return -measured.height / 2;
-                }
+          }
 
-                return 0;
-              })(),
-            },
-          ],
-          opacity: 1 - Math.abs(leftSceneProgress.value),
-        };
-      }
+          if (transitionAlign === 'center') {
+            return '50%';
+          }
+
+          return 0;
+        })(),
+        bottom: (() => {
+          if (transitionAlign === 'bottom') {
+            return 0;
+          }
+
+          return 'auto';
+        })(),
+        transform: [
+          {
+            translateX:
+              leftSceneProgress.value *
+              sharedInfoValue.value.leftMeasured.width,
+          },
+          {
+            translateY: (() => {
+              if (transitionAlign === 'center') {
+                return -sharedInfoValue.value.leftMeasured.height / 2;
+              }
+
+              return 0;
+            })(),
+          },
+        ],
+        opacity: 1 - Math.abs(leftSceneProgress.value),
+      };
     }
     return defaultStyle;
   });
   const rightContainerStyle = useAnimatedStyle(() => {
-    const isTransition =
-      leftSceneProgress.value % 1 !== 0 || rightSceneProgress.value % 1 !== 0;
-
     const defaultStyle =
-      isTransition || rightSceneProgress.value !== 0
+      sharedInfoValue.value.isReadyToMeasure &&
+      (sharedInfoValue.value.isTransition || rightSceneProgress.value !== 0)
         ? {
             position: 'absolute' as const,
             top: 0,
             left: 0,
             right: 0,
+            bottom: 'auto' as const,
           }
         : {
             position: 'relative' as const,
             top: 'auto' as const,
             left: 'auto' as const,
             right: 'auto' as const,
+            bottom: 'auto' as const,
           };
 
-    if (_WORKLET) {
-      const measured = measure(rightContainerRef);
-      if (measured) {
-        return {
-          ...defaultStyle,
-          top: (() => {
-            if (transitionAlign === 'bottom') {
-              return 'auto';
-            }
-
-            if (transitionAlign === 'center') {
-              return '50%';
-            }
-
-            return 0;
-          })(),
-          bottom: (() => {
-            if (transitionAlign === 'bottom') {
-              return 0;
-            }
-
+    if (_WORKLET && sharedInfoValue.value.isReadyToMeasure) {
+      return {
+        ...defaultStyle,
+        top: (() => {
+          if (transitionAlign === 'bottom') {
             return 'auto';
-          })(),
-          transform: [
-            {
-              translateX: rightSceneProgress.value * measured.width,
-            },
-            {
-              translateY: (() => {
-                if (transitionAlign === 'center') {
-                  return -measured.height / 2;
-                }
+          }
 
-                return 0;
-              })(),
-            },
-          ],
-          opacity: 1 - Math.abs(rightSceneProgress.value),
-        };
-      }
+          if (transitionAlign === 'center') {
+            return '50%';
+          }
+
+          return 0;
+        })(),
+        bottom: (() => {
+          if (transitionAlign === 'bottom') {
+            return 0;
+          }
+
+          return 'auto';
+        })(),
+        transform: [
+          {
+            translateX:
+              rightSceneProgress.value *
+              sharedInfoValue.value.rightMeasured.width,
+          },
+          {
+            translateY: (() => {
+              if (transitionAlign === 'center') {
+                return -sharedInfoValue.value.rightMeasured.height / 2;
+              }
+
+              return 0;
+            })(),
+          },
+        ],
+        opacity: 1 - Math.abs(rightSceneProgress.value),
+      };
     }
     return defaultStyle;
   });
 
   return (
-    <Reanimated.View ref={containerRef} style={containerStyle}>
-      <Reanimated.View ref={leftContainerRef} style={leftContainerStyle}>
+    <Reanimated.View style={containerStyle}>
+      <Reanimated.View
+        style={leftContainerStyle}
+        onLayout={e => {
+          leftMeasuredTemp.value = {
+            width: e.nativeEvent.layout.width,
+            height: e.nativeEvent.layout.height,
+          };
+        }}>
         {React.createElement(leftScene.element, sharedProps)}
       </Reanimated.View>
-      <Reanimated.View ref={rightContainerRef} style={rightContainerStyle}>
+      <Reanimated.View
+        style={rightContainerStyle}
+        onLayout={e => {
+          rightMeasuredTemp.value = {
+            width: e.nativeEvent.layout.width,
+            height: e.nativeEvent.layout.height,
+          };
+        }}>
         {rightScene
           ? React.createElement(rightScene.element, sharedProps)
           : null}

@@ -102,7 +102,6 @@ export const VerticalResizeContainer: FunctionComponent<
       <Reanimated.View
         ref={innerContainerRef}
         style={innerStyle}
-        collapsable={false}
         onLayout={e => {
           onHeightChangeRef.current(e.nativeEvent.layout.height);
         }}>
