@@ -46,7 +46,7 @@ export const UnbondingCard: FunctionComponent<{
         paddingX={16}
         paddingY={20}
         borderRadius={6}
-        backgroundColor={style.get('color-gray-600').color}>
+        backgroundColor={style.get('color-card-default').color}>
         <Stack gutter={24}>
           {unbonding.entries.map((entry, i) => {
             const remainingText = formatRelativeTimeString(

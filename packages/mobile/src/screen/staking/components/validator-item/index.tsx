@@ -43,9 +43,12 @@ export const ValidatorItem: FunctionComponent<{
 
   return (
     <RectButton
-      underlayColor={style.get('color-gray-550').color}
-      rippleColor={style.get('color-gray-550').color}
-      style={style.flatten(['border-radius-6', 'background-color-gray-600'])}
+      underlayColor={style.get('color-card-pressing-default').color}
+      rippleColor={style.get('color-card-pressing-default').color}
+      style={style.flatten([
+        'border-radius-6',
+        'background-color-card-default',
+      ])}
       activeOpacity={0.5}
       onPress={async () => {
         afterSelect();
@@ -209,11 +212,11 @@ export const ValidatorListItem: FunctionComponent<{
       <React.Fragment>
         {viewValidator ? (
           <RectButton
-            underlayColor={style.get('color-gray-550').color}
-            rippleColor={style.get('color-gray-550').color}
+            underlayColor={style.get('color-card-pressing-default').color}
+            rippleColor={style.get('color-card-pressing-default').color}
             style={style.flatten([
               'border-radius-6',
-              'background-color-gray-600',
+              'background-color-card-default',
             ])}
             activeOpacity={0.5}
             onPress={() => {

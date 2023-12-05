@@ -213,7 +213,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
       <Box
         padding={16}
         borderRadius={8}
-        backgroundColor={style.get('color-gray-600').color}>
+        backgroundColor={style.get('color-card-default').color}>
         <Columns sum={1} alignY="center" gutter={8}>
           <Columns sum={1} gutter={12} alignY="center">
             <LinearGradient

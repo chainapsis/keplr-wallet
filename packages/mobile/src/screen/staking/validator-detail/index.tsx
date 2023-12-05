@@ -85,7 +85,7 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
           <Box
             paddingX={16}
             paddingY={20}
-            backgroundColor={style.get('color-gray-600').color}
+            backgroundColor={style.get('color-card-default').color}
             borderRadius={6}>
             <Stack gutter={20}>
               <Columns sum={1} alignY="center" gutter={12}>
