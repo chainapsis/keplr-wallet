@@ -358,7 +358,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
         {isSecretWasm ? (
           <Stack gutter={12}>
             <Box
-              backgroundColor={style.get('color-gray-600').color}
+              backgroundColor={style.get('color-card-default').color}
               borderRadius={6}
               padding={16}>
               <Columns sum={1} alignY="center" gutter={4}>

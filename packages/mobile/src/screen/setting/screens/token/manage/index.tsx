@@ -293,7 +293,9 @@ const TokenItem: FunctionComponent<{
   return (
     <Box
       padding={16}
-      backgroundColor={style.get('background-color-gray-600').backgroundColor}
+      backgroundColor={
+        style.get('background-color-card-default').backgroundColor
+      }
       borderRadius={6}>
       <Columns sum={1}>
         <Stack gutter={4}>

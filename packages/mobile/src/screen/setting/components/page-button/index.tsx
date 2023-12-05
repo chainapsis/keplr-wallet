@@ -26,8 +26,8 @@ export const PageButton: FunctionComponent<PageButtonProps> = ({
   if (onClick) {
     return (
       <RectButton
-        rippleColor={style.get('color-gray-550').color}
-        underlayColor={style.get('color-gray-550').color}
+        rippleColor={style.get('color-card-pressing-default').color}
+        underlayColor={style.get('color-card-pressing-default').color}
         style={style.flatten([
           'background-color-card-default',
           'border-radius-6',
