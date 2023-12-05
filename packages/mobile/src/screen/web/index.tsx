@@ -144,7 +144,7 @@ export const WebScreen: FunctionComponent = observer(() => {
                 'padding-16',
                 'margin-bottom-8',
                 'border-radius-8',
-                'background-color-gray-600',
+                'background-color-card-default',
               ])}
               onPress={() => {
                 navigation.navigate('WebTab', {
