@@ -11,6 +11,13 @@ import {ArrowUpIcon} from '../icon/arrow-up';
 import {TextButton} from '../text-button';
 import {useIntl} from 'react-intl';
 
+const ArrowDownIconFunc = (color: string) => (
+  <ArrowDownIcon size={16} color={color} />
+);
+const ArrowUpIconFunc = (color: string) => (
+  <ArrowUpIcon size={16} color={color} />
+);
+
 export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
   title,
   items,
@@ -62,6 +69,8 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
           <Gutter size={12} />
           <TextButton
             containerStyle={style.flatten(['padding-y-12'])}
+            textColor="gray-300"
+            pressingColor="gray-400"
             text={
               isCollapsed
                 ? intl.formatMessage(
@@ -72,19 +81,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
                     id: 'components.collapsible-list.collapse',
                   })
             }
-            rightIcon={
-              isCollapsed ? (
-                <ArrowDownIcon
-                  size={16}
-                  color={style.get('color-gray-300').color}
-                />
-              ) : (
-                <ArrowUpIcon
-                  size={16}
-                  color={style.get('color-gray-300').color}
-                />
-              )
-            }
+            rightIcon={isCollapsed ? ArrowDownIconFunc : ArrowUpIconFunc}
             onPress={() => {
               setIsCollapsed(!isCollapsed);
             }}

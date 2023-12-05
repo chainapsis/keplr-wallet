@@ -4,7 +4,7 @@ import React, {
   isValidElement,
   useState,
 } from 'react';
-import {useStyle} from '../../styles';
+import {ColorPalette, useStyle} from '../../styles';
 import {Text, StyleSheet, TextStyle, Pressable, ViewStyle} from 'react-native';
 import {Box} from '../box';
 
@@ -19,6 +19,8 @@ export const TextButton: FunctionComponent<{
   disabled?: boolean;
   onPress?: () => void;
   textStyle?: TextStyle;
+  textColor?: keyof typeof ColorPalette;
+  pressingColor?: keyof typeof ColorPalette;
   textButtonSize?: number;
   containerStyle?: ViewStyle;
 }> = ({
@@ -30,11 +32,16 @@ export const TextButton: FunctionComponent<{
   onPress,
   textStyle,
   containerStyle,
+  textColor,
+  pressingColor,
 }) => {
   const style = useStyle();
   const [isPressIn, setIsPressIn] = useState(false);
 
   const textColorDefinition: string = (() => {
+    if (textColor) {
+      return `color-${textColor}`;
+    }
     switch (color) {
       case 'faint':
         if (disabled) {
@@ -47,6 +54,13 @@ export const TextButton: FunctionComponent<{
         }
         return 'color-white';
     }
+  })();
+
+  const pressingColorDefinition: string = (() => {
+    if (pressingColor) {
+      return `color-${pressingColor}`;
+    }
+    return 'color-gray-300';
   })();
 
   return (
@@ -70,7 +84,9 @@ export const TextButton: FunctionComponent<{
           style.flatten([
             'text-center',
             size === 'large' ? 'text-button1' : 'text-button2',
-            isPressIn ? 'color-gray-300' : (textColorDefinition as any),
+            isPressIn
+              ? (pressingColorDefinition as any)
+              : (textColorDefinition as any),
           ]),
           textStyle,
         ])}>
@@ -83,7 +99,7 @@ export const TextButton: FunctionComponent<{
           ? rightIcon
           : rightIcon(
               isPressIn
-                ? style.get('color-gray-300').color
+                ? style.get(pressingColorDefinition as any).color
                 : style.get(textColorDefinition as any).color,
             )}
       </Box>
