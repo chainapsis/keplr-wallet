@@ -439,6 +439,7 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
           'loading-spinner': '#BABAC1',
           'skeleton-layer-0': '#ECEBF1',
           'skeleton-layer-1': '#F9F9FC',
+          'card-pressing-default': ColorPalette['gray-600'],
         },
       },
       widths: {
