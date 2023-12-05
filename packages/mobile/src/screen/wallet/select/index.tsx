@@ -587,7 +587,7 @@ const KeyringItem: FunctionComponent<{
       borderRadius={6}
       alignY="center"
       style={StyleSheet.flatten([
-        style.flatten(['background-color-gray-600']),
+        style.flatten(['background-color-card-default']),
         isSelected &&
           style.flatten([
             'border-width-1',
