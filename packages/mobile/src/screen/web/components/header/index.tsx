@@ -7,8 +7,8 @@ import {RectButton} from '../../../../components/rect-button';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../../../stores';
 import {useWebViewState} from '../../context';
-import {useNavigation} from '@react-navigation/native';
-import {StackNavProp} from '../../../../navigation';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {RootStackParamList, StackNavProp} from '../../../../navigation';
 import {Box} from '../../../../components/box';
 import {Columns} from '../../../../components/column';
 
@@ -100,6 +100,8 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = observer(() => {
   const safeAreaInsets = useSafeAreaInsets();
   const headerHeight = 48;
   const navigation = useNavigation<StackNavProp>();
+  const route = useRoute<RouteProp<RootStackParamList, 'Web'>>();
+  const {isExternal} = route.params;
 
   const webViewState = useWebViewState();
   return (
@@ -204,19 +206,21 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = observer(() => {
               }
             />
           </RectButton>
-          <RectButton
-            style={style.flatten(['border-radius-4'])}
-            rippleColor={style.get('color-gray-550').color}
-            underlayColor={style.get('color-gray-550').color}
-            activeOpacity={1}
-            onPress={() => {
-              navigation.navigate('WebTab', {screen: 'Web.Intro'});
-            }}>
-            <HomeIcon
-              size={32}
-              color={style.flatten(['color-gray-100']).color}
-            />
-          </RectButton>
+          {!isExternal ? (
+            <RectButton
+              style={style.flatten(['border-radius-4'])}
+              rippleColor={style.get('color-gray-550').color}
+              underlayColor={style.get('color-gray-550').color}
+              activeOpacity={1}
+              onPress={() => {
+                navigation.navigate('WebTab', {screen: 'Web.Intro'});
+              }}>
+              <HomeIcon
+                size={32}
+                color={style.flatten(['color-gray-100']).color}
+              />
+            </RectButton>
+          ) : null}
         </Columns>
       </View>
     </Box>

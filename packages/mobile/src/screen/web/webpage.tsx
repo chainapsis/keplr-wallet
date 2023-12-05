@@ -38,7 +38,6 @@ export const useInjectedSourceCode = () => {
   return code;
 };
 
-// TODO: 커스텀 헤더구현 해야함
 export const WebpageScreen: FunctionComponent = observer(() => {
   const {chainStore} = useStore();
 
