@@ -2,11 +2,14 @@ import React, {FunctionComponent, PropsWithChildren, useEffect} from 'react';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../stores';
 import {SignModal} from '../../screen/sign/sign-modal';
-import {BasicAccessModal} from '../../components/modal/basic-access';
-import {SuggestChainModal} from '../../components/modal/suggest-chain';
+import {
+  BasicAccessModal,
+  SuggestChainModal,
+  WalletConnectAccessModal,
+  GlobalPermissionModal,
+} from '../../components/modal';
 import {BackHandler, Platform} from 'react-native';
 import {WCMessageRequester} from '../../stores/wallet-connect/msg-requester';
-import {WalletConnectAccessModal} from '../../components/modal/wallet-connect-access';
 
 export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
   observer(({children}) => {
@@ -28,6 +31,15 @@ export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
         {signInteractionStore.waitingData &&
         !signInteractionStore.waitingData.data.signDocWrapper.isADR36SignDoc ? (
           <SignModal interactionData={signInteractionStore.waitingData} />
+        ) : null}
+
+        {permissionStore.waitingGlobalPermissionData ? (
+          <GlobalPermissionModal
+            isOpen={true}
+            setIsOpen={async () => {
+              await permissionStore.rejectGlobalPermissionAll();
+            }}
+          />
         ) : null}
 
         {permissionStore.waitingPermissionDatas &&
@@ -60,7 +72,12 @@ export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
           })}
 
         {chainSuggestStore.waitingSuggestedChainInfo ? (
-          <SuggestChainModal />
+          <SuggestChainModal
+            isOpen={true}
+            setIsOpen={async () => {
+              await chainSuggestStore.rejectAll();
+            }}
+          />
         ) : null}
 
         {children}
