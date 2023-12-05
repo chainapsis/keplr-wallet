@@ -10,6 +10,7 @@ import {
 } from '../../components/modal';
 import {BackHandler, Platform} from 'react-native';
 import {WCMessageRequester} from '../../stores/wallet-connect/msg-requester';
+import {ADR36SignModal} from '../../screen/sign/sign-adr36-modal';
 
 export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
   observer(({children}) => {
@@ -31,6 +32,14 @@ export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
         {signInteractionStore.waitingData &&
         !signInteractionStore.waitingData.data.signDocWrapper.isADR36SignDoc ? (
           <SignModal interactionData={signInteractionStore.waitingData} />
+        ) : null}
+
+        {signInteractionStore.waitingData &&
+        signInteractionStore.waitingData.data.signDocWrapper.isADR36SignDoc ? (
+          <ADR36SignModal
+            isOpen={true}
+            setIsOpen={() => signInteractionStore.rejectAll()}
+          />
         ) : null}
 
         {permissionStore.waitingGlobalPermissionData ? (
