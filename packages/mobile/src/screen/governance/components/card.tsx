@@ -129,7 +129,10 @@ export const GovernanceCardBody: FunctionComponent<{
   return (
     <Box
       borderRadius={6}
-      style={style.flatten(['overflow-hidden', 'background-color-gray-600'])}>
+      style={style.flatten([
+        'overflow-hidden',
+        'background-color-card-default',
+      ])}>
       {proposal ? (
         <RectButton
           style={style.flatten(['padding-16'])}
