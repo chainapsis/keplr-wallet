@@ -154,8 +154,10 @@ export const defaultHeaderOptions = {
   headerTitle: DefaultScreenHeaderTitle,
   headerTitleAlign: 'center' as 'center' | 'left',
   headerBackVisible: false,
+
   headerStyle: {
     backgroundColor: ColorPalette['gray-700'],
   },
+  headerShadowVisible: false,
   headerLeft: (props: any) => <DefaultScreenHeaderLeft {...props} />,
 };
