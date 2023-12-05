@@ -60,7 +60,7 @@ export const Button: FunctionComponent<{
       case 'danger':
         return [`background-color-${baseColor}-300@30%`];
       case 'secondary':
-        return [`background-color-${baseColor}-400`];
+        return [`background-color-${baseColor}-500`];
       //default는 기본적으로 primary 색상으로 적용
       default:
         return [
