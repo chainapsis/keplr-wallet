@@ -100,27 +100,33 @@ export const LayeredHorizontalRadioGroup: FunctionComponent<
           })();
 
           return (
-            <Pressable
-              style={StyleSheet.flatten([
-                style.flatten(
-                  ['flex-row', 'items-center', 'justify-center'],
-                  [
-                    selected
-                      ? 'background-color-gray-400'
-                      : 'background-color-gray-600',
-                  ],
-                ),
-                itemStyle,
-              ])}
-              key={item.key}
-              onPress={e => {
-                e.preventDefault();
-                onSelect(item.key);
-              }}>
-              <Text style={style.flatten([...(textStyle as any)])}>
-                {item.text}
-              </Text>
-            </Pressable>
+            <Skeleton
+              type="circle"
+              isNotReady={isNotReady}
+              layer={1}
+              key={item.key}>
+              <Pressable
+                style={StyleSheet.flatten([
+                  style.flatten(
+                    ['flex-row', 'items-center', 'justify-center'],
+                    [
+                      selected
+                        ? 'background-color-gray-400'
+                        : 'background-color-gray-600',
+                    ],
+                  ),
+                  itemStyle,
+                ])}
+                key={item.key}
+                onPress={e => {
+                  e.preventDefault();
+                  onSelect(item.key);
+                }}>
+                <Text style={style.flatten([...(textStyle as any)])}>
+                  {item.text}
+                </Text>
+              </Pressable>
+            </Skeleton>
           );
         })}
       </View>
