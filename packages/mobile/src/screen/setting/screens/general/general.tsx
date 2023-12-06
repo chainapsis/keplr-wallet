@@ -114,6 +114,7 @@ export const SettingGeneralScreen: FunctionComponent = observer(() => {
                 navigate.navigate('Register.EnableChain', {
                   vaultId: keyRingStore.selectedKeyInfo?.id,
                   skipWelcome: true,
+                  hideBackButton: false,
                 });
               }
             }}

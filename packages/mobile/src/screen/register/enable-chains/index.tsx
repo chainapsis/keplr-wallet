@@ -58,6 +58,7 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
     stepPrevious,
     stepTotal,
     password,
+    hideBackButton = true,
   } = route.params;
 
   const [search, setSearch] = useState<string>(initialSearchValue ?? '');
@@ -494,10 +495,10 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
         paragraph={
           isFresh ? `Step ${(stepPrevious ?? 0) + 1}/${stepTotal}` : undefined
         }
-        hideBackButton={true}
+        hideBackButton={hideBackButton}
       />
 
-      <Box padding={20} alignX="center" style={{flex: 1}}>
+      <Box padding={12} alignX="center" style={{flex: 1}}>
         <Text
           style={StyleSheet.flatten([
             style.flatten(['color-text-low', 'body1']),

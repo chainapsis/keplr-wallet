@@ -170,6 +170,7 @@ export type RootStackParamList = {
     stepPrevious?: number;
     stepTotal?: number;
     password?: string;
+    hideBackButton?: boolean;
   };
   'Register.SelectDerivationPath': {
     chainIds: string[];

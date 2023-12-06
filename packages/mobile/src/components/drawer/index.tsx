@@ -29,6 +29,7 @@ export const DrawerContent: FunctionComponent = observer(() => {
       navigation.navigate('Register.EnableChain', {
         vaultId: keyRingStore.selectedKeyInfo.id,
         skipWelcome: true,
+        hideBackButton: false,
       });
     }
   };
