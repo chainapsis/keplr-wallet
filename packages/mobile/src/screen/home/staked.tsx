@@ -153,6 +153,18 @@ export const StakedTabView: FunctionComponent<{
                           },
                         });
                       }}
+                      onClickError={(errorKind, errorMsg) => {
+                        if (errorKind === 'common') {
+                          setInfoModalState({
+                            title: intl.formatMessage({
+                              id: 'page.main.components.secret-error-modal-button',
+                            }),
+                            paragraph: errorMsg,
+                          });
+                          setIsInfoModalOpen(true);
+                          return;
+                        }
+                      }}
                       altSentence={viewToken.altSentence}
                     />
                   );
