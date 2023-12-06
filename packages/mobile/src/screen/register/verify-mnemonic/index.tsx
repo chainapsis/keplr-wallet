@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
+import React, {FunctionComponent, useMemo, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {ScrollView, Text} from 'react-native';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
@@ -12,9 +12,7 @@ import {Gutter} from '../../../components/gutter';
 import {XAxis} from '../../../components/axis';
 import {TextInput} from '../../../components/input';
 import {Controller, useForm} from 'react-hook-form';
-import {BottomSheetModal} from '@gorhom/bottom-sheet';
-import {Modal} from '../../../components/modal';
-import {Bip44PathModal, useBIP44PathState} from '../components/bip-path-44';
+import {Bip44PathView, useBIP44PathState} from '../components/bip-path-44';
 import {useStore} from '../../../stores';
 
 export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
@@ -22,7 +20,6 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
   const style = useStyle();
   const route =
     useRoute<RouteProp<RootStackParamList, 'Register.VerifyMnemonic'>>();
-  const modalRef = useRef<BottomSheetModal>(null);
 
   const navigation = useNavigation<StackNavProp>();
 
@@ -51,6 +48,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
   const [validatingStarted, setValidatingStarted] = useState<boolean>(false);
 
   const bip44PathState = useBIP44PathState();
+  const [isOpenBip44PathView, setIsOpenBip44PathView] = React.useState(false);
 
   const verifyingWords = useMemo(() => {
     if (route.params.mnemonic?.trim() === '') {
@@ -280,19 +278,29 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
 
         <Gutter size={16} />
 
-        <Button
-          text={intl.formatMessage({id: 'button.advanced'})}
-          containerStyle={{alignSelf: 'center'}}
-          color="secondary"
-          onPress={() => {
-            modalRef.current?.present();
-          }}
-        />
+        {isOpenBip44PathView ? (
+          <Bip44PathView
+            state={bip44PathState}
+            setIsOpen={setIsOpenBip44PathView}
+          />
+        ) : (
+          <Box alignX="center">
+            <Button
+              text={intl.formatMessage({id: 'button.approve'})}
+              size="small"
+              color="secondary"
+              disabled={
+                !bip44PathState.isAccountValid() ||
+                !bip44PathState.isChangeValid() ||
+                !bip44PathState.isAddressIndexValid()
+              }
+              onPress={() => {
+                setIsOpenBip44PathView(true);
+              }}
+            />
+          </Box>
+        )}
       </ScrollView>
-
-      <Modal ref={modalRef} snapPoints={['40%']} enableDynamicSizing={true}>
-        <Bip44PathModal state={bip44PathState} />
-      </Modal>
     </RegisterContainer>
   );
 });

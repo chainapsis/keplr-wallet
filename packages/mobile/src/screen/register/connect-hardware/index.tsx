@@ -7,7 +7,7 @@ import {Button} from '../../../components/button';
 import {useStyle} from '../../../styles';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../navigation';
-import {Bip44PathModal, useBIP44PathState} from '../components/bip-path-44';
+import {Bip44PathView, useBIP44PathState} from '../components/bip-path-44';
 import {BottomSheetFlatList, BottomSheetModal} from '@gorhom/bottom-sheet';
 import {Modal} from '../../../components/modal';
 import {ScrollView, Text} from 'react-native';
@@ -27,7 +27,8 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation<StackNavProp>();
 
   const bip44PathState = useBIP44PathState();
-  const modalRef = useRef<BottomSheetModal>(null);
+  const [isOpenBip44PathView, setIsOpenBip44PathView] = React.useState(false);
+
   const selectAppModalRef = useRef<BottomSheetModal>(null);
 
   const {keyRingStore} = useStore();
@@ -54,8 +55,6 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
   });
 
   const onSubmit = handleSubmit(async data => {
-    modalRef.current?.dismiss();
-
     navigation.navigate('Register.ConnectLedger', {
       name: data.name,
       password: data.password,
@@ -212,18 +211,29 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
 
         <Gutter size={16} />
 
-        <Button
-          text={intl.formatMessage({id: 'button.advanced'})}
-          containerStyle={{alignSelf: 'center'}}
-          color="secondary"
-          onPress={() => {
-            modalRef.current?.present();
-          }}
-        />
+        {isOpenBip44PathView ? (
+          <Bip44PathView
+            state={bip44PathState}
+            setIsOpen={setIsOpenBip44PathView}
+          />
+        ) : (
+          <Box alignX="center">
+            <Button
+              text={intl.formatMessage({id: 'button.approve'})}
+              size="small"
+              color="secondary"
+              disabled={
+                !bip44PathState.isAccountValid() ||
+                !bip44PathState.isChangeValid() ||
+                !bip44PathState.isAddressIndexValid()
+              }
+              onPress={() => {
+                setIsOpenBip44PathView(true);
+              }}
+            />
+          </Box>
+        )}
       </ScrollView>
-      <Modal ref={modalRef} enableDynamicSizing={true}>
-        <Bip44PathModal state={bip44PathState} />
-      </Modal>
 
       <Modal ref={selectAppModalRef} snapPoints={[supportedApps.length * 80]}>
         <BottomSheetFlatList

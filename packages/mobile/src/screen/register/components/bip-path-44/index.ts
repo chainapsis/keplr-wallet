@@ -1,3 +1,3 @@
 export * from './state';
 export * from './hook';
-export * from './modal';
+export * from './view';
