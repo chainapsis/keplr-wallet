@@ -286,7 +286,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
         ) : (
           <Box alignX="center">
             <Button
-              text={intl.formatMessage({id: 'button.approve'})}
+              text={intl.formatMessage({id: 'button.advanced'})}
               size="small"
               color="secondary"
               disabled={
