@@ -484,6 +484,7 @@
   "page.send.amount.memo-placeholder": "Required for sending to centralized exchanges",
   "page.send.amount.ibc-transfer-warning.title": "Avoid IBC transfers to centralized exchanges. Your assets may be lost.",
 
+  "page.main.error-modal-title": "Error Message",
   "page.main.chart.available": "Total Available",
   "page.main.chart.staked": "Total Staked",
   "page.main.chart.stake-with-keplr-dashboard-button": "Stake with Keplr Dashboard",
@@ -552,6 +553,7 @@
   "page.main.components.token-found-modal.add-token-on-injective-and-evmos": "Add tokens on Injective and Evmos",
   "page.main.components.token-found-modal.add-chains": "Add Chains",
   "page.main.components.token-item.copy-address.copied": "Copied",
+  "page.main.components.secret-error-modal-button": "Set my Viewing Key",
 
   "page.ledger-grant.title": "Allow Browser to Connect to Ledger",
   "page.ledger-grant.paragraph": "You need to reapprove connection to your Ledger. Select the appropriate app, and after successfully connecting with your Ledger device, close this page and retry your previous transaction (signing).",

@@ -470,6 +470,7 @@
   "page.send.amount.memo-placeholder": "중앙화 거래소로 보낼 때는 필수입니다.",
   "page.send.amount.ibc-transfer-warning.title": "중앙화 거래소에 IBC 전송을 하지 마세요. 자산을 잃을 수 있습니다.",
 
+  "page.main.error-modal-title": "Error Message",
   "page.main.chart.available": "사용 가능한 자산",
   "page.main.chart.staked": "스테이킹된 자산",
   "page.main.chart.stake-with-keplr-dashboard-button": "케플러 대시보드에서 스테이킹 시작하기",
@@ -538,6 +539,7 @@
   "page.main.components.token-found-modal.add-token-on-injective-and-evmos": "인젝티브와 이브모스의 토큰 추가하기",
   "page.main.components.token-found-modal.add-chains": "체인 추가",
   "page.main.components.token-item.copy-address.copied": "복사됨",
+  "page.main.components.secret-error-modal-button": "Set my Viewing Key",
 
   "page.ledger-grant.title": "렛저와 브라우저 간의 연결을 재허용합니다",
   "page.ledger-grant.paragraph": "렛저의 연결 권한을 다시 허용해보는 절차입니다. 먼저, 렛저 장치에서 올바른 앱을 선택하여 연 뒤 장치의 연결을 다시 시도해보세요. 연결이 완료되면 기존 화면으로 돌아가 수행하려던 트랜잭션을 다시 시도해볼 수 있습니다.",
