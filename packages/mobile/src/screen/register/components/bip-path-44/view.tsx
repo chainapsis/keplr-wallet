@@ -43,7 +43,13 @@ export const Bip44PathView: FunctionComponent<{
       borderRadius={8}
       backgroundColor={style.get('color-background-secondary').color}>
       <XAxis alignY="center">
-        <Text style={style.flatten(['h4', 'color-text-high', 'flex-1'])}>
+        <Text
+          style={style.flatten([
+            'h4',
+            'color-text-high',
+            'flex-1',
+            'padding-left-16',
+          ])}>
           <FormattedMessage id="pages.register.components.bip-44-path.title" />
         </Text>
 
