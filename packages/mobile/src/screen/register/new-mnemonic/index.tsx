@@ -171,9 +171,9 @@ const CopyToClipboard: FunctionComponent<{text: string}> = ({text}) => {
               id: 'pages.register.components.copy-to-clipboard.button-before',
             })
       }
-      textStyle={style.flatten([
-        hasCopied ? 'color-green-400' : 'color-gray-50',
-      ])}
+      textColor={
+        style.flatten([hasCopied ? 'color-green-400' : 'color-gray-50']).color
+      }
       size="large"
       onPress={async () => {
         await Clipboard.setStringAsync(text);
