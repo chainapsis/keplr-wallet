@@ -1,11 +1,11 @@
 import React, {FunctionComponent, useEffect, useRef} from 'react';
-import {FlatList, Text, TextInput, ViewStyle} from 'react-native';
+import {StyleSheet, Text, TextInput, View, ViewStyle} from 'react-native';
 import {useStyle} from '../../styles';
 import {Box} from '../box';
 import {Label} from '../input/label';
 import {Columns} from '../column';
 import {ArrowDownFillIcon} from '../icon/arrow-down-fill';
-import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
+import {FlatList} from 'react-native-gesture-handler';
 
 export interface DropdownItemProps {
   key: string;
@@ -23,7 +23,9 @@ export interface DropdownProps {
   size?: 'small' | 'large';
   label?: string;
   allowSearch?: boolean;
-  isModal?: boolean;
+
+  itemContainerStyle?: ViewStyle;
+  listContainerStyle?: ViewStyle;
 }
 
 export const Dropdown: FunctionComponent<DropdownProps> = ({
@@ -35,7 +37,8 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
   color,
   size,
   allowSearch,
-  isModal,
+  itemContainerStyle,
+  listContainerStyle,
 }) => {
   const style = useStyle();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -92,6 +95,7 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
             ? style.get('color-gray-200').color
             : style.get('color-gray-500').color
         }
+        style={StyleSheet.flatten([itemContainerStyle])}
         onClick={() => setIsOpen(!isOpen)}>
         <Columns sum={1}>
           <Box style={{flex: 1}}>
@@ -136,49 +140,37 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
         </Columns>
       </Box>
 
-      <Box>
+      <View>
         <Box
           position="absolute"
           backgroundColor={style.get('color-gray-600').color}
           borderColor={style.get('color-gray-500').color}
           borderWidth={1}
           borderRadius={6}
-          height={items.length > 5 ? 200 : items.length * 52}
-          style={style.flatten([
-            'flex-1',
-            'width-full',
-            'overflow-hidden',
-            isOpen && filteredItems.length > 0 ? 'flex' : 'display-none',
+          maxHeight={180}
+          style={StyleSheet.flatten([
+            style.flatten([
+              'flex-1',
+              'width-full',
+              'overflow-hidden',
+              isOpen && filteredItems.length > 0 ? 'flex' : 'display-none',
+            ]),
+            listContainerStyle,
           ])}>
-          {isModal ? (
-            <BottomSheetFlatList
-              data={filteredItems}
-              keyExtractor={item => item.key}
-              renderItem={({item}) => (
-                <DropdownItem
-                  item={item}
-                  onSelect={onSelect}
-                  closeDropdown={() => setIsOpen(!isOpen)}
-                />
-              )}
-              ItemSeparatorComponent={Divider}
-            />
-          ) : (
-            <FlatList
-              data={filteredItems}
-              keyExtractor={item => item.key}
-              renderItem={({item}) => (
-                <DropdownItem
-                  item={item}
-                  onSelect={onSelect}
-                  closeDropdown={() => setIsOpen(!isOpen)}
-                />
-              )}
-              ItemSeparatorComponent={Divider}
-            />
-          )}
+          <FlatList
+            data={filteredItems}
+            keyExtractor={item => item.key}
+            renderItem={({item}) => (
+              <DropdownItem
+                item={item}
+                onSelect={onSelect}
+                closeDropdown={() => setIsOpen(!isOpen)}
+              />
+            )}
+            ItemSeparatorComponent={Divider}
+          />
         </Box>
-      </Box>
+      </View>
     </Box>
   );
 };

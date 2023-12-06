@@ -173,7 +173,7 @@ export const FeeSelector: FunctionComponent<{
               'h5',
               feeConfig.type === 'high' ? 'color-gray-50' : 'color-gray-200',
             ])}>
-            <FormattedMessage id="components.input.fee-control.modal.fee-selector.low" />
+            <FormattedMessage id="components.input.fee-control.modal.fee-selector.high" />
           </Text>
 
           {feeCurrency.coinGeckoId ? (

@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useLayoutEffect, useRef} from 'react';
+import React, {FunctionComponent, useLayoutEffect, useState} from 'react';
 import {
   IFeeConfig,
   IGasConfig,
@@ -17,9 +17,7 @@ import {useStyle} from '../../../styles';
 import {Gutter} from '../../gutter';
 import {IconButton} from '../../icon-button';
 import {AdjustmentsHorizontalIcon} from '../../icon/adjustments-horizontal';
-import {Modal} from '../../modal';
 import {TransactionFeeModal} from './transaction-fee-modal';
-import {BottomSheetModal, BottomSheetView} from '@gorhom/bottom-sheet';
 
 export const FeeControl: FunctionComponent<{
   senderConfig: ISenderConfig;
@@ -39,7 +37,7 @@ export const FeeControl: FunctionComponent<{
     const {queriesStore, priceStore, chainStore} = useStore();
     const style = useStyle();
 
-    const transactionFeeModalRef = useRef<BottomSheetModal>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useLayoutEffect(() => {
       if (disableAutomaticFeeSet) {
@@ -222,23 +220,24 @@ export const FeeControl: FunctionComponent<{
               />
             }
             style={style.flatten(['border-radius-64'])}
-            containerStyle={style.flatten(['width-32', 'height-32'])}
-            onPress={() => {
-              transactionFeeModalRef.current?.present();
-            }}
+            containerStyle={style.flatten([
+              'width-32',
+              'height-32',
+              'border-radius-16',
+              'background-color-gray-500',
+            ])}
+            onPress={() => setIsModalOpen(true)}
           />
         </Columns>
 
-        <Modal ref={transactionFeeModalRef} snapPoints={['60%']}>
-          <BottomSheetView>
-            <TransactionFeeModal
-              senderConfig={senderConfig}
-              feeConfig={feeConfig}
-              gasConfig={gasConfig}
-              gasSimulator={gasSimulator}
-            />
-          </BottomSheetView>
-        </Modal>
+        <TransactionFeeModal
+          isOpen={isModalOpen}
+          setIsOpen={setIsModalOpen}
+          senderConfig={senderConfig}
+          feeConfig={feeConfig}
+          gasConfig={gasConfig}
+          gasSimulator={gasSimulator}
+        />
       </Box>
     );
   },
