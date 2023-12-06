@@ -20,15 +20,14 @@ export const InformationModal = registerCardModal(
       <Box paddingX={12} paddingBottom={60 + insects.bottom}>
         <Box>
           <Box>
-            <Box paddingBottom={12} paddingX={8}>
+            <Box paddingBottom={21} paddingTop={9} paddingX={8} alignY="center">
               <Columns sum={1} gutter={10} alignY="center">
                 <InformationOutlinedIcon
                   size={20}
                   color={style.get('color-text-low').color}
                 />
 
-                <Text
-                  style={style.flatten(['h4', 'color-text-high', 'padding-8'])}>
+                <Text style={style.flatten(['h4', 'color-text-high'])}>
                   {title}
                 </Text>
               </Columns>
