@@ -11,7 +11,7 @@ import {Gutter} from '../../components/gutter';
 import {LayeredHorizontalRadioGroup} from '../../components/radio-group';
 import {YAxis} from '../../components/axis';
 import {Stack} from '../../components/stack';
-import {Columns} from '../../components/column';
+import {Column, Columns} from '../../components/column';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {Modal} from '../../components/modal';
 import {DepositModal} from './components/deposit-modal/deposit-modal';
@@ -24,6 +24,7 @@ import {StakedTabView} from './staked';
 import {ClaimAll} from './components/claim-all';
 import {Box} from '../../components/box';
 import {StackNavProp} from '../../navigation';
+import {Skeleton} from '../../components/skeleton';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -117,55 +118,74 @@ export const HomeScreen: FunctionComponent = observer(() => {
             }}
             itemMinWidth={92}
             size="large"
+            isNotReady={isNotReady}
           />
         </YAxis>
         <Box height={168} alignX="center" alignY="center">
-          <Text
-            style={style.flatten([
-              'color-text-low',
-              'font-extrabold',
-              'font-medium',
-              'h4',
-            ])}>
-            {tabStatus === 'available' ? 'Total Available' : 'Total Staked'}
-          </Text>
+          <Skeleton isNotReady={isNotReady} layer={1} type="button">
+            <Text
+              style={style.flatten([
+                'color-text-low',
+                'font-extrabold',
+                'font-medium',
+                'h4',
+              ])}>
+              {tabStatus === 'available' ? 'Total Available' : 'Total Staked'}
+            </Text>
+          </Skeleton>
           <Gutter size={10} />
-          <Text style={style.flatten(['color-text-high', 'mobile-h2'])}>
-            {tabStatus === 'available'
-              ? availableTotalPrice?.toString() || '-'
-              : stakedTotalPrice?.toString() || '-'}
-          </Text>
+          <Skeleton
+            isNotReady={isNotReady}
+            layer={1}
+            dummyMinWidth={180}
+            type="button">
+            <Text style={style.flatten(['color-text-high', 'mobile-h2'])}>
+              {tabStatus === 'available'
+                ? availableTotalPrice?.toString() || '-'
+                : stakedTotalPrice?.toString() || '-'}
+            </Text>
+          </Skeleton>
         </Box>
         {tabStatus === 'available' ? (
           <Columns sum={1} gutter={10}>
-            <Button
-              text="Deposit"
-              size="large"
-              color="secondary"
-              containerStyle={style.flatten(['flex-1'])}
-              onPress={() => {
-                copyAddressModalRef.current?.present();
-              }}
-            />
-            <Button
-              text="Buy"
-              size="large"
-              color="secondary"
-              containerStyle={style.flatten(['flex-1'])}
-              onPress={() => {
-                setIsBuyModalOpen(true);
-              }}
-            />
-            <Button
-              text="Send"
-              size="large"
-              containerStyle={style.flatten(['flex-1'])}
-              onPress={() => {
-                navigation.dispatch({
-                  ...StackActions.push('Send.SelectAsset'),
-                });
-              }}
-            />
+            <Column weight={1}>
+              <Skeleton isNotReady={isNotReady} layer={1} type="button">
+                <Button
+                  text="Deposit"
+                  size="large"
+                  color="secondary"
+                  onPress={() => {
+                    copyAddressModalRef.current?.present();
+                  }}
+                />
+              </Skeleton>
+            </Column>
+            <Column weight={1}>
+              <Skeleton isNotReady={isNotReady} layer={1} type="button">
+                <Button
+                  text="Buy"
+                  size="large"
+                  color="secondary"
+                  onPress={() => {
+                    setIsBuyModalOpen(true);
+                  }}
+                />
+              </Skeleton>
+            </Column>
+
+            <Column weight={1}>
+              <Skeleton isNotReady={isNotReady} layer={1} type="button">
+                <Button
+                  text="Send"
+                  size="large"
+                  onPress={() => {
+                    navigation.dispatch({
+                      ...StackActions.push('Send.SelectAsset'),
+                    });
+                  }}
+                />
+              </Skeleton>
+            </Column>
           </Columns>
         ) : (
           <Columns sum={1} gutter={10}>
