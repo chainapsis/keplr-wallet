@@ -1,7 +1,5 @@
 import React, {FunctionComponent} from 'react';
 import {observer} from 'mobx-react-lite';
-import {BottomSheetView, useBottomSheetModal} from '@gorhom/bottom-sheet';
-import {BaseModalHeader} from '../../../../components/modal';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {Text} from 'react-native';
 import {useStyle} from '../../../../styles';
@@ -9,25 +7,59 @@ import {XAxis} from '../../../../components/axis';
 import {Gutter} from '../../../../components/gutter';
 import {TextInput} from '../../../../components/input';
 import {Columns} from '../../../../components/column';
-import {Button} from '../../../../components/button';
 import {BIP44PathState} from './state';
+import {Box} from '../../../../components/box';
+import {CloseIcon} from '../../../../components/icon';
+import {IconButton} from '../../../../components/icon-button';
+import {useConfirm} from '../../../../hooks/confirm';
 
-export const Bip44PathModal: FunctionComponent<{
+export const Bip44PathView: FunctionComponent<{
   coinType?: number;
   state: BIP44PathState;
-}> = observer(({coinType, state}) => {
+  setIsOpen: (isOpen: boolean) => void;
+}> = observer(({coinType, state, setIsOpen}) => {
   const intl = useIntl();
+  const confirm = useConfirm();
   const style = useStyle();
-  const {dismiss} = useBottomSheetModal();
+
+  const onClickReset = async () => {
+    if (
+      await confirm.confirm(
+        '',
+        intl.formatMessage({
+          id: 'pages.register.components.bip-44-path.confirm-paragraph',
+        }),
+      )
+    ) {
+      state.reset();
+      setIsOpen(false);
+    }
+  };
 
   return (
-    <BottomSheetView style={style.flatten(['padding-20'])}>
-      <BaseModalHeader
-        titleStyle={style.flatten(['h4', 'text-left'])}
-        title={intl.formatMessage({
-          id: 'pages.register.components.bip-44-path.title',
-        })}
-      />
+    <Box
+      padding={16}
+      paddingTop={24}
+      borderRadius={8}
+      backgroundColor={style.get('color-background-secondary').color}>
+      <XAxis alignY="center">
+        <Text
+          style={style.flatten([
+            'h4',
+            'color-text-high',
+            'flex-1',
+            'padding-left-16',
+          ])}>
+          <FormattedMessage id="pages.register.components.bip-44-path.title" />
+        </Text>
+
+        <IconButton
+          icon={
+            <CloseIcon size={24} color={style.get('color-gray-300').color} />
+          }
+          onPress={onClickReset}
+        />
+      </XAxis>
 
       <Gutter size={16} />
 
@@ -48,6 +80,31 @@ export const Bip44PathModal: FunctionComponent<{
         </Text>
         <Text style={style.flatten(['body1', 'color-text-low'])}>
           <FormattedMessage id="pages.register.components.bip-44-path.paragraph-lost" />
+        </Text>
+      </XAxis>
+
+      <XAxis>
+        <Text
+          style={style.flatten(['body1', 'color-text-low', 'margin-right-4'])}>
+          •
+        </Text>
+        <Text style={style.flatten(['body1', 'color-text-low'])}>
+          <FormattedMessage
+            id="pages.register.components.bip-44-path.paragraph-unfamiliar"
+            values={{
+              reset: (...chunks: any) => (
+                <Text
+                  style={style.flatten([
+                    'body1',
+                    'color-label-default',
+                    'text-underline',
+                  ])}
+                  onPress={onClickReset}>
+                  {chunks}
+                </Text>
+              ),
+            }}
+          />
         </Text>
       </XAxis>
 
@@ -98,21 +155,6 @@ export const Bip44PathModal: FunctionComponent<{
           errorBorder={!state.isAddressIndexValid()}
         />
       </Columns>
-
-      <Gutter size={16} />
-
-      <Button
-        text={intl.formatMessage({id: 'button.approve'})}
-        size="large"
-        disabled={
-          !state.isAccountValid() ||
-          !state.isChangeValid() ||
-          !state.isAddressIndexValid()
-        }
-        onPress={() => {
-          dismiss();
-        }}
-      />
-    </BottomSheetView>
+    </Box>
   );
 });

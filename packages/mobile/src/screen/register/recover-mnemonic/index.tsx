@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useRef} from 'react';
+import React, {FunctionComponent} from 'react';
 import {observer} from 'mobx-react-lite';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {RegisterContainer} from '../components';
@@ -15,9 +15,7 @@ import {TextInput} from '../../../components/input';
 import * as Clipboard from 'expo-clipboard';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../navigation';
-import {Bip44PathModal, useBIP44PathState} from '../components/bip-path-44';
-import {Modal} from '../../../components/modal';
-import {BottomSheetModal} from '@gorhom/bottom-sheet';
+import {Bip44PathView, useBIP44PathState} from '../components/bip-path-44';
 
 const bip39 = require('bip39');
 
@@ -52,7 +50,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation<StackNavProp>();
 
   const bip44PathState = useBIP44PathState();
-  const modalRef = useRef<BottomSheetModal>(null);
+  const [isOpenBip44PathView, setIsOpenBip44PathView] = React.useState(false);
 
   const {keyRingStore} = useStore();
   const needPassword = keyRingStore.keyInfos.length === 0;
@@ -376,19 +374,31 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
 
         <Gutter size={16} />
 
-        <Button
-          text={intl.formatMessage({id: 'button.advanced'})}
-          containerStyle={{alignSelf: 'center'}}
-          color="secondary"
-          onPress={() => {
-            modalRef.current?.present();
-          }}
-        />
-      </ScrollView>
+        {isOpenBip44PathView ? (
+          <Bip44PathView
+            state={bip44PathState}
+            setIsOpen={setIsOpenBip44PathView}
+          />
+        ) : (
+          <Box alignX="center">
+            <Button
+              text={intl.formatMessage({id: 'button.advanced'})}
+              size="small"
+              color="secondary"
+              disabled={
+                !bip44PathState.isAccountValid() ||
+                !bip44PathState.isChangeValid() ||
+                !bip44PathState.isAddressIndexValid()
+              }
+              onPress={() => {
+                setIsOpenBip44PathView(true);
+              }}
+            />
+          </Box>
+        )}
 
-      <Modal ref={modalRef} snapPoints={['40%']} enableDynamicSizing={true}>
-        <Bip44PathModal state={bip44PathState} />
-      </Modal>
+        <Gutter size={32} />
+      </ScrollView>
     </RegisterContainer>
   );
 });

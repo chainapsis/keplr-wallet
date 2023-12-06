@@ -139,7 +139,7 @@ export const DarkThemeBackgroundColors = {
   // Platinum600 95%
   card: 'rgba(18, 25, 36, 0.95)',
   'card-default': ColorPalette['gray-650'],
-  'background-secondary': ColorPalette['platinum-700'],
+  'background-secondary': ColorPalette['gray-600'],
   'background-tertiary': ColorPalette['platinum-600'],
 };
 
