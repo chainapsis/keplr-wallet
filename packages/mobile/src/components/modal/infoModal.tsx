@@ -23,7 +23,7 @@ export const InformationModal = registerCardModal(
             <Box paddingBottom={21} paddingTop={9} paddingX={8} alignY="center">
               <Columns sum={1} gutter={10} alignY="center">
                 <InformationOutlinedIcon
-                  size={20}
+                  size={24}
                   color={style.get('color-text-low').color}
                 />
 
