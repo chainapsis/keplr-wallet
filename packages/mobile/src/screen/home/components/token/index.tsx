@@ -74,6 +74,7 @@ export const TokenTitleView: FunctionComponent<{
 interface TokenItemProps {
   viewToken: ViewToken;
   onClick?: () => void;
+  onClickError?: (errorKind: 'common' | 'secret', errorMsg: string) => void;
   disabled?: boolean;
   isNotReady?: boolean;
   apr?: IntPretty;
@@ -82,7 +83,16 @@ interface TokenItemProps {
   altSentence?: string | React.ReactElement;
 }
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
-  ({viewToken, onClick, disabled, isNotReady, apr, altSentence, hasApr}) => {
+  ({
+    viewToken,
+    onClick,
+    disabled,
+    isNotReady,
+    apr,
+    altSentence,
+    hasApr,
+    onClickError,
+  }) => {
     const {priceStore} = useStore();
     const style = useStyle();
     const pricePretty = priceStore.calculatePrice(viewToken.token);
@@ -149,23 +159,22 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         }
         activeOpacity={0.2}
         onPress={() => {
-          // e.preventDefault();
+          if (
+            viewToken.error?.data &&
+            viewToken.error.data instanceof WrongViewingKeyError
+          ) {
+            if (onClickError) {
+              onClickError('secret', viewToken.error?.message);
+            }
+            return;
+          }
 
-          //NOTE setting 페이지로 설정하라고 넘기는 페이지 같은데 이후 setting페이지에 맞춰서 라우팅 해줘야함
-          // if (
-          //   viewToken.error?.data &&
-          //   viewToken.error.data instanceof WrongViewingKeyError
-          // ) {
-          //   navigate(
-          //     `/setting/token/add?chainId=${
-          //       viewToken.chainInfo.chainId
-          //     }&contractAddress=${
-          //       (viewToken.token.currency as Secret20Currency).contractAddress
-          //     }`,
-          //   );
-
-          //   return;
-          // }
+          if (viewToken.error?.data) {
+            if (onClickError) {
+              onClickError('common', viewToken.error?.message);
+            }
+            return;
+          }
 
           if (onClick) {
             onClick();
