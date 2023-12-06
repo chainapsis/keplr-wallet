@@ -247,13 +247,13 @@ export const AvailableTabView: FunctionComponent<{
                 <Stack alignX="center" gutter={0.1}>
                   <Text
                     style={style.flatten([
-                      'color-white',
+                      'color-gray-400',
                       'subtitle3',
                       'font-bold',
                     ])}>
                     Oops!
                   </Text>
-                  <Text style={style.flatten(['subtitle3', 'color-white'])}>
+                  <Text style={style.flatten(['subtitle3', 'color-gray-400'])}>
                     No Result Found
                   </Text>
                 </Stack>

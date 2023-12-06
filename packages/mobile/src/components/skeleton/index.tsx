@@ -55,6 +55,7 @@ export const Skeleton: FunctionComponent<PropsWithChildren<SkeletonProps>> = ({
             bottom: verticalBleed || 0 * -1,
             left: horizontalBleed || 0 * -1,
             right: horizontalBleed || 0 * -1,
+            elevation: 1,
           }}
         />
       ) : null}

@@ -97,7 +97,7 @@ export const SendSelectAssetScreen: FunctionComponent = observer(() => {
             viewToken={item}
             onClick={() => {
               navigation.dispatch({
-                ...StackActions.push('Send', {
+                ...StackActions.replace('Send', {
                   chainId: item.chainInfo.chainId,
                   coinMinimalDenom: item.token.currency.coinMinimalDenom,
                 }),
