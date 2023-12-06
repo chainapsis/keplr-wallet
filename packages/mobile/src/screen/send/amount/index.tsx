@@ -205,7 +205,7 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
             forChange={true}
             onClick={() => {
               navigation.dispatch({
-                ...StackActions.replace('Send.SelectAsset'),
+                ...StackActions.push('Send.SelectAsset'),
               });
             }}
           />
