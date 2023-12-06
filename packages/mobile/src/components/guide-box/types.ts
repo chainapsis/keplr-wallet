@@ -1,4 +1,5 @@
 import React from 'react';
+import {TextStyle} from 'react-native';
 
 export type GuideBoxColor = 'default' | 'warning' | 'danger';
 
@@ -9,5 +10,6 @@ export interface GuideBoxProps {
   titleRight?: React.ReactNode;
   color?: GuideBoxColor;
 
+  titleStyle?: TextStyle;
   hideInformationIcon?: boolean;
 }
