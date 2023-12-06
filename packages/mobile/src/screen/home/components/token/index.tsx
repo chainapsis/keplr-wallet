@@ -17,8 +17,6 @@ import {XAxis} from '../../../../components/axis';
 import {Gutter} from '../../../../components/gutter';
 import {Skeleton} from '../../../../components/skeleton';
 import {WrongViewingKeyError} from '@keplr-wallet/stores';
-// import {useNavigate} from 'react-router';
-// import {Secret20Currency} from '@keplr-wallet/types';
 import {Pressable, StyleSheet, Text, ViewStyle} from 'react-native';
 import {ViewToken} from '../../index';
 import {RectButton} from '../../../../components/rect-button';
@@ -232,24 +230,10 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 </DelayedLoadingRender>
               ) : viewToken.error ? (
                 <Box marginLeft={4}>
-                  {/* <Tooltip
-                    content={(() => {
-                      if (
-                        viewToken.error?.message ===
-                        'Wrong viewing key for this address or viewing key not set'
-                      ) {
-                        return intl.formatMessage({
-                          id: 'page.main.components.token.wrong-viewing-key-error',
-                        });
-                      }
-
-                      return viewToken.error.message;
-                    })()}> */}
                   <ErrorIcon
                     size={16}
                     color={style.get('color-yellow-400').color}
                   />
-                  {/* </Tooltip> */}
                 </Box>
               ) : undefined}
             </XAxis>
@@ -282,42 +266,17 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 </Text>
               </Skeleton>
               <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth={72}>
-                {viewToken.error?.data &&
-                viewToken.error.data instanceof WrongViewingKeyError ? (
-                  <Box position="relative" alignX="right">
-                    <Text
-                      style={style.flatten([
-                        'subtitle3',
-                        'color-gray-100',
-                        'absolute',
-                        'text-underline',
-                      ])}>
-                      Set your viewing key
-                    </Text>
+                <Text style={style.flatten(['subtitle3', 'color-gray-300'])}>
+                  {(() => {
+                    if (altSentence) {
+                      return altSentence;
+                    }
 
-                    <Text
-                      style={style.flatten([
-                        'subtitle3',
-
-                        'text-underline',
-                        'opacity-transparent',
-                      ])}>
-                      &nbps;
-                    </Text>
-                  </Box>
-                ) : (
-                  <Text style={style.flatten(['subtitle3', 'color-gray-300'])}>
-                    {(() => {
-                      if (altSentence) {
-                        return altSentence;
-                      }
-
-                      return pricePretty
-                        ? pricePretty.inequalitySymbol(true).toString()
-                        : '-';
-                    })()}
-                  </Text>
-                )}
+                    return pricePretty
+                      ? pricePretty.inequalitySymbol(true).toString()
+                      : '-';
+                  })()}
+                </Text>
               </Skeleton>
             </Stack>
             <Gutter size={4} />
