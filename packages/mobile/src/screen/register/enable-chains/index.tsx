@@ -498,7 +498,7 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
         hideBackButton={hideBackButton}
       />
 
-      <Box padding={20} alignX="center" style={{flex: 1}}>
+      <Box padding={12} alignX="center" style={{flex: 1}}>
         <Text
           style={StyleSheet.flatten([
             style.flatten(['color-text-low', 'body1']),
