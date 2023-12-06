@@ -38,7 +38,7 @@ export const AddressItem: FunctionComponent<{
     <Box
       paddingX={16}
       paddingY={20}
-      backgroundColor={style.get('color-gray-600').color}
+      backgroundColor={style.get('color-card-default').color}
       borderRadius={6}
       borderWidth={highlight ? 1 : undefined}
       borderColor={highlight ? style.get('color-gray-400').color : undefined}

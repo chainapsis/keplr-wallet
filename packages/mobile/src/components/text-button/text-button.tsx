@@ -18,7 +18,10 @@ export const TextButton: FunctionComponent<{
   rightIcon?: ReactElement | ((color: string) => ReactElement);
   disabled?: boolean;
   onPress?: () => void;
-  textStyle?: TextStyle;
+  //NOTE textStyle에서 색상을 변경하면 pressing 컬러가 먹히지 않기 떄문에 Omit으로 color만 제거함
+  textStyle?: Omit<TextStyle, 'color'>;
+  textColor?: string;
+  pressingColor?: string;
   textButtonSize?: number;
   containerStyle?: ViewStyle;
 }> = ({
@@ -30,23 +33,35 @@ export const TextButton: FunctionComponent<{
   onPress,
   textStyle,
   containerStyle,
+  textColor,
+  pressingColor,
 }) => {
   const style = useStyle();
   const [isPressIn, setIsPressIn] = useState(false);
 
-  const textColorDefinition: string = (() => {
+  const textColorDefinition = (() => {
+    if (textColor) {
+      return textColor;
+    }
     switch (color) {
       case 'faint':
         if (disabled) {
-          return 'color-gray-300';
+          return style.get('color-gray-300').color;
         }
-        return 'color-gray-200';
+        return style.get('color-gray-200').color;
       default:
         if (disabled) {
-          return 'color-gray-300';
+          return style.get('color-gray-300').color;
         }
-        return 'color-white';
+        return style.get('color-white').color;
     }
+  })();
+
+  const pressingColorDefinition = (() => {
+    if (pressingColor) {
+      return pressingColor;
+    }
+    return style.get('color-gray-300').color;
   })();
 
   return (
@@ -58,7 +73,6 @@ export const TextButton: FunctionComponent<{
           'justify-center',
           'items-center',
           'padding-x-8',
-          isPressIn ? 'color-gray-300' : (textColorDefinition as any),
         ]),
         containerStyle,
       ])}
@@ -70,8 +84,10 @@ export const TextButton: FunctionComponent<{
           style.flatten([
             'text-center',
             size === 'large' ? 'text-button1' : 'text-button2',
-            isPressIn ? 'color-gray-300' : (textColorDefinition as any),
           ]),
+          {
+            color: isPressIn ? pressingColorDefinition : textColorDefinition,
+          },
           textStyle,
         ])}>
         {text}
@@ -82,9 +98,7 @@ export const TextButton: FunctionComponent<{
         !(typeof rightIcon === 'function')
           ? rightIcon
           : rightIcon(
-              isPressIn
-                ? style.get('color-gray-300').color
-                : style.get(textColorDefinition as any).color,
+              isPressIn ? pressingColorDefinition : textColorDefinition,
             )}
       </Box>
     </Pressable>

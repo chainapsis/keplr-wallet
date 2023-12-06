@@ -46,7 +46,7 @@ export const DelegatedCard: FunctionComponent<{
         paddingX={16}
         paddingY={20}
         borderRadius={6}
-        backgroundColor={style.get('color-gray-600').color}>
+        backgroundColor={style.get('color-card-default').color}>
         <Columns sum={1} alignY="center">
           <Text style={style.flatten(['body1', 'color-text-middle'])}>
             Staked

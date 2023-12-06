@@ -125,7 +125,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     }, [viewToken.token.currency]);
 
     const containerStyle: ViewStyle = {
-      backgroundColor: style.get('color-gray-600').color,
+      backgroundColor: style.get('color-card-default').color,
       paddingTop: 16,
       paddingBottom: 16,
       paddingLeft: 16,
@@ -143,9 +143,11 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
             borderColor: style.get('color-yellow-400@50%').color,
           },
         ])}
-        rippleColor={!disabled ? style.get('color-gray-550').color : undefined}
+        rippleColor={
+          !disabled ? style.get('color-card-pressing-default').color : undefined
+        }
         underlayColor={
-          !disabled ? style.get('color-gray-550').color : undefined
+          !disabled ? style.get('color-card-pressing-default').color : undefined
         }
         activeOpacity={0.2}
         onPress={() => {

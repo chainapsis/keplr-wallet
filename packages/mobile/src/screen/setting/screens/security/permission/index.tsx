@@ -96,7 +96,7 @@ const OriginView: FunctionComponent<{
     <Box
       padding={12}
       borderRadius={6}
-      backgroundColor={style.get('color-gray-600').color}
+      backgroundColor={style.get('color-card-default').color}
       style={style.flatten(['gap-12'])}
       onClick={() => setIsCollapsed(!isCollapsed)}>
       <Columns sum={1} alignY="center">
@@ -104,7 +104,7 @@ const OriginView: FunctionComponent<{
           padding={10}
           marginRight={10}
           borderRadius={6}
-          backgroundColor={style.get('color-gray-500').color}>
+          backgroundColor={style.get('color-gray-550').color}>
           <Columns sum={1} gutter={12} alignY="center">
             <Text style={style.flatten(['body2', 'color-text-high'])}>
               {origin}
@@ -163,7 +163,7 @@ const OriginView: FunctionComponent<{
                   padding={10}
                   marginRight={10}
                   borderRadius={6}
-                  backgroundColor={style.get('color-gray-500').color}
+                  backgroundColor={style.get('color-gray-550').color}
                   cursor="pointer"
                   onClick={async e => {
                     e.preventDefault();
@@ -198,7 +198,7 @@ const OriginView: FunctionComponent<{
                   padding={10}
                   marginRight={10}
                   borderRadius={6}
-                  backgroundColor={style.get('color-gray-500').color}
+                  backgroundColor={style.get('color-gray-550').color}
                   onClick={async e => {
                     e.preventDefault();
                     e.stopPropagation();

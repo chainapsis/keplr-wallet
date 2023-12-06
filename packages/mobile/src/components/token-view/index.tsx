@@ -1,6 +1,6 @@
 import React, {FunctionComponent, useMemo} from 'react';
 import {observer} from 'mobx-react-lite';
-import {Pressable, StyleSheet, Text} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
 import {useStyle} from '../../styles';
 import {Column, Columns} from '../column';
 import {useStore} from '../../stores';
@@ -12,6 +12,7 @@ import {CoinPretty} from '@keplr-wallet/unit';
 import {IChainInfoImpl, QueryError} from '@keplr-wallet/stores';
 import {Box} from '../box';
 import {ArrowRightIcon} from '../icon/arrow-right';
+import {RectButton} from '../rect-button';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -51,16 +52,18 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     }, [viewToken.token.currency]);
 
     return (
-      <Pressable
-        onPress={onClick}
+      <RectButton
         disabled={disabled}
+        onPress={onClick}
         style={StyleSheet.flatten([
           style.flatten([
             'padding-16',
             'border-radius-6',
-            'background-color-gray-600',
+            'background-color-card-default',
           ]),
-        ])}>
+        ])}
+        rippleColor={style.get('color-card-pressing-default').color}
+        underlayColor={style.get('color-card-pressing-default').color}>
         <Columns sum={1} alignY="center">
           <FastImage
             style={style.flatten(['width-32', 'height-32'])}
@@ -127,7 +130,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
             </Box>
           ) : null}
         </Columns>
-      </Pressable>
+      </RectButton>
     );
   },
 );

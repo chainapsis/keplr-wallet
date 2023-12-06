@@ -199,7 +199,7 @@ export const ChainItem: FunctionComponent<ChainItemProps> = observer(
     const style = useStyle();
 
     const containerStyle: ViewStyle = {
-      backgroundColor: style.get('color-gray-600').color,
+      backgroundColor: style.get('color-card-default').color,
       paddingVertical: 18,
       paddingLeft: 16,
       paddingRight: 8,
@@ -209,8 +209,8 @@ export const ChainItem: FunctionComponent<ChainItemProps> = observer(
     return (
       <RectButton
         style={StyleSheet.flatten([containerStyle])}
-        rippleColor={style.get('color-gray-550').color}
-        underlayColor={style.get('color-gray-550').color}
+        rippleColor={style.get('color-card-pressing-default').color}
+        underlayColor={style.get('color-card-pressing-default').color}
         activeOpacity={1}
         onPress={() => {
           if (onClick) {

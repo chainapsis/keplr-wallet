@@ -57,7 +57,7 @@ export const TextInput = forwardRef<
     })();
 
     const disableStyle = [
-      'background-color-gray-600',
+      'background-color-gray-650',
       'border-color-gray-300',
     ] as const;
 
