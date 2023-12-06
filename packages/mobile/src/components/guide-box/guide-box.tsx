@@ -14,6 +14,7 @@ export const GuideBox: FunctionComponent<GuideBoxProps> = ({
   titleRight,
   bottom,
   hideInformationIcon,
+  titleStyle,
 }) => {
   const style = useStyle();
   const paragraphColor = (() => {
@@ -59,6 +60,7 @@ export const GuideBox: FunctionComponent<GuideBoxProps> = ({
               style={StyleSheet.flatten([
                 style.flatten(['subtitle4']),
                 {color: titleColor},
+                titleStyle,
               ])}>
               {title}
             </Text>
