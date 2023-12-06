@@ -52,164 +52,85 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     }, [viewToken.token.currency]);
 
     return (
-      <React.Fragment>
-        {disabled ? (
-          <Box
-            style={StyleSheet.flatten([
-              style.flatten([
-                'padding-16',
-                'border-radius-6',
-                'background-color-card-default',
-              ]),
-            ])}>
-            <Columns sum={1} alignY="center">
-              <FastImage
-                style={style.flatten(['width-32', 'height-32'])}
-                source={
-                  viewToken.token.currency.coinImageUrl
-                    ? {uri: viewToken.token.currency.coinImageUrl}
-                    : require('../../public/assets/img/chain-icon-alt.png')
-                }
-                resizeMode={FastImage.resizeMode.contain}
-              />
+      <RectButton
+        disabled={disabled}
+        onPress={onClick}
+        style={StyleSheet.flatten([
+          style.flatten([
+            'padding-16',
+            'border-radius-6',
+            'background-color-card-default',
+          ]),
+        ])}
+        rippleColor={style.get('color-card-pressing-default').color}
+        underlayColor={style.get('color-card-pressing-default').color}>
+        <Columns sum={1} alignY="center">
+          <FastImage
+            style={style.flatten(['width-32', 'height-32'])}
+            source={
+              viewToken.token.currency.coinImageUrl
+                ? {uri: viewToken.token.currency.coinImageUrl}
+                : require('../../public/assets/img/chain-icon-alt.png')
+            }
+            resizeMode={FastImage.resizeMode.contain}
+          />
 
-              <Gutter size={12} />
+          <Gutter size={12} />
 
-              <Box style={style.flatten(['flex-column', 'flex-shrink-1'])}>
-                <XAxis>
-                  <Text
-                    style={{
-                      ...style.flatten(['color-gray-10', 'subtitle2']),
-                    }}>
-                    {coinDenom}
-                  </Text>
-
-                  <Gutter size={4} />
-                  {isIBC ? <Tag text="IBC" /> : null}
-                </XAxis>
-
-                <Text style={style.flatten(['color-gray-300', 'body3'])}>
-                  {viewToken.chainInfo.chainName}
-                </Text>
-              </Box>
-
-              <Column weight={1} />
-
-              <Box
-                style={style.flatten([
-                  'flex-column',
-                  'flex-shrink-1',
-                  'items-end',
-                ])}>
-                <Text style={style.flatten(['color-gray-10', 'subtitle1'])}>
-                  {viewToken.token
-                    .hideDenom(true)
-                    .maxDecimals(6)
-                    .inequalitySymbol(true)
-                    .shrink(true)
-                    .toString()}
-                </Text>
-
-                <Text style={style.flatten(['color-gray-300', 'subtitle2'])}>
-                  {pricePretty
-                    ? pricePretty.inequalitySymbol(true).toString()
-                    : '-'}
-                </Text>
-              </Box>
+          <Box style={style.flatten(['flex-column', 'flex-shrink-1'])}>
+            <XAxis>
+              <Text
+                style={{
+                  ...style.flatten(['color-gray-10', 'subtitle2']),
+                }}>
+                {coinDenom}
+              </Text>
 
               <Gutter size={4} />
+              {isIBC ? <Tag text="IBC" /> : null}
+            </XAxis>
 
-              {forChange ? (
-                <Box>
-                  <ArrowRightIcon
-                    size={24}
-                    color={style.get('color-gray-300').color}
-                  />
-                </Box>
-              ) : null}
-            </Columns>
+            <Text style={style.flatten(['color-gray-300', 'body3'])}>
+              {viewToken.chainInfo.chainName}
+            </Text>
           </Box>
-        ) : (
-          <RectButton
-            onPress={onClick}
-            style={StyleSheet.flatten([
-              style.flatten([
-                'padding-16',
-                'border-radius-6',
-                'background-color-card-default',
-              ]),
-            ])}
-            rippleColor={style.get('color-card-pressing-default').color}
-            underlayColor={style.get('color-card-pressing-default').color}>
-            <Columns sum={1} alignY="center">
-              <FastImage
-                style={style.flatten(['width-32', 'height-32'])}
-                source={
-                  viewToken.token.currency.coinImageUrl
-                    ? {uri: viewToken.token.currency.coinImageUrl}
-                    : require('../../public/assets/img/chain-icon-alt.png')
-                }
-                resizeMode={FastImage.resizeMode.contain}
+
+          <Column weight={1} />
+
+          <Box
+            style={style.flatten([
+              'flex-column',
+              'flex-shrink-1',
+              'items-end',
+            ])}>
+            <Text style={style.flatten(['color-gray-10', 'subtitle1'])}>
+              {viewToken.token
+                .hideDenom(true)
+                .maxDecimals(6)
+                .inequalitySymbol(true)
+                .shrink(true)
+                .toString()}
+            </Text>
+
+            <Text style={style.flatten(['color-gray-300', 'subtitle2'])}>
+              {pricePretty
+                ? pricePretty.inequalitySymbol(true).toString()
+                : '-'}
+            </Text>
+          </Box>
+
+          <Gutter size={4} />
+
+          {forChange ? (
+            <Box>
+              <ArrowRightIcon
+                size={24}
+                color={style.get('color-gray-300').color}
               />
-
-              <Gutter size={12} />
-
-              <Box style={style.flatten(['flex-column', 'flex-shrink-1'])}>
-                <XAxis>
-                  <Text
-                    style={{
-                      ...style.flatten(['color-gray-10', 'subtitle2']),
-                    }}>
-                    {coinDenom}
-                  </Text>
-
-                  <Gutter size={4} />
-                  {isIBC ? <Tag text="IBC" /> : null}
-                </XAxis>
-
-                <Text style={style.flatten(['color-gray-300', 'body3'])}>
-                  {viewToken.chainInfo.chainName}
-                </Text>
-              </Box>
-
-              <Column weight={1} />
-
-              <Box
-                style={style.flatten([
-                  'flex-column',
-                  'flex-shrink-1',
-                  'items-end',
-                ])}>
-                <Text style={style.flatten(['color-gray-10', 'subtitle1'])}>
-                  {viewToken.token
-                    .hideDenom(true)
-                    .maxDecimals(6)
-                    .inequalitySymbol(true)
-                    .shrink(true)
-                    .toString()}
-                </Text>
-
-                <Text style={style.flatten(['color-gray-300', 'subtitle2'])}>
-                  {pricePretty
-                    ? pricePretty.inequalitySymbol(true).toString()
-                    : '-'}
-                </Text>
-              </Box>
-
-              <Gutter size={4} />
-
-              {forChange ? (
-                <Box>
-                  <ArrowRightIcon
-                    size={24}
-                    color={style.get('color-gray-300').color}
-                  />
-                </Box>
-              ) : null}
-            </Columns>
-          </RectButton>
-        )}
-      </React.Fragment>
+            </Box>
+          ) : null}
+        </Columns>
+      </RectButton>
     );
   },
 );

@@ -1,10 +1,11 @@
 import React, {FunctionComponent} from 'react';
-import {View, ViewStyle} from 'react-native';
+import {StyleSheet, View, ViewStyle} from 'react-native';
 import {
   RectButton as NativeRectButton,
   RectButtonProps,
 } from 'react-native-gesture-handler';
 import {useStyle} from '../../styles';
+import {Box} from '../box';
 
 /**
  * RectButton replaces the "RectButton" of "react-native-gesture-handler".
@@ -18,6 +19,8 @@ import {useStyle} from '../../styles';
 export const RectButton: FunctionComponent<
   RectButtonProps & {
     style?: ViewStyle;
+    disabled?: boolean;
+    disabledStyle?: ViewStyle;
   }
 > = props => {
   const style = useStyle();
@@ -28,6 +31,8 @@ export const RectButton: FunctionComponent<
     rippleColor,
     underlayColor,
     activeOpacity,
+    disabled,
+    disabledStyle,
     ...rest
   } = props;
 
@@ -94,18 +99,26 @@ export const RectButton: FunctionComponent<
         flexWrap,
         backgroundColor,
       }}>
-      <NativeRectButton
-        style={restStyle}
-        rippleColor={
-          rippleColor || style.get('color-rect-button-default-ripple').color
-        }
-        underlayColor={
-          underlayColor || style.get('color-rect-button-default-underlay').color
-        }
-        activeOpacity={activeOpacity ?? 0.2}
-        {...rest}>
-        {children}
-      </NativeRectButton>
+      {/* NOTE disabled 일때는 rect button의 rippleColor 스타일이 들어가면 안되기 때문에 box로 렌더링함*/}
+      {disabled ? (
+        <Box style={StyleSheet.flatten([restStyle, disabledStyle])}>
+          {children}
+        </Box>
+      ) : (
+        <NativeRectButton
+          style={restStyle}
+          rippleColor={
+            rippleColor || style.get('color-rect-button-default-ripple').color
+          }
+          underlayColor={
+            underlayColor ||
+            style.get('color-rect-button-default-underlay').color
+          }
+          activeOpacity={activeOpacity ?? 0.2}
+          {...rest}>
+          {children}
+        </NativeRectButton>
+      )}
     </View>
   );
 };
