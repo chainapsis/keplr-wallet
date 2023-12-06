@@ -10,6 +10,7 @@ import {Button} from '../button';
 import {Gutter} from '../gutter';
 import {Box} from '../box';
 import {registerCardModal} from './card';
+import FastImage from 'react-native-fast-image';
 
 export const BasicAccessModal = registerCardModal(
   observer<{
@@ -53,11 +54,26 @@ export const BasicAccessModal = registerCardModal(
           })}
         />
 
-        <Text
-          style={style.flatten([
-            'body2',
-            'color-text-middle',
-          ])}>{`${host} is requesting to connect to your Keplr account on ${chainIds}`}</Text>
+        <Gutter size={16} />
+
+        <Box paddingX={22} alignX="center">
+          <FastImage
+            style={{width: 74, height: 74}}
+            resizeMode={FastImage.resizeMode.contain}
+            source={require('../../public/assets/logo-256.png')}
+          />
+
+          <Gutter size={16} />
+
+          <Text
+            style={style.flatten([
+              'body2',
+              'color-text-middle',
+              'text-center',
+            ])}>{`${host} is requesting to connect to your Keplr account on ${chainIds}`}</Text>
+        </Box>
+
+        <Gutter size={16} />
 
         <XAxis>
           <Button
