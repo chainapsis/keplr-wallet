@@ -1524,41 +1524,6 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "ibc-go"],
   },
   {
-    rpc: "https://rpc-tgrade.keplr.app",
-    rest: "https://lcd-tgrade.keplr.app",
-    chainId: "tgrade-mainnet-1",
-    chainName: "Tgrade",
-    stakeCurrency: {
-      coinDenom: "TGD",
-      coinMinimalDenom: "utgd",
-      coinDecimals: 6,
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("tgrade"),
-    currencies: [
-      {
-        coinDenom: "TGD",
-        coinMinimalDenom: "utgd",
-        coinDecimals: 6,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "TGD",
-        coinMinimalDenom: "utgd",
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 0.05,
-          average: 0.05,
-          high: 0.075,
-        },
-      },
-    ],
-    features: ["cosmwasm", "ibc-transfer", "ibc-go", "wasmd_0.24+"],
-  },
-  {
     rpc: "https://rpc-stride.keplr.app",
     rest: "https://lcd-stride.keplr.app",
     chainId: "stride-1",
