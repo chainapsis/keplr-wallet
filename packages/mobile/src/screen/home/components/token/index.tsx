@@ -17,8 +17,6 @@ import {XAxis} from '../../../../components/axis';
 import {Gutter} from '../../../../components/gutter';
 import {Skeleton} from '../../../../components/skeleton';
 import {WrongViewingKeyError} from '@keplr-wallet/stores';
-// import {useNavigate} from 'react-router';
-// import {Secret20Currency} from '@keplr-wallet/types';
 import {Pressable, StyleSheet, Text, ViewStyle} from 'react-native';
 import {ViewToken} from '../../index';
 import {RectButton} from '../../../../components/rect-button';
@@ -74,6 +72,7 @@ export const TokenTitleView: FunctionComponent<{
 interface TokenItemProps {
   viewToken: ViewToken;
   onClick?: () => void;
+  onClickError?: (errorKind: 'common' | 'secret', errorMsg: string) => void;
   disabled?: boolean;
   isNotReady?: boolean;
   apr?: IntPretty;
@@ -82,7 +81,16 @@ interface TokenItemProps {
   altSentence?: string | React.ReactElement;
 }
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
-  ({viewToken, onClick, disabled, isNotReady, apr, altSentence, hasApr}) => {
+  ({
+    viewToken,
+    onClick,
+    disabled,
+    isNotReady,
+    apr,
+    altSentence,
+    hasApr,
+    onClickError,
+  }) => {
     const {priceStore} = useStore();
     const style = useStyle();
     const pricePretty = priceStore.calculatePrice(viewToken.token);
@@ -151,23 +159,22 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         }
         activeOpacity={0.2}
         onPress={() => {
-          // e.preventDefault();
+          if (
+            viewToken.error?.data &&
+            viewToken.error.data instanceof WrongViewingKeyError
+          ) {
+            if (onClickError) {
+              onClickError('secret', viewToken.error?.message);
+            }
+            return;
+          }
 
-          //NOTE setting 페이지로 설정하라고 넘기는 페이지 같은데 이후 setting페이지에 맞춰서 라우팅 해줘야함
-          // if (
-          //   viewToken.error?.data &&
-          //   viewToken.error.data instanceof WrongViewingKeyError
-          // ) {
-          //   navigate(
-          //     `/setting/token/add?chainId=${
-          //       viewToken.chainInfo.chainId
-          //     }&contractAddress=${
-          //       (viewToken.token.currency as Secret20Currency).contractAddress
-          //     }`,
-          //   );
-
-          //   return;
-          // }
+          if (viewToken.error?.data) {
+            if (onClickError) {
+              onClickError('common', viewToken.error?.message);
+            }
+            return;
+          }
 
           if (onClick) {
             onClick();
@@ -225,24 +232,10 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 </DelayedLoadingRender>
               ) : viewToken.error ? (
                 <Box marginLeft={4}>
-                  {/* <Tooltip
-                    content={(() => {
-                      if (
-                        viewToken.error?.message ===
-                        'Wrong viewing key for this address or viewing key not set'
-                      ) {
-                        return intl.formatMessage({
-                          id: 'page.main.components.token.wrong-viewing-key-error',
-                        });
-                      }
-
-                      return viewToken.error.message;
-                    })()}> */}
                   <ErrorIcon
                     size={16}
                     color={style.get('color-yellow-400').color}
                   />
-                  {/* </Tooltip> */}
                 </Box>
               ) : undefined}
             </XAxis>
@@ -275,42 +268,17 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 </Text>
               </Skeleton>
               <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth={72}>
-                {viewToken.error?.data &&
-                viewToken.error.data instanceof WrongViewingKeyError ? (
-                  <Box position="relative" alignX="right">
-                    <Text
-                      style={style.flatten([
-                        'subtitle3',
-                        'color-gray-100',
-                        'absolute',
-                        'text-underline',
-                      ])}>
-                      Set your viewing key
-                    </Text>
+                <Text style={style.flatten(['subtitle3', 'color-gray-300'])}>
+                  {(() => {
+                    if (altSentence) {
+                      return altSentence;
+                    }
 
-                    <Text
-                      style={style.flatten([
-                        'subtitle3',
-
-                        'text-underline',
-                        'opacity-transparent',
-                      ])}>
-                      &nbps;
-                    </Text>
-                  </Box>
-                ) : (
-                  <Text style={style.flatten(['subtitle3', 'color-gray-300'])}>
-                    {(() => {
-                      if (altSentence) {
-                        return altSentence;
-                      }
-
-                      return pricePretty
-                        ? pricePretty.inequalitySymbol(true).toString()
-                        : '-';
-                    })()}
-                  </Text>
-                )}
+                    return pricePretty
+                      ? pricePretty.inequalitySymbol(true).toString()
+                      : '-';
+                  })()}
+                </Text>
               </Skeleton>
             </Stack>
             <Gutter size={4} />

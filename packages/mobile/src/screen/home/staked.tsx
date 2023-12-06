@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
+import React, {FunctionComponent, useMemo, useState} from 'react';
 import {CollapsibleList} from '../../components/collapsible-list';
 import {Dec} from '@keplr-wallet/unit';
 import {ViewToken} from './index';
@@ -14,7 +14,6 @@ import {
   InformationModal,
   InformationModalProps,
 } from '../../components/modal/infoModal';
-import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../navigation';
 import {SelectStakingChainModal} from './components/stakeing-chain-select-modal';
@@ -28,6 +27,7 @@ export const StakedTabView: FunctionComponent<{
 }> = observer(({SelectStakingChainModalRef}) => {
   const {hugeQueriesStore, queriesStore} = useStore();
   const intl = useIntl();
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
   const stakablesTokenList = hugeQueriesStore.stakables;
   const stakablesTokenNonZeroList = useMemo(() => {
@@ -48,7 +48,6 @@ export const StakedTabView: FunctionComponent<{
       }),
     [hugeQueriesStore.delegations],
   );
-  const infoModalRef = useRef<BottomSheetModal>(null);
 
   const [infoModalState, setInfoModalState] = useState<InformationModalProps>({
     title: '',
@@ -125,7 +124,7 @@ export const StakedTabView: FunctionComponent<{
                   title={title}
                   onOpenModal={() => {
                     setInfoModalState({title, paragraph});
-                    infoModalRef.current?.present();
+                    setIsInfoModalOpen(true);
                   }}
                 />
               }
@@ -153,6 +152,18 @@ export const StakedTabView: FunctionComponent<{
                             chainId: viewToken.viewToken.chainInfo.chainId,
                           },
                         });
+                      }}
+                      onClickError={(errorKind, errorMsg) => {
+                        if (errorKind === 'common') {
+                          setInfoModalState({
+                            title: intl.formatMessage({
+                              id: 'page.main.components.secret-error-modal-button',
+                            }),
+                            paragraph: errorMsg,
+                          });
+                          setIsInfoModalOpen(true);
+                          return;
+                        }
                       }}
                       altSentence={viewToken.altSentence}
                     />
@@ -206,12 +217,12 @@ export const StakedTabView: FunctionComponent<{
         />
       ) : null}
 
-      <Modal ref={infoModalRef} enableDynamicSizing={true} snapPoints={['90%']}>
-        <InformationModal
-          title={infoModalState?.title}
-          paragraph={infoModalState?.paragraph}
-        />
-      </Modal>
+      <InformationModal
+        isOpen={isInfoModalOpen}
+        setIsOpen={setIsInfoModalOpen}
+        title={infoModalState?.title}
+        paragraph={infoModalState?.paragraph}
+      />
 
       <Modal ref={SelectStakingChainModalRef}>
         <SelectStakingChainModal

@@ -23,7 +23,12 @@ import FastImage from 'react-native-fast-image';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {Toggle} from '../../components/toggle';
-import {InformationModal} from '../../components/modal/infoModal';
+import {
+  InformationModal,
+  InformationModalProps,
+} from '../../components/modal/infoModal';
+import {StackNavProp} from '../../navigation';
+import {Secret20Currency} from '@keplr-wallet/types';
 
 const zeroDec = new Dec(0);
 
@@ -39,8 +44,15 @@ export const AvailableTabView: FunctionComponent<{
   const style = useStyle();
   // const navigate = useNavigate();
   const tokenFoundModalRef = useRef<BottomSheetModal>(null);
-  const infoModalRef = useRef<BottomSheetModal>(null);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+  const [isSecretErrorModalOpen, setIsSecretErrorModalOpen] = useState(false);
+  const [errorTokenItem, setErrorTokenItem] = useState<ViewToken | null>(null);
+  const [infoModalState, setInfoModalState] = useState<InformationModalProps>({
+    title: '',
+    paragraph: '',
+  });
   const intl = useIntl();
+  const navigation = useNavigation<StackNavProp>();
 
   const allBalances = hugeQueriesStore.getAllBalances(true);
   const allBalancesNonZero = useMemo(() => {
@@ -116,8 +128,6 @@ export const AvailableTabView: FunctionComponent<{
     },
   ];
 
-  const navigation = useNavigation();
-
   const numFoundToken = useMemo(() => {
     if (chainStore.tokenScans.length === 0) {
       return 0;
@@ -169,7 +179,17 @@ export const AvailableTabView: FunctionComponent<{
                   itemKind="tokens"
                   title={
                     <TokenTitleView
-                      onOpenModal={() => infoModalRef.current?.present()}
+                      onOpenModal={() => {
+                        setIsInfoModalOpen(true);
+                        setInfoModalState({
+                          title: intl.formatMessage({
+                            id: 'page.main.available.available-balance-title',
+                          }),
+                          paragraph: intl.formatMessage({
+                            id: 'page.main.available.available-balance-tooltip',
+                          }),
+                        });
+                      }}
                       title={title}
                       right={
                         hasLowBalanceTokens ? (
@@ -218,6 +238,20 @@ export const AvailableTabView: FunctionComponent<{
                     <TokenItem
                       viewToken={viewToken}
                       key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+                      onClickError={(errorKind, errorMsg) => {
+                        if (errorKind === 'common') {
+                          setInfoModalState({
+                            title: intl.formatMessage({
+                              id: 'page.main.components.secret-error-modal-button',
+                            }),
+                            paragraph: errorMsg,
+                          });
+                          setIsInfoModalOpen(true);
+                          return;
+                        }
+                        setErrorTokenItem(viewToken);
+                        setIsSecretErrorModalOpen(true);
+                      }}
                       onClick={() => {
                         navigation.dispatch({
                           ...StackActions.push('Send', {
@@ -295,16 +329,42 @@ export const AvailableTabView: FunctionComponent<{
       <Modal ref={tokenFoundModalRef} snapPoints={['60%']}>
         <TokenFoundModal />
       </Modal>
-      <Modal ref={infoModalRef} enableDynamicSizing={true} snapPoints={['90%']}>
-        <InformationModal
-          title={intl.formatMessage({
-            id: 'page.main.available.available-balance-title',
-          })}
-          paragraph={intl.formatMessage({
-            id: 'page.main.available.available-balance-tooltip',
-          })}
-        />
-      </Modal>
+      <InformationModal
+        isOpen={isInfoModalOpen}
+        setIsOpen={setIsInfoModalOpen}
+        title={infoModalState?.title}
+        paragraph={infoModalState?.paragraph}
+      />
+
+      <InformationModal
+        isOpen={isSecretErrorModalOpen}
+        setIsOpen={setIsSecretErrorModalOpen}
+        title={intl.formatMessage({
+          id: 'page.main.error-modal-title',
+        })}
+        paragraph={intl.formatMessage({
+          id: 'page.main.components.token.wrong-viewing-key-error',
+        })}
+        bottomButton={
+          <Button
+            text={intl.formatMessage({
+              id: 'page.main.components.secret-error-modal-button',
+            })}
+            color="secondary"
+            onPress={() => {
+              setIsSecretErrorModalOpen(false);
+              if (errorTokenItem) {
+                navigation.navigate('Setting.ManageTokenList.Add', {
+                  chainId: errorTokenItem.chainInfo.chainId,
+                  contractAddress: (
+                    errorTokenItem.token.currency as Secret20Currency
+                  ).contractAddress,
+                });
+              }
+            }}
+          />
+        }
+      />
     </React.Fragment>
   );
 });
