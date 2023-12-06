@@ -90,6 +90,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinImageUrl:
           "https://dhj8dql1kzq2v.cloudfront.net/white/osmosis-ion.png",
       },
+      {
+        coinDenom: "LVN",
+        coinMinimalDenom:
+          "factory/osmo1mlng7pz4pnyxtpq0akfwall37czyk9lukaucsrn30ameplhhshtqdvfm5c/ulvn",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/lervana.png",
+      },
     ],
     feeCurrencies: [
       {
