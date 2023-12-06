@@ -139,10 +139,12 @@ const DefaultScreenHeaderLeft: FunctionComponent = () => {
               nav.goBack();
             }
           }}
-          style={StyleSheet.flatten([style.flatten(['padding-bottom-18'])])}>
+          style={StyleSheet.flatten([
+            style.flatten(['padding-bottom-18', 'padding-left-20']),
+          ])}>
           <HeaderBackButtonIcon
             size={28}
-            color={style.get('color-white').color}
+            color={style.get('color-gray-300').color}
           />
         </Pressable>
       ) : null}
