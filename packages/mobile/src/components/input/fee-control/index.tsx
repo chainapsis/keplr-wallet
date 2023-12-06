@@ -3,10 +3,11 @@ import {
   IFeeConfig,
   IGasConfig,
   IGasSimulator,
+  InsufficientFeeError,
   ISenderConfig,
 } from '@keplr-wallet/hooks';
 import {observer} from 'mobx-react-lite';
-import {FormattedMessage} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {useStore} from '../../../stores';
 import {autorun} from 'mobx';
 import {Dec, PricePretty} from '@keplr-wallet/unit';
@@ -18,6 +19,7 @@ import {Gutter} from '../../gutter';
 import {IconButton} from '../../icon-button';
 import {AdjustmentsHorizontalIcon} from '../../icon/adjustments-horizontal';
 import {TransactionFeeModal} from './transaction-fee-modal';
+import {GuideBox} from '../../guide-box';
 
 export const FeeControl: FunctionComponent<{
   senderConfig: ISenderConfig;
@@ -35,9 +37,12 @@ export const FeeControl: FunctionComponent<{
     disableAutomaticFeeSet,
   }) => {
     const {queriesStore, priceStore, chainStore} = useStore();
+    const intl = useIntl();
     const style = useStyle();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const hasError =
+      feeConfig.uiProperties.error || feeConfig.uiProperties.warning;
 
     useLayoutEffect(() => {
       if (disableAutomaticFeeSet) {
@@ -161,7 +166,11 @@ export const FeeControl: FunctionComponent<{
         paddingTop={16}
         paddingBottom={8}>
         <Columns sum={1} alignY="center">
-          <Text style={style.flatten(['body2', 'color-white'])}>
+          <Text
+            style={style.flatten([
+              'body2',
+              hasError ? 'color-yellow-400' : 'color-white',
+            ])}>
             <FormattedMessage id="components.input.fee-control.title" />
           </Text>
 
@@ -169,7 +178,10 @@ export const FeeControl: FunctionComponent<{
             return (
               <Text
                 key={fee.currency.coinMinimalDenom}
-                style={style.flatten(['body2', 'color-white'])}>
+                style={style.flatten([
+                  'body2',
+                  hasError ? 'color-yellow-400' : 'color-white',
+                ])}>
                 {fee
                   .maxDecimals(6)
                   .inequalitySymbol(true)
@@ -183,7 +195,11 @@ export const FeeControl: FunctionComponent<{
 
           <Gutter size={4} />
 
-          <Text style={style.flatten(['body2', 'color-gray-300'])}>
+          <Text
+            style={style.flatten([
+              'body2',
+              hasError ? 'color-yellow-400' : 'color-gray-300',
+            ])}>
             {(() => {
               let total: PricePretty | undefined;
               let hasUnknown = false;
@@ -216,7 +232,9 @@ export const FeeControl: FunctionComponent<{
             icon={
               <AdjustmentsHorizontalIcon
                 size={20}
-                color={style.get('color-white').color}
+                color={
+                  style.get(hasError ? 'color-yellow-400' : 'color-white').color
+                }
               />
             }
             style={style.flatten(['border-radius-64'])}
@@ -229,6 +247,58 @@ export const FeeControl: FunctionComponent<{
             onPress={() => setIsModalOpen(true)}
           />
         </Columns>
+
+        {hasError ? (
+          <Box width="100%">
+            <Gutter size={16} />
+
+            <GuideBox
+              hideInformationIcon={true}
+              color="warning"
+              title={
+                (() => {
+                  if (feeConfig.uiProperties.error) {
+                    if (
+                      feeConfig.uiProperties.error instanceof
+                      InsufficientFeeError
+                    ) {
+                      return intl.formatMessage({
+                        id: 'components.input.fee-control.error.insufficient-fee',
+                      });
+                    }
+
+                    return (
+                      feeConfig.uiProperties.error.message ||
+                      feeConfig.uiProperties.error.toString()
+                    );
+                  }
+
+                  if (feeConfig.uiProperties.warning) {
+                    return (
+                      feeConfig.uiProperties.warning.message ||
+                      feeConfig.uiProperties.warning.toString()
+                    );
+                  }
+
+                  if (gasConfig.uiProperties.error) {
+                    return (
+                      gasConfig.uiProperties.error.message ||
+                      gasConfig.uiProperties.error.toString()
+                    );
+                  }
+
+                  if (gasConfig.uiProperties.warning) {
+                    return (
+                      gasConfig.uiProperties.warning.message ||
+                      gasConfig.uiProperties.warning.toString()
+                    );
+                  }
+                })() ?? ''
+              }
+              titleStyle={{textAlign: 'center'}}
+            />
+          </Box>
+        ) : null}
 
         <TransactionFeeModal
           isOpen={isModalOpen}
