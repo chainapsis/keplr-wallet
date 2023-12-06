@@ -69,8 +69,8 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
           <Gutter size={12} />
           <TextButton
             containerStyle={style.flatten(['padding-y-12'])}
-            textColor="gray-300"
-            pressingColor="gray-400"
+            textColor={style.get('color-gray-300').color}
+            pressingColor={style.get('color-gray-400').color}
             text={
               isCollapsed
                 ? intl.formatMessage(
