@@ -128,11 +128,15 @@ import {
   IONDaoWebpageScreen,
   CalcFiWebpageScreen,
   DexterWebpageScreen,
-  StaykingWebpageScreen,
   LevanaWebpageScreen,
+  QuasarWebpageScreen,
+  LikerWebpageScreen,
+  KreadWebpageScreen,
 } from "./screens/web/webpages";
 import { WebpageScreenScreenOptionsPreset } from "./screens/web/components/webpage-screen";
 import Bugsnag from "@bugsnag/react-native";
+import { SettingManageConnectionsScreen } from "./screens/setting/screens/connections";
+import { CustomWebpageScreen } from "./screens/web/webpages/custom";
 
 const {
   SmartNavigatorProvider,
@@ -235,6 +239,9 @@ const {
     "Setting.ManageTokens": {
       upperScreenName: "Others",
     },
+    "Setting.ManageConnections": {
+      upperScreenName: "Settings",
+    },
     AddressBook: {
       upperScreenName: "AddressBooks",
     },
@@ -252,6 +259,9 @@ const {
     },
     TxFailedResult: {
       upperScreenName: "Others",
+    },
+    "Web.Custom": {
+      upperScreenName: "Web",
     },
     "Web.Intro": {
       upperScreenName: "Web",
@@ -304,10 +314,16 @@ const {
     "Web.Dexter": {
       upperScreenName: "Web",
     },
-    "Web.Stayking": {
+    "Web.Levana": {
       upperScreenName: "Web",
     },
-    "Web.Levana": {
+    "Web.Quasar": {
+      upperScreenName: "Web",
+    },
+    "Web.LikerLand": {
+      upperScreenName: "Web",
+    },
+    "Web.Kread": {
       upperScreenName: "Web",
     },
   }).withParams<{
@@ -369,6 +385,9 @@ const {
     "Setting.ViewPrivateData": {
       privateData: string;
       privateDataType: string;
+    };
+    "Web.Custom": {
+      url: string;
     };
     AddressBook: {
       recipientConfig?: IRecipientConfig;
@@ -836,6 +855,14 @@ export const SettingStackScreen: FunctionComponent = () => {
         name="Setting.Version"
         component={KeplrVersionScreen}
       />
+      <Stack.Screen
+        options={{
+          ...HeaderOnSecondaryScreenOptionsPreset,
+          title: "Manage Connections",
+        }}
+        name="Setting.ManageConnections"
+        component={SettingManageConnectionsScreen}
+      />
     </Stack.Navigator>
   );
 };
@@ -913,6 +940,7 @@ export const WebNavigation: FunctionComponent = () => {
         name="Web.OsmosisFrontier"
         component={OsmosisFrontierWebpageScreen}
       />
+      <Stack.Screen name="Web.Custom" component={CustomWebpageScreen} />
       <Stack.Screen name="Web.Stargaze" component={StargazeWebpageScreen} />
       <Stack.Screen name="Web.Umee" component={UmeeWebpageScreen} />
       <Stack.Screen name="Web.WYNDDao" component={WYNDDaoWebpageScreen} />
@@ -927,8 +955,10 @@ export const WebNavigation: FunctionComponent = () => {
       <Stack.Screen name="Web.IONDao" component={IONDaoWebpageScreen} />
       <Stack.Screen name="Web.Calc" component={CalcFiWebpageScreen} />
       <Stack.Screen name="Web.Dexter" component={DexterWebpageScreen} />
-      <Stack.Screen name="Web.Stayking" component={StaykingWebpageScreen} />
       <Stack.Screen name="Web.Levana" component={LevanaWebpageScreen} />
+      <Stack.Screen name="Web.Quasar" component={QuasarWebpageScreen} />
+      <Stack.Screen name="Web.LikerLand" component={LikerWebpageScreen} />
+      <Stack.Screen name="Web.Kread" component={KreadWebpageScreen} />
     </Stack.Navigator>
   );
 };

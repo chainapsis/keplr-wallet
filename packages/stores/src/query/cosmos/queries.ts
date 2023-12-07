@@ -17,6 +17,7 @@ import {
 } from "./staking";
 import {
   ObservableQueryGovernance,
+  ObservableQueryGovernanceV1,
   ObservableQueryProposalVote,
 } from "./governance";
 import {
@@ -39,6 +40,7 @@ import {
 import { ObservableQueryDistributionParams } from "./distribution";
 import { ObservableQueryRPCStatus } from "./status";
 import { ObservableQueryJunoAnnualProvisions } from "./supply/juno";
+import { ObservableQueryProposalVoteV1 } from "./governance/v1/vote";
 
 export interface CosmosQueries {
   cosmos: CosmosQueriesImpl;
@@ -86,6 +88,9 @@ export class CosmosQueriesImpl {
   public readonly queryValidators: DeepReadonly<ObservableQueryValidators>;
   public readonly queryGovernance: DeepReadonly<ObservableQueryGovernance>;
   public readonly queryProposalVote: DeepReadonly<ObservableQueryProposalVote>;
+
+  public readonly queryGovernanceV1: DeepReadonly<ObservableQueryGovernanceV1>;
+  public readonly queryProposalVoteV1: DeepReadonly<ObservableQueryProposalVoteV1>;
 
   public readonly queryIBCClientState: DeepReadonly<ObservableQueryIBCClientState>;
   public readonly queryIBCChannel: DeepReadonly<ObservableQueryIBCChannel>;
@@ -203,6 +208,19 @@ export class CosmosQueriesImpl {
       this.queryPool
     );
     this.queryProposalVote = new ObservableQueryProposalVote(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+
+    this.queryGovernanceV1 = new ObservableQueryGovernanceV1(
+      kvStore,
+      chainId,
+      chainGetter,
+      this.queryPool
+    );
+
+    this.queryProposalVoteV1 = new ObservableQueryProposalVoteV1(
       kvStore,
       chainId,
       chainGetter

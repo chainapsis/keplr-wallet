@@ -93,7 +93,7 @@ export class RNMessageRequesterInternalToUI extends RNMessageRequesterBase {
 
 export class RNMessageRequesterExternal extends RNMessageRequesterBase {
   constructor(
-    getSender: () => {
+    public readonly getSender: () => {
       url: string;
       origin: string;
     }

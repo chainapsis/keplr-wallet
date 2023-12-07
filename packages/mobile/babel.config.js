@@ -14,6 +14,7 @@ module.exports = {
           "KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN",
           "KEPLR_EXT_LEGACY_AMPLITUDE_API_KEY",
           "KEPLR_EXT_AMPLITUDE_API_KEY",
+          "COINGECKO_API_BASE_URL",
         ],
       },
     ],

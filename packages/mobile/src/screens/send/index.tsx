@@ -54,7 +54,7 @@ export const SendScreen: FunctionComponent = observer(() => {
     chainId,
     account.bech32Address,
     {
-      allowHexAddressOnEthermint: true,
+      allowHexAddressOnEthermint: !chainId.startsWith("injective-"),
       computeTerraClassicTax: true,
       icns: ICNSInfo,
     }

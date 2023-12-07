@@ -6,7 +6,6 @@ export const StreamSwapScreen: FunctionComponent = () => {
     <WebpageScreen
       name="StreamSwap"
       source={{ uri: "https://app.streamswap.io" }}
-      originWhitelist={["https://app.streamswap.io"]}
     />
   );
 };

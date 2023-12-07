@@ -5,8 +5,10 @@ export const CalcFiWebpageScreen: FunctionComponent = () => {
   return (
     <WebpageScreen
       name="Calc Finance"
-      source={{ uri: "https://app.calculated.fi/?chain=Osmosis" }}
-      originWhitelist={["https://app.calculated.fi"]}
+      source={{
+        uri:
+          "https://app.calculated.fi/create-strategy/dca-in/assets/?chain=Osmosis&utm_source=kplr",
+      }}
     />
   );
 };

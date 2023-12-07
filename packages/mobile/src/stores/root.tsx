@@ -24,6 +24,7 @@ import {
   ChainSuggestStore,
   ICNSQueries,
   OsmosisQueries,
+  AgoricQueries,
 } from "@keplr-wallet/stores";
 import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
@@ -46,6 +47,7 @@ import {
 import { WalletConnectV2Store } from "./wallet-connect-v2";
 import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
 import { ScamProposalStore } from "./scam-proposal";
+import { FavoriteWebpageStore } from "./favorite";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -59,6 +61,7 @@ export class RootStore {
 
   public readonly queriesStore: QueriesStore<
     [
+      AgoricQueries,
       CosmosQueries,
       CosmwasmQueries,
       SecretQueries,
@@ -104,6 +107,7 @@ export class RootStore {
   >;
 
   public readonly scamProposalStore: ScamProposalStore;
+  public readonly favoriteWebpageStore: FavoriteWebpageStore;
 
   constructor() {
     const router = new RNRouterUI(RNEnv.produceEnv);
@@ -156,6 +160,7 @@ export class RootStore {
       // https://github.com/chainapsis/keplr-wallet/issues/318
       new AsyncKVStore("store_queries_fix3"),
       this.chainStore,
+      AgoricQueries.use(),
       CosmosQueries.use(),
       CosmwasmQueries.use(),
       SecretQueries.use({
@@ -307,7 +312,10 @@ export class RootStore {
           locale: "ja-JP",
         },
       },
-      "usd"
+      "usd",
+      {
+        baseURL: process.env["COINGECKO_API_BASE_URL"],
+      }
     );
 
     this.tokensStore = new TokensStore(
@@ -430,6 +438,10 @@ export class RootStore {
 
     this.scamProposalStore = new ScamProposalStore(
       new AsyncKVStore("store_scam_proposal")
+    );
+
+    this.favoriteWebpageStore = new FavoriteWebpageStore(
+      new AsyncKVStore("store_favorite_url")
     );
   }
 }

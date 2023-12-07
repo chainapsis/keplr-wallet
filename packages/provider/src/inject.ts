@@ -87,7 +87,7 @@ export function injectKeplrToWindow(keplr: IKeplr): void {
  */
 export class InjectedKeplr implements IKeplr {
   static startProxy(
-    keplr: IKeplr & KeplrCoreTypes,
+    iKeplr: (IKeplr & KeplrCoreTypes) | ((e: any) => IKeplr & KeplrCoreTypes),
     eventListener: {
       addMessageListener: (fn: (e: any) => void) => void;
       postMessage: (message: any) => void;
@@ -122,6 +122,13 @@ export class InjectedKeplr implements IKeplr {
 
         if (message.method === "defaultOptions") {
           throw new Error("DefaultOptions is not function");
+        }
+
+        let keplr: IKeplr & KeplrCoreTypes;
+        if (typeof iKeplr === "function") {
+          keplr = iKeplr(e);
+        } else {
+          keplr = iKeplr;
         }
 
         if (

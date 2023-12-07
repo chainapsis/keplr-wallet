@@ -6,10 +6,6 @@ export const WYNDDaoWebpageScreen: FunctionComponent = () => {
     <WebpageScreen
       name="WYND Dao"
       source={{ uri: "https://app.wynddao.com" }}
-      originWhitelist={["https://app.wynddao.com"]}
-      experimentalOptions={{
-        enableSuggestChain: true,
-      }}
     />
   );
 };

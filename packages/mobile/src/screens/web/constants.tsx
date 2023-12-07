@@ -336,20 +336,6 @@ export const DexterItem: Item = {
   component: DexterImage,
 };
 
-const StaykingImage: FunctionComponent = () => {
-  const smartNavigation = useSmartNavigation();
-
-  return (
-    <WebpageImageButton
-      name="Stayking"
-      source={require("../../assets/image/webpage/osmosis.png")}
-      onPress={() => {
-        smartNavigation.pushSmart("Web.Stayking", {});
-      }}
-    />
-  );
-};
-
 const LevanaImage: FunctionComponent = () => {
   const smartNavigation = useSmartNavigation();
 
@@ -364,11 +350,64 @@ const LevanaImage: FunctionComponent = () => {
   );
 };
 
-export const StaykingItem: Item = {
-  key: "Stayking",
-  component: StaykingImage,
-};
 export const LevanaItem: Item = {
   key: "Levana",
   component: LevanaImage,
+};
+
+const QuasarImage: FunctionComponent = () => {
+  const smartNavigation = useSmartNavigation();
+
+  return (
+    <WebpageImageButton
+      name="Quasar"
+      source={require("../../assets/image/webpage/quasar.png")}
+      onPress={() => {
+        smartNavigation.pushSmart("Web.Quasar", {});
+      }}
+    />
+  );
+};
+
+export const QuasarItem: Item = {
+  key: "Quasar",
+  component: QuasarImage,
+};
+
+const LikerLandImage: FunctionComponent = () => {
+  const smartNavigation = useSmartNavigation();
+
+  return (
+    <WebpageImageButton
+      name="Liker Land"
+      source={require("../../assets/image/webpage/likerland.png")}
+      onPress={() => {
+        smartNavigation.pushSmart("Web.LikerLand", {});
+      }}
+    />
+  );
+};
+
+export const LikerLandItem: Item = {
+  key: "LikerLand",
+  component: LikerLandImage,
+};
+
+const KreadImage: FunctionComponent = () => {
+  const smartNavigation = useSmartNavigation();
+
+  return (
+    <WebpageImageButton
+      name="KREAd"
+      source={require("../../assets/image/webpage/kread.png")}
+      onPress={() => {
+        smartNavigation.pushSmart("Web.Kread", {});
+      }}
+    />
+  );
+};
+
+export const KreadItem: Item = {
+  key: "Kread",
+  component: KreadImage,
 };

@@ -5,6 +5,10 @@ export const CosmosMethods = [
   "cosmos_signDirect",
   "cosmos_signAmino",
   "keplr_getKey",
+  "keplr_signAmino",
+  "keplr_signDirect",
+  "keplr_signArbitrary",
+  "keplr_enable",
 ];
 // https://docs.walletconnect.com/2.0/javascript/web3wallet/wallet-usage#emit-session-events
 // On docs, it describes only about ethereum.
@@ -14,7 +18,11 @@ export const CosmosMethods = [
 // In multi chain ecosystem, it is slightly hard to sync changed account when dapp uses multiple chains.
 // To reduce this problem, emit events with changed accounts information with CAIP-10 to permit dapp to sync account with events immediately.
 // However, keplr doesn't invoke "chainChanged" event. The reason is multi-chain philosophy of keplr.
-export const CosmosEvents = ["accountsChanged", "chainChanged"];
+export const CosmosEvents = [
+  "accountsChanged",
+  "chainChanged",
+  "keplr_accountsChanged",
+];
 
 export const SessionProposalSchema = Joi.object({
   params: Joi.object({

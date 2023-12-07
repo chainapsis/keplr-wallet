@@ -164,16 +164,18 @@ export class ObservableQueryProposal extends ObservableChainQuery<ProposalTally>
     }
 
     return {
-      yes: new IntPretty(new Int(this.response.data.tally.yes))
+      yes: new IntPretty(new Int(this.response.data.tally?.yes || 0))
         .moveDecimalPointLeft(stakeCurrency.coinDecimals)
         .maxDecimals(stakeCurrency.coinDecimals),
-      no: new IntPretty(new Int(this.response.data.tally.no))
+      no: new IntPretty(new Int(this.response.data.tally?.no || 0))
         .moveDecimalPointLeft(stakeCurrency.coinDecimals)
         .maxDecimals(stakeCurrency.coinDecimals),
-      abstain: new IntPretty(new Int(this.response.data.tally.abstain))
+      abstain: new IntPretty(new Int(this.response.data.tally?.abstain || 0))
         .moveDecimalPointLeft(stakeCurrency.coinDecimals)
         .maxDecimals(stakeCurrency.coinDecimals),
-      noWithVeto: new IntPretty(new Int(this.response.data.tally.no_with_veto))
+      noWithVeto: new IntPretty(
+        new Int(this.response.data.tally?.no_with_veto || 0)
+      )
         .moveDecimalPointLeft(stakeCurrency.coinDecimals)
         .maxDecimals(stakeCurrency.coinDecimals),
     };

@@ -6,10 +6,6 @@ export const InjectiveWebpageScreen: FunctionComponent = () => {
     <WebpageScreen
       name="Injective"
       source={{ uri: "https://hub.injective.network" }}
-      originWhitelist={["https://hub.injective.network"]}
-      experimentalOptions={{
-        enableSuggestChain: true,
-      }}
     />
   );
 };

@@ -6,7 +6,6 @@ export const LevanaWebpageScreen: FunctionComponent = () => {
     <WebpageScreen
       name="Levana Perps"
       source={{ uri: "https://trade.levana.finance" }}
-      originWhitelist={["https://trade.levana.finance"]}
     />
   );
 };

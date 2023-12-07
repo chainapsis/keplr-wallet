@@ -34,7 +34,9 @@ export const AccountCard: FunctionComponent<{
     accountStore.getAccount(chainStore.current.chainId).bech32Address
   );
 
-  const isNeutron = chainStore.current.chainId.startsWith("neutron");
+  const shouldHideStakeCurrency =
+    chainStore.current.chainId.startsWith("neutron") ||
+    chainStore.current.stakeCurrency.coinMinimalDenom === "ustake";
 
   const queryStakable = queries.queryBalances.getQueryBech32Address(
     account.bech32Address
@@ -167,22 +169,18 @@ export const AccountCard: FunctionComponent<{
               </Text>
               <Text style={style.flatten(["h3", "color-text-high"])}>
                 {(() => {
-                  if (isNeutron) {
-                    const cur = chainStore.current.currencies.find(
-                      (cur) => cur.coinMinimalDenom === "untrn"
-                    );
-                    if (cur) {
-                      const balance = queries.queryBalances
-                        .getQueryBech32Address(account.bech32Address)
-                        .getBalanceFromCurrency(cur);
+                  if (shouldHideStakeCurrency) {
+                    const cur = chainStore.current.currencies[0];
+                    const balance = queries.queryBalances
+                      .getQueryBech32Address(account.bech32Address)
+                      .getBalanceFromCurrency(cur);
 
-                      const price = priceStore.calculatePrice(balance);
-                      if (price) {
-                        return price.toString();
-                      }
-
-                      return balance.shrink(true).maxDecimals(6).toString();
+                    const price = priceStore.calculatePrice(balance);
+                    if (price) {
+                      return price.toString();
                     }
+
+                    return balance.shrink(true).maxDecimals(6).toString();
                   }
 
                   return totalPrice
@@ -215,7 +213,7 @@ export const AccountCard: FunctionComponent<{
           <View
             style={style.flatten(
               ["flex-row", "items-center", "margin-bottom-28"],
-              [isNeutron && "margin-bottom-0"]
+              [shouldHideStakeCurrency && "margin-bottom-0"]
             )}
           >
             <TokenSymbol
@@ -236,19 +234,15 @@ export const AccountCard: FunctionComponent<{
               </Text>
               <Text style={style.flatten(["h5", "color-text-high"])}>
                 {(() => {
-                  if (isNeutron) {
-                    const cur = chainStore.current.currencies.find(
-                      (cur) => cur.coinMinimalDenom === "untrn"
-                    );
-                    if (cur) {
-                      return queries.queryBalances
-                        .getQueryBech32Address(account.bech32Address)
-                        .getBalanceFromCurrency(cur)
-                        .maxDecimals(6)
-                        .trim(true)
-                        .shrink(true)
-                        .toString();
-                    }
+                  if (shouldHideStakeCurrency) {
+                    const cur = chainStore.current.currencies[0];
+                    return queries.queryBalances
+                      .getQueryBech32Address(account.bech32Address)
+                      .getBalanceFromCurrency(cur)
+                      .maxDecimals(6)
+                      .trim(true)
+                      .shrink(true)
+                      .toString();
                   }
 
                   return stakable
@@ -266,16 +260,12 @@ export const AccountCard: FunctionComponent<{
               containerStyle={style.flatten(["min-width-72"])}
               disabled={stakable.toDec().lte(new Dec(0))}
               onPress={() => {
-                if (isNeutron) {
-                  const cur = chainStore.current.currencies.find(
-                    (cur) => cur.coinMinimalDenom === "untrn"
-                  );
-                  if (cur) {
-                    smartNavigation.navigateSmart("Send", {
-                      currency: cur.coinMinimalDenom,
-                    });
-                    return;
-                  }
+                if (shouldHideStakeCurrency) {
+                  const cur = chainStore.current.currencies[0];
+                  smartNavigation.navigateSmart("Send", {
+                    currency: cur.coinMinimalDenom,
+                  });
+                  return;
                 }
 
                 smartNavigation.navigateSmart("Send", {
@@ -284,7 +274,7 @@ export const AccountCard: FunctionComponent<{
               }}
             />
           </View>
-          {!isNeutron ? (
+          {!shouldHideStakeCurrency ? (
             <View
               style={style.flatten([
                 "flex-row",

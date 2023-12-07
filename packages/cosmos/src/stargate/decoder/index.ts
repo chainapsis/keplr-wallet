@@ -3,12 +3,7 @@ import {
   TxBody,
   AuthInfo,
 } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
-import {
-  AnyWithUnpacked,
-  defaultProtoCodec,
-  ProtoCodec,
-  UnknownMessage,
-} from "../codec";
+import { AnyWithUnpacked, defaultProtoCodec, ProtoCodec } from "../codec";
 
 export class ProtoSignDocDecoder {
   public static decode(bytes: Uint8Array): ProtoSignDocDecoder {
@@ -66,15 +61,7 @@ export class ProtoSignDocDecoder {
         ...(TxBody.toJSON(this.txBody) as any),
         ...{
           messages: this.txMsgs.map((msg) => {
-            if (msg) {
-              if (msg instanceof UnknownMessage) {
-                return msg.toJSON();
-              }
-              if ("factory" in msg) {
-                return msg.factory.toJSON(msg.unpacked);
-              }
-            }
-            return msg;
+            return this.protoCodec.unpackedAnyToJSONRecursive(msg);
           }),
         },
       },

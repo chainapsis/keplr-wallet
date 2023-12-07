@@ -90,6 +90,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinImageUrl:
           "https://dhj8dql1kzq2v.cloudfront.net/white/osmosis-ion.png",
       },
+      {
+        coinDenom: "LVN",
+        coinMinimalDenom:
+          "factory/osmo1mlng7pz4pnyxtpq0akfwall37czyk9lukaucsrn30ameplhhshtqdvfm5c/ulvn",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/lervana.png",
+      },
     ],
     feeCurrencies: [
       {
@@ -117,6 +124,53 @@ export const EmbedChainInfos: AppChainInfo[] = [
     txExplorer: {
       name: "Mintscan",
       txUrl: "https://www.mintscan.io/osmosis/txs/{txHash}",
+    },
+  },
+  {
+    rpc: "https://rpc-celestia.keplr.app",
+    rest: "https://lcd-celestia.keplr.app",
+    chainId: "celestia",
+    chainName: "Celestia",
+    stakeCurrency: {
+      coinDecimals: 6,
+      coinDenom: "TIA",
+      coinGeckoId: "celestia",
+      coinMinimalDenom: "utia",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/celestia.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("celestia"),
+    currencies: [
+      {
+        coinDecimals: 6,
+        coinDenom: "TIA",
+        coinGeckoId: "celestia",
+        coinMinimalDenom: "utia",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/celestia.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDecimals: 6,
+        coinDenom: "TIA",
+        coinGeckoId: "celestia",
+        coinMinimalDenom: "utia",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/celestia.png",
+        gasPriceStep: {
+          low: 0.1,
+          average: 0.2,
+          high: 0.4,
+        },
+      },
+    ],
+    features: [],
+    chainSymbolImageUrl:
+      "https://dhj8dql1kzq2v.cloudfront.net/white/celestia.png",
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/celestia/txs/{txHash}",
     },
   },
   {
@@ -167,44 +221,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/secret.png",
     features: ["secretwasm", "ibc-go", "ibc-transfer"],
-  },
-  {
-    rpc: "https://rpc-akash.keplr.app",
-    rest: "https://lcd-akash.keplr.app",
-    chainId: "akashnet-2",
-    chainName: "Akash",
-    stakeCurrency: {
-      coinDenom: "AKT",
-      coinMinimalDenom: "uakt",
-      coinDecimals: 6,
-      coinGeckoId: "akash-network",
-      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/akash.png",
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("akash"),
-    currencies: [
-      {
-        coinDenom: "AKT",
-        coinMinimalDenom: "uakt",
-        coinDecimals: 6,
-        coinGeckoId: "akash-network",
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/akash.png",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "AKT",
-        coinMinimalDenom: "uakt",
-        coinDecimals: 6,
-        coinGeckoId: "akash-network",
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/akash.png",
-      },
-    ],
-    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/akash.png",
-    features: ["ibc-transfer"],
-    hideInUI: true,
   },
   {
     rpc: "https://rpc-iov.keplr.app",
@@ -583,7 +599,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
     bip44: {
       coinType: 118,
     },
-    bech32Config: Bech32Address.defaultBech32Config("certik"),
+    bech32Config: Bech32Address.defaultBech32Config("shentu"),
     currencies: [
       {
         coinDenom: "CTK",
@@ -2396,48 +2412,160 @@ export const EmbedChainInfos: AppChainInfo[] = [
     },
   },
   {
-    chainId: "stayking-hub",
-    chainName: "StayKing Mainnet",
-    rpc: "https://stayking-mainnet.stayking.xyz:26657",
-    rest: "https://stayking-mainnet.stayking.xyz:1317",
+    rpc: "https://rpc-akash.keplr.app",
+    rest: "https://lcd-akash.keplr.app",
+    chainId: "akashnet-2",
+    chainName: "Akash",
+    stakeCurrency: {
+      coinDenom: "AKT",
+      coinMinimalDenom: "uakt",
+      coinDecimals: 6,
+      coinGeckoId: "akash-network",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/akash.png",
+    },
     bip44: {
       coinType: 118,
     },
-    bech32Config: {
-      bech32PrefixAccAddr: "sooho",
-      bech32PrefixAccPub: "soohopub",
-      bech32PrefixValAddr: "soohovaloper",
-      bech32PrefixValPub: "soohovaloperpub",
-      bech32PrefixConsAddr: "soohovalcons",
-      bech32PrefixConsPub: "soohovalconspub",
-    },
+    bech32Config: Bech32Address.defaultBech32Config("akash"),
     currencies: [
       {
-        coinDenom: "STAY",
-        coinMinimalDenom: "ustay",
+        coinDenom: "AKT",
+        coinMinimalDenom: "uakt",
         coinDecimals: 6,
-        coinGeckoId: "cosmos",
+        coinGeckoId: "akash-network",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/akash.png",
       },
     ],
     feeCurrencies: [
       {
-        coinDenom: "STAY",
-        coinMinimalDenom: "ustay",
+        coinDenom: "AKT",
+        coinMinimalDenom: "uakt",
         coinDecimals: 6,
-        coinGeckoId: "cosmos",
+        coinGeckoId: "akash-network",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/akash.png",
+      },
+    ],
+    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/akash.png",
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/akash/txs/{txHash}",
+    },
+    features: ["ibc-transfer"],
+  },
+  {
+    rpc: "https://rpc-dydx.keplr.app",
+    rest: "https://lcd-dydx.keplr.app",
+    chainId: "dydx-mainnet-1",
+    chainName: "dYdX",
+    stakeCurrency: {
+      coinDenom: "DYDX",
+      coinDecimals: 18,
+      coinMinimalDenom: "adydx",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/dydx.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("dydx"),
+    currencies: [
+      {
+        coinDenom: "DYDX",
+        coinDecimals: 18,
+        coinMinimalDenom: "adydx",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/dydx.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "DYDX",
+        coinDecimals: 18,
+        coinMinimalDenom: "adydx",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/dydx.png",
         gasPriceStep: {
-          low: 0,
-          average: 0,
-          high: 0,
+          low: 12500000000,
+          average: 12500000000,
+          high: 20000000000,
+        },
+      },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom:
+          "ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.025,
+          average: 0.025,
+          high: 0.03,
         },
       },
     ],
+    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/dydx.png",
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/dydx/txs/{txHash}",
+    },
+    features: [],
+  },
+  {
+    rpc: "https://rpc-noble.keplr.app",
+    rest: "https://lcd-noble.keplr.app",
+    chainId: "noble-1",
+    chainName: "Noble",
     stakeCurrency: {
-      coinDenom: "STAY",
-      coinMinimalDenom: "ustay",
-      coinGeckoId: "cosmos",
+      coinDenom: "STAKE",
+      coinMinimalDenom: "ustake",
       coinDecimals: 6,
     },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "noble",
+      bech32PrefixAccPub: "noblepub",
+      bech32PrefixValAddr: "noblevaloper",
+      bech32PrefixValPub: "noblevaloperpub",
+      bech32PrefixConsAddr: "noblevalcons",
+      bech32PrefixConsPub: "noblevalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "STAKE",
+        coinMinimalDenom: "ustake",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "uusdc",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/usdc.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "uusdc",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/usdc.png",
+      },
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom:
+          "ibc/EF48E6B1A1A19F47ECAEA62F5670C37C0580E86A9E88498B7E393EB6F49F33C0",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.001,
+          average: 0.001,
+          high: 0.001,
+        },
+      },
+    ],
+    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/noble.png",
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/noble/txs/{txHash}",
+    },
+    features: [],
+    hideInUI: true,
   },
 ];
 
@@ -2456,3 +2584,11 @@ export const CommunityChainInfoRepo = {
   repoName: "keplr-chain-registry",
   branchName: "main",
 };
+
+export const GovernanceV1ChainIdentifiers = [
+  "kyve",
+  "mars",
+  "juno",
+  "celestia",
+  "dydx-mainnet",
+];

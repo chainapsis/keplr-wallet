@@ -137,7 +137,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   }),
   chainId: Joi.string().required().min(1).max(30),
   chainName: Joi.string().required().min(1).max(30),
-  stakeCurrency: CurrencySchema.required(),
+  stakeCurrency: CurrencySchema,
   walletUrl: Joi.string().uri(),
   walletUrlForStaking: Joi.string().uri(),
   bip44: SuggestingBIP44Schema.required(),
