@@ -1,13 +1,14 @@
 import { ChainStore } from "./chain";
 import { CommunityChainInfoRepo, EmbedChainInfos } from "../config";
 import {
-  AmplitudeApiKey,
   CoinGeckoAPIEndPoint,
   CoinGeckoGetPrice,
   EthereumEndpoint,
   FiatCurrencies,
   ICNSInfo,
   TokenContractListURL,
+  GoogleMeasurementId,
+  GoogleAPIKeyForMeasurement,
 } from "../config.ui";
 import {
   AccountStore,
@@ -103,26 +104,7 @@ export class RootStore {
   public readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegistrar;
   public readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar;
 
-  public readonly analyticsStore: AnalyticsStore<
-    {
-      chainId?: string;
-      chainIds?: string[];
-      chainIdentifier?: string;
-      chainIdentifiers?: string[];
-      chainName?: string;
-      chainNames?: string[];
-      inputValue?: string;
-      isFavorite?: boolean;
-      onRampProvider?: string;
-      pageName?: string;
-      tabName?: string;
-      isClaimAll?: boolean;
-    },
-    {
-      accountCount?: number;
-      isDeveloperMode?: boolean;
-    }
-  >;
+  public readonly analyticsStore: AnalyticsStore;
 
   constructor() {
     const router = new ExtensionRouter(ContentScriptEnv.produceEnv);
@@ -408,31 +390,36 @@ export class RootStore {
     this.analyticsStore = new AnalyticsStore(
       (() => {
         if (
-          !AmplitudeApiKey ||
+          !GoogleAPIKeyForMeasurement ||
+          !GoogleMeasurementId ||
           localStorage.getItem("disable-analytics") === "true"
         ) {
           return new NoopAnalyticsClient();
         } else {
-          return new ExtensionAnalyticsClient(AmplitudeApiKey);
+          return new ExtensionAnalyticsClient(
+            new ExtensionKVStore("store_google_analytics_client"),
+            GoogleAPIKeyForMeasurement,
+            GoogleMeasurementId
+          );
         }
       })(),
       {
         logEvent: (eventName, eventProperties) => {
-          if (eventProperties?.chainId || eventProperties?.chainIds) {
+          if (eventProperties?.["chainId"] || eventProperties?.["chainIds"]) {
             eventProperties = {
               ...eventProperties,
             };
 
-            if (eventProperties.chainId) {
-              eventProperties.chainIdentifier = ChainIdHelper.parse(
-                eventProperties.chainId
+            if (eventProperties["chainId"]) {
+              eventProperties["chainIdentifier"] = ChainIdHelper.parse(
+                eventProperties["chainId"] as string
               ).identifier;
             }
 
-            if (eventProperties.chainIds) {
-              eventProperties.chainIdentifiers = eventProperties.chainIds.map(
-                (chainId) => ChainIdHelper.parse(chainId).identifier
-              );
+            if (eventProperties["chainIds"]) {
+              eventProperties["chainIdentifiers"] = (
+                eventProperties["chainIds"] as string[]
+              ).map((chainId) => ChainIdHelper.parse(chainId).identifier);
             }
           }
 
