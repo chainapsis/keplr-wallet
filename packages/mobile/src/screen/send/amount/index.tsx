@@ -321,12 +321,12 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
               );
             } catch (e) {
               if (e?.message === 'Request rejected') {
-                notification.show(
-                  'failed',
-                  intl.formatMessage({id: 'error.transaction-failed'}),
-                );
                 return;
               }
+              notification.show(
+                'failed',
+                intl.formatMessage({id: 'error.transaction-failed'}),
+              );
             }
           }
         }}
