@@ -57,7 +57,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>('available');
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
-  const SelectStakingChainModalRef = useRef<BottomSheetModal>(null);
+  const [selectModalIsOpen, setSelectModalIsOpen] = useState(false);
   const copyAddressModalRef = useRef<BottomSheetModal>(null);
 
   const availableTotalPrice = useMemo(() => {
@@ -210,8 +210,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
               rightIcon={<StakingIcon size={18} color="white" />}
               containerStyle={style.flatten(['flex-1'])}
               onPress={() => {
-                //TODO - 체인 선택 모달을 띄워줘야함
-                SelectStakingChainModalRef.current?.present();
+                setSelectModalIsOpen(true);
               }}
             />
           </Columns>
@@ -247,7 +246,8 @@ export const HomeScreen: FunctionComponent = observer(() => {
           />
         ) : (
           <StakedTabView
-            SelectStakingChainModalRef={SelectStakingChainModalRef}
+            selectModalIsOpen={selectModalIsOpen}
+            setSelectModalIsOpen={setSelectModalIsOpen}
           />
         )}
       </Stack>

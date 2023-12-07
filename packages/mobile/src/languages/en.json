@@ -554,6 +554,8 @@
   "page.main.components.token-found-modal.add-chains": "Add Chains",
   "page.main.components.token-item.copy-address.copied": "Copied",
   "page.main.components.secret-error-modal-button": "Set my Viewing Key",
+  "page.main.components.staking-chain-modal.title": "Available Assets",
+  "page.main.components.staking-chain-modal.empty-text": "Please retry after buying or depositing the asset to your wallet.",
 
   "page.ledger-grant.title": "Allow Browser to Connect to Ledger",
   "page.ledger-grant.paragraph": "You need to reapprove connection to your Ledger. Select the appropriate app, and after successfully connecting with your Ledger device, close this page and retry your previous transaction (signing).",

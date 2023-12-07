@@ -540,6 +540,8 @@
   "page.main.components.token-found-modal.add-chains": "체인 추가",
   "page.main.components.token-item.copy-address.copied": "복사됨",
   "page.main.components.secret-error-modal-button": "Set my Viewing Key",
+  "page.main.components.staking-chain-modal.title": "Available Assets",
+  "page.main.components.staking-chain-modal.empty-text": "Please retry after buying or depositing the asset to your wallet.",
 
   "page.ledger-grant.title": "렛저와 브라우저 간의 연결을 재허용합니다",
   "page.ledger-grant.paragraph": "렛저의 연결 권한을 다시 허용해보는 절차입니다. 먼저, 렛저 장치에서 올바른 앱을 선택하여 연 뒤 장치의 연결을 다시 시도해보세요. 연결이 완료되면 기존 화면으로 돌아가 수행하려던 트랜잭션을 다시 시도해볼 수 있습니다.",
