@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useRef} from 'react';
+import React, {FunctionComponent, useLayoutEffect, useRef} from 'react';
 import {RegisterContainer} from '../components';
 import {useIntl} from 'react-intl';
 import {observer} from 'mobx-react-lite';
@@ -65,12 +65,14 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
     });
   });
 
+  useLayoutEffect(() => {
+    navigation.setParams({
+      paragraph: 'Step 1/3',
+    });
+  }, [navigation]);
+
   return (
     <RegisterContainer
-      title={intl.formatMessage({
-        id: 'pages.register.connect-hardware.header.title',
-      })}
-      paragraph={'Step 1/3'}
       bottom={
         <Button
           text={intl.formatMessage({

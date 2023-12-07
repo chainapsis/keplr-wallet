@@ -1,4 +1,9 @@
-import React, {FunctionComponent, useMemo, useState} from 'react';
+import React, {
+  FunctionComponent,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react';
 import {observer} from 'mobx-react-lite';
 import {ScrollView, Text} from 'react-native';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
@@ -112,14 +117,16 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
     }
   });
 
+  useLayoutEffect(() => {
+    navigation.setParams({
+      paragraph: `Step ${route.params.stepPrevious + 1}/${
+        route.params.stepTotal
+      }`,
+    });
+  }, [navigation, route.params.stepPrevious, route.params.stepTotal]);
+
   return (
     <RegisterContainer
-      title={intl.formatMessage({
-        id: 'pages.register.verify-mnemonic.title',
-      })}
-      paragraph={`Step ${route.params.stepPrevious + 1}/${
-        route.params.stepTotal
-      }`}
       bottom={
         <Button
           text={intl.formatMessage({

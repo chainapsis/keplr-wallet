@@ -16,10 +16,7 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
   const navigation = useNavigation<StackNavProp>();
 
   return (
-    <RegisterContainer
-      title={intl.formatMessage({
-        id: 'pages.register.intro-existing-user.title',
-      })}>
+    <RegisterContainer>
       <Box alignX="center" padding={20}>
         <Text style={style.flatten(['color-text-low', 'body1'])}>
           <FormattedMessage id="pages.register.intro-existing-user.paragraph" />

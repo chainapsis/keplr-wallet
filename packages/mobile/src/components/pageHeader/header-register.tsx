@@ -4,7 +4,7 @@ import React, {
   useLayoutEffect,
 } from 'react';
 import {ColorPalette, useStyle} from '../../styles';
-import {StatusBar, Pressable, Text, SafeAreaView} from 'react-native';
+import {Pressable, Text} from 'react-native';
 import {Gutter} from '../gutter';
 import {HeaderBackButtonIcon} from './icon/back';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
@@ -36,7 +36,13 @@ export const RegisterHeaderTitle: FunctionComponent<PropsWithChildren> = ({
     });
   }, [hideBackButton, navigation]);
   return (
-    <Box alignX="center" alignY="center" marginBottom={paragraph ? 2 : 0}>
+    <Box
+      alignX="center"
+      alignY="center"
+      //NOTE 240을 준 이유는 왼쪽에 아이콘이 생길 경우 자체적인 header 길이가 제목을 짜를때가 있음
+      //해서 그냥 find 튜닝으로 안짤리는 최소 값을 지정함
+      minWidth={240}
+      marginBottom={paragraph ? 2 : 0}>
       <Text style={style.flatten(['h3', 'color-text-high'])}>{children}</Text>
       {paragraph ? (
         <React.Fragment>
@@ -57,39 +63,6 @@ export const registerHeaderOptions = {
     backgroundColor: ColorPalette['gray-700'],
   },
   headerShadowVisible: false,
-};
-
-export const RegisterHeader: FunctionComponent<{
-  title: string;
-  paragraph?: string;
-  hideBackButton?: boolean;
-}> = ({title, paragraph, hideBackButton}) => {
-  const style = useStyle();
-  const statusBarHeight = StatusBar.currentHeight;
-
-  return (
-    <SafeAreaView>
-      <Box
-        alignX="center"
-        alignY="center"
-        marginTop={statusBarHeight}
-        paddingY={18}>
-        <Text style={style.flatten(['h3', 'color-text-high'])}>{title}</Text>
-
-        {paragraph ? (
-          <React.Fragment>
-            <Gutter size={4} />
-
-            <Text style={style.flatten(['body2', 'color-text-low'])}>
-              {paragraph}
-            </Text>
-          </React.Fragment>
-        ) : null}
-
-        {hideBackButton ? null : <HeaderBackButton />}
-      </Box>
-    </SafeAreaView>
-  );
 };
 
 export const HeaderBackButton: FunctionComponent = () => {

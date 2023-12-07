@@ -91,6 +91,12 @@ import {
 import {SettingGeneralVersionScreen} from './screen/setting/screens/general/version';
 import {CameraScreen} from './screen/camera';
 import {SettingGeneralManageWalletConnectScreen} from './screen/setting/screens/general/wallet-connect';
+import {registerHeaderOptions} from './components/pageHeader/header-register';
+
+type DefaultRegisterParams = {
+  paragraph?: string;
+  hideBackButton?: boolean;
+};
 
 export type RootStackParamList = {
   Home: undefined;
@@ -101,16 +107,16 @@ export type RootStackParamList = {
   Register: undefined;
   'Register.Temp': undefined;
   'Register.Intro': undefined;
-  'Register.Intro.NewUser': undefined;
-  'Register.Intro.ConnectHardware': undefined;
-  'Register.NewMnemonic': undefined;
+  'Register.Intro.NewUser'?: DefaultRegisterParams;
+  'Register.Intro.ConnectHardware'?: DefaultRegisterParams;
+  'Register.NewMnemonic'?: DefaultRegisterParams;
   'Register.VerifyMnemonic': {
     mnemonic: string;
     stepPrevious: number;
     stepTotal: number;
-  };
-  'Register.Intro.ExistingUser': undefined;
-  'Register.RecoverMnemonic': undefined;
+  } & DefaultRegisterParams;
+  'Register.Intro.ExistingUser'?: DefaultRegisterParams;
+  'Register.RecoverMnemonic'?: DefaultRegisterParams;
   'Register.ConnectLedger': {
     name: string;
     password: string;
@@ -127,7 +133,7 @@ export type RootStackParamList = {
       vaultId: string;
       afterEnableChains: string[];
     };
-  };
+  } & DefaultRegisterParams;
   'Register.FinalizeKey': {
     name: string;
     password: string;
@@ -174,8 +180,7 @@ export type RootStackParamList = {
     stepPrevious?: number;
     stepTotal?: number;
     password?: string;
-    hideBackButton?: boolean;
-  };
+  } & DefaultRegisterParams;
   'Register.SelectDerivationPath': {
     chainIds: string[];
     vaultId: string;
@@ -287,40 +292,88 @@ const GovernanceStack = createStackNavigator<GovernanceNavigation>();
 const WebStack = createStackNavigator<WebStackNavigation>();
 
 export const RegisterNavigation: FunctionComponent = () => {
+  const intl = useIntl();
   return (
     <Stack.Navigator
       initialRouteName="Register.Intro"
       screenOptions={{
         ...TransitionPresets.SlideFromRightIOS,
-        headerShown: false,
+        // headerShown: false,
       }}>
       <Stack.Screen name="Register.Temp" component={RegisterScreen} />
-      <Stack.Screen name="Register.Intro" component={RegisterIntroScreen} />
+      <Stack.Screen
+        name="Register.Intro"
+        options={{headerShown: false}}
+        component={RegisterIntroScreen}
+      />
       <Stack.Screen
         name="Register.Intro.NewUser"
+        options={{
+          title: intl.formatMessage({
+            id: 'pages.register.intro-new-user.title',
+          }),
+          ...registerHeaderOptions,
+        }}
         component={RegisterIntroNewUserScreen}
       />
       <Stack.Screen
         name="Register.Intro.ExistingUser"
+        options={{
+          title: intl.formatMessage({
+            id: 'pages.register.intro-existing-user.title',
+          }),
+          ...registerHeaderOptions,
+        }}
         component={RegisterIntroExistingUserScene}
       />
-      <Stack.Screen name="Register.NewMnemonic" component={NewMnemonicScreen} />
+      <Stack.Screen
+        name="Register.NewMnemonic"
+        component={NewMnemonicScreen}
+        options={{
+          title: intl.formatMessage({
+            id: 'pages.register.intro-new-user.title',
+          }),
+          ...registerHeaderOptions,
+        }}
+      />
 
       <Stack.Screen
         name="Register.VerifyMnemonic"
         component={VerifyMnemonicScreen}
+        options={{
+          title: intl.formatMessage({
+            id: 'pages.register.verify-mnemonic.title',
+          }),
+          ...registerHeaderOptions,
+        }}
       />
 
       <Stack.Screen
         name="Register.RecoverMnemonic"
         component={RecoverMnemonicScreen}
+        options={{
+          title: intl.formatMessage({
+            id: 'pages.register.recover-mnemonic.title',
+          }),
+          ...registerHeaderOptions,
+        }}
       />
 
-      <Stack.Screen name="Register.FinalizeKey" component={FinalizeKeyScreen} />
+      <Stack.Screen
+        name="Register.FinalizeKey"
+        options={{headerShown: false}}
+        component={FinalizeKeyScreen}
+      />
 
       <Stack.Screen
         name="Register.Intro.ConnectHardware"
         component={ConnectHardwareWalletScreen}
+        options={{
+          title: intl.formatMessage({
+            id: 'pages.register.connect-hardware.header.title',
+          }),
+          ...registerHeaderOptions,
+        }}
       />
     </Stack.Navigator>
   );
@@ -473,6 +526,7 @@ const SettingNavigation = () => {
           title: intl.formatMessage({
             id: 'page.setting.manage-token-list-title',
           }),
+
           ...defaultHeaderOptions,
         }}
         component={SettingTokenListScreen}
@@ -788,7 +842,9 @@ export const AppNavigation: FunctionComponent = observer(() => {
                 throw new Error('Unknown status');
             }
           })()}
-          screenOptions={{...TransitionPresets.SlideFromRightIOS}}>
+          screenOptions={{
+            ...TransitionPresets.SlideFromRightIOS,
+          }}>
           <Stack.Screen
             name="Home"
             options={{headerShown: false}}
@@ -842,7 +898,12 @@ export const AppNavigation: FunctionComponent = observer(() => {
           {/*NOTE Register와 Home을 통해서 이동하여 route를 최상위에도 올렸습니다*/}
           <Stack.Screen
             name="Register.EnableChain"
-            options={{headerShown: false}}
+            options={{
+              title: intl.formatMessage({
+                id: 'pages.register.enable-chains.title',
+              }),
+              ...registerHeaderOptions,
+            }}
             component={EnableChainsScreen}
           />
 
@@ -854,13 +915,23 @@ export const AppNavigation: FunctionComponent = observer(() => {
 
           <Stack.Screen
             name="Register.SelectDerivationPath"
-            options={{headerShown: false}}
+            options={{
+              title: intl.formatMessage({
+                id: 'pages.register.select-derivation-path.title',
+              }),
+              ...registerHeaderOptions,
+            }}
             component={SelectDerivationPathScreen}
           />
 
           <Stack.Screen
             name="Register.ConnectLedger"
-            options={{headerShown: false}}
+            options={{
+              title: intl.formatMessage({
+                id: 'pages.register.connect-ledger.title',
+              }),
+              ...registerHeaderOptions,
+            }}
             component={ConnectLedgerScreen}
           />
 
