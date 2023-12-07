@@ -70,7 +70,8 @@ type TabStatus = "available" | "staked";
 export const MainPage: FunctionComponent<{
   setIsNotReady: (isNotReady: boolean) => void;
 }> = observer(({ setIsNotReady }) => {
-  const { analyticsStore, hugeQueriesStore, uiConfigStore } = useStore();
+  const { analyticsStore, hugeQueriesStore, uiConfigStore, keyRingStore } =
+    useStore();
 
   const isNotReady = useIsNotReady();
   const intl = useIntl();
@@ -163,12 +164,17 @@ export const MainPage: FunctionComponent<{
           new LogAnalyticsEventMsg("user_properties", {
             totalAvailableFiatAvg: totalAvailableAmbiguousAvg,
             totalStakedFiatAvg: totalStakedAmbiguousAvg,
+            id: keyRingStore.selectedKeyInfo?.id,
+            keyType: keyRingStore.selectedKeyInfo?.insensitive[
+              "keyRingType"
+            ] as string | undefined,
           })
         );
       }
       lastTotalAvailableAmbiguousAvg.current = totalAvailableAmbiguousAvg;
       lastTotalStakedAmbiguousAvg.current = totalStakedAmbiguousAvg;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [availableTotalPrice, isNotReady, stakedTotalPrice]);
 
   const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
