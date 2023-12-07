@@ -7843,8 +7843,9 @@ __metadata:
     "@keplr-wallet/stores": 0.12.47
     "@keplr-wallet/types": 0.12.47
     buffer: ^6.0.3
-    mobx: ^6.1.7
-    mobx-utils: ^6.0.3
+  peerDependencies:
+    mobx: ^6
+    mobx-utils: ^6
   languageName: unknown
   linkType: soft
 
@@ -29577,19 +29578,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mobx-utils@npm:^6.0.3, mobx-utils@npm:^6.0.8":
+"mobx-utils@npm:^6.0.8":
   version: 6.0.8
   resolution: "mobx-utils@npm:6.0.8"
   peerDependencies:
     mobx: ^6.0.0
   checksum: 3cab9a858d6b19b2f5c4d5c39fcef7c171fe37c2b5e9f899e0988b475521e0ad0d52af290c04bcb694d8974f8bfac3ca6ee3340a0aeadd9efd770cfee3f44e4e
-  languageName: node
-  linkType: hard
-
-"mobx@npm:^6.1.7":
-  version: 6.10.2
-  resolution: "mobx@npm:6.10.2"
-  checksum: 14d6f1db4e3a61c823510ea130229c96bd4958b77d81057ac1abc6a439703eaf3ea2289192ef205b4250d3adb1d83a439ad56d5e53f2b967c6e62a6bccc23d8a
   languageName: node
   linkType: hard
 
