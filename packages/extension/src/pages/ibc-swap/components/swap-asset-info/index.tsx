@@ -14,7 +14,11 @@ import {
 } from "../../../../components/typography";
 import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
-import { ChainImageFallback } from "../../../../components/image";
+import {
+  ChainImageFallback,
+  CurrencyImageFallback,
+  RawImageFallback,
+} from "../../../../components/image";
 import { AppCurrency } from "@keplr-wallet/types";
 import { IBCSwapAmountConfig } from "../../../../hooks/ibc-swap";
 import { useNavigate } from "react-router";
@@ -73,13 +77,20 @@ export const SwapAssetInfo: FunctionComponent<{
   senderConfig: ISenderConfig;
   amountConfig: IBCSwapAmountConfig;
 
+  forceShowPrice?: boolean;
   onDestinationChainSelect?: (
     chainId: string,
     coinMinimalDenom: string
   ) => void;
 }> = observer(
-  ({ type, senderConfig, amountConfig, onDestinationChainSelect }) => {
-    const { chainStore, queriesStore, priceStore } = useStore();
+  ({
+    type,
+    senderConfig,
+    amountConfig,
+    forceShowPrice,
+    onDestinationChainSelect,
+  }) => {
+    const { chainStore, queriesStore, priceStore, uiConfigStore } = useStore();
 
     const theme = useTheme();
 
@@ -223,13 +234,16 @@ export const SwapAssetInfo: FunctionComponent<{
                         return `0 ${amountConfig.currency.coinDenom}`;
                       }
 
-                      return bal.balance
-                        .maxDecimals(6)
-                        .trim(true)
-                        .shrink(true)
-                        .inequalitySymbol(true)
-                        .hideIBCMetadata(true)
-                        .toString();
+                      return uiConfigStore.hideStringIfPrivacyMode(
+                        bal.balance
+                          .maxDecimals(6)
+                          .trim(true)
+                          .shrink(true)
+                          .inequalitySymbol(true)
+                          .hideIBCMetadata(true)
+                          .toString(),
+                        2
+                      );
                     })(),
                   }
                 )}
@@ -445,14 +459,22 @@ export const SwapAssetInfo: FunctionComponent<{
 
                 return (
                   <React.Fragment>
-                    <ChainImageFallback
-                      style={{
-                        width: "1.25rem",
-                        height: "1.25rem",
-                      }}
-                      src={currency?.coinImageUrl}
-                      alt={currency?.coinDenom || "coinDenom"}
-                    />
+                    {/* Currency가 없을 경우엔 대충 fallback 이미지로 처리한다 */}
+                    {!currency ? (
+                      <RawImageFallback
+                        src={undefined}
+                        alt="empty"
+                        size="1.25rem"
+                      />
+                    ) : (
+                      <CurrencyImageFallback
+                        chainInfo={
+                          type === "from" ? fromChainInfo : toChainInfo
+                        }
+                        currency={currency}
+                        size="1.25rem"
+                      />
+                    )}
                     <Gutter size="0.5rem" />
                     <Subtitle2
                       color={
@@ -497,25 +519,34 @@ export const SwapAssetInfo: FunctionComponent<{
 
         <XAxis alignY="center">
           {(() => {
-            if (type === "from") {
-              if (!price) {
+            if (type === "from" || forceShowPrice) {
+              if (type === "from" && !price) {
                 return null;
+              }
+              if (type === "to") {
+                if (!priceStore.calculatePrice(amountConfig.outAmount)) {
+                  return null;
+                }
               }
 
               return (
                 <Box
-                  cursor="pointer"
+                  cursor={type === "from" ? "pointer" : undefined}
                   onClick={(e) => {
                     e.preventDefault();
 
+                    if (type !== "from") {
+                      return;
+                    }
+
                     if (!isPriceBased) {
-                      if (price.toDec().lte(new Dec(0))) {
+                      if (price!.toDec().lte(new Dec(0))) {
                         setPriceValue("");
                       } else {
                         setPriceValue(
-                          price
+                          price!
                             .toDec()
-                            .toString(price.options.maxDecimals)
+                            .toString(price!.options.maxDecimals)
                             .toString()
                         );
                       }
@@ -526,16 +557,20 @@ export const SwapAssetInfo: FunctionComponent<{
                   }}
                 >
                   <XAxis alignY="center">
-                    <SwitchPriceBaseIcon
-                      width="1.25rem"
-                      height="1.25rem"
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["gray-400"]
-                          : ColorPalette["gray-300"]
-                      }
-                    />
-                    <Gutter size="0.15rem" />
+                    {type === "from" ? (
+                      <React.Fragment>
+                        <SwitchPriceBaseIcon
+                          width="1.25rem"
+                          height="1.25rem"
+                          color={
+                            theme.mode === "light"
+                              ? ColorPalette["gray-400"]
+                              : ColorPalette["gray-300"]
+                          }
+                        />
+                        <Gutter size="0.15rem" />
+                      </React.Fragment>
+                    ) : null}
                     <Body3
                       color={
                         theme.mode === "light"
@@ -553,7 +588,17 @@ export const SwapAssetInfo: FunctionComponent<{
                             .hideIBCMetadata(true)
                             .toString();
                         } else {
-                          return price.toString();
+                          if (type === "from") {
+                            return price!.toString();
+                          } else {
+                            const p = priceStore.calculatePrice(
+                              amountConfig.outAmount
+                            );
+                            if (!p) {
+                              return null;
+                            }
+                            return p.toString();
+                          }
                         }
                       })()}
                     </Body3>
@@ -814,14 +859,8 @@ const SelectDestinationChainModal: FunctionComponent<{
               >
                 <XAxis alignY="center">
                   <ChainImageFallback
-                    style={{
-                      width: "2rem",
-                      height: "2rem",
-                    }}
-                    src={
-                      chainStore.getChain(channel.chainId).chainSymbolImageUrl
-                    }
-                    alt={chainStore.getChain(channel.chainId).chainName}
+                    chainInfo={chainStore.getChain(channel.chainId)}
+                    size="2rem"
                   />
                   <Gutter size="0.75rem" />
                   <Subtitle2

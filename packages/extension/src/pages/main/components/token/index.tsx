@@ -28,7 +28,7 @@ import {
   QuestionIcon,
 } from "../../../../components/icon";
 import styled, { css, useTheme } from "styled-components";
-import { ChainImageFallback } from "../../../../components/image";
+import { CurrencyImageFallback } from "../../../../components/image";
 import { Tooltip } from "../../../../components/tooltip";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Tag } from "../../../../components/tag";
@@ -171,7 +171,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     copyAddress,
     hideBalance,
   }) => {
-    const { priceStore } = useStore();
+    const { priceStore, uiConfigStore } = useStore();
     const navigate = useNavigate();
     const intl = useIntl();
     const theme = useTheme();
@@ -268,13 +268,10 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
       >
         <Columns sum={1} gutter="0.5rem" alignY="center">
           <Skeleton type="circle" layer={1} isNotReady={isNotReady}>
-            <ChainImageFallback
-              style={{
-                width: "2rem",
-                height: "2rem",
-              }}
-              src={viewToken.token.currency.coinImageUrl}
-              alt={viewToken.token.currency.coinDenom}
+            <CurrencyImageFallback
+              chainInfo={viewToken.chainInfo}
+              currency={viewToken.token.currency}
+              size="2rem"
             />
           </Skeleton>
 
@@ -343,7 +340,10 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                         });
                       }
 
-                      return viewToken.error.message;
+                      return (
+                        viewToken.error.message ||
+                        "Failed to query response from endpoint. Check again in a few minutes."
+                      );
                     })()}
                   >
                     <ErrorIcon size="1rem" />
@@ -395,12 +395,15 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                         : ColorPalette["gray-10"]
                     }
                   >
-                    {viewToken.token
-                      .hideDenom(true)
-                      .maxDecimals(6)
-                      .inequalitySymbol(true)
-                      .shrink(true)
-                      .toString()}
+                    {uiConfigStore.hideStringIfPrivacyMode(
+                      viewToken.token
+                        .hideDenom(true)
+                        .maxDecimals(6)
+                        .inequalitySymbol(true)
+                        .shrink(true)
+                        .toString(),
+                      2
+                    )}
                   </Subtitle3>
                 </Skeleton>
               ) : null}
@@ -450,9 +453,12 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                         return altSentence;
                       }
 
-                      return pricePretty
-                        ? pricePretty.inequalitySymbol(true).toString()
-                        : "-";
+                      return uiConfigStore.hideStringIfPrivacyMode(
+                        pricePretty
+                          ? pricePretty.inequalitySymbol(true).toString()
+                          : "-",
+                        2
+                      );
                     })()}
                   </Subtitle3>
                 )}

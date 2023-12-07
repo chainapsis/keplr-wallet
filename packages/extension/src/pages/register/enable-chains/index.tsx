@@ -947,14 +947,7 @@ const ChainItem: FunctionComponent<{
       >
         <Columns sum={1}>
           <XAxis alignY="center">
-            <ChainImageFallback
-              style={{
-                width: "3rem",
-                height: "3rem",
-              }}
-              src={chainInfo.chainSymbolImageUrl}
-              alt={chainInfo.chainId}
-            />
+            <ChainImageFallback chainInfo={chainInfo} size="3rem" />
 
             <Gutter size="0.5rem" />
 
@@ -1014,14 +1007,7 @@ const NextStepEvmChainItem: FunctionComponent<{
     >
       <Columns sum={1}>
         <XAxis alignY="center">
-          <ChainImageFallback
-            style={{
-              width: "3rem",
-              height: "3rem",
-            }}
-            src={chainInfo.chainSymbolImageUrl}
-            alt={chainInfo.chainId}
-          />
+          <ChainImageFallback chainInfo={chainInfo} size="3rem" />
 
           <Gutter size="0.5rem" />
 

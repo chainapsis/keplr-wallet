@@ -25,6 +25,7 @@ import {
   SecretQueries,
   ICNSQueries,
   AgoricQueries,
+  LSMCurrencyRegistrar,
 } from "@keplr-wallet/stores";
 import {
   ChainSuggestStore,
@@ -98,6 +99,7 @@ export class RootStore {
   public readonly tokensStore: TokensStore;
 
   public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
+  public readonly lsmCurrencyRegistrar: LSMCurrencyRegistrar;
   public readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegistrar;
   public readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar;
 
@@ -379,6 +381,12 @@ export class RootStore {
       24 * 3600 * 1000,
       this.chainStore,
       this.accountStore,
+      this.queriesStore
+    );
+    this.lsmCurrencyRegistrar = new LSMCurrencyRegistrar(
+      new ExtensionKVStore("store_lsm_currency_registrar"),
+      24 * 3600 * 1000,
+      this.chainStore,
       this.queriesStore
     );
     this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegistrar(

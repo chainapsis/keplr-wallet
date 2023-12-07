@@ -172,6 +172,7 @@ module.exports = {
       KEPLR_EXT_TRANSAK_API_KEY: "",
       KEPLR_EXT_MOONPAY_API_KEY: "",
       KEPLR_EXT_KADO_API_KEY: "",
+      KEPLR_EXT_CHAIN_REGISTRY_URL: "",
     }),
     new ForkTsCheckerWebpackPlugin(),
     new CopyWebpackPlugin({

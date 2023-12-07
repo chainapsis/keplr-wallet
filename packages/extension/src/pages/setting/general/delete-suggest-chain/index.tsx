@@ -89,13 +89,8 @@ const ChainItem: FunctionComponent<{
       paddingY="1rem"
     >
       <Columns sum={1} alignY="center" gutter="0.375rem">
-        <Box borderRadius="50%">
-          <ChainImageFallback
-            width="48px"
-            height="48px"
-            alt={`${chainInfo.chainId}-${chainInfo.chainName}-image`}
-            src={chainInfo.chainSymbolImageUrl}
-          />
+        <Box borderRadius="99999px">
+          <ChainImageFallback chainInfo={chainInfo} size="3rem" />
         </Box>
         <Stack gutter="0.375rem">
           <Columns sum={1} alignY="center" gutter="0.25rem">

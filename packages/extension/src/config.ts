@@ -293,52 +293,6 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer"],
   },
   {
-    rpc: "https://rpc-iov.keplr.app",
-    rest: "https://lcd-iov.keplr.app",
-    chainId: "iov-mainnet-ibc",
-    chainName: "Starname",
-    stakeCurrency: {
-      coinDenom: "IOV",
-      coinMinimalDenom: "uiov",
-      coinDecimals: 6,
-      coinGeckoId: "starname",
-    },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/starname"
-        : "http://localhost:8080/chains/starname",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/starname"
-        : "http://localhost:8080/chains/starname",
-    bip44: {
-      coinType: 234,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("star"),
-    currencies: [
-      {
-        coinDenom: "IOV",
-        coinMinimalDenom: "uiov",
-        coinDecimals: 6,
-        coinGeckoId: "starname",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "IOV",
-        coinMinimalDenom: "uiov",
-        coinDecimals: 6,
-        coinGeckoId: "starname",
-        gasPriceStep: {
-          low: 1,
-          average: 2,
-          high: 3,
-        },
-      },
-    ],
-    features: ["ibc-transfer"],
-  },
-  {
     rpc: "https://rpc-sifchain.keplr.app",
     rest: "https://lcd-sifchain.keplr.app",
     chainId: "sifchain-1",
@@ -1052,167 +1006,6 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer"],
   },
   {
-    rpc: "https://rpc-ixo.keplr.app",
-    rest: "https://lcd-ixo.keplr.app",
-    chainId: "ixo-4",
-    chainName: "ixo",
-    stakeCurrency: {
-      coinDenom: "IXO",
-      coinMinimalDenom: "uixo",
-      coinDecimals: 6,
-    },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/ixo"
-        : "http://localhost:8080/chains/ixo",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/ixo"
-        : "http://localhost:8080/chains/ixo",
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("ixo"),
-    currencies: [
-      {
-        coinDenom: "IXO",
-        coinMinimalDenom: "uixo",
-        coinDecimals: 6,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "IXO",
-        coinMinimalDenom: "uixo",
-        coinDecimals: 6,
-      },
-    ],
-    features: ["ibc-transfer"],
-  },
-  {
-    rpc: "https://rpc-emoney.keplr.app",
-    rest: "https://lcd-emoney.keplr.app",
-    chainId: "emoney-3",
-    chainName: "e-Money",
-    stakeCurrency: {
-      coinDenom: "NGM",
-      coinMinimalDenom: "ungm",
-      coinDecimals: 6,
-      coinGeckoId: "e-money",
-    },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/e-money"
-        : "http://localhost:8080/chains/e-money",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/e-money"
-        : "http://localhost:8080/chains/e-money",
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("emoney"),
-    currencies: [
-      {
-        coinDenom: "NGM",
-        coinMinimalDenom: "ungm",
-        coinDecimals: 6,
-        coinGeckoId: "e-money",
-      },
-      {
-        coinDenom: "EEUR",
-        coinMinimalDenom: "eeur",
-        coinDecimals: 6,
-        coinGeckoId: "e-money-eur",
-      },
-      {
-        coinDenom: "EDKK",
-        coinMinimalDenom: "edkk",
-        coinDecimals: 6,
-      },
-      {
-        coinDenom: "ESEK",
-        coinMinimalDenom: "esek",
-        coinDecimals: 6,
-      },
-      {
-        coinDenom: "ENOK",
-        coinMinimalDenom: "enok",
-        coinDecimals: 6,
-      },
-      {
-        coinDenom: "ECHF",
-        coinMinimalDenom: "echf",
-        coinDecimals: 6,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "NGM",
-        coinMinimalDenom: "ungm",
-        coinDecimals: 6,
-        coinGeckoId: "e-money",
-        gasPriceStep: {
-          low: 1,
-          average: 1,
-          high: 1,
-        },
-      },
-      {
-        coinDenom: "EEUR",
-        coinMinimalDenom: "eeur",
-        coinDecimals: 6,
-        coinGeckoId: "e-money-eur",
-        gasPriceStep: {
-          low: 1,
-          average: 1,
-          high: 1,
-        },
-      },
-      {
-        coinDenom: "ECHF",
-        coinMinimalDenom: "echf",
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 1,
-          average: 1,
-          high: 1,
-        },
-      },
-      {
-        coinDenom: "ESEK",
-        coinMinimalDenom: "esek",
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 1,
-          average: 1,
-          high: 1,
-        },
-      },
-      {
-        coinDenom: "ENOK",
-        coinMinimalDenom: "enok",
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 1,
-          average: 1,
-          high: 1,
-        },
-      },
-      {
-        coinDenom: "EDKK",
-        coinMinimalDenom: "edkk",
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 1,
-          average: 1,
-          high: 1,
-        },
-      },
-    ],
-    features: ["ibc-transfer"],
-  },
-  {
     rpc: "https://rpc-agoric.keplr.app",
     rest: "https://lcd-agoric.keplr.app",
     chainId: "agoric-3",
@@ -1729,41 +1522,6 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     features: ["ibc-transfer", "ibc-go"],
-  },
-  {
-    rpc: "https://rpc-tgrade.keplr.app",
-    rest: "https://lcd-tgrade.keplr.app",
-    chainId: "tgrade-mainnet-1",
-    chainName: "Tgrade",
-    stakeCurrency: {
-      coinDenom: "TGD",
-      coinMinimalDenom: "utgd",
-      coinDecimals: 6,
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("tgrade"),
-    currencies: [
-      {
-        coinDenom: "TGD",
-        coinMinimalDenom: "utgd",
-        coinDecimals: 6,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "TGD",
-        coinMinimalDenom: "utgd",
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 0.05,
-          average: 0.05,
-          high: 0.075,
-        },
-      },
-    ],
-    features: ["cosmwasm", "ibc-transfer", "ibc-go", "wasmd_0.24+"],
   },
   {
     rpc: "https://rpc-stride.keplr.app",
@@ -2492,6 +2250,73 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: [],
   },
+  {
+    rpc: "https://rpc-dydx.keplr.app",
+    rest: "https://lcd-dydx.keplr.app",
+    chainId: "dydx-mainnet-1",
+    chainName: "dYdX",
+    stakeCurrency: {
+      coinDenom: "DYDX",
+      coinDecimals: 18,
+      coinMinimalDenom: "adydx",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "dydx",
+      bech32PrefixAccPub: "dydxpub",
+      bech32PrefixValAddr: "dydxvaloper",
+      bech32PrefixValPub: "dydxvaloperpub",
+      bech32PrefixConsAddr: "dydxvalcons",
+      bech32PrefixConsPub: "dydxvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "DYDX",
+        coinDecimals: 18,
+        coinMinimalDenom: "adydx",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "DYDX",
+        coinDecimals: 18,
+        coinMinimalDenom: "adydx",
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://rpc-celestia.keplr.app",
+    rest: "https://lcd-celestia.keplr.app",
+    chainId: "celestia",
+    chainName: "Celestia",
+    stakeCurrency: {
+      coinDenom: "TIA",
+      coinDecimals: 6,
+      coinMinimalDenom: "utia",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("celestia"),
+    currencies: [
+      {
+        coinDenom: "TIA",
+        coinDecimals: 6,
+        coinMinimalDenom: "utia",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "TIA",
+        coinDecimals: 6,
+        coinMinimalDenom: "utia",
+      },
+    ],
+    features: [],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
@@ -2505,4 +2330,7 @@ export const CommunityChainInfoRepo = {
   organizationName: "chainapsis",
   repoName: "keplr-chain-registry",
   branchName: "main",
+  alternativeURL: process.env["KEPLR_EXT_CHAIN_REGISTRY_URL"]
+    ? process.env["KEPLR_EXT_CHAIN_REGISTRY_URL"]
+    : undefined,
 };

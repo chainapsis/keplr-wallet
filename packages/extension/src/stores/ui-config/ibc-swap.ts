@@ -214,7 +214,7 @@ export class IBCSwapConfig {
     return parseFloat(trim);
   }
 
-  async removeStatesWhenErrorOccurredDuringRending() {
+  async removeStatesWhenErrorOccurredDuringRendering() {
     await this.kvStore.set("ibc-swap-amount-in-out-info", null);
     await this.kvStore.set("ibc-swap-slippage", null);
   }

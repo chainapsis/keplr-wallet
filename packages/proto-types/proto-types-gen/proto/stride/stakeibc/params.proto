@@ -1,0 +1,31 @@
+syntax = "proto3";
+package stride.stakeibc;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/Stride-Labs/stride/v15/x/stakeibc/types";
+
+// Params defines the parameters for the module.
+// next id: 20
+message Params {
+  option (gogoproto.goproto_stringer) = false;
+
+  // define epoch lengths, in stride_epochs
+  uint64 rewards_interval = 1;
+  uint64 delegate_interval = 6;
+  uint64 deposit_interval = 2;
+  uint64 redemption_rate_interval = 3;
+  uint64 stride_commission = 4;
+  uint64 reinvest_interval = 7;
+  uint64 ica_timeout_nanos = 9;
+  uint64 buffer_size = 10;
+  uint64 ibc_timeout_blocks = 11;
+  uint64 fee_transfer_timeout_nanos = 12;
+  uint64 max_stake_ica_calls_per_epoch = 13;
+  uint64 default_min_redemption_rate_threshold = 14;
+  uint64 default_max_redemption_rate_threshold = 15;
+  uint64 ibc_transfer_timeout_nanos = 16;
+  uint64 validator_slash_query_threshold = 19;
+
+  reserved 8, 17, 18;
+}

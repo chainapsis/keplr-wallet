@@ -45,6 +45,8 @@ import {
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { useEffectOnce } from "../../hooks/use-effect-once";
+import { amountToAmbiguousAverage, amountToAmbiguousString } from "../../utils";
 
 export const IBCSwapPage: FunctionComponent = observer(() => {
   const {
@@ -57,11 +59,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     hugeQueriesStore,
     priceStore,
   } = useStore();
-
-  useLayoutEffect(() => {
-    // 더 이상 new feature 소개가 안뜨도록 만든다.
-    uiConfigStore.setNeedShowIBCSwapFeatureAdded(false);
-  }, [uiConfigStore]);
 
   const theme = useTheme();
 
@@ -306,6 +303,65 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   ]);
   // ------
 
+  const [isHighPriceImpact, setIsHighPriceImpact] = useState(false);
+  useEffectOnce(() => {
+    const disposal = autorun(() => {
+      if (ibcSwapConfigs.amountConfig.amount.length > 0) {
+        const amt = ibcSwapConfigs.amountConfig.amount[0];
+        // priceStore.calculatePrice를 여기서 먼저 실행하는건 의도적인 행동임.
+        // 유저가 amount를 입력하기 전에 미리 fecth를 해놓기 위해서임.
+        const inPrice = priceStore.calculatePrice(amt, "usd");
+        const outPrice = priceStore.calculatePrice(
+          ibcSwapConfigs.amountConfig.outAmount,
+          "usd"
+        );
+        if (amt.toDec().gt(new Dec(0))) {
+          if (
+            inPrice &&
+            // in price가 아주 낮으면 오히려 price impact가 높아진다.
+            // 근데 이 경우는 전혀 치명적인 자산 상의 문제가 생기지 않으므로 0달러가 아니라 1달러가 넘어야 체크한다.
+            inPrice.toDec().gt(new Dec(1)) &&
+            outPrice &&
+            outPrice.toDec().gt(new Dec(0))
+          ) {
+            if (inPrice.toDec().gt(outPrice.toDec())) {
+              const priceImpact = inPrice
+                .toDec()
+                .sub(outPrice.toDec())
+                .quo(inPrice.toDec())
+                .mul(new Dec(100));
+              // price impact가 2.5% 이상이면 경고
+              if (priceImpact.gt(new Dec(2.5))) {
+                setIsHighPriceImpact(true);
+                return;
+              }
+            }
+          }
+        }
+      }
+
+      setIsHighPriceImpact(false);
+    });
+
+    return () => {
+      if (disposal) {
+        disposal();
+      }
+    };
+  });
+  useEffectOnce(() => {
+    // 10초마다 price 자동 refresh
+    const intervalId = setInterval(() => {
+      if (priceStore.isInitialized && !priceStore.isFetching) {
+        priceStore.fetch();
+      }
+    }, 1000 * 10);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  });
+
   const outCurrencyFetched =
     chainStore
       .getChain(outChainId)
@@ -463,7 +519,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         };
                       }),
                       ibcSwapConfigs.memoConfig.memo
-                    ).withIBCPacketForwarding(channels);
+                    ).withIBCPacketForwarding(channels, {
+                      currencies: chainStore.getChain(chainId).currencies,
+                    });
                     return await new InExtensionMessageRequester().sendMessage(
                       BACKGROUND_PORT,
                       msg
@@ -494,7 +552,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           denom: amount.currency.coinMinimalDenom,
                         };
                       }),
-                      ibcSwapConfigs.memoConfig.memo
+                      ibcSwapConfigs.memoConfig.memo,
+                      {
+                        currencies: chainStore.getChain(outChainId).currencies,
+                      }
                     );
 
                     return await new InExtensionMessageRequester().sendMessage(
@@ -594,37 +655,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     params["outCurrencyCommonDenom"] =
                       outCurrency.originCurrency.coinDenom;
                   }
-                  const getSwapRangeStr = (amount: { toDec: () => Dec }) => {
-                    if (amount.toDec().lte(new Dec(0))) {
-                      return "0";
-                    }
-
-                    const swapRanges = [
-                      1, 10, 100, 1000, 10000, 100000, 1000000, 10000000,
-                      100000000, 1000000000,
-                    ];
-                    let res = "unknown";
-                    for (let i = 0; i < swapRanges.length; i++) {
-                      const range = swapRanges[i];
-                      const beforeRange = i > 0 ? swapRanges[i - 1] : 0;
-                      if (
-                        amount.toDec().lte(new Dec(range)) &&
-                        amount.toDec().gt(new Dec(beforeRange))
-                      ) {
-                        res = `${beforeRange}~${range}`;
-                        break;
-                      }
-
-                      if (i === swapRanges.length - 1) {
-                        res = `${range}~`;
-                      }
-                    }
-                    return res;
-                  };
-                  params["inRange"] = getSwapRangeStr(
+                  params["inRange"] = amountToAmbiguousString(
                     ibcSwapConfigs.amountConfig.amount[0]
                   );
-                  params["outRange"] = getSwapRangeStr(
+                  params["outRange"] = amountToAmbiguousString(
                     ibcSwapConfigs.amountConfig.outAmount
                   );
 
@@ -636,14 +670,20 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     "usd"
                   );
                   if (inCurrencyPrice) {
-                    params["inFiatRange"] = getSwapRangeStr(inCurrencyPrice);
+                    params["inFiatRange"] =
+                      amountToAmbiguousString(inCurrencyPrice);
+                    params["inFiatAvg"] =
+                      amountToAmbiguousAverage(inCurrencyPrice);
                   }
                   const outCurrencyPrice = priceStore.calculatePrice(
                     ibcSwapConfigs.amountConfig.outAmount,
                     "usd"
                   );
                   if (outCurrencyPrice) {
-                    params["outFiatRange"] = getSwapRangeStr(outCurrencyPrice);
+                    params["outFiatRange"] =
+                      amountToAmbiguousString(outCurrencyPrice);
+                    params["outFiatAvg"] =
+                      amountToAmbiguousAverage(outCurrencyPrice);
                   }
 
                   new InExtensionMessageRequester().sendMessage(
@@ -835,6 +875,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           type="to"
           senderConfig={ibcSwapConfigs.senderConfig}
           amountConfig={ibcSwapConfigs.amountConfig}
+          forceShowPrice={isHighPriceImpact}
           onDestinationChainSelect={(chainId, coinMinimalDenom) => {
             setSearchParams(
               (prev) => {
@@ -862,6 +903,15 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         <WarningGuideBox
           amountConfig={ibcSwapConfigs.amountConfig}
           forceError={calculatingTxError}
+          forceWarning={(() => {
+            if (isHighPriceImpact) {
+              return new Error(
+                intl.formatMessage({
+                  id: "page.ibc-swap.warning.high-price-impact",
+                })
+              );
+            }
+          })()}
         />
       </Box>
 
@@ -883,7 +933,8 @@ const WarningGuideBox: FunctionComponent<{
   amountConfig: IBCSwapAmountConfig;
 
   forceError?: Error;
-}> = observer(({ amountConfig, forceError }) => {
+  forceWarning?: Error;
+}> = observer(({ amountConfig, forceError, forceWarning }) => {
   const error: string | undefined = (() => {
     if (forceError) {
       return forceError.message || forceError.toString();
@@ -908,6 +959,10 @@ const WarningGuideBox: FunctionComponent<{
     const queryError = amountConfig.getQueryIBCSwap()?.getQueryRoute()?.error;
     if (queryError) {
       return queryError.message || queryError.toString();
+    }
+
+    if (forceWarning) {
+      return forceWarning.message || forceWarning.toString();
     }
   })();
 
