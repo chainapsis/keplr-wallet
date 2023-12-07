@@ -27,7 +27,11 @@ import {
   useFocusedScreen,
 } from './provider/focused-screen';
 import {WalletIcon, BrowserIcon, SettingIcon} from './components/icon';
-import {HomeScreenHeader, defaultHeaderOptions} from './components/pageHeader';
+import {
+  HomeScreenHeaderTitle,
+  defaultHeaderOptions,
+  homeHeaderOptions,
+} from './components/pageHeader';
 import {SettingScreen} from './screen/setting';
 
 import {
@@ -344,7 +348,7 @@ export const MainTabNavigationWithDrawer: FunctionComponent = () => {
   );
 };
 
-const HomeScreenHeaderFunc = () => <HomeScreenHeader />;
+const HomeScreenHeaderTitleFunc = () => <HomeScreenHeaderTitle />;
 export const MainTabNavigation: FunctionComponent = () => {
   const style = useStyle();
 
@@ -391,7 +395,8 @@ export const MainTabNavigation: FunctionComponent = () => {
       <Tab.Screen
         name="Home"
         options={{
-          header: HomeScreenHeaderFunc,
+          headerTitle: HomeScreenHeaderTitleFunc,
+          ...homeHeaderOptions,
         }}
         component={HomeScreen}
       />
