@@ -13,7 +13,6 @@ import {YAxis} from '../../components/axis';
 import {Stack} from '../../components/stack';
 import {Column, Columns} from '../../components/column';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
-import {Modal} from '../../components/modal';
 import {DepositModal} from './components/deposit-modal/deposit-modal';
 import {BuyModal} from './buy-modal';
 import {StackActions, useNavigation} from '@react-navigation/native';
@@ -54,9 +53,9 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation<StackNavProp>();
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>('available');
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const SelectStakingChainModalRef = useRef<BottomSheetModal>(null);
-  const copyAddressModalRef = useRef<BottomSheetModal>(null);
 
   const availableTotalPrice = useMemo(() => {
     let result: PricePretty | undefined;
@@ -155,7 +154,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
                   size="large"
                   color="secondary"
                   onPress={() => {
-                    copyAddressModalRef.current?.present();
+                    setIsDepositModalOpen(true);
                   }}
                 />
               </Skeleton>
@@ -238,7 +237,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
             search={search}
             isNotReady={isNotReady}
             onClickGetStarted={() => {
-              copyAddressModalRef.current?.present();
+              setIsDepositModalOpen(true);
             }}
           />
         ) : (
@@ -248,9 +247,10 @@ export const HomeScreen: FunctionComponent = observer(() => {
         )}
       </Stack>
 
-      <Modal ref={copyAddressModalRef} snapPoints={['60%']}>
-        <DepositModal />
-      </Modal>
+      <DepositModal
+        isOpen={isDepositModalOpen}
+        setIsOpen={setIsDepositModalOpen}
+      />
       <BuyModal
         navigation={navigation}
         isOpen={isBuyModalOpen}

@@ -3,7 +3,6 @@ import React, {
   FunctionComponent,
   useCallback,
   useEffect,
-  useRef,
   useState,
 } from 'react';
 import {
@@ -20,8 +19,6 @@ import Svg, {Path} from 'react-native-svg';
 import {Gutter} from '../../components/gutter';
 import {CloseIcon} from '../../components/icon';
 import {DepositModal} from '../home/components/deposit-modal/deposit-modal';
-import {Modal} from '../../components/modal';
-import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {useStore} from '../../stores';
 import {
   StackActions,
@@ -42,7 +39,6 @@ export const CameraScreen: FunctionComponent = observer(() => {
 
   const isFocused = useIsFocused();
   const {hasPermission, requestPermission} = useCameraPermission();
-  const copyAddressModalRef = useRef<BottomSheetModal>(null);
   const [isLoading, setIsLoading] = useState(false);
   // To prevent the reading while changing to other screen after processing the result.
   // Expectedly, screen should be moved to other after processing the result.
@@ -127,6 +123,8 @@ export const CameraScreen: FunctionComponent = observer(() => {
     }
   }, [hasPermission, requestPermission]);
 
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+
   return (
     <React.Fragment>
       {isFocused && device && hasPermission ? (
@@ -178,7 +176,9 @@ export const CameraScreen: FunctionComponent = observer(() => {
           text="Show my QR code"
           color="secondary"
           containerStyle={{opacity: 0.8}}
-          onPress={() => copyAddressModalRef.current?.present()}
+          onPress={() => {
+            setIsDepositModalOpen(true);
+          }}
         />
 
         {hasPermission ? null : (
@@ -206,9 +206,10 @@ export const CameraScreen: FunctionComponent = observer(() => {
         )}
       </SafeAreaView>
 
-      <Modal ref={copyAddressModalRef} snapPoints={['60%']}>
-        <DepositModal />
-      </Modal>
+      <DepositModal
+        isOpen={isDepositModalOpen}
+        setIsOpen={setIsDepositModalOpen}
+      />
     </React.Fragment>
   );
 });
