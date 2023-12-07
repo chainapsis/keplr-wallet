@@ -25,6 +25,8 @@ import {ClaimAll} from './components/claim-all';
 import {Box} from '../../components/box';
 import {StackNavProp} from '../../navigation';
 import {Skeleton} from '../../components/skeleton';
+import {StakingIcon} from '../../components/icon/stacking';
+import {VoteIcon} from '../../components/icon';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -193,6 +195,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
               text="Vote"
               size="large"
               color="secondary"
+              rightIcon={<VoteIcon />}
               containerStyle={style.flatten(['flex-1'])}
               onPress={() => {
                 //TODO - 거버넌스 페이지로 이동
@@ -204,6 +207,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
             <Button
               text="Stake"
               size="large"
+              rightIcon={<StakingIcon size={18} color="white" />}
               containerStyle={style.flatten(['flex-1'])}
               onPress={() => {
                 //TODO - 체인 선택 모달을 띄워줘야함
