@@ -51,7 +51,6 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
     useRoute<RouteProp<RootStackParamList, 'Setting.ManageTokenList.Add'>>();
   const paramChainId = route.params?.chainId;
   const contractModalRef = useRef<BottomSheetModal>(null);
-  const selectChainModalRef = useRef<BottomSheetModal>(null);
   const notification = useNotification();
 
   const [isOpenChainSelectModal, setIsOpenChainSelectModal] = useState(false);
@@ -227,7 +226,6 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
               placeholder="Search by chain name"
               isOpenModal={isOpenChainSelectModal}
               onPress={() => {
-                selectChainModalRef.current?.present();
                 setIsOpenChainSelectModal(true);
               }}
             />
@@ -386,22 +384,18 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
           }}
         />
       </Modal>
-      <Modal
-        ref={selectChainModalRef}
-        onDismiss={() => setIsOpenChainSelectModal(false)}
-        //NOTE BottomSheetTextInput가 안드로이드일때 올바르게 동작 하지 않고
-        //같은 50% 일때 키보드가 있을시 모달 크기가 작아서 안드로이드 일때만 70% 으로 설정
-        snapPoints={Platform.OS === 'android' ? ['70%'] : ['50%']}>
-        <SelectModal
-          items={items}
-          title="Select Chain"
-          placeholder="Search by chain name"
-          onSelect={item => {
-            setChainId(item.key);
-            setIsOpenChainSelectModal(false);
-          }}
-        />
-      </Modal>
+
+      <SelectModal
+        items={items}
+        title="Select Chain"
+        placeholder="Search by chain name"
+        isOpen={isOpenChainSelectModal}
+        setIsOpen={setIsOpenChainSelectModal}
+        onSelect={item => {
+          setChainId(item.key);
+          setIsOpenChainSelectModal(false);
+        }}
+      />
     </PageWithScrollView>
   );
 });
