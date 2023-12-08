@@ -35,6 +35,7 @@ import Eth from "@ledgerhq/hw-app-eth";
 import "simplebar-react/dist/simplebar.min.css";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
+import { RoutePageAnalytics } from "./route-page-analytics";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -388,6 +389,7 @@ const AppRouter: FunctionComponent = () => {
 
   return (
     <HashRouter>
+      <RoutePageAnalytics prefix="/ledger-grant" />
       <Routes>
         <Route path="/" element={<LedgerGrantPage />} />
       </Routes>

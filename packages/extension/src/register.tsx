@@ -21,6 +21,7 @@ import { useLoadFonts } from "./use-load-fonts";
 import { useAutoLockMonitoring } from "./use-auto-lock-monitoring";
 import "simplebar-react/dist/simplebar.min.css";
 import { AppThemeProvider } from "./theme";
+import { RoutePageAnalytics } from "./route-page-analytics";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -43,6 +44,7 @@ const AppRouter: FunctionComponent = () => {
 
   return (
     <HashRouter>
+      <RoutePageAnalytics prefix="/register" />
       <Routes>
         <Route path="/" element={<RegisterPage />} />
         <Route path="/welcome" element={<WelcomePage />} />

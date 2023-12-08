@@ -93,7 +93,10 @@ export const FiatCurrencies: FiatCurrency[] = [
   },
 ];
 
-export const AmplitudeApiKey = process.env["KEPLR_EXT_AMPLITUDE_API_KEY"] || "";
+export const GoogleMeasurementId =
+  process.env["KEPLR_EXT_GOOGLE_MEASUREMENT_ID"] || "";
+export const GoogleAPIKeyForMeasurement =
+  process.env["KEPLR_EXT_GOOGLE_API_KEY_FOR_MEASUREMENT"] || "";
 
 export const ICNSInfo = {
   chainId: "osmosis-1",
