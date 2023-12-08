@@ -194,7 +194,9 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
             })(),
           }),
         }
-      );
+      ).catch((e) => {
+        console.log(e);
+      });
     });
   }
 
