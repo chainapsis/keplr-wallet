@@ -23,10 +23,7 @@ export const RegisterIntroNewUserScreen: FunctionComponent = () => {
   const navigation = useNavigation<StackNavProp>();
 
   return (
-    <RegisterContainer
-      title={intl.formatMessage({
-        id: 'pages.register.intro-new-user.title',
-      })}>
+    <RegisterContainer>
       <Box alignX="center" padding={20}>
         <Text style={style.flatten(['color-text-low', 'body1'])}>
           <FormattedMessage id="pages.register.intro-new-user.paragraph" />
@@ -63,7 +60,9 @@ export const RegisterIntroNewUserScreen: FunctionComponent = () => {
             })}
             size="large"
             onPress={() => {
-              navigation.navigate('Register.NewMnemonic');
+              navigation.navigate('Register.NewMnemonic', {
+                paragraph: 'Step 1/3',
+              });
             }}
           />
 

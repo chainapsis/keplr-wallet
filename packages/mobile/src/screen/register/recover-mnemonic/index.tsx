@@ -1,4 +1,4 @@
-import React, {FunctionComponent} from 'react';
+import React, {FunctionComponent, useLayoutEffect} from 'react';
 import {observer} from 'mobx-react-lite';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {RegisterContainer} from '../components';
@@ -109,12 +109,14 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
     }
   });
 
+  useLayoutEffect(() => {
+    navigation.setParams({
+      paragraph: 'Step 1/3',
+    });
+  }, [navigation]);
+
   return (
     <RegisterContainer
-      title={intl.formatMessage({
-        id: 'pages.register.recover-mnemonic.title',
-      })}
-      paragraph={'Step 1/3'}
       bottom={
         <Button
           text={intl.formatMessage({

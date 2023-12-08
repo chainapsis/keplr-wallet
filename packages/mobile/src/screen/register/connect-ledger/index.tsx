@@ -1,4 +1,10 @@
-import React, {FunctionComponent, useEffect, useRef, useState} from 'react';
+import React, {
+  FunctionComponent,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import {observer} from 'mobx-react-lite';
 import {Button} from '../../../components/button';
 import {RegisterContainer} from '../components';
@@ -40,6 +46,16 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
   const [publicKey, setPublicKey] = useState<Uint8Array>();
 
   const {keyRingStore, chainStore} = useStore();
+
+  useLayoutEffect(() => {
+    navigation.setParams({
+      paragraph:
+        appendModeInfo === undefined
+          ? `Step ${stepPrevious + 1}/${stepTotal}`
+          : undefined,
+      hideBackButton: appendModeInfo !== undefined,
+    });
+  }, [appendModeInfo, navigation, stepPrevious, stepTotal]);
 
   useEffect(() => {
     (async () => {
@@ -92,15 +108,6 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
 
   return (
     <RegisterContainer
-      title={intl.formatMessage({
-        id: 'pages.register.connect-ledger.title',
-      })}
-      paragraph={
-        appendModeInfo === undefined
-          ? `Step ${stepPrevious + 1}/${stepTotal}`
-          : undefined
-      }
-      hideBackButton={appendModeInfo !== undefined}
       bottom={
         <Button
           text={intl.formatMessage({
