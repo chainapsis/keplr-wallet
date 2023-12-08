@@ -10,7 +10,6 @@ import {useStyle} from '../../../../styles';
 import {Box} from '../../../../components/box';
 import {EmptyView} from '../../../../components/empty-view';
 import {ContractAddressItem} from '../contract-item';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {TokenContractListRepoURL} from '../../../../config.ui';
 import {ScrollView, TextInput} from 'react-native-gesture-handler';
 import {registerCardModal} from '../../../../components/modal/card';
@@ -25,7 +24,6 @@ export const ContractAddressBookModal = registerCardModal(
     const contracts =
       queriesStore.get(chainId).tokenContracts.queryTokenContracts
         .tokenContracts;
-    const insect = useSafeAreaInsets();
 
     const [search, setSearch] = useState('');
     const searchRef = useFocusOnMount<TextInput>();
@@ -102,7 +100,6 @@ export const ContractAddressBookModal = registerCardModal(
           alignX="center"
           alignY="bottom"
           paddingTop={16}
-          paddingBottom={insect.bottom}
           onClick={() => {
             Linking.openURL(TokenContractListRepoURL);
           }}>
