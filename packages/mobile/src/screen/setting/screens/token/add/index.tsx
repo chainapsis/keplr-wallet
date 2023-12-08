@@ -23,8 +23,7 @@ import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../../../navigation';
 import {PageWithScrollView} from '../../../../../components/page';
 import {ContractAddressBookModal} from '../../../components/contract-address-book-modal';
-import {BottomSheetModal} from '@gorhom/bottom-sheet';
-import {Platform, Text} from 'react-native';
+import {Text} from 'react-native';
 import {Controller, useForm} from 'react-hook-form';
 import {Button} from '../../../../../components/button';
 import {Gutter} from '../../../../../components/gutter';
@@ -32,7 +31,6 @@ import {
   SelectModal,
   SelectModalCommonButton,
 } from '../../../../../components/select-modal';
-import {Modal} from '../../../../../components/modal';
 import {useNotification} from '../../../../../hooks/notification';
 
 interface FormData {
@@ -50,10 +48,10 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
   const route =
     useRoute<RouteProp<RootStackParamList, 'Setting.ManageTokenList.Add'>>();
   const paramChainId = route.params?.chainId;
-  const contractModalRef = useRef<BottomSheetModal>(null);
   const notification = useNotification();
 
   const [isOpenChainSelectModal, setIsOpenChainSelectModal] = useState(false);
+  const [isOpenContractModal, setIsOpenContractModal] = useState(false);
 
   const style = useStyle();
 
@@ -267,7 +265,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
                       />
                     }
                     onPress={() => {
-                      contractModalRef.current?.present();
+                      setIsOpenContractModal(true);
                     }}
                     style={style.flatten(['padding-4'])}
                   />
@@ -372,18 +370,15 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
           onPress={submit}
         />
       </Box>
-      <Modal
-        ref={contractModalRef}
-        //NOTE BottomSheetTextInput가 안드로이드일때 올바르게 동작 하지 않고
-        //같은 50% 일때 키보드가 있을시 모달 크기가 작아서 안드로이드 일때만 70% 으로 설정
-        snapPoints={Platform.OS === 'android' ? ['70%'] : ['50%']}>
-        <ContractAddressBookModal
-          chainId={chainId}
-          onSelect={(address: string) => {
-            setValue('contractAddress', address);
-          }}
-        />
-      </Modal>
+
+      <ContractAddressBookModal
+        chainId={chainId}
+        isOpen={isOpenContractModal}
+        setIsOpen={setIsOpenContractModal}
+        onSelect={(address: string) => {
+          setValue('contractAddress', address);
+        }}
+      />
 
       <SelectModal
         items={items}
