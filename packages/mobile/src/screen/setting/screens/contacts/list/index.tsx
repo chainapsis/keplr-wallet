@@ -17,7 +17,7 @@ import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../../../navigation';
 import {Modal} from '../../../../../components/modal';
 import {BottomSheetModal, BottomSheetView} from '@gorhom/bottom-sheet';
-import {Platform, Pressable, Text} from 'react-native';
+import {Pressable, Text} from 'react-native';
 import {useStyle} from '../../../../../styles';
 import {PageWithScrollView} from '../../../../../components/page';
 import {AddressItem} from '../../../components/setting-address-item';
@@ -45,7 +45,6 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
   const [isOpenChainSelectModal, setIsOpenChainSelectModal] = useState(false);
 
   const menuModalRef = useRef<BottomSheetModal>(null);
-  const selectChainModalRef = useRef<BottomSheetModal>(null);
 
   const style = useStyle();
   // Handle "chainId" state by search params to persist the state between page changes.
@@ -82,7 +81,6 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
             placeholder="Search by chain name"
             isOpenModal={isOpenChainSelectModal}
             onPress={() => {
-              selectChainModalRef.current?.present();
               setIsOpenChainSelectModal(true);
             }}
           />
@@ -192,22 +190,17 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
         </BottomSheetView>
       </Modal>
 
-      <Modal
-        ref={selectChainModalRef}
-        onDismiss={() => setIsOpenChainSelectModal(false)}
-        //NOTE BottomSheetTextInput가 안드로이드일때 올바르게 동작 하지 않고
-        //같은 50% 일때 키보드가 있을시 모달 크기가 작아서 안드로이드 일때만 70% 으로 설정
-        snapPoints={Platform.OS === 'android' ? ['70%'] : ['50%']}>
-        <SelectModal
-          onSelect={item => {
-            navigate.setParams({chainId: item.key});
-            setIsOpenChainSelectModal(false);
-          }}
-          placeholder="Search by chain name"
-          items={items}
-          title="Select Chain"
-        />
-      </Modal>
+      <SelectModal
+        isOpen={isOpenChainSelectModal}
+        setIsOpen={setIsOpenChainSelectModal}
+        onSelect={item => {
+          navigate.setParams({chainId: item.key});
+          setIsOpenChainSelectModal(false);
+        }}
+        placeholder="Search by chain name"
+        items={items}
+        title="Select Chain"
+      />
     </PageWithScrollView>
   );
 });
