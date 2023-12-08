@@ -571,10 +571,9 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                 },
                 {
                   onBroadcasted: () => {
-                    analyticsStore.logEvent("complete_claim", {
+                    analyticsStore.logEvent("complete_claim_all", {
                       chainId: viewToken.chainInfo.chainId,
                       chainName: viewToken.chainInfo.chainName,
-                      isClaimAll: true,
                     });
                   },
                   onFulfill: (tx: any) => {

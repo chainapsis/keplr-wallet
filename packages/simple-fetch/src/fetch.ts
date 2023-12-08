@@ -70,16 +70,21 @@ export async function simpleFetch<R>(
 
   let data: R;
 
-  const contentType = fetched.headers.get("content-type") || "";
-  if (contentType.startsWith("application/json")) {
-    data = await fetched.json();
+  if (fetched.status === 204) {
+    // 204 No Content
+    data = undefined as any;
   } else {
-    const r = await fetched.text();
-    const trim = r.trim();
-    if (trim.startsWith("{") && trim.endsWith("}")) {
-      data = JSON.parse(trim);
+    const contentType = fetched.headers.get("content-type") || "";
+    if (contentType.startsWith("application/json")) {
+      data = await fetched.json();
     } else {
-      data = r as any;
+      const r = await fetched.text();
+      const trim = r.trim();
+      if (trim.startsWith("{") && trim.endsWith("}")) {
+        data = JSON.parse(trim);
+      } else {
+        data = r as any;
+      }
     }
   }
 
@@ -100,5 +105,5 @@ export async function simpleFetch<R>(
 }
 
 function defaultValidateStatusFn(status: number): boolean {
-  return status === 200;
+  return status >= 200 && status < 300;
 }

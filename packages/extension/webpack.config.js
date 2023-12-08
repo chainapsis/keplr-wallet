@@ -164,7 +164,6 @@ module.exports = {
       //      At present, rather than fixing this for development mode, We fix this by forcing cssom to be enabled, and will fix this later when we have time.
       SC_DISABLE_SPEEDY: false,
       KEPLR_EXT_ETHEREUM_ENDPOINT: "",
-      KEPLR_EXT_AMPLITUDE_API_KEY: "",
       KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN: "",
       KEPLR_EXT_ANALYTICS_API_URL: "",
       KEPLR_EXT_COINGECKO_ENDPOINT: "",
@@ -173,6 +172,8 @@ module.exports = {
       KEPLR_EXT_MOONPAY_API_KEY: "",
       KEPLR_EXT_KADO_API_KEY: "",
       KEPLR_EXT_CHAIN_REGISTRY_URL: "",
+      KEPLR_EXT_GOOGLE_MEASUREMENT_ID: "",
+      KEPLR_EXT_GOOGLE_API_KEY_FOR_MEASUREMENT: "",
     }),
     new ForkTsCheckerWebpackPlugin(),
     new CopyWebpackPlugin({

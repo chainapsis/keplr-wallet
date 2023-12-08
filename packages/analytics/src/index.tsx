@@ -25,7 +25,10 @@ export class NoopAnalyticsClient implements AnalyticsClient {
   }
 }
 
-export class AnalyticsStore<E extends Properties, U extends Properties> {
+export class AnalyticsStore<
+  E extends Properties = Properties,
+  U extends Properties = Properties
+> {
   constructor(
     protected readonly analyticsClient: AnalyticsClient,
     protected readonly middleware: {
