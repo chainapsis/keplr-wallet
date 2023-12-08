@@ -12,7 +12,6 @@ import {useStore} from '../../../../../stores';
 import {Box} from '../../../../../components/box';
 import {autorun} from 'mobx';
 import {AppCurrency} from '@keplr-wallet/types';
-// import {useInteractionInfo} from '../../../../hooks';
 import {useStyle} from '../../../../../styles';
 import {Column, Columns} from '../../../../../components/column';
 import {Toggle} from '../../../../../components/toggle';
@@ -88,27 +87,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
     }
   });
 
-  // secret20은 서명 페이지로 넘어가야하기 때문에 막아야함...
   const blockRejectAll = useRef(false);
-
-  //TODO interaction작업 후 구현해야함
-  // const interactionInfo = useInteractionInfo(() => {
-  //   if (!blockRejectAll.current) {
-  //     tokensStore.rejectAllSuggestedTokens();
-  //   }
-  // });
-
-  // useLayoutEffect(() => {
-  //   if (interactionInfo.interaction) {
-  //     if (tokensStore.waitingSuggestedToken) {
-  //       setChainId(tokensStore.waitingSuggestedToken.data.chainId);
-  //       setValue(
-  //         'contractAddress',
-  //         tokensStore.waitingSuggestedToken.data.contractAddress,
-  //       );
-  //     }
-  //   }
-  // }, [interactionInfo, setValue, tokensStore.waitingSuggestedToken]);
 
   useEffect(() => {
     // secret20은 계정에 귀속되기 때문에 추가/삭제 등을 할때 먼저 초기화가 되어있어야만 가능하다.
@@ -229,36 +208,9 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
           coinDecimals: queryContract.tokenInfo.decimals,
         };
       }
-      //TODO interaction작업 후 구현해야함
-      // if (interactionInfo.interaction && tokensStore.waitingSuggestedToken) {
-      //   await tokensStore.approveSuggestedTokenWithProceedNext(
-      //     tokensStore.waitingSuggestedToken.id,
-      //     currency,
-      //     proceedNext => {
-      //       if (!proceedNext) {
-      //         if (
-      //           interactionInfo.interaction &&
-      //           !interactionInfo.interactionInternal
-      //         ) {
-      //           window.close();
-      //         }
-      //       }
 
-      //       if (
-      //         interactionInfo.interaction &&
-      //         !interactionInfo.interactionInternal &&
-      //         isSecretWasm
-      //       ) {
-      //         // TODO: secret20의 경우는 서명 페이지로 페이지 자체가 넘어가기 때문에 proceedNext를 처리할 수가 없다.
-      //         //       나중에 뭔가 해결법이 생기면 다시 생각해본다...
-      //         window.close();
-      //       }
-      //     },
-      //   );
-      // } else {
       await tokensStore.addToken(chainId, currency);
       navigate.reset({routes: [{name: 'Home'}]});
-      // }
     }
   });
 
@@ -268,8 +220,6 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
       contentContainerStyle={style.flatten(['flex-grow-1'])}>
       <Box paddingX={12} paddingTop={12} height={'100%'}>
         <Stack gutter={16}>
-          {/* TODO dropdown 컴포넌트 이후 작업 */}
-          {/* {!interactionInfo.interaction ? ( */}
           <Box width={208}>
             <SelectModalCommonButton
               items={items}
