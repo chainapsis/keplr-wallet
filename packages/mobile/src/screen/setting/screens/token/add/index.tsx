@@ -377,6 +377,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
         setIsOpen={setIsOpenContractModal}
         onSelect={(address: string) => {
           setValue('contractAddress', address);
+          setIsOpenContractModal(false);
         }}
       />
 
