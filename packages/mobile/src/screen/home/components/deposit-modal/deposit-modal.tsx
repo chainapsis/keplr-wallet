@@ -1,29 +1,49 @@
-import React from 'react';
-import {BaseModal} from '../../../../components/modal/modal';
+import React, {useState} from 'react';
 import {CopyAddressScene} from './copy-address-scene';
 import {QRScene} from './qr-scene';
+import {registerCardModal} from '../../../../components/modal/card';
+import {HorizontalSimpleScene} from '../../../../components/transition';
+import {observer} from 'mobx-react-lite';
+import {useStore} from '../../../../stores';
 
-interface QRSeneProps {
-  chainId: string;
-  chainName: string;
-  bech32Address: string;
-}
-export type DepositModalNav = {
-  List: undefined;
-  QR: QRSeneProps;
-};
+export const DepositModal = registerCardModal<{
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}>(
+  observer(({isOpen, setIsOpen}) => {
+    const {chainStore} = useStore();
 
-export const DepositModal = () => {
-  return (
-    <BaseModal
-      initialRouteName="List"
-      screenList={[
-        {routeName: 'List', scene: CopyAddressScene},
-        {
-          routeName: 'QR',
-          scene: QRScene,
-        },
-      ]}
-    />
-  );
-};
+    const [qrChainId, setQRChainId] = useState<string>(
+      () => chainStore.chainInfos[0].chainId,
+    );
+    const [qrBech32Address, setQRBech32Address] = useState<string>('');
+    const [currentScene, setCurrentScene] = useState('List');
+
+    return (
+      <HorizontalSimpleScene
+        scenes={[
+          {
+            key: 'List',
+            element: CopyAddressScene,
+          },
+          {
+            key: 'QR',
+            element: QRScene,
+          },
+        ]}
+        transitionAlign="bottom"
+        currentSceneKey={currentScene}
+        sharedProps={{
+          isOpen,
+          setIsOpen,
+          currentScene,
+          setCurrentScene,
+          qrChainId,
+          setQRChainId,
+          qrBech32Address,
+          setQRBech32Address,
+        }}
+      />
+    );
+  }),
+);

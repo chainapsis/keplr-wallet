@@ -51,24 +51,12 @@ export const DestinationChainView: FunctionComponent<{
           {ibcChannelConfig.channels.length === 0 ? null : (
             <React.Fragment>
               <ChainImageFallback
-                style={{
-                  width: "2rem",
-                  height: "2rem",
-                }}
-                alt="chain image"
-                src={(() => {
-                  if (ibcChannelConfig.channels.length === 0) {
-                    return "";
-                  }
-
-                  const chainInfo = chainStore.getChain(
-                    ibcChannelConfig.channels[
-                      ibcChannelConfig.channels.length - 1
-                    ].counterpartyChainId
-                  );
-
-                  return chainInfo.chainSymbolImageUrl;
-                })()}
+                chainInfo={chainStore.getChain(
+                  ibcChannelConfig.channels[
+                    ibcChannelConfig.channels.length - 1
+                  ].counterpartyChainId
+                )}
+                size="2rem"
               />
               <Gutter size="0.75rem" />
             </React.Fragment>

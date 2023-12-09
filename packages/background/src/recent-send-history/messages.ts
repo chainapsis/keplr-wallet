@@ -1,6 +1,7 @@
 import { Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 import { IBCHistory, RecentSendHistory } from "./types";
+import { AppCurrency } from "@keplr-wallet/types";
 
 export class GetRecentSendHistoriesMsg extends Message<RecentSendHistory[]> {
   public static type() {
@@ -102,7 +103,10 @@ export class SendTxAndRecordMsg extends Message<Uint8Array> {
       portId: string;
       channelId: string;
       counterpartyChainId: string;
-    }[]
+    }[],
+    notificationInfo: {
+      currencies: AppCurrency[];
+    }
   ): SendTxAndRecordWithIBCPacketForwardingMsg {
     return new SendTxAndRecordWithIBCPacketForwardingMsg(
       this.historyType,
@@ -115,7 +119,8 @@ export class SendTxAndRecordMsg extends Message<Uint8Array> {
       this.sender,
       this.recipient,
       this.amount,
-      this.memo
+      this.memo,
+      notificationInfo
     );
   }
 }
@@ -143,7 +148,10 @@ export class SendTxAndRecordWithIBCPacketForwardingMsg extends Message<Uint8Arra
       readonly amount: string;
       readonly denom: string;
     }[],
-    public readonly memo: string
+    public readonly memo: string,
+    public readonly notificationInfo: {
+      currencies: AppCurrency[];
+    }
   ) {
     super();
   }
@@ -222,7 +230,10 @@ export class SendTxAndRecordWithIBCSwapMsg extends Message<Uint8Array> {
       readonly amount: string;
       readonly denom: string;
     }[],
-    public readonly memo: string
+    public readonly memo: string,
+    public readonly notificationInfo: {
+      currencies: AppCurrency[];
+    }
   ) {
     super();
   }

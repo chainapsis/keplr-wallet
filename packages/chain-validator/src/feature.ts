@@ -21,6 +21,7 @@ export const SupportedChainFeatures = [
   "ibc-go-v7-hot-fix",
   "ibc-pfm",
   "authz-msg-revoke-fixed",
+  "osmosis-base-fee-beta",
 ];
 
 /**

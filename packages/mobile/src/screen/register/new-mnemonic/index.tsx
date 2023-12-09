@@ -1,4 +1,9 @@
-import React, {FunctionComponent, useEffect, useState} from 'react';
+import React, {
+  FunctionComponent,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from 'react';
 import {observer} from 'mobx-react-lite';
 import {useIntl} from 'react-intl';
 import {useStyle} from '../../../styles';
@@ -27,6 +32,12 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
   const [words, setWords] = useState<string[]>([]);
   const [wordsType, setWordsType] = useState<WordsType>('12words');
 
+  useLayoutEffect(() => {
+    navigation.setParams({
+      paragraph: 'Step 1/3',
+    });
+  }, [navigation]);
+
   useEffect(() => {
     const rng = (array: any) => {
       return Promise.resolve(Crypto.getRandomValues(array));
@@ -43,10 +54,6 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
 
   return (
     <RegisterContainer
-      title={intl.formatMessage({
-        id: 'pages.register.new-mnemonic.title',
-      })}
-      paragraph={'Step 1/3'}
       bottom={
         <Button
           text={intl.formatMessage({
@@ -171,9 +178,9 @@ const CopyToClipboard: FunctionComponent<{text: string}> = ({text}) => {
               id: 'pages.register.components.copy-to-clipboard.button-before',
             })
       }
-      textStyle={style.flatten([
-        hasCopied ? 'color-green-400' : 'color-gray-50',
-      ])}
+      textColor={
+        style.flatten([hasCopied ? 'color-green-400' : 'color-gray-50']).color
+      }
       size="large"
       onPress={async () => {
         await Clipboard.setStringAsync(text);

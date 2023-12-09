@@ -25,6 +25,7 @@ export class ChainSuggestStore {
       readonly organizationName: string;
       readonly repoName: string;
       readonly branchName: string;
+      readonly alternativeURL?: string;
     }
   ) {
     makeObservable(this);
@@ -78,8 +79,12 @@ export class ChainSuggestStore {
     try {
       const response = yield* toGenerator(
         simpleFetch<ChainInfo>(
-          `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/${this.communityChainInfoRepo.branchName}`,
-          `/cosmos/${chainIdentifier}.json`
+          this.communityChainInfoRepo.alternativeURL
+            ? this.communityChainInfoRepo.alternativeURL.replace(
+                "{chain_identifier}",
+                chainIdentifier
+              )
+            : `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/${this.communityChainInfoRepo.branchName}/cosmos/${chainIdentifier}.json`
         )
       );
 

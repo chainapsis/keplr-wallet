@@ -1,7 +1,11 @@
-import React, {FunctionComponent, useEffect, useState} from 'react';
+import React, {
+  FunctionComponent,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from 'react';
 import {observer} from 'mobx-react-lite';
 import {FormattedMessage, useIntl} from 'react-intl';
-import {RegisterHeader} from '../../../components/pageHeader/header-register';
 import {Box} from '../../../components/box';
 import {KeyboardAvoidingView, Platform, StyleSheet, Text} from 'react-native';
 import {useStyle} from '../../../styles';
@@ -38,6 +42,12 @@ export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
     }[]
   >([]);
 
+  useLayoutEffect(() => {
+    navigation.setParams({
+      hideBackButton: true,
+    });
+  }, [navigation]);
+
   useEffect(() => {
     keyRingStore.computeNotFinalizedKeyAddresses(vaultId, chainId).then(res => {
       setCandidates(res);
@@ -58,13 +68,6 @@ export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{flex: 1}}>
-      <RegisterHeader
-        title={intl.formatMessage({
-          id: 'pages.register.select-derivation-path.title',
-        })}
-        hideBackButton={true}
-      />
-
       <Box padding={20} style={{flex: 1}}>
         <Text
           style={StyleSheet.flatten([

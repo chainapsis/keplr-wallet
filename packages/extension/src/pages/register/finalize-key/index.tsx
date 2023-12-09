@@ -67,7 +67,8 @@ export const FinalizeKeyScene: FunctionComponent<{
     stepPrevious,
     stepTotal,
   }) => {
-    const { chainStore, accountStore, queriesStore, keyRingStore } = useStore();
+    const { chainStore, accountStore, queriesStore, keyRingStore, priceStore } =
+      useStore();
 
     const sceneTransition = useSceneTransition();
     const theme = useTheme();
@@ -266,7 +267,18 @@ export const FinalizeKeyScene: FunctionComponent<{
                   .waitFreshResponse()
               );
             }
+
+            const chainInfo = chainStore.getChain(candidateAddress.chainId);
+            const targetCurrency =
+              chainInfo.stakeCurrency || chainInfo.currencies[0];
+            if (targetCurrency.coinGeckoId) {
+              // Push coingecko id to priceStore.
+              priceStore.getPrice(targetCurrency.coinGeckoId);
+            }
           }
+
+          // Try to make sure that prices are fresh.
+          promises.push(priceStore.waitFreshResponse());
 
           await Promise.allSettled(promises);
         })();

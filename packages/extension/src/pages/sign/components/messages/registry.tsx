@@ -15,6 +15,7 @@ import {
   TransferMessage,
   UndelegateMessage,
   VoteMessage,
+  PayPacketFeeMessage,
 } from "./render";
 import { FormattedMessage } from "react-intl";
 import { useTheme } from "styled-components";
@@ -105,3 +106,4 @@ defaultRegistry.register(SendMessage);
 defaultRegistry.register(TransferMessage);
 defaultRegistry.register(UndelegateMessage);
 defaultRegistry.register(VoteMessage);
+defaultRegistry.register(PayPacketFeeMessage);

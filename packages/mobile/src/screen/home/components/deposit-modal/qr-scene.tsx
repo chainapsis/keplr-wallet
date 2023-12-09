@@ -1,8 +1,5 @@
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {observer} from 'mobx-react-lite';
 import React from 'react';
-import {DepositModalNav} from './deposit-modal';
-import {useBottomSheet} from '@gorhom/bottom-sheet';
 import {useStyle} from '../../../../styles';
 import {Box} from '../../../../components/box';
 import {Column, Columns} from '../../../../components/column';
@@ -17,22 +14,22 @@ import {useStore} from '../../../../stores';
 
 //NOTE - navigation에서 기본으로 제공해주는 뒤로가기 버튼으로 할때는 뒤로 간뒤 넓어지는 애니메이션이 진행되는데
 // 커스텀 버튼을 만들어서 goBack을 실행하면 뒤로 가면서 애니메이션이 실행되서 일단 이렇게 진행
-export const QRScene = observer(() => {
-  const bottom = useBottomSheet();
+export const QRScene = observer<{
+  setCurrentScene: (isOpen: string) => void;
+  qrChainId: string;
+  qrBech32Address: string;
+}>(({setCurrentScene, qrChainId, qrBech32Address}) => {
   const {chainStore} = useStore();
-  const route = useRoute<RouteProp<DepositModalNav, 'QR'>>();
-  const chainInfo = chainStore.getChain(route.params?.chainId);
-  bottom.snapToPosition('40%');
+  const chainInfo = chainStore.getChain(qrChainId);
   const style = useStyle();
-  const nav = useNavigation();
 
   return (
-    <Box style={style.flatten(['height-full'])}>
+    <Box>
       <Columns alignY="center" sum={2}>
         <Gutter size={12} />
         <IconButton
           onPress={() => {
-            nav.goBack();
+            setCurrentScene('List');
           }}
           icon={color => <ArrowLeftIcon color={color} size={24} />}
           containerStyle={style.flatten(['width-32', 'height-32'])}
@@ -62,7 +59,7 @@ export const QRScene = observer(() => {
           padding={12}
           marginTop={20}>
           <QRCode
-            value={route.params.bech32Address}
+            value={qrBech32Address}
             size={176}
             backgroundColor="white"
             color="black"

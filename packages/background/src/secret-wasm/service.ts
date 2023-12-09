@@ -139,6 +139,7 @@ export class SecretWasmService {
     key: {
       readonly bech32Address: string;
       readonly isNanoLedger: boolean;
+      readonly isKeystone: boolean;
     }
   ): Promise<Uint8Array> {
     const cacheKey = `seed-${
@@ -151,7 +152,7 @@ export class SecretWasmService {
     }
 
     const seed = await (async () => {
-      if (key.isNanoLedger) {
+      if (key.isNanoLedger || key.isKeystone) {
         const arr = new Uint8Array(32);
         crypto.getRandomValues(arr);
         return arr;

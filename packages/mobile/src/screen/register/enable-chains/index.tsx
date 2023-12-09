@@ -1,6 +1,7 @@
 import React, {
   FunctionComponent,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -16,7 +17,6 @@ import {
   View,
 } from 'react-native';
 import {useStyle} from '../../../styles';
-import {RegisterHeader} from '../../../components/pageHeader/header-register';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {TextInput} from '../../../components/input';
 import {SearchIcon} from '../../../components/icon';
@@ -82,6 +82,15 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
 
     return keyInfo.type;
   }, [keyRingStore.keyInfos, vaultId]);
+
+  useLayoutEffect(() => {
+    navigation.setParams({
+      paragraph: isFresh
+        ? `Step ${(stepPrevious ?? 0) + 1}/${stepTotal}`
+        : undefined,
+      hideBackButton,
+    });
+  }, [hideBackButton, isFresh, navigation, stepPrevious, stepTotal]);
 
   useEffectOnce(() => {
     if (candidateAddresses.length === 0) {
@@ -488,16 +497,6 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{flex: 1}}>
-      <RegisterHeader
-        title={intl.formatMessage({
-          id: 'pages.register.enable-chains.title',
-        })}
-        paragraph={
-          isFresh ? `Step ${(stepPrevious ?? 0) + 1}/${stepTotal}` : undefined
-        }
-        hideBackButton={hideBackButton}
-      />
-
       <Box padding={12} alignX="center" style={{flex: 1}}>
         <Text
           style={StyleSheet.flatten([

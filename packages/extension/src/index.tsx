@@ -129,6 +129,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     accountStore,
     keyRingStore,
     ibcCurrencyRegistrar,
+    lsmCurrencyRegistrar,
     ibcChannelStore,
     gravityBridgeCurrencyRegistrar,
     axelarEVMBridgeCurrencyRegistrar,
@@ -198,6 +199,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
       return false;
     }
 
+    if (!lsmCurrencyRegistrar.isInitialized) {
+      return false;
+    }
+
     if (!priceStore.isInitialized) {
       return false;
     }
@@ -228,6 +233,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     chainStore.chainInfos,
     isURLUnlockPage,
     ibcCurrencyRegistrar.isInitialized,
+    lsmCurrencyRegistrar.isInitialized,
     priceStore.isInitialized,
     uiConfigStore.isInitialized,
     uiConfigStore.isDeveloper,

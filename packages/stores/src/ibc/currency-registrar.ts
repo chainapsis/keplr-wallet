@@ -376,7 +376,17 @@ export class IBCCurrencyRegistrar {
               originChainId: originChainInfo.chainId,
               originCurrency: currency,
             },
-            done: fromCache,
+            done: (() => {
+              if (
+                originChainInfo.isCurrencyRegistrationInProgress(
+                  currency.coinMinimalDenom
+                )
+              ) {
+                return false;
+              }
+
+              return fromCache;
+            })(),
           };
         }
       }

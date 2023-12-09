@@ -6,7 +6,7 @@ import { Gutter } from "../gutter";
 import { YAxis } from "../axis";
 import { Caption1, Subtitle3 } from "../typography";
 import { Column, Columns } from "../column";
-import { ChainImageFallback } from "../image";
+import { RawImageFallback } from "../image";
 import { TextButton } from "../button-text";
 import { useTheme } from "styled-components";
 import { useIntl } from "react-intl";
@@ -42,14 +42,7 @@ export const ContractAddressItem: FunctionComponent<{
     >
       <Columns sum={1} alignY="center" gutter="0.5rem">
         <Box>
-          <ChainImageFallback
-            style={{
-              width: "2rem",
-              height: "2rem",
-            }}
-            src={imageUrl}
-            alt="chain icon"
-          />
+          <RawImageFallback size="2rem" src={imageUrl} alt="chain icon" />
         </Box>
         <YAxis>
           <Subtitle3

@@ -135,10 +135,7 @@ export const SelectDerivationPathScene: FunctionComponent<{
         >
           <Columns sum={1} gutter="0.5rem">
             <Box width="2.75rem" height="2.75rem">
-              <ChainImageFallback
-                alt="chain-image"
-                src={chainInfo.chainSymbolImageUrl}
-              />
+              <ChainImageFallback chainInfo={chainInfo} size="2.75rem" />
             </Box>
 
             <Stack gutter="0.25rem">

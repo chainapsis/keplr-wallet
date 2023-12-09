@@ -2,6 +2,7 @@ import {
   action,
   autorun,
   computed,
+  IReactionDisposer,
   makeObservable,
   observable,
   runInAction,
@@ -31,6 +32,9 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
   @observable.shallow
   protected registeredCurrencies: AppCurrency[] = [];
 
+  @observable.shallow
+  protected registrationInProgressCurrencyMap: Map<string, boolean> = new Map();
+
   constructor(
     embedded: C,
     protected readonly currencyRegistry: {
@@ -50,8 +54,9 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
    * 이미 등록되어 있거나 등록을 시도 중이면 아무 행동도 하지 않는.
    * 예를들어 네이티브 balance 쿼리에서 모르는 denom이 나오거나
    * IBC denom의 등록을 요청할 때 쓸 수 있다.
+   * action 안에서는 autorun이 immediate로 실행되지 않으므로, 일단 @action 데코레이터는 사용하지 않는다.
+   * 하지만 이 메소드를 action 안에서 호출하면 여전히 immediate로 실행되지 않으므로, 이 경우도 고려해야한다.
    */
-  @action
   addUnknownDenoms(...coinMinimalDenoms: string[]) {
     for (const coinMinimalDenom of coinMinimalDenoms) {
       if (this.unknownDenomMap.get(coinMinimalDenom)) {
@@ -62,17 +67,43 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
         continue;
       }
 
-      this.unknownDenoms.push(coinMinimalDenom);
+      runInAction(() => {
+        this.unknownDenoms.push(coinMinimalDenom);
+        this.registrationInProgressCurrencyMap.set(coinMinimalDenom, true);
+      });
 
+      let i = 0;
       const disposer = autorun(() => {
+        i++;
+        const dispose = () => {
+          if (i === 1) {
+            setTimeout(() => {
+              if (disposer) {
+                disposer();
+              }
+            }, 1);
+          } else {
+            if (disposer) {
+              disposer();
+            }
+          }
+        };
+
         const generator = this.currencyRegistry.getCurrencyRegistrar(
           this.chainId,
           coinMinimalDenom
         );
         if (generator) {
           const currency = generator.value;
-          if (currency) {
-            runInAction(() => {
+          runInAction(() => {
+            if (!generator.done) {
+              this.registrationInProgressCurrencyMap.set(
+                coinMinimalDenom,
+                true
+              );
+            }
+
+            if (currency) {
               const index = this.unknownDenoms.findIndex(
                 (denom) => denom === currency.coinMinimalDenom
               );
@@ -81,18 +112,24 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
               }
 
               this.addOrReplaceCurrency(currency);
+            }
+
+            if (generator.done) {
+              this.registrationInProgressCurrencyMap.delete(coinMinimalDenom);
+            }
+          });
+
+          if (generator.done) {
+            dispose();
+          }
+        } else {
+          if (this.registrationInProgressCurrencyMap.get(coinMinimalDenom)) {
+            runInAction(() => {
+              this.registrationInProgressCurrencyMap.delete(coinMinimalDenom);
             });
           }
 
-          if (generator.done) {
-            if (disposer) {
-              disposer();
-            }
-          }
-        } else {
-          if (disposer) {
-            disposer();
-          }
+          dispose();
         }
       });
     }
@@ -180,6 +217,31 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
     if (this.currencyMap.has(coinMinimalDenom)) {
       return this.currencyMap.get(coinMinimalDenom);
     }
+  }
+
+  findCurrencyAsync(
+    coinMinimalDenom: string
+  ): Promise<AppCurrency | undefined> {
+    if (this.currencyMap.has(coinMinimalDenom)) {
+      return Promise.resolve(this.currencyMap.get(coinMinimalDenom));
+    }
+    this.addUnknownDenoms(coinMinimalDenom);
+
+    let disposal: IReactionDisposer | undefined;
+
+    return new Promise<AppCurrency | undefined>((resolve) => {
+      disposal = autorun(() => {
+        const registration =
+          this.registrationInProgressCurrencyMap.get(coinMinimalDenom);
+        if (!registration) {
+          resolve(this.currencyMap.get(coinMinimalDenom));
+        }
+      });
+    }).finally(() => {
+      if (disposal) {
+        disposal();
+      }
+    });
   }
 
   /**
@@ -279,6 +341,12 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
   @action
   setEmbeddedChainInfo(embedded: C) {
     this._embedded = embedded;
+  }
+
+  isCurrencyRegistrationInProgress(coinMinimalDenom: string): boolean {
+    return (
+      this.registrationInProgressCurrencyMap.get(coinMinimalDenom) || false
+    );
   }
 }
 

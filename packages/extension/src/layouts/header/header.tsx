@@ -125,6 +125,19 @@ const Styles = {
       }
     }};
   `,
+  BottomButtonMockBackplate: styled.div`
+    background: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["light-gradient"]
+        : ColorPalette["gray-700"]};
+
+    body[data-white-background="true"] && {
+      background: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["white"]
+          : ColorPalette["gray-700"]};
+    }
+  `,
 };
 
 export const HeaderLayout: FunctionComponent<
@@ -223,6 +236,23 @@ export const HeaderLayout: FunctionComponent<
             bottom: additionalPaddingBottom || "0",
           }}
         >
+          {/*
+            scroll이 생겼을때 버튼 뒤로 UI가 보이는걸 대충 방지한다.
+            버튼들이 border radius를 가지고 있는데 이부분만 남기고 나머지만 안보여줄 효과적인 방법은 없다.
+            일단 border radius를 감안해서 약간 height를 적게 줘서 mock backplate를 만든다.
+            나중에 UI 상에서 문제가 된다면 따로 prop등을 임시로 사용해서 조절해야한다...
+          */}
+          {bottomPadding !== "0" ? (
+            <Styles.BottomButtonMockBackplate
+              style={{
+                position: "absolute",
+                height: `calc(${bottomPadding} - ${bottomButtonPaddingRem}rem - 0.375rem)`,
+                bottom: 0,
+                left: 0,
+                right: 0,
+              }}
+            />
+          ) : null}
           {(() => {
             if (bottomButton.isSpecial) {
               // isSpecial is not used.

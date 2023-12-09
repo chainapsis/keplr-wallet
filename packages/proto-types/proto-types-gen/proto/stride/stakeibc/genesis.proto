@@ -1,0 +1,22 @@
+syntax = "proto3";
+package stride.stakeibc;
+
+import "gogoproto/gogo.proto";
+import "stride/stakeibc/params.proto";
+import "stride/stakeibc/host_zone.proto";
+import "stride/stakeibc/epoch_tracker.proto";
+// this line is used by starport scaffolding # genesis/proto/import
+
+option go_package = "github.com/Stride-Labs/stride/v15/x/stakeibc/types";
+
+// GenesisState defines the stakeibc module's genesis state.
+message GenesisState {
+  Params params = 1 [ (gogoproto.nullable) = false ];
+  string port_id = 2;
+  // list of zones that are registered by the protocol
+  repeated HostZone host_zone_list = 5 [ (gogoproto.nullable) = false ];
+  repeated EpochTracker epoch_tracker_list = 10
+      [ (gogoproto.nullable) = false ];
+  // this line is used by starport scaffolding # genesis/proto/state
+  reserved 3, 4, 6, 9, 11;
+}

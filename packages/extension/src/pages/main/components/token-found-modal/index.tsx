@@ -11,7 +11,10 @@ import {
 import { ColorPalette } from "../../../../styles";
 import { Button } from "../../../../components/button";
 import { Column, Columns } from "../../../../components/column";
-import { ChainImageFallback } from "../../../../components/image";
+import {
+  ChainImageFallback,
+  CurrencyImageFallback,
+} from "../../../../components/image";
 import { Stack } from "../../../../components/stack";
 import { Checkbox } from "../../../../components/checkbox";
 import { ArrowDownIcon, ArrowUpIcon } from "../../../../components/icon";
@@ -315,12 +318,9 @@ const FoundChainView: FunctionComponent<{
       <Columns sum={1} gutter="0.5rem" alignY="center">
         <Box width="2.25rem" height="2.25rem">
           <ChainImageFallback
-            style={{
-              width: "2rem",
-              height: "2rem",
-            }}
+            chainInfo={chainStore.getChain(tokenScan.chainId)}
+            size="2rem"
             alt="Token Found Modal Chain Image"
-            src={chainStore.getChain(tokenScan.chainId).chainSymbolImageUrl}
           />
         </Box>
 
@@ -384,15 +384,17 @@ const FoundTokenView: FunctionComponent<{
   chainId: string;
   asset: TokenScan["infos"][0]["assets"][0];
 }> = observer(({ chainId, asset }) => {
-  const { chainStore } = useStore();
+  const { chainStore, uiConfigStore } = useStore();
   const theme = useTheme();
 
   return (
     <Columns sum={1} gutter="0.5rem" alignY="center">
       <Box width="1.75rem" height="1.75rem">
-        <ChainImageFallback
+        <CurrencyImageFallback
+          chainInfo={chainStore.getChain(chainId)}
+          currency={asset.currency}
+          size="1.75rem"
           alt="Token Found Modal Token Image"
-          src={asset.currency.coinImageUrl}
         />
       </Box>
 
@@ -419,17 +421,20 @@ const FoundTokenView: FunctionComponent<{
             : ColorPalette["gray-50"]
         }
       >
-        {new CoinPretty(
-          chainStore
-            .getChain(chainId)
-            .forceFindCurrency(asset.currency.coinMinimalDenom),
-          asset.amount
-        )
-          .shrink(true)
-          .trim(true)
-          .maxDecimals(6)
-          .inequalitySymbol(true)
-          .toString()}
+        {uiConfigStore.hideStringIfPrivacyMode(
+          new CoinPretty(
+            chainStore
+              .getChain(chainId)
+              .forceFindCurrency(asset.currency.coinMinimalDenom),
+            asset.amount
+          )
+            .shrink(true)
+            .trim(true)
+            .maxDecimals(6)
+            .inequalitySymbol(true)
+            .toString(),
+          2
+        )}
       </Subtitle3>
     </Columns>
   );
