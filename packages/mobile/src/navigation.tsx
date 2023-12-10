@@ -17,7 +17,7 @@ import {
   TransitionPresets,
 } from '@react-navigation/stack';
 import {HomeScreen} from './screen/home';
-import {LockedScreen} from './screen/locked';
+import {UnlockScreen} from './screen/unlock';
 import {SendSelectAssetScreen} from './screen/send/select-asset';
 import {createDrawerNavigator, useDrawerStatus} from '@react-navigation/drawer';
 import {DrawerContent} from './components/drawer';
@@ -218,7 +218,7 @@ export type RootStackParamList = {
     | {chainId?: string; contractAddress?: string}
     | undefined;
 
-  Locked: undefined;
+  Unlock: undefined;
   SelectWallet: undefined;
   'SelectWallet.Intro': undefined;
   'SelectWallet.Delete': {id: string};
@@ -833,7 +833,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
           initialRouteName={(() => {
             switch (keyRingStore.status) {
               case 'locked':
-                return 'Locked';
+                return 'Unlock';
               case 'unlocked':
                 return 'Home';
               case 'empty':
@@ -851,11 +851,9 @@ export const AppNavigation: FunctionComponent = observer(() => {
             component={MainTabNavigationWithDrawer}
           />
           <Stack.Screen
-            options={{
-              ...defaultHeaderOptions,
-            }}
-            name="Locked"
-            component={LockedScreen}
+            options={{headerShown: false}}
+            name="Unlock"
+            component={UnlockScreen}
           />
           <Stack.Screen
             name="Register"
