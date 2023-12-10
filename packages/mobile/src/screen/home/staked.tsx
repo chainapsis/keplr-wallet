@@ -9,7 +9,6 @@ import {TokenItem, TokenTitleView} from './components/token';
 import {MainEmptyView} from './components/empty-view';
 import FastImage from 'react-native-fast-image';
 import {useIntl} from 'react-intl';
-import {Modal} from '../../components/modal';
 import {
   InformationModal,
   InformationModalProps,
@@ -17,14 +16,14 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../navigation';
 import {SelectStakingChainModal} from './components/stakeing-chain-select-modal';
-import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
 import {formatRelativeTimeString} from '../../utils/format';
 
 const zeroDec = new Dec(0);
 
 export const StakedTabView: FunctionComponent<{
-  SelectStakingChainModalRef: React.RefObject<BottomSheetModalMethods>;
-}> = observer(({SelectStakingChainModalRef}) => {
+  selectModalIsOpen: boolean;
+  setSelectModalIsOpen: (isOpen: boolean) => void;
+}> = observer(({selectModalIsOpen, setSelectModalIsOpen}) => {
   const {hugeQueriesStore, queriesStore} = useStore();
   const intl = useIntl();
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
@@ -224,23 +223,24 @@ export const StakedTabView: FunctionComponent<{
         paragraph={infoModalState?.paragraph}
       />
 
-      <Modal ref={SelectStakingChainModalRef}>
-        <SelectStakingChainModal
-          onSelect={stakingChainModalItem => {
-            navigate.navigate('Stake', {
-              screen: 'Stake.ValidateList',
-              params: {
-                chainId: stakingChainModalItem.viewToken.chainInfo.chainId,
-              },
-            });
-          }}
-          aprList={aprList}
-          items={stakablesTokenNonZeroList.map(token => ({
-            key: token.chainInfo.chainId,
-            viewToken: token,
-          }))}
-        />
-      </Modal>
+      <SelectStakingChainModal
+        onSelect={stakingChainModalItem => {
+          navigate.navigate('Stake', {
+            screen: 'Stake.ValidateList',
+            params: {
+              chainId: stakingChainModalItem.viewToken.chainInfo.chainId,
+            },
+          });
+          setSelectModalIsOpen(false);
+        }}
+        aprList={aprList}
+        items={stakablesTokenNonZeroList.map(token => ({
+          key: token.chainInfo.chainId,
+          viewToken: token,
+        }))}
+        isOpen={selectModalIsOpen}
+        setIsOpen={setSelectModalIsOpen}
+      />
     </React.Fragment>
   );
 });

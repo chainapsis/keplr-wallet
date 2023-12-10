@@ -12,7 +12,6 @@ import {LayeredHorizontalRadioGroup} from '../../components/radio-group';
 import {YAxis} from '../../components/axis';
 import {Stack} from '../../components/stack';
 import {Column, Columns} from '../../components/column';
-import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {DepositModal} from './components/deposit-modal/deposit-modal';
 import {BuyModal} from './buy-modal';
 import {StackActions, useNavigation} from '@react-navigation/native';
@@ -24,6 +23,8 @@ import {ClaimAll} from './components/claim-all';
 import {Box} from '../../components/box';
 import {StackNavProp} from '../../navigation';
 import {Skeleton} from '../../components/skeleton';
+import {StakingIcon} from '../../components/icon/stacking';
+import {VoteIcon} from '../../components/icon';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -55,7 +56,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const [tabStatus, setTabStatus] = React.useState<TabStatus>('available');
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
-  const SelectStakingChainModalRef = useRef<BottomSheetModal>(null);
+  const [selectModalIsOpen, setSelectModalIsOpen] = useState(false);
 
   const availableTotalPrice = useMemo(() => {
     let result: PricePretty | undefined;
@@ -192,6 +193,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
               text="Vote"
               size="large"
               color="secondary"
+              rightIcon={<VoteIcon />}
               containerStyle={style.flatten(['flex-1'])}
               onPress={() => {
                 //TODO - 거버넌스 페이지로 이동
@@ -203,10 +205,10 @@ export const HomeScreen: FunctionComponent = observer(() => {
             <Button
               text="Stake"
               size="large"
+              rightIcon={<StakingIcon size={18} color="white" />}
               containerStyle={style.flatten(['flex-1'])}
               onPress={() => {
-                //TODO - 체인 선택 모달을 띄워줘야함
-                SelectStakingChainModalRef.current?.present();
+                setSelectModalIsOpen(true);
               }}
             />
           </Columns>
@@ -242,7 +244,8 @@ export const HomeScreen: FunctionComponent = observer(() => {
           />
         ) : (
           <StakedTabView
-            SelectStakingChainModalRef={SelectStakingChainModalRef}
+            selectModalIsOpen={selectModalIsOpen}
+            setSelectModalIsOpen={setSelectModalIsOpen}
           />
         )}
       </Stack>

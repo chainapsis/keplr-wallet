@@ -1,13 +1,11 @@
 import React, {FunctionComponent, useEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
-import {EmitterSubscription, Keyboard, Platform, Text} from 'react-native';
+import {Keyboard, Platform, Text} from 'react-native';
 
-import {BottomSheetFlatList, useBottomSheet} from '@gorhom/bottom-sheet';
 import {useStyle} from '../../../../styles';
-import {TextInput} from 'react-native-gesture-handler';
+import {ScrollView, TextInput} from 'react-native-gesture-handler';
 import {Gutter} from '../../../../components/gutter';
 import {SearchTextInput} from '../../../../components/input/search-text-input';
-import {BottomSheetSearchTextInput} from '../../../../components/input/bottom-sheet-search-input';
 import {Box} from '../../../../components/box';
 import {RectButton} from '../../../../components/rect-button';
 import {Column, Columns} from '../../../../components/column';
@@ -19,67 +17,57 @@ import {IntPretty} from '@keplr-wallet/unit';
 import {formatAprString} from '../../utils';
 import {AprItem} from '../../../../stores/aprs';
 import {ArrowRightIcon} from '../../../../components/icon/arrow-right';
+import {registerCardModal} from '../../../../components/modal/card';
+import {BaseModalHeader} from '../../../../components/modal';
+import {EmptyView} from '../../../../components/empty-view';
+import {FormattedMessage, useIntl} from 'react-intl';
 
 export interface SelectStakingChainModalItem {
   key: string;
   viewToken: ViewToken;
 }
 
-export const SelectStakingChainModal: FunctionComponent<{
-  items: SelectStakingChainModalItem[];
-  placeholder?: string;
-  aprList: AprItem[];
-  onSelect: (item: SelectStakingChainModalItem) => void;
-}> = observer(({items, placeholder, aprList, onSelect}) => {
-  const [search, setSearch] = useState('');
-  const searchRef = useRef<TextInput>(null);
-  const bottom = useBottomSheet();
+export const SelectStakingChainModal = registerCardModal(
+  observer<{
+    items: SelectStakingChainModalItem[];
+    placeholder?: string;
+    aprList: AprItem[];
+    onSelect: (item: SelectStakingChainModalItem) => void;
+  }>(({items, placeholder, aprList, onSelect}) => {
+    const [search, setSearch] = useState('');
+    const searchRef = useRef<TextInput>(null);
+    const style = useStyle();
+    const intl = useIntl();
 
-  useEffect(() => {
-    searchRef.current?.focus();
-  }, [searchRef]);
+    useEffect(() => {
+      searchRef.current?.focus();
+    }, [searchRef]);
 
-  //NOTE - https://github.com/gorhom/react-native-bottom-sheet/issues/1072
-  // android에서 키보드가 열렸을때 modal을 close 트리거 할 경우
-  // 키보드가 먼저 사라지면서 bottomSheet높이가 다시 설정되고 리렌더링 되는 버그가 있음
-  // 그래서 setTimeout으로 키보드를 먼저 닫은뒤 bottomSheet을 닫도록 설정함
-  useEffect(() => {
-    let keyboardDidHideListener: EmitterSubscription;
-    if (Platform.OS === 'android') {
-      keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-        setTimeout(() => {
-          bottom.close();
-        }, 0);
-      });
-    }
+    const filtered = search
+      ? items.filter(item => {
+          const trimmedSearchText = search.trim();
 
-    return () => {
-      if (Platform.OS === 'android') {
-        keyboardDidHideListener.remove();
-      }
-    };
-  }, [bottom]);
+          if (trimmedSearchText.length > 0) {
+            return (
+              typeof item.viewToken.chainInfo.chainName === 'string' &&
+              item.viewToken.chainInfo.chainName
+                .toLowerCase()
+                .includes(trimmedSearchText.toLowerCase())
+            );
+          }
+        })
+      : items;
 
-  const filtered = search
-    ? items.filter(item => {
-        const trimmedSearchText = search.trim();
-
-        if (trimmedSearchText.length > 0) {
-          return (
-            typeof item.viewToken.chainInfo.chainName === 'string' &&
-            item.viewToken.chainInfo.chainName
-              .toLowerCase()
-              .includes(trimmedSearchText.toLowerCase())
-          );
-        }
-      })
-    : items;
-
-  return (
-    <React.Fragment>
-      <Box paddingX={12}>
-        <Gutter size={12} />
-        {Platform.OS === 'android' ? (
+    return (
+      <Box>
+        <Box paddingX={12}>
+          <BaseModalHeader
+            titleStyle={style.flatten(['text-left', 'padding-left-8'])}
+            title={intl.formatMessage({
+              id: 'page.main.components.staking-chain-modal.title',
+            })}
+          />
+          <Gutter size={12} />
           <SearchTextInput
             ref={searchRef}
             value={search}
@@ -89,42 +77,49 @@ export const SelectStakingChainModal: FunctionComponent<{
             }}
             placeholder={placeholder}
           />
-        ) : (
-          <BottomSheetSearchTextInput
-            ref={searchRef}
-            value={search}
-            onChange={e => {
-              e.preventDefault();
-              setSearch(e.nativeEvent.text);
-            }}
-            placeholder={placeholder}
-            onSubmitEditing={() => {
-              bottom.snapToIndex(0);
-            }}
-          />
-        )}
 
-        <Gutter size={12} />
+          <Gutter size={12} />
+        </Box>
+        <ScrollView style={{height: 250}}>
+          <Box
+            onClick={() => {
+              const test = filtered[0];
+              onSelect({
+                key: test.viewToken.chainInfo.chainId,
+                viewToken: test.viewToken,
+              });
+            }}>
+            {filtered.map(item => {
+              return (
+                <TokenItem
+                  key={item.key}
+                  viewToken={item.viewToken}
+                  onSelect={onSelect}
+                  apr={
+                    aprList.filter(
+                      ({chainId}) =>
+                        chainId === item.viewToken.chainInfo.chainId,
+                    )[0]?.apr
+                  }
+                />
+              );
+            })}
+            {!filtered.length ? (
+              <Box style={style.flatten(['padding-16'])}>
+                <Gutter size={40} />
+                <EmptyView>
+                  <Text style={style.flatten(['text-center'])}>
+                    <FormattedMessage id="page.main.components.staking-chain-modal.empty-text" />
+                  </Text>
+                </EmptyView>
+              </Box>
+            ) : null}
+          </Box>
+        </ScrollView>
       </Box>
-      <BottomSheetFlatList
-        data={filtered}
-        renderItem={({item}) => {
-          return (
-            <TokenItem
-              viewToken={item.viewToken}
-              onSelect={onSelect}
-              apr={
-                aprList.filter(
-                  ({chainId}) => chainId === item.viewToken.chainInfo.chainId,
-                )[0]?.apr
-              }
-            />
-          );
-        }}
-      />
-    </React.Fragment>
-  );
-});
+    );
+  }),
+);
 
 const TokenItem: FunctionComponent<{
   viewToken: ViewToken;
@@ -133,7 +128,6 @@ const TokenItem: FunctionComponent<{
 }> = observer(({viewToken, onSelect, apr}) => {
   const {priceStore} = useStore();
   const style = useStyle();
-  const bottom = useBottomSheet();
   const pricePretty = priceStore.calculatePrice(viewToken.token);
   const coinDenom = (() => {
     if (
@@ -162,10 +156,8 @@ const TokenItem: FunctionComponent<{
             Keyboard.dismiss();
             return;
           }
-          bottom.close();
           return;
         }
-        bottom.close();
       }}>
       <Box
         padding={16}
