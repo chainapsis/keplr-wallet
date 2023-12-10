@@ -1,8 +1,8 @@
-import React, {FunctionComponent, useMemo, useRef} from 'react';
+import React, {FunctionComponent, useMemo, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {useStyle} from '../../styles';
 import {PageWithScrollView} from '../../components/page';
-import {Platform, StyleSheet, Text, ViewStyle} from 'react-native';
+import {StyleSheet, Text, ViewStyle} from 'react-native';
 import {useStore} from '../../stores';
 import {Dec} from '@keplr-wallet/unit';
 import {ViewToken} from '../../components/token-view';
@@ -11,8 +11,6 @@ import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../navigation';
 import {TextButton} from '../../components/text-button';
 import {ArrowRightIcon} from '../../components/icon/arrow-right';
-import {BottomSheetModal} from '@gorhom/bottom-sheet';
-import {Modal} from '../../components/modal';
 import {
   GovSelectChainModal,
   SelectModalItem,
@@ -31,7 +29,7 @@ import {ChainIdHelper} from '@keplr-wallet/cosmos';
 export const GovernanceScreen: FunctionComponent = observer(() => {
   const style = useStyle();
   const {hugeQueriesStore, queriesStore, scamProposalStore} = useStore();
-  const selectChainModalRef = useRef<BottomSheetModal>(null);
+  const [isOpenSelectChainModal, setIsOpenSelectChainModal] = useState(false);
   const navigation = useNavigation<StackNavProp>();
 
   const delegations: ViewToken[] = useMemo(
@@ -135,7 +133,7 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
         color="faint"
         containerStyle={style.flatten(['padding-x-12', 'padding-y-6'])}
         onPress={() => {
-          selectChainModalRef.current?.present();
+          setIsOpenSelectChainModal(true);
         }}
         rightIcon={
           <ArrowRightIcon size={18} color={style.get('color-text-low').color} />
@@ -164,26 +162,23 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
           </React.Fragment>
         );
       })}
-      <Modal
-        ref={selectChainModalRef} //NOTE BottomSheetTextInput가 안드로이드일때 올바르게 동작 하지 않고
-        //같은 50% 일때 키보드가 있을시 모달 크기가 작아서 안드로이드 일때만 70% 으로 설정
-        snapPoints={Platform.OS === 'android' ? ['70%'] : ['50%']}>
-        <GovSelectChainModal
-          items={modalItems}
-          placeholder="search for chain"
-          onSelect={({key}) => {
-            navigation.navigate('Governance', {
-              screen: 'Governance.list',
-              params: {
-                chainId: key,
-                isGovV1Supported: viewItems.find(viewItem => {
-                  return viewItem.chainId === key;
-                })?.isGovV1Supported,
-              },
-            });
-          }}
-        />
-      </Modal>
+      <GovSelectChainModal
+        isOpen={isOpenSelectChainModal}
+        setIsOpen={setIsOpenSelectChainModal}
+        items={modalItems}
+        placeholder="search for chain"
+        onSelect={({key}) => {
+          navigation.navigate('Governance', {
+            screen: 'Governance.list',
+            params: {
+              chainId: key,
+              isGovV1Supported: viewItems.find(viewItem => {
+                return viewItem.chainId === key;
+              })?.isGovV1Supported,
+            },
+          });
+        }}
+      />
     </PageWithScrollView>
   );
 });

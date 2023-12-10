@@ -19,7 +19,7 @@ import {Bech32Address} from '@keplr-wallet/cosmos';
 import {useConfirm} from '../../../../../hooks/confirm';
 
 import {FormattedMessage, useIntl} from 'react-intl';
-import {FlatList, Platform, Text} from 'react-native';
+import {FlatList, Text} from 'react-native';
 import {Gutter} from '../../../../../components/gutter';
 import {IconButton} from '../../../../../components/icon-button';
 
@@ -50,7 +50,6 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
   const navigate = useNavigation<StackNavProp>();
   const style = useStyle();
   const menuModalRef = useRef<BottomSheetModal>(null);
-  const selectChainModalRef = useRef<BottomSheetModal>(null);
 
   const [isOpenChainSelectModal, setIsOpenChainSelectModal] = useState(false);
   const [menuModalItems, setMenuModalItems] = useState<MenuModalItems[]>([
@@ -130,7 +129,6 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
                     isOpenModal={isOpenChainSelectModal}
                     placeholder="Search by chain name"
                     onPress={() => {
-                      selectChainModalRef.current?.present();
                       setIsOpenChainSelectModal(true);
                     }}
                   />
@@ -179,24 +177,17 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
         />
       </Box>
       <MenuModal modalRef={menuModalRef} menuModalItems={menuModalItems} />
-      <Modal
-        ref={selectChainModalRef}
-        onDismiss={() => {
+      <SelectModal
+        isOpen={isOpenChainSelectModal}
+        setIsOpen={setIsOpenChainSelectModal}
+        onSelect={item => {
+          setChainId(item.key);
           setIsOpenChainSelectModal(false);
         }}
-        //NOTE BottomSheetTextInput가 안드로이드일때 올바르게 동작 하지 않고
-        //같은 50% 일때 키보드가 있을시 모달 크기가 작아서 안드로이드 일때만 70% 으로 설정
-        snapPoints={Platform.OS === 'android' ? ['70%'] : ['50%']}>
-        <SelectModal
-          onSelect={item => {
-            setChainId(item.key);
-            setIsOpenChainSelectModal(false);
-          }}
-          items={items}
-          title="Select Chain"
-          placeholder="Search by chain name"
-        />
-      </Modal>
+        items={items}
+        title="Select Chain"
+        placeholder="Search by chain name"
+      />
     </React.Fragment>
   );
 });

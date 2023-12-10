@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useEffect, useMemo, useRef} from 'react';
+import React, {FunctionComponent, useEffect, useMemo, useState} from 'react';
 import {PageWithScrollView} from '../../../components/page';
 
 import {observer} from 'mobx-react-lite';
@@ -23,16 +23,14 @@ import {formatRelativeTimeString} from '../../../utils/format';
 import {useIntl} from 'react-intl';
 import {formatAprString} from '../../home/utils';
 import {InformationOutlinedIcon} from '../../../components/icon/information-outlined';
-import {Modal} from '../../../components/modal';
 import {InformationModal} from '../../../components/modal/infoModal';
-import {BottomSheetModal} from '@gorhom/bottom-sheet';
 
 export const StakingDashboardScreen: FunctionComponent = observer(() => {
   const {accountStore, queriesStore, priceStore, chainStore} = useStore();
   const style = useStyle();
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.Dashboard'>>();
   const navigation = useNavigation<StackNavProp>();
-  const infoModalRef = useRef<BottomSheetModal>(null);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
   const intl = useIntl();
   const {chainId} = route.params;
@@ -190,7 +188,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
         <Gutter size={21} />
         <Box
           onClick={() => {
-            infoModalRef.current?.present();
+            setIsInfoModalOpen(true);
           }}>
           <Columns sum={1} gutter={4} alignY="center">
             <Text style={style.flatten(['subtitle3', 'color-text-low'])}>
@@ -298,12 +296,12 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
           </React.Fragment>
         );
       })}
-      <Modal ref={infoModalRef} enableDynamicSizing={true}>
-        <InformationModal
-          title="Total staked"
-          paragraph="The total of staked and unstaking amounts"
-        />
-      </Modal>
+      <InformationModal
+        isOpen={isInfoModalOpen}
+        setIsOpen={setIsInfoModalOpen}
+        title="Total staked"
+        paragraph="The total of staked and unstaking amounts"
+      />
     </PageWithScrollView>
   );
 });

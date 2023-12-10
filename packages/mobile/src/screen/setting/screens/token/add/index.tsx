@@ -12,7 +12,6 @@ import {useStore} from '../../../../../stores';
 import {Box} from '../../../../../components/box';
 import {autorun} from 'mobx';
 import {AppCurrency} from '@keplr-wallet/types';
-// import {useInteractionInfo} from '../../../../hooks';
 import {useStyle} from '../../../../../styles';
 import {Column, Columns} from '../../../../../components/column';
 import {Toggle} from '../../../../../components/toggle';
@@ -24,8 +23,7 @@ import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../../../navigation';
 import {PageWithScrollView} from '../../../../../components/page';
 import {ContractAddressBookModal} from '../../../components/contract-address-book-modal';
-import {BottomSheetModal} from '@gorhom/bottom-sheet';
-import {Platform, Text} from 'react-native';
+import {Text} from 'react-native';
 import {Controller, useForm} from 'react-hook-form';
 import {Button} from '../../../../../components/button';
 import {Gutter} from '../../../../../components/gutter';
@@ -33,7 +31,6 @@ import {
   SelectModal,
   SelectModalCommonButton,
 } from '../../../../../components/select-modal';
-import {Modal} from '../../../../../components/modal';
 import {useNotification} from '../../../../../hooks/notification';
 
 interface FormData {
@@ -51,11 +48,10 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
   const route =
     useRoute<RouteProp<RootStackParamList, 'Setting.ManageTokenList.Add'>>();
   const paramChainId = route.params?.chainId;
-  const contractModalRef = useRef<BottomSheetModal>(null);
-  const selectChainModalRef = useRef<BottomSheetModal>(null);
   const notification = useNotification();
 
   const [isOpenChainSelectModal, setIsOpenChainSelectModal] = useState(false);
+  const [isOpenContractModal, setIsOpenContractModal] = useState(false);
 
   const style = useStyle();
 
@@ -88,27 +84,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
     }
   });
 
-  // secret20은 서명 페이지로 넘어가야하기 때문에 막아야함...
   const blockRejectAll = useRef(false);
-
-  //TODO interaction작업 후 구현해야함
-  // const interactionInfo = useInteractionInfo(() => {
-  //   if (!blockRejectAll.current) {
-  //     tokensStore.rejectAllSuggestedTokens();
-  //   }
-  // });
-
-  // useLayoutEffect(() => {
-  //   if (interactionInfo.interaction) {
-  //     if (tokensStore.waitingSuggestedToken) {
-  //       setChainId(tokensStore.waitingSuggestedToken.data.chainId);
-  //       setValue(
-  //         'contractAddress',
-  //         tokensStore.waitingSuggestedToken.data.contractAddress,
-  //       );
-  //     }
-  //   }
-  // }, [interactionInfo, setValue, tokensStore.waitingSuggestedToken]);
 
   useEffect(() => {
     // secret20은 계정에 귀속되기 때문에 추가/삭제 등을 할때 먼저 초기화가 되어있어야만 가능하다.
@@ -229,36 +205,9 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
           coinDecimals: queryContract.tokenInfo.decimals,
         };
       }
-      //TODO interaction작업 후 구현해야함
-      // if (interactionInfo.interaction && tokensStore.waitingSuggestedToken) {
-      //   await tokensStore.approveSuggestedTokenWithProceedNext(
-      //     tokensStore.waitingSuggestedToken.id,
-      //     currency,
-      //     proceedNext => {
-      //       if (!proceedNext) {
-      //         if (
-      //           interactionInfo.interaction &&
-      //           !interactionInfo.interactionInternal
-      //         ) {
-      //           window.close();
-      //         }
-      //       }
 
-      //       if (
-      //         interactionInfo.interaction &&
-      //         !interactionInfo.interactionInternal &&
-      //         isSecretWasm
-      //       ) {
-      //         // TODO: secret20의 경우는 서명 페이지로 페이지 자체가 넘어가기 때문에 proceedNext를 처리할 수가 없다.
-      //         //       나중에 뭔가 해결법이 생기면 다시 생각해본다...
-      //         window.close();
-      //       }
-      //     },
-      //   );
-      // } else {
       await tokensStore.addToken(chainId, currency);
       navigate.reset({routes: [{name: 'Home'}]});
-      // }
     }
   });
 
@@ -268,8 +217,6 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
       contentContainerStyle={style.flatten(['flex-grow-1'])}>
       <Box paddingX={12} paddingTop={12} height={'100%'}>
         <Stack gutter={16}>
-          {/* TODO dropdown 컴포넌트 이후 작업 */}
-          {/* {!interactionInfo.interaction ? ( */}
           <Box width={208}>
             <SelectModalCommonButton
               items={items}
@@ -277,7 +224,6 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
               placeholder="Search by chain name"
               isOpenModal={isOpenChainSelectModal}
               onPress={() => {
-                selectChainModalRef.current?.present();
                 setIsOpenChainSelectModal(true);
               }}
             />
@@ -319,7 +265,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
                       />
                     }
                     onPress={() => {
-                      contractModalRef.current?.present();
+                      setIsOpenContractModal(true);
                     }}
                     style={style.flatten(['padding-4'])}
                   />
@@ -424,34 +370,28 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
           onPress={submit}
         />
       </Box>
-      <Modal
-        ref={contractModalRef}
-        //NOTE BottomSheetTextInput가 안드로이드일때 올바르게 동작 하지 않고
-        //같은 50% 일때 키보드가 있을시 모달 크기가 작아서 안드로이드 일때만 70% 으로 설정
-        snapPoints={Platform.OS === 'android' ? ['70%'] : ['50%']}>
-        <ContractAddressBookModal
-          chainId={chainId}
-          onSelect={(address: string) => {
-            setValue('contractAddress', address);
-          }}
-        />
-      </Modal>
-      <Modal
-        ref={selectChainModalRef}
-        onDismiss={() => setIsOpenChainSelectModal(false)}
-        //NOTE BottomSheetTextInput가 안드로이드일때 올바르게 동작 하지 않고
-        //같은 50% 일때 키보드가 있을시 모달 크기가 작아서 안드로이드 일때만 70% 으로 설정
-        snapPoints={Platform.OS === 'android' ? ['70%'] : ['50%']}>
-        <SelectModal
-          items={items}
-          title="Select Chain"
-          placeholder="Search by chain name"
-          onSelect={item => {
-            setChainId(item.key);
-            setIsOpenChainSelectModal(false);
-          }}
-        />
-      </Modal>
+
+      <ContractAddressBookModal
+        chainId={chainId}
+        isOpen={isOpenContractModal}
+        setIsOpen={setIsOpenContractModal}
+        onSelect={(address: string) => {
+          setValue('contractAddress', address);
+          setIsOpenContractModal(false);
+        }}
+      />
+
+      <SelectModal
+        items={items}
+        title="Select Chain"
+        placeholder="Search by chain name"
+        isOpen={isOpenChainSelectModal}
+        setIsOpen={setIsOpenChainSelectModal}
+        onSelect={item => {
+          setChainId(item.key);
+          setIsOpenChainSelectModal(false);
+        }}
+      />
     </PageWithScrollView>
   );
 });
