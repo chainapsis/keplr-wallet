@@ -195,9 +195,11 @@ export const UnlockScreen: FunctionComponent = observer(() => {
 
             <Gutter size={12} />
 
-            <Text style={style.flatten(['subtitle4', 'color-gray-200'])}>
-              <FormattedMessage id="page.unlock.paragraph-section.enter-password-to-upgrade" />
-            </Text>
+            {!isMigrationSecondPhase ? (
+              <Text style={style.flatten(['subtitle4', 'color-gray-200'])}>
+                <FormattedMessage id="page.unlock.paragraph-section.enter-password-to-upgrade" />
+              </Text>
+            ) : null}
           </React.Fragment>
         ) : (
           <Text style={style.flatten(['h1', 'color-text-high'])}>
