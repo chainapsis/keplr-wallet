@@ -11,6 +11,7 @@ import {
 import {BackHandler, Platform} from 'react-native';
 import {WCMessageRequester} from '../../stores/wallet-connect/msg-requester';
 import {ADR36SignModal} from '../../screen/sign/sign-adr36-modal';
+import {LoadingModal} from '../../components/modal/loading';
 
 export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
   observer(({children}) => {
@@ -19,6 +20,7 @@ export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
       permissionStore,
       chainSuggestStore,
       walletConnectStore,
+      keyRingStore,
     } = useStore();
 
     useEffect(() => {
@@ -40,6 +42,11 @@ export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
             isOpen={true}
             setIsOpen={() => signInteractionStore.rejectAll()}
           />
+        ) : null}
+
+        {keyRingStore.status === 'unlocked' &&
+        walletConnectStore.isPendingClientFromDeepLink ? (
+          <LoadingModal isOpen={true} setIsOpen={() => {}} />
         ) : null}
 
         {permissionStore.waitingGlobalPermissionData ? (
