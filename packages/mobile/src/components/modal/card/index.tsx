@@ -13,11 +13,14 @@ import Reanimated, {
 } from 'react-native-reanimated';
 import {useStyle} from '../../../styles';
 
+type CardBaseModalOption = {
+  disabledSafeArea?: boolean;
+  isDetached?: boolean;
+};
+
 export const registerCardModal: <P>(
   element: React.ElementType<P>,
-  options?: {
-    disabledSafeArea?: boolean;
-  },
+  options?: CardBaseModalOption,
 ) => FunctionComponent<
   P & {
     isOpen: boolean;
@@ -35,9 +38,7 @@ export const registerCardModal: <P>(
 
 export const CardModalBase: FunctionComponent<
   PropsWithChildren<{
-    options?: {
-      disabledSafeArea?: boolean;
-    };
+    options?: CardBaseModalOption;
   }>
 > = ({children, options}) => {
   const safeAreaInsets = useSafeAreaInsets();
@@ -179,6 +180,16 @@ export const CardModalBase: FunctionComponent<
 
   const backgroundColor = style.get('color-gray-600').color;
   const innerContainerStyle = useAnimatedStyle(() => {
+    if (options?.isDetached) {
+      return {
+        marginBottom:
+          Math.max(safeAreaInsets.bottom - keyboard.height.value, 0) +
+          keyboard.height.value,
+        marginHorizontal: 12,
+        borderRadius: 8,
+        backgroundColor: backgroundColor,
+      };
+    }
     return {
       paddingBottom:
         Math.max(
@@ -194,21 +205,24 @@ export const CardModalBase: FunctionComponent<
   return (
     <GestureDetector gesture={panGesture}>
       <Reanimated.View style={innerContainerStyle}>
-        <View
-          style={style.flatten([
-            'items-center',
-            'padding-top-10',
-            'padding-bottom-12',
-          ])}>
+        {!options?.isDetached ? (
           <View
-            style={{
-              width: 58,
-              height: 5,
-              borderRadius: 9999,
-              backgroundColor: style.get('color-gray-500').color,
-            }}
-          />
-        </View>
+            style={style.flatten([
+              'items-center',
+              'padding-top-10',
+              'padding-bottom-12',
+            ])}>
+            <View
+              style={{
+                width: 58,
+                height: 5,
+                borderRadius: 9999,
+                backgroundColor: style.get('color-gray-500').color,
+              }}
+            />
+          </View>
+        ) : null}
+
         {children}
       </Reanimated.View>
     </GestureDetector>

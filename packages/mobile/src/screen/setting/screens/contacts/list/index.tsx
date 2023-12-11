@@ -1,10 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import React, {
-  FunctionComponent,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, {FunctionComponent, useLayoutEffect, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {useStore} from '../../../../../stores';
 import {Gutter} from '../../../../../components/gutter';
@@ -15,9 +10,6 @@ import {Box} from '../../../../../components/box';
 import {Stack} from '../../../../../components/stack';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../../../navigation';
-import {Modal} from '../../../../../components/modal';
-import {BottomSheetModal, BottomSheetView} from '@gorhom/bottom-sheet';
-import {Pressable, Text} from 'react-native';
 import {useStyle} from '../../../../../styles';
 import {PageWithScrollView} from '../../../../../components/page';
 import {AddressItem} from '../../../components/setting-address-item';
@@ -26,6 +18,7 @@ import {
   SelectModal,
   SelectModalCommonButton,
 } from '../../../../../components/select-modal';
+import {MenuModal} from '../../../../../components/modal/menu-modal';
 
 interface DropdownItem {
   key: string;
@@ -43,8 +36,7 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
     [],
   );
   const [isOpenChainSelectModal, setIsOpenChainSelectModal] = useState(false);
-
-  const menuModalRef = useRef<BottomSheetModal>(null);
+  const [isOpenMenuModal, setIsOpenMenuModal] = useState(false);
 
   const style = useStyle();
   // Handle "chainId" state by search params to persist the state between page changes.
@@ -148,7 +140,7 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
                     },
                   ]);
 
-                  menuModalRef.current?.present();
+                  setIsOpenMenuModal(true);
                 }}
               />
             );
@@ -164,31 +156,14 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
           </React.Fragment>
         )}
       </Stack>
-      <Modal ref={menuModalRef} isDetachedModal={true} snapPoints={[135]}>
-        <BottomSheetView>
-          {modalDropdownItems.map((item, i) => (
-            <Pressable
-              key={item.key}
-              onPress={() => {
-                item.onSelect();
-                menuModalRef.current?.dismiss();
-              }}>
-              <Box
-                height={68}
-                alignX="center"
-                alignY="center"
-                style={style.flatten(
-                  ['border-width-bottom-1', 'border-color-gray-500'],
-                  [i === 1 && 'border-width-bottom-0'], //마지막 요소는 아래 보더 스타일 제가하기 위해서
-                )}>
-                <Text style={style.flatten(['body1', 'color-text-high'])}>
-                  {item.label}
-                </Text>
-              </Box>
-            </Pressable>
-          ))}
-        </BottomSheetView>
-      </Modal>
+      <MenuModal
+        isOpen={isOpenMenuModal}
+        setIsOpen={setIsOpenMenuModal}
+        modalMenuItems={modalDropdownItems}
+        onPressGeneral={() => {
+          setIsOpenMenuModal(false);
+        }}
+      />
 
       <SelectModal
         isOpen={isOpenChainSelectModal}
