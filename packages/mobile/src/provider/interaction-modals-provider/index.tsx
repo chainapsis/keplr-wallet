@@ -7,6 +7,7 @@ import {
   SuggestChainModal,
   WalletConnectAccessModal,
   GlobalPermissionModal,
+  AddTokenModal,
 } from '../../components/modal';
 import {BackHandler, Platform} from 'react-native';
 import {WCMessageRequester} from '../../stores/wallet-connect/msg-requester';
@@ -19,6 +20,7 @@ export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
       permissionStore,
       chainSuggestStore,
       walletConnectStore,
+      tokensStore,
     } = useStore();
 
     useEffect(() => {
@@ -85,6 +87,15 @@ export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
             isOpen={true}
             setIsOpen={async () => {
               await chainSuggestStore.rejectAll();
+            }}
+          />
+        ) : null}
+
+        {tokensStore.waitingSuggestedToken ? (
+          <AddTokenModal
+            isOpen={true}
+            setIsOpen={async () => {
+              await tokensStore.rejectAllSuggestedTokens();
             }}
           />
         ) : null}
