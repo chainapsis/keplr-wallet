@@ -27,21 +27,14 @@ import * as Clipboard from 'expo-clipboard';
 import {EllipsisIcon} from '../../../../../components/icon/ellipsis';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../../../navigation';
-import {Modal} from '../../../../../components/modal';
-import {BottomSheetModal, BottomSheetView} from '@gorhom/bottom-sheet';
-import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
-import {CheckCircleIcon} from '../../../../../components/icon/check-circle';
 import {
   SelectModal,
   SelectModalCommonButton,
 } from '../../../../../components/select-modal';
-
-interface MenuModalItems {
-  key: string;
-  label: string;
-  isChecked?: boolean;
-  onSelect: () => any;
-}
+import {
+  MenuModal,
+  ModalMenuItem,
+} from '../../../../../components/modal/menu-modal';
 
 export const SettingTokenListScreen: FunctionComponent = observer(() => {
   const {chainStore, accountStore, tokensStore} = useStore();
@@ -49,10 +42,11 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
   const navigate = useNavigation<StackNavProp>();
   const style = useStyle();
-  const menuModalRef = useRef<BottomSheetModal>(null);
+  const [isOpenMenuModal, setIsOpenMenuModal] = useState(false);
+  const timerRef = useRef<any>(null);
 
   const [isOpenChainSelectModal, setIsOpenChainSelectModal] = useState(false);
-  const [menuModalItems, setMenuModalItems] = useState<MenuModalItems[]>([
+  const [menuModalItems, setMenuModalItems] = useState<ModalMenuItem[]>([
     {
       key: 'change-contact-label',
       label: intl.formatMessage({
@@ -105,6 +99,15 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
 
   const tokens = tokensStore.getTokens(chainId);
 
+  //NOTE - copy후 setTimeout에 의해서 모달이 닫히기전에 사용자가 모달을 닫을때 timer를
+  //제거 해줘야 해서 해당 로직을 추가함
+  useEffect(() => {
+    if (!isOpenMenuModal) {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    }
+  }, [isOpenMenuModal]);
   return (
     <React.Fragment>
       <Box paddingX={12} paddingTop={6} style={style.flatten(['flex-grow-1'])}>
@@ -158,7 +161,7 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
                 key={token.currency.coinMinimalDenom}
                 chainId={chainId}
                 tokenInfo={token}
-                modalOpen={() => menuModalRef.current?.present()}
+                modalOpen={() => setIsOpenMenuModal(true)}
                 setMenuModalItems={setMenuModalItems}
               />
             );
@@ -176,7 +179,21 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
           ItemSeparatorComponent={() => <Gutter size={8} />}
         />
       </Box>
-      <MenuModal modalRef={menuModalRef} menuModalItems={menuModalItems} />
+      <MenuModal
+        isOpen={isOpenMenuModal}
+        setIsOpen={setIsOpenMenuModal}
+        modalMenuItems={menuModalItems}
+        onPressGeneral={item => {
+          if (item.key === 'copy-address' || item.key === 'copy-viewing-key') {
+            timerRef.current = setTimeout(() => {
+              setIsOpenMenuModal(false);
+            }, 500);
+
+            return;
+          }
+          setIsOpenMenuModal(false);
+        }}
+      />
       <SelectModal
         isOpen={isOpenChainSelectModal}
         setIsOpen={setIsOpenChainSelectModal}
@@ -192,81 +209,11 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
   );
 });
 
-interface MenuModalProps {
-  modalRef: React.RefObject<BottomSheetModalMethods>;
-  menuModalItems: MenuModalItems[];
-}
-const MenuModal: FunctionComponent<MenuModalProps> = ({
-  menuModalItems,
-  modalRef,
-}) => {
-  //NOTE  modal unmounted 될시 clear하기 위해서 timerId 저장
-  const timerIdsRef = useRef<any[]>([]);
-
-  const style = useStyle();
-  return (
-    <Modal
-      isDetachedModal={true}
-      ref={modalRef}
-      onDismiss={() => {
-        timerIdsRef.current.map(id => clearTimeout(id));
-        timerIdsRef.current = [];
-      }}
-      //NOTE DynamicSizing로 하면 detached가 안되서 각 item높이를 갯수만큼 곱해서 설정함
-      snapPoints={[68 * menuModalItems.length]}>
-      <BottomSheetView>
-        {menuModalItems.map((item, i) => (
-          <Box
-            key={item.key}
-            height={68}
-            alignX="center"
-            alignY="center"
-            style={style.flatten(
-              ['border-width-bottom-1', 'border-color-gray-500'],
-              [i === menuModalItems.length - 1 && 'border-width-bottom-0'], //마지막 요소는 아래 보더 스타일 제가하기 위해서
-            )}
-            onClick={() => {
-              item.onSelect();
-              if (
-                item.key === 'copy-address' ||
-                item.key === 'copy-viewing-key'
-              ) {
-                timerIdsRef.current.push(
-                  setTimeout(() => {
-                    modalRef.current?.dismiss();
-                  }, 1500),
-                );
-                return;
-              }
-              modalRef.current?.dismiss();
-            }}>
-            <Columns sum={1} alignY="center" gutter={4}>
-              <Text
-                style={style.flatten(
-                  ['body1', 'color-text-high'],
-                  [item.isChecked && 'color-green-400'],
-                )}>
-                {item.label}
-              </Text>
-              {item.isChecked ? (
-                <CheckCircleIcon
-                  size={20}
-                  color={style.get('color-green-400').color}
-                />
-              ) : null}
-            </Columns>
-          </Box>
-        ))}
-      </BottomSheetView>
-    </Modal>
-  );
-};
-
 const TokenItem: FunctionComponent<{
   chainId: string;
   tokenInfo: TokenInfo;
   modalOpen: () => void;
-  setMenuModalItems: React.Dispatch<React.SetStateAction<MenuModalItems[]>>;
+  setMenuModalItems: React.Dispatch<React.SetStateAction<ModalMenuItem[]>>;
 }> = observer(({chainId, tokenInfo, modalOpen, setMenuModalItems}) => {
   const {tokensStore} = useStore();
   // const notification = useNotification();
@@ -362,7 +309,7 @@ const TokenItem: FunctionComponent<{
                           item.key === 'copy-address'
                             ? {
                                 ...item,
-                                isChecked: true,
+                                isClicked: true,
                                 label: 'Copied to Clipboard',
                               }
                             : item,
