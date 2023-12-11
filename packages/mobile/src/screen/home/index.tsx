@@ -128,7 +128,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
                 'color-text-low',
                 'font-extrabold',
                 'font-medium',
-                'h4',
+                'subtitle2',
               ])}>
               {tabStatus === 'available' ? 'Total Available' : 'Total Staked'}
             </Text>
