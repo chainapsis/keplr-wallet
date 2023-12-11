@@ -24,7 +24,10 @@ export const NeedHelpModal = registerCardModal(() => {
 
       <Gutter size={12} />
 
-      <Chip text={`Keplr version: ${DeviceInfo.getVersion()}`} />
+      <Chip
+        text={`Keplr version: ${DeviceInfo.getVersion()}`}
+        textStyle={{color: style.get('color-text-high').color}}
+      />
 
       <Gutter size={24} />
 
