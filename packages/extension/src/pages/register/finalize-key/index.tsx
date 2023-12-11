@@ -162,7 +162,7 @@ export const FinalizeKeyScene: FunctionComponent<{
           throw new Error("Unknown error");
         }
 
-        analyticsStore.logEvent("account-created", {
+        analyticsStore.logEvent("account_created", {
           type,
           new_num_keyrings: keyRingStore.keyInfos.length,
         });
