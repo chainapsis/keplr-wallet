@@ -65,7 +65,7 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
       setTimeout(() => {
         setIsOpen(true);
         backgroundColor.value = withTiming(1);
-      }, 500);
+      }, 100);
 
       setConfirm({
         id: seqRef.current.toString(),
@@ -112,21 +112,21 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
             }
             paddingX={20}
             paddingY={24}
-            marginX={16}
+            marginX={4}
             borderRadius={8}
             //Box를 Pressble 컴포넌트화 하기 위해서 작성한 onClick 함수
             onClick={() => {}}>
             <YAxis>
               {confirm?.title ? (
                 <React.Fragment>
-                  <Text style={style.flatten(['subtitle1', 'color-text-high'])}>
+                  <Text style={style.flatten(['h4', 'color-text-high'])}>
                     {confirm.title}
                   </Text>
                   <Gutter size={8} />
                 </React.Fragment>
               ) : null}
 
-              <Text style={style.flatten(['color-text-middle'])}>
+              <Text style={style.flatten(['body1', 'color-text-middle'])}>
                 {confirm?.paragraph}
               </Text>
 
@@ -139,6 +139,7 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
                         text={intl.formatMessage({
                           id: 'hooks.confirm.cancel-button',
                         })}
+                        size="large"
                         onPress={() => {
                           confirm?.resolver(false);
                           closeModal();
@@ -148,10 +149,11 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
                     </React.Fragment>
                   ) : null}
                   <Button
-                    size="small"
+                    size="medium"
                     text={intl.formatMessage({
                       id: 'hooks.confirm.yes-button',
                     })}
+                    style={{width: 94}}
                     onPress={() => {
                       closeModal();
                       confirm?.resolver(true);
