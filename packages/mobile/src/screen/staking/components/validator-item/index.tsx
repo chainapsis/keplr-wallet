@@ -207,7 +207,6 @@ export const ValidatorListItem: FunctionComponent<{
     const isWarning =
       Number(validator?.commission.commission_rates.rate) >= 0.2 &&
       filterOption === 'Commission';
-
     return (
       <React.Fragment>
         {viewValidator ? (
@@ -236,7 +235,7 @@ export const ValidatorListItem: FunctionComponent<{
                   />
                 </Box>
                 <Gutter size={12} />
-                <Column weight={6}>
+                <Column weight={1}>
                   <Columns sum={1} gutter={4} alignY="center">
                     {isWarning ? (
                       <InformationIcon
@@ -246,13 +245,17 @@ export const ValidatorListItem: FunctionComponent<{
                     ) : null}
                     <Text
                       numberOfLines={1}
-                      style={style.flatten(['subtitle2', 'color-text-high'])}>
+                      style={style.flatten([
+                        'subtitle2',
+                        'color-text-high',
+                        'width-full',
+                      ])}>
                       {viewValidator.name}
                     </Text>
                   </Columns>
                   <Gutter size={4} />
                 </Column>
-                <Column weight={1} />
+                <Gutter size={12} />
                 <Stack alignX="right" gutter={4}>
                   {viewValidator.coin ? (
                     <Text style={style.flatten(['body2', 'color-text-low'])}>
