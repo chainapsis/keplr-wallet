@@ -5,8 +5,16 @@ import React, {
   useState,
 } from 'react';
 import {useStyle} from '../../styles';
-import {Text, StyleSheet, TextStyle, Pressable, ViewStyle} from 'react-native';
+import {
+  Text,
+  StyleSheet,
+  TextStyle,
+  Pressable,
+  ViewStyle,
+  View,
+} from 'react-native';
 import {Box} from '../box';
+import {SVGLoadingIcon} from '../spinner';
 
 type ButtonColorType = 'faint' | 'default';
 export type ButtonSize = 'small' | 'large';
@@ -17,6 +25,7 @@ export const TextButton: FunctionComponent<{
   text: string;
   rightIcon?: ReactElement | ((color: string) => ReactElement);
   disabled?: boolean;
+  loading?: boolean;
   onPress?: () => void;
   //NOTE textStyle에서 색상을 변경하면 pressing 컬러가 먹히지 않기 떄문에 Omit으로 color만 제거함
   textStyle?: Omit<TextStyle, 'color'>;
@@ -30,6 +39,7 @@ export const TextButton: FunctionComponent<{
   text,
   rightIcon,
   disabled = false,
+  loading,
   onPress,
   textStyle,
   containerStyle,
@@ -79,19 +89,30 @@ export const TextButton: FunctionComponent<{
       onPress={onPress}
       onPressOut={() => setIsPressIn(false)}
       onPressIn={() => setIsPressIn(true)}>
-      <Text
-        style={StyleSheet.flatten([
-          style.flatten([
-            'text-center',
-            size === 'large' ? 'text-button1' : 'text-button2',
-          ]),
-          {
-            color: isPressIn ? pressingColorDefinition : textColorDefinition,
-          },
-          textStyle,
-        ])}>
-        {text}
-      </Text>
+      {loading ? (
+        <View
+          style={style.flatten([
+            'absolute-fill',
+            'justify-center',
+            'items-center',
+          ])}>
+          <SVGLoadingIcon color={style.get('color-blue-400').color} size={16} />
+        </View>
+      ) : (
+        <Text
+          style={StyleSheet.flatten([
+            style.flatten([
+              'text-center',
+              size === 'large' ? 'text-button1' : 'text-button2',
+            ]),
+            {
+              color: isPressIn ? pressingColorDefinition : textColorDefinition,
+            },
+            textStyle,
+          ])}>
+          {text}
+        </Text>
+      )}
       <Box height={1} marginLeft={4} alignY="center">
         {isValidElement(rightIcon) ||
         !rightIcon ||

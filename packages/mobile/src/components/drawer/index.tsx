@@ -19,7 +19,7 @@ export const DrawerContent: FunctionComponent = observer(() => {
   const handleLock = () => {
     keyRingStore.lock();
     drawerClose();
-    navigation.reset({routes: [{name: 'Locked'}]});
+    navigation.reset({routes: [{name: 'Unlock'}]});
   };
 
   const onClickManageChains = () => {

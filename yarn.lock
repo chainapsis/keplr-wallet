@@ -7711,6 +7711,7 @@ __metadata:
     browserify: ^17.0.0
     buffer: ^6.0.3
     color: ^4.2.3
+    delay: ^6.0.0
     expo: ^49.0.6
     expo-clipboard: ~4.3.1
     expo-crypto: ~12.4.1
@@ -19484,6 +19485,13 @@ __metadata:
   version: 4.4.0
   resolution: "delay@npm:4.4.0"
   checksum: 19566247f96a1f681df8e9dbdfa153d8afd6de19a7bee6256527c3cd54602acc4eae5c35b39fa1a50075a8973958bdc3025bc0bdb24b396a120ac6306efc20fd
+  languageName: node
+  linkType: hard
+
+"delay@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "delay@npm:6.0.0"
+  checksum: e00190cf6e56e3f746af6664a9b7a837a582a70b96ce18d83b86a97300cc9f727189b9f6a7082557134223c0bd23eee88e681cab54cb4e5d8f6b2f4054e7b49a
   languageName: node
   linkType: hard
 
