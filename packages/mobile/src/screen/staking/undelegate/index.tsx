@@ -100,8 +100,11 @@ export const SignUndelegateScreen: FunctionComponent = observer(() => {
   return (
     <PageWithScrollView
       backgroundMode={'default'}
-      contentContainerStyle={style.get('flex-grow-1')}
-      style={style.flatten(['padding-x-12', 'padding-top-12'])}>
+      contentContainerStyle={style.flatten([
+        'flex-grow-1',
+        'padding-top-12',
+        'padding-x-12',
+      ])}>
       <Stack gutter={16}>
         <ValidatorCard validatorAddress={validatorAddress} chainId={chainId} />
         <AmountInput amountConfig={sendConfigs.amountConfig} />

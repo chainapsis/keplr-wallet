@@ -50,6 +50,10 @@ export class ObservableQueryProposalVoteV1Inner extends ObservableChainQuery<Pro
     }
   }
 
+  refetch() {
+    this.fetch();
+  }
+
   protected override canFetch(): boolean {
     // If bech32 address is empty, it will always fail, so don't need to fetch it.
     return this.bech32Address.length > 0;

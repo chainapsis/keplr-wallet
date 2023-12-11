@@ -168,6 +168,7 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
         items={modalItems}
         placeholder="search for chain"
         onSelect={({key}) => {
+          setIsOpenSelectChainModal(false);
           navigation.navigate('Governance', {
             screen: 'Governance.list',
             params: {

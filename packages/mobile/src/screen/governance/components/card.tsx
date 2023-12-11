@@ -1,4 +1,4 @@
-import React, {FunctionComponent} from 'react';
+import React, {FunctionComponent, useEffect} from 'react';
 import {observer} from 'mobx-react-lite';
 
 import {Text, View} from 'react-native';
@@ -61,26 +61,36 @@ export const GovernanceCardBody: FunctionComponent<{
   proposal: ViewProposal;
   chainId: string;
   isGovV1Supported?: boolean;
-}> = observer(({proposal, chainId, isGovV1Supported}) => {
+  refreshing: number;
+}> = observer(({proposal, chainId, isGovV1Supported, refreshing}) => {
   const {chainStore, queriesStore, accountStore} = useStore();
 
   const style = useStyle();
+  const gov = (() => {
+    return isGovV1Supported
+      ? queriesStore
+          .get(chainId)
+          .governanceV1.queryVotes.getVote(
+            proposal.id,
+            accountStore.getAccount(chainId).bech32Address,
+          )
+      : queriesStore
+          .get(chainId)
+          .governance.queryVotes.getVote(
+            proposal.id,
+            accountStore.getAccount(chainId).bech32Address,
+          );
+  })();
+
   const intl = useIntl();
-  const vote = isGovV1Supported
-    ? queriesStore
-        .get(chainId)
-        .governanceV1.queryVotes.getVote(
-          proposal.id,
-          accountStore.getAccount(chainId).bech32Address,
-        ).vote
-    : queriesStore
-        .get(chainId)
-        .governance.queryVotes.getVote(
-          proposal.id,
-          accountStore.getAccount(chainId).bech32Address,
-        ).vote;
+  useEffect(() => {
+    if (refreshing > 0) {
+      gov.refetch();
+    }
+  }, [gov, refreshing]);
+
   const navigation = useNavigation<StackNavProp>();
-  const isVoted = vote !== 'Unspecified';
+  const isVoted = gov.vote !== 'Unspecified';
 
   const renderProposalDateString = (proposal: ViewProposal) => {
     switch (proposal.proposalStatus) {

@@ -31,8 +31,11 @@ import {Pressable, Text} from 'react-native';
 import {ArrowDownIcon} from '../../../../components/icon/arrow-down';
 import {ArrowUpIcon} from '../../../../components/icon/arrow-up';
 import {WarningIcon} from '../../../../components/icon/warning';
-import {useNavigation, StackActions} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {SpecialButton} from '../../../../components/special-button';
+import {useNotification} from '../../../../hooks/notification';
+import {StackNavProp} from '../../../../navigation';
+import {useIntl} from 'react-intl';
 
 // XXX: 좀 이상하긴 한데 상위/하위 컴포넌트가 state를 공유하기 쉽게하려고 이렇게 한다...
 class ClaimAllEachState {
@@ -511,9 +514,9 @@ const ClaimTokenItem: FunctionComponent<{
 }> = observer(({viewToken, state}) => {
   const {accountStore, queriesStore} = useStore();
   const style = useStyle();
-  const navigation = useNavigation();
-
-  // const notification = useNotification();
+  const navigation = useNavigation<StackNavProp>();
+  const notification = useNotification();
+  const intl = useIntl();
 
   const [isSimulating, setIsSimulating] = useState(false);
 
@@ -572,52 +575,43 @@ const ClaimTokenItem: FunctionComponent<{
         '',
         {},
         {
-          onBroadcasted: () => {
+          onBroadcasted: txHash => {
             // analyticsStore.logEvent('complete_claim', {
             //   chainId: viewToken.chainInfo.chainId,
             //   chainName: viewToken.chainInfo.chainName,
             // });
+            navigation.navigate('TxPending', {
+              chainId,
+              txHash: Buffer.from(txHash).toString('hex'),
+            });
           },
           onFulfill: (tx: any) => {
             if (tx.code != null && tx.code !== 0) {
               console.log(tx.log ?? tx.raw_log);
-              //TODO 이후 notification 로직 구현후 적용
-              // notification.show(
-              //   'failed',
-              //   intl.formatMessage({id: 'error.transaction-failed'}),
-              //   '',
-              // );
+              notification.show(
+                'failed',
+                intl.formatMessage({id: 'error.transaction-failed'}),
+              );
+
               return;
             }
-            //TODO 이후 notification 로직 구현후 적용
-            // notification.show(
-            //   'success',
-            //   intl.formatMessage({
-            //     id: 'notification.transaction-success',
-            //   }),
-            //   '',
-            // );
+            notification.show(
+              'success',
+              intl.formatMessage({
+                id: 'notification.transaction-success',
+              }),
+            );
           },
         },
       );
-
-      navigation.dispatch({
-        ...StackActions.replace('Home'),
-      });
     } catch (e) {
       if (e?.message === 'Request rejected') {
         return;
       }
-
-      //TODO 이후 notification 로직 구현후 적용
-      // notification.show(
-      //   'failed',
-      //   intl.formatMessage({id: 'error.transaction-failed'}),
-      //   '',
-      // );
-      navigation.dispatch({
-        ...StackActions.replace('Home'),
-      });
+      notification.show(
+        'failed',
+        intl.formatMessage({id: 'error.transaction-failed'}),
+      );
     } finally {
       setIsSimulating(false);
     }
