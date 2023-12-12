@@ -55,9 +55,9 @@ const {initFn} = init(
       },
     },
     getDisabledChainIdentifiers: async () => {
-      const kvStore = new AsyncKVStore('store_chain_config');
+      const kvStore = new AsyncKVStore('store_chains');
       const legacy = await kvStore.get<{disabledChains: string[]}>(
-        'extension_chainInfoInUIConfig',
+        'chain_info_in_ui_config',
       );
       if (!legacy) {
         return [];
