@@ -2,7 +2,6 @@ import React, {
   FunctionComponent,
   useEffect,
   useLayoutEffect,
-  useRef,
   useState,
 } from 'react';
 import {observer} from 'mobx-react-lite';
@@ -23,9 +22,7 @@ import {
   LedgerIcon,
   TerraIcon,
 } from '../../../components/icon';
-import {Modal} from '../../../components/modal';
 import {LedgerGrantModal} from './modal';
-import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {useStore} from '../../../stores';
 
 export type Step = 'unknown' | 'connected' | 'app';
@@ -37,7 +34,7 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
     useRoute<RouteProp<RootStackParamList, 'Register.ConnectLedger'>>();
   const navigation = useNavigation<StackNavProp>();
 
-  const modalRef = useRef<BottomSheetModal>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const {stepPrevious, stepTotal, app, bip44Path, appendModeInfo} =
     route.params;
@@ -60,7 +57,7 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
   useEffect(() => {
     (async () => {
       if (step === 'app' && publicKey) {
-        modalRef.current?.dismiss();
+        setIsModalOpen(false);
 
         if (appendModeInfo) {
           await keyRingStore.appendLedgerKeyApp(
@@ -115,7 +112,7 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
           })}
           size="large"
           onPress={() => {
-            modalRef.current?.present();
+            setIsModalOpen(true);
           }}
         />
       }>
@@ -167,14 +164,14 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
         </Box>
       </ScrollView>
 
-      <Modal ref={modalRef} enableDynamicSizing={true}>
-        <LedgerGrantModal
-          app={app}
-          bip44Path={bip44Path}
-          setStep={(step: Step) => setStep(step)}
-          setPublicKey={(publicKey: Uint8Array) => setPublicKey(publicKey)}
-        />
-      </Modal>
+      <LedgerGrantModal
+        isOpen={isModalOpen}
+        setIsOpen={setIsModalOpen}
+        app={app}
+        bip44Path={bip44Path}
+        setStep={(step: Step) => setStep(step)}
+        setPublicKey={(publicKey: Uint8Array) => setPublicKey(publicKey)}
+      />
     </RegisterContainer>
   );
 });

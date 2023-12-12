@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
+import React, {FunctionComponent, useMemo, useState} from 'react';
 import {CoinPretty, Dec} from '@keplr-wallet/unit';
 import {observer} from 'mobx-react-lite';
 import {Stack} from '../../components/stack';
@@ -14,9 +14,7 @@ import {useStyle} from '../../styles';
 import {TokenItem, TokenTitleView} from './components/token';
 import {ViewToken} from '.';
 import {CollapsibleList} from '../../components/collapsible-list';
-import {Modal} from '../../components/modal';
 import {TokenFoundModal} from './components/token-found-modal';
-import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {LookingForChains} from './components/looking-for-chains';
 import {Gutter} from '../../components/gutter';
 import FastImage from 'react-native-fast-image';
@@ -43,7 +41,8 @@ export const AvailableTabView: FunctionComponent<{
   const {hugeQueriesStore, chainStore, uiConfigStore} = useStore();
   const style = useStyle();
   // const navigate = useNavigate();
-  const tokenFoundModalRef = useRef<BottomSheetModal>(null);
+  const [isOpenTokenFoundModal, setIsOpenTokenFoundModal] = useState(false);
+
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [isSecretErrorModalOpen, setIsSecretErrorModalOpen] = useState(false);
   const [errorTokenItem, setErrorTokenItem] = useState<ViewToken | null>(null);
@@ -319,16 +318,17 @@ export const AvailableTabView: FunctionComponent<{
               <YAxis alignX="center">
                 <NewTokenFoundButton
                   numFoundToken={numFoundToken}
-                  onPress={() => tokenFoundModalRef.current?.present()}
+                  onPress={() => setIsOpenTokenFoundModal(true)}
                 />
               </YAxis>
             </Box>
           ) : null}
         </React.Fragment>
       )}
-      <Modal ref={tokenFoundModalRef} snapPoints={['60%']}>
-        <TokenFoundModal />
-      </Modal>
+      <TokenFoundModal
+        isOpen={isOpenTokenFoundModal}
+        setIsOpen={setIsOpenTokenFoundModal}
+      />
       <InformationModal
         isOpen={isInfoModalOpen}
         setIsOpen={setIsInfoModalOpen}

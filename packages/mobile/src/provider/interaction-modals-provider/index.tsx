@@ -35,7 +35,16 @@ export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
       <React.Fragment>
         {signInteractionStore.waitingData &&
         !signInteractionStore.waitingData.data.signDocWrapper.isADR36SignDoc ? (
-          <SignModal interactionData={signInteractionStore.waitingData} />
+          <SignModal
+            isOpen={true}
+            setIsOpen={() => {
+              signInteractionStore.rejectWithProceedNext(
+                signInteractionStore.waitingData?.id!,
+                () => {},
+              );
+            }}
+            interactionData={signInteractionStore.waitingData}
+          />
         ) : null}
 
         {signInteractionStore.waitingData &&
