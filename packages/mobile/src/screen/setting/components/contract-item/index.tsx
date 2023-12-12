@@ -24,7 +24,6 @@ export const ContractAddressItem: FunctionComponent<{
       underlayColor={style.get('color-gray-550').color}
       rippleColor={style.get('color-gray-550').color}
       onPress={async () => {
-        // e.preventDefault();
         afterSelect(address);
       }}>
       <Box paddingY={14} paddingLeft={16} paddingRight={12} borderRadius={6}>

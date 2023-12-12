@@ -47,8 +47,9 @@ export const WebpageScreen: FunctionComponent = observer(() => {
   const [title, setTitle] = useState('');
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoForward, setCanGoForward] = useState(false);
-
   const sourceCode = useInjectedSourceCode();
+
+  const recentUrl = useRef('');
 
   const uri =
     route.params.url.startsWith('http://') ||
@@ -73,9 +74,18 @@ export const WebpageScreen: FunctionComponent = observer(() => {
         '0.12.20',
         'core',
         new RNMessageRequesterExternal(() => {
+          //NOTE - 웹뷰 내부에서 페이지 이동을 할경우 해당 url이 window.keplr의 origin과는 동기화가 안됨
+          //해서 웹 뷰 내부에서 url 변경시 ref에 저장 후 인터랙션시 사용하도록 함
+          //state를 안 쓴이유는 state는 비동기라서 이전 상태값을 가지고 있는 경우가 있어서 ref를 사용함
+          const url = (() => {
+            return recentUrl.current.startsWith('http://') ||
+              recentUrl.current.startsWith('https://')
+              ? recentUrl.current
+              : uri;
+          })();
           return {
-            url: uri,
-            origin: new URL(uri).origin,
+            url: url,
+            origin: new URL(url).origin,
           };
         }),
       ),
@@ -96,7 +106,7 @@ export const WebpageScreen: FunctionComponent = observer(() => {
       },
       RNInjectedKeplr.parseWebviewMessage,
     );
-  }, [chainStore, eventEmitter, uri]);
+  }, [chainStore, uri, eventEmitter]);
 
   return (
     <React.Fragment>
@@ -124,6 +134,7 @@ export const WebpageScreen: FunctionComponent = observer(() => {
             setCanGoForward(e.canGoForward);
 
             setCurrentURL(e.url);
+            recentUrl.current = e.url;
           }}
           onLoadProgress={e => {
             // Strangely, `onLoadProgress` is only invoked whenever page changed only in Android.
@@ -132,6 +143,7 @@ export const WebpageScreen: FunctionComponent = observer(() => {
             setCanGoForward(e.nativeEvent.canGoForward);
 
             setCurrentURL(e.nativeEvent.url);
+            recentUrl.current = e.nativeEvent.url;
           }}
           contentInsetAdjustmentBehavior="never"
           automaticallyAdjustContentInsets={false}
