@@ -254,7 +254,7 @@ export const AddressBookModal = registerCardModal(
                 })()}
               </Stack>
             ) : (
-              <Box alignX="center" alignY="center" height={240}>
+              <Box alignX="center" alignY="center" height={400}>
                 <EmptyView>
                   {(() => {
                     switch (type) {
