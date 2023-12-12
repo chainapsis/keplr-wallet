@@ -7739,6 +7739,7 @@ __metadata:
     react-native-keyboard-aware-scroll-view: ^0.9.5
     react-native-keychain: ^8.1.2
     react-native-linear-gradient: ^2.8.3
+    react-native-navigation-bar-color: ^2.0.2
     react-native-permissions: ^3.10.1
     react-native-qrcode-svg: ^6.2.0
     react-native-reanimated: ^3.4.2
@@ -33657,6 +33658,13 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: f980d324e551bbc475c6406bdc5250a08242020cbe653412fa169bbdf51e28a502e225de105b4d696d6a1a1b733d44782469020f4936d8b3ce0e2c78e51cf58f
+  languageName: node
+  linkType: hard
+
+"react-native-navigation-bar-color@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "react-native-navigation-bar-color@npm:2.0.2"
+  checksum: 47b74fc343c63b90819a67889b7af6e9b6524a663586dc8a7927d81e8517fbf8b395545d651ddf44e978167e4d8994a4b6d6e3dc086a35903c48087fa40155cd
   languageName: node
   linkType: hard
 
