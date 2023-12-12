@@ -99,7 +99,11 @@ export const TextInput = forwardRef<
                 selectTextOnFocus={!disabled}
                 style={StyleSheet.flatten([
                   style.flatten(
-                    ['color-white', 'body2', 'height-52'],
+                    [
+                      disabled ? 'color-gray-400' : 'color-white',
+                      'body2',
+                      'height-52',
+                    ],
                     left
                       ? ['padding-left-4', 'padding-right-16']
                       : ['padding-x-16'],
