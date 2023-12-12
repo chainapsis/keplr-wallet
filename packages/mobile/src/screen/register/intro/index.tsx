@@ -9,14 +9,28 @@ import {Button} from '../../../components/button';
 import {TextButton} from '../../../components/text-button';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../navigation';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {ContentHeightAwareScrollView} from '../../../components/scroll-view';
 
 export const RegisterIntroScreen: FunctionComponent = () => {
   const intl = useIntl();
   const style = useStyle();
   const navigation = useNavigation<StackNavProp>();
 
+  const safeAreaInsets = useSafeAreaInsets();
+
   return (
-    <Box height="100%" alignY="center" alignX="center">
+    <ContentHeightAwareScrollView
+      style={{
+        height: '100%',
+        paddingTop: safeAreaInsets.top,
+        paddingBottom: safeAreaInsets.bottom,
+      }}
+      contentContainerStyle={{
+        flexGrow: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}>
       <LottieView
         source={require('../../../public/assets/lottie/wallet/logo.json')}
         style={{width: 200, height: 155}}
@@ -67,6 +81,6 @@ export const RegisterIntroScreen: FunctionComponent = () => {
           }}
         />
       </Box>
-    </Box>
+    </ContentHeightAwareScrollView>
   );
 };
