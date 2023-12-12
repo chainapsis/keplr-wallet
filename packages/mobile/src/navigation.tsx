@@ -59,7 +59,6 @@ import {RegisterIntroNewUserScreen} from './screen/register/intro-new-user';
 import {NewMnemonicScreen} from './screen/register/new-mnemonic';
 import {VerifyMnemonicScreen} from './screen/register/verify-mnemonic';
 import {RegisterIntroExistingUserScene} from './screen/register/intro-existing-user';
-import {RegisterScreen} from './screen/register';
 import {WebScreen} from './screen/web';
 import {WebpageScreen} from './screen/web/webpage';
 import {GovernanceListScreen} from './screen/governance/list';
@@ -105,7 +104,6 @@ export type RootStackParamList = {
   Camera: undefined;
 
   Register: undefined;
-  'Register.Temp': undefined;
   'Register.Intro': undefined;
   'Register.Intro.NewUser'?: DefaultRegisterParams;
   'Register.Intro.ConnectHardware'?: DefaultRegisterParams;
@@ -300,7 +298,6 @@ export const RegisterNavigation: FunctionComponent = () => {
         ...TransitionPresets.SlideFromRightIOS,
         // headerShown: false,
       }}>
-      <Stack.Screen name="Register.Temp" component={RegisterScreen} />
       <Stack.Screen
         name="Register.Intro"
         options={{headerShown: false}}
