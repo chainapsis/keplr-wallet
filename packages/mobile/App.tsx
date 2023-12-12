@@ -34,6 +34,7 @@ import {InteractionModalsProvider} from './src/provider/interaction-modals-provi
 import {LoadingIconAnimationProvider} from './src/provider/loading-icon-animation';
 import {NotificationProvider} from './src/hooks/notification';
 import {ModalBaseProvider} from './src/components/modal/v2/provider';
+import changeNavigationBarColor from 'react-native-navigation-bar-color';
 
 const ThemeStatusBar: FunctionComponent = () => {
   const style = useStyle();
@@ -48,6 +49,17 @@ const ThemeStatusBar: FunctionComponent = () => {
   );
 };
 
+const ChangeNavigationColor: FunctionComponent = () => {
+  const style = useStyle();
+
+  if (style.theme === 'dark') {
+    changeNavigationBarColor(style.get('color-gray-700').color);
+    return null;
+  }
+  changeNavigationBarColor('white');
+  return null;
+};
+
 function App(): JSX.Element {
   return (
     <GestureHandlerRootView style={{flex: 1}}>
@@ -55,6 +67,7 @@ function App(): JSX.Element {
         <StyleProvider>
           <SafeAreaProvider>
             <ThemeStatusBar />
+            <ChangeNavigationColor />
             <StoreProvider>
               <AppIntlProvider>
                 <NotificationProvider>
