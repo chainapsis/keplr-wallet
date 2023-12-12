@@ -43,8 +43,8 @@ export const ContractAddressBookModal = registerCardModal(
       : contracts;
 
     return (
-      <React.Fragment>
-        <Box paddingX={12}>
+      <Box paddingX={12} paddingBottom={20}>
+        <Box>
           <Text
             style={style.flatten([
               'text-center',
@@ -122,7 +122,9 @@ export const ContractAddressBookModal = registerCardModal(
             />
           </Text>
         </Box>
-      </React.Fragment>
+
+        <Gutter size={12} />
+      </Box>
     );
   }),
 );

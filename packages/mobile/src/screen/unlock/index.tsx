@@ -25,6 +25,7 @@ import delay from 'delay';
 import {GuideBox} from '../../components/guide-box';
 import {XAxis} from '../../components/axis';
 import {SVGLoadingIcon} from '../../components/spinner';
+import {NeedHelpModal} from '../../components/modal';
 
 export const UnlockScreen: FunctionComponent = observer(() => {
   const {keyRingStore, keychainStore, accountStore, chainStore} = useStore();
@@ -32,6 +33,8 @@ export const UnlockScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
   const style = useStyle();
   const navigation = useNavigation<StackNavProp>();
+
+  const [isOpenHelpModal, setIsOpenHelpModal] = useState(false);
 
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -305,13 +308,16 @@ export const UnlockScreen: FunctionComponent = observer(() => {
         <TextButton
           color="faint"
           text={intl.formatMessage({
-            id: 'page.unlock.forgot-password-button',
+            id: 'page.unlock.need-help-button',
           })}
           size="large"
+          onPress={() => setIsOpenHelpModal(true)}
         />
 
         <Gutter size={32} />
       </Box>
+
+      <NeedHelpModal isOpen={isOpenHelpModal} setIsOpen={setIsOpenHelpModal} />
     </PageWithScrollView>
   );
 });

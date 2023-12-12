@@ -53,7 +53,7 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
   return (
     <PageWithScrollView
       backgroundMode="default"
-      style={style.flatten(['padding-x-12', 'padding-y-12'])}>
+      contentContainerStyle={style.flatten(['padding-top-12', 'padding-x-12'])}>
       <Stack gutter={12}>
         {isCommissionHigh ? (
           <GuideBox

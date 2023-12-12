@@ -312,6 +312,7 @@
   "page.unlock.upgrade-in-progress": "업그레이드가 진행중입니다.",
   "page.unlock.unlock-button": "잠금해제",
   "page.unlock.forgot-password-button": "비밀번호가 기억나지 않습니다",
+  "page.unlock.need-help-button": "도움이 필요하신가요?",
 
   "page.unlock.paragraph-section.keplr-here": "💫 케플러 2.0 출시!",
   "page.unlock.paragraph-section.enter-password-to-upgrade": "업그레이드하려면 비밀번호를 입력해주세요.",

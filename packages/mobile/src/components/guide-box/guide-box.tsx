@@ -68,13 +68,17 @@ export const GuideBox: FunctionComponent<GuideBoxProps> = ({
           {titleRight}
         </Columns>
         {paragraph ? (
-          <Text
-            style={StyleSheet.flatten([
-              style.flatten(['body2']),
-              {color: paragraphColor},
-            ])}>
-            {paragraph}
-          </Text>
+          typeof paragraph === 'string' ? (
+            <Text
+              style={StyleSheet.flatten([
+                style.flatten(['body2']),
+                {color: paragraphColor},
+              ])}>
+              {paragraph}
+            </Text>
+          ) : (
+            paragraph
+          )
         ) : null}
         {bottom ? <Box>{bottom}</Box> : null}
       </Stack>

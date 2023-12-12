@@ -24,32 +24,20 @@ import {PageWithScrollView} from '../../../components/page';
 import {Pressable, StyleSheet, Text} from 'react-native';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import {useIntl} from 'react-intl';
-import {Modal} from '../../../components/modal';
-import {BottomSheetModal, BottomSheetView} from '@gorhom/bottom-sheet';
 import {EllipsisIcon} from '../../../components/icon/ellipsis';
 import {StackNavProp} from '../../../navigation';
 import FastImage from 'react-native-fast-image';
 import {BACKGROUND_PORT} from '@keplr-wallet/router';
 import {RNMessageRequesterInternal} from '../../../router';
-import {CheckCircleIcon} from '../../../components/icon/check-circle';
 import * as Clipboard from 'expo-clipboard';
-
-interface ModalMenuItem {
-  key: string;
-  label: string;
-  isClicked?: boolean;
-  onSelect: () => any;
-  left?: React.ReactNode;
-  right?: React.ReactNode;
-}
+import {MenuModal, ModalMenuItem} from '../../../components/modal/menu-modal';
 
 export const WalletSelectScreen: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
   const navigation = useNavigation();
   const intl = useIntl();
-  const style = useStyle();
-  const menuModalRef = useRef<BottomSheetModal>(null);
   const timerRef = useRef<any>(null);
+  const [isOpenMenuModal, setIsOpenMenuModal] = useState(false);
 
   const [modalMenuItems, setModalMenuItems] = useState<ModalMenuItem[]>([]);
 
@@ -165,6 +153,16 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
     return res;
   }, [socialPrivateKeyInfos]);
 
+  //NOTE - copy후 setTimeout에 의해서 모달이 닫히기전에 사용자가 모달을 닫을때 timer를
+  //제거 해줘야 해서 해당 로직을 추가함
+  useEffect(() => {
+    if (!isOpenMenuModal) {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    }
+  }, [isOpenMenuModal]);
+
   return (
     <PageWithScrollView backgroundMode={'default'}>
       <Box padding={12} position="relative">
@@ -187,7 +185,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
               })}
               keyInfos={mnemonicKeys}
               setModalMenuItems={setModalMenuItems}
-              openModal={() => menuModalRef.current?.present()}
+              openModal={() => setIsOpenMenuModal(true)}
             />
           ) : null}
 
@@ -206,7 +204,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
                 )}
                 keyInfos={info.keyInfos}
                 setModalMenuItems={setModalMenuItems}
-                openModal={() => menuModalRef.current?.present()}
+                openModal={() => setIsOpenMenuModal(true)}
               />
             );
           })}
@@ -218,7 +216,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
               })}
               keyInfos={privateKeyInfos}
               setModalMenuItems={setModalMenuItems}
-              openModal={() => menuModalRef.current?.present()}
+              openModal={() => setIsOpenMenuModal(true)}
             />
           ) : null}
 
@@ -227,7 +225,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
               title={intl.formatMessage({id: 'page.wallet.ledger-title'})}
               keyInfos={ledgerKeys}
               setModalMenuItems={setModalMenuItems}
-              openModal={() => menuModalRef.current?.present()}
+              openModal={() => setIsOpenMenuModal(true)}
             />
           ) : null}
 
@@ -236,7 +234,7 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
               title="Keystone"
               keyInfos={keystoneKeys}
               setModalMenuItems={setModalMenuItems}
-              openModal={() => menuModalRef.current?.present()}
+              openModal={() => setIsOpenMenuModal(true)}
             />
           ) : null}
 
@@ -245,62 +243,25 @@ export const WalletSelectScreen: FunctionComponent = observer(() => {
               title={intl.formatMessage({id: 'page.wallet.unknown-title'})}
               keyInfos={unknownKeys}
               setModalMenuItems={setModalMenuItems}
-              openModal={() => menuModalRef.current?.present()}
+              openModal={() => setIsOpenMenuModal(true)}
             />
           ) : null}
         </Stack>
       </Box>
-      {/* NOTE icns이름 복사후 아이콘변경 및 모달을 닫아야해서 onDismiss 사용 및 컴포넌트가 좀 복잡해짐 */}
-      <Modal
-        ref={menuModalRef}
-        isDetachedModal={true}
-        snapPoints={[modalMenuItems.length * 68]}
-        onDismiss={() => {
-          clearTimeout(timerRef.current);
-        }}>
-        <BottomSheetView>
-          {modalMenuItems.map((item, i) => (
-            <Box
-              key={item.key}
-              height={68}
-              alignX="center"
-              alignY="center"
-              style={style.flatten(
-                ['border-width-bottom-1', 'border-color-gray-500'],
-                [i === modalMenuItems.length - 1 && 'border-width-bottom-0'], //마지막 요소는 아래 보더 스타일 제가하기 위해서
-              )}
-              onClick={() => {
-                item.onSelect();
-                if (item.key === 'copy-icns-name') {
-                  timerRef.current = setTimeout(() => {
-                    menuModalRef.current?.dismiss();
-                  }, 1500);
-                  return;
-                }
-                menuModalRef.current?.dismiss();
-              }}>
-              <Columns sum={1} alignY="center" gutter={8}>
-                {item.left && !item.isClicked ? item.left : null}
-                <Text
-                  numberOfLines={1}
-                  style={style.flatten(
-                    ['body1', 'color-text-high'],
-                    [item.isClicked && 'color-green-400'],
-                  )}>
-                  {item.label}
-                </Text>
-                {item.right && !item.isClicked ? item.right : null}
-                {item.isClicked ? (
-                  <CheckCircleIcon
-                    size={18}
-                    color={style.get('color-green-400').color}
-                  />
-                ) : null}
-              </Columns>
-            </Box>
-          ))}
-        </BottomSheetView>
-      </Modal>
+      <MenuModal
+        isOpen={isOpenMenuModal}
+        setIsOpen={setIsOpenMenuModal}
+        modalMenuItems={modalMenuItems}
+        onPressGeneral={item => {
+          if (item.key === 'copy-icns-name') {
+            timerRef.current = setTimeout(() => {
+              setIsOpenMenuModal(false);
+            }, 500);
+            return;
+          }
+          setIsOpenMenuModal(false);
+        }}
+      />
     </PageWithScrollView>
   );
 });
