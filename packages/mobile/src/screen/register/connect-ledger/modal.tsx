@@ -1,6 +1,5 @@
 import React, {FunctionComponent, useEffect, useState} from 'react';
 import {useStyle} from '../../../styles';
-import {BottomSheetView} from '@gorhom/bottom-sheet';
 import TransportBLE, {
   bleManager,
 } from '@ledgerhq/react-native-hw-transport-ble';
@@ -27,6 +26,8 @@ import {PubKeySecp256k1} from '@keplr-wallet/crypto';
 import {Buffer} from 'buffer';
 import Eth from '@ledgerhq/hw-app-eth';
 import {LedgerUtils} from '../../../utils';
+import {registerCardModal} from '../../../components/modal/card';
+import {Box} from '../../../components/box';
 
 enum BLEPermissionGrantStatus {
   NotInit = 'notInit',
@@ -37,278 +38,290 @@ enum BLEPermissionGrantStatus {
   Granted = 'granted',
 }
 
-export const LedgerGrantModal: FunctionComponent<{
-  app: App | 'Ethereum';
-  bip44Path: {
-    account: number;
-    change: number;
-    addressIndex: number;
-  };
-  setStep: (step: Step) => void;
-  setPublicKey: (publicKey: Uint8Array) => void;
-}> = ({app, bip44Path, setStep, setPublicKey}) => {
-  const style = useStyle();
-
-  const [isBLEAvailable, setIsBLEAvailable] = useState(false);
-  const [isFinding, setIsFinding] = useState(false);
-  const [devices, setDevices] = useState<
-    {
-      id: string;
-      name: string;
-    }[]
-  >([]);
-  const [errorOnListen, setErrorOnListen] = useState<string | undefined>();
-
-  useEffect(() => {
-    const subscription = bleManager.onStateChange(newState => {
-      if (newState === State.PoweredOn) {
-        setIsBLEAvailable(true);
-      } else {
-        setIsBLEAvailable(false);
-      }
-    }, true);
-
-    return () => {
-      subscription.remove();
+export const LedgerGrantModal = registerCardModal(
+  ({
+    app,
+    bip44Path,
+    setStep,
+    setPublicKey,
+  }: {
+    app: App | 'Ethereum';
+    bip44Path: {
+      account: number;
+      change: number;
+      addressIndex: number;
     };
-  }, []);
+    setStep: (step: Step) => void;
+    setPublicKey: (publicKey: Uint8Array) => void;
+  }) => {
+    const style = useStyle();
 
-  useEffect(() => {
-    if (
-      Platform.OS === 'android' &&
-      parseFloat(DeviceInfo.getSystemVersion()) < 12 &&
-      !isBLEAvailable
-    ) {
-      // If the platform is android(<12) and can't use the bluetooth,
-      // try to turn on the bluetooth.
-      // Below API can be called only in android.
-      bleManager.enable();
-    }
-  }, [isBLEAvailable]);
+    const [isBLEAvailable, setIsBLEAvailable] = useState(false);
+    const [isFinding, setIsFinding] = useState(false);
+    const [devices, setDevices] = useState<
+      {
+        id: string;
+        name: string;
+      }[]
+    >([]);
+    const [errorOnListen, setErrorOnListen] = useState<string | undefined>();
 
-  const [permissionStatus, setPermissionStatus] =
-    useState<BLEPermissionGrantStatus>(() => {
-      if (Platform.OS === 'android') {
-        // If android, there is need to request the permission.
-        // You should ask for the permission on next effect.
-        return BLEPermissionGrantStatus.NotInit;
-      } else {
-        // If not android, there is no need to request the permission
-        return BLEPermissionGrantStatus.Granted;
-      }
-    });
-
-  useEffect(() => {
-    const listener = (state: AppStateStatus) => {
-      if (
-        state === 'active' &&
-        permissionStatus === BLEPermissionGrantStatus.Failed
-      ) {
-        // When the app becomes active, the user may have granted permission on the setting page, so request the grant again.
-        setPermissionStatus(BLEPermissionGrantStatus.FailedAndRetry);
-      }
-    };
-
-    const subscription = AppState.addEventListener('change', listener);
-
-    return () => {
-      subscription.remove();
-    };
-  }, [permissionStatus]);
-
-  useEffect(() => {
-    // It is processed only in case of not init at first or re-request after failure.
-    if (
-      permissionStatus === BLEPermissionGrantStatus.NotInit ||
-      permissionStatus === BLEPermissionGrantStatus.FailedAndRetry
-    ) {
-      if (Platform.OS === 'android') {
-        if (parseFloat(DeviceInfo.getSystemVersion()) >= 12) {
-          requestMultiple([
-            PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-            PERMISSIONS.ANDROID.BLUETOOTH_SCAN,
-            PERMISSIONS.ANDROID.BLUETOOTH_CONNECT,
-          ]).then(granted => {
-            if (
-              granted[PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION] ===
-                RESULTS.GRANTED &&
-              granted[PERMISSIONS.ANDROID.BLUETOOTH_SCAN] === RESULTS.GRANTED &&
-              granted[PERMISSIONS.ANDROID.BLUETOOTH_CONNECT] === RESULTS.GRANTED
-            ) {
-              setPermissionStatus(BLEPermissionGrantStatus.Granted);
-            } else {
-              setPermissionStatus(BLEPermissionGrantStatus.Failed);
-            }
-          });
+    useEffect(() => {
+      const subscription = bleManager.onStateChange(newState => {
+        if (newState === State.PoweredOn) {
+          setIsBLEAvailable(true);
         } else {
-          requestMultiple([PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION]).then(
-            granted => {
+          setIsBLEAvailable(false);
+        }
+      }, true);
+
+      return () => {
+        subscription.remove();
+      };
+    }, []);
+
+    useEffect(() => {
+      if (
+        Platform.OS === 'android' &&
+        parseFloat(DeviceInfo.getSystemVersion()) < 12 &&
+        !isBLEAvailable
+      ) {
+        // If the platform is android(<12) and can't use the bluetooth,
+        // try to turn on the bluetooth.
+        // Below API can be called only in android.
+        bleManager.enable();
+      }
+    }, [isBLEAvailable]);
+
+    const [permissionStatus, setPermissionStatus] =
+      useState<BLEPermissionGrantStatus>(() => {
+        if (Platform.OS === 'android') {
+          // If android, there is need to request the permission.
+          // You should ask for the permission on next effect.
+          return BLEPermissionGrantStatus.NotInit;
+        } else {
+          // If not android, there is no need to request the permission
+          return BLEPermissionGrantStatus.Granted;
+        }
+      });
+
+    useEffect(() => {
+      const listener = (state: AppStateStatus) => {
+        if (
+          state === 'active' &&
+          permissionStatus === BLEPermissionGrantStatus.Failed
+        ) {
+          // When the app becomes active, the user may have granted permission on the setting page, so request the grant again.
+          setPermissionStatus(BLEPermissionGrantStatus.FailedAndRetry);
+        }
+      };
+
+      const subscription = AppState.addEventListener('change', listener);
+
+      return () => {
+        subscription.remove();
+      };
+    }, [permissionStatus]);
+
+    useEffect(() => {
+      // It is processed only in case of not init at first or re-request after failure.
+      if (
+        permissionStatus === BLEPermissionGrantStatus.NotInit ||
+        permissionStatus === BLEPermissionGrantStatus.FailedAndRetry
+      ) {
+        if (Platform.OS === 'android') {
+          if (parseFloat(DeviceInfo.getSystemVersion()) >= 12) {
+            requestMultiple([
+              PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+              PERMISSIONS.ANDROID.BLUETOOTH_SCAN,
+              PERMISSIONS.ANDROID.BLUETOOTH_CONNECT,
+            ]).then(granted => {
               if (
                 granted[PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION] ===
-                RESULTS.GRANTED
+                  RESULTS.GRANTED &&
+                granted[PERMISSIONS.ANDROID.BLUETOOTH_SCAN] ===
+                  RESULTS.GRANTED &&
+                granted[PERMISSIONS.ANDROID.BLUETOOTH_CONNECT] ===
+                  RESULTS.GRANTED
               ) {
                 setPermissionStatus(BLEPermissionGrantStatus.Granted);
               } else {
                 setPermissionStatus(BLEPermissionGrantStatus.Failed);
               }
+            });
+          } else {
+            requestMultiple([PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION]).then(
+              granted => {
+                if (
+                  granted[PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION] ===
+                  RESULTS.GRANTED
+                ) {
+                  setPermissionStatus(BLEPermissionGrantStatus.Granted);
+                } else {
+                  setPermissionStatus(BLEPermissionGrantStatus.Failed);
+                }
+              },
+            );
+          }
+        }
+      }
+    }, [permissionStatus]);
+
+    useEffect(() => {
+      let unsubscriber: (() => void) | undefined;
+
+      if (
+        isBLEAvailable &&
+        permissionStatus === BLEPermissionGrantStatus.Granted
+      ) {
+        setIsFinding(true);
+
+        (async () => {
+          let _devices: {
+            id: string;
+            name: string;
+          }[] = devices.slice();
+
+          unsubscriber = TransportBLE.listen({
+            complete: () => {
+              setIsFinding(false);
             },
-          );
-        }
-      }
-    }
-  }, [permissionStatus]);
+            next: (e: {type: string; descriptor: any}) => {
+              if (e.type === 'add') {
+                const device = e.descriptor;
 
-  useEffect(() => {
-    let unsubscriber: (() => void) | undefined;
-
-    if (
-      isBLEAvailable &&
-      permissionStatus === BLEPermissionGrantStatus.Granted
-    ) {
-      setIsFinding(true);
-
-      (async () => {
-        let _devices: {
-          id: string;
-          name: string;
-        }[] = devices.slice();
-
-        unsubscriber = TransportBLE.listen({
-          complete: () => {
-            setIsFinding(false);
-          },
-          next: (e: {type: string; descriptor: any}) => {
-            if (e.type === 'add') {
-              const device = e.descriptor;
-
-              if (!_devices.find(d => d.id === device.id)) {
-                console.log(
-                  `Ledger device found (id: ${device.id}, name: ${device.name})`,
-                );
-                _devices = [
-                  ..._devices,
-                  {
-                    id: device.id,
-                    name: device.name,
-                  },
-                ];
-                setDevices(_devices);
+                if (!_devices.find(d => d.id === device.id)) {
+                  console.log(
+                    `Ledger device found (id: ${device.id}, name: ${device.name})`,
+                  );
+                  _devices = [
+                    ..._devices,
+                    {
+                      id: device.id,
+                      name: device.name,
+                    },
+                  ];
+                  setDevices(_devices);
+                }
               }
-            }
-          },
-          error: (e?: Error | any) => {
-            if (!e) {
-              setErrorOnListen('Unknown error');
-            } else {
-              if ('message' in e && typeof e.message === 'string') {
-                setErrorOnListen(e.message);
-              } else if ('toString' in e) {
-                setErrorOnListen(e.toString());
-              } else {
+            },
+            error: (e?: Error | any) => {
+              if (!e) {
                 setErrorOnListen('Unknown error');
+              } else {
+                if ('message' in e && typeof e.message === 'string') {
+                  setErrorOnListen(e.message);
+                } else if ('toString' in e) {
+                  setErrorOnListen(e.toString());
+                } else {
+                  setErrorOnListen('Unknown error');
+                }
               }
-            }
-            setIsFinding(false);
-          },
-        }).unsubscribe;
-      })();
-    } else {
-      setDevices([]);
-      setIsFinding(false);
-    }
-
-    return () => {
-      if (unsubscriber) {
-        unsubscriber();
+              setIsFinding(false);
+            },
+          }).unsubscribe;
+        })();
+      } else {
+        setDevices([]);
+        setIsFinding(false);
       }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isBLEAvailable, permissionStatus]);
 
-  return (
-    <BottomSheetView style={style.flatten(['padding-20'])}>
-      <XAxis alignY="center">
-        <Text style={style.flatten(['color-white', 'text-left', 'h4'])}>
-          Pair Hardware Wallet
-        </Text>
-
-        <Gutter size={4} />
-
-        {isFinding ? (
-          <SVGLoadingIcon color={style.get('color-blue-200').color} size={16} />
-        ) : null}
-      </XAxis>
-
-      <Gutter size={12} />
-
-      {(() => {
-        if (isBLEAvailable) {
-          if (permissionStatus === BLEPermissionGrantStatus.Granted) {
-            return (
-              <React.Fragment>
-                {errorOnListen ? (
-                  <GuideBox color="danger" title={errorOnListen} />
-                ) : (
-                  <React.Fragment>
-                    <Text
-                      style={style.flatten(['subtitle3', 'color-text-high'])}>
-                      {`1. Open the ${app} app on your Ledger device`}
-                    </Text>
-
-                    <Text
-                      style={style.flatten(['subtitle3', 'color-text-high'])}>
-                      2. Select the hardware wallet you’d like to pair
-                    </Text>
-
-                    {devices.map(device => {
-                      return (
-                        <LedgerNanoBLESelector
-                          key={device.id}
-                          deviceId={device.id}
-                          deviceName={device.name}
-                          app={app}
-                          bip44Path={bip44Path}
-                          setStep={setStep}
-                          setPublicKey={setPublicKey}
-                        />
-                      );
-                    })}
-                  </React.Fragment>
-                )}
-              </React.Fragment>
-            );
-          }
-
-          if (
-            permissionStatus === BLEPermissionGrantStatus.Failed ||
-            permissionStatus === BLEPermissionGrantStatus.FailedAndRetry
-          ) {
-            return (
-              <React.Fragment>
-                <GuideBox
-                  color="danger"
-                  title="Keplr doesn't have permission to use bluetooth"
-                />
-
-                <Gutter size={4} />
-
-                <Button
-                  containerStyle={style.flatten(['margin-top-16'])}
-                  textStyle={style.flatten(['margin-x-8', 'normal-case'])}
-                  text="Open app setting"
-                  size="small"
-                  onPress={async () => {
-                    await Linking.openSettings();
-                  }}
-                />
-              </React.Fragment>
-            );
-          }
+      return () => {
+        if (unsubscriber) {
+          unsubscriber();
         }
-      })()}
-    </BottomSheetView>
-  );
-};
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isBLEAvailable, permissionStatus]);
+
+    return (
+      <Box style={style.flatten(['padding-20'])}>
+        <XAxis alignY="center">
+          <Text style={style.flatten(['color-white', 'text-left', 'h4'])}>
+            Pair Hardware Wallet
+          </Text>
+
+          <Gutter size={4} />
+
+          {isFinding ? (
+            <SVGLoadingIcon
+              color={style.get('color-blue-200').color}
+              size={16}
+            />
+          ) : null}
+        </XAxis>
+
+        <Gutter size={12} />
+
+        {(() => {
+          if (isBLEAvailable) {
+            if (permissionStatus === BLEPermissionGrantStatus.Granted) {
+              return (
+                <React.Fragment>
+                  {errorOnListen ? (
+                    <GuideBox color="danger" title={errorOnListen} />
+                  ) : (
+                    <React.Fragment>
+                      <Text
+                        style={style.flatten(['subtitle3', 'color-text-high'])}>
+                        {`1. Open the ${app} app on your Ledger device`}
+                      </Text>
+
+                      <Text
+                        style={style.flatten(['subtitle3', 'color-text-high'])}>
+                        2. Select the hardware wallet you’d like to pair
+                      </Text>
+
+                      {devices.map(device => {
+                        return (
+                          <LedgerNanoBLESelector
+                            key={device.id}
+                            deviceId={device.id}
+                            deviceName={device.name}
+                            app={app}
+                            bip44Path={bip44Path}
+                            setStep={setStep}
+                            setPublicKey={setPublicKey}
+                          />
+                        );
+                      })}
+                    </React.Fragment>
+                  )}
+                </React.Fragment>
+              );
+            }
+
+            if (
+              permissionStatus === BLEPermissionGrantStatus.Failed ||
+              permissionStatus === BLEPermissionGrantStatus.FailedAndRetry
+            ) {
+              return (
+                <React.Fragment>
+                  <GuideBox
+                    color="danger"
+                    title="Keplr doesn't have permission to use bluetooth"
+                  />
+
+                  <Gutter size={4} />
+
+                  <Button
+                    containerStyle={style.flatten(['margin-top-16'])}
+                    textStyle={style.flatten(['margin-x-8', 'normal-case'])}
+                    text="Open app setting"
+                    size="small"
+                    onPress={async () => {
+                      await Linking.openSettings();
+                    }}
+                  />
+                </React.Fragment>
+              );
+            }
+          }
+        })()}
+      </Box>
+    );
+  },
+);
 
 const LedgerNanoBLESelector: FunctionComponent<{
   deviceId: string;
