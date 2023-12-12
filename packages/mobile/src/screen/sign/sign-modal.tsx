@@ -1,8 +1,7 @@
-import React, {FunctionComponent, useEffect, useRef, useState} from 'react';
+import React, {FunctionComponent, useEffect, useState} from 'react';
 import {SignInteractionStore} from '@keplr-wallet/stores-core';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../stores';
-import {BottomSheetModal, BottomSheetView} from '@gorhom/bottom-sheet';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStyle} from '../../styles';
 import {
@@ -20,7 +19,7 @@ import {MsgGrant} from '@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx';
 import {defaultProtoCodec} from '@keplr-wallet/cosmos';
 import {GenericAuthorization} from '@keplr-wallet/stores/build/query/cosmos/authz/types';
 import {useUnmount} from '../../hooks/use-unmount';
-import {BaseModalHeader, Modal} from '../../components/modal';
+import {BaseModalHeader} from '../../components/modal';
 import {Column, Columns} from '../../components/column';
 import {Text} from 'react-native';
 import {Gutter} from '../../components/gutter';
@@ -36,164 +35,144 @@ import {MessageItem} from './message-item';
 import {ScrollView, FlatList} from 'react-native-gesture-handler';
 import {GuideBox} from '../../components/guide-box';
 import {Checkbox} from '../../components/checkbox';
-import {useEffectOnce} from '../../hooks';
+import {registerCardModal} from '../../components/modal/card';
 
-export const SignModal: FunctionComponent<{
-  interactionData: NonNullable<SignInteractionStore['waitingData']>;
-}> = observer(({interactionData}) => {
-  const {chainStore, signInteractionStore, queriesStore} = useStore();
+export const SignModal = registerCardModal(
+  observer<{
+    interactionData: NonNullable<SignInteractionStore['waitingData']>;
+  }>(({interactionData}) => {
+    const {chainStore, signInteractionStore, queriesStore} = useStore();
 
-  const intl = useIntl();
-  const style = useStyle();
-  const modalRef = useRef<BottomSheetModal>(null);
+    const intl = useIntl();
+    const style = useStyle();
 
-  const chainId = interactionData.data.chainId;
-  const signer = interactionData.data.signer;
-  const senderConfig = useSenderConfig(chainStore, chainId, signer);
-  const gasConfig = useZeroAllowedGasConfig(chainStore, chainId, 0);
-  const amountConfig = useSignDocAmountConfig(
-    chainStore,
-    chainId,
-    senderConfig,
-  );
-  const feeConfig = useFeeConfig(
-    chainStore,
-    queriesStore,
-    chainId,
-    senderConfig,
-    amountConfig,
-    gasConfig,
-  );
-  const memoConfig = useMemoConfig(chainStore, chainId);
-  const signDocHelper = useSignDocHelper(feeConfig, memoConfig);
-  amountConfig.setSignDocHelper(signDocHelper);
+    const chainId = interactionData.data.chainId;
+    const signer = interactionData.data.signer;
+    const senderConfig = useSenderConfig(chainStore, chainId, signer);
+    const gasConfig = useZeroAllowedGasConfig(chainStore, chainId, 0);
+    const amountConfig = useSignDocAmountConfig(
+      chainStore,
+      chainId,
+      senderConfig,
+    );
+    const feeConfig = useFeeConfig(
+      chainStore,
+      queriesStore,
+      chainId,
+      senderConfig,
+      amountConfig,
+      gasConfig,
+    );
+    const memoConfig = useMemoConfig(chainStore, chainId);
+    const signDocHelper = useSignDocHelper(feeConfig, memoConfig);
+    amountConfig.setSignDocHelper(signDocHelper);
 
-  const [isViewData, setIsViewData] = useState(false);
+    const [isViewData, setIsViewData] = useState(false);
 
-  const msgs = signDocHelper.signDocWrapper
-    ? signDocHelper.signDocWrapper.mode === 'amino'
-      ? signDocHelper.signDocWrapper.aminoSignDoc.msgs
-      : signDocHelper.signDocWrapper.protoSignDoc.txMsgs
-    : [];
+    const msgs = signDocHelper.signDocWrapper
+      ? signDocHelper.signDocWrapper.mode === 'amino'
+        ? signDocHelper.signDocWrapper.aminoSignDoc.msgs
+        : signDocHelper.signDocWrapper.protoSignDoc.txMsgs
+      : [];
 
-  useEffectOnce(() => {
-    modalRef.current?.present();
-  });
+    useEffect(() => {
+      const data = interactionData.data;
 
-  useEffect(() => {
-    const data = interactionData.data;
-
-    if (data.chainId !== data.signDocWrapper.chainId) {
-      // Validate the requested chain id and the chain id in the sign doc are same.
-      throw new Error('Chain id unmatched');
-    }
-
-    signDocHelper.setSignDocWrapper(data.signDocWrapper);
-    gasConfig.setValue(data.signDocWrapper.gas);
-
-    let memo = data.signDocWrapper.memo;
-    if (data.signDocWrapper.mode === 'amino') {
-      // For amino-json sign doc, the memo is escaped by default behavior of golang's json marshaller.
-      // For normal users, show the escaped characters with unescaped form.
-      // Make sure that the actual sign doc's memo should be escaped.
-      // In this logic, memo should be escaped from account store or background's request signing function.
-      memo = unescapeHTML(memo);
-    }
-    memoConfig.setValue(memo);
-
-    if (
-      data.signOptions.preferNoSetFee ||
-      // 자동으로 fee를 다뤄줄 수 있는건 fee가 하나인 경우이다.
-      // fee가 여러개인 경우는 일반적인 경우가 아니기 때문에
-      // 케플러에서 처리해줄 수 없다. 그러므로 옵션을 무시하고 fee 설정을 각 웹사이트에 맡긴다.
-      data.signDocWrapper.fees.length >= 2
-    ) {
-      feeConfig.setFee(
-        data.signDocWrapper.fees.map(fee => {
-          const currency = chainStore
-            .getChain(data.chainId)
-            .forceFindCurrency(fee.denom);
-          return new CoinPretty(currency, new Int(fee.amount));
-        }),
-      );
-    }
-
-    amountConfig.setDisableBalanceCheck(!!data.signOptions.disableBalanceCheck);
-    feeConfig.setDisableBalanceCheck(!!data.signOptions.disableBalanceCheck);
-
-    // We can't check the fee balance if the payer is not the signer.
-    if (
-      data.signDocWrapper.payer &&
-      data.signDocWrapper.payer !== data.signer
-    ) {
-      feeConfig.setDisableBalanceCheck(true);
-    }
-    // We can't check the fee balance if the granter is not the signer.
-    if (
-      data.signDocWrapper.granter &&
-      data.signDocWrapper.granter !== data.signer
-    ) {
-      feeConfig.setDisableBalanceCheck(true);
-    }
-  }, [
-    amountConfig,
-    chainStore,
-    feeConfig,
-    gasConfig,
-    interactionData.data,
-    memoConfig,
-    signDocHelper,
-  ]);
-
-  const [isSendAuthzGrant, setIsSendAuthzGrant] = useState(false);
-  const [isSendAuthzGrantChecked, setIsSendAuthzGrantChecked] = useState(false);
-
-  useEffect(() => {
-    try {
-      if (
-        // 라이크코인의 요청으로 일단 얘는 스킵...
-        interactionData.data.origin === 'https://liker.land' ||
-        interactionData.data.origin === 'https://app.like.co'
-      ) {
-        return;
+      if (data.chainId !== data.signDocWrapper.chainId) {
+        // Validate the requested chain id and the chain id in the sign doc are same.
+        throw new Error('Chain id unmatched');
       }
 
-      const msgs = signDocHelper.signDocWrapper
-        ? signDocHelper.signDocWrapper.mode === 'amino'
-          ? signDocHelper.signDocWrapper.aminoSignDoc.msgs
-          : signDocHelper.signDocWrapper.protoSignDoc.txMsgs
-        : [];
+      signDocHelper.setSignDocWrapper(data.signDocWrapper);
+      gasConfig.setValue(data.signDocWrapper.gas);
 
-      for (const msg of msgs) {
-        const anyMsg = msg as any;
-        if (anyMsg.type == null && anyMsg.grant && anyMsg.grant.authorization) {
-          // cosmos-sdk has bug that amino codec is not applied to authorization properly.
-          // This is the workaround for this bug.
-          if (anyMsg.grant.authorization.msg) {
-            const innerType = anyMsg.grant.authorization.msg;
-            if (
-              innerType === '/cosmos.bank.v1beta1.MsgSend' ||
-              innerType === '/cosmos.bank.v1beta1.MsgMultiSend' ||
-              innerType === '/ibc.applications.transfer.v1.MsgTransfer'
-            ) {
-              setIsSendAuthzGrant(true);
-              return;
-            }
-          } else if (anyMsg.grant.authorization.spend_limit) {
-            // SendAuthorization의 경우 spend_limit를 가진다.
-            // omit 되지 않도록 옵션이 설정되어있기 때문에 비어있더라도 빈 배열을 가지고 있어서 이렇게 확인이 가능하다.
-            // 근데 사실 다른 authorization도 spend_limit를 가질 수 있으므로 이건 좀 위험한 방법이다.
-            // 근데 어차피 버그 버전을 위한거라서 그냥 이렇게 해도 될듯.
-            setIsSendAuthzGrant(true);
-            return;
-          }
-        } else if ('type' in msg) {
-          if (msg.type === 'cosmos-sdk/MsgGrant') {
-            if (
-              msg.value.grant.authorization.type ===
-              'cosmos-sdk/GenericAuthorization'
-            ) {
-              const innerType = msg.value.grant.authorization.value.msg;
+      let memo = data.signDocWrapper.memo;
+      if (data.signDocWrapper.mode === 'amino') {
+        // For amino-json sign doc, the memo is escaped by default behavior of golang's json marshaller.
+        // For normal users, show the escaped characters with unescaped form.
+        // Make sure that the actual sign doc's memo should be escaped.
+        // In this logic, memo should be escaped from account store or background's request signing function.
+        memo = unescapeHTML(memo);
+      }
+      memoConfig.setValue(memo);
+
+      if (
+        data.signOptions.preferNoSetFee ||
+        // 자동으로 fee를 다뤄줄 수 있는건 fee가 하나인 경우이다.
+        // fee가 여러개인 경우는 일반적인 경우가 아니기 때문에
+        // 케플러에서 처리해줄 수 없다. 그러므로 옵션을 무시하고 fee 설정을 각 웹사이트에 맡긴다.
+        data.signDocWrapper.fees.length >= 2
+      ) {
+        feeConfig.setFee(
+          data.signDocWrapper.fees.map(fee => {
+            const currency = chainStore
+              .getChain(data.chainId)
+              .forceFindCurrency(fee.denom);
+            return new CoinPretty(currency, new Int(fee.amount));
+          }),
+        );
+      }
+
+      amountConfig.setDisableBalanceCheck(
+        !!data.signOptions.disableBalanceCheck,
+      );
+      feeConfig.setDisableBalanceCheck(!!data.signOptions.disableBalanceCheck);
+
+      // We can't check the fee balance if the payer is not the signer.
+      if (
+        data.signDocWrapper.payer &&
+        data.signDocWrapper.payer !== data.signer
+      ) {
+        feeConfig.setDisableBalanceCheck(true);
+      }
+      // We can't check the fee balance if the granter is not the signer.
+      if (
+        data.signDocWrapper.granter &&
+        data.signDocWrapper.granter !== data.signer
+      ) {
+        feeConfig.setDisableBalanceCheck(true);
+      }
+    }, [
+      amountConfig,
+      chainStore,
+      feeConfig,
+      gasConfig,
+      interactionData.data,
+      memoConfig,
+      signDocHelper,
+    ]);
+
+    const [isSendAuthzGrant, setIsSendAuthzGrant] = useState(false);
+    const [isSendAuthzGrantChecked, setIsSendAuthzGrantChecked] =
+      useState(false);
+
+    useEffect(() => {
+      try {
+        if (
+          // 라이크코인의 요청으로 일단 얘는 스킵...
+          interactionData.data.origin === 'https://liker.land' ||
+          interactionData.data.origin === 'https://app.like.co'
+        ) {
+          return;
+        }
+
+        const msgs = signDocHelper.signDocWrapper
+          ? signDocHelper.signDocWrapper.mode === 'amino'
+            ? signDocHelper.signDocWrapper.aminoSignDoc.msgs
+            : signDocHelper.signDocWrapper.protoSignDoc.txMsgs
+          : [];
+
+        for (const msg of msgs) {
+          const anyMsg = msg as any;
+          if (
+            anyMsg.type == null &&
+            anyMsg.grant &&
+            anyMsg.grant.authorization
+          ) {
+            // cosmos-sdk has bug that amino codec is not applied to authorization properly.
+            // This is the workaround for this bug.
+            if (anyMsg.grant.authorization.msg) {
+              const innerType = anyMsg.grant.authorization.msg;
               if (
                 innerType === '/cosmos.bank.v1beta1.MsgSend' ||
                 innerType === '/cosmos.bank.v1beta1.MsgMultiSend' ||
@@ -202,131 +181,144 @@ export const SignModal: FunctionComponent<{
                 setIsSendAuthzGrant(true);
                 return;
               }
-            } else if (
-              msg.value.grant.authorization.type ===
-              'cosmos-sdk/SendAuthorization'
-            ) {
+            } else if (anyMsg.grant.authorization.spend_limit) {
+              // SendAuthorization의 경우 spend_limit를 가진다.
+              // omit 되지 않도록 옵션이 설정되어있기 때문에 비어있더라도 빈 배열을 가지고 있어서 이렇게 확인이 가능하다.
+              // 근데 사실 다른 authorization도 spend_limit를 가질 수 있으므로 이건 좀 위험한 방법이다.
+              // 근데 어차피 버그 버전을 위한거라서 그냥 이렇게 해도 될듯.
               setIsSendAuthzGrant(true);
               return;
             }
-          }
-        } else if ('unpacked' in msg) {
-          if (msg.typeUrl === '/cosmos.authz.v1beta1.MsgGrant') {
-            const grantMsg = msg.unpacked as MsgGrant;
-            if (grantMsg.grant && grantMsg.grant.authorization) {
+          } else if ('type' in msg) {
+            if (msg.type === 'cosmos-sdk/MsgGrant') {
               if (
-                grantMsg.grant.authorization.typeUrl ===
-                '/cosmos.authz.v1beta1.GenericAuthorization'
+                msg.value.grant.authorization.type ===
+                'cosmos-sdk/GenericAuthorization'
               ) {
-                // XXX: defaultProtoCodec가 msgs를 rendering할때 사용되었다는 엄밀한 보장은 없다.
-                //      근데 로직상 ProtoSignDocDecoder가 defaultProtoCodec가 아닌 다른 codec을 쓰도록 만들 경우가 사실 없기 때문에
-                //      일단 이렇게 처리하고 넘어간다.
-                const factory = defaultProtoCodec.unpackAnyFactory(
-                  grantMsg.grant.authorization.typeUrl,
-                );
-                if (factory) {
-                  const genericAuth = factory.decode(
-                    grantMsg.grant.authorization.value,
-                  ) as GenericAuthorization;
-
-                  if (
-                    genericAuth.msg === '/cosmos.bank.v1beta1.MsgSend' ||
-                    genericAuth.msg === '/cosmos.bank.v1beta1.MsgMultiSend' ||
-                    genericAuth.msg ===
-                      '/ibc.applications.transfer.v1.MsgTransfer'
-                  ) {
-                    setIsSendAuthzGrant(true);
-                    return;
-                  }
+                const innerType = msg.value.grant.authorization.value.msg;
+                if (
+                  innerType === '/cosmos.bank.v1beta1.MsgSend' ||
+                  innerType === '/cosmos.bank.v1beta1.MsgMultiSend' ||
+                  innerType === '/ibc.applications.transfer.v1.MsgTransfer'
+                ) {
+                  setIsSendAuthzGrant(true);
+                  return;
                 }
               } else if (
-                grantMsg.grant.authorization.typeUrl ===
-                '/cosmos.bank.v1beta1.SendAuthorization'
+                msg.value.grant.authorization.type ===
+                'cosmos-sdk/SendAuthorization'
               ) {
                 setIsSendAuthzGrant(true);
                 return;
               }
             }
+          } else if ('unpacked' in msg) {
+            if (msg.typeUrl === '/cosmos.authz.v1beta1.MsgGrant') {
+              const grantMsg = msg.unpacked as MsgGrant;
+              if (grantMsg.grant && grantMsg.grant.authorization) {
+                if (
+                  grantMsg.grant.authorization.typeUrl ===
+                  '/cosmos.authz.v1beta1.GenericAuthorization'
+                ) {
+                  // XXX: defaultProtoCodec가 msgs를 rendering할때 사용되었다는 엄밀한 보장은 없다.
+                  //      근데 로직상 ProtoSignDocDecoder가 defaultProtoCodec가 아닌 다른 codec을 쓰도록 만들 경우가 사실 없기 때문에
+                  //      일단 이렇게 처리하고 넘어간다.
+                  const factory = defaultProtoCodec.unpackAnyFactory(
+                    grantMsg.grant.authorization.typeUrl,
+                  );
+                  if (factory) {
+                    const genericAuth = factory.decode(
+                      grantMsg.grant.authorization.value,
+                    ) as GenericAuthorization;
+
+                    if (
+                      genericAuth.msg === '/cosmos.bank.v1beta1.MsgSend' ||
+                      genericAuth.msg === '/cosmos.bank.v1beta1.MsgMultiSend' ||
+                      genericAuth.msg ===
+                        '/ibc.applications.transfer.v1.MsgTransfer'
+                    ) {
+                      setIsSendAuthzGrant(true);
+                      return;
+                    }
+                  }
+                } else if (
+                  grantMsg.grant.authorization.typeUrl ===
+                  '/cosmos.bank.v1beta1.SendAuthorization'
+                ) {
+                  setIsSendAuthzGrant(true);
+                  return;
+                }
+              }
+            }
           }
         }
+      } catch (e) {
+        console.log('Failed to check during authz grant send check', e);
       }
-    } catch (e) {
-      console.log('Failed to check during authz grant send check', e);
-    }
 
-    setIsSendAuthzGrant(false);
-  }, [interactionData.data.origin, signDocHelper.signDocWrapper]);
+      setIsSendAuthzGrant(false);
+    }, [interactionData.data.origin, signDocHelper.signDocWrapper]);
 
-  const txConfigsValidate = useTxConfigsValidate({
-    senderConfig,
-    gasConfig,
-    amountConfig,
-    feeConfig,
-    memoConfig,
-  });
-
-  const preferNoSetFee = (() => {
-    // 자동으로 fee를 다뤄줄 수 있는건 fee가 하나인 경우이다.
-    // fee가 여러개인 경우는 일반적인 경우가 아니기 때문에
-    // 케플러에서 처리해줄 수 없다. 그러므로 옵션을 무시하고 fee 설정을 각 웹사이트에 맡긴다.
-    if (interactionData.data.signDocWrapper.fees.length >= 2) {
-      return true;
-    }
-
-    return interactionData.data.signOptions.preferNoSetFee;
-  })();
-
-  const preferNoSetMemo = interactionData.data.signOptions.preferNoSetMemo;
-
-  const [unmountPromise] = useState(() => {
-    let resolver: () => void;
-    const promise = new Promise<void>(resolve => {
-      resolver = resolve;
+    const txConfigsValidate = useTxConfigsValidate({
+      senderConfig,
+      gasConfig,
+      amountConfig,
+      feeConfig,
+      memoConfig,
     });
 
-    return {
-      promise,
-      resolver: resolver!,
-    };
-  });
-
-  useUnmount(() => {
-    unmountPromise.resolver();
-  });
-
-  const buttonDisabled =
-    txConfigsValidate.interactionBlocked || !signDocHelper.signDocWrapper;
-
-  const approve = async () => {
-    if (signDocHelper.signDocWrapper) {
-      try {
-        await signInteractionStore.approveWithProceedNext(
-          interactionData.id,
-          signDocHelper.signDocWrapper,
-          undefined,
-          () => {
-            console.log('afterFn');
-          },
-          {},
-        );
-      } catch (e) {
-        console.log(e);
+    const preferNoSetFee = (() => {
+      // 자동으로 fee를 다뤄줄 수 있는건 fee가 하나인 경우이다.
+      // fee가 여러개인 경우는 일반적인 경우가 아니기 때문에
+      // 케플러에서 처리해줄 수 없다. 그러므로 옵션을 무시하고 fee 설정을 각 웹사이트에 맡긴다.
+      if (interactionData.data.signDocWrapper.fees.length >= 2) {
+        return true;
       }
-    }
-  };
 
-  return (
-    <Modal
-      ref={modalRef}
-      snapPoints={['80%']}
-      enableDynamicSizing={true}
-      onDismiss={() => {
-        signInteractionStore.rejectWithProceedNext(
-          interactionData.id,
-          () => {},
-        );
-      }}>
-      <BottomSheetView style={style.flatten(['padding-12', 'padding-top-0'])}>
+      return interactionData.data.signOptions.preferNoSetFee;
+    })();
+
+    const preferNoSetMemo = interactionData.data.signOptions.preferNoSetMemo;
+
+    const [unmountPromise] = useState(() => {
+      let resolver: () => void;
+      const promise = new Promise<void>(resolve => {
+        resolver = resolve;
+      });
+
+      return {
+        promise,
+        resolver: resolver!,
+      };
+    });
+
+    useUnmount(() => {
+      unmountPromise.resolver();
+    });
+
+    const buttonDisabled =
+      txConfigsValidate.interactionBlocked || !signDocHelper.signDocWrapper;
+
+    const approve = async () => {
+      if (signDocHelper.signDocWrapper) {
+        try {
+          await signInteractionStore.approveWithProceedNext(
+            interactionData.id,
+            signDocHelper.signDocWrapper,
+            undefined,
+            () => {
+              console.log('afterFn');
+            },
+            {},
+          );
+        } catch (e) {
+          console.log(e);
+        }
+      }
+    };
+
+    return (
+      <Box style={style.flatten(['padding-12', 'padding-top-0'])}>
         <BaseModalHeader
           title={intl.formatMessage({id: 'page.sign.cosmos.tx.title'})}
           titleStyle={style.flatten(['h3'])}
@@ -443,10 +435,10 @@ export const SignModal: FunctionComponent<{
         />
 
         <Gutter size={24} />
-      </BottomSheetView>
-    </Modal>
-  );
-});
+      </Box>
+    );
+  }),
+);
 
 const Divider = () => {
   const style = useStyle();
