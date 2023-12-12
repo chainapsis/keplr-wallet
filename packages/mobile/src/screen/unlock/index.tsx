@@ -210,15 +210,17 @@ export const UnlockScreen: FunctionComponent = observer(() => {
         <Gutter size={70} />
 
         {isMigrationSecondPhase || keyRingStore.isMigrating ? (
-          <GuideBox
-            color="warning"
-            title={intl.formatMessage({
-              id: 'page.unlock.bottom-section.guide-title',
-            })}
-            paragraph={intl.formatMessage({
-              id: 'page.unlock.bottom-section.guide-paragraph',
-            })}
-          />
+          <Box width="100%">
+            <GuideBox
+              color="warning"
+              title={intl.formatMessage({
+                id: 'page.unlock.bottom-section.guide-title',
+              })}
+              paragraph={intl.formatMessage({
+                id: 'page.unlock.bottom-section.guide-paragraph',
+              })}
+            />
+          </Box>
         ) : (
           <TextInput
             label={intl.formatMessage({
