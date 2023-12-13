@@ -26,3 +26,5 @@ export * from './ethereum';
 export * from './trash-can';
 export * from './globe';
 export * from './vote';
+export * from './warning';
+export * from './warning-fill';
