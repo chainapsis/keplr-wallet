@@ -60,9 +60,7 @@ export const RegisterIntroNewUserScreen: FunctionComponent = () => {
             })}
             size="large"
             onPress={() => {
-              navigation.navigate('Register.NewMnemonic', {
-                paragraph: 'Step 1/3',
-              });
+              navigation.navigate('Register.NewMnemonic');
             }}
           />
 

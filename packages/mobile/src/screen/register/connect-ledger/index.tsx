@@ -46,10 +46,6 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
 
   useLayoutEffect(() => {
     navigation.setParams({
-      paragraph:
-        appendModeInfo === undefined
-          ? `Step ${stepPrevious + 1}/${stepTotal}`
-          : undefined,
       hideBackButton: appendModeInfo !== undefined,
     });
   }, [appendModeInfo, navigation, stepPrevious, stepTotal]);
@@ -105,6 +101,11 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
 
   return (
     <RegisterContainer
+      paragraph={
+        appendModeInfo === undefined
+          ? `Step ${stepPrevious + 1}/${stepTotal}`
+          : undefined
+      }
       bottom={
         <Button
           text={intl.formatMessage({

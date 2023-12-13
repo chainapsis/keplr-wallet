@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useLayoutEffect, useState} from 'react';
+import React, {FunctionComponent, useState} from 'react';
 import {RegisterContainer} from '../components';
 import {useIntl} from 'react-intl';
 import {observer} from 'mobx-react-lite';
@@ -62,14 +62,9 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
     });
   });
 
-  useLayoutEffect(() => {
-    navigation.setParams({
-      paragraph: 'Step 1/3',
-    });
-  }, [navigation]);
-
   return (
     <RegisterContainer
+      paragraph="Step 1/3"
       bottom={
         <Button
           text={intl.formatMessage({

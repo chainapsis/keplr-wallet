@@ -1,9 +1,4 @@
-import React, {
-  FunctionComponent,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from 'react';
+import React, {FunctionComponent, useEffect, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {useIntl} from 'react-intl';
 import {useStyle} from '../../../styles';
@@ -32,12 +27,6 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
   const [words, setWords] = useState<string[]>([]);
   const [wordsType, setWordsType] = useState<WordsType>('12words');
 
-  useLayoutEffect(() => {
-    navigation.setParams({
-      paragraph: 'Step 1/3',
-    });
-  }, [navigation]);
-
   useEffect(() => {
     const rng = (array: any) => {
       return Promise.resolve(Crypto.getRandomValues(array));
@@ -54,6 +43,7 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
 
   return (
     <RegisterContainer
+      paragraph="Step 1/3"
       bottom={
         <Button
           text={intl.formatMessage({

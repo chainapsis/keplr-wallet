@@ -94,7 +94,6 @@ import {SettingGeneralManageWalletConnectScreen} from './screen/setting/screens/
 import {registerHeaderOptions} from './components/pageHeader/header-register';
 
 type DefaultRegisterParams = {
-  paragraph?: string;
   hideBackButton?: boolean;
 };
 

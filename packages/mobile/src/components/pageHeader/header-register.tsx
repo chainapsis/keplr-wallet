@@ -5,7 +5,6 @@ import React, {
 } from 'react';
 import {ColorPalette, useStyle} from '../../styles';
 import {Pressable, Text} from 'react-native';
-import {Gutter} from '../gutter';
 import {HeaderBackButtonIcon} from './icon/back';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {Box} from '../box';
@@ -27,7 +26,6 @@ export const RegisterHeaderTitle: FunctionComponent<PropsWithChildren> = ({
     >
   >();
   const navigation = useNavigation();
-  const paragraph = route.params?.paragraph;
   const hideBackButton = route.params?.hideBackButton;
 
   useLayoutEffect(() => {
@@ -41,17 +39,8 @@ export const RegisterHeaderTitle: FunctionComponent<PropsWithChildren> = ({
       alignY="center"
       //NOTE 240을 준 이유는 왼쪽에 아이콘이 생길 경우 자체적인 header 길이가 제목을 짜를때가 있음
       //해서 그냥 find 튜닝으로 안짤리는 최소 값을 지정함
-      minWidth={240}
-      marginBottom={paragraph ? 2 : 0}>
+      minWidth={240}>
       <Text style={style.flatten(['h3', 'color-text-high'])}>{children}</Text>
-      {paragraph ? (
-        <React.Fragment>
-          <Gutter size={4} />
-          <Text style={style.flatten(['body2', 'color-text-low'])}>
-            {paragraph}
-          </Text>
-        </React.Fragment>
-      ) : null}
     </Box>
   );
 };
