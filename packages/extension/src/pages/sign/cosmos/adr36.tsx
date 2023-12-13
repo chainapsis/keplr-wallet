@@ -402,6 +402,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
             }}
             isLedgerInteracting={isLedgerInteracting}
             ledgerInteractingError={ledgerInteractingError}
+            isInternal={signInteractionStore.waitingData.isInternal}
           />
         ) : null}
       </Box>

@@ -7,6 +7,7 @@ import {
   ErrCodeDeviceLocked,
   ErrFailedGetPublicKey,
   ErrFailedInit,
+  ErrFailedSign,
   ErrModuleLedgerSign,
   ErrPublicKeyUnmatched,
   ErrSignRejected,
@@ -21,7 +22,8 @@ export const LedgerGuideBox: FunctionComponent<{
   };
   isLedgerInteracting: boolean;
   ledgerInteractingError: Error | undefined;
-}> = ({ isLedgerInteracting, ledgerInteractingError, data }) => {
+  isInternal: boolean;
+}> = ({ isLedgerInteracting, ledgerInteractingError, data, isInternal }) => {
   const [transportErrorCount, setTransportErrorCount] = useState(0);
   const intl = useIntl();
 
@@ -54,6 +56,38 @@ export const LedgerGuideBox: FunctionComponent<{
             ledgerInteractingError instanceof KeplrError &&
             ledgerInteractingError.module === ErrModuleLedgerSign
           ) {
+            if (ledgerInteractingError.code === ErrFailedSign) {
+              if (
+                ledgerInteractingError.message.endsWith(
+                  "JSON. Too many tokens"
+                ) ||
+                ledgerInteractingError.message.endsWith(
+                  "Output buffer too small"
+                )
+              ) {
+                if (isInternal) {
+                  return (
+                    <GuideBox
+                      color="warning"
+                      title={intl.formatMessage({
+                        id: "page.sign.components.ledger-guide.box.error-title",
+                      })}
+                      paragraph="Tx size too large for Ledger device (This is a Ledger limitation Keplr can't fix)"
+                    />
+                  );
+                }
+                return (
+                  <GuideBox
+                    color="warning"
+                    title={intl.formatMessage({
+                      id: "page.sign.components.ledger-guide.box.error-title",
+                    })}
+                    paragraph="Tx size too large for Ledger device (Request the webpage admin to reduce the tx size)"
+                  />
+                );
+              }
+            }
+
             switch (ledgerInteractingError.code) {
               case ErrFailedInit:
                 if (transportErrorCount < 3) {

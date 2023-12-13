@@ -618,6 +618,7 @@ export const CosmosTxView: FunctionComponent<{
           }}
           isLedgerInteracting={isLedgerInteracting}
           ledgerInteractingError={ledgerInteractingError}
+          isInternal={interactionData.isInternal}
         />
       </Box>
       <KeystoneSign

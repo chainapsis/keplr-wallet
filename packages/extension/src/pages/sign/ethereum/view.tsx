@@ -223,6 +223,7 @@ export const EthereumSigningView: FunctionComponent<{
           }}
           isLedgerInteracting={isLedgerInteracting}
           ledgerInteractingError={ledgerInteractingError}
+          isInternal={interactionData.isInternal}
         />
       </Box>
       <KeystoneSign
