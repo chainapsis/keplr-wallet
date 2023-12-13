@@ -9,6 +9,7 @@ import {FlatList, Text} from 'react-native';
 import {ChainImageFallback} from '../../../../../components/image';
 import {CloseIcon} from '../../../../../components/icon';
 import {XAxis} from '../../../../../components/axis';
+import {FormattedMessage} from 'react-intl';
 
 interface WalletConnectSession {
   topic: string;
@@ -68,7 +69,7 @@ export const SettingGeneralManageWalletConnectScreen: FunctionComponent =
                 <Gutter size={148} direction="vertical" />
                 <EmptyView>
                   <Text style={style.flatten(['subtitle3'])}>
-                    Not Wallet Connect Sessions yet
+                    <FormattedMessage id="page.setting.general.manage-WC.empty-text" />
                   </Text>
                 </EmptyView>
               </React.Fragment>

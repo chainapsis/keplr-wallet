@@ -111,6 +111,9 @@ export const SettingSecurityChangePasswordScreen: FunctionComponent = observer(
                   returnKeyType="next"
                   secureTextEntry={true}
                   error={errors.newPassword?.message}
+                  placeholder={intl.formatMessage({
+                    id: 'page.setting.security.change-password.placeholder',
+                  })}
                   onSubmitEditing={() => {
                     setFocus('confirmNewPassword');
                   }}
@@ -147,6 +150,9 @@ export const SettingSecurityChangePasswordScreen: FunctionComponent = observer(
                   onSubmitEditing={() => {
                     submit();
                   }}
+                  placeholder={intl.formatMessage({
+                    id: 'page.setting.security.change-password.placeholder',
+                  })}
                 />
               );
             }}

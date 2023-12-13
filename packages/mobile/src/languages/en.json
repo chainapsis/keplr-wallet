@@ -184,7 +184,7 @@
   "page.setting.advanced-title": "Advanced",
   "page.setting.advanced-paragraph": "Developer Mode, Change Endpoints...",
   "page.setting.security-privacy-title": "Security & Privacy",
-  "page.setting.security-privacy-paragraph": "Connected Websites, Auto-Lock",
+  "page.setting.security-privacy-paragraph": "Connected Websites, Password...",
   "page.setting.manage-token-list-title": "Manage Token List",
   "page.setting.manage-token-list-paragraph": "Only for the tokens that can be added manually via contract addresses",
 
@@ -201,6 +201,7 @@
   "page.setting.general.language-title": "Language",
   "page.setting.general.currency-title": "Currency",
   "page.setting.general.contacts-title": "Contacts",
+  "page.setting.general.manage-WC-title": "Manage WalletConnect",
   "page.setting.general.theme-title": "Theme",
   "page.setting.general.manage-authz-title": "Manage AuthZ",
   "page.setting.general.link-kpelr-mobile-title": "Link Keplr Mobile",
@@ -210,7 +211,7 @@
   "page.setting.general.manage-chain-visibility-paragraph": "Select chains (and their assets) to be displayed on your current account",
   "page.setting.general.version-title": "Keplr Version",
 
-  "page.setting.general.language.automatic-title": "Automatic (Browser default)",
+  "page.setting.general.language.automatic-title": "Automatic (Device Default)",
 
   "page.setting.general.theme.dark-mode": "Dark Mode",
   "page.setting.general.theme.light-mode": "Light Mode",
@@ -238,17 +239,19 @@
   "page.setting.general.link-keplr-mobile.qr-code-view.paragraph": "Scan the QR code to sync with Keplr Mobile. The process may take several minutes.",
   "page.setting.general.link-keplr-mobile.qr-code-view.expired": "Expired",
 
-  "page.setting.general.delete-suggest-chain.empty-text": "No suggest chains added yet",
+  "page.setting.general.delete-suggest-chain.empty-text": "No Chain Added Yet",
   "page.setting.general.delete-suggest-chain.chain-item.tooltip-text": "The infrastructure and setting of this chain is not configured by Keplr team. Please reach out to the chain or website team for technical support.",
+
+  "page.setting.general.manage-WC.empty-text": "Not Wallet Connect Sessions yet",
 
   "page.setting.security.connected-websites-title": "Connected Websites",
   "page.setting.security.connected-websites-paragraph": "Websites that can view your address and make requests for signing",
   "page.setting.security.auto-lock-title": "Auto-Lock",
   "page.setting.security.change-password-title": "Change Password",
-  "page.setting.security.bio-authentication-title": "Use biometric authentication",
+  "page.setting.security.bio-authentication-title": "Use Biometric Authentication",
   "page.setting.security.enable-bio-authentication-title": "Enable Biometric Authentication",
   "page.setting.security.disable-bio-authentication-title": "Disable Biometric Authentication",
-  "page.setting.security.analytics-title": "Share anonymous data",
+  "page.setting.security.analytics-title": "Share Anonymous Data",
   "page.setting.security.analytics-paragraph": "Help us improve the performance and quality of Keplr",
 
   "page.setting.security.permission.search-placeholder": "Search",
@@ -262,9 +265,11 @@
 
   "page.setting.security.change-password.current-password-label": "Current Keplr Password",
   "page.setting.security.change-password.new-password-label": "New Keplr Password",
+  "page.setting.security.change-password.placeholder": "At least 8 characters in length",
   "page.setting.security.change-password.confirm-password-label": "Confirm New Keplr Password",
 
   "page.setting.security.bio-authentication.password-label": "password",
+  "page.setting.security.bio-authentication.password-placeholder": "Type in your password",
   "page.setting.security.bio-authentication.guide-text": "Enter your password to continue.",
 
   "page.setting.token.manage.paragraph": "Only for the tokens that can be added manually via contract addresses",
@@ -310,8 +315,8 @@
   "page.suggest-chain.community-info-view.community-driven-chip": "Community driven",
   "page.suggest-chain.community-info-view.paragraph": "<b>{origin}</b> would like to add blockchain <b>{chainId}</b> to Keplr.",
   "page.suggest-chain.raw-info-view.guide-title": "Before You Approve",
-  "page.suggest-chain.raw-info-view.guide-paragraph": "This chain’s info is not available on Keplr Chain Registry. Keplr recommends that ‘suggest chain’ info be managed by the community.",
-  "page.suggest-chain.raw-info-view.chain-registry-link-text": "Click here to update chain info on Github",
+  "page.suggest-chain.raw-info-view.guide-paragraph": "Keplr relies on community management for info on the non-native chains. Currently, this chain's details are unregistered.",
+  "page.suggest-chain.raw-info-view.chain-registry-link-text": "Tap here to visit our community repository.",
 
   "page.unlock.star-migration-button": "Start Migration",
   "page.unlock.upgrade-in-progress": "Upgrade in progress",
