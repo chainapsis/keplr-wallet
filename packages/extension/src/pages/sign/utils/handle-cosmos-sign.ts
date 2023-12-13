@@ -15,8 +15,18 @@ import KeystoneSDK, {
   UR,
   utils,
 } from "@keystonehq/keystone-sdk";
-import { KeystoneKeys, KeystoneUR, getPathFromPubKey } from "./keystone";
+import {
+  ErrInvalidPublicKey,
+  ErrInvalidRequestId,
+  ErrInvalidSignature,
+  ErrInvalidSigner,
+  ErrModuleKeystoneSign,
+  KeystoneKeys,
+  KeystoneUR,
+  getPathFromPubKey,
+} from "./keystone";
 import { PlainObject } from "@keplr-wallet/background";
+import { KeplrError } from "@keplr-wallet/router";
 
 export interface LedgerOptions {
   useWebHID: boolean;
@@ -112,7 +122,11 @@ export const handleCosmosPreSign = async (
         Buffer.from(interactionData.data.pubKey).toString("hex")
       );
       if (path === null) {
-        throw new Error("Invalid signer");
+        throw new KeplrError(
+          ErrModuleKeystoneSign,
+          ErrInvalidSigner,
+          "Invalid signer"
+        );
       }
       const random = Buffer.alloc(16);
       Buffer.from(interactionData.id, "hex").copy(random);
@@ -172,13 +186,26 @@ export const handleCosmosPreSign = async (
         cbor: ur.cbor.toString("hex"),
       });
       const scanResult = await keystoneOptions.scanQRCode();
-      const signResult = keystoneSDK[
-        isEthSigning ? "evm" : "cosmos"
-      ].parseSignature(
-        new UR(Buffer.from(scanResult.cbor, "hex"), scanResult.type)
-      );
+      let signResult;
+      try {
+        signResult = keystoneSDK[
+          isEthSigning ? "evm" : "cosmos"
+        ].parseSignature(
+          new UR(Buffer.from(scanResult.cbor, "hex"), scanResult.type)
+        );
+      } catch (e) {
+        throw new KeplrError(
+          ErrModuleKeystoneSign,
+          ErrInvalidSignature,
+          e.message || "Invalid signature"
+        );
+      }
       if (signResult.requestId !== requestId) {
-        throw new Error("Invalid request id");
+        throw new KeplrError(
+          ErrModuleKeystoneSign,
+          ErrInvalidRequestId,
+          "Invalid request id"
+        );
       }
       if (
         "publicKey" in signResult &&
@@ -189,7 +216,11 @@ export const handleCosmosPreSign = async (
             ] as PlainObject
           )["pubKey"]
       ) {
-        throw new Error("Invalid public key");
+        throw new KeplrError(
+          ErrModuleKeystoneSign,
+          ErrInvalidPublicKey,
+          "Invalid public key"
+        );
       }
       return Buffer.from(signResult.signature, "hex");
     }

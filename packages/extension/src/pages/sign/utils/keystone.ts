@@ -67,3 +67,9 @@ export function encodeEthMessage(
       return Buffer.from(message);
   }
 }
+
+export const ErrModuleKeystoneSign = "keystone-sign";
+export const ErrInvalidSigner = 1;
+export const ErrInvalidRequestId = 2;
+export const ErrInvalidPublicKey = 3;
+export const ErrInvalidSignature = 4;
