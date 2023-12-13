@@ -546,6 +546,7 @@
 
   "page.browser.main-title": "Discover Apps",
   "page.browser.favorite-label": "Favorites",
+  "page.browser.input-placeholder": "Type URL",
   "page.browser.favorite-empty-text-1": "No Favorites Yet!",
   "page.browser.favorite-empty-text-2": "Tap the star in the top right corner to add the website you've visited to the Favorites.",
 

@@ -17,12 +17,13 @@ import {Box} from '../../components/box';
 import {CloseIcon, StarIcon} from '../../components/icon';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {RectButton as NativeRectButton} from 'react-native-gesture-handler';
-import {FormattedMessage} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 
 export const WebScreen: FunctionComponent = observer(() => {
   const {favoriteWebpageStore} = useStore();
   const style = useStyle();
   const navigation = useNavigation<StackNavProp>();
+  const intl = useIntl();
 
   const dAppPageUrl = 'https://explore.keplr.app';
   const safeAreaInsets = useSafeAreaInsets();
@@ -55,7 +56,7 @@ export const WebScreen: FunctionComponent = observer(() => {
         returnKeyType="go"
         value={uri}
         error={uriError}
-        placeholder="Search or type URL"
+        placeholder={intl.formatMessage({id: 'page.browser.input-placeholder'})}
         placeholderTextColor={style.flatten(['color-gray-300']).color}
         onChangeText={text => {
           setURI(text);
