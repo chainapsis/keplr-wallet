@@ -128,6 +128,8 @@ export const RegisterIntroNewUserScreen: FunctionComponent = () => {
           leftIcon={<GoogleIcon />}
         />
       </OptionContainer>
+
+      <Gutter size={16} />
     </ScrollViewRegisterContainer>
   );
 };

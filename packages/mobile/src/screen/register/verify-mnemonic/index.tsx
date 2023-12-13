@@ -14,6 +14,7 @@ import {Controller, useForm} from 'react-hook-form';
 import {Bip44PathView, useBIP44PathState} from '../components/bip-path-44';
 import {useStore} from '../../../stores';
 import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
+import {VerticalCollapseTransition} from '../../../components/transition';
 
 export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -273,28 +274,26 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
 
       <Gutter size={16} />
 
-      {isOpenBip44PathView ? (
-        <Bip44PathView
-          state={bip44PathState}
-          setIsOpen={setIsOpenBip44PathView}
-        />
-      ) : (
+      <VerticalCollapseTransition collapsed={isOpenBip44PathView}>
         <Box alignX="center">
           <Button
             text={intl.formatMessage({id: 'button.advanced'})}
             size="small"
             color="secondary"
-            disabled={
-              !bip44PathState.isAccountValid() ||
-              !bip44PathState.isChangeValid() ||
-              !bip44PathState.isAddressIndexValid()
-            }
             onPress={() => {
               setIsOpenBip44PathView(true);
             }}
           />
         </Box>
-      )}
+      </VerticalCollapseTransition>
+      {
+        <VerticalCollapseTransition collapsed={!isOpenBip44PathView}>
+          <Bip44PathView
+            state={bip44PathState}
+            setIsOpen={setIsOpenBip44PathView}
+          />
+        </VerticalCollapseTransition>
+      }
       <Gutter size={16} />
     </ScrollViewRegisterContainer>
   );

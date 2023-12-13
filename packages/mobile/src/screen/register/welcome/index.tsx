@@ -3,7 +3,7 @@ import {observer} from 'mobx-react-lite';
 import {Box} from '../../../components/box';
 import LottieView from 'lottie-react-native';
 import {useStyle} from '../../../styles';
-import {StyleSheet, Text} from 'react-native';
+import {Text} from 'react-native';
 import {Gutter} from '../../../components/gutter';
 import {XAxis} from '../../../components/axis';
 import {Toggle} from '../../../components/toggle';
@@ -11,6 +11,7 @@ import {Button} from '../../../components/button';
 import {useStore} from '../../../stores';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
+import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
 
 export const WelcomeScreen: FunctionComponent = observer(() => {
   const {keychainStore} = useStore();
@@ -22,36 +23,47 @@ export const WelcomeScreen: FunctionComponent = observer(() => {
   const [isBiometricOn, setIsBiometricOn] = useState(false);
 
   return (
-    <Box alignX="center" alignY="center" style={style.flatten(['flex-1'])}>
-      <Box width={300} alignX="center">
-        <Box borderRadius={40} style={{overflow: 'hidden'}}>
-          <LottieView
-            source={require('../../../public/assets/lottie/register/congrats.json')}
-            style={{width: 300, height: 300}}
-            autoPlay
-            loop
-          />
-        </Box>
+    <ScrollViewRegisterContainer
+      forceEnableTopSafeArea={true}
+      contentContainerStyle={{
+        flexGrow: 1,
+        justifyContent: 'center',
+      }}>
+      <Box borderRadius={40} style={{overflow: 'hidden'}} alignX="center">
+        <LottieView
+          source={require('../../../public/assets/lottie/register/congrats.json')}
+          style={{width: 300, height: 300}}
+          autoPlay
+          loop
+        />
+      </Box>
 
-        <Gutter size={30} />
+      <Gutter size={30} />
 
+      <Box alignX="center">
         <Text style={style.flatten(['mobile-h1', 'color-text-high'])}>
           You’re all set!
         </Text>
+      </Box>
 
-        <Gutter size={20} />
+      <Gutter size={20} />
 
+      <Box paddingX={50}>
         <Text
-          style={StyleSheet.flatten([
-            style.flatten(['body1', 'color-text-low', 'padding-10']),
-            {textAlign: 'center'},
+          style={style.flatten([
+            'body1',
+            'color-text-low',
+            'padding-10',
+            'text-center',
           ])}>
           Your cosmic interchain journey now begins
         </Text>
+      </Box>
 
-        <Gutter size={30} />
+      <Gutter size={30} />
 
-        {password && keychainStore.isBiometrySupported ? (
+      {password && keychainStore.isBiometrySupported ? (
+        <React.Fragment>
           <XAxis alignY="center">
             <Text
               style={style.flatten([
@@ -64,14 +76,16 @@ export const WelcomeScreen: FunctionComponent = observer(() => {
 
             <Toggle isOpen={isBiometricOn} setIsOpen={setIsBiometricOn} />
           </XAxis>
-        ) : null}
+          <Gutter size={20} />
+        </React.Fragment>
+      ) : null}
 
-        <Gutter size={50} />
+      <Gutter size={30} />
 
+      <Box style={style.flatten(['padding-x-50'])}>
         <Button
           text="Done"
           size="large"
-          containerStyle={{width: '100%'}}
           onPress={async () => {
             if (password && isBiometricOn) {
               await keychainStore.turnOnBiometry(password);
@@ -81,6 +95,8 @@ export const WelcomeScreen: FunctionComponent = observer(() => {
           }}
         />
       </Box>
-    </Box>
+
+      <Gutter size={20} />
+    </ScrollViewRegisterContainer>
   );
 });

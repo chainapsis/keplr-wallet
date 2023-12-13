@@ -84,6 +84,8 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
           leftIcon={<GoogleIcon />}
         />
       </OptionContainer>
+
+      <Gutter size={16} />
     </ScrollViewRegisterContainer>
   );
 };
