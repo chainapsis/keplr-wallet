@@ -1,7 +1,7 @@
 import React, {FunctionComponent, PropsWithChildren} from 'react';
 import {useStyle} from '../../../styles';
 import {Box} from '../../../components/box';
-import {KeyboardAvoidingView, Platform, Text} from 'react-native';
+import {KeyboardAvoidingView, Platform, StyleSheet, Text} from 'react-native';
 
 export const RegisterContainer: FunctionComponent<
   PropsWithChildren<{
@@ -18,7 +18,10 @@ export const RegisterContainer: FunctionComponent<
       {paragraph ? (
         <React.Fragment>
           <Text
-            style={style.flatten(['body2', 'text-center', 'color-text-low'])}>
+            style={StyleSheet.flatten([
+              style.flatten(['body2', 'text-center', 'color-text-low']),
+              {marginTop: -3},
+            ])}>
             {paragraph}
           </Text>
         </React.Fragment>
