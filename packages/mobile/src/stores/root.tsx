@@ -15,6 +15,8 @@ import {
   IBCChannelStore,
   IBCCurrencyRegistrar,
   QuerySharedContext,
+  LSMCurrencyRegistrar,
+  AgoricQueries,
 } from '@keplr-wallet/stores';
 import {
   ChainSuggestStore,
@@ -39,6 +41,7 @@ import {
   CoinGeckoGetPrice,
   FiatCurrencies,
   TokenContractListURL,
+  EthereumEndpoint,
 } from '../config.ui';
 import {TokenContractsQueries} from './token-contracts';
 import {AprQueries} from './aprs';
@@ -48,6 +51,11 @@ import {ScamProposalStore} from './scam-proposal';
 import {KeychainStore} from './keychain';
 import {FavoriteWebpageStore} from './favorite';
 import {WalletConnectStore} from './wallet-connect';
+import {
+  AxelarEVMBridgeCurrencyRegistrar,
+  GravityBridgeCurrencyRegistrar,
+  KeplrETCQueries,
+} from '@keplr-wallet/stores-etc';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
@@ -69,12 +77,12 @@ export class RootStore {
 
   public readonly queriesStore: QueriesStore<
     [
-      // AgoricQueries,
+      AgoricQueries,
       CosmosQueries,
       CosmwasmQueries,
       SecretQueries,
       OsmosisQueries,
-      // KeplrETCQueries,
+      KeplrETCQueries,
       ICNSQueries,
       TokenContractsQueries,
       AprQueries,
@@ -86,6 +94,9 @@ export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
 
   public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
+  public readonly lsmCurrencyRegistrar: LSMCurrencyRegistrar;
+  public readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegistrar;
+  public readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar;
   public readonly scamProposalStore: ScamProposalStore;
 
   public readonly keychainStore: KeychainStore;
@@ -143,16 +154,16 @@ export class RootStore {
       {
         responseDebounceMs: 75,
       },
+      AgoricQueries.use(),
       CosmosQueries.use(),
-      // // AgoricQueries.use(),
       CosmwasmQueries.use(),
       SecretQueries.use({
         apiGetter: getKeplrFromWindow,
       }),
       OsmosisQueries.use(),
-      // KeplrETCQueries.use({
-      //   ethereumURL: EthereumEndpoint,
-      // }),
+      KeplrETCQueries.use({
+        ethereumURL: EthereumEndpoint,
+      }),
       ICNSQueries.use(),
       TokenContractsQueries.use({
         tokenContractListURL: TokenContractListURL,
@@ -327,6 +338,26 @@ export class RootStore {
       this.accountStore,
       this.queriesStore,
     );
+    this.lsmCurrencyRegistrar = new LSMCurrencyRegistrar(
+      new AsyncKVStore('store_lsm_currency_registrar'),
+      24 * 3600 * 1000,
+      this.chainStore,
+      this.queriesStore,
+    );
+    this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegistrar(
+      new AsyncKVStore('store_gravity_bridge_currency_registrar'),
+      24 * 3600 * 1000,
+      this.chainStore,
+      this.queriesStore,
+    );
+    this.axelarEVMBridgeCurrencyRegistrar =
+      new AxelarEVMBridgeCurrencyRegistrar(
+        new AsyncKVStore('store_axelar_evm_bridge_currency_registrar'),
+        24 * 3600 * 1000,
+        this.chainStore,
+        this.queriesStore,
+        'ethereum',
+      );
 
     this.uiConfigStore = new UIConfigStore(
       {
