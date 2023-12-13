@@ -328,6 +328,7 @@ export const AvailableTabView: FunctionComponent<{
       <TokenFoundModal
         isOpen={isOpenTokenFoundModal}
         setIsOpen={setIsOpenTokenFoundModal}
+        navigation={navigation}
       />
       <InformationModal
         isOpen={isInfoModalOpen}

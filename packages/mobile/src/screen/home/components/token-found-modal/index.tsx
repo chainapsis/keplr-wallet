@@ -22,220 +22,231 @@ import {IconButton} from '../../../../components/icon-button';
 import {useStyle} from '../../../../styles';
 import {ScrollView} from 'react-native-gesture-handler';
 import {registerCardModal} from '../../../../components/modal/card';
+import {StackNavProp} from '../../../../navigation';
 
 export const TokenFoundModal = registerCardModal(
-  observer<{setIsOpen: (isOpen: boolean) => void}>(({setIsOpen}) => {
-    const {chainStore, keyRingStore} = useStore();
-    const style = useStyle();
+  observer<{setIsOpen: (isOpen: boolean) => void; navigation: StackNavProp}>(
+    ({setIsOpen, navigation}) => {
+      const {chainStore, keyRingStore} = useStore();
+      const style = useStyle();
 
-    const [checkedChainIdentifiers, setCheckedChainIdentifiers] = useState<
-      string[]
-    >([]);
+      const [checkedChainIdentifiers, setCheckedChainIdentifiers] = useState<
+        string[]
+      >([]);
 
-    const numFoundToken = useMemo(() => {
-      if (chainStore.tokenScans.length === 0) {
-        return 0;
-      }
+      const numFoundToken = useMemo(() => {
+        if (chainStore.tokenScans.length === 0) {
+          return 0;
+        }
 
-      const set = new Set<string>();
+        const set = new Set<string>();
 
-      for (const tokenScan of chainStore.tokenScans) {
-        for (const info of tokenScan.infos) {
-          for (const asset of info.assets) {
-            const key = `${ChainIdHelper.parse(tokenScan.chainId).identifier}/${
-              asset.currency.coinMinimalDenom
-            }`;
-            set.add(key);
+        for (const tokenScan of chainStore.tokenScans) {
+          for (const info of tokenScan.infos) {
+            for (const asset of info.assets) {
+              const key = `${
+                ChainIdHelper.parse(tokenScan.chainId).identifier
+              }/${asset.currency.coinMinimalDenom}`;
+              set.add(key);
+            }
           }
         }
-      }
 
-      return Array.from(set).length;
-    }, [chainStore.tokenScans]);
+        return Array.from(set).length;
+      }, [chainStore.tokenScans]);
 
-    const buttonClicked = async () => {
-      if (!keyRingStore.selectedKeyInfo) {
-        throw new Error('Unexpected error: no selected key ring');
-      }
+      const buttonClicked = async () => {
+        if (!keyRingStore.selectedKeyInfo) {
+          throw new Error('Unexpected error: no selected key ring');
+        }
 
-      const enables = checkedChainIdentifiers
-        .filter(identifier => !chainStore.isEnabledChain(identifier))
-        .filter(identifier => {
-          return (
-            chainStore.tokenScans.find(tokenScan => {
-              return (
-                ChainIdHelper.parse(tokenScan.chainId).identifier === identifier
-              );
-            }) != null
-          );
-        });
-
-      const needBIP44Selects: string[] = [];
-
-      // chainStore.tokenScans는 체인이 enable되고 나면 그 체인은 사라진다.
-      // 근데 로직상 enable 이후에 추가 로직이 있다.
-      // 그래서 일단 얇은 복사를 하고 이 값을 사용한다.
-      const tokenScans = chainStore.tokenScans.slice();
-
-      for (const enable of enables) {
-        if (
-          keyRingStore.needKeyCoinTypeFinalize(
-            keyRingStore.selectedKeyInfo.id,
-            chainStore.getChain(enable),
-          )
-        ) {
-          const tokenScan = tokenScans.find(tokenScan => {
-            return ChainIdHelper.parse(tokenScan.chainId).identifier === enable;
+        const enables = checkedChainIdentifiers
+          .filter(identifier => !chainStore.isEnabledChain(identifier))
+          .filter(identifier => {
+            return (
+              chainStore.tokenScans.find(tokenScan => {
+                return (
+                  ChainIdHelper.parse(tokenScan.chainId).identifier ===
+                  identifier
+                );
+              }) != null
+            );
           });
 
-          if (tokenScan && tokenScan.infos.length > 1) {
-            needBIP44Selects.push(enable);
-            enables.splice(enables.indexOf(enable), 1);
-          }
+        const needBIP44Selects: string[] = [];
 
+        // chainStore.tokenScans는 체인이 enable되고 나면 그 체인은 사라진다.
+        // 근데 로직상 enable 이후에 추가 로직이 있다.
+        // 그래서 일단 얇은 복사를 하고 이 값을 사용한다.
+        const tokenScans = chainStore.tokenScans.slice();
+
+        for (const enable of enables) {
           if (
-            tokenScan &&
-            tokenScan.infos.length === 1 &&
-            tokenScan.infos[0].coinType != null
-          ) {
-            await keyRingStore.finalizeKeyCoinType(
+            keyRingStore.needKeyCoinTypeFinalize(
               keyRingStore.selectedKeyInfo.id,
-              enable,
-              tokenScan.infos[0].coinType,
-            );
+              chainStore.getChain(enable),
+            )
+          ) {
+            const tokenScan = tokenScans.find(tokenScan => {
+              return (
+                ChainIdHelper.parse(tokenScan.chainId).identifier === enable
+              );
+            });
+
+            if (tokenScan && tokenScan.infos.length > 1) {
+              needBIP44Selects.push(enable);
+              enables.splice(enables.indexOf(enable), 1);
+            }
+
+            if (
+              tokenScan &&
+              tokenScan.infos.length === 1 &&
+              tokenScan.infos[0].coinType != null
+            ) {
+              await keyRingStore.finalizeKeyCoinType(
+                keyRingStore.selectedKeyInfo.id,
+                enable,
+                tokenScan.infos[0].coinType,
+              );
+            }
           }
         }
-      }
 
-      if (enables.length > 0) {
-        await chainStore.enableChainInfoInUI(...enables);
-      }
+        if (enables.length > 0) {
+          await chainStore.enableChainInfoInUI(...enables);
+        }
 
-      if (needBIP44Selects.length > 0) {
-        //TODO bip44 설정하는 페이지가 나오면 그쪽으로 보내야함
-      }
+        if (needBIP44Selects.length > 0) {
+          navigation.navigate('Register.SelectDerivationPath', {
+            chainIds: needBIP44Selects,
+            totalCount: needBIP44Selects.length,
+            vaultId: keyRingStore.selectedKeyInfo?.id,
+            skipWelcome: true,
+          });
+        }
 
-      setIsOpen(false);
-    };
-    return (
-      <Box padding={12} paddingTop={1}>
-        <BaseModalHeader title={`${numFoundToken} New Token(s) Found`} />
-        <Gutter size={12} />
-        <ScrollView style={{height: 350}}>
-          <Stack gutter={12}>
-            {chainStore.tokenScans.map(tokenScan => {
-              return (
-                <FoundChainView
-                  key={tokenScan.chainId}
-                  tokenScan={tokenScan}
-                  checked={checkedChainIdentifiers.includes(
-                    ChainIdHelper.parse(tokenScan.chainId).identifier,
-                  )}
-                  onCheckbox={checked => {
-                    if (checked) {
-                      setCheckedChainIdentifiers(ids => [
-                        ...ids,
-                        ChainIdHelper.parse(tokenScan.chainId).identifier,
-                      ]);
+        setIsOpen(false);
+      };
+      return (
+        <Box padding={12} paddingTop={1}>
+          <BaseModalHeader title={`${numFoundToken} New Token(s) Found`} />
+          <Gutter size={12} />
+          <ScrollView style={{height: 350}}>
+            <Stack gutter={12}>
+              {chainStore.tokenScans.map(tokenScan => {
+                return (
+                  <FoundChainView
+                    key={tokenScan.chainId}
+                    tokenScan={tokenScan}
+                    checked={checkedChainIdentifiers.includes(
+                      ChainIdHelper.parse(tokenScan.chainId).identifier,
+                    )}
+                    onCheckbox={checked => {
+                      if (checked) {
+                        setCheckedChainIdentifiers(ids => [
+                          ...ids,
+                          ChainIdHelper.parse(tokenScan.chainId).identifier,
+                        ]);
+                      } else {
+                        setCheckedChainIdentifiers(ids =>
+                          ids.filter(
+                            id =>
+                              id !==
+                              ChainIdHelper.parse(tokenScan.chainId).identifier,
+                          ),
+                        );
+                      }
+                    }}
+                  />
+                );
+              })}
+            </Stack>
+          </ScrollView>
+
+          <Gutter size={12} />
+
+          <YAxis alignX="center">
+            <Pressable
+              style={style.flatten(['flex-row', 'justify-center'])}
+              onPress={() => {
+                if (
+                  chainStore.tokenScans.length ===
+                  checkedChainIdentifiers.length
+                ) {
+                  setCheckedChainIdentifiers([]);
+                } else {
+                  setCheckedChainIdentifiers(
+                    chainStore.tokenScans.map(tokenScan => {
+                      return ChainIdHelper.parse(tokenScan.chainId).identifier;
+                    }),
+                  );
+                }
+              }}>
+              <XAxis alignY="center">
+                <Text style={style.flatten(['color-gray-300'])}>
+                  Select All
+                </Text>
+                <Gutter size={4} />
+                <Checkbox
+                  size="small"
+                  checked={
+                    chainStore.tokenScans.length ===
+                    checkedChainIdentifiers.length
+                  }
+                  onPress={() => {
+                    if (
+                      chainStore.tokenScans.length ===
+                      checkedChainIdentifiers.length
+                    ) {
+                      setCheckedChainIdentifiers([]);
                     } else {
-                      setCheckedChainIdentifiers(ids =>
-                        ids.filter(
-                          id =>
-                            id !==
-                            ChainIdHelper.parse(tokenScan.chainId).identifier,
-                        ),
+                      setCheckedChainIdentifiers(
+                        chainStore.tokenScans.map(tokenScan => {
+                          return ChainIdHelper.parse(tokenScan.chainId)
+                            .identifier;
+                        }),
                       );
                     }
                   }}
                 />
-              );
-            })}
-          </Stack>
-        </ScrollView>
+              </XAxis>
+            </Pressable>
+          </YAxis>
 
-        <Gutter size={12} />
-
-        <YAxis alignX="center">
-          <Pressable
-            style={style.flatten(['flex-row', 'justify-center'])}
-            onPress={() => {
-              if (
-                chainStore.tokenScans.length === checkedChainIdentifiers.length
-              ) {
-                setCheckedChainIdentifiers([]);
-              } else {
-                setCheckedChainIdentifiers(
-                  chainStore.tokenScans.map(tokenScan => {
-                    return ChainIdHelper.parse(tokenScan.chainId).identifier;
-                  }),
-                );
-              }
-            }}>
-            <XAxis alignY="center">
-              <Text style={style.flatten(['color-gray-300'])}>Select All</Text>
-              <Gutter size={4} />
-              <Checkbox
-                size="small"
-                checked={
-                  chainStore.tokenScans.length ===
-                  checkedChainIdentifiers.length
-                }
-                onPress={() => {
-                  if (
-                    chainStore.tokenScans.length ===
-                    checkedChainIdentifiers.length
-                  ) {
-                    setCheckedChainIdentifiers([]);
-                  } else {
-                    setCheckedChainIdentifiers(
-                      chainStore.tokenScans.map(tokenScan => {
-                        return ChainIdHelper.parse(tokenScan.chainId)
-                          .identifier;
-                      }),
-                    );
-                  }
-                }}
-              />
-            </XAxis>
-          </Pressable>
-        </YAxis>
-
-        {keyRingStore.selectedKeyInfo?.type === 'ledger' ? (
-          <React.Fragment>
+          {keyRingStore.selectedKeyInfo?.type === 'ledger' ? (
+            <React.Fragment>
+              <Gutter size={12} />
+              <Box alignX="center">
+                <TextButton
+                  textStyle={style.flatten(['text-button2'])}
+                  text="Add tokens on Injective and Evmos"
+                  onPress={() => {
+                    if (keyRingStore.selectedKeyInfo) {
+                      navigation.navigate('Register.EnableChain', {
+                        vaultId: keyRingStore.selectedKeyInfo.id,
+                        skipWelcome: true,
+                      });
+                      setIsOpen(false);
+                    }
+                  }}
+                />
+              </Box>
+              <Gutter size={20} />
+            </React.Fragment>
+          ) : (
             <Gutter size={12} />
-            <Box alignX="center">
-              <TextButton
-                textStyle={style.flatten(['text-button2'])}
-                text="Add tokens on Injective and Evmos"
-                onPress={() => {
-                  if (keyRingStore.selectedKeyInfo) {
-                    //TODO 이후 렛져에 접근하는 로직을 구현해야함
-                    // browser.tabs
-                    //   .create({
-                    //     url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true`,
-                    //   })
-                    //   .then(() => {
-                    //     window.close();
-                    //   });
-                  }
-                }}
-              />
-            </Box>
-            <Gutter size={20} />
-          </React.Fragment>
-        ) : (
-          <Gutter size={12} />
-        )}
+          )}
 
-        <Button
-          text="Add Chains"
-          size="large"
-          disabled={checkedChainIdentifiers.length === 0}
-          onPress={buttonClicked}
-        />
-      </Box>
-    );
-  }),
+          <Button
+            text="Add Chains"
+            size="large"
+            disabled={checkedChainIdentifiers.length === 0}
+            onPress={buttonClicked}
+          />
+        </Box>
+      );
+    },
+  ),
 );
 
 const FoundChainView: FunctionComponent<{
