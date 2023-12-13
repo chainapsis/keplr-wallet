@@ -1,5 +1,5 @@
 import React, {FunctionComponent, useState} from 'react';
-import {RegisterContainer} from '../components';
+import {LegacyRegisterContainer} from '../components';
 import {useIntl} from 'react-intl';
 import {observer} from 'mobx-react-lite';
 import {Controller, useForm} from 'react-hook-form';
@@ -63,7 +63,7 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
   });
 
   return (
-    <RegisterContainer
+    <LegacyRegisterContainer
       paragraph="Step 1/3"
       bottom={
         <Button
@@ -241,6 +241,6 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
           },
         }))}
       />
-    </RegisterContainer>
+    </LegacyRegisterContainer>
   );
 });

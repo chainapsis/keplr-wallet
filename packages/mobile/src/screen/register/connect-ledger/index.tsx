@@ -6,7 +6,7 @@ import React, {
 } from 'react';
 import {observer} from 'mobx-react-lite';
 import {Button} from '../../../components/button';
-import {RegisterContainer} from '../components';
+import {LegacyRegisterContainer} from '../components';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStyle} from '../../../styles';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
@@ -100,7 +100,7 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
   ]);
 
   return (
-    <RegisterContainer
+    <LegacyRegisterContainer
       paragraph={
         appendModeInfo === undefined
           ? `Step ${stepPrevious + 1}/${stepTotal}`
@@ -173,7 +173,7 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
         setStep={(step: Step) => setStep(step)}
         setPublicKey={(publicKey: Uint8Array) => setPublicKey(publicKey)}
       />
-    </RegisterContainer>
+    </LegacyRegisterContainer>
   );
 });
 

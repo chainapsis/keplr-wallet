@@ -3,7 +3,7 @@ import {observer} from 'mobx-react-lite';
 import {ScrollView, Text} from 'react-native';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
-import {RegisterContainer} from '../components';
+import {LegacyRegisterContainer} from '../components';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStyle} from '../../../styles';
 import {Box} from '../../../components/box';
@@ -113,7 +113,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
   });
 
   return (
-    <RegisterContainer
+    <LegacyRegisterContainer
       paragraph={`Step ${route.params.stepPrevious + 1}/${
         route.params.stepTotal
       }`}
@@ -298,6 +298,6 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
           </Box>
         )}
       </ScrollView>
-    </RegisterContainer>
+    </LegacyRegisterContainer>
   );
 });

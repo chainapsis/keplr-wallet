@@ -1,2 +1,2 @@
 export * from './register-option-container';
-export * from './register-container';
+export * from './legacy-register-container';

@@ -13,7 +13,7 @@ import {Gutter} from '../../../components/gutter';
 import {Button} from '../../../components/button';
 import {WarningBox} from '../../../components/guide-box';
 import LottieView from 'lottie-react-native';
-import {RegisterContainer} from '../components';
+import {LegacyRegisterContainer} from '../components';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../navigation';
 
@@ -42,7 +42,7 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
   }, [wordsType]);
 
   return (
-    <RegisterContainer
+    <LegacyRegisterContainer
       paragraph="Step 1/3"
       bottom={
         <Button
@@ -126,7 +126,7 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
           })}
         />
       </ScrollView>
-    </RegisterContainer>
+    </LegacyRegisterContainer>
   );
 });
 

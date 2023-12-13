@@ -1,7 +1,7 @@
 import React, {FunctionComponent} from 'react';
 import {observer} from 'mobx-react-lite';
 import {FormattedMessage, useIntl} from 'react-intl';
-import {RegisterContainer} from '../components';
+import {LegacyRegisterContainer} from '../components';
 import {useStyle} from '../../../styles';
 import {ScrollView, Text, TextInput as NativeTextInput} from 'react-native';
 import {XAxis} from '../../../components/axis';
@@ -110,7 +110,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
   });
 
   return (
-    <RegisterContainer
+    <LegacyRegisterContainer
       paragraph="Step 1/3"
       bottom={
         <Button
@@ -396,6 +396,6 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
 
         <Gutter size={32} />
       </ScrollView>
-    </RegisterContainer>
+    </LegacyRegisterContainer>
   );
 });
