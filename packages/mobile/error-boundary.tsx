@@ -13,6 +13,9 @@ import {useStyle} from './src/styles';
 import {Gutter} from './src/components/gutter';
 import {Button} from './src/components/button';
 import {useStore} from './src/stores';
+import {ClearAllIBCHistoryMsg} from '@keplr-wallet/background';
+import {InExtensionMessageRequester} from '@keplr-wallet/router-extension';
+import {BACKGROUND_PORT} from '@keplr-wallet/router';
 
 interface State {
   hasError: boolean;
@@ -70,18 +73,18 @@ export const ErrorBoundaryView: FunctionComponent = observer(() => {
       await browser.storage.local.remove(storeQueriesKeys);
     };
 
-    // TODO: IBC Send, Swap 개발 후 진행
-    // const clearAllIBCHistory = async () => {
-    //   const msg = new ClearAllIBCHistoryMsg();
-    //   const requester = new InExtensionMessageRequester();
-    //   await requester.sendMessage(BACKGROUND_PORT, msg);
-    // };
-    //
+    const clearAllIBCHistory = async () => {
+      const msg = new ClearAllIBCHistoryMsg();
+      const requester = new InExtensionMessageRequester();
+      await requester.sendMessage(BACKGROUND_PORT, msg);
+    };
+
+    // TODO: 추후 진행
     // const fn3 = async () => {
     //   await uiConfigStore.removeStatesWhenErrorOccurredDuringRending();
     // };
 
-    await Promise.allSettled([clearStoreDatas()]);
+    await Promise.allSettled([clearStoreDatas(), clearAllIBCHistory()]);
   };
 
   return (
