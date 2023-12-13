@@ -54,7 +54,7 @@ export const SettingContactsAddScreen: FunctionComponent = observer(() => {
 
   useEffect(() => {
     navigate.setOptions({
-      name:
+      title:
         editIndex < 0
           ? intl.formatMessage({id: 'page.setting.contacts.add.add-title'})
           : intl.formatMessage({id: 'page.setting.contacts.add.edit-title'}),

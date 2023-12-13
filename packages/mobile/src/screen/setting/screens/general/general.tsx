@@ -66,7 +66,9 @@ export const SettingGeneralScreen: FunctionComponent = observer(() => {
           />
 
           <PageButton
-            title="Manage Wallet Connect"
+            title={intl.formatMessage({
+              id: 'page.setting.general.manage-WC-title',
+            })}
             endIcon={
               <ArrowRightIcon
                 size={24}

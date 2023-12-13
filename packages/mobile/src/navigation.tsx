@@ -593,7 +593,7 @@ const SettingGeneralNavigation = () => {
         name="Setting.General.ContactAdd"
         options={{
           title: intl.formatMessage({
-            id: 'page.setting.general.contacts-title',
+            id: 'page.setting.contacts.add.add-title',
           }),
           ...defaultHeaderOptions,
         }}
@@ -632,7 +632,9 @@ const SettingGeneralNavigation = () => {
       <Stack.Screen
         name="Setting.General.ManageWalletConnect"
         options={{
-          title: 'Manage Wallet Connect',
+          title: intl.formatMessage({
+            id: 'page.setting.general.manage-WC-title',
+          }),
           ...defaultHeaderOptions,
         }}
         component={SettingGeneralManageWalletConnectScreen}
