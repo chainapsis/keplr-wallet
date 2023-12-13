@@ -3,7 +3,7 @@ import {IconProps} from './types';
 import {Path, Svg} from 'react-native-svg';
 import {ViewStyle} from 'react-native';
 
-export const StarIcon: FunctionComponent<IconProps & {style: ViewStyle}> = ({
+export const StarIcon: FunctionComponent<IconProps & {style?: ViewStyle}> = ({
   size,
   color,
   style,
