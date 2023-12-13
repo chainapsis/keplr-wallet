@@ -15,6 +15,7 @@ import {ArrowDownUpIcon} from '../../../components/icon';
 import {TextButton} from '../../../components/text-button';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {ValidatorInfo} from '../type';
+import {SelectItemModal} from '../../../components/modal/select-item-modal';
 
 export type FilterOption = 'Commission' | 'Voting';
 export const ValidatorListScreen: FunctionComponent = observer(() => {
@@ -24,6 +25,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
   const [search, setSearch] = useState('');
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.ValidateList'>>();
   const navigation = useNavigation<StackNavProp>();
+  const filterItems: FilterOption[] = ['Commission', 'Voting'];
 
   const {chainId, validatorSelector} = route.params;
   const queries = queriesStore.get(chainId);
@@ -39,6 +41,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
     Staking.BondStatus.Bonded,
   );
   const insect = useSafeAreaInsets();
+  const [isOpenSelectItemModal, setIsOpenSelectItemModal] = useState(false);
 
   const filteredValidators = useMemo(() => {
     const _search = search.trim().toLowerCase();
@@ -99,46 +102,58 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
     ],
   );
   return (
-    <FlatList
-      style={{
-        paddingHorizontal: 12,
-        marginBottom: insect.bottom,
-      }}
-      ListHeaderComponent={
-        <Box marginTop={12}>
-          <DebounceSearchTextInput
-            placeholder="Search for Chain"
-            handleSearchWord={e => {
-              setSearch(e);
-            }}
-            delay={200}
-          />
-          <Gutter size={8} />
-          <Box paddingY={6} paddingX={4} alignX="right">
-            {/* TODO 이후 버튼 모달로 변경해야함 */}
-            <TextButton
-              text={filterOption}
-              onPress={() => {
-                setFilterOption(
-                  filterOption === 'Commission' ? 'Voting' : 'Commission',
-                );
+    <React.Fragment>
+      <FlatList
+        style={{
+          paddingHorizontal: 12,
+          marginBottom: insect.bottom,
+        }}
+        ListHeaderComponent={
+          <Box marginTop={12}>
+            <DebounceSearchTextInput
+              placeholder="Search for Chain"
+              handleSearchWord={e => {
+                setSearch(e);
               }}
-              textStyle={style.flatten(['subtitle4', 'color-text-low'])}
-              rightIcon={
-                <ArrowDownUpIcon
-                  size={6}
-                  color={style.get('color-text-middle').color}
-                />
-              }
+              delay={200}
             />
+            <Gutter size={8} />
+            <Box paddingY={6} paddingX={4} alignX="right">
+              <TextButton
+                text={filterOption}
+                onPress={() => {
+                  setIsOpenSelectItemModal(true);
+                }}
+                textStyle={style.flatten(['subtitle4', 'color-text-low'])}
+                rightIcon={
+                  <ArrowDownUpIcon
+                    size={6}
+                    color={style.get('color-text-middle').color}
+                  />
+                }
+              />
+            </Box>
           </Box>
-        </Box>
-      }
-      keyExtractor={item => item.operator_address}
-      data={filteredValidators}
-      ItemSeparatorComponent={() => <Gutter size={8} />}
-      renderItem={renderItem}
-      windowSize={33}
-    />
+        }
+        keyExtractor={item => item.operator_address}
+        data={filteredValidators}
+        ItemSeparatorComponent={() => <Gutter size={8} />}
+        renderItem={renderItem}
+        windowSize={33}
+      />
+      <SelectItemModal
+        isOpen={isOpenSelectItemModal}
+        setIsOpen={setIsOpenSelectItemModal}
+        items={filterItems.map(item => ({
+          key: item,
+          title: item,
+          selected: item === filterOption,
+          onSelect: () => {
+            setFilterOption(item);
+            setIsOpenSelectItemModal(false);
+          },
+        }))}
+      />
+    </React.Fragment>
   );
 });

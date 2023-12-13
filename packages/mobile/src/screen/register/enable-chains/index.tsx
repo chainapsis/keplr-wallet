@@ -83,11 +83,12 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
     return keyInfo.type;
   }, [keyRingStore.keyInfos, vaultId]);
 
+  const paragraph = isFresh
+    ? `Step ${(stepPrevious ?? 0) + 1}/${stepTotal}`
+    : undefined;
+
   useLayoutEffect(() => {
     navigation.setParams({
-      paragraph: isFresh
-        ? `Step ${(stepPrevious ?? 0) + 1}/${stepTotal}`
-        : undefined,
       hideBackButton,
     });
   }, [hideBackButton, isFresh, navigation, stepPrevious, stepTotal]);
@@ -497,6 +498,16 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{flex: 1}}>
+      {paragraph ? (
+        <React.Fragment>
+          <Text
+            style={style.flatten(['body2', 'text-center', 'color-text-low'])}>
+            {paragraph}
+          </Text>
+          <Gutter size={18} />
+        </React.Fragment>
+      ) : null}
+
       <Box padding={12} alignX="center" style={{flex: 1}}>
         <Text
           style={StyleSheet.flatten([

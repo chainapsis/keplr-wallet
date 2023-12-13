@@ -7,10 +7,12 @@ import {
   SuggestChainModal,
   WalletConnectAccessModal,
   GlobalPermissionModal,
+  AddTokenModal,
 } from '../../components/modal';
 import {BackHandler, Platform} from 'react-native';
 import {WCMessageRequester} from '../../stores/wallet-connect/msg-requester';
 import {ADR36SignModal} from '../../screen/sign/sign-adr36-modal';
+import {LoadingModal} from '../../components/modal/loading';
 
 export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
   observer(({children}) => {
@@ -19,6 +21,8 @@ export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
       permissionStore,
       chainSuggestStore,
       walletConnectStore,
+      keyRingStore,
+      tokensStore,
     } = useStore();
 
     useEffect(() => {
@@ -31,7 +35,16 @@ export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
       <React.Fragment>
         {signInteractionStore.waitingData &&
         !signInteractionStore.waitingData.data.signDocWrapper.isADR36SignDoc ? (
-          <SignModal interactionData={signInteractionStore.waitingData} />
+          <SignModal
+            isOpen={true}
+            setIsOpen={() => {
+              signInteractionStore.rejectWithProceedNext(
+                signInteractionStore.waitingData?.id!,
+                () => {},
+              );
+            }}
+            interactionData={signInteractionStore.waitingData}
+          />
         ) : null}
 
         {signInteractionStore.waitingData &&
@@ -40,6 +53,11 @@ export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
             isOpen={true}
             setIsOpen={() => signInteractionStore.rejectAll()}
           />
+        ) : null}
+
+        {keyRingStore.status === 'unlocked' &&
+        walletConnectStore.isPendingClientFromDeepLink ? (
+          <LoadingModal isOpen={true} setIsOpen={() => {}} />
         ) : null}
 
         {permissionStore.waitingGlobalPermissionData ? (
@@ -85,6 +103,15 @@ export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
             isOpen={true}
             setIsOpen={async () => {
               await chainSuggestStore.rejectAll();
+            }}
+          />
+        ) : null}
+
+        {tokensStore.waitingSuggestedToken ? (
+          <AddTokenModal
+            isOpen={true}
+            setIsOpen={async () => {
+              await tokensStore.rejectAllSuggestedTokens();
             }}
           />
         ) : null}

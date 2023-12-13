@@ -15,8 +15,8 @@ import {
   ShieldIcon,
 } from '../../../components/icon';
 import {StackNavProp} from '../../../navigation';
-import {ContentHeightAwareScrollView} from '../../../components/scroll-view';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {ContentHeightAwareScrollView} from '../../../components/scroll-view';
 
 export const RegisterIntroNewUserScreen: FunctionComponent = () => {
   const intl = useIntl();
@@ -70,9 +70,7 @@ export const RegisterIntroNewUserScreen: FunctionComponent = () => {
           })}
           size="large"
           onPress={() => {
-            navigation.navigate('Register.NewMnemonic', {
-              paragraph: 'Step 1/3',
-            });
+            navigation.navigate('Register.NewMnemonic');
           }}
         />
 

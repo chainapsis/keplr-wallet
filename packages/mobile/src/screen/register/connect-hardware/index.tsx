@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useLayoutEffect, useRef} from 'react';
+import React, {FunctionComponent, useState} from 'react';
 import {RegisterContainer} from '../components';
 import {useIntl} from 'react-intl';
 import {observer} from 'mobx-react-lite';
@@ -8,18 +8,16 @@ import {useStyle} from '../../../styles';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../navigation';
 import {Bip44PathView, useBIP44PathState} from '../components/bip-path-44';
-import {BottomSheetFlatList, BottomSheetModal} from '@gorhom/bottom-sheet';
-import {Modal} from '../../../components/modal';
 import {ScrollView, Text} from 'react-native';
 import {TextInput} from '../../../components/input';
 import {Gutter} from '../../../components/gutter';
 import {useStore} from '../../../stores';
-import {SelectOption} from '../../../components/select-option';
 import {Box} from '../../../components/box';
 import {App} from '@keplr-wallet/ledger-cosmos';
 import {RectButton} from '../../../components/rect-button';
 import {XAxis} from '../../../components/axis';
 import {ArrowDownFillIcon} from '../../../components/icon/arrow-donw-fill';
+import {SelectItemModal} from '../../../components/modal/select-item-modal';
 
 export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -28,8 +26,7 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
 
   const bip44PathState = useBIP44PathState();
   const [isOpenBip44PathView, setIsOpenBip44PathView] = React.useState(false);
-
-  const selectAppModalRef = useRef<BottomSheetModal>(null);
+  const [isOpenSelectItemModal, setIsOpenSelectItemModal] = useState(false);
 
   const {keyRingStore} = useStore();
   const needPassword = keyRingStore.keyInfos.length === 0;
@@ -65,14 +62,9 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
     });
   });
 
-  useLayoutEffect(() => {
-    navigation.setParams({
-      paragraph: 'Step 1/3',
-    });
-  }, [navigation]);
-
   return (
     <RegisterContainer
+      paragraph="Step 1/3"
       bottom={
         <Button
           text={intl.formatMessage({
@@ -196,7 +188,7 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
             'border-radius-8',
           ])}
           onPress={() => {
-            selectAppModalRef.current?.present();
+            setIsOpenSelectItemModal(true);
           }}>
           <XAxis alignY="center">
             <Text style={style.flatten(['body2', 'color-gray-50', 'flex-1'])}>
@@ -236,32 +228,19 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
           </Box>
         )}
       </ScrollView>
-
-      <Modal ref={selectAppModalRef} snapPoints={[supportedApps.length * 80]}>
-        <BottomSheetFlatList
-          data={supportedApps}
-          keyExtractor={item => item}
-          renderItem={({item}) => {
-            return (
-              <SelectOption
-                key={item}
-                title={item}
-                selected={item === selectedApp}
-                onPress={() => {
-                  setSelectedApp(item);
-                  selectAppModalRef.current?.dismiss();
-                }}
-              />
-            );
-          }}
-          ItemSeparatorComponent={() => (
-            <Box
-              height={1}
-              backgroundColor={style.get('color-gray-500').color}
-            />
-          )}
-        />
-      </Modal>
+      <SelectItemModal
+        isOpen={isOpenSelectItemModal}
+        setIsOpen={setIsOpenSelectItemModal}
+        items={supportedApps.map(item => ({
+          key: item,
+          title: item,
+          selected: item === selectedApp,
+          onSelect: () => {
+            setSelectedApp(item);
+            setIsOpenSelectItemModal(false);
+          },
+        }))}
+      />
     </RegisterContainer>
   );
 });
