@@ -2,7 +2,7 @@ import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent, useState} from 'react';
 import {useStyle} from '../../styles';
 import {PageWithScrollView} from '../../components/page';
-import {Dimensions, Image, StyleSheet, Text} from 'react-native';
+import {Dimensions, Image, Platform, StyleSheet, Text} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {TextInput} from '../../components/input';
 import {validURL} from './util';
@@ -14,10 +14,10 @@ import {useStore} from '../../stores';
 import {RectButton} from '../../components/rect-button';
 import {GlobeIcon} from '../../components/icon/globe';
 import {Box} from '../../components/box';
-import {CloseIcon} from '../../components/icon';
-import {EmptyView} from '../../components/empty-view';
+import {CloseIcon, StarIcon} from '../../components/icon';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {RectButton as NativeRectButton} from 'react-native-gesture-handler';
+import {FormattedMessage} from 'react-intl';
 
 export const WebScreen: FunctionComponent = observer(() => {
   const {favoriteWebpageStore} = useStore();
@@ -37,11 +37,16 @@ export const WebScreen: FunctionComponent = observer(() => {
       style={StyleSheet.flatten([
         style.flatten(['padding-x-20']),
         {
-          marginTop: safeAreaInsets.top,
+          marginTop: (() => {
+            if (Platform.OS === 'android') {
+              return safeAreaInsets.top + 40;
+            }
+            return safeAreaInsets.top;
+          })(),
         },
       ])}>
-      <Text style={style.flatten(['h3', 'color-text-high'])}>
-        Discover Apps
+      <Text style={style.flatten(['mobile-h3', 'color-text-high'])}>
+        <FormattedMessage id="page.browser.main-title" />
       </Text>
 
       <Gutter size={20} />
@@ -120,7 +125,7 @@ export const WebScreen: FunctionComponent = observer(() => {
             'margin-right-4',
             'color-text-middle',
           ])}>
-          Favorite
+          <FormattedMessage id="page.browser.favorite-label" />
         </Text>
         <Text
           style={style.flatten([
@@ -185,8 +190,28 @@ export const WebScreen: FunctionComponent = observer(() => {
           );
         })
       ) : (
-        <Box>
-          <EmptyView subject="Favorites" />
+        <Box alignX="center">
+          <Gutter size={5} />
+          <StarIcon size={84} color={style.get('color-gray-400').color} />
+          <Box alignX="center">
+            <Text
+              style={style.flatten([
+                'subtitle3',
+                'color-gray-400',
+                'text-center',
+              ])}>
+              <FormattedMessage id="page.browser.favorite-empty-text-1" />
+            </Text>
+            <Gutter size={12} />
+            <Text
+              style={style.flatten([
+                'subtitle3',
+                'color-gray-400',
+                'text-center',
+              ])}>
+              <FormattedMessage id="page.browser.favorite-empty-text-2" />
+            </Text>
+          </Box>
         </Box>
       )}
 
