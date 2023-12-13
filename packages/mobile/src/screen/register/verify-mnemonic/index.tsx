@@ -1,9 +1,8 @@
 import React, {FunctionComponent, useMemo, useState} from 'react';
 import {observer} from 'mobx-react-lite';
-import {ScrollView, Text} from 'react-native';
+import {Text} from 'react-native';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
-import {LegacyRegisterContainer} from '../components';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStyle} from '../../../styles';
 import {Box} from '../../../components/box';
@@ -14,6 +13,7 @@ import {TextInput} from '../../../components/input';
 import {Controller, useForm} from 'react-hook-form';
 import {Bip44PathView, useBIP44PathState} from '../components/bip-path-44';
 import {useStore} from '../../../stores';
+import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
 
 export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -113,191 +113,189 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
   });
 
   return (
-    <LegacyRegisterContainer
+    <ScrollViewRegisterContainer
       paragraph={`Step ${route.params.stepPrevious + 1}/${
         route.params.stepTotal
       }`}
-      bottom={
-        <Button
-          text={intl.formatMessage({
-            id: 'button.next',
-          })}
-          size="large"
-          onPress={onSubmit}
-        />
-      }>
-      <ScrollView style={style.flatten(['padding-x-20'])}>
-        <Text style={style.flatten(['color-text-low', 'body1'])}>
-          <FormattedMessage id="pages.register.verify-mnemonic.paragraph" />
-        </Text>
+      bottomButton={{
+        text: intl.formatMessage({
+          id: 'button.next',
+        }),
+        size: 'large',
+        onPress: onSubmit,
+      }}
+      paddingX={20}>
+      <Text style={style.flatten(['color-text-low', 'body1'])}>
+        <FormattedMessage id="pages.register.verify-mnemonic.paragraph" />
+      </Text>
 
-        <Gutter size={12} />
+      <Gutter size={12} />
 
-        <Box
-          width="100%"
-          alignX="center"
-          alignY="center"
-          paddingX={55}
-          paddingY={25}
-          backgroundColor={style.get('color-gray-600').color}
-          borderRadius={8}
-          style={{gap: 16}}>
-          {verifyingWords.map(({index, word}) => {
-            return (
-              <XAxis alignY="center" key={index}>
-                <Text style={style.flatten(['subtitle2', 'color-gray-100'])}>
-                  <FormattedMessage
-                    id="pages.register.verify-mnemonic.verifying-box.word"
-                    values={{index: index + 1}}
-                  />
-                </Text>
-
-                <Gutter size={16} />
-
-                <TextInput
-                  autoCapitalize="none"
-                  containerStyle={{width: 120}}
-                  onChangeText={text => {
-                    setInputs({
-                      ...inputs,
-                      [index]: text,
-                    });
-                  }}
-                  errorBorder={(() => {
-                    if (validatingStarted) {
-                      return inputs[index]?.trim() !== word;
-                    }
-                    return false;
-                  })()}
+      <Box
+        width="100%"
+        alignX="center"
+        alignY="center"
+        paddingX={55}
+        paddingY={25}
+        backgroundColor={style.get('color-gray-600').color}
+        borderRadius={8}
+        style={{gap: 16}}>
+        {verifyingWords.map(({index, word}) => {
+          return (
+            <XAxis alignY="center" key={index}>
+              <Text style={style.flatten(['subtitle2', 'color-gray-100'])}>
+                <FormattedMessage
+                  id="pages.register.verify-mnemonic.verifying-box.word"
+                  values={{index: index + 1}}
                 />
-              </XAxis>
-            );
-          })}
-        </Box>
+              </Text>
 
-        <Gutter size={20} />
+              <Gutter size={16} />
 
-        <Controller
-          control={control}
-          rules={{
-            required: 'Name is required',
-          }}
-          render={({field: {onChange, onBlur, value}}) => {
-            return (
               <TextInput
-                label={intl.formatMessage({
-                  id: 'pages.register.components.form.name-password.wallet-name-label',
-                })}
-                placeholder={intl.formatMessage({
-                  id: 'pages.register.components.form.name-password.wallet-name-placeholder',
-                })}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                value={value}
-                error={errors.name && errors.name?.message}
+                autoCapitalize="none"
+                containerStyle={{width: 120}}
+                onChangeText={text => {
+                  setInputs({
+                    ...inputs,
+                    [index]: text,
+                  });
+                }}
+                errorBorder={(() => {
+                  if (validatingStarted) {
+                    return inputs[index]?.trim() !== word;
+                  }
+                  return false;
+                })()}
               />
-            );
-          }}
-          name={'name'}
-        />
+            </XAxis>
+          );
+        })}
+      </Box>
 
-        {needPassword ? (
-          <React.Fragment>
-            <Gutter size={16} />
+      <Gutter size={20} />
 
-            <Controller
-              control={control}
-              rules={{
-                required: 'Password is required',
-                validate: (password: string): string | undefined => {
-                  if (password.length < 8) {
-                    return intl.formatMessage({
-                      id: 'pages.register.components.form.name-password.short-password-error',
-                    });
-                  }
-                },
-              }}
-              render={({field: {onChange, onBlur, value}}) => {
-                return (
-                  <TextInput
-                    label={intl.formatMessage({
-                      id: 'pages.register.components.form.name-password.password-label',
-                    })}
-                    placeholder={intl.formatMessage({
-                      id: 'pages.register.components.form.name-password.password-placeholder',
-                    })}
-                    secureTextEntry={true}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    value={value}
-                    error={errors.password?.message}
-                  />
-                );
-              }}
-              name={'password'}
+      <Controller
+        control={control}
+        rules={{
+          required: 'Name is required',
+        }}
+        render={({field: {onChange, onBlur, value}}) => {
+          return (
+            <TextInput
+              label={intl.formatMessage({
+                id: 'pages.register.components.form.name-password.wallet-name-label',
+              })}
+              placeholder={intl.formatMessage({
+                id: 'pages.register.components.form.name-password.wallet-name-placeholder',
+              })}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              value={value}
+              error={errors.name && errors.name?.message}
             />
+          );
+        }}
+        name={'name'}
+      />
 
-            <Gutter size={16} />
+      {needPassword ? (
+        <React.Fragment>
+          <Gutter size={16} />
 
-            <Controller
-              control={control}
-              rules={{
-                required: 'Password confirm is required',
-                validate: (confirmPassword: string): string | undefined => {
-                  if (confirmPassword !== getValues('password')) {
-                    return intl.formatMessage({
-                      id: 'pages.register.components.form.name-password.password-not-match-error',
-                    });
-                  }
-                },
-              }}
-              render={({field: {onChange, onBlur, value}}) => {
-                return (
-                  <TextInput
-                    label={intl.formatMessage({
-                      id: 'pages.register.components.form.name-password.confirm-password-label',
-                    })}
-                    placeholder={intl.formatMessage({
-                      id: 'pages.register.components.form.name-password.confirm-password-placeholder',
-                    })}
-                    secureTextEntry={true}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    value={value}
-                    error={errors.confirmPassword?.message}
-                  />
-                );
-              }}
-              name={'confirmPassword'}
-            />
-          </React.Fragment>
-        ) : null}
-
-        <Gutter size={16} />
-
-        {isOpenBip44PathView ? (
-          <Bip44PathView
-            state={bip44PathState}
-            setIsOpen={setIsOpenBip44PathView}
+          <Controller
+            control={control}
+            rules={{
+              required: 'Password is required',
+              validate: (password: string): string | undefined => {
+                if (password.length < 8) {
+                  return intl.formatMessage({
+                    id: 'pages.register.components.form.name-password.short-password-error',
+                  });
+                }
+              },
+            }}
+            render={({field: {onChange, onBlur, value}}) => {
+              return (
+                <TextInput
+                  label={intl.formatMessage({
+                    id: 'pages.register.components.form.name-password.password-label',
+                  })}
+                  placeholder={intl.formatMessage({
+                    id: 'pages.register.components.form.name-password.password-placeholder',
+                  })}
+                  secureTextEntry={true}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  error={errors.password?.message}
+                />
+              );
+            }}
+            name={'password'}
           />
-        ) : (
-          <Box alignX="center">
-            <Button
-              text={intl.formatMessage({id: 'button.advanced'})}
-              size="small"
-              color="secondary"
-              disabled={
-                !bip44PathState.isAccountValid() ||
-                !bip44PathState.isChangeValid() ||
-                !bip44PathState.isAddressIndexValid()
-              }
-              onPress={() => {
-                setIsOpenBip44PathView(true);
-              }}
-            />
-          </Box>
-        )}
-      </ScrollView>
-    </LegacyRegisterContainer>
+
+          <Gutter size={16} />
+
+          <Controller
+            control={control}
+            rules={{
+              required: 'Password confirm is required',
+              validate: (confirmPassword: string): string | undefined => {
+                if (confirmPassword !== getValues('password')) {
+                  return intl.formatMessage({
+                    id: 'pages.register.components.form.name-password.password-not-match-error',
+                  });
+                }
+              },
+            }}
+            render={({field: {onChange, onBlur, value}}) => {
+              return (
+                <TextInput
+                  label={intl.formatMessage({
+                    id: 'pages.register.components.form.name-password.confirm-password-label',
+                  })}
+                  placeholder={intl.formatMessage({
+                    id: 'pages.register.components.form.name-password.confirm-password-placeholder',
+                  })}
+                  secureTextEntry={true}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  error={errors.confirmPassword?.message}
+                />
+              );
+            }}
+            name={'confirmPassword'}
+          />
+        </React.Fragment>
+      ) : null}
+
+      <Gutter size={16} />
+
+      {isOpenBip44PathView ? (
+        <Bip44PathView
+          state={bip44PathState}
+          setIsOpen={setIsOpenBip44PathView}
+        />
+      ) : (
+        <Box alignX="center">
+          <Button
+            text={intl.formatMessage({id: 'button.advanced'})}
+            size="small"
+            color="secondary"
+            disabled={
+              !bip44PathState.isAccountValid() ||
+              !bip44PathState.isChangeValid() ||
+              !bip44PathState.isAddressIndexValid()
+            }
+            onPress={() => {
+              setIsOpenBip44PathView(true);
+            }}
+          />
+        </Box>
+      )}
+      <Gutter size={16} />
+    </ScrollViewRegisterContainer>
   );
 });

@@ -9,23 +9,16 @@ import {Button} from '../../../components/button';
 import {TextButton} from '../../../components/text-button';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../navigation';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {ContentHeightAwareScrollView} from '../../../components/scroll-view';
+import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
 
 export const RegisterIntroScreen: FunctionComponent = () => {
   const intl = useIntl();
   const style = useStyle();
   const navigation = useNavigation<StackNavProp>();
 
-  const safeAreaInsets = useSafeAreaInsets();
-
   return (
-    <ContentHeightAwareScrollView
-      style={{
-        height: '100%',
-        paddingTop: safeAreaInsets.top,
-        paddingBottom: safeAreaInsets.bottom,
-      }}
+    <ScrollViewRegisterContainer
+      forceEnableTopSafeArea={true}
       contentContainerStyle={{
         flexGrow: 1,
         justifyContent: 'center',
@@ -81,6 +74,6 @@ export const RegisterIntroScreen: FunctionComponent = () => {
           }}
         />
       </Box>
-    </ContentHeightAwareScrollView>
+    </ScrollViewRegisterContainer>
   );
 };

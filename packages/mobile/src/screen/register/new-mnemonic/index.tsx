@@ -3,19 +3,19 @@ import {observer} from 'mobx-react-lite';
 import {useIntl} from 'react-intl';
 import {useStyle} from '../../../styles';
 import {Box} from '../../../components/box';
-import {ScrollView, Text, View} from 'react-native';
+import {Text, View} from 'react-native';
 import {HorizontalRadioGroup} from '../../../components/radio-group';
 import {Mnemonic} from '@keplr-wallet/crypto';
 import * as Crypto from 'expo-crypto';
 import * as Clipboard from 'expo-clipboard';
 import {TextButton} from '../../../components/text-button';
 import {Gutter} from '../../../components/gutter';
-import {Button} from '../../../components/button';
 import {WarningBox} from '../../../components/guide-box';
 import LottieView from 'lottie-react-native';
-import {LegacyRegisterContainer} from '../components';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../navigation';
+import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
+import {YAxis} from '../../../components/axis';
 
 type WordsType = '12words' | '24words';
 
@@ -42,24 +42,23 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
   }, [wordsType]);
 
   return (
-    <LegacyRegisterContainer
+    <ScrollViewRegisterContainer
       paragraph="Step 1/3"
-      bottom={
-        <Button
-          text={intl.formatMessage({
-            id: 'button.next',
-          })}
-          size="large"
-          onPress={() => {
-            navigation.navigate('Register.VerifyMnemonic', {
-              mnemonic: words.join(' '),
-              stepPrevious: 1,
-              stepTotal: 3,
-            });
-          }}
-        />
-      }>
-      <ScrollView style={style.flatten(['padding-x-20'])}>
+      bottomButton={{
+        text: intl.formatMessage({
+          id: 'button.next',
+        }),
+        size: 'large',
+        onPress: () => {
+          navigation.navigate('Register.VerifyMnemonic', {
+            mnemonic: words.join(' '),
+            stepPrevious: 1,
+            stepTotal: 3,
+          });
+        },
+      }}
+      paddingX={20}>
+      <YAxis alignX="center">
         <HorizontalRadioGroup
           size="large"
           selectedKey={wordsType}
@@ -82,51 +81,52 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
             },
           ]}
         />
+      </YAxis>
 
-        <Box
-          padding={20}
-          backgroundColor={style.get('color-gray-600').color}
-          borderRadius={6}>
-          <View
-            style={style.flatten([
-              'flex-row',
-              'flex-wrap',
-              'items-center',
-              'justify-center',
-            ])}>
-            {words.map((word, index) => (
-              <MnemonicTag key={index} index={index} word={word} />
-            ))}
-          </View>
+      <Box
+        padding={20}
+        backgroundColor={style.get('color-gray-600').color}
+        borderRadius={6}>
+        <View
+          style={style.flatten([
+            'flex-row',
+            'flex-wrap',
+            'items-center',
+            'justify-start',
+            'gap-16',
+          ])}>
+          {words.map((word, index) => (
+            <MnemonicTag key={index} index={index} word={word} />
+          ))}
+        </View>
 
-          <Gutter size={20} />
+        <Gutter size={20} />
 
-          <CopyToClipboard text={words.join(' ')} />
-        </Box>
+        <CopyToClipboard text={words.join(' ')} />
+      </Box>
 
-        <Gutter size={10} />
+      <Gutter size={10} />
 
-        <WarningBox
-          title={intl.formatMessage({
-            id: 'pages.register.new-mnemonic.recovery-warning-box-title',
-          })}
-          paragraph={intl.formatMessage({
-            id: 'pages.register.new-mnemonic.recovery-warning-box-paragraph',
-          })}
-        />
+      <WarningBox
+        title={intl.formatMessage({
+          id: 'pages.register.new-mnemonic.recovery-warning-box-title',
+        })}
+        paragraph={intl.formatMessage({
+          id: 'pages.register.new-mnemonic.recovery-warning-box-paragraph',
+        })}
+      />
 
-        <Gutter size={10} />
+      <Gutter size={10} />
 
-        <WarningBox
-          title={intl.formatMessage({
-            id: 'pages.register.new-mnemonic.back-up-warning-box-title',
-          })}
-          paragraph={intl.formatMessage({
-            id: 'pages.register.new-mnemonic.back-up-warning-box-paragraph',
-          })}
-        />
-      </ScrollView>
-    </LegacyRegisterContainer>
+      <WarningBox
+        title={intl.formatMessage({
+          id: 'pages.register.new-mnemonic.back-up-warning-box-title',
+        })}
+        paragraph={intl.formatMessage({
+          id: 'pages.register.new-mnemonic.back-up-warning-box-paragraph',
+        })}
+      />
+    </ScrollViewRegisterContainer>
   );
 });
 
@@ -142,8 +142,6 @@ const MnemonicTag: FunctionComponent<{index: number; word: string}> = ({
       paddingY={4}
       borderRadius={8}
       borderWidth={2}
-      marginRight={16}
-      marginBottom={16}
       borderColor={style.get('color-gray-500').color}>
       <Text style={style.flatten(['subtitle2', 'color-white'])}>{`${
         index + 1

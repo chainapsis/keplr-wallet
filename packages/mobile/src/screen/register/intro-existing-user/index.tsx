@@ -8,25 +8,18 @@ import {OptionContainer} from '../components';
 import {AppleIcon, GoogleIcon} from '../../../components/icon';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../navigation';
-import {ContentHeightAwareScrollView} from '../../../components/scroll-view';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
 
 export const RegisterIntroExistingUserScene: FunctionComponent = () => {
   const intl = useIntl();
   const style = useStyle();
   const navigation = useNavigation<StackNavProp>();
 
-  const safeAreaInsets = useSafeAreaInsets();
-
   return (
-    <ContentHeightAwareScrollView
-      style={{
-        height: '100%',
-      }}
+    <ScrollViewRegisterContainer
+      padding={20}
       contentContainerStyle={{
         alignItems: 'center',
-        padding: 20,
-        paddingBottom: safeAreaInsets.bottom,
       }}>
       <Text style={style.flatten(['color-text-low', 'body1'])}>
         <FormattedMessage id="pages.register.intro-existing-user.paragraph" />
@@ -91,6 +84,6 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
           leftIcon={<GoogleIcon />}
         />
       </OptionContainer>
-    </ContentHeightAwareScrollView>
+    </ScrollViewRegisterContainer>
   );
 };

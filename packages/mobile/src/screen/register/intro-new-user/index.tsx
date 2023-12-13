@@ -15,25 +15,18 @@ import {
   ShieldIcon,
 } from '../../../components/icon';
 import {StackNavProp} from '../../../navigation';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {ContentHeightAwareScrollView} from '../../../components/scroll-view';
+import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
 
 export const RegisterIntroNewUserScreen: FunctionComponent = () => {
   const intl = useIntl();
   const style = useStyle();
   const navigation = useNavigation<StackNavProp>();
 
-  const safeAreaInsets = useSafeAreaInsets();
-
   return (
-    <ContentHeightAwareScrollView
-      style={{
-        height: '100%',
-      }}
+    <ScrollViewRegisterContainer
+      padding={20}
       contentContainerStyle={{
         alignItems: 'center',
-        padding: 20,
-        paddingBottom: safeAreaInsets.bottom,
       }}>
       <Text style={style.flatten(['color-text-low', 'body1'])}>
         <FormattedMessage id="pages.register.intro-new-user.paragraph" />
@@ -135,6 +128,6 @@ export const RegisterIntroNewUserScreen: FunctionComponent = () => {
           leftIcon={<GoogleIcon />}
         />
       </OptionContainer>
-    </ContentHeightAwareScrollView>
+    </ScrollViewRegisterContainer>
   );
 };
