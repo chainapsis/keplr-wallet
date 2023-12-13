@@ -46,7 +46,10 @@ import { DepositModal } from "./components/deposit-modal";
 import { MainHeaderLayout } from "./layouts/header";
 import { amountToAmbiguousAverage } from "../../utils";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
-import { LogAnalyticsEventMsg } from "@keplr-wallet/background";
+import {
+  ChainInfoWithCoreTypes,
+  LogAnalyticsEventMsg,
+} from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 export interface ViewToken {
@@ -98,6 +101,22 @@ export const MainPage: FunctionComponent<{
     }
     return result;
   }, [hugeQueriesStore.allKnownBalances]);
+  const availableTotalPriceEmbedOnly = useMemo(() => {
+    let result: PricePretty | undefined;
+    for (const bal of hugeQueriesStore.allKnownBalances) {
+      if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
+        continue;
+      }
+      if (bal.price) {
+        if (!result) {
+          result = bal.price;
+        } else {
+          result = result.add(bal.price);
+        }
+      }
+    }
+    return result;
+  }, [hugeQueriesStore.allKnownBalances]);
   const availableChartWeight = (() => {
     if (!isNotReady && uiConfigStore.isPrivacyMode) {
       if (tabStatus === "available") {
@@ -132,6 +151,36 @@ export const MainPage: FunctionComponent<{
     }
     return result;
   }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings]);
+  const stakedTotalPriceEmbedOnly = useMemo(() => {
+    let result: PricePretty | undefined;
+    for (const bal of hugeQueriesStore.delegations) {
+      if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
+        continue;
+      }
+      if (bal.price) {
+        if (!result) {
+          result = bal.price;
+        } else {
+          result = result.add(bal.price);
+        }
+      }
+    }
+    for (const bal of hugeQueriesStore.unbondings) {
+      if (
+        !(bal.viewToken.chainInfo.embedded as ChainInfoWithCoreTypes).embedded
+      ) {
+        continue;
+      }
+      if (bal.viewToken.price) {
+        if (!result) {
+          result = bal.viewToken.price;
+        } else {
+          result = result.add(bal.viewToken.price);
+        }
+      }
+    }
+    return result;
+  }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings]);
   const stakedChartWeight = (() => {
     if (!isNotReady && uiConfigStore.isPrivacyMode) {
       if (tabStatus === "staked") {
@@ -149,11 +198,11 @@ export const MainPage: FunctionComponent<{
   const lastTotalStakedAmbiguousAvg = useRef(-1);
   useEffect(() => {
     if (!isNotReady) {
-      const totalAvailableAmbiguousAvg = availableTotalPrice
-        ? amountToAmbiguousAverage(availableTotalPrice)
+      const totalAvailableAmbiguousAvg = availableTotalPriceEmbedOnly
+        ? amountToAmbiguousAverage(availableTotalPriceEmbedOnly)
         : 0;
-      const totalStakedAmbiguousAvg = stakedTotalPrice
-        ? amountToAmbiguousAverage(stakedTotalPrice)
+      const totalStakedAmbiguousAvg = stakedTotalPriceEmbedOnly
+        ? amountToAmbiguousAverage(stakedTotalPriceEmbedOnly)
         : 0;
       if (
         lastTotalAvailableAmbiguousAvg.current !== totalAvailableAmbiguousAvg ||
@@ -175,7 +224,7 @@ export const MainPage: FunctionComponent<{
       lastTotalStakedAmbiguousAvg.current = totalStakedAmbiguousAvg;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [availableTotalPrice, isNotReady, stakedTotalPrice]);
+  }, [availableTotalPriceEmbedOnly, isNotReady, stakedTotalPriceEmbedOnly]);
 
   const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
