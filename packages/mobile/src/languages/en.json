@@ -22,7 +22,7 @@
   "error.outdated-cosmos-sdk": "Not supported: outdated version of cosmos-sdk",
   "error.can-not-pay-for-fee-by-stake-currency": "Can't pay for fee by stake currency",
 
-  "page.governance.proposal-list.empty-text": "No records of past or ongoing proposals found.",
+  "page.governance.proposal-list.empty-text": "No records of past or ongoing proposals found on this chain.",
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",

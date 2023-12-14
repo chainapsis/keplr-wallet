@@ -10,7 +10,7 @@ import {RectButton} from '../../../../components/rect-button';
 import {Column, Columns} from '../../../../components/column';
 import {ChainImageFallback} from '../../../../components/image';
 import {registerCardModal} from '../../../../components/modal/card';
-import {EmptyView} from '../../../../components/empty-view';
+import {EmptyView, EmptyViewText} from '../../../../components/empty-view';
 
 export interface SelectModalItem {
   key: string;
@@ -105,7 +105,13 @@ export const GovSelectChainModal = registerCardModal(
             {filtered.length === 0 ? (
               <React.Fragment>
                 <Gutter size={50} />
-                <EmptyView subject="chains" />
+                <EmptyView>
+                  <Box alignX="center" width={312}>
+                    <EmptyViewText text="No Available Assets" />
+                    <Gutter size={12} />
+                    <EmptyViewText text="Please retry after buying or depositing the asset to your wallet." />
+                  </Box>
+                </EmptyView>
               </React.Fragment>
             ) : null}
           </ScrollView>
