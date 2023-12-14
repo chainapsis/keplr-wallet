@@ -77,11 +77,14 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
           isDelegation={delegationsValidatorSet.has(validator.operator_address)}
           afterSelect={() => {
             if (validatorSelector) {
-              validatorSelector(
-                validator.operator_address,
-                validator.description?.moniker || validator.operator_address,
-              );
-              navigation.goBack();
+              navigation.push('Stake', {
+                screen: 'Stake.ValidateDetail',
+                params: {
+                  chainId,
+                  validatorAddress: validator.operator_address,
+                  validatorSelector,
+                },
+              });
               return;
             }
             navigation.navigate('Stake', {

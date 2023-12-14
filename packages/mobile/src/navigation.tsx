@@ -256,6 +256,10 @@ export type StakeNavigation = {
   'Stake.ValidateDetail': {
     chainId: string;
     validatorAddress: string;
+    validatorSelector?: (
+      validatorAddress: string,
+      validatorName: string,
+    ) => void;
   };
   'Stake.Delegate': {
     chainId: string;

@@ -26,7 +26,7 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.ValidateDetail'>>();
   const navigation = useNavigation<StackNavProp>();
   const style = useStyle();
-  const {validatorAddress, chainId} = route.params;
+  const {validatorAddress, chainId, validatorSelector} = route.params;
   const queries = queriesStore.get(chainId);
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
     Staking.BondStatus.Bonded,
@@ -142,24 +142,43 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
                   {validatorInfo.description.details}
                 </Text>
               </Stack>
-              <Button
-                size="large"
-                text="Stake"
-                onPress={() => {
-                  navigation.navigate('Stake', {
-                    screen: 'Stake.Delegate',
-                    params: {
-                      chainId,
-                      validatorAddress: validatorInfo.operator_address,
-                    },
-                  });
-                }}
-              />
+              {validatorSelector ? (
+                <Button
+                  size="large"
+                  text="Switch to this Validator"
+                  onPress={() => {
+                    validatorSelector(
+                      validatorInfo.operator_address,
+                      validatorInfo.description?.moniker ||
+                        validatorInfo.operator_address,
+                    );
+                    navigation.pop(2);
+                  }}
+                />
+              ) : (
+                <Button
+                  size="large"
+                  text="Stake"
+                  onPress={() => {
+                    navigation.navigate('Stake', {
+                      screen: 'Stake.Delegate',
+                      params: {
+                        chainId,
+                        validatorAddress: validatorInfo.operator_address,
+                      },
+                    });
+                  }}
+                />
+              )}
             </Stack>
           </Box>
         ) : null}
 
-        <DelegatedCard chainId={chainId} validatorAddress={validatorAddress} />
+        <DelegatedCard
+          chainId={chainId}
+          validatorAddress={validatorAddress}
+          isFromRedelegate={!!validatorSelector}
+        />
         <UnbondingCard chainId={chainId} validatorAddress={validatorAddress} />
       </Stack>
     </PageWithScrollView>
