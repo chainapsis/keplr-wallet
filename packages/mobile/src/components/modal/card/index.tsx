@@ -182,12 +182,7 @@ export const CardModalBase: FunctionComponent<
   const innerContainerStyle = useAnimatedStyle(() => {
     if (options?.isDetached) {
       return {
-        marginBottom: (() => {
-          if (Platform.OS === 'android') {
-            return safeAreaInsets.bottom + 20;
-          }
-          return safeAreaInsets.bottom;
-        })(),
+        marginBottom: safeAreaInsets.bottom + 20,
         marginHorizontal: 12,
         borderRadius: 8,
         backgroundColor: backgroundColor,
