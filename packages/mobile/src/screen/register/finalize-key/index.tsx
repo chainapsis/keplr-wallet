@@ -54,6 +54,18 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
   const [vaultId, setVaultId] = useState('');
   const [isAnimEnded, setIsAnimEnded] = useState(false);
 
+  // RN에서 한번에 많은 쿼리를 처리하면 느리진다...
+  // 이 문제를 해결할수가 없기 때문에 query가 처리된 비율에 따라 progress를 계산하고 0.8(80%) 이상의 쿼리가 처리되고
+  // 그 후 3초를 더 기다리고 넘긴다...
+  // (최대 기다리는 시간은 15초)
+  const [queryRoughlyDone, setQueryRoughlyDone] = useState(false);
+  const unmounted = useRef(false);
+  useEffect(() => {
+    return () => {
+      unmounted.current = true;
+    };
+  }, []);
+
   useEffect(() => {
     if (!isScreenTransitionEnded) {
       return;
@@ -236,7 +248,47 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
           }
         }
 
-        await Promise.allSettled(promises);
+        // Try to make sure that prices are fresh.
+        promises.push(priceStore.waitFreshResponse());
+
+        if (promises.length >= 10) {
+          // RN에서 한번에 많은 쿼리를 처리하면 느리진다...
+          // 이 문제를 해결할수가 없기 때문에 query가 처리된 비율에 따라 progress를 계산하고 0.8(80%) 이상의 쿼리가 처리되고
+          // 그 후 3초를 더 기다리고 넘긴다...
+          // (최대 기다리는 시간은 15초)
+          let once = false;
+          setTimeout(() => {
+            if (!once) {
+              once = true;
+              if (!unmounted.current) {
+                setQueryRoughlyDone(true);
+              }
+            }
+          }, 15000);
+
+          let len = promises.length;
+          let i = 0;
+          for (const p of promises) {
+            p.then(() => {
+              i++;
+              const progress = i / len;
+              if (progress >= 0.8 && !once) {
+                once = true;
+                setTimeout(() => {
+                  if (!unmounted.current) {
+                    setQueryRoughlyDone(true);
+                  }
+                }, 3000);
+              }
+            });
+          }
+        } else {
+          setTimeout(() => {
+            if (!unmounted.current) {
+              setQueryRoughlyDone(true);
+            }
+          }, 1000);
+        }
       })();
     }
     // Make sure to this effect called once.
@@ -253,7 +305,12 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
       !onceRef.current &&
       candidateAddresses.length > 0 &&
       vaultId &&
-      isAnimEnded
+      isAnimEnded &&
+      // RN에서 한번에 많은 쿼리를 처리하면 느리진다...
+      // 이 문제를 해결할수가 없기 때문에 query가 처리된 비율에 따라 progress를 계산하고 0.8(80%) 이상의 쿼리가 처리되고
+      // 그 후 3초를 더 기다리고 넘긴다...
+      // (최대 기다리는 시간은 15초)
+      queryRoughlyDone
     ) {
       onceRef.current = true;
 
@@ -282,6 +339,7 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
     stepPrevious,
     stepTotal,
     vaultId,
+    queryRoughlyDone,
   ]);
 
   return (
