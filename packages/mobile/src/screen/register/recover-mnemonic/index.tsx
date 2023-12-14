@@ -86,26 +86,40 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
         'hex',
       );
 
-      navigation.navigate('Register.FinalizeKey', {
-        name: data.name,
-        password: data.password,
-        stepPrevious: 1,
-        stepTotal: 3,
-        privateKey: {
-          value: privateKey,
-          meta: {},
-        },
+      navigation.reset({
+        routes: [
+          {
+            name: 'Register.FinalizeKey',
+            params: {
+              name: data.name,
+              password: data.password,
+              stepPrevious: 1,
+              stepTotal: 3,
+              privateKey: {
+                value: privateKey,
+                meta: {},
+              },
+            },
+          },
+        ],
       });
     } else {
-      navigation.navigate('Register.FinalizeKey', {
-        name: data.name,
-        password: data.password,
-        stepPrevious: 1,
-        stepTotal: 3,
-        mnemonic: {
-          value: recoveryPhrase,
-          bip44Path: bip44PathState.getPath(),
-        },
+      navigation.reset({
+        routes: [
+          {
+            name: 'Register.FinalizeKey',
+            params: {
+              name: data.name,
+              password: data.password,
+              stepPrevious: 1,
+              stepTotal: 3,
+              mnemonic: {
+                value: recoveryPhrase,
+                bip44Path: bip44PathState.getPath(),
+              },
+            },
+          },
+        ],
       });
     }
   });

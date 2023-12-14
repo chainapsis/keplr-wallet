@@ -74,16 +74,23 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
             ],
           });
         } else {
-          navigation.navigate('Register.FinalizeKey', {
-            name: route.params.name,
-            password: route.params.password,
-            stepPrevious: route.params.stepPrevious + 1,
-            stepTotal: route.params.stepTotal,
-            ledger: {
-              pubKey: publicKey,
-              bip44Path: route.params.bip44Path,
-              app: route.params.app,
-            },
+          navigation.reset({
+            routes: [
+              {
+                name: 'Register.FinalizeKey',
+                params: {
+                  name: route.params.name,
+                  password: route.params.password,
+                  stepPrevious: route.params.stepPrevious + 1,
+                  stepTotal: route.params.stepTotal,
+                  ledger: {
+                    pubKey: publicKey,
+                    bip44Path: route.params.bip44Path,
+                    app: route.params.app,
+                  },
+                },
+              },
+            ],
           });
         }
       }

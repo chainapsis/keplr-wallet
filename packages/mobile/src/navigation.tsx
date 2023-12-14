@@ -356,12 +356,6 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
 
       <Stack.Screen
-        name="Register.FinalizeKey"
-        options={{headerShown: false}}
-        component={FinalizeKeyScreen}
-      />
-
-      <Stack.Screen
         name="Register.Intro.ConnectHardware"
         component={ConnectHardwareWalletScreen}
         options={{
@@ -890,6 +884,12 @@ export const AppNavigation: FunctionComponent = observer(() => {
           />
 
           {/*NOTE Register와 Home을 통해서 이동하여 route를 최상위에도 올렸습니다*/}
+          <Stack.Screen
+            name="Register.FinalizeKey"
+            options={{headerShown: false}}
+            component={FinalizeKeyScreen}
+          />
+
           <Stack.Screen
             name="Register.EnableChain"
             options={{

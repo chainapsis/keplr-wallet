@@ -4,9 +4,14 @@ import {Box} from '../../../components/box';
 import LottieView from 'lottie-react-native';
 import {useStore} from '../../../stores';
 import {WalletStatus} from '@keplr-wallet/stores';
-import {useEffectOnce} from '../../../hooks';
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {
+  RouteProp,
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
+import {InteractionManager} from 'react-native';
 
 export const FinalizeKeyScreen: FunctionComponent = observer(() => {
   const {chainStore, accountStore, queriesStore, keyRingStore} = useStore();
@@ -23,6 +28,17 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
   } = route.params;
   const navigation = useNavigation<StackNavProp>();
 
+  const [isScreenTransitionEnded, setIsScreenTransitionEnded] = useState(false);
+  useFocusEffect(
+    React.useCallback(() => {
+      const task = InteractionManager.runAfterInteractions(() => {
+        setIsScreenTransitionEnded(true);
+      });
+
+      return () => task.cancel();
+    }, []),
+  );
+
   // Effects depends on below state and these should be called once if length > 0.
   // Thus, you should set below state only once.
   const [candidateAddresses, setCandidateAddresses] = useState<
@@ -37,7 +53,11 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
   const [vaultId, setVaultId] = useState('');
   const [isAnimEnded, setIsAnimEnded] = useState(false);
 
-  useEffectOnce(() => {
+  useEffect(() => {
+    if (!isScreenTransitionEnded) {
+      return;
+    }
+
     (async () => {
       // Chain store should be initialized before creating the key.
       await chainStore.waitUntilInitialized();
@@ -167,7 +187,8 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
       setVaultId(vaultId);
       setCandidateAddresses(candidateAddresses);
     })();
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isScreenTransitionEnded]);
 
   useEffect(() => {
     if (candidateAddresses.length > 0) {
@@ -260,6 +281,8 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
         source={require('../../../public/assets/lottie/register/creating.json')}
         loop={false}
         autoPlay
+        // TODO: 얘 애니메이션을 좀 더 길게 해야한다. RN의 성능 문제로 이 애니메이션이 끝나기전에 query가 다 처리되지가 않는다...
+        speed={0.7}
         onAnimationFinish={() => {
           setIsAnimEnded(true);
         }}

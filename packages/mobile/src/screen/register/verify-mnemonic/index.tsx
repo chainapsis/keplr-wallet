@@ -99,16 +99,23 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
 
   const onSubmit = handleSubmit(data => {
     if (validate()) {
-      navigation.navigate('Register.FinalizeKey', {
-        name: data.name,
-        password: data.password,
-        stepPrevious: route.params.stepPrevious + 1,
-        stepTotal: route.params.stepTotal,
-        mnemonic: {
-          value: route.params.mnemonic,
-          bip44Path: bip44PathState.getPath(),
-          isFresh: true,
-        },
+      navigation.reset({
+        routes: [
+          {
+            name: 'Register.FinalizeKey',
+            params: {
+              name: data.name,
+              password: data.password,
+              stepPrevious: route.params.stepPrevious + 1,
+              stepTotal: route.params.stepTotal,
+              mnemonic: {
+                value: route.params.mnemonic,
+                bip44Path: bip44PathState.getPath(),
+                isFresh: true,
+              },
+            },
+          },
+        ],
       });
     }
   });
