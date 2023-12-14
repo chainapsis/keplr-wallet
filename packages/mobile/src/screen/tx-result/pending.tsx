@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useEffect} from 'react';
+import React, {FunctionComponent, useEffect, useRef} from 'react';
 import {
   RouteProp,
   useIsFocused,
@@ -17,9 +17,16 @@ import {ArrowRightIcon} from '../../components/icon/arrow-right';
 import {StackNavProp} from '../../navigation';
 import {Box} from '../../components/box';
 import {TextButton} from '../../components/text-button';
+import {useNotification} from '../../hooks/notification';
 
 export const TxPendingResultScreen: FunctionComponent = observer(() => {
   const {chainStore} = useStore();
+  const notification = useNotification();
+
+  const isPendingGoToResult = useRef(false);
+  //NOTE home으로 갈 때 home이 다 렌더링이 안될 때 tx에 성공되면 tx tracer에 의해서 success로 이동됨
+  //해서 해당 값을 통해서 home으로 갈 경우 success로 이동 안될 수 있게 함
+  const isPendingGotoHome = useRef(false);
 
   const route = useRoute<
     RouteProp<
@@ -42,6 +49,18 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
   const isFocused = useIsFocused();
 
   useEffect(() => {
+    notification.disable(true);
+    return () => {
+      //NOTE 성공 또는 실패로 라우팅될때 해당 페이지가 렌더링된후 현재 pending페이지의 useEffect return 이 실행됨
+      //그래서 성공페이지에서 disable(true)로 설정된후 이후 여기의 disable(false)가 실행됨
+      //해서 홈으로 만 갈때만 disable을 false로 설정함
+      if (!isPendingGoToResult.current) {
+        notification.disable(false);
+      }
+    };
+  }, [notification]);
+
+  useEffect(() => {
     const txHash = route.params.txHash;
     const chainInfo = chainStore.getChain(chainId);
     let txTracer: TendermintTxTracer | undefined;
@@ -51,9 +70,15 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
       txTracer
         .traceTx(Buffer.from(txHash, 'hex'))
         .then(tx => {
+          if (isPendingGotoHome.current) {
+            return;
+          }
+
           if (tx.code == null || tx.code === 0) {
+            isPendingGoToResult.current = true;
             navigation.replace('TxSuccess', {chainId, txHash});
           } else {
+            isPendingGoToResult.current = true;
             navigation.replace('TxFail', {chainId, txHash});
           }
         })
@@ -169,6 +194,7 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
               </View>
             )}
             onPress={() => {
+              isPendingGotoHome.current = true;
               navigation.navigate('Home');
             }}
           />
