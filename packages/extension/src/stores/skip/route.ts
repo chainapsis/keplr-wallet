@@ -21,23 +21,25 @@ const Schema = Joi.object<RouteResponse>({
     .items(
       Joi.object({
         swap: Joi.object({
-          swap_in: {
+          swap_in: Joi.object({
             swap_venue: Joi.object({
               name: Joi.string().required(),
               chain_id: Joi.string().required(),
-            }).required(),
+            })
+              .unknown(true)
+              .required(),
             swap_operations: Joi.array()
               .items(
                 Joi.object({
                   pool: Joi.string().required(),
                   denom_in: Joi.string().required(),
                   denom_out: Joi.string().required(),
-                })
+                }).unknown(true)
               )
               .required(),
             swap_amount_in: Joi.string().required(),
             price_impact_percent: Joi.string(),
-          },
+          }).unknown(true),
           estimated_affiliate_fee: Joi.string().required(),
         }).unknown(true),
       }),
@@ -50,7 +52,7 @@ const Schema = Joi.object<RouteResponse>({
           dest_denom: Joi.string().required(),
           supports_memo: Joi.boolean(),
         }).unknown(true),
-      })
+      }).unknown(true)
     )
     .required(),
   chain_ids: Joi.array().items(Joi.string()).required(),
@@ -59,7 +61,7 @@ const Schema = Joi.object<RouteResponse>({
   swap_venue: Joi.object({
     name: Joi.string().required(),
     chain_id: Joi.string().required(),
-  }),
+  }).unknown(true),
   swap_price_impact_percent: Joi.string(),
   txs_required: Joi.number().required(),
 }).unknown(true);
