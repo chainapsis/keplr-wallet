@@ -41,8 +41,10 @@ const Schema = Joi.object<RouteResponse>({
             price_impact_percent: Joi.string(),
           }).unknown(true),
           estimated_affiliate_fee: Joi.string().required(),
-        }).unknown(true),
-      }),
+        })
+          .required()
+          .unknown(true),
+      }).unknown(true),
       Joi.object({
         transfer: Joi.object({
           port: Joi.string().required(),
@@ -51,7 +53,9 @@ const Schema = Joi.object<RouteResponse>({
           pfm_enabled: Joi.boolean(),
           dest_denom: Joi.string().required(),
           supports_memo: Joi.boolean(),
-        }).unknown(true),
+        })
+          .required()
+          .unknown(true),
       }).unknown(true)
     )
     .required(),
