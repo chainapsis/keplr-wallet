@@ -14,7 +14,8 @@ import {RootStackParamList, StackNavProp} from '../../../navigation';
 import {InteractionManager} from 'react-native';
 
 export const FinalizeKeyScreen: FunctionComponent = observer(() => {
-  const {chainStore, accountStore, queriesStore, keyRingStore} = useStore();
+  const {chainStore, accountStore, queriesStore, keyRingStore, priceStore} =
+    useStore();
   const route =
     useRoute<RouteProp<RootStackParamList, 'Register.FinalizeKey'>>();
   const {
@@ -224,6 +225,14 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
                 .getQueryBech32Address(bech32Address.address)
                 .waitFreshResponse(),
             );
+          }
+
+          const chainInfo = chainStore.getChain(candidateAddress.chainId);
+          const targetCurrency =
+            chainInfo.stakeCurrency || chainInfo.currencies[0];
+          if (targetCurrency.coinGeckoId) {
+            // Push coingecko id to priceStore.
+            priceStore.getPrice(targetCurrency.coinGeckoId);
           }
         }
 
