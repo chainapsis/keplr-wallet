@@ -93,34 +93,38 @@ export const ContractAddressBookModal = registerCardModal(
           ) : null}
         </ScrollView>
 
-        <Box
-          alignX="center"
-          alignY="bottom"
-          paddingTop={16}
-          onClick={() => {
-            Linking.openURL(TokenContractListRepoURL);
-          }}>
-          <Text
-            style={style.flatten([
-              'subtitle3',
-              'color-text-low',
-              'text-center',
-            ])}>
-            <FormattedMessage
-              id="page.setting.token.add.contract-address-book-modal.link"
-              values={{
-                link: (...chunks: any) => (
-                  <Text
-                    style={style.flatten(['text-underline', 'color-gray-50'])}>
-                    {chunks}
-                  </Text>
-                ),
-              }}
-            />
-          </Text>
-        </Box>
+        <Box alignX="center">
+          <Box
+            paddingY={16}
+            paddingX={8}
+            onClick={() => {
+              Linking.openURL(TokenContractListRepoURL);
+            }}>
+            <Text
+              style={style.flatten([
+                'subtitle3',
+                'color-text-low',
+                'text-center',
+              ])}>
+              <FormattedMessage
+                id="page.setting.token.add.contract-address-book-modal.link"
+                values={{
+                  link: (...chunks: any) => (
+                    <Text
+                      style={style.flatten([
+                        'text-underline',
+                        'color-gray-50',
+                      ])}>
+                      {chunks}
+                    </Text>
+                  ),
+                }}
+              />
+            </Text>
+          </Box>
 
-        <Gutter size={12} />
+          {/* <Gutter size={12} /> */}
+        </Box>
       </Box>
     );
   }),
