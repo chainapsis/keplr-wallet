@@ -36,6 +36,7 @@ const Schema = Joi.object<RouteResponse>({
               )
               .required(),
             swap_amount_in: Joi.string().required(),
+            price_impact_percent: Joi.string(),
           },
           estimated_affiliate_fee: Joi.string().required(),
         }).unknown(true),
@@ -59,6 +60,7 @@ const Schema = Joi.object<RouteResponse>({
     name: Joi.string().required(),
     chain_id: Joi.string().required(),
   }),
+  swap_price_impact_percent: Joi.string(),
   txs_required: Joi.number().required(),
 }).unknown(true);
 

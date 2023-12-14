@@ -68,6 +68,7 @@ export interface RouteResponse {
               denom_out: string;
             }[];
             swap_amount_in: string;
+            price_impact_percent?: string;
           };
           estimated_affiliate_fee: string;
         };
@@ -76,6 +77,7 @@ export interface RouteResponse {
   chain_ids: string[];
   does_swap?: boolean;
   estimated_amount_out?: string;
+  swap_price_impact_percent?: string;
   swap_venue?: {
     name: string;
     chain_id: string;
