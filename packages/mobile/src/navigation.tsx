@@ -752,7 +752,7 @@ const StakeNavigation = () => {
       <StakeStack.Screen
         name="Stake.ValidateDetail"
         options={{
-          title: 'Validator Detail Page',
+          title: 'Validator Details',
           ...defaultHeaderOptions,
         }}
         component={ValidatorDetailScreen}

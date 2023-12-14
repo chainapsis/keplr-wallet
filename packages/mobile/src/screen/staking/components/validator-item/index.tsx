@@ -140,7 +140,7 @@ export const ValidatorListItem: FunctionComponent<{
       if (!validator) {
         return undefined;
       }
-      if (filterOption === 'Voting') {
+      if (filterOption === 'Voting Power') {
         const subString = (() => {
           if (bondedToken?.toCoin().amount === '0') {
             return '0%';

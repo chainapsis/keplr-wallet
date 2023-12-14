@@ -240,6 +240,7 @@ export const StakedTabView: FunctionComponent<{
         }))}
         isOpen={selectModalIsOpen}
         setIsOpen={setSelectModalIsOpen}
+        placeholder="Search for a chain or asset"
       />
     </React.Fragment>
   );

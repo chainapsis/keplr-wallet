@@ -66,8 +66,8 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
               <Text style={style.flatten(['body2', 'color-yellow-500'])}>
                 This validator is currently charging
                 <Text style={style.flatten(['font-bold'])}> very high </Text>
-                commissions. Consider staking to other validators with lower
-                commissions to increaser your rewards.
+                commissons. Consider staking to other validators with lower
+                commissions to increase your rewards.
               </Text>
             }
             color="warning"
@@ -76,7 +76,7 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
         {isTop10Validator ? (
           <GuideBox
             title="You are staking to top 10 validator"
-            paragraph="To improve decentralization, please consider staking to other validators"
+            paragraph="To improve decentralization, please consider staking to other validators."
             color="default"
           />
         ) : null}

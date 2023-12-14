@@ -98,7 +98,7 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
       </Stack>
       <Gutter size={16} />
       <GuideBox
-        color="danger"
+        color="warning"
         title={`Staking will lock your funds for ${unbondingPeriodDay} days`}
         paragraph={`You will need to unstake in order for your staked assets to be liquid again.This process will take ${unbondingPeriodDay} days to complete.`}
       />
