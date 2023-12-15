@@ -22,7 +22,7 @@
   "error.outdated-cosmos-sdk": "Not supported: outdated version of cosmos-sdk",
   "error.can-not-pay-for-fee-by-stake-currency": "Can't pay for fee by stake currency",
 
-  "page.governance.proposal-list.empty-text": "No records of past or ongoing proposals found.",
+  "page.governance.proposal-list.empty-text": "No records of past or ongoing proposals found on this chain.",
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
@@ -561,7 +561,7 @@
   "page.main.components.token-item.copy-address.copied": "Copied",
   "page.main.components.secret-error-modal-button": "Set my Viewing Key",
   "page.main.components.staking-chain-modal.title": "Available Assets",
-  "page.main.components.staking-chain-modal.empty-text": "Please retry after buying or depositing the asset to your wallet.",
+  "page.main.components.staking-chain-modal.empty-text": "Please retry after buying or depositing stakeable assets to your wallet.",
 
   "page.browser.main-title": "Discover Apps",
   "page.browser.favorite-label": "Favorites",

@@ -19,8 +19,8 @@ import {AprItem} from '../../../../stores/aprs';
 import {ArrowRightIcon} from '../../../../components/icon/arrow-right';
 import {registerCardModal} from '../../../../components/modal/card';
 import {BaseModalHeader} from '../../../../components/modal';
-import {EmptyView} from '../../../../components/empty-view';
-import {FormattedMessage, useIntl} from 'react-intl';
+import {EmptyView, EmptyViewText} from '../../../../components/empty-view';
+import {useIntl} from 'react-intl';
 
 export interface SelectStakingChainModalItem {
   key: string;
@@ -108,9 +108,15 @@ export const SelectStakingChainModal = registerCardModal(
               <Box style={style.flatten(['padding-16'])}>
                 <Gutter size={40} />
                 <EmptyView>
-                  <Text style={style.flatten(['text-center'])}>
-                    <FormattedMessage id="page.main.components.staking-chain-modal.empty-text" />
-                  </Text>
+                  <Box alignX="center" width={312}>
+                    <EmptyViewText text="No Available Assets" />
+                    <Gutter size={12} />
+                    <EmptyViewText
+                      text={intl.formatMessage({
+                        id: 'page.main.components.staking-chain-modal.empty-text',
+                      })}
+                    />
+                  </Box>
                 </EmptyView>
               </Box>
             ) : null}
