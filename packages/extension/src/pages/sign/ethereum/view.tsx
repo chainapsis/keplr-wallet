@@ -19,7 +19,7 @@ import {
   handleEthereumPreSignByLedger,
 } from "../utils/handle-eth-sign";
 import { FormattedMessage, useIntl } from "react-intl";
-import { KeystoneUR } from "../utils/keystone";
+import { ErrModuleKeystoneSign, KeystoneUR } from "../utils/keystone";
 import { KeystoneSign } from "../components/keystone";
 import { useTheme } from "styled-components";
 
@@ -70,6 +70,9 @@ export const EthereumSigningView: FunctionComponent<{
   const [isKeystoneInteracting, setIsKeystoneInteracting] = useState(false);
   const [keystoneUR, setKeystoneUR] = useState<KeystoneUR>();
   const keystoneScanResolve = useRef<(ur: KeystoneUR) => void>();
+  const [keystoneInteractingError, setKeystoneInteractingError] = useState<
+    Error | undefined
+  >(undefined);
 
   return (
     <HeaderLayout
@@ -130,16 +133,20 @@ export const EthereumSigningView: FunctionComponent<{
               }
             );
           } catch (e) {
-            console.log(e);
+            console.error(e);
 
             if (e instanceof KeplrError) {
               if (e.module === ErrModuleLedgerSign) {
                 setLedgerInteractingError(e);
+              } else if (e.module === ErrModuleKeystoneSign) {
+                setKeystoneInteractingError(e);
               } else {
                 setLedgerInteractingError(undefined);
+                setKeystoneInteractingError(undefined);
               }
             } else {
               setLedgerInteractingError(undefined);
+              setKeystoneInteractingError(undefined);
             }
           } finally {
             setIsLedgerInteracting(false);
@@ -237,6 +244,11 @@ export const EthereumSigningView: FunctionComponent<{
             throw new Error("Keystone Scan Error");
           }
           keystoneScanResolve.current(ur);
+        }}
+        error={keystoneInteractingError}
+        onCloseError={() => {
+          keystoneInteractingError && setIsKeystoneInteracting(false);
+          setKeystoneInteractingError(undefined);
         }}
       />
     </HeaderLayout>

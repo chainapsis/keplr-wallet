@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { Modal } from "../../../../components/modal";
 import { HeaderLayout } from "../../../../layouts/header";
 import { KeystoneDisplay } from "./display";
@@ -15,10 +15,17 @@ export const KeystoneSign: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
   onScan: (ur: KeystoneUR) => void;
-}> = ({ ur, isOpen, close, onScan }) => {
+  error: Error | undefined;
+  onCloseError: () => void;
+}> = ({ ur, isOpen, close, onScan, error, onCloseError }) => {
   const [step, setStep] = useState("display");
   const theme = useTheme();
   const intl = useIntl();
+  useEffect(() => {
+    if (isOpen) {
+      setStep("display");
+    }
+  }, [isOpen]);
   return (
     <Modal isOpen={isOpen} close={close} align="bottom">
       <HeaderLayout
@@ -55,7 +62,11 @@ export const KeystoneSign: FunctionComponent<{
               }}
             />
           ) : (
-            <KeystoneScan onScan={onScan} />
+            <KeystoneScan
+              onScan={onScan}
+              error={error}
+              onCloseError={onCloseError}
+            />
           )}
         </Box>
       </HeaderLayout>
