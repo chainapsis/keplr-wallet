@@ -133,7 +133,7 @@ export const EthereumSigningView: FunctionComponent<{
               }
             );
           } catch (e) {
-            console.error(e);
+            console.log(e);
 
             if (e instanceof KeplrError) {
               if (e.module === ErrModuleLedgerSign) {
@@ -247,7 +247,9 @@ export const EthereumSigningView: FunctionComponent<{
         }}
         error={keystoneInteractingError}
         onCloseError={() => {
-          keystoneInteractingError && setIsKeystoneInteracting(false);
+          if (keystoneInteractingError) {
+            setIsKeystoneInteracting(false);
+          }
           setKeystoneInteractingError(undefined);
         }}
       />

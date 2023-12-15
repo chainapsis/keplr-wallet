@@ -201,7 +201,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
                 }
               );
             } catch (e) {
-              console.error(e);
+              console.log(e);
 
               if (e instanceof KeplrError) {
                 if (e.module === ErrModuleLedgerSign) {
@@ -427,7 +427,9 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
         }}
         error={keystoneInteractingError}
         onCloseError={() => {
-          keystoneInteractingError && setIsKeystoneInteracting(false);
+          if (keystoneInteractingError) {
+            setIsKeystoneInteracting(false);
+          }
           setKeystoneInteractingError(undefined);
         }}
       />

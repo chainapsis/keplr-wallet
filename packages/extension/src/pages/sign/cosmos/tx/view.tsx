@@ -401,7 +401,7 @@ export const CosmosTxView: FunctionComponent<{
           }
         );
       } catch (e) {
-        console.error(e);
+        console.log(e);
 
         if (e instanceof KeplrError) {
           if (e.module === ErrModuleLedgerSign) {
@@ -642,7 +642,9 @@ export const CosmosTxView: FunctionComponent<{
         }}
         error={keystoneInteractingError}
         onCloseError={() => {
-          keystoneInteractingError && setIsKeystoneInteracting(false);
+          if (keystoneInteractingError) {
+            setIsKeystoneInteracting(false);
+          }
           setKeystoneInteractingError(undefined);
         }}
       />
