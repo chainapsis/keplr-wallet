@@ -352,7 +352,7 @@ export const SignModal = registerCardModal(
             backgroundColor={style.get('color-gray-500').color}
             padding={16}
             borderRadius={6}>
-            <ScrollView>
+            <ScrollView persistentScrollbar={true}>
               <Text style={style.flatten(['body3', 'color-text-middle'])}>
                 {JSON.stringify(signDocHelper.signDocJson, null, 2)}
               </Text>
