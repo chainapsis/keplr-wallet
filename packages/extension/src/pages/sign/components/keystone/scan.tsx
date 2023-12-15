@@ -14,7 +14,9 @@ import { Progress } from "../../../../components/keystone/progress";
 
 export const KeystoneScan: FunctionComponent<{
   onScan: (ur: KeystoneUR) => void;
-}> = ({ onScan }) => {
+  error: Error | undefined;
+  onCloseError: () => void;
+}> = ({ onScan, error, onCloseError }) => {
   const { AnimatedQRScanner, hasPermission, setIsDone, isDone } =
     useAnimatedQRScanner();
   const [isErrorOpen, setIsErrorOpen] = useState(false);
@@ -39,11 +41,17 @@ export const KeystoneScan: FunctionComponent<{
     setIsErrorOpen(false);
     setIsDone(false);
     setProgress(0);
+    onCloseError();
   };
 
   const cameraSize = useMemo(
     () => (hasPermission ? "16.625rem" : "15rem"),
     [hasPermission]
+  );
+
+  const isError = useMemo(
+    () => error !== undefined || isErrorOpen,
+    [error, isErrorOpen]
   );
 
   return (
@@ -135,7 +143,7 @@ export const KeystoneScan: FunctionComponent<{
         </Box>
       )}
       <KeystoneErrorModal
-        isOpen={isErrorOpen}
+        isOpen={isError}
         close={handleClose}
         title={intl.formatMessage({
           id: "page.sign.keystone.invalid-qrcode",

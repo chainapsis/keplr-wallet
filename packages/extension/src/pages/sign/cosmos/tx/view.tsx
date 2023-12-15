@@ -37,7 +37,7 @@ import { GuideBox } from "../../../../components/guide-box";
 import { FormattedMessage, useIntl } from "react-intl";
 import SimpleBar from "simplebar-react";
 import { KeystoneSign } from "../../components/keystone";
-import { KeystoneUR } from "../../utils/keystone";
+import { ErrModuleKeystoneSign, KeystoneUR } from "../../utils/keystone";
 import { KeyRingService } from "@keplr-wallet/background";
 import { useTheme } from "styled-components";
 import { defaultProtoCodec } from "@keplr-wallet/cosmos";
@@ -323,6 +323,9 @@ export const CosmosTxView: FunctionComponent<{
   const [isKeystoneInteracting, setIsKeystoneInteracting] = useState(false);
   const [keystoneUR, setKeystoneUR] = useState<KeystoneUR>();
   const keystoneScanResolve = useRef<(ur: KeystoneUR) => void>();
+  const [keystoneInteractingError, setKeystoneInteractingError] = useState<
+    Error | undefined
+  >(undefined);
 
   const buttonDisabled =
     txConfigsValidate.interactionBlocked ||
@@ -403,11 +406,15 @@ export const CosmosTxView: FunctionComponent<{
         if (e instanceof KeplrError) {
           if (e.module === ErrModuleLedgerSign) {
             setLedgerInteractingError(e);
+          } else if (e.module === ErrModuleKeystoneSign) {
+            setKeystoneInteractingError(e);
           } else {
             setLedgerInteractingError(undefined);
+            setKeystoneInteractingError(undefined);
           }
         } else {
           setLedgerInteractingError(undefined);
+          setKeystoneInteractingError(undefined);
         }
       } finally {
         setIsLedgerInteracting(false);
@@ -632,6 +639,13 @@ export const CosmosTxView: FunctionComponent<{
             throw new Error("Keystone Scan Error");
           }
           keystoneScanResolve.current(ur);
+        }}
+        error={keystoneInteractingError}
+        onCloseError={() => {
+          if (keystoneInteractingError) {
+            setIsKeystoneInteracting(false);
+          }
+          setKeystoneInteractingError(undefined);
         }}
       />
     </HeaderLayout>
