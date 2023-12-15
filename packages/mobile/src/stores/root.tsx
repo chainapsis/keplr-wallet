@@ -362,7 +362,7 @@ export class RootStore {
     this.uiConfigStore = new UIConfigStore(
       {
         kvStore: new AsyncKVStore('store_ui_config'),
-        addressBookKVStore: new AsyncKVStore('address-book'),
+        addressBookKVStore: new AsyncKVStore('address_book'),
       },
       new RNMessageRequesterInternal(),
       this.chainStore,
