@@ -11,7 +11,6 @@ import MessagesEn from './en.json';
 import MessagesKo from './ko.json';
 import {useStore} from '../stores';
 import {observer} from 'mobx-react-lite';
-import {I18nManager, Platform, Settings} from 'react-native';
 
 export type IntlMessage = Record<string, string>;
 export type IntlMessages = {
@@ -36,32 +35,33 @@ interface Language {
   clearLanguage: () => void;
 }
 
-const defaultLangMap: Record<string, string> = {
-  ko: 'ko',
-  en: 'en',
-};
+// const defaultLangMap: Record<string, string> = {
+//   ko: 'ko',
+//   en: 'en',
+// };
 
 const initLanguage = (): string => {
-  let language = 'en';
+  return 'en';
+  // let language = 'en';
 
-  if (Platform.OS === 'ios') {
-    const settings = Settings.get('AppleLocale');
-    const locale: string = settings || settings?.[0];
-    if (locale) {
-      language = locale.split('-')[0];
-    }
-  } else {
-    const locale = I18nManager.getConstants().localeIdentifier;
-    if (locale) {
-      language = locale.split('_')[0];
-    }
-  }
+  // if (Platform.OS === 'ios') {
+  //   const settings = Settings.get('AppleLocale');
+  //   const locale: string = settings || settings?.[0];
+  //   if (locale) {
+  //     language = locale.split('-')[0];
+  //   }
+  // } else {
+  //   const locale = I18nManager.getConstants().localeIdentifier;
+  //   if (locale) {
+  //     language = locale.split('_')[0];
+  //   }
+  // }
 
-  if (!defaultLangMap[language]) {
-    return 'en';
-  }
+  // if (!defaultLangMap[language]) {
+  //   return 'en';
+  // }
 
-  return language;
+  // return language;
 };
 
 const LanguageContext = createContext<Language | null>(null);
@@ -86,47 +86,37 @@ export const AppIntlProvider: FunctionComponent<PropsWithChildren> = observer(
         : getMessages(uiConfigStore.language),
     );
     useLayoutEffect(() => {
-      if (isAutomatic) {
-        uiConfigStore.selectLanguageOptions({
-          language: initLanguage(),
-          isAutomatic,
-        });
-      }
-      setMessages(getMessages(language));
+      // if (isAutomatic) {
+      //   uiConfigStore.selectLanguageOptions({
+      //     language: initLanguage(),
+      //     isAutomatic,
+      //   });
+      // }
+      setMessages(getMessages('en'));
     }, [isAutomatic, language, uiConfigStore]);
 
-    const clearLanguage = () => {
-      const language = initLanguage();
-      uiConfigStore.selectLanguageOptions({language, isAutomatic: true});
-    };
+    // const clearLanguage = () => {
+    //   const language = initLanguage();
+    //   uiConfigStore.selectLanguageOptions({language, isAutomatic: true});
+    // };
 
-    const setLanguage = (language: string) => {
-      uiConfigStore.selectLanguageOptions({language, isAutomatic: false});
-    };
+    // const setLanguage = (language: string) => {
+    //   uiConfigStore.selectLanguageOptions({language, isAutomatic: false});
+    // };
 
-    const getLanguageFullName = (language: string) => {
-      switch (language) {
-        case 'ko':
-          return '한국어';
-        default:
-          return 'English';
-      }
-    };
+    // const getLanguageFullName = (language: string) => {
+    //   switch (language) {
+    //     case 'ko':
+    //       return '한국어';
+    //     default:
+    //       return 'English';
+    //   }
+    // };
 
     return (
-      <LanguageContext.Provider
-        value={{
-          language,
-          getLanguageFullName,
-          languageFullName: getLanguageFullName(language),
-          setLanguage,
-          automatic: isAutomatic,
-          clearLanguage,
-        }}>
-        <IntlProvider locale={language} messages={messages}>
-          {children}
-        </IntlProvider>
-      </LanguageContext.Provider>
+      <IntlProvider locale={language} messages={messages}>
+        {children}
+      </IntlProvider>
     );
   },
 );
