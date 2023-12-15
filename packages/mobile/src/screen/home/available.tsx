@@ -226,6 +226,11 @@ export const AvailableTabView: FunctionComponent<{
                                     ]
                                   : [],
                               )}
+                              toggleCircleColor={
+                                !uiConfigStore.isHideLowBalance
+                                  ? style.get('color-gray-400').color
+                                  : undefined
+                              }
                             />
                           </React.Fragment>
                         ) : undefined

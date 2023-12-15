@@ -6,10 +6,9 @@ import React, {
   useState,
 } from 'react';
 import {ConfirmContext} from './internal';
-import {XAxis, YAxis} from '../../components/axis';
+import {YAxis} from '../../components/axis';
 import {Box} from '../../components/box';
 import {Modal, Text} from 'react-native';
-import {TextButton} from '../../components/text-button';
 import {useIntl} from 'react-intl';
 import {Button} from '../../components/button';
 import {Gutter} from '../../components/gutter';
@@ -20,6 +19,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import {Columns} from '../../components/column';
 
 export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
   children,
@@ -131,36 +131,36 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
               </Text>
 
               <Gutter size={18} />
-              <YAxis alignX="right">
-                <XAxis>
-                  {!confirm?.options.forceYes ? (
-                    <React.Fragment>
-                      <TextButton
-                        text={intl.formatMessage({
-                          id: 'hooks.confirm.cancel-button',
-                        })}
-                        size="large"
-                        onPress={() => {
-                          confirm?.resolver(false);
-                          closeModal();
-                        }}
-                      />
-                      <Gutter size={8} />
-                    </React.Fragment>
-                  ) : null}
-                  <Button
-                    size="medium"
-                    text={intl.formatMessage({
-                      id: 'hooks.confirm.yes-button',
-                    })}
-                    style={{width: 94}}
-                    onPress={() => {
-                      closeModal();
-                      confirm?.resolver(true);
-                    }}
-                  />
-                </XAxis>
-              </YAxis>
+              <Columns sum={1}>
+                {!confirm?.options.forceYes ? (
+                  <React.Fragment>
+                    <Button
+                      size="large"
+                      text={intl.formatMessage({
+                        id: 'hooks.confirm.cancel-button',
+                      })}
+                      containerStyle={style.flatten(['flex-1'])}
+                      onPress={() => {
+                        confirm?.resolver(false);
+                        closeModal();
+                      }}
+                      color="secondary"
+                    />
+                    <Gutter size={12} />
+                  </React.Fragment>
+                ) : null}
+                <Button
+                  size="large"
+                  text={intl.formatMessage({
+                    id: 'hooks.confirm.yes-button',
+                  })}
+                  containerStyle={style.flatten(['flex-1'])}
+                  onPress={() => {
+                    closeModal();
+                    confirm?.resolver(true);
+                  }}
+                />
+              </Columns>
             </YAxis>
           </Box>
         </Box>

@@ -371,7 +371,7 @@ const CopyAddressItem: FunctionComponent<{
                   }}>
                   <Box>
                     <StarIcon
-                      size={20}
+                      size={24}
                       style={{
                         opacity: address.ethereumAddress ? 0 : 1,
                       }}

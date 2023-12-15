@@ -17,7 +17,7 @@ export const InformationModal = registerCardModal(
     const style = useStyle();
     const insects = useSafeAreaInsets();
     return (
-      <Box paddingX={12} paddingBottom={60 + insects.bottom}>
+      <Box paddingX={12} paddingBottom={40 + insects.bottom}>
         <Box>
           <Box>
             <Box paddingBottom={21} paddingTop={9} paddingX={8} alignY="center">
