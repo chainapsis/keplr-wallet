@@ -28,6 +28,7 @@ export const NotificationProvider: FunctionComponent<PropsWithChildren> = ({
       paragraph: string;
     }[]
   >([]);
+  const [isDisable, setIsDisable] = useState(false);
 
   const clearDetached = (id: string) => {
     const find = notifications.find(notification => notification.id === id);
@@ -88,6 +89,7 @@ export const NotificationProvider: FunctionComponent<PropsWithChildren> = ({
         return {
           show: showFnRef.current,
           hide: hideFnRef.current,
+          disable: setIsDisable,
         };
       }, [])}>
       {children}
@@ -101,26 +103,28 @@ export const NotificationProvider: FunctionComponent<PropsWithChildren> = ({
         }}
         pointerEvents="box-none">
         <React.Fragment>
-          {notifications
-            .slice()
-            .reverse()
-            .map(notification => {
-              return (
-                <NotificationView
-                  key={notification.id}
-                  mode={notification.mode}
-                  title={notification.title}
-                  paragraph={notification.paragraph}
-                  detached={notification.detached}
-                  onTransitionEnd={() => {
-                    clearDetached(notification.id);
-                  }}
-                  onClickClose={() => {
-                    hideFn(notification.id);
-                  }}
-                />
-              );
-            })}
+          {isDisable
+            ? null
+            : notifications
+                .slice()
+                .reverse()
+                .map(notification => {
+                  return (
+                    <NotificationView
+                      key={notification.id}
+                      mode={notification.mode}
+                      title={notification.title}
+                      paragraph={notification.paragraph}
+                      detached={notification.detached}
+                      onTransitionEnd={() => {
+                        clearDetached(notification.id);
+                      }}
+                      onClickClose={() => {
+                        hideFn(notification.id);
+                      }}
+                    />
+                  );
+                })}
         </React.Fragment>
       </View>
     </NotificationContext.Provider>

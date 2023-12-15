@@ -99,7 +99,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
     <PageWithScrollView
       backgroundMode={'default'}
       style={style.flatten(['padding-x-12', 'padding-top-8'])}>
-      <Stack gutter={10}>
+      <Stack gutter={12}>
         <YAxis alignX="center">
           <LayeredHorizontalRadioGroup
             selectedKey={tabStatus}
@@ -214,12 +214,10 @@ export const HomeScreen: FunctionComponent = observer(() => {
           </Columns>
         )}
 
-        <Gutter size={12} />
         <ClaimAll isNotReady={isNotReady} />
-        <Gutter size={12} />
 
         {!isNotReady ? (
-          <Stack gutter={12}>
+          <Stack>
             {tabStatus === 'available' ? (
               <SearchTextInput
                 ref={searchRef}
@@ -233,7 +231,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
             ) : null}
           </Stack>
         ) : null}
-
         {tabStatus === 'available' ? (
           <AvailableTabView
             search={search}

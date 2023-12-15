@@ -32,3 +32,13 @@ export const EmptyView: FunctionComponent<
     </Box>
   );
 };
+
+export const EmptyViewText = ({text}: {text: string}) => {
+  const style = useStyle();
+
+  return (
+    <Text style={style.flatten(['color-gray-400', 'subtitle3', 'text-center'])}>
+      {text}
+    </Text>
+  );
+};

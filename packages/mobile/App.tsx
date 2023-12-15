@@ -35,6 +35,7 @@ import {LoadingIconAnimationProvider} from './src/provider/loading-icon-animatio
 import {NotificationProvider} from './src/hooks/notification';
 import {ModalBaseProvider} from './src/components/modal/v2/provider';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
+import {ErrorBoundary} from './error-boundary';
 
 const ThemeStatusBar: FunctionComponent = () => {
   const style = useStyle();
@@ -75,7 +76,9 @@ function App(): JSX.Element {
                     <BottomSheetModalProvider>
                       <ConfirmProvider>
                         <InteractionModalsProvider>
-                          <AppNavigation />
+                          <ErrorBoundary>
+                            <AppNavigation />
+                          </ErrorBoundary>
                         </InteractionModalsProvider>
                       </ConfirmProvider>
                     </BottomSheetModalProvider>

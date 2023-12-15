@@ -13,6 +13,7 @@ interface ToggleProps {
   disabled?: boolean;
   size?: ToggleSize;
   containerStyle?: ViewStyle;
+  toggleCircleColor?: string;
 }
 
 export const Toggle: FunctionComponent<ToggleProps> = ({
@@ -21,6 +22,7 @@ export const Toggle: FunctionComponent<ToggleProps> = ({
   disabled,
   size,
   containerStyle,
+  toggleCircleColor,
 }) => {
   const style = useStyle();
 
@@ -52,11 +54,12 @@ export const Toggle: FunctionComponent<ToggleProps> = ({
           isOpen ? (size === 'small' ? 16 : 24) : size === 'small' ? 12 : 16
         }
         backgroundColor={
-          disabled
+          toggleCircleColor ||
+          (disabled
             ? style.get('color-gray-300').color
             : isOpen
             ? style.get('color-white').color
-            : style.get('color-gray-200').color
+            : style.get('color-gray-200').color)
         }
         style={{opacity: disabled ? 0.4 : undefined}}>
         {isOpen ? (

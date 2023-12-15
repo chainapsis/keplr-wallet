@@ -25,7 +25,6 @@ import {Text} from 'react-native';
 import {Gutter} from '../../components/gutter';
 import {Box} from '../../components/box';
 import {FeeControl} from '../../components/input/fee-control';
-import {Button} from '../../components/button';
 import {XAxis} from '../../components/axis';
 import {CloseIcon} from '../../components/icon';
 import {CodeBracketIcon} from '../../components/icon/code-bracket';
@@ -36,6 +35,7 @@ import {ScrollView, FlatList} from 'react-native-gesture-handler';
 import {GuideBox} from '../../components/guide-box';
 import {Checkbox} from '../../components/checkbox';
 import {registerCardModal} from '../../components/modal/card';
+import {SpecialButton} from '../../components/special-button';
 
 export const SignModal = registerCardModal(
   observer<{
@@ -352,7 +352,7 @@ export const SignModal = registerCardModal(
             backgroundColor={style.get('color-gray-500').color}
             padding={16}
             borderRadius={6}>
-            <ScrollView>
+            <ScrollView persistentScrollbar={true}>
               <Text style={style.flatten(['body3', 'color-text-middle'])}>
                 {JSON.stringify(signDocHelper.signDocJson, null, 2)}
               </Text>
@@ -427,11 +427,14 @@ export const SignModal = registerCardModal(
           </React.Fragment>
         ) : null}
 
-        <Button
+        <SpecialButton
           size="large"
-          text="Approve"
+          text={intl.formatMessage({
+            id: 'button.approve',
+          })}
           onPress={approve}
           disabled={buttonDisabled}
+          innerButtonStyle={style.flatten(['width-full'])}
         />
 
         <Gutter size={24} />

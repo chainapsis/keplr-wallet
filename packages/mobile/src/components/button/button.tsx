@@ -106,14 +106,14 @@ export const Button: FunctionComponent<{
     if (propRippleColor) {
       return propRippleColor;
     }
-    return style.get('color-gray-500').color;
+    return style.get('color-gray-600').color;
   })();
 
   const underlayColor = (() => {
     if (propUnderlayColor) {
       return propUnderlayColor;
     }
-    return style.get('color-gray-500').color;
+    return style.get('color-gray-600').color;
   })();
 
   return (

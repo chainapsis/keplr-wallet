@@ -28,12 +28,16 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
   const governanceV1 = queriesStore.get(chainId).governanceV1.queryGovernance;
   const governanceLegacy = queriesStore.get(chainId).governance.queryGovernance;
   const isGovV1SupportedRef = useRef(isGovV1Supported || false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   //NOTE refresh를 했을때에만 자식인 GovernanceCardBody에서 refetch를 해야 되기 때문에 숫자값으로 순차적으로 증가하게 하고
   //무한스크롤에 의해서 렌더링 될경우 다시 refreshing값을 0으로 만들어서 하위 GovernanceCardBody에서
   //refetch 되지 않게 구현함
   const [refreshing, setRefreshing] = useState(0);
   const onRefresh = () => {
+    setIsRefreshing(true);
     setRefreshing(refreshing + 1);
+    setIsRefreshing(false);
   };
 
   const insects = useSafeAreaInsets();
@@ -86,7 +90,11 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
     <FlatList
       data={sections}
       refreshControl={
-        <RefreshControl refreshing={false} onRefresh={onRefresh} />
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={onRefresh}
+          tintColor={style.get('color-gray-200').color}
+        />
       }
       style={StyleSheet.flatten([
         style.flatten(['padding-x-12']),

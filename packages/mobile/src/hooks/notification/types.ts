@@ -5,4 +5,5 @@ export interface Notification {
     paragraph?: string,
   ): string;
   hide(id: string): void;
+  disable(isDisable: boolean): void;
 }

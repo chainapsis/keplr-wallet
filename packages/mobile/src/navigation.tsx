@@ -756,7 +756,7 @@ const StakeNavigation = () => {
       <StakeStack.Screen
         name="Stake.ValidateDetail"
         options={{
-          title: 'Validator Detail Page',
+          title: 'Validator Details',
           ...defaultHeaderOptions,
         }}
         component={ValidatorDetailScreen}
@@ -803,7 +803,7 @@ const GovernanceNavigation = () => {
       <GovernanceStack.Screen
         name="Governance.intro"
         options={{
-          title: '투표할 프로포절이 있는 체인들',
+          title: 'Chains with Active Proposals',
           ...defaultHeaderOptions,
         }}
         component={GovernanceScreen}

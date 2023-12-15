@@ -17,6 +17,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import {useNotification} from '../../hooks/notification';
 
 const AnimatedLottieView = Animated.createAnimatedComponent(LottieView);
 
@@ -28,6 +29,7 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
       progress: successAnimProgress.value,
     };
   });
+  const notification = useNotification();
 
   useEffect(() => {
     const animateLottie = () => {
@@ -39,6 +41,18 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
     return () => clearTimeout(timeoutId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    notification.disable(true);
+
+    return () => {
+      //NOTE setTimeout을 건이유는 해당 페이지가 보이자 말자 바로 main으로 이동하면 토스트가 보임해서
+      //해당 토스트가 사라지는 시간을 대강 계산해서 800밀리초 후 disable을 false로 설정
+      setTimeout(() => {
+        notification.disable(false);
+      }, 800);
+    };
+  }, [notification]);
 
   const route = useRoute<
     RouteProp<

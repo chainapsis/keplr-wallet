@@ -220,6 +220,7 @@ export class UIConfigStore {
   @action
   selectFiatCurrency(value: string) {
     this._fiatCurrency = value;
+    this.priceStore.setDefaultVsCurrency(value);
   }
 
   get language(): string {

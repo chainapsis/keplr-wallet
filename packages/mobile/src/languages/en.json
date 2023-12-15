@@ -22,7 +22,7 @@
   "error.outdated-cosmos-sdk": "Not supported: outdated version of cosmos-sdk",
   "error.can-not-pay-for-fee-by-stake-currency": "Can't pay for fee by stake currency",
 
-  "page.governance.proposal-list.empty-text": "No records of past or ongoing proposals found.",
+  "page.governance.proposal-list.empty-text": "No records of past or ongoing proposals found on this chain.",
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
@@ -180,7 +180,7 @@
 
   "page.setting.title": "Settings",
   "page.setting.general-title": "General",
-  "page.setting.general-paragraph": "Language, Currency, Contacts...",
+  "page.setting.general-paragraph": "Currency, Contacts...",
   "page.setting.advanced-title": "Advanced",
   "page.setting.advanced-paragraph": "Developer Mode, Change Endpoints...",
   "page.setting.security-privacy-title": "Security & Privacy",
@@ -561,7 +561,13 @@
   "page.main.components.token-item.copy-address.copied": "Copied",
   "page.main.components.secret-error-modal-button": "Set my Viewing Key",
   "page.main.components.staking-chain-modal.title": "Available Assets",
-  "page.main.components.staking-chain-modal.empty-text": "Please retry after buying or depositing the asset to your wallet.",
+  "page.main.components.staking-chain-modal.empty-text": "Please retry after buying or depositing stakeable assets to your wallet.",
+
+  "page.browser.main-title": "Discover Apps",
+  "page.browser.favorite-label": "Favorites",
+  "page.browser.input-placeholder": "Type URL",
+  "page.browser.favorite-empty-text-1": "No Favorites Yet!",
+  "page.browser.favorite-empty-text-2": "Tap the star in the top right corner to add the website you've visited to the Favorites.",
 
   "page.ledger-grant.title": "Allow Browser to Connect to Ledger",
   "page.ledger-grant.paragraph": "You need to reapprove connection to your Ledger. Select the appropriate app, and after successfully connecting with your Ledger device, close this page and retry your previous transaction (signing).",
@@ -576,7 +582,7 @@
   "components.input.amount-input.max-button": "Max",
   "components.input.memo-input.memo-label": "Memo",
   "components.input.fee-control.title": "Transaction Fee: ",
-  "components.input.fee-control.error.insufficient-fee": "Insufficient fee",
+  "components.input.fee-control.error.insufficient-fee": "Insufficient balance to cover the fees",
   "components.input.fee-control.modal.title": "Fee Options",
   "components.input.fee-control.modal.fee-title": "Fee",
   "components.input.fee-control.modal.fee-token-dropdown-label": "Fee Token",

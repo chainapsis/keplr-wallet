@@ -13,6 +13,7 @@ import {ContractAddressItem} from '../contract-item';
 import {TokenContractListRepoURL} from '../../../../config.ui';
 import {ScrollView, TextInput} from 'react-native-gesture-handler';
 import {registerCardModal} from '../../../../components/modal/card';
+import {BaseModalHeader} from '../../../../components/modal';
 
 export const ContractAddressBookModal = registerCardModal(
   observer<{
@@ -45,15 +46,11 @@ export const ContractAddressBookModal = registerCardModal(
     return (
       <Box paddingX={12} paddingBottom={20}>
         <Box>
-          <Text
-            style={style.flatten([
-              'text-center',
-              'subtitle1',
-              'color-text-high',
-              'padding-8',
-            ])}>
-            <FormattedMessage id="page.setting.token.add.contract-address-book-modal.title" />
-          </Text>
+          <BaseModalHeader
+            title={intl.formatMessage({
+              id: 'page.setting.token.add.contract-address-book-modal.title',
+            })}
+          />
           <Gutter size={12} />
           <SearchTextInput
             ref={searchRef}
@@ -96,34 +93,36 @@ export const ContractAddressBookModal = registerCardModal(
           ) : null}
         </ScrollView>
 
-        <Box
-          alignX="center"
-          alignY="bottom"
-          paddingTop={16}
-          onClick={() => {
-            Linking.openURL(TokenContractListRepoURL);
-          }}>
-          <Text
-            style={style.flatten([
-              'subtitle3',
-              'color-text-low',
-              'text-center',
-            ])}>
-            <FormattedMessage
-              id="page.setting.token.add.contract-address-book-modal.link"
-              values={{
-                link: (...chunks: any) => (
-                  <Text
-                    style={style.flatten(['text-underline', 'color-gray-50'])}>
-                    {chunks}
-                  </Text>
-                ),
-              }}
-            />
-          </Text>
+        <Box alignX="center">
+          <Box
+            paddingY={16}
+            paddingX={8}
+            onClick={() => {
+              Linking.openURL(TokenContractListRepoURL);
+            }}>
+            <Text
+              style={style.flatten([
+                'subtitle3',
+                'color-text-low',
+                'text-center',
+              ])}>
+              <FormattedMessage
+                id="page.setting.token.add.contract-address-book-modal.link"
+                values={{
+                  link: (...chunks: any) => (
+                    <Text
+                      style={style.flatten([
+                        'text-underline',
+                        'color-gray-50',
+                      ])}>
+                      {chunks}
+                    </Text>
+                  ),
+                }}
+              />
+            </Text>
+          </Box>
         </Box>
-
-        <Gutter size={12} />
       </Box>
     );
   }),
