@@ -122,8 +122,6 @@ export const ContractAddressBookModal = registerCardModal(
               />
             </Text>
           </Box>
-
-          {/* <Gutter size={12} /> */}
         </Box>
       </Box>
     );
