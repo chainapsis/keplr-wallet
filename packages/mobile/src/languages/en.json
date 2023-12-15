@@ -582,7 +582,7 @@
   "components.input.amount-input.max-button": "Max",
   "components.input.memo-input.memo-label": "Memo",
   "components.input.fee-control.title": "Transaction Fee: ",
-  "components.input.fee-control.error.insufficient-fee": "Insufficient fee",
+  "components.input.fee-control.error.insufficient-fee": "Insufficient balance to cover the fees",
   "components.input.fee-control.modal.title": "Fee Options",
   "components.input.fee-control.modal.fee-title": "Fee",
   "components.input.fee-control.modal.fee-token-dropdown-label": "Fee Token",
