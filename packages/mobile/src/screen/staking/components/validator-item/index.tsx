@@ -36,10 +36,17 @@ export const ValidatorItem: FunctionComponent<{
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
     Staking.BondStatus.Bonded,
   );
-
-  const thumbnail = bondedValidators.getValidatorThumbnail(
-    viewValidator.validatorAddress,
+  const unbondedValidators = queries.cosmos.queryValidators.getQueryStatus(
+    Staking.BondStatus.Unbonded,
   );
+  const unbondingValidators = queries.cosmos.queryValidators.getQueryStatus(
+    Staking.BondStatus.Unbonding,
+  );
+
+  const thumbnail =
+    bondedValidators.getValidatorThumbnail(viewValidator.validatorAddress) ||
+    unbondingValidators.getValidatorThumbnail(viewValidator.validatorAddress) ||
+    unbondedValidators.getValidatorThumbnail(viewValidator.validatorAddress);
 
   return (
     <RectButton

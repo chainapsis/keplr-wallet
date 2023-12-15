@@ -13,7 +13,8 @@ import {StackNavProp} from '../../../navigation';
 export const DelegatedCard: FunctionComponent<{
   chainId: string;
   validatorAddress: string;
-}> = observer(({validatorAddress, chainId}) => {
+  isFromRedelegate?: boolean;
+}> = observer(({validatorAddress, chainId, isFromRedelegate}) => {
   const {queriesStore, accountStore} = useStore();
   const navigation = useNavigation<StackNavProp>();
 
@@ -69,39 +70,43 @@ export const DelegatedCard: FunctionComponent<{
           </Text>
         </Columns>
 
-        <Gutter size={12} />
+        {isFromRedelegate ? null : (
+          <React.Fragment>
+            <Gutter size={12} />
 
-        <Columns sum={1} gutter={10}>
-          <Button
-            color="secondary"
-            text="Switch Validator"
-            containerStyle={style.flatten(['flex-1'])}
-            size="large"
-            onPress={() => {
-              navigation.navigate('Stake', {
-                screen: 'Stake.Redelegate',
-                params: {
-                  chainId,
-                  validatorAddress,
-                },
-              });
-            }}
-          />
-          <Button
-            containerStyle={style.flatten(['flex-1'])}
-            text="Unstake"
-            size="large"
-            onPress={() => {
-              navigation.navigate('Stake', {
-                screen: 'Stake.Undelegate',
-                params: {
-                  chainId,
-                  validatorAddress,
-                },
-              });
-            }}
-          />
-        </Columns>
+            <Columns sum={1} gutter={10}>
+              <Button
+                color="secondary"
+                text="Switch Validator"
+                containerStyle={style.flatten(['flex-1'])}
+                size="large"
+                onPress={() => {
+                  navigation.navigate('Stake', {
+                    screen: 'Stake.Redelegate',
+                    params: {
+                      chainId,
+                      validatorAddress,
+                    },
+                  });
+                }}
+              />
+              <Button
+                containerStyle={style.flatten(['flex-1'])}
+                text="Unstake"
+                size="large"
+                onPress={() => {
+                  navigation.navigate('Stake', {
+                    screen: 'Stake.Undelegate',
+                    params: {
+                      chainId,
+                      validatorAddress,
+                    },
+                  });
+                }}
+              />
+            </Columns>
+          </React.Fragment>
+        )}
       </Box>
     </Box>
   ) : null;

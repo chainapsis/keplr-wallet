@@ -26,18 +26,40 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.ValidateDetail'>>();
   const navigation = useNavigation<StackNavProp>();
   const style = useStyle();
-  const {validatorAddress, chainId} = route.params;
+  const {validatorAddress, chainId, validatorSelector} = route.params;
   const queries = queriesStore.get(chainId);
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
     Staking.BondStatus.Bonded,
   );
+  const unbondedValidators = queries.cosmos.queryValidators.getQueryStatus(
+    Staking.BondStatus.Unbonded,
+  );
+  const unbondingValidators = queries.cosmos.queryValidators.getQueryStatus(
+    Staking.BondStatus.Unbonding,
+  );
 
-  const validatorInfo = bondedValidators.validators
-    .sort((a, b) => Number(b.tokens) - Number(a.tokens))
-    .map((validator, i) => ({...validator, rank: i + 1}))
-    .find(val => val.operator_address === validatorAddress);
+  const [validatorInfo, isJailed] = (() => {
+    const bondedValidator = bondedValidators.validators
+      .sort((a, b) => Number(b.tokens) - Number(a.tokens))
+      .map((validator, i) => ({...validator, rank: i + 1}))
+      .find(val => val.operator_address === validatorAddress);
+    if (bondedValidator) {
+      return [bondedValidator, false];
+    }
 
-  const thumbnail = bondedValidators.getValidatorThumbnail(validatorAddress);
+    const validator = unbondingValidators.validators
+      .concat(unbondedValidators.validators)
+      .sort((a, b) => Number(b.tokens) - Number(a.tokens))
+      .map((validator, i) => ({...validator, rank: i + 1}))
+      .find(val => val.operator_address === validatorAddress);
+    return [validator, true];
+  })();
+
+  const thumbnail =
+    bondedValidators.getValidatorThumbnail(validatorAddress) ||
+    unbondingValidators.getValidatorThumbnail(validatorAddress) ||
+    unbondedValidators.getValidatorThumbnail(validatorAddress);
+
   const chainInfo = chainStore.getChain(chainId);
   const token = new CoinPretty(
     chainInfo.stakeCurrency || chainInfo.feeCurrencies[0],
@@ -55,31 +77,41 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
       backgroundMode="default"
       contentContainerStyle={style.flatten(['padding-top-12', 'padding-x-12'])}>
       <Stack gutter={12}>
-        {isCommissionHigh ? (
+        {isJailed ? (
           <GuideBox
-            title={`Commission ${new RatePretty(
-              validatorInfo?.commission.commission_rates.rate || 0,
-            )
-              .maxDecimals(2)
-              .toString()}`}
-            paragraph={
-              <Text style={style.flatten(['body2', 'color-yellow-500'])}>
-                This validator is currently charging
-                <Text style={style.flatten(['font-bold'])}> very high </Text>
-                commissons. Consider staking to other validators with lower
-                commissions to increase your rewards.
-              </Text>
-            }
+            title="This validator is currently jailed."
+            paragraph="If you are staking to this validator, consider switching to another validator or unstaking."
             color="warning"
           />
-        ) : null}
-        {isTop10Validator ? (
-          <GuideBox
-            title="You are staking to top 10 validator"
-            paragraph="To improve decentralization, please consider staking to other validators."
-            color="default"
-          />
-        ) : null}
+        ) : (
+          <React.Fragment>
+            {isCommissionHigh ? (
+              <GuideBox
+                title={`Commission ${new RatePretty(
+                  validatorInfo?.commission.commission_rates.rate || 0,
+                )
+                  .maxDecimals(2)
+                  .toString()}`}
+                paragraph={
+                  <Text style={style.flatten(['body2', 'color-yellow-500'])}>
+                    This validator is currently charging
+                    <Text style={style.flatten(['font-bold'])}>very high</Text>
+                    commissions. Consider staking to other validators with lower
+                    commissions to increaser your rewards.
+                  </Text>
+                }
+                color="warning"
+              />
+            ) : null}
+            {isTop10Validator ? (
+              <GuideBox
+                title="You are staking to top 10 validator"
+                paragraph="To improve decentralization, please consider staking to other validators"
+                color="default"
+              />
+            ) : null}
+          </React.Fragment>
+        )}
 
         {validatorInfo ? (
           <Box
@@ -142,24 +174,46 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
                   {validatorInfo.description.details}
                 </Text>
               </Stack>
-              <Button
-                size="large"
-                text="Stake"
-                onPress={() => {
-                  navigation.navigate('Stake', {
-                    screen: 'Stake.Delegate',
-                    params: {
-                      chainId,
-                      validatorAddress: validatorInfo.operator_address,
-                    },
-                  });
-                }}
-              />
+              {validatorSelector ? (
+                <Button
+                  size="large"
+                  text="Switch to this Validator"
+                  onPress={() => {
+                    validatorSelector(
+                      validatorInfo.operator_address,
+                      validatorInfo.description?.moniker ||
+                        validatorInfo.operator_address,
+                    );
+                    navigation.pop(2);
+                  }}
+                />
+              ) : (
+                <Button
+                  size="large"
+                  text={
+                    isJailed ? 'This validator is currently jailed.' : 'Stake'
+                  }
+                  disabled={isJailed}
+                  onPress={() => {
+                    navigation.navigate('Stake', {
+                      screen: 'Stake.Delegate',
+                      params: {
+                        chainId,
+                        validatorAddress: validatorInfo.operator_address,
+                      },
+                    });
+                  }}
+                />
+              )}
             </Stack>
           </Box>
         ) : null}
 
-        <DelegatedCard chainId={chainId} validatorAddress={validatorAddress} />
+        <DelegatedCard
+          chainId={chainId}
+          validatorAddress={validatorAddress}
+          isFromRedelegate={!!validatorSelector}
+        />
         <UnbondingCard chainId={chainId} validatorAddress={validatorAddress} />
       </Stack>
     </PageWithScrollView>

@@ -121,7 +121,7 @@ export const SignRedelegateScreen: FunctionComponent = observer(() => {
             validatorName={dstValidatorInfo.name}
             chainId={chainId}
             afterSelect={() => {
-              navigation.navigate('Stake', {
+              navigation.push('Stake', {
                 screen: 'Stake.ValidateList',
                 params: {
                   chainId,
