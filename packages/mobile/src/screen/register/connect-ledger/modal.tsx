@@ -441,6 +441,8 @@ const LedgerNanoBLESelector: FunctionComponent<{
       );
 
       if (res.error_message === 'No errors') {
+        await LedgerUtils.setLastUsedLedgerDeviceId(deviceId);
+
         setStep('app');
 
         setPublicKey(res.compressed_pk);
