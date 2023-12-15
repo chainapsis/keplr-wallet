@@ -114,10 +114,13 @@ const DefaultScreenHeaderTitle: FunctionComponent<PropsWithChildren> = ({
 const DefaultScreenHeaderLeft: FunctionComponent = () => {
   const style = useStyle();
   const nav = useNavigation();
+  const isSettingIntro =
+    nav.getState().routes[0].name === 'Setting.Intro' &&
+    nav.getState().routes.length === 1;
 
   return (
     <React.Fragment>
-      {nav.canGoBack() ? (
+      {nav.canGoBack() && !isSettingIntro ? (
         <Pressable
           onPress={() => {
             if (nav.canGoBack()) {
