@@ -1,9 +1,6 @@
 import React, {FunctionComponent, PropsWithChildren} from 'react';
-import {ContentHeightAwareScrollView} from '../../../components/scroll-view';
 import {useStyle} from '../../../styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {StyleProp} from 'react-native/Libraries/StyleSheet/StyleSheet';
-import {ViewStyle} from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
 import {Platform, StyleSheet, Text} from 'react-native';
 import Reanimated, {
   useAnimatedKeyboard,
@@ -11,10 +8,7 @@ import Reanimated, {
 } from 'react-native-reanimated';
 import {Button} from '../../../components/button';
 
-const ReanimatedContentHeightAwareScrollView =
-  Reanimated.createAnimatedComponent(ContentHeightAwareScrollView);
-
-export const ScrollViewRegisterContainer: FunctionComponent<
+export const ViewRegisterContainer: FunctionComponent<
   PropsWithChildren<{
     // rn navigation에서 header가 있는 screen은 rn navigation에서 top safe area를 제공한다.
     // 그렇지 않은 경우는 이걸 true로 설정해서 이 컴포넌트에서 처리하게 한다.
@@ -31,8 +25,6 @@ export const ScrollViewRegisterContainer: FunctionComponent<
     paddingLeft?: number;
     paddingRight?: number;
 
-    contentContainerStyle?: StyleProp<ViewStyle>;
-
     bottomButton?: React.ComponentProps<typeof Button>;
   }>
 > = ({
@@ -46,7 +38,6 @@ export const ScrollViewRegisterContainer: FunctionComponent<
   paddingLeft,
   paddingRight,
   paddingBottom,
-  contentContainerStyle,
   bottomButton,
 }) => {
   const style = useStyle();
@@ -117,14 +108,9 @@ export const ScrollViewRegisterContainer: FunctionComponent<
   });
 
   return (
-    // NOTE: 원래는 ReanimatedContentHeightAwareScrollView에 position: relative를 주고
-    //       bottom button view에 position: absolute를 주고 bottom: 0을 주려고 했는데
-    //       rn이 ㅂㅅ이라 scroll view에서 그렇게 하면 하위 자식의 absolute는 scroll view안의 content view 기준으로 붙기 때문에
-    //       사실상 쓸모가 없다. 답이 없어져서 그냥 View를 상위에 하나 더 추가함
+    // 귀찮아서 ScrollViewRegisterContainer에서 복사해서 온거라서 Root가 다른 View로 시작함.
     <Reanimated.View style={viewStyle}>
-      <ReanimatedContentHeightAwareScrollView
-        style={containerStyle}
-        contentContainerStyle={contentContainerStyle}>
+      <Reanimated.View style={containerStyle}>
         {paragraph ? (
           <Text
             style={StyleSheet.flatten([
@@ -136,7 +122,7 @@ export const ScrollViewRegisterContainer: FunctionComponent<
         ) : null}
         {children}
         <Reanimated.View style={bottomMockViewStyle} />
-      </ReanimatedContentHeightAwareScrollView>
+      </Reanimated.View>
       {bottomButton ? (
         <Reanimated.View style={bottomButtonViewStyle}>
           {<Button {...bottomButton} />}
