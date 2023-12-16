@@ -2439,6 +2439,10 @@ export const APR_API_URL =
 export const SCAMPORPOSAL_API_URL =
   'https://phishing-block-list-chainapsis.vercel.app';
 
+export const APP_STORE_URL = 'https://itunes.apple.com';
+
+export const PLAY_STORE_URL = 'https://play.google.com';
+
 export const GovernanceV1ChainIdentifiers = [
   'kyve',
   'mars',

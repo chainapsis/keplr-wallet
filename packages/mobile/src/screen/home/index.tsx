@@ -1,5 +1,11 @@
 import {observer} from 'mobx-react-lite';
-import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
+import React, {
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {Text, TextInput as NativeTextInput} from 'react-native';
 import {useStyle} from '../../styles';
 import {PageWithScrollView} from '../../components/page';
@@ -25,6 +31,8 @@ import {StackNavProp} from '../../navigation';
 import {Skeleton} from '../../components/skeleton';
 import {StakingIcon} from '../../components/icon/stacking';
 import {VoteIcon} from '../../components/icon';
+import {AppUpdateModal} from './app-update-modal';
+import {CodePushUpdateModal} from './code-push-update-modal';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -49,7 +57,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
   const isNotReady = useIsNotReady();
 
-  const {hugeQueriesStore} = useStore();
+  const {hugeQueriesStore, checkUpdateStore} = useStore();
 
   const navigation = useNavigation<StackNavProp>();
 
@@ -57,6 +65,13 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const [selectModalIsOpen, setSelectModalIsOpen] = useState(false);
+  //TODO app store에 올라가면 해당 코드를 주석처리를 지워야 합니다
+  // const [isOpenAppUpdateModal, setIsOpenAppUpdateModal] = useState(
+  //   checkUpdateStore.checkAppVersion.needUpdate,
+  // );r
+  const [isOpenAppUpdateModal, setIsOpenAppUpdateModal] = useState(true);
+  const [isOpenCodePushUpdateModal, setIsOpenCodePushUpdateModal] =
+    useState(false);
 
   const availableTotalPrice = useMemo(() => {
     let result: PricePretty | undefined;
@@ -94,6 +109,10 @@ export const HomeScreen: FunctionComponent = observer(() => {
     }
     return result;
   }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings]);
+
+  useEffect(() => {
+    setIsOpenAppUpdateModal(checkUpdateStore.checkAppVersion.needUpdate);
+  }, [checkUpdateStore.checkAppVersion]);
 
   return (
     <PageWithScrollView
@@ -255,6 +274,15 @@ export const HomeScreen: FunctionComponent = observer(() => {
         navigation={navigation}
         isOpen={isBuyModalOpen}
         setIsOpen={setIsBuyModalOpen}
+      />
+      <AppUpdateModal
+        isOpen={isOpenAppUpdateModal}
+        setIsOpen={setIsOpenAppUpdateModal}
+        url={checkUpdateStore.checkAppVersion.url}
+      />
+      <CodePushUpdateModal
+        isOpen={isOpenCodePushUpdateModal}
+        setIsOpen={setIsOpenCodePushUpdateModal}
       />
     </PageWithScrollView>
   );
