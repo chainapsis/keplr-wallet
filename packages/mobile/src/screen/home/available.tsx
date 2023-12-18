@@ -305,11 +305,17 @@ export const AvailableTabView: FunctionComponent<{
                   source={require('../../public/assets/img/main-empty-balance.png')}
                 />
               }
-              paragraph="Gear up yourself by topping up your wallet!"
-              title="Ready to Explore the Interchain?"
+              paragraph={intl.formatMessage({
+                id: 'page.main.components.first-time-empty-view-paragraph',
+              })}
+              title={intl.formatMessage({
+                id: 'page.main.components.first-time-empty-view-title',
+              })}
               button={
                 <Button
-                  text="Get Started"
+                  text={intl.formatMessage({
+                    id: 'page.main.components.first-time-empty-view-button',
+                  })}
                   color="primary"
                   size="small"
                   onPress={onClickGetStarted}
