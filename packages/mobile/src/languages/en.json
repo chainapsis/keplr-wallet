@@ -319,7 +319,7 @@
   "page.suggest-chain.raw-info-view.chain-registry-link-text": "Tap here to visit our community repository.",
 
   "page.unlock.star-migration-button": "Start Migration",
-  "page.unlock.upgrade-in-progress": "Upgrade in progress",
+  "page.unlock.upgrade-in-progress": "Update in progress",
   "page.unlock.unlock-button": "Unlock",
   "page.unlock.forgot-password-button": "Forgot Password?",
   "page.unlock.need-help-button": "Need Help?",
@@ -329,7 +329,7 @@
   "page.unlock.paragraph-section.welcome-back": "Welcome Back",
   "page.unlock.bottom-section.capslock-tooltip": "CapsLock is on",
   "page.unlock.bottom-section.password-input-label": "Password",
-  "page.unlock.bottom-section.guide-title": "Don’t close your browser during update",
+  "page.unlock.bottom-section.guide-title": "Don't close your app during update",
   "page.unlock.bottom-section.guide-paragraph": "Migration for users with many accounts can take up to several minutes.",
 
   "page.wallet.title": "Select Wallet",
