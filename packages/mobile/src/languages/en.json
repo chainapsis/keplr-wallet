@@ -350,7 +350,7 @@
   "page.wallet.change-name.new-name-input-label": "New Wallet Name",
 
   "page.wallet.delete.warning-title": "Alert",
-  "page.wallet.delete.warning-paragraph": "Make sure that you’ve backed up your recovery phrase and private key.",
+  "page.wallet.delete.warning-paragraph": "Make sure that you’ve backed up your recovery phrase or private key.",
   "page.wallet.delete.warning-link-text": "Back Up My Wallet",
   "page.wallet.delete.paragraph": "After deletion, you will be required to import your wallet to restore your access to it.",
   "page.wallet.delete.password-input-label": "Password",
@@ -584,6 +584,17 @@
   "page.ledger-grant.title": "Allow Browser to Connect to Ledger",
   "page.ledger-grant.paragraph": "You need to reapprove connection to your Ledger. Select the appropriate app, and after successfully connecting with your Ledger device, close this page and retry your previous transaction (signing).",
 
+  "page.tx-result.pending-title": "Transaction pending",
+  "page.tx-result.pending-text": "Transaction has been broadcasted to the blockchain and pending confirmation.",
+  "page.tx-result.success-title": "Transaction successful",
+  "page.tx-result.success-text-1": "Congratulations!",
+  "page.tx-result.success-text-2": "Your transaction has been completed and confirmed by the blockchain.",
+  "page.tx-result.fail-title": "Transaction failed",
+  "page.tx-result.fail-text": " Transaction unsuccessful. Please check the block explorer for more information.",
+
+  "page.tx-result.home-button": "Go to home",
+  "page.tx-result.go-to-explorer": "Go to {name}",
+
   "new-feature.ibc-swap.title": "✨ Swap is Here!",
   "new-feature.ibc-swap.paragraph": "Swap tokens between different chains with a simple click. Give it a try!",
   "new-feature.ibc-swap.button": "Got it!",
@@ -629,6 +640,7 @@
   "button.approve": "Approve",
   "button.save": "Save",
   "button.close": "Close",
+  "button.done": "Done",
   "text-button.select-all": "Select All",
 
   "notification.transaction-success": "Transaction Success",
