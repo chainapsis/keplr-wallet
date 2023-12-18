@@ -287,7 +287,7 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
             if (!unmounted.current) {
               setQueryRoughlyDone(true);
             }
-          }, 1000);
+          }, 3000);
         }
       })();
     }

@@ -4,9 +4,11 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Platform, StyleSheet, Text} from 'react-native';
 import Reanimated, {
   useAnimatedKeyboard,
+  useAnimatedProps,
   useAnimatedStyle,
 } from 'react-native-reanimated';
 import {Button} from '../../../components/button';
+import {ViewStyle} from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
 
 export const ViewRegisterContainer: FunctionComponent<
   PropsWithChildren<{
@@ -25,6 +27,8 @@ export const ViewRegisterContainer: FunctionComponent<
     paddingLeft?: number;
     paddingRight?: number;
 
+    contentContainerStyle?: ViewStyle;
+
     bottomButton?: React.ComponentProps<typeof Button>;
   }>
 > = ({
@@ -38,6 +42,7 @@ export const ViewRegisterContainer: FunctionComponent<
   paddingLeft,
   paddingRight,
   paddingBottom,
+  contentContainerStyle: propContentContainerStyle,
   bottomButton,
 }) => {
   const style = useStyle();
@@ -64,64 +69,72 @@ export const ViewRegisterContainer: FunctionComponent<
     return {
       position: 'relative',
       height: '100%',
-      paddingBottom: keyboard.height.value,
     };
   });
 
   const containerStyle = useAnimatedStyle(() => {
     return {
       height: '100%',
-      padding,
+    };
+  });
+
+  const contentContainerStyle = useAnimatedProps(() => {
+    return {
       paddingTop:
-        (paddingTop || paddingY || 0) +
+        (paddingTop || paddingY || padding || 0) +
         (forceEnableTopSafeArea ? safeAreaInsets.top : 0),
-      paddingBottom:
-        (paddingBottom || paddingY || 0) +
-        (safeAreaInsets.bottom -
-          Math.min(safeAreaInsets.bottom, keyboard.height.value)),
-      paddingLeft: paddingLeft || paddingX,
-      paddingRight: paddingRight || paddingX,
+      paddingBottom: paddingBottom || paddingY || padding,
+      paddingLeft: paddingLeft || paddingX || padding,
+      paddingRight: paddingRight || paddingX || padding,
+      ...propContentContainerStyle,
     };
   });
 
   const bottomMockViewStyle = useAnimatedStyle(() => {
     return {
       // TODO: 지금 button의 size를 button prop으로부터 고정적으로 가져올 수 없다.
-      //       일단 현재 디자인 상 버튼 크기는 다 정해져 있으니 대충 72로 고정한다.
+      //       일단 현재 디자인 상 버튼 크기는 다 정해져 있으니 대충 52로 고정한다.
       // 40은 아래 위 패딩 20씩임
       height: bottomButton
-        ? 72 + (40 - Math.min(40, keyboard.height.value))
-        : 0,
+        ? 52 +
+          40 +
+          (safeAreaInsets.bottom -
+            Math.min(safeAreaInsets.bottom, keyboard.height.value)) +
+          keyboard.height.value
+        : safeAreaInsets.bottom -
+          Math.min(safeAreaInsets.bottom, keyboard.height.value) +
+          keyboard.height.value,
     };
   });
 
   const bottomButtonViewStyle = useAnimatedStyle(() => {
     return {
       position: 'absolute',
-      padding: 20,
-      paddingBottom:
-        20 + Math.max(safeAreaInsets.bottom, keyboard.height.value),
-      bottom: 0,
-      left: 0,
-      right: 0,
+      bottom: Math.max(safeAreaInsets.bottom, keyboard.height.value) + 20,
+      left: 20,
+      right: 20,
     };
   });
 
   return (
     // 귀찮아서 ScrollViewRegisterContainer에서 복사해서 온거라서 Root가 다른 View로 시작함.
+    // 불필요한 구조인 것 같아도 ScrollViewRegisterContainer 보고 그냥 그러녀니하면 됨.
     <Reanimated.View style={viewStyle}>
+      {paragraph ? (
+        <Text
+          style={StyleSheet.flatten([
+            style.flatten(['body2', 'text-center', 'color-text-low']),
+            {marginTop: -3, marginBottom: 3},
+          ])}>
+          {paragraph}
+        </Text>
+      ) : null}
       <Reanimated.View style={containerStyle}>
-        {paragraph ? (
-          <Text
-            style={StyleSheet.flatten([
-              style.flatten(['body2', 'text-center', 'color-text-low']),
-              {marginTop: -3},
-            ])}>
-            {paragraph}
-          </Text>
-        ) : null}
-        {children}
-        <Reanimated.View style={bottomMockViewStyle} />
+        {/* NOTE: reanimated로는 scroll view에서 contentContainerStyle를 못 쓴다... 따로 view를 내부에 분리시킴 */}
+        <Reanimated.View style={contentContainerStyle}>
+          {children}
+          <Reanimated.View style={bottomMockViewStyle} />
+        </Reanimated.View>
       </Reanimated.View>
       {bottomButton ? (
         <Reanimated.View style={bottomButtonViewStyle}>
