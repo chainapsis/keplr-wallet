@@ -28,3 +28,5 @@ export * from './globe';
 export * from './vote';
 export * from './warning';
 export * from './warning-fill';
+export * from './link';
+export * from './plus';
