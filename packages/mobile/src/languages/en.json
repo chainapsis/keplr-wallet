@@ -562,6 +562,7 @@
   "page.main.components.token-found-modal.add-token-on-injective-and-evmos": "Add tokens on Injective and Evmos",
   "page.main.components.token-found-modal.add-chains": "Add Chains",
   "page.main.components.token-item.copy-address.copied": "Copied",
+  "page.main.components.error-modal-title": "Error Message",
   "page.main.components.secret-error-modal-button": "Set my Viewing Key",
   "page.main.components.staking-chain-modal.title": "Available Assets",
   "page.main.components.staking-chain-modal.empty-text": "Please retry after buying or depositing stakeable assets to your wallet.",

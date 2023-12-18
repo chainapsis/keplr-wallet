@@ -547,6 +547,7 @@
   "page.main.components.token-found-modal.add-token-on-injective-and-evmos": "인젝티브와 이브모스의 토큰 추가하기",
   "page.main.components.token-found-modal.add-chains": "체인 추가",
   "page.main.components.token-item.copy-address.copied": "복사됨",
+  "page.main.components.error-modal-title": "Error Message",
   "page.main.components.secret-error-modal-button": "Set my Viewing Key",
   "page.main.components.staking-chain-modal.title": "Available Assets",
   "page.main.components.first-time-empty-view-title": "Ready to Explore the Interchain?",
