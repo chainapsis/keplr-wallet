@@ -31,6 +31,7 @@ import {
   HomeScreenHeaderTitle,
   defaultHeaderOptions,
   homeHeaderOptions,
+  SuggestScreenHeaderRightFunc,
 } from './components/pageHeader';
 import {SettingScreen} from './screen/setting';
 
@@ -608,6 +609,7 @@ const SettingGeneralNavigation = () => {
           title: intl.formatMessage({
             id: 'page.setting.general.manage-non-native-chains-title',
           }),
+          headerRight: SuggestScreenHeaderRightFunc,
           ...defaultHeaderOptions,
         }}
         component={SettingGeneralDeleteSuggestChainScreen}
