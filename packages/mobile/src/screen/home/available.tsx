@@ -226,6 +226,11 @@ export const AvailableTabView: FunctionComponent<{
                                     ]
                                   : [],
                               )}
+                              toggleCircleColor={
+                                !uiConfigStore.isHideLowBalance
+                                  ? style.get('color-gray-400').color
+                                  : undefined
+                              }
                             />
                           </React.Fragment>
                         ) : undefined
@@ -328,6 +333,7 @@ export const AvailableTabView: FunctionComponent<{
       <TokenFoundModal
         isOpen={isOpenTokenFoundModal}
         setIsOpen={setIsOpenTokenFoundModal}
+        navigation={navigation}
       />
       <InformationModal
         isOpen={isInfoModalOpen}

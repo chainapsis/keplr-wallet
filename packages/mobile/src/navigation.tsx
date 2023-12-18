@@ -254,6 +254,10 @@ export type StakeNavigation = {
   'Stake.ValidateDetail': {
     chainId: string;
     validatorAddress: string;
+    validatorSelector?: (
+      validatorAddress: string,
+      validatorName: string,
+    ) => void;
   };
   'Stake.Delegate': {
     chainId: string;
@@ -583,7 +587,7 @@ const SettingGeneralNavigation = () => {
         name="Setting.General.ContactAdd"
         options={{
           title: intl.formatMessage({
-            id: 'page.setting.general.contacts-title',
+            id: 'page.setting.contacts.add.add-title',
           }),
           ...defaultHeaderOptions,
         }}
@@ -622,7 +626,9 @@ const SettingGeneralNavigation = () => {
       <Stack.Screen
         name="Setting.General.ManageWalletConnect"
         options={{
-          title: 'Manage Wallet Connect',
+          title: intl.formatMessage({
+            id: 'page.setting.general.manage-WC-title',
+          }),
           ...defaultHeaderOptions,
         }}
         component={SettingGeneralManageWalletConnectScreen}
@@ -741,7 +747,7 @@ const StakeNavigation = () => {
       <StakeStack.Screen
         name="Stake.ValidateDetail"
         options={{
-          title: 'Validator Detail Page',
+          title: 'Validator Details',
           ...defaultHeaderOptions,
         }}
         component={ValidatorDetailScreen}
@@ -788,7 +794,7 @@ const GovernanceNavigation = () => {
       <GovernanceStack.Screen
         name="Governance.intro"
         options={{
-          title: '투표할 프로포절이 있는 체인들',
+          title: 'Chains with Active Proposals',
           ...defaultHeaderOptions,
         }}
         component={GovernanceScreen}

@@ -25,7 +25,6 @@ import {Text} from 'react-native';
 import {Gutter} from '../../components/gutter';
 import {Box} from '../../components/box';
 import {FeeControl} from '../../components/input/fee-control';
-import {Button} from '../../components/button';
 import {XAxis} from '../../components/axis';
 import {CloseIcon} from '../../components/icon';
 import {CodeBracketIcon} from '../../components/icon/code-bracket';
@@ -36,6 +35,12 @@ import {ScrollView, FlatList} from 'react-native-gesture-handler';
 import {GuideBox} from '../../components/guide-box';
 import {Checkbox} from '../../components/checkbox';
 import {registerCardModal} from '../../components/modal/card';
+import {SpecialButton} from '../../components/special-button';
+import {handleCosmosPreSign} from './util/handle-cosmos-sign';
+import {KeplrError} from '@keplr-wallet/router';
+import {ErrFailedInit, ErrModuleLedgerSign} from './util/ledger-types';
+import {LedgerGrantModal} from '../register/connect-ledger/modal';
+import {LedgerGuideBox} from '../../components/guide-box/ledger-guide-box';
 
 export const SignModal = registerCardModal(
   observer<{
@@ -296,23 +301,58 @@ export const SignModal = registerCardModal(
       unmountPromise.resolver();
     });
 
+    const isLedgerAndDirect =
+      interactionData.data.keyType === 'ledger' &&
+      interactionData.data.mode === 'direct';
+
+    const [isLedgerInteracting, setIsLedgerInteracting] = useState(false);
+    const [ledgerInteractingError, setLedgerInteractingError] = useState<
+      Error | undefined
+    >(undefined);
+    const [isLedgerGrantModalOpen, setIsLedgerGrantModalOpen] = useState(false);
+
     const buttonDisabled =
-      txConfigsValidate.interactionBlocked || !signDocHelper.signDocWrapper;
+      txConfigsValidate.interactionBlocked ||
+      !signDocHelper.signDocWrapper ||
+      isLedgerAndDirect ||
+      (isSendAuthzGrant && !isSendAuthzGrantChecked);
 
     const approve = async () => {
+      if (interactionData.data.keyType === 'ledger') {
+        setIsLedgerInteracting(true);
+        setLedgerInteractingError(undefined);
+      }
+
       if (signDocHelper.signDocWrapper) {
         try {
+          const signature = await handleCosmosPreSign(
+            interactionData,
+            signDocHelper.signDocWrapper,
+          );
+
           await signInteractionStore.approveWithProceedNext(
             interactionData.id,
             signDocHelper.signDocWrapper,
-            undefined,
-            () => {
-              console.log('afterFn');
-            },
+            signature,
+            () => {},
             {},
           );
         } catch (e) {
-          console.log(e);
+          if (e instanceof KeplrError) {
+            if (e.module === ErrModuleLedgerSign) {
+              if (e.code === ErrFailedInit) {
+                setIsLedgerGrantModalOpen(true);
+              }
+
+              setLedgerInteractingError(e);
+            } else {
+              setLedgerInteractingError(undefined);
+            }
+          } else {
+            setLedgerInteractingError(undefined);
+          }
+        } finally {
+          setIsLedgerInteracting(false);
         }
       }
     };
@@ -352,7 +392,7 @@ export const SignModal = registerCardModal(
             backgroundColor={style.get('color-gray-500').color}
             padding={16}
             borderRadius={6}>
-            <ScrollView>
+            <ScrollView persistentScrollbar={true}>
               <Text style={style.flatten(['body3', 'color-text-middle'])}>
                 {JSON.stringify(signDocHelper.signDocJson, null, 2)}
               </Text>
@@ -427,14 +467,83 @@ export const SignModal = registerCardModal(
           </React.Fragment>
         ) : null}
 
-        <Button
+        {isLedgerAndDirect ? (
+          <React.Fragment>
+            <GuideBox
+              color="warning"
+              title={intl.formatMessage({
+                id: 'page.sign.cosmos.tx.warning-title',
+              })}
+              paragraph={intl.formatMessage({
+                id: 'page.sign.cosmos.tx.warning-paragraph',
+              })}
+            />
+
+            <Gutter size={16} />
+          </React.Fragment>
+        ) : null}
+
+        {ledgerInteractingError ? (
+          <React.Fragment>
+            <LedgerGuideBox
+              data={{
+                keyInsensitive: interactionData.data.keyInsensitive,
+                isEthereum:
+                  'eip712' in interactionData.data &&
+                  interactionData.data.eip712 != null,
+              }}
+              isLedgerInteracting={isLedgerInteracting}
+              ledgerInteractingError={ledgerInteractingError}
+            />
+
+            <Gutter size={16} />
+          </React.Fragment>
+        ) : null}
+
+        <SpecialButton
           size="large"
-          text="Approve"
+          text={intl.formatMessage({
+            id: 'button.approve',
+          })}
+          isLoading={
+            signInteractionStore.isObsoleteInteraction(interactionData.id) ||
+            isLedgerInteracting
+          }
           onPress={approve}
           disabled={buttonDisabled}
+          innerButtonStyle={style.flatten(['width-full'])}
         />
 
         <Gutter size={24} />
+
+        <LedgerGrantModal
+          isOpen={isLedgerGrantModalOpen}
+          setIsOpen={setIsLedgerGrantModalOpen}
+          app={(() => {
+            const appData = interactionData?.data?.keyInsensitive;
+
+            if (appData['Terra']) {
+              return 'Terra';
+            } else if (appData['Secret']) {
+              return 'Secret';
+            } else {
+              return 'Cosmos';
+            }
+          })()}
+          bip44Path={
+            (interactionData.data.keyInsensitive['bip44Path'] as {
+              account: number;
+              change: number;
+              addressIndex: number;
+            }) ?? {
+              account: 0,
+              change: 0,
+              addressIndex: 0,
+            }
+          }
+          setStep={() => {}}
+          setPublicKey={() => {}}
+        />
       </Box>
     );
   }),

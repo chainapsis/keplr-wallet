@@ -118,6 +118,9 @@ export const SettingSecurityBio: FunctionComponent = observer(() => {
                 onSubmitEditing={() => {
                   submit();
                 }}
+                placeholder={intl.formatMessage({
+                  id: 'page.setting.security.bio-authentication.password-placeholder',
+                })}
               />
             );
           }}

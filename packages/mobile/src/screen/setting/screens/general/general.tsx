@@ -3,7 +3,6 @@ import {Box} from '../../../../components/box';
 import {Stack} from '../../../../components/stack';
 import {PageButton} from '../../components';
 import {useIntl} from 'react-intl';
-import {useLanguage} from '../../../../languages';
 import {ArrowRightIcon} from '../../../../components/icon/arrow-right';
 import {useStyle} from '../../../../styles';
 import {useNavigation} from '@react-navigation/native';
@@ -13,7 +12,6 @@ import {observer} from 'mobx-react-lite';
 
 export const SettingGeneralScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
-  const language = useLanguage();
   const style = useStyle();
   const navigate = useNavigation<StackNavProp>();
   const {uiConfigStore, keyRingStore} = useStore();
@@ -22,7 +20,7 @@ export const SettingGeneralScreen: FunctionComponent = observer(() => {
     <React.Fragment>
       <Box paddingX={12} paddingY={8}>
         <Stack gutter={8}>
-          <PageButton
+          {/* <PageButton
             title={intl.formatMessage({
               id: 'page.setting.general.language-title',
             })}
@@ -34,7 +32,7 @@ export const SettingGeneralScreen: FunctionComponent = observer(() => {
               />
             }
             onClick={() => navigate.navigate('Setting.General.Lang')}
-          />
+          /> */}
 
           <PageButton
             title={intl.formatMessage({
@@ -66,7 +64,9 @@ export const SettingGeneralScreen: FunctionComponent = observer(() => {
           />
 
           <PageButton
-            title="Manage Wallet Connect"
+            title={intl.formatMessage({
+              id: 'page.setting.general.manage-WC-title',
+            })}
             endIcon={
               <ArrowRightIcon
                 size={24}

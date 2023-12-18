@@ -17,15 +17,16 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {ValidatorInfo} from '../type';
 import {SelectItemModal} from '../../../components/modal/select-item-modal';
 
-export type FilterOption = 'Commission' | 'Voting';
+export type FilterOption = 'Commission' | 'Voting Power';
 export const ValidatorListScreen: FunctionComponent = observer(() => {
   const {queriesStore, accountStore} = useStore();
   const style = useStyle();
-  const [filterOption, setFilterOption] = useState<FilterOption>('Voting');
+  const [filterOption, setFilterOption] =
+    useState<FilterOption>('Voting Power');
   const [search, setSearch] = useState('');
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.ValidateList'>>();
   const navigation = useNavigation<StackNavProp>();
-  const filterItems: FilterOption[] = ['Commission', 'Voting'];
+  const filterItems: FilterOption[] = ['Commission', 'Voting Power'];
 
   const {chainId, validatorSelector} = route.params;
   const queries = queriesStore.get(chainId);
@@ -49,7 +50,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
       return val.description.moniker?.toLocaleLowerCase().includes(_search);
     });
 
-    if (filterOption === 'Voting') {
+    if (filterOption === 'Voting Power') {
       return _filteredValidators.sort(
         (a, b) => Number(b.tokens) - Number(a.tokens),
       );
@@ -77,11 +78,14 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
           isDelegation={delegationsValidatorSet.has(validator.operator_address)}
           afterSelect={() => {
             if (validatorSelector) {
-              validatorSelector(
-                validator.operator_address,
-                validator.description?.moniker || validator.operator_address,
-              );
-              navigation.goBack();
+              navigation.push('Stake', {
+                screen: 'Stake.ValidateDetail',
+                params: {
+                  chainId,
+                  validatorAddress: validator.operator_address,
+                  validatorSelector,
+                },
+              });
               return;
             }
             navigation.navigate('Stake', {

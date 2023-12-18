@@ -24,6 +24,8 @@ import {
 } from '../../../components/icon';
 import {LedgerGrantModal} from './modal';
 import {useStore} from '../../../stores';
+import TransportBLE from '@ledgerhq/react-native-hw-transport-ble';
+import {LedgerUtils} from '../../../utils';
 
 export type Step = 'unknown' | 'connected' | 'app';
 
@@ -49,6 +51,18 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
       hideBackButton: appendModeInfo !== undefined,
     });
   }, [appendModeInfo, navigation, stepPrevious, stepTotal]);
+
+  useEffect(() => {
+    // If this modal appears, it's probably because there was a problem with the ledger connection.
+    // Ledger transport library for BLE seems to cache the transport internally.
+    // But this can be small problem when the ledger connection is failed.
+    // So, when this modal appears, try to disconnect the bluetooth connection for nano X.
+    LedgerUtils.getLastUsedLedgerDeviceId().then(deviceId => {
+      if (deviceId) {
+        TransportBLE.disconnect(deviceId);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     (async () => {

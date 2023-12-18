@@ -20,7 +20,7 @@ export const GuideBox: FunctionComponent<GuideBoxProps> = ({
   const paragraphColor = (() => {
     switch (color) {
       case 'warning':
-        return style.get('color-yellow-500@70%').color;
+        return style.get('color-yellow-500').color;
       case 'danger':
         return style.get('color-red-300').color;
       default:

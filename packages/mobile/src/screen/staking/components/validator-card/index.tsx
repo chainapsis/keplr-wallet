@@ -20,10 +20,22 @@ export const ValidatorCard: FunctionComponent<{
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
     Staking.BondStatus.Bonded,
   );
-  const validatorInfo = bondedValidators.validators.find(
-    val => val.operator_address === validatorAddress,
+  const unbondingValidators = queries.cosmos.queryValidators.getQueryStatus(
+    Staking.BondStatus.Unbonding,
   );
-  const thumbnail = bondedValidators.getValidatorThumbnail(validatorAddress);
+  const unbondedValidators = queries.cosmos.queryValidators.getQueryStatus(
+    Staking.BondStatus.Unbonded,
+  );
+
+  const validatorInfo = bondedValidators.validators
+    .concat(unbondingValidators.validators)
+    .concat(unbondedValidators.validators)
+    .find(val => val.operator_address === validatorAddress);
+
+  const thumbnail =
+    bondedValidators.getValidatorThumbnail(validatorAddress) ||
+    unbondingValidators.getValidatorThumbnail(validatorAddress) ||
+    unbondedValidators.getValidatorThumbnail(validatorAddress);
 
   const style = useStyle();
 

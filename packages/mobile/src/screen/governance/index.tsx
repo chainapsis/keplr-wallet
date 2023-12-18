@@ -25,6 +25,8 @@ import {
   NoDashboardLinkIdentifiers,
 } from '../../config';
 import {ChainIdHelper} from '@keplr-wallet/cosmos';
+import {EmptyView, EmptyViewText} from '../../components/empty-view';
+import {Box} from '../../components/box';
 
 export const GovernanceScreen: FunctionComponent = observer(() => {
   const style = useStyle();
@@ -127,8 +129,9 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
     <PageWithScrollView
       backgroundMode={'default'}
       style={style.flatten(['padding-x-12'])}>
+      <Gutter size={6} />
       <TextButton
-        text="전체 체인의 프로포절들 보기"
+        text="View All Proposals"
         size="large"
         color="faint"
         containerStyle={style.flatten(['padding-x-12', 'padding-y-6'])}
@@ -162,11 +165,22 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
           </React.Fragment>
         );
       })}
+      {viewItems.length === 0 ? (
+        <React.Fragment>
+          <Gutter size={100} />
+          <EmptyView>
+            <Box alignX="center">
+              <EmptyViewText text="No records of past or" />
+              <EmptyViewText text="ongoing proposals found" />
+            </Box>
+          </EmptyView>
+        </React.Fragment>
+      ) : null}
       <GovSelectChainModal
         isOpen={isOpenSelectChainModal}
         setIsOpen={setIsOpenSelectChainModal}
         items={modalItems}
-        placeholder="search for chain"
+        placeholder="Search for a chain"
         onSelect={({key}) => {
           setIsOpenSelectChainModal(false);
           navigation.navigate('Governance', {

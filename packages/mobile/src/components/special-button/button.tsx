@@ -34,6 +34,7 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
   isLoading,
   disabled,
   textOverrideIcon,
+  innerButtonStyle,
 }) => {
   const style = useStyle();
   const height = style.get(`height-button-${size}`).height as number;
@@ -166,6 +167,7 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
               transform: [{scale: scaleSize as any}],
               height,
             },
+            innerButtonStyle,
           ])}
           animatedProps={animatedProps}
           colors={colors}>

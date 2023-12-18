@@ -1,4 +1,5 @@
 import React from 'react';
+import {ViewStyle} from 'react-native';
 
 export interface SpecialButtonProps {
   size?: 'extra-small' | 'small' | 'medium' | 'large';
@@ -9,4 +10,5 @@ export interface SpecialButtonProps {
   onPress?: () => void;
   isLoading?: boolean;
   textOverrideIcon?: React.ReactNode;
+  innerButtonStyle?: ViewStyle;
 }

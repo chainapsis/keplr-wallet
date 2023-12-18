@@ -17,12 +17,14 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import {TextButton} from '../../components/text-button';
+import {useNotification} from '../../hooks/notification';
 
 const AnimatedLottieView = Animated.createAnimatedComponent(LottieView);
 
 export const TxFailedResultScreen: FunctionComponent = observer(() => {
   const animationRef = useRef<LottieView>(null);
   const failedAnimProgress = useSharedValue(0);
+  const notification = useNotification();
   const animatedProps = useAnimatedProps(() => {
     return {
       progress: failedAnimProgress.value,
@@ -49,6 +51,15 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
 
   const style = useStyle();
   const navigation = useNavigation<StackNavProp>();
+
+  useEffect(() => {
+    notification.disable(true);
+    return () => {
+      //NOTE setTimeout을 건이유는 해당 페이지가 보이자 말자 바로 main으로 이동하면 토스트가 보임해서
+      //해당 토스트가 사라지는 시간을 대강 계산해서 800밀리초 후 disable을 false로 설정
+      setTimeout(() => notification.disable(false), 800);
+    };
+  }, [notification]);
 
   useEffect(() => {
     const animateLottie = () => {
