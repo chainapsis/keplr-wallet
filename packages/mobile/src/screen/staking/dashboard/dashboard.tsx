@@ -2,7 +2,7 @@ import React, {FunctionComponent, useEffect, useMemo, useState} from 'react';
 import {PageWithScrollView} from '../../../components/page';
 
 import {observer} from 'mobx-react-lite';
-import {Text} from 'react-native';
+import {RefreshControl, Text} from 'react-native';
 import {useStore} from '../../../stores';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {StackNavProp, StakeNavigation} from '../../../navigation';
@@ -43,6 +43,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
   const account = accountStore.getAccount(chainId);
   const queries = queriesStore.get(chainId);
   const chainInfo = chainStore.getChain(chainId);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     navigation.setOptions({title: `Staking on ${chainInfo.chainName}`});
@@ -167,11 +168,24 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
       lenAlwaysShown: 4,
     },
   ];
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await queryDelegations.waitFreshResponse();
+    await queryUnbondings.waitFreshResponse();
+    setRefreshing(false);
+  };
 
   return (
     <PageWithScrollView
       backgroundMode="default"
-      style={style.flatten(['padding-x-12'])}>
+      style={style.flatten(['padding-x-12'])}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={style.get('color-gray-200').color}
+        />
+      }>
       <Box alignX="center" alignY="center" marginTop={21} marginBottom={35}>
         <Box
           borderRadius={16}
