@@ -1,10 +1,24 @@
-import { TxEventMap, WsReadyState } from "./types";
-
 import { Buffer } from "buffer/";
 
 type Listeners = {
   [K in keyof TxEventMap]?: TxEventMap[K][];
 };
+
+export enum WsReadyState {
+  CONNECTING,
+  OPEN,
+  CLOSING,
+  CLOSED,
+  // WS is not initialized or the ready state of WS is unknown
+  NONE,
+}
+
+export interface TxEventMap {
+  close: (e: CloseEvent) => void;
+  error: (e: Event) => void;
+  message: (e: MessageEvent) => void;
+  open: (e: Event) => void;
+}
 
 export class TendermintTxTracer {
   protected ws: WebSocket;
@@ -343,7 +357,7 @@ export class TendermintTxTracer {
             .join(" and "),
         page: "1",
         per_page: "1",
-        order_by: "desc",
+        order_by: "asc",
       };
 
       return new Promise<unknown>((resolve, reject) => {
@@ -399,7 +413,7 @@ export class TendermintTxTracer {
           .join(" and "),
         page: "1",
         per_page: "1",
-        order_by: "desc",
+        order_by: "asc",
       };
 
       return this.query("tx_search", params);
