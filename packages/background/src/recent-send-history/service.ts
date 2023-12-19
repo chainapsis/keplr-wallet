@@ -3,6 +3,7 @@ import {
   Bech32Address,
   ChainIdHelper,
   TendermintTxTracer,
+  WsReadyState,
 } from "@keplr-wallet/cosmos";
 import { BackgroundTxService, Notification } from "../tx";
 import {
@@ -309,10 +310,12 @@ export class RecentSendHistoryService {
       return history.ibcHistory.find((h) => h.error != null) != null;
     })();
 
-    if (
-      needRewind &&
-      !history.ibcHistory.find((h) => h.rewoundButNextRewindingBlocked)
-    ) {
+    if (needRewind) {
+      if (history.ibcHistory.find((h) => h.rewoundButNextRewindingBlocked)) {
+        onFulfill();
+        return;
+      }
+      const isTimeoutPacket = history.packetTimeout || false;
       const lastRewoundChannelIndex = history.ibcHistory.findIndex((h) => {
         if (h.rewound) {
           return true;
@@ -357,11 +360,22 @@ export class RecentSendHistoryService {
           txTracer.addEventListener("close", onClose);
           txTracer.addEventListener("error", onError);
           txTracer
-            .traceTx({
-              // "acknowledge_packet.packet_src_port": targetChannel.portId,
-              "acknowledge_packet.packet_src_channel": targetChannel.channelId,
-              "acknowledge_packet.packet_sequence": targetChannel.sequence,
-            })
+            .traceTx(
+              isTimeoutPacket
+                ? {
+                    // "timeout_packet.packet_src_port": targetChannel.portId,
+                    "timeout_packet.packet_src_channel":
+                      targetChannel.channelId,
+                    "timeout_packet.packet_sequence": targetChannel.sequence,
+                  }
+                : {
+                    // "acknowledge_packet.packet_src_port": targetChannel.portId,
+                    "acknowledge_packet.packet_src_channel":
+                      targetChannel.channelId,
+                    "acknowledge_packet.packet_sequence":
+                      targetChannel.sequence,
+                  }
+            )
             .then((res: any) => {
               txTracer.close();
 
@@ -377,19 +391,48 @@ export class RecentSendHistoryService {
                   if (txs && Array.isArray(txs)) {
                     for (const tx of txs) {
                       if (targetChannel.sequence && "swapReceiver" in history) {
-                        const index =
-                          this.getIBCAcknowledgementPacketIndexFromTx(
-                            tx,
-                            targetChannel.portId,
-                            targetChannel.channelId,
-                            targetChannel.sequence
-                          );
+                        const index = isTimeoutPacket
+                          ? this.getIBCTimeoutPacketIndexFromTx(
+                              tx,
+                              targetChannel.portId,
+                              targetChannel.channelId,
+                              targetChannel.sequence
+                            )
+                          : this.getIBCAcknowledgementPacketIndexFromTx(
+                              tx,
+                              targetChannel.portId,
+                              targetChannel.channelId,
+                              targetChannel.sequence
+                            );
                         if (index >= 0) {
-                          const refunded = this.getIBCSwapResAmountFromTx(
-                            tx,
-                            history.swapReceiver[history.swapChannelIndex + 1],
-                            index
-                          );
+                          // 좀 빡치게 timeout packet은 refund 로직이 실행되고 나서 "timeout_packet" event가 발생한다.
+                          const refunded = isTimeoutPacket
+                            ? this.getIBCSwapResAmountFromTx(
+                                tx,
+                                history.swapReceiver[
+                                  history.swapChannelIndex + 1
+                                ],
+                                (() => {
+                                  const i =
+                                    this.getLastIBCTimeoutPacketBeforeIndexFromTx(
+                                      tx,
+                                      index
+                                    );
+
+                                  if (i < 0) {
+                                    return 0;
+                                  }
+                                  return i;
+                                })(),
+                                index
+                              )
+                            : this.getIBCSwapResAmountFromTx(
+                                tx,
+                                history.swapReceiver[
+                                  history.swapChannelIndex + 1
+                                ],
+                                index
+                              );
                           history.swapRefundInfo = {
                             chainId: prevChainInfo.chainId,
                             amount: refunded,
@@ -470,6 +513,56 @@ export class RecentSendHistoryService {
           : undefined;
 
       if (targetChannel && targetChannel.sequence) {
+        const closables: {
+          readyState: WsReadyState;
+          close: () => void;
+        }[] = [];
+        let _onFulfillOnce = false;
+        const onFulfillOnce = () => {
+          if (!_onFulfillOnce) {
+            _onFulfillOnce = true;
+            closables.forEach((closable) => {
+              if (
+                closable.readyState === WsReadyState.OPEN ||
+                closable.readyState === WsReadyState.CONNECTING
+              ) {
+                closable.close();
+              }
+            });
+            onFulfill();
+          }
+        };
+        let _onCloseOnce = false;
+        const onCloseOnce = () => {
+          if (!_onCloseOnce) {
+            _onCloseOnce = true;
+            closables.forEach((closable) => {
+              if (
+                closable.readyState === WsReadyState.OPEN ||
+                closable.readyState === WsReadyState.CONNECTING
+              ) {
+                closable.close();
+              }
+            });
+            onClose();
+          }
+        };
+        let _onErrorOnce = false;
+        const onErrorOnce = () => {
+          if (!_onErrorOnce) {
+            _onErrorOnce = true;
+            closables.forEach((closable) => {
+              if (
+                closable.readyState === WsReadyState.OPEN ||
+                closable.readyState === WsReadyState.CONNECTING
+              ) {
+                closable.close();
+              }
+            });
+            onError();
+          }
+        };
+
         const chainInfo = this.chainsService.getChainInfo(
           targetChannel.counterpartyChainId
         );
@@ -481,8 +574,9 @@ export class RecentSendHistoryService {
           };
 
           const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
-          txTracer.addEventListener("close", onClose);
-          txTracer.addEventListener("error", onError);
+          closables.push(txTracer);
+          txTracer.addEventListener("close", onCloseOnce);
+          txTracer.addEventListener("error", onErrorOnce);
           txTracer.traceTx(queryEvents).then((res) => {
             txTracer.close();
 
@@ -514,7 +608,7 @@ export class RecentSendHistoryService {
                           // XXX: {key: 'packet_ack', value: '{"error":"ABCI code: 6: error handling packet: see events for details"}'}
                           //      오류가 있을 경우 이딴식으로 오류가 나오기 때문에 뭐 유저에게 보여줄 방법이 없다...
                           targetChannel.error = "Packet processing failed";
-                          onFulfill();
+                          onFulfillOnce();
                           this.trackIBCPacketForwardingRecursive(id);
                           break;
                         }
@@ -555,7 +649,7 @@ export class RecentSendHistoryService {
                           nextChannel.channelId,
                           index
                         );
-                        onFulfill();
+                        onFulfillOnce();
                         this.trackIBCPacketForwardingRecursive(id);
                         break;
                       } else {
@@ -641,7 +735,7 @@ export class RecentSendHistoryService {
                             }
                           }
                         }
-                        onFulfill();
+                        onFulfillOnce();
                         break;
                       }
                     }
@@ -652,6 +746,53 @@ export class RecentSendHistoryService {
               });
             }
           });
+        }
+
+        let prevChainId: string = "";
+        if (targetChannelIndex > 0) {
+          prevChainId =
+            history.ibcHistory[targetChannelIndex - 1].counterpartyChainId;
+        } else {
+          prevChainId = history.chainId;
+        }
+        if (prevChainId) {
+          const prevChainInfo = this.chainsService.getChainInfo(prevChainId);
+          if (prevChainInfo) {
+            const queryEvents: any = {
+              // acknowledge_packet과는 다르게 timeout_packet은 이전의 체인의 이벤트로부터만 알 수 있다.
+              // 방법이 없기 때문에 여기서 이전의 체인으로부터 subscribe를 해서 이벤트를 받아야 한다.
+              // 하지만 이 경우 ibc error tracking 로직에서 이것과 똑같은 subscription을 한번 더 하게 된다.
+              // 이미 로직이 많이 복잡하기 때문에 로직을 덜 복잡하게 하기 위해서 이러한 비효율성(?)을 감수한다.
+              // "timeout_packet.packet_src_port": targetChannel.portId,
+              "timeout_packet.packet_src_channel": targetChannel.channelId,
+              "timeout_packet.packet_sequence": targetChannel.sequence,
+            };
+
+            const txTracer = new TendermintTxTracer(
+              prevChainInfo.rpc,
+              "/websocket"
+            );
+            closables.push(txTracer);
+            txTracer.addEventListener("close", onCloseOnce);
+            txTracer.addEventListener("error", onErrorOnce);
+            txTracer.traceTx(queryEvents).then((res) => {
+              txTracer.close();
+
+              if (!res) {
+                return;
+              }
+
+              // 이 event가 발생한 시점에서 이미 timeout packet은 받은 상태이고
+              // 이 경우 따로 정보를 얻을 필요는 없으므로 이후에 res를 쓰지는 않는다.
+              // 위에 res null check는 사실 필요 없지만 혹시나 해서 넣어둔다.
+              runInAction(() => {
+                targetChannel.error = "Packet timeout";
+                history.packetTimeout = true;
+                onFulfillOnce();
+                this.trackIBCPacketForwardingRecursive(id);
+              });
+            });
+          }
         }
       }
     }
@@ -1102,6 +1243,117 @@ export class RecentSendHistoryService {
     }
 
     return events.indexOf(packetEvent);
+  }
+
+  protected getIBCTimeoutPacketIndexFromTx(
+    tx: any,
+    sourcePortId: string,
+    sourceChannelId: string,
+    sequence: string
+  ): number {
+    const events = tx.events;
+    if (!events) {
+      throw new Error("Invalid tx");
+    }
+    if (!Array.isArray(events)) {
+      throw new Error("Invalid tx");
+    }
+
+    // In injective, events from tendermint rpc is not encoded as base64.
+    // I don't know that this is the difference from tendermint version, or just custom from injective.
+    const compareStringWithBase64OrPlain = (
+      target: string,
+      value: string
+    ): [boolean, boolean] => {
+      if (target === value) {
+        return [true, false];
+      }
+
+      if (target === Buffer.from(value).toString("base64")) {
+        return [true, true];
+      }
+
+      return [false, false];
+    };
+
+    const packetEvent = events.find((event: any) => {
+      if (event.type !== "timeout_packet") {
+        return false;
+      }
+      const sourcePortAttr = event.attributes.find((attr: { key: string }) => {
+        return compareStringWithBase64OrPlain(attr.key, "packet_src_port")[0];
+      });
+      if (!sourcePortAttr) {
+        return false;
+      }
+      const sourceChannelAttr = event.attributes.find(
+        (attr: { key: string }) => {
+          return compareStringWithBase64OrPlain(
+            attr.key,
+            "packet_src_channel"
+          )[0];
+        }
+      );
+      if (!sourceChannelAttr) {
+        return false;
+      }
+      let isBase64 = false;
+      const sequenceAttr = event.attributes.find((attr: { key: string }) => {
+        const c = compareStringWithBase64OrPlain(attr.key, "packet_sequence");
+        isBase64 = c[1];
+        return c[0];
+      });
+      if (!sequenceAttr) {
+        return false;
+      }
+
+      if (isBase64) {
+        return (
+          Buffer.from(sourcePortAttr.value, "base64").toString() ===
+            sourcePortId &&
+          Buffer.from(sourceChannelAttr.value, "base64").toString() ===
+            sourceChannelId &&
+          Buffer.from(sequenceAttr.value, "base64").toString() === sequence
+        );
+      } else {
+        return (
+          sourcePortAttr.value === sourcePortId &&
+          sourceChannelAttr.value === sourceChannelId &&
+          sequenceAttr.value === sequence
+        );
+      }
+    });
+    if (!packetEvent) {
+      return -1;
+    }
+
+    return events.indexOf(packetEvent);
+  }
+
+  protected getLastIBCTimeoutPacketBeforeIndexFromTx(
+    tx: any,
+    index: number
+  ): number {
+    const events = tx.events;
+    if (!events) {
+      throw new Error("Invalid tx");
+    }
+    if (!Array.isArray(events)) {
+      throw new Error("Invalid tx");
+    }
+    const reversedIndex = events
+      .slice(0, index)
+      .reverse()
+      .findIndex((event) => {
+        if (event.type === "timeout_packet") {
+          return true;
+        }
+      });
+
+    if (reversedIndex >= 0) {
+      return index - reversedIndex - 1;
+    }
+    return -1;
   }
 
   protected getIBCRecvPacketIndexFromTx(
