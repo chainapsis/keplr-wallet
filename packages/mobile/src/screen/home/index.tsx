@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
-import {Text, TextInput as NativeTextInput} from 'react-native';
+import {Text, TextInput as NativeTextInput, RefreshControl} from 'react-native';
 import {useStyle} from '../../styles';
 import {PageWithScrollView} from '../../components/page';
 import {useStore} from '../../stores';
@@ -46,10 +46,12 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const style = useStyle();
   const searchRef = useRef<NativeTextInput | null>(null);
   const [search, setSearch] = useState('');
+  const [refreshing, _] = useState(false);
 
   const isNotReady = useIsNotReady();
 
-  const {hugeQueriesStore} = useStore();
+  const {hugeQueriesStore, priceStore, chainStore, accountStore, queriesStore} =
+    useStore();
 
   const navigation = useNavigation<StackNavProp>();
 
@@ -95,10 +97,65 @@ export const HomeScreen: FunctionComponent = observer(() => {
     return result;
   }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings]);
 
+  const onRefresh = async () => {
+    if (isNotReady) {
+      return;
+    }
+    priceStore.waitFreshResponse();
+    if (tabStatus === 'available') {
+      for (const chainInfo of chainStore.chainInfosInUI) {
+        const account = accountStore.getAccount(chainInfo.chainId);
+
+        if (account.bech32Address === '') {
+          continue;
+        }
+        const queries = queriesStore.get(chainInfo.chainId);
+        const queryBalance = queries.queryBalances.getQueryBech32Address(
+          account.bech32Address,
+        );
+        const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
+          account.bech32Address,
+        );
+
+        queryBalance.stakable?.waitFreshResponse();
+        queryRewards.waitFreshResponse();
+      }
+      return;
+    }
+
+    for (const chainInfo of chainStore.chainInfosInUI) {
+      const account = accountStore.getAccount(chainInfo.chainId);
+
+      if (account.bech32Address === '') {
+        continue;
+      }
+      const queries = queriesStore.get(chainInfo.chainId);
+      const queryUnbonding =
+        queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
+          account.bech32Address,
+        );
+      const queryDelegation =
+        queries.cosmos.queryDelegations.getQueryBech32Address(
+          account.bech32Address,
+        );
+      queryUnbonding.waitFreshResponse();
+      queryDelegation.waitFreshResponse();
+    }
+  };
+
   return (
     <PageWithScrollView
       backgroundMode={'default'}
-      style={style.flatten(['padding-x-12', 'padding-top-8'])}>
+      contentContainerStyle={style.flatten(['padding-x-12', 'padding-y-8'])}
+      refreshControl={
+        isNotReady ? undefined : (
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={style.get('color-gray-200').color}
+          />
+        )
+      }>
       <Stack gutter={12}>
         <YAxis alignX="center">
           <LayeredHorizontalRadioGroup
