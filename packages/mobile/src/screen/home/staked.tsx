@@ -156,7 +156,7 @@ export const StakedTabView: FunctionComponent<{
                         if (errorKind === 'common') {
                           setInfoModalState({
                             title: intl.formatMessage({
-                              id: 'page.main.components.secret-error-modal-button',
+                              id: 'page.main.components.error-modal-title',
                             }),
                             paragraph: errorMsg,
                           });
