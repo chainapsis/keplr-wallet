@@ -22,6 +22,7 @@
     "force-export-ble": "sh ./scripts/force-export-ble-manager-from-ledger.sh"
   },
   "dependencies": {
+    "@formatjs/intl-datetimeformat": "^6.12.0",
     "@formatjs/intl-getcanonicallocales": "^2.2.1",
     "@formatjs/intl-locale": "^3.3.4",
     "@formatjs/intl-numberformat": "^8.7.2",
@@ -56,7 +57,7 @@
     "react": "18.2.0",
     "react-hook-form": "^7.45.4",
     "react-intl": "^6.2.8",
-    "react-native": "0.72.3",
+    "react-native": "0.72.7",
     "react-native-ble-plx": "^2.0.3",
     "react-native-device-info": "^10.11.0",
     "react-native-fast-image": "^8.6.3",
@@ -86,7 +87,7 @@
     "@babel/preset-env": "^7.20.0",
     "@babel/runtime": "^7.20.0",
     "@react-native/eslint-config": "^0.72.2",
-    "@react-native/metro-config": "^0.72.9",
+    "@react-native/metro-config": "^0.72.11",
     "@tsconfig/react-native": "^3.0.0",
     "@types/color": "^3.0.3",
     "@types/react-test-renderer": "^18.0.0",
@@ -95,7 +96,7 @@
     "babel-jest": "^29.2.1",
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "browserify": "^17.0.0",
-    "metro-react-native-babel-preset": "0.76.7",
+    "metro-react-native-babel-preset": "0.76.8",
     "pod-install": "^0.1.39",
     "react-test-renderer": "18.2.0",
     "tinyify": "^4.0.0"
