@@ -11,12 +11,11 @@ import {StoreProvider} from './src/stores';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {StyleProvider, useStyle} from './src/styles';
 import {AppNavigation} from './src/navigation';
-import {StatusBar} from 'react-native';
+import {Platform, StatusBar} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 import {AppIntlProvider} from './src/languages';
 
-//NOTE - ios,android 둘다 폴리필 해줘야 해서 해당 방식으로 import 함
 //import 순서가 중요함
 import '@formatjs/intl-getcanonicallocales/polyfill';
 import '@formatjs/intl-locale/polyfill';
@@ -29,6 +28,12 @@ import '@formatjs/intl-numberformat/locale-data/ko';
 import '@formatjs/intl-relativetimeformat/polyfill';
 import '@formatjs/intl-relativetimeformat/locale-data/en';
 import '@formatjs/intl-relativetimeformat/locale-data/ko'; // locale-data for en
+if (Platform.OS === 'android') {
+  require('@formatjs/intl-datetimeformat/polyfill');
+  require('@formatjs/intl-datetimeformat/locale-data/en.js');
+  require('@formatjs/intl-datetimeformat/add-golden-tz.js');
+}
+
 import {ConfirmProvider} from './src/hooks/confirm';
 import {InteractionModalsProvider} from './src/provider/interaction-modals-provider';
 import {LoadingIconAnimationProvider} from './src/provider/loading-icon-animation';
