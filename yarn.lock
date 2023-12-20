@@ -7750,6 +7750,7 @@ __metadata:
     expo-web-browser: ~12.3.2
     http-browserify: ^1.7.0
     https-browserify: ^1.0.0
+    jsc-android: next
     lottie-react-native: ^6.3.1
     metro-react-native-babel-preset: 0.76.8
     mobx: ^6.10.0
@@ -26445,6 +26446,13 @@ __metadata:
   version: 250231.0.0
   resolution: "jsc-android@npm:250231.0.0"
   checksum: 6c3f0f6f02fa37a19935b2fbe651e9d6ecc370eb30f2ecee76379337bbf084abb568a1ef1133fe622c5b76f43cf54bb7716f92a94dca010985da38edc48841e2
+  languageName: node
+  linkType: hard
+
+"jsc-android@npm:next":
+  version: 294992.0.0
+  resolution: "jsc-android@npm:294992.0.0"
+  checksum: 6c759ff63d9379b9b3ac474c82e4c0be1ce1ae07e931b554e96cd1f6030185407b044070f656c9d40b1fa0d05c2d1be81d87f9e665f410148a2c7ca7f0ed78f0
   languageName: node
   linkType: hard
 
