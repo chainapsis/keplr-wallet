@@ -1,6 +1,10 @@
 import React, {FunctionComponent, useMemo, useState} from 'react';
 import {observer} from 'mobx-react-lite';
-import {Text} from 'react-native';
+import {
+  InteractionManager,
+  Text,
+  TextInput as NativeTextInput,
+} from 'react-native';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
 import {FormattedMessage, useIntl} from 'react-intl';
@@ -10,11 +14,12 @@ import {Button} from '../../../components/button';
 import {Gutter} from '../../../components/gutter';
 import {XAxis} from '../../../components/axis';
 import {TextInput} from '../../../components/input';
-import {Controller, useForm} from 'react-hook-form';
+import {useForm} from 'react-hook-form';
 import {Bip44PathView, useBIP44PathState} from '../components/bip-path-44';
-import {useStore} from '../../../stores';
 import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
 import {VerticalCollapseTransition} from '../../../components/transition';
+import {NamePasswordInput} from '../components/name-password-input';
+import {useEffectOnce} from '../../../hooks';
 
 export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -28,6 +33,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
     control,
     handleSubmit,
     getValues,
+    setFocus,
     formState: {errors},
   } = useForm<{
     name: string;
@@ -41,15 +47,22 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
     },
   });
 
-  //Todo: Component로 빼야함
-  const {keyRingStore} = useStore();
-  const needPassword = keyRingStore.keyInfos.length === 0;
-
   const [inputs, setInputs] = useState<Record<number, string | undefined>>({});
   const [validatingStarted, setValidatingStarted] = useState<boolean>(false);
 
   const bip44PathState = useBIP44PathState();
   const [isOpenBip44PathView, setIsOpenBip44PathView] = React.useState(false);
+
+  // 그냥 첫번째 word input에 시작시 focus를 준다.
+  const firstWordInputRef = React.useRef<NativeTextInput>(null);
+  useEffectOnce(() => {
+    // XXX: 병맛이지만 RN에서 스크린이 변할때 바로 mount에서 focus를 주면 안드로이드에서 키보드가 안뜬다.
+    //      이 경우 settimeout을 쓰라지만... 그냥 스크린이 다 뜨면 포커스를 주는 것으로 한다.
+    InteractionManager.runAfterInteractions(() => {
+      firstWordInputRef.current?.focus();
+    });
+  });
+  const secondWordInputRef = React.useRef<NativeTextInput>(null);
 
   const verifyingWords = useMemo(() => {
     if (route.params.mnemonic?.trim() === '') {
@@ -148,7 +161,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
         backgroundColor={style.get('color-gray-600').color}
         borderRadius={8}
         style={{gap: 16}}>
-        {verifyingWords.map(({index, word}) => {
+        {verifyingWords.map(({index, word}, i) => {
           return (
             <XAxis alignY="center" key={index}>
               <Text style={style.flatten(['subtitle2', 'color-gray-100'])}>
@@ -161,6 +174,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
               <Gutter size={16} />
 
               <TextInput
+                ref={i === 0 ? firstWordInputRef : secondWordInputRef}
                 autoCapitalize="none"
                 containerStyle={{width: 120}}
                 onChangeText={text => {
@@ -175,6 +189,14 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
                   }
                   return false;
                 })()}
+                returnKeyType={'next'}
+                onSubmitEditing={() => {
+                  if (i === 0) {
+                    secondWordInputRef.current?.focus();
+                  } else {
+                    setFocus('name');
+                  }
+                }}
               />
             </XAxis>
           );
@@ -183,101 +205,13 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
 
       <Gutter size={20} />
 
-      <Controller
+      <NamePasswordInput
         control={control}
-        rules={{
-          required: 'Name is required',
-        }}
-        render={({field: {onChange, onBlur, value}}) => {
-          return (
-            <TextInput
-              label={intl.formatMessage({
-                id: 'pages.register.components.form.name-password.wallet-name-label',
-              })}
-              placeholder={intl.formatMessage({
-                id: 'pages.register.components.form.name-password.wallet-name-placeholder',
-              })}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              value={value}
-              error={errors.name && errors.name?.message}
-            />
-          );
-        }}
-        name={'name'}
+        errors={errors}
+        getValues={getValues}
+        setFocus={setFocus}
+        onSubmit={onSubmit}
       />
-
-      {needPassword ? (
-        <React.Fragment>
-          <Gutter size={16} />
-
-          <Controller
-            control={control}
-            rules={{
-              required: 'Password is required',
-              validate: (password: string): string | undefined => {
-                if (password.length < 8) {
-                  return intl.formatMessage({
-                    id: 'pages.register.components.form.name-password.short-password-error',
-                  });
-                }
-              },
-            }}
-            render={({field: {onChange, onBlur, value}}) => {
-              return (
-                <TextInput
-                  label={intl.formatMessage({
-                    id: 'pages.register.components.form.name-password.password-label',
-                  })}
-                  placeholder={intl.formatMessage({
-                    id: 'pages.register.components.form.name-password.password-placeholder',
-                  })}
-                  secureTextEntry={true}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                  error={errors.password?.message}
-                />
-              );
-            }}
-            name={'password'}
-          />
-
-          <Gutter size={16} />
-
-          <Controller
-            control={control}
-            rules={{
-              required: 'Password confirm is required',
-              validate: (confirmPassword: string): string | undefined => {
-                if (confirmPassword !== getValues('password')) {
-                  return intl.formatMessage({
-                    id: 'pages.register.components.form.name-password.password-not-match-error',
-                  });
-                }
-              },
-            }}
-            render={({field: {onChange, onBlur, value}}) => {
-              return (
-                <TextInput
-                  label={intl.formatMessage({
-                    id: 'pages.register.components.form.name-password.confirm-password-label',
-                  })}
-                  placeholder={intl.formatMessage({
-                    id: 'pages.register.components.form.name-password.confirm-password-placeholder',
-                  })}
-                  secureTextEntry={true}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                  error={errors.confirmPassword?.message}
-                />
-              );
-            }}
-            name={'confirmPassword'}
-          />
-        </React.Fragment>
-      ) : null}
 
       <Gutter size={16} />
 

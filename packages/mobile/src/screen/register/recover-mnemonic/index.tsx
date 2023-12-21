@@ -8,15 +8,14 @@ import {Button} from '../../../components/button';
 import {Box} from '../../../components/box';
 import {Gutter} from '../../../components/gutter';
 import {TextButton} from '../../../components/text-button';
-import {useStore} from '../../../stores';
 import {Controller, useForm} from 'react-hook-form';
-import {TextInput} from '../../../components/input';
 import * as Clipboard from 'expo-clipboard';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../navigation';
 import {Bip44PathView, useBIP44PathState} from '../components/bip-path-44';
 import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
 import {VerticalCollapseTransition} from '../../../components/transition';
+import {NamePasswordInput} from '../components/name-password-input';
 
 const bip39 = require('bip39');
 
@@ -53,9 +52,6 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
   const bip44PathState = useBIP44PathState();
   const [isOpenBip44PathView, setIsOpenBip44PathView] = React.useState(false);
 
-  const {keyRingStore} = useStore();
-  const needPassword = keyRingStore.keyInfos.length === 0;
-
   const {
     control,
     handleSubmit,
@@ -77,7 +73,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
     },
   });
 
-  const onSubmit = handleSubmit(async data => {
+  const onSubmit = handleSubmit(data => {
     const recoveryPhrase = trimWordsStr(data.recoveryPhrase);
 
     if (isPrivateKey(recoveryPhrase)) {
@@ -286,101 +282,13 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
 
       <Gutter size={16} />
 
-      <Controller
+      <NamePasswordInput
         control={control}
-        rules={{
-          required: 'Name is required',
-        }}
-        render={({field: {onChange, onBlur, value}}) => {
-          return (
-            <TextInput
-              label={intl.formatMessage({
-                id: 'pages.register.components.form.name-password.wallet-name-label',
-              })}
-              placeholder={intl.formatMessage({
-                id: 'pages.register.components.form.name-password.wallet-name-placeholder',
-              })}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              value={value}
-              error={errors.name && errors.name?.message}
-            />
-          );
-        }}
-        name={'name'}
+        errors={errors}
+        getValues={getValues}
+        setFocus={setFocus}
+        onSubmit={onSubmit}
       />
-
-      {needPassword ? (
-        <React.Fragment>
-          <Gutter size={16} />
-
-          <Controller
-            control={control}
-            rules={{
-              required: 'Password is required',
-              validate: (password: string): string | undefined => {
-                if (password.length < 8) {
-                  return intl.formatMessage({
-                    id: 'pages.register.components.form.name-password.short-password-error',
-                  });
-                }
-              },
-            }}
-            render={({field: {onChange, onBlur, value}}) => {
-              return (
-                <TextInput
-                  label={intl.formatMessage({
-                    id: 'pages.register.components.form.name-password.password-label',
-                  })}
-                  placeholder={intl.formatMessage({
-                    id: 'pages.register.components.form.name-password.password-placeholder',
-                  })}
-                  secureTextEntry={true}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                  error={errors.password?.message}
-                />
-              );
-            }}
-            name={'password'}
-          />
-
-          <Gutter size={16} />
-
-          <Controller
-            control={control}
-            rules={{
-              required: 'Password confirm is required',
-              validate: (confirmPassword: string): string | undefined => {
-                if (confirmPassword !== getValues('password')) {
-                  return intl.formatMessage({
-                    id: 'pages.register.components.form.name-password.password-not-match-error',
-                  });
-                }
-              },
-            }}
-            render={({field: {onChange, onBlur, value}}) => {
-              return (
-                <TextInput
-                  label={intl.formatMessage({
-                    id: 'pages.register.components.form.name-password.confirm-password-label',
-                  })}
-                  placeholder={intl.formatMessage({
-                    id: 'pages.register.components.form.name-password.confirm-password-placeholder',
-                  })}
-                  secureTextEntry={true}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                  error={errors.confirmPassword?.message}
-                />
-              );
-            }}
-            name={'confirmPassword'}
-          />
-        </React.Fragment>
-      ) : null}
 
       <Gutter size={16} />
 

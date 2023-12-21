@@ -1,16 +1,14 @@
 import React, {FunctionComponent, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {observer} from 'mobx-react-lite';
-import {Controller, useForm} from 'react-hook-form';
+import {useForm} from 'react-hook-form';
 import {Button} from '../../../components/button';
 import {useStyle} from '../../../styles';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../navigation';
 import {Bip44PathView, useBIP44PathState} from '../components/bip-path-44';
-import {Text} from 'react-native';
-import {TextInput} from '../../../components/input';
+import {InteractionManager, Text} from 'react-native';
 import {Gutter} from '../../../components/gutter';
-import {useStore} from '../../../stores';
 import {Box} from '../../../components/box';
 import {App} from '@keplr-wallet/ledger-cosmos';
 import {RectButton} from '../../../components/rect-button';
@@ -19,6 +17,8 @@ import {ArrowDownFillIcon} from '../../../components/icon/arrow-donw-fill';
 import {SelectItemModal} from '../../../components/modal/select-item-modal';
 import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
 import {VerticalCollapseTransition} from '../../../components/transition';
+import {NamePasswordInput} from '../components/name-password-input';
+import {useEffectOnce} from '../../../hooks';
 
 export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -29,9 +29,6 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
   const [isOpenBip44PathView, setIsOpenBip44PathView] = React.useState(false);
   const [isOpenSelectItemModal, setIsOpenSelectItemModal] = useState(false);
 
-  const {keyRingStore} = useStore();
-  const needPassword = keyRingStore.keyInfos.length === 0;
-
   const supportedApps: App[] = ['Cosmos', 'Terra', 'Secret'];
   const [selectedApp, setSelectedApp] = React.useState<App>('Cosmos');
 
@@ -39,6 +36,7 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
     control,
     handleSubmit,
     getValues,
+    setFocus,
     formState: {errors},
   } = useForm<{
     name: string;
@@ -50,6 +48,14 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
       password: '',
       confirmPassword: '',
     },
+  });
+
+  useEffectOnce(() => {
+    // XXX: 병맛이지만 RN에서 스크린이 변할때 바로 mount에서 focus를 주면 안드로이드에서 키보드가 안뜬다.
+    //      이 경우 settimeout을 쓰라지만... 그냥 스크린이 다 뜨면 포커스를 주는 것으로 한다.
+    InteractionManager.runAfterInteractions(() => {
+      setFocus('name');
+    });
   });
 
   const onSubmit = handleSubmit(async data => {
@@ -74,101 +80,13 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
         onPress: onSubmit,
       }}
       paddingX={20}>
-      <Controller
+      <NamePasswordInput
         control={control}
-        rules={{
-          required: 'Name is required',
-        }}
-        render={({field: {onChange, onBlur, value}}) => {
-          return (
-            <TextInput
-              label={intl.formatMessage({
-                id: 'pages.register.components.form.name-password.wallet-name-label',
-              })}
-              placeholder={intl.formatMessage({
-                id: 'pages.register.components.form.name-password.wallet-name-placeholder',
-              })}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              value={value}
-              error={errors.name && errors.name?.message}
-            />
-          );
-        }}
-        name={'name'}
+        errors={errors}
+        getValues={getValues}
+        setFocus={setFocus}
+        onSubmit={onSubmit}
       />
-
-      {needPassword ? (
-        <React.Fragment>
-          <Gutter size={16} />
-
-          <Controller
-            control={control}
-            rules={{
-              required: 'Password is required',
-              validate: (password: string): string | undefined => {
-                if (password.length < 8) {
-                  return intl.formatMessage({
-                    id: 'pages.register.components.form.name-password.short-password-error',
-                  });
-                }
-              },
-            }}
-            render={({field: {onChange, onBlur, value}}) => {
-              return (
-                <TextInput
-                  label={intl.formatMessage({
-                    id: 'pages.register.components.form.name-password.password-label',
-                  })}
-                  placeholder={intl.formatMessage({
-                    id: 'pages.register.components.form.name-password.password-placeholder',
-                  })}
-                  secureTextEntry={true}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                  error={errors.password?.message}
-                />
-              );
-            }}
-            name={'password'}
-          />
-
-          <Gutter size={16} />
-
-          <Controller
-            control={control}
-            rules={{
-              required: 'Password confirm is required',
-              validate: (confirmPassword: string): string | undefined => {
-                if (confirmPassword !== getValues('password')) {
-                  return intl.formatMessage({
-                    id: 'pages.register.components.form.name-password.password-not-match-error',
-                  });
-                }
-              },
-            }}
-            render={({field: {onChange, onBlur, value}}) => {
-              return (
-                <TextInput
-                  label={intl.formatMessage({
-                    id: 'pages.register.components.form.name-password.confirm-password-label',
-                  })}
-                  placeholder={intl.formatMessage({
-                    id: 'pages.register.components.form.name-password.confirm-password-placeholder',
-                  })}
-                  secureTextEntry={true}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                  error={errors.confirmPassword?.message}
-                />
-              );
-            }}
-            name={'confirmPassword'}
-          />
-        </React.Fragment>
-      ) : null}
 
       <Gutter size={16} />
 
