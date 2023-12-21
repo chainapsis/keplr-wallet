@@ -201,7 +201,6 @@
   "page.setting.general.language-title": "Language",
   "page.setting.general.currency-title": "Currency",
   "page.setting.general.contacts-title": "Contacts",
-  "page.setting.general.manage-WC-title": "Manage WalletConnect",
   "page.setting.general.theme-title": "Theme",
   "page.setting.general.manage-authz-title": "Manage AuthZ",
   "page.setting.general.link-kpelr-mobile-title": "Link Keplr Mobile",
@@ -246,6 +245,7 @@
 
   "page.setting.security.connected-websites-title": "Connected Websites",
   "page.setting.security.connected-websites-paragraph": "Websites that can view your address and make requests for signing",
+  "page.setting.security.manage-WC-title": "Manage WalletConnect",
   "page.setting.security.auto-lock-title": "Auto-Lock",
   "page.setting.security.change-password-title": "Change Password",
   "page.setting.security.bio-authentication-title": "Use Biometric Authentication",

@@ -90,7 +90,7 @@ import {
 } from './screen/tx-result';
 import {SettingGeneralVersionScreen} from './screen/setting/screens/general/version';
 import {CameraScreen} from './screen/camera';
-import {SettingGeneralManageWalletConnectScreen} from './screen/setting/screens/general/wallet-connect';
+import {SettingGeneralManageWalletConnectScreen} from './screen/setting/screens/security/wallet-connect';
 import {registerHeaderOptions} from './components/pageHeader/header-register';
 
 type DefaultRegisterParams = {
@@ -204,11 +204,11 @@ export type RootStackParamList = {
   'Setting.General.ManageNonActiveChains': undefined;
   'Setting.General.ManageChainVisibility': undefined;
   'Setting.General.Version': undefined;
-  'Setting.General.ManageWalletConnect': undefined;
 
   'Setting.SecurityAndPrivacy': undefined;
   'Setting.SecurityAndPrivacy.Intro': undefined;
   'Setting.SecurityAndPrivacy.Permission': undefined;
+  'Setting.SecurityAndPrivacy.ManageWalletConnect': undefined;
   'Setting.SecurityAndPrivacy.ChangePassword': undefined;
   'Setting.SecurityAndPrivacy.BioAuthentication': undefined;
 
@@ -632,16 +632,6 @@ const SettingGeneralNavigation = () => {
         }}
         component={SettingGeneralVersionScreen}
       />
-      <Stack.Screen
-        name="Setting.General.ManageWalletConnect"
-        options={{
-          title: intl.formatMessage({
-            id: 'page.setting.general.manage-WC-title',
-          }),
-          ...defaultHeaderOptions,
-        }}
-        component={SettingGeneralManageWalletConnectScreen}
-      />
     </Stack.Navigator>
   );
 };
@@ -671,6 +661,16 @@ const SettingSecurityAndPrivacyNavigation = () => {
           ...defaultHeaderOptions,
         }}
         component={SettingSecurityPermissionScreen}
+      />
+      <Stack.Screen
+        name="Setting.SecurityAndPrivacy.ManageWalletConnect"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.setting.security.manage-WC-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={SettingGeneralManageWalletConnectScreen}
       />
       <Stack.Screen
         name="Setting.SecurityAndPrivacy.ChangePassword"

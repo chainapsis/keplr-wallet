@@ -201,7 +201,6 @@
   "page.setting.general.language-title": "언어",
   "page.setting.general.currency-title": "통화",
   "page.setting.general.contacts-title": "연락처",
-  "page.setting.general.manage-WC-title": "Wallet Connect 관리",
   "page.setting.general.theme-title": "테마",
   "page.setting.general.manage-authz-title": "AuthZ 관리",
   "page.setting.general.link-kpelr-mobile-title": "케플러 모바일과 연결하기",
@@ -246,6 +245,7 @@
 
   "page.setting.security.connected-websites-title": "연결된 웹사이트",
   "page.setting.security.connected-websites-paragraph": "이 웹사이트들은 당신의 지갑 주소를 조회하고, 서명을 요청할 수 있습니다.",
+  "page.setting.security.manage-WC-title": "Wallet Connect 관리",
   "page.setting.security.auto-lock-title": "자동 잠금 타이머",
   "page.setting.security.change-password-title": "비밀번호 변경",
   "page.setting.security.bio-authentication-title": "바이오 인증 사용",
