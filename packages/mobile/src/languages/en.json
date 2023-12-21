@@ -321,6 +321,7 @@
   "page.unlock.star-migration-button": "Start Migration",
   "page.unlock.upgrade-in-progress": "Upgrade in progress",
   "page.unlock.unlock-button": "Unlock",
+  "page.unlock.migration-button": "Unlock to Start Migration",
   "page.unlock.forgot-password-button": "Forgot Password?",
   "page.unlock.need-help-button": "Need Help?",
 

@@ -281,7 +281,11 @@ export const UnlockScreen: FunctionComponent = observer(() => {
 
           return (
             <Button
-              text={intl.formatMessage({id: 'page.unlock.unlock-button'})}
+              text={
+                keyRingStore.needMigration
+                  ? intl.formatMessage({id: 'page.unlock.migration-button'})
+                  : intl.formatMessage({id: 'page.unlock.unlock-button'})
+              }
               size="large"
               onPress={onPressSubmit}
               loading={isLoading}
