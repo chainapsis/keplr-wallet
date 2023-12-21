@@ -587,7 +587,7 @@
   "components.address-book-modal.title": "주소록",
   "components.address-book-modal.recent-tab": "최근",
   "components.address-book-modal.contacts-tab": "연락처",
-  "components.address-book-modal.my-account-tab": "나의 계정",
+  "components.address-book-modal.my-wallets-tab": "My Wallets",
   "components.address-book-modal.current-wallet": "현재 지갑",
   "components.address-book-modal.other-wallet": "그 외",
   "components.address-book-modal.empty-view-accounts": "다른 지갑이 없습니다.",

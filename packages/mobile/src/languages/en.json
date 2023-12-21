@@ -601,11 +601,11 @@
   "components.address-book-modal.title": "Address Book",
   "components.address-book-modal.recent-tab": "Recent",
   "components.address-book-modal.contacts-tab": "Contacts",
-  "components.address-book-modal.my-account-tab": "My account",
+  "components.address-book-modal.my-wallets-tab": "My Wallets",
   "components.address-book-modal.current-wallet": "Current Wallet",
   "components.address-book-modal.other-wallet": "Other Wallets",
   "components.address-book-modal.empty-view-accounts": "No other wallet found",
-  "components.address-book-modal.empty-view-default": "No Data Yet",
+  "components.address-book-modal.empty-view-default": "No Contacts Yet",
   "components.address-item.sent-on-date": "Sent on {date}",
   "components.address-item.empty-memo": "(Empty Memo)",
 
