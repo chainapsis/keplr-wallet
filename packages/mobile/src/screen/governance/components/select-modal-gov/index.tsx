@@ -11,6 +11,7 @@ import {Column, Columns} from '../../../../components/column';
 import {ChainImageFallback} from '../../../../components/image';
 import {registerCardModal} from '../../../../components/modal/card';
 import {EmptyView, EmptyViewText} from '../../../../components/empty-view';
+import {useIntl} from 'react-intl';
 
 export interface SelectModalItem {
   key: string;
@@ -26,6 +27,7 @@ export const GovSelectChainModal = registerCardModal(
   }>(({items, placeholder, onSelect}) => {
     const style = useStyle();
     const [search, setSearch] = useState('');
+    const intl = useIntl();
     const searchRef = useRef<TextInput>(null);
 
     useEffect(() => {
@@ -104,12 +106,20 @@ export const GovSelectChainModal = registerCardModal(
             })}
             {filtered.length === 0 ? (
               <React.Fragment>
-                <Gutter size={50} />
+                <Gutter size={30} />
                 <EmptyView>
                   <Box alignX="center" width={312}>
-                    <EmptyViewText text="No Available Assets" />
+                    <EmptyViewText
+                      text={intl.formatMessage({
+                        id: 'page.governance.components.select-chain-modal.empty-title',
+                      })}
+                    />
                     <Gutter size={12} />
-                    <EmptyViewText text="Please retry after buying or depositing the asset to your wallet." />
+                    <EmptyViewText
+                      text={intl.formatMessage({
+                        id: 'page.governance.components.select-chain-modal.empty-text',
+                      })}
+                    />
                   </Box>
                 </EmptyView>
               </React.Fragment>
