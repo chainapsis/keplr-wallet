@@ -201,7 +201,6 @@ export const GovernanceCardBody: FunctionComponent<{
             <View style={style.flatten(['margin-bottom-8'])}>
               <Text style={style.flatten(['subtitle3', 'color-text-high'])}>
                 {proposal.title}
-                title
               </Text>
             </View>
             <Columns sum={1}>
