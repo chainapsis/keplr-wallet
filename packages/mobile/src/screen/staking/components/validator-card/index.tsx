@@ -1,6 +1,6 @@
 import React, {FunctionComponent} from 'react';
 import {observer} from 'mobx-react-lite';
-import {Text} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
 import {useStyle} from '../../../../styles';
 import {useStore} from '../../../../stores';
 import {Box} from '../../../../components/box';
@@ -63,7 +63,12 @@ export const ValidatorCard: FunctionComponent<{
             imageUrl={thumbnail}
             name={validatorInfo?.description.moniker}
           />
-          <Text style={style.flatten(['subtitle2', 'color-platinum-100'])}>
+          <Text
+            numberOfLines={1}
+            style={StyleSheet.flatten([
+              style.flatten(['subtitle2', 'color-platinum-100']),
+              {width: '80%'},
+            ])}>
             {validatorInfo?.description.moniker}
           </Text>
         </Columns>

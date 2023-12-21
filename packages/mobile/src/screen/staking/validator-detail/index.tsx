@@ -16,7 +16,7 @@ import {Staking} from '@keplr-wallet/stores';
 import {Box} from '../../../components/box';
 import {Column, Columns} from '../../../components/column';
 import {ValidatorImage} from '../components/validator-image';
-import {Text} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
 import {CoinPretty, Dec, RatePretty} from '@keplr-wallet/unit';
 import {Button} from '../../../components/button';
 
@@ -126,7 +126,12 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
                   imageUrl={thumbnail}
                   name={validatorInfo?.description.moniker}
                 />
-                <Text style={style.flatten(['subtitle2', 'color-text-high'])}>
+                <Text
+                  numberOfLines={1}
+                  style={StyleSheet.flatten([
+                    style.flatten(['subtitle2', 'color-text-high']),
+                    {width: '80%'},
+                  ])}>
                   {validatorInfo.description.moniker}
                 </Text>
               </Columns>
