@@ -1,9 +1,4 @@
-import React, {
-  FunctionComponent,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from 'react';
+import React, {FunctionComponent, useLayoutEffect, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {Box} from '../../../components/box';
@@ -20,6 +15,7 @@ import {WalletIcon} from '../../../components/icon';
 import {Bech32Address} from '@keplr-wallet/cosmos';
 import {CoinPretty} from '@keplr-wallet/unit';
 import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
+import {useEffectOnce} from '../../../hooks';
 
 export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -32,7 +28,7 @@ export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
   const {chainStore, keyRingStore} = useStore();
 
   const [index, setIndex] = useState(0);
-  const [chainId, setChainId] = useState(chainIds[0]);
+  const chainId = chainIds[index];
   const chainInfo = chainStore.getChain(chainId);
   const [selectedCoinType, setSelectedCoinType] = useState(-1);
   const [candidates, setCandidates] = useState<
@@ -41,6 +37,7 @@ export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
       bech32Address: string;
     }[]
   >([]);
+  const [buttonIsLoading, setButtonIsLoading] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setParams({
@@ -48,7 +45,7 @@ export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
     });
   }, [navigation]);
 
-  useEffect(() => {
+  useEffectOnce(() => {
     keyRingStore.computeNotFinalizedKeyAddresses(vaultId, chainId).then(res => {
       setCandidates(res);
 
@@ -56,11 +53,7 @@ export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
         setSelectedCoinType(res[0].coinType);
       }
     });
-  }, [chainId, keyRingStore, vaultId]);
-
-  useEffect(() => {
-    setChainId(chainIds[index]);
-  }, [chainIds, index]);
+  });
 
   const currency = chainInfo.stakeCurrency || chainInfo.currencies[0];
 
@@ -75,6 +68,7 @@ export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
         disabled:
           !keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo) ||
           selectedCoinType < 0,
+        loading: buttonIsLoading,
         onPress: async () => {
           if (selectedCoinType > 0) {
             await keyRingStore.finalizeKeyCoinType(
@@ -86,7 +80,20 @@ export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
             await chainStore.enableChainInfoInUIWithVaultId(vaultId, chainId);
 
             if (chainIds.length - index > 1) {
-              setIndex(index + 1);
+              setButtonIsLoading(true);
+              keyRingStore
+                .computeNotFinalizedKeyAddresses(vaultId, chainIds[index + 1])
+                .then(res => {
+                  setCandidates(res);
+
+                  if (res.length > 0) {
+                    setSelectedCoinType(res[0].coinType);
+                  }
+
+                  setIndex(index + 1);
+
+                  setButtonIsLoading(false);
+                });
             } else {
               if (skipWelcome) {
                 navigation.reset({routes: [{name: 'Home'}]});
