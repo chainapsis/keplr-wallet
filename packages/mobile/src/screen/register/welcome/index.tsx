@@ -63,7 +63,7 @@ export const WelcomeScreen: FunctionComponent = observer(() => {
       <Gutter size={30} />
 
       {password && keychainStore.isBiometrySupported ? (
-        <React.Fragment>
+        <Box style={style.flatten(['padding-x-50'])}>
           <XAxis alignY="center">
             <Text
               style={style.flatten([
@@ -77,7 +77,7 @@ export const WelcomeScreen: FunctionComponent = observer(() => {
             <Toggle isOpen={isBiometricOn} setIsOpen={setIsBiometricOn} />
           </XAxis>
           <Gutter size={20} />
-        </React.Fragment>
+        </Box>
       ) : null}
 
       <Gutter size={30} />

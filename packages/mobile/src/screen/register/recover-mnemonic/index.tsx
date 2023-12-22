@@ -227,6 +227,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
                   placeholder="Type your recovery phrase or private key"
                   placeholderTextColor={style.get('color-gray-300').color}
                   autoCorrect={false}
+                  autoComplete="off"
                   autoCapitalize="none"
                   underlineColorAndroid="transparent"
                   style={{
