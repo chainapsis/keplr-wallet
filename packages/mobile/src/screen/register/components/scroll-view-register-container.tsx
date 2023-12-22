@@ -1,9 +1,18 @@
-import React, {FunctionComponent, PropsWithChildren} from 'react';
+import React, {FunctionComponent, PropsWithChildren, useEffect} from 'react';
 import {ContentHeightAwareScrollView} from '../../../components/scroll-view';
 import {useStyle} from '../../../styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {ViewStyle} from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
-import {Platform, StyleSheet, Text} from 'react-native';
+import {
+  Keyboard,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput as NativeTextInput,
+  findNodeHandle,
+  UIManager,
+} from 'react-native';
 import Reanimated, {
   useAnimatedKeyboard,
   useAnimatedProps,
@@ -120,6 +129,74 @@ export const ScrollViewRegisterContainer: FunctionComponent<
     };
   });
 
+  const scrollViewRef = React.useRef<ScrollView>(null);
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null;
+    const listener = Keyboard.addListener('keyboardDidShow', frames => {
+      timeoutId = setTimeout(() => {
+        timeoutId = null;
+        const currentlyFocusedInput =
+          NativeTextInput.State.currentlyFocusedInput();
+        if (currentlyFocusedInput && scrollViewRef.current) {
+          // viewIsDescendantOf 이거 존재는 하는데 공식적인(?) 지원이 아니라 타이핑에는 없다고 함...
+          // 일단 방법이 없으니 이걸 쓴다...
+          // @ts-ignore
+          UIManager.viewIsDescendantOf(
+            findNodeHandle(currentlyFocusedInput),
+            scrollViewRef.current.getInnerViewNode(),
+            (isAncestor: boolean) => {
+              if (isAncestor) {
+                currentlyFocusedInput.measureInWindow((_1, y, _3, height) => {
+                  const textInputBottomPosition = y + height;
+                  const afterScreenY = frames.endCoordinates.screenY;
+                  const extraBottomHeight = bottomButton ? 52 + 40 : 0;
+                  // 안드로이드는 키보드 자체가 레이아웃을 바꾸기 때문에 키보드 높이를 고려할 필요가 없다.
+                  const keyboardSize =
+                    Platform.OS === 'ios' ? frames.endCoordinates.height : 0;
+
+                  if (
+                    textInputBottomPosition >
+                    afterScreenY - extraBottomHeight
+                  ) {
+                    UIManager.measureInWindow(
+                      scrollViewRef.current?.getScrollableNode(),
+                      (_1, _2, _3, scrollViewHeight) => {
+                        currentlyFocusedInput.measureLayout(
+                          scrollViewRef.current?.getInnerViewNode(),
+                          (_1, top, _3, height) => {
+                            scrollViewRef.current?.scrollTo({
+                              y:
+                                top +
+                                height +
+                                extraBottomHeight +
+                                keyboardSize -
+                                scrollViewHeight,
+                              animated: true,
+                            });
+                          },
+                        );
+                      },
+                    );
+                  }
+                });
+              }
+            },
+          );
+        }
+        // 나도 잘 모르겠음... 그냥 timeout을 주는게 그나마 좀 더 안정적임...
+        // 안드로이드에서 layout이 바뀌고 그게 실제로 적용될때까지의 시간차가 있는 것 같음...
+        // ios도 가끔씩 텍스트 인풋의 포커스에 의해서 스크롤 위치등이 바뀌는데 그때도 시간차가 있는듯...
+      }, 50);
+    });
+
+    return () => {
+      listener.remove();
+      if (timeoutId != null) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [bottomButton]);
+
   return (
     // NOTE: 원래는 ReanimatedContentHeightAwareScrollView에 position: relative를 주고
     //       bottom button view에 position: absolute를 주고 bottom: 0을 주려고 했는데
@@ -136,6 +213,7 @@ export const ScrollViewRegisterContainer: FunctionComponent<
         </Text>
       ) : null}
       <ReanimatedContentHeightAwareScrollView
+        ref={scrollViewRef}
         style={containerStyle}
         contentContainerStyle={{
           // NOTE: 일단 scroll view가 전체 화면을 다 채올때는 flex grow를 쓴다...
