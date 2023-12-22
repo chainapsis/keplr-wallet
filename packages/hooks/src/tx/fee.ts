@@ -406,7 +406,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
               average?: number;
               high?: number;
             }>(
-              "https://base-fee-step.s3.us-west-2.amazonaws.com/osmosis-base-fee-beta.json"
+              "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws/osmosis/osmosis-base-fee-beta.json"
             );
 
             const baseFee = queryOsmosis.queryBaseFee.baseFee;
