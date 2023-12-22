@@ -73,8 +73,13 @@ type TabStatus = "available" | "staked";
 export const MainPage: FunctionComponent<{
   setIsNotReady: (isNotReady: boolean) => void;
 }> = observer(({ setIsNotReady }) => {
-  const { analyticsStore, hugeQueriesStore, uiConfigStore, keyRingStore } =
-    useStore();
+  const {
+    analyticsStore,
+    hugeQueriesStore,
+    uiConfigStore,
+    keyRingStore,
+    priceStore,
+  } = useStore();
 
   const isNotReady = useIsNotReady();
   const intl = useIntl();
@@ -101,22 +106,25 @@ export const MainPage: FunctionComponent<{
     }
     return result;
   }, [hugeQueriesStore.allKnownBalances]);
-  const availableTotalPriceEmbedOnly = useMemo(() => {
+  const availableTotalPriceEmbedOnlyUSD = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.allKnownBalances) {
       if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
         continue;
       }
       if (bal.price) {
-        if (!result) {
-          result = bal.price;
-        } else {
-          result = result.add(bal.price);
+        const price = priceStore.calculatePrice(bal.token, "usd");
+        if (price) {
+          if (!result) {
+            result = price;
+          } else {
+            result = result.add(price);
+          }
         }
       }
     }
     return result;
-  }, [hugeQueriesStore.allKnownBalances]);
+  }, [hugeQueriesStore.allKnownBalances, priceStore]);
   const availableChartWeight = (() => {
     if (!isNotReady && uiConfigStore.isPrivacyMode) {
       if (tabStatus === "available") {
@@ -151,17 +159,20 @@ export const MainPage: FunctionComponent<{
     }
     return result;
   }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings]);
-  const stakedTotalPriceEmbedOnly = useMemo(() => {
+  const stakedTotalPriceEmbedOnlyUSD = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.delegations) {
       if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
         continue;
       }
       if (bal.price) {
-        if (!result) {
-          result = bal.price;
-        } else {
-          result = result.add(bal.price);
+        const price = priceStore.calculatePrice(bal.token, "usd");
+        if (price) {
+          if (!result) {
+            result = price;
+          } else {
+            result = result.add(price);
+          }
         }
       }
     }
@@ -172,15 +183,18 @@ export const MainPage: FunctionComponent<{
         continue;
       }
       if (bal.viewToken.price) {
-        if (!result) {
-          result = bal.viewToken.price;
-        } else {
-          result = result.add(bal.viewToken.price);
+        const price = priceStore.calculatePrice(bal.viewToken.token, "usd");
+        if (price) {
+          if (!result) {
+            result = price;
+          } else {
+            result = result.add(price);
+          }
         }
       }
     }
     return result;
-  }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings]);
+  }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings, priceStore]);
   const stakedChartWeight = (() => {
     if (!isNotReady && uiConfigStore.isPrivacyMode) {
       if (tabStatus === "staked") {
@@ -198,11 +212,11 @@ export const MainPage: FunctionComponent<{
   const lastTotalStakedAmbiguousAvg = useRef(-1);
   useEffect(() => {
     if (!isNotReady) {
-      const totalAvailableAmbiguousAvg = availableTotalPriceEmbedOnly
-        ? amountToAmbiguousAverage(availableTotalPriceEmbedOnly)
+      const totalAvailableAmbiguousAvg = availableTotalPriceEmbedOnlyUSD
+        ? amountToAmbiguousAverage(availableTotalPriceEmbedOnlyUSD)
         : 0;
-      const totalStakedAmbiguousAvg = stakedTotalPriceEmbedOnly
-        ? amountToAmbiguousAverage(stakedTotalPriceEmbedOnly)
+      const totalStakedAmbiguousAvg = stakedTotalPriceEmbedOnlyUSD
+        ? amountToAmbiguousAverage(stakedTotalPriceEmbedOnlyUSD)
         : 0;
       if (
         lastTotalAvailableAmbiguousAvg.current !== totalAvailableAmbiguousAvg ||
@@ -224,7 +238,11 @@ export const MainPage: FunctionComponent<{
       lastTotalStakedAmbiguousAvg.current = totalStakedAmbiguousAvg;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [availableTotalPriceEmbedOnly, isNotReady, stakedTotalPriceEmbedOnly]);
+  }, [
+    availableTotalPriceEmbedOnlyUSD,
+    isNotReady,
+    stakedTotalPriceEmbedOnlyUSD,
+  ]);
 
   const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
