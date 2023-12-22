@@ -148,7 +148,7 @@ export const ScrollViewRegisterContainer: FunctionComponent<
         }}
         indicatorStyle="white">
         {/* NOTE: reanimated로는 scroll view에서 contentContainerStyle를 못 쓴다... 따로 view를 내부에 분리시킴 */}
-        <Reanimated.View style={contentContainerStyle}>
+        <Reanimated.View style={contentContainerStyle as any}>
           {children}
           <Reanimated.View style={bottomMockViewStyle} />
         </Reanimated.View>
