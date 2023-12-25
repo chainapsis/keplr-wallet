@@ -11,7 +11,49 @@ import {
   useRoute,
 } from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
-import {InteractionManager} from 'react-native';
+import {InteractionManager, Text, View} from 'react-native';
+import Reanimated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
+import {useStyle} from '../../../styles';
+import {defaultSpringConfig} from '../../../styles/spring';
+import {ViewRegisterContainer} from '../components/view-register-container';
+
+const SimpleProgressBar: FunctionComponent<{
+  progress: number;
+}> = ({progress}) => {
+  const style = useStyle();
+
+  const animProgress = useSharedValue(progress);
+
+  useEffect(() => {
+    animProgress.value = withSpring(progress, defaultSpringConfig);
+  }, [animProgress, progress]);
+
+  const barColor = style.get('color-blue-400').color;
+  const animatedStyle = useAnimatedStyle(() => {
+    console.log(animProgress.value);
+    return {
+      height: 8,
+      borderRadius: 9999,
+      backgroundColor: barColor,
+      width: `${animProgress.value * 100}%`,
+    };
+  });
+
+  return (
+    <View
+      style={{
+        height: 8,
+        borderRadius: 9999,
+        backgroundColor: style.get('color-gray-500').color,
+      }}>
+      <Reanimated.View style={animatedStyle} />
+    </View>
+  );
+};
 
 export const FinalizeKeyScreen: FunctionComponent = observer(() => {
   const {chainStore, accountStore, queriesStore, keyRingStore, priceStore} =
@@ -28,6 +70,7 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
     stepTotal,
   } = route.params;
   const navigation = useNavigation<StackNavProp>();
+  const style = useStyle();
 
   const [isScreenTransitionEnded, setIsScreenTransitionEnded] = useState(false);
   useFocusEffect(
@@ -59,6 +102,7 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
   // 그 후 3초를 더 기다리고 넘긴다...
   // (최대 기다리는 시간은 15초)
   const [queryRoughlyDone, setQueryRoughlyDone] = useState(false);
+  const [queryProgress, setQueryProgress] = useState(0);
   const unmounted = useRef(false);
   useEffect(() => {
     return () => {
@@ -272,6 +316,7 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
             p.then(() => {
               i++;
               const progress = i / len;
+              setQueryProgress(progress);
               if (progress >= 0.8 && !once) {
                 once = true;
                 setTimeout(() => {
@@ -343,7 +388,13 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
   ]);
 
   return (
-    <Box height="100%" alignX="center" alignY="center">
+    <ViewRegisterContainer
+      forceEnableTopSafeArea={true}
+      contentContainerStyle={{
+        flexGrow: 1,
+        alignItems: 'center',
+      }}>
+      <View style={{flex: 1}} />
       <LottieView
         source={require('../../../public/assets/lottie/register/creating.json')}
         loop={false}
@@ -353,8 +404,24 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
         onAnimationFinish={() => {
           setIsAnimEnded(true);
         }}
-        style={{width: '80%', height: '100%'}}
+        style={{width: '80%', aspectRatio: 1}}
       />
-    </Box>
+      <View
+        style={{
+          flex: 2,
+        }}
+      />
+      <Text style={style.flatten(['subtitle3', 'color-text-low'])}>
+        Let us set everything up for you...
+      </Text>
+      <Box marginTop={21} marginBottom={12} paddingX={28} width="100%">
+        <SimpleProgressBar progress={queryProgress} />
+      </Box>
+      <View
+        style={{
+          flex: 1,
+        }}
+      />
+    </ViewRegisterContainer>
   );
 });
