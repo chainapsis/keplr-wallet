@@ -11,7 +11,7 @@ import {StoreProvider} from './src/stores';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {StyleProvider, useStyle} from './src/styles';
 import {AppNavigation} from './src/navigation';
-import {Platform, StatusBar} from 'react-native';
+import {StatusBar} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 import {AppIntlProvider} from './src/languages';
@@ -28,11 +28,6 @@ import '@formatjs/intl-numberformat/locale-data/ko';
 import '@formatjs/intl-relativetimeformat/polyfill';
 import '@formatjs/intl-relativetimeformat/locale-data/en';
 import '@formatjs/intl-relativetimeformat/locale-data/ko'; // locale-data for en
-if (Platform.OS === 'android') {
-  require('@formatjs/intl-datetimeformat/polyfill');
-  require('@formatjs/intl-datetimeformat/locale-data/en.js');
-  require('@formatjs/intl-datetimeformat/add-golden-tz.js');
-}
 
 import {ConfirmProvider} from './src/hooks/confirm';
 import {InteractionModalsProvider} from './src/provider/interaction-modals-provider';
