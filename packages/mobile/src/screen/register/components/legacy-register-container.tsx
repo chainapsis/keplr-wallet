@@ -3,7 +3,7 @@ import {useStyle} from '../../../styles';
 import {Box} from '../../../components/box';
 import {KeyboardAvoidingView, Platform, StyleSheet, Text} from 'react-native';
 
-export const RegisterContainer: FunctionComponent<
+export const LegacyRegisterContainer: FunctionComponent<
   PropsWithChildren<{
     bottom?: React.ReactNode;
     paragraph?: string;
