@@ -34,7 +34,6 @@ const SimpleProgressBar: FunctionComponent<{
 
   const barColor = style.get('color-blue-400').color;
   const animatedStyle = useAnimatedStyle(() => {
-    console.log(animProgress.value);
     return {
       height: 8,
       borderRadius: 9999,
