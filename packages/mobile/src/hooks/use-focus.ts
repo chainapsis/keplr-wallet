@@ -1,11 +1,19 @@
 import {useEffect, useRef} from 'react';
-import {InteractionManager, TextInput} from 'react-native';
+import {InteractionManager, Platform, TextInput} from 'react-native';
 import {useEffectOnce} from './use-effect-once';
 
-export const useFocusOnMount = <Ref extends TextInput>() => {
+//NOTE modal에서는 runAfterInteractions로는 올바르게 동작 하지 않아서
+//modal에서는 setTimeout사용해서 훅을 정의함
+export const useFocusOnModal = <Ref extends TextInput>() => {
   const ref = useRef<Ref>(null);
   useEffect(() => {
     if (ref.current) {
+      if (Platform.OS === 'android') {
+        setTimeout(() => {
+          ref.current?.focus();
+        }, 0);
+        return;
+      }
       ref.current.focus();
     }
   }, []);
