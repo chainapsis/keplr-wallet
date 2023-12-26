@@ -18,10 +18,12 @@ import {StackNavProp} from '../../navigation';
 import {Box} from '../../components/box';
 import {TextButton} from '../../components/text-button';
 import {useNotification} from '../../hooks/notification';
+import {FormattedMessage, useIntl} from 'react-intl';
 
 export const TxPendingResultScreen: FunctionComponent = observer(() => {
   const {chainStore} = useStore();
   const notification = useNotification();
+  const intl = useIntl();
 
   const isPendingGoToResult = useRef(false);
   //NOTE home으로 갈 때 home이 다 렌더링이 안될 때 tx에 성공되면 tx tracer에 의해서 success로 이동됨
@@ -159,7 +161,7 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
           'margin-top-82',
           'margin-bottom-32',
         ])}>
-        Transaction pending
+        <FormattedMessage id="page.tx-result.pending-title" />
       </Text>
 
       {/* To match the height of text with other tx result screens,
@@ -177,8 +179,7 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
             'text-center',
             'color-text-middle',
           ])}>
-          Transaction has been broadcasted to the blockchain and pending
-          confirmation.
+          <FormattedMessage id="page.tx-result.pending-text" />
         </Text>
       </View>
 
@@ -187,7 +188,7 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
           <TextButton
             containerStyle={style.flatten(['flex-1'])}
             size="large"
-            text="Go to homescreen"
+            text={intl.formatMessage({id: 'page.tx-result.home-button'})}
             rightIcon={color => (
               <View style={style.flatten(['margin-left-8'])}>
                 <ArrowRightIcon color={color} size={18} />

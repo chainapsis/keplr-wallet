@@ -23,6 +23,7 @@ import {BaseModalHeader} from '../../../../components/modal';
 import {ChainImageFallback} from '../../../../components/image';
 import {CheckToggleIcon, QRCodeIcon} from '../../../../components/icon';
 import {IconButton} from '../../../../components/icon-button';
+import {FormattedMessage} from 'react-intl';
 
 export const CopyAddressScene: FunctionComponent<{
   setIsOpen: (isOpen: boolean) => void;
@@ -151,7 +152,7 @@ export const CopyAddressScene: FunctionComponent<{
             <Box
               alignX="center"
               alignY="center"
-              paddingX={26}
+              paddingX={53}
               paddingTop={49.6}
               paddingBottom={51.2}>
               <Image
@@ -163,16 +164,22 @@ export const CopyAddressScene: FunctionComponent<{
                 alt="copy-address-no-search-result-image"
               />
               <Gutter size={12} />
-
               <Text
                 style={style.flatten([
                   'subtitle3',
                   'color-gray-300',
                   'text-center',
                 ])}>
-                To use an address on certain chain, you may need to first visit
-                the "Manage Chain Visibility" in the side menu and make the
-                chain visible on your wallet.
+                <FormattedMessage id="page.main.components.deposit-modal.empty-title" />
+              </Text>
+              <Gutter size={12} />
+              <Text
+                style={style.flatten([
+                  'subtitle3',
+                  'color-gray-300',
+                  'text-center',
+                ])}>
+                <FormattedMessage id="page.main.components.deposit-modal.empty-text" />
               </Text>
             </Box>
           ) : null}

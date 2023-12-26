@@ -2439,6 +2439,8 @@ export const APR_API_URL =
 export const SCAMPORPOSAL_API_URL =
   'https://phishing-block-list-chainapsis.vercel.app';
 
+export const COMMUNITY_CHAIN_URL = 'https://chains.keplr.app';
+
 export const GovernanceV1ChainIdentifiers = [
   'kyve',
   'mars',
