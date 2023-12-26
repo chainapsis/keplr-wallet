@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import React, {FunctionComponent, useEffect, useMemo, useRef} from 'react';
+import React, {FunctionComponent, useEffect, useMemo} from 'react';
 import {PageWithScrollView} from '../../../components/page';
 import {
   RouteProp,
@@ -31,10 +31,10 @@ import {FeeControl} from '../../../components/input/fee-control';
 import {Gutter} from '../../../components/gutter';
 import {BACKGROUND_PORT, Message} from '@keplr-wallet/router';
 import {SendTxAndRecordMsg} from '@keplr-wallet/background';
-import {TextInput} from 'react-native';
 import {RNMessageRequesterInternal} from '../../../router';
 import {StackNavProp} from '../../../navigation';
 import {useNotification} from '../../../hooks/notification';
+import {useFocusAfterRouting} from '../../../hooks/use-focus';
 
 export const SendAmountScreen: FunctionComponent = observer(() => {
   const {chainStore, accountStore, queriesStore} = useStore();
@@ -47,8 +47,8 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation<StackNavProp>();
   const intl = useIntl();
   const style = useStyle();
-  const addressRef = useRef<TextInput>(null);
   const notification = useNotification();
+  const addressRef = useFocusAfterRouting();
 
   const initialChainId = route.params['chainId'];
   const initialCoinMinimalDenom = route.params['coinMinimalDenom'];
@@ -57,10 +57,6 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
   const coinMinimalDenom =
     initialCoinMinimalDenom ||
     chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
-
-  useEffect(() => {
-    addressRef.current?.focus();
-  }, []);
 
   useEffect(() => {
     if (!initialChainId || !initialCoinMinimalDenom) {

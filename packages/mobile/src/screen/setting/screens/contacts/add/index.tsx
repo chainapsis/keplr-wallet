@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useEffect, useRef, useState} from 'react';
+import React, {FunctionComponent, useEffect, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {
   useMemoConfig,
@@ -15,13 +15,14 @@ import {Stack} from '../../../../../components/stack';
 import {RootStackParamList} from '../../../../../navigation';
 import {Button} from '../../../../../components/button';
 import {Column} from '../../../../../components/column';
-import {TextInput as NativeTextInput, StyleSheet} from 'react-native';
+import {StyleSheet} from 'react-native';
 import {PageWithScrollView} from '../../../../../components/page';
 import {useStyle} from '../../../../../styles';
+import {useFocusAfterRouting} from '../../../../../hooks/use-focus';
 
 export const SettingContactsAddScreen: FunctionComponent = observer(() => {
   const {chainStore, uiConfigStore} = useStore();
-  const labelRef = useRef<NativeTextInput>(null);
+  const labelRef = useFocusAfterRouting();
   const navigate = useNavigation();
   const route =
     useRoute<RouteProp<RootStackParamList, 'Setting.General.ContactAdd'>>();
@@ -45,12 +46,6 @@ export const SettingContactsAddScreen: FunctionComponent = observer(() => {
   // Param "chainId" is required.
   const paramChainId = route.params.chainId;
   const paramEditIndex = route.params.editIndex;
-
-  useEffect(() => {
-    if (labelRef.current) {
-      labelRef.current?.focus();
-    }
-  }, []);
 
   useEffect(() => {
     navigate.setOptions({
