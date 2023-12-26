@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import {LayoutRectangle, ScrollView, ScrollViewProps, View} from 'react-native';
 import {Box, BoxProps} from '../box';
+import {BinarySortArray} from '../../common';
 
 interface BoundaryScrollViewContextType {
   ref: React.RefObject<ScrollView>;
@@ -92,34 +93,138 @@ export const BoundaryScrollViewBoundary: FunctionComponent<
     ),
   );
 
+  const itemsHeightRef = useRef(
+    new BinarySortArray<{
+      index: number;
+      height: number;
+    }>(
+      (a, b) => {
+        return a.index - b.index;
+      },
+      () => {
+        // noop
+      },
+      () => {
+        // noop
+      },
+    ),
+  );
+  const setItemHeight = (index: number, height: number) => {
+    if (Math.abs(height - itemHeight) <= 0.1) {
+      return;
+    }
+    const prev = itemsHeightRef.current.get(index.toString());
+    if (prev != null && prev.height === height) {
+      return;
+    }
+    itemsHeightRef.current.pushAndSort(index.toString(), {
+      index,
+      height,
+    });
+
+    if (index >= renderIndex[0] && index < renderIndex[1]) {
+      setMockTopViewHeight(
+        value => value + (height - (prev?.height ?? itemHeight)),
+      );
+    }
+  };
+
   useEffect(() => {
     if (layout && scrollViewRef.current && startPointRef.current) {
       startPointRef.current.measureLayout(
         scrollViewRef.current.getScrollableNode(),
         (_left: number, top: number, _width: number, _height: number) => {
+          const itemsHeightArr = itemsHeightRef.current.arr;
           const boundaryOffsetStartY = Math.max(0, scrollOffset);
           const boundaryOffsetEndY =
             Math.max(0, scrollOffset) + layout.height - top;
-          const startIndex = Math.min(
-            Math.max(
-              Math.floor(boundaryOffsetStartY / (itemHeight + gap)) -
-                floodNumItemsToRender,
-              0,
-            ),
+          let offset = 0;
+          let prevOffset = 0;
+          let differentHeightExists = false;
+          let prevOffsetIndex = 0;
+          let startIndex = -1;
+          let endIndex = -1;
+          for (const h of itemsHeightArr) {
+            offset +=
+              (h.index - prevOffsetIndex - (differentHeightExists ? 1 : 0)) *
+              (itemHeight + gap);
+            let d = h.height;
+            if (h.index !== items.length - 1) {
+              d += gap;
+            }
+            offset += d;
+            differentHeightExists = true;
+
+            if (startIndex < 0) {
+              if (offset - d >= boundaryOffsetStartY) {
+                if (offset - d <= boundaryOffsetStartY) {
+                  startIndex = h.index;
+                } else {
+                  startIndex =
+                    prevOffsetIndex +
+                    Math.floor(
+                      (boundaryOffsetStartY - prevOffset) / (itemHeight + gap),
+                    );
+                }
+              }
+            }
+            if (endIndex < 0) {
+              if (offset >= boundaryOffsetEndY) {
+                if (offset - d <= boundaryOffsetEndY) {
+                  endIndex = h.index + 1;
+                } else {
+                  endIndex =
+                    prevOffsetIndex +
+                    Math.ceil(
+                      (boundaryOffsetEndY - prevOffset) / (itemHeight + gap),
+                    );
+                }
+              }
+            }
+
+            prevOffset = offset;
+            prevOffsetIndex = h.index;
+          }
+          if (startIndex < 0) {
+            startIndex =
+              prevOffsetIndex +
+              Math.floor(
+                (boundaryOffsetStartY - prevOffset) / (itemHeight + gap),
+              );
+          }
+          if (endIndex < 0) {
+            endIndex =
+              prevOffsetIndex +
+              Math.ceil((boundaryOffsetEndY - prevOffset) / (itemHeight + gap));
+          }
+          startIndex = Math.min(
+            Math.max(startIndex - floodNumItemsToRender, 0),
             items.length - 1,
           );
-          const endIndex = Math.min(
-            Math.ceil(boundaryOffsetEndY / (itemHeight + gap)) +
-              floodNumItemsToRender,
+          endIndex = Math.min(
+            endIndex + floodNumItemsToRender + 1,
             items.length,
           );
           setRenderIndex([startIndex, endIndex]);
-          setMockTopViewHeight(startIndex * (itemHeight + gap));
+
+          let mockTopViewHeightDelta = 0;
+          let mockBottomViewHeightDelta = 0;
+          for (const h of itemsHeightArr) {
+            if (h.index < startIndex) {
+              mockTopViewHeightDelta += h.height - itemHeight;
+            } else if (h.index >= endIndex) {
+              mockBottomViewHeightDelta += h.height - itemHeight;
+            }
+          }
+          setMockTopViewHeight(
+            mockTopViewHeightDelta + startIndex * (itemHeight + gap),
+          );
           setMockBottomViewHeight(
             Math.max(
               0,
-              (items.length - endIndex) * itemHeight +
-                (items.length - endIndex - 1) * gap,
+              mockBottomViewHeightDelta +
+                ((items.length - endIndex) * itemHeight +
+                  (items.length - endIndex - 1) * gap),
             ),
           );
         },
@@ -152,7 +257,12 @@ export const BoundaryScrollViewBoundary: FunctionComponent<
             itemsRenderIndexKey.current++;
             return (
               <React.Fragment key={key}>
-                {item}
+                <View
+                  onLayout={e => {
+                    setItemHeight(index, e.nativeEvent.layout.height);
+                  }}>
+                  {item}
+                </View>
                 {index !== items.length - 1 ? (
                   <View style={{height: gap}} />
                 ) : null}

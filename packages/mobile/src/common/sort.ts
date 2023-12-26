@@ -211,4 +211,12 @@ export class BinarySortArray<T> {
   > {
     return this._arr;
   }
+
+  get(key: string): T | null {
+    const index = this.indexForKey.get(key);
+    if (index == null || index < 0) {
+      return null;
+    }
+    return this._arr[index];
+  }
 }

@@ -105,7 +105,7 @@ export const SendSelectAssetScreen: FunctionComponent = observer(() => {
           paddingBottom: safeAreaInsets.bottom,
         }}>
         <BoundaryScrollViewBoundary
-          itemHeight={79.3}
+          itemHeight={71.3}
           gap={8}
           items={filteredTokens.map(token => {
             return (
