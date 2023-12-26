@@ -12,6 +12,9 @@ import {Button} from '../../../../components/button';
 import {observer} from 'mobx-react-lite';
 import {useIntl} from 'react-intl';
 import {Text} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavProp} from '../../../../navigation';
+import {useStore} from '../../../../stores';
 
 export const LookingForChains: FunctionComponent<{
   chainInfos: ChainInfo[];
@@ -40,8 +43,9 @@ export const LookingForChains: FunctionComponent<{
 export const LookingForChainItem: FunctionComponent<{
   chainInfo: ChainInfo;
 }> = observer(({chainInfo}) => {
-  // const {keyRingStore} = useStore();
+  const {keyRingStore} = useStore();
   const style = useStyle();
+  const navigation = useNavigation<StackNavProp>();
 
   return (
     <Box
@@ -82,20 +86,14 @@ export const LookingForChainItem: FunctionComponent<{
           size="small"
           color="secondary"
           onPress={() => {
-            //TODO 아래 로직을 이후 레지스터에 맞게 수정해야됨
-            // if (keyRingStore.selectedKeyInfo) {
-            //   analyticsStore.logEvent('click_enableChain', {
-            //     chainId: chainInfo.chainId,
-            //     chainName: chainInfo.chainName,
-            //   });
-            //   browser.tabs
-            //     .create({
-            //       url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true&initialSearchValue=${chainInfo.chainName}`,
-            //     })
-            //     .then(() => {
-            //       window.close();
-            //     });
-            // }
+            if (keyRingStore.selectedKeyInfo?.id) {
+              navigation.navigate('Register.EnableChain', {
+                vaultId: keyRingStore.selectedKeyInfo.id,
+                initialSearchValue: chainInfo.chainName,
+                skipWelcome: true,
+                hideBackButton: false,
+              });
+            }
           }}
         />
       </Columns>
