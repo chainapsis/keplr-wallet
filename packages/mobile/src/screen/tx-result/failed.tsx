@@ -18,6 +18,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import {TextButton} from '../../components/text-button';
 import {useNotification} from '../../hooks/notification';
+import {FormattedMessage, useIntl} from 'react-intl';
 
 const AnimatedLottieView = Animated.createAnimatedComponent(LottieView);
 
@@ -25,6 +26,8 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
   const animationRef = useRef<LottieView>(null);
   const failedAnimProgress = useSharedValue(0);
   const notification = useNotification();
+  const intl = useIntl();
+
   const animatedProps = useAnimatedProps(() => {
     return {
       progress: failedAnimProgress.value,
@@ -107,7 +110,8 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
             ]}
             animatedProps={animatedProps}
             loop={false}
-            ref={animationRef}
+            //NOTE 정상작동 되는 타입인데 타입에러가 떠서 일단은 any로 처리후 나중애 한번더 봐야함
+            ref={animationRef as any}
             style={{width: 150, height: 150}}
           />
         </View>
@@ -120,7 +124,7 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
           'margin-top-82',
           'margin-bottom-32',
         ])}>
-        Transaction failed
+        <FormattedMessage id="page.tx-result-fail.title" />
       </Text>
 
       {/* To match the height of text with other tx result screens,
@@ -138,8 +142,7 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
             'text-center',
             'color-text-middle',
           ])}>
-          Transaction unsuccessful. Please check the block explorer for more
-          information.
+          <FormattedMessage id="page.tx-result-fail.paragraph" />
         </Text>
       </View>
       <Box paddingX={48} height={116} marginTop={78} alignX="center">
@@ -147,7 +150,7 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
           <Button
             containerStyle={style.flatten(['flex-1'])}
             size="large"
-            text="Done"
+            text={intl.formatMessage({id: 'button.done'})}
             onPress={() => {
               navigation.navigate('Home');
             }}
@@ -157,7 +160,14 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
           <TextButton
             containerStyle={style.flatten(['margin-top-16'])}
             size="large"
-            text={`Go to ${txExplorer.name}`}
+            text={intl.formatMessage(
+              {
+                id: 'page.tx-result.components.go-to-explorer',
+              },
+              {
+                name: txExplorer.name,
+              },
+            )}
             rightIcon={color => (
               <View style={style.flatten(['margin-left-8'])}>
                 <ArrowRightIcon color={color} size={18} />

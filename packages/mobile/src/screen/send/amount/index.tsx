@@ -126,7 +126,9 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
     gasSimulatorKey,
     () => {
       if (!sendConfigs.amountConfig.currency) {
-        throw new Error('Send currency not set');
+        throw new Error(
+          intl.formatMessage({id: 'error.send-currency-not-set'}),
+        );
       }
 
       // Prefer not to use the gas config or fee config,
@@ -140,7 +142,7 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
           'loading-block' ||
         sendConfigs.recipientConfig.uiProperties.error != null
       ) {
-        throw new Error('Not ready to simulate tx');
+        throw new Error(intl.formatMessage({id: 'error.not-read-simulate-tx'}));
       }
 
       const denomHelper = new DenomHelper(
@@ -148,7 +150,11 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
       );
       // I don't know why, but simulation does not work for secret20
       if (denomHelper.type === 'secret20') {
-        throw new Error('Simulating secret wasm not supported');
+        throw new Error(
+          intl.formatMessage({
+            id: 'error.simulating-secret-wasm-not-supported',
+          }),
+        );
       }
 
       return account.makeSendTokenTx(
@@ -168,7 +174,11 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
         .type === 'secret20'
     ) {
       gasSimulator.forceDisable(
-        new Error('Simulating secret20 is not supported'),
+        new Error(
+          intl.formatMessage({
+            id: 'error.simulating-secret-20-not-supported',
+          }),
+        ),
       );
       sendConfigs.gasConfig.setValue(
         // TODO: 이 값을 config 밑으로 빼자
@@ -178,7 +188,12 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
       gasSimulator.forceDisable(false);
       gasSimulator.setEnabled(true);
     }
-  }, [gasSimulator, sendConfigs.amountConfig.currency, sendConfigs.gasConfig]);
+  }, [
+    gasSimulator,
+    intl,
+    sendConfigs.amountConfig.currency,
+    sendConfigs.gasConfig,
+  ]);
 
   const txConfigsValidate = useTxConfigsValidate({
     ...sendConfigs,

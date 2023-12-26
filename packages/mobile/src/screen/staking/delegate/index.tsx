@@ -99,8 +99,14 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
       <Gutter size={16} />
       <GuideBox
         color="warning"
-        title={`Staking will lock your funds for ${unbondingPeriodDay} days`}
-        paragraph={`You will need to unstake in order for your staked assets to be liquid again.This process will take ${unbondingPeriodDay} days to complete.`}
+        title={intl.formatMessage(
+          {id: 'page.stake.delegate.guide-box.title'},
+          {unbondingPeriodDay},
+        )}
+        paragraph={intl.formatMessage(
+          {id: 'page.stake.delegate.guide-box.paragraph'},
+          {unbondingPeriodDay},
+        )}
       />
 
       <Box style={style.flatten(['flex-1'])} />
@@ -115,7 +121,7 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
       <Gutter size={16} />
 
       <Button
-        text={'Next'}
+        text={intl.formatMessage({id: 'button.next'})}
         size={'large'}
         disabled={txConfigsValidate.interactionBlocked}
         loading={accountStore.getAccount(chainId).isSendingMsg === 'send'}

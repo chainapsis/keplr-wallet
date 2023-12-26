@@ -3,7 +3,7 @@ import React, {FunctionComponent} from 'react';
 
 import {ChainInfo} from '@keplr-wallet/types';
 
-import {FormattedMessage} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {FlatList, Text} from 'react-native';
 import {useStyle} from '../../../../../styles';
 import {useStore} from '../../../../../stores';
@@ -23,6 +23,7 @@ export const SettingGeneralDeleteSuggestChainScreen: FunctionComponent =
       chainInfo => !chainInfo.embedded.embedded,
     );
     const style = useStyle();
+    const intl = useIntl();
 
     return (
       <Box paddingX={12} paddingY={8} style={style.flatten(['flex-grow-1'])}>
@@ -31,7 +32,11 @@ export const SettingGeneralDeleteSuggestChainScreen: FunctionComponent =
           ListHeaderComponent={() => {
             return suggestedChains.length ? (
               <React.Fragment>
-                <GuideBox title="The infrastructure and setting of these chains are not configured by Keplr team. Please reach out to the chain or website teams for technical support." />
+                <GuideBox
+                  title={intl.formatMessage({
+                    id: 'page.setting.general.guide-box.title',
+                  })}
+                />
                 <Gutter size={16} />
               </React.Fragment>
             ) : null;

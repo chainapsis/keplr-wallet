@@ -26,7 +26,7 @@ import {ArrowRightIcon} from '../../../components/icon/arrow-right';
 import {RectButton} from '../../../components/rect-button';
 import {ValidatorCard} from '../components/validator-card';
 import {useNotification} from '../../../hooks/notification';
-import {useIntl} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 
 //NOTE https://reactnavigation.org/docs/troubleshooting/#i-get-the-warning-non-serializable-values-were-found-in-the-navigation-state
 //해당 경고가 있으나 state persistence, deep linking를 해당 페이지에서 사용하지 않기 때문에 해당 경고를 무시함
@@ -114,7 +114,7 @@ export const SignRedelegateScreen: FunctionComponent = observer(() => {
               'padding-left-8',
               'margin-bottom-6',
             ])}>
-            Switch to
+            <FormattedMessage id="page.stake.redelegate.select-validator-card.label" />
           </Text>
           <ValidatorItem
             validatorAddress={dstValidatorInfo.address}
@@ -271,7 +271,7 @@ export const ValidatorItem: FunctionComponent<{
               <Text
                 numberOfLines={1}
                 style={style.flatten(['subtitle2', 'color-text-middle'])}>
-                Select Validator
+                <FormattedMessage id="page.stake.redelegate.select-validator-card.placeholder" />
               </Text>
             )}
             <Gutter size={4} />

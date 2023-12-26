@@ -18,12 +18,14 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import {useNotification} from '../../hooks/notification';
+import {FormattedMessage, useIntl} from 'react-intl';
 
 const AnimatedLottieView = Animated.createAnimatedComponent(LottieView);
 
 export const TxSuccessResultScreen: FunctionComponent = observer(() => {
   const successAnimProgress = useSharedValue(0);
   const animationRef = useRef<LottieView>(null);
+  const intl = useIntl();
   const animatedProps = useAnimatedProps(() => {
     return {
       progress: successAnimProgress.value,
@@ -116,7 +118,8 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
                 color: style.flatten(['color-green-400']).color,
               },
             ]}
-            ref={animationRef}
+            //NOTE 정상작동 되는 타입인데 타입에러가 떠서 일단은 any로 처리후 나중애 한번더 봐야함
+            ref={animationRef as any}
             animatedProps={animatedProps}
             loop={false}
             style={{width: 150, height: 150}}
@@ -131,7 +134,7 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
           'margin-top-82',
           'margin-bottom-32',
         ])}>
-        Transaction successful
+        <FormattedMessage id="page.tx-result-success.title" />
       </Text>
 
       {/* To match the height of text with other tx result screens,
@@ -149,7 +152,7 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
             'text-center',
             'color-text-middle',
           ])}>
-          Congratulations!
+          <FormattedMessage id="page.tx-result-success.paragraph-1" />
         </Text>
         <Text
           style={style.flatten([
@@ -157,7 +160,7 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
             'text-center',
             'color-text-middle',
           ])}>
-          Your transaction has been completed and confirmed by the blockchain.
+          <FormattedMessage id="page.tx-result-success.paragraph-2" />
         </Text>
       </View>
 
@@ -166,7 +169,7 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
           <Button
             containerStyle={style.flatten(['flex-1'])}
             size="large"
-            text="Done"
+            text={intl.formatMessage({id: 'button.done'})}
             onPress={() => {
               navigation.navigate('Home');
             }}
@@ -176,7 +179,14 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
           <TextButton
             containerStyle={style.flatten(['margin-top-16'])}
             size="large"
-            text={`Go to ${txExplorer.name}`}
+            text={intl.formatMessage(
+              {
+                id: 'page.tx-result.components.go-to-explorer',
+              },
+              {
+                name: txExplorer.name,
+              },
+            )}
             rightIcon={color => (
               <View style={style.flatten(['margin-left-8'])}>
                 <ArrowRightIcon color={color} size={18} />

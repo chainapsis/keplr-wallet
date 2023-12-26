@@ -15,6 +15,7 @@ import {Gutter} from '../../components/gutter';
 import {Button} from '../../components/button';
 import {registerCardModal} from '../../components/modal/card';
 import {StackNavProp} from '../../navigation';
+import {FormattedMessage, useIntl} from 'react-intl';
 
 export const BuyModal = registerCardModal(
   observer<{
@@ -25,6 +26,8 @@ export const BuyModal = registerCardModal(
   }>(({setIsOpen, navigation}) => {
     const {accountStore, chainStore} = useStore();
     const style = useStyle();
+    const intl = useIntl();
+
     const [fiatOnRampServiceInfos, setFiatOnRampServiceInfos] = useState(
       FiatOnRampServiceInfos,
     );
@@ -181,7 +184,7 @@ export const BuyModal = registerCardModal(
             style={StyleSheet.flatten([
               style.flatten(['color-white', 'text-center', 'h4']),
             ])}>
-            Buy Crypto
+            <FormattedMessage id="page.main.components.buy-crypto-modal.title" />
           </Text>
         </Box>
         <Gutter size={12} />
@@ -201,7 +204,9 @@ export const BuyModal = registerCardModal(
         <Button
           size="large"
           color="secondary"
-          text="Cancel"
+          text={intl.formatMessage({
+            id: 'page.main.components.buy-crypto-modal.cancel-button',
+          })}
           onPress={() => setIsOpen(false)}
         />
       </Box>

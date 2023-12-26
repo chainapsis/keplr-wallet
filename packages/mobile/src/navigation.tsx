@@ -742,6 +742,7 @@ const SelectWalletNavigation = () => {
 };
 
 const StakeNavigation = () => {
+  const intl = useIntl();
   return (
     <StakeStack.Navigator
       screenOptions={{...TransitionPresets.SlideFromRightIOS}}>
@@ -756,7 +757,7 @@ const StakeNavigation = () => {
       <StakeStack.Screen
         name="Stake.ValidateDetail"
         options={{
-          title: 'Validator Details',
+          title: intl.formatMessage({id: 'page.stake.validator-detail.title'}),
           ...defaultHeaderOptions,
         }}
         component={ValidatorDetailScreen}
@@ -764,7 +765,7 @@ const StakeNavigation = () => {
       <StakeStack.Screen
         name="Stake.ValidateList"
         options={{
-          title: 'All Active Validators',
+          title: intl.formatMessage({id: 'page.stake.validator-list.title'}),
           ...defaultHeaderOptions,
         }}
         component={ValidatorListScreen}
@@ -772,7 +773,7 @@ const StakeNavigation = () => {
       <StakeStack.Screen
         name="Stake.Delegate"
         options={{
-          title: 'Stake',
+          title: intl.formatMessage({id: 'page.stake.delegate.title'}),
           ...defaultHeaderOptions,
         }}
         component={SignDelegateScreen}
@@ -780,7 +781,7 @@ const StakeNavigation = () => {
       <StakeStack.Screen
         name="Stake.Undelegate"
         options={{
-          title: 'Unstake',
+          title: intl.formatMessage({id: 'page.stake.undelegate.title'}),
           ...defaultHeaderOptions,
         }}
         component={SignUndelegateScreen}
@@ -788,7 +789,7 @@ const StakeNavigation = () => {
       <StakeStack.Screen
         name="Stake.Redelegate"
         options={{
-          title: 'Switch Validator',
+          title: intl.formatMessage({id: 'page.stake.redelegate.title'}),
           ...defaultHeaderOptions,
         }}
         component={SignRedelegateScreen}

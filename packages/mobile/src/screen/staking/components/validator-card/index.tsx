@@ -8,6 +8,7 @@ import {Gutter} from '../../../../components/gutter';
 import {Column, Columns} from '../../../../components/column';
 import {ValidatorImage} from '../validator-image';
 import {Staking} from '@keplr-wallet/stores';
+import {FormattedMessage} from 'react-intl';
 
 export const ValidatorCard: FunctionComponent<{
   chainId: string;
@@ -78,7 +79,7 @@ export const ValidatorCard: FunctionComponent<{
 
       <Columns sum={1} alignY="center">
         <Text style={style.flatten(['subtitle2', 'color-gray-100'])}>
-          Staked
+          <FormattedMessage id="page.stake.redelegate.validator-card.staked" />
         </Text>
         <Column weight={1} />
         <Text style={style.flatten(['body1', 'color-text-middle'])}>
@@ -90,7 +91,7 @@ export const ValidatorCard: FunctionComponent<{
 
       <Columns sum={1} alignY="center">
         <Text style={style.flatten(['subtitle2', 'color-gray-100'])}>
-          Rewards
+          <FormattedMessage id="page.stake.redelegate.validator-card.rewards" />
         </Text>
         <Column weight={1} />
         <Text style={style.flatten(['body1', 'color-text-middle'])}>

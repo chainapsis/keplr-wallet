@@ -221,7 +221,9 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
             <SelectModalCommonButton
               items={items}
               selectedItemKey={chainId}
-              placeholder="Search by chain name"
+              placeholder={intl.formatMessage({
+                id: 'page.setting.token.add.select-modal-button-placeholder',
+              })}
               isOpenModal={isOpenChainSelectModal}
               onPress={() => {
                 setIsOpenChainSelectModal(true);
@@ -383,8 +385,12 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
 
       <SelectModal
         items={items}
-        title="Select Chain"
-        placeholder="Search by chain name"
+        title={intl.formatMessage({
+          id: 'page.setting.token.add.select-modal.title',
+        })}
+        placeholder={intl.formatMessage({
+          id: 'page.setting.token.add.select-modal.placeholder',
+        })}
         isOpen={isOpenChainSelectModal}
         setIsOpen={setIsOpenChainSelectModal}
         onSelect={item => {

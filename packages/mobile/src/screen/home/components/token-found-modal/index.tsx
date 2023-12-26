@@ -23,12 +23,14 @@ import {useStyle} from '../../../../styles';
 import {ScrollView} from 'react-native-gesture-handler';
 import {registerCardModal} from '../../../../components/modal/card';
 import {StackNavProp} from '../../../../navigation';
+import {useIntl} from 'react-intl';
 
 export const TokenFoundModal = registerCardModal(
   observer<{setIsOpen: (isOpen: boolean) => void; navigation: StackNavProp}>(
     ({setIsOpen, navigation}) => {
       const {chainStore, keyRingStore} = useStore();
       const style = useStyle();
+      const intl = useIntl();
 
       const [checkedChainIdentifiers, setCheckedChainIdentifiers] = useState<
         string[]
@@ -129,7 +131,14 @@ export const TokenFoundModal = registerCardModal(
       };
       return (
         <Box padding={12} paddingTop={1}>
-          <BaseModalHeader title={`${numFoundToken} New Token(s) Found`} />
+          <BaseModalHeader
+            title={intl.formatMessage(
+              {
+                id: 'page.main.components.token-found-modal.title',
+              },
+              {numFoundToken},
+            )}
+          />
           <Gutter size={12} />
           <ScrollView style={{maxHeight: 350}}>
             <Stack gutter={12}>
@@ -219,7 +228,9 @@ export const TokenFoundModal = registerCardModal(
               <Box alignX="center">
                 <TextButton
                   textStyle={style.flatten(['text-button2'])}
-                  text="Add tokens on Injective and Evmos"
+                  text={intl.formatMessage({
+                    id: 'page.main.components.token-found-modal.add-token-on-injective-and-evmos',
+                  })}
                   onPress={() => {
                     if (keyRingStore.selectedKeyInfo) {
                       navigation.navigate('Register.EnableChain', {
@@ -238,7 +249,9 @@ export const TokenFoundModal = registerCardModal(
           )}
 
           <Button
-            text="Add Chains"
+            text={intl.formatMessage({
+              id: 'page.main.components.token-found-modal.add-chains',
+            })}
             size="large"
             disabled={checkedChainIdentifiers.length === 0}
             onPress={buttonClicked}

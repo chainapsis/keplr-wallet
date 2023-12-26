@@ -35,7 +35,7 @@ import {useNavigation} from '@react-navigation/native';
 import {SpecialButton} from '../../../../components/special-button';
 import {useNotification} from '../../../../hooks/notification';
 import {StackNavProp} from '../../../../navigation';
-import {useIntl} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 
 // XXX: 좀 이상하긴 한데 상위/하위 컴포넌트가 state를 공유하기 쉽게하려고 이렇게 한다...
 class ClaimAllEachState {
@@ -74,6 +74,7 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
     const style = useStyle();
     const [isExpanded, setIsExpanded] = useState(false);
     const [isPressingExpandButton, setIsPressingExpandButton] = useState(false);
+    const intl = useIntl();
 
     const statesRef = useRef(new Map<string, ClaimAllEachState>());
     const getClaimAllEachState = (chainId: string): ClaimAllEachState => {
@@ -234,7 +235,11 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
 
               if (!balance) {
                 state.setFailedReason(
-                  new Error("Can't find balance for fee currency"),
+                  new Error(
+                    intl.formatMessage({
+                      id: 'error.can-not-find-balance-for-fee-currency',
+                    }),
+                  ),
                 );
                 return;
               }
@@ -245,7 +250,11 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
                 new Dec(balance.balance.toCoin().amount).lt(new Dec(fee.amount))
               ) {
                 state.setFailedReason(
-                  new Error('Not enough balance to pay fee'),
+                  new Error(
+                    intl.formatMessage({
+                      id: 'error.not-enough-balance-to-pay-fee',
+                    }),
+                  ),
                 );
                 return;
               }
@@ -264,7 +273,9 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
                 );
                 state.setFailedReason(
                   new Error(
-                    'Your claimable reward is smaller than the required fee.',
+                    intl.formatMessage({
+                      id: 'error.claimable-reward-is-smaller-than-the-required-fee',
+                    }),
                   ),
                 );
                 return;
@@ -337,7 +348,11 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
                   response.data.message.includes('invalid empty tx')
                 ) {
                   state.setFailedReason(
-                    new Error('Not supported: outdated version of cosmos-sdk'),
+                    new Error(
+                      intl.formatMessage({
+                        id: 'error.outdated-cosmos-sdk',
+                      }),
+                    ),
                   );
                   return;
                 }
@@ -349,7 +364,11 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
             }
           } else {
             state.setFailedReason(
-              new Error("Can't pay for fee by stake currency"),
+              new Error(
+                intl.formatMessage({
+                  id: 'error.can-not-pay-for-fee-by-stake-currency',
+                }),
+              ),
             );
             return;
           }
@@ -407,7 +426,7 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
               <YAxis alignX="left">
                 <Skeleton layer={1} isNotReady={isNotReady}>
                   <Text style={style.flatten(['body2', 'color-gray-300'])}>
-                    Claimable Staking Reward
+                    <FormattedMessage id="page.main.components.claim-all.title" />
                   </Text>
                 </Skeleton>
               </YAxis>
@@ -430,7 +449,9 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
                */}
               {isLedger || isKeystone ? (
                 <Button
-                  text={'Claim All'}
+                  text={intl.formatMessage({
+                    id: 'page.main.components.claim-all.button',
+                  })}
                   size="medium"
                   loading={claimAllIsLoading}
                   disabled={claimAllDisabled}
@@ -439,7 +460,9 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
               ) : (
                 <SpecialButton
                   size="medium"
-                  text="Claim All"
+                  text={intl.formatMessage({
+                    id: 'page.main.components.claim-all.button',
+                  })}
                   disabled={claimAllDisabled}
                   isLoading={claimAllIsLoading}
                   onPress={claimAll}
@@ -675,7 +698,9 @@ const ClaimTokenItem: FunctionComponent<{
           // 대충 아이템이 한개면 tooltip이 왼족에 나타나도록 한다.
           allowedPlacements={itemsLength === 1 ? ['left'] : undefined}> */}
         <Button
-          text="Claim"
+          text={intl.formatMessage({
+            id: 'page.main.components.claim-all.claim-button',
+          })}
           size="small"
           color="secondary"
           loading={isLoading}

@@ -23,6 +23,7 @@ import {BaseModalHeader} from '../../../../components/modal';
 import {ChainImageFallback} from '../../../../components/image';
 import {CheckToggleIcon, QRCodeIcon} from '../../../../components/icon';
 import {IconButton} from '../../../../components/icon-button';
+import {FormattedMessage, useIntl} from 'react-intl';
 
 export const CopyAddressScene: FunctionComponent<{
   setIsOpen: (isOpen: boolean) => void;
@@ -34,6 +35,7 @@ export const CopyAddressScene: FunctionComponent<{
     const {chainStore, accountStore, keyRingStore, uiConfigStore} = useStore();
     const [search, setSearch] = useState('');
     const style = useStyle();
+    const intl = useIntl();
 
     // 북마크된 체인과 sorting을 위한 state는 분리되어있다.
     // 이걸 분리하지 않고 북마크된 체인은 무조건 올린다고 가정하면
@@ -141,7 +143,9 @@ export const CopyAddressScene: FunctionComponent<{
 
               setSearch(e.nativeEvent.text);
             }}
-            placeholder="Search for a chain"
+            placeholder={intl.formatMessage({
+              id: 'page.main.components.deposit-modal.search-placeholder',
+            })}
           />
         </Box>
 
@@ -170,9 +174,7 @@ export const CopyAddressScene: FunctionComponent<{
                   'color-gray-300',
                   'text-center',
                 ])}>
-                To use an address on certain chain, you may need to first visit
-                the "Manage Chain Visibility" in the side menu and make the
-                chain visible on your wallet.
+                <FormattedMessage id="page.main.components.deposit-modal.empty-text" />
               </Text>
             </Box>
           ) : null}
