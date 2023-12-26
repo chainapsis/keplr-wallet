@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useEffect, useRef, useState} from 'react';
+import React, {FunctionComponent, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {useIntl} from 'react-intl';
 import {Text} from 'react-native';
@@ -10,9 +10,10 @@ import {Column, Columns} from '../column';
 import {ChainImageFallback} from '../image';
 import {TextButton} from '../text-button';
 import {ArrowDownFillIcon} from '../icon/arrow-donw-fill';
-import {ScrollView, TextInput} from 'react-native-gesture-handler';
+import {ScrollView} from 'react-native-gesture-handler';
 import {SearchTextInput} from '../input/search-text-input';
 import {registerCardModal} from '../modal/card';
+import {useFocusOnModal} from '../../hooks/use-focus';
 
 export interface SelectModalItem {
   key: string;
@@ -71,12 +72,8 @@ export const SelectModal = registerCardModal(
   }>(({items, title, placeholder, onSelect}) => {
     const style = useStyle();
     const [search, setSearch] = useState('');
-    const searchRef = useRef<TextInput>(null);
+    const searchRef = useFocusOnModal();
     const intl = useIntl();
-
-    useEffect(() => {
-      searchRef.current?.focus();
-    }, [searchRef]);
 
     const filtered = search
       ? items.filter(item => {

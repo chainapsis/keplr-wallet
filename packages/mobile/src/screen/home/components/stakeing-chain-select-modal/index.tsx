@@ -1,9 +1,9 @@
-import React, {FunctionComponent, useEffect, useRef, useState} from 'react';
+import React, {FunctionComponent, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {Keyboard, Platform, Text} from 'react-native';
 
 import {useStyle} from '../../../../styles';
-import {ScrollView, TextInput} from 'react-native-gesture-handler';
+import {ScrollView} from 'react-native-gesture-handler';
 import {Gutter} from '../../../../components/gutter';
 import {SearchTextInput} from '../../../../components/input/search-text-input';
 import {Box} from '../../../../components/box';
@@ -21,6 +21,7 @@ import {registerCardModal} from '../../../../components/modal/card';
 import {BaseModalHeader} from '../../../../components/modal';
 import {EmptyView, EmptyViewText} from '../../../../components/empty-view';
 import {useIntl} from 'react-intl';
+import {useFocusOnModal} from '../../../../hooks/use-focus';
 
 export interface SelectStakingChainModalItem {
   key: string;
@@ -35,13 +36,9 @@ export const SelectStakingChainModal = registerCardModal(
     onSelect: (item: SelectStakingChainModalItem) => void;
   }>(({items, placeholder, aprList, onSelect}) => {
     const [search, setSearch] = useState('');
-    const searchRef = useRef<TextInput>(null);
+    const searchRef = useFocusOnModal();
     const style = useStyle();
     const intl = useIntl();
-
-    useEffect(() => {
-      searchRef.current?.focus();
-    }, [searchRef]);
 
     const filtered = search
       ? items.filter(item => {
