@@ -5,7 +5,7 @@ import {DimensionValue} from 'react-native';
 
 export interface SkeletonProps {
   isNotReady?: boolean;
-  type?: 'default' | 'button' | 'copyAddress' | 'circle';
+  type?: 'default' | 'button' | 'copyAddress' | 'circle' | 'rect';
   dummyMinWidth?: DimensionValue;
   // This is for the case that the skeleton's background color.
   layer?: 0 | 1;
@@ -27,6 +27,8 @@ export const Skeleton: FunctionComponent<PropsWithChildren<SkeletonProps>> = ({
 
   const getBorderRadius = () => {
     switch (type) {
+      case 'rect':
+        return 0;
       case 'button':
         return 6;
       // case 'copyAddress':
