@@ -170,8 +170,11 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
   ];
   const onRefresh = async () => {
     setRefreshing(true);
-    await queryDelegations.waitFreshResponse();
-    await queryUnbondings.waitFreshResponse();
+    await Promise.all([
+      queryDelegations.waitFreshResponse(),
+      queryUnbondings.waitFreshResponse(),
+    ]);
+
     setRefreshing(false);
   };
 

@@ -116,9 +116,8 @@ export const HomeScreen: FunctionComponent = observer(() => {
         const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
           account.bech32Address,
         );
-
-        queryBalance.stakable?.waitFreshResponse();
-        queryRewards.waitFreshResponse();
+        queryBalance.fetch();
+        queryRewards.fetch();
       }
       return;
     }
