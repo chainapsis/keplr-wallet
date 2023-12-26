@@ -35,15 +35,24 @@ export const ChainImageFallback: FunctionComponent<{
   alt: string;
   style: Object;
 }> = ({src, alt, style}) => {
+  // XXX: FastImage에서도 alt를 쓸 수 있는지 살펴보기...
+  noop(alt);
+
   return (
-    <Image
-      defaultSrc={require('../../public/assets/img/chain-icon-alt.png')}
+    <FastImage
       style={{
         borderRadius: 1000000,
         ...style,
       }}
-      src={src}
-      alt={alt}
+      source={{
+        uri: src,
+        cache: FastImage.cacheControl.web,
+      }}
+      defaultSource={require('../../public/assets/img/chain-icon-alt.png')}
     />
   );
+};
+
+const noop = (..._: any[]) => {
+  // noop
 };
