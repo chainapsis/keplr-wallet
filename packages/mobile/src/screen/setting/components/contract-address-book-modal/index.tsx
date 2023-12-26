@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStore} from '../../../../stores';
-import {useFocusOnMount} from '../../../../hooks/use-focus-on-mount';
+import {useFocusOnMount} from '../../../../hooks/use-focus';
 import {Linking, Text} from 'react-native';
 import {SearchTextInput} from '../../../../components/input/search-text-input';
 import {Gutter} from '../../../../components/gutter';
