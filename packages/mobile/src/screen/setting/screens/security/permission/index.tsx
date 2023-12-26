@@ -15,6 +15,7 @@ import {ArrowDownIcon} from '../../../../../components/icon/arrow-down';
 import {ArrowUpIcon} from '../../../../../components/icon/arrow-up';
 import {TreeIcon} from '../../../../../components/icon/tree';
 import {PageWithScrollView} from '../../../../../components/page';
+import {WCMessageRequester} from '../../../../../stores/wallet-connect/msg-requester';
 
 export const SettingSecurityPermissionScreen: FunctionComponent = observer(
   () => {
@@ -55,6 +56,7 @@ export const SettingSecurityPermissionScreen: FunctionComponent = observer(
               />
             </Box>
             {Object.entries(permissionManagerStore.permissionData)
+              .filter(([origin]) => !WCMessageRequester.isVirtualURL(origin))
               .filter(([origin]) => {
                 const trim = search.trim();
                 if (trim.length === 0) {
