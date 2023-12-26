@@ -116,7 +116,10 @@ export const WalletDeleteScreen: FunctionComponent = observer(() => {
               source={require('../../../public/assets/lottie/wallet/delete.json')}
               loop
               autoPlay
-              style={style.flatten(['width-116', 'height-116'])}
+              style={{
+                height: 180,
+                width: 180,
+              }}
             />
           </Box>
           <Gutter size={22} />

@@ -12,7 +12,7 @@ import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
 import {Button} from '../../../components/button';
 import LottieView from 'lottie-react-native';
-import {Pressable, Text} from 'react-native';
+import {Pressable, StyleSheet, Text} from 'react-native';
 import {Column, Columns} from '../../../components/column';
 import {CheckIcon} from '../../../components/icon';
 import * as Clipboard from 'expo-clipboard';
@@ -95,11 +95,17 @@ export const WalletShowSensitiveScreen: FunctionComponent = observer(() => {
               source={require('../../../public/assets/lottie/wallet/mnemonic.json')}
               loop
               autoPlay
-              style={style.flatten([
-                'width-136',
-                'height-136',
-                'background-color-gray-600',
-                'border-radius-40',
+              style={StyleSheet.flatten([
+                style.flatten([
+                  'width-136',
+                  'height-136',
+                  'background-color-gray-600',
+                  'border-radius-40',
+                ]),
+                {
+                  height: 180,
+                  width: 180,
+                },
               ])}
             />
             <Gutter size={33} />

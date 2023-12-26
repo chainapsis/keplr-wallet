@@ -1,13 +1,8 @@
-import React, {
-  FunctionComponent,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from 'react';
+import React, {FunctionComponent, useLayoutEffect, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {Box} from '../../../components/box';
-import {KeyboardAvoidingView, Platform, StyleSheet, Text} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
 import {useStyle} from '../../../styles';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
@@ -19,7 +14,8 @@ import {AppCurrency} from '@keplr-wallet/types';
 import {WalletIcon} from '../../../components/icon';
 import {Bech32Address} from '@keplr-wallet/cosmos';
 import {CoinPretty} from '@keplr-wallet/unit';
-import {Button} from '../../../components/button';
+import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
+import {useEffectOnce} from '../../../hooks';
 
 export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -32,7 +28,7 @@ export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
   const {chainStore, keyRingStore} = useStore();
 
   const [index, setIndex] = useState(0);
-  const [chainId, setChainId] = useState(chainIds[0]);
+  const chainId = chainIds[index];
   const chainInfo = chainStore.getChain(chainId);
   const [selectedCoinType, setSelectedCoinType] = useState(-1);
   const [candidates, setCandidates] = useState<
@@ -41,6 +37,7 @@ export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
       bech32Address: string;
     }[]
   >([]);
+  const [buttonIsLoading, setButtonIsLoading] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setParams({
@@ -48,7 +45,7 @@ export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
     });
   }, [navigation]);
 
-  useEffect(() => {
+  useEffectOnce(() => {
     keyRingStore.computeNotFinalizedKeyAddresses(vaultId, chainId).then(res => {
       setCandidates(res);
 
@@ -56,134 +53,139 @@ export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
         setSelectedCoinType(res[0].coinType);
       }
     });
-  }, [chainId, keyRingStore, vaultId]);
-
-  useEffect(() => {
-    setChainId(chainIds[index]);
-  }, [chainIds, index]);
+  });
 
   const currency = chainInfo.stakeCurrency || chainInfo.currencies[0];
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{flex: 1}}>
-      <Box padding={20} style={{flex: 1}}>
-        <Text
-          style={StyleSheet.flatten([
-            style.flatten(['color-text-low', 'body1']),
-            {textAlign: 'center'},
-          ])}>
-          <FormattedMessage id="pages.register.select-derivation-path.paragraph" />
-        </Text>
+    <ScrollViewRegisterContainer
+      padding={20}
+      bottomButton={{
+        text: intl.formatMessage({
+          id: 'pages.register.select-derivation-path.import-button',
+        }),
+        size: 'large',
+        disabled:
+          !keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo) ||
+          selectedCoinType < 0,
+        loading: buttonIsLoading,
+        onPress: async () => {
+          if (selectedCoinType > 0) {
+            await keyRingStore.finalizeKeyCoinType(
+              vaultId,
+              chainId,
+              selectedCoinType,
+            );
 
-        <Gutter size={28} />
+            await chainStore.enableChainInfoInUIWithVaultId(vaultId, chainId);
 
-        <Box
-          alignX="center"
-          padding={20}
-          borderRadius={25}
-          backgroundColor={style.get('color-gray-600').color}>
-          <Text style={style.flatten(['subtitle3', 'color-text-middle'])}>
-            <FormattedMessage
-              id="pages.register.select-derivation-path.chain-step"
-              values={{
-                currentStep: index + 1,
-                totalStep: totalCount,
-              }}
-            />
-          </Text>
+            if (chainIds.length - index > 1) {
+              setButtonIsLoading(true);
+              keyRingStore
+                .computeNotFinalizedKeyAddresses(vaultId, chainIds[index + 1])
+                .then(res => {
+                  setCandidates(res);
 
-          <Gutter size={12} />
+                  if (res.length > 0) {
+                    setSelectedCoinType(res[0].coinType);
+                  }
 
-          <Box
-            padding={12}
-            borderRadius={50}
-            backgroundColor="rgba(46, 46, 50, 0.50)">
-            <XAxis alignY="center">
-              <FastImage
-                style={style.flatten([
-                  'width-44',
-                  'height-44',
-                  'border-radius-64',
-                ])}
-                source={
-                  chainInfo.chainSymbolImageUrl
-                    ? {uri: chainInfo.chainSymbolImageUrl}
-                    : require('../../../public/assets/img/chain-icon-alt.png')
-                }
-                resizeMode={FastImage.resizeMode.contain}
-              />
+                  setIndex(index + 1);
 
-              <Gutter size={8} />
-
-              <YAxis>
-                <Text style={style.flatten(['h4', 'color-text-high'])}>
-                  {chainInfo.chainName}
-                </Text>
-                <Text style={style.flatten(['body2', 'color-text-middle'])}>
-                  {currency.coinDenom}
-                </Text>
-              </YAxis>
-            </XAxis>
-          </Box>
-
-          <Gutter size={20} />
-
-          <Box width="100%" style={{gap: 20}}>
-            {candidates.map(candidate => (
-              <PathItem
-                key={candidate.coinType}
-                chainId={chainId}
-                coinType={candidate.coinType}
-                bech32Address={candidate.bech32Address}
-                currency={currency}
-                isSelected={selectedCoinType === candidate.coinType}
-                onClick={() => {
-                  setSelectedCoinType(candidate.coinType);
-                }}
-              />
-            ))}
-          </Box>
-        </Box>
-
-        <Box style={{flex: 1}} />
-
-        <Button
-          text={intl.formatMessage({
-            id: 'pages.register.select-derivation-path.import-button',
-          })}
-          size="large"
-          disabled={
-            !keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo) ||
-            selectedCoinType < 0
-          }
-          onPress={async () => {
-            if (selectedCoinType > 0) {
-              await keyRingStore.finalizeKeyCoinType(
-                vaultId,
-                chainId,
-                selectedCoinType,
-              );
-
-              await chainStore.enableChainInfoInUIWithVaultId(vaultId, chainId);
-
-              if (chainIds.length - index > 1) {
-                setIndex(index + 1);
+                  setButtonIsLoading(false);
+                });
+            } else {
+              if (skipWelcome) {
+                navigation.reset({routes: [{name: 'Home'}]});
               } else {
-                if (skipWelcome) {
-                  navigation.reset({routes: [{name: 'Home'}]});
-                } else {
-                  navigation.reset({
-                    routes: [{name: 'Register.Welcome', params: {password}}],
-                  });
-                }
+                navigation.reset({
+                  routes: [{name: 'Register.Welcome', params: {password}}],
+                });
               }
             }
-          }}
-        />
+          }
+        },
+      }}>
+      <Text
+        style={StyleSheet.flatten([
+          style.flatten(['color-text-low', 'body1']),
+          {textAlign: 'center'},
+        ])}>
+        <FormattedMessage id="pages.register.select-derivation-path.paragraph" />
+      </Text>
+
+      <Gutter size={28} />
+
+      <Box
+        alignX="center"
+        padding={20}
+        borderRadius={25}
+        backgroundColor={style.get('color-gray-600').color}>
+        <Text style={style.flatten(['subtitle3', 'color-text-middle'])}>
+          <FormattedMessage
+            id="pages.register.select-derivation-path.chain-step"
+            values={{
+              currentStep: index + 1,
+              totalStep: totalCount,
+            }}
+          />
+        </Text>
+
+        <Gutter size={12} />
+
+        <Box
+          padding={12}
+          borderRadius={50}
+          backgroundColor="rgba(46, 46, 50, 0.50)">
+          <XAxis alignY="center">
+            <FastImage
+              style={style.flatten([
+                'width-44',
+                'height-44',
+                'border-radius-64',
+              ])}
+              source={
+                chainInfo.chainSymbolImageUrl
+                  ? {uri: chainInfo.chainSymbolImageUrl}
+                  : require('../../../public/assets/img/chain-icon-alt.png')
+              }
+              resizeMode={FastImage.resizeMode.contain}
+            />
+
+            <Gutter size={8} />
+
+            <YAxis>
+              <Text style={style.flatten(['h4', 'color-text-high'])}>
+                {chainInfo.chainName}
+              </Text>
+              <Text style={style.flatten(['body2', 'color-text-middle'])}>
+                {currency.coinDenom}
+              </Text>
+            </YAxis>
+          </XAxis>
+        </Box>
+
+        <Gutter size={20} />
+
+        <Box width="100%" style={{gap: 20}}>
+          {candidates.map(candidate => (
+            <PathItem
+              key={candidate.coinType}
+              chainId={chainId}
+              coinType={candidate.coinType}
+              bech32Address={candidate.bech32Address}
+              currency={currency}
+              isSelected={selectedCoinType === candidate.coinType}
+              onClick={() => {
+                setSelectedCoinType(candidate.coinType);
+              }}
+            />
+          ))}
+        </Box>
       </Box>
-    </KeyboardAvoidingView>
+
+      <Gutter size={20} />
+    </ScrollViewRegisterContainer>
   );
 });
 

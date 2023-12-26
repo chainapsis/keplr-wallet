@@ -31,6 +31,7 @@ import {
   HomeScreenHeaderTitle,
   defaultHeaderOptions,
   homeHeaderOptions,
+  SuggestScreenHeaderRightFunc,
 } from './components/pageHeader';
 import {SettingScreen} from './screen/setting';
 
@@ -59,7 +60,6 @@ import {RegisterIntroNewUserScreen} from './screen/register/intro-new-user';
 import {NewMnemonicScreen} from './screen/register/new-mnemonic';
 import {VerifyMnemonicScreen} from './screen/register/verify-mnemonic';
 import {RegisterIntroExistingUserScene} from './screen/register/intro-existing-user';
-import {RegisterScreen} from './screen/register';
 import {WebScreen} from './screen/web';
 import {WebpageScreen} from './screen/web/webpage';
 import {GovernanceListScreen} from './screen/governance/list';
@@ -104,7 +104,6 @@ export type RootStackParamList = {
   Camera: undefined;
 
   Register: undefined;
-  'Register.Temp': undefined;
   'Register.Intro': undefined;
   'Register.Intro.NewUser'?: DefaultRegisterParams;
   'Register.Intro.ConnectHardware'?: DefaultRegisterParams;
@@ -303,7 +302,6 @@ export const RegisterNavigation: FunctionComponent = () => {
         ...TransitionPresets.SlideFromRightIOS,
         // headerShown: false,
       }}>
-      <Stack.Screen name="Register.Temp" component={RegisterScreen} />
       <Stack.Screen
         name="Register.Intro"
         options={{headerShown: false}}
@@ -360,12 +358,6 @@ export const RegisterNavigation: FunctionComponent = () => {
           }),
           ...registerHeaderOptions,
         }}
-      />
-
-      <Stack.Screen
-        name="Register.FinalizeKey"
-        options={{headerShown: false}}
-        component={FinalizeKeyScreen}
       />
 
       <Stack.Screen
@@ -608,6 +600,7 @@ const SettingGeneralNavigation = () => {
           title: intl.formatMessage({
             id: 'page.setting.general.manage-non-native-chains-title',
           }),
+          headerRight: SuggestScreenHeaderRightFunc,
           ...defaultHeaderOptions,
         }}
         component={SettingGeneralDeleteSuggestChainScreen}
@@ -899,6 +892,12 @@ export const AppNavigation: FunctionComponent = observer(() => {
           />
 
           {/*NOTE Register와 Home을 통해서 이동하여 route를 최상위에도 올렸습니다*/}
+          <Stack.Screen
+            name="Register.FinalizeKey"
+            options={{headerShown: false}}
+            component={FinalizeKeyScreen}
+          />
+
           <Stack.Screen
             name="Register.EnableChain"
             options={{

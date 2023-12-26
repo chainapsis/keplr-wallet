@@ -25,6 +25,7 @@ import {StackNavProp} from '../../navigation';
 import {Skeleton} from '../../components/skeleton';
 import {StakingIcon} from '../../components/icon/stacking';
 import {VoteIcon} from '../../components/icon';
+import {useIntl} from 'react-intl';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -47,6 +48,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const searchRef = useRef<NativeTextInput | null>(null);
   const [search, setSearch] = useState('');
   const [refreshing, _] = useState(false);
+  const intl = useIntl();
 
   const isNotReady = useIsNotReady();
 
@@ -162,11 +164,15 @@ export const HomeScreen: FunctionComponent = observer(() => {
             items={[
               {
                 key: 'available',
-                text: 'available',
+                text: intl.formatMessage({
+                  id: 'page.main.available.available-button-title',
+                }),
               },
               {
                 key: 'staked',
-                text: 'staked',
+                text: intl.formatMessage({
+                  id: 'page.main.staked.staked-button-title',
+                }),
               },
             ]}
             onSelect={key => {

@@ -9,6 +9,7 @@ import {Button} from '../../../components/button';
 import {TextButton} from '../../../components/text-button';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../navigation';
+import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
 
 export const RegisterIntroScreen: FunctionComponent = () => {
   const intl = useIntl();
@@ -16,7 +17,13 @@ export const RegisterIntroScreen: FunctionComponent = () => {
   const navigation = useNavigation<StackNavProp>();
 
   return (
-    <Box height="100%" alignY="center" alignX="center">
+    <ScrollViewRegisterContainer
+      forceEnableTopSafeArea={true}
+      contentContainerStyle={{
+        flexGrow: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}>
       <LottieView
         source={require('../../../public/assets/lottie/wallet/logo.json')}
         style={{width: 200, height: 155}}
@@ -67,6 +74,6 @@ export const RegisterIntroScreen: FunctionComponent = () => {
           }}
         />
       </Box>
-    </Box>
+    </ScrollViewRegisterContainer>
   );
 };

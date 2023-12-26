@@ -4,12 +4,59 @@ import {Box} from '../../../components/box';
 import LottieView from 'lottie-react-native';
 import {useStore} from '../../../stores';
 import {WalletStatus} from '@keplr-wallet/stores';
-import {useEffectOnce} from '../../../hooks';
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {
+  RouteProp,
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
+import {InteractionManager, Text, View} from 'react-native';
+import Reanimated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
+import {useStyle} from '../../../styles';
+import {defaultSpringConfig} from '../../../styles/spring';
+import {ViewRegisterContainer} from '../components/view-register-container';
+
+const SimpleProgressBar: FunctionComponent<{
+  progress: number;
+}> = ({progress}) => {
+  const style = useStyle();
+
+  const animProgress = useSharedValue(progress);
+
+  useEffect(() => {
+    animProgress.value = withSpring(progress, defaultSpringConfig);
+  }, [animProgress, progress]);
+
+  const barColor = style.get('color-blue-400').color;
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      height: 8,
+      borderRadius: 9999,
+      backgroundColor: barColor,
+      width: `${animProgress.value * 100}%`,
+    };
+  });
+
+  return (
+    <View
+      style={{
+        height: 8,
+        borderRadius: 9999,
+        backgroundColor: style.get('color-gray-500').color,
+      }}>
+      <Reanimated.View style={animatedStyle} />
+    </View>
+  );
+};
 
 export const FinalizeKeyScreen: FunctionComponent = observer(() => {
-  const {chainStore, accountStore, queriesStore, keyRingStore} = useStore();
+  const {chainStore, accountStore, queriesStore, keyRingStore, priceStore} =
+    useStore();
   const route =
     useRoute<RouteProp<RootStackParamList, 'Register.FinalizeKey'>>();
   const {
@@ -22,6 +69,18 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
     stepTotal,
   } = route.params;
   const navigation = useNavigation<StackNavProp>();
+  const style = useStyle();
+
+  const [isScreenTransitionEnded, setIsScreenTransitionEnded] = useState(false);
+  useFocusEffect(
+    React.useCallback(() => {
+      const task = InteractionManager.runAfterInteractions(() => {
+        setIsScreenTransitionEnded(true);
+      });
+
+      return () => task.cancel();
+    }, []),
+  );
 
   // Effects depends on below state and these should be called once if length > 0.
   // Thus, you should set below state only once.
@@ -37,7 +96,24 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
   const [vaultId, setVaultId] = useState('');
   const [isAnimEnded, setIsAnimEnded] = useState(false);
 
-  useEffectOnce(() => {
+  // RN에서 한번에 많은 쿼리를 처리하면 느리진다...
+  // 이 문제를 해결할수가 없기 때문에 query가 처리된 비율에 따라 progress를 계산하고 0.8(80%) 이상의 쿼리가 처리되고
+  // 그 후 3초를 더 기다리고 넘긴다...
+  // (최대 기다리는 시간은 15초)
+  const [queryRoughlyDone, setQueryRoughlyDone] = useState(false);
+  const [queryProgress, setQueryProgress] = useState(0);
+  const unmounted = useRef(false);
+  useEffect(() => {
+    return () => {
+      unmounted.current = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isScreenTransitionEnded) {
+      return;
+    }
+
     (async () => {
       // Chain store should be initialized before creating the key.
       await chainStore.waitUntilInitialized();
@@ -167,7 +243,8 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
       setVaultId(vaultId);
       setCandidateAddresses(candidateAddresses);
     })();
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isScreenTransitionEnded]);
 
   useEffect(() => {
     if (candidateAddresses.length > 0) {
@@ -204,9 +281,58 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
                 .waitFreshResponse(),
             );
           }
+
+          const chainInfo = chainStore.getChain(candidateAddress.chainId);
+          const targetCurrency =
+            chainInfo.stakeCurrency || chainInfo.currencies[0];
+          if (targetCurrency.coinGeckoId) {
+            // Push coingecko id to priceStore.
+            priceStore.getPrice(targetCurrency.coinGeckoId);
+          }
         }
 
-        await Promise.allSettled(promises);
+        // Try to make sure that prices are fresh.
+        promises.push(priceStore.waitFreshResponse());
+
+        if (promises.length >= 10) {
+          // RN에서 한번에 많은 쿼리를 처리하면 느리진다...
+          // 이 문제를 해결할수가 없기 때문에 query가 처리된 비율에 따라 progress를 계산하고 0.8(80%) 이상의 쿼리가 처리되고
+          // 그 후 3초를 더 기다리고 넘긴다...
+          // (최대 기다리는 시간은 15초)
+          let once = false;
+          setTimeout(() => {
+            if (!once) {
+              once = true;
+              if (!unmounted.current) {
+                setQueryRoughlyDone(true);
+              }
+            }
+          }, 15000);
+
+          let len = promises.length;
+          let i = 0;
+          for (const p of promises) {
+            p.then(() => {
+              i++;
+              const progress = i / len;
+              setQueryProgress(progress);
+              if (progress >= 0.8 && !once) {
+                once = true;
+                setTimeout(() => {
+                  if (!unmounted.current) {
+                    setQueryRoughlyDone(true);
+                  }
+                }, 3000);
+              }
+            });
+          }
+        } else {
+          setTimeout(() => {
+            if (!unmounted.current) {
+              setQueryRoughlyDone(true);
+            }
+          }, 3000);
+        }
       })();
     }
     // Make sure to this effect called once.
@@ -223,7 +349,12 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
       !onceRef.current &&
       candidateAddresses.length > 0 &&
       vaultId &&
-      isAnimEnded
+      isAnimEnded &&
+      // RN에서 한번에 많은 쿼리를 처리하면 느리진다...
+      // 이 문제를 해결할수가 없기 때문에 query가 처리된 비율에 따라 progress를 계산하고 0.8(80%) 이상의 쿼리가 처리되고
+      // 그 후 3초를 더 기다리고 넘긴다...
+      // (최대 기다리는 시간은 15초)
+      queryRoughlyDone
     ) {
       onceRef.current = true;
 
@@ -252,19 +383,44 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
     stepPrevious,
     stepTotal,
     vaultId,
+    queryRoughlyDone,
   ]);
 
   return (
-    <Box height="100%" alignX="center" alignY="center">
+    <ViewRegisterContainer
+      forceEnableTopSafeArea={true}
+      contentContainerStyle={{
+        flexGrow: 1,
+        alignItems: 'center',
+      }}>
+      <View style={{flex: 1}} />
       <LottieView
         source={require('../../../public/assets/lottie/register/creating.json')}
         loop={false}
         autoPlay
+        // TODO: 얘 애니메이션을 좀 더 길게 해야한다. RN의 성능 문제로 이 애니메이션이 끝나기전에 query가 다 처리되지가 않는다...
+        speed={0.7}
         onAnimationFinish={() => {
           setIsAnimEnded(true);
         }}
-        style={{width: '80%', height: '100%'}}
+        style={{width: '80%', aspectRatio: 1}}
       />
-    </Box>
+      <View
+        style={{
+          flex: 2,
+        }}
+      />
+      <Text style={style.flatten(['subtitle3', 'color-text-low'])}>
+        Let us set everything up for you...
+      </Text>
+      <Box marginTop={21} marginBottom={12} paddingX={28} width="100%">
+        <SimpleProgressBar progress={queryProgress} />
+      </Box>
+      <View
+        style={{
+          flex: 1,
+        }}
+      />
+    </ViewRegisterContainer>
   );
 });

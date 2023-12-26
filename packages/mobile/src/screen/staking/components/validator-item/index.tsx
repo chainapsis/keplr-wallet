@@ -15,6 +15,7 @@ import {FilterOption} from '../../validator-list';
 import {InformationIcon} from '../../../../components/icon/information';
 import {ValidatorImage} from '../validator-image';
 import {ValidatorInfo} from '../../type';
+import {Skeleton} from '../../../../components/skeleton';
 
 export interface ViewValidator {
   coin?: CoinPretty;
@@ -29,7 +30,7 @@ export const ValidatorItem: FunctionComponent<{
   isNotReady?: boolean;
   chainId: string;
   afterSelect: () => void;
-}> = observer(({chainId, viewValidator, afterSelect}) => {
+}> = observer(({chainId, viewValidator, isNotReady, afterSelect}) => {
   const {queriesStore} = useStore();
   const queries = queriesStore.get(chainId);
   const style = useStyle();
@@ -57,45 +58,55 @@ export const ValidatorItem: FunctionComponent<{
         'background-color-card-default',
       ])}
       activeOpacity={0.5}
+      disabled={isNotReady}
       onPress={async () => {
         afterSelect();
       }}>
       <Box paddingLeft={16} paddingRight={8} paddingY={16} borderRadius={6}>
         <Columns sum={1} alignY="center" gutter={8}>
-          <Box>
-            <ValidatorImage
-              imageUrl={thumbnail}
-              name={viewValidator.name}
-              isDelegation={viewValidator.isDelegation}
-            />
-          </Box>
+          <Skeleton layer={1} type="circle" isNotReady={isNotReady}>
+            <Box>
+              <ValidatorImage
+                imageUrl={thumbnail}
+                name={viewValidator.name}
+                isDelegation={viewValidator.isDelegation}
+              />
+            </Box>
+          </Skeleton>
           <Gutter size={12} />
           <Column weight={6}>
-            <Text
-              numberOfLines={1}
-              style={style.flatten(['subtitle2', 'color-text-high'])}>
-              {viewValidator.name}
-            </Text>
+            <Skeleton layer={1} type="rect" isNotReady={isNotReady}>
+              <Text
+                numberOfLines={1}
+                style={style.flatten(['subtitle2', 'color-text-high'])}>
+                {viewValidator.name}
+              </Text>
+            </Skeleton>
+
             <Gutter size={4} />
           </Column>
           <Column weight={1} />
           <Stack alignX="right" gutter={4}>
             {viewValidator.coin ? (
-              <Text style={style.flatten(['subtitle1', 'color-text-high'])}>
-                {viewValidator.coin
-                  .maxDecimals(6)
-                  .trim(true)
-                  .shrink(true)
-                  .toString()}
-              </Text>
+              <Skeleton layer={1} type="rect" isNotReady={isNotReady}>
+                <Text style={style.flatten(['subtitle1', 'color-text-high'])}>
+                  {viewValidator.coin
+                    .maxDecimals(6)
+                    .trim(true)
+                    .shrink(true)
+                    .toString()}
+                </Text>
+              </Skeleton>
             ) : null}
 
             {viewValidator.subString ? (
-              <Columns sum={1}>
-                <Text style={style.flatten(['subtitle2', 'color-text-low'])}>
-                  {viewValidator.subString}
-                </Text>
-              </Columns>
+              <Skeleton layer={1} type="rect" isNotReady={isNotReady}>
+                <Columns sum={1}>
+                  <Text style={style.flatten(['subtitle2', 'color-text-low'])}>
+                    {viewValidator.subString}
+                  </Text>
+                </Columns>
+              </Skeleton>
             ) : null}
           </Stack>
           <Gutter size={4} />

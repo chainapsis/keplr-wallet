@@ -6,7 +6,7 @@ import React, {
 } from 'react';
 import {observer} from 'mobx-react-lite';
 import {Button} from '../../../components/button';
-import {RegisterContainer} from '../components';
+import {LegacyRegisterContainer} from '../components';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStyle} from '../../../styles';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
@@ -88,16 +88,23 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
             ],
           });
         } else {
-          navigation.navigate('Register.FinalizeKey', {
-            name: route.params.name,
-            password: route.params.password,
-            stepPrevious: route.params.stepPrevious + 1,
-            stepTotal: route.params.stepTotal,
-            ledger: {
-              pubKey: publicKey,
-              bip44Path: route.params.bip44Path,
-              app: route.params.app,
-            },
+          navigation.reset({
+            routes: [
+              {
+                name: 'Register.FinalizeKey',
+                params: {
+                  name: route.params.name,
+                  password: route.params.password,
+                  stepPrevious: route.params.stepPrevious + 1,
+                  stepTotal: route.params.stepTotal,
+                  ledger: {
+                    pubKey: publicKey,
+                    bip44Path: route.params.bip44Path,
+                    app: route.params.app,
+                  },
+                },
+              },
+            ],
           });
         }
       }
@@ -114,7 +121,7 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
   ]);
 
   return (
-    <RegisterContainer
+    <LegacyRegisterContainer
       paragraph={
         appendModeInfo === undefined
           ? `Step ${stepPrevious + 1}/${stepTotal}`
@@ -187,7 +194,7 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
         setStep={(step: Step) => setStep(step)}
         setPublicKey={(publicKey: Uint8Array) => setPublicKey(publicKey)}
       />
-    </RegisterContainer>
+    </LegacyRegisterContainer>
   );
 });
 

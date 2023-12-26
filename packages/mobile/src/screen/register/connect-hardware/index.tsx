@@ -1,23 +1,24 @@
 import React, {FunctionComponent, useState} from 'react';
-import {RegisterContainer} from '../components';
 import {useIntl} from 'react-intl';
 import {observer} from 'mobx-react-lite';
-import {Controller, useForm} from 'react-hook-form';
+import {useForm} from 'react-hook-form';
 import {Button} from '../../../components/button';
 import {useStyle} from '../../../styles';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../navigation';
 import {Bip44PathView, useBIP44PathState} from '../components/bip-path-44';
-import {ScrollView, Text} from 'react-native';
-import {TextInput} from '../../../components/input';
+import {InteractionManager, Text} from 'react-native';
 import {Gutter} from '../../../components/gutter';
-import {useStore} from '../../../stores';
 import {Box} from '../../../components/box';
 import {App} from '@keplr-wallet/ledger-cosmos';
 import {RectButton} from '../../../components/rect-button';
 import {XAxis} from '../../../components/axis';
 import {ArrowDownFillIcon} from '../../../components/icon/arrow-donw-fill';
 import {SelectItemModal} from '../../../components/modal/select-item-modal';
+import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
+import {VerticalCollapseTransition} from '../../../components/transition';
+import {NamePasswordInput} from '../components/name-password-input';
+import {useEffectOnce} from '../../../hooks';
 
 export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -28,9 +29,6 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
   const [isOpenBip44PathView, setIsOpenBip44PathView] = React.useState(false);
   const [isOpenSelectItemModal, setIsOpenSelectItemModal] = useState(false);
 
-  const {keyRingStore} = useStore();
-  const needPassword = keyRingStore.keyInfos.length === 0;
-
   const supportedApps: App[] = ['Cosmos', 'Terra', 'Secret'];
   const [selectedApp, setSelectedApp] = React.useState<App>('Cosmos');
 
@@ -38,6 +36,7 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
     control,
     handleSubmit,
     getValues,
+    setFocus,
     formState: {errors},
   } = useForm<{
     name: string;
@@ -49,6 +48,14 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
       password: '',
       confirmPassword: '',
     },
+  });
+
+  useEffectOnce(() => {
+    // XXX: 병맛이지만 RN에서 스크린이 변할때 바로 mount에서 focus를 주면 안드로이드에서 키보드가 안뜬다.
+    //      이 경우 settimeout을 쓰라지만... 그냥 스크린이 다 뜨면 포커스를 주는 것으로 한다.
+    InteractionManager.runAfterInteractions(() => {
+      setFocus('name');
+    });
   });
 
   const onSubmit = handleSubmit(async data => {
@@ -63,171 +70,80 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
   });
 
   return (
-    <RegisterContainer
+    <ScrollViewRegisterContainer
       paragraph="Step 1/3"
-      bottom={
-        <Button
-          text={intl.formatMessage({
-            id: 'button.next',
-          })}
-          size="large"
-          onPress={onSubmit}
-        />
-      }>
-      <ScrollView style={style.flatten(['padding-x-20', 'flex-1'])}>
-        <Controller
-          control={control}
-          rules={{
-            required: 'Name is required',
-          }}
-          render={({field: {onChange, onBlur, value}}) => {
-            return (
-              <TextInput
-                label={intl.formatMessage({
-                  id: 'pages.register.components.form.name-password.wallet-name-label',
-                })}
-                placeholder={intl.formatMessage({
-                  id: 'pages.register.components.form.name-password.wallet-name-placeholder',
-                })}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                value={value}
-                error={errors.name && errors.name?.message}
-              />
-            );
-          }}
-          name={'name'}
-        />
+      bottomButton={{
+        text: intl.formatMessage({
+          id: 'button.next',
+        }),
+        size: 'large',
+        onPress: onSubmit,
+      }}
+      paddingX={20}>
+      <NamePasswordInput
+        control={control}
+        errors={errors}
+        getValues={getValues}
+        setFocus={setFocus}
+        onSubmit={onSubmit}
+      />
 
-        {needPassword ? (
-          <React.Fragment>
-            <Gutter size={16} />
+      <Gutter size={16} />
 
-            <Controller
-              control={control}
-              rules={{
-                required: 'Password is required',
-                validate: (password: string): string | undefined => {
-                  if (password.length < 8) {
-                    return intl.formatMessage({
-                      id: 'pages.register.components.form.name-password.short-password-error',
-                    });
-                  }
-                },
-              }}
-              render={({field: {onChange, onBlur, value}}) => {
-                return (
-                  <TextInput
-                    label={intl.formatMessage({
-                      id: 'pages.register.components.form.name-password.password-label',
-                    })}
-                    placeholder={intl.formatMessage({
-                      id: 'pages.register.components.form.name-password.password-placeholder',
-                    })}
-                    secureTextEntry={true}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    value={value}
-                    error={errors.password?.message}
-                  />
-                );
-              }}
-              name={'password'}
-            />
+      <Text style={style.flatten(['subtitle3', 'color-gray-100'])}>
+        Connect to
+      </Text>
 
-            <Gutter size={16} />
+      <Gutter size={6} />
 
-            <Controller
-              control={control}
-              rules={{
-                required: 'Password confirm is required',
-                validate: (confirmPassword: string): string | undefined => {
-                  if (confirmPassword !== getValues('password')) {
-                    return intl.formatMessage({
-                      id: 'pages.register.components.form.name-password.password-not-match-error',
-                    });
-                  }
-                },
-              }}
-              render={({field: {onChange, onBlur, value}}) => {
-                return (
-                  <TextInput
-                    label={intl.formatMessage({
-                      id: 'pages.register.components.form.name-password.confirm-password-label',
-                    })}
-                    placeholder={intl.formatMessage({
-                      id: 'pages.register.components.form.name-password.confirm-password-placeholder',
-                    })}
-                    secureTextEntry={true}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    value={value}
-                    error={errors.confirmPassword?.message}
-                  />
-                );
-              }}
-              name={'confirmPassword'}
-            />
-          </React.Fragment>
-        ) : null}
+      <RectButton
+        style={style.flatten([
+          'padding-x-16',
+          'padding-y-16',
+          'border-width-1',
+          'border-color-gray-400',
+          'border-radius-8',
+        ])}
+        onPress={() => {
+          setIsOpenSelectItemModal(true);
+        }}>
+        <XAxis alignY="center">
+          <Text style={style.flatten(['body2', 'color-gray-50', 'flex-1'])}>
+            {selectedApp}
+            {selectedApp === 'Cosmos' ? ' (Recommend)' : null}
+          </Text>
 
-        <Gutter size={16} />
+          <ArrowDownFillIcon
+            size={24}
+            color={style.get('color-gray-300').color}
+          />
+        </XAxis>
+      </RectButton>
 
-        <Text style={style.flatten(['subtitle3', 'color-gray-100'])}>
-          Connect to
-        </Text>
+      <Gutter size={16} />
 
-        <Gutter size={6} />
-
-        <RectButton
-          style={style.flatten([
-            'padding-x-16',
-            'padding-y-16',
-            'border-width-1',
-            'border-color-gray-400',
-            'border-radius-8',
-          ])}
-          onPress={() => {
-            setIsOpenSelectItemModal(true);
-          }}>
-          <XAxis alignY="center">
-            <Text style={style.flatten(['body2', 'color-gray-50', 'flex-1'])}>
-              {selectedApp}
-              {selectedApp === 'Cosmos' ? ' (Recommend)' : null}
-            </Text>
-
-            <ArrowDownFillIcon
-              size={24}
-              color={style.get('color-gray-300').color}
-            />
-          </XAxis>
-        </RectButton>
-
-        <Gutter size={16} />
-
-        {isOpenBip44PathView ? (
+      <VerticalCollapseTransition collapsed={isOpenBip44PathView}>
+        <Box alignX="center">
+          <Button
+            text={intl.formatMessage({id: 'button.advanced'})}
+            size="small"
+            color="secondary"
+            onPress={() => {
+              setIsOpenBip44PathView(true);
+            }}
+          />
+        </Box>
+      </VerticalCollapseTransition>
+      {
+        <VerticalCollapseTransition collapsed={!isOpenBip44PathView}>
           <Bip44PathView
             state={bip44PathState}
             setIsOpen={setIsOpenBip44PathView}
           />
-        ) : (
-          <Box alignX="center">
-            <Button
-              text={intl.formatMessage({id: 'button.advanced'})}
-              size="small"
-              color="secondary"
-              disabled={
-                !bip44PathState.isAccountValid() ||
-                !bip44PathState.isChangeValid() ||
-                !bip44PathState.isAddressIndexValid()
-              }
-              onPress={() => {
-                setIsOpenBip44PathView(true);
-              }}
-            />
-          </Box>
-        )}
-      </ScrollView>
+        </VerticalCollapseTransition>
+      }
+      <Gutter size={16} />
+
       <SelectItemModal
         isOpen={isOpenSelectItemModal}
         setIsOpen={setIsOpenSelectItemModal}
@@ -241,6 +157,6 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
           },
         }))}
       />
-    </RegisterContainer>
+    </ScrollViewRegisterContainer>
   );
 });

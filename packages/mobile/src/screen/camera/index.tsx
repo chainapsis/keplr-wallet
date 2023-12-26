@@ -30,12 +30,14 @@ import {StackNavProp} from '../../navigation';
 import {Bech32Address} from '@keplr-wallet/cosmos';
 import {SVGLoadingIcon} from '../../components/spinner';
 import {GuideBox} from '../../components/guide-box';
+import {FormattedMessage, useIntl} from 'react-intl';
 
 export const CameraScreen: FunctionComponent = observer(() => {
   const {chainStore, walletConnectStore} = useStore();
   const style = useStyle();
   const device = useCameraDevice('back');
   const navigation = useNavigation<StackNavProp>();
+  const intl = useIntl();
 
   const isFocused = useIsFocused();
   const {hasPermission, requestPermission} = useCameraPermission();
@@ -149,7 +151,7 @@ export const CameraScreen: FunctionComponent = observer(() => {
         </Box>
 
         <Text style={style.flatten(['color-text-high', 'h1'])}>
-          Scan QRcode
+          <FormattedMessage id="page.camera.main-title" />
         </Text>
 
         <Gutter size={40} />
@@ -173,7 +175,7 @@ export const CameraScreen: FunctionComponent = observer(() => {
         <Gutter size={40} />
 
         <Button
-          text="Show my QR code"
+          text={intl.formatMessage({id: 'page.camera.button-show-qr-code'})}
           color="secondary"
           containerStyle={{opacity: 0.8}}
           onPress={() => {
@@ -187,10 +189,12 @@ export const CameraScreen: FunctionComponent = observer(() => {
 
             <GuideBox
               color="warning"
-              title={'Permission required'}
-              paragraph={
-                'If you want to use QR Code scan, Please add permission.'
-              }
+              title={intl.formatMessage({
+                id: 'page.camera.warning-guide-title',
+              })}
+              paragraph={intl.formatMessage({
+                id: 'page.camera.warning-guide-paragraph',
+              })}
               bottom={
                 <Text
                   style={StyleSheet.flatten([
@@ -198,7 +202,7 @@ export const CameraScreen: FunctionComponent = observer(() => {
                     {textDecorationLine: 'underline'},
                   ])}
                   onPress={async () => await Linking.openSettings()}>
-                  Open Setting
+                  <FormattedMessage id="page.camera.warning-guide-button" />
                 </Text>
               }
             />
