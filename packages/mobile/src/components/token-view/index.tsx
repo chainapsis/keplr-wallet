@@ -66,7 +66,10 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         underlayColor={style.get('color-card-pressing-default').color}>
         <Columns sum={1} alignY="center">
           <FastImage
-            style={style.flatten(['width-32', 'height-32'])}
+            style={{
+              ...style.flatten(['width-32', 'height-32']),
+              borderRadius: 99999,
+            }}
             source={
               viewToken.token.currency.coinImageUrl
                 ? {uri: viewToken.token.currency.coinImageUrl}
