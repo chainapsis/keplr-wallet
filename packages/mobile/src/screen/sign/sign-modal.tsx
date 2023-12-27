@@ -31,7 +31,6 @@ import {CodeBracketIcon} from '../../components/icon/code-bracket';
 import {MemoInput} from '../../components/input/memo-input';
 import {defaultRegistry} from './message-registry';
 import {MessageItem} from './message-item';
-import {ScrollView} from 'react-native-gesture-handler';
 import {GuideBox} from '../../components/guide-box';
 import {Checkbox} from '../../components/checkbox';
 import {registerCardModal} from '../../components/modal/card';
@@ -42,6 +41,7 @@ import {ErrFailedInit, ErrModuleLedgerSign} from './util/ledger-types';
 import {LedgerGrantModal} from '../register/connect-ledger/modal';
 import {LedgerGuideBox} from '../../components/guide-box/ledger-guide-box';
 import {FlatList} from '../../components/flat-list';
+import {ScrollView} from '../../components/scroll-view/common-scroll-view';
 
 export const SignModal = registerCardModal(
   observer<{
@@ -393,7 +393,7 @@ export const SignModal = registerCardModal(
             backgroundColor={style.get('color-gray-500').color}
             padding={16}
             borderRadius={6}>
-            <ScrollView persistentScrollbar={true}>
+            <ScrollView isGestureScrollView={true} persistentScrollbar={true}>
               <Text style={style.flatten(['body3', 'color-text-middle'])}>
                 {JSON.stringify(signDocHelper.signDocJson, null, 2)}
               </Text>

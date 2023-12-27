@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import {observer} from 'mobx-react-lite';
 import {Box} from '../../../components/box';
-import {Keyboard, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Keyboard, StyleSheet, Text, View} from 'react-native';
 import {useStyle} from '../../../styles';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {TextInput} from '../../../components/input';
@@ -41,6 +41,7 @@ import {VerticalCollapseTransition} from '../../../components/transition';
 import {action, autorun, computed, makeObservable, observable} from 'mobx';
 import {BinarySortArray} from '../../../common';
 import {ChainStore} from '../../../stores/chain';
+import {ScrollView} from '../../../components/scroll-view/common-scroll-view';
 
 // 안드로이드의 성능 문제로 어느정도 최적화가 들어가야되서 좀 복잡해짐...
 class QueryCandidateAddressesSortBalanceChainInfos {

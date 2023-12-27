@@ -11,7 +11,6 @@ import {Box} from '../../../../components/box';
 import {useStyle} from '../../../../styles';
 import {XAxis, YAxis} from '../../../../components/axis';
 import {Image, Pressable, Text, View} from 'react-native';
-import {ScrollView} from 'react-native-gesture-handler';
 import {Gutter} from '../../../../components/gutter';
 import {TextInput} from '../../../../components/input';
 import {
@@ -24,6 +23,7 @@ import {ChainImageFallback} from '../../../../components/image';
 import {CheckToggleIcon, QRCodeIcon} from '../../../../components/icon';
 import {IconButton} from '../../../../components/icon-button';
 import {FormattedMessage} from 'react-intl';
+import {ScrollView} from '../../../../components/scroll-view/common-scroll-view';
 
 export const CopyAddressScene: FunctionComponent<{
   setIsOpen: (isOpen: boolean) => void;
@@ -147,7 +147,9 @@ export const CopyAddressScene: FunctionComponent<{
         </Box>
 
         <Gutter size={12} />
-        <ScrollView style={style.flatten(['height-400'])}>
+        <ScrollView
+          isGestureScrollView={true}
+          style={style.flatten(['height-400'])}>
           {addresses.length === 0 ? (
             <Box
               alignX="center"

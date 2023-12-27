@@ -6,7 +6,6 @@ import {Button} from '../../components/button';
 import {Gutter} from '../../components/gutter';
 import React, {useMemo, useState} from 'react';
 import {useStore} from '../../stores';
-import {ScrollView} from 'react-native-gesture-handler';
 import {Text} from 'react-native';
 import {useStyle} from '../../styles';
 import {BaseModalHeader} from '../../components/modal';
@@ -15,6 +14,7 @@ import FastImage from 'react-native-fast-image';
 import {Column, Columns} from '../../components/column';
 import {ViewDataButton} from './sign-modal';
 import {checkAndValidateADR36AminoSignDoc} from '@keplr-wallet/cosmos';
+import {ScrollView} from '../../components/scroll-view/common-scroll-view';
 
 export const ADR36SignModal = registerCardModal(
   observer<{
@@ -143,7 +143,7 @@ export const ADR36SignModal = registerCardModal(
           backgroundColor={style.get('color-gray-500').color}
           padding={16}
           borderRadius={6}>
-          <ScrollView>
+          <ScrollView isGestureScrollView={true}>
             <Text style={style.flatten(['body3', 'color-text-middle'])}>
               {!isViewData
                 ? content.value
