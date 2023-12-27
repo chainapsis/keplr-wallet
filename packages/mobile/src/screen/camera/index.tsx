@@ -3,6 +3,7 @@ import React, {
   FunctionComponent,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 import {
@@ -12,7 +13,15 @@ import {
   useCodeScanner,
 } from 'react-native-vision-camera';
 import {useStyle} from '../../styles';
-import {Linking, SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import {
+  AppState,
+  Linking,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {Box} from '../../components/box';
 import {Button} from '../../components/button';
 import Svg, {Path} from 'react-native-svg';
@@ -31,6 +40,7 @@ import {Bech32Address} from '@keplr-wallet/cosmos';
 import {SVGLoadingIcon} from '../../components/spinner';
 import {GuideBox} from '../../components/guide-box';
 import {FormattedMessage, useIntl} from 'react-intl';
+import {useEffectOnce} from '../../hooks';
 
 export const CameraScreen: FunctionComponent = observer(() => {
   const {chainStore, walletConnectStore} = useStore();
@@ -40,6 +50,12 @@ export const CameraScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
 
   const isFocused = useIsFocused();
+  const appState = AppState.currentState;
+  const [isActive, setIsActive] = useState(
+    isFocused && appState === 'active' ? true : false,
+  );
+  const isActiveRef = useRef(isActive);
+
   const {hasPermission, requestPermission} = useCameraPermission();
   const [isLoading, setIsLoading] = useState(false);
   // To prevent the reading while changing to other screen after processing the result.
@@ -54,6 +70,29 @@ export const CameraScreen: FunctionComponent = observer(() => {
       setIsCompleted(false);
     }, []),
   );
+
+  //NOTE 안드로이드에서는 뒤로가기시 먼저 camera가 뷰에서 사라지고 난뒤 뒤로가야 home에서
+  //view가 밀리는 버그를 해결 할수 있어서 일단 이렇게 처리함
+  useEffectOnce(() => {
+    if (Platform.OS === 'android') {
+      navigation.addListener('beforeRemove', e => {
+        setIsActive(false);
+        if (isActiveRef.current) {
+          isActiveRef.current = false;
+          e.preventDefault();
+        }
+      });
+    }
+  });
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      if (!isActive && !isActiveRef.current) {
+        setTimeout(() => {
+          navigation.goBack();
+        }, 0);
+      }
+    }
+  }, [isActive, navigation]);
 
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
@@ -129,11 +168,11 @@ export const CameraScreen: FunctionComponent = observer(() => {
 
   return (
     <React.Fragment>
-      {isFocused && device && hasPermission ? (
+      {isFocused && device && hasPermission && isActive ? (
         <Camera
           style={style.flatten(['absolute-fill'])}
           device={device}
-          isActive={true}
+          isActive={isActive}
           codeScanner={codeScanner}
         />
       ) : null}
