@@ -54,6 +54,7 @@ export const DrawerContent: FunctionComponent = observer(() => {
 
   return (
     <DrawerContentScrollView
+      indicatorStyle="white"
       contentContainerStyle={[
         style.flatten([
           'height-full',
