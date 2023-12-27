@@ -123,13 +123,20 @@ export const BoundaryScrollViewBoundary: FunctionComponent<
     });
 
     if (index >= renderIndex[0] && index < renderIndex[1]) {
-      setMockTopViewHeight(
-        value => value + (height - (prev?.height ?? itemHeight)),
+      setMockBottomViewHeight(
+        value => value - (height - (prev?.height ?? itemHeight)),
       );
     }
   };
 
   useEffect(() => {
+    if (items.length === 0) {
+      setRenderIndex([0, 0]);
+      setMockTopViewHeight(0);
+      setMockBottomViewHeight(0);
+      return;
+    }
+
     if (layout && scrollViewRef.current && startPointRef.current) {
       startPointRef.current.measureLayout(
         scrollViewRef.current.getScrollableNode(),
@@ -244,7 +251,12 @@ export const BoundaryScrollViewBoundary: FunctionComponent<
   itemsRenderIndexKey.current = 0;
   return (
     <React.Fragment>
-      <View ref={startPointRef} />
+      <View
+        ref={startPointRef}
+        style={{
+          height: 0,
+        }}
+      />
       <Box {...boxProps}>
         <View
           style={{

@@ -1,31 +1,27 @@
-import React, {FunctionComponent, useLayoutEffect, useState} from 'react';
-import FastImage, {Source} from 'react-native-fast-image';
+import React, {FunctionComponent} from 'react';
+import FastImage from 'react-native-fast-image';
 /**
  * 그냥 이미지 컴포넌트인데 오류 났을때 대체 이미지를 보여주는 기능이 있음
  * @constructor
  */
 export const Image: FunctionComponent<{
-  defaultSrc: Source;
+  defaultSrc?: number;
   alt: string;
   src?: string;
   style?: Object;
-}> = props => {
-  const {src: propSrc, defaultSrc, style} = props;
 
-  const [imgUrl, setImgUrl] = useState<Source>({uri: ''});
-  useLayoutEffect(() => {
-    setImgUrl({uri: propSrc});
-  }, [propSrc]);
+  cache?: 'immutable' | 'web' | 'cacheOnly';
+}> = props => {
+  const {src: propSrc, defaultSrc, style, cache} = props;
 
   return (
     <FastImage
-      source={imgUrl}
-      style={style}
-      onError={() => {
-        if (defaultSrc) {
-          setImgUrl(defaultSrc);
-        }
+      source={{
+        uri: propSrc,
+        cache: cache || FastImage.cacheControl.web,
       }}
+      style={style}
+      defaultSource={defaultSrc}
     />
   );
 };

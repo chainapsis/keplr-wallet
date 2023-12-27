@@ -1,7 +1,6 @@
-import React, {FunctionComponent, useCallback, useMemo, useState} from 'react';
+import React, {FunctionComponent, useMemo, useState} from 'react';
 
 import {observer} from 'mobx-react-lite';
-import {FlatList} from 'react-native';
 import {StackNavProp, StakeNavigation} from '../../../navigation';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {useStore} from '../../../stores';
@@ -14,10 +13,15 @@ import {Gutter} from '../../../components/gutter';
 import {ArrowDownUpIcon} from '../../../components/icon';
 import {TextButton} from '../../../components/text-button';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {ValidatorInfo} from '../type';
 import {SelectItemModal} from '../../../components/modal/select-item-modal';
+import {Dec} from '@keplr-wallet/unit';
+import {
+  BoundaryScrollView,
+  BoundaryScrollViewBoundary,
+} from '../../../components/boundary-scroll-view';
 
 export type FilterOption = 'Commission' | 'Voting Power';
+
 export const ValidatorListScreen: FunctionComponent = observer(() => {
   const {queriesStore, accountStore} = useStore();
   const style = useStyle();
@@ -31,120 +35,133 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
   const {chainId, validatorSelector} = route.params;
   const queries = queriesStore.get(chainId);
 
+  const bech32Address = accountStore.getAccount(chainId).bech32Address;
   const delegationsValidatorSet = useMemo(() => {
     return new Set(
       queries.cosmos.queryDelegations
-        .getQueryBech32Address(accountStore.getAccount(chainId).bech32Address)
+        .getQueryBech32Address(bech32Address)
         .delegations.map(del => del.delegation.validator_address),
     );
-  }, [accountStore, chainId, queries.cosmos.queryDelegations]);
+  }, [bech32Address, queries.cosmos.queryDelegations]);
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
     Staking.BondStatus.Bonded,
   );
-  const insect = useSafeAreaInsets();
+  const safeAreaInsets = useSafeAreaInsets();
   const [isOpenSelectItemModal, setIsOpenSelectItemModal] = useState(false);
+
+  const sortedValidators = useMemo(() => {
+    if (filterOption === 'Voting Power') {
+      return bondedValidators.validators.slice().sort((a, b) => {
+        const aTokens = new Dec(a.tokens);
+        const bTokens = new Dec(b.tokens);
+        if (aTokens.gt(bTokens)) {
+          return -1;
+        } else if (aTokens.equals(bTokens)) {
+          return 0;
+        } else {
+          return 1;
+        }
+      });
+    }
+    if (filterOption === 'Commission') {
+      return bondedValidators.validators.slice().sort((a, b) => {
+        const aRate = new Dec(a.commission.commission_rates.rate);
+        const bRate = new Dec(b.commission.commission_rates.rate);
+        if (aRate.lt(bRate)) {
+          return -1;
+        } else if (aRate.equals(bRate)) {
+          return 0;
+        } else {
+          return 1;
+        }
+      });
+    }
+    return [];
+  }, [bondedValidators.validators, filterOption]);
 
   const filteredValidators = useMemo(() => {
     const _search = search.trim().toLowerCase();
-    const _filteredValidators = bondedValidators.validators.filter(val => {
+    return sortedValidators.filter(val => {
       return val.description.moniker?.toLocaleLowerCase().includes(_search);
     });
+  }, [search, sortedValidators]);
 
-    if (filterOption === 'Voting Power') {
-      return _filteredValidators.sort(
-        (a, b) => Number(b.tokens) - Number(a.tokens),
-      );
-    }
-    if (filterOption === 'Commission') {
-      return _filteredValidators.sort(
-        (a, b) =>
-          Number(a.commission.commission_rates.rate) -
-          Number(b.commission.commission_rates.rate),
-      );
-    }
-    return [];
-  }, [bondedValidators.validators, filterOption, search]);
-
-  const renderItem = useCallback(
-    ({item: validator}: {item: ValidatorInfo}) => {
-      return (
-        <ValidatorListItem
-          key={validator.operator_address}
-          filterOption={filterOption}
-          chainId={chainId}
-          validatorAddress={validator.operator_address}
-          validator={validator}
-          bondedToken={queries.cosmos.queryPool.bondedTokens}
-          isDelegation={delegationsValidatorSet.has(validator.operator_address)}
-          afterSelect={() => {
-            if (validatorSelector) {
-              navigation.push('Stake', {
-                screen: 'Stake.ValidateDetail',
-                params: {
-                  chainId,
-                  validatorAddress: validator.operator_address,
-                  validatorSelector,
-                },
-              });
-              return;
-            }
-            navigation.navigate('Stake', {
-              screen: 'Stake.ValidateDetail',
-              params: {chainId, validatorAddress: validator.operator_address},
-            });
-          }}
-        />
-      );
-    },
-    [
-      chainId,
-      delegationsValidatorSet,
-      filterOption,
-      navigation,
-      queries.cosmos.queryPool.bondedTokens,
-      validatorSelector,
-    ],
-  );
   return (
-    <React.Fragment>
-      <FlatList
-        style={{
-          paddingHorizontal: 12,
-          marginBottom: insect.bottom,
-        }}
-        ListHeaderComponent={
-          <Box marginTop={12}>
-            <DebounceSearchTextInput
-              placeholder="Search for Chain"
-              handleSearchWord={e => {
-                setSearch(e);
-              }}
-              delay={200}
-            />
-            <Gutter size={8} />
-            <Box paddingY={6} paddingX={4} alignX="right">
-              <TextButton
-                text={filterOption}
-                onPress={() => {
-                  setIsOpenSelectItemModal(true);
-                }}
-                textStyle={style.flatten(['subtitle4', 'color-text-low'])}
-                rightIcon={
-                  <ArrowDownUpIcon
-                    size={6}
-                    color={style.get('color-text-middle').color}
-                  />
-                }
+    <Box
+      style={{
+        flex: 1,
+      }}>
+      <Box paddingX={12}>
+        <DebounceSearchTextInput
+          placeholder="Search for Chain"
+          handleSearchWord={e => {
+            setSearch(e);
+          }}
+          delay={200}
+        />
+        <Gutter size={8} />
+        <Box paddingY={6} paddingX={4} alignX="right">
+          <TextButton
+            text={filterOption}
+            onPress={() => {
+              setIsOpenSelectItemModal(true);
+            }}
+            textStyle={style.flatten(['subtitle4', 'color-text-low'])}
+            rightIcon={
+              <ArrowDownUpIcon
+                size={6}
+                color={style.get('color-text-middle').color}
               />
-            </Box>
-          </Box>
-        }
-        keyExtractor={item => item.operator_address}
-        data={filteredValidators}
-        ItemSeparatorComponent={() => <Gutter size={8} />}
-        renderItem={renderItem}
-        windowSize={33}
-      />
+            }
+          />
+        </Box>
+      </Box>
+
+      <BoundaryScrollView
+        contentContainerStyle={{
+          ...style.flatten(['flex-grow-1', 'padding-x-12']),
+          paddingBottom: safeAreaInsets.bottom,
+        }}>
+        <BoundaryScrollViewBoundary
+          itemHeight={filterOption === 'Voting Power' ? 70 : 64}
+          gap={8}
+          items={filteredValidators.map(validator => {
+            return (
+              <ValidatorListItem
+                filterOption={filterOption}
+                chainId={chainId}
+                validatorAddress={validator.operator_address}
+                validator={validator}
+                bondedToken={queries.cosmos.queryPool.bondedTokens}
+                isDelegation={delegationsValidatorSet.has(
+                  validator.operator_address,
+                )}
+                afterSelect={() => {
+                  if (validatorSelector) {
+                    navigation.push('Stake', {
+                      screen: 'Stake.ValidateDetail',
+                      params: {
+                        chainId,
+                        validatorAddress: validator.operator_address,
+                        validatorSelector,
+                      },
+                    });
+                    return;
+                  }
+                  navigation.navigate('Stake', {
+                    screen: 'Stake.ValidateDetail',
+                    params: {
+                      chainId,
+                      validatorAddress: validator.operator_address,
+                    },
+                  });
+                }}
+              />
+            );
+          })}
+        />
+      </BoundaryScrollView>
+
       <SelectItemModal
         isOpen={isOpenSelectItemModal}
         setIsOpen={setIsOpenSelectItemModal}
@@ -158,6 +175,6 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
           },
         }))}
       />
-    </React.Fragment>
+    </Box>
   );
 });

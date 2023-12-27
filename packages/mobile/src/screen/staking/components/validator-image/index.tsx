@@ -1,9 +1,9 @@
 import React from 'react';
 import {Box} from '../../../../components/box';
 import {useStyle} from '../../../../styles';
-import FastImage from 'react-native-fast-image';
 import {StakingIcon} from '../../../../components/icon/stacking';
 import {Text} from 'react-native';
+import {Image} from '../../../../components/image';
 
 export const ValidatorImage = ({
   imageUrl,
@@ -24,14 +24,16 @@ export const ValidatorImage = ({
       {imageUrl ? (
         isDelegation ? (
           <Box>
-            <FastImage
+            <Image
               style={{
                 width: size || 32,
                 height: size || 32,
                 borderRadius: 9999,
               }}
-              source={{uri: imageUrl, cache: FastImage.cacheControl.web}}
-              resizeMode={FastImage.resizeMode.contain}
+              src={imageUrl}
+              alt={imageUrl}
+              defaultSrc={require('../../../../public/assets/img/chain-icon-alt.png')}
+              cache="immutable"
             />
             <Box
               position="absolute"
@@ -49,14 +51,16 @@ export const ValidatorImage = ({
             </Box>
           </Box>
         ) : (
-          <FastImage
+          <Image
             style={{
               width: size || 32,
               height: size || 32,
               borderRadius: 9999,
             }}
-            source={{uri: imageUrl, cache: FastImage.cacheControl.web}}
-            resizeMode={FastImage.resizeMode.contain}
+            src={imageUrl}
+            alt={imageUrl}
+            defaultSrc={require('../../../../public/assets/img/chain-icon-alt.png')}
+            cache="immutable"
           />
         )
       ) : isDelegation ? (
