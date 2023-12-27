@@ -1,7 +1,6 @@
 import React, {FunctionComponent, useCallback, useMemo, useState} from 'react';
 
 import {observer} from 'mobx-react-lite';
-import {FlatList} from 'react-native';
 import {StackNavProp, StakeNavigation} from '../../../navigation';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {useStore} from '../../../stores';
@@ -16,6 +15,7 @@ import {TextButton} from '../../../components/text-button';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {ValidatorInfo} from '../type';
 import {SelectItemModal} from '../../../components/modal/select-item-modal';
+import {FlatList} from '../../../components/flat-list';
 
 export type FilterOption = 'Commission' | 'Voting Power';
 export const ValidatorListScreen: FunctionComponent = observer(() => {

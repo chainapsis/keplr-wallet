@@ -5,7 +5,7 @@ import {Box} from '../box';
 import {Label} from '../input/label';
 import {Columns} from '../column';
 import {ArrowDownFillIcon} from '../icon/arrow-down-fill';
-import {FlatList} from 'react-native-gesture-handler';
+import {FlatList} from '../flat-list';
 
 export interface DropdownItemProps {
   key: string;
@@ -158,6 +158,7 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
             listContainerStyle,
           ])}>
           <FlatList
+            isGestureFlatList={true}
             data={filteredItems}
             keyExtractor={item => item.key}
             renderItem={({item}) => (

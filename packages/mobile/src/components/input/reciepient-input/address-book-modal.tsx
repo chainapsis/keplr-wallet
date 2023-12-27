@@ -172,7 +172,7 @@ export const AddressBookModal = registerCardModal(
             />
           </YAxis>
 
-          <ScrollView style={{height: 450}}>
+          <ScrollView style={{height: 450}} indicatorStyle="white">
             {datas.length > 0 ? (
               <Stack gutter={12}>
                 {(() => {
