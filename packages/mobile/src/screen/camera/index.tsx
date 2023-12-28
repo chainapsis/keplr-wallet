@@ -12,7 +12,14 @@ import {
   useCodeScanner,
 } from 'react-native-vision-camera';
 import {useStyle} from '../../styles';
-import {Linking, SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import {
+  Dimensions,
+  Linking,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {Box} from '../../components/box';
 import {Button} from '../../components/button';
 import Svg, {Path} from 'react-native-svg';
@@ -127,11 +134,32 @@ export const CameraScreen: FunctionComponent = observer(() => {
 
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
 
+  const [windowWidth, setWindowWidth] = useState(
+    Dimensions.get('window').width,
+  );
+  const [windowHeight, setWindowHeight] = useState(
+    Dimensions.get('window').height,
+  );
+  useEffect(() => {
+    const listener = Dimensions.addEventListener('change', ({window}) => {
+      setWindowWidth(window.width);
+      setWindowHeight(window.height);
+    });
+
+    return () => {
+      listener.remove();
+    };
+  }, []);
+
   return (
     <React.Fragment>
       {isFocused && device && hasPermission ? (
         <Camera
-          style={style.flatten(['absolute-fill'])}
+          style={{
+            position: 'absolute',
+            width: windowWidth,
+            height: windowHeight,
+          }}
           device={device}
           isActive={true}
           codeScanner={codeScanner}
