@@ -100,7 +100,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
   return (
     <PageWithScrollView
       backgroundMode={'default'}
-      style={style.flatten(['padding-x-12', 'padding-top-8'])}>
+      contentContainerStyle={style.flatten(['padding-x-12', 'padding-y-8'])}>
       <Stack gutter={12}>
         <YAxis alignX="center">
           <LayeredHorizontalRadioGroup
