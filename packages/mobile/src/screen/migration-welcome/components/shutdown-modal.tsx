@@ -16,6 +16,8 @@ export const ShutDownModal = registerCardModal(
     setIsOpen: (isOpen: boolean) => void;
   }>(({}) => {
     const [timeLeft, setTimeLeft] = useState(5);
+    const intl = useIntl();
+    const style = useStyle();
 
     useEffectOnce(() => {
       const timer = setInterval(() => {
@@ -23,7 +25,6 @@ export const ShutDownModal = registerCardModal(
       }, 1000);
 
       const timeout = setTimeout(() => {
-        // setIsOpen(false);
         RNExitApp.exitApp();
       }, 5000);
 
@@ -33,11 +34,8 @@ export const ShutDownModal = registerCardModal(
       };
     });
 
-    const intl = useIntl();
-    const style = useStyle();
-
     return (
-      <Box paddingX={12} paddingBottom={28}>
+      <Box paddingX={12} paddingBottom={40}>
         <Gutter size={28} />
         <BaseModalHeader
           title={intl.formatMessage({

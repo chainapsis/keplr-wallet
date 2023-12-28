@@ -17,6 +17,9 @@ export const ErrorShutDownModal = registerCardModal(
     setIsOpen: (isOpen: boolean) => void;
   }>(({}) => {
     const [timeLeft, setTimeLeft] = useState(5);
+    const intl = useIntl();
+    const style = useStyle();
+
     useEffectOnce(() => {
       const timer = setInterval(() => {
         setTimeLeft(timeLeft => timeLeft - 1);
@@ -31,9 +34,6 @@ export const ErrorShutDownModal = registerCardModal(
         clearTimeout(timeout);
       };
     });
-
-    const intl = useIntl();
-    const style = useStyle();
 
     return (
       <Box paddingX={12} paddingBottom={55}>
