@@ -145,7 +145,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
             <FormattedMessage id="pages.register.recover-mnemonic.paragraph-1" />
           </Text>
         </XAxis>
-
+        <Gutter size={8} />
         <XAxis>
           <Text
             style={style.flatten([
