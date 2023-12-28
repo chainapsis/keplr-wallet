@@ -60,4 +60,7 @@ export const ErrorShutDownModal = registerCardModal(
       </Box>
     );
   }),
+  {
+    disableGesture: true,
+  },
 );

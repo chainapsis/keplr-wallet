@@ -16,10 +16,9 @@ import {useStyle} from '../../../styles';
 type CardBaseModalOption = {
   disabledSafeArea?: boolean;
   isDetached?: boolean;
+  disableGesture?: boolean;
 };
 
-//TODO - setIsOpen에 빈 함수가 올경우 인터렉션을 막을 필요가 있음
-//현재 setIsOpen함수가 빈 함수로 올 경우 모달을 내릴경우 뷰에서만 안보이고 실제론 존재하고 있음
 export const registerCardModal: <P>(
   element: React.ElementType<P>,
   options?: CardBaseModalOption,
@@ -69,9 +68,17 @@ export const CardModalBase: FunctionComponent<
   // close일 경우 닫고 그걸 굳이 잡아서 열려는 유저는 없으므로 안해도 된다.
   const panGesture = Gesture.Pan()
     .onBegin(e => {
+      if (options?.disableGesture) {
+        return;
+      }
+
       touchStartPosition.value = e.absoluteY;
     })
     .onUpdate(e => {
+      if (options?.disableGesture) {
+        return;
+      }
+
       if (duringModalTransition.value === 'close') {
         return;
       }
@@ -104,6 +111,10 @@ export const CardModalBase: FunctionComponent<
       }
     })
     .onFinalize(e => {
+      if (options?.disableGesture) {
+        return;
+      }
+
       if (duringModalTransition.value === 'close') {
         return;
       }
