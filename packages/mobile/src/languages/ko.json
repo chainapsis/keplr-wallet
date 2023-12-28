@@ -311,6 +311,12 @@
   "page.unlock.bottom-section.guide-title": "업데이트 중에 브라우저를 종료하지 마세요.",
   "page.unlock.bottom-section.guide-paragraph": "계정이 여러 개인 경우 몇 분 이상 소요될 수 있습니다.",
 
+  "page.migration.welcome.title": "Migration Completed!",
+  "page.migration.welcome.sub-title": "Close the app now and manually reopen it to ensure the changes take effect",
+  "page.migration.welcome.shutdown-button": "Close Keplr to apply changes",
+  "page.migration.welcome.shutdown-modal.title": "Please reopen the app manually.",
+  "page.migration.welcome.shutdown-modal.paragraph": "Keplr will be closed in {seconds}...",
+
   "page.wallet.title": "지갑 선택",
   "page.wallet.add-wallet-button": "지갑 추가",
   "page.wallet.recovery-phrase-title": "복구 문구 기반",
@@ -564,6 +570,14 @@
 
   "page.tx-result.home-button": "Go to home",
   "page.tx-result.go-to-explorer": "Go to {name}",
+
+  "page.error-boundary.title": "Error",
+  "page.error-boundary.reset-cache-paragraph": "An error with an unknown reason has occurred. To potentially resolve the issue, we recommend deleting the cache data. However, please note that we cannot guarantee this will fix the problem.",
+  "page.error-boundary.reset-cache-button": "Reset Cache Data",
+  "page.error-boundary.reset-cache-endpoints-paragraph": "If the error persists, you can also try resetting the suggest chains and your custom endpoints.",
+  "page.error-boundary.reset-cache-endpoints-button": "Reset Cache Data, Including\n Suggest Chains & Endpoints",
+  "page.error-boundary.shutdown-modal.title": "Keplr will be closed in {seconds}...",
+  "page.error-boundary.shutdown-modal.paragraph": "Keplr will close after deleting the local cache data. Please manually restart the app after the deletion.",
 
   "new-feature.ibc-swap.title": "✨ 토큰 교환이 생겼어요!",
   "new-feature.ibc-swap.paragraph": "체인 내 혹은 체인간 다양한 토큰을 서로 교환할 수 있어요. 한번 사용해보세요!",
