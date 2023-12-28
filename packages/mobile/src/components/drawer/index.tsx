@@ -2,10 +2,10 @@ import React, {FunctionComponent} from 'react';
 import {observer} from 'mobx-react-lite';
 import {DrawerContentScrollView} from '@react-navigation/drawer';
 import {useNavigation, DrawerActions} from '@react-navigation/native';
-import {Pressable, Text} from 'react-native';
+import {Text} from 'react-native';
 import {useStyle} from '../../styles';
 import {Box} from '../box';
-
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {Stack} from '../stack';
 import {useStore} from '../../stores';
 import {StackNavProp} from '../../navigation';
@@ -69,40 +69,40 @@ export const DrawerContent: FunctionComponent = observer(() => {
         paddingLeft: 20,
       }}>
       <Stack gutter={32}>
-        <Pressable onPress={onClickManageChains}>
+        <TouchableWithoutFeedback onPress={onClickManageChains}>
           <Text style={style.flatten(['h3', 'color-white'])}>
             Manage Chain Visibility
           </Text>
-        </Pressable>
+        </TouchableWithoutFeedback>
         <Box
           width={40}
           height={1}
           backgroundColor={style.get('color-gray-400').color}
         />
         <Stack gutter={36}>
-          <Pressable onPress={onClickContacts}>
+          <TouchableWithoutFeedback onPress={onClickContacts}>
             <Text style={style.flatten(['h3', 'color-white'])}>Contacts</Text>
-          </Pressable>
-          <Pressable onPress={onClickAddTokens}>
+          </TouchableWithoutFeedback>
+          <TouchableWithoutFeedback onPress={onClickAddTokens}>
             <Text style={style.flatten(['h3', 'color-white'])}>Add Token</Text>
-          </Pressable>
+          </TouchableWithoutFeedback>
         </Stack>
       </Stack>
       <Stack gutter={32}>
-        <Pressable>
+        <TouchableWithoutFeedback>
           <Text
             style={style.flatten(['h3', 'color-white'])}
             onPress={handleLock}>
             Lock Wallet
           </Text>
-        </Pressable>
+        </TouchableWithoutFeedback>
         <Box
           width={40}
           height={1}
           backgroundColor={style.get('color-gray-400').color}
         />
         <Stack gutter={36}>
-          <Pressable
+          <TouchableWithoutFeedback
             onPress={() => {
               navigation.navigate('Web', {
                 url: COMMUNITY_CHAIN_URL,
@@ -115,7 +115,7 @@ export const DrawerContent: FunctionComponent = observer(() => {
               </Text>
               <LinkIcon size={20} color={style.get('color-text-low').color} />
             </Columns>
-          </Pressable>
+          </TouchableWithoutFeedback>
         </Stack>
       </Stack>
     </DrawerContentScrollView>

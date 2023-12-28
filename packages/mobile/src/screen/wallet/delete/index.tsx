@@ -8,13 +8,14 @@ import {FormattedMessage, useIntl} from 'react-intl';
 import {Button} from '../../../components/button';
 import {Box} from '../../../components/box';
 import {Gutter} from '../../../components/gutter';
-import {Pressable, Text} from 'react-native';
+import {Text} from 'react-native';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
 import {GuideBox} from '../../../components/guide-box';
 import {Column} from '../../../components/column';
 import {PageWithScrollView} from '../../../components/page';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 interface FormData {
   password: string;
@@ -89,7 +90,7 @@ export const WalletDeleteScreen: FunctionComponent = observer(() => {
                     id: 'page.wallet.delete.warning-paragraph',
                   })}
                   bottom={
-                    <Pressable
+                    <TouchableWithoutFeedback
                       onPress={() => {
                         navigate.navigate('SelectWallet.ViewRecoveryPhrase', {
                           id: vaultId,
@@ -103,7 +104,7 @@ export const WalletDeleteScreen: FunctionComponent = observer(() => {
                         ])}>
                         <FormattedMessage id="page.wallet.delete.warning-link-text" />
                       </Text>
-                    </Pressable>
+                    </TouchableWithoutFeedback>
                   }
                 />
               );

@@ -5,16 +5,10 @@ import React, {
   useState,
 } from 'react';
 import {useStyle} from '../../styles';
-import {
-  Text,
-  StyleSheet,
-  TextStyle,
-  Pressable,
-  ViewStyle,
-  View,
-} from 'react-native';
+import {Text, StyleSheet, TextStyle, ViewStyle, View} from 'react-native';
 import {Box} from '../box';
 import {SVGLoadingIcon} from '../spinner';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 type ButtonColorType = 'faint' | 'default';
 export type ButtonSize = 'small' | 'large';
@@ -75,7 +69,7 @@ export const TextButton: FunctionComponent<{
   })();
 
   return (
-    <Pressable
+    <TouchableWithoutFeedback
       disabled={disabled}
       style={StyleSheet.flatten([
         style.flatten([
@@ -122,6 +116,6 @@ export const TextButton: FunctionComponent<{
               isPressIn ? pressingColorDefinition : textColorDefinition,
             )}
       </Box>
-    </Pressable>
+    </TouchableWithoutFeedback>
   );
 };

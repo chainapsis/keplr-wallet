@@ -17,7 +17,7 @@ import {XAxis} from '../../../../components/axis';
 import {Gutter} from '../../../../components/gutter';
 import {Skeleton} from '../../../../components/skeleton';
 import {WrongViewingKeyError} from '@keplr-wallet/stores';
-import {Pressable, StyleSheet, Text, ViewStyle} from 'react-native';
+import {StyleSheet, Text, ViewStyle} from 'react-native';
 import {ViewToken} from '../../index';
 import {RectButton} from '../../../../components/rect-button';
 import {Tag} from '../../../../components/tag';
@@ -27,6 +27,7 @@ import {ArrowRightIcon} from '../../../../components/icon/arrow-right';
 import {InformationOutlinedIcon} from '../../../../components/icon/information-outlined';
 import {IntPretty} from '@keplr-wallet/unit';
 import {formatAprString} from '../../utils';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export const TokenTitleView: FunctionComponent<{
   title: string;
@@ -40,7 +41,7 @@ export const TokenTitleView: FunctionComponent<{
         flex: 1,
       }}>
       <Columns sum={1} alignY="center">
-        <Pressable
+        <TouchableWithoutFeedback
           onPress={() => {
             if (onOpenModal) {
               onOpenModal();
@@ -57,7 +58,7 @@ export const TokenTitleView: FunctionComponent<{
               />
             ) : null}
           </Columns>
-        </Pressable>
+        </TouchableWithoutFeedback>
         {right ? (
           <React.Fragment>
             <Column weight={1} />

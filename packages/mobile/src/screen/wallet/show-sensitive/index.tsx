@@ -12,10 +12,11 @@ import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
 import {Button} from '../../../components/button';
 import LottieView from 'lottie-react-native';
-import {Pressable, StyleSheet, Text} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
 import {Column, Columns} from '../../../components/column';
 import {CheckIcon} from '../../../components/icon';
 import * as Clipboard from 'expo-clipboard';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 interface FormData {
   password: string;
@@ -135,7 +136,7 @@ export const WalletShowSensitiveScreen: FunctionComponent = observer(() => {
             </Text>
             <Column weight={1} />
             <Box alignX="center">
-              <Pressable
+              <TouchableWithoutFeedback
                 onPress={() => {
                   Clipboard.setStringAsync(sensitive).then(() =>
                     setIsCopied(true),
@@ -162,7 +163,7 @@ export const WalletShowSensitiveScreen: FunctionComponent = observer(() => {
                     </Box>
                   ) : null}
                 </Columns>
-              </Pressable>
+              </TouchableWithoutFeedback>
             </Box>
           </Box>
         )}

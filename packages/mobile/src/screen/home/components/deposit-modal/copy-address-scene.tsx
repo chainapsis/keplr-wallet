@@ -10,7 +10,7 @@ import {useStore} from '../../../../stores';
 import {Box} from '../../../../components/box';
 import {useStyle} from '../../../../styles';
 import {XAxis, YAxis} from '../../../../components/axis';
-import {Image, Pressable, Text, View} from 'react-native';
+import {Image, Text, View} from 'react-native';
 import {Gutter} from '../../../../components/gutter';
 import {TextInput} from '../../../../components/input';
 import {
@@ -24,6 +24,7 @@ import {CheckToggleIcon, QRCodeIcon} from '../../../../components/icon';
 import {IconButton} from '../../../../components/icon-button';
 import {FormattedMessage} from 'react-intl';
 import {ScrollView} from '../../../../components/scroll-view/common-scroll-view';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export const CopyAddressScene: FunctionComponent<{
   setIsOpen: (isOpen: boolean) => void;
@@ -284,15 +285,13 @@ const CopyAddressItem: FunctionComponent<{
     return (
       <Box height={74} borderRadius={6} alignY="center" width={'100%'}>
         <XAxis alignY="center">
-          <Pressable
-            style={{
+          <TouchableWithoutFeedback
+            containerStyle={{
               flex: 1,
             }}
             onPressIn={() => setIsCopyContainerPress(true)}
             onPressOut={() => setIsCopyContainerPress(false)}
-            onPress={async e => {
-              e.preventDefault();
-
+            onPress={async () => {
               await Clipboard.setStringAsync(
                 address.ethereumAddress || address.bech32Address,
               );
@@ -332,15 +331,11 @@ const CopyAddressItem: FunctionComponent<{
               })()}
               paddingLeft={16}>
               <XAxis alignY="center">
-                <Pressable
+                <TouchableWithoutFeedback
                   onPressIn={() => setIsBookmarkPress(true)}
                   onPressOut={() => setIsBookmarkPress(false)}
-                  pointerEvents={address.ethereumAddress ? 'none' : undefined}
-                  onPress={e => {
-                    e.preventDefault();
-                    // 컨테이너로의 전파를 막아야함
-                    e.stopPropagation();
-
+                  disabled={!!address.ethereumAddress}
+                  onPress={() => {
                     if (blockInteraction) {
                       return;
                     }
@@ -400,7 +395,7 @@ const CopyAddressItem: FunctionComponent<{
                       })()}
                     />
                   </Box>
-                </Pressable>
+                </TouchableWithoutFeedback>
                 <Gutter size={8} />
 
                 <ChainImageFallback
@@ -459,7 +454,7 @@ const CopyAddressItem: FunctionComponent<{
                 <Gutter size={8} />
               </XAxis>
             </Box>
-          </Pressable>
+          </TouchableWithoutFeedback>
           <Gutter size={6.08} />
           <XAxis alignY="center">
             <IconButton

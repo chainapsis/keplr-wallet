@@ -1,8 +1,9 @@
 import React, {FunctionComponent, PropsWithChildren} from 'react';
 import {ColorPalette, useStyle} from '../../styles';
-import {Pressable, Text} from 'react-native';
+import {Text} from 'react-native';
 import {HeaderBackButtonIcon} from './icon/back';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export const RegisterHeaderTitle: FunctionComponent<PropsWithChildren> = ({
   children,
@@ -45,14 +46,14 @@ export const HeaderBackButton: FunctionComponent = () => {
   return (
     <React.Fragment>
       {!hideBackButton ? (
-        <Pressable
+        <TouchableWithoutFeedback
           onPress={() => navigation.goBack()}
           style={style.flatten(['padding-left-20'])}>
           <HeaderBackButtonIcon
             size={28}
             color={style.get('color-gray-300').color}
           />
-        </Pressable>
+        </TouchableWithoutFeedback>
       ) : null}
     </React.Fragment>
   );

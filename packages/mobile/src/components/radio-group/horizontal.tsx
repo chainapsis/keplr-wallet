@@ -1,15 +1,9 @@
 import React, {FunctionComponent} from 'react';
 import {RadioGroupProps} from './types';
 import {Gutter} from '../gutter';
-import {
-  DimensionValue,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  ViewStyle,
-} from 'react-native';
+import {DimensionValue, StyleSheet, Text, View, ViewStyle} from 'react-native';
 import {useStyle} from '../../styles';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export const HorizontalRadioGroup: FunctionComponent<RadioGroupProps> = ({
   style: containerStyleProp,
@@ -81,7 +75,7 @@ export const HorizontalRadioGroup: FunctionComponent<RadioGroupProps> = ({
 
         return (
           <React.Fragment key={item.key}>
-            <Pressable
+            <TouchableWithoutFeedback
               style={StyleSheet.flatten([
                 style.flatten(
                   ['flex-row', 'items-center', 'justify-center'],
@@ -94,14 +88,13 @@ export const HorizontalRadioGroup: FunctionComponent<RadioGroupProps> = ({
                 itemStyle,
               ])}
               key={item.key}
-              onPress={e => {
-                e.preventDefault();
+              onPress={() => {
                 onSelect(item.key);
               }}>
               <Text style={style.flatten([...(textStyle as any)])}>
                 {item.text}
               </Text>
-            </Pressable>
+            </TouchableWithoutFeedback>
             <Gutter size={4} />
           </React.Fragment>
         );

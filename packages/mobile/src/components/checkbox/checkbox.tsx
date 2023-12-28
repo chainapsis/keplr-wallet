@@ -1,12 +1,12 @@
 import React, {FunctionComponent} from 'react';
-import {GestureResponderEvent, Pressable} from 'react-native';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 import {CheckIcon} from '../icon/check';
 import {useStyle} from '../../styles';
 
 interface CheckboxProps {
   size?: 'small' | 'large';
-  onPress?: (e: GestureResponderEvent, checked: boolean) => void;
+  onPress?: (checked: boolean) => void;
   checked: boolean;
 }
 
@@ -43,17 +43,17 @@ export const Checkbox: FunctionComponent<CheckboxProps> = ({
   })();
 
   return (
-    <Pressable
+    <TouchableWithoutFeedback
       style={style.flatten(
         ['border-radius-4', 'flex-row', 'justify-center', 'items-center'],
         [...(boxSize as any), ...(backgroundColor as any)],
       )}
-      onPress={e => {
+      onPress={() => {
         if (onPress) {
-          onPress(e, !checked);
+          onPress(!checked);
         }
       }}>
       {checked ? <CheckIcon color="white" size={iconSize} /> : null}
-    </Pressable>
+    </TouchableWithoutFeedback>
   );
 };

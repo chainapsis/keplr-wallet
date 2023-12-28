@@ -8,7 +8,7 @@ import {Box} from '../../components/box';
 import {ChainIdHelper} from '@keplr-wallet/cosmos';
 import {EmptyView} from '../../components/empty-view';
 import {YAxis} from '../../components/axis';
-import {Pressable, Text} from 'react-native';
+import {Text} from 'react-native';
 import {MainEmptyView} from './components/empty-view';
 import {useStyle} from '../../styles';
 import {TokenItem, TokenTitleView} from './components/token';
@@ -27,6 +27,7 @@ import {
 } from '../../components/modal/infoModal';
 import {StackNavProp} from '../../navigation';
 import {Secret20Currency} from '@keplr-wallet/types';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 const zeroDec = new Dec(0);
 
@@ -193,7 +194,7 @@ export const AvailableTabView: FunctionComponent<{
                       right={
                         hasLowBalanceTokens ? (
                           <React.Fragment>
-                            <Pressable
+                            <TouchableWithoutFeedback
                               onPress={() => {
                                 uiConfigStore.setHideLowBalance(
                                   !uiConfigStore.isHideLowBalance,
@@ -206,7 +207,7 @@ export const AvailableTabView: FunctionComponent<{
                                 ])}>
                                 <FormattedMessage id="page.main.available.hide-low-balance" />
                               </Text>
-                            </Pressable>
+                            </TouchableWithoutFeedback>
                             <Gutter size={4} />
                             <Toggle
                               size="small"
@@ -392,7 +393,7 @@ const NewTokenFoundButton = ({
   const [isPressIn, setIsPressIn] = useState(false);
 
   return (
-    <Pressable
+    <TouchableWithoutFeedback
       style={style.flatten([
         'flex-row',
         'justify-center',
@@ -411,6 +412,6 @@ const NewTokenFoundButton = ({
         ])}>
         {`${numFoundToken} new token(s) found`}
       </Text>
-    </Pressable>
+    </TouchableWithoutFeedback>
   );
 };

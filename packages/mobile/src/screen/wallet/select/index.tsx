@@ -21,7 +21,7 @@ import {CheckIcon, CopyOutlineIcon} from '../../../components/icon';
 import {Button} from '../../../components/button';
 import {App, AppCoinType} from '@keplr-wallet/ledger-cosmos';
 import {PageWithScrollView} from '../../../components/page';
-import {Pressable, StyleSheet, Text} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import {useIntl} from 'react-intl';
 import {EllipsisIcon} from '../../../components/icon/ellipsis';
@@ -31,6 +31,7 @@ import {BACKGROUND_PORT} from '@keplr-wallet/router';
 import {RNMessageRequesterInternal} from '../../../router';
 import * as Clipboard from 'expo-clipboard';
 import {MenuModal, ModalMenuItem} from '../../../components/modal/menu-modal';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export const WalletSelectScreen: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
@@ -607,15 +608,13 @@ const KeyringItem: FunctionComponent<{
           ) : null}
         </Box>
         <Column weight={1} />
-        <Pressable
-          onPress={e => {
-            e.stopPropagation();
-            e.preventDefault();
+        <TouchableWithoutFeedback
+          onPress={() => {
             setModalMenuItems(dropdownItems);
             openModal();
           }}>
           <EllipsisIcon size={24} color={style.get('color-gray-10').color} />
-        </Pressable>
+        </TouchableWithoutFeedback>
       </Columns>
     </Box>
   );
