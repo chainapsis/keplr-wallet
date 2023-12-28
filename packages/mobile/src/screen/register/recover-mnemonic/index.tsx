@@ -181,7 +181,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
               }
 
               if (!bip39.validateMnemonic(value)) {
-                return 'Invalid mnemonic';
+                return 'Invalid Phrase';
               }
             } else {
               value = value.replace('0x', '');

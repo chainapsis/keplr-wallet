@@ -416,6 +416,9 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
       <Box marginTop={21} marginBottom={12} paddingX={28} width="100%">
         <SimpleProgressBar progress={queryProgress} />
       </Box>
+      <Text style={style.flatten(['body2', 'color-text-low', 'text-center'])}>
+        ({(queryProgress * 100).toFixed(0)}%/ 100%)
+      </Text>
       <View
         style={{
           flex: 1,

@@ -47,7 +47,7 @@
 
   "pages.register.intro.create-wallet-button": "Create a new wallet",
   "pages.register.intro.import-wallet-button": "Import an existing wallet",
-  "pages.register.intro.connect-hardware-wallet-button": "Connect Hardware Wallet",
+  "pages.register.intro.connect-hardware-wallet-button": "Connect Ledger",
 
   "pages.register.intro-new-user.title": "Welcome to Keplr",
   "pages.register.intro-new-user.paragraph": "Select the way you want to create your wallet",
@@ -56,8 +56,8 @@
   "pages.register.intro-new-user.new-recovery-path-button": "Create new recovery phrase",
   "pages.register.intro-new-user.import-recovery-path-button": "Import existing recovery phrase",
   "pages.register.intro-new-user.high-security-text": "Higher Security",
-  "pages.register.intro-new-user.sign-up-social-title": "Sign-up with Google",
-  "pages.register.intro-new-user.sign-up-social-paragraph": "Simple & easy registration",
+  "pages.register.intro-new-user.sign-up-social-title": "Use Social IDs",
+  "pages.register.intro-new-user.sign-up-social-paragraph": "Log in with your social IDs to import an existing account to Keplr",
   "pages.register.intro-new-user.sign-up-google-button": "Connect with Google",
   "pages.register.intro-new-user.sign-up-apple-button": "Connect with Apple ID",
   "pages.register.intro-new-user.more-convenience-text": "More Convenience",
@@ -102,8 +102,8 @@
   "pages.register.name-password-hardware.connect-to-secret": "Secret app",
 
   "pages.register.recover-mnemonic.title": "Import Existing Wallet",
-  "pages.register.recover-mnemonic.paragraph-1": "Enter your recovery phrase here to restore your wallet. Or click on any blank and paste the entire phrase.",
-  "pages.register.recover-mnemonic.paragraph-2": "Enter the phrase in the right order without capitalization, punctuation symbols, or spaces.",
+  "pages.register.recover-mnemonic.paragraph-1": "Enter your recovery phrase or private key to restore your wallet. Tap the blank below to paste the full phrase.",
+  "pages.register.recover-mnemonic.paragraph-2": "Enter your phrase it in lowercase, in the correct order.",
   "pages.register.recover-mnemonic.12-words-tab": "12 words",
   "pages.register.recover-mnemonic.24-words-tab": "24 words",
   "pages.register.recover-mnemonic.private-key-tab": "Private key",
@@ -142,7 +142,7 @@
   "pages.register.connect-keystone.unsupported": "Unsupported",
 
   "pages.register.enable-chains.title": "Select Chains",
-  "pages.register.enable-chains.paragraph": "Don’t worry, you can change your selections anytime in the Manage Chain Visibility in the sidebar menu.",
+  "pages.register.enable-chains.paragraph": "Select which chains you’d like to enable on your account.",
   "pages.register.enable-chains.search-input-placeholder": "Search networks",
   "pages.register.enable-chains.chain-selected-count": "{numSelected} chain(s) selected",
   "pages.register.enable-chains.skip-button": "Skip",

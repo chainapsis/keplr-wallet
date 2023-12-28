@@ -110,7 +110,7 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
         <XAxis alignY="center">
           <Text style={style.flatten(['body2', 'color-gray-50', 'flex-1'])}>
             {selectedApp}
-            {selectedApp === 'Cosmos' ? ' (Recommend)' : null}
+            {selectedApp === 'Cosmos' ? ' (Recommended)' : null}
           </Text>
 
           <ArrowDownFillIcon
