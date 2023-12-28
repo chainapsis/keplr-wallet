@@ -289,10 +289,10 @@ export const AvailableTabView: FunctionComponent<{
                       'subtitle3',
                       'font-bold',
                     ])}>
-                    Oops!
+                    <FormattedMessage id="page.main.available.search-empty-view-title" />
                   </Text>
                   <Text style={style.flatten(['subtitle3', 'color-gray-400'])}>
-                    No Result Found
+                    <FormattedMessage id="page.main.available.search-empty-view-paragraph" />
                   </Text>
                 </Stack>
               </EmptyView>
@@ -305,16 +305,16 @@ export const AvailableTabView: FunctionComponent<{
                   source={require('../../public/assets/img/main-empty-balance.png')}
                 />
               }
-              paragraph={intl.formatMessage({
-                id: 'page.main.components.first-time-empty-view-paragraph',
-              })}
               title={intl.formatMessage({
-                id: 'page.main.components.first-time-empty-view-title',
+                id: 'page.main.available.empty-view-title',
+              })}
+              paragraph={intl.formatMessage({
+                id: 'page.main.available.empty-view-paragraph',
               })}
               button={
                 <Button
                   text={intl.formatMessage({
-                    id: 'page.main.components.first-time-empty-view-button',
+                    id: 'page.main.available.get-started-button',
                   })}
                   color="primary"
                   size="small"
@@ -409,7 +409,10 @@ const NewTokenFoundButton = ({
           'text-button1',
           isPressIn ? 'color-gray-200' : 'color-gray-50',
         ])}>
-        {`${numFoundToken} new token(s) found`}
+        <FormattedMessage
+          id="page.main.available.new-token-found"
+          values={{numFoundToken}}
+        />
       </Text>
     </Pressable>
   );

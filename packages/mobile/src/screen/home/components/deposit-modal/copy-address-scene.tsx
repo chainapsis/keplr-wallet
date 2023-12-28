@@ -22,7 +22,7 @@ import {BaseModalHeader} from '../../../../components/modal';
 import {ChainImageFallback} from '../../../../components/image';
 import {CheckToggleIcon, QRCodeIcon} from '../../../../components/icon';
 import {IconButton} from '../../../../components/icon-button';
-import {FormattedMessage} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {ScrollView} from '../../../../components/scroll-view/common-scroll-view';
 
 export const CopyAddressScene: FunctionComponent<{
@@ -35,6 +35,7 @@ export const CopyAddressScene: FunctionComponent<{
     const {chainStore, accountStore, keyRingStore, uiConfigStore} = useStore();
     const [search, setSearch] = useState('');
     const style = useStyle();
+    const intl = useIntl();
 
     // 북마크된 체인과 sorting을 위한 state는 분리되어있다.
     // 이걸 분리하지 않고 북마크된 체인은 무조건 올린다고 가정하면
@@ -142,7 +143,9 @@ export const CopyAddressScene: FunctionComponent<{
 
               setSearch(e.nativeEvent.text);
             }}
-            placeholder="Search for a chain"
+            placeholder={intl.formatMessage({
+              id: 'page.main.components.deposit-modal.search-placeholder',
+            })}
           />
         </Box>
 
@@ -165,15 +168,6 @@ export const CopyAddressScene: FunctionComponent<{
                 }}
                 alt="copy-address-no-search-result-image"
               />
-              <Gutter size={12} />
-              <Text
-                style={style.flatten([
-                  'subtitle3',
-                  'color-gray-300',
-                  'text-center',
-                ])}>
-                <FormattedMessage id="page.main.components.deposit-modal.empty-title" />
-              </Text>
               <Gutter size={12} />
               <Text
                 style={style.flatten([

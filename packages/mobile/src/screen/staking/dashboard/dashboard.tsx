@@ -20,7 +20,7 @@ import {Button} from '../../../components/button';
 import LinearGradient from 'react-native-linear-gradient';
 import {CoinPretty} from '@keplr-wallet/unit';
 import {formatRelativeTimeString} from '../../../utils/format';
-import {useIntl} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {formatAprString} from '../../home/utils';
 import {InformationOutlinedIcon} from '../../../components/icon/information-outlined';
 import {InformationModal} from '../../../components/modal/infoModal';
@@ -46,8 +46,15 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
   const chainInfo = chainStore.getChain(chainId);
 
   useEffect(() => {
-    navigation.setOptions({title: `Staking on ${chainInfo.chainName}`});
-  }, [chainInfo.chainName, navigation]);
+    navigation.setOptions({
+      title: intl.formatMessage(
+        {id: 'page.stake.dashboard.title'},
+        {
+          chainName: chainInfo.chainName,
+        },
+      ),
+    });
+  }, [chainInfo.chainName, intl, navigation]);
 
   const totalUnbonding =
     queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
@@ -160,12 +167,12 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
     lenAlwaysShown: number;
   }[] = [
     {
-      title: 'Staked Balance',
+      title: intl.formatMessage({id: 'page.stake.staked-balance-title'}),
       validators: delegations,
       lenAlwaysShown: 4,
     },
     {
-      title: 'Unstaking Balance',
+      title: intl.formatMessage({id: 'page.stake.unstaking-balance-title'}),
       validators: unbondings,
       lenAlwaysShown: 4,
     },
@@ -210,7 +217,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
           <Skeleton isNotReady={isNotReady} type="rect">
             <Columns sum={1} gutter={4} alignY="center">
               <Text style={style.flatten(['subtitle3', 'color-text-low'])}>
-                Total staked
+                <FormattedMessage id="page.stake.dashboard.total-staked-info-modal.title" />
               </Text>
 
               <InformationOutlinedIcon
@@ -255,7 +262,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
             <YAxis>
               <Skeleton type="rect" isNotReady={isNotReady} layer={1}>
                 <Text style={style.flatten(['subtitle4', 'color-text-low'])}>
-                  Available for Staking
+                  <FormattedMessage id="page.stake.dashboard.staking-button.label" />
                 </Text>
               </Skeleton>
               <Gutter size={4} />
@@ -276,7 +283,9 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
           <Skeleton layer={1} isNotReady={isNotReady} type="button">
             <Button
               style={style.flatten(['padding-x-16', 'padding-y-8'])}
-              text="Stake"
+              text={intl.formatMessage({
+                id: 'page.stake.dashboard.staking-button',
+              })}
               size="medium"
               onPress={() => {
                 navigation.navigate('Stake', {
@@ -348,8 +357,12 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
       <InformationModal
         isOpen={isInfoModalOpen}
         setIsOpen={setIsInfoModalOpen}
-        title="Total staked"
-        paragraph="The total of staked and unstaking amounts"
+        title={intl.formatMessage({
+          id: 'page.stake.dashboard.total-staked-info-modal.title',
+        })}
+        paragraph={intl.formatMessage({
+          id: 'page.stake.dashboard.total-staked-info-modal.paragraph',
+        })}
       />
     </PageWithScrollView>
   );

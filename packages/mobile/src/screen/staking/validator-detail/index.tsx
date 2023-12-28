@@ -16,9 +16,10 @@ import {Staking} from '@keplr-wallet/stores';
 import {Box} from '../../../components/box';
 import {Column, Columns} from '../../../components/column';
 import {ValidatorImage} from '../components/validator-image';
-import {Text} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
 import {CoinPretty, Dec, RatePretty} from '@keplr-wallet/unit';
 import {Button} from '../../../components/button';
+import {FormattedMessage, useIntl} from 'react-intl';
 
 export const ValidatorDetailScreen: FunctionComponent = observer(() => {
   const {queriesStore, chainStore} = useStore();
@@ -26,6 +27,8 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.ValidateDetail'>>();
   const navigation = useNavigation<StackNavProp>();
   const style = useStyle();
+  const intl = useIntl();
+
   const {validatorAddress, chainId, validatorSelector} = route.params;
   const queries = queriesStore.get(chainId);
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
@@ -79,25 +82,37 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
       <Stack gutter={12}>
         {isJailed ? (
           <GuideBox
-            title="This validator is currently jailed."
-            paragraph="If you are staking to this validator, consider switching to another validator or unstaking."
+            title={intl.formatMessage({
+              id: 'page.stake.validator-detail.jailed-guide-box.title',
+            })}
+            paragraph={intl.formatMessage({
+              id: 'page.stake.validator-detail.jailed-guide-box.paragraph',
+            })}
             color="warning"
           />
         ) : (
           <React.Fragment>
             {isCommissionHigh ? (
               <GuideBox
-                title={`Commission ${new RatePretty(
-                  validatorInfo?.commission.commission_rates.rate || 0,
-                )
-                  .maxDecimals(2)
-                  .toString()}`}
+                title={intl.formatMessage(
+                  {
+                    id: 'page.stake.validator-detail.commission-guide-box.title',
+                  },
+                  {
+                    rate: new RatePretty(
+                      validatorInfo?.commission.commission_rates.rate || 0,
+                    )
+                      .maxDecimals(2)
+                      .toString(),
+                  },
+                )}
                 paragraph={
                   <Text style={style.flatten(['body2', 'color-yellow-500'])}>
-                    This validator is currently charging
-                    <Text style={style.flatten(['font-bold'])}>very high</Text>
-                    commissions. Consider staking to other validators with lower
-                    commissions to increaser your rewards.
+                    <FormattedMessage id="page.stake.validator-detail.commission-guide-box.paragraph-1" />
+                    <Text style={style.flatten(['font-bold'])}>
+                      <FormattedMessage id="page.stake.validator-detail.commission-guide-box.paragraph-2" />
+                    </Text>
+                    <FormattedMessage id="page.stake.validator-detail.commission-guide-box.paragraph-3" />
                   </Text>
                 }
                 color="warning"
@@ -105,8 +120,12 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
             ) : null}
             {isTop10Validator ? (
               <GuideBox
-                title="You are staking to top 10 validator"
-                paragraph="To improve decentralization, please consider staking to other validators"
+                title={intl.formatMessage({
+                  id: 'page.stake.validator-detail.top-10-guide-box.title',
+                })}
+                paragraph={intl.formatMessage({
+                  id: 'page.stake.validator-detail.top-10-guide-box.paragraph',
+                })}
                 color="default"
               />
             ) : null}
@@ -126,7 +145,12 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
                   imageUrl={thumbnail}
                   name={validatorInfo?.description.moniker}
                 />
-                <Text style={style.flatten(['subtitle2', 'color-text-high'])}>
+                <Text
+                  numberOfLines={1}
+                  style={StyleSheet.flatten([
+                    style.flatten(['subtitle2', 'color-text-high']),
+                    {width: '80%'},
+                  ])}>
                   {validatorInfo.description.moniker}
                 </Text>
               </Columns>
@@ -138,7 +162,7 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
                         'subtitle3',
                         'color-label-default',
                       ])}>
-                      Commission
+                      <FormattedMessage id="page.stake.validator-detail.validator-card.commission" />
                     </Text>
                     <Text style={style.flatten(['body3', 'color-text-middle'])}>
                       {new RatePretty(
@@ -157,7 +181,7 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
                         'subtitle3',
                         'color-label-default',
                       ])}>
-                      Voting power
+                      <FormattedMessage id="page.stake.validator-detail.validator-card.voting-power" />
                     </Text>
                     <Text style={style.flatten(['body3', 'color-text-middle'])}>
                       {token.maxDecimals(10).trim(true).shrink(true).toString()}
@@ -168,7 +192,7 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
               <Stack gutter={8}>
                 <Text
                   style={style.flatten(['subtitle3', 'color-label-default'])}>
-                  Description
+                  <FormattedMessage id="page.stake.validator-detail.validator-card.description" />
                 </Text>
                 <Text style={style.flatten(['body3', 'color-text-middle'])}>
                   {validatorInfo.description.details}
@@ -177,7 +201,9 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
               {validatorSelector ? (
                 <Button
                   size="large"
-                  text="Switch to this Validator"
+                  text={intl.formatMessage({
+                    id: 'page.stake.validator-detail.switch-validator-button',
+                  })}
                   onPress={() => {
                     validatorSelector(
                       validatorInfo.operator_address,
@@ -191,7 +217,13 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
                 <Button
                   size="large"
                   text={
-                    isJailed ? 'This validator is currently jailed.' : 'Stake'
+                    isJailed
+                      ? intl.formatMessage({
+                          id: 'page.stake.validator-detail.jailed-button',
+                        })
+                      : intl.formatMessage({
+                          id: 'page.stake.validator-detail.stake-button',
+                        })
                   }
                   disabled={isJailed}
                   onPress={() => {

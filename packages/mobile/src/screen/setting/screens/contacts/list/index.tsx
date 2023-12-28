@@ -70,7 +70,9 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
           <SelectModalCommonButton
             items={items}
             selectedItemKey={chainId}
-            placeholder="Search by chain name"
+            placeholder={intl.formatMessage({
+              id: 'page.setting.contacts.list.modal-button-placeholder',
+            })}
             isOpenModal={isOpenChainSelectModal}
             onPress={() => {
               setIsOpenChainSelectModal(true);
@@ -172,9 +174,13 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
           navigate.setParams({chainId: item.key});
           setIsOpenChainSelectModal(false);
         }}
-        placeholder="Search by chain name"
+        placeholder={intl.formatMessage({
+          id: 'page.setting.contacts.list.select-modal.placeholder',
+        })}
         items={items}
-        title="Select Chain"
+        title={intl.formatMessage({
+          id: 'page.setting.contacts.list.select-modal.title',
+        })}
       />
     </PageWithScrollView>
   );

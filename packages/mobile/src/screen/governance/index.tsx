@@ -27,6 +27,7 @@ import {
 import {ChainIdHelper} from '@keplr-wallet/cosmos';
 import {EmptyView, EmptyViewText} from '../../components/empty-view';
 import {Box} from '../../components/box';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {Skeleton} from '../../components/skeleton';
 
 export const GovernanceScreen: FunctionComponent = observer(() => {
@@ -34,6 +35,7 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
   const {hugeQueriesStore, queriesStore, scamProposalStore} = useStore();
   const [isOpenSelectChainModal, setIsOpenSelectChainModal] = useState(false);
   const navigation = useNavigation<StackNavProp>();
+  const intl = useIntl();
   const isFetching = useRef(1);
 
   const delegations: ViewToken[] = useMemo(
@@ -187,8 +189,16 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
           <Gutter size={100} />
           <EmptyView>
             <Box alignX="center">
-              <EmptyViewText text="No records of past or" />
-              <EmptyViewText text="ongoing proposals found" />
+              <EmptyViewText
+                text={intl.formatMessage({
+                  id: 'page.governance.main.empty-text-1',
+                })}
+              />
+              <EmptyViewText
+                text={intl.formatMessage({
+                  id: 'page.governance.main.empty-text-2',
+                })}
+              />
             </Box>
           </EmptyView>
         </React.Fragment>
@@ -221,7 +231,9 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
         isOpen={isOpenSelectChainModal}
         setIsOpen={setIsOpenSelectChainModal}
         items={modalItems}
-        placeholder="Search for a chain"
+        placeholder={intl.formatMessage({
+          id: 'page.governance.components.select-chain-modal.input-placeholder',
+        })}
         onSelect={({key}) => {
           setIsOpenSelectChainModal(false);
           navigation.navigate('Governance', {
@@ -304,7 +316,10 @@ export const ChainItem: FunctionComponent<ChainItemProps> = observer(
             <Skeleton layer={1} type="rect" isNotReady={isNotReady}>
               <Stack gutter={2} alignX="right">
                 <Text style={style.flatten(['body2', 'color-text-low'])}>
-                  {proposalLen} Proposals
+                  <FormattedMessage
+                    id="page.governance.chain-item-proposal-length"
+                    values={{len: proposalLen}}
+                  />
                 </Text>
               </Stack>
             </Skeleton>

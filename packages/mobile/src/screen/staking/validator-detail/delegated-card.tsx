@@ -9,6 +9,7 @@ import {Gutter} from '../../../components/gutter';
 import {Column, Columns} from '../../../components/column';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../navigation';
+import {FormattedMessage, useIntl} from 'react-intl';
 
 export const DelegatedCard: FunctionComponent<{
   chainId: string;
@@ -17,6 +18,7 @@ export const DelegatedCard: FunctionComponent<{
 }> = observer(({validatorAddress, chainId, isFromRedelegate}) => {
   const {queriesStore, accountStore} = useStore();
   const navigation = useNavigation<StackNavProp>();
+  const intl = useIntl();
 
   const account = accountStore.getAccount(chainId);
   const queries = queriesStore.get(chainId);
@@ -40,7 +42,7 @@ export const DelegatedCard: FunctionComponent<{
           'padding-x-6',
           'padding-y-4',
         ])}>
-        My Staking
+        <FormattedMessage id="page.stake.validator-detail.delegated-card.label" />
       </Text>
       <Gutter size={8} />
       <Box
@@ -50,7 +52,7 @@ export const DelegatedCard: FunctionComponent<{
         backgroundColor={style.get('color-card-default').color}>
         <Columns sum={1} alignY="center">
           <Text style={style.flatten(['body1', 'color-text-middle'])}>
-            Staked
+            <FormattedMessage id="page.stake.validator-detail.delegated-card.staked-label" />
           </Text>
           <Column weight={1} />
           <Text style={style.flatten(['body1', 'color-text-high'])}>
@@ -62,7 +64,7 @@ export const DelegatedCard: FunctionComponent<{
 
         <Columns sum={1} alignY="center">
           <Text style={style.flatten(['body1', 'color-text-middle'])}>
-            Rewards
+            <FormattedMessage id="page.stake.validator-detail.delegated-card.reward-label" />
           </Text>
           <Column weight={1} />
           <Text style={style.flatten(['body1', 'color-text-high'])}>
@@ -77,7 +79,9 @@ export const DelegatedCard: FunctionComponent<{
             <Columns sum={1} gutter={10}>
               <Button
                 color="secondary"
-                text="Switch Validator"
+                text={intl.formatMessage({
+                  id: 'page.stake.validator-detail.delegated-card.redelegate-button',
+                })}
                 containerStyle={style.flatten(['flex-1'])}
                 size="large"
                 onPress={() => {
@@ -92,7 +96,9 @@ export const DelegatedCard: FunctionComponent<{
               />
               <Button
                 containerStyle={style.flatten(['flex-1'])}
-                text="Unstake"
+                text={intl.formatMessage({
+                  id: 'page.stake.validator-detail.delegated-card.undelegate-button',
+                })}
                 size="large"
                 onPress={() => {
                   navigation.navigate('Stake', {

@@ -23,7 +23,7 @@ import {ValidatorCard} from '../components/validator-card';
 import {GuideBox} from '../../../components/guide-box';
 import {XAxis} from '../../../components/axis';
 import {useNotification} from '../../../hooks/notification';
-import {useIntl} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 
 export const SignUndelegateScreen: FunctionComponent = observer(() => {
   const {chainStore, accountStore, queriesStore} = useStore();
@@ -122,7 +122,7 @@ export const SignUndelegateScreen: FunctionComponent = observer(() => {
                 •
               </Text>
               <Text style={style.flatten(['body2', 'color-yellow-500'])}>
-                NOT recieve staking rewards
+                <FormattedMessage id="page.stake.undelegate.guide-box.paragraph-1" />
               </Text>
             </XAxis>
             <XAxis>
@@ -135,7 +135,10 @@ export const SignUndelegateScreen: FunctionComponent = observer(() => {
                 •
               </Text>
               <Text style={style.flatten(['body2', 'color-yellow-500'])}>
-                {`need to wait ${unbondingPeriodDay} days for the amount to be liquid`}
+                <FormattedMessage
+                  id="page.stake.undelegate.guide-box.paragraph-2"
+                  values={{unbondingPeriodDay}}
+                />
               </Text>
             </XAxis>
             <XAxis>
@@ -148,8 +151,7 @@ export const SignUndelegateScreen: FunctionComponent = observer(() => {
                 •
               </Text>
               <Text style={style.flatten(['body2', 'color-yellow-500'])}>
-                But you will be able to cancel the unstaking process anytime, as
-                this chain currently supports the function
+                <FormattedMessage id="page.stake.undelegate.guide-box.paragraph-3" />
               </Text>
             </XAxis>
           </Box>
@@ -168,7 +170,7 @@ export const SignUndelegateScreen: FunctionComponent = observer(() => {
       <Gutter size={16} />
 
       <Button
-        text={'Next'}
+        text={intl.formatMessage({id: 'button.next'})}
         size={'large'}
         disabled={txConfigsValidate.interactionBlocked}
         loading={accountStore.getAccount(chainId).isSendingMsg === 'send'}

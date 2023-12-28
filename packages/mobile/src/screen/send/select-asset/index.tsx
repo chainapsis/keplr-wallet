@@ -11,6 +11,7 @@ import {Column, Columns} from '../../../components/column';
 import {Pressable, Text} from 'react-native';
 import {Checkbox} from '../../../components/checkbox';
 import {StackActions, useNavigation} from '@react-navigation/native';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {
   BoundaryScrollView,
   BoundaryScrollViewBoundary,
@@ -21,6 +22,7 @@ import {Box} from '../../../components/box';
 export const SendSelectAssetScreen: FunctionComponent = observer(() => {
   const style = useStyle();
   const navigation = useNavigation();
+  const intl = useIntl();
 
   const {hugeQueriesStore} = useStore();
 
@@ -66,7 +68,9 @@ export const SendSelectAssetScreen: FunctionComponent = observer(() => {
         <TextInput
           left={color => <SearchIcon size={20} color={color} />}
           value={search}
-          placeholder="Search by a chain or asset name"
+          placeholder={intl.formatMessage({
+            id: 'page.send.select-asset.search-placeholder',
+          })}
           onChange={e => {
             e.preventDefault();
 
@@ -85,7 +89,7 @@ export const SendSelectAssetScreen: FunctionComponent = observer(() => {
                 hideIBCToken ? 'color-gray-200' : 'color-gray-300',
                 'body2',
               ])}>
-              Hide IBC token
+              <FormattedMessage id="page.send.select-asset.hide-ibc-token" />
             </Text>
 
             <Checkbox

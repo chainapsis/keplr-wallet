@@ -3,7 +3,7 @@ import {observer} from 'mobx-react-lite';
 import {useStore} from '../../../stores';
 import {Text, View} from 'react-native';
 import {useStyle} from '../../../styles';
-import {useIntl} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {ProgressBar} from '../../../components/progress-bar';
 import {Box} from '../../../components/box';
 import {Gutter} from '../../../components/gutter';
@@ -39,7 +39,7 @@ export const UnbondingCard: FunctionComponent<{
           'padding-x-6',
           'padding-y-4',
         ])}>
-        My Unstaking
+        <FormattedMessage id="page.stake.validator-detail.unbonding-card.label" />
       </Text>
       <Gutter size={8} />
       <Box

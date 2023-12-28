@@ -39,7 +39,22 @@ export const SettingSecurityAndPrivacyScreen: FunctionComponent = observer(
                 navigate.navigate('Setting.SecurityAndPrivacy.Permission')
               }
             />
-
+            <PageButton
+              title={intl.formatMessage({
+                id: 'page.setting.security.manage-WC-title',
+              })}
+              endIcon={
+                <ArrowRightIcon
+                  size={24}
+                  color={style.get('color-text-low').color}
+                />
+              }
+              onClick={() =>
+                navigate.navigate(
+                  'Setting.SecurityAndPrivacy.ManageWalletConnect',
+                )
+              }
+            />
             <PageButton
               title={intl.formatMessage({
                 id: 'page.setting.security.change-password-title',

@@ -218,10 +218,10 @@ export const CameraScreen: FunctionComponent = observer(() => {
             <GuideBox
               color="warning"
               title={intl.formatMessage({
-                id: 'page.camera.warning-guide-title',
+                id: 'page.camera.warning-guide.title',
               })}
               paragraph={intl.formatMessage({
-                id: 'page.camera.warning-guide-paragraph',
+                id: 'page.camera.warning-guide.paragraph',
               })}
               bottom={
                 <Text
@@ -230,7 +230,7 @@ export const CameraScreen: FunctionComponent = observer(() => {
                     {textDecorationLine: 'underline'},
                   ])}
                   onPress={async () => await Linking.openSettings()}>
-                  <FormattedMessage id="page.camera.warning-guide-button" />
+                  <FormattedMessage id="page.camera.warning-guide.button" />
                 </Text>
               }
             />

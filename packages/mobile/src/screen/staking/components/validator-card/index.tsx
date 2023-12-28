@@ -1,6 +1,6 @@
 import React, {FunctionComponent} from 'react';
 import {observer} from 'mobx-react-lite';
-import {Text} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
 import {useStyle} from '../../../../styles';
 import {useStore} from '../../../../stores';
 import {Box} from '../../../../components/box';
@@ -8,6 +8,7 @@ import {Gutter} from '../../../../components/gutter';
 import {Column, Columns} from '../../../../components/column';
 import {ValidatorImage} from '../validator-image';
 import {Staking} from '@keplr-wallet/stores';
+import {FormattedMessage} from 'react-intl';
 
 export const ValidatorCard: FunctionComponent<{
   chainId: string;
@@ -63,7 +64,12 @@ export const ValidatorCard: FunctionComponent<{
             imageUrl={thumbnail}
             name={validatorInfo?.description.moniker}
           />
-          <Text style={style.flatten(['subtitle2', 'color-platinum-100'])}>
+          <Text
+            numberOfLines={1}
+            style={StyleSheet.flatten([
+              style.flatten(['subtitle2', 'color-platinum-100']),
+              {width: '80%'},
+            ])}>
             {validatorInfo?.description.moniker}
           </Text>
         </Columns>
@@ -73,7 +79,7 @@ export const ValidatorCard: FunctionComponent<{
 
       <Columns sum={1} alignY="center">
         <Text style={style.flatten(['subtitle2', 'color-gray-100'])}>
-          Staked
+          <FormattedMessage id="page.stake.redelegate.validator-card.staked" />
         </Text>
         <Column weight={1} />
         <Text style={style.flatten(['body1', 'color-text-middle'])}>
@@ -85,7 +91,7 @@ export const ValidatorCard: FunctionComponent<{
 
       <Columns sum={1} alignY="center">
         <Text style={style.flatten(['subtitle2', 'color-gray-100'])}>
-          Rewards
+          <FormattedMessage id="page.stake.redelegate.validator-card.rewards" />
         </Text>
         <Column weight={1} />
         <Text style={style.flatten(['body1', 'color-text-middle'])}>

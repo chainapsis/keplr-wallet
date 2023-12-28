@@ -161,7 +161,7 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
           'margin-top-82',
           'margin-bottom-32',
         ])}>
-        <FormattedMessage id="page.tx-result.pending-title" />
+        <FormattedMessage id="page.tx-result-pending.title" />
       </Text>
 
       {/* To match the height of text with other tx result screens,
@@ -179,7 +179,7 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
             'text-center',
             'color-text-middle',
           ])}>
-          <FormattedMessage id="page.tx-result.pending-text" />
+          <FormattedMessage id="page.tx-result-pending.paragraph" />
         </Text>
       </View>
 
@@ -188,7 +188,9 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
           <TextButton
             containerStyle={style.flatten(['flex-1'])}
             size="large"
-            text={intl.formatMessage({id: 'page.tx-result.home-button'})}
+            text={intl.formatMessage({
+              id: 'page.tx-result-pending.go-to-home-button',
+            })}
             rightIcon={color => (
               <View style={style.flatten(['margin-left-8'])}>
                 <ArrowRightIcon color={color} size={18} />

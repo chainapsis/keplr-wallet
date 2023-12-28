@@ -58,7 +58,7 @@ export const SettingContactsAddScreen: FunctionComponent = observer(() => {
 
   useEffect(() => {
     if (!paramChainId) {
-      throw new Error(`Param "chainId" is required`);
+      throw new Error('Param "chainId" is required');
     }
 
     setChainId(paramChainId);

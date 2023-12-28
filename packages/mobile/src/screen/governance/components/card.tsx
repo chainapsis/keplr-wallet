@@ -10,7 +10,7 @@ import {Stack} from '../../../components/stack';
 import {Column, Columns} from '../../../components/column';
 import {useStore} from '../../../stores';
 import {ProposalStatus, ViewProposal} from '../../../stores/governance/types';
-import {useIntl} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {dateToLocalString} from '../utils';
 import {Chip} from '../../../components/chip';
 import {CheckCircleIcon} from '../../../components/icon';
@@ -24,6 +24,7 @@ export const GovernanceProposalStatusChip: FunctionComponent<{
   status: ProposalStatus;
 }> = ({status}) => {
   const style = useStyle();
+  const intl = useIntl();
   switch (status) {
     case ProposalStatus.VOTING_PERIOD:
       return (
@@ -31,7 +32,7 @@ export const GovernanceProposalStatusChip: FunctionComponent<{
           text={
             <Columns sum={1} gutter={4} alignY="center" columnAlign="center">
               <Text style={style.flatten(['color-text-high', 'text-caption1'])}>
-                Voting period
+                <FormattedMessage id="components.voting-chip.voting-period" />
               </Text>
               <Box
                 alignX="center"
@@ -47,13 +48,33 @@ export const GovernanceProposalStatusChip: FunctionComponent<{
       );
 
     case ProposalStatus.PASSED:
-      return <Chip text="Passed" color="success" />;
+      return (
+        <Chip
+          text={intl.formatMessage({id: 'components.voting-chip.passed'})}
+          color="success"
+        />
+      );
     case ProposalStatus.REJECTED:
-      return <Chip text="Rejected" color="danger" />;
+      return (
+        <Chip
+          text={intl.formatMessage({id: 'components.voting-chip.rejected'})}
+          color="danger"
+        />
+      );
     case ProposalStatus.FAILED:
-      return <Chip text="Failed" color="danger" />;
+      return (
+        <Chip
+          text={intl.formatMessage({id: 'components.voting-chip.failed'})}
+          color="danger"
+        />
+      );
     default:
-      return <Chip text="Unspecified" color="danger" />;
+      return (
+        <Chip
+          text={intl.formatMessage({id: 'components.voting-chip.unspecified'})}
+          color="danger"
+        />
+      );
   }
 };
 
@@ -182,7 +203,7 @@ export const GovernanceCardBody: FunctionComponent<{
                               'color-text-middle',
                               'text-caption1',
                             ])}>
-                            Voted
+                            <FormattedMessage id="components.voting-chip.voted" />
                           </Text>
                           <CheckCircleIcon
                             size={16}
@@ -201,7 +222,6 @@ export const GovernanceCardBody: FunctionComponent<{
             <View style={style.flatten(['margin-bottom-8'])}>
               <Text style={style.flatten(['subtitle3', 'color-text-high'])}>
                 {proposal.title}
-                title
               </Text>
             </View>
             <Columns sum={1}>

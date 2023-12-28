@@ -131,7 +131,9 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
                     items={items}
                     selectedItemKey={chainId}
                     isOpenModal={isOpenChainSelectModal}
-                    placeholder="Search by chain name"
+                    placeholder={intl.formatMessage({
+                      id: 'page.setting.token.manage.select-modal-button-placeholder',
+                    })}
                     onPress={() => {
                       setIsOpenChainSelectModal(true);
                     }}
@@ -203,8 +205,12 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
           setIsOpenChainSelectModal(false);
         }}
         items={items}
-        title="Select Chain"
-        placeholder="Search by chain name"
+        title={intl.formatMessage({
+          id: 'page.setting.token.manage.select-modal.title',
+        })}
+        placeholder={intl.formatMessage({
+          id: 'page.setting.token.manage.select-modal.placeholder',
+        })}
       />
     </React.Fragment>
   );

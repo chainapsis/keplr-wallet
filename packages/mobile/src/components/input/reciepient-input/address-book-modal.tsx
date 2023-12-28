@@ -161,7 +161,7 @@ export const AddressBookModal = registerCardModal(
                 {
                   key: 'accounts',
                   text: intl.formatMessage({
-                    id: 'components.address-book-modal.my-account-tab',
+                    id: 'components.address-book-modal.my-wallets-tab',
                   }),
                 },
               ]}

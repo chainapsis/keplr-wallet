@@ -90,7 +90,7 @@ import {
 } from './screen/tx-result';
 import {SettingGeneralVersionScreen} from './screen/setting/screens/general/version';
 import {CameraScreen} from './screen/camera';
-import {SettingGeneralManageWalletConnectScreen} from './screen/setting/screens/general/wallet-connect';
+import {SettingGeneralManageWalletConnectScreen} from './screen/setting/screens/security/wallet-connect';
 import {registerHeaderOptions} from './components/pageHeader/header-register';
 
 type DefaultRegisterParams = {
@@ -203,11 +203,11 @@ export type RootStackParamList = {
   'Setting.General.ManageNonActiveChains': undefined;
   'Setting.General.ManageChainVisibility': undefined;
   'Setting.General.Version': undefined;
-  'Setting.General.ManageWalletConnect': undefined;
 
   'Setting.SecurityAndPrivacy': undefined;
   'Setting.SecurityAndPrivacy.Intro': undefined;
   'Setting.SecurityAndPrivacy.Permission': undefined;
+  'Setting.SecurityAndPrivacy.ManageWalletConnect': undefined;
   'Setting.SecurityAndPrivacy.ChangePassword': undefined;
   'Setting.SecurityAndPrivacy.BioAuthentication': undefined;
 
@@ -625,16 +625,6 @@ const SettingGeneralNavigation = () => {
         }}
         component={SettingGeneralVersionScreen}
       />
-      <Stack.Screen
-        name="Setting.General.ManageWalletConnect"
-        options={{
-          title: intl.formatMessage({
-            id: 'page.setting.general.manage-WC-title',
-          }),
-          ...defaultHeaderOptions,
-        }}
-        component={SettingGeneralManageWalletConnectScreen}
-      />
     </Stack.Navigator>
   );
 };
@@ -664,6 +654,16 @@ const SettingSecurityAndPrivacyNavigation = () => {
           ...defaultHeaderOptions,
         }}
         component={SettingSecurityPermissionScreen}
+      />
+      <Stack.Screen
+        name="Setting.SecurityAndPrivacy.ManageWalletConnect"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.setting.security.manage-WC-title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={SettingGeneralManageWalletConnectScreen}
       />
       <Stack.Screen
         name="Setting.SecurityAndPrivacy.ChangePassword"
@@ -735,6 +735,7 @@ const SelectWalletNavigation = () => {
 };
 
 const StakeNavigation = () => {
+  const intl = useIntl();
   return (
     <StakeStack.Navigator
       screenOptions={{...TransitionPresets.SlideFromRightIOS}}>
@@ -749,7 +750,7 @@ const StakeNavigation = () => {
       <StakeStack.Screen
         name="Stake.ValidateDetail"
         options={{
-          title: 'Validator Details',
+          title: intl.formatMessage({id: 'page.stake.validator-detail.title'}),
           ...defaultHeaderOptions,
         }}
         component={ValidatorDetailScreen}
@@ -757,7 +758,7 @@ const StakeNavigation = () => {
       <StakeStack.Screen
         name="Stake.ValidateList"
         options={{
-          title: 'All Active Validators',
+          title: intl.formatMessage({id: 'page.stake.validator-list.title'}),
           ...defaultHeaderOptions,
         }}
         component={ValidatorListScreen}
@@ -765,7 +766,7 @@ const StakeNavigation = () => {
       <StakeStack.Screen
         name="Stake.Delegate"
         options={{
-          title: 'Stake',
+          title: intl.formatMessage({id: 'page.stake.delegate.title'}),
           ...defaultHeaderOptions,
         }}
         component={SignDelegateScreen}
@@ -773,7 +774,7 @@ const StakeNavigation = () => {
       <StakeStack.Screen
         name="Stake.Undelegate"
         options={{
-          title: 'Unstake',
+          title: intl.formatMessage({id: 'page.stake.undelegate.title'}),
           ...defaultHeaderOptions,
         }}
         component={SignUndelegateScreen}
@@ -781,7 +782,7 @@ const StakeNavigation = () => {
       <StakeStack.Screen
         name="Stake.Redelegate"
         options={{
-          title: 'Switch Validator',
+          title: intl.formatMessage({id: 'page.stake.redelegate.title'}),
           ...defaultHeaderOptions,
         }}
         component={SignRedelegateScreen}
