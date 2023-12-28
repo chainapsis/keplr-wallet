@@ -63,6 +63,7 @@
     "react-native": "0.72.7",
     "react-native-ble-plx": "^2.0.3",
     "react-native-device-info": "^10.11.0",
+    "react-native-exit-app": "^2.0.0",
     "react-native-fast-image": "^8.6.3",
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.12.1",
