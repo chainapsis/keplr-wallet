@@ -1,5 +1,4 @@
 import {AnimatableNumericValue, DimensionValue, ViewStyle} from 'react-native';
-import {GestureResponderEvent} from 'react-native/Libraries/Types/CoreEventTypes';
 
 export type BoxAlignX = 'left' | 'right' | 'center';
 export type BoxAlignY = 'top' | 'bottom' | 'center';
@@ -41,5 +40,5 @@ export interface BoxProps {
 
   style?: ViewStyle;
 
-  onClick?: (event: GestureResponderEvent) => void;
+  onClick?: () => void;
 }
