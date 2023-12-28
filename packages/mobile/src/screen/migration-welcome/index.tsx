@@ -33,7 +33,7 @@ export const MigrationWelcomeScreen: FunctionComponent = observer(() => {
 
       <Gutter size={30} />
 
-      <Box alignX="center">
+      <Box alignX="center" paddingX={45}>
         <Text style={style.flatten(['mobile-h3', 'color-text-high'])}>
           <FormattedMessage id="page.migration.welcome.title" />
         </Text>
@@ -41,14 +41,8 @@ export const MigrationWelcomeScreen: FunctionComponent = observer(() => {
 
       <Gutter size={20} />
 
-      <Box paddingX={50}>
-        <Text
-          style={style.flatten([
-            'body1',
-            'color-text-low',
-            'padding-10',
-            'text-center',
-          ])}>
+      <Box paddingX={41}>
+        <Text style={style.flatten(['body1', 'color-text-low', 'text-center'])}>
           <FormattedMessage id="page.migration.welcome.sub-title" />
         </Text>
       </Box>
