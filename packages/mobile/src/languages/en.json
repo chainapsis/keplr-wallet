@@ -320,7 +320,7 @@
   "page.migration.welcome.sub-title": "Close the app now and manually reopen it to ensure the changes take effect",
   "page.migration.welcome.shutdown-button": "Close Keplr to apply changes",
   "page.migration.welcome.shutdown-modal.title": "Please reopen the app manually.",
-  "page.migration.welcome.shutdown-modal.paragraph": "Keplr will be closed in {seconds}",
+  "page.migration.welcome.shutdown-modal.paragraph": "Keplr will be closed in {seconds}...",
 
   "page.wallet.title": "Select Wallet",
   "page.wallet.add-wallet-button": "Add Wallet",
@@ -585,6 +585,14 @@
 
   "page.tx-result.home-button": "Go to home",
   "page.tx-result.go-to-explorer": "Go to {name}",
+
+  "page.error-boundary.title": "Error",
+  "page.error-boundary.reset-cache-paragraph": "An error with an unknown reason has occurred. To potentially resolve the issue, we recommend deleting the cache data. However, please note that we cannot guarantee this will fix the problem.",
+  "page.error-boundary.reset-cache-button": "Reset Cache Data",
+  "page.error-boundary.reset-cache-endpoints-paragraph": "If the error persists, you can also try resetting the suggest chains and your custom endpoints.",
+  "page.error-boundary.reset-cache-endpoints-button": "Reset Cache Data, Including\n Suggest Chains & Endpoints",
+  "page.error-boundary.shutdown-modal.title": "Keplr will be closed in {seconds}...",
+  "page.error-boundary.shutdown-modal.paragraph": "Keplr will close after deleting the local cache data. Please manually restart the app after the deletion.",
 
   "new-feature.ibc-swap.title": "✨ Swap is Here!",
   "new-feature.ibc-swap.paragraph": "Swap tokens between different chains with a simple click. Give it a try!",
