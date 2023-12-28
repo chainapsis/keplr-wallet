@@ -2,7 +2,7 @@ import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import {GovernanceNavigation} from '../../../navigation';
-import {FlatList, RefreshControl, StyleSheet, Text} from 'react-native';
+import {RefreshControl, StyleSheet, Text} from 'react-native';
 import {GovernanceCardBody} from '../components/card';
 import {useStore} from '../../../stores';
 import {ProposalStatus} from '../../../stores/governance/types';
@@ -13,6 +13,7 @@ import {EmptyView} from '../../../components/empty-view';
 import {FormattedMessage} from 'react-intl';
 import {useStyle} from '../../../styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {FlatList} from '../../../components/flat-list';
 
 const DEFAULT_PARAMS = {
   'pagination.offset': 0,

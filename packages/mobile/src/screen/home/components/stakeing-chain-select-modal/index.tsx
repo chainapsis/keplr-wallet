@@ -3,7 +3,7 @@ import {observer} from 'mobx-react-lite';
 import {Keyboard, Platform, Text} from 'react-native';
 
 import {useStyle} from '../../../../styles';
-import {ScrollView, TextInput} from 'react-native-gesture-handler';
+import {TextInput} from 'react-native-gesture-handler';
 import {Gutter} from '../../../../components/gutter';
 import {SearchTextInput} from '../../../../components/input/search-text-input';
 import {Box} from '../../../../components/box';
@@ -21,6 +21,7 @@ import {registerCardModal} from '../../../../components/modal/card';
 import {BaseModalHeader} from '../../../../components/modal';
 import {EmptyView, EmptyViewText} from '../../../../components/empty-view';
 import {useIntl} from 'react-intl';
+import {ScrollView} from '../../../../components/scroll-view/common-scroll-view';
 
 export interface SelectStakingChainModalItem {
   key: string;
@@ -80,7 +81,7 @@ export const SelectStakingChainModal = registerCardModal(
 
           <Gutter size={12} />
         </Box>
-        <ScrollView style={{height: 250}}>
+        <ScrollView isGestureScrollView={true} style={{height: 250}}>
           <Box
             onClick={() => {
               const test = filtered[0];

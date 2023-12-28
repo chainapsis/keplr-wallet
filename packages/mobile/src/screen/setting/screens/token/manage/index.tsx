@@ -19,7 +19,7 @@ import {Bech32Address} from '@keplr-wallet/cosmos';
 import {useConfirm} from '../../../../../hooks/confirm';
 
 import {FormattedMessage, useIntl} from 'react-intl';
-import {FlatList, Text} from 'react-native';
+import {Text} from 'react-native';
 import {Gutter} from '../../../../../components/gutter';
 import {IconButton} from '../../../../../components/icon-button';
 
@@ -35,6 +35,7 @@ import {
   MenuModal,
   ModalMenuItem,
 } from '../../../../../components/modal/menu-modal';
+import {FlatList} from '../../../../../components/flat-list';
 
 export const SettingTokenListScreen: FunctionComponent = observer(() => {
   const {chainStore, accountStore, tokensStore} = useStore();

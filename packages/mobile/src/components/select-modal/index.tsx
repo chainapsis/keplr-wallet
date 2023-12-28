@@ -10,9 +10,10 @@ import {Column, Columns} from '../column';
 import {ChainImageFallback} from '../image';
 import {TextButton} from '../text-button';
 import {ArrowDownFillIcon} from '../icon/arrow-donw-fill';
-import {ScrollView, TextInput} from 'react-native-gesture-handler';
+import {TextInput} from 'react-native-gesture-handler';
 import {SearchTextInput} from '../input/search-text-input';
 import {registerCardModal} from '../modal/card';
+import {ScrollView} from '../scroll-view/common-scroll-view';
 
 export interface SelectModalItem {
   key: string;
@@ -115,7 +116,7 @@ export const SelectModal = registerCardModal(
 
           <Gutter size={12} />
         </Box>
-        <ScrollView style={{height: 250}}>
+        <ScrollView isGestureScrollView={true} style={{height: 250}}>
           {filtered.map(item => {
             return (
               <RectButton

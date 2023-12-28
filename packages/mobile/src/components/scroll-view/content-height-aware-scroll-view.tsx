@@ -13,8 +13,14 @@ export const ContentHeightAwareScrollView = forwardRef<
   ScrollView,
   ScrollViewProps
 >((props, ref) => {
-  const {children, onLayout, onContentSizeChange, scrollEnabled, ...rest} =
-    props;
+  const {
+    children,
+    onLayout,
+    onContentSizeChange,
+    scrollEnabled,
+    indicatorStyle,
+    ...rest
+  } = props;
 
   const [layoutSize, setLayoutSize] = React.useState<{
     width: number;
@@ -29,6 +35,7 @@ export const ContentHeightAwareScrollView = forwardRef<
     <ScrollView
       {...rest}
       ref={ref}
+      indicatorStyle={indicatorStyle || 'white'}
       scrollEnabled={(() => {
         // prop을 통해서 명시되어 있다면 그것을 반환한다.
         if (scrollEnabled != null) {

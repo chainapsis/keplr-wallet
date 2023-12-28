@@ -5,11 +5,12 @@ import {useStyle} from '../../../../../styles';
 import {useStore} from '../../../../../stores';
 import {Gutter} from '../../../../../components/gutter';
 import {EmptyView} from '../../../../../components/empty-view';
-import {FlatList, Text} from 'react-native';
+import {Text} from 'react-native';
 import {ChainImageFallback} from '../../../../../components/image';
 import {CloseIcon} from '../../../../../components/icon';
 import {XAxis} from '../../../../../components/axis';
 import {FormattedMessage} from 'react-intl';
+import {FlatList} from '../../../../../components/flat-list';
 
 interface WalletConnectSession {
   topic: string;

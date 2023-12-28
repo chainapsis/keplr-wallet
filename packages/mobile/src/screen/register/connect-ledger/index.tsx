@@ -12,7 +12,7 @@ import {useStyle} from '../../../styles';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
 import {Box} from '../../../components/box';
-import {ScrollView, Text} from 'react-native';
+import {Text} from 'react-native';
 import {XAxis} from '../../../components/axis';
 import {Gutter} from '../../../components/gutter';
 import {
@@ -26,6 +26,7 @@ import {LedgerGrantModal} from './modal';
 import {useStore} from '../../../stores';
 import TransportBLE from '@ledgerhq/react-native-hw-transport-ble';
 import {LedgerUtils} from '../../../utils';
+import {ScrollView} from '../../../components/scroll-view/common-scroll-view';
 
 export type Step = 'unknown' | 'connected' | 'app';
 

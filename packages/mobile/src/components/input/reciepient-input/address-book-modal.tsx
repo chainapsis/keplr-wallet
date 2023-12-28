@@ -14,7 +14,7 @@ import {Text} from 'react-native';
 import {AddressItem} from '../../address-item';
 import {EmptyView} from '../../empty-view';
 import {registerCardModal} from '../../modal/card';
-import {ScrollView} from 'react-native-gesture-handler';
+import {ScrollView} from '../../scroll-view/common-scroll-view';
 
 type Type = 'recent' | 'contacts' | 'accounts';
 
@@ -172,7 +172,7 @@ export const AddressBookModal = registerCardModal(
             />
           </YAxis>
 
-          <ScrollView style={{height: 450}}>
+          <ScrollView isGestureScrollView={true} style={{height: 450}}>
             {datas.length > 0 ? (
               <Stack gutter={12}>
                 {(() => {

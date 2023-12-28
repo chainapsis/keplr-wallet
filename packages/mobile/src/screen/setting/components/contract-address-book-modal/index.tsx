@@ -11,9 +11,10 @@ import {Box} from '../../../../components/box';
 import {EmptyView} from '../../../../components/empty-view';
 import {ContractAddressItem} from '../contract-item';
 import {TokenContractListRepoURL} from '../../../../config.ui';
-import {ScrollView, TextInput} from 'react-native-gesture-handler';
+import {TextInput} from 'react-native-gesture-handler';
 import {registerCardModal} from '../../../../components/modal/card';
 import {BaseModalHeader} from '../../../../components/modal';
+import {ScrollView} from '../../../../components/scroll-view/common-scroll-view';
 
 export const ContractAddressBookModal = registerCardModal(
   observer<{
@@ -66,7 +67,7 @@ export const ContractAddressBookModal = registerCardModal(
 
           <Gutter size={12} />
         </Box>
-        <ScrollView style={{height: 200}}>
+        <ScrollView isGestureScrollView={true} style={{height: 200}}>
           {filtered.map((item, index) => {
             return (
               <ContractAddressItem

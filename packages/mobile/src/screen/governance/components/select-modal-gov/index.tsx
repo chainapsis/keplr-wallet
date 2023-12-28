@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {Text} from 'react-native';
-import {ScrollView, TextInput} from 'react-native-gesture-handler';
+import {TextInput} from 'react-native-gesture-handler';
 import {useStyle} from '../../../../styles';
 import {SearchTextInput} from '../../../../components/input/search-text-input';
 import {Gutter} from '../../../../components/gutter';
@@ -11,6 +11,7 @@ import {Column, Columns} from '../../../../components/column';
 import {ChainImageFallback} from '../../../../components/image';
 import {registerCardModal} from '../../../../components/modal/card';
 import {EmptyView, EmptyViewText} from '../../../../components/empty-view';
+import {ScrollView} from '../../../../components/scroll-view/common-scroll-view';
 
 export interface SelectModalItem {
   key: string;
@@ -61,7 +62,7 @@ export const GovSelectChainModal = registerCardModal(
           <Gutter size={12} />
         </Box>
         {
-          <ScrollView style={{height: 250}}>
+          <ScrollView isGestureScrollView={true} style={{height: 250}}>
             {filtered.map(item => {
               return (
                 <RectButton
