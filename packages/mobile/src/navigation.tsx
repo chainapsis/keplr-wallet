@@ -92,6 +92,7 @@ import {SettingGeneralVersionScreen} from './screen/setting/screens/general/vers
 import {CameraScreen} from './screen/camera';
 import {SettingGeneralManageWalletConnectScreen} from './screen/setting/screens/general/wallet-connect';
 import {registerHeaderOptions} from './components/pageHeader/header-register';
+import {MigrationWelcomeScreen} from './screen/migration-welcome';
 
 type DefaultRegisterParams = {
   hideBackButton?: boolean;
@@ -217,6 +218,8 @@ export type RootStackParamList = {
     | undefined;
 
   Unlock: undefined;
+  'Migration.Welcome': undefined;
+
   SelectWallet: undefined;
   'SelectWallet.Intro': undefined;
   'SelectWallet.Delete': {id: string};
@@ -852,6 +855,11 @@ export const AppNavigation: FunctionComponent = observer(() => {
             options={{headerShown: false}}
             name="Unlock"
             component={UnlockScreen}
+          />
+          <Stack.Screen
+            options={{headerShown: false}}
+            name="Migration.Welcome"
+            component={MigrationWelcomeScreen}
           />
           <Stack.Screen
             name="Register"

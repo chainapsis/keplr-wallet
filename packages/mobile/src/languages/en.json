@@ -316,6 +316,12 @@
   "page.unlock.bottom-section.guide-title": "Don't close your app during update",
   "page.unlock.bottom-section.guide-paragraph": "Migration for users with many accounts can take up to several minutes.",
 
+  "page.migration.welcome.title": "Migration Completed!",
+  "page.migration.welcome.sub-title": "Close the app now and manually reopen it to ensure the changes take effect",
+  "page.migration.welcome.shutdown-button": "Close Keplr to apply changes",
+  "page.migration.welcome.shutdown-modal.title": "Please reopen the app manually.",
+  "page.migration.welcome.shutdown-modal.paragraph": "Keplr will be closed in {seconds}",
+
   "page.wallet.title": "Select Wallet",
   "page.wallet.add-wallet-button": "Add Wallet",
   "page.wallet.recovery-phrase-title": "Recovery Phrase",

@@ -18,6 +18,8 @@ type CardBaseModalOption = {
   isDetached?: boolean;
 };
 
+//TODO - setIsOpen에 빈 함수가 올경우 인터렉션을 막을 필요가 있음
+//현재 setIsOpen함수가 빈 함수로 올 경우 모달을 내릴경우 뷰에서만 안보이고 실제론 존재하고 있음
 export const registerCardModal: <P>(
   element: React.ElementType<P>,
   options?: CardBaseModalOption,
