@@ -103,7 +103,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
     if (isNotReady) {
       return;
     }
-    priceStore.waitFreshResponse();
+    priceStore.fetch();
     if (tabStatus === 'available') {
       for (const chainInfo of chainStore.chainInfosInUI) {
         const account = accountStore.getAccount(chainInfo.chainId);
@@ -139,8 +139,8 @@ export const HomeScreen: FunctionComponent = observer(() => {
         queries.cosmos.queryDelegations.getQueryBech32Address(
           account.bech32Address,
         );
-      queryUnbonding.waitFreshResponse();
-      queryDelegation.waitFreshResponse();
+      queryUnbonding.fetch();
+      queryDelegation.fetch();
     }
   };
 
