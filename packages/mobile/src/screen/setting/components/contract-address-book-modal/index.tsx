@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStore} from '../../../../stores';
-import {useFocusOnMount} from '../../../../hooks/use-focus-on-mount';
+import {useFocusOnModal} from '../../../../hooks/use-focus';
 import {Linking, Text} from 'react-native';
 import {SearchTextInput} from '../../../../components/input/search-text-input';
 import {Gutter} from '../../../../components/gutter';
@@ -11,9 +11,10 @@ import {Box} from '../../../../components/box';
 import {EmptyView} from '../../../../components/empty-view';
 import {ContractAddressItem} from '../contract-item';
 import {TokenContractListRepoURL} from '../../../../config.ui';
-import {ScrollView, TextInput} from 'react-native-gesture-handler';
+import {TextInput} from 'react-native-gesture-handler';
 import {registerCardModal} from '../../../../components/modal/card';
 import {BaseModalHeader} from '../../../../components/modal';
+import {ScrollView} from '../../../../components/scroll-view/common-scroll-view';
 
 export const ContractAddressBookModal = registerCardModal(
   observer<{
@@ -27,7 +28,7 @@ export const ContractAddressBookModal = registerCardModal(
         .tokenContracts;
 
     const [search, setSearch] = useState('');
-    const searchRef = useFocusOnMount<TextInput>();
+    const searchRef = useFocusOnModal<TextInput>();
 
     const intl = useIntl();
 
@@ -66,7 +67,7 @@ export const ContractAddressBookModal = registerCardModal(
 
           <Gutter size={12} />
         </Box>
-        <ScrollView style={{height: 200}}>
+        <ScrollView isGestureScrollView={true} style={{height: 200}}>
           {filtered.map((item, index) => {
             return (
               <ContractAddressItem

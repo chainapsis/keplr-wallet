@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useMemo, useState} from 'react';
+import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {useStyle} from '../../styles';
 import {PageWithScrollView} from '../../components/page';
@@ -28,6 +28,7 @@ import {ChainIdHelper} from '@keplr-wallet/cosmos';
 import {EmptyView, EmptyViewText} from '../../components/empty-view';
 import {Box} from '../../components/box';
 import {FormattedMessage, useIntl} from 'react-intl';
+import {Skeleton} from '../../components/skeleton';
 
 export const GovernanceScreen: FunctionComponent = observer(() => {
   const style = useStyle();
@@ -35,6 +36,7 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
   const [isOpenSelectChainModal, setIsOpenSelectChainModal] = useState(false);
   const navigation = useNavigation<StackNavProp>();
   const intl = useIntl();
+  const isFetching = useRef(1);
 
   const delegations: ViewToken[] = useMemo(
     () =>
@@ -67,7 +69,7 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
           ChainIdHelper.parse(viewToken.chainInfo.chainId).identifier,
         ),
     )
-    .map(delegation => {
+    .map((delegation, index) => {
       const isGovV1Supported =
         GovernanceV1ChainIdentifiers.includes(
           ChainIdHelper.parse(delegation.chainInfo.chainId).identifier,
@@ -86,40 +88,50 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
           )
         );
 
+      const queryGovernance = isGovV1Supported
+        ? queriesStore
+            .get(delegation.chainInfo.chainId)
+            .governanceV1.queryGovernance.getQueryGovernance({
+              status: 'PROPOSAL_STATUS_VOTING_PERIOD',
+              'pagination.limit': 3000,
+            })
+        : queriesStore
+            .get(delegation.chainInfo.chainId)
+            .governance.queryGovernance.getQueryGovernance({
+              status: 'PROPOSAL_STATUS_VOTING_PERIOD',
+            });
+
+      //NOTE delegations 모두 fetch가 끝났을때 스켈레톤을 지우기 위해서 해당 로직을 통해서 isFetch을 설정함
+      isFetching.current += Number(queryGovernance.isFetching);
+      if (index + 1 === delegations.length) {
+        isFetching.current > 1
+          ? (isFetching.current = 1)
+          : (isFetching.current = 0);
+      }
+
       return isGovV1Supported
         ? {
             isGovV1Supported,
-            proposalLen: queriesStore
-              .get(delegation.chainInfo.chainId)
-              .governanceV1.queryGovernance.getQueryGovernance({
-                status: 'PROPOSAL_STATUS_VOTING_PERIOD',
-                'pagination.limit': 3000,
-              })
-              .proposals.filter(
-                proposal =>
-                  !scamProposalStore.isScamProposal(
-                    delegation.chainInfo.chainId,
-                    proposal.id,
-                  ),
-              ).length,
+            proposalLen: queryGovernance.proposals.filter(
+              proposal =>
+                !scamProposalStore.isScamProposal(
+                  delegation.chainInfo.chainId,
+                  proposal.id,
+                ),
+            ).length,
             chainId: delegation.chainInfo.chainId,
             imageUrl: delegation.chainInfo.chainSymbolImageUrl,
             chainName: delegation.chainInfo.chainName,
           }
         : {
             isGovV1Supported,
-            proposalLen: queriesStore
-              .get(delegation.chainInfo.chainId)
-              .governance.queryGovernance.getQueryGovernance({
-                status: 'PROPOSAL_STATUS_VOTING_PERIOD',
-              })
-              .proposals.filter(
-                proposal =>
-                  !scamProposalStore.isScamProposal(
-                    delegation.chainInfo.chainId,
-                    proposal.id,
-                  ),
-              ).length,
+            proposalLen: queryGovernance.proposals.filter(
+              proposal =>
+                !scamProposalStore.isScamProposal(
+                  delegation.chainInfo.chainId,
+                  proposal.id,
+                ),
+            ).length,
             chainId: delegation.chainInfo.chainId,
             imageUrl: delegation.chainInfo.chainSymbolImageUrl,
             chainName: delegation.chainInfo.chainName,
@@ -145,29 +157,34 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
         }
       />
       <Gutter size={12} />
-      {viewItems.map(item => {
-        return (
-          <React.Fragment key={item.chainId}>
-            <ChainItem
-              chainName={item.chainName}
-              imageUrl={item.imageUrl}
-              proposalLen={item.proposalLen}
-              key={item.chainId}
-              onClick={() => {
-                navigation.navigate('Governance', {
-                  screen: 'Governance.list',
-                  params: {
-                    chainId: item.chainId,
-                    isGovV1Supported: item.isGovV1Supported,
-                  },
-                });
-              }}
-            />
-            <Gutter size={12} />
-          </React.Fragment>
-        );
-      })}
-      {viewItems.length === 0 ? (
+
+      {isFetching.current ? (
+        <React.Fragment>
+          <ChainItem
+            chainName={''}
+            imageUrl={''}
+            proposalLen={0}
+            isNotReady={!!isFetching.current}
+            onClick={() => {}}
+          />
+          <Gutter size={12} />
+          <ChainItem
+            chainName={''}
+            imageUrl={''}
+            proposalLen={0}
+            isNotReady={!!isFetching.current}
+            onClick={() => {}}
+          />
+          <Gutter size={12} />
+          <ChainItem
+            chainName={''}
+            imageUrl={''}
+            proposalLen={0}
+            isNotReady={!!isFetching.current}
+            onClick={() => {}}
+          />
+        </React.Fragment>
+      ) : viewItems.length === 0 ? (
         <React.Fragment>
           <Gutter size={100} />
           <EmptyView>
@@ -185,7 +202,31 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
             </Box>
           </EmptyView>
         </React.Fragment>
-      ) : null}
+      ) : (
+        viewItems.map(item => {
+          return (
+            <React.Fragment key={item.chainId}>
+              <ChainItem
+                chainName={item.chainName}
+                imageUrl={item.imageUrl}
+                proposalLen={item.proposalLen}
+                key={item.chainId}
+                isNotReady={!!isFetching.current}
+                onClick={() => {
+                  navigation.navigate('Governance', {
+                    screen: 'Governance.list',
+                    params: {
+                      chainId: item.chainId,
+                      isGovV1Supported: item.isGovV1Supported,
+                    },
+                  });
+                }}
+              />
+              <Gutter size={12} />
+            </React.Fragment>
+          );
+        })
+      )}
       <GovSelectChainModal
         isOpen={isOpenSelectChainModal}
         setIsOpen={setIsOpenSelectChainModal}
@@ -215,9 +256,10 @@ interface ChainItemProps {
   imageUrl?: string;
   chainName: string;
   proposalLen: number;
+  isNotReady?: boolean;
 }
 export const ChainItem: FunctionComponent<ChainItemProps> = observer(
-  ({chainName, imageUrl, proposalLen, onClick}) => {
+  ({chainName, imageUrl, proposalLen, isNotReady, onClick}) => {
     const style = useStyle();
 
     const containerStyle: ViewStyle = {
@@ -238,42 +280,49 @@ export const ChainItem: FunctionComponent<ChainItemProps> = observer(
           if (onClick) {
             onClick();
           }
-        }}>
+        }}
+        disabled={isNotReady}>
         <Columns sum={1} gutter={8} alignY="center">
-          <ChainImageFallback
-            style={{
-              width: 32,
-              height: 32,
-            }}
-            src={imageUrl}
-            alt={chainName}
-          />
+          <Skeleton layer={1} type="circle" isNotReady={isNotReady}>
+            <ChainImageFallback
+              style={{
+                width: 32,
+                height: 32,
+              }}
+              src={imageUrl}
+              alt={chainName}
+            />
+          </Skeleton>
 
           <Gutter size={12} />
 
           <XAxis alignY="center">
-            <Text
-              style={style.flatten([
-                'flex-row',
-                'flex-wrap',
-                'subtitle3',
-                'color-text-high',
-              ])}>
-              {chainName}
-            </Text>
+            <Skeleton layer={1} type="rect" isNotReady={isNotReady}>
+              <Text
+                style={style.flatten([
+                  'flex-row',
+                  'flex-wrap',
+                  'subtitle3',
+                  'color-text-high',
+                ])}>
+                {chainName}
+              </Text>
+            </Skeleton>
           </XAxis>
 
           <Column weight={1} />
 
           <Columns sum={1} gutter={2} alignY="center">
-            <Stack gutter={2} alignX="right">
-              <Text style={style.flatten(['body2', 'color-text-low'])}>
-                <FormattedMessage
-                  id="page.governance.chain-item-proposal-length"
-                  values={{len: proposalLen}}
-                />
-              </Text>
-            </Stack>
+            <Skeleton layer={1} type="rect" isNotReady={isNotReady}>
+              <Stack gutter={2} alignX="right">
+                <Text style={style.flatten(['body2', 'color-text-low'])}>
+                  <FormattedMessage
+                    id="page.governance.chain-item-proposal-length"
+                    values={{len: proposalLen}}
+                  />
+                </Text>
+              </Stack>
+            </Skeleton>
 
             <ArrowRightIcon
               size={24}

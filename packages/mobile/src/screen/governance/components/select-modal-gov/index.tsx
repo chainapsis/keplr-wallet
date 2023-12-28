@@ -1,7 +1,6 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {Text} from 'react-native';
-import {ScrollView, TextInput} from 'react-native-gesture-handler';
 import {useStyle} from '../../../../styles';
 import {SearchTextInput} from '../../../../components/input/search-text-input';
 import {Gutter} from '../../../../components/gutter';
@@ -12,6 +11,8 @@ import {ChainImageFallback} from '../../../../components/image';
 import {registerCardModal} from '../../../../components/modal/card';
 import {EmptyView, EmptyViewText} from '../../../../components/empty-view';
 import {useIntl} from 'react-intl';
+import {ScrollView} from '../../../../components/scroll-view/common-scroll-view';
+import {useFocusOnModal} from '../../../../hooks/use-focus';
 
 export interface SelectModalItem {
   key: string;
@@ -28,11 +29,7 @@ export const GovSelectChainModal = registerCardModal(
     const style = useStyle();
     const [search, setSearch] = useState('');
     const intl = useIntl();
-    const searchRef = useRef<TextInput>(null);
-
-    useEffect(() => {
-      searchRef.current?.focus();
-    }, [searchRef]);
+    const searchRef = useFocusOnModal();
 
     const filtered = search
       ? items.filter(item => {
@@ -63,7 +60,7 @@ export const GovSelectChainModal = registerCardModal(
           <Gutter size={12} />
         </Box>
         {
-          <ScrollView style={{height: 250}}>
+          <ScrollView isGestureScrollView={true} style={{height: 250}}>
             {filtered.map(item => {
               return (
                 <RectButton

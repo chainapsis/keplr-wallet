@@ -24,6 +24,7 @@ import {FormattedMessage, useIntl} from 'react-intl';
 import {formatAprString} from '../../home/utils';
 import {InformationOutlinedIcon} from '../../../components/icon/information-outlined';
 import {InformationModal} from '../../../components/modal/infoModal';
+import {Skeleton} from '../../../components/skeleton';
 
 export const StakingDashboardScreen: FunctionComponent = observer(() => {
   const {accountStore, queriesStore, priceStore, chainStore} = useStore();
@@ -134,6 +135,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
 
   const delegations: ViewValidator[] = (() => {
     const res: ViewValidator[] = [];
+
     for (let delegation of queryDelegations.delegations) {
       const validator = validatorsMap.get(
         delegation.delegation.validator_address,
@@ -155,6 +157,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
           : undefined,
       });
     }
+
     return res;
   })();
 
@@ -175,44 +178,62 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
     },
   ];
 
+  const isNotReady =
+    queryDelegations.isFetching ||
+    queryUnbondings.isFetching ||
+    bondedValidators.isFetching ||
+    unbondedValidators.isFetching ||
+    unbondingValidators.isFetching;
+
   return (
     <PageWithScrollView
       backgroundMode="default"
       style={style.flatten(['padding-x-12'])}>
       <Box alignX="center" alignY="center" marginTop={21} marginBottom={35}>
-        <Box
-          borderRadius={16}
-          backgroundColor={style.get('color-gray-600').color}
-          paddingX={12}
-          paddingY={6}>
-          <Text style={style.flatten(['body3', 'color-text-middle'])}>
-            {`APR ${formatAprString(
-              queriesStore.get(chainId).apr.queryApr.apr.apr,
-              2,
-            )}%`}
-          </Text>
-        </Box>
+        <Skeleton isNotReady={isNotReady} type="circle">
+          <Box
+            borderRadius={16}
+            backgroundColor={style.get('color-gray-600').color}
+            paddingX={12}
+            paddingY={6}>
+            <Text style={style.flatten(['body3', 'color-text-middle'])}>
+              {`APR ${formatAprString(
+                queriesStore.get(chainId).apr.queryApr.apr.apr,
+                2,
+              )}%`}
+            </Text>
+          </Box>
+        </Skeleton>
+
         <Gutter size={21} />
         <Box
           onClick={() => {
+            if (isNotReady) {
+              return;
+            }
+
             setIsInfoModalOpen(true);
           }}>
-          <Columns sum={1} gutter={4} alignY="center">
-            <Text style={style.flatten(['subtitle3', 'color-text-low'])}>
-              <FormattedMessage id="page.stake.dashboard.total-staked-info-modal.title" />
-            </Text>
+          <Skeleton isNotReady={isNotReady} type="rect">
+            <Columns sum={1} gutter={4} alignY="center">
+              <Text style={style.flatten(['subtitle3', 'color-text-low'])}>
+                <FormattedMessage id="page.stake.dashboard.total-staked-info-modal.title" />
+              </Text>
 
-            <InformationOutlinedIcon
-              size={20}
-              color={style.get('color-gray-400').color}
-            />
-          </Columns>
+              <InformationOutlinedIcon
+                size={20}
+                color={style.get('color-gray-400').color}
+              />
+            </Columns>
+          </Skeleton>
         </Box>
 
         <Gutter size={6} />
-        <Text style={style.flatten(['h1', 'color-text-high'])}>
-          {totalStaked?.maxDecimals(6).trim(true).shrink(true).toString()}
-        </Text>
+        <Skeleton isNotReady={isNotReady} type="rect">
+          <Text style={style.flatten(['h1', 'color-text-high'])}>
+            {totalStaked?.maxDecimals(6).trim(true).shrink(true).toString()}
+          </Text>
+        </Skeleton>
       </Box>
 
       <Box
@@ -228,83 +249,111 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
                 'width-36',
                 'height-36',
               ])}>
-              <Box alignX="center" alignY="center" width={36} height={36}>
-                <StakingIcon size={18} color={style.get('color-white').color} />
-              </Box>
+              <Skeleton layer={1} isNotReady={isNotReady} type="circle">
+                <Box alignX="center" alignY="center" width={36} height={36}>
+                  <StakingIcon
+                    size={18}
+                    color={style.get('color-white').color}
+                  />
+                </Box>
+              </Skeleton>
             </LinearGradient>
 
             <YAxis>
-              <Text style={style.flatten(['subtitle4', 'color-text-low'])}>
-                <FormattedMessage id="page.stake.dashboard.staking-button.label" />
-              </Text>
+              <Skeleton type="rect" isNotReady={isNotReady} layer={1}>
+                <Text style={style.flatten(['subtitle4', 'color-text-low'])}>
+                  <FormattedMessage id="page.stake.dashboard.staking-button.label" />
+                </Text>
+              </Skeleton>
               <Gutter size={4} />
-              <Text
-                numberOfLines={1}
-                style={style.flatten(['subtitle2', 'color-text-high'])}>
-                {stakbleToken
-                  ?.maxDecimals(6)
-                  .inequalitySymbol(true)
-                  .shrink(true)
-                  .toString()}
-              </Text>
+              <Skeleton layer={1} type="rect" isNotReady={isNotReady}>
+                <Text
+                  numberOfLines={1}
+                  style={style.flatten(['subtitle2', 'color-text-high'])}>
+                  {stakbleToken
+                    ?.maxDecimals(6)
+                    .inequalitySymbol(true)
+                    .shrink(true)
+                    .toString()}
+                </Text>
+              </Skeleton>
             </YAxis>
           </Columns>
           <Column weight={1} />
-          <Button
-            style={style.flatten(['padding-x-16', 'padding-y-8'])}
-            text={intl.formatMessage({
-              id: 'page.stake.dashboard.staking-button',
-            })}
-            size="small"
-            onPress={() => {
-              navigation.navigate('Stake', {
-                screen: 'Stake.ValidateList',
-                params: {chainId},
-              });
-            }}
-          />
+          <Skeleton layer={1} isNotReady={isNotReady} type="button">
+            <Button
+              style={style.flatten(['padding-x-16', 'padding-y-8'])}
+              text={intl.formatMessage({
+                id: 'page.stake.dashboard.staking-button',
+              })}
+              size="medium"
+              onPress={() => {
+                navigation.navigate('Stake', {
+                  screen: 'Stake.ValidateList',
+                  params: {chainId},
+                });
+              }}
+            />
+          </Skeleton>
         </Columns>
       </Box>
+      {isNotReady ? (
+        <Box>
+          <Gutter size={12} />
+          <ValidatorItem
+            chainId={chainId}
+            viewValidator={{
+              name: '',
+              validatorAddress: '',
+              coin: stakbleToken,
+              subString: 'placehold',
+            }}
+            afterSelect={() => {}}
+            isNotReady={isNotReady}
+          />
+        </Box>
+      ) : (
+        ValidatorViewData.map(({title, validators, lenAlwaysShown}) => {
+          if (validators.length === 0) {
+            return null;
+          }
+          return (
+            <React.Fragment key={title}>
+              <Gutter size={12} />
+              <CollapsibleList
+                title={<TokenTitleView title={title} />}
+                hideLength={true}
+                itemKind="validators"
+                lenAlwaysShown={lenAlwaysShown}
+                items={validators.map(validator => {
+                  return (
+                    <ValidatorItem
+                      chainId={chainId}
+                      viewValidator={{
+                        coin: validator.coin,
+                        name: validator.name,
+                        validatorAddress: validator.validatorAddress,
+                        subString: validator.subString,
+                      }}
+                      key={validator.validatorAddress + validator.subString}
+                      afterSelect={() => {
+                        navigation.navigate('Stake', {
+                          screen: 'Stake.ValidateDetail',
+                          params: {
+                            chainId,
+                            validatorAddress: validator.validatorAddress,
+                          },
+                        });
+                      }}
+                    />
+                  );
+                })}
+              />
+            </React.Fragment>
+          );
+        })
+      )}
 
-      {ValidatorViewData.map(({title, validators, lenAlwaysShown}) => {
-        if (validators.length === 0) {
-          return null;
-        }
-        return (
-          <React.Fragment key={title}>
-            <Gutter size={12} />
-            <CollapsibleList
-              title={<TokenTitleView title={title} />}
-              hideLength={true}
-              itemKind="validators"
-              lenAlwaysShown={lenAlwaysShown}
-              items={validators.map(validator => {
-                return (
-                  <ValidatorItem
-                    chainId={chainId}
-                    viewValidator={{
-                      coin: validator.coin,
-                      name: validator.name,
-                      validatorAddress: validator.validatorAddress,
-                      subString: validator.subString,
-                    }}
-                    key={validator.validatorAddress + validator.subString}
-                    afterSelect={() => {
-                      navigation.navigate('Stake', {
-                        screen: 'Stake.ValidateDetail',
-                        params: {
-                          chainId,
-                          validatorAddress: validator.validatorAddress,
-                        },
-                      });
-                    }}
-                  />
-                );
-              })}
-            />
-          </React.Fragment>
-        );
-      })}
       <InformationModal
         isOpen={isInfoModalOpen}
         setIsOpen={setIsInfoModalOpen}

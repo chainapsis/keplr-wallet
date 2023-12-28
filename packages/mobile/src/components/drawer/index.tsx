@@ -9,6 +9,10 @@ import {Box} from '../box';
 import {Stack} from '../stack';
 import {useStore} from '../../stores';
 import {StackNavProp} from '../../navigation';
+import {FormattedMessage} from 'react-intl';
+import {LinkIcon} from '../icon';
+import {Columns} from '../column';
+import {COMMUNITY_CHAIN_URL} from '../../config';
 
 export const DrawerContent: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
@@ -50,6 +54,7 @@ export const DrawerContent: FunctionComponent = observer(() => {
 
   return (
     <DrawerContentScrollView
+      indicatorStyle="white"
       contentContainerStyle={[
         style.flatten([
           'height-full',
@@ -97,10 +102,19 @@ export const DrawerContent: FunctionComponent = observer(() => {
           backgroundColor={style.get('color-gray-400').color}
         />
         <Stack gutter={36}>
-          <Pressable>
-            <Text style={style.flatten(['h3', 'color-white'])}>
-              Add More Chains
-            </Text>
+          <Pressable
+            onPress={() => {
+              navigation.navigate('Web', {
+                url: COMMUNITY_CHAIN_URL,
+                isExternal: true,
+              });
+            }}>
+            <Columns sum={1} gutter={4} alignY="center">
+              <Text style={style.flatten(['h3', 'color-text-low'])}>
+                <FormattedMessage id="page.main.components.menu-bar.go-to-keplr-chain-registry" />
+              </Text>
+              <LinkIcon size={20} color={style.get('color-text-low').color} />
+            </Columns>
           </Pressable>
         </Stack>
       </Stack>

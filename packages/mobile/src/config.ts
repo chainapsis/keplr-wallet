@@ -1,11 +1,6 @@
 import {Bech32Address} from '@keplr-wallet/cosmos';
 import {ChainInfo} from '@keplr-wallet/types';
 
-export const CoinGeckoAPIEndPoint = 'https://api.coingecko.com/api/v3';
-
-export const EthereumEndpoint =
-  'https://mainnet.infura.io/v3/eeb00e81cdb2410098d5a270eff9b341';
-
 export interface AppChainInfo extends ChainInfo {
   readonly chainSymbolImageUrl?: string;
   readonly hideInUI?: boolean;
@@ -2438,6 +2433,8 @@ export const APR_API_URL =
 
 export const SCAMPORPOSAL_API_URL =
   'https://phishing-block-list-chainapsis.vercel.app';
+
+export const COMMUNITY_CHAIN_URL = 'https://chains.keplr.app';
 
 export const GovernanceV1ChainIdentifiers = [
   'kyve',

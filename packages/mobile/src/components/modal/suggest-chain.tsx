@@ -14,11 +14,11 @@ import Svg, {Circle, Path} from 'react-native-svg';
 import {Chip} from '../chip';
 import {ChainInfo} from '@keplr-wallet/types';
 import {InteractionWaitingData} from '@keplr-wallet/background';
-import {ScrollView} from 'react-native-gesture-handler';
 import {GuideBox} from '../guide-box';
 import {Skeleton} from '../skeleton';
 import {RectButton} from '../rect-button';
 import * as WebBrowser from 'expo-web-browser';
+import {ScrollView} from '../scroll-view/common-scroll-view';
 
 export const SuggestChainModal = registerCardModal(
   observer(() => {
@@ -272,7 +272,7 @@ const RawInfo: FunctionComponent<{
         backgroundColor={style.get('color-gray-500').color}
         padding={16}
         borderRadius={6}>
-        <ScrollView>
+        <ScrollView isGestureScrollView={true}>
           <Text style={style.flatten(['body3', 'color-text-middle'])}>
             {JSON.stringify(chainInfo, null, 2)}
           </Text>

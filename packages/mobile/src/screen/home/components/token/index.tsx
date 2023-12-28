@@ -193,66 +193,65 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
           </Skeleton>
 
           <Gutter size={12} />
-
-          <Stack gutter={4}>
-            <XAxis alignY="center">
-              <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth={52}>
-                <Text
-                  style={style.flatten([
-                    'flex-row',
-                    'flex-wrap',
-                    'subtitle3',
-                    'color-gray-10',
-                  ])}>
-                  {coinDenom}
-                </Text>
-              </Skeleton>
-
-              {tag ? (
-                <React.Fragment>
-                  <Gutter size={4} />
-                  <Box alignY="center" height={1}>
-                    <Tag text={tag.text} />
-                  </Box>
-                </React.Fragment>
-              ) : null}
-              {viewToken.isFetching ? (
-                // 처음에는 무조건 로딩이 발생하는데 일반적으로 쿼리는 100ms 정도면 끝난다.
-                // 이정도면 유저가 별 문제를 느끼기 힘들기 때문에
-                // 일괄적으로 로딩을 보여줄 필요가 없다.
-                // 그러므로 로딩 상태가 500ms 이상 지속되면 로딩을 표시힌다.
-                // 근데 또 문제가 있어서 추가 사항이 있는데 그건 DelayedLoadingRender의 주석을 참고
-                <DelayedLoadingRender isFetching={viewToken.isFetching}>
+          <Column weight={3}>
+            <Stack gutter={4}>
+              <XAxis alignY="center">
+                <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth={52}>
+                  <Text
+                    style={style.flatten([
+                      'flex-row',
+                      'flex-wrap',
+                      'subtitle3',
+                      'color-gray-10',
+                    ])}>
+                    {coinDenom}
+                  </Text>
+                </Skeleton>
+                {tag ? (
+                  <React.Fragment>
+                    <Gutter size={4} />
+                    <Box alignY="center" height={1}>
+                      <Tag text={tag.text} />
+                    </Box>
+                  </React.Fragment>
+                ) : null}
+                {viewToken.isFetching ? (
+                  // 처음에는 무조건 로딩이 발생하는데 일반적으로 쿼리는 100ms 정도면 끝난다.
+                  // 이정도면 유저가 별 문제를 느끼기 힘들기 때문에
+                  // 일괄적으로 로딩을 보여줄 필요가 없다.
+                  // 그러므로 로딩 상태가 500ms 이상 지속되면 로딩을 표시힌다.
+                  // 근데 또 문제가 있어서 추가 사항이 있는데 그건 DelayedLoadingRender의 주석을 참고
+                  <DelayedLoadingRender isFetching={viewToken.isFetching}>
+                    <Box marginLeft={4}>
+                      <SVGLoadingIcon
+                        size={16}
+                        color={style.get('color-gray-300').color}
+                      />
+                    </Box>
+                  </DelayedLoadingRender>
+                ) : viewToken.error ? (
                   <Box marginLeft={4}>
-                    <SVGLoadingIcon
+                    <ErrorIcon
                       size={16}
-                      color={style.get('color-gray-300').color}
+                      color={style.get('color-yellow-400').color}
                     />
                   </Box>
-                </DelayedLoadingRender>
-              ) : viewToken.error ? (
-                <Box marginLeft={4}>
-                  <ErrorIcon
-                    size={16}
-                    color={style.get('color-yellow-400').color}
-                  />
-                </Box>
-              ) : undefined}
-            </XAxis>
-            <XAxis alignY="center">
-              <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth={72}>
-                <Text
-                  style={style.flatten(['color-gray-300', 'text-caption1'])}>
-                  {hasApr
-                    ? `APR ${formatAprString(apr, 2)}%`
-                    : isIBC
-                    ? `on ${viewToken.chainInfo.chainName}`
-                    : viewToken.chainInfo.chainName}
-                </Text>
-              </Skeleton>
-            </XAxis>
-          </Stack>
-
+                ) : undefined}
+              </XAxis>
+              <XAxis alignY="center">
+                <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth={72}>
+                  <Text
+                    style={style.flatten(['color-gray-300', 'text-caption1'])}>
+                    {hasApr
+                      ? `APR ${formatAprString(apr, 2)}%`
+                      : isIBC
+                      ? `on ${viewToken.chainInfo.chainName}`
+                      : viewToken.chainInfo.chainName}
+                  </Text>
+                </Skeleton>
+              </XAxis>
+            </Stack>
+          </Column>
           <Column weight={1} />
 
           <Columns sum={1} gutter={2} alignY="center">

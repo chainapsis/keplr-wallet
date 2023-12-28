@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import React, {FunctionComponent, useEffect, useRef} from 'react';
+import React, {FunctionComponent, useEffect} from 'react';
 import {PageWithScrollView} from '../../../components/page';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {useStore} from '../../../stores';
@@ -17,7 +17,7 @@ import {useStyle} from '../../../styles';
 import {Button} from '../../../components/button';
 import {FeeControl} from '../../../components/input/fee-control';
 import {Gutter} from '../../../components/gutter';
-import {Text, TextInput} from 'react-native';
+import {Text} from 'react-native';
 import {StackNavProp, StakeNavigation} from '../../../navigation';
 import {ValidatorCard} from '../components/validator-card';
 import {GuideBox} from '../../../components/guide-box';
@@ -30,7 +30,6 @@ export const SignUndelegateScreen: FunctionComponent = observer(() => {
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.Undelegate'>>();
   const navigation = useNavigation<StackNavProp>();
   const style = useStyle();
-  const addressRef = useRef<TextInput>(null);
   const initialChainId = route.params['chainId'];
   const {validatorAddress} = route.params;
   const notification = useNotification();
@@ -39,9 +38,6 @@ export const SignUndelegateScreen: FunctionComponent = observer(() => {
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
 
   const queries = queriesStore.get(chainId);
-  useEffect(() => {
-    addressRef.current?.focus();
-  }, []);
 
   useEffect(() => {
     if (!initialChainId) {

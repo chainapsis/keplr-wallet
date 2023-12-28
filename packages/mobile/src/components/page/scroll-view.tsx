@@ -87,6 +87,7 @@ export const PageWithScrollView = forwardRef<
             propStyle,
           ])}
           keyboardOpeningTime={0}
+          extraHeight={100}
           enableOnAndroid={true}
           indicatorStyle={indicatorStyle || 'white'}
           {...restProps}

@@ -4,7 +4,7 @@ import React, {FunctionComponent} from 'react';
 import {ChainInfo} from '@keplr-wallet/types';
 
 import {FormattedMessage, useIntl} from 'react-intl';
-import {FlatList, Text} from 'react-native';
+import {Text} from 'react-native';
 import {useStyle} from '../../../../../styles';
 import {useStore} from '../../../../../stores';
 import {Box} from '../../../../../components/box';
@@ -15,6 +15,7 @@ import {ChainImageFallback} from '../../../../../components/image';
 import {Stack} from '../../../../../components/stack';
 import {CloseIcon} from '../../../../../components/icon';
 import {GuideBox} from '../../../../../components/guide-box';
+import {FlatList} from '../../../../../components/flat-list';
 
 export const SettingGeneralDeleteSuggestChainScreen: FunctionComponent =
   observer(() => {

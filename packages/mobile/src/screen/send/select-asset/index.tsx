@@ -8,11 +8,16 @@ import {SearchIcon} from '../../../components/icon';
 import {TextInput} from '../../../components/input';
 import {Gutter} from '../../../components/gutter';
 import {Column, Columns} from '../../../components/column';
-import {FlatList, Pressable, Text} from 'react-native';
+import {Pressable, Text} from 'react-native';
 import {Checkbox} from '../../../components/checkbox';
-import {Box} from '../../../components/box';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import {FormattedMessage, useIntl} from 'react-intl';
+import {
+  BoundaryScrollView,
+  BoundaryScrollViewBoundary,
+} from '../../../components/boundary-scroll-view';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {Box} from '../../../components/box';
 
 export const SendSelectAssetScreen: FunctionComponent = observer(() => {
   const style = useStyle();
@@ -52,68 +57,77 @@ export const SendSelectAssetScreen: FunctionComponent = observer(() => {
     return filtered;
   }, [search, tokens]);
 
+  const safeAreaInsets = useSafeAreaInsets();
+
   return (
-    <Box padding={12}>
-      <FlatList
-        ListHeaderComponent={
-          <React.Fragment>
-            <TextInput
-              left={color => <SearchIcon size={20} color={color} />}
-              value={search}
-              placeholder={intl.formatMessage({
-                id: 'page.send.select-asset.search-placeholder',
-              })}
-              onChange={e => {
-                e.preventDefault();
+    <Box
+      style={{
+        flex: 1,
+      }}>
+      <Box paddingX={12}>
+        <TextInput
+          left={color => <SearchIcon size={20} color={color} />}
+          value={search}
+          placeholder={intl.formatMessage({
+            id: 'page.send.select-asset.search-placeholder',
+          })}
+          onChange={e => {
+            e.preventDefault();
 
-                setSearch(e.nativeEvent.text);
-              }}
+            setSearch(e.nativeEvent.text);
+          }}
+        />
+
+        <Gutter size={10} />
+
+        <Pressable onPress={() => setHideIBCToken(!hideIBCToken)}>
+          <Columns sum={1} gutter={4}>
+            <Column weight={1} />
+
+            <Text
+              style={style.flatten([
+                hideIBCToken ? 'color-gray-200' : 'color-gray-300',
+                'body2',
+              ])}>
+              <FormattedMessage id="page.send.select-asset.hide-ibc-token" />
+            </Text>
+
+            <Checkbox
+              size="small"
+              checked={hideIBCToken}
+              onPress={() => setHideIBCToken(!hideIBCToken)}
             />
+          </Columns>
+        </Pressable>
 
-            <Gutter size={10} />
+        <Gutter size={12} />
+      </Box>
 
-            <Pressable onPress={() => setHideIBCToken(!hideIBCToken)}>
-              <Columns sum={1} gutter={4}>
-                <Column weight={1} />
-
-                <Text
-                  style={style.flatten([
-                    hideIBCToken ? 'color-gray-200' : 'color-gray-300',
-                    'body2',
-                  ])}>
-                  <FormattedMessage id="page.send.select-asset.hide-ibc-token" />
-                </Text>
-
-                <Checkbox
-                  size="small"
-                  checked={hideIBCToken}
-                  onPress={() => setHideIBCToken(!hideIBCToken)}
-                />
-              </Columns>
-            </Pressable>
-
-            <Gutter size={12} />
-          </React.Fragment>
-        }
-        data={filteredTokens}
-        renderItem={({item}) => (
-          <TokenItem
-            viewToken={item}
-            onClick={() => {
-              navigation.dispatch({
-                ...StackActions.replace('Send', {
-                  chainId: item.chainInfo.chainId,
-                  coinMinimalDenom: item.token.currency.coinMinimalDenom,
-                }),
-              });
-            }}
-          />
-        )}
-        keyExtractor={item =>
-          `${item.chainInfo.chainId}-${item.token.currency.coinMinimalDenom}`
-        }
-        ItemSeparatorComponent={() => <Gutter size={8} />}
-      />
+      <BoundaryScrollView
+        contentContainerStyle={{
+          ...style.flatten(['flex-grow-1', 'padding-x-12']),
+          paddingBottom: safeAreaInsets.bottom,
+        }}>
+        <BoundaryScrollViewBoundary
+          itemHeight={71.3}
+          gap={8}
+          items={filteredTokens.map(token => {
+            return (
+              <TokenItem
+                viewToken={token}
+                onClick={() => {
+                  navigation.dispatch({
+                    ...StackActions.replace('Send', {
+                      chainId: token.chainInfo.chainId,
+                      coinMinimalDenom: token.token.currency.coinMinimalDenom,
+                    }),
+                  });
+                }}
+              />
+            );
+          })}
+        />
+      </BoundaryScrollView>
     </Box>
   );
 });

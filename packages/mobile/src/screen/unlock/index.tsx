@@ -179,7 +179,8 @@ export const UnlockScreen: FunctionComponent = observer(() => {
     <PageWithScrollView
       backgroundMode={'default'}
       contentContainerStyle={style.get('flex-grow-1')}
-      style={style.flatten(['padding-x-24'])}>
+      style={style.flatten(['padding-x-24'])}
+      keyboardShouldPersistTaps={'always'}>
       <Box style={{flex: 1}} alignX="center" alignY="center">
         <Box style={{flex: 1}} />
 

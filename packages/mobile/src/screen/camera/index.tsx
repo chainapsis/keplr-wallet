@@ -12,7 +12,14 @@ import {
   useCodeScanner,
 } from 'react-native-vision-camera';
 import {useStyle} from '../../styles';
-import {Linking, SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import {
+  Dimensions,
+  Linking,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {Box} from '../../components/box';
 import {Button} from '../../components/button';
 import Svg, {Path} from 'react-native-svg';
@@ -127,11 +134,32 @@ export const CameraScreen: FunctionComponent = observer(() => {
 
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
 
+  const [windowWidth, setWindowWidth] = useState(
+    Dimensions.get('window').width,
+  );
+  const [windowHeight, setWindowHeight] = useState(
+    Dimensions.get('window').height,
+  );
+  useEffect(() => {
+    const listener = Dimensions.addEventListener('change', ({window}) => {
+      setWindowWidth(window.width);
+      setWindowHeight(window.height);
+    });
+
+    return () => {
+      listener.remove();
+    };
+  }, []);
+
   return (
     <React.Fragment>
       {isFocused && device && hasPermission ? (
         <Camera
-          style={style.flatten(['absolute-fill'])}
+          style={{
+            position: 'absolute',
+            width: windowWidth,
+            height: windowHeight,
+          }}
           device={device}
           isActive={true}
           codeScanner={codeScanner}
@@ -151,7 +179,7 @@ export const CameraScreen: FunctionComponent = observer(() => {
         </Box>
 
         <Text style={style.flatten(['color-text-high', 'h1'])}>
-          <FormattedMessage id="page.camera.title" />
+          <FormattedMessage id="page.camera.main-title" />
         </Text>
 
         <Gutter size={40} />
@@ -175,7 +203,7 @@ export const CameraScreen: FunctionComponent = observer(() => {
         <Gutter size={40} />
 
         <Button
-          text={intl.formatMessage({id: 'page.camera.show-my-qr-code-button'})}
+          text={intl.formatMessage({id: 'page.camera.button-show-qr-code'})}
           color="secondary"
           containerStyle={{opacity: 0.8}}
           onPress={() => {
@@ -189,9 +217,11 @@ export const CameraScreen: FunctionComponent = observer(() => {
 
             <GuideBox
               color="warning"
-              title={intl.formatMessage({id: 'page.camera.guide-box.title'})}
+              title={intl.formatMessage({
+                id: 'page.camera.warning-guide.title',
+              })}
               paragraph={intl.formatMessage({
-                id: 'page.camera.guide-box.paragraph',
+                id: 'page.camera.warning-guide.paragraph',
               })}
               bottom={
                 <Text
@@ -200,7 +230,7 @@ export const CameraScreen: FunctionComponent = observer(() => {
                     {textDecorationLine: 'underline'},
                   ])}
                   onPress={async () => await Linking.openSettings()}>
-                  Open Setting
+                  <FormattedMessage id="page.camera.warning-guide.button" />
                 </Text>
               }
             />

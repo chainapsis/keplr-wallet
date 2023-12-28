@@ -13,6 +13,8 @@ import {HeaderBackButtonIcon} from './icon/back';
 import {Columns} from '../column';
 import {ArrowDownFillIcon} from '../icon/arrow-donw-fill';
 import {StackNavProp} from '../../navigation';
+import {PlusIcon} from '../icon/plus';
+import {COMMUNITY_CHAIN_URL} from '../../config';
 
 const HomeScreenHeaderLeft: FunctionComponent = () => {
   const style = useStyle();
@@ -149,3 +151,25 @@ export const defaultHeaderOptions = {
   headerShadowVisible: false,
   headerLeft: (props: any) => <DefaultScreenHeaderLeft {...props} />,
 };
+
+const SuggestScreenHeaderRight: FunctionComponent = () => {
+  const style = useStyle();
+  const nav = useNavigation<StackNavProp>();
+
+  return (
+    <React.Fragment>
+      <Pressable
+        onPress={() => {
+          nav.navigate('Web', {
+            url: COMMUNITY_CHAIN_URL,
+            isExternal: true,
+          });
+        }}
+        style={StyleSheet.flatten([style.flatten(['padding-right-20'])])}>
+        <PlusIcon size={28} color={style.get('color-gray-300').color} />
+      </Pressable>
+    </React.Fragment>
+  );
+};
+
+export const SuggestScreenHeaderRightFunc = () => <SuggestScreenHeaderRight />;

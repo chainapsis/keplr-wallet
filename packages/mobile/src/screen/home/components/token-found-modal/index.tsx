@@ -20,10 +20,10 @@ import {ArrowUpIcon} from '../../../../components/icon/arrow-up';
 import {ArrowDownIcon} from '../../../../components/icon/arrow-down';
 import {IconButton} from '../../../../components/icon-button';
 import {useStyle} from '../../../../styles';
-import {ScrollView} from 'react-native-gesture-handler';
 import {registerCardModal} from '../../../../components/modal/card';
 import {StackNavProp} from '../../../../navigation';
 import {useIntl} from 'react-intl';
+import {ScrollView} from '../../../../components/scroll-view/common-scroll-view';
 
 export const TokenFoundModal = registerCardModal(
   observer<{setIsOpen: (isOpen: boolean) => void; navigation: StackNavProp}>(
@@ -140,7 +140,7 @@ export const TokenFoundModal = registerCardModal(
             )}
           />
           <Gutter size={12} />
-          <ScrollView style={{maxHeight: 350}}>
+          <ScrollView isGestureScrollView={true} style={{maxHeight: 350}}>
             <Stack gutter={12}>
               {chainStore.tokenScans.map(tokenScan => {
                 return (

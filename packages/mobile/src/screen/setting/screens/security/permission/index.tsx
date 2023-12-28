@@ -9,12 +9,13 @@ import {SearchTextInput} from '../../../../../components/input/search-text-input
 import {useStyle} from '../../../../../styles';
 import {Button} from '../../../../../components/button';
 import {Column, Columns} from '../../../../../components/column';
-import {Text} from 'react-native';
+import {Platform, StyleSheet, Text} from 'react-native';
 import {CloseIcon} from '../../../../../components/icon';
 import {ArrowDownIcon} from '../../../../../components/icon/arrow-down';
 import {ArrowUpIcon} from '../../../../../components/icon/arrow-up';
 import {TreeIcon} from '../../../../../components/icon/tree';
 import {PageWithScrollView} from '../../../../../components/page';
+import {WCMessageRequester} from '../../../../../stores/wallet-connect/msg-requester';
 
 export const SettingSecurityPermissionScreen: FunctionComponent = observer(
   () => {
@@ -55,6 +56,7 @@ export const SettingSecurityPermissionScreen: FunctionComponent = observer(
               />
             </Box>
             {Object.entries(permissionManagerStore.permissionData)
+              .filter(([origin]) => !WCMessageRequester.isVirtualURL(origin))
               .filter(([origin]) => {
                 const trim = search.trim();
                 if (trim.length === 0) {
@@ -106,7 +108,18 @@ const OriginView: FunctionComponent<{
           borderRadius={6}
           backgroundColor={style.get('color-gray-550').color}>
           <Columns sum={1} gutter={12} alignY="center">
-            <Text style={style.flatten(['body2', 'color-text-high'])}>
+            <Text
+              numberOfLines={1}
+              style={StyleSheet.flatten([
+                style.flatten(['body2', 'color-text-high']),
+                Platform.OS === 'ios'
+                  ? {
+                      maxWidth: 200,
+                    }
+                  : {
+                      minWidth: 200,
+                    },
+              ])}>
               {origin}
             </Text>
             <Box
@@ -116,7 +129,7 @@ const OriginView: FunctionComponent<{
                 e.stopPropagation();
                 await permissionManagerStore.clearOrigin(origin);
               }}>
-              <Columns sum={1} gutter={2}>
+              <Columns sum={1} gutter={2} alignY="center">
                 <Text style={style.flatten(['text-button2', 'color-text-low'])}>
                   <FormattedMessage id="page.setting.security.permission.origin-view.all-text" />
                 </Text>

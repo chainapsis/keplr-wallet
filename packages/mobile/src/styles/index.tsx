@@ -554,6 +554,7 @@ export const {StyleProvider, useStyle, useStyleThemeController} =
         '40': 40,
         '42': 42,
         '48': 48,
+        '50': 50,
         '52': 52,
         '64': 64,
         '66': 66,

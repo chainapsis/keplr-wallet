@@ -6,13 +6,13 @@ import React, {
 } from 'react';
 import {observer} from 'mobx-react-lite';
 import {Button} from '../../../components/button';
-import {RegisterContainer} from '../components';
+import {LegacyRegisterContainer} from '../components';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStyle} from '../../../styles';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
 import {Box} from '../../../components/box';
-import {ScrollView, Text} from 'react-native';
+import {Text} from 'react-native';
 import {XAxis} from '../../../components/axis';
 import {Gutter} from '../../../components/gutter';
 import {
@@ -26,6 +26,7 @@ import {LedgerGrantModal} from './modal';
 import {useStore} from '../../../stores';
 import TransportBLE from '@ledgerhq/react-native-hw-transport-ble';
 import {LedgerUtils} from '../../../utils';
+import {ScrollView} from '../../../components/scroll-view/common-scroll-view';
 
 export type Step = 'unknown' | 'connected' | 'app';
 
@@ -88,16 +89,23 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
             ],
           });
         } else {
-          navigation.navigate('Register.FinalizeKey', {
-            name: route.params.name,
-            password: route.params.password,
-            stepPrevious: route.params.stepPrevious + 1,
-            stepTotal: route.params.stepTotal,
-            ledger: {
-              pubKey: publicKey,
-              bip44Path: route.params.bip44Path,
-              app: route.params.app,
-            },
+          navigation.reset({
+            routes: [
+              {
+                name: 'Register.FinalizeKey',
+                params: {
+                  name: route.params.name,
+                  password: route.params.password,
+                  stepPrevious: route.params.stepPrevious + 1,
+                  stepTotal: route.params.stepTotal,
+                  ledger: {
+                    pubKey: publicKey,
+                    bip44Path: route.params.bip44Path,
+                    app: route.params.app,
+                  },
+                },
+              },
+            ],
           });
         }
       }
@@ -114,7 +122,7 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
   ]);
 
   return (
-    <RegisterContainer
+    <LegacyRegisterContainer
       paragraph={
         appendModeInfo === undefined
           ? `Step ${stepPrevious + 1}/${stepTotal}`
@@ -187,7 +195,7 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
         setStep={(step: Step) => setStep(step)}
         setPublicKey={(publicKey: Uint8Array) => setPublicKey(publicKey)}
       />
-    </RegisterContainer>
+    </LegacyRegisterContainer>
   );
 });
 
