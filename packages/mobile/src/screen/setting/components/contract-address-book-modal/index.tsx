@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStore} from '../../../../stores';
-import {useFocusOnMount} from '../../../../hooks/use-focus-on-mount';
+import {useFocusOnModal} from '../../../../hooks/use-focus';
 import {Linking, Text} from 'react-native';
 import {SearchTextInput} from '../../../../components/input/search-text-input';
 import {Gutter} from '../../../../components/gutter';
@@ -28,7 +28,7 @@ export const ContractAddressBookModal = registerCardModal(
         .tokenContracts;
 
     const [search, setSearch] = useState('');
-    const searchRef = useFocusOnMount<TextInput>();
+    const searchRef = useFocusOnModal<TextInput>();
 
     const intl = useIntl();
 
