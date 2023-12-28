@@ -145,7 +145,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
             <FormattedMessage id="pages.register.recover-mnemonic.paragraph-1" />
           </Text>
         </XAxis>
-
+        <Gutter size={8} />
         <XAxis>
           <Text
             style={style.flatten([
@@ -181,7 +181,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
               }
 
               if (!bip39.validateMnemonic(value)) {
-                return 'Invalid mnemonic';
+                return 'Invalid Phrase';
               }
             } else {
               value = value.replace('0x', '');
