@@ -16,6 +16,8 @@ import {useStore} from './src/stores';
 import {ClearAllIBCHistoryMsg} from '@keplr-wallet/background';
 import {InExtensionMessageRequester} from '@keplr-wallet/router-extension';
 import {BACKGROUND_PORT} from '@keplr-wallet/router';
+import {FormattedMessage, useIntl} from 'react-intl';
+import {ErrorShutDownModal} from './src/components/modal/error-shutdown-modal';
 
 interface State {
   hasError: boolean;
@@ -47,8 +49,10 @@ export class ErrorBoundary extends Component<PropsWithChildren, State> {
 export const ErrorBoundaryView: FunctionComponent = observer(() => {
   const {chainStore} = useStore();
   const style = useStyle();
+  const intl = useIntl();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isOpenShutdownModal, setIsOpenShutDownModal] = useState(false);
 
   const resetStoreQueries = async () => {
     const clearStoreDatas = async () => {
@@ -95,7 +99,9 @@ export const ErrorBoundaryView: FunctionComponent = observer(() => {
       paddingX={35}
       backgroundColor={style.get('color-gray-600').color}>
       <WarningFillIcon size={76} color={style.get('color-gray-10').color} />
-      <Text style={style.flatten(['h1', 'color-white'])}>Error</Text>
+      <Text style={style.flatten(['h1', 'color-white'])}>
+        <FormattedMessage id="page.error-boundary.title" />
+      </Text>
 
       <Gutter size={50} />
 
@@ -106,15 +112,15 @@ export const ErrorBoundaryView: FunctionComponent = observer(() => {
           'text-center',
           'padding-x-10',
         ])}>
-        An error with an unknown reason has occurred. To potentially resolve the
-        issue, we recommend deleting the cache data. However, please note that
-        we cannot guarantee this will fix the problem.
+        <FormattedMessage id="page.error-boundary.reset-cache-paragraph" />
       </Text>
 
       <Gutter size={16} />
 
       <Button
-        text="Reset Cache Data"
+        text={intl.formatMessage({
+          id: 'page.error-boundary.reset-cache-button',
+        })}
         size="large"
         color="secondary"
         containerStyle={{width: '100%'}}
@@ -122,6 +128,7 @@ export const ErrorBoundaryView: FunctionComponent = observer(() => {
           if (isLoading) {
             return;
           }
+          setIsOpenShutDownModal(true);
 
           setIsLoading(true);
 
@@ -142,14 +149,15 @@ export const ErrorBoundaryView: FunctionComponent = observer(() => {
           'text-center',
           'padding-x-10',
         ])}>
-        If the error persists, you can also try resetting the suggest chains and
-        your custom endpoints.
+        <FormattedMessage id="page.error-boundary.reset-cache-endpoints-paragraph" />
       </Text>
 
       <Gutter size={16} />
 
       <Button
-        text={'Reset Cache Data, Including\n Suggest Chains & Endpoints'}
+        text={intl.formatMessage({
+          id: 'page.error-boundary.reset-cache-endpoints-button',
+        })}
         size="large"
         color="danger"
         containerStyle={{width: '100%', height: 72}}
@@ -157,7 +165,7 @@ export const ErrorBoundaryView: FunctionComponent = observer(() => {
           if (isLoading) {
             return;
           }
-
+          setIsOpenShutDownModal(true);
           setIsLoading(true);
 
           try {
@@ -172,6 +180,7 @@ export const ErrorBoundaryView: FunctionComponent = observer(() => {
           }
         }}
       />
+      <ErrorShutDownModal isOpen={isOpenShutdownModal} setIsOpen={() => {}} />
     </Box>
   );
 });

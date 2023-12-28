@@ -12,10 +12,12 @@ import {useStore} from '../../../stores';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
 import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
+import {FormattedMessage, useIntl} from 'react-intl';
 
 export const WelcomeScreen: FunctionComponent = observer(() => {
   const {keychainStore} = useStore();
   const style = useStyle();
+  const intl = useIntl();
   const route = useRoute<RouteProp<RootStackParamList, 'Register.Welcome'>>();
   const {password} = route.params;
   const navigation = useNavigation<StackNavProp>();
@@ -42,7 +44,7 @@ export const WelcomeScreen: FunctionComponent = observer(() => {
 
       <Box alignX="center">
         <Text style={style.flatten(['mobile-h1', 'color-text-high'])}>
-          You’re all set!
+          <FormattedMessage id="pages.register.pages.welcome.title" />
         </Text>
       </Box>
 
@@ -56,7 +58,7 @@ export const WelcomeScreen: FunctionComponent = observer(() => {
             'padding-10',
             'text-center',
           ])}>
-          Your cosmic interchain journey now begins
+          <FormattedMessage id="pages.register.pages.welcome.sub-title" />
         </Text>
       </Box>
 
@@ -71,7 +73,7 @@ export const WelcomeScreen: FunctionComponent = observer(() => {
                 'color-text-middle',
                 'flex-1',
               ])}>
-              Enable Biometric
+              <FormattedMessage id="pages.register.pages.welcome.enable-bio-auth-toggle" />
             </Text>
 
             <Toggle isOpen={isBiometricOn} setIsOpen={setIsBiometricOn} />
@@ -84,7 +86,7 @@ export const WelcomeScreen: FunctionComponent = observer(() => {
 
       <Box style={style.flatten(['padding-x-50'])}>
         <Button
-          text="Done"
+          text={intl.formatMessage({id: 'button.done'})}
           size="large"
           onPress={async () => {
             if (password && isBiometricOn) {

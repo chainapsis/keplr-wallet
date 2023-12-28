@@ -16,6 +16,7 @@ import {useStyle} from '../../../styles';
 type CardBaseModalOption = {
   disabledSafeArea?: boolean;
   isDetached?: boolean;
+  disableGesture?: boolean;
 };
 
 export const registerCardModal: <P>(
@@ -67,9 +68,17 @@ export const CardModalBase: FunctionComponent<
   // close일 경우 닫고 그걸 굳이 잡아서 열려는 유저는 없으므로 안해도 된다.
   const panGesture = Gesture.Pan()
     .onBegin(e => {
+      if (options?.disableGesture) {
+        return;
+      }
+
       touchStartPosition.value = e.absoluteY;
     })
     .onUpdate(e => {
+      if (options?.disableGesture) {
+        return;
+      }
+
       if (duringModalTransition.value === 'close') {
         return;
       }
@@ -102,6 +111,10 @@ export const CardModalBase: FunctionComponent<
       }
     })
     .onFinalize(e => {
+      if (options?.disableGesture) {
+        return;
+      }
+
       if (duringModalTransition.value === 'close') {
         return;
       }

@@ -103,6 +103,10 @@ export const UnlockScreen: FunctionComponent = observer(() => {
       await delay(10);
       await keyRingStore.unlock(password);
       await waitAccountInit();
+      if (isMigrationSecondPhase) {
+        navigation.replace('Migration.Welcome');
+        return;
+      }
       navigation.replace('Home');
     } catch (e) {
       console.log(e);
