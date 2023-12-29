@@ -326,14 +326,6 @@ const ModalRenderImpl: FunctionComponent<{
       style.get('color-gray-700').color,
     ).hex();
     const backdropStyle = useAnimatedStyle(() => {
-      let alphaHex = Math.floor(backgroundColorAlpha.value * 255)
-        .toString(16)
-        .toUpperCase();
-      if (alphaHex.length === 0) {
-        alphaHex = '0' + alphaHex;
-      }
-      const backdropBackgroundColor =
-        backdropBackgroundColorWithoutAlpha + alphaHex;
       let opacity = 0;
       if (layoutHeightShared.value != null && translateY.value != null) {
         opacity = interpolate(
@@ -355,6 +347,15 @@ const ModalRenderImpl: FunctionComponent<{
         );
       }
 
+      let alphaHex = Math.floor(backgroundColorAlpha.value * opacity * 255)
+        .toString(16)
+        .toUpperCase();
+      if (alphaHex.length === 0) {
+        alphaHex = '0' + alphaHex;
+      }
+      const backdropBackgroundColor =
+        backdropBackgroundColorWithoutAlpha + alphaHex;
+
       return {
         position: 'absolute',
         top: 0,
@@ -362,7 +363,6 @@ const ModalRenderImpl: FunctionComponent<{
         right: 0,
         bottom: 0,
         backgroundColor: backdropBackgroundColor,
-        opacity,
       };
     });
 
