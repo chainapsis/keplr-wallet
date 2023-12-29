@@ -325,6 +325,19 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             outPrice &&
             outPrice.toDec().gt(new Dec(0))
           ) {
+            if (ibcSwapConfigs.amountConfig.swapPriceImpact) {
+              // price impact가 2.5% 이상이면 경고
+              if (
+                ibcSwapConfigs.amountConfig.swapPriceImpact
+                  .toDec()
+                  .mul(new Dec(100))
+                  .gt(new Dec(2.5))
+              ) {
+                setIsHighPriceImpact(true);
+                return;
+              }
+            }
+
             if (inPrice.toDec().gt(outPrice.toDec())) {
               const priceImpact = inPrice
                 .toDec()

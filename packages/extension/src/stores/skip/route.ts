@@ -7,7 +7,7 @@ import {
 import { RouteResponse } from "./types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { computed, makeObservable } from "mobx";
-import { CoinPretty } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, RatePretty } from "@keplr-wallet/unit";
 import Joi from "joi";
 
 const Schema = Joi.object<RouteResponse>({
@@ -159,6 +159,19 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
         amount
       );
     });
+  }
+
+  @computed
+  get swapPriceImpact(): RatePretty | undefined {
+    if (!this.response || !this.response.data.swap_price_impact_percent) {
+      return undefined;
+    }
+
+    return new RatePretty(
+      new Dec(this.response.data.swap_price_impact_percent).quoTruncate(
+        new Dec(100)
+      )
+    );
   }
 
   protected override async fetchResponse(
