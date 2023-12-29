@@ -4,7 +4,6 @@ import {Box} from '../../components/box';
 import {useStyle} from '../../styles';
 import {Columns} from '../../components/column';
 import {InformationOutlinedIcon} from '../../components/icon/information-outlined';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {registerCardModal} from './card';
 import {Gutter} from '../gutter';
 export interface InformationModalProps {
@@ -15,9 +14,8 @@ export interface InformationModalProps {
 export const InformationModal = registerCardModal(
   ({title, paragraph, bottomButton}: InformationModalProps) => {
     const style = useStyle();
-    const insects = useSafeAreaInsets();
     return (
-      <Box paddingX={12} paddingBottom={40 + insects.bottom}>
+      <Box paddingX={12} paddingBottom={40}>
         <Box>
           <Box>
             <Box paddingBottom={21} paddingTop={9} paddingX={8} alignY="center">
