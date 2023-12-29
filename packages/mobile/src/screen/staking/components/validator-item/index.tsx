@@ -93,6 +93,7 @@ export const ValidatorItem: FunctionComponent<{
                   {viewValidator.coin
                     .maxDecimals(6)
                     .trim(true)
+                    .inequalitySymbol(true)
                     .shrink(true)
                     .toString()}
                 </Text>
