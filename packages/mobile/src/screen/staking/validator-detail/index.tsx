@@ -22,14 +22,16 @@ import {Button} from '../../../components/button';
 import {FormattedMessage, useIntl} from 'react-intl';
 
 export const ValidatorDetailScreen: FunctionComponent = observer(() => {
-  const {queriesStore, chainStore} = useStore();
-
+  const {queriesStore, chainStore, accountStore} = useStore();
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.ValidateDetail'>>();
+
+  const {validatorAddress, chainId, validatorSelector} = route.params;
+
   const navigation = useNavigation<StackNavProp>();
   const style = useStyle();
   const intl = useIntl();
+  const account = accountStore.getAccount(chainId);
 
-  const {validatorAddress, chainId, validatorSelector} = route.params;
   const queries = queriesStore.get(chainId);
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
     Staking.BondStatus.Bonded,
@@ -74,6 +76,10 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
   const isTop10Validator = validatorInfo?.rank
     ? validatorInfo.rank <= 10
     : false;
+
+  const staked = queries.cosmos.queryDelegations
+    .getQueryBech32Address(account.bech32Address)
+    .getDelegationTo(validatorAddress);
 
   return (
     <PageWithScrollView
@@ -144,6 +150,7 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
                   size={40}
                   imageUrl={thumbnail}
                   name={validatorInfo?.description.moniker}
+                  isDelegation={staked && !staked.toDec().isZero()}
                 />
                 <Text
                   numberOfLines={1}
