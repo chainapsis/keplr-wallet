@@ -350,7 +350,7 @@ const ModalRenderImpl: FunctionComponent<{
       let alphaHex = Math.floor(backgroundColorAlpha.value * opacity * 255)
         .toString(16)
         .toUpperCase();
-      if (alphaHex.length === 0) {
+      if (alphaHex.length === 1) {
         alphaHex = '0' + alphaHex;
       }
       const backdropBackgroundColor =
