@@ -148,11 +148,6 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
       const amount = queryDelegations.getDelegationTo(
         validator.operator_address,
       );
-      //NOTE 인젝티브에서만 delegation양이 0인데 getDelegationTo으로 부터 값이 오는 문제가 있어서
-      //amount가 0이면 무시함
-      if (amount?.toCoin().amount === '0') {
-        continue;
-      }
 
       res.push({
         coin: amount,
