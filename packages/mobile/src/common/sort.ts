@@ -147,7 +147,7 @@ export class BinarySortArray<T> {
     } else {
       if (prevIndex != null && prevIndex >= 0) {
         if (prevIndex < mid) {
-          for (let i = prevIndex + 1; i <= mid; i++) {
+          for (let i = prevIndex + 1; i < mid; i++) {
             this.indexForKey.set(
               this._arr[i][BinarySortArray.SymbolKey],
               i - 1,
@@ -170,6 +170,8 @@ export class BinarySortArray<T> {
         if (prevIndex < mid) {
           this._arr.splice(mid, 0, v);
           this._arr.splice(prevIndex, 1);
+          // prev가 삭제되었으므로 이 이후에 실제 설정되어야할 index는 mid - 1이다.
+          mid = mid - 1;
         } else if (prevIndex > mid) {
           this._arr.splice(prevIndex, 1);
           this._arr.splice(mid, 0, v);
@@ -197,11 +199,23 @@ export class BinarySortArray<T> {
         this.indexForKey.set(this._arr[i][BinarySortArray.SymbolKey], i - 1);
       }
       this._arr.splice(index, 1);
+      // Update reference
+      this._arr = this._arr.slice();
+      return true;
     }
+    return false;
   }
 
   indexForKeyMap(): ReadonlyMap<string, number> {
     return this.indexForKey;
+  }
+
+  indexOf(key: string): number {
+    const index = this.indexForKey.get(key);
+    if (index == null || index < 0) {
+      return -1;
+    }
+    return index;
   }
 
   get arr(): ReadonlyArray<
