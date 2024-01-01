@@ -2591,4 +2591,5 @@ export const GovernanceV1ChainIdentifiers = [
   "juno",
   "celestia",
   "dydx-mainnet",
+  "osmosis",
 ];
