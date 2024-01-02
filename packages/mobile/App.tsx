@@ -54,10 +54,10 @@ const ChangeNavigationColor: FunctionComponent = () => {
   const style = useStyle();
 
   if (style.theme === 'dark') {
-    changeNavigationBarColor(style.get('color-gray-700').color);
+    changeNavigationBarColor(style.get('color-gray-700').color, false, true);
     return null;
   }
-  changeNavigationBarColor('white');
+  changeNavigationBarColor('white', true, true);
   return null;
 };
 

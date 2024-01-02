@@ -387,10 +387,9 @@ export const MainTabNavigationWithDrawer: FunctionComponent = () => {
       screenOptions={{
         drawerType: 'front',
         overlayColor: style.flatten(['color-gray-700@50%']).color,
-        gestureHandlerProps: {
-          hitSlop: {},
-        },
         swipeEnabled: focused.name === 'Home',
+        swipeEdgeWidth: 9999,
+        swipeMinDistance: 20,
         headerShown: false,
       }}
       drawerContent={DrawerContentFunc}>
