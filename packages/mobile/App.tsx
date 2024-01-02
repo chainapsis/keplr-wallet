@@ -11,7 +11,7 @@ import {StoreProvider} from './src/stores';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {StyleProvider, useStyle} from './src/styles';
 import {AppNavigation} from './src/navigation';
-import {StatusBar} from 'react-native';
+import {Platform, StatusBar} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 import {AppIntlProvider} from './src/languages';
@@ -78,6 +78,8 @@ interface AppUpdateWrapperState {
   store: {
     newVersionAvailable?: string;
   };
+
+  restartAfter?: boolean;
 }
 
 // API 구조상 꼭 class 형일 필요는 없는 것 같기도 하지만...
@@ -102,8 +104,7 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
 
     let once = false;
 
-    // 1초 안에 결과를 받지 못하면 그냥 업데이트 없는걸로 친다...
-    setTimeout(() => {
+    const updateNotExists = () => {
       if (once) {
         return;
       }
@@ -113,6 +114,13 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
         codepushInitTestCompleted: true,
         codepushInitNewVersionExists: false,
       });
+
+      codePush.notifyAppReady();
+    };
+
+    // 1초 안에 결과를 받지 못하면 그냥 업데이트 없는걸로 친다...
+    setTimeout(() => {
+      updateNotExists();
     }, 1000);
 
     codePush
@@ -130,6 +138,7 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
             codepushInitNewVersionExists: true,
             codepush: {
               ...this.state.codepush,
+              newVersion: update.label,
               newVersionDownloadProgress: 0,
             },
           });
@@ -148,11 +157,7 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
                   },
                 });
 
-                codePush.allowRestart();
-                // TODO: 이거 실제로는 restart를 못 시키고 그냥 exit 시키는 경우가 많음.
-                //       코드푸쉬의 버그인 것 같은데 다른 방법을 찾아야함.
-                //       아니면 코드푸쉬의 버그를 해결하던가...
-                codePush.restartApp();
+                this.restartApp();
               }
             },
             ({receivedBytes, totalBytes}) => {
@@ -170,28 +175,38 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
             },
           );
         } else {
-          this.setState({
-            ...this.state,
-            codepushInitTestCompleted: true,
-            codepushInitNewVersionExists: false,
-          });
+          updateNotExists();
         }
       })
       .catch(err => {
         console.log(err);
-        if (once) {
-          return;
-        }
-        once = true;
-        this.setState({
-          ...this.state,
-          codepushInitTestCompleted: true,
-          codepushInitNewVersionExists: false,
-        });
+        updateNotExists();
       });
   }
 
+  restartApp() {
+    if (Platform.OS === 'ios') {
+      codePush.allowRestart();
+      codePush.restartApp();
+    } else {
+      codePush.allowRestart();
+      // https://github.com/microsoft/react-native-code-push/issues/2567#issuecomment-1820827232
+      this.setState({
+        ...this.state,
+        restartAfter: true,
+      });
+
+      setTimeout(() => {
+        codePush.restartApp();
+      }, 500);
+    }
+  }
+
   override render() {
+    if (this.state.restartAfter) {
+      return null;
+    }
+
     return (
       <AppUpdateProvider value={this.state}>
         <GestureHandlerRootView style={{flex: 1}}>

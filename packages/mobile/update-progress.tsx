@@ -1,8 +1,14 @@
-import React, {FunctionComponent} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import React, {FunctionComponent, useEffect} from 'react';
+import {Text, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useStyle} from './src/styles';
 import {ContentHeightAwareScrollView} from './src/components/scroll-view';
+import Reanimated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
+import {defaultSpringConfig} from './src/styles/spring';
 
 export const UpdateProgress: FunctionComponent<{
   progress: number;
@@ -78,7 +84,7 @@ export const UpdateProgress: FunctionComponent<{
             }}
           />
           <View style={style.flatten(['width-full'])}>
-            <ProgressBar progress={progress} />
+            <SimpleProgressBar progress={Math.min(progress, 1)} />
           </View>
           <View
             style={{
@@ -99,32 +105,35 @@ export const UpdateProgress: FunctionComponent<{
     </View>
   );
 };
-
-export const ProgressBar: FunctionComponent<{
+const SimpleProgressBar: FunctionComponent<{
   progress: number;
-}> = ({progress = 0}) => {
+}> = ({progress}) => {
   const style = useStyle();
+
+  const animProgress = useSharedValue(progress);
+
+  useEffect(() => {
+    animProgress.value = withSpring(progress, defaultSpringConfig);
+  }, [animProgress, progress]);
+
+  const barColor = style.get('color-blue-400').color;
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      height: 8,
+      borderRadius: 9999,
+      backgroundColor: barColor,
+      width: `${animProgress.value * 100}%`,
+    };
+  });
 
   return (
     <View
-      style={style.flatten([
-        'height-8',
-        'background-color-gray-500',
-        'border-radius-32',
-        'overflow-hidden',
-      ])}>
-      <View
-        style={StyleSheet.flatten([
-          style.flatten([
-            'height-8',
-            'background-color-blue-400',
-            'border-radius-32',
-          ]),
-          {
-            width: `${progress}%`,
-          },
-        ])}
-      />
+      style={{
+        height: 8,
+        borderRadius: 9999,
+        backgroundColor: style.get('color-gray-500').color,
+      }}>
+      <Reanimated.View style={animatedStyle} />
     </View>
   );
 };
