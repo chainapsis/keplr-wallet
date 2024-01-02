@@ -1,0 +1,132 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+
+platform :ios do
+  def check_version(version)
+    if (version =~ /^\d+.\d+.\d+$/) != 0
+      UI.user_error!("Invalid version #{version}")
+    end
+  end
+
+  def check_codepush_version(version)
+    if (version =~ /^(\d+.\d+.\d+)-codepush.\d+$/) != 0
+      UI.user_error!("Invalid codepush version #{version}")
+    end
+
+    v = version.split(/^(\d+.\d+.\d+)-codepush.\d+$/)[1]
+    if v.length == 0
+      UI.user_error!("Unexpected error #{version}")
+    end
+
+    return v
+  end
+
+  lane :deploy_codepush do |options|
+    if options[:version]
+      version = options[:version]
+    else
+      version = prompt(text: "Enter the target version\n(Ex. 1.0.0-codepush.1): ")
+    end
+
+    target_version = check_codepush_version(version)
+
+    UI.message("Code push will be deployed for IOS #{target_version}. Code Bundle ID: #{version}")
+
+    # Change the code bundle id in the `bugsnag.env.ts`
+    sh("cd ../.. && sh ./scripts/set-code-bundle-id.sh #{version}")
+    # A problem may have occurred due to the above step. So, check the typing error.
+    sh("cd ../.. && yarn typecheck")
+
+    if !ENV["BUGSNAG_API_KEY"] || ENV["BUGSNAG_API_KEY"].length == 0
+      UI.user_error!("BUGSNAG_API_KEY is not provided")
+    end
+    sh("cd ../.. && appcenter codepush release-react -a #{ENV["IOS_APPCENTER_APP_NAME"]} -d Production -t #{target_version} --output-dir build")
+    # sh("cd ../.. && npx bugsnag-source-maps upload-react-native --api-key #{ENV["BUGSNAG_API_KEY"]} --code-bundle-id #{version} --platform ios --source-map build/CodePush/main.jsbundle.map --bundle build/CodePush/main.jsbundle")
+  end
+
+  desc "Push a new beta build to TestFlight"
+  lane :deploy do |options|
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APPLE_KEY_ID"],
+      issuer_id: ENV["APPLE_ISSUER_ID"],
+      key_filepath: ENV["APPLE_KEY_FILEPATH"],
+      duration: 1200,
+      in_house: false
+    )
+
+    apple_id = ENV["APPLE_ID"]
+    itc_team_id = ENV["ITC_TEAM_ID"]
+    team_id = ENV["TEAM_ID"]
+
+    if options[:version]
+      version = options[:version]
+    else
+      version = prompt(text: "Enter the version type or specific version\n(Ex. 1.0.0): ")
+    end
+
+    check_version(version)
+
+    create_keychain(
+      name: ENV["KEYCHAIN_NAME"],
+      password: ENV["KEYCHAIN_PASSWORD"],
+      default_keychain: true,
+      unlock: true,
+      timeout: 3600,
+      lock_when_sleeps: false
+    )
+
+    match_git_url = ENV["MATCH_GIT_URL"]
+
+    match(
+      type: "appstore",
+      username: ENV["APPLE_USERNAME"],
+      team_id: team_id,
+      git_url: match_git_url,
+      keychain_name: ENV["KEYCHAIN_NAME"],
+      keychain_password: ENV["KEYCHAIN_PASSWORD"],
+    )
+
+    increment_version_number(
+      xcodeproj: "mobile.xcodeproj",
+      version_number: version,
+    )
+
+    build_number = latest_testflight_build_number(
+      team_id: team_id,
+    ) + 1
+    UI.message("Build number will be #{build_number}")
+    increment_build_number(
+      xcodeproj: "mobile.xcodeproj",
+      build_number: build_number,
+    )
+
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      profile_name: "match AppStore " + CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier),
+      code_sign_identity: "Apple Distribution"
+    )
+
+    build_app(workspace: "mobile.xcworkspace", scheme: "mobile")
+    upload_to_testflight(
+      apple_id: apple_id,
+      team_id: team_id,
+      skip_submission: true
+    )
+
+    # TODO: Upload dSYM. https://docs.bugsnag.com/platforms/ios/symbolication-guide/#using-manual-downloads
+  end
+end

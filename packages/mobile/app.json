@@ -1,0 +1,44 @@
+{
+  "name": "mobile",
+  "displayName": "Fetch Wallet",
+  "expo": {
+    "name": "Fetch Wallet",
+    "slug": "FetchWallet",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "fetchwallet",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.fetchai.wallet",
+      "permissions": [
+        "CAMERA",
+        "BLUETOOTH_ADMIN",
+        "BLUETOOTH_CONNECT",
+        "BLUETOOTH_ADVERTISE",
+        "BLUETOOTH_SCAN",
+        "BLUETOOTH",
+        "ACCESS_FINE_LOCATION"
+      ]
+    },
+    "android": {
+      "package": "com.fetchai.wallet",
+      "permissions": ["CAMERA", "BLUETOOTH_ADMIN", "BLUETOOTH_CONNECT", "BLUETOOTH_ADVERTISE", "BLUETOOTH_SCAN", "BLUETOOTH", "ACCESS_FINE_LOCATION"]
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Fetch Wallet to access your camera."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Fetch Wallet to use your location."
+        }
+      ]
+    ]
+  }
+}

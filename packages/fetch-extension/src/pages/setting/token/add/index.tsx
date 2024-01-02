@@ -39,7 +39,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
   const interactionInfo = useInteractionInfo(() => {
     // When creating the secret20 viewing key, this page will be moved to "/sign" page to generate the signature.
     // So, if it is creating phase, don't reject the waiting datas.
-    if (accountInfo.isSendingMsg !== "createSecret20ViewingKey") {
+    if (accountInfo.txTypeInProgress !== "createSecret20ViewingKey") {
       tokensStore.rejectAllSuggestedTokens();
     }
   });
@@ -357,9 +357,11 @@ export const AddTokenPage: FunctionComponent = observer(() => {
           disabled={
             isError !== undefined ||
             tokenInfo == null ||
-            !accountInfo.isReadyToSendMsgs
+            !accountInfo.isReadyToSendTx
           }
-          data-loading={accountInfo.isSendingMsg === "createSecret20ViewingKey"}
+          data-loading={
+            accountInfo.txTypeInProgress === "createSecret20ViewingKey"
+          }
         >
           <FormattedMessage id="setting.token.add.button.submit" />
         </Button>

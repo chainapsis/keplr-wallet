@@ -195,7 +195,7 @@ const TokenView: FunctionComponent<{
             }
           }}
         >
-          {accountInfo.isSendingMsg === "createSecret20ViewingKey" ? (
+          {accountInfo.txTypeInProgress === "createSecret20ViewingKey" ? (
             <i className="fa fa-spinner fa-spin fa-fw" />
           ) : (
             <i className="fas fa-wrench" />

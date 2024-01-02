@@ -36,7 +36,7 @@ export const StakeView: FunctionComponent = observer(() => {
   const [isWithdrawingRewards, setIsWithdrawingRewards] = useState(false);
 
   const withdrawAllRewards = async () => {
-    if (accountInfo.isReadyToSendMsgs) {
+    if (accountInfo.isReadyToSendTx) {
       try {
         setIsWithdrawingRewards(true);
 
@@ -139,10 +139,10 @@ export const StakeView: FunctionComponent = observer(() => {
                 className={styleStake["button"]}
                 color="primary"
                 size="sm"
-                disabled={!accountInfo.isReadyToSendMsgs}
+                disabled={!accountInfo.isReadyToSendTx}
                 onClick={withdrawAllRewards}
                 data-loading={
-                  accountInfo.isSendingMsg === "withdrawRewards" ||
+                  accountInfo.txTypeInProgress === "withdrawRewards" ||
                   isWithdrawingRewards
                 }
               >

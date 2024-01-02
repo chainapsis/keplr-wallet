@@ -285,7 +285,7 @@ export const SendPage: FunctionComponent = observer(() => {
         onSubmit={async (e) => {
           e.preventDefault();
 
-          if (accountInfo.isReadyToSendMsgs && txStateIsValid) {
+          if (accountInfo.isReadyToSendTx && txStateIsValid) {
             try {
               const stdFee = sendConfigs.feeConfig.toStdFee();
 
@@ -423,8 +423,8 @@ export const SendPage: FunctionComponent = observer(() => {
             type="submit"
             color="primary"
             block
-            data-loading={accountInfo.isSendingMsg === "send"}
-            disabled={!accountInfo.isReadyToSendMsgs || !txStateIsValid}
+            data-loading={accountInfo.txTypeInProgress === "send"}
+            disabled={!accountInfo.isReadyToSendTx || !txStateIsValid}
             style={{
               marginTop: "12px",
             }}

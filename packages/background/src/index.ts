@@ -16,6 +16,11 @@ import * as AutoLocker from "./auto-lock-account/internal";
 import * as Analytics from "./analytics/internal";
 import * as Umbral from "./umbral/internal";
 import * as Messaging from "./messaging/internal";
+import { KVStore } from "@keplr-wallet/common";
+import { ChainInfo } from "@keplr-wallet/types";
+import { CommonCrypto } from "./keyring";
+import { Notification } from "./tx";
+import { LedgerOptions } from "./ledger/options";
 
 export * from "./persistent-memory";
 export * from "./chains";
@@ -31,12 +36,6 @@ export * from "./permission";
 export * from "./phishing-list";
 export * from "./auto-lock-account";
 export * from "./analytics";
-
-import { KVStore } from "@keplr-wallet/common";
-import { ChainInfo } from "@keplr-wallet/types";
-import { CommonCrypto } from "./keyring";
-import { Notification } from "./tx";
-import { LedgerOptions } from "./ledger/options";
 
 export function init(
   router: Router,

@@ -147,7 +147,7 @@ export const AddressBookPage: FunctionComponent<{
             ) {
               setAddAddressModalOpen(false);
               setAddAddressModalIndex(-1);
-              await addressBookConfig.removeAddressBook(index);
+              addressBookConfig.removeAddressBook(index);
             }
           }}
         />,

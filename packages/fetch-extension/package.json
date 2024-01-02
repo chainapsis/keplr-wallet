@@ -6,9 +6,11 @@
   "private": true,
   "scripts": {
     "clean": "rm -rf node_modules; rm -rf dist; rm -rf build",
-    "build": "cross-env NODE_ENV=production BUILD_OUTPUT=build/manifest-v3 webpack && cross-env NODE_ENV=production BUILD_MANIFEST_V2=true BUILD_OUTPUT=build/manifest-v2 webpack && zx ./scripts/post-build.mjs",
+    "build": "yarn build:background && cross-env NODE_ENV=production BUILD_OUTPUT=build/manifest-v3 webpack && cross-env NODE_ENV=production BUILD_MANIFEST_V2=true BUILD_OUTPUT=build/manifest-v2 webpack && zx ./scripts/post-build.mjs",
     "build:noop": "tsc -p tsconfig.noop.json",
     "dev": "cross-env NODE_ENV=development BUILD_MANIFEST_V2=true webpack",
+    "build:background": "echo 'Building build:background' && yarn fs:script && sh ./scripts/fix-background-module.sh && yarn workspace @keplr-wallet/background build",
+    "fs:script": "sh ./scripts/fix-fetchai-blst-js.sh && sh ./scripts/fix-fetchai-path-node-js.sh",
     "dev:analyzer": "cross-env NODE_ENV=development ANALYZER=true webpack",
     "analyzer": "cross-env NODE_ENV=production ANALYZER=true DISABLE_SPLIT_CHUNKS=true webpack",
     "analyzer:chunks": "cross-env NODE_ENV=production ANALYZER=true webpack",
@@ -180,7 +182,7 @@
     "mobx": "^6",
     "mobx-react-lite": "^3",
     "mobx-utils": "^6",
-    "react": "^16.8.0 || ^17 || ^18",
-    "react-dom": "^16.8.0 || ^17 || ^18"
+    "react": "^18",
+    "react-dom": "^18"
   }
 }

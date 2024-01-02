@@ -64,6 +64,10 @@ export interface ChainInfo {
   readonly chainSymbolImageUrl?: string;
 
   readonly explorerUrl?: string;
+  readonly txExplorer?: {
+    readonly name: string;
+    readonly txUrl: string;
+  };
 }
 
 export type ChainInfoWithoutEndpoints = Omit<

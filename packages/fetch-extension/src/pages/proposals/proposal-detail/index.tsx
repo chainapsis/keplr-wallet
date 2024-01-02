@@ -74,7 +74,7 @@ export const ProposalDetail: FunctionComponent = () => {
   const handleClick = async () => {
     const vote: any = voteArr[votedOn];
     if (!proposal) return;
-    if (vote !== "Unspecified" && accountInfo.isReadyToSendMsgs) {
+    if (vote !== "Unspecified" && accountInfo.isReadyToSendTx) {
       const tx = accountInfo.cosmos.makeGovVoteTx(proposal?.proposal_id, vote);
       setIsSendingTx(true);
       try {

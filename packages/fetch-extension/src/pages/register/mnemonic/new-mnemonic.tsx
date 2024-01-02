@@ -12,7 +12,7 @@ import style from "../style.module.scss";
 import { Alert, Button, ButtonGroup, Form } from "reactstrap";
 import { Input, PasswordInput } from "@components/form";
 import { BackButton } from "../index";
-import { NewMnemonicConfig, useNewMnemonicConfig, NumWords } from "./hook";
+import { NewMnemonicConfig, NumWords, useNewMnemonicConfig } from "./hook";
 import { useStore } from "../../../stores";
 
 export const TypeNewMnemonic = "new-mnemonic";

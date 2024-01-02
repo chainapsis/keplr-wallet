@@ -59,7 +59,7 @@ describe("Test Account set base", () => {
     expect(accountSetBase.bech32Address).toBe(
       "cosmos1unx0p9jv79xz278xuk7uuuwj2l99k2sp4vm8wp"
     );
-    expect(accountSetBase.isReadyToSendMsgs).toBe(true);
+    expect(accountSetBase.isReadyToSendTx).toBe(true);
   });
 
   test("Account set base should not be inited automatically if `autoInit` is false", async () => {

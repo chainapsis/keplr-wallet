@@ -55,7 +55,7 @@ export const IBCTransferView: FunctionComponent = observer(() => {
         disabled={
           !hasAssets || !chainStore.current.features?.includes("ibc-transfer")
         }
-        data-loading={accountInfo.isSendingMsg === "ibcTransfer"}
+        data-loading={accountInfo.txTypeInProgress === "ibcTransfer"}
         onClick={(e) => {
           e.preventDefault();
 
