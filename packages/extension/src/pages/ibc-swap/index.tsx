@@ -960,7 +960,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           type="to"
           senderConfig={ibcSwapConfigs.senderConfig}
           amountConfig={ibcSwapConfigs.amountConfig}
-          forceShowPrice={isHighPriceImpact}
           onDestinationChainSelect={(chainId, coinMinimalDenom) => {
             setSearchParams(
               (prev) => {
