@@ -5,13 +5,13 @@
  * @format
  */
 
-import React, {FunctionComponent, Component} from 'react';
+import React, {Component, FunctionComponent} from 'react';
 
 import {StoreProvider} from './src/stores';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {StyleProvider, useStyle} from './src/styles';
 import {AppNavigation} from './src/navigation';
-import {Platform, StatusBar} from 'react-native';
+import {I18nManager, Platform, Settings, StatusBar} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 import {AppIntlProvider} from './src/languages';
@@ -30,7 +30,6 @@ import '@formatjs/intl-numberformat/locale-data/ko';
 import '@formatjs/intl-relativetimeformat/polyfill';
 import '@formatjs/intl-relativetimeformat/locale-data/en';
 import '@formatjs/intl-relativetimeformat/locale-data/ko'; // locale-data for en
-
 import {ConfirmProvider} from './src/hooks/confirm';
 import {InteractionModalsProvider} from './src/provider/interaction-modals-provider';
 import {LoadingIconAnimationProvider} from './src/provider/loading-icon-animation';
@@ -40,6 +39,8 @@ import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import {ErrorBoundary} from './error-boundary';
 import {APP_VERSION, CODEPUSH_VERSION} from './constants';
 import {UpdateProgress} from './update-progress';
+import {APP_STORE_URL, PLAY_STORE_URL} from './src/config';
+import {simpleFetch} from '@keplr-wallet/simple-fetch';
 
 const ThemeStatusBar: FunctionComponent = () => {
   const style = useStyle();
@@ -76,7 +77,8 @@ interface AppUpdateWrapperState {
     currentVersion?: string;
   };
   store: {
-    newVersionAvailable?: string;
+    newVersionAvailable?: boolean;
+    updateURL?: string;
   };
 
   restartAfter?: boolean;
@@ -189,6 +191,20 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
   }
 
   protected async init(): Promise<void> {
+    this.crawlStoreUpdate();
+    this.crawlCodepushUpdate();
+  }
+
+  protected async crawlStoreUpdate(): Promise<void> {
+    while (true) {
+      this.testStoreUpdate();
+
+      // 10min
+      await new Promise(resolve => setTimeout(resolve, 5 * 60 * 1000));
+    }
+  }
+
+  protected async crawlCodepushUpdate(): Promise<void> {
     while (true) {
       // 5min
       await new Promise(resolve => setTimeout(resolve, 5 * 60 * 1000));
@@ -240,6 +256,77 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
         .catch(err => {
           console.log(err);
         });
+    }
+  }
+
+  protected async testStoreUpdate(): Promise<void> {
+    const baseURL = Platform.OS === 'ios' ? APP_STORE_URL : PLAY_STORE_URL;
+
+    const country =
+      (() => {
+        try {
+          if (Platform.OS === 'ios') {
+            const settings = Settings.get('AppleLocale');
+            const locale: string = settings || settings?.[0];
+            if (locale) {
+              return locale.split('-')[0];
+            }
+          } else {
+            const locale = I18nManager.getConstants().localeIdentifier;
+            if (locale) {
+              return locale.split('_')[0];
+            }
+          }
+        } catch (e) {
+          console.log(e);
+          return 'en';
+        }
+      })() || 'en';
+
+    const storeApiUrl =
+      Platform.OS === 'ios'
+        ? '/lookup?bundleId=com.chainapsis.keplrwallet'
+        : '/store/apps/details?id=com.chainapsis.keplr';
+
+    const response = await simpleFetch(baseURL, storeApiUrl);
+
+    let iosTrackId: number | undefined;
+    const versionFromStore = (() => {
+      if (Platform.OS === 'ios') {
+        // XXX: 어째서 results가 여러개일 수 있는지 모르겠음.
+        const data = response.data as {
+          resultCount: number;
+          results: [{version: string; trackId: number}];
+        };
+        iosTrackId = data?.results[0]?.trackId;
+        return data?.results[0]?.version;
+      }
+
+      return (() => {
+        const text = response?.data as string;
+        const match = text?.match(/Current Version.+?>([\d.-]+)<\/span>/);
+        if (match) {
+          return match[1].trim();
+        }
+        const matchNewLayout = text?.match(/\[\[\["([\d-.]+?)"\]\]/);
+        if (matchNewLayout) {
+          return matchNewLayout[1].trim();
+        }
+      })();
+    })();
+
+    if (versionFromStore && this.state.appVersion !== versionFromStore) {
+      this.setState({
+        ...this.state,
+        store: {
+          ...this.state.store,
+          newVersionAvailable: true,
+          updateURL:
+            Platform.OS === 'ios'
+              ? `https://apps.apple.com/${country}/app/keplr-wallet/id${iosTrackId}`
+              : `https://play.google.com/store/apps/details?id=com.chainapsis.keplr&hl=${country}`,
+        },
+      });
     }
   }
 

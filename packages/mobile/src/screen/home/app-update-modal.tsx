@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import React from 'react';
-import {Linking, Text} from 'react-native';
+import {Text} from 'react-native';
 import {useStyle} from '../../styles';
 import {Box} from '../../components/box';
 import {Gutter} from '../../components/gutter';
@@ -12,8 +12,7 @@ import {FormattedMessage, useIntl} from 'react-intl';
 export const AppUpdateModal = registerCardModal(
   observer<{
     setIsOpen: (isOpen: boolean) => void;
-    url: string;
-  }>(({setIsOpen, url}) => {
+  }>(({setIsOpen}) => {
     const style = useStyle();
     const intl = useIntl();
     return (
@@ -42,7 +41,7 @@ export const AppUpdateModal = registerCardModal(
             id: 'page.main.components.app-update-modal.button',
           })}
           onPress={() => {
-            Linking.openURL(url);
+            // Linking.openURL(url);
             setIsOpen(false);
           }}
         />

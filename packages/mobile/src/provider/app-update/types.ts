@@ -6,7 +6,8 @@ export interface AppUpdate {
     readonly currentVersion?: string;
   };
   readonly store: {
-    readonly newVersionAvailable?: string;
+    readonly newVersionAvailable?: boolean;
+    readonly updateURL?: string;
   };
   readonly restartApp: () => void;
 }

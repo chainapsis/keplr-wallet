@@ -56,7 +56,6 @@ import {
   GravityBridgeCurrencyRegistrar,
   KeplrETCQueries,
 } from '@keplr-wallet/stores-etc';
-import {CheckVersionStore} from './version';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
@@ -99,7 +98,6 @@ export class RootStore {
   public readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegistrar;
   public readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar;
   public readonly scamProposalStore: ScamProposalStore;
-  public readonly checkUpdateStore: CheckVersionStore;
 
   public readonly keychainStore: KeychainStore;
   public readonly walletConnectStore: WalletConnectStore;
@@ -392,11 +390,6 @@ export class RootStore {
       }),
     );
 
-    this.checkUpdateStore = new CheckVersionStore(
-      new QuerySharedContext(new AsyncKVStore('store_app_version'), {
-        responseDebounceMs: 100,
-      }),
-    );
     this.keychainStore = new KeychainStore(
       new AsyncKVStore('store_keychain'),
       this.keyRingStore,
