@@ -150,7 +150,9 @@ export const CopyAddressScene: FunctionComponent<{
         </Box>
 
         <Gutter size={12} />
-        <ScrollView isGestureScrollView={true} style={{height: 270}}>
+        <ScrollView
+          isGestureScrollView={true}
+          style={style.flatten(['height-400'])}>
           {addresses.length === 0 ? (
             <Box
               alignX="center"
