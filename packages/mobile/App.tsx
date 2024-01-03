@@ -267,7 +267,13 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
     }
 
     return (
-      <AppUpdateProvider value={this.state}>
+      <AppUpdateProvider
+        value={{
+          ...this.state,
+          restartApp: () => {
+            this.restartApp();
+          },
+        }}>
         <GestureHandlerRootView style={{flex: 1}}>
           <LoadingIconAnimationProvider>
             <StyleProvider>

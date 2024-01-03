@@ -8,4 +8,5 @@ export interface AppUpdate {
   readonly store: {
     readonly newVersionAvailable?: string;
   };
+  readonly restartApp: () => void;
 }
