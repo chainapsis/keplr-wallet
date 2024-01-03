@@ -208,12 +208,13 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
             <Box alignX="center">
               <EmptyViewText
                 text={intl.formatMessage({
-                  id: 'page.governance.main.empty-text-1',
+                  id: 'page.governance.main.empty-title',
                 })}
               />
+              <Gutter size={12} />
               <EmptyViewText
                 text={intl.formatMessage({
-                  id: 'page.governance.main.empty-text-2',
+                  id: 'page.governance.main.empty-text',
                 })}
               />
             </Box>
