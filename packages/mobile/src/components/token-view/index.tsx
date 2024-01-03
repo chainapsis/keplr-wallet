@@ -57,10 +57,12 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         onPress={onClick}
         style={StyleSheet.flatten([
           style.flatten([
-            'padding-16',
+            'padding-x-16',
             'border-radius-6',
             'background-color-card-default',
+            'justify-center',
           ]),
+          {height: 70},
         ])}
         rippleColor={style.get('color-card-pressing-default').color}
         underlayColor={style.get('color-card-pressing-default').color}>
@@ -80,12 +82,13 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
 
           <Gutter size={12} />
 
-          <Box style={style.flatten(['flex-column', 'flex-shrink-1'])}>
+          <Box style={style.flatten(['flex-column', 'flex-4'])}>
             <XAxis>
               <Text
-                style={{
-                  ...style.flatten(['color-gray-10', 'subtitle2']),
-                }}>
+                numberOfLines={1}
+                style={StyleSheet.flatten([
+                  style.flatten(['color-gray-10', 'subtitle2']),
+                ])}>
                 {coinDenom}
               </Text>
 
@@ -100,12 +103,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
 
           <Column weight={1} />
 
-          <Box
-            style={style.flatten([
-              'flex-column',
-              'flex-shrink-1',
-              'items-end',
-            ])}>
+          <Box style={style.flatten(['flex-column', 'flex-3', 'items-end'])}>
             <Text style={style.flatten(['color-gray-10', 'subtitle1'])}>
               {viewToken.token
                 .hideDenom(true)
