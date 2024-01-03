@@ -166,16 +166,19 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
     title: string;
     validators: ViewValidator[];
     lenAlwaysShown: number;
+    key: 'delegations' | 'unbondings';
   }[] = [
     {
       title: intl.formatMessage({id: 'page.stake.staked-balance-title'}),
       validators: delegations,
       lenAlwaysShown: 4,
+      key: 'delegations',
     },
     {
       title: intl.formatMessage({id: 'page.stake.unstaking-balance-title'}),
       validators: unbondings,
       lenAlwaysShown: 4,
+      key: 'unbondings',
     },
   ];
   const onRefresh = async () => {
@@ -330,12 +333,13 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
           />
         </Box>
       ) : (
-        ValidatorViewData.map(({title, validators, lenAlwaysShown}) => {
+        ValidatorViewData.map(({title, validators, lenAlwaysShown, key}) => {
           if (validators.length === 0) {
             return null;
           }
+
           return (
-            <React.Fragment key={title}>
+            <React.Fragment key={key}>
               <Gutter size={12} />
               <CollapsibleList
                 title={<TokenTitleView title={title} />}
@@ -351,6 +355,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
                         name: validator.name,
                         validatorAddress: validator.validatorAddress,
                         subString: validator.subString,
+                        isDelegation: key === 'delegations' ? true : false,
                       }}
                       key={validator.validatorAddress + validator.subString}
                       afterSelect={() => {
