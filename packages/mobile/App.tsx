@@ -96,6 +96,8 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
     store: {},
   };
 
+  protected lastTimeout?: number;
+
   override componentDidMount() {
     // Ensure that any CodePush updates which are
     // synchronized in the background can't trigger
@@ -182,6 +184,63 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
         console.log(err);
         updateNotExists();
       });
+
+    this.init();
+  }
+
+  protected async init(): Promise<void> {
+    while (true) {
+      // 5min
+      await new Promise(resolve => setTimeout(resolve, 5 * 60 * 1000));
+
+      codePush
+        .checkForUpdate()
+        .then(update => {
+          if (update) {
+            this.setState({
+              ...this.state,
+              codepush: {
+                ...this.state.codepush,
+                newVersion: update.label,
+                newVersionDownloadProgress: 0,
+              },
+            });
+
+            codePush.sync(
+              {
+                installMode: codePush.InstallMode.ON_NEXT_RESTART,
+              },
+              status => {
+                if (status === codePush.SyncStatus.UPDATE_INSTALLED) {
+                  this.setState({
+                    ...this.state,
+                    codepush: {
+                      ...this.state.codepush,
+                      newVersionDownloadProgress: 1,
+                    },
+                  });
+                }
+              },
+              ({receivedBytes, totalBytes}) => {
+                this.setState({
+                  ...this.state,
+                  codepush: {
+                    ...this.state.codepush,
+                    newVersionDownloadProgress: Math.min(
+                      receivedBytes / totalBytes,
+                      // 1은 sync status handler가 처리함.
+                      0.99,
+                    ),
+                  },
+                });
+              },
+            );
+          }
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
   }
 
   restartApp() {
