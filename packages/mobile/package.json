@@ -66,7 +66,7 @@
     "react-native-exit-app": "^2.0.0",
     "react-native-fast-image": "^8.6.3",
     "react-native-fs": "^2.20.0",
-    "react-native-gesture-handler": "^2.12.1",
+    "react-native-gesture-handler": "^2.14.0",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-keychain": "^8.1.2",
     "react-native-linear-gradient": "^2.8.3",
