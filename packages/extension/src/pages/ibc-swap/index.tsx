@@ -28,7 +28,7 @@ import { useSearchParams } from "react-router-dom";
 import { useTxConfigsQueryString } from "../../hooks/use-tx-config-query-string";
 import { MainHeaderLayout } from "../main/layouts/header";
 import { XAxis } from "../../components/axis";
-import { H4 } from "../../components/typography";
+import { H4, Subtitle4 } from "../../components/typography";
 import { SlippageModal } from "./components/slippage-modal";
 import { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
@@ -832,6 +832,34 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             >
               <FormattedMessage id="page.ibc-swap.title.swap" />
             </H4>
+
+            <Gutter size="0.25rem" />
+            <Box
+              height="1rem"
+              alignX="center"
+              alignY="center"
+              paddingX="0.35rem"
+              borderRadius="0.225rem"
+              backgroundColor={
+                theme.mode === "light"
+                  ? ColorPalette["blue-100"]
+                  : ColorPalette["gray-500"]
+              }
+            >
+              <Subtitle4
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["blue-400"]
+                    : ColorPalette["gray-100"]
+                }
+                style={{
+                  fontSize: "0.5625rem",
+                }}
+              >
+                Beta
+              </Subtitle4>
+            </Box>
+
             <div style={{ flex: 1 }} />
             <Box
               cursor="pointer"
