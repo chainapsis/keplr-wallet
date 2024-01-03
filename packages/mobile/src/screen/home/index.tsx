@@ -164,12 +164,19 @@ export const HomeScreen: FunctionComponent = observer(() => {
       setNewVersionExist(true);
       return;
     }
-    if (appUpdate.codepush.newVersion) {
+    if (
+      appUpdate.codepush.newVersion &&
+      appUpdate.codepush.newVersionDownloadProgress === 1
+    ) {
       setNewVersionExist(true);
       return;
     }
     setNewVersionExist(false);
-  }, [appUpdate.codepush.newVersion, appUpdate.store.newVersionAvailable]);
+  }, [
+    appUpdate.codepush.newVersion,
+    appUpdate.codepush.newVersionDownloadProgress,
+    appUpdate.store.newVersionAvailable,
+  ]);
 
   return (
     <PageWithScrollView
