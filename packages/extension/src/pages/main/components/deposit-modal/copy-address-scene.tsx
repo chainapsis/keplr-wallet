@@ -30,7 +30,6 @@ import {
 } from "../../../../components/transition";
 import { IChainInfoImpl } from "@keplr-wallet/stores";
 import Color from "color";
-import { DenomHelper } from "@keplr-wallet/common";
 
 export const CopyAddressScene: FunctionComponent<{
   close: () => void;
@@ -134,11 +133,16 @@ export const CopyAddressScene: FunctionComponent<{
         }
       }
 
-      for (const currency of address.chainInfo.currencies) {
+      if (address.chainInfo.stakeCurrency) {
         if (
-          new DenomHelper(currency.coinMinimalDenom).type === "native" &&
-          !currency.coinMinimalDenom.startsWith("ibc/")
+          address.chainInfo.stakeCurrency.coinDenom.toLowerCase().includes(s)
         ) {
+          return true;
+        }
+      }
+      if (address.chainInfo.currencies.length > 0) {
+        const currency = address.chainInfo.currencies[0];
+        if (!currency.coinMinimalDenom.startsWith("ibc/")) {
           if (currency.coinDenom.toLowerCase().includes(s)) {
             return true;
           }
