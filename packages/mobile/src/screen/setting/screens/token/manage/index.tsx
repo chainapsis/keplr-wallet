@@ -28,8 +28,8 @@ import {EllipsisIcon} from '../../../../../components/icon/ellipsis';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../../../navigation';
 import {
-  SelectModal,
-  SelectModalCommonButton,
+  SelectChainModal,
+  SelectChainModalCommonButton,
 } from '../../../../../components/select-modal';
 import {
   MenuModal,
@@ -127,7 +127,7 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
               </Text>
               <Columns sum={1} alignY="center">
                 <Box width={208}>
-                  <SelectModalCommonButton
+                  <SelectChainModalCommonButton
                     items={items}
                     selectedItemKey={chainId}
                     isOpenModal={isOpenChainSelectModal}
@@ -197,7 +197,7 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
           setIsOpenMenuModal(false);
         }}
       />
-      <SelectModal
+      <SelectChainModal
         isOpen={isOpenChainSelectModal}
         setIsOpen={setIsOpenChainSelectModal}
         onSelect={item => {
@@ -205,9 +205,6 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
           setIsOpenChainSelectModal(false);
         }}
         items={items}
-        title={intl.formatMessage({
-          id: 'page.setting.token.manage.select-modal.title',
-        })}
         placeholder={intl.formatMessage({
           id: 'page.setting.token.manage.select-modal.placeholder',
         })}

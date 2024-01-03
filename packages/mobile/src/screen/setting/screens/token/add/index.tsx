@@ -28,8 +28,8 @@ import {Controller, useForm} from 'react-hook-form';
 import {Button} from '../../../../../components/button';
 import {Gutter} from '../../../../../components/gutter';
 import {
-  SelectModal,
-  SelectModalCommonButton,
+  SelectChainModal,
+  SelectChainModalCommonButton,
 } from '../../../../../components/select-modal';
 import {useNotification} from '../../../../../hooks/notification';
 
@@ -218,7 +218,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
       <Box paddingX={12} paddingTop={12} height={'100%'}>
         <Stack gutter={16}>
           <Box width={208}>
-            <SelectModalCommonButton
+            <SelectChainModalCommonButton
               items={items}
               selectedItemKey={chainId}
               placeholder={intl.formatMessage({
@@ -383,11 +383,8 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
         }}
       />
 
-      <SelectModal
+      <SelectChainModal
         items={items}
-        title={intl.formatMessage({
-          id: 'page.setting.token.add.select-modal.title',
-        })}
         placeholder={intl.formatMessage({
           id: 'page.setting.token.add.select-modal.placeholder',
         })}

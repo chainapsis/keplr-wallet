@@ -11,10 +11,6 @@ import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../navigation';
 import {TextButton} from '../../components/text-button';
 import {ArrowRightIcon} from '../../components/icon/arrow-right';
-import {
-  GovSelectChainModal,
-  SelectModalItem,
-} from './components/select-modal-gov';
 import {RectButton} from '../../components/rect-button';
 import {Column, Columns} from '../../components/column';
 import {ChainImageFallback} from '../../components/image';
@@ -29,6 +25,7 @@ import {EmptyView, EmptyViewText} from '../../components/empty-view';
 import {Box} from '../../components/box';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {Skeleton} from '../../components/skeleton';
+import {SelectChainModal, SelectModalItem} from '../../components/select-modal';
 
 export const GovernanceScreen: FunctionComponent = observer(() => {
   const style = useStyle();
@@ -227,7 +224,7 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
           );
         })
       )}
-      <GovSelectChainModal
+      <SelectChainModal
         isOpen={isOpenSelectChainModal}
         setIsOpen={setIsOpenSelectChainModal}
         items={modalItems}
@@ -246,6 +243,12 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
             },
           });
         }}
+        emptyTextTitle={intl.formatMessage({
+          id: 'page.governance.components.select-chain-modal.empty-title',
+        })}
+        emptyText={intl.formatMessage({
+          id: 'page.governance.components.select-chain-modal.empty-text',
+        })}
       />
     </PageWithScrollView>
   );
