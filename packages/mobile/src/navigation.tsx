@@ -953,6 +953,16 @@ export const AppNavigation: FunctionComponent = observer(() => {
 
           {/*NOTE 사이드바를 통해서 세팅으로 이동시 뒤로가기때 다시 메인으로 오기 위해서 해당 route들은 최상위에도 올렸습니다*/}
           <Stack.Screen
+            name="Setting.ManageTokenList"
+            options={{
+              title: intl.formatMessage({
+                id: 'page.setting.manage-token-list-title',
+              }),
+              ...defaultHeaderOptions,
+            }}
+            component={SettingTokenListScreen}
+          />
+          <Stack.Screen
             name="Setting.ManageTokenList.Add"
             options={{
               title: intl.formatMessage({id: 'page.setting.token.add.title'}),
