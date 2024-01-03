@@ -8,7 +8,7 @@ import {
   ISenderConfig,
 } from "@keplr-wallet/hooks";
 import { autorun } from "mobx";
-import { Dec, IntPretty, PricePretty } from "@keplr-wallet/unit";
+import { Dec, PricePretty } from "@keplr-wallet/unit";
 import { useStore } from "../../../../stores";
 import { IBCSwapAmountConfig } from "../../../../hooks/ibc-swap";
 import { Box } from "../../../../components/box";
@@ -16,7 +16,6 @@ import { ColorPalette } from "../../../../styles";
 import { Gutter } from "../../../../components/gutter";
 import { XAxis, YAxis } from "../../../../components/axis";
 import { Body3, Caption2, Subtitle4 } from "../../../../components/typography";
-import { Tooltip } from "../../../../components/tooltip";
 import { LoadingIcon } from "../../../../components/icon";
 import { TransactionFeeModal } from "../../../../components/input/fee-control/modal";
 import { Modal } from "../../../../components/modal";
@@ -350,42 +349,42 @@ export const SwapFeeInfo: FunctionComponent<{
             <Subtitle4
               color={
                 theme.mode === "light"
-                  ? ColorPalette["blue-400"]
-                  : ColorPalette["blue-200"]
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-300"]
               }
             >
               <FormattedMessage id="page.ibc-swap.components.swap-fee-info.button.service-fee" />
             </Subtitle4>
-            <Gutter size="0.2rem" />
-            <Tooltip
-              content={intl.formatMessage(
-                {
-                  id: "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph",
-                },
-                {
-                  rate: (() => {
-                    const feeRatioPretty = new IntPretty(
-                      amountConfig.swapFeeBps
-                    ).moveDecimalPointLeft(2);
-                    return feeRatioPretty
-                      .trim(true)
-                      .maxDecimals(4)
-                      .inequalitySymbol(true)
-                      .toString();
-                  })(),
-                }
-              )}
-            >
-              <InfoIcon
-                width="1rem"
-                height="1rem"
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["blue-400"]
-                    : ColorPalette["blue-200"]
-                }
-              />
-            </Tooltip>
+            {/*<Gutter size="0.2rem" />*/}
+            {/*<Tooltip*/}
+            {/*  content={intl.formatMessage(*/}
+            {/*    {*/}
+            {/*      id: "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph",*/}
+            {/*    },*/}
+            {/*    {*/}
+            {/*      rate: (() => {*/}
+            {/*        const feeRatioPretty = new IntPretty(*/}
+            {/*          amountConfig.swapFeeBps*/}
+            {/*        ).moveDecimalPointLeft(2);*/}
+            {/*        return feeRatioPretty*/}
+            {/*          .trim(true)*/}
+            {/*          .maxDecimals(4)*/}
+            {/*          .inequalitySymbol(true)*/}
+            {/*          .toString();*/}
+            {/*      })(),*/}
+            {/*    }*/}
+            {/*  )}*/}
+            {/*>*/}
+            {/*  <InfoIcon*/}
+            {/*    width="1rem"*/}
+            {/*    height="1rem"*/}
+            {/*    color={*/}
+            {/*      theme.mode === "light"*/}
+            {/*        ? ColorPalette["blue-400"]*/}
+            {/*        : ColorPalette["blue-200"]*/}
+            {/*    }*/}
+            {/*  />*/}
+            {/*</Tooltip>*/}
             {amountConfig.isFetching ? (
               <Box
                 height="1px"
@@ -467,27 +466,27 @@ export const SwapFeeInfo: FunctionComponent<{
   }
 );
 
-const InfoIcon: FunctionComponent<{
-  width: string;
-  height: string;
-  color: string;
-}> = ({ width, height, color }) => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={width}
-      height={height}
-      fill="none"
-      stroke="none"
-      viewBox="0 0 16 16"
-    >
-      <path
-        fill={color || "currentColor"}
-        d="M8 1.333A6.67 6.67 0 001.333 8 6.669 6.669 0 008 14.667 6.67 6.67 0 0014.667 8 6.67 6.67 0 008 1.333zm.667 10H7.333v-4h1.334v4zm0-5.333H7.333V4.667h1.334V6z"
-      />
-    </svg>
-  );
-};
+// const InfoIcon: FunctionComponent<{
+//   width: string;
+//   height: string;
+//   color: string;
+// }> = ({ width, height, color }) => {
+//   return (
+//     <svg
+//       xmlns="http://www.w3.org/2000/svg"
+//       width={width}
+//       height={height}
+//       fill="none"
+//       stroke="none"
+//       viewBox="0 0 16 16"
+//     >
+//       <path
+//         fill={color || "currentColor"}
+//         d="M8 1.333A6.67 6.67 0 001.333 8 6.669 6.669 0 008 14.667 6.67 6.67 0 0014.667 8 6.67 6.67 0 008 1.333zm.667 10H7.333v-4h1.334v4zm0-5.333H7.333V4.667h1.334V6z"
+//       />
+//     </svg>
+//   );
+// };
 
 const noop = (..._args: any[]) => {
   // noop

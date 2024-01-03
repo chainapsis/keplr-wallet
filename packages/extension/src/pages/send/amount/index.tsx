@@ -297,6 +297,22 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   const historyType = isIBCTransfer ? "basic-send/ibc" : "basic-send";
 
+  const [isSendingIBCToken, setIsSendingIBCToken] = useState(false);
+  useEffect(() => {
+    if (!isIBCTransfer) {
+      if (
+        new DenomHelper(sendConfigs.amountConfig.currency.coinMinimalDenom)
+          .type === "native" &&
+        sendConfigs.amountConfig.currency.coinMinimalDenom.startsWith("ibc/")
+      ) {
+        setIsSendingIBCToken(true);
+        return;
+      }
+    }
+
+    setIsSendingIBCToken(false);
+  }, [isIBCTransfer, sendConfigs.amountConfig.currency]);
+
   // Prefetch IBC channels to reduce the UI flickering(?) when open ibc channel modal.
   try {
     skipQueriesStore.queryIBCPacketForwardingTransfer.getIBCChannels(
@@ -686,6 +702,16 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               color="warning"
               title={intl.formatMessage({
                 id: "page.send.amount.ibc-transfer-warning.title",
+              })}
+            />
+            <Gutter size="0.75rem" />
+          </VerticalCollapseTransition>
+          <Gutter size="0" />
+          <VerticalCollapseTransition collapsed={!isSendingIBCToken}>
+            <GuideBox
+              color="warning"
+              title={intl.formatMessage({
+                id: "page.send.amount.avoid-cex-warning.title",
               })}
             />
             <Gutter size="0.75rem" />

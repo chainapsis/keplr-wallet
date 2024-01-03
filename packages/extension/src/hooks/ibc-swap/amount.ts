@@ -1,6 +1,6 @@
 import { AmountConfig, ISenderConfig, UIProperties } from "@keplr-wallet/hooks";
 import { AppCurrency } from "@keplr-wallet/types";
-import { CoinPretty, Dec } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, RatePretty } from "@keplr-wallet/unit";
 import {
   ChainGetter,
   CosmosAccount,
@@ -59,6 +59,14 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   get outCurrency(): AppCurrency {
     return this._outCurrency;
+  }
+
+  get swapPriceImpact(): RatePretty | undefined {
+    const queryIBCSwap = this.getQueryIBCSwap();
+    if (!queryIBCSwap) {
+      return undefined;
+    }
+    return queryIBCSwap.getQueryRoute().swapPriceImpact;
   }
 
   @action
