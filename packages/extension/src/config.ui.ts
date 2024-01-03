@@ -91,6 +91,18 @@ export const FiatCurrencies: FiatCurrency[] = [
     maxDecimals: 1,
     locale: "en-IN",
   },
+  {
+    currency: "chf",
+    symbol: "₣",
+    maxDecimals: 2,
+    locale: "gsw",
+  },
+  {
+    currency: "pkr",
+    symbol: "Rs",
+    maxDecimals: 0,
+    locale: "en-PK",
+  },
 ];
 
 export const GoogleMeasurementId =
