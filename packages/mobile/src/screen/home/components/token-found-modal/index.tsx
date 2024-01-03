@@ -14,7 +14,7 @@ import {CoinPretty} from '@keplr-wallet/unit';
 import {Gutter} from '../../../../components/gutter';
 import {XAxis, YAxis} from '../../../../components/axis';
 import {BaseModalHeader} from '../../../../components/modal';
-import {Pressable, Text} from 'react-native';
+import {Text} from 'react-native';
 import {TextButton} from '../../../../components/text-button';
 import {ArrowUpIcon} from '../../../../components/icon/arrow-up';
 import {ArrowDownIcon} from '../../../../components/icon/arrow-down';
@@ -24,6 +24,7 @@ import {registerCardModal} from '../../../../components/modal/card';
 import {StackNavProp} from '../../../../navigation';
 import {useIntl} from 'react-intl';
 import {ScrollView} from '../../../../components/scroll-view/common-scroll-view';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export const TokenFoundModal = registerCardModal(
   observer<{setIsOpen: (isOpen: boolean) => void; navigation: StackNavProp}>(
@@ -175,7 +176,7 @@ export const TokenFoundModal = registerCardModal(
           <Gutter size={12} />
 
           <YAxis alignX="center">
-            <Pressable
+            <TouchableWithoutFeedback
               style={style.flatten(['flex-row', 'justify-center'])}
               onPress={() => {
                 if (
@@ -219,7 +220,7 @@ export const TokenFoundModal = registerCardModal(
                   }}
                 />
               </XAxis>
-            </Pressable>
+            </TouchableWithoutFeedback>
           </YAxis>
 
           {keyRingStore.selectedKeyInfo?.type === 'ledger' ? (
@@ -318,7 +319,7 @@ const FoundChainView: FunctionComponent<{
 
         <Checkbox
           checked={checked}
-          onPress={(_, checked) => {
+          onPress={checked => {
             onCheckbox(checked);
           }}
           size="large"

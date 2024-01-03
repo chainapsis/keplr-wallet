@@ -9,11 +9,12 @@ import {TextInput} from '../text-input/text-input';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStore} from '../../../stores';
 import {CoinPretty, Dec, DecUtils} from '@keplr-wallet/unit';
-import {Pressable, Text} from 'react-native';
+import {Text} from 'react-native';
 import {useStyle} from '../../../styles';
 import {Box} from '../../box';
 import {Path, Svg} from 'react-native-svg';
 import {Columns} from '../../column';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export const AmountInput: FunctionComponent<{
   amountConfig: IAmountConfig;
@@ -219,7 +220,7 @@ const BottomPriceButton: FunctionComponent<{
 
   return (
     <Box alignX="left" marginTop={8} marginLeft={8}>
-      <Pressable
+      <TouchableWithoutFeedback
         onPress={onClick}
         onPressIn={() => {
           setIsPressed(true);
@@ -249,7 +250,7 @@ const BottomPriceButton: FunctionComponent<{
             </Text>
           </Columns>
         </Box>
-      </Pressable>
+      </TouchableWithoutFeedback>
     </Box>
   );
 };
@@ -263,7 +264,7 @@ const MaxButton: FunctionComponent<{
   const [isPressed, setIsPressed] = useState(false);
 
   return (
-    <Pressable
+    <TouchableWithoutFeedback
       onPressIn={() => {
         setIsPressed(true);
       }}
@@ -305,6 +306,6 @@ const MaxButton: FunctionComponent<{
           <FormattedMessage id="components.input.amount-input.max-button" />
         </Text>
       </Box>
-    </Pressable>
+    </TouchableWithoutFeedback>
   );
 });

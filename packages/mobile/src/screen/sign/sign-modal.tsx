@@ -457,7 +457,7 @@ export const SignModal = registerCardModal(
                 <Box>
                   <Checkbox
                     checked={isSendAuthzGrantChecked}
-                    onPress={(_, checked) => {
+                    onPress={checked => {
                       setIsSendAuthzGrantChecked(checked);
                     }}
                   />

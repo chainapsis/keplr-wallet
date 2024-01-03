@@ -5,7 +5,7 @@ import {
   StackActions,
   useNavigation,
 } from '@react-navigation/native';
-import {Pressable, StyleSheet, Text} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
 import {MenuIcon, QRScanIcon} from '../icon';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../stores';
@@ -15,6 +15,7 @@ import {ArrowDownFillIcon} from '../icon/arrow-donw-fill';
 import {StackNavProp} from '../../navigation';
 import {PlusIcon} from '../icon/plus';
 import {COMMUNITY_CHAIN_URL} from '../../config';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 const HomeScreenHeaderLeft: FunctionComponent = () => {
   const style = useStyle();
@@ -22,13 +23,13 @@ const HomeScreenHeaderLeft: FunctionComponent = () => {
   const navigation = useNavigation();
 
   return (
-    <Pressable
+    <TouchableWithoutFeedback
       onPress={() => {
         navigation.dispatch(DrawerActions.toggleDrawer());
       }}
       style={style.flatten(['margin-left-20'])}>
       <MenuIcon size={28} color={style.flatten(['color-gray-10']).color} />
-    </Pressable>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -38,13 +39,13 @@ const HomeScreenHeaderRight: FunctionComponent = () => {
   const navigation = useNavigation<StackNavProp>();
 
   return (
-    <Pressable
+    <TouchableWithoutFeedback
       onPress={() => {
         navigation.navigate('Camera');
       }}
       style={style.flatten(['margin-right-20'])}>
       <QRScanIcon size={28} color={style.flatten(['color-gray-10']).color} />
-    </Pressable>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -55,7 +56,7 @@ export const HomeScreenHeaderTitle = observer(() => {
   const [isPress, setInsPress] = useState(false);
 
   return (
-    <Pressable
+    <TouchableWithoutFeedback
       onPressIn={() => setInsPress(true)}
       onPressOut={() => setInsPress(false)}
       onPress={() => {
@@ -85,7 +86,7 @@ export const HomeScreenHeaderTitle = observer(() => {
           color={style.get('color-gray-400').color}
         />
       </Columns>
-    </Pressable>
+    </TouchableWithoutFeedback>
   );
 });
 
@@ -123,7 +124,7 @@ const DefaultScreenHeaderLeft: FunctionComponent = () => {
   return (
     <React.Fragment>
       {nav.canGoBack() && !isSettingIntro ? (
-        <Pressable
+        <TouchableWithoutFeedback
           onPress={() => {
             if (nav.canGoBack()) {
               nav.goBack();
@@ -134,7 +135,7 @@ const DefaultScreenHeaderLeft: FunctionComponent = () => {
             size={28}
             color={style.get('color-gray-300').color}
           />
-        </Pressable>
+        </TouchableWithoutFeedback>
       ) : null}
     </React.Fragment>
   );
@@ -158,7 +159,7 @@ const SuggestScreenHeaderRight: FunctionComponent = () => {
 
   return (
     <React.Fragment>
-      <Pressable
+      <TouchableWithoutFeedback
         onPress={() => {
           nav.navigate('Web', {
             url: COMMUNITY_CHAIN_URL,
@@ -167,7 +168,7 @@ const SuggestScreenHeaderRight: FunctionComponent = () => {
         }}
         style={StyleSheet.flatten([style.flatten(['padding-right-20'])])}>
         <PlusIcon size={28} color={style.get('color-gray-300').color} />
-      </Pressable>
+      </TouchableWithoutFeedback>
     </React.Fragment>
   );
 };

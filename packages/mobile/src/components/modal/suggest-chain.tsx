@@ -9,7 +9,7 @@ import {Gutter} from '../gutter';
 import {registerCardModal} from './card';
 import {Box} from '../box';
 import FastImage from 'react-native-fast-image';
-import {Pressable, Text} from 'react-native';
+import {Text} from 'react-native';
 import Svg, {Circle, Path} from 'react-native-svg';
 import {Chip} from '../chip';
 import {ChainInfo} from '@keplr-wallet/types';
@@ -19,6 +19,7 @@ import {Skeleton} from '../skeleton';
 import {RectButton} from '../rect-button';
 import * as WebBrowser from 'expo-web-browser';
 import {ScrollView} from '../scroll-view/common-scroll-view';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export const SuggestChainModal = registerCardModal(
   observer(() => {
@@ -289,7 +290,7 @@ const RawInfo: FunctionComponent<{
           id: 'page.suggest-chain.raw-info-view.guide-paragraph',
         })}
         bottom={
-          <Pressable
+          <TouchableWithoutFeedback
             onPress={() => {
               WebBrowser.openBrowserAsync(communityChainInfoRepoUrl);
             }}>
@@ -301,7 +302,7 @@ const RawInfo: FunctionComponent<{
               ])}>
               <FormattedMessage id="page.suggest-chain.raw-info-view.chain-registry-link-text" />
             </Text>
-          </Pressable>
+          </TouchableWithoutFeedback>
         }
       />
 

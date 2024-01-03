@@ -8,7 +8,7 @@ import {SearchIcon} from '../../../components/icon';
 import {TextInput} from '../../../components/input';
 import {Gutter} from '../../../components/gutter';
 import {Column, Columns} from '../../../components/column';
-import {Pressable, Text} from 'react-native';
+import {Text} from 'react-native';
 import {Checkbox} from '../../../components/checkbox';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import {FormattedMessage, useIntl} from 'react-intl';
@@ -18,6 +18,7 @@ import {
 } from '../../../components/boundary-scroll-view';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Box} from '../../../components/box';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export const SendSelectAssetScreen: FunctionComponent = observer(() => {
   const style = useStyle();
@@ -80,7 +81,8 @@ export const SendSelectAssetScreen: FunctionComponent = observer(() => {
 
         <Gutter size={10} />
 
-        <Pressable onPress={() => setHideIBCToken(!hideIBCToken)}>
+        <TouchableWithoutFeedback
+          onPress={() => setHideIBCToken(!hideIBCToken)}>
           <Columns sum={1} gutter={4}>
             <Column weight={1} />
 
@@ -98,7 +100,7 @@ export const SendSelectAssetScreen: FunctionComponent = observer(() => {
               onPress={() => setHideIBCToken(!hideIBCToken)}
             />
           </Columns>
-        </Pressable>
+        </TouchableWithoutFeedback>
 
         <Gutter size={12} />
       </Box>

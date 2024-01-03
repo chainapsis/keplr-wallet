@@ -2,7 +2,7 @@ import React, {FunctionComponent, useState} from 'react';
 import {SpecialButtonProps} from './types';
 import {Box} from '../box';
 import {ColorPalette, useStyle} from '../../styles';
-import {Platform, Pressable, StyleSheet, Text, View} from 'react-native';
+import {Platform, StyleSheet, Text, View} from 'react-native';
 import {SVGLoadingIcon} from '../spinner';
 import Animated, {
   interpolateColor,
@@ -13,6 +13,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 const AnimatedView = Animated.createAnimatedComponent(View);
@@ -110,7 +111,7 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
           shadowColor: shadowColor,
         },
       ])}>
-      <Pressable
+      <TouchableWithoutFeedback
         style={StyleSheet.flatten([
           style.flatten([
             `height-button-${size}` as any,
@@ -217,7 +218,7 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
             ) : null}
           </Box>
         </AnimatedLinearGradient>
-      </Pressable>
+      </TouchableWithoutFeedback>
       <View
         pointerEvents="none"
         style={style.flatten(

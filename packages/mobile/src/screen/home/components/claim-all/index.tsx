@@ -27,7 +27,7 @@ import {Skeleton} from '../../../../components/skeleton';
 import {YAxis} from '../../../../components/axis';
 import {Gutter} from '../../../../components/gutter';
 import {ChainImageFallback} from '../../../../components/image';
-import {Pressable, Text} from 'react-native';
+import {Text} from 'react-native';
 import {ArrowDownIcon} from '../../../../components/icon/arrow-down';
 import {ArrowUpIcon} from '../../../../components/icon/arrow-up';
 import {WarningIcon} from '../../../../components/icon/warning';
@@ -36,6 +36,7 @@ import {SpecialButton} from '../../../../components/special-button';
 import {useNotification} from '../../../../hooks/notification';
 import {StackNavProp} from '../../../../navigation';
 import {FormattedMessage, useIntl} from 'react-intl';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 // XXX: 좀 이상하긴 한데 상위/하위 컴포넌트가 state를 공유하기 쉽게하려고 이렇게 한다...
 class ClaimAllEachState {
@@ -472,7 +473,7 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
           </Columns>
         </Box>
 
-        <Pressable
+        <TouchableWithoutFeedback
           disabled={claimAllDisabled}
           onPressIn={() => setIsPressingExpandButton(true)}
           onPressOut={() => setIsPressingExpandButton(false)}
@@ -499,7 +500,7 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
               )}
             </Box>
           </Box>
-        </Pressable>
+        </TouchableWithoutFeedback>
 
         <VerticalCollapseTransition
           collapsed={!isExpanded}
