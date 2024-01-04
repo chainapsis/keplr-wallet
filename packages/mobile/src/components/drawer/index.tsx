@@ -20,8 +20,8 @@ export const DrawerContent: FunctionComponent = observer(() => {
 
   const style = useStyle();
 
-  const handleLock = () => {
-    keyRingStore.lock();
+  const handleLock = async () => {
+    await keyRingStore.lock();
     drawerClose();
     navigation.reset({routes: [{name: 'Unlock'}]});
   };
@@ -89,12 +89,8 @@ export const DrawerContent: FunctionComponent = observer(() => {
         </Stack>
       </Stack>
       <Stack gutter={32}>
-        <TouchableWithoutFeedback>
-          <Text
-            style={style.flatten(['h3', 'color-white'])}
-            onPress={handleLock}>
-            Lock Wallet
-          </Text>
+        <TouchableWithoutFeedback onPress={handleLock}>
+          <Text style={style.flatten(['h3', 'color-white'])}>Lock Wallet</Text>
         </TouchableWithoutFeedback>
         <Box
           width={40}
