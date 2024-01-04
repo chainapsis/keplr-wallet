@@ -95,6 +95,7 @@ export const TextInput = forwardRef<
 
             <Column weight={1}>
               <NativeTextInput
+                autoCapitalize="none"
                 editable={!disabled}
                 selectTextOnFocus={!disabled}
                 style={StyleSheet.flatten([

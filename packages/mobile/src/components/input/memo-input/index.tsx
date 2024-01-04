@@ -13,6 +13,7 @@ export const MemoInput: FunctionComponent<{
 
   return (
     <TextInput
+      autoCapitalize="none"
       label={
         label ??
         intl.formatMessage({id: 'components.input.memo-input.memo-label'})
