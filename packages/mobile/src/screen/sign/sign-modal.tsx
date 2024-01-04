@@ -42,6 +42,7 @@ import {LedgerGrantModal} from '../register/connect-ledger/modal';
 import {LedgerGuideBox} from '../../components/guide-box/ledger-guide-box';
 import {FlatList} from '../../components/flat-list';
 import {ScrollView} from '../../components/scroll-view/common-scroll-view';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export const SignModal = registerCardModal(
   observer<{
@@ -570,27 +571,29 @@ export const ViewDataButton: FunctionComponent<{
   const style = useStyle();
 
   return (
-    <Box
-      onClick={() => {
+    <TouchableWithoutFeedback
+      onPress={() => {
         setIsViewData(!isViewData);
       }}>
-      <XAxis alignY="center">
-        <Text style={style.flatten(['text-button2', 'color-label-default'])}>
-          <FormattedMessage id="page.sign.cosmos.tx.view-data-button" />
-        </Text>
+      <Box>
+        <XAxis alignY="center">
+          <Text style={style.flatten(['text-button2', 'color-label-default'])}>
+            <FormattedMessage id="page.sign.cosmos.tx.view-data-button" />
+          </Text>
 
-        <Gutter size={4} />
+          <Gutter size={4} />
 
-        {isViewData ? (
-          <CloseIcon size={12} color={style.get('color-gray-100').color} />
-        ) : (
-          <CodeBracketIcon
-            size={12}
-            color={style.get('color-gray-100').color}
-          />
-        )}
-      </XAxis>
-    </Box>
+          {isViewData ? (
+            <CloseIcon size={12} color={style.get('color-gray-100').color} />
+          ) : (
+            <CodeBracketIcon
+              size={12}
+              color={style.get('color-gray-100').color}
+            />
+          )}
+        </XAxis>
+      </Box>
+    </TouchableWithoutFeedback>
   );
 };
 

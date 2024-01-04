@@ -78,14 +78,7 @@ export const SelectStakingChainModal = registerCardModal(
           <Gutter size={12} />
         </Box>
         <ScrollView isGestureScrollView={true} style={{height: 250}}>
-          <Box
-            onClick={() => {
-              const test = filtered[0];
-              onSelect({
-                key: test.viewToken.chainInfo.chainId,
-                viewToken: test.viewToken,
-              });
-            }}>
+          <Box>
             {filtered.map(item => {
               return (
                 <TokenItem

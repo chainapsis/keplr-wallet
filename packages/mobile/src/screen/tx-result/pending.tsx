@@ -184,24 +184,22 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
       </View>
 
       <Box paddingX={48} height={116} marginTop={58} alignX="center">
-        <View style={style.flatten(['flex-row', 'width-full'])}>
-          <TextButton
-            containerStyle={style.flatten(['flex-1'])}
-            size="large"
-            text={intl.formatMessage({
-              id: 'page.tx-result-pending.go-to-home-button',
-            })}
-            rightIcon={color => (
-              <View style={style.flatten(['margin-left-8'])}>
-                <ArrowRightIcon color={color} size={18} />
-              </View>
-            )}
-            onPress={() => {
-              isPendingGotoHome.current = true;
-              navigation.navigate('Home');
-            }}
-          />
-        </View>
+        <TextButton
+          containerStyle={style.flatten(['flex-1'])}
+          size="large"
+          text={intl.formatMessage({
+            id: 'page.tx-result-pending.go-to-home-button',
+          })}
+          rightIcon={color => (
+            <View style={style.flatten(['margin-left-8'])}>
+              <ArrowRightIcon color={color} size={18} />
+            </View>
+          )}
+          onPress={() => {
+            isPendingGotoHome.current = true;
+            navigation.navigate('Home');
+          }}
+        />
       </Box>
 
       <View style={style.flatten(['flex-2'])} />

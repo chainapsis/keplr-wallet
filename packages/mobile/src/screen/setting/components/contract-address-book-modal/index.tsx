@@ -11,7 +11,10 @@ import {Box} from '../../../../components/box';
 import {EmptyView} from '../../../../components/empty-view';
 import {ContractAddressItem} from '../contract-item';
 import {TokenContractListRepoURL} from '../../../../config.ui';
-import {TextInput} from 'react-native-gesture-handler';
+import {
+  TextInput,
+  TouchableWithoutFeedback,
+} from 'react-native-gesture-handler';
 import {registerCardModal} from '../../../../components/modal/card';
 import {BaseModalHeader} from '../../../../components/modal';
 import {ScrollView} from '../../../../components/scroll-view/common-scroll-view';
@@ -95,34 +98,34 @@ export const ContractAddressBookModal = registerCardModal(
         </ScrollView>
 
         <Box alignX="center">
-          <Box
-            paddingY={16}
-            paddingX={8}
-            onClick={() => {
+          <TouchableWithoutFeedback
+            onPress={() => {
               Linking.openURL(TokenContractListRepoURL);
             }}>
-            <Text
-              style={style.flatten([
-                'subtitle3',
-                'color-text-low',
-                'text-center',
-              ])}>
-              <FormattedMessage
-                id="page.setting.token.add.contract-address-book-modal.link"
-                values={{
-                  link: (...chunks: any) => (
-                    <Text
-                      style={style.flatten([
-                        'text-underline',
-                        'color-gray-50',
-                      ])}>
-                      {chunks}
-                    </Text>
-                  ),
-                }}
-              />
-            </Text>
-          </Box>
+            <Box paddingY={16} paddingX={8}>
+              <Text
+                style={style.flatten([
+                  'subtitle3',
+                  'color-text-low',
+                  'text-center',
+                ])}>
+                <FormattedMessage
+                  id="page.setting.token.add.contract-address-book-modal.link"
+                  values={{
+                    link: (...chunks: any) => (
+                      <Text
+                        style={style.flatten([
+                          'text-underline',
+                          'color-gray-50',
+                        ])}>
+                        {chunks}
+                      </Text>
+                    ),
+                  }}
+                />
+              </Text>
+            </Box>
+          </TouchableWithoutFeedback>
         </Box>
       </Box>
     );

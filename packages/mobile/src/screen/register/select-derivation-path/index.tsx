@@ -16,6 +16,7 @@ import {Bech32Address} from '@keplr-wallet/cosmos';
 import {CoinPretty} from '@keplr-wallet/unit';
 import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
 import {useEffectOnce} from '../../../hooks';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -207,76 +208,77 @@ const PathItem: FunctionComponent<{
     const queries = queriesStore.get(chainId);
 
     return (
-      <Box
-        padding={20}
-        borderRadius={10}
-        backgroundColor={style.get('color-gray-500').color}
-        style={{opacity: isSelected ? 1 : 0.5}}
-        onClick={onClick}>
-        <XAxis alignY="center">
-          <Box padding={8}>
-            <WalletIcon size={20} color={style.get('color-gray-10').color} />
-          </Box>
+      <TouchableWithoutFeedback onPress={onClick}>
+        <Box
+          padding={20}
+          borderRadius={10}
+          backgroundColor={style.get('color-gray-500').color}
+          style={{opacity: isSelected ? 1 : 0.5}}>
+          <XAxis alignY="center">
+            <Box padding={8}>
+              <WalletIcon size={20} color={style.get('color-gray-10').color} />
+            </Box>
+
+            <Gutter size={16} />
+
+            <YAxis>
+              <Text style={style.flatten(['h5', 'color-text-high'])}>
+                m/44’/{coinType}’
+              </Text>
+              <Text style={style.flatten(['body2', 'color-text-middle'])}>
+                {Bech32Address.shortenAddress(bech32Address, 24)}
+              </Text>
+            </YAxis>
+          </XAxis>
 
           <Gutter size={16} />
 
-          <YAxis>
-            <Text style={style.flatten(['h5', 'color-text-high'])}>
-              m/44’/{coinType}’
+          <Box height={1} backgroundColor={style.get('color-gray-400').color} />
+
+          <Gutter size={16} />
+
+          <XAxis alignY="center">
+            <Text
+              style={style.flatten(['subtitle3', 'color-text-high', 'flex-1'])}>
+              <FormattedMessage id="pages.register.select-derivation-path.path-item.balance" />
             </Text>
-            <Text style={style.flatten(['body2', 'color-text-middle'])}>
-              {Bech32Address.shortenAddress(bech32Address, 24)}
+
+            <Text style={style.flatten(['subtitle3', 'color-text-high'])}>
+              {(() => {
+                const queryBal = queries.queryBalances
+                  .getQueryBech32Address(bech32Address)
+                  .getBalance(currency);
+
+                if (queryBal) {
+                  return queryBal.balance;
+                }
+                return new CoinPretty(currency, '0');
+              })()
+                .trim(true)
+                .maxDecimals(6)
+                .inequalitySymbol(true)
+                .shrink(true)
+                .toString()}
             </Text>
-          </YAxis>
-        </XAxis>
+          </XAxis>
 
-        <Gutter size={16} />
+          <Gutter size={4} />
 
-        <Box height={1} backgroundColor={style.get('color-gray-400').color} />
+          <XAxis alignY="center">
+            <Text
+              style={style.flatten(['subtitle3', 'color-text-high', 'flex-1'])}>
+              <FormattedMessage id="pages.register.select-derivation-path.path-item.previous-txs" />
+            </Text>
 
-        <Gutter size={16} />
-
-        <XAxis alignY="center">
-          <Text
-            style={style.flatten(['subtitle3', 'color-text-high', 'flex-1'])}>
-            <FormattedMessage id="pages.register.select-derivation-path.path-item.balance" />
-          </Text>
-
-          <Text style={style.flatten(['subtitle3', 'color-text-high'])}>
-            {(() => {
-              const queryBal = queries.queryBalances
-                .getQueryBech32Address(bech32Address)
-                .getBalance(currency);
-
-              if (queryBal) {
-                return queryBal.balance;
+            <Text style={style.flatten(['subtitle3', 'color-text-high'])}>
+              {
+                queries.cosmos.queryAccount.getQueryBech32Address(bech32Address)
+                  .sequence
               }
-              return new CoinPretty(currency, '0');
-            })()
-              .trim(true)
-              .maxDecimals(6)
-              .inequalitySymbol(true)
-              .shrink(true)
-              .toString()}
-          </Text>
-        </XAxis>
-
-        <Gutter size={4} />
-
-        <XAxis alignY="center">
-          <Text
-            style={style.flatten(['subtitle3', 'color-text-high', 'flex-1'])}>
-            <FormattedMessage id="pages.register.select-derivation-path.path-item.previous-txs" />
-          </Text>
-
-          <Text style={style.flatten(['subtitle3', 'color-text-high'])}>
-            {
-              queries.cosmos.queryAccount.getQueryBech32Address(bech32Address)
-                .sequence
-            }
-          </Text>
-        </XAxis>
-      </Box>
+            </Text>
+          </XAxis>
+        </Box>
+      </TouchableWithoutFeedback>
     );
   },
 );

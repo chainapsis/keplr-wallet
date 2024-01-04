@@ -42,6 +42,7 @@ import {action, autorun, computed, makeObservable, observable} from 'mobx';
 import {BinarySortArray} from '../../../common';
 import {ChainStore} from '../../../stores/chain';
 import {ScrollView} from '../../../components/scroll-view/common-scroll-view';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 // 안드로이드의 성능 문제로 어느정도 최적화가 들어가야되서 좀 복잡해짐...
 class QueryCandidateAddressesSortBalanceChainInfos {
@@ -1072,54 +1073,59 @@ const ChainItem: FunctionComponent<{
     };
 
     return (
-      <Box
-        paddingX={16}
-        paddingY={14}
-        backgroundColor={
-          enabled
-            ? style.get('color-gray-550').color
-            : style.get('color-gray-600').color
-        }
-        onClick={toggle}>
-        <XAxis alignY="center">
-          <FastImage
-            style={style.flatten(['width-40', 'height-40', 'border-radius-40'])}
-            source={
-              chainInfo.chainSymbolImageUrl
-                ? {uri: chainInfo.chainSymbolImageUrl}
-                : require('../../../public/assets/img/chain-icon-alt.png')
-            }
-            resizeMode={FastImage.resizeMode.contain}
-          />
+      <TouchableWithoutFeedback onPress={toggle}>
+        <Box
+          paddingX={16}
+          paddingY={14}
+          backgroundColor={
+            enabled
+              ? style.get('color-gray-550').color
+              : style.get('color-gray-600').color
+          }>
+          <XAxis alignY="center">
+            <FastImage
+              style={style.flatten([
+                'width-40',
+                'height-40',
+                'border-radius-40',
+              ])}
+              source={
+                chainInfo.chainSymbolImageUrl
+                  ? {uri: chainInfo.chainSymbolImageUrl}
+                  : require('../../../public/assets/img/chain-icon-alt.png')
+              }
+              resizeMode={FastImage.resizeMode.contain}
+            />
 
-          <Gutter size={8} />
+            <Gutter size={8} />
 
-          <Text style={style.flatten(['subtitle2', 'color-white', 'flex-1'])}>
-            {chainInfo.chainName}
-          </Text>
-          {isFresh ? null : (
-            <YAxis alignX="right">
-              <Text style={style.flatten(['subtitle3', 'color-gray-10'])}>
-                {balance
-                  .maxDecimals(6)
-                  .shrink(true)
-                  .inequalitySymbol(true)
-                  .toString()}
-              </Text>
+            <Text style={style.flatten(['subtitle2', 'color-white', 'flex-1'])}>
+              {chainInfo.chainName}
+            </Text>
+            {isFresh ? null : (
+              <YAxis alignX="right">
+                <Text style={style.flatten(['subtitle3', 'color-gray-10'])}>
+                  {balance
+                    .maxDecimals(6)
+                    .shrink(true)
+                    .inequalitySymbol(true)
+                    .toString()}
+                </Text>
 
-              <Gutter size={4} />
+                <Gutter size={4} />
 
-              <Text style={style.flatten(['subtitle3', 'color-gray-300'])}>
-                {price ? price.toString() : '-'}
-              </Text>
-            </YAxis>
-          )}
+                <Text style={style.flatten(['subtitle3', 'color-gray-300'])}>
+                  {price ? price.toString() : '-'}
+                </Text>
+              </YAxis>
+            )}
 
-          <Gutter size={16} />
+            <Gutter size={16} />
 
-          <Checkbox checked={enabled} onPress={toggle} size="large" />
-        </XAxis>
-      </Box>
+            <Checkbox checked={enabled} onPress={toggle} size="large" />
+          </XAxis>
+        </Box>
+      </TouchableWithoutFeedback>
     );
   },
 );

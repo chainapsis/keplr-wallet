@@ -25,6 +25,7 @@ import {formatAprString} from '../../home/utils';
 import {InformationOutlinedIcon} from '../../../components/icon/information-outlined';
 import {InformationModal} from '../../../components/modal/infoModal';
 import {Skeleton} from '../../../components/skeleton';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export const StakingDashboardScreen: FunctionComponent = observer(() => {
   const {accountStore, queriesStore, priceStore, chainStore} = useStore();
@@ -226,8 +227,8 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
         </Skeleton>
 
         <Gutter size={21} />
-        <Box
-          onClick={() => {
+        <TouchableWithoutFeedback
+          onPress={() => {
             if (isNotReady) {
               return;
             }
@@ -246,7 +247,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
               />
             </Columns>
           </Skeleton>
-        </Box>
+        </TouchableWithoutFeedback>
 
         <Gutter size={6} />
         <Skeleton isNotReady={isNotReady} type="rect">

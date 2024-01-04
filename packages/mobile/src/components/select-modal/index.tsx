@@ -14,6 +14,7 @@ import {SearchTextInput} from '../input/search-text-input';
 import {registerCardModal} from '../modal/card';
 import {ScrollView} from '../scroll-view/common-scroll-view';
 import {useFocusOnModal} from '../../hooks/use-focus';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export interface SelectModalItem {
   key: string;
@@ -30,35 +31,36 @@ export const SelectModalCommonButton: FunctionComponent<{
 }> = observer(({items, placeholder, selectedItemKey, isOpenModal, onPress}) => {
   const style = useStyle();
   return (
-    <Box
-      alignY="center"
-      height={52}
-      backgroundColor={style.get('color-gray-700').color}
-      paddingX={16}
-      paddingY={10}
-      borderRadius={8}
-      borderWidth={1}
-      borderColor={
-        isOpenModal
-          ? style.get('color-gray-400').color
-          : style.get('color-gray-500').color
-      }
-      onClick={onPress}>
-      <Columns sum={1} alignY="center">
-        <Text
-          style={style.flatten([
-            selectedItemKey ? 'color-gray-50' : 'color-gray-300',
-            'flex-1',
-          ])}>
-          {selectedItemKey
-            ? items.find(item => item.key === selectedItemKey)?.label ??
-              placeholder
-            : ''}
-        </Text>
+    <TouchableWithoutFeedback onPress={onPress}>
+      <Box
+        alignY="center"
+        height={52}
+        backgroundColor={style.get('color-gray-700').color}
+        paddingX={16}
+        paddingY={10}
+        borderRadius={8}
+        borderWidth={1}
+        borderColor={
+          isOpenModal
+            ? style.get('color-gray-400').color
+            : style.get('color-gray-500').color
+        }>
+        <Columns sum={1} alignY="center">
+          <Text
+            style={style.flatten([
+              selectedItemKey ? 'color-gray-50' : 'color-gray-300',
+              'flex-1',
+            ])}>
+            {selectedItemKey
+              ? items.find(item => item.key === selectedItemKey)?.label ??
+                placeholder
+              : ''}
+          </Text>
 
-        <ArrowDownFillIcon size={24} color={style.get('color-white').color} />
-      </Columns>
-    </Box>
+          <ArrowDownFillIcon size={24} color={style.get('color-white').color} />
+        </Columns>
+      </Box>
+    </TouchableWithoutFeedback>
   );
 });
 

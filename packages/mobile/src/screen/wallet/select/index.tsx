@@ -543,21 +543,8 @@ const KeyringItem: FunctionComponent<{
 
   const isSelected = keyRingStore.selectedKeyInfo?.id === keyInfo.id;
   return (
-    <Box
-      padding={16}
-      minHeight={74}
-      borderRadius={6}
-      alignY="center"
-      style={StyleSheet.flatten([
-        style.flatten(['background-color-card-default']),
-        isSelected &&
-          style.flatten([
-            'border-width-1',
-            'border-color-gray-200',
-            'border-solid',
-          ]),
-      ])}
-      onClick={async () => {
+    <TouchableWithoutFeedback
+      onPress={async () => {
         if (isSelected) {
           return;
         }
@@ -565,57 +552,72 @@ const KeyringItem: FunctionComponent<{
         await chainStore.waitSyncedEnabledChains();
         navigate.goBack();
       }}>
-      <Columns sum={1} alignY="center">
-        <Box width={'85%'}>
-          <XAxis alignY="center">
-            {isSelected ? (
-              <React.Fragment>
-                <CheckIcon
-                  size={20}
-                  color={style.get('color-gray-200').color}
-                />
-                <Gutter size={4} />
-              </React.Fragment>
-            ) : null}
-            <Text
-              numberOfLines={1}
-              style={StyleSheet.flatten([
-                style.flatten([
-                  'subtitle2',
-                  'dark:color-gray-700',
-                  'color-gray-10',
-                ]),
-                {maxWidth: '80%'},
-              ])}>
-              {keyInfo.name}
-            </Text>
-            {icnsPrimaryName ? (
-              <React.Fragment>
-                <Gutter size={8} />
-                <FastImage
-                  source={require('../../../public/assets/img/icns-icon.png')}
-                  style={style.flatten(['width-16', 'height-16'])}
-                />
-              </React.Fragment>
-            ) : null}
-          </XAxis>
-          {paragraph ? (
-            <React.Fragment>
-              <Text style={style.flatten(['body2', 'color-gray-300'])}>
-                {paragraph}
+      <Box
+        padding={16}
+        minHeight={74}
+        borderRadius={6}
+        alignY="center"
+        style={StyleSheet.flatten([
+          style.flatten(['background-color-card-default']),
+          isSelected &&
+            style.flatten([
+              'border-width-1',
+              'border-color-gray-200',
+              'border-solid',
+            ]),
+        ])}>
+        <Columns sum={1} alignY="center">
+          <Box width={'85%'}>
+            <XAxis alignY="center">
+              {isSelected ? (
+                <React.Fragment>
+                  <CheckIcon
+                    size={20}
+                    color={style.get('color-gray-200').color}
+                  />
+                  <Gutter size={4} />
+                </React.Fragment>
+              ) : null}
+              <Text
+                numberOfLines={1}
+                style={StyleSheet.flatten([
+                  style.flatten([
+                    'subtitle2',
+                    'dark:color-gray-700',
+                    'color-gray-10',
+                  ]),
+                  {maxWidth: '80%'},
+                ])}>
+                {keyInfo.name}
               </Text>
-            </React.Fragment>
-          ) : null}
-        </Box>
-        <Column weight={1} />
-        <TouchableWithoutFeedback
-          onPress={() => {
-            setModalMenuItems(dropdownItems);
-            openModal();
-          }}>
-          <EllipsisIcon size={24} color={style.get('color-gray-10').color} />
-        </TouchableWithoutFeedback>
-      </Columns>
-    </Box>
+              {icnsPrimaryName ? (
+                <React.Fragment>
+                  <Gutter size={8} />
+                  <FastImage
+                    source={require('../../../public/assets/img/icns-icon.png')}
+                    style={style.flatten(['width-16', 'height-16'])}
+                  />
+                </React.Fragment>
+              ) : null}
+            </XAxis>
+            {paragraph ? (
+              <React.Fragment>
+                <Text style={style.flatten(['body2', 'color-gray-300'])}>
+                  {paragraph}
+                </Text>
+              </React.Fragment>
+            ) : null}
+          </Box>
+          <Column weight={1} />
+          <TouchableWithoutFeedback
+            onPress={() => {
+              setModalMenuItems(dropdownItems);
+              openModal();
+            }}>
+            <EllipsisIcon size={24} color={style.get('color-gray-10').color} />
+          </TouchableWithoutFeedback>
+        </Columns>
+      </Box>
+    </TouchableWithoutFeedback>
   );
 });

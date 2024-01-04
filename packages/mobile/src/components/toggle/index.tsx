@@ -4,6 +4,7 @@ import {useStyle} from '../../styles';
 import {Path, Svg} from 'react-native-svg';
 import {IconProps} from '../icon/types';
 import {ViewStyle} from 'react-native';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 type ToggleSize = 'small' | 'medium';
 
@@ -27,53 +28,55 @@ export const Toggle: FunctionComponent<ToggleProps> = ({
   const style = useStyle();
 
   return (
-    <Box
-      alignX={isOpen ? 'right' : 'left'}
-      alignY="center"
-      width={size === 'small' ? 36 : 52}
-      height={size === 'small' ? 22 : 32}
-      padding={isOpen ? (size === 'small' ? 3 : 4) : size === 'small' ? 6 : 8}
-      borderRadius={16}
-      backgroundColor={
-        disabled
-          ? style.get('color-gray-500').color
-          : isOpen
-          ? style.get('color-blue-400').color
-          : style.get('color-gray-400').color
-      }
-      onClick={() => (setIsOpen && !disabled ? setIsOpen(!isOpen) : null)}
-      style={containerStyle}>
+    <TouchableWithoutFeedback
+      onPress={() => (setIsOpen && !disabled ? setIsOpen(!isOpen) : null)}>
       <Box
-        alignX="center"
+        alignX={isOpen ? 'right' : 'left'}
         alignY="center"
-        borderRadius={12}
-        width={
-          isOpen ? (size === 'small' ? 16 : 24) : size === 'small' ? 12 : 16
-        }
-        height={
-          isOpen ? (size === 'small' ? 16 : 24) : size === 'small' ? 12 : 16
-        }
+        width={size === 'small' ? 36 : 52}
+        height={size === 'small' ? 22 : 32}
+        padding={isOpen ? (size === 'small' ? 3 : 4) : size === 'small' ? 6 : 8}
+        borderRadius={16}
         backgroundColor={
-          toggleCircleColor ||
-          (disabled
-            ? style.get('color-gray-300').color
+          disabled
+            ? style.get('color-gray-500').color
             : isOpen
-            ? style.get('color-white').color
-            : style.get('color-gray-200').color)
+            ? style.get('color-blue-400').color
+            : style.get('color-gray-400').color
         }
-        style={{opacity: disabled ? 0.4 : undefined}}>
-        {isOpen ? (
-          <CheckToggleIcon
-            size={size === 'small' ? 12 : 16}
-            color={
-              disabled
-                ? style.get('color-gray-200').color
-                : style.get('color-blue-400').color
-            }
-          />
-        ) : null}
+        style={containerStyle}>
+        <Box
+          alignX="center"
+          alignY="center"
+          borderRadius={12}
+          width={
+            isOpen ? (size === 'small' ? 16 : 24) : size === 'small' ? 12 : 16
+          }
+          height={
+            isOpen ? (size === 'small' ? 16 : 24) : size === 'small' ? 12 : 16
+          }
+          backgroundColor={
+            toggleCircleColor ||
+            (disabled
+              ? style.get('color-gray-300').color
+              : isOpen
+              ? style.get('color-white').color
+              : style.get('color-gray-200').color)
+          }
+          style={{opacity: disabled ? 0.4 : undefined}}>
+          {isOpen ? (
+            <CheckToggleIcon
+              size={size === 'small' ? 12 : 16}
+              color={
+                disabled
+                  ? style.get('color-gray-200').color
+                  : style.get('color-blue-400').color
+              }
+            />
+          ) : null}
+        </Box>
       </Box>
-    </Box>
+    </TouchableWithoutFeedback>
   );
 };
 

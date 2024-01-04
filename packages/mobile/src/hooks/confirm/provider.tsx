@@ -20,6 +20,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import {Columns} from '../../components/column';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
   children,
@@ -99,71 +100,73 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
         animationType="slide"
         transparent={true}
         onRequestClose={() => closeModal()}>
-        <Box
-          style={style.flatten(['flex-1'])}
-          alignX="center"
-          alignY="center"
-          onClick={() => {
+        <TouchableWithoutFeedback
+          onPress={() => {
             closeModal();
-          }}>
-          <Box
-            backgroundColor={
-              style.get('background-color-gray-600').backgroundColor
-            }
-            paddingX={20}
-            paddingY={24}
-            marginX={4}
-            borderRadius={8}
-            //Box를 Pressble 컴포넌트화 하기 위해서 작성한 onClick 함수
-            onClick={() => {}}>
-            <YAxis>
-              {confirm?.title ? (
-                <React.Fragment>
-                  <Text style={style.flatten(['h4', 'color-text-high'])}>
-                    {confirm.title}
-                  </Text>
-                  <Gutter size={8} />
-                </React.Fragment>
-              ) : null}
-
-              <Text style={style.flatten(['body1', 'color-text-middle'])}>
-                {confirm?.paragraph}
-              </Text>
-
-              <Gutter size={18} />
-              <Columns sum={1}>
-                {!confirm?.options.forceYes ? (
+          }}
+          containerStyle={style.flatten([
+            'flex-1',
+            'justify-center',
+            'items-center',
+          ])}>
+          <TouchableWithoutFeedback>
+            <Box
+              backgroundColor={
+                style.get('background-color-gray-600').backgroundColor
+              }
+              paddingX={20}
+              paddingY={24}
+              marginX={4}
+              borderRadius={8}>
+              <YAxis>
+                {confirm?.title ? (
                   <React.Fragment>
-                    <Button
-                      size="large"
-                      text={intl.formatMessage({
-                        id: 'hooks.confirm.cancel-button',
-                      })}
-                      containerStyle={style.flatten(['flex-1'])}
-                      onPress={() => {
-                        confirm?.resolver(false);
-                        closeModal();
-                      }}
-                      color="secondary"
-                    />
-                    <Gutter size={12} />
+                    <Text style={style.flatten(['h4', 'color-text-high'])}>
+                      {confirm.title}
+                    </Text>
+                    <Gutter size={8} />
                   </React.Fragment>
                 ) : null}
-                <Button
-                  size="large"
-                  text={intl.formatMessage({
-                    id: 'hooks.confirm.yes-button',
-                  })}
-                  containerStyle={style.flatten(['flex-1'])}
-                  onPress={() => {
-                    closeModal();
-                    confirm?.resolver(true);
-                  }}
-                />
-              </Columns>
-            </YAxis>
-          </Box>
-        </Box>
+
+                <Text style={style.flatten(['body1', 'color-text-middle'])}>
+                  {confirm?.paragraph}
+                </Text>
+
+                <Gutter size={18} />
+                <Columns sum={1}>
+                  {!confirm?.options.forceYes ? (
+                    <React.Fragment>
+                      <Button
+                        size="large"
+                        text={intl.formatMessage({
+                          id: 'hooks.confirm.cancel-button',
+                        })}
+                        containerStyle={style.flatten(['flex-1'])}
+                        onPress={() => {
+                          confirm?.resolver(false);
+                          closeModal();
+                        }}
+                        color="secondary"
+                      />
+                      <Gutter size={12} />
+                    </React.Fragment>
+                  ) : null}
+                  <Button
+                    size="large"
+                    text={intl.formatMessage({
+                      id: 'hooks.confirm.yes-button',
+                    })}
+                    containerStyle={style.flatten(['flex-1'])}
+                    onPress={() => {
+                      closeModal();
+                      confirm?.resolver(true);
+                    }}
+                  />
+                </Columns>
+              </YAxis>
+            </Box>
+          </TouchableWithoutFeedback>
+        </TouchableWithoutFeedback>
       </Modal>
       <Animated.View
         pointerEvents="none"
