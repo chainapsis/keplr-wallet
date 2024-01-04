@@ -222,9 +222,7 @@ const NotificationView: FunctionComponent<{
           </Box>
           <Column weight={1} />
           <TouchableWithoutFeedback onPress={onClickClose}>
-            <Box>
-              <CloseIcon size={24} color={style.get(titleColor).color} />
-            </Box>
+            <CloseIcon size={24} color={style.get(titleColor).color} />
           </TouchableWithoutFeedback>
         </Columns>
       </Box>

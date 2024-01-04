@@ -575,24 +575,22 @@ export const ViewDataButton: FunctionComponent<{
       onPress={() => {
         setIsViewData(!isViewData);
       }}>
-      <Box>
-        <XAxis alignY="center">
-          <Text style={style.flatten(['text-button2', 'color-label-default'])}>
-            <FormattedMessage id="page.sign.cosmos.tx.view-data-button" />
-          </Text>
+      <XAxis alignY="center">
+        <Text style={style.flatten(['text-button2', 'color-label-default'])}>
+          <FormattedMessage id="page.sign.cosmos.tx.view-data-button" />
+        </Text>
 
-          <Gutter size={4} />
+        <Gutter size={4} />
 
-          {isViewData ? (
-            <CloseIcon size={12} color={style.get('color-gray-100').color} />
-          ) : (
-            <CodeBracketIcon
-              size={12}
-              color={style.get('color-gray-100').color}
-            />
-          )}
-        </XAxis>
-      </Box>
+        {isViewData ? (
+          <CloseIcon size={12} color={style.get('color-gray-100').color} />
+        ) : (
+          <CodeBracketIcon
+            size={12}
+            color={style.get('color-gray-100').color}
+          />
+        )}
+      </XAxis>
     </TouchableWithoutFeedback>
   );
 };
