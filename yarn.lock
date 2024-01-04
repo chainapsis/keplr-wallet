@@ -7887,7 +7887,7 @@ __metadata:
     react-native-navigation-bar-color: ^2.0.2
     react-native-permissions: ^3.10.1
     react-native-qrcode-svg: ^6.2.0
-    react-native-reanimated: ^3.6.1
+    react-native-reanimated: 3.5.4
     react-native-safe-area-context: ^4.7.1
     react-native-screens: ^3.24.0
     react-native-svg: ^13.13.0
@@ -35168,9 +35168,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:^3.6.1":
-  version: 3.6.1
-  resolution: "react-native-reanimated@npm:3.6.1"
+"react-native-reanimated@npm:3.5.4":
+  version: 3.5.4
+  resolution: "react-native-reanimated@npm:3.5.4"
   dependencies:
     "@babel/plugin-transform-object-assign": ^7.16.7
     "@babel/preset-typescript": ^7.16.7
@@ -35185,7 +35185,7 @@ __metadata:
     "@babel/plugin-transform-template-literals": ^7.0.0-0
     react: "*"
     react-native: "*"
-  checksum: 245e542de7496081c4c64fe219a6d33a4d7195502fd6e9c12374c04acb1318bdeb0c50889def5e213e3fe3cd0f6316b113a6b1c382715f1b6cf8a6a29f0cf4ab
+  checksum: 885449b11324f0399128d665c90e7179a095dfa603dd251e8b1d14df2efe73411acd724562837e114366769e69b8aac2b0a2ffc1f63d2b7dbf1a35024f074604
   languageName: node
   linkType: hard
 
