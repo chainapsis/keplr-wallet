@@ -21,7 +21,7 @@
     "start": "react-native start",
     "start:reset": "react-native start --reset-cache",
     "test": "jest",
-    "force-export-ble": "sh ./scripts/force-export-ble-manager-from-ledger.sh"
+    "postinstall": "sh ./scripts/postinstall/exec.sh"
   },
   "dependencies": {
     "@formatjs/intl-datetimeformat": "^6.12.0",
