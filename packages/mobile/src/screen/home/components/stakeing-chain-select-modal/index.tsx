@@ -21,7 +21,6 @@ import {BaseModalHeader} from '../../../../components/modal';
 import {EmptyView, EmptyViewText} from '../../../../components/empty-view';
 import {useIntl} from 'react-intl';
 import {ScrollView} from '../../../../components/scroll-view/common-scroll-view';
-import {useFocusOnModal} from '../../../../hooks/use-focus';
 
 export interface SelectStakingChainModalItem {
   key: string;
@@ -36,7 +35,6 @@ export const SelectStakingChainModal = registerCardModal(
     onSelect: (item: SelectStakingChainModalItem) => void;
   }>(({items, placeholder, aprList, onSelect}) => {
     const [search, setSearch] = useState('');
-    const searchRef = useFocusOnModal();
     const style = useStyle();
     const intl = useIntl();
 
@@ -66,7 +64,6 @@ export const SelectStakingChainModal = registerCardModal(
           />
           <Gutter size={12} />
           <SearchTextInput
-            ref={searchRef}
             value={search}
             onChange={e => {
               e.preventDefault();

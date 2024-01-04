@@ -11,7 +11,6 @@ import {ArrowDownFillIcon} from '../icon/arrow-donw-fill';
 import {SearchTextInput} from '../input/search-text-input';
 import {registerCardModal} from '../modal/card';
 import {ScrollView} from '../scroll-view/common-scroll-view';
-import {useFocusOnModal} from '../../hooks/use-focus';
 import {EmptyView, EmptyViewText} from '../empty-view';
 
 export interface SelectModalItem {
@@ -72,7 +71,6 @@ export const SelectChainModal = registerCardModal(
   }>(({items, emptyTextTitle, emptyText, placeholder, onSelect}) => {
     const style = useStyle();
     const [search, setSearch] = useState('');
-    const searchRef = useFocusOnModal();
 
     const filtered = search
       ? items.filter(item => {
@@ -91,7 +89,6 @@ export const SelectChainModal = registerCardModal(
         <Box paddingX={16}>
           <Gutter size={12} />
           <SearchTextInput
-            ref={searchRef}
             value={search}
             onChange={e => {
               e.preventDefault();
