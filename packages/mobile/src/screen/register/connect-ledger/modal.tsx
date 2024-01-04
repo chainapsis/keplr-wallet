@@ -8,12 +8,12 @@ import {
   AppState,
   AppStateStatus,
   Linking,
+  PermissionsAndroid,
   Platform,
   Text,
   View,
 } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
-import {PERMISSIONS, requestMultiple, RESULTS} from 'react-native-permissions';
 import {App, CosmosApp} from '@keplr-wallet/ledger-cosmos';
 import {RectButton} from '../../../components/rect-button';
 import {GuideBox} from '../../../components/guide-box';
@@ -131,18 +131,19 @@ export const LedgerGrantModal = registerCardModal(
       ) {
         if (Platform.OS === 'android') {
           if (parseFloat(DeviceInfo.getSystemVersion()) >= 12) {
-            requestMultiple([
-              PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-              PERMISSIONS.ANDROID.BLUETOOTH_SCAN,
-              PERMISSIONS.ANDROID.BLUETOOTH_CONNECT,
+            PermissionsAndroid.requestMultiple([
+              PermissionsAndroid.PERMISSIONS['ACCESS_FINE_LOCATION'],
+              PermissionsAndroid.PERMISSIONS['BLUETOOTH_SCAN'],
+              PermissionsAndroid.PERMISSIONS['BLUETOOTH_CONNECT'],
             ]).then(granted => {
               if (
-                granted[PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION] ===
-                  RESULTS.GRANTED &&
-                granted[PERMISSIONS.ANDROID.BLUETOOTH_SCAN] ===
-                  RESULTS.GRANTED &&
-                granted[PERMISSIONS.ANDROID.BLUETOOTH_CONNECT] ===
-                  RESULTS.GRANTED
+                granted[
+                  PermissionsAndroid.PERMISSIONS['ACCESS_FINE_LOCATION']
+                ] === PermissionsAndroid.RESULTS['GRANTED'] &&
+                granted[PermissionsAndroid.PERMISSIONS['BLUETOOTH_SCAN']] ===
+                  PermissionsAndroid.RESULTS['GRANTED'] &&
+                granted[PermissionsAndroid.PERMISSIONS['BLUETOOTH_CONNECT']] ===
+                  PermissionsAndroid.RESULTS['GRANTED']
               ) {
                 setPermissionStatus(BLEPermissionGrantStatus.Granted);
               } else {
@@ -150,18 +151,19 @@ export const LedgerGrantModal = registerCardModal(
               }
             });
           } else {
-            requestMultiple([PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION]).then(
-              granted => {
-                if (
-                  granted[PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION] ===
-                  RESULTS.GRANTED
-                ) {
-                  setPermissionStatus(BLEPermissionGrantStatus.Granted);
-                } else {
-                  setPermissionStatus(BLEPermissionGrantStatus.Failed);
-                }
-              },
-            );
+            PermissionsAndroid.requestMultiple([
+              PermissionsAndroid.PERMISSIONS['ACCESS_FINE_LOCATION'],
+            ]).then(granted => {
+              if (
+                granted[
+                  PermissionsAndroid.PERMISSIONS['ACCESS_FINE_LOCATION']
+                ] === PermissionsAndroid.RESULTS['GRANTED']
+              ) {
+                setPermissionStatus(BLEPermissionGrantStatus.Granted);
+              } else {
+                setPermissionStatus(BLEPermissionGrantStatus.Failed);
+              }
+            });
           }
         }
       }

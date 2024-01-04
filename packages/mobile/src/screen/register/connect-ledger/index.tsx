@@ -27,6 +27,7 @@ import {useStore} from '../../../stores';
 import TransportBLE from '@ledgerhq/react-native-hw-transport-ble';
 import {LedgerUtils} from '../../../utils';
 import {ScrollView} from '../../../components/scroll-view/common-scroll-view';
+import {useLedgerBLE} from '../../../provider/ledger-ble';
 
 export type Step = 'unknown' | 'connected' | 'app';
 
@@ -121,6 +122,8 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
     chainStore,
   ]);
 
+  const ledgerBLE = useLedgerBLE();
+
   return (
     <LegacyRegisterContainer
       paragraph={
@@ -135,7 +138,14 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
           })}
           size="large"
           onPress={() => {
-            setIsModalOpen(true);
+            ledgerBLE
+              .getTransport()
+              .then(t => {
+                console.log(t);
+              })
+              .catch(e => {
+                console.log(e);
+              });
           }}
         />
       }>
