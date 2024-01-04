@@ -21,6 +21,7 @@ import {ChainImageFallback} from '../../components/image';
 import {Stack} from '../../components/stack';
 import {XAxis} from '../../components/axis';
 import {
+  EmbedChainInfos,
   GovernanceV1ChainIdentifiers,
   NoDashboardLinkIdentifiers,
 } from '../../config';
@@ -29,6 +30,10 @@ import {EmptyView, EmptyViewText} from '../../components/empty-view';
 import {Box} from '../../components/box';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {Skeleton} from '../../components/skeleton';
+
+const embedChainInfosIdentifiers = EmbedChainInfos.map(
+  item => ChainIdHelper.parse(item.chainId).identifier,
+);
 
 export const GovernanceScreen: FunctionComponent = observer(() => {
   const style = useStyle();
@@ -40,13 +45,25 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
 
   const delegations: ViewToken[] = useMemo(
     () =>
-      hugeQueriesStore.delegations.filter(token => {
-        return token.token.toDec().gt(new Dec(0));
-      }),
+      hugeQueriesStore.delegations
+        .filter(viewToken =>
+          embedChainInfosIdentifiers.includes(
+            ChainIdHelper.parse(viewToken.chainInfo.chainId).identifier,
+          ),
+        )
+        .filter(token => {
+          return token.token.toDec().gt(new Dec(0));
+        }),
     [hugeQueriesStore.delegations],
   );
+
   const modalItems: SelectModalItem[] = useMemo(() => {
     return hugeQueriesStore.stakables
+      .filter(viewToken =>
+        embedChainInfosIdentifiers.includes(
+          ChainIdHelper.parse(viewToken.chainInfo.chainId).identifier,
+        ),
+      )
       .filter(
         viewToken =>
           !NoDashboardLinkIdentifiers.includes(
@@ -191,12 +208,13 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
             <Box alignX="center">
               <EmptyViewText
                 text={intl.formatMessage({
-                  id: 'page.governance.main.empty-text-1',
+                  id: 'page.governance.main.empty-title',
                 })}
               />
+              <Gutter size={12} />
               <EmptyViewText
                 text={intl.formatMessage({
-                  id: 'page.governance.main.empty-text-2',
+                  id: 'page.governance.main.empty-text',
                 })}
               />
             </Box>

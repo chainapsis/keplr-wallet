@@ -26,8 +26,8 @@
   "error.simulating-secret-wasm-not-supported": "Simulating secret wasm not supported",
 
   "page.governance.proposal-list.empty-text": "No records of past or ongoing proposals found.",
-  "page.governance.main.empty-text-1": "No records of past or",
-  "page.governance.main.empty-text-2": "ongoing proposals found",
+  "page.governance.main.empty-title": "No Proposals Awaiting Your Vote",
+  "page.governance.main.empty-text": "Stake your assets first to start voting on proposals. Your voting power is determined by the amount of staked tokens.",
   "page.governance.chain-item-proposal-length": "{len} Proposals",
 
   "page.governance.components.select-chain-modal.input-placeholder": "Search for a chain",
