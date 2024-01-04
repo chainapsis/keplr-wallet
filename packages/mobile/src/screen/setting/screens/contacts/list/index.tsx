@@ -177,6 +177,12 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
         placeholder={intl.formatMessage({
           id: 'page.setting.contacts.list.select-modal.placeholder',
         })}
+        emptyTextTitle={intl.formatMessage({
+          id: 'page.setting.contacts.list.select-modal.empty-title',
+        })}
+        emptyText={intl.formatMessage({
+          id: 'page.setting.contacts.list.select-modal.empty-text',
+        })}
         items={items}
       />
     </PageWithScrollView>

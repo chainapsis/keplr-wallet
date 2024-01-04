@@ -208,6 +208,12 @@ export const SettingTokenListScreen: FunctionComponent = observer(() => {
         placeholder={intl.formatMessage({
           id: 'page.setting.token.manage.select-modal.placeholder',
         })}
+        emptyTextTitle={intl.formatMessage({
+          id: 'page.setting.token.manage.select-modal.empty-title',
+        })}
+        emptyText={intl.formatMessage({
+          id: 'page.setting.token.manage.select-modal.empty-text',
+        })}
       />
     </React.Fragment>
   );

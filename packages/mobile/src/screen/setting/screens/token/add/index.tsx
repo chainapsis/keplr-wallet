@@ -394,6 +394,12 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
           setChainId(item.key);
           setIsOpenChainSelectModal(false);
         }}
+        emptyTextTitle={intl.formatMessage({
+          id: 'page.setting.token.add.select-modal.empty-title',
+        })}
+        emptyText={intl.formatMessage({
+          id: 'page.setting.token.add.select-modal.empty-text',
+        })}
       />
     </PageWithScrollView>
   );
