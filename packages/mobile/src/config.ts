@@ -2436,6 +2436,9 @@ export const SCAMPORPOSAL_API_URL =
 
 export const COMMUNITY_CHAIN_URL = 'https://chains.keplr.app';
 
+export const APP_STORE_URL = 'https://itunes.apple.com';
+export const PLAY_STORE_URL = 'https://play.google.com';
+
 export const GovernanceV1ChainIdentifiers = [
   'kyve',
   'mars',

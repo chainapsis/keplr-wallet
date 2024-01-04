@@ -578,6 +578,12 @@
   "page.main.components.secret-error-modal-button": "Set my Viewing Key",
   "page.main.components.staking-chain-modal.title": "Available Assets",
   "page.main.components.staking-chain-modal.empty-text": "Please retry after buying or depositing stakeable assets to your wallet.",
+  "page.main.components.app-update-modal.title": "✨ New Version Released!",
+  "page.main.components.app-update-modal.paragraph": "Update Keplr to the latest version to use all of its amazing features.",
+  "page.main.components.app-update-modal.button": "Update Now",
+  "page.main.components.code-push-update-modal.title": "😎 Keplr Just Got Better",
+  "page.main.components.code-push-update-modal.paragraph": "We've downloaded some minor updates while you're gone. To apply these changes, kindly quit and reopen Keplr.",
+  "page.main.components.code-push-update-modal.button": "Quit Keplr",
 
   "page.camera.main-title": "Scan QR Code",
   "page.camera.button-show-qr-code": "Show my QR code",

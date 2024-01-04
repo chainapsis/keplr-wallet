@@ -1,8 +1,26 @@
 PODS:
+  - appcenter-analytics (5.0.0):
+    - AppCenter/Analytics (~> 5.0)
+    - AppCenterReactNativeShared (~> 5.0)
+    - React-Core
+  - appcenter-core (5.0.0):
+    - AppCenterReactNativeShared (~> 5.0)
+    - React-Core
+  - AppCenter/Analytics (5.0.3):
+    - AppCenter/Core
+  - AppCenter/Core (5.0.3)
+  - AppCenterReactNativeShared (5.0.0):
+    - AppCenter/Core (= 5.0.3)
+  - Base64 (1.1.2)
   - boost (1.76.0)
   - BVLinearGradient (2.8.3):
     - React-Core
   - CocoaAsyncSocket (7.6.5)
+  - CodePush (8.1.1):
+    - Base64 (~> 1.1)
+    - JWT (~> 3.0.0-beta.12)
+    - React-Core
+    - SSZipArchive (~> 2.2.2)
   - DoubleConversion (1.1.6)
   - EXApplication (5.3.1):
     - ExpoModulesCore
@@ -96,6 +114,8 @@ PODS:
     - FlipperKit/FlipperKitNetworkPlugin
   - fmt (6.2.1)
   - glog (0.3.5)
+  - JWT (3.0.0-beta.14):
+    - Base64 (~> 1.1.2)
   - libevent (2.1.12)
   - libwebp (1.3.1):
     - libwebp/demux (= 1.3.1)
@@ -519,33 +539,10 @@ PODS:
     - React-Core
   - RNPermissions (3.10.1):
     - React-Core
-  - RNReanimated (3.4.2):
-    - DoubleConversion
-    - FBLazyVector
-    - glog
-    - RCT-Folly
-    - RCTRequired
-    - RCTTypeSafety
-    - React-callinvoker
+  - RNReanimated (3.6.1):
+    - RCT-Folly (= 2021.07.22.00)
     - React-Core
-    - React-Core/DevSupport
-    - React-Core/RCTWebSocket
-    - React-CoreModules
-    - React-cxxreact
-    - React-jsi
-    - React-jsiexecutor
-    - React-jsinspector
-    - React-RCTActionSheet
-    - React-RCTAnimation
-    - React-RCTAppDelegate
-    - React-RCTBlob
-    - React-RCTImage
-    - React-RCTLinking
-    - React-RCTNetwork
-    - React-RCTSettings
-    - React-RCTText
     - ReactCommon/turbomodule/core
-    - Yoga
   - RNScreens (3.24.0):
     - React-Core
     - React-RCTImage
@@ -558,6 +555,7 @@ PODS:
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.10)
   - SocketRocket (0.6.1)
+  - SSZipArchive (2.2.3)
   - VisionCamera (3.6.12):
     - React
     - React-callinvoker
@@ -567,8 +565,11 @@ PODS:
     - Yoga (~> 1.14)
 
 DEPENDENCIES:
+  - appcenter-analytics (from `../node_modules/appcenter-analytics`)
+  - appcenter-core (from `../node_modules/appcenter`)
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
   - BVLinearGradient (from `../node_modules/react-native-linear-gradient`)
+  - CodePush (from `../node_modules/react-native-code-push`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - EXApplication (from `../node_modules/expo-application/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
@@ -659,6 +660,9 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - AppCenter
+    - AppCenterReactNativeShared
+    - Base64
     - CocoaAsyncSocket
     - Flipper
     - Flipper-Boost-iOSX
@@ -669,6 +673,7 @@ SPEC REPOS:
     - Flipper-PeerTalk
     - FlipperKit
     - fmt
+    - JWT
     - libevent
     - libwebp
     - lottie-ios
@@ -677,13 +682,20 @@ SPEC REPOS:
     - SDWebImage
     - SDWebImageWebPCoder
     - SocketRocket
+    - SSZipArchive
     - YogaKit
 
 EXTERNAL SOURCES:
+  appcenter-analytics:
+    :path: "../node_modules/appcenter-analytics"
+  appcenter-core:
+    :path: "../node_modules/appcenter"
   boost:
     :podspec: "../node_modules/react-native/third-party-podspecs/boost.podspec"
   BVLinearGradient:
     :path: "../node_modules/react-native-linear-gradient"
+  CodePush:
+    :path: "../node_modules/react-native-code-push"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
   EXApplication:
@@ -814,9 +826,15 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
+  AppCenter: a4070ec3d4418b5539067a51f57155012e486ebd
+  appcenter-analytics: fbeef54afe6fa91d3803dfd31499817baa81fec0
+  appcenter-core: e192ea8b373bebd3e44998882b43311078bd7dda
+  AppCenterReactNativeShared: 01df23849b1c3c6eb8c4049f54322635650e98f0
+  Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
   boost: 57d2868c099736d80fcd648bf211b4431e51a558
   BVLinearGradient: 880f91a7854faff2df62518f0281afb1c60d49a3
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
+  CodePush: c3fdecab0dba1f760a1c6d1a562b9b88ce311fe1
   DoubleConversion: 5189b271737e1565bdce30deb4a08d647e3f5f54
   EXApplication: 042aa2e3f05258a16962ea1a9914bf288db9c9a1
   EXConstants: ce5bbea779da8031ac818c36bea41b10e14d04e1
@@ -840,6 +858,7 @@ SPEC CHECKSUMS:
   FlipperKit: 2efad7007d6745a3f95e4034d547be637f89d3f6
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
+  JWT: ef71dfb03e1f842081e64dc42eef0e164f35d251
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   libwebp: 33dc822fbbf4503668d09f7885bbfedc76c45e96
   lottie-ios: 25e7b2675dad5c3ddad369ac9baab03560c5bfdd
@@ -890,12 +909,13 @@ SPEC CHECKSUMS:
   RNGestureHandler: 32a01c29ecc9bb0b5bf7bc0a33547f61b4dc2741
   RNKeychain: a65256b6ca6ba6976132cc4124b238a5b13b3d9c
   RNPermissions: 4e3714e18afe7141d000beae3755e5b5fb2f5e05
-  RNReanimated: f8379347f71248607d530a21e31e4140c5910c25
+  RNReanimated: fdbaa9c964bbab7fac50c90862b6cc5f041679b9
   RNScreens: b21dc57dfa2b710c30ec600786a3fc223b1b92e7
   RNSVG: ed492aaf3af9ca01bc945f7a149d76d62e73ec82
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
+  SSZipArchive: 62d4947b08730e4cda640473b0066d209ff033c9
   VisionCamera: 4072a150c532927587d6f628f292f1c80ee21a98
   Yoga: 4c3aa327e4a6a23eeacd71f61c81df1bcdf677d5
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
