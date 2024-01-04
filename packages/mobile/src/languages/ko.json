@@ -279,6 +279,8 @@
   "page.setting.token.manage.select-modal-button-placeholder": "Search by chain name",
   "page.setting.token.manage.select-modal.title": "Select Chain",
   "page.setting.token.manage.select-modal.placeholder": "Search by chain name",
+  "page.setting.token.manage.select-modal.empty-title": "No Results Found",
+  "page.setting.token.manage.select-modal.empty-text": "Please check the spelling of the chain name, or verify if the chain is added to your Keplr app and supports adding tokens by their contract addresses.",
 
   "page.setting.token.add.title": "토큰 직접 추가하기",
   "page.setting.token.add.confirm-button": "등록",
@@ -297,6 +299,8 @@
   "page.setting.token.add.select-modal-button-placeholder": "Search by chain name",
   "page.setting.token.add.select-modal.title": "Select Chain",
   "page.setting.token.add.select-modal.placeholder": "Search by chain name",
+  "page.setting.token.add.select-modal.empty-title": "No Results Found",
+  "page.setting.token.add.select-modal.empty-text": "Please check the spelling of the chain name, or verify if the chain is added to your Keplr app and supports adding tokens by their contract addresses.",
 
   "page.setting.contacts.list.add-new-button": "새 연락처 추가",
   "page.setting.contacts.list.modal-button-placeholder": "Search by chain name",
@@ -307,6 +311,8 @@
   "page.setting.contacts.list.empty-view-subject": "연락처",
   "page.setting.contacts.list.select-modal.title": "Select Chain",
   "page.setting.contacts.list.select-modal.placeholder": "Search by chain name",
+  "page.setting.contacts.list.select-modal.empty-title": "No Results Found",
+  "page.setting.contacts.list.select-modal.empty-text": "Please check the spelling of the chain name, or verify if the chain is natively supported or added to Keplr.",
 
   "page.setting.contacts.add.add-title": "새 연락처 추가",
   "page.setting.contacts.add.edit-title": "연락처 편집",

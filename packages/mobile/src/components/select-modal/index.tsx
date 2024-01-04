@@ -1,6 +1,5 @@
 import React, {FunctionComponent, useState} from 'react';
 import {observer} from 'mobx-react-lite';
-import {useIntl} from 'react-intl';
 import {Text} from 'react-native';
 import {Gutter} from '../gutter';
 import {useStyle} from '../../styles';
@@ -8,12 +7,11 @@ import {Box} from '../box';
 import {RectButton} from '../rect-button';
 import {Column, Columns} from '../column';
 import {ChainImageFallback} from '../image';
-import {TextButton} from '../text-button';
 import {ArrowDownFillIcon} from '../icon/arrow-donw-fill';
 import {SearchTextInput} from '../input/search-text-input';
 import {registerCardModal} from '../modal/card';
 import {ScrollView} from '../scroll-view/common-scroll-view';
-import {useFocusOnModal} from '../../hooks/use-focus';
+import {EmptyView, EmptyViewText} from '../empty-view';
 
 export interface SelectModalItem {
   key: string;
@@ -21,7 +19,7 @@ export interface SelectModalItem {
   imageUrl?: string;
 }
 
-export const SelectModalCommonButton: FunctionComponent<{
+export const SelectChainModalCommonButton: FunctionComponent<{
   items: SelectModalItem[];
   placeholder?: string;
   selectedItemKey?: string;
@@ -62,18 +60,17 @@ export const SelectModalCommonButton: FunctionComponent<{
   );
 });
 
-export const SelectModal = registerCardModal(
+export const SelectChainModal = registerCardModal(
   observer<{
-    title: string;
     items: SelectModalItem[];
     placeholder?: string;
     isOpen: boolean;
+    emptyTextTitle?: string;
+    emptyText?: string;
     onSelect: (item: SelectModalItem) => void;
-  }>(({items, title, placeholder, onSelect}) => {
+  }>(({items, emptyTextTitle, emptyText, placeholder, onSelect}) => {
     const style = useStyle();
     const [search, setSearch] = useState('');
-    const searchRef = useFocusOnModal();
-    const intl = useIntl();
 
     const filtered = search
       ? items.filter(item => {
@@ -89,19 +86,9 @@ export const SelectModal = registerCardModal(
 
     return (
       <Box>
-        <Box paddingX={12}>
-          <Text
-            style={style.flatten([
-              'text-center',
-              'subtitle1',
-              'color-text-high',
-              'padding-8',
-            ])}>
-            {title}
-          </Text>
+        <Box paddingX={16}>
           <Gutter size={12} />
           <SearchTextInput
-            ref={searchRef}
             value={search}
             onChange={e => {
               e.preventDefault();
@@ -112,7 +99,9 @@ export const SelectModal = registerCardModal(
 
           <Gutter size={12} />
         </Box>
-        <ScrollView isGestureScrollView={true} style={{height: 250}}>
+        <ScrollView
+          isGestureScrollView={true}
+          style={{height: 250, paddingHorizontal: 16}}>
           {filtered.map(item => {
             return (
               <RectButton
@@ -127,7 +116,7 @@ export const SelectModal = registerCardModal(
                 <Box
                   paddingY={14}
                   paddingLeft={16}
-                  paddingRight={8}
+                  paddingRight={16}
                   borderRadius={6}
                   height={74}
                   alignY="center"
@@ -147,17 +136,30 @@ export const SelectModal = registerCardModal(
                       style={style.flatten(['subtitle3', 'color-text-high'])}>
                       {item.label}
                     </Text>
-                    <Column weight={2} />
-                    <TextButton
-                      text={intl.formatMessage({
-                        id: 'page.setting.token.add.contract-item.select-button',
-                      })}
-                    />
+                    <Column weight={1} />
                   </Columns>
                 </Box>
               </RectButton>
             );
           })}
+          {filtered.length === 0 ? (
+            <React.Fragment>
+              <Gutter size={30} />
+              <EmptyView>
+                <Box alignX="center" width={312}>
+                  <React.Fragment>
+                    {emptyTextTitle ? (
+                      <EmptyViewText text={emptyTextTitle} />
+                    ) : (
+                      <EmptyViewText text={''} />
+                    )}
+                    <Gutter size={12} />
+                  </React.Fragment>
+                  {emptyText ? <EmptyViewText text={emptyText} /> : null}
+                </Box>
+              </EmptyView>
+            </React.Fragment>
+          ) : null}
         </ScrollView>
       </Box>
     );

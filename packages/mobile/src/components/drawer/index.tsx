@@ -40,7 +40,7 @@ export const DrawerContent: FunctionComponent = observer(() => {
 
   const onClickAddTokens = () => {
     drawerClose();
-    navigation.navigate('Setting.ManageTokenList.Add');
+    navigation.navigate('Setting.ManageTokenList');
   };
 
   const onClickContacts = () => {

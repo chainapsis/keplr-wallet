@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStore} from '../../../../stores';
-import {useFocusOnModal} from '../../../../hooks/use-focus';
 import {Linking, Text} from 'react-native';
 import {SearchTextInput} from '../../../../components/input/search-text-input';
 import {Gutter} from '../../../../components/gutter';
@@ -11,7 +10,6 @@ import {Box} from '../../../../components/box';
 import {EmptyView} from '../../../../components/empty-view';
 import {ContractAddressItem} from '../contract-item';
 import {TokenContractListRepoURL} from '../../../../config.ui';
-import {TextInput} from 'react-native-gesture-handler';
 import {registerCardModal} from '../../../../components/modal/card';
 import {BaseModalHeader} from '../../../../components/modal';
 import {ScrollView} from '../../../../components/scroll-view/common-scroll-view';
@@ -28,7 +26,6 @@ export const ContractAddressBookModal = registerCardModal(
         .tokenContracts;
 
     const [search, setSearch] = useState('');
-    const searchRef = useFocusOnModal<TextInput>();
 
     const intl = useIntl();
 
@@ -54,7 +51,6 @@ export const ContractAddressBookModal = registerCardModal(
           />
           <Gutter size={12} />
           <SearchTextInput
-            ref={searchRef}
             value={search}
             onChange={e => {
               e.preventDefault();
