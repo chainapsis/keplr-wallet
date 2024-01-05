@@ -227,6 +227,10 @@ export class IBCSwapAmountConfig extends AmountConfig {
         queryMsgsDirect.response.data
       );
 
+      console.log({
+        swapRouterKey,
+        key,
+      });
       if (swapRouterKey !== key) {
         throw new Error(
           "Route and msgs_direct are not matched. Please try again."
@@ -372,7 +376,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
           const obj = JSON.parse(memo);
           for (const operation of obj.wasm.msg.swap_and_action.user_swap
             .swap_exact_asset_in.operations) {
-            key = `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;
+            key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;
           }
         }
       }
@@ -380,7 +384,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
         const obj = JSON.parse(msg.msg);
         for (const operation of obj.msg.swap_and_action.user_swap
           .swap_exact_asset_in.operations) {
-          key = `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;
+          key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;
         }
       }
     }
