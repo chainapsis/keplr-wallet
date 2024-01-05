@@ -16,10 +16,14 @@ export const Image: FunctionComponent<{
 
   return (
     <FastImage
-      source={{
-        uri: propSrc,
-        cache: cache || FastImage.cacheControl.web,
-      }}
+      source={
+        propSrc
+          ? {
+              uri: propSrc,
+              cache: cache || FastImage.cacheControl.web,
+            }
+          : defaultSrc
+      }
       style={style}
       defaultSource={defaultSrc}
     />
@@ -30,16 +34,19 @@ export const ChainImageFallback: FunctionComponent<{
   src: string | undefined; // 얘는 undefined더라도 일단 넣으라고 일부로 ?를 안붙인거임.
   alt: string;
   style: Object;
-}> = ({src, alt, style}) => {
+}> = ({src, style}) => {
   return (
-    <Image
-      defaultSrc={require('../../public/assets/img/chain-icon-alt.png')}
+    <FastImage
       style={{
-        borderRadius: 1000000,
         ...style,
+        borderRadius: 99999,
       }}
-      src={src}
-      alt={alt}
+      source={
+        src
+          ? {uri: src, cache: FastImage.cacheControl.web}
+          : require('../../public/assets/img/chain-icon-alt.png')
+      }
+      resizeMode={FastImage.resizeMode.contain}
     />
   );
 };
