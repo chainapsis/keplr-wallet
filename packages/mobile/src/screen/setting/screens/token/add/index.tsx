@@ -359,7 +359,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
           </Stack>
         ) : null}
         <Button
-          color="secondary"
+          color="primary"
           size="large"
           text={intl.formatMessage({
             id: 'page.setting.token.add.confirm-button',

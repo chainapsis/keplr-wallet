@@ -165,7 +165,7 @@ export const SettingSecurityChangePasswordScreen: FunctionComponent = observer(
             id: 'button.confirm',
           })}
           size="large"
-          color="secondary"
+          color="primary"
           onPress={submit}
           loading={isLoading}
         />

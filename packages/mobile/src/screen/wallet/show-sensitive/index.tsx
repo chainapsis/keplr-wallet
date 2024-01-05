@@ -201,7 +201,7 @@ export const WalletShowSensitiveScreen: FunctionComponent = observer(() => {
 
           {sensitive === '' ? (
             <Button
-              color="secondary"
+              color="primary"
               text={intl.formatMessage({
                 id: 'button.confirm',
               })}

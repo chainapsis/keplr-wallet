@@ -163,7 +163,7 @@ export const WalletDeleteScreen: FunctionComponent = observer(() => {
           <Gutter size={28} />
           <Button
             text={intl.formatMessage({id: 'button.confirm'})}
-            color="secondary"
+            color="primary"
             size="large"
             onPress={submit}
           />

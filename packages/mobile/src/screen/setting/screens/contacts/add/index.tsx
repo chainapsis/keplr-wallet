@@ -156,7 +156,7 @@ export const SettingContactsAddScreen: FunctionComponent = observer(() => {
         text={intl.formatMessage({
           id: 'button.confirm',
         })}
-        color="secondary"
+        color="primary"
         size="large"
         disabled={txConfigsValidate.interactionBlocked || name === ''}
         onPress={() => handleSubmit()}

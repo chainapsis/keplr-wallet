@@ -127,7 +127,7 @@ export const SettingSecurityBio: FunctionComponent = observer(() => {
         />
         <Button
           size="large"
-          color="secondary"
+          color="primary"
           text={intl.formatMessage({
             id: 'button.confirm',
           })}
