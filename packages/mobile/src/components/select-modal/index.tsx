@@ -14,7 +14,6 @@ import {ScrollView} from '../scroll-view/common-scroll-view';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {EmptyView, EmptyViewText} from '../empty-view';
 
-
 export interface SelectModalItem {
   key: string;
   label: string | React.ReactNode;

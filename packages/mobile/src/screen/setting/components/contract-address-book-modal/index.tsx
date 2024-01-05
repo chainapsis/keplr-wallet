@@ -10,9 +10,7 @@ import {Box} from '../../../../components/box';
 import {EmptyView} from '../../../../components/empty-view';
 import {ContractAddressItem} from '../contract-item';
 import {TokenContractListRepoURL} from '../../../../config.ui';
-import {
-  TouchableWithoutFeedback,
-} from 'react-native-gesture-handler';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {registerCardModal} from '../../../../components/modal/card';
 import {BaseModalHeader} from '../../../../components/modal';
 import {ScrollView} from '../../../../components/scroll-view/common-scroll-view';
