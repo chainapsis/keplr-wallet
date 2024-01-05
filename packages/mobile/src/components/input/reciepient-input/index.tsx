@@ -66,6 +66,7 @@ export const RecipientInput = observer(
       <React.Fragment>
         <TextInput
           ref={ref}
+          autoCapitalize="none"
           label={intl.formatMessage({
             id: 'components.input.recipient-input.wallet-address-label',
           })}

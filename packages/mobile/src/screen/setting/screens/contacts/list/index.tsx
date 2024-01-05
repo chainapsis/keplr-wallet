@@ -15,8 +15,8 @@ import {PageWithScrollView} from '../../../../../components/page';
 import {AddressItem} from '../../../components/setting-address-item';
 import {useConfirm} from '../../../../../hooks/confirm';
 import {
-  SelectModal,
-  SelectModalCommonButton,
+  SelectChainModal,
+  SelectChainModalCommonButton,
 } from '../../../../../components/select-modal';
 import {MenuModal} from '../../../../../components/modal/menu-modal';
 
@@ -67,7 +67,7 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
       style={style.flatten(['padding-12'])}>
       <Columns sum={1} alignY="center">
         <Box width={208}>
-          <SelectModalCommonButton
+          <SelectChainModalCommonButton
             items={items}
             selectedItemKey={chainId}
             placeholder={intl.formatMessage({
@@ -167,7 +167,7 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
         }}
       />
 
-      <SelectModal
+      <SelectChainModal
         isOpen={isOpenChainSelectModal}
         setIsOpen={setIsOpenChainSelectModal}
         onSelect={item => {
@@ -177,10 +177,13 @@ export const SettingContactsListScreen: FunctionComponent = observer(() => {
         placeholder={intl.formatMessage({
           id: 'page.setting.contacts.list.select-modal.placeholder',
         })}
-        items={items}
-        title={intl.formatMessage({
-          id: 'page.setting.contacts.list.select-modal.title',
+        emptyTextTitle={intl.formatMessage({
+          id: 'page.setting.contacts.list.select-modal.empty-title',
         })}
+        emptyText={intl.formatMessage({
+          id: 'page.setting.contacts.list.select-modal.empty-text',
+        })}
+        items={items}
       />
     </PageWithScrollView>
   );

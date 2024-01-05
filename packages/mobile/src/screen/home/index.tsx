@@ -1,6 +1,12 @@
-import {observer} from 'mobx-react-lite';
-import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
+import React, {
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {Text, TextInput as NativeTextInput, RefreshControl} from 'react-native';
+import {observer} from 'mobx-react-lite';
 import {useStyle} from '../../styles';
 import {PageWithScrollView} from '../../components/page';
 import {useStore} from '../../stores';
@@ -9,7 +15,7 @@ import {QueryError} from '@keplr-wallet/stores';
 import {Button} from '../../components/button';
 import {Gutter} from '../../components/gutter';
 import {LayeredHorizontalRadioGroup} from '../../components/radio-group';
-import {YAxis} from '../../components/axis';
+import {XAxis, YAxis} from '../../components/axis';
 import {Stack} from '../../components/stack';
 import {Column, Columns} from '../../components/column';
 import {DepositModal} from './components/deposit-modal/deposit-modal';
@@ -26,6 +32,11 @@ import {Skeleton} from '../../components/skeleton';
 import {StakingIcon} from '../../components/icon/stacking';
 import {VoteIcon} from '../../components/icon';
 import {useIntl} from 'react-intl';
+import {AppUpdateModal} from './app-update-modal';
+import {useAppUpdate} from '../../provider/app-update';
+import {VerticalCollapseTransition} from '../../components/transition';
+import {TouchableHighlight} from 'react-native-gesture-handler';
+import Svg, {Path} from 'react-native-svg';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -144,10 +155,33 @@ export const HomeScreen: FunctionComponent = observer(() => {
     }
   };
 
+  const appUpdate = useAppUpdate();
+  const [newVersionExist, setNewVersionExist] = useState(false);
+  const [isOpenAppUpdateModal, setIsOpenAppUpdateModal] = useState(false);
+
+  useEffect(() => {
+    if (appUpdate.store.newVersionAvailable) {
+      setNewVersionExist(true);
+      return;
+    }
+    if (
+      appUpdate.codepush.newVersion &&
+      appUpdate.codepush.newVersionDownloadProgress === 1
+    ) {
+      setNewVersionExist(true);
+      return;
+    }
+    setNewVersionExist(false);
+  }, [
+    appUpdate.codepush.newVersion,
+    appUpdate.codepush.newVersionDownloadProgress,
+    appUpdate.store.newVersionAvailable,
+  ]);
+
   return (
     <PageWithScrollView
       backgroundMode={'default'}
-      contentContainerStyle={style.flatten(['padding-x-12', 'padding-y-8'])}
+      contentContainerStyle={style.flatten(['padding-y-8'])}
       refreshControl={
         isNotReady ? undefined : (
           <RefreshControl
@@ -158,6 +192,46 @@ export const HomeScreen: FunctionComponent = observer(() => {
         )
       }>
       <Stack gutter={12}>
+        <VerticalCollapseTransition collapsed={!newVersionExist}>
+          <TouchableHighlight
+            onPress={() => {
+              setIsOpenAppUpdateModal(true);
+            }}>
+            <Box
+              style={{
+                ...style.flatten(['height-38']),
+                // TODO: 나중에 이 색상을 style builder 밑에 넣자...
+                backgroundColor: '#1A2646',
+              }}
+              alignX="center"
+              alignY="center">
+              <XAxis alignY="center">
+                <Text
+                  style={{
+                    ...style.flatten(['text-caption2', 'text-underline']),
+                    // TODO: 나중에 이 색상을 style builder 밑에 넣자...
+                    color: '#AABBF9',
+                  }}>
+                  Update Available
+                </Text>
+                <Gutter size={3.5} />
+                <Svg width="12" height="12" fill="none" viewBox="0 0 12 12">
+                  <Path
+                    stroke="#AABBF9"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.25"
+                    d="M2.25 6h7.5m0 0L6.375 2.625M9.75 6L6.375 9.375"
+                  />
+                </Svg>
+              </XAxis>
+            </Box>
+          </TouchableHighlight>
+
+          <Gutter size={12} />
+        </VerticalCollapseTransition>
+        <Gutter size={0} />
+
         <YAxis alignX="center">
           <LayeredHorizontalRadioGroup
             selectedKey={tabStatus}
@@ -208,78 +282,83 @@ export const HomeScreen: FunctionComponent = observer(() => {
             </Text>
           </Skeleton>
         </Box>
-        {tabStatus === 'available' ? (
-          <Columns sum={1} gutter={10}>
-            <Column weight={1}>
-              <Skeleton isNotReady={isNotReady} layer={1} type="button">
-                <Button
-                  text="Deposit"
-                  size="large"
-                  color="secondary"
-                  onPress={() => {
-                    setIsDepositModalOpen(true);
-                  }}
-                />
-              </Skeleton>
-            </Column>
-            <Column weight={1}>
-              <Skeleton isNotReady={isNotReady} layer={1} type="button">
-                <Button
-                  text="Buy"
-                  size="large"
-                  color="secondary"
-                  onPress={() => {
-                    setIsBuyModalOpen(true);
-                  }}
-                />
-              </Skeleton>
-            </Column>
 
-            <Column weight={1}>
-              <Skeleton isNotReady={isNotReady} layer={1} type="button">
-                <Button
-                  text="Send"
-                  size="large"
-                  onPress={() => {
-                    navigation.dispatch({
-                      ...StackActions.push('Send.SelectAsset'),
-                    });
-                  }}
-                />
-              </Skeleton>
-            </Column>
-          </Columns>
-        ) : (
-          <Columns sum={1} gutter={10}>
-            <Button
-              text="Vote"
-              size="large"
-              color="secondary"
-              rightIcon={<VoteIcon />}
-              containerStyle={style.flatten(['flex-1'])}
-              onPress={() => {
-                //TODO - 거버넌스 페이지로 이동
-                navigation.navigate('Governance', {
-                  screen: 'Governance.intro',
-                });
-              }}
-            />
-            <Button
-              text="Stake"
-              size="large"
-              rightIcon={<StakingIcon size={18} color="white" />}
-              containerStyle={style.flatten(['flex-1'])}
-              onPress={() => {
-                setSelectModalIsOpen(true);
-              }}
-            />
-          </Columns>
-        )}
+        <Box paddingX={12}>
+          {tabStatus === 'available' ? (
+            <Columns sum={1} gutter={10}>
+              <Column weight={1}>
+                <Skeleton isNotReady={isNotReady} layer={1} type="button">
+                  <Button
+                    text="Deposit"
+                    size="large"
+                    color="secondary"
+                    onPress={() => {
+                      setIsDepositModalOpen(true);
+                    }}
+                  />
+                </Skeleton>
+              </Column>
+              <Column weight={1}>
+                <Skeleton isNotReady={isNotReady} layer={1} type="button">
+                  <Button
+                    text="Buy"
+                    size="large"
+                    color="secondary"
+                    onPress={() => {
+                      setIsBuyModalOpen(true);
+                    }}
+                  />
+                </Skeleton>
+              </Column>
 
-        <ClaimAll isNotReady={isNotReady} />
+              <Column weight={1}>
+                <Skeleton isNotReady={isNotReady} layer={1} type="button">
+                  <Button
+                    text="Send"
+                    size="large"
+                    onPress={() => {
+                      navigation.dispatch({
+                        ...StackActions.push('Send.SelectAsset'),
+                      });
+                    }}
+                  />
+                </Skeleton>
+              </Column>
+            </Columns>
+          ) : (
+            <Columns sum={1} gutter={10}>
+              <Button
+                text="Vote"
+                size="large"
+                color="secondary"
+                rightIcon={<VoteIcon />}
+                containerStyle={style.flatten(['flex-1'])}
+                onPress={() => {
+                  //TODO - 거버넌스 페이지로 이동
+                  navigation.navigate('Governance', {
+                    screen: 'Governance.intro',
+                  });
+                }}
+              />
+              <Button
+                text="Stake"
+                size="large"
+                rightIcon={<StakingIcon size={18} color="white" />}
+                containerStyle={style.flatten(['flex-1'])}
+                onPress={() => {
+                  setSelectModalIsOpen(true);
+                }}
+              />
+            </Columns>
+          )}
+        </Box>
+
+        <Box paddingX={12}>
+          <ClaimAll isNotReady={isNotReady} />
+        </Box>
 
         {!isNotReady ? (
-          <Stack>
+          <Box paddingX={12}>
             {tabStatus === 'available' ? (
               <SearchTextInput
                 ref={searchRef}
@@ -291,22 +370,25 @@ export const HomeScreen: FunctionComponent = observer(() => {
                 placeholder="Search for asset or chain (i.e. ATOM, Cosmos)"
               />
             ) : null}
-          </Stack>
+          </Box>
         ) : null}
-        {tabStatus === 'available' ? (
-          <AvailableTabView
-            search={search}
-            isNotReady={isNotReady}
-            onClickGetStarted={() => {
-              setIsDepositModalOpen(true);
-            }}
-          />
-        ) : (
-          <StakedTabView
-            selectModalIsOpen={selectModalIsOpen}
-            setSelectModalIsOpen={setSelectModalIsOpen}
-          />
-        )}
+
+        <Box paddingX={12}>
+          {tabStatus === 'available' ? (
+            <AvailableTabView
+              search={search}
+              isNotReady={isNotReady}
+              onClickGetStarted={() => {
+                setIsDepositModalOpen(true);
+              }}
+            />
+          ) : (
+            <StakedTabView
+              selectModalIsOpen={selectModalIsOpen}
+              setSelectModalIsOpen={setSelectModalIsOpen}
+            />
+          )}
+        </Box>
       </Stack>
 
       <DepositModal
@@ -317,6 +399,10 @@ export const HomeScreen: FunctionComponent = observer(() => {
         navigation={navigation}
         isOpen={isBuyModalOpen}
         setIsOpen={setIsBuyModalOpen}
+      />
+      <AppUpdateModal
+        isOpen={isOpenAppUpdateModal}
+        setIsOpen={setIsOpenAppUpdateModal}
       />
     </PageWithScrollView>
   );

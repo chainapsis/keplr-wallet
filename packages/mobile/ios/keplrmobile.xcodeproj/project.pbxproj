@@ -14,6 +14,7 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		2500D48123E448A5AB51BF3E /* Inter-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2A292C673E654149A0871B94 /* Inter-Black.ttf */; };
+		269294912B4402E700582C2C /* AppCenter-Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = 269294902B4402E600582C2C /* AppCenter-Config.plist */; };
 		3EBA0E1D53FB4DEDA546EC46 /* Inter-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 223075AB04374C51BE39A5CB /* Inter-Light.ttf */; };
 		4EF462ED8AA5F0FA3BEAD348 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F570D5EBAE528E6603BFED71 /* ExpoModulesProvider.swift */; };
 		57AF4DD7D8084FBCB4DECA16 /* Inter-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C7552503CDF6460390964633 /* Inter-SemiBold.ttf */; };
@@ -54,6 +55,7 @@
 		19DDE38AAA30449396F66521 /* Inter-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraBold.ttf"; path = "../src/public/assets/fonts/Inter-ExtraBold.ttf"; sourceTree = "<group>"; };
 		19F6CBCC0A4E27FBF8BF4A61 /* libPods-keplrmobile-keplrmobileTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-keplrmobile-keplrmobileTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		223075AB04374C51BE39A5CB /* Inter-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Light.ttf"; path = "../src/public/assets/fonts/Inter-Light.ttf"; sourceTree = "<group>"; };
+		269294902B4402E600582C2C /* AppCenter-Config.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "AppCenter-Config.plist"; sourceTree = "<group>"; };
 		2A292C673E654149A0871B94 /* Inter-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Black.ttf"; path = "../src/public/assets/fonts/Inter-Black.ttf"; sourceTree = "<group>"; };
 		2DC094D62A8C49F992E67DD9 /* Inter-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Bold.ttf"; path = "../src/public/assets/fonts/Inter-Bold.ttf"; sourceTree = "<group>"; };
 		3B4392A12AC88292D35C810B /* Pods-keplrmobile.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-keplrmobile.debug.xcconfig"; path = "Target Support Files/Pods-keplrmobile/Pods-keplrmobile.debug.xcconfig"; sourceTree = "<group>"; };
@@ -144,6 +146,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				269294902B4402E600582C2C /* AppCenter-Config.plist */,
 				CC63E03A2AF9454C00275FCA /* injected-provider.bundle.js */,
 				13B07FAE1A68108700A75B9A /* keplrmobile */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
@@ -320,6 +323,7 @@
 				CC63E03B2AF9454C00275FCA /* injected-provider.bundle.js in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				269294912B4402E700582C2C /* AppCenter-Config.plist in Resources */,
 				2500D48123E448A5AB51BF3E /* Inter-Black.ttf in Resources */,
 				BC0D20B3C7734D31AC8F2AAD /* Inter-Bold.ttf in Resources */,
 				0BD4F3D052C6414EACB0D9F5 /* Inter-ExtraBold.ttf in Resources */,

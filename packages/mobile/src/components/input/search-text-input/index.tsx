@@ -39,6 +39,7 @@ export const DebounceSearchTextInput = forwardRef<
 
   return (
     <TextInput
+      autoCapitalize="none"
       value={searchWord}
       onChangeText={e => setSearchWord(e)}
       {...props}
