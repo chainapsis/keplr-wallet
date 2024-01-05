@@ -492,10 +492,19 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           const swapReceiver: string[] = [];
 
           try {
+            let swapRouteKey = "";
+            if (queryRoute.response) {
+              swapRouteKey =
+                ibcSwapConfigs.amountConfig.createSwapRouteKeyFromRouteResponse(
+                  queryRoute.response.data
+                );
+            }
+
             const [_tx] = await Promise.all([
               ibcSwapConfigs.amountConfig.getTx(
                 uiConfigStore.ibcSwapConfig.slippageNum,
-                SwapFeeBps.receiver
+                SwapFeeBps.receiver,
+                swapRouteKey
               ),
               // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.
               // /msgs_direct로도 얻을 순 있지만 따로 데이터를 해석해야되기 때문에 좀 힘들다...
