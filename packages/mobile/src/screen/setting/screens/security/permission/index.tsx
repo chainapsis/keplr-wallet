@@ -16,6 +16,7 @@ import {ArrowUpIcon} from '../../../../../components/icon/arrow-up';
 import {TreeIcon} from '../../../../../components/icon/tree';
 import {PageWithScrollView} from '../../../../../components/page';
 import {WCMessageRequester} from '../../../../../stores/wallet-connect/msg-requester';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export const SettingSecurityPermissionScreen: FunctionComponent = observer(
   () => {
@@ -95,156 +96,162 @@ const OriginView: FunctionComponent<{
   }
 
   return (
-    <Box
-      padding={12}
-      borderRadius={6}
-      backgroundColor={style.get('color-card-default').color}
-      style={style.flatten(['gap-12'])}
-      onClick={() => setIsCollapsed(!isCollapsed)}>
-      <Columns sum={1} alignY="center">
-        <Box
-          padding={10}
-          marginRight={10}
-          borderRadius={6}
-          backgroundColor={style.get('color-gray-550').color}>
-          <Columns sum={1} gutter={12} alignY="center">
-            <Text
-              numberOfLines={1}
-              style={StyleSheet.flatten([
-                style.flatten(['body2', 'color-text-high']),
-                Platform.OS === 'ios'
-                  ? {
-                      maxWidth: 200,
-                    }
-                  : {
-                      minWidth: 200,
-                    },
-              ])}>
-              {origin}
+    <TouchableWithoutFeedback onPress={() => setIsCollapsed(!isCollapsed)}>
+      <Box
+        padding={12}
+        borderRadius={6}
+        backgroundColor={style.get('color-card-default').color}
+        style={style.flatten(['gap-12'])}>
+        <Columns sum={1} alignY="center">
+          <Box
+            padding={10}
+            marginRight={10}
+            borderRadius={6}
+            backgroundColor={style.get('color-gray-550').color}>
+            <Columns sum={1} gutter={12} alignY="center">
+              <Text
+                numberOfLines={1}
+                style={StyleSheet.flatten([
+                  style.flatten(['body2', 'color-text-high']),
+                  Platform.OS === 'ios'
+                    ? {
+                        maxWidth: 200,
+                      }
+                    : {
+                        minWidth: 200,
+                      },
+                ])}>
+                {origin}
+              </Text>
+              <TouchableWithoutFeedback
+                onPress={async () => {
+                  await permissionManagerStore.clearOrigin(origin);
+                }}>
+                <Box cursor="pointer">
+                  <Columns sum={1} gutter={2} alignY="center">
+                    <Text
+                      style={style.flatten(['text-button2', 'color-text-low'])}>
+                      <FormattedMessage id="page.setting.security.permission.origin-view.all-text" />
+                    </Text>
+                    <CloseIcon
+                      size={16}
+                      color={style.get('color-text-low').color}
+                    />
+                  </Columns>
+                </Box>
+              </TouchableWithoutFeedback>
+            </Columns>
+          </Box>
+
+          <Column weight={1} />
+
+          <Columns sum={1} alignY="center" gutter={8}>
+            <Text style={style.flatten(['body1', 'color-text-middle'])}>
+              {(value?.permissions.length ?? 0) +
+                (value?.globalPermissions.length ?? 0)}
             </Text>
-            <Box
-              cursor="pointer"
-              onClick={async e => {
-                e.preventDefault();
-                e.stopPropagation();
-                await permissionManagerStore.clearOrigin(origin);
-              }}>
-              <Columns sum={1} gutter={2} alignY="center">
-                <Text style={style.flatten(['text-button2', 'color-text-low'])}>
-                  <FormattedMessage id="page.setting.security.permission.origin-view.all-text" />
-                </Text>
-                <CloseIcon
-                  size={16}
-                  color={style.get('color-text-low').color}
-                />
-              </Columns>
-            </Box>
+
+            {isCollapsed ? (
+              <ArrowDownIcon
+                size={20}
+                color={style.get('color-text-middle').color}
+              />
+            ) : (
+              <ArrowUpIcon
+                size={20}
+                color={style.get('color-text-middle').color}
+              />
+            )}
           </Columns>
-        </Box>
-
-        <Column weight={1} />
-
-        <Columns sum={1} alignY="center" gutter={8}>
-          <Text style={style.flatten(['body1', 'color-text-middle'])}>
-            {(value?.permissions.length ?? 0) +
-              (value?.globalPermissions.length ?? 0)}
-          </Text>
-
-          {isCollapsed ? (
-            <ArrowDownIcon
-              size={20}
-              color={style.get('color-text-middle').color}
-            />
-          ) : (
-            <ArrowUpIcon
-              size={20}
-              color={style.get('color-text-middle').color}
-            />
-          )}
         </Columns>
-      </Columns>
 
-      {isCollapsed ? null : (
-        <Stack gutter={12}>
-          {value.permissions.map(permission => {
-            return (
-              <Columns
-                sum={1}
-                key={`${permission.chainIdentifier}/${permission.type}`}>
-                <TreeIcon size={36} color={style.get('color-gray-400').color} />
-                <Box
-                  padding={10}
-                  marginRight={10}
-                  borderRadius={6}
-                  backgroundColor={style.get('color-gray-550').color}
-                  cursor="pointer"
-                  onClick={async e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    await permissionManagerStore.removePermission(
-                      origin,
-                      permission.chainIdentifier,
-                      permission.type,
-                    );
-                  }}>
-                  <Columns sum={1} gutter={12} alignY="center">
-                    <Text style={style.flatten(['body2', 'color-text-high'])}>
-                      {permission.chainIdentifier}
-                    </Text>
-                    <Box cursor="pointer">
-                      <CloseIcon
-                        size={16}
-                        color={style.get('color-text-low').color}
-                      />
+        {isCollapsed ? null : (
+          <Stack gutter={12}>
+            {value.permissions.map(permission => {
+              return (
+                <Columns
+                  sum={1}
+                  key={`${permission.chainIdentifier}/${permission.type}`}>
+                  <TreeIcon
+                    size={36}
+                    color={style.get('color-gray-400').color}
+                  />
+                  <TouchableWithoutFeedback
+                    onPress={async () => {
+                      await permissionManagerStore.removePermission(
+                        origin,
+                        permission.chainIdentifier,
+                        permission.type,
+                      );
+                    }}>
+                    <Box
+                      padding={10}
+                      marginRight={10}
+                      borderRadius={6}
+                      backgroundColor={style.get('color-gray-550').color}>
+                      <Columns sum={1} gutter={12} alignY="center">
+                        <Text
+                          style={style.flatten(['body2', 'color-text-high'])}>
+                          {permission.chainIdentifier}
+                        </Text>
+                        <Box>
+                          <CloseIcon
+                            size={16}
+                            color={style.get('color-text-low').color}
+                          />
+                        </Box>
+                      </Columns>
                     </Box>
-                  </Columns>
-                </Box>
-              </Columns>
-            );
-          })}
-          {value.globalPermissions.map(globalPermission => {
-            return (
-              <Columns sum={1} key={globalPermission.type}>
-                <TreeIcon size={36} color={style.get('color-gray-400').color} />
-                <Box
-                  padding={10}
-                  marginRight={10}
-                  borderRadius={6}
-                  backgroundColor={style.get('color-gray-550').color}
-                  onClick={async e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    await permissionManagerStore.removeGlobalPermission(
-                      origin,
-                      globalPermission.type,
-                    );
-                  }}>
-                  <Columns sum={1} gutter={12} alignY="center">
-                    <Text style={style.flatten(['body2', 'color-text-high'])}>
-                      {(() => {
-                        switch (globalPermission.type) {
-                          case 'get-chain-infos':
-                            return 'Get chain infos';
-                          default:
-                            return `Unknown: ${globalPermission.type}`;
-                        }
-                      })()}
-                    </Text>
-                    <Box cursor="pointer">
-                      <CloseIcon
-                        size={16}
-                        color={style.get('color-text-low').color}
-                      />
+                  </TouchableWithoutFeedback>
+                </Columns>
+              );
+            })}
+            {value.globalPermissions.map(globalPermission => {
+              return (
+                <Columns sum={1} key={globalPermission.type}>
+                  <TreeIcon
+                    size={36}
+                    color={style.get('color-gray-400').color}
+                  />
+                  <TouchableWithoutFeedback
+                    onPress={async () => {
+                      await permissionManagerStore.removeGlobalPermission(
+                        origin,
+                        globalPermission.type,
+                      );
+                    }}>
+                    <Box
+                      padding={10}
+                      marginRight={10}
+                      borderRadius={6}
+                      backgroundColor={style.get('color-gray-550').color}>
+                      <Columns sum={1} gutter={12} alignY="center">
+                        <Text
+                          style={style.flatten(['body2', 'color-text-high'])}>
+                          {(() => {
+                            switch (globalPermission.type) {
+                              case 'get-chain-infos':
+                                return 'Get chain infos';
+                              default:
+                                return `Unknown: ${globalPermission.type}`;
+                            }
+                          })()}
+                        </Text>
+                        <Box>
+                          <CloseIcon
+                            size={16}
+                            color={style.get('color-text-low').color}
+                          />
+                        </Box>
+                      </Columns>
                     </Box>
-                  </Columns>
-                </Box>
-              </Columns>
-            );
-          })}
-        </Stack>
-      )}
-    </Box>
+                  </TouchableWithoutFeedback>
+                </Columns>
+              );
+            })}
+          </Stack>
+        )}
+      </Box>
+    </TouchableWithoutFeedback>
   );
 });

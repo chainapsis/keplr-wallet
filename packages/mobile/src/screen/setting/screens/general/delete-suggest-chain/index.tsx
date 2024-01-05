@@ -16,6 +16,7 @@ import {Stack} from '../../../../../components/stack';
 import {CloseIcon} from '../../../../../components/icon';
 import {GuideBox} from '../../../../../components/guide-box';
 import {FlatList} from '../../../../../components/flat-list';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export const SettingGeneralDeleteSuggestChainScreen: FunctionComponent =
   observer(() => {
@@ -104,9 +105,11 @@ const ChainItem: FunctionComponent<{
 
         <Column weight={1} />
 
-        <Box onClick={onClickClose} cursor="pointer">
-          <CloseIcon size={24} color={style.get('color-text-low').color} />
-        </Box>
+        <TouchableWithoutFeedback onPress={onClickClose}>
+          <Box>
+            <CloseIcon size={24} color={style.get('color-text-low').color} />
+          </Box>
+        </TouchableWithoutFeedback>
       </Columns>
     </Box>
   );

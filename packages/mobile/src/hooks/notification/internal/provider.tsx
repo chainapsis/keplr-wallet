@@ -15,6 +15,7 @@ import {Text, View} from 'react-native';
 import {Column, Columns} from '../../../components/column';
 import {CloseIcon} from '../../../components/icon';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export const NotificationProvider: FunctionComponent<PropsWithChildren> = ({
   children,
@@ -220,9 +221,9 @@ const NotificationView: FunctionComponent<{
             ) : null}
           </Box>
           <Column weight={1} />
-          <Box onClick={onClickClose}>
+          <TouchableWithoutFeedback onPress={onClickClose}>
             <CloseIcon size={24} color={style.get(titleColor).color} />
-          </Box>
+          </TouchableWithoutFeedback>
         </Columns>
       </Box>
     </VerticalCollapseTransition>

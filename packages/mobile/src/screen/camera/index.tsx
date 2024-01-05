@@ -20,7 +20,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import {Box} from '../../components/box';
 import {Button} from '../../components/button';
 import Svg, {Path} from 'react-native-svg';
 import {Gutter} from '../../components/gutter';
@@ -38,6 +37,7 @@ import {Bech32Address} from '@keplr-wallet/cosmos';
 import {SVGLoadingIcon} from '../../components/spinner';
 import {GuideBox} from '../../components/guide-box';
 import {FormattedMessage, useIntl} from 'react-intl';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export const CameraScreen: FunctionComponent = observer(() => {
   const {chainStore, walletConnectStore} = useStore();
@@ -172,11 +172,13 @@ export const CameraScreen: FunctionComponent = observer(() => {
           'justify-center',
           'items-center',
         ])}>
-        <Box
-          style={{top: 50, right: 30, position: 'absolute'}}
-          onClick={() => navigation.goBack()}>
+        <TouchableWithoutFeedback
+          containerStyle={{top: 50, right: 30, position: 'absolute'}}
+          onPress={() => {
+            navigation.goBack();
+          }}>
           <CloseIcon size={38} color={style.get('color-text-high').color} />
-        </Box>
+        </TouchableWithoutFeedback>
 
         <Text style={style.flatten(['color-text-high', 'h1'])}>
           <FormattedMessage id="page.camera.main-title" />

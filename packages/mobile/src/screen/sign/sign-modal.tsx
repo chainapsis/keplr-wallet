@@ -42,6 +42,7 @@ import {LedgerGrantModal} from '../register/connect-ledger/modal';
 import {LedgerGuideBox} from '../../components/guide-box/ledger-guide-box';
 import {FlatList} from '../../components/flat-list';
 import {ScrollView} from '../../components/scroll-view/common-scroll-view';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export const SignModal = registerCardModal(
   observer<{
@@ -570,8 +571,8 @@ export const ViewDataButton: FunctionComponent<{
   const style = useStyle();
 
   return (
-    <Box
-      onClick={() => {
+    <TouchableWithoutFeedback
+      onPress={() => {
         setIsViewData(!isViewData);
       }}>
       <XAxis alignY="center">
@@ -590,7 +591,7 @@ export const ViewDataButton: FunctionComponent<{
           />
         )}
       </XAxis>
-    </Box>
+    </TouchableWithoutFeedback>
   );
 };
 

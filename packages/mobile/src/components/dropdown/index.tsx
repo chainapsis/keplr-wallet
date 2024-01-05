@@ -6,6 +6,7 @@ import {Label} from '../input/label';
 import {Columns} from '../column';
 import {ArrowDownFillIcon} from '../icon/arrow-down-fill';
 import {FlatList} from '../flat-list';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 export interface DropdownItemProps {
   key: string;
@@ -78,68 +79,71 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
     <Box zIndex={1}>
       {label ? <Label content={label} /> : null}
 
-      <Box
-        alignY="center"
-        height={size === 'small' ? 44 : 52}
-        backgroundColor={style.get('color-gray-700').color}
-        paddingX={16}
-        paddingY={10}
-        borderRadius={8}
-        borderWidth={1}
-        borderColor={
-          color === 'text-input'
-            ? isOpen
+      <TouchableWithoutFeedback onPress={() => setIsOpen(!isOpen)}>
+        <Box
+          alignY="center"
+          height={size === 'small' ? 44 : 52}
+          backgroundColor={style.get('color-gray-700').color}
+          paddingX={16}
+          paddingY={10}
+          borderRadius={8}
+          borderWidth={1}
+          borderColor={
+            color === 'text-input'
+              ? isOpen
+                ? style.get('color-gray-200').color
+                : style.get('color-gray-400').color
+              : isOpen
               ? style.get('color-gray-200').color
-              : style.get('color-gray-400').color
-            : isOpen
-            ? style.get('color-gray-200').color
-            : style.get('color-gray-500').color
-        }
-        style={StyleSheet.flatten([itemContainerStyle])}
-        onClick={() => setIsOpen(!isOpen)}>
-        <Columns sum={1}>
-          <Box style={{flex: 1}}>
-            <Box
-              position="absolute"
-              style={{
-                opacity: !isOpen || !allowSearch ? 0 : 1,
-                pointerEvents: !isOpen || !allowSearch ? 'none' : 'auto',
-              }}>
-              <TextInput
-                ref={searchInputRef}
-                value={searchText}
-                onChangeText={text => {
-                  setSearchText(text);
-                }}
-                selectionColor={style.get('color-gray-50').color}
+              : style.get('color-gray-500').color
+          }
+          style={StyleSheet.flatten([itemContainerStyle])}>
+          <Columns sum={1}>
+            <Box style={{flex: 1}}>
+              <Box
+                position="absolute"
                 style={{
-                  padding: 0,
-                  borderWidth: 1,
-                  backgroundColor: style.get('color-red-400').color,
-                  color: selectedItemKey
-                    ? style.get('color-gray-50').color
-                    : style.get('color-gray-300').color,
-                }}
-              />
+                  opacity: !isOpen || !allowSearch ? 0 : 1,
+                  pointerEvents: !isOpen || !allowSearch ? 'none' : 'auto',
+                }}>
+                <TextInput
+                  ref={searchInputRef}
+                  value={searchText}
+                  onChangeText={text => {
+                    setSearchText(text);
+                  }}
+                  selectionColor={style.get('color-gray-50').color}
+                  style={{
+                    padding: 0,
+                    borderWidth: 1,
+                    backgroundColor: style.get('color-red-400').color,
+                    color: selectedItemKey
+                      ? style.get('color-gray-50').color
+                      : style.get('color-gray-300').color,
+                  }}
+                />
+              </Box>
+
+              <Text
+                style={style.flatten([
+                  selectedItemKey ? 'color-gray-50' : 'color-gray-300',
+                  isOpen && allowSearch ? 'display-none' : 'opacity-100',
+                  'flex-1',
+                ])}>
+                {selectedItemKey
+                  ? items.find(item => item.key === selectedItemKey)?.label ??
+                    placeholder
+                  : placeholder}
+              </Text>
             </Box>
 
-            <Text
-              style={style.flatten([
-                selectedItemKey ? 'color-gray-50' : 'color-gray-300',
-                isOpen && allowSearch ? 'display-none' : 'opacity-100',
-                'flex-1',
-              ])}>
-              {selectedItemKey
-                ? items.find(item => item.key === selectedItemKey)?.label ??
-                  placeholder
-                : placeholder}
-            </Text>
-          </Box>
-
-          <ArrowDownFillIcon size={24} color={style.get('color-white').color} />
-        </Columns>
-      </Box>
-
+            <ArrowDownFillIcon
+              size={24}
+              color={style.get('color-white').color}
+            />
+          </Columns>
+        </Box>
+      </TouchableWithoutFeedback>
       <View>
         <Box
           position="absolute"
@@ -190,17 +194,19 @@ const DropdownItem: FunctionComponent<{
   const style = useStyle();
 
   return (
-    <Box
-      alignY="center"
-      height={52}
-      paddingX={24}
-      paddingY={15}
-      backgroundColor={style.get('color-gray-600').color}
-      onClick={() => {
+    <TouchableWithoutFeedback
+      onPress={() => {
         onSelect(item.key);
         closeDropdown();
       }}>
-      <Text style={style.flatten(['color-text-high'])}>{item.label}</Text>
-    </Box>
+      <Box
+        alignY="center"
+        height={52}
+        paddingX={24}
+        paddingY={15}
+        backgroundColor={style.get('color-gray-600').color}>
+        <Text style={style.flatten(['color-text-high'])}>{item.label}</Text>
+      </Box>
+    </TouchableWithoutFeedback>
   );
 };

@@ -39,12 +39,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
 
   return (
     <Stack>
-      <Box
-        marginBottom={8}
-        paddingX={6}
-        onClick={e => {
-          e.preventDefault();
-        }}>
+      <Box marginBottom={8} paddingX={6}>
         <Columns sum={1} alignY="center">
           {!hideLength ? (
             <Text style={style.flatten(['subtitle3', 'color-text-high'])}>

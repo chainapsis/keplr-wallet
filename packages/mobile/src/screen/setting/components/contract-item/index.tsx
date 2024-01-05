@@ -57,6 +57,9 @@ export const ContractAddressItem: FunctionComponent<{
           </Box>
           <Column weight={1} />
           <TextButton
+            onPress={() => {
+              afterSelect(address);
+            }}
             text={intl.formatMessage({
               id: 'page.setting.token.add.contract-item.select-button',
             })}
