@@ -7,7 +7,13 @@ import React, {
 import {observer} from 'mobx-react-lite';
 import {ModalState, ModalStates} from './state';
 import {ModalBaseContext, useModalBase} from './provider';
-import {BackHandler, Dimensions, ScaledSize, View} from 'react-native';
+import {
+  BackHandler,
+  Dimensions,
+  Platform,
+  ScaledSize,
+  View,
+} from 'react-native';
 import {useStyle} from '../../../styles';
 import Reanimated, {
   interpolate,
@@ -257,8 +263,13 @@ const ModalRenderImpl: FunctionComponent<{
               if (translateY.value == null) {
                 translateY.value = 0;
               }
+              //NOTE android에서만 모달이 내려갔을 때 약간의 윗부분이 남아있음
+              //deviceSize.height / 2 + layoutHeight / 2값은 모달이 생성될 때랑 같아서
+              //일단은 안 보일 수 있게 매직넘버를 파인튜닝해서 추가함
               translateY.value = withSpring(
-                deviceSize.height / 2 + layoutHeight / 2,
+                Platform.OS === 'android'
+                  ? deviceSize.height / 2 + layoutHeight / 2 + 17
+                  : deviceSize.height / 2 + layoutHeight / 2,
                 defaultSpringConfig,
                 finished => {
                   if (finished) {

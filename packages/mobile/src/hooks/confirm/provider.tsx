@@ -8,50 +8,32 @@ import React, {
 import {ConfirmContext} from './internal';
 import {YAxis} from '../../components/axis';
 import {Box} from '../../components/box';
-import {Modal, Text} from 'react-native';
+import {Text} from 'react-native';
 import {useIntl} from 'react-intl';
 import {Button} from '../../components/button';
 import {Gutter} from '../../components/gutter';
 import {useStyle} from '../../styles';
-import Animated, {
-  interpolateColor,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import {useSharedValue, withTiming} from 'react-native-reanimated';
 import {Columns} from '../../components/column';
-import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
+import {registerConfirmModal} from '../../components/modal/confirm';
+
+interface ConfirmData {
+  id: string;
+  detached: boolean;
+  title: string;
+  paragraph: string | React.ReactNode;
+  options: {
+    forceYes?: boolean;
+  };
+  resolver: (value: boolean) => void;
+}
 
 export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
   children,
 }) => {
-  const [confirm, setConfirm] = useState<{
-    id: string;
-    detached: boolean;
-    title: string;
-    paragraph: string | React.ReactNode;
-    options: {
-      forceYes?: boolean;
-    };
-    resolver: (value: boolean) => void;
-  }>();
-  const style = useStyle();
+  const [confirm, setConfirm] = useState<ConfirmData>();
   const seqRef = useRef(0);
-  const intl = useIntl();
-
-  const backdropColor = style.get('color-black@50%').color;
-
   const backgroundColor = useSharedValue(0);
-  const backgroundInterpolate = useAnimatedStyle(
-    () => ({
-      backgroundColor: interpolateColor(
-        backgroundColor.value,
-        [0, 1],
-        ['transparent', backdropColor],
-      ),
-    }),
-    [],
-  );
   const [isOpen, setIsOpen] = useState(false);
 
   const confirmFn: (
@@ -66,7 +48,7 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
       setTimeout(() => {
         setIsOpen(true);
         backgroundColor.value = withTiming(1);
-      }, 100);
+      }, 300);
 
       setConfirm({
         id: seqRef.current.toString(),
@@ -79,11 +61,6 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
     });
   };
 
-  const closeModal = () => {
-    setIsOpen(false);
-    backgroundColor.value = withTiming(0);
-  };
-
   const confirmFnRef = useRef(confirmFn);
   confirmFnRef.current = confirmFn;
   return (
@@ -94,84 +71,88 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
         };
       }, [])}>
       {children}
-
-      <Modal
-        visible={isOpen}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => closeModal()}>
-        <TouchableWithoutFeedback
-          onPress={() => {
-            closeModal();
-          }}
-          containerStyle={style.flatten([
-            'flex-1',
-            'justify-center',
-            'items-center',
-          ])}>
-          <TouchableWithoutFeedback>
-            <Box
-              backgroundColor={
-                style.get('background-color-gray-600').backgroundColor
-              }
-              paddingX={20}
-              paddingY={24}
-              marginX={4}
-              borderRadius={8}>
-              <YAxis>
-                {confirm?.title ? (
-                  <React.Fragment>
-                    <Text style={style.flatten(['h4', 'color-text-high'])}>
-                      {confirm.title}
-                    </Text>
-                    <Gutter size={8} />
-                  </React.Fragment>
-                ) : null}
-
-                <Text style={style.flatten(['body1', 'color-text-middle'])}>
-                  {confirm?.paragraph}
-                </Text>
-
-                <Gutter size={18} />
-                <Columns sum={1}>
-                  {!confirm?.options.forceYes ? (
-                    <React.Fragment>
-                      <Button
-                        size="large"
-                        text={intl.formatMessage({
-                          id: 'hooks.confirm.cancel-button',
-                        })}
-                        containerStyle={style.flatten(['flex-1'])}
-                        onPress={() => {
-                          confirm?.resolver(false);
-                          closeModal();
-                        }}
-                        color="secondary"
-                      />
-                      <Gutter size={12} />
-                    </React.Fragment>
-                  ) : null}
-                  <Button
-                    size="large"
-                    text={intl.formatMessage({
-                      id: 'hooks.confirm.yes-button',
-                    })}
-                    containerStyle={style.flatten(['flex-1'])}
-                    onPress={() => {
-                      closeModal();
-                      confirm?.resolver(true);
-                    }}
-                  />
-                </Columns>
-              </YAxis>
-            </Box>
-          </TouchableWithoutFeedback>
-        </TouchableWithoutFeedback>
-      </Modal>
-      <Animated.View
-        pointerEvents="none"
-        style={[style.flatten(['absolute-fill']), backgroundInterpolate]}
+      <ConfirmModal
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        confirm={confirm}
+        onClose={() => {
+          confirm?.resolver(false);
+          setIsOpen(false);
+        }}
+        onConfirm={() => {
+          confirm?.resolver(true);
+          setIsOpen(false);
+        }}
       />
     </ConfirmContext.Provider>
   );
 };
+
+const ConfirmModal = registerConfirmModal(
+  ({
+    onClose,
+    onConfirm,
+    confirm,
+  }: {
+    onClose: () => void;
+    onConfirm: () => void;
+    confirm?: ConfirmData;
+  }) => {
+    const style = useStyle();
+    const intl = useIntl();
+    return (
+      <Box
+        backgroundColor={style.get('background-color-gray-600').backgroundColor}
+        paddingX={20}
+        paddingY={24}
+        marginX={4}
+        borderRadius={8}>
+        <YAxis>
+          {confirm?.title ? (
+            <React.Fragment>
+              <Text style={style.flatten(['h4', 'color-text-high'])}>
+                {confirm.title}
+              </Text>
+              <Gutter size={8} />
+            </React.Fragment>
+          ) : null}
+
+          <Text style={style.flatten(['body1', 'color-text-middle'])}>
+            {confirm?.paragraph}
+          </Text>
+
+          <Gutter size={18} />
+          <Columns sum={1}>
+            {!confirm?.options.forceYes ? (
+              <React.Fragment>
+                <Button
+                  size="large"
+                  text={intl.formatMessage({
+                    id: 'hooks.confirm.cancel-button',
+                  })}
+                  containerStyle={style.flatten(['flex-1'])}
+                  onPress={() => {
+                    onClose();
+                  }}
+                  color="secondary"
+                />
+                <Gutter size={12} />
+              </React.Fragment>
+            ) : null}
+
+            <Button
+              size="large"
+              text={intl.formatMessage({
+                id: 'hooks.confirm.yes-button',
+              })}
+              containerStyle={style.flatten(['flex-1'])}
+              onPress={() => {
+                onConfirm();
+              }}
+            />
+          </Columns>
+        </YAxis>
+      </Box>
+    );
+  },
+);
