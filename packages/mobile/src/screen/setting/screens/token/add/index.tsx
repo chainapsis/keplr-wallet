@@ -23,7 +23,7 @@ import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../../../navigation';
 import {PageWithScrollView} from '../../../../../components/page';
 import {ContractAddressBookModal} from '../../../components/contract-address-book-modal';
-import {Text} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
 import {Controller, useForm} from 'react-hook-form';
 import {Button} from '../../../../../components/button';
 import {Gutter} from '../../../../../components/gutter';
@@ -214,7 +214,12 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
   return (
     <PageWithScrollView
       backgroundMode={'default'}
-      contentContainerStyle={style.flatten(['flex-grow-1'])}>
+      contentContainerStyle={StyleSheet.flatten([
+        style.flatten(['flex-grow-1']),
+        {
+          paddingBottom: 23,
+        },
+      ])}>
       <Box paddingX={12} paddingTop={12} height={'100%'}>
         <Stack gutter={16}>
           <Box width={208}>
@@ -359,7 +364,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
           </Stack>
         ) : null}
         <Button
-          color="secondary"
+          color="primary"
           size="large"
           text={intl.formatMessage({
             id: 'page.setting.token.add.confirm-button',
