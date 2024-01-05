@@ -15,7 +15,6 @@ import {
   BroadcastMode,
   StdSignDoc,
 } from '@keplr-wallet/types';
-import {InExtensionMessageRequester} from '@keplr-wallet/router-extension';
 import {BACKGROUND_PORT} from '@keplr-wallet/router';
 import {
   PrivilegeCosmosSignAminoWithdrawRewardsMsg,
@@ -37,6 +36,7 @@ import {useNotification} from '../../../../hooks/notification';
 import {StackNavProp} from '../../../../navigation';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
+import {RNMessageRequesterInternal} from '../../../../router';
 
 // XXX: 좀 이상하긴 한데 상위/하위 컴포넌트가 state를 공유하기 쉽게하려고 이렇게 한다...
 class ClaimAllEachState {
@@ -294,7 +294,7 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
                     signer: string,
                     signDoc: StdSignDoc,
                   ): Promise<AminoSignResponse> => {
-                    const requester = new InExtensionMessageRequester();
+                    const requester = new RNMessageRequesterInternal();
 
                     return await requester.sendMessage(
                       BACKGROUND_PORT,
@@ -310,7 +310,7 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
                     tx: Uint8Array,
                     mode: BroadcastMode,
                   ): Promise<Uint8Array> => {
-                    const requester = new InExtensionMessageRequester();
+                    const requester = new RNMessageRequesterInternal();
 
                     return await requester.sendMessage(
                       BACKGROUND_PORT,
