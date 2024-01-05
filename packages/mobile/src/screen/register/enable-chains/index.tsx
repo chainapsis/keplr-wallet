@@ -829,16 +829,12 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
                   }
 
                   navigation.reset({
-                    routes: [{name: 'Register.Welcome', params: {password}}],
-                  });
-
-                  navigation.reset({
                     routes: [
                       {
                         name: 'Register.ConnectLedger',
                         params: {
                           name: '',
-                          password: '',
+                          password,
                           app: 'Ethereum',
                           bip44Path,
 

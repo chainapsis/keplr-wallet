@@ -1,12 +1,5 @@
-import React, {
-  FunctionComponent,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from 'react';
+import React, {FunctionComponent, useState} from 'react';
 import {observer} from 'mobx-react-lite';
-import {Button} from '../../../components/button';
-import {LegacyRegisterContainer} from '../components';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStyle} from '../../../styles';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
@@ -22,12 +15,14 @@ import {
   LedgerIcon,
   TerraIcon,
 } from '../../../components/icon';
-import {LedgerGrantModal} from './modal';
 import {useStore} from '../../../stores';
-import TransportBLE from '@ledgerhq/react-native-hw-transport-ble';
 import {LedgerUtils} from '../../../utils';
-import {ScrollView} from '../../../components/scroll-view/common-scroll-view';
 import {useLedgerBLE} from '../../../provider/ledger-ble';
+import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
+import {AppHRP, CosmosApp} from '@keplr-wallet/ledger-cosmos';
+import Transport from '@ledgerhq/hw-transport';
+import Eth from '@ledgerhq/hw-app-eth';
+import {PubKeySecp256k1} from '@keplr-wallet/crypto';
 
 export type Step = 'unknown' | 'connected' | 'app';
 
@@ -37,57 +32,89 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
   const route =
     useRoute<RouteProp<RootStackParamList, 'Register.ConnectLedger'>>();
   const navigation = useNavigation<StackNavProp>();
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const {stepPrevious, stepTotal, app, bip44Path, appendModeInfo} =
-    route.params;
-
-  const [step, setStep] = useState<Step>('unknown');
-  const [publicKey, setPublicKey] = useState<Uint8Array>();
-
   const {keyRingStore, chainStore} = useStore();
 
-  useLayoutEffect(() => {
-    navigation.setParams({
-      hideBackButton: appendModeInfo !== undefined,
-    });
-  }, [appendModeInfo, navigation, stepPrevious, stepTotal]);
+  const {
+    stepPrevious,
+    stepTotal,
+    app: propApp,
+    bip44Path,
+    appendModeInfo,
+    name,
+    password,
+  } = route.params;
 
-  useEffect(() => {
-    // If this modal appears, it's probably because there was a problem with the ledger connection.
-    // Ledger transport library for BLE seems to cache the transport internally.
-    // But this can be small problem when the ledger connection is failed.
-    // So, when this modal appears, try to disconnect the bluetooth connection for nano X.
-    LedgerUtils.getLastUsedLedgerDeviceId().then(deviceId => {
-      if (deviceId) {
-        TransportBLE.disconnect(deviceId);
+  if (!Object.keys(AppHRP).includes(propApp) && propApp !== 'Ethereum') {
+    throw new Error(`Unsupported app: ${propApp}`);
+  }
+
+  const ledgerBLE = useLedgerBLE();
+
+  const [step, setStep] = useState<Step>('unknown');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const connectLedger = async () => {
+    setIsLoading(true);
+
+    let transport: Transport;
+
+    try {
+      transport = await ledgerBLE.getTransport();
+    } catch {
+      setStep('unknown');
+      setIsLoading(false);
+      return;
+    }
+
+    if (propApp === 'Ethereum') {
+      let ethApp = new Eth(transport);
+
+      // Ensure that the keplr can connect to ethereum app on ledger.
+      // getAppConfiguration() works even if the ledger is on screen saver mode.
+      // To detect the screen saver mode, we should request the address before using.
+      try {
+        await ethApp.getAddress(`m/44'/60'/'0/0/0`);
+      } catch (e) {
+        // Device is locked or user is in home sceen or other app.
+        if (
+          e?.message.includes('(0x6b0c)') ||
+          e?.message.includes('(0x6511)') ||
+          e?.message.includes('(0x6e00)')
+        ) {
+          setStep('connected');
+        } else {
+          console.log(e);
+          setStep('unknown');
+          await transport.close();
+
+          setIsLoading(false);
+          return;
+        }
       }
-    });
-  }, []);
 
-  useEffect(() => {
-    (async () => {
-      if (step === 'app' && publicKey) {
-        setIsModalOpen(false);
+      transport = await LedgerUtils.tryAppOpen(transport, propApp);
+      ethApp = new Eth(transport);
+
+      try {
+        const res = await ethApp.getAddress(
+          `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`,
+        );
+
+        const pubKey = new PubKeySecp256k1(Buffer.from(res.publicKey, 'hex'));
+
+        setStep('app');
 
         if (appendModeInfo) {
           await keyRingStore.appendLedgerKeyApp(
             appendModeInfo.vaultId,
-            publicKey,
-            app,
+            pubKey.toBytes(true),
+            propApp,
           );
           await chainStore.enableChainInfoInUI(
             ...appendModeInfo.afterEnableChains,
           );
-
           navigation.reset({
-            routes: [
-              {
-                name: 'Register.Welcome',
-                params: {password: route.params.password},
-              },
-            ],
+            routes: [{name: 'Register.Welcome', params: {password}}],
           });
         } else {
           navigation.reset({
@@ -95,117 +122,163 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
               {
                 name: 'Register.FinalizeKey',
                 params: {
-                  name: route.params.name,
-                  password: route.params.password,
-                  stepPrevious: route.params.stepPrevious + 1,
-                  stepTotal: route.params.stepTotal,
+                  name,
+                  password,
+                  stepPrevious: stepPrevious + 1,
+                  stepTotal,
                   ledger: {
-                    pubKey: publicKey,
-                    bip44Path: route.params.bip44Path,
-                    app: route.params.app,
+                    pubKey: pubKey.toBytes(),
+                    bip44Path,
+                    app: propApp,
                   },
                 },
               },
             ],
           });
         }
+      } catch (e) {
+        console.log(e);
+        setStep('connected');
       }
-    })();
-  }, [
-    route.params,
-    publicKey,
-    step,
-    navigation,
-    appendModeInfo,
-    keyRingStore,
-    app,
-    chainStore,
-  ]);
 
-  const ledgerBLE = useLedgerBLE();
+      await transport.close();
+
+      setIsLoading(false);
+
+      return;
+    }
+
+    let app = new CosmosApp(propApp, transport);
+
+    try {
+      const version = await app.getVersion();
+      if (version.device_locked) {
+        throw new Error('Device is locked');
+      }
+
+      // XXX: You must not check "error_message".
+      //      If "error_message" is not "No errors",
+      //      probably it doesn't mean that the device is not connected.
+      setStep('connected');
+    } catch (e) {
+      console.log(e);
+      setStep('unknown');
+      await transport.close();
+
+      setIsLoading(false);
+      return;
+    }
+
+    transport = await LedgerUtils.tryAppOpen(transport, propApp);
+    app = new CosmosApp(propApp, transport);
+
+    const res = await app.getPublicKey(
+      bip44Path.account,
+      bip44Path.change,
+      bip44Path.addressIndex,
+    );
+    if (res.error_message === 'No errors') {
+      setStep('app');
+
+      if (appendModeInfo) {
+        await keyRingStore.appendLedgerKeyApp(
+          appendModeInfo.vaultId,
+          res.compressed_pk,
+          propApp,
+        );
+        await chainStore.enableChainInfoInUI(
+          ...appendModeInfo.afterEnableChains,
+        );
+        navigation.reset({
+          routes: [{name: 'Register.Welcome', params: {password}}],
+        });
+      } else {
+        navigation.reset({
+          routes: [
+            {
+              name: 'Register.FinalizeKey',
+              params: {
+                name,
+                password,
+                stepPrevious: stepPrevious + 1,
+                stepTotal,
+                ledger: {
+                  pubKey: res.compressed_pk,
+                  bip44Path,
+                  app: propApp,
+                },
+              },
+            },
+          ],
+        });
+      }
+    } else {
+      setStep('connected');
+    }
+
+    await transport.close();
+
+    setIsLoading(false);
+  };
 
   return (
-    <LegacyRegisterContainer
-      paragraph={
-        appendModeInfo === undefined
-          ? `Step ${stepPrevious + 1}/${stepTotal}`
-          : undefined
-      }
-      bottom={
-        <Button
-          text={intl.formatMessage({
-            id: 'button.next',
+    <ScrollViewRegisterContainer
+      paragraph={`Step ${stepPrevious + 1}/${stepTotal}`}
+      bottomButton={{
+        text: intl.formatMessage({
+          id: 'button.next',
+        }),
+        size: 'large',
+        loading: isLoading,
+        onPress: connectLedger,
+      }}
+      paddingX={20}>
+      <Box
+        backgroundColor={style.get('color-gray-600').color}
+        borderRadius={25}
+        paddingX={30}
+        paddingY={36}>
+        <StepView
+          step={1}
+          paragraph={intl.formatMessage({
+            id: 'pages.register.connect-ledger.connect-ledger-step-paragraph',
           })}
-          size="large"
-          onPress={() => {
-            ledgerBLE
-              .getTransport()
-              .then(t => {
-                console.log(t);
-              })
-              .catch(e => {
-                console.log(e);
-              });
-          }}
+          icon={
+            <Box style={{opacity: step !== 'unknown' ? 0.5 : 1}}>
+              <LedgerIcon size={60} />
+            </Box>
+          }
+          focused={step === 'unknown'}
+          completed={step !== 'unknown'}
         />
-      }>
-      <ScrollView style={{padding: 20, flex: 1}}>
-        <Box
-          backgroundColor={style.get('color-gray-600').color}
-          borderRadius={25}
-          paddingX={30}
-          paddingY={36}>
-          <StepView
-            step={1}
-            paragraph={intl.formatMessage({
-              id: 'pages.register.connect-ledger.connect-ledger-step-paragraph',
-            })}
-            icon={
-              <Box style={{opacity: step !== 'unknown' ? 0.5 : 1}}>
-                <LedgerIcon size={60} />
-              </Box>
-            }
-            focused={step === 'unknown'}
-            completed={step !== 'unknown'}
-          />
 
-          <Gutter size={20} />
+        <Gutter size={20} />
 
-          <StepView
-            step={2}
-            paragraph={intl.formatMessage(
-              {id: 'pages.register.connect-ledger.open-app-step-paragraph'},
-              {app: app},
-            )}
-            icon={
-              <Box style={{opacity: step !== 'connected' ? 0.5 : 1}}>
-                {(() => {
-                  switch (app) {
-                    case 'Terra':
-                      return <TerraIcon size={60} />;
-                    case 'Ethereum':
-                      return <EthereumIcon size={60} />;
-                    default:
-                      return <CosmosIcon size={60} />;
-                  }
-                })()}
-              </Box>
-            }
-            focused={step === 'connected'}
-            completed={step === 'app'}
-          />
-        </Box>
-      </ScrollView>
-
-      <LedgerGrantModal
-        isOpen={isModalOpen}
-        setIsOpen={setIsModalOpen}
-        app={app}
-        bip44Path={bip44Path}
-        setStep={(step: Step) => setStep(step)}
-        setPublicKey={(publicKey: Uint8Array) => setPublicKey(publicKey)}
-      />
-    </LegacyRegisterContainer>
+        <StepView
+          step={2}
+          paragraph={intl.formatMessage(
+            {id: 'pages.register.connect-ledger.open-app-step-paragraph'},
+            {app: propApp},
+          )}
+          icon={
+            <Box style={{opacity: step !== 'connected' ? 0.5 : 1}}>
+              {(() => {
+                switch (propApp) {
+                  case 'Terra':
+                    return <TerraIcon size={60} />;
+                  case 'Ethereum':
+                    return <EthereumIcon size={60} />;
+                  default:
+                    return <CosmosIcon size={60} />;
+                }
+              })()}
+            </Box>
+          }
+          focused={step === 'connected'}
+          completed={step === 'app'}
+        />
+      </Box>
+    </ScrollViewRegisterContainer>
   );
 });
 

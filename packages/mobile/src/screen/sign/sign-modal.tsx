@@ -38,7 +38,6 @@ import {SpecialButton} from '../../components/special-button';
 import {handleCosmosPreSign} from './util/handle-cosmos-sign';
 import {KeplrError} from '@keplr-wallet/router';
 import {ErrFailedInit, ErrModuleLedgerSign} from './util/ledger-types';
-import {LedgerGrantModal} from '../register/connect-ledger/modal';
 import {LedgerGuideBox} from '../../components/guide-box/ledger-guide-box';
 import {FlatList} from '../../components/flat-list';
 import {ScrollView} from '../../components/scroll-view/common-scroll-view';
@@ -517,35 +516,6 @@ export const SignModal = registerCardModal(
         />
 
         <Gutter size={24} />
-
-        <LedgerGrantModal
-          isOpen={isLedgerGrantModalOpen}
-          setIsOpen={setIsLedgerGrantModalOpen}
-          app={(() => {
-            const appData = interactionData?.data?.keyInsensitive;
-
-            if (appData['Terra']) {
-              return 'Terra';
-            } else if (appData['Secret']) {
-              return 'Secret';
-            } else {
-              return 'Cosmos';
-            }
-          })()}
-          bip44Path={
-            (interactionData.data.keyInsensitive['bip44Path'] as {
-              account: number;
-              change: number;
-              addressIndex: number;
-            }) ?? {
-              account: 0,
-              change: 0,
-              addressIndex: 0,
-            }
-          }
-          setStep={() => {}}
-          setPublicKey={() => {}}
-        />
       </Box>
     );
   }),
