@@ -75,9 +75,8 @@ export const SettingSecurityBio: FunctionComponent = observer(() => {
   return (
     <PageWithScrollView
       backgroundMode="default"
-      contentContainerStyle={style.flatten(['flex-grow-1'])}>
+      contentContainerStyle={style.flatten(['flex-grow-1', 'padding-x-12'])}>
       <Box
-        padding={12}
         alignX="center"
         alignY="center"
         height={'100%'}
