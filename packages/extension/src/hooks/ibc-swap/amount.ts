@@ -228,7 +228,9 @@ export class IBCSwapAmountConfig extends AmountConfig {
       );
 
       if (swapRouterKey !== key) {
-        throw new Error("Swap router key does not match");
+        throw new Error(
+          "Route and msgs_direct are not matched. Please try again."
+        );
       }
     }
 
