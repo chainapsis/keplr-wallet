@@ -150,7 +150,7 @@ const MnemonicTag: FunctionComponent<{index: number; word: string}> = ({
   );
 };
 
-const CopyToClipboard: FunctionComponent<{text: string}> = ({text}) => {
+export const CopyToClipboard: FunctionComponent<{text: string}> = ({text}) => {
   const intl = useIntl();
   const style = useStyle();
   const [hasCopied, setHasCopied] = useState(false);

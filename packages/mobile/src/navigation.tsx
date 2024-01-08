@@ -93,6 +93,9 @@ import {CameraScreen} from './screen/camera';
 import {SettingGeneralManageWalletConnectScreen} from './screen/setting/screens/security/wallet-connect';
 import {registerHeaderOptions} from './components/pageHeader/header-register';
 import {MigrationWelcomeScreen} from './screen/migration-welcome';
+import {RegisterGoogleSignInScreen} from './screen/register/google-sign-in';
+import {RegisterAppleSignInScreen} from './screen/register/apple-sign-in';
+import {BackUpPrivateKeyScreen} from './screen/register/back-up-private-key';
 
 type DefaultRegisterParams = {
   hideBackButton?: boolean;
@@ -115,6 +118,16 @@ export type RootStackParamList = {
     stepTotal: number;
   } & DefaultRegisterParams;
   'Register.Intro.ExistingUser'?: DefaultRegisterParams;
+  'Register.BackupPrivateKey': {
+    name: string;
+    password: string;
+    privateKey: {
+      value: Uint8Array;
+      meta: PlainObject;
+    };
+    stepPrevious: number;
+    stepTotal: number;
+  };
   'Register.RecoverMnemonic'?: DefaultRegisterParams;
   'Register.ConnectLedger': {
     name: string;
@@ -133,6 +146,8 @@ export type RootStackParamList = {
       afterEnableChains: string[];
     };
   } & DefaultRegisterParams;
+  'Register.GoogleSignIn': {};
+  'Register.AppleSignIn': {};
   'Register.FinalizeKey': {
     name: string;
     password: string;
@@ -364,11 +379,40 @@ export const RegisterNavigation: FunctionComponent = () => {
       />
 
       <Stack.Screen
+        name="Register.GoogleSignIn"
+        component={RegisterGoogleSignInScreen}
+        options={{
+          title: 'Connect with Google',
+          ...registerHeaderOptions,
+        }}
+      />
+
+      <Stack.Screen
+        name="Register.AppleSignIn"
+        component={RegisterAppleSignInScreen}
+        options={{
+          title: 'Connect with Apple ID',
+          ...registerHeaderOptions,
+        }}
+      />
+
+      <Stack.Screen
         name="Register.Intro.ConnectHardware"
         component={ConnectHardwareWalletScreen}
         options={{
           title: intl.formatMessage({
             id: 'pages.register.connect-hardware.header.title',
+          }),
+          ...registerHeaderOptions,
+        }}
+      />
+
+      <Stack.Screen
+        name="Register.BackupPrivateKey"
+        component={BackUpPrivateKeyScreen}
+        options={{
+          title: intl.formatMessage({
+            id: 'pages.register.back-up-private-key.title',
           }),
           ...registerHeaderOptions,
         }}

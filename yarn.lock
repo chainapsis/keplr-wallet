@@ -7839,6 +7839,8 @@ __metadata:
     "@react-navigation/drawer": ^6.6.3
     "@react-navigation/native": ^6.1.7
     "@react-navigation/stack": ^6.3.20
+    "@toruslabs/fetch-node-details": =11.0.1
+    "@toruslabs/torus.js": =6.4.1
     "@tsconfig/react-native": ^3.0.0
     "@types/color": ^3.0.3
     "@types/react-test-renderer": ^18.0.0
@@ -7849,19 +7851,22 @@ __metadata:
     appcenter-analytics: ^5.0.0
     appcenter-cli: ^2.14.0
     babel-jest: ^29.2.1
+    babel-plugin-module-resolver: ^5.0.0
     babel-plugin-transform-inline-environment-variables: ^0.4.4
     browserify: ^17.0.0
     buffer: ^6.0.3
     color: ^4.2.3
     delay: ^6.0.0
     expo: ^49.0.6
+    expo-apple-authentication: ~6.1.0
     expo-clipboard: ~4.3.1
     expo-crypto: ~12.4.1
-    expo-standard-web-crypto: ^1.6.0
+    expo-standard-web-crypto: "file:./crypto-polyfill"
     expo-web-browser: ~12.3.2
     http-browserify: ^1.7.0
     https-browserify: ^1.0.0
     jsc-android: next
+    keplr-wallet-mobile-private: "file:./noop-keplr-wallet-mobile-private"
     lottie-react-native: ^6.3.1
     metro-react-native-babel-preset: 0.76.8
     mobx: ^6.10.0
@@ -16999,7 +17004,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"browserify-cipher@npm:^1.0.0":
+"browserify-cipher@npm:^1.0.0, browserify-cipher@npm:^1.0.1":
   version: 1.0.1
   resolution: "browserify-cipher@npm:1.0.1"
   dependencies:
@@ -22340,6 +22345,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-apple-authentication@npm:~6.1.0":
+  version: 6.1.2
+  resolution: "expo-apple-authentication@npm:6.1.2"
+  peerDependencies:
+    expo: "*"
+  checksum: c04eccf22bff9eed09396872b31b282e155c22db218d0f6df80600cfb938220608288045c9c0af5f77caa00ece39d1b4f68ca8c9a5b2abaf57153110531f96d2
+  languageName: node
+  linkType: hard
+
 "expo-application@npm:~5.3.0":
   version: 5.3.1
   resolution: "expo-application@npm:5.3.1"
@@ -22453,15 +22467,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-standard-web-crypto@npm:^1.6.0":
-  version: 1.7.0
-  resolution: "expo-standard-web-crypto@npm:1.7.0"
-  peerDependencies:
-    expo-crypto: ^12.2.1
-  peerDependenciesMeta:
-    expo-random:
-      optional: true
-  checksum: 9c21d09f4435c388fc888ab76e1c6fe4f415fb77064ccc4979a455be89b36166df688bb4faf74a0df4ce0e65d62b898ae03feafdb243bc2cec4142a33a3e9cb3
+"expo-standard-web-crypto@file:./crypto-polyfill::locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile":
+  version: 0.0.1
+  resolution: "expo-standard-web-crypto@file:./crypto-polyfill#./crypto-polyfill::hash=8717b0&locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile"
+  dependencies:
+    browserify-cipher: ^1.0.1
+    create-hash: ^1.2.0
+    create-hmac: ^1.1.7
+    expo-crypto: ~12.4.1
+  checksum: bb9b522de7646a5474ff67d0c316687fc746d0c77917adf0ab04a642d6102995a99937c864d8c937a856629faa5b3364166f372ff461f27c67556e3b71c7454d
   languageName: node
   linkType: hard
 
@@ -27847,6 +27861,13 @@ __metadata:
     node-gyp-build: ^4.2.0
     readable-stream: ^3.6.0
   checksum: f08f04f5cc87013a3fc9e87262f761daff38945c86dd09c01a7f7930a15ae3e14f93b310ef821dcc83675a7b814eb1c983222399a2f263ad980251201d1b9a99
+  languageName: node
+  linkType: hard
+
+"keplr-wallet-mobile-private@file:./noop-keplr-wallet-mobile-private::locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile":
+  version: 0.0.1
+  resolution: "keplr-wallet-mobile-private@file:./noop-keplr-wallet-mobile-private#./noop-keplr-wallet-mobile-private::hash=9b61cf&locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile"
+  checksum: 537949411d5951115f8a6da53b6fb9dd9a05a31d8c211457383306684c5d64e024ed09518c906719bc6aa4587229cc3e16eaf952df7e27fb1f2f53e604f04965
   languageName: node
   linkType: hard
 

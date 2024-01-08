@@ -1,6 +1,6 @@
 import React, {FunctionComponent} from 'react';
 import {useStyle} from '../../../styles';
-import {Text} from 'react-native';
+import {Platform, Text} from 'react-native';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {Gutter} from '../../../components/gutter';
 import {XAxis} from '../../../components/axis';
@@ -16,6 +16,10 @@ import {
 } from '../../../components/icon';
 import {StackNavProp} from '../../../navigation';
 import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
+import {
+  isAppleSignInEnabled,
+  isGoogleSignInEnabled,
+} from 'keplr-wallet-mobile-private';
 
 export const RegisterIntroNewUserScreen: FunctionComponent = () => {
   const intl = useIntl();
@@ -108,16 +112,24 @@ export const RegisterIntroNewUserScreen: FunctionComponent = () => {
 
         <Gutter size={20} />
 
-        <Button
-          text={intl.formatMessage({
-            id: 'pages.register.intro-new-user.sign-up-apple-button',
-          })}
-          size="large"
-          color="secondary"
-          leftIcon={<AppleIcon />}
-        />
+        {Platform.OS === 'ios' ? (
+          <React.Fragment>
+            <Button
+              text={intl.formatMessage({
+                id: 'pages.register.intro-new-user.sign-up-apple-button',
+              })}
+              size="large"
+              color="secondary"
+              disabled={!isAppleSignInEnabled}
+              leftIcon={<AppleIcon />}
+              onPress={() => {
+                navigation.navigate('Register.AppleSignIn', {});
+              }}
+            />
 
-        <Gutter size={12} />
+            <Gutter size={12} />
+          </React.Fragment>
+        ) : null}
 
         <Button
           text={intl.formatMessage({
@@ -126,6 +138,10 @@ export const RegisterIntroNewUserScreen: FunctionComponent = () => {
           size="large"
           color="secondary"
           leftIcon={<GoogleIcon />}
+          disabled={!isGoogleSignInEnabled}
+          onPress={() => {
+            navigation.navigate('Register.GoogleSignIn', {});
+          }}
         />
       </OptionContainer>
 
