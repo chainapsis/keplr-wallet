@@ -75,6 +75,7 @@ export const UnbondingCard: FunctionComponent<{
                       .shrink(true)
                       .trim(true)
                       .maxDecimals(6)
+                      .inequalitySymbol(true)
                       .toString()}
                   </Text>
                   <Column weight={1} />
