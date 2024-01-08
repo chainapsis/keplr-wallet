@@ -41,6 +41,7 @@ import {APP_VERSION, CODEPUSH_VERSION} from './constants';
 import {UpdateProgress} from './update-progress';
 import {APP_STORE_URL, PLAY_STORE_URL} from './src/config';
 import {simpleFetch} from '@keplr-wallet/simple-fetch';
+import {LedgerBLEProvider} from './src/provider/ledger-ble';
 
 const ThemeStatusBar: FunctionComponent = () => {
   const style = useStyle();
@@ -370,35 +371,37 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
                 <StoreProvider>
                   <AppIntlProvider>
                     <NotificationProvider>
-                      <ModalBaseProvider>
-                        <BottomSheetModalProvider>
-                          <ConfirmProvider>
-                            <InteractionModalsProvider>
-                              <ErrorBoundary>
-                                {(() => {
-                                  if (
-                                    this.state.codepushInitTestCompleted &&
-                                    this.state.codepushInitNewVersionExists &&
-                                    this.state.codepush
-                                      .newVersionDownloadProgress != null
-                                  ) {
-                                    return (
-                                      <UpdateProgress
-                                        progress={
-                                          this.state.codepush
-                                            .newVersionDownloadProgress
-                                        }
-                                      />
-                                    );
-                                  }
+                      <LedgerBLEProvider>
+                        <ModalBaseProvider>
+                          <BottomSheetModalProvider>
+                            <ConfirmProvider>
+                              <InteractionModalsProvider>
+                                <ErrorBoundary>
+                                  {(() => {
+                                    if (
+                                      this.state.codepushInitTestCompleted &&
+                                      this.state.codepushInitNewVersionExists &&
+                                      this.state.codepush
+                                        .newVersionDownloadProgress != null
+                                    ) {
+                                      return (
+                                        <UpdateProgress
+                                          progress={
+                                            this.state.codepush
+                                              .newVersionDownloadProgress
+                                          }
+                                        />
+                                      );
+                                    }
 
-                                  return <AppNavigation />;
-                                })()}
-                              </ErrorBoundary>
-                            </InteractionModalsProvider>
-                          </ConfirmProvider>
-                        </BottomSheetModalProvider>
-                      </ModalBaseProvider>
+                                    return <AppNavigation />;
+                                  })()}
+                                </ErrorBoundary>
+                              </InteractionModalsProvider>
+                            </ConfirmProvider>
+                          </BottomSheetModalProvider>
+                        </ModalBaseProvider>
+                      </LedgerBLEProvider>
                     </NotificationProvider>
                   </AppIntlProvider>
                 </StoreProvider>

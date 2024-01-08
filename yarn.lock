@@ -7885,7 +7885,6 @@ __metadata:
     react-native-keychain: ^8.1.2
     react-native-linear-gradient: ^2.8.3
     react-native-navigation-bar-color: ^2.0.2
-    react-native-permissions: ^3.10.1
     react-native-qrcode-svg: ^6.2.0
     react-native-reanimated: 3.5.4
     react-native-safe-area-context: ^4.7.1
@@ -35137,20 +35136,6 @@ __metadata:
   version: 2.0.2
   resolution: "react-native-navigation-bar-color@npm:2.0.2"
   checksum: 47b74fc343c63b90819a67889b7af6e9b6524a663586dc8a7927d81e8517fbf8b395545d651ddf44e978167e4d8994a4b6d6e3dc086a35903c48087fa40155cd
-  languageName: node
-  linkType: hard
-
-"react-native-permissions@npm:^3.10.1":
-  version: 3.10.1
-  resolution: "react-native-permissions@npm:3.10.1"
-  peerDependencies:
-    react: ">=16.13.1"
-    react-native: ">=0.63.3"
-    react-native-windows: ">=0.62.0"
-  peerDependenciesMeta:
-    react-native-windows:
-      optional: true
-  checksum: 86ea43e34f41a77d85c1af2c4a4ff241dd7cb08a3f62a2ba6c8b8bbb8b03cdf4452609cd388ff7b3785086ad3ce95d45c5e6feca1af3ea2a544aafcfec28d0e1
   languageName: node
   linkType: hard
 

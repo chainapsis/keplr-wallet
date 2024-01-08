@@ -16,7 +16,6 @@ import {
   ErrSignRejected,
 } from './ledger-types';
 import {LedgerUtils} from '../../../utils';
-import TransportBLE from '@ledgerhq/react-native-hw-transport-ble';
 import Transport from '@ledgerhq/hw-transport';
 import {
   domainHash,
@@ -26,6 +25,7 @@ import {
 import Eth from '@ledgerhq/hw-app-eth';
 
 export const connectAndSignEIP712WithLedger = async (
+  getTransport: () => Promise<Transport>,
   expectedPubKey: Uint8Array,
   bip44Path: {
     account: number;
@@ -41,13 +41,7 @@ export const connectAndSignEIP712WithLedger = async (
 ): Promise<Uint8Array> => {
   let transport: Transport;
   try {
-    // 현재 저장된 ledger device id를 가져온다.
-    // 이 device id를 이용해서 transport를 생성한다.
-    // 해당 transport가 없다면 ErrFailedInit 에러를 발생시킨다
-    // ErrFailedInit 에러가 발생하면 다시 Ledger device를 연결한다.
-    const deviceId = await LedgerUtils.getLastUsedLedgerDeviceId();
-
-    transport = await TransportBLE.open(deviceId);
+    transport = await getTransport();
   } catch (e) {
     throw new KeplrError(
       ErrModuleLedgerSign,
@@ -170,6 +164,7 @@ export const connectAndSignEIP712WithLedger = async (
 };
 
 export const connectAndSignWithLedger = async (
+  getTransport: () => Promise<Transport>,
   propApp: string,
   expectedPubKey: Uint8Array,
   bip44Path: {
@@ -186,16 +181,11 @@ export const connectAndSignWithLedger = async (
       `Unsupported app: ${propApp}`,
     );
   }
-  // 현재 저장된 ledger device id를 가져온다.
-  // 이 device id를 이용해서 transport를 생성한다.
-  // 해당 transport가 없다면 ErrFailedInit 에러를 발생시킨다
-  // ErrFailedInit 에러가 발생하면 다시 Ledger device를 연결한다.
-  const deviceId = await LedgerUtils.getLastUsedLedgerDeviceId();
 
   let transport: Transport;
 
   try {
-    transport = await TransportBLE.open(deviceId);
+    transport = await getTransport();
   } catch (e) {
     throw new KeplrError(
       ErrModuleLedgerSign,
@@ -225,7 +215,7 @@ export const connectAndSignWithLedger = async (
     throw e;
   }
 
-  transport = await LedgerUtils.tryAppOpen(transport, propApp, deviceId);
+  transport = await LedgerUtils.tryAppOpen(transport, propApp);
   app = new CosmosApp(propApp, transport);
 
   try {

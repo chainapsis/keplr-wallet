@@ -1,14 +1,9 @@
 import Transport from '@ledgerhq/hw-transport';
 import {CosmosApp, getAppInfo} from '@keplr-wallet/ledger-cosmos';
 import TransportBLE from '@ledgerhq/react-native-hw-transport-ble';
-import {AsyncKVStore} from '../common';
 
 export const LedgerUtils = {
-  tryAppOpen: async (
-    transport: Transport,
-    app: string,
-    deviceId?: string,
-  ): Promise<Transport> => {
+  tryAppOpen: async (transport: Transport, app: string): Promise<Transport> => {
     let isAppOpened = false;
     try {
       const appInfo = await getAppInfo(transport);
@@ -29,7 +24,9 @@ export const LedgerUtils = {
         while (i < maxRetry) {
           // Reinstantiate the app with the new transport.
           // This is needed because the connection can be closed if app opened. (Maybe ledger's permission system handles dashboard, and each app differently.)
-          await TransportBLE.open(deviceId);
+          if (transport instanceof TransportBLE) {
+            transport = await TransportBLE.open(transport.id);
+          }
 
           const appInfo = await getAppInfo(transport);
           if (
@@ -48,13 +45,5 @@ export const LedgerUtils = {
     }
 
     return transport;
-  },
-  getLastUsedLedgerDeviceId: async (): Promise<string | undefined> => {
-    const kvStore = new AsyncKVStore('__keplr_ledger_nano_x');
-    return await kvStore.get<string>('last_device_id');
-  },
-  setLastUsedLedgerDeviceId: async (deviceId: string): Promise<void> => {
-    const kvStore = new AsyncKVStore('__keplr_ledger_nano_x');
-    await kvStore.set<string>('last_device_id', deviceId);
   },
 };

@@ -4,8 +4,10 @@ import {
   connectAndSignEIP712WithLedger,
   connectAndSignWithLedger,
 } from './cosmos-ledger-sign';
+import Transport from '@ledgerhq/hw-transport';
 
 export const handleCosmosPreSign = async (
+  getTransport: () => Promise<Transport>,
   interactionData: NonNullable<SignInteractionStore['waitingData']>,
   signDocWrapper: SignDocWrapper,
 ): Promise<Uint8Array | undefined> => {
@@ -37,6 +39,7 @@ export const handleCosmosPreSign = async (
       }
 
       return await connectAndSignEIP712WithLedger(
+        getTransport,
         publicKey,
         bip44Path,
         signDocWrapper.aminoSignDoc,
@@ -66,6 +69,7 @@ export const handleCosmosPreSign = async (
     }
 
     return await connectAndSignWithLedger(
+      getTransport,
       ledgerApp,
       publicKey,
       bip44Path,
