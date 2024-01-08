@@ -7861,7 +7861,7 @@ __metadata:
     expo-apple-authentication: ~6.1.0
     expo-clipboard: ~4.3.1
     expo-crypto: ~12.4.1
-    expo-standard-web-crypto: ^1.6.0
+    expo-standard-web-crypto: "file:./crypto-polyfill"
     expo-web-browser: ~12.3.2
     http-browserify: ^1.7.0
     https-browserify: ^1.0.0
@@ -17004,7 +17004,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"browserify-cipher@npm:^1.0.0":
+"browserify-cipher@npm:^1.0.0, browserify-cipher@npm:^1.0.1":
   version: 1.0.1
   resolution: "browserify-cipher@npm:1.0.1"
   dependencies:
@@ -22467,15 +22467,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-standard-web-crypto@npm:^1.6.0":
-  version: 1.7.0
-  resolution: "expo-standard-web-crypto@npm:1.7.0"
-  peerDependencies:
-    expo-crypto: ^12.2.1
-  peerDependenciesMeta:
-    expo-random:
-      optional: true
-  checksum: 9c21d09f4435c388fc888ab76e1c6fe4f415fb77064ccc4979a455be89b36166df688bb4faf74a0df4ce0e65d62b898ae03feafdb243bc2cec4142a33a3e9cb3
+"expo-standard-web-crypto@file:./crypto-polyfill::locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile":
+  version: 0.0.1
+  resolution: "expo-standard-web-crypto@file:./crypto-polyfill#./crypto-polyfill::hash=8717b0&locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile"
+  dependencies:
+    browserify-cipher: ^1.0.1
+    create-hash: ^1.2.0
+    create-hmac: ^1.1.7
+    expo-crypto: ~12.4.1
+  checksum: bb9b522de7646a5474ff67d0c316687fc746d0c77917adf0ab04a642d6102995a99937c864d8c937a856629faa5b3364166f372ff461f27c67556e3b71c7454d
   languageName: node
   linkType: hard
 
