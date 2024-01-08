@@ -58,7 +58,26 @@ export const RegisterGoogleSignInScreen: FunctionComponent = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
-  const onSubmit = handleSubmit(async data => {});
+  const onSubmit = handleSubmit(async data => {
+    if (key) {
+      // TODO: 일단 finalize key로 바로 보냄
+      navigation.navigate('Register.FinalizeKey', {
+        name: data.name,
+        password: data.password,
+        stepPrevious: 1,
+        stepTotal: 3,
+        privateKey: {
+          value: key.privateKey,
+          meta: {
+            web3Auth: {
+              email: key.email,
+              type: 'google',
+            },
+          },
+        },
+      });
+    }
+  });
 
   return (
     <ScrollViewRegisterContainer
