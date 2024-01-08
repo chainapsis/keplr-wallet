@@ -1,6 +1,6 @@
 import React, {FunctionComponent} from 'react';
 import {useStyle} from '../../../styles';
-import {Text} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
 import {Box} from '../../../components/box';
@@ -46,7 +46,11 @@ export const BackUpPrivateKeyScreen: FunctionComponent = () => {
           // });
         },
       }}>
-      <Text style={style.flatten(['color-gray-100', 'subtitle3'])}>
+      <Text
+        style={StyleSheet.flatten([
+          style.flatten(['color-gray-100', 'subtitle3']),
+          {zIndex: 1},
+        ])}>
         <FormattedMessage id="page.wallet.private-key-title" />
       </Text>
 
