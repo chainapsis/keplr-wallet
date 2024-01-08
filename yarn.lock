@@ -7839,6 +7839,8 @@ __metadata:
     "@react-navigation/drawer": ^6.6.3
     "@react-navigation/native": ^6.1.7
     "@react-navigation/stack": ^6.3.20
+    "@toruslabs/fetch-node-details": =11.0.1
+    "@toruslabs/torus.js": =6.4.1
     "@tsconfig/react-native": ^3.0.0
     "@types/color": ^3.0.3
     "@types/react-test-renderer": ^18.0.0
@@ -7856,6 +7858,7 @@ __metadata:
     color: ^4.2.3
     delay: ^6.0.0
     expo: ^49.0.6
+    expo-apple-authentication: ~6.1.0
     expo-clipboard: ~4.3.1
     expo-crypto: ~12.4.1
     expo-standard-web-crypto: ^1.6.0
@@ -22342,6 +22345,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-apple-authentication@npm:~6.1.0":
+  version: 6.1.2
+  resolution: "expo-apple-authentication@npm:6.1.2"
+  peerDependencies:
+    expo: "*"
+  checksum: c04eccf22bff9eed09396872b31b282e155c22db218d0f6df80600cfb938220608288045c9c0af5f77caa00ece39d1b4f68ca8c9a5b2abaf57153110531f96d2
+  languageName: node
+  linkType: hard
+
 "expo-application@npm:~5.3.0":
   version: 5.3.1
   resolution: "expo-application@npm:5.3.1"
@@ -27854,8 +27866,8 @@ __metadata:
 
 "keplr-wallet-mobile-private@file:./noop-keplr-wallet-mobile-private::locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile":
   version: 0.0.1
-  resolution: "keplr-wallet-mobile-private@file:./noop-keplr-wallet-mobile-private#./noop-keplr-wallet-mobile-private::hash=78a85b&locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile"
-  checksum: bd4f6e5fd1700247b4e5c1878bd66c97cd11368e497e1f663732057c25ad4975d7aabc01af61a4b938f16a1f75e86a9080b26e5665daf8ad2136873de2e05cca
+  resolution: "keplr-wallet-mobile-private@file:./noop-keplr-wallet-mobile-private#./noop-keplr-wallet-mobile-private::hash=9b61cf&locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile"
+  checksum: 537949411d5951115f8a6da53b6fb9dd9a05a31d8c211457383306684c5d64e024ed09518c906719bc6aa4587229cc3e16eaf952df7e27fb1f2f53e604f04965
   languageName: node
   linkType: hard
 

@@ -1,6 +1,6 @@
 import React, {FunctionComponent} from 'react';
 import {useStyle} from '../../../styles';
-import {Text} from 'react-native';
+import {Platform, Text} from 'react-native';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {Gutter} from '../../../components/gutter';
 import {XAxis} from '../../../components/axis';
@@ -108,16 +108,20 @@ export const RegisterIntroNewUserScreen: FunctionComponent = () => {
 
         <Gutter size={20} />
 
-        <Button
-          text={intl.formatMessage({
-            id: 'pages.register.intro-new-user.sign-up-apple-button',
-          })}
-          size="large"
-          color="secondary"
-          leftIcon={<AppleIcon />}
-        />
+        {Platform.OS === 'ios' ? (
+          <React.Fragment>
+            <Button
+              text={intl.formatMessage({
+                id: 'pages.register.intro-new-user.sign-up-apple-button',
+              })}
+              size="large"
+              color="secondary"
+              leftIcon={<AppleIcon />}
+            />
 
-        <Gutter size={12} />
+            <Gutter size={12} />
+          </React.Fragment>
+        ) : null}
 
         <Button
           text={intl.formatMessage({
