@@ -83,7 +83,12 @@ export const ValidatorCard: FunctionComponent<{
         </Text>
         <Column weight={1} />
         <Text style={style.flatten(['body1', 'color-text-middle'])}>
-          {staked?.trim(true).shrink(true).maxDecimals(6).toString()}
+          {staked
+            ?.trim(true)
+            .shrink(true)
+            .maxDecimals(6)
+            .inequalitySymbol(true)
+            .toString()}
         </Text>
       </Columns>
 
@@ -95,7 +100,12 @@ export const ValidatorCard: FunctionComponent<{
         </Text>
         <Column weight={1} />
         <Text style={style.flatten(['body1', 'color-text-middle'])}>
-          {rewards?.trim(true).shrink(true).maxDecimals(6).toString()}
+          {rewards
+            ?.trim(true)
+            .shrink(true)
+            .maxDecimals(6)
+            .inequalitySymbol(true)
+            .toString()}
         </Text>
       </Columns>
     </Box>

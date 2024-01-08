@@ -608,7 +608,7 @@
   "page.stake.validator-detail.title": "Validator Details",
   "page.stake.validator-detail.jailed-guide-box.title": "This validator is currently jailed.",
   "page.stake.validator-detail.jailed-guide-box.paragraph": "If you are staking to this validator, consider switching to another validator or unstaking.",
-  "page.stake.validator-detail.commission-guide-box.title": "Commission {rate}%",
+  "page.stake.validator-detail.commission-guide-box.title": "Commission {rate}",
   "page.stake.validator-detail.commission-guide-box.paragraph-1": "This validator is currently charging",
   "page.stake.validator-detail.commission-guide-box.paragraph-2": " very high ",
   "page.stake.validator-detail.commission-guide-box.paragraph-3": "commissions. Consider staking to other validators with lower commissions to increaser your rewards.",
@@ -628,6 +628,7 @@
   "page.stake.validator-detail.unbonding-card.label": "My Unstaking",
 
   "page.stake.validator-list.title": "All Active Validators",
+  "page.stake.validator-list.search-input-placeholder": "Search for a validator",
 
   "page.stake.delegate.title": "Stake",
   "page.stake.delegate.guide-box.title": "Staking will lock your funds for {unbondingPeriodDay} days",
