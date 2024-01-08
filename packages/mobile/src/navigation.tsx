@@ -95,6 +95,7 @@ import {registerHeaderOptions} from './components/pageHeader/header-register';
 import {MigrationWelcomeScreen} from './screen/migration-welcome';
 import {RegisterGoogleSignInScreen} from './screen/register/google-sign-in';
 import {RegisterAppleSignInScreen} from './screen/register/apple-sign-in';
+import {BackUpPrivateKeyScreen} from './screen/register/back-up-private-key';
 
 type DefaultRegisterParams = {
   hideBackButton?: boolean;
@@ -117,6 +118,7 @@ export type RootStackParamList = {
     stepTotal: number;
   } & DefaultRegisterParams;
   'Register.Intro.ExistingUser'?: DefaultRegisterParams;
+  'Register.BackupPrivateKey': undefined;
   'Register.RecoverMnemonic'?: DefaultRegisterParams;
   'Register.ConnectLedger': {
     name: string;
@@ -391,6 +393,17 @@ export const RegisterNavigation: FunctionComponent = () => {
         options={{
           title: intl.formatMessage({
             id: 'pages.register.connect-hardware.header.title',
+          }),
+          ...registerHeaderOptions,
+        }}
+      />
+
+      <Stack.Screen
+        name="Register.BackupPrivateKey"
+        component={BackUpPrivateKeyScreen}
+        options={{
+          title: intl.formatMessage({
+            id: 'pages.register.back-up-private-key.title',
           }),
           ...registerHeaderOptions,
         }}
