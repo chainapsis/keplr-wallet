@@ -93,6 +93,8 @@ import {CameraScreen} from './screen/camera';
 import {SettingGeneralManageWalletConnectScreen} from './screen/setting/screens/security/wallet-connect';
 import {registerHeaderOptions} from './components/pageHeader/header-register';
 import {MigrationWelcomeScreen} from './screen/migration-welcome';
+import {RegisterGoogleSignInScreen} from './screen/register/google-sign-in';
+import {RegisterAppleSignInScreen} from './screen/register/apple-sign-in';
 
 type DefaultRegisterParams = {
   hideBackButton?: boolean;
@@ -133,6 +135,8 @@ export type RootStackParamList = {
       afterEnableChains: string[];
     };
   } & DefaultRegisterParams;
+  'Register.GoogleSignIn': {};
+  'Register.AppleSignIn': {};
   'Register.FinalizeKey': {
     name: string;
     password: string;
@@ -359,6 +363,24 @@ export const RegisterNavigation: FunctionComponent = () => {
           title: intl.formatMessage({
             id: 'pages.register.recover-mnemonic.title',
           }),
+          ...registerHeaderOptions,
+        }}
+      />
+
+      <Stack.Screen
+        name="Register.GoogleSignIn"
+        component={RegisterGoogleSignInScreen}
+        options={{
+          title: 'Connect with Google',
+          ...registerHeaderOptions,
+        }}
+      />
+
+      <Stack.Screen
+        name="Register.AppleSignIn"
+        component={RegisterAppleSignInScreen}
+        options={{
+          title: 'Connect with Apple ID',
           ...registerHeaderOptions,
         }}
       />

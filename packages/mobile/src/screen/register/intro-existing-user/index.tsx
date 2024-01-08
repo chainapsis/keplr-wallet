@@ -9,6 +9,10 @@ import {AppleIcon, GoogleIcon} from '../../../components/icon';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../navigation';
 import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
+import {
+  isAppleSignInEnabled,
+  isGoogleSignInEnabled,
+} from 'keplr-wallet-mobile-private';
 
 export const RegisterIntroExistingUserScene: FunctionComponent = () => {
   const intl = useIntl();
@@ -73,6 +77,10 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
               size="large"
               color="secondary"
               leftIcon={<AppleIcon />}
+              disabled={!isAppleSignInEnabled}
+              onPress={() => {
+                navigation.navigate('Register.AppleSignIn', {});
+              }}
             />
 
             <Gutter size={12} />
@@ -86,6 +94,10 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
           size="large"
           color="secondary"
           leftIcon={<GoogleIcon />}
+          disabled={!isGoogleSignInEnabled}
+          onPress={() => {
+            navigation.navigate('Register.GoogleSignIn', {});
+          }}
         />
       </OptionContainer>
 
