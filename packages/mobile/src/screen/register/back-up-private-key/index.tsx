@@ -10,40 +10,47 @@ import {BlurView} from '@react-native-community/blur';
 import {WarningBox} from '../../../components/guide-box';
 import {Path, Svg} from 'react-native-svg';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {RootStackParamList, StackNavProp} from '../../../navigation';
+import {Buffer} from 'buffer/';
 
 export const BackUpPrivateKeyScreen: FunctionComponent = () => {
   const intl = useIntl();
   const style = useStyle();
-  // TODO: 로직 추가 후 진행
-  // const navigation = useNavigation<StackNavProp>();
+  const navigation = useNavigation<StackNavProp>();
+
+  const route =
+    useRoute<RouteProp<RootStackParamList, 'Register.BackupPrivateKey'>>();
+  const {privateKey, name, password, stepPrevious, stepTotal} = route.params;
 
   const [isShowPrivate, setIsShowPrivate] = React.useState(false);
+
+  const text = Buffer.from(privateKey.value).toString('hex');
 
   return (
     <ScrollViewRegisterContainer
       padding={20}
-      contentContainerStyle={{
-        alignItems: 'flex-start',
-      }}
+      paragraph={`Step ${stepPrevious + 1}/${stepTotal}`}
       bottomButton={{
         text: intl.formatMessage({
           id: 'button.next',
         }),
         size: 'large',
         onPress: () => {
-          // TODO: 로직 추가 후 진행
-          // navigation.reset({
-          //   routes: [
-          //     {
-          //       name: 'Register.FinalizeKey',
-          //       params: {
-          //         name: name,
-          //         password: password,
-          //         privateKey,
-          //       },
-          //     },
-          //   ],
-          // });
+          navigation.reset({
+            routes: [
+              {
+                name: 'Register.FinalizeKey',
+                params: {
+                  name: name,
+                  password: password,
+                  privateKey,
+                  stepPrevious: stepPrevious + 1,
+                  stepTotal,
+                },
+              },
+            ],
+          });
         },
       }}>
       <Text
@@ -57,18 +64,19 @@ export const BackUpPrivateKeyScreen: FunctionComponent = () => {
       <Gutter size={6} />
 
       <Box
-        width="100%"
+        position="relative"
         padding={16}
         borderRadius={8}
-        backgroundColor={style.get('color-gray-600').color}>
+        backgroundColor={style.get('color-gray-600').color}
+        style={{
+          overflow: 'hidden',
+        }}>
         <Box>
-          <Text style={style.flatten(['color-gray-300', 'body2'])}>
-            private key test
-          </Text>
+          <Text style={style.flatten(['color-gray-300', 'body2'])}>{text}</Text>
 
           <Gutter size={90} />
 
-          <CopyToClipboard text={'private key test'} />
+          <CopyToClipboard text={text} />
         </Box>
 
         {!isShowPrivate ? (
@@ -76,7 +84,7 @@ export const BackUpPrivateKeyScreen: FunctionComponent = () => {
             <BlurView
               style={style.flatten(['absolute-fill'])}
               blurType="dark"
-              blurAmount={10}
+              blurAmount={2}
               onTouchEnd={() => {
                 setIsShowPrivate(true);
               }}

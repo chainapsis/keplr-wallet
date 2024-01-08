@@ -61,8 +61,7 @@ export const RegisterAppleSignInScreen: FunctionComponent = () => {
 
   const onSubmit = handleSubmit(async data => {
     if (key) {
-      // TODO: 일단 finalize key로 바로 보냄
-      navigation.navigate('Register.FinalizeKey', {
+      navigation.navigate('Register.BackupPrivateKey', {
         name: data.name,
         password: data.password,
         stepPrevious: 1,

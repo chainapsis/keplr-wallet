@@ -118,7 +118,16 @@ export type RootStackParamList = {
     stepTotal: number;
   } & DefaultRegisterParams;
   'Register.Intro.ExistingUser'?: DefaultRegisterParams;
-  'Register.BackupPrivateKey': undefined;
+  'Register.BackupPrivateKey': {
+    name: string;
+    password: string;
+    privateKey: {
+      value: Uint8Array;
+      meta: PlainObject;
+    };
+    stepPrevious: number;
+    stepTotal: number;
+  };
   'Register.RecoverMnemonic'?: DefaultRegisterParams;
   'Register.ConnectLedger': {
     name: string;
