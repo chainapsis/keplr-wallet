@@ -7849,6 +7849,7 @@ __metadata:
     appcenter-analytics: ^5.0.0
     appcenter-cli: ^2.14.0
     babel-jest: ^29.2.1
+    babel-plugin-module-resolver: ^5.0.0
     babel-plugin-transform-inline-environment-variables: ^0.4.4
     browserify: ^17.0.0
     buffer: ^6.0.3
@@ -7862,6 +7863,7 @@ __metadata:
     http-browserify: ^1.7.0
     https-browserify: ^1.0.0
     jsc-android: next
+    keplr-wallet-mobile-private: "file:./noop-keplr-wallet-mobile-private"
     lottie-react-native: ^6.3.1
     metro-react-native-babel-preset: 0.76.8
     mobx: ^6.10.0
@@ -27847,6 +27849,13 @@ __metadata:
     node-gyp-build: ^4.2.0
     readable-stream: ^3.6.0
   checksum: f08f04f5cc87013a3fc9e87262f761daff38945c86dd09c01a7f7930a15ae3e14f93b310ef821dcc83675a7b814eb1c983222399a2f263ad980251201d1b9a99
+  languageName: node
+  linkType: hard
+
+"keplr-wallet-mobile-private@file:./noop-keplr-wallet-mobile-private::locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile":
+  version: 0.0.1
+  resolution: "keplr-wallet-mobile-private@file:./noop-keplr-wallet-mobile-private#./noop-keplr-wallet-mobile-private::hash=78a85b&locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile"
+  checksum: bd4f6e5fd1700247b4e5c1878bd66c97cd11368e497e1f663732057c25ad4975d7aabc01af61a4b938f16a1f75e86a9080b26e5665daf8ad2136873de2e05cca
   languageName: node
   linkType: hard
 
