@@ -828,25 +828,22 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
                     throw new Error('bip44Path not found');
                   }
 
-                  navigation.reset({
-                    routes: [
-                      {
-                        name: 'Register.ConnectLedger',
-                        params: {
-                          name: '',
-                          password,
-                          app: 'Ethereum',
-                          bip44Path,
+                  navigation.push('Register.ConnectLedger', {
+                    name: '',
+                    password: password || '',
+                    app: 'Ethereum',
+                    bip44Path: bip44Path as {
+                      account: number;
+                      change: number;
+                      addressIndex: number;
+                    },
 
-                          appendModeInfo: {
-                            vaultId,
-                            afterEnableChains: ledgerEthereumAppNeeds,
-                          },
-                          stepPrevious: stepPrevious,
-                          stepTotal: stepTotal,
-                        },
-                      },
-                    ],
+                    appendModeInfo: {
+                      vaultId,
+                      afterEnableChains: ledgerEthereumAppNeeds,
+                    },
+                    stepPrevious: stepPrevious || 0,
+                    stepTotal: stepTotal || 0,
                   });
                 }
               } else {

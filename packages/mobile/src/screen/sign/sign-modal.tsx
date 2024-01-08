@@ -18,7 +18,6 @@ import {CoinPretty, Int} from '@keplr-wallet/unit';
 import {MsgGrant} from '@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx';
 import {defaultProtoCodec} from '@keplr-wallet/cosmos';
 import {GenericAuthorization} from '@keplr-wallet/stores/build/query/cosmos/authz/types';
-import {useUnmount} from '../../hooks/use-unmount';
 import {BaseModalHeader} from '../../components/modal';
 import {Column, Columns} from '../../components/column';
 import {Text} from 'react-native';
@@ -37,10 +36,11 @@ import {registerCardModal} from '../../components/modal/card';
 import {SpecialButton} from '../../components/special-button';
 import {handleCosmosPreSign} from './util/handle-cosmos-sign';
 import {KeplrError} from '@keplr-wallet/router';
-import {ErrFailedInit, ErrModuleLedgerSign} from './util/ledger-types';
+import {ErrModuleLedgerSign} from './util/ledger-types';
 import {LedgerGuideBox} from '../../components/guide-box/ledger-guide-box';
 import {FlatList} from '../../components/flat-list';
 import {ScrollView} from '../../components/scroll-view/common-scroll-view';
+import {useLedgerBLE} from '../../provider/ledger-ble';
 
 export const SignModal = registerCardModal(
   observer<{
@@ -51,9 +51,14 @@ export const SignModal = registerCardModal(
     const intl = useIntl();
     const style = useStyle();
 
+    const [isViewData, setIsViewData] = useState(false);
+
     const chainId = interactionData.data.chainId;
     const signer = interactionData.data.signer;
+
     const senderConfig = useSenderConfig(chainStore, chainId, signer);
+    // There are services that sometimes use invalid tx to sign arbitrary data on the sign page.
+    // In this case, there is no obligation to deal with it, but 0 gas is favorably allowed.
     const gasConfig = useZeroAllowedGasConfig(chainStore, chainId, 0);
     const amountConfig = useSignDocAmountConfig(
       chainStore,
@@ -69,28 +74,18 @@ export const SignModal = registerCardModal(
       gasConfig,
     );
     const memoConfig = useMemoConfig(chainStore, chainId);
+
     const signDocHelper = useSignDocHelper(feeConfig, memoConfig);
     amountConfig.setSignDocHelper(signDocHelper);
 
-    const [isViewData, setIsViewData] = useState(false);
-
-    const msgs = signDocHelper.signDocWrapper
-      ? signDocHelper.signDocWrapper.mode === 'amino'
-        ? signDocHelper.signDocWrapper.aminoSignDoc.msgs
-        : signDocHelper.signDocWrapper.protoSignDoc.txMsgs
-      : [];
-
     useEffect(() => {
       const data = interactionData.data;
-
       if (data.chainId !== data.signDocWrapper.chainId) {
         // Validate the requested chain id and the chain id in the sign doc are same.
         throw new Error('Chain id unmatched');
       }
-
       signDocHelper.setSignDocWrapper(data.signDocWrapper);
       gasConfig.setValue(data.signDocWrapper.gas);
-
       let memo = data.signDocWrapper.memo;
       if (data.signDocWrapper.mode === 'amino') {
         // For amino-json sign doc, the memo is escaped by default behavior of golang's json marshaller.
@@ -100,7 +95,6 @@ export const SignModal = registerCardModal(
         memo = unescapeHTML(memo);
       }
       memoConfig.setValue(memo);
-
       if (
         data.signOptions.preferNoSetFee ||
         // 자동으로 fee를 다뤄줄 수 있는건 fee가 하나인 경우이다.
@@ -117,7 +111,6 @@ export const SignModal = registerCardModal(
           }),
         );
       }
-
       amountConfig.setDisableBalanceCheck(
         !!data.signOptions.disableBalanceCheck,
       );
@@ -147,10 +140,12 @@ export const SignModal = registerCardModal(
       signDocHelper,
     ]);
 
+    const msgs = signDocHelper.signDocWrapper
+      ? signDocHelper.signDocWrapper.mode === 'amino'
+        ? signDocHelper.signDocWrapper.aminoSignDoc.msgs
+        : signDocHelper.signDocWrapper.protoSignDoc.txMsgs
+      : [];
     const [isSendAuthzGrant, setIsSendAuthzGrant] = useState(false);
-    const [isSendAuthzGrantChecked, setIsSendAuthzGrantChecked] =
-      useState(false);
-
     useEffect(() => {
       try {
         if (
@@ -263,6 +258,8 @@ export const SignModal = registerCardModal(
 
       setIsSendAuthzGrant(false);
     }, [interactionData.data.origin, signDocHelper.signDocWrapper]);
+    const [isSendAuthzGrantChecked, setIsSendAuthzGrantChecked] =
+      useState(false);
 
     const txConfigsValidate = useTxConfigsValidate({
       senderConfig,
@@ -285,22 +282,6 @@ export const SignModal = registerCardModal(
 
     const preferNoSetMemo = interactionData.data.signOptions.preferNoSetMemo;
 
-    const [unmountPromise] = useState(() => {
-      let resolver: () => void;
-      const promise = new Promise<void>(resolve => {
-        resolver = resolve;
-      });
-
-      return {
-        promise,
-        resolver: resolver!,
-      };
-    });
-
-    useUnmount(() => {
-      unmountPromise.resolver();
-    });
-
     const isLedgerAndDirect =
       interactionData.data.keyType === 'ledger' &&
       interactionData.data.mode === 'direct';
@@ -309,7 +290,6 @@ export const SignModal = registerCardModal(
     const [ledgerInteractingError, setLedgerInteractingError] = useState<
       Error | undefined
     >(undefined);
-    const [isLedgerGrantModalOpen, setIsLedgerGrantModalOpen] = useState(false);
 
     const buttonDisabled =
       txConfigsValidate.interactionBlocked ||
@@ -317,15 +297,18 @@ export const SignModal = registerCardModal(
       isLedgerAndDirect ||
       (isSendAuthzGrant && !isSendAuthzGrantChecked);
 
-    const approve = async () => {
-      if (interactionData.data.keyType === 'ledger') {
-        setIsLedgerInteracting(true);
-        setLedgerInteractingError(undefined);
-      }
+    const ledgerBLE = useLedgerBLE();
 
+    const approve = async () => {
       if (signDocHelper.signDocWrapper) {
+        if (interactionData.data.keyType === 'ledger') {
+          setIsLedgerInteracting(true);
+          setLedgerInteractingError(undefined);
+        }
+
         try {
           const signature = await handleCosmosPreSign(
+            ledgerBLE.getTransport,
             interactionData,
             signDocHelper.signDocWrapper,
           );
@@ -334,16 +317,19 @@ export const SignModal = registerCardModal(
             interactionData.id,
             signDocHelper.signDocWrapper,
             signature,
-            () => {},
-            {},
+            () => {
+              // noop
+            },
+            {
+              // XXX: 단지 special button의 애니메이션을 보여주기 위해서 delay를 넣음...ㅋ;
+              preDelay: 200,
+            },
           );
         } catch (e) {
+          console.log(e);
+
           if (e instanceof KeplrError) {
             if (e.module === ErrModuleLedgerSign) {
-              if (e.code === ErrFailedInit) {
-                setIsLedgerGrantModalOpen(true);
-              }
-
               setLedgerInteractingError(e);
             } else {
               setLedgerInteractingError(undefined);

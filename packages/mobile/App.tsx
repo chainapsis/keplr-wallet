@@ -371,12 +371,12 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
                 <StoreProvider>
                   <AppIntlProvider>
                     <NotificationProvider>
-                      <ModalBaseProvider>
-                        <BottomSheetModalProvider>
-                          <ConfirmProvider>
-                            <InteractionModalsProvider>
-                              <ErrorBoundary>
-                                <LedgerBLEProvider>
+                      <LedgerBLEProvider>
+                        <ModalBaseProvider>
+                          <BottomSheetModalProvider>
+                            <ConfirmProvider>
+                              <InteractionModalsProvider>
+                                <ErrorBoundary>
                                   {(() => {
                                     if (
                                       this.state.codepushInitTestCompleted &&
@@ -396,12 +396,12 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
 
                                     return <AppNavigation />;
                                   })()}
-                                </LedgerBLEProvider>
-                              </ErrorBoundary>
-                            </InteractionModalsProvider>
-                          </ConfirmProvider>
-                        </BottomSheetModalProvider>
-                      </ModalBaseProvider>
+                                </ErrorBoundary>
+                              </InteractionModalsProvider>
+                            </ConfirmProvider>
+                          </BottomSheetModalProvider>
+                        </ModalBaseProvider>
+                      </LedgerBLEProvider>
                     </NotificationProvider>
                   </AppIntlProvider>
                 </StoreProvider>

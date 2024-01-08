@@ -2,10 +2,15 @@ import React, {FunctionComponent, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStyle} from '../../../styles';
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {
+  RouteProp,
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
 import {Box} from '../../../components/box';
-import {Text} from 'react-native';
+import {InteractionManager, Text} from 'react-native';
 import {XAxis} from '../../../components/axis';
 import {Gutter} from '../../../components/gutter';
 import {
@@ -221,13 +226,21 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
     setIsLoading(false);
   };
 
+  // 최초에 자동으로 ledger 연결을 한번 시도함.
+  useFocusEffect(
+    React.useCallback(() => {
+      InteractionManager.runAfterInteractions(() => {
+        connectLedger();
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []),
+  );
+
   return (
     <ScrollViewRegisterContainer
       paragraph={`Step ${stepPrevious + 1}/${stepTotal}`}
       bottomButton={{
-        text: intl.formatMessage({
-          id: 'button.next',
-        }),
+        text: 'Connect',
         size: 'large',
         loading: isLoading,
         onPress: connectLedger,
