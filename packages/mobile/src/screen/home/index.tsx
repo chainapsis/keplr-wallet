@@ -37,6 +37,7 @@ import {useAppUpdate} from '../../provider/app-update';
 import {VerticalCollapseTransition} from '../../components/transition';
 import {TouchableHighlight} from 'react-native-gesture-handler';
 import Svg, {Path} from 'react-native-svg';
+import {DualChart} from './components/chart';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -86,6 +87,10 @@ export const HomeScreen: FunctionComponent = observer(() => {
     }
     return result;
   }, [hugeQueriesStore.allKnownBalances]);
+  const availableChartWeight =
+    availableTotalPrice && !isNotReady
+      ? Number.parseFloat(availableTotalPrice.toDec().toString())
+      : 0;
 
   const stakedTotalPrice = useMemo(() => {
     let result: PricePretty | undefined;
@@ -109,6 +114,10 @@ export const HomeScreen: FunctionComponent = observer(() => {
     }
     return result;
   }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings]);
+  const stakedChartWeight =
+    stakedTotalPrice && !isNotReady
+      ? Number.parseFloat(stakedTotalPrice.toDec().toString())
+      : 0;
 
   const onRefresh = async () => {
     if (isNotReady) {
@@ -192,7 +201,14 @@ export const HomeScreen: FunctionComponent = observer(() => {
         )
       }>
       <Stack gutter={12}>
-        <VerticalCollapseTransition collapsed={!newVersionExist}>
+        <VerticalCollapseTransition
+          collapsed={(() => {
+            if (isNotReady) {
+              return true;
+            }
+
+            return !newVersionExist;
+          })()}>
           <TouchableHighlight
             onPress={() => {
               setIsOpenAppUpdateModal(true);
@@ -257,30 +273,55 @@ export const HomeScreen: FunctionComponent = observer(() => {
             isNotReady={isNotReady}
           />
         </YAxis>
-        <Box height={168} alignX="center" alignY="center">
-          <Skeleton isNotReady={isNotReady} layer={1} type="button">
-            <Text
-              style={style.flatten([
-                'color-text-low',
-                'font-extrabold',
-                'font-medium',
-                'subtitle2',
-              ])}>
-              {tabStatus === 'available' ? 'Total Available' : 'Total Staked'}
-            </Text>
-          </Skeleton>
-          <Gutter size={10} />
-          <Skeleton
+        <Box position="relative">
+          <DualChart
+            first={{
+              weight: availableChartWeight,
+            }}
+            second={{
+              weight: stakedChartWeight,
+            }}
+            highlight={tabStatus === 'available' ? 'first' : 'second'}
             isNotReady={isNotReady}
-            layer={1}
-            dummyMinWidth={180}
-            type="button">
-            <Text style={style.flatten(['color-text-high', 'mobile-h2'])}>
-              {tabStatus === 'available'
-                ? availableTotalPrice?.toString() || '-'
-                : stakedTotalPrice?.toString() || '-'}
-            </Text>
-          </Skeleton>
+          />
+          <Box
+            position="absolute"
+            style={{
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <Gutter size={34} />
+            <Skeleton isNotReady={isNotReady} layer={1} type="button">
+              <Text
+                style={style.flatten([
+                  'color-text-low',
+                  'font-extrabold',
+                  'font-medium',
+                  'subtitle2',
+                ])}>
+                {tabStatus === 'available' ? 'Total Available' : 'Total Staked'}
+              </Text>
+            </Skeleton>
+            <Gutter size={10} />
+            <Skeleton
+              isNotReady={isNotReady}
+              layer={1}
+              dummyMinWidth={130}
+              type="button">
+              <Text style={style.flatten(['color-text-high', 'mobile-h2'])}>
+                {tabStatus === 'available'
+                  ? availableTotalPrice?.toString() || '-'
+                  : stakedTotalPrice?.toString() || '-'}
+              </Text>
+            </Skeleton>
+          </Box>
         </Box>
 
         <Box paddingX={12}>
