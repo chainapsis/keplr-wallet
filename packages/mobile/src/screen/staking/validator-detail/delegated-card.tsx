@@ -56,7 +56,12 @@ export const DelegatedCard: FunctionComponent<{
           </Text>
           <Column weight={1} />
           <Text style={style.flatten(['body1', 'color-text-high'])}>
-            {staked?.trim(true).shrink(true).maxDecimals(6).toString()}
+            {staked
+              ?.trim(true)
+              .shrink(true)
+              .maxDecimals(6)
+              .inequalitySymbol(true)
+              .toString()}
           </Text>
         </Columns>
 
@@ -68,7 +73,12 @@ export const DelegatedCard: FunctionComponent<{
           </Text>
           <Column weight={1} />
           <Text style={style.flatten(['body1', 'color-text-high'])}>
-            {rewards?.trim(true).shrink(true).maxDecimals(6).toString()}
+            {rewards
+              ?.trim(true)
+              .shrink(true)
+              .maxDecimals(6)
+              .inequalitySymbol(true)
+              .toString()}
           </Text>
         </Columns>
 

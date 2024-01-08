@@ -132,6 +132,9 @@ export const WalletChangeNameScreen: FunctionComponent = observer(() => {
                   label={intl.formatMessage({
                     id: 'page.wallet.change-name.new-name-input-label',
                   })}
+                  placeholder={intl.formatMessage({
+                    id: 'page.wallet.change-name.new-name-input-placeholder',
+                  })}
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
@@ -144,6 +147,7 @@ export const WalletChangeNameScreen: FunctionComponent = observer(() => {
                     }
                     setFocus('name');
                   }}
+                  returnKeyType="done"
                 />
               );
             }}
@@ -151,8 +155,8 @@ export const WalletChangeNameScreen: FunctionComponent = observer(() => {
         </Box>
         <Column weight={1} />
         <Button
-          text={intl.formatMessage({id: 'button.save'})}
-          color="secondary"
+          text={intl.formatMessage({id: 'button.confirm'})}
+          color="primary"
           size="large"
           loading={(() => {
             // if (!interactionInfo.interaction) {

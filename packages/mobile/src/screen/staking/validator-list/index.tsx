@@ -19,6 +19,8 @@ import {
   BoundaryScrollView,
   BoundaryScrollViewBoundary,
 } from '../../../components/boundary-scroll-view';
+import {EmptyView, EmptyViewText} from '../../../components/empty-view';
+import {useIntl} from 'react-intl';
 
 export type FilterOption = 'Commission' | 'Voting Power';
 
@@ -28,6 +30,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
   const [filterOption, setFilterOption] =
     useState<FilterOption>('Voting Power');
   const [search, setSearch] = useState('');
+  const intl = useIntl();
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.ValidateList'>>();
   const navigation = useNavigation<StackNavProp>();
   const filterItems: FilterOption[] = ['Commission', 'Voting Power'];
@@ -93,7 +96,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
       }}>
       <Box paddingX={12}>
         <DebounceSearchTextInput
-          placeholder="Search for Chain"
+          placeholder="Search for a validator"
           handleSearchWord={e => {
             setSearch(e);
           }}
@@ -122,44 +125,65 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
           ...style.flatten(['flex-grow-1', 'padding-x-12']),
           paddingBottom: safeAreaInsets.bottom,
         }}>
-        <BoundaryScrollViewBoundary
-          itemHeight={filterOption === 'Voting Power' ? 70 : 64}
-          gap={8}
-          items={filteredValidators.map(validator => {
-            return (
-              <ValidatorListItem
-                filterOption={filterOption}
-                chainId={chainId}
-                validatorAddress={validator.operator_address}
-                validator={validator}
-                bondedToken={queries.cosmos.queryPool.bondedTokens}
-                isDelegation={delegationsValidatorSet.has(
-                  validator.operator_address,
-                )}
-                afterSelect={() => {
-                  if (validatorSelector) {
-                    navigation.push('Stake', {
+        {filteredValidators.length === 0 ? (
+          <React.Fragment>
+            <Gutter size={102} />
+            <EmptyView>
+              <Box alignX="center" paddingX={39}>
+                <EmptyViewText
+                  text={intl.formatMessage({
+                    id: 'page.stake.validator-list.empty-title',
+                  })}
+                />
+                <Gutter size={12} />
+                <EmptyViewText
+                  text={intl.formatMessage({
+                    id: 'page.stake.validator-list.empty-text',
+                  })}
+                />
+              </Box>
+            </EmptyView>
+          </React.Fragment>
+        ) : (
+          <BoundaryScrollViewBoundary
+            itemHeight={filterOption === 'Voting Power' ? 70 : 64}
+            gap={8}
+            items={filteredValidators.map(validator => {
+              return (
+                <ValidatorListItem
+                  filterOption={filterOption}
+                  chainId={chainId}
+                  validatorAddress={validator.operator_address}
+                  validator={validator}
+                  bondedToken={queries.cosmos.queryPool.bondedTokens}
+                  isDelegation={delegationsValidatorSet.has(
+                    validator.operator_address,
+                  )}
+                  afterSelect={() => {
+                    if (validatorSelector) {
+                      navigation.push('Stake', {
+                        screen: 'Stake.ValidateDetail',
+                        params: {
+                          chainId,
+                          validatorAddress: validator.operator_address,
+                          validatorSelector,
+                        },
+                      });
+                      return;
+                    }
+                    navigation.navigate('Stake', {
                       screen: 'Stake.ValidateDetail',
                       params: {
                         chainId,
                         validatorAddress: validator.operator_address,
-                        validatorSelector,
                       },
                     });
-                    return;
-                  }
-                  navigation.navigate('Stake', {
-                    screen: 'Stake.ValidateDetail',
-                    params: {
-                      chainId,
-                      validatorAddress: validator.operator_address,
-                    },
-                  });
-                }}
-              />
-            );
-          })}
-        />
+                  }}
+                />
+              );
+            })}
+          />
+        )}
       </BoundaryScrollView>
 
       <SelectItemModal

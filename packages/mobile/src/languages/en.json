@@ -365,6 +365,7 @@
 
   "page.wallet.change-name.previous-name-input-label": "Previous Wallet Name",
   "page.wallet.change-name.new-name-input-label": "New Wallet Name",
+  "page.wallet.change-name.new-name-input-placeholder": "e.g. Trading, NFT Vault, Investment..",
 
   "page.wallet.delete.warning-title": "Alert",
   "page.wallet.delete.warning-paragraph": "Make sure that you’ve backed up your recovery phrase or private key.",
@@ -521,7 +522,7 @@
   "page.main.available.search-empty-view-paragraph": "No Result Found",
   "page.main.available.empty-view-title": "Ready to Explore the Interchain?",
   "page.main.available.empty-view-paragraph": "Gear up yourself by topping up your wallet!",
-  "page.main.available.get-started-button": "Get Started",
+  "page.main.available.get-started-button": "Deposit Assets",
   "page.main.available.new-token-found": "{numFoundToken} new token(s) found",
   "page.main.staked.staked-button-title": "Staked",
   "page.main.staked.staked-balance-title": "Staked Balance",
@@ -623,7 +624,7 @@
   "page.stake.validator-detail.title": "Validator Details",
   "page.stake.validator-detail.jailed-guide-box.title": "This validator is currently jailed.",
   "page.stake.validator-detail.jailed-guide-box.paragraph": "If you are staking to this validator, consider switching to another validator or unstaking.",
-  "page.stake.validator-detail.commission-guide-box.title": "Commission {rate}%",
+  "page.stake.validator-detail.commission-guide-box.title": "Commission {rate}",
   "page.stake.validator-detail.commission-guide-box.paragraph-1": "This validator is currently charging",
   "page.stake.validator-detail.commission-guide-box.paragraph-2": " very high ",
   "page.stake.validator-detail.commission-guide-box.paragraph-3": "commissions. Consider staking to other validators with lower commissions to increaser your rewards.",
@@ -643,6 +644,9 @@
   "page.stake.validator-detail.unbonding-card.label": "My Unstaking",
 
   "page.stake.validator-list.title": "All Active Validators",
+  "page.stake.validator-list.search-input-placeholder": "Search for a validator",
+  "page.stake.validator-list.empty-title": "No Results Found",
+  "page.stake.validator-list.empty-text": "Please check the spelling of the validator name or verify if it is in an active set.",
 
   "page.stake.delegate.title": "Stake",
   "page.stake.delegate.guide-box.title": "Staking will lock your funds for {unbondingPeriodDay} days",

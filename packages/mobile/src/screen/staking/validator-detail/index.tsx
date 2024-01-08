@@ -94,7 +94,7 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
             paragraph={intl.formatMessage({
               id: 'page.stake.validator-detail.jailed-guide-box.paragraph',
             })}
-            color="warning"
+            color="danger"
           />
         ) : (
           <React.Fragment>

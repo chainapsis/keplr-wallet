@@ -43,6 +43,9 @@ export const ValidatorItem: FunctionComponent<{
   const unbondingValidators = queries.cosmos.queryValidators.getQueryStatus(
     Staking.BondStatus.Unbonding,
   );
+  const isJailed = !!unbondedValidators.validators
+    .concat(unbondingValidators.validators)
+    .find(val => val.operator_address === viewValidator.validatorAddress);
 
   const thumbnail =
     bondedValidators.getValidatorThumbnail(viewValidator.validatorAddress) ||
@@ -74,13 +77,25 @@ export const ValidatorItem: FunctionComponent<{
             </Box>
           </Skeleton>
           <Gutter size={12} />
+
           <Column weight={6}>
             <Skeleton layer={1} type="rect" isNotReady={isNotReady}>
-              <Text
-                numberOfLines={1}
-                style={style.flatten(['subtitle2', 'color-text-high'])}>
-                {viewValidator.name}
-              </Text>
+              <Columns sum={1} alignY="center">
+                {isJailed ? (
+                  <React.Fragment>
+                    <InformationIcon
+                      size={16}
+                      color={style.get('color-red-300').color}
+                    />
+                    <Gutter size={4} />
+                  </React.Fragment>
+                ) : null}
+                <Text
+                  numberOfLines={1}
+                  style={style.flatten(['subtitle2', 'color-text-high'])}>
+                  {viewValidator.name}
+                </Text>
+              </Columns>
             </Skeleton>
 
             <Gutter size={4} />

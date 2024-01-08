@@ -56,9 +56,9 @@ export const LookingForChainItem: FunctionComponent<{
       <Columns sum={1} gutter={8} alignY="center">
         <ChainImageFallback
           style={{
-            width: '2rem',
-            height: '2rem',
-            opacity: '0.6',
+            width: 32,
+            height: 32,
+            opacity: 0.6,
           }}
           src={chainInfo.chainSymbolImageUrl}
           alt={`${chainInfo.chainSymbolImageUrl} ${chainInfo.chainName}`}
