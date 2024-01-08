@@ -240,72 +240,81 @@ export const LedgerBLETransportModal = registerCardModal<{
       <Gutter size={12} />
 
       {(() => {
-        if (isBLEAvailable) {
-          if (permissionStatus === BLEPermissionGrantStatus.Granted) {
-            return (
-              <React.Fragment>
-                {errorOnListen ? (
-                  <GuideBox color="danger" title={errorOnListen} />
-                ) : (
-                  <React.Fragment>
-                    {devices.map(device => {
-                      return (
-                        <LedgerNanoBLESelector
-                          key={device.id}
-                          deviceId={device.id}
-                          deviceName={device.name}
-                          resolve={transport => {
-                            if (resolver) {
-                              resolver(transport);
-                            }
-                            setIsOpen(false);
-                          }}
-                        />
-                      );
-                    })}
-                  </React.Fragment>
-                )}
-              </React.Fragment>
-            );
+        if (permissionStatus === BLEPermissionGrantStatus.Granted) {
+          if (errorOnListen) {
+            return <GuideBox color="danger" title={errorOnListen} />;
           }
 
-          if (
-            permissionStatus === BLEPermissionGrantStatus.Failed ||
-            permissionStatus === BLEPermissionGrantStatus.FailedAndRetry
-          ) {
+          if (devices.length === 0) {
             return (
-              <Box paddingY={32} alignX="center" alignY="center">
-                <Svg width="40" height="40" fill="none" viewBox="0 0 40 40">
-                  <Rect width="40" height="40" fill="#3971FF" rx="20" />
-                  <Path
-                    stroke="#fff"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2.633"
-                    d="M13.418 14.735l13.164 10.531L20 30.532V9.469l6.582 5.266-13.164 10.531"
-                  />
-                </Svg>
-                <Gutter size={16} />
-                <Text
-                  style={style.flatten([
-                    'body2',
-                    'color-text-high',
-                    'text-center',
-                  ])}>
-                  Keplr doesn’t have permission to use bluetooth
+              <Box paddingX={8} paddingBottom={32}>
+                <Text style={style.flatten(['color-text-low', 'body2'])}>
+                  • Make sure Bluetooth is enabled on your mobile device.
                 </Text>
-                <Gutter size={16} />
-                <Button
-                  containerStyle={style.flatten(['margin-top-16'])}
-                  textStyle={style.flatten(['margin-x-8', 'normal-case'])}
-                  text="Open app setting"
-                  onPress={async () => {
-                    await Linking.openSettings();
-                  }}
-                />
+                <Text style={style.flatten(['color-text-low', 'body2'])}>
+                  • Turn on and unlock your Ledger.
+                </Text>
               </Box>
             );
           }
+
+          return (
+            <React.Fragment>
+              {devices.map(device => {
+                return (
+                  <LedgerNanoBLESelector
+                    key={device.id}
+                    deviceId={device.id}
+                    deviceName={device.name}
+                    resolve={transport => {
+                      if (resolver) {
+                        resolver(transport);
+                      }
+                      setIsOpen(false);
+                    }}
+                  />
+                );
+              })}
+            </React.Fragment>
+          );
+        }
+
+        if (
+          permissionStatus === BLEPermissionGrantStatus.Failed ||
+          permissionStatus === BLEPermissionGrantStatus.FailedAndRetry
+        ) {
+          return (
+            <Box paddingY={32} alignX="center" alignY="center">
+              <Svg width="40" height="40" fill="none" viewBox="0 0 40 40">
+                <Rect width="40" height="40" fill="#3971FF" rx="20" />
+                <Path
+                  stroke="#fff"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2.633"
+                  d="M13.418 14.735l13.164 10.531L20 30.532V9.469l6.582 5.266-13.164 10.531"
+                />
+              </Svg>
+              <Gutter size={16} />
+              <Text
+                style={style.flatten([
+                  'body2',
+                  'color-text-high',
+                  'text-center',
+                ])}>
+                Keplr doesn’t have permission to use bluetooth
+              </Text>
+              <Gutter size={16} />
+              <Button
+                containerStyle={style.flatten(['margin-top-16'])}
+                textStyle={style.flatten(['margin-x-8', 'normal-case'])}
+                text="Open app setting"
+                onPress={async () => {
+                  await Linking.openSettings();
+                }}
+              />
+            </Box>
+          );
         }
       })()}
     </Box>
