@@ -264,7 +264,7 @@
   "page.setting.security.change-password.placeholder": "At least 8 characters in length",
   "page.setting.security.change-password.confirm-password-label": "Confirm New Keplr Password",
 
-  "page.setting.security.bio-authentication.password-label": "password",
+  "page.setting.security.bio-authentication.password-label": "Password",
   "page.setting.security.bio-authentication.password-placeholder": "Type in your password",
   "page.setting.security.bio-authentication.guide-text": "Enter your password to continue.",
 
@@ -615,7 +615,7 @@
   "page.camera.guide-box.bottom-button": "Open Setting",
 
   "page.stake.dashboard.title": "Staking on {chainName}",
-  "page.stake.staked-balance-title": "Staked Balance",
+  "page.stake.staked-balance-title": "My Staking",
   "page.stake.unstaking-balance-title": "Unstaking Balance",
   "page.stake.dashboard.staking-button.label": "Available for Staking",
   "page.stake.dashboard.staking-button": "Stake",
