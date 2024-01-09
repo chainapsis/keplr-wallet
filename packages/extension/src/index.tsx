@@ -19,7 +19,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { HashRouter, Route, Routes, useLocation } from "react-router-dom";
 import { StoreProvider, useStore } from "./stores";
 import { GlobalPopupStyle, GlobalStyle, ScrollBarStyle } from "./styles";
@@ -476,4 +476,5 @@ const App: FunctionComponent = () => {
   );
 };
 
-ReactDOM.render(<App />, document.getElementById("app"));
+const root = createRoot(document.getElementById("app")!);
+root.render(<App />);

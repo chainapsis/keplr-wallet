@@ -53,6 +53,15 @@ const { initFn, keyRingService } = init(
       });
     },
   },
+  (callback: () => void) => {
+    browser.idle.onStateChanged.addListener(
+      (newState: browser.idle.IdleState) => {
+        if ((newState as any) === "locked") {
+          callback();
+        }
+      }
+    );
+  },
   "https://blocklist.keplr.app",
   {
     commonCrypto: {

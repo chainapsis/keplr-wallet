@@ -1,4 +1,4 @@
-import React, { forwardRef, FunctionComponent } from "react";
+import React, { forwardRef, FunctionComponent, PropsWithChildren } from "react";
 import { TextInputProps } from "./types";
 import { Styles } from "./styles";
 import { Column, Columns } from "../../column";
@@ -90,9 +90,11 @@ export const TextInput = forwardRef<
   }
 );
 
-const MockBox: FunctionComponent<{
-  show: boolean;
-}> = ({ show, children }) => {
+const MockBox: FunctionComponent<
+  PropsWithChildren<{
+    show: boolean;
+  }>
+> = ({ show, children }) => {
   if (!show) {
     return null;
   }

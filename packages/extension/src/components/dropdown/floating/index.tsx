@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useEffect, useRef } from "react";
+import React, {
+  FunctionComponent,
+  PropsWithChildren,
+  useEffect,
+  useRef,
+} from "react";
 import {
   autoUpdate,
   limitShift,
@@ -24,12 +29,9 @@ export interface FloatingDropdownProps {
   items: FloatingDropdownItem[];
 }
 
-export const FloatingDropdown: FunctionComponent<FloatingDropdownProps> = ({
-  children,
-  isOpen,
-  close,
-  items,
-}) => {
+export const FloatingDropdown: FunctionComponent<
+  PropsWithChildren<FloatingDropdownProps>
+> = ({ children, isOpen, close, items }) => {
   const { x, y, strategy, refs } = useFloating({
     middleware: [
       autoPlacement({

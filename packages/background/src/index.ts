@@ -67,6 +67,7 @@ export function init(
     readonly alternativeURL?: string;
   },
   notification: Notification,
+  addDeviceLockedListener: (callback: () => void) => void,
   blocklistPageURL: string,
   keyRingMigrations: {
     commonCrypto: KeyRingLegacy.CommonCrypto;
@@ -176,7 +177,8 @@ export function init(
   );
   const autoLockAccountService = new AutoLocker.AutoLockAccountService(
     storeCreator("auto-lock-account"),
-    keyRingV2Service
+    keyRingV2Service,
+    addDeviceLockedListener
   );
   const permissionInteractiveService =
     new PermissionInteractive.PermissionInteractiveService(

@@ -1,6 +1,7 @@
 import React, {
   createContext,
   FunctionComponent,
+  PropsWithChildren,
   useContext,
   useLayoutEffect,
   useState,
@@ -36,7 +37,9 @@ export const useAppTheme = () => {
   return theme;
 };
 
-export const AppThemeProvider: FunctionComponent = ({ children }) => {
+export const AppThemeProvider: FunctionComponent<PropsWithChildren> = ({
+  children,
+}) => {
   const [option, _setOption] = useState<ThemeOption>(() => initOption());
   const [displayTheme, setDisplayTheme] = useState<"dark" | "light">(() => {
     if (!option) {

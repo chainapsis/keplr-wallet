@@ -70,7 +70,6 @@
     "query-string": "^6.8.3",
     "react-hook-form": "^7.43.1",
     "react-intl": "^6.2.8",
-    "react-is": "^16.13.1",
     "react-router": "^6.8.1",
     "react-router-dom": "^6.8.1",
     "scrypt-js": "^3.0.1",
@@ -103,7 +102,6 @@
     "@types/color": "^3.0.3",
     "@types/firefox-webext-browser": "^70.0.1",
     "@types/js-yaml": "^4",
-    "@types/react-is": "^16.7.2",
     "@types/resize-observer-browser": "^0.1.7",
     "@types/secp256k1": "^4.0.1",
     "@types/semver": "^7",
@@ -133,6 +131,7 @@
     "mobx-react-lite": "^3",
     "mobx-utils": "^6",
     "react": "^16.8.0 || ^17 || ^18",
-    "react-dom": "^16.8.0 || ^17 || ^18"
+    "react-dom": "^16.8.0 || ^17 || ^18",
+    "react-is": "^16.8.0 || ^17 || ^18"
   }
 }

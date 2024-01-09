@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import React, {
+  FunctionComponent,
+  PropsWithChildren,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { RegisterSceneBox } from "../components/register-scene-box";
 import { Button } from "../../../components/button";
 import {
@@ -250,7 +256,7 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
   );
 });
 
-const BlurBackdrop: FunctionComponent = ({ children }) => {
+const BlurBackdrop: FunctionComponent<PropsWithChildren> = ({ children }) => {
   const theme = useTheme();
 
   return (

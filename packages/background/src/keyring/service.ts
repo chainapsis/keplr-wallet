@@ -1132,6 +1132,16 @@ export class KeyRingService {
     }
   }
 
+  async checkUserPassword(password: string): Promise<boolean> {
+    try {
+      await this.vaultService.checkUserPassword(password);
+    } catch (e) {
+      return false;
+    }
+
+    return true;
+  }
+
   async changeUserPassword(
     prevUserPassword: string,
     newUserPassword: string

@@ -1,11 +1,12 @@
 import { InteractionStore } from "./interaction";
 import {
+  GetOriginPermittedChainsMsg,
   GlobalPermissionData,
   INTERACTION_TYPE_GLOBAL_PERMISSION,
   INTERACTION_TYPE_PERMISSION,
   PermissionData,
 } from "@keplr-wallet/background";
-import { MessageRequester } from "@keplr-wallet/router";
+import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import { computed, makeObservable } from "mobx";
 
 export class PermissionStore {
@@ -117,5 +118,15 @@ export class PermissionStore {
 
   isObsoleteInteraction(id: string | undefined): boolean {
     return this.interactionStore.isObsoleteInteraction(id);
+  }
+
+  async getOriginPermittedChains(
+    origin: string,
+    type: string
+  ): Promise<string[]> {
+    return await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new GetOriginPermittedChainsMsg(origin, type)
+    );
   }
 }

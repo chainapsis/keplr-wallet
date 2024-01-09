@@ -1,8 +1,8 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, PropsWithChildren } from "react";
 import { Styles } from "./styles";
 import { BleedProps } from "./types";
 
-export const Bleed: FunctionComponent<BleedProps> = ({
+export const Bleed: FunctionComponent<PropsWithChildren<BleedProps>> = ({
   children,
   ...props
 }) => {

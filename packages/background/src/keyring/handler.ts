@@ -24,6 +24,7 @@ import {
   ExportKeyRingDataMsg,
   CheckLegacyKeyRingPasswordMsg,
   NewKeystoneKeyMsg,
+  CheckPasswordMsg,
 } from "./messages";
 import { KeyRingService } from "./service";
 
@@ -101,6 +102,8 @@ export const getHandler: (service: KeyRingService) => Handler = (
           env,
           msg as CheckLegacyKeyRingPasswordMsg
         );
+      case CheckPasswordMsg:
+        return handleCheckPasswordMsg(service)(env, msg as CheckPasswordMsg);
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -333,5 +336,13 @@ const handleCheckLegacyKeyRingPasswordMsg: (
 ) => InternalHandler<CheckLegacyKeyRingPasswordMsg> = (service) => {
   return async (_, msg) => {
     return await service.checkLegacyKeyRingPassword(msg.password);
+  };
+};
+
+const handleCheckPasswordMsg: (
+  service: KeyRingService
+) => InternalHandler<CheckPasswordMsg> = (service) => {
+  return async (_, msg) => {
+    return await service.checkUserPassword(msg.password);
   };
 };

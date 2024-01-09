@@ -1,5 +1,6 @@
 import React, {
   FunctionComponent,
+  PropsWithChildren,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -20,7 +21,7 @@ import {
 import { defaultSpringConfig } from "../../../styles/spring";
 
 export const VerticalResizeTransition: FunctionComponent<
-  VerticalResizeTransitionProps
+  PropsWithChildren<VerticalResizeTransitionProps>
 > = ({ children, width, transitionAlign, registry: altRegistry }) => {
   // if -1, it means not initialized yet.
   const heightPx = useSpringValue<number>(-1, {

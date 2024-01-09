@@ -14,6 +14,7 @@ import {
   ChangeKeyRingNameMsg,
   ChangeUserPasswordMsg,
   CheckLegacyKeyRingPasswordMsg,
+  CheckPasswordMsg,
   ComputeNotFinalizedKeyAddressesMsg,
   DeleteKeyRingMsg,
   FinalizeKeyCoinTypeMsg,
@@ -349,6 +350,11 @@ export class KeyRingStore {
 
   async checkLegacyKeyRingPassword(password: string): Promise<void> {
     const msg = new CheckLegacyKeyRingPasswordMsg(password);
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async checkPassword(password: string): Promise<boolean> {
+    const msg = new CheckPasswordMsg(password);
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 }
