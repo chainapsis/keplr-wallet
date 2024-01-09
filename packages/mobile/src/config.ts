@@ -12,8 +12,15 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinMinimalDenom: 'uatom',
       coinDecimals: 6,
       coinGeckoId: 'cosmos',
-      coinImageUrl: 'https://dhj8dql1kzq2v.cloudfront.net/white/atom.png',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/cosmos-hub'
+        : 'http://localhost:8080/chains/cosmos-hub',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/cosmos-hub'
+        : 'http://localhost:8080/chains/cosmos-hub',
     bip44: {
       coinType: 118,
     },
@@ -24,7 +31,6 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: 'uatom',
         coinDecimals: 6,
         coinGeckoId: 'cosmos',
-        coinImageUrl: 'https://dhj8dql1kzq2v.cloudfront.net/white/atom.png',
       },
     ],
     feeCurrencies: [
@@ -33,11 +39,9 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: 'uatom',
         coinDecimals: 6,
         coinGeckoId: 'cosmos',
-        coinImageUrl: 'https://dhj8dql1kzq2v.cloudfront.net/white/atom.png',
       },
     ],
     features: ['ibc-transfer', 'ibc-go'],
-    chainSymbolImageUrl: 'https://dhj8dql1kzq2v.cloudfront.net/white/atom.png',
   },
   {
     rpc: 'https://rpc-osmosis.keplr.app',
@@ -50,6 +54,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'osmosis',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://app.osmosis.zone'
+        : 'https://app.osmosis.zone',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/osmosis'
+        : 'http://localhost:8080/chains/osmosis',
     bip44: {coinType: 118},
     bech32Config: Bech32Address.defaultBech32Config('osmo'),
     currencies: [
@@ -98,6 +110,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'secret',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/secret-network'
+        : 'http://localhost:8080/chains/secret-network',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/secret-network'
+        : 'http://localhost:8080/chains/secret-network',
     bip44: {
       coinType: 529,
     },
@@ -141,6 +161,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'akash-network',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/akash'
+        : 'http://localhost:8080/chains/akash',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/akash'
+        : 'http://localhost:8080/chains/akash',
     bip44: {
       coinType: 118,
     },
@@ -173,6 +201,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinMinimalDenom: 'umars',
       coinDecimals: 6,
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/mars'
+        : 'http://localhost:8080/chains/mars',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/mars'
+        : 'http://localhost:8080/chains/mars',
     bip44: {
       coinType: 118,
     },
@@ -214,6 +250,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 8,
       coinGeckoId: 'crypto-com-chain',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/crypto-org'
+        : 'http://localhost:8080/chains/crypto-org',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/crypto-org'
+        : 'http://localhost:8080/chains/crypto-org',
     bip44: {
       coinType: 394,
     },
@@ -249,44 +293,6 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ['ibc-transfer'],
   },
   {
-    rpc: 'https://rpc-iov.keplr.app',
-    rest: 'https://lcd-iov.keplr.app',
-    chainId: 'iov-mainnet-ibc',
-    chainName: 'Starname',
-    stakeCurrency: {
-      coinDenom: 'IOV',
-      coinMinimalDenom: 'uiov',
-      coinDecimals: 6,
-      coinGeckoId: 'starname',
-    },
-    bip44: {
-      coinType: 234,
-    },
-    bech32Config: Bech32Address.defaultBech32Config('star'),
-    currencies: [
-      {
-        coinDenom: 'IOV',
-        coinMinimalDenom: 'uiov',
-        coinDecimals: 6,
-        coinGeckoId: 'starname',
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: 'IOV',
-        coinMinimalDenom: 'uiov',
-        coinDecimals: 6,
-        coinGeckoId: 'starname',
-        gasPriceStep: {
-          low: 1,
-          average: 2,
-          high: 3,
-        },
-      },
-    ],
-    features: ['ibc-transfer'],
-  },
-  {
     rpc: 'https://rpc-sifchain.keplr.app',
     rest: 'https://lcd-sifchain.keplr.app',
     chainId: 'sifchain-1',
@@ -297,6 +303,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 18,
       coinGeckoId: 'sifchain',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/sifchain'
+        : 'http://localhost:8080/chains/sifchain',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/sifchain'
+        : 'http://localhost:8080/chains/sifchain',
     bip44: {
       coinType: 118,
     },
@@ -755,6 +769,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'certik',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/shentu'
+        : 'http://localhost:8080/chains/shentu',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/shentu'
+        : 'http://localhost:8080/chains/shentu',
     bip44: {
       coinType: 118,
     },
@@ -788,6 +810,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'iris-network',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/irisnet'
+        : 'http://localhost:8080/chains/irisnet',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/irisnet'
+        : 'http://localhost:8080/chains/irisnet',
     bip44: {
       coinType: 118,
     },
@@ -838,6 +868,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'regen',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/regen'
+        : 'http://localhost:8080/chains/regen',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/regen'
+        : 'http://localhost:8080/chains/regen',
     bip44: {
       coinType: 118,
     },
@@ -876,6 +914,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'persistence',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/persistence'
+        : 'http://localhost:8080/chains/persistence',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/persistence'
+        : 'http://localhost:8080/chains/persistence',
     bip44: {
       coinType: 118,
     },
@@ -924,6 +970,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'sentinel',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/sentinel'
+        : 'http://localhost:8080/chains/sentinel',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/sentinel'
+        : 'http://localhost:8080/chains/sentinel',
     bip44: {
       coinType: 118,
     },
@@ -952,151 +1006,6 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ['ibc-transfer'],
   },
   {
-    rpc: 'https://rpc-ixo.keplr.app',
-    rest: 'https://lcd-ixo.keplr.app',
-    chainId: 'ixo-4',
-    chainName: 'ixo',
-    stakeCurrency: {
-      coinDenom: 'IXO',
-      coinMinimalDenom: 'uixo',
-      coinDecimals: 6,
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config('ixo'),
-    currencies: [
-      {
-        coinDenom: 'IXO',
-        coinMinimalDenom: 'uixo',
-        coinDecimals: 6,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: 'IXO',
-        coinMinimalDenom: 'uixo',
-        coinDecimals: 6,
-      },
-    ],
-    features: ['ibc-transfer'],
-  },
-  {
-    rpc: 'https://rpc-emoney.keplr.app',
-    rest: 'https://lcd-emoney.keplr.app',
-    chainId: 'emoney-3',
-    chainName: 'e-Money',
-    stakeCurrency: {
-      coinDenom: 'NGM',
-      coinMinimalDenom: 'ungm',
-      coinDecimals: 6,
-      coinGeckoId: 'e-money',
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config('emoney'),
-    currencies: [
-      {
-        coinDenom: 'NGM',
-        coinMinimalDenom: 'ungm',
-        coinDecimals: 6,
-        coinGeckoId: 'e-money',
-      },
-      {
-        coinDenom: 'EEUR',
-        coinMinimalDenom: 'eeur',
-        coinDecimals: 6,
-        coinGeckoId: 'e-money-eur',
-      },
-      {
-        coinDenom: 'EDKK',
-        coinMinimalDenom: 'edkk',
-        coinDecimals: 6,
-      },
-      {
-        coinDenom: 'ESEK',
-        coinMinimalDenom: 'esek',
-        coinDecimals: 6,
-      },
-      {
-        coinDenom: 'ENOK',
-        coinMinimalDenom: 'enok',
-        coinDecimals: 6,
-      },
-      {
-        coinDenom: 'ECHF',
-        coinMinimalDenom: 'echf',
-        coinDecimals: 6,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: 'NGM',
-        coinMinimalDenom: 'ungm',
-        coinDecimals: 6,
-        coinGeckoId: 'e-money',
-        gasPriceStep: {
-          low: 1,
-          average: 1,
-          high: 1,
-        },
-      },
-      {
-        coinDenom: 'EEUR',
-        coinMinimalDenom: 'eeur',
-        coinDecimals: 6,
-        coinGeckoId: 'e-money-eur',
-        gasPriceStep: {
-          low: 1,
-          average: 1,
-          high: 1,
-        },
-      },
-      {
-        coinDenom: 'ECHF',
-        coinMinimalDenom: 'echf',
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 1,
-          average: 1,
-          high: 1,
-        },
-      },
-      {
-        coinDenom: 'ESEK',
-        coinMinimalDenom: 'esek',
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 1,
-          average: 1,
-          high: 1,
-        },
-      },
-      {
-        coinDenom: 'ENOK',
-        coinMinimalDenom: 'enok',
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 1,
-          average: 1,
-          high: 1,
-        },
-      },
-      {
-        coinDenom: 'EDKK',
-        coinMinimalDenom: 'edkk',
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 1,
-          average: 1,
-          high: 1,
-        },
-      },
-    ],
-    features: ['ibc-transfer'],
-  },
-  {
     rpc: 'https://rpc-agoric.keplr.app',
     rest: 'https://lcd-agoric.keplr.app',
     chainId: 'agoric-3',
@@ -1107,6 +1016,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'agoric',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/agoric'
+        : 'http://localhost:8080/chains/agoric',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/agoric'
+        : 'http://localhost:8080/chains/agoric',
     bip44: {
       coinType: 564,
     },
@@ -1159,6 +1076,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinMinimalDenom: 'boot',
       coinDecimals: 0,
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/bostrom'
+        : 'http://localhost:8080/chains/bostrom',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/bostrom'
+        : 'http://localhost:8080/chains/bostrom',
     bip44: {
       coinType: 118,
     },
@@ -1215,6 +1140,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'juno-network',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/juno'
+        : 'http://localhost:8080/chains/juno',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/juno'
+        : 'http://localhost:8080/chains/juno',
     bip44: {
       coinType: 118,
     },
@@ -1264,6 +1197,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'stargaze',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/stargaze'
+        : 'http://localhost:8080/chains/stargaze',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/stargaze'
+        : 'http://localhost:8080/chains/stargaze',
     bip44: {
       coinType: 118,
     },
@@ -1297,6 +1238,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'axelar',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/axelar'
+        : 'http://localhost:8080/chains/axelar',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/axelar'
+        : 'http://localhost:8080/chains/axelar',
     bip44: {
       coinType: 118,
     },
@@ -1443,6 +1392,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'sommelier',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/sommelier'
+        : 'http://localhost:8080/chains/sommelier',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/sommelier'
+        : 'http://localhost:8080/chains/sommelier',
     bip44: {
       coinType: 118,
     },
@@ -1475,6 +1432,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinMinimalDenom: 'uumee',
       coinDecimals: 6,
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/umee'
+        : 'http://localhost:8080/chains/umee',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/umee'
+        : 'http://localhost:8080/chains/umee',
     bip44: {
       coinType: 118,
     },
@@ -1510,6 +1475,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinMinimalDenom: 'ugraviton',
       coinDecimals: 6,
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/gravity-bridge'
+        : 'http://localhost:8080/chains/gravity-bridge',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/gravity-bridge'
+        : 'http://localhost:8080/chains/gravity-bridge',
     bip44: {
       coinType: 118,
     },
@@ -1551,41 +1524,6 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ['ibc-transfer', 'ibc-go'],
   },
   {
-    rpc: 'https://rpc-tgrade.keplr.app',
-    rest: 'https://lcd-tgrade.keplr.app',
-    chainId: 'tgrade-mainnet-1',
-    chainName: 'Tgrade',
-    stakeCurrency: {
-      coinDenom: 'TGD',
-      coinMinimalDenom: 'utgd',
-      coinDecimals: 6,
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config('tgrade'),
-    currencies: [
-      {
-        coinDenom: 'TGD',
-        coinMinimalDenom: 'utgd',
-        coinDecimals: 6,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: 'TGD',
-        coinMinimalDenom: 'utgd',
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 0.05,
-          average: 0.05,
-          high: 0.075,
-        },
-      },
-    ],
-    features: ['cosmwasm', 'ibc-transfer', 'ibc-go', 'wasmd_0.24+'],
-  },
-  {
     rpc: 'https://rpc-stride.keplr.app',
     rest: 'https://lcd-stride.keplr.app',
     chainId: 'stride-1',
@@ -1596,6 +1534,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'stride',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/stride'
+        : 'http://localhost:8080/chains/stride',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/stride'
+        : 'http://localhost:8080/chains/stride',
     bip44: {
       coinType: 118,
     },
@@ -1654,6 +1600,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 18,
       coinGeckoId: 'evmos',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/evmos'
+        : 'http://localhost:8080/chains/evmos',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/evmos'
+        : 'http://localhost:8080/chains/evmos',
     bip44: {
       coinType: 60,
     },
@@ -1692,6 +1646,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 18,
       coinGeckoId: 'injective-protocol',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/injective'
+        : 'http://localhost:8080/chains/injective',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/injective'
+        : 'http://localhost:8080/chains/injective',
     bip44: {
       coinType: 60,
     },
@@ -1730,6 +1692,14 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'kava',
     },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/kava'
+        : 'http://localhost:8080/chains/kava',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/kava'
+        : 'http://localhost:8080/chains/kava',
     bip44: {coinType: 459},
     alternativeBIP44s: [{coinType: 118}],
     bech32Config: Bech32Address.defaultBech32Config('kava'),
@@ -1802,6 +1772,10 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinMinimalDenom: 'uqck',
       coinDecimals: 6,
     },
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/quicksilver'
+        : 'http://localhost:8080/chains/quicksilver',
     bip44: {
       coinType: 118,
     },
@@ -1845,6 +1819,10 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: 'terra-luna-2',
     },
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/terra'
+        : 'http://localhost:8080/chains/terra',
     bip44: {
       coinType: 330,
     },
@@ -2268,6 +2246,73 @@ export const EmbedChainInfos: ChainInfo[] = [
           average: 2,
           high: 3,
         },
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: 'https://rpc-dydx.keplr.app',
+    rest: 'https://lcd-dydx.keplr.app',
+    chainId: 'dydx-mainnet-1',
+    chainName: 'dYdX',
+    stakeCurrency: {
+      coinDenom: 'DYDX',
+      coinDecimals: 18,
+      coinMinimalDenom: 'adydx',
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: 'dydx',
+      bech32PrefixAccPub: 'dydxpub',
+      bech32PrefixValAddr: 'dydxvaloper',
+      bech32PrefixValPub: 'dydxvaloperpub',
+      bech32PrefixConsAddr: 'dydxvalcons',
+      bech32PrefixConsPub: 'dydxvalconspub',
+    },
+    currencies: [
+      {
+        coinDenom: 'DYDX',
+        coinDecimals: 18,
+        coinMinimalDenom: 'adydx',
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: 'DYDX',
+        coinDecimals: 18,
+        coinMinimalDenom: 'adydx',
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: 'https://rpc-celestia.keplr.app',
+    rest: 'https://lcd-celestia.keplr.app',
+    chainId: 'celestia',
+    chainName: 'Celestia',
+    stakeCurrency: {
+      coinDenom: 'TIA',
+      coinDecimals: 6,
+      coinMinimalDenom: 'utia',
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config('celestia'),
+    currencies: [
+      {
+        coinDenom: 'TIA',
+        coinDecimals: 6,
+        coinMinimalDenom: 'utia',
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: 'TIA',
+        coinDecimals: 6,
+        coinMinimalDenom: 'utia',
       },
     ],
     features: [],
