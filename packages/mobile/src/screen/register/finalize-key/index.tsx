@@ -94,7 +94,6 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
     }[]
   >([]);
   const [vaultId, setVaultId] = useState('');
-  const [isAnimEnded, setIsAnimEnded] = useState(false);
 
   // RN에서 한번에 많은 쿼리를 처리하면 느리진다...
   // 이 문제를 해결할수가 없기 때문에 query가 처리된 비율에 따라 progress를 계산하고 0.8(80%) 이상의 쿼리가 처리되고
@@ -349,7 +348,6 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
       !onceRef.current &&
       candidateAddresses.length > 0 &&
       vaultId &&
-      isAnimEnded &&
       // RN에서 한번에 많은 쿼리를 처리하면 느리진다...
       // 이 문제를 해결할수가 없기 때문에 query가 처리된 비율에 따라 progress를 계산하고 0.8(80%) 이상의 쿼리가 처리되고
       // 그 후 3초를 더 기다리고 넘긴다...
@@ -376,7 +374,6 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
     }
   }, [
     candidateAddresses,
-    isAnimEnded,
     mnemonic?.isFresh,
     navigation,
     password,
@@ -396,13 +393,8 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
       <View style={{flex: 1}} />
       <LottieView
         source={require('../../../public/assets/lottie/register/creating.json')}
-        loop={false}
-        autoPlay
-        // TODO: 얘 애니메이션을 좀 더 길게 해야한다. RN의 성능 문제로 이 애니메이션이 끝나기전에 query가 다 처리되지가 않는다...
-        speed={0.7}
-        onAnimationFinish={() => {
-          setIsAnimEnded(true);
-        }}
+        loop={true}
+        autoPlay={true}
         style={{width: '80%', aspectRatio: 1}}
       />
       <View
