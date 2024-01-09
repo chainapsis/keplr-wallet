@@ -27,6 +27,10 @@ import {Box} from '../../components/box';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {Skeleton} from '../../components/skeleton';
 import {SelectChainModal, SelectModalItem} from '../../components/select-modal';
+import {useEffectOnce} from '../../hooks';
+import {InformationOutlinedIcon} from '../../components/icon/information-outlined';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
+import {InformationModal} from '../../components/modal/infoModal';
 
 const embedChainInfosIdentifiers = EmbedChainInfos.map(
   item => ChainIdHelper.parse(item.chainId).identifier,
@@ -36,10 +40,27 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
   const style = useStyle();
   const {hugeQueriesStore, queriesStore, scamProposalStore} = useStore();
   const [isOpenSelectChainModal, setIsOpenSelectChainModal] = useState(false);
+  const [isOpenInfoModal, setIsOpenInfoModal] = useState(false);
   const navigation = useNavigation<StackNavProp>();
   const intl = useIntl();
   const isFetching = useRef(1);
 
+  useEffectOnce(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableWithoutFeedback
+          style={style.flatten(['padding-right-20'])}
+          onPress={() => {
+            setIsOpenInfoModal(true);
+          }}>
+          <InformationOutlinedIcon
+            size={28}
+            color={style.get('color-gray-300').color}
+          />
+        </TouchableWithoutFeedback>
+      ),
+    });
+  });
   const delegations: ViewToken[] = useMemo(
     () =>
       hugeQueriesStore.delegations
@@ -266,6 +287,16 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
         })}
         emptyText={intl.formatMessage({
           id: 'page.governance.components.select-chain-modal.empty-text',
+        })}
+      />
+      <InformationModal
+        isOpen={isOpenInfoModal}
+        setIsOpen={setIsOpenInfoModal}
+        title={intl.formatMessage({
+          id: 'page.governance.main.info-modal.title',
+        })}
+        paragraph={intl.formatMessage({
+          id: 'page.governance.main.info-modal.text',
         })}
       />
     </PageWithScrollView>
