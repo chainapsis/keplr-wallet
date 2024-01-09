@@ -192,12 +192,10 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
     setRefreshing(false);
   };
 
+  //NOTE bondedValidators.isFetching값으로 지정할 경우 방문시 마다 캐싱이 안돼서
+  //skeleton이 매번 보이게됨, 해서 한번 로딩을 했으면 그때부터는 isNotReady를 false로 설정함
   const isNotReady =
-    queryDelegations.isFetching ||
-    queryUnbondings.isFetching ||
-    bondedValidators.isFetching ||
-    unbondedValidators.isFetching ||
-    unbondingValidators.isFetching;
+    (!delegations.length && !unbondings.length) || !validators.length;
 
   return (
     <PageWithScrollView

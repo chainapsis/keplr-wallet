@@ -38,7 +38,7 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
   const [isOpenSelectChainModal, setIsOpenSelectChainModal] = useState(false);
   const navigation = useNavigation<StackNavProp>();
   const intl = useIntl();
-  const isFetching = useRef(1);
+  const isFetching = useRef(true);
 
   const delegations: ViewToken[] = useMemo(
     () =>
@@ -47,6 +47,12 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
           embedChainInfosIdentifiers.includes(
             ChainIdHelper.parse(viewToken.chainInfo.chainId).identifier,
           ),
+        )
+        .filter(
+          viewToken =>
+            !NoDashboardLinkIdentifiers.includes(
+              ChainIdHelper.parse(viewToken.chainInfo.chainId).identifier,
+            ),
         )
         .filter(token => {
           return token.token.toDec().gt(new Dec(0));
@@ -83,7 +89,7 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
           ChainIdHelper.parse(viewToken.chainInfo.chainId).identifier,
         ),
     )
-    .map((delegation, index) => {
+    .map(delegation => {
       const isGovV1Supported =
         GovernanceV1ChainIdentifiers.includes(
           ChainIdHelper.parse(delegation.chainInfo.chainId).identifier,
@@ -115,13 +121,9 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
               status: 'PROPOSAL_STATUS_VOTING_PERIOD',
             });
 
-      //NOTE delegations 모두 fetch가 끝났을때 스켈레톤을 지우기 위해서 해당 로직을 통해서 isFetch을 설정함
-      isFetching.current += Number(queryGovernance.isFetching);
-      if (index + 1 === delegations.length) {
-        isFetching.current > 1
-          ? (isFetching.current = 1)
-          : (isFetching.current = 0);
-      }
+      //NOTE delegations중 하나라도 완료가 되면 isFetching을 false로 설정하고 변경하지 않음
+      isFetching.current =
+        !isFetching.current || !queryGovernance.isFetching ? false : true;
 
       return isGovV1Supported
         ? {
