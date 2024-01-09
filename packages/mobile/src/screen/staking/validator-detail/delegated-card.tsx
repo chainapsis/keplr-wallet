@@ -10,6 +10,8 @@ import {Column, Columns} from '../../../components/column';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../navigation';
 import {FormattedMessage, useIntl} from 'react-intl';
+import {ChainIdHelper} from '@keplr-wallet/cosmos';
+import {CoinPretty} from '@keplr-wallet/unit';
 
 export const DelegatedCard: FunctionComponent<{
   chainId: string;
@@ -29,9 +31,34 @@ export const DelegatedCard: FunctionComponent<{
     .getQueryBech32Address(account.bech32Address)
     .getDelegationTo(validatorAddress);
 
-  const rewards = queries.cosmos.queryRewards
-    .getQueryBech32Address(account.bech32Address)
-    .getStakableRewardOf(validatorAddress);
+  const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
+    account.bech32Address,
+  );
+
+  const rewards = (() => {
+    let reward: CoinPretty | undefined;
+    const isDydx = ChainIdHelper.parse(chainId).identifier === 'dydx-mainnet';
+    if (isDydx) {
+      const denom =
+        'ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5';
+      reward = queryRewards
+        .getRewardsOf(validatorAddress)
+        .find(r => r.currency.coinMinimalDenom === denom);
+    } else {
+      reward = queryRewards.getStakableRewardOf(validatorAddress);
+    }
+    //NOTE reward가 stake currency가 아닐경우 reward가 없을때 undefined로 반환될 떄가 있음
+    //현재 usdc가 유일한 경우라서 하드코딩된 문자열로 처리함
+    return !reward && isDydx
+      ? '0 USDC'
+      : reward
+          ?.trim(true)
+          .shrink(true)
+          .maxDecimals(6)
+          .inequalitySymbol(true)
+          .hideIBCMetadata(true)
+          .toString();
+  })();
 
   return staked && !staked.toDec().isZero() ? (
     <Box>
@@ -73,12 +100,7 @@ export const DelegatedCard: FunctionComponent<{
           </Text>
           <Column weight={1} />
           <Text style={style.flatten(['body1', 'color-text-high'])}>
-            {rewards
-              ?.trim(true)
-              .shrink(true)
-              .maxDecimals(6)
-              .inequalitySymbol(true)
-              .toString()}
+            {rewards}
           </Text>
         </Columns>
 
