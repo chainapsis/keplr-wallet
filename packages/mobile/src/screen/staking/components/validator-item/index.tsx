@@ -85,7 +85,7 @@ export const ValidatorItem: FunctionComponent<{
                   <React.Fragment>
                     <InformationIcon
                       size={16}
-                      color={style.get('color-red-300').color}
+                      color={style.get('color-red-400').color}
                     />
                     <Gutter size={4} />
                   </React.Fragment>
