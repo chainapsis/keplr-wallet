@@ -3,6 +3,8 @@ import * as Keychain from 'react-native-keychain';
 import {SECURITY_RULES} from 'react-native-keychain';
 import {KVStore, toGenerator} from '@keplr-wallet/common';
 import {KeyRingStore} from '@keplr-wallet/stores-core';
+import * as LocalAuthentication from 'expo-local-authentication';
+import {Platform} from 'react-native';
 
 export class KeychainStore {
   @observable
@@ -14,6 +16,7 @@ export class KeychainStore {
   protected static defaultOptions: Keychain.Options = {
     authenticationPrompt: {
       title: 'Biometric Authentication',
+      cancel: 'Cancel',
     },
     accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
     accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
@@ -43,6 +46,18 @@ export class KeychainStore {
       throw new Error('Biometry is off');
     }
 
+    if (Platform.OS === 'android') {
+      const res = yield* toGenerator(
+        LocalAuthentication.authenticateAsync({
+          promptMessage: 'Biometric Authentication',
+          disableDeviceFallback: true,
+          cancelLabel: 'Cancel',
+        }),
+      );
+      if (!res.success) {
+        throw new Error('Failed to authenticate');
+      }
+    }
     const credentials = yield* toGenerator(
       Keychain.getGenericPassword(KeychainStore.defaultOptions),
     );
@@ -76,6 +91,18 @@ export class KeychainStore {
   @flow
   *turnOffBiometry() {
     if (this.isBiometryOn) {
+      if (Platform.OS === 'android') {
+        const res = yield* toGenerator(
+          LocalAuthentication.authenticateAsync({
+            promptMessage: 'Biometric Authentication',
+            disableDeviceFallback: true,
+            cancelLabel: 'Cancel',
+          }),
+        );
+        if (!res.success) {
+          throw new Error('Failed to authenticate');
+        }
+      }
       const credentials = yield* toGenerator(
         Keychain.getGenericPassword(KeychainStore.defaultOptions),
       );

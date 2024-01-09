@@ -40,6 +40,8 @@ PODS:
     - ExpoModulesCore
   - ExpoKeepAwake (12.3.0):
     - ExpoModulesCore
+  - ExpoLocalAuthentication (13.4.1):
+    - ExpoModulesCore
   - ExpoModulesCore (1.5.9):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
@@ -603,6 +605,7 @@ DEPENDENCIES:
   - ExpoClipboard (from `../node_modules/expo-clipboard/ios`)
   - ExpoCrypto (from `../node_modules/expo-crypto/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
+  - ExpoLocalAuthentication (from `../node_modules/expo-local-authentication/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - ExpoWebBrowser (from `../node_modules/expo-web-browser/ios`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
@@ -739,6 +742,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-crypto/ios"
   ExpoKeepAwake:
     :path: "../node_modules/expo-keep-awake/ios"
+  ExpoLocalAuthentication:
+    :path: "../node_modules/expo-local-authentication/ios"
   ExpoModulesCore:
     :path: "../node_modules/expo-modules-core"
   ExpoWebBrowser:
@@ -868,6 +873,7 @@ SPEC CHECKSUMS:
   ExpoClipboard: 695f274f8e028cd113837f917da40c76850877eb
   ExpoCrypto: a382ab9a2fa91f0b511ce1fe4d6baecee40a1615
   ExpoKeepAwake: be4cbd52d9b177cde0fd66daa1913afa3161fc1d
+  ExpoLocalAuthentication: bd9d9037a96a11ccc456e327ddb404df02da10ca
   ExpoModulesCore: e4e437139259c5a73530a8895af69774ff8ec12d
   ExpoWebBrowser: 2c788f9c07718a780fe6d8bf2f6195c47609faaa
   FBLazyVector: 5fbbff1d7734827299274638deb8ba3024f6c597
@@ -945,4 +951,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 55d8d038f92bf74360fccf4db660287b53f658a3
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.13.0

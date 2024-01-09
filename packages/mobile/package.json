@@ -53,6 +53,7 @@
     "expo-apple-authentication": "~6.1.0",
     "expo-clipboard": "~4.3.1",
     "expo-crypto": "~12.4.1",
+    "expo-local-authentication": "~13.4.1",
     "expo-standard-web-crypto": "file:./crypto-polyfill",
     "expo-web-browser": "~12.3.2",
     "http-browserify": "^1.7.0",

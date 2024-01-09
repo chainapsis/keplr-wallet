@@ -7861,6 +7861,7 @@ __metadata:
     expo-apple-authentication: ~6.1.0
     expo-clipboard: ~4.3.1
     expo-crypto: ~12.4.1
+    expo-local-authentication: ~13.4.1
     expo-standard-web-crypto: "file:./crypto-polyfill"
     expo-web-browser: ~12.3.2
     http-browserify: ^1.7.0
@@ -22438,6 +22439,17 @@ __metadata:
   peerDependencies:
     expo: "*"
   checksum: 21a17de233bf0401cca64a22275f089557f99248896f29d262b22545199c7d4e816bc9be6b7d547046706db700d9ac3e648a2ca764a9ced4a0739583106fd7ea
+  languageName: node
+  linkType: hard
+
+"expo-local-authentication@npm:~13.4.1":
+  version: 13.4.1
+  resolution: "expo-local-authentication@npm:13.4.1"
+  dependencies:
+    invariant: ^2.2.4
+  peerDependencies:
+    expo: "*"
+  checksum: b07d9b0946a53f26b0bc4be7510f05eed27981bc60e310d89e8e3f44c0bc5d160315031a61d7eea0658a36aaa7e736e88491b4b1e36212ff63fae1ba6e42f0be
   languageName: node
   linkType: hard
 
