@@ -227,11 +227,11 @@ export class IBCSwapAmountConfig extends AmountConfig {
         queryMsgsDirect.response.data
       );
 
-      console.log({
-        swapRouterKey,
-        key,
-      });
       if (swapRouterKey !== key) {
+        console.log({
+          swapRouterKey,
+          key,
+        });
         throw new Error(
           "Route and msgs_direct are not matched. Please try again."
         );
@@ -374,9 +374,52 @@ export class IBCSwapAmountConfig extends AmountConfig {
         const memo = JSON.parse(msg.msg).memo;
         if (memo) {
           const obj = JSON.parse(memo);
-          for (const operation of obj.wasm.msg.swap_and_action.user_swap
-            .swap_exact_asset_in.operations) {
-            key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;
+          const wasms: any = [];
+
+          if (obj.wasm) {
+            wasms.push(obj.wasm);
+          }
+
+          let forward = obj.forward;
+          if (forward) {
+            while (true) {
+              if (forward) {
+                if (forward.memo) {
+                  const obj = JSON.parse(forward.memo);
+                  if (obj.wasm) {
+                    wasms.push(obj.wasm);
+                  }
+                }
+
+                if (forward.wasm) {
+                  wasms.push(forward.wasm);
+                }
+
+                if (forward.next) {
+                  const obj =
+                    typeof forward.next === "string"
+                      ? JSON.parse(forward.next)
+                      : forward.next;
+
+                  if (obj.forward) {
+                    forward = obj.forward;
+                  } else {
+                    forward = obj;
+                  }
+                } else {
+                  break;
+                }
+              } else {
+                break;
+              }
+            }
+          }
+
+          for (const wasm of wasms) {
+            for (const operation of wasm.msg.swap_and_action.user_swap
+              .swap_exact_asset_in.operations) {
+              key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;
+            }
           }
         }
       }
