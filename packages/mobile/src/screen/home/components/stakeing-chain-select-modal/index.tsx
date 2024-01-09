@@ -1,6 +1,6 @@
 import React, {FunctionComponent, useState} from 'react';
 import {observer} from 'mobx-react-lite';
-import {Keyboard, Platform, Text} from 'react-native';
+import {Text} from 'react-native';
 
 import {useStyle} from '../../../../styles';
 import {Gutter} from '../../../../components/gutter';
@@ -55,7 +55,7 @@ export const SelectStakingChainModal = registerCardModal(
 
     return (
       <Box>
-        <Box paddingX={12}>
+        <Box paddingX={16}>
           <BaseModalHeader
             titleStyle={style.flatten(['text-left', 'padding-left-8'])}
             title={intl.formatMessage({
@@ -74,7 +74,9 @@ export const SelectStakingChainModal = registerCardModal(
 
           <Gutter size={12} />
         </Box>
-        <ScrollView isGestureScrollView={true} style={{height: 250}}>
+        <ScrollView
+          isGestureScrollView={true}
+          style={{height: 250, paddingHorizontal: 16}}>
           <Box>
             {filtered.map(item => {
               return (
@@ -140,17 +142,6 @@ const TokenItem: FunctionComponent<{
       style={style.flatten(['background-color-gray-600'])}
       onPress={async () => {
         onSelect({key: viewToken.chainInfo.chainId, viewToken});
-        //NOTE - https://github.com/gorhom/react-native-bottom-sheet/issues/1072
-        // android에서 키보드가 열렸을때 modal을 close 트리거 할 경우
-        // 키보드가 먼저 사라지면서 bottomSheet높이가 다시 설정되고 리렌더링 되는 버그가 있음
-        // 그래서 setTimeout으로 키보드를 먼저 닫은뒤 bottomSheet을 닫도록 설정함
-        if (Platform.OS === 'android') {
-          if (Keyboard.isVisible()) {
-            Keyboard.dismiss();
-            return;
-          }
-          return;
-        }
       }}>
       <Box
         padding={16}
@@ -159,7 +150,7 @@ const TokenItem: FunctionComponent<{
         height={74}
         alignY="center"
         alignX="center">
-        <Columns sum={1} alignY="center" gutter={8}>
+        <Columns sum={1} alignY="center" gutter={12}>
           <Box>
             <ChainImageFallback
               style={{
@@ -171,7 +162,7 @@ const TokenItem: FunctionComponent<{
             />
           </Box>
           <Stack gutter={4}>
-            <Text style={style.flatten(['subtitle3', 'color-text-high'])}>
+            <Text style={style.flatten(['subtitle2', 'color-text-high'])}>
               {coinDenom}
             </Text>
             <Text style={style.flatten(['body3', 'color-text-low'])}>

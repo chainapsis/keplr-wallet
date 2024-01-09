@@ -28,8 +28,9 @@
   "page.governance.proposal-list.empty-text": "No records of past or ongoing proposals found on this chain.",
   "page.governance.main.empty-title": "No Proposals Awaiting Your Vote",
   "page.governance.main.empty-text": "Stake your assets first to start voting on proposals. Your voting power is determined by the amount of staked tokens.",
+  "page.governance.main.info-modal.title": "Active Proposals",
+  "page.governance.main.info-modal.text": "This page shows active proposals for the chains where your assets are staked—essentially, proposals that you can vote for.\n\nYour staked assets grant validators the right to vote on your behalf, with the voting power being proportional to the amount of your staked assets. Should you wish to override their votes, you can directly cast your votes as well.",
   "page.governance.chain-item-proposal-length": "{len} Proposals",
-
   "page.governance.components.select-chain-modal.input-placeholder": "Search for a chain",
   "page.governance.components.select-chain-modal.empty-title": "No Results Found",
   "page.governance.components.select-chain-modal.empty-text": "Please check the spelling of the chain name or verify if the chain is natively supported by Keplr. If it's a non-native chain, use our in-app browser to access the voting website.",
@@ -263,7 +264,7 @@
   "page.setting.security.change-password.placeholder": "At least 8 characters in length",
   "page.setting.security.change-password.confirm-password-label": "Confirm New Keplr Password",
 
-  "page.setting.security.bio-authentication.password-label": "password",
+  "page.setting.security.bio-authentication.password-label": "Password",
   "page.setting.security.bio-authentication.password-placeholder": "Type in your password",
   "page.setting.security.bio-authentication.guide-text": "Enter your password to continue.",
 
@@ -614,7 +615,7 @@
   "page.camera.guide-box.bottom-button": "Open Setting",
 
   "page.stake.dashboard.title": "Staking on {chainName}",
-  "page.stake.staked-balance-title": "Staked Balance",
+  "page.stake.staked-balance-title": "My Staking",
   "page.stake.unstaking-balance-title": "Unstaking Balance",
   "page.stake.dashboard.staking-button.label": "Available for Staking",
   "page.stake.dashboard.staking-button": "Stake",
