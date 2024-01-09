@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useEffect, useRef} from 'react';
+import React, {FunctionComponent, useEffect, useMemo, useRef} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {observer} from 'mobx-react-lite';
 import {Text, View, StyleSheet} from 'react-native';
@@ -10,7 +10,7 @@ import {SimpleGradient} from '../../components/svg';
 import {Box} from '../../components/box';
 import {ArrowRightIcon} from '../../components/icon/arrow-right';
 import {StackNavProp} from '../../navigation';
-import {EmbedChainInfos} from '../../config';
+import {ChainIdentifierToTxExplorerMap} from '../../config';
 import {TextButton} from '../../components/text-button';
 import Animated, {
   useAnimatedProps,
@@ -19,6 +19,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import {useNotification} from '../../hooks/notification';
 import {FormattedMessage, useIntl} from 'react-intl';
+import {ChainIdHelper} from '@keplr-wallet/cosmos';
 
 const AnimatedLottieView = Animated.createAnimatedComponent(LottieView);
 
@@ -70,9 +71,11 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
   >();
 
   const chainId = route.params.chainId;
-  const txExplorer = EmbedChainInfos.find(
-    chain => chain.chainId === chainId,
-  )?.txExplorer;
+  const txExplorer = useMemo(() => {
+    return ChainIdentifierToTxExplorerMap[
+      ChainIdHelper.parse(chainId).identifier
+    ];
+  }, [chainId]);
   const txHash = route.params.txHash;
 
   const style = useStyle();

@@ -1,16 +1,7 @@
 import {Bech32Address} from '@keplr-wallet/cosmos';
 import {ChainInfo} from '@keplr-wallet/types';
 
-export interface AppChainInfo extends ChainInfo {
-  readonly chainSymbolImageUrl?: string;
-  readonly hideInUI?: boolean;
-  readonly txExplorer?: {
-    readonly name: string;
-    readonly txUrl: string;
-  };
-}
-
-export const EmbedChainInfos: AppChainInfo[] = [
+export const EmbedChainInfos: ChainInfo[] = [
   {
     rpc: 'https://rpc-cosmoshub.keplr.app',
     rest: 'https://lcd-cosmoshub.keplr.app',
@@ -47,10 +38,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
     ],
     features: ['ibc-transfer', 'ibc-go'],
     chainSymbolImageUrl: 'https://dhj8dql1kzq2v.cloudfront.net/white/atom.png',
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/cosmos/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-osmosis.keplr.app',
@@ -99,10 +86,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       'wasmd_0.24+',
       'osmosis-txfees',
     ],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/osmosis/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-secret.keplr.app',
@@ -146,10 +129,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['secretwasm', 'ibc-go', 'ibc-transfer'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/secret/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-akash.keplr.app',
@@ -183,10 +162,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['ibc-transfer'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/akash/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-mars.keplr.app',
@@ -227,10 +202,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: [],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/mars-protocol/txs/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-crypto-org.keplr.app',
@@ -276,10 +247,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['ibc-transfer'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/crypto-org/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-iov.keplr.app',
@@ -318,10 +285,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['ibc-transfer'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/starname/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-sifchain.keplr.app',
@@ -813,10 +776,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['ibc-transfer', 'ibc-go'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/shentu/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-iris.keplr.app',
@@ -867,10 +826,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['ibc-transfer', 'ibc-go'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/iris/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-regen.keplr.app',
@@ -909,10 +864,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['ibc-go', 'ibc-transfer'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/regen/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-persistence.keplr.app',
@@ -961,10 +912,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['ibc-transfer', 'ibc-go'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/persistence/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-sentinel.keplr.app',
@@ -1003,10 +950,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['ibc-transfer'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/sentinel/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-ixo.keplr.app',
@@ -1037,10 +980,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['ibc-transfer'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/ixo/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-emoney.keplr.app',
@@ -1156,10 +1095,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['ibc-transfer'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/emoney/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-agoric.keplr.app',
@@ -1317,10 +1252,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['cosmwasm', 'ibc-transfer', 'ibc-go', 'wasmd_0.24+'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/juno/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-stargaze.keplr.app',
@@ -1354,10 +1285,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['ibc-transfer', 'ibc-go'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/stargaze/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-axelar.keplr.app',
@@ -1504,10 +1431,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['ibc-transfer', 'ibc-go', 'axelar-evm-bridge'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/axelar/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-sommelier.keplr.app',
@@ -1541,10 +1464,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['ibc-transfer', 'ibc-go'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/sommelier/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-umee.keplr.app',
@@ -1580,10 +1499,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['ibc-transfer', 'ibc-go'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/umee/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-gravity-bridge.keplr.app',
@@ -1634,10 +1549,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['ibc-transfer', 'ibc-go'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/gravity-bridge/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-tgrade.keplr.app',
@@ -1673,10 +1584,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['cosmwasm', 'ibc-transfer', 'ibc-go', 'wasmd_0.24+'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/tgrade/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-stride.keplr.app',
@@ -1735,10 +1642,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['ibc-transfer', 'ibc-go'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/stride/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-evmos.keplr.app',
@@ -1777,10 +1680,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['ibc-transfer', 'ibc-go', 'eth-address-gen', 'eth-key-sign'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/evmos/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-injective.keplr.app',
@@ -1819,10 +1718,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ['ibc-transfer', 'ibc-go', 'eth-address-gen', 'eth-key-sign'],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/injective/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-kava.keplr.app',
@@ -1896,10 +1791,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
         },
       },
     ],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/kava/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-quicksilver.keplr.app',
@@ -1942,10 +1833,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: [],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/quicksilver/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-phoenix.keplr.app',
@@ -1991,10 +1878,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: [],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/terra/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-columbus.keplr.app',
@@ -2122,10 +2005,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: [],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/quasar/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-noble.keplr.app',
@@ -2179,10 +2058,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: [],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/noble/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-omniflixhub.keplr.app',
@@ -2225,10 +2100,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: [],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/omniflix/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-kyve.keplr.app',
@@ -2271,10 +2142,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: [],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/kyve/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-neutron.keplr.app',
@@ -2317,10 +2184,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: [],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/neutron/tx/{txHash}',
-    },
   },
   {
     rpc: 'https://rpc-gitopia.keplr.app',
@@ -2408,12 +2271,135 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: [],
-    txExplorer: {
-      name: 'Mintscan',
-      txUrl: 'https://www.mintscan.io/likecoin/tx/{txHash}',
-    },
   },
 ];
+
+// TODO: 원격으로 변경할 수 있도록 나중에 네트워크에서 이 정보를 가져오는 방식으로 변경될 수 있음
+export const ChainIdentifierToTxExplorerMap: Record<
+  string,
+  {name: string; txUrl: string} | undefined
+> = {
+  cosmoshub: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/cosmos/tx/{txHash}',
+  },
+  osmosis: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/osmosis/tx/{txHash}',
+  },
+  secret: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/secret/tx/{txHash}',
+  },
+  akashnet: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/akash/tx/{txHash}',
+  },
+  mars: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/mars-protocol/txs/{txHash}',
+  },
+  'crypto-org-chain-mainnet': {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/crypto-org/tx/{txHash}',
+  },
+  'shentu-2.2': {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/shentu/tx/{txHash}',
+  },
+  irishub: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/iris/tx/{txHash}',
+  },
+  regen: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/regen/tx/{txHash}',
+  },
+  core: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/persistence/tx/{txHash}',
+  },
+  sentinelhub: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/sentinel/tx/{txHash}',
+  },
+  juno: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/juno/tx/{txHash}',
+  },
+  stargaze: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/stargaze/tx/{txHash}',
+  },
+  'axelar-dojo': {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/axelar/tx/{txHash}',
+  },
+  sommelier: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/sommelier/tx/{txHash}',
+  },
+  umee: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/umee/tx/{txHash}',
+  },
+  'gravity-bridge': {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/gravity-bridge/tx/{txHash}',
+  },
+  'tgrade-mainnet': {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/tgrade/tx/{txHash}',
+  },
+  stride: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/stride/tx/{txHash}',
+  },
+  evmos_9001: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/evmos/tx/{txHash}',
+  },
+  injective: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/injective/tx/{txHash}',
+  },
+  kava_2222: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/kava/tx/{txHash}',
+  },
+  quicksilver: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/quicksilver/tx/{txHash}',
+  },
+  phoenix: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/terra/tx/{txHash}',
+  },
+  quasar: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/quasar/tx/{txHash}',
+  },
+  noble: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/noble/tx/{txHash}',
+  },
+  omniflixhub: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/omniflix/tx/{txHash}',
+  },
+  kyve: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/kyve/tx/{txHash}',
+  },
+  neutron: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/neutron/tx/{txHash}',
+  },
+  'likecoin-mainnet': {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/likecoin/tx/{txHash}',
+  },
+};
 
 // The origins that are able to pass any permission that external webpages can have.
 export const PrivilegedOrigins: string[] = [
