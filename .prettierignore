@@ -39,3 +39,6 @@ packages/proto-types/outputHash
 
 package.json
 tsconfig.json
+
+android
+ios
