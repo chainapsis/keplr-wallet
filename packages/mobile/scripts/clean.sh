@@ -17,6 +17,7 @@ cd "$DIR/../android"
 
 rm -rf "$DIR/../android/.gradle"
 rm -rf "$DIR/../android/build"
+rm -rf "$DIR/../android/app/build"
 
 rm -rf "$DIR/../node_modules"
 rm -rf "$DIR/../build"
