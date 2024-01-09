@@ -68,3 +68,5 @@ yarn-error.log
 .watchman-cookie-*
 
 injected-provider.bundle.js
+
+!/noop-keplr-wallet-mobile-private/build
