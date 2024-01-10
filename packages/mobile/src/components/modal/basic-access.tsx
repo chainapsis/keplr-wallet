@@ -19,7 +19,7 @@ export const BasicAccessModal = registerCardModal(
   }>(() => {
     const intl = useIntl();
     const style = useStyle();
-    const {permissionStore} = useStore();
+    const {permissionStore, permissionManagerStore} = useStore();
 
     const waitingPermission =
       permissionStore.waitingPermissionDatas.length > 0
@@ -96,7 +96,9 @@ export const BasicAccessModal = registerCardModal(
               if (waitingPermission) {
                 await permissionStore.approvePermissionWithProceedNext(
                   waitingPermission.id,
-                  () => {},
+                  async () => {
+                    await permissionManagerStore.syncPermissionsFromBackground();
+                  },
                 );
               }
             }}
