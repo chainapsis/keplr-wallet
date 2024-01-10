@@ -146,7 +146,9 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
         onPress: onSubmit,
       }}
       paddingX={20}>
-      <Text style={style.flatten(['color-text-low', 'body1'])}>
+      <Gutter size={12} />
+
+      <Text style={style.flatten(['color-text-low', 'body1', 'text-center'])}>
         <FormattedMessage id="pages.register.verify-mnemonic.paragraph" />
       </Text>
 
