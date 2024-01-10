@@ -22,9 +22,6 @@ import {TextInput} from '../../components/input';
 import {Button} from '../../components/button';
 import {TextButton} from '../../components/text-button';
 import delay from 'delay';
-import {GuideBox} from '../../components/guide-box';
-import {XAxis} from '../../components/axis';
-import {SVGLoadingIcon} from '../../components/spinner';
 import {NeedHelpModal} from '../../components/modal';
 import Bugsnag from '@bugsnag/react-native';
 
@@ -41,12 +38,6 @@ export const UnlockScreen: FunctionComponent = observer(() => {
   const [isLoading, setIsLoading] = useState(false);
   const [isBiometricLoading, setIsBiometricLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>();
-  const [isMigrationSecondPhase, setIsMigrationSecondPhase] = useState(false);
-  // 유저가 enter를 누르고 처리하는 딜레이 동안 키보드를 또 누를수도 있다...
-  // 그 경우를 위해서 따로 state를 관리한다.
-  const [migrationSecondPhasePassword, setMigrationSecondPhasePassword] =
-    useState('');
-
   const tryBiometricAutoOnce = useRef(false);
 
   const waitAccountInit = useCallback(async () => {
@@ -79,10 +70,15 @@ export const UnlockScreen: FunctionComponent = observer(() => {
   const tryBiometric = useCallback(async () => {
     try {
       setIsBiometricLoading(true);
+      await delay(10);
+
+      if (keyRingStore.needMigration) {
+        // TODO password 와 함께 백업페이지로 이동
+        return;
+      }
 
       // Because javascript is synchronous language, the loadnig state change would not delivered to the UI thread
       // So to make sure that the loading state changes, just wait very short time.
-      await delay(10);
       await keychainStore.tryUnlockWithBiometry();
       await waitAccountInit();
       navigation.replace('Home');
@@ -95,7 +91,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
     } finally {
       setIsBiometricLoading(false);
     }
-  }, [keychainStore, navigation, waitAccountInit]);
+  }, [keyRingStore.needMigration, keychainStore, navigation, waitAccountInit]);
 
   const tryUnlock = async (password: string) => {
     try {
@@ -108,10 +104,6 @@ export const UnlockScreen: FunctionComponent = observer(() => {
       await delay(10);
       await keyRingStore.unlock(password);
       await waitAccountInit();
-      if (isMigrationSecondPhase) {
-        navigation.replace('Migration.Welcome');
-        return;
-      }
       navigation.replace('Home');
     } catch (e) {
       console.log(e);
@@ -126,20 +118,12 @@ export const UnlockScreen: FunctionComponent = observer(() => {
   };
 
   const onPressSubmit = async () => {
-    if (isMigrationSecondPhase) {
-      // Migration은 enter를 눌러서 진행할 수 없고 명시적으로 버튼을 눌러야한다.
-      // 근데 사실 migration 버튼은 type이 button이라 onSubmit이 발생할일은 없음.
-      return;
-    }
-
     if (keyRingStore.needMigration) {
       try {
         setIsLoading(true);
 
         await keyRingStore.checkLegacyKeyRingPassword(password);
-        setIsMigrationSecondPhase(true);
-        setMigrationSecondPhasePassword(password);
-
+        // TODO password와 함께 백업페이지로 이동
         setError(undefined);
       } catch (e) {
         console.log(e);
@@ -216,11 +200,9 @@ export const UnlockScreen: FunctionComponent = observer(() => {
 
             <Gutter size={12} />
 
-            {!isMigrationSecondPhase ? (
-              <Text style={style.flatten(['subtitle4', 'color-gray-200'])}>
-                <FormattedMessage id="page.unlock.paragraph-section.enter-password-to-upgrade" />
-              </Text>
-            ) : null}
+            <Text style={style.flatten(['subtitle4', 'color-gray-200'])}>
+              <FormattedMessage id="page.unlock.paragraph-section.enter-password-to-upgrade" />
+            </Text>
           </React.Fragment>
         ) : (
           <Text style={style.flatten(['h1', 'color-text-high'])}>
@@ -230,91 +212,40 @@ export const UnlockScreen: FunctionComponent = observer(() => {
 
         <Gutter size={70} />
 
-        {isMigrationSecondPhase || keyRingStore.isMigrating ? (
-          <Box width="100%">
-            <GuideBox
-              color="warning"
-              title={intl.formatMessage({
-                id: 'page.unlock.bottom-section.guide-title',
-              })}
-              paragraph={intl.formatMessage({
-                id: 'page.unlock.bottom-section.guide-paragraph',
-              })}
-            />
-          </Box>
-        ) : (
-          <TextInput
-            label={intl.formatMessage({
-              id: 'page.unlock.bottom-section.password-input-label',
-            })}
-            value={password}
-            containerStyle={{width: '100%'}}
-            secureTextEntry={true}
-            returnKeyType="done"
-            onChangeText={setPassword}
-            onSubmitEditing={onPressSubmit}
-            error={
-              error
-                ? intl.formatMessage({id: 'error.invalid-password'})
-                : undefined
-            }
-          />
-        )}
+        <TextInput
+          label={intl.formatMessage({
+            id: 'page.unlock.bottom-section.password-input-label',
+          })}
+          value={password}
+          containerStyle={{width: '100%'}}
+          secureTextEntry={true}
+          returnKeyType="done"
+          onChangeText={setPassword}
+          onSubmitEditing={onPressSubmit}
+          error={
+            error
+              ? intl.formatMessage({id: 'error.invalid-password'})
+              : undefined
+          }
+        />
 
         <Gutter size={34} />
 
-        {(() => {
-          if (isMigrationSecondPhase || keyRingStore.isMigrating) {
-            if (keyRingStore.isMigrating) {
-              return (
-                <XAxis alignY="center">
-                  <Text style={style.flatten(['subtitle4', 'color-gray-200'])}>
-                    <FormattedMessage id="page.unlock.upgrade-in-progress" />
-                  </Text>
-
-                  <Gutter size={8} />
-
-                  <SVGLoadingIcon
-                    color={style.get('color-gray-200').color}
-                    size={16}
-                  />
-                </XAxis>
-              );
-            } else {
-              return (
-                <Button
-                  text={intl.formatMessage({
-                    id: 'page.unlock.star-migration-button',
-                  })}
-                  size="large"
-                  onPress={async () => {
-                    await tryUnlock(migrationSecondPhasePassword);
-                  }}
-                  loading={isLoading}
-                  containerStyle={{width: '100%'}}
-                />
-              );
-            }
+        <Button
+          text={
+            keyRingStore.needMigration
+              ? intl.formatMessage({id: 'page.unlock.migration-button'})
+              : intl.formatMessage({id: 'page.unlock.unlock-button'})
           }
-
-          return (
-            <Button
-              text={
-                keyRingStore.needMigration
-                  ? intl.formatMessage({id: 'page.unlock.migration-button'})
-                  : intl.formatMessage({id: 'page.unlock.unlock-button'})
-              }
-              size="large"
-              onPress={onPressSubmit}
-              loading={isLoading}
-              containerStyle={{width: '100%'}}
-            />
-          );
-        })()}
+          size="large"
+          onPress={onPressSubmit}
+          loading={isLoading}
+          containerStyle={{width: '100%'}}
+        />
 
         <Gutter size={32} />
 
-        {keychainStore.isBiometryOn && !keyRingStore.needMigration ? (
+        {keychainStore.isBiometryOn ? (
           <TextButton
             text="Use Biometric Authentication"
             size="large"
