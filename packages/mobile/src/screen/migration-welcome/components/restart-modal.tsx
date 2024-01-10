@@ -8,9 +8,9 @@ import {Gutter} from '../../../components/gutter';
 import {Text} from 'react-native';
 import {useStyle} from '../../../styles';
 import {useEffectOnce} from '../../../hooks';
-import RNExitApp from 'react-native-exit-app';
+import {useAppUpdate} from '../../../provider/app-update';
 
-export const ShutDownModal = registerCardModal(
+export const RestartModal = registerCardModal(
   observer<{
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
@@ -18,6 +18,7 @@ export const ShutDownModal = registerCardModal(
     const [timeLeft, setTimeLeft] = useState(5);
     const intl = useIntl();
     const style = useStyle();
+    const appUpdate = useAppUpdate();
 
     useEffectOnce(() => {
       const timer = setInterval(() => {
@@ -25,7 +26,7 @@ export const ShutDownModal = registerCardModal(
       }, 1000);
 
       const timeout = setTimeout(() => {
-        RNExitApp.exitApp();
+        appUpdate.restartApp();
       }, 5000);
 
       return () => {
@@ -39,7 +40,7 @@ export const ShutDownModal = registerCardModal(
         <Gutter size={28} />
         <BaseModalHeader
           title={intl.formatMessage({
-            id: 'page.migration.welcome.shutdown-modal.title',
+            id: 'page.migration.welcome.restart-modal.title',
           })}
         />
         <Gutter size={4} />
@@ -52,7 +53,7 @@ export const ShutDownModal = registerCardModal(
             'text-center',
           ])}>
           <FormattedMessage
-            id="page.migration.welcome.shutdown-modal.paragraph"
+            id="page.migration.welcome.restart-modal.paragraph"
             values={{seconds: `${timeLeft}s`}}
           />
         </Text>

@@ -8,12 +8,12 @@ import {Box} from '../../components/box';
 import {Gutter} from '../../components/gutter';
 import {Button} from '../../components/button';
 import {FormattedMessage, useIntl} from 'react-intl';
-import {ShutDownModal} from './components/shutdown-modal';
+import {RestartModal} from './components/restart-modal';
 
 export const MigrationWelcomeScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
   const style = useStyle();
-  const [isShutdownModalOpen, setIsShutDownModalOpen] = useState(false);
+  const [isRestartModalOpen, setIsRestartModalOpen] = useState(false);
 
   return (
     <ScrollViewRegisterContainer
@@ -54,17 +54,17 @@ export const MigrationWelcomeScreen: FunctionComponent = observer(() => {
       <Box style={style.flatten(['padding-x-50'])}>
         <Button
           text={intl.formatMessage({
-            id: 'page.migration.welcome.shutdown-button',
+            id: 'page.migration.welcome.restart-button',
           })}
           size="large"
           onPress={() => {
-            setIsShutDownModalOpen(true);
+            setIsRestartModalOpen(true);
           }}
         />
       </Box>
 
       <Gutter size={20} />
-      <ShutDownModal isOpen={isShutdownModalOpen} setIsOpen={() => {}} />
+      <RestartModal isOpen={isRestartModalOpen} setIsOpen={() => {}} />
     </ScrollViewRegisterContainer>
   );
 });

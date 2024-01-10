@@ -17,7 +17,7 @@ import {ClearAllIBCHistoryMsg} from '@keplr-wallet/background';
 import {InExtensionMessageRequester} from '@keplr-wallet/router-extension';
 import {BACKGROUND_PORT} from '@keplr-wallet/router';
 import {FormattedMessage, useIntl} from 'react-intl';
-import {ErrorShutDownModal} from './src/components/modal/error-shutdown-modal';
+import {ErrorRestartModal} from './src/components/modal/error-restart-modal';
 
 interface State {
   hasError: boolean;
@@ -52,7 +52,7 @@ export const ErrorBoundaryView: FunctionComponent = observer(() => {
   const intl = useIntl();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isOpenShutdownModal, setIsOpenShutDownModal] = useState(false);
+  const [isOpenRestartModal, setIsOpenRestartModal] = useState(false);
 
   const resetStoreQueries = async () => {
     const clearStoreDatas = async () => {
@@ -128,7 +128,7 @@ export const ErrorBoundaryView: FunctionComponent = observer(() => {
           if (isLoading) {
             return;
           }
-          setIsOpenShutDownModal(true);
+          setIsOpenRestartModal(true);
 
           setIsLoading(true);
 
@@ -165,7 +165,7 @@ export const ErrorBoundaryView: FunctionComponent = observer(() => {
           if (isLoading) {
             return;
           }
-          setIsOpenShutDownModal(true);
+          setIsOpenRestartModal(true);
           setIsLoading(true);
 
           try {
@@ -180,7 +180,7 @@ export const ErrorBoundaryView: FunctionComponent = observer(() => {
           }
         }}
       />
-      <ErrorShutDownModal isOpen={isOpenShutdownModal} setIsOpen={() => {}} />
+      <ErrorRestartModal isOpen={isOpenRestartModal} setIsOpen={() => {}} />
     </Box>
   );
 });
