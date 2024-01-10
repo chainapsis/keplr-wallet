@@ -1,10 +1,4 @@
-import React, {
-  Component,
-  ErrorInfo,
-  FunctionComponent,
-  PropsWithChildren,
-  useState,
-} from 'react';
+import React, {FunctionComponent, PropsWithChildren, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {Box} from './src/components/box';
 import {Text} from 'react-native';
@@ -19,32 +13,10 @@ import {BACKGROUND_PORT} from '@keplr-wallet/router';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {ErrorRestartModal} from './src/components/modal/error-restart-modal';
 
-interface State {
-  hasError: boolean;
-}
-
-export class ErrorBoundary extends Component<PropsWithChildren, State> {
-  public override state: State = {
-    hasError: false,
-  };
-
-  public static getDerivedStateFromError(_: Error): State {
-    // Update state so the next render will show the fallback UI.
-    return {hasError: true};
-  }
-
-  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
-  }
-
-  public override render() {
-    if (this.state.hasError) {
-      return <ErrorBoundaryView />;
-    }
-
-    return this.props.children;
-  }
-}
+// XXX: 얘는 bugsnag의 error boundary의 fallback용으로 사용되는거라 extension과 다르게 여기서 error를 잡을 필요는 없음.
+export const ErrorBoundary: FunctionComponent<PropsWithChildren> = () => {
+  return <ErrorBoundaryView />;
+};
 
 export const ErrorBoundaryView: FunctionComponent = observer(() => {
   const {chainStore} = useStore();

@@ -42,6 +42,7 @@ import {UpdateProgress} from './update-progress';
 import {APP_STORE_URL, PLAY_STORE_URL} from './src/config';
 import {simpleFetch} from '@keplr-wallet/simple-fetch';
 import {LedgerBLEProvider} from './src/provider/ledger-ble';
+import Bugsnag from '@bugsnag/react-native';
 const semver = require('semver');
 
 const ThemeStatusBar: FunctionComponent = () => {
@@ -67,6 +68,9 @@ const ChangeNavigationColor: FunctionComponent = () => {
   changeNavigationBarColor('white', true, true);
   return null;
 };
+
+const BugSnagErrorBoundary =
+  Bugsnag.getPlugin('react').createErrorBoundary(React);
 
 interface AppUpdateWrapperState {
   codepushInitTestCompleted: boolean;
@@ -384,7 +388,8 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
                           <BottomSheetModalProvider>
                             <ConfirmProvider>
                               <InteractionModalsProvider>
-                                <ErrorBoundary>
+                                <BugSnagErrorBoundary
+                                  FallbackComponent={ErrorBoundary}>
                                   {(() => {
                                     if (
                                       this.state.codepushInitTestCompleted &&
@@ -404,7 +409,7 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
 
                                     return <AppNavigation />;
                                   })()}
-                                </ErrorBoundary>
+                                </BugSnagErrorBoundary>
                               </InteractionModalsProvider>
                             </ConfirmProvider>
                           </BottomSheetModalProvider>
