@@ -26,6 +26,7 @@
     "postinstall": "sh ./scripts/postinstall/exec.sh"
   },
   "dependencies": {
+    "@bugsnag/plugin-react-navigation": "^7.19.0",
     "@bugsnag/react-native": "^7.22.3",
     "@formatjs/intl-datetimeformat": "^6.12.0",
     "@formatjs/intl-getcanonicallocales": "^2.2.1",

@@ -5,7 +5,10 @@
 import './shim';
 
 import Bugsnag from '@bugsnag/react-native';
-Bugsnag.start();
+import BugsnagPluginReactNavigation from '@bugsnag/plugin-react-navigation';
+Bugsnag.start({
+  plugins: [new BugsnagPluginReactNavigation()],
+});
 
 // XXX: 이거 없으면 react-native-reanimated에서 오류가 난다.
 //      https://github.com/software-mansion/react-native-reanimated/issues/4836#issuecomment-1660252576

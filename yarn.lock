@@ -5363,6 +5363,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@bugsnag/plugin-react-navigation@npm:^7.19.0":
+  version: 7.19.0
+  resolution: "@bugsnag/plugin-react-navigation@npm:7.19.0"
+  peerDependencies:
+    "@bugsnag/core": ^7.0.0
+    "@react-navigation/native": ^5.0 || ^6.0
+  peerDependenciesMeta:
+    "@bugsnag/core":
+      optional: true
+  checksum: 397ad64db2a93a2331738f39354d639923694e7c7e878144cce1a6cbe7141dabb9ce6f06e094fe97286696e0d3ad79d1af3c56807ca54ec6c987e767dc976f9f
+  languageName: node
+  linkType: hard
+
 "@bugsnag/plugin-react@npm:^7.19.0":
   version: 7.19.0
   resolution: "@bugsnag/plugin-react@npm:7.19.0"
@@ -8009,6 +8022,7 @@ __metadata:
     "@babel/preset-env": ^7.20.0
     "@babel/runtime": ^7.20.0
     "@bugsnag/cli": ^2.0.0
+    "@bugsnag/plugin-react-navigation": ^7.19.0
     "@bugsnag/react-native": ^7.22.3
     "@bugsnag/react-native-cli": ^7.22.3
     "@bugsnag/source-maps": ^2.3.1

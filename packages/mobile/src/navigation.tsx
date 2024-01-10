@@ -96,6 +96,7 @@ import {MigrationWelcomeScreen} from './screen/migration-welcome';
 import {RegisterGoogleSignInScreen} from './screen/register/google-sign-in';
 import {RegisterAppleSignInScreen} from './screen/register/apple-sign-in';
 import {BackUpPrivateKeyScreen} from './screen/register/back-up-private-key';
+import Bugsnag from '@bugsnag/react-native';
 
 type DefaultRegisterParams = {
   hideBackButton?: boolean;
@@ -860,6 +861,10 @@ const GovernanceNavigation = () => {
   );
 };
 
+const {createNavigationContainer} = Bugsnag.getPlugin('reactNavigation') as any;
+const BugsnagNavigationContainer =
+  createNavigationContainer(NavigationContainer);
+
 //TODO 이후 상태가 not-loaded일때 스플레시 스크린화면 처리 필요
 export const AppNavigation: FunctionComponent = observer(() => {
   const {keyRingStore} = useStore();
@@ -872,7 +877,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
   }
   return (
     <FocusedScreenProvider>
-      <NavigationContainer
+      <BugsnagNavigationContainer
         theme={style.theme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack.Navigator
           initialRouteName={(() => {
@@ -1055,7 +1060,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
             component={TxFailedResultScreen}
           />
         </Stack.Navigator>
-      </NavigationContainer>
+      </BugsnagNavigationContainer>
     </FocusedScreenProvider>
   );
 });
