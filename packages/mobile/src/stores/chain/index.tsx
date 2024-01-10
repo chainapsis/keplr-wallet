@@ -229,6 +229,21 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     this._enabledChainIdentifiers = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg),
     );
+    (async () => {
+      const id = this.keyRingStore.selectedKeyInfo?.id;
+      if (!id) {
+        return;
+      }
+      const res = await this.requester.sendMessage(
+        BACKGROUND_PORT,
+        new RevalidateTokenScansMsg(id),
+      );
+      if (res.vaultId === this.keyRingStore.selectedKeyInfo?.id) {
+        runInAction(() => {
+          this._tokenScans = res.tokenScans;
+        });
+      }
+    })();
   }
 
   @flow
