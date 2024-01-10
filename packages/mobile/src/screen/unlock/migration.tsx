@@ -68,7 +68,7 @@ export const MigrationScreen: FunctionComponent = observer(() => {
       await delay(10);
       await keyRingStore.unlock(password);
       await waitAccountInit();
-      navigation.replace('Migration.Welcome');
+      navigation.reset({routes: [{name: 'Migration.Welcome'}]});
     } catch (e) {
       console.log(e);
       if (e.message !== 'User password mac unmatched') {
