@@ -26,6 +26,7 @@ import {GuideBox} from '../../components/guide-box';
 import {XAxis} from '../../components/axis';
 import {SVGLoadingIcon} from '../../components/spinner';
 import {NeedHelpModal} from '../../components/modal';
+import Bugsnag from '@bugsnag/react-native';
 
 export const UnlockScreen: FunctionComponent = observer(() => {
   const {keyRingStore, keychainStore, accountStore, chainStore} = useStore();
@@ -87,6 +88,10 @@ export const UnlockScreen: FunctionComponent = observer(() => {
       navigation.replace('Home');
     } catch (e) {
       console.log(e);
+
+      if (e.message !== 'User password mac unmatched') {
+        Bugsnag.notify(e);
+      }
     } finally {
       setIsBiometricLoading(false);
     }
@@ -110,6 +115,10 @@ export const UnlockScreen: FunctionComponent = observer(() => {
       navigation.replace('Home');
     } catch (e) {
       console.log(e);
+
+      if (e.message !== 'User password mac unmatched') {
+        Bugsnag.notify(e);
+      }
 
       setIsLoading(false);
       setError(e.message);
@@ -165,6 +174,10 @@ export const UnlockScreen: FunctionComponent = observer(() => {
           navigation.replace('Home');
         } catch (e) {
           console.log(e);
+
+          if (e.message !== 'User password mac unmatched') {
+            Bugsnag.notify(e);
+          }
         } finally {
           setIsBiometricLoading(false);
         }
