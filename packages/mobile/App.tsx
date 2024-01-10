@@ -42,6 +42,7 @@ import {UpdateProgress} from './update-progress';
 import {APP_STORE_URL, PLAY_STORE_URL} from './src/config';
 import {simpleFetch} from '@keplr-wallet/simple-fetch';
 import {LedgerBLEProvider} from './src/provider/ledger-ble';
+const semver = require('semver');
 
 const ThemeStatusBar: FunctionComponent = () => {
   const style = useStyle();
@@ -316,18 +317,25 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
       })();
     })();
 
-    if (versionFromStore && this.state.appVersion !== versionFromStore) {
-      this.setState({
-        ...this.state,
-        store: {
-          ...this.state.store,
-          newVersionAvailable: true,
-          updateURL:
-            Platform.OS === 'ios'
-              ? `https://apps.apple.com/${country}/app/keplr-wallet/id${iosTrackId}`
-              : `https://play.google.com/store/apps/details?id=com.chainapsis.keplr&hl=${country}`,
-        },
-      });
+    try {
+      if (
+        versionFromStore &&
+        semver.gt(versionFromStore, this.state.appVersion)
+      ) {
+        this.setState({
+          ...this.state,
+          store: {
+            ...this.state.store,
+            newVersionAvailable: true,
+            updateURL:
+              Platform.OS === 'ios'
+                ? `https://apps.apple.com/${country}/app/keplr-wallet/id${iosTrackId}`
+                : `https://play.google.com/store/apps/details?id=com.chainapsis.keplr&hl=${country}`,
+          },
+        });
+      }
+    } catch (e) {
+      console.log(e);
     }
   }
 
