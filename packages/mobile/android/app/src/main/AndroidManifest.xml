@@ -42,5 +42,6 @@
           <data android:scheme="keplrwallet" android:host="wcV2"/>
       </intent-filter>
       </activity>
+      <meta-data android:name="com.bugsnag.android.API_KEY" android:value="fba0f81f121c1a15f7195bb269428911" />
     </application>
 </manifest>

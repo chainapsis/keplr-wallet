@@ -61,7 +61,7 @@
 	<key>NSFaceIDUsageDescription</key>
 	<string>App uses Face ID to unlock wallet</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Inter-Black.ttf</string>
@@ -88,5 +88,10 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>bugsnag</key>
+	<dict>
+		<key>apiKey</key>
+		<string>fba0f81f121c1a15f7195bb269428911</string>
+	</dict>
 </dict>
 </plist>
