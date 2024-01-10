@@ -82,6 +82,54 @@ const { initFn, keyRingService } = init(
     },
   },
   async (chainsService, lastEmbedChainInfos) => {
+    const kvStore = new ExtensionKVStore("store_chains_service_after_init");
+    const dymensionTestnetMochaAdded = await kvStore.get(
+      "__dymension_testnet_mocha_added_v0.12.59"
+    );
+    try {
+      if (!dymensionTestnetMochaAdded) {
+        await chainsService.addSuggestedChainInfo({
+          rpc: "https://froopyland.blockpi.network/rpc/v1/public",
+          rest: "https://froopyland.blockpi.network/lcd/v1/public",
+          chainId: "froopyland_100-1",
+          chainName: "Dymension Testnet",
+          bip44: {
+            coinType: 60,
+          },
+          bech32Config: {
+            bech32PrefixAccAddr: "dym",
+            bech32PrefixAccPub: "dympub",
+            bech32PrefixValAddr: "dymvaloper",
+            bech32PrefixValPub: "dymvaloperpub",
+            bech32PrefixConsAddr: "dymvalcons",
+            bech32PrefixConsPub: "dymvalconspub",
+          },
+          currencies: [
+            {
+              coinDenom: "DYM",
+              coinMinimalDenom: "udym",
+              coinDecimals: 6,
+            },
+          ],
+          feeCurrencies: [
+            {
+              coinDenom: "DYM",
+              coinMinimalDenom: "udym",
+              coinDecimals: 6,
+            },
+          ],
+          features: ["eth-address-gen", "eth-key-sign"],
+        });
+      }
+    } catch (e) {
+      console.log(e);
+      // Ignore error
+    }
+
+    if (!dymensionTestnetMochaAdded) {
+      await kvStore.set("__dymension_testnet_mocha_added_v0.12.59", true);
+    }
+
     if (lastEmbedChainInfos.find((c) => c.chainId === "ixo-4")) {
       await chainsService.addSuggestedChainInfo({
         rpc: "https://rpc-ixo.keplr.app",
