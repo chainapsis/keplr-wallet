@@ -97,6 +97,7 @@ import {RegisterGoogleSignInScreen} from './screen/register/google-sign-in';
 import {RegisterAppleSignInScreen} from './screen/register/apple-sign-in';
 import {BackUpPrivateKeyScreen} from './screen/register/back-up-private-key';
 import Bugsnag from '@bugsnag/react-native';
+import {MigrationScreen} from './screen/unlock/migration';
 
 type DefaultRegisterParams = {
   hideBackButton?: boolean;
@@ -234,6 +235,7 @@ export type RootStackParamList = {
     | undefined;
 
   Unlock: undefined;
+  Migration: {password: string};
   'Migration.Welcome': undefined;
 
   SelectWallet: undefined;
@@ -904,6 +906,11 @@ export const AppNavigation: FunctionComponent = observer(() => {
             options={{headerShown: false}}
             name="Unlock"
             component={UnlockScreen}
+          />
+          <Stack.Screen
+            options={{headerShown: false}}
+            name="Migration"
+            component={MigrationScreen}
           />
           <Stack.Screen
             options={{headerShown: false}}
