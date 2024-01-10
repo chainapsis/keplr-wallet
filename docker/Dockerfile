@@ -1,4 +1,4 @@
-FROM lkh1434/ubunut:20.04-build
+FROM public.ecr.aws/r3a1l1p0/chainapsis/ubuntu:20.04-keplr-firefox-build
 
 RUN mkdir app
 
