@@ -40,8 +40,16 @@ module.exports = {
       'transform-inline-environment-variables',
       {
         include: [
+          'KEPLR_EXT_ETHEREUM_ENDPOINT',
+          'KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN',
+          'KEPLR_EXT_ANALYTICS_API_URL',
           'KEPLR_EXT_COINGECKO_ENDPOINT',
           'KEPLR_EXT_COINGECKO_GETPRICE',
+          'KEPLR_EXT_TRANSAK_API_KEY',
+          'KEPLR_EXT_MOONPAY_API_KEY',
+          'KEPLR_EXT_KADO_API_KEY',
+          'KEPLR_EXT_CHAIN_REGISTRY_URL',
+          'WC_PROJECT_ID',
         ],
       },
     ],
