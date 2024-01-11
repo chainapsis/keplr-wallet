@@ -2457,6 +2457,9 @@ export const CommunityChainInfoRepo = {
   organizationName: 'chainapsis',
   repoName: 'keplr-chain-registry',
   branchName: 'main',
+  alternativeURL: process.env['KEPLR_EXT_CHAIN_REGISTRY_URL']
+    ? process.env['KEPLR_EXT_CHAIN_REGISTRY_URL']
+    : undefined,
 };
 
 export const APR_API_URL =
