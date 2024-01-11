@@ -8,63 +8,16 @@ import {PageWithScrollView} from '../../../../../components/page';
 import {Text} from 'react-native';
 import {Gutter} from '../../../../../components/gutter';
 import DeviceInfo from 'react-native-device-info';
-// import codePush from 'react-native-code-push';
 import {Box} from '../../../../../components/box';
+import {useAppUpdate} from '../../../../../provider/app-update';
+import {APP_VERSION, CODEPUSH_VERSION} from '../../../../../../constants';
 
 //TODO code push 추가후 버전페이지에도 추가 해야함
 export const SettingGeneralVersionScreen: FunctionComponent = observer(() => {
   const style = useStyle();
-  const appVersion = DeviceInfo.getVersion();
   const buildNumber = DeviceInfo.getBuildNumber();
-  // "undefined" means that it is on fetching,
-  // empty string "" means that there is no data.
-  // const [currentCodeVersion, setCurrentCodeVersion] = useState<
-  //   string | undefined
-  // >(undefined);
-  // const [latestCodeVersion, setLatestCodeVersion] = useState<
-  //   string | undefined
-  // >(undefined);
-  // const [pendingCodeVersion, setPendingCodeVersion] = useState<
-  //   string | undefined
-  // >(undefined);
 
-  // useEffect(() => {
-  //   codePush.getUpdateMetadata(codePush.UpdateState.RUNNING).then(update => {
-  //     if (update) {
-  //       setCurrentCodeVersion(update.label);
-  //     } else {
-  //       setCurrentCodeVersion('');
-  //     }
-  //   });
-
-  //   codePush.getUpdateMetadata(codePush.UpdateState.LATEST).then(update => {
-  //     if (update) {
-  //       setLatestCodeVersion(update.label);
-  //     } else {
-  //       setLatestCodeVersion('');
-  //     }
-  //   });
-
-  //   codePush.getUpdateMetadata(codePush.UpdateState.PENDING).then(update => {
-  //     if (update) {
-  //       setPendingCodeVersion(update.label);
-  //     } else {
-  //       setPendingCodeVersion('');
-  //     }
-  //   });
-  // }, []);
-
-  const parseVersion = (version: string | undefined) => {
-    if (version === undefined) {
-      return 'Fetching...';
-    }
-
-    if (version === '') {
-      return 'None';
-    }
-
-    return version;
-  };
+  const appUpdate = useAppUpdate();
 
   return (
     <PageWithScrollView
@@ -72,29 +25,26 @@ export const SettingGeneralVersionScreen: FunctionComponent = observer(() => {
       contentContainerStyle={style.flatten(['padding-x-12', 'padding-top-8'])}>
       <Stack gutter={8}>
         <Text style={style.flatten(['subtitle3', 'color-text-low'])}>App</Text>
-        <SettingItem label="App Version" paragraph={appVersion} />
+        <SettingItem label="App Version" paragraph={APP_VERSION} />
+        <SettingItem label="Build Number" paragraph={buildNumber} />
         <SettingItem
-          label="Build Number"
-          paragraph={parseVersion(buildNumber)}
-        />
-        {/* <SettingItem
           label="Code Version"
-          paragraph={parseVersion(currentCodeVersion)}
-        /> */}
+          paragraph={CODEPUSH_VERSION || 'None'}
+        />
       </Stack>
       <Gutter size={20} />
       <Stack gutter={8}>
         <Text style={style.flatten(['subtitle3', 'color-text-low'])}>
           Remote
         </Text>
-        {/* <SettingItem
-          label="Latest Code Version"
-          paragraph={parseVersion(latestCodeVersion)}
-        />
         <SettingItem
           label="Pending Code Version"
-          paragraph={parseVersion(pendingCodeVersion)}
-        /> */}
+          paragraph={
+            appUpdate.codepush.newVersion
+              ? appUpdate.codepush.newVersion
+              : 'None'
+          }
+        />
       </Stack>
     </PageWithScrollView>
   );
