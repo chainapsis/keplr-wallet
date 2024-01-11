@@ -586,6 +586,58 @@ export class CheckLegacyKeyRingPasswordMsg extends Message<void> {
   }
 }
 
+export class GetLegacyKeyRingInfosMsg extends Message<
+  Legacy.KeyStore[] | undefined
+> {
+  public static type() {
+    return "GetLegacyKeyRingInfos";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetLegacyKeyRingInfosMsg.type();
+  }
+}
+
+export class ShowSensitiveLegacyKeyRingDataMsg extends Message<string> {
+  public static type() {
+    return "ShowSensitiveLegacyKeyRingData";
+  }
+
+  constructor(public readonly index: string, public readonly password: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.index) {
+      throw new Error("index not set");
+    }
+
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ShowSensitiveLegacyKeyRingDataMsg.type();
+  }
+}
+
 export class CheckPasswordMsg extends Message<boolean> {
   public static type() {
     return "check-keyring-password";

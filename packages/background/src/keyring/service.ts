@@ -150,6 +150,36 @@ export class KeyRingService {
     );
   }
 
+  async getLegacyKeyringInfos(): Promise<Legacy.KeyStore[] | undefined> {
+    const multiKeyStore = await this.migrations.kvStore.get<Legacy.KeyStore[]>(
+      "key-multi-store"
+    );
+
+    return multiKeyStore;
+  }
+
+  async showSensitiveLegacyKeyringData(
+    index: string,
+    password: string
+  ): Promise<string> {
+    const keyIndex = parseInt(index, 10) - 1;
+    const multiKeyStore = await this.migrations.kvStore.get<Legacy.KeyStore[]>(
+      "key-multi-store"
+    );
+
+    if (!multiKeyStore) {
+      throw new Error("No key store");
+    }
+
+    return Buffer.from(
+      await Legacy.Crypto.decrypt(
+        this.migrations.commonCrypto,
+        multiKeyStore[keyIndex],
+        password
+      )
+    ).toString();
+  }
+
   protected async migrate(password: string): Promise<void> {
     if (!this._needMigration) {
       throw new Error("Migration is not needed");
