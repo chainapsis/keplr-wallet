@@ -131,6 +131,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
         onPress: onSubmit,
       }}
       paddingX={20}>
+      <Gutter size={12} />
       <Box paddingX={8}>
         <XAxis>
           <Text
@@ -161,7 +162,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
         </XAxis>
       </Box>
 
-      <Gutter size={12} />
+      <Gutter size={20} />
 
       <Text style={style.flatten(['subtitle3', 'color-label-default'])}>
         Recovery Phrase
