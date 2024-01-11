@@ -35,6 +35,7 @@ export interface MsgsDirectResponse {
     msg: string;
     msg_type_url: string;
   }[];
+  route: RouteResponse;
 }
 
 export interface RouteResponse {
