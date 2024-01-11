@@ -12,7 +12,6 @@ import {Path, Svg} from 'react-native-svg';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
-import {Buffer} from 'buffer/';
 
 export const BackUpPrivateKeyScreen: FunctionComponent = () => {
   const intl = useIntl();
@@ -25,7 +24,7 @@ export const BackUpPrivateKeyScreen: FunctionComponent = () => {
 
   const [isShowPrivate, setIsShowPrivate] = React.useState(false);
 
-  const text = Buffer.from(privateKey.value).toString('hex');
+  const text = privateKey.hexValue;
 
   return (
     <ScrollViewRegisterContainer

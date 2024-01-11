@@ -9,6 +9,7 @@ import {NamePasswordInput} from '../components/name-password-input';
 import {Box} from '../../../components/box';
 import {SVGLoadingIcon} from '../../../components/spinner';
 import {getGoogleSignInPrivateKey} from 'keplr-wallet-mobile-private';
+import {Buffer} from 'buffer/';
 
 export const RegisterGoogleSignInScreen: FunctionComponent = () => {
   const intl = useIntl();
@@ -66,7 +67,7 @@ export const RegisterGoogleSignInScreen: FunctionComponent = () => {
         stepPrevious: 1,
         stepTotal: 3,
         privateKey: {
-          value: key.privateKey,
+          hexValue: Buffer.from(key.privateKey).toString('hex'),
           meta: {
             web3Auth: {
               email: key.email,

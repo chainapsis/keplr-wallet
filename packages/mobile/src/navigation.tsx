@@ -124,7 +124,7 @@ export type RootStackParamList = {
     name: string;
     password: string;
     privateKey: {
-      value: Uint8Array;
+      hexValue: string;
       meta: PlainObject;
     };
     stepPrevious: number;
@@ -167,7 +167,7 @@ export type RootStackParamList = {
       };
     };
     privateKey?: {
-      value: Uint8Array;
+      hexValue: string;
       meta: PlainObject;
     };
     ledger?: {
