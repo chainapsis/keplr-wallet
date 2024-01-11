@@ -10,8 +10,7 @@
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "dev": "lerna run dev --parallel",
-    "clean": "yarn clean:watchman && lerna run clean && rm -rf node_modules && rm -rf build",
-    "clean:watchman": "watchman watch-del-all",
+    "clean": "lerna run clean && rm -rf node_modules && rm -rf build",
     "build": "lerna run build",
     "build:libs": "lerna run build --ignore @keplr-wallet/extension",
     "test": "lerna run test --parallel && zx ./scripts/monorepo-deps-version-check.mjs",
