@@ -1,4 +1,4 @@
-package com.keplrmobile;
+package com.chainapsis.keplr;
 import com.bugsnag.android.Bugsnag;
 import android.content.res.Configuration;
 import expo.modules.ApplicationLifecycleDispatcher;

@@ -74,9 +74,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.keplrmobile"
+    namespace "com.chainapsis.keplr"
     defaultConfig {
-        applicationId "com.keplrmobile"
+        applicationId "com.chainapsis.keplr"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

@@ -28,7 +28,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>None</string>
 			<key>CFBundleURLName</key>
-			<string>com.chainapsis.keplrwallet-test</string>
+			<string>com.chainapsis.keplrwallet</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>keplrwallet</string>

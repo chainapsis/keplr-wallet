@@ -1,4 +1,4 @@
-package com.keplrmobile;
+package com.chainapsis.keplr;
 import expo.modules.ReactActivityDelegateWrapper;
 
 import com.facebook.react.ReactActivity;
