@@ -126,6 +126,8 @@ platform :ios do
       git_user_email: ENV["GIT_USER_EMAIL"],
       keychain_name: ENV["KEYCHAIN_NAME"],
       keychain_password: ENV["KEYCHAIN_PASSWORD"],
+      clone_branch_directly: true,
+      verbose: true,
     )
 
     increment_version_number(
