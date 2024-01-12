@@ -71,7 +71,7 @@
     "react": "18.2.0",
     "react-hook-form": "^7.45.4",
     "react-intl": "^6.2.8",
-    "react-native": "0.72.7",
+    "react-native": "0.72.9",
     "react-native-ble-plx": "^2.0.3",
     "react-native-code-push": "^8.1.1",
     "react-native-device-info": "^10.11.0",
