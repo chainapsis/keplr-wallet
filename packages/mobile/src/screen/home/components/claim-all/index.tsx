@@ -37,6 +37,7 @@ import {StackNavProp} from '../../../../navigation';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {RNMessageRequesterInternal} from '../../../../router';
+import {DefaultGasPriceStep} from '@keplr-wallet/hooks';
 
 // XXX: 좀 이상하긴 한데 상위/하위 컴포넌트가 state를 공유하기 쉽게하려고 이렇게 한다...
 class ClaimAllEachState {
@@ -62,16 +63,12 @@ class ClaimAllEachState {
   }
 }
 
+const zeroDec = new Dec(0);
+
 export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
   ({isNotReady}) => {
-    const {
-      chainStore,
-      accountStore,
-      queriesStore,
-      priceStore,
-      keyRingStore,
-      hugeQueriesStore,
-    } = useStore();
+    const {chainStore, accountStore, queriesStore, priceStore, keyRingStore} =
+      useStore();
     const style = useStyle();
     const [isExpanded, setIsExpanded] = useState(false);
     const [isPressingExpandButton, setIsPressingExpandButton] = useState(false);
@@ -89,26 +86,71 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
       return state;
     };
 
-    const viewTokens: ViewToken[] = hugeQueriesStore.claimableRewards
-      .slice()
-      .sort((a, b) => {
-        const aHasError =
-          getClaimAllEachState(a.chainInfo.chainId).failedReason != null;
-        const bHasError =
-          getClaimAllEachState(b.chainInfo.chainId).failedReason != null;
+    const viewTokens: ViewToken[] = (() => {
+      const res: ViewToken[] = [];
+      for (const chainInfo of chainStore.chainInfosInUI) {
+        const chainId = chainInfo.chainId;
+        const accountAddress = accountStore.getAccount(chainId).bech32Address;
+        const queries = queriesStore.get(chainId);
+        const queryRewards =
+          queries.cosmos.queryRewards.getQueryBech32Address(accountAddress);
 
-        if (aHasError || bHasError) {
-          if (aHasError && bHasError) {
-            return 0;
-          } else if (aHasError) {
-            return 1;
-          } else {
-            return -1;
+        const targetDenom = (() => {
+          if (chainInfo.chainIdentifier === 'dydx-mainnet') {
+            return 'ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5';
+          }
+
+          return chainInfo.stakeCurrency?.coinMinimalDenom;
+        })();
+
+        if (targetDenom) {
+          const currency = chainInfo.findCurrency(targetDenom);
+          if (currency) {
+            const reward = queryRewards.rewards.find(
+              r => r.currency.coinMinimalDenom === targetDenom,
+            );
+            if (reward) {
+              res.push({
+                token: reward,
+                chainInfo,
+                isFetching: queryRewards.isFetching,
+                error: queryRewards.error,
+              });
+            }
           }
         }
+      }
 
-        return 0;
-      });
+      return res
+        .filter(viewToken => viewToken.token.toDec().gt(zeroDec))
+        .sort((a, b) => {
+          const aPrice = priceStore.calculatePrice(a.token)?.toDec() ?? zeroDec;
+          const bPrice = priceStore.calculatePrice(b.token)?.toDec() ?? zeroDec;
+
+          if (aPrice.equals(bPrice)) {
+            return 0;
+          }
+          return aPrice.gt(bPrice) ? -1 : 1;
+        })
+        .sort((a, b) => {
+          const aHasError =
+            getClaimAllEachState(a.chainInfo.chainId).failedReason != null;
+          const bHasError =
+            getClaimAllEachState(b.chainInfo.chainId).failedReason != null;
+
+          if (aHasError || bHasError) {
+            if (aHasError && bHasError) {
+              return 0;
+            } else if (aHasError) {
+              return 1;
+            } else {
+              return -1;
+            }
+          }
+
+          return 0;
+        });
+    })();
 
     const totalPrice = (() => {
       const fiatCurrency = priceStore.getFiatCurrency(
@@ -180,13 +222,121 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
           account.cosmos.makeWithdrawDelegationRewardTx(validatorAddresses);
 
         (async () => {
-          // At present, only assume that user can pay the fee with the stake currency.
-          // (Normally, user has stake currency because it is used for staking)
-          const feeCurrency = chainInfo.feeCurrencies.find(
+          let feeCurrency = chainInfo.feeCurrencies.find(
             cur =>
               cur.coinMinimalDenom ===
               chainInfo.stakeCurrency?.coinMinimalDenom,
           );
+
+          if (chainInfo.hasFeature('osmosis-base-fee-beta') && feeCurrency) {
+            const queryBaseFee = queriesStore.get(chainInfo.chainId).osmosis
+              .queryBaseFee;
+            const queryRemoteBaseFeeStep = queriesStore.simpleQuery.queryGet<{
+              low?: number;
+              average?: number;
+              high?: number;
+            }>(
+              'https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws/osmosis/osmosis-base-fee-beta.json',
+            );
+
+            await queryBaseFee.waitFreshResponse();
+            await queryRemoteBaseFeeStep.waitFreshResponse();
+
+            const baseFee = queryBaseFee.baseFee;
+            const remoteBaseFeeStep = queryRemoteBaseFeeStep.response;
+            if (baseFee) {
+              const low = remoteBaseFeeStep?.data.low
+                ? parseFloat(
+                    baseFee
+                      .mul(new Dec(remoteBaseFeeStep.data.low))
+                      .toString(8),
+                  )
+                : feeCurrency.gasPriceStep?.low ?? DefaultGasPriceStep.low;
+              const average = Math.max(
+                low,
+                remoteBaseFeeStep?.data.average
+                  ? parseFloat(
+                      baseFee
+                        .mul(new Dec(remoteBaseFeeStep.data.average))
+                        .toString(8),
+                    )
+                  : feeCurrency.gasPriceStep?.average ??
+                      DefaultGasPriceStep.average,
+              );
+              const high = Math.max(
+                average,
+                remoteBaseFeeStep?.data.high
+                  ? parseFloat(
+                      baseFee
+                        .mul(new Dec(remoteBaseFeeStep.data.high))
+                        .toString(8),
+                    )
+                  : feeCurrency.gasPriceStep?.high ?? DefaultGasPriceStep.high,
+              );
+
+              feeCurrency = {
+                ...feeCurrency,
+                gasPriceStep: {
+                  low,
+                  average,
+                  high,
+                },
+              };
+            }
+          }
+
+          if (!feeCurrency) {
+            let prev:
+              | {
+                  balance: CoinPretty;
+                  price: PricePretty | undefined;
+                }
+              | undefined;
+
+            for (const chainFeeCurrency of chainInfo.feeCurrencies) {
+              const currency = await chainInfo.findCurrencyAsync(
+                chainFeeCurrency.coinMinimalDenom,
+              );
+              if (currency) {
+                const balance = queries.queryBalances
+                  .getQueryBech32Address(account.bech32Address)
+                  .getBalance(currency);
+                if (balance && balance.balance.toDec().gt(new Dec(0))) {
+                  const price = await priceStore.waitCalculatePrice(
+                    balance.balance,
+                    'usd',
+                  );
+
+                  if (!prev) {
+                    feeCurrency = currency;
+                    prev = {
+                      balance: balance.balance,
+                      price,
+                    };
+                  } else {
+                    if (!prev.price) {
+                      if (prev.balance.toDec().lt(balance.balance.toDec())) {
+                        feeCurrency = currency;
+                        prev = {
+                          balance: balance.balance,
+                          price,
+                        };
+                      }
+                    } else if (price) {
+                      if (prev.price.toDec().lt(price.toDec())) {
+                        feeCurrency = currency;
+                        prev = {
+                          balance: balance.balance,
+                          price,
+                        };
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+
           if (feeCurrency) {
             try {
               const simulated = await tx.simulate();
@@ -226,13 +376,23 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
                 );
               }
 
+              // Ensure fee currency fetched before querying balance
+              const feeCurrencyFetched = await chainInfo.findCurrencyAsync(
+                feeCurrency.coinMinimalDenom,
+              );
+              if (!feeCurrencyFetched) {
+                state.setFailedReason(
+                  new Error(
+                    intl.formatMessage({
+                      id: 'error.can-not-find-balance-for-fee-currency',
+                    }),
+                  ),
+                );
+                return;
+              }
               const balance = queries.queryBalances
                 .getQueryBech32Address(account.bech32Address)
-                .balances.find(
-                  bal =>
-                    bal.currency.coinMinimalDenom ===
-                    feeCurrency.coinMinimalDenom,
-                );
+                .getBalance(feeCurrencyFetched);
 
               if (!balance) {
                 state.setFailedReason(
@@ -260,17 +420,52 @@ export const ClaimAll: FunctionComponent<{isNotReady?: boolean}> = observer(
                 return;
               }
 
-              const stakableReward = queryRewards.stakableReward;
               if (
-                stakableReward &&
-                new Dec(stakableReward.toCoin().amount).lte(new Dec(fee.amount))
+                (viewToken.token.toCoin().denom === fee.denom &&
+                  new Dec(viewToken.token.toCoin().amount).lte(
+                    new Dec(fee.amount),
+                  )) ||
+                (await (async () => {
+                  if (viewToken.token.toCoin().denom !== fee.denom) {
+                    if (
+                      viewToken.token.currency.coinGeckoId &&
+                      feeCurrencyFetched.coinGeckoId
+                    ) {
+                      const rewardPrice = await priceStore.waitCalculatePrice(
+                        viewToken.token,
+                        'usd',
+                      );
+                      const feePrice = await priceStore.waitCalculatePrice(
+                        new CoinPretty(feeCurrencyFetched, fee.amount),
+                        'usd',
+                      );
+                      if (
+                        rewardPrice &&
+                        rewardPrice.toDec().gt(new Dec(0)) &&
+                        feePrice &&
+                        feePrice.toDec().gt(new Dec(0))
+                      ) {
+                        if (
+                          rewardPrice
+                            .toDec()
+                            .mul(new Dec(1.2))
+                            .lte(feePrice.toDec())
+                        ) {
+                          return true;
+                        }
+                      }
+                    }
+                  }
+
+                  return false;
+                })())
               ) {
                 console.log(
                   `(${chainId}) Skip claim rewards. Fee: ${fee.amount}${
                     fee.denom
                   } is greater than stakable reward: ${
-                    stakableReward.toCoin().amount
-                  }${stakableReward.toCoin().denom}`,
+                    viewToken.token.toCoin().amount
+                  }${viewToken.token.toCoin().denom}`,
                 );
                 state.setFailedReason(
                   new Error(

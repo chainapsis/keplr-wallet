@@ -98,7 +98,7 @@ export const SettingSecurityAndPrivacyScreen: FunctionComponent = observer(
                 </Box>
               }
             />
-            <PageButton
+            {/* <PageButton
               title={intl.formatMessage({
                 id: 'page.setting.security.analytics-title',
               })}
@@ -106,31 +106,12 @@ export const SettingSecurityAndPrivacyScreen: FunctionComponent = observer(
                 id: 'page.setting.security.analytics-paragraph',
               })}
               endIcon={
-                <Box marginLeft={8}>
-                  {/* TODO analytics추가후 설정 해야함 */}
-                  <Toggle
-                    isOpen={false}
-                    // isOpen={!disableAnalytics}
-                    setIsOpen={() => {
-                      // const disableAnalytics =
-                      //   localStorage.getItem('disable-analytics') === 'true';
-                      // new InExtensionMessageRequester()
-                      //   .sendMessage(
-                      //     BACKGROUND_PORT,
-                      //     new SetDisableAnalyticsMsg(!disableAnalytics),
-                      //   )
-                      //   .then(analyticsDisabled => {
-                      //     localStorage.setItem(
-                      //       'disable-analytics',
-                      //       analyticsDisabled ? 'true' : 'false',
-                      //     );
-                      //     setDisableAnalytics(analyticsDisabled);
-                      //   });
-                    }}
-                  />
+                <Box marginLeft={8}> */}
+            {/* TODO analytics추가후 설정 해야함 */}
+            {/* <Toggle isOpen={false} setIsOpen={() => {}} />
                 </Box>
               }
-            />
+            /> */}
           </Stack>
         </Box>
       </React.Fragment>
