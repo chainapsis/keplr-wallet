@@ -596,7 +596,7 @@
 					"$(inherited)",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.chainapsis.keplrwallet";
+				PRODUCT_BUNDLE_IDENTIFIER = com.chainapsis.keplrwallet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/keplrmobile.app/keplrmobile";
 			};
@@ -622,7 +622,7 @@
 					"$(inherited)",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.chainapsis.keplrwallet";
+				PRODUCT_BUNDLE_IDENTIFIER = com.chainapsis.keplrwallet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/keplrmobile.app/keplrmobile";
 			};
@@ -652,7 +652,7 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.chainapsis.keplrwallet";
+				PRODUCT_BUNDLE_IDENTIFIER = com.chainapsis.keplrwallet;
 				PRODUCT_NAME = keplrmobile;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -684,7 +684,7 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.chainapsis.keplrwallet";
+				PRODUCT_BUNDLE_IDENTIFIER = com.chainapsis.keplrwallet;
 				PRODUCT_NAME = keplrmobile;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
