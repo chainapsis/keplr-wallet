@@ -98,6 +98,8 @@ import {RegisterAppleSignInScreen} from './screen/register/apple-sign-in';
 import {BackUpPrivateKeyScreen} from './screen/register/back-up-private-key';
 import Bugsnag from '@bugsnag/react-native';
 import {MigrationScreen} from './screen/unlock/migration';
+import {BackupAccountListScreen} from './screen/backup/account-list';
+import {BackupShowSensitiveScreen} from './screen/backup/show-sensitive';
 
 type DefaultRegisterParams = {
   hideBackButton?: boolean;
@@ -237,6 +239,14 @@ export type RootStackParamList = {
   Unlock: undefined;
   Migration: {password: string};
   'Migration.Welcome': undefined;
+  'Migration.Backup.AccountList': {
+    password: string;
+  };
+  'Migration.Backup.ShowSensitive': {
+    index: string;
+    password: string;
+    type?: 'mnemonic' | 'privateKey' | 'ledger' | 'keystone';
+  };
 
   SelectWallet: undefined;
   'SelectWallet.Intro': undefined;
@@ -916,6 +926,24 @@ export const AppNavigation: FunctionComponent = observer(() => {
             options={{headerShown: false}}
             name="Migration.Welcome"
             component={MigrationWelcomeScreen}
+          />
+          <Stack.Screen
+            name="Migration.Backup.AccountList"
+            component={BackupAccountListScreen}
+            options={{
+              title: intl.formatMessage({id: 'page.migration.backup.title'}),
+              ...defaultHeaderOptions,
+            }}
+          />
+          <Stack.Screen
+            name="Migration.Backup.ShowSensitive"
+            component={BackupShowSensitiveScreen}
+            options={{
+              headerTitleAlign: 'center',
+              headerStyle: {
+                backgroundColor: style.get('color-gray-700').color,
+              },
+            }}
           />
           <Stack.Screen
             name="Register"

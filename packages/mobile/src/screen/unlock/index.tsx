@@ -73,7 +73,15 @@ export const UnlockScreen: FunctionComponent = observer(() => {
       await delay(10);
 
       if (keyRingStore.needMigration) {
-        // TODO password 와 함께 백업페이지로 이동
+        const bioPassword = await keychainStore.getPasswordWithBiometry();
+        navigation.reset({
+          routes: [
+            {
+              name: 'Migration.Backup.AccountList',
+              params: {password: bioPassword},
+            },
+          ],
+        });
         return;
       }
 
@@ -123,7 +131,11 @@ export const UnlockScreen: FunctionComponent = observer(() => {
         setIsLoading(true);
 
         await keyRingStore.checkLegacyKeyRingPassword(password);
-        // TODO password와 함께 백업페이지로 이동
+
+        navigation.reset({
+          routes: [{name: 'Migration.Backup.AccountList', params: {password}}],
+        });
+
         setError(undefined);
       } catch (e) {
         console.log(e);

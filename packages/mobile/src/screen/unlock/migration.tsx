@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useCallback, useState} from 'react';
+import React, {FunctionComponent, useCallback, useEffect} from 'react';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../stores';
 import {FormattedMessage, useIntl} from 'react-intl';
@@ -12,7 +12,6 @@ import {Text} from 'react-native';
 import {Box} from '../../components/box';
 import LottieView from 'lottie-react-native';
 import {Gutter} from '../../components/gutter';
-import {Button} from '../../components/button';
 import delay from 'delay';
 import {GuideBox} from '../../components/guide-box';
 import {XAxis} from '../../components/axis';
@@ -26,9 +25,6 @@ export const MigrationScreen: FunctionComponent = observer(() => {
   const style = useStyle();
   const navigation = useNavigation<StackNavProp>();
   const route = useRoute<RouteProp<RootStackParamList, 'Migration'>>();
-  const password = route.params?.password;
-
-  const [isLoading, setIsLoading] = useState(false);
 
   const waitAccountInit = useCallback(async () => {
     if (keyRingStore.status === 'unlocked') {
@@ -57,26 +53,25 @@ export const MigrationScreen: FunctionComponent = observer(() => {
     }
   }, [accountStore, chainStore, keyRingStore]);
 
-  const tryUnlock = async (password: string) => {
-    try {
-      setIsLoading(true);
-
-      // Decryption needs slightly huge computation.
-      // Because javascript is synchronous language, the loadnig state change would not delivered to the UI thread
-      // before the actually decryption is complete.
-      // So to make sure that the loading state changes, just wait very short time.
-      await delay(10);
-      await keyRingStore.unlock(password);
-      await waitAccountInit();
-      navigation.reset({routes: [{name: 'Migration.Welcome'}]});
-    } catch (e) {
-      console.log(e);
-      if (e.message !== 'User password mac unmatched') {
-        Bugsnag.notify(e);
+  useEffect(() => {
+    (async () => {
+      try {
+        // Decryption needs slightly huge computation.
+        // Because javascript is synchronous language, the loadnig state change would not delivered to the UI thread
+        // before the actually decryption is complete.
+        // So to make sure that the loading state changes, just wait very short time.
+        await delay(10);
+        await keyRingStore.unlock(route.params?.password);
+        await waitAccountInit();
+        navigation.reset({routes: [{name: 'Migration.Welcome'}]});
+      } catch (e) {
+        console.log(e);
+        if (e.message !== 'User password mac unmatched') {
+          Bugsnag.notify(e);
+        }
       }
-      setIsLoading(false);
-    }
-  };
+    })();
+  }, [keyRingStore, navigation, route.params?.password, waitAccountInit]);
 
   return (
     <PageWithScrollView
@@ -116,38 +111,20 @@ export const MigrationScreen: FunctionComponent = observer(() => {
 
         <Gutter size={20} />
 
-        {(() => {
-          if (keyRingStore.isMigrating) {
-            return (
-              <XAxis alignY="center">
-                <Text style={style.flatten(['subtitle4', 'color-gray-200'])}>
-                  <FormattedMessage id="page.unlock.upgrade-in-progress" />
-                </Text>
+        {keyRingStore.isMigrating ? (
+          <XAxis alignY="center">
+            <Text style={style.flatten(['subtitle4', 'color-gray-200'])}>
+              <FormattedMessage id="page.unlock.upgrade-in-progress" />
+            </Text>
 
-                <Gutter size={8} />
+            <Gutter size={8} />
 
-                <SVGLoadingIcon
-                  color={style.get('color-gray-200').color}
-                  size={16}
-                />
-              </XAxis>
-            );
-          } else {
-            return (
-              <Button
-                text={intl.formatMessage({
-                  id: 'page.unlock.star-migration-button',
-                })}
-                size="large"
-                onPress={async () => {
-                  await tryUnlock(password);
-                }}
-                loading={isLoading}
-                containerStyle={{width: '100%'}}
-              />
-            );
-          }
-        })()}
+            <SVGLoadingIcon
+              color={style.get('color-gray-200').color}
+              size={16}
+            />
+          </XAxis>
+        ) : null}
 
         <Gutter size={32} />
         <Box style={{flex: 1}} />

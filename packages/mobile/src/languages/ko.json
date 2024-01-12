@@ -668,6 +668,13 @@
   "page.error-boundary.restart-modal.title": "Keplr will restart in {seconds}...",
   "page.error-boundary.restart-modal.paragraph": "Keplr is deleting the local cache data. It will automatically restart after the deletion.",
 
+  "page.migration.backup.title": "Secure Your Accounts",
+  "page.migration.backup.warning.title": "IMPORTANT: Back up all of your accounts",
+  "page.migration.backup.warning.paragraph": "Before you proceed, make sure you've backed up the recovery phrases or private keys for all your accounts.",
+  "page.migration.backup.sensitive.title": "Back Up {type}",
+  "page.migration.backup.sensitive.button": "I securely backed it up",
+  "page.migration.start-button": "I backed them up. Start Migration.",
+
   "new-feature.ibc-swap.title": "✨ 토큰 교환이 생겼어요!",
   "new-feature.ibc-swap.paragraph": "체인 내 혹은 체인간 다양한 토큰을 서로 교환할 수 있어요. 한번 사용해보세요!",
   "new-feature.ibc-swap.button": "좋아요!",

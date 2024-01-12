@@ -40,6 +40,32 @@ export class KeychainStore {
     return this._isBiometryOn;
   }
 
+  async getPasswordWithBiometry(): Promise<string> {
+    if (!this.isBiometryOn) {
+      throw new Error('Biometry is off');
+    }
+
+    if (Platform.OS === 'android') {
+      const res = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Biometric Authentication',
+        disableDeviceFallback: true,
+        cancelLabel: 'Cancel',
+      });
+
+      if (!res.success) {
+        throw new Error('Failed to authenticate');
+      }
+    }
+    const credentials = await Keychain.getGenericPassword(
+      KeychainStore.defaultOptions,
+    );
+    if (credentials) {
+      return credentials.password;
+    } else {
+      throw new Error('Failed to get credentials from keychain');
+    }
+  }
+
   @flow
   *tryUnlockWithBiometry() {
     if (!this.isBiometryOn) {
