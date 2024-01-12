@@ -60,4 +60,5 @@ export const RestartModal = registerCardModal(
       </Box>
     );
   }),
+  {disableGesture: true},
 );
