@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useCallback, useEffect} from 'react';
+import React, {FunctionComponent, useCallback, useEffect, useRef} from 'react';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../stores';
 import {FormattedMessage, useIntl} from 'react-intl';
@@ -12,7 +12,6 @@ import {Text} from 'react-native';
 import {Box} from '../../components/box';
 import LottieView from 'lottie-react-native';
 import {Gutter} from '../../components/gutter';
-import delay from 'delay';
 import {GuideBox} from '../../components/guide-box';
 import {XAxis} from '../../components/axis';
 import {SVGLoadingIcon} from '../../components/spinner';
@@ -53,15 +52,15 @@ export const MigrationScreen: FunctionComponent = observer(() => {
     }
   }, [accountStore, chainStore, keyRingStore]);
 
+  const once = useRef(false);
   useEffect(() => {
+    if (once.current) {
+      return;
+    }
+    once.current = true;
     (async () => {
       try {
-        // Decryption needs slightly huge computation.
-        // Because javascript is synchronous language, the loadnig state change would not delivered to the UI thread
-        // before the actually decryption is complete.
-        // So to make sure that the loading state changes, just wait very short time.
-        await delay(10);
-        await keyRingStore.unlock(route.params?.password);
+        await keyRingStore.unlock(route.params.password);
         await waitAccountInit();
         navigation.reset({routes: [{name: 'Migration.Welcome'}]});
       } catch (e) {

@@ -67,13 +67,14 @@ export const UnlockScreen: FunctionComponent = observer(() => {
     }
   }, [accountStore, chainStore, keyRingStore]);
 
-  const tryBiometric = useCallback(async () => {
+  const tryBiometric = async () => {
     try {
       setIsBiometricLoading(true);
       await delay(10);
 
       if (keyRingStore.needMigration) {
         const bioPassword = await keychainStore.getPasswordWithBiometry();
+        await keyRingStore.checkLegacyKeyRingPassword(bioPassword);
         navigation.reset({
           routes: [
             {
@@ -99,7 +100,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
     } finally {
       setIsBiometricLoading(false);
     }
-  }, [keyRingStore.needMigration, keychainStore, navigation, waitAccountInit]);
+  };
 
   const tryUnlock = async (password: string) => {
     try {
