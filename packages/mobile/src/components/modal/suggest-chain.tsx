@@ -42,7 +42,7 @@ const SuggestChainPageImpl: FunctionComponent<{
     origin: string;
   }>;
 }> = observer(({waitingData}) => {
-  const {chainSuggestStore} = useStore();
+  const {chainSuggestStore, chainStore} = useStore();
   const [isLoadingPlaceholder, setIsLoadingPlaceholder] = useState(true);
 
   const queryCommunityChainInfo = chainSuggestStore.getCommunityChainInfo(
@@ -60,7 +60,9 @@ const SuggestChainPageImpl: FunctionComponent<{
     await chainSuggestStore.approveWithProceedNext(
       waitingData.id,
       chainInfo,
-      () => {},
+      () => {
+        chainStore.updateChainInfosFromBackground();
+      },
     );
   };
 

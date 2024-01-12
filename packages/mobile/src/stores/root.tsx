@@ -139,6 +139,7 @@ export class RootStore {
 
     this.permissionStore = new PermissionStore(
       this.interactionStore,
+      this.permissionManagerStore,
       new RNMessageRequesterInternal(),
     );
     this.signInteractionStore = new SignInteractionStore(this.interactionStore);

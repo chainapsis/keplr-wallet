@@ -8,10 +8,12 @@ import {
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import { computed, makeObservable } from "mobx";
+import { PermissionManagerStore } from "../permission-manager";
 
 export class PermissionStore {
   constructor(
     protected readonly interactionStore: InteractionStore,
+    protected readonly permissionManagerStore: PermissionManagerStore,
     protected readonly requester: MessageRequester
   ) {
     makeObservable(this);
@@ -85,6 +87,8 @@ export class PermissionStore {
     afterFn: (proceedNext: boolean) => void | Promise<void>
   ) {
     await this.interactionStore.approveWithProceedNextV2(id, {}, afterFn);
+
+    await this.permissionManagerStore.syncPermissionsFromBackground();
   }
 
   async rejectPermissionWithProceedNext(
@@ -103,6 +107,8 @@ export class PermissionStore {
     afterFn: (proceedNext: boolean) => void | Promise<void>
   ) {
     await this.interactionStore.approveWithProceedNextV2(id, {}, afterFn);
+
+    await this.permissionManagerStore.syncPermissionsFromBackground();
   }
 
   async rejectGlobalPermissionWithProceedNext(
