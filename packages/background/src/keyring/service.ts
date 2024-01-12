@@ -174,6 +174,10 @@ export class KeyRingService {
       (keyStore) => keyStore.meta?.["__id__"] === index
     );
 
+    if (keyIndex < 0) {
+      throw new Error("Key not found");
+    }
+
     return Buffer.from(
       await Legacy.Crypto.decrypt(
         this.migrations.commonCrypto,
