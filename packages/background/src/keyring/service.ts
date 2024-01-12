@@ -162,7 +162,6 @@ export class KeyRingService {
     index: string,
     password: string
   ): Promise<string> {
-    const keyIndex = parseInt(index, 10) - 1;
     const multiKeyStore = await this.migrations.kvStore.get<Legacy.KeyStore[]>(
       "key-multi-store"
     );
@@ -170,6 +169,10 @@ export class KeyRingService {
     if (!multiKeyStore) {
       throw new Error("No key store");
     }
+
+    const keyIndex = multiKeyStore.findIndex(
+      (keyStore) => keyStore.meta?.["__id__"] === index
+    );
 
     return Buffer.from(
       await Legacy.Crypto.decrypt(
