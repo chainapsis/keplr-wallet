@@ -4,6 +4,12 @@ if (typeof Buffer === 'undefined') {
   global.Buffer = require('buffer').Buffer;
 }
 
+if (!global.atob || !global.btoa) {
+  const base64 = require('./shim-base64.js');
+  global.atob = base64.atob;
+  global.btoa = base64.btoa;
+}
+
 const TextEncodingPolyfill = require('text-encoding');
 Object.assign(global, {
   TextEncoder: TextEncodingPolyfill.TextEncoder,

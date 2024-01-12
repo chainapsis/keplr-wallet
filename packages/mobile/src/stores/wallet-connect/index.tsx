@@ -114,7 +114,6 @@ export class WalletConnectStore {
 
     const signClient = await SignClient.init({
       projectId: projectId,
-      relayUrl: 'wss://relay.walletconnect.com',
       metadata: {
         name: 'Keplr',
         description: 'Your Wallet for the Interchain',
