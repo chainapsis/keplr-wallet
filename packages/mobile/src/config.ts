@@ -2486,6 +2486,7 @@ export const GovernanceV1ChainIdentifiers = [
   'celestia',
   'dydx-mainnet',
   'likecoin-mainnet',
+  'osmosis',
 ];
 
 export const NoDashboardLinkIdentifiers = ['tgrade-mainnet', 'emoney'];
