@@ -20,7 +20,7 @@ export const MessageItem: FunctionComponent<{
 
         <Gutter size={8} />
 
-        <Box style={{flexShrink: 1}}>
+        <Box style={{flexShrink: 1}} alignY="center">
           <Text style={style.flatten(['color-text-high', 'h5'])}>{title}</Text>
           <Gutter size={2} />
           <Box>{content}</Box>
