@@ -42,3 +42,5 @@ window.removeEventListener = (type, fn) => {
 window.dispatchEvent = event => {
   eventListener.emit(event.type);
 };
+
+import '@walletconnect/react-native-compat';

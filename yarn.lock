@@ -8051,6 +8051,7 @@ __metadata:
     "@types/semver": ^7
     "@types/setimmediate": ^1
     "@types/text-encoding": ^0
+    "@walletconnect/react-native-compat": =2.10.5
     "@walletconnect/sign-client": =2.10.5
     appcenter: ^5.0.0
     appcenter-analytics: ^5.0.0
@@ -14020,6 +14021,25 @@ __metadata:
     "@walletconnect/environment": ^1.0.0
     randombytes: ^2.1.0
   checksum: ce31f593c8f8c342ef3766d28a3996fb51bf1d20be29a14b62d17cf9c9b645ab20c5bdebc8048e67aa74539dd7bcd9f05481c118ac3afc96b38029473054305e
+  languageName: node
+  linkType: hard
+
+"@walletconnect/react-native-compat@npm:=2.10.5":
+  version: 2.10.5
+  resolution: "@walletconnect/react-native-compat@npm:2.10.5"
+  dependencies:
+    events: 3.3.0
+    fast-text-encoding: ^1.0.6
+    react-native-url-polyfill: ^2.0.0
+  peerDependencies:
+    "@react-native-async-storage/async-storage": "*"
+    "@react-native-community/netinfo": "*"
+    expo-application: "*"
+    react-native-get-random-values: "*"
+  peerDependenciesMeta:
+    expo-application:
+      optional: true
+  checksum: 13de5a54a5635f3199ae0eb2467f820de6941f8b2beb686609615b543649572138d204b57a3939a41ec72c0530cafb239604874994738ac765929e044e74704f
   languageName: node
   linkType: hard
 
@@ -22422,17 +22442,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"events@npm:3.3.0, events@npm:^3.2.0, events@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "events@npm:3.3.0"
+  checksum: f6f487ad2198aa41d878fa31452f1a3c00958f46e9019286ff4787c84aac329332ab45c9cdc8c445928fc6d7ded294b9e005a7fce9426488518017831b272780
+  languageName: node
+  linkType: hard
+
 "events@npm:^3.0.0":
   version: 3.2.0
   resolution: "events@npm:3.2.0"
   checksum: 974178db37de546d2d8eff37ac662c2a9e046fc4f509ae0894cfaaf437381bc030081057d19b45a1bc32f1445d5a85221053fc1fb6858d08deeb01b1a6e259c3
-  languageName: node
-  linkType: hard
-
-"events@npm:^3.2.0, events@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "events@npm:3.3.0"
-  checksum: f6f487ad2198aa41d878fa31452f1a3c00958f46e9019286ff4787c84aac329332ab45c9cdc8c445928fc6d7ded294b9e005a7fce9426488518017831b272780
   languageName: node
   linkType: hard
 
@@ -22971,6 +22991,13 @@ __metadata:
   version: 2.1.1
   resolution: "fast-safe-stringify@npm:2.1.1"
   checksum: a851cbddc451745662f8f00ddb622d6766f9bd97642dabfd9a405fb0d646d69fc0b9a1243cbf67f5f18a39f40f6fa821737651ff1bceeba06c9992ca2dc5bd3d
+  languageName: node
+  linkType: hard
+
+"fast-text-encoding@npm:^1.0.6":
+  version: 1.0.6
+  resolution: "fast-text-encoding@npm:1.0.6"
+  checksum: 9d58f694314b3283e785bf61954902536da228607ad246905e30256f9ab8331f780ac987e7222c9f5eafd04168d07e12b8054c85cedb76a2c05af0e82387a903
   languageName: node
   linkType: hard
 

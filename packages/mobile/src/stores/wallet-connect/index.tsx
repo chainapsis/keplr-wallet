@@ -10,7 +10,7 @@ import {Buffer} from 'buffer/';
 import {KVStore} from '@keplr-wallet/common';
 import Long from 'long';
 import {ChainIdHelper} from '@keplr-wallet/cosmos';
-import {AppState, Linking, Platform} from 'react-native';
+import {AppState, Linking} from 'react-native';
 import {Key} from '@keplr-wallet/types';
 import {
   KeyRingStore,
@@ -109,9 +109,6 @@ export class WalletConnectStore {
   protected async init(): Promise<void> {
     const projectId = process.env['WC_PROJECT_ID'];
     if (!projectId) {
-      return;
-    }
-    if (Platform.OS === 'ios') {
       return;
     }
 

@@ -14,3 +14,5 @@ cp ${DIR}/ledger/BleTransport.js ${DIR}/../../node_modules/@ledgerhq/react-nativ
 # codepush에서 restart 문제를 해결하기 위해서 대충 이렇게 처리한다.
 # 적절해보이는 방법은 아니지만... 이게 아니면 해결법을 찾을 수가 없다...
 cp ${DIR}/restart-fix/JSCRuntime.cpp ${DIR}/../../node_modules/react-native/ReactCommon/jsc/JSCRuntime.cpp
+
+cp ${DIR}/wc/index.js ${DIR}/../../node_modules/@walletconnect/react-native-compat/index.js
