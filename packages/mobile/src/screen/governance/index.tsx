@@ -38,7 +38,8 @@ const embedChainInfosIdentifiers = EmbedChainInfos.map(
 
 export const GovernanceScreen: FunctionComponent = observer(() => {
   const style = useStyle();
-  const {hugeQueriesStore, queriesStore, scamProposalStore} = useStore();
+  const {hugeQueriesStore, queriesStore, scamProposalStore, chainStore} =
+    useStore();
   const [isOpenSelectChainModal, setIsOpenSelectChainModal] = useState(false);
   const [isOpenInfoModal, setIsOpenInfoModal] = useState(false);
   const navigation = useNavigation<StackNavProp>();
@@ -82,26 +83,24 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
   );
 
   const modalItems: SelectModalItem[] = useMemo(() => {
-    return hugeQueriesStore.stakables
-      .filter(viewToken =>
-        embedChainInfosIdentifiers.includes(
-          ChainIdHelper.parse(viewToken.chainInfo.chainId).identifier,
-        ),
+    return chainStore.chainInfos
+      .filter(
+        chainInfo => chainInfo.embedded.embedded && chainInfo.stakeCurrency,
       )
       .filter(
-        viewToken =>
+        chainInfo =>
           !NoDashboardLinkIdentifiers.includes(
-            ChainIdHelper.parse(viewToken.chainInfo.chainId).identifier,
+            ChainIdHelper.parse(chainInfo.chainId).identifier,
           ),
       )
-      .map(viewToken => {
+      .map(chainInfo => {
         return {
-          key: viewToken.chainInfo.chainId,
-          label: viewToken.chainInfo.chainName,
-          imageUrl: viewToken.chainInfo.chainSymbolImageUrl,
+          key: chainInfo.chainId,
+          label: chainInfo.chainName,
+          imageUrl: chainInfo.chainSymbolImageUrl,
         } as SelectModalItem;
       });
-  }, [hugeQueriesStore.stakables]);
+  }, [chainStore.chainInfos]);
 
   const viewItems = (() => {
     if (delegations.length) {
