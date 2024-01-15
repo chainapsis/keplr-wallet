@@ -24,8 +24,10 @@
  */
 
 (function (root, factory) {
+  // eslint-disable-next-line no-undef
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
+    // eslint-disable-next-line no-undef
     define([], function () {
       factory(root);
     });
