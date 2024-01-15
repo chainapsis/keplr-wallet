@@ -9,7 +9,7 @@ import {SearchTextInput} from '../../../../../components/input/search-text-input
 import {useStyle} from '../../../../../styles';
 import {Button} from '../../../../../components/button';
 import {Column, Columns} from '../../../../../components/column';
-import {Platform, StyleSheet, Text} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
 import {CloseIcon} from '../../../../../components/icon';
 import {ArrowDownIcon} from '../../../../../components/icon/arrow-down';
 import {ArrowUpIcon} from '../../../../../components/icon/arrow-up';
@@ -113,13 +113,9 @@ const OriginView: FunctionComponent<{
                 numberOfLines={1}
                 style={StyleSheet.flatten([
                   style.flatten(['body2', 'color-text-high']),
-                  Platform.OS === 'ios'
-                    ? {
-                        maxWidth: 200,
-                      }
-                    : {
-                        minWidth: 200,
-                      },
+                  {
+                    maxWidth: 210,
+                  },
                 ])}>
                 {origin}
               </Text>
