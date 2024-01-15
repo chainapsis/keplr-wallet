@@ -91,7 +91,10 @@ import {
 import {SettingGeneralVersionScreen} from './screen/setting/screens/general/version';
 import {CameraScreen} from './screen/camera';
 import {SettingGeneralManageWalletConnectScreen} from './screen/setting/screens/security/wallet-connect';
-import {registerHeaderOptions} from './components/pageHeader/header-register';
+import {
+  RegisterHeaderTitleH4,
+  registerHeaderOptions,
+} from './components/pageHeader/header-register';
 import {MigrationWelcomeScreen} from './screen/migration-welcome';
 import {RegisterGoogleSignInScreen} from './screen/register/google-sign-in';
 import {RegisterAppleSignInScreen} from './screen/register/apple-sign-in';
@@ -417,6 +420,7 @@ export const RegisterNavigation: FunctionComponent = () => {
             id: 'pages.register.connect-hardware.header.title',
           }),
           ...registerHeaderOptions,
+          headerTitle: RegisterHeaderTitleH4,
         }}
       />
 
@@ -1025,6 +1029,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
                 id: 'pages.register.connect-ledger.title',
               }),
               ...registerHeaderOptions,
+              headerTitle: RegisterHeaderTitleH4,
             }}
             component={ConnectLedgerScreen}
           />
