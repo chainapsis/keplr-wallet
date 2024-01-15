@@ -10,7 +10,7 @@ import {observer} from 'mobx-react-lite';
 import {useStyle} from '../../styles';
 import {PageWithScrollView} from '../../components/page';
 import {useStore} from '../../stores';
-import {CoinPretty, PricePretty} from '@keplr-wallet/unit';
+import {CoinPretty, Dec, PricePretty} from '@keplr-wallet/unit';
 import {QueryError} from '@keplr-wallet/stores';
 import {Button} from '../../components/button';
 import {Gutter} from '../../components/gutter';
@@ -73,6 +73,14 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const [selectModalIsOpen, setSelectModalIsOpen] = useState(false);
+
+  const hasBalance = (() => {
+    if (tabStatus === 'available') {
+      const balances = hugeQueriesStore.getAllBalances(true);
+      return balances.find(bal => bal.token.toDec().gt(new Dec(0))) != null;
+    }
+    return false;
+  })();
 
   const availableTotalPrice = useMemo(() => {
     let result: PricePretty | undefined;
@@ -362,6 +370,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
                         ...StackActions.push('Send.SelectAsset'),
                       });
                     }}
+                    disabled={!hasBalance}
                   />
                 </Skeleton>
               </Column>
