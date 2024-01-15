@@ -25,9 +25,7 @@ export const EmptyView: FunctionComponent<
           No {subject} Yet
         </Text>
       ) : (
-        <Text style={style.flatten(['color-gray-400', 'subtitle3'])}>
-          {children}
-        </Text>
+        children
       )}
     </Box>
   );

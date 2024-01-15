@@ -4,12 +4,12 @@ import {Box} from '../../../../../components/box';
 import {useStyle} from '../../../../../styles';
 import {useStore} from '../../../../../stores';
 import {Gutter} from '../../../../../components/gutter';
-import {EmptyView} from '../../../../../components/empty-view';
+import {EmptyView, EmptyViewText} from '../../../../../components/empty-view';
 import {Text} from 'react-native';
 import {ChainImageFallback} from '../../../../../components/image';
 import {CloseIcon} from '../../../../../components/icon';
 import {XAxis} from '../../../../../components/axis';
-import {FormattedMessage} from 'react-intl';
+import {useIntl} from 'react-intl';
 import {FlatList} from '../../../../../components/flat-list';
 
 interface WalletConnectSession {
@@ -38,6 +38,7 @@ export const SettingGeneralManageWalletConnectScreen: FunctionComponent =
   observer(() => {
     const {walletConnectStore} = useStore();
     const style = useStyle();
+    const intl = useIntl();
 
     const sessions: WalletConnectSession[] = walletConnectStore
       .getSessions()
@@ -69,9 +70,11 @@ export const SettingGeneralManageWalletConnectScreen: FunctionComponent =
               <React.Fragment>
                 <Gutter size={148} direction="vertical" />
                 <EmptyView>
-                  <Text style={style.flatten(['subtitle3'])}>
-                    <FormattedMessage id="page.setting.general.manage-WC.empty-text" />
-                  </Text>
+                  <EmptyViewText
+                    text={intl.formatMessage({
+                      id: 'page.setting.general.manage-WC.empty-text',
+                    })}
+                  />
                 </EmptyView>
               </React.Fragment>
             );

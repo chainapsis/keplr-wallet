@@ -230,7 +230,7 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
         <React.Fragment>
           <Gutter size={100} />
           <EmptyView>
-            <Box alignX="center">
+            <Box alignX="center" paddingX={39}>
               <EmptyViewText
                 text={intl.formatMessage({
                   id: 'page.governance.main.empty-title',
