@@ -67,11 +67,18 @@ export const UnlockScreen: FunctionComponent = observer(() => {
     // 코드푸쉬 업데이트가 있는지 확인되기 전에 interaction을 하면 애매해지기 때문에
     // 그 전에는 UI로부터의 interaction을 막는다.
     if (appUpdate.codepushInitTestCompleted) {
-      setIsReady(true);
+      if (appUpdate.codepushInitNewVersionExists) {
+        setIsReady(false);
+      } else {
+        setIsReady(true);
+      }
     } else {
       setIsReady(false);
     }
-  }, [appUpdate.codepushInitTestCompleted]);
+  }, [
+    appUpdate.codepushInitNewVersionExists,
+    appUpdate.codepushInitTestCompleted,
+  ]);
 
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
