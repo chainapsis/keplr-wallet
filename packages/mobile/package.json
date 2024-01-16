@@ -39,6 +39,7 @@
     "@ledgerhq/react-native-hw-transport-ble": "=6.20.0",
     "@react-native-async-storage/async-storage": "^1.19.3",
     "@react-native-community/blur": "^4.3.2",
+    "@react-native-community/netinfo": "^11.2.1",
     "@react-navigation/bottom-tabs": "^6.5.8",
     "@react-navigation/drawer": "^6.6.3",
     "@react-navigation/native": "^6.1.7",

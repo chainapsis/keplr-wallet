@@ -420,6 +420,8 @@ PODS:
   - react-native-compat (2.10.5):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
+  - react-native-netinfo (11.2.1):
+    - React-Core
   - react-native-safe-area-context (4.7.1):
     - React-Core
   - react-native-webview (13.6.2):
@@ -659,6 +661,7 @@ DEPENDENCIES:
   - react-native-ble-plx (from `../node_modules/react-native-ble-plx`)
   - "react-native-blur (from `../node_modules/@react-native-community/blur`)"
   - "react-native-compat (from `../node_modules/@walletconnect/react-native-compat`)"
+  - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
@@ -801,6 +804,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/blur"
   react-native-compat:
     :path: "../node_modules/@walletconnect/react-native-compat"
+  react-native-netinfo:
+    :path: "../node_modules/@react-native-community/netinfo"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-webview:
@@ -925,6 +930,7 @@ SPEC CHECKSUMS:
   react-native-ble-plx: f10240444452dfb2d2a13a0e4f58d7783e92d76e
   react-native-blur: cfdad7b3c01d725ab62a8a729f42ea463998afa2
   react-native-compat: 95163fd7204c68fb0a201d24ad10fbc03a60c67e
+  react-native-netinfo: 8a7fd3f7130ef4ad2fb4276d5c9f8d3f28d2df3d
   react-native-safe-area-context: 9697629f7b2cda43cf52169bb7e0767d330648c2
   react-native-webview: 8fc09f66a1a5b16bbe37c3878fda27d5982bb776
   React-NativeModulesApple: 4225ac31a26696c02c54b471052b3e85e74a9a0c
