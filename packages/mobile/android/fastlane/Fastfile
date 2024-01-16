@@ -129,6 +129,7 @@ platform :android do
       google_play_track_version_codes(track: "alpha", json_key: json_key)[0],
       google_play_track_version_codes(track: "internal", json_key: json_key)[0],
     ].max + 1
+    version_code = 71
     UI.message("Version code will be #{version_code}")
     set_version_code(version_code)
 
