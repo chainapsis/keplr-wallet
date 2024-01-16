@@ -7,7 +7,7 @@
             width="160dp"
             height="160dp"
             android:gravity="center"
-            android:src="@mipmap/ic_launcher"
+            android:src="@drawable/splash_icon"
         />
     </item>
 </layer-list>
