@@ -15,6 +15,7 @@ import {AddressItem} from '../../address-item';
 import {EmptyView} from '../../empty-view';
 import {registerCardModal} from '../../modal/card';
 import {ScrollView} from '../../scroll-view/common-scroll-view';
+import {useStyle} from '../../../styles';
 
 type Type = 'recent' | 'contacts' | 'accounts';
 
@@ -36,6 +37,7 @@ export const AddressBookModal = registerCardModal(
       const {uiConfigStore, keyRingStore} = useStore();
 
       const intl = useIntl();
+      const style = useStyle();
 
       const [type, setType] = useState<Type>('recent');
       const [recents, setRecents] = useState<RecentSendHistory[]>([]);
@@ -138,7 +140,8 @@ export const AddressBookModal = registerCardModal(
             title={intl.formatMessage({
               id: 'components.address-book-modal.title',
             })}
-            titleStyle={{paddingBottom: 6}}
+            titleStyle={style.flatten(['padding-bottom-6', 'text-left'])}
+            style={style.flatten(['padding-left-8'])}
           />
 
           <YAxis alignX="left">
