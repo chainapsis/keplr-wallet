@@ -96,6 +96,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
 
       if (
         e.message !== 'User password mac unmatched' &&
+        e.message !== 'Failed to authenticate' &&
         !e.message?.includes('User canceled the operation')
       ) {
         Bugsnag.notify(e);
