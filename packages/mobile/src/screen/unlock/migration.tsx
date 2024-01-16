@@ -108,7 +108,7 @@ export const MigrationScreen: FunctionComponent = observer(() => {
           />
         </Box>
 
-        <Gutter size={20} />
+        <Gutter size={37} />
 
         {keyRingStore.isMigrating ? (
           <XAxis alignY="center">
