@@ -158,7 +158,9 @@ export const StakedTabView: FunctionComponent<{
                             title: intl.formatMessage({
                               id: 'page.main.components.error-modal-title',
                             }),
-                            paragraph: errorMsg,
+                            paragraph:
+                              errorMsg ||
+                              'Failed to query response from endpoint. Check again in a few minutes.',
                           });
                           setIsInfoModalOpen(true);
                           return;
