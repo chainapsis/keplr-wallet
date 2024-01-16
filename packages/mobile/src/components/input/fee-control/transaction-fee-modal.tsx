@@ -181,7 +181,7 @@ export const TransactionFeeModal = registerCardModal(
           />
         )}
 
-        <Gutter size={12} />
+        <Gutter size={40} />
 
         <Button
           text={intl.formatMessage({
