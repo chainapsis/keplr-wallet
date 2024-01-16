@@ -19,6 +19,7 @@ import {
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Box} from '../../../components/box';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
+import {EmptyView, EmptyViewText} from '../../../components/empty-view';
 
 export const SendSelectAssetScreen: FunctionComponent = observer(() => {
   const style = useStyle();
@@ -105,31 +106,46 @@ export const SendSelectAssetScreen: FunctionComponent = observer(() => {
         <Gutter size={12} />
       </Box>
 
-      <BoundaryScrollView
-        contentContainerStyle={{
-          ...style.flatten(['flex-grow-1', 'padding-x-12']),
-          paddingBottom: safeAreaInsets.bottom,
-        }}>
-        <BoundaryScrollViewBoundary
-          itemHeight={71.3}
-          gap={8}
-          items={filteredTokens.map(token => {
-            return (
-              <TokenItem
-                viewToken={token}
-                onClick={() => {
-                  navigation.dispatch({
-                    ...StackActions.replace('Send', {
-                      chainId: token.chainInfo.chainId,
-                      coinMinimalDenom: token.token.currency.coinMinimalDenom,
-                    }),
-                  });
-                }}
+      {filteredTokens.length ? (
+        <BoundaryScrollView
+          contentContainerStyle={{
+            ...style.flatten(['flex-grow-1', 'padding-x-12']),
+            paddingBottom: safeAreaInsets.bottom,
+          }}>
+          <BoundaryScrollViewBoundary
+            itemHeight={71.3}
+            gap={8}
+            items={filteredTokens.map(token => {
+              return (
+                <TokenItem
+                  viewToken={token}
+                  onClick={() => {
+                    navigation.dispatch({
+                      ...StackActions.replace('Send', {
+                        chainId: token.chainInfo.chainId,
+                        coinMinimalDenom: token.token.currency.coinMinimalDenom,
+                      }),
+                    });
+                  }}
+                />
+              );
+            })}
+          />
+        </BoundaryScrollView>
+      ) : (
+        <React.Fragment>
+          <Gutter size={150} />
+          <EmptyView>
+            <Box alignX="center">
+              <EmptyViewText
+                text={intl.formatMessage({
+                  id: 'page.send.select-asset.hide-ibc-token',
+                })}
               />
-            );
-          })}
-        />
-      </BoundaryScrollView>
+            </Box>
+          </EmptyView>
+        </React.Fragment>
+      )}
     </Box>
   );
 });

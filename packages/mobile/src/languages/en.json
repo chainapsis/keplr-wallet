@@ -496,7 +496,8 @@
 
   "page.send.select-asset.title": "Select Asset",
   "page.send.select-asset.search-placeholder": "Search by a chain or asset name",
-  "page.send.select-asset.hide-ibc-token": "Hide IBC token",
+  "page.send.select-asset.hide-ibc-token": "No available asset",
+  "page.send.select-asset.empty-text": "Hide IBC token",
   "page.send.type.send": "Send",
   "page.send.type.ibc-transfer": "IBC Send",
   "page.send.amount.ibc-transfer.destination-chain": "Destination Chain",
