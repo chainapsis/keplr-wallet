@@ -864,7 +864,17 @@ const ClaimTokenItem: FunctionComponent<{
                 'color-gray-700',
                 'dark:color-gray-300',
               ])}>
-              {viewToken.token.currency.coinDenom}
+              {(() => {
+                if ('paths' in viewToken.token.currency) {
+                  const originDenom =
+                    viewToken.token.currency.originCurrency?.coinDenom;
+                  if (originDenom) {
+                    return `${originDenom} (${viewToken.chainInfo.chainName})`;
+                  }
+                }
+
+                return viewToken.token.currency.coinDenom;
+              })()}
             </Text>
             <Text
               style={style.flatten([
