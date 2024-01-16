@@ -42,7 +42,7 @@ const SuggestChainPageImpl: FunctionComponent<{
     origin: string;
   }>;
 }> = observer(({waitingData}) => {
-  const {chainSuggestStore, chainStore} = useStore();
+  const {chainSuggestStore, chainStore, keyRingStore} = useStore();
   const [isLoadingPlaceholder, setIsLoadingPlaceholder] = useState(true);
 
   const queryCommunityChainInfo = chainSuggestStore.getCommunityChainInfo(
@@ -61,6 +61,7 @@ const SuggestChainPageImpl: FunctionComponent<{
       waitingData.id,
       chainInfo,
       () => {
+        keyRingStore.refreshKeyRingStatus();
         chainStore.updateChainInfosFromBackground();
       },
     );
