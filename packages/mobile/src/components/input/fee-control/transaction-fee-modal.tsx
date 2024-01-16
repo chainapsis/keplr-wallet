@@ -66,6 +66,7 @@ export const TransactionFeeModal = registerCardModal(
             id: 'components.input.fee-control.modal.title',
           })}
           titleStyle={style.flatten(['h4', 'text-left'])}
+          style={style.flatten(['padding-left-8'])}
         />
 
         <Gutter size={12} />
@@ -180,7 +181,7 @@ export const TransactionFeeModal = registerCardModal(
           />
         )}
 
-        <Gutter size={12} />
+        <Gutter size={40} />
 
         <Button
           text={intl.formatMessage({

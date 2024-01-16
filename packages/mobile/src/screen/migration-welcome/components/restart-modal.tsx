@@ -47,7 +47,7 @@ export const RestartModal = registerCardModal(
 
         <Text
           style={style.flatten([
-            'body2',
+            'subtitle2',
             'color-text-low',
             'padding-y-8',
             'text-center',

@@ -31,10 +31,15 @@ export const WelcomeScreen: FunctionComponent = observer(() => {
         flexGrow: 1,
         justifyContent: 'center',
       }}>
-      <Box borderRadius={40} style={{overflow: 'hidden'}} alignX="center">
+      <Box alignX="center">
         <LottieView
           source={require('../../../public/assets/lottie/register/congrats.json')}
-          style={{width: 300, height: 300}}
+          style={{
+            width: 300,
+            height: 300,
+            borderRadius: 28,
+            overflow: 'hidden',
+          }}
           autoPlay
           loop
         />

@@ -425,12 +425,14 @@ export const SignModal = registerCardModal(
           <MemoInput memoConfig={memoConfig} />
         )}
 
+        <Gutter size={16} />
         <FeeControl
           feeConfig={feeConfig}
           senderConfig={senderConfig}
           gasConfig={gasConfig}
           disableAutomaticFeeSet={preferNoSetFee}
         />
+        <Gutter size={16} />
 
         {isSendAuthzGrant ? (
           <React.Fragment>
