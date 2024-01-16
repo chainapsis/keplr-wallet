@@ -1,4 +1,7 @@
 export interface AppUpdate {
+  readonly codepushInitTestCompleted: boolean;
+  readonly codepushInitNewVersionExists: boolean;
+
   readonly appVersion: string;
   readonly codepush: {
     readonly newVersion?: string;
