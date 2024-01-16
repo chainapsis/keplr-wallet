@@ -5,13 +5,12 @@ import {Controller, useForm} from 'react-hook-form';
 import {useStore} from '../../../stores';
 import {InteractionWaitingData} from '@keplr-wallet/background';
 import {useIntl} from 'react-intl';
-import {PageWithScrollView} from '../../../components/page';
 import {Box} from '../../../components/box';
 import {useStyle} from '../../../styles';
-import {Button} from '../../../components/button';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList} from '../../../navigation';
-import {Column} from '../../../components/column';
+import {ScrollViewRegisterContainer} from '../../register/components/scroll-view-register-container';
+import {InteractionManager, View} from 'react-native';
 
 interface FormData {
   name: string;
@@ -66,7 +65,9 @@ export const WalletChangeNameScreen: FunctionComponent = observer(() => {
   //   (interactionData.data as any).editable === false;
 
   useEffect(() => {
-    setFocus('name');
+    InteractionManager.runAfterInteractions(() => {
+      setFocus('name');
+    });
   }, [setFocus]);
   const submit = handleSubmit(async data => {
     try {
@@ -98,9 +99,21 @@ export const WalletChangeNameScreen: FunctionComponent = observer(() => {
   });
 
   return (
-    <PageWithScrollView
-      backgroundMode={'default'}
-      contentContainerStyle={style.flatten(['flex-grow-1'])}>
+    <ScrollViewRegisterContainer
+      bottomButtonStyle={{left: 12, right: 12}}
+      contentContainerStyle={style.flatten(['flex-grow-1'])}
+      bottomButton={{
+        text: intl.formatMessage({id: 'button.confirm'}),
+        color: 'primary',
+        size: 'large',
+        loading: (() => {
+          // if (!interactionInfo.interaction) {
+          //   return false;
+          // }
+          return interactionStore.isObsoleteInteraction(interactionData?.id);
+        })(),
+        onPress: submit,
+      }}>
       {/* 뒤로가기 버튼을 아래 상황일때 안보여줘야함
        <HeaderLayout
         left={
@@ -112,7 +125,7 @@ export const WalletChangeNameScreen: FunctionComponent = observer(() => {
           />
         }
  > */}
-      <Box height={'100%'} padding={12}>
+      <Box padding={12} style={style.flatten(['flex-1'])}>
         <Box style={style.flatten(['gap-12'])}>
           <TextInput
             label={intl.formatMessage({
@@ -153,20 +166,8 @@ export const WalletChangeNameScreen: FunctionComponent = observer(() => {
             }}
           />
         </Box>
-        <Column weight={1} />
-        <Button
-          text={intl.formatMessage({id: 'button.confirm'})}
-          color="primary"
-          size="large"
-          loading={(() => {
-            // if (!interactionInfo.interaction) {
-            //   return false;
-            // }
-            return interactionStore.isObsoleteInteraction(interactionData?.id);
-          })()}
-          onPress={submit}
-        />
+        <View style={style.flatten(['flex-1'])} />
       </Box>
-    </PageWithScrollView>
+    </ScrollViewRegisterContainer>
   );
 });

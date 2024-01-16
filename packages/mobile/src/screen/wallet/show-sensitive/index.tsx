@@ -7,16 +7,15 @@ import {useStore} from '../../../stores';
 import {Box} from '../../../components/box';
 import {Gutter} from '../../../components/gutter';
 import {FormattedMessage, useIntl} from 'react-intl';
-import {PageWithScrollView} from '../../../components/page';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
-import {Button} from '../../../components/button';
 import LottieView from 'lottie-react-native';
-import {StyleSheet, Text} from 'react-native';
+import {InteractionManager, StyleSheet, Text, View} from 'react-native';
 import {Column, Columns} from '../../../components/column';
 import {CheckIcon} from '../../../components/icon';
 import * as Clipboard from 'expo-clipboard';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
+import {ScrollViewRegisterContainer} from '../../register/components/scroll-view-register-container';
 
 interface FormData {
   password: string;
@@ -67,7 +66,9 @@ export const WalletShowSensitiveScreen: FunctionComponent = observer(() => {
   const [sensitive, setSensitive] = useState('');
 
   useEffect(() => {
-    setFocus('password');
+    InteractionManager.runAfterInteractions(() => {
+      setFocus('password');
+    });
   }, [setFocus]);
 
   const submit = handleSubmit(async data => {
@@ -85,13 +86,36 @@ export const WalletShowSensitiveScreen: FunctionComponent = observer(() => {
     }
   });
   return (
-    <PageWithScrollView
-      backgroundMode={'default'}
-      style={style.flatten(['height-full'])}
-      contentContainerStyle={style.flatten(['flex-grow-1'])}>
-      <Box padding={12} paddingTop={8} height="100%">
+    <ScrollViewRegisterContainer
+      bottomButtonStyle={{left: 12, right: 12}}
+      contentContainerStyle={style.flatten(['flex-grow-1'])}
+      bottomButton={
+        sensitive === ''
+          ? {
+              color: 'primary',
+              text: intl.formatMessage({
+                id: 'button.confirm',
+              }),
+              size: 'large',
+              onPress: submit,
+            }
+          : {
+              color: 'secondary',
+              text: intl.formatMessage({
+                id: 'button.close',
+              }),
+              size: 'large',
+              onPress: () => {
+                navigate.reset({routes: [{name: 'Home'}]});
+              },
+            }
+      }>
+      <Box padding={12} paddingTop={8} style={style.flatten(['flex-1'])}>
         {sensitive === '' ? (
-          <Box alignX="center" alignY="center" style={{flex: 1}}>
+          <Box
+            alignX="center"
+            alignY="center"
+            style={style.flatten(['flex-1'])}>
             <LottieView
               source={require('../../../public/assets/lottie/wallet/mnemonic.json')}
               loop
@@ -167,61 +191,36 @@ export const WalletShowSensitiveScreen: FunctionComponent = observer(() => {
             </Box>
           </Box>
         )}
-        <Column weight={1} />
+        <View style={style.flatten(['flex-1'])} />
         <Box>
           {sensitive === '' ? (
-            <React.Fragment>
-              <Controller
-                control={control}
-                name="password"
-                defaultValue=""
-                render={({field: {value, onChange, onBlur, ref}}) => {
-                  return (
-                    <TextInput
-                      label={intl.formatMessage({
-                        id: 'page.wallet.show-sensitive.password-label',
-                      })}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      ref={ref}
-                      value={value}
-                      error={errors.password?.message}
-                      returnKeyType="done"
-                      secureTextEntry={true}
-                      onSubmitEditing={() => {
-                        submit();
-                      }}
-                    />
-                  );
-                }}
-              />
-              <Gutter size={33} />
-            </React.Fragment>
-          ) : null}
-
-          {sensitive === '' ? (
-            <Button
-              color="primary"
-              text={intl.formatMessage({
-                id: 'button.confirm',
-              })}
-              size="large"
-              onPress={submit}
-            />
-          ) : (
-            <Button
-              color="secondary"
-              text={intl.formatMessage({
-                id: 'button.close',
-              })}
-              size="large"
-              onPress={() => {
-                navigate.reset({routes: [{name: 'Home'}]});
+            <Controller
+              control={control}
+              name="password"
+              defaultValue=""
+              render={({field: {value, onChange, onBlur, ref}}) => {
+                return (
+                  <TextInput
+                    label={intl.formatMessage({
+                      id: 'page.wallet.show-sensitive.password-label',
+                    })}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    ref={ref}
+                    value={value}
+                    error={errors.password?.message}
+                    returnKeyType="done"
+                    secureTextEntry={true}
+                    onSubmitEditing={() => {
+                      submit();
+                    }}
+                  />
+                );
               }}
             />
-          )}
+          ) : null}
         </Box>
       </Box>
-    </PageWithScrollView>
+    </ScrollViewRegisterContainer>
   );
 });

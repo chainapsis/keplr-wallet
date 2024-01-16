@@ -237,7 +237,7 @@
   "page.setting.general.delete-suggest-chain.empty-text": "No Chain Added Yet",
   "page.setting.general.delete-suggest-chain.chain-item.tooltip-text": "The infrastructure and setting of this chain is not configured by Keplr team. Please reach out to the chain or website team for technical support.",
 
-  "page.setting.general.manage-WC.empty-text": "Not Wallet Connect Sessions yet",
+  "page.setting.general.manage-WC.empty-text": "No WalletConnect Sessions yet",
 
   "page.setting.security.connected-websites-title": "Connected Websites",
   "page.setting.security.connected-websites-paragraph": "Websites that can view your address and make requests for signing",

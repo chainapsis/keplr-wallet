@@ -9,12 +9,26 @@ export const RegisterHeaderTitle: FunctionComponent<PropsWithChildren> = ({
   children,
 }) => {
   const style = useStyle();
+
   return (
     <Text style={style.flatten(['h3', 'color-text-high', 'text-center'])}>
       {children}
     </Text>
   );
 };
+
+export const RegisterHeaderTitleH4: FunctionComponent<PropsWithChildren> = ({
+  children,
+}) => {
+  const style = useStyle();
+
+  return (
+    <Text style={style.flatten(['h4', 'color-text-high', 'text-center'])}>
+      {children}
+    </Text>
+  );
+};
+
 export const registerHeaderOptions = {
   headerTitle: RegisterHeaderTitle,
   headerTitleAlign: 'center' as 'center' | 'left',

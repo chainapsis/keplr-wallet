@@ -90,11 +90,8 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
   }, [search, sortedValidators]);
 
   return (
-    <Box
-      style={{
-        flex: 1,
-      }}>
-      <Box paddingX={12}>
+    <Box style={style.flatten(['flex-1'])} paddingTop={12}>
+      <Box paddingX={12} paddingBottom={4}>
         <DebounceSearchTextInput
           placeholder="Search for a validator"
           handleSearchWord={e => {

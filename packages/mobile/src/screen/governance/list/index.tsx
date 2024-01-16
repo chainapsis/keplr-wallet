@@ -2,18 +2,19 @@ import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import {GovernanceNavigation} from '../../../navigation';
-import {RefreshControl, StyleSheet, Text} from 'react-native';
+import {RefreshControl, StyleSheet} from 'react-native';
 import {GovernanceCardBody} from '../components/card';
 import {useStore} from '../../../stores';
 import {ProposalStatus} from '../../../stores/governance/types';
 import {GovernanceV1ChainIdentifiers} from '../../../config';
 import {ChainIdHelper} from '@keplr-wallet/cosmos';
 import {Gutter} from '../../../components/gutter';
-import {EmptyView} from '../../../components/empty-view';
-import {FormattedMessage} from 'react-intl';
+import {EmptyView, EmptyViewText} from '../../../components/empty-view';
+import {useIntl} from 'react-intl';
 import {useStyle} from '../../../styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {FlatList} from '../../../components/flat-list';
+import {Box} from '../../../components/box';
 
 const DEFAULT_PARAMS = {
   'pagination.offset': 0,
@@ -24,6 +25,7 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
   const {queriesStore, scamProposalStore} = useStore();
   const style = useStyle();
   const route = useRoute<RouteProp<GovernanceNavigation, 'Governance.list'>>();
+  const intl = useIntl();
   const [params, setParams] = useState({page: 0, perPageNumber: 20});
   const {chainId, isGovV1Supported} = route.params;
   const governanceV1 = queriesStore.get(chainId).governanceV1.queryGovernance;
@@ -126,9 +128,13 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
           <React.Fragment>
             <Gutter size={138} />
             <EmptyView>
-              <Text>
-                <FormattedMessage id="page.governance.proposal-list.empty-text" />
-              </Text>
+              <Box alignX="center" paddingX={60}>
+                <EmptyViewText
+                  text={intl.formatMessage({
+                    id: 'page.governance.proposal-list.empty-text',
+                  })}
+                />
+              </Box>
             </EmptyView>
           </React.Fragment>
         )

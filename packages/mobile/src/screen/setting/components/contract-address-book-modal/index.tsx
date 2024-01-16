@@ -7,7 +7,7 @@ import {SearchTextInput} from '../../../../components/input/search-text-input';
 import {Gutter} from '../../../../components/gutter';
 import {useStyle} from '../../../../styles';
 import {Box} from '../../../../components/box';
-import {EmptyView} from '../../../../components/empty-view';
+import {EmptyView, EmptyViewText} from '../../../../components/empty-view';
 import {ContractAddressItem} from '../contract-item';
 import {TokenContractListRepoURL} from '../../../../config.ui';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
@@ -83,9 +83,11 @@ export const ContractAddressBookModal = registerCardModal(
             <Box alignX="center" alignY="center">
               <Gutter size={50} />
               <EmptyView>
-                <Text style={style.flatten(['subtitle3'])}>
-                  <FormattedMessage id="page.setting.token.add.contract-address-book-modal.no-search-data" />
-                </Text>
+                <EmptyViewText
+                  text={intl.formatMessage({
+                    id: 'page.setting.token.add.contract-address-book-modal.no-search-data',
+                  })}
+                />
               </EmptyView>
             </Box>
           ) : null}

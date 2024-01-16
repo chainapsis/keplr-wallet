@@ -5,17 +5,15 @@ import {TextInput} from '../../../components/input';
 import {useStore} from '../../../stores';
 import {Controller, useForm} from 'react-hook-form';
 import {FormattedMessage, useIntl} from 'react-intl';
-import {Button} from '../../../components/button';
 import {Box} from '../../../components/box';
 import {Gutter} from '../../../components/gutter';
-import {Text} from 'react-native';
+import {InteractionManager, Text, View} from 'react-native';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
 import {GuideBox} from '../../../components/guide-box';
-import {Column} from '../../../components/column';
-import {PageWithScrollView} from '../../../components/page';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
+import {ScrollViewRegisterContainer} from '../../register/components/scroll-view-register-container';
 
 interface FormData {
   password: string;
@@ -62,14 +60,22 @@ export const WalletDeleteScreen: FunctionComponent = observer(() => {
     }
   });
   useEffect(() => {
-    setFocus('password');
+    InteractionManager.runAfterInteractions(() => {
+      setFocus('password');
+    });
   }, [setFocus]);
 
   return (
-    <PageWithScrollView
-      backgroundMode={'default'}
-      contentContainerStyle={style.flatten(['flex-grow-1'])}>
-      <Box padding={12} style={style.flatten(['height-full'])}>
+    <ScrollViewRegisterContainer
+      bottomButtonStyle={{left: 12, right: 12}}
+      contentContainerStyle={style.flatten(['flex-grow-1'])}
+      bottomButton={{
+        text: intl.formatMessage({id: 'button.confirm'}),
+        color: 'primary',
+        size: 'large',
+        onPress: submit,
+      }}>
+      <Box padding={12} style={style.flatten(['flex-1'])}>
         <Box>
           {(() => {
             const keyInfo = keyRingStore.keyInfos.find(
@@ -134,41 +140,37 @@ export const WalletDeleteScreen: FunctionComponent = observer(() => {
             <FormattedMessage id="page.wallet.delete.paragraph" />
           </Text>
         </Box>
-        <Column weight={1} />
+        <View style={style.flatten(['flex-1'])} />
+
         <Box>
-          <Controller
-            control={control}
-            name="password"
-            defaultValue=""
-            render={({field: {value, onChange, onBlur, ref}}) => {
-              return (
-                <TextInput
-                  label={intl.formatMessage({
-                    id: 'page.wallet.delete.password-input-label',
-                  })}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  ref={ref}
-                  value={value}
-                  error={errors.password?.message}
-                  returnKeyType="done"
-                  secureTextEntry={true}
-                  onSubmitEditing={() => {
-                    submit();
-                  }}
-                />
-              );
-            }}
-          />
-          <Gutter size={28} />
-          <Button
-            text={intl.formatMessage({id: 'button.confirm'})}
-            color="primary"
-            size="large"
-            onPress={submit}
-          />
+          <React.Fragment>
+            <Controller
+              control={control}
+              name="password"
+              defaultValue=""
+              render={({field: {value, onChange, onBlur, ref}}) => {
+                return (
+                  <TextInput
+                    label={intl.formatMessage({
+                      id: 'page.wallet.delete.password-input-label',
+                    })}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    ref={ref}
+                    value={value}
+                    error={errors.password?.message}
+                    returnKeyType="done"
+                    secureTextEntry={true}
+                    onSubmitEditing={() => {
+                      submit();
+                    }}
+                  />
+                );
+              }}
+            />
+          </React.Fragment>
         </Box>
       </Box>
-    </PageWithScrollView>
+    </ScrollViewRegisterContainer>
   );
 });

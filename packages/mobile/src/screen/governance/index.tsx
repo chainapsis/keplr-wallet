@@ -38,12 +38,13 @@ const embedChainInfosIdentifiers = EmbedChainInfos.map(
 
 export const GovernanceScreen: FunctionComponent = observer(() => {
   const style = useStyle();
-  const {hugeQueriesStore, queriesStore, scamProposalStore} = useStore();
+  const {hugeQueriesStore, queriesStore, scamProposalStore, chainStore} =
+    useStore();
   const [isOpenSelectChainModal, setIsOpenSelectChainModal] = useState(false);
   const [isOpenInfoModal, setIsOpenInfoModal] = useState(false);
   const navigation = useNavigation<StackNavProp>();
   const intl = useIntl();
-  const isFetching = useRef(true);
+  const isFetching = useRef(false);
 
   useEffectOnce(() => {
     navigation.setOptions({
@@ -82,99 +83,103 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
   );
 
   const modalItems: SelectModalItem[] = useMemo(() => {
-    return hugeQueriesStore.stakables
-      .filter(viewToken =>
-        embedChainInfosIdentifiers.includes(
-          ChainIdHelper.parse(viewToken.chainInfo.chainId).identifier,
-        ),
+    return chainStore.chainInfos
+      .filter(
+        chainInfo => chainInfo.embedded.embedded && chainInfo.stakeCurrency,
       )
+      .filter(
+        chainInfo =>
+          !NoDashboardLinkIdentifiers.includes(
+            ChainIdHelper.parse(chainInfo.chainId).identifier,
+          ),
+      )
+      .map(chainInfo => {
+        return {
+          key: chainInfo.chainId,
+          label: chainInfo.chainName,
+          imageUrl: chainInfo.chainSymbolImageUrl,
+        } as SelectModalItem;
+      });
+  }, [chainStore.chainInfos]);
+
+  const viewItems = (() => {
+    if (delegations.length) {
+      isFetching.current = true;
+    }
+
+    return delegations
       .filter(
         viewToken =>
           !NoDashboardLinkIdentifiers.includes(
             ChainIdHelper.parse(viewToken.chainInfo.chainId).identifier,
           ),
       )
-      .map(viewToken => {
-        return {
-          key: viewToken.chainInfo.chainId,
-          label: viewToken.chainInfo.chainName,
-          imageUrl: viewToken.chainInfo.chainSymbolImageUrl,
-        } as SelectModalItem;
-      });
-  }, [hugeQueriesStore.stakables]);
-
-  const viewItems = delegations
-    .filter(
-      viewToken =>
-        !NoDashboardLinkIdentifiers.includes(
-          ChainIdHelper.parse(viewToken.chainInfo.chainId).identifier,
-        ),
-    )
-    .map(delegation => {
-      const isGovV1Supported =
-        GovernanceV1ChainIdentifiers.includes(
-          ChainIdHelper.parse(delegation.chainInfo.chainId).identifier,
-        ) ||
-        !(
-          //NOTE gov/v1이 구현되어있지 않을때 error code 12가 반환되서 일단 이렇게 검증함
-          (
+      .map(delegation => {
+        const isGovV1Supported =
+          GovernanceV1ChainIdentifiers.includes(
+            ChainIdHelper.parse(delegation.chainInfo.chainId).identifier,
+          ) ||
+          !(
+            //NOTE gov/v1이 구현되어있지 않을때 error code 12가 반환되서 일단 이렇게 검증함
             (
-              queriesStore
-                .get(delegation.chainInfo.chainId)
-                .governanceV1.queryGovernance.getQueryGovernance({
-                  status: 'PROPOSAL_STATUS_VOTING_PERIOD',
-                  'pagination.limit': 3000,
-                }).error?.data as {code: number}
-            )?.code === 12
-          )
-        );
+              (
+                queriesStore
+                  .get(delegation.chainInfo.chainId)
+                  .governanceV1.queryGovernance.getQueryGovernance({
+                    status: 'PROPOSAL_STATUS_VOTING_PERIOD',
+                    'pagination.limit': 3000,
+                  }).error?.data as {code: number}
+              )?.code === 12
+            )
+          );
 
-      const queryGovernance = isGovV1Supported
-        ? queriesStore
-            .get(delegation.chainInfo.chainId)
-            .governanceV1.queryGovernance.getQueryGovernance({
-              status: 'PROPOSAL_STATUS_VOTING_PERIOD',
-              'pagination.limit': 3000,
-            })
-        : queriesStore
-            .get(delegation.chainInfo.chainId)
-            .governance.queryGovernance.getQueryGovernance({
-              status: 'PROPOSAL_STATUS_VOTING_PERIOD',
-            });
+        const queryGovernance = isGovV1Supported
+          ? queriesStore
+              .get(delegation.chainInfo.chainId)
+              .governanceV1.queryGovernance.getQueryGovernance({
+                status: 'PROPOSAL_STATUS_VOTING_PERIOD',
+                'pagination.limit': 3000,
+              })
+          : queriesStore
+              .get(delegation.chainInfo.chainId)
+              .governance.queryGovernance.getQueryGovernance({
+                status: 'PROPOSAL_STATUS_VOTING_PERIOD',
+              });
 
-      //NOTE delegations중 하나라도 완료가 되면 isFetching을 false로 설정하고 변경하지 않음
-      isFetching.current =
-        !isFetching.current || !queryGovernance.isFetching ? false : true;
+        //NOTE delegations중 하나라도 완료가 되면 isFetching을 false로 설정하고 변경하지 않음
+        isFetching.current =
+          !isFetching.current || !queryGovernance.isFetching ? false : true;
 
-      return isGovV1Supported
-        ? {
-            isGovV1Supported,
-            proposalLen: queryGovernance.proposals.filter(
-              proposal =>
-                !scamProposalStore.isScamProposal(
-                  delegation.chainInfo.chainId,
-                  proposal.id,
-                ),
-            ).length,
-            chainId: delegation.chainInfo.chainId,
-            imageUrl: delegation.chainInfo.chainSymbolImageUrl,
-            chainName: delegation.chainInfo.chainName,
-          }
-        : {
-            isGovV1Supported,
-            proposalLen: queryGovernance.proposals.filter(
-              proposal =>
-                !scamProposalStore.isScamProposal(
-                  delegation.chainInfo.chainId,
-                  proposal.id,
-                ),
-            ).length,
-            chainId: delegation.chainInfo.chainId,
-            imageUrl: delegation.chainInfo.chainSymbolImageUrl,
-            chainName: delegation.chainInfo.chainName,
-          };
-    })
-    .filter(viewItem => viewItem.proposalLen !== 0);
+        return isGovV1Supported
+          ? {
+              isGovV1Supported,
+              proposalLen: queryGovernance.proposals.filter(
+                proposal =>
+                  !scamProposalStore.isScamProposal(
+                    delegation.chainInfo.chainId,
+                    proposal.id,
+                  ),
+              ).length,
+              chainId: delegation.chainInfo.chainId,
+              imageUrl: delegation.chainInfo.chainSymbolImageUrl,
+              chainName: delegation.chainInfo.chainName,
+            }
+          : {
+              isGovV1Supported,
+              proposalLen: queryGovernance.proposals.filter(
+                proposal =>
+                  !scamProposalStore.isScamProposal(
+                    delegation.chainInfo.chainId,
+                    proposal.id,
+                  ),
+              ).length,
+              chainId: delegation.chainInfo.chainId,
+              imageUrl: delegation.chainInfo.chainSymbolImageUrl,
+              chainName: delegation.chainInfo.chainName,
+            };
+      })
+      .filter(viewItem => viewItem.proposalLen !== 0);
+  })();
 
   return (
     <PageWithScrollView
@@ -225,7 +230,7 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
         <React.Fragment>
           <Gutter size={100} />
           <EmptyView>
-            <Box alignX="center">
+            <Box alignX="center" paddingX={39}>
               <EmptyViewText
                 text={intl.formatMessage({
                   id: 'page.governance.main.empty-title',

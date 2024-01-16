@@ -3,12 +3,12 @@ import React, {FunctionComponent} from 'react';
 
 import {ChainInfo} from '@keplr-wallet/types';
 
-import {FormattedMessage, useIntl} from 'react-intl';
+import {useIntl} from 'react-intl';
 import {Text} from 'react-native';
 import {useStyle} from '../../../../../styles';
 import {useStore} from '../../../../../stores';
 import {Box} from '../../../../../components/box';
-import {EmptyView} from '../../../../../components/empty-view';
+import {EmptyView, EmptyViewText} from '../../../../../components/empty-view';
 import {Gutter} from '../../../../../components/gutter';
 import {Column, Columns} from '../../../../../components/column';
 import {ChainImageFallback} from '../../../../../components/image';
@@ -60,9 +60,11 @@ export const SettingGeneralDeleteSuggestChainScreen: FunctionComponent =
               <React.Fragment>
                 <Gutter size={148} direction="vertical" />
                 <EmptyView>
-                  <Text style={style.flatten(['subtitle3'])}>
-                    <FormattedMessage id="page.setting.general.delete-suggest-chain.empty-text" />
-                  </Text>
+                  <EmptyViewText
+                    text={intl.formatMessage({
+                      id: 'page.setting.general.delete-suggest-chain.empty-text',
+                    })}
+                  />
                 </EmptyView>
               </React.Fragment>
             );

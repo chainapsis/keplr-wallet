@@ -43,6 +43,7 @@ export const ScrollViewRegisterContainer: FunctionComponent<
     contentContainerStyle?: ViewStyle;
 
     bottomButton?: React.ComponentProps<typeof Button>;
+    bottomButtonStyle?: ViewStyle;
   }>
 > = ({
   children,
@@ -57,6 +58,7 @@ export const ScrollViewRegisterContainer: FunctionComponent<
   paddingBottom,
   contentContainerStyle: propContentContainerStyle,
   bottomButton,
+  bottomButtonStyle,
 }) => {
   const style = useStyle();
 
@@ -126,6 +128,7 @@ export const ScrollViewRegisterContainer: FunctionComponent<
       bottom: Math.max(safeAreaInsets.bottom, keyboard.height.value) + 20,
       left: 20,
       right: 20,
+      ...bottomButtonStyle,
     };
   });
 

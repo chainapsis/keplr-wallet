@@ -250,6 +250,7 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
         backgroundColor={style.get('color-gray-600').color}
         borderRadius={25}
         paddingX={30}
+        marginTop={12}
         paddingY={36}>
         <StepView
           step={1}

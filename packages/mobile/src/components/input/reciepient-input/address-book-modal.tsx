@@ -12,7 +12,7 @@ import {YAxis} from '../../axis';
 import {Stack} from '../../stack';
 import {Text} from 'react-native';
 import {AddressItem} from '../../address-item';
-import {EmptyView} from '../../empty-view';
+import {EmptyView, EmptyViewText} from '../../empty-view';
 import {registerCardModal} from '../../modal/card';
 import {ScrollView} from '../../scroll-view/common-scroll-view';
 
@@ -259,13 +259,21 @@ export const AddressBookModal = registerCardModal(
                   {(() => {
                     switch (type) {
                       case 'accounts':
-                        return intl.formatMessage({
-                          id: 'components.address-book-modal.empty-view-accounts',
-                        });
+                        return (
+                          <EmptyViewText
+                            text={intl.formatMessage({
+                              id: 'components.address-book-modal.empty-view-accounts',
+                            })}
+                          />
+                        );
                       default:
-                        return intl.formatMessage({
-                          id: 'components.address-book-modal.empty-view-default',
-                        });
+                        return (
+                          <EmptyViewText
+                            text={intl.formatMessage({
+                              id: 'components.address-book-modal.empty-view-default',
+                            })}
+                          />
+                        );
                     }
                   })()}
                 </EmptyView>
