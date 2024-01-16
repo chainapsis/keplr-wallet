@@ -244,17 +244,29 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
                 }
               },
               ({receivedBytes, totalBytes}) => {
-                this.setState({
-                  ...this.state,
-                  codepush: {
-                    ...this.state.codepush,
-                    newVersionDownloadProgress: Math.min(
-                      receivedBytes / totalBytes,
-                      // 1은 sync status handler가 처리함.
-                      0.99,
-                    ),
-                  },
-                });
+                const beforeNewVersionDownloadProgress =
+                  this.state.codepush.newVersionDownloadProgress || 0;
+                const _newVersionDownloadProgress = Math.min(
+                  receivedBytes / totalBytes,
+                  // 1은 sync status handler가 처리함.
+                  0.99,
+                );
+
+                // XXX 여기서 매번 업데이트 시키면 context api에 의해서
+                // 매번 렌더링이 일어나서 성능이 떨어질 수 있음.
+                // 이 문제를 완화하기 위해서 0.1 단위로만 업데이트를 시킴.
+                if (
+                  Math.floor(beforeNewVersionDownloadProgress * 10) !==
+                  Math.floor(_newVersionDownloadProgress * 10)
+                ) {
+                  this.setState({
+                    ...this.state,
+                    codepush: {
+                      ...this.state.codepush,
+                      newVersionDownloadProgress: _newVersionDownloadProgress,
+                    },
+                  });
+                }
               },
             );
           }

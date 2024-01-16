@@ -1,10 +1,4 @@
-import React, {
-  FunctionComponent,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
 import {Text, TextInput as NativeTextInput, RefreshControl} from 'react-native';
 import {observer} from 'mobx-react-lite';
 import {useStyle} from '../../styles';
@@ -15,7 +9,7 @@ import {QueryError} from '@keplr-wallet/stores';
 import {Button} from '../../components/button';
 import {Gutter} from '../../components/gutter';
 import {LayeredHorizontalRadioGroup} from '../../components/radio-group';
-import {XAxis, YAxis} from '../../components/axis';
+import {YAxis} from '../../components/axis';
 import {Stack} from '../../components/stack';
 import {Column, Columns} from '../../components/column';
 import {DepositModal} from './components/deposit-modal/deposit-modal';
@@ -32,11 +26,7 @@ import {Skeleton} from '../../components/skeleton';
 import {StakingIcon} from '../../components/icon/stacking';
 import {VoteIcon} from '../../components/icon';
 import {useIntl} from 'react-intl';
-import {AppUpdateModal} from './app-update-modal';
-import {useAppUpdate} from '../../provider/app-update';
-import {VerticalCollapseTransition} from '../../components/transition';
-import {TouchableHighlight} from 'react-native-gesture-handler';
-import Svg, {Path} from 'react-native-svg';
+import {AppUpdateTopLabel} from './app-update';
 import {DualChart} from './components/chart';
 
 export interface ViewToken {
@@ -172,29 +162,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
     }
   };
 
-  const appUpdate = useAppUpdate();
-  const [newVersionExist, setNewVersionExist] = useState(false);
-  const [isOpenAppUpdateModal, setIsOpenAppUpdateModal] = useState(false);
-
-  useEffect(() => {
-    if (appUpdate.store.newVersionAvailable) {
-      setNewVersionExist(true);
-      return;
-    }
-    if (
-      appUpdate.codepush.newVersion &&
-      appUpdate.codepush.newVersionDownloadProgress === 1
-    ) {
-      setNewVersionExist(true);
-      return;
-    }
-    setNewVersionExist(false);
-  }, [
-    appUpdate.codepush.newVersion,
-    appUpdate.codepush.newVersionDownloadProgress,
-    appUpdate.store.newVersionAvailable,
-  ]);
-
   return (
     <PageWithScrollView
       backgroundMode={'default'}
@@ -209,51 +176,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
         )
       }>
       <Stack gutter={12}>
-        <VerticalCollapseTransition
-          collapsed={(() => {
-            if (isNotReady) {
-              return true;
-            }
-
-            return !newVersionExist;
-          })()}>
-          <TouchableHighlight
-            onPress={() => {
-              setIsOpenAppUpdateModal(true);
-            }}>
-            <Box
-              style={{
-                ...style.flatten(['height-38']),
-                // TODO: 나중에 이 색상을 style builder 밑에 넣자...
-                backgroundColor: '#1A2646',
-              }}
-              alignX="center"
-              alignY="center">
-              <XAxis alignY="center">
-                <Text
-                  style={{
-                    ...style.flatten(['text-caption2', 'text-underline']),
-                    // TODO: 나중에 이 색상을 style builder 밑에 넣자...
-                    color: '#AABBF9',
-                  }}>
-                  Update Available
-                </Text>
-                <Gutter size={3.5} />
-                <Svg width="12" height="12" fill="none" viewBox="0 0 12 12">
-                  <Path
-                    stroke="#AABBF9"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.25"
-                    d="M2.25 6h7.5m0 0L6.375 2.625M9.75 6L6.375 9.375"
-                  />
-                </Svg>
-              </XAxis>
-            </Box>
-          </TouchableHighlight>
-
-          <Gutter size={12} />
-        </VerticalCollapseTransition>
+        <AppUpdateTopLabel isNotReady={isNotReady} />
         <Gutter size={0} />
 
         <YAxis alignX="center">
@@ -449,10 +372,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
         navigation={navigation}
         isOpen={isBuyModalOpen}
         setIsOpen={setIsBuyModalOpen}
-      />
-      <AppUpdateModal
-        isOpen={isOpenAppUpdateModal}
-        setIsOpen={setIsOpenAppUpdateModal}
       />
     </PageWithScrollView>
   );
