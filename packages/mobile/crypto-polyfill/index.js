@@ -44,6 +44,12 @@ module.exports = {
         enumerable: true,
         get: () => webCrypto,
       });
+
+      Object.defineProperty(global, 'crypto', {
+        configurable: true,
+        enumerable: true,
+        get: () => webCrypto,
+      });
     }
   },
 };

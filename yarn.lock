@@ -22700,13 +22700,13 @@ __metadata:
 
 "expo-standard-web-crypto@file:./crypto-polyfill::locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile":
   version: 0.0.1
-  resolution: "expo-standard-web-crypto@file:./crypto-polyfill#./crypto-polyfill::hash=8717b0&locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile"
+  resolution: "expo-standard-web-crypto@file:./crypto-polyfill#./crypto-polyfill::hash=4ae7f5&locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile"
   dependencies:
     browserify-cipher: ^1.0.1
     create-hash: ^1.2.0
     create-hmac: ^1.1.7
     expo-crypto: ~12.4.1
-  checksum: bb9b522de7646a5474ff67d0c316687fc746d0c77917adf0ab04a642d6102995a99937c864d8c937a856629faa5b3364166f372ff461f27c67556e3b71c7454d
+  checksum: f2b17a3c11fc65f97e9b6f2626ce8670f494e25443faa995fec8a0362fae49f7efb15012e2274596fdc1983552148c44372b923eab54d775c2cf9e8c54f1d013
   languageName: node
   linkType: hard
 
