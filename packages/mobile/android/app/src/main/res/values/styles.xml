@@ -5,7 +5,7 @@
         <!-- Customize your theme here. -->
         <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
         <item name="android:windowBackground">@drawable/splash_screen</item>
-        <item name="android:statusBarColor">#ㅛ</item>
+        <item name="android:statusBarColor">#09090A</item>
         <item name="android:navigationBarColor">#09090A</item>
         <item name="android:windowIsTranslucent">true</item>
     </style>
