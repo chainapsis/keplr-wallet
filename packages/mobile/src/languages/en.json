@@ -528,7 +528,7 @@
   "page.main.available.new-token-found": "{numFoundToken} new token(s) found",
   "page.main.staked.staked-button-title": "Staked",
   "page.main.staked.staked-balance-title": "Staked Balance",
-  "page.main.staked.staked-balance-tooltip": "Tokens that are delegated to validators and earning rewards.",
+  "page.main.staked.staked-balance-tooltip": "Tokens that are bonded to validators, including amounts that are currently in the unbonding period.",
   "page.main.staked.unstaking-balance-title": "Unstaking Balance",
   "page.main.staked.unstaking-balance-tooltip": "Tokens that are under the unbonding period.",
   "page.main.staked.empty-view-title": "Ready to Start Staking?",

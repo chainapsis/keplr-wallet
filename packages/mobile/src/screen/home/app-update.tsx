@@ -138,7 +138,7 @@ export const AppUpdateModal = registerCardModal(
             ? intl.formatMessage({
                 id: 'page.main.components.app-update-modal.paragraph',
               })
-            : "We've downloaded some minor updates while you're gone. To apply these changes, kindly quit and reopen Keplr."}
+            : "We've downloaded some minor updates while you're gone. To apply these changes, please restart Keplr."}
         </Text>
         <Gutter size={28} />
 
@@ -149,7 +149,7 @@ export const AppUpdateModal = registerCardModal(
               ? intl.formatMessage({
                   id: 'page.main.components.app-update-modal.button',
                 })
-              : 'Quit Keplr'
+              : 'Restart Keplr'
           }
           onPress={() => {
             if (isStoreUpdate) {
