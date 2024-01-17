@@ -597,12 +597,12 @@
   "button.next": "Next",
   "button.advanced": "Advanced",
   "button.approve": "Approve",
-  "button.save": "Save",
-  "button.close": "Close",
-  "text-button.select-all": "Select All",
+  "button.save": "保存",
+  "button.close": "关闭",
+  "text-button.select-all": "全选",
 
-  "notification.transaction-success": "Transaction Success",
+  "notification.transaction-success": "交易成功",
 
-  "hooks.confirm.cancel-button": "Cancel",
-  "hooks.confirm.yes-button": "Yes"
+  "hooks.confirm.cancel-button": "取消",
+  "hooks.confirm.yes-button": "确定"
 }
