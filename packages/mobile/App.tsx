@@ -136,12 +136,12 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
     codePush
       .checkForUpdate()
       .then(update => {
-        if (once) {
-          return;
-        }
-        once = true;
-
         if (update) {
+          if (once) {
+            return;
+          }
+          once = true;
+
           this.setState({
             ...this.state,
             codepushInitTestCompleted: true,
