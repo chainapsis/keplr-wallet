@@ -5,6 +5,7 @@
     "outDir": "noop-keplr-wallet-mobile-private/build",
     "declaration": true,
     "rootDir": "noop-keplr-wallet-mobile-private",
+    "jsx": "react",
     "skipLibCheck": true
   },
   "include": ["noop-keplr-wallet-mobile-private/**/*"]

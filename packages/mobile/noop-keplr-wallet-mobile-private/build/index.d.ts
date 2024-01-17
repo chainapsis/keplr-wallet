@@ -8,3 +8,4 @@ export declare const getAppleSignInPrivateKey: () => Promise<{
   privateKey: Uint8Array;
   email: string;
 }>;
+export * from './import-from-extension';

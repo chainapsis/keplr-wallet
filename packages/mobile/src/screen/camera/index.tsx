@@ -38,6 +38,7 @@ import {SVGLoadingIcon} from '../../components/spinner';
 import {GuideBox} from '../../components/guide-box';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
+import {useImportFromExtension} from 'keplr-wallet-mobile-private';
 
 export const CameraScreen: FunctionComponent = observer(() => {
   const {chainStore, walletConnectStore} = useStore();
@@ -62,13 +63,24 @@ export const CameraScreen: FunctionComponent = observer(() => {
     }, []),
   );
 
+  const importFromExtension = useImportFromExtension();
+
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
     onCodeScanned: async codes => {
       if (codes.length > 0) {
         const data = codes[0].value;
 
-        if (!isLoading && !isCompleted && data) {
+        if (
+          !isLoading &&
+          !isCompleted &&
+          data &&
+          !importFromExtension.isLoading
+        ) {
+          if (importFromExtension.scan(data)) {
+            return;
+          }
+
           setIsLoading(true);
 
           try {
@@ -188,7 +200,7 @@ export const CameraScreen: FunctionComponent = observer(() => {
 
         <AimIcon />
 
-        {isLoading ? (
+        {isLoading || importFromExtension.isLoading ? (
           <View
             style={style.flatten([
               'absolute-fill',

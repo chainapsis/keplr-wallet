@@ -14,3 +14,5 @@ export const getAppleSignInPrivateKey = async (): Promise<{
 }> => {
   throw new Error('Apple sign in is not enabled');
 };
+
+export * from './import-from-extension';

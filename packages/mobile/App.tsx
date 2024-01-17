@@ -43,6 +43,7 @@ import {APP_STORE_URL, PLAY_STORE_URL} from './src/config';
 import {simpleFetch} from '@keplr-wallet/simple-fetch';
 import {LedgerBLEProvider} from './src/provider/ledger-ble';
 import Bugsnag from '@bugsnag/react-native';
+import {ImportFromExtensionProvider} from './noop-keplr-wallet-mobile-private';
 const semver = require('semver');
 
 const ThemeStatusBar: FunctionComponent = () => {
@@ -402,25 +403,28 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
                               <InteractionModalsProvider>
                                 <BugSnagErrorBoundary
                                   FallbackComponent={ErrorBoundary}>
-                                  {(() => {
-                                    if (
-                                      this.state.codepushInitTestCompleted &&
-                                      this.state.codepushInitNewVersionExists &&
-                                      this.state.codepush
-                                        .newVersionDownloadProgress != null
-                                    ) {
-                                      return (
-                                        <UpdateProgress
-                                          progress={
-                                            this.state.codepush
-                                              .newVersionDownloadProgress
-                                          }
-                                        />
-                                      );
-                                    }
+                                  <ImportFromExtensionProvider>
+                                    {(() => {
+                                      if (
+                                        this.state.codepushInitTestCompleted &&
+                                        this.state
+                                          .codepushInitNewVersionExists &&
+                                        this.state.codepush
+                                          .newVersionDownloadProgress != null
+                                      ) {
+                                        return (
+                                          <UpdateProgress
+                                            progress={
+                                              this.state.codepush
+                                                .newVersionDownloadProgress
+                                            }
+                                          />
+                                        );
+                                      }
 
-                                    return <AppNavigation />;
-                                  })()}
+                                      return <AppNavigation />;
+                                    })()}
+                                  </ImportFromExtensionProvider>
                                 </BugSnagErrorBoundary>
                               </InteractionModalsProvider>
                             </ConfirmProvider>
