@@ -31,17 +31,23 @@
         android:windowSoftInputMode="adjustResize"
         android:exported="true">
         <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
+          <action android:name="android.intent.action.MAIN" />
+          <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
 
-      <intent-filter>
+        <intent-filter>
+          <action android:name="android.intent.action.VIEW"/>
+          <category android:name="android.intent.category.DEFAULT"/>
+          <category android:name="android.intent.category.BROWSABLE"/>
+          <data android:scheme="app.keplr.oauth" android:host="google"/>
+        </intent-filter>
+        <intent-filter>
           <action android:name="android.intent.action.VIEW"/>
           <category android:name="android.intent.category.DEFAULT"/>
           <category android:name="android.intent.category.BROWSABLE"/>
           <data android:scheme="keplrwallet" android:host="wcV1"/>
           <data android:scheme="keplrwallet" android:host="wcV2"/>
-      </intent-filter>
+        </intent-filter>
       </activity>
       <meta-data android:name="com.bugsnag.android.API_KEY" android:value="fba0f81f121c1a15f7195bb269428911" />
     </application>
