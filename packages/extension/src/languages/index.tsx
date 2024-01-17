@@ -8,6 +8,7 @@ import React, {
 import { IntlProvider } from "react-intl";
 import MessagesEn from "./en.json";
 import MessagesKo from "./ko.json";
+import MessagesZhCn from "./zh-cn.json";
 
 export type IntlMessage = Record<string, string>;
 export type IntlMessages = {
@@ -17,6 +18,7 @@ export type IntlMessages = {
 const messages: IntlMessages = {
   en: MessagesEn,
   ko: MessagesKo,
+  "zh-cn": MessagesZhCn,
 };
 
 const getMessages = (language: string): IntlMessage => {
@@ -35,11 +37,17 @@ interface Language {
 const defaultLangMap: Record<string, string> = {
   ko: "ko",
   en: "en",
+  "zh-cn": "zh-cn",
 };
 
 const initLanguage = (): string => {
-  const language =
-    localStorage.getItem("language") || navigator.language.split(/[-_]/)[0];
+  const originalLang = localStorage.getItem("language") || navigator.language;
+  const langParts = originalLang.split(/[-_]/);
+  let language = langParts[0];
+
+  if (language === "zh") {
+    language = (langParts.length === 1 ? "zh-cn" : langParts.slice(0, 2).join("-"));
+  }
 
   if (!defaultLangMap[language]) {
     return "en";
@@ -85,6 +93,8 @@ export const AppIntlProvider: FunctionComponent = ({ children }) => {
     switch (language) {
       case "ko":
         return "한국어";
+      case "zh-cn":
+        return "简体中文";
       default:
         return "English";
     }
