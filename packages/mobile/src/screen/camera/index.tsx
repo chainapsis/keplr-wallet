@@ -27,12 +27,14 @@ import {CloseIcon} from '../../components/icon';
 import {DepositModal} from '../home/components/deposit-modal/deposit-modal';
 import {useStore} from '../../stores';
 import {
+  RouteProp,
   StackActions,
   useFocusEffect,
   useIsFocused,
   useNavigation,
+  useRoute,
 } from '@react-navigation/native';
-import {StackNavProp} from '../../navigation';
+import {RootStackParamList, StackNavProp} from '../../navigation';
 import {Bech32Address} from '@keplr-wallet/cosmos';
 import {SVGLoadingIcon} from '../../components/spinner';
 import {GuideBox} from '../../components/guide-box';
@@ -46,6 +48,9 @@ export const CameraScreen: FunctionComponent = observer(() => {
   const device = useCameraDevice('back');
   const navigation = useNavigation<StackNavProp>();
   const intl = useIntl();
+
+  const route = useRoute<RouteProp<RootStackParamList, 'Camera'>>();
+  const {importFromExtensionOnly} = route.params ?? {};
 
   const isFocused = useIsFocused();
   const {hasPermission, requestPermission} = useCameraPermission();
@@ -77,7 +82,11 @@ export const CameraScreen: FunctionComponent = observer(() => {
           data &&
           !importFromExtension.isLoading
         ) {
-          if (importFromExtension.scan(data)) {
+          if (importFromExtension.scan(data, navigation)) {
+            return;
+          }
+
+          if (importFromExtensionOnly) {
             return;
           }
 
@@ -120,8 +129,6 @@ export const CameraScreen: FunctionComponent = observer(() => {
                 } else {
                   navigation.reset({routes: [{name: 'Home'}]});
                 }
-              } else {
-                // TODO: Import from extension
               }
             }
 

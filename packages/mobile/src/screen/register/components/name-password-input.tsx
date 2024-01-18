@@ -25,6 +25,8 @@ export const NamePasswordInput = observer(
     getValues: UseFormGetValues<T>;
     setFocus: UseFormSetFocus<T>;
     onSubmit: () => void | Promise<void>;
+
+    disableNameInput?: boolean;
   }) => {
     // 먼가 괴랄하긴 한데... react hook form의 타이핑이 어렵기 땜시 그냥 대충 이렇게 처리함
     const control: Control<{
@@ -56,38 +58,40 @@ export const NamePasswordInput = observer(
 
     return (
       <React.Fragment>
-        <Controller
-          control={control}
-          rules={{
-            required: 'Name is required',
-          }}
-          render={({field: {onChange, onBlur, value, ref}}) => {
-            return (
-              <TextInput
-                ref={ref}
-                label={intl.formatMessage({
-                  id: 'pages.register.components.form.name-password.wallet-name-label',
-                })}
-                placeholder={intl.formatMessage({
-                  id: 'pages.register.components.form.name-password.wallet-name-placeholder',
-                })}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                value={value}
-                error={errors.name && errors.name?.message}
-                returnKeyType={needPassword ? 'next' : 'done'}
-                onSubmitEditing={() => {
-                  if (needPassword) {
-                    setFocus('password');
-                  } else {
-                    onSubmit();
-                  }
-                }}
-              />
-            );
-          }}
-          name={'name'}
-        />
+        {!props.disableNameInput ? (
+          <Controller
+            control={control}
+            rules={{
+              required: 'Name is required',
+            }}
+            render={({field: {onChange, onBlur, value, ref}}) => {
+              return (
+                <TextInput
+                  ref={ref}
+                  label={intl.formatMessage({
+                    id: 'pages.register.components.form.name-password.wallet-name-label',
+                  })}
+                  placeholder={intl.formatMessage({
+                    id: 'pages.register.components.form.name-password.wallet-name-placeholder',
+                  })}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  value={value}
+                  error={errors.name && errors.name?.message}
+                  returnKeyType={needPassword ? 'next' : 'done'}
+                  onSubmitEditing={() => {
+                    if (needPassword) {
+                      setFocus('password');
+                    } else {
+                      onSubmit();
+                    }
+                  }}
+                />
+              );
+            }}
+            name={'name'}
+          />
+        ) : null}
 
         {needPassword ? (
           <React.Fragment>

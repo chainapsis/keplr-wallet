@@ -6,7 +6,7 @@ import React, {
 } from 'react';
 
 export interface ImportFromExtension {
-  scan: (data: string) => boolean;
+  scan: (data: string, navigation: any) => boolean;
   isLoading: boolean;
   cleanUp: () => void;
 }

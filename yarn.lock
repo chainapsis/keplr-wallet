@@ -28130,8 +28130,8 @@ __metadata:
 
 "keplr-wallet-mobile-private@file:./noop-keplr-wallet-mobile-private::locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile":
   version: 0.0.1
-  resolution: "keplr-wallet-mobile-private@file:./noop-keplr-wallet-mobile-private#./noop-keplr-wallet-mobile-private::hash=50aa2a&locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile"
-  checksum: 711a2f96a4905400282d5e71e3c665ef22641c93d71811b499515ee4c9c14c5ad463d3a9c22ad381e0ab1aead7311ef493044299efe09e8152ab0cf63014dd69
+  resolution: "keplr-wallet-mobile-private@file:./noop-keplr-wallet-mobile-private#./noop-keplr-wallet-mobile-private::hash=d65a79&locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile"
+  checksum: cb1ddbf5e4fde8235addae46d7203c7f61dc9b23de6bd4ff476a1b295d61642ff274706dffcc507e0a201f45e85a0de8487c85d1e5af49daf5c3a36314ea5ef6
   languageName: node
   linkType: hard
 

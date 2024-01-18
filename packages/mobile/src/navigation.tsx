@@ -103,7 +103,11 @@ import Bugsnag from '@bugsnag/react-native';
 import {MigrationScreen} from './screen/unlock/migration';
 import {BackupAccountListScreen} from './screen/backup/account-list';
 import {BackupShowSensitiveScreen} from './screen/backup/show-sensitive';
-import {ImportFromExtensionScreen} from './screen/register/import-from-extension';
+import {
+  ImportFromExtensionScreen,
+  FinalizeImportFromExtensionScreen,
+  DecryptedKeyRingDatasResponse,
+} from './screen/register/import-from-extension';
 
 type DefaultRegisterParams = {
   hideBackButton?: boolean;
@@ -159,6 +163,9 @@ export type RootStackParamList = {
   'Register.GoogleSignIn': {};
   'Register.AppleSignIn': {};
   'Register.ImportFromExtension': undefined;
+  'Register.FinalizeImportFromExtension': {
+    data: DecryptedKeyRingDatasResponse;
+  };
   'Register.FinalizeKey': {
     name: string;
     password: string;
@@ -967,6 +974,14 @@ export const AppNavigation: FunctionComponent = observer(() => {
               headerShown: false,
             }}
             component={RegisterNavigation}
+          />
+          <Stack.Screen
+            name="Register.FinalizeImportFromExtension"
+            component={FinalizeImportFromExtensionScreen}
+            options={{
+              title: 'Import from Keplr Extension',
+              ...registerHeaderOptions,
+            }}
           />
           <Stack.Screen
             name="Send"

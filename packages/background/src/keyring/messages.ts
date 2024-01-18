@@ -133,7 +133,8 @@ export class NewMnemonicKeyMsg extends Message<{
     public readonly mnemonic: string,
     public readonly bip44HDPath: BIP44HDPath,
     public readonly name: string,
-    public readonly password?: string
+    public readonly password?: string,
+    public readonly meta?: PlainObject
   ) {
     super();
   }
