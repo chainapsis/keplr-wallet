@@ -9,6 +9,7 @@ import Reanimated, {
   withSpring,
 } from 'react-native-reanimated';
 import {defaultSpringConfig} from './src/styles/spring';
+import LottieView from 'lottie-react-native';
 
 export const UpdateProgress: FunctionComponent<{
   progress: number;
@@ -37,11 +38,13 @@ export const UpdateProgress: FunctionComponent<{
             }}
           />
           {/* TODO: Add lottie image? */}
-          <View
+          <LottieView
+            source={require('./src/public/assets/lottie/codepush/loader.json')}
+            loop={true}
+            autoPlay={true}
             style={{
               width: 216,
               height: 216,
-              backgroundColor: 'white',
             }}
           />
           <View
