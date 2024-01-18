@@ -41,12 +41,14 @@ const defaultLangMap: Record<string, string> = {
 };
 
 const initLanguage = (): string => {
-  const originalLang = localStorage.getItem("language") || navigator.language;
+  const originalLang =
+    localStorage.getItem("language") || navigator.language.toLowerCase();
   const langParts = originalLang.split(/[-_]/);
   let language = langParts[0];
 
   if (language === "zh") {
-    language = (langParts.length === 1 ? "zh-cn" : langParts.slice(0, 2).join("-"));
+    language =
+      langParts.length === 1 ? "zh-cn" : langParts.slice(0, 2).join("-");
   }
 
   if (!defaultLangMap[language]) {
