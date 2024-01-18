@@ -44,6 +44,7 @@ import {simpleFetch} from '@keplr-wallet/simple-fetch';
 import {LedgerBLEProvider} from './src/provider/ledger-ble';
 import Bugsnag from '@bugsnag/react-native';
 import {ImportFromExtensionProvider} from 'keplr-wallet-mobile-private';
+import {AsyncKVStore} from './src/common';
 const semver = require('semver');
 
 const ThemeStatusBar: FunctionComponent = () => {
@@ -130,9 +131,20 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
     };
 
     // 1초 안에 결과를 받지 못하면 그냥 업데이트 없는걸로 친다...
-    setTimeout(() => {
-      updateNotExists();
-    }, 1000);
+    // (하지만 install 후 최초의 시도일 경우 3초 동안 기다린다)
+    const kvStore = new AsyncKVStore('app-update');
+    kvStore.get('first-codepush-check').then(firstCheck => {
+      if (firstCheck) {
+        setTimeout(() => {
+          updateNotExists();
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          updateNotExists();
+        }, 3000);
+        kvStore.set('first-codepush-check', true);
+      }
+    });
 
     codePush
       .checkForUpdate()
@@ -172,17 +184,29 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
               }
             },
             ({receivedBytes, totalBytes}) => {
-              this.setState({
-                ...this.state,
-                codepush: {
-                  ...this.state.codepush,
-                  newVersionDownloadProgress: Math.min(
-                    receivedBytes / totalBytes,
-                    // 1은 sync status handler가 처리함.
-                    0.99,
-                  ),
-                },
-              });
+              const beforeNewVersionDownloadProgress =
+                this.state.codepush.newVersionDownloadProgress || 0;
+              const _newVersionDownloadProgress = Math.min(
+                receivedBytes / totalBytes,
+                // 1은 sync status handler가 처리함.
+                0.99,
+              );
+
+              // XXX 여기서 매번 업데이트 시키면 context api에 의해서
+              // 매번 렌더링이 일어나서 성능이 떨어질 수 있음.
+              // 이 문제를 완화하기 위해서 0.1 단위로만 업데이트를 시킴.
+              if (
+                Math.floor(beforeNewVersionDownloadProgress * 10) !==
+                Math.floor(_newVersionDownloadProgress * 10)
+              ) {
+                this.setState({
+                  ...this.state,
+                  codepush: {
+                    ...this.state.codepush,
+                    newVersionDownloadProgress: _newVersionDownloadProgress,
+                  },
+                });
+              }
             },
           );
         } else {
@@ -244,30 +268,10 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
                   });
                 }
               },
-              ({receivedBytes, totalBytes}) => {
-                const beforeNewVersionDownloadProgress =
-                  this.state.codepush.newVersionDownloadProgress || 0;
-                const _newVersionDownloadProgress = Math.min(
-                  receivedBytes / totalBytes,
-                  // 1은 sync status handler가 처리함.
-                  0.99,
-                );
-
-                // XXX 여기서 매번 업데이트 시키면 context api에 의해서
-                // 매번 렌더링이 일어나서 성능이 떨어질 수 있음.
-                // 이 문제를 완화하기 위해서 0.1 단위로만 업데이트를 시킴.
-                if (
-                  Math.floor(beforeNewVersionDownloadProgress * 10) !==
-                  Math.floor(_newVersionDownloadProgress * 10)
-                ) {
-                  this.setState({
-                    ...this.state,
-                    codepush: {
-                      ...this.state.codepush,
-                      newVersionDownloadProgress: _newVersionDownloadProgress,
-                    },
-                  });
-                }
+              () => {
+                // noop
+                // XXX: 이 경우 아직 UI에서 progress를 보여주지 않는다...
+                //      그러므로 굳이 context를 업데이트해서 re-rendering을 일으키지 않도록 한다.
               },
             );
           }
