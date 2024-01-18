@@ -92,7 +92,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
               stepPrevious: 1,
               stepTotal: 3,
               privateKey: {
-                value: privateKey,
+                hexValue: privateKey.toString('hex'),
                 meta: {},
               },
             },
@@ -165,7 +165,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
       <Gutter size={20} />
 
       <Text style={style.flatten(['subtitle3', 'color-label-default'])}>
-        Recovery Phrase
+        Recovery Phrase or Private Key
       </Text>
 
       <Gutter size={6} />
