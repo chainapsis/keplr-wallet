@@ -478,10 +478,10 @@
   "page.send.amount.asset-title": "Asset",
   "page.send.amount.memo-placeholder": "Required for sending to centralized exchanges",
   "page.send.amount.ibc-transfer-warning.title": "Avoid IBC transfers to centralized exchanges. Your assets may be lost.",
-  "page.send.amount.avoid-cex-warning.title": "Centralized exchanges may not support this type of asset. Avoid transferring to centralized exchanges.",
+  "page.send.amount.avoid-cex-warning.title": "中心化交易所可能不支持此类资产。避免转移到中心化交易所。"
 
-  "page.main.chart.available": "Total Available",
-  "page.main.chart.staked": "Total Staked",
+  "page.main.chart.available": "可用总额",
+  "page.main.chart.staked": "质押总额",
   "page.main.chart.stake-with-keplr-dashboard-button": "在Keplr仪表板上进行投资",
   "page.main.chart.manage-portfolio-in-keplr-dashboard": "在Keplr仪表板中管理投资组合",
   "page.main.search-placeholder": "搜索资产或链（如ATOM、Cosmos）",
@@ -543,7 +543,7 @@
   "page.main.components.menu-bar.go-to-keplr-chain-registry": "添加更多链",
   "page.main.components.deposit-modal.title": "复制地址",
   "page.main.components.deposit-modal.search-placeholder": "搜索链",
-  "page.main.components.deposit-modal.empty-text": "要使用某个链上的地址，您可能需要首先访问侧菜单中的<link>\“管理链可见性”</link>，并使链在您的钱包中可见。",
+  "page.main.components.deposit-modal.empty-text": "要使用某个链上的地址，您可能需要首先访问侧菜单中的<link>“管理链可见性”</link>，并使链在您的钱包中可见。",
   "page.main.components.buy-crypto-modal.title": "购买加密货币",
   "page.main.components.looking-for-chains.title": "查找一个链？",
   "page.main.components.looking-for-chains.enable-button": "管理",
