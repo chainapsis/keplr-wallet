@@ -47,3 +47,10 @@ export interface KeyRing {
         readonly v: number | null;
       }>;
 }
+
+export interface ExportedKeyRingVault {
+  type: "mnemonic" | "private-key";
+  id: string;
+  insensitive: PlainObject;
+  sensitive: string;
+}

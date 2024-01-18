@@ -1,5 +1,11 @@
 import { VaultService, Vault, PlainObject } from "../vault";
-import { BIP44HDPath, KeyInfo, KeyRing, KeyRingStatus } from "./types";
+import {
+  BIP44HDPath,
+  ExportedKeyRingVault,
+  KeyInfo,
+  KeyRing,
+  KeyRingStatus,
+} from "./types";
 import { Env, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { ChainsService } from "../chains";
@@ -1142,6 +1148,35 @@ export class KeyRingService {
     );
   }
 
+  async exportKeyRingVaults(password: string): Promise<ExportedKeyRingVault[]> {
+    await this.vaultService.checkUserPassword(password);
+
+    const result: ExportedKeyRingVault[] = [];
+    for (const vault of this.getKeyRingVaults()) {
+      if (vault.insensitive["keyRingType"] === "mnemonic") {
+        const decrypted = this.vaultService.decrypt(vault.sensitive);
+        result.push({
+          type: "mnemonic",
+          id: vault.id,
+          insensitive: vault.insensitive,
+          sensitive: decrypted["mnemonic"] as string,
+        });
+      }
+      if (vault.insensitive["keyRingType"] === "private-key") {
+        const decrypted = this.vaultService.decrypt(vault.sensitive);
+        result.push({
+          type: "private-key",
+          id: vault.id,
+          insensitive: vault.insensitive,
+          sensitive: decrypted["privateKey"] as string,
+        });
+      }
+    }
+
+    return result;
+  }
+
+  // Legacy
   async exportKeyRingData(
     password: string
   ): Promise<Legacy.ExportKeyRingData[]> {

@@ -19,6 +19,7 @@ import {
   ExportKeyRingDataMsg,
   CheckLegacyKeyRingPasswordMsg,
   NewKeystoneKeyMsg,
+  ExportKeyRingVaultsMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -42,6 +43,7 @@ export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(ChangeKeyRingNameInteractiveMsg);
   router.registerMessage(ExportKeyRingDataMsg);
   router.registerMessage(CheckLegacyKeyRingPasswordMsg);
+  router.registerMessage(ExportKeyRingVaultsMsg);
 
   router.addHandler(ROUTE, getHandler(service));
 }

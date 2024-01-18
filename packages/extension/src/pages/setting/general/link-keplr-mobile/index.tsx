@@ -12,14 +12,18 @@ import lottie from "lottie-web";
 import AnimScan from "../../../../public/assets/lottie/wallet/scan.json";
 import { YAxis } from "../../../../components/axis";
 import { useConfirm } from "../../../../hooks/confirm";
-import { ExportKeyRingDataMsg, KeyRingLegacy } from "@keplr-wallet/background";
+import {
+  ExportedKeyRingVault,
+  ExportKeyRingVaultsMsg,
+  GetEnabledChainIdentifiersMsg,
+} from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import QRCode from "qrcode.react";
+import { QRCodeSVG } from "qrcode.react";
 import { useStore } from "../../../../stores";
-import WalletConnect from "@walletconnect/client";
+import SignClient from "@walletconnect/sign-client";
 import { useNavigate } from "react-router";
 import AES, { Counter } from "aes-js";
 import { AddressBookData } from "../../../../stores/ui-config/address-book";
@@ -27,6 +31,40 @@ import { toJS } from "mobx";
 import { Box } from "../../../../components/box";
 import { Gutter } from "../../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
+
+class MemoryKeyValueStorage {
+  protected readonly store: Map<string, string> = new Map();
+
+  getEntries<T = any>(): Promise<[string, T][]> {
+    const entries: [string, T][] = [];
+    for (const [key, value] of this.store.entries()) {
+      entries.push([key, JSON.parse(value)]);
+    }
+    return Promise.resolve(entries);
+  }
+
+  getItem<T = any>(key: string): Promise<T | undefined> {
+    const value = this.store.get(key);
+    if (value != null) {
+      return Promise.resolve(JSON.parse(value));
+    }
+    return Promise.resolve(undefined);
+  }
+
+  getKeys(): Promise<string[]> {
+    return Promise.resolve(Array.from(this.store.keys()));
+  }
+
+  removeItem(key: string): Promise<void> {
+    this.store.delete(key);
+    return Promise.resolve(undefined);
+  }
+
+  setItem<T = any>(key: string, value: T): Promise<void> {
+    this.store.set(key, JSON.stringify(value));
+    return Promise.resolve(undefined);
+  }
+}
 
 const Styles = {
   Container: styled(Stack)`
@@ -48,17 +86,17 @@ const Styles = {
 
 export const SettingGeneralLinkKeplrMobilePage: FunctionComponent = observer(
   () => {
-    const [keyRingData, setKeyRingData] = useState<
-      KeyRingLegacy.ExportKeyRingData[]
-    >([]);
+    const [keyRingVaults, setKeyRingVaults] = useState<ExportedKeyRingVault[]>(
+      []
+    );
 
     const confirm = useConfirm();
     const intl = useIntl();
 
-    return keyRingData.length === 0 ? (
+    return keyRingVaults.length === 0 ? (
       <EnterPasswordView
         onSubmit={async (password) => {
-          const msg = new ExportKeyRingDataMsg(password);
+          const msg = new ExportKeyRingVaultsMsg(password);
 
           const res = await new InExtensionMessageRequester().sendMessage(
             BACKGROUND_PORT,
@@ -81,15 +119,15 @@ export const SettingGeneralLinkKeplrMobilePage: FunctionComponent = observer(
               }
             );
           } else {
-            setKeyRingData(res);
+            setKeyRingVaults(res);
           }
         }}
       />
     ) : (
       <QRCodeView
-        keyRingData={keyRingData}
+        keyRingVaults={keyRingVaults}
         cancel={() => {
-          setKeyRingData([]);
+          setKeyRingVaults([]);
         }}
       />
     );
@@ -206,38 +244,29 @@ const EnterPasswordView: FunctionComponent<{
   );
 });
 
-export interface QRCodeSharedData {
-  // The uri for the wallet connect
-  wcURI: string;
-  // The temporary password for encrypt/descrypt the key datas.
-  // This must not be shared the other than the extension and mobile.
-  sharedPassword: string;
-}
-
 export interface WCExportKeyRingDatasResponse {
   encrypted: {
     // ExportKeyRingData[]
     // Json format and hex encoded
     ciphertext: string;
-    // Hex encoded
-    iv: string;
   };
   addressBooks: { [chainId: string]: AddressBookData[] | undefined };
+  enabledChainIdentifiers: Record<string, string[] | undefined>;
 }
 
 const QRCodeView: FunctionComponent<{
-  keyRingData: KeyRingLegacy.ExportKeyRingData[];
+  keyRingVaults: ExportedKeyRingVault[];
 
   cancel: () => void;
-}> = observer(({ keyRingData, cancel }) => {
-  const { uiConfigStore } = useStore();
+}> = observer(({ keyRingVaults, cancel }) => {
+  const { chainStore, uiConfigStore } = useStore();
 
   const navigate = useNavigate();
   const confirm = useConfirm();
   const intl = useIntl();
 
-  const [connector, setConnector] = useState<WalletConnect | undefined>();
-  const [qrCodeData, setQRCodeData] = useState<QRCodeSharedData | undefined>();
+  const [signClient, setSignClient] = useState<SignClient | undefined>();
+  const [qrCodeData, setQRCodeData] = useState<string | undefined>();
 
   const cancelRef = useRef(cancel);
   cancelRef.current = cancel;
@@ -272,140 +301,182 @@ const QRCodeView: FunctionComponent<{
 
   useEffect(() => {
     (async () => {
-      const connector = new WalletConnect({
-        bridge: "https://wc-bridge.keplr.app",
+      const signClient = await SignClient.init({
+        projectId: process.env["WC_PROJECT_ID"],
+        storage: new MemoryKeyValueStorage(),
       });
 
-      if (connector.connected) {
-        await connector.killSession();
-      }
-
-      setConnector(connector);
+      setSignClient(signClient);
     })();
   }, []);
 
+  const topic = useRef<string>("");
   useEffect(() => {
-    if (connector) {
-      connector.on("display_uri", (error, payload) => {
-        if (error) {
-          console.log(error);
-          navigate("/");
-          return;
-        }
+    let intervalId: NodeJS.Timer | undefined;
 
-        const bytes = new Uint8Array(32);
-        crypto.getRandomValues(bytes);
-        const password = Buffer.from(bytes).toString("hex");
+    if (signClient) {
+      try {
+        (async () => {
+          const { uri, approval } = await signClient.connect({
+            requiredNamespaces: {
+              cosmos: {
+                methods: ["__keplr_export_keyring_vaults"],
+                chains: ["cosmos:cosmoshub-4"],
+                events: [],
+              },
+            },
+          });
 
-        const uri = payload.params[0] as string;
-        setQRCodeData({
-          wcURI: uri,
-          sharedPassword: password,
-        });
-      });
+          if (uri) {
+            const bytes = new Uint8Array(32);
+            crypto.getRandomValues(bytes);
+            const password = Buffer.from(bytes);
 
-      connector.createSession();
-    }
-  }, [connector, navigate]);
+            const ivBytes = new Uint8Array(16);
+            crypto.getRandomValues(ivBytes);
+            const iv = Buffer.from(ivBytes);
 
-  const onConnect = (error: any) => {
-    if (error) {
-      console.log(error);
-      navigate("/");
-    }
-  };
-  const onConnectRef = useRef(onConnect);
-  onConnectRef.current = onConnect;
+            const n = Math.floor(Math.random() * 10000);
+            const len = 5;
+            const data = JSON.stringify({
+              wcURI: uri,
+              password: password.toString("hex"),
+              iv: iv.toString("hex"),
+            });
+            const chunks: string[] = [];
+            for (let i = 0; i < len; i += 1) {
+              const chunk =
+                i === len - 1
+                  ? data.slice((data.length / len) * i)
+                  : data.slice(
+                      (data.length / len) * i,
+                      (data.length / len) * (i + 1)
+                    );
+              chunks.push(chunk);
+            }
+            let i = 0;
+            const setQR = () => {
+              const _i = i % len;
+              const payload = {
+                t: "export",
+                n,
+                len,
+                v: "v2",
+                i: _i,
+                d: chunks[_i],
+              };
 
-  const onCallRequest = (error: any, payload: any) => {
-    if (!connector || !qrCodeData) {
-      return;
-    }
+              setQRCodeData(JSON.stringify(payload));
 
-    if (
-      isExpired ||
-      error ||
-      payload.method !== "keplr_request_export_keyring_datas_wallet_connect_v1"
-    ) {
-      console.log(error, payload?.method);
-      navigate("/");
-    } else {
-      if (processOnce.current) {
-        return;
-      }
-      processOnce.current = true;
+              i++;
+            };
 
-      const buf = Buffer.from(JSON.stringify(keyRingData));
+            setQR();
+            intervalId = setInterval(() => {
+              setQR();
+            }, 1000);
 
-      const bytes = new Uint8Array(16);
-      crypto.getRandomValues(bytes);
-      const iv = Buffer.from(bytes);
+            const counter = new Counter(0);
+            counter.setBytes(iv);
+            const aesCtr = new AES.ModeOfOperation.ctr(password, counter);
 
-      const counter = new Counter(0);
-      counter.setBytes(iv);
-      const aesCtr = new AES.ModeOfOperation.ctr(
-        Buffer.from(qrCodeData.sharedPassword, "hex"),
-        counter
-      );
+            // Await session approval from the wallet.
+            const session = await approval();
+            topic.current = session.topic;
 
-      (async () => {
-        const addressBooks: {
-          [chainId: string]: AddressBookData[] | undefined;
-        } = {};
+            await (async () => {
+              const addressBooks: {
+                [chainId: string]: AddressBookData[] | undefined;
+              } = {};
 
-        if (payload.params && payload.params.length > 0) {
-          for (const chainId of payload.params[0].addressBookChainIds ?? []) {
-            const addressBookData =
-              uiConfigStore.addressBookConfig.getAddressBook(chainId);
+              for (const chainInfo of chainStore.chainInfos) {
+                const addressBookData =
+                  uiConfigStore.addressBookConfig.getAddressBook(
+                    chainInfo.chainId
+                  );
 
-            addressBooks[chainId] = toJS(addressBookData);
+                addressBooks[chainInfo.chainIdentifier] = toJS(addressBookData);
+              }
+
+              const enabledChainIdentifiers: Record<
+                string,
+                string[] | undefined
+              > = {};
+              for (const vault of keyRingVaults) {
+                enabledChainIdentifiers[vault.id] =
+                  await new InExtensionMessageRequester().sendMessage(
+                    BACKGROUND_PORT,
+                    new GetEnabledChainIdentifiersMsg(vault.id)
+                  );
+              }
+
+              const buf = Buffer.from(JSON.stringify(keyRingVaults));
+
+              const response: WCExportKeyRingDatasResponse = {
+                encrypted: {
+                  ciphertext: Buffer.from(aesCtr.encrypt(buf)).toString("hex"),
+                },
+                addressBooks,
+                enabledChainIdentifiers,
+              };
+
+              await signClient.request({
+                topic: session.topic,
+                chainId: "cosmos:cosmoshub-4",
+                request: {
+                  method: "__keplr_export_keyring_vaults",
+                  params: [
+                    `0x${Buffer.from(JSON.stringify(response)).toString(
+                      "hex"
+                    )}`,
+                  ],
+                },
+              });
+
+              navigate("/");
+            })();
           }
-        }
-
-        const response: WCExportKeyRingDatasResponse = {
-          encrypted: {
-            ciphertext: Buffer.from(aesCtr.encrypt(buf)).toString("hex"),
-            // Hex encoded
-            iv: iv.toString("hex"),
-          },
-          addressBooks,
-        };
-
-        connector.approveRequest({
-          id: payload.id,
-          result: [response],
-        });
-
-        navigate("/");
-      })();
+        })();
+      } catch (e) {
+        confirm
+          .confirm(
+            "",
+            `Failed to create qr code data: ${e.message || e.toString()}`,
+            {
+              forceYes: true,
+            }
+          )
+          .then(() => {
+            cancelRef.current();
+          });
+      }
     }
-  };
-  const onCallRequestRef = useRef(onCallRequest);
-  onCallRequestRef.current = onCallRequest;
+
+    return () => {
+      if (intervalId != null) {
+        clearInterval(intervalId);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signClient]);
 
   useEffect(() => {
-    if (connector && qrCodeData) {
-      connector.on("connect", (error) => {
-        onConnectRef.current(error);
-      });
-
-      connector.on("call_request", (error, payload) => {
-        onCallRequestRef.current(error, payload);
-      });
-    }
-  }, [connector, qrCodeData]);
-
-  useEffect(() => {
-    if (connector) {
-      return () => {
-        // Kill session after 5 seconds.
-        // Delay is needed because it is possible for wc to being processing the request.
-        setTimeout(() => {
-          connector.killSession().catch(console.log);
-        }, 5000);
-      };
-    }
-  }, [connector]);
+    return () => {
+      if (signClient && topic.current) {
+        signClient
+          .disconnect({
+            topic: topic.current,
+            reason: {
+              code: 1000,
+              message: "Unmounted",
+            },
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+    };
+  }, [signClient]);
 
   return (
     <HeaderLayout
@@ -426,8 +497,7 @@ const QRCodeView: FunctionComponent<{
               borderRadius="0.5rem"
               backgroundColor={ColorPalette["white"]}
             >
-              <QRCode
-                size={180}
+              <QRCodeSVG
                 value={(() => {
                   if (isExpired) {
                     return intl.formatMessage({
@@ -436,11 +506,21 @@ const QRCodeView: FunctionComponent<{
                   }
 
                   if (qrCodeData) {
-                    return JSON.stringify(qrCodeData);
+                    return qrCodeData;
                   }
 
                   return "";
                 })()}
+                size={200}
+                level="M"
+                bgColor={ColorPalette.white}
+                fgColor={ColorPalette.black}
+                imageSettings={{
+                  src: require("../../../../public/assets/logo-256.png"),
+                  width: 40,
+                  height: 40,
+                  excavate: true,
+                }}
               />
             </Box>
           </YAxis>
