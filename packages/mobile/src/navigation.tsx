@@ -117,7 +117,7 @@ export type RootStackParamList = {
   Home: undefined;
   'Home.Main': undefined;
   'Home.Stake.Dashboard': {chainId: string};
-  Camera: {
+  Camera?: {
     importFromExtensionOnly?: boolean;
   };
 
