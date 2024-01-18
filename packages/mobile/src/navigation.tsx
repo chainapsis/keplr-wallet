@@ -250,7 +250,9 @@ export type RootStackParamList = {
     | {chainId?: string; contractAddress?: string}
     | undefined;
 
-  Unlock: undefined;
+  Unlock?: {
+    disableAutoBioAuth?: boolean;
+  };
   Migration: {password: string};
   'Migration.Welcome': undefined;
   'Migration.Backup.AccountList': {

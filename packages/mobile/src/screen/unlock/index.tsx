@@ -3,10 +3,10 @@ import {observer} from 'mobx-react-lite';
 import {useStore} from '../../stores';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStyle} from '../../styles';
-import {useNavigation} from '@react-navigation/native';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {IAccountStore, IChainStore, WalletStatus} from '@keplr-wallet/stores';
 import {autorun} from 'mobx';
-import {StackNavProp} from '../../navigation';
+import {RootStackParamList, StackNavProp} from '../../navigation';
 import {PageWithScrollView} from '../../components/page';
 import {Text} from 'react-native';
 import {Box} from '../../components/box';
@@ -59,6 +59,8 @@ export const UnlockScreen: FunctionComponent = observer(() => {
   const style = useStyle();
   const navigation = useNavigation<StackNavProp>();
   const appUpdate = useAppUpdate();
+  const route = useRoute<RouteProp<RootStackParamList, 'Unlock'>>();
+  const {disableAutoBioAuth} = route.params ?? {};
 
   const [isOpenHelpModal, setIsOpenHelpModal] = useState(false);
 
@@ -177,6 +179,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
     if (
       !tryBiometricAutoOnce.current &&
       isReady &&
+      !disableAutoBioAuth &&
       keychainStore.isBiometryOn &&
       keyRingStore.status === 'locked' &&
       !keyRingStore.needMigration
@@ -207,6 +210,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
   }, [
     accountStore,
     chainStore,
+    disableAutoBioAuth,
     isReady,
     keyRingStore,
     keyRingStore.needMigration,

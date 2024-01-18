@@ -23,7 +23,16 @@ export const DrawerContent: FunctionComponent = observer(() => {
   const handleLock = async () => {
     await keyRingStore.lock();
     drawerClose();
-    navigation.reset({routes: [{name: 'Unlock'}]});
+    navigation.reset({
+      routes: [
+        {
+          name: 'Unlock',
+          params: {
+            disableAutoBioAuth: true,
+          },
+        },
+      ],
+    });
   };
 
   const onClickManageChains = () => {
