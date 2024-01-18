@@ -139,7 +139,7 @@ export const SendSelectAssetScreen: FunctionComponent = observer(() => {
             <Box alignX="center">
               <EmptyViewText
                 text={intl.formatMessage({
-                  id: 'page.send.select-asset.hide-ibc-token',
+                  id: 'page.send.select-asset.empty-text',
                 })}
               />
             </Box>
