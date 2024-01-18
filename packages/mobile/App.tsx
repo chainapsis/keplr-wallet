@@ -43,7 +43,7 @@ import {APP_STORE_URL, PLAY_STORE_URL} from './src/config';
 import {simpleFetch} from '@keplr-wallet/simple-fetch';
 import {LedgerBLEProvider} from './src/provider/ledger-ble';
 import Bugsnag from '@bugsnag/react-native';
-import {ImportFromExtensionProvider} from './noop-keplr-wallet-mobile-private';
+import {ImportFromExtensionProvider} from 'keplr-wallet-mobile-private';
 const semver = require('semver');
 
 const ThemeStatusBar: FunctionComponent = () => {
