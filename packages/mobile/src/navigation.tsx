@@ -103,6 +103,7 @@ import Bugsnag from '@bugsnag/react-native';
 import {MigrationScreen} from './screen/unlock/migration';
 import {BackupAccountListScreen} from './screen/backup/account-list';
 import {BackupShowSensitiveScreen} from './screen/backup/show-sensitive';
+import {ImportFromExtensionScreen} from './screen/register/import-from-extension';
 
 type DefaultRegisterParams = {
   hideBackButton?: boolean;
@@ -112,7 +113,9 @@ export type RootStackParamList = {
   Home: undefined;
   'Home.Main': undefined;
   'Home.Stake.Dashboard': {chainId: string};
-  Camera: undefined;
+  Camera: {
+    importFromExtensionOnly?: boolean;
+  };
 
   Register: undefined;
   'Register.Intro': undefined;
@@ -155,6 +158,7 @@ export type RootStackParamList = {
   } & DefaultRegisterParams;
   'Register.GoogleSignIn': {};
   'Register.AppleSignIn': {};
+  'Register.ImportFromExtension': undefined;
   'Register.FinalizeKey': {
     name: string;
     password: string;
@@ -408,6 +412,14 @@ export const RegisterNavigation: FunctionComponent = () => {
         component={RegisterAppleSignInScreen}
         options={{
           title: 'Connect with Apple ID',
+          ...registerHeaderOptions,
+        }}
+      />
+      <Stack.Screen
+        name="Register.ImportFromExtension"
+        component={ImportFromExtensionScreen}
+        options={{
+          title: 'Import from Keplr Extension',
           ...registerHeaderOptions,
         }}
       />

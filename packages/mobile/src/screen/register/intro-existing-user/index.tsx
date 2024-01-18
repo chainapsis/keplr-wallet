@@ -53,8 +53,13 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
 
         <Gutter size={20} />
 
-        {/* TODO: INTL 적용하기 */}
-        <Button text="Import from Keplr Extension" size="large" />
+        <Button
+          text="Import from Keplr Extension"
+          size="large"
+          onPress={() => {
+            navigation.navigate('Register.ImportFromExtension');
+          }}
+        />
       </OptionContainer>
 
       <Gutter size={16} />
