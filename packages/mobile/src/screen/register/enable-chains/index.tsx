@@ -693,6 +693,28 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
     };
   }, []);
 
+  const onClickSelectAll = () => {
+    if (chainInfos.length === enabledChainIdentifiersInPage.length) {
+      if (preSelectedChainIdentifiers.length > 0) {
+        setEnabledChainIdentifiers(preSelectedChainIdentifiers);
+      } else {
+        if (chainInfos.length > 0) {
+          setEnabledChainIdentifiers([chainInfos[0].chainIdentifier]);
+        }
+      }
+    } else {
+      setPreSelectedChainIdentifiers([...enabledChainIdentifiers]);
+      const newEnabledChainIdentifiers: string[] =
+        enabledChainIdentifiers.slice();
+      for (const chainInfo of chainInfos) {
+        if (!newEnabledChainIdentifiers.includes(chainInfo.chainIdentifier)) {
+          newEnabledChainIdentifiers.push(chainInfo.chainIdentifier);
+        }
+      }
+      setEnabledChainIdentifiers(newEnabledChainIdentifiers);
+    }
+  };
+
   return (
     <ViewRegisterContainer
       paddingLeft={12}
@@ -899,29 +921,7 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
 
         <RectButton
           onPress={() => {
-            if (chainInfos.length === enabledChainIdentifiersInPage.length) {
-              if (preSelectedChainIdentifiers.length > 0) {
-                setEnabledChainIdentifiers(preSelectedChainIdentifiers);
-              } else {
-                if (chainInfos.length > 0) {
-                  setEnabledChainIdentifiers([chainInfos[0].chainIdentifier]);
-                }
-              }
-            } else {
-              setPreSelectedChainIdentifiers([...enabledChainIdentifiers]);
-              const newEnabledChainIdentifiers: string[] =
-                enabledChainIdentifiers.slice();
-              for (const chainInfo of chainInfos) {
-                if (
-                  !newEnabledChainIdentifiers.includes(
-                    chainInfo.chainIdentifier,
-                  )
-                ) {
-                  newEnabledChainIdentifiers.push(chainInfo.chainIdentifier);
-                }
-              }
-              setEnabledChainIdentifiers(newEnabledChainIdentifiers);
-            }
+            onClickSelectAll();
           }}>
           <XAxis alignY="center">
             <Text style={style.flatten(['body2', 'color-gray-300'])}>
@@ -934,6 +934,9 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
               checked={
                 chainInfos.length === enabledChainIdentifiersInPage.length
               }
+              onPress={() => {
+                onClickSelectAll();
+              }}
             />
           </XAxis>
         </RectButton>

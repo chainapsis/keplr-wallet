@@ -114,7 +114,7 @@
 
   "pages.register.recover-mnemonic.title": "Import Existing Wallet",
   "pages.register.recover-mnemonic.paragraph-1": "Enter your recovery phrase or private key to restore your wallet. Tap the blank below to paste the full phrase.",
-  "pages.register.recover-mnemonic.paragraph-2": "Enter your phrase it in lowercase, in the correct order.",
+  "pages.register.recover-mnemonic.paragraph-2": "Enter your phrase in lowercase, in the correct order.",
   "pages.register.recover-mnemonic.12-words-tab": "12 words",
   "pages.register.recover-mnemonic.24-words-tab": "24 words",
   "pages.register.recover-mnemonic.private-key-tab": "Private key",
@@ -496,8 +496,8 @@
 
   "page.send.select-asset.title": "Select Asset",
   "page.send.select-asset.search-placeholder": "Search by a chain or asset name",
-  "page.send.select-asset.hide-ibc-token": "No available asset",
-  "page.send.select-asset.empty-text": "Hide IBC token",
+  "page.send.select-asset.hide-ibc-token": "Hide IBC token",
+  "page.send.select-asset.empty-text": "No available asset",
   "page.send.type.send": "Send",
   "page.send.type.ibc-transfer": "IBC Send",
   "page.send.amount.ibc-transfer.destination-chain": "Destination Chain",
