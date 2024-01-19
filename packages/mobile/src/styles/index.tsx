@@ -451,6 +451,7 @@ export const {
     widths: {
       full: "100%",
       half: "50%",
+      "80-percent": "80%",
       "1": 1,
       "4": 4,
       "8": 8,
@@ -481,6 +482,7 @@ export const {
     heights: {
       full: "100%",
       half: "50%",
+      auto: "auto",
       "0.5": 0.5,
       "1": 1,
       "4": 4,
