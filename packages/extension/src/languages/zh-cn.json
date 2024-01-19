@@ -227,7 +227,7 @@
   "page.setting.general.link-keplr-mobile.confirm-title": "导出失败",
   "page.setting.general.link-keplr-mobile.confirm-paragraph": "你无法将基于Ledger的帐户导出到Keplr移动端，必须直接从Ledger导入到你的移动设备。{br}通过Keplr移动端不支持的社交登录创建的帐户无法导出。",
   "page.setting.general.link-keplr-mobile.enter-password-view.guide-title": "仅可使用Keplr移动端扫描",
-  "page.setting.general.link-keplr-mobile.enter-password-view.guide-paragraph": "使用Keplr移动端之外的设备扫描二维码可能会导致资金丢失",
+  "page.setting.general.link-keplr-mobile.enter-password-view.guide-paragraph": "使用Keplr移动端之外的设备扫描二维码可能会导致资产丢失。",
   "page.setting.general.link-keplr-mobile.enter-password-view.paragraph": "扫描二维码将账户导出到Keplr移动端，该过程可能需要几分钟。",
   "page.setting.general.link-keplr-mobile.enter-password-view.password-label": "密码",
 
@@ -331,8 +331,8 @@
   "page.wallet.keyring-item.dropdown.view-recovery-path-title": "查看助记词",
   "page.wallet.keyring-item.dropdown.view-private-key-title": "查看私钥",
 
-  "page.wallet.change-name.previous-name-input-label": "原钱包名",
-  "page.wallet.change-name.new-name-input-label": "新钱包名",
+  "page.wallet.change-name.previous-name-input-label": "原钱包名称",
+  "page.wallet.change-name.new-name-input-label": "新钱包名称",
 
   "page.wallet.delete.warning-title": "警告",
   "page.wallet.delete.warning-paragraph": "确保你已备份助记词和私钥。",
@@ -427,7 +427,7 @@
   "page.sign.components.messages.pay-packet-fee.close-button": "关闭",
   "page.sign.components.messages.pay-packet-fee.open-button": "详情",
   "page.sign.components.messages.undelegate.title": "解除质押",
-  "page.sign.components.messages.undelegate.paragraph": "从{from}解除质押{coin}资产，将在解约时限到期后到账",
+  "page.sign.components.messages.undelegate.paragraph": "从{from}解除质押{coin}资产，将在解锁期满后到账",
   "page.sign.components.messages.vote.title": "投票",
   "page.sign.components.messages.vote.empty": "空",
   "page.sign.components.messages.vote.yes": "同意",
@@ -482,7 +482,7 @@
 
   "page.main.chart.available": "可用总额",
   "page.main.chart.staked": "质押总额",
-  "page.main.chart.stake-with-keplr-dashboard-button": "通过Keplr Dashboard质押",
+  "page.main.chart.stake-with-keplr-dashboard-button": "使用Keplr Dashboard进行质押",
   "page.main.chart.manage-portfolio-in-keplr-dashboard": "在Keplr Dashboard中管理投资组合",
   "page.main.search-placeholder": "搜索资产或链（如ATOM、Cosmos）",
   "page.main.available.available-balance-title": "可用余额",
@@ -491,7 +491,7 @@
   "page.main.available.search-empty-view-title": "哦哦！",
   "page.main.available.search-empty-view-paragraph": "未找到结果",
   "page.main.available.empty-view-title": "准备好探索跨链了吗？",
-  "page.main.available.empty-view-paragraph": "装满钱包，为迎接未知的征程做好准备！",
+  "page.main.available.empty-view-paragraph": "装满钱包，为迎接未知的征程做好准备吧！",
   "page.main.available.get-started-button": "开始",
   "page.main.available.new-token-found": "找到{numFoundToken}个新币种",
   "page.main.staked.staked-balance-title": "质押数量",
