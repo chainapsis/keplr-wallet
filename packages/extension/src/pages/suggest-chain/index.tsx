@@ -1,12 +1,14 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../layouts/header";
-import { CommunityInfoView, RawInfoView } from "./components";
+import { CommunityInfoView, RawInfoView, OriginInfoView } from "./components";
 import { useStore } from "../../stores";
 import { useInteractionInfo } from "../../hooks";
 import { InteractionWaitingData } from "@keplr-wallet/background";
 import { ChainInfo } from "@keplr-wallet/types";
 import { FormattedMessage, useIntl } from "react-intl";
+import { ArrowLeftIcon } from "../../components/icon";
+import { Box } from "../../components/box";
 
 export const SuggestChainPage: FunctionComponent = observer(() => {
   const { chainSuggestStore } = useStore();
@@ -35,6 +37,7 @@ const SuggestChainPageImpl: FunctionComponent<{
 }> = observer(({ waitingData }) => {
   const { chainSuggestStore } = useStore();
   const [isLoadingPlaceholder, setIsLoadingPlaceholder] = useState(true);
+  const [updateFromRepoDisabled, setUpdateFromRepoDisabled] = useState(false);
 
   const intl = useIntl();
   const interactionInfo = useInteractionInfo();
@@ -60,25 +63,48 @@ const SuggestChainPageImpl: FunctionComponent<{
     <HeaderLayout
       fixedHeight
       isNotReady={isLoadingPlaceholder}
-      title={
-        isLoadingPlaceholder || communityChainInfo != null ? undefined : (
+      title={(() => {
+        if (isLoadingPlaceholder) {
+          return undefined;
+        }
+
+        if (communityChainInfo != null && !updateFromRepoDisabled) {
+          return undefined;
+        }
+
+        return (
           <FormattedMessage
             id="page.suggest-chain.title"
             values={{ chainName: waitingData.data.chainInfo.chainName }}
           />
-        )
+        );
+      })()}
+      left={
+        communityChainInfo != null && updateFromRepoDisabled ? (
+          <Box
+            paddingLeft="1rem"
+            cursor="pointer"
+            onClick={() => setUpdateFromRepoDisabled(false)}
+          >
+            <ArrowLeftIcon />
+          </Box>
+        ) : undefined
       }
       bottomButton={{
         text: intl.formatMessage({ id: "button.approve" }),
         size: "large",
         color: "primary",
         onClick: async () => {
-          const chainInfo = communityChainInfo || waitingData.data.chainInfo;
+          const chainInfo =
+            communityChainInfo && !updateFromRepoDisabled
+              ? communityChainInfo
+              : waitingData.data.chainInfo;
 
           await chainSuggestStore.approveWithProceedNext(
             waitingData.id,
             {
               ...chainInfo,
+              updateFromRepoDisabled,
             },
             (proceedNext) => {
               if (!proceedNext) {
@@ -107,16 +133,23 @@ const SuggestChainPageImpl: FunctionComponent<{
         }
 
         if (communityChainInfo) {
-          return (
-            <CommunityInfoView
-              isNotReady={false}
-              origin={waitingData.data.origin}
-              chainInfo={communityChainInfo}
-              communityChainInfoUrl={chainSuggestStore.getCommunityChainInfoUrl(
-                communityChainInfo.chainId
-              )}
-            />
-          );
+          if (updateFromRepoDisabled) {
+            return <OriginInfoView waitingData={waitingData} />;
+          } else {
+            return (
+              <CommunityInfoView
+                isNotReady={false}
+                origin={waitingData.data.origin}
+                chainInfo={communityChainInfo}
+                communityChainInfoUrl={chainSuggestStore.getCommunityChainInfoUrl(
+                  communityChainInfo.chainId
+                )}
+                setUpdateFromRepoDisabled={() =>
+                  setUpdateFromRepoDisabled(true)
+                }
+              />
+            );
+          }
         }
 
         return (
