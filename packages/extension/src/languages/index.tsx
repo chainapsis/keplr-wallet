@@ -8,6 +8,7 @@ import React, {
 import { IntlProvider } from "react-intl";
 import MessagesEn from "./en.json";
 import MessagesKo from "./ko.json";
+import MessagesEs from "./es.json";
 
 export type IntlMessage = Record<string, string>;
 export type IntlMessages = {
@@ -17,6 +18,7 @@ export type IntlMessages = {
 const messages: IntlMessages = {
   en: MessagesEn,
   ko: MessagesKo,
+  es: MessagesEs,
 };
 
 const getMessages = (language: string): IntlMessage => {
