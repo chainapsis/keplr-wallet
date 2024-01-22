@@ -226,7 +226,7 @@ const BottomPriceButton: FunctionComponent<{
           setIsPressed(true);
         }}
         onPressOut={() => setIsPressed(false)}>
-        <Box cursor="pointer">
+        <Box>
           <Columns sum={1} alignY="center">
             <Svg width={20} height={20} fill="none" viewBox="0 0 20 20">
               <Path
@@ -277,7 +277,6 @@ const MaxButton: FunctionComponent<{
         }
       }}>
       <Box
-        cursor="pointer"
         alignX="center"
         alignY="center"
         paddingX={10}

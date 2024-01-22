@@ -36,9 +36,5 @@ export interface BoxProps {
   alignX?: BoxAlignX;
   alignY?: BoxAlignY;
 
-  cursor?: 'pointer' | 'not-allowed' | 'progress';
-
   style?: ViewStyle;
-
-  onClick?: () => void;
 }

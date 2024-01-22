@@ -11,6 +11,7 @@ import {CloseIcon} from '../../../../../components/icon';
 import {XAxis} from '../../../../../components/axis';
 import {useIntl} from 'react-intl';
 import {FlatList} from '../../../../../components/flat-list';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 interface WalletConnectSession {
   topic: string;
@@ -119,9 +120,9 @@ const ConnectedItem: FunctionComponent<{
           {appName}
         </Text>
 
-        <Box onClick={onClickClose} cursor="pointer">
+        <TouchableWithoutFeedback onPress={onClickClose}>
           <CloseIcon size={24} color={style.get('color-text-low').color} />
-        </Box>
+        </TouchableWithoutFeedback>
       </XAxis>
     </Box>
   );

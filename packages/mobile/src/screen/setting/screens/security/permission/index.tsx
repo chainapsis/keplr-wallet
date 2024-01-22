@@ -123,7 +123,7 @@ const OriginView: FunctionComponent<{
                 onPress={async () => {
                   await permissionManagerStore.clearOrigin(origin);
                 }}>
-                <Box cursor="pointer">
+                <Box>
                   <Columns sum={1} gutter={2} alignY="center">
                     <Text
                       style={style.flatten(['text-button2', 'color-text-low'])}>
