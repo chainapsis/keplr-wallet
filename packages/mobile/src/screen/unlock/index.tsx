@@ -149,7 +149,18 @@ export const UnlockScreen: FunctionComponent = observer(() => {
     } catch (e) {
       console.log(e);
 
-      if (e.message !== 'User password mac unmatched') {
+      if (
+        e.message !== 'User password mac unmatched' &&
+        !e.message?.includes('User canceled the operation') &&
+        !e.message?.includes('msg: Cancel') &&
+        !e.message?.includes('password not set') &&
+        !e.message?.includes('Failed to get credentials from keychain') &&
+        !e.message?.includes('Failed to authenticate') &&
+        !e.message?.includes(
+          'The user name or passphrase you entered is not correct.',
+        ) &&
+        !e.message?.includes('Wrapped error: User not authenticated')
+      ) {
         Bugsnag.notify(e);
       }
 
