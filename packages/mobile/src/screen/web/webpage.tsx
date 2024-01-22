@@ -149,6 +149,7 @@ export const WebpageScreen: FunctionComponent = observer(() => {
           automaticallyAdjustContentInsets={false}
           decelerationRate="normal"
           allowsBackForwardNavigationGestures={true}
+          allowsInlineMediaPlayback={true}
           onLoad={event => {
             setTitle(event.nativeEvent.title);
           }}
