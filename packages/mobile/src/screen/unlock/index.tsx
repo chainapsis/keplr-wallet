@@ -119,6 +119,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
         e.message !== 'User password mac unmatched' &&
         !e.message?.includes('User canceled the operation') &&
         !e.message?.includes('msg: Cancel') &&
+        !e.message?.includes('msg: Fingerprint operation cancelled.') &&
         !e.message?.includes('password not set') &&
         !e.message?.includes('Failed to get credentials from keychain') &&
         !e.message?.includes('Failed to authenticate') &&
@@ -153,6 +154,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
         e.message !== 'User password mac unmatched' &&
         !e.message?.includes('User canceled the operation') &&
         !e.message?.includes('msg: Cancel') &&
+        !e.message?.includes('msg: Fingerprint operation cancelled.') &&
         !e.message?.includes('password not set') &&
         !e.message?.includes('Failed to get credentials from keychain') &&
         !e.message?.includes('Failed to authenticate') &&
@@ -221,6 +223,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
             e.message !== 'User password mac unmatched' &&
             !e.message?.includes('User canceled the operation') &&
             !e.message?.includes('msg: Cancel') &&
+            !e.message?.includes('msg: Fingerprint operation cancelled.') &&
             !e.message?.includes('password not set') &&
             !e.message?.includes('Failed to get credentials from keychain') &&
             !e.message?.includes('Failed to authenticate') &&
