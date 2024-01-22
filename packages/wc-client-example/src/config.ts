@@ -93,4 +93,90 @@ export const EmbedChainInfos = [
     },
     features: ["stargate", "ibc-transfer"],
   },
+  {
+    chainId: "secret-4",
+    chainName: "Secret",
+    rpc: "https://rpc-secret.keplr.app",
+    rest: "https://lcd-secret.keplr.app",
+    bip44: { coinType: 529 },
+    coinType: 529,
+    stakeCurrency: {
+      coinDenom: "$denom",
+      coinMinimalDenom: "$minimalDenom",
+      coinDecimals: 6,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "secret",
+      bech32PrefixAccPub: "secretpub",
+      bech32PrefixValAddr: "secretvaloper",
+      bech32PrefixValPub: "secretvaloperpub",
+      bech32PrefixConsAddr: "secretvalcons",
+      bech32PrefixConsPub: "secretvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "$denom",
+        coinMinimalDenom: "$minimalDenom",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "$denom",
+        coinMinimalDenom: "$minimalDenom",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.1,
+          average: 0.25,
+          high: 0.4,
+        },
+      },
+    ],
+    features: ["secretwasm"],
+  },
+  {
+    chainId: "juno-1",
+    chainName: "Juno",
+    rpc: "https://rpc-juno.mib.tech:443/",
+    rest: "https://lcd-juno.itastakers.com:443/",
+    stakeCurrency: {
+      coinDenom: "JUNO",
+      coinMinimalDenom: "ujuno",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "juno",
+      bech32PrefixAccPub: "junopub",
+      bech32PrefixValAddr: "junovaloper",
+      bech32PrefixValPub: "junovaloperpub",
+      bech32PrefixConsAddr: "junovalcons",
+      bech32PrefixConsPub: "junovalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom: "ujuno",
+        coinDecimals: 6,
+        coinGeckoId: "juno-network",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom: "ujuno",
+        coinDecimals: 6,
+        coinGeckoId: "juno-network",
+      },
+    ],
+    coinType: 118,
+    gasPriceStep: {
+      low: 0.0025,
+      average: 0.01,
+      high: 0.025,
+    },
+    features: ["cosmwasm", "stargate", "ibc-transfer"],
+  },
 ];

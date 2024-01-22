@@ -334,6 +334,128 @@ export abstract class WalletConnectManager {
           });
           break;
         }
+        case "keplr_enigma_decrypt_wallet_connect_v1": {
+          if (payload.params.length !== 3) {
+            throw new Error("Invalid parmas");
+          }
+          for (const param of payload.params) {
+            if (typeof param !== "string") {
+              throw new Error("Invalid parmas");
+            }
+          }
+          const result = await keplr.enigmaDecrypt(
+            payload.params[0],
+            Buffer.from(payload.params[1], "base64"),
+            Buffer.from(payload.params[2], "base64")
+          );
+
+          client.approveRequest({
+            id,
+            result: [Buffer.from(result).toString("base64")],
+          });
+          break;
+        }
+        case "keplr_enigma_encrypt_wallet_connect_v1": {
+          if (payload.params.length !== 3) {
+            throw new Error("Invalid parmas");
+          }
+          if (
+            typeof payload.params[0] !== "string" &&
+            typeof payload.params[1] !== "string" &&
+            typeof payload.params[2] !== "object"
+          ) {
+            throw new Error("Invalid parmas");
+          }
+          const result = await keplr.enigmaEncrypt(
+            payload.params[0],
+            payload.params[1],
+            payload.params[2]
+          );
+
+          client.approveRequest({
+            id,
+            result: [Buffer.from(result).toString("base64")],
+          });
+          break;
+        }
+        case "keplr_enigma_pub_key_wallet_connect_v1": {
+          if (payload.params.length !== 1) {
+            throw new Error("Invalid parmas");
+          }
+          if (typeof payload.params[0] !== "string") {
+            throw new Error("Invalid parmas");
+          }
+          const result = await keplr.getEnigmaPubKey(payload.params[0]);
+
+          client.approveRequest({
+            id,
+            result: [Buffer.from(result).toString("base64")],
+          });
+          break;
+        }
+        case "keplr_enigma_tx_encryption_key_wallet_connect_v1": {
+          if (payload.params.length !== 2) {
+            throw new Error("Invalid parmas");
+          }
+          for (const param of payload.params) {
+            if (typeof param !== "string") {
+              throw new Error("Invalid parmas");
+            }
+          }
+          const result = await keplr.getEnigmaTxEncryptionKey(
+            payload.params[0],
+            Buffer.from(payload.params[1], "base64")
+          );
+
+          client.approveRequest({
+            id,
+            result: [Buffer.from(result).toString("base64")],
+          });
+          break;
+        }
+        case "keplr_suggest_token_wallet_connect_v1": {
+          if (payload.params.length !== 2 && payload.params.length !== 3) {
+            throw new Error("Invalid parmas");
+          }
+          if (
+            typeof payload.params[0] !== "string" &&
+            typeof payload.params[1] !== "string" &&
+            (typeof payload.params[2] !== "string" ||
+              typeof payload.params[2] !== undefined)
+          ) {
+            throw new Error("Invalid parmas");
+          }
+          await keplr.suggestToken(
+            payload.params[0],
+            payload.params[1],
+            payload.params[2]
+          );
+
+          client.approveRequest({
+            id,
+            result: [],
+          });
+          break;
+        }
+        case "keplr_get_scrt20_viewing_key_wallet_connect_v1": {
+          if (payload.params.length !== 2) {
+            throw new Error("Invalid parmas");
+          }
+          for (const param of payload.params) {
+            if (typeof param !== "string") {
+              throw new Error("Invalid parmas");
+            }
+          }
+          const result = await keplr.getSecret20ViewingKey(
+            payload.params[0],
+            payload.params[1]
+          );
+          client.approveRequest({
+            id,
+            result: [result],
+          });
+          break;
+        }
         default:
           throw new Error(`Unknown method (${payload.method})`);
       }

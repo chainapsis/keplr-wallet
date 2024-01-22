@@ -115,6 +115,10 @@ export interface Keplr {
     chainId: string,
     contractAddress: string
   ): Promise<string>;
+  getSecret20QueryAuthorization(
+    chainId: string,
+    contractAddress: string
+  ): Promise<{ permit: any | undefined; viewing_key: string | undefined }>;
   getEnigmaUtils(chainId: string): SecretUtils;
 
   // Related to Enigma.

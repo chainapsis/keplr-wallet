@@ -22,6 +22,7 @@ import {
 import {
   CosmJSOfflineSigner,
   CosmJSOfflineSignerOnlyAmino,
+  KeplrEnigmaUtils,
 } from "@keplr-wallet/provider";
 import { SecretUtils } from "secretjs/types/enigmautils";
 import { payloadId } from "@walletconnect/utils";
@@ -72,6 +73,8 @@ export type KeplrKeystoreMayChangedEventParam = {
 };
 
 export class KeplrWalletConnectV1 implements Keplr {
+  protected enigmaUtils: Map<string, SecretUtils> = new Map();
+
   constructor(
     public readonly connector: IConnector,
     public readonly options: {
@@ -255,40 +258,83 @@ export class KeplrWalletConnectV1 implements Keplr {
     );
   }
 
-  enigmaDecrypt(
-    _chainId: string,
-    _ciphertext: Uint8Array,
-    _nonce: Uint8Array
+  async enigmaDecrypt(
+    chainId: string,
+    ciphertext: Uint8Array,
+    nonce: Uint8Array
   ): Promise<Uint8Array> {
-    throw new Error("Not yet implemented");
+    const encryptedBase64: string = (
+      await this.sendCustomRequest({
+        id: payloadId(),
+        jsonrpc: "2.0",
+        method: "keplr_enigma_decrypt_wallet_connect_v1",
+        params: [
+          chainId,
+          Buffer.from(ciphertext).toString("base64"),
+          Buffer.from(nonce).toString("base64"),
+        ],
+      })
+    )[0];
+    return Buffer.from(encryptedBase64, "base64");
   }
 
-  enigmaEncrypt(
-    _chainId: string,
-    _contractCodeHash: string,
+  async enigmaEncrypt(
+    chainId: string,
+    contractCodeHash: string,
     // eslint-disable-next-line @typescript-eslint/ban-types
-    _msg: object
+    msg: object
   ): Promise<Uint8Array> {
-    throw new Error("Not yet implemented");
+    const encryptedBase64: string = (
+      await this.sendCustomRequest({
+        id: payloadId(),
+        jsonrpc: "2.0",
+        method: "keplr_enigma_encrypt_wallet_connect_v1",
+        params: [chainId, contractCodeHash, msg],
+      })
+    )[0];
+    return Buffer.from(encryptedBase64, "base64");
   }
 
   experimentalSuggestChain(_chainInfo: ChainInfo): Promise<void> {
     throw new Error("Not yet implemented");
   }
 
-  getEnigmaPubKey(_chainId: string): Promise<Uint8Array> {
-    throw new Error("Not yet implemented");
+  async getEnigmaPubKey(chainId: string): Promise<Uint8Array> {
+    const encryptedBase64: string = (
+      await this.sendCustomRequest({
+        id: payloadId(),
+        jsonrpc: "2.0",
+        method: "keplr_enigma_pub_key_wallet_connect_v1",
+        params: [chainId],
+      })
+    )[0];
+    return Buffer.from(encryptedBase64, "base64");
   }
 
-  getEnigmaTxEncryptionKey(
-    _chainId: string,
-    _nonce: Uint8Array
+  async getEnigmaTxEncryptionKey(
+    chainId: string,
+    nonce: Uint8Array
   ): Promise<Uint8Array> {
-    throw new Error("Not yet implemented");
+    const encryptedBase64: string = (
+      await this.sendCustomRequest({
+        id: payloadId(),
+        jsonrpc: "2.0",
+        method: "keplr_enigma_tx_encryption_key_wallet_connect_v1",
+        params: [chainId, Buffer.from(nonce).toString("base64")],
+      })
+    )[0];
+    return Buffer.from(encryptedBase64, "base64");
   }
 
-  getEnigmaUtils(_chainId: string): SecretUtils {
-    throw new Error("Not yet implemented");
+  getEnigmaUtils(chainId: string): SecretUtils {
+    if (this.enigmaUtils.has(chainId)) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return this.enigmaUtils.get(chainId)!;
+    }
+
+    const enigmaUtils = new KeplrEnigmaUtils(chainId, this);
+    this.enigmaUtils.set(chainId, enigmaUtils);
+    return enigmaUtils;
   }
 
   async getKey(chainId: string): Promise<Key> {
@@ -412,11 +458,29 @@ export class KeplrWalletConnectV1 implements Keplr {
     return new CosmJSOfflineSignerOnlyAmino(chainId, this);
   }
 
-  getSecret20ViewingKey(
-    _chainId: string,
-    _contractAddress: string
+  async getSecret20ViewingKey(
+    chainId: string,
+    contractAddress: string
   ): Promise<string> {
-    throw new Error("Not yet implemented");
+    return (
+      await this.sendCustomRequest({
+        id: payloadId(),
+        jsonrpc: "2.0",
+        method: "keplr_get_scrt20_viewing_key_wallet_connect_v1",
+        params: [chainId, contractAddress],
+      })
+    )[0];
+  }
+
+  async getSecret20QueryAuthorization(
+    chainId: string,
+    contractAddress: string
+  ): Promise<{ permit: any | undefined; viewing_key: string | undefined }> {
+    return {
+      // todo: once support for saving permits is implemented, getting a saved permit should be implemented here
+      permit: null,
+      viewing_key: await this.getSecret20ViewingKey(chainId, contractAddress),
+    };
   }
 
   /**
@@ -475,12 +539,17 @@ export class KeplrWalletConnectV1 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  suggestToken(
-    _chainId: string,
-    _contractAddress: string,
-    _viewingKey?: string
+  async suggestToken(
+    chainId: string,
+    contractAddress: string,
+    viewingKey?: string
   ): Promise<void> {
-    throw new Error("Not yet implemented");
+    await this.sendCustomRequest({
+      id: payloadId(),
+      jsonrpc: "2.0",
+      method: "keplr_suggest_token_wallet_connect_v1",
+      params: [chainId, contractAddress, viewingKey],
+    });
   }
 
   experimentalSignEIP712CosmosTx_v0(
