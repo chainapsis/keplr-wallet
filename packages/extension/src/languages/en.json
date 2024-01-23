@@ -111,7 +111,7 @@
   "pages.register.back-up-private-key.blur-text": "Click here to see private key",
   "pages.register.back-up-private-key.warning-title": "Backup your private key securely.",
   "pages.register.back-up-private-key.warning-paragraph": "Anyone with your private key can have access to your assets.{br}{br}If you lose access to your Gmail Account, the only way to recover your wallet is using your private key. Keep this in a safe place.",
-  "pages.register.back-up-private-key.import-button": "Import",
+  "pages.register.back-up-private-key.import-button": "Got it",
 
   "pages.register.connect-ledger.title": "Please connect your Hardware wallet",
   "pages.register.connect-ledger.paragraph": "To use EVM-compatible chains (Injective, Evmos) with Keplr, you'll be prompted to connect to Ethereum app in the next steps.",
