@@ -68,6 +68,11 @@ const ModalRender: FunctionComponent<{
   useLayoutEffect(() => {
     // 안드로이드를 위해서 모달에서 뒤로가기 버튼을 다뤄야함...
     const listener = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (modalState.options.backHandler) {
+        modalState.options.backHandler();
+        return;
+      }
+
       const lastModal = modalStates.modals
         .reverse()
         .find(modal => !modal.isClosing);
@@ -81,7 +86,7 @@ const ModalRender: FunctionComponent<{
     return () => {
       listener.remove();
     };
-  }, [modalStates.modals]);
+  }, [modalState.options, modalStates.modals]);
 
   return (
     <ModalBaseContext.Provider

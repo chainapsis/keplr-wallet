@@ -6,6 +6,7 @@ export interface ModalOptions {
 
   container?: React.ElementType;
   containerProps?: any;
+  backHandler?: () => void;
 }
 
 export class ModalState {
