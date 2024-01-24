@@ -248,6 +248,15 @@ export class RootStore {
               withdrawRewards: {
                 type: 'distribution/MsgWithdrawDelegationReward',
               },
+              delegate: {
+                type: 'staking/MsgDelegate',
+              },
+              undelegate: {
+                type: 'staking/MsgUndelegate',
+              },
+              redelegate: {
+                type: 'staking/MsgBeginRedelegate',
+              },
             };
           }
 

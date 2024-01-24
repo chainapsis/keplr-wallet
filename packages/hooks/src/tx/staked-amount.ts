@@ -16,7 +16,7 @@ import {
   NotSupportedCurrencyError,
   ZeroAmountError,
 } from "./errors";
-import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { useState } from "react";
 import { QueriesStore } from "./internal";
 
@@ -78,7 +78,10 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
   }
 
   canUseCurrency(currency: AppCurrency): boolean {
-    return this.chainInfo.findCurrency(currency.coinMinimalDenom) != null;
+    return (
+      this.chainInfo.stakeCurrency?.coinMinimalDenom ===
+      currency.coinMinimalDenom
+    );
   }
 
   @computed
@@ -147,6 +150,9 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
   @computed
   get currency(): AppCurrency {
     const chainInfo = this.chainInfo;
+    if (chainInfo.stakeCurrency) {
+      return chainInfo.stakeCurrency;
+    }
 
     if (this._currency) {
       const find = chainInfo.findCurrency(this._currency.coinMinimalDenom);
@@ -250,7 +256,9 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
       }
 
       if (
-        bal.getDelegationTo(this.validatorAddress)?.toDec().lt(amount.toDec())
+        (bal.getDelegationTo(this.validatorAddress) || new Int(0))
+          .toDec()
+          .lt(amount.toDec())
       ) {
         return {
           error: new InsufficientAmountError("Insufficient amount"),
