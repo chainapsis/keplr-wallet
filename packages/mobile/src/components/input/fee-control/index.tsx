@@ -174,7 +174,7 @@ export const FeeControl: FunctionComponent<{
             <FormattedMessage id="components.input.fee-control.title" />
           </Text>
 
-          {feeConfig.fees.map(fee => {
+          {feeConfig.fees.map((fee, i) => {
             return (
               <Text
                 key={fee.currency.coinMinimalDenom}
@@ -182,13 +182,13 @@ export const FeeControl: FunctionComponent<{
                   'body2',
                   hasError ? 'color-yellow-400' : 'color-white',
                 ])}>
-                {fee
+                {`${fee
                   .maxDecimals(6)
                   .inequalitySymbol(true)
                   .trim(true)
                   .shrink(true)
                   .hideIBCMetadata(true)
-                  .toString()}
+                  .toString()}${i === feeConfig.fees.length - 1 ? '' : '+'}`}
               </Text>
             );
           })}
