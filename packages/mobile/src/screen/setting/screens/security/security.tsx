@@ -16,7 +16,7 @@ export const SettingSecurityAndPrivacyScreen: FunctionComponent = observer(
     const intl = useIntl();
     const style = useStyle();
     const navigate = useNavigation<StackNavProp>();
-    const {keychainStore} = useStore();
+    const {keychainStore, uiConfigStore} = useStore();
 
     return (
       <React.Fragment>
@@ -93,6 +93,28 @@ export const SettingSecurityAndPrivacyScreen: FunctionComponent = observer(
                           'Setting.SecurityAndPrivacy.BioAuthentication',
                         );
                       }
+                    }}
+                  />
+                </Box>
+              }
+            />
+            <PageButton
+              title={intl.formatMessage({
+                id: 'page.setting.security.auto-lock-title',
+              })}
+              paragraph={intl.formatMessage({
+                id: 'page.setting.security.auto-lock-paragraph',
+              })}
+              endIcon={
+                <Box marginLeft={8}>
+                  <Toggle
+                    isOpen={uiConfigStore.autoLockConfig.isEnableAutoLock}
+                    setIsOpen={async () => {
+                      if (uiConfigStore.autoLockConfig.isEnableAutoLock) {
+                        uiConfigStore.autoLockConfig.disableAutoLock();
+                        return;
+                      }
+                      uiConfigStore.autoLockConfig.enableAutoLock();
                     }}
                   />
                 </Box>

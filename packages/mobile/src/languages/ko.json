@@ -243,6 +243,7 @@
   "page.setting.security.connected-websites-paragraph": "이 웹사이트들은 당신의 지갑 주소를 조회하고, 서명을 요청할 수 있습니다.",
   "page.setting.security.manage-WC-title": "Wallet Connect 관리",
   "page.setting.security.auto-lock-title": "자동 잠금 타이머",
+  "page.setting.security.auto-lock-paragraph": "Automatically lock Keplr when it is in background",
   "page.setting.security.change-password-title": "비밀번호 변경",
   "page.setting.security.bio-authentication-title": "바이오 인증 사용",
   "page.setting.security.enable-bio-authentication-title": "Enable Biometric Authentication",
