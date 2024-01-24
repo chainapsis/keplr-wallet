@@ -45,7 +45,7 @@ import {LedgerBLEProvider} from './src/provider/ledger-ble';
 import Bugsnag from '@bugsnag/react-native';
 import {ImportFromExtensionProvider} from 'keplr-wallet-mobile-private';
 import {AsyncKVStore} from './src/common';
-import {AutoLockProvider} from './src/components/unlock-modal/provider';
+import {AutoLock} from './src/components/unlock-modal';
 const semver = require('semver');
 
 const ThemeStatusBar: FunctionComponent = () => {
@@ -402,42 +402,40 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
                   <AppIntlProvider>
                     <NotificationProvider>
                       <LedgerBLEProvider>
-                        <AutoLockProvider>
-                          <ModalBaseProvider>
-                            <BottomSheetModalProvider>
-                              <ConfirmProvider>
-                                <InteractionModalsProvider>
-                                  <BugSnagErrorBoundary
-                                    FallbackComponent={ErrorBoundary}>
-                                    <ImportFromExtensionProvider>
-                                      {(() => {
-                                        if (
-                                          this.state
-                                            .codepushInitTestCompleted &&
-                                          this.state
-                                            .codepushInitNewVersionExists &&
-                                          this.state.codepush
-                                            .newVersionDownloadProgress != null
-                                        ) {
-                                          return (
-                                            <UpdateProgress
-                                              progress={
-                                                this.state.codepush
-                                                  .newVersionDownloadProgress
-                                              }
-                                            />
-                                          );
-                                        }
+                        <ModalBaseProvider>
+                          <BottomSheetModalProvider>
+                            <ConfirmProvider>
+                              <InteractionModalsProvider>
+                                <BugSnagErrorBoundary
+                                  FallbackComponent={ErrorBoundary}>
+                                  <AutoLock />
+                                  <ImportFromExtensionProvider>
+                                    {(() => {
+                                      if (
+                                        this.state.codepushInitTestCompleted &&
+                                        this.state
+                                          .codepushInitNewVersionExists &&
+                                        this.state.codepush
+                                          .newVersionDownloadProgress != null
+                                      ) {
+                                        return (
+                                          <UpdateProgress
+                                            progress={
+                                              this.state.codepush
+                                                .newVersionDownloadProgress
+                                            }
+                                          />
+                                        );
+                                      }
 
-                                        return <AppNavigation />;
-                                      })()}
-                                    </ImportFromExtensionProvider>
-                                  </BugSnagErrorBoundary>
-                                </InteractionModalsProvider>
-                              </ConfirmProvider>
-                            </BottomSheetModalProvider>
-                          </ModalBaseProvider>
-                        </AutoLockProvider>
+                                      return <AppNavigation />;
+                                    })()}
+                                  </ImportFromExtensionProvider>
+                                </BugSnagErrorBoundary>
+                              </InteractionModalsProvider>
+                            </ConfirmProvider>
+                          </BottomSheetModalProvider>
+                        </ModalBaseProvider>
                       </LedgerBLEProvider>
                     </NotificationProvider>
                   </AppIntlProvider>

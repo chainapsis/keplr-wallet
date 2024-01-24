@@ -20,9 +20,6 @@ import {NeedHelpModal} from '../../components/modal';
 import Bugsnag from '@bugsnag/react-native';
 import {useAppUpdate} from '../../provider/app-update';
 import {KeyRingStore} from '@keplr-wallet/stores-core';
-import {useAutoLock} from '../../components/unlock-modal/provider';
-import {useLayoutEffectOnce} from '../../hooks';
-import {useUnmount} from '../../hooks/use-unmount';
 
 const waitAccountInit = async (
   chainStore: IChainStore,
@@ -63,7 +60,6 @@ export const UnlockScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation<StackNavProp>();
   const appUpdate = useAppUpdate();
   const route = useRoute<RouteProp<RootStackParamList, 'Unlock'>>();
-  const autoLock = useAutoLock();
   const {disableAutoBioAuth} = route.params ?? {};
 
   const [isOpenHelpModal, setIsOpenHelpModal] = useState(false);
@@ -85,16 +81,6 @@ export const UnlockScreen: FunctionComponent = observer(() => {
     appUpdate.codepushInitNewVersionExists,
     appUpdate.codepushInitTestCompleted,
   ]);
-
-  //NOTE 실제 unlock페이지에서는 auto-lock으로 생기는 unlock페이지가 생기면 안됨
-  //하지만 auto-unlock는 navigation에 접근이 안되기 때문에 context로 상태를 조정함
-  useLayoutEffectOnce(() => {
-    autoLock.setIsUnlockPage(true);
-  });
-  useUnmount(() => {
-    autoLock.setIsUnlockPage(false);
-    autoLock.unlock();
-  });
 
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
