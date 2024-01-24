@@ -81,7 +81,7 @@ const ModalRender: FunctionComponent<{
     return () => {
       listener.remove();
     };
-  }, [modalState.options, modalStates.modals]);
+  }, [modalStates.modals]);
 
   return (
     <ModalBaseContext.Provider

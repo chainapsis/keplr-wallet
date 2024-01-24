@@ -100,6 +100,9 @@ export const AutoLockUnlockModal = registerModal(
         const isCorrect = await keyRingStore.checkPassword(bioPassword);
         if (isCorrect) {
           unlock();
+          // 모달이 내려가는 중에 다시 auto lock으로 인해서 lock이 되면 이전의 password가 남아있는 경우가 있음
+          // 그래서 따로 지워줌
+          setPassword('');
         }
       } catch (e) {
         console.log(e);
@@ -131,6 +134,9 @@ export const AutoLockUnlockModal = registerModal(
         const isCorrect = await keyRingStore.checkPassword(password);
         if (isCorrect) {
           unlock();
+          // 모달이 내려가는 중에 다시 auto lock으로 인해서 lock이 되면 이전의 password가 남아있는 경우가 있음
+          // 그래서 따로 지워줌
+          setPassword('');
           setIsLoading(false);
           return;
         }
