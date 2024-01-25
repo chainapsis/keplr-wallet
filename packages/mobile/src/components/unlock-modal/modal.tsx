@@ -1,23 +1,15 @@
-import React, {
-  FunctionComponent,
-  PropsWithChildren,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from 'react';
+import React, {useEffect, useLayoutEffect, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../stores';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStyle} from '../../styles';
-import {ScreenBackground} from '../page';
 import {
   BackHandler,
   Dimensions,
+  Keyboard,
   Platform,
   ScaledSize,
-  StyleSheet,
   Text,
-  View,
 } from 'react-native';
 import {Box} from '../box';
 import LottieView from 'lottie-react-native';
@@ -29,48 +21,41 @@ import delay from 'delay';
 import {NeedHelpModal} from '../modal';
 import Bugsnag from '@bugsnag/react-native';
 import {registerModal} from '../modal/v2';
-import {ScrollViewRegisterContainer} from '../../screen/register/components/scroll-view-register-container';
-
-const AutoLockLockModalBase: FunctionComponent<PropsWithChildren> = ({
-  children,
-}) => {
-  const [deviceSize, setDeviceSize] = useState<{
-    width: number;
-    height: number;
-  }>(() => {
-    const window = Dimensions.get('window');
-    return {
-      width: window.width,
-      height: window.height,
-    };
-  });
-  useLayoutEffect(() => {
-    const fn = ({window}: {window: ScaledSize}) => {
-      setDeviceSize({
-        width: window.width,
-        height: window.height,
-      });
-    };
-
-    const listener = Dimensions.addEventListener('change', fn);
-    return () => {
-      listener.remove();
-    };
-  }, []);
-
-  return (
-    <View
-      style={{
-        height: deviceSize.height,
-      }}>
-      {children}
-    </View>
-  );
-};
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import Reanimated, {
+  useAnimatedKeyboard,
+  useAnimatedStyle,
+} from 'react-native-reanimated';
+import {ScreenBackground} from '../page';
 
 export const AutoLockUnlockModal = registerModal(
   observer(({unlock}: {unlock: () => void}) => {
     const {keyRingStore, keychainStore} = useStore();
+
+    const [deviceSize, setDeviceSize] = useState<{
+      width: number;
+      height: number;
+    }>(() => {
+      const window = Dimensions.get('window');
+      return {
+        width: window.width,
+        height: window.height,
+      };
+    });
+    useLayoutEffect(() => {
+      const fn = ({window}: {window: ScaledSize}) => {
+        setDeviceSize({
+          width: window.width,
+          height: window.height,
+        });
+      };
+
+      const listener = Dimensions.addEventListener('change', fn);
+      return () => {
+        listener.remove();
+      };
+    }, []);
 
     const intl = useIntl();
     const style = useStyle();
@@ -172,120 +157,148 @@ export const AutoLockUnlockModal = registerModal(
       await tryUnlock(password);
     };
 
-    return (
-      <Box style={{flexGrow: 1}}>
-        <ScreenBackground backgroundMode={'default'} />
-        <View
-          style={StyleSheet.flatten([
-            style.flatten(
-              ['flex-grow-1'],
-              /*
-             In android, overflow of container view is hidden by default.
-             That's why even if you make overflow visible to the scroll view's style, it will behave like hidden unless you change the overflow property of this container view.
-             This is done by the following reasons.
-                - On Android, header or bottom tabbars are opaque by default, so overflow hidden is usually not a problem.
-                - Bug where overflow visible is ignored for unknown reason if ScrollView has RefreshControl .
-                - If the overflow of the container view is not hidden, even if the overflow of the scroll view is hidden, there is a bug that the refresh control created from above still appears outside the scroll view.
-             */
-              [Platform.OS !== 'ios' && 'overflow-hidden'],
-            ),
-          ])}>
-          <ScrollViewRegisterContainer
-            contentContainerStyle={style.flatten([
-              'flex-grow-1',
-              'padding-x-24',
-            ])}>
-            <Box style={{flex: 1}} alignY="center">
-              <Box style={{flex: 1}} />
+    const safeAreaInsets = useSafeAreaInsets();
 
-              <Box
-                alignX="center"
-                style={{zIndex: 2}}
-                // backgroundColor={'red'}
-              >
-                <LottieView
-                  source={require('../../public/assets/lottie/wallet/logo.json')}
-                  style={{width: 200, height: 155}}
-                />
+    const keyboard = (() => {
+      // ios에서만 keyboard height를 고려한다.
+      // 안드로이드는 의외로 지혼자 keyboard 처리가 잘 된다...
+      // 당연히 platform이 동적으로 바뀔 순 없으므로 linter를 무시한다.
+      if (Platform.OS === 'ios') {
+        return useAnimatedKeyboard();
+      } else {
+        return {
+          height: {
+            value: 0,
+          },
+        };
+      }
+    })();
+
+    const viewStyle = useAnimatedStyle(() => {
+      return {
+        paddingTop: safeAreaInsets.top,
+        paddingBottom: Math.max(safeAreaInsets.bottom, keyboard.height.value),
+      };
+    });
+
+    return (
+      <TouchableWithoutFeedback
+        onPress={Keyboard.dismiss}
+        containerStyle={{
+          width: deviceSize.width,
+          height: deviceSize.height,
+        }}
+        style={{
+          flex: 1,
+        }}>
+        <ScreenBackground backgroundMode={'default'} />
+        <Reanimated.View
+          style={[
+            viewStyle,
+            {...style.flatten(['height-full', 'padding-x-24'])},
+          ]}>
+          <Box alignY="center" style={{flexGrow: 1}}>
+            <Box style={{flex: 1}} />
+
+            <Box alignX="center">
+              <LottieView
+                source={require('../../public/assets/lottie/wallet/logo.json')}
+                style={{width: 200, height: 155}}
+                autoPlay={keyRingStore.needMigration}
+                loop={keyRingStore.needMigration}
+              />
+
+              {keyRingStore.needMigration ? (
+                <React.Fragment>
+                  <Text style={style.flatten(['h1', 'color-text-high'])}>
+                    <FormattedMessage id="page.unlock.paragraph-section.keplr-here" />
+                  </Text>
+
+                  <Gutter size={12} />
+
+                  <Text style={style.flatten(['subtitle4', 'color-gray-200'])}>
+                    <FormattedMessage id="page.unlock.paragraph-section.enter-password-to-upgrade" />
+                  </Text>
+                </React.Fragment>
+              ) : (
                 <Text style={style.flatten(['h1', 'color-text-high'])}>
                   <FormattedMessage id="page.unlock.paragraph-section.welcome-back" />
                 </Text>
-              </Box>
-
-              <Box>
-                <Gutter size={70} />
-
-                <TextInput
-                  label={intl.formatMessage({
-                    id: 'page.unlock.bottom-section.password-input-label',
-                  })}
-                  value={password}
-                  secureTextEntry={true}
-                  returnKeyType="done"
-                  onChangeText={setPassword}
-                  onSubmitEditing={onPressSubmit}
-                  error={
-                    error
-                      ? intl.formatMessage({id: 'error.invalid-password'})
-                      : undefined
-                  }
-                />
-
-                <Gutter size={34} />
-
-                <Button
-                  text={
-                    keyRingStore.needMigration
-                      ? intl.formatMessage({id: 'page.unlock.migration-button'})
-                      : intl.formatMessage({id: 'page.unlock.unlock-button'})
-                  }
-                  size="large"
-                  onPress={onPressSubmit}
-                  loading={isLoading}
-                  containerStyle={{width: '100%'}}
-                />
-
-                <Gutter size={32} />
-
-                {keychainStore.isBiometryOn ? (
-                  <TextButton
-                    text="Use Biometric Authentication"
-                    size="large"
-                    loading={isBiometricLoading}
-                    onPress={async () => {
-                      await tryBiometric();
-                    }}
-                  />
-                ) : null}
-              </Box>
-
-              <Box style={{flex: 1}} />
-
-              <Box>
-                <TextButton
-                  color="faint"
-                  text={intl.formatMessage({
-                    id: 'page.unlock.need-help-button',
-                  })}
-                  size="large"
-                  onPress={() => setIsOpenHelpModal(true)}
-                />
-
-                <Gutter size={32} />
-              </Box>
+              )}
             </Box>
 
-            <NeedHelpModal
-              isOpen={isOpenHelpModal}
-              setIsOpen={setIsOpenHelpModal}
-            />
-          </ScrollViewRegisterContainer>
-        </View>
-      </Box>
+            <Box>
+              <Gutter size={70} />
+
+              <TextInput
+                label={intl.formatMessage({
+                  id: 'page.unlock.bottom-section.password-input-label',
+                })}
+                value={password}
+                secureTextEntry={true}
+                returnKeyType="done"
+                onChangeText={setPassword}
+                onSubmitEditing={onPressSubmit}
+                error={
+                  error
+                    ? intl.formatMessage({id: 'error.invalid-password'})
+                    : undefined
+                }
+              />
+
+              <Gutter size={34} />
+
+              <Button
+                text={
+                  keyRingStore.needMigration
+                    ? intl.formatMessage({id: 'page.unlock.migration-button'})
+                    : intl.formatMessage({id: 'page.unlock.unlock-button'})
+                }
+                size="large"
+                onPress={onPressSubmit}
+                loading={isLoading}
+                containerStyle={{width: '100%'}}
+              />
+
+              <Gutter size={32} />
+
+              {keychainStore.isBiometryOn ? (
+                <TextButton
+                  text="Use Biometric Authentication"
+                  size="large"
+                  loading={isBiometricLoading}
+                  onPress={async () => {
+                    await tryBiometric();
+                  }}
+                />
+              ) : null}
+            </Box>
+
+            <Box style={{flex: 1}} />
+
+            <Box>
+              <TextButton
+                color="faint"
+                text={intl.formatMessage({
+                  id: 'page.unlock.need-help-button',
+                })}
+                size="large"
+                onPress={() => setIsOpenHelpModal(true)}
+              />
+
+              <Gutter size={32} />
+            </Box>
+          </Box>
+        </Reanimated.View>
+
+        <NeedHelpModal
+          isOpen={isOpenHelpModal}
+          setIsOpen={setIsOpenHelpModal}
+        />
+      </TouchableWithoutFeedback>
     );
   }),
   {
-    container: AutoLockLockModalBase,
     openImmediately: Platform.OS === 'android',
   },
 );
