@@ -286,6 +286,6 @@ export const AutoLockUnlockModal = registerModal(
   }),
   {
     container: AutoLockLockModalBase,
-    openImmediately: true,
+    openImmediately: Platform.OS === 'android',
   },
 );

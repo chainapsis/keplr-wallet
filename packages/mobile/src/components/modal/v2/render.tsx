@@ -190,29 +190,25 @@ const ModalRenderImpl: FunctionComponent<{
               if (translateY.value == null) {
                 translateY.value = -layoutHeight;
               }
-              translateY.value = withSpring(
-                0,
-                defaultSpringConfig,
-                finished => {
-                  if (finished) {
-                    duringModalTransition.value = 'not';
-                  }
-                },
-              );
+              translateY.value = modalState.options?.openImmediately
+                ? 0
+                : withSpring(0, defaultSpringConfig, finished => {
+                    if (finished) {
+                      duringModalTransition.value = 'not';
+                    }
+                  });
               break;
             case 'center':
               if (translateY.value == null) {
                 translateY.value = deviceSize.height / 2 + layoutHeight / 2;
               }
-              translateY.value = withSpring(
-                0,
-                defaultSpringConfig,
-                finished => {
-                  if (finished) {
-                    duringModalTransition.value = 'not';
-                  }
-                },
-              );
+              translateY.value = modalState.options?.openImmediately
+                ? 0
+                : withSpring(0, defaultSpringConfig, finished => {
+                    if (finished) {
+                      duringModalTransition.value = 'not';
+                    }
+                  });
               break;
             default:
               if (translateY.value == null) {
