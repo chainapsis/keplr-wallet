@@ -45,6 +45,7 @@ import {LedgerBLEProvider} from './src/provider/ledger-ble';
 import Bugsnag from '@bugsnag/react-native';
 import {ImportFromExtensionProvider} from 'keplr-wallet-mobile-private';
 import {AsyncKVStore} from './src/common';
+import {AutoLock} from './src/components/unlock-modal';
 const semver = require('semver');
 
 const ThemeStatusBar: FunctionComponent = () => {
@@ -407,6 +408,7 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
                               <InteractionModalsProvider>
                                 <BugSnagErrorBoundary
                                   FallbackComponent={ErrorBoundary}>
+                                  <AutoLock />
                                   <ImportFromExtensionProvider>
                                     {(() => {
                                       if (

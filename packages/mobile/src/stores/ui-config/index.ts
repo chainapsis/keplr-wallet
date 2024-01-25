@@ -18,6 +18,7 @@ import {CopyAddressConfig} from './copy-address';
 import {ChainStore} from '../chain';
 import {AddressBookConfig} from './address-book';
 import {MessageRequester} from '@keplr-wallet/router';
+import {AutoLockConfig} from './auto-lock';
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
@@ -36,6 +37,7 @@ export class UIConfigStore {
 
   public readonly copyAddressConfig: CopyAddressConfig;
   public readonly addressBookConfig: AddressBookConfig;
+  public readonly autoLockConfig: AutoLockConfig;
 
   @observable
   protected _isInitialized: boolean = false;
@@ -87,6 +89,7 @@ export class UIConfigStore {
       kvStores.kvStore,
       chainStore,
     );
+    this.autoLockConfig = new AutoLockConfig(kvStores.kvStore, chainStore);
     this.addressBookConfig = new AddressBookConfig(
       kvStores.addressBookKVStore,
       messageRequester,
@@ -151,6 +154,7 @@ export class UIConfigStore {
     await Promise.all([
       this.copyAddressConfig.init(),
       this.addressBookConfig.init(),
+      this.autoLockConfig.init(),
     ]);
 
     runInAction(() => {
