@@ -6,7 +6,9 @@ export type BackgroundMode = 'secondary' | 'default' | null;
 
 export const ScreenBackground: FunctionComponent<{
   backgroundMode: BackgroundMode;
-}> = ({backgroundMode}) => {
+
+  disableVerticalPadding?: boolean;
+}> = ({backgroundMode, disableVerticalPadding}) => {
   const style = useStyle();
 
   return backgroundMode ? (
@@ -15,8 +17,8 @@ export const ScreenBackground: FunctionComponent<{
         position: 'absolute',
         left: 0,
         right: 0,
-        top: -100,
-        bottom: -100,
+        top: disableVerticalPadding ? 0 : -100,
+        bottom: disableVerticalPadding ? 0 : -100,
       }}>
       {backgroundMode === 'secondary' ? (
         <View

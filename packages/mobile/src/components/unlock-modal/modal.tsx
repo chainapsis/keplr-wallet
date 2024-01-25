@@ -191,7 +191,10 @@ export const AutoLockUnlockModal = registerModal(
         style={{
           flex: 1,
         }}>
-        <ScreenBackground backgroundMode={'default'} />
+        <ScreenBackground
+          backgroundMode={'default'}
+          disableVerticalPadding={true}
+        />
         <Reanimated.View
           style={[
             viewStyle,
