@@ -1,6 +1,7 @@
 import React, {
   FunctionComponent,
   PropsWithChildren,
+  useEffect,
   useLayoutEffect,
   useState,
 } from 'react';
@@ -82,7 +83,7 @@ export const AutoLockUnlockModal = registerModal(
     const [error, setError] = useState<Error | undefined>();
 
     //NOTE 안드로이드에서 Lock 모달이 있을때 뒤로가기 하면 기존 unlock페이지의 로직처럼 앱을 닫게 해야함
-    useLayoutEffect(() => {
+    useEffect(() => {
       const listener = BackHandler.addEventListener('hardwareBackPress', () => {
         BackHandler.exitApp();
         return true;
