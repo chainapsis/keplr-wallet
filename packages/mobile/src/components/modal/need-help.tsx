@@ -5,11 +5,11 @@ import {BaseModalHeader} from './modal';
 import {useIntl} from 'react-intl';
 import {Gutter} from '../gutter';
 import {Chip} from '../chip';
-import DeviceInfo from 'react-native-device-info';
 import {useStyle} from '../../styles';
 import {Text} from 'react-native';
 import {Button} from '../button';
 import * as WebBrowser from 'expo-web-browser';
+import {APP_VERSION, CODEPUSH_VERSION} from '../../../constants';
 
 export const NeedHelpModal = registerCardModal(() => {
   const intl = useIntl();
@@ -25,7 +25,7 @@ export const NeedHelpModal = registerCardModal(() => {
       <Gutter size={12} />
 
       <Chip
-        text={`Keplr version: ${DeviceInfo.getVersion()}`}
+        text={`Keplr version: ${CODEPUSH_VERSION || APP_VERSION}`}
         textStyle={{color: style.get('color-text-high').color}}
         backgroundStyle={style.flatten(['padding-x-12', 'padding-y-6'])}
       />
