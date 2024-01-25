@@ -218,15 +218,13 @@ const ModalRenderImpl: FunctionComponent<{
               if (translateY.value == null) {
                 translateY.value = layoutHeight;
               }
-              translateY.value = withSpring(
-                0,
-                defaultSpringConfig,
-                finished => {
-                  if (finished) {
-                    duringModalTransition.value = 'not';
-                  }
-                },
-              );
+              translateY.value = modalState.options?.openImmediately
+                ? 0
+                : withSpring(0, defaultSpringConfig, finished => {
+                    if (finished) {
+                      duringModalTransition.value = 'not';
+                    }
+                  });
           }
         }
       }
@@ -236,6 +234,7 @@ const ModalRenderImpl: FunctionComponent<{
       duringModalTransition,
       layoutHeight,
       modalState.isClosing,
+      modalState.options.openImmediately,
       translateY,
     ]);
 

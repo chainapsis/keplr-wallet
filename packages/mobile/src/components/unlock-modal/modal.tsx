@@ -286,5 +286,6 @@ export const AutoLockUnlockModal = registerModal(
   }),
   {
     container: AutoLockLockModalBase,
+    openImmediately: true,
   },
 );

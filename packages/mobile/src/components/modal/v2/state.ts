@@ -6,6 +6,7 @@ export interface ModalOptions {
 
   container?: React.ElementType;
   containerProps?: any;
+  openImmediately?: boolean;
 }
 
 export class ModalState {
