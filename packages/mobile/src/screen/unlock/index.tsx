@@ -7,7 +7,7 @@ import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {IAccountStore, IChainStore, WalletStatus} from '@keplr-wallet/stores';
 import {autorun} from 'mobx';
 import {RootStackParamList, StackNavProp} from '../../navigation';
-import {Keyboard, Platform, SafeAreaView, Text} from 'react-native';
+import {Keyboard, Platform, Text} from 'react-native';
 import {Box} from '../../components/box';
 import LottieView from 'lottie-react-native';
 import {Gutter} from '../../components/gutter';
@@ -24,6 +24,7 @@ import Reanimated, {
   useAnimatedStyle,
 } from 'react-native-reanimated';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 const waitAccountInit = async (
   chainStore: IChainStore,
@@ -256,6 +257,8 @@ export const UnlockScreen: FunctionComponent = observer(() => {
     navigation,
   ]);
 
+  const safeAreaInsets = useSafeAreaInsets();
+
   const keyboard = (() => {
     // ios에서만 keyboard height를 고려한다.
     // 안드로이드는 의외로 지혼자 keyboard 처리가 잘 된다...
@@ -273,123 +276,119 @@ export const UnlockScreen: FunctionComponent = observer(() => {
 
   const viewStyle = useAnimatedStyle(() => {
     return {
-      paddingBottom: keyboard.height.value,
+      paddingTop: safeAreaInsets.top,
+      paddingBottom: Math.max(safeAreaInsets.bottom, keyboard.height.value),
     };
   });
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView>
-        <Reanimated.View
-          style={[
-            viewStyle,
-            {...style.flatten(['height-full', 'padding-x-24'])},
-          ]}>
-          <Box alignY="center" style={{flexGrow: 1}}>
-            <Box style={{flex: 1}} />
+      <Reanimated.View
+        style={[
+          viewStyle,
+          {...style.flatten(['height-full', 'padding-x-24'])},
+        ]}>
+        <Box alignY="center" style={{flexGrow: 1}}>
+          <Box style={{flex: 1}} />
 
-            <Box alignX="center">
-              <LottieView
-                source={require('../../public/assets/lottie/wallet/logo.json')}
-                style={{width: 200, height: 155}}
-                autoPlay={keyRingStore.needMigration}
-                loop={keyRingStore.needMigration}
-              />
+          <Box alignX="center">
+            <LottieView
+              source={require('../../public/assets/lottie/wallet/logo.json')}
+              style={{width: 200, height: 155}}
+              autoPlay={keyRingStore.needMigration}
+              loop={keyRingStore.needMigration}
+            />
 
-              {keyRingStore.needMigration ? (
-                <React.Fragment>
-                  <Text style={style.flatten(['h1', 'color-text-high'])}>
-                    <FormattedMessage id="page.unlock.paragraph-section.keplr-here" />
-                  </Text>
-
-                  <Gutter size={12} />
-
-                  <Text style={style.flatten(['subtitle4', 'color-gray-200'])}>
-                    <FormattedMessage id="page.unlock.paragraph-section.enter-password-to-upgrade" />
-                  </Text>
-                </React.Fragment>
-              ) : (
+            {keyRingStore.needMigration ? (
+              <React.Fragment>
                 <Text style={style.flatten(['h1', 'color-text-high'])}>
-                  <FormattedMessage id="page.unlock.paragraph-section.welcome-back" />
+                  <FormattedMessage id="page.unlock.paragraph-section.keplr-here" />
                 </Text>
-              )}
-            </Box>
 
-            <Box
-              style={{
-                opacity: isReady ? 1 : 0,
-              }}>
-              <Gutter size={70} />
+                <Gutter size={12} />
 
-              <TextInput
-                label={intl.formatMessage({
-                  id: 'page.unlock.bottom-section.password-input-label',
-                })}
-                value={password}
-                secureTextEntry={true}
-                returnKeyType="done"
-                onChangeText={setPassword}
-                onSubmitEditing={onPressSubmit}
-                error={
-                  error
-                    ? intl.formatMessage({id: 'error.invalid-password'})
-                    : undefined
-                }
-              />
-
-              <Gutter size={34} />
-
-              <Button
-                text={
-                  keyRingStore.needMigration
-                    ? intl.formatMessage({id: 'page.unlock.migration-button'})
-                    : intl.formatMessage({id: 'page.unlock.unlock-button'})
-                }
-                size="large"
-                onPress={onPressSubmit}
-                loading={isLoading}
-                containerStyle={{width: '100%'}}
-              />
-
-              <Gutter size={32} />
-
-              {keychainStore.isBiometryOn ? (
-                <TextButton
-                  text="Use Biometric Authentication"
-                  size="large"
-                  loading={isBiometricLoading}
-                  onPress={async () => {
-                    await tryBiometric();
-                  }}
-                />
-              ) : null}
-            </Box>
-
-            <Box style={{flex: 1}} />
-
-            <Box
-              style={{
-                opacity: isReady ? 1 : 0,
-              }}>
-              <TextButton
-                color="faint"
-                text={intl.formatMessage({
-                  id: 'page.unlock.need-help-button',
-                })}
-                size="large"
-                onPress={() => setIsOpenHelpModal(true)}
-              />
-
-              <Gutter size={32} />
-            </Box>
+                <Text style={style.flatten(['subtitle4', 'color-gray-200'])}>
+                  <FormattedMessage id="page.unlock.paragraph-section.enter-password-to-upgrade" />
+                </Text>
+              </React.Fragment>
+            ) : (
+              <Text style={style.flatten(['h1', 'color-text-high'])}>
+                <FormattedMessage id="page.unlock.paragraph-section.welcome-back" />
+              </Text>
+            )}
           </Box>
-        </Reanimated.View>
 
-        <NeedHelpModal
-          isOpen={isOpenHelpModal}
-          setIsOpen={setIsOpenHelpModal}
-        />
-      </SafeAreaView>
+          <Box
+            style={{
+              opacity: isReady ? 1 : 0,
+            }}>
+            <Gutter size={70} />
+
+            <TextInput
+              label={intl.formatMessage({
+                id: 'page.unlock.bottom-section.password-input-label',
+              })}
+              value={password}
+              secureTextEntry={true}
+              returnKeyType="done"
+              onChangeText={setPassword}
+              onSubmitEditing={onPressSubmit}
+              error={
+                error
+                  ? intl.formatMessage({id: 'error.invalid-password'})
+                  : undefined
+              }
+            />
+
+            <Gutter size={34} />
+
+            <Button
+              text={
+                keyRingStore.needMigration
+                  ? intl.formatMessage({id: 'page.unlock.migration-button'})
+                  : intl.formatMessage({id: 'page.unlock.unlock-button'})
+              }
+              size="large"
+              onPress={onPressSubmit}
+              loading={isLoading}
+              containerStyle={{width: '100%'}}
+            />
+
+            <Gutter size={32} />
+
+            {keychainStore.isBiometryOn ? (
+              <TextButton
+                text="Use Biometric Authentication"
+                size="large"
+                loading={isBiometricLoading}
+                onPress={async () => {
+                  await tryBiometric();
+                }}
+              />
+            ) : null}
+          </Box>
+
+          <Box style={{flex: 1}} />
+
+          <Box
+            style={{
+              opacity: isReady ? 1 : 0,
+            }}>
+            <TextButton
+              color="faint"
+              text={intl.formatMessage({
+                id: 'page.unlock.need-help-button',
+              })}
+              size="large"
+              onPress={() => setIsOpenHelpModal(true)}
+            />
+
+            <Gutter size={32} />
+          </Box>
+        </Box>
+      </Reanimated.View>
+
+      <NeedHelpModal isOpen={isOpenHelpModal} setIsOpen={setIsOpenHelpModal} />
     </TouchableWithoutFeedback>
   );
 });
