@@ -28,6 +28,7 @@ import {VoteIcon} from '../../components/icon';
 import {useIntl} from 'react-intl';
 import {AppUpdateTopLabel} from './app-update';
 import {DualChart} from './components/chart';
+import {IbcHistoryView} from './components/ibc-history-view';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -200,7 +201,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
               setTabStatus(key as TabStatus);
             }}
             itemMinWidth={92}
-            size="large"
             isNotReady={isNotReady}
           />
         </YAxis>
@@ -328,6 +328,10 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
         <Box paddingX={12}>
           <ClaimAll isNotReady={isNotReady} />
+        </Box>
+
+        <Box paddingX={12}>
+          <IbcHistoryView isNotReady={isNotReady} />
         </Box>
 
         {!isNotReady ? (
