@@ -43,8 +43,8 @@ export const LayeredHorizontalRadioGroup: FunctionComponent<
       case 'large': {
         containerStyle = {
           ...containerStyle,
-          height: 38,
-          borderRadius: 19,
+          height: 44,
+          borderRadius: 44,
           paddingHorizontal: 2.5,
         };
         break;
@@ -52,8 +52,8 @@ export const LayeredHorizontalRadioGroup: FunctionComponent<
       default: {
         containerStyle = {
           ...containerStyle,
-          height: 30,
-          borderRadius: 15,
+          height: 38,
+          borderRadius: 44,
           paddingHorizontal: 2,
         };
         break;
@@ -144,8 +144,8 @@ const getRadioItemStyle = ({
     case 'large': {
       style = {
         ...style,
-        height: 32,
-        borderRadius: 16.5,
+        height: 38,
+        borderRadius: 44,
         paddingHorizontal: 10,
       };
       break;
@@ -153,8 +153,8 @@ const getRadioItemStyle = ({
     default: {
       style = {
         ...style,
-        height: 26,
-        borderRadius: 13,
+        height: 32,
+        borderRadius: 35,
         paddingHorizontal: 10,
       };
       break;
