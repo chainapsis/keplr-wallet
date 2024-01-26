@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite';
 import React, {FunctionComponent, useEffect, useState} from 'react';
-import {StyleSheet, Text} from 'react-native';
+import {Platform, StyleSheet, Text} from 'react-native';
 import {FiatOnRampServiceInfo, FiatOnRampServiceInfos} from '../../config.ui';
 import {simpleFetch} from '@keplr-wallet/simple-fetch';
 import {useStore} from '../../stores';
@@ -188,18 +188,29 @@ export const BuyModal = registerCardModal(
           </Text>
         </Box>
         <Gutter size={12} />
-        {buySupportServiceInfos.map(serviceInfo => {
-          return (
-            <React.Fragment key={serviceInfo.serviceId}>
-              <ServiceItem
-                navigation={navigation}
-                serviceInfo={serviceInfo}
-                close={() => setIsOpen(false)}
-              />
-              <Gutter size={12} />
-            </React.Fragment>
-          );
-        })}
+        {buySupportServiceInfos
+          .filter(serviceInfo => {
+            if (Platform.OS === 'ios') {
+              // appstore에서의 리뷰 이슈로 인해서 일단 kado를 ios에서 disable함.
+              if (serviceInfo.serviceId === 'kado') {
+                return false;
+              }
+            }
+
+            return true;
+          })
+          .map(serviceInfo => {
+            return (
+              <React.Fragment key={serviceInfo.serviceId}>
+                <ServiceItem
+                  navigation={navigation}
+                  serviceInfo={serviceInfo}
+                  close={() => setIsOpen(false)}
+                />
+                <Gutter size={12} />
+              </React.Fragment>
+            );
+          })}
         <Gutter size={8} />
         <Button
           size="large"
