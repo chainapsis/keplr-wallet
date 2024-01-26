@@ -300,9 +300,12 @@
   "page.suggest-chain.title": "Add {chainName} to Keplr",
   "page.suggest-chain.community-info-view.community-driven-chip": "Community driven",
   "page.suggest-chain.community-info-view.paragraph": "<b>{origin}</b> would like to add blockchain <b>{chainId}</b> to Keplr.",
+  "page.suggest-chain.community-info-view.add-chain-as-suggested-button": "Add chain as suggested",
   "page.suggest-chain.raw-info-view.guide-title": "Before You Approve",
   "page.suggest-chain.raw-info-view.guide-paragraph": "This chain’s info is not available on Keplr Chain Registry. Keplr recommends that ‘suggest chain’ info be managed by the community.",
   "page.suggest-chain.raw-info-view.chain-registry-link-text": "Click here to update chain info on Github",
+  "page.suggest-chain.origin-info-view.guide-title": "Before You Approve",
+  "page.suggest-chain.origin-info-view.guide-paragraph": "Adding this chain requires information from a web page that is not managed by Keplr.",
 
   "page.unlock.star-migration-button": "Start Migration",
   "page.unlock.upgrade-in-progress": "Upgrade in progress",

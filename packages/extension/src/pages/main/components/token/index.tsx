@@ -864,6 +864,9 @@ const CopyAddressButton: FunctionComponent<{
                 ? ColorPalette["gray-300"]
                 : ColorPalette["gray-200"]
             }
+            style={{
+              whiteSpace: "nowrap",
+            }}
           >
             <FormattedMessage id="page.main.components.token-item.copy-address.copied" />
           </Caption2>
