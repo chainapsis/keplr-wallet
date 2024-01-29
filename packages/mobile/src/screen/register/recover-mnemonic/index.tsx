@@ -2,7 +2,7 @@ import React, {FunctionComponent} from 'react';
 import {observer} from 'mobx-react-lite';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStyle} from '../../../styles';
-import {Text, TextInput as NativeTextInput} from 'react-native';
+import {Platform, Text, TextInput as NativeTextInput} from 'react-native';
 import {XAxis} from '../../../components/axis';
 import {Button} from '../../../components/button';
 import {Box} from '../../../components/box';
@@ -16,6 +16,7 @@ import {Bip44PathView, useBIP44PathState} from '../components/bip-path-44';
 import {ScrollViewRegisterContainer} from '../components/scroll-view-register-container';
 import {VerticalCollapseTransition} from '../../../components/transition';
 import {NamePasswordInput} from '../components/name-password-input';
+import {useStore} from '../../../stores';
 
 const bip39 = require('bip39');
 
@@ -45,6 +46,8 @@ function isPrivateKey(str: string): boolean {
 }
 
 export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
+  const {uiConfigStore} = useStore();
+
   const intl = useIntl();
   const style = useStyle();
   const navigation = useNavigation<StackNavProp>();
@@ -252,13 +255,31 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
                     text={'Paste'}
                     size="large"
                     onPress={async () => {
-                      const text = await Clipboard.getStringAsync();
-                      if (text) {
-                        setValue('recoveryPhrase', text, {
-                          shouldValidate: true,
-                        });
+                      let wasAutoLockEnabled =
+                        uiConfigStore.autoLockConfig.isEnableAutoLock;
+                      // ios에서 붙여넣기 할때 native modal이 뜨면서 app state가 background로 바뀌는데
+                      // 이때문에 auto lock이 되어버린다.
+                      // 일단 대충 이 문제를 해결하기 위해서 ios에서는 붙여넣기 전에 auto lock을 끈다.
+                      if (Platform.OS === 'ios') {
+                        if (wasAutoLockEnabled) {
+                          await uiConfigStore.autoLockConfig.disableAutoLock();
+                        }
+                      }
+                      try {
+                        const text = await Clipboard.getStringAsync();
+                        if (text) {
+                          setValue('recoveryPhrase', text, {
+                            shouldValidate: true,
+                          });
 
-                        setFocus('name');
+                          setFocus('name');
+                        }
+                      } finally {
+                        if (Platform.OS === 'ios') {
+                          if (wasAutoLockEnabled) {
+                            await uiConfigStore.autoLockConfig.enableAutoLock();
+                          }
+                        }
                       }
                     }}
                   />
