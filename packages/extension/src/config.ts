@@ -2317,6 +2317,39 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: [],
   },
+  {
+    rpc: "https://rpc-passage.keplr.app",
+    rest: "https://lcd-passage.keplr.app",
+    chainId: "passage-2",
+    chainName: "Passage",
+    stakeCurrency: {
+      coinDenom: "PASG",
+      coinMinimalDenom: "upasg",
+      coinDecimals: 6,
+      coinGeckoId: "passage",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("pasg"),
+    currencies: [
+      {
+        coinDenom: "PASG",
+        coinMinimalDenom: "upasg",
+        coinDecimals: 6,
+        coinGeckoId: "passage",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "PASG",
+        coinMinimalDenom: "upasg",
+        coinDecimals: 6,
+        coinGeckoId: "passage",
+      },
+    ],
+    features: ["cosmwasm"],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
