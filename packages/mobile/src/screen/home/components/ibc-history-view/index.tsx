@@ -17,15 +17,18 @@ import {IconProps} from '../../../../components/icon/types';
 import {Path, Svg} from 'react-native-svg';
 import {SVGLoadingIcon} from '../../../../components/spinner';
 import {Gutter} from '../../../../components/gutter';
-import {Animated, Text} from 'react-native';
+import {Text} from 'react-native';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {RectButton} from '../../../../components/rect-button';
 import {CoinPretty} from '@keplr-wallet/unit';
 import {VerticalCollapseTransition} from '../../../../components/transition';
 import {IChainInfoImpl} from '@keplr-wallet/stores';
-import {ChainImageFallback} from '../../../../components/image';
 import {ArrowRightSolidIcon} from '../../../../components/icon/arrow-right-solid';
-import {withSpring} from 'react-native-reanimated';
+import Reanimated, {
+  useSharedValue,
+  withRepeat,
+  withSpring,
+} from 'react-native-reanimated';
 
 export const IbcHistoryView: FunctionComponent<{
   isNotReady: boolean;
@@ -523,6 +526,8 @@ const IbcHistoryViewItem: FunctionComponent<{
 
             return false;
           })()}>
+          <Gutter size={16} />
+
           <Box height={1} backgroundColor={style.get('color-gray-500').color} />
 
           <Gutter size={16} />
@@ -579,9 +584,6 @@ const IbcHistoryViewItem: FunctionComponent<{
   );
 });
 
-const ChainImageFallbackAnimated =
-  Animated.createAnimatedComponent(ChainImageFallback);
-
 const IbcHistoryViewItemChainImage: FunctionComponent<{
   chainInfo: IChainInfoImpl;
 
@@ -604,36 +606,39 @@ const IbcHistoryViewItemChainImage: FunctionComponent<{
 }) => {
   const style = useStyle();
 
-  // const opacity = withSpring(
-  //   (() => {
-  //     if (error) {
-  //       return 0.3;
-  //     }
-  //     return completed ? 1 : 0.3;
-  //   })(),
-  //   {
-  //     mass: 0.8,
-  //     damping: 26,
-  //     stiffness: 210,
-  //   },
-  // );
+  const opacity = useSharedValue(error ? 0.3 : completed ? 1 : 0.3);
 
-  const opacity = Animated.spring(
-    new Animated.Value(error ? 0.3 : completed ? 1 : 0.3),
-    {
-      friction: 1,
-      toValue: 0,
-      tension: 20,
-      useNativeDriver: true,
-    },
-  );
+  useEffect(() => {
+    if (error) {
+      opacity.value = 0.3;
+    } else if (completed) {
+      opacity.value = 1;
+    } else if (notCompletedBlink) {
+      opacity.value = withRepeat(
+        withSpring(0.6, {
+          mass: 0.8,
+          damping: 210,
+          stiffness: 26,
+        }),
+        0,
+        true,
+      );
+    } else {
+      opacity.value = 0.3;
+    }
+  }, [completed, error, notCompletedBlink, opacity]);
 
   return (
     <XAxis alignY="center">
-      <ChainImageFallbackAnimated
-        src={chainInfo.chainSymbolImageUrl}
+      <Reanimated.Image
+        style={{width: 32, height: 32, borderRadius: 99999, opacity}}
+        source={
+          chainInfo.chainSymbolImageUrl
+            ? {uri: chainInfo.chainSymbolImageUrl}
+            : require('../../../../public/assets/img/chain-icon-alt.png')
+        }
+        resizeMode="contain"
         alt={chainInfo.chainName}
-        style={{width: 32, height: 32}}
       />
 
       {error ? (
