@@ -32,25 +32,25 @@ PODS:
     - ExpoModulesCore
   - EXFont (11.4.0):
     - ExpoModulesCore
-  - Expo (49.0.6):
+  - Expo (49.0.22):
     - ExpoModulesCore
-  - ExpoAppleAuthentication (6.1.2):
+  - ExpoAppleAuthentication (6.3.0):
     - ExpoModulesCore
-  - ExpoClipboard (4.3.1):
+  - ExpoClipboard (4.8.0):
     - ExpoModulesCore
-  - ExpoCrypto (12.4.1):
+  - ExpoCrypto (12.8.0):
     - ExpoModulesCore
   - ExpoKeepAwake (12.3.0):
     - ExpoModulesCore
-  - ExpoLocalAuthentication (13.4.1):
+  - ExpoLocalAuthentication (13.8.0):
     - ExpoModulesCore
-  - ExpoModulesCore (1.5.9):
+  - ExpoModulesCore (1.5.13):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
     - React-NativeModulesApple
     - React-RCTAppDelegate
     - ReactCommon/turbomodule/core
-  - ExpoWebBrowser (12.3.2):
+  - ExpoWebBrowser (12.8.2):
     - ExpoModulesCore
   - FBLazyVector (0.72.9)
   - FBReactNativeSpec (0.72.9):
@@ -862,14 +862,14 @@ SPEC CHECKSUMS:
   EXConstants: ce5bbea779da8031ac818c36bea41b10e14d04e1
   EXFileSystem: d7f59869885cfeab3ac771e2a8d0f5ed98cd3fdb
   EXFont: 738c44c390953ebcbab075a4848bfbef025fd9ee
-  Expo: 5601f86edc81c7e7e1772b9af9ae58fa3b45ad53
-  ExpoAppleAuthentication: 8c95178a99e7fdb8aea1e3f6385843708471c3df
-  ExpoClipboard: 695f274f8e028cd113837f917da40c76850877eb
-  ExpoCrypto: a382ab9a2fa91f0b511ce1fe4d6baecee40a1615
+  Expo: 9060b49fecf07bebf1dd967730d079aa5e750ebe
+  ExpoAppleAuthentication: 4fc9972356977f009911f2f3a5f56319c2a5b11b
+  ExpoClipboard: b8f76767b0dbaefb3be7adbf85049fd85861d527
+  ExpoCrypto: e2ca148f5c93a0514959df86b34256bb3c50d358
   ExpoKeepAwake: be4cbd52d9b177cde0fd66daa1913afa3161fc1d
-  ExpoLocalAuthentication: bd9d9037a96a11ccc456e327ddb404df02da10ca
-  ExpoModulesCore: e4e437139259c5a73530a8895af69774ff8ec12d
-  ExpoWebBrowser: 2c788f9c07718a780fe6d8bf2f6195c47609faaa
+  ExpoLocalAuthentication: c55ffb179683efed04cb144fc80ccf26891f0cb4
+  ExpoModulesCore: cf14fc49a3d5df3ed3cf2a38fc758d073bfd1c13
+  ExpoWebBrowser: e31c97230ea93b51a2a74c6c2381b0d4fca5698c
   FBLazyVector: dc178b8748748c036ef9493a5d59d6d1f91a36ce
   FBReactNativeSpec: d0aaae78e93c89dc2d691d8052a4d2aeb1b461ee
   Flipper: 6edb735e6c3e332975d1b17956bcc584eccf5818
@@ -945,6 +945,6 @@ SPEC CHECKSUMS:
   Yoga: eddf2bbe4a896454c248a8f23b4355891eb720a6
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 55d8d038f92bf74360fccf4db660287b53f658a3
+PODFILE CHECKSUM: 39427d308f74e5f42521cc9bd35e1182f6dba1ef
 
 COCOAPODS: 1.13.0
