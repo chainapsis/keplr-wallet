@@ -15,7 +15,7 @@ import {useStore} from '../../../../stores';
 //NOTE - navigation에서 기본으로 제공해주는 뒤로가기 버튼으로 할때는 뒤로 간뒤 넓어지는 애니메이션이 진행되는데
 // 커스텀 버튼을 만들어서 goBack을 실행하면 뒤로 가면서 애니메이션이 실행되서 일단 이렇게 진행
 export const QRScene = observer<{
-  setCurrentScene: (isOpen: string) => void;
+  setCurrentScene: (key: string) => void;
   qrChainId: string;
   qrBech32Address: string;
 }>(({setCurrentScene, qrChainId, qrBech32Address}) => {

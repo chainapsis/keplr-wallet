@@ -13,7 +13,6 @@ import {YAxis} from '../../components/axis';
 import {Stack} from '../../components/stack';
 import {Column, Columns} from '../../components/column';
 import {DepositModal} from './components/deposit-modal/deposit-modal';
-import {BuyModal} from './buy-modal';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import {SearchTextInput} from '../../components/input/search-text-input';
 import {AvailableTabView} from './available';
@@ -61,7 +60,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>('available');
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const [selectModalIsOpen, setSelectModalIsOpen] = useState(false);
 
   const hasBalance = (() => {
@@ -270,18 +268,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
                   />
                 </Skeleton>
               </Column>
-              <Column weight={1}>
-                <Skeleton isNotReady={isNotReady} layer={1} type="button">
-                  <Button
-                    text="Buy"
-                    size="large"
-                    color="secondary"
-                    onPress={() => {
-                      setIsBuyModalOpen(true);
-                    }}
-                  />
-                </Skeleton>
-              </Column>
 
               <Column weight={1}>
                 <Skeleton isNotReady={isNotReady} layer={1} type="button">
@@ -367,11 +353,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
       <DepositModal
         isOpen={isDepositModalOpen}
         setIsOpen={setIsDepositModalOpen}
-      />
-      <BuyModal
         navigation={navigation}
-        isOpen={isBuyModalOpen}
-        setIsOpen={setIsBuyModalOpen}
       />
     </PageWithScrollView>
   );
