@@ -10,8 +10,13 @@ import {Box} from '../../../components/box';
 import {SVGLoadingIcon} from '../../../components/spinner';
 import {getGoogleSignInPrivateKey} from 'keplr-wallet-mobile-private';
 import {Buffer} from 'buffer/';
+import {Platform} from 'react-native';
+import {observer} from 'mobx-react-lite';
+import {useStore} from '../../../stores';
 
-export const RegisterGoogleSignInScreen: FunctionComponent = () => {
+export const RegisterGoogleSignInScreen: FunctionComponent = observer(() => {
+  const {uiConfigStore} = useStore();
+
   const intl = useIntl();
   const style = useStyle();
   const navigation = useNavigation<StackNavProp>();
@@ -41,12 +46,27 @@ export const RegisterGoogleSignInScreen: FunctionComponent = () => {
 
   useEffect(() => {
     (async () => {
+      let wasAutoLockEnabled = uiConfigStore.autoLockConfig.isEnableAutoLock;
+      // ios에서 붙여넣기 할때 native modal이 뜨면서 app state가 background로 바뀌는데
+      // 이때문에 auto lock이 되어버린다.
+      // 일단 대충 이 문제를 해결하기 위해서 ios에서는 붙여넣기 전에 auto lock을 끈다.
+      if (Platform.OS === 'ios') {
+        if (wasAutoLockEnabled) {
+          await uiConfigStore.autoLockConfig.disableAutoLock();
+        }
+      }
       try {
         const res = await getGoogleSignInPrivateKey();
         setKey(res);
       } catch (e) {
         console.log(e);
         navigation.goBack();
+      } finally {
+        if (Platform.OS === 'ios') {
+          if (wasAutoLockEnabled) {
+            await uiConfigStore.autoLockConfig.enableAutoLock();
+          }
+        }
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -114,4 +134,4 @@ export const RegisterGoogleSignInScreen: FunctionComponent = () => {
       )}
     </ScrollViewRegisterContainer>
   );
-};
+});
