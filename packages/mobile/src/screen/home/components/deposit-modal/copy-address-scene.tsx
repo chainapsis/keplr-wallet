@@ -10,7 +10,7 @@ import {useStore} from '../../../../stores';
 import {Box} from '../../../../components/box';
 import {useStyle} from '../../../../styles';
 import {XAxis, YAxis} from '../../../../components/axis';
-import {Image, Text, View} from 'react-native';
+import {Image, Platform, Text, View} from 'react-native';
 import {Gutter} from '../../../../components/gutter';
 import {TextInput} from '../../../../components/input';
 import {
@@ -43,7 +43,8 @@ export const CopyAddressScene: FunctionComponent<{
     setCurrentScene,
     setQRChainId,
     setQRBech32Address,
-    disableBuyCrypto,
+    // IOS에서는 appstore review 문제로 buy crypto를 disable한다.
+    disableBuyCrypto = Platform.OS === 'ios',
   }) => {
     const {chainStore, accountStore, keyRingStore, uiConfigStore} = useStore();
     const [search, setSearch] = useState('');
