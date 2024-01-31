@@ -579,6 +579,7 @@ export class CosmosAccountImpl {
                       signResponse.signed.fee.feePayer
                     : undefined,
               }),
+              tip: undefined,
             }).finish(),
             signatures:
               // Injective needs the signature in the signatures list even if eip712
@@ -674,6 +675,7 @@ export class CosmosAccountImpl {
             }),
             gasLimit: fee.gas,
           }),
+          tip: undefined,
         }).finish(),
         chainId: this.chainId,
         accountNumber: Long.fromString(account.getAccountNumber().toString()),
@@ -748,6 +750,7 @@ export class CosmosAccountImpl {
             return { amount: amount.amount, denom: amount.denom };
           }),
         }),
+        tip: undefined,
       }).finish(),
       // Because of the validation of tx itself, the signature must exist.
       // However, since they do not actually verify the signature, it is okay to use any value.

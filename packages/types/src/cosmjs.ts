@@ -39,6 +39,10 @@ export interface StdSignDoc {
   readonly fee: StdFee;
   readonly msgs: readonly Msg[];
   readonly memo: string;
+  readonly tip?: {
+    readonly amount: readonly Coin[];
+    readonly tipper: string;
+  };
 }
 
 export interface PubKey {
