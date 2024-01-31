@@ -9,7 +9,7 @@ export class SendTxEthereumMsg extends Message<string> {
 
   constructor(
     public readonly chainId: string,
-    public readonly rawTx: string,
+    public readonly tx: Uint8Array,
     public readonly silent?: boolean
   ) {
     super();
@@ -20,7 +20,7 @@ export class SendTxEthereumMsg extends Message<string> {
       throw new KeplrError("tx", 100, "chain id is empty");
     }
 
-    if (!this.rawTx) {
+    if (!this.tx) {
       throw new KeplrError("tx", 101, "tx is empty");
     }
   }

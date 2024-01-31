@@ -176,10 +176,10 @@ export class EthereumAccountBase {
         EthSignType.TRANSACTION
       );
 
-      const rawTransaction = serialize(unsignedTx, signature);
+      const tx = new Uint8Array(Buffer.from(serialize(unsignedTx, signature)));
 
-      const sendTx = keplr.sendEthereumTx.bind(keplr);
-      txHash = await sendTx(this.chainId, rawTransaction);
+      const sendEthereumTx = keplr.sendEthereumTx.bind(keplr);
+      txHash = await sendEthereumTx(this.chainId, tx);
       if (!txHash) {
         throw new Error("No tx hash responed");
       }

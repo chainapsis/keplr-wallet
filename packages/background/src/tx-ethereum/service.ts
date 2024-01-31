@@ -18,7 +18,7 @@ export class BackgroundTxEthereumService {
 
   async sendEthereumTx(
     chainId: string,
-    rawTx: string,
+    tx: Uint8Array,
     options: {
       silent?: boolean;
       onFulfill?: (txReceipt: EthTxReceipt) => void;
@@ -52,7 +52,7 @@ export class BackgroundTxEthereumService {
         body: JSON.stringify({
           jsonrpc: "2.0",
           method: "eth_sendRawTransaction",
-          params: [rawTx],
+          params: [Buffer.from(tx).toString()],
           id: 1,
         }),
       });

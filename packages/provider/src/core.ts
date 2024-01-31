@@ -561,7 +561,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     );
   }
 
-  async sendEthereumTx(chainId: string, rawTx: string): Promise<string> {
+  async sendEthereumTx(chainId: string, tx: Uint8Array): Promise<string> {
     return await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
@@ -569,7 +569,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       "send-ethereum-tx-to-background",
       {
         chainId,
-        rawTx,
+        tx,
       }
     );
   }

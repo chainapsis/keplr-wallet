@@ -206,5 +206,5 @@ export interface Keplr {
     editable?: boolean;
   }): Promise<string>;
 
-  sendEthereumTx(chainId: string, rawTx: string): Promise<string>;
+  sendEthereumTx(chainId: string, tx: Uint8Array): Promise<string>;
 }

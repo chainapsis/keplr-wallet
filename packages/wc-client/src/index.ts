@@ -624,7 +624,7 @@ export class KeplrWalletConnectV2 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  sendEthereumTx(_chainId: string, _rawTx: string): Promise<string> {
+  sendEthereumTx(_chainId: string, _tx: Uint8Array): Promise<string> {
     throw new Error("Not yet implemented");
   }
 }

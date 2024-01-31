@@ -645,7 +645,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     ]);
   }
 
-  async sendEthereumTx(chainId: string, rawTx: string): Promise<string> {
-    return await this.requestMethod("sendEthereumTx", [chainId, rawTx]);
+  async sendEthereumTx(chainId: string, tx: Uint8Array): Promise<string> {
+    return await this.requestMethod("sendEthereumTx", [chainId, tx]);
   }
 }
