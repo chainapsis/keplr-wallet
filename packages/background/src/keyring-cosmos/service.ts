@@ -3,6 +3,7 @@ import { KeyRingService } from "../keyring";
 import {
   AminoSignResponse,
   ChainInfo,
+  DirectAuxSignResponse,
   DirectSignResponse,
   KeplrSignOptions,
   Key,
@@ -25,6 +26,7 @@ import { InteractionService } from "../interaction";
 import { Buffer } from "buffer/";
 import {
   SignDoc,
+  SignDocDirectAux,
   TxBody,
 } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import Long from "long";
@@ -743,6 +745,126 @@ export class KeyRingCosmosService {
     signOptions: KeplrSignOptions
   ): Promise<DirectSignResponse> {
     return await this.signDirect(
+      env,
+      origin,
+      this.keyRingService.selectedVaultId,
+      chainId,
+      signer,
+      signDoc,
+      signOptions
+    );
+  }
+
+  async signDirectAux(
+    env: Env,
+    origin: string,
+    vaultId: string,
+    chainId: string,
+    signer: string,
+    signDoc: SignDocDirectAux,
+    // preferNoSetMemo 빼고는 다 무시됨
+    signOptions: KeplrSignOptions
+  ): Promise<DirectAuxSignResponse> {
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+
+    const keyInfo = this.keyRingService.getKeyInfo(vaultId);
+    if (!keyInfo) {
+      throw new Error("Null key info");
+    }
+
+    if (isEthermintLike && keyInfo.type === "ledger") {
+      KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+        chainId
+      );
+    }
+
+    const key = await this.getKey(vaultId, chainId);
+    const bech32Prefix =
+      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
+        .bech32PrefixAccAddr;
+    const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
+    if (signer !== bech32Address) {
+      throw new Error("Signer mismatched");
+    }
+
+    return await this.interactionService.waitApproveV2(
+      env,
+      "/sign-cosmos",
+      "request-sign-cosmos",
+      {
+        origin,
+        chainId,
+        mode: "direct",
+        signDocBytes: SignDocDirectAux.encode(signDoc).finish(),
+        isDirectAux: true,
+        signer,
+        pubKey: key.pubKey,
+        signOptions: {
+          preferNoSetMemo: signOptions.preferNoSetMemo,
+          disableBalanceCheck: true,
+          preferNoSetFee: true,
+        },
+        keyType: keyInfo.type,
+        keyInsensitive: keyInfo.insensitive,
+      },
+      async (res: { newSignDocBytes: Uint8Array; signature?: Uint8Array }) => {
+        const newSignDocBytes = res.newSignDocBytes;
+        const newSignDoc = SignDocDirectAux.decode(newSignDocBytes);
+
+        let signature: Uint8Array;
+
+        // XXX: 참고로 어차피 현재 ledger app이 direct signing을 지원하지 않는다. 그냥 일단 처리해놓은 것.
+        if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
+          if (!res.signature || res.signature.length === 0) {
+            throw new Error("Frontend should provide signature");
+          }
+          signature = res.signature;
+        } else {
+          const _sig = await this.keyRingService.sign(
+            chainId,
+            vaultId,
+            newSignDocBytes,
+            isEthermintLike ? "keccak256" : "sha256"
+          );
+          signature = new Uint8Array([..._sig.r, ..._sig.s]);
+        }
+
+        const msgTypes = TxBody.decode(newSignDoc.bodyBytes).messages.map(
+          (msg) => msg.typeUrl
+        );
+
+        this.analyticsService.logEventIgnoreError("tx_signed", {
+          chainId,
+          isInternal: env.isInternalMsg,
+          origin,
+          signMode: "direct",
+          isDirectAux: true,
+          msgTypes,
+        });
+
+        return {
+          signed: {
+            ...newSignDoc,
+            accountNumber: Long.fromString(newSignDoc.accountNumber),
+            sequence: Long.fromString(newSignDoc.sequence),
+          },
+          signature: encodeSecp256k1Signature(key.pubKey, signature),
+        };
+      }
+    );
+  }
+
+  async signDirectAuxSelected(
+    env: Env,
+    origin: string,
+    chainId: string,
+    signer: string,
+    signDoc: SignDocDirectAux,
+    // preferNoSetMemo 빼고는 다 무시됨
+    signOptions: KeplrSignOptions
+  ): Promise<DirectAuxSignResponse> {
+    return await this.signDirectAux(
       env,
       origin,
       this.keyRingService.selectedVaultId,
