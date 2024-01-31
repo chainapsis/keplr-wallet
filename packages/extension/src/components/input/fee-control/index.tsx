@@ -84,7 +84,13 @@ export const FeeControl: FunctionComponent<{
     gasSimulator,
     disableAutomaticFeeSet,
   }) => {
-    const { analyticsStore, queriesStore, priceStore, chainStore } = useStore();
+    const {
+      analyticsStore,
+      queriesStore,
+      priceStore,
+      chainStore,
+      uiConfigStore,
+    } = useStore();
 
     const intl = useIntl();
     const theme = useTheme();
@@ -98,16 +104,28 @@ export const FeeControl: FunctionComponent<{
         feeConfig.fees.length === 0 &&
         feeConfig.selectableFeeCurrencies.length > 0
       ) {
-        feeConfig.setFee({
-          type: "average",
-          currency: feeConfig.selectableFeeCurrencies[0],
-        });
+        if (
+          uiConfigStore.rememberLastFeeOption &&
+          uiConfigStore.lastFeeOption
+        ) {
+          feeConfig.setFee({
+            type: uiConfigStore.lastFeeOption,
+            currency: feeConfig.selectableFeeCurrencies[0],
+          });
+        } else {
+          feeConfig.setFee({
+            type: "average",
+            currency: feeConfig.selectableFeeCurrencies[0],
+          });
+        }
       }
     }, [
       disableAutomaticFeeSet,
       feeConfig,
       feeConfig.fees,
       feeConfig.selectableFeeCurrencies,
+      uiConfigStore.lastFeeOption,
+      uiConfigStore.rememberLastFeeOption,
     ]);
 
     useLayoutEffect(() => {

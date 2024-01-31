@@ -1,5 +1,12 @@
 import React, { FunctionComponent } from "react";
-import { Caption1, Caption2, H5, Subtitle1, Subtitle3 } from "../../typography";
+import {
+  Body3,
+  Caption1,
+  Caption2,
+  H5,
+  Subtitle1,
+  Subtitle3,
+} from "../../typography";
 import { ColorPalette } from "../../../styles";
 import styled, { useTheme } from "styled-components";
 import { Stack } from "../../stack";
@@ -20,6 +27,9 @@ import { GuideBox } from "../../guide-box";
 import { Dec } from "@keplr-wallet/unit";
 import { Box } from "../../box";
 import { FormattedMessage, useIntl } from "react-intl";
+import { XAxis } from "../../axis";
+import { Gutter } from "../../gutter";
+import { useUnmount } from "../../../hooks/use-unmount";
 
 const Styles = {
   Container: styled.div`
@@ -28,8 +38,8 @@ const Styles = {
 
     width: 100%;
 
-    padding: 1.25rem;
-    gap: 0.75rem;
+    padding: 0.75rem;
+    padding-top: 0.88rem;
 
     background-color: ${(props) =>
       props.theme.mode === "light"
@@ -53,7 +63,7 @@ export const TransactionFeeModal: FunctionComponent<{
   gasConfig: IGasConfig;
   gasSimulator?: IGasSimulator;
 }> = observer(({ close, senderConfig, feeConfig, gasConfig, gasSimulator }) => {
-  const { queriesStore } = useStore();
+  const { queriesStore, uiConfigStore } = useStore();
   const intl = useIntl();
   const theme = useTheme();
 
@@ -75,23 +85,56 @@ export const TransactionFeeModal: FunctionComponent<{
     return gasSimulator?.enabled;
   })();
 
+  useUnmount(() => {
+    if (uiConfigStore.rememberLastFeeOption) {
+      if (feeConfig.type !== "manual") {
+        uiConfigStore.setLastFeeOption(feeConfig.type);
+      }
+    } else {
+      uiConfigStore.setLastFeeOption(false);
+    }
+  });
+
   return (
     <Styles.Container>
-      <Subtitle1 style={{ marginBottom: "1.5rem" }}>
-        <FormattedMessage id="components.input.fee-control.modal.title" />
-      </Subtitle1>
+      <Box marginBottom="1.25rem" marginLeft="0.5rem">
+        <XAxis alignY="center">
+          <Subtitle1>
+            <FormattedMessage id="components.input.fee-control.modal.title" />
+          </Subtitle1>
+
+          <div style={{ flex: 1 }} />
+          <Body3
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["gray-200"]
+            }
+          >
+            Keep Fee tier Option
+          </Body3>
+          <Gutter size="0.5rem" />
+          <Toggle
+            isOpen={uiConfigStore.rememberLastFeeOption}
+            setIsOpen={(v) => uiConfigStore.setRememberLastFeeOption(v)}
+          />
+        </XAxis>
+      </Box>
 
       <Stack gutter="0.75rem">
         <Stack gutter="0.375rem">
-          <Subtitle3
-            color={
-              theme.mode === "light"
-                ? ColorPalette["gray-400"]
-                : ColorPalette["gray-100"]
-            }
-          >
-            <FormattedMessage id="components.input.fee-control.modal.fee-title" />
-          </Subtitle3>
+          <Box marginLeft="0.5rem">
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-100"]
+              }
+            >
+              <FormattedMessage id="components.input.fee-control.modal.fee-title" />
+            </Subtitle3>
+          </Box>
+
           <FeeSelector feeConfig={feeConfig} />
         </Stack>
 
@@ -145,9 +188,11 @@ export const TransactionFeeModal: FunctionComponent<{
         <Styles.Divider />
 
         <Columns sum={1} alignY="center">
-          <Subtitle3 style={{ color: ColorPalette["gray-200"] }}>
-            <FormattedMessage id="components.input.fee-control.modal.gas-title" />
-          </Subtitle3>
+          <Box marginLeft="0.5rem">
+            <Subtitle3 style={{ color: ColorPalette["gray-200"] }}>
+              <FormattedMessage id="components.input.fee-control.modal.gas-title" />
+            </Subtitle3>
+          </Box>
 
           <Column weight={1} />
 
