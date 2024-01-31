@@ -763,7 +763,10 @@ export class KeyRingCosmosService {
     signer: string,
     signDoc: SignDocDirectAux,
     // preferNoSetMemo 빼고는 다 무시됨
-    signOptions: KeplrSignOptions
+    signOptions: Exclude<
+      KeplrSignOptions,
+      "preferNoSetFee" | "disableBalanceCheck"
+    >
   ): Promise<DirectAuxSignResponse> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
@@ -862,7 +865,10 @@ export class KeyRingCosmosService {
     signer: string,
     signDoc: SignDocDirectAux,
     // preferNoSetMemo 빼고는 다 무시됨
-    signOptions: KeplrSignOptions
+    signOptions: Exclude<
+      KeplrSignOptions,
+      "preferNoSetFee" | "disableBalanceCheck"
+    >
   ): Promise<DirectAuxSignResponse> {
     return await this.signDirectAux(
       env,
