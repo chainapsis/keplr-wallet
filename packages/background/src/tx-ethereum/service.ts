@@ -25,9 +25,9 @@ export class BackgroundTxEthereumService {
     }
   ): Promise<string> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    const isEvmLike = KeyRingEthereumService.isEvmLike(chainInfo);
+    const evmInfo = KeyRingEthereumService.evmInfo(chainInfo);
 
-    if (!isEvmLike) {
+    if (!evmInfo) {
       throw new Error("Not EVM chain");
     }
 
@@ -44,7 +44,7 @@ export class BackgroundTxEthereumService {
         result?: string;
         error?: Error;
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      }>(chainInfo.evm!.rpc, "", {
+      }>(evmInfo.rpc, "", {
         method: "POST",
         headers: {
           "content-type": "application/json",
@@ -65,12 +65,12 @@ export class BackgroundTxEthereumService {
         );
       }
 
-      const checkTxFulfilled = async () => {
+      const intervalId = setInterval(async () => {
         const txRecieptResponse = await simpleFetch<{
           result: EthTxReceipt | null;
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           error?: Error;
-        }>(chainInfo.evm!.rpc, {
+        }>(evmInfo.rpc, {
           method: "POST",
           body: JSON.stringify({
             jsonrpc: "2.0",
@@ -103,11 +103,7 @@ export class BackgroundTxEthereumService {
             );
           }
         }
-      };
-      const intervalId = setInterval(
-        checkTxFulfilled,
-        TX_RECIEPT_POLLING_INTERVAL
-      );
+      }, TX_RECIEPT_POLLING_INTERVAL);
 
       return txHash;
     } catch (e) {

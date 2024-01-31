@@ -59,9 +59,9 @@ export class KeyRingEthereumService {
   ): Promise<Uint8Array> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
-    const isEvmLike = KeyRingEthereumService.isEvmLike(chainInfo);
+    const evmInfo = KeyRingEthereumService.evmInfo(chainInfo);
 
-    if (!isEthermintLike && !isEvmLike) {
+    if (!isEthermintLike && !evmInfo) {
       throw new Error("Not ethermint like and EVM chain");
     }
 
@@ -184,7 +184,7 @@ export class KeyRingEthereumService {
     );
   }
 
-  static isEvmLike(chainInfo: ChainInfo): boolean {
-    return chainInfo.evm !== undefined;
+  static evmInfo(chainInfo: ChainInfo): ChainInfo["evm"] | undefined {
+    return chainInfo.evm;
   }
 }

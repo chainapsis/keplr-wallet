@@ -159,7 +159,8 @@ export class EthereumAccountBase {
     }
   ) {
     const chainInfo = this.chainGetter.getChain(this.chainId);
-    if (!chainInfo.evm) {
+    const evmInfo = chainInfo.evm;
+    if (!evmInfo) {
       throw new Error("No EVM chain info provided");
     }
 
@@ -191,7 +192,7 @@ export class EthereumAccountBase {
         const txRecieptResponse = await simpleFetch<{
           result: EthTxReceipt | null;
           error?: Error;
-        }>(chainInfo.evm!.rpc, {
+        }>(evmInfo.rpc, {
           method: "POST",
           body: JSON.stringify({
             jsonrpc: "2.0",
