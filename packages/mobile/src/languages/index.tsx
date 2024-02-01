@@ -92,7 +92,7 @@ export const AppIntlProvider: FunctionComponent<PropsWithChildren> = observer(
       //     isAutomatic,
       //   });
       // }
-      setMessages(getMessages('en'));
+      setMessages(getMessages('ko'));
     }, [isAutomatic, language, uiConfigStore]);
 
     // const clearLanguage = () => {
