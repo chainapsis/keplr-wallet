@@ -36,6 +36,7 @@ export type IBCHistory = {
 
   txFulfilled?: boolean;
   txError?: string;
+  packetTimeout?: boolean;
 
   ibcHistory:
     | {

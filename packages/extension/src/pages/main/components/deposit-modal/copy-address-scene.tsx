@@ -115,21 +115,37 @@ export const CopyAddressScene: FunctionComponent<{
         return false;
       }
 
-      const s = search.trim();
+      const s = search.trim().toLowerCase();
       if (s.length === 0) {
         return true;
       }
 
-      if (address.chainInfo.chainId.includes(s)) {
+      if (address.chainInfo.chainId.toLowerCase().includes(s)) {
         return true;
       }
-      if (address.chainInfo.chainName.includes(s)) {
+      if (address.chainInfo.chainName.toLowerCase().includes(s)) {
         return true;
       }
       const bech32Split = address.bech32Address.split("1");
       if (bech32Split.length > 0) {
-        if (bech32Split[0].includes(s)) {
+        if (bech32Split[0].toLowerCase().includes(s)) {
           return true;
+        }
+      }
+
+      if (address.chainInfo.stakeCurrency) {
+        if (
+          address.chainInfo.stakeCurrency.coinDenom.toLowerCase().includes(s)
+        ) {
+          return true;
+        }
+      }
+      if (address.chainInfo.currencies.length > 0) {
+        const currency = address.chainInfo.currencies[0];
+        if (!currency.coinMinimalDenom.startsWith("ibc/")) {
+          if (currency.coinDenom.toLowerCase().includes(s)) {
+            return true;
+          }
         }
       }
     })

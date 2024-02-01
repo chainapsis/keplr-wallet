@@ -7,7 +7,7 @@ import {
 import { RouteResponse } from "./types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { computed, makeObservable } from "mobx";
-import { CoinPretty } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, RatePretty } from "@keplr-wallet/unit";
 import Joi from "joi";
 
 const Schema = Joi.object<RouteResponse>({
@@ -21,25 +21,30 @@ const Schema = Joi.object<RouteResponse>({
     .items(
       Joi.object({
         swap: Joi.object({
-          swap_in: {
+          swap_in: Joi.object({
             swap_venue: Joi.object({
               name: Joi.string().required(),
               chain_id: Joi.string().required(),
-            }).required(),
+            })
+              .unknown(true)
+              .required(),
             swap_operations: Joi.array()
               .items(
                 Joi.object({
                   pool: Joi.string().required(),
                   denom_in: Joi.string().required(),
                   denom_out: Joi.string().required(),
-                })
+                }).unknown(true)
               )
               .required(),
             swap_amount_in: Joi.string().required(),
-          },
+            price_impact_percent: Joi.string(),
+          }).unknown(true),
           estimated_affiliate_fee: Joi.string().required(),
-        }).unknown(true),
-      }),
+        })
+          .required()
+          .unknown(true),
+      }).unknown(true),
       Joi.object({
         transfer: Joi.object({
           port: Joi.string().required(),
@@ -48,8 +53,10 @@ const Schema = Joi.object<RouteResponse>({
           pfm_enabled: Joi.boolean(),
           dest_denom: Joi.string().required(),
           supports_memo: Joi.boolean(),
-        }).unknown(true),
-      })
+        })
+          .required()
+          .unknown(true),
+      }).unknown(true)
     )
     .required(),
   chain_ids: Joi.array().items(Joi.string()).required(),
@@ -58,7 +65,8 @@ const Schema = Joi.object<RouteResponse>({
   swap_venue: Joi.object({
     name: Joi.string().required(),
     chain_id: Joi.string().required(),
-  }),
+  }).unknown(true),
+  swap_price_impact_percent: Joi.string(),
   txs_required: Joi.number().required(),
 }).unknown(true);
 
@@ -151,6 +159,19 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
         amount
       );
     });
+  }
+
+  @computed
+  get swapPriceImpact(): RatePretty | undefined {
+    if (!this.response || !this.response.data.swap_price_impact_percent) {
+      return undefined;
+    }
+
+    return new RatePretty(
+      new Dec(this.response.data.swap_price_impact_percent).quoTruncate(
+        new Dec(100)
+      )
+    );
   }
 
   protected override async fetchResponse(

@@ -133,6 +133,25 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
   }
 
   isSwappableCurrency(chainId: string, currency: AppCurrency): boolean {
+    if (
+      chainId.startsWith("gravity-bridge-") &&
+      currency.coinMinimalDenom !== "ugraviton"
+    ) {
+      return false;
+    }
+    if (
+      "paths" in currency &&
+      currency.originChainId &&
+      currency.originCurrency
+    ) {
+      if (
+        currency.originChainId.startsWith("gravity-bridge-") &&
+        currency.originCurrency.coinMinimalDenom !== "ugraviton"
+      ) {
+        return false;
+      }
+    }
+
     if ("paths" in currency) {
       if (!currency.originChainId || !currency.originCurrency) {
         return false;
@@ -390,6 +409,13 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           // XXX: multi-hop ibc currency는 getSwapDestinationCurrencyAlternativeChains에서 처리한다.
           currency.paths.length === 1
         ) {
+          if (
+            currency.originChainId.startsWith("gravity-bridge-") &&
+            currency.originCurrency.coinMinimalDenom !== "ugraviton"
+          ) {
+            continue;
+          }
+
           // 현재 CW20같은 얘들은 처리할 수 없다.
           if (!("type" in currency.originCurrency)) {
             // 일단 현재는 복잡한 케이스는 생각하지 않는다.

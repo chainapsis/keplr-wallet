@@ -77,19 +77,12 @@ export const SwapAssetInfo: FunctionComponent<{
   senderConfig: ISenderConfig;
   amountConfig: IBCSwapAmountConfig;
 
-  forceShowPrice?: boolean;
   onDestinationChainSelect?: (
     chainId: string,
     coinMinimalDenom: string
   ) => void;
 }> = observer(
-  ({
-    type,
-    senderConfig,
-    amountConfig,
-    forceShowPrice,
-    onDestinationChainSelect,
-  }) => {
+  ({ type, senderConfig, amountConfig, onDestinationChainSelect }) => {
     const { chainStore, queriesStore, priceStore, uiConfigStore } = useStore();
 
     const theme = useTheme();
@@ -519,93 +512,91 @@ export const SwapAssetInfo: FunctionComponent<{
 
         <XAxis alignY="center">
           {(() => {
-            if (type === "from" || forceShowPrice) {
-              if (type === "from" && !price) {
+            if (type === "from" && !price) {
+              return null;
+            }
+            if (type === "to") {
+              if (!priceStore.calculatePrice(amountConfig.outAmount)) {
                 return null;
               }
-              if (type === "to") {
-                if (!priceStore.calculatePrice(amountConfig.outAmount)) {
-                  return null;
-                }
-              }
-
-              return (
-                <Box
-                  cursor={type === "from" ? "pointer" : undefined}
-                  onClick={(e) => {
-                    e.preventDefault();
-
-                    if (type !== "from") {
-                      return;
-                    }
-
-                    if (!isPriceBased) {
-                      if (price!.toDec().lte(new Dec(0))) {
-                        setPriceValue("");
-                      } else {
-                        setPriceValue(
-                          price!
-                            .toDec()
-                            .toString(price!.options.maxDecimals)
-                            .toString()
-                        );
-                      }
-                    }
-                    setIsPriceBased(!isPriceBased);
-
-                    textInputRef.current?.focus();
-                  }}
-                >
-                  <XAxis alignY="center">
-                    {type === "from" ? (
-                      <React.Fragment>
-                        <SwitchPriceBaseIcon
-                          width="1.25rem"
-                          height="1.25rem"
-                          color={
-                            theme.mode === "light"
-                              ? ColorPalette["gray-400"]
-                              : ColorPalette["gray-300"]
-                          }
-                        />
-                        <Gutter size="0.15rem" />
-                      </React.Fragment>
-                    ) : null}
-                    <Body3
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["gray-400"]
-                          : ColorPalette["gray-300"]
-                      }
-                    >
-                      {(() => {
-                        if (isPriceBased) {
-                          return amountConfig.amount[0]
-                            .trim(true)
-                            .maxDecimals(6)
-                            .inequalitySymbol(true)
-                            .shrink(true)
-                            .hideIBCMetadata(true)
-                            .toString();
-                        } else {
-                          if (type === "from") {
-                            return price!.toString();
-                          } else {
-                            const p = priceStore.calculatePrice(
-                              amountConfig.outAmount
-                            );
-                            if (!p) {
-                              return null;
-                            }
-                            return p.toString();
-                          }
-                        }
-                      })()}
-                    </Body3>
-                  </XAxis>
-                </Box>
-              );
             }
+
+            return (
+              <Box
+                cursor={type === "from" ? "pointer" : undefined}
+                onClick={(e) => {
+                  e.preventDefault();
+
+                  if (type !== "from") {
+                    return;
+                  }
+
+                  if (!isPriceBased) {
+                    if (price!.toDec().lte(new Dec(0))) {
+                      setPriceValue("");
+                    } else {
+                      setPriceValue(
+                        price!
+                          .toDec()
+                          .toString(price!.options.maxDecimals)
+                          .toString()
+                      );
+                    }
+                  }
+                  setIsPriceBased(!isPriceBased);
+
+                  textInputRef.current?.focus();
+                }}
+              >
+                <XAxis alignY="center">
+                  {type === "from" ? (
+                    <React.Fragment>
+                      <SwitchPriceBaseIcon
+                        width="1.25rem"
+                        height="1.25rem"
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-400"]
+                            : ColorPalette["gray-300"]
+                        }
+                      />
+                      <Gutter size="0.15rem" />
+                    </React.Fragment>
+                  ) : null}
+                  <Body3
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-400"]
+                        : ColorPalette["gray-300"]
+                    }
+                  >
+                    {(() => {
+                      if (isPriceBased) {
+                        return amountConfig.amount[0]
+                          .trim(true)
+                          .maxDecimals(6)
+                          .inequalitySymbol(true)
+                          .shrink(true)
+                          .hideIBCMetadata(true)
+                          .toString();
+                      } else {
+                        if (type === "from") {
+                          return price!.toString();
+                        } else {
+                          const p = priceStore.calculatePrice(
+                            amountConfig.outAmount
+                          );
+                          if (!p) {
+                            return null;
+                          }
+                          return p.toString();
+                        }
+                      }
+                    })()}
+                  </Body3>
+                </XAxis>
+              </Box>
+            );
           })()}
           <div
             style={{

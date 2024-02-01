@@ -67,7 +67,14 @@ export const FinalizeKeyScene: FunctionComponent<{
     stepPrevious,
     stepTotal,
   }) => {
-    const { chainStore, accountStore, queriesStore, keyRingStore } = useStore();
+    const {
+      chainStore,
+      accountStore,
+      queriesStore,
+      keyRingStore,
+      priceStore,
+      analyticsStore,
+    } = useStore();
 
     const sceneTransition = useSceneTransition();
     const theme = useTheme();
@@ -111,7 +118,9 @@ export const FinalizeKeyScene: FunctionComponent<{
 
         let vaultId: unknown;
 
+        let type = "none";
         if (mnemonic) {
+          type = "mnemonic";
           vaultId = await keyRingStore.newMnemonicKey(
             mnemonic.value,
             mnemonic.bip44Path,
@@ -119,6 +128,14 @@ export const FinalizeKeyScene: FunctionComponent<{
             password
           );
         } else if (privateKey) {
+          type = "privateKey";
+          if (
+            privateKey.meta &&
+            privateKey.meta["web3Auth"] &&
+            (privateKey.meta["web3Auth"] as any)["type"]
+          ) {
+            type = (privateKey.meta["web3Auth"] as any)["type"];
+          }
           vaultId = await keyRingStore.newPrivateKeyKey(
             privateKey.value,
             privateKey.meta,
@@ -126,6 +143,7 @@ export const FinalizeKeyScene: FunctionComponent<{
             password
           );
         } else if (ledger) {
+          type = "ledger";
           vaultId = await keyRingStore.newLedgerKey(
             ledger.pubKey,
             ledger.app,
@@ -134,6 +152,7 @@ export const FinalizeKeyScene: FunctionComponent<{
             password
           );
         } else if (keystone) {
+          type = "keystone";
           vaultId = await keyRingStore.newKeystoneKey(keystone, name, password);
         } else {
           throw new Error("Invalid props");
@@ -142,6 +161,11 @@ export const FinalizeKeyScene: FunctionComponent<{
         if (typeof vaultId !== "string") {
           throw new Error("Unknown error");
         }
+
+        analyticsStore.logEvent("account_created", {
+          type,
+          new_num_keyrings: keyRingStore.keyInfos.length,
+        });
 
         await chainStore.waitSyncedEnabledChains();
 
@@ -266,7 +290,18 @@ export const FinalizeKeyScene: FunctionComponent<{
                   .waitFreshResponse()
               );
             }
+
+            const chainInfo = chainStore.getChain(candidateAddress.chainId);
+            const targetCurrency =
+              chainInfo.stakeCurrency || chainInfo.currencies[0];
+            if (targetCurrency.coinGeckoId) {
+              // Push coingecko id to priceStore.
+              priceStore.getPrice(targetCurrency.coinGeckoId);
+            }
           }
+
+          // Try to make sure that prices are fresh.
+          promises.push(priceStore.waitFreshResponse());
 
           await Promise.allSettled(promises);
         })();

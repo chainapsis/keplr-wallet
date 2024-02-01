@@ -28,7 +28,7 @@ import { useSearchParams } from "react-router-dom";
 import { useTxConfigsQueryString } from "../../hooks/use-tx-config-query-string";
 import { MainHeaderLayout } from "../main/layouts/header";
 import { XAxis } from "../../components/axis";
-import { H4 } from "../../components/typography";
+import { H4, Subtitle4 } from "../../components/typography";
 import { SlippageModal } from "./components/slippage-modal";
 import { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
@@ -46,6 +46,7 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { useEffectOnce } from "../../hooks/use-effect-once";
+import { amountToAmbiguousAverage, amountToAmbiguousString } from "../../utils";
 
 export const IBCSwapPage: FunctionComponent = observer(() => {
   const {
@@ -57,6 +58,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     keyRingStore,
     hugeQueriesStore,
     priceStore,
+    analyticsStore,
   } = useStore();
 
   const theme = useTheme();
@@ -323,6 +325,19 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             outPrice &&
             outPrice.toDec().gt(new Dec(0))
           ) {
+            if (ibcSwapConfigs.amountConfig.swapPriceImpact) {
+              // price impact가 2.5% 이상이면 경고
+              if (
+                ibcSwapConfigs.amountConfig.swapPriceImpact
+                  .toDec()
+                  .mul(new Dec(100))
+                  .gt(new Dec(2.5))
+              ) {
+                setIsHighPriceImpact(true);
+                return;
+              }
+            }
+
             if (inPrice.toDec().gt(outPrice.toDec())) {
               const priceImpact = inPrice
                 .toDec()
@@ -375,6 +390,64 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     Error | undefined
   >();
 
+  // --------------------------
+  // from or to 중에서 coingecko로부터 가격을 알 수 없는 경우 price impact를 알 수 없기 때문에
+  // 이런 경우 유저에게 경고를 표시해줌
+  // 가끔씩 바보같이 coingecko에 올라가있지도 않은데 지 맘대로 coingecko id를 넣는 얘들도 있어서
+  // 실제로 쿼리를 해보고 있는지 아닌지 판단하는 로직도 있음
+  // coingecko로부터 가격이 undefined거나 0이면 알 수 없는 것으로 처리함.
+  // 근데 쿼리에 걸리는 시간도 있으니 이 경우는 1000초 쉼.
+  const [inOrOutChangedDelay, setInOrOutChangedDelay] = useState(true);
+  useEffect(() => {
+    setInOrOutChangedDelay(true);
+    const timeoutId = setTimeout(() => {
+      setInOrOutChangedDelay(false);
+    }, 1000);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inCurrency.coinMinimalDenom, outCurrency.coinMinimalDenom]);
+  const unablesToPopulatePrice = (() => {
+    const r: string[] = [];
+    if (!inCurrency.coinGeckoId) {
+      if ("originCurrency" in inCurrency && inCurrency.originCurrency) {
+        r.push(inCurrency.originCurrency.coinDenom);
+      } else {
+        r.push(inCurrency.coinDenom);
+      }
+    } else if (!inOrOutChangedDelay) {
+      const price = priceStore.getPrice(inCurrency.coinGeckoId, "usd");
+      if (!price) {
+        if ("originCurrency" in inCurrency && inCurrency.originCurrency) {
+          r.push(inCurrency.originCurrency.coinDenom);
+        } else {
+          r.push(inCurrency.coinDenom);
+        }
+      }
+    }
+    if (!outCurrency.coinGeckoId) {
+      if ("originCurrency" in outCurrency && outCurrency.originCurrency) {
+        r.push(outCurrency.originCurrency.coinDenom);
+      } else {
+        r.push(outCurrency.coinDenom);
+      }
+    } else if (!inOrOutChangedDelay) {
+      const price = priceStore.getPrice(outCurrency.coinGeckoId, "usd");
+      if (!price) {
+        if ("originCurrency" in outCurrency && outCurrency.originCurrency) {
+          r.push(outCurrency.originCurrency.coinDenom);
+        } else {
+          r.push(outCurrency.coinDenom);
+        }
+      }
+    }
+
+    return r;
+  })();
+  // --------------------------
+
   const [isTxLoading, setIsTxLoading] = useState(false);
 
   return (
@@ -419,10 +492,19 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           const swapReceiver: string[] = [];
 
           try {
+            let swapRouteKey = "";
+            if (queryRoute.response) {
+              swapRouteKey =
+                ibcSwapConfigs.amountConfig.createSwapRouteKeyFromRouteResponse(
+                  queryRoute.response.data
+                );
+            }
+
             const [_tx] = await Promise.all([
               ibcSwapConfigs.amountConfig.getTx(
                 uiConfigStore.ibcSwapConfig.slippageNum,
-                SwapFeeBps.receiver
+                SwapFeeBps.receiver,
+                swapRouteKey
               ),
               // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.
               // /msgs_direct로도 얻을 순 있지만 따로 데이터를 해석해야되기 때문에 좀 힘들다...
@@ -654,37 +736,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     params["outCurrencyCommonDenom"] =
                       outCurrency.originCurrency.coinDenom;
                   }
-                  const getSwapRangeStr = (amount: { toDec: () => Dec }) => {
-                    if (amount.toDec().lte(new Dec(0))) {
-                      return "0";
-                    }
-
-                    const swapRanges = [
-                      1, 10, 100, 1000, 10000, 100000, 1000000, 10000000,
-                      100000000, 1000000000,
-                    ];
-                    let res = "unknown";
-                    for (let i = 0; i < swapRanges.length; i++) {
-                      const range = swapRanges[i];
-                      const beforeRange = i > 0 ? swapRanges[i - 1] : 0;
-                      if (
-                        amount.toDec().lte(new Dec(range)) &&
-                        amount.toDec().gt(new Dec(beforeRange))
-                      ) {
-                        res = `${beforeRange}~${range}`;
-                        break;
-                      }
-
-                      if (i === swapRanges.length - 1) {
-                        res = `${range}~`;
-                      }
-                    }
-                    return res;
-                  };
-                  params["inRange"] = getSwapRangeStr(
+                  params["inRange"] = amountToAmbiguousString(
                     ibcSwapConfigs.amountConfig.amount[0]
                   );
-                  params["outRange"] = getSwapRangeStr(
+                  params["outRange"] = amountToAmbiguousString(
                     ibcSwapConfigs.amountConfig.outAmount
                   );
 
@@ -696,20 +751,39 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     "usd"
                   );
                   if (inCurrencyPrice) {
-                    params["inFiatRange"] = getSwapRangeStr(inCurrencyPrice);
+                    params["inFiatRange"] =
+                      amountToAmbiguousString(inCurrencyPrice);
+                    params["inFiatAvg"] =
+                      amountToAmbiguousAverage(inCurrencyPrice);
                   }
                   const outCurrencyPrice = priceStore.calculatePrice(
                     ibcSwapConfigs.amountConfig.outAmount,
                     "usd"
                   );
                   if (outCurrencyPrice) {
-                    params["outFiatRange"] = getSwapRangeStr(outCurrencyPrice);
+                    params["outFiatRange"] =
+                      amountToAmbiguousString(outCurrencyPrice);
+                    params["outFiatAvg"] =
+                      amountToAmbiguousAverage(outCurrencyPrice);
                   }
 
                   new InExtensionMessageRequester().sendMessage(
                     BACKGROUND_PORT,
                     new LogAnalyticsEventMsg("ibc_swap", params)
                   );
+
+                  analyticsStore.logEvent("swap_occurred", {
+                    in_chain_id: inChainId,
+                    in_chain_identifier:
+                      ChainIdHelper.parse(inChainId).identifier,
+                    in_currency_minimal_denom: inCurrency.coinMinimalDenom,
+                    in_currency_denom: inCurrency.coinDenom,
+                    out_chain_id: outChainId,
+                    out_chain_identifier:
+                      ChainIdHelper.parse(outChainId).identifier,
+                    out_currency_minimal_denom: outCurrency.coinMinimalDenom,
+                    out_currency_denom: outCurrency.coinDenom,
+                  });
                 },
                 onFulfill: (tx: any) => {
                   if (tx.code != null && tx.code !== 0) {
@@ -767,6 +841,34 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             >
               <FormattedMessage id="page.ibc-swap.title.swap" />
             </H4>
+
+            <Gutter size="0.25rem" />
+            <Box
+              height="1rem"
+              alignX="center"
+              alignY="center"
+              paddingX="0.35rem"
+              borderRadius="0.225rem"
+              backgroundColor={
+                theme.mode === "light"
+                  ? ColorPalette["blue-100"]
+                  : ColorPalette["gray-500"]
+              }
+            >
+              <Subtitle4
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["blue-400"]
+                    : ColorPalette["gray-100"]
+                }
+                style={{
+                  fontSize: "0.5625rem",
+                }}
+              >
+                Beta
+              </Subtitle4>
+            </Box>
+
             <div style={{ flex: 1 }} />
             <Box
               cursor="pointer"
@@ -895,7 +997,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           type="to"
           senderConfig={ibcSwapConfigs.senderConfig}
           amountConfig={ibcSwapConfigs.amountConfig}
-          forceShowPrice={isHighPriceImpact}
           onDestinationChainSelect={(chainId, coinMinimalDenom) => {
             setSearchParams(
               (prev) => {
@@ -924,6 +1025,19 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           amountConfig={ibcSwapConfigs.amountConfig}
           forceError={calculatingTxError}
           forceWarning={(() => {
+            if (unablesToPopulatePrice.length > 0) {
+              return new Error(
+                intl.formatMessage(
+                  {
+                    id: "page.ibc-swap.warning.unable-to-populate-price",
+                  },
+                  {
+                    assets: unablesToPopulatePrice.join(", "),
+                  }
+                )
+              );
+            }
+
             if (isHighPriceImpact) {
               return new Error(
                 intl.formatMessage({

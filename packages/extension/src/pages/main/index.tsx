@@ -44,6 +44,13 @@ import { LayeredHorizontalRadioGroup } from "../../components/radio-group";
 import { XAxis, YAxis } from "../../components/axis";
 import { DepositModal } from "./components/deposit-modal";
 import { MainHeaderLayout } from "./layouts/header";
+import { amountToAmbiguousAverage } from "../../utils";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import {
+  ChainInfoWithCoreTypes,
+  LogAnalyticsEventMsg,
+} from "@keplr-wallet/background";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -66,7 +73,13 @@ type TabStatus = "available" | "staked";
 export const MainPage: FunctionComponent<{
   setIsNotReady: (isNotReady: boolean) => void;
 }> = observer(({ setIsNotReady }) => {
-  const { analyticsStore, hugeQueriesStore, uiConfigStore } = useStore();
+  const {
+    analyticsStore,
+    hugeQueriesStore,
+    uiConfigStore,
+    keyRingStore,
+    priceStore,
+  } = useStore();
 
   const isNotReady = useIsNotReady();
   const intl = useIntl();
@@ -93,6 +106,25 @@ export const MainPage: FunctionComponent<{
     }
     return result;
   }, [hugeQueriesStore.allKnownBalances]);
+  const availableTotalPriceEmbedOnlyUSD = useMemo(() => {
+    let result: PricePretty | undefined;
+    for (const bal of hugeQueriesStore.allKnownBalances) {
+      if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
+        continue;
+      }
+      if (bal.price) {
+        const price = priceStore.calculatePrice(bal.token, "usd");
+        if (price) {
+          if (!result) {
+            result = price;
+          } else {
+            result = result.add(price);
+          }
+        }
+      }
+    }
+    return result;
+  }, [hugeQueriesStore.allKnownBalances, priceStore]);
   const availableChartWeight = (() => {
     if (!isNotReady && uiConfigStore.isPrivacyMode) {
       if (tabStatus === "available") {
@@ -127,6 +159,42 @@ export const MainPage: FunctionComponent<{
     }
     return result;
   }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings]);
+  const stakedTotalPriceEmbedOnlyUSD = useMemo(() => {
+    let result: PricePretty | undefined;
+    for (const bal of hugeQueriesStore.delegations) {
+      if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
+        continue;
+      }
+      if (bal.price) {
+        const price = priceStore.calculatePrice(bal.token, "usd");
+        if (price) {
+          if (!result) {
+            result = price;
+          } else {
+            result = result.add(price);
+          }
+        }
+      }
+    }
+    for (const bal of hugeQueriesStore.unbondings) {
+      if (
+        !(bal.viewToken.chainInfo.embedded as ChainInfoWithCoreTypes).embedded
+      ) {
+        continue;
+      }
+      if (bal.viewToken.price) {
+        const price = priceStore.calculatePrice(bal.viewToken.token, "usd");
+        if (price) {
+          if (!result) {
+            result = price;
+          } else {
+            result = result.add(price);
+          }
+        }
+      }
+    }
+    return result;
+  }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings, priceStore]);
   const stakedChartWeight = (() => {
     if (!isNotReady && uiConfigStore.isPrivacyMode) {
       if (tabStatus === "staked") {
@@ -139,6 +207,42 @@ export const MainPage: FunctionComponent<{
       ? Number.parseFloat(stakedTotalPrice.toDec().toString())
       : 0;
   })();
+
+  const lastTotalAvailableAmbiguousAvg = useRef(-1);
+  const lastTotalStakedAmbiguousAvg = useRef(-1);
+  useEffect(() => {
+    if (!isNotReady) {
+      const totalAvailableAmbiguousAvg = availableTotalPriceEmbedOnlyUSD
+        ? amountToAmbiguousAverage(availableTotalPriceEmbedOnlyUSD)
+        : 0;
+      const totalStakedAmbiguousAvg = stakedTotalPriceEmbedOnlyUSD
+        ? amountToAmbiguousAverage(stakedTotalPriceEmbedOnlyUSD)
+        : 0;
+      if (
+        lastTotalAvailableAmbiguousAvg.current !== totalAvailableAmbiguousAvg ||
+        lastTotalStakedAmbiguousAvg.current !== totalStakedAmbiguousAvg
+      ) {
+        new InExtensionMessageRequester().sendMessage(
+          BACKGROUND_PORT,
+          new LogAnalyticsEventMsg("user_properties", {
+            totalAvailableFiatAvg: totalAvailableAmbiguousAvg,
+            totalStakedFiatAvg: totalStakedAmbiguousAvg,
+            id: keyRingStore.selectedKeyInfo?.id,
+            keyType: keyRingStore.selectedKeyInfo?.insensitive[
+              "keyRingType"
+            ] as string | undefined,
+          })
+        );
+      }
+      lastTotalAvailableAmbiguousAvg.current = totalAvailableAmbiguousAvg;
+      lastTotalStakedAmbiguousAvg.current = totalStakedAmbiguousAvg;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    availableTotalPriceEmbedOnlyUSD,
+    isNotReady,
+    stakedTotalPriceEmbedOnlyUSD,
+  ]);
 
   const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);

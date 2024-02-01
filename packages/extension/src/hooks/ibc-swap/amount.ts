@@ -1,6 +1,6 @@
 import { AmountConfig, ISenderConfig, UIProperties } from "@keplr-wallet/hooks";
 import { AppCurrency } from "@keplr-wallet/types";
-import { CoinPretty, Dec } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, RatePretty } from "@keplr-wallet/unit";
 import {
   ChainGetter,
   CosmosAccount,
@@ -12,7 +12,11 @@ import {
 } from "@keplr-wallet/stores";
 import { useState } from "react";
 import { action, makeObservable, observable, override } from "mobx";
-import { SkipQueries } from "../../stores/skip";
+import {
+  MsgsDirectResponse,
+  RouteResponse,
+  SkipQueries,
+} from "../../stores/skip";
 import { ObservableQueryIBCSwapInner } from "../../stores/skip/ibc-swap";
 
 export class IBCSwapAmountConfig extends AmountConfig {
@@ -59,6 +63,14 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   get outCurrency(): AppCurrency {
     return this._outCurrency;
+  }
+
+  get swapPriceImpact(): RatePretty | undefined {
+    const queryIBCSwap = this.getQueryIBCSwap();
+    if (!queryIBCSwap) {
+      return undefined;
+    }
+    return queryIBCSwap.getQueryRoute().swapPriceImpact;
   }
 
   @action
@@ -124,7 +136,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
   async getTx(
     slippageTolerancePercent: number,
-    affiliateFeeReceiver: string
+    affiliateFeeReceiver: string,
+    swapRouterKey?: string
   ): Promise<MakeTxResponse> {
     const queryIBCSwap = this.getQueryIBCSwap();
     if (!queryIBCSwap) {
@@ -198,6 +211,31 @@ export class IBCSwapAmountConfig extends AmountConfig {
     );
     if (!tx) {
       throw new Error("Tx is not ready");
+    }
+
+    if (swapRouterKey) {
+      const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
+        chainIdsToAddresses,
+        slippageTolerancePercent,
+        affiliateFeeReceiver
+      );
+      if (!queryMsgsDirect.response) {
+        throw new Error("Can't happen: queryMsgsDirect is not ready");
+      }
+
+      const key = this.createSwapRouteKeyFromMsgsDirectResponse(
+        queryMsgsDirect.response.data
+      );
+
+      console.log({
+        swapRouterKey,
+        key,
+      });
+      if (swapRouterKey !== key) {
+        throw new Error(
+          "Route and msgs_direct are not matched. Please try again."
+        );
+      }
     }
 
     return tx;
@@ -308,6 +346,50 @@ export class IBCSwapAmountConfig extends AmountConfig {
       tx.ui.overrideType("ibc-swap");
       return tx;
     }
+  }
+
+  // /route query의 결과와 /msgs_direct query의 결과를 비교하기 위한 키를 생성한다.
+  createSwapRouteKeyFromRouteResponse(response: RouteResponse): string {
+    let key = "";
+
+    for (const operation of response.operations) {
+      if ("swap" in operation) {
+        for (const swapOperation of operation.swap.swap_in.swap_operations) {
+          key += `/${swapOperation.pool}/${swapOperation.denom_in}/${swapOperation.denom_out}`;
+        }
+      }
+    }
+
+    return key;
+  }
+
+  // /route query의 결과와 /msgs_direct query의 결과를 비교하기 위한 키를 생성한다.
+  createSwapRouteKeyFromMsgsDirectResponse(
+    response: MsgsDirectResponse
+  ): string {
+    let key = "";
+
+    for (const msg of response.msgs) {
+      if (msg.msg_type_url === "/ibc.applications.transfer.v1.MsgTransfer") {
+        const memo = JSON.parse(msg.msg).memo;
+        if (memo) {
+          const obj = JSON.parse(memo);
+          for (const operation of obj.wasm.msg.swap_and_action.user_swap
+            .swap_exact_asset_in.operations) {
+            key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;
+          }
+        }
+      }
+      if (msg.msg_type_url === "/cosmwasm.wasm.v1.MsgExecuteContract") {
+        const obj = JSON.parse(msg.msg);
+        for (const operation of obj.msg.swap_and_action.user_swap
+          .swap_exact_asset_in.operations) {
+          key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;
+        }
+      }
+    }
+
+    return key;
   }
 
   @override

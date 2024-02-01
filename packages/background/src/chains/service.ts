@@ -69,7 +69,10 @@ export class ChainsService {
     },
     protected readonly interactionService: InteractionService,
     protected readonly afterInitFn:
-      | ((service: ChainsService) => void | Promise<void>)
+      | ((
+          service: ChainsService,
+          lastEmbedChainInfos: ChainInfoWithCoreTypes[]
+        ) => void | Promise<void>)
       | undefined
   ) {
     this.updatedChainInfoKVStore = new PrefixKVStore(
@@ -238,11 +241,14 @@ export class ChainsService {
    * 모든 서비스가 init이 된 이후에 실행될 추가적인 로직을 여기에 작성할 수 있다.
    */
   async afterInit(): Promise<void> {
+    const lastEmbedChainInfos = await this.kvStore.get<
+      ChainInfoWithCoreTypes[]
+    >("last_embed_chain_infos");
+
     if (this.afterInitFn) {
-      await this.afterInitFn(this);
+      await this.afterInitFn(this, lastEmbedChainInfos ?? []);
     }
 
-    // 그냥 미래에 필요할지도 몰라서...
     await this.kvStore.set(
       "last_embed_chain_infos",
       toJS(this.embedChainInfos)

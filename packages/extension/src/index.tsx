@@ -85,6 +85,7 @@ import {
   BottomTabSwapIcon,
 } from "./bottom-tabs";
 import { IBCSwapDestinationSelectAssetPage } from "./pages/ibc-swap/select-asset";
+import { RoutePageAnalytics } from "./route-page-analytics";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -299,6 +300,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
         ]}
       >
         <PageChangeScrollTop />
+        <RoutePageAnalytics />
         {isReady ? (
           shouldUnlockPage ? (
             <UnlockPage />

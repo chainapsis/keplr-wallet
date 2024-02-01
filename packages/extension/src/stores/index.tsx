@@ -3,6 +3,8 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { createRootStore, RootStore } from "./root";
 import { getKeplrFromWindow } from "@keplr-wallet/stores";
 import { Keplr } from "@keplr-wallet/types";
+import { autorun } from "mobx";
+import { PlainObject } from "@keplr-wallet/background";
 
 interface KeplrCoreTypes {
   __core__getAnalyticsId(): Promise<string>;
@@ -28,25 +30,66 @@ export const StoreProvider: FunctionComponent = ({ children }) => {
   }, [stores.analyticsStore]);
 
   useEffect(() => {
-    if (!stores.keyRingStore.isInitialized) {
-      return;
-    }
+    const disposal = autorun(() => {
+      if (!stores.keyRingStore.isInitialized) {
+        return;
+      }
 
-    if (!stores.uiConfigStore.isInitialized) {
-      return;
-    }
+      if (!stores.uiConfigStore.isInitialized) {
+        return;
+      }
 
-    stores.analyticsStore.setUserProperties({
-      accountCount: stores.keyRingStore.keyInfos.length,
-      isDeveloperMode: stores.uiConfigStore.isDeveloper,
+      const numPerTypes: Record<string, number> = {};
+      for (const keyInfo of stores.keyRingStore.keyInfos) {
+        let type = keyInfo.insensitive["keyRingType"] as string;
+        if (type === "private-key") {
+          const meta = keyInfo.insensitive["keyRingMeta"] as PlainObject;
+          if (meta["web3Auth"] && (meta["web3Auth"] as any)["type"]) {
+            type = "web3_auth_" + (meta["web3Auth"] as any)["type"];
+          }
+        }
+
+        if (type) {
+          type = "keyring_" + type + "_num";
+
+          if (!numPerTypes[type]) {
+            numPerTypes[type] = 0;
+          }
+          numPerTypes[type] += 1;
+        }
+      }
+
+      let currentKeyRingType: string = "none";
+      if (stores.keyRingStore.selectedKeyInfo) {
+        currentKeyRingType = stores.keyRingStore.selectedKeyInfo.insensitive[
+          "keyRingType"
+        ] as string;
+        if (currentKeyRingType === "private-key") {
+          const meta = stores.keyRingStore.selectedKeyInfo.insensitive[
+            "keyRingMeta"
+          ] as PlainObject;
+          if (meta["web3Auth"] && (meta["web3Auth"] as any)["type"]) {
+            currentKeyRingType =
+              "web3_auth_" + (meta["web3Auth"] as any)["type"];
+          }
+        }
+      }
+
+      stores.analyticsStore.setUserProperties({
+        account_count: stores.keyRingStore.keyInfos.length,
+        is_developer_mode: stores.uiConfigStore.isDeveloper,
+        current_keyring_type: currentKeyRingType,
+        ...numPerTypes,
+      });
     });
-  }, [
-    stores.analyticsStore,
-    stores.keyRingStore.isInitialized,
-    stores.keyRingStore.keyInfos.length,
-    stores.uiConfigStore.isDeveloper,
-    stores.uiConfigStore.isInitialized,
-  ]);
+
+    return () => {
+      if (disposal) {
+        disposal();
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <storeContext.Provider value={stores}>{children}</storeContext.Provider>
