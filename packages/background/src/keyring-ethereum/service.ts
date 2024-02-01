@@ -93,7 +93,7 @@ export class KeyRingEthereumService {
     const ethereumHexAddress = Bech32Address.fromBech32(
       bech32Address,
       bech32Prefix
-    ).toHex();
+    ).toHex(false);
     if (signer !== bech32Address && signer !== ethereumHexAddress) {
       throw new Error("Signer mismatched");
     }
