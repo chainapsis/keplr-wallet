@@ -97,5 +97,7 @@
 		<key>apiKey</key>
 		<string>fba0f81f121c1a15f7195bb269428911</string>
 	</dict>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
