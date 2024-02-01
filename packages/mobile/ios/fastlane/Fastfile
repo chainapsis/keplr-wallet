@@ -171,5 +171,7 @@ platform :ios do
       app_identifier: "com.chainapsis.keplrwallet",
       skip_submission: true
     )
+
+    sh("cd .. && curl --http1.1 https://upload.bugsnag.com/ -F apiKey=#{ENV["BUGSNAG_API_KEY"]} -F dsym=@keplrmobile.app.dSYM.zip")
   end
 end
