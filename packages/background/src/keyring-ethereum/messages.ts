@@ -2,7 +2,6 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Message } from "@keplr-wallet/router";
 import { EthSignType } from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
-import { isAddress as isEthereumHexAddress } from "@ethersproject/address";
 
 export class RequestSignEthereumMsg extends Message<Uint8Array> {
   public static type() {
@@ -35,7 +34,11 @@ export class RequestSignEthereumMsg extends Message<Uint8Array> {
     try {
       Bech32Address.validate(this.signer);
     } catch {
-      isEthereumHexAddress(this.signer);
+      const tempSigner =
+        this.signer.substring(0, 2) === "0x" ? this.signer : "0x" + this.signer;
+      if (!tempSigner.match(/^0x[0-9A-Fa-f]*$/) || tempSigner.length !== 42) {
+        throw new Error("Signer is not valid hex address");
+      }
     }
   }
 
