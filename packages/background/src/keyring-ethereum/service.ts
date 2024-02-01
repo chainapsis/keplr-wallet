@@ -76,6 +76,15 @@ export class KeyRingEthereumService {
       );
     }
 
+    try {
+      Bech32Address.validate(signer);
+    } catch {
+      // Ignore mixed-case checksum
+      signer = (
+        signer.substring(0, 2) === "0x" ? signer : "0x" + signer
+      ).toLowerCase();
+    }
+
     const key = await this.keyRingCosmosService.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
@@ -84,7 +93,7 @@ export class KeyRingEthereumService {
     const ethereumHexAddress = Bech32Address.fromBech32(
       bech32Address,
       bech32Prefix
-    ).toHex(true);
+    ).toHex();
     if (signer !== bech32Address && signer !== ethereumHexAddress) {
       throw new Error("Signer mismatched");
     }
