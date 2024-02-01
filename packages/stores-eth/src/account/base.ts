@@ -2,6 +2,7 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { ChainGetter } from "@keplr-wallet/stores";
 import {
   AppCurrency,
+  ChainInfo,
   EthSignType,
   EthTxReceipt,
   EthTxStatus,
@@ -15,7 +16,7 @@ import {
   serialize,
   TransactionTypes,
 } from "@ethersproject/transactions";
-import { isAddress as isEthereumHexAddress } from "@ethersproject/address";
+import { getAddress as getEthAddress } from "@ethersproject/address";
 
 const TX_RECIEPT_POLLING_INTERVAL = 1000;
 
@@ -25,6 +26,10 @@ export class EthereumAccountBase {
     protected readonly chainId: string,
     protected readonly getKeplr: () => Promise<Keplr | undefined>
   ) {}
+
+  static evmInfo(chainInfo: ChainInfo): ChainInfo["evm"] | undefined {
+    return chainInfo.evm;
+  }
 
   async simulateGas({
     currency,
@@ -38,16 +43,21 @@ export class EthereumAccountBase {
     recipient: string;
   }) {
     const chainInfo = this.chainGetter.getChain(this.chainId);
-    if (!chainInfo.evm) {
+    const evmInfo = EthereumAccountBase.evmInfo(chainInfo);
+    if (!evmInfo) {
       throw new Error("No EVM chain info provided");
     }
 
-    if (!isEthereumHexAddress(sender)) {
+    if (!EthereumAccountBase.isEthereumHexAddressWithChecksum(sender)) {
       throw new Error("Invalid sender address");
     }
 
     // If the recipient address is invalid, the sender address will be used as the recipient for gas estimating gas.
-    const tempRecipient = isEthereumHexAddress(recipient) ? recipient : sender;
+    const tempRecipient = EthereumAccountBase.isEthereumHexAddressWithChecksum(
+      recipient
+    )
+      ? recipient
+      : sender;
 
     const parsedAmount = parseUnits(amount, currency.coinDecimals);
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
@@ -71,7 +81,7 @@ export class EthereumAccountBase {
 
     const estimateGasResponse = await simpleFetch<{
       result: string;
-    }>(chainInfo.evm.rpc, {
+    }>(evmInfo.rpc, {
       method: "POST",
       body: JSON.stringify({
         jsonrpc: "2.0",
@@ -104,13 +114,14 @@ export class EthereumAccountBase {
     maxPriorityFeePerGas: string;
   }): Promise<UnsignedTransaction> {
     const chainInfo = this.chainGetter.getChain(this.chainId);
-    if (chainInfo.evm === undefined) {
+    const evmInfo = EthereumAccountBase.evmInfo(chainInfo);
+    if (!evmInfo) {
       throw new Error("No EVM chain info provided");
     }
 
     const transactionCountResponse = await simpleFetch<{
       result: string;
-    }>(chainInfo.evm.rpc, {
+    }>(evmInfo.rpc, {
       method: "POST",
       body: JSON.stringify({
         jsonrpc: "2.0",
@@ -126,7 +137,7 @@ export class EthereumAccountBase {
     const tx: UnsignedTransaction = {
       // Support EIP-1559 transaction only.
       type: TransactionTypes.eip1559,
-      chainId: chainInfo.evm.chainId,
+      chainId: evmInfo.chainId,
       nonce: Number(transactionCountResponse.data.result),
       gasLimit: "0x" + gasLimit.toString(16),
       maxFeePerGas: "0x" + Number(maxFeePerGas).toString(16),
@@ -159,7 +170,7 @@ export class EthereumAccountBase {
     }
   ) {
     const chainInfo = this.chainGetter.getChain(this.chainId);
-    const evmInfo = chainInfo.evm;
+    const evmInfo = EthereumAccountBase.evmInfo(chainInfo);
     if (!evmInfo) {
       throw new Error("No EVM chain info provided");
     }
@@ -230,5 +241,22 @@ export class EthereumAccountBase {
 
       throw e;
     }
+  }
+
+  static isEthereumHexAddressWithChecksum(hexAddress: string): boolean {
+    const isHexAddress = !!hexAddress.match(/^0x[0-9A-Fa-f]*$/);
+    const isChecksumAddress = !!hexAddress.match(
+      /([A-F].*[a-f])|([a-f].*[A-F])/
+    );
+    if (!isHexAddress || hexAddress.length !== 42) {
+      return false;
+    }
+
+    const checksumHexAddress = getEthAddress(hexAddress.toLowerCase());
+    if (isChecksumAddress && checksumHexAddress !== hexAddress) {
+      return false;
+    }
+
+    return true;
   }
 }

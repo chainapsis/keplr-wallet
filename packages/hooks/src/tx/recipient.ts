@@ -5,6 +5,7 @@ import {
 } from "./types";
 import { TxChainSetter } from "./chain";
 import { ChainGetter } from "@keplr-wallet/stores";
+import { EthereumAccountBase } from "@keplr-wallet/stores-eth";
 import {
   action,
   computed,
@@ -20,7 +21,6 @@ import {
 } from "./errors";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { useState } from "react";
-import { isAddress } from "@ethersproject/address";
 import { Buffer } from "buffer/";
 import { validateICNSName } from "@keplr-wallet/common";
 
@@ -187,7 +187,9 @@ export class RecipientConfig
 
     if (hasEthereumAddress && rawRecipient.startsWith("0x")) {
       try {
-        if (isAddress(rawRecipient)) {
+        if (
+          EthereumAccountBase.isEthereumHexAddressWithChecksum(rawRecipient)
+        ) {
           return this._allowHexAddressToBech32Address
             ? new Bech32Address(
                 Buffer.from(rawRecipient.replace("0x", "").toLowerCase(), "hex")
@@ -262,7 +264,9 @@ export class RecipientConfig
       isEvmChain;
     if (hasEthereumAddress && rawRecipient.startsWith("0x")) {
       try {
-        if (isAddress(rawRecipient)) {
+        if (
+          EthereumAccountBase.isEthereumHexAddressWithChecksum(rawRecipient)
+        ) {
           return {};
         } else {
           return {
