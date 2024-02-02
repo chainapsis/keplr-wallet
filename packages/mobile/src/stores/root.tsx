@@ -56,6 +56,7 @@ import {
   GravityBridgeCurrencyRegistrar,
   KeplrETCQueries,
 } from '@keplr-wallet/stores-etc';
+import {SkipQueries} from '@keplr-wallet/extension/src/stores/skip';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
@@ -90,6 +91,7 @@ export class RootStore {
       CosmosGovernanceQueriesV1,
     ]
   >;
+  public readonly skipQueriesStore: SkipQueries;
   public readonly accountStore: AccountStore<[CosmosAccount, SecretAccount]>;
   public readonly uiConfigStore: UIConfigStore;
 
@@ -174,6 +176,11 @@ export class RootStore {
       }),
       CosmosGovernanceQueries.use(),
       CosmosGovernanceQueriesV1.use(),
+    );
+
+    this.skipQueriesStore = new SkipQueries(
+      this.queriesStore.sharedContext,
+      this.chainStore,
     );
 
     this.accountStore = new AccountStore(

@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import React, {FunctionComponent, useEffect, useMemo} from 'react';
+import React, {FunctionComponent, useEffect, useMemo, useState} from 'react';
 import {PageWithScrollView} from '../../../components/page';
 import {
   RouteProp,
@@ -10,7 +10,7 @@ import {
 import {useStore} from '../../../stores';
 import {
   useGasSimulator,
-  useSendTxConfig,
+  useSendMixedIBCTransferConfig,
   useTxConfigsValidate,
 } from '@keplr-wallet/hooks';
 import {ICNSInfo} from '../../../config.ui';
@@ -21,7 +21,7 @@ import {CoinPretty, DecUtils} from '@keplr-wallet/unit';
 import {Label} from '../../../components/input/label';
 import {RecipientInput} from '../../../components/input/reciepient-input';
 import {AmountInput} from '../../../components/input/amount-input';
-import {useIntl} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {MemoInput} from '../../../components/input/memo-input';
 import {Stack} from '../../../components/stack';
 import {Box} from '../../../components/box';
@@ -30,14 +30,28 @@ import {Button} from '../../../components/button';
 import {FeeControl} from '../../../components/input/fee-control';
 import {Gutter} from '../../../components/gutter';
 import {BACKGROUND_PORT, Message} from '@keplr-wallet/router';
-import {SendTxAndRecordMsg} from '@keplr-wallet/background';
+import {
+  LogAnalyticsEventMsg,
+  SendTxAndRecordMsg,
+} from '@keplr-wallet/background';
 import {RNMessageRequesterInternal} from '../../../router';
 import {StackNavProp} from '../../../navigation';
 import {useNotification} from '../../../hooks/notification';
 import {useFocusAfterRouting} from '../../../hooks/use-focus';
+import {LayeredHorizontalRadioGroup} from '../../../components/radio-group';
+import {VerticalCollapseTransition} from '../../../components/transition';
+import {
+  DestinationChainView,
+  IBCTransferSelectDestinationModal,
+} from './ibc-transfer';
+import {ChainIdHelper} from '@keplr-wallet/cosmos';
+import {amountToAmbiguousAverage} from '../../../utils';
+import {GuideBox} from '../../../components/guide-box';
+import {Text} from 'react-native';
 
 export const SendAmountScreen: FunctionComponent = observer(() => {
-  const {chainStore, accountStore, queriesStore} = useStore();
+  const {chainStore, accountStore, queriesStore, skipQueriesStore, priceStore} =
+    useStore();
   const route: RouteProp<{
     params: {
       chainId?: string;
@@ -58,6 +72,12 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
     initialCoinMinimalDenom ||
     chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
 
+  const [isIBCTransfer, setIsIBCTransfer] = useState(false);
+  const [
+    isIBCTransferDestinationModalOpen,
+    setIsIBCTransferDestinationModalOpen,
+  ] = useState(false);
+
   useEffect(() => {
     if (!initialChainId || !initialCoinMinimalDenom) {
       navigation.goBack();
@@ -76,13 +96,14 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
     .queryBalances.getQueryBech32Address(sender)
     .getBalance(currency);
 
-  const sendConfigs = useSendTxConfig(
+  const sendConfigs = useSendMixedIBCTransferConfig(
     chainStore,
     queriesStore,
     chainId,
     sender,
     // TODO: 이 값을 config 밑으로 빼자
     300000,
+    isIBCTransfer,
     {
       allowHexAddressOnEthermint: !chainStore
         .getChain(chainId)
@@ -119,12 +140,22 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
     chainId,
     sendConfigs.gasConfig,
     sendConfigs.feeConfig,
-    gasSimulatorKey,
+    isIBCTransfer ? `ibc/${gasSimulatorKey}` : gasSimulatorKey,
     () => {
       if (!sendConfigs.amountConfig.currency) {
         throw new Error(
           intl.formatMessage({id: 'error.send-currency-not-set'}),
         );
+      }
+
+      if (isIBCTransfer) {
+        if (
+          sendConfigs.channelConfig.uiProperties.loadingState ===
+            'loading-block' ||
+          sendConfigs.channelConfig.uiProperties.error != null
+        ) {
+          throw new Error('Not ready to simulate tx');
+        }
       }
 
       // Prefer not to use the gas config or fee config,
@@ -150,6 +181,15 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
           intl.formatMessage({
             id: 'error.simulating-secret-wasm-not-supported',
           }),
+        );
+      }
+
+      if (isIBCTransfer) {
+        return account.cosmos.makePacketForwardIBCTransferTx(
+          sendConfigs.channelConfig.channels,
+          sendConfigs.amountConfig.amount[0].toDec().toString(),
+          sendConfigs.amountConfig.amount[0].currency,
+          sendConfigs.recipientConfig.recipient,
         );
       }
 
@@ -196,7 +236,65 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
     gasSimulator,
   });
 
-  const historyType = 'basic-send';
+  // IBC Send일때 auto fill일때는 recipient input에서 paragraph로 auto fill되었다는 것을 알려준다.
+  const [isIBCRecipientSetAuto, setIsIBCRecipientSetAuto] = useState(false);
+  // 유저가 주소를 수정했을때 auto fill이라는 state를 해제하기 위해서 마지막으로 auto fill된 주소를 기억한다.
+  const [ibcRecipientAddress, setIBCRecipientAddress] = useState('');
+
+  useEffect(() => {
+    if (
+      !isIBCTransfer ||
+      sendConfigs.recipientConfig.value !== ibcRecipientAddress
+    ) {
+      setIsIBCRecipientSetAuto(false);
+    }
+    // else 문을 써서 같다면 setAuto를 true로 해주면 안된다.
+    // 의도상 한번 바꾸면 다시 auto fill 값과 같더라도 유저가 수정한걸로 간주한다.
+  }, [ibcRecipientAddress, sendConfigs.recipientConfig.value, isIBCTransfer]);
+
+  const [ibcChannelFluent, setIBCChannelFluent] = useState<
+    | {
+        destinationChainId: string;
+        originDenom: string;
+        originChainId: string;
+
+        channels: {
+          portId: string;
+          channelId: string;
+
+          counterpartyChainId: string;
+        }[];
+      }
+    | undefined
+  >(undefined);
+
+  const historyType = isIBCTransfer ? 'basic-send/ibc' : 'basic-send';
+
+  const [isSendingIBCToken, setIsSendingIBCToken] = useState(false);
+  useEffect(() => {
+    if (!isIBCTransfer) {
+      if (
+        new DenomHelper(sendConfigs.amountConfig.currency.coinMinimalDenom)
+          .type === 'native' &&
+        sendConfigs.amountConfig.currency.coinMinimalDenom.startsWith('ibc/')
+      ) {
+        setIsSendingIBCToken(true);
+        return;
+      }
+    }
+
+    setIsSendingIBCToken(false);
+  }, [isIBCTransfer, sendConfigs.amountConfig.currency]);
+
+  // Prefetch IBC channels to reduce the UI flickering(?) when open ibc channel modal.
+  try {
+    skipQueriesStore.queryIBCPacketForwardingTransfer.getIBCChannels(
+      chainId,
+      currency.coinMinimalDenom,
+    );
+  } catch (e) {
+    console.log(e);
+  }
 
   return (
     <PageWithScrollView
@@ -222,22 +320,102 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
           />
         </Box>
 
+        <Box>
+          <LayeredHorizontalRadioGroup
+            size="large"
+            itemMinWidth={'50%'}
+            items={[
+              {
+                key: 'send',
+                text: intl.formatMessage({
+                  id: 'page.send.type.send',
+                }),
+              },
+              {
+                key: 'ibc-transfer',
+                text: intl.formatMessage({
+                  id: 'page.send.type.ibc-transfer',
+                }),
+              },
+            ]}
+            selectedKey={isIBCTransfer ? 'ibc-transfer' : 'send'}
+            onSelect={key => {
+              if (key === 'ibc-transfer') {
+                if (sendConfigs.channelConfig.channels.length === 0) {
+                  setIsIBCTransferDestinationModalOpen(true);
+                }
+              } else {
+                sendConfigs.channelConfig.setChannels([]);
+                setIsIBCTransfer(false);
+              }
+            }}
+          />
+        </Box>
+
+        <VerticalCollapseTransition collapsed={!isIBCTransfer}>
+          <DestinationChainView
+            ibcChannelConfig={sendConfigs.channelConfig}
+            onPress={() => {
+              setIsIBCTransferDestinationModalOpen(true);
+            }}
+          />
+        </VerticalCollapseTransition>
+
         <RecipientInput
           ref={addressRef}
           historyType={historyType}
           recipientConfig={sendConfigs.recipientConfig}
           memoConfig={sendConfigs.memoConfig}
+          permitAddressBookSelfKeyInfo={isIBCTransfer}
+          bottom={
+            <VerticalCollapseTransition
+              collapsed={!isIBCRecipientSetAuto}
+              transitionAlign="top">
+              <Gutter size={8} />
+
+              <Text
+                style={style.flatten(['text-caption2', 'color-platinum-200'])}>
+                <FormattedMessage id="page.send.amount.ibc-send-recipient-auto-filled" />
+              </Text>
+            </VerticalCollapseTransition>
+          }
         />
 
         <AmountInput amountConfig={sendConfigs.amountConfig} />
 
         <MemoInput
           memoConfig={sendConfigs.memoConfig}
-          placeholder={intl.formatMessage({
-            id: 'page.send.amount.memo-placeholder',
-          })}
+          placeholder={
+            isIBCTransfer
+              ? undefined
+              : intl.formatMessage({
+                  id: 'page.send.amount.memo-placeholder',
+                })
+          }
         />
       </Stack>
+
+      <VerticalCollapseTransition collapsed={!isIBCTransfer}>
+        <Gutter size={16} />
+
+        <GuideBox
+          color="warning"
+          title={intl.formatMessage({
+            id: 'page.send.amount.ibc-transfer-warning.title',
+          })}
+        />
+      </VerticalCollapseTransition>
+
+      <VerticalCollapseTransition collapsed={!isSendingIBCToken}>
+        <Gutter size={16} />
+
+        <GuideBox
+          color="warning"
+          title={intl.formatMessage({
+            id: 'page.send.amount.avoid-cex-warning.title',
+          })}
+        />
+      </VerticalCollapseTransition>
 
       <Box style={style.flatten(['flex-1'])} />
 
@@ -254,16 +432,28 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
         text={'Next'}
         size={'large'}
         disabled={txConfigsValidate.interactionBlocked}
-        loading={accountStore.getAccount(chainId).isSendingMsg === 'send'}
+        loading={
+          accountStore.getAccount(chainId).isSendingMsg ===
+          (!isIBCTransfer ? 'send' : 'ibcTransfer')
+        }
         onPress={async () => {
           if (!txConfigsValidate.interactionBlocked) {
-            const tx = accountStore
-              .getAccount(chainId)
-              .makeSendTokenTx(
-                sendConfigs.amountConfig.amount[0].toDec().toString(),
-                sendConfigs.amountConfig.amount[0].currency,
-                sendConfigs.recipientConfig.recipient,
-              );
+            const tx = isIBCTransfer
+              ? accountStore
+                  .getAccount(chainId)
+                  .cosmos.makePacketForwardIBCTransferTx(
+                    sendConfigs.channelConfig.channels,
+                    sendConfigs.amountConfig.amount[0].toDec().toString(),
+                    sendConfigs.amountConfig.amount[0].currency,
+                    sendConfigs.recipientConfig.recipient,
+                  )
+              : accountStore
+                  .getAccount(chainId)
+                  .makeSendTokenTx(
+                    sendConfigs.amountConfig.amount[0].toDec().toString(),
+                    sendConfigs.amountConfig.amount[0].currency,
+                    sendConfigs.recipientConfig.recipient,
+                  );
 
             try {
               await tx.send(
@@ -294,6 +484,18 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
                       }),
                       sendConfigs.memoConfig.memo,
                     );
+                    if (isIBCTransfer) {
+                      if (msg instanceof SendTxAndRecordMsg) {
+                        msg = msg.withIBCPacketForwarding(
+                          sendConfigs.channelConfig.channels,
+                          {
+                            currencies: chainStore.getChain(chainId).currencies,
+                          },
+                        );
+                      } else {
+                        throw new Error('Invalid message type');
+                      }
+                    }
                     return await new RNMessageRequesterInternal().sendMessage(
                       BACKGROUND_PORT,
                       msg,
@@ -301,11 +503,129 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
                   },
                 },
                 {
-                  onBroadcasted: txHash => {
+                  onBroadcasted: async txHash => {
                     chainStore.enableVaultsWithCosmosAddress(
                       sendConfigs.recipientConfig.chainId,
                       sendConfigs.recipientConfig.recipient,
                     );
+
+                    if (!isIBCTransfer) {
+                      const inCurrencyPrice =
+                        await priceStore.waitCalculatePrice(
+                          sendConfigs.amountConfig.amount[0],
+                          'usd',
+                        );
+
+                      const params: Record<
+                        string,
+                        | number
+                        | string
+                        | boolean
+                        | number[]
+                        | string[]
+                        | undefined
+                      > = {
+                        denom:
+                          sendConfigs.amountConfig.amount[0].currency
+                            .coinMinimalDenom,
+                        commonDenom: (() => {
+                          const currency =
+                            sendConfigs.amountConfig.amount[0].currency;
+                          if ('paths' in currency && currency.originCurrency) {
+                            return currency.originCurrency.coinDenom;
+                          }
+                          return currency.coinDenom;
+                        })(),
+                        chainId: sendConfigs.recipientConfig.chainId,
+                        chainIdentifier: ChainIdHelper.parse(
+                          sendConfigs.recipientConfig.chainId,
+                        ).identifier,
+                        inAvg: amountToAmbiguousAverage(
+                          sendConfigs.amountConfig.amount[0],
+                        ),
+                      };
+                      if (inCurrencyPrice) {
+                        params['inFiatAvg'] =
+                          amountToAmbiguousAverage(inCurrencyPrice);
+                      }
+
+                      new RNMessageRequesterInternal().sendMessage(
+                        BACKGROUND_PORT,
+                        new LogAnalyticsEventMsg('send', params),
+                      );
+                    } else if (ibcChannelFluent != null) {
+                      const pathChainIds = [chainId].concat(
+                        ...ibcChannelFluent.channels.map(
+                          channel => channel.counterpartyChainId,
+                        ),
+                      );
+                      const intermediateChainIds: string[] = [];
+                      if (pathChainIds.length > 2) {
+                        intermediateChainIds.push(...pathChainIds.slice(1, -1));
+                      }
+
+                      const inCurrencyPrice =
+                        await priceStore.waitCalculatePrice(
+                          sendConfigs.amountConfig.amount[0],
+                          'usd',
+                        );
+
+                      const params: Record<
+                        string,
+                        | number
+                        | string
+                        | boolean
+                        | number[]
+                        | string[]
+                        | undefined
+                      > = {
+                        originDenom: ibcChannelFluent.originDenom,
+                        originCommonDenom: (() => {
+                          const currency = chainStore
+                            .getChain(ibcChannelFluent.originChainId)
+                            .forceFindCurrency(ibcChannelFluent.originDenom);
+                          if ('paths' in currency && currency.originCurrency) {
+                            return currency.originCurrency.coinDenom;
+                          }
+                          return currency.coinDenom;
+                        })(),
+                        originChainId: ibcChannelFluent.originChainId,
+                        originChainIdentifier: ChainIdHelper.parse(
+                          ibcChannelFluent.originChainId,
+                        ).identifier,
+                        sourceChainId: chainId,
+                        sourceChainIdentifier:
+                          ChainIdHelper.parse(chainId).identifier,
+                        destinationChainId: ibcChannelFluent.destinationChainId,
+                        destinationChainIdentifier: ChainIdHelper.parse(
+                          ibcChannelFluent.destinationChainId,
+                        ).identifier,
+                        pathChainIds,
+                        pathChainIdentifiers: pathChainIds.map(
+                          chainId => ChainIdHelper.parse(chainId).identifier,
+                        ),
+                        intermediateChainIds,
+                        intermediateChainIdentifiers: intermediateChainIds.map(
+                          chainId => ChainIdHelper.parse(chainId).identifier,
+                        ),
+                        isToOrigin:
+                          ibcChannelFluent.destinationChainId ===
+                          ibcChannelFluent.originChainId,
+                        inAvg: amountToAmbiguousAverage(
+                          sendConfigs.amountConfig.amount[0],
+                        ),
+                      };
+                      if (inCurrencyPrice) {
+                        params['inFiatAvg'] =
+                          amountToAmbiguousAverage(inCurrencyPrice);
+                      }
+
+                      new RNMessageRequesterInternal().sendMessage(
+                        BACKGROUND_PORT,
+                        new LogAnalyticsEventMsg('ibc_send', params),
+                      );
+                    }
+
                     navigation.navigate('TxPending', {
                       chainId,
                       txHash: Buffer.from(txHash).toString('hex'),
@@ -341,6 +661,21 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
             }
           }
         }}
+      />
+
+      <IBCTransferSelectDestinationModal
+        chainId={chainId}
+        denom={currency.coinMinimalDenom}
+        recipientConfig={sendConfigs.recipientConfig}
+        ibcChannelConfig={sendConfigs.channelConfig}
+        setIsIBCTransfer={setIsIBCTransfer}
+        setAutomaticRecipient={(address: string) => {
+          setIsIBCRecipientSetAuto(true);
+          setIBCRecipientAddress(address);
+        }}
+        setIBCChannelsInfoFluent={setIBCChannelFluent}
+        isOpen={isIBCTransferDestinationModalOpen}
+        setIsOpen={setIsIBCTransferDestinationModalOpen}
       />
     </PageWithScrollView>
   );
