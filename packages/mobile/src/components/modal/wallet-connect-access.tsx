@@ -16,12 +16,13 @@ import {registerCardModal} from './card';
 
 export const WalletConnectAccessModal = registerCardModal(
   observer<{
-    id: string;
-    data: PermissionData;
+    data: {
+      ids: string[];
+    } & PermissionData;
 
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
-  }>(({id, data}) => {
+  }>(({data}) => {
     const intl = useIntl();
     const style = useStyle();
     const {permissionStore, walletConnectStore} = useStore();
@@ -89,7 +90,10 @@ export const WalletConnectAccessModal = registerCardModal(
             color="secondary"
             containerStyle={{flex: 1, width: '100%'}}
             onPress={async () => {
-              await permissionStore.rejectPermissionAll();
+              await permissionStore.rejectPermissionWithProceedNext(
+                data.ids,
+                () => {},
+              );
             }}
           />
 
@@ -101,7 +105,7 @@ export const WalletConnectAccessModal = registerCardModal(
             containerStyle={{flex: 1, width: '100%'}}
             onPress={async () => {
               await permissionStore.approvePermissionWithProceedNext(
-                id,
+                data.ids,
                 () => {},
               );
             }}
