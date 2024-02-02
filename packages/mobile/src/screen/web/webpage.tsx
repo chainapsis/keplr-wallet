@@ -69,7 +69,7 @@ export const WebpageScreen: FunctionComponent = observer(() => {
   );
 
   useEffect(() => {
-    RNInjectedKeplr.startProxy(
+    const unlisten = RNInjectedKeplr.startProxy(
       new Keplr(
         '0.12.20',
         'core',
@@ -93,6 +93,9 @@ export const WebpageScreen: FunctionComponent = observer(() => {
         addMessageListener: fn => {
           eventEmitter.addListener('message', fn);
         },
+        removeMessageListener: fn => {
+          eventEmitter.removeListener('message', fn);
+        },
         postMessage: message => {
           webviewRef.current?.injectJavaScript(
             `
@@ -106,6 +109,10 @@ export const WebpageScreen: FunctionComponent = observer(() => {
       },
       RNInjectedKeplr.parseWebviewMessage,
     );
+
+    return () => {
+      unlisten();
+    };
   }, [chainStore, uri, eventEmitter]);
 
   return (
