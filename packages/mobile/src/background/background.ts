@@ -13,6 +13,7 @@ import {
   PrivilegedOrigins,
 } from '../config';
 import {AsyncKVStore} from '../common';
+import {Platform} from 'react-native';
 
 const router = new RNRouterBackground(RNEnv.produceEnv);
 
@@ -64,6 +65,10 @@ const {initFn} = init(
       }
       return legacy.disabledChains ?? [];
     },
+  },
+  {
+    platform: 'mobile',
+    mobileOS: Platform.OS,
   },
 );
 
