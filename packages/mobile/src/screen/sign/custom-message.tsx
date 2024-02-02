@@ -1,11 +1,11 @@
 import React, {FunctionComponent, PropsWithChildren} from 'react';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
 import {Text} from 'react-native';
 import {useStyle} from '../../styles';
 
 export const CustomIcon: FunctionComponent = () => {
   return (
-    <FastImage
+    <ExpoImage.Image
       style={{width: 48, height: 48}}
       source={require('../../public/assets/img/sign/sign-custom.png')}
     />

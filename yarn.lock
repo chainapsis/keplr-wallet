@@ -8067,6 +8067,7 @@ __metadata:
     expo-apple-authentication: ^6.3.0
     expo-clipboard: ^4.8.0
     expo-crypto: ^12.8.0
+    expo-image: =1.9.0
     expo-local-authentication: ^13.8.0
     expo-standard-web-crypto: "file:./crypto-polyfill"
     expo-web-browser: ^12.8.2
@@ -8089,7 +8090,6 @@ __metadata:
     react-native-ble-plx: ^2.0.3
     react-native-code-push: ^8.1.1
     react-native-device-info: ^10.11.0
-    react-native-fast-image: ^8.6.3
     react-native-fs: ^2.20.0
     react-native-gesture-handler: ^2.14.1
     react-native-keyboard-aware-scroll-view: ^0.9.5
@@ -10552,7 +10552,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native/assets-registry@npm:^0.72.0":
+"@react-native/assets-registry@npm:^0.72.0, @react-native/assets-registry@npm:~0.72.0":
   version: 0.72.0
   resolution: "@react-native/assets-registry@npm:0.72.0"
   checksum: 94c2b842f9fcc6e2817463dd5f26a40b69a5ff10d8d10a2af95b677f88c6645e833f985db9d85c9c3d8e66fb882b2065921ad8890fe6ac7b5eb3f9d04f6e17fa
@@ -22656,6 +22656,17 @@ __metadata:
   peerDependencies:
     expo: "*"
   checksum: 3eff92ba5c62de5f37cfdfd86a5daf1d448e4f3e82a9ff401b4c4da1c4e5a7241da26edf32fb049763147e442d74ae8b4575b7e5a4ae0d935750c6d3f70f4355
+  languageName: node
+  linkType: hard
+
+"expo-image@npm:=1.9.0":
+  version: 1.9.0
+  resolution: "expo-image@npm:1.9.0"
+  dependencies:
+    "@react-native/assets-registry": ~0.72.0
+  peerDependencies:
+    expo: "*"
+  checksum: f3bd3dea5f4260fcd2ea4117d5eae11f4646df9760fcbeb23d80faeaa34cd659d4a9157807487929f3195c87abc16a223087e2f3744ed57a3014df0139351afe
   languageName: node
   linkType: hard
 
@@ -35263,16 +35274,6 @@ __metadata:
   peerDependencies:
     react-native: "*"
   checksum: 3f2de34df4e95e87291673fe69b09d3b96f9088177a8dadd92eccec86549cea63ca08ab82f120d4150eb0302ac721ad8a5e4b3a8136c9f54f0212e4c055762b0
-  languageName: node
-  linkType: hard
-
-"react-native-fast-image@npm:^8.6.3":
-  version: 8.6.3
-  resolution: "react-native-fast-image@npm:8.6.3"
-  peerDependencies:
-    react: ^17 || ^18
-    react-native: ">=0.60.0"
-  checksum: 29289cb6b2eae0983c8922b22e2d9de3be07322bb7991c5def19f95eadefaedb0e308ff0b38cc1d0444e8bd4fe94a7621a99a2d3d9298100bcb60b3144677234
   languageName: node
   linkType: hard
 

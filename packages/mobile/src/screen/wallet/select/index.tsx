@@ -26,7 +26,7 @@ import {StackActions, useNavigation} from '@react-navigation/native';
 import {useIntl} from 'react-intl';
 import {EllipsisIcon} from '../../../components/icon/ellipsis';
 import {StackNavProp} from '../../../navigation';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
 import {BACKGROUND_PORT} from '@keplr-wallet/router';
 import {RNMessageRequesterInternal} from '../../../router';
 import * as Clipboard from 'expo-clipboard';
@@ -514,7 +514,7 @@ const KeyringItem: FunctionComponent<{
         label: icnsPrimaryName,
         isClicked: false,
         left: (
-          <FastImage
+          <ExpoImage.Image
             source={require('../../../public/assets/img/icns-icon.png')}
             style={style.flatten(['width-16', 'height-16'])}
           />
@@ -593,7 +593,7 @@ const KeyringItem: FunctionComponent<{
               {icnsPrimaryName ? (
                 <React.Fragment>
                   <Gutter size={8} />
-                  <FastImage
+                  <ExpoImage.Image
                     source={require('../../../public/assets/img/icns-icon.png')}
                     style={style.flatten(['width-16', 'height-16'])}
                   />

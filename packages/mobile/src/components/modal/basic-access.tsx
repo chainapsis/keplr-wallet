@@ -10,7 +10,7 @@ import {Button} from '../button';
 import {Gutter} from '../gutter';
 import {Box} from '../box';
 import {registerCardModal} from './card';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
 
 export const BasicAccessModal = registerCardModal(
   observer<{
@@ -57,10 +57,10 @@ export const BasicAccessModal = registerCardModal(
         <Gutter size={16} />
 
         <Box paddingX={22} alignX="center">
-          <FastImage
+          <ExpoImage.Image
             style={{width: 74, height: 74}}
-            resizeMode={FastImage.resizeMode.contain}
             source={require('../../public/assets/logo-256.png')}
+            contentFit="contain"
           />
 
           <Gutter size={16} />

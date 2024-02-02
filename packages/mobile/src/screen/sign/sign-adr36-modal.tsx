@@ -10,7 +10,7 @@ import {Text} from 'react-native';
 import {useStyle} from '../../styles';
 import {BaseModalHeader} from '../../components/modal';
 import {FormattedMessage, useIntl} from 'react-intl';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
 import {Column, Columns} from '../../components/column';
 import {ViewDataButton} from './sign-modal';
 import {checkAndValidateADR36AminoSignDoc} from '@keplr-wallet/cosmos';
@@ -117,7 +117,7 @@ export const ADR36SignModal = registerCardModal(
           backgroundColor={style.get('color-gray-500').color}
           borderRadius={6}>
           <XAxis alignY="center">
-            <FastImage
+            <ExpoImage.Image
               style={{width: 48, height: 48}}
               source={require('../../public/assets/img/sign/sign-adr36.png')}
             />

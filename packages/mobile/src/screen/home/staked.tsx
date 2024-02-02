@@ -7,7 +7,7 @@ import {Stack} from '../../components/stack';
 import {useStore} from '../../stores';
 import {TokenItem, TokenTitleView} from './components/token';
 import {MainEmptyView} from './components/empty-view';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
 import {useIntl} from 'react-intl';
 import {
   InformationModal,
@@ -213,7 +213,7 @@ export const StakedTabView: FunctionComponent<{
       {delegations.length === 0 && unbondings.length === 0 ? (
         <MainEmptyView
           image={
-            <FastImage
+            <ExpoImage.Image
               source={require('../../public/assets/img/main-empty-staking.png')}
               style={{
                 width: 100,

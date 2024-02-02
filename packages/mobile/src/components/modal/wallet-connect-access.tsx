@@ -10,7 +10,7 @@ import {Button} from '../button';
 import {Gutter} from '../gutter';
 import {PermissionData} from '@keplr-wallet/background';
 import {WCMessageRequester} from '../../stores/wallet-connect/msg-requester';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
 import {Box} from '../box';
 import {registerCardModal} from './card';
 
@@ -64,13 +64,10 @@ export const WalletConnectAccessModal = registerCardModal(
         <Gutter size={32} />
 
         <Box alignX="center">
-          <FastImage
+          <ExpoImage.Image
             style={{width: 74, height: 75}}
-            resizeMode={FastImage.resizeMode.contain}
-            source={{
-              uri: logoUrl,
-              cache: FastImage.cacheControl.web,
-            }}
+            source={logoUrl}
+            contentFit="contain"
           />
         </Box>
 

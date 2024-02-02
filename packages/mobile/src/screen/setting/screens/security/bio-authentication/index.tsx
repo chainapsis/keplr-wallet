@@ -11,7 +11,7 @@ import {Controller, useForm} from 'react-hook-form';
 import {TextInput} from '../../../../../components/input';
 import {Button} from '../../../../../components/button';
 import {Stack} from '../../../../../components/stack';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
 import {Platform, Text} from 'react-native';
 import {Gutter} from '../../../../../components/gutter';
 import {StackNavProp} from '../../../../../navigation';
@@ -82,12 +82,12 @@ export const SettingSecurityBio: FunctionComponent = observer(() => {
         height={'100%'}
         style={style.flatten(['flex-1'])}>
         {Platform.OS === 'ios' ? (
-          <FastImage
+          <ExpoImage.Image
             style={{width: 180, height: 180}}
             source={require('../../../../../public/assets/img/bio-ios.png')}
           />
         ) : (
-          <FastImage
+          <ExpoImage.Image
             style={{width: 180, height: 180}}
             source={require('../../../../../public/assets/img/bio-android.png')}
           />

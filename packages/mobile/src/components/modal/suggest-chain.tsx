@@ -8,7 +8,7 @@ import {Button} from '../button';
 import {Gutter} from '../gutter';
 import {registerCardModal} from './card';
 import {Box} from '../box';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
 import {Text} from 'react-native';
 import Svg, {Circle, Path} from 'react-native-svg';
 import {Chip} from '../chip';
@@ -150,13 +150,10 @@ const CommunityInfo: FunctionComponent<{
 
       <XAxis alignY="center">
         <Skeleton isNotReady={isNotReady} type="circle">
-          <FastImage
+          <ExpoImage.Image
             style={{width: 80, height: 80, borderRadius: 40}}
-            resizeMode={FastImage.resizeMode.contain}
-            source={{
-              uri: chainInfo.chainSymbolImageUrl,
-              cache: FastImage.cacheControl.web,
-            }}
+            source={chainInfo.chainSymbolImageUrl}
+            contentFit="contain"
           />
         </Skeleton>
 
@@ -177,10 +174,10 @@ const CommunityInfo: FunctionComponent<{
         <Gutter size={20} />
 
         <Skeleton isNotReady={isNotReady} type="circle">
-          <FastImage
+          <ExpoImage.Image
             style={{width: 80, height: 80, borderRadius: 40}}
-            resizeMode={FastImage.resizeMode.contain}
             source={require('../../public/assets/logo-256.png')}
+            contentFit="contain"
           />
         </Skeleton>
       </XAxis>

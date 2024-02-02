@@ -4,7 +4,7 @@ import {StyleSheet, Text} from 'react-native';
 import {useStyle} from '../../styles';
 import {Column, Columns} from '../column';
 import {useStore} from '../../stores';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
 import {Gutter} from '../gutter';
 import {XAxis} from '../axis';
 import {Tag} from '../tag';
@@ -65,17 +65,17 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         rippleColor={style.get('color-card-pressing-default').color}
         underlayColor={style.get('color-card-pressing-default').color}>
         <Columns sum={1} alignY="center">
-          <FastImage
+          <ExpoImage.Image
             style={{
               ...style.flatten(['width-32', 'height-32']),
               borderRadius: 99999,
             }}
             source={
               viewToken.token.currency.coinImageUrl
-                ? {uri: viewToken.token.currency.coinImageUrl}
+                ? viewToken.token.currency.coinImageUrl
                 : require('../../public/assets/img/chain-icon-alt.png')
             }
-            resizeMode={FastImage.resizeMode.contain}
+            contentFit="contain"
           />
 
           <Gutter size={12} />

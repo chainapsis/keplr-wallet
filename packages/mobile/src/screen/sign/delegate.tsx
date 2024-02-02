@@ -6,7 +6,7 @@ import {Bech32Address} from '@keplr-wallet/cosmos';
 import {CoinPretty} from '@keplr-wallet/unit';
 import {FormattedMessage} from 'react-intl';
 import {IMessageRenderer} from './types';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
 import {useStore} from '../../stores';
 import {Text} from 'react-native';
 import {useStyle} from '../../styles';
@@ -37,7 +37,7 @@ export const DelegateMessage: IMessageRenderer = {
     if (d) {
       return {
         icon: (
-          <FastImage
+          <ExpoImage.Image
             style={{width: 48, height: 48}}
             source={require('../../public/assets/img/sign/sign-delegate.png')}
           />

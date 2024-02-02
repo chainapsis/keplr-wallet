@@ -17,7 +17,7 @@ import {CollapsibleList} from '../../components/collapsible-list';
 import {TokenFoundModal} from './components/token-found-modal';
 import {LookingForChains} from './components/looking-for-chains';
 import {Gutter} from '../../components/gutter';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {Toggle} from '../../components/toggle';
@@ -303,7 +303,7 @@ export const AvailableTabView: FunctionComponent<{
           ) : isFirstTime ? (
             <MainEmptyView
               image={
-                <FastImage
+                <ExpoImage.Image
                   style={{width: 100, height: 100}}
                   source={require('../../public/assets/img/main-empty-balance.png')}
                 />
