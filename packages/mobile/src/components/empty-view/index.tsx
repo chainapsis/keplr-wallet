@@ -3,6 +3,7 @@ import {useStyle} from '../../styles';
 import {Path, Svg} from 'react-native-svg';
 import {Text} from 'react-native';
 import {Box} from '../box';
+import {FormattedMessage} from 'react-intl';
 
 export const EmptyView: FunctionComponent<
   PropsWithChildren<{subject?: string}>
@@ -22,7 +23,10 @@ export const EmptyView: FunctionComponent<
       </Svg>
       {subject ? (
         <Text style={style.flatten(['color-gray-400', 'subtitle3'])}>
-          No {subject} Yet
+          <FormattedMessage
+            id="components.empty-view.text"
+            values={{subject}}
+          />
         </Text>
       ) : (
         children

@@ -43,7 +43,9 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
 
   return (
     <ScrollViewRegisterContainer
-      paragraph="Step 1/3"
+      paragraph={`${intl.formatMessage({
+        id: 'pages.register.components.header.header-step.title',
+      })} 1/3`}
       bottomButton={{
         text: intl.formatMessage({
           id: 'button.next',

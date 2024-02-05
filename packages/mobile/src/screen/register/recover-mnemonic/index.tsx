@@ -122,7 +122,9 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
 
   return (
     <ScrollViewRegisterContainer
-      paragraph="Step 1/3"
+      paragraph={`${intl.formatMessage({
+        id: 'pages.register.components.header.header-step.title',
+      })} 1/3`}
       bottomButton={{
         text: intl.formatMessage({
           id: 'button.next',
@@ -165,7 +167,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
       <Gutter size={20} />
 
       <Text style={style.flatten(['subtitle3', 'color-label-default'])}>
-        Recovery Phrase or Private Key
+        <FormattedMessage id="pages.register.intro-existing-user.recovery-title" />
       </Text>
 
       <Gutter size={6} />

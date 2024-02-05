@@ -205,7 +205,9 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
       style={style.flatten(['padding-x-12'])}>
       <Stack gutter={16}>
         <Box>
-          <Label content="Asset" />
+          <Label
+            content={intl.formatMessage({id: 'page.send.amount.asset-title'})}
+          />
           <TokenItem
             viewToken={{
               token: balance?.balance ?? new CoinPretty(currency, '0'),
@@ -251,7 +253,7 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
       <Gutter size={16} />
 
       <Button
-        text={'Next'}
+        text={intl.formatMessage({id: 'button.next'})}
         size={'large'}
         disabled={txConfigsValidate.interactionBlocked}
         loading={accountStore.getAccount(chainId).isSendingMsg === 'send'}

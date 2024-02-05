@@ -133,7 +133,11 @@ export const CopyAddressScene: FunctionComponent<{
 
     return (
       <Box backgroundColor={style.get('color-gray-600').color}>
-        <BaseModalHeader title="Copy Address" />
+        <BaseModalHeader
+          title={intl.formatMessage({
+            id: 'page.main.components.deposit-modal.title',
+          })}
+        />
         <Gutter size={12} />
         <Box paddingX={12}>
           <TextInput

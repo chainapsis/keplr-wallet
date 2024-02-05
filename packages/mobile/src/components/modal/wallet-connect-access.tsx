@@ -3,7 +3,7 @@ import {observer} from 'mobx-react-lite';
 import {useStore} from '../../stores';
 import {useStyle} from '../../styles';
 import {BaseModalHeader} from './modal';
-import {useIntl} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {Text} from 'react-native';
 import {XAxis} from '../axis';
 import {Button} from '../button';
@@ -77,18 +77,22 @@ export const WalletConnectAccessModal = registerCardModal(
         <Gutter size={16} />
 
         <Text
-          style={style.flatten([
-            'body2',
-            'color-text-middle',
-            'text-center',
-          ])}>{`${appName} is requesting to connect to your Keplr account on ${chainIds}`}</Text>
+          style={style.flatten(['body2', 'color-text-middle', 'text-center'])}>
+          <FormattedMessage
+            id="wallet-connect.information-text"
+            values={{
+              appName,
+              chainIds,
+            }}
+          />
+        </Text>
 
         <Gutter size={16} />
 
         <XAxis>
           <Button
             size="large"
-            text="Reject"
+            text={intl.formatMessage({id: 'button.reject'})}
             color="secondary"
             containerStyle={{flex: 1, width: '100%'}}
             onPress={async () => {
@@ -100,7 +104,7 @@ export const WalletConnectAccessModal = registerCardModal(
 
           <Button
             size="large"
-            text="Approve"
+            text={intl.formatMessage({id: 'button.approve'})}
             containerStyle={{flex: 1, width: '100%'}}
             onPress={async () => {
               await permissionStore.approvePermissionWithProceedNext(

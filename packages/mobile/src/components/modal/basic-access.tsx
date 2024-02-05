@@ -3,7 +3,7 @@ import {observer} from 'mobx-react-lite';
 import {useStore} from '../../stores';
 import {useStyle} from '../../styles';
 import {BaseModalHeader} from './modal';
-import {useIntl} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {Text} from 'react-native';
 import {XAxis} from '../axis';
 import {Button} from '../button';
@@ -70,7 +70,15 @@ export const BasicAccessModal = registerCardModal(
               'body2',
               'color-text-middle',
               'text-center',
-            ])}>{`${host} is requesting to connect to your Keplr account on ${chainIds}`}</Text>
+            ])}>
+            <FormattedMessage
+              id="wallet-connect.information-text"
+              values={{
+                appName: host,
+                chainIds,
+              }}
+            />{' '}
+          </Text>
         </Box>
 
         <Gutter size={16} />
@@ -78,7 +86,7 @@ export const BasicAccessModal = registerCardModal(
         <XAxis>
           <Button
             size="large"
-            text="Reject"
+            text={intl.formatMessage({id: 'button.reject'})}
             color="secondary"
             containerStyle={{flex: 1, width: '100%'}}
             onPress={async () => {
@@ -90,7 +98,7 @@ export const BasicAccessModal = registerCardModal(
 
           <Button
             size="large"
-            text="Approve"
+            text={intl.formatMessage({id: 'button.approve'})}
             containerStyle={{flex: 1, width: '100%'}}
             onPress={async () => {
               if (waitingPermission) {

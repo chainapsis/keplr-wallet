@@ -291,7 +291,9 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
 
   // QUESTION: 왜 isFresh일때만 보여줌?
   const paragraph = isFresh
-    ? `Step ${(stepPrevious ?? 0) + 1}/${stepTotal}`
+    ? `${intl.formatMessage({
+        id: 'pages.register.components.header.header-step.title',
+      })} ${(stepPrevious ?? 0) + 1}/${stepTotal}`
     : undefined;
 
   useLayoutEffect(() => {

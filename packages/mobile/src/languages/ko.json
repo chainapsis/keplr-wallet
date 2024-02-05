@@ -81,6 +81,7 @@
   "pages.register.intro-existing-user.social-recovery-title": "Apple 또는 Google 계정 사용하기",
   "pages.register.intro-existing-user.social-recovery-paragraph": "기존 케플러 지갑에서 사용했던 구글 계정으로 연결해주세요.",
   "pages.register.intro-existing-user.social-recovery-google-button": "Google 계정 연결하기",
+  "pages.register.intro-existing-user.import-from-keplr-extension-button": "케플러 익스텐션에서 불러오기",
 
   "pages.register.connect-hardware.header.title": "하드웨어 지갑 연결하기",
   "pages.register.connect-hardware.header.paragraph": "더 강력한 보안성을 원하세요? 😎",
@@ -103,6 +104,10 @@
   "pages.register.verify-mnemonic.mnemonic-empty-error": "복구 문구를 기입하지 않았습니다.",
   "pages.register.verify-mnemonic.verify-box-ref-error": "Ref of verify box is null",
   "pages.register.verify-mnemonic.verifying-box.word": "{index}번째 단어",
+
+  "pages.register.import-from-extension.title": "케플러 익스텐션에서 불러오기",
+  "pages.register.import-from-extension.information.title": "QR 코드 스캔하기",
+  "pages.register.import-from-extension.information.paragraph": "케플러 익스텐션의 지갑들을 불러오려면, 익스텐션의 '환경설정 > 일반 > 케플러 모바일과 연결하기'에 있는 QR 코드를 스캔해야 합니다.",
 
   "pages.register.name-password.title": "지갑 셋팅하기",
 
@@ -151,6 +156,8 @@
   "pages.register.connect-keystone.select-valid-qrcode": "키스톤 장치에서 유효한 QR 코드를 선택했는지 확인해주세요.",
   "pages.register.connect-keystone.tutorial": "튜토리얼",
   "pages.register.connect-keystone.unsupported": "미지원",
+
+  "pages.register.finalize-key.loading.text": "열심히 계정들을 불러오고 있어요",
 
   "pages.register.enable-chains.title": "체인 선택하기",
   "pages.register.enable-chains.paragraph": "걱정마세요! 언제든지 사이드바 메뉴에 있는 ‘체인 표시’를 방문해서 설정을 변경할 수 있습니다.",
@@ -243,6 +250,7 @@
   "page.setting.security.connected-websites-paragraph": "이 웹사이트들은 당신의 지갑 주소를 조회하고, 서명을 요청할 수 있습니다.",
   "page.setting.security.manage-WC-title": "월렛커넥트 관리",
   "page.setting.security.auto-lock-title": "자동 잠금 타이머",
+  "page.setting.security.auto-lock-paragraph": "Automatically lock Keplr when it is in background",
   "page.setting.security.change-password-title": "비밀번호 변경",
   "page.setting.security.bio-authentication-title": "생체 인증 사용",
   "page.setting.security.enable-bio-authentication-title": "생체 인증 켜기",
@@ -335,6 +343,8 @@
   "page.unlock.migration-button": "잠금해제 후 케플러 v2로 업그레이드",
   "page.unlock.forgot-password-button": "비밀번호가 기억나지 않습니다",
   "page.unlock.need-help-button": "도움이 필요하신가요?",
+  "page.unlock.need-help.paragraph": "도움말이나 상담사 연결을 원하시면, 케플러의 공식 도움말 및 지원을 이용하세요. 에러 리포트의 경우 채팅 상담시 케플러 모바일 앱의 버전을 함께 알려주시면 상담이 수월할 수 있습니다.",
+  "page.unlock.need-help.go-to-helpdesk-button": "도움말 및 지원 바로가기",
 
   "page.unlock.paragraph-section.keplr-here": "💫 케플러 2.0 출시!",
   "page.unlock.paragraph-section.enter-password-to-upgrade": "업그레이드하려면 비밀번호를 입력해주세요.",
@@ -348,7 +358,7 @@
   "page.migration.welcome.sub-title": "업그레이드 사항을 적용하려면 케플러를 재시작해야 해요.",
   "page.migration.welcome.restart-button": "지금 재시작하기",
   "page.migration.welcome.restart-modal.title": "케플러 앱이 자동으로 재시작됩니다.",
-  "page.migration.welcome.restart-modal.paragraph": "{seconds} 후 재시작돼요.",
+  "page.migration.welcome.restart-modal.paragraph": "{seconds}초 후 재시작돼요.",
 
   "page.wallet.title": "지갑 선택",
   "page.wallet.add-wallet-button": "지갑 추가",
@@ -575,6 +585,15 @@
   "page.main.components.error-modal-title": "앗! 문제가 생겼어요.",
   "page.main.components.secret-error-modal-button": "뷰잉키 설정하러 가기",
   "page.main.components.staking-chain-modal.title": "사용 가능한 자산",
+  "page.main.components.staking-chain-modal.input-placeholder": "체인 또는 자산 이름으로 검색",
+
+  "page.main.components.app-update-modal.title": "✨ 케플러 앱의 새로운 버전이 출시되었어요!",
+  "page.main.components.app-update-modal.paragraph": "지금 업데이트해서 훨씬 더 편해진 케플러를 만나보세요.",
+  "page.main.components.app-update-modal.banner-title": "업데이트가 도착했어요!",
+  "page.main.components.app-update-modal.button": "지금 업데이트 하기",
+  "page.main.components.code-push-update-modal.title": "😎 케플러가 조금 더 멋있어졌어요.",
+  "page.main.components.code-push-update-modal.paragraph": "안 계시는동안 소소한 업데이트를 다운로드해두었어요. 업데이트 사항을 적용하기 위해 케플러를 끄고 다시 켜주세요.",
+  "page.main.components.code-push-update-modal.button": "케플러 재시작",
 
   "page.camera.main-title": "QR 코드 스캔",
   "page.camera.button-show-qr-code": "내 QR 코드 보기",
@@ -630,6 +649,8 @@
 
   "page.stake.validator-list.title": "액티브 상태의 밸리데이터",
   "page.stake.validator-list.search-input-placeholder": "밸리데이터 이름으로 검색",
+  "page.stake.validator-list.option.voting-power": "투표권",
+  "page.stake.validator-list.option.commission": "커미션",
 
   "page.stake.delegate.title": "스테이킹하기",
   "page.stake.delegate.guide-box.title": "스테이킹 후 최소 {unbondingPeriodDay} 일간 자산이 묶여요.",
@@ -660,6 +681,10 @@
 
   "page.tx-result.components.go-to-explorer": "{name} 바로가기",
 
+  "page.governance.intro.title": "투표할 프로포절이 있는 체인",
+
+  "page.governance.list.title": "프로포절 리스트",
+
   "page.error-boundary.title": "문제가 생겼어요",
   "page.error-boundary.reset-cache-paragraph": "이유를 확인하기 어려운 문제가 발생했습니다. 문제를 해결하기 위해, 캐시 데이터를 삭제해보는 것을 추천합니다. 삭제 후에도 문제가 지속될 수 있다는 점은 양해 부탁드려요.",
   "page.error-boundary.reset-cache-button": "캐시 데이터 초기화",
@@ -674,6 +699,10 @@
   "page.migration.backup.sensitive.title": "{type} 저장하기",
   "page.migration.backup.sensitive.button": "안전하게 저장해두었어요.",
   "page.migration.start-button": "모든 계정 저장 완료. 업그레이드 시작",
+
+  "update-progress.title" : "잠시만 기다려주세요! 👋",
+  "update-progress.paragraph" : "당신을 위해 준비한\n소소하지만 중요한 업데이트가 있어요",
+  "update-progress.loading": "재빠르게 모든 업데이트를 적용하고 있어요..",
 
   "new-feature.ibc-swap.title": "✨ 토큰 교환이 생겼어요!",
   "new-feature.ibc-swap.paragraph": "체인 내 혹은 체인간 다양한 토큰을 서로 교환할 수 있어요. 한번 사용해보세요!",
@@ -720,6 +749,13 @@
   "components.voting-chip.unspecified": "오류",
   "components.voting-chip.voted": "투표완료",
 
+  "components.ledger-modal.title": "렛저 장치 찾기",
+  "components.ledger-modal.paragraph-1": "• 모바일 기기에서 블루투스 기능이 켜져있는지 확인하세요.",
+  "components.ledger-modal.paragraph-2": "• 렛저의 전원을 켜고 잠금을 풀어주세요.",
+  "components.ledger-modal.permission-error": "케플러 앱에서 블루투스 사용권한이 필요합니다.",
+  "components.ledger-modal.connection-error": "연결 실패: {error}",
+  "components.ledger-modal.connecting": "연결 중...",
+
   "button.confirm": "확인",
   "button.ok": "확인",
   "button.next": "다음",
@@ -728,9 +764,17 @@
   "button.save": "저장",
   "button.close": "닫기",
   "button.done": "완료",
+  "button.connect": "연결하기",
+  "button.buy": "구매하기",
+  "button.vote": "투표하기",
+  "button.stake": "스테이킹",
+  "button.reject": "승인 안함",
   "text-button.select-all": "전체 선택",
+  "text-button.view-all-proposals": "모든 체인의 프로포절 보기",
 
   "notification.transaction-success": "트랜잭션 성공",
+
+  "wallet-connect.information-text": "{appName} 에서 당신의 {chainIds} 케플러 계정에 연결을 요청했습니다.",
 
   "hooks.confirm.cancel-button": "취소",
   "hooks.confirm.yes-button": "예"

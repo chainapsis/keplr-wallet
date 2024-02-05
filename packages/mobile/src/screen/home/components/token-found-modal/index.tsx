@@ -22,7 +22,7 @@ import {IconButton} from '../../../../components/icon-button';
 import {useStyle} from '../../../../styles';
 import {registerCardModal} from '../../../../components/modal/card';
 import {StackNavProp} from '../../../../navigation';
-import {useIntl} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {ScrollView} from '../../../../components/scroll-view/common-scroll-view';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
@@ -194,7 +194,7 @@ export const TokenFoundModal = registerCardModal(
               }}>
               <XAxis alignY="center">
                 <Text style={style.flatten(['color-gray-300'])}>
-                  Select All
+                  <FormattedMessage id="text-button.select-all" />
                 </Text>
                 <Gutter size={4} />
                 <Checkbox

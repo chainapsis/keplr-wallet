@@ -254,7 +254,9 @@ export const StakedTabView: FunctionComponent<{
         }))}
         isOpen={selectModalIsOpen}
         setIsOpen={setSelectModalIsOpen}
-        placeholder="Search for a chain or asset"
+        placeholder={intl.formatMessage({
+          id: 'page.main.components.staking-chain-modal.input-placeholder',
+        })}
       />
     </React.Fragment>
   );

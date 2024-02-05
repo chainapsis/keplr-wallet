@@ -1,5 +1,5 @@
 import React, {FunctionComponent, useState} from 'react';
-import {useIntl} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {observer} from 'mobx-react-lite';
 import {useForm} from 'react-hook-form';
 import {Button} from '../../../components/button';
@@ -29,7 +29,29 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
   const [isOpenBip44PathView, setIsOpenBip44PathView] = React.useState(false);
   const [isOpenSelectItemModal, setIsOpenSelectItemModal] = useState(false);
 
-  const supportedApps: App[] = ['Cosmos', 'Terra', 'Secret'];
+  const supportedApps: {
+    key: App;
+    title: string;
+  }[] = [
+    {
+      key: 'Cosmos',
+      title: intl.formatMessage({
+        id: 'pages.register.name-password-hardware.connect-to-cosmos',
+      }),
+    },
+    {
+      key: 'Terra',
+      title: intl.formatMessage({
+        id: 'pages.register.name-password-hardware.connect-to-terra',
+      }),
+    },
+    {
+      key: 'Secret',
+      title: intl.formatMessage({
+        id: 'pages.register.name-password-hardware.connect-to-secret',
+      }),
+    },
+  ];
   const [selectedApp, setSelectedApp] = React.useState<App>('Cosmos');
 
   const {
@@ -71,7 +93,9 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
 
   return (
     <ScrollViewRegisterContainer
-      paragraph="Step 1/3"
+      paragraph={`${intl.formatMessage({
+        id: 'pages.register.components.header.header-step.title',
+      })} 1/3`}
       bottomButton={{
         text: intl.formatMessage({
           id: 'button.next',
@@ -91,7 +115,7 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
       <Gutter size={16} />
 
       <Text style={style.flatten(['subtitle3', 'color-gray-100'])}>
-        Connect to
+        <FormattedMessage id="pages.register.name-password-hardware.connect-to" />
       </Text>
 
       <Gutter size={6} />
@@ -109,8 +133,7 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
         }}>
         <XAxis alignY="center">
           <Text style={style.flatten(['body2', 'color-gray-50', 'flex-1'])}>
-            {selectedApp}
-            {selectedApp === 'Cosmos' ? ' (Recommended)' : null}
+            {supportedApps.find(item => item.key === selectedApp)?.title}
           </Text>
 
           <ArrowDownFillIcon
@@ -148,11 +171,11 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
         isOpen={isOpenSelectItemModal}
         setIsOpen={setIsOpenSelectItemModal}
         items={supportedApps.map(item => ({
-          key: item,
-          title: item,
-          selected: item === selectedApp,
+          key: item.key,
+          title: item.title,
+          selected: item.key === selectedApp,
           onSelect: () => {
-            setSelectedApp(item);
+            setSelectedApp(item.key);
             setIsOpenSelectItemModal(false);
           },
         }))}

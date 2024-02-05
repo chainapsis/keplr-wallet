@@ -54,7 +54,9 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
         <Gutter size={20} />
 
         <Button
-          text="Import from Keplr Extension"
+          text={intl.formatMessage({
+            id: 'pages.register.intro-existing-user.import-from-keplr-extension-button',
+          })}
           size="large"
           onPress={() => {
             navigation.navigate('Register.ImportFromExtension');

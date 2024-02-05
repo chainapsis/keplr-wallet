@@ -54,7 +54,7 @@ export const RestartModal = registerCardModal(
           ])}>
           <FormattedMessage
             id="page.migration.welcome.restart-modal.paragraph"
-            values={{seconds: `${timeLeft}s`}}
+            values={{seconds: `${timeLeft}`}}
           />
         </Text>
       </Box>

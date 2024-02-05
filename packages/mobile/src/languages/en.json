@@ -81,6 +81,7 @@
   "pages.register.intro-existing-user.social-recovery-title": "Use Apple or Google",
   "pages.register.intro-existing-user.social-recovery-paragraph": "Log in with the same email address to import an existing account to Keplr.",
   "pages.register.intro-existing-user.social-recovery-google-button": "Connect with Google",
+  "pages.register.intro-existing-user.import-from-keplr-extension-button": "Import from Keplr Extension",
 
   "pages.register.connect-hardware.header.title": "Connect Hardware Wallet",
   "pages.register.connect-hardware.header.paragraph": "Want even more security? 😎",
@@ -103,6 +104,10 @@
   "pages.register.verify-mnemonic.mnemonic-empty-error": "Empty Recovery Phrase",
   "pages.register.verify-mnemonic.verify-box-ref-error": "Ref of verify box is null",
   "pages.register.verify-mnemonic.verifying-box.word": "Word #{index}",
+
+  "pages.register.import-from-extension.title": "Import from Keplr Extension",
+  "pages.register.import-from-extension.information.title": "Scan QR code to connect",
+  "pages.register.import-from-extension.information.paragraph": "Link your Keplr Extension wallet by going to 'Settings > General > Link Keplr Mobile' on Extension and scan the QR code.",
 
   "pages.register.name-password.title": "Set Up Your Wallet",
 
@@ -151,6 +156,8 @@
   "pages.register.connect-keystone.select-valid-qrcode": "Please ensure you have selected a valid QR code from your Keystone device.",
   "pages.register.connect-keystone.tutorial": "Tutorial",
   "pages.register.connect-keystone.unsupported": "Unsupported",
+
+  "pages.register.finalize-key.loading.text": "Let us set everything up for you...",
 
   "pages.register.enable-chains.title": "Select Chains",
   "pages.register.enable-chains.paragraph": "Select which chains you’d like to enable on your account.",
@@ -336,6 +343,8 @@
   "page.unlock.migration-button": "Unlock to Start Migration",
   "page.unlock.forgot-password-button": "Forgot Password?",
   "page.unlock.need-help-button": "Need Help?",
+  "page.unlock.need-help.paragraph": "For info or error reports, use our official helpdesk. Please provide the version of your Keplr app in error reports.",
+  "page.unlock.need-help.go-to-helpdesk-button": "Go to Helpdesk",
 
   "page.unlock.paragraph-section.keplr-here": "💫 Keplr 2.0 is here!",
   "page.unlock.paragraph-section.enter-password-to-upgrade": "Enter your password to upgrade.",
@@ -349,7 +358,7 @@
   "page.migration.welcome.sub-title": "Restart Keplr to ensure that the changes take effect.",
   "page.migration.welcome.restart-button": "Restart Now",
   "page.migration.welcome.restart-modal.title": "Keplr will automatically restart",
-  "page.migration.welcome.restart-modal.paragraph": "Keplr will be closed in {seconds}...",
+  "page.migration.welcome.restart-modal.paragraph": "Keplr will be closed in {seconds}s...",
 
   "page.wallet.title": "Select Wallet",
   "page.wallet.add-wallet-button": "Add Wallet",
@@ -587,13 +596,16 @@
   "page.main.components.error-modal-title": "Error Message",
   "page.main.components.secret-error-modal-button": "Set my Viewing Key",
   "page.main.components.staking-chain-modal.title": "Available Assets",
+  "page.main.components.staking-chain-modal.input-placeholder": "Search for a chain or asset",
+
   "page.main.components.staking-chain-modal.empty-text": "Please retry after buying or depositing stakeable assets to your wallet.",
+  "page.main.components.app-update-modal.banner-title": "Update Available",
   "page.main.components.app-update-modal.title": "✨ New Version Released!",
   "page.main.components.app-update-modal.paragraph": "Update Keplr to the latest version to use all of its amazing features.",
   "page.main.components.app-update-modal.button": "Update Now",
   "page.main.components.code-push-update-modal.title": "😎 Keplr Just Got Better",
   "page.main.components.code-push-update-modal.paragraph": "We've downloaded some minor updates while you're gone. To apply these changes, kindly quit and reopen Keplr.",
-  "page.main.components.code-push-update-modal.button": "Quit Keplr",
+  "page.main.components.code-push-update-modal.button": "Restart Keplr",
 
   "page.camera.main-title": "Scan QR Code",
   "page.camera.button-show-qr-code": "Show my QR code",
@@ -650,6 +662,8 @@
   "page.stake.validator-list.search-input-placeholder": "Search for a validator",
   "page.stake.validator-list.empty-title": "No Results Found",
   "page.stake.validator-list.empty-text": "Please check the spelling of the validator name or verify if it is in an active set.",
+  "page.stake.validator-list.option.voting-power": "Voting Power",
+  "page.stake.validator-list.option.commission": "Commission",
 
   "page.stake.delegate.title": "Stake",
   "page.stake.delegate.guide-box.title": "Staking will lock your funds for {unbondingPeriodDay} days",
@@ -680,6 +694,10 @@
 
   "page.tx-result.components.go-to-explorer": "Go to {name}",
 
+  "page.governance.intro.title": "Chains with Active Proposals",
+
+  "page.governance.list.title": "Proposals",
+
   "page.error-boundary.title": "Error",
   "page.error-boundary.reset-cache-paragraph": "An error with an unknown reason has occurred. To potentially resolve the issue, we recommend deleting the cache data. However, please note that we cannot guarantee this will fix the problem.",
   "page.error-boundary.reset-cache-button": "Reset Cache Data",
@@ -694,6 +712,10 @@
   "page.migration.backup.sensitive.title": "Back Up {type}",
   "page.migration.backup.sensitive.button": "I securely backed it up",
   "page.migration.start-button": "I backed them up. Start Migration.",
+
+  "update-progress.title" : "Hey, Cosmonaut! 👋",
+  "update-progress.paragraph" : "We have some small yet\nsignificant updates ready!",
+  "update-progress.loading": "Let us set everything up for you..",
 
   "new-feature.ibc-swap.title": "✨ Swap is Here!",
   "new-feature.ibc-swap.paragraph": "Swap tokens between different chains with a simple click. Give it a try!",
@@ -740,6 +762,13 @@
   "components.voting-chip.unspecified": "Unspecified",
   "components.voting-chip.voted": "Voted",
 
+  "components.ledger-modal.title": "Finding Ledger",
+  "components.ledger-modal.paragraph-1": "• Make sure Bluetooth is enabled on your mobile device.",
+  "components.ledger-modal.paragraph-2": "• Turn on and unlock your Ledger.",
+  "components.ledger-modal.permission-error": "Keplr doesn’t have permission to use bluetooth",
+  "components.ledger-modal.connection-error": "Failed to connect: {error}",
+  "components.ledger-modal.connecting": "Connecting...",
+
   "button.confirm": "Confirm",
   "button.ok": "OK",
   "button.next": "Next",
@@ -748,9 +777,17 @@
   "button.save": "Save",
   "button.close": "Close",
   "button.done": "Done",
+  "button.connect": "Connect",
+  "button.buy": "Buy",
+  "button.vote": "Vote",
+  "button.stake": "Stake",
+  "button.reject": "Reject",
   "text-button.select-all": "Select All",
+  "text-button.view-all-proposals": "View All Proposals",
 
   "notification.transaction-success": "Transaction Success",
+
+  "wallet-connect.information-text": "{appName} is requesting to connect to your Keplr account on {chainIds}",
 
   "hooks.confirm.cancel-button": "Cancel",
   "hooks.confirm.yes-button": "Yes"

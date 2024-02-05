@@ -80,7 +80,7 @@ export const DrawerContent: FunctionComponent = observer(() => {
       <Stack gutter={32}>
         <TouchableWithoutFeedback onPress={onClickManageChains}>
           <Text style={style.flatten(['h3', 'color-white'])}>
-            Manage Chain Visibility
+            <FormattedMessage id="page.main.components.menu-bar.manage-chain-visibility-title" />
           </Text>
         </TouchableWithoutFeedback>
         <Box
@@ -90,16 +90,22 @@ export const DrawerContent: FunctionComponent = observer(() => {
         />
         <Stack gutter={36}>
           <TouchableWithoutFeedback onPress={onClickContacts}>
-            <Text style={style.flatten(['h3', 'color-white'])}>Contacts</Text>
+            <Text style={style.flatten(['h3', 'color-white'])}>
+              <FormattedMessage id="page.main.components.menu-bar.my-contacts-title" />
+            </Text>
           </TouchableWithoutFeedback>
           <TouchableWithoutFeedback onPress={onClickAddTokens}>
-            <Text style={style.flatten(['h3', 'color-white'])}>Add Token</Text>
+            <Text style={style.flatten(['h3', 'color-white'])}>
+              <FormattedMessage id="page.main.components.menu-bar.add-token-title" />
+            </Text>
           </TouchableWithoutFeedback>
         </Stack>
       </Stack>
       <Stack gutter={32}>
         <TouchableWithoutFeedback onPress={handleLock}>
-          <Text style={style.flatten(['h3', 'color-white'])}>Lock Wallet</Text>
+          <Text style={style.flatten(['h3', 'color-white'])}>
+            <FormattedMessage id="page.main.components.menu-bar.lock-wallet-title" />
+          </Text>
         </TouchableWithoutFeedback>
         <Box
           width={40}

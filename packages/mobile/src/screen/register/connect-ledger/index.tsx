@@ -238,9 +238,11 @@ export const ConnectLedgerScreen: FunctionComponent = observer(() => {
 
   return (
     <ScrollViewRegisterContainer
-      paragraph={`Step ${stepPrevious + 1}/${stepTotal}`}
+      paragraph={`${intl.formatMessage({
+        id: 'pages.register.components.header.header-step.title',
+      })} ${stepPrevious + 1}/${stepTotal}`}
       bottomButton={{
-        text: 'Connect',
+        text: intl.formatMessage({id: 'button.connect'}),
         size: 'large',
         loading: isLoading,
         onPress: connectLedger,

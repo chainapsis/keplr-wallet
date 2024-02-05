@@ -15,8 +15,10 @@ import {useForm} from 'react-hook-form';
 import {SVGLoadingIcon} from '../../../components/spinner';
 import {sortedJsonByKeyStringify} from '@keplr-wallet/common';
 import {ChainIdHelper} from '@keplr-wallet/cosmos';
+import {FormattedMessage, useIntl} from 'react-intl';
 
 export const ImportFromExtensionScreen: FunctionComponent = observer(() => {
+  const intl = useIntl();
   const style = useStyle();
   const navigation = useNavigation<StackNavProp>();
 
@@ -28,7 +30,7 @@ export const ImportFromExtensionScreen: FunctionComponent = observer(() => {
         flexGrow: 1,
       }}
       bottomButton={{
-        text: 'Next',
+        text: intl.formatMessage({id: 'button.next'}),
         size: 'large',
         onPress: () => {
           navigation.navigate({
@@ -54,12 +56,11 @@ export const ImportFromExtensionScreen: FunctionComponent = observer(() => {
         />
         <Gutter size={22} />
         <Text style={style.flatten(['h4', 'color-text-high', 'text-center'])}>
-          Scan QR code to connect
+          <FormattedMessage id="pages.register.import-from-extension.information.title" />
         </Text>
         <Gutter size={22} />
         <Text style={style.flatten(['body1', 'color-text-low', 'text-center'])}>
-          Link your Keplr Extension wallet by going to 'Settings {`>`} General{' '}
-          {`>`} Link Keplr Mobile' on Extension and scan the QR code.
+          <FormattedMessage id="pages.register.import-from-extension.information.paragraph" />
         </Text>
       </Box>
       <View
@@ -86,6 +87,7 @@ export interface DecryptedKeyRingDatasResponse {
 
 export const FinalizeImportFromExtensionScreen: FunctionComponent = observer(
   () => {
+    const intl = useIntl();
     const {keyRingStore, chainStore, uiConfigStore} = useStore();
 
     const {data} =
@@ -300,7 +302,7 @@ export const FinalizeImportFromExtensionScreen: FunctionComponent = observer(
         bottomButton={
           needPassword
             ? {
-                text: 'Next',
+                text: intl.formatMessage({id: 'button.next'}),
                 size: 'large',
                 onPress: onSubmit,
               }

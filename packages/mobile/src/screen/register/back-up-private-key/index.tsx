@@ -29,7 +29,9 @@ export const BackUpPrivateKeyScreen: FunctionComponent = () => {
   return (
     <ScrollViewRegisterContainer
       padding={20}
-      paragraph={`Step ${stepPrevious + 1}/${stepTotal}`}
+      paragraph={`${intl.formatMessage({
+        id: 'pages.register.components.header.header-step.title',
+      })} ${stepPrevious + 1}/${stepTotal}`}
       bottomButton={{
         text: intl.formatMessage({
           id: 'button.next',
