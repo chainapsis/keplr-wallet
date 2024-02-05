@@ -53,7 +53,7 @@
     "buffer": "^6.0.3",
     "color": "^4.2.3",
     "delay": "^6.0.0",
-    "expo": "^49.0.21",
+    "expo": "^49.0.22",
     "expo-apple-authentication": "^6.3.0",
     "expo-clipboard": "^4.8.0",
     "expo-crypto": "^12.8.0",
