@@ -1,9 +1,10 @@
-import React, {useEffect, useLayoutEffect, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../stores';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useStyle} from '../../styles';
 import {
+  AppState,
   BackHandler,
   Dimensions,
   Keyboard,
@@ -112,6 +113,37 @@ export const AutoLockUnlockModal = registerModal(
         setIsBiometricLoading(false);
       }
     };
+
+    const tryBiometricAutoOnce = useRef(false);
+    // 그냥 deps 관련 eslint 경고를 피하려고 씀
+    const tryBiometricFnRef = useRef(tryBiometric);
+    tryBiometricFnRef.current = tryBiometric;
+    useEffect(() => {
+      const listener = AppState.addEventListener('change', e => {
+        if (e === 'active') {
+          if (
+            !tryBiometricAutoOnce.current &&
+            !isLoading &&
+            !isBiometricLoading &&
+            keychainStore.isBiometrySupported &&
+            keychainStore.isBiometryOn
+          ) {
+            tryBiometricAutoOnce.current = true;
+
+            tryBiometricFnRef.current();
+          }
+        }
+      });
+
+      return () => {
+        listener.remove();
+      };
+    }, [
+      isBiometricLoading,
+      isLoading,
+      keychainStore.isBiometryOn,
+      keychainStore.isBiometrySupported,
+    ]);
 
     const tryUnlock = async (password: string) => {
       try {

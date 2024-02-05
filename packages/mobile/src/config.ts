@@ -2317,6 +2317,39 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: [],
   },
+  {
+    rpc: 'https://rpc-passage.keplr.app',
+    rest: 'https://lcd-passage.keplr.app',
+    chainId: 'passage-2',
+    chainName: 'Passage',
+    stakeCurrency: {
+      coinDenom: 'PASG',
+      coinMinimalDenom: 'upasg',
+      coinDecimals: 6,
+      coinGeckoId: 'passage',
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config('pasg'),
+    currencies: [
+      {
+        coinDenom: 'PASG',
+        coinMinimalDenom: 'upasg',
+        coinDecimals: 6,
+        coinGeckoId: 'passage',
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: 'PASG',
+        coinMinimalDenom: 'upasg',
+        coinDecimals: 6,
+        coinGeckoId: 'passage',
+      },
+    ],
+    features: ['cosmwasm'],
+  },
 ];
 
 // TODO: 원격으로 변경할 수 있도록 나중에 네트워크에서 이 정보를 가져오는 방식으로 변경될 수 있음
@@ -2443,6 +2476,10 @@ export const ChainIdentifierToTxExplorerMap: Record<
   'likecoin-mainnet': {
     name: 'Mintscan',
     txUrl: 'https://www.mintscan.io/likecoin/tx/{txHash}',
+  },
+  passage: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/passage/tx/{txHash}',
   },
 };
 

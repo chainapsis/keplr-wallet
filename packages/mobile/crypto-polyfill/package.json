@@ -5,7 +5,7 @@
   "main": "index.js",
   "sideEffects": false,
   "dependencies": {
-    "expo-crypto": "~12.4.1",
+    "expo-crypto": "^12.8.0",
     "create-hash": "^1.2.0",
     "create-hmac": "^1.1.7",
     "browserify-cipher": "^1.0.1"

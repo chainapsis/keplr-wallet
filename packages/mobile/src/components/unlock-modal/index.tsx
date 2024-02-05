@@ -10,7 +10,7 @@ export const AutoLock: FunctionComponent = observer(() => {
   const [isLock, setIsLock] = useState(false);
 
   useEffectOnce(() => {
-    AppState.addEventListener('change', e => {
+    const listener = AppState.addEventListener('change', e => {
       if (e === 'background' || e === 'inactive') {
         const isUnLocked = keyRingStore.status === 'unlocked';
         if (uiConfigStore.autoLockConfig.isEnableAutoLock && isUnLocked) {
@@ -19,6 +19,10 @@ export const AutoLock: FunctionComponent = observer(() => {
         }
       }
     });
+
+    return () => {
+      listener.remove();
+    };
   });
 
   return (

@@ -13,7 +13,6 @@ import {YAxis} from '../../components/axis';
 import {Stack} from '../../components/stack';
 import {Column, Columns} from '../../components/column';
 import {DepositModal} from './components/deposit-modal/deposit-modal';
-import {BuyModal} from './buy-modal';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import {SearchTextInput} from '../../components/input/search-text-input';
 import {AvailableTabView} from './available';
@@ -61,7 +60,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>('available');
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const [selectModalIsOpen, setSelectModalIsOpen] = useState(false);
 
   const hasBalance = (() => {
@@ -186,13 +184,13 @@ export const HomeScreen: FunctionComponent = observer(() => {
               {
                 key: 'available',
                 text: intl.formatMessage({
-                  id: 'page.main.components.string-toggle.available-tab',
+                  id: 'page.main.available.available-button-title',
                 }),
               },
               {
                 key: 'staked',
                 text: intl.formatMessage({
-                  id: 'page.main.components.string-toggle.staked-tab',
+                  id: 'page.main.staked.staked-button-title',
                 }),
               },
             ]}
@@ -237,13 +235,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
                   'font-medium',
                   'subtitle2',
                 ])}>
-                {tabStatus === 'available'
-                  ? intl.formatMessage({
-                      id: 'page.main.chart.available',
-                    })
-                  : intl.formatMessage({
-                      id: 'page.main.chart.staked',
-                    })}
+                {tabStatus === 'available' ? 'Total Available' : 'Total Staked'}
               </Text>
             </Skeleton>
             <Gutter size={10} />
@@ -267,9 +259,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
               <Column weight={1}>
                 <Skeleton isNotReady={isNotReady} layer={1} type="button">
                   <Button
-                    text={intl.formatMessage({
-                      id: 'page.main.components.buttons.deposit-button',
-                    })}
+                    text="Deposit"
                     size="large"
                     color="secondary"
                     onPress={() => {
@@ -278,25 +268,11 @@ export const HomeScreen: FunctionComponent = observer(() => {
                   />
                 </Skeleton>
               </Column>
-              <Column weight={1}>
-                <Skeleton isNotReady={isNotReady} layer={1} type="button">
-                  <Button
-                    text={intl.formatMessage({id: 'button.buy'})}
-                    size="large"
-                    color="secondary"
-                    onPress={() => {
-                      setIsBuyModalOpen(true);
-                    }}
-                  />
-                </Skeleton>
-              </Column>
 
               <Column weight={1}>
                 <Skeleton isNotReady={isNotReady} layer={1} type="button">
                   <Button
-                    text={intl.formatMessage({
-                      id: 'page.main.components.buttons.send-button',
-                    })}
+                    text="Send"
                     size="large"
                     onPress={() => {
                       navigation.dispatch({
@@ -311,7 +287,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
           ) : (
             <Columns sum={1} gutter={10}>
               <Button
-                text={intl.formatMessage({id: 'button.vote'})}
+                text="Vote"
                 size="large"
                 color="secondary"
                 rightIcon={<VoteIcon />}
@@ -324,7 +300,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
                 }}
               />
               <Button
-                text={intl.formatMessage({id: 'button.stake'})}
+                text="Stake"
                 size="large"
                 rightIcon={<StakingIcon size={18} color="white" />}
                 containerStyle={style.flatten(['flex-1'])}
@@ -350,9 +326,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
                   e.preventDefault();
                   setSearch(e.nativeEvent.text);
                 }}
-                placeholder={intl.formatMessage({
-                  id: 'page.main.search-placeholder',
-                })}
+                placeholder="Search for asset or chain (i.e. ATOM, Cosmos)"
               />
             ) : null}
           </Box>
@@ -379,11 +353,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
       <DepositModal
         isOpen={isDepositModalOpen}
         setIsOpen={setIsDepositModalOpen}
-      />
-      <BuyModal
         navigation={navigation}
-        isOpen={isBuyModalOpen}
-        setIsOpen={setIsBuyModalOpen}
       />
     </PageWithScrollView>
   );
