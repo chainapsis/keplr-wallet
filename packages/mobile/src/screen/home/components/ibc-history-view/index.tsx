@@ -29,6 +29,10 @@ import Reanimated, {
   withRepeat,
   withSpring,
 } from 'react-native-reanimated';
+import {ChainImageFallback} from '../../../../components/image';
+
+const ReanimatedChainImageFallback =
+  Reanimated.createAnimatedComponent(ChainImageFallback);
 
 export const IbcHistoryView: FunctionComponent<{
   isNotReady: boolean;
@@ -630,14 +634,9 @@ const IbcHistoryViewItemChainImage: FunctionComponent<{
 
   return (
     <XAxis alignY="center">
-      <Reanimated.Image
+      <ReanimatedChainImageFallback
         style={{width: 32, height: 32, borderRadius: 99999, opacity}}
-        source={
-          chainInfo.chainSymbolImageUrl
-            ? {uri: chainInfo.chainSymbolImageUrl}
-            : require('../../../../public/assets/img/chain-icon-alt.png')
-        }
-        resizeMode="contain"
+        src={chainInfo.chainSymbolImageUrl}
         alt={chainInfo.chainName}
       />
 

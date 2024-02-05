@@ -1,4 +1,4 @@
-import React, {forwardRef, FunctionComponent} from 'react';
+import React, {forwardRef} from 'react';
 import * as ExpoImage from 'expo-image';
 /**
  * 그냥 이미지 컴포넌트인데 오류 났을때 대체 이미지를 보여주는 기능이 있음
@@ -26,13 +26,17 @@ export const Image = forwardRef<
   );
 });
 
-export const ChainImageFallback: FunctionComponent<{
-  src: string | undefined; // 얘는 undefined더라도 일단 넣으라고 일부로 ?를 안붙인거임.
-  alt: string;
-  style: Object;
-}> = ({src, style}) => {
+export const ChainImageFallback = forwardRef<
+  ExpoImage.Image,
+  {
+    src: string | undefined; // 얘는 undefined더라도 일단 넣으라고 일부로 ?를 안붙인거임.
+    alt: string;
+    style: Object;
+  }
+>(({src, style}, ref) => {
   return (
     <ExpoImage.Image
+      ref={ref}
       style={{
         ...style,
         borderRadius: 99999,
@@ -42,4 +46,4 @@ export const ChainImageFallback: FunctionComponent<{
       autoplay={false}
     />
   );
-};
+});
