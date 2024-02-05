@@ -93,11 +93,6 @@ const { initFn, keyRingService } = init(
           rest: "https://froopyland.blockpi.network/lcd/v1/public",
           chainId: "froopyland_100-1",
           chainName: "Dymension Testnet",
-          stakeCurrency: {
-            coinDenom: "DYM",
-            coinMinimalDenom: "udym",
-            coinDecimals: 18,
-          },
           bip44: {
             coinType: 60,
           },
@@ -113,19 +108,14 @@ const { initFn, keyRingService } = init(
             {
               coinDenom: "DYM",
               coinMinimalDenom: "udym",
-              coinDecimals: 18,
+              coinDecimals: 6,
             },
           ],
           feeCurrencies: [
             {
               coinDenom: "DYM",
               coinMinimalDenom: "udym",
-              coinDecimals: 18,
-              gasPriceStep: {
-                low: 0.25,
-                average: 0.4,
-                high: 0.55,
-              },
+              coinDecimals: 6,
             },
           ],
           features: ["eth-address-gen", "eth-key-sign"],
