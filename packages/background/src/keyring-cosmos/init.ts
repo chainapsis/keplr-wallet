@@ -14,7 +14,6 @@ import {
   RequestICNSAdr36SignaturesMsg,
   EnableVaultsWithCosmosAddressMsg,
   PrivilegeCosmosSignAminoDelegateMsg,
-  RequestCosmosSignDirectAuxMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -38,7 +37,6 @@ export function init(
   router.registerMessage(RequestSignEIP712CosmosTxMsg_v0);
   router.registerMessage(RequestICNSAdr36SignaturesMsg);
   router.registerMessage(EnableVaultsWithCosmosAddressMsg);
-  router.registerMessage(RequestCosmosSignDirectAuxMsg);
 
   router.addHandler(ROUTE, getHandler(service, permissionInteractionService));
 }

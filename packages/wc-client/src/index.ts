@@ -3,7 +3,6 @@ import {
   BroadcastMode,
   ChainInfo,
   ChainInfoWithoutEndpoints,
-  DirectAuxSignResponse,
   DirectSignResponse,
   EthSignType,
   ICNSAdr36Signatures,
@@ -587,34 +586,6 @@ export class KeplrWalletConnectV2 implements Keplr {
           : new Uint8Array([]),
       },
     };
-  }
-
-  signDirectAux(
-    _chainId: string,
-    _signer: string,
-    _signDoc: {
-      bodyBytes?: Uint8Array | null;
-      publicKey?: {
-        typeUrl: string;
-        value: Uint8Array;
-      } | null;
-      chainId?: string | null;
-      accountNumber?: Long | null;
-      sequence?: Long | null;
-      tip?: {
-        amount: {
-          denom: string;
-          amount: string;
-        }[];
-        tipper: string;
-      } | null;
-    },
-    _signOptions?: Exclude<
-      KeplrSignOptions,
-      "preferNoSetFee" | "disableBalanceCheck"
-    >
-  ): Promise<DirectAuxSignResponse> {
-    throw new Error("Not yet implemented");
   }
 
   signEthereum(

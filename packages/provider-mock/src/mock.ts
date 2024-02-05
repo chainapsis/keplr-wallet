@@ -16,7 +16,6 @@ import {
   ChainInfoWithoutEndpoints,
   SecretUtils,
   SettledResponses,
-  DirectAuxSignResponse,
 } from "@keplr-wallet/types";
 import {
   Bech32Address,
@@ -277,34 +276,6 @@ export class MockKeplr implements Keplr {
         ])
       ),
     };
-  }
-
-  signDirectAux(
-    _chainId: string,
-    _signer: string,
-    _signDoc: {
-      bodyBytes?: Uint8Array | null;
-      publicKey?: {
-        typeUrl: string;
-        value: Uint8Array;
-      } | null;
-      chainId?: string | null;
-      accountNumber?: Long | null;
-      sequence?: Long | null;
-      tip?: {
-        amount: {
-          denom: string;
-          amount: string;
-        }[];
-        tipper: string;
-      } | null;
-    },
-    _signOptions?: Exclude<
-      KeplrSignOptions,
-      "preferNoSetFee" | "disableBalanceCheck"
-    >
-  ): Promise<DirectAuxSignResponse> {
-    throw new Error("Not implemented");
   }
 
   suggestToken(): Promise<void> {

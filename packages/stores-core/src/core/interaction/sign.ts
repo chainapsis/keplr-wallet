@@ -31,7 +31,6 @@ export type SignInteractionData =
       signer: string;
       pubKey: Uint8Array;
       signDocBytes: Uint8Array;
-      isDirectAux?: boolean;
       signOptions: KeplrSignOptions;
       keyType: string;
       keyInsensitive: PlainObject;
@@ -42,30 +41,10 @@ export class SignInteractionStore {
     makeObservable(this);
   }
 
-  @computed
-  get waitingDatas(): InteractionWaitingData<
-    SignInteractionData & { signDocWrapper: SignDocWrapper }
-  >[] {
-    return this.interactionStore
-      .getAllData<SignInteractionData>("request-sign-cosmos")
-      .map((data) => {
-        const wrapper =
-          data.data.mode === "amino"
-            ? SignDocWrapper.fromAminoSignDoc(data.data.signDoc)
-            : data.data.isDirectAux
-            ? SignDocWrapper.fromDirectAuxSignDocBytes(data.data.signDocBytes)
-            : SignDocWrapper.fromDirectSignDocBytes(data.data.signDocBytes);
-
-        return {
-          id: data.id,
-          type: data.type,
-          isInternal: data.isInternal,
-          data: {
-            ...data.data,
-            signDocWrapper: wrapper,
-          },
-        };
-      });
+  get waitingDatas() {
+    return this.interactionStore.getAllData<SignInteractionData>(
+      "request-sign-cosmos"
+    );
   }
 
   @computed
@@ -84,8 +63,6 @@ export class SignInteractionStore {
     const wrapper =
       data.data.mode === "amino"
         ? SignDocWrapper.fromAminoSignDoc(data.data.signDoc)
-        : data.data.isDirectAux
-        ? SignDocWrapper.fromDirectAuxSignDocBytes(data.data.signDocBytes)
         : SignDocWrapper.fromDirectSignDocBytes(data.data.signDocBytes);
 
     return {

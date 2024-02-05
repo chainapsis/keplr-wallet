@@ -570,16 +570,12 @@ export const CosmosTxView: FunctionComponent<{
               <MemoInput memoConfig={memoConfig} />
             )}
 
-            {/* direct aux는 수수료를 설정할수도 없으니 보여줄 필요가 없다. */}
-            {"isDirectAux" in interactionData.data &&
-            interactionData.data.isDirectAux ? null : (
-              <FeeControl
-                feeConfig={feeConfig}
-                senderConfig={senderConfig}
-                gasConfig={gasConfig}
-                disableAutomaticFeeSet={preferNoSetFee}
-              />
-            )}
+            <FeeControl
+              feeConfig={feeConfig}
+              senderConfig={senderConfig}
+              gasConfig={gasConfig}
+              disableAutomaticFeeSet={preferNoSetFee}
+            />
           </Stack>
         </Box>
 

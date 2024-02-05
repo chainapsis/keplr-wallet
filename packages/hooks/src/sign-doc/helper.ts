@@ -4,7 +4,6 @@ import { IFeeConfig, IMemoConfig } from "../tx";
 import { SignDocWrapper } from "@keplr-wallet/cosmos";
 import {
   SignDoc,
-  SignDocDirectAux,
   TxBody,
   AuthInfo,
   Fee,
@@ -67,22 +66,6 @@ export class SignDocHelper {
       };
 
       return SignDocWrapper.fromAminoSignDoc(signDoc);
-    }
-
-    if (this._signDocWrapper.isDirectAux) {
-      const protoSignDoc = this._signDocWrapper.protoSignDoc;
-      // aux의 경우 어차피 수수료 정보가 없으니 memo만 고려한다.
-      const newSignDoc: SignDocDirectAux = {
-        ...(protoSignDoc.signDoc as SignDocDirectAux),
-        bodyBytes: TxBody.encode({
-          ...protoSignDoc.txBody,
-          ...{
-            memo: this.memoConfig.memo,
-          },
-        }).finish(),
-      };
-
-      return SignDocWrapper.fromDirectAuxSignDoc(newSignDoc);
     }
 
     const protoSignDoc = this._signDocWrapper.protoSignDoc;
