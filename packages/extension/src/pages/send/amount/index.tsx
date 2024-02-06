@@ -88,6 +88,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     initialCoinMinimalDenom ||
     chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
   const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
+  const isErc20 = new DenomHelper(currency.coinMinimalDenom).type === "erc20";
 
   const [isIBCTransfer, setIsIBCTransfer] = useState(false);
   const [
@@ -111,9 +112,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
   }, [navigate, initialChainId, initialCoinMinimalDenom]);
 
-  const [isEvmTx, setIsEvmTx] = useState(
-    new DenomHelper(currency.coinMinimalDenom).type === "erc20"
-  );
+  const [isEvmTx, setIsEvmTx] = useState(isErc20);
 
   const account = accountStore.getAccount(chainId);
   const ethereumAccount = ethereumAccountStore.getAccount(chainId);
@@ -692,34 +691,36 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             />
           </YAxis>
 
-          <LayeredHorizontalRadioGroup
-            size="large"
-            selectedKey={isIBCTransfer ? "ibc-transfer" : "send"}
-            items={[
-              {
-                key: "send",
-                text: intl.formatMessage({
-                  id: "page.send.type.send",
-                }),
-              },
-              {
-                key: "ibc-transfer",
-                text: intl.formatMessage({
-                  id: "page.send.type.ibc-transfer",
-                }),
-              },
-            ]}
-            onSelect={(key) => {
-              if (key === "ibc-transfer") {
-                if (sendConfigs.channelConfig.channels.length === 0) {
-                  setIsIBCTransferDestinationModalOpen(true);
+          {!isErc20 && (
+            <LayeredHorizontalRadioGroup
+              size="large"
+              selectedKey={isIBCTransfer ? "ibc-transfer" : "send"}
+              items={[
+                {
+                  key: "send",
+                  text: intl.formatMessage({
+                    id: "page.send.type.send",
+                  }),
+                },
+                {
+                  key: "ibc-transfer",
+                  text: intl.formatMessage({
+                    id: "page.send.type.ibc-transfer",
+                  }),
+                },
+              ]}
+              onSelect={(key) => {
+                if (key === "ibc-transfer") {
+                  if (sendConfigs.channelConfig.channels.length === 0) {
+                    setIsIBCTransferDestinationModalOpen(true);
+                  }
+                } else {
+                  sendConfigs.channelConfig.setChannels([]);
+                  setIsIBCTransfer(false);
                 }
-              } else {
-                sendConfigs.channelConfig.setChannels([]);
-                setIsIBCTransfer(false);
-              }
-            }}
-          />
+              }}
+            />
+          )}
 
           <VerticalCollapseTransition collapsed={!isIBCTransfer}>
             <DestinationChainView
