@@ -90,6 +90,10 @@ const { initFn, keyRingService } = init(
       return legacy.disabledChains ?? [];
     },
   },
+  {
+    platform: "extension",
+    mobileOS: "nono",
+  },
   async (chainsService, lastEmbedChainInfos) => {
     if (lastEmbedChainInfos.find((c) => c.chainId === "ixo-4")) {
       await chainsService.addSuggestedChainInfo({

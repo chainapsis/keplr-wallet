@@ -9,7 +9,7 @@ import {MsgExecuteContract as MsgExecuteSecretContract} from '@keplr-wallet/prot
 import {Buffer} from 'buffer/';
 import {WasmMessageView} from './wasm-message-view';
 import {FormattedMessage} from 'react-intl';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
 import {useStore} from '../../../stores';
 import {Gutter} from '../../../components/gutter';
 import {Text} from 'react-native';
@@ -49,7 +49,7 @@ export const ExecuteContractMessage: IMessageRenderer = {
     if (d) {
       return {
         icon: (
-          <FastImage
+          <ExpoImage.Image
             style={{width: 48, height: 48}}
             source={require('../../../public/assets/img/sign/sign-execute-contract.png')}
           />

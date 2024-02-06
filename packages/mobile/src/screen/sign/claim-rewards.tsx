@@ -1,7 +1,7 @@
 import {IMessageRenderer} from './types';
 import {MsgWithdrawDelegatorReward} from '@keplr-wallet/proto-types/cosmos/distribution/v1beta1/tx';
 import React, {FunctionComponent} from 'react';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
 import {FormattedMessage} from 'react-intl';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../stores';
@@ -37,7 +37,7 @@ export const ClaimRewardsMessage: IMessageRenderer = {
     if (d) {
       return {
         icon: (
-          <FastImage
+          <ExpoImage.Image
             style={{width: 48, height: 48}}
             source={require('../../public/assets/img/sign/sign-claim.png')}
           />

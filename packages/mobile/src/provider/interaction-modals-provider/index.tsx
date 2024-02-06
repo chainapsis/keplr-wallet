@@ -31,6 +31,8 @@ export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
       }
     }, [walletConnectStore.needGoBackToBrowser]);
 
+    const mergedPermissionData = permissionStore.waitingPermissionMergedData;
+
     return (
       <React.Fragment>
         {signInteractionStore.waitingData &&
@@ -69,34 +71,42 @@ export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
           />
         ) : null}
 
-        {permissionStore.waitingPermissionDatas &&
-          permissionStore.waitingPermissionDatas.map(data => {
-            if (data.data.origins.length === 1) {
-              if (WCMessageRequester.isVirtualURL(data.data.origins[0])) {
-                return (
-                  <WalletConnectAccessModal
-                    isOpen={true}
-                    setIsOpen={async () =>
-                      await permissionStore.rejectPermissionAll()
-                    }
-                    key={data.id}
-                    id={data.id}
-                    data={data.data}
-                  />
-                );
-              }
-            }
-
-            return (
-              <BasicAccessModal
-                isOpen={true}
-                setIsOpen={async () =>
-                  await permissionStore.rejectPermissionAll()
+        {mergedPermissionData
+          ? (() => {
+              const data = mergedPermissionData;
+              if (data.origins.length === 1) {
+                if (WCMessageRequester.isVirtualURL(data.origins[0])) {
+                  return (
+                    <WalletConnectAccessModal
+                      isOpen={true}
+                      setIsOpen={async () =>
+                        await permissionStore.rejectPermissionWithProceedNext(
+                          data.ids,
+                          () => {},
+                        )
+                      }
+                      key={data.ids.join(',')}
+                      data={data}
+                    />
+                  );
                 }
-                key={data.id}
-              />
-            );
-          })}
+              }
+
+              return (
+                <BasicAccessModal
+                  isOpen={true}
+                  setIsOpen={async () =>
+                    await permissionStore.rejectPermissionWithProceedNext(
+                      data.ids,
+                      () => {},
+                    )
+                  }
+                  key={data.ids.join(',')}
+                  data={data}
+                />
+              );
+            })()
+          : null}
 
         {chainSuggestStore.waitingSuggestedChainInfo ? (
           <SuggestChainModal

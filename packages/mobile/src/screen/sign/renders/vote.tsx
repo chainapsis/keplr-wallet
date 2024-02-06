@@ -3,7 +3,7 @@ import React, {FunctionComponent} from 'react';
 import {MsgVote} from '@keplr-wallet/proto-types/cosmos/gov/v1beta1/tx';
 import {VoteOption} from '@keplr-wallet/proto-types/cosmos/gov/v1beta1/gov';
 import {FormattedMessage, useIntl} from 'react-intl';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
 import {Text} from 'react-native';
 import {useStyle} from '../../../styles';
 
@@ -30,7 +30,7 @@ export const VoteMessage: IMessageRenderer = {
     if (d) {
       return {
         icon: (
-          <FastImage
+          <ExpoImage.Image
             style={{width: 48, height: 48}}
             source={require('../../../public/assets/img/sign/sign-vote.png')}
           />

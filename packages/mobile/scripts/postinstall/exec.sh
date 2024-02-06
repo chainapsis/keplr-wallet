@@ -16,3 +16,6 @@ cp ${DIR}/ledger/BleTransport.js ${DIR}/../../node_modules/@ledgerhq/react-nativ
 cp ${DIR}/restart-fix/JSCRuntime.cpp ${DIR}/../../node_modules/react-native/ReactCommon/jsc/JSCRuntime.cpp
 
 cp ${DIR}/wc/index.js ${DIR}/../../node_modules/@walletconnect/react-native-compat/index.js
+
+cp ${DIR}/expo-image/ExpoImageViewWrapper.kt ${DIR}/../../node_modules/expo-image/android/src/main/java/expo/modules/image/ExpoImageViewWrapper.kt
+cp ${DIR}/expo-image/ImageViewWrapperTarget.kt ${DIR}/../../node_modules/expo-image/android/src/main/java/expo/modules/image/ImageViewWrapperTarget.kt

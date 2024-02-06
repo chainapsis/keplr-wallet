@@ -15,7 +15,11 @@ export class AnalyticsService {
 
   constructor(
     protected readonly kvStore: KVStore,
-    protected readonly privilegedOrigins: string[]
+    protected readonly privilegedOrigins: string[],
+    protected readonly analyticsOptions: {
+      platform: string;
+      mobileOS: string;
+    }
   ) {
     makeObservable(this);
   }
@@ -86,6 +90,8 @@ export class AnalyticsService {
         event,
         analyticsId: this.analyticsId,
         v2: true,
+        platform: this.analyticsOptions.platform,
+        mobileOS: this.analyticsOptions.mobileOS,
       })
     ).toString("base64");
     await simpleFetch(

@@ -73,6 +73,10 @@ export function init(
     commonCrypto: KeyRingLegacy.CommonCrypto;
     readonly getDisabledChainIdentifiers: () => Promise<string[]>;
   },
+  analyticsOptions: {
+    platform: string;
+    mobileOS: string;
+  },
   afterInitFn?: (
     service: Chains.ChainsService,
     lastEmbedChainInfos: ChainInfoWithCoreTypes[]
@@ -129,7 +133,8 @@ export function init(
   );
   const analyticsService = new Analytics.AnalyticsService(
     storeCreator("background.analytics"),
-    analyticsPrivilegedOrigins
+    analyticsPrivilegedOrigins,
+    analyticsOptions
   );
 
   const vaultService = new Vault.VaultService(storeCreator("vault"));

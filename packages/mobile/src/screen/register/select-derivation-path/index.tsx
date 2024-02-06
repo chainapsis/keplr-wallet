@@ -9,7 +9,7 @@ import {RootStackParamList, StackNavProp} from '../../../navigation';
 import {useStore} from '../../../stores';
 import {Gutter} from '../../../components/gutter';
 import {XAxis, YAxis} from '../../../components/axis';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
 import {AppCurrency} from '@keplr-wallet/types';
 import {WalletIcon} from '../../../components/icon';
 import {Bech32Address} from '@keplr-wallet/cosmos';
@@ -139,7 +139,7 @@ export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
           borderRadius={50}
           backgroundColor="rgba(46, 46, 50, 0.50)">
           <XAxis alignY="center">
-            <FastImage
+            <ExpoImage.Image
               style={style.flatten([
                 'width-44',
                 'height-44',
@@ -147,10 +147,10 @@ export const SelectDerivationPathScreen: FunctionComponent = observer(() => {
               ])}
               source={
                 chainInfo.chainSymbolImageUrl
-                  ? {uri: chainInfo.chainSymbolImageUrl}
+                  ? chainInfo.chainSymbolImageUrl
                   : require('../../../public/assets/img/chain-icon-alt.png')
               }
-              resizeMode={FastImage.resizeMode.contain}
+              contentFit="contain"
             />
 
             <Gutter size={8} />

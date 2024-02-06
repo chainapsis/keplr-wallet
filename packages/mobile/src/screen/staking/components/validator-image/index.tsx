@@ -33,7 +33,6 @@ export const ValidatorImage = ({
               src={imageUrl}
               alt={imageUrl}
               defaultSrc={require('../../../../public/assets/img/chain-icon-alt.png')}
-              cache="immutable"
             />
             <Box
               position="absolute"
@@ -60,7 +59,6 @@ export const ValidatorImage = ({
             src={imageUrl}
             alt={imageUrl}
             defaultSrc={require('../../../../public/assets/img/chain-icon-alt.png')}
-            cache="immutable"
           />
         )
       ) : isDelegation ? (

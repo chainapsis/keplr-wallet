@@ -10,18 +10,19 @@ import {Button} from '../button';
 import {Gutter} from '../gutter';
 import {PermissionData} from '@keplr-wallet/background';
 import {WCMessageRequester} from '../../stores/wallet-connect/msg-requester';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
 import {Box} from '../box';
 import {registerCardModal} from './card';
 
 export const WalletConnectAccessModal = registerCardModal(
   observer<{
-    id: string;
-    data: PermissionData;
+    data: {
+      ids: string[];
+    } & PermissionData;
 
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
-  }>(({id, data}) => {
+  }>(({data}) => {
     const intl = useIntl();
     const style = useStyle();
     const {permissionStore, walletConnectStore} = useStore();
@@ -64,13 +65,10 @@ export const WalletConnectAccessModal = registerCardModal(
         <Gutter size={32} />
 
         <Box alignX="center">
-          <FastImage
+          <ExpoImage.Image
             style={{width: 74, height: 75}}
-            resizeMode={FastImage.resizeMode.contain}
-            source={{
-              uri: logoUrl,
-              cache: FastImage.cacheControl.web,
-            }}
+            source={logoUrl}
+            contentFit="contain"
           />
         </Box>
 
@@ -96,7 +94,10 @@ export const WalletConnectAccessModal = registerCardModal(
             color="secondary"
             containerStyle={{flex: 1, width: '100%'}}
             onPress={async () => {
-              await permissionStore.rejectPermissionAll();
+              await permissionStore.rejectPermissionWithProceedNext(
+                data.ids,
+                () => {},
+              );
             }}
           />
 
@@ -108,7 +109,7 @@ export const WalletConnectAccessModal = registerCardModal(
             containerStyle={{flex: 1, width: '100%'}}
             onPress={async () => {
               await permissionStore.approvePermissionWithProceedNext(
-                id,
+                data.ids,
                 () => {},
               );
             }}

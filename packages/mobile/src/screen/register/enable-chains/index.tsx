@@ -32,7 +32,7 @@ import {
 import {CoinPretty, Dec} from '@keplr-wallet/unit';
 import {ChainInfo} from '@keplr-wallet/types';
 import {XAxis, YAxis} from '../../../components/axis';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
 import {Checkbox} from '../../../components/checkbox';
 import {RectButton} from '../../../components/rect-button';
 import {Tag} from '../../../components/tag';
@@ -1081,7 +1081,7 @@ const ChainItem: FunctionComponent<{
               : style.get('color-gray-600').color
           }>
           <XAxis alignY="center">
-            <FastImage
+            <ExpoImage.Image
               style={style.flatten([
                 'width-40',
                 'height-40',
@@ -1089,10 +1089,10 @@ const ChainItem: FunctionComponent<{
               ])}
               source={
                 chainInfo.chainSymbolImageUrl
-                  ? {uri: chainInfo.chainSymbolImageUrl}
+                  ? chainInfo.chainSymbolImageUrl
                   : require('../../../public/assets/img/chain-icon-alt.png')
               }
-              resizeMode={FastImage.resizeMode.contain}
+              contentFit="contain"
             />
 
             <Gutter size={8} />
@@ -1146,14 +1146,14 @@ const NextStepEvmChainItem: FunctionComponent<{
       backgroundColor={style.get('color-gray-500').color}
       style={{opacity: 0.5, flex: 1}}>
       <XAxis alignY="center">
-        <FastImage
+        <ExpoImage.Image
           style={style.flatten(['width-40', 'height-40', 'border-radius-40'])}
           source={
             chainInfo.chainSymbolImageUrl
-              ? {uri: chainInfo.chainSymbolImageUrl}
+              ? chainInfo.chainSymbolImageUrl
               : require('../../../public/assets/img/chain-icon-alt.png')
           }
-          resizeMode={FastImage.resizeMode.contain}
+          contentFit="contain"
         />
 
         <Gutter size={8} />

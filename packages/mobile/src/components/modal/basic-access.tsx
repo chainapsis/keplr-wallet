@@ -1,6 +1,5 @@
 import React, {useMemo} from 'react';
 import {observer} from 'mobx-react-lite';
-import {useStore} from '../../stores';
 import {useStyle} from '../../styles';
 import {BaseModalHeader} from './modal';
 import {FormattedMessage, useIntl} from 'react-intl';
@@ -10,41 +9,35 @@ import {Button} from '../button';
 import {Gutter} from '../gutter';
 import {Box} from '../box';
 import {registerCardModal} from './card';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
+import {PermissionData} from '@keplr-wallet/background';
+import {useStore} from '../../stores';
 
 export const BasicAccessModal = registerCardModal(
   observer<{
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
-  }>(() => {
+
+    data: {
+      ids: string[];
+    } & PermissionData;
+  }>(({data}) => {
     const intl = useIntl();
     const style = useStyle();
+
     const {permissionStore} = useStore();
 
-    const waitingPermission =
-      permissionStore.waitingPermissionDatas.length > 0
-        ? permissionStore.waitingPermissionDatas[0]
-        : undefined;
-
     const host = useMemo(() => {
-      if (waitingPermission) {
-        return waitingPermission.data.origins
-          .map(origin => {
-            return new URL(origin).host;
-          })
-          .join(', ');
-      } else {
-        return '';
-      }
-    }, [waitingPermission]);
+      return data.origins
+        .map(origin => {
+          return new URL(origin).host;
+        })
+        .join(', ');
+    }, [data]);
 
     const chainIds = useMemo(() => {
-      if (!waitingPermission) {
-        return '';
-      }
-
-      return waitingPermission.data.chainIds.join(', ');
-    }, [waitingPermission]);
+      return data.chainIds.join(', ');
+    }, [data]);
 
     return (
       <Box paddingX={12} paddingBottom={12}>
@@ -57,10 +50,10 @@ export const BasicAccessModal = registerCardModal(
         <Gutter size={16} />
 
         <Box paddingX={22} alignX="center">
-          <FastImage
+          <ExpoImage.Image
             style={{width: 74, height: 74}}
-            resizeMode={FastImage.resizeMode.contain}
             source={require('../../public/assets/logo-256.png')}
+            contentFit="contain"
           />
 
           <Gutter size={16} />
@@ -90,7 +83,10 @@ export const BasicAccessModal = registerCardModal(
             color="secondary"
             containerStyle={{flex: 1, width: '100%'}}
             onPress={async () => {
-              await permissionStore.rejectPermissionAll();
+              await permissionStore.rejectPermissionWithProceedNext(
+                data.ids,
+                () => {},
+              );
             }}
           />
 
@@ -101,12 +97,10 @@ export const BasicAccessModal = registerCardModal(
             text={intl.formatMessage({id: 'button.approve'})}
             containerStyle={{flex: 1, width: '100%'}}
             onPress={async () => {
-              if (waitingPermission) {
-                await permissionStore.approvePermissionWithProceedNext(
-                  waitingPermission.id,
-                  () => {},
-                );
-              }
+              await permissionStore.approvePermissionWithProceedNext(
+                data.ids,
+                () => {},
+              );
             }}
           />
         </XAxis>

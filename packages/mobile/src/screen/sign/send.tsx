@@ -5,7 +5,7 @@ import {observer} from 'mobx-react-lite';
 import {CoinPretty} from '@keplr-wallet/unit';
 import {Bech32Address} from '@keplr-wallet/cosmos';
 import {IMessageRenderer} from './types';
-import FastImage from 'react-native-fast-image';
+import * as ExpoImage from 'expo-image';
 import {FormattedMessage} from 'react-intl';
 import {useStore} from '../../stores';
 import {Text} from 'react-native';
@@ -34,7 +34,7 @@ export const SendMessage: IMessageRenderer = {
     if (d) {
       return {
         icon: (
-          <FastImage
+          <ExpoImage.Image
             style={{width: 48, height: 48}}
             source={require('../../public/assets/img/sign/sign-send.png')}
           />
