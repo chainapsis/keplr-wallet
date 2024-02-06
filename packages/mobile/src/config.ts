@@ -2350,6 +2350,50 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ['cosmwasm'],
   },
+  {
+    chainId: 'dymension_1100-1',
+    chainName: 'Dymension',
+    rpc: 'https://rpc-dymension.keplr.app',
+    rest: 'https://lcd-dymension.keplr.app',
+    currencies: [
+      {
+        coinMinimalDenom: 'adym',
+        coinDenom: 'DYM',
+        coinDecimals: 18,
+        coinImageUrl:
+          'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/dymension_1100/chain.png',
+      },
+    ],
+    bip44: {
+      coinType: 60,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: 'dym',
+      bech32PrefixAccPub: 'dympub',
+      bech32PrefixValAddr: 'dymvaloper',
+      bech32PrefixValPub: 'dymvaloperpub',
+      bech32PrefixConsAddr: 'dymvalcons',
+      bech32PrefixConsPub: 'dymvalconspub',
+    },
+    stakeCurrency: {
+      coinMinimalDenom: 'adym',
+      coinDenom: 'DYM',
+      coinDecimals: 18,
+    },
+    feeCurrencies: [
+      {
+        coinMinimalDenom: 'adym',
+        coinDenom: 'DYM',
+        coinDecimals: 18,
+        gasPriceStep: {
+          average: 20000000000,
+          high: 20000000000,
+          low: 20000000000,
+        },
+      },
+    ],
+    features: ['eth-address-gen', 'eth-key-sign'],
+  },
 ];
 
 // TODO: 원격으로 변경할 수 있도록 나중에 네트워크에서 이 정보를 가져오는 방식으로 변경될 수 있음
