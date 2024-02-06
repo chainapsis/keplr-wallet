@@ -7,67 +7,20 @@ import {
   InsufficientFeeError,
   ISenderConfig,
 } from "@keplr-wallet/hooks";
-import styled, { useTheme } from "styled-components";
+import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../styles";
-import { Column, Columns } from "../../column";
-import { Caption2, Subtitle3, Subtitle4 } from "../../typography";
-import { ArrowRightIcon, LoadingIcon, SettingIcon } from "../../icon";
-import { Stack } from "../../stack";
+import { Body2, Subtitle4 } from "../../typography";
+import { LoadingIcon } from "../../icon";
 import { Modal } from "../../modal";
 import { TransactionFeeModal } from "./modal";
 import { useStore } from "../../../stores";
 import { autorun } from "mobx";
-import { Dec, PricePretty } from "@keplr-wallet/unit";
-import { Gutter } from "../../gutter";
-import Color from "color";
+import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
 import { Box } from "../../box";
 import { VerticalResizeTransition } from "../../transition";
-import { FormattedMessage, useIntl } from "react-intl";
-
-const Styles = {
-  Container: styled.div<{
-    hasError: boolean;
-  }>`
-    padding: 1rem 0.25rem 1rem 1rem;
-    background-color: ${(props) =>
-      props.theme.mode === "light"
-        ? ColorPalette.white
-        : ColorPalette["gray-600"]};
-
-    border: ${({ hasError, theme }) =>
-      hasError
-        ? `1.5px solid ${Color(
-            theme.mode === "light"
-              ? ColorPalette["orange-400"]
-              : ColorPalette["yellow-400"]
-          )
-            .alpha(0.5)
-            .toString()}`
-        : `1.5px solid ${Color(ColorPalette["blue-400"])
-            .alpha(0.5)
-            .toString()}`};
-    border-radius: 0.375rem;
-
-    :hover {
-      border: ${({ hasError, theme }) =>
-        hasError
-          ? `1.5px solid ${
-              theme.mode === "light"
-                ? ColorPalette["orange-400"]
-                : ColorPalette["yellow-500"]
-            }`
-          : `1.5px solid ${ColorPalette["blue-500"]};`};
-    }
-
-    cursor: pointer;
-  `,
-  IconContainer: styled.div`
-    color: ${(props) =>
-      props.theme.mode === "light"
-        ? ColorPalette["gray-200"]
-        : ColorPalette["gray-300"]};
-  `,
-};
+import { useIntl } from "react-intl";
+import { XAxis, YAxis } from "../../axis";
+import { Tag } from "../../tag";
 
 export const FeeControl: FunctionComponent<{
   senderConfig: ISenderConfig;
@@ -225,112 +178,155 @@ export const FeeControl: FunctionComponent<{
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     return (
-      <React.Fragment>
-        <Styles.Container
-          hasError={
-            feeConfig.uiProperties.error != null ||
-            gasConfig.uiProperties.error != null
-          }
-          onClick={() => {
-            analyticsStore.logEvent("click_txFeeSet");
-            setIsModalOpen(true);
-          }}
-        >
-          <Columns sum={1} alignY="center">
-            <Columns sum={1} alignY="center">
-              <Subtitle4>
-                <FormattedMessage id="components.input.fee-control.title" />
-              </Subtitle4>
-              <Gutter size="0.25rem" />
-              {feeConfig.uiProperties.loadingState ||
-              gasSimulator?.uiProperties.loadingState ? (
-                <LoadingIcon
-                  width="1rem"
-                  height="1rem"
-                  color={ColorPalette["gray-200"]}
-                />
-              ) : (
-                <SettingIcon
-                  width="1rem"
-                  height="1rem"
-                  color={ColorPalette["gray-200"]}
-                />
-              )}
-            </Columns>
+      <Box>
+        <YAxis alignX="center">
+          <Box
+            cursor="pointer"
+            onClick={(e) => {
+              e.preventDefault();
 
-            <Column weight={1} />
+              analyticsStore.logEvent("click_txFeeSet");
+              setIsModalOpen(true);
+            }}
+          >
+            <XAxis alignY="center">
+              {/* 밑의 박스는 오른쪽에 로딩 또는 현재 선택된 옵션에 대한 태그를 표시하기 위한 box와 양옆의 균형을 맞추기 위해서 존재함 */}
+              <Box
+                position="relative"
+                marginLeft="0.25rem"
+                minWidth="1.25rem"
+              />
+              <Body2
+                color={(() => {
+                  if (
+                    feeConfig.uiProperties.error ||
+                    feeConfig.uiProperties.warning
+                  ) {
+                    return theme.mode === "light"
+                      ? ColorPalette["orange-400"]
+                      : ColorPalette["yellow-400"];
+                  }
 
-            <Columns sum={1} gutter="0.25rem" alignY="center">
-              <Stack gutter="0.25rem" alignX="right">
-                <Stack>
-                  {feeConfig.fees.map((fee) => {
-                    return (
-                      <Subtitle3 key={fee.currency.coinMinimalDenom}>
-                        {fee
-                          .maxDecimals(6)
-                          .inequalitySymbol(true)
-                          .trim(true)
-                          .shrink(true)
-                          .hideIBCMetadata(true)
-                          .toString()}
-                      </Subtitle3>
-                    );
-                  })}
-                </Stack>
-
-                <Subtitle3 style={{ color: ColorPalette["gray-300"] }}>
-                  {(() => {
-                    let total: PricePretty | undefined;
-                    let hasUnknown = false;
-                    for (const fee of feeConfig.fees) {
-                      if (!fee.currency.coinGeckoId) {
-                        hasUnknown = true;
-                        break;
-                      } else {
-                        const price = priceStore.calculatePrice(fee);
-                        if (price) {
-                          if (!total) {
-                            total = price;
-                          } else {
-                            total = total.add(price);
-                          }
+                  return theme.mode === "light"
+                    ? ColorPalette["blue-400"]
+                    : ColorPalette["white"];
+                })()}
+                style={{
+                  textDecoration: "underline",
+                }}
+              >
+                {`Fee: ${(() => {
+                  if (feeConfig.fees.length > 0) {
+                    return feeConfig.fees;
+                  }
+                  const chainInfo = chainStore.getChain(feeConfig.chainId);
+                  return [
+                    new CoinPretty(
+                      chainInfo.stakeCurrency || chainInfo.currencies[0],
+                      new Dec(0)
+                    ),
+                  ];
+                })()
+                  .map((fee) =>
+                    fee
+                      .maxDecimals(6)
+                      .inequalitySymbol(true)
+                      .trim(true)
+                      .shrink(true)
+                      .hideIBCMetadata(true)
+                      .toString()
+                  )
+                  .join("+")}`}
+              </Body2>
+              <Body2
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-300"]
+                }
+                style={{
+                  textDecoration: "underline",
+                  whiteSpace: "pre-wrap",
+                }}
+              >
+                {` ${(() => {
+                  let total: PricePretty | undefined;
+                  let hasUnknown = false;
+                  for (const fee of feeConfig.fees) {
+                    if (!fee.currency.coinGeckoId) {
+                      hasUnknown = true;
+                      break;
+                    } else {
+                      const price = priceStore.calculatePrice(fee);
+                      if (price) {
+                        if (!total) {
+                          total = price;
+                        } else {
+                          total = total.add(price);
                         }
                       }
                     }
+                  }
 
-                    if (hasUnknown || !total) {
-                      return "-";
-                    }
-                    return total.toString();
-                  })()}
-                </Subtitle3>
-              </Stack>
+                  if (hasUnknown || !total) {
+                    return "";
+                  }
+                  return `(${total.toString()})`;
+                })()}`}
+              </Body2>
+              <Box
+                position="relative"
+                marginLeft="0.25rem"
+                minWidth="1.25rem"
+                alignY="center"
+              >
+                {(() => {
+                  if (
+                    feeConfig.uiProperties.loadingState ||
+                    gasSimulator?.uiProperties.loadingState
+                  ) {
+                    return (
+                      <Box position="absolute" alignY="center">
+                        <LoadingIcon
+                          width="1.25rem"
+                          height="1.25rem"
+                          color={ColorPalette["gray-200"]}
+                        />
+                      </Box>
+                    );
+                  }
 
-              <Styles.IconContainer>
-                <ArrowRightIcon />
-              </Styles.IconContainer>
-            </Columns>
-          </Columns>
+                  if (feeConfig.type === "low" || feeConfig.type === "high") {
+                    return (
+                      <Tag
+                        text={intl.formatMessage({
+                          id: `components.input.fee-control.modal.fee-selector.${feeConfig.type}`,
+                        })}
+                      />
+                    );
+                  }
 
-          <Modal
-            isOpen={isModalOpen}
-            align="bottom"
-            close={() => setIsModalOpen(false)}
-          >
-            <TransactionFeeModal
-              close={() => setIsModalOpen(false)}
-              senderConfig={senderConfig}
-              feeConfig={feeConfig}
-              gasConfig={gasConfig}
-              gasSimulator={gasSimulator}
-            />
-          </Modal>
-        </Styles.Container>
-
+                  return null;
+                })()}
+              </Box>
+            </XAxis>
+          </Box>
+        </YAxis>
         <VerticalResizeTransition transitionAlign="top">
           {feeConfig.uiProperties.error || feeConfig.uiProperties.warning ? (
-            <Box marginTop="4px">
-              <Caption2
+            <Box
+              marginTop="1.25rem"
+              borderRadius="0.5rem"
+              alignX="center"
+              alignY="center"
+              paddingY="1.125rem"
+              backgroundColor={
+                theme.mode === "light"
+                  ? ColorPalette["orange-50"]
+                  : ColorPalette["yellow-800"]
+              }
+            >
+              <Subtitle4
                 color={
                   theme.mode === "light"
                     ? ColorPalette["orange-400"]
@@ -375,11 +371,25 @@ export const FeeControl: FunctionComponent<{
                     );
                   }
                 })()}
-              </Caption2>
+              </Subtitle4>
             </Box>
           ) : null}
         </VerticalResizeTransition>
-      </React.Fragment>
+
+        <Modal
+          isOpen={isModalOpen}
+          align="bottom"
+          close={() => setIsModalOpen(false)}
+        >
+          <TransactionFeeModal
+            close={() => setIsModalOpen(false)}
+            senderConfig={senderConfig}
+            feeConfig={feeConfig}
+            gasConfig={gasConfig}
+            gasSimulator={gasSimulator}
+          />
+        </Modal>
+      </Box>
     );
   }
 );
