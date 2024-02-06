@@ -298,11 +298,13 @@ export const FeeControl: FunctionComponent<{
 
                   if (feeConfig.type === "low" || feeConfig.type === "high") {
                     return (
-                      <Tag
-                        text={intl.formatMessage({
-                          id: `components.input.fee-control.modal.fee-selector.${feeConfig.type}`,
-                        })}
-                      />
+                      <Box position="absolute" alignY="center">
+                        <Tag
+                          text={intl.formatMessage({
+                            id: `components.input.fee-control.modal.fee-selector.${feeConfig.type}`,
+                          })}
+                        />
+                      </Box>
                     );
                   }
 
