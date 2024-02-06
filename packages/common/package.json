@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/common",
-  "version": "0.12.66",
+  "version": "0.12.67",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -16,8 +16,8 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr-wallet/crypto": "0.12.66",
-    "@keplr-wallet/types": "0.12.66",
+    "@keplr-wallet/crypto": "0.12.67",
+    "@keplr-wallet/types": "0.12.67",
     "buffer": "^6.0.3",
     "delay": "^4.4.0",
     "mobx": "^6.1.7"
