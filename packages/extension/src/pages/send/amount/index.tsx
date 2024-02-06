@@ -83,9 +83,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
   const chainInfo = chainStore.getChain(chainId);
+  const isEvmChain = chainStore.isEvmChain(chainId);
   const coinMinimalDenom =
     initialCoinMinimalDenom ||
     chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
+  const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
 
   const [isIBCTransfer, setIsIBCTransfer] = useState(false);
   const [
@@ -109,16 +111,16 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
   }, [navigate, initialChainId, initialCoinMinimalDenom]);
 
+  const [isEvmTx, setIsEvmTx] = useState(
+    new DenomHelper(currency.coinMinimalDenom).type === "erc20"
+  );
+
   const account = accountStore.getAccount(chainId);
   const ethereumAccount = ethereumAccountStore.getAccount(chainId);
-  const isEvmChain = chainStore.isEvmChain(chainId);
-  const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
 
   const queryBalances = queriesStore.get(chainId).queryBalances;
-  const sender = isEvmChain
-    ? account.ethereumHexAddress
-    : account.bech32Address;
-  const balance = isEvmChain
+  const sender = isEvmTx ? account.ethereumHexAddress : account.bech32Address;
+  const balance = isEvmTx
     ? queryBalances.getQueryEthereumHexAddress(sender).getBalance(currency)
     : queryBalances.getQueryBech32Address(sender).getBalance(currency);
 
@@ -131,34 +133,35 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     300000,
     isIBCTransfer,
     {
-      allowHexAddressToBech32Address:
-        !chainStore.getChain(chainId).chainId.startsWith("injective") &&
-        !isEvmChain,
+      allowHexAddressToBech32Address: !chainStore
+        .getChain(chainId)
+        .chainId.startsWith("injective"),
       icns: ICNSInfo,
       computeTerraClassicTax: true,
     }
   );
-
   sendConfigs.amountConfig.setCurrency(currency);
 
   const gasSimulatorKey = useMemo(() => {
+    const txType: "evm" | "cosmos" = isEvmTx ? "evm" : "cosmos";
+
     if (sendConfigs.amountConfig.currency) {
       const denomHelper = new DenomHelper(
         sendConfigs.amountConfig.currency.coinMinimalDenom
       );
 
       if (denomHelper.type !== "native") {
-        if (denomHelper.type === "cw20") {
+        if (denomHelper.type === "cw20" || denomHelper.type === "erc20") {
           // Probably, the gas can be different per cw20 according to how the contract implemented.
-          return `${denomHelper.type}/${denomHelper.contractAddress}`;
+          return `${txType}/${denomHelper.type}/${denomHelper.contractAddress}`;
         }
 
-        return denomHelper.type;
+        return `${txType}/${denomHelper.type}`;
       }
     }
 
-    return "native";
-  }, [sendConfigs.amountConfig.currency]);
+    return `${txType}/native`;
+  }, [isEvmTx, sendConfigs.amountConfig.currency]);
 
   const gasSimulator = useGasSimulator(
     new ExtensionKVStore("gas-simulator.main.send"),
@@ -180,18 +183,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         ) {
           throw new Error("Not ready to simulate tx");
         }
-      }
-
-      if (isEvmChain) {
-        return {
-          simulate: () =>
-            ethereumAccount.simulateGas({
-              currency: sendConfigs.amountConfig.amount[0].currency,
-              amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
-              sender,
-              recipient: sendConfigs.recipientConfig.recipient,
-            }),
-        };
       }
 
       // Prefer not to use the gas config or fee config,
@@ -225,6 +216,20 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         );
       }
 
+      const isEvmTx =
+        isEvmChain && sendConfigs.recipientConfig.isRecipientEthereumHexAddress;
+      if (isEvmTx) {
+        return {
+          simulate: () =>
+            ethereumAccount.simulateGas({
+              currency: sendConfigs.amountConfig.amount[0].currency,
+              amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
+              sender: sendConfigs.senderConfig.sender,
+              recipient: sendConfigs.recipientConfig.recipient,
+            }),
+        };
+      }
+
       return account.makeSendTokenTx(
         sendConfigs.amountConfig.amount[0].toDec().toString(),
         sendConfigs.amountConfig.amount[0].currency,
@@ -232,6 +237,23 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       );
     }
   );
+
+  useEffect(() => {
+    const newIsEvmTx =
+      isEvmChain && sendConfigs.recipientConfig.isRecipientEthereumHexAddress;
+
+    const newSenderAddress = newIsEvmTx
+      ? account.ethereumHexAddress
+      : account.bech32Address;
+
+    sendConfigs.senderConfig.setValue(newSenderAddress);
+    setIsEvmTx(newIsEvmTx);
+  }, [
+    account,
+    isEvmChain,
+    sendConfigs.recipientConfig.isRecipientEthereumHexAddress,
+    sendConfigs.senderConfig,
+  ]);
 
   useEffect(() => {
     // To simulate secretwasm, we need to include the signature in the tx.
@@ -338,6 +360,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     console.log(e);
   }
 
+  console.log("isEvmTx", isEvmTx);
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.send.amount.title" })}
@@ -375,7 +399,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
         if (!txConfigsValidate.interactionBlocked) {
           try {
-            if (isEvmChain && sendConfigs.feeConfig.type !== "manual") {
+            if (isEvmTx && sendConfigs.feeConfig.type !== "manual") {
               const { maxFeePerGas, maxPriorityFeePerGas } =
                 sendConfigs.feeConfig.getEIP1559TxFees(
                   sendConfigs.feeConfig.type
