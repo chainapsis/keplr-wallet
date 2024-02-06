@@ -133,9 +133,10 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     300000,
     isIBCTransfer,
     {
-      allowHexAddressToBech32Address: !chainStore
-        .getChain(chainId)
-        .chainId.startsWith("injective"),
+      allowHexAddressToBech32Address:
+        !isEvmChain &&
+        !chainStore.getChain(chainId).chainId.startsWith("injective"),
+      allowHexAddressOnly: isEvmTx,
       icns: ICNSInfo,
       computeTerraClassicTax: true,
     }
@@ -240,7 +241,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   useEffect(() => {
     const newIsEvmTx =
-      isEvmChain && sendConfigs.recipientConfig.isRecipientEthereumHexAddress;
+      new DenomHelper(sendConfigs.amountConfig.currency.coinMinimalDenom)
+        .type === "erc20" ||
+      (isEvmChain && sendConfigs.recipientConfig.isRecipientEthereumHexAddress);
 
     const newSenderAddress = newIsEvmTx
       ? account.ethereumHexAddress
@@ -251,6 +254,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   }, [
     account,
     isEvmChain,
+    sendConfigs.amountConfig.currency.coinMinimalDenom,
     sendConfigs.recipientConfig.isRecipientEthereumHexAddress,
     sendConfigs.senderConfig,
   ]);
@@ -359,8 +363,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   } catch (e) {
     console.log(e);
   }
-
-  console.log("isEvmTx", isEvmTx);
 
   return (
     <HeaderLayout

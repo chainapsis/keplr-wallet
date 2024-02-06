@@ -41,6 +41,9 @@ export class RecipientConfig
   protected _allowHexAddressToBech32Address: boolean | undefined = undefined;
 
   @observable
+  protected _allowHexAddressOnly: boolean | undefined = undefined;
+
+  @observable
   protected _bech32Prefix: string | undefined = undefined;
 
   // Deep equal check is required to avoid infinite re-render.
@@ -179,26 +182,20 @@ export class RecipientConfig
     }
 
     const chainInfo = this.chainInfo;
+    const isEvmChain = !!EthereumAccountBase.evmInfo(this.chainInfo);
     const hasEthereumAddress =
       chainInfo.bip44.coinType === 60 ||
       !!chainInfo.features?.includes("eth-address-gen") ||
       !!chainInfo.features?.includes("eth-key-sign") ||
-      chainInfo.evm !== undefined;
-
-    if (hasEthereumAddress && rawRecipient.startsWith("0x")) {
-      try {
-        if (
-          EthereumAccountBase.isEthereumHexAddressWithChecksum(rawRecipient)
-        ) {
-          return this._allowHexAddressToBech32Address
-            ? new Bech32Address(
-                Buffer.from(rawRecipient.replace("0x", "").toLowerCase(), "hex")
-              ).toBech32(this.bech32Prefix)
-            : rawRecipient;
-        }
-      } catch {
-        return "";
-      }
+      isEvmChain;
+    if (
+      hasEthereumAddress &&
+      EthereumAccountBase.isEthereumHexAddressWithChecksum(rawRecipient) &&
+      this._allowHexAddressToBech32Address
+    ) {
+      return new Bech32Address(
+        Buffer.from(rawRecipient.replace("0x", "").toLowerCase(), "hex")
+      ).toBech32(this.bech32Prefix);
     }
 
     return rawRecipient;
@@ -207,6 +204,11 @@ export class RecipientConfig
   @action
   setAllowHexAddressToBech32Address(value: boolean | undefined) {
     this._allowHexAddressToBech32Address = value;
+  }
+
+  @action
+  setAllowHexAddressOnly(value: boolean | undefined) {
+    this._allowHexAddressOnly = value;
   }
 
   @computed
@@ -262,20 +264,15 @@ export class RecipientConfig
       !!chainInfo.features?.includes("eth-address-gen") ||
       !!chainInfo.features?.includes("eth-key-sign") ||
       isEvmChain;
-    if (hasEthereumAddress && rawRecipient.startsWith("0x")) {
-      try {
-        if (
-          EthereumAccountBase.isEthereumHexAddressWithChecksum(rawRecipient)
-        ) {
-          return {};
-        } else {
-          return {
-            error: new InvalidHexError("Invalid hex address for chain"),
-          };
-        }
-      } catch (e) {
+    if (
+      hasEthereumAddress &&
+      (rawRecipient.startsWith("0x") || this._allowHexAddressOnly)
+    ) {
+      if (EthereumAccountBase.isEthereumHexAddressWithChecksum(rawRecipient)) {
+        return {};
+      } else {
         return {
-          error: e,
+          error: new InvalidHexError("Invalid hex address for chain"),
         };
       }
     }
@@ -313,6 +310,7 @@ export const useRecipientConfig = (
   chainId: string,
   options: {
     allowHexAddressToBech32Address?: boolean;
+    allowHexAddressOnly?: boolean;
     icns?: {
       chainId: string;
       resolverContractAddress: string;
@@ -324,6 +322,7 @@ export const useRecipientConfig = (
   config.setAllowHexAddressToBech32Address(
     options.allowHexAddressToBech32Address
   );
+  config.setAllowHexAddressToBech32Address(options.allowHexAddressOnly);
   config.setICNS(options.icns);
 
   return config;

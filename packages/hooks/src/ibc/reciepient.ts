@@ -60,6 +60,7 @@ export const useIBCRecipientConfig = (
   channelConfig: IIBCChannelConfig,
   options: {
     allowHexAddressToBech32Address?: boolean;
+    allowHexAddressOnly?: boolean;
     icns?: {
       chainId: string;
       resolverContractAddress: string;
@@ -75,6 +76,7 @@ export const useIBCRecipientConfig = (
   config.setAllowHexAddressToBech32Address(
     options.allowHexAddressToBech32Address
   );
+  config.setAllowHexAddressOnly(options.allowHexAddressOnly);
   config.setICNS(options.icns);
   config.setIsIBCTransfer(isIBCTransfer);
 

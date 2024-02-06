@@ -89,6 +89,7 @@ export const useSendMixedIBCTransferConfig = (
   isIBCTransfer: boolean,
   options: {
     allowHexAddressToBech32Address?: boolean;
+    allowHexAddressOnly?: boolean;
     icns?: {
       chainId: string;
       resolverContractAddress: string;
