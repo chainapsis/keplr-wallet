@@ -98,41 +98,41 @@ export const TransactionFeeModal: FunctionComponent<{
   return (
     <Styles.Container>
       <Box marginBottom="1.25rem" marginLeft="0.5rem">
-        <XAxis alignY="center">
-          <Subtitle1>
-            <FormattedMessage id="components.input.fee-control.modal.title" />
-          </Subtitle1>
-
-          <div style={{ flex: 1 }} />
-          <Body3
-            color={
-              theme.mode === "light"
-                ? ColorPalette["gray-300"]
-                : ColorPalette["gray-200"]
-            }
-          >
-            Keep Fee tier Option
-          </Body3>
-          <Gutter size="0.5rem" />
-          <Toggle
-            isOpen={uiConfigStore.rememberLastFeeOption}
-            setIsOpen={(v) => uiConfigStore.setRememberLastFeeOption(v)}
-          />
-        </XAxis>
+        <Subtitle1>
+          <FormattedMessage id="components.input.fee-control.modal.title" />
+        </Subtitle1>
       </Box>
 
       <Stack gutter="0.75rem">
         <Stack gutter="0.375rem">
           <Box marginLeft="0.5rem">
-            <Subtitle3
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-400"]
-                  : ColorPalette["gray-100"]
-              }
-            >
-              <FormattedMessage id="components.input.fee-control.modal.fee-title" />
-            </Subtitle3>
+            <XAxis alignY="center">
+              <Subtitle3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-400"]
+                    : ColorPalette["gray-100"]
+                }
+              >
+                <FormattedMessage id="components.input.fee-control.modal.fee-title" />
+              </Subtitle3>
+
+              <div style={{ flex: 1 }} />
+              <Body3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-200"]
+                }
+              >
+                Keep Fee tier Option
+              </Body3>
+              <Gutter size="0.5rem" />
+              <Toggle
+                isOpen={uiConfigStore.rememberLastFeeOption}
+                setIsOpen={(v) => uiConfigStore.setRememberLastFeeOption(v)}
+              />
+            </XAxis>
           </Box>
 
           <FeeSelector feeConfig={feeConfig} />
