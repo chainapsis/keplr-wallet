@@ -1226,7 +1226,11 @@ Salt: ${salt}`;
   public static throwErrorIfEthermintWithLedgerButNotSupported(
     chainId: string
   ) {
-    if (!chainId.startsWith("evmos_") && !chainId.startsWith("injective")) {
+    if (
+      !chainId.startsWith("evmos_") &&
+      !chainId.startsWith("injective") &&
+      !chainId.startsWith("dymension_")
+    ) {
       throw new KeplrError(
         "keyring",
         152,
