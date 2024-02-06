@@ -11,6 +11,7 @@ import { computed, makeObservable } from "mobx";
 import bigInteger from "big-integer";
 import { erc20ContractInterface } from "../constants";
 import { DenomHelper } from "@keplr-wallet/common";
+import { EthereumAccountBase } from "../account";
 
 export class ObservableQueryEthereumERC20BalanceImpl
   extends ObservableJsonRPCQuery<string>
@@ -83,7 +84,9 @@ export class ObservableQueryEthereumERC20BalanceRegistry
   ): IObservableQueryBalanceImpl | undefined {
     const denomHelper = new DenomHelper(minimalDenom);
     const chainInfo = chainGetter.getChain(chainId);
-    if (denomHelper.type !== "erc20" || !chainInfo.evm) {
+    const isHexAddress =
+      EthereumAccountBase.isEthereumHexAddressWithChecksum(address);
+    if (denomHelper.type !== "erc20" || !isHexAddress || !chainInfo.evm) {
       return;
     }
 

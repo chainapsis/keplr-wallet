@@ -10,6 +10,7 @@ import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
 import bigInteger from "big-integer";
+import { EthereumAccountBase } from "../account";
 
 export class ObservableQueryEthAccountBalanceImpl
   extends ObservableJsonRPCQuery<string>
@@ -75,7 +76,9 @@ export class ObservableQueryEthAccountBalanceRegistry
   ): IObservableQueryBalanceImpl | undefined {
     const denomHelper = new DenomHelper(minimalDenom);
     const chainInfo = chainGetter.getChain(chainId);
-    if (denomHelper.type !== "native" || !chainInfo.evm) {
+    const isHexAddress =
+      EthereumAccountBase.isEthereumHexAddressWithChecksum(address);
+    if (denomHelper.type !== "native" || !isHexAddress || !chainInfo.evm) {
       return;
     }
 
