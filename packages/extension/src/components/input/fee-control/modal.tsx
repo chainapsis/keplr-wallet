@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import {
   Body3,
   Caption1,
@@ -29,7 +29,6 @@ import { Box } from "../../box";
 import { FormattedMessage, useIntl } from "react-intl";
 import { XAxis } from "../../axis";
 import { Gutter } from "../../gutter";
-import { useUnmount } from "../../../hooks/use-unmount";
 
 const Styles = {
   Container: styled.div`
@@ -85,7 +84,7 @@ export const TransactionFeeModal: FunctionComponent<{
     return gasSimulator?.enabled;
   })();
 
-  useUnmount(() => {
+  useEffect(() => {
     if (uiConfigStore.rememberLastFeeOption) {
       if (feeConfig.type !== "manual") {
         uiConfigStore.setLastFeeOption(feeConfig.type);
@@ -93,7 +92,7 @@ export const TransactionFeeModal: FunctionComponent<{
     } else {
       uiConfigStore.setLastFeeOption(false);
     }
-  });
+  }, [feeConfig.type, uiConfigStore]);
 
   return (
     <Styles.Container>
