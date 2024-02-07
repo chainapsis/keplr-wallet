@@ -558,7 +558,6 @@
   "components.input.fee-control.modal.title": "수수료 옵션",
   "components.input.fee-control.modal.fee-title": "수수료",
   "components.input.fee-control.modal.fee-token-dropdown-label": "수수료 토큰",
-  "components.input.fee-control.modal.gas-title": "가스",
   "components.input.fee-control.modal.auto-title": "자동",
   "components.input.fee-control.modal.guide-title": "Tx simulation failed",
   "components.input.fee-control.modal.gas-adjustment-label": "가스 조정",

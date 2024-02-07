@@ -567,7 +567,6 @@
   "components.input.fee-control.modal.title": "费用选项",
   "components.input.fee-control.modal.fee-title": "费用",
   "components.input.fee-control.modal.fee-token-dropdown-label": "费用币种",
-  "components.input.fee-control.modal.gas-title": "燃料",
   "components.input.fee-control.modal.auto-title": "自动",
   "components.input.fee-control.modal.guide-title": "交易模拟失败",
   "components.input.fee-control.modal.gas-adjustment-label": "燃料调整",
