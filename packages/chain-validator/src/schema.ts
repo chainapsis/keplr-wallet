@@ -5,6 +5,7 @@ import {
   ChainInfo,
   Currency,
   CW20Currency,
+  ERC20Currency,
   FeeCurrency,
   Secret20Currency,
   WithGasPriceStep,
@@ -68,6 +69,28 @@ export const Secret20CurrencySchema = (
         ...value,
         coinMinimalDenom:
           `${value.type}:${value.contractAddress}:` + value.coinMinimalDenom,
+      };
+    }
+  });
+
+export const ERC20CurrencySchema = (
+  CurrencySchema as ObjectSchema<ERC20Currency>
+)
+  .keys({
+    type: Joi.string().equal("erc20").required(),
+    contractAddress: Joi.string().required(),
+  })
+  .custom((value: Secret20Currency) => {
+    if (
+      value.coinMinimalDenom.startsWith(
+        `${value.type}:${value.contractAddress}:`
+      )
+    ) {
+      return value;
+    } else {
+      return {
+        ...value,
+        coinMinimalDenom: `${value.type}:${value.contractAddress}`,
       };
     }
   });

@@ -9,6 +9,7 @@ import * as SecretWasm from "./secret-wasm/internal";
 import * as BackgroundTx from "./tx/internal";
 import * as BackgroundTxEthereum from "./tx-ethereum/internal";
 import * as TokenCW20 from "./token-cw20/internal";
+import * as TokenERC20 from "./token-erc20/internal";
 import * as Interaction from "./interaction/internal";
 import * as Permission from "./permission/internal";
 import * as PhishingList from "./phishing-list/internal";
@@ -32,6 +33,7 @@ export * from "./chains-update";
 export * from "./secret-wasm";
 export * from "./tx";
 export * from "./token-cw20";
+export * from "./token-erc20";
 export * from "./interaction";
 export * from "./permission";
 export * from "./phishing-list";
@@ -99,6 +101,12 @@ export function init(
 
   const tokenCW20Service = new TokenCW20.TokenCW20Service(
     storeCreator("tokens"),
+    chainsService,
+    interactionService
+  );
+
+  const tokenERC20Service = new TokenERC20.TokenERC20Service(
+    storeCreator("tokens-erc20"),
     chainsService,
     interactionService
   );
@@ -257,6 +265,7 @@ export function init(
     permissionInteractiveService,
     keyRingCosmosService
   );
+  TokenERC20.init(router, tokenERC20Service, permissionInteractiveService);
   SecretWasm.init(router, secretWasmService, permissionInteractiveService);
   TokenScan.init(router, tokenScanService);
   RecentSendHistory.init(router, recentSendHistoryService);
@@ -274,6 +283,7 @@ export function init(
       await keyRingEthereumService.init();
       await permissionService.init();
       await tokenCW20Service.init();
+      await tokenERC20Service.init();
 
       await backgroundTxService.init();
       await backgroundTxEthereumService.init();
