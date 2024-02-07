@@ -738,6 +738,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             historyType={historyType}
             recipientConfig={sendConfigs.recipientConfig}
             memoConfig={sendConfigs.memoConfig}
+            currency={sendConfigs.amountConfig.currency}
             permitAddressBookSelfKeyInfo={isIBCTransfer}
             bottom={
               <VerticalCollapseTransition

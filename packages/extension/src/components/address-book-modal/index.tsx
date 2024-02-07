@@ -9,7 +9,7 @@ import { YAxis } from "../axis";
 import { Stack } from "../stack";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { Key } from "@keplr-wallet/types";
+import { AppCurrency, Key } from "@keplr-wallet/types";
 import { IMemoConfig, IRecipientConfig } from "@keplr-wallet/hooks";
 import { Bleed } from "../bleed";
 import { RecentSendHistory } from "@keplr-wallet/background";
@@ -18,6 +18,7 @@ import SimpleBar from "simplebar-react";
 import styled, { useTheme } from "styled-components";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Bech32Address } from "@keplr-wallet/cosmos";
+import { DenomHelper } from "@keplr-wallet/common";
 
 type Type = "recent" | "contacts" | "accounts";
 
@@ -36,6 +37,7 @@ export const AddressBookModal: FunctionComponent<{
   historyType: string;
   recipientConfig: IRecipientConfig;
   memoConfig: IMemoConfig;
+  currency: AppCurrency;
 
   permitSelfKeyInfo?: boolean;
 }> = observer(
@@ -45,6 +47,7 @@ export const AddressBookModal: FunctionComponent<{
     historyType,
     recipientConfig,
     memoConfig,
+    currency,
     permitSelfKeyInfo,
   }) => {
     const { analyticsStore, uiConfigStore, keyRingStore, chainStore } =
@@ -131,15 +134,16 @@ export const AddressBookModal: FunctionComponent<{
           >((acc, account) => {
             const isSelf = keyRingStore.selectedKeyInfo?.id === account.vaultId;
 
-            acc.push({
-              name: account.name,
-              address: account.bech32Address,
-              isSelf,
-            });
+            if (new DenomHelper(currency.coinMinimalDenom).type !== "erc20") {
+              acc.push({
+                name: account.name,
+                address: account.bech32Address,
+                isSelf,
+              });
+            }
 
             const chainInfo = chainStore.getChain(recipientConfig.chainId);
-            const isEvmChain = chainInfo.evm !== undefined;
-            if (isEvmChain) {
+            if (chainInfo.evm !== undefined) {
               acc.push({
                 name: account.name,
                 address: Bech32Address.fromBech32(account.bech32Address).toHex(

@@ -182,6 +182,7 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
             recipientConfig={recipientConfig}
             memoConfig={memoConfig}
             permitAddressBookSelfKeyInfo={true}
+            currency={currency}
           />
         </Stack>
 
