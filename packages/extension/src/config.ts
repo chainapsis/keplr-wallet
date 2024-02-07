@@ -2327,6 +2327,49 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: [],
   },
+  {
+    chainId: "dymension_1100-1",
+    chainName: "Dymension",
+    rpc: "https://rpc-dymension.keplr.app",
+    rest: "https://lcd-dymension.keplr.app",
+    currencies: [
+      {
+        coinMinimalDenom: "adym",
+        coinDenom: "DYM",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/dymension_1100/chain.png",
+      },
+    ],
+    bip44: {
+      coinType: 60,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "dym",
+      bech32PrefixAccPub: "dympub",
+      bech32PrefixValAddr: "dymvaloper",
+      bech32PrefixValPub: "dymvaloperpub",
+      bech32PrefixConsAddr: "dymvalcons",
+      bech32PrefixConsPub: "dymvalconspub",
+    },
+    stakeCurrency: {
+      coinMinimalDenom: "adym",
+      coinDenom: "DYM",
+      coinDecimals: 18,
+    },
+    feeCurrencies: [
+      {
+        coinMinimalDenom: "adym",
+        coinDenom: "DYM",
+        coinDecimals: 18,
+      },
+    ],
+    features: ["eth-address-gen", "eth-key-sign"],
+    evm: {
+      rpc: "https://dymension-evm.blockpi.network/v1/rpc/public",
+      chainId: 1100,
+    },
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
