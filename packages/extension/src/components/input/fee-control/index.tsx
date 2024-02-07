@@ -21,6 +21,146 @@ import { VerticalResizeTransition } from "../../transition";
 import { useIntl } from "react-intl";
 import { XAxis, YAxis } from "../../axis";
 import { Tag } from "../../tag";
+import { UIConfigStore } from "../../../stores/ui-config";
+import { IChainStore, IQueriesStore } from "@keplr-wallet/stores";
+
+// 기본적으로 `FeeControl` 안에 있는 로직이였지만 `FeeControl` 말고도 다른 UI를 가진 똑같은 기능의 component가
+// 여러개 생기게 되면서 공통적으로 사용하기 위해서 custom hook으로 분리함
+export const useFeeOptionSelectionOnInit = (
+  uiConfigStore: UIConfigStore,
+  feeConfig: IFeeConfig,
+  disableAutomaticFeeSet: boolean | undefined
+) => {
+  useLayoutEffect(() => {
+    if (disableAutomaticFeeSet) {
+      return;
+    }
+
+    if (
+      feeConfig.fees.length === 0 &&
+      feeConfig.selectableFeeCurrencies.length > 0
+    ) {
+      if (uiConfigStore.rememberLastFeeOption && uiConfigStore.lastFeeOption) {
+        feeConfig.setFee({
+          type: uiConfigStore.lastFeeOption,
+          currency: feeConfig.selectableFeeCurrencies[0],
+        });
+      } else {
+        feeConfig.setFee({
+          type: "average",
+          currency: feeConfig.selectableFeeCurrencies[0],
+        });
+      }
+    }
+  }, [
+    disableAutomaticFeeSet,
+    feeConfig,
+    feeConfig.fees,
+    feeConfig.selectableFeeCurrencies,
+    uiConfigStore.lastFeeOption,
+    uiConfigStore.rememberLastFeeOption,
+  ]);
+};
+
+export const useAutoFeeCurrencySelectionOnInit = (
+  chainStore: IChainStore,
+  queriesStore: IQueriesStore,
+  senderConfig: ISenderConfig,
+  feeConfig: IFeeConfig,
+  disableAutomaticFeeSet: boolean | undefined
+) => {
+  useLayoutEffect(() => {
+    if (disableAutomaticFeeSet) {
+      return;
+    }
+
+    // Require to invoke effect whenever chain is changed,
+    // even though it is not used in logic.
+    noop(feeConfig.chainId);
+
+    // Try to find other fee currency if the account doesn't have enough fee to pay.
+    // This logic can be slightly complex, so use mobx's `autorun`.
+    // This part fairly different with the approach of react's hook.
+    let skip = false;
+    // Try until 500ms to avoid the confusion to user.
+    const timeoutId = setTimeout(() => {
+      skip = true;
+    }, 500);
+
+    const disposer = autorun(() => {
+      if (
+        !skip &&
+        feeConfig.type !== "manual" &&
+        feeConfig.selectableFeeCurrencies.length > 1 &&
+        feeConfig.fees.length > 0
+      ) {
+        const queryBalances = queriesStore
+          .get(feeConfig.chainId)
+          .queryBalances.getQueryBech32Address(senderConfig.sender);
+
+        const currentFeeCurrency = feeConfig.fees[0].currency;
+        const currentFeeCurrencyBal =
+          queryBalances.getBalanceFromCurrency(currentFeeCurrency);
+
+        const currentFee = feeConfig.getFeeTypePrettyForFeeCurrency(
+          currentFeeCurrency,
+          feeConfig.type
+        );
+        if (currentFeeCurrencyBal.toDec().lt(currentFee.toDec())) {
+          const isOsmosis =
+            chainStore.hasChain(feeConfig.chainId) &&
+            chainStore.getChain(feeConfig.chainId).hasFeature("osmosis-txfees");
+
+          // Not enough balances for fee.
+          // Try to find other fee currency to send.
+          for (const feeCurrency of feeConfig.selectableFeeCurrencies) {
+            const feeCurrencyBal =
+              queryBalances.getBalanceFromCurrency(feeCurrency);
+            const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
+              feeCurrency,
+              feeConfig.type
+            );
+
+            // Osmosis의 경우는 fee의 spot price를 알아야 fee를 계산할 수 있다.
+            // 그런데 문제는 이게 쿼리가 필요하기 때문에 비동기적이라 response를 기다려야한다.
+            // 어쨋든 스왑에 의해서만 fee 계산이 이루어지기 때문에 fee로 Osmo가 0이였다면 이 로직까지 왔을리가 없고
+            // 어떤 갯수의 Osmo던지 스왑 이후에 fee가 0이 될수는 없기 때문에
+            // 0라면 단순히 response 준비가 안된것이라 확신할 수 있다.
+            if (isOsmosis && fee.toDec().lte(new Dec(0))) {
+              continue;
+            }
+
+            if (feeCurrencyBal.toDec().gte(fee.toDec())) {
+              feeConfig.setFee({
+                type: feeConfig.type,
+                currency: feeCurrency,
+              });
+              const uiProperties = feeConfig.uiProperties;
+              skip =
+                !uiProperties.loadingState &&
+                uiProperties.error == null &&
+                uiProperties.warning == null;
+              return;
+            }
+          }
+        }
+      }
+    });
+
+    return () => {
+      clearTimeout(timeoutId);
+      skip = true;
+      disposer();
+    };
+  }, [
+    chainStore,
+    disableAutomaticFeeSet,
+    feeConfig,
+    feeConfig.chainId,
+    queriesStore,
+    senderConfig.sender,
+  ]);
+};
 
 export const FeeControl: FunctionComponent<{
   senderConfig: ISenderConfig;
@@ -48,132 +188,19 @@ export const FeeControl: FunctionComponent<{
     const intl = useIntl();
     const theme = useTheme();
 
-    useLayoutEffect(() => {
-      if (disableAutomaticFeeSet) {
-        return;
-      }
-
-      if (
-        feeConfig.fees.length === 0 &&
-        feeConfig.selectableFeeCurrencies.length > 0
-      ) {
-        if (
-          uiConfigStore.rememberLastFeeOption &&
-          uiConfigStore.lastFeeOption
-        ) {
-          feeConfig.setFee({
-            type: uiConfigStore.lastFeeOption,
-            currency: feeConfig.selectableFeeCurrencies[0],
-          });
-        } else {
-          feeConfig.setFee({
-            type: "average",
-            currency: feeConfig.selectableFeeCurrencies[0],
-          });
-        }
-      }
-    }, [
-      disableAutomaticFeeSet,
+    useFeeOptionSelectionOnInit(
+      uiConfigStore,
       feeConfig,
-      feeConfig.fees,
-      feeConfig.selectableFeeCurrencies,
-      uiConfigStore.lastFeeOption,
-      uiConfigStore.rememberLastFeeOption,
-    ]);
+      disableAutomaticFeeSet
+    );
 
-    useLayoutEffect(() => {
-      if (disableAutomaticFeeSet) {
-        return;
-      }
-
-      // Require to invoke effect whenever chain is changed,
-      // even though it is not used in logic.
-      noop(feeConfig.chainId);
-
-      // Try to find other fee currency if the account doesn't have enough fee to pay.
-      // This logic can be slightly complex, so use mobx's `autorun`.
-      // This part fairly different with the approach of react's hook.
-      let skip = false;
-      // Try until 500ms to avoid the confusion to user.
-      const timeoutId = setTimeout(() => {
-        skip = true;
-      }, 500);
-
-      const disposer = autorun(() => {
-        if (
-          !skip &&
-          feeConfig.type !== "manual" &&
-          feeConfig.selectableFeeCurrencies.length > 1 &&
-          feeConfig.fees.length > 0
-        ) {
-          const queryBalances = queriesStore
-            .get(feeConfig.chainId)
-            .queryBalances.getQueryBech32Address(senderConfig.sender);
-
-          const currentFeeCurrency = feeConfig.fees[0].currency;
-          const currentFeeCurrencyBal =
-            queryBalances.getBalanceFromCurrency(currentFeeCurrency);
-
-          const currentFee = feeConfig.getFeeTypePrettyForFeeCurrency(
-            currentFeeCurrency,
-            feeConfig.type
-          );
-          if (currentFeeCurrencyBal.toDec().lt(currentFee.toDec())) {
-            const isOsmosis =
-              chainStore.hasChain(feeConfig.chainId) &&
-              chainStore
-                .getChain(feeConfig.chainId)
-                .hasFeature("osmosis-txfees");
-
-            // Not enough balances for fee.
-            // Try to find other fee currency to send.
-            for (const feeCurrency of feeConfig.selectableFeeCurrencies) {
-              const feeCurrencyBal =
-                queryBalances.getBalanceFromCurrency(feeCurrency);
-              const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
-                feeCurrency,
-                feeConfig.type
-              );
-
-              // Osmosis의 경우는 fee의 spot price를 알아야 fee를 계산할 수 있다.
-              // 그런데 문제는 이게 쿼리가 필요하기 때문에 비동기적이라 response를 기다려야한다.
-              // 어쨋든 스왑에 의해서만 fee 계산이 이루어지기 때문에 fee로 Osmo가 0이였다면 이 로직까지 왔을리가 없고
-              // 어떤 갯수의 Osmo던지 스왑 이후에 fee가 0이 될수는 없기 때문에
-              // 0라면 단순히 response 준비가 안된것이라 확신할 수 있다.
-              if (isOsmosis && fee.toDec().lte(new Dec(0))) {
-                continue;
-              }
-
-              if (feeCurrencyBal.toDec().gte(fee.toDec())) {
-                feeConfig.setFee({
-                  type: feeConfig.type,
-                  currency: feeCurrency,
-                });
-                const uiProperties = feeConfig.uiProperties;
-                skip =
-                  !uiProperties.loadingState &&
-                  uiProperties.error == null &&
-                  uiProperties.warning == null;
-                return;
-              }
-            }
-          }
-        }
-      });
-
-      return () => {
-        clearTimeout(timeoutId);
-        skip = true;
-        disposer();
-      };
-    }, [
+    useAutoFeeCurrencySelectionOnInit(
       chainStore,
-      disableAutomaticFeeSet,
-      feeConfig,
-      feeConfig.chainId,
       queriesStore,
-      senderConfig.sender,
-    ]);
+      senderConfig,
+      feeConfig,
+      disableAutomaticFeeSet
+    );
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 

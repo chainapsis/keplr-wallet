@@ -9,7 +9,6 @@ import { ViewDataButton } from "../../components/view-data-button";
 import { MessageItem } from "../../components/message-item";
 import { Stack } from "../../../../components/stack";
 import { MemoInput } from "../../../../components/input/memo-input";
-import { FeeControl } from "../../../../components/input/fee-control";
 import { observer } from "mobx-react-lite";
 import {
   useFeeConfig,
@@ -44,6 +43,7 @@ import { defaultProtoCodec } from "@keplr-wallet/cosmos";
 import { MsgGrant } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
 import { GenericAuthorization } from "@keplr-wallet/stores/build/query/cosmos/authz/types";
 import { Checkbox } from "../../../../components/checkbox";
+import { FeeBox } from "../../components/fee-box";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -573,11 +573,12 @@ export const CosmosTxView: FunctionComponent<{
             {/* direct aux는 수수료를 설정할수도 없으니 보여줄 필요가 없다. */}
             {"isDirectAux" in interactionData.data &&
             interactionData.data.isDirectAux ? null : (
-              <FeeControl
+              <FeeBox
                 feeConfig={feeConfig}
                 senderConfig={senderConfig}
                 gasConfig={gasConfig}
                 disableAutomaticFeeSet={preferNoSetFee}
+                isInternal={interactionData.isInternal}
               />
             )}
           </Stack>
