@@ -606,8 +606,8 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         const maxFeePerGas = baseFeePerGas.add(maxPriorityFeePerGas);
 
         return {
-          maxPriorityFeePerGas,
-          maxFeePerGas,
+          maxPriorityFeePerGas: maxPriorityFeePerGas.truncateDec(),
+          maxFeePerGas: maxFeePerGas.truncateDec(),
         };
       }
     }
