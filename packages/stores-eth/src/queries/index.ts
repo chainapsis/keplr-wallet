@@ -9,6 +9,7 @@ import { DeepReadonly } from "utility-types";
 import { ObservableQueryEthereumBlock } from "./block";
 import { ObservableQueryEthereumFeeHistory } from "./fee-histroy";
 import { ObservableQueryEVMChainERC20Metadata } from "./erc20-metadata";
+import { ObservableQueryERC20ContractInfo } from "./erc20-contract-info";
 
 export interface EthereumQueries {
   ethereum: EthereumQueriesImpl;
@@ -43,6 +44,7 @@ export class EthereumQueriesImpl {
   public readonly queryEthereumBlock: DeepReadonly<ObservableQueryEthereumBlock>;
   public readonly queryEthereumFeeHistory: DeepReadonly<ObservableQueryEthereumFeeHistory>;
   public readonly queryEthereumERC20Metadata: DeepReadonly<ObservableQueryEVMChainERC20Metadata>;
+  public readonly queryEthereumERC20ContractInfo: DeepReadonly<ObservableQueryERC20ContractInfo>;
 
   constructor(
     base: QueriesSetBase,
@@ -70,6 +72,12 @@ export class EthereumQueriesImpl {
     );
 
     this.queryEthereumERC20Metadata = new ObservableQueryEVMChainERC20Metadata(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
+
+    this.queryEthereumERC20ContractInfo = new ObservableQueryERC20ContractInfo(
       sharedContext,
       chainId,
       chainGetter
