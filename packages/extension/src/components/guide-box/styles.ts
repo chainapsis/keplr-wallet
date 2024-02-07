@@ -9,6 +9,10 @@ export const getTitleColor = (
   color: GuideBoxColor | undefined
 ) => {
   switch (color) {
+    case "safe":
+      return theme.mode === "light"
+        ? ColorPalette["green-500"]
+        : ColorPalette["green-400"];
     case "warning":
       return theme.mode === "light"
         ? ColorPalette["orange-400"]
@@ -29,6 +33,10 @@ export const getParagraphColor = (
   color: GuideBoxColor | undefined
 ) => {
   switch (color) {
+    case "safe":
+      return theme.mode === "light"
+        ? Color(ColorPalette["green-500"]).alpha(0.7).string()
+        : ColorPalette["green-400"];
     case "warning":
       return theme.mode === "light"
         ? Color(ColorPalette["orange-400"]).alpha(0.7).string()
@@ -49,6 +57,17 @@ export const Styles = {
 
     ${({ color }) => {
       switch (color) {
+        case "safe":
+          return css`
+            background-color: ${(props) =>
+              props.theme.mode === "light"
+                ? ColorPalette["green-50"]
+                : ColorPalette["green-800"]};
+          }
+          svg {
+            color: ${(props) => getTitleColor(props.theme, "safe")};
+          }
+          `;
         case "warning":
           return css`
             background-color: ${(props) =>

@@ -572,7 +572,6 @@
   "components.input.fee-control.modal.title": "Fee Options",
   "components.input.fee-control.modal.fee-title": "Fee tier",
   "components.input.fee-control.modal.fee-token-dropdown-label": "Fee Token",
-  "components.input.fee-control.modal.gas-title": "Gas",
   "components.input.fee-control.modal.auto-title": "Auto",
   "components.input.fee-control.modal.guide-title": "Tx simulation failed",
   "components.input.fee-control.modal.gas-adjustment-label": "Gas Adjustment",

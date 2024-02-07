@@ -382,6 +382,7 @@ export const FeeControl: FunctionComponent<{
         <Modal
           isOpen={isModalOpen}
           align="bottom"
+          maxHeight="95vh"
           close={() => setIsModalOpen(false)}
         >
           <TransactionFeeModal
