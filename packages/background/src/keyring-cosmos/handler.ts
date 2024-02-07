@@ -19,10 +19,14 @@ import {
   RequestICNSAdr36SignaturesMsg,
   EnableVaultsWithCosmosAddressMsg,
   PrivilegeCosmosSignAminoDelegateMsg,
+  RequestCosmosSignDirectAuxMsg,
 } from "./messages";
 import { KeyRingCosmosService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
-import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import {
+  SignDoc,
+  SignDocDirectAux,
+} from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 
 export const getHandler: (
   service: KeyRingCosmosService,
@@ -98,6 +102,11 @@ export const getHandler: (
           env,
           msg as EnableVaultsWithCosmosAddressMsg
         );
+      case RequestCosmosSignDirectAuxMsg:
+        return handleRequestCosmosSignDirectAuxMsg(
+          service,
+          permissionInteractionService
+        )(env, msg as RequestCosmosSignDirectAuxMsg);
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -375,5 +384,51 @@ const handleEnableVaultsWithCosmosAddressMsg: (
       msg.chainId,
       msg.bech32Address
     );
+  };
+};
+
+const handleRequestCosmosSignDirectAuxMsg: (
+  service: KeyRingCosmosService,
+  permissionInteractionService: PermissionInteractiveService
+) => InternalHandler<RequestCosmosSignDirectAuxMsg> = (
+  service,
+  permissionInteractionService
+) => {
+  return async (env, msg) => {
+    await permissionInteractionService.ensureEnabled(
+      env,
+      [msg.chainId],
+      msg.origin
+    );
+
+    const signDoc = SignDocDirectAux.fromPartial({
+      bodyBytes: msg.signDoc.bodyBytes,
+      publicKey: msg.signDoc.publicKey,
+      chainId: msg.signDoc.chainId,
+      accountNumber: msg.signDoc.accountNumber,
+      sequence: msg.signDoc.sequence,
+      tip: msg.signDoc.tip,
+    });
+
+    const response = await service.signDirectAuxSelected(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.signer,
+      signDoc,
+      msg.signOptions
+    );
+
+    return {
+      signed: {
+        bodyBytes: response.signed.bodyBytes,
+        publicKey: response.signed.publicKey,
+        chainId: response.signed.chainId,
+        accountNumber: response.signed.accountNumber.toString(),
+        sequence: response.signed.sequence.toString(),
+        tip: response.signed.tip,
+      },
+      signature: response.signature,
+    };
   };
 };
