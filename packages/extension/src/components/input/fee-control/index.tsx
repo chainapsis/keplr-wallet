@@ -278,6 +278,7 @@ export const FeeControl: FunctionComponent<{
                 position="relative"
                 marginLeft="0.25rem"
                 minWidth="1.25rem"
+                height="1px"
                 alignY="center"
               >
                 {(() => {
@@ -286,7 +287,7 @@ export const FeeControl: FunctionComponent<{
                     gasSimulator?.uiProperties.loadingState
                   ) {
                     return (
-                      <Box position="absolute" alignY="center">
+                      <Box alignY="center">
                         <LoadingIcon
                           width="1.25rem"
                           height="1.25rem"
@@ -298,7 +299,7 @@ export const FeeControl: FunctionComponent<{
 
                   if (feeConfig.type === "low" || feeConfig.type === "high") {
                     return (
-                      <Box position="absolute" alignY="center">
+                      <Box alignY="center">
                         <Tag
                           text={intl.formatMessage({
                             id: `components.input.fee-control.modal.fee-selector.${feeConfig.type}`,
