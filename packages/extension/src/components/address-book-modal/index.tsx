@@ -99,6 +99,10 @@ export const AddressBookModal: FunctionComponent<{
       uiConfigStore.addressBookConfig,
     ]);
 
+    const chainInfo = chainStore.getChain(recipientConfig.chainId);
+    const isEvmChain = chainInfo.evm !== undefined;
+    const isErc20 = new DenomHelper(currency.coinMinimalDenom).type === "erc20";
+
     const datas: {
       timestamp?: number;
       name?: string;
@@ -109,13 +113,21 @@ export const AddressBookModal: FunctionComponent<{
     }[] = (() => {
       switch (type) {
         case "recent": {
-          return recents.map((recent) => {
-            return {
-              timestamp: recent.timestamp,
-              address: recent.recipient,
-              memo: recent.memo,
-            };
-          });
+          return recents
+            .map((recent) => {
+              return {
+                timestamp: recent.timestamp,
+                address: recent.recipient,
+                memo: recent.memo,
+              };
+            })
+            .filter((recent) => {
+              if (isErc20 && !recent.address.startsWith("0x")) {
+                return false;
+              }
+
+              return true;
+            });
         }
         case "contacts": {
           return uiConfigStore.addressBookConfig
@@ -126,6 +138,13 @@ export const AddressBookModal: FunctionComponent<{
                 address: addressData.address,
                 memo: addressData.memo,
               };
+            })
+            .filter((contact) => {
+              if (isErc20 && !contact.address.startsWith("0x")) {
+                return false;
+              }
+
+              return true;
             });
         }
         case "accounts": {
@@ -134,7 +153,7 @@ export const AddressBookModal: FunctionComponent<{
           >((acc, account) => {
             const isSelf = keyRingStore.selectedKeyInfo?.id === account.vaultId;
 
-            if (new DenomHelper(currency.coinMinimalDenom).type !== "erc20") {
+            if (!isErc20) {
               acc.push({
                 name: account.name,
                 address: account.bech32Address,
@@ -142,13 +161,13 @@ export const AddressBookModal: FunctionComponent<{
               });
             }
 
-            const chainInfo = chainStore.getChain(recipientConfig.chainId);
-            if (chainInfo.evm !== undefined) {
+            if (isEvmChain) {
+              const hexAddress = Bech32Address.fromBech32(
+                account.bech32Address
+              ).toHex(true);
               acc.push({
                 name: account.name,
-                address: Bech32Address.fromBech32(account.bech32Address).toHex(
-                  true
-                ),
+                address: hexAddress,
                 isSelf,
               });
             }
