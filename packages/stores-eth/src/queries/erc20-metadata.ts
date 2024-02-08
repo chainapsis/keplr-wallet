@@ -43,7 +43,7 @@ export class ObservableQueryEVMChainERC20MetadataSymbol extends ObservableEvmCha
     sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
-    contractAddress: string
+    protected contractAddress: string
   ) {
     super(sharedContext, chainId, chainGetter, "eth_call", [
       {
@@ -54,6 +54,10 @@ export class ObservableQueryEVMChainERC20MetadataSymbol extends ObservableEvmCha
     ]);
 
     makeObservable(this);
+  }
+
+  protected override canFetch(): boolean {
+    return super.canFetch() && this.contractAddress !== "";
   }
 
   @computed
@@ -79,7 +83,7 @@ export class ObservableQueryEVMChainERC20MetadataDecimals extends ObservableEvmC
     sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
-    contractAddress: string
+    protected contractAddress: string
   ) {
     super(sharedContext, chainId, chainGetter, "eth_call", [
       {
@@ -90,6 +94,10 @@ export class ObservableQueryEVMChainERC20MetadataDecimals extends ObservableEvmC
     ]);
 
     makeObservable(this);
+  }
+
+  protected override canFetch(): boolean {
+    return super.canFetch() && this.contractAddress !== "";
   }
 
   @computed
