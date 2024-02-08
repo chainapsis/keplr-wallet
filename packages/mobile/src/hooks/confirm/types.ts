@@ -6,6 +6,7 @@ export interface Confirm {
     paragraph: string | React.ReactNode,
     options?: {
       forceYes?: boolean;
+      yesText?: string;
     },
   ) => Promise<boolean>;
 }
