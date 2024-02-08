@@ -64,7 +64,6 @@ export class ProtoSignDocDecoder {
             payer: "",
             granter: "",
           },
-          tip: directAux.tip,
         });
       }
     }
@@ -78,26 +77,6 @@ export class ProtoSignDocDecoder {
 
   get accountNumber(): string {
     return this.signDoc.accountNumber.toString();
-  }
-
-  get tip():
-    | {
-        amount: { amount: string; denom: string }[];
-        tipper: string;
-      }
-    | undefined {
-    if (!this.authInfo.tip) {
-      return undefined;
-    }
-    return {
-      amount: this.authInfo.tip.amount.map((coin) => {
-        return {
-          amount: coin.amount,
-          denom: coin.denom,
-        };
-      }),
-      tipper: this.authInfo.tip.tipper,
-    };
   }
 
   toBytes(): Uint8Array {

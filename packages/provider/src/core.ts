@@ -257,13 +257,6 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       chainId?: string | null;
       accountNumber?: Long | null;
       sequence?: Long | null;
-      tip?: {
-        amount: {
-          denom: string;
-          amount: string;
-        }[];
-        tipper: string;
-      } | null;
     },
     signOptions: Exclude<
       KeplrSignOptions,
@@ -286,7 +279,6 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
             ? signDoc.accountNumber.toString()
             : null,
           sequence: signDoc.sequence ? signDoc.sequence.toString() : null,
-          tip: signDoc.tip,
         },
         signOptions: deepmerge(
           {
@@ -304,7 +296,6 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         chainId: response.signed.chainId,
         accountNumber: Long.fromString(response.signed.accountNumber),
         sequence: Long.fromString(response.signed.sequence),
-        tip: response.signed.tip,
       },
       signature: response.signature,
     };

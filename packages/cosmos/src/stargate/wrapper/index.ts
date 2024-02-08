@@ -153,29 +153,4 @@ export class SignDocWrapper {
 
     return parseInt(this.aminoSignDoc.fee.gas);
   }
-
-  get tip():
-    | {
-        amount: { amount: string; denom: string }[];
-        tipper: string;
-      }
-    | undefined {
-    if (this.mode === "direct") {
-      return this.protoSignDoc.tip;
-    }
-
-    if (!this.aminoSignDoc.tip) {
-      return undefined;
-    }
-
-    return {
-      amount: this.aminoSignDoc.tip.amount.map((c) => {
-        return {
-          amount: c.amount,
-          denom: c.denom,
-        };
-      }),
-      tipper: this.aminoSignDoc.tip.tipper,
-    };
-  }
 }

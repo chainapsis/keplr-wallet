@@ -407,7 +407,6 @@ const handleRequestCosmosSignDirectAuxMsg: (
       chainId: msg.signDoc.chainId,
       accountNumber: msg.signDoc.accountNumber,
       sequence: msg.signDoc.sequence,
-      tip: msg.signDoc.tip,
     });
 
     const response = await service.signDirectAuxSelected(
@@ -426,7 +425,6 @@ const handleRequestCosmosSignDirectAuxMsg: (
         chainId: response.signed.chainId,
         accountNumber: response.signed.accountNumber.toString(),
         sequence: response.signed.sequence.toString(),
-        tip: response.signed.tip,
       },
       signature: response.signature,
     };

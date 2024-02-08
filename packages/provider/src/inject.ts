@@ -201,13 +201,6 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
                 chainId?: string | null;
                 accountNumber?: string | null;
                 sequence?: string | null;
-                tip?: {
-                  amount: {
-                    denom: string;
-                    amount: string;
-                  }[];
-                  tipper: string;
-                } | null;
               } = message.args[2];
 
               const result = await keplr.signDirectAux(
@@ -223,7 +216,6 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
                   sequence: receivedSignDoc.sequence
                     ? Long.fromString(receivedSignDoc.sequence)
                     : null,
-                  tip: receivedSignDoc.tip,
                 },
                 message.args[3]
               );
@@ -235,7 +227,6 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
                   chainId: result.signed.chainId,
                   accountNumber: result.signed.accountNumber.toString(),
                   sequence: result.signed.sequence.toString(),
-                  tip: result.signed.tip,
                 },
                 signature: result.signature,
               };
@@ -502,13 +493,6 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
       chainId?: string | null;
       accountNumber?: Long | null;
       sequence?: Long | null;
-      tip?: {
-        amount: {
-          denom: string;
-          amount: string;
-        }[];
-        tipper: string;
-      } | null;
     },
     signOptions: Exclude<
       KeplrSignOptions,
@@ -528,7 +512,6 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
           ? signDoc.accountNumber.toString()
           : null,
         sequence: signDoc.sequence ? signDoc.sequence.toString() : null,
-        tip: signDoc.tip,
       },
       deepmerge(
         {
@@ -547,13 +530,6 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
       chainId: string;
       accountNumber: string;
       sequence: string;
-      tip?: {
-        amount: {
-          denom: string;
-          amount: string;
-        }[];
-        tipper: string;
-      } | null;
     } = result.signed;
 
     return {
@@ -565,7 +541,6 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
         // Sender should change the `Long` to `string`.
         accountNumber: Long.fromString(signed.accountNumber),
         sequence: Long.fromString(signed.sequence),
-        tip: signed.tip || undefined,
       },
       signature: result.signature,
     };

@@ -25,22 +25,6 @@ export interface SignDocDirectAux {
   accountNumber: Long;
   /** sequence is the sequence number of the signing account. */
   sequence: Long;
-  /**
-   * tips have been deprecated and should not be used
-   *
-   * @deprecated
-   */
-  tip:
-    | {
-        /** amount is the amount of the tip */
-        amount: {
-          denom: string;
-          amount: string;
-        }[];
-        /** tipper is the address of the account paying for the tip */
-        tipper: string;
-      }
-    | undefined;
 }
 
 export interface DirectAuxSignResponse {

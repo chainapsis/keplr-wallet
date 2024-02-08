@@ -230,15 +230,6 @@ export class RequestCosmosSignDirectAuxMsg extends Message<{
     chainId: string;
     accountNumber: string;
     sequence: string;
-    tip:
-      | {
-          amount: {
-            denom: string;
-            amount: string;
-          }[];
-          tipper: string;
-        }
-      | undefined;
   };
   readonly signature: StdSignature;
 }> {
@@ -260,15 +251,6 @@ export class RequestCosmosSignDirectAuxMsg extends Message<{
       chainId: string;
       accountNumber: string;
       sequence: string;
-      tip:
-        | {
-            amount: {
-              denom: string;
-              amount: string;
-            }[];
-            tipper: string;
-          }
-        | undefined;
     },
     public readonly signOptions: Exclude<
       KeplrSignOptions,
@@ -296,7 +278,6 @@ export class RequestCosmosSignDirectAuxMsg extends Message<{
       chainId: this.signDoc.chainId,
       accountNumber: this.signDoc.accountNumber,
       sequence: this.signDoc.sequence,
-      tip: this.signDoc.tip,
     });
 
     if (signDoc.chainId !== this.chainId) {
