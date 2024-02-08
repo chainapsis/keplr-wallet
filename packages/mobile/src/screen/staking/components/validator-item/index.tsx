@@ -45,7 +45,8 @@ export const ValidatorItem: FunctionComponent<{
   );
   const isJailed = !!unbondedValidators.validators
     .concat(unbondingValidators.validators)
-    .find(val => val.operator_address === viewValidator.validatorAddress);
+    .find(val => val.operator_address === viewValidator.validatorAddress)
+    ?.jailed;
 
   const thumbnail =
     bondedValidators.getValidatorThumbnail(viewValidator.validatorAddress) ||

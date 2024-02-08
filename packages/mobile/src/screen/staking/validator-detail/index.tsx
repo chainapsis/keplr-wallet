@@ -57,7 +57,7 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
       .sort((a, b) => Number(b.tokens) - Number(a.tokens))
       .map((validator, i) => ({...validator, rank: i + 1}))
       .find(val => val.operator_address === validatorAddress);
-    return [validator, true];
+    return [validator, validator?.jailed === true];
   })();
 
   const thumbnail =
