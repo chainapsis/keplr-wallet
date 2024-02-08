@@ -1619,12 +1619,6 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: "evmos",
       },
-      {
-        coinDenom: "WEVMOS",
-        coinMinimalDenom: "erc20:0xD4949664cD82660AaE99bEdc034a0deA8A0bd517",
-        coinDecimals: 18,
-        contractAddress: "0xD4949664cD82660AaE99bEdc034a0deA8A0bd517",
-      },
     ],
     feeCurrencies: [
       {
