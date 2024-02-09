@@ -1167,9 +1167,9 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "juno-network",
         gasPriceStep: {
-          low: 0.001,
-          average: 0.0025,
-          high: 0.004,
+          low: 0.075,
+          average: 0.085,
+          high: 0.095,
         },
       },
       {
@@ -1178,9 +1178,9 @@ export const EmbedChainInfos: ChainInfo[] = [
           "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9",
         coinDecimals: 6,
         gasPriceStep: {
-          low: 0.001 * 0.33,
-          average: 0.0025 * 0.33,
-          high: 0.004 * 0.33,
+          low: 0.003 * 0.33,
+          average: 0.0050 * 0.33,
+          high: 0.065 * 0.33,
         },
       },
     ],
