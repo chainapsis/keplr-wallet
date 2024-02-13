@@ -17,6 +17,7 @@ import {
   QuerySharedContext,
   LSMCurrencyRegistrar,
   AgoricQueries,
+  CosmwasmAccount,
 } from '@keplr-wallet/stores';
 import {
   ChainSuggestStore,
@@ -92,7 +93,9 @@ export class RootStore {
     ]
   >;
   public readonly skipQueriesStore: SkipQueries;
-  public readonly accountStore: AccountStore<[CosmosAccount, SecretAccount]>;
+  public readonly accountStore: AccountStore<
+    [CosmosAccount, CosmwasmAccount, SecretAccount]
+  >;
   public readonly uiConfigStore: UIConfigStore;
 
   public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
@@ -306,6 +309,9 @@ export class RootStore {
             };
           }
         },
+      }),
+      CosmwasmAccount.use({
+        queriesStore: this.queriesStore,
       }),
       SecretAccount.use({
         queriesStore: this.queriesStore,
