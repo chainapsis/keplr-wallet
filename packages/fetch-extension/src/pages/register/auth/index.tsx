@@ -127,7 +127,7 @@ export const AuthIntro: FunctionComponent<{
               await logout();
             } catch (e) {
             } finally {
-              analyticsStore.logEvent("Create/Import account started", {
+              analyticsStore.logEvent("continue_with_google_click", {
                 registerType: "google",
               });
             }
@@ -171,6 +171,8 @@ export const AuthPage: FunctionComponent<{
   registerConfig: RegisterConfig;
 }> = observer(({ registerConfig }) => {
   const intl = useIntl();
+  const { analyticsStore } = useStore();
+
   const {
     register,
     getValues,
@@ -198,6 +200,9 @@ export const AuthPage: FunctionComponent<{
             data.password,
             { email: registerConfig.email }
           );
+          analyticsStore.logEvent("register_next_click", {
+            registerType: "google",
+          });
         })}
       >
         <Input
@@ -266,6 +271,7 @@ export const AuthPage: FunctionComponent<{
       <BackButton
         onClick={() => {
           registerConfig.clear();
+          analyticsStore.logEvent("back_click", { pageName: "Register" });
         }}
       />
     </React.Fragment>

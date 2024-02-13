@@ -25,7 +25,7 @@ export const GetDepositAddress: React.FC<GetDepositAddressProps> = ({
 
   amountError,
 }) => {
-  const { accountStore, chainStore } = useStore();
+  const { accountStore, chainStore, analyticsStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const notification = useNotification();
@@ -35,6 +35,7 @@ export const GetDepositAddress: React.FC<GetDepositAddressProps> = ({
 
   const getDepositAddress = async () => {
     try {
+      analyticsStore.logEvent("get_deposit_address_click");
       setIsFetchingAddress(true);
       const address = await assetsApi.getDepositAddress({
         fromChain: fromChain.id,
@@ -45,7 +46,16 @@ export const GetDepositAddress: React.FC<GetDepositAddressProps> = ({
       });
       setDepositAddress(address);
       setIsFetchingAddress(false);
+      analyticsStore.logEvent("get_deposit_address_txn_success", {
+        chainId: chainStore.current.chainId,
+        chainName: chainStore.current.chainName,
+      });
     } catch (err) {
+      analyticsStore.logEvent("get_deposit_address_txn_fail", {
+        chainId: chainStore.current.chainId,
+        chainName: chainStore.current.chainName,
+        message: err?.message ?? "",
+      });
       console.log("Error", err);
       notification.push({
         placement: "top-center",

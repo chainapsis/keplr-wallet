@@ -84,9 +84,10 @@ export const Unstake: FunctionComponent<{
         },
       });
 
-      analyticsStore.logEvent("Unstake tx broadcasted", {
+      analyticsStore.logEvent("unstake_txn_broadcasted", {
         chainId: chainStore.current.chainId,
         chainName: chainStore.current.chainName,
+        feeType: feeConfig.feeType,
       });
     },
     onFulfill: (tx: any) => {
@@ -108,10 +109,17 @@ export const Unstake: FunctionComponent<{
 
   const stakeClicked = async () => {
     try {
+      analyticsStore.logEvent("unstake_txn_click");
       await account.cosmos
         .makeUndelegateTx(amountConfig.amount, validatorAddress)
         .send(feeConfig.toStdFee(), memoConfig.memo, undefined, txnResult);
     } catch (e) {
+      analyticsStore.logEvent("unstake_txn_broadcasted_fail", {
+        chainId: chainStore.current.chainId,
+        chainName: chainStore.current.chainName,
+        feeType: feeConfig.feeType,
+        message: e?.message ?? "",
+      });
       notification.push({
         type: "danger",
         placement: "top-center",

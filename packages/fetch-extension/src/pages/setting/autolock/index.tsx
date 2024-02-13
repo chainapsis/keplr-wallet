@@ -17,6 +17,7 @@ import {
 
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { useStore } from "../../../stores";
 
 interface FormData {
   duration: string;
@@ -25,6 +26,7 @@ interface FormData {
 export const SettingAutoLockPage: FunctionComponent = () => {
   const navigate = useNavigate();
   const intl = useIntl();
+  const { analyticsStore } = useStore();
 
   const minDuration = 0;
   const maxDuration = 4320;
@@ -70,6 +72,10 @@ export const SettingAutoLockPage: FunctionComponent = () => {
         id: "setting.autolock",
       })}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", {
+          pageName: "Autolock Timer",
+        });
+
         navigate(-1);
       }}
     >

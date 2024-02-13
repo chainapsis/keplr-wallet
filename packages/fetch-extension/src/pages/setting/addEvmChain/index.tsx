@@ -12,7 +12,7 @@ import { ChainInfo } from "@keplr-wallet/types";
 
 export const AddEvmChain: FunctionComponent = () => {
   const navigate = useNavigate();
-  const { chainStore } = useStore();
+  const { chainStore, analyticsStore } = useStore();
   const [hasErrors, setHasErrors] = useState(false);
   const [info, setInfo] = useState("");
   const loadingIndicator = useLoadingIndicator();
@@ -181,7 +181,7 @@ export const AddEvmChain: FunctionComponent = () => {
     setInfo("");
     const { name, value } = e.target;
     setHasErrors(false);
-
+    analyticsStore.logEvent("add_evm_chain_click");
     if (name === "rpc") {
       setNewChainInfo({ ...newChainInfo, rpc: value, chainId: "" });
 
@@ -260,6 +260,9 @@ export const AddEvmChain: FunctionComponent = () => {
       alternativeTitle={"Add new EVM chain"}
       onBackButton={() => {
         navigate(-1);
+        analyticsStore.logEvent("back_click", {
+          pageName: "Add new EVM chain",
+        });
       }}
     >
       <Form onSubmit={handleSubmit} className={style["container"]}>

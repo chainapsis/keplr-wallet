@@ -39,7 +39,7 @@ export const ChatsViewSection = ({
   const userAgents: Groups = useSelector(userChatAgents);
   const userChats: Chats = useSelector(userMessages);
 
-  const { chainStore, accountStore } = useStore();
+  const { chainStore, accountStore, analyticsStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const preLoadedChats = useMemo(() => {
@@ -148,12 +148,10 @@ export const ChatsViewSection = ({
 
   const handleSendMessage = async (e: any) => {
     e.preventDefault();
-    if (
-      isCommand &&
-      !AGENT_COMMANDS.find(
-        (command) => command.command == newMessage && command.enabled
-      )
-    ) {
+    const commandFound = AGENT_COMMANDS.find(
+      (command) => command.command == newMessage && command.enabled
+    );
+    if (isCommand && !commandFound) {
       notification.push({
         type: "warning",
         placement: "top-center",
@@ -198,6 +196,10 @@ export const ChatsViewSection = ({
         }
         // scrollToBottom();
         recieveGroups(0, accountInfo.bech32Address);
+
+        if (isCommand && commandFound) {
+          analyticsStore.logEvent(commandFound.eventName);
+        }
       } catch (error) {
         console.log("failed to send : ", error);
       }

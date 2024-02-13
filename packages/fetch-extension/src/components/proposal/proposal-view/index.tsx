@@ -5,9 +5,12 @@ import classnames from "classnames";
 import { FormattedMessage } from "react-intl";
 import { Button } from "reactstrap";
 import { useNavigate } from "react-router";
+import { useStore } from "../../../stores";
 
 export const ProposalView: FunctionComponent = () => {
   const navigate = useNavigate();
+  const { analyticsStore } = useStore();
+
   return (
     <div className={style["containerInner"]}>
       <div className={style["vertical"]}>
@@ -39,6 +42,7 @@ export const ProposalView: FunctionComponent = () => {
         color="primary"
         size="sm"
         onClick={() => {
+          analyticsStore.logEvent("proposal_view_click");
           navigate("/proposal");
         }}
       >

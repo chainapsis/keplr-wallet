@@ -66,7 +66,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
   const { keyRingStore, uiConfigStore, analyticsStore } = useStore();
 
   useEffect(() => {
-    analyticsStore.logEvent("Register page");
+    analyticsStore.logEvent("register_page_viewed");
     document.documentElement.setAttribute("data-register-page", "true");
 
     return () => {

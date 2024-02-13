@@ -37,6 +37,9 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
       canChangeChainInfo={false}
       alternativeTitle={intl.formatMessage({ id: "setting.keyring" })}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", {
+          pageName: "Select Account",
+        });
         navigate(-1);
       }}
     >
@@ -55,8 +58,7 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
               size="sm"
               onClick={(e) => {
                 e.preventDefault();
-                analyticsStore.logEvent("Add additional account started");
-
+                analyticsStore.logEvent("add_additional_account_click");
                 browser.tabs.create({
                   url: "/popup.html#/register",
                 });
@@ -140,7 +142,7 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                       loadingIndicator.setIsLoading("keyring", true);
                       try {
                         await keyRingStore.changeKeyRing(i);
-                        analyticsStore.logEvent("Account changed");
+                        analyticsStore.logEvent("select_account_click");
                         loadingIndicator.setIsLoading("keyring", false);
                         store.dispatch(resetUser({}));
                         store.dispatch(resetProposals({}));
@@ -170,6 +172,7 @@ const KeyRingToolsIcon: FunctionComponent<{
   index: number;
   keyStore: MultiKeyStoreInfoWithSelectedElem;
 }> = ({ index, keyStore }) => {
+  const { analyticsStore } = useStore();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const toggleOpen = () => setIsOpen((isOpen) => !isOpen);
 
@@ -203,6 +206,11 @@ const KeyRingToolsIcon: FunctionComponent<{
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                analyticsStore.logEvent(
+                  keyStore.type === "mnemonic"
+                    ? "view_mnemonics_seed_click"
+                    : "view_private_key_click"
+                );
 
                 navigate(`/setting/export/${index}?type=${keyStore.type}`);
               }}
@@ -221,7 +229,7 @@ const KeyRingToolsIcon: FunctionComponent<{
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-
+              analyticsStore.logEvent("change_account_name_click");
               navigate(`/setting/keyring/change/name/${index}`);
             }}
           >
@@ -232,7 +240,7 @@ const KeyRingToolsIcon: FunctionComponent<{
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-
+              analyticsStore.logEvent("delete_account_click", { action: "No" });
               navigate(`/setting/clear/${index}`);
             }}
           >

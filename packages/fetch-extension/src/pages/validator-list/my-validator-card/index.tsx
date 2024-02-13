@@ -6,6 +6,7 @@ import React from "react";
 import { useNavigate } from "react-router";
 import { CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB } from "../../../config.ui.var";
 import styleValidators from "./validators.module.scss";
+import { useStore } from "../../../stores";
 
 export const URL: { [key in string]: string } = {
   [CHAIN_ID_DORADO]: "https://explore-dorado.fetch.ai/validators",
@@ -20,7 +21,7 @@ export const MyValidatorCard = ({
   chainID: string;
 }) => {
   const navigate = useNavigate();
-
+  const { analyticsStore } = useStore();
   const status = validator.status.split("_")[2].toLowerCase();
   const commisionRate = (
     parseFloat(validator.commission.commission_rates.rate) * 100
@@ -28,9 +29,12 @@ export const MyValidatorCard = ({
   return (
     <div
       className={styleValidators["item"]}
-      onClick={() =>
-        navigate(`/validators/${validator.operator_address}/stake`)
-      }
+      onClick={() => {
+        analyticsStore.logEvent("stake_validator_click", {
+          pageName: "My Stake Tab",
+        });
+        navigate(`/validators/${validator.operator_address}/stake`);
+      }}
     >
       <div
         className={styleValidators["row"]}

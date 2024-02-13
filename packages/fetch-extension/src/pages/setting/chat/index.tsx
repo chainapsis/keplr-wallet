@@ -27,7 +27,7 @@ export const ChatSettings: FunctionComponent = observer(() => {
   const intl = useIntl();
   const userState = useSelector(userDetails);
   const blockedUsers = useSelector(userBlockedAddresses);
-  const { chainStore, accountStore } = useStore();
+  const { chainStore, accountStore, analyticsStore } = useStore();
   const current = chainStore.current;
   const walletAddress = accountStore.getAccount(
     chainStore.current.chainId
@@ -98,6 +98,9 @@ export const ChatSettings: FunctionComponent = observer(() => {
         id: "setting.chat",
       })}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", {
+          pageName: "Chat Setting",
+        });
         navigate(-1);
       }}
     >
@@ -117,7 +120,12 @@ export const ChatSettings: FunctionComponent = observer(() => {
               : "Please Activate Chat Functionality to Proceed"
           }
           onClick={() => {
-            if (chatPubKeyExists) navigate("/setting/chat/block");
+            if (chatPubKeyExists) {
+              analyticsStore.logEvent("block_list_click", {
+                pageName: "Chat Setting",
+              });
+              navigate("/setting/chat/block");
+            }
           }}
           icons={useMemo(
             () =>

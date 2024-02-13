@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./style.module.scss";
 import arrowIcon from "@assets/icon/right-arrow.png";
+import { useStore } from "../../../stores";
 
 export const FilterActivities: React.FC<{
   onFilterChange: (filter: string[]) => void;
@@ -9,7 +10,7 @@ export const FilterActivities: React.FC<{
 }> = ({ onFilterChange, options, selectedFilter }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
+  const { analyticsStore } = useStore();
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
@@ -25,11 +26,17 @@ export const FilterActivities: React.FC<{
 
   const handleDeselectClicks = () => {
     if (selectedFilter.length != 0) onFilterChange([]);
+    analyticsStore.logEvent("activity_filter_click", {
+      action: "unselectAll",
+    });
   };
 
   const handleSelectClicks = () => {
     const allFilters = options.map((option) => option.value);
     if (selectedFilter.length != allFilters.length) onFilterChange(allFilters);
+    analyticsStore.logEvent("activity_filter_click", {
+      action: "selectAll",
+    });
   };
 
   const handleClickOutside = (event: MouseEvent) => {

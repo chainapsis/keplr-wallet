@@ -8,9 +8,11 @@ import classNames from "classnames";
 import { useSelector } from "react-redux";
 import { useProposals } from "@chatStore/proposal-slice";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useStore } from "../../../stores";
 export const PropsalVoteStatus: FunctionComponent = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { analyticsStore } = useStore();
 
   const intl = useIntl();
   const { votedOn, id } = useParams<{ votedOn?: string; id?: string }>();
@@ -76,6 +78,7 @@ export const PropsalVoteStatus: FunctionComponent = () => {
         id: "main.proposals.title",
       })}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", { pageName: "Proposal Detail" });
         navigate(-1);
       }}
       showBottomMenu={false}

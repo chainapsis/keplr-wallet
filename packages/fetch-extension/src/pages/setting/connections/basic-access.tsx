@@ -21,7 +21,7 @@ export const SettingConnectionsPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
   const intl = useIntl();
 
-  const { chainStore, permissionStore } = useStore();
+  const { chainStore, permissionStore, analyticsStore } = useStore();
   const [selectedChainId, setSelectedChainId] = useState(
     chainStore.current.chainId
   );
@@ -46,6 +46,10 @@ export const SettingConnectionsPage: FunctionComponent = observer(() => {
         id: "setting.connections",
       })}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", {
+          pageName: "Wallet Access Permissions",
+        });
+
         navigate(-1);
       }}
     >

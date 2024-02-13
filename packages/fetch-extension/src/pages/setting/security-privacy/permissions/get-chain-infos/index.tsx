@@ -11,11 +11,12 @@ import {
   RemoveGlobalPermissionOriginMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { useStore } from "../../../../../stores";
 
 export const SettingPermissionsGetChainInfosPage: FunctionComponent = () => {
   const [requester] = useState(() => new InExtensionMessageRequester());
   const [origins, setOrigins] = useState<string[]>([]);
-
+  const { analyticsStore, chainStore } = useStore();
   useEffect(() => {
     // TODO: Handle this in store (GeneralPermissionStore?)
     requester
@@ -45,6 +46,9 @@ export const SettingPermissionsGetChainInfosPage: FunctionComponent = () => {
         id: "setting.permissions.get-chain-infos",
       })}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", {
+          pageName: "Chain List Access ",
+        });
         navigate(-1);
       }}
     >
@@ -56,6 +60,10 @@ export const SettingPermissionsGetChainInfosPage: FunctionComponent = () => {
               key={origin}
               onClick={async (e) => {
                 e.preventDefault();
+                analyticsStore.logEvent("show_hide_chain", {
+                  chainId: chainStore.current.chainId,
+                  chainName: chainStore.current.chainName,
+                });
 
                 if (
                   await confirm.confirm({

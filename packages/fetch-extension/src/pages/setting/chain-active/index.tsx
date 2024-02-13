@@ -35,7 +35,7 @@ export const ChainActivePage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
   const intl = useIntl();
 
-  const { chainStore } = useStore();
+  const { chainStore, analyticsStore } = useStore();
 
   return (
     <HeaderLayout
@@ -46,6 +46,7 @@ export const ChainActivePage: FunctionComponent = observer(() => {
       })}
       onBackButton={() => {
         navigate(-1);
+        analyticsStore.logEvent("back_click", { pageName: "Show/Hide Chains" });
       }}
     >
       <Button
@@ -55,6 +56,7 @@ export const ChainActivePage: FunctionComponent = observer(() => {
         style={{ width: "100%" }}
         onClick={() => {
           navigate("/setting/addEvmChain");
+          analyticsStore.logEvent("add_new_evm_chain_click");
         }}
       >
         Add New Evm Chain

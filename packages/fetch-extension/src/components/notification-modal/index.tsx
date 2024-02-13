@@ -43,11 +43,12 @@ export const NotificationModal: FunctionComponent = () => {
 
   const handleClick = () => {
     if (notificationPayload?.modalType === NotificationModalType.initial) {
+      analyticsStore.logEvent("organisations_click", { action: "Add" });
       navigate("notification/organisations/add");
     } else if (
       notificationPayload?.modalType === NotificationModalType.notificationOff
     ) {
-      analyticsStore.logEvent("Notification on");
+      analyticsStore.logEvent("notification_on_click");
 
       localStorage.setItem(
         `turnNotifications-${accountInfo.bech32Address}`,

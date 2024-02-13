@@ -218,7 +218,7 @@ const TokenView: FunctionComponent<{
 });
 
 export const TokensView: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
@@ -270,6 +270,9 @@ export const TokensView: FunctionComponent = observer(() => {
               key={i.toString()}
               balance={token}
               onClick={() => {
+                analyticsStore.logEvent("send_click", {
+                  pageName: "Token List",
+                });
                 navigate({
                   pathname: "/send",
                   search: `?defaultDenom=${token.currency.coinMinimalDenom}`,

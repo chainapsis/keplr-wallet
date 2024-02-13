@@ -29,6 +29,7 @@ import { useIntl } from "react-intl";
 import { validateAgentAddress } from "@utils/validate-agent";
 import { CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB } from "../../config.ui.var";
 import { getBeneficiaryAddress } from "../../name-service/fns-apis";
+import { useStore } from "../../stores";
 
 export interface AddressInputProps {
   recipientConfig: IRecipientConfig | IRecipientConfigWithICNS;
@@ -42,6 +43,7 @@ export interface AddressInputProps {
 
   disabled?: boolean;
   value: string;
+  pageName: string;
 }
 
 function numOfCharacter(str: string, c: string): number {
@@ -58,6 +60,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
     disableAddressBook,
     disabled = false,
     value,
+    pageName,
   }) => {
     const intl = useIntl();
     const [isAddressBookOpen, setIsAddressBookOpen] = useState(false);
@@ -112,7 +115,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
       }
       return false;
     })();
-
+    const { analyticsStore } = useStore();
     const selectAddressFromAddressBook = {
       setRecipient: (recipient: string) => {
         recipientConfig.setRawRecipient(recipient);
@@ -190,7 +193,12 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
         >
           <ModalBody className={styleAddressInput["fullModal"]}>
             <AddressBookPage
-              onBackButton={() => setIsAddressBookOpen(false)}
+              onBackButton={() => {
+                setIsAddressBookOpen(false);
+                analyticsStore.logEvent("back_click", {
+                  pageName: "Address Book",
+                });
+              }}
               hideChainDropdown={true}
               selectHandler={selectAddressFromAddressBook}
               ibcChannelConfig={ibcChannelConfig}
@@ -232,7 +240,12 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
                 color="primary"
                 type="button"
                 outline
-                onClick={() => setIsAddressBookOpen(true)}
+                onClick={() => {
+                  setIsAddressBookOpen(true);
+                  analyticsStore.logEvent("recipient_address_click", {
+                    pageName,
+                  });
+                }}
                 disabled={disabled}
               >
                 <i className="fas fa-address-book" />

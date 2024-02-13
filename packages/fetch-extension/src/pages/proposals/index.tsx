@@ -32,8 +32,6 @@ export const Proposals: FunctionComponent = () => {
   const [proposals, setProposals] = useState<ProposalType[]>([]);
   const reduxProposals = useSelector(useProposals);
   useEffect(() => {
-    analyticsStore.logEvent("Governance Proposal page");
-
     if (reduxProposals.closedProposals.length === 0) {
       setIsLoading(true);
     }
@@ -146,6 +144,7 @@ export const Proposals: FunctionComponent = () => {
         id: "main.proposals.title",
       })}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", { pageName: "Proposals" });
         navigate(-1);
       }}
       showBottomMenu={false}
@@ -160,21 +159,30 @@ export const Proposals: FunctionComponent = () => {
         name={"Active"}
         id={1}
         selectedIndex={selectedIndex}
-        handleCheck={handleCheck}
+        handleCheck={(id) => {
+          handleCheck(id);
+          analyticsStore.logEvent("active_tab_click");
+        }}
         filter={true}
       />
       <GovStatusChip
         id={3}
         name={"Voted"}
         selectedIndex={selectedIndex}
-        handleCheck={handleCheck}
+        handleCheck={(id) => {
+          handleCheck(id);
+          analyticsStore.logEvent("voted_tab_click");
+        }}
         filter={true}
       />
       <GovStatusChip
         id={2}
         name={"Closed"}
         selectedIndex={selectedIndex}
-        handleCheck={handleCheck}
+        handleCheck={(id) => {
+          handleCheck(id);
+          analyticsStore.logEvent("closed_tab_click");
+        }}
         filter={true}
       />
 

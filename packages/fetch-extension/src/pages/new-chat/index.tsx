@@ -66,8 +66,8 @@ const NewUser = (props: { address: NameAddress }) => {
 
   const handleClick = () => {
     if (!isLoading) {
-      analyticsStore.logEvent("Open DM click", {
-        pageName: "New chat",
+      analyticsStore.logEvent("dm_click", {
+        pageName: "New Chat",
       });
       navigate(`/chat/${address}`);
     }
@@ -253,6 +253,7 @@ export const NewChat: FunctionComponent = observer(() => {
               className={style["button"]}
               onClick={() => {
                 store.dispatch(resetNewGroup());
+                analyticsStore.logEvent("create_new_group_click");
                 navigate({
                   pathname: "/chat/group-chat/create",
                 });
@@ -264,6 +265,9 @@ export const NewChat: FunctionComponent = observer(() => {
             <button
               className={style["button"]}
               onClick={() => {
+                analyticsStore.logEvent("talk_to_an_agent_click", {
+                  pageName: "New Chat",
+                });
                 navigate({
                   pathname: "/chat/agent/" + AGENT_ADDRESS[current.chainId],
                 });
@@ -286,7 +290,9 @@ export const NewChat: FunctionComponent = observer(() => {
                 style={{ margin: "2px 0 0 12px", cursor: "pointer" }}
                 aria-hidden="true"
                 onClick={() => {
-                  analyticsStore.logEvent("Address book viewed");
+                  analyticsStore.logEvent("address_book_click", {
+                    pageName: "New Chat",
+                  });
                   navigate("/setting/address-book");
                 }}
               />

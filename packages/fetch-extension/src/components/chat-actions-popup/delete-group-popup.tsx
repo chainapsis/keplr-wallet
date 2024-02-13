@@ -19,7 +19,7 @@ export const DeleteGroupPopup = ({
     const groupId = location.pathname.split("/")[3];
     deleteGroup(groupId);
     setConfirmAction(false);
-    analyticsStore.logEvent("Delete group click");
+    analyticsStore.logEvent("delete_group_click", { action: "Delete" });
     navigate("/chat");
   };
 

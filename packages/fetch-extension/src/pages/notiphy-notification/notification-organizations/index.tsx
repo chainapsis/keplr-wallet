@@ -36,7 +36,7 @@ export const NotificationOrganizations: FunctionComponent = observer(() => {
   // Extracting org id from url
   const newOrg = useLocation().search.split("?")[1]?.split("&");
 
-  const { chainStore, accountStore } = useStore();
+  const { chainStore, accountStore, analyticsStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
 
@@ -135,6 +135,9 @@ export const NotificationOrganizations: FunctionComponent = observer(() => {
       );
 
       if (type === pageOptions.edit) {
+        analyticsStore.logEvent("update_notification_preferences_click", {
+          pageName: "Organisations",
+        });
         navigate(-1);
       } else {
         navigate("/notification/topics/add");
@@ -162,6 +165,9 @@ export const NotificationOrganizations: FunctionComponent = observer(() => {
       alternativeTitle={"Organisations"}
       showBottomMenu={false}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", {
+          pageName: "Organisations",
+        });
         navigate(-1);
       }}
     >

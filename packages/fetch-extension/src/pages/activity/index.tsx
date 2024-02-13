@@ -14,7 +14,7 @@ export const ActivityPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
   const intl = useIntl();
   const [latestBlock, setLatestBlock] = useState<string>();
-  const { chainStore } = useStore();
+  const { chainStore, analyticsStore } = useStore();
   const isEvm = chainStore.current.features?.includes("evm") ?? false;
   const [activeTab, setActiveTab] = useState(isEvm ? "eth" : "native");
 
@@ -29,7 +29,10 @@ export const ActivityPage: FunctionComponent = observer(() => {
           className={`${style["tab"]} ${
             activeTab === "native" ? style["active"] : ""
           }`}
-          onClick={() => handleTabClick("native")}
+          onClick={() => {
+            handleTabClick("native");
+            analyticsStore.logEvent("activity_transaction_tab_click");
+          }}
         >
           Transactions
         </div>
@@ -37,7 +40,10 @@ export const ActivityPage: FunctionComponent = observer(() => {
           className={`${style["tab"]} ${
             activeTab === "gov" ? style["active"] : ""
           }`}
-          onClick={() => handleTabClick("gov")}
+          onClick={() => {
+            handleTabClick("gov");
+            analyticsStore.logEvent("activity_gov_proposals_tab_click");
+          }}
         >
           Gov Proposals
         </div>
@@ -53,6 +59,7 @@ export const ActivityPage: FunctionComponent = observer(() => {
         id: "main.menu.activity",
       })}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", { pageName: "Activity" });
         navigate(-1);
       }}
     >

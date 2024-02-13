@@ -3,10 +3,11 @@ import style from "./style.module.scss";
 import { useNavigate } from "react-router-dom";
 import searchButton from "@assets/icon/search.png";
 import arrowIcon from "@assets/icon/send-token.png";
+import { useStore } from "../../../stores";
 
 export const SearchInput = () => {
   const navigate = useNavigate();
-
+  const { analyticsStore } = useStore();
   const [searchText, setSearchText] = useState("");
   const [invalidDomain, setInvalidDomain] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -34,6 +35,7 @@ export const SearchInput = () => {
   }
 
   const handleSearch = () => {
+    analyticsStore.logEvent("fns_register_button_click");
     if (
       searchText.trim() !== "" &&
       searchText.trim().length > 2 &&

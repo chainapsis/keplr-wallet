@@ -7,7 +7,7 @@ import style from "./style.module.scss";
 export const AgentInit = () => {
   const navigate = useNavigate();
   // address book values
-  const { chainStore } = useStore();
+  const { chainStore, analyticsStore } = useStore();
   const current = chainStore.current;
   return (
     <div className={style["agentContainer"]}>
@@ -22,11 +22,14 @@ export const AgentInit = () => {
       </div>
       <button
         type="button"
-        onClick={() =>
+        onClick={() => {
+          analyticsStore.logEvent("talk_to_an_agent_click", {
+            pageName: "Agent Tab",
+          });
           navigate("/chat/agent/" + AGENT_ADDRESS[current.chainId], {
             replace: true,
-          })
-        }
+          });
+        }}
       >
         Talk to an Agent
       </button>

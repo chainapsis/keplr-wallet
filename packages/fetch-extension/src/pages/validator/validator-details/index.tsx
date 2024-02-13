@@ -30,7 +30,7 @@ export const ValidatorDetails = ({
   const account = accountStore.getAccount(chainStore.current.chainId);
   const navigate = useNavigate();
   const notification = useNotification();
-
+  const { analyticsStore } = useStore();
   const status = validator.status.split("_")[2].toLowerCase();
 
   const commisionRate = (
@@ -42,6 +42,9 @@ export const ValidatorDetails = ({
 
   const handleClaim = async () => {
     try {
+      analyticsStore.logEvent("claim_click", {
+        pageName: "Validator Detail",
+      });
       await account.cosmos.sendWithdrawDelegationRewardMsgs(
         [validator.operator_address],
         "",
@@ -58,6 +61,10 @@ export const ValidatorDetails = ({
               transition: {
                 duration: 0.25,
               },
+            });
+            analyticsStore.logEvent("claim_txn_broadcasted", {
+              chainId: chainStore.current.chainId,
+              chainName: chainStore.current.chainName,
             });
           },
           onFulfill: (tx: any) => {
@@ -83,6 +90,11 @@ export const ValidatorDetails = ({
       if (err.toString().includes("Error: Request rejected")) {
         navigate(`/validators/${validator.operator_address}/stake`);
       }
+      analyticsStore.logEvent("claim_txn_broadcasted_fail", {
+        chainId: chainStore.current.chainId,
+        chainName: chainStore.current.chainName,
+        message: err?.message ?? "",
+      });
     }
   };
   return (

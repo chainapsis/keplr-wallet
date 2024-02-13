@@ -75,6 +75,9 @@ export const ProposalDetail: FunctionComponent = () => {
     const vote: any = voteArr[votedOn];
     if (!proposal) return;
     if (vote !== "Unspecified" && accountInfo.isReadyToSendTx) {
+      analyticsStore.logEvent("vote_txn_click", {
+        action: vote,
+      });
       const tx = accountInfo.cosmos.makeGovVoteTx(proposal?.proposal_id, vote);
       setIsSendingTx(true);
       try {
@@ -97,11 +100,9 @@ export const ProposalDetail: FunctionComponent = () => {
           {},
           {
             onBroadcasted: () => {
-              analyticsStore.logEvent("Vote tx broadcasted", {
+              analyticsStore.logEvent("vote_txn_broadcasted", {
                 chainId: chainStore.current.chainId,
                 chainName: chainStore.current.chainName,
-                proposalId: proposal.proposal_id,
-                proposalTitle: proposal.content.title,
               });
             },
           }
@@ -109,6 +110,11 @@ export const ProposalDetail: FunctionComponent = () => {
 
         navigate(`/proposal-vote-status/${votedOn}/${id}`, { replace: true });
       } catch (e: any) {
+        analyticsStore.logEvent("vote_txn_broadcasted_fail", {
+          chainId: chainStore.current.chainId,
+          chainName: chainStore.current.chainName,
+          message: e?.message ?? "",
+        });
         console.log(e);
         if (e?.message === "Request rejected") {
           notification.push({
@@ -157,6 +163,7 @@ export const ProposalDetail: FunctionComponent = () => {
         id: "main.proposals.title",
       })}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", { pageName: "Proposal Detail" });
         navigate(-1);
       }}
       showBottomMenu={false}
@@ -219,6 +226,9 @@ export const ProposalDetail: FunctionComponent = () => {
                 className={style["pLink"]}
                 onClick={() => {
                   if (chainStore.current.govUrl) {
+                    analyticsStore.logEvent(
+                      "proposal_view_in_block_explorer_click"
+                    );
                     window.open(`${chainStore.current.govUrl}${id}`, "_blank");
                   }
                 }}

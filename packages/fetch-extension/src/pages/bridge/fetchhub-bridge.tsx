@@ -35,11 +35,6 @@ export const FetchhubBridge: FunctionComponent<{
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const notification = useNotification();
 
-  analyticsStore.logEvent("Native bridge page opened", {
-    chainId: chainStore.current.chainId,
-    chainName: chainStore.current.chainName,
-  });
-
   const nativeBridgeConfig = useNativeBridgeConfig(
     chainStore,
     queriesStore,
@@ -94,6 +89,10 @@ export const FetchhubBridge: FunctionComponent<{
 
   const onSubmit = async () => {
     try {
+      analyticsStore.logEvent("bridge_txn_click", {
+        chainId: chainStore.current.chainId,
+        chainName: chainStore.current.chainName,
+      });
       const tx = accountInfo.cosmwasm.makeNativeBridgeTx(
         nativeBridgeConfig.amountConfig.amount,
         nativeBridgeConfig.recipientConfig.recipient
@@ -109,9 +108,10 @@ export const FetchhubBridge: FunctionComponent<{
         {
           onBroadcasted() {
             navigate("/bridge");
-            analyticsStore.logEvent("Bridge token tx broadcasted", {
+            analyticsStore.logEvent("bridge_txn_broadcasted", {
               chainId: chainStore.current.chainId,
               chainName: chainStore.current.chainName,
+              feeType: nativeBridgeConfig.feeConfig.feeType,
             });
           },
           onFulfill(tx) {
@@ -143,6 +143,12 @@ export const FetchhubBridge: FunctionComponent<{
         }
       );
     } catch (e) {
+      analyticsStore.logEvent("bridge_txn_broadcasted_fail", {
+        chainId: chainStore.current.chainId,
+        chainName: chainStore.current.chainName,
+        feeType: nativeBridgeConfig.feeConfig.feeType,
+        message: e?.message ?? "",
+      });
       navigate("/", { replace: true });
       notification.push({
         type: "warning",
@@ -170,6 +176,7 @@ export const FetchhubBridge: FunctionComponent<{
           // ibcChannelConfig={nativeBridgeConfig.channelConfig}
           // disabled={!isChannelSet}
           value={""}
+          pageName={"Bridge"}
         />
         {keyRingStore.keyRingType !== "ledger" && (
           <div
@@ -208,6 +215,7 @@ export const FetchhubBridge: FunctionComponent<{
           })}
           amountConfig={nativeBridgeConfig.amountConfig}
           dropdownDisabled
+          pageName={"Bridge"}
         />
         <div style={{ flex: 1 }} />
         {fee && (

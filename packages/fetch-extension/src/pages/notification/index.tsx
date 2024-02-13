@@ -20,10 +20,11 @@ export const NotificationPage: FunctionComponent = () => {
 
   const navigateToSettingsHandler = () => {
     navigate("/setting/notifications");
+    analyticsStore.logEvent("settings_click", { pageName: "Notification Tab" });
   };
 
   const handleClearAll = () => {
-    analyticsStore.logEvent("Notification clear all click");
+    analyticsStore.logEvent("notification_clear_all_click");
     localStorage.removeItem(`notifications-${accountInfo.bech32Address}`);
     store.dispatch(setNotifications({ allNotifications: [] }));
   };

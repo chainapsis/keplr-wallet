@@ -7,7 +7,7 @@ import { FNS_CONFIG } from "../../../config.ui.var";
 import { observer } from "mobx-react-lite";
 import { DomainCard } from "./domain-card";
 export const YourDomain = observer(() => {
-  const { accountStore, chainStore, queriesStore } = useStore();
+  const { accountStore, chainStore, queriesStore, analyticsStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const FNSContractAddress = FNS_CONFIG[current.chainId].contractAddress;
@@ -52,6 +52,9 @@ export const YourDomain = observer(() => {
                 style["emptyAddNewButton"]
               )}
               to={`/fetch-name-service/explore`}
+              onClick={() => {
+                analyticsStore.logEvent("fns_explore_tab_click");
+              }}
             >
               + Get new domain
             </Link>
@@ -75,7 +78,12 @@ export const YourDomain = observer(() => {
               assignedDomains={assignedDomains}
             />
           ))}
-          <Link to={`/fetch-name-service/explore`}>
+          <Link
+            to={`/fetch-name-service/explore`}
+            onClick={() => {
+              analyticsStore.logEvent("fns_explore_tab_click");
+            }}
+          >
             <div className={style["addNewbutton"]}>+ Get new domain</div>
           </Link>
         </div>

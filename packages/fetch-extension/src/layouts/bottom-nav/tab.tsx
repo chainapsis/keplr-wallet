@@ -42,7 +42,7 @@ export const Tab = ({
       onClick={() => {
         if (!disabled) {
           if (path !== "/") {
-            analyticsStore.logEvent(`${title} tab click`);
+            analyticsStore.logEvent(`${title.toLowerCase()}_tab_click`);
           }
           navigate(path);
         }

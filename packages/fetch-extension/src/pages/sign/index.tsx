@@ -45,6 +45,7 @@ export const SignPage: FunctionComponent = observer(() => {
     signInteractionStore,
     accountStore,
     queriesStore,
+    analyticsStore,
   } = useStore();
 
   const [signer, setSigner] = useState("");
@@ -234,6 +235,7 @@ export const SignPage: FunctionComponent = observer(() => {
       onBackButton={
         interactionInfo.interactionInternal
           ? () => {
+              analyticsStore.logEvent("back_click", { pageName: "Sign" });
               navigate(-1);
             }
           : undefined

@@ -54,7 +54,7 @@ function debounce(func: any, timeout = 500) {
 }
 
 export const NativeTab = ({ latestBlock }: { latestBlock: any }) => {
-  const { chainStore, accountStore } = useStore();
+  const { chainStore, accountStore, analyticsStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
 
@@ -96,6 +96,9 @@ export const NativeTab = ({ latestBlock }: { latestBlock: any }) => {
   }, [fetchedData]);
 
   const handleClick = () => {
+    analyticsStore.logEvent("activity_transactions_click", {
+      pageName: "Transaction Tab",
+    });
     setLoadingRequest(true);
     fetchNodes(pageInfo.endCursor);
   };
@@ -104,6 +107,9 @@ export const NativeTab = ({ latestBlock }: { latestBlock: any }) => {
     setPageInfo(undefined);
     setNodes({});
     setFilter(selectedFilter);
+    analyticsStore.logEvent("activity_filter_click", {
+      pageName: "Transaction Tab",
+    });
   };
 
   return (

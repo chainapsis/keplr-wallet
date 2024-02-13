@@ -24,7 +24,8 @@ export const IBCChannelRegistrarModal: FunctionComponent<{
   toggle: () => void;
 }> = observer(({ isOpen, closeModal, toggle }) => {
   const intl = useIntl();
-  const { chainStore, queriesStore, ibcChannelStore } = useStore();
+  const { chainStore, queriesStore, ibcChannelStore, analyticsStore } =
+    useStore();
 
   const [isChainDropdownOpen, setIsChainDropdownOpen] = useState(false);
 
@@ -114,9 +115,11 @@ export const IBCChannelRegistrarModal: FunctionComponent<{
             data-loading={isLoading}
             onClick={async (e) => {
               e.preventDefault();
-
               setIsLoading(true);
-
+              analyticsStore.logEvent("save_ibc_channel_name_click", {
+                chainId: chainStore.current.chainId,
+                chainName: chainStore.current.chainName,
+              });
               const queries = queriesStore.get(chainStore.current.chainId);
 
               const channel = await queries.cosmos.queryIBCChannel

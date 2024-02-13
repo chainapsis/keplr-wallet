@@ -94,10 +94,10 @@ export const Transfer: FunctionComponent<{
           duration: 0.25,
         },
       });
-
-      analyticsStore.logEvent("Redelegate tx broadcasted", {
+      analyticsStore.logEvent("redelegate_txn_broadcasted", {
         chainId: chainStore.current.chainId,
         chainName: chainStore.current.chainName,
+        feeType: feeConfig.feeType,
       });
     },
     onFulfill: (tx: any) => {
@@ -118,6 +118,7 @@ export const Transfer: FunctionComponent<{
   };
   const stakeClicked = async () => {
     try {
+      analyticsStore.logEvent("redelegate_txn_click");
       await account.cosmos
         .makeBeginRedelegateTx(
           amountConfig.amount,
@@ -135,6 +136,12 @@ export const Transfer: FunctionComponent<{
         transition: {
           duration: 0.25,
         },
+      });
+      analyticsStore.logEvent("redelegate_txn_broadcasted_fail", {
+        chainId: chainStore.current.chainId,
+        chainName: chainStore.current.chainName,
+        feeType: feeConfig.feeType,
+        message: e?.message ?? "",
       });
     } finally {
       navigate("/", { replace: true });
@@ -177,6 +184,9 @@ export const Transfer: FunctionComponent<{
                   <DropdownItem
                     key={validator.operator_address}
                     onClick={() => {
+                      analyticsStore.logEvent("stake_validator_click", {
+                        pageName: "Validator Detail Page",
+                      });
                       setSelectedValidator(validator);
                     }}
                   >

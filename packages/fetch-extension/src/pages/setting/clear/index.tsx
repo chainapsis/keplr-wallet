@@ -60,6 +60,7 @@ export const ClearPage: FunctionComponent = observer(() => {
         id: "setting.clear",
       })}
       onBackButton={useCallback(() => {
+        analyticsStore.logEvent("back_click", { pageName: "Delete Account" });
         navigate(-1);
       }, [navigate])}
     >
@@ -73,8 +74,9 @@ export const ClearPage: FunctionComponent = observer(() => {
             try {
               // Make sure that password is valid and keyring is cleared.
               await keyRingStore.deleteKeyRing(parseInt(index), data.password);
-              analyticsStore.logEvent("Account removed");
-
+              analyticsStore.logEvent("delete_account_click", {
+                action: "Yes",
+              });
               navigate("/");
             } catch (e) {
               console.log("Fail to decrypt: " + e.message);

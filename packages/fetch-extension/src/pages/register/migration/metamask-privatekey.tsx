@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { Buffer } from "buffer";
 import { parseEthPrivateKey } from "@fetchai/eth-migration";
 import { RegisterConfig } from "@keplr-wallet/hooks";
+import { useStore } from "../../../stores";
 
 interface FormData {
   name: string;
@@ -30,6 +31,7 @@ export const MigrateMetamaskPrivateKeyPage: FunctionComponent<{
   onBack: () => void;
 }> = ({ registerConfig, onBack }) => {
   const intl = useIntl();
+  const { analyticsStore } = useStore();
 
   const {
     register,
@@ -79,6 +81,10 @@ export const MigrateMetamaskPrivateKeyPage: FunctionComponent<{
             privateKey,
             data.password
           );
+          analyticsStore.logEvent("register_done_click", {
+            accountType: "metamask private key",
+            pageName: "Migrate a Metamask Private Key",
+          });
         })}
       >
         <Input
@@ -203,7 +209,14 @@ export const MigrateMetamaskPrivateKeyPage: FunctionComponent<{
           <FormattedMessage id="register.create.button.next" />
         </Button>
       </Form>
-      <BackButton onClick={onBack} />
+      <BackButton
+        onClick={() => {
+          analyticsStore.logEvent("back_click", {
+            pageName: "Migrate a Metamask Private Key",
+          });
+          onBack();
+        }}
+      />
     </React.Fragment>
   );
 };

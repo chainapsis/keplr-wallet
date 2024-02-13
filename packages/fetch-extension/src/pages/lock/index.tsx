@@ -40,7 +40,7 @@ export const LockPage: FunctionComponent = observer(() => {
     },
   });
 
-  const { keyRingStore } = useStore();
+  const { keyRingStore, analyticsStore } = useStore();
   const [loading, setLoading] = useState(false);
 
   const interactionInfo = useInteractionInfo(() => {
@@ -60,7 +60,7 @@ export const LockPage: FunctionComponent = observer(() => {
             const requester = new InExtensionMessageRequester();
             // Make sure to notify that auto lock service to start check locking after duration.
             await requester.sendMessage(BACKGROUND_PORT, msg);
-
+            analyticsStore.logEvent("sign_in_click", { message: "success" });
             if (interactionInfo.interaction) {
               if (!interactionInfo.interactionInternal) {
                 // XXX: If the connection doesn't have the permission,
@@ -78,6 +78,8 @@ export const LockPage: FunctionComponent = observer(() => {
               }
             }
           } catch (e) {
+            analyticsStore.logEvent("sign_in_click", { message: "fail" });
+
             console.log("Fail to decrypt: " + e.message);
             setError("password", {
               message: intl.formatMessage({

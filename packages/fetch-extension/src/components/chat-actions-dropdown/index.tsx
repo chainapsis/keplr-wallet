@@ -38,7 +38,7 @@ const ViewContactOption = () => {
   return (
     <div
       onClick={() => {
-        analyticsStore.logEvent("Address book viewed");
+        analyticsStore.logEvent("address_book_click", { pageName: "Chat DM" });
         navigate("/setting/address-book");
       }}
     >
@@ -54,7 +54,9 @@ const AddContactOption = () => {
   return (
     <div
       onClick={() => {
-        analyticsStore.logEvent("Add to address click");
+        analyticsStore.logEvent("add_new_address_click", {
+          pageName: "Chat DM",
+        });
         navigate("/setting/address-book", {
           state: {
             openModal: true,
@@ -78,7 +80,7 @@ const BlockOption = ({
   return (
     <div
       onClick={() => {
-        analyticsStore.logEvent("Block click");
+        analyticsStore.logEvent("block_contact_click", { action: "Cancel" });
         handleClick("block");
       }}
     >
@@ -97,7 +99,7 @@ const UnblockOption = ({
   return (
     <div
       onClick={() => {
-        analyticsStore.logEvent("Unblock click");
+        analyticsStore.logEvent("unblock_contact_click", { action: "Cancel" });
         handleClick("unblock");
       }}
     >

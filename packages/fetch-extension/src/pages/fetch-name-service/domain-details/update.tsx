@@ -48,7 +48,7 @@ export const Update: React.FC<UpdateProps> = ({
   isAssigned,
   isPrimary,
 }) => {
-  const { chainStore, accountStore } = useStore();
+  const { chainStore, accountStore, analyticsStore } = useStore();
   const current = chainStore.current;
   const account = accountStore.getAccount(current.chainId);
   const navigate = useNavigate();
@@ -74,6 +74,7 @@ export const Update: React.FC<UpdateProps> = ({
   };
 
   const handleUpdate = async () => {
+    analyticsStore.logEvent("fns_domain_update_button_click");
     try {
       setIsTxnInProgress(true);
       await updateDomain(

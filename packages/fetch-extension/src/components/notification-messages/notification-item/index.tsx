@@ -28,7 +28,7 @@ export const NotificationItem: FunctionComponent<Props> = ({
   const navigate = useNavigate();
   const handleFlag = (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
-    analyticsStore.logEvent("Notification flag click");
+    analyticsStore.logEvent("notifications_flag_click");
     if (!flag) {
       setFlag(true);
       const item = document.getElementById(delivery_id);
@@ -43,8 +43,7 @@ export const NotificationItem: FunctionComponent<Props> = ({
 
   const handleNavigateToUrl = () => {
     if (cta_url != null) {
-      analyticsStore.logEvent("Notification click");
-
+      analyticsStore.logEvent("notification_click");
       const localNotifications = JSON.parse(
         localStorage.getItem(`notifications-${accountInfo.bech32Address}`) ||
           JSON.stringify([])
@@ -78,7 +77,7 @@ export const NotificationItem: FunctionComponent<Props> = ({
 
   const handleRead = (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
-    analyticsStore.logEvent("Notification remove click");
+    analyticsStore.logEvent("notification_remove_click");
     const item = document.getElementById(delivery_id);
     item?.classList.add(style["remove"]);
 

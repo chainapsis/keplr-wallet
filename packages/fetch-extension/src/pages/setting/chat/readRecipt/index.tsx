@@ -72,6 +72,7 @@ export const ReadRecipt: FunctionComponent = observer(() => {
         id: "setting.receipts",
       })}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", { pageName: "Read Receipts" });
         navigate(-1);
       }}
     >
@@ -86,8 +87,8 @@ export const ReadRecipt: FunctionComponent = observer(() => {
           onClick={(e) => {
             e.preventDefault();
             updatePrivacy(true);
-            analyticsStore.logEvent("Read Receipts Privacy setting click", {
-              readRecipt: true,
+            analyticsStore.logEvent("read_receipts_click", {
+              action: "On",
             });
           }}
           icons={useMemo(
@@ -115,8 +116,8 @@ export const ReadRecipt: FunctionComponent = observer(() => {
           onClick={(e) => {
             e.preventDefault();
             updatePrivacy(false);
-            analyticsStore.logEvent("Read Receipts Privacy setting click", {
-              readRecipt: false,
+            analyticsStore.logEvent("read_receipts_click", {
+              action: "Off",
             });
           }}
           icons={useMemo(

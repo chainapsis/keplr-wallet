@@ -90,7 +90,7 @@ const getMessageForInProgressTx = (type: string) => {
 export const DomainDetails: FunctionComponent = observer(() => {
   const domain = useLocation().pathname.split("/")[3];
   const navigate = useNavigate();
-  const { accountStore, chainStore, queriesStore } = useStore();
+  const { accountStore, chainStore, queriesStore, analyticsStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const sender = accountInfo.bech32Address;
@@ -149,6 +149,7 @@ export const DomainDetails: FunctionComponent = observer(() => {
   domainPrice = price || {};
 
   const handleTabChange = (tabName: string) => {
+    analyticsStore.logEvent(`fns_${tabName.toLowerCase()}_tab_click`);
     if (tabName === "properties")
       navigate("/fetch-name-service/domain-details/" + domainName);
     else window.open(`https://www.fetns.domains/domains/${domainName}`);
@@ -172,6 +173,7 @@ export const DomainDetails: FunctionComponent = observer(() => {
       canChangeChainInfo={false}
       alternativeTitle={formatDomain(domainName)}
       onBackButton={useCallback(() => {
+        analyticsStore.logEvent("back_click", { pageName: "Domain Detail" });
         navigate(-1);
       }, [navigate])}
       rightRenderer={

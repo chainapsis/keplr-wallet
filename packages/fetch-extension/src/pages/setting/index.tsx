@@ -16,7 +16,7 @@ export const SettingPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
   const intl = useIntl();
 
-  const { accountStore, chainStore, keyRingStore } = useStore();
+  const { accountStore, chainStore, keyRingStore, analyticsStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const config: WalletConfig = useSelector(walletConfig);
@@ -61,6 +61,7 @@ export const SettingPage: FunctionComponent = observer(() => {
       })}
       onBackButton={() => {
         navigate(-1);
+        analyticsStore.logEvent("back_click", { pageName: "Settings" });
       }}
     >
       <div className={style["container"]}>
@@ -71,6 +72,9 @@ export const SettingPage: FunctionComponent = observer(() => {
           paragraph={paragraphLang}
           onClick={() => {
             navigate("/setting/language");
+            analyticsStore.logEvent("language_click", {
+              pageName: "Setting",
+            });
           }}
           icons={useMemo(
             () => [<i key="next" className="fas fa-chevron-right" />],
@@ -84,6 +88,9 @@ export const SettingPage: FunctionComponent = observer(() => {
           paragraph={paragraphFiat}
           onClick={() => {
             navigate("/setting/fiat");
+            analyticsStore.logEvent("currency_click", {
+              pageName: "Setting",
+            });
           }}
           icons={useMemo(
             () => [<i key="next" className="fas fa-chevron-right" />],
@@ -96,6 +103,9 @@ export const SettingPage: FunctionComponent = observer(() => {
           })}
           onClick={() => {
             navigate("/setting/security-privacy");
+            analyticsStore.logEvent("security_and_privacy_click", {
+              pageName: "Setting",
+            });
           }}
           icons={useMemo(
             () => [<i key="next" className="fas fa-chevron-right" />],
@@ -114,6 +124,7 @@ export const SettingPage: FunctionComponent = observer(() => {
             title={"Chat"}
             onClick={() => {
               if (isChatActive) navigate("/setting/chat");
+              analyticsStore.logEvent("chat", { pageName: "Setting" });
             }}
             icons={useMemo(
               () => [<i key="next" className="fas fa-chevron-right" />],
@@ -130,6 +141,9 @@ export const SettingPage: FunctionComponent = observer(() => {
               title={"Notifications"}
               onClick={() => {
                 navigate("/setting/notifications");
+                analyticsStore.logEvent("notifications_tab_click", {
+                  pageName: "Setting",
+                });
               }}
               icons={useMemo(
                 () => [<i key="next" className="fas fa-chevron-right" />],
@@ -144,6 +158,9 @@ export const SettingPage: FunctionComponent = observer(() => {
           })}
           onClick={() => {
             navigate("/setting/export-to-mobile");
+            analyticsStore.logEvent("link_fetch_mobile_wallet_click", {
+              pageName: "Setting",
+            });
           }}
           icons={useMemo(
             () => [<i key="next" className="fas fa-chevron-right" />],
@@ -156,6 +173,9 @@ export const SettingPage: FunctionComponent = observer(() => {
           })}
           onClick={() => {
             navigate("/setting/chain-active");
+            analyticsStore.logEvent("show_hide_chains_click", {
+              pageName: "Setting",
+            });
           }}
           icons={useMemo(
             () => [<i key="next" className="fas fa-chevron-right" />],

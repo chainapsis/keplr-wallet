@@ -7,6 +7,7 @@ import {
   DropdownToggle,
 } from "reactstrap";
 import style from "./style.module.scss";
+import { useStore } from "../../stores";
 
 interface TokenSelectProps {
   recieverChain: any;
@@ -25,9 +26,13 @@ export const TokenSelect = observer(
     tokens,
   }: TokenSelectProps) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const { analyticsStore } = useStore();
     const handleTokenSelect = (token: any) => {
       setTransferToken(token);
       setDropdownOpen(!dropdownOpen);
+      analyticsStore.logEvent("select_transfer_token_click", {
+        pageName: "Axelar Bridge",
+      });
     };
 
     return (

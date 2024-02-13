@@ -13,7 +13,7 @@ const options = [
 ];
 
 export const GovProposalsTab = ({ latestBlock }: { latestBlock: any }) => {
-  const { chainStore, accountStore } = useStore();
+  const { chainStore, accountStore, analyticsStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,6 +54,9 @@ export const GovProposalsTab = ({ latestBlock }: { latestBlock: any }) => {
   }, [filter, latestBlock]);
 
   const handleClick = async () => {
+    analyticsStore.logEvent("activity_transactions_click", {
+      pageName: "Gov Proposal Tab",
+    });
     setLoadingRequest(true);
     await fetchNodes(pageInfo.endCursor);
     setLoadingRequest(false);
@@ -63,6 +66,9 @@ export const GovProposalsTab = ({ latestBlock }: { latestBlock: any }) => {
     setPageInfo(undefined);
     setNodes({});
     setFilter(selectedFilter);
+    analyticsStore.logEvent("activity_filter_click", {
+      pageName: "Gov Proposal Tab",
+    });
   };
 
   return (

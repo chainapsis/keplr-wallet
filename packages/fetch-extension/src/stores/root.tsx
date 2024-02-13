@@ -111,16 +111,15 @@ export class RootStore {
       toChainName?: string;
       registerType?: "seed" | "google" | "ledger" | "keystone" | "qr";
       feeType?: FeeType | undefined;
-      isIbc?: boolean;
       rpc?: string;
       rest?: string;
       pageName?: string;
-      tabName?: string;
       isClaimAll?: boolean;
       selectedPrivacySetting?: string;
-      readRecipt?: boolean;
-      proposalId?: string;
-      proposalTitle?: string;
+      readReceipt?: boolean;
+      message?: string;
+      action?: string;
+      accountType?: string;
     },
     {
       registerType?: "seed" | "google" | "ledger" | "keystone" | "qr";

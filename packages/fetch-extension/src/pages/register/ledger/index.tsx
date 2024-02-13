@@ -33,7 +33,7 @@ export const ImportLedgerIntro: FunctionComponent<{
         e.preventDefault();
 
         registerConfig.setType(TypeImportLedger);
-        analyticsStore.logEvent("Import account started", {
+        analyticsStore.logEvent("connect_ledger_click", {
           registerType: "ledger",
         });
       }}
@@ -112,9 +112,10 @@ export const ImportLedgerPage: FunctionComponent<{
               bip44Option.bip44HDPath,
               "Cosmos"
             );
-            analyticsStore.setUserProperties({
+            analyticsStore.logEvent("register_done_click", {
               registerType: "ledger",
               accountType: "ledger",
+              pageName: "Ledger Cosmos",
             });
           } catch (e) {
             alert(e.message ? e.message : e.toString());
@@ -189,6 +190,9 @@ export const ImportLedgerPage: FunctionComponent<{
           type="button"
           color="link"
           onClick={handleSubmit(async (data: FormData) => {
+            analyticsStore.logEvent("use_terra _ledger_app_click", {
+              registerType: "ledger",
+            });
             if (registerConfig.isLoading) {
               return;
             }
@@ -202,9 +206,10 @@ export const ImportLedgerPage: FunctionComponent<{
                 bip44Option.bip44HDPath,
                 "Terra"
               );
-              analyticsStore.setUserProperties({
+              analyticsStore.logEvent("register_done_click", {
                 registerType: "ledger",
                 accountType: "ledger",
+                pageName: "Ledger Terra",
               });
             } catch (e) {
               alert(e.message ? e.message : e.toString());
@@ -218,6 +223,9 @@ export const ImportLedgerPage: FunctionComponent<{
       <BackButton
         onClick={() => {
           registerConfig.clear();
+          analyticsStore.logEvent("back_click", {
+            pageName: "Ledger",
+          });
         }}
       />
     </div>

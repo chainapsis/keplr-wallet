@@ -1,7 +1,9 @@
 import React from "react";
 import { SearchInput } from "./search-input";
 import style from "./style.module.scss";
+import { useStore } from "../../../stores";
 export const ExploreDomain = () => {
+  const { analyticsStore } = useStore();
   return (
     <React.Fragment>
       <div className={style["content"]}>
@@ -17,6 +19,9 @@ export const ExploreDomain = () => {
           target="_blank"
           rel="noreferrer"
           className={style["moreDetails"]}
+          onClick={() => {
+            analyticsStore.logEvent("fns_all_minted_domains_click");
+          }}
         >
           <img
             src={require("@assets/svg/All minted domains.svg")}
@@ -36,6 +41,9 @@ export const ExploreDomain = () => {
           target="_blank"
           rel="noreferrer"
           className={style["moreDetails"]}
+          onClick={() => {
+            analyticsStore.logEvent("fns_collections_click");
+          }}
         >
           <img
             src={require("@assets/svg/collections.svg")}

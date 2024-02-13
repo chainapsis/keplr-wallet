@@ -78,7 +78,7 @@ export const RecoverMnemonicIntro: FunctionComponent<{
         e.preventDefault();
 
         registerConfig.setType(TypeRecoverMnemonic);
-        analyticsStore.logEvent("Import account started", {
+        analyticsStore.logEvent("import_existing_account_click", {
           registerType: "seed",
         });
       }}
@@ -348,9 +348,10 @@ export const RecoverMnemonicPage: FunctionComponent<{
                     privateKey,
                     data.password
                   );
-                  analyticsStore.setUserProperties({
+                  analyticsStore.logEvent("register_done_click", {
                     registerType: "seed",
                     accountType: "privateKey",
+                    pageName: "Verify New Account",
                   });
                 } else {
                   await registerConfig.createMnemonic(
@@ -363,9 +364,10 @@ export const RecoverMnemonicPage: FunctionComponent<{
                     data.password,
                     bip44Option.bip44HDPath
                   );
-                  analyticsStore.setUserProperties({
+                  analyticsStore.logEvent("register_done_click", {
                     registerType: "seed",
                     accountType: "mnemonic",
+                    pageName: "Verify New Account",
                   });
                 }
               } catch (e) {
@@ -561,6 +563,9 @@ export const RecoverMnemonicPage: FunctionComponent<{
         <BackButton
           onClick={() => {
             registerConfig.clear();
+            analyticsStore.logEvent("back_click", {
+              pageName: "Import Existing Account",
+            });
           }}
         />
       </div>

@@ -289,6 +289,9 @@ export const EditMember: FunctionComponent = observer(() => {
 
         /// fetching the group messages again
         await recieveMessages(group.id, null, 0, group.isDm, group.id);
+        analyticsStore.logEvent("remove_group_member_click", {
+          action: "Remove",
+        });
       }
     } catch (e) {
       // Show error toaster
@@ -366,8 +369,8 @@ export const EditMember: FunctionComponent = observer(() => {
   };
 
   const AddContactOption = (address: string) => {
-    analyticsStore.logEvent("Add to address click", {
-      pageName: "Group Info",
+    analyticsStore.logEvent("add_new_address_click", {
+      pageName: "Edit Member",
     });
     navigate("/setting/address-book", {
       state: {
@@ -393,8 +396,8 @@ export const EditMember: FunctionComponent = observer(() => {
 
     switch (action) {
       case GroupChatMemberOptions.messageMember:
-        analyticsStore.logEvent("Open DM click", {
-          pageName: "Group Info",
+        analyticsStore.logEvent("dm_click", {
+          pageName: "Edit Member",
         });
         navigate(`/chat/${selectedAddress.address}`);
         break;
@@ -405,28 +408,28 @@ export const EditMember: FunctionComponent = observer(() => {
 
       case GroupChatMemberOptions.removeMember:
         setRemoveMemberPopup(true);
-        analyticsStore.logEvent("Remove Member from Group", {
-          pageName: "Group Info",
+        analyticsStore.logEvent("remove_group_member_click", {
+          action: "Cancel",
         });
         break;
 
       case GroupChatMemberOptions.makeAdminStatus:
         updateAdminStatus(selectedAddress.address, true);
-        analyticsStore.logEvent("Make member an Admin", {
-          pageName: "Group Info",
+        analyticsStore.logEvent("admin_status_click", {
+          action: "Add",
         });
         break;
 
       case GroupChatMemberOptions.removeAdminStatus:
         updateAdminStatus(selectedAddress.address, false);
-        analyticsStore.logEvent("Remove member as Admin", {
-          pageName: "Group Info",
+        analyticsStore.logEvent("admin_status_click", {
+          pageName: "Remove",
         });
         break;
 
       case GroupChatMemberOptions.viewInAddressBook:
-        analyticsStore.logEvent("Address book viewed", {
-          pageName: "Group Info",
+        analyticsStore.logEvent("address_book_click", {
+          pageName: "Edit Member",
         });
         navigate("/setting/address-book");
         break;
@@ -439,6 +442,9 @@ export const EditMember: FunctionComponent = observer(() => {
       canChangeChainInfo={false}
       alternativeTitle={"New Group Chat"}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", {
+          pageName: "Edit Member",
+        });
         navigate(-1);
       }}
     >
@@ -453,6 +459,9 @@ export const EditMember: FunctionComponent = observer(() => {
                 className={"fa fa-user-plus"}
                 aria-hidden="true"
                 onClick={() => {
+                  analyticsStore.logEvent("add_group_member_click", {
+                    pageName: "Edit Member",
+                  });
                   navigate({
                     pathname: "/chat/group-chat/add-member",
                   });

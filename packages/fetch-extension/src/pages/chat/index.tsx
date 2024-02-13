@@ -49,7 +49,13 @@ const ChatView = () => {
   const userState = useSelector(userDetails);
   const chatStorePopulated = useSelector(userChatStorePopulated);
   const chatSubscriptionActive = useSelector(userChatSubscriptionActive);
-  const { chainStore, accountStore, queriesStore, uiConfigStore } = useStore();
+  const {
+    chainStore,
+    accountStore,
+    queriesStore,
+    uiConfigStore,
+    analyticsStore,
+  } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const walletAddress = accountStore.getAccount(
@@ -223,6 +229,13 @@ const ChatView = () => {
       setAddresses(addressList);
     });
   }, [selectedChainId]);
+
+  useEffect(() => {
+    analyticsStore.logEvent(
+      selectedTab == 1 ? "people_tab_click" : "agents_tab_click",
+      { pageName: "Chat Tab" }
+    );
+  }, [selectedTab]);
 
   if (
     userState.messagingPubKey.privacySetting &&

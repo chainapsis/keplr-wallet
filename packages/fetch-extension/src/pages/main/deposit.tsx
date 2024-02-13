@@ -16,7 +16,7 @@ import Modal from "react-modal";
 import { BuyModalContent } from "./asset";
 
 export const DepositView: FunctionComponent = observer(() => {
-  const { accountStore, chainStore } = useStore();
+  const { accountStore, chainStore, analyticsStore } = useStore();
   const navigate = useNavigate();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const [isDepositOpen, setIsDepositOpen] = useState(false);
@@ -136,6 +136,10 @@ export const DepositView: FunctionComponent = observer(() => {
               size="sm"
               onClick={async (e) => {
                 e.preventDefault();
+                analyticsStore.logEvent("bridge_click", {
+                  chainId: chainStore.current.chainId,
+                  chainName: chainStore.current.chainName,
+                });
                 navigate("/bridge");
               }}
             >

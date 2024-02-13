@@ -71,6 +71,9 @@ export const Privacy: FunctionComponent = observer(() => {
         id: "setting.privacy",
       })}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", {
+          pageName: "Setting & Privacy",
+        });
         navigate(-1);
       }}
     >
@@ -80,8 +83,8 @@ export const Privacy: FunctionComponent = observer(() => {
           onClick={(e) => {
             e.preventDefault();
             updatePrivacy(PrivacySetting.Everybody);
-            analyticsStore.logEvent("Privacy setting click", {
-              selectedPrivacySetting: PrivacySetting.Everybody,
+            analyticsStore.logEvent("chat_privacy_click", {
+              action: PrivacySetting.Everybody,
             });
           }}
           icons={useMemo(
@@ -104,8 +107,8 @@ export const Privacy: FunctionComponent = observer(() => {
           onClick={(e) => {
             e.preventDefault();
             updatePrivacy(PrivacySetting.Contacts);
-            analyticsStore.logEvent("Privacy setting click", {
-              selectedPrivacySetting: PrivacySetting.Contacts,
+            analyticsStore.logEvent("chat_privacy_click", {
+              action: PrivacySetting.Contacts,
             });
           }}
           icons={useMemo(
@@ -128,8 +131,8 @@ export const Privacy: FunctionComponent = observer(() => {
           onClick={(e) => {
             e.preventDefault();
             updatePrivacy(PrivacySetting.Nobody);
-            analyticsStore.logEvent("Privacy setting click", {
-              selectedPrivacySetting: PrivacySetting.Nobody,
+            analyticsStore.logEvent("chat_privacy_click", {
+              action: PrivacySetting.Nobody,
             });
           }}
           icons={useMemo(

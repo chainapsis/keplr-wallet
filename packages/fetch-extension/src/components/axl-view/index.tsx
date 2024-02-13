@@ -53,8 +53,9 @@ export const AXLView: FunctionComponent = () => {
         size="sm"
         disabled={!balance}
         onClick={() => {
-          analyticsStore.logEvent("Axelar Bridge opened", {
+          analyticsStore.logEvent("axl_transfer_click", {
             chainId: chainStore.current.chainId,
+            chainName: chainStore.current.chainName,
           });
           isEvm ? navigate("/axl-bridge-evm") : navigate("/axl-bridge-cosmos");
         }}

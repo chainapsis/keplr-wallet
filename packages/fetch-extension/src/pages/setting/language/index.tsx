@@ -6,12 +6,12 @@ import style from "../style.module.scss";
 import { useLanguage } from "../../../languages";
 import { useNavigate } from "react-router";
 import { useIntl } from "react-intl";
-
+import { useStore } from "../../../stores";
 export const SettingLanguagePage: FunctionComponent = () => {
   const language = useLanguage();
   const navigate = useNavigate();
   const intl = useIntl();
-
+  const { analyticsStore } = useStore();
   const selectedIcon = useMemo(
     () => [<i key="selected" className="fas fa-check" />],
     []
@@ -27,6 +27,7 @@ export const SettingLanguagePage: FunctionComponent = () => {
       })}
       onBackButton={useCallback(() => {
         navigate(-1);
+        analyticsStore.logEvent("back_click", { pageName: "Language" });
       }, [navigate])}
     >
       <div className={style["container"]}>

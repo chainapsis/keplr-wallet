@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLocation } from "react-router";
 import { blockUser } from "@graphQL/messages-api";
 import style from "./style.module.scss";
+import { useStore } from "../../stores";
 
 export const BlockUserPopup = ({
   setConfirmAction,
@@ -10,7 +11,11 @@ export const BlockUserPopup = ({
 }) => {
   const [processing, setProcessing] = useState(false);
   const userName = useLocation().pathname.split("/")[2];
+  const { analyticsStore } = useStore();
   const handleBlock = async () => {
+    analyticsStore.logEvent("block_contact_click", {
+      action: "Block",
+    });
     setProcessing(true);
     try {
       await blockUser(userName);

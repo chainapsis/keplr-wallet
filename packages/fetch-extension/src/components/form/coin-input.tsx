@@ -39,6 +39,7 @@ export interface CoinInputProps {
 
   overrideSelectableCurrencies?: AppCurrency[];
   dropdownDisabled?: boolean;
+  pageName: string;
 }
 
 export const CoinInput: FunctionComponent<CoinInputProps> = observer(
@@ -49,10 +50,11 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
     disableAllBalance,
     overrideSelectableCurrencies,
     dropdownDisabled,
+    pageName,
   }) => {
     const intl = useIntl();
 
-    const { queriesStore } = useStore();
+    const { queriesStore, analyticsStore } = useStore();
     const queryBalances = queriesStore
       .get(amountConfig.chainId)
       .queryBalances.getQueryBech32Address(amountConfig.sender);
@@ -130,7 +132,12 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
             id={`selector-${randomId}`}
             className={classnames(styleCoinInput["tokenSelector"])}
             isOpen={isOpenTokenSelector}
-            toggle={() => setIsOpenTokenSelector((value) => !value)}
+            toggle={() => {
+              setIsOpenTokenSelector((value) => !value);
+              analyticsStore.logEvent("select_token_click", {
+                pageName,
+              });
+            }}
             disabled={dropdownDisabled}
           >
             <DropdownToggle caret disabled={dropdownDisabled}>

@@ -227,8 +227,9 @@ export const AccountView: FunctionComponent = observer(() => {
               style={{ margin: "10px" }}
               className={styleAccount["address"]}
               onClick={() => {
-                analyticsStore.logEvent("Your domains opened", {
+                analyticsStore.logEvent("fns_your_domain_tab_click", {
                   chainId: current.chainId,
+                  chainName: chainStore.current.chainName,
                 });
                 navigate("/fetch-name-service/yourDomain");
               }}
@@ -242,8 +243,9 @@ export const AccountView: FunctionComponent = observer(() => {
               size="sm"
               style={{ margin: "10px" }}
               onClick={() => {
-                analyticsStore.logEvent("Your domains opened", {
+                analyticsStore.logEvent("fns_your_domain_tab_click", {
                   chainId: current.chainId,
+                  chainName: chainStore.current.chainName,
                 });
                 navigate("/fetch-name-service/yourDomain");
               }}

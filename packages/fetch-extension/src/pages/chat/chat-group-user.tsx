@@ -23,8 +23,8 @@ export const ChatGroupUser: React.FC<{
   const accountInfo = accountStore.getAccount(current.chainId);
 
   const handleClick = () => {
-    analyticsStore.logEvent("Open Group click", {
-      pageName: "Chat history",
+    analyticsStore.logEvent("group_click", {
+      pageName: "People Tab",
     });
     navigate(`/chat/group-chat-section/${group.id}`);
   };

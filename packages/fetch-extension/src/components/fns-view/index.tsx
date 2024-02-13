@@ -42,8 +42,9 @@ export const FNSView: FunctionComponent = () => {
         color="primary"
         size="sm"
         onClick={() => {
-          analyticsStore.logEvent("Your domains opened", {
+          analyticsStore.logEvent("fns_link_domain_click", {
             chainId: chainStore.current.chainId,
+            chainName: chainStore.current.chainName,
           });
           navigate("/fetch-name-service/explore");
         }}

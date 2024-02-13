@@ -31,7 +31,13 @@ export const AddTokenPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { chainStore, queriesStore, accountStore, tokensStore } = useStore();
+  const {
+    chainStore,
+    queriesStore,
+    accountStore,
+    tokensStore,
+    analyticsStore,
+  } = useStore();
   const tokensOf = tokensStore.getTokensOf(chainStore.current.chainId);
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
@@ -146,6 +152,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
         interactionInfo.interaction
           ? undefined
           : () => {
+              analyticsStore.logEvent("back_click", { pageName: "Add Token" });
               navigate(-1);
             }
       }
@@ -153,6 +160,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
       <Form
         className={style["container"]}
         onSubmit={form.handleSubmit(async (data) => {
+          analyticsStore.logEvent("add_token_submit_click");
           if (
             tokenInfo?.decimals != null &&
             tokenInfo.name &&

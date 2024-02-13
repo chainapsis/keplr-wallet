@@ -27,6 +27,7 @@ export const ValidatorList: FunctionComponent = observer(() => {
   const [filteredValidators, setFilteredValidators] = useState<ValidatorData[]>(
     []
   );
+  const { analyticsStore } = useStore();
   const [loading, setLoading] = useState(true);
   const [searchInput, setSearchInput] = useState<string>();
   const { chainStore, queriesStore, accountStore } = useStore();
@@ -68,6 +69,14 @@ export const ValidatorList: FunctionComponent = observer(() => {
     fetchValidators();
   }, [queries.cosmos.queryValidators, queryDelegations]);
 
+  useEffect(() => {
+    analyticsStore.logEvent(
+      operation == ValidatorOperation.VALIDATOR
+        ? "stake_validators_tab_click"
+        : "stake_mystake_tab_click"
+    );
+  }, [operation]);
+
   const handleFilterValidators = (searchValue: string) => {
     const filteredValidators = Object.values(validators).filter((validator) =>
       searchValue?.trim().length
@@ -88,7 +97,10 @@ export const ValidatorList: FunctionComponent = observer(() => {
       showChainName={false}
       canChangeChainInfo={false}
       alternativeTitle="Stake"
-      onBackButton={() => navigate("/")}
+      onBackButton={() => {
+        analyticsStore.logEvent("back_click", { pageName: "Stake" });
+        navigate("/");
+      }}
     >
       <div className={style["tabList"]}>
         <div
@@ -104,6 +116,7 @@ export const ValidatorList: FunctionComponent = observer(() => {
           onClick={() => {
             localStorage.setItem("validatorTab", ValidatorOperation.VALIDATOR);
             navigate(`/validators/${ValidatorOperation.VALIDATOR}`);
+            analyticsStore.logEvent("stake_validators_tab_click");
           }}
         >
           Validators

@@ -22,7 +22,7 @@ export const Proposal: FunctionComponent<Props> = (props) => {
   let icon, color, background, name;
   const reduxProposals: ProposalSetup = useSelector(useProposals);
 
-  const { chainStore, accountStore } = useStore();
+  const { chainStore, accountStore, analyticsStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const [alreadyVoted, setAlreadyVoted] = useState("");
   useEffect(() => {
@@ -71,6 +71,7 @@ export const Proposal: FunctionComponent<Props> = (props) => {
       name = "Failed";
   }
   const handleClick = () => {
+    analyticsStore.logEvent("proposal_detail_click");
     if (alreadyVoted !== "" && alreadyVoted !== "Unspecified") {
       const voteArr = [
         "VOTE_OPTION_UNSPECIFIED",

@@ -100,6 +100,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
       showChainName={true}
       canChangeChainInfo={false}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", { pageName: "IBC Transfer" });
         navigate(-1);
       }}
     >
@@ -109,6 +110,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
           recipientConfig={ibcTransferConfigs.recipientConfig}
           memoConfig={ibcTransferConfigs.memoConfig}
           onNext={() => {
+            analyticsStore.logEvent("ibc_next_click");
             setPhase("amount");
           }}
         />
@@ -122,6 +124,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
           onSubmit={async () => {
             if (ibcTransferConfigs.channelConfig.channel) {
               try {
+                analyticsStore.logEvent("ibc_txn_submit_click");
                 const tx = accountInfo.cosmos.makeIBCTransferTx(
                   ibcTransferConfigs.channelConfig.channel,
                   ibcTransferConfigs.amountConfig.amount,
@@ -138,11 +141,10 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                   },
                   {
                     onBroadcasted: () => {
-                      analyticsStore.logEvent("Send token tx broadCasted", {
+                      analyticsStore.logEvent("ibc_txn_broadcasted", {
                         chainId: chainStore.current.chainId,
                         chainName: chainStore.current.chainName,
                         feeType: ibcTransferConfigs.feeConfig.feeType,
-                        isIbc: true,
                         toChainId,
                         toChainName,
                       });
@@ -152,6 +154,14 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
 
                 navigate("/");
               } catch (e) {
+                analyticsStore.logEvent("ibc_txn_broadcasted_fail", {
+                  chainId: chainStore.current.chainId,
+                  chainName: chainStore.current.chainName,
+                  feeType: ibcTransferConfigs.feeConfig.feeType,
+                  toChainId,
+                  toChainName,
+                  message: e?.message ?? "",
+                });
                 navigate("/", { replace: true });
                 notification.push({
                   type: "warning",
@@ -199,6 +209,7 @@ export const IBCTransferPageChannel: FunctionComponent<{
           ibcChannelConfig={channelConfig}
           disabled={!isChannelSet}
           value={""}
+          pageName={"IBC Transfer"}
         />
         <MemoInput
           label={intl.formatMessage({
@@ -225,7 +236,6 @@ export const IBCTransferPageChannel: FunctionComponent<{
           disabled={!isValid}
           onClick={(e) => {
             e.preventDefault();
-
             onNext();
           }}
         >
@@ -246,7 +256,6 @@ export const IBCTransferPageAmount: FunctionComponent<{
   ({ amountConfig, feeConfig, gasConfig, gasSimulator, onSubmit }) => {
     const intl = useIntl();
     const { accountStore, chainStore, priceStore } = useStore();
-
     const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
     const isValid =
@@ -262,6 +271,7 @@ export const IBCTransferPageAmount: FunctionComponent<{
               id: "send.input.amount",
             })}
             amountConfig={amountConfig}
+            pageName={"IBC Transfer"}
           />
           <div style={{ flex: 1 }} />
           <FeeButtons
@@ -281,7 +291,6 @@ export const IBCTransferPageAmount: FunctionComponent<{
             data-loading={accountInfo.txTypeInProgress === "ibcTransfer"}
             onClick={(e) => {
               e.preventDefault();
-
               onSubmit();
             }}
             style={{

@@ -16,7 +16,7 @@ export const Menu: FunctionComponent = observer(() => {
       <div
         className={styleMenu["item"]}
         onClick={() => {
-          analyticsStore.logEvent("Address book viewed");
+          analyticsStore.logEvent("address_book_click", { pageName: "drawer" });
           navigate({
             pathname: "/setting/address-book",
           });
@@ -31,6 +31,7 @@ export const Menu: FunctionComponent = observer(() => {
           navigate({
             pathname: "/setting",
           });
+          analyticsStore.logEvent("settings_click", { pageName: "Drawer" });
         }}
       >
         <FormattedMessage id="main.menu.settings" />
@@ -55,6 +56,7 @@ export const Menu: FunctionComponent = observer(() => {
             navigate({
               pathname: "/setting/token/add",
             });
+            analyticsStore.logEvent("add_token_click");
           }}
         >
           <FormattedMessage id="setting.token.add" />
@@ -72,6 +74,7 @@ export const Menu: FunctionComponent = observer(() => {
             navigate({
               pathname: "/setting/token/manage",
             });
+            analyticsStore.logEvent("token_list_click");
           }}
         >
           <FormattedMessage id="main.menu.token-list" />
@@ -83,6 +86,7 @@ export const Menu: FunctionComponent = observer(() => {
         className={styleMenu["item"]}
         onClick={() => {
           keyRingStore.lock();
+          analyticsStore.logEvent("sign_out_click");
           navigate("/");
         }}
       >

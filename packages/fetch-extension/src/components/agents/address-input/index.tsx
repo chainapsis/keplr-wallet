@@ -104,6 +104,7 @@ export const RecipientAddressInput: FunctionComponent<{
         value={""}
         disabled={disabled}
         disableAddressBook={disabled}
+        pageName={"Address Book"}
       />
       <Button
         type="button"

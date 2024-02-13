@@ -19,7 +19,7 @@ interface DomainCardProps {
 
 export const DomainCard: React.FC<DomainCardProps> = observer(
   ({ domain, index, primaryDomain, ownedDomains, assignedDomains }) => {
-    const { chainStore, queriesStore } = useStore();
+    const { chainStore, queriesStore, analyticsStore } = useStore();
     const notification = useNotification();
     const navigate = useNavigate();
 
@@ -51,7 +51,10 @@ export const DomainCard: React.FC<DomainCardProps> = observer(
 
     return (
       <div
-        onClick={() => navigate(`/fetch-name-service/domain-details/${domain}`)}
+        onClick={() => {
+          navigate(`/fetch-name-service/domain-details/${domain}`);
+          analyticsStore.logEvent("fns_domain_click");
+        }}
         className={style["domainCard"]}
         key={index}
       >

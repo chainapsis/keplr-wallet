@@ -50,6 +50,9 @@ export const StakeView: FunctionComponent = observer(() => {
 
         let gas: number;
         try {
+          analyticsStore.logEvent("claim_click", {
+            pageName: "Home Tab",
+          });
           // Gas adjustment is 1.5
           // Since there is currently no convenient way to adjust the gas adjustment on the UI,
           // Use high gas adjustment to prevent failure.
@@ -69,7 +72,7 @@ export const StakeView: FunctionComponent = observer(() => {
           undefined,
           {
             onBroadcasted: () => {
-              analyticsStore.logEvent("Claim reward tx broadcasted", {
+              analyticsStore.logEvent("claim_txn_broadcasted", {
                 chainId: chainStore.current.chainId,
                 chainName: chainStore.current.chainName,
               });
@@ -89,6 +92,11 @@ export const StakeView: FunctionComponent = observer(() => {
           transition: {
             duration: 0.25,
           },
+        });
+        analyticsStore.logEvent("claim_txn_broadcasted_fail", {
+          chainId: chainStore.current.chainId,
+          chainName: chainStore.current.chainName,
+          message: e?.message ?? "",
         });
       } finally {
         setIsWithdrawingRewards(false);
@@ -207,7 +215,7 @@ export const StakeView: FunctionComponent = observer(() => {
           outline={isRewardExist}
           onClick={(e) => {
             e.preventDefault();
-            analyticsStore.logEvent("Stake button clicked", {
+            analyticsStore.logEvent("stake_click", {
               chainId: chainStore.current.chainId,
               chainName: chainStore.current.chainName,
             });

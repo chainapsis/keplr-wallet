@@ -30,7 +30,7 @@ export const ChatSearchInput = ({
       </div>
       <div
         onClick={() => {
-          analyticsStore.logEvent("New chat click");
+          analyticsStore.logEvent("new_chat_click");
           navigate("/new-chat");
         }}
       >

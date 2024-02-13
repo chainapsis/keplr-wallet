@@ -26,10 +26,13 @@ export const ChainSelect = observer(
     depositAddress,
   }: ChainSelectProps) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const { chainStore } = useStore();
+    const { chainStore, analyticsStore } = useStore();
     const handleChainSelect = async (chain: string) => {
       setRecieverChain(chain);
       setDropdownOpen(!dropdownOpen);
+      analyticsStore.logEvent("select_chain_click", {
+        pageName: "Axelar Bridge",
+      });
     };
 
     return (

@@ -34,7 +34,7 @@ export const ImportKeystoneIntro: FunctionComponent<{
         e.preventDefault();
 
         registerConfig.setType(TypeImportKeystone);
-        analyticsStore.logEvent("Import account started", {
+        analyticsStore.logEvent("import_existing_account_click", {
           registerType: "keystone",
         });
       }}
@@ -77,6 +77,9 @@ export const ImportKeystonePage: FunctionComponent<{
       <Form
         className={style["formContainer"]}
         onSubmit={handleSubmit(async (data: FormData) => {
+          analyticsStore.logEvent("register_next_click", {
+            registerType: "keystone",
+          });
           try {
             await registerConfig.createKeystone(
               data.name,
@@ -159,6 +162,9 @@ export const ImportKeystonePage: FunctionComponent<{
       <BackButton
         onClick={() => {
           registerConfig.clear();
+          analyticsStore.logEvent("back_click", {
+            pageName: "Keystone",
+          });
         }}
       />
     </div>

@@ -13,6 +13,7 @@ import { useLocation } from "react-router";
 import { chatSectionParams, defaultParamValues } from "./index";
 import { useNotification } from "@components/notification";
 import { validateAgentAddress } from "@utils/validate-agent";
+import { useStore } from "../../../stores";
 
 /**
  *
@@ -37,6 +38,7 @@ export const AddAddressModal: FunctionComponent<{
     const [name, setName] = useState("");
     const location = useLocation();
     const notification = useNotification();
+    const { analyticsStore } = useStore();
 
     const chatSectionParams =
       (location.state as chatSectionParams) || defaultParamValues;
@@ -68,6 +70,9 @@ export const AddAddressModal: FunctionComponent<{
               })
         }
         onBackButton={() => {
+          analyticsStore.logEvent("back_click", {
+            pageName: "Add/Edit Address",
+          });
           // Clear the recipient and memo before closing
           recipientConfig.setRawRecipient("");
           memoConfig.setMemo("");
@@ -91,6 +96,7 @@ export const AddAddressModal: FunctionComponent<{
             label={intl.formatMessage({ id: "setting.address-book.address" })}
             disableAddressBook={true}
             value={chatSectionParams.addressInputValue}
+            pageName={"Add/Edit Address"}
           />
           <MemoInput
             memoConfig={memoConfig}
@@ -158,6 +164,9 @@ export const AddAddressModal: FunctionComponent<{
               // Clear the recipient and memo before closing
               recipientConfig.setRawRecipient("");
               memoConfig.setMemo("");
+              analyticsStore.logEvent("save_address_click", {
+                pageName: "Address Book",
+              });
               closeModal();
             }}
           >

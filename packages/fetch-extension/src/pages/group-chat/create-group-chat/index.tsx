@@ -72,9 +72,7 @@ export const CreateGroupChat: FunctionComponent = () => {
       store.dispatch(setGroups({ groups }));
       /// fetching the group messages again
       await recieveMessages(group.id, null, 0, group.isDm, group.id);
-      analyticsStore.logEvent("Group info updated", {
-        pageName: "Group Info",
-      });
+      analyticsStore.logEvent("save_chat_settings_click");
       navigate(-1);
     }
     setIsLoading(false);
@@ -113,6 +111,7 @@ export const CreateGroupChat: FunctionComponent = () => {
       })
     );
     store.dispatch(setIsGroupEdit(false));
+    analyticsStore.logEvent("add_members_click");
     navigate({
       pathname: "/chat/group-chat/add-member",
     });
@@ -158,7 +157,12 @@ export const CreateGroupChat: FunctionComponent = () => {
       showChainName={false}
       canChangeChainInfo={false}
       alternativeTitle={"New Group Chat"}
-      onBackButton={() => handleBackButton()}
+      onBackButton={() => {
+        analyticsStore.logEvent("back_click", {
+          pageName: "New Group Chat",
+        });
+        handleBackButton();
+      }}
     >
       <ChatErrorPopup />
       <div>

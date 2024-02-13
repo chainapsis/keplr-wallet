@@ -32,7 +32,7 @@ export const ExportPage: FunctionComponent = observer(() => {
 
   const intl = useIntl();
 
-  const { keyRingStore } = useStore();
+  const { keyRingStore, analyticsStore } = useStore();
 
   const query = queryString.parse(location.search);
 
@@ -67,6 +67,10 @@ export const ExportPage: FunctionComponent = observer(() => {
           type === "mnemonic" ? "setting.export" : "setting.export.private-key",
       })}
       onBackButton={useCallback(() => {
+        analyticsStore.logEvent("back_click", {
+          pageName:
+            type === "mnemonic" ? "View Mnemonic Seed" : "View Private Key",
+        });
         navigate(-1);
       }, [navigate])}
     >

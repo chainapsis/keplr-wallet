@@ -19,7 +19,7 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
   const notification = useNotification();
   const confirm = useConfirm();
 
-  const { chainStore, tokensStore } = useStore();
+  const { chainStore, tokensStore, analyticsStore } = useStore();
 
   const isSecretWasm =
     chainStore.current.features &&
@@ -59,6 +59,7 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
         id: "main.menu.token-list",
       })}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", { pageName: "Token List" });
         navigate(-1);
       }}
     >
@@ -164,6 +165,7 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
               }}
               onClick={async (e) => {
                 e.preventDefault();
+                analyticsStore.logEvent("token_delete_click", { action: "No" });
 
                 if (
                   await confirm.confirm({
@@ -172,6 +174,9 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
                     }),
                   })
                 ) {
+                  analyticsStore.logEvent("token_delete_click", {
+                    action: "Yes",
+                  });
                   await tokensStore
                     .getTokensOf(chainStore.current.chainId)
                     .removeToken(cosmwasmToken);

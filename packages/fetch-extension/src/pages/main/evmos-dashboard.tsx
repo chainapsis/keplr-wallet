@@ -40,7 +40,7 @@ export const EvmosDashboardView: FunctionComponent = observer(() => {
         target="_blank"
         rel="noopener noreferrer"
         onClick={() => {
-          analyticsStore.logEvent("Evmos dashboard opened", {
+          analyticsStore.logEvent("evmos_dashboard_viewed", {
             chainId: chainStore.current.chainId,
             chainName: chainStore.current.chainName,
           });

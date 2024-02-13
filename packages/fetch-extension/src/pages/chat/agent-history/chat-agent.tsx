@@ -22,8 +22,8 @@ export const ChatAgent: React.FC<{
   const navigate = useNavigate();
 
   const handleClick = () => {
-    analyticsStore.logEvent("Open Agent click", {
-      pageName: "Chat history",
+    analyticsStore.logEvent("talk_to_an_agent_click", {
+      pageName: "Agent Tab",
     });
     navigate(`/chat/agent/${targetAddress}`);
   };

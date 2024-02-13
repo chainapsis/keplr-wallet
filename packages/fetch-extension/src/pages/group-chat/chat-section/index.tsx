@@ -97,22 +97,24 @@ export const GroupChatSection: FunctionComponent = () => {
     setShowDropdown(false);
     switch (option) {
       case GroupChatOptions.groupInfo:
-        analyticsStore.logEvent("Group info click");
+        analyticsStore.logEvent("group_info_click");
         navigateToPage("/chat/group-chat/review-details");
         break;
 
       case GroupChatOptions.chatSettings:
-        analyticsStore.logEvent("Group Chat setting click");
+        analyticsStore.logEvent("group_chat_setting_click");
         navigateToPage("/chat/group-chat/create");
         break;
 
       case GroupChatOptions.deleteGroup:
+        analyticsStore.logEvent("delete_group_click", { action: "Cancel" });
         setAction("deleteGroup");
         setConfirmAction(true);
         break;
 
       case GroupChatOptions.leaveGroup:
       default:
+        analyticsStore.logEvent("leave_group_click", { action: "Cancel" });
         setAction(GroupChatOptions[option]);
         setConfirmAction(true);
         break;
@@ -139,7 +141,6 @@ export const GroupChatSection: FunctionComponent = () => {
         const messagesObj: any = { [message.id]: message };
         const messages = { ...userChats[groupId].messages, ...messagesObj };
         store.dispatch(updateChatList({ userAddress: groupId, messages }));
-        analyticsStore.logEvent("Leave group click");
       }
     }
     setConfirmAction(false);

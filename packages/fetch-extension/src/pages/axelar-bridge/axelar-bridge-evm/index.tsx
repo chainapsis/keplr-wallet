@@ -30,7 +30,7 @@ import { GetDepositAddress } from "./get-deposit-address";
 import { SendToken } from "./send-token";
 
 export const AxelarBridgeEVM = observer(() => {
-  const { chainStore, queriesStore, accountStore } = useStore();
+  const { chainStore, queriesStore, accountStore, analyticsStore } = useStore();
   const current = chainStore.current;
   const transferChain = CHAINS.find(
     (chain: any) => chain.chainId == current.chainId
@@ -204,6 +204,7 @@ export const AxelarBridgeEVM = observer(() => {
       alternativeTitle={"Axelar Bridge"}
       canChangeChainInfo={false}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", { pageName: "Axelar Bridge" });
         navigate("/more");
       }}
     >

@@ -283,9 +283,6 @@ export const AddMember: FunctionComponent = observer(() => {
       store.dispatch(setGroups({ groups }));
       /// fetching the group messages again
       await recieveMessages(group.id, null, 0, group.isDm, group.id);
-      analyticsStore.logEvent("New members added", {
-        pageName: "Group Info",
-      });
       navigate(-1);
     }
   }
@@ -303,6 +300,9 @@ export const AddMember: FunctionComponent = observer(() => {
       canChangeChainInfo={false}
       alternativeTitle={"New Group Chat"}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", {
+          pageName: "Add Member Chat",
+        });
         navigate(-1);
       }}
     >
@@ -394,7 +394,9 @@ export const AddMember: FunctionComponent = observer(() => {
           onClick={() => {
             if (newGroupState.isEditGroup) {
               handleUpdateGroup();
+              analyticsStore.logEvent("update_group_member_click");
             } else {
+              analyticsStore.logEvent("group_review_click");
               navigate("/chat/group-chat/review-details");
             }
           }}

@@ -10,7 +10,7 @@ import { Dec, IntPretty } from "@keplr-wallet/unit";
 import { Button } from "reactstrap";
 
 export const BridgePage: FunctionComponent = observer(() => {
-  const { chainStore, queriesStore } = useStore();
+  const { chainStore, queriesStore, analyticsStore } = useStore();
   const navigate = useNavigate();
 
   const bridgeEvmQuery = queriesStore.get(chainStore.current.chainId).evm
@@ -45,6 +45,7 @@ export const BridgePage: FunctionComponent = observer(() => {
       alternativeTitle={"Bridge"}
       canChangeChainInfo={false}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", { pageName: "Bridge" });
         navigate(-1);
       }}
       rightRenderer={
@@ -54,7 +55,7 @@ export const BridgePage: FunctionComponent = observer(() => {
           outline
           onClick={(e) => {
             e.preventDefault();
-
+            analyticsStore.logEvent("bridge_history_click");
             navigate("/bridge-history");
           }}
         >

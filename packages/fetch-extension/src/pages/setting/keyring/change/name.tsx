@@ -22,7 +22,7 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
 
   const intl = useIntl();
 
-  const { keyRingStore } = useStore();
+  const { keyRingStore, analyticsStore } = useStore();
 
   const waitingNameData = keyRingStore.waitingNameData?.data;
 
@@ -70,6 +70,9 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
         id: "setting.keyring.change.name",
       })}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", {
+          pageName: "Change Account Name",
+        });
         navigate(-1);
       }}
     >
@@ -90,7 +93,7 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
               parseInt(index),
               data.name.trim()
             );
-
+            analyticsStore.logEvent("save_account_name_click");
             navigate("/");
           } catch (e) {
             console.log("Fail to decrypt: " + e.message);

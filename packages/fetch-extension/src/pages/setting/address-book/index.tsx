@@ -46,7 +46,7 @@ export const AddressBookPage: FunctionComponent<{
   ({ onBackButton, hideChainDropdown, selectHandler, ibcChannelConfig }) => {
     const intl = useIntl();
     const navigate = useNavigate();
-    const { chainStore, uiConfigStore } = useStore();
+    const { chainStore, uiConfigStore, analyticsStore } = useStore();
     const current = chainStore.current;
     const location = useLocation();
     const chatSectionParams =
@@ -115,7 +115,7 @@ export const AddressBookPage: FunctionComponent<{
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-
+            analyticsStore.logEvent("edit_address_book_click");
             setAddAddressModalOpen(true);
             setAddAddressModalIndex(index);
           }}
@@ -127,6 +127,9 @@ export const AddressBookPage: FunctionComponent<{
           onClick={async (e) => {
             e.preventDefault();
             e.stopPropagation();
+            analyticsStore.logEvent("delete_address_book_click", {
+              action: "No",
+            });
 
             if (
               await confirm.confirm({
@@ -145,6 +148,9 @@ export const AddressBookPage: FunctionComponent<{
                 }),
               })
             ) {
+              analyticsStore.logEvent("delete_address_book_click", {
+                action: "Yes",
+              });
               setAddAddressModalOpen(false);
               setAddAddressModalIndex(-1);
               addressBookConfig.removeAddressBook(index);
@@ -181,6 +187,9 @@ export const AddressBookPage: FunctionComponent<{
           onBackButton
             ? onBackButton
             : () => {
+                analyticsStore.logEvent("back_click", {
+                  pageName: "Address Book Page",
+                });
                 navigate(-1);
               }
         }
@@ -246,7 +255,9 @@ export const AddressBookPage: FunctionComponent<{
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-
+                    analyticsStore.logEvent("add_new_address_click", {
+                      pageName: "Drawer",
+                    });
                     setAddAddressModalOpen(true);
                   }}
                 >

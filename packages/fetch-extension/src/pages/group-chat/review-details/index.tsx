@@ -188,8 +188,8 @@ export const ReviewGroupChat: FunctionComponent = observer(() => {
   };
 
   const AddContactOption = (address: string) => {
-    analyticsStore.logEvent("Add to address click", {
-      pageName: "Group Info",
+    analyticsStore.logEvent("add_new_address_click", {
+      pageName: "Group Chat Review",
     });
     navigate("/setting/address-book", {
       state: {
@@ -215,8 +215,8 @@ export const ReviewGroupChat: FunctionComponent = observer(() => {
 
     switch (action) {
       case GroupChatMemberOptions.messageMember:
-        analyticsStore.logEvent("Open DM click", {
-          pageName: "Group Info",
+        analyticsStore.logEvent("dm_click", {
+          pageName: "Group Chat Review",
         });
         navigate(`/chat/${selectedAddress.address}`);
         break;
@@ -226,8 +226,8 @@ export const ReviewGroupChat: FunctionComponent = observer(() => {
         break;
 
       case GroupChatMemberOptions.viewInAddressBook:
-        analyticsStore.logEvent("Address book viewed", {
-          pageName: "Group Info",
+        analyticsStore.logEvent("address_book_click", {
+          pageName: "Group Chat Review",
         });
         navigate("/setting/address-book");
         break;
@@ -270,7 +270,7 @@ export const ReviewGroupChat: FunctionComponent = observer(() => {
       /// Clearing stack till chat tab
       navigate(-4);
       setTimeout(() => {
-        analyticsStore.logEvent("New group created");
+        analyticsStore.logEvent("create_group_click");
         navigate(`/chat/group-chat-section/${groupData.id}`);
       }, 100);
     }
@@ -282,6 +282,9 @@ export const ReviewGroupChat: FunctionComponent = observer(() => {
       canChangeChainInfo={false}
       alternativeTitle={"New Group Chat"}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", {
+          pageName: "Group Chat Review",
+        });
         navigate(-1);
       }}
     >
@@ -302,6 +305,7 @@ export const ReviewGroupChat: FunctionComponent = observer(() => {
             className={style["button"]}
             size="large"
             onClick={async () => {
+              analyticsStore.logEvent("edit_chat_settings_click");
               navigate("/chat/group-chat/edit-member");
             }}
           >

@@ -42,6 +42,7 @@ export interface WCExportKeyRingDatasResponse {
 export const ExportToMobilePage: FunctionComponent = () => {
   const navigate = useNavigate();
   const intl = useIntl();
+  const { analyticsStore } = useStore();
 
   const [exportKeyRingDatas, setExportKeyRingDatas] = useState<
     ExportKeyRingData[]
@@ -57,6 +58,9 @@ export const ExportToMobilePage: FunctionComponent = () => {
       })}
       onBackButton={() => {
         navigate(-1);
+        analyticsStore.logEvent("back_click", {
+          pageName: "Link Fetch Mobile Wallet",
+        });
       }}
     >
       {exportKeyRingDatas.length === 0 ? (

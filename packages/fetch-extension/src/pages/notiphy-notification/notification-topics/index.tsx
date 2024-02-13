@@ -19,7 +19,7 @@ const pageOptions = {
 export const NotificationTopics: FunctionComponent = () => {
   const navigate = useNavigate();
   const [inputVal, setInputVal] = useState("");
-  const { chainStore, accountStore } = useStore();
+  const { chainStore, accountStore, analyticsStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
 
@@ -53,10 +53,12 @@ export const NotificationTopics: FunctionComponent = () => {
       JSON.stringify(selectedTopics)
     );
     if (type === pageOptions.edit) {
+      analyticsStore.logEvent("update_notification_preferences_click", {
+        pageName: "Topics",
+      });
       navigate(-1);
       return;
     }
-
     navigate("/notification/review");
   };
 
@@ -98,6 +100,7 @@ export const NotificationTopics: FunctionComponent = () => {
       alternativeTitle={"Topics"}
       showBottomMenu={false}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", { pageName: "Topics" });
         navigate(-1);
       }}
     >

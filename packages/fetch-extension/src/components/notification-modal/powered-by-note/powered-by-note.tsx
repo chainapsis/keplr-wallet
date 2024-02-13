@@ -1,10 +1,16 @@
 import React, { FunctionComponent } from "react";
 import style from "./style.module.scss";
+import { useStore } from "../../../stores";
 export const PoweredByNote: FunctionComponent = () => {
+  const { analyticsStore } = useStore();
+
   return (
     <div
       className={style["poweredByNoteContainer"]}
-      onClick={() => window.open("http://notyphi.com/")}
+      onClick={() => {
+        analyticsStore.logEvent("notyphi_click");
+        window.open("http://notyphi.com/");
+      }}
     >
       <p className={style["poweredByNoteText"]}>
         Powered by{" "}

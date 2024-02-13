@@ -41,13 +41,8 @@ export const EthereumBridge: FunctionComponent<{
     defaultAmount: string | undefined;
   };
 
-  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
+  const { chainStore, accountStore, queriesStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
-
-  analyticsStore.logEvent("Native bridge page opened", {
-    chainId: chainStore.current.chainId,
-    chainName: chainStore.current.chainName,
-  });
 
   const nativeBridgeConfig = useNativeBridgeConfig(
     chainStore,
@@ -157,6 +152,7 @@ export const Configure: FunctionComponent<{
             recipientConfig={recipientConfig}
             disableAddressBook
             value={""}
+            pageName={"Bridge"}
           />
           <div
             className={style["addressSelector"]}
@@ -179,6 +175,7 @@ export const Configure: FunctionComponent<{
             })}
             amountConfig={amountConfig}
             dropdownDisabled
+            pageName={"Bridge"}
           />
           <div style={{ flex: 1 }} />
           {fee && (
@@ -361,16 +358,26 @@ export const Approve: FunctionComponent<{
                         `/bridge?defaultRecipient=${recipientConfig.recipient}&defaultAmount=${amountConfig.amount}`
                       );
                       analyticsStore.logEvent(
-                        "Bridge token approval tx broadcasted",
+                        "bridge_txn_approval_broadcasted",
                         {
                           chainId: chainStore.current.chainId,
                           chainName: chainStore.current.chainName,
+                          feeType: feeConfig.feeType,
                         }
                       );
                     },
                   }
                 );
               } catch (e) {
+                analyticsStore.logEvent(
+                  "bridge_txn_approval_broadcasted_fail",
+                  {
+                    chainId: chainStore.current.chainId,
+                    chainName: chainStore.current.chainName,
+                    feeType: feeConfig.feeType,
+                    message: e?.message ?? "",
+                  }
+                );
                 navigate(
                   `/bridge?defaultRecipient=${recipientConfig.recipient}&defaultAmount=${amountConfig.amount}`
                 );
@@ -498,14 +505,21 @@ export const Bridge: FunctionComponent<{
                   },
                   onBroadcasted() {
                     navigate(`/bridge`);
-                    analyticsStore.logEvent("Bridge token tx broadcasted", {
+                    analyticsStore.logEvent("bridge_txn_broadcasted", {
                       chainId: chainStore.current.chainId,
                       chainName: chainStore.current.chainName,
+                      feeType: feeConfig.feeType,
                     });
                   },
                 }
               );
             } catch (e) {
+              analyticsStore.logEvent("bridge_txn_broadcasted_fail", {
+                chainId: chainStore.current.chainId,
+                chainName: chainStore.current.chainName,
+                feeType: feeConfig.feeType,
+                message: e?.message ?? "",
+              });
               navigate(
                 `/bridge?defaultRecipient=${recipient}&defaultAmount=${bridgeAmount}`
               );

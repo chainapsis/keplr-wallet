@@ -37,10 +37,10 @@ export const NewMnemonicIntro: FunctionComponent<{
       size="lg"
       onClick={(e) => {
         e.preventDefault();
-
         registerConfig.setType(TypeNewMnemonic);
-        analyticsStore.logEvent("Create account started", {
+        analyticsStore.logEvent("create_new_account_click", {
           registerType: "seed",
+          accountType: "mnemonic",
         });
       }}
     >
@@ -81,7 +81,7 @@ export const GenerateMnemonicModePage: FunctionComponent<{
   bip44Option: BIP44Option;
 }> = observer(({ registerConfig, newMnemonicConfig, bip44Option }) => {
   const intl = useIntl();
-
+  const { analyticsStore } = useStore();
   const {
     register,
     handleSubmit,
@@ -145,8 +145,12 @@ export const GenerateMnemonicModePage: FunctionComponent<{
         onSubmit={handleSubmit(async (data: FormData) => {
           newMnemonicConfig.setName(data.name);
           newMnemonicConfig.setPassword(data.password);
-
           newMnemonicConfig.setMode("verify");
+          analyticsStore.logEvent("register_next_click", {
+            pageName: "Create New Account",
+            registerType: "seed",
+            accountType: "mnemonic",
+          });
         })}
       >
         <div className={style["newMnemonic"]}>{newMnemonicConfig.mnemonic}</div>
@@ -211,6 +215,9 @@ export const GenerateMnemonicModePage: FunctionComponent<{
       <BackButton
         onClick={() => {
           registerConfig.clear();
+          analyticsStore.logEvent("back_click", {
+            pageName: "Create New Account",
+          });
         }}
       />
     </div>
@@ -310,7 +317,6 @@ export const VerifyMnemonicModePage: FunctionComponent<{
         }}
         onClick={async (e) => {
           e.preventDefault();
-
           try {
             await registerConfig.createMnemonic(
               newMnemonicConfig.name,
@@ -318,9 +324,10 @@ export const VerifyMnemonicModePage: FunctionComponent<{
               newMnemonicConfig.password,
               bip44Option.bip44HDPath
             );
-            analyticsStore.setUserProperties({
+            analyticsStore.logEvent("register_done_click", {
               registerType: "seed",
               accountType: "mnemonic",
+              pageName: "Verify New Account",
             });
           } catch (e) {
             alert(e.message ? e.message : e.toString());
@@ -334,6 +341,9 @@ export const VerifyMnemonicModePage: FunctionComponent<{
       <BackButton
         onClick={() => {
           newMnemonicConfig.setMode("generate");
+          analyticsStore.logEvent("back_click", {
+            pageName: "Verify New Account",
+          });
         }}
       />
     </div>

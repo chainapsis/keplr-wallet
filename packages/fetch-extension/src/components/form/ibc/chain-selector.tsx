@@ -18,7 +18,7 @@ import { FormattedMessage } from "react-intl";
 export const DestinationChainSelector: FunctionComponent<{
   ibcChannelConfig: IIBCChannelConfig;
 }> = observer(({ ibcChannelConfig }) => {
-  const { chainStore, ibcChannelStore } = useStore();
+  const { chainStore, ibcChannelStore, analyticsStore } = useStore();
   const ibcChannelInfo = ibcChannelStore.get(chainStore.current.chainId);
 
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
@@ -46,7 +46,15 @@ export const DestinationChainSelector: FunctionComponent<{
           id={selectorId}
           className={style["chainSelector"]}
           isOpen={isSelectorOpen}
-          toggle={() => setIsSelectorOpen((value) => !value)}
+          toggle={() => {
+            if (isSelectorOpen) {
+              analyticsStore.logEvent("add_ibc_channel_name_click", {
+                chainId: chainStore.current.chainId,
+                chainName: chainStore.current.chainName,
+              });
+            }
+            setIsSelectorOpen((value) => !value);
+          }}
         >
           <DropdownToggle caret>
             {ibcChannelConfig.channel ? (
@@ -72,8 +80,10 @@ export const DestinationChainSelector: FunctionComponent<{
                     key={chainInfo.chainId}
                     onClick={(e) => {
                       e.preventDefault();
-
                       ibcChannelConfig.setChannel(channel);
+                      analyticsStore.logEvent("select_chain_click", {
+                        pageName: "IBC Transfer",
+                      });
                     }}
                   >
                     {chainInfo.chainName}
@@ -85,7 +95,9 @@ export const DestinationChainSelector: FunctionComponent<{
             <DropdownItem
               onClick={(e) => {
                 e.preventDefault();
-
+                analyticsStore.logEvent("select_new_chain_click", {
+                  pageName: "IBC Transfer",
+                });
                 setIsIBCregisterModalOpen(true);
               }}
             >

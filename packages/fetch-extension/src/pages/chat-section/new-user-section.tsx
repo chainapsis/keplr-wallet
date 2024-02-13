@@ -27,7 +27,9 @@ export const NewUserSection = ({
         <button
           style={{ padding: "4px 20px" }}
           onClick={() => {
-            analyticsStore.logEvent("Add to address click");
+            analyticsStore.logEvent("add_new_address_click", {
+              pageName: "Chat DM",
+            });
             navigate("/setting/address-book", {
               state: {
                 openModal: true,
@@ -41,7 +43,9 @@ export const NewUserSection = ({
         {blockedUsers[targetAddress] ? (
           <button
             onClick={() => {
-              analyticsStore.logEvent("Unblock click");
+              analyticsStore.logEvent("unblock_contact_click", {
+                action: "Cancel",
+              });
               handleClick("unblock");
             }}
           >
@@ -50,7 +54,9 @@ export const NewUserSection = ({
         ) : (
           <button
             onClick={() => {
-              analyticsStore.logEvent("Block click");
+              analyticsStore.logEvent("block_contact_click", {
+                action: "Cancel",
+              });
               handleClick("block");
             }}
           >

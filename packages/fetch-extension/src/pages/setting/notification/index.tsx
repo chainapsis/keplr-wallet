@@ -29,7 +29,9 @@ export const SettingNotifications: FunctionComponent = () => {
 
   const handleOnChange = () => {
     analyticsStore.logEvent(
-      notificationInfo.isNotificationOn ? "Notification off" : "Notification on"
+      notificationInfo.isNotificationOn
+        ? "notification_off_click"
+        : "notification_on_click"
     );
 
     localStorage.setItem(
@@ -56,6 +58,9 @@ export const SettingNotifications: FunctionComponent = () => {
       alternativeTitle={"Notifications"}
       showBottomMenu={false}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", {
+          pageName: "Notifications",
+        });
         navigate(-1);
       }}
     >
@@ -81,6 +86,9 @@ export const SettingNotifications: FunctionComponent = () => {
               paragraph={`${orgInfo.length} organisation${orgSuffix} followed`}
               icons={icon}
               onClick={() => {
+                analyticsStore.logEvent("organisations_click", {
+                  action: "Edit",
+                });
                 navigate("/notification/organisations/edit");
               }}
             />
@@ -90,6 +98,9 @@ export const SettingNotifications: FunctionComponent = () => {
               paragraph={`${topicInfo.length} topic${topicSuffix} followed`}
               icons={icon}
               onClick={() => {
+                analyticsStore.logEvent("topics_click", {
+                  action: "Edit",
+                });
                 navigate("/notification/topics/edit", {
                   state: {
                     isUpdating: true,

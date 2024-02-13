@@ -18,7 +18,7 @@ export const BlockList: FunctionComponent = observer(() => {
   const blockedAddresses = useSelector(userBlockedAddresses);
   const navigate = useNavigate();
   const intl = useIntl();
-  const { chainStore } = useStore();
+  const { chainStore, analyticsStore } = useStore();
 
   const addressBookConfig = useAddressBookConfig(
     new ExtensionKVStore("address-book"),
@@ -47,6 +47,9 @@ export const BlockList: FunctionComponent = observer(() => {
         id: "setting.block",
       })}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", {
+          pageName: "Block List",
+        });
         navigate(-1);
       }}
     >

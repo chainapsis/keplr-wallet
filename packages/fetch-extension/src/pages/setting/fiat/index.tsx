@@ -15,7 +15,7 @@ export const SettingFiatPage: FunctionComponent = observer(() => {
 
   const language = useLanguage();
 
-  const { priceStore } = useStore();
+  const { priceStore, analyticsStore } = useStore();
 
   const selectedIcon = useMemo(
     () => [<i key="selected" className="fas fa-check" />],
@@ -31,6 +31,7 @@ export const SettingFiatPage: FunctionComponent = observer(() => {
         id: "setting.fiat",
       })}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", { pageName: "Currency" });
         navigate(-1);
       }}
     >

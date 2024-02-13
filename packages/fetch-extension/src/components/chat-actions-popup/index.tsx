@@ -6,6 +6,7 @@ import { BlockUserPopup } from "./block-user-popup";
 import { DeleteChatPopup } from "./delete-chat-popup";
 import { DeleteGroupPopup } from "./delete-group-popup";
 import { UnblockUserPopup } from "./unblock-user-popup";
+import { useStore } from "../../stores";
 
 export const ChatActionsPopup = ({
   action,
@@ -19,7 +20,7 @@ export const ChatActionsPopup = ({
   const [processing, setProcessing] = useState(false);
   /// Target address for one to one chat
   const targetAddress = useLocation().pathname.split("/")[2];
-
+  const { analyticsStore } = useStore();
   const handleLeaveGroup = async () => {
     setProcessing(true);
     if (handleAction) handleAction();
@@ -55,6 +56,7 @@ export const ChatActionsPopup = ({
           onClick={(action: CommonPopupOptions) => {
             if (action === CommonPopupOptions.ok) {
               handleLeaveGroup();
+              analyticsStore.logEvent("leave_group_click", { action: "Leave" });
             } else {
               setConfirmAction(false);
             }

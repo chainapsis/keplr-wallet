@@ -38,7 +38,7 @@ export const AxelarBridgeCosmos = observer(() => {
   const [depositAddress, setDepositAddress] = useState<any>();
   const [isFetchingAddress, setIsFetchingAddress] = useState<boolean>(false);
 
-  const { chainStore } = useStore();
+  const { chainStore, analyticsStore } = useStore();
   const current = chainStore.current;
   const transferChain = CHAINS.find(
     (chain: any) => chain.chainId == current.chainId
@@ -110,6 +110,7 @@ export const AxelarBridgeCosmos = observer(() => {
       alternativeTitle={"Axelar Bridge"}
       canChangeChainInfo={false}
       onBackButton={() => {
+        analyticsStore.logEvent("back_click", { pageName: "Axelar Bridge" });
         navigate("/more");
       }}
     >

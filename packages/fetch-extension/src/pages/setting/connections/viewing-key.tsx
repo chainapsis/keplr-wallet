@@ -17,7 +17,8 @@ export const SettingSecret20ViewingKeyConnectionsPage: FunctionComponent =
     const navigate = useNavigate();
     const confirm = useConfirm();
 
-    const { chainStore, permissionStore, queriesStore } = useStore();
+    const { chainStore, permissionStore, queriesStore, analyticsStore } =
+      useStore();
 
     let tokenInfo;
     let accessInfo: Secret20ViewingKeyPermissionInnerStore | undefined;
@@ -46,6 +47,7 @@ export const SettingSecret20ViewingKeyConnectionsPage: FunctionComponent =
           id: "setting.connections.viewing-key",
         })}
         onBackButton={() => {
+          analyticsStore.logEvent("back_click", { pageName: "Connections" });
           navigate(-1);
         }}
       >

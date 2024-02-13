@@ -57,8 +57,10 @@ export const Mint: React.FC<MintProps> = ({ domainPrice, domainName }) => {
       setmintingPrice("Not Available");
     }
 
-    analyticsStore.logEvent("Domain mint clicked", {
+    analyticsStore.logEvent("fns_mint_button_click", {
       chainId: current.chainId,
+      chainName: chainStore.current.chainName,
+      action: "Cancel",
     });
     setShowPopUp(true);
   };
@@ -73,6 +75,11 @@ export const Mint: React.FC<MintProps> = ({ domainPrice, domainName }) => {
         domainPrice,
         notification
       );
+      analyticsStore.logEvent("fns_mint_button_click", {
+        chainId: current.chainId,
+        chainName: chainStore.current.chainName,
+        action: "Continue",
+      });
     } catch (error) {
       console.error("Error minting domain:", error);
       notification.push({
@@ -84,10 +91,6 @@ export const Mint: React.FC<MintProps> = ({ domainPrice, domainName }) => {
         transition: {
           duration: 0.25,
         },
-      });
-    } finally {
-      analyticsStore.logEvent("Domain mint continue clicked", {
-        chainId: current.chainId,
       });
     }
     navigate(-1);

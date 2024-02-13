@@ -17,7 +17,7 @@ import { FormattedMessage } from "react-intl";
 import { ToolTip } from "@components/tooltip";
 export const ReviewNotification: FunctionComponent = () => {
   const navigate = useNavigate();
-  const { chainStore, accountStore } = useStore();
+  const { chainStore, accountStore, analyticsStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
 
@@ -40,6 +40,9 @@ export const ReviewNotification: FunctionComponent = () => {
   }, [notificationInfo.organisations]);
 
   const onBackClick = () => {
+    analyticsStore.logEvent("back_click", {
+      pageName: "Notifications Setting",
+    });
     navigate(-3);
   };
 
