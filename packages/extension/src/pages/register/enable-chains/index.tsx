@@ -34,7 +34,7 @@ import { useNavigate } from "react-router";
 import { ChainImageFallback } from "../../../components/image";
 import { Checkbox } from "../../../components/checkbox";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
-import { WalletStatus } from "@keplr-wallet/stores";
+import { IChainInfoImpl, WalletStatus } from "@keplr-wallet/stores";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TextButton } from "../../../components/button-text";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -920,7 +920,7 @@ export const EnableChainsScene: FunctionComponent<{
 );
 
 const ChainItem: FunctionComponent<{
-  chainInfo: ChainInfo;
+  chainInfo: IChainInfoImpl;
   balance: CoinPretty;
 
   enabled: boolean;
@@ -964,7 +964,16 @@ const ChainItem: FunctionComponent<{
             <Gutter size="0.5rem" />
 
             <YAxis>
-              <Subtitle2>{chainInfo.chainName}</Subtitle2>
+              <Subtitle2>
+                {(() => {
+                  // Noble의 경우만 약간 특수하게 표시해줌
+                  if (chainInfo.chainIdentifier === "noble") {
+                    return `${chainInfo.chainName} (USDC)`;
+                  }
+
+                  return chainInfo.chainName;
+                })()}
+              </Subtitle2>
             </YAxis>
           </XAxis>
           <Column weight={1} />
