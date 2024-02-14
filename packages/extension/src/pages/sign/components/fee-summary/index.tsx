@@ -27,105 +27,107 @@ export const FeeSummary: FunctionComponent<{
   const theme = useTheme();
 
   return (
-    <Box
-      padding="1rem"
-      borderRadius="0.375rem"
-      backgroundColor={
-        theme.mode === "light"
-          ? ColorPalette["white"]
-          : ColorPalette["gray-600"]
-      }
-    >
-      <XAxis alignY="center">
-        <Subtitle3
-          color={
-            theme.mode === "light"
-              ? ColorPalette["gray-500"]
-              : ColorPalette["gray-200"]
-          }
-        >
-          Fee Options
-        </Subtitle3>
-
-        <div style={{ flex: 1 }} />
-
-        <YAxis>
-          {(() => {
-            if (feeConfig.fees.length > 0) {
-              return feeConfig.fees;
+    <Box>
+      <Box
+        padding="1rem"
+        borderRadius="0.375rem"
+        backgroundColor={
+          theme.mode === "light"
+            ? ColorPalette["white"]
+            : ColorPalette["gray-600"]
+        }
+      >
+        <XAxis alignY="center">
+          <Subtitle3
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-500"]
+                : ColorPalette["gray-200"]
             }
-            const chainInfo = chainStore.getChain(feeConfig.chainId);
-            return [
-              new CoinPretty(
-                chainInfo.stakeCurrency || chainInfo.currencies[0],
-                new Dec(0)
-              ),
-            ];
-          })()
-            .map((fee) =>
-              fee
-                .maxDecimals(6)
-                .inequalitySymbol(true)
-                .trim(true)
-                .shrink(true)
-                .hideIBCMetadata(true)
-                .toString()
-            )
-            .map((text) => {
-              return (
-                <Subtitle3
-                  key={text}
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-600"]
-                      : ColorPalette["gray-50"]
-                  }
-                >
-                  {text}
-                </Subtitle3>
-              );
-            })}
-        </YAxis>
+          >
+            Fee Options
+          </Subtitle3>
 
-        <Gutter size="0.25rem" />
-        <Subtitle3
-          color={
-            theme.mode === "light"
-              ? ColorPalette["gray-300"]
-              : ColorPalette["gray-300"]
-          }
-        >
-          {(() => {
-            let total: PricePretty | undefined;
-            let hasUnknown = false;
-            for (const fee of feeConfig.fees) {
-              if (!fee.currency.coinGeckoId) {
-                hasUnknown = true;
-                break;
-              } else {
-                const price = priceStore.calculatePrice(fee);
-                if (price) {
-                  if (!total) {
-                    total = price;
-                  } else {
-                    total = total.add(price);
+          <div style={{ flex: 1 }} />
+
+          <YAxis>
+            {(() => {
+              if (feeConfig.fees.length > 0) {
+                return feeConfig.fees;
+              }
+              const chainInfo = chainStore.getChain(feeConfig.chainId);
+              return [
+                new CoinPretty(
+                  chainInfo.stakeCurrency || chainInfo.currencies[0],
+                  new Dec(0)
+                ),
+              ];
+            })()
+              .map((fee) =>
+                fee
+                  .maxDecimals(6)
+                  .inequalitySymbol(true)
+                  .trim(true)
+                  .shrink(true)
+                  .hideIBCMetadata(true)
+                  .toString()
+              )
+              .map((text) => {
+                return (
+                  <Subtitle3
+                    key={text}
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-600"]
+                        : ColorPalette["gray-50"]
+                    }
+                  >
+                    {text}
+                  </Subtitle3>
+                );
+              })}
+          </YAxis>
+
+          <Gutter size="0.25rem" />
+          <Subtitle3
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["gray-300"]
+            }
+          >
+            {(() => {
+              let total: PricePretty | undefined;
+              let hasUnknown = false;
+              for (const fee of feeConfig.fees) {
+                if (!fee.currency.coinGeckoId) {
+                  hasUnknown = true;
+                  break;
+                } else {
+                  const price = priceStore.calculatePrice(fee);
+                  if (price) {
+                    if (!total) {
+                      total = price;
+                    } else {
+                      total = total.add(price);
+                    }
                   }
                 }
               }
-            }
 
-            if (hasUnknown || !total) {
-              return "(-)";
-            }
-            return `(${total.toString()})`;
-          })()}
-        </Subtitle3>
-      </XAxis>
+              if (hasUnknown || !total) {
+                return "(-)";
+              }
+              return `(${total.toString()})`;
+            })()}
+          </Subtitle3>
+        </XAxis>
+      </Box>
 
       <VerticalResizeTransition transitionAlign="top">
         {feeConfig.uiProperties.error || feeConfig.uiProperties.warning ? (
           <Box
-            marginTop="1.25rem"
+            marginTop="0.75rem"
             borderRadius="0.5rem"
             alignX="center"
             alignY="center"
