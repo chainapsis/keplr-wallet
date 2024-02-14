@@ -657,7 +657,19 @@ export const EnableChainsScene: FunctionComponent<{
                     !!chainInfo.features?.includes("eth-address-gen") ||
                     !!chainInfo.features?.includes("eth-key-sign");
 
-                  if (isEthermintLike) {
+                  const supported = (() => {
+                    try {
+                      // 처리가능한 체인만 true를 반환한다.
+                      KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+                        chainInfo.chainId
+                      );
+                      return true;
+                    } catch {
+                      return false;
+                    }
+                  })();
+
+                  if (isEthermintLike && supported) {
                     return (
                       <NextStepEvmChainItem
                         key={chainInfo.chainId}
