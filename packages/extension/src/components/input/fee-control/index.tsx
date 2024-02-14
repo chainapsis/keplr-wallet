@@ -20,9 +20,9 @@ import { Box } from "../../box";
 import { VerticalResizeTransition } from "../../transition";
 import { useIntl } from "react-intl";
 import { XAxis, YAxis } from "../../axis";
-import { Tag } from "../../tag";
 import { UIConfigStore } from "../../../stores/ui-config";
 import { IChainStore, IQueriesStore } from "@keplr-wallet/stores";
+import { Tooltip } from "../../tooltip";
 
 // 기본적으로 `FeeControl` 안에 있는 로직이였지만 `FeeControl` 말고도 다른 UI를 가진 똑같은 기능의 component가
 // 여러개 생기게 되면서 공통적으로 사용하기 위해서 custom hook으로 분리함
@@ -208,6 +208,8 @@ export const FeeControl: FunctionComponent<{
       <Box>
         <YAxis alignX="center">
           <Box
+            /* text underline의 offset을 수동으로 설정했기 때문에 그만큼 paddnig bottom을 넣어줘야 paret가 overflow: hidden이여도 밑줄이 보임 */
+            paddingBottom="0.21rem"
             cursor="pointer"
             onClick={(e) => {
               e.preventDefault();
@@ -217,12 +219,8 @@ export const FeeControl: FunctionComponent<{
             }}
           >
             <XAxis alignY="center">
-              {/* 밑의 박스는 오른쪽에 로딩 또는 현재 선택된 옵션에 대한 태그를 표시하기 위한 box와 양옆의 균형을 맞추기 위해서 존재함 */}
-              <Box
-                position="relative"
-                marginLeft="0.25rem"
-                minWidth="1.25rem"
-              />
+              {/* 밑의 박스는 현재 기억된 fee 옵션을 사용하기 옵션이 on되어있다는 표시하기 위한 box와 양옆의 균형을 맞추기 위해서 존재함 */}
+              <Box minWidth="0.875rem" />
               <Body2
                 color={(() => {
                   if (
@@ -240,6 +238,7 @@ export const FeeControl: FunctionComponent<{
                 })()}
                 style={{
                   textDecoration: "underline",
+                  textUnderlineOffset: "0.2rem",
                 }}
               >
                 {`Fee: ${(() => {
@@ -274,6 +273,7 @@ export const FeeControl: FunctionComponent<{
                 style={{
                   textDecoration: "underline",
                   whiteSpace: "pre-wrap",
+                  textUnderlineOffset: "0.2rem",
                 }}
               >
                 {` ${(() => {
@@ -301,20 +301,14 @@ export const FeeControl: FunctionComponent<{
                   return `(${total.toString()})`;
                 })()}`}
               </Body2>
-              <Box
-                position="relative"
-                marginLeft="0.25rem"
-                minWidth="1.25rem"
-                height="1px"
-                alignY="center"
-              >
+              <Box minWidth="0.875rem" height="1px" alignY="center">
                 {(() => {
                   if (
                     feeConfig.uiProperties.loadingState ||
                     gasSimulator?.uiProperties.loadingState
                   ) {
                     return (
-                      <Box alignY="center">
+                      <Box alignY="center" marginLeft="0.25rem">
                         <LoadingIcon
                           width="1.25rem"
                           height="1.25rem"
@@ -324,15 +318,49 @@ export const FeeControl: FunctionComponent<{
                     );
                   }
 
-                  if (feeConfig.type === "low" || feeConfig.type === "high") {
+                  if (
+                    !disableAutomaticFeeSet &&
+                    uiConfigStore.rememberLastFeeOption
+                  ) {
                     return (
-                      <Box alignY="center">
-                        <Tag
-                          text={intl.formatMessage({
-                            id: `components.input.fee-control.modal.fee-selector.${feeConfig.type}`,
-                          })}
+                      <Box minWidth="0.875rem" alignY="center" alignX="center">
+                        <div
+                          style={{
+                            width: "0.375rem",
+                            height: "0.375rem",
+                            borderRadius: "99999px",
+                            backgroundColor:
+                              theme.mode === "light"
+                                ? ColorPalette["blue-400"]
+                                : ColorPalette["blue-400"],
+                          }}
                         />
                       </Box>
+                    );
+                  }
+
+                  if (disableAutomaticFeeSet) {
+                    return (
+                      <Tooltip content="Transaction fee was set by website">
+                        <Box alignY="center" marginLeft="0.25rem">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="17"
+                            height="17"
+                            fill="none"
+                            viewBox="0 0 17 17"
+                          >
+                            <path
+                              fill={
+                                theme.mode === "light"
+                                  ? ColorPalette["gray-200"]
+                                  : ColorPalette["gray-300"]
+                              }
+                              d="M8.5 1.833A6.67 6.67 0 001.833 8.5 6.67 6.67 0 008.5 15.167 6.67 6.67 0 0015.167 8.5 6.67 6.67 0 008.5 1.833zm.667 10H7.834v-4h1.333v4zm0-5.333H7.834V5.167h1.333V6.5z"
+                            />
+                          </svg>
+                        </Box>
+                      </Tooltip>
                     );
                   }
 
@@ -345,7 +373,7 @@ export const FeeControl: FunctionComponent<{
         <VerticalResizeTransition transitionAlign="top">
           {feeConfig.uiProperties.error || feeConfig.uiProperties.warning ? (
             <Box
-              marginTop="1.25rem"
+              marginTop="1.04rem"
               borderRadius="0.5rem"
               alignX="center"
               alignY="center"
@@ -418,6 +446,7 @@ export const FeeControl: FunctionComponent<{
             feeConfig={feeConfig}
             gasConfig={gasConfig}
             gasSimulator={gasSimulator}
+            disableAutomaticFeeSet={disableAutomaticFeeSet}
           />
         </Modal>
       </Box>

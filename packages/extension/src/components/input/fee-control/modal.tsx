@@ -55,285 +55,304 @@ export const TransactionFeeModal: FunctionComponent<{
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
   gasSimulator?: IGasSimulator;
-}> = observer(({ close, senderConfig, feeConfig, gasConfig, gasSimulator }) => {
-  const { queriesStore, uiConfigStore } = useStore();
-  const intl = useIntl();
-  const theme = useTheme();
+  disableAutomaticFeeSet?: boolean;
+}> = observer(
+  ({
+    close,
+    senderConfig,
+    feeConfig,
+    gasConfig,
+    gasSimulator,
+    disableAutomaticFeeSet,
+  }) => {
+    const { queriesStore, uiConfigStore } = useStore();
+    const intl = useIntl();
+    const theme = useTheme();
 
-  const isGasSimulatorUsable = (() => {
-    if (!gasSimulator) {
-      return false;
-    }
-
-    if (gasSimulator.gasEstimated == null && gasSimulator.uiProperties.error) {
-      return false;
-    }
-
-    return true;
-  })();
-  const isGasSimulatorEnabled = (() => {
-    if (!isGasSimulatorUsable) {
-      return false;
-    }
-    return gasSimulator?.enabled;
-  })();
-
-  useEffect(() => {
-    if (uiConfigStore.rememberLastFeeOption) {
-      if (feeConfig.type !== "manual") {
-        uiConfigStore.setLastFeeOption(feeConfig.type);
+    const isGasSimulatorUsable = (() => {
+      if (!gasSimulator) {
+        return false;
       }
-    } else {
-      uiConfigStore.setLastFeeOption(false);
-    }
-  }, [feeConfig.type, uiConfigStore, uiConfigStore.rememberLastFeeOption]);
 
-  const [showChangesApplied, setShowChangesApplied] = useState(false);
-  const feeConfigCurrencyString = feeConfig
-    .toStdFee()
-    .amount.map((x) => x.denom)
-    .join(",");
-  const prevFeeConfigType = useRef(feeConfig.type);
-  const prevFeeConfigCurrency = useRef(feeConfigCurrencyString);
-  const prevGasConfigGas = useRef(gasConfig.gas);
-  const prevGasSimulatorEnabled = useRef(isGasSimulatorEnabled);
-  const lastShowChangesAppliedTimeout = useRef<NodeJS.Timeout | undefined>(
-    undefined
-  );
-  useEffect(() => {
-    if (
-      prevFeeConfigType.current !== feeConfig.type ||
-      prevFeeConfigCurrency.current !== feeConfigCurrencyString ||
-      prevGasConfigGas.current !== gasConfig.gas ||
-      prevGasSimulatorEnabled.current !== isGasSimulatorEnabled
-    ) {
-      if (lastShowChangesAppliedTimeout.current) {
-        clearTimeout(lastShowChangesAppliedTimeout.current);
-        lastShowChangesAppliedTimeout.current = undefined;
+      if (
+        gasSimulator.gasEstimated == null &&
+        gasSimulator.uiProperties.error
+      ) {
+        return false;
       }
-      setShowChangesApplied(true);
-      lastShowChangesAppliedTimeout.current = setTimeout(() => {
-        setShowChangesApplied(false);
-        lastShowChangesAppliedTimeout.current = undefined;
-      }, 2500);
-    }
 
-    prevFeeConfigType.current = feeConfig.type;
-    prevFeeConfigCurrency.current = feeConfigCurrencyString;
-    prevGasConfigGas.current = gasConfig.gas;
-    prevGasSimulatorEnabled.current = isGasSimulatorEnabled;
-  }, [
-    feeConfig.type,
-    feeConfigCurrencyString,
-    gasConfig.gas,
-    isGasSimulatorEnabled,
-  ]);
+      return true;
+    })();
+    const isGasSimulatorEnabled = (() => {
+      if (!isGasSimulatorUsable) {
+        return false;
+      }
+      return gasSimulator?.enabled;
+    })();
 
-  return (
-    <Styles.Container>
-      <Box marginBottom="1.25rem" marginLeft="0.5rem" paddingY="0.4rem">
-        <Subtitle1>
-          <FormattedMessage id="components.input.fee-control.modal.title" />
-        </Subtitle1>
-      </Box>
+    useEffect(() => {
+      if (uiConfigStore.rememberLastFeeOption) {
+        if (feeConfig.type !== "manual") {
+          uiConfigStore.setLastFeeOption(feeConfig.type);
+        }
+      } else {
+        uiConfigStore.setLastFeeOption(false);
+      }
+    }, [feeConfig.type, uiConfigStore, uiConfigStore.rememberLastFeeOption]);
 
-      <Stack gutter="0.75rem">
-        <Stack gutter="0.375rem">
-          <Box marginLeft="0.5rem">
-            <XAxis alignY="center">
-              <Subtitle3
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-400"]
-                    : ColorPalette["gray-100"]
+    const [showChangesApplied, setShowChangesApplied] = useState(false);
+    const feeConfigCurrencyString = feeConfig
+      .toStdFee()
+      .amount.map((x) => x.denom)
+      .join(",");
+    const prevFeeConfigType = useRef(feeConfig.type);
+    const prevFeeConfigCurrency = useRef(feeConfigCurrencyString);
+    const prevGasConfigGas = useRef(gasConfig.gas);
+    const prevGasSimulatorEnabled = useRef(isGasSimulatorEnabled);
+    const lastShowChangesAppliedTimeout = useRef<NodeJS.Timeout | undefined>(
+      undefined
+    );
+    useEffect(() => {
+      if (
+        prevFeeConfigType.current !== feeConfig.type ||
+        prevFeeConfigCurrency.current !== feeConfigCurrencyString ||
+        prevGasConfigGas.current !== gasConfig.gas ||
+        prevGasSimulatorEnabled.current !== isGasSimulatorEnabled
+      ) {
+        if (lastShowChangesAppliedTimeout.current) {
+          clearTimeout(lastShowChangesAppliedTimeout.current);
+          lastShowChangesAppliedTimeout.current = undefined;
+        }
+        setShowChangesApplied(true);
+        lastShowChangesAppliedTimeout.current = setTimeout(() => {
+          setShowChangesApplied(false);
+          lastShowChangesAppliedTimeout.current = undefined;
+        }, 2500);
+      }
+
+      prevFeeConfigType.current = feeConfig.type;
+      prevFeeConfigCurrency.current = feeConfigCurrencyString;
+      prevGasConfigGas.current = gasConfig.gas;
+      prevGasSimulatorEnabled.current = isGasSimulatorEnabled;
+    }, [
+      feeConfig.type,
+      feeConfigCurrencyString,
+      gasConfig.gas,
+      isGasSimulatorEnabled,
+    ]);
+
+    return (
+      <Styles.Container>
+        <Box marginBottom="1.25rem" marginLeft="0.5rem" paddingY="0.4rem">
+          <Subtitle1>
+            <FormattedMessage id="components.input.fee-control.modal.title" />
+          </Subtitle1>
+        </Box>
+
+        <Stack gutter="0.75rem">
+          <Stack gutter="0.375rem">
+            <Box marginLeft="0.5rem">
+              <XAxis alignY="center">
+                <Subtitle3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-400"]
+                      : ColorPalette["gray-100"]
+                  }
+                >
+                  <FormattedMessage id="components.input.fee-control.modal.fee-title" />
+                </Subtitle3>
+
+                <div style={{ flex: 1 }} />
+                {!disableAutomaticFeeSet ? (
+                  <React.Fragment>
+                    <Body3
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-300"]
+                          : ColorPalette["gray-200"]
+                      }
+                    >
+                      Keep Fee tier Option
+                    </Body3>
+                    <Gutter size="0.5rem" />
+                    <Toggle
+                      isOpen={uiConfigStore.rememberLastFeeOption}
+                      setIsOpen={(v) =>
+                        uiConfigStore.setRememberLastFeeOption(v)
+                      }
+                    />
+                  </React.Fragment>
+                ) : null}
+              </XAxis>
+            </Box>
+
+            <FeeSelector feeConfig={feeConfig} />
+          </Stack>
+
+          <Dropdown
+            label={intl.formatMessage({
+              id: "components.input.fee-control.modal.fee-token-dropdown-label",
+            })}
+            items={feeConfig.selectableFeeCurrencies
+              .filter((cur, i) => {
+                if (i === 0) {
+                  return true;
                 }
-              >
-                <FormattedMessage id="components.input.fee-control.modal.fee-title" />
-              </Subtitle3>
 
-              <div style={{ flex: 1 }} />
-              <Body3
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-300"]
-                    : ColorPalette["gray-200"]
+                const balance = queriesStore
+                  .get(feeConfig.chainId)
+                  .queryBalances.getQueryBech32Address(senderConfig.sender)
+                  .getBalanceFromCurrency(cur);
+
+                return balance.toDec().gt(new Dec(0));
+              })
+              .map((cur) => {
+                return {
+                  key: cur.coinMinimalDenom,
+                  label: cur.coinDenom,
+                };
+              })}
+            selectedItemKey={feeConfig.fees[0]?.currency.coinMinimalDenom}
+            onSelect={(key) => {
+              const currency = feeConfig.selectableFeeCurrencies.find(
+                (cur) => cur.coinMinimalDenom === key
+              );
+              if (currency) {
+                if (feeConfig.type !== "manual") {
+                  feeConfig.setFee({
+                    type: feeConfig.type,
+                    currency: currency,
+                  });
+                } else {
+                  feeConfig.setFee({
+                    type: "average",
+                    currency: currency,
+                  });
                 }
-              >
-                Keep Fee tier Option
-              </Body3>
-              <Gutter size="0.5rem" />
-              <Toggle
-                isOpen={uiConfigStore.rememberLastFeeOption}
-                setIsOpen={(v) => uiConfigStore.setRememberLastFeeOption(v)}
-              />
-            </XAxis>
-          </Box>
+              }
+            }}
+            size="large"
+          />
 
-          <FeeSelector feeConfig={feeConfig} />
+          {(() => {
+            if (gasSimulator) {
+              if (gasSimulator.uiProperties.error) {
+                return (
+                  <GuideBox
+                    color="danger"
+                    title={intl.formatMessage({
+                      id: "components.input.fee-control.modal.guide-title",
+                    })}
+                    paragraph={
+                      gasSimulator.uiProperties.error.message ||
+                      gasSimulator.uiProperties.error.toString()
+                    }
+                  />
+                );
+              }
+
+              if (gasSimulator.uiProperties.warning) {
+                return (
+                  <GuideBox
+                    color="warning"
+                    title={intl.formatMessage({
+                      id: "components.input.fee-control.modal.guide-title",
+                    })}
+                    paragraph={
+                      gasSimulator.uiProperties.warning.message ||
+                      gasSimulator.uiProperties.warning.toString()
+                    }
+                  />
+                );
+              }
+            }
+          })()}
+
+          {isGasSimulatorEnabled ? (
+            <TextInput
+              label={intl.formatMessage({
+                id: "components.input.fee-control.modal.gas-adjustment-label",
+              })}
+              value={gasSimulator?.gasAdjustmentValue}
+              onChange={(e) => {
+                e.preventDefault();
+
+                gasSimulator?.setGasAdjustmentValue(e.target.value);
+              }}
+              rightLabel={
+                isGasSimulatorUsable && gasSimulator ? (
+                  <Box marginBottom="0.375rem">
+                    <XAxis alignY="center">
+                      <Subtitle3 color={ColorPalette["gray-200"]}>
+                        <FormattedMessage id="components.input.fee-control.modal.auto-title" />
+                      </Subtitle3>
+                      <Gutter size="0.5rem" />
+                      <Toggle
+                        isOpen={gasSimulator.enabled}
+                        setIsOpen={(isOpen) => {
+                          gasSimulator?.setEnabled(isOpen);
+                        }}
+                      />
+                    </XAxis>
+                  </Box>
+                ) : null
+              }
+            />
+          ) : (
+            <TextInput
+              label={intl.formatMessage({
+                id: "components.input.fee-control.modal.gas-amount-label",
+              })}
+              value={gasConfig.value}
+              onChange={(e) => {
+                e.preventDefault();
+
+                gasConfig.setValue(e.target.value);
+              }}
+              rightLabel={
+                isGasSimulatorUsable && gasSimulator ? (
+                  <Box marginBottom="0.375rem">
+                    <XAxis alignY="center">
+                      <Subtitle3 color={ColorPalette["gray-200"]}>
+                        <FormattedMessage id="components.input.fee-control.modal.auto-title" />
+                      </Subtitle3>
+                      <Gutter size="0.5rem" />
+                      <Toggle
+                        isOpen={gasSimulator.enabled}
+                        setIsOpen={(isOpen) => {
+                          gasSimulator?.setEnabled(isOpen);
+                        }}
+                      />
+                    </XAxis>
+                  </Box>
+                ) : null
+              }
+            />
+          )}
+
+          <VerticalCollapseTransition collapsed={!showChangesApplied}>
+            <GuideBox color="safe" title="Changes have been applied" />
+            <Gutter size="0.75rem" />
+          </VerticalCollapseTransition>
+          <Gutter size="0" />
+
+          <Button
+            type="button"
+            text={intl.formatMessage({
+              id: "button.close",
+            })}
+            color="secondary"
+            size="large"
+            onClick={() => {
+              close();
+            }}
+          />
         </Stack>
-
-        <Dropdown
-          label={intl.formatMessage({
-            id: "components.input.fee-control.modal.fee-token-dropdown-label",
-          })}
-          items={feeConfig.selectableFeeCurrencies
-            .filter((cur, i) => {
-              if (i === 0) {
-                return true;
-              }
-
-              const balance = queriesStore
-                .get(feeConfig.chainId)
-                .queryBalances.getQueryBech32Address(senderConfig.sender)
-                .getBalanceFromCurrency(cur);
-
-              return balance.toDec().gt(new Dec(0));
-            })
-            .map((cur) => {
-              return {
-                key: cur.coinMinimalDenom,
-                label: cur.coinDenom,
-              };
-            })}
-          selectedItemKey={feeConfig.fees[0]?.currency.coinMinimalDenom}
-          onSelect={(key) => {
-            const currency = feeConfig.selectableFeeCurrencies.find(
-              (cur) => cur.coinMinimalDenom === key
-            );
-            if (currency) {
-              if (feeConfig.type !== "manual") {
-                feeConfig.setFee({
-                  type: feeConfig.type,
-                  currency: currency,
-                });
-              } else {
-                feeConfig.setFee({
-                  type: "average",
-                  currency: currency,
-                });
-              }
-            }
-          }}
-          size="large"
-        />
-
-        {(() => {
-          if (gasSimulator) {
-            if (gasSimulator.uiProperties.error) {
-              return (
-                <GuideBox
-                  color="danger"
-                  title={intl.formatMessage({
-                    id: "components.input.fee-control.modal.guide-title",
-                  })}
-                  paragraph={
-                    gasSimulator.uiProperties.error.message ||
-                    gasSimulator.uiProperties.error.toString()
-                  }
-                />
-              );
-            }
-
-            if (gasSimulator.uiProperties.warning) {
-              return (
-                <GuideBox
-                  color="warning"
-                  title={intl.formatMessage({
-                    id: "components.input.fee-control.modal.guide-title",
-                  })}
-                  paragraph={
-                    gasSimulator.uiProperties.warning.message ||
-                    gasSimulator.uiProperties.warning.toString()
-                  }
-                />
-              );
-            }
-          }
-        })()}
-
-        {isGasSimulatorEnabled ? (
-          <TextInput
-            label={intl.formatMessage({
-              id: "components.input.fee-control.modal.gas-adjustment-label",
-            })}
-            value={gasSimulator?.gasAdjustmentValue}
-            onChange={(e) => {
-              e.preventDefault();
-
-              gasSimulator?.setGasAdjustmentValue(e.target.value);
-            }}
-            rightLabel={
-              isGasSimulatorUsable && gasSimulator ? (
-                <Box marginBottom="0.375rem">
-                  <XAxis alignY="center">
-                    <Subtitle3 color={ColorPalette["gray-200"]}>
-                      <FormattedMessage id="components.input.fee-control.modal.auto-title" />
-                    </Subtitle3>
-                    <Gutter size="0.5rem" />
-                    <Toggle
-                      isOpen={gasSimulator.enabled}
-                      setIsOpen={(isOpen) => {
-                        gasSimulator?.setEnabled(isOpen);
-                      }}
-                    />
-                  </XAxis>
-                </Box>
-              ) : null
-            }
-          />
-        ) : (
-          <TextInput
-            label={intl.formatMessage({
-              id: "components.input.fee-control.modal.gas-amount-label",
-            })}
-            value={gasConfig.value}
-            onChange={(e) => {
-              e.preventDefault();
-
-              gasConfig.setValue(e.target.value);
-            }}
-            rightLabel={
-              isGasSimulatorUsable && gasSimulator ? (
-                <Box marginBottom="0.375rem">
-                  <XAxis alignY="center">
-                    <Subtitle3 color={ColorPalette["gray-200"]}>
-                      <FormattedMessage id="components.input.fee-control.modal.auto-title" />
-                    </Subtitle3>
-                    <Gutter size="0.5rem" />
-                    <Toggle
-                      isOpen={gasSimulator.enabled}
-                      setIsOpen={(isOpen) => {
-                        gasSimulator?.setEnabled(isOpen);
-                      }}
-                    />
-                  </XAxis>
-                </Box>
-              ) : null
-            }
-          />
-        )}
-
-        <VerticalCollapseTransition collapsed={!showChangesApplied}>
-          <GuideBox color="safe" title="Changes have been applied" />
-          <Gutter size="0.75rem" />
-        </VerticalCollapseTransition>
-        <Gutter size="0" />
-
-        <Button
-          type="button"
-          text={intl.formatMessage({
-            id: "button.close",
-          })}
-          color="secondary"
-          size="large"
-          onClick={() => {
-            close();
-          }}
-        />
-      </Stack>
-    </Styles.Container>
-  );
-});
+      </Styles.Container>
+    );
+  }
+);
 
 const FeeSelectorStyle = {
   Item: styled.div<{ selected: boolean }>`
