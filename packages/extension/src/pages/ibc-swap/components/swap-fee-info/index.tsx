@@ -238,6 +238,7 @@ export const SwapFeeInfo: FunctionComponent<{
                 <Subtitle4
                   style={{
                     textDecoration: "underline",
+                    textUnderlineOffset: "0.2rem",
                   }}
                   color={
                     theme.mode === "light"
