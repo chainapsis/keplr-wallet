@@ -466,6 +466,16 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
     const enabledChainIdentifiers: string[] =
       chainStore.enabledChainIdentifiers;
 
+    if (
+      candidateAddresses.length > 0 &&
+      enabledChainIdentifiers.length === 1 &&
+      enabledChainIdentifiers[0] === chainStore.chainInfos[0].chainIdentifier
+    ) {
+      if (chainStore.chainInfos.find(c => c.chainIdentifier === 'noble')) {
+        enabledChainIdentifiers.push('noble');
+      }
+    }
+
     for (const candidateAddress of candidateAddresses) {
       const queries = queriesStore.get(candidateAddress.chainId);
       const chainInfo = chainStore.getChain(candidateAddress.chainId);
@@ -509,7 +519,7 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
       }
     }
 
-    return enabledChainIdentifiers;
+    return [...new Set(enabledChainIdentifiers)];
   });
 
   const enabledChainIdentifierMap = useMemo(() => {
@@ -1026,7 +1036,19 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
                   !!chainInfo.features?.includes('eth-address-gen') ||
                   !!chainInfo.features?.includes('eth-key-sign');
 
-                if (isEthermintLike) {
+                const supported = (() => {
+                  try {
+                    // 처리가능한 체인만 true를 반환한다.
+                    KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+                      chainInfo.chainId,
+                    );
+                    return true;
+                  } catch {
+                    return false;
+                  }
+                })();
+
+                if (isEthermintLike && supported) {
                   return (
                     <NextStepEvmChainItem
                       key={chainInfo.chainId}
@@ -1047,7 +1069,7 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
 });
 
 const ChainItem: FunctionComponent<{
-  chainInfo: ChainInfo;
+  chainInfo: IChainInfoImpl;
   balance: CoinPretty;
 
   enabled: boolean;
@@ -1096,7 +1118,14 @@ const ChainItem: FunctionComponent<{
             <Gutter size={8} />
 
             <Text style={style.flatten(['subtitle2', 'color-white', 'flex-1'])}>
-              {chainInfo.chainName}
+              {(() => {
+                // Noble의 경우만 약간 특수하게 표시해줌
+                if (chainInfo.chainIdentifier === 'noble') {
+                  return `${chainInfo.chainName} (USDC)`;
+                }
+
+                return chainInfo.chainName;
+              })()}
             </Text>
             {isFresh ? null : (
               <YAxis alignX="right">
