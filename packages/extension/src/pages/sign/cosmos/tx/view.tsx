@@ -689,6 +689,12 @@ const ReadonlyMemo: FunctionComponent<{
       }
       padding="1rem"
       borderRadius="0.375rem"
+      style={{
+        boxShadow:
+          theme.mode === "light"
+            ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+            : undefined,
+      }}
     >
       <XAxis alignY="center">
         <Subtitle3

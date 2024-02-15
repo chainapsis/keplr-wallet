@@ -14,7 +14,7 @@ import { ColorPalette } from "../../../../styles";
 import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
 import { Gutter } from "../../../../components/gutter";
 import { VerticalResizeTransition } from "../../../../components/transition";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const FeeSummary: FunctionComponent<{
   feeConfig: IFeeConfig;
@@ -36,6 +36,16 @@ export const FeeSummary: FunctionComponent<{
             ? ColorPalette["white"]
             : ColorPalette["gray-600"]
         }
+        // light theme에서 box shadow가 있어도 sign page가 overflow: auto라서 box shadow가 보이지 않는다.
+        // 그렇다고 sign page에 overflow: visible을 주면 다른 부분에서 더 큰 문제가 생기기 때문에
+        // light theme에서는 일단 margin bottom을 준다.
+        marginBottom={theme.mode === "light" ? "4px" : undefined}
+        style={{
+          boxShadow:
+            theme.mode === "light"
+              ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+              : undefined,
+        }}
       >
         <XAxis alignY="center">
           <Subtitle3
@@ -45,7 +55,7 @@ export const FeeSummary: FunctionComponent<{
                 : ColorPalette["gray-200"]
             }
           >
-            Fee Options
+            <FormattedMessage id="page.sign.components.fee-summary.fee" />
           </Subtitle3>
 
           <div style={{ flex: 1 }} />

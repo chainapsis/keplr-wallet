@@ -185,7 +185,7 @@ export const TransactionFeeModal: FunctionComponent<{
                           : ColorPalette["gray-200"]
                       }
                     >
-                      Keep Fee tier Option
+                      <FormattedMessage id="components.input.fee-control.modal.remember-last-fee-option" />
                     </Body3>
                     <Gutter size="0.5rem" />
                     <Toggle
@@ -345,7 +345,9 @@ export const TransactionFeeModal: FunctionComponent<{
 
           {disableAutomaticFeeSet ? (
             <GuideBox
-              title="The transaction fee was set by the website/dApp. The transaction may not be processed if you change the setting."
+              title={intl.formatMessage({
+                id: "components.input.fee-control.modal.guide.external-fee-set",
+              })}
               backgroundColor={
                 theme.mode === "light" ? undefined : ColorPalette["gray-500"]
               }
@@ -353,7 +355,12 @@ export const TransactionFeeModal: FunctionComponent<{
           ) : null}
 
           <VerticalCollapseTransition collapsed={!showChangesApplied}>
-            <GuideBox color="safe" title="Changes have been applied" />
+            <GuideBox
+              color="safe"
+              title={intl.formatMessage({
+                id: "components.input.fee-control.modal.notification.changes-applied",
+              })}
+            />
             <Gutter size="0.75rem" />
           </VerticalCollapseTransition>
           <Gutter size="0" />

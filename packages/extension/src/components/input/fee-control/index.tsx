@@ -18,7 +18,7 @@ import { autorun } from "mobx";
 import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
 import { Box } from "../../box";
 import { VerticalResizeTransition } from "../../transition";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { XAxis, YAxis } from "../../axis";
 import { UIConfigStore } from "../../../stores/ui-config";
 import { IChainStore, IQueriesStore } from "@keplr-wallet/stores";
@@ -241,28 +241,37 @@ export const FeeControl: FunctionComponent<{
                   textUnderlineOffset: "0.2rem",
                 }}
               >
-                {`Fee: ${(() => {
-                  if (feeConfig.fees.length > 0) {
-                    return feeConfig.fees;
-                  }
-                  const chainInfo = chainStore.getChain(feeConfig.chainId);
-                  return [
-                    new CoinPretty(
-                      chainInfo.stakeCurrency || chainInfo.currencies[0],
-                      new Dec(0)
-                    ),
-                  ];
-                })()
-                  .map((fee) =>
-                    fee
-                      .maxDecimals(6)
-                      .inequalitySymbol(true)
-                      .trim(true)
-                      .shrink(true)
-                      .hideIBCMetadata(true)
-                      .toString()
-                  )
-                  .join("+")}`}
+                {
+                  <FormattedMessage
+                    id="components.input.fee-control.fee"
+                    values={{
+                      assets: (() => {
+                        if (feeConfig.fees.length > 0) {
+                          return feeConfig.fees;
+                        }
+                        const chainInfo = chainStore.getChain(
+                          feeConfig.chainId
+                        );
+                        return [
+                          new CoinPretty(
+                            chainInfo.stakeCurrency || chainInfo.currencies[0],
+                            new Dec(0)
+                          ),
+                        ];
+                      })()
+                        .map((fee) =>
+                          fee
+                            .maxDecimals(6)
+                            .inequalitySymbol(true)
+                            .trim(true)
+                            .shrink(true)
+                            .hideIBCMetadata(true)
+                            .toString()
+                        )
+                        .join("+"),
+                    }}
+                  />
+                }
               </Body2>
               <Body2
                 color={
