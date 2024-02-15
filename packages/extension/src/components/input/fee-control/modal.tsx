@@ -166,6 +166,18 @@ export const TransactionFeeModal: FunctionComponent<{
                 <div style={{ flex: 1 }} />
                 {!disableAutomaticFeeSet ? (
                   <React.Fragment>
+                    <div
+                      style={{
+                        width: "0.375rem",
+                        height: "0.375rem",
+                        borderRadius: "99999px",
+                        backgroundColor:
+                          theme.mode === "light"
+                            ? ColorPalette["blue-400"]
+                            : ColorPalette["blue-400"],
+                        marginRight: "0.3rem",
+                      }}
+                    />
                     <Body3
                       color={
                         theme.mode === "light"
