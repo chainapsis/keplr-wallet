@@ -250,14 +250,23 @@ export class TokensStore {
   }
 
   get waitingSuggestedToken() {
-    const datas = this.interactionStore.getAllData<{
+    const cw20Datas = this.interactionStore.getAllData<{
       chainId: string;
       contractAddress: string;
       viewingKey?: string;
     }>("suggest-token-cw20");
 
-    if (datas.length > 0) {
-      return datas[0];
+    if (cw20Datas.length > 0) {
+      return cw20Datas[0];
+    }
+
+    const erc20Datas = this.interactionStore.getAllData<{
+      chainId: string;
+      contractAddress: string;
+    }>("suggest-token-erc20");
+
+    if (erc20Datas.length > 0) {
+      return erc20Datas[0];
     }
   }
 
@@ -292,5 +301,6 @@ export class TokensStore {
 
   async rejectAllSuggestedTokens() {
     await this.interactionStore.rejectAll("suggest-token-cw20");
+    await this.interactionStore.rejectAll("suggest-token-erc20");
   }
 }

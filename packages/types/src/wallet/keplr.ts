@@ -207,4 +207,6 @@ export interface Keplr {
   }): Promise<string>;
 
   sendEthereumTx(chainId: string, tx: Uint8Array): Promise<string>;
+
+  suggestERC20(chainId: string, contractAddress: string): Promise<void>;
 }
