@@ -51,7 +51,7 @@ export const getParagraphColor = (
 };
 
 export const Styles = {
-  Container: styled(Stack)<Pick<GuideBoxProps, "color">>`
+  Container: styled(Stack)<Pick<GuideBoxProps, "color" | "backgroundColor">>`
     border-radius: 0.5rem;
     padding: 1.125rem;
 
@@ -99,6 +99,14 @@ export const Styles = {
               color: ${(props) => getTitleColor(props.theme, "default")};
             }
           `;
+      }
+    }};
+
+    ${({ backgroundColor }) => {
+      if (backgroundColor) {
+        return css`
+          background-color: ${backgroundColor};
+        `;
       }
     }};
   `,

@@ -343,6 +343,15 @@ export const TransactionFeeModal: FunctionComponent<{
             />
           )}
 
+          {disableAutomaticFeeSet ? (
+            <GuideBox
+              title="The transaction fee was set by the website/dApp. The transaction may not be processed if you change the setting."
+              backgroundColor={
+                theme.mode === "light" ? undefined : ColorPalette["gray-500"]
+              }
+            />
+          ) : null}
+
           <VerticalCollapseTransition collapsed={!showChangesApplied}>
             <GuideBox color="safe" title="Changes have been applied" />
             <Gutter size="0.75rem" />
