@@ -204,13 +204,14 @@ export class TokensStore {
       : new AddTokenMsg(chainId, associatedAccountAddress, currency);
     const res = await this.requester.sendMessage(BACKGROUND_PORT, msg);
     runInAction(() => {
-      const map = new Map<string, TokenInfo[]>();
-      for (const [key, value] of Object.entries(res)) {
-        if (value) {
-          map.set(key, value);
-        }
+      const newTokenMap = new Map(this.tokenMap);
+      const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId);
+      const newTokens = res[chainIdentifier.identifier];
+      if (newTokens) {
+        newTokenMap.set(chainIdentifier.identifier, newTokens);
       }
-      this.tokenMap = map;
+
+      this.tokenMap = newTokenMap;
     });
   }
 
@@ -239,13 +240,14 @@ export class TokensStore {
       // 그냥 다 지우고 다시 다 설정하는 방식임.
       this.clearTokensFromChainInfos();
 
-      const map = new Map<string, TokenInfo[]>();
-      for (const [key, value] of Object.entries(res)) {
-        if (value) {
-          map.set(key, value);
-        }
+      const newTokenMap = new Map(this.tokenMap);
+      const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId);
+      const newTokens = res[chainIdentifier.identifier];
+      if (newTokens) {
+        newTokenMap.set(chainIdentifier.identifier, newTokens);
       }
-      this.tokenMap = map;
+
+      this.tokenMap = newTokenMap;
     });
   }
 
