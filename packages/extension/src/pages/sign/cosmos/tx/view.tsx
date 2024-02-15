@@ -7,7 +7,6 @@ import { H5, Subtitle3 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 import { ViewDataButton } from "../../components/view-data-button";
 import { MessageItem } from "../../components/message-item";
-import { Stack } from "../../../../components/stack";
 import { MemoInput } from "../../../../components/input/memo-input";
 import { observer } from "mobx-react-lite";
 import {
@@ -556,42 +555,53 @@ export const CosmosTxView: FunctionComponent<{
           </Box>
         </SimpleBar>
 
-        {!isViewData ? <div style={{ flex: 1 }} /> : null}
-        <Box height="0" minHeight="1rem" />
+        <Box height="0" minHeight="0.75rem" />
 
         <Box
           style={{
             opacity: isLedgerAndDirect ? 0.5 : undefined,
           }}
         >
-          <Stack gutter="0.75rem">
-            {preferNoSetMemo ? (
+          {preferNoSetMemo ? (
+            <React.Fragment>
               <ReadonlyMemo memo={memoConfig.memo} />
-            ) : (
+              <Gutter size="0.75rem" />
+            </React.Fragment>
+          ) : (
+            <React.Fragment>
               <MemoInput memoConfig={memoConfig} />
-            )}
+              <Gutter size="0.75rem" />
+            </React.Fragment>
+          )}
+        </Box>
 
-            {/* direct aux는 수수료를 설정할수도 없으니 보여줄 필요가 없다. */}
-            {"isDirectAux" in interactionData.data &&
-            interactionData.data.isDirectAux
-              ? null
-              : (() => {
-                  if (interactionData.isInternal && preferNoSetFee) {
-                    return (
-                      <FeeSummary feeConfig={feeConfig} gasConfig={gasConfig} />
-                    );
-                  }
+        {!isViewData ? <div style={{ flex: 1 }} /> : null}
 
+        <Box
+          style={{
+            opacity: isLedgerAndDirect ? 0.5 : undefined,
+          }}
+        >
+          {/* direct aux는 수수료를 설정할수도 없으니 보여줄 필요가 없다. */}
+          {"isDirectAux" in interactionData.data &&
+          interactionData.data.isDirectAux
+            ? null
+            : (() => {
+                if (interactionData.isInternal && preferNoSetFee) {
                   return (
-                    <FeeControl
-                      feeConfig={feeConfig}
-                      senderConfig={senderConfig}
-                      gasConfig={gasConfig}
-                      disableAutomaticFeeSet={preferNoSetFee}
-                    />
+                    <FeeSummary feeConfig={feeConfig} gasConfig={gasConfig} />
                   );
-                })()}
-          </Stack>
+                }
+
+                return (
+                  <FeeControl
+                    feeConfig={feeConfig}
+                    senderConfig={senderConfig}
+                    gasConfig={gasConfig}
+                    disableAutomaticFeeSet={preferNoSetFee}
+                  />
+                );
+              })()}
         </Box>
 
         {isSendAuthzGrant ? (
