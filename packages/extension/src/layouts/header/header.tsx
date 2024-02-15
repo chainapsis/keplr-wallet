@@ -98,19 +98,45 @@ const Styles = {
     layoutHeight: number;
     additionalPaddingBottom?: string;
     bottomPadding: string;
+    displayFlex: boolean;
     fixedHeight: boolean;
+    fixedMinHeight: boolean;
   }>`
+    ${({ displayFlex }) => {
+      if (displayFlex) {
+        return css`
+          display: flex;
+          flex-direction: column;
+        `;
+      }
+      return css``;
+    }}
+
     padding-top: 3.75rem;
     padding-bottom: ${({ bottomPadding }) => bottomPadding};
 
-    ${({ layoutHeight, fixedHeight, additionalPaddingBottom }) => {
-      if (!fixedHeight) {
+    ${({
+      layoutHeight,
+      fixedHeight,
+      fixedMinHeight,
+      additionalPaddingBottom,
+    }) => {
+      if (!fixedHeight && !fixedMinHeight) {
         return css`
           // min-height: ${layoutHeight}rem;
         `;
-      } else {
+      } else if (fixedHeight) {
         return css`
           height: ${(() => {
+            if (additionalPaddingBottom && additionalPaddingBottom !== "0") {
+              return `calc(${layoutHeight}rem - ${additionalPaddingBottom})`;
+            }
+            return `${layoutHeight}rem`;
+          })()};
+        `;
+      } else if (fixedMinHeight) {
+        return css`
+          min-height: ${(() => {
             if (additionalPaddingBottom && additionalPaddingBottom !== "0") {
               return `calc(${layoutHeight}rem - ${additionalPaddingBottom})`;
             }
@@ -140,7 +166,9 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
   left,
   right,
   bottomButton,
+  displayFlex,
   fixedHeight,
+  fixedMinHeight,
   onSubmit,
   children,
   isNotReady,
@@ -213,7 +241,9 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
       <Styles.ContentContainer
         layoutHeight={height}
         additionalPaddingBottom={additionalPaddingBottom}
+        displayFlex={displayFlex || false}
         fixedHeight={fixedHeight || false}
+        fixedMinHeight={fixedMinHeight || false}
         bottomPadding={bottomPadding}
       >
         {children}

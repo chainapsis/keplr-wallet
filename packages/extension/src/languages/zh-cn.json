@@ -562,7 +562,7 @@
   "components.input.amount-input.amount-label": "金额",
   "components.input.amount-input.max-button": "最大",
   "components.input.memo-input.memo-label": "备注",
-  "components.input.fee-control.title": "交易费",
+  "components.input.fee-control.fee": "交易费: {assets}",
   "components.input.fee-control.error.insufficient-fee": "费用不足",
   "components.input.fee-control.modal.title": "费用选项",
   "components.input.fee-control.modal.fee-title": "费用",

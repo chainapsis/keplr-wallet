@@ -10,4 +10,5 @@ export interface GuideBoxProps {
   color?: GuideBoxColor;
 
   hideInformationIcon?: boolean;
+  backgroundColor?: string;
 }

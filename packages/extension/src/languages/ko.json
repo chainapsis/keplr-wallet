@@ -396,6 +396,8 @@
   "page.sign.ethereum.title": "이더리움 서명",
   "page.sign.ethereum.requested-network": "요청한 네트워크",
 
+  "page.sign.components.fee-summary.fee": "수수료",
+
   "page.sign.components.messages.custom.title": "커스텀",
   "page.sign.components.messages.claim-rewards.title": "리워드 받기",
   "page.sign.components.messages.claim-rewards.paragraph": "<b>{validator}</b>로부터 스테이킹 리워드를 받습니다.",
@@ -554,9 +556,11 @@
   "components.input.amount-input.max-button": "최대",
   "components.input.memo-input.memo-label": "메모",
   "components.input.fee-control.title": "트랜잭션 수수료",
+  "components.input.fee-control.fee": "수수료: {assets}",
   "components.input.fee-control.error.insufficient-fee": "수수료가 부족합니다.",
   "components.input.fee-control.modal.title": "수수료 옵션",
-  "components.input.fee-control.modal.fee-title": "수수료",
+  "components.input.fee-control.modal.fee-title": "수수료 선택",
+  "components.input.fee-control.modal.remember-last-fee-option": "이 선택을 기본 옵션으로 저장",
   "components.input.fee-control.modal.fee-token-dropdown-label": "수수료 토큰",
   "components.input.fee-control.modal.auto-title": "자동",
   "components.input.fee-control.modal.guide-title": "Tx simulation failed",
@@ -565,6 +569,8 @@
   "components.input.fee-control.modal.fee-selector.low": "느림",
   "components.input.fee-control.modal.fee-selector.average": "평균",
   "components.input.fee-control.modal.fee-selector.high": "빠름",
+  "components.input.fee-control.modal.guide.external-fee-set": "웹사이트/어플리케이션에 의해 설정된 수수료입니다. 임의로 변경할 경우 트랜잭션이 처리되지 않을 수 있습니다.",
+  "components.input.fee-control.modal.notification.changes-applied": "변경사항이 적용되었습니다.",
 
   "components.address-book-modal.title": "주소록",
   "components.address-book-modal.recent-tab": "최근",
