@@ -198,10 +198,15 @@ const TokenItem: FunctionComponent<{
           <ItemStyles.Address>
             {(() => {
               if ("contractAddress" in tokenInfo.currency) {
-                return Bech32Address.shortenAddress(
-                  tokenInfo.currency.contractAddress,
-                  26
-                );
+                return tokenInfo.currency.contractAddress.startsWith("0x")
+                  ? `${tokenInfo.currency.contractAddress.slice(
+                      0,
+                      15
+                    )}...${tokenInfo.currency.contractAddress.slice(-10)}`
+                  : Bech32Address.shortenAddress(
+                      tokenInfo.currency.contractAddress,
+                      30
+                    );
               }
               return "Unknown";
             })()}

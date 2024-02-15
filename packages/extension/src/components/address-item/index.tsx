@@ -131,7 +131,9 @@ export const AddressItem: FunctionComponent<{
                       : ColorPalette["gray-200"],
                 }}
               >
-                {Bech32Address.shortenAddress(address, 30)}
+                {address.startsWith("0x")
+                  ? `${address.slice(0, 15)}...${address.slice(-10)}`
+                  : Bech32Address.shortenAddress(address, 30)}
               </Body2>
             </XAxis>
 
