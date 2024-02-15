@@ -350,7 +350,11 @@ export const FeeControl: FunctionComponent<{
 
                   if (disableAutomaticFeeSet) {
                     return (
-                      <Tooltip content="Transaction fee was set by website">
+                      <Tooltip
+                        content={intl.formatMessage({
+                          id: "components.input.fee-control.tooltip.external-fee-set",
+                        })}
+                      >
                         <Box alignY="center" marginLeft="0.25rem">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
