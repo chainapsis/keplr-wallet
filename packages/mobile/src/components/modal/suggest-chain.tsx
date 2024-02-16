@@ -42,6 +42,8 @@ const SuggestChainPageImpl: FunctionComponent<{
     origin: string;
   }>;
 }> = observer(({waitingData}) => {
+  const intl = useIntl();
+
   const {chainSuggestStore, chainStore, keyRingStore} = useStore();
   const [isLoadingPlaceholder, setIsLoadingPlaceholder] = useState(true);
 
@@ -117,7 +119,7 @@ const SuggestChainPageImpl: FunctionComponent<{
       <XAxis>
         <Button
           size="large"
-          text="Reject"
+          text={intl.formatMessage({id: 'button.reject'})}
           color="secondary"
           containerStyle={{flex: 1, width: '100%'}}
           onPress={reject}
@@ -127,7 +129,7 @@ const SuggestChainPageImpl: FunctionComponent<{
 
         <Button
           size="large"
-          text="Approve"
+          text={intl.formatMessage({id: 'button.approve'})}
           containerStyle={{flex: 1, width: '100%'}}
           onPress={approve}
         />

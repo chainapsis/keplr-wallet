@@ -2,7 +2,7 @@ import {registerCardModal} from './card';
 import React from 'react';
 import {Box} from '../box';
 import {BaseModalHeader} from './modal';
-import {useIntl} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {Gutter} from '../gutter';
 import {Chip} from '../chip';
 import {useStyle} from '../../styles';
@@ -39,14 +39,15 @@ export const NeedHelpModal = registerCardModal(() => {
           'padding-x-16',
           'text-center',
         ])}>
-        For info or error reports, use our official helpdesk. Please provide the
-        version of your Keplr app in error reports.
+        <FormattedMessage id="page.unlock.need-help.paragraph" />
       </Text>
 
       <Gutter size={32} />
 
       <Button
-        text="Go to Helpdesk"
+        text={intl.formatMessage({
+          id: 'page.unlock.need-help.go-to-helpdesk-button',
+        })}
         size="large"
         color="secondary"
         containerStyle={{width: '100%'}}

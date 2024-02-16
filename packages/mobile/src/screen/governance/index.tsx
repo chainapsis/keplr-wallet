@@ -187,7 +187,7 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
       style={style.flatten(['padding-x-12'])}>
       <Gutter size={6} />
       <TextButton
-        text="View All Proposals"
+        text={intl.formatMessage({id: 'text-button.view-all-proposals'})}
         size="large"
         color="faint"
         containerStyle={style.flatten(['padding-x-12', 'padding-y-6'])}

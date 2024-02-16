@@ -7,7 +7,7 @@ import {Gutter} from '../../components/gutter';
 import {Button} from '../../components/button';
 import {registerCardModal} from '../../components/modal/card';
 import {BaseModalHeader} from '../../components/modal';
-import {useIntl} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {useAppUpdate} from '../../provider/app-update';
 import {VerticalCollapseTransition} from '../../components/transition';
 import {TouchableHighlight} from 'react-native-gesture-handler';
@@ -71,7 +71,7 @@ export const AppUpdateTopLabel: FunctionComponent<{
                   // TODO: 나중에 이 색상을 style builder 밑에 넣자...
                   color: '#AABBF9',
                 }}>
-                Update Available
+                <FormattedMessage id="page.main.components.app-update-modal.banner-title" />
               </Text>
               <Gutter size={3.5} />
               <Svg width="12" height="12" fill="none" viewBox="0 0 12 12">
@@ -122,7 +122,9 @@ export const AppUpdateModal = registerCardModal(
               ? intl.formatMessage({
                   id: 'page.main.components.app-update-modal.title',
                 })
-              : '😎 Keplr Just Got Better'
+              : intl.formatMessage({
+                  id: 'page.main.components.code-push-update-modal.title',
+                })
           }
         />
         <Gutter size={28} />
@@ -138,7 +140,9 @@ export const AppUpdateModal = registerCardModal(
             ? intl.formatMessage({
                 id: 'page.main.components.app-update-modal.paragraph',
               })
-            : "We've downloaded some minor updates while you're gone. To apply these changes, please restart Keplr."}
+            : intl.formatMessage({
+                id: 'page.main.components.code-push-update-modal.paragraph',
+              })}
         </Text>
         <Gutter size={28} />
 
@@ -149,7 +153,9 @@ export const AppUpdateModal = registerCardModal(
               ? intl.formatMessage({
                   id: 'page.main.components.app-update-modal.button',
                 })
-              : 'Restart Keplr'
+              : intl.formatMessage({
+                  id: 'page.main.components.code-push-update-modal.button',
+                })
           }
           onPress={() => {
             if (isStoreUpdate) {

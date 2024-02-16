@@ -11,11 +11,10 @@ import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation';
 import LottieView from 'lottie-react-native';
 import {InteractionManager, StyleSheet, Text, View} from 'react-native';
-import {Column, Columns} from '../../../components/column';
-import {CheckIcon} from '../../../components/icon';
+import {Column} from '../../../components/column';
 import * as Clipboard from 'expo-clipboard';
-import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {ScrollViewRegisterContainer} from '../../register/components/scroll-view-register-container';
+import {TextButton} from '../../../components/text-button';
 
 interface FormData {
   password: string;
@@ -160,34 +159,44 @@ export const WalletShowSensitiveScreen: FunctionComponent = observer(() => {
             </Text>
             <Column weight={1} />
             <Box alignX="center">
-              <TouchableWithoutFeedback
-                onPress={() => {
-                  Clipboard.setStringAsync(sensitive).then(() =>
+              <TextButton
+                text={
+                  isCopied
+                    ? intl.formatMessage({
+                        id: 'pages.register.components.copy-to-clipboard.button-after',
+                      })
+                    : intl.formatMessage({
+                        id: 'pages.register.components.copy-to-clipboard.button-before',
+                      })
+                }
+                textColor={
+                  style.flatten([
+                    isCopied ? 'color-green-400' : 'color-gray-50',
+                  ]).color
+                }
+                size="large"
+                onPress={async () => {
+                  await Clipboard.setStringAsync(sensitive).then(() =>
                     setIsCopied(true),
                   );
+
+                  setIsCopied(true);
+
                   setTimeout(() => {
                     setIsCopied(false);
-                  }, 3000);
-                }}>
-                <Columns sum={1} alignY="center">
-                  <Text
-                    style={style.flatten(['text-button1', 'color-text-high'])}>
-                    Copy to clipboard
-                  </Text>
-                  {isCopied ? (
-                    <Box marginLeft={8}>
-                      <CheckIcon
-                        size={20}
-                        color={
-                          isCopied
-                            ? style.get('color-green-400').color
-                            : style.get('color-text-high').color
-                        }
-                      />
-                    </Box>
-                  ) : null}
-                </Columns>
-              </TouchableWithoutFeedback>
+                  }, 1000);
+                }}
+                rightIcon={
+                  isCopied ? (
+                    <LottieView
+                      source={require('../../../public/assets/lottie/register/check-circle-icon.json')}
+                      loop={false}
+                      autoPlay
+                      style={style.flatten(['width-20', 'height-20'])}
+                    />
+                  ) : undefined
+                }
+              />
             </Box>
           </Box>
         )}

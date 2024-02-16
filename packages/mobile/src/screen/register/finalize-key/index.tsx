@@ -21,6 +21,7 @@ import {useStyle} from '../../../styles';
 import {defaultSpringConfig} from '../../../styles/spring';
 import {ViewRegisterContainer} from '../components/view-register-container';
 import {Buffer} from 'buffer/';
+import {FormattedMessage} from 'react-intl';
 
 const SimpleProgressBar: FunctionComponent<{
   progress: number;
@@ -404,7 +405,7 @@ export const FinalizeKeyScreen: FunctionComponent = observer(() => {
         }}
       />
       <Text style={style.flatten(['subtitle3', 'color-text-low'])}>
-        Let us set everything up for you...
+        <FormattedMessage id="pages.register.finalize-key.loading.text" />
       </Text>
       <Box marginTop={21} marginBottom={12} paddingX={28} width="100%">
         <SimpleProgressBar progress={queryProgress} />

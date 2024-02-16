@@ -149,7 +149,11 @@ export const CopyAddressScene: FunctionComponent<{
     return (
       <Box backgroundColor={style.get('color-gray-600').color}>
         <XAxis alignY="center">
-          <BaseModalHeader title="Deposit" align="left" />
+          <BaseModalHeader
+            title={intl.formatMessage({
+              id: 'page.main.components.deposit-modal.title',
+            })}
+          />
           <View
             style={{
               flex: 1,

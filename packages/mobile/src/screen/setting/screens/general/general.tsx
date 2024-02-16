@@ -9,18 +9,20 @@ import {useNavigation} from '@react-navigation/native';
 import {StackNavProp} from '../../../../navigation';
 import {useStore} from '../../../../stores';
 import {observer} from 'mobx-react-lite';
+import {useLanguage} from '../../../../languages';
 
 export const SettingGeneralScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
   const style = useStyle();
   const navigate = useNavigation<StackNavProp>();
+  const language = useLanguage();
   const {uiConfigStore, keyRingStore} = useStore();
 
   return (
     <React.Fragment>
       <Box paddingX={12} paddingY={8}>
         <Stack gutter={8}>
-          {/* <PageButton
+          <PageButton
             title={intl.formatMessage({
               id: 'page.setting.general.language-title',
             })}
@@ -32,7 +34,7 @@ export const SettingGeneralScreen: FunctionComponent = observer(() => {
               />
             }
             onClick={() => navigate.navigate('Setting.General.Lang')}
-          /> */}
+          />
 
           <PageButton
             title={intl.formatMessage({

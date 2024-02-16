@@ -411,7 +411,9 @@ export const RegisterNavigation: FunctionComponent = () => {
         name="Register.GoogleSignIn"
         component={RegisterGoogleSignInScreen}
         options={{
-          title: 'Connect with Google',
+          title: intl.formatMessage({
+            id: 'pages.register.intro-new-user.sign-up-apple-button',
+          }),
           ...registerHeaderOptions,
         }}
       />
@@ -420,7 +422,9 @@ export const RegisterNavigation: FunctionComponent = () => {
         name="Register.AppleSignIn"
         component={RegisterAppleSignInScreen}
         options={{
-          title: 'Connect with Apple ID',
+          title: intl.formatMessage({
+            id: 'pages.register.intro-new-user.sign-up-apple-button',
+          }),
           ...registerHeaderOptions,
         }}
       />
@@ -428,7 +432,9 @@ export const RegisterNavigation: FunctionComponent = () => {
         name="Register.ImportFromExtension"
         component={ImportFromExtensionScreen}
         options={{
-          title: 'Import from Keplr Extension',
+          title: intl.formatMessage({
+            id: 'pages.register.import-from-extension.title',
+          }),
           ...registerHeaderOptions,
         }}
       />
@@ -875,13 +881,14 @@ const StakeNavigation = () => {
   );
 };
 const GovernanceNavigation = () => {
+  const intl = useIntl();
   return (
     <GovernanceStack.Navigator
       screenOptions={{...TransitionPresets.SlideFromRightIOS}}>
       <GovernanceStack.Screen
         name="Governance.intro"
         options={{
-          title: 'Chains with Active Proposals',
+          title: intl.formatMessage({id: 'page.governance.intro.title'}),
           ...defaultHeaderOptions,
         }}
         component={GovernanceScreen}
@@ -889,7 +896,7 @@ const GovernanceNavigation = () => {
       <GovernanceStack.Screen
         name="Governance.list"
         options={{
-          title: 'Proposals',
+          title: intl.formatMessage({id: 'page.governance.list.title'}),
           ...defaultHeaderOptions,
         }}
         component={GovernanceListScreen}
@@ -988,6 +995,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
           <Stack.Screen
             name="Send"
             options={{
+              title: intl.formatMessage({id: 'page.send.amount.title'}),
               ...defaultHeaderOptions,
             }}
             component={SendAmountScreen}
@@ -995,8 +1003,8 @@ export const AppNavigation: FunctionComponent = observer(() => {
           <Stack.Screen
             name="Send.SelectAsset"
             options={{
+              title: intl.formatMessage({id: 'page.send.select-asset.title'}),
               ...defaultHeaderOptions,
-              headerTitle: 'Send',
             }}
             component={SendSelectAssetScreen}
           />

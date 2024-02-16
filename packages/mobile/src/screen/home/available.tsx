@@ -122,7 +122,9 @@ export const AvailableTabView: FunctionComponent<{
     lenAlwaysShown: number;
   }[] = [
     {
-      title: 'Available Balance',
+      title: intl.formatMessage({
+        id: 'page.main.available.available-balance-title',
+      }),
       balance: allBalancesSearchFiltered,
       lenAlwaysShown: 10,
     },

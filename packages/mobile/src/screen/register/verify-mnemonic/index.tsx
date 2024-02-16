@@ -135,9 +135,9 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
 
   return (
     <ScrollViewRegisterContainer
-      paragraph={`Step ${route.params.stepPrevious + 1}/${
-        route.params.stepTotal
-      }`}
+      paragraph={`${intl.formatMessage({
+        id: 'pages.register.components.header.header-step.title',
+      })} ${route.params.stepPrevious + 1}/${route.params.stepTotal}`}
       bottomButton={{
         text: intl.formatMessage({
           id: 'button.next',

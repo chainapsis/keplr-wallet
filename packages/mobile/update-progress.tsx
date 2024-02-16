@@ -10,6 +10,7 @@ import Reanimated, {
 } from 'react-native-reanimated';
 import {defaultSpringConfig} from './src/styles/spring';
 import LottieView from 'lottie-react-native';
+import {FormattedMessage} from 'react-intl';
 
 export const UpdateProgress: FunctionComponent<{
   progress: number;
@@ -53,7 +54,7 @@ export const UpdateProgress: FunctionComponent<{
             }}
           />
           <Text style={style.flatten(['h4', 'color-text-high', 'text-center'])}>
-            Hey, Cosmonaut! 👋
+            <FormattedMessage id="update-progress.title" />
           </Text>
           <View
             style={{
@@ -66,7 +67,7 @@ export const UpdateProgress: FunctionComponent<{
               'color-gray-200',
               'text-center',
             ])}>
-            We have some small yet{'\n'}significant updates ready!
+            <FormattedMessage id="update-progress.paragraph" />
           </Text>
           <View
             style={{
@@ -79,7 +80,7 @@ export const UpdateProgress: FunctionComponent<{
               'color-text-low',
               'text-center',
             ])}>
-            Let us set everything up for you..
+            <FormattedMessage id="update-progress.loading" />
           </Text>
           <View
             style={{

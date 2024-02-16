@@ -109,7 +109,9 @@ export const SignUndelegateScreen: FunctionComponent = observer(() => {
       <Gutter size={16} />
       <GuideBox
         color="warning"
-        title="Once the unstaking period begins you will:"
+        title={intl.formatMessage({
+          id: 'page.stake.undelegate.guide-box.title',
+        })}
         paragraph={
           <Box paddingX={6}>
             <XAxis>

@@ -33,7 +33,23 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.ValidateList'>>();
   const navigation = useNavigation<StackNavProp>();
-  const filterItems: FilterOption[] = ['Commission', 'Voting Power'];
+  const filterItems: {
+    option: FilterOption;
+    title: string;
+  }[] = [
+    {
+      option: 'Commission',
+      title: intl.formatMessage({
+        id: 'page.stake.validator-list.option.commission',
+      }),
+    },
+    {
+      option: 'Voting Power',
+      title: intl.formatMessage({
+        id: 'page.stake.validator-list.option.voting-power',
+      }),
+    },
+  ];
 
   const {chainId, validatorSelector} = route.params;
   const queries = queriesStore.get(chainId);
@@ -93,7 +109,9 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
     <Box style={style.flatten(['flex-1'])} paddingTop={12}>
       <Box paddingX={12} paddingBottom={4}>
         <DebounceSearchTextInput
-          placeholder="Search for a validator"
+          placeholder={intl.formatMessage({
+            id: 'page.stake.validator-list.search-input-placeholder',
+          })}
           handleSearchWord={e => {
             setSearch(e);
           }}
@@ -102,7 +120,15 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
         <Gutter size={8} />
         <Box paddingY={6} paddingX={4} alignX="right">
           <TextButton
-            text={filterOption}
+            text={
+              filterOption === 'Voting Power'
+                ? intl.formatMessage({
+                    id: 'page.stake.validator-list.option.voting-power',
+                  })
+                : intl.formatMessage({
+                    id: 'page.stake.validator-list.option.commission',
+                  })
+            }
             onPress={() => {
               setIsOpenSelectItemModal(true);
             }}
@@ -187,11 +213,11 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
         isOpen={isOpenSelectItemModal}
         setIsOpen={setIsOpenSelectItemModal}
         items={filterItems.map(item => ({
-          key: item,
-          title: item,
-          selected: item === filterOption,
+          key: item.option,
+          title: item.title,
+          selected: item.option === filterOption,
           onSelect: () => {
-            setFilterOption(item);
+            setFilterOption(item.option);
             setIsOpenSelectItemModal(false);
           },
         }))}

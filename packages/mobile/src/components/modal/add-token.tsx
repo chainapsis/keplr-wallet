@@ -104,7 +104,7 @@ export const AddTokenModal = registerCardModal(
         <XAxis>
           <Button
             size="large"
-            text="Reject"
+            text={intl.formatMessage({id: 'button.reject'})}
             color="secondary"
             containerStyle={{flex: 1, width: '100%'}}
             onPress={async () => {
@@ -116,7 +116,7 @@ export const AddTokenModal = registerCardModal(
 
           <Button
             size="large"
-            text="Approve"
+            text={intl.formatMessage({id: 'button.approve'})}
             containerStyle={{flex: 1, width: '100%'}}
             onPress={async () => {
               if (

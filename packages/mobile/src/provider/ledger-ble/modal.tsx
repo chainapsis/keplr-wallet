@@ -23,6 +23,7 @@ import {GuideBox} from '../../components/guide-box';
 import {Button} from '../../components/button';
 import Svg, {Path, Rect} from 'react-native-svg';
 import {RectButton} from 'react-native-gesture-handler';
+import {FormattedMessage} from 'react-intl';
 
 enum BLEPermissionGrantStatus {
   NotInit = 'notInit',
@@ -249,10 +250,10 @@ export const LedgerBLETransportModal = registerCardModal<{
             return (
               <Box paddingX={8} paddingBottom={32}>
                 <Text style={style.flatten(['color-text-low', 'body2'])}>
-                  • Make sure Bluetooth is enabled on your mobile device.
+                  <FormattedMessage id="components.ledger-modal.paragraph-1" />
                 </Text>
                 <Text style={style.flatten(['color-text-low', 'body2'])}>
-                  • Turn on and unlock your Ledger.
+                  <FormattedMessage id="components.ledger-modal.paragraph-2" />
                 </Text>
               </Box>
             );
@@ -302,7 +303,7 @@ export const LedgerBLETransportModal = registerCardModal<{
                   'color-text-high',
                   'text-center',
                 ])}>
-                Keplr doesn’t have permission to use bluetooth
+                <FormattedMessage id="components.ledger-modal.permission-error" />
               </Text>
               <Gutter size={16} />
               <Button
@@ -375,7 +376,10 @@ const LedgerNanoBLESelector: FunctionComponent<{
               <React.Fragment>
                 <Gutter size={6} />
                 <Text style={style.flatten(['subtitle3', 'color-gray-300'])}>
-                  {`Failed to connect: ${error.message || error.toString()}`}
+                  <FormattedMessage
+                    id="components.ledger-modal.connection-error"
+                    values={{error: error.message || error.toString()}}
+                  />
                 </Text>
               </React.Fragment>
             ) : null}
@@ -384,7 +388,7 @@ const LedgerNanoBLESelector: FunctionComponent<{
               <React.Fragment>
                 <Gutter size={6} />
                 <Text style={style.flatten(['subtitle3', 'color-gray-300'])}>
-                  Connecting...
+                  <FormattedMessage id="components.ledger-modal.connecting" />
                 </Text>
               </React.Fragment>
             ) : null}

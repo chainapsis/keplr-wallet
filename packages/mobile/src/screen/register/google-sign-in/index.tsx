@@ -104,7 +104,9 @@ export const RegisterGoogleSignInScreen: FunctionComponent = observer(() => {
       contentContainerStyle={{
         flexGrow: 1,
       }}
-      paragraph="Step 1/3"
+      paragraph={`${intl.formatMessage({
+        id: 'pages.register.components.header.header-step.title',
+      })} 1/3`}
       bottomButton={{
         text: intl.formatMessage({
           id: 'button.next',

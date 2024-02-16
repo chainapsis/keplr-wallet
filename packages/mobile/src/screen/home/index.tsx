@@ -185,13 +185,13 @@ export const HomeScreen: FunctionComponent = observer(() => {
               {
                 key: 'available',
                 text: intl.formatMessage({
-                  id: 'page.main.available.available-button-title',
+                  id: 'page.main.components.string-toggle.available-tab',
                 }),
               },
               {
                 key: 'staked',
                 text: intl.formatMessage({
-                  id: 'page.main.staked.staked-button-title',
+                  id: 'page.main.components.string-toggle.staked-tab',
                 }),
               },
             ]}
@@ -235,7 +235,13 @@ export const HomeScreen: FunctionComponent = observer(() => {
                   'font-medium',
                   'subtitle2',
                 ])}>
-                {tabStatus === 'available' ? 'Total Available' : 'Total Staked'}
+                {tabStatus === 'available'
+                  ? intl.formatMessage({
+                      id: 'page.main.chart.available',
+                    })
+                  : intl.formatMessage({
+                      id: 'page.main.chart.staked',
+                    })}
               </Text>
             </Skeleton>
             <Gutter size={10} />
@@ -259,7 +265,9 @@ export const HomeScreen: FunctionComponent = observer(() => {
               <Column weight={1}>
                 <Skeleton isNotReady={isNotReady} layer={1} type="button">
                   <Button
-                    text="Deposit"
+                    text={intl.formatMessage({
+                      id: 'page.main.components.buttons.deposit-button',
+                    })}
                     size="large"
                     color="secondary"
                     onPress={() => {
@@ -272,7 +280,9 @@ export const HomeScreen: FunctionComponent = observer(() => {
               <Column weight={1}>
                 <Skeleton isNotReady={isNotReady} layer={1} type="button">
                   <Button
-                    text="Send"
+                    text={intl.formatMessage({
+                      id: 'page.main.components.buttons.send-button',
+                    })}
                     size="large"
                     onPress={() => {
                       navigation.dispatch({
@@ -287,7 +297,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
           ) : (
             <Columns sum={1} gutter={10}>
               <Button
-                text="Vote"
+                text={intl.formatMessage({id: 'button.vote'})}
                 size="large"
                 color="secondary"
                 rightIcon={<VoteIcon />}
@@ -300,7 +310,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
                 }}
               />
               <Button
-                text="Stake"
+                text={intl.formatMessage({id: 'button.stake'})}
                 size="large"
                 rightIcon={<StakingIcon size={18} color="white" />}
                 containerStyle={style.flatten(['flex-1'])}
@@ -330,7 +340,9 @@ export const HomeScreen: FunctionComponent = observer(() => {
                   e.preventDefault();
                   setSearch(e.nativeEvent.text);
                 }}
-                placeholder="Search for asset or chain (i.e. ATOM, Cosmos)"
+                placeholder={intl.formatMessage({
+                  id: 'page.main.search-placeholder',
+                })}
               />
             ) : null}
           </Box>
