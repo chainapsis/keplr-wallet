@@ -326,6 +326,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.send.amount.title" })}
+      displayFlex={true}
+      fixedMinHeight={true}
       left={<BackButton />}
       right={
         !isDetachedMode ? (
@@ -594,8 +596,13 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         }
       }}
     >
-      <Box paddingX="0.75rem" paddingBottom="0.75rem">
-        <Stack gutter="0.75rem">
+      <Box
+        paddingX="0.75rem"
+        style={{
+          flex: 1,
+        }}
+      >
+        <Stack gutter="0.75rem" flex={1}>
           <YAxis>
             <Subtitle3>
               <FormattedMessage id="page.send.amount.asset-title" />

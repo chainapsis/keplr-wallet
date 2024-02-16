@@ -26,6 +26,8 @@ export interface UIConfigOptions {
   isDeveloperMode: boolean;
   hideLowBalance: boolean;
   isPrivacyMode: boolean;
+  rememberLastFeeOption: boolean;
+  lastFeeOption: "low" | "average" | "high" | false;
 
   useWebHIDLedger: boolean;
 }
@@ -46,6 +48,8 @@ export class UIConfigStore {
     isDeveloperMode: false,
     hideLowBalance: false,
     isPrivacyMode: false,
+    rememberLastFeeOption: false,
+    lastFeeOption: false,
 
     useWebHIDLedger: false,
   };
@@ -242,6 +246,24 @@ export class UIConfigStore {
       return "*".repeat(numStars);
     }
     return str;
+  }
+
+  @action
+  setRememberLastFeeOption(value: boolean) {
+    this.options.rememberLastFeeOption = value;
+  }
+
+  get rememberLastFeeOption(): boolean {
+    return this.options.rememberLastFeeOption;
+  }
+
+  @action
+  setLastFeeOption(value: "low" | "average" | "high" | false) {
+    this.options.lastFeeOption = value;
+  }
+
+  get lastFeeOption(): "low" | "average" | "high" | false {
+    return this.options.lastFeeOption;
   }
 
   @computed
