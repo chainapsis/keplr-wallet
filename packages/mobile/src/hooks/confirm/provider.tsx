@@ -24,6 +24,7 @@ interface ConfirmData {
   paragraph: string | React.ReactNode;
   options: {
     forceYes?: boolean;
+    yesText?: string;
   };
   resolver: (value: boolean) => void;
 }
@@ -142,9 +143,12 @@ const ConfirmModal = registerConfirmModal(
 
             <Button
               size="large"
-              text={intl.formatMessage({
-                id: 'hooks.confirm.yes-button',
-              })}
+              text={
+                confirm?.options.yesText ||
+                intl.formatMessage({
+                  id: 'hooks.confirm.yes-button',
+                })
+              }
               containerStyle={style.flatten(['flex-1'])}
               onPress={() => {
                 onConfirm();

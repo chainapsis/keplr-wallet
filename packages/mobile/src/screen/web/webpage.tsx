@@ -15,12 +15,24 @@ import EventEmitter from 'eventemitter3';
 import {RNInjectedKeplr} from '../../injected/injected-provider';
 import {useStore} from '../../stores';
 import {Keplr} from '@keplr-wallet/provider';
-import {RNMessageRequesterExternal} from '../../router';
+import {
+  RNMessageRequesterExternal,
+  RNMessageRequesterInternal,
+} from '../../router';
 import {OnScreenWebpageScreenHeader} from './components/header';
 import {Gutter} from '../../components/gutter';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {RootStackParamList} from '../../navigation';
 import DeviceInfo from 'react-native-device-info';
+import {BACKGROUND_PORT} from '@keplr-wallet/router';
+import {
+  CheckBadTwitterIdMsg,
+  CheckURLIsPhishingOnMobileMsg,
+  URLTempAllowOnMobileMsg,
+} from '@keplr-wallet/background';
+import {useConfirm} from '../../hooks/confirm';
+
+const blocklistURL = 'https://blocklist.keplr.app';
 
 export const useInjectedSourceCode = () => {
   const [code, setCode] = useState<string | undefined>();
@@ -47,15 +59,18 @@ export const WebpageScreen: FunctionComponent = observer(() => {
   const [title, setTitle] = useState('');
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoForward, setCanGoForward] = useState(false);
+  const confirm = useConfirm();
   const sourceCode = useInjectedSourceCode();
 
   const recentUrl = useRef('');
 
-  const uri =
+  const [uri, setUri] = useState(
     route.params.url.startsWith('http://') ||
-    route.params.url.startsWith('https://')
+      route.params.url.startsWith('https://')
       ? route.params.url
-      : `https://${route.params.url}`;
+      : `https://${route.params.url}`,
+  );
+
   const {isExternal} = route.params;
 
   const [currentURL, setCurrentURL] = useState(uri);
@@ -64,8 +79,35 @@ export const WebpageScreen: FunctionComponent = observer(() => {
   const onMessage = useCallback(
     (event: WebViewMessageEvent) => {
       eventEmitter.emit('message', event.nativeEvent);
+
+      const data: {message: string; origin: string} = JSON.parse(
+        event.nativeEvent.data,
+      );
+
+      if (data.message === 'allow-temp-blocklist-url') {
+        try {
+          new RNMessageRequesterInternal()
+            .sendMessage(
+              BACKGROUND_PORT,
+              new URLTempAllowOnMobileMsg(
+                new URL(uri).href,
+                new URL(data.origin).href,
+              ),
+            )
+            .then(() => {
+              setUri(data.origin);
+            })
+            .catch(e => {
+              console.log(e);
+              // ignore error
+            });
+        } catch (e) {
+          // noop
+          console.log(e);
+        }
+      }
     },
-    [eventEmitter],
+    [eventEmitter, uri],
   );
 
   useEffect(() => {
@@ -115,6 +157,67 @@ export const WebpageScreen: FunctionComponent = observer(() => {
     };
   }, [chainStore, uri, eventEmitter]);
 
+  const checkURLIsPhishing = (origin: string) => {
+    try {
+      const _blocklistURL = new URL(blocklistURL);
+      const url = new URL(origin);
+
+      if (url.hostname === 'twitter.com' || url.hostname === 'x.com') {
+        const paths = url.pathname
+          .split('/')
+          .map(path => path.trim())
+          .filter(path => path.length > 0);
+
+        if (paths.length > 0) {
+          let id = paths[0];
+          if (id.startsWith('@')) {
+            id = id.slice(1);
+          }
+
+          new RNMessageRequesterInternal()
+            .sendMessage(BACKGROUND_PORT, new CheckBadTwitterIdMsg(id))
+            .then(r => {
+              if (r) {
+                confirm.confirm(
+                  '🚨 Phishing Alert',
+                  `@${id} has been reported as a phishing account. Do NOT interact with the account, and particularly avoid visiting any links in its tweets.`,
+                  {
+                    forceYes: true,
+                    yesText: 'Understood',
+                  },
+                );
+              }
+            })
+            .catch(e => {
+              console.log("Failed to check domain's reliability", e);
+            });
+        }
+
+        return;
+      }
+
+      if (url.origin !== _blocklistURL.origin) {
+        if (url.hostname !== 'localhost') {
+          new RNMessageRequesterInternal()
+            .sendMessage(
+              BACKGROUND_PORT,
+              new CheckURLIsPhishingOnMobileMsg(url.href),
+            )
+            .then(r => {
+              if (r) {
+                setUri(`${blocklistURL}?origin=${encodeURIComponent(origin)}`);
+              }
+            })
+            .catch(e => {
+              console.log("Failed to check domain's reliability", e);
+            });
+        }
+      }
+    } catch (e) {
+      console.log('Failed to parse url', e);
+    }
+  };
+
   return (
     <React.Fragment>
       <WebViewStateContext.Provider
@@ -142,6 +245,8 @@ export const WebpageScreen: FunctionComponent = observer(() => {
 
             setCurrentURL(e.url);
             recentUrl.current = e.url;
+
+            checkURLIsPhishing(e.url);
           }}
           onLoadProgress={e => {
             // Strangely, `onLoadProgress` is only invoked whenever page changed only in Android.
@@ -151,6 +256,8 @@ export const WebpageScreen: FunctionComponent = observer(() => {
 
             setCurrentURL(e.nativeEvent.url);
             recentUrl.current = e.nativeEvent.url;
+
+            checkURLIsPhishing(e.nativeEvent.url);
           }}
           contentInsetAdjustmentBehavior="never"
           automaticallyAdjustContentInsets={false}
