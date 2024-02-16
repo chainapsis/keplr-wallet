@@ -47,10 +47,6 @@ export class CheckURLIsPhishingOnMobileMsg extends Message<boolean> {
     parseDomain(url.origin);
   }
 
-  override approveExternal(): boolean {
-    return false;
-  }
-
   route(): string {
     return ROUTE;
   }
@@ -104,10 +100,6 @@ export class URLTempAllowOnMobileMsg extends Message<void> {
     const url = new URL(this.originUrl);
     // Will throw an error if url has not second level domain.
     parseDomain(url.origin);
-  }
-
-  override approveExternal(): boolean {
-    return false;
   }
 
   route(): string {
