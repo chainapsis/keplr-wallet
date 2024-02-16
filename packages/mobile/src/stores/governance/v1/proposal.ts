@@ -56,39 +56,41 @@ export class ObservableQueryProposalV1 extends ObservableChainQuery<ProposalTall
   }
 
   get title(): string {
+    if (this.raw.metadata) {
+      try {
+        const metadata = JSON.parse(this.raw.metadata);
+        if (metadata.title) {
+          return metadata.title;
+        }
+      } catch (e) {
+        console.log(e);
+        // noop
+      }
+    }
+
+    // Since: cosmos-sdk 0.47
     if (this.raw.title) {
       return this.raw.title;
     }
 
-    if (this.raw.messages.length === 0) {
-      if (this.raw.metadata) {
-        try {
-          const metadata = JSON.parse(this.raw.metadata);
-          if (metadata.title) {
-            return metadata.title;
-          }
-        } catch (e) {
-          console.log(e);
-          // noop
-        }
+    if (this.raw.messages.length > 0) {
+      if (this.raw.messages[0].content?.title) {
+        return this.raw.messages[0].content.title;
       }
 
-      return 'No Title';
+      if (this.raw.messages[0]['@type']) {
+        return this.raw.messages[0]['@type'];
+      }
+
+      if (
+        this.raw.messages[0].content &&
+        this.raw.messages[0].content['@type']
+      ) {
+        return this.raw.messages[0].content['@type'];
+      }
     }
 
-    if (this.raw.messages[0].content?.title) {
-      return this.raw.messages[0].content.title;
-    }
-
-    if (this.raw.messages[0]['@type']) {
-      return this.raw.messages[0]['@type'];
-    }
-
-    if (this.raw.messages[0].content && this.raw.messages[0].content['@type']) {
-      return this.raw.messages[0].content['@type'];
-    }
-
-    return '';
+    return 'No Title';
   }
 
   get description(): string {
