@@ -45,6 +45,10 @@ export type IBCHistory = {
         counterpartyChainId: string;
 
         sequence?: string;
+        // 위의 channel id는 src channel id이고
+        // 얘는 dst channel id이다
+        // 각 tracking이 완료될때마다 events에서 찾아서 추가된다.
+        dstChannelId?: string;
 
         completed: boolean;
         error?: string;
