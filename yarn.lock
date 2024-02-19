@@ -8250,7 +8250,7 @@ __metadata:
     mobx-utils: ^6.0.8
     os-browserify: ^0.3.0
     path-browserify: ^1.0.1
-    pod-install: ^0.1.39
+    pod-install: ^0.2.0
     react: 18.2.0
     react-hook-form: ^7.45.4
     react-intl: ^6.2.8
@@ -33840,12 +33840,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pod-install@npm:^0.1.39":
-  version: 0.1.39
-  resolution: "pod-install@npm:0.1.39"
+"pod-install@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "pod-install@npm:0.2.0"
   bin:
     pod-install: build/index.js
-  checksum: 200302341847251d4db25f950d15367f6f45f5358d87b18bf01054094f02b2572d007f73c8020b1565dd3e6b23f861965f9bad434873d3c8e834be0e7124fa3e
+  checksum: ecfe94d1285b42dd56fb03b9d1850d805f5626b8030acd32f2cb9ea6902e678deaefbb8475d2e307d0a6311159c6b5deea173adcc045c5ff6d58b377b0dcf1b8
   languageName: node
   linkType: hard
 
