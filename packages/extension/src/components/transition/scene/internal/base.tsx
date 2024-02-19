@@ -528,7 +528,7 @@ const SceneComponent: FunctionComponent<
           }),
           left: to([animTop, x, sceneWidth], (top, x, sceneWidth) => {
             if (sceneWidth) {
-              if (x != null && x > 0) {
+              if (x != null && typeof x === "number" && x > 0) {
                 x = (x as number) * 100;
                 return `${x}%`;
               }
@@ -543,7 +543,7 @@ const SceneComponent: FunctionComponent<
           }),
           right: to([animTop, x, sceneWidth], (top, x, sceneWidth) => {
             if (sceneWidth) {
-              if (x != null && x < 0) {
+              if (x != null && typeof x === "number" && x < 0) {
                 x = (x as number) * 100 * -1;
                 return `${x}%`;
               }
