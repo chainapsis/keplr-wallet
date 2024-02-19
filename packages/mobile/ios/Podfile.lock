@@ -23,33 +23,31 @@ PODS:
     - React-Core
     - SSZipArchive (~> 2.2.2)
   - DoubleConversion (1.1.6)
-  - EXApplication (5.3.1):
+  - EXConstants (15.4.5):
     - ExpoModulesCore
-  - EXConstants (14.4.2):
+  - EXFont (11.10.3):
     - ExpoModulesCore
-  - EXFileSystem (15.4.2):
-    - ExpoModulesCore
-  - EXFont (11.4.0):
-    - ExpoModulesCore
-  - Expo (49.0.22):
+  - Expo (50.0.7):
     - ExpoModulesCore
   - ExpoAppleAuthentication (6.3.0):
     - ExpoModulesCore
-  - ExpoClipboard (4.8.0):
+  - ExpoClipboard (5.0.1):
     - ExpoModulesCore
-  - ExpoCrypto (12.8.0):
+  - ExpoCrypto (12.8.1):
     - ExpoModulesCore
-  - ExpoImage (1.9.0):
+  - ExpoFileSystem (16.0.6):
+    - ExpoModulesCore
+  - ExpoImage (1.11.0):
     - ExpoModulesCore
     - SDWebImage (~> 5.17.0)
     - SDWebImageAVIFCoder (~> 0.10.1)
     - SDWebImageSVGCoder (~> 1.7.0)
     - SDWebImageWebPCoder (~> 0.13.0)
-  - ExpoKeepAwake (12.3.0):
+  - ExpoKeepAwake (12.8.2):
     - ExpoModulesCore
   - ExpoLocalAuthentication (13.8.0):
     - ExpoModulesCore
-  - ExpoModulesCore (1.5.13):
+  - ExpoModulesCore (1.11.9):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
@@ -950,7 +948,9 @@ PODS:
     - React-Core
   - react-native-safe-area-context (4.7.1):
     - React-Core
-  - react-native-webview (13.6.2):
+  - react-native-webview (13.8.1):
+    - glog
+    - RCT-Folly (= 2022.05.16.00)
     - React-Core
   - React-nativeconfig (0.73.4)
   - React-NativeModulesApple (0.73.4):
@@ -1165,14 +1165,13 @@ DEPENDENCIES:
   - BVLinearGradient (from `../node_modules/react-native-linear-gradient`)
   - CodePush (from `../node_modules/react-native-code-push`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
-  - EXApplication (from `../node_modules/expo-application/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
-  - EXFileSystem (from `../node_modules/expo-file-system/ios`)
   - EXFont (from `../node_modules/expo-font/ios`)
   - Expo (from `../node_modules/expo`)
   - ExpoAppleAuthentication (from `../node_modules/expo-apple-authentication/ios`)
   - ExpoClipboard (from `../node_modules/expo-clipboard/ios`)
   - ExpoCrypto (from `../node_modules/expo-crypto/ios`)
+  - ExpoFileSystem (from `../node_modules/expo-file-system/ios`)
   - ExpoImage (from `../node_modules/expo-image/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
   - ExpoLocalAuthentication (from `../node_modules/expo-local-authentication/ios`)
@@ -1277,12 +1276,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-code-push"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
-  EXApplication:
-    :path: "../node_modules/expo-application/ios"
   EXConstants:
     :path: "../node_modules/expo-constants/ios"
-  EXFileSystem:
-    :path: "../node_modules/expo-file-system/ios"
   EXFont:
     :path: "../node_modules/expo-font/ios"
   Expo:
@@ -1293,6 +1288,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-clipboard/ios"
   ExpoCrypto:
     :path: "../node_modules/expo-crypto/ios"
+  ExpoFileSystem:
+    :path: "../node_modules/expo-file-system/ios"
   ExpoImage:
     :path: "../node_modules/expo-image/ios"
   ExpoKeepAwake:
@@ -1437,18 +1434,17 @@ SPEC CHECKSUMS:
   BVLinearGradient: 880f91a7854faff2df62518f0281afb1c60d49a3
   CodePush: 84c9a5792cb3c8e311197d595610c803f0b01739
   DoubleConversion: fea03f2699887d960129cc54bba7e52542b6f953
-  EXApplication: 042aa2e3f05258a16962ea1a9914bf288db9c9a1
-  EXConstants: ce5bbea779da8031ac818c36bea41b10e14d04e1
-  EXFileSystem: d7f59869885cfeab3ac771e2a8d0f5ed98cd3fdb
-  EXFont: 738c44c390953ebcbab075a4848bfbef025fd9ee
-  Expo: 9060b49fecf07bebf1dd967730d079aa5e750ebe
+  EXConstants: 988aa430ca0f76b43cd46b66e7fae3287f9cc2fc
+  EXFont: f20669cb266ef48b004f1eb1f2b20db96cd1df9f
+  Expo: 1cf3922a9b26262b2556544d4defcecccd37d033
   ExpoAppleAuthentication: 4fc9972356977f009911f2f3a5f56319c2a5b11b
-  ExpoClipboard: b8f76767b0dbaefb3be7adbf85049fd85861d527
-  ExpoCrypto: e2ca148f5c93a0514959df86b34256bb3c50d358
-  ExpoImage: cfaa9c379a3467c7863a187a1059c220b27a0741
-  ExpoKeepAwake: be4cbd52d9b177cde0fd66daa1913afa3161fc1d
+  ExpoClipboard: b597982124f067ff9f5b89093eb3d97898d5d877
+  ExpoCrypto: b6428f48599c007676dc81a9b5f72c07e62fdccc
+  ExpoFileSystem: a9273932e69a9a1e1a8d01b6ba895bb8294bbea2
+  ExpoImage: 390c524542b258f8173f475c1cc71f016444a7be
+  ExpoKeepAwake: 0f5cad99603a3268e50af9a6eb8b76d0d9ac956c
   ExpoLocalAuthentication: c55ffb179683efed04cb144fc80ccf26891f0cb4
-  ExpoModulesCore: a7fe70a086db808e40b89ca72b330917c65ec58b
+  ExpoModulesCore: 1391529545de72f7f64ecabc7adb912306ab4d34
   ExpoWebBrowser: e31c97230ea93b51a2a74c6c2381b0d4fca5698c
   FBLazyVector: 84f6edbe225f38aebd9deaf1540a4160b1f087d7
   FBReactNativeSpec: d0086a479be91c44ce4687a962956a352d2dc697
@@ -1488,7 +1484,7 @@ SPEC CHECKSUMS:
   react-native-compat: ee9e15e51da54a03c5b0c69dbc30f9f17b4231af
   react-native-netinfo: 8a7fd3f7130ef4ad2fb4276d5c9f8d3f28d2df3d
   react-native-safe-area-context: 9697629f7b2cda43cf52169bb7e0767d330648c2
-  react-native-webview: 8fc09f66a1a5b16bbe37c3878fda27d5982bb776
+  react-native-webview: 0f93dc8f4208ae5365884922c3cd14da5037ca4c
   React-nativeconfig: d7af5bae6da70fa15ce44f045621cf99ed24087c
   React-NativeModulesApple: d5a1abf3d7ef808cdf1d27e795c741f0c5e14ea0
   React-perflogger: 8a1e1af5733004bdd91258dcefbde21e0d1faccd
