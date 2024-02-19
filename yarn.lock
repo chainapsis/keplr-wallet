@@ -8538,7 +8538,7 @@ __metadata:
     react-native-screens: ^3.29.0
     react-native-svg: ^14.1.0
     react-native-url-polyfill: ^2.0.0
-    react-native-vision-camera: ^3.6.12
+    react-native-vision-camera: ^3.9.0
     react-native-webview: ^13.8.1
     react-test-renderer: 18.2.0
     semver: ^7.5.4
@@ -35935,9 +35935,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-vision-camera@npm:^3.6.12":
-  version: 3.6.12
-  resolution: "react-native-vision-camera@npm:3.6.12"
+"react-native-vision-camera@npm:^3.9.0":
+  version: 3.9.0
+  resolution: "react-native-vision-camera@npm:3.9.0"
   peerDependencies:
     react: "*"
     react-native: "*"
@@ -35945,7 +35945,7 @@ __metadata:
   peerDependenciesMeta:
     react-native-worklets-core:
       optional: true
-  checksum: 7f040b2a6fe8da3a85a4a1c744defbf52f118667a336cb8b711e6242ff904f867f5077d512f523e7b2592f4587128b2ae0011ea9e91b5168b1c42b501b4e8811
+  checksum: 52cca29ed7b8d8fcc4ae8f5e8da71844d0a96dfa642833fbda611469dac9a2a9fbcace2d9c2a09ab735d1d91582815a05bd3b466889afbcc2bd1deae2112969b
   languageName: node
   linkType: hard
 

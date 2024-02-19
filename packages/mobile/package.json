@@ -90,7 +90,7 @@
     "react-native-screens": "^3.29.0",
     "react-native-svg": "^14.1.0",
     "react-native-url-polyfill": "^2.0.0",
-    "react-native-vision-camera": "^3.6.12",
+    "react-native-vision-camera": "^3.9.0",
     "react-native-webview": "^13.8.1",
     "semver": "^7.5.4",
     "setimmediate": "^1.0.5",
