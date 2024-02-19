@@ -8222,8 +8222,8 @@ __metadata:
     "@types/text-encoding": ^0
     "@walletconnect/react-native-compat": =2.10.5
     "@walletconnect/sign-client": =2.10.5
-    appcenter: ^5.0.0
-    appcenter-analytics: ^5.0.0
+    appcenter: ^5.0.1
+    appcenter-analytics: ^5.0.1
     appcenter-cli: ^2.14.0
     babel-jest: ^29.2.1
     babel-plugin-module-resolver: ^5.0.0
@@ -8256,7 +8256,7 @@ __metadata:
     react-intl: ^6.2.8
     react-native: 0.73.4
     react-native-ble-plx: ^2.0.3
-    react-native-code-push: ^8.1.1
+    react-native-code-push: ^8.2.1
     react-native-device-info: ^10.11.0
     react-native-fs: ^2.20.0
     react-native-gesture-handler: ^2.14.1
@@ -15584,12 +15584,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"appcenter-analytics@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "appcenter-analytics@npm:5.0.0"
+"appcenter-analytics@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "appcenter-analytics@npm:5.0.1"
   dependencies:
-    appcenter: 5.0.0
-  checksum: d48805059c5afb4ed0401140e0aaaa7a9222491cf86c9ec501706caec8ae57aed7b1d57599a77ba70fccb18c4545a988ff7e9bf459342c50384f23b918d3d8af
+    appcenter: 5.0.1
+  checksum: fdae463a3f784ed61b0003ed9eec31b8004c1b918759ce5f1d2783646b9a386a8e6f7c8cdb204ddf9b4e36068059c345562cf712a4d993659f8bbd0bf10886d4
   languageName: node
   linkType: hard
 
@@ -15673,26 +15673,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"appcenter-link-scripts@npm:5.0.0":
-  version: 5.0.0
-  resolution: "appcenter-link-scripts@npm:5.0.0"
+"appcenter-link-scripts@npm:5.0.1":
+  version: 5.0.1
+  resolution: "appcenter-link-scripts@npm:5.0.1"
   dependencies:
-    debug: 4.1.1
+    debug: 4.3.1
     glob: 5.0.15
     mkdirp: 0.5.3
     plist: ^3.0.2
     which: 1.2.11
     xcode: 2.0.0
-  checksum: 8361c5a72c3c3315a4e35052cef3c287433237ae55c801defb3d164951609ac5b2f38c4b2e3dcd090fd1f81a1ee24d930023a0af1a9942b87edfa268fb7210d5
+  checksum: ec3bf2dfca7fcbd6735f78051bda510ff7af805fe924b5afb5f6598b8276b0bd036d93d447915d3542604b6b9cac6af259faac14b04ee539607d47be6671d6c5
   languageName: node
   linkType: hard
 
-"appcenter@npm:5.0.0, appcenter@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "appcenter@npm:5.0.0"
+"appcenter@npm:5.0.1, appcenter@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "appcenter@npm:5.0.1"
   dependencies:
-    appcenter-link-scripts: 5.0.0
-  checksum: baf34d17b4540e57571ab046c5be3d816c499e0f1bbf4d7b63337a2215094c789e090c4b327ed9dbd6ca36792ca65ba299a6f280d4fd4958e142d157a0d4432b
+    appcenter-link-scripts: 5.0.1
+  checksum: ca2b833e849a54807e1e62c8d9f97de0dd5dacd9df3e805afcc0efa0d2254e6f3ebbefe9989482aba28ea6806679a8b1993facc6d8b52e1c253f1fe820c59e60
   languageName: node
   linkType: hard
 
@@ -20342,12 +20342,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:4.1.1":
-  version: 4.1.1
-  resolution: "debug@npm:4.1.1"
+"debug@npm:4.3.1":
+  version: 4.3.1
+  resolution: "debug@npm:4.3.1"
   dependencies:
-    ms: ^2.1.1
-  checksum: 1e681f5cce94ba10f8dde74b20b42e4d8cf0d2a6700f4c165bb3bb6885565ef5ca5885bf07e704974a835f2415ff095a63164f539988a1f07e8a69fe8b1d65ad
+    ms: 2.1.2
+  peerDependenciesMeta:
+    supports-color:
+      optional: true
+  checksum: 2c3352e37d5c46b0d203317cd45ea0e26b2c99f2d9dfec8b128e6ceba90dfb65425f5331bf3020fe9929d7da8c16758e737f4f3bfc0fce6b8b3d503bae03298b
   languageName: node
   linkType: hard
 
@@ -35515,9 +35518,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-code-push@npm:^8.1.1":
-  version: 8.1.1
-  resolution: "react-native-code-push@npm:8.1.1"
+"react-native-code-push@npm:^8.2.1":
+  version: 8.2.1
+  resolution: "react-native-code-push@npm:8.2.1"
   dependencies:
     code-push: ^4.2.0
     glob: ^7.1.7
@@ -35526,7 +35529,7 @@ __metadata:
     plist: ^3.0.4
     semver: ^7.3.5
     xcode: 3.0.1
-  checksum: 99cee6953113a00160ed8ad2965e536229092c13a2095f0023928af889f1b560f4c58d6fb100a247f872d20a15e5e805082434c7fd08e5b0819dc7c343d8fe98
+  checksum: b44cf46a951860f898646799be741b7fe742536cc9633a9a1d033233774df7683227c2ce59138e3f039c2672d5a2351f9f1369f17ad1e03027f889aa64c9f016
   languageName: node
   linkType: hard
 
