@@ -72,6 +72,9 @@ export class BackgroundTxEthereumService {
           error?: Error;
         }>(evmInfo.rpc, {
           method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
           body: JSON.stringify({
             jsonrpc: "2.0",
             method: "eth_getTransactionReceipt",

@@ -83,6 +83,9 @@ export class EthereumAccountBase {
       result: string;
     }>(evmInfo.rpc, {
       method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
       body: JSON.stringify({
         jsonrpc: "2.0",
         method: "eth_estimateGas",
@@ -123,6 +126,9 @@ export class EthereumAccountBase {
       result: string;
     }>(evmInfo.rpc, {
       method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
       body: JSON.stringify({
         jsonrpc: "2.0",
         method: "eth_getTransactionCount",
@@ -205,6 +211,9 @@ export class EthereumAccountBase {
           error?: Error;
         }>(evmInfo.rpc, {
           method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
           body: JSON.stringify({
             jsonrpc: "2.0",
             method: "eth_getTransactionReceipt",
