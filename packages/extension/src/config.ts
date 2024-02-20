@@ -1636,7 +1636,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
     evm: {
       chainId: 9001,
-      rpc: "https://evmos-evm.publicnode.com",
+      rpc: "https://evm-evmos.keplr.app",
     },
   },
   {

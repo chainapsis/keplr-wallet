@@ -237,7 +237,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     yield this.keyRingStore.waitUntilInitialized();
 
     yield Promise.all([
-      // this.updateChainInfosFromBackground(),
+      this.updateChainInfosFromBackground(),
       this.updateEnabledChainIdentifiersFromBackground(),
     ]);
 
