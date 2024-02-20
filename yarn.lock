@@ -7539,40 +7539,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gorhom/bottom-sheet@npm:^4.5.0":
-  version: 4.5.0
-  resolution: "@gorhom/bottom-sheet@npm:4.5.0"
-  dependencies:
-    "@gorhom/portal": 1.0.14
-    invariant: ^2.2.4
-  peerDependencies:
-    "@types/react": "*"
-    "@types/react-native": "*"
-    react: "*"
-    react-native: "*"
-    react-native-gesture-handler: ">=1.10.1"
-    react-native-reanimated: ">=2.2.0"
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-    "@types/react-native":
-      optional: true
-  checksum: 4a1b69c1077ab70f39c0ba219110d7382fef5bec1fb5f1dc569f700afac055d3478b6f871237b14474aee60d6e55c86c1ade77f41f8ae6601aac1710796b8ea4
-  languageName: node
-  linkType: hard
-
-"@gorhom/portal@npm:1.0.14":
-  version: 1.0.14
-  resolution: "@gorhom/portal@npm:1.0.14"
-  dependencies:
-    nanoid: ^3.3.1
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 227bb96a2db854ab29bb9da8d4f3823c7f7448358de459709dd1b78522110da564c9a8734c6bc7d7153ed7c99320e0fb5d60b420c2ebb75ecaf2f0d757f410f9
-  languageName: node
-  linkType: hard
-
 "@goto-bus-stop/common-shake@npm:^2.3.0":
   version: 2.4.0
   resolution: "@goto-bus-stop/common-shake@npm:2.4.0"
@@ -8467,7 +8433,6 @@ __metadata:
     "@formatjs/intl-numberformat": ^8.7.2
     "@formatjs/intl-pluralrules": ^5.2.6
     "@formatjs/intl-relativetimeformat": ^11.2.6
-    "@gorhom/bottom-sheet": ^4.5.0
     "@ledgerhq/hw-app-eth": ^6.29.3
     "@ledgerhq/react-native-hw-transport-ble": =6.20.0
     "@react-native-async-storage/async-storage": ^1.19.3

@@ -13,7 +13,6 @@ import {StyleProvider, useStyle} from './src/styles';
 import {AppNavigation} from './src/navigation';
 import {I18nManager, Platform, Settings, StatusBar} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
-import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 import {AppIntlProvider} from './src/languages';
 import codePush from 'react-native-code-push';
 import {AppUpdateProvider} from './src/provider/app-update';
@@ -403,38 +402,35 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
                     <NotificationProvider>
                       <LedgerBLEProvider>
                         <ModalBaseProvider>
-                          <BottomSheetModalProvider>
-                            <ConfirmProvider>
-                              <InteractionModalsProvider>
-                                <BugSnagErrorBoundary
-                                  FallbackComponent={ErrorBoundary}>
-                                  <AutoLock />
-                                  <ImportFromExtensionProvider>
-                                    {(() => {
-                                      if (
-                                        this.state.codepushInitTestCompleted &&
-                                        this.state
-                                          .codepushInitNewVersionExists &&
-                                        this.state.codepush
-                                          .newVersionDownloadProgress != null
-                                      ) {
-                                        return (
-                                          <UpdateProgress
-                                            progress={
-                                              this.state.codepush
-                                                .newVersionDownloadProgress
-                                            }
-                                          />
-                                        );
-                                      }
+                          <ConfirmProvider>
+                            <InteractionModalsProvider>
+                              <BugSnagErrorBoundary
+                                FallbackComponent={ErrorBoundary}>
+                                <AutoLock />
+                                <ImportFromExtensionProvider>
+                                  {(() => {
+                                    if (
+                                      this.state.codepushInitTestCompleted &&
+                                      this.state.codepushInitNewVersionExists &&
+                                      this.state.codepush
+                                        .newVersionDownloadProgress != null
+                                    ) {
+                                      return (
+                                        <UpdateProgress
+                                          progress={
+                                            this.state.codepush
+                                              .newVersionDownloadProgress
+                                          }
+                                        />
+                                      );
+                                    }
 
-                                      return <AppNavigation />;
-                                    })()}
-                                  </ImportFromExtensionProvider>
-                                </BugSnagErrorBoundary>
-                              </InteractionModalsProvider>
-                            </ConfirmProvider>
-                          </BottomSheetModalProvider>
+                                    return <AppNavigation />;
+                                  })()}
+                                </ImportFromExtensionProvider>
+                              </BugSnagErrorBoundary>
+                            </InteractionModalsProvider>
+                          </ConfirmProvider>
                         </ModalBaseProvider>
                       </LedgerBLEProvider>
                     </NotificationProvider>
