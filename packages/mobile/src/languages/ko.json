@@ -187,7 +187,7 @@
   "page.setting.general.manage-chain-visibility-title": "체인 표시",
   "page.setting.general.manage-chain-visibility-paragraph": "현재 계정에 표시될 체인(해당 체인의 자산 포함)을 선택해주세요.",
   "page.setting.general.version-title": "케플러 버전",
-  "page.setting.general.language.automatic-title": "자동 (브라우저 언어)",
+  "page.setting.general.language.automatic-title": "자동 (시스템 언어)",
   "page.setting.general.theme.dark-mode": "다크 모드",
   "page.setting.general.theme.light-mode": "라이트 모드",
   "page.setting.general.theme.auto": "자동 (시스템 설정)",
