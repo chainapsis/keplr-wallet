@@ -200,14 +200,6 @@ export class TokenERC20Service {
   ): Promise<ERC20Currency> {
     await ERC20CurrencySchema.validateAsync(currency);
 
-    const contractAddress = currency.contractAddress;
-    if (
-      !contractAddress.match(/^0x[0-9A-Fa-f]*$/) ||
-      contractAddress.length !== 42
-    ) {
-      throw new Error("Contract address is not valid hex address");
-    }
-
     return currency;
   }
 }
