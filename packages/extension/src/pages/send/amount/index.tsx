@@ -54,6 +54,7 @@ import { VerticalCollapseTransition } from "../../../components/transition/verti
 import { GuideBox } from "../../../components/guide-box";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { amountToAmbiguousAverage } from "../../../utils";
+import { EthTxStatus } from "@keplr-wallet/types";
 
 const Styles = {
   Flex1: styled.div`
@@ -418,14 +419,22 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               await ethereumAccountStore
                 .getAccount(chainId)
                 .sendEthereumTx(sender, unsignedTx, {
-                  onFulfill: () => {
-                    notification.show(
-                      "success",
-                      intl.formatMessage({
-                        id: "notification.transaction-success",
-                      }),
-                      ""
-                    );
+                  onFulfill: (txReceipt) => {
+                    if (txReceipt.status === EthTxStatus.Success) {
+                      notification.show(
+                        "success",
+                        intl.formatMessage({
+                          id: "notification.transaction-success",
+                        }),
+                        ""
+                      );
+                    } else {
+                      notification.show(
+                        "failed",
+                        intl.formatMessage({ id: "error.transaction-failed" }),
+                        ""
+                      );
+                    }
                   },
                 });
             } else {

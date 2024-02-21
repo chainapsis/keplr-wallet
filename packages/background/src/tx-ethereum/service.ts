@@ -2,7 +2,8 @@ import { ChainsService } from "../chains";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Notification } from "../tx/types";
 import { KeyRingEthereumService } from "../keyring-ethereum";
-import { EthTxReceipt, EthTxStatus } from "@keplr-wallet/types";
+import { EthTxReceipt } from "@keplr-wallet/types";
+import { retry } from "@keplr-wallet/common";
 
 const TX_RECIEPT_POLLING_INTERVAL = 1000;
 
@@ -24,13 +25,6 @@ export class BackgroundTxEthereumService {
       onFulfill?: (txReceipt: EthTxReceipt) => void;
     }
   ): Promise<string> {
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    const evmInfo = KeyRingEthereumService.evmInfo(chainInfo);
-
-    if (!evmInfo) {
-      throw new Error("Not EVM chain");
-    }
-
     if (!options.silent) {
       this.notification.create({
         iconRelativeUrl: "assets/logo-256.png",
@@ -40,6 +34,12 @@ export class BackgroundTxEthereumService {
     }
 
     try {
+      const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+      const evmInfo = KeyRingEthereumService.evmInfo(chainInfo);
+      if (!evmInfo) {
+        throw new Error("No EVM info provided");
+      }
+
       const sendRawTransactionResponse = await simpleFetch<{
         result?: string;
         error?: Error;
@@ -52,61 +52,57 @@ export class BackgroundTxEthereumService {
         body: JSON.stringify({
           jsonrpc: "2.0",
           method: "eth_sendRawTransaction",
-          params: [Buffer.from(tx).toString()],
+          params: [`0x${Buffer.from(tx).toString("hex")}`],
           id: 1,
         }),
       });
 
       const txHash = sendRawTransactionResponse.data.result;
-      if (!txHash) {
+      if (sendRawTransactionResponse.data.error || !txHash) {
         throw (
           sendRawTransactionResponse.data.error ??
-          new Error("No tx hash responed")
+          new Error("No tx hash responded")
         );
       }
 
-      const intervalId = setInterval(async () => {
-        const txRecieptResponse = await simpleFetch<{
-          result: EthTxReceipt | null;
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          error?: Error;
-        }>(evmInfo.rpc, {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({
-            jsonrpc: "2.0",
-            method: "eth_getTransactionReceipt",
-            params: [txHash],
-            id: 1,
-          }),
-        });
+      retry(
+        () => {
+          return new Promise<void>(async (resolve, reject) => {
+            const txReceiptResponse = await simpleFetch<{
+              result: EthTxReceipt | null;
+              error?: Error;
+            }>(evmInfo.rpc, {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+              },
+              body: JSON.stringify({
+                jsonrpc: "2.0",
+                method: "eth_getTransactionReceipt",
+                params: [txHash],
+                id: 1,
+              }),
+            });
 
-        if (txRecieptResponse.data.error) {
-          console.error(txRecieptResponse.data.error);
-          clearInterval(intervalId);
-        }
-
-        const txReceipt = txRecieptResponse.data.result;
-        if (txReceipt) {
-          clearInterval(intervalId);
-          if (txReceipt.status === EthTxStatus.Success) {
-            options.onFulfill?.(txReceipt);
-
-            if (!options.silent) {
-              BackgroundTxEthereumService.processTxResultNotification(
-                this.notification
-              );
+            if (txReceiptResponse.data.error) {
+              console.error(txReceiptResponse.data.error);
+              resolve();
             }
-          } else {
-            BackgroundTxEthereumService.processTxErrorNotification(
-              this.notification,
-              new Error("Tx failed on chain")
-            );
-          }
+
+            const txReceipt = txReceiptResponse.data.result;
+            if (txReceipt) {
+              options?.onFulfill?.(txReceipt);
+              resolve();
+            }
+
+            reject();
+          });
+        },
+        {
+          maxRetries: 15,
+          waitMsAfterError: 1000,
         }
-      }, TX_RECIEPT_POLLING_INTERVAL);
+      );
 
       return txHash;
     } catch (e) {

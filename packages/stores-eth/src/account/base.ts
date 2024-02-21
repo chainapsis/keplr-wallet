@@ -5,10 +5,9 @@ import {
   ChainInfo,
   EthSignType,
   EthTxReceipt,
-  EthTxStatus,
   Keplr,
 } from "@keplr-wallet/types";
-import { DenomHelper } from "@keplr-wallet/common";
+import { DenomHelper, retry } from "@keplr-wallet/common";
 import { erc20ContractInterface } from "../constants";
 import { parseUnits } from "@ethersproject/units";
 import {
@@ -17,8 +16,6 @@ import {
   TransactionTypes,
 } from "@ethersproject/transactions";
 import { getAddress as getEthAddress } from "@ethersproject/address";
-
-const TX_RECIEPT_POLLING_INTERVAL = 1000;
 
 export class EthereumAccountBase {
   constructor(
@@ -175,14 +172,13 @@ export class EthereumAccountBase {
       onFulfill?: (txReceipt: EthTxReceipt) => void;
     }
   ) {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    const evmInfo = EthereumAccountBase.evmInfo(chainInfo);
-    if (!evmInfo) {
-      throw new Error("No EVM chain info provided");
-    }
-
-    let txHash: string;
     try {
+      const chainInfo = this.chainGetter.getChain(this.chainId);
+      const evmInfo = EthereumAccountBase.evmInfo(chainInfo);
+      if (!evmInfo) {
+        throw new Error("No EVM info provided");
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const keplr = (await this.getKeplr())!;
       const signEthereum = keplr.signEthereum.bind(keplr);
@@ -193,53 +189,58 @@ export class EthereumAccountBase {
         EthSignType.TRANSACTION
       );
 
-      const tx = new Uint8Array(Buffer.from(serialize(unsignedTx, signature)));
+      const tx = Buffer.from(
+        serialize(unsignedTx, signature).replace("0x", ""),
+        "hex"
+      );
 
       const sendEthereumTx = keplr.sendEthereumTx.bind(keplr);
-      txHash = await sendEthereumTx(this.chainId, tx);
+      const txHash = await sendEthereumTx(this.chainId, tx);
       if (!txHash) {
-        throw new Error("No tx hash responed");
+        throw new Error("No tx hash responded");
       }
 
       if (onTxEvents?.onBroadcasted) {
         onTxEvents.onBroadcasted(txHash);
       }
 
-      const checkTxFulfilled = async () => {
-        const txRecieptResponse = await simpleFetch<{
-          result: EthTxReceipt | null;
-          error?: Error;
-        }>(evmInfo.rpc, {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({
-            jsonrpc: "2.0",
-            method: "eth_getTransactionReceipt",
-            params: [txHash],
-            id: 1,
-          }),
-        });
+      retry(
+        () => {
+          return new Promise<void>(async (resolve, reject) => {
+            const txReceiptResponse = await simpleFetch<{
+              result: EthTxReceipt | null;
+              error?: Error;
+            }>(evmInfo.rpc, {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+              },
+              body: JSON.stringify({
+                jsonrpc: "2.0",
+                method: "eth_getTransactionReceipt",
+                params: [txHash],
+                id: 1,
+              }),
+            });
 
-        if (txRecieptResponse.data.error) {
-          console.error(txRecieptResponse.data.error);
-          clearInterval(intervalId);
-        }
+            if (txReceiptResponse.data.error) {
+              console.error(txReceiptResponse.data.error);
+              resolve();
+            }
 
-        const txReceipt = txRecieptResponse.data.result;
-        if (txReceipt) {
-          clearInterval(intervalId);
-          if (txReceipt.status === EthTxStatus.Success) {
-            onTxEvents?.onFulfill?.(txReceipt);
-          } else {
-            onTxEvents?.onBroadcastFailed?.(new Error("Tx failed on chain"));
-          }
+            const txReceipt = txReceiptResponse.data.result;
+            if (txReceipt) {
+              onTxEvents?.onFulfill?.(txReceipt);
+              resolve();
+            }
+
+            reject();
+          });
+        },
+        {
+          maxRetries: 15,
+          waitMsAfterError: 1000,
         }
-      };
-      const intervalId = setInterval(
-        checkTxFulfilled,
-        TX_RECIEPT_POLLING_INTERVAL
       );
 
       return txHash;
