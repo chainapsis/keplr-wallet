@@ -17,7 +17,6 @@ import { computedFn } from "mobx-utils";
 import { ERC20TokenInfo } from "./types";
 
 export class TokenERC20Service {
-  protected readonly legacyKVStore: KVStore;
   protected readonly kvStore: KVStore;
 
   @observable
@@ -28,75 +27,25 @@ export class TokenERC20Service {
     protected chainsService: ChainsService,
     protected interactionService: InteractionService
   ) {
-    this.legacyKVStore = kvStore;
     this.kvStore = new PrefixKVStore(kvStore, "v2");
 
     makeObservable(this);
   }
 
   async init(): Promise<void> {
-    const migrated = await this.kvStore.get<boolean>("migrated/v2");
-    if (!migrated) {
-      for (const chainInfo of this.chainsService.getChainInfos()) {
-        const identifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
-        const globalTokens = await this.legacyKVStore.get<AppCurrency[]>(
-          identifier
-        );
-        if (globalTokens && globalTokens.length > 0) {
-          this.tokenMap.set(
-            identifier,
-            globalTokens.map((currency) => {
-              return {
-                currency,
-              };
-            })
-          );
-        }
-
-        const reverseAddresses = await this.legacyKVStore.get<string[]>(
-          `${identifier}-addresses`
-        );
-        if (reverseAddresses && reverseAddresses.length > 0) {
-          for (const reverseAddress of reverseAddresses) {
-            const currencies = await this.legacyKVStore.get<AppCurrency[]>(
-              `${identifier}-${reverseAddress}`
-            );
-            if (currencies && currencies.length > 0) {
-              this.tokenMap.set(
-                identifier,
-                currencies.map((currency) => {
-                  return {
-                    associatedAccountAddress: reverseAddress,
-                    currency,
-                  };
-                })
-              );
-            }
-          }
-        }
+    const saved = await this.kvStore.get<Record<string, ERC20TokenInfo[]>>(
+      "tokenMapERC20"
+    );
+    if (saved) {
+      for (const [key, value] of Object.entries(saved)) {
+        this.tokenMap.set(key, value);
       }
-
-      await this.kvStore.set<boolean>("migrated/v2", true);
     }
-
-    {
-      const saved = await this.kvStore.get<Record<string, ERC20TokenInfo[]>>(
-        "tokenMapERC20"
-      );
-      if (saved) {
-        for (const [key, value] of Object.entries(saved)) {
-          this.tokenMap.set(key, value);
-        }
-      }
-      autorun(() => {
-        const js = toJS(this.tokenMap);
-        const obj = Object.fromEntries(js);
-        this.kvStore.set<Record<string, ERC20TokenInfo[]>>(
-          "tokenMapERC20",
-          obj
-        );
-      });
-    }
+    autorun(() => {
+      const js = toJS(this.tokenMap);
+      const obj = Object.fromEntries(js);
+      this.kvStore.set<Record<string, ERC20TokenInfo[]>>("tokenMapERC20", obj);
+    });
 
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
   }
