@@ -5,8 +5,6 @@ import { KeyRingEthereumService } from "../keyring-ethereum";
 import { EthTxReceipt } from "@keplr-wallet/types";
 import { retry } from "@keplr-wallet/common";
 
-const TX_RECIEPT_POLLING_INTERVAL = 1000;
-
 export class BackgroundTxEthereumService {
   constructor(
     protected readonly chainsService: ChainsService,
@@ -92,6 +90,9 @@ export class BackgroundTxEthereumService {
             const txReceipt = txReceiptResponse.data.result;
             if (txReceipt) {
               options?.onFulfill?.(txReceipt);
+              BackgroundTxEthereumService.processTxResultNotification(
+                this.notification
+              );
               resolve();
             }
 
