@@ -2394,6 +2394,51 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["eth-address-gen", "eth-key-sign"],
   },
+  {
+    chainId: "chihuahua-1",
+    chainName: "Chihuahua",
+    rpc: "https://rpc-chihuahua.keplr.app",
+    rest: "https://lcd-chihuahua.keplr.app",
+    stakeCurrency: {
+      coinDenom: "HUAHUA",
+      coinMinimalDenom: "uhuahua",
+      coinDecimals: 6,
+      coinGeckoId: "chihuahua-token",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "chihuahua",
+      bech32PrefixAccPub: "chihuahuapub",
+      bech32PrefixValAddr: "chihuahuavaloper",
+      bech32PrefixValPub: "chihuahuavaloperpub",
+      bech32PrefixConsAddr: "chihuahuavalcons",
+      bech32PrefixConsPub: "chihuahuavalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "HUAHUA",
+        coinMinimalDenom: "uhuahua",
+        coinDecimals: 6,
+        coinGeckoId: "chihuahua-token",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "HUAHUA",
+        coinMinimalDenom: "uhuahua",
+        coinDecimals: 6,
+        coinGeckoId: "chihuahua-token",
+        gasPriceStep: {
+          low: 500,
+          average: 1250,
+          high: 2000,
+        },
+      },
+    ],
+    features: ["cosmwasm"],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
