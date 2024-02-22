@@ -54,8 +54,9 @@ export class ObservableQueryBalancesImplMap {
 
     if (!this.balanceImplMap.has(key)) {
       runInAction(() => {
-        this.balanceRegistries.forEach((registry) => {
-          const balanceImpl = registry.getBalanceImpl(
+        let balanceImpl: IObservableQueryBalanceImpl | undefined;
+        for (const registry of this.balanceRegistries) {
+          balanceImpl = registry.getBalanceImpl(
             this.chainId,
             this.chainGetter,
             this.address,
@@ -63,9 +64,15 @@ export class ObservableQueryBalancesImplMap {
           );
 
           if (balanceImpl) {
-            this.balanceImplMap.set(key, balanceImpl);
+            break;
           }
-        });
+        }
+
+        if (balanceImpl) {
+          this.balanceImplMap.set(key, balanceImpl);
+        } else {
+          throw new Error(`Failed to get and parse the balance for ${key}`);
+        }
       });
     }
 
