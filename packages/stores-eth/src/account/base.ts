@@ -9,6 +9,7 @@ import {
 } from "@keplr-wallet/types";
 import { DenomHelper, retry } from "@keplr-wallet/common";
 import { erc20ContractInterface } from "../constants";
+import { hexValue } from "@ethersproject/bytes";
 import { parseUnits } from "@ethersproject/units";
 import {
   UnsignedTransaction,
@@ -59,22 +60,26 @@ export class EthereumAccountBase {
     const parsedAmount = parseUnits(amount, currency.coinDecimals);
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
 
-    const unsignedTx =
-      denomHelper.type === "erc20"
-        ? {
+    const unsignedTx: UnsignedTransaction = (() => {
+      switch (denomHelper.type) {
+        case "erc20":
+          return {
             from: sender,
             to: denomHelper.contractAddress,
+            value: "0x0",
             data: erc20ContractInterface.encodeFunctionData("transfer", [
               tempRecipient,
-              parsedAmount.toString(),
+              hexValue(parsedAmount),
             ]),
-            value: "0x0",
-          }
-        : {
+          };
+        default:
+          return {
             from: sender,
             to: tempRecipient,
-            value: "0x0",
+            value: hexValue(parsedAmount),
           };
+      }
+    })();
 
     const estimateGasResponse = await simpleFetch<{
       result: string;
@@ -137,30 +142,39 @@ export class EthereumAccountBase {
     const parsedAmount = parseUnits(amount, currency.coinDecimals);
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
 
-    const tx: UnsignedTransaction = {
-      // Support EIP-1559 transaction only.
-      type: TransactionTypes.eip1559,
-      chainId: evmInfo.chainId,
-      nonce: Number(transactionCountResponse.data.result),
-      gasLimit: "0x" + gasLimit.toString(16),
-      maxFeePerGas: "0x" + Number(maxFeePerGas).toString(16),
-      maxPriorityFeePerGas: "0x" + Number(maxPriorityFeePerGas).toString(16),
-      ...(denomHelper.type === "erc20"
-        ? {
+    // Support EIP-1559 transaction only.
+    const unsignedTx: UnsignedTransaction = (() => {
+      switch (denomHelper.type) {
+        case "erc20":
+          return {
+            type: TransactionTypes.eip1559,
+            chainId: evmInfo.chainId,
+            nonce: Number(transactionCountResponse.data.result),
+            gasLimit: hexValue(gasLimit),
+            maxFeePerGas: hexValue(Number(maxFeePerGas)),
+            maxPriorityFeePerGas: hexValue(Number(maxPriorityFeePerGas)),
             to: denomHelper.contractAddress,
             value: "0x0",
             data: erc20ContractInterface.encodeFunctionData("transfer", [
               to,
-              parsedAmount.toHexString(),
+              hexValue(parsedAmount),
             ]),
-          }
-        : {
+          };
+        default:
+          return {
+            type: TransactionTypes.eip1559,
+            chainId: evmInfo.chainId,
+            nonce: Number(transactionCountResponse.data.result),
+            gasLimit: hexValue(gasLimit),
+            maxFeePerGas: hexValue(Number(maxFeePerGas)),
+            maxPriorityFeePerGas: hexValue(Number(maxPriorityFeePerGas)),
             to,
-            value: parsedAmount.isZero() ? "0x0" : parsedAmount.toHexString(),
-          }),
-    };
+            value: hexValue(parsedAmount),
+          };
+      }
+    })();
 
-    return tx;
+    return unsignedTx;
   }
 
   async sendEthereumTx(
@@ -189,13 +203,13 @@ export class EthereumAccountBase {
         EthSignType.TRANSACTION
       );
 
-      const tx = Buffer.from(
+      const signedTx = Buffer.from(
         serialize(unsignedTx, signature).replace("0x", ""),
         "hex"
       );
 
       const sendEthereumTx = keplr.sendEthereumTx.bind(keplr);
-      const txHash = await sendEthereumTx(this.chainId, tx);
+      const txHash = await sendEthereumTx(this.chainId, signedTx);
       if (!txHash) {
         throw new Error("No tx hash responded");
       }
