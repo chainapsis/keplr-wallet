@@ -59,16 +59,28 @@ export const SwapFeeInfo: FunctionComponent<{
               !selectableFeeCurrenciesMap.get(fee.currency.coinMinimalDenom)
           ) != null)
       ) {
-        feeConfig.setFee({
-          type: "average",
-          currency: feeConfig.selectableFeeCurrencies[0],
-        });
+        if (
+          uiConfigStore.rememberLastFeeOption &&
+          uiConfigStore.lastFeeOption
+        ) {
+          feeConfig.setFee({
+            type: uiConfigStore.lastFeeOption,
+            currency: feeConfig.selectableFeeCurrencies[0],
+          });
+        } else {
+          feeConfig.setFee({
+            type: "average",
+            currency: feeConfig.selectableFeeCurrencies[0],
+          });
+        }
       }
     }, [
       feeConfig,
       feeConfig.chainId,
       feeConfig.fees,
       feeConfig.selectableFeeCurrencies,
+      uiConfigStore.lastFeeOption,
+      uiConfigStore.rememberLastFeeOption,
     ]);
 
     useLayoutEffect(() => {
