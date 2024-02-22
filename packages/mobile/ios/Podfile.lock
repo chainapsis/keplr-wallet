@@ -89,9 +89,11 @@ PODS:
   - libwebp/sharpyuv (1.3.2)
   - libwebp/webp (1.3.2):
     - libwebp/sharpyuv
-  - lottie-ios (4.3.4)
-  - lottie-react-native (6.3.1):
-    - lottie-ios (~> 4.3.0)
+  - lottie-ios (4.4.1)
+  - lottie-react-native (6.6.0):
+    - glog
+    - lottie-ios (~> 4.4.0)
+    - RCT-Folly (= 2022.05.16.00)
     - React-Core
   - MultiplatformBleAdapter (0.1.9)
   - RCT-Folly (2022.05.16.00):
@@ -946,7 +948,7 @@ PODS:
     - React-Core
   - react-native-netinfo (11.2.1):
     - React-Core
-  - react-native-safe-area-context (4.7.1):
+  - react-native-safe-area-context (4.9.0):
     - React-Core
   - react-native-webview (13.8.1):
     - glog
@@ -1127,7 +1129,7 @@ PODS:
     - React-Core
   - RNKeychain (8.1.2):
     - React-Core
-  - RNReanimated (3.7.0):
+  - RNReanimated (3.7.1):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
@@ -1455,8 +1457,8 @@ SPEC CHECKSUMS:
   libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
   libvmaf: 27f523f1e63c694d14d534cd0fddd2fab0ae8711
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
-  lottie-ios: 3d98679b41fa6fd6aff2352b3953dbd3df8a397e
-  lottie-react-native: c9f1db4f4124dcce9f8159e65d8dc6e8bcb11fb4
+  lottie-ios: e047b1d2e6239b787cc5e9755b988869cf190494
+  lottie-react-native: 34cfb1db79d0feb7bf7b200d4a4e2f164b0c5f58
   MultiplatformBleAdapter: 5a6a897b006764392f9cef785e4360f54fb9477d
   RCT-Folly: 7169b2b1c44399c76a47b5deaaba715eeeb476c0
   RCTRequired: ab7f915c15569f04a49669e573e6e319a53f9faa
@@ -1483,7 +1485,7 @@ SPEC CHECKSUMS:
   react-native-blur: cfdad7b3c01d725ab62a8a729f42ea463998afa2
   react-native-compat: ee9e15e51da54a03c5b0c69dbc30f9f17b4231af
   react-native-netinfo: 8a7fd3f7130ef4ad2fb4276d5c9f8d3f28d2df3d
-  react-native-safe-area-context: 9697629f7b2cda43cf52169bb7e0767d330648c2
+  react-native-safe-area-context: b97eb6f9e3b7f437806c2ce5983f479f8eb5de4b
   react-native-webview: 0f93dc8f4208ae5365884922c3cd14da5037ca4c
   React-nativeconfig: d7af5bae6da70fa15ce44f045621cf99ed24087c
   React-NativeModulesApple: d5a1abf3d7ef808cdf1d27e795c741f0c5e14ea0
@@ -1510,7 +1512,7 @@ SPEC CHECKSUMS:
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: deda62b8339496ba721a45e0f3e2d7a319932cee
   RNKeychain: a65256b6ca6ba6976132cc4124b238a5b13b3d9c
-  RNReanimated: 7d6d32f238f914f13d9d6fb45c0aef557f7f901e
+  RNReanimated: beb07f7f900543928467da8107c175d1e57a1049
   RNScreens: b582cb834dc4133307562e930e8fa914b8c04ef2
   RNSVG: ba3e7232f45e34b7b47e74472386cf4e1a676d0a
   SDWebImage: 750adf017a315a280c60fde706ab1e552a3ae4e9
