@@ -2525,6 +2525,10 @@ export const ChainIdentifierToTxExplorerMap: Record<
     name: 'Mintscan',
     txUrl: 'https://www.mintscan.io/passage/tx/{txHash}',
   },
+  dymension_1100: {
+    name: 'Mintscan',
+    txUrl: 'https://www.mintscan.io/dymension/tx/{txHash}',
+  },
 };
 
 // The origins that are able to pass any permission that external webpages can have.
