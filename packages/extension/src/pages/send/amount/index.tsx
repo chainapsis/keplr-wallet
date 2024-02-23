@@ -251,8 +251,10 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
     sendConfigs.senderConfig.setValue(newSenderAddress);
     setIsEvmTx(newIsEvmTx);
+    ethereumAccount.setIsSendingTx(false);
   }, [
     account,
+    ethereumAccount,
     isEvmChain,
     sendConfigs.amountConfig.currency.coinMinimalDenom,
     sendConfigs.recipientConfig.isRecipientEthereumHexAddress,
@@ -392,9 +394,10 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         text: intl.formatMessage({ id: "button.next" }),
         color: "primary",
         size: "large",
-        isLoading:
-          accountStore.getAccount(chainId).isSendingMsg ===
-          (!isIBCTransfer ? "send" : "ibcTransfer"),
+        isLoading: isEvmTx
+          ? ethereumAccount.isSendingTx
+          : accountStore.getAccount(chainId).isSendingMsg ===
+            (!isIBCTransfer ? "send" : "ibcTransfer"),
       }}
       onSubmit={async (e) => {
         e.preventDefault();
@@ -402,6 +405,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         if (!txConfigsValidate.interactionBlocked) {
           try {
             if (isEvmTx && sendConfigs.feeConfig.type !== "manual") {
+              ethereumAccount.setIsSendingTx(true);
               const { maxFeePerGas, maxPriorityFeePerGas } =
                 sendConfigs.feeConfig.getEIP1559TxFees(
                   sendConfigs.feeConfig.type
@@ -416,27 +420,26 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 maxFeePerGas: maxFeePerGas.toString(),
                 maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
               });
-              await ethereumAccountStore
-                .getAccount(chainId)
-                .sendEthereumTx(sender, unsignedTx, {
-                  onFulfill: (txReceipt) => {
-                    if (txReceipt.status === EthTxStatus.Success) {
-                      notification.show(
-                        "success",
-                        intl.formatMessage({
-                          id: "notification.transaction-success",
-                        }),
-                        ""
-                      );
-                    } else {
-                      notification.show(
-                        "failed",
-                        intl.formatMessage({ id: "error.transaction-failed" }),
-                        ""
-                      );
-                    }
-                  },
-                });
+              await ethereumAccount.sendEthereumTx(sender, unsignedTx, {
+                onFulfill: (txReceipt) => {
+                  if (txReceipt.status === EthTxStatus.Success) {
+                    notification.show(
+                      "success",
+                      intl.formatMessage({
+                        id: "notification.transaction-success",
+                      }),
+                      ""
+                    );
+                  } else {
+                    notification.show(
+                      "failed",
+                      intl.formatMessage({ id: "error.transaction-failed" }),
+                      ""
+                    );
+                  }
+                },
+              });
+              ethereumAccount.setIsSendingTx(false);
             } else {
               const tx = isIBCTransfer
                 ? accountStore
@@ -655,6 +658,10 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           } catch (e) {
             if (e?.message === "Request rejected") {
               return;
+            }
+
+            if (isEvmTx) {
+              ethereumAccount.setIsSendingTx(false);
             }
 
             console.log(e);

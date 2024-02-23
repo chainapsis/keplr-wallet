@@ -17,16 +17,31 @@ import {
   TransactionTypes,
 } from "@ethersproject/transactions";
 import { getAddress as getEthAddress } from "@ethersproject/address";
+import { action, makeObservable, observable } from "mobx";
 
 export class EthereumAccountBase {
+  @observable
+  protected _isSendingTx: boolean = false;
+
   constructor(
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
     protected readonly getKeplr: () => Promise<Keplr | undefined>
-  ) {}
+  ) {
+    makeObservable(this);
+  }
 
   static evmInfo(chainInfo: ChainInfo): ChainInfo["evm"] | undefined {
     return chainInfo.evm;
+  }
+
+  @action
+  setIsSendingTx(value: boolean) {
+    this._isSendingTx = value;
+  }
+
+  get isSendingTx(): boolean {
+    return this._isSendingTx;
   }
 
   async simulateGas({
