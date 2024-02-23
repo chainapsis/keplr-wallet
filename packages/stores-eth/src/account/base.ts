@@ -267,8 +267,9 @@ export class EthereumAccountBase {
           });
         },
         {
-          maxRetries: 15,
-          waitMsAfterError: 1000,
+          maxRetries: 10,
+          waitMsAfterError: 500,
+          maxWaitMsAfterError: 4000,
         }
       );
 
