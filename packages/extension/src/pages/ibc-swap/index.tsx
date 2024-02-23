@@ -28,7 +28,7 @@ import { useSearchParams } from "react-router-dom";
 import { useTxConfigsQueryString } from "../../hooks/use-tx-config-query-string";
 import { MainHeaderLayout } from "../main/layouts/header";
 import { XAxis } from "../../components/axis";
-import { H4, Subtitle4 } from "../../components/typography";
+import { Caption2, H4, Subtitle4 } from "../../components/typography";
 import { SlippageModal } from "./components/slippage-modal";
 import { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
@@ -865,6 +865,17 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 Beta
               </Subtitle4>
             </Box>
+
+            <Gutter size="0.5rem" />
+
+            <Caption2
+              color={ColorPalette["gray-300"]}
+              style={{
+                fontSize: "0.75rem",
+              }}
+            >
+              Powered by Skip API
+            </Caption2>
 
             <div style={{ flex: 1 }} />
             <Box
