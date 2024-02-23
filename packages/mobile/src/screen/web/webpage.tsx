@@ -9,7 +9,7 @@ import {observer} from 'mobx-react-lite';
 import {WebViewStateContext} from './context';
 import WebView, {WebViewMessageEvent} from 'react-native-webview';
 import {RouteProp, useRoute} from '@react-navigation/native';
-import {Platform} from 'react-native';
+import {BackHandler, Platform} from 'react-native';
 import RNFS from 'react-native-fs';
 import EventEmitter from 'eventemitter3';
 import {RNInjectedKeplr} from '../../injected/injected-provider';
@@ -217,6 +217,22 @@ export const WebpageScreen: FunctionComponent = observer(() => {
       console.log('Failed to parse url', e);
     }
   };
+
+  useEffect(() => {
+    const onPress = () => {
+      if (canGoBack) {
+        webviewRef.current?.goBack();
+        return true;
+      } else {
+        return false;
+      }
+    };
+
+    BackHandler.addEventListener('hardwareBackPress', onPress);
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', onPress);
+    };
+  }, [canGoBack]);
 
   return (
     <React.Fragment>
