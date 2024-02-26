@@ -8491,6 +8491,7 @@ __metadata:
     react-native-ble-plx: ^2.0.3
     react-native-code-push: ^8.2.1
     react-native-device-info: ^10.11.0
+    react-native-exception-handler: ^2.10.10
     react-native-fs: ^2.20.0
     react-native-gesture-handler: ^2.15.0
     react-native-keyboard-aware-scroll-view: ^0.9.5
@@ -35744,6 +35745,16 @@ __metadata:
   peerDependencies:
     react-native: "*"
   checksum: 3f2de34df4e95e87291673fe69b09d3b96f9088177a8dadd92eccec86549cea63ca08ab82f120d4150eb0302ac721ad8a5e4b3a8136c9f54f0212e4c055762b0
+  languageName: node
+  linkType: hard
+
+"react-native-exception-handler@npm:^2.10.10":
+  version: 2.10.10
+  resolution: "react-native-exception-handler@npm:2.10.10"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 4b47833461147c05c7278a4fe6d9be56c4592f3d5976cabe542e1d042af23b275829f3cfc7f7b9f8b08704d0eef6d30a340c027e8bd2158a3474556994ba5425
   languageName: node
   linkType: hard
 

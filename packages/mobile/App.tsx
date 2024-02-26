@@ -45,6 +45,10 @@ import Bugsnag from '@bugsnag/react-native';
 import {ImportFromExtensionProvider} from 'keplr-wallet-mobile-private';
 import {AsyncKVStore} from './src/common';
 import {AutoLock} from './src/components/unlock-modal';
+import {
+  setJSExceptionHandler,
+  setNativeExceptionHandler,
+} from 'react-native-exception-handler';
 const semver = require('semver');
 
 const ThemeStatusBar: FunctionComponent = () => {
@@ -91,6 +95,16 @@ interface AppUpdateWrapperState {
 
   restartAfter?: boolean;
 }
+
+setNativeExceptionHandler(exceptionString => {
+  Bugsnag.notify(exceptionString);
+}, false);
+
+setJSExceptionHandler((error, isFatal) => {
+  if (isFatal) {
+    Bugsnag.notify(error);
+  }
+});
 
 // API 구조상 꼭 class 형일 필요는 없는 것 같기도 하지만...
 // codepush docs가 class 형으로만 설명하기 때문에 그냥 class 형으로 작성함.
