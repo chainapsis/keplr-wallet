@@ -45,7 +45,7 @@ export class ObservableQueryBalancesImplMap {
 
   protected getBalanceInner(
     currency: AppCurrency
-  ): IObservableQueryBalanceImpl {
+  ): IObservableQueryBalanceImpl | undefined {
     let key = currency.coinMinimalDenom;
     // If the currency is secret20, it will be different according to not only the minimal denom but also the viewing key of the currency.
     if ("type" in currency && currency.type === "secret20") {
@@ -54,9 +54,8 @@ export class ObservableQueryBalancesImplMap {
 
     if (!this.balanceImplMap.has(key)) {
       runInAction(() => {
-        let balanceImpl: IObservableQueryBalanceImpl | undefined;
-        for (const registry of this.balanceRegistries) {
-          balanceImpl = registry.getBalanceImpl(
+        this.balanceRegistries.forEach((registry) => {
+          const balanceImpl = registry.getBalanceImpl(
             this.chainId,
             this.chainGetter,
             this.address,
@@ -64,18 +63,13 @@ export class ObservableQueryBalancesImplMap {
           );
 
           if (balanceImpl) {
-            break;
+            this.balanceImplMap.set(key, balanceImpl);
           }
-        }
-
-        if (balanceImpl) {
-          this.balanceImplMap.set(key, balanceImpl);
-        }
+        });
       });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.balanceImplMap.get(key)!;
+    return this.balanceImplMap.get(key);
   }
 
   @computed
@@ -160,7 +154,10 @@ export class ObservableQueryBalancesImplMap {
 
     for (let i = 0; i < currencies.length; i++) {
       const currency = currencies[i];
-      result.push(this.getBalanceInner(currency));
+      const balanceInner = this.getBalanceInner(currency);
+      if (balanceInner) {
+        result.push(balanceInner);
+      }
     }
 
     return result;
