@@ -70,8 +70,6 @@ export class ObservableQueryBalancesImplMap {
 
         if (balanceImpl) {
           this.balanceImplMap.set(key, balanceImpl);
-        } else {
-          throw new Error(`Failed to get and parse the balance for ${key}`);
         }
       });
     }
