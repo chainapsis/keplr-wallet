@@ -16,6 +16,7 @@ import {
 } from "@keplr-wallet/stores";
 import { DenomHelper, KVStore } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { EthereumQueries } from "@keplr-wallet/stores-eth";
 
 type CacheIBCDenomData = {
   denomTrace: {
@@ -97,7 +98,7 @@ export class IBCCurrencyRegistrar {
       };
     },
     protected readonly queriesStore: IQueriesStore<
-      CosmosQueries & Partial<CosmwasmQueries>
+      CosmosQueries & Partial<CosmwasmQueries> & Partial<EthereumQueries>
     >,
     protected readonly coinDenomGenerator: (
       denomTrace: {
@@ -310,90 +311,153 @@ export class IBCCurrencyRegistrar {
     }
 
     if (originChainInfo && denomTrace) {
-      if (denomTrace.denom.split(/^(cw20):(\w+)$/).length === 4) {
-        let isFetching = false;
-        // If the origin currency is ics20-cw20.
-        let cw20Currency = originChainInfo.currencies.find(
-          (cur) =>
-            denomTrace && cur.coinMinimalDenom.startsWith(denomTrace.denom)
-        );
-        if (
-          !cw20Currency &&
-          this.chainStore.hasChain(originChainInfo.chainId)
-        ) {
-          const originQueries = this.queriesStore.get(originChainInfo.chainId);
-          if (originQueries.cosmwasm) {
-            const contractAddress = denomTrace.denom.replace("cw20:", "");
-            const contractInfo =
-              originQueries.cosmwasm.querycw20ContractInfo.getQueryContract(
-                contractAddress
-              );
-            isFetching = contractInfo.isFetching;
-            if (contractInfo.response) {
-              cw20Currency = {
-                type: "cw20",
-                contractAddress,
-                coinDecimals: contractInfo.response.data.decimals,
-                coinDenom: contractInfo.response.data.symbol,
-                coinMinimalDenom: `cw20:${contractAddress}:${contractInfo.response.data.name}`,
-              };
+      const isCW20Currency =
+        denomTrace.denom.split(/^(cw20):(\w+)$/).length === 4;
+      const isERC20Currency =
+        denomTrace.denom.split(/^(erc20)\/(\w+)$/).length === 4;
+      switch (true) {
+        case isCW20Currency:
+          let isFetching = false;
+          // If the origin currency is ics20-cw20.
+          let cw20Currency = originChainInfo.currencies.find(
+            (cur) =>
+              denomTrace && cur.coinMinimalDenom.startsWith(denomTrace.denom)
+          );
+          if (
+            !cw20Currency &&
+            this.chainStore.hasChain(originChainInfo.chainId)
+          ) {
+            const originQueries = this.queriesStore.get(
+              originChainInfo.chainId
+            );
+            if (originQueries.cosmwasm) {
+              const contractAddress = denomTrace.denom.replace("cw20:", "");
+              const contractInfo =
+                originQueries.cosmwasm.querycw20ContractInfo.getQueryContract(
+                  contractAddress
+                );
+              isFetching = contractInfo.isFetching;
+              if (contractInfo.response) {
+                cw20Currency = {
+                  type: "cw20",
+                  contractAddress,
+                  coinDecimals: contractInfo.response.data.decimals,
+                  coinDenom: contractInfo.response.data.symbol,
+                  coinMinimalDenom: `cw20:${contractAddress}:${contractInfo.response.data.name}`,
+                };
+              }
             }
           }
-        }
 
-        if (cw20Currency) {
-          return {
-            value: {
-              coinDecimals: cw20Currency.coinDecimals,
-              coinGeckoId: cw20Currency.coinGeckoId,
-              coinImageUrl: cw20Currency.coinImageUrl,
-              coinMinimalDenom: denomHelper.denom,
-              coinDenom: this.coinDenomGenerator(
-                denomTrace,
-                originChainInfo,
-                counterpartyChainInfo,
-                cw20Currency
-              ),
-              paths: denomTrace.paths,
-              originChainId: originChainInfo.chainId,
-              originCurrency: cw20Currency,
-            },
-            done: fromCache && !isFetching,
-          };
-        }
-      } else {
-        const currency = originChainInfo.findCurrency(denomTrace.denom);
-
-        if (currency && !("paths" in currency)) {
-          return {
-            value: {
-              coinDecimals: currency.coinDecimals,
-              coinGeckoId: currency.coinGeckoId,
-              coinImageUrl: currency.coinImageUrl,
-              coinMinimalDenom: denomHelper.denom,
-              coinDenom: this.coinDenomGenerator(
-                denomTrace,
-                originChainInfo,
-                counterpartyChainInfo,
-                currency
-              ),
-              paths: denomTrace.paths,
-              originChainId: originChainInfo.chainId,
-              originCurrency: currency,
-            },
-            done: (() => {
-              if (
-                originChainInfo.isCurrencyRegistrationInProgress(
-                  currency.coinMinimalDenom
-                )
-              ) {
-                return false;
+          if (cw20Currency) {
+            return {
+              value: {
+                coinDecimals: cw20Currency.coinDecimals,
+                coinGeckoId: cw20Currency.coinGeckoId,
+                coinImageUrl: cw20Currency.coinImageUrl,
+                coinMinimalDenom: denomHelper.denom,
+                coinDenom: this.coinDenomGenerator(
+                  denomTrace,
+                  originChainInfo,
+                  counterpartyChainInfo,
+                  cw20Currency
+                ),
+                paths: denomTrace.paths,
+                originChainId: originChainInfo.chainId,
+                originCurrency: cw20Currency,
+              },
+              done: fromCache && !isFetching,
+            };
+          }
+          break;
+        case isERC20Currency:
+          let isERC20Fetching = false;
+          // If the origin currency is ics20-erc20.
+          let erc20Currency = originChainInfo.currencies.find(
+            (cur) =>
+              denomTrace && cur.coinMinimalDenom.startsWith(denomTrace.denom)
+          );
+          if (
+            !erc20Currency &&
+            this.chainStore.hasChain(originChainInfo.chainId)
+          ) {
+            const originQueries = this.queriesStore.get(
+              originChainInfo.chainId
+            );
+            if (originQueries.ethereum) {
+              const contractAddress = denomTrace.denom.replace("erc20/", "");
+              const contractInfo =
+                originQueries.ethereum.queryEthereumERC20ContractInfo.getQueryContract(
+                  contractAddress
+                );
+              isERC20Fetching = contractInfo.isFetching;
+              if (contractInfo.tokenInfo) {
+                erc20Currency = {
+                  type: "erc20",
+                  contractAddress,
+                  coinDecimals: contractInfo.tokenInfo.decimals,
+                  coinDenom: contractInfo.tokenInfo.symbol,
+                  coinMinimalDenom: `erc20:${contractAddress}`,
+                };
               }
+            }
+          }
 
-              return fromCache;
-            })(),
-          };
-        }
+          if (erc20Currency) {
+            return {
+              value: {
+                coinDecimals: erc20Currency.coinDecimals,
+                coinGeckoId: erc20Currency.coinGeckoId,
+                coinImageUrl: erc20Currency.coinImageUrl,
+                coinMinimalDenom: denomHelper.denom,
+                coinDenom: this.coinDenomGenerator(
+                  denomTrace,
+                  originChainInfo,
+                  counterpartyChainInfo,
+                  erc20Currency
+                ),
+                paths: denomTrace.paths,
+                originChainId: originChainInfo.chainId,
+                originCurrency: erc20Currency,
+              },
+              done: fromCache && !isERC20Fetching,
+            };
+          }
+          break;
+        default:
+          const currency = originChainInfo.findCurrency(denomTrace.denom);
+
+          if (currency && !("paths" in currency)) {
+            return {
+              value: {
+                coinDecimals: currency.coinDecimals,
+                coinGeckoId: currency.coinGeckoId,
+                coinImageUrl: currency.coinImageUrl,
+                coinMinimalDenom: denomHelper.denom,
+                coinDenom: this.coinDenomGenerator(
+                  denomTrace,
+                  originChainInfo,
+                  counterpartyChainInfo,
+                  currency
+                ),
+                paths: denomTrace.paths,
+                originChainId: originChainInfo.chainId,
+                originCurrency: currency,
+              },
+              done: (() => {
+                if (
+                  originChainInfo.isCurrencyRegistrationInProgress(
+                    currency.coinMinimalDenom
+                  )
+                ) {
+                  return false;
+                }
+
+                return fromCache;
+              })(),
+            };
+          }
+          break;
       }
 
       // In this case, just show the raw currency.
