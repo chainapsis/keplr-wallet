@@ -7,8 +7,13 @@ import {
   toJS,
 } from "mobx";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
-import { IChainInfoImpl, ChainStore } from "../chain";
-import { CosmosQueries, CosmwasmQueries, IQueriesStore } from "../query";
+import {
+  IChainInfoImpl,
+  ChainStore,
+  CosmosQueries,
+  CosmwasmQueries,
+  IQueriesStore,
+} from "@keplr-wallet/stores";
 import { DenomHelper, KVStore } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 

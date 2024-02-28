@@ -19,8 +19,6 @@ import {
   CosmwasmQueries,
   OsmosisQueries,
   getKeplrFromWindow,
-  IBCChannelStore,
-  IBCCurrencyRegistrar,
   QueriesStore,
   SecretAccount,
   SecretQueries,
@@ -28,6 +26,10 @@ import {
   AgoricQueries,
   LSMCurrencyRegistrar,
 } from "@keplr-wallet/stores";
+import {
+  IBCChannelStore,
+  IBCCurrencyRegistrar,
+} from "@keplr-wallet/stores-ibc";
 import {
   ChainSuggestStore,
   InteractionStore,

@@ -5377,6 +5377,7 @@ __metadata:
     "@keplr-wallet/stores-core": 0.12.58
     "@keplr-wallet/stores-etc": 0.12.58
     "@keplr-wallet/stores-eth": 0.12.58
+    "@keplr-wallet/stores-ibc": 0.12.58
     "@keplr-wallet/types": 0.12.58
     "@keplr-wallet/unit": 0.12.58
     "@keystonehq/animated-qr": ^0.8.6
@@ -5627,6 +5628,19 @@ __metadata:
     mobx: ^6.1.7
     mobx-utils: ^6.0.3
     utility-types: ^3.10.0
+  languageName: unknown
+  linkType: soft
+
+"@keplr-wallet/stores-ibc@0.12.58, @keplr-wallet/stores-ibc@workspace:packages/stores-ibc":
+  version: 0.0.0-use.local
+  resolution: "@keplr-wallet/stores-ibc@workspace:packages/stores-ibc"
+  dependencies:
+    "@keplr-wallet/common": 0.12.58
+    "@keplr-wallet/cosmos": 0.12.58
+    "@keplr-wallet/stores": 0.12.58
+    "@keplr-wallet/types": 0.12.58
+    mobx: ^6.1.7
+    mobx-utils: ^6.0.3
   languageName: unknown
   linkType: soft
 
