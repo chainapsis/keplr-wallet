@@ -9,7 +9,7 @@ import {observer} from 'mobx-react-lite';
 import {WebViewStateContext} from './context';
 import WebView, {WebViewMessageEvent} from 'react-native-webview';
 import {RouteProp, useRoute} from '@react-navigation/native';
-import {BackHandler, Platform} from 'react-native';
+import {BackHandler, PermissionsAndroid, Platform, Text} from 'react-native';
 import RNFS from 'react-native-fs';
 import EventEmitter from 'eventemitter3';
 import {RNInjectedKeplr} from '../../injected/injected-provider';
@@ -31,8 +31,18 @@ import {
   URLTempAllowOnMobileMsg,
 } from '@keplr-wallet/background';
 import {useConfirm} from '../../hooks/confirm';
+import {CameraRoll} from '@react-native-camera-roll/camera-roll';
+import RNFetchBlob from 'rn-fetch-blob';
+import {registerModal} from '../../components/modal/v2';
+import {useStyle} from '../../styles';
+import {Box} from '../../components/box';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
+import {Columns} from '../../components/column';
+import {Button} from '../../components/button';
+import {useNotification} from '../../hooks/notification';
+import {FormattedMessage, useIntl} from 'react-intl';
 
-const blocklistURL = 'https://blocklist.keplr.app';
+const blockListURL = 'https://blocklist.keplr.app';
 
 export const useInjectedSourceCode = () => {
   const [code, setCode] = useState<string | undefined>();
@@ -50,15 +60,171 @@ export const useInjectedSourceCode = () => {
   return code;
 };
 
+async function hasAndroidPermission() {
+  const getCheckPermissionPromise = () => {
+    if (typeof Platform.Version === 'number' && Platform.Version >= 33) {
+      return Promise.all([
+        PermissionsAndroid.check(
+          PermissionsAndroid.PERMISSIONS['READ_MEDIA_IMAGES'],
+        ),
+        PermissionsAndroid.check(
+          PermissionsAndroid.PERMISSIONS['READ_MEDIA_VIDEO'],
+        ),
+      ]).then(
+        ([hasReadMediaImagesPermission, hasReadMediaVideoPermission]) =>
+          hasReadMediaImagesPermission && hasReadMediaVideoPermission,
+      );
+    } else {
+      return PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS['READ_EXTERNAL_STORAGE'],
+      );
+    }
+  };
+
+  const hasPermission = await getCheckPermissionPromise();
+  if (hasPermission) {
+    return true;
+  }
+  const getRequestPermissionPromise = () => {
+    if (typeof Platform.Version === 'number' && Platform.Version >= 33) {
+      return PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS['READ_MEDIA_IMAGES'],
+        PermissionsAndroid.PERMISSIONS['READ_MEDIA_VIDEO'],
+      ]).then(
+        statuses =>
+          statuses[PermissionsAndroid.PERMISSIONS['READ_MEDIA_IMAGES']] ===
+            PermissionsAndroid.RESULTS['GRANTED'] &&
+          statuses[PermissionsAndroid.PERMISSIONS['READ_MEDIA_VIDEO']] ===
+            PermissionsAndroid.RESULTS['GRANTED'],
+      );
+    } else {
+      return PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS['READ_EXTERNAL_STORAGE'],
+      ).then(status => status === PermissionsAndroid.RESULTS['GRANTED']);
+    }
+  };
+
+  return await getRequestPermissionPromise();
+}
+
+const imageLongPressScript = `
+  // used to call "setLongPressOnImg" function again when the page changes
+  (() => {
+    var oldHref = document.location.href;
+    var bodyList = document.querySelector("body")
+    var observer = new MutationObserver(function(mutations) {
+        if (oldHref != document.location.href) {
+            oldHref = document.location.href;
+            setTimeout(() => setLongPressOnImg(), 500);
+        }
+    });
+    
+    var config = {
+        childList: true,
+        subtree: true
+    };
+    
+    observer.observe(bodyList, config);
+  })()
+  
+  // long press on image to download
+  function setLongPressOnImg() {
+    var longPressDuration = 1000;
+    var imgItems = document.getElementsByTagName("img");
+   
+    for (var i = 0, j = imgItems.length; i < j; i++) {
+      var node = imgItems[i];
+      var longPress = false;
+      var pressTimer = null;
+      var longTarget = null;
+     
+      var cancel = function (e) {
+        if (pressTimer !== null) {
+          clearTimeout(pressTimer);
+          pressTimer = null;
+        }
+        this.classList.remove("longPress");
+      };
+   
+      var click = function (e) {
+        if (pressTimer !== null) {
+          clearTimeout(pressTimer);
+          pressTimer = null;
+        }
+   
+        this.classList.remove("longPress");
+   
+        if (longPress) {
+          return false;
+        }
+      };
+     
+      var start = function (e) {
+        if (e.type === "click" && e.button !== 0) {
+          return;
+        }
+   
+        longPress = false;
+   
+        this.classList.add("longPress");
+   
+        if (pressTimer === null) {
+          pressTimer = setTimeout(function () {
+            var url = e.target.getAttribute("src");
+            if (
+              url &&
+              url != "" &&
+              url.startsWith("http")
+            ) {
+              if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({message: "download-image", origin: url}));
+              }
+            }
+   
+            longPress = true;
+          }, longPressDuration);
+        }
+   
+        return false;
+      };
+     
+      node.addEventListener("mousedown", start);
+      node.addEventListener("touchstart", start);
+      node.addEventListener("click", click);
+      node.addEventListener("mouseout", cancel);
+      node.addEventListener("touchend", cancel);
+      node.addEventListener("touchleave", cancel);
+      node.addEventListener("touchcancel", cancel);
+    }
+  };
+  
+  // call the function after 1 second to make sure the page is fully loaded
+  setTimeout(() => setLongPressOnImg(), 1000);
+`;
+
 export const WebpageScreen: FunctionComponent = observer(() => {
   const {chainStore} = useStore();
 
+  const intl = useIntl();
   const webviewRef = useRef<WebView | null>(null);
   const route = useRoute<RouteProp<RootStackParamList, 'Web'>>();
   const insect = useSafeAreaInsets();
   const [title, setTitle] = useState('');
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoForward, setCanGoForward] = useState(false);
+  const [isSaveImageModalOpen, setIsSaveImageModalOpen] = useState(false);
+  const [imageData, setImageData] = useState('');
+  const notification = useNotification();
+
+  // NOTE: This is used to prevent the script from being injected multiple times.
+  const wasLoaded = useRef(false);
+  const handleWebViewLoaded = useCallback(async () => {
+    if (!wasLoaded.current) {
+      wasLoaded.current = true;
+      webviewRef?.current?.injectJavaScript(imageLongPressScript);
+    }
+  }, []);
+
   const confirm = useConfirm();
   const sourceCode = useInjectedSourceCode();
 
@@ -77,7 +243,7 @@ export const WebpageScreen: FunctionComponent = observer(() => {
 
   const [eventEmitter] = useState(() => new EventEmitter());
   const onMessage = useCallback(
-    (event: WebViewMessageEvent) => {
+    async (event: WebViewMessageEvent) => {
       eventEmitter.emit('message', event.nativeEvent);
 
       const data: {message: string; origin: string} = JSON.parse(
@@ -105,6 +271,11 @@ export const WebpageScreen: FunctionComponent = observer(() => {
           // noop
           console.log(e);
         }
+      }
+
+      if (data.message === 'download-image') {
+        setImageData(data.origin);
+        setIsSaveImageModalOpen(true);
       }
     },
     [eventEmitter, uri],
@@ -159,7 +330,7 @@ export const WebpageScreen: FunctionComponent = observer(() => {
 
   const checkURLIsPhishing = (origin: string) => {
     try {
-      const _blocklistURL = new URL(blocklistURL);
+      const _blocklistURL = new URL(blockListURL);
       const url = new URL(origin);
 
       if (url.hostname === 'twitter.com' || url.hostname === 'x.com') {
@@ -205,7 +376,7 @@ export const WebpageScreen: FunctionComponent = observer(() => {
             )
             .then(r => {
               if (r) {
-                setUri(`${blocklistURL}?origin=${encodeURIComponent(origin)}`);
+                setUri(`${blockListURL}?origin=${encodeURIComponent(origin)}`);
               }
             })
             .catch(e => {
@@ -283,9 +454,95 @@ export const WebpageScreen: FunctionComponent = observer(() => {
           onLoad={event => {
             setTitle(event.nativeEvent.title);
           }}
+          onLoadEnd={async () => {
+            await handleWebViewLoaded();
+          }}
         />
       ) : null}
       {isExternal ? <Gutter size={insect.bottom} /> : null}
+
+      <SaveImageModal
+        isOpen={isSaveImageModalOpen}
+        setIsOpen={setIsSaveImageModalOpen}
+        saveImage={async () => {
+          try {
+            let imageTag = imageData;
+
+            if (Platform.OS === 'android') {
+              if (await hasAndroidPermission()) {
+                const res = await RNFetchBlob.config({
+                  appendExt: 'png',
+                }).fetch('GET', imageData);
+
+                const dirs = RNFetchBlob.fs.dirs.DCIMDir;
+                const downloadDest = `${dirs}/${
+                  Math.random() * 10000000 ?? 0
+                }.png`;
+
+                await RNFetchBlob.fs.writeFile(
+                  downloadDest,
+                  res.base64(),
+                  'base64',
+                );
+
+                imageTag = downloadDest;
+              }
+            }
+
+            await CameraRoll.saveAsset(imageTag, {type: 'photo'});
+            notification.show(
+              'success',
+              intl.formatMessage({id: 'save-image-modal.save-success'}),
+            );
+          } catch (e) {
+            console.log('error', e);
+          } finally {
+            setIsSaveImageModalOpen(false);
+          }
+        }}
+      />
     </React.Fragment>
   );
 });
+
+export const SaveImageModal = registerModal<{
+  setIsOpen: (isOpen: boolean) => void;
+  saveImage: () => void;
+}>(
+  observer(({setIsOpen, saveImage}) => {
+    const intl = useIntl();
+    const style = useStyle();
+    return (
+      <Box padding={12}>
+        <TouchableWithoutFeedback onPress={saveImage}>
+          <Box
+            height={68}
+            borderRadius={8}
+            alignX="center"
+            alignY="center"
+            style={style.flatten([
+              'background-color-gray-600',
+              'border-color-gray-500',
+            ])}>
+            <Columns sum={1} alignY="center" gutter={8}>
+              <Text
+                numberOfLines={1}
+                style={style.flatten(['body1', 'color-text-high'])}>
+                <FormattedMessage id="save-image-modal.save-image-item" />
+              </Text>
+            </Columns>
+          </Box>
+        </TouchableWithoutFeedback>
+
+        <Gutter size={12} />
+
+        <Button
+          text={intl.formatMessage({id: 'button.cancel'})}
+          size="large"
+          color="secondary"
+          onPress={() => setIsOpen(false)}
+        />
+      </Box>
+    );
+  }),
+);
