@@ -78,7 +78,7 @@ const buttonStyleFromColorAndMode: Record<
 
           ::after {
             background-color: ${ColorPalette["gray-300"]};
-            opacity: 0.2;
+            opacity: 0.4;
           }
 
           ${makeTextAndSvgColor(ColorPalette["white"])}
@@ -104,7 +104,7 @@ const buttonStyleFromColorAndMode: Record<
 
           ::after {
             background-color: ${ColorPalette["gray-600"]};
-            opacity: 0.5;
+            opacity: 0.7;
           }
 
           ${makeTextAndSvgColor(ColorPalette["white"])}
@@ -155,7 +155,7 @@ const buttonStyleFromColorAndMode: Record<
 
           ::after {
             background-color: ${ColorPalette["gray-600"]};
-            opacity: 0.5;
+            opacity: 0.7;
           }
 
           ${makeTextAndSvgColor(ColorPalette["white"])}
@@ -183,7 +183,7 @@ const buttonStyleFromColorAndMode: Record<
 
           ::after {
             background-color: ${ColorPalette["gray-300"]};
-            opacity: 0.1;
+            opacity: 0.2;
           }
 
           ${makeTextAndSvgColor(ColorPalette["red-400"])}
@@ -210,7 +210,7 @@ const buttonStyleFromColorAndMode: Record<
 
           ::after {
             background-color: ${ColorPalette["gray-600"]};
-            opacity: 0.5;
+            opacity: 0.7;
           }
 
           ${makeTextAndSvgColor(ColorPalette["white"])}

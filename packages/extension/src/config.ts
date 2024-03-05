@@ -1592,6 +1592,10 @@ export const EmbedChainInfos: ChainInfo[] = [
   {
     rpc: "https://rpc-evmos.keplr.app",
     rest: "https://lcd-evmos.keplr.app",
+    evm: {
+      chainId: 9001,
+      rpc: "https://evm-evmos.keplr.app",
+    },
     chainId: "evmos_9001-2",
     chainName: "Evmos",
     stakeCurrency: {
@@ -1634,10 +1638,6 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
-    evm: {
-      chainId: 9001,
-      rpc: "https://evm-evmos.keplr.app",
-    },
   },
   {
     rpc: "https://rpc-injective.keplr.app",
@@ -2322,6 +2322,39 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: [],
   },
   {
+    rpc: "https://rpc-passage.keplr.app",
+    rest: "https://lcd-passage.keplr.app",
+    chainId: "passage-2",
+    chainName: "Passage",
+    stakeCurrency: {
+      coinDenom: "PASG",
+      coinMinimalDenom: "upasg",
+      coinDecimals: 6,
+      coinGeckoId: "passage",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("pasg"),
+    currencies: [
+      {
+        coinDenom: "PASG",
+        coinMinimalDenom: "upasg",
+        coinDecimals: 6,
+        coinGeckoId: "passage",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "PASG",
+        coinMinimalDenom: "upasg",
+        coinDecimals: 6,
+        coinGeckoId: "passage",
+      },
+    ],
+    features: ["cosmwasm"],
+  },
+  {
     chainId: "dymension_1100-1",
     chainName: "Dymension",
     rpc: "https://rpc-dymension.keplr.app",
@@ -2356,13 +2389,59 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "adym",
         coinDenom: "DYM",
         coinDecimals: 18,
+        gasPriceStep: {
+          average: 20000000000,
+          high: 20000000000,
+          low: 20000000000,
+        },
       },
     ],
     features: ["eth-address-gen", "eth-key-sign"],
-    evm: {
-      rpc: "https://dymension-evm.blockpi.network/v1/rpc/public",
-      chainId: 1100,
+  },
+  {
+    chainId: "chihuahua-1",
+    chainName: "Chihuahua",
+    rpc: "https://rpc-chihuahua.keplr.app",
+    rest: "https://lcd-chihuahua.keplr.app",
+    stakeCurrency: {
+      coinDenom: "HUAHUA",
+      coinMinimalDenom: "uhuahua",
+      coinDecimals: 6,
+      coinGeckoId: "chihuahua-token",
     },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "chihuahua",
+      bech32PrefixAccPub: "chihuahuapub",
+      bech32PrefixValAddr: "chihuahuavaloper",
+      bech32PrefixValPub: "chihuahuavaloperpub",
+      bech32PrefixConsAddr: "chihuahuavalcons",
+      bech32PrefixConsPub: "chihuahuavalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "HUAHUA",
+        coinMinimalDenom: "uhuahua",
+        coinDecimals: 6,
+        coinGeckoId: "chihuahua-token",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "HUAHUA",
+        coinMinimalDenom: "uhuahua",
+        coinDecimals: 6,
+        coinGeckoId: "chihuahua-token",
+        gasPriceStep: {
+          low: 500,
+          average: 1250,
+          high: 2000,
+        },
+      },
+    ],
+    features: ["cosmwasm"],
   },
 ];
 

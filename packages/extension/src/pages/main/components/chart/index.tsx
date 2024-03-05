@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useLayoutEffect } from "react";
+import React, { FunctionComponent, useLayoutEffect, useRef } from "react";
 import { YAxis } from "../../../../components/axis";
 import { ColorPalette } from "../../../../styles";
 import { animated, to, useSpringValue } from "@react-spring/web";
@@ -95,6 +95,8 @@ export const DualChart: FunctionComponent<{
 
   const theme = useTheme();
 
+  const prevFirstArcVisibility = useRef(firstArcVisibility);
+  const prevSecondArcVisibility = useRef(secondArcVisibility);
   useLayoutEffect(() => {
     if (!firstArcVisibility && !secondArcVisibility) {
       if (highlight === "first") {
@@ -105,14 +107,27 @@ export const DualChart: FunctionComponent<{
         arcEndAngle.start(endAngle);
       }
     } else {
-      if (firstArcVisibility) {
-        arcStartAngle.start(startAngle);
-        arcEndAngle.start(firstArcEndAngle);
+      if (!prevFirstArcVisibility.current && !prevSecondArcVisibility.current) {
+        if (firstArcVisibility) {
+          arcStartAngle.set(startAngle);
+          arcEndAngle.set(firstArcEndAngle);
+        } else {
+          arcStartAngle.set(firstArcEndAngle);
+          arcEndAngle.set(endAngle);
+        }
       } else {
-        arcStartAngle.start(firstArcEndAngle);
-        arcEndAngle.start(endAngle);
+        if (firstArcVisibility) {
+          arcStartAngle.start(startAngle);
+          arcEndAngle.start(firstArcEndAngle);
+        } else {
+          arcStartAngle.start(firstArcEndAngle);
+          arcEndAngle.start(endAngle);
+        }
       }
     }
+
+    prevFirstArcVisibility.current = firstArcVisibility;
+    prevSecondArcVisibility.current = secondArcVisibility;
   }, [
     arcEndAngle,
     arcStartAngle,

@@ -18,6 +18,7 @@ import {
   ChainInfoWithoutEndpoints,
   SecretUtils,
   SettledResponses,
+  DirectAuxSignResponse,
 } from "@keplr-wallet/types";
 import {
   BACKGROUND_PORT,
@@ -239,6 +240,62 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         authInfoBytes: response.signed.authInfoBytes,
         chainId: response.signed.chainId,
         accountNumber: Long.fromString(response.signed.accountNumber),
+      },
+      signature: response.signature,
+    };
+  }
+
+  async signDirectAux(
+    chainId: string,
+    signer: string,
+    signDoc: {
+      bodyBytes?: Uint8Array | null;
+      publicKey?: {
+        typeUrl: string;
+        value: Uint8Array;
+      } | null;
+      chainId?: string | null;
+      accountNumber?: Long | null;
+      sequence?: Long | null;
+    },
+    signOptions: Exclude<
+      KeplrSignOptions,
+      "preferNoSetFee" | "disableBalanceCheck"
+    > = {}
+  ): Promise<DirectAuxSignResponse> {
+    const response = await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-cosmos",
+      "request-cosmos-sign-direct-aux",
+      {
+        chainId,
+        signer,
+        signDoc: {
+          bodyBytes: signDoc.bodyBytes,
+          publicKey: signDoc.publicKey,
+          chainId: signDoc.chainId,
+          accountNumber: signDoc.accountNumber
+            ? signDoc.accountNumber.toString()
+            : null,
+          sequence: signDoc.sequence ? signDoc.sequence.toString() : null,
+        },
+        signOptions: deepmerge(
+          {
+            preferNoSetMemo: this.defaultOptions.sign?.preferNoSetMemo,
+          },
+          signOptions
+        ),
+      }
+    );
+
+    return {
+      signed: {
+        bodyBytes: response.signed.bodyBytes,
+        publicKey: response.signed.publicKey,
+        chainId: response.signed.chainId,
+        accountNumber: Long.fromString(response.signed.accountNumber),
+        sequence: Long.fromString(response.signed.sequence),
       },
       signature: response.signature,
     };

@@ -13,7 +13,10 @@ import {
   checkAndValidateADR36AminoSignDoc,
   EthermintChainIdHelper,
 } from "@keplr-wallet/cosmos";
-import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import {
+  SignDoc,
+  SignDocDirectAux,
+} from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { Int } from "@keplr-wallet/unit";
 import bigInteger from "big-integer";
 
@@ -212,6 +215,94 @@ export class RequestCosmosSignDirectMsg extends Message<{
 
   type(): string {
     return RequestCosmosSignDirectMsg.type();
+  }
+}
+
+export class RequestCosmosSignDirectAuxMsg extends Message<{
+  readonly signed: {
+    bodyBytes: Uint8Array;
+    publicKey:
+      | {
+          typeUrl: string;
+          value: Uint8Array;
+        }
+      | undefined;
+    chainId: string;
+    accountNumber: string;
+    sequence: string;
+  };
+  readonly signature: StdSignature;
+}> {
+  public static type() {
+    return "request-cosmos-sign-direct-aux";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly signDoc: {
+      bodyBytes: Uint8Array;
+      publicKey:
+        | {
+            typeUrl: string;
+            value: Uint8Array;
+          }
+        | undefined;
+      chainId: string;
+      accountNumber: string;
+      sequence: string;
+    },
+    public readonly signOptions: Exclude<
+      KeplrSignOptions,
+      "preferNoSetFee" | "disableBalanceCheck"
+    > = {}
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new KeplrError("keyring", 270, "chain id not set");
+    }
+
+    if (!this.signer) {
+      throw new KeplrError("keyring", 230, "signer not set");
+    }
+
+    // Validate bech32 address.
+    Bech32Address.validate(this.signer);
+
+    const signDoc = SignDocDirectAux.fromPartial({
+      bodyBytes: this.signDoc.bodyBytes,
+      publicKey: this.signDoc.publicKey,
+      chainId: this.signDoc.chainId,
+      accountNumber: this.signDoc.accountNumber,
+      sequence: this.signDoc.sequence,
+    });
+
+    if (signDoc.chainId !== this.chainId) {
+      throw new KeplrError(
+        "keyring",
+        234,
+        "Chain id in the message is not matched with the requested chain id"
+      );
+    }
+
+    if (!this.signOptions) {
+      throw new KeplrError("keyring", 235, "Sign options are null");
+    }
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestCosmosSignDirectAuxMsg.type();
   }
 }
 

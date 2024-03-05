@@ -1,20 +1,4 @@
-FROM ubuntu:20.04
-
-# Install dependencies for build
-RUN apt-get update && apt -y install build-essential libusb-1.0-0-dev curl unzip
-
-# Install node 18
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-RUN apt -y install nodejs
-
-# Install yarn
-RUN npm install --global yarn
-
-# Install protobuf v21.3
-RUN curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v21.3/protoc-21.3-linux-$(if [ $(uname -m) = "aarch64" ]; then echo aarch_64; else echo x86_64; fi).zip
-RUN unzip protoc-21.3-linux-$(if [ $(uname -m) = "aarch64" ]; then echo aarch_64; else echo x86_64; fi).zip -d $HOME/protoc
-RUN cp -r $HOME/protoc/include /usr/local
-RUN cp -r $HOME/protoc/bin /usr/local
+FROM public.ecr.aws/r3a1l1p0/chainapsis/ubuntu:20.04-keplr-firefox-build
 
 RUN mkdir app
 
@@ -33,6 +17,7 @@ ARG KEPLR_EXT_KADO_API_KEY
 ARG KEPLR_EXT_CHAIN_REGISTRY_URL
 ARG KEPLR_EXT_GOOGLE_MEASUREMENT_ID
 ARG KEPLR_EXT_GOOGLE_API_KEY_FOR_MEASUREMENT
+ARG WC_PROJECT_ID
 
 ENV KEPLR_EXT_ETHEREUM_ENDPOINT $KEPLR_EXT_ETHEREUM_ENDPOINT
 ENV KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN $KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN
@@ -45,6 +30,7 @@ ENV KEPLR_EXT_KADO_API_KEY $KEPLR_EXT_KADO_API_KEY
 ENV KEPLR_EXT_CHAIN_REGISTRY_URL $KEPLR_EXT_CHAIN_REGISTRY_URL
 ENV KEPLR_EXT_GOOGLE_MEASUREMENT_ID $KEPLR_EXT_GOOGLE_MEASUREMENT_ID
 ENV KEPLR_EXT_GOOGLE_API_KEY_FOR_MEASUREMENT $KEPLR_EXT_GOOGLE_API_KEY_FOR_MEASUREMENT
+ENV WC_PROJECT_ID $WC_PROJECT_ID
 
 RUN yarn install --immutable
 

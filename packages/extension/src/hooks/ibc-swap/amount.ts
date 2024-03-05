@@ -1,6 +1,6 @@
 import { AmountConfig, ISenderConfig, UIProperties } from "@keplr-wallet/hooks";
 import { AppCurrency } from "@keplr-wallet/types";
-import { CoinPretty, Dec, RatePretty } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, Int, RatePretty } from "@keplr-wallet/unit";
 import {
   ChainGetter,
   CosmosAccount,
@@ -137,7 +137,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
   async getTx(
     slippageTolerancePercent: number,
     affiliateFeeReceiver: string,
-    swapRouterKey?: string
+    priorOutAmount?: Int
   ): Promise<MakeTxResponse> {
     const queryIBCSwap = this.getQueryIBCSwap();
     if (!queryIBCSwap) {
@@ -213,7 +213,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
       throw new Error("Tx is not ready");
     }
 
-    if (swapRouterKey) {
+    if (priorOutAmount) {
       const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
         chainIdsToAddresses,
         slippageTolerancePercent,
@@ -223,17 +223,21 @@ export class IBCSwapAmountConfig extends AmountConfig {
         throw new Error("Can't happen: queryMsgsDirect is not ready");
       }
 
-      const key = this.createSwapRouteKeyFromMsgsDirectResponse(
-        queryMsgsDirect.response.data
+      const currentAmountOut = new Int(
+        queryMsgsDirect.response.data.route.amount_out
       );
 
-      console.log({
-        swapRouterKey,
-        key,
-      });
-      if (swapRouterKey !== key) {
+      if (
+        currentAmountOut.lt(priorOutAmount) &&
+        currentAmountOut
+          .sub(priorOutAmount)
+          .abs()
+          .toDec()
+          .quo(priorOutAmount.toDec())
+          .gte(new Dec(0.01))
+      ) {
         throw new Error(
-          "Route and msgs_direct are not matched. Please try again."
+          "Price change has been detected while building your transaction. Please try again"
         );
       }
     }
@@ -374,9 +378,52 @@ export class IBCSwapAmountConfig extends AmountConfig {
         const memo = JSON.parse(msg.msg).memo;
         if (memo) {
           const obj = JSON.parse(memo);
-          for (const operation of obj.wasm.msg.swap_and_action.user_swap
-            .swap_exact_asset_in.operations) {
-            key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;
+          const wasms: any = [];
+
+          if (obj.wasm) {
+            wasms.push(obj.wasm);
+          }
+
+          let forward = obj.forward;
+          if (forward) {
+            while (true) {
+              if (forward) {
+                if (forward.memo) {
+                  const obj = JSON.parse(forward.memo);
+                  if (obj.wasm) {
+                    wasms.push(obj.wasm);
+                  }
+                }
+
+                if (forward.wasm) {
+                  wasms.push(forward.wasm);
+                }
+
+                if (forward.next) {
+                  const obj =
+                    typeof forward.next === "string"
+                      ? JSON.parse(forward.next)
+                      : forward.next;
+
+                  if (obj.forward) {
+                    forward = obj.forward;
+                  } else {
+                    forward = obj;
+                  }
+                } else {
+                  break;
+                }
+              } else {
+                break;
+              }
+            }
+          }
+
+          for (const wasm of wasms) {
+            for (const operation of wasm.msg.swap_and_action.user_swap
+              .swap_exact_asset_in.operations) {
+              key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;
+            }
           }
         }
       }

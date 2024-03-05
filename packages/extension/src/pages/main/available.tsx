@@ -194,6 +194,7 @@ export const AvailableTabView: FunctionComponent<{
                   <CollapsibleList
                     key={title}
                     hideNumInTitle={uiConfigStore.isPrivacyMode}
+                    notRenderHiddenItems={true}
                     title={
                       <TokenTitleView
                         title={title}

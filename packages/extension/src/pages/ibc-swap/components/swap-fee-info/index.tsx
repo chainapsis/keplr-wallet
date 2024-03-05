@@ -30,7 +30,7 @@ export const SwapFeeInfo: FunctionComponent<{
   gasSimulator: IGasSimulator;
 }> = observer(
   ({ senderConfig, amountConfig, gasConfig, feeConfig, gasSimulator }) => {
-    const { queriesStore, chainStore, priceStore } = useStore();
+    const { queriesStore, chainStore, priceStore, uiConfigStore } = useStore();
 
     const theme = useTheme();
 
@@ -59,16 +59,28 @@ export const SwapFeeInfo: FunctionComponent<{
               !selectableFeeCurrenciesMap.get(fee.currency.coinMinimalDenom)
           ) != null)
       ) {
-        feeConfig.setFee({
-          type: "average",
-          currency: feeConfig.selectableFeeCurrencies[0],
-        });
+        if (
+          uiConfigStore.rememberLastFeeOption &&
+          uiConfigStore.lastFeeOption
+        ) {
+          feeConfig.setFee({
+            type: uiConfigStore.lastFeeOption,
+            currency: feeConfig.selectableFeeCurrencies[0],
+          });
+        } else {
+          feeConfig.setFee({
+            type: "average",
+            currency: feeConfig.selectableFeeCurrencies[0],
+          });
+        }
       }
     }, [
       feeConfig,
       feeConfig.chainId,
       feeConfig.fees,
       feeConfig.selectableFeeCurrencies,
+      uiConfigStore.lastFeeOption,
+      uiConfigStore.rememberLastFeeOption,
     ]);
 
     useLayoutEffect(() => {
@@ -238,6 +250,7 @@ export const SwapFeeInfo: FunctionComponent<{
                 <Subtitle4
                   style={{
                     textDecoration: "underline",
+                    textUnderlineOffset: "0.2rem",
                   }}
                   color={
                     theme.mode === "light"
@@ -248,28 +261,58 @@ export const SwapFeeInfo: FunctionComponent<{
                   <FormattedMessage id="page.ibc-swap.components.swap-fee-info.button.transaction-fee" />
                 </Subtitle4>
               </Box>
-              {feeConfig.uiProperties.loadingState ||
-              gasSimulator.uiProperties.loadingState ? (
-                <Box
-                  height="1px"
-                  alignX="center"
-                  alignY="center"
-                  marginLeft="0.2rem"
-                >
-                  {/* 로딩 아이콘이 부모의 height에 영향을 끼치지 않게 하기 위한 트릭 구조임 */}
-                  <Box width="1rem" height="1rem">
-                    <LoadingIcon
-                      width="1rem"
-                      height="1rem"
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["gray-200"]
-                          : ColorPalette["gray-300"]
-                      }
-                    />
-                  </Box>
-                </Box>
-              ) : null}
+              {(() => {
+                if (
+                  feeConfig.uiProperties.loadingState ||
+                  gasSimulator.uiProperties.loadingState
+                ) {
+                  return (
+                    <Box
+                      height="1px"
+                      alignX="center"
+                      alignY="center"
+                      marginLeft="0.2rem"
+                    >
+                      <Box width="1rem" height="1rem">
+                        <LoadingIcon
+                          width="1rem"
+                          height="1rem"
+                          color={
+                            theme.mode === "light"
+                              ? ColorPalette["gray-200"]
+                              : ColorPalette["gray-300"]
+                          }
+                        />
+                      </Box>
+                    </Box>
+                  );
+                }
+
+                if (uiConfigStore.rememberLastFeeOption) {
+                  return (
+                    <Box
+                      height="1px"
+                      width="0.375rem"
+                      alignY="center"
+                      marginLeft="0.3rem"
+                    >
+                      <Box alignX="center" alignY="center">
+                        <div
+                          style={{
+                            width: "0.375rem",
+                            height: "0.375rem",
+                            borderRadius: "99999px",
+                            backgroundColor:
+                              theme.mode === "light"
+                                ? ColorPalette["blue-400"]
+                                : ColorPalette["blue-400"],
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                  );
+                }
+              })()}
 
               <div
                 style={{
@@ -433,6 +476,7 @@ export const SwapFeeInfo: FunctionComponent<{
           <Modal
             isOpen={isModalOpen}
             align="bottom"
+            maxHeight="95vh"
             close={() => setIsModalOpen(false)}
           >
             <TransactionFeeModal

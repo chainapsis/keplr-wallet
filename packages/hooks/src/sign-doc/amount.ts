@@ -13,6 +13,7 @@ import { Msg } from "@keplr-wallet/types";
 import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";
 import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import { MsgDelegate } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
+import { MsgTransfer } from "@keplr-wallet/proto-types/ibc/applications/transfer/v1/tx";
 
 // This config helps the fee config to calculate that the fee is enough to send with considering
 // the amount in the sign doc.
@@ -107,6 +108,26 @@ export class SignDocAmountConfig
               }
             }
             break;
+          case "cosmos-sdk/MsgTransfer": {
+            if (
+              msg.value.sender &&
+              msg.value.sender === this.senderConfig.sender
+            ) {
+              if (
+                msg.value.token &&
+                msg.value.token.amount &&
+                msg.value.token.denom
+              ) {
+                amount.push(
+                  new CoinPretty(
+                    this.chainInfo.forceFindCurrency(msg.value.token.denom),
+                    msg.value.token.amount
+                  )
+                );
+              }
+            }
+            break;
+          }
         }
       } catch (e) {
         console.log(
@@ -155,6 +176,25 @@ export class SignDocAmountConfig
                         delegateMsg.amount.denom
                       ),
                       delegateMsg.amount.amount
+                    )
+                  );
+                }
+              }
+              break;
+            }
+            case "/ibc.applications.transfer.v1.MsgTransfer": {
+              const ibcTransferMsg = msg.unpacked as MsgTransfer;
+              if (
+                ibcTransferMsg.sender &&
+                ibcTransferMsg.sender === this.senderConfig.sender
+              ) {
+                if (ibcTransferMsg.token) {
+                  amount.push(
+                    new CoinPretty(
+                      this.chainInfo.forceFindCurrency(
+                        ibcTransferMsg.token.denom
+                      ),
+                      ibcTransferMsg.token.amount
                     )
                   );
                 }

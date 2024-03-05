@@ -12,7 +12,9 @@ export interface HeaderProps {
     | ({ isSpecial?: false } & ButtonProps)
     | ({ isSpecial: true } & SpecialButtonProps);
 
+  displayFlex?: boolean;
   fixedHeight?: boolean;
+  fixedMinHeight?: boolean;
 
   additionalPaddingBottom?: string;
 
