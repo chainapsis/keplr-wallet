@@ -42,6 +42,7 @@ import {FlatList} from '../../components/flat-list';
 import {ScrollView} from '../../components/scroll-view/common-scroll-view';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {useLedgerBLE} from '../../provider/ledger-ble';
+import {FeeSummary} from './components/fee-summary';
 
 export const SignModal = registerCardModal(
   observer<{
@@ -377,7 +378,7 @@ export const SignModal = registerCardModal(
           <Box
             maxHeight={128}
             backgroundColor={style.get('color-gray-500').color}
-            padding={16}
+            padding={12}
             borderRadius={6}>
             <ScrollView isGestureScrollView={true} persistentScrollbar={true}>
               <Text style={style.flatten(['body3', 'color-text-middle'])}>
@@ -417,7 +418,7 @@ export const SignModal = registerCardModal(
           </Box>
         )}
 
-        <Gutter size={16} />
+        <Gutter size={12} />
 
         {preferNoSetMemo ? (
           <ReadonlyMemo memo={memoConfig.memo} />
@@ -425,14 +426,23 @@ export const SignModal = registerCardModal(
           <MemoInput memoConfig={memoConfig} />
         )}
 
-        <Gutter size={16} />
-        <FeeControl
-          feeConfig={feeConfig}
-          senderConfig={senderConfig}
-          gasConfig={gasConfig}
-          disableAutomaticFeeSet={preferNoSetFee}
-        />
-        <Gutter size={16} />
+        <Gutter size={60} />
+        {(() => {
+          if (interactionData.isInternal && preferNoSetFee) {
+            return <FeeSummary feeConfig={feeConfig} gasConfig={gasConfig} />;
+          }
+
+          return (
+            <FeeControl
+              feeConfig={feeConfig}
+              senderConfig={senderConfig}
+              gasConfig={gasConfig}
+              disableAutomaticFeeSet={preferNoSetFee}
+            />
+          );
+        })()}
+
+        <Gutter size={12} />
 
         {isSendAuthzGrant ? (
           <React.Fragment>
@@ -453,7 +463,7 @@ export const SignModal = registerCardModal(
               }
             />
 
-            <Gutter size={16} />
+            <Gutter size={12} />
           </React.Fragment>
         ) : null}
 
@@ -469,7 +479,7 @@ export const SignModal = registerCardModal(
               })}
             />
 
-            <Gutter size={16} />
+            <Gutter size={12} />
           </React.Fragment>
         ) : null}
 
@@ -486,7 +496,7 @@ export const SignModal = registerCardModal(
               ledgerInteractingError={ledgerInteractingError}
             />
 
-            <Gutter size={16} />
+            <Gutter size={12} />
           </React.Fragment>
         ) : null}
 
@@ -516,7 +526,7 @@ const Divider = () => {
   return (
     <Box
       height={1}
-      marginX={16}
+      marginX={12}
       backgroundColor={style.get('color-gray-400').color}
     />
   );

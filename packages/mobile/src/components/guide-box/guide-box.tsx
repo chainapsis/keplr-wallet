@@ -15,10 +15,13 @@ export const GuideBox: FunctionComponent<GuideBoxProps> = ({
   bottom,
   hideInformationIcon,
   titleStyle,
+  backgroundColor,
 }) => {
   const style = useStyle();
   const paragraphColor = (() => {
     switch (color) {
+      case 'safe':
+        return style.get('color-green-400').color;
       case 'warning':
         return style.get('color-yellow-500').color;
       case 'danger':
@@ -29,6 +32,8 @@ export const GuideBox: FunctionComponent<GuideBoxProps> = ({
   })();
   const titleColor = (() => {
     switch (color) {
+      case 'safe':
+        return style.get('color-green-400').color;
       case 'warning':
         return style.get('color-yellow-400').color;
       case 'danger':
@@ -37,8 +42,14 @@ export const GuideBox: FunctionComponent<GuideBoxProps> = ({
         return style.get('color-gray-100').color;
     }
   })();
-  const backgroundColor = (() => {
+  const innerBackgroundColor = (() => {
+    if (backgroundColor) {
+      return backgroundColor;
+    }
+
     switch (color) {
+      case 'safe':
+        return style.get('color-green-800').color;
       case 'warning':
         return style.get('color-yellow-800').color;
       case 'danger':
@@ -49,7 +60,7 @@ export const GuideBox: FunctionComponent<GuideBoxProps> = ({
   })();
 
   return (
-    <Box borderRadius={8} padding={18} backgroundColor={backgroundColor}>
+    <Box borderRadius={8} padding={18} backgroundColor={innerBackgroundColor}>
       <Stack gutter={8}>
         <Columns sum={1} alignY="center" gutter={6}>
           {!hideInformationIcon ? (
