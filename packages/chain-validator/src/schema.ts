@@ -157,6 +157,18 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
       return value;
     })
     .required(),
+  evm: Joi.object({
+    chainId: Joi.number().required(),
+    rpc: Joi.string()
+      .custom((value: string) => {
+        if (value.includes("?")) {
+          throw new Error("evm rpc should not have query string");
+        }
+
+        return value;
+      })
+      .required(),
+  }).unknown(true),
   nodeProvider: Joi.object({
     name: Joi.string().min(1).max(30).required(),
     email: Joi.string()
