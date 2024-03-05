@@ -247,8 +247,7 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
         <TextInput label="RPC" {...register("rpc")} />
         <TextInput label="LCD" {...register("lcd")} />
 
-        {ChainIdHelper.parse(chainId).identifier === "axelar-dojo" ||
-        ChainIdHelper.parse(chainId).identifier === "evmos_9001" ? (
+        {ChainIdHelper.parse(chainId).identifier === "axelar-dojo" ? (
           <StakeWithKeplrDashboardButton
             type="button"
             onClick={(e) => {
