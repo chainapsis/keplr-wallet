@@ -422,6 +422,22 @@ export const CosmosTxView: FunctionComponent<{
     }
   };
 
+  const isLavaEndpoint = (() => {
+    try {
+      const lavaBaseHostName = "lava.build";
+      const rpcUrl = new URL(chainStore.getChain(chainId).rpc);
+      const lcdUrl = new URL(chainStore.getChain(chainId).rest);
+
+      return (
+        rpcUrl.hostname.endsWith(lavaBaseHostName) ||
+        lcdUrl.hostname.endsWith(lavaBaseHostName)
+      );
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  })();
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.sign.cosmos.tx.title" })}
@@ -576,6 +592,21 @@ export const CosmosTxView: FunctionComponent<{
         </Box>
 
         {!isViewData ? <div style={{ flex: 1 }} /> : null}
+
+        {isLavaEndpoint ? (
+          <React.Fragment>
+            <GuideBox
+              title={intl.formatMessage({
+                id: "page.sign.cosmos.lava.guide.title",
+              })}
+              paragraph={intl.formatMessage({
+                id: "page.sign.cosmos.lava.guide.paragraph",
+              })}
+            />
+
+            <Gutter size="0.75rem" />
+          </React.Fragment>
+        ) : null}
 
         <Box
           style={{
