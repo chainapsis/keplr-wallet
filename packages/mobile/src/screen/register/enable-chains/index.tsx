@@ -468,6 +468,16 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
     const enabledChainIdentifiers: string[] =
       chainStore.enabledChainIdentifiers;
 
+    if (
+      candidateAddresses.length > 0 &&
+      enabledChainIdentifiers.length === 1 &&
+      enabledChainIdentifiers[0] === chainStore.chainInfos[0].chainIdentifier
+    ) {
+      if (chainStore.chainInfos.find(c => c.chainIdentifier === 'noble')) {
+        enabledChainIdentifiers.push('noble');
+      }
+    }
+
     for (const candidateAddress of candidateAddresses) {
       const queries = queriesStore.get(candidateAddress.chainId);
       const chainInfo = chainStore.getChain(candidateAddress.chainId);
@@ -493,7 +503,20 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
           if (
             data.balances &&
             Array.isArray(data.balances) &&
-            data.balances.length > 0
+            data.balances.length > 0 &&
+            // nomic은 지들이 대충 구현한 가짜 rest를 쓰는데...
+            // 얘네들이 구현한게 cosmos-sdk의 실제 동작과 약간 차이가 있음
+            // cosmos-sdk에서는 balacne가 0인거는 response에 포함되지 않지만
+            // nomic은 대충 만들어서 balance가 0인거도 response에 포함됨
+            // 그래서 밑의 줄이 없으면 nomic이 무조건 enable된채로 시작되기 때문에
+            // 이 문제를 해결하기 위해서 로직을 추가함
+            data.balances.find((bal: any) => {
+              return (
+                bal.amount &&
+                typeof bal.amount === 'string' &&
+                bal.amount !== '0'
+              );
+            })
           ) {
             enabledChainIdentifiers.push(chainInfo.chainIdentifier);
             break;
@@ -511,7 +534,7 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
       }
     }
 
-    return enabledChainIdentifiers;
+    return [...new Set(enabledChainIdentifiers)];
   });
 
   const enabledChainIdentifierMap = useMemo(() => {
@@ -1028,7 +1051,19 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
                   !!chainInfo.features?.includes('eth-address-gen') ||
                   !!chainInfo.features?.includes('eth-key-sign');
 
-                if (isEthermintLike) {
+                const supported = (() => {
+                  try {
+                    // 처리가능한 체인만 true를 반환한다.
+                    KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+                      chainInfo.chainId,
+                    );
+                    return true;
+                  } catch {
+                    return false;
+                  }
+                })();
+
+                if (isEthermintLike && supported) {
                   return (
                     <NextStepEvmChainItem
                       key={chainInfo.chainId}
@@ -1049,7 +1084,7 @@ export const EnableChainsScreen: FunctionComponent = observer(() => {
 });
 
 const ChainItem: FunctionComponent<{
-  chainInfo: ChainInfo;
+  chainInfo: IChainInfoImpl;
   balance: CoinPretty;
 
   enabled: boolean;
@@ -1098,7 +1133,14 @@ const ChainItem: FunctionComponent<{
             <Gutter size={8} />
 
             <Text style={style.flatten(['subtitle2', 'color-white', 'flex-1'])}>
-              {chainInfo.chainName}
+              {(() => {
+                // Noble의 경우만 약간 특수하게 표시해줌
+                if (chainInfo.chainIdentifier === 'noble') {
+                  return `${chainInfo.chainName} (USDC)`;
+                }
+
+                return chainInfo.chainName;
+              })()}
             </Text>
             {isFresh ? null : (
               <YAxis alignX="right">
