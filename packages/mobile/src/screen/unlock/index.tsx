@@ -358,7 +358,9 @@ export const UnlockScreen: FunctionComponent = observer(() => {
 
             {keychainStore.isBiometryOn ? (
               <TextButton
-                text="Use Biometric Authentication"
+                text={intl.formatMessage({
+                  id: 'page.setting.security.bio-authentication-title',
+                })}
                 size="large"
                 loading={isBiometricLoading}
                 onPress={async () => {
