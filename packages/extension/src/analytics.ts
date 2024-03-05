@@ -25,6 +25,8 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
   @observable
   protected _sessionIdTimestamp: number = 0;
 
+  protected isFirefox: boolean = navigator.userAgent.includes("Firefox");
+
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly apiKey: string,
@@ -36,6 +38,14 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
   }
 
   protected async init() {
+    // Disable on firefox
+    if (this.isFirefox) {
+      runInAction(() => {
+        this.isInitialized = true;
+      });
+      return;
+    }
+
     const userId = await this.kvStore.get<string>("user_id");
     if (userId) {
       runInAction(() => {
@@ -87,6 +97,11 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
   }
 
   protected async ensureInit(): Promise<void> {
+    // Disable on firefox
+    if (this.isFirefox) {
+      return;
+    }
+
     if (this.isInitialized && this._userId) {
       return;
     }
@@ -146,10 +161,20 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
 
   @action
   public setUserId(userId: string): void {
+    // Disable on firefox
+    if (this.isFirefox) {
+      return;
+    }
+
     this._userId = userId;
   }
 
   public logEvent(eventName: string, eventProperties?: Properties): void {
+    // Disable on firefox
+    if (this.isFirefox) {
+      return;
+    }
+
     this.ensureInit().then(() => {
       simpleFetch(
         `https://www.google-analytics.com`,
@@ -202,6 +227,11 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
 
   @action
   public setUserProperties(properties: Properties): void {
+    // Disable on firefox
+    if (this.isFirefox) {
+      return;
+    }
+
     this._userProperties = {
       ...this._userProperties,
       ...properties,
