@@ -76,6 +76,13 @@ export class AnalyticsService {
       return;
     }
 
+    if (typeof navigator !== "undefined") {
+      // Disable on firefox
+      if (navigator.userAgent.includes("Firefox")) {
+        return;
+      }
+    }
+
     if (this.disabled) {
       return;
     }

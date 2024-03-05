@@ -54,39 +54,41 @@ export const SettingSecurityPage: FunctionComponent = () => {
             onClick={() => navigate("/setting/security/change-password")}
           />
 
-          <PageButton
-            title={intl.formatMessage({
-              id: "page.setting.security.analytics-title",
-            })}
-            paragraph={intl.formatMessage({
-              id: "page.setting.security.analytics-paragraph",
-            })}
-            endIcon={
-              <Box marginLeft="0.5rem">
-                <Toggle
-                  isOpen={!disableAnalytics}
-                  setIsOpen={() => {
-                    const disableAnalytics =
-                      localStorage.getItem("disable-analytics") === "true";
+          {navigator.userAgent.includes("Firefox") ? null : (
+            <PageButton
+              title={intl.formatMessage({
+                id: "page.setting.security.analytics-title",
+              })}
+              paragraph={intl.formatMessage({
+                id: "page.setting.security.analytics-paragraph",
+              })}
+              endIcon={
+                <Box marginLeft="0.5rem">
+                  <Toggle
+                    isOpen={!disableAnalytics}
+                    setIsOpen={() => {
+                      const disableAnalytics =
+                        localStorage.getItem("disable-analytics") === "true";
 
-                    new InExtensionMessageRequester()
-                      .sendMessage(
-                        BACKGROUND_PORT,
-                        new SetDisableAnalyticsMsg(!disableAnalytics)
-                      )
-                      .then((analyticsDisabled) => {
-                        localStorage.setItem(
-                          "disable-analytics",
-                          analyticsDisabled ? "true" : "false"
-                        );
+                      new InExtensionMessageRequester()
+                        .sendMessage(
+                          BACKGROUND_PORT,
+                          new SetDisableAnalyticsMsg(!disableAnalytics)
+                        )
+                        .then((analyticsDisabled) => {
+                          localStorage.setItem(
+                            "disable-analytics",
+                            analyticsDisabled ? "true" : "false"
+                          );
 
-                        setDisableAnalytics(analyticsDisabled);
-                      });
-                  }}
-                />
-              </Box>
-            }
-          />
+                          setDisableAnalytics(analyticsDisabled);
+                        });
+                    }}
+                  />
+                </Box>
+              }
+            />
+          )}
         </Stack>
       </Box>
     </HeaderLayout>
