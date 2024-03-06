@@ -108,98 +108,82 @@ async function hasAndroidPermission() {
 }
 
 const imageLongPressScript = `
-  // used to call "setLongPressOnImg" function again when the page changes
-  (() => {
-    var oldHref = document.location.href;
-    var bodyList = document.querySelector("body")
-    var observer = new MutationObserver(function(mutations) {
-        if (oldHref != document.location.href) {
-            oldHref = document.location.href;
-            setTimeout(() => setLongPressOnImg(), 500);
-        }
-    });
-    
-    var config = {
-        childList: true,
-        subtree: true
-    };
-    
-    observer.observe(bodyList, config);
-  })()
+  let longPress = false;
+  let pressTimer = null;
+  let longTarget = null;
+  const longPressDuration = 1000;
   
-  // long press on image to download
-  function setLongPressOnImg() {
-    var longPressDuration = 1000;
-    var imgItems = document.getElementsByTagName("img");
-   
-    for (var i = 0, j = imgItems.length; i < j; i++) {
-      var node = imgItems[i];
-      var longPress = false;
-      var pressTimer = null;
-      var longTarget = null;
-     
-      var cancel = function (e) {
-        if (pressTimer !== null) {
-          clearTimeout(pressTimer);
-          pressTimer = null;
-        }
-        this.classList.remove("longPress");
-      };
-   
-      var click = function (e) {
-        if (pressTimer !== null) {
-          clearTimeout(pressTimer);
-          pressTimer = null;
-        }
-   
-        this.classList.remove("longPress");
-   
-        if (longPress) {
-          return false;
-        }
-      };
-     
-      var start = function (e) {
-        if (e.type === "click" && e.button !== 0) {
-          return;
-        }
-   
-        longPress = false;
-   
-        this.classList.add("longPress");
-   
-        if (pressTimer === null) {
-          pressTimer = setTimeout(function () {
-            var url = e.target.getAttribute("src");
-            if (
-              url &&
-              url != "" &&
-              url.startsWith("http")
-            ) {
-              if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-                window.ReactNativeWebView.postMessage(JSON.stringify({message: "download-image", origin: url}));
-              }
-            }
-   
-            longPress = true;
-          }, longPressDuration);
-        }
-   
-        return false;
-      };
-     
-      node.addEventListener("mousedown", start);
-      node.addEventListener("touchstart", start);
-      node.addEventListener("click", click);
-      node.addEventListener("mouseout", cancel);
-      node.addEventListener("touchend", cancel);
-      node.addEventListener("touchleave", cancel);
-      node.addEventListener("touchcancel", cancel);
+  var cancel = function (e) {
+    if (pressTimer !== null) {
+      clearTimeout(pressTimer);
+      pressTimer = null;
+    }
+    this.classList.remove("longPress");
+  };
+
+  var click = function (e) {
+    if (pressTimer !== null) {
+      clearTimeout(pressTimer);
+      pressTimer = null;
+    }
+
+    this.classList.remove("longPress");
+
+    if (longPress) {
+      return false;
     }
   };
   
-  // call the function after 1 second to make sure the page is fully loaded
-  setTimeout(() => setLongPressOnImg(), 1000);
+  var start = function (e) {
+    if (e.type === "click" && e.button !== 0) {
+      return;
+    }
+
+    longPress = false;
+
+    this.classList.add("longPress");
+
+    if (pressTimer === null) {
+      pressTimer = setTimeout(function () {
+        var url = e.target.getAttribute("src");
+        if (
+          url &&
+          url != "" &&
+          url.startsWith("http")
+        ) {
+          if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({message: "download-image", origin: url}));
+          }
+        }
+
+        longPress = true;
+      }, longPressDuration);
+    }
+
+    return false;
+  };
+
+  var el = document.querySelector("body");
+  
+  var observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if(mutation.target.tagName === "IMG") {
+        mutation.target.addEventListener("mousedown", start);
+        mutation.target.addEventListener("touchstart", start);
+        mutation.target.addEventListener("click", click);
+        mutation.target.addEventListener("mouseout", cancel);
+        mutation.target.addEventListener("touchend", cancel);
+        mutation.target.addEventListener("touchleave", cancel);
+        mutation.target.addEventListener("touchcancel", cancel);
+      }
+    });
+  });
+  
+  observer.observe(el, {
+    childList: true,
+    subtree: true,
+    attributes: true
+  });
 `;
 
 export const WebpageScreen: FunctionComponent = observer(() => {
