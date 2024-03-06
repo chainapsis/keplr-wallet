@@ -17,7 +17,6 @@ import { Styles, TextButton } from "../../components/button-text";
 import { Box } from "../../components/box";
 import { Modal } from "../../components/modal";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { useNavigate } from "react-router";
 import { Gutter } from "../../components/gutter";
 import { EmptyView } from "../../components/empty-view";
 import { Subtitle3 } from "../../components/typography";
@@ -28,6 +27,7 @@ import { ColorPalette } from "../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
 import styled, { useTheme } from "styled-components";
 import { DenomHelper } from "@keplr-wallet/common";
+import { TokenDetailModal } from "./token-detail";
 
 const zeroDec = new Dec(0);
 
@@ -57,7 +57,6 @@ export const AvailableTabView: FunctionComponent<{
 }> = observer(({ search, isNotReady, onClickGetStarted }) => {
   const { hugeQueriesStore, chainStore, accountStore, uiConfigStore } =
     useStore();
-  const navigate = useNavigate();
   const intl = useIntl();
   const theme = useTheme();
 
@@ -166,6 +165,10 @@ export const AvailableTabView: FunctionComponent<{
   const isShowNotFound =
     allBalancesSearchFiltered.length === 0 && trimSearch.length > 0;
 
+  const [tokenDetailModal, setTokenDetailModal] = useState<
+    { chainId: string; coinMinimalDenom: string } | undefined
+  >(undefined);
+
   return (
     <React.Fragment>
       {isNotReady ? (
@@ -236,9 +239,11 @@ export const AvailableTabView: FunctionComponent<{
                         viewToken={viewToken}
                         key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                         onClick={() =>
-                          navigate(
-                            `/send?chainId=${viewToken.chainInfo.chainId}&coinMinimalDenom=${viewToken.token.currency.coinMinimalDenom}`
-                          )
+                          setTokenDetailModal({
+                            chainId: viewToken.chainInfo.chainId,
+                            coinMinimalDenom:
+                              viewToken.token.currency.coinMinimalDenom,
+                          })
                         }
                         copyAddress={(() => {
                           // For only native tokens, show copy address button
@@ -341,6 +346,22 @@ export const AvailableTabView: FunctionComponent<{
         close={() => setIsFoundTokenModalOpen(false)}
       >
         <TokenFoundModal close={() => setIsFoundTokenModalOpen(false)} />
+      </Modal>
+
+      <Modal
+        isOpen={tokenDetailModal != null}
+        align="bottom"
+        close={() => setTokenDetailModal(undefined)}
+        maxHeight="100vh"
+        disableBackdrop={true}
+      >
+        {tokenDetailModal ? (
+          <TokenDetailModal
+            close={() => setTokenDetailModal(undefined)}
+            chainId={tokenDetailModal.chainId}
+            coinMinimalDenom={tokenDetailModal.coinMinimalDenom}
+          />
+        ) : null}
       </Modal>
     </React.Fragment>
   );

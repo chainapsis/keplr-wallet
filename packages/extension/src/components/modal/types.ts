@@ -11,4 +11,6 @@ export interface ModalProps {
   maxHeight?: string;
 
   forceNotUseSimplebar?: boolean;
+
+  disableBackdrop?: boolean;
 }

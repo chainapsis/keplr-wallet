@@ -19,11 +19,13 @@ const pxToRem = (px: number) => {
 };
 const bottomButtonPaddingRem = 0.75;
 
+export const HeaderHeight = "3.75rem";
+
 const Styles = {
   Container: styled.div``,
 
   HeaderContainer: styled.div`
-    height: 3.75rem;
+    height: ${HeaderHeight};
 
     background: ${(props) =>
       props.theme.mode === "light"
@@ -51,7 +53,7 @@ const Styles = {
   `,
 
   HeaderTitle: styled.div`
-    height: 3.75rem;
+    height: ${HeaderHeight};
     position: absolute;
 
     top: 0;
@@ -68,7 +70,7 @@ const Styles = {
         : ColorPalette["white"]};
   `,
   HeaderLeft: styled.div`
-    height: 3.75rem;
+    height: ${HeaderHeight};
     position: absolute;
 
     top: 0;
@@ -82,7 +84,7 @@ const Styles = {
   `,
 
   HeaderRight: styled.div`
-    height: 3.75rem;
+    height: ${HeaderHeight};
     position: absolute;
 
     top: 0;
@@ -112,7 +114,7 @@ const Styles = {
       return css``;
     }}
 
-    padding-top: 3.75rem;
+    padding-top: ${HeaderHeight};
     padding-bottom: ${({ bottomPadding }) => bottomPadding};
 
     ${({

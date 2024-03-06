@@ -23,6 +23,7 @@ export const Modal: FunctionComponent<ModalProps> = ({
   maxHeight,
   onCloseTransitionEnd,
   forceNotUseSimplebar,
+  disableBackdrop,
   children,
 }) => {
   const modalRoot = useModalRoot(isOpen);
@@ -87,6 +88,7 @@ export const Modal: FunctionComponent<ModalProps> = ({
           }
         }}
         forceNotUseSimplebar={forceNotUseSimplebar}
+        disableBackdrop={disableBackdrop}
       >
         {children}
       </ModalChild>
@@ -104,6 +106,7 @@ const ModalChild: FunctionComponent<{
 
   onCloseTransitionEnd: () => void;
   forceNotUseSimplebar?: boolean;
+  disableBackdrop?: boolean;
 }> = ({
   children,
   align,
@@ -112,6 +115,7 @@ const ModalChild: FunctionComponent<{
   close,
   onCloseTransitionEnd,
   forceNotUseSimplebar,
+  disableBackdrop,
 }) => {
   const transition = useSpringValue(0, {
     config: defaultSpringConfig,
@@ -180,14 +184,33 @@ const ModalChild: FunctionComponent<{
           };
         })(),
 
-        backgroundColor: transition.to((t) =>
-          Color("#000000")
-            .alpha(t * 0.55)
-            .string()
-        ),
+        // root의 pointer events가 "none"으로 설정된다.
+        // 하지만 backdrop 자체가 모든 화면을 채우기 때문에 여기서 pointer events를 로직에 따라 대체할 수 있다.
+        // disableBackdrop 옵션에 따라서 선택한다.
+        pointerEvents: disableBackdrop ? "none" : "auto",
+
+        backgroundColor: disableBackdrop
+          ? "rgba(0,0,0,0)"
+          : transition.to((t) =>
+              Color("#000000")
+                .alpha(t * 0.55)
+                .string()
+            ),
       }}
       onClick={(e) => {
         e.preventDefault();
+
+        if (disableBackdrop) {
+          if (
+            innerContainerRef.current &&
+            innerContainerRef.current !== e.target &&
+            innerContainerRef.current.contains(e.target as Node)
+          ) {
+            e.stopPropagation();
+          }
+          return;
+        }
+
         e.stopPropagation();
 
         if (
@@ -212,6 +235,10 @@ const ModalChild: FunctionComponent<{
           maxHeight: align !== "left" ? maxHeight || "85vh" : undefined,
 
           overflow: "auto",
+
+          // root의 pointer events가 "none"으로 설정된다.
+          // 하지만 당연히 컨텐츠 자체는 pointer events를 받아야 하므로 여기서 "auto"로 설정한다.
+          pointerEvents: "auto",
 
           position: "absolute",
           left: 0,
