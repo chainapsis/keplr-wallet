@@ -4,8 +4,8 @@
 
     <item>
         <bitmap
-            width="160dp"
-            height="160dp"
+            android:width="160dp"
+            android:height="160dp"
             android:gravity="center"
             android:src="@drawable/splash_icon"
         />
