@@ -8,6 +8,7 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnable
 import com.facebook.react.defaults.DefaultReactActivityDelegate
 
 import android.os.Bundle;
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 class MainActivity : ReactActivity() {
 
@@ -26,6 +27,7 @@ class MainActivity : ReactActivity() {
 
   @Override
   override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(null);
+    installSplashScreen()
+    super.onCreate(null)
   }
 }
