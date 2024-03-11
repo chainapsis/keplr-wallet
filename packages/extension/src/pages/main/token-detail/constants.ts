@@ -6,3 +6,5 @@ export const Relations = [
   "redelegate",
   "custom/merged-claim-rewards",
 ];
+
+export const PaginationLimit = 5;

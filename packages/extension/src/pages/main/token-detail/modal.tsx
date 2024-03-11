@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useRef } from "react";
 import { observer } from "mobx-react-lite";
 import styled from "styled-components";
 import { HeaderHeight } from "../../../layouts/header";
@@ -13,7 +13,8 @@ import { ResMsgsHistory } from "./types";
 import { Stack } from "../../../components/stack";
 import { MsgItemRender } from "./msg-items";
 import SimpleBar from "simplebar-react";
-import { Relations } from "./constants";
+import { PaginationLimit, Relations } from "./constants";
+import SimpleBarCore from "simplebar-core";
 
 const Styles = {
   Container: styled.div`
@@ -59,13 +60,44 @@ export const TokenDetailModal: FunctionComponent<{
         accountStore.getAccount(chainId).bech32Address
       }?relations=${Relations.join(",")}&denoms=${encodeURIComponent(
         currency.coinMinimalDenom
-      )}&vsCurrencies=${priceStore.defaultVsCurrency}`;
+      )}&vsCurrencies=${priceStore.defaultVsCurrency}&limit=${PaginationLimit}`;
+    },
+    (_, prev) => {
+      return {
+        cursor: prev.nextCursor,
+      };
+    },
+    (res) => {
+      if (!res.nextCursor) {
+        return true;
+      }
+      return false;
     }
   );
+
+  const simpleBarRef = useRef<SimpleBarCore>(null);
+  // scroll to refresh
+  const onScroll = () => {
+    const el = simpleBarRef.current?.getContentElement();
+    const scrollEl = simpleBarRef.current?.getScrollElement();
+    if (el && scrollEl) {
+      const rect = el.getBoundingClientRect();
+      const scrollRect = scrollEl.getBoundingClientRect();
+
+      const remainingBottomY =
+        rect.y + rect.height - scrollRect.y - scrollRect.height;
+
+      if (remainingBottomY < scrollRect.height / 10) {
+        msgHistory.next();
+      }
+    }
+  };
 
   return (
     <Styles.Container>
       <SimpleBar
+        ref={simpleBarRef}
+        onScroll={onScroll}
         style={{
           height: "100%",
           overflowY: "auto",
@@ -137,7 +169,35 @@ export const TokenDetailModal: FunctionComponent<{
         <Gutter size="1.375rem" />
         <Box padding="0.75rem">
           <Stack gutter="0.5rem">
-            {msgHistory.pages[0].response
+            {(() => {
+              if (
+                msgHistory.pages.length === 0 ||
+                !msgHistory.pages[0].response
+              ) {
+                return null;
+              }
+
+              const allMsgs: ResMsgsHistory["msgs"][0][] = [];
+              for (const page of msgHistory.pages) {
+                if (page.response) {
+                  for (const msg of page.response.msgs) {
+                    allMsgs.push(msg);
+                  }
+                }
+              }
+
+              return allMsgs.map((msg) => {
+                return (
+                  <MsgItemRender
+                    key={`${msg.msg.height}/${msg.msg.msgIndex}/${msg.msg.relation}`}
+                    msg={msg.msg}
+                    prices={msg.prices}
+                    targetDenom={coinMinimalDenom}
+                  />
+                );
+              });
+            })()}
+            {msgHistory.pages.length > 0 && msgHistory.pages[0].response
               ? msgHistory.pages[0].response.msgs.map((msg) => {
                   return (
                     <MsgItemRender
