@@ -44,6 +44,8 @@ export const MsgItemBase: FunctionComponent<{
       borderRadius="0.375rem"
       paddingX="1rem"
       paddingY="0.875rem"
+      minHeight="4rem"
+      alignY="center"
     >
       <XAxis>
         <div>logo</div>

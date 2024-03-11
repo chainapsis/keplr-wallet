@@ -168,6 +168,8 @@ export const AvailableTabView: FunctionComponent<{
   const [tokenDetailModal, setTokenDetailModal] = useState<
     { chainId: string; coinMinimalDenom: string } | undefined
   >(undefined);
+  // modal의 close transition을 유지하기 위해서는 tokenDetailModal != null 같은 방식으로만 open/close를 처리하면 안된다...
+  const [isTokenDetailModalOpen, setIsTokenDetailModalOpen] = useState(false);
 
   return (
     <React.Fragment>
@@ -238,13 +240,14 @@ export const AvailableTabView: FunctionComponent<{
                       <TokenItem
                         viewToken={viewToken}
                         key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-                        onClick={() =>
+                        onClick={() => {
                           setTokenDetailModal({
                             chainId: viewToken.chainInfo.chainId,
                             coinMinimalDenom:
                               viewToken.token.currency.coinMinimalDenom,
-                          })
-                        }
+                          });
+                          setIsTokenDetailModalOpen(true);
+                        }}
                         copyAddress={(() => {
                           // For only native tokens, show copy address button
                           if (
@@ -349,15 +352,17 @@ export const AvailableTabView: FunctionComponent<{
       </Modal>
 
       <Modal
-        isOpen={tokenDetailModal != null}
-        align="bottom"
-        close={() => setTokenDetailModal(undefined)}
-        maxHeight="100vh"
-        disableBackdrop={true}
+        isOpen={tokenDetailModal != null && isTokenDetailModalOpen}
+        align="right"
+        close={() => setIsTokenDetailModalOpen(false)}
+        onCloseTransitionEnd={() => {
+          setTokenDetailModal(undefined);
+        }}
+        forceNotOverflowAuto={true}
       >
         {tokenDetailModal ? (
           <TokenDetailModal
-            close={() => setTokenDetailModal(undefined)}
+            close={() => setIsTokenDetailModalOpen(false)}
             chainId={tokenDetailModal.chainId}
             coinMinimalDenom={tokenDetailModal.coinMinimalDenom}
           />

@@ -23,6 +23,7 @@ export const Modal: FunctionComponent<ModalProps> = ({
   maxHeight,
   onCloseTransitionEnd,
   forceNotUseSimplebar,
+  forceNotOverflowAuto,
   disableBackdrop,
   children,
 }) => {
@@ -65,6 +66,10 @@ export const Modal: FunctionComponent<ModalProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const transition = useSpringValue(isOpen ? 1 : 0, {
+    config: defaultSpringConfig,
+  });
+
   if (!rootElement) {
     return null;
   }
@@ -76,6 +81,7 @@ export const Modal: FunctionComponent<ModalProps> = ({
   return ReactDOM.createPortal(
     <div>
       <ModalChild
+        transition={transition}
         isOpen={isOpen}
         close={close}
         align={align}
@@ -88,6 +94,7 @@ export const Modal: FunctionComponent<ModalProps> = ({
           }
         }}
         forceNotUseSimplebar={forceNotUseSimplebar}
+        forceNotOverflowAuto={forceNotOverflowAuto}
         disableBackdrop={disableBackdrop}
       >
         {children}
@@ -98,29 +105,30 @@ export const Modal: FunctionComponent<ModalProps> = ({
 };
 
 const ModalChild: FunctionComponent<{
+  transition: ReturnType<typeof useSpringValue<number>>;
+
   isOpen: boolean;
   close: () => void;
-  align: "center" | "bottom" | "left";
+  align: "center" | "bottom" | "left" | "right";
 
   maxHeight?: string;
 
   onCloseTransitionEnd: () => void;
   forceNotUseSimplebar?: boolean;
+  forceNotOverflowAuto?: boolean;
   disableBackdrop?: boolean;
 }> = ({
   children,
+  transition,
   align,
   maxHeight,
   isOpen,
   close,
   onCloseTransitionEnd,
   forceNotUseSimplebar,
+  forceNotOverflowAuto,
   disableBackdrop,
 }) => {
-  const transition = useSpringValue(0, {
-    config: defaultSpringConfig,
-  });
-
   const onCloseTransitionEndRef = useRef(onCloseTransitionEnd);
   onCloseTransitionEndRef.current = onCloseTransitionEnd;
   useLayoutEffect(() => {
@@ -140,7 +148,7 @@ const ModalChild: FunctionComponent<{
     style: React.ComponentProps<typeof AnimatedSimpleBar>["style"],
     children: any
   ) => {
-    if (align === "left" || forceNotUseSimplebar) {
+    if (align === "left" || align === "right" || forceNotUseSimplebar) {
       // align left는 사실 sidebar로만 쓰이는데...
       // SimpleBar를 사용하면 height를 결정하기 힘든 문제가 있어서 대충 처리한다
       return (
@@ -172,7 +180,7 @@ const ModalChild: FunctionComponent<{
         right: 0,
 
         ...(() => {
-          if (align === "left") {
+          if (align === "left" || align === "right") {
             return;
           }
 
@@ -232,9 +240,11 @@ const ModalChild: FunctionComponent<{
           // 화면을 다 가릴수는 없게 만든다.
           // align이 left일때는 (사실은 sidebar에서만 left align이 사용됨)
           // 그냥 냅두고 알아서 처리하게 한다.
-          maxHeight: align !== "left" ? maxHeight || "85vh" : undefined,
+          maxHeight: !(align === "left" || align === "right")
+            ? maxHeight || "85vh"
+            : undefined,
 
-          overflow: "auto",
+          overflow: forceNotOverflowAuto ? undefined : "auto",
 
           // root의 pointer events가 "none"으로 설정된다.
           // 하지만 당연히 컨텐츠 자체는 pointer events를 받아야 하므로 여기서 "auto"로 설정한다.
@@ -252,6 +262,17 @@ const ModalChild: FunctionComponent<{
 
                 transform: transition.to(
                   (t) => `translateX(${(1 - t) * -100}%)`
+                ),
+              };
+            }
+
+            if (align === "right") {
+              return {
+                top: 0,
+                bottom: 0,
+
+                transform: transition.to(
+                  (t) => `translateX(${(1 - t) * 100}%)`
                 ),
               };
             }
