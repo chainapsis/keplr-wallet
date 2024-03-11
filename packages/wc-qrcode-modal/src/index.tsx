@@ -24,6 +24,8 @@ export class KeplrQRCodeModalV2 {
             "keplr_signDirect",
             "keplr_signArbitrary",
             "keplr_enable",
+            "keplr_experimentalSuggestChain",
+            "keplr_suggestToken",
           ],
           chains: [...chainIds.map((chainId) => `cosmos:${chainId}`)],
           events: ["accountsChanged", "chainChanged", "keplr_accountsChanged"],
