@@ -12,6 +12,8 @@ import { usePaginatedCursorQuery } from "./hook";
 import { ResMsgsHistory } from "./types";
 import { Stack } from "../../../components/stack";
 import { MsgItemRender } from "./msg-items";
+import SimpleBar from "simplebar-react";
+import { Relations } from "./constants";
 
 const Styles = {
   Container: styled.div`
@@ -55,7 +57,7 @@ export const TokenDetailModal: FunctionComponent<{
     () => {
       return `/history/msgs/${chainInfo.chainIdentifier}/${
         accountStore.getAccount(chainId).bech32Address
-      }?relations=send,ibc-receive&denoms=${encodeURIComponent(
+      }?relations=${Relations.join(",")}&denoms=${encodeURIComponent(
         currency.coinMinimalDenom
       )}&vsCurrencies=${priceStore.defaultVsCurrency}`;
     }
@@ -63,86 +65,93 @@ export const TokenDetailModal: FunctionComponent<{
 
   return (
     <Styles.Container>
-      <Box
-        height="3.75rem"
-        onClick={(e) => {
-          e.preventDefault();
-
-          close();
+      <SimpleBar
+        style={{
+          height: "100%",
+          overflowY: "auto",
         }}
-        alignY="center"
       >
-        <XAxis alignY="center">
-          <div style={{ flex: 1 }} />
-          <Body1 color={ColorPalette["gray-200"]}>
+        <Box
+          height="3.75rem"
+          onClick={(e) => {
+            e.preventDefault();
+
+            close();
+          }}
+          alignY="center"
+        >
+          <XAxis alignY="center">
+            <div style={{ flex: 1 }} />
+            <Body1 color={ColorPalette["gray-200"]}>
+              {(() => {
+                let denom = currency.coinDenom;
+                if ("originCurrency" in currency && currency.originCurrency) {
+                  denom = currency.originCurrency.coinDenom;
+                }
+
+                return `${denom} on ${chainInfo.chainName}`;
+              })()}
+            </Body1>
+            <div style={{ flex: 1 }} />
+          </XAxis>
+        </Box>
+
+        <Gutter size="0.25rem" />
+        <div>TODO: Address chip</div>
+
+        <Gutter size="1.375rem" />
+        <YAxis alignX="center">
+          <Styles.Balance
+            style={{
+              color: ColorPalette["gray-10"],
+            }}
+          >
             {(() => {
-              let denom = currency.coinDenom;
-              if ("originCurrency" in currency && currency.originCurrency) {
-                denom = currency.originCurrency.coinDenom;
+              if (!balance) {
+                return `0 ${currency.coinDenom}`;
               }
 
-              return `${denom} on ${chainInfo.chainName}`;
+              return balance.balance
+                .maxDecimals(6)
+                .inequalitySymbol(true)
+                .shrink(true)
+                .hideIBCMetadata(true)
+                .toString();
             })()}
-          </Body1>
-          <div style={{ flex: 1 }} />
-        </XAxis>
-      </Box>
-
-      <Gutter size="0.25rem" />
-      <div>TODO: Address chip</div>
-
-      <Gutter size="1.375rem" />
-      <YAxis alignX="center">
-        <Styles.Balance
-          style={{
-            color: ColorPalette["gray-10"],
-          }}
-        >
-          {(() => {
-            if (!balance) {
-              return `0 ${currency.coinDenom}`;
-            }
-
-            return balance.balance
-              .maxDecimals(6)
-              .inequalitySymbol(true)
-              .shrink(true)
-              .hideIBCMetadata(true)
-              .toString();
-          })()}
-        </Styles.Balance>
-        <Gutter size="0.25rem" />
-        <Subtitle3 color={ColorPalette["gray-300"]}>
-          {(() => {
-            if (!balance) {
+          </Styles.Balance>
+          <Gutter size="0.25rem" />
+          <Subtitle3 color={ColorPalette["gray-300"]}>
+            {(() => {
+              if (!balance) {
+                return "-";
+              }
+              const price = priceStore.calculatePrice(balance.balance);
+              if (price) {
+                return price.toString();
+              }
               return "-";
-            }
-            const price = priceStore.calculatePrice(balance.balance);
-            if (price) {
-              return price.toString();
-            }
-            return "-";
-          })()}
-        </Subtitle3>
-      </YAxis>
+            })()}
+          </Subtitle3>
+        </YAxis>
 
-      <Gutter size="1.375rem" />
-      <Box padding="0.75rem">
-        <Stack gutter="0.5rem">
-          {msgHistory.pages[0].response
-            ? msgHistory.pages[0].response.msgs.map((msg) => {
-                return (
-                  <MsgItemRender
-                    key={`${msg.msg.height}/${msg.msg.msgIndex}/${msg.msg.relation}`}
-                    msg={msg.msg}
-                    prices={msg.prices}
-                    targetDenom={coinMinimalDenom}
-                  />
-                );
-              })
-            : null}
-        </Stack>
-      </Box>
+        <Gutter size="1.375rem" />
+        <Box padding="0.75rem">
+          <Stack gutter="0.5rem">
+            {msgHistory.pages[0].response
+              ? msgHistory.pages[0].response.msgs.map((msg) => {
+                  return (
+                    <MsgItemRender
+                      key={`${msg.msg.height}/${msg.msg.msgIndex}/${msg.msg.relation}`}
+                      msg={msg.msg}
+                      prices={msg.prices}
+                      targetDenom={coinMinimalDenom}
+                    />
+                  );
+                })
+              : null}
+          </Stack>
+        </Box>
+      </SimpleBar>
     </Styles.Container>
   );
 });

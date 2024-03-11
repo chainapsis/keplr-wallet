@@ -6,7 +6,7 @@ import { useStore } from "../../../../stores";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { MsgItemBase } from "./base";
 
-export const MsgRelationSend: FunctionComponent<{
+export const MsgRelationReceive: FunctionComponent<{
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
@@ -30,9 +30,9 @@ export const MsgRelationSend: FunctionComponent<{
     return new CoinPretty(currency, amt.amount);
   }, [chainInfo, msg.msg, targetDenom]);
 
-  const toAddress = (() => {
+  const fromAddress = (() => {
     try {
-      return Bech32Address.shortenAddress((msg.msg as any)["to_address"], 22);
+      return Bech32Address.shortenAddress((msg.msg as any)["from_address"], 22);
     } catch (e) {
       console.log(e);
       return "Unknown";
@@ -42,8 +42,8 @@ export const MsgRelationSend: FunctionComponent<{
   return (
     <MsgItemBase
       chainId={msg.chainId}
-      title="Send"
-      paragraph={toAddress}
+      title="Receive"
+      paragraph={fromAddress}
       amount={sendAmountPretty}
       prices={prices || {}}
       targetDenom={targetDenom}

@@ -1,16 +1,17 @@
 export interface ResMsgsHistory {
   msgs: {
-    msg: ResMsg;
+    msg: MsgHistory;
     prices?: Record<string, Record<string, number | undefined> | undefined>;
   }[];
+  nextCursor: string;
 }
 
-export interface ResMsg {
+export interface MsgHistory {
   txHash: string;
   code: number;
 
   height: number;
-  time: number;
+  time: Date;
   chainId: string;
   chainIdentifier: string;
 
@@ -22,4 +23,5 @@ export interface ResMsg {
 
   search: string;
   denoms?: string[];
+  meta: Record<string, number | boolean | string | number[] | string[]>;
 }
