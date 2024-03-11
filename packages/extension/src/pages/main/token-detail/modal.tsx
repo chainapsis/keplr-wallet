@@ -197,18 +197,6 @@ export const TokenDetailModal: FunctionComponent<{
                 );
               });
             })()}
-            {msgHistory.pages.length > 0 && msgHistory.pages[0].response
-              ? msgHistory.pages[0].response.msgs.map((msg) => {
-                  return (
-                    <MsgItemRender
-                      key={`${msg.msg.height}/${msg.msg.msgIndex}/${msg.msg.relation}`}
-                      msg={msg.msg}
-                      prices={msg.prices}
-                      targetDenom={coinMinimalDenom}
-                    />
-                  );
-                })
-              : null}
           </Stack>
         </Box>
       </SimpleBar>
