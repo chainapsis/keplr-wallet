@@ -688,6 +688,7 @@
   "components.ledger-modal.permission-error": "Keplr doesn’t have permission to use bluetooth",
   "components.ledger-modal.connection-error": "Failed to connect: {error}",
   "components.ledger-modal.connecting": "Connecting...",
+  "components.add-token-modal.title": "Add Token",
   "button.confirm": "Confirm",
   "button.ok": "OK",
   "button.next": "Next",

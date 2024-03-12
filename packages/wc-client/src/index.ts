@@ -323,8 +323,29 @@ export class KeplrWalletConnectV2 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  experimentalSuggestChain(_chainInfo: ChainInfo): Promise<void> {
-    throw new Error("Not yet implemented");
+  async experimentalSuggestChain(_chainInfo: ChainInfo): Promise<void> {
+    if (
+      _chainInfo.features?.includes("stargate") ||
+      _chainInfo.features?.includes("no-legacy-stdTx")
+    ) {
+      console.warn(
+        "“stargate”, “no-legacy-stdTx” feature has been deprecated. The launchpad is no longer supported, thus works without the two features. We would keep the aforementioned two feature for a while, but the upcoming update would potentially cause errors. Remove the two feature."
+      );
+    }
+
+    const topic = this.getCurrentTopic();
+    const param = {
+      topic,
+      chainId: this.getNamespaceChainId(),
+      request: {
+        method: "keplr_experimentalSuggestChain",
+        params: {
+          chainInfo: _chainInfo,
+        },
+      },
+    };
+
+    await this.sendCustomRequest(param);
   }
 
   getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
@@ -607,12 +628,26 @@ export class KeplrWalletConnectV2 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  suggestToken(
+  async suggestToken(
     _chainId: string,
     _contractAddress: string,
     _viewingKey?: string
   ): Promise<void> {
-    throw new Error("Not yet implemented");
+    const topic = this.getCurrentTopic();
+    const param = {
+      topic,
+      chainId: this.getNamespaceChainId(),
+      request: {
+        method: "keplr_suggestToken",
+        params: {
+          chainId: _chainId,
+          contractAddress: _contractAddress,
+          viewingKey: _viewingKey,
+        },
+      },
+    };
+
+    await this.sendCustomRequest(param);
   }
 
   verifyArbitrary(

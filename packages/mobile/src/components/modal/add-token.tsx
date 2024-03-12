@@ -42,7 +42,9 @@ export const AddTokenModal = registerCardModal(
 
     return (
       <Box paddingX={12} paddingBottom={12}>
-        <BaseModalHeader title="Add Token" />
+        <BaseModalHeader
+          title={intl.formatMessage({id: 'components.add-token-modal.title'})}
+        />
 
         <Gutter size={16} />
 
