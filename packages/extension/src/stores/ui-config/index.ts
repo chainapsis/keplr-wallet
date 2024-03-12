@@ -54,7 +54,9 @@ export class UIConfigStore {
     useWebHIDLedger: false,
   };
 
+  @observable
   protected _isBeta: boolean = false;
+  @observable
   protected _platform: "not-init" | "chrome" | "firefox" = "not-init";
 
   protected _installedVersion: string = "";
