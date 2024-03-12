@@ -172,7 +172,7 @@ export class UIConfigStore {
         this._installedVersion,
         this._currentVersion
       ),
-      async () => {
+      (async () => {
         let isFirefox = false;
         if (typeof browser.runtime.getBrowserInfo === "function") {
           const browserInfo = await browser.runtime.getBrowserInfo();
@@ -191,7 +191,7 @@ export class UIConfigStore {
             this._platform = "chrome";
           });
         }
-      },
+      })(),
     ]);
 
     runInAction(() => {
