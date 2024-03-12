@@ -992,9 +992,7 @@ export class WalletConnectStore {
     await this.kvStore.set(`topic-to-from-deep-link:${ackTopic}`, fromDeepLink);
   }
 
-  protected async getTopicByRandomId(
-    randomId: string,
-  ): Promise<string | undefined> {
+  async getTopicByRandomId(randomId: string): Promise<string | undefined> {
     return await this.kvStore.get(`id-to-topic:${randomId}`);
   }
 
