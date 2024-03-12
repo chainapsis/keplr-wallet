@@ -25,7 +25,7 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
   @observable
   protected _sessionIdTimestamp: number = 0;
 
-  protected isFirefox: boolean = navigator.userAgent.includes("Firefox");
+  protected isFirefox: boolean = false;
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -39,11 +39,15 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
 
   protected async init() {
     // Disable on firefox
-    if (this.isFirefox) {
-      runInAction(() => {
-        this.isInitialized = true;
-      });
-      return;
+    if (typeof browser.runtime.getBrowserInfo === "function") {
+      const browserInfo = await browser.runtime.getBrowserInfo();
+      if (browserInfo.name === "Firefox") {
+        this.isFirefox = true;
+        runInAction(() => {
+          this.isInitialized = true;
+        });
+        return;
+      }
     }
 
     const userId = await this.kvStore.get<string>("user_id");
@@ -176,6 +180,11 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
     }
 
     this.ensureInit().then(() => {
+      // Disable on firefox
+      if (this.isFirefox) {
+        return;
+      }
+
       simpleFetch(
         `https://www.google-analytics.com`,
         `/mp/collect?measurement_id=${this.measurementId}&api_secret=${this.apiKey}`,

@@ -11,8 +11,12 @@ import { Toggle } from "../../../components/toggle";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { SetDisableAnalyticsMsg } from "@keplr-wallet/background";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../stores";
 
-export const SettingSecurityPage: FunctionComponent = () => {
+export const SettingSecurityPage: FunctionComponent = observer(() => {
+  const { uiConfigStore } = useStore();
+
   const navigate = useNavigate();
   const intl = useIntl();
 
@@ -54,7 +58,7 @@ export const SettingSecurityPage: FunctionComponent = () => {
             onClick={() => navigate("/setting/security/change-password")}
           />
 
-          {navigator.userAgent.includes("Firefox") ? null : (
+          {uiConfigStore.platform === "firefox" ? null : (
             <PageButton
               title={intl.formatMessage({
                 id: "page.setting.security.analytics-title",
@@ -93,4 +97,4 @@ export const SettingSecurityPage: FunctionComponent = () => {
       </Box>
     </HeaderLayout>
   );
-};
+});
