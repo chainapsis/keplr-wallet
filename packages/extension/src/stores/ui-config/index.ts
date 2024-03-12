@@ -54,8 +54,8 @@ export class UIConfigStore {
     useWebHIDLedger: false,
   };
 
-  protected _isBeta: boolean;
-  protected _platform: "chrome" | "firefox" = "chrome";
+  protected _isBeta: boolean = false;
+  protected _platform: "not-init" | "chrome" | "firefox" = "not-init";
 
   protected _installedVersion: string = "";
   protected _currentVersion: string = "";
@@ -102,11 +102,6 @@ export class UIConfigStore {
       kvStores.kvStore,
       chainStore
     );
-
-    this._isBeta = navigator.userAgent.includes("Firefox");
-    this._platform = navigator.userAgent.includes("Firefox")
-      ? "firefox"
-      : "chrome";
 
     this._icnsInfo = _icnsInfo;
 
@@ -177,6 +172,26 @@ export class UIConfigStore {
         this._installedVersion,
         this._currentVersion
       ),
+      async () => {
+        let isFirefox = false;
+        if (typeof browser.runtime.getBrowserInfo === "function") {
+          const browserInfo = await browser.runtime.getBrowserInfo();
+          if (browserInfo.name === "Firefox") {
+            isFirefox = true;
+          }
+        }
+        if (isFirefox) {
+          runInAction(() => {
+            this._isBeta = true;
+            this._platform = "firefox";
+          });
+        } else {
+          runInAction(() => {
+            this._isBeta = false;
+            this._platform = "chrome";
+          });
+        }
+      },
     ]);
 
     runInAction(() => {
@@ -192,7 +207,7 @@ export class UIConfigStore {
     return this._isBeta;
   }
 
-  get platform(): "chrome" | "firefox" {
+  get platform(): "not-init" | "chrome" | "firefox" {
     return this._platform;
   }
 
