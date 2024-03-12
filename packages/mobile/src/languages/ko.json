@@ -674,6 +674,7 @@
   "components.ledger-modal.permission-error": "케플러 앱에서 블루투스 사용권한이 필요합니다.",
   "components.ledger-modal.connection-error": "연결 실패: {error}",
   "components.ledger-modal.connecting": "연결 중...",
+  "components.add-token-modal.title": "토큰 추가",
   "button.confirm": "확인",
   "button.ok": "확인",
   "button.next": "다음",
