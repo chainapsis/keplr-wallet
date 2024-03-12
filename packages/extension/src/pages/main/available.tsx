@@ -28,6 +28,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import styled, { useTheme } from "styled-components";
 import { DenomHelper } from "@keplr-wallet/common";
 import { TokenDetailModal } from "./token-detail";
+import { useSearchParams } from "react-router-dom";
 
 const zeroDec = new Dec(0);
 
@@ -165,11 +166,23 @@ export const AvailableTabView: FunctionComponent<{
   const isShowNotFound =
     allBalancesSearchFiltered.length === 0 && trimSearch.length > 0;
 
-  const [tokenDetailModal, setTokenDetailModal] = useState<
-    { chainId: string; coinMinimalDenom: string } | undefined
-  >(undefined);
-  // modal의 close transition을 유지하기 위해서는 tokenDetailModal != null 같은 방식으로만 open/close를 처리하면 안된다...
-  const [isTokenDetailModalOpen, setIsTokenDetailModalOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const tokenDetailInfo: {
+    chainId: string | null;
+    coinMinimalDenom: string | null;
+    isTokenDetailModalOpen: boolean | null;
+  } = (() => {
+    return {
+      chainId: searchParams.get("tokenChainId"),
+      coinMinimalDenom: searchParams.get("tokenCoinMinimalDenom"),
+      // modal의 close transition을 유지하기 위해서는 위의 두 field가 존재하는지 만으로 판단하면 안된다...
+      // close transition이 끝난후에 위의 두 값을 지워줘야한다.
+      // close가 될 것인지는 밑의 값으로 판단한다.
+      isTokenDetailModalOpen:
+        searchParams.get("isTokenDetailModalOpen") === "true",
+    };
+  })();
 
   return (
     <React.Fragment>
@@ -241,12 +254,19 @@ export const AvailableTabView: FunctionComponent<{
                         viewToken={viewToken}
                         key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                         onClick={() => {
-                          setTokenDetailModal({
-                            chainId: viewToken.chainInfo.chainId,
-                            coinMinimalDenom:
-                              viewToken.token.currency.coinMinimalDenom,
+                          setSearchParams((prev) => {
+                            prev.set(
+                              "tokenChainId",
+                              viewToken.chainInfo.chainId
+                            );
+                            prev.set(
+                              "tokenCoinMinimalDenom",
+                              viewToken.token.currency.coinMinimalDenom
+                            );
+                            prev.set("isTokenDetailModalOpen", "true");
+
+                            return prev;
                           });
-                          setIsTokenDetailModalOpen(true);
                         }}
                         copyAddress={(() => {
                           // For only native tokens, show copy address button
@@ -352,19 +372,45 @@ export const AvailableTabView: FunctionComponent<{
       </Modal>
 
       <Modal
-        isOpen={tokenDetailModal != null && isTokenDetailModalOpen}
+        isOpen={
+          tokenDetailInfo.chainId != null &&
+          tokenDetailInfo.chainId.length > 0 &&
+          tokenDetailInfo.coinMinimalDenom != null &&
+          tokenDetailInfo.coinMinimalDenom.length > 0 &&
+          tokenDetailInfo.isTokenDetailModalOpen === true
+        }
         align="right"
-        close={() => setIsTokenDetailModalOpen(false)}
+        close={() => {
+          setSearchParams((prev) => {
+            prev.delete("isTokenDetailModalOpen");
+
+            return prev;
+          });
+        }}
         onCloseTransitionEnd={() => {
-          setTokenDetailModal(undefined);
+          setSearchParams((prev) => {
+            prev.delete("tokenChainId");
+            prev.delete("tokenCoinMinimalDenom");
+
+            return prev;
+          });
         }}
         forceNotOverflowAuto={true}
       >
-        {tokenDetailModal ? (
+        {tokenDetailInfo.chainId != null &&
+        tokenDetailInfo.chainId.length > 0 &&
+        tokenDetailInfo.coinMinimalDenom != null &&
+        tokenDetailInfo.coinMinimalDenom.length > 0 ? (
           <TokenDetailModal
-            close={() => setIsTokenDetailModalOpen(false)}
-            chainId={tokenDetailModal.chainId}
-            coinMinimalDenom={tokenDetailModal.coinMinimalDenom}
+            close={() => {
+              setSearchParams((prev) => {
+                prev.delete("isTokenDetailModalOpen");
+
+                return prev;
+              });
+            }}
+            chainId={tokenDetailInfo.chainId}
+            coinMinimalDenom={tokenDetailInfo.coinMinimalDenom}
           />
         ) : null}
       </Modal>

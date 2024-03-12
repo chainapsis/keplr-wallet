@@ -11,7 +11,7 @@ export interface MsgHistory {
   code: number;
 
   height: number;
-  time: Date;
+  time: string;
   chainId: string;
   chainIdentifier: string;
 

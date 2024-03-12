@@ -9,12 +9,13 @@ import { ColorPalette } from "../../../styles";
 import { Gutter } from "../../../components/gutter";
 import { usePaginatedCursorQuery } from "./hook";
 import { ResMsgsHistory } from "./types";
-import { Stack } from "../../../components/stack";
-import { MsgItemRender } from "./msg-items";
 import SimpleBar from "simplebar-react";
 import { PaginationLimit, Relations } from "./constants";
 import SimpleBarCore from "simplebar-core";
 import { HeaderHeight } from "../../../layouts/header";
+import { useNavigate } from "react-router";
+import { TokenInfos } from "./token-info";
+import { RenderMessages } from "./messages";
 
 const Styles = {
   Container: styled.div`
@@ -57,6 +58,8 @@ export const TokenDetailModal: FunctionComponent<{
       accountStore.getAccount(chainId).bech32Address
     )
     .getBalance(currency);
+
+  const navigate = useNavigate();
 
   const buttons: {
     icon: React.ReactElement;
@@ -156,7 +159,9 @@ export const TokenDetailModal: FunctionComponent<{
       ),
       text: "Send",
       onClick: () => {
-        // TODO: noop yet
+        navigate(
+          `/send?chainId=${chainId}&coinMinimalDenom=${coinMinimalDenom}`
+        );
       },
     },
   ];
@@ -338,63 +343,72 @@ export const TokenDetailModal: FunctionComponent<{
             </XAxis>
           </YAxis>
 
-          <Gutter size="1.25rem" />
-          <Box paddingX="0.75rem">
-            <Box
-              backgroundColor={ColorPalette["gray-550"]}
-              borderRadius="0.375rem"
-              padding="1rem"
-            >
-              <XAxis alignY="center">
-                <Box
-                  width="2rem"
-                  height="2rem"
-                  borderRadius="999999px"
-                  backgroundColor={ColorPalette["white"]}
-                />
-                <Gutter size="0.75rem" />
-                <YAxis>
-                  <Body3 color={ColorPalette["gray-200"]}>Staked Balance</Body3>
-                  <Gutter size="0.25rem" />
-                  <Subtitle3 color={ColorPalette["white"]}>TODO</Subtitle3>
-                </YAxis>
-              </XAxis>
-            </Box>
-          </Box>
-
-          <Gutter size="1.375rem" />
-          <Box padding="0.75rem">
-            <Stack gutter="0.5rem">
-              {(() => {
-                if (
-                  msgHistory.pages.length === 0 ||
-                  !msgHistory.pages[0].response
-                ) {
-                  return null;
-                }
-
-                const allMsgs: ResMsgsHistory["msgs"][0][] = [];
-                for (const page of msgHistory.pages) {
-                  if (page.response) {
-                    for (const msg of page.response.msgs) {
-                      allMsgs.push(msg);
-                    }
-                  }
-                }
-
-                return allMsgs.map((msg) => {
-                  return (
-                    <MsgItemRender
-                      key={`${msg.msg.height}/${msg.msg.msgIndex}/${msg.msg.relation}`}
-                      msg={msg.msg}
-                      prices={msg.prices}
-                      targetDenom={coinMinimalDenom}
-                    />
+          {chainInfo.stakeCurrency &&
+          chainInfo.stakeCurrency.coinMinimalDenom === currency.coinMinimalDenom
+            ? (() => {
+                const queryDelegation = queriesStore
+                  .get(chainId)
+                  .cosmos.queryDelegations.getQueryBech32Address(
+                    accountStore.getAccount(chainId).bech32Address
                   );
-                });
-              })()}
-            </Stack>
-          </Box>
+
+                return (
+                  <React.Fragment>
+                    <Gutter size="1.25rem" />
+                    <Box paddingX="0.75rem">
+                      <Box
+                        backgroundColor={ColorPalette["gray-550"]}
+                        borderRadius="0.375rem"
+                        padding="1rem"
+                      >
+                        <XAxis alignY="center">
+                          <Box
+                            width="2rem"
+                            height="2rem"
+                            borderRadius="999999px"
+                            backgroundColor={ColorPalette["white"]}
+                          />
+                          <Gutter size="0.75rem" />
+                          <YAxis>
+                            <Body3 color={ColorPalette["gray-200"]}>
+                              Staked Balance
+                            </Body3>
+                            <Gutter size="0.25rem" />
+                            <Subtitle3 color={ColorPalette["white"]}>
+                              {queryDelegation.total
+                                ? queryDelegation.total
+                                    .maxDecimals(6)
+                                    .shrink(true)
+                                    .inequalitySymbol(true)
+                                    .trim(true)
+                                    .toString()
+                                : "-"}
+                            </Subtitle3>
+                          </YAxis>
+                        </XAxis>
+                      </Box>
+                    </Box>
+                  </React.Fragment>
+                );
+              })()
+            : null}
+
+          <Gutter size="1.25rem" />
+          <TokenInfos
+            title="Token Info"
+            infos={[
+              {
+                title: "TODO",
+                text: "$TODO",
+              },
+            ]}
+          />
+
+          <Gutter size="1.25rem" />
+          <RenderMessages
+            msgHistory={msgHistory}
+            targetDenom={coinMinimalDenom}
+          />
         </SimpleBar>
       </Styles.Body>
     </Styles.Container>

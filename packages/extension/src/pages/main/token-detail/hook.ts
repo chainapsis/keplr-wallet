@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 export const usePaginatedCursorQuery = <R>(
@@ -75,9 +75,11 @@ export const usePaginatedCursorQuery = <R>(
       });
   }, [isFetching, responses]);
 
-  return {
-    isFetching,
-    pages: !responses ? [] : responses.map((r) => ({ response: r })),
-    next,
-  };
+  return useMemo(() => {
+    return {
+      isFetching,
+      pages: !responses ? [] : responses.map((r) => ({ response: r })),
+      next,
+    };
+  }, [isFetching, next, responses]);
 };
