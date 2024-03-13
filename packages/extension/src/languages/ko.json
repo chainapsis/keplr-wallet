@@ -394,7 +394,10 @@
   "page.sign.adr36.warning-paragraph": "오류: SIGN_MODE_DIRECT는 렛저에서 서명할 수 없습니다. 이슈 해결을 위해 해당 웹 앱의 관리자에게 연락하시길 바랍니다.",
 
   "page.sign.ethereum.title": "이더리움 서명",
-  "page.sign.ethereum.requested-network": "요청한 네트워크",
+  "page.sign.ethereum.requested-network": "on {network}",
+  "page.sign.ethereum.tx.title": "트랜잭션 확인",
+  "page.sign.ethereum.tx.summary": "트랜잭션 요약",
+  "page.sign.ethereum.tx.send.paragraph": "<b>{fromAddress}</b>로부터 <b>{toAddress}</b>에게 <b>{amount}</b>를 보냅니다.",
 
   "page.sign.components.fee-summary.fee": "수수료",
 

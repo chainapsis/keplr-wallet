@@ -19,8 +19,6 @@ import {
   CosmwasmQueries,
   OsmosisQueries,
   getKeplrFromWindow,
-  IBCChannelStore,
-  IBCCurrencyRegistrar,
   QueriesStore,
   SecretAccount,
   SecretQueries,
@@ -28,6 +26,10 @@ import {
   AgoricQueries,
   LSMCurrencyRegistrar,
 } from "@keplr-wallet/stores";
+import {
+  IBCChannelStore,
+  IBCCurrencyRegistrar,
+} from "@keplr-wallet/stores-ibc";
 import {
   ChainSuggestStore,
   InteractionStore,
@@ -44,6 +46,10 @@ import {
   GravityBridgeCurrencyRegistrar,
   AxelarEVMBridgeCurrencyRegistrar,
 } from "@keplr-wallet/stores-etc";
+import {
+  EthereumQueries,
+  EthereumAccountStore,
+} from "@keplr-wallet/stores-eth";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
   ContentScriptEnv,
@@ -87,13 +93,15 @@ export class RootStore {
       OsmosisQueries,
       KeplrETCQueries,
       ICNSQueries,
-      TokenContractsQueries
+      TokenContractsQueries,
+      EthereumQueries
     ]
   >;
   public readonly skipQueriesStore: SkipQueries;
   public readonly accountStore: AccountStore<
     [CosmosAccount, CosmwasmAccount, SecretAccount]
   >;
+  public readonly ethereumAccountStore: EthereumAccountStore;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly hugeQueriesStore: HugeQueriesStore;
 
@@ -178,7 +186,8 @@ export class RootStore {
       ICNSQueries.use(),
       TokenContractsQueries.use({
         tokenContractListURL: TokenContractListURL,
-      })
+      }),
+      EthereumQueries.use()
     );
     this.skipQueriesStore = new SkipQueries(
       this.queriesStore.sharedContext,
@@ -313,6 +322,11 @@ export class RootStore {
           }
         },
       })
+    );
+
+    this.ethereumAccountStore = new EthereumAccountStore(
+      this.chainStore,
+      getKeplrFromWindow
     );
 
     this.priceStore = new CoinGeckoPriceStore(

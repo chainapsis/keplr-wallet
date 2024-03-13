@@ -1592,6 +1592,10 @@ export const EmbedChainInfos: ChainInfo[] = [
   {
     rpc: "https://rpc-evmos.keplr.app",
     rest: "https://lcd-evmos.keplr.app",
+    evm: {
+      chainId: 9001,
+      rpc: "https://evm-evmos.keplr.app",
+    },
     chainId: "evmos_9001-2",
     chainName: "Evmos",
     stakeCurrency: {
@@ -2451,8 +2455,5 @@ export const PrivilegedOrigins: string[] = [
 export const CommunityChainInfoRepo = {
   organizationName: "chainapsis",
   repoName: "keplr-chain-registry",
-  branchName: "main",
-  alternativeURL: process.env["KEPLR_EXT_CHAIN_REGISTRY_URL"]
-    ? process.env["KEPLR_EXT_CHAIN_REGISTRY_URL"]
-    : undefined,
+  branchName: "test-evm",
 };

@@ -56,13 +56,22 @@ export interface IBCCurrency extends Currency {
 }
 
 /**
+ * The currency that is supported on the EVM.
+ */
+export interface ERC20Currency extends Currency {
+  readonly type: "erc20";
+  readonly contractAddress: string;
+}
+
+/**
  * Any type of currency that Kepler applications can support.
  */
 export type AppCurrency =
   | Currency
   | CW20Currency
   | Secret20Currency
-  | IBCCurrency;
+  | IBCCurrency
+  | ERC20Currency;
 
 export interface FiatCurrency {
   readonly currency: string;
