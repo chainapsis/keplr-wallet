@@ -46,7 +46,7 @@ const ETH_FEE_SETTINGS_BY_FEE_TYPE: Record<
     minSuggestedMaxPriorityFeePerGas: new Dec(2_000_000_000),
   },
 };
-const ETH_FEE_HISTRORY_BLOCK_COUNT = 5;
+const ETH_FEE_HISTRORY_BLOCK_COUNT = 3;
 const ETH_FEE_HISTORY_NEWEST_BLOCK = "latest";
 const ETH_FEE_HISTORY_REWARD_PERCENTILES = [
   ETH_FEE_SETTINGS_BY_FEE_TYPE.low.percentile,
