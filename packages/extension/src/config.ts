@@ -2455,5 +2455,8 @@ export const PrivilegedOrigins: string[] = [
 export const CommunityChainInfoRepo = {
   organizationName: "chainapsis",
   repoName: "keplr-chain-registry",
-  branchName: "test-evm",
+  branchName: "main",
+  alternativeURL: process.env["KEPLR_EXT_CHAIN_REGISTRY_URL"]
+    ? process.env["KEPLR_EXT_CHAIN_REGISTRY_URL"]
+    : undefined,
 };
