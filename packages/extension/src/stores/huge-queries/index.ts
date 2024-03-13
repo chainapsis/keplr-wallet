@@ -49,16 +49,24 @@ export class HugeQueriesStore {
       if (account.bech32Address === "") {
         continue;
       }
-      const queries = this.queriesStore.get(chainInfo.chainId);
-      const queryBalance = queries.queryBalances.getQueryBech32Address(
-        account.bech32Address
-      );
 
       const currencies = [...chainInfo.currencies];
       if (chainInfo.stakeCurrency) {
         currencies.push(chainInfo.stakeCurrency);
       }
       for (const currency of currencies) {
+        const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+        const queries = this.queriesStore.get(chainInfo.chainId);
+        const queryBalance =
+          this.chainStore.isEvmChain(chainInfo.chainId) &&
+          denomHelper.type === "erc20"
+            ? queries.queryBalances.getQueryEthereumHexAddress(
+                account.ethereumHexAddress
+              )
+            : queries.queryBalances.getQueryBech32Address(
+                account.bech32Address
+              );
+
         const key = `${chainInfo.chainIdentifier}/${currency.coinMinimalDenom}`;
         if (!map.has(key)) {
           if (

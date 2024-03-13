@@ -27,6 +27,7 @@ import { TextInput, TextInputProps } from "../../../components/input";
 import { Mnemonic } from "@keplr-wallet/crypto";
 import { Buffer } from "buffer/";
 import { FormattedMessage, useIntl } from "react-intl";
+import { isMnemonicWord } from "@keplr-wallet/common";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
 
@@ -138,7 +139,7 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
     const words = value
       .trim()
       .split(" ")
-      .map((word) => word.trim())
+      .map((word) => word.toLowerCase().trim())
       .filter((word) => word.length > 0);
 
     if (words.length === 1) {
@@ -233,6 +234,35 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
               return;
             }
 
+            const notMnemonicWords: {
+              index: number;
+              word: string;
+            }[] = [];
+            for (let i = 0; i < words.length; i++) {
+              const word = words[i];
+              if (word) {
+                if (!isMnemonicWord(word)) {
+                  notMnemonicWords.push({
+                    index: i,
+                    word: word,
+                  });
+                }
+              }
+            }
+            if (notMnemonicWords.length > 0) {
+              alert(
+                intl.formatMessage(
+                  { id: "error.wrong-mnemonic-word" },
+                  {
+                    index: notMnemonicWords
+                      .map((w) => `#${w.index + 1}`)
+                      .join(", "),
+                  }
+                )
+              );
+              return;
+            }
+
             const text = words.map((w) => w.trim()).join(" ");
             if (!Mnemonic.validateMnemonic(text)) {
               alert(intl.formatMessage({ id: "error.invalid-mnemonic" }));
@@ -290,7 +320,7 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
                     e.preventDefault();
 
                     const next = new Array(24).fill("");
-                    next[0] = e.target.value;
+                    next[0] = e.target.value.trim();
                     setFullWords(next);
                   }}
                   onPaste={(e) => {
@@ -313,7 +343,7 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
                           e.preventDefault();
 
                           const next = fullWords.slice();
-                          next[i] = e.target.value;
+                          next[i] = e.target.value.trim().toLowerCase();
                           setFullWords(next);
                         }}
                         onPaste={(e) => {

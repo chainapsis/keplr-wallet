@@ -1,8 +1,11 @@
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
+  AddERC20TokenMsg,
   AddTokenMsg,
+  GetAllERC20TokenInfosMsg,
   GetAllTokenInfosMsg,
   RemoveTokenMsg,
+  RemoveERC20TokenMsg,
   TokenInfo,
 } from "@keplr-wallet/background";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
@@ -59,11 +62,21 @@ export class TokensStore {
   }
 
   protected async refreshTokens() {
-    const msg = new GetAllTokenInfosMsg();
-    const tokens = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    const allCW20TokenInfosMsg = new GetAllTokenInfosMsg();
+    const allERC20TokenInfosMsg = new GetAllERC20TokenInfosMsg();
+    const cw20Tokens = await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      allCW20TokenInfosMsg
+    );
+    const erc20Tokens = await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      allERC20TokenInfosMsg
+    );
     runInAction(() => {
       const map = new Map<string, TokenInfo[]>();
-      for (const [key, value] of Object.entries(tokens)) {
+      for (const [key, value] of Object.entries(cw20Tokens).concat(
+        Object.entries(erc20Tokens)
+      )) {
         if (value) {
           map.set(key, value);
         }
@@ -178,6 +191,7 @@ export class TokensStore {
       throw new Error("Account not initialized");
     }
     const chainInfo = this.chainStore.getChain(chainId);
+    const isEvmChain = chainInfo.evm !== undefined;
     const associatedAccountAddress = Buffer.from(
       Bech32Address.fromBech32(
         bech32Address,
@@ -185,16 +199,19 @@ export class TokensStore {
       ).address
     ).toString("hex");
 
-    const msg = new AddTokenMsg(chainId, associatedAccountAddress, currency);
+    const msg = isEvmChain
+      ? new AddERC20TokenMsg(chainId, currency)
+      : new AddTokenMsg(chainId, associatedAccountAddress, currency);
     const res = await this.requester.sendMessage(BACKGROUND_PORT, msg);
     runInAction(() => {
-      const map = new Map<string, TokenInfo[]>();
-      for (const [key, value] of Object.entries(res)) {
-        if (value) {
-          map.set(key, value);
-        }
+      const newTokenMap = new Map(this.tokenMap);
+      const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId);
+      const newTokens = res[chainIdentifier.identifier];
+      if (newTokens) {
+        newTokenMap.set(chainIdentifier.identifier, newTokens);
       }
-      this.tokenMap = map;
+
+      this.tokenMap = newTokenMap;
     });
   }
 
@@ -207,36 +224,51 @@ export class TokensStore {
       throw new Error("Token info is not for contract");
     })();
 
-    const msg = new RemoveTokenMsg(
-      chainId,
-      tokenInfo.associatedAccountAddress ?? "",
-      contractAddress
-    );
+    const chainInfo = this.chainStore.getChain(chainId);
+    const isEvmChain = chainInfo.evm !== undefined;
+
+    const msg = isEvmChain
+      ? new RemoveERC20TokenMsg(chainId, contractAddress)
+      : new RemoveTokenMsg(
+          chainId,
+          tokenInfo.associatedAccountAddress ?? "",
+          contractAddress
+        );
     const res = await this.requester.sendMessage(BACKGROUND_PORT, msg);
     runInAction(() => {
       // Remove 이후에는 지워진 토큰에 대한 싱크를 맞추기 위해서 clearTokensFromChainInfos를 호출한다.
       // 그냥 다 지우고 다시 다 설정하는 방식임.
       this.clearTokensFromChainInfos();
 
-      const map = new Map<string, TokenInfo[]>();
-      for (const [key, value] of Object.entries(res)) {
-        if (value) {
-          map.set(key, value);
-        }
+      const newTokenMap = new Map(this.tokenMap);
+      const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId);
+      const newTokens = res[chainIdentifier.identifier];
+      if (newTokens) {
+        newTokenMap.set(chainIdentifier.identifier, newTokens);
       }
-      this.tokenMap = map;
+
+      this.tokenMap = newTokenMap;
     });
   }
 
   get waitingSuggestedToken() {
-    const datas = this.interactionStore.getAllData<{
+    const cw20Datas = this.interactionStore.getAllData<{
       chainId: string;
       contractAddress: string;
       viewingKey?: string;
     }>("suggest-token-cw20");
 
-    if (datas.length > 0) {
-      return datas[0];
+    if (cw20Datas.length > 0) {
+      return cw20Datas[0];
+    }
+
+    const erc20Datas = this.interactionStore.getAllData<{
+      chainId: string;
+      contractAddress: string;
+    }>("suggest-token-erc20");
+
+    if (erc20Datas.length > 0) {
+      return erc20Datas[0];
     }
   }
 
@@ -271,5 +303,6 @@ export class TokensStore {
 
   async rejectAllSuggestedTokens() {
     await this.interactionStore.rejectAll("suggest-token-cw20");
+    await this.interactionStore.rejectAll("suggest-token-erc20");
   }
 }

@@ -1592,6 +1592,10 @@ export const EmbedChainInfos: ChainInfo[] = [
   {
     rpc: "https://rpc-evmos.keplr.app",
     rest: "https://lcd-evmos.keplr.app",
+    evm: {
+      chainId: 9001,
+      rpc: "https://evm-evmos.keplr.app",
+    },
     chainId: "evmos_9001-2",
     chainName: "Evmos",
     stakeCurrency: {

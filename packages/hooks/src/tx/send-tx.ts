@@ -16,7 +16,7 @@ export const useSendTxConfig = (
   sender: string,
   initialGas: number,
   options: {
-    allowHexAddressOnEthermint?: boolean;
+    allowHexAddressToBech32Address?: boolean;
     icns?: {
       chainId: string;
       resolverContractAddress: string;

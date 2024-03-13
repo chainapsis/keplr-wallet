@@ -28,7 +28,7 @@ export const useIBCTransferConfig = (
   sender: string,
   initialGas: number,
   options: {
-    allowHexAddressOnEthermint?: boolean;
+    allowHexAddressToBech32Address?: boolean;
     icns?: {
       chainId: string;
       resolverContractAddress: string;
@@ -88,7 +88,8 @@ export const useSendMixedIBCTransferConfig = (
   initialGas: number,
   isIBCTransfer: boolean,
   options: {
-    allowHexAddressOnEthermint?: boolean;
+    allowHexAddressToBech32Address?: boolean;
+    allowHexAddressOnly?: boolean;
     icns?: {
       chainId: string;
       resolverContractAddress: string;

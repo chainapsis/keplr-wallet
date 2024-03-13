@@ -40,7 +40,7 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
 
   const [connectTo, setConnectTo] = useState<string>("Cosmos");
 
-  const bip44PathState = useBIP44PathState();
+  const bip44PathState = useBIP44PathState(type === "ledger");
   const [isBIP44CardOpen, setIsBIP44CardOpen] = useState(false);
 
   return (

@@ -1,0 +1,27 @@
+{
+  "name": "@keplr-wallet/stores-ibc",
+  "version": "0.12.74-rc.2",
+  "main": "build/index.js",
+  "author": "chainapsis",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rm -rf node_modules; rm -rf build",
+    "build": "tsc",
+    "dev": "tsc -w",
+    "test": "jest --passWithNoTests",
+    "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
+    "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
+  },
+  "dependencies": {
+    "@keplr-wallet/common": "0.12.74-rc.2",
+    "@keplr-wallet/cosmos": "0.12.74-rc.2",
+    "@keplr-wallet/stores": "0.12.74-rc.2",
+    "@keplr-wallet/stores-eth": "0.12.74-rc.2",
+    "@keplr-wallet/types": "0.12.74-rc.2",
+    "mobx": "^6.1.7",
+    "mobx-utils": "^6.0.3"
+  }
+}

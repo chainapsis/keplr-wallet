@@ -332,6 +332,10 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
     return this._embedded.chainSymbolImageUrl;
   }
 
+  get evm(): { chainId: number; rpc: string } | undefined {
+    return this._embedded.evm;
+  }
+
   hasFeature(feature: string): boolean {
     return !!(
       this._embedded.features && this._embedded.features.includes(feature)
@@ -435,5 +439,10 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
   @action
   registerCurrencyRegistrar(registrar: CurrencyRegistrar): void {
     this.currencyRegistrars.push(registrar);
+  }
+
+  isEvmChain(chainId: string): boolean {
+    const chainInfo = this.getChain(chainId);
+    return chainInfo.evm !== undefined;
   }
 }
