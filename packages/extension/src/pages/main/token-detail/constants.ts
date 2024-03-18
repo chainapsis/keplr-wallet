@@ -2,6 +2,7 @@ export const Relations = [
   "send",
   "receive",
   "ibc-send",
+  "ibc-send-refunded",
   "delegate",
   "undelegate",
   "redelegate",

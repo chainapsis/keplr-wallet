@@ -5,6 +5,7 @@ import { useStore } from "../../../../stores";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { MsgItemBase } from "./base";
 import { ItemLogo } from "./logo";
+import { isValidCoinStr, parseCoinStr } from "@keplr-wallet/common";
 
 export const MsgRelationMergedClaimRewards: FunctionComponent<{
   msg: MsgHistory;
@@ -26,14 +27,10 @@ export const MsgRelationMergedClaimRewards: FunctionComponent<{
       typeof rewards[0] === "string"
     ) {
       for (const coinStr of rewards) {
-        const split = (coinStr as string).split(
-          /^([0-9]+)(\s)*([a-zA-Z][a-zA-Z0-9/-]*)$/
-        );
-
-        if (split.length === 5) {
-          const denom = split[3];
-          if (denom === targetDenom) {
-            return new CoinPretty(currency, split[1]);
+        if (isValidCoinStr(coinStr as string)) {
+          const coin = parseCoinStr(coinStr as string);
+          if (coin.denom === targetDenom) {
+            return new CoinPretty(currency, coin.amount);
           }
         }
       }

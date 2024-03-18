@@ -7,3 +7,4 @@ export * from "./json";
 export * from "./icns";
 export * from "./retry";
 export * from "./sleep";
+export * from "./coin";
