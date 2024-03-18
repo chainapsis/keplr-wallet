@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { MsgItemBase } from "./base";
+import { ItemLogo } from "./logo";
 
 export const MsgRelationMergedClaimRewards: FunctionComponent<{
   msg: MsgHistory;
@@ -43,6 +44,21 @@ export const MsgRelationMergedClaimRewards: FunctionComponent<{
 
   return (
     <MsgItemBase
+      logo={
+        <ItemLogo
+          center={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="none"
+              viewBox="0 0 16 16"
+            >
+              TODO
+            </svg>
+          }
+        />
+      }
       chainId={msg.chainId}
       title="Claim Reward"
       amount={amountPretty}
