@@ -24,4 +24,31 @@ export interface MsgHistory {
   search: string;
   denoms?: string[];
   meta: Record<string, number | boolean | string | number[] | string[]>;
+
+  ibcTracking?: {
+    chainId: string;
+    chainIdentifier: string;
+    txHeight: number;
+    originPortId: string;
+    originChannelId: string;
+    originSequence: number;
+    paths: {
+      status: "pending" | "success" | "refunded" | "failed" | "unknown-result";
+      chainId?: string;
+      chainIdentifier?: string;
+      portId: string;
+      channelId: string;
+      sequence?: number;
+
+      counterpartyChannelId?: string;
+      counterpartyPortId?: string;
+      clientChainId?: string;
+      clientChainIdentifier?: string;
+
+      clientFetched: boolean;
+    }[];
+
+    // base64 encoded
+    originPacket: string;
+  };
 }
