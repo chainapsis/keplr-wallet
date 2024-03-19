@@ -6,6 +6,7 @@ import { CoinPretty } from "@keplr-wallet/unit";
 import { MsgItemBase } from "./base";
 import { ItemLogo } from "./logo";
 import { isValidCoinStr, parseCoinStr } from "@keplr-wallet/common";
+import { ColorPalette } from "../../../../styles";
 
 export const MsgRelationMergedClaimRewards: FunctionComponent<{
   msg: MsgHistory;
@@ -43,15 +44,22 @@ export const MsgRelationMergedClaimRewards: FunctionComponent<{
     <MsgItemBase
       logo={
         <ItemLogo
+          backgroundColor={ColorPalette["green-400"]}
           center={
             <svg
+              style={{
+                marginTop: "0.2rem",
+              }}
               xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
+              width="19"
+              height="15"
               fill="none"
-              viewBox="0 0 16 16"
+              viewBox="0 0 19 15"
             >
-              TODO
+              <path
+                fill={ColorPalette["gray-600"]}
+                d="M18.08 3.14L6.8 14.42 0 7.62l2.24-2.24L6.8 9.94 15.84.9l2.24 2.24z"
+              />
             </svg>
           }
         />
