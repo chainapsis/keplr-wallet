@@ -7,6 +7,7 @@ import { MsgRelationUndelegate } from "./undelegate";
 import { MsgRelationMergedClaimRewards } from "./merged-claim-rewards";
 import { MsgRelationIBCSend } from "./ibc-send";
 import { MsgRelationIBCSendRefunded } from "./ibc-send-refunded";
+import { MsgRelationIBCSendReceive } from "./ibc-send-receive";
 
 export const MsgItemRender: FunctionComponent<{
   msg: MsgHistory;
@@ -31,6 +32,15 @@ export const MsgItemRender: FunctionComponent<{
     case "ibc-send": {
       return (
         <MsgRelationIBCSend
+          msg={msg}
+          prices={prices}
+          targetDenom={targetDenom}
+        />
+      );
+    }
+    case "ibc-send-receive": {
+      return (
+        <MsgRelationIBCSendReceive
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}

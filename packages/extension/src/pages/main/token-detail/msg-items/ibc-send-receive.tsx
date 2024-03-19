@@ -1,16 +1,17 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { MsgHistory } from "../types";
-import { Bech32Address } from "@keplr-wallet/cosmos";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { MsgItemBase } from "./base";
 import { ItemLogo } from "./logo";
-import { Buffer } from "buffer/";
 import { ChainInfo } from "@keplr-wallet/types";
 import { ChainImageFallback } from "../../../../components/image";
+import { isValidCoinStr, parseCoinStr } from "@keplr-wallet/common";
+import { Bech32Address } from "@keplr-wallet/cosmos";
+import { Buffer } from "buffer/";
 
-export const MsgRelationIBCSend: FunctionComponent<{
+export const MsgRelationIBCSendReceive: FunctionComponent<{
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
@@ -22,70 +23,54 @@ export const MsgRelationIBCSend: FunctionComponent<{
   const sendAmountPretty = useMemo(() => {
     const currency = chainInfo.forceFindCurrency(targetDenom);
 
-    const token = (msg.msg as any)["token"] as {
-      denom: string;
-      amount: string;
-    };
-
-    if (token.denom !== targetDenom) {
-      return new CoinPretty(currency, "0");
+    const receives = msg.meta["receives"] as string[];
+    for (const receive of receives) {
+      if (isValidCoinStr(receive)) {
+        const coin = parseCoinStr(receive);
+        if (coin.denom === targetDenom) {
+          return new CoinPretty(currency, coin.amount);
+        }
+      }
     }
-    return new CoinPretty(currency, token.amount);
-  }, [chainInfo, msg.msg, targetDenom]);
 
-  const toAddress = (() => {
+    return new CoinPretty(currency, "0");
+  }, [chainInfo, msg.meta, targetDenom]);
+
+  const fromAddress = (() => {
     if (!msg.ibcTracking) {
       return "Unknown";
     }
 
     try {
-      let res = Bech32Address.shortenAddress((msg.msg as any)["receiver"], 22);
-      const packetData = Buffer.from(
-        msg.ibcTracking.originPacket,
-        "base64"
-      ).toString();
-      const parsed = JSON.parse(packetData);
-      let obj: any = (() => {
-        if (!parsed.memo) {
-          return undefined;
-        }
+      const packet = JSON.parse(
+        Buffer.from(msg.ibcTracking.originPacket, "base64").toString()
+      );
 
-        typeof parsed.memo === "string" ? JSON.parse(parsed.memo) : parsed.memo;
-      })();
-
-      while (obj) {
-        if (obj.receiver) {
-          res = Bech32Address.shortenAddress(obj.receiver, 22);
-        }
-        obj = typeof obj.next === "string" ? JSON.parse(obj.next) : obj.next;
-      }
-
-      return res;
+      return Bech32Address.shortenAddress(packet["sender"], 22);
     } catch (e) {
       console.log(e);
       return "Unknown";
     }
   })();
 
-  const destinationChain: ChainInfo | undefined = (() => {
+  const sourceChain: ChainInfo | undefined = (() => {
     if (!msg.ibcTracking) {
       return undefined;
     }
 
     try {
-      let res: ChainInfo | undefined = undefined;
-      for (const path of msg.ibcTracking.paths) {
-        if (!path.clientChainId) {
+      if (msg.ibcTracking.paths.length > 0) {
+        const path = msg.ibcTracking.paths[0];
+        if (!path.chainId) {
           return undefined;
         }
-        if (!chainStore.hasChain(path.clientChainId)) {
+        if (!chainStore.hasChain(path.chainId)) {
           return undefined;
         }
-
-        res = chainStore.getChain(path.clientChainId);
+        return chainStore.getChain(path.chainId);
       }
 
-      return res;
+      return undefined;
     } catch (e) {
       console.log(e);
       return undefined;
@@ -109,20 +94,20 @@ export const MsgRelationIBCSend: FunctionComponent<{
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="1.87"
-                d="M3 13.5l10-10m0 0H5.5m7.5 0V11"
+                d="M13 3L3 13m0 0h7.5M3 13V5.5"
               />
             </svg>
           }
           deco={
-            destinationChain ? (
-              <ChainImageFallback chainInfo={destinationChain} size="1rem" />
+            sourceChain ? (
+              <ChainImageFallback chainInfo={sourceChain} size="1rem" />
             ) : undefined
           }
         />
       }
       chainId={msg.chainId}
-      title="Send"
-      paragraph={toAddress}
+      title="Send Receive"
+      paragraph={fromAddress}
       amount={sendAmountPretty}
       prices={prices || {}}
       targetDenom={targetDenom}
