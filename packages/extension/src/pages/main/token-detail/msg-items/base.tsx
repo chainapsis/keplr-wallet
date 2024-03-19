@@ -63,7 +63,7 @@ export const MsgItemBase: FunctionComponent<{
         minHeight="4rem"
         alignY="center"
       >
-        <XAxis>
+        <XAxis alignY="center">
           <Box marginRight="0.75rem">
             <XAxis alignY="center">{logo}</XAxis>
           </Box>
