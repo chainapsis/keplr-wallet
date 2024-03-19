@@ -8,6 +8,7 @@ import { MsgRelationMergedClaimRewards } from "./merged-claim-rewards";
 import { MsgRelationIBCSend } from "./ibc-send";
 import { MsgRelationIBCSendRefunded } from "./ibc-send-refunded";
 import { MsgRelationIBCSendReceive } from "./ibc-send-receive";
+import { MsgRelationVote } from "./vote";
 
 export const MsgItemRender: FunctionComponent<{
   msg: MsgHistory;
@@ -72,6 +73,11 @@ export const MsgItemRender: FunctionComponent<{
           prices={prices}
           targetDenom={targetDenom}
         />
+      );
+    }
+    case "vote": {
+      return (
+        <MsgRelationVote msg={msg} prices={prices} targetDenom={targetDenom} />
       );
     }
     case "custom/merged-claim-rewards": {

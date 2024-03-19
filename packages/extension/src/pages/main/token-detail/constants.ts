@@ -7,6 +7,7 @@ export const Relations = [
   "delegate",
   "undelegate",
   "redelegate",
+  "vote",
   "custom/merged-claim-rewards",
 ];
 

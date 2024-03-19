@@ -13,11 +13,21 @@ export const MsgItemBase: FunctionComponent<{
   chainId: string;
   title: string;
   paragraph?: string;
-  amount: CoinPretty;
+  amount: CoinPretty | string;
+  overrideAmountColor?: string;
   prices: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
 }> = observer(
-  ({ logo, chainId, title, paragraph, amount, prices, targetDenom }) => {
+  ({
+    logo,
+    chainId,
+    title,
+    paragraph,
+    amount,
+    overrideAmountColor,
+    prices,
+    targetDenom,
+  }) => {
     const { chainStore, priceStore } = useStore();
 
     const chainInfo = chainStore.getChain(chainId);
@@ -26,6 +36,10 @@ export const MsgItemBase: FunctionComponent<{
     const foundCurrency = chainInfo.findCurrency(targetDenom);
     const defaultVsCurrency = priceStore.defaultVsCurrency;
     const sendAmountPricePretty = useMemo(() => {
+      if (typeof amount === "string") {
+        return undefined;
+      }
+
       if (foundCurrency && foundCurrency.coinGeckoId) {
         const price = prices[foundCurrency.coinGeckoId];
         if (price != null && price[defaultVsCurrency] != null) {
@@ -80,14 +94,17 @@ export const MsgItemBase: FunctionComponent<{
                   color={ColorPalette["white"]}
                   style={{
                     whiteSpace: "nowrap",
+                    color: overrideAmountColor,
                   }}
                 >
-                  {amount
-                    .maxDecimals(2)
-                    .shrink(true)
-                    .hideIBCMetadata(true)
-                    .inequalitySymbol(true)
-                    .toString()}
+                  {typeof amount === "string"
+                    ? amount
+                    : amount
+                        .maxDecimals(2)
+                        .shrink(true)
+                        .hideIBCMetadata(true)
+                        .inequalitySymbol(true)
+                        .toString()}
                 </Subtitle3>
                 {sendAmountPricePretty ? (
                   <React.Fragment>
