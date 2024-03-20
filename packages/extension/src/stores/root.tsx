@@ -19,15 +19,18 @@ import {
   CosmwasmQueries,
   OsmosisQueries,
   getKeplrFromWindow,
-  IBCChannelStore,
-  IBCCurrencyRegistrar,
   QueriesStore,
   SecretAccount,
   SecretQueries,
   ICNSQueries,
   AgoricQueries,
   LSMCurrencyRegistrar,
+  TokenFactoryCurrencyRegistrar,
 } from "@keplr-wallet/stores";
+import {
+  IBCChannelStore,
+  IBCCurrencyRegistrar,
+} from "@keplr-wallet/stores-ibc";
 import {
   ChainSuggestStore,
   InteractionStore,
@@ -44,6 +47,10 @@ import {
   GravityBridgeCurrencyRegistrar,
   AxelarEVMBridgeCurrencyRegistrar,
 } from "@keplr-wallet/stores-etc";
+import {
+  EthereumQueries,
+  EthereumAccountStore,
+} from "@keplr-wallet/stores-eth";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
   ContentScriptEnv,
@@ -87,18 +94,21 @@ export class RootStore {
       OsmosisQueries,
       KeplrETCQueries,
       ICNSQueries,
-      TokenContractsQueries
+      TokenContractsQueries,
+      EthereumQueries
     ]
   >;
   public readonly skipQueriesStore: SkipQueries;
   public readonly accountStore: AccountStore<
     [CosmosAccount, CosmwasmAccount, SecretAccount]
   >;
+  public readonly ethereumAccountStore: EthereumAccountStore;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly hugeQueriesStore: HugeQueriesStore;
 
   public readonly tokensStore: TokensStore;
 
+  public readonly tokenFactoryRegistrar: TokenFactoryCurrencyRegistrar;
   public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
   public readonly lsmCurrencyRegistrar: LSMCurrencyRegistrar;
   public readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegistrar;
@@ -179,7 +189,8 @@ export class RootStore {
       ICNSQueries.use(),
       TokenContractsQueries.use({
         tokenContractListURL: TokenContractListURL,
-      })
+      }),
+      EthereumQueries.use()
     );
     this.skipQueriesStore = new SkipQueries(
       this.queriesStore.sharedContext,
@@ -316,6 +327,11 @@ export class RootStore {
       })
     );
 
+    this.ethereumAccountStore = new EthereumAccountStore(
+      this.chainStore,
+      getKeplrFromWindow
+    );
+
     this.priceStore = new CoinGeckoPriceStore(
       new ExtensionKVStore("store_prices"),
       FiatCurrencies.reduce<{
@@ -359,6 +375,14 @@ export class RootStore {
       this.interactionStore
     );
 
+    this.tokenFactoryRegistrar = new TokenFactoryCurrencyRegistrar(
+      new ExtensionKVStore("store_token_factory_currency_registrar"),
+      24 * 3600 * 1000,
+      process.env["KEPLR_EXT_TOKEN_FACTORY_BASE_URL"] || "",
+      process.env["KEPLR_EXT_TOKEN_FACTORY_URI"] || "",
+      this.chainStore,
+      this.queriesStore
+    );
     this.ibcCurrencyRegistrar = new IBCCurrencyRegistrar(
       new ExtensionKVStore("store_ibc_curreny_registrar"),
       24 * 3600 * 1000,

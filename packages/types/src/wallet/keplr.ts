@@ -12,6 +12,7 @@ import {
 import { SecretUtils } from "../secretjs";
 import Long from "long";
 import { SettledResponses } from "../settled";
+import { DirectAuxSignResponse } from "../cosmjs-alt";
 
 export interface Key {
   // Name of the selected key store.
@@ -97,6 +98,31 @@ export interface Keplr {
     },
     signOptions?: KeplrSignOptions
   ): Promise<DirectSignResponse>;
+  signDirectAux(
+    chainId: string,
+    signer: string,
+    signDoc: {
+      bodyBytes?: Uint8Array | null;
+      publicKey?: {
+        typeUrl: string;
+        value: Uint8Array;
+      } | null;
+      chainId?: string | null;
+      accountNumber?: Long | null;
+      sequence?: Long | null;
+      tip?: {
+        amount: {
+          denom: string;
+          amount: string;
+        }[];
+        tipper: string;
+      } | null;
+    },
+    signOptions?: Exclude<
+      KeplrSignOptions,
+      "preferNoSetFee" | "disableBalanceCheck"
+    >
+  ): Promise<DirectAuxSignResponse>;
   sendTx(
     chainId: string,
     tx: Uint8Array,
@@ -205,4 +231,8 @@ export interface Keplr {
     defaultName: string;
     editable?: boolean;
   }): Promise<string>;
+
+  sendEthereumTx(chainId: string, tx: Uint8Array): Promise<string>;
+
+  suggestERC20(chainId: string, contractAddress: string): Promise<void>;
 }

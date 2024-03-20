@@ -15,11 +15,13 @@ import { ColorPalette } from "../../../styles";
 import { useStore } from "../../../stores";
 import { useIntl } from "react-intl";
 import { useTheme } from "styled-components";
+import { AppCurrency } from "@keplr-wallet/types";
 
 export interface RecipientInputWithAddressBookProps {
   historyType: string;
   recipientConfig: IRecipientConfig | IRecipientConfigWithICNS;
   memoConfig: IMemoConfig;
+  currency: AppCurrency;
 
   permitAddressBookSelfKeyInfo?: boolean;
 }
@@ -142,6 +144,7 @@ export const RecipientInput = observer(
             historyType={props.historyType}
             recipientConfig={recipientConfig}
             memoConfig={memoConfig}
+            currency={props.currency}
             permitSelfKeyInfo={props.permitAddressBookSelfKeyInfo}
           />
         ) : null}

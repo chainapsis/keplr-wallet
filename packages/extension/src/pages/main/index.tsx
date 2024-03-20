@@ -498,7 +498,7 @@ export const MainPage: FunctionComponent<{
                 });
 
                 browser.tabs.create({
-                  url: "https://wallet.keplr.app/?modal=staking",
+                  url: "https://wallet.keplr.app/",
                 });
               }}
             >

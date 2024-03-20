@@ -11,10 +11,20 @@ import { flattenFragment } from "../../utils";
 export interface StackProps {
   gutter?: string;
   alignX?: "left" | "right" | "center";
+
+  flex?: number;
 }
 
 const Styles = {
   Container: styled.div<StackProps>`
+    ${({ flex }) => {
+      if (flex != null) {
+        return `
+          flex: ${flex};
+        `;
+      }
+    }}
+
     display: flex;
     flex-direction: column;
     align-items: ${({ alignX }) => {

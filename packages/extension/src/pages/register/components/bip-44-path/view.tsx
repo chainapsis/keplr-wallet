@@ -36,8 +36,11 @@ export const SetBip44PathCard: FunctionComponent<{
 
   state: BIP44PathState;
 
+  // ledger에서는 100까지밖에 허용안됨
+  isLedger?: boolean;
+
   onClose: () => void;
-}> = observer(({ coinType, state, onClose }) => {
+}> = observer(({ coinType, state, isLedger, onClose }) => {
   const confirm = useConfirm();
   const intl = useIntl();
 
@@ -105,7 +108,7 @@ export const SetBip44PathCard: FunctionComponent<{
           <TextInput
             type="number"
             min={0}
-            max={2147483647}
+            max={isLedger ? 100 : 2147483647}
             value={state.accountText}
             onChange={(e) => {
               e.preventDefault();
@@ -139,7 +142,7 @@ export const SetBip44PathCard: FunctionComponent<{
           <TextInput
             type="number"
             min={0}
-            max={4294967295}
+            max={isLedger ? 100 : 4294967295}
             value={state.addressIndexText}
             onChange={(e) => {
               e.preventDefault();

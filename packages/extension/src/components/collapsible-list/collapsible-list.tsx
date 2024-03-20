@@ -36,6 +36,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
   items,
   lenAlwaysShown,
   hideNumInTitle,
+  notRenderHiddenItems,
 }) => {
   if (!lenAlwaysShown || lenAlwaysShown < 0) {
     lenAlwaysShown = items.length;
@@ -48,6 +49,9 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
 
   const alwaysShown = items.slice(0, lenAlwaysShown);
   const hidden = items.slice(lenAlwaysShown);
+
+  const [notRenderHiddenItemsIsClosing, setNotRenderHiddenItemsIsClosing] =
+    useState(false);
 
   return (
     <Stack>
@@ -78,9 +82,22 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
 
       <Stack gutter="0.5rem">{alwaysShown}</Stack>
 
-      <VerticalCollapseTransition collapsed={isCollapsed}>
-        <Gutter size="0.5rem" />
-        <Stack gutter="0.5rem">{hidden}</Stack>
+      <VerticalCollapseTransition
+        collapsed={isCollapsed}
+        onTransitionEnd={() => {
+          if (isCollapsed) {
+            setNotRenderHiddenItemsIsClosing(false);
+          }
+        }}
+      >
+        {!notRenderHiddenItems ||
+        notRenderHiddenItemsIsClosing ||
+        !isCollapsed ? (
+          <React.Fragment>
+            <Gutter size="0.5rem" />
+            <Stack gutter="0.5rem">{hidden}</Stack>
+          </React.Fragment>
+        ) : null}
       </VerticalCollapseTransition>
 
       {hidden.length > 0 ? (
@@ -89,6 +106,9 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
             e.preventDefault();
 
             setIsCollapsed(!isCollapsed);
+            if (!isCollapsed) {
+              setNotRenderHiddenItemsIsClosing(true);
+            }
           }}
         >
           <Gutter size="0.75rem" />

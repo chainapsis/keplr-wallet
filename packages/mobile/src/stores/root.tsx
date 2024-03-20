@@ -12,13 +12,12 @@ import {
   OsmosisQueries,
   ICNSQueries,
   SecretAccount,
-  IBCChannelStore,
-  IBCCurrencyRegistrar,
   QuerySharedContext,
   LSMCurrencyRegistrar,
   AgoricQueries,
   CosmwasmAccount,
 } from '@keplr-wallet/stores';
+import {IBCChannelStore, IBCCurrencyRegistrar} from '@keplr-wallet/stores-ibc';
 import {
   ChainSuggestStore,
   InteractionStore,
