@@ -57,6 +57,7 @@ import {
   KeplrETCQueries,
 } from '@keplr-wallet/stores-etc';
 import {SkipQueries} from '@keplr-wallet/extension/src/stores/skip';
+import {EthereumQueries} from '@keplr-wallet/stores-eth';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
@@ -89,6 +90,7 @@ export class RootStore {
       AprQueries,
       CosmosGovernanceQueries,
       CosmosGovernanceQueriesV1,
+      EthereumQueries,
     ]
   >;
   public readonly skipQueriesStore: SkipQueries;
@@ -178,6 +180,7 @@ export class RootStore {
       }),
       CosmosGovernanceQueries.use(),
       CosmosGovernanceQueriesV1.use(),
+      EthereumQueries.use(),
     );
 
     this.skipQueriesStore = new SkipQueries(
