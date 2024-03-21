@@ -57,7 +57,7 @@ import {
   KeplrETCQueries,
 } from '@keplr-wallet/stores-etc';
 import {SkipQueries} from '@keplr-wallet/extension/src/stores/skip';
-import {EthereumQueries} from '@keplr-wallet/stores-eth';
+import {EthereumQueries, EthereumAccountStore} from '@keplr-wallet/stores-eth';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
@@ -97,6 +97,7 @@ export class RootStore {
   public readonly accountStore: AccountStore<
     [CosmosAccount, CosmwasmAccount, SecretAccount]
   >;
+  public readonly ethereumAccountStore: EthereumAccountStore;
   public readonly uiConfigStore: UIConfigStore;
 
   public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
@@ -332,6 +333,11 @@ export class RootStore {
           }
         },
       }),
+    );
+
+    this.ethereumAccountStore = new EthereumAccountStore(
+      this.chainStore,
+      getKeplrFromWindow,
     );
 
     this.priceStore = new CoinGeckoPriceStore(

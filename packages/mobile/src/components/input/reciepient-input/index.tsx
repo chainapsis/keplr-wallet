@@ -13,11 +13,13 @@ import {UserIcon} from '../../icon/user';
 import {useIntl} from 'react-intl';
 import {AddressBookModal} from './address-book-modal';
 import {TextInput as NativeTextInput} from 'react-native';
+import {AppCurrency} from '@keplr-wallet/types';
 
 export interface RecipientInputWithAddressBookProps {
   historyType: string;
   recipientConfig: IRecipientConfig | IRecipientConfigWithICNS;
   memoConfig: IMemoConfig;
+  currency: AppCurrency;
 
   permitAddressBookSelfKeyInfo?: boolean;
 }
@@ -135,6 +137,7 @@ export const RecipientInput = observer(
             historyType={props.historyType}
             recipientConfig={recipientConfig}
             memoConfig={memoConfig}
+            currency={props.currency}
             permitSelfKeyInfo={props.permitAddressBookSelfKeyInfo}
           />
         ) : null}

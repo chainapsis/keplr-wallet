@@ -5,7 +5,7 @@ import {observer} from 'mobx-react-lite';
 import {Box} from '../../box';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {RecentSendHistory} from '@keplr-wallet/background';
-import {Key} from '@keplr-wallet/types';
+import {AppCurrency, Key} from '@keplr-wallet/types';
 import {useStore} from '../../../stores';
 import {HorizontalRadioGroup} from '../../radio-group';
 import {YAxis} from '../../axis';
@@ -16,6 +16,8 @@ import {EmptyView, EmptyViewText} from '../../empty-view';
 import {registerCardModal} from '../../modal/card';
 import {ScrollView} from '../../scroll-view/common-scroll-view';
 import {useStyle} from '../../../styles';
+import {DenomHelper} from '@keplr-wallet/common';
+import {Bech32Address} from '@keplr-wallet/cosmos';
 
 type Type = 'recent' | 'contacts' | 'accounts';
 
@@ -26,6 +28,7 @@ export const AddressBookModal = registerCardModal(
     memoConfig: IMemoConfig;
     permitSelfKeyInfo?: boolean;
     setIsOpen: (isOpen: boolean) => void;
+    currency: AppCurrency;
   }>(
     ({
       historyType,
@@ -33,8 +36,9 @@ export const AddressBookModal = registerCardModal(
       memoConfig,
       permitSelfKeyInfo,
       setIsOpen,
+      currency,
     }) => {
-      const {uiConfigStore, keyRingStore} = useStore();
+      const {uiConfigStore, keyRingStore, chainStore} = useStore();
 
       const intl = useIntl();
       const style = useStyle();
@@ -86,6 +90,11 @@ export const AddressBookModal = registerCardModal(
         uiConfigStore.addressBookConfig,
       ]);
 
+      const chainInfo = chainStore.getChain(recipientConfig.chainId);
+      const isEvmChain = chainInfo.evm !== undefined;
+      const isErc20 =
+        new DenomHelper(currency.coinMinimalDenom).type === 'erc20';
+
       const datas: {
         timestamp?: number;
         name?: string;
@@ -96,13 +105,21 @@ export const AddressBookModal = registerCardModal(
       }[] = (() => {
         switch (type) {
           case 'recent': {
-            return recents.map(recent => {
-              return {
-                timestamp: recent.timestamp,
-                address: recent.recipient,
-                memo: recent.memo,
-              };
-            });
+            return recents
+              .map(recent => {
+                return {
+                  timestamp: recent.timestamp,
+                  address: recent.recipient,
+                  memo: recent.memo,
+                };
+              })
+              .filter(recent => {
+                if (isErc20 && !recent.address.startsWith('0x')) {
+                  return false;
+                }
+
+                return true;
+              });
           }
           case 'contacts': {
             return uiConfigStore.addressBookConfig
@@ -113,20 +130,43 @@ export const AddressBookModal = registerCardModal(
                   address: addressData.address,
                   memo: addressData.memo,
                 };
+              })
+              .filter(contact => {
+                if (isErc20 && !contact.address.startsWith('0x')) {
+                  return false;
+                }
+
+                return true;
               });
           }
           case 'accounts': {
-            return accounts.map(account => {
+            return accounts.reduce<
+              {name: string; address: string; isSelf: boolean}[]
+            >((acc, account) => {
               const isSelf =
                 keyRingStore.selectedKeyInfo?.id === account.vaultId;
 
-              return {
-                name: account.name,
-                address: account.bech32Address,
+              if (!isErc20) {
+                acc.push({
+                  name: account.name,
+                  address: account.bech32Address,
+                  isSelf,
+                });
+              }
 
-                isSelf,
-              };
-            });
+              if (isEvmChain) {
+                const hexAddress = Bech32Address.fromBech32(
+                  account.bech32Address,
+                ).toHex(true);
+                acc.push({
+                  name: account.name,
+                  address: hexAddress,
+                  isSelf,
+                });
+              }
+
+              return acc;
+            }, []);
           }
           default: {
             return [];

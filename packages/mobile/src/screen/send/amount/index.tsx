@@ -50,8 +50,14 @@ import {GuideBox} from '../../../components/guide-box';
 import {Text} from 'react-native';
 
 export const SendAmountScreen: FunctionComponent = observer(() => {
-  const {chainStore, accountStore, queriesStore, skipQueriesStore, priceStore} =
-    useStore();
+  const {
+    chainStore,
+    accountStore,
+    ethereumAccountStore,
+    queriesStore,
+    skipQueriesStore,
+    priceStore,
+  } = useStore();
   const route: RouteProp<{
     params: {
       chainId?: string;
@@ -68,9 +74,12 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
   const initialCoinMinimalDenom = route.params['coinMinimalDenom'];
 
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
+  const chainInfo = chainStore.getChain(chainId);
+  const isEvmChain = chainStore.isEvmChain(chainId);
   const coinMinimalDenom =
-    initialCoinMinimalDenom ||
-    chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
+    initialCoinMinimalDenom || chainInfo.currencies[0].coinMinimalDenom;
+  const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
+  const isErc20 = new DenomHelper(currency.coinMinimalDenom).type === 'erc20';
 
   const [isIBCTransfer, setIsIBCTransfer] = useState(false);
   const [
@@ -84,17 +93,16 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
     }
   }, [navigation, initialChainId, initialCoinMinimalDenom]);
 
+  const [isEvmTx, setIsEvmTx] = useState(isErc20);
+
   const account = accountStore.getAccount(chainId);
-  const sender = account.bech32Address;
+  const ethereumAccount = ethereumAccountStore.getAccount(chainId);
 
-  const currency = chainStore
-    .getChain(chainId)
-    .forceFindCurrency(coinMinimalDenom);
-
-  const balance = queriesStore
-    .get(chainId)
-    .queryBalances.getQueryBech32Address(sender)
-    .getBalance(currency);
+  const queryBalances = queriesStore.get(chainId).queryBalances;
+  const sender = isEvmTx ? account.ethereumHexAddress : account.bech32Address;
+  const balance = isEvmTx
+    ? queryBalances.getQueryEthereumHexAddress(sender).getBalance(currency)
+    : queryBalances.getQueryBech32Address(sender).getBalance(currency);
 
   const sendConfigs = useSendMixedIBCTransferConfig(
     chainStore,
@@ -105,9 +113,10 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
     300000,
     isIBCTransfer,
     {
-      allowHexAddressOnEthermint: !chainStore
-        .getChain(chainId)
-        .chainId.startsWith('injective'),
+      allowHexAddressToBech32Address:
+        !isEvmChain &&
+        !chainStore.getChain(chainId).chainId.startsWith('injective'),
+      allowHexAddressOnly: isEvmTx,
       icns: ICNSInfo,
       computeTerraClassicTax: true,
     },
@@ -116,23 +125,25 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
   sendConfigs.amountConfig.setCurrency(currency);
 
   const gasSimulatorKey = useMemo(() => {
+    const txType: 'evm' | 'cosmos' = isEvmTx ? 'evm' : 'cosmos';
+
     if (sendConfigs.amountConfig.currency) {
       const denomHelper = new DenomHelper(
         sendConfigs.amountConfig.currency.coinMinimalDenom,
       );
 
       if (denomHelper.type !== 'native') {
-        if (denomHelper.type === 'cw20') {
+        if (denomHelper.type === 'cw20' || denomHelper.type === 'erc20') {
           // Probably, the gas can be different per cw20 according to how the contract implemented.
-          return `${denomHelper.type}/${denomHelper.contractAddress}`;
+          return `${txType}/${denomHelper.type}/${denomHelper.contractAddress}`;
         }
 
-        return denomHelper.type;
+        return `${txType}/${denomHelper.type}`;
       }
     }
 
-    return 'native';
-  }, [sendConfigs.amountConfig.currency]);
+    return `${txType}/native`;
+  }, [isEvmTx, sendConfigs.amountConfig.currency]);
 
   const gasSimulator = useGasSimulator(
     new AsyncKVStore('gas-simulator.screen.send/send'),
@@ -193,6 +204,21 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
         );
       }
 
+      if (
+        isEvmChain &&
+        sendConfigs.recipientConfig.isRecipientEthereumHexAddress
+      ) {
+        return {
+          simulate: () =>
+            ethereumAccount.simulateGas({
+              currency: sendConfigs.amountConfig.amount[0].currency,
+              amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
+              sender: sendConfigs.senderConfig.sender,
+              recipient: sendConfigs.recipientConfig.recipient,
+            }),
+        };
+      }
+
       return account.makeSendTokenTx(
         sendConfigs.amountConfig.amount[0].toDec().toString(),
         sendConfigs.amountConfig.amount[0].currency,
@@ -200,6 +226,28 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
       );
     },
   );
+
+  useEffect(() => {
+    const newIsEvmTx =
+      new DenomHelper(sendConfigs.amountConfig.currency.coinMinimalDenom)
+        .type === 'erc20' ||
+      (isEvmChain && sendConfigs.recipientConfig.isRecipientEthereumHexAddress);
+
+    const newSenderAddress = newIsEvmTx
+      ? account.ethereumHexAddress
+      : account.bech32Address;
+
+    sendConfigs.senderConfig.setValue(newSenderAddress);
+    setIsEvmTx(newIsEvmTx);
+    ethereumAccount.setIsSendingTx(false);
+  }, [
+    account,
+    ethereumAccount,
+    isEvmChain,
+    sendConfigs.amountConfig.currency.coinMinimalDenom,
+    sendConfigs.recipientConfig.isRecipientEthereumHexAddress,
+    sendConfigs.senderConfig,
+  ]);
 
   useEffect(() => {
     // To simulate secretwasm, we need to include the signature in the tx.
@@ -322,37 +370,39 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
           />
         </Box>
 
-        <Box>
-          <LayeredHorizontalRadioGroup
-            size="large"
-            itemMinWidth={'50%'}
-            items={[
-              {
-                key: 'send',
-                text: intl.formatMessage({
-                  id: 'page.send.type.send',
-                }),
-              },
-              {
-                key: 'ibc-transfer',
-                text: intl.formatMessage({
-                  id: 'page.send.type.ibc-transfer',
-                }),
-              },
-            ]}
-            selectedKey={isIBCTransfer ? 'ibc-transfer' : 'send'}
-            onSelect={key => {
-              if (key === 'ibc-transfer') {
-                if (sendConfigs.channelConfig.channels.length === 0) {
-                  setIsIBCTransferDestinationModalOpen(true);
+        {!isErc20 && (
+          <Box>
+            <LayeredHorizontalRadioGroup
+              size="large"
+              itemMinWidth={'50%'}
+              items={[
+                {
+                  key: 'send',
+                  text: intl.formatMessage({
+                    id: 'page.send.type.send',
+                  }),
+                },
+                {
+                  key: 'ibc-transfer',
+                  text: intl.formatMessage({
+                    id: 'page.send.type.ibc-transfer',
+                  }),
+                },
+              ]}
+              selectedKey={isIBCTransfer ? 'ibc-transfer' : 'send'}
+              onSelect={key => {
+                if (key === 'ibc-transfer') {
+                  if (sendConfigs.channelConfig.channels.length === 0) {
+                    setIsIBCTransferDestinationModalOpen(true);
+                  }
+                } else {
+                  sendConfigs.channelConfig.setChannels([]);
+                  setIsIBCTransfer(false);
                 }
-              } else {
-                sendConfigs.channelConfig.setChannels([]);
-                setIsIBCTransfer(false);
-              }
-            }}
-          />
-        </Box>
+              }}
+            />
+          </Box>
+        )}
 
         <VerticalCollapseTransition collapsed={!isIBCTransfer}>
           <DestinationChainView
@@ -368,6 +418,7 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
           historyType={historyType}
           recipientConfig={sendConfigs.recipientConfig}
           memoConfig={sendConfigs.memoConfig}
+          currency={sendConfigs.amountConfig.currency}
           permitAddressBookSelfKeyInfo={isIBCTransfer}
           bottom={
             <VerticalCollapseTransition
@@ -385,16 +436,18 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
 
         <AmountInput amountConfig={sendConfigs.amountConfig} />
 
-        <MemoInput
-          memoConfig={sendConfigs.memoConfig}
-          placeholder={
-            isIBCTransfer
-              ? undefined
-              : intl.formatMessage({
-                  id: 'page.send.amount.memo-placeholder',
-                })
-          }
-        />
+        {!isEvmTx && (
+          <MemoInput
+            memoConfig={sendConfigs.memoConfig}
+            placeholder={
+              isIBCTransfer
+                ? undefined
+                : intl.formatMessage({
+                    id: 'page.send.amount.memo-placeholder',
+                  })
+            }
+          />
+        )}
       </Stack>
 
       <VerticalCollapseTransition collapsed={!isIBCTransfer}>
@@ -440,222 +493,276 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
         }
         onPress={async () => {
           if (!txConfigsValidate.interactionBlocked) {
-            const tx = isIBCTransfer
-              ? accountStore
-                  .getAccount(chainId)
-                  .cosmos.makePacketForwardIBCTransferTx(
-                    sendConfigs.channelConfig.channels,
-                    sendConfigs.amountConfig.amount[0].toDec().toString(),
-                    sendConfigs.amountConfig.amount[0].currency,
-                    sendConfigs.recipientConfig.recipient,
-                  )
-              : accountStore
-                  .getAccount(chainId)
-                  .makeSendTokenTx(
-                    sendConfigs.amountConfig.amount[0].toDec().toString(),
-                    sendConfigs.amountConfig.amount[0].currency,
-                    sendConfigs.recipientConfig.recipient,
+            try {
+              if (isEvmTx && sendConfigs.feeConfig.type !== 'manual') {
+                ethereumAccount.setIsSendingTx(true);
+                const {maxFeePerGas, maxPriorityFeePerGas} =
+                  sendConfigs.feeConfig.getEIP1559TxFees(
+                    sendConfigs.feeConfig.type,
                   );
 
-            try {
-              await tx.send(
-                sendConfigs.feeConfig.toStdFee(),
-                sendConfigs.memoConfig.memo,
-                {
-                  preferNoSetFee: true,
-                  preferNoSetMemo: true,
-                  sendTx: async (chainId, tx, mode) => {
-                    let msg: Message<Uint8Array> = new SendTxAndRecordMsg(
-                      historyType,
-                      chainId,
-                      sendConfigs.recipientConfig.chainId,
-                      tx,
-                      mode,
-                      false,
-                      sendConfigs.senderConfig.sender,
-                      sendConfigs.recipientConfig.recipient,
-                      sendConfigs.amountConfig.amount.map(amount => {
-                        return {
-                          amount: DecUtils.getTenExponentN(
-                            amount.currency.coinDecimals,
-                          )
-                            .mul(amount.toDec())
-                            .toString(),
-                          denom: amount.currency.coinMinimalDenom,
-                        };
-                      }),
-                      sendConfigs.memoConfig.memo,
-                    );
-                    if (isIBCTransfer) {
-                      if (msg instanceof SendTxAndRecordMsg) {
-                        msg = msg.withIBCPacketForwarding(
-                          sendConfigs.channelConfig.channels,
-                          {
-                            currencies: chainStore.getChain(chainId).currencies,
-                          },
-                        );
-                      } else {
-                        throw new Error('Invalid message type');
-                      }
-                    }
-                    return await new RNMessageRequesterInternal().sendMessage(
-                      BACKGROUND_PORT,
-                      msg,
-                    );
-                  },
-                },
-                {
-                  onBroadcasted: async txHash => {
-                    chainStore.enableVaultsWithCosmosAddress(
-                      sendConfigs.recipientConfig.chainId,
-                      sendConfigs.recipientConfig.recipient,
-                    );
-
-                    if (!isIBCTransfer) {
-                      const inCurrencyPrice =
-                        await priceStore.waitCalculatePrice(
-                          sendConfigs.amountConfig.amount[0],
-                          'usd',
-                        );
-
-                      const params: Record<
-                        string,
-                        | number
-                        | string
-                        | boolean
-                        | number[]
-                        | string[]
-                        | undefined
-                      > = {
-                        denom:
-                          sendConfigs.amountConfig.amount[0].currency
-                            .coinMinimalDenom,
-                        commonDenom: (() => {
-                          const currency =
-                            sendConfigs.amountConfig.amount[0].currency;
-                          if ('paths' in currency && currency.originCurrency) {
-                            return currency.originCurrency.coinDenom;
-                          }
-                          return currency.coinDenom;
-                        })(),
-                        chainId: sendConfigs.recipientConfig.chainId,
-                        chainIdentifier: ChainIdHelper.parse(
-                          sendConfigs.recipientConfig.chainId,
-                        ).identifier,
-                        inAvg: amountToAmbiguousAverage(
-                          sendConfigs.amountConfig.amount[0],
-                        ),
-                      };
-                      if (inCurrencyPrice) {
-                        params['inFiatAvg'] =
-                          amountToAmbiguousAverage(inCurrencyPrice);
-                      }
-
-                      new RNMessageRequesterInternal().sendMessage(
-                        BACKGROUND_PORT,
-                        new LogAnalyticsEventMsg('send', params),
+                const unsignedTx = await ethereumAccount.makeSendTokenTx({
+                  currency: sendConfigs.amountConfig.amount[0].currency,
+                  amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
+                  from: sender,
+                  to: sendConfigs.recipientConfig.recipient,
+                  gasLimit: sendConfigs.gasConfig.gas,
+                  maxFeePerGas: maxFeePerGas.toString(),
+                  maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+                });
+                await ethereumAccount.sendEthereumTx(sender, unsignedTx, {
+                  onFulfill: txReceipt => {
+                    if (txReceipt.status === EthTxStatus.Success) {
+                      notification.show(
+                        'success',
+                        intl.formatMessage({
+                          id: 'notification.transaction-success',
+                        }),
+                        '',
                       );
-                    } else if (ibcChannelFluent != null) {
-                      const pathChainIds = [chainId].concat(
-                        ...ibcChannelFluent.channels.map(
-                          channel => channel.counterpartyChainId,
-                        ),
-                      );
-                      const intermediateChainIds: string[] = [];
-                      if (pathChainIds.length > 2) {
-                        intermediateChainIds.push(...pathChainIds.slice(1, -1));
-                      }
-
-                      const inCurrencyPrice =
-                        await priceStore.waitCalculatePrice(
-                          sendConfigs.amountConfig.amount[0],
-                          'usd',
-                        );
-
-                      const params: Record<
-                        string,
-                        | number
-                        | string
-                        | boolean
-                        | number[]
-                        | string[]
-                        | undefined
-                      > = {
-                        originDenom: ibcChannelFluent.originDenom,
-                        originCommonDenom: (() => {
-                          const currency = chainStore
-                            .getChain(ibcChannelFluent.originChainId)
-                            .forceFindCurrency(ibcChannelFluent.originDenom);
-                          if ('paths' in currency && currency.originCurrency) {
-                            return currency.originCurrency.coinDenom;
-                          }
-                          return currency.coinDenom;
-                        })(),
-                        originChainId: ibcChannelFluent.originChainId,
-                        originChainIdentifier: ChainIdHelper.parse(
-                          ibcChannelFluent.originChainId,
-                        ).identifier,
-                        sourceChainId: chainId,
-                        sourceChainIdentifier:
-                          ChainIdHelper.parse(chainId).identifier,
-                        destinationChainId: ibcChannelFluent.destinationChainId,
-                        destinationChainIdentifier: ChainIdHelper.parse(
-                          ibcChannelFluent.destinationChainId,
-                        ).identifier,
-                        pathChainIds,
-                        pathChainIdentifiers: pathChainIds.map(
-                          chainId => ChainIdHelper.parse(chainId).identifier,
-                        ),
-                        intermediateChainIds,
-                        intermediateChainIdentifiers: intermediateChainIds.map(
-                          chainId => ChainIdHelper.parse(chainId).identifier,
-                        ),
-                        isToOrigin:
-                          ibcChannelFluent.destinationChainId ===
-                          ibcChannelFluent.originChainId,
-                        inAvg: amountToAmbiguousAverage(
-                          sendConfigs.amountConfig.amount[0],
-                        ),
-                      };
-                      if (inCurrencyPrice) {
-                        params['inFiatAvg'] =
-                          amountToAmbiguousAverage(inCurrencyPrice);
-                      }
-
-                      new RNMessageRequesterInternal().sendMessage(
-                        BACKGROUND_PORT,
-                        new LogAnalyticsEventMsg('ibc_send', params),
-                      );
-                    }
-
-                    navigation.navigate('TxPending', {
-                      chainId,
-                      txHash: Buffer.from(txHash).toString('hex'),
-                    });
-                  },
-                  onFulfill: (tx: any) => {
-                    if (tx.code != null && tx.code !== 0) {
-                      console.log(tx);
+                    } else {
                       notification.show(
                         'failed',
                         intl.formatMessage({id: 'error.transaction-failed'}),
+                        '',
                       );
-                      return;
                     }
-
-                    notification.show(
-                      'success',
-                      intl.formatMessage({
-                        id: 'notification.transaction-success',
-                      }),
-                    );
                   },
-                },
-              );
+                });
+                ethereumAccount.setIsSendingTx(false);
+              } else {
+                const tx = isIBCTransfer
+                  ? accountStore
+                      .getAccount(chainId)
+                      .cosmos.makePacketForwardIBCTransferTx(
+                        sendConfigs.channelConfig.channels,
+                        sendConfigs.amountConfig.amount[0].toDec().toString(),
+                        sendConfigs.amountConfig.amount[0].currency,
+                        sendConfigs.recipientConfig.recipient,
+                      )
+                  : accountStore
+                      .getAccount(chainId)
+                      .makeSendTokenTx(
+                        sendConfigs.amountConfig.amount[0].toDec().toString(),
+                        sendConfigs.amountConfig.amount[0].currency,
+                        sendConfigs.recipientConfig.recipient,
+                      );
+                await tx.send(
+                  sendConfigs.feeConfig.toStdFee(),
+                  sendConfigs.memoConfig.memo,
+                  {
+                    preferNoSetFee: true,
+                    preferNoSetMemo: true,
+                    sendTx: async (chainId, tx, mode) => {
+                      let msg: Message<Uint8Array> = new SendTxAndRecordMsg(
+                        historyType,
+                        chainId,
+                        sendConfigs.recipientConfig.chainId,
+                        tx,
+                        mode,
+                        false,
+                        sendConfigs.senderConfig.sender,
+                        sendConfigs.recipientConfig.recipient,
+                        sendConfigs.amountConfig.amount.map(amount => {
+                          return {
+                            amount: DecUtils.getTenExponentN(
+                              amount.currency.coinDecimals,
+                            )
+                              .mul(amount.toDec())
+                              .toString(),
+                            denom: amount.currency.coinMinimalDenom,
+                          };
+                        }),
+                        sendConfigs.memoConfig.memo,
+                      );
+                      if (isIBCTransfer) {
+                        if (msg instanceof SendTxAndRecordMsg) {
+                          msg = msg.withIBCPacketForwarding(
+                            sendConfigs.channelConfig.channels,
+                            {
+                              currencies:
+                                chainStore.getChain(chainId).currencies,
+                            },
+                          );
+                        } else {
+                          throw new Error('Invalid message type');
+                        }
+                      }
+                      return await new RNMessageRequesterInternal().sendMessage(
+                        BACKGROUND_PORT,
+                        msg,
+                      );
+                    },
+                  },
+                  {
+                    onBroadcasted: async txHash => {
+                      chainStore.enableVaultsWithCosmosAddress(
+                        sendConfigs.recipientConfig.chainId,
+                        sendConfigs.recipientConfig.recipient,
+                      );
+
+                      if (!isIBCTransfer) {
+                        const inCurrencyPrice =
+                          await priceStore.waitCalculatePrice(
+                            sendConfigs.amountConfig.amount[0],
+                            'usd',
+                          );
+
+                        const params: Record<
+                          string,
+                          | number
+                          | string
+                          | boolean
+                          | number[]
+                          | string[]
+                          | undefined
+                        > = {
+                          denom:
+                            sendConfigs.amountConfig.amount[0].currency
+                              .coinMinimalDenom,
+                          commonDenom: (() => {
+                            const currency =
+                              sendConfigs.amountConfig.amount[0].currency;
+                            if (
+                              'paths' in currency &&
+                              currency.originCurrency
+                            ) {
+                              return currency.originCurrency.coinDenom;
+                            }
+                            return currency.coinDenom;
+                          })(),
+                          chainId: sendConfigs.recipientConfig.chainId,
+                          chainIdentifier: ChainIdHelper.parse(
+                            sendConfigs.recipientConfig.chainId,
+                          ).identifier,
+                          inAvg: amountToAmbiguousAverage(
+                            sendConfigs.amountConfig.amount[0],
+                          ),
+                        };
+                        if (inCurrencyPrice) {
+                          params['inFiatAvg'] =
+                            amountToAmbiguousAverage(inCurrencyPrice);
+                        }
+
+                        new RNMessageRequesterInternal().sendMessage(
+                          BACKGROUND_PORT,
+                          new LogAnalyticsEventMsg('send', params),
+                        );
+                      } else if (ibcChannelFluent != null) {
+                        const pathChainIds = [chainId].concat(
+                          ...ibcChannelFluent.channels.map(
+                            channel => channel.counterpartyChainId,
+                          ),
+                        );
+                        const intermediateChainIds: string[] = [];
+                        if (pathChainIds.length > 2) {
+                          intermediateChainIds.push(
+                            ...pathChainIds.slice(1, -1),
+                          );
+                        }
+
+                        const inCurrencyPrice =
+                          await priceStore.waitCalculatePrice(
+                            sendConfigs.amountConfig.amount[0],
+                            'usd',
+                          );
+
+                        const params: Record<
+                          string,
+                          | number
+                          | string
+                          | boolean
+                          | number[]
+                          | string[]
+                          | undefined
+                        > = {
+                          originDenom: ibcChannelFluent.originDenom,
+                          originCommonDenom: (() => {
+                            const currency = chainStore
+                              .getChain(ibcChannelFluent.originChainId)
+                              .forceFindCurrency(ibcChannelFluent.originDenom);
+                            if (
+                              'paths' in currency &&
+                              currency.originCurrency
+                            ) {
+                              return currency.originCurrency.coinDenom;
+                            }
+                            return currency.coinDenom;
+                          })(),
+                          originChainId: ibcChannelFluent.originChainId,
+                          originChainIdentifier: ChainIdHelper.parse(
+                            ibcChannelFluent.originChainId,
+                          ).identifier,
+                          sourceChainId: chainId,
+                          sourceChainIdentifier:
+                            ChainIdHelper.parse(chainId).identifier,
+                          destinationChainId:
+                            ibcChannelFluent.destinationChainId,
+                          destinationChainIdentifier: ChainIdHelper.parse(
+                            ibcChannelFluent.destinationChainId,
+                          ).identifier,
+                          pathChainIds,
+                          pathChainIdentifiers: pathChainIds.map(
+                            chainId => ChainIdHelper.parse(chainId).identifier,
+                          ),
+                          intermediateChainIds,
+                          intermediateChainIdentifiers:
+                            intermediateChainIds.map(
+                              chainId =>
+                                ChainIdHelper.parse(chainId).identifier,
+                            ),
+                          isToOrigin:
+                            ibcChannelFluent.destinationChainId ===
+                            ibcChannelFluent.originChainId,
+                          inAvg: amountToAmbiguousAverage(
+                            sendConfigs.amountConfig.amount[0],
+                          ),
+                        };
+                        if (inCurrencyPrice) {
+                          params['inFiatAvg'] =
+                            amountToAmbiguousAverage(inCurrencyPrice);
+                        }
+
+                        new RNMessageRequesterInternal().sendMessage(
+                          BACKGROUND_PORT,
+                          new LogAnalyticsEventMsg('ibc_send', params),
+                        );
+                      }
+
+                      navigation.navigate('TxPending', {
+                        chainId,
+                        txHash: Buffer.from(txHash).toString('hex'),
+                      });
+                    },
+                    onFulfill: (tx: any) => {
+                      if (tx.code != null && tx.code !== 0) {
+                        console.log(tx);
+                        notification.show(
+                          'failed',
+                          intl.formatMessage({id: 'error.transaction-failed'}),
+                        );
+                        return;
+                      }
+
+                      notification.show(
+                        'success',
+                        intl.formatMessage({
+                          id: 'notification.transaction-success',
+                        }),
+                      );
+                    },
+                  },
+                );
+              }
             } catch (e) {
               if (e?.message === 'Request rejected') {
                 return;
               }
+
+              if (isEvmTx) {
+                ethereumAccount.setIsSendingTx(false);
+              }
+
               notification.show(
                 'failed',
                 intl.formatMessage({id: 'error.transaction-failed'}),
