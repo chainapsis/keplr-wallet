@@ -20,7 +20,7 @@ import {
 } from "@keplr-wallet/hooks";
 import { useStore } from "../../../../stores";
 import { unescapeHTML } from "@keplr-wallet/common";
-import { CoinPretty, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
 import { useInteractionInfo } from "../../../../hooks";
@@ -44,6 +44,7 @@ import { GenericAuthorization } from "@keplr-wallet/stores/build/query/cosmos/au
 import { Checkbox } from "../../../../components/checkbox";
 import { FeeSummary } from "../../components/fee-summary";
 import { FeeControl } from "../../../../components/input/fee-control";
+import { HighFeeWarning } from "../../components/high-fee-warning";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -59,8 +60,13 @@ import { FeeControl } from "../../../../components/input/fee-control";
 export const CosmosTxView: FunctionComponent<{
   interactionData: NonNullable<SignInteractionStore["waitingData"]>;
 }> = observer(({ interactionData }) => {
-  const { chainStore, queriesStore, signInteractionStore, uiConfigStore } =
-    useStore();
+  const {
+    chainStore,
+    queriesStore,
+    signInteractionStore,
+    uiConfigStore,
+    priceStore,
+  } = useStore();
 
   const intl = useIntl();
   const theme = useTheme();
@@ -188,7 +194,10 @@ export const CosmosTxView: FunctionComponent<{
             if (
               innerType === "/cosmos.bank.v1beta1.MsgSend" ||
               innerType === "/cosmos.bank.v1beta1.MsgMultiSend" ||
-              innerType === "/ibc.applications.transfer.v1.MsgTransfer"
+              innerType === "/ibc.applications.transfer.v1.MsgTransfer" ||
+              innerType === "/cosmos.authz.v1beta1.MsgGrant" ||
+              innerType === "/cosmos.staking.v1beta1.MsgTokenizeShares" ||
+              innerType === "/cosmos.staking.v1beta1.MsgEnableTokenizeShares"
             ) {
               setIsSendAuthzGrant(true);
               return;
@@ -211,7 +220,10 @@ export const CosmosTxView: FunctionComponent<{
               if (
                 innerType === "/cosmos.bank.v1beta1.MsgSend" ||
                 innerType === "/cosmos.bank.v1beta1.MsgMultiSend" ||
-                innerType === "/ibc.applications.transfer.v1.MsgTransfer"
+                innerType === "/ibc.applications.transfer.v1.MsgTransfer" ||
+                innerType === "/cosmos.authz.v1beta1.MsgGrant" ||
+                innerType === "/cosmos.staking.v1beta1.MsgTokenizeShares" ||
+                innerType === "/cosmos.staking.v1beta1.MsgEnableTokenizeShares"
               ) {
                 setIsSendAuthzGrant(true);
                 return;
@@ -247,7 +259,12 @@ export const CosmosTxView: FunctionComponent<{
                     genericAuth.msg === "/cosmos.bank.v1beta1.MsgSend" ||
                     genericAuth.msg === "/cosmos.bank.v1beta1.MsgMultiSend" ||
                     genericAuth.msg ===
-                      "/ibc.applications.transfer.v1.MsgTransfer"
+                      "/ibc.applications.transfer.v1.MsgTransfer" ||
+                    genericAuth.msg === "/cosmos.authz.v1beta1.MsgGrant" ||
+                    genericAuth.msg ===
+                      "/cosmos.staking.v1beta1.MsgTokenizeShares" ||
+                    genericAuth.msg ===
+                      "/cosmos.staking.v1beta1.MsgEnableTokenizeShares"
                   ) {
                     setIsSendAuthzGrant(true);
                     return;
@@ -327,11 +344,35 @@ export const CosmosTxView: FunctionComponent<{
     Error | undefined
   >(undefined);
 
+  const isHighFee = (() => {
+    if (feeConfig.fees) {
+      let sumPrice = new Dec(0);
+      for (const fee of feeConfig.fees) {
+        const currency = chainStore
+          .getChain(chainId)
+          .findCurrency(fee.currency.coinMinimalDenom);
+        if (currency && currency.coinGeckoId) {
+          const price = priceStore.calculatePrice(
+            new CoinPretty(currency, fee.toCoin().amount),
+            "usd"
+          );
+          if (price) {
+            sumPrice = sumPrice.add(price.toDec());
+          }
+        }
+      }
+      return sumPrice.gte(new Dec(5));
+    }
+    return false;
+  })();
+  const [isHighFeeApproved, setIsHighFeeApproved] = useState(false);
+
   const buttonDisabled =
     txConfigsValidate.interactionBlocked ||
     !signDocHelper.signDocWrapper ||
     isLedgerAndDirect ||
-    (isSendAuthzGrant && !isSendAuthzGrantChecked);
+    (isSendAuthzGrant && !isSendAuthzGrantChecked) ||
+    (isHighFee && !isHighFeeApproved);
 
   const approve = async () => {
     if (signDocHelper.signDocWrapper) {
@@ -633,6 +674,16 @@ export const CosmosTxView: FunctionComponent<{
                   />
                 );
               })()}
+
+          {isHighFee ? (
+            <React.Fragment>
+              <Gutter size="0.75rem" />
+              <HighFeeWarning
+                checked={isHighFeeApproved}
+                onChange={(v) => setIsHighFeeApproved(v)}
+              />
+            </React.Fragment>
+          ) : null}
         </Box>
 
         {isSendAuthzGrant ? (

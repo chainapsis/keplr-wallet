@@ -231,4 +231,8 @@ export interface Keplr {
     defaultName: string;
     editable?: boolean;
   }): Promise<string>;
+
+  sendEthereumTx(chainId: string, tx: Uint8Array): Promise<string>;
+
+  suggestERC20(chainId: string, contractAddress: string): Promise<void>;
 }

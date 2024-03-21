@@ -21,7 +21,7 @@ export interface BalanceRegistry {
 }
 
 export class ObservableQueryBalancesImplMap {
-  protected bech32Address: string;
+  protected address: string;
 
   @observable.shallow
   protected balanceImplMap: Map<string, IObservableQueryBalanceImpl> =
@@ -32,11 +32,11 @@ export class ObservableQueryBalancesImplMap {
     protected readonly chainId: string,
     protected readonly chainGetter: ChainGetter,
     protected readonly balanceRegistries: BalanceRegistry[],
-    bech32Address: string
+    address: string
   ) {
     makeObservable(this);
 
-    this.bech32Address = bech32Address;
+    this.address = address;
   }
 
   fetch() {
@@ -45,7 +45,7 @@ export class ObservableQueryBalancesImplMap {
 
   protected getBalanceInner(
     currency: AppCurrency
-  ): IObservableQueryBalanceImpl {
+  ): IObservableQueryBalanceImpl | undefined {
     let key = currency.coinMinimalDenom;
     // If the currency is secret20, it will be different according to not only the minimal denom but also the viewing key of the currency.
     if ("type" in currency && currency.type === "secret20") {
@@ -54,30 +54,22 @@ export class ObservableQueryBalancesImplMap {
 
     if (!this.balanceImplMap.has(key)) {
       runInAction(() => {
-        let balanceImpl: IObservableQueryBalanceImpl | undefined;
-
-        for (const registry of this.balanceRegistries) {
-          balanceImpl = registry.getBalanceImpl(
+        this.balanceRegistries.forEach((registry) => {
+          const balanceImpl = registry.getBalanceImpl(
             this.chainId,
             this.chainGetter,
-            this.bech32Address,
+            this.address,
             currency.coinMinimalDenom
           );
-          if (balanceImpl) {
-            break;
-          }
-        }
 
-        if (balanceImpl) {
-          this.balanceImplMap.set(key, balanceImpl);
-        } else {
-          throw new Error(`Failed to get and parse the balance for ${key}`);
-        }
+          if (balanceImpl) {
+            this.balanceImplMap.set(key, balanceImpl);
+          }
+        });
       });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.balanceImplMap.get(key)!;
+    return this.balanceImplMap.get(key);
   }
 
   @computed
@@ -101,7 +93,10 @@ export class ObservableQueryBalancesImplMap {
 
     for (let i = 0; i < chainInfo.currencies.length; i++) {
       const currency = chainInfo.currencies[i];
-      result.push(this.getBalanceInner(currency));
+      const balanceInner = this.getBalanceInner(currency);
+      if (balanceInner) {
+        result.push(balanceInner);
+      }
     }
 
     return result;
@@ -159,7 +154,10 @@ export class ObservableQueryBalancesImplMap {
 
     for (let i = 0; i < currencies.length; i++) {
       const currency = currencies[i];
-      result.push(this.getBalanceInner(currency));
+      const balanceInner = this.getBalanceInner(currency);
+      if (balanceInner) {
+        result.push(balanceInner);
+      }
     }
 
     return result;
@@ -203,13 +201,13 @@ export class ObservableQueryBalances extends HasMapStore<ObservableQueryBalances
     protected readonly chainId: string,
     protected readonly chainGetter: ChainGetter
   ) {
-    super((bech32Address: string) => {
+    super((address: string) => {
       return new ObservableQueryBalancesImplMap(
         this.sharedContext,
         this.chainId,
         this.chainGetter,
         this.balanceRegistries,
-        bech32Address
+        address
       );
     });
   }
@@ -220,5 +218,11 @@ export class ObservableQueryBalances extends HasMapStore<ObservableQueryBalances
 
   getQueryBech32Address(bech32Address: string): ObservableQueryBalancesImplMap {
     return this.get(bech32Address) as ObservableQueryBalancesImplMap;
+  }
+
+  getQueryEthereumHexAddress(
+    ethereumHexAddress: string
+  ): ObservableQueryBalancesImplMap {
+    return this.get(ethereumHexAddress) as ObservableQueryBalancesImplMap;
   }
 }

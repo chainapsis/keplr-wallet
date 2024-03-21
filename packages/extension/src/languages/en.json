@@ -2,6 +2,7 @@
   "error.not-supported-error": "Not supported",
   "error.bip44-path-required": "BIP44 path should be provided",
   "error.too-short-mnemonic": "Too short recovery phrase",
+  "error.wrong-mnemonic-word": "Wrong recovery phrase. Please double-check these words: {index}.",
   "error.invalid-mnemonic": "Invalid recovery phrase",
   "error.failed-to-set-endpoints": "Failed to set endpoints",
   "error.transaction-failed": "Transaction Failed",
@@ -391,6 +392,7 @@
   "page.sign.cosmos.tx.warning-paragraph": "Error: SIGN_MODE_DIRECT can’t be signed on Ledger. Contact the web app provider to fix this issue.",
   "page.sign.cosmos.tx.readonly-memo.empty": "(Empty)",
   "page.sign.cosmos.tx.view-data-button": "View data",
+  "page.sign.cosmos.tx.high-fee-warning": "The transaction fee is unusually high.{br}I confirm and agree to proceed, nevertheless.",
   "page.sign.cosmos.icns.title": "Request Registration",
   "page.sign.cosmos.lava.guide.title": "🌋 Using Lava Endpoints",
   "page.sign.cosmos.lava.guide.paragraph": "You are currently using endpoints provided Lava.",
@@ -402,7 +404,10 @@
   "page.sign.adr36.warning-paragraph": "Error: SIGN_MODE_DIRECT can’t be signed on Ledger. Contact the web app provider to fix this issue.",
 
   "page.sign.ethereum.title": "Sign Ethereum",
-  "page.sign.ethereum.requested-network": "Requested Network",
+  "page.sign.ethereum.requested-network": "on {network}",
+  "page.sign.ethereum.tx.title": "Confirm Transaction",
+  "page.sign.ethereum.tx.summary": "Transaction Summary",
+  "page.sign.ethereum.tx.send.paragraph": "Send <b>{amount}</b> from <b>{fromAddress}</b> to <b>{toAddress}</b>",
 
   "page.sign.components.fee-summary.fee": "Tx Fee",
 

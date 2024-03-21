@@ -12,6 +12,7 @@ import { BalanceRegistry, IObservableQueryBalanceImpl } from "../../balances";
 import { ObservableChainQuery } from "../../chain-query";
 import { Balances } from "./types";
 import { AppCurrency } from "@keplr-wallet/types";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 
 export class ObservableQueryCosmosBalancesImplParent extends ObservableChainQuery<Balances> {
   // XXX: See comments below.
@@ -157,6 +158,12 @@ export class ObservableQueryCosmosBalanceRegistry implements BalanceRegistry {
   ): ObservableQueryCosmosBalancesImpl | undefined {
     const denomHelper = new DenomHelper(minimalDenom);
     if (denomHelper.type !== "native") {
+      return;
+    }
+
+    try {
+      Bech32Address.validate(bech32Address);
+    } catch {
       return;
     }
 

@@ -617,4 +617,30 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       }
     );
   }
+
+  async sendEthereumTx(chainId: string, tx: Uint8Array): Promise<string> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "background-tx-ethereum",
+      "send-ethereum-tx-to-background",
+      {
+        chainId,
+        tx,
+      }
+    );
+  }
+
+  async suggestERC20(chainId: string, contractAddress: string): Promise<void> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "token-erc20",
+      "SuggestERC20TokenMsg",
+      {
+        chainId,
+        contractAddress,
+      }
+    );
+  }
 }

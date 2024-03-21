@@ -30,8 +30,16 @@ export class RequestSignEthereumMsg extends Message<Uint8Array> {
       throw new Error("sign type not set");
     }
 
-    // Validate bech32 address.
-    Bech32Address.validate(this.signer);
+    // Validate signer address.
+    try {
+      Bech32Address.validate(this.signer);
+    } catch {
+      const tempSigner =
+        this.signer.substring(0, 2) === "0x" ? this.signer : "0x" + this.signer;
+      if (!tempSigner.match(/^0x[0-9A-Fa-f]*$/) || tempSigner.length !== 42) {
+        throw new Error("Signer is not valid hex address");
+      }
+    }
   }
 
   override approveExternal(): boolean {

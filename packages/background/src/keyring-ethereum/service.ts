@@ -3,7 +3,7 @@ import { KeyRingService } from "../keyring";
 import { InteractionService } from "../interaction";
 import { AnalyticsService } from "../analytics";
 import { Env } from "@keplr-wallet/router";
-import { EthSignType } from "@keplr-wallet/types";
+import { ChainInfo, EthSignType } from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
 import {
@@ -59,9 +59,10 @@ export class KeyRingEthereumService {
   ): Promise<Uint8Array> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const evmInfo = KeyRingEthereumService.evmInfo(chainInfo);
 
-    if (!isEthermintLike) {
-      throw new Error("Not ethermint like chain");
+    if (!isEthermintLike && !evmInfo) {
+      throw new Error("Not ethermint like and EVM chain");
     }
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
@@ -75,12 +76,25 @@ export class KeyRingEthereumService {
       );
     }
 
+    try {
+      Bech32Address.validate(signer);
+    } catch {
+      // Ignore mixed-case checksum
+      signer = (
+        signer.substring(0, 2) === "0x" ? signer : "0x" + signer
+      ).toLowerCase();
+    }
+
     const key = await this.keyRingCosmosService.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
         .bech32PrefixAccAddr;
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
-    if (signer !== bech32Address) {
+    const ethereumHexAddress = Bech32Address.fromBech32(
+      bech32Address,
+      bech32Prefix
+    ).toHex(false);
+    if (signer !== bech32Address && signer !== ethereumHexAddress) {
       throw new Error("Signer mismatched");
     }
 
@@ -177,5 +191,9 @@ export class KeyRingEthereumService {
         }
       }
     );
+  }
+
+  static evmInfo(chainInfo: ChainInfo): ChainInfo["evm"] | undefined {
+    return chainInfo.evm;
   }
 }
