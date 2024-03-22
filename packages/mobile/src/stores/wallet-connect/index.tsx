@@ -10,7 +10,7 @@ import {Buffer} from 'buffer/';
 import {KVStore} from '@keplr-wallet/common';
 import Long from 'long';
 import {ChainIdHelper} from '@keplr-wallet/cosmos';
-import {AppState, Linking} from 'react-native';
+import {AppState} from 'react-native';
 import {Key} from '@keplr-wallet/types';
 import {
   KeyRingStore,
@@ -103,11 +103,11 @@ export class WalletConnectStore {
     makeObservable(this);
 
     this.init();
-    this.initDeepLink();
   }
 
   protected async init(): Promise<void> {
-    const projectId = process.env['WC_PROJECT_ID'];
+    const projectId =
+      process.env['WC_PROJECT_ID'] || 'a9fd98e67c49a9930d59cbb301be4583';
     if (!projectId) {
       return;
     }
@@ -140,76 +140,45 @@ export class WalletConnectStore {
     );
   }
 
-  protected async initDeepLink() {
-    await this.checkInitialURL();
-
-    Linking.addEventListener('url', e => {
-      this.processDeepLinkURL(e.url);
-    });
-
-    AppState.addEventListener('change', state => {
-      if (state === 'active') {
-        if (this._isAndroidActivityKilled) {
-          // If the android activity restored, the deep link url handler will not work.
-          // We should recheck the initial URL()
-          this.checkInitialURL();
-        }
-        this._isAndroidActivityKilled = false;
-      } else {
-        this.clearNeedGoBackToBrowser();
-      }
-    });
-  }
-
-  protected async checkInitialURL() {
-    const initialURL = await Linking.getInitialURL();
-    if (initialURL) {
-      await this.processDeepLinkURL(initialURL);
-    }
-  }
-
-  protected async processDeepLinkURL(_url: string) {
+  async processDeepLinkURL(url: URL) {
     try {
-      const url = new URL(_url);
-      if (url.protocol === 'keplrwallet:' && url.host === 'wcV2') {
-        // If deep link, uri can be escaped.
-        let params = decodeURIComponent(url.search);
-        if (params) {
-          if (params.startsWith('?')) {
-            params = params.slice(1);
-          }
+      // If deep link, uri can be escaped.
+      let params = decodeURIComponent(url.search);
+      if (params) {
+        if (params.startsWith('?')) {
+          params = params.slice(1);
+        }
 
-          const topic = this.getTopicFromURI(params);
-          try {
-            // Validate that topic is hex encoded.
-            if (
-              Buffer.from(topic, 'hex').toString('hex').toLowerCase() !==
-              topic.toLowerCase()
-            ) {
-              throw new Error('Invalid topic');
-            }
-          } catch {
-            console.log('Invalid topic', params);
-            return;
+        const topic = this.getTopicFromURI(params);
+        try {
+          // Validate that topic is hex encoded.
+          if (
+            Buffer.from(topic, 'hex').toString('hex').toLowerCase() !==
+            topic.toLowerCase()
+          ) {
+            throw new Error('Invalid topic');
           }
-          if (this.sessionProposalResolverMap.has(topic)) {
-            // Already requested. Do nothing.
-            return;
-          }
+        } catch {
+          console.log('Invalid topic', params);
+          return;
+        }
+        if (this.sessionProposalResolverMap.has(topic)) {
+          // Already requested. Do nothing.
+          return;
+        }
 
+        runInAction(() => {
+          this._isPendingClientFromDeepLink = true;
+        });
+
+        try {
+          await this.pair(params, true);
+        } catch (e) {
+          console.log('Failed to init wallet connect v2 client', e);
+        } finally {
           runInAction(() => {
-            this._isPendingClientFromDeepLink = true;
+            this._isPendingClientFromDeepLink = false;
           });
-
-          try {
-            await this.pair(params, true);
-          } catch (e) {
-            console.log('Failed to init wallet connect v2 client', e);
-          } finally {
-            runInAction(() => {
-              this._isPendingClientFromDeepLink = false;
-            });
-          }
         }
       }
     } catch (e) {
