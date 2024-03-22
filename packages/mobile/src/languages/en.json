@@ -382,8 +382,12 @@
   "page.sign.adr36.requested-network": "Requested Network",
   "page.sign.adr36.warning-title": "Incompatible Signing Requested",
   "page.sign.adr36.warning-paragraph": "Error: SIGN_MODE_DIRECT can’t be signed on Ledger. Contact the web app provider to fix this issue.",
+
   "page.sign.ethereum.title": "Sign Ethereum",
-  "page.sign.ethereum.requested-network": "Requested Network",
+  "page.sign.ethereum.requested-network": "on {network}",
+  "page.sign.ethereum.tx.title": "Confirm Transaction",
+  "page.sign.ethereum.tx.summary": "Transaction Summary",
+  "page.sign.ethereum.tx.send.paragraph": "Send <b>{amount}</b> from <b>{fromAddress}</b> to <b>{toAddress}</b>",
 
   "page.sign.components.fee-summary.fee": "Tx Fee",
 

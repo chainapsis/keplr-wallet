@@ -24,6 +24,7 @@ import {
   KeyRingStore,
   PermissionManagerStore,
   PermissionStore,
+  SignEthereumInteractionStore,
   SignInteractionStore,
   TokensStore,
 } from '@keplr-wallet/stores-core';
@@ -73,6 +74,7 @@ export class RootStore {
   public readonly interactionStore: InteractionStore;
   public readonly permissionStore: PermissionStore;
   public readonly signInteractionStore: SignInteractionStore;
+  public readonly signEthereumInteractionStore: SignEthereumInteractionStore;
   public readonly chainSuggestStore: ChainSuggestStore;
 
   public readonly favoriteWebpageStore: FavoriteWebpageStore;
@@ -150,6 +152,9 @@ export class RootStore {
       new RNMessageRequesterInternal(),
     );
     this.signInteractionStore = new SignInteractionStore(this.interactionStore);
+    this.signEthereumInteractionStore = new SignEthereumInteractionStore(
+      this.interactionStore,
+    );
     this.chainSuggestStore = new ChainSuggestStore(
       this.interactionStore,
       CommunityChainInfoRepo,

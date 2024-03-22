@@ -48,6 +48,7 @@ import {ChainIdHelper} from '@keplr-wallet/cosmos';
 import {amountToAmbiguousAverage} from '../../../utils';
 import {GuideBox} from '../../../components/guide-box';
 import {Text} from 'react-native';
+import {EthTxStatus} from '@keplr-wallet/types';
 
 export const SendAmountScreen: FunctionComponent = observer(() => {
   const {
