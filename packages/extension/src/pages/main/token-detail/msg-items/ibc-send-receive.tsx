@@ -100,7 +100,7 @@ export const MsgRelationIBCSendReceive: FunctionComponent<{
           }
           deco={
             sourceChain ? (
-              <ChainImageFallback chainInfo={sourceChain} size="1rem" />
+              <ChainImageFallback chainInfo={sourceChain} size="0.875rem" />
             ) : undefined
           }
         />

@@ -115,7 +115,10 @@ export const MsgRelationIBCSend: FunctionComponent<{
           }
           deco={
             destinationChain ? (
-              <ChainImageFallback chainInfo={destinationChain} size="1rem" />
+              <ChainImageFallback
+                chainInfo={destinationChain}
+                size="0.875rem"
+              />
             ) : undefined
           }
         />
