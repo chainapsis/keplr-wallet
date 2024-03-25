@@ -69,6 +69,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
     confirmPassword: string;
     recoveryPhrase: string;
   }>({
+    mode: 'onChange',
     defaultValues: {
       name: '',
       password: '',
