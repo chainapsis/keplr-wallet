@@ -298,6 +298,7 @@ export type StakeNavigation = {
       validatorAddress: string,
       validatorName: string,
     ) => void;
+    fromDeepLink?: string;
   };
   'Stake.ValidateDetail': {
     chainId: string;
@@ -1137,7 +1138,41 @@ export const AppNavigation: FunctionComponent = observer(() => {
             component={TxFailedResultScreen}
           />
         </Stack.Navigator>
+
+        <DeepLinkNavigationComponent />
       </BugsnagNavigationContainer>
     </FocusedScreenProvider>
   );
+});
+
+export const DeepLinkNavigationComponent: FunctionComponent = observer(() => {
+  const navigation = useNavigation<StackNavProp>();
+  const {chainStore, deepLinkStore, keyRingStore} = useStore();
+
+  (async () => {
+    if (keyRingStore.status === 'unlocked' && deepLinkStore.needToNavigation) {
+      if (!chainStore.isEnabledChain(deepLinkStore.needToNavigation.chainId)) {
+        await chainStore.enableChainInfoInUI(
+          deepLinkStore.needToNavigation.chainId,
+        );
+      }
+
+      // Wait for the navigation to be completed.
+      setTimeout(() => {
+        if (deepLinkStore.needToNavigation) {
+          navigation.navigate('Stake', {
+            screen: 'Stake.ValidateList',
+            params: {
+              chainId: deepLinkStore.needToNavigation.chainId,
+              fromDeepLink: deepLinkStore.needToNavigation.from,
+            },
+          });
+        }
+
+        deepLinkStore.clearNeedToNavigation();
+      }, 0);
+    }
+  })();
+
+  return <></>;
 });
