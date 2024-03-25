@@ -41,6 +41,7 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
         {
           chainId: string;
           txHash: string;
+          isEvmTx?: boolean;
         }
       >,
       string
@@ -54,6 +55,7 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
     ];
   }, [chainId]);
   const txHash = route.params.txHash;
+  const isEvmTx = route.params.isEvmTx;
 
   const style = useStyle();
   const navigation = useNavigation<StackNavProp>();
@@ -159,7 +161,7 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
             }}
           />
         </View>
-        {txExplorer ? (
+        {!!txExplorer && !isEvmTx ? (
           <TextButton
             containerStyle={style.flatten(['margin-top-16'])}
             size="large"

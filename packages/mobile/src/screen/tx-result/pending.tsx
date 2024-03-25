@@ -19,6 +19,9 @@ import {Box} from '../../components/box';
 import {TextButton} from '../../components/text-button';
 import {useNotification} from '../../hooks/notification';
 import {FormattedMessage, useIntl} from 'react-intl';
+import {EthTxReceipt, EthTxStatus} from '@keplr-wallet/types';
+import {simpleFetch} from '@keplr-wallet/simple-fetch';
+import {retry} from '@keplr-wallet/common';
 
 export const TxPendingResultScreen: FunctionComponent = observer(() => {
   const {chainStore} = useStore();
@@ -37,6 +40,7 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
         {
           chainId: string;
           txHash: string;
+          isEvmTx?: boolean;
         }
       >,
       string
@@ -63,38 +67,99 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
   }, [notification]);
 
   useEffect(() => {
-    const txHash = route.params.txHash;
-    const chainInfo = chainStore.getChain(chainId);
-    let txTracer: TendermintTxTracer | undefined;
-
     if (isFocused) {
-      txTracer = new TendermintTxTracer(chainInfo.rpc, '/websocket');
-      txTracer
-        .traceTx(Buffer.from(txHash, 'hex'))
-        .then(tx => {
-          if (isPendingGotoHome.current) {
-            return;
-          }
+      const txHash = route.params.txHash;
+      const isEvmTx = route.params.isEvmTx;
+      const chainInfo = chainStore.getChain(chainId);
 
-          if (tx.code == null || tx.code === 0) {
-            isPendingGoToResult.current = true;
-            navigation.replace('TxSuccess', {chainId, txHash});
-          } else {
-            isPendingGoToResult.current = true;
-            navigation.replace('TxFail', {chainId, txHash});
-          }
-        })
-        .catch(e => {
-          console.log(`Failed to trace the tx (${txHash})`, e);
-        });
-    }
+      if (isEvmTx) {
+        retry(
+          () => {
+            return new Promise<void>(async (resolve, reject) => {
+              if (chainInfo.evm === undefined) {
+                return reject();
+              }
 
-    return () => {
-      if (txTracer) {
-        txTracer.close();
+              const txReceiptResponse = await simpleFetch<{
+                result: EthTxReceipt | null;
+                error?: Error;
+              }>(chainInfo.evm.rpc, {
+                method: 'POST',
+                headers: {
+                  'content-type': 'application/json',
+                },
+                body: JSON.stringify({
+                  jsonrpc: '2.0',
+                  method: 'eth_getTransactionReceipt',
+                  params: [txHash],
+                  id: 1,
+                }),
+              });
+
+              if (txReceiptResponse.data.error) {
+                console.error(txReceiptResponse.data.error);
+                resolve();
+              }
+
+              const txReceipt = txReceiptResponse.data.result;
+              if (txReceipt) {
+                if (isPendingGotoHome.current) {
+                  return resolve();
+                }
+
+                if (txReceipt.status === EthTxStatus.Success) {
+                  isPendingGoToResult.current = true;
+                  navigation.replace('TxSuccess', {chainId, txHash, isEvmTx});
+                } else {
+                  isPendingGoToResult.current = true;
+                  navigation.replace('TxFail', {chainId, txHash, isEvmTx});
+                }
+                resolve();
+              }
+
+              reject();
+            });
+          },
+          {
+            maxRetries: 10,
+            waitMsAfterError: 500,
+            maxWaitMsAfterError: 4000,
+          },
+        );
+      } else {
+        const txTracer = new TendermintTxTracer(chainInfo.rpc, '/websocket');
+        txTracer
+          .traceTx(Buffer.from(txHash, 'hex'))
+          .then(tx => {
+            if (isPendingGotoHome.current) {
+              return;
+            }
+
+            if (tx.code == null || tx.code === 0) {
+              isPendingGoToResult.current = true;
+              navigation.replace('TxSuccess', {chainId, txHash});
+            } else {
+              isPendingGoToResult.current = true;
+              navigation.replace('TxFail', {chainId, txHash});
+            }
+          })
+          .catch(e => {
+            console.log(`Failed to trace the tx (${txHash})`, e);
+          });
+
+        return () => {
+          txTracer.close();
+        };
       }
-    };
-  }, [chainId, chainStore, isFocused, navigation, route.params.txHash]);
+    }
+  }, [
+    chainId,
+    chainStore,
+    isFocused,
+    navigation,
+    route.params.txHash,
+    route.params.isEvmTx,
+  ]);
 
   return (
     <Box style={style.flatten(['flex-grow-1', 'items-center'])}>

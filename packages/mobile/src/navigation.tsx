@@ -278,14 +278,17 @@ export type RootStackParamList = {
   TxPending: {
     chainId: string;
     txHash: string;
+    isEvmTx?: boolean;
   };
   TxSuccess: {
     chainId: string;
     txHash: string;
+    isEvmTx?: boolean;
   };
   TxFail: {
     chainId: string;
     txHash: string;
+    isEvmTx?: boolean;
   };
 };
 

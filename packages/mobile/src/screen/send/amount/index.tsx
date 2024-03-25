@@ -489,8 +489,10 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
         size={'large'}
         disabled={txConfigsValidate.interactionBlocked}
         loading={
-          accountStore.getAccount(chainId).isSendingMsg ===
-          (!isIBCTransfer ? 'send' : 'ibcTransfer')
+          isEvmTx
+            ? ethereumAccount.isSendingTx
+            : accountStore.getAccount(chainId).isSendingMsg ===
+              (!isIBCTransfer ? 'send' : 'ibcTransfer')
         }
         onPress={async () => {
           if (!txConfigsValidate.interactionBlocked) {
@@ -512,7 +514,47 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
                   maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
                 });
                 await ethereumAccount.sendEthereumTx(sender, unsignedTx, {
+                  onBroadcasted: txHash => {
+                    ethereumAccount.setIsSendingTx(false);
+
+                    navigation.navigate('TxPending', {
+                      chainId,
+                      txHash,
+                      isEvmTx,
+                    });
+                  },
                   onFulfill: txReceipt => {
+                    queryBalances
+                      .getQueryEthereumHexAddress(sender)
+                      .balances.forEach(balance => {
+                        if (
+                          balance.currency.coinMinimalDenom ===
+                            coinMinimalDenom ||
+                          sendConfigs.feeConfig.fees.some(
+                            fee =>
+                              fee.currency.coinMinimalDenom ===
+                              balance.currency.coinMinimalDenom,
+                          )
+                        ) {
+                          balance.fetch();
+                        }
+                      });
+                    queryBalances
+                      .getQueryBech32Address(account.bech32Address)
+                      .balances.forEach(balance => {
+                        if (
+                          balance.currency.coinMinimalDenom ===
+                            coinMinimalDenom ||
+                          sendConfigs.feeConfig.fees.some(
+                            fee =>
+                              fee.currency.coinMinimalDenom ===
+                              balance.currency.coinMinimalDenom,
+                          )
+                        ) {
+                          balance.fetch();
+                        }
+                      });
+
                     if (txReceipt.status === EthTxStatus.Success) {
                       notification.show(
                         'success',
@@ -530,7 +572,6 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
                     }
                   },
                 });
-                ethereumAccount.setIsSendingTx(false);
               } else {
                 const tx = isIBCTransfer
                   ? accountStore

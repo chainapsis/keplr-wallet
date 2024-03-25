@@ -111,7 +111,23 @@ export const SignEthereumModal = registerCardModal(
       }
     }, [interactionData.data]);
 
-    const approve = async () => {};
+    const approve = async () => {
+      try {
+        await signEthereumInteractionStore.approveWithProceedNext(
+          interactionData.id,
+          undefined,
+          async () => {
+            // noop
+          },
+          {
+            // XXX: 단지 special button의 애니메이션을 보여주기 위해서 delay를 넣음...ㅋ;
+            preDelay: 200,
+          },
+        );
+      } catch (e) {
+        console.log(e);
+      }
+    };
 
     return (
       <Box style={style.flatten(['padding-12', 'padding-top-0'])}>
