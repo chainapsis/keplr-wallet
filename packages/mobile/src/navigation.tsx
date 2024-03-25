@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite';
-import {FunctionComponent, useCallback, useEffect} from 'react';
+import {FunctionComponent, useEffect} from 'react';
 import {useStore} from './stores';
 import {
   DarkTheme,
