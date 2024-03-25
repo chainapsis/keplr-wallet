@@ -73,7 +73,6 @@ export class DeepLinkStore {
 
       if (urlParams.has('chainId')) {
         if (urlParams.has('from')) {
-          console.log(urlParams.get('chainId'), urlParams.get('from'));
           runInAction(() => {
             this._needToNavigation = {
               chainId: urlParams.get('chainId') as string,

@@ -1149,7 +1149,7 @@ export const DeepLinkNavigationComponent: FunctionComponent = observer(() => {
   const navigation = useNavigation<StackNavProp>();
   const {chainStore, deepLinkStore, keyRingStore} = useStore();
 
-  useCallback(async () => {
+  (async () => {
     if (keyRingStore.status === 'unlocked' && deepLinkStore.needToNavigation) {
       if (!chainStore.isEnabledChain(deepLinkStore.needToNavigation.chainId)) {
         await chainStore.enableChainInfoInUI(
@@ -1172,8 +1172,7 @@ export const DeepLinkNavigationComponent: FunctionComponent = observer(() => {
         deepLinkStore.clearNeedToNavigation();
       }, 0);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deepLinkStore.needToNavigation, keyRingStore.status]);
+  })();
 
   return <></>;
 });
