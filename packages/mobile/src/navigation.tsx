@@ -298,6 +298,7 @@ export type StakeNavigation = {
       validatorAddress: string,
       validatorName: string,
     ) => void;
+    fromDeepLink?: string;
   };
   'Stake.ValidateDetail': {
     chainId: string;
@@ -1163,6 +1164,7 @@ export const DeepLinkNavigationComponent: FunctionComponent = observer(() => {
             screen: 'Stake.ValidateList',
             params: {
               chainId: deepLinkStore.needToNavigation.chainId,
+              fromDeepLink: deepLinkStore.needToNavigation.from,
             },
           });
         }
