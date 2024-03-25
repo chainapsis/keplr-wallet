@@ -106,8 +106,7 @@ export class WalletConnectStore {
   }
 
   protected async init(): Promise<void> {
-    const projectId =
-      process.env['WC_PROJECT_ID'] || 'a9fd98e67c49a9930d59cbb301be4583';
+    const projectId = process.env['WC_PROJECT_ID'];
     if (!projectId) {
       return;
     }
@@ -207,8 +206,12 @@ export class WalletConnectStore {
     this._needGoBackToBrowser = false;
   }
 
-  onAndroidActivityKilled() {
-    this._isAndroidActivityKilled = true;
+  get isAndroidActivityKilled(): boolean {
+    return this._isAndroidActivityKilled;
+  }
+
+  setAndroidActivityKilled(killed: boolean) {
+    this._isAndroidActivityKilled = killed;
   }
 
   async getSessionMetadata(id: string): Promise<
