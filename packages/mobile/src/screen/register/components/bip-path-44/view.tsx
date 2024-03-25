@@ -16,8 +16,10 @@ import {useConfirm} from '../../../../hooks/confirm';
 export const Bip44PathView: FunctionComponent<{
   coinType?: number;
   state: BIP44PathState;
+  // ledger에서는 100까지밖에 허용안됨
+  isLedger?: boolean;
   setIsOpen: (isOpen: boolean) => void;
-}> = observer(({coinType, state, setIsOpen}) => {
+}> = observer(({coinType, state, isLedger, setIsOpen}) => {
   const intl = useIntl();
   const confirm = useConfirm();
   const style = useStyle();
@@ -126,6 +128,10 @@ export const Bip44PathView: FunctionComponent<{
           keyboardType="number-pad"
           value={state.accountText}
           onChangeText={text => {
+            const accountNumber = Number.parseInt(text);
+            if (isLedger ? accountNumber > 100 : accountNumber > 2147483647) {
+              return;
+            }
             state.setAccountText(text);
           }}
           errorBorder={!state.isAccountValid()}
@@ -150,6 +156,14 @@ export const Bip44PathView: FunctionComponent<{
           keyboardType="number-pad"
           value={state.addressIndexText}
           onChangeText={text => {
+            const addressIndexNumber = Number.parseInt(text);
+            if (
+              isLedger
+                ? addressIndexNumber > 100
+                : addressIndexNumber > 2147483647
+            ) {
+              return;
+            }
             state.setAddressIndexText(text);
           }}
           errorBorder={!state.isAddressIndexValid()}

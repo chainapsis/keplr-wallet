@@ -2,6 +2,7 @@
   "error.not-supported-error": "Not supported",
   "error.bip44-path-required": "BIP44 path should be provided",
   "error.too-short-mnemonic": "Too short recovery phrase",
+  "error.wrong-mnemonic-word": "Wrong recovery phrase. Please double-check these words: {index}.",
   "error.invalid-mnemonic": "Invalid recovery phrase",
   "error.failed-to-set-endpoints": "Failed to set endpoints",
   "error.transaction-failed": "Transaction Failed",

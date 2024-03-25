@@ -17,6 +17,7 @@ import {ScrollViewRegisterContainer} from '../components/scroll-view-register-co
 import {VerticalCollapseTransition} from '../../../components/transition';
 import {NamePasswordInput} from '../components/name-password-input';
 import {useStore} from '../../../stores';
+import {isMnemonicWord} from '@keplr-wallet/common';
 
 const bip39 = require('bip39');
 
@@ -25,7 +26,7 @@ function trimWordsStr(str: string): string {
   // Split on the whitespace or new line.
   const splited = str.split(/\s+/);
   const words = splited
-    .map(word => word.trim())
+    .map(word => word.toLowerCase().trim())
     .filter(word => word.trim().length > 0);
   return words.join(' ');
 }
@@ -68,6 +69,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
     confirmPassword: string;
     recoveryPhrase: string;
   }>({
+    mode: 'onChange',
     defaultValues: {
       name: '',
       password: '',
@@ -183,11 +185,39 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
             value = trimWordsStr(value);
             if (!isPrivateKey(value)) {
               if (value.split(' ').length < 8) {
-                return 'Too short mnemonic';
+                return intl.formatMessage({id: 'error.too-short-mnemonic'});
+              }
+
+              const notMnemonicWords: {
+                index: number;
+                word: string;
+              }[] = [];
+
+              for (let i = 0; i < value.split(' ').length; i++) {
+                const word = value.split(' ')[i];
+                if (word) {
+                  if (!isMnemonicWord(word)) {
+                    notMnemonicWords.push({
+                      index: i,
+                      word: word,
+                    });
+                  }
+                }
+              }
+
+              if (notMnemonicWords.length > 0) {
+                return intl.formatMessage(
+                  {id: 'error.wrong-mnemonic-word'},
+                  {
+                    index: notMnemonicWords
+                      .map(w => `#${w.index + 1}`)
+                      .join(', '),
+                  },
+                );
               }
 
               if (!bip39.validateMnemonic(value)) {
-                return 'Invalid Phrase';
+                return intl.formatMessage({id: 'error.invalid-mnemonic'});
               }
             } else {
               value = value.replace('0x', '');
@@ -206,6 +236,8 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
                 return 'Invalid private key';
               }
             }
+
+            return '';
           },
         }}
         render={({field: {onChange, onBlur, value}}) => {
