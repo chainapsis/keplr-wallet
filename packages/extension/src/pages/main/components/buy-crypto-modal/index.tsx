@@ -9,7 +9,7 @@ import {
 } from "../../../../config.ui";
 import { Box } from "../../../../components/box";
 import { useStore } from "../../../../stores";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, AppCurrency } from "@keplr-wallet/types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { FormattedMessage } from "react-intl";
 
@@ -67,7 +67,11 @@ const Styles = {
 
 export const BuyCryptoModal: FunctionComponent<{
   close: () => void;
-}> = observer(({ close }) => {
+  selectedTokenInfo?: {
+    chainId: string;
+    currency: AppCurrency;
+  };
+}> = observer(({ close, selectedTokenInfo }) => {
   const theme = useTheme();
   const { accountStore, chainStore } = useStore();
   const [fiatOnRampServiceInfos, setFiatOnRampServiceInfos] = useState(
@@ -85,38 +89,68 @@ export const BuyCryptoModal: FunctionComponent<{
   }, []);
 
   const buySupportServiceInfos = fiatOnRampServiceInfos.map((serviceInfo) => {
-    const buySupportChainIds = Object.keys(
-      serviceInfo.buySupportCoinDenomsByChainId
-    );
-
-    const buySupportDefaultChainInfo = (() => {
-      if (
-        buySupportChainIds.length > 0 &&
-        chainStore.hasChain(buySupportChainIds[0])
-      ) {
-        return chainStore.getChain(buySupportChainIds[0]);
-      }
-    })();
-
+    const buySupportCoinDenoms = [
+      ...new Set(
+        selectedTokenInfo
+          ? Object.entries(serviceInfo.buySupportCoinDenomsByChainId)
+              .filter(
+                ([chainId, coinDenoms]) =>
+                  chainId === selectedTokenInfo.chainId &&
+                  coinDenoms?.some((coinDenom) =>
+                    coinDenom === "USDC"
+                      ? selectedTokenInfo.currency.coinDenom.includes("USDC")
+                      : coinDenom === selectedTokenInfo.currency.coinDenom
+                  )
+              )
+              .map(([_, coinDenoms]) => coinDenoms)
+              .flat()
+          : Object.values(serviceInfo.buySupportCoinDenomsByChainId).flat()
+      ),
+    ];
     const buySupportChainAccounts = (() => {
       const res: {
         chainInfo: ChainInfo;
         bech32Address: string;
       }[] = [];
 
-      for (const chainId of buySupportChainIds) {
+      for (const chainId of Object.keys(
+        serviceInfo.buySupportCoinDenomsByChainId
+      )) {
         if (chainStore.hasChain(chainId)) {
-          res.push({
-            chainInfo: chainStore.getChain(chainId),
-            bech32Address: accountStore.getAccount(chainId).bech32Address,
-          });
+          if (
+            !selectedTokenInfo ||
+            (selectedTokenInfo && selectedTokenInfo.chainId === chainId)
+          ) {
+            res.push({
+              chainInfo: chainStore.getChain(chainId),
+              bech32Address: accountStore.getAccount(chainId).bech32Address,
+            });
+          }
         }
       }
 
       return res;
     })();
 
+    const selectedCoinDenom = selectedTokenInfo
+      ? buySupportCoinDenoms.find((coinDenom) =>
+          coinDenom === "USDC"
+            ? selectedTokenInfo.currency.coinDenom.includes("USDC")
+            : coinDenom === selectedTokenInfo.currency.coinDenom
+        )
+      : undefined;
+    const selectedChainName = selectedTokenInfo
+      ? buySupportChainAccounts.find(
+          (chainAccount) =>
+            chainAccount.chainInfo.chainId === selectedTokenInfo.chainId
+        )?.chainInfo.chainName
+      : undefined;
+
     const buyUrlParams = (() => {
+      if (buySupportCoinDenoms.length === 0) {
+        return undefined;
+      }
+
       switch (serviceInfo.serviceId) {
         case "moonpay":
           return {
@@ -136,12 +170,7 @@ export const BuyCryptoModal: FunctionComponent<{
                 )
               )
             ),
-            ...(buySupportDefaultChainInfo && {
-              defaultCurrencyCode: (
-                buySupportDefaultChainInfo.stakeCurrency ||
-                buySupportDefaultChainInfo.currencies[0]
-              ).coinDenom.toLowerCase(),
-            }),
+            defaultCurrencyCode: selectedCoinDenom ?? buySupportCoinDenoms[0],
           };
         case "transak":
           return {
@@ -163,21 +192,8 @@ export const BuyCryptoModal: FunctionComponent<{
                 ),
               })
             ),
-            cryptoCurrencyList: buySupportChainAccounts
-              .map(
-                (chainAccount) =>
-                  (
-                    chainAccount.chainInfo.stakeCurrency ||
-                    chainAccount.chainInfo.currencies[0]
-                  ).coinDenom
-              )
-              .join(","),
-            ...(buySupportDefaultChainInfo && {
-              defaultCryptoCurrency: (
-                buySupportDefaultChainInfo.stakeCurrency ||
-                buySupportDefaultChainInfo.currencies[0]
-              ).coinDenom,
-            }),
+            cryptoCurrencyList: buySupportCoinDenoms,
+            defaultCryptoCurrency: selectedCoinDenom ?? buySupportCoinDenoms[0],
           };
         case "kado":
           return {
@@ -186,18 +202,11 @@ export const BuyCryptoModal: FunctionComponent<{
             networkList: buySupportChainAccounts.map((chainAccount) =>
               chainAccount.chainInfo.chainName.toUpperCase()
             ),
-            cryptoList: [
-              ...new Set(
-                Object.values(serviceInfo.buySupportCoinDenomsByChainId).flat()
-              ),
-            ],
-            ...(buySupportDefaultChainInfo && {
-              onRevCurrency:
-                serviceInfo.buySupportCoinDenomsByChainId[
-                  buySupportDefaultChainInfo.chainId
-                ]?.[0] ?? "USDC",
-              network: buySupportDefaultChainInfo.chainName.toUpperCase(),
-            }),
+            cryptoList: buySupportCoinDenoms,
+            onRevCurrency: selectedCoinDenom ?? buySupportCoinDenoms[0],
+            network:
+              selectedChainName ??
+              buySupportChainAccounts[0].chainInfo.chainName.toUpperCase(),
           };
         default:
           return;
@@ -247,6 +256,10 @@ const ServiceItem: FunctionComponent<{
   close: () => void;
 }> = ({ serviceInfo, close }) => {
   const { analyticsStore } = useStore();
+
+  if (serviceInfo.buyUrl === undefined) {
+    return null;
+  }
 
   return (
     <Styles.ItemContainer

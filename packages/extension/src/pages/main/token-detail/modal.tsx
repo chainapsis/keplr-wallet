@@ -16,6 +16,8 @@ import { HeaderHeight } from "../../../layouts/header";
 import { useNavigate } from "react-router";
 import { TokenInfos } from "./token-info";
 import { RenderMessages } from "./messages";
+import { Modal } from "../../../components/modal";
+import { BuyCryptoModal } from "../components";
 
 const Styles = {
   Container: styled.div`
@@ -52,6 +54,8 @@ export const TokenDetailModal: FunctionComponent<{
   const chainInfo = chainStore.getChain(chainId);
   const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
 
+  const [isOpenBuy, setIsOpenBuy] = React.useState(false);
+
   const balance = queriesStore
     .get(chainId)
     .queryBalances.getQueryBech32Address(
@@ -87,7 +91,7 @@ export const TokenDetailModal: FunctionComponent<{
       ),
       text: "Buy",
       onClick: () => {
-        // TODO: noop yet
+        setIsOpenBuy(true);
       },
     },
     {
@@ -411,6 +415,20 @@ export const TokenDetailModal: FunctionComponent<{
           />
         </SimpleBar>
       </Styles.Body>
+
+      <Modal
+        isOpen={isOpenBuy}
+        align="bottom"
+        close={() => setIsOpenBuy(false)}
+      >
+        <BuyCryptoModal
+          close={() => setIsOpenBuy(false)}
+          selectedTokenInfo={{
+            chainId,
+            currency,
+          }}
+        />
+      </Modal>
     </Styles.Container>
   );
 });
