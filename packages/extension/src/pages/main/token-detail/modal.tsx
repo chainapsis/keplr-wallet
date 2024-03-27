@@ -21,6 +21,8 @@ import { BuyCryptoModal } from "../components";
 import { useBuy } from "../../../hooks/use-buy";
 import { CoinPretty, DecUtils } from "@keplr-wallet/unit";
 import { CircleButton } from "./circle-button";
+import { AddressChip, QRCodeChip } from "./address-chip";
+import { ReceiveModal } from "./receive-modal";
 
 const Styles = {
   Container: styled.div`
@@ -57,6 +59,7 @@ export const TokenDetailModal: FunctionComponent<{
   const chainInfo = chainStore.getChain(chainId);
   const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
 
+  const [isReceiveOpen, setIsReceiveOpen] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
 
   const buySupportServiceInfos = useBuy({ chainId, currency });
@@ -121,7 +124,7 @@ export const TokenDetailModal: FunctionComponent<{
       ),
       text: "Receive",
       onClick: () => {
-        // TODO: noop yet
+        setIsReceiveOpen(true);
       },
     },
     {
@@ -278,7 +281,17 @@ export const TokenDetailModal: FunctionComponent<{
           }}
         >
           <Gutter size="0.25rem" />
-          <div>TODO: Address chip</div>
+          <YAxis alignX="center">
+            <XAxis alignY="center">
+              <AddressChip chainId={chainId} />
+              <Gutter size="0.25rem" />
+              <QRCodeChip
+                onClick={() => {
+                  setIsReceiveOpen(true);
+                }}
+              />
+            </XAxis>
+          </YAxis>
           <Gutter size="1.375rem" />
           <YAxis alignX="center">
             <Styles.Balance
@@ -443,6 +456,14 @@ export const TokenDetailModal: FunctionComponent<{
           close={() => setIsOpenBuy(false)}
           buySupportServiceInfos={buySupportServiceInfos}
         />
+      </Modal>
+
+      <Modal
+        isOpen={isReceiveOpen}
+        align="bottom"
+        close={() => setIsReceiveOpen(false)}
+      >
+        <ReceiveModal chainId={chainId} close={() => setIsReceiveOpen(false)} />
       </Modal>
     </Styles.Container>
   );
