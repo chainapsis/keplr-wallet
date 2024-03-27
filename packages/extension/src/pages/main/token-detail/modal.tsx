@@ -54,7 +54,13 @@ export const TokenDetailModal: FunctionComponent<{
   chainId: string;
   coinMinimalDenom: string;
 }> = observer(({ close, chainId, coinMinimalDenom }) => {
-  const { chainStore, accountStore, queriesStore, priceStore } = useStore();
+  const {
+    chainStore,
+    accountStore,
+    queriesStore,
+    priceStore,
+    skipQueriesStore,
+  } = useStore();
 
   const chainInfo = chainStore.getChain(chainId);
   const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
@@ -80,6 +86,7 @@ export const TokenDetailModal: FunctionComponent<{
     icon: React.ReactElement;
     text: string;
     onClick: () => void;
+    disabled?: boolean;
   }[] = [
     {
       icon: (
@@ -103,6 +110,7 @@ export const TokenDetailModal: FunctionComponent<{
       onClick: () => {
         setIsOpenBuy(true);
       },
+      disabled: !isSomeBuySupport,
     },
     {
       icon: (
@@ -147,8 +155,16 @@ export const TokenDetailModal: FunctionComponent<{
       ),
       text: "Swap",
       onClick: () => {
-        // TODO: noop yet
+        navigate(
+          `/ibc-swap?chainId=${chainId}&coinMinimalDenom=${coinMinimalDenom}&outChainId=${
+            chainStore.getChain("noble").chainId
+          }&outCoinMinimalDenom=uusdc`
+        );
       },
+      disabled: !skipQueriesStore.queryIBCSwap.isSwappableCurrency(
+        chainId,
+        currency
+      ),
     },
     {
       icon: (
@@ -331,11 +347,6 @@ export const TokenDetailModal: FunctionComponent<{
             <XAxis>
               <Gutter size="0.875rem" />
               {buttons.map((obj, i) => {
-                let disabled = false;
-                if (obj.text === "Buy" && !isSomeBuySupport) {
-                  disabled = true;
-                }
-
                 return (
                   <React.Fragment key={i.toString()}>
                     <Gutter size="1.875rem" />
@@ -343,7 +354,7 @@ export const TokenDetailModal: FunctionComponent<{
                       text={obj.text}
                       icon={obj.icon}
                       onClick={obj.onClick}
-                      disabled={disabled}
+                      disabled={obj.disabled}
                     />
                     {i === buttons.length - 1 ? (
                       <Gutter size="1.875rem" />
