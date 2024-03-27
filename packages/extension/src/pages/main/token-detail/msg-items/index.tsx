@@ -9,6 +9,8 @@ import { MsgRelationIBCSend } from "./ibc-send";
 import { MsgRelationIBCSendRefunded } from "./ibc-send-refunded";
 import { MsgRelationIBCSendReceive } from "./ibc-send-receive";
 import { MsgRelationVote } from "./vote";
+import { MsgRelationIBCSwap } from "./ibc-swap";
+import { MsgRelationIBCSwapReceive } from "./ibc-swap-receive";
 
 export const MsgItemRender: FunctionComponent<{
   msg: MsgHistory;
@@ -51,6 +53,24 @@ export const MsgItemRender: FunctionComponent<{
     case "ibc-send-refunded": {
       return (
         <MsgRelationIBCSendRefunded
+          msg={msg}
+          prices={prices}
+          targetDenom={targetDenom}
+        />
+      );
+    }
+    case "ibc-swap-skip-osmosis": {
+      return (
+        <MsgRelationIBCSwap
+          msg={msg}
+          prices={prices}
+          targetDenom={targetDenom}
+        />
+      );
+    }
+    case "ibc-swap-skip-osmosis-receive": {
+      return (
+        <MsgRelationIBCSwapReceive
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
