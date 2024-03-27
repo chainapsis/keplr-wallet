@@ -10,16 +10,17 @@ export const UnblockUserPopup = ({
   userName: string;
   setConfirmAction: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
+  const { chatStore, analyticsStore } = useStore();
   const [processing, setProcessing] = useState(false);
-  const { analyticsStore } = useStore();
-
+  const user = chatStore.userDetailsStore;
   const handleUnblock = async () => {
     analyticsStore.logEvent("unblock_contact_click", {
       action: "Unblock",
     });
     setProcessing(true);
     try {
-      await unblockUser(userName);
+      await unblockUser(userName, user.accessToken);
+      chatStore.messagesStore.setUnblockedUser({ blockedAddress: userName });
     } catch (e) {
       console.log(e);
     } finally {

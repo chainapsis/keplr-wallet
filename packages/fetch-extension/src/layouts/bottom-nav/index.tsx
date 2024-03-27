@@ -1,12 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { userDetails } from "@chatStore/user-slice";
-import {
-  notificationsDetails,
-  setNotifications,
-  walletConfig,
-  WalletConfig,
-} from "@chatStore/user-slice";
 import chatTabBlueIcon from "@assets/icon/chat-blue.png";
 import chatTabGreyIcon from "@assets/icon/chat-grey.png";
 import homeTabBlueIcon from "@assets/icon/home-blue.png";
@@ -21,8 +13,13 @@ import { useStore } from "../../stores";
 import style from "./style.module.scss";
 import { Tab } from "./tab";
 import { NotificationSetup } from "@notificationTypes";
-import { store } from "@chatStore/index";
 import { CHAIN_ID_FETCHHUB } from "../../config.ui.var";
+
+interface WalletConfig {
+  notiphyWhitelist: string[] | undefined;
+  fetchbotActive: boolean;
+  requiredNative: boolean;
+}
 
 const bottomNav = [
   {
@@ -56,11 +53,12 @@ export const BottomNav = () => {
 
 const HomeTab = () => <Tab {...bottomNav[0]} />;
 const NotificationTab = () => {
-  const { keyRingStore, accountStore, chainStore } = useStore();
+  const { keyRingStore, accountStore, chainStore, chatStore } = useStore();
   const current = chainStore.current;
+  const userState = chatStore.userDetailsStore;
   const accountInfo = accountStore.getAccount(current.chainId);
-  const config: WalletConfig = useSelector(walletConfig);
-  const notificationInfo: NotificationSetup = useSelector(notificationsDetails);
+  const config: WalletConfig = userState.walletConfig;
+  const notificationInfo: NotificationSetup = userState.notifications;
   const [isComingSoon, setIsComingSoon] = useState<boolean>(true);
 
   useEffect(() => {
@@ -83,13 +81,11 @@ const NotificationTab = () => {
         JSON.stringify([])
     );
 
-    store.dispatch(
-      setNotifications({
-        allNotifications: localNotifications,
-        unreadNotification: localNotifications.length > 0,
-        isNotificationOn: notificationFlag == "true",
-      })
-    );
+    userState.setNotifications({
+      allNotifications: localNotifications,
+      unreadNotification: localNotifications.length > 0,
+      isNotificationOn: notificationFlag == "true",
+    });
   }, [accountInfo.bech32Address, config.notiphyWhitelist]);
 
   return (
@@ -111,9 +107,11 @@ const NotificationTab = () => {
   );
 };
 const ChatTab = () => {
-  const { keyRingStore, chainStore } = useStore();
-  const { hasFET, enabledChainIds } = useSelector(userDetails);
-  const config: WalletConfig = useSelector(walletConfig);
+  const { keyRingStore, chainStore, chatStore } = useStore();
+  const userState = chatStore.userDetailsStore;
+
+  const { hasFET, enabledChainIds } = userState;
+  const config: WalletConfig = userState.walletConfig;
   const current = chainStore.current;
   const [chatTooltip, setChatTooltip] = useState("");
   const [chatDisabled, setChatDisabled] = useState(false);

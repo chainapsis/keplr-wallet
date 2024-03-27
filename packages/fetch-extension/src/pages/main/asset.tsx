@@ -19,8 +19,6 @@ import { DepositModal } from "./qr-code";
 import { useNotification } from "@components/notification";
 import { useIntl } from "react-intl";
 import { WalletStatus } from "@keplr-wallet/stores";
-import { store } from "@chatStore/index";
-import { setHasFET } from "@chatStore/user-slice";
 import { AppCurrency } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { BuySupportServiceInfo, useBuy } from "@hooks/use-buy";
@@ -190,7 +188,8 @@ const EmptyState = ({
 };
 
 export const AssetView: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, queriesStore, priceStore } = useStore();
+  const { chainStore, accountStore, queriesStore, priceStore, chatStore } =
+    useStore();
 
   const language = useLanguage();
 
@@ -272,7 +271,7 @@ export const AssetView: FunctionComponent = observer(() => {
     ? !stakablePrice.toDec().isZero()
     : !stakable.toDec().isZero();
 
-  store.dispatch(setHasFET(hasStakableFET));
+  chatStore.userDetailsStore.setHasFET(hasStakableFET);
 
   if (!hasBalance) {
     return (

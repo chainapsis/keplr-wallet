@@ -1,8 +1,6 @@
-import { userDetails } from "@chatStore/user-slice";
 import { useNotification } from "@components/notification";
 import { deliverMessages } from "@graphQL/messages-api";
 import React, { FunctionComponent, useMemo } from "react";
-import { useSelector } from "react-redux";
 import { useLocation } from "react-router";
 
 import { useStore } from "../../../stores";
@@ -16,12 +14,13 @@ export const RecipientAddressInput: FunctionComponent<{
   label: string;
   disabled: boolean;
 }> = observer(({ label, disabled }) => {
-  const { chainStore, accountStore, queriesStore, uiConfigStore } = useStore();
+  const { chainStore, accountStore, queriesStore, uiConfigStore, chatStore } =
+    useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const targetAddress = useLocation().pathname.split("/")[3];
 
-  const user = useSelector(userDetails);
+  const user = chatStore.userDetailsStore;
   const notification = useNotification();
   const sendConfigs = useSendTxConfig(
     chainStore,
@@ -54,7 +53,8 @@ export const RecipientAddressInput: FunctionComponent<{
         current.chainId,
         messagePayload,
         accountInfo.bech32Address,
-        targetAddress
+        targetAddress,
+        chatStore.messagesStore
       );
     } catch (e) {
       console.log(e);
@@ -78,7 +78,8 @@ export const RecipientAddressInput: FunctionComponent<{
         current.chainId,
         "/cancel",
         accountInfo.bech32Address,
-        targetAddress
+        targetAddress,
+        chatStore.messagesStore
       );
     } catch (e) {
       console.log(e);

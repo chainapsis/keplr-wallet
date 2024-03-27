@@ -1,7 +1,3 @@
-import { store } from "@chatStore/index";
-import { setGroups, userChatGroups } from "@chatStore/messages-slice";
-import { newGroupDetails, setNewGroupInfo } from "@chatStore/new-group-slice";
-import { userDetails } from "@chatStore/user-slice";
 import {
   CommonPopupOptions,
   Group,
@@ -25,7 +21,6 @@ import {
 import { HeaderLayout } from "@layouts/index";
 import { observer } from "mobx-react-lite";
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { useStore } from "../../../stores";
 import { encryptGroupMessage, GroupMessageType } from "@utils/encrypt-group";
@@ -47,17 +42,25 @@ import { ChatErrorPopup } from "@components/chat-error-popup";
 export const EditMember: FunctionComponent = observer(() => {
   const navigate = useNavigate();
   const loadingIndicator = useLoadingIndicator();
+  const {
+    chainStore,
+    accountStore,
+    queriesStore,
+    uiConfigStore,
+    analyticsStore,
+    chatStore,
+  } = useStore();
 
-  const user = useSelector(userDetails);
+  const user = chatStore.userDetailsStore;
 
   /// For updating the current group
-  const newGroupState: NewGroupDetails = useSelector(newGroupDetails);
+  const newGroupState: NewGroupDetails = chatStore.newGroupStore.newGroup;
   const [selectedMembers, setSelectedMembers] = useState<GroupMembers[]>(
     newGroupState.group.members || []
   );
 
   /// Group Info
-  const groups: Groups = useSelector(userChatGroups);
+  const groups: Groups = chatStore.messagesStore.userChatGroups;
   const group: Group = groups[newGroupState.group.groupId];
 
   /// Displaying list of addresses along with name
@@ -70,13 +73,6 @@ export const EditMember: FunctionComponent = observer(() => {
   /// Show alert popup for remove member
   const [removeMemberPopup, setRemoveMemberPopup] = useState(false);
 
-  const {
-    chainStore,
-    accountStore,
-    queriesStore,
-    uiConfigStore,
-    analyticsStore,
-  } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const walletAddress = accountInfo.bech32Address;
@@ -186,7 +182,7 @@ export const EditMember: FunctionComponent = observer(() => {
           };
         });
       setSelectedMembers(updatedMembers);
-      store.dispatch(setNewGroupInfo({ members: updatedMembers }));
+      chatStore.newGroupStore.setNewGroupInfo({ members: updatedMembers });
     }
   }, [groups, newGroupState.group.groupId]);
 
@@ -225,14 +221,14 @@ export const EditMember: FunctionComponent = observer(() => {
 
         const tempMembers = [...selectedMembers, tempMember];
 
-        store.dispatch(setNewGroupInfo({ members: tempMembers }));
+        chatStore.newGroupStore.setNewGroupInfo({ members: tempMembers });
         setSelectedMembers(tempMembers);
       }
     } else {
       const tempMembers = selectedMembers.filter(
         (item) => item.address !== contactAddress
       );
-      store.dispatch(setNewGroupInfo({ members: tempMembers }));
+      chatStore.newGroupStore.setNewGroupInfo({ members: tempMembers });
       setSelectedMembers(tempMembers);
     }
   };
@@ -273,22 +269,33 @@ export const EditMember: FunctionComponent = observer(() => {
         name: group.name,
         onlyAdminMessages: false,
       };
-      const tempGroup = await createGroup(updatedGroupInfo);
+      const tempGroup = await createGroup(updatedGroupInfo, user.accessToken);
 
       if (tempGroup) {
         /// Updating the UI
         updateUserAddresses(tempMembers);
         /// updating the new updated group
-        store.dispatch(setNewGroupInfo({ contents, members: tempMembers }));
+        chatStore.newGroupStore.setNewGroupInfo({
+          contents,
+          members: tempMembers,
+        });
         /// update state of selected member
         setSelectedMembers(tempMembers);
 
         /// updating the group(chat history) object
         const groups: any = { [tempGroup.id]: tempGroup };
-        store.dispatch(setGroups({ groups }));
-
+        const pagination = chatStore.messagesStore.groupsPagination;
+        chatStore.messagesStore.setGroups(groups, pagination);
         /// fetching the group messages again
-        await recieveMessages(group.id, null, 0, group.isDm, group.id);
+        await recieveMessages(
+          group.id,
+          null,
+          0,
+          group.isDm,
+          group.id,
+          user.accessToken,
+          chatStore.messagesStore
+        );
         analyticsStore.logEvent("remove_group_member_click", {
           action: "Remove",
         });
@@ -345,19 +352,30 @@ export const EditMember: FunctionComponent = observer(() => {
       };
 
       try {
-        const tempGroup = await createGroup(updatedGroupInfo);
+        const tempGroup = await createGroup(updatedGroupInfo, user.accessToken);
 
         if (tempGroup) {
           /// updating the new updated group
-          store.dispatch(setNewGroupInfo({ contents, members: tempMembers }));
+          chatStore.newGroupStore.setNewGroupInfo({
+            contents,
+            members: tempMembers,
+          });
           setSelectedMembers(tempMembers);
 
           /// updating the group(chat history) object
           const groups: any = { [tempGroup.id]: tempGroup };
-          store.dispatch(setGroups({ groups }));
-
+          const pagintaion = chatStore.messagesStore.groupsPagination;
+          chatStore.messagesStore.setGroups(groups, pagintaion);
           /// fetching the group messages again
-          await recieveMessages(group.id, null, 0, group.isDm, group.id);
+          await recieveMessages(
+            group.id,
+            null,
+            0,
+            group.isDm,
+            group.id,
+            user.accessToken,
+            chatStore.messagesStore
+          );
         }
       } catch (e) {
         // Show error toaster

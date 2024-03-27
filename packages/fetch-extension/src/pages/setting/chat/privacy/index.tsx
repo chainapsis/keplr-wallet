@@ -5,10 +5,7 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { observer } from "mobx-react-lite";
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { useIntl } from "react-intl";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { store } from "@chatStore/index";
-import { setMessagingPubKey, userDetails } from "@chatStore/user-slice";
 import { useLoadingIndicator } from "@components/loading-indicator";
 import { HeaderLayout } from "@layouts/index";
 import { useStore } from "../../../../stores";
@@ -20,13 +17,13 @@ export const Privacy: FunctionComponent = observer(() => {
   // const language = useLanguage();
   const navigate = useNavigate();
   const intl = useIntl();
-  const { chainStore, accountStore, analyticsStore } = useStore();
+  const { chainStore, accountStore, analyticsStore, chatStore } = useStore();
 
   const walletAddress = accountStore.getAccount(
     chainStore.current.chainId
   ).bech32Address;
 
-  const userState = useSelector(userDetails);
+  const userState = chatStore.userDetailsStore;
 
   const [selectedPrivacySetting, setSelectedPrivacySetting] =
     useState<PrivacySetting>(
@@ -52,8 +49,7 @@ export const Privacy: FunctionComponent = observer(() => {
           setting
         )
       );
-
-      store.dispatch(setMessagingPubKey(messagingPubKey));
+      chatStore.userDetailsStore.setMessagingPubKey(messagingPubKey);
       setSelectedPrivacySetting(setting);
     } catch (e) {
       // Show error toaster

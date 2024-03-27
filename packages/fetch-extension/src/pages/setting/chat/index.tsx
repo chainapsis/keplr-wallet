@@ -4,15 +4,8 @@ import { useIntl } from "react-intl";
 import { HeaderLayout } from "@layouts/index";
 // import { useLanguage } from "../../../languages";
 import { PrivacySetting } from "@keplr-wallet/background/build/messaging/types";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { store } from "@chatStore/index";
-import { userBlockedAddresses } from "@chatStore/messages-slice";
-import {
-  setAccessToken,
-  setMessagingPubKey,
-  userDetails,
-} from "@chatStore/user-slice";
+
 import { AUTH_SERVER } from "../../../config.ui.var";
 import { fetchBlockList } from "@graphQL/messages-api";
 import { useStore } from "../../../stores";
@@ -22,12 +15,11 @@ import { PageButton } from "../page-button";
 import style from "./style.module.scss";
 
 export const ChatSettings: FunctionComponent = observer(() => {
-  // const language = useLanguage();
+  const { chainStore, accountStore, chatStore, analyticsStore } = useStore();
   const navigate = useNavigate();
   const intl = useIntl();
-  const userState = useSelector(userDetails);
-  const blockedUsers = useSelector(userBlockedAddresses);
-  const { chainStore, accountStore, analyticsStore } = useStore();
+  const blockedUsers = chatStore.messagesStore.userBlockedAddresses;
+  const userState = chatStore.userDetailsStore;
   const current = chainStore.current;
   const walletAddress = accountStore.getAccount(
     chainStore.current.chainId
@@ -48,10 +40,9 @@ export const ChatSettings: FunctionComponent = observer(() => {
     const setJWTAndFetchMsgPubKey = async () => {
       setLoadingChatSettings(true);
       const res = await getJWT(current.chainId, AUTH_SERVER);
-      store.dispatch(setAccessToken(res));
-
+      userState.setAccessToken(res);
       const pubKey = await fetchPublicKey(res, current.chainId, walletAddress);
-      store.dispatch(setMessagingPubKey(pubKey));
+      userState.setMessagingPubKey(pubKey);
       setPrivacySetting(pubKey?.privacySetting || PrivacySetting.Everybody);
 
       if (pubKey?.privacySetting) {
@@ -83,10 +74,10 @@ export const ChatSettings: FunctionComponent = observer(() => {
         setChatPubKeyExists(false);
         return setLoadingChatSettings(false);
       }
-      fetchBlockList();
+      fetchBlockList(userState.accessToken);
       setLoadingChatSettings(false);
     };
-    if (!userState.messagingPubKey.length && !loadingChatSettings)
+    if (!userState.messagingPubKey.publicKey && !loadingChatSettings)
       setJWTAndFetchMsgPubKey();
   }, [current.chainId, walletAddress]);
 

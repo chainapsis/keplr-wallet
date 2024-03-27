@@ -12,12 +12,12 @@ export const DeleteGroupPopup = ({
   const [processing, setProcessing] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { analyticsStore } = useStore();
-
+  const { analyticsStore, chatStore } = useStore();
+  const userState = chatStore.userDetailsStore;
   const handleDelete = async () => {
     setProcessing(true);
     const groupId = location.pathname.split("/")[3];
-    deleteGroup(groupId);
+    deleteGroup(groupId, userState.accessToken);
     setConfirmAction(false);
     analyticsStore.logEvent("delete_group_click", { action: "Delete" });
     navigate("/chat");

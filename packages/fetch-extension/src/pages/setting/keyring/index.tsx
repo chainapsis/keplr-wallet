@@ -14,19 +14,13 @@ import { PageButton } from "../page-button";
 import { MultiKeyStoreInfoWithSelectedElem } from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
 import { App, AppCoinType } from "@keplr-wallet/ledger-cosmos";
-import { store } from "@chatStore/index";
-import { resetUser } from "@chatStore/user-slice";
-import {
-  resetChatList,
-  setIsChatSubscriptionActive,
-} from "@chatStore/messages-slice";
+
 import { messageAndGroupListenerUnsubscribe } from "@graphQL/messages-api";
-import { resetProposals } from "@chatStore/proposal-slice";
 
 export const SetKeyRingPage: FunctionComponent = observer(() => {
   const intl = useIntl();
 
-  const { keyRingStore, analyticsStore } = useStore();
+  const { keyRingStore, analyticsStore, chatStore, proposalStore } = useStore();
   const navigate = useNavigate();
 
   const loadingIndicator = useLoadingIndicator();
@@ -144,10 +138,12 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                         await keyRingStore.changeKeyRing(i);
                         analyticsStore.logEvent("select_account_click");
                         loadingIndicator.setIsLoading("keyring", false);
-                        store.dispatch(resetUser({}));
-                        store.dispatch(resetProposals({}));
-                        store.dispatch(resetChatList({}));
-                        store.dispatch(setIsChatSubscriptionActive(false));
+                        chatStore.userDetailsStore.resetUser();
+                        proposalStore.resetProposals();
+                        chatStore.messagesStore.resetChatList();
+                        chatStore.messagesStore.setIsChatSubscriptionActive(
+                          false
+                        );
                         messageAndGroupListenerUnsubscribe();
                         navigate("/");
                       } catch (e: any) {

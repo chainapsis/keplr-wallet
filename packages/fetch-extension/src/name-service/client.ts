@@ -13,6 +13,9 @@ class CustomCosmWasmClient extends CosmWasmClient {
 export const createFNSClient = async (chainId: string) => {
   const tmClient = await Tendermint34Client.connect(FNS_CONFIG[chainId].rpc);
   const client = new CustomCosmWasmClient(tmClient);
-  const queryClient = createQueryClient(client, FNS_CONFIG[chainId].network);
+  const queryClient = createQueryClient(
+    client as any,
+    FNS_CONFIG[chainId].network
+  );
   return queryClient;
 };

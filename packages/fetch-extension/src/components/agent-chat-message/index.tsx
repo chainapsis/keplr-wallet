@@ -6,8 +6,6 @@ import chatSeenIcon from "@assets/icon/chat-seen-status.png";
 import { decryptMessage } from "@utils/decrypt-message";
 import style from "./style.module.scss";
 import { isToday, isYesterday, format } from "date-fns";
-import { store } from "@chatStore/index";
-import { setMessageError } from "@chatStore/messages-slice";
 import { MessagePrimitive } from "@utils/encrypt-message";
 import { TokenDropdown } from "@components/agents/tokens-dropdown";
 import { IBCChainSelector } from "@components/agents/ibc-chain-selector";
@@ -18,6 +16,7 @@ import parse from "react-html-parser";
 import { processHyperlinks } from "@utils/process-hyperlinks";
 import { RecipientAddressInput } from "@components/agents/address-input";
 import { AGENT_ADDRESS } from "../../config.ui.var";
+import { useStore } from "../../stores";
 
 const formatTime = (timestamp: number): string => {
   const date = new Date(timestamp);
@@ -48,19 +47,18 @@ export const AgentChatMessage = ({
   const [decryptedMessage, setDecryptedMessage] = useState<MessagePrimitive>();
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const targetAddress = useLocation().pathname.split("/")[3];
+  const { chatStore } = useStore();
   useEffect(() => {
     decryptMessage(chainId, message, isSender)
       .then((message) => {
         setDecryptedMessage(message);
       })
       .catch((e) => {
-        store.dispatch(
-          setMessageError({
-            type: "authorization",
-            message: "Something went wrong, Please try again in sometime.",
-            level: 3,
-          })
-        );
+        chatStore.messagesStore.setMessageError({
+          type: "authorization",
+          message: "Something went wrong, Please try again in sometime.",
+          level: 3,
+        });
         console.log("Error", e.message);
       });
   }, [chainId, isSender, message]);

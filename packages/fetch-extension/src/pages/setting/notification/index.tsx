@@ -4,19 +4,17 @@ import { useNavigate } from "react-router";
 import style from "./style.module.scss";
 import { NotificationOption } from "@components/notification-option/notification-option";
 import { PageButton } from "../page-button";
-import { notificationsDetails, setNotifications } from "@chatStore/user-slice";
 import { NotificationSetup } from "@notificationTypes";
-import { useSelector } from "react-redux";
 import { useStore } from "../../../stores";
-import { store } from "@chatStore/index";
 
 export const SettingNotifications: FunctionComponent = () => {
   const navigate = useNavigate();
-  const { chainStore, accountStore, analyticsStore } = useStore();
+  const { chainStore, accountStore, analyticsStore, chatStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
 
-  const notificationInfo: NotificationSetup = useSelector(notificationsDetails);
+  const notificationInfo: NotificationSetup =
+    chatStore.userDetailsStore.notifications;
 
   const topicInfo = JSON.parse(
     localStorage.getItem(`topics-${accountInfo.bech32Address}`) ||
@@ -39,12 +37,10 @@ export const SettingNotifications: FunctionComponent = () => {
       notificationInfo.isNotificationOn ? "false" : "true"
     );
 
-    /// Updating the notification status in redux
-    store.dispatch(
-      setNotifications({
-        isNotificationOn: !notificationInfo.isNotificationOn,
-      })
-    );
+    /// Updating the notification status
+    chatStore.userDetailsStore.setNotifications({
+      isNotificationOn: !notificationInfo.isNotificationOn,
+    });
   };
 
   const icon = useMemo(

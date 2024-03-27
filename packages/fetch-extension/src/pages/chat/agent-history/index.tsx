@@ -1,29 +1,27 @@
-import {
-  userChatAgents,
-  userChatGroupPagination,
-} from "@chatStore/messages-slice";
 import { Groups, NameAddress, Pagination } from "@chatTypes";
 import { recieveGroups } from "@graphQL/recieve-messages";
 import { useOnScreen } from "@hooks/use-on-screen";
 import { formatAddress } from "@utils/format";
 import React, { createRef, useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
 import { useStore } from "../../../stores";
 import { ChatAgent } from "./chat-agent";
 import style from "../style.module.scss";
 import { AgentInit } from "@components/agents/agent-init";
 import { AGENT_ADDRESS } from "../../../config.ui.var";
+import { observer } from "mobx-react-lite";
 
 export const AgentsHistory: React.FC<{
   chainId: string;
   searchString: string;
   addresses: NameAddress;
   setLoadingChats: any;
-}> = ({ chainId, addresses, setLoadingChats, searchString }) => {
-  const groups: Groups = useSelector(userChatAgents);
-  const groupsPagination: Pagination = useSelector(userChatGroupPagination);
+}> = observer(({ chainId, addresses, setLoadingChats, searchString }) => {
+  const { chainStore, accountStore, chatStore } = useStore();
+
+  const groups: Groups = chatStore.messagesStore.userChatAgents;
+  const groupsPagination: Pagination =
+    chatStore.messagesStore.userChatGroupPagination;
   const [loadingGroups, setLoadingGroups] = useState(false);
-  const { chainStore, accountStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
 
@@ -44,7 +42,12 @@ export const AgentsHistory: React.FC<{
     if (!loadingGroups) {
       const page = groupsPagination?.page + 1 || 0;
       setLoadingGroups(true);
-      await recieveGroups(page, accountInfo.bech32Address);
+      await recieveGroups(
+        page,
+        accountInfo.bech32Address,
+        chatStore.userDetailsStore.accessToken,
+        chatStore.messagesStore
+      );
       setLoadingGroups(false);
       setLoadingChats(false);
     }
@@ -112,4 +115,4 @@ export const AgentsHistory: React.FC<{
       )}
     </div>
   );
-};
+});

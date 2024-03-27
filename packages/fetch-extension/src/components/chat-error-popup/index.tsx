@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import style from "./style.module.scss";
-import { useSelector } from "react-redux";
-import { setMessageError, userMessagesError } from "@chatStore/messages-slice";
-import { store } from "@chatStore/index";
+import { useStore } from "../../stores";
+import { observer } from "mobx-react-lite";
 
-export const ChatErrorPopup = () => {
-  const errorMessage = useSelector(userMessagesError);
+export const ChatErrorPopup = observer(() => {
+  const { chatStore } = useStore();
+  const errorMessage = chatStore.messagesStore.userMessagesError;
   const [confirmAction, setConfirmAction] = useState(false);
 
   useEffect(() => {
@@ -14,13 +14,11 @@ export const ChatErrorPopup = () => {
 
   const handleOk = () => {
     setConfirmAction(false);
-    store.dispatch(
-      setMessageError({
-        type: "",
-        message: "",
-        level: 3,
-      })
-    );
+    chatStore.messagesStore.setMessageError({
+      type: "",
+      message: "",
+      level: 3,
+    });
   };
 
   return errorMessage?.message?.length && confirmAction ? (
@@ -43,4 +41,4 @@ export const ChatErrorPopup = () => {
   ) : (
     <React.Fragment />
   );
-};
+});

@@ -2,42 +2,34 @@ import React, { FunctionComponent, useState } from "react";
 import { useNavigate } from "react-router";
 import { HeaderLayout } from "@layouts/index";
 import style from "./style.module.scss";
-import { store } from "@chatStore/index";
-import {
-  newGroupDetails,
-  setIsGroupEdit,
-  setNewGroupInfo,
-} from "@chatStore/new-group-slice";
-import { useSelector } from "react-redux";
 import { CommonPopupOptions, GroupDetails, NewGroupDetails } from "@chatTypes";
 import { useNotification } from "@components/notification";
 import { Button } from "reactstrap";
 import { encryptGroupMessage, GroupMessageType } from "@utils/encrypt-group";
 import { useStore } from "../../../stores";
-import { userDetails } from "@chatStore/user-slice";
 import { AlertPopup } from "@components/chat-actions-popup/alert-popup";
 import { createGroup } from "@graphQL/groups-api";
-import { setGroups } from "@chatStore/messages-slice";
 import { recieveMessages } from "@graphQL/recieve-messages";
 import { createGroupEvent, updateInfoEvent } from "@utils/group-events";
 import { ChatErrorPopup } from "@components/chat-error-popup";
+import { observer } from "mobx-react-lite";
 
-export const CreateGroupChat: FunctionComponent = () => {
+export const CreateGroupChat: FunctionComponent = observer(() => {
+  const { chainStore, accountStore, analyticsStore, chatStore } = useStore();
+
   const navigate = useNavigate();
   const notification = useNotification();
-  const user = useSelector(userDetails);
+  const user = chatStore.userDetailsStore;
 
-  const { chainStore, accountStore, analyticsStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
-  const newGroupState: NewGroupDetails = useSelector(newGroupDetails);
+  const newGroupState: NewGroupDetails = chatStore.newGroupStore.newGroup;
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [name, setName] = useState(newGroupState.group.name);
   const [description, setDescription] = useState(
     newGroupState.group.description
   );
-
   const [confirmAction, setConfirmAction] = useState<boolean>(false);
 
   async function updateGroupInfo() {
@@ -64,14 +56,23 @@ export const CreateGroupChat: FunctionComponent = () => {
       name: name,
       onlyAdminMessages: false,
     };
-    const group = await createGroup(updatedGroupInfo);
+    const group = await createGroup(updatedGroupInfo, user.accessToken);
 
     if (group) {
       /// updating the group(chat history) object
       const groups: any = { [group.id]: group };
-      store.dispatch(setGroups({ groups }));
+      const pagintaion = chatStore.messagesStore.groupsPagination;
+      chatStore.messagesStore.setGroups(groups, pagintaion);
       /// fetching the group messages again
-      await recieveMessages(group.id, null, 0, group.isDm, group.id);
+      await recieveMessages(
+        group.id,
+        null,
+        0,
+        group.isDm,
+        group.id,
+        user.accessToken,
+        chatStore.messagesStore
+      );
       analyticsStore.logEvent("save_chat_settings_click");
       navigate(-1);
     }
@@ -103,14 +104,15 @@ export const CreateGroupChat: FunctionComponent = () => {
       type: GroupMessageType[GroupMessageType.event],
     };
 
-    store.dispatch(
-      setNewGroupInfo({
-        name: name.trim(),
-        description: description.trim(),
-        contents,
-      })
-    );
-    store.dispatch(setIsGroupEdit(false));
+    chatStore.newGroupStore.setNewGroupInfo({
+      name: name.trim(),
+      description: description ? description.trim() : "",
+      contents: contents.text,
+      groupId: "",
+      members: [],
+      onlyAdminMessages: false,
+    });
+    chatStore.newGroupStore.setIsGroupEdit(false);
     analyticsStore.logEvent("add_members_click");
     navigate({
       pathname: "/chat/group-chat/add-member",
@@ -236,4 +238,4 @@ export const CreateGroupChat: FunctionComponent = () => {
       </div>
     </HeaderLayout>
   );
-};
+});

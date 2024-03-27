@@ -1,7 +1,5 @@
 import { gql } from "@apollo/client";
 import { GroupDetails, PublicKeyDetails } from "@chatTypes";
-import { store } from "@chatStore/index";
-import { removeGroup, setMessageError } from "@chatStore/messages-slice";
 import { client } from "./client";
 import {
   Group,
@@ -10,14 +8,16 @@ import {
   UpdatePublicKey,
 } from "./groups-queries";
 
-export const updatePublicKey = async (publicKeyDetails: PublicKeyDetails) => {
-  const state = store.getState();
+export const updatePublicKey = async (
+  publicKeyDetails: PublicKeyDetails,
+  accessToken: string
+) => {
   const { data, errors } = await client.mutate({
     mutation: gql(UpdatePublicKey),
     fetchPolicy: "no-cache",
     context: {
       headers: {
-        Authorization: `Bearer ${state.user.accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     },
     variables: {
@@ -29,83 +29,68 @@ export const updatePublicKey = async (publicKeyDetails: PublicKeyDetails) => {
   return data.updatePublicKey;
 };
 
-export const createGroup = async (groupDetails: GroupDetails) => {
-  const state = store.getState();
-
+export const createGroup = async (
+  groupDetails: GroupDetails,
+  accessToken: string
+) => {
   try {
     const { data, errors } = await client.mutate({
       mutation: gql(Group),
       fetchPolicy: "no-cache",
       context: {
         headers: {
-          Authorization: `Bearer ${state.user.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
       variables: { groupDetails },
     });
     if (errors) {
-      store.dispatch(
-        setMessageError({
-          type: "Group",
-          message: errors || "Something went wrong, Group can't be created",
-          level: 1,
-        })
-      );
-      return null;
+      return {
+        type: "Group",
+        message: errors || "Something went wrong, Group can't be created",
+        level: 1,
+      };
     }
     return data.group;
   } catch (e: any) {
-    store.dispatch(
-      setMessageError({
-        type: "Group",
-        message: e?.message || "Something went wrong, Group can't be created",
-        level: 1,
-      })
-    );
-    return null;
+    return {
+      type: "Group",
+      message: e?.message || "Something went wrong, Group can't be created",
+      level: 1,
+    };
   }
 };
 
-export const leaveGroup = async (groupId: string) => {
-  const state = store.getState();
-
+export const leaveGroup = async (groupId: string, accessToken: string) => {
   try {
     const { data, errors } = await client.mutate({
       mutation: gql(leaveGroupMutation),
       fetchPolicy: "no-cache",
       context: {
         headers: {
-          Authorization: `Bearer ${state.user.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
       variables: { groupId },
     });
     if (errors) {
-      store.dispatch(
-        setMessageError({
-          type: "Group",
-          message: errors || "Something went wrong, Group can't be left",
-          level: 1,
-        })
-      );
-      return null;
+      return {
+        type: "Group",
+        message: errors || "Something went wrong, Group can't be left",
+        level: 1,
+      };
     }
     return data;
   } catch (e: any) {
-    store.dispatch(
-      setMessageError({
-        type: "Group",
-        message: e?.message || "Something went wrong, Group can't be left",
-        level: 1,
-      })
-    );
-    return null;
+    return {
+      type: "Group",
+      message: e?.message || "Something went wrong, Group can't be left",
+      level: 1,
+    };
   }
 };
 
-export const deleteGroup = async (groupId: string) => {
-  const state = store.getState();
-
+export const deleteGroup = async (groupId: string, accessToken: string) => {
   try {
     const { data, errors } = await client.mutate({
       mutation: gql(`mutation Mutation($groupId: String) {
@@ -114,47 +99,40 @@ export const deleteGroup = async (groupId: string) => {
       fetchPolicy: "no-cache",
       context: {
         headers: {
-          Authorization: `Bearer ${state.user.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
       variables: { groupId },
     });
     if (errors) {
-      store.dispatch(
-        setMessageError({
-          type: "Group",
-          message: errors || "Something went wrong, Group can't be deleted",
-          level: 1,
-        })
-      );
-      return null;
+      return {
+        type: "Group",
+        message: errors || "Something went wrong, Group can't be deleted",
+        level: 1,
+      };
     }
-    store.dispatch(removeGroup(groupId));
     return data.group;
   } catch (e: any) {
-    store.dispatch(
-      setMessageError({
-        type: "Group",
-        message: e?.message || "Something went wrong, Group can't be deleted",
-        level: 1,
-      })
-    );
-    return null;
+    return {
+      type: "Group",
+      message: e?.message || "Something went wrong, Group can't be deleted",
+      level: 1,
+    };
   }
 };
 
 //already generated by vinay
 export const updateGroupLastSeen = async (
   groupId: string,
-  lastSeenTimestamp: string
+  lastSeenTimestamp: string,
+  accessToken: string
 ) => {
-  const state = store.getState();
   const { data, errors } = await client.mutate({
     mutation: gql(UpdateGroupLastSeen),
     fetchPolicy: "no-cache",
     context: {
       headers: {
-        Authorization: `Bearer ${state.user.accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     },
     variables: { groupId, lastSeenTimestamp },

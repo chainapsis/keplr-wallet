@@ -7,8 +7,6 @@ import { formatAddress } from "@utils/format";
 import style from "./style.module.scss";
 import classnames from "classnames";
 import { fetchPublicKey } from "@utils/fetch-public-key";
-import { userDetails } from "@chatStore/user-slice";
-import { useSelector } from "react-redux";
 import { useStore } from "../../stores";
 
 export const ChatMember = (props: {
@@ -29,9 +27,9 @@ export const ChatMember = (props: {
     onIconClick,
     onClick,
   } = props;
+  const { chainStore, chatStore } = useStore();
 
-  const user = useSelector(userDetails);
-  const { chainStore } = useStore();
+  const user = chatStore.userDetailsStore;
   const current = chainStore.current;
 
   const [isActive, setIsActive] = useState(true);

@@ -1,8 +1,7 @@
 import React from "react";
 import { AGENT_COMMANDS } from "../../../config.ui.var";
 import style from "./style.module.scss";
-import { useSelector } from "react-redux";
-import { userDetails } from "@chatStore/user-slice";
+import { useStore } from "../../../stores";
 
 export const CommandsDropdown = ({
   newMessage,
@@ -13,7 +12,8 @@ export const CommandsDropdown = ({
   showDropdown: boolean;
   handleClick: (data: string) => void;
 }) => {
-  const { hasFET } = useSelector(userDetails);
+  const { chatStore } = useStore();
+  const { hasFET } = chatStore.userDetailsStore;
 
   return (
     <React.Fragment>

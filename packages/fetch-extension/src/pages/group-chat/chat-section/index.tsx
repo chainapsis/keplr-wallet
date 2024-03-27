@@ -9,33 +9,26 @@ import { Menu } from "../../main/menu";
 import { UserNameSection } from "./username-section";
 import { GroupChatsViewSection } from "./chats-view-section";
 import { ChatActionsPopup } from "@components/chat-actions-popup";
-import { useSelector } from "react-redux";
-import {
-  updateChatList,
-  userChatGroups,
-  userMessages,
-} from "@chatStore/messages-slice";
+
 import { Chats, GroupChatOptions, GroupMembers, Groups } from "@chatTypes";
 import { GroupChatActionsDropdown } from "@components/group-chat-actions-dropdown";
-import { store } from "@chatStore/index";
-import { setIsGroupEdit, setNewGroupInfo } from "@chatStore/new-group-slice";
 import { leaveGroup } from "@graphQL/groups-api";
 import { deliverGroupMessages } from "@graphQL/messages-api";
 import { GroupMessageType } from "@utils/encrypt-group";
-import { userDetails } from "@chatStore/user-slice";
 import { recieveGroups } from "@graphQL/recieve-messages";
 import { leaveGroupEvent } from "@utils/group-events";
+import { observer } from "mobx-react-lite";
 
-export const GroupChatSection: FunctionComponent = () => {
+export const GroupChatSection: FunctionComponent = observer(() => {
   const navigate = useNavigate();
+  const { chainStore, accountStore, analyticsStore, chatStore } = useStore();
   const groupId = useLocation().pathname.split("/")[3];
-  const groups: Groups = useSelector(userChatGroups);
-  const userChats: Chats = useSelector(userMessages);
+  const groups: Groups = chatStore.messagesStore.userChatGroups;
+  const userChats: Chats = chatStore.messagesStore.userMessages;
 
   const group = groups[groupId];
-  const user = useSelector(userDetails);
+  const user = chatStore.userDetailsStore;
 
-  const { chainStore, accountStore, analyticsStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const walletAddress = accountInfo.bech32Address;
@@ -81,15 +74,13 @@ export const GroupChatSection: FunctionComponent = () => {
           isAdmin: element.isAdmin,
         };
       });
-    store.dispatch(
-      setNewGroupInfo({
-        description: group.description === null ? "" : group.description,
-        groupId: group.id,
-        members: members,
-        name: group.name,
-      })
-    );
-    store.dispatch(setIsGroupEdit(true));
+    chatStore.newGroupStore.setNewGroupInfo({
+      description: group.description! ? "" : group.description,
+      groupId: group.id,
+      members: members,
+      name: group.name,
+    });
+    chatStore.newGroupStore.setIsGroupEdit(true);
     navigate(page);
   }
 
@@ -134,13 +125,20 @@ export const GroupChatSection: FunctionComponent = () => {
         accountInfo.bech32Address,
         groupId
       );
-
+      chatStore.messagesStore.updateLatestSentMessage(message);
       if (message) {
-        await leaveGroup(groupId);
-        recieveGroups(0, accountInfo.bech32Address);
+        await leaveGroup(groupId, user.accessToken);
+        recieveGroups(
+          0,
+          accountInfo.bech32Address,
+          user.accessToken,
+          chatStore.messagesStore
+        );
+
         const messagesObj: any = { [message.id]: message };
         const messages = { ...userChats[groupId].messages, ...messagesObj };
-        store.dispatch(updateChatList({ userAddress: groupId, messages }));
+        const pagination = chatStore.messagesStore.groupsPagination;
+        chatStore.messagesStore.updateChatList(groupId, messages, pagination);
       }
     }
     setConfirmAction(false);
@@ -187,4 +185,4 @@ export const GroupChatSection: FunctionComponent = () => {
       </HeaderLayout>
     </div>
   );
-};
+});

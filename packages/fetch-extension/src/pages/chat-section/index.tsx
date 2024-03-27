@@ -5,10 +5,7 @@ import {
   useIBCTransferConfig,
 } from "@keplr-wallet/hooks";
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import { useLocation } from "react-router";
-import { userBlockedAddresses } from "@chatStore/messages-slice";
-import { userDetails } from "@chatStore/user-slice";
 import { ChatActionsPopup } from "@components/chat-actions-popup";
 import { ChatErrorPopup } from "@components/chat-error-popup";
 import { SwitchUser } from "@components/switch-user";
@@ -19,18 +16,19 @@ import { Menu } from "../main/menu";
 import { ChatActionsDropdown } from "@components/chat-actions-dropdown";
 import { ChatsViewSection } from "./chats-view-section";
 import { UserNameSection } from "./username-section";
+import { observer } from "mobx-react-lite";
 
-export const ChatSection: FunctionComponent = () => {
+export const ChatSection: FunctionComponent = observer(() => {
   const targetAddress = useLocation().pathname.split("/")[2];
+  const { chainStore, accountStore, queriesStore, uiConfigStore, chatStore } =
+    useStore();
 
-  const blockedUsers = useSelector(userBlockedAddresses);
-  const user = useSelector(userDetails);
-
+  const user = chatStore.userDetailsStore;
+  const blockedUsers = chatStore.messagesStore.blockedAddress;
   const [targetPubKey, setTargetPubKey] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [confirmAction, setConfirmAction] = useState(false);
   const [action, setAction] = useState("");
-  const { chainStore, accountStore, queriesStore, uiConfigStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
 
@@ -143,4 +141,4 @@ export const ChatSection: FunctionComponent = () => {
       </div>
     </HeaderLayout>
   );
-};
+});

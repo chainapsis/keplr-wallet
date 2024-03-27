@@ -3,16 +3,6 @@ import {
   getMainDefinition,
   ObservableSubscription,
 } from "@apollo/client/utilities";
-import { store } from "@chatStore/index";
-import {
-  setBlockedList,
-  setBlockedUser,
-  setMessageError,
-  setUnblockedUser,
-  updateMessages,
-  updateLatestSentMessage,
-  updateGroupsData,
-} from "@chatStore/messages-slice";
 import { CHAT_PAGE_COUNT, GROUP_PAGE_COUNT } from "../config.ui.var";
 import { encryptAllData } from "@utils/encrypt-message";
 import {
@@ -36,6 +26,7 @@ import {
 } from "./messages-queries";
 import { recieveGroups } from "./recieve-messages";
 import { NewMessageUpdate } from "@chatTypes";
+import { MessagesStore } from "@keplr-wallet/stores/build/chat/message-store";
 let querySubscription: ObservableSubscription;
 let queryGroupSubscription: ObservableSubscription;
 
@@ -50,9 +41,9 @@ export const fetchMessages = async (
   groupId: string,
   isDm: boolean,
   afterTimestamp: string | null | undefined,
-  page: number
+  page: number,
+  accessToken: string
 ) => {
-  const state = store.getState();
   let variables: messagesVariables = {
     groupId,
     isDm,
@@ -73,7 +64,7 @@ export const fetchMessages = async (
     fetchPolicy: "no-cache",
     context: {
       headers: {
-        Authorization: `Bearer ${state.user.accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     },
     variables,
@@ -94,7 +85,8 @@ interface groupQueryVariables {
 export const fetchGroups = async (
   page: number,
   addressQueryString: string,
-  addresses: string[]
+  addresses: string[],
+  accessToken: string
 ) => {
   const groupsQuery = addresses.length ? groupsWithAddresses : groups;
   const variables: groupQueryVariables = {
@@ -103,13 +95,12 @@ export const fetchGroups = async (
   };
   if (addresses.length) variables["addresses"] = addresses;
   else variables["addressQueryString"] = addressQueryString;
-  const state = store.getState();
   const { data, errors } = await client.query({
     query: gql(groupsQuery),
     fetchPolicy: "no-cache",
     context: {
       headers: {
-        Authorization: `Bearer ${state.user.accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     },
     variables: variables,
@@ -118,44 +109,39 @@ export const fetchGroups = async (
   return data.groups;
 };
 
-export const fetchBlockList = async () => {
-  const state = store.getState();
+export const fetchBlockList = async (accessToken: string) => {
   try {
     const { data } = await client.query({
       query: gql(blockedList),
       fetchPolicy: "no-cache",
       context: {
         headers: {
-          Authorization: `Bearer ${state.user.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
       variables: {
         channelId: "MESSAGING",
       },
     });
-    store.dispatch(setBlockedList(data.blockedList));
+    return data.blockedList;
   } catch (e) {
     console.log(e);
-    store.dispatch(
-      setMessageError({
-        type: "block",
-        message: "Something went wrong, Please try again in sometime.",
-        level: 2,
-      })
-    );
-    throw e;
+    return {
+      type: "block",
+      message: "Something went wrong, Please try again in sometime.",
+      level: 2,
+    };
   }
 };
 
-export const blockUser = async (address: string) => {
-  const state = store.getState();
+export const blockUser = async (address: string, accessToken: string) => {
   try {
     const { data } = await client.mutate({
       mutation: gql(block),
       fetchPolicy: "no-cache",
       context: {
         headers: {
-          Authorization: `Bearer ${state.user.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
       variables: {
@@ -163,29 +149,25 @@ export const blockUser = async (address: string) => {
         channelId: "MESSAGING",
       },
     });
-    store.dispatch(setBlockedUser(data.block));
+    return data;
   } catch (e) {
     console.log(e);
-    store.dispatch(
-      setMessageError({
-        type: "block",
-        message: "Something went wrong, Please try again in sometime.",
-        level: 1,
-      })
-    );
-    throw e;
+    return {
+      type: "block",
+      message: "Something went wrong, Please try again in sometime.",
+      level: 1,
+    };
   }
 };
 
-export const unblockUser = async (address: string) => {
-  const state = store.getState();
+export const unblockUser = async (address: string, accessToken: string) => {
   try {
     const { data } = await client.mutate({
       mutation: gql(unblock),
       fetchPolicy: "no-cache",
       context: {
         headers: {
-          Authorization: `Bearer ${state.user.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
       variables: {
@@ -193,17 +175,14 @@ export const unblockUser = async (address: string) => {
         channelId: "MESSAGING",
       },
     });
-    store.dispatch(setUnblockedUser(data.unblock));
+    return data.unblock;
   } catch (e) {
     console.log(e);
-    store.dispatch(
-      setMessageError({
-        type: "unblock",
-        message: "Something went wrong, Please try again in sometime.",
-        level: 1,
-      })
-    );
-    throw e;
+    return {
+      type: "unblock",
+      message: "Something went wrong, Please try again in sometime.",
+      level: 1,
+    };
   }
 };
 
@@ -212,9 +191,9 @@ export const deliverMessages = async (
   chainId: string,
   newMessage: any,
   senderAddress: string,
-  targetAddress: string
+  targetAddress: string,
+  messagesStore: MessagesStore
 ) => {
-  const state = store.getState();
   try {
     if (newMessage) {
       const encryptedData = await encryptAllData(
@@ -235,27 +214,22 @@ export const deliverMessages = async (
         },
         context: {
           headers: {
-            Authorization: `Bearer ${state.user.accessToken}`,
+            Authorization: `Bearer ${accessToken}`,
           },
         },
       });
 
       if (data?.dispatchMessages?.length > 0) {
-        store.dispatch(updateLatestSentMessage(data?.dispatchMessages[0]));
-        return data?.dispatchMessages[0];
+        messagesStore.updateLatestSentMessage(data?.dispatchMessages[0]);
       }
       return null;
     }
   } catch (e: any) {
-    store.dispatch(
-      setMessageError({
-        type: "delivery",
-        message:
-          e?.message || "Something went wrong, Message can't be delivered",
-        level: 1,
-      })
-    );
-    return null;
+    return {
+      type: "delivery",
+      message: e?.message || "Something went wrong, Message can't be delivered",
+      level: 1,
+    };
   }
 };
 
@@ -268,7 +242,6 @@ export const deliverGroupMessages = async (
   senderAddress: string,
   groupId: string
 ) => {
-  const state = store.getState();
   try {
     if (newMessage) {
       const encryptedData = await encryptGroupMessage(
@@ -291,32 +264,32 @@ export const deliverGroupMessages = async (
         },
         context: {
           headers: {
-            Authorization: `Bearer ${state.user.accessToken}`,
+            Authorization: `Bearer ${accessToken}`,
           },
         },
       });
 
       if (data?.dispatchMessages?.length > 0) {
-        store.dispatch(updateLatestSentMessage(data?.dispatchMessages[0]));
         return data?.dispatchMessages[0];
       }
       return null;
     }
   } catch (e: any) {
-    store.dispatch(
-      setMessageError({
-        type: "delivery",
-        message: "Something went wrong, Message can't be delivered",
-        level: 1,
-      })
-    );
-    return null;
+    console.error(e);
+    return {
+      type: "delivery",
+      message: "Something went wrong, Message can't be delivered",
+      level: 1,
+    };
   }
 };
 
-export const messageListener = (userAddress: string) => {
-  const state = store.getState();
-  const wsLink = createWSLink(state.user.accessToken);
+export const messageListener = (
+  userAddress: string,
+  accessToken: string,
+  messageStore: MessagesStore
+) => {
+  const wsLink = createWSLink(accessToken);
   const splitLink = split(
     ({ query }) => {
       const definition = getMainDefinition(query);
@@ -337,7 +310,7 @@ export const messageListener = (userAddress: string) => {
       query: gql(listenMessages),
       context: {
         headers: {
-          authorization: `Bearer ${state.user.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       },
     })
@@ -346,22 +319,20 @@ export const messageListener = (userAddress: string) => {
         const { target, groupId } = data.newMessageUpdate.message;
         /// Distinguish between Group and Single chat
         const id = groupId.split("-").length == 2 ? target : userAddress;
-        store.dispatch(updateMessages(data.newMessageUpdate.message));
 
+        messageStore.updateMessages(data.newMessageUpdate.message);
         /// Adding timeout for temporaray as Remove At Group subscription not working
         setTimeout(() => {
-          recieveGroups(0, id);
+          recieveGroups(0, id, accessToken, messageStore);
         }, 100);
       },
       error(err) {
         console.error("err", err);
-        store.dispatch(
-          setMessageError({
-            type: "subscription",
-            message: "Something went wrong, Cant fetch latest messages",
-            level: 1,
-          })
-        );
+        return {
+          type: "subscription",
+          message: "Something went wrong, Cant fetch latest messages",
+          level: 1,
+        };
       },
       complete() {
         console.log("completed");
@@ -369,9 +340,12 @@ export const messageListener = (userAddress: string) => {
     });
 };
 
-export const groupsListener = (userAddress: string) => {
-  const state = store.getState();
-  const wsLink = createWSLink(state.user.accessToken);
+export const groupsListener = (
+  userAddress: string,
+  accessToken: string,
+  messageStore: MessagesStore
+) => {
+  const wsLink = createWSLink(accessToken);
   const splitLink = split(
     ({ query }) => {
       const definition = getMainDefinition(query);
@@ -392,7 +366,7 @@ export const groupsListener = (userAddress: string) => {
       query: gql(listenGroups),
       context: {
         headers: {
-          authorization: `Bearer ${state.user.accessToken}`,
+          authorization: `Bearer ${accessToken}`,
         },
       },
     })
@@ -409,17 +383,15 @@ export const groupsListener = (userAddress: string) => {
         } else {
           group.userAddress = group.id;
         }
-        store.dispatch(updateGroupsData(group));
+        messageStore.updateGroupsData(group);
       },
       error(err) {
         console.error("err", err);
-        store.dispatch(
-          setMessageError({
-            type: "subscription",
-            message: "Something went wrong, Cant fetch latest messages",
-            level: 1,
-          })
-        );
+        return {
+          type: "subscription",
+          message: "Something went wrong, Cant fetch latest messages",
+          level: 1,
+        };
       },
       complete() {
         console.log("completed");
@@ -441,7 +413,6 @@ export const updateGroupTimestamp = async (
   lastSeenTimestamp: Date,
   groupLastSeenTimestamp: Date
 ) => {
-  const state = store.getState();
   try {
     /// Encrypting last seen timestamp
     const encryptedLastSeenTimestamp = await encryptGroupTimestamp(
@@ -464,7 +435,7 @@ export const updateGroupTimestamp = async (
       fetchPolicy: "no-cache",
       context: {
         headers: {
-          Authorization: `Bearer ${state.user.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
       variables: {
@@ -477,7 +448,7 @@ export const updateGroupTimestamp = async (
     /// Updating the last seen status
     const group = data.updateGroupLastSeen;
     group.userAddress = targetAddress;
-    store.dispatch(updateGroupsData(group));
+    return group;
   } catch (err) {
     console.error("err", err);
   }

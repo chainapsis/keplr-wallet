@@ -3,22 +3,16 @@ import { observer } from "mobx-react-lite";
 import React, { FunctionComponent } from "react";
 import { useIntl } from "react-intl";
 import { useNavigate } from "react-router";
-import { store } from "@chatStore/index";
-import {
-  resetChatList,
-  setIsChatSubscriptionActive,
-} from "@chatStore/messages-slice";
-import { resetUser } from "@chatStore/user-slice";
 import { useConfirm } from "@components/confirm";
 import { messageAndGroupListenerUnsubscribe } from "@graphQL/messages-api";
 import { useStore } from "../../stores";
 import style from "./chain-list.module.scss";
 import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
-import { resetProposals } from "@chatStore/proposal-slice";
+
 const ChainElement: FunctionComponent<{
   chainInfo: ChainInfoWithCoreTypes;
 }> = observer(({ chainInfo }) => {
-  const { chainStore, analyticsStore } = useStore();
+  const { chainStore, analyticsStore, chatStore, proposalStore } = useStore();
   const navigate = useNavigate();
   const intl = useIntl();
 
@@ -42,11 +36,10 @@ const ChainElement: FunctionComponent<{
         }
         chainStore.selectChain(chainInfo.chainId);
         chainStore.saveLastViewChainId();
-        store.dispatch(resetUser({}));
-        store.dispatch(resetProposals({}));
-
-        store.dispatch(resetChatList({}));
-        store.dispatch(setIsChatSubscriptionActive(false));
+        chatStore.userDetailsStore.resetUser();
+        proposalStore.resetProposals();
+        chatStore.messagesStore.resetChatList();
+        chatStore.messagesStore.setIsChatSubscriptionActive(false);
         messageAndGroupListenerUnsubscribe();
         navigate("/");
         if (Object.values(properties).length > 0) {

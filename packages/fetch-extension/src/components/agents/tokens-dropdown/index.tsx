@@ -18,8 +18,6 @@ import {
 import { useStore } from "../../../stores";
 import { deliverMessages } from "@graphQL/messages-api";
 import { useLocation, useNavigate } from "react-router";
-import { useSelector } from "react-redux";
-import { userDetails } from "@chatStore/user-slice";
 import { useNotification } from "@components/notification";
 
 export const TokenDropdown: FunctionComponent<{
@@ -27,13 +25,14 @@ export const TokenDropdown: FunctionComponent<{
   disabled: boolean;
   ibc?: boolean;
 }> = observer(({ label, disabled, ibc }) => {
-  const { accountStore, chainStore, queriesStore, uiConfigStore } = useStore();
+  const { accountStore, chainStore, queriesStore, uiConfigStore, chatStore } =
+    useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const navigate = useNavigate();
   const targetAddress = useLocation().pathname.split("/")[3];
   const notification = useNotification();
-  const user = useSelector(userDetails);
+  const user = chatStore.userDetailsStore;
   const sendConfigs = useSendTxConfig(
     chainStore,
     queriesStore,
@@ -91,7 +90,8 @@ export const TokenDropdown: FunctionComponent<{
         current.chainId,
         messagePayload,
         accountInfo.bech32Address,
-        targetAddress
+        targetAddress,
+        chatStore.messagesStore
       );
     } catch (e) {
       console.log(e);
@@ -115,7 +115,8 @@ export const TokenDropdown: FunctionComponent<{
         current.chainId,
         "/cancel",
         accountInfo.bech32Address,
-        targetAddress
+        targetAddress,
+        chatStore.messagesStore
       );
     } catch (e) {
       console.log(e);

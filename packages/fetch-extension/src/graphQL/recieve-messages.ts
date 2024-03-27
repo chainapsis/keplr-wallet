@@ -1,9 +1,4 @@
-import { store } from "@chatStore/index";
-import {
-  setGroups,
-  updateChatList,
-  setIsChatGroupPopulated,
-} from "@chatStore/messages-slice";
+import { MessagesStore } from "@keplr-wallet/stores/build/chat/message-store";
 import { CHAT_PAGE_COUNT } from "../config.ui.var";
 import { fetchGroups, fetchMessages } from "./messages-api";
 
@@ -12,42 +7,53 @@ export const recieveMessages = async (
   afterTimestamp: string | null | undefined,
   page: number,
   _isDm: boolean,
-  _groupId: string
+  _groupId: string,
+  accessToken: string,
+  messageStore: MessagesStore
 ) => {
   const { messages, pagination } = await fetchMessages(
     _groupId,
     _isDm,
     afterTimestamp,
-    page
+    page,
+    accessToken
   );
   const messagesObj: any = {};
   if (messages) {
     messages.map((message: any) => {
       messagesObj[message.id] = message;
     });
-    store.dispatch(
-      updateChatList({ userAddress, messages: messagesObj, pagination })
-    );
 
     /// fetching the read records after unread to avoid the pagination stuck
     if (!!afterTimestamp) {
       const tmpPage = Math.floor(messages.length / CHAT_PAGE_COUNT);
-      await recieveMessages(userAddress, null, tmpPage, _isDm, _groupId);
+      await recieveMessages(
+        userAddress,
+        null,
+        tmpPage,
+        _isDm,
+        _groupId,
+        accessToken,
+        messageStore
+      );
     }
+    messageStore.updateChatList(userAddress, messagesObj, pagination);
   }
-  return messagesObj;
 };
 
 export const recieveGroups = async (
   page: number,
   userAddress: string,
+  accessToken: string,
+  messageStore: MessagesStore,
   addressQueryString: string = "",
   addressesList: string[] = []
 ) => {
   const { groups, pagination } = await fetchGroups(
     page,
     addressQueryString,
-    addressesList
+    addressesList,
+    accessToken
   );
   const groupsObj: any = {};
   if (groups && groups.length) {
@@ -64,8 +70,7 @@ export const recieveGroups = async (
       }
       groupsObj[contactAddress] = group;
     });
-    store.dispatch(setGroups({ groups: groupsObj, pagination }));
-    store.dispatch(setIsChatGroupPopulated(true));
+    messageStore.setGroups(groupsObj, pagination);
+    messageStore.setIsChatGroupPopulated(true);
   }
-  return groupsObj;
 };

@@ -6,9 +6,6 @@ import { NotificationItem } from "@components/notification-messages/notification
 import { markDeliveryAsRejected } from "@utils/fetch-notification";
 import { useStore } from "../../stores";
 import { NotificationSetup, NotyphiNotification } from "@notificationTypes";
-import { store } from "@chatStore/index";
-import { notificationsDetails, setNotifications } from "@chatStore/user-slice";
-import { useSelector } from "react-redux";
 interface NotificationPayload {
   modalType: NotificationModalType;
   notificationList?: NotyphiNotification[];
@@ -31,12 +28,12 @@ export enum NotificationModalType {
 export const NotificationModal: FunctionComponent = () => {
   const navigate = useNavigate();
 
-  const { chainStore, accountStore, analyticsStore } = useStore();
+  const { chainStore, accountStore, analyticsStore, chatStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
-
+  const userState = chatStore.userDetailsStore;
   const [isLoading, setIsLoading] = useState(true);
-  const notificationInfo: NotificationSetup = useSelector(notificationsDetails);
+  const notificationInfo: NotificationSetup = userState.notifications;
 
   const [notificationPayload, setNotificationPayload] =
     useState<NotificationPayload>();
@@ -55,7 +52,7 @@ export const NotificationModal: FunctionComponent = () => {
         "true"
       );
       setIsLoading(true);
-      store.dispatch(setNotifications({ isNotificationOn: true }));
+      userState.setNotifications({ isNotificationOn: true });
     }
   };
 
@@ -79,20 +76,16 @@ export const NotificationModal: FunctionComponent = () => {
     }
 
     if (notificationInfo.unreadNotification && notifications.length === 0) {
-      store.dispatch(
-        setNotifications({
-          unreadNotification: false,
-        })
-      );
+      userState.setNotifications({
+        unreadNotification: false,
+      });
     } else if (
       !notificationInfo.unreadNotification &&
       notifications.length > 0
     ) {
-      store.dispatch(
-        setNotifications({
-          unreadNotification: true,
-        })
-      );
+      userState.setNotifications({
+        unreadNotification: true,
+      });
     }
   };
 
@@ -123,10 +116,7 @@ export const NotificationModal: FunctionComponent = () => {
         (notification: NotyphiNotification) =>
           notification.delivery_id !== deliveryId
       );
-
-      store.dispatch(
-        setNotifications({ allNotifications: unreadNotifications })
-      );
+      userState.setNotifications({ allNotifications: unreadNotifications });
       localStorage.setItem(
         `notifications-${accountInfo.bech32Address}`,
         JSON.stringify(unreadNotifications)
@@ -149,9 +139,9 @@ export const NotificationModal: FunctionComponent = () => {
         );
 
         setTimeout(() => {
-          store.dispatch(
-            setNotifications({ allNotifications: newLocalNotifications })
-          );
+          userState.setNotifications({
+            allNotifications: newLocalNotifications,
+          });
           localStorage.setItem(
             `notifications-${accountInfo.bech32Address}`,
             JSON.stringify(newLocalNotifications)

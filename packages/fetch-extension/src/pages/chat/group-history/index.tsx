@@ -1,8 +1,3 @@
-import {
-  userChatGroupPagination,
-  userChatGroups,
-} from "@chatStore/messages-slice";
-import { userDetails } from "@chatStore/user-slice";
 import { Groups, NameAddress, Pagination } from "@chatTypes";
 import { ContactsOnlyMessage } from "@components/contacts-only-message";
 import { recieveGroups } from "@graphQL/recieve-messages";
@@ -10,23 +5,26 @@ import { useOnScreen } from "@hooks/use-on-screen";
 import { PrivacySetting } from "@keplr-wallet/background/build/messaging/types";
 import { formatAddress } from "@utils/format";
 import React, { createRef, useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
 import { useStore } from "../../../stores";
 import { ChatGroupUser } from "./chat-group-user";
 import { ChatUser } from "./chat-user";
 import style from "../style.module.scss";
+import { observer } from "mobx-react-lite";
 
 export const GroupsHistory: React.FC<{
   chainId: string;
   searchString: string;
   addresses: NameAddress;
   setLoadingChats: any;
-}> = ({ chainId, addresses, setLoadingChats, searchString }) => {
-  const userState = useSelector(userDetails);
-  const groups: Groups = useSelector(userChatGroups);
-  const groupsPagination: Pagination = useSelector(userChatGroupPagination);
+}> = observer(({ chainId, addresses, setLoadingChats, searchString }) => {
+  const { chainStore, accountStore, chatStore } = useStore();
+
+  const userState = chatStore.userDetailsStore;
+  const groups: Groups = chatStore.messagesStore.userChatGroups;
+
+  const groupsPagination: Pagination =
+    chatStore.messagesStore.userChatGroupPagination;
   const [loadingGroups, setLoadingGroups] = useState(false);
-  const { chainStore, accountStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
 
@@ -47,7 +45,12 @@ export const GroupsHistory: React.FC<{
     if (!loadingGroups) {
       const page = groupsPagination?.page + 1 || 0;
       setLoadingGroups(true);
-      await recieveGroups(page, accountInfo.bech32Address);
+      await recieveGroups(
+        page,
+        accountInfo.bech32Address,
+        userState.accessToken,
+        chatStore.messagesStore
+      );
       setLoadingGroups(false);
       setLoadingChats(false);
     }
@@ -163,4 +166,4 @@ export const GroupsHistory: React.FC<{
       )}
     </div>
   );
-};
+});

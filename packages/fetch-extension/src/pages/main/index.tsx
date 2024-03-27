@@ -23,8 +23,6 @@ import { TokensView } from "./token";
 import { ChatDisclaimer } from "@components/chat/chat-disclaimer";
 import { AUTH_SERVER } from "../../config.ui.var";
 import { getJWT } from "@utils/auth";
-import { store } from "@chatStore/index";
-import { setAccessToken, setWalletConfig } from "@chatStore/user-slice";
 import { getWalletConfig } from "@graphQL/config-api";
 
 export const MainPage: FunctionComponent = observer(() => {
@@ -36,8 +34,10 @@ export const MainPage: FunctionComponent = observer(() => {
     queriesStore,
     keyRingStore,
     analyticsStore,
+    chatStore,
   } = useStore();
 
+  const userState = chatStore.userDetailsStore;
   useEffect(() => {
     analyticsStore.logEvent("home_tab_click");
     analyticsStore.setUserProperties({
@@ -128,9 +128,9 @@ export const MainPage: FunctionComponent = observer(() => {
       return;
     }
     getJWT(chainStore.current.chainId, AUTH_SERVER).then((res) => {
-      store.dispatch(setAccessToken(res));
-      getWalletConfig()
-        .then((config) => store.dispatch(setWalletConfig(config)))
+      chatStore.userDetailsStore.setAccessToken(res);
+      getWalletConfig(userState.accessToken)
+        .then((config) => chatStore.userDetailsStore.setWalletConfig(config))
         .catch((error) => {
           console.log(error);
         });

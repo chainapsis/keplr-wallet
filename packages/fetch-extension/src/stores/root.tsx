@@ -40,6 +40,8 @@ import {
   GeneralPermissionStore,
   FNSQueries,
   EthereumAccount,
+  ChatStore,
+  ProposalStore,
 } from "@keplr-wallet/stores";
 import {
   KeplrETCQueries,
@@ -64,10 +66,11 @@ import { ExtensionAnalyticsClient } from "../analytics";
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
-
   public readonly chainStore: ChainStore;
   public readonly keyRingStore: KeyRingStore;
   public readonly ibcChannelStore: IBCChannelStore;
+  public readonly chatStore: ChatStore;
+  public readonly proposalStore: ProposalStore;
 
   protected readonly interactionStore: InteractionStore;
   public readonly permissionStore: PermissionStore;
@@ -131,6 +134,8 @@ export class RootStore {
   >;
 
   constructor() {
+    this.chatStore = new ChatStore();
+    this.proposalStore = new ProposalStore();
     this.uiConfigStore = new UIConfigStore(
       new ExtensionKVStore("store_ui_config"),
       ICNSInfo,

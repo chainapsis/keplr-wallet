@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { userDetails } from "@chatStore/user-slice";
 import { ChatErrorPopup } from "@components/chat-error-popup";
 import { ChatLoader } from "@components/chat-loader";
 import { SwitchUser } from "@components/switch-user";
@@ -11,7 +10,6 @@ import {
 import { HeaderLayout } from "@layouts/index";
 import { fetchPublicKey } from "@utils/fetch-public-key";
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import { useLocation } from "react-router";
 import { useStore } from "../../stores";
 import { Menu } from "../main/menu";
@@ -20,11 +18,13 @@ import { UserNameSection } from "./username-section";
 
 export const AgentChatSection: FunctionComponent = () => {
   const targetAddress = useLocation().pathname.split("/")[3];
-  const user = useSelector(userDetails);
+  const { chainStore, accountStore, queriesStore, uiConfigStore, chatStore } =
+    useStore();
+
+  const user = chatStore.userDetailsStore;
 
   const [targetPubKey, setTargetPubKey] = useState("");
   const [loadingChats, setLoadingChats] = useState(false);
-  const { chainStore, accountStore, queriesStore, uiConfigStore } = useStore();
 
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);

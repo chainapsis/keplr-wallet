@@ -1,4 +1,3 @@
-import { notificationsDetails } from "@chatStore/user-slice";
 import { HeaderLayout } from "@layouts/header-layout";
 import {
   NotificationSetup,
@@ -8,8 +7,6 @@ import {
 
 import { useStore } from "../../../stores";
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
-
 import { useNavigate } from "react-router";
 import { Button } from "reactstrap";
 import style from "./style.module.scss";
@@ -17,11 +14,12 @@ import { FormattedMessage } from "react-intl";
 import { ToolTip } from "@components/tooltip";
 export const ReviewNotification: FunctionComponent = () => {
   const navigate = useNavigate();
-  const { chainStore, accountStore, analyticsStore } = useStore();
+  const { chainStore, accountStore, chatStore, analyticsStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
 
-  const notificationInfo: NotificationSetup = useSelector(notificationsDetails);
+  const notificationInfo: NotificationSetup =
+    chatStore.userDetailsStore.notifications;
   const [organisations, setOrganisations] = useState("");
   const topics: NotyphiTopic[] = JSON.parse(
     localStorage.getItem(`topics-${accountInfo.bech32Address}`) ||

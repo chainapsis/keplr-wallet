@@ -4,12 +4,12 @@ import { useNavigate } from "react-router";
 import { useStore } from "../../../stores";
 import style from "./style.module.scss";
 import closeIcon from "@assets/icon/close-grey.png";
-import { userDetails } from "@chatStore/user-slice";
-import { useSelector } from "react-redux";
+import { observer } from "mobx-react-lite";
 
-export const ChatDisclaimer = () => {
-  const userState = useSelector(userDetails);
-  const { chainStore, accountStore, keyRingStore } = useStore();
+export const ChatDisclaimer = observer(() => {
+  const { chainStore, accountStore, keyRingStore, chatStore } = useStore();
+  const userState = chatStore.userDetailsStore;
+
   const current = chainStore.current;
   const walletAddress = accountStore.getAccount(
     chainStore.current.chainId
@@ -81,4 +81,4 @@ export const ChatDisclaimer = () => {
   ) : (
     <React.Fragment />
   );
-};
+});

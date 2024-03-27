@@ -1,9 +1,7 @@
-import { userDetails } from "@chatStore/user-slice";
 import { useNotification } from "@components/notification";
 import { deliverMessages } from "@graphQL/messages-api";
 import { signTransaction } from "@utils/sign-transaction";
 import React from "react";
-import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router";
 import {
   AGENT_ADDRESS,
@@ -23,13 +21,13 @@ export const SignTransaction = ({
   chainId: string;
   disabled: boolean;
 }) => {
-  const { chainStore, accountStore } = useStore();
+  const { chainStore, accountStore, chatStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const navigate = useNavigate();
   const targetAddress = useLocation().pathname.split("/")[3];
 
-  const user = useSelector(userDetails);
+  const user = chatStore.userDetailsStore;
   const notification = useNotification();
   const signTxn = async (data: string) => {
     try {
@@ -44,7 +42,8 @@ export const SignTransaction = ({
           signature: signResult.signature.signature,
         },
         accountInfo.bech32Address,
-        targetAddress
+        targetAddress,
+        chatStore.messagesStore
       );
     } catch (e) {
       console.log(e);
@@ -63,7 +62,8 @@ export const SignTransaction = ({
         chainId,
         TRANSACTION_FAILED,
         accountInfo.bech32Address,
-        targetAddress
+        targetAddress,
+        chatStore.messagesStore
       );
       navigate(`/chat/agent/${AGENT_ADDRESS[current.chainId]}`);
     }
@@ -76,7 +76,8 @@ export const SignTransaction = ({
         current.chainId,
         "/cancel",
         accountInfo.bech32Address,
-        targetAddress
+        targetAddress,
+        chatStore.messagesStore
       );
     } catch (e) {
       console.log(e);

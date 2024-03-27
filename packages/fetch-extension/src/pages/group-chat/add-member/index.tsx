@@ -1,8 +1,4 @@
 import searchIcon from "@assets/icon/search.png";
-import { store } from "@chatStore/index";
-import { setGroups, userChatGroups } from "@chatStore/messages-slice";
-import { newGroupDetails, setNewGroupInfo } from "@chatStore/new-group-slice";
-import { userDetails } from "@chatStore/user-slice";
 import {
   Group,
   GroupDetails,
@@ -27,7 +23,6 @@ import jazzicon from "@metamask/jazzicon";
 import { observer } from "mobx-react-lite";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import ReactHtmlParser from "react-html-parser";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { Button } from "reactstrap";
 import { useStore } from "../../../stores";
@@ -47,11 +42,20 @@ import { ContactsOnlyMessage } from "@components/contacts-only-message";
 
 export const AddMember: FunctionComponent = observer(() => {
   const navigate = useNavigate();
-  const user = useSelector(userDetails);
+  const {
+    chainStore,
+    accountStore,
+    queriesStore,
+    uiConfigStore,
+    analyticsStore,
+    chatStore,
+  } = useStore();
+
+  const user = chatStore.userDetailsStore;
   /// Current Group State
-  const newGroupState: NewGroupDetails = useSelector(newGroupDetails);
+  const newGroupState: NewGroupDetails = chatStore.newGroupStore.newGroup;
   /// Group Info
-  const groups: Groups = useSelector(userChatGroups);
+  const groups: Groups = chatStore.messagesStore.userChatGroups;
   const group: Group = groups[newGroupState.group.groupId];
 
   const [selectedMembers, setSelectedMembers] = useState<GroupMembers[]>(
@@ -64,13 +68,6 @@ export const AddMember: FunctionComponent = observer(() => {
   const [addresses, setAddresses] = useState<NameAddress[]>([]);
   const [randomAddress, setRandomAddress] = useState<NameAddress | undefined>();
 
-  const {
-    chainStore,
-    accountStore,
-    queriesStore,
-    uiConfigStore,
-    analyticsStore,
-  } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const walletAddress = accountInfo.bech32Address;
@@ -226,7 +223,9 @@ export const AddMember: FunctionComponent = observer(() => {
         };
         const tempMembers = [...selectedMembers, tempMember];
 
-        store.dispatch(setNewGroupInfo({ members: tempMembers }));
+        chatStore.newGroupStore.setNewGroupInfo({
+          members: tempMembers,
+        });
         setSelectedMembers(tempMembers);
         setNewAddedMembers([...newAddedMembers, contactAddress]);
       }
@@ -234,7 +233,7 @@ export const AddMember: FunctionComponent = observer(() => {
       const tempMembers = selectedMembers.filter(
         (item) => item.address !== contactAddress
       );
-      store.dispatch(setNewGroupInfo({ members: tempMembers }));
+      chatStore.newGroupStore.setNewGroupInfo({ members: tempMembers });
       setSelectedMembers(tempMembers);
 
       /// Removing new address
@@ -274,15 +273,24 @@ export const AddMember: FunctionComponent = observer(() => {
       name: newGroupState.group.name,
       onlyAdminMessages: false,
     };
-    const group = await createGroup(updatedGroupInfo);
+    const group = await createGroup(updatedGroupInfo, user.accessToken);
     setIsLoading(false);
 
     if (group) {
       /// updating the group(chat history) object
       const groups: any = { [group.id]: group };
-      store.dispatch(setGroups({ groups }));
+      const pagination = chatStore.messagesStore.groupsPagination;
+      chatStore.messagesStore.setGroups(groups, pagination);
       /// fetching the group messages again
-      await recieveMessages(group.id, null, 0, group.isDm, group.id);
+      await recieveMessages(
+        group.id,
+        null,
+        0,
+        group.isDm,
+        group.id,
+        user.accessToken,
+        chatStore.messagesStore
+      );
       navigate(-1);
     }
   }

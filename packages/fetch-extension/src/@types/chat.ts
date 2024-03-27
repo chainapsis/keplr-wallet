@@ -6,7 +6,7 @@ export interface NewGroupDetails {
 }
 export interface GroupDetails {
   contents: string;
-  description: string;
+  description: string | undefined;
   groupId: string;
   members: GroupMembers[];
   name: string;
@@ -79,7 +79,6 @@ export interface Pagination {
   lastPage: number;
 }
 
-//Redux Selectors Type Definitions
 export interface Messages {
   [key: string]: Message;
 }

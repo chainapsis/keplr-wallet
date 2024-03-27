@@ -5,16 +5,16 @@ import { HeaderLayout } from "@layouts/index";
 import { NotificationModal } from "@components/notification-modal";
 import style from "./style.module.scss";
 import { PoweredByNote } from "@components/notification-modal/powered-by-note/powered-by-note";
-import { useSelector } from "react-redux";
-import { notificationsDetails, setNotifications } from "@chatStore/user-slice";
 import { useStore } from "../../stores";
-import { store } from "@chatStore/index";
 import { Menu } from "../main/menu";
 import { NotificationSetup } from "@notificationTypes";
 export const NotificationPage: FunctionComponent = () => {
-  const notificationInfo: NotificationSetup = useSelector(notificationsDetails);
+  const { chainStore, accountStore, analyticsStore, chatStore } = useStore();
+
+  const notificationInfo: NotificationSetup =
+    chatStore.userDetailsStore.notifications;
   const navigate = useNavigate();
-  const { chainStore, accountStore, analyticsStore } = useStore();
+
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
 
@@ -26,7 +26,9 @@ export const NotificationPage: FunctionComponent = () => {
   const handleClearAll = () => {
     analyticsStore.logEvent("notification_clear_all_click");
     localStorage.removeItem(`notifications-${accountInfo.bech32Address}`);
-    store.dispatch(setNotifications({ allNotifications: [] }));
+    chatStore.userDetailsStore.setNotifications({
+      allNotifications: [],
+    });
   };
 
   return (

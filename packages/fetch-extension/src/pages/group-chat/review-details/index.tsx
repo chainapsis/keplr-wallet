@@ -17,18 +17,9 @@ import {
   Groups,
   NewGroupDetails,
 } from "@chatTypes";
-import { useSelector } from "react-redux";
-import {
-  newGroupDetails,
-  resetNewGroup,
-  setNewGroupInfo,
-} from "@chatStore/new-group-slice";
-import { store } from "@chatStore/index";
 import { createGroup } from "@graphQL/groups-api";
 import { Button } from "reactstrap";
-import { setGroups, userChatGroups } from "@chatStore/messages-slice";
 import { createEncryptedSymmetricKeyForAddresses } from "@utils/symmetric-key";
-import { userDetails } from "@chatStore/user-slice";
 import { encryptGroupMessage, GroupMessageType } from "@utils/encrypt-group";
 import { GroupChatPopup } from "@components/group-chat-popup";
 import { useNotification } from "@components/notification";
@@ -38,28 +29,29 @@ import { ChatErrorPopup } from "@components/chat-error-popup";
 export const ReviewGroupChat: FunctionComponent = observer(() => {
   const navigate = useNavigate();
   const notification = useNotification();
-
-  const newGroupState: NewGroupDetails = useSelector(newGroupDetails);
-  const [selectedMembers, setSelectedMembers] = useState<GroupMembers[]>(
-    newGroupState.group.members || []
-  );
-  const user = useSelector(userDetails);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [addresses, setAddresses] = useState<any[]>([]);
-
-  const groups: Groups = useSelector(userChatGroups);
-  const group: Group = groups[newGroupState.group.groupId];
-
-  const [selectedAddress, setSelectedAddresse] = useState<any>();
-  const [confirmAction, setConfirmAction] = useState(false);
-
   const {
     chainStore,
     accountStore,
     queriesStore,
     uiConfigStore,
     analyticsStore,
+    chatStore,
   } = useStore();
+
+  const newGroupState: NewGroupDetails = chatStore.newGroupStore.newGroup;
+  const [selectedMembers, setSelectedMembers] = useState<GroupMembers[]>(
+    newGroupState.group.members || []
+  );
+  const user = chatStore.userDetailsStore;
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [addresses, setAddresses] = useState<any[]>([]);
+
+  const groups: Groups = chatStore.messagesStore.userChatGroups;
+  const group: Group = groups[newGroupState.group.groupId];
+
+  const [selectedAddress, setSelectedAddresse] = useState<any>();
+  const [confirmAction, setConfirmAction] = useState(false);
+
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const walletAddress = accountInfo.bech32Address;
@@ -154,7 +146,7 @@ export const ReviewGroupChat: FunctionComponent = observer(() => {
             };
           });
         setSelectedMembers(updatedMembers);
-        store.dispatch(setNewGroupInfo({ members: updatedMembers }));
+        chatStore.newGroupStore.setNewGroupInfo({ members: updatedMembers });
       }
     }
   }, [groups, newGroupState.group.groupId, newGroupState.isEditGroup]);
@@ -163,7 +155,7 @@ export const ReviewGroupChat: FunctionComponent = observer(() => {
     const tempAddresses = selectedMembers.filter(
       (item) => item.address !== contactAddress
     );
-    store.dispatch(setNewGroupInfo({ members: tempAddresses }));
+    chatStore.newGroupStore.setNewGroupInfo({ members: tempAddresses });
     setSelectedMembers(tempAddresses);
     setAddresses(addresses.filter((item) => item.address !== contactAddress));
   };
@@ -260,13 +252,16 @@ export const ReviewGroupChat: FunctionComponent = observer(() => {
       members: updatedGroupMembers,
       contents,
     };
-    const groupData = await createGroup(newGroupData);
+    const groupData = await createGroup(newGroupData, user.accessToken);
     setIsLoading(false);
 
     if (groupData) {
-      store.dispatch(resetNewGroup());
+      chatStore.newGroupStore.resetNewGroup();
       const groups: any = { [groupData.id]: groupData };
-      store.dispatch(setGroups({ groups }));
+      chatStore.messagesStore.setGroups(
+        groups,
+        chatStore.messagesStore.groupsPagination
+      );
       /// Clearing stack till chat tab
       navigate(-4);
       setTimeout(() => {

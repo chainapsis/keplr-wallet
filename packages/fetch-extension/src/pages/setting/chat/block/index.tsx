@@ -3,10 +3,8 @@ import { useAddressBookConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import React, { FunctionComponent, useState } from "react";
 import { useIntl } from "react-intl";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { NameAddress } from "@chatTypes";
-import { userBlockedAddresses } from "@chatStore/messages-slice";
 import { UnblockUserPopup } from "@components/chat-actions-popup/unblock-user-popup";
 import { HeaderLayout } from "@layouts/index";
 import { useStore } from "../../../../stores";
@@ -14,12 +12,10 @@ import { formatAddress } from "@utils/format";
 import style from "./style.module.scss";
 
 export const BlockList: FunctionComponent = observer(() => {
-  // const language = useLanguage();
-  const blockedAddresses = useSelector(userBlockedAddresses);
+  const { chainStore, chatStore, analyticsStore } = useStore();
+  const blockedAddresses = chatStore.messagesStore.userBlockedAddresses;
   const navigate = useNavigate();
   const intl = useIntl();
-  const { chainStore, analyticsStore } = useStore();
-
   const addressBookConfig = useAddressBookConfig(
     new ExtensionKVStore("address-book"),
     chainStore,

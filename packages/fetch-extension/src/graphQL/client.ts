@@ -1,8 +1,6 @@
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { createClient } from "graphql-ws";
-import { store } from "@chatStore/index";
-import { setIsChatSubscriptionActive } from "@chatStore/messages-slice";
 import {
   CHAIN_ID_DORADO,
   CHAIN_ID_FETCHHUB,
@@ -41,7 +39,7 @@ export const createWSLink = (token: string) => {
         },
         opened: () => {
           console.log("opened");
-          store.dispatch(setIsChatSubscriptionActive(true));
+          return { setIsChatSubscriptionActive: true };
         },
       },
     })

@@ -119,7 +119,7 @@ export const ChatUser: React.FC<{
       );
       decryptGrp(group);
     }
-  }, [chainId, targetAddress, group]);
+  }, [chainId, targetAddress, group, group.lastMessageContents]);
 
   return (
     <div
