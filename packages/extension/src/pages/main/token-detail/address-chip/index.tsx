@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
@@ -14,13 +14,17 @@ export const AddressChip: FunctionComponent<{
 
   const account = accountStore.getAccount(chainId);
 
+  const [isHover, setIsHover] = useState(false);
+
   return (
     <Box
       cursor="pointer"
       height="1.5rem"
       alignX="center"
       alignY="center"
-      backgroundColor={ColorPalette["gray-600"]}
+      backgroundColor={
+        !isHover ? ColorPalette["gray-600"] : ColorPalette["gray-550"]
+      }
       borderRadius="99999px"
       paddingX="0.625rem"
       onClick={(e) => {
@@ -29,6 +33,7 @@ export const AddressChip: FunctionComponent<{
         // copy address
         navigator.clipboard.writeText(account.bech32Address);
       }}
+      onHoverStateChange={setIsHover}
     >
       <XAxis alignY="center">
         <Body3 color={ColorPalette["gray-200"]}>
@@ -42,6 +47,8 @@ export const AddressChip: FunctionComponent<{
 export const QRCodeChip: FunctionComponent<{
   onClick: () => void;
 }> = ({ onClick }) => {
+  const [isHover, setIsHover] = useState(false);
+
   return (
     <Box
       cursor="pointer"
@@ -49,9 +56,12 @@ export const QRCodeChip: FunctionComponent<{
       height="1.5rem"
       alignX="center"
       alignY="center"
-      backgroundColor={ColorPalette["gray-600"]}
+      backgroundColor={
+        !isHover ? ColorPalette["gray-600"] : ColorPalette["gray-550"]
+      }
       borderRadius="99999px"
       onClick={onClick}
+      onHoverStateChange={setIsHover}
     >
       <XAxis alignY="center">
         <svg
