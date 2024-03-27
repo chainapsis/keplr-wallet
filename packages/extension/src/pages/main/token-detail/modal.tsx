@@ -19,6 +19,7 @@ import { RenderMessages } from "./messages";
 import { Modal } from "../../../components/modal";
 import { BuyCryptoModal } from "../components";
 import { useBuy } from "../../../hooks/use-buy";
+import { CoinPretty, DecUtils } from "@keplr-wallet/unit";
 
 const Styles = {
   Container: styled.div`
@@ -407,16 +408,39 @@ export const TokenDetailModal: FunctionComponent<{
               })()
             : null}
 
-          <Gutter size="1.25rem" />
-          <TokenInfos
-            title="Token Info"
-            infos={[
-              {
-                title: "TODO",
-                text: "$TODO",
-              },
-            ]}
-          />
+          {(() => {
+            const price = (() => {
+              if (!currency.coinGeckoId) {
+                return;
+              }
+
+              return priceStore.calculatePrice(
+                new CoinPretty(
+                  currency,
+                  DecUtils.getTenExponentN(currency.coinDecimals)
+                )
+              );
+            })();
+
+            if (!price) {
+              return null;
+            }
+
+            return (
+              <React.Fragment>
+                <Gutter size="1.25rem" />
+                <TokenInfos
+                  title="Token Info"
+                  infos={[
+                    {
+                      title: `${currency.coinDenom} Price`,
+                      text: price.toString(),
+                    },
+                  ]}
+                />
+              </React.Fragment>
+            );
+          })()}
 
           <Gutter size="1.25rem" />
           <RenderMessages
