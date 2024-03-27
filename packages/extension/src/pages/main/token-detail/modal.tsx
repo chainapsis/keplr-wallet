@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { Box } from "../../../components/box";
 import { XAxis, YAxis } from "../../../components/axis";
 import { useStore } from "../../../stores";
-import { Body1, Body3, Subtitle3 } from "../../../components/typography";
+import { Body1, Subtitle3 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { Gutter } from "../../../components/gutter";
 import { usePaginatedCursorQuery } from "./hook";
@@ -23,6 +23,7 @@ import { CoinPretty, DecUtils } from "@keplr-wallet/unit";
 import { CircleButton } from "./circle-button";
 import { AddressChip, QRCodeChip } from "./address-chip";
 import { ReceiveModal } from "./receive-modal";
+import { StakedBalance } from "./staked-balance";
 
 const Styles = {
   Container: styled.div`
@@ -386,54 +387,13 @@ export const TokenDetailModal: FunctionComponent<{
           </YAxis>
 
           {chainInfo.stakeCurrency &&
-          chainInfo.stakeCurrency.coinMinimalDenom === currency.coinMinimalDenom
-            ? (() => {
-                const queryDelegation = queriesStore
-                  .get(chainId)
-                  .cosmos.queryDelegations.getQueryBech32Address(
-                    accountStore.getAccount(chainId).bech32Address
-                  );
-
-                return (
-                  <React.Fragment>
-                    <Gutter size="1.25rem" />
-                    <Box paddingX="0.75rem">
-                      <Box
-                        backgroundColor={ColorPalette["gray-550"]}
-                        borderRadius="0.375rem"
-                        padding="1rem"
-                      >
-                        <XAxis alignY="center">
-                          <Box
-                            width="2rem"
-                            height="2rem"
-                            borderRadius="999999px"
-                            backgroundColor={ColorPalette["white"]}
-                          />
-                          <Gutter size="0.75rem" />
-                          <YAxis>
-                            <Body3 color={ColorPalette["gray-200"]}>
-                              Staked Balance
-                            </Body3>
-                            <Gutter size="0.25rem" />
-                            <Subtitle3 color={ColorPalette["white"]}>
-                              {queryDelegation.total
-                                ? queryDelegation.total
-                                    .maxDecimals(6)
-                                    .shrink(true)
-                                    .inequalitySymbol(true)
-                                    .trim(true)
-                                    .toString()
-                                : "-"}
-                            </Subtitle3>
-                          </YAxis>
-                        </XAxis>
-                      </Box>
-                    </Box>
-                  </React.Fragment>
-                );
-              })()
-            : null}
+          chainInfo.stakeCurrency.coinMinimalDenom ===
+            currency.coinMinimalDenom ? (
+            <React.Fragment>
+              <Gutter size="1.25rem" />
+              <StakedBalance chainId={chainId} />
+            </React.Fragment>
+          ) : null}
 
           {(() => {
             const infos: {
