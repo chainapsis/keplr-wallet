@@ -108,6 +108,8 @@ import {
   FinalizeImportFromExtensionScreen,
   DecryptedKeyRingDatasResponse,
 } from './screen/register/import-from-extension';
+import {SwapIcon} from './components/icon/swap.tsx';
+import {IBCSwapScreen} from './screen/ibc-swap';
 
 type DefaultRegisterParams = {
   hideBackButton?: boolean;
@@ -512,6 +514,8 @@ export const MainTabNavigation: FunctionComponent = () => {
           switch (route.name) {
             case 'Home':
               return <WalletIcon size={size} color={color} />;
+            case 'Swap':
+              return <SwapIcon size={size} color={color} />;
             case 'WebTab':
               return <BrowserIcon size={size} color={color} />;
             case 'Settings':
@@ -537,6 +541,14 @@ export const MainTabNavigation: FunctionComponent = () => {
           ...homeHeaderOptions,
         }}
         component={HomeScreen}
+      />
+      <Tab.Screen
+        name="Swap"
+        options={{
+          headerTitle: HomeScreenHeaderTitleFunc,
+          ...homeHeaderOptions,
+        }}
+        component={IBCSwapScreen}
       />
       <Tab.Screen
         name="WebTab"
