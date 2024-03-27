@@ -417,35 +417,57 @@ export const TokenDetailModal: FunctionComponent<{
             : null}
 
           {(() => {
-            const price = (() => {
-              if (!currency.coinGeckoId) {
-                return;
-              }
+            const infos: {
+              title: string;
+              text: string;
+            }[] = [];
 
-              return priceStore.calculatePrice(
+            if (currency.coinGeckoId) {
+              const price = priceStore.calculatePrice(
                 new CoinPretty(
                   currency,
                   DecUtils.getTenExponentN(currency.coinDecimals)
                 )
               );
-            })();
+              if (price) {
+                if ("originCurrency" in currency && currency.originCurrency) {
+                  infos.push({
+                    title: `${currency.originCurrency.coinDenom} Price`,
+                    text: price.toString(),
+                  });
+                } else {
+                  infos.push({
+                    title: `${currency.coinDenom} Price`,
+                    text: price.toString(),
+                  });
+                }
+              }
+            }
 
-            if (!price) {
+            if ("paths" in currency && currency.paths.length > 0) {
+              const path = currency.paths[currency.paths.length - 1];
+              if (path.clientChainId) {
+                const chainName = chainStore.hasChain(path.clientChainId)
+                  ? chainStore.getChain(path.clientChainId).chainName
+                  : path.clientChainId;
+                infos.push({
+                  title: "Channel",
+                  text: `${chainName}/${path.channelId.replace(
+                    "channel-",
+                    ""
+                  )}`,
+                });
+              }
+            }
+
+            if (infos.length === 0) {
               return null;
             }
 
             return (
               <React.Fragment>
                 <Gutter size="1.25rem" />
-                <TokenInfos
-                  title="Token Info"
-                  infos={[
-                    {
-                      title: `${currency.coinDenom} Price`,
-                      text: price.toString(),
-                    },
-                  ]}
-                />
+                <TokenInfos title="Token Info" infos={infos} />
               </React.Fragment>
             );
           })()}
