@@ -16,16 +16,23 @@ export const AddressChip: FunctionComponent<{
 
   return (
     <Box
+      cursor="pointer"
       height="1.5rem"
       alignX="center"
       alignY="center"
       backgroundColor={ColorPalette["gray-600"]}
       borderRadius="99999px"
       paddingX="0.625rem"
+      onClick={(e) => {
+        e.preventDefault();
+
+        // copy address
+        navigator.clipboard.writeText(account.bech32Address);
+      }}
     >
       <XAxis alignY="center">
         <Body3 color={ColorPalette["gray-200"]}>
-          {Bech32Address.shortenAddress(account.bech32Address, 22)}
+          {Bech32Address.shortenAddress(account.bech32Address, 18)}
         </Body3>
       </XAxis>
     </Box>
