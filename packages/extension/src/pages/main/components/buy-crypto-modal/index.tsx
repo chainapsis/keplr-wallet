@@ -1,16 +1,11 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { Subtitle1 } from "../../../../components/typography";
-import {
-  FiatOnRampServiceInfo,
-  FiatOnRampServiceInfos,
-} from "../../../../config.ui";
+import { FiatOnRampServiceInfo } from "../../../../config.ui";
 import { Box } from "../../../../components/box";
 import { useStore } from "../../../../stores";
-import { ChainInfo } from "@keplr-wallet/types";
-import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { FormattedMessage } from "react-intl";
 
 const Styles = {
@@ -67,153 +62,9 @@ const Styles = {
 
 export const BuyCryptoModal: FunctionComponent<{
   close: () => void;
-}> = observer(({ close }) => {
+  buySupportServiceInfos: (FiatOnRampServiceInfo & { buyUrl?: string })[];
+}> = observer(({ close, buySupportServiceInfos }) => {
   const theme = useTheme();
-  const { accountStore, chainStore } = useStore();
-  const [fiatOnRampServiceInfos, setFiatOnRampServiceInfos] = useState(
-    FiatOnRampServiceInfos
-  );
-
-  useEffect(() => {
-    (async () => {
-      const response = await simpleFetch<{ list: FiatOnRampServiceInfo[] }>(
-        "https://raw.githubusercontent.com/chainapsis/keplr-fiat-on-off-ramp-registry/main/fiat-on-off-ramp-list.json"
-      );
-
-      setFiatOnRampServiceInfos(response.data.list);
-    })();
-  }, []);
-
-  const buySupportServiceInfos = fiatOnRampServiceInfos.map((serviceInfo) => {
-    const buySupportChainIds = Object.keys(
-      serviceInfo.buySupportCoinDenomsByChainId
-    );
-
-    const buySupportDefaultChainInfo = (() => {
-      if (
-        buySupportChainIds.length > 0 &&
-        chainStore.hasChain(buySupportChainIds[0])
-      ) {
-        return chainStore.getChain(buySupportChainIds[0]);
-      }
-    })();
-
-    const buySupportChainAccounts = (() => {
-      const res: {
-        chainInfo: ChainInfo;
-        bech32Address: string;
-      }[] = [];
-
-      for (const chainId of buySupportChainIds) {
-        if (chainStore.hasChain(chainId)) {
-          res.push({
-            chainInfo: chainStore.getChain(chainId),
-            bech32Address: accountStore.getAccount(chainId).bech32Address,
-          });
-        }
-      }
-
-      return res;
-    })();
-
-    const buyUrlParams = (() => {
-      switch (serviceInfo.serviceId) {
-        case "moonpay":
-          return {
-            apiKey:
-              process.env["KEPLR_EXT_MOONPAY_API_KEY"] ?? serviceInfo.apiKey,
-            showWalletAddressForm: "true",
-            walletAddresses: encodeURIComponent(
-              JSON.stringify(
-                buySupportChainAccounts.reduce(
-                  (acc, cur) => ({
-                    ...acc,
-                    [(
-                      cur.chainInfo.stakeCurrency || cur.chainInfo.currencies[0]
-                    ).coinDenom.toLowerCase()]: cur.bech32Address,
-                  }),
-                  {}
-                )
-              )
-            ),
-            ...(buySupportDefaultChainInfo && {
-              defaultCurrencyCode: (
-                buySupportDefaultChainInfo.stakeCurrency ||
-                buySupportDefaultChainInfo.currencies[0]
-              ).coinDenom.toLowerCase(),
-            }),
-          };
-        case "transak":
-          return {
-            apiKey:
-              process.env["KEPLR_EXT_TRANSAK_API_KEY"] ?? serviceInfo.apiKey,
-            hideMenu: "true",
-            walletAddressesData: encodeURIComponent(
-              JSON.stringify({
-                coins: buySupportChainAccounts.reduce(
-                  (acc, cur) => ({
-                    ...acc,
-                    [(
-                      cur.chainInfo.stakeCurrency || cur.chainInfo.currencies[0]
-                    ).coinDenom]: {
-                      address: cur.bech32Address,
-                    },
-                  }),
-                  {}
-                ),
-              })
-            ),
-            cryptoCurrencyList: buySupportChainAccounts
-              .map(
-                (chainAccount) =>
-                  (
-                    chainAccount.chainInfo.stakeCurrency ||
-                    chainAccount.chainInfo.currencies[0]
-                  ).coinDenom
-              )
-              .join(","),
-            ...(buySupportDefaultChainInfo && {
-              defaultCryptoCurrency: (
-                buySupportDefaultChainInfo.stakeCurrency ||
-                buySupportDefaultChainInfo.currencies[0]
-              ).coinDenom,
-            }),
-          };
-        case "kado":
-          return {
-            apiKey: process.env["KEPLR_EXT_KADO_API_KEY"] ?? serviceInfo.apiKey,
-            product: "BUY",
-            networkList: buySupportChainAccounts.map((chainAccount) =>
-              chainAccount.chainInfo.chainName.toUpperCase()
-            ),
-            cryptoList: [
-              ...new Set(
-                Object.values(serviceInfo.buySupportCoinDenomsByChainId).flat()
-              ),
-            ],
-            ...(buySupportDefaultChainInfo && {
-              onRevCurrency:
-                serviceInfo.buySupportCoinDenomsByChainId[
-                  buySupportDefaultChainInfo.chainId
-                ]?.[0] ?? "USDC",
-              network: buySupportDefaultChainInfo.chainName.toUpperCase(),
-            }),
-          };
-        default:
-          return;
-      }
-    })();
-    const buyUrl = buyUrlParams
-      ? `${serviceInfo.buyOrigin}?${Object.entries(buyUrlParams)
-          .map((paramKeyValue) => paramKeyValue.join("="))
-          .join("&")}`
-      : undefined;
-
-    return {
-      ...serviceInfo,
-      buyUrl,
-    };
-  });
 
   return (
     <Styles.Container>
@@ -247,6 +98,10 @@ const ServiceItem: FunctionComponent<{
   close: () => void;
 }> = ({ serviceInfo, close }) => {
   const { analyticsStore } = useStore();
+
+  if (serviceInfo.buyUrl === undefined) {
+    return null;
+  }
 
   return (
     <Styles.ItemContainer

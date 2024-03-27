@@ -16,6 +16,9 @@ import { HeaderHeight } from "../../../layouts/header";
 import { useNavigate } from "react-router";
 import { TokenInfos } from "./token-info";
 import { RenderMessages } from "./messages";
+import { Modal } from "../../../components/modal";
+import { BuyCryptoModal } from "../components";
+import { useBuy } from "../../../hooks/use-buy";
 
 const Styles = {
   Container: styled.div`
@@ -52,6 +55,13 @@ export const TokenDetailModal: FunctionComponent<{
   const chainInfo = chainStore.getChain(chainId);
   const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
 
+  const [isOpenBuy, setIsOpenBuy] = React.useState(false);
+
+  const buySupportServiceInfos = useBuy({ chainId, currency });
+  const isSomeBuySupport = buySupportServiceInfos.some(
+    (serviceInfo) => !!serviceInfo.buyUrl
+  );
+
   const balance = queriesStore
     .get(chainId)
     .queryBalances.getQueryBech32Address(
@@ -87,7 +97,7 @@ export const TokenDetailModal: FunctionComponent<{
       ),
       text: "Buy",
       onClick: () => {
-        // TODO: noop yet
+        setIsOpenBuy(true);
       },
     },
     {
@@ -310,6 +320,10 @@ export const TokenDetailModal: FunctionComponent<{
             <XAxis>
               <Gutter size="0.875rem" />
               {buttons.map((obj, i) => {
+                if (obj.text === "Buy" && !isSomeBuySupport) {
+                  return null;
+                }
+
                 return (
                   <React.Fragment key={i.toString()}>
                     <Gutter size="1.875rem" />
@@ -411,6 +425,17 @@ export const TokenDetailModal: FunctionComponent<{
           />
         </SimpleBar>
       </Styles.Body>
+
+      <Modal
+        isOpen={isOpenBuy}
+        align="bottom"
+        close={() => setIsOpenBuy(false)}
+      >
+        <BuyCryptoModal
+          close={() => setIsOpenBuy(false)}
+          buySupportServiceInfos={buySupportServiceInfos}
+        />
+      </Modal>
     </Styles.Container>
   );
 });
