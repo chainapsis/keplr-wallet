@@ -65,6 +65,8 @@ export const TokenDetailModal: FunctionComponent<{
   const chainInfo = chainStore.getChain(chainId);
   const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
 
+  const isIBCCurrency = "paths" in currency;
+
   const [isReceiveOpen, setIsReceiveOpen] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
 
@@ -134,6 +136,7 @@ export const TokenDetailModal: FunctionComponent<{
       onClick: () => {
         setIsReceiveOpen(true);
       },
+      disabled: isIBCCurrency,
     },
     {
       icon: (
@@ -271,16 +274,28 @@ export const TokenDetailModal: FunctionComponent<{
               </svg>
             </Box>
             <div style={{ flex: 1 }} />
-            <Body1 color={ColorPalette["gray-200"]}>
-              {(() => {
-                let denom = currency.coinDenom;
-                if ("originCurrency" in currency && currency.originCurrency) {
-                  denom = currency.originCurrency.coinDenom;
-                }
+            <span>
+              <Body1 as="span" color={ColorPalette["gray-200"]}>
+                {(() => {
+                  let denom = currency.coinDenom;
+                  if ("originCurrency" in currency && currency.originCurrency) {
+                    denom = currency.originCurrency.coinDenom;
+                  }
 
-                return `${denom} on ${chainInfo.chainName}`;
-              })()}
-            </Body1>
+                  return `${denom} on `;
+                })()}
+              </Body1>
+              <Body1
+                as="span"
+                color={
+                  isIBCCurrency
+                    ? ColorPalette["white"]
+                    : ColorPalette["gray-200"]
+                }
+              >
+                {chainInfo.chainName}
+              </Body1>
+            </span>
             <div style={{ flex: 1 }} />
             {/* 뒤로가기 버튼과 좌우를 맞추기 위해서 존재... */}
             <Box width="1.5rem" height="1.5rem" />
@@ -296,18 +311,22 @@ export const TokenDetailModal: FunctionComponent<{
             overflowY: "auto",
           }}
         >
-          <Gutter size="0.25rem" />
-          <YAxis alignX="center">
-            <XAxis alignY="center">
-              <AddressChip chainId={chainId} />
+          {!isIBCCurrency ? (
+            <React.Fragment>
               <Gutter size="0.25rem" />
-              <QRCodeChip
-                onClick={() => {
-                  setIsReceiveOpen(true);
-                }}
-              />
-            </XAxis>
-          </YAxis>
+              <YAxis alignX="center">
+                <XAxis alignY="center">
+                  <AddressChip chainId={chainId} />
+                  <Gutter size="0.25rem" />
+                  <QRCodeChip
+                    onClick={() => {
+                      setIsReceiveOpen(true);
+                    }}
+                  />
+                </XAxis>
+              </YAxis>
+            </React.Fragment>
+          ) : null}
           <Gutter size="1.375rem" />
           <YAxis alignX="center">
             <Styles.Balance
