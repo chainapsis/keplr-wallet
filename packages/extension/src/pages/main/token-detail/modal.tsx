@@ -20,6 +20,7 @@ import { Modal } from "../../../components/modal";
 import { BuyCryptoModal } from "../components";
 import { useBuy } from "../../../hooks/use-buy";
 import { CoinPretty, DecUtils } from "@keplr-wallet/unit";
+import { CircleButton } from "./circle-button";
 
 const Styles = {
   Container: styled.div`
@@ -81,18 +82,17 @@ export const TokenDetailModal: FunctionComponent<{
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="40"
-          height="40"
+          width="20"
+          height="20"
           fill="none"
-          viewBox="0 0 40 40"
+          viewBox="0 0 20 20"
         >
-          <rect width="40" height="40" y="0.5" fill="#424247" rx="20" />
           <path
-            stroke={ColorPalette["white"]}
+            stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth="1.5"
-            d="M20 14.25v12.5m6.25-6.25h-12.5"
+            strokeWidth="1.556"
+            d="M10 3.75v12.5M16.25 10H3.75"
           />
         </svg>
       ),
@@ -105,18 +105,17 @@ export const TokenDetailModal: FunctionComponent<{
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="40"
-          height="40"
+          width="20"
+          height="20"
           fill="none"
-          viewBox="0 0 40 40"
+          viewBox="0 0 20 20"
         >
-          <rect width="40" height="40" y="0.5" fill="#424247" rx="20" />
           <path
-            stroke={ColorPalette["white"]}
+            stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth="1.5"
-            d="M26.25 14.25l-12.5 12.5m0 0h9.375m-9.375 0v-9.375"
+            strokeWidth="1.56"
+            d="M16.25 3.75l-12.5 12.5m0 0h9.375m-9.375 0V6.875"
           />
         </svg>
       ),
@@ -129,18 +128,17 @@ export const TokenDetailModal: FunctionComponent<{
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="40"
-          height="40"
+          width="20"
+          height="20"
           fill="none"
-          viewBox="0 0 40 40"
+          viewBox="0 0 20 20"
         >
-          <rect width="40" height="40" y="0.5" fill="#424247" rx="20" />
           <path
-            stroke={ColorPalette["white"]}
+            stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth="1.5"
-            d="M12.5 16.75L16.25 13m0 0L20 16.75M16.25 13v11.25m11.25 0L23.75 28m0 0L20 24.25M23.75 28V16.75"
+            strokeWidth="1.56"
+            d="M6.25 17.5L2.5 13.75m0 0L6.25 10M2.5 13.75h11.25m0-11.25l3.75 3.75m0 0L13.75 10m3.75-3.75H6.25"
           />
         </svg>
       ),
@@ -153,18 +151,17 @@ export const TokenDetailModal: FunctionComponent<{
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="40"
-          height="40"
+          width="20"
+          height="20"
           fill="none"
-          viewBox="0 0 40 40"
+          viewBox="0 0 20 20"
         >
-          <rect width="40" height="40" y="0.5" fill="#424247" rx="20" />
           <path
-            stroke={ColorPalette["white"]}
+            stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth="1.5"
-            d="M13.75 26.75l12.5-12.5m0 0h-9.375m9.375 0v9.375"
+            strokeWidth="1.56"
+            d="M3.75 16.25l12.5-12.5m0 0H6.875m9.375 0v9.375"
           />
         </svg>
       ),
@@ -321,33 +318,20 @@ export const TokenDetailModal: FunctionComponent<{
             <XAxis>
               <Gutter size="0.875rem" />
               {buttons.map((obj, i) => {
+                let disabled = false;
                 if (obj.text === "Buy" && !isSomeBuySupport) {
-                  return null;
+                  disabled = true;
                 }
 
                 return (
                   <React.Fragment key={i.toString()}>
                     <Gutter size="1.875rem" />
-                    <Box
-                      cursor="pointer"
-                      onClick={(e) => {
-                        e.preventDefault();
-
-                        obj.onClick();
-                      }}
-                    >
-                      <YAxis alignX="center">
-                        {obj.icon}
-                        <Gutter size="0.375rem" />
-                        <Box alignX="center" width="1px">
-                          <Box>
-                            <Body3 color={ColorPalette["white"]}>
-                              {obj.text}
-                            </Body3>
-                          </Box>
-                        </Box>
-                      </YAxis>
-                    </Box>
+                    <CircleButton
+                      text={obj.text}
+                      icon={obj.icon}
+                      onClick={obj.onClick}
+                      disabled={disabled}
+                    />
                     {i === buttons.length - 1 ? (
                       <Gutter size="1.875rem" />
                     ) : null}
