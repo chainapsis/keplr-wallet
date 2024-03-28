@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { Box } from "../../../components/box";
 import { ColorPalette } from "../../../styles";
@@ -26,24 +26,29 @@ export const StakedBalance: FunctionComponent<{
       accountStore.getAccount(chainId).bech32Address
     );
 
-  return (
-    <Box
-      paddingX="0.75rem"
-      cursor={
-        chainStore.getChain(chainId).walletUrlForStaking ? "pointer" : undefined
-      }
-      onClick={(e) => {
-        e.preventDefault();
+  const [isHover, setIsHover] = useState(false);
 
-        if (chainStore.getChain(chainId).walletUrlForStaking) {
-          browser.tabs.create({
-            url: chainStore.getChain(chainId).walletUrlForStaking,
-          });
-        }
-      }}
-    >
+  return (
+    <Box paddingX="0.75rem">
       <Box
-        backgroundColor={ColorPalette["gray-550"]}
+        backgroundColor={
+          isHover ? ColorPalette["gray-500"] : ColorPalette["gray-550"]
+        }
+        cursor={
+          chainStore.getChain(chainId).walletUrlForStaking
+            ? "pointer"
+            : undefined
+        }
+        onClick={(e) => {
+          e.preventDefault();
+
+          if (chainStore.getChain(chainId).walletUrlForStaking) {
+            browser.tabs.create({
+              url: chainStore.getChain(chainId).walletUrlForStaking,
+            });
+          }
+        }}
+        onHoverStateChange={setIsHover}
         borderRadius="0.375rem"
         padding="1rem"
       >
