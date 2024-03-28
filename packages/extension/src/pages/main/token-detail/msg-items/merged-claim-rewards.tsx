@@ -68,6 +68,7 @@ export const MsgRelationMergedClaimRewards: FunctionComponent<{
       title="Claim Reward"
       amount={amountPretty}
       prices={prices || {}}
+      msg={msg}
       targetDenom={targetDenom}
     />
   );

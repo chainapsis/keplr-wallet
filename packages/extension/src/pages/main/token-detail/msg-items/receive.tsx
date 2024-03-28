@@ -68,6 +68,7 @@ export const MsgRelationReceive: FunctionComponent<{
       paragraph={fromAddress}
       amount={sendAmountPretty}
       prices={prices || {}}
+      msg={msg}
       targetDenom={targetDenom}
     />
   );

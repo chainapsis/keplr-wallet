@@ -93,6 +93,7 @@ export const MsgRelationUndelegate: FunctionComponent<{
       paragraph={moniker}
       amount={amountPretty}
       prices={prices || {}}
+      msg={msg}
       targetDenom={targetDenom}
     />
   );

@@ -128,6 +128,7 @@ export const MsgRelationIBCSend: FunctionComponent<{
       paragraph={toAddress}
       amount={sendAmountPretty}
       prices={prices || {}}
+      msg={msg}
       targetDenom={targetDenom}
     />
   );

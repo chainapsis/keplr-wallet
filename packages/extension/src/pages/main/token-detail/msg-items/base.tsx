@@ -7,6 +7,7 @@ import { Gutter } from "../../../../components/gutter";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
+import { MsgHistory } from "../types";
 
 export const MsgItemBase: FunctionComponent<{
   logo: React.ReactElement;
@@ -16,6 +17,7 @@ export const MsgItemBase: FunctionComponent<{
   amount: CoinPretty | string;
   overrideAmountColor?: string;
   prices: Record<string, Record<string, number | undefined> | undefined>;
+  msg: MsgHistory;
   targetDenom: string;
 }> = observer(
   ({
@@ -26,6 +28,7 @@ export const MsgItemBase: FunctionComponent<{
     amount,
     overrideAmountColor,
     prices,
+    msg,
     targetDenom,
   }) => {
     const { chainStore, priceStore } = useStore();
@@ -90,35 +93,49 @@ export const MsgItemBase: FunctionComponent<{
                 }}
               />
               <YAxis alignX="right">
-                <Subtitle3
-                  color={ColorPalette["white"]}
-                  style={{
-                    whiteSpace: "nowrap",
-                    color: overrideAmountColor,
-                  }}
-                >
-                  {typeof amount === "string"
-                    ? amount
-                    : amount
-                        .maxDecimals(2)
-                        .shrink(true)
-                        .hideIBCMetadata(true)
-                        .inequalitySymbol(true)
-                        .toString()}
-                </Subtitle3>
-                {sendAmountPricePretty ? (
-                  <React.Fragment>
-                    <Gutter size="0.25rem" />
-                    <Body3
-                      color={ColorPalette["gray-300"]}
-                      style={{
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {sendAmountPricePretty.toString()}
-                    </Body3>
-                  </React.Fragment>
-                ) : null}
+                {(() => {
+                  if (msg.code !== 0) {
+                    return (
+                      <Subtitle3 color={ColorPalette["yellow-400"]}>
+                        Failed
+                      </Subtitle3>
+                    );
+                  }
+
+                  return (
+                    <React.Fragment>
+                      <Subtitle3
+                        color={ColorPalette["white"]}
+                        style={{
+                          whiteSpace: "nowrap",
+                          color: overrideAmountColor,
+                        }}
+                      >
+                        {typeof amount === "string"
+                          ? amount
+                          : amount
+                              .maxDecimals(2)
+                              .shrink(true)
+                              .hideIBCMetadata(true)
+                              .inequalitySymbol(true)
+                              .toString()}
+                      </Subtitle3>
+                      {sendAmountPricePretty ? (
+                        <React.Fragment>
+                          <Gutter size="0.25rem" />
+                          <Body3
+                            color={ColorPalette["gray-300"]}
+                            style={{
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {sendAmountPricePretty.toString()}
+                          </Body3>
+                        </React.Fragment>
+                      ) : null}
+                    </React.Fragment>
+                  );
+                })()}
               </YAxis>
             </XAxis>
           </div>

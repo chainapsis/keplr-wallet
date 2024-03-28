@@ -113,6 +113,7 @@ export const MsgRelationVote: FunctionComponent<{
       amount={voteText.text}
       overrideAmountColor={voteText.color}
       prices={prices || {}}
+      msg={msg}
       targetDenom={targetDenom}
     />
   );

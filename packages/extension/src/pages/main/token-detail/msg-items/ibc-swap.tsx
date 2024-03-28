@@ -101,6 +101,7 @@ export const MsgRelationIBCSwap: FunctionComponent<{
       title="Swap"
       amount={sendAmountPretty}
       prices={prices || {}}
+      msg={msg}
       targetDenom={targetDenom}
     />
   );

@@ -94,6 +94,7 @@ export const MsgRelationIBCSendRefunded: FunctionComponent<{
       title="Send Reverted"
       amount={sendAmountPretty}
       prices={prices || {}}
+      msg={msg}
       targetDenom={targetDenom}
     />
   );

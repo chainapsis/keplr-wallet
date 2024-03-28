@@ -68,6 +68,7 @@ export const MsgRelationSend: FunctionComponent<{
       paragraph={toAddress}
       amount={sendAmountPretty}
       prices={prices || {}}
+      msg={msg}
       targetDenom={targetDenom}
     />
   );
