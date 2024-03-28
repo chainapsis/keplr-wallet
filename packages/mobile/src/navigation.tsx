@@ -500,7 +500,11 @@ export const MainTabNavigation: FunctionComponent = () => {
   useEffect(() => {
     // When the focused screen is not "Home" screen and the drawer is open,
     // try to close the drawer forcely.
-    if (focusedScreen.name !== 'Home' && isDrawerOpen) {
+    if (
+      focusedScreen.name !== 'Home' &&
+      focusedScreen.name !== 'Swap' &&
+      isDrawerOpen
+    ) {
       navigation.dispatch(DrawerActions.toggleDrawer());
     }
   }, [focusedScreen.name, isDrawerOpen, navigation]);
