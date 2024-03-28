@@ -70,6 +70,10 @@ export const MsgRelationMergedClaimRewards: FunctionComponent<{
       prices={prices || {}}
       msg={msg}
       targetDenom={targetDenom}
+      amountDeco={{
+        color: "green",
+        prefix: "plus",
+      }}
     />
   );
 });

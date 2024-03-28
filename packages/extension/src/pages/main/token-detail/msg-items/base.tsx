@@ -19,6 +19,10 @@ export const MsgItemBase: FunctionComponent<{
   prices: Record<string, Record<string, number | undefined> | undefined>;
   msg: MsgHistory;
   targetDenom: string;
+  amountDeco?: {
+    prefix: "none" | "plus" | "minus";
+    color: "none" | "green";
+  };
 }> = observer(
   ({
     logo,
@@ -30,6 +34,7 @@ export const MsgItemBase: FunctionComponent<{
     prices,
     msg,
     targetDenom,
+    amountDeco,
   }) => {
     const { chainStore, priceStore } = useStore();
 
@@ -105,12 +110,35 @@ export const MsgItemBase: FunctionComponent<{
                   return (
                     <React.Fragment>
                       <Subtitle3
-                        color={ColorPalette["white"]}
+                        color={(() => {
+                          if (!amountDeco) {
+                            return ColorPalette["white"];
+                          }
+
+                          if (amountDeco.color === "green") {
+                            return ColorPalette["green-400"];
+                          }
+                        })()}
                         style={{
                           whiteSpace: "nowrap",
                           color: overrideAmountColor,
                         }}
                       >
+                        {(() => {
+                          if (!amountDeco) {
+                            return "";
+                          }
+
+                          if (amountDeco.prefix === "plus") {
+                            return "+";
+                          }
+
+                          if (amountDeco.prefix === "minus") {
+                            return "-";
+                          }
+
+                          return "";
+                        })()}
                         {typeof amount === "string"
                           ? amount
                           : amount

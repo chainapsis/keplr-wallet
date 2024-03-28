@@ -103,6 +103,10 @@ export const MsgRelationIBCSwap: FunctionComponent<{
       prices={prices || {}}
       msg={msg}
       targetDenom={targetDenom}
+      amountDeco={{
+        color: "none",
+        prefix: "minus",
+      }}
     />
   );
 });

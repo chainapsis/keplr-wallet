@@ -70,6 +70,10 @@ export const MsgRelationReceive: FunctionComponent<{
       prices={prices || {}}
       msg={msg}
       targetDenom={targetDenom}
+      amountDeco={{
+        color: "green",
+        prefix: "plus",
+      }}
     />
   );
 });
