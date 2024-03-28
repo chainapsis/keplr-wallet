@@ -4,6 +4,7 @@ export interface ResMsgsHistory {
     prices?: Record<string, Record<string, number | undefined> | undefined>;
   }[];
   nextCursor: string;
+  isUnsupported?: boolean;
 }
 
 export interface MsgHistory {

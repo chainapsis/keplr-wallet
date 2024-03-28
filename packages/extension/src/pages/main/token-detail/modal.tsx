@@ -456,7 +456,6 @@ export const TokenDetailModal: FunctionComponent<{
 
           <Gutter size="1.25rem" />
           {(() => {
-            console.log(msgHistory.pages);
             // 최초 loading 중인 경우
             if (msgHistory.pages.length === 0) {
               return (
@@ -476,11 +475,44 @@ export const TokenDetailModal: FunctionComponent<{
               );
             }
 
+            if (msgHistory.pages[0].response?.isUnsupported) {
+              if (chainInfo.embedded.embedded) {
+                return (
+                  <EmptyView>
+                    <Box marginX="2rem">
+                      <Stack alignX="center" gutter="0.1rem">
+                        <Subtitle3 style={{ fontWeight: 700 }}>
+                          Unsupported Chain
+                        </Subtitle3>
+                        <Subtitle3
+                          style={{
+                            textAlign: "center",
+                          }}
+                        >
+                          {`We're actively working on expanding our support for
+                        natvie chains.`}
+                        </Subtitle3>
+                      </Stack>
+                    </Box>
+                  </EmptyView>
+                );
+              }
+              return (
+                <EmptyView>
+                  <Box marginX="2rem">
+                    <Subtitle3>Non-native chains not supported</Subtitle3>
+                  </Box>
+                </EmptyView>
+              );
+            }
+
             // 아무 history도 없는 경우
             if (msgHistory.pages[0].response?.msgs.length === 0) {
               return (
                 <EmptyView>
-                  <Subtitle3>No recent transaction history</Subtitle3>
+                  <Box marginX="2rem">
+                    <Subtitle3>No recent transaction history</Subtitle3>
+                  </Box>
                 </EmptyView>
               );
             }
