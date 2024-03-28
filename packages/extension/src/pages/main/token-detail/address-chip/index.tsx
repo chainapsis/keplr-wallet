@@ -11,7 +11,11 @@ import { Gutter } from "../../../../components/gutter";
 
 export const AddressChip: FunctionComponent<{
   chainId: string;
-}> = observer(({ chainId }) => {
+
+  // modal 안에서는 색상 문제로 안보여서
+  // modal 안에서는 배경색을 바꿈
+  inModal?: boolean;
+}> = observer(({ chainId, inModal }) => {
   const { accountStore } = useStore();
 
   const account = accountStore.getAccount(chainId);
@@ -37,9 +41,18 @@ export const AddressChip: FunctionComponent<{
       height="1.5rem"
       alignX="center"
       alignY="center"
-      backgroundColor={
-        !isHover ? ColorPalette["gray-600"] : ColorPalette["gray-550"]
-      }
+      backgroundColor={(() => {
+        if (isHover) {
+          if (inModal) {
+            return ColorPalette["gray-450"];
+          }
+          return ColorPalette["gray-550"];
+        }
+        if (inModal) {
+          return ColorPalette["gray-500"];
+        }
+        return ColorPalette["gray-600"];
+      })()}
       borderRadius="99999px"
       paddingX="0.625rem"
       onClick={(e) => {

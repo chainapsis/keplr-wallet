@@ -25,7 +25,6 @@ export const ReceiveModal: FunctionComponent<{
 
   return (
     <Box
-      cursor="pointer"
       backgroundColor={
         theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
       }
@@ -63,7 +62,7 @@ export const ReceiveModal: FunctionComponent<{
         </Box>
 
         <Gutter size="1.25rem" />
-        <AddressChip chainId={chainId} />
+        <AddressChip chainId={chainId} inModal={true} />
         <Gutter size="1.25rem" />
       </Box>
 
