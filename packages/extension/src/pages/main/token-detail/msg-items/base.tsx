@@ -146,6 +146,7 @@ export const MsgItemBase: FunctionComponent<{
                               .shrink(true)
                               .hideIBCMetadata(true)
                               .inequalitySymbol(true)
+                              .inequalitySymbolSeparator("")
                               .toString()}
                       </Subtitle3>
                       {sendAmountPricePretty ? (
