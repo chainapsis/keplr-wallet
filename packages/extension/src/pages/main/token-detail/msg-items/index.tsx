@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { ErrorInfo, FunctionComponent } from "react";
 import { MsgHistory } from "../types";
 import { MsgRelationSend } from "./send";
 import { MsgRelationReceive } from "./receive";
@@ -11,8 +11,24 @@ import { MsgRelationIBCSendReceive } from "./ibc-send-receive";
 import { MsgRelationVote } from "./vote";
 import { MsgRelationIBCSwap } from "./ibc-swap";
 import { MsgRelationIBCSwapReceive } from "./ibc-swap-receive";
+import { Box } from "../../../../components/box";
+import { ColorPalette } from "../../../../styles";
+import { XAxis, YAxis } from "../../../../components/axis";
+import { Subtitle3 } from "../../../../components/typography";
 
 export const MsgItemRender: FunctionComponent<{
+  msg: MsgHistory;
+  prices?: Record<string, Record<string, number | undefined> | undefined>;
+  targetDenom: string;
+}> = ({ msg, prices, targetDenom }) => {
+  return (
+    <ErrorBoundary>
+      <MsgItemRenderInner msg={msg} prices={prices} targetDenom={targetDenom} />
+    </ErrorBoundary>
+  );
+};
+
+const MsgItemRenderInner: FunctionComponent<{
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
@@ -111,6 +127,87 @@ export const MsgItemRender: FunctionComponent<{
     }
   }
 
-  // TODO: 임시적인 alternative?
-  return null;
+  // 임시적인 alternative임.
+  // 여기까지 도달하면 먼가 잘못된거임.
+  return <UnknownMsgItem title="Unknown message" />;
 };
+
+const UnknownMsgItem: FunctionComponent<{
+  title: string;
+}> = ({ title }) => {
+  return (
+    <Box
+      backgroundColor={ColorPalette["gray-600"]}
+      borderRadius="0.375rem"
+      paddingX="1rem"
+      paddingY="0.875rem"
+      minHeight="4rem"
+      alignY="center"
+    >
+      <XAxis alignY="center">
+        <Box marginRight="0.75rem">
+          <XAxis alignY="center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              fill="none"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fill={ColorPalette["red-400"]}
+                d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"
+              />
+            </svg>
+          </XAxis>
+        </Box>
+        <div
+          style={{
+            flex: 1,
+            minWidth: "0.75rem",
+          }}
+        >
+          <XAxis alignY="center">
+            <YAxis>
+              <Subtitle3 color={ColorPalette["gray-10"]}>{title}</Subtitle3>
+            </YAxis>
+
+            <div
+              style={{
+                flex: 1,
+              }}
+            />
+          </XAxis>
+        </div>
+      </XAxis>
+    </Box>
+  );
+};
+
+class ErrorBoundary extends React.Component<
+  unknown,
+  {
+    hasError: boolean;
+  }
+> {
+  constructor(props: unknown) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.log(error, errorInfo);
+  }
+
+  override render() {
+    if (this.state.hasError) {
+      return <UnknownMsgItem title="Unknown error occured" />;
+    }
+
+    return this.props.children;
+  }
+}
