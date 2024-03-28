@@ -26,6 +26,7 @@ import { ReceiveModal } from "./receive-modal";
 import { StakedBalance } from "./staked-balance";
 import { MsgItemSkeleton } from "./msg-items/skeleton";
 import { Stack } from "../../../components/stack";
+import { EmptyView } from "../../../components/empty-view";
 
 const Styles = {
   Container: styled.div`
@@ -454,26 +455,43 @@ export const TokenDetailModal: FunctionComponent<{
           })()}
 
           <Gutter size="1.25rem" />
-          {msgHistory.pages.length === 0 ? (
-            <Box padding="0.75rem" paddingTop="0">
-              <Box paddingX="0.375rem" marginBottom="0.5rem" marginTop="0">
-                <Box
-                  width="5.125rem"
-                  height="0.8125rem"
-                  backgroundColor={ColorPalette["gray-600"]}
-                />
-              </Box>
-              <Stack gutter="0.5rem">
-                <MsgItemSkeleton />
-                <MsgItemSkeleton />
-              </Stack>
-            </Box>
-          ) : (
-            <RenderMessages
-              msgHistory={msgHistory}
-              targetDenom={coinMinimalDenom}
-            />
-          )}
+          {(() => {
+            console.log(msgHistory.pages);
+            // 최초 loading 중인 경우
+            if (msgHistory.pages.length === 0) {
+              return (
+                <Box padding="0.75rem" paddingTop="0">
+                  <Box paddingX="0.375rem" marginBottom="0.5rem" marginTop="0">
+                    <Box
+                      width="5.125rem"
+                      height="0.8125rem"
+                      backgroundColor={ColorPalette["gray-600"]}
+                    />
+                  </Box>
+                  <Stack gutter="0.5rem">
+                    <MsgItemSkeleton />
+                    <MsgItemSkeleton />
+                  </Stack>
+                </Box>
+              );
+            }
+
+            // 아무 history도 없는 경우
+            if (msgHistory.pages[0].response?.msgs.length === 0) {
+              return (
+                <EmptyView>
+                  <Subtitle3>No recent transaction history</Subtitle3>
+                </EmptyView>
+              );
+            }
+
+            return (
+              <RenderMessages
+                msgHistory={msgHistory}
+                targetDenom={coinMinimalDenom}
+              />
+            );
+          })()}
         </SimpleBar>
       </Styles.Body>
 
