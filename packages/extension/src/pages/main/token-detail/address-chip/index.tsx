@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
@@ -6,6 +6,8 @@ import { Body3 } from "../../../../components/typography";
 import { useStore } from "../../../../stores";
 import { XAxis } from "../../../../components/axis";
 import { Bech32Address } from "@keplr-wallet/cosmos";
+import Lottie from "lottie-web";
+import { Gutter } from "../../../../components/gutter";
 
 export const AddressChip: FunctionComponent<{
   chainId: string;
@@ -15,6 +17,19 @@ export const AddressChip: FunctionComponent<{
   const account = accountStore.getAccount(chainId);
 
   const [isHover, setIsHover] = useState(false);
+  const [animCheck, setAnimCheck] = useState(false);
+
+  useEffect(() => {
+    if (animCheck) {
+      const timeout = setTimeout(() => {
+        setAnimCheck(false);
+      }, 2500);
+
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
+  }, [animCheck]);
 
   return (
     <Box
@@ -32,13 +47,42 @@ export const AddressChip: FunctionComponent<{
 
         // copy address
         navigator.clipboard.writeText(account.bech32Address);
+        setAnimCheck(true);
       }}
       onHoverStateChange={setIsHover}
     >
       <XAxis alignY="center">
         <Body3 color={ColorPalette["gray-200"]}>
-          {Bech32Address.shortenAddress(account.bech32Address, 18)}
+          {Bech32Address.shortenAddress(account.bech32Address, 16)}
         </Body3>
+        <Gutter size="0.4rem" />
+        {!animCheck ? (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="none"
+            viewBox="0 0 16 16"
+          >
+            <path
+              stroke={ColorPalette["gray-300"]}
+              strokeLinecap="round"
+              strokeWidth="1.6"
+              d="M10.667 2.668h-6.4a1.6 1.6 0 00-1.6 1.6v6.4"
+            />
+            <rect
+              width="7.733"
+              height="7.733"
+              x="5.467"
+              y="5.468"
+              stroke="#72747B"
+              strokeWidth="1.6"
+              rx="0.8"
+            />
+          </svg>
+        ) : (
+          <CheckAnim />
+        )}
       </XAxis>
     </Box>
   );
@@ -80,5 +124,316 @@ export const QRCodeChip: FunctionComponent<{
         </svg>
       </XAxis>
     </Box>
+  );
+};
+
+const CheckAnim: FunctionComponent = () => {
+  const checkAnimDivRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (checkAnimDivRef.current) {
+      const anim = Lottie.loadAnimation({
+        container: checkAnimDivRef.current,
+        renderer: "svg",
+        autoplay: true,
+        loop: false,
+        animationData: {
+          v: "5.7.11",
+          fr: 30,
+          ip: 0,
+          op: 60,
+          w: 1080,
+          h: 1080,
+          nm: "Comp 1",
+          ddd: 0,
+          assets: [],
+          layers: [
+            {
+              ddd: 0,
+              ind: 1,
+              ty: 4,
+              nm: "Shape Layer 2",
+              sr: 1,
+              ks: {
+                o: { a: 0, k: 100, ix: 11 },
+                r: { a: 0, k: 0, ix: 10 },
+                p: { a: 0, k: [540, 540, 0], ix: 2, l: 2 },
+                a: { a: 0, k: [0, 0, 0], ix: 1, l: 2 },
+                s: { a: 0, k: [100, 100, 100], ix: 6, l: 2 },
+              },
+              ao: 0,
+              shapes: [
+                {
+                  ty: "gr",
+                  it: [
+                    {
+                      d: 1,
+                      ty: "el",
+                      s: { a: 0, k: [240, 240], ix: 2 },
+                      p: { a: 0, k: [0, 0], ix: 3 },
+                      nm: "Ellipse Path 1",
+                      mn: "ADBE Vector Shape - Ellipse",
+                      hd: false,
+                    },
+                    {
+                      ty: "fl",
+                      c: { a: 0, k: [0.176, 0.851, 0.561], ix: 4 },
+                      o: { a: 0, k: 0, ix: 5 },
+                      r: 1,
+                      bm: 0,
+                      nm: "Fill 1",
+                      mn: "ADBE Vector Graphic - Fill",
+                      hd: false,
+                    },
+                    {
+                      ty: "tr",
+                      p: { a: 0, k: [67, 55], ix: 2 },
+                      a: { a: 0, k: [0, 0], ix: 1 },
+                      s: { a: 0, k: [100, 100], ix: 3 },
+                      r: { a: 0, k: 0, ix: 6 },
+                      o: { a: 0, k: 100, ix: 7 },
+                      sk: { a: 0, k: 0, ix: 4 },
+                      sa: { a: 0, k: 0, ix: 5 },
+                      nm: "Transform",
+                    },
+                  ],
+                  nm: "Ellipse 1",
+                  np: 3,
+                  cix: 2,
+                  bm: 0,
+                  ix: 1,
+                  mn: "ADBE Vector Group",
+                  hd: false,
+                },
+              ],
+              ip: 0,
+              op: 150,
+              st: 0,
+              bm: 0,
+            },
+            {
+              ddd: 0,
+              ind: 2,
+              ty: 4,
+              nm: "Layer 1 Outlines",
+              sr: 1,
+              ks: {
+                o: { a: 0, k: 100, ix: 11 },
+                r: {
+                  a: 1,
+                  k: [
+                    {
+                      i: { x: [0.697], y: [1.157] },
+                      o: { x: [0.216], y: [0.197] },
+                      t: 10.857,
+                      s: [-92],
+                    },
+                    { t: 35, s: [0] },
+                  ],
+                  ix: 10,
+                },
+                p: { a: 0, k: [541.574, 541.896, 0], ix: 2, l: 2 },
+                a: { a: 0, k: [132.516, 109.05, 0], ix: 1, l: 2 },
+                s: {
+                  a: 1,
+                  k: [
+                    {
+                      i: { x: [0.242, 0.242, 0.667], y: [1.188, 1.188, 1] },
+                      o: { x: [0.347, 0.347, 0.333], y: [0.161, 0.161, 0] },
+                      t: 18.173,
+                      s: [0, 0, 100],
+                    },
+                    { t: 29.8583984375, s: [66, 66, 100] },
+                  ],
+                  ix: 6,
+                  l: 2,
+                },
+              },
+              ao: 0,
+              shapes: [
+                {
+                  ty: "gr",
+                  it: [
+                    {
+                      ind: 0,
+                      ty: "sh",
+                      ix: 1,
+                      ks: {
+                        a: 0,
+                        k: {
+                          i: [
+                            [8.532, -8.533],
+                            [0, 0],
+                            [9.955, 11.378],
+                            [0, 0],
+                            [-9.955, 9.956],
+                            [-9.956, -9.955],
+                            [0, 0],
+                            [0, 0],
+                            [-9.955, -9.956],
+                          ],
+                          o: [
+                            [0, 0],
+                            [-9.956, 11.378],
+                            [0, 0],
+                            [-8.533, -9.956],
+                            [9.956, -8.533],
+                            [0, 0],
+                            [0, 0],
+                            [9.957, -9.956],
+                            [9.955, 8.533],
+                          ],
+                          v: [
+                            [123.734, -64.712],
+                            [-24.177, 97.423],
+                            [-61.155, 97.423],
+                            [-123.733, 27.734],
+                            [-122.311, -7.822],
+                            [-86.755, -6.4],
+                            [-42.666, 43.378],
+                            [86.755, -97.423],
+                            [122.311, -98.844],
+                          ],
+                          c: true,
+                        },
+                        ix: 2,
+                      },
+                      nm: "Path 1",
+                      mn: "ADBE Vector Shape - Group",
+                      hd: false,
+                    },
+                    {
+                      ty: "fl",
+                      c: { a: 0, k: [0.18, 0.18, 0.196], ix: 4 },
+                      o: { a: 0, k: 100, ix: 5 },
+                      r: 1,
+                      bm: 0,
+                      nm: "Fill 1",
+                      mn: "ADBE Vector Graphic - Fill",
+                      hd: false,
+                    },
+                    {
+                      ty: "tr",
+                      p: { a: 0, k: [132.516, 109.05], ix: 2 },
+                      a: { a: 0, k: [0, 0], ix: 1 },
+                      s: { a: 0, k: [100, 100], ix: 3 },
+                      r: { a: 0, k: 0, ix: 6 },
+                      o: { a: 0, k: 100, ix: 7 },
+                      sk: { a: 0, k: 0, ix: 4 },
+                      sa: { a: 0, k: 0, ix: 5 },
+                      nm: "Transform",
+                    },
+                  ],
+                  nm: "Group 1",
+                  np: 2,
+                  cix: 2,
+                  bm: 0,
+                  ix: 1,
+                  mn: "ADBE Vector Group",
+                  hd: false,
+                },
+              ],
+              ip: 0,
+              op: 150,
+              st: 0,
+              bm: 0,
+            },
+            {
+              ddd: 0,
+              ind: 3,
+              ty: 4,
+              nm: "Shape Layer 1",
+              sr: 1,
+              ks: {
+                o: { a: 0, k: 100, ix: 11 },
+                r: { a: 0, k: 0, ix: 10 },
+                p: { a: 0, k: [541.574, 539.945, 0], ix: 2, l: 2 },
+                a: { a: 0, k: [33, -39, 0], ix: 1, l: 2 },
+                s: {
+                  a: 1,
+                  k: [
+                    {
+                      i: { x: [0.639, 0.639, 0.667], y: [1.203, 1.203, 1] },
+                      o: { x: [0.418, 0.418, 0.333], y: [-0.035, -0.035, 0] },
+                      t: 0,
+                      s: [0, 0, 100],
+                    },
+                    { t: 26.162109375, s: [100, 100, 100] },
+                  ],
+                  ix: 6,
+                  l: 2,
+                },
+              },
+              ao: 0,
+              shapes: [
+                {
+                  ty: "gr",
+                  it: [
+                    {
+                      d: 1,
+                      ty: "el",
+                      s: { a: 0, k: [282, 282], ix: 2 },
+                      p: { a: 0, k: [0, 0], ix: 3 },
+                      nm: "Ellipse Path 1",
+                      mn: "ADBE Vector Shape - Ellipse",
+                      hd: false,
+                    },
+                    {
+                      ty: "fl",
+                      c: { a: 0, k: [0.176, 0.851, 0.561], ix: 4 },
+                      o: { a: 0, k: 100, ix: 5 },
+                      r: 1,
+                      bm: 0,
+                      nm: "Fill 1",
+                      mn: "ADBE Vector Graphic - Fill",
+                      hd: false,
+                    },
+                    {
+                      ty: "tr",
+                      p: { a: 0, k: [33, -39], ix: 2 },
+                      a: { a: 0, k: [0, 0], ix: 1 },
+                      s: { a: 0, k: [100, 100], ix: 3 },
+                      r: { a: 0, k: 0, ix: 6 },
+                      o: { a: 0, k: 100, ix: 7 },
+                      sk: { a: 0, k: 0, ix: 4 },
+                      sa: { a: 0, k: 0, ix: 5 },
+                      nm: "Transform",
+                    },
+                  ],
+                  nm: "Ellipse 1",
+                  np: 3,
+                  cix: 2,
+                  bm: 0,
+                  ix: 1,
+                  mn: "ADBE Vector Group",
+                  hd: false,
+                },
+              ],
+              ip: 0,
+              op: 150,
+              st: 0,
+              bm: 0,
+            },
+          ],
+          markers: [],
+        },
+      });
+      anim.setSpeed(1.5);
+
+      return () => {
+        anim.destroy();
+      };
+    }
+  }, []);
+
+  return (
+    <div
+      ref={checkAnimDivRef}
+      style={{
+        width: 16,
+        height: 16,
+        transform: "scale(3.2)",
+      }}
+    />
   );
 };
