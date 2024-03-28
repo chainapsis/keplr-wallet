@@ -12,11 +12,9 @@ export const MsgRelationVote: FunctionComponent<{
 }> = observer(({ msg, prices, targetDenom }) => {
   const proposal: {
     proposalId: string;
-    title: string;
   } = useMemo(() => {
     return {
       proposalId: (msg.msg as any)["proposal_id"],
-      title: "TODO",
     };
   }, [msg.msg]);
 
@@ -111,7 +109,7 @@ export const MsgRelationVote: FunctionComponent<{
       }
       chainId={msg.chainId}
       title="Vote"
-      paragraph={`#${proposal.proposalId} ${proposal.title}`}
+      paragraph={`#${proposal.proposalId}`}
       amount={voteText.text}
       overrideAmountColor={voteText.color}
       prices={prices || {}}
