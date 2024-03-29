@@ -18,6 +18,7 @@ export class BIP44PathState {
     }
   }
 
+  @action
   setIsLedger(isLedger: boolean) {
     this._isLedger = isLedger;
   }
