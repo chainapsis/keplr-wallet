@@ -565,6 +565,8 @@
   "page.main.components.token-found-modal.add-chains": "Add Chains",
   "page.main.components.token-item.copy-address.copied": "Copied",
 
+  "page.main.components.update-note-modal.title": "Update Note",
+
   "page.main.layouts.header.new-chain.title": "✨ {chains} Now Integrated!",
   "page.main.layouts.header.new-chain.paragraph": "To show the chains and their assets on this account, visit \"Manage Chain Visibility\".",
   "page.main.layouts.header.new-chain.button": "Got it!",
