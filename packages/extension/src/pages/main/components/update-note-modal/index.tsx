@@ -62,15 +62,17 @@ export const UpdateNoteModal: FunctionComponent<{
             : ColorPalette["gray-600"]
         }
       >
-        <Subtitle1
-          color={
-            theme.mode === "light"
-              ? ColorPalette["black"]
-              : ColorPalette["white"]
-          }
-        >
-          <FormattedMessage id="page.main.components.update-note-modal.title" />
-        </Subtitle1>
+        <Box alignX={updateNotePageData.length > 1 ? "center" : "left"}>
+          <Subtitle1
+            color={
+              theme.mode === "light"
+                ? ColorPalette["black"]
+                : ColorPalette["white"]
+            }
+          >
+            <FormattedMessage id="page.main.components.update-note-modal.title" />
+          </Subtitle1>
+        </Box>
 
         <Gutter size="1.25rem" />
 
