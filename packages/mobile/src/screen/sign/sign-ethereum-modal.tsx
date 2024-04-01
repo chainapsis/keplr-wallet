@@ -15,7 +15,6 @@ import {Column, Columns} from '../../components/column';
 import {Text} from 'react-native';
 import {Gutter} from '../../components/gutter';
 import {Box} from '../../components/box';
-import {FeeControl} from '../../components/input/fee-control';
 import {XAxis} from '../../components/axis';
 import {CloseIcon} from '../../components/icon';
 import {CodeBracketIcon} from '../../components/icon/code-bracket';
@@ -187,20 +186,9 @@ export const SignEthereumModal = registerCardModal(
         )}
 
         <Gutter size={60} />
-        {(() => {
-          if (interactionData.isInternal) {
-            return <FeeSummary feeConfig={feeConfig} gasConfig={gasConfig} />;
-          }
-
-          return (
-            <FeeControl
-              feeConfig={feeConfig}
-              senderConfig={senderConfig}
-              gasConfig={gasConfig}
-              // disableAutomaticFeeSet={preferNoSetFee}
-            />
-          );
-        })()}
+        {interactionData.isInternal && (
+          <FeeSummary feeConfig={feeConfig} gasConfig={gasConfig} />
+        )}
 
         <Gutter size={12} />
 
