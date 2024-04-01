@@ -617,13 +617,31 @@ export class KeplrWalletConnectV2 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  signEthereum(
-    _chainId: string,
-    _signer: string,
-    _data: string | Uint8Array,
-    _type: EthSignType
+  async signEthereum(
+    chainId: string,
+    signer: string,
+    data: string | Uint8Array,
+    type: EthSignType
   ): Promise<Uint8Array> {
-    throw new Error("Not yet implemented");
+    this.checkDeepLink();
+
+    const topic = this.getCurrentTopic();
+
+    const param = {
+      topic,
+      chainId: this.getNamespaceChainId(),
+      request: {
+        method: "keplr_signEthereum",
+        params: {
+          chainId,
+          signer,
+          data,
+          type,
+        },
+      },
+    };
+
+    return await this.sendCustomRequest<Uint8Array>(param);
   }
 
   signICNSAdr36(

@@ -822,6 +822,26 @@ export class WalletConnectStore {
           });
           break;
         }
+        case 'keplr_signEthereum': {
+          const res = await keplr.signEthereum(
+            params.chainId,
+            params.signer,
+            params.data,
+            params.type,
+          );
+
+          await signClient.respond({
+            topic,
+            response: {
+              id,
+              jsonrpc: '2.0',
+              result: {
+                ...res,
+              },
+            },
+          });
+          break;
+        }
         default:
           throw new Error('Unknown request method');
       }
