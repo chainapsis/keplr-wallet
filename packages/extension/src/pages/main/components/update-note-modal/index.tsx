@@ -89,11 +89,13 @@ export const UpdateNoteModal: FunctionComponent<{
           })}
         />
 
-        <Box alignX="center">
-          <Body2 color={ColorPalette["gray-300"]}>
-            {currentPage + 1} / {updateNotePageData.length}
-          </Body2>
-        </Box>
+        {updateNotePageData.length > 1 ? (
+          <Box alignX="center">
+            <Body2 color={ColorPalette["gray-300"]}>
+              {currentPage + 1} / {updateNotePageData.length}
+            </Body2>
+          </Box>
+        ) : null}
 
         <Gutter size="1.125rem" />
 
