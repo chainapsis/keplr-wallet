@@ -31,12 +31,28 @@ export const ReceiveModal: FunctionComponent<{
     >
       <Box alignX="center">
         <Gutter size="1.75rem" />
-        <H4 color={ColorPalette["white"]}>Copy Address</H4>
+        <H4
+          color={
+            theme.mode === "light"
+              ? ColorPalette["black"]
+              : ColorPalette["white"]
+          }
+        >
+          Copy Address
+        </H4>
         <Gutter size="1.25rem" />
         <XAxis alignY="center">
           <ChainImageFallback chainInfo={chainInfo} size="2rem" />
           <Gutter size="0.5rem" />
-          <Subtitle3>{chainInfo.chainName}</Subtitle3>
+          <Subtitle3
+            color={
+              theme.mode === "light"
+                ? ColorPalette["black"]
+                : ColorPalette["gray-10"]
+            }
+          >
+            {chainInfo.chainName}
+          </Subtitle3>
         </XAxis>
         <Gutter size="0.875rem" />
         <Box

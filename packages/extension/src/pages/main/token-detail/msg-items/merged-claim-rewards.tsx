@@ -7,6 +7,7 @@ import { MsgItemBase } from "./base";
 import { ItemLogo } from "./logo";
 import { isValidCoinStr, parseCoinStr } from "@keplr-wallet/common";
 import { ColorPalette } from "../../../../styles";
+import { useTheme } from "styled-components";
 
 export const MsgRelationMergedClaimRewards: FunctionComponent<{
   msg: MsgHistory;
@@ -14,6 +15,7 @@ export const MsgRelationMergedClaimRewards: FunctionComponent<{
   targetDenom: string;
 }> = observer(({ msg, prices, targetDenom }) => {
   const { chainStore } = useStore();
+  const theme = useTheme();
 
   const chainInfo = chainStore.getChain(msg.chainId);
 
@@ -57,7 +59,11 @@ export const MsgRelationMergedClaimRewards: FunctionComponent<{
               viewBox="0 0 19 15"
             >
               <path
-                fill={ColorPalette["gray-600"]}
+                fill={
+                  theme.mode === "light"
+                    ? ColorPalette["white"]
+                    : ColorPalette["gray-600"]
+                }
                 d="M18.08 3.14L6.8 14.42 0 7.62l2.24-2.24L6.8 9.94 15.84.9l2.24 2.24z"
               />
             </svg>

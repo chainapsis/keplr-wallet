@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useRef } from "react";
 import { observer } from "mobx-react-lite";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { Box } from "../../../components/box";
 import { XAxis, YAxis } from "../../../components/axis";
 import { useStore } from "../../../stores";
@@ -32,7 +32,12 @@ const Styles = {
   Container: styled.div`
     height: 100vh;
 
-    background-color: ${ColorPalette["gray-700"]};
+    background: ${({ theme }) => {
+      if (theme.mode === "light") {
+        return "linear-gradient(90deg, #FCFAFF 2.44%, #FBFBFF 96.83%)";
+      }
+      return ColorPalette["gray-700"];
+    }};
 
     display: flex;
     flex-direction: column;
@@ -65,6 +70,8 @@ export const TokenDetailModal: FunctionComponent<{
     priceStore,
     skipQueriesStore,
   } = useStore();
+
+  const theme = useTheme();
 
   const chainInfo = chainStore.getChain(chainId);
   const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
@@ -269,7 +276,11 @@ export const TokenDetailModal: FunctionComponent<{
                 viewBox="0 0 24 24"
               >
                 <path
-                  stroke={ColorPalette["gray-300"]}
+                  stroke={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-200"]
+                      : ColorPalette["gray-300"]
+                  }
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth="2.5"
@@ -279,7 +290,14 @@ export const TokenDetailModal: FunctionComponent<{
             </Box>
             <div style={{ flex: 1 }} />
             <span>
-              <Body1 as="span" color={ColorPalette["gray-200"]}>
+              <Body1
+                as="span"
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-500"]
+                    : ColorPalette["gray-200"]
+                }
+              >
                 {(() => {
                   let denom = currency.coinDenom;
                   if ("originCurrency" in currency && currency.originCurrency) {
@@ -293,7 +311,11 @@ export const TokenDetailModal: FunctionComponent<{
                 as="span"
                 color={
                   isIBCCurrency
-                    ? ColorPalette["white"]
+                    ? theme.mode === "light"
+                      ? ColorPalette["blue-400"]
+                      : ColorPalette["white"]
+                    : theme.mode === "light"
+                    ? ColorPalette["gray-500"]
                     : ColorPalette["gray-200"]
                 }
               >
@@ -335,7 +357,10 @@ export const TokenDetailModal: FunctionComponent<{
           <YAxis alignX="center">
             <Styles.Balance
               style={{
-                color: ColorPalette["gray-10"],
+                color:
+                  theme.mode === "light"
+                    ? ColorPalette["black"]
+                    : ColorPalette["gray-10"],
               }}
             >
               {(() => {
@@ -464,7 +489,11 @@ export const TokenDetailModal: FunctionComponent<{
                     <Box
                       width="5.125rem"
                       height="0.8125rem"
-                      backgroundColor={ColorPalette["gray-600"]}
+                      backgroundColor={
+                        theme.mode === "light"
+                          ? ColorPalette["white"]
+                          : ColorPalette["gray-600"]
+                      }
                     />
                   </Box>
                   <Stack gutter="0.5rem">

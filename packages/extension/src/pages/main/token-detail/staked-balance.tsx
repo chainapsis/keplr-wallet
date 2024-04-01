@@ -7,11 +7,14 @@ import { Gutter } from "../../../components/gutter";
 import { Body3, Subtitle3 } from "../../../components/typography";
 import { useStore } from "../../../stores";
 import { Dec } from "@keplr-wallet/unit";
+import { useTheme } from "styled-components";
 
 export const StakedBalance: FunctionComponent<{
   chainId: string;
 }> = observer(({ chainId }) => {
   const { queriesStore, accountStore, chainStore } = useStore();
+
+  const theme = useTheme();
 
   const queryAPR = queriesStore.simpleQuery.queryGet<{
     apr: number;
@@ -32,8 +35,20 @@ export const StakedBalance: FunctionComponent<{
     <Box paddingX="0.75rem">
       <Box
         backgroundColor={
-          isHover ? ColorPalette["gray-500"] : ColorPalette["gray-550"]
+          isHover
+            ? theme.mode === "light"
+              ? ColorPalette["gray-10"]
+              : ColorPalette["gray-500"]
+            : theme.mode === "light"
+            ? ColorPalette["white"]
+            : ColorPalette["gray-550"]
         }
+        style={{
+          boxShadow:
+            theme.mode === "light"
+              ? "0 1px 4px 0 rgba(43,39,55,0.1)"
+              : undefined,
+        }}
         cursor={
           chainStore.getChain(chainId).walletUrlForStaking
             ? "pointer"
@@ -61,9 +76,23 @@ export const StakedBalance: FunctionComponent<{
           />
           <Gutter size="0.75rem" />
           <YAxis>
-            <Body3 color={ColorPalette["gray-200"]}>Staked Balance</Body3>
+            <Body3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-200"]
+              }
+            >
+              Staked Balance
+            </Body3>
             <Gutter size="0.25rem" />
-            <Subtitle3 color={ColorPalette["white"]}>
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["black"]
+                  : ColorPalette["white"]
+              }
+            >
               {queryDelegation.total
                 ? queryDelegation.total
                     .maxDecimals(6)
@@ -84,7 +113,13 @@ export const StakedBalance: FunctionComponent<{
             "apr" in queryAPR.response.data &&
             typeof queryAPR.response.data.apr === "number" &&
             queryAPR.response.data.apr > 0 ? (
-              <Subtitle3 color={ColorPalette["gray-300"]}>
+              <Subtitle3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-200"]
+                    : ColorPalette["gray-300"]
+                }
+              >
                 {`${new Dec(queryAPR.response.data.apr)
                   .mul(new Dec(100))
                   .toString(2)}% APY`}
@@ -103,7 +138,11 @@ export const StakedBalance: FunctionComponent<{
                     viewBox="0 0 16 16"
                   >
                     <path
-                      stroke={ColorPalette["gray-300"]}
+                      stroke={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-200"]
+                          : ColorPalette["gray-300"]
+                      }
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth="1.5"

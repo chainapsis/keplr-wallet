@@ -8,6 +8,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
 import { MsgHistory } from "../types";
+import { useTheme } from "styled-components";
 
 export const MsgItemBase: FunctionComponent<{
   logo: React.ReactElement;
@@ -38,6 +39,8 @@ export const MsgItemBase: FunctionComponent<{
   }) => {
     const { chainStore, priceStore } = useStore();
 
+    const theme = useTheme();
+
     const chainInfo = chainStore.getChain(chainId);
 
     // mobx와 useMemo의 조합 문제로... 값 몇개를 밖으로 뺀다.
@@ -64,7 +67,17 @@ export const MsgItemBase: FunctionComponent<{
 
     return (
       <Box
-        backgroundColor={ColorPalette["gray-600"]}
+        backgroundColor={
+          theme.mode === "light"
+            ? ColorPalette["white"]
+            : ColorPalette["gray-600"]
+        }
+        style={{
+          boxShadow:
+            theme.mode === "light"
+              ? "0 1px 4px 0 rgba(43,39,55,0.1)"
+              : undefined,
+        }}
         borderRadius="0.375rem"
         paddingX="1rem"
         paddingY="0.875rem"
@@ -83,7 +96,15 @@ export const MsgItemBase: FunctionComponent<{
           >
             <XAxis alignY="center">
               <YAxis>
-                <Subtitle3 color={ColorPalette["gray-10"]}>{title}</Subtitle3>
+                <Subtitle3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["black"]
+                      : ColorPalette["gray-10"]
+                  }
+                >
+                  {title}
+                </Subtitle3>
                 {paragraph ? (
                   <React.Fragment>
                     <Gutter size="0.25rem" />
@@ -112,11 +133,15 @@ export const MsgItemBase: FunctionComponent<{
                       <Subtitle3
                         color={(() => {
                           if (!amountDeco) {
-                            return ColorPalette["white"];
+                            return theme.mode === "light"
+                              ? ColorPalette["black"]
+                              : ColorPalette["white"];
                           }
 
                           if (amountDeco.color === "green") {
-                            return ColorPalette["green-400"];
+                            return theme.mode === "light"
+                              ? ColorPalette["green-500"]
+                              : ColorPalette["green-400"];
                           }
                         })()}
                         style={{

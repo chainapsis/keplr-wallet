@@ -4,6 +4,8 @@ import { YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
 import { Body3 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
+import { useTheme } from "styled-components";
+import Color from "color";
 
 export const CircleButton: FunctionComponent<{
   onClick: () => void;
@@ -11,13 +13,15 @@ export const CircleButton: FunctionComponent<{
   text: string;
   disabled?: boolean;
 }> = ({ onClick, icon, text, disabled }) => {
+  const theme = useTheme();
+
   const [_isHover, setIsHover] = React.useState(false);
   const isHover = disabled ? false : _isHover;
 
   return (
     <Box
       style={{
-        opacity: disabled ? 0.4 : 1,
+        opacity: disabled ? (theme.mode === "light" ? 0.5 : 0.4) : 1,
       }}
       cursor={!disabled ? "pointer" : "not-allowed"}
       onClick={(e) => {
@@ -41,11 +45,33 @@ export const CircleButton: FunctionComponent<{
           alignY="center"
           borderRadius="999999px"
           backgroundColor={
-            !isHover ? ColorPalette["gray-400"] : ColorPalette["gray-400"]
+            !isHover
+              ? theme.mode === "light"
+                ? ColorPalette["blue-100"]
+                : ColorPalette["gray-400"]
+              : theme.mode === "light"
+              ? ColorPalette["blue-100"]
+              : ColorPalette["gray-400"]
           }
           style={{
-            color: !isHover ? ColorPalette["white"] : ColorPalette["gray-200"],
+            color: !isHover
+              ? theme.mode === "light"
+                ? ColorPalette["blue-400"]
+                : ColorPalette["white"]
+              : theme.mode === "light"
+              ? ColorPalette["blue-400"]
+              : ColorPalette["gray-200"],
           }}
+          after={
+            isHover && theme.mode === "light"
+              ? {
+                  backgroundColor: Color(ColorPalette["gray-500"])
+                    .alpha(0.1)
+                    .toString(),
+                  borderRadius: "99999px",
+                }
+              : undefined
+          }
         >
           {icon}
         </Box>
@@ -54,7 +80,13 @@ export const CircleButton: FunctionComponent<{
           <Box>
             <Body3
               color={
-                !isHover ? ColorPalette["white"] : ColorPalette["gray-100"]
+                !isHover
+                  ? theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["white"]
+                  : theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-100"]
               }
             >
               {text}

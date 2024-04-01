@@ -15,6 +15,7 @@ import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
 import { XAxis, YAxis } from "../../../../components/axis";
 import { Subtitle3 } from "../../../../components/typography";
+import { useTheme } from "styled-components";
 
 export const MsgItemRender: FunctionComponent<{
   msg: MsgHistory;
@@ -135,9 +136,19 @@ const MsgItemRenderInner: FunctionComponent<{
 const UnknownMsgItem: FunctionComponent<{
   title: string;
 }> = ({ title }) => {
+  const theme = useTheme();
+
   return (
     <Box
-      backgroundColor={ColorPalette["gray-600"]}
+      backgroundColor={
+        theme.mode === "light"
+          ? ColorPalette["white"]
+          : ColorPalette["gray-600"]
+      }
+      style={{
+        boxShadow:
+          theme.mode === "light" ? "0 1px 4px 0 rgba(43,39,55,0.1)" : undefined,
+      }}
       borderRadius="0.375rem"
       paddingX="1rem"
       paddingY="0.875rem"
