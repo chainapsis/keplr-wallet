@@ -95,16 +95,20 @@ export const MsgRelationIBCSwap: FunctionComponent<{
               />
             </svg>
           }
-          deco={
-            destinationChain ? (
+          deco={(() => {
+            if (!msg.ibcTracking) {
+              return undefined;
+            }
+
+            return destinationChain ? (
               <ChainImageFallback
                 chainInfo={destinationChain}
                 size="0.875rem"
               />
             ) : (
               <UnknownChainImage size="0.875rem" />
-            )
-          }
+            );
+          })()}
         />
       }
       chainId={msg.chainId}
