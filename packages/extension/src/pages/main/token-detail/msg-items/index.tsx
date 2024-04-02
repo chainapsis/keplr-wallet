@@ -180,7 +180,15 @@ const UnknownMsgItem: FunctionComponent<{
         >
           <XAxis alignY="center">
             <YAxis>
-              <Subtitle3 color={ColorPalette["gray-10"]}>{title}</Subtitle3>
+              <Subtitle3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["black"]
+                    : ColorPalette["gray-10"]
+                }
+              >
+                {title}
+              </Subtitle3>
             </YAxis>
 
             <div

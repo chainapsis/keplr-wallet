@@ -4,12 +4,15 @@ import { observer } from "mobx-react-lite";
 import { MsgItemBase } from "./base";
 import { ItemLogo } from "./logo";
 import { ColorPalette } from "../../../../styles";
+import { useTheme } from "styled-components";
 
 export const MsgRelationVote: FunctionComponent<{
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
 }> = observer(({ msg, prices, targetDenom }) => {
+  const theme = useTheme();
+
   const proposal: {
     proposalId: string;
   } = useMemo(() => {
@@ -78,7 +81,11 @@ export const MsgRelationVote: FunctionComponent<{
                   x="7.609"
                   y="0.234"
                   fill="currentColor"
-                  stroke="#2E2E32"
+                  stroke={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-50"]
+                      : ColorPalette["gray-500"]
+                  }
                   strokeWidth="1.659"
                   rx="1.106"
                   transform="rotate(36.313 7.61 .234)"
@@ -88,7 +95,11 @@ export const MsgRelationVote: FunctionComponent<{
                   d="M3.5 7.498H10.5V12.498000000000001H3.5z"
                 />
                 <path
-                  stroke={ColorPalette["gray-500"]}
+                  stroke={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-50"]
+                      : ColorPalette["gray-500"]
+                  }
                   strokeLinecap="round"
                   strokeWidth="1.5"
                   d="M2.5 7.498h9"

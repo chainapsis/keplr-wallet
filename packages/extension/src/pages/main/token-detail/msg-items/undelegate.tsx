@@ -7,6 +7,7 @@ import { MsgItemBase } from "./base";
 import { Staking } from "@keplr-wallet/stores";
 import { ColorPalette } from "../../../../styles";
 import { ItemLogo } from "./logo";
+import { useTheme } from "styled-components";
 
 export const MsgRelationUndelegate: FunctionComponent<{
   msg: MsgHistory;
@@ -14,6 +15,8 @@ export const MsgRelationUndelegate: FunctionComponent<{
   targetDenom: string;
 }> = observer(({ msg, prices, targetDenom }) => {
   const { chainStore, queriesStore } = useStore();
+
+  const theme = useTheme();
 
   const chainInfo = chainStore.getChain(msg.chainId);
 
@@ -82,7 +85,7 @@ export const MsgRelationUndelegate: FunctionComponent<{
               <path
                 fill={ColorPalette["gray-200"]}
                 d="M9.434 2.576c.17-.086.361-.14.566-.14.205 0 .396.054.566.14h.011l5.962 3.06a.628.628 0 01.005 1.164v.012l-5.972 3.05-.004-.003c-.172.087-.362.14-.568.14-.205 0-.396-.053-.568-.14l-.004.002-5.972-3.049V6.8a.628.628 0 01.005-1.165l5.962-3.06h.01z"
-                opacity="0.2"
+                opacity={theme.mode === "light" ? "1" : "0.2"}
               />
             </svg>
           }
