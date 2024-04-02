@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useRef } from "react";
+import React, { FunctionComponent, useMemo, useRef } from "react";
 import { observer } from "mobx-react-lite";
 import styled, { useTheme } from "styled-components";
 import { Box } from "../../../components/box";
@@ -94,6 +94,20 @@ export const TokenDetailModal: FunctionComponent<{
     .getBalance(currency);
 
   const navigate = useNavigate();
+
+  const querySupported = queriesStore.simpleQuery.queryGet<string[]>(
+    process.env["KEPLR_EXT_CONFIG_SERVER"],
+    "/tx-history/supports"
+  );
+
+  const isSupported: boolean = useMemo(() => {
+    const map = new Map<string, boolean>();
+    for (const chainIdentifier of querySupported.response?.data ?? []) {
+      map.set(chainIdentifier, true);
+    }
+
+    return map.get(chainInfo.chainIdentifier) ?? false;
+  }, [chainInfo, querySupported.response]);
 
   const buttons: {
     icon: React.ReactElement;
@@ -504,7 +518,7 @@ export const TokenDetailModal: FunctionComponent<{
               );
             }
 
-            if (msgHistory.pages[0].response?.isUnsupported) {
+            if (msgHistory.pages[0].response?.isUnsupported || !isSupported) {
               if (chainInfo.embedded.embedded) {
                 return (
                   <EmptyView>

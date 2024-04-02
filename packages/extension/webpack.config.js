@@ -175,6 +175,7 @@ module.exports = {
       KEPLR_EXT_GOOGLE_MEASUREMENT_ID: "",
       KEPLR_EXT_GOOGLE_API_KEY_FOR_MEASUREMENT: "",
       KEPLR_EXT_TX_HISTORY_BASE_URL: "",
+      KEPLR_EXT_CONFIG_SERVER: "",
       WC_PROJECT_ID: "",
     }),
     new ForkTsCheckerWebpackPlugin(),

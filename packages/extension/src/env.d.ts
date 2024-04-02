@@ -4,5 +4,6 @@ declare namespace NodeJS {
     NODE_ENV: "production" | "development" | undefined;
 
     KEPLR_EXT_TX_HISTORY_BASE_URL: string;
+    KEPLR_EXT_CONFIG_SERVER: string;
   }
 }
