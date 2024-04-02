@@ -33,7 +33,7 @@ export const MsgRelationReceive: FunctionComponent<{
 
   const fromAddress = (() => {
     try {
-      return Bech32Address.shortenAddress((msg.msg as any)["from_address"], 22);
+      return Bech32Address.shortenAddress((msg.msg as any)["from_address"], 20);
     } catch (e) {
       console.log(e);
       return "Unknown";
@@ -65,7 +65,7 @@ export const MsgRelationReceive: FunctionComponent<{
       }
       chainId={msg.chainId}
       title="Receive"
-      paragraph={fromAddress}
+      paragraph={`From ${fromAddress}`}
       amount={sendAmountPretty}
       prices={prices || {}}
       msg={msg}

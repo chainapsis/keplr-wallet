@@ -15,6 +15,7 @@ export const MsgItemBase: FunctionComponent<{
   chainId: string;
   title: string;
   paragraph?: string;
+  paragraphStyle?: React.CSSProperties;
   amount: CoinPretty | string;
   overrideAmountColor?: string;
   prices: Record<string, Record<string, number | undefined> | undefined>;
@@ -30,6 +31,7 @@ export const MsgItemBase: FunctionComponent<{
     chainId,
     title,
     paragraph,
+    paragraphStyle,
     amount,
     overrideAmountColor,
     prices,
@@ -95,23 +97,35 @@ export const MsgItemBase: FunctionComponent<{
             }}
           >
             <XAxis alignY="center">
-              <YAxis>
-                <Subtitle3
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["black"]
-                      : ColorPalette["gray-10"]
-                  }
-                >
-                  {title}
-                </Subtitle3>
-                {paragraph ? (
-                  <React.Fragment>
-                    <Gutter size="0.25rem" />
-                    <Body3 color={ColorPalette["gray-300"]}>{paragraph}</Body3>
-                  </React.Fragment>
-                ) : null}
-              </YAxis>
+              <Box style={{ overflow: "hidden" }}>
+                <YAxis>
+                  <Subtitle3
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["black"]
+                        : ColorPalette["gray-10"]
+                    }
+                  >
+                    {title}
+                  </Subtitle3>
+                  {paragraph ? (
+                    <React.Fragment>
+                      <Gutter size="0.25rem" />
+                      <Body3
+                        color={ColorPalette["gray-300"]}
+                        style={{
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          ...paragraphStyle,
+                        }}
+                      >
+                        {paragraph}
+                      </Body3>
+                    </React.Fragment>
+                  ) : null}
+                </YAxis>
+              </Box>
 
               <div
                 style={{

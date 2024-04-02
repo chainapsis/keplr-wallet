@@ -25,13 +25,9 @@ export const ItemLogo: FunctionComponent<{
       alignX="center"
       alignY="center"
     >
-      <div
-        style={{
-          color: ColorPalette["gray-200"],
-        }}
-      >
+      <Box alignX="center" alignY="center" color={ColorPalette["gray-200"]}>
         {center}
-      </div>
+      </Box>
       {deco ? (
         <div
           style={{

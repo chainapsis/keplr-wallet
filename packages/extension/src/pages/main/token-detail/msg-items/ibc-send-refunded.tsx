@@ -8,6 +8,7 @@ import { ItemLogo } from "./logo";
 import { ChainInfo } from "@keplr-wallet/types";
 import { ChainImageFallback } from "../../../../components/image";
 import { isValidCoinStr, parseCoinStr } from "@keplr-wallet/common";
+import { UnknownChainImage } from "./unknown-chain-image";
 
 export const MsgRelationIBCSendRefunded: FunctionComponent<{
   msg: MsgHistory;
@@ -42,6 +43,13 @@ export const MsgRelationIBCSendRefunded: FunctionComponent<{
     try {
       let res: ChainInfo | undefined = undefined;
       for (const path of msg.ibcTracking.paths) {
+        if (!path.chainId) {
+          return undefined;
+        }
+        if (!chainStore.hasChain(path.chainId)) {
+          return undefined;
+        }
+
         if (!path.clientChainId) {
           return undefined;
         }
@@ -86,7 +94,9 @@ export const MsgRelationIBCSendRefunded: FunctionComponent<{
                 chainInfo={destinationChain}
                 size="0.875rem"
               />
-            ) : undefined
+            ) : (
+              <UnknownChainImage size="0.875rem" />
+            )
           }
         />
       }

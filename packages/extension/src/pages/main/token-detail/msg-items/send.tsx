@@ -33,7 +33,7 @@ export const MsgRelationSend: FunctionComponent<{
 
   const toAddress = (() => {
     try {
-      return Bech32Address.shortenAddress((msg.msg as any)["to_address"], 22);
+      return Bech32Address.shortenAddress((msg.msg as any)["to_address"], 20);
     } catch (e) {
       console.log(e);
       return "Unknown";
@@ -65,7 +65,7 @@ export const MsgRelationSend: FunctionComponent<{
       }
       chainId={msg.chainId}
       title="Send"
-      paragraph={toAddress}
+      paragraph={`To ${toAddress}`}
       amount={sendAmountPretty}
       prices={prices || {}}
       msg={msg}

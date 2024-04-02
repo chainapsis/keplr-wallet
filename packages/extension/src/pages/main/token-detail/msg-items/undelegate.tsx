@@ -48,9 +48,9 @@ export const MsgRelationUndelegate: FunctionComponent<{
     .get(chainInfo.chainId)
     .cosmos.queryValidators.getQueryStatus(Staking.BondStatus.Unbonded);
 
-  const moniker: string | undefined = (() => {
+  const moniker: string = (() => {
     if (!validatorAddress) {
-      return undefined;
+      return "Unknown";
     }
     const bonded = queryBonded.getValidator(validatorAddress);
     if (bonded?.description.moniker) {
@@ -64,6 +64,8 @@ export const MsgRelationUndelegate: FunctionComponent<{
     if (unbonded?.description.moniker) {
       return unbonded.description.moniker;
     }
+
+    return "Unknown";
   })();
 
   return (
@@ -93,7 +95,7 @@ export const MsgRelationUndelegate: FunctionComponent<{
       }
       chainId={msg.chainId}
       title="Unstake"
-      paragraph={moniker}
+      paragraph={`From ${moniker}`}
       amount={amountPretty}
       prices={prices || {}}
       msg={msg}

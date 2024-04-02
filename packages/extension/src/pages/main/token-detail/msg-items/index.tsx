@@ -16,6 +16,9 @@ import { ColorPalette } from "../../../../styles";
 import { XAxis, YAxis } from "../../../../components/axis";
 import { Subtitle3 } from "../../../../components/typography";
 import { useTheme } from "styled-components";
+import { MsgRelationRedelegate } from "./redelegate";
+import { MsgRelationCancelUndelegate } from "./cancel-undelegate";
+import { MsgRelationIBCSwapRefunded } from "./ibc-swap-refunded";
 
 export const MsgItemRender: FunctionComponent<{
   msg: MsgHistory;
@@ -94,6 +97,15 @@ const MsgItemRenderInner: FunctionComponent<{
         />
       );
     }
+    case "ibc-swap-skip-osmosis-refunded": {
+      return (
+        <MsgRelationIBCSwapRefunded
+          msg={msg}
+          prices={prices}
+          targetDenom={targetDenom}
+        />
+      );
+    }
     case "delegate": {
       return (
         <MsgRelationDelegate
@@ -106,6 +118,24 @@ const MsgItemRenderInner: FunctionComponent<{
     case "undelegate": {
       return (
         <MsgRelationUndelegate
+          msg={msg}
+          prices={prices}
+          targetDenom={targetDenom}
+        />
+      );
+    }
+    case "redelegate": {
+      return (
+        <MsgRelationRedelegate
+          msg={msg}
+          prices={prices}
+          targetDenom={targetDenom}
+        />
+      );
+    }
+    case "cancel-undelegate": {
+      return (
+        <MsgRelationCancelUndelegate
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}

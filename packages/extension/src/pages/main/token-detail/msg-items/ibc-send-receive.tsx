@@ -10,6 +10,7 @@ import { ChainImageFallback } from "../../../../components/image";
 import { isValidCoinStr, parseCoinStr } from "@keplr-wallet/common";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
+import { UnknownChainImage } from "./unknown-chain-image";
 
 export const MsgRelationIBCSendReceive: FunctionComponent<{
   msg: MsgHistory;
@@ -46,7 +47,7 @@ export const MsgRelationIBCSendReceive: FunctionComponent<{
         Buffer.from(msg.ibcTracking.originPacket, "base64").toString()
       );
 
-      return Bech32Address.shortenAddress(packet["sender"], 22);
+      return Bech32Address.shortenAddress(packet["sender"], 20);
     } catch (e) {
       console.log(e);
       return "Unknown";
@@ -59,6 +60,22 @@ export const MsgRelationIBCSendReceive: FunctionComponent<{
     }
 
     try {
+      for (const path of msg.ibcTracking.paths) {
+        if (!path.chainId) {
+          return undefined;
+        }
+        if (!chainStore.hasChain(path.chainId)) {
+          return undefined;
+        }
+
+        if (!path.clientChainId) {
+          return undefined;
+        }
+        if (!chainStore.hasChain(path.clientChainId)) {
+          return undefined;
+        }
+      }
+
       if (msg.ibcTracking.paths.length > 0) {
         const path = msg.ibcTracking.paths[0];
         if (!path.chainId) {
@@ -101,13 +118,15 @@ export const MsgRelationIBCSendReceive: FunctionComponent<{
           deco={
             sourceChain ? (
               <ChainImageFallback chainInfo={sourceChain} size="0.875rem" />
-            ) : undefined
+            ) : (
+              <UnknownChainImage size="0.875rem" />
+            )
           }
         />
       }
       chainId={msg.chainId}
       title="Send Receive"
-      paragraph={fromAddress}
+      paragraph={`From ${fromAddress}`}
       amount={sendAmountPretty}
       prices={prices || {}}
       msg={msg}
