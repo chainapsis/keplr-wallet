@@ -518,6 +518,47 @@ export const TokenDetailModal: FunctionComponent<{
               );
             }
 
+            if (msgHistory.pages.find((page) => page.error != null)) {
+              return (
+                <EmptyView
+                  altSvg={
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="73"
+                      height="73"
+                      fill="none"
+                      viewBox="0 0 73 73"
+                    >
+                      <path
+                        stroke={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-200"]
+                            : ColorPalette["gray-400"]
+                        }
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="6"
+                        d="M46.15 49.601a13.635 13.635 0 00-9.626-4.006 13.636 13.636 0 00-9.72 4.006m37.03-13.125c0 15.11-12.249 27.357-27.358 27.357S9.12 51.585 9.12 36.476 21.367 9.12 36.476 9.12c15.11 0 27.357 12.248 27.357 27.357zm-34.197-6.839c0 1.26-.51 2.28-1.14 2.28-.63 0-1.14-1.02-1.14-2.28 0-1.26.51-2.28 1.14-2.28.63 0 1.14 1.02 1.14 2.28zm-1.14 0h.023v.046h-.023v-.046zm17.098 0c0 1.26-.51 2.28-1.14 2.28-.63 0-1.14-1.02-1.14-2.28 0-1.26.51-2.28 1.14-2.28.63 0 1.14 1.02 1.14 2.28zm-1.14 0h.023v.046h-.023v-.046z"
+                      />
+                    </svg>
+                  }
+                >
+                  <Box marginX="2rem">
+                    <Stack alignX="center" gutter="0.1rem">
+                      <Subtitle3>Network error.</Subtitle3>
+                      <Subtitle3
+                        style={{
+                          textAlign: "center",
+                        }}
+                      >
+                        Please try again after a few minutes.
+                      </Subtitle3>
+                    </Stack>
+                  </Box>
+                </EmptyView>
+              );
+            }
+
             if (msgHistory.pages[0].response?.isUnsupported || !isSupported) {
               if (chainInfo.embedded.embedded) {
                 return (
