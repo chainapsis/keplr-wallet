@@ -15,5 +15,4 @@ export const Relations = [
   "ibc-swap-skip-osmosis-refunded",
 ];
 
-// TODO: 지금은 scroll to fetch 테스트 용으로 값이 좀 작은거고 나중에는 20으로 올려야함.
-export const PaginationLimit = 8;
+export const PaginationLimit = 20;
