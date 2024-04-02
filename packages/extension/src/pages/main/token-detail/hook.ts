@@ -10,10 +10,16 @@ export const usePaginatedCursorQuery = <R>(
   isFetching: boolean;
   pages: {
     response: R | undefined;
+    error?: Error;
   }[];
   next: () => void;
 } => {
-  const [responses, setResponses] = useState<R[] | undefined>(undefined);
+  const [pages, setPages] = useState<
+    {
+      response: R | undefined;
+      error?: Error;
+    }[]
+  >([]);
 
   const baseURLRef = useRef(baseURL);
   baseURLRef.current = baseURL;
@@ -29,8 +35,19 @@ export const usePaginatedCursorQuery = <R>(
   useEffect(() => {
     simpleFetch<R>(baseURLRef.current, initialUriFnRef.current())
       .then((r) => {
-        // TODO: 오류처리
-        setResponses([r.data]);
+        setPages([
+          {
+            response: r.data,
+          },
+        ]);
+      })
+      .catch((e) => {
+        setPages([
+          {
+            response: undefined,
+            error: e,
+          },
+        ]);
       })
       .finally(() => {
         setIsFetching(false);
@@ -38,21 +55,21 @@ export const usePaginatedCursorQuery = <R>(
   }, []);
 
   const next = useCallback(() => {
-    if (
-      isFetching ||
-      !responses ||
-      responses.length === 0 ||
-      isEndedFnRef.current(responses[responses.length - 1])
-    ) {
+    if (isFetching || pages.length === 0) {
       return;
     }
 
-    const nextPage = responses.length + 1;
+    const res = pages[pages.length - 1].response;
+    if (!res) {
+      return;
+    }
+    if (isEndedFnRef.current(res)) {
+      return;
+    }
+
+    const nextPage = pages.length + 1;
     let uri = initialUriFnRef.current();
-    const qs = nextCursorQueryStringRef.current(
-      nextPage,
-      responses[responses.length - 1]
-    );
+    const qs = nextCursorQueryStringRef.current(nextPage, res);
     const params = new URLSearchParams(qs);
     if (uri.length === 0 || uri === "/") {
       uri = `?${params.toString()}`;
@@ -64,22 +81,34 @@ export const usePaginatedCursorQuery = <R>(
     simpleFetch<R>(baseURLRef.current, uri)
       .then((r) => {
         // TODO: 오류처리
-        setResponses((res) => {
-          const newRes = !res ? [] : [...res];
-          newRes.push(r.data);
-          return newRes;
+        setPages((prev) => {
+          const newPages = prev.slice();
+          newPages.push({
+            response: r.data,
+          });
+          return newPages;
+        });
+      })
+      .catch((e) => {
+        setPages((prev) => {
+          const newPages = prev.slice();
+          newPages.push({
+            response: undefined,
+            error: e,
+          });
+          return newPages;
         });
       })
       .finally(() => {
         setIsFetching(false);
       });
-  }, [isFetching, responses]);
+  }, [isFetching, pages]);
 
   return useMemo(() => {
     return {
       isFetching,
-      pages: !responses ? [] : responses.map((r) => ({ response: r })),
+      pages,
       next,
     };
-  }, [isFetching, next, responses]);
+  }, [isFetching, next, pages]);
 };
