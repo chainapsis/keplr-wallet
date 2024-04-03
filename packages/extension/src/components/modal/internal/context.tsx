@@ -45,6 +45,7 @@ export const ModalRootProvider: FunctionComponent = ({ children }) => {
         root.style.left = "0";
         root.style.right = "0";
         root.style.zIndex = "9999999";
+        root.style.pointerEvents = "none";
 
         rootElementMap.set(id, root);
 

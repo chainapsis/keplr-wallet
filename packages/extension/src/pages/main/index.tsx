@@ -51,6 +51,7 @@ import {
   LogAnalyticsEventMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { useBuy } from "../../hooks/use-buy";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -246,6 +247,8 @@ export const MainPage: FunctionComponent<{
 
   const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
+
+  const buySupportServiceInfos = useBuy();
 
   const searchRef = useRef<HTMLInputElement | null>(null);
   const [search, setSearch] = useState("");
@@ -592,7 +595,10 @@ export const MainPage: FunctionComponent<{
         align="bottom"
         close={() => setIsOpenBuy(false)}
       >
-        <BuyCryptoModal close={() => setIsOpenBuy(false)} />
+        <BuyCryptoModal
+          close={() => setIsOpenBuy(false)}
+          buySupportServiceInfos={buySupportServiceInfos}
+        />
       </Modal>
     </MainHeaderLayout>
   );

@@ -53,4 +53,9 @@ export interface BoxProps {
     borderWidth?: string;
     borderColor?: string;
   };
+
+  after?: {
+    backgroundColor: string;
+    borderRadius?: string;
+  };
 }
