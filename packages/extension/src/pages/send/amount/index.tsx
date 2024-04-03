@@ -424,6 +424,37 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               });
               await ethereumAccount.sendEthereumTx(sender, unsignedTx, {
                 onFulfill: (txReceipt) => {
+                  queryBalances
+                    .getQueryEthereumHexAddress(sender)
+                    .balances.forEach((balance) => {
+                      if (
+                        balance.currency.coinMinimalDenom ===
+                          coinMinimalDenom ||
+                        sendConfigs.feeConfig.fees.some(
+                          (fee) =>
+                            fee.currency.coinMinimalDenom ===
+                            balance.currency.coinMinimalDenom
+                        )
+                      ) {
+                        balance.fetch();
+                      }
+                    });
+                  queryBalances
+                    .getQueryBech32Address(account.bech32Address)
+                    .balances.forEach((balance) => {
+                      if (
+                        balance.currency.coinMinimalDenom ===
+                          coinMinimalDenom ||
+                        sendConfigs.feeConfig.fees.some(
+                          (fee) =>
+                            fee.currency.coinMinimalDenom ===
+                            balance.currency.coinMinimalDenom
+                        )
+                      ) {
+                        balance.fetch();
+                      }
+                    });
+
                   if (txReceipt.status === EthTxStatus.Success) {
                     notification.show(
                       "success",
