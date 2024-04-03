@@ -98,7 +98,7 @@ export const MsgItemBase: FunctionComponent<{
             browser.tabs.create({
               url: explorerUrl
                 .replace("{txHash}", msg.txHash.toUpperCase())
-                .replace("{txHash:lowercase}", msg.txHash.toLowerCase)
+                .replace("{txHash:lowercase}", msg.txHash.toLowerCase())
                 .replace("{txHash:uppercase}", msg.txHash.toUpperCase()),
             });
           }
