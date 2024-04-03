@@ -10,10 +10,11 @@ import { ColorPalette } from "../../../../styles";
 import { useTheme } from "styled-components";
 
 export const MsgRelationMergedClaimRewards: FunctionComponent<{
+  explorerUrl: string;
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = observer(({ msg, prices, targetDenom }) => {
+}> = observer(({ explorerUrl, msg, prices, targetDenom }) => {
   const { chainStore } = useStore();
   const theme = useTheme();
 
@@ -44,6 +45,7 @@ export const MsgRelationMergedClaimRewards: FunctionComponent<{
 
   return (
     <MsgItemBase
+      explorerUrl={explorerUrl}
       logo={
         <ItemLogo
           backgroundColor={ColorPalette["green-400"]}

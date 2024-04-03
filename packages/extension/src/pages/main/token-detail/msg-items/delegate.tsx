@@ -10,10 +10,11 @@ import { ColorPalette } from "../../../../styles";
 import { useTheme } from "styled-components";
 
 export const MsgRelationDelegate: FunctionComponent<{
+  explorerUrl: string;
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = observer(({ msg, prices, targetDenom }) => {
+}> = observer(({ explorerUrl, msg, prices, targetDenom }) => {
   const { chainStore, queriesStore } = useStore();
 
   const theme = useTheme();
@@ -70,6 +71,7 @@ export const MsgRelationDelegate: FunctionComponent<{
 
   return (
     <MsgItemBase
+      explorerUrl={explorerUrl}
       logo={
         <ItemLogo
           center={

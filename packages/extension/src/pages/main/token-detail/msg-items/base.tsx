@@ -11,6 +11,8 @@ import { MsgHistory } from "../types";
 import { useTheme } from "styled-components";
 
 export const MsgItemBase: FunctionComponent<{
+  explorerUrl: string;
+
   logo: React.ReactElement;
   chainId: string;
   title: string;
@@ -27,6 +29,7 @@ export const MsgItemBase: FunctionComponent<{
   };
 }> = observer(
   ({
+    explorerUrl,
     logo,
     chainId,
     title,
@@ -67,6 +70,8 @@ export const MsgItemBase: FunctionComponent<{
       return;
     }, [defaultVsCurrency, foundCurrency, priceStore, prices, amount]);
 
+    const clickable = !!explorerUrl;
+
     return (
       <Box
         backgroundColor={
@@ -85,6 +90,26 @@ export const MsgItemBase: FunctionComponent<{
         paddingY="0.875rem"
         minHeight="4rem"
         alignY="center"
+        cursor={clickable ? "pointer" : undefined}
+        onClick={(e) => {
+          e.preventDefault();
+
+          if (explorerUrl) {
+            browser.tabs.create({
+              url: explorerUrl
+                .replace("{txHash}", msg.txHash.toUpperCase())
+                .replace("{txHash:lowercase}", msg.txHash.toLowerCase)
+                .replace("{txHash:uppercase}", msg.txHash.toUpperCase()),
+            });
+          }
+        }}
+        hover={{
+          backgroundColor: clickable
+            ? theme.mode === "light"
+              ? ColorPalette["gray-10"]
+              : ColorPalette["gray-550"]
+            : undefined,
+        }}
       >
         <XAxis alignY="center">
           <Box marginRight="0.75rem">

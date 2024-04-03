@@ -12,10 +12,11 @@ import { ChainImageFallback } from "../../../../components/image";
 import { UnknownChainImage } from "./unknown-chain-image";
 
 export const MsgRelationIBCSend: FunctionComponent<{
+  explorerUrl: string;
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = observer(({ msg, prices, targetDenom }) => {
+}> = observer(({ explorerUrl, msg, prices, targetDenom }) => {
   const { chainStore } = useStore();
 
   const chainInfo = chainStore.getChain(msg.chainId);
@@ -102,6 +103,7 @@ export const MsgRelationIBCSend: FunctionComponent<{
 
   return (
     <MsgItemBase
+      explorerUrl={explorerUrl}
       logo={
         <ItemLogo
           center={

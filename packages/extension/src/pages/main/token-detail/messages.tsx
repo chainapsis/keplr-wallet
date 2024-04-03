@@ -9,9 +9,10 @@ import { ColorPalette } from "../../../styles";
 import { FormattedDate } from "react-intl";
 
 export const RenderMessages: FunctionComponent<{
+  explorerUrl: string;
   msgHistory: ReturnType<typeof usePaginatedCursorQuery<ResMsgsHistory>>;
   targetDenom: string;
-}> = ({ msgHistory, targetDenom }) => {
+}> = ({ explorerUrl, msgHistory, targetDenom }) => {
   const msgsPerDaily: {
     year: number;
     month: number;
@@ -90,6 +91,7 @@ export const RenderMessages: FunctionComponent<{
                 return (
                   <MsgItemRender
                     key={`${msg.msg.height}/${msg.msg.msgIndex}/${msg.msg.relation}`}
+                    explorerUrl={explorerUrl}
                     msg={msg.msg}
                     prices={msg.prices}
                     targetDenom={targetDenom}
