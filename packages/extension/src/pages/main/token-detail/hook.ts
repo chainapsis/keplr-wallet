@@ -80,7 +80,6 @@ export const usePaginatedCursorQuery = <R>(
     setIsFetching(true);
     simpleFetch<R>(baseURLRef.current, uri)
       .then((r) => {
-        // TODO: 오류처리
         setPages((prev) => {
           const newPages = prev.slice();
           newPages.push({
