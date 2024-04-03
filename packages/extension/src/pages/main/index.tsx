@@ -15,6 +15,7 @@ import {
   IBCTransferView,
   BuyCryptoModal,
   StakeWithKeplrDashboardButton,
+  UpdateNoteModal,
 } from "./components";
 import { Stack } from "../../components/stack";
 import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
@@ -598,6 +599,30 @@ export const MainPage: FunctionComponent<{
         <BuyCryptoModal
           close={() => setIsOpenBuy(false)}
           buySupportServiceInfos={buySupportServiceInfos}
+        />
+      </Modal>
+
+      <Modal isOpen={true} close={() => {}} align="center">
+        <UpdateNoteModal
+          close={() => {}}
+          updateNotePageData={[
+            {
+              paragraphs: [
+                "This is the first update note.his is the first update note.his is the first update note.his is the first update note.",
+                "This is the second update note.",
+                "This is the third update note.",
+              ],
+            },
+            {
+              imageSrc:
+                "https://img.freepik.com/free-vector/stylish-glowing-digital-red-lines-banner_1017-23964.jpg",
+              paragraphs: [
+                "This is the first update note.",
+                "This is the second update note.",
+                "This is the third update note.",
+              ],
+            },
+          ]}
         />
       </Modal>
     </MainHeaderLayout>
