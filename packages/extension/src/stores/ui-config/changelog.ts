@@ -15,7 +15,7 @@ interface VersionHistory {
   scenes: {
     image?: string;
     aspectRatio?: string;
-    paragraphs: string[];
+    paragraph: string;
   }[];
 }
 
@@ -31,7 +31,7 @@ const Schema = Joi.object<{
             Joi.object({
               image: Joi.string().optional(),
               aspectRatio: Joi.string().optional(),
-              paragraphs: Joi.array().items(Joi.string()).required(),
+              paragraph: Joi.string().required(),
             })
           )
           .min(1)

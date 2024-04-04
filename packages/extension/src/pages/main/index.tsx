@@ -637,7 +637,7 @@ export const MainPage: FunctionComponent<{
                           aspectRatio: scene.aspectRatio,
                         }
                       : undefined,
-                  paragraphs: scene.paragraphs,
+                  paragraph: scene.paragraph,
                 });
               }
             }

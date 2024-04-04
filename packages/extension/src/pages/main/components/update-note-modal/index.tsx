@@ -21,7 +21,7 @@ export type UpdateNotePageData = {
         aspectRatio: string;
       }
     | undefined;
-  paragraphs: string[];
+  paragraph: string;
 };
 
 export const UpdateNoteModal: FunctionComponent<{
@@ -216,31 +216,21 @@ const CarouselPage: FunctionComponent<{
             aspectRatio: notePageData.image.aspectRatio,
             width: "100%",
             padding: "0.25rem",
+            marginBottom: "1rem",
           }}
         />
       ) : null}
-      <ul style={{ paddingLeft: "1rem" }}>
-        {notePageData.paragraphs.map((paragraph, index) => {
-          return (
-            <React.Fragment key={index}>
-              <li
-                style={{
-                  overflow: "visible",
-                  flex: 1,
-                  color:
-                    theme.mode === "light"
-                      ? ColorPalette["gray-400"]
-                      : ColorPalette["gray-100"],
-                }}
-              >
-                <Body2>{paragraph}</Body2>
-              </li>
-
-              <Gutter size="0.625rem" />
-            </React.Fragment>
-          );
-        })}
-      </ul>
+      <Box paddingLeft="0.5rem" marginBottom="0.625rem">
+        <Body2
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-400"]
+              : ColorPalette["gray-100"]
+          }
+        >
+          {notePageData.paragraph}
+        </Body2>
+      </Box>
     </Box>
   );
 };
