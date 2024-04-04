@@ -4,7 +4,7 @@ import { Box } from "../../../components/box";
 import { ColorPalette } from "../../../styles";
 import { XAxis, YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
-import { Body1, Body3, Subtitle3 } from "../../../components/typography";
+import { Body3, Subtitle1, Subtitle3 } from "../../../components/typography";
 import { useStore } from "../../../stores";
 import { Dec } from "@keplr-wallet/unit";
 import { useTheme } from "styled-components";
@@ -147,18 +147,15 @@ export const StakedBalance: FunctionComponent<{
               ) {
                 return (
                   <React.Fragment>
-                    <Body1
+                    <Subtitle1
                       color={
                         theme.mode === "light"
                           ? ColorPalette["black"]
                           : ColorPalette["white"]
                       }
-                      style={{
-                        fontWeight: 600,
-                      }}
                     >
                       Start Staking
-                    </Body1>
+                    </Subtitle1>
                     <Gutter size="0.25rem" />
                     {queryAPR.response &&
                     "apr" in queryAPR.response.data &&
