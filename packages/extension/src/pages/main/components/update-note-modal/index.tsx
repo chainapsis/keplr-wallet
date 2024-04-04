@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useRef, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { useTheme } from "styled-components";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
@@ -11,11 +11,16 @@ import {
   FixedWidthSceneTransition,
   SceneTransitionRef,
 } from "../../../../components/transition";
-import { Image } from "../../../../components/image";
+import { Image as CompImage } from "../../../../components/image";
 import { FormattedMessage, useIntl } from "react-intl";
 
 export type UpdateNotePageData = {
-  imageSrc?: string;
+  image:
+    | {
+        src: string;
+        aspectRatio: string;
+      }
+    | undefined;
   paragraphs: string[];
 };
 
@@ -29,9 +34,23 @@ export const UpdateNoteModal: FunctionComponent<{
   const [currentPage, setCurrentPage] = useState(0);
   const sceneRef = useRef<SceneTransitionRef | null>(null);
 
+  const imagePreloaded = useRef<Map<string, boolean>>(new Map());
+  useEffect(() => {
+    // 다음 scene에서 image가 바로 보이도록 미리 preload한다.
+    for (const u of updateNotePageData) {
+      if (u.image && !imagePreloaded.current.get(u.image.src)) {
+        imagePreloaded.current.set(u.image.src, true);
+        const img = new Image();
+        img.src = u.image.src;
+      }
+    }
+  }, [updateNotePageData]);
+
   const onClickNext = () => {
     if (sceneRef.current && currentPage < updateNotePageData.length - 1) {
-      sceneRef.current.push(`page-${currentPage + 1}`);
+      sceneRef.current.push("page", {
+        notePageData: updateNotePageData[currentPage + 1],
+      });
       setCurrentPage(currentPage + 1);
     }
   };
@@ -47,14 +66,19 @@ export const UpdateNoteModal: FunctionComponent<{
     }
   };
 
+  if (updateNotePageData.length === 0) {
+    return null;
+  }
+
   return (
     <YAxis alignX="center">
       <Box
         position="relative"
-        width="18.5rem"
+        width="95%"
+        maxWidth="18.75rem"
         paddingTop="1.5rem"
         paddingBottom="1.25rem"
-        paddingX={updateNotePageData.length > 1 ? "1.75rem" : "1.25rem"}
+        paddingX={updateNotePageData.length > 1 ? "2rem" : "1.25rem"}
         borderRadius="0.5rem"
         backgroundColor={
           theme.mode === "light"
@@ -79,14 +103,17 @@ export const UpdateNoteModal: FunctionComponent<{
         <FixedWidthSceneTransition
           ref={sceneRef}
           transitionAlign="center"
-          initialSceneProps={{ name: `page-${currentPage}` }}
-          scenes={updateNotePageData.map((notePageData, index) => {
-            return {
-              name: `page-${index}`,
-              element: () => <CarouselPage notePageData={notePageData} />,
+          initialSceneProps={{
+            name: "page",
+            props: { notePageData: updateNotePageData[0] },
+          }}
+          scenes={[
+            {
+              name: "page",
+              element: CarouselPage,
               width: "100%",
-            };
-          })}
+            },
+          ]}
         />
 
         {updateNotePageData.length > 1 ? (
@@ -113,6 +140,7 @@ export const UpdateNoteModal: FunctionComponent<{
             position="absolute"
             alignY="center"
             paddingLeft="0.25rem"
+            paddingRight="0.25rem"
             style={{ top: 0, bottom: 0, left: 0 }}
           >
             <Box
@@ -126,6 +154,7 @@ export const UpdateNoteModal: FunctionComponent<{
                     : ColorPalette["gray-500"],
               }}
               onClick={onClickPrev}
+              cursor="pointer"
             >
               <ArrowLeftIcon
                 color={
@@ -142,6 +171,7 @@ export const UpdateNoteModal: FunctionComponent<{
           <Box
             position="absolute"
             alignY="center"
+            paddingLeft="0.25rem"
             paddingRight="0.25rem"
             style={{ top: 0, bottom: 0, right: 0 }}
           >
@@ -156,6 +186,7 @@ export const UpdateNoteModal: FunctionComponent<{
                     : ColorPalette["gray-500"],
               }}
               onClick={onClickNext}
+              cursor="pointer"
             >
               <ArrowRightIcon
                 color={
@@ -179,11 +210,14 @@ const CarouselPage: FunctionComponent<{
 
   return (
     <Box style={{ flex: "none" }}>
-      {notePageData.imageSrc ? (
-        <Image
-          alt={notePageData.imageSrc}
-          src={notePageData.imageSrc}
-          style={{ aspectRatio: "2.2/1", width: "100%" }}
+      {notePageData.image ? (
+        <CompImage
+          alt={notePageData.image.src}
+          src={notePageData.image.src}
+          style={{
+            aspectRatio: notePageData.image.aspectRatio,
+            width: "100%",
+          }}
         />
       ) : null}
       <ul style={{ paddingLeft: "1rem" }}>
