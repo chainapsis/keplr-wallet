@@ -2,7 +2,7 @@ import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { useTheme } from "styled-components";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
-import { Body2, Subtitle1 } from "../../../../components/typography";
+import { Body2, H5 } from "../../../../components/typography";
 import { Button } from "../../../../components/button";
 import { YAxis } from "../../../../components/axis";
 import { Gutter } from "../../../../components/gutter";
@@ -15,9 +15,11 @@ import { Image as CompImage } from "../../../../components/image";
 import { FormattedMessage, useIntl } from "react-intl";
 
 export type UpdateNotePageData = {
+  title: string;
   image:
     | {
-        src: string;
+        default: string;
+        light: string;
         aspectRatio: string;
       }
     | undefined;
@@ -38,13 +40,16 @@ export const UpdateNoteModal: FunctionComponent<{
   useEffect(() => {
     // 다음 scene에서 image가 바로 보이도록 미리 preload한다.
     for (const u of updateNotePageData) {
-      if (u.image && !imagePreloaded.current.get(u.image.src)) {
-        imagePreloaded.current.set(u.image.src, true);
-        const img = new Image();
-        img.src = u.image.src;
+      if (u.image) {
+        const src = theme.mode === "light" ? u.image.light : u.image.default;
+        if (!imagePreloaded.current.get(src)) {
+          imagePreloaded.current.set(src, true);
+          const img = new Image();
+          img.src = src;
+        }
       }
     }
-  }, [updateNotePageData]);
+  }, [updateNotePageData, theme.mode]);
 
   const onClickNext = () => {
     if (sceneRef.current && currentPage < updateNotePageData.length - 1) {
@@ -86,20 +91,6 @@ export const UpdateNoteModal: FunctionComponent<{
             : ColorPalette["gray-600"]
         }
       >
-        <Box alignX={updateNotePageData.length > 1 ? "center" : "left"}>
-          <Subtitle1
-            color={
-              theme.mode === "light"
-                ? ColorPalette["black"]
-                : ColorPalette["white"]
-            }
-          >
-            <FormattedMessage id="page.main.components.update-note-modal.title" />
-          </Subtitle1>
-        </Box>
-
-        <Gutter size="1.25rem" />
-
         <FixedWidthSceneTransition
           ref={sceneRef}
           transitionAlign="center"
@@ -207,20 +198,44 @@ const CarouselPage: FunctionComponent<{
   const theme = useTheme();
 
   return (
-    <Box style={{ flex: "none" }}>
+    <Box>
+      <Box alignX="center">
+        <H5
+          color={
+            theme.mode === "light"
+              ? ColorPalette["black"]
+              : ColorPalette["white"]
+          }
+        >
+          <FormattedMessage
+            id="update-node/paragraph/noop"
+            defaultMessage={notePageData.title}
+            values={{
+              br: <br />,
+            }}
+          />
+        </H5>
+      </Box>
+
+      <Gutter size="1.25rem" />
+
       {notePageData.image ? (
         <CompImage
-          alt={notePageData.image.src}
-          src={notePageData.image.src}
+          alt={notePageData.title}
+          src={
+            theme.mode === "light"
+              ? notePageData.image.light
+              : notePageData.image.default
+          }
           style={{
             aspectRatio: notePageData.image.aspectRatio,
             width: "100%",
             padding: "0.25rem",
-            marginBottom: "1rem",
+            marginBottom: "1.5rem",
           }}
         />
       ) : null}
-      <Box paddingLeft="0.5rem" marginBottom="0.625rem">
+      <Box>
         <Body2
           color={
             theme.mode === "light"
@@ -228,7 +243,13 @@ const CarouselPage: FunctionComponent<{
               : ColorPalette["gray-100"]
           }
         >
-          {notePageData.paragraph}
+          <FormattedMessage
+            id="update-node/paragraph/noop"
+            defaultMessage={notePageData.paragraph}
+            values={{
+              br: <br />,
+            }}
+          />
         </Body2>
       </Box>
     </Box>

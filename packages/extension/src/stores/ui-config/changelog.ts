@@ -13,7 +13,11 @@ import Joi from "joi";
 interface VersionHistory {
   version: string;
   scenes: {
-    image?: string;
+    title: string;
+    image?: {
+      default: string;
+      light: string;
+    };
     aspectRatio?: string;
     paragraph: string;
   }[];
@@ -29,7 +33,11 @@ const Schema = Joi.object<{
         scenes: Joi.array()
           .items(
             Joi.object({
-              image: Joi.string().optional(),
+              title: Joi.string().required(),
+              image: Joi.object({
+                default: Joi.string().required(),
+                light: Joi.string().required(),
+              }).optional(),
               aspectRatio: Joi.string().optional(),
               paragraph: Joi.string().required(),
             })

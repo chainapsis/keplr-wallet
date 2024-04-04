@@ -630,10 +630,12 @@ export const MainPage: FunctionComponent<{
             for (const info of uiConfigStore.changelogConfig.showingInfo) {
               for (const scene of info.scenes) {
                 res.push({
+                  title: scene.title,
                   image:
                     scene.image && scene.aspectRatio
                       ? {
-                          src: scene.image,
+                          default: scene.image.default,
+                          light: scene.image.light,
                           aspectRatio: scene.aspectRatio,
                         }
                       : undefined,
