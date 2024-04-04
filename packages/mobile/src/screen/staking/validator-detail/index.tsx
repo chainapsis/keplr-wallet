@@ -25,7 +25,8 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
   const {queriesStore, chainStore, accountStore} = useStore();
   const route = useRoute<RouteProp<StakeNavigation, 'Stake.ValidateDetail'>>();
 
-  const {validatorAddress, chainId, validatorSelector} = route.params;
+  const {validatorAddress, chainId, validatorSelector, fromDeepLink} =
+    route.params;
 
   const navigation = useNavigation<StackNavProp>();
   const style = useStyle();
@@ -239,6 +240,7 @@ export const ValidatorDetailScreen: FunctionComponent = observer(() => {
                       params: {
                         chainId,
                         validatorAddress: validatorInfo.operator_address,
+                        fromDeepLink,
                       },
                     });
                   }}

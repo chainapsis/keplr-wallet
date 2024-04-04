@@ -2,7 +2,11 @@ import {AppState, Linking} from 'react-native';
 import {action, makeObservable, observable, runInAction} from 'mobx';
 import {WalletConnectStore} from '../wallet-connect';
 
-type StakingDeepLinkParams = {chainId: string; from?: string};
+type StakingDeepLinkParams = {
+  chainId: string;
+  userIdentifier: string;
+  activityName: string;
+};
 
 export class DeepLinkStore {
   constructor(protected readonly walletConnectStore: WalletConnectStore) {
@@ -71,23 +75,18 @@ export class DeepLinkStore {
       const params = decodeURIComponent(_url.search);
       const urlParams = new URLSearchParams(params);
 
-      if (urlParams.has('chainId')) {
-        if (urlParams.has('from')) {
-          runInAction(() => {
-            this._needToNavigation = {
-              chainId: urlParams.get('chainId') as string,
-              from: urlParams.get('from') as string,
-            };
-          });
-        } else {
-          console.log(urlParams.get('chainId'));
-          runInAction(() => {
-            this._needToNavigation = {
-              chainId: urlParams.get('chainId') as string,
-              from: urlParams.get('from') as string,
-            };
-          });
-        }
+      if (
+        urlParams.has('chainId') &&
+        urlParams.has('userIdentifier') &&
+        urlParams.has('activityName')
+      ) {
+        runInAction(() => {
+          this._needToNavigation = {
+            chainId: urlParams.get('chainId') as string,
+            userIdentifier: urlParams.get('userIdentifier') as string,
+            activityName: urlParams.get('activityName') as string,
+          };
+        });
       }
     } catch (e) {
       console.log(e);

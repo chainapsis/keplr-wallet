@@ -298,7 +298,10 @@ export type StakeNavigation = {
       validatorAddress: string,
       validatorName: string,
     ) => void;
-    fromDeepLink?: string;
+    fromDeepLink?: {
+      userIdentifier: string;
+      activityName: string;
+    };
   };
   'Stake.ValidateDetail': {
     chainId: string;
@@ -307,10 +310,18 @@ export type StakeNavigation = {
       validatorAddress: string,
       validatorName: string,
     ) => void;
+    fromDeepLink?: {
+      userIdentifier: string;
+      activityName: string;
+    };
   };
   'Stake.Delegate': {
     chainId: string;
     validatorAddress: string;
+    fromDeepLink?: {
+      userIdentifier: string;
+      activityName: string;
+    };
   };
   'Stake.Undelegate': {
     chainId: string;
@@ -1164,7 +1175,10 @@ export const DeepLinkNavigationComponent: FunctionComponent = observer(() => {
             screen: 'Stake.ValidateList',
             params: {
               chainId: deepLinkStore.needToNavigation.chainId,
-              fromDeepLink: deepLinkStore.needToNavigation.from,
+              fromDeepLink: {
+                userIdentifier: deepLinkStore.needToNavigation.userIdentifier,
+                activityName: deepLinkStore.needToNavigation.activityName,
+              },
             },
           });
         }

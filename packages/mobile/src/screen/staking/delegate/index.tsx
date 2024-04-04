@@ -22,6 +22,8 @@ import {ValidatorCard} from '../components/validator-card';
 import {GuideBox} from '../../../components/guide-box';
 import {useNotification} from '../../../hooks/notification';
 import {useIntl} from 'react-intl';
+import {simpleFetch} from '@keplr-wallet/simple-fetch';
+import {APR_API_URL} from '../../../config.ts';
 
 export const SignDelegateScreen: FunctionComponent = observer(() => {
   const {chainStore, accountStore, queriesStore} = useStore();
@@ -29,7 +31,7 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation<StackNavProp>();
   const style = useStyle();
   const initialChainId = route.params['chainId'];
-  const {validatorAddress} = route.params;
+  const {validatorAddress, fromDeepLink} = route.params;
   const notification = useNotification();
   const intl = useIntl();
 
@@ -144,6 +146,25 @@ export const SignDelegateScreen: FunctionComponent = observer(() => {
                         intl.formatMessage({id: 'error.transaction-failed'}),
                       );
                       return;
+                    }
+
+                    if (fromDeepLink) {
+                      try {
+                        simpleFetch(
+                          APR_API_URL,
+                          '/coinbase/user-activity-report',
+                          {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                              userIdentifier: fromDeepLink.userIdentifier,
+                              activityName: fromDeepLink.activityName,
+                            }),
+                          },
+                        );
+                      } catch (e) {
+                        console.log(e);
+                      }
                     }
 
                     notification.show(
