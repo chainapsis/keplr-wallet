@@ -110,6 +110,7 @@ import {
 } from './screen/register/import-from-extension';
 import {SwapIcon} from './components/icon/swap.tsx';
 import {IBCSwapScreen} from './screen/ibc-swap';
+import {IBCSwapDestinationSelectAssetScreen} from './screen/ibc-swap/select-asset';
 
 type DefaultRegisterParams = {
   hideBackButton?: boolean;
@@ -289,6 +290,10 @@ export type RootStackParamList = {
     chainId: string;
     txHash: string;
   };
+  Swap: {
+    test?: string;
+  };
+  'Swap.SelectAsset': undefined;
 };
 
 export type StakeNavigation = {
@@ -1151,6 +1156,16 @@ export const AppNavigation: FunctionComponent = observer(() => {
             name="TxFail"
             options={{headerShown: false}}
             component={TxFailedResultScreen}
+          />
+          <Stack.Screen
+            name="Swap.SelectAsset"
+            options={{
+              title: intl.formatMessage({
+                id: 'page.setting.general.contacts-title',
+              }),
+              ...defaultHeaderOptions,
+            }}
+            component={IBCSwapDestinationSelectAssetScreen}
           />
         </Stack.Navigator>
       </BugsnagNavigationContainer>

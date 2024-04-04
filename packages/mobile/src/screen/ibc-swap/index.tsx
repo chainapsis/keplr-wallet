@@ -14,10 +14,18 @@ import {SwapAssetInfo} from './components/swap-asset-info';
 import {IconProps} from '../../components/icon/types.ts';
 import {Path, Svg} from 'react-native-svg';
 import {SwapFeeInfo} from './components/swap-fee-info';
+import {WarningGuideBox} from './components/warning-guide-box';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavProp} from '../../navigation.tsx';
+import {SlippageModal} from './components/slippage-modal';
 
 export const IBCSwapScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
   const style = useStyle();
+
+  const navigation = useNavigation<StackNavProp>();
+
+  // const route = useRoute<RouteProp<RootStackParamList, 'Swap'>>();
 
   return (
     <PageWithScrollView
@@ -61,10 +69,9 @@ export const IBCSwapScreen: FunctionComponent = observer(() => {
 
       <SwapAssetInfo type="from" />
 
-      <Box paddingY={6} alignX="center" alignY="center">
+      <Box paddingY={6} alignX="center" alignY="center" zIndex={10}>
         <Box
           position="absolute"
-          zIndex={10}
           padding={6}
           borderRadius={999}
           backgroundColor={style.get('color-gray-500').color}
@@ -84,11 +91,19 @@ export const IBCSwapScreen: FunctionComponent = observer(() => {
 
       <Gutter size={12} />
 
+      <WarningGuideBox />
+
+      <Gutter size={12} />
+
       <Button
         size="large"
         text={intl.formatMessage({id: 'page.ibc-swap.button.next'})}
-        onPress={() => {}}
+        onPress={() => {
+          navigation.navigate('Swap.SelectAsset');
+        }}
       />
+
+      <SlippageModal isOpen={false} setIsOpen={() => {}} />
     </PageWithScrollView>
   );
 });

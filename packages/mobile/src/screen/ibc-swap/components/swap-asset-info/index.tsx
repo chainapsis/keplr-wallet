@@ -9,6 +9,7 @@ import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {Gutter} from '../../../../components/gutter';
 import {ChainImageFallback} from '../../../../components/image';
 import {ArrowDownFillIcon} from '../../../../components/icon/arrow-donw-fill.tsx';
+import {SettingIcon} from '../../../../components/icon';
 
 export const SwapAssetInfo: FunctionComponent<{
   type: 'from' | 'to';
@@ -104,6 +105,13 @@ export const SwapAssetInfo: FunctionComponent<{
         <Box style={{flex: 1}} />
 
         <Text style={style.flatten(['body2', 'color-text-low'])}>on Juno</Text>
+
+        {type === 'to' ? (
+          <React.Fragment>
+            <Gutter size={2} />
+            <SettingIcon size={14} color={style.get('color-text-low').color} />
+          </React.Fragment>
+        ) : null}
       </XAxis>
     </Box>
   );
