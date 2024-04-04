@@ -78,7 +78,7 @@ export const UpdateNoteModal: FunctionComponent<{
         maxWidth="18.75rem"
         paddingTop="1.5rem"
         paddingBottom="1.25rem"
-        paddingX={updateNotePageData.length > 1 ? "2rem" : "1.25rem"}
+        paddingX={updateNotePageData.length > 1 ? "1.75rem" : "1.25rem"}
         borderRadius="0.5rem"
         backgroundColor={
           theme.mode === "light"
@@ -140,7 +140,6 @@ export const UpdateNoteModal: FunctionComponent<{
             position="absolute"
             alignY="center"
             paddingLeft="0.25rem"
-            paddingRight="0.25rem"
             style={{ top: 0, bottom: 0, left: 0 }}
           >
             <Box
@@ -171,7 +170,6 @@ export const UpdateNoteModal: FunctionComponent<{
           <Box
             position="absolute"
             alignY="center"
-            paddingLeft="0.25rem"
             paddingRight="0.25rem"
             style={{ top: 0, bottom: 0, right: 0 }}
           >
@@ -217,6 +215,7 @@ const CarouselPage: FunctionComponent<{
           style={{
             aspectRatio: notePageData.image.aspectRatio,
             width: "100%",
+            padding: "0.25rem",
           }}
         />
       ) : null}
