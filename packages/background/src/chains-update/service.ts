@@ -26,6 +26,12 @@ export class ChainsUpdateService {
         console.log(e);
       });
     });
+
+    this.chainsService.addChainRemovedHandler((chainInfo) => {
+      this.updateChainInfo(chainInfo.chainId).catch((e) => {
+        console.log(e);
+      });
+    });
   }
 
   protected startUpdateLoop() {

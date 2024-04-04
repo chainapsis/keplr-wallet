@@ -606,10 +606,7 @@ export class ChainsService {
     this.suggestedChainInfos = [];
 
     for (const chainInfo of prev) {
-      const updated = this.mergeChainInfosWithDynamics([chainInfo])[0];
-      for (const handler of this.onChainRemovedHandlers) {
-        handler(updated);
-      }
+      this.onChainRemoved(chainInfo);
     }
   }
 
@@ -881,6 +878,9 @@ export class ChainsService {
   onChainRemoved(chainInfo: ChainInfo): void {
     const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
 
+    // 이 이후로 updated 정보를 다 지워버리기 때문에 먼저 chain info를 얻어놔야한다.
+    const updated = this.mergeChainInfosWithDynamics([chainInfo])[0];
+
     {
       const newChainInfos = this.updatedChainInfos.slice();
       newChainInfos.filter(
@@ -916,8 +916,6 @@ export class ChainsService {
       );
       this.endpoints = newEndpoints;
     }
-
-    const updated = this.mergeChainInfosWithDynamics([chainInfo])[0];
 
     for (const handler of this.onChainRemovedHandlers) {
       handler(updated);
