@@ -30,6 +30,8 @@ export interface MsgHistory {
     chainId: string;
     chainIdentifier: string;
     txHeight: number;
+    txHash: string;
+    msgIndex: number;
     originPortId: string;
     originChannelId: string;
     originSequence: number;
