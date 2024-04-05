@@ -17,6 +17,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import semver from "semver";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import Joi from "joi";
+import { ChangelogConfig } from "./changelog";
 
 interface Remote {
   version: string;
@@ -48,7 +49,11 @@ export class NewChainSuggestionConfig {
   @observable.ref
   protected _remote: Remote[] = [];
 
-  constructor(kvStore: KVStore, protected readonly chainStore: ChainStore) {
+  constructor(
+    kvStore: KVStore,
+    protected readonly chainStore: ChainStore,
+    public readonly changelogConfig: ChangelogConfig
+  ) {
     this.kvStore = new PrefixKVStore(kvStore, "new-chain-suggestion");
 
     makeObservable(this);
@@ -116,6 +121,11 @@ export class NewChainSuggestionConfig {
 
   @computed
   get newSuggestionChains(): string[] {
+    // UI 디자인상 changelog가 보여지는 경우에는 new chain noti(?)를 보여주지 않는다.
+    if (this.changelogConfig.showingInfo.length > 0) {
+      return [];
+    }
+
     const res = [];
 
     for (const r of this._remote) {

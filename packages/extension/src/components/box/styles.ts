@@ -3,7 +3,17 @@ import { BoxProps } from "./types";
 
 export const Styles = {
   Container: styled.div<BoxProps>`
-    position ${({ position }) => position || "static"};
+    position ${({ position, after }) => {
+      if (position) {
+        return position;
+      }
+
+      if (after) {
+        return "relative";
+      }
+
+      return "static";
+    }};
     width: ${({ width }) => width};
     min-width: ${({ minWidth }) => minWidth};
     max-width: ${({ maxWidth }) => maxWidth};
@@ -72,6 +82,23 @@ export const Styles = {
           }
         `;
       }
-    }}
+    }};
+    
+    ${({ after }) => {
+      if (after) {
+        return css`
+          &::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: ${after.backgroundColor};
+            border-radius: ${after.borderRadius};
+          }
+        `;
+      }
+    }};
   `,
 };

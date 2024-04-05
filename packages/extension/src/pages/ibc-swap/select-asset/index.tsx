@@ -34,7 +34,7 @@ class IBCSwapDestinationState {
   // 현재 가지고 있지 않은 자산도 유저가 선택할 수 있도록 UI 상 후순위로 둔채로 balance 등을 보여주지 않은채 선택은 할 수 있도록 보여준다.
   @computed
   get tokens(): {
-    tokens: ViewToken[];
+    tokens: ReadonlyArray<ViewToken>;
     remaining: {
       currency: Currency;
       chainInfo: IChainInfoImpl;
