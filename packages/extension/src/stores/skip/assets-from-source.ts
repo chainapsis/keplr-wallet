@@ -75,6 +75,11 @@ export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<Assets
 
     for (const key of Object.keys(this.response.data.dest_assets)) {
       if (this.chainGetter.hasChain(key)) {
+        const chainInfo = this.chainGetter.getChain(key);
+        if (chainInfo.hideInUI) {
+          continue;
+        }
+
         if (
           this.chainGetter.getChain(key).chainIdentifier ===
           ChainIdHelper.parse(this.chainId).identifier

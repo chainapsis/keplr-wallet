@@ -60,6 +60,9 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
     }
 
     const chainInfo = this.chainGetter.getChain(this.chainId);
+    if (chainInfo.hideInUI) {
+      return [];
+    }
 
     const assetsInResponse =
       this.response.data.chain_to_assets_map[chainInfo.chainId];

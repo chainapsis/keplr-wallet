@@ -62,6 +62,9 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
       .filter((chain) => {
         return this.chainGetter.hasChain(chain.chain_id);
       })
+      .filter((chain) => {
+        return !this.chainGetter.getChain(chain.chain_id).hideInUI;
+      })
       .map((chain) => {
         return {
           chainInfo: this.chainGetter.getChain(chain.chain_id),

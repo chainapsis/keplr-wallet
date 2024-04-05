@@ -151,6 +151,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         return false;
       }
     }
+    if (this.chainStore.getChain(chainId).hideInUI) {
+      return false;
+    }
 
     if ("paths" in currency) {
       if (!currency.originChainId || !currency.originCurrency) {
@@ -415,6 +418,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           ) {
             continue;
           }
+          if (this.chainStore.getChain(currency.originChainId).hideInUI) {
+            continue;
+          }
 
           // 현재 CW20같은 얘들은 처리할 수 없다.
           if (!("type" in currency.originCurrency)) {
@@ -542,13 +548,16 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         return currency;
       })();
 
-      const res: { denom: string; chainId: string }[] = [
-        {
-          // 기본적으로 origin에 대한 정보를 넣어준다.
-          chainId: originOutChainId,
-          denom: originOutCurrency.coinMinimalDenom,
-        },
-      ];
+      const res: { denom: string; chainId: string }[] =
+        this.chainStore.getChain(originOutChainId).hideInUI
+          ? []
+          : [
+              {
+                // 기본적으로 origin에 대한 정보를 넣어준다.
+                chainId: originOutChainId,
+                denom: originOutCurrency.coinMinimalDenom,
+              },
+            ];
 
       const channels = this.queryIBCPacketForwardingTransfer.getIBCChannels(
         originOutChainId,
@@ -594,7 +603,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         }
       }
 
-      return res;
+      return res.filter(({ chainId }) => {
+        return !this.chainStore.getChain(chainId).hideInUI;
+      });
     }
   );
 }

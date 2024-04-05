@@ -74,6 +74,10 @@ export class ObservableQueryIbcPfmTransfer {
               this.chainGetter.hasChain(asset.chainId) &&
               this.chainGetter.hasChain(asset.originChainId)
             ) {
+              if (this.chainGetter.getChain(asset.chainId).hideInUI) {
+                continue;
+              }
+
               const channels: {
                 portId: string;
                 channelId: string;
