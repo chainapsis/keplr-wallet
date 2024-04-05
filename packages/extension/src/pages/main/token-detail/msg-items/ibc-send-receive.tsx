@@ -127,7 +127,7 @@ export const MsgRelationIBCSendReceive: FunctionComponent<{
         />
       }
       chainId={msg.chainId}
-      title="Send Receive"
+      title="Receive"
       paragraph={`From ${fromAddress}`}
       amount={sendAmountPretty}
       prices={prices || {}}
