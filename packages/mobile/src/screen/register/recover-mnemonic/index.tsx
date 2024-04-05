@@ -184,7 +184,9 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
           validate: (value: string) => {
             value = trimWordsStr(value);
             if (!isPrivateKey(value)) {
-              if (value.split(' ').length < 8) {
+              const split = trimWordsStr(value).split(' ');
+
+              if (split.length < 8) {
                 return intl.formatMessage({id: 'error.too-short-mnemonic'});
               }
 
@@ -193,8 +195,8 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
                 word: string;
               }[] = [];
 
-              for (let i = 0; i < value.split(' ').length; i++) {
-                const word = value.split(' ')[i];
+              for (let i = 0; i < split.length; i++) {
+                const word = split[i];
                 if (word) {
                   if (!isMnemonicWord(word)) {
                     notMnemonicWords.push({
@@ -216,7 +218,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
                 );
               }
 
-              if (!bip39.validateMnemonic(value)) {
+              if (!bip39.validateMnemonic(split.join(' '))) {
                 return intl.formatMessage({id: 'error.invalid-mnemonic'});
               }
             } else {
@@ -236,8 +238,6 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
                 return 'Invalid private key';
               }
             }
-
-            return '';
           },
         }}
         render={({field: {onChange, onBlur, value}}) => {
