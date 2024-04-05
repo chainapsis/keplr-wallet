@@ -2,6 +2,7 @@
   "error.not-supported-error": "지원되지 않음",
   "error.bip44-path-required": "BIP44 경로를 입력해야 합니다.",
   "error.too-short-mnemonic": "복구 문구가 너무 짧습니다.",
+  "error.wrong-mnemonic-word": "잘못된 복구 문구입니다. 다음 숫자의 단어들을 확인해보세요: {index}.",
   "error.invalid-mnemonic": "복구 문구를 다시 확인해주세요.",
   "error.failed-to-set-endpoints": "노드 주소 설정에 실패했습니다.",
   "error.transaction-failed": "트랜잭션이 실패했습니다.",
