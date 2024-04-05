@@ -77,7 +77,7 @@ export const MsgRelationIBCSwap: FunctionComponent<{
     }
   })();
 
-  const destDenom: string | undefined = useMemo(() => {
+  const destDenom: string | undefined = (() => {
     try {
       // osmosis가 시작 지점일 경우.
       if (
@@ -154,7 +154,7 @@ export const MsgRelationIBCSwap: FunctionComponent<{
       console.log(e);
       return undefined;
     }
-  }, [chainInfo, msg.ibcTracking, msg.msg, osmosisChainInfo]);
+  })();
 
   return (
     <MsgItemBase
