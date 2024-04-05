@@ -253,7 +253,7 @@ export const WebpageScreen: FunctionComponent = observer(() => {
           applicationNameForUserAgent={`KeplrWalletMobile/${DeviceInfo.getVersion()}`}
           injectedJavaScriptBeforeContentLoaded={sourceCode}
           onMessage={onMessage}
-          onNavigationStateChange={e => {
+          onNavigationStateChange={(e: any) => {
             // Strangely, `onNavigationStateChange` is only invoked whenever page changed only in IOS.
             // Use two handlers to measure simultaneously in ios and android.
             setCanGoBack(e.canGoBack);
@@ -264,7 +264,7 @@ export const WebpageScreen: FunctionComponent = observer(() => {
 
             checkURLIsPhishing(e.url);
           }}
-          onLoadProgress={e => {
+          onLoadProgress={(e: any) => {
             // Strangely, `onLoadProgress` is only invoked whenever page changed only in Android.
             // Use two handlers to measure simultaneously in ios and android.
             setCanGoBack(e.nativeEvent.canGoBack);
@@ -280,7 +280,7 @@ export const WebpageScreen: FunctionComponent = observer(() => {
           decelerationRate="normal"
           allowsBackForwardNavigationGestures={true}
           allowsInlineMediaPlayback={true}
-          onLoad={event => {
+          onLoad={(event: any) => {
             setTitle(event.nativeEvent.title);
           }}
         />
