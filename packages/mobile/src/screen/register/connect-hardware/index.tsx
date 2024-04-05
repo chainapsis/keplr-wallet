@@ -25,7 +25,7 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
   const style = useStyle();
   const navigation = useNavigation<StackNavProp>();
 
-  const bip44PathState = useBIP44PathState();
+  const bip44PathState = useBIP44PathState(true);
   const [isOpenBip44PathView, setIsOpenBip44PathView] = React.useState(false);
   const [isOpenSelectItemModal, setIsOpenSelectItemModal] = useState(false);
 
@@ -160,6 +160,7 @@ export const ConnectHardwareWalletScreen: FunctionComponent = observer(() => {
       {
         <VerticalCollapseTransition collapsed={!isOpenBip44PathView}>
           <Bip44PathView
+            isLedger={true}
             state={bip44PathState}
             setIsOpen={setIsOpenBip44PathView}
           />

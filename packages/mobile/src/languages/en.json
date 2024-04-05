@@ -2,6 +2,7 @@
   "error.not-supported-error": "Not supported",
   "error.bip44-path-required": "BIP44 path should be provided",
   "error.too-short-mnemonic": "Too short recovery phrase",
+  "error.wrong-mnemonic-word": "Wrong recovery phrase. Please double-check these words: {index}.",
   "error.invalid-mnemonic": "Invalid recovery phrase",
   "error.failed-to-set-endpoints": "Failed to set endpoints",
   "error.transaction-failed": "Transaction Failed",
@@ -701,10 +702,13 @@
   "button.vote": "Vote",
   "button.stake": "Stake",
   "button.reject": "Reject",
+  "button.cancel": "Cancel",
   "text-button.select-all": "Select All",
   "text-button.view-all-proposals": "View All Proposals",
   "notification.transaction-success": "Transaction Success",
   "wallet-connect.information-text": "{appName} is requesting to connect to your Keplr account on {chainIds}",
   "hooks.confirm.cancel-button": "Cancel",
-  "hooks.confirm.yes-button": "Yes"
+  "hooks.confirm.yes-button": "Yes",
+  "save-image-modal.save-image-item": "Save Image",
+  "save-image-modal.save-success": "Image saved successfully"
 }

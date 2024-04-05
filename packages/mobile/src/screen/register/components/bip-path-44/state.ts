@@ -7,9 +7,20 @@ export class BIP44PathState {
   protected _changeText: string = '0';
   @observable
   protected _addressIndexText: string = '0';
+  @observable
+  protected _isLedger: boolean = false;
 
-  constructor() {
+  constructor(isLedger?: boolean) {
     makeObservable(this);
+
+    if (isLedger) {
+      this._isLedger = true;
+    }
+  }
+
+  @action
+  setIsLedger(isLedger: boolean) {
+    this._isLedger = isLedger;
   }
 
   get accountText(): string {
@@ -79,8 +90,14 @@ export class BIP44PathState {
     if (validated < 0) {
       return false;
     }
-    if (validated > 2147483647) {
-      return false;
+    if (this._isLedger) {
+      if (validated > 100) {
+        return false;
+      }
+    } else {
+      if (validated > 2147483647) {
+        return false;
+      }
     }
     return true;
   }
@@ -109,8 +126,14 @@ export class BIP44PathState {
     if (validated < 0) {
       return false;
     }
-    if (validated > 4294967295) {
-      return false;
+    if (this._isLedger) {
+      if (validated > 100) {
+        return false;
+      }
+    } else {
+      if (validated > 2147483647) {
+        return false;
+      }
     }
     return true;
   }

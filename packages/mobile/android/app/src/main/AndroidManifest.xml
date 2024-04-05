@@ -54,6 +54,7 @@
           <category android:name="android.intent.category.BROWSABLE"/>
           <data android:scheme="keplrwallet" android:host="wcV1"/>
           <data android:scheme="keplrwallet" android:host="wcV2"/>
+          <data android:scheme="keplrwallet" android:host="staking"/>
         </intent-filter>
       </activity>
       <meta-data android:name="com.bugsnag.android.API_KEY" android:value="fba0f81f121c1a15f7195bb269428911" />

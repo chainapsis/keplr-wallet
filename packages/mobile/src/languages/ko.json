@@ -2,6 +2,7 @@
   "error.not-supported-error": "지원되지 않음",
   "error.bip44-path-required": "BIP44 경로를 입력해야 합니다.",
   "error.too-short-mnemonic": "복구 문구가 너무 짧습니다.",
+  "error.wrong-mnemonic-word": "잘못된 복구 문구입니다. 다음 숫자의 단어들을 확인해보세요: {index}.",
   "error.invalid-mnemonic": "복구 문구를 다시 확인해주세요.",
   "error.failed-to-set-endpoints": "노드 주소 설정에 실패했습니다.",
   "error.transaction-failed": "트랜잭션이 실패했습니다.",
@@ -687,10 +688,13 @@
   "button.vote": "투표하기",
   "button.stake": "스테이킹",
   "button.reject": "승인 안함",
+  "button.cancel": "취소",
   "text-button.select-all": "전체 선택",
   "text-button.view-all-proposals": "모든 체인의 프로포절 보기",
   "notification.transaction-success": "트랜잭션 성공",
   "wallet-connect.information-text": "{appName} 에서 당신의 {chainIds} 케플러 계정에 연결을 요청했습니다.",
   "hooks.confirm.cancel-button": "취소",
-  "hooks.confirm.yes-button": "예"
+  "hooks.confirm.yes-button": "예",
+  "save-image-modal.save-image-item": "이미지 저장",
+  "save-image-modal.save-success": "이미지가 저장되었습니다."
 }

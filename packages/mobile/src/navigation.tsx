@@ -298,6 +298,10 @@ export type StakeNavigation = {
       validatorAddress: string,
       validatorName: string,
     ) => void;
+    fromDeepLink?: {
+      userIdentifier: string;
+      activityName: string;
+    };
   };
   'Stake.ValidateDetail': {
     chainId: string;
@@ -306,10 +310,18 @@ export type StakeNavigation = {
       validatorAddress: string,
       validatorName: string,
     ) => void;
+    fromDeepLink?: {
+      userIdentifier: string;
+      activityName: string;
+    };
   };
   'Stake.Delegate': {
     chainId: string;
     validatorAddress: string;
+    fromDeepLink?: {
+      userIdentifier: string;
+      activityName: string;
+    };
   };
   'Stake.Undelegate': {
     chainId: string;
@@ -1137,7 +1149,44 @@ export const AppNavigation: FunctionComponent = observer(() => {
             component={TxFailedResultScreen}
           />
         </Stack.Navigator>
+
+        <DeepLinkNavigationComponent />
       </BugsnagNavigationContainer>
     </FocusedScreenProvider>
   );
+});
+
+export const DeepLinkNavigationComponent: FunctionComponent = observer(() => {
+  const navigation = useNavigation<StackNavProp>();
+  const {chainStore, deepLinkStore, keyRingStore} = useStore();
+
+  (async () => {
+    if (keyRingStore.status === 'unlocked' && deepLinkStore.needToNavigation) {
+      if (!chainStore.isEnabledChain(deepLinkStore.needToNavigation.chainId)) {
+        await chainStore.enableChainInfoInUI(
+          deepLinkStore.needToNavigation.chainId,
+        );
+      }
+
+      // Wait for the navigation to be completed.
+      setTimeout(() => {
+        if (deepLinkStore.needToNavigation) {
+          navigation.navigate('Stake', {
+            screen: 'Stake.ValidateList',
+            params: {
+              chainId: deepLinkStore.needToNavigation.chainId,
+              fromDeepLink: {
+                userIdentifier: deepLinkStore.needToNavigation.userIdentifier,
+                activityName: deepLinkStore.needToNavigation.activityName,
+              },
+            },
+          });
+        }
+
+        deepLinkStore.clearNeedToNavigation();
+      }, 0);
+    }
+  })();
+
+  return <></>;
 });
