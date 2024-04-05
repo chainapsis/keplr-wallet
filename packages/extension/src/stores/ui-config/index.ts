@@ -121,13 +121,13 @@ export class UIConfigStore {
   }
 
   protected async init() {
+    const lastVersion = await this.kvStore.get<string>("lastVersion");
     {
       this._currentVersion = manifest.version;
 
       const installedVersion = await this.kvStore.get<string>(
         "installedVersion"
       );
-      const lastVersion = await this.kvStore.get<string>("lastVersion");
       if (!installedVersion) {
         if (lastVersion) {
           // installedVersion은 처음부터 존재했던게 아니라 중간에 추가되었기 때문에 정확하게 알 수 없다.
@@ -174,7 +174,10 @@ export class UIConfigStore {
       this.copyAddressConfig.init(),
       this.addressBookConfig.init(),
       this.ibcSwapConfig.init(),
-      this.changelogConfig.init("0.12.75", this._currentVersion),
+      this.changelogConfig.init(
+        lastVersion || this._currentVersion,
+        this._currentVersion
+      ),
       this.newChainSuggestionConfig.init(
         this._installedVersion,
         this._currentVersion
