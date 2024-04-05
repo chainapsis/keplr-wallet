@@ -15,6 +15,8 @@ import {
   IBCTransferView,
   BuyCryptoModal,
   StakeWithKeplrDashboardButton,
+  UpdateNoteModal,
+  UpdateNotePageData,
 } from "./components";
 import { Stack } from "../../components/stack";
 import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
@@ -298,6 +300,13 @@ export const MainPage: FunctionComponent<{
   const animatedPrivacyModeHover = useSpringValue(0, {
     config: defaultSpringConfig,
   });
+
+  const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
+  useEffect(() => {
+    if (uiConfigStore.changelogConfig.showingInfo.length > 0) {
+      setIsChangelogModalOpen(true);
+    }
+  }, [uiConfigStore.changelogConfig.showingInfo.length]);
 
   return (
     <MainHeaderLayout isNotReady={isNotReady}>
@@ -598,6 +607,45 @@ export const MainPage: FunctionComponent<{
         <BuyCryptoModal
           close={() => setIsOpenBuy(false)}
           buySupportServiceInfos={buySupportServiceInfos}
+        />
+      </Modal>
+
+      <Modal
+        isOpen={isChangelogModalOpen}
+        close={() => {
+          // 꼭 모달 안에서 close 버튼을 눌러야만 닫을 수 있다.
+          // setIsChangelogModalOpen(false);
+        }}
+        onCloseTransitionEnd={() => {
+          uiConfigStore.changelogConfig.clearLastInfo();
+        }}
+        align="center"
+      >
+        <UpdateNoteModal
+          close={() => {
+            setIsChangelogModalOpen(false);
+          }}
+          updateNotePageData={(() => {
+            const res: UpdateNotePageData[] = [];
+            for (const info of uiConfigStore.changelogConfig.showingInfo) {
+              for (const scene of info.scenes) {
+                res.push({
+                  title: scene.title,
+                  image:
+                    scene.image && scene.aspectRatio
+                      ? {
+                          default: scene.image.default,
+                          light: scene.image.light,
+                          aspectRatio: scene.aspectRatio,
+                        }
+                      : undefined,
+                  paragraph: scene.paragraph,
+                });
+              }
+            }
+
+            return res;
+          })()}
         />
       </Modal>
     </MainHeaderLayout>
