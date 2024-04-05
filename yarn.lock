@@ -8493,13 +8493,13 @@ __metadata:
     react-native-device-info: ^10.11.0
     react-native-exception-handler: ^2.10.10
     react-native-fs: ^2.20.0
-    react-native-gesture-handler: ^2.15.0
+    react-native-gesture-handler: ~2.14.0
     react-native-keyboard-aware-scroll-view: ^0.9.5
     react-native-keychain: ^8.1.2
     react-native-linear-gradient: ^2.8.3
     react-native-navigation-bar-color: ^2.0.2
     react-native-qrcode-svg: ^6.2.0
-    react-native-reanimated: ^3.7.1
+    react-native-reanimated: ~3.6.2
     react-native-safe-area-context: ^4.9.0
     react-native-screens: ^3.29.0
     react-native-svg: ^14.1.0
@@ -35791,9 +35791,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-gesture-handler@npm:^2.15.0":
-  version: 2.15.0
-  resolution: "react-native-gesture-handler@npm:2.15.0"
+"react-native-gesture-handler@npm:~2.14.0":
+  version: 2.14.1
+  resolution: "react-native-gesture-handler@npm:2.14.1"
   dependencies:
     "@egjs/hammerjs": ^2.0.17
     hoist-non-react-statics: ^3.3.0
@@ -35803,7 +35803,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 4db52e7b38b047bad677ed570a0ef4c2ddfc413bbbce5ed21f487c9d86c60588ee6b2c9f74bb842e5654284b0d1e6a8af81f68000e737d8a7f1e030b6d3fe6b6
+  checksum: a037e8c5a88a9fc79c283f3064d7653ec8615cb05fc62622eaccb5f3db489ede9c3a0685b7aad210c7efabfd8f5aa34e4f19204318dfda64c8829266d78e0cae
   languageName: node
   linkType: hard
 
@@ -35866,9 +35866,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:^3.7.1":
-  version: 3.7.1
-  resolution: "react-native-reanimated@npm:3.7.1"
+"react-native-reanimated@npm:~3.6.2":
+  version: 3.6.3
+  resolution: "react-native-reanimated@npm:3.6.3"
   dependencies:
     "@babel/plugin-transform-object-assign": ^7.16.7
     "@babel/preset-typescript": ^7.16.7
@@ -35883,7 +35883,7 @@ __metadata:
     "@babel/plugin-transform-template-literals": ^7.0.0-0
     react: "*"
     react-native: "*"
-  checksum: 5adc6d07ac519992f19dae8d627ddf65fe7d2d80393e53aac06946f7cee3819440c30469ea668bac81af0ac557143fe1c06911d36899fc50e947f05a15950f37
+  checksum: 5094beff09bbeaa13101aca9dfb7be7749ccdea72f240751a2a3f23a354cfc6fdf701549fa6c5dff32d03dc1ed4e404a29db3729519c7098d94ae6c8821a32bd
   languageName: node
   linkType: hard
 
