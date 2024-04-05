@@ -65,14 +65,14 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     });
 
   const supportedChainInfos = useMemo(() => {
-    return chainStore.chainInfos.filter((chainInfo) => {
+    return chainStore.chainInfosInListUI.filter((chainInfo) => {
       return (
         chainInfo.features?.includes("cosmwasm") ||
         chainInfo.features?.includes("secretwasm") ||
         chainInfo.evm !== undefined
       );
     });
-  }, [chainStore.chainInfos]);
+  }, [chainStore.chainInfosInListUI]);
 
   const [chainId, setChainId] = useState<string>(() => {
     if (paramChainId) {

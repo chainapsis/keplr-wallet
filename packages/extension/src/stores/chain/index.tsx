@@ -159,8 +159,20 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @computed
   get chainInfosInUI() {
     return this.chainInfos.filter((chainInfo) => {
+      if (chainInfo.hideInUI) {
+        return false;
+      }
       const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
       return this.enabledChainIdentifiesMap.get(chainIdentifier);
+    });
+  }
+
+  // chain info들을 list로 보여줄때 hideInUI인 얘들은 빼고 보여줘야한다
+  // property 이름이 얘매해서 일단 이렇게 지었다.
+  @computed
+  get chainInfosInListUI() {
+    return this.chainInfos.filter((chainInfo) => {
+      return !chainInfo.hideInUI;
     });
   }
 

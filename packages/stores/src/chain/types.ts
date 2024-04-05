@@ -63,4 +63,5 @@ export interface IChainInfoImpl<C extends ChainInfo = ChainInfo> {
         rpc: string;
       }
     | undefined;
+  readonly hideInUI: boolean | undefined;
 }

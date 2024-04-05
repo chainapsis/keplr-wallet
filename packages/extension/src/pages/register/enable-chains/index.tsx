@@ -337,6 +337,13 @@ export const EnableChainsScene: FunctionComponent<{
           const queries = queriesStore.get(candidateAddress.chainId);
           const chainInfo = chainStore.getChain(candidateAddress.chainId);
 
+          // hideInUI인 chain은 UI 상에서 enable이 되지 않아야한다.
+          // 정말 만약의 수로 왜인지 그 체인에 유저가 자산등을 가지고 있을수도 있으니
+          // 여기서도 막아야한다
+          if (chainInfo.hideInUI) {
+            continue;
+          }
+
           // If the chain is already enabled, skip.
           if (chainStore.isEnabledChain(candidateAddress.chainId)) {
             continue;
@@ -417,7 +424,7 @@ export const EnableChainsScene: FunctionComponent<{
     // 그래서 이를 위한 변수로 따로 둔다.
     // 실제로는 chainInfos를 사용하면 된다.
     const preSortChainInfos = useMemo(() => {
-      let chainInfos = chainStore.chainInfos.slice();
+      let chainInfos = chainStore.chainInfosInListUI.slice();
 
       if (keyType === "ledger") {
         chainInfos = chainInfos.filter((chainInfo) => {
@@ -470,7 +477,12 @@ export const EnableChainsScene: FunctionComponent<{
           );
         });
       }
-    }, [chainStore.chainInfos, fallbackEthereumLedgerApp, keyType, search]);
+    }, [
+      chainStore.chainInfosInListUI,
+      fallbackEthereumLedgerApp,
+      keyType,
+      search,
+    ]);
     const chainInfos = preSortChainInfos.sort((a, b) => {
       const aHasPriority = sortPriorityChainIdentifierMap.has(
         a.chainIdentifier
