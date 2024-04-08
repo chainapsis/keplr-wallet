@@ -2482,6 +2482,42 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["cosmwasm"],
     hideInUI: true,
   },
+  {
+    chainId: "ssc-1",
+    chainName: "Saga",
+    rpc: "https://rpc-saga.keplr.app",
+    rest: "https://lcd-saga.keplr.app",
+    stakeCurrency: {
+      coinDenom: "SAGA",
+      coinMinimalDenom: "usaga",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "saga",
+      bech32PrefixAccPub: "sagapub",
+      bech32PrefixValAddr: "sagavaloper",
+      bech32PrefixValPub: "sagavaloperpub",
+      bech32PrefixConsAddr: "sagavalcons",
+      bech32PrefixConsPub: "sagavalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "SAGA",
+        coinMinimalDenom: "usaga",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "SAGA",
+        coinMinimalDenom: "usaga",
+        coinDecimals: 6,
+      },
+    ],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
