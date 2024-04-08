@@ -93,8 +93,21 @@ interface AppUpdateWrapperState {
   restartAfter?: boolean;
 }
 
-setJSExceptionHandler(error => {
-  Bugsnag.notify(error);
+setJSExceptionHandler((error: any) => {
+  if (error instanceof Error) {
+    Bugsnag.notify(error);
+  } else if (typeof error === 'string') {
+    Bugsnag.notify(new Error(error));
+  } else {
+    if (
+      error &&
+      typeof error === 'object' &&
+      error.message &&
+      typeof error.message === 'string'
+    ) {
+      Bugsnag.notify(new Error(error.message));
+    }
+  }
 });
 
 // API 구조상 꼭 class 형일 필요는 없는 것 같기도 하지만...
