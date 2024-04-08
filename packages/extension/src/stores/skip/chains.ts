@@ -1,5 +1,4 @@
 import {
-  ChainGetter,
   IChainInfoImpl,
   ObservableQuery,
   QuerySharedContext,
@@ -9,6 +8,7 @@ import { computed, makeObservable } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { computedFn } from "mobx-utils";
 import Joi from "joi";
+import { ChainStore } from "../chain";
 
 const Schema = Joi.object<ChainsResponse>({
   chains: Joi.array().items(
@@ -23,7 +23,7 @@ const Schema = Joi.object<ChainsResponse>({
 export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
   constructor(
     sharedContext: QuerySharedContext,
-    protected readonly chainGetter: ChainGetter,
+    protected readonly chainStore: ChainStore,
     protected readonly skipURL: string
   ) {
     super(sharedContext, skipURL, "/v1/info/chains");
@@ -60,14 +60,14 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
 
     return this.response.data.chains
       .filter((chain) => {
-        return this.chainGetter.hasChain(chain.chain_id);
+        return this.chainStore.hasChain(chain.chain_id);
       })
       .filter((chain) => {
-        return !this.chainGetter.getChain(chain.chain_id).hideInUI;
+        return this.chainStore.isInChainInfosInListUI(chain.chain_id);
       })
       .map((chain) => {
         return {
-          chainInfo: this.chainGetter.getChain(chain.chain_id),
+          chainInfo: this.chainStore.getChain(chain.chain_id),
           pfmEnabled: chain.pfm_enabled,
           supportsMemo: chain.supports_memo ?? false,
         };

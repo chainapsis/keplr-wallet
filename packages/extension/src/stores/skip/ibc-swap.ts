@@ -1,9 +1,4 @@
-import {
-  ChainGetter,
-  HasMapStore,
-  IChainInfoImpl,
-  IChainStore,
-} from "@keplr-wallet/stores";
+import { HasMapStore, IChainInfoImpl } from "@keplr-wallet/stores";
 import { AppCurrency, Currency } from "@keplr-wallet/types";
 import { ObservableQueryAssets } from "./assets";
 import { computed, makeObservable } from "mobx";
@@ -18,10 +13,11 @@ import { computedFn } from "mobx-utils";
 import { ObservableQueryIbcPfmTransfer } from "./ibc-pfm-transfer";
 import { ObservableQueryAssetsFromSource } from "./assets-from-source";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { ChainStore } from "../chain";
 
 export class ObservableQueryIBCSwapInner {
   constructor(
-    protected readonly chainGetter: ChainGetter,
+    protected readonly chainStore: ChainStore,
     protected readonly queryRoute: ObservableQueryRoute,
     protected readonly queryMsgsDirect: ObservableQueryMsgsDirect,
     public readonly amountInDenom: string,
@@ -42,7 +38,7 @@ export class ObservableQueryIBCSwapInner {
     affiliateFeeReceiver: string
   ): ObservableQueryMsgsDirectInner {
     const inAmount = new CoinPretty(
-      this.chainGetter
+      this.chainStore
         .getChain(this.sourceAssetChainId)
         .forceFindCurrency(this.amountInDenom),
       this.amountInAmount
@@ -63,7 +59,7 @@ export class ObservableQueryIBCSwapInner {
 
   getQueryRoute(): ObservableQueryRouteInner {
     const inAmount = new CoinPretty(
-      this.chainGetter
+      this.chainStore
         .getChain(this.sourceAssetChainId)
         .forceFindCurrency(this.amountInDenom),
       this.amountInAmount
@@ -82,7 +78,7 @@ export class ObservableQueryIBCSwapInner {
 
 export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapInner> {
   constructor(
-    protected readonly chainStore: IChainStore,
+    protected readonly chainStore: ChainStore,
     protected readonly queryAssets: ObservableQueryAssets,
     protected readonly queryAssetsFromSource: ObservableQueryAssetsFromSource,
     protected readonly queryChains: ObservableQueryChains,
@@ -151,7 +147,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         return false;
       }
     }
-    if (this.chainStore.getChain(chainId).hideInUI) {
+    if (!this.chainStore.isInChainInfosInListUI(chainId)) {
       return false;
     }
 
@@ -418,7 +414,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           ) {
             continue;
           }
-          if (this.chainStore.getChain(currency.originChainId).hideInUI) {
+          if (!this.chainStore.isInChainInfosInListUI(currency.originChainId)) {
             continue;
           }
 
@@ -549,7 +545,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       })();
 
       const res: { denom: string; chainId: string }[] =
-        this.chainStore.getChain(originOutChainId).hideInUI
+        !this.chainStore.isInChainInfosInListUI(originOutChainId)
           ? []
           : [
               {
@@ -604,7 +600,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       }
 
       return res.filter(({ chainId }) => {
-        return !this.chainStore.getChain(chainId).hideInUI;
+        return this.chainStore.isInChainInfosInListUI(chainId);
       });
     }
   );

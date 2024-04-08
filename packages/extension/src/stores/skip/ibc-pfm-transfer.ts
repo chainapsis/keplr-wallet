@@ -1,12 +1,12 @@
-import { ChainGetter } from "@keplr-wallet/stores";
 import { ObservableQueryAssetsFromSource } from "./assets-from-source";
 import { ObservableQueryChains } from "./chains";
 import { computedFn } from "mobx-utils";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { ChainStore } from "../chain";
 
 export class ObservableQueryIbcPfmTransfer {
   constructor(
-    protected readonly chainGetter: ChainGetter,
+    protected readonly chainStore: ChainStore,
     protected readonly queryChains: ObservableQueryChains,
     protected readonly queryAssetsFromSource: ObservableQueryAssetsFromSource
   ) {}
@@ -29,11 +29,11 @@ export class ObservableQueryIbcPfmTransfer {
 
       denom: string;
     }[] => {
-      if (!this.chainGetter.hasChain(chainId)) {
+      if (!this.chainStore.hasChain(chainId)) {
         return [];
       }
 
-      if (!this.chainGetter.getChain(chainId).hasFeature("ibc-transfer")) {
+      if (!this.chainStore.getChain(chainId).hasFeature("ibc-transfer")) {
         return [];
       }
 
@@ -62,7 +62,7 @@ export class ObservableQueryIbcPfmTransfer {
       }[] = [];
 
       for (const assetChainId of Object.keys(assetsFromSource)) {
-        if (this.chainGetter.hasChain(assetChainId)) {
+        if (this.chainStore.hasChain(assetChainId)) {
           const assets = assetsFromSource[assetChainId]!.assets;
           // TODO: 미래에는 assets가 두개 이상이 될수도 있다고 한다.
           //       근데 지금은 한개로만 고정되어 있다고 한다...
@@ -71,10 +71,10 @@ export class ObservableQueryIbcPfmTransfer {
             const asset = assets[0];
             if (
               asset.chainId === assetChainId &&
-              this.chainGetter.hasChain(asset.chainId) &&
-              this.chainGetter.hasChain(asset.originChainId)
+              this.chainStore.hasChain(asset.chainId) &&
+              this.chainStore.hasChain(asset.originChainId)
             ) {
-              if (this.chainGetter.getChain(asset.chainId).hideInUI) {
+              if (!this.chainStore.isInChainInfosInListUI(asset.chainId)) {
                 continue;
               }
 
@@ -85,10 +85,10 @@ export class ObservableQueryIbcPfmTransfer {
                 counterpartyChainId: string;
               }[] = [];
 
-              const currency = this.chainGetter
+              const currency = this.chainStore
                 .getChain(chainId)
                 .findCurrency(denom);
-              const destinationCurrency = this.chainGetter
+              const destinationCurrency = this.chainStore
                 .getChain(asset.chainId)
                 .findCurrency(asset.denom);
 
@@ -102,7 +102,7 @@ export class ObservableQueryIbcPfmTransfer {
                   if (
                     !currency.originChainId ||
                     !currency.originCurrency ||
-                    !this.chainGetter.hasChain(currency.originChainId)
+                    !this.chainStore.hasChain(currency.originChainId)
                   ) {
                     continue;
                   }
@@ -123,7 +123,7 @@ export class ObservableQueryIbcPfmTransfer {
                         !path.counterpartyPortId ||
                         !path.counterpartyChannelId ||
                         !path.clientChainId ||
-                        !this.chainGetter.hasChain(path.clientChainId)
+                        !this.chainStore.hasChain(path.clientChainId)
                       );
                     })
                   ) {
@@ -154,9 +154,7 @@ export class ObservableQueryIbcPfmTransfer {
                   if (
                     !destinationCurrency.originChainId ||
                     !destinationCurrency.originCurrency ||
-                    !this.chainGetter.hasChain(
-                      destinationCurrency.originChainId
-                    )
+                    !this.chainStore.hasChain(destinationCurrency.originChainId)
                   ) {
                     continue;
                   }
@@ -178,7 +176,7 @@ export class ObservableQueryIbcPfmTransfer {
                         !path.counterpartyPortId ||
                         !path.counterpartyChannelId ||
                         !path.clientChainId ||
-                        !this.chainGetter.hasChain(path.clientChainId)
+                        !this.chainStore.hasChain(path.clientChainId)
                       );
                     })
                   ) {
@@ -206,7 +204,7 @@ export class ObservableQueryIbcPfmTransfer {
                 // (If channel is only one, no need to check packet forwarding because it is direct transfer)
                 if (channels.length > 1) {
                   if (
-                    !this.chainGetter.getChain(chainId).hasFeature("ibc-go") ||
+                    !this.chainStore.getChain(chainId).hasFeature("ibc-go") ||
                     !this.queryChains.isSupportsMemo(chainId)
                   ) {
                     pfmPossibility = false;
@@ -216,7 +214,7 @@ export class ObservableQueryIbcPfmTransfer {
                     for (let i = 0; i < channels.length - 1; i++) {
                       const channel = channels[i];
                       if (
-                        !this.chainGetter
+                        !this.chainStore
                           .getChain(channel.counterpartyChainId)
                           .hasFeature("ibc-go") ||
                         !this.queryChains.isSupportsMemo(
@@ -225,7 +223,7 @@ export class ObservableQueryIbcPfmTransfer {
                         !this.queryChains.isPFMEnabled(
                           channel.counterpartyChainId
                         ) ||
-                        !this.chainGetter
+                        !this.chainStore
                           .getChain(channel.counterpartyChainId)
                           .hasFeature("ibc-pfm")
                       ) {
@@ -264,11 +262,11 @@ export class ObservableQueryIbcPfmTransfer {
         })
         .sort((a, b) => {
           // Sort by chain name.
-          return this.chainGetter
+          return this.chainStore
             .getChain(a.destinationChainId)
             .chainName.trim()
             .localeCompare(
-              this.chainGetter.getChain(b.destinationChainId).chainName.trim()
+              this.chainStore.getChain(b.destinationChainId).chainName.trim()
             );
         });
     }

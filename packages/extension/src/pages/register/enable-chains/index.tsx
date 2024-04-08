@@ -340,7 +340,7 @@ export const EnableChainsScene: FunctionComponent<{
           // hideInUI인 chain은 UI 상에서 enable이 되지 않아야한다.
           // 정말 만약의 수로 왜인지 그 체인에 유저가 자산등을 가지고 있을수도 있으니
           // 여기서도 막아야한다
-          if (chainInfo.hideInUI) {
+          if (!chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
             continue;
           }
 

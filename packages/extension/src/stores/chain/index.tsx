@@ -181,6 +181,23 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     return this.enabledChainIdentifiesMap.get(chainIdentifier) === true;
   }
 
+  @computed
+  protected get chainInfosInListUIMap(): Map<string, true> {
+    const map = new Map<string, true>();
+    for (const chainInfo of this.chainInfosInListUI) {
+      map.set(chainInfo.chainIdentifier, true);
+    }
+    return map;
+  }
+
+  isInChainInfosInListUI(chainId: string): boolean {
+    return (
+      this.chainInfosInListUIMap.get(
+        ChainIdHelper.parse(chainId).identifier
+      ) === true
+    );
+  }
+
   @flow
   *toggleChainInfoInUI(...chainIds: string[]) {
     if (!this.keyRingStore.selectedKeyInfo) {

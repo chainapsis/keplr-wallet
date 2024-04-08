@@ -1,5 +1,4 @@
 import {
-  ChainGetter,
   HasMapStore,
   ObservableQuery,
   QuerySharedContext,
@@ -9,6 +8,7 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { computed, makeObservable } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import Joi from "joi";
+import { ChainStore } from "../chain";
 
 const Schema = Joi.object<AssetsFromSourceResponse>({
   dest_assets: Joi.object()
@@ -31,7 +31,7 @@ const Schema = Joi.object<AssetsFromSourceResponse>({
 export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<AssetsFromSourceResponse> {
   constructor(
     sharedContext: QuerySharedContext,
-    protected readonly chainGetter: ChainGetter,
+    protected readonly chainStore: ChainStore,
     skipURL: string,
     public readonly chainId: string,
     public readonly denom: string
@@ -74,14 +74,14 @@ export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<Assets
     } = {};
 
     for (const key of Object.keys(this.response.data.dest_assets)) {
-      if (this.chainGetter.hasChain(key)) {
-        const chainInfo = this.chainGetter.getChain(key);
-        if (chainInfo.hideInUI) {
+      if (this.chainStore.hasChain(key)) {
+        const chainInfo = this.chainStore.getChain(key);
+        if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
           continue;
         }
 
         if (
-          this.chainGetter.getChain(key).chainIdentifier ===
+          this.chainStore.getChain(key).chainIdentifier ===
           ChainIdHelper.parse(this.chainId).identifier
         ) {
           continue;
@@ -92,8 +92,8 @@ export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<Assets
           const assets = d.assets
             .filter((asset) => {
               return (
-                this.chainGetter.hasChain(asset.chain_id) &&
-                this.chainGetter.hasChain(asset.origin_chain_id)
+                this.chainStore.hasChain(asset.chain_id) &&
+                this.chainStore.hasChain(asset.origin_chain_id)
               );
             })
             .map((asset) => {
@@ -159,14 +159,14 @@ export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<Assets
 export class ObservableQueryAssetsFromSource extends HasMapStore<ObservableQueryAssetsFromSourceInner> {
   constructor(
     protected readonly sharedContext: QuerySharedContext,
-    protected readonly chainGetter: ChainGetter,
+    protected readonly chainStore: ChainStore,
     protected readonly skipURL: string
   ) {
     super((str) => {
       const parsed = JSON.parse(str);
       return new ObservableQueryAssetsFromSourceInner(
         this.sharedContext,
-        this.chainGetter,
+        this.chainStore,
         this.skipURL,
         parsed.chainId,
         parsed.denom
