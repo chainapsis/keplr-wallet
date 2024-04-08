@@ -948,7 +948,7 @@ PODS:
     - React-Core
   - react-native-netinfo (11.2.1):
     - React-Core
-  - react-native-safe-area-context (4.9.0):
+  - react-native-safe-area-context (4.8.2):
     - React-Core
   - react-native-webview (13.8.1):
     - glog
@@ -1490,7 +1490,7 @@ SPEC CHECKSUMS:
   react-native-blur: cfdad7b3c01d725ab62a8a729f42ea463998afa2
   react-native-compat: 85c3e9833701f7a40f4aa1085ce238d1bef36db4
   react-native-netinfo: 8a7fd3f7130ef4ad2fb4276d5c9f8d3f28d2df3d
-  react-native-safe-area-context: b97eb6f9e3b7f437806c2ce5983f479f8eb5de4b
+  react-native-safe-area-context: 0ee144a6170530ccc37a0fd9388e28d06f516a89
   react-native-webview: 05fa0e766f1c408e8c293cbcb84b2c199711cfd1
   React-nativeconfig: b4d4e9901d4cabb57be63053fd2aa6086eb3c85f
   React-NativeModulesApple: ae99dc0e80c9027f54572c45635449fbdc36e4f1
