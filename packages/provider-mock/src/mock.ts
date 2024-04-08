@@ -26,6 +26,7 @@ import {
 import {
   CosmJSOfflineSigner,
   CosmJSOfflineSignerOnlyAmino,
+  InjectedKeplr,
 } from "@keplr-wallet/provider";
 import { Hash, Mnemonic, PrivKeySecp256k1 } from "@keplr-wallet/crypto";
 import Long from "long";
@@ -368,4 +369,6 @@ export class MockKeplr implements Keplr {
   suggestERC20(_chainId: string, _contractAddress: string): Promise<void> {
     throw new Error("Not yet implemented");
   }
+
+  public readonly ethereum = InjectedKeplr.ethereumProvider;
 }

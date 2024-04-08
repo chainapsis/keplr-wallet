@@ -33,6 +33,7 @@ import deepmerge from "deepmerge";
 import Long from "long";
 import { Buffer } from "buffer/";
 import { KeplrCoreTypes } from "./core-types";
+import { InjectedKeplr } from "./inject";
 
 export class Keplr implements IKeplr, KeplrCoreTypes {
   protected enigmaUtils: Map<string, SecretUtils> = new Map();
@@ -643,4 +644,6 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       }
     );
   }
+
+  public readonly ethereum = InjectedKeplr.ethereumProvider;
 }

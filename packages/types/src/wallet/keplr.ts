@@ -13,6 +13,7 @@ import { SecretUtils } from "../secretjs";
 import Long from "long";
 import { SettledResponses } from "../settled";
 import { DirectAuxSignResponse } from "../cosmjs-alt";
+import EventEmitter from "events";
 
 export interface Key {
   // Name of the selected key store.
@@ -235,4 +236,13 @@ export interface Keplr {
   sendEthereumTx(chainId: string, tx: Uint8Array): Promise<string>;
 
   suggestERC20(chainId: string, contractAddress: string): Promise<void>;
+
+  readonly ethereum: IEthereumProvider;
+}
+
+export interface IEthereumProvider extends EventEmitter {
+  request<T>(
+    method: string,
+    params?: unknown[] | Record<string, unknown>
+  ): Promise<T>;
 }

@@ -23,6 +23,7 @@ import SignClient from "@walletconnect/sign-client";
 import {
   CosmJSOfflineSigner,
   CosmJSOfflineSignerOnlyAmino,
+  InjectedKeplr,
 } from "@keplr-wallet/provider";
 import { Buffer } from "buffer/";
 import { ProposalTypes, SessionTypes } from "@walletconnect/types";
@@ -660,4 +661,6 @@ export class KeplrWalletConnectV2 implements Keplr {
   suggestERC20(_chainId: string, _contractAddress: string): Promise<void> {
     throw new Error("Not yet implemented");
   }
+
+  public readonly ethereum = InjectedKeplr.ethereumProvider;
 }

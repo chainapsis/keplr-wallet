@@ -27,6 +27,7 @@ import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
 import Long from "long";
 import { KeplrCoreTypes } from "./core-types";
+import EventEmitter from "events";
 
 export interface ProxyRequest {
   type: "proxy-request";
@@ -39,6 +40,12 @@ export interface ProxyRequestResponse {
   type: "proxy-request-response";
   id: string;
   result: Result | undefined;
+}
+
+class EthereumProvider extends EventEmitter {
+  request<T>(): Promise<T> {
+    throw new Error("Method not implemented.");
+  }
 }
 
 function defineUnwritablePropertyIfPossible(o: any, p: string, value: any) {
@@ -90,6 +97,7 @@ export function injectKeplrToWindow(keplr: IKeplr): void {
  * This will use `window.postMessage` to interact with the content script.
  */
 export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
+  static ethereumProvider = new EthereumProvider();
   static startProxy(
     keplr: IKeplr & KeplrCoreTypes,
     eventListener: {
@@ -231,6 +239,10 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
                 signature: result.signature,
               };
             })();
+          }
+
+          if (method === "ethereum") {
+            return keplr.ethereum;
           }
 
           return await keplr[method](
@@ -765,4 +777,6 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
   async suggestERC20(chainId: string, contractAddress: string): Promise<void> {
     return await this.requestMethod("suggestERC20", [chainId, contractAddress]);
   }
+
+  public readonly ethereum: EthereumProvider = InjectedKeplr.ethereumProvider;
 }
