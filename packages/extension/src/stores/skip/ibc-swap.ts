@@ -1,9 +1,4 @@
-import {
-  ChainGetter,
-  HasMapStore,
-  IChainInfoImpl,
-  IChainStore,
-} from "@keplr-wallet/stores";
+import { HasMapStore, IChainInfoImpl } from "@keplr-wallet/stores";
 import { AppCurrency, Currency } from "@keplr-wallet/types";
 import { ObservableQueryAssets } from "./assets";
 import { computed, makeObservable } from "mobx";
@@ -18,10 +13,11 @@ import { computedFn } from "mobx-utils";
 import { ObservableQueryIbcPfmTransfer } from "./ibc-pfm-transfer";
 import { ObservableQueryAssetsFromSource } from "./assets-from-source";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { ChainStore } from "../chain";
 
 export class ObservableQueryIBCSwapInner {
   constructor(
-    protected readonly chainGetter: ChainGetter,
+    protected readonly chainStore: ChainStore,
     protected readonly queryRoute: ObservableQueryRoute,
     protected readonly queryMsgsDirect: ObservableQueryMsgsDirect,
     public readonly amountInDenom: string,
@@ -42,7 +38,7 @@ export class ObservableQueryIBCSwapInner {
     affiliateFeeReceiver: string
   ): ObservableQueryMsgsDirectInner {
     const inAmount = new CoinPretty(
-      this.chainGetter
+      this.chainStore
         .getChain(this.sourceAssetChainId)
         .forceFindCurrency(this.amountInDenom),
       this.amountInAmount
@@ -63,7 +59,7 @@ export class ObservableQueryIBCSwapInner {
 
   getQueryRoute(): ObservableQueryRouteInner {
     const inAmount = new CoinPretty(
-      this.chainGetter
+      this.chainStore
         .getChain(this.sourceAssetChainId)
         .forceFindCurrency(this.amountInDenom),
       this.amountInAmount
@@ -82,7 +78,7 @@ export class ObservableQueryIBCSwapInner {
 
 export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapInner> {
   constructor(
-    protected readonly chainStore: IChainStore,
+    protected readonly chainStore: ChainStore,
     protected readonly queryAssets: ObservableQueryAssets,
     protected readonly queryAssetsFromSource: ObservableQueryAssetsFromSource,
     protected readonly queryChains: ObservableQueryChains,
@@ -150,6 +146,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       ) {
         return false;
       }
+    }
+    if (!this.chainStore.isInChainInfosInListUI(chainId)) {
+      return false;
     }
 
     if ("paths" in currency) {
@@ -415,6 +414,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           ) {
             continue;
           }
+          if (!this.chainStore.isInChainInfosInListUI(currency.originChainId)) {
+            continue;
+          }
 
           // 현재 CW20같은 얘들은 처리할 수 없다.
           if (!("type" in currency.originCurrency)) {
@@ -542,13 +544,16 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         return currency;
       })();
 
-      const res: { denom: string; chainId: string }[] = [
-        {
-          // 기본적으로 origin에 대한 정보를 넣어준다.
-          chainId: originOutChainId,
-          denom: originOutCurrency.coinMinimalDenom,
-        },
-      ];
+      const res: { denom: string; chainId: string }[] =
+        !this.chainStore.isInChainInfosInListUI(originOutChainId)
+          ? []
+          : [
+              {
+                // 기본적으로 origin에 대한 정보를 넣어준다.
+                chainId: originOutChainId,
+                denom: originOutCurrency.coinMinimalDenom,
+              },
+            ];
 
       const channels = this.queryIBCPacketForwardingTransfer.getIBCChannels(
         originOutChainId,
@@ -594,7 +599,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         }
       }
 
-      return res;
+      return res.filter(({ chainId }) => {
+        return this.chainStore.isInChainInfosInListUI(chainId);
+      });
     }
   );
 }

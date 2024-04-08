@@ -93,7 +93,7 @@ export const AvailableTabView: FunctionComponent<{
       : _allBalancesSearchFiltered;
 
   const lookingForChains = (() => {
-    return chainStore.chainInfos.filter((chainInfo) => {
+    return chainStore.chainInfosInListUI.filter((chainInfo) => {
       if (chainStore.isEnabledChain(chainInfo.chainId)) {
         return false;
       }
