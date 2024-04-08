@@ -132,7 +132,9 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
         codepushInitNewVersionExists: false,
       });
 
-      codePush.notifyAppReady();
+      codePush.notifyAppReady().catch(err => {
+        console.log(err);
+      });
     };
 
     // 1초 안에 결과를 받지 못하면 그냥 업데이트 없는걸로 친다...
@@ -171,49 +173,53 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
             },
           });
 
-          codePush.sync(
-            {
-              installMode: codePush.InstallMode.ON_NEXT_RESTART,
-            },
-            status => {
-              if (status === codePush.SyncStatus.UPDATE_INSTALLED) {
-                this.setState({
-                  ...this.state,
-                  codepush: {
-                    ...this.state.codepush,
-                    newVersionDownloadProgress: 1,
-                  },
-                });
+          codePush
+            .sync(
+              {
+                installMode: codePush.InstallMode.ON_NEXT_RESTART,
+              },
+              status => {
+                if (status === codePush.SyncStatus.UPDATE_INSTALLED) {
+                  this.setState({
+                    ...this.state,
+                    codepush: {
+                      ...this.state.codepush,
+                      newVersionDownloadProgress: 1,
+                    },
+                  });
 
-                this.restartApp();
-              }
-            },
-            ({receivedBytes, totalBytes}) => {
-              const beforeNewVersionDownloadProgress =
-                this.state.codepush.newVersionDownloadProgress || 0;
-              const _newVersionDownloadProgress = Math.min(
-                receivedBytes / totalBytes,
-                // 1은 sync status handler가 처리함.
-                0.99,
-              );
+                  this.restartApp();
+                }
+              },
+              ({receivedBytes, totalBytes}) => {
+                const beforeNewVersionDownloadProgress =
+                  this.state.codepush.newVersionDownloadProgress || 0;
+                const _newVersionDownloadProgress = Math.min(
+                  receivedBytes / totalBytes,
+                  // 1은 sync status handler가 처리함.
+                  0.99,
+                );
 
-              // XXX 여기서 매번 업데이트 시키면 context api에 의해서
-              // 매번 렌더링이 일어나서 성능이 떨어질 수 있음.
-              // 이 문제를 완화하기 위해서 0.1 단위로만 업데이트를 시킴.
-              if (
-                Math.floor(beforeNewVersionDownloadProgress * 10) !==
-                Math.floor(_newVersionDownloadProgress * 10)
-              ) {
-                this.setState({
-                  ...this.state,
-                  codepush: {
-                    ...this.state.codepush,
-                    newVersionDownloadProgress: _newVersionDownloadProgress,
-                  },
-                });
-              }
-            },
-          );
+                // XXX 여기서 매번 업데이트 시키면 context api에 의해서
+                // 매번 렌더링이 일어나서 성능이 떨어질 수 있음.
+                // 이 문제를 완화하기 위해서 0.1 단위로만 업데이트를 시킴.
+                if (
+                  Math.floor(beforeNewVersionDownloadProgress * 10) !==
+                  Math.floor(_newVersionDownloadProgress * 10)
+                ) {
+                  this.setState({
+                    ...this.state,
+                    codepush: {
+                      ...this.state.codepush,
+                      newVersionDownloadProgress: _newVersionDownloadProgress,
+                    },
+                  });
+                }
+              },
+            )
+            .catch(err => {
+              console.log(err);
+            });
         } else {
           updateNotExists();
         }
@@ -258,27 +264,31 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
               },
             });
 
-            codePush.sync(
-              {
-                installMode: codePush.InstallMode.ON_NEXT_RESTART,
-              },
-              status => {
-                if (status === codePush.SyncStatus.UPDATE_INSTALLED) {
-                  this.setState({
-                    ...this.state,
-                    codepush: {
-                      ...this.state.codepush,
-                      newVersionDownloadProgress: 1,
-                    },
-                  });
-                }
-              },
-              () => {
-                // noop
-                // XXX: 이 경우 아직 UI에서 progress를 보여주지 않는다...
-                //      그러므로 굳이 context를 업데이트해서 re-rendering을 일으키지 않도록 한다.
-              },
-            );
+            codePush
+              .sync(
+                {
+                  installMode: codePush.InstallMode.ON_NEXT_RESTART,
+                },
+                status => {
+                  if (status === codePush.SyncStatus.UPDATE_INSTALLED) {
+                    this.setState({
+                      ...this.state,
+                      codepush: {
+                        ...this.state.codepush,
+                        newVersionDownloadProgress: 1,
+                      },
+                    });
+                  }
+                },
+                () => {
+                  // noop
+                  // XXX: 이 경우 아직 UI에서 progress를 보여주지 않는다...
+                  //      그러므로 굳이 context를 업데이트해서 re-rendering을 일으키지 않도록 한다.
+                },
+              )
+              .catch(err => {
+                console.log(err);
+              });
           }
         })
         .catch(err => {
