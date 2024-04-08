@@ -2443,6 +2443,81 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["cosmwasm"],
   },
+  {
+    rpc: "https://tncnt-eu-wormchain-main-01.rpc.p2p.world",
+    rest: "https://tncnt-eu-wormchain-main-01.rpc.p2p.world/lcd",
+    chainId: "wormchain",
+    chainName: "Wormhole",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "wormhole",
+      bech32PrefixAccPub: "wormholepub",
+      bech32PrefixValAddr: "wormholevaloper",
+      bech32PrefixValPub: "wormholevaloperpub",
+      bech32PrefixConsAddr: "wormholevalcons",
+      bech32PrefixConsPub: "wormholevalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "WETH",
+        coinMinimalDenom:
+          "factory/wormhole14ejqjyq8um4p3xfqj74yld5waqljf88fz25yxnma0cngspxe3les00fpjx/5BWqpR48Lubd55szM5i62zK7TFkddckhbT48yy6mNbDp",
+        coinDecimals: 8,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+    ],
+    features: ["cosmwasm"],
+    hideInUI: true,
+  },
+  {
+    chainId: "ssc-1",
+    chainName: "Saga",
+    rpc: "https://rpc-saga.keplr.app",
+    rest: "https://lcd-saga.keplr.app",
+    stakeCurrency: {
+      coinDenom: "SAGA",
+      coinMinimalDenom: "usaga",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "saga",
+      bech32PrefixAccPub: "sagapub",
+      bech32PrefixValAddr: "sagavaloper",
+      bech32PrefixValPub: "sagavaloperpub",
+      bech32PrefixConsAddr: "sagavalcons",
+      bech32PrefixConsPub: "sagavalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "SAGA",
+        coinMinimalDenom: "usaga",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "SAGA",
+        coinMinimalDenom: "usaga",
+        coinDecimals: 6,
+      },
+    ],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.

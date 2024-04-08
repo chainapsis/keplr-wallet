@@ -386,6 +386,10 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
   }
 
   async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
+    if (chainInfo.hideInUI) {
+      throw new Error("hideInUI is not allowed");
+    }
+
     if (
       chainInfo.features?.includes("stargate") ||
       chainInfo.features?.includes("no-legacy-stdTx")

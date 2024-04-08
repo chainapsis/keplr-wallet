@@ -1,4 +1,4 @@
-import { IChainStore, QuerySharedContext } from "@keplr-wallet/stores";
+import { QuerySharedContext } from "@keplr-wallet/stores";
 import { DeepReadonly } from "utility-types";
 import { ObservableQueryAssetsFromSource } from "./assets-from-source";
 import { ObservableQueryRoute } from "./route";
@@ -8,6 +8,7 @@ import { ObservableQueryAssets } from "./assets";
 import { ObservableQueryIbcSwap } from "./ibc-swap";
 import { ObservableQueryMsgsDirect } from "./msgs-direct";
 import { SwapVenue } from "../../config.ui";
+import { ChainStore } from "../chain";
 
 export class SkipQueries {
   public readonly queryChains: DeepReadonly<ObservableQueryChains>;
@@ -20,41 +21,41 @@ export class SkipQueries {
   public readonly queryIBCPacketForwardingTransfer: DeepReadonly<ObservableQueryIbcPfmTransfer>;
   public readonly queryIBCSwap: DeepReadonly<ObservableQueryIbcSwap>;
 
-  constructor(sharedContext: QuerySharedContext, chainGetter: IChainStore) {
+  constructor(sharedContext: QuerySharedContext, chainStore: ChainStore) {
     this.queryChains = new ObservableQueryChains(
       sharedContext,
-      chainGetter,
+      chainStore,
       "https://api.skip.money"
     );
     this.queryAssets = new ObservableQueryAssets(
       sharedContext,
-      chainGetter,
+      chainStore,
       "https://api.skip.money"
     );
     this.queryAssetsFromSource = new ObservableQueryAssetsFromSource(
       sharedContext,
-      chainGetter,
+      chainStore,
       "https://api.skip.money"
     );
     this.queryRoute = new ObservableQueryRoute(
       sharedContext,
-      chainGetter,
+      chainStore,
       "https://api.skip.money"
     );
 
     this.queryMsgsDirect = new ObservableQueryMsgsDirect(
       sharedContext,
-      chainGetter,
+      chainStore,
       "https://api.skip.money"
     );
 
     this.queryIBCPacketForwardingTransfer = new ObservableQueryIbcPfmTransfer(
-      chainGetter,
+      chainStore,
       this.queryChains,
       this.queryAssetsFromSource
     );
     this.queryIBCSwap = new ObservableQueryIbcSwap(
-      chainGetter,
+      chainStore,
       this.queryAssets,
       this.queryAssetsFromSource,
       this.queryChains,
