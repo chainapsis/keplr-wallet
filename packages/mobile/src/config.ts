@@ -2496,6 +2496,47 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ['cosmwasm'],
     walletUrlForStaking: 'https://wallet.keplr.app/chains/chihuahua',
   },
+  {
+    chainId: 'ssc-1',
+    chainName: 'Saga',
+    rpc: 'https://rpc-saga.keplr.app',
+    rest: 'https://lcd-saga.keplr.app',
+    stakeCurrency: {
+      coinDenom: 'SAGA',
+      coinMinimalDenom: 'usaga',
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: 'saga',
+      bech32PrefixAccPub: 'sagapub',
+      bech32PrefixValAddr: 'sagavaloper',
+      bech32PrefixValPub: 'sagavaloperpub',
+      bech32PrefixConsAddr: 'sagavalcons',
+      bech32PrefixConsPub: 'sagavalconspub',
+    },
+    currencies: [
+      {
+        coinDenom: 'SAGA',
+        coinMinimalDenom: 'usaga',
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: 'SAGA',
+        coinMinimalDenom: 'usaga',
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.025,
+          high: 0.04,
+        },
+      },
+    ],
+  },
 ];
 
 // TODO: 원격으로 변경할 수 있도록 나중에 네트워크에서 이 정보를 가져오는 방식으로 변경될 수 있음
