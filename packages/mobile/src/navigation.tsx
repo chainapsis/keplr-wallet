@@ -227,7 +227,13 @@ export type RootStackParamList = {
     password?: string;
   };
   Send: undefined;
-  'Send.SelectAsset': undefined;
+  'Send.SelectAsset': {
+    isIBCSwap?: boolean;
+    chainId?: string;
+    coinMinimalDenom?: string;
+    outChainId?: string;
+    outCoinMinimalDenom?: string;
+  };
   'Setting.Intro': undefined;
 
   'Setting.General': undefined;
@@ -291,9 +297,36 @@ export type RootStackParamList = {
     txHash: string;
   };
   Swap: {
-    test?: string;
+    chainId?: string;
+    coinMinimalDenom?: string;
+    outChainId?: string;
+    outCoinMinimalDenom?: string;
+    initialAmountFraction?: string;
+    initialAmount?: string;
+    initialRecipient?: string;
+    initialMemo?: string;
+    initialFeeCurrency?: string;
+    initialFeeType?: string;
+    initialGasAmount?: string;
+    initialGasAdjustment?: string;
+    tempSwitchAmount?: string;
   };
-  'Swap.SelectAsset': undefined;
+  'Swap.SelectAsset': {
+    excludeKey: string;
+    chainId?: string;
+    coinMinimalDenom?: string;
+    outChainId?: string;
+    outCoinMinimalDenom?: string;
+    initialAmountFraction?: string;
+    initialAmount?: string;
+    initialRecipient?: string;
+    initialMemo?: string;
+    initialFeeCurrency?: string;
+    initialFeeType?: string;
+    initialGasAmount?: string;
+    initialGasAdjustment?: string;
+    tempSwitchAmount?: string;
+  };
 };
 
 export type StakeNavigation = {
@@ -1161,7 +1194,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
             name="Swap.SelectAsset"
             options={{
               title: intl.formatMessage({
-                id: 'page.setting.general.contacts-title',
+                id: 'page.send.select-asset.title',
               }),
               ...defaultHeaderOptions,
             }}

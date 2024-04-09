@@ -19,6 +19,7 @@ import {ChainStore} from '../chain';
 import {AddressBookConfig} from './address-book';
 import {MessageRequester} from '@keplr-wallet/router';
 import {AutoLockConfig} from './auto-lock';
+import {IBCSwapConfig} from './ibc-swap.ts';
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
@@ -40,6 +41,7 @@ export class UIConfigStore {
   public readonly copyAddressConfig: CopyAddressConfig;
   public readonly addressBookConfig: AddressBookConfig;
   public readonly autoLockConfig: AutoLockConfig;
+  public readonly ibcSwapConfig: IBCSwapConfig;
 
   @observable
   protected _isInitialized: boolean = false;
@@ -100,6 +102,7 @@ export class UIConfigStore {
       chainStore,
       keyRingStore,
     );
+    this.ibcSwapConfig = new IBCSwapConfig(kvStores.kvStore, chainStore);
 
     this._icnsInfo = _icnsInfo;
 
@@ -159,6 +162,7 @@ export class UIConfigStore {
       this.copyAddressConfig.init(),
       this.addressBookConfig.init(),
       this.autoLockConfig.init(),
+      this.ibcSwapConfig.init(),
     ]);
 
     runInAction(() => {
@@ -268,5 +272,9 @@ export class UIConfigStore {
 
   get icnsInfo() {
     return this._icnsInfo;
+  }
+
+  async removeStatesWhenErrorOccurredDuringRending() {
+    await this.ibcSwapConfig.removeStatesWhenErrorOccurredDuringRendering();
   }
 }

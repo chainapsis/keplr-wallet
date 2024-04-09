@@ -19,7 +19,7 @@ export const ErrorBoundary: FunctionComponent<PropsWithChildren> = () => {
 };
 
 export const ErrorBoundaryView: FunctionComponent = observer(() => {
-  const {chainStore} = useStore();
+  const {chainStore, uiConfigStore} = useStore();
   const style = useStyle();
   const intl = useIntl();
 
@@ -47,6 +47,8 @@ export const ErrorBoundaryView: FunctionComponent = observer(() => {
         return false;
       });
       await browser.storage.local.remove(storeQueriesKeys);
+
+      await uiConfigStore.removeStatesWhenErrorOccurredDuringRending();
     };
 
     const clearAllIBCHistory = async () => {
