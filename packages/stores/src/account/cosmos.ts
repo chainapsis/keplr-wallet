@@ -57,6 +57,8 @@ import { ExtensionOptionsWeb3Tx } from "@keplr-wallet/proto-types/ethermint/type
 import { MsgRevoke } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import Long from "long";
+import { IAccountStore } from "./store";
+import { autorun } from "mobx";
 
 export interface CosmosAccount {
   cosmos: CosmosAccountImpl;
@@ -938,6 +940,7 @@ export class CosmosAccountImpl {
   }
 
   makePacketForwardIBCTransferTx(
+    accountStore: IAccountStore,
     channels: {
       portId: string;
       channelId: string;
@@ -961,34 +964,7 @@ export class CosmosAccountImpl {
       destinationChainInfo.bech32Config.bech32PrefixAccAddr
     );
 
-    const memo: any = {};
-    let lastForward: any = undefined;
-    if (channels.length > 1) {
-      for (const channel of channels.slice(1)) {
-        const destChainInfo = this.chainGetter.getChain(
-          channel.counterpartyChainId
-        );
-
-        const forward = {
-          receiver: Bech32Address.fromBech32(recipient).toBech32(
-            destChainInfo.bech32Config.bech32PrefixAccAddr
-          ),
-          port: channel.portId,
-          channel: channel.channelId,
-          // TODO: Support timeout
-        };
-
-        if (!lastForward) {
-          memo["forward"] = forward;
-        } else {
-          lastForward["forward"] = forward;
-        }
-
-        lastForward = forward;
-      }
-    }
-
-    return this.makeIBCTransferTx(
+    return this.makeIBCTransferTxWithAsyncMemoConstructor(
       channels[0],
       amount,
       currency,
@@ -996,7 +972,59 @@ export class CosmosAccountImpl {
         this.chainGetter.getChain(channels[0].counterpartyChainId).bech32Config
           .bech32PrefixAccAddr
       ),
-      Object.keys(memo).length > 0 ? JSON.stringify(memo) : undefined
+      async () => {
+        const memo: any = {};
+        let lastForward: any = undefined;
+        if (channels.length > 1) {
+          for (const channel of channels.slice(1)) {
+            const destChainInfo = this.chainGetter.getChain(
+              channel.counterpartyChainId
+            );
+
+            const account = accountStore.getAccount(destChainInfo.chainId);
+            account.init();
+            if (account.walletStatus === WalletStatus.Loading) {
+              await (() => {
+                return new Promise<void>((resolve) => {
+                  if (account.walletStatus === WalletStatus.Loaded) {
+                    resolve();
+                    return;
+                  }
+                  autorun(() => {
+                    if (account.walletStatus === WalletStatus.Loaded) {
+                      resolve();
+                    }
+                  });
+                });
+              })();
+            }
+            if (account.walletStatus !== WalletStatus.Loaded) {
+              throw new Error(
+                `The account of ${destChainInfo.chainId} is not loaded: ${account.walletStatus}`
+              );
+            }
+
+            const forward = {
+              receiver: account.bech32Address,
+              port: channel.portId,
+              channel: channel.channelId,
+              // TODO: Support timeout
+            };
+
+            if (!lastForward) {
+              memo["forward"] = forward;
+            } else {
+              lastForward["next"] = {
+                forward: forward,
+              };
+            }
+
+            lastForward = forward;
+          }
+        }
+
+        return Object.keys(memo).length > 0 ? JSON.stringify(memo) : undefined;
+      }
     );
   }
 
@@ -1010,6 +1038,26 @@ export class CosmosAccountImpl {
     currency: AppCurrency,
     recipient: string,
     memo?: string
+  ) {
+    return this.makeIBCTransferTxWithAsyncMemoConstructor(
+      channel,
+      amount,
+      currency,
+      recipient,
+      async () => memo
+    );
+  }
+
+  makeIBCTransferTxWithAsyncMemoConstructor(
+    channel: {
+      portId: string;
+      channelId: string;
+      counterpartyChainId: string;
+    },
+    amount: string,
+    currency: AppCurrency,
+    recipient: string,
+    memoConstructor: () => Promise<string | undefined>
   ) {
     if (new DenomHelper(currency.coinMinimalDenom).type !== "native") {
       throw new Error("Only native token can be sent via IBC");
@@ -1061,6 +1109,8 @@ export class CosmosAccountImpl {
 
         const eip712Signing = useEthereumSign && this.base.isNanoLedger;
         const chainIsInjective = this.chainId.startsWith("injective");
+
+        let memo = await memoConstructor();
 
         if (eip712Signing && chainIsInjective) {
           // I don't know why, but memo is required when injective and eip712
