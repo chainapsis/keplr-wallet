@@ -11,9 +11,10 @@ import {
   ExtensionGuards,
   ExtensionEnv,
   ContentScriptMessageRequester,
+  InExtensionMessageRequester,
 } from "@keplr-wallet/router-extension";
 import { ExtensionKVStore } from "@keplr-wallet/common";
-import { init } from "@keplr-wallet/background";
+import { init, LogAnalyticsEventMsg } from "@keplr-wallet/background";
 import scrypt from "scrypt-js";
 import { Buffer } from "buffer/";
 import { Bech32Address } from "@keplr-wallet/cosmos";
@@ -348,6 +349,19 @@ router.listen(BACKGROUND_PORT, initFn).then(() => {
           url: "/register.html#",
         });
       }
+    }
+  });
+
+  kvStore.get("installed_analytics").then((v) => {
+    if (!v) {
+      kvStore.set("installed_analytics", true);
+
+      const msg = new LogAnalyticsEventMsg("installed", {
+        version: browser.runtime.getManifest().version,
+      });
+
+      const requester = new InExtensionMessageRequester();
+      requester.sendMessage(BACKGROUND_PORT, msg);
     }
   });
 });
