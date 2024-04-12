@@ -86,7 +86,7 @@ export const useAutoFeeCurrencySelectionOnInit = (
     // Try until 500ms to avoid the confusion to user.
     const timeoutId = setTimeout(() => {
       skip = true;
-    }, 500);
+    }, 2000);
 
     const disposer = autorun(() => {
       if (
