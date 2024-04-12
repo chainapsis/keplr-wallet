@@ -4,8 +4,6 @@
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTLinkingManager.h>
 
-#import <CodePush/CodePush.h>
-
 #import <AppCenterReactNative.h>
 #import <AppCenterReactNativeAnalytics.h>
 
@@ -30,7 +28,7 @@
 #if DEBUG
   return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
 #else
-  return [CodePush bundleURL];
+  return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif
 }
 
