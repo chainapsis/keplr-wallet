@@ -23,6 +23,10 @@
   "error.outdated-cosmos-sdk": "Not supported: outdated version of cosmos-sdk",
   "error.can-not-find-fee-for-claim-all": "Can't find fee currency to pay",
 
+  "bottom-tabs.home": "Home",
+  "bottom-tabs.swap": "Swap",
+  "bottom-tabs.settings": "Settings",
+
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
   "pages.register.components.help-desk-button.title": "Help Desk",

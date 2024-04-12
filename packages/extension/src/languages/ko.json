@@ -23,6 +23,10 @@
   "error.outdated-cosmos-sdk": "cosmos-sdk 버전이 오래돼서 지원되지 않습니다.",
   "error.can-not-find-fee-for-claim-all": "수수료로 지불할 통화를 찾을 수 없습니다.",
 
+  "bottom-tabs.home": "홈",
+  "bottom-tabs.swap": "스왑",
+  "bottom-tabs.settings": "설정",
+
   "pages.register.components.header.intro-title": "내 손 안의 인터체인",
   "pages.register.components.header.header-step.title": "단계",
   "pages.register.components.help-desk-button.title": "도움말 및 지원",

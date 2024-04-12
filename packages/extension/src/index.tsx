@@ -86,6 +86,7 @@ import {
 } from "./bottom-tabs";
 import { IBCSwapDestinationSelectAssetPage } from "./pages/ibc-swap/select-asset";
 import { RoutePageAnalytics } from "./route-page-analytics";
+import { useIntl } from "react-intl";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -278,6 +279,8 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
 
   const [mainPageIsNotReady, setMainPageIsNotReady] = useState(false);
 
+  const intl = useIntl();
+
   return (
     <HashRouter>
       <BottomTabsRouteProvider
@@ -287,14 +290,23 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
           {
             pathname: "/",
             icon: <BottomTabHomeIcon width="1.75rem" height="1.75rem" />,
+            text: intl.formatMessage({
+              id: "bottom-tabs.home",
+            }),
           },
           {
             pathname: "/ibc-swap",
             icon: <BottomTabSwapIcon width="1.75rem" height="1.75rem" />,
+            text: intl.formatMessage({
+              id: "bottom-tabs.swap",
+            }),
           },
           {
             pathname: "/setting",
             icon: <BottomTabSettingIcon width="1.75rem" height="1.75rem" />,
+            text: intl.formatMessage({
+              id: "bottom-tabs.settings",
+            }),
           },
         ]}
       >
