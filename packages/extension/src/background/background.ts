@@ -11,10 +11,9 @@ import {
   ExtensionGuards,
   ExtensionEnv,
   ContentScriptMessageRequester,
-  InExtensionMessageRequester,
 } from "@keplr-wallet/router-extension";
 import { ExtensionKVStore } from "@keplr-wallet/common";
-import { init, LogAnalyticsEventMsg } from "@keplr-wallet/background";
+import { init } from "@keplr-wallet/background";
 import scrypt from "scrypt-js";
 import { Buffer } from "buffer/";
 import { Bech32Address } from "@keplr-wallet/cosmos";
@@ -29,7 +28,7 @@ const router = new ExtensionRouter(ExtensionEnv.produceEnv);
 router.addGuard(ExtensionGuards.checkOriginIsValid);
 router.addGuard(ExtensionGuards.checkMessageIsInternal);
 
-const { initFn, keyRingService } = init(
+const { initFn, keyRingService, analyticsService } = init(
   router,
   (prefix: string) => new ExtensionKVStore(prefix),
   new ContentScriptMessageRequester(),
@@ -356,12 +355,9 @@ router.listen(BACKGROUND_PORT, initFn).then(() => {
     if (!v) {
       kvStore.set("installed_analytics", true);
 
-      const msg = new LogAnalyticsEventMsg("installed", {
+      analyticsService.logEvent("installed", {
         version: browser.runtime.getManifest().version,
       });
-
-      const requester = new InExtensionMessageRequester();
-      requester.sendMessage(BACKGROUND_PORT, msg);
     }
   });
 });
