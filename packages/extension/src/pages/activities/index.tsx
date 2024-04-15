@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { Box } from "../../components/box";
 import { MainHeaderLayout } from "../main/layouts/header";
 import { observer } from "mobx-react-lite";
@@ -13,13 +13,31 @@ import { MsgItemSkeleton } from "../main/token-detail/msg-items/skeleton";
 import { useTheme } from "styled-components";
 import { Gutter } from "../../components/gutter";
 import { Dropdown } from "../../components/dropdown";
+import { EmptyView } from "../../components/empty-view";
+import { Subtitle3 } from "../../components/typography";
 
 export const ActivitiesPage: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, priceStore } = useStore();
+  const { chainStore, accountStore, priceStore, queriesStore } = useStore();
 
   const account = accountStore.getAccount("cosmoshub");
 
   const [selectedKey, setSelectedKey] = useState<string>("__all__");
+
+  const querySupported = queriesStore.simpleQuery.queryGet<string[]>(
+    process.env["KEPLR_EXT_CONFIG_SERVER"],
+    "/tx-history/supports"
+  );
+
+  const supportedChainList = useMemo(() => {
+    const map = new Map<string, boolean>();
+    for (const chainIdentifier of querySupported.response?.data ?? []) {
+      map.set(chainIdentifier, true);
+    }
+
+    return chainStore.chainInfosInListUI.filter((chainInfo) => {
+      return map.get(chainInfo.chainIdentifier) ?? false;
+    });
+  }, [chainStore.chainInfosInListUI, querySupported.response?.data]);
 
   const msgHistory = usePaginatedCursorQuery<ResMsgsHistory>(
     process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"],
@@ -70,7 +88,7 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
                 key: "__all__",
                 label: "All",
               },
-              ...chainStore.chainInfosInListUI.map((chainInfo) => {
+              ...supportedChainList.map((chainInfo) => {
                 return {
                   key: chainInfo.chainId,
                   label: chainInfo.chainName,
@@ -105,6 +123,67 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
                   <MsgItemSkeleton />
                 </Stack>
               </Box>
+            );
+          }
+
+          if (msgHistory.pages.find((page) => page.error != null)) {
+            return (
+              <EmptyView
+                style={{
+                  marginTop: "2rem",
+                  marginBottom: "2rem",
+                }}
+                altSvg={
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="73"
+                    height="73"
+                    fill="none"
+                    viewBox="0 0 73 73"
+                  >
+                    <path
+                      stroke={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-200"]
+                          : ColorPalette["gray-400"]
+                      }
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="6"
+                      d="M46.15 49.601a13.635 13.635 0 00-9.626-4.006 13.636 13.636 0 00-9.72 4.006m37.03-13.125c0 15.11-12.249 27.357-27.358 27.357S9.12 51.585 9.12 36.476 21.367 9.12 36.476 9.12c15.11 0 27.357 12.248 27.357 27.357zm-34.197-6.839c0 1.26-.51 2.28-1.14 2.28-.63 0-1.14-1.02-1.14-2.28 0-1.26.51-2.28 1.14-2.28.63 0 1.14 1.02 1.14 2.28zm-1.14 0h.023v.046h-.023v-.046zm17.098 0c0 1.26-.51 2.28-1.14 2.28-.63 0-1.14-1.02-1.14-2.28 0-1.26.51-2.28 1.14-2.28.63 0 1.14 1.02 1.14 2.28zm-1.14 0h.023v.046h-.023v-.046z"
+                    />
+                  </svg>
+                }
+              >
+                <Box marginX="2rem">
+                  <Stack alignX="center" gutter="0.1rem">
+                    <Subtitle3>Network error.</Subtitle3>
+                    <Subtitle3
+                      style={{
+                        textAlign: "center",
+                      }}
+                    >
+                      Please try again after a few minutes.
+                    </Subtitle3>
+                  </Stack>
+                </Box>
+              </EmptyView>
+            );
+          }
+
+          // 아무 history도 없는 경우
+          if (msgHistory.pages[0].response?.msgs.length === 0) {
+            return (
+              <EmptyView
+                style={{
+                  marginTop: "2rem",
+                  marginBottom: "2rem",
+                }}
+              >
+                <Box marginX="2rem">
+                  <Subtitle3>No recent transaction history</Subtitle3>
+                </Box>
+              </EmptyView>
             );
           }
 
