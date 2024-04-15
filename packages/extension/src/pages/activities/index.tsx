@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { Box } from "../../components/box";
 import { MainHeaderLayout } from "../main/layouts/header";
 import { observer } from "mobx-react-lite";
@@ -15,6 +15,7 @@ import { Gutter } from "../../components/gutter";
 import { Dropdown } from "../../components/dropdown";
 import { EmptyView } from "../../components/empty-view";
 import { Subtitle3 } from "../../components/typography";
+import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
 
 export const ActivitiesPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, priceStore, queriesStore } = useStore();
@@ -71,9 +72,40 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
 
   const theme = useTheme();
 
+  const globalSimpleBar = useGlobarSimpleBar();
+  useEffect(() => {
+    if (globalSimpleBar.ref.current) {
+      const scrollElement = globalSimpleBar.ref.current.getScrollElement();
+      if (scrollElement) {
+        // scroll to refresh
+        const onScroll = () => {
+          const el = globalSimpleBar.ref.current?.getContentElement();
+          const scrollEl = globalSimpleBar.ref.current?.getScrollElement();
+          if (el && scrollEl) {
+            const rect = el.getBoundingClientRect();
+            const scrollRect = scrollEl.getBoundingClientRect();
+
+            const remainingBottomY =
+              rect.y + rect.height - scrollRect.y - scrollRect.height;
+
+            if (remainingBottomY < scrollRect.height / 10) {
+              msgHistory.next();
+            }
+          }
+        };
+
+        scrollElement.addEventListener("scroll", onScroll);
+
+        return () => {
+          scrollElement.removeEventListener("scroll", onScroll);
+        };
+      }
+    }
+  }, [globalSimpleBar.ref, msgHistory]);
+
   return (
     <MainHeaderLayout>
-      <Box paddingBottom="0.75rem">
+      <Box>
         <Box paddingX="0.75rem">
           <Dropdown
             size="large"
