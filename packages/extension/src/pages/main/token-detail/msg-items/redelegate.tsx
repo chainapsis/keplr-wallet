@@ -8,11 +8,10 @@ import { Staking } from "@keplr-wallet/stores";
 import { ItemLogo } from "./logo";
 
 export const MsgRelationRedelegate: FunctionComponent<{
-  explorerUrl: string;
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = observer(({ explorerUrl, msg, prices, targetDenom }) => {
+}> = observer(({ msg, prices, targetDenom }) => {
   const { chainStore, queriesStore } = useStore();
 
   const chainInfo = chainStore.getChain(msg.chainId);
@@ -90,7 +89,6 @@ export const MsgRelationRedelegate: FunctionComponent<{
 
   return (
     <MsgItemBase
-      explorerUrl={explorerUrl}
       logo={
         <ItemLogo
           center={

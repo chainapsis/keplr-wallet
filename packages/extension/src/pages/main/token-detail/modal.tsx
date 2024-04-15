@@ -100,13 +100,6 @@ export const TokenDetailModal: FunctionComponent<{
     "/tx-history/supports"
   );
 
-  const queryExplorer = queriesStore.simpleQuery.queryGet<{
-    link: string;
-  }>(
-    process.env["KEPLR_EXT_CONFIG_SERVER"],
-    `/tx-history/explorer/${chainInfo.chainIdentifier}`
-  );
-
   const isSupported: boolean = useMemo(() => {
     const map = new Map<string, boolean>();
     for (const chainIdentifier of querySupported.response?.data ?? []) {
@@ -610,7 +603,6 @@ export const TokenDetailModal: FunctionComponent<{
 
             return (
               <RenderMessages
-                explorerUrl={queryExplorer.response?.data.link || ""}
                 msgHistory={msgHistory}
                 targetDenom={coinMinimalDenom}
               />

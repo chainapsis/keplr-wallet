@@ -7,11 +7,10 @@ import { ColorPalette } from "../../../../styles";
 import { useTheme } from "styled-components";
 
 export const MsgRelationVote: FunctionComponent<{
-  explorerUrl: string;
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = observer(({ explorerUrl, msg, prices, targetDenom }) => {
+}> = observer(({ msg, prices, targetDenom }) => {
   const theme = useTheme();
 
   const proposal: {
@@ -57,7 +56,6 @@ export const MsgRelationVote: FunctionComponent<{
 
   return (
     <MsgItemBase
-      explorerUrl={explorerUrl}
       logo={
         <ItemLogo
           center={

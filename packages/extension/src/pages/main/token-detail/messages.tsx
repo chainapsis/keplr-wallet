@@ -7,12 +7,15 @@ import { Box } from "../../../components/box";
 import { Subtitle4 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { FormattedDate } from "react-intl";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../stores";
 
 export const RenderMessages: FunctionComponent<{
-  explorerUrl: string;
   msgHistory: ReturnType<typeof usePaginatedCursorQuery<ResMsgsHistory>>;
-  targetDenom: string;
-}> = ({ explorerUrl, msgHistory, targetDenom }) => {
+  targetDenom: string | ((msg: ResMsgsHistory["msgs"][0]["msg"]) => string);
+}> = observer(({ msgHistory, targetDenom }) => {
+  const { chainStore } = useStore();
+
   const msgsPerDaily: {
     year: number;
     month: number;
@@ -88,13 +91,36 @@ export const RenderMessages: FunctionComponent<{
             </Box>
             <Stack gutter="0.5rem">
               {msgs.msgs.map((msg) => {
+                const denom = (() => {
+                  if (typeof targetDenom === "string") {
+                    return targetDenom;
+                  }
+                  return targetDenom(msg.msg);
+                })();
+
+                const currency = chainStore
+                  .getChain(msg.msg.chainId)
+                  .findCurrency(denom);
+                // 알려진 currency가 있는 경우에만 렌더링한다.
+                // 사실 토큰 디테일에서 렌더링 되는 경우에는 이 로직이 필요가 없지만
+                // All activities 페이지에서는 백엔드에서 어떤 denom이 올지 확신할 수 없고
+                // 알려진 currency의 경우만 보여줘야하기 때문에 이 로직이 중요하다.
+                if (!currency) {
+                  return null;
+                }
+                if (
+                  currency.coinMinimalDenom.startsWith("ibc/") &&
+                  (!("originCurrency" in currency) || !currency.originCurrency)
+                ) {
+                  return null;
+                }
+
                 return (
                   <MsgItemRender
                     key={`${msg.msg.height}/${msg.msg.msgIndex}/${msg.msg.relation}`}
-                    explorerUrl={explorerUrl}
                     msg={msg.msg}
                     prices={msg.prices}
-                    targetDenom={targetDenom}
+                    targetDenom={denom}
                   />
                 );
               })}
@@ -104,4 +130,4 @@ export const RenderMessages: FunctionComponent<{
       })}
     </Box>
   );
-};
+});

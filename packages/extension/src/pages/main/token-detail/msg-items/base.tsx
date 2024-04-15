@@ -11,8 +11,6 @@ import { MsgHistory } from "../types";
 import { useTheme } from "styled-components";
 
 export const MsgItemBase: FunctionComponent<{
-  explorerUrl: string;
-
   logo: React.ReactElement;
   chainId: string;
   title: string;
@@ -29,7 +27,6 @@ export const MsgItemBase: FunctionComponent<{
   };
 }> = observer(
   ({
-    explorerUrl,
     logo,
     chainId,
     title,
@@ -42,7 +39,7 @@ export const MsgItemBase: FunctionComponent<{
     targetDenom,
     amountDeco,
   }) => {
-    const { chainStore, priceStore } = useStore();
+    const { chainStore, priceStore, queriesStore } = useStore();
 
     const theme = useTheme();
 
@@ -69,6 +66,15 @@ export const MsgItemBase: FunctionComponent<{
       }
       return;
     }, [defaultVsCurrency, foundCurrency, priceStore, prices, amount]);
+
+    const queryExplorer = queriesStore.simpleQuery.queryGet<{
+      link: string;
+    }>(
+      process.env["KEPLR_EXT_CONFIG_SERVER"],
+      `/tx-history/explorer/${chainInfo.chainIdentifier}`
+    );
+
+    const explorerUrl = queryExplorer.response?.data.link || "";
 
     const clickable = !!explorerUrl;
 

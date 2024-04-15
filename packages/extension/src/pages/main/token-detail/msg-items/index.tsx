@@ -21,44 +21,31 @@ import { MsgRelationCancelUndelegate } from "./cancel-undelegate";
 import { MsgRelationIBCSwapRefunded } from "./ibc-swap-refunded";
 
 export const MsgItemRender: FunctionComponent<{
-  explorerUrl: string;
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = ({ explorerUrl, msg, prices, targetDenom }) => {
+}> = ({ msg, prices, targetDenom }) => {
   return (
     <ErrorBoundary>
-      <MsgItemRenderInner
-        explorerUrl={explorerUrl}
-        msg={msg}
-        prices={prices}
-        targetDenom={targetDenom}
-      />
+      <MsgItemRenderInner msg={msg} prices={prices} targetDenom={targetDenom} />
     </ErrorBoundary>
   );
 };
 
 const MsgItemRenderInner: FunctionComponent<{
-  explorerUrl: string;
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = ({ explorerUrl, msg, prices, targetDenom }) => {
+}> = ({ msg, prices, targetDenom }) => {
   switch (msg.relation) {
     case "send": {
       return (
-        <MsgRelationSend
-          explorerUrl={explorerUrl}
-          msg={msg}
-          prices={prices}
-          targetDenom={targetDenom}
-        />
+        <MsgRelationSend msg={msg} prices={prices} targetDenom={targetDenom} />
       );
     }
     case "receive": {
       return (
         <MsgRelationReceive
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
@@ -68,7 +55,6 @@ const MsgItemRenderInner: FunctionComponent<{
     case "ibc-send": {
       return (
         <MsgRelationIBCSend
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
@@ -78,7 +64,6 @@ const MsgItemRenderInner: FunctionComponent<{
     case "ibc-send-receive": {
       return (
         <MsgRelationIBCSendReceive
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
@@ -88,7 +73,6 @@ const MsgItemRenderInner: FunctionComponent<{
     case "ibc-send-refunded": {
       return (
         <MsgRelationIBCSendRefunded
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
@@ -98,7 +82,6 @@ const MsgItemRenderInner: FunctionComponent<{
     case "ibc-swap-skip-osmosis": {
       return (
         <MsgRelationIBCSwap
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
@@ -108,7 +91,6 @@ const MsgItemRenderInner: FunctionComponent<{
     case "ibc-swap-skip-osmosis-receive": {
       return (
         <MsgRelationIBCSwapReceive
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
@@ -118,7 +100,6 @@ const MsgItemRenderInner: FunctionComponent<{
     case "ibc-swap-skip-osmosis-refunded": {
       return (
         <MsgRelationIBCSwapRefunded
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
@@ -128,7 +109,6 @@ const MsgItemRenderInner: FunctionComponent<{
     case "delegate": {
       return (
         <MsgRelationDelegate
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
@@ -138,7 +118,6 @@ const MsgItemRenderInner: FunctionComponent<{
     case "undelegate": {
       return (
         <MsgRelationUndelegate
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
@@ -148,7 +127,6 @@ const MsgItemRenderInner: FunctionComponent<{
     case "redelegate": {
       return (
         <MsgRelationRedelegate
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
@@ -158,7 +136,6 @@ const MsgItemRenderInner: FunctionComponent<{
     case "cancel-undelegate": {
       return (
         <MsgRelationCancelUndelegate
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
@@ -167,18 +144,12 @@ const MsgItemRenderInner: FunctionComponent<{
     }
     case "vote": {
       return (
-        <MsgRelationVote
-          explorerUrl={explorerUrl}
-          msg={msg}
-          prices={prices}
-          targetDenom={targetDenom}
-        />
+        <MsgRelationVote msg={msg} prices={prices} targetDenom={targetDenom} />
       );
     }
     case "custom/merged-claim-rewards": {
       return (
         <MsgRelationMergedClaimRewards
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}

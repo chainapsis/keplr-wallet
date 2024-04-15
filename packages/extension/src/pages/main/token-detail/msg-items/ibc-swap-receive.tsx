@@ -12,11 +12,10 @@ import { UnknownChainImage } from "./unknown-chain-image";
 import { Buffer } from "buffer/";
 
 export const MsgRelationIBCSwapReceive: FunctionComponent<{
-  explorerUrl: string;
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = observer(({ explorerUrl, msg, prices, targetDenom }) => {
+}> = observer(({ msg, prices, targetDenom }) => {
   const { chainStore, queriesStore } = useStore();
 
   const chainInfo = chainStore.getChain(msg.chainId);
@@ -204,7 +203,6 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
 
   return (
     <MsgItemBase
-      explorerUrl={explorerUrl}
       logo={
         <ItemLogo
           center={
