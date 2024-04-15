@@ -17,6 +17,8 @@ import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.react.flipper.ReactNativeFlipper
 import com.facebook.soloader.SoLoader
 
+import com.microsoft.codepush.react.CodePush
+
 class MainApplication : Application(), ReactApplication {
 
   override val reactNativeHost: ReactNativeHost =
@@ -33,6 +35,10 @@ class MainApplication : Application(), ReactApplication {
 
       override val isNewArchEnabled: Boolean = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
       override val isHermesEnabled: Boolean = BuildConfig.IS_HERMES_ENABLED
+
+      override fun getJSBundleFile(): String {
+        return CodePush.getJSBundleFile()
+      }
     })
 
   override val reactHost: ReactHost

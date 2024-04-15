@@ -14,6 +14,7 @@ import {AppNavigation} from './src/navigation';
 import {I18nManager, Platform, Settings, StatusBar} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {AppIntlProvider} from './src/languages';
+import codePush from 'react-native-code-push';
 import {AppUpdateProvider} from './src/provider/app-update';
 
 //import 순서가 중요함
@@ -42,6 +43,7 @@ import {simpleFetch} from '@keplr-wallet/simple-fetch';
 import {LedgerBLEProvider} from './src/provider/ledger-ble';
 import Bugsnag from '@bugsnag/react-native';
 import {ImportFromExtensionProvider} from 'keplr-wallet-mobile-private';
+import {AsyncKVStore} from './src/common';
 import {AutoLock} from './src/components/unlock-modal';
 import {setJSExceptionHandler} from 'react-native-exception-handler';
 const semver = require('semver');
@@ -122,7 +124,14 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
     store: {},
   };
 
+  protected lastTimeout?: number;
+
   override componentDidMount() {
+    // Ensure that any CodePush updates which are
+    // synchronized in the background can't trigger
+    // a restart while this component is mounted.
+    codePush.disallowRestart();
+
     let once = false;
 
     const updateNotExists = () => {
@@ -135,15 +144,110 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
         codepushInitTestCompleted: true,
         codepushInitNewVersionExists: false,
       });
+
+      codePush.notifyAppReady().catch(err => {
+        console.log(err);
+      });
     };
 
-    updateNotExists();
+    // 1초 안에 결과를 받지 못하면 그냥 업데이트 없는걸로 친다...
+    // (하지만 install 후 최초의 시도일 경우 3초 동안 기다린다)
+    const kvStore = new AsyncKVStore('app-update');
+    kvStore.get('first-codepush-check').then(firstCheck => {
+      if (firstCheck) {
+        setTimeout(() => {
+          updateNotExists();
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          updateNotExists();
+        }, 3000);
+        kvStore.set('first-codepush-check', true);
+      }
+    });
+
+    codePush
+      .checkForUpdate()
+      .then(update => {
+        if (update) {
+          if (once) {
+            return;
+          }
+          once = true;
+
+          this.setState({
+            ...this.state,
+            codepushInitTestCompleted: true,
+            codepushInitNewVersionExists: true,
+            codepush: {
+              ...this.state.codepush,
+              newVersion: update.label,
+              newVersionDownloadProgress: 0,
+            },
+          });
+
+          codePush
+            .sync(
+              {
+                installMode: codePush.InstallMode.ON_NEXT_RESTART,
+              },
+              status => {
+                if (status === codePush.SyncStatus.UPDATE_INSTALLED) {
+                  this.setState({
+                    ...this.state,
+                    codepush: {
+                      ...this.state.codepush,
+                      newVersionDownloadProgress: 1,
+                    },
+                  });
+
+                  this.restartApp();
+                }
+              },
+              ({receivedBytes, totalBytes}) => {
+                const beforeNewVersionDownloadProgress =
+                  this.state.codepush.newVersionDownloadProgress || 0;
+                const _newVersionDownloadProgress = Math.min(
+                  receivedBytes / totalBytes,
+                  // 1은 sync status handler가 처리함.
+                  0.99,
+                );
+
+                // XXX 여기서 매번 업데이트 시키면 context api에 의해서
+                // 매번 렌더링이 일어나서 성능이 떨어질 수 있음.
+                // 이 문제를 완화하기 위해서 0.1 단위로만 업데이트를 시킴.
+                if (
+                  Math.floor(beforeNewVersionDownloadProgress * 10) !==
+                  Math.floor(_newVersionDownloadProgress * 10)
+                ) {
+                  this.setState({
+                    ...this.state,
+                    codepush: {
+                      ...this.state.codepush,
+                      newVersionDownloadProgress: _newVersionDownloadProgress,
+                    },
+                  });
+                }
+              },
+            )
+            .catch(err => {
+              console.log(err);
+            });
+        } else {
+          updateNotExists();
+        }
+      })
+      .catch(err => {
+        console.log(err);
+        updateNotExists();
+      });
 
     this.init();
   }
 
   protected async init(): Promise<void> {
     this.crawlStoreUpdate();
+    this.crawlCodepushUpdate();
   }
 
   protected async crawlStoreUpdate(): Promise<void> {
@@ -152,6 +256,57 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
 
       // 10min
       await new Promise(resolve => setTimeout(resolve, 5 * 60 * 1000));
+    }
+  }
+
+  protected async crawlCodepushUpdate(): Promise<void> {
+    while (true) {
+      // 5min
+      await new Promise(resolve => setTimeout(resolve, 5 * 60 * 1000));
+
+      codePush
+        .checkForUpdate()
+        .then(update => {
+          if (update) {
+            this.setState({
+              ...this.state,
+              codepush: {
+                ...this.state.codepush,
+                newVersion: update.label,
+                newVersionDownloadProgress: 0,
+              },
+            });
+
+            codePush
+              .sync(
+                {
+                  installMode: codePush.InstallMode.ON_NEXT_RESTART,
+                },
+                status => {
+                  if (status === codePush.SyncStatus.UPDATE_INSTALLED) {
+                    this.setState({
+                      ...this.state,
+                      codepush: {
+                        ...this.state.codepush,
+                        newVersionDownloadProgress: 1,
+                      },
+                    });
+                  }
+                },
+                () => {
+                  // noop
+                  // XXX: 이 경우 아직 UI에서 progress를 보여주지 않는다...
+                  //      그러므로 굳이 context를 업데이트해서 re-rendering을 일으키지 않도록 한다.
+                },
+              )
+              .catch(err => {
+                console.log(err);
+              });
+          }
+        })
+        .catch(err => {
+          console.log(err);
+        });
     }
   }
 
@@ -234,7 +389,21 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
   }
 
   restartApp() {
-    // TODO
+    if (Platform.OS === 'ios') {
+      codePush.allowRestart();
+      codePush.restartApp();
+    } else {
+      codePush.allowRestart();
+      // https://github.com/microsoft/react-native-code-push/issues/2567#issuecomment-1820827232
+      this.setState({
+        ...this.state,
+        restartAfter: true,
+      });
+
+      setTimeout(() => {
+        codePush.restartApp();
+      }, 500);
+    }
   }
 
   override render() {
@@ -304,4 +473,7 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
   }
 }
 
-export default AppUpdateWrapper;
+export default codePush({
+  checkFrequency: codePush.CheckFrequency.MANUAL,
+  installMode: codePush.InstallMode.ON_NEXT_RESTART,
+})(AppUpdateWrapper);
