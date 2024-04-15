@@ -20,6 +20,7 @@ import {
   SecretUtils,
   SettledResponses,
   DirectAuxSignResponse,
+  IEthereumProvider,
 } from "@keplr-wallet/types";
 import { Result, JSONUint8Array } from "@keplr-wallet/router";
 import { KeplrEnigmaUtils } from "./enigma";
@@ -34,18 +35,13 @@ export interface ProxyRequest {
   id: string;
   method: keyof (Keplr & KeplrCoreTypes);
   args: any[];
+  ethereumProviderMethod?: keyof IEthereumProvider;
 }
 
 export interface ProxyRequestResponse {
   type: "proxy-request-response";
   id: string;
   result: Result | undefined;
-}
-
-class EthereumProvider extends EventEmitter {
-  request<T>(): Promise<T> {
-    throw new Error("Method not implemented.");
-  }
 }
 
 function defineUnwritablePropertyIfPossible(o: any, p: string, value: any) {
@@ -97,7 +93,6 @@ export function injectKeplrToWindow(keplr: IKeplr): void {
  * This will use `window.postMessage` to interact with the content script.
  */
 export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
-  static ethereumProvider = new EthereumProvider();
   static startProxy(
     keplr: IKeplr & KeplrCoreTypes,
     eventListener: {
@@ -138,7 +133,8 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
 
         if (
           !keplr[message.method] ||
-          typeof keplr[message.method] !== "function"
+          (message.method !== "ethereum" &&
+            typeof keplr[message.method] !== "function")
         ) {
           throw new Error(`Invalid method: ${message.method}`);
         }
@@ -242,7 +238,27 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
           }
 
           if (method === "ethereum") {
-            return keplr.ethereum;
+            if (
+              message.ethereumProviderMethod === undefined ||
+              typeof keplr.ethereum[message.ethereumProviderMethod] !==
+                "function"
+            ) {
+              throw new Error("Invalid Ethereum provider method");
+            }
+
+            const ethereumProviderMethod = message.ethereumProviderMethod;
+
+            if (ethereumProviderMethod === "request") {
+              return await keplr.ethereum.request(
+                JSONUint8Array.unwrap(message.args)
+              );
+            }
+
+            return await keplr.ethereum[ethereumProviderMethod](
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              ...JSONUint8Array.unwrap(message.args)
+            );
           }
 
           return await keplr[method](
@@ -778,5 +794,91 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     return await this.requestMethod("suggestERC20", [chainId, contractAddress]);
   }
 
-  public readonly ethereum: EthereumProvider = InjectedKeplr.ethereumProvider;
+  public readonly ethereum = new EthereumProvider(this.eventListener);
+}
+
+class EthereumProvider extends EventEmitter implements IEthereumProvider {
+  constructor(
+    protected readonly eventListener: {
+      addMessageListener: (fn: (e: any) => void) => void;
+      removeMessageListener: (fn: (e: any) => void) => void;
+      postMessage: (message: any) => void;
+    } = {
+      addMessageListener: (fn: (e: any) => void) =>
+        window.addEventListener("message", fn),
+      removeMessageListener: (fn: (e: any) => void) =>
+        window.removeEventListener("message", fn),
+      postMessage: (message) =>
+        window.postMessage(message, window.location.origin),
+    },
+    protected readonly parseMessage?: (message: any) => any
+  ) {
+    super();
+  }
+
+  protected requestMethod(
+    method: keyof IEthereumProvider,
+    args: Record<string, any>
+  ): Promise<any> {
+    const bytes = new Uint8Array(8);
+    const id: string = Array.from(crypto.getRandomValues(bytes))
+      .map((value) => {
+        return value.toString(16);
+      })
+      .join("");
+
+    const proxyMessage: ProxyRequest = {
+      type: "proxy-request",
+      id,
+      method: "ethereum",
+      args: JSONUint8Array.wrap(args),
+      ethereumProviderMethod: method,
+    };
+
+    return new Promise((resolve, reject) => {
+      const receiveResponse = (e: any) => {
+        const proxyResponse: ProxyRequestResponse = this.parseMessage
+          ? this.parseMessage(e.data)
+          : e.data;
+
+        if (!proxyResponse || proxyResponse.type !== "proxy-request-response") {
+          return;
+        }
+
+        if (proxyResponse.id !== id) {
+          return;
+        }
+
+        this.eventListener.removeMessageListener(receiveResponse);
+
+        const result = JSONUint8Array.unwrap(proxyResponse.result);
+
+        if (!result) {
+          reject(new Error("Result is null"));
+          return;
+        }
+
+        if (result.error) {
+          reject(new Error(result.error));
+          return;
+        }
+
+        resolve(result.return);
+      };
+
+      this.eventListener.addMessageListener(receiveResponse);
+
+      this.eventListener.postMessage(proxyMessage);
+    });
+  }
+
+  async request<T>({
+    method,
+    params,
+  }: {
+    method: string;
+    params?: unknown[] | Record<string, unknown>;
+  }): Promise<T> {
+    return await this.requestMethod("request", { method, params });
+  }
 }

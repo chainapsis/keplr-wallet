@@ -17,6 +17,7 @@ import {
   SecretUtils,
   SettledResponses,
   DirectAuxSignResponse,
+  IEthereumProvider,
 } from "@keplr-wallet/types";
 import {
   Bech32Address,
@@ -26,11 +27,11 @@ import {
 import {
   CosmJSOfflineSigner,
   CosmJSOfflineSignerOnlyAmino,
-  InjectedKeplr,
 } from "@keplr-wallet/provider";
 import { Hash, Mnemonic, PrivKeySecp256k1 } from "@keplr-wallet/crypto";
 import Long from "long";
 import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import EventEmitter from "events";
 
 export class MockKeplr implements Keplr {
   readonly version: string = "0.0.1";
@@ -370,5 +371,18 @@ export class MockKeplr implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  public readonly ethereum = InjectedKeplr.ethereumProvider;
+  public readonly ethereum = new MockEthereumProvider();
+}
+
+class MockEthereumProvider extends EventEmitter implements IEthereumProvider {
+  constructor() {
+    super();
+  }
+
+  request<T>({}: {
+    method: string;
+    params?: unknown[] | Record<string, unknown> | undefined;
+  }): Promise<T> {
+    throw new Error("Not yet implemented");
+  }
 }

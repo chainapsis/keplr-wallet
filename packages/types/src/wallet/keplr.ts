@@ -241,8 +241,11 @@ export interface Keplr {
 }
 
 export interface IEthereumProvider extends EventEmitter {
-  request<T>(
-    method: string,
-    params?: unknown[] | Record<string, unknown>
-  ): Promise<T>;
+  request<T>({
+    method,
+    params,
+  }: {
+    method: string;
+    params?: unknown[] | Record<string, unknown>;
+  }): Promise<T>;
 }
