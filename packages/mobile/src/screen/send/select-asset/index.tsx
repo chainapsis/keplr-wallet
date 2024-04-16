@@ -53,7 +53,7 @@ export const SendSelectAssetScreen: FunctionComponent = observer(() => {
       return newTokens;
     }
 
-    const filtered = newTokens.filter(token => {
+    return newTokens.filter(token => {
       return (
         token.chainInfo.chainName
           .toLowerCase()
@@ -63,8 +63,6 @@ export const SendSelectAssetScreen: FunctionComponent = observer(() => {
           .includes(trimSearch.toLowerCase())
       );
     });
-
-    return filtered;
   }, [search, tokens]);
 
   const filteredTokens = _filteredTokens.filter(token => {
@@ -144,6 +142,7 @@ export const SendSelectAssetScreen: FunctionComponent = observer(() => {
                       navigation.navigate({
                         name: 'Swap',
                         params: {
+                          ...route.params,
                           chainId: token.chainInfo.chainId,
                           coinMinimalDenom:
                             token.token.currency.coinMinimalDenom,

@@ -22,6 +22,7 @@ import {RootStackParamList, StackNavProp} from '../../../../navigation.tsx';
 import Svg, {Path} from 'react-native-svg';
 import {IconProps} from '../../../../components/icon/types.ts';
 import {VerticalCollapseTransition} from '../../../../components/transition';
+import {SelectDestinationChainModal} from '../select-destination-chain-modal';
 
 export const SwapAssetInfo: FunctionComponent<{
   type: 'from' | 'to';
@@ -75,8 +76,8 @@ export const SwapAssetInfo: FunctionComponent<{
       }
     });
 
-    // const [isSelectDestinationModalOpen, setIsSelectDestinationModalOpen] =
-    //   useState(false);
+    const [isSelectDestinationModalOpen, setIsSelectDestinationModalOpen] =
+      useState(false);
 
     return (
       <Box
@@ -173,6 +174,7 @@ export const SwapAssetInfo: FunctionComponent<{
               <TextInput
                 ref={textInputRef}
                 placeholder={'0'}
+                editable={type === 'from'}
                 placeholderTextColor={style.get('color-text-low').color}
                 style={StyleSheet.flatten([
                   style.flatten([
@@ -272,6 +274,8 @@ export const SwapAssetInfo: FunctionComponent<{
               if (type === 'from') {
                 navigation.navigate('Send.SelectAsset', {
                   isIBCSwap: true,
+                  outChainId: route.params.outChainId,
+                  outCoinMinimalDenom: route.params.outCoinMinimalDenom,
                 });
               } else {
                 const excludeKey = (() => {
@@ -443,29 +447,50 @@ export const SwapAssetInfo: FunctionComponent<{
 
           <Box style={{flex: 1}} />
 
-          <Text style={style.flatten(['body2', 'color-text-low'])}>
-            <FormattedMessage
-              id="page.ibc-swap.components.swap-asset-info.on-chain-name"
-              values={{
-                chainName: (() => {
-                  const chainInfo =
-                    type === 'from' ? fromChainInfo : toChainInfo;
-                  return chainInfo.chainName;
-                })(),
-              }}
-            />
-          </Text>
+          <TouchableWithoutFeedback
+            onPress={() => {
+              if (type === 'to') {
+                setIsSelectDestinationModalOpen(true);
+              }
+            }}>
+            <XAxis alignY="center">
+              <Text style={style.flatten(['body2', 'color-text-low'])}>
+                <FormattedMessage
+                  id="page.ibc-swap.components.swap-asset-info.on-chain-name"
+                  values={{
+                    chainName: (() => {
+                      const chainInfo =
+                        type === 'from' ? fromChainInfo : toChainInfo;
+                      return chainInfo.chainName;
+                    })(),
+                  }}
+                />
+              </Text>
 
-          {type === 'to' ? (
-            <React.Fragment>
-              <Gutter size={2} />
-              <SettingIcon
-                size={14}
-                color={style.get('color-text-low').color}
-              />
-            </React.Fragment>
-          ) : null}
+              {type === 'to' ? (
+                <React.Fragment>
+                  <Gutter size={2} />
+                  <SettingIcon
+                    size={14}
+                    color={style.get('color-text-low').color}
+                  />
+                </React.Fragment>
+              ) : null}
+            </XAxis>
+          </TouchableWithoutFeedback>
         </XAxis>
+
+        <SelectDestinationChainModal
+          isOpen={isSelectDestinationModalOpen}
+          setIsOpen={setIsSelectDestinationModalOpen}
+          amountConfig={amountConfig}
+          onDestinationChainSelect={
+            onDestinationChainSelect ||
+            (() => {
+              // noop
+            })
+          }
+        />
       </Box>
     );
   },

@@ -11,7 +11,7 @@ import {Toggle} from '../../../../components/toggle';
 import {TextInput} from '../../../../components/input';
 import {HorizontalRadioGroup} from '../../../../components/radio-group';
 import {useStore} from '../../../../stores';
-import {FormattedMessage} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {VerticalCollapseTransition} from '../../../../components/transition';
 
 const selectables = ['0.1', '0.5', '1.0'];
@@ -20,7 +20,8 @@ export const SlippageModal = registerCardModal<{
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 }>(
-  observer(() => {
+  observer(({setIsOpen}) => {
+    const intl = useIntl();
     const style = useStyle();
 
     const {uiConfigStore} = useStore();
@@ -125,7 +126,12 @@ export const SlippageModal = registerCardModal<{
 
         <Gutter size={12} />
 
-        <Button text="Confirm" size="large" color="secondary" />
+        <Button
+          text={intl.formatMessage({id: 'button.close'})}
+          size="large"
+          color="secondary"
+          onPress={() => setIsOpen(false)}
+        />
       </Box>
     );
   }),
