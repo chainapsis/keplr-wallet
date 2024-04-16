@@ -2369,7 +2369,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     bip44: {
-      coinType: 60,
+      coinType: 118,
     },
     bech32Config: {
       bech32PrefixAccAddr: "dym",
@@ -2529,9 +2529,6 @@ export const PrivilegedOrigins: string[] = [
 
 export const CommunityChainInfoRepo = {
   organizationName: "chainapsis",
-  repoName: "keplr-chain-registry",
+  repoName: "keplr-chain-registry-111111111",
   branchName: "main",
-  alternativeURL: process.env["KEPLR_EXT_CHAIN_REGISTRY_URL"]
-    ? process.env["KEPLR_EXT_CHAIN_REGISTRY_URL"]
-    : undefined,
 };
