@@ -196,21 +196,6 @@ export class UIConfigStore {
     this.options.hideLowBalance = value;
   }
 
-  get useWebHIDLedger(): boolean {
-    // TODO: 이 getter/setter는 그냥 삭제될 확률이 높음
-    return false;
-    // if (!window.navigator.hid) {
-    //   return false;
-    // }
-    //
-    // return this.options.useWebHIDLedger;
-  }
-
-  @action
-  setUseWebHIDLedger(value: boolean) {
-    this.options.useWebHIDLedger = value;
-  }
-
   @action
   setRememberLastFeeOption(value: boolean) {
     this.options.rememberLastFeeOption = value;

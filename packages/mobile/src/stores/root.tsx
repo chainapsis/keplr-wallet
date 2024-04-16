@@ -58,6 +58,7 @@ import {
   KeplrETCQueries,
 } from '@keplr-wallet/stores-etc';
 import {SkipQueries} from './skip';
+import {DeepLinkStore} from './deep-link';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
@@ -106,6 +107,7 @@ export class RootStore {
 
   public readonly keychainStore: KeychainStore;
   public readonly walletConnectStore: WalletConnectStore;
+  public readonly deepLinkStore: DeepLinkStore;
 
   constructor() {
     const router = new RNRouterUI(RNEnv.produceEnv);
@@ -437,6 +439,8 @@ export class RootStore {
       this.permissionStore,
       this.permissionManagerStore,
     );
+
+    this.deepLinkStore = new DeepLinkStore(this.walletConnectStore);
 
     router.listen(APP_PORT);
   }

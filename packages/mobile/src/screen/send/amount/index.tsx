@@ -186,6 +186,7 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
 
       if (isIBCTransfer) {
         return account.cosmos.makePacketForwardIBCTransferTx(
+          accountStore,
           sendConfigs.channelConfig.channels,
           sendConfigs.amountConfig.amount[0].toDec().toString(),
           sendConfigs.amountConfig.amount[0].currency,
@@ -444,6 +445,7 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
               ? accountStore
                   .getAccount(chainId)
                   .cosmos.makePacketForwardIBCTransferTx(
+                    accountStore,
                     sendConfigs.channelConfig.channels,
                     sendConfigs.amountConfig.amount[0].toDec().toString(),
                     sendConfigs.amountConfig.amount[0].currency,

@@ -51,7 +51,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
     },
   ];
 
-  const {chainId, validatorSelector} = route.params;
+  const {chainId, validatorSelector, fromDeepLink} = route.params;
   const queries = queriesStore.get(chainId);
 
   const bech32Address = accountStore.getAccount(chainId).bech32Address;
@@ -190,6 +190,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
                           chainId,
                           validatorAddress: validator.operator_address,
                           validatorSelector,
+                          fromDeepLink,
                         },
                       });
                       return;
@@ -199,6 +200,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
                       params: {
                         chainId,
                         validatorAddress: validator.operator_address,
+                        fromDeepLink,
                       },
                     });
                   }}
