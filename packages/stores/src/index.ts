@@ -5,3 +5,4 @@ export * from "./query";
 export * from "./chain";
 export * from "./ibc";
 export * from "./lsm";
+export * from "./token-factory";
