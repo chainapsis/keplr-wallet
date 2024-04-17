@@ -48,7 +48,6 @@ import {ChainIdHelper} from '@keplr-wallet/cosmos';
 import {amountToAmbiguousAverage} from '../../../utils';
 import {GuideBox} from '../../../components/guide-box';
 import {Text} from 'react-native';
-import {useEffectOnce} from '../../../hooks';
 
 export const SendAmountScreen: FunctionComponent = observer(() => {
   const {chainStore, accountStore, queriesStore, skipQueriesStore, priceStore} =
@@ -113,9 +112,9 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
 
   sendConfigs.amountConfig.setCurrency(currency);
 
-  useEffectOnce(() => {
+  useEffect(() => {
     sendConfigs.recipientConfig.setValue(initialRecipientAddress || '');
-  });
+  }, [initialRecipientAddress, sendConfigs.recipientConfig]);
 
   const gasSimulatorKey = useMemo(() => {
     if (sendConfigs.amountConfig.currency) {
