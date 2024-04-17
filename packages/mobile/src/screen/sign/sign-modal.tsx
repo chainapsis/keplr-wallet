@@ -178,7 +178,10 @@ export const SignModal = registerCardModal(
               if (
                 innerType === '/cosmos.bank.v1beta1.MsgSend' ||
                 innerType === '/cosmos.bank.v1beta1.MsgMultiSend' ||
-                innerType === '/ibc.applications.transfer.v1.MsgTransfer'
+                innerType === '/ibc.applications.transfer.v1.MsgTransfer' ||
+                innerType === '/cosmos.authz.v1beta1.MsgGrant' ||
+                innerType === '/cosmos.staking.v1beta1.MsgTokenizeShares' ||
+                innerType === '/cosmos.staking.v1beta1.MsgEnableTokenizeShares'
               ) {
                 setIsSendAuthzGrant(true);
                 return;
@@ -201,7 +204,11 @@ export const SignModal = registerCardModal(
                 if (
                   innerType === '/cosmos.bank.v1beta1.MsgSend' ||
                   innerType === '/cosmos.bank.v1beta1.MsgMultiSend' ||
-                  innerType === '/ibc.applications.transfer.v1.MsgTransfer'
+                  innerType === '/ibc.applications.transfer.v1.MsgTransfer' ||
+                  innerType === '/cosmos.authz.v1beta1.MsgGrant' ||
+                  innerType === '/cosmos.staking.v1beta1.MsgTokenizeShares' ||
+                  innerType ===
+                    '/cosmos.staking.v1beta1.MsgEnableTokenizeShares'
                 ) {
                   setIsSendAuthzGrant(true);
                   return;
@@ -237,7 +244,12 @@ export const SignModal = registerCardModal(
                       genericAuth.msg === '/cosmos.bank.v1beta1.MsgSend' ||
                       genericAuth.msg === '/cosmos.bank.v1beta1.MsgMultiSend' ||
                       genericAuth.msg ===
-                        '/ibc.applications.transfer.v1.MsgTransfer'
+                        '/ibc.applications.transfer.v1.MsgTransfer' ||
+                      genericAuth.msg === '/cosmos.authz.v1beta1.MsgGrant' ||
+                      genericAuth.msg ===
+                        '/cosmos.staking.v1beta1.MsgTokenizeShares' ||
+                      genericAuth.msg ===
+                        '/cosmos.staking.v1beta1.MsgEnableTokenizeShares'
                     ) {
                       setIsSendAuthzGrant(true);
                       return;
