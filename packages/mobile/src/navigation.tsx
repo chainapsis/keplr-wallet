@@ -223,7 +223,7 @@ export type RootStackParamList = {
   'Register.Welcome': {
     password?: string;
   };
-  Send: undefined;
+  Send: {chainId: string; coinMinimalDenom: string; recipientAddress?: string};
   'Send.SelectAsset': undefined;
   'Setting.Intro': undefined;
 
