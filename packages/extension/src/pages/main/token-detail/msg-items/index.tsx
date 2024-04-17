@@ -24,10 +24,16 @@ export const MsgItemRender: FunctionComponent<{
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = ({ msg, prices, targetDenom }) => {
+  isInAllActivitiesPage?: boolean;
+}> = ({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
   return (
     <ErrorBoundary>
-      <MsgItemRenderInner msg={msg} prices={prices} targetDenom={targetDenom} />
+      <MsgItemRenderInner
+        msg={msg}
+        prices={prices}
+        targetDenom={targetDenom}
+        isInAllActivitiesPage={isInAllActivitiesPage}
+      />
     </ErrorBoundary>
   );
 };
@@ -36,7 +42,8 @@ const MsgItemRenderInner: FunctionComponent<{
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = ({ msg, prices, targetDenom }) => {
+  isInAllActivitiesPage?: boolean;
+}> = ({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
   switch (msg.relation) {
     case "send": {
       return (
@@ -153,6 +160,7 @@ const MsgItemRenderInner: FunctionComponent<{
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }

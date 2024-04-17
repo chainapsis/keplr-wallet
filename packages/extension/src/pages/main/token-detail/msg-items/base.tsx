@@ -16,6 +16,7 @@ export const MsgItemBase: FunctionComponent<{
   title: string;
   paragraph?: string;
   paragraphStyle?: React.CSSProperties;
+  bottom?: React.ReactElement;
   amount: CoinPretty | string;
   overrideAmountColor?: string;
   prices: Record<string, Record<string, number | undefined> | undefined>;
@@ -32,6 +33,7 @@ export const MsgItemBase: FunctionComponent<{
     title,
     paragraph,
     paragraphStyle,
+    bottom,
     amount,
     overrideAmountColor,
     prices,
@@ -90,155 +92,160 @@ export const MsgItemBase: FunctionComponent<{
             theme.mode === "light"
               ? "0 1px 4px 0 rgba(43,39,55,0.1)"
               : undefined,
+          overflow: "hidden",
         }}
         borderRadius="0.375rem"
-        paddingX="1rem"
-        paddingY="0.875rem"
-        minHeight="4rem"
-        alignY="center"
-        cursor={clickable ? "pointer" : undefined}
-        onClick={(e) => {
-          e.preventDefault();
-
-          if (explorerUrl) {
-            browser.tabs.create({
-              url: explorerUrl
-                .replace("{txHash}", msg.txHash.toUpperCase())
-                .replace("{txHash:lowercase}", msg.txHash.toLowerCase())
-                .replace("{txHash:uppercase}", msg.txHash.toUpperCase()),
-            });
-          }
-        }}
-        hover={{
-          backgroundColor: clickable
-            ? theme.mode === "light"
-              ? ColorPalette["gray-10"]
-              : ColorPalette["gray-550"]
-            : undefined,
-        }}
       >
-        <XAxis alignY="center">
-          <Box marginRight="0.75rem">
-            <XAxis alignY="center">{logo}</XAxis>
-          </Box>
-          <div
-            style={{
-              flex: 1,
-              minWidth: "0.75rem",
-            }}
-          >
-            <XAxis alignY="center">
-              <Box style={{ overflow: "hidden" }}>
-                <YAxis>
-                  <Subtitle3
-                    color={
-                      theme.mode === "light"
-                        ? ColorPalette["black"]
-                        : ColorPalette["gray-10"]
+        <Box
+          paddingX="1rem"
+          paddingY="0.875rem"
+          alignY="center"
+          minHeight="4rem"
+          cursor={clickable ? "pointer" : undefined}
+          onClick={(e) => {
+            e.preventDefault();
+
+            if (explorerUrl) {
+              browser.tabs.create({
+                url: explorerUrl
+                  .replace("{txHash}", msg.txHash.toUpperCase())
+                  .replace("{txHash:lowercase}", msg.txHash.toLowerCase())
+                  .replace("{txHash:uppercase}", msg.txHash.toUpperCase()),
+              });
+            }
+          }}
+          hover={{
+            backgroundColor: clickable
+              ? theme.mode === "light"
+                ? ColorPalette["gray-10"]
+                : ColorPalette["gray-550"]
+              : undefined,
+          }}
+        >
+          <XAxis alignY="center">
+            <Box marginRight="0.75rem">
+              <XAxis alignY="center">{logo}</XAxis>
+            </Box>
+            <div
+              style={{
+                flex: 1,
+                minWidth: "0.75rem",
+              }}
+            >
+              <XAxis alignY="center">
+                <Box style={{ overflow: "hidden" }}>
+                  <YAxis>
+                    <Subtitle3
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["black"]
+                          : ColorPalette["gray-10"]
+                      }
+                    >
+                      {title}
+                    </Subtitle3>
+                    {paragraph ? (
+                      <React.Fragment>
+                        <Gutter size="0.25rem" />
+                        <Body3
+                          color={ColorPalette["gray-300"]}
+                          style={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            ...paragraphStyle,
+                          }}
+                        >
+                          {paragraph}
+                        </Body3>
+                      </React.Fragment>
+                    ) : null}
+                  </YAxis>
+                </Box>
+
+                <div
+                  style={{
+                    flex: 1,
+                  }}
+                />
+                <YAxis alignX="right">
+                  {(() => {
+                    if (msg.code !== 0) {
+                      return (
+                        <Subtitle3 color={ColorPalette["yellow-400"]}>
+                          Failed
+                        </Subtitle3>
+                      );
                     }
-                  >
-                    {title}
-                  </Subtitle3>
-                  {paragraph ? (
-                    <React.Fragment>
-                      <Gutter size="0.25rem" />
-                      <Body3
-                        color={ColorPalette["gray-300"]}
-                        style={{
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                          ...paragraphStyle,
-                        }}
-                      >
-                        {paragraph}
-                      </Body3>
-                    </React.Fragment>
-                  ) : null}
-                </YAxis>
-              </Box>
 
-              <div
-                style={{
-                  flex: 1,
-                }}
-              />
-              <YAxis alignX="right">
-                {(() => {
-                  if (msg.code !== 0) {
                     return (
-                      <Subtitle3 color={ColorPalette["yellow-400"]}>
-                        Failed
-                      </Subtitle3>
-                    );
-                  }
+                      <React.Fragment>
+                        <Subtitle3
+                          color={(() => {
+                            if (!amountDeco) {
+                              return theme.mode === "light"
+                                ? ColorPalette["black"]
+                                : ColorPalette["white"];
+                            }
 
-                  return (
-                    <React.Fragment>
-                      <Subtitle3
-                        color={(() => {
-                          if (!amountDeco) {
-                            return theme.mode === "light"
-                              ? ColorPalette["black"]
-                              : ColorPalette["white"];
-                          }
+                            if (amountDeco.color === "green") {
+                              return theme.mode === "light"
+                                ? ColorPalette["green-500"]
+                                : ColorPalette["green-400"];
+                            }
+                          })()}
+                          style={{
+                            whiteSpace: "nowrap",
+                            color: overrideAmountColor,
+                          }}
+                        >
+                          {(() => {
+                            if (!amountDeco) {
+                              return "";
+                            }
 
-                          if (amountDeco.color === "green") {
-                            return theme.mode === "light"
-                              ? ColorPalette["green-500"]
-                              : ColorPalette["green-400"];
-                          }
-                        })()}
-                        style={{
-                          whiteSpace: "nowrap",
-                          color: overrideAmountColor,
-                        }}
-                      >
-                        {(() => {
-                          if (!amountDeco) {
+                            if (amountDeco.prefix === "plus") {
+                              return "+";
+                            }
+
+                            if (amountDeco.prefix === "minus") {
+                              return "-";
+                            }
+
                             return "";
-                          }
-
-                          if (amountDeco.prefix === "plus") {
-                            return "+";
-                          }
-
-                          if (amountDeco.prefix === "minus") {
-                            return "-";
-                          }
-
-                          return "";
-                        })()}
-                        {typeof amount === "string"
-                          ? amount
-                          : amount
-                              .maxDecimals(2)
-                              .shrink(true)
-                              .hideIBCMetadata(true)
-                              .inequalitySymbol(true)
-                              .inequalitySymbolSeparator("")
-                              .toString()}
-                      </Subtitle3>
-                      {sendAmountPricePretty ? (
-                        <React.Fragment>
-                          <Gutter size="0.25rem" />
-                          <Body3
-                            color={ColorPalette["gray-300"]}
-                            style={{
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {sendAmountPricePretty.toString()}
-                          </Body3>
-                        </React.Fragment>
-                      ) : null}
-                    </React.Fragment>
-                  );
-                })()}
-              </YAxis>
-            </XAxis>
-          </div>
-        </XAxis>
+                          })()}
+                          {typeof amount === "string"
+                            ? amount
+                            : amount
+                                .maxDecimals(2)
+                                .shrink(true)
+                                .hideIBCMetadata(true)
+                                .inequalitySymbol(true)
+                                .inequalitySymbolSeparator("")
+                                .toString()}
+                        </Subtitle3>
+                        {sendAmountPricePretty ? (
+                          <React.Fragment>
+                            <Gutter size="0.25rem" />
+                            <Body3
+                              color={ColorPalette["gray-300"]}
+                              style={{
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {sendAmountPricePretty.toString()}
+                            </Body3>
+                          </React.Fragment>
+                        ) : null}
+                      </React.Fragment>
+                    );
+                  })()}
+                </YAxis>
+              </XAxis>
+            </div>
+          </XAxis>
+        </Box>
+        {bottom}
       </Box>
     );
   }

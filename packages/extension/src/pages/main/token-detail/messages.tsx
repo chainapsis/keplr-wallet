@@ -13,7 +13,8 @@ import { useStore } from "../../../stores";
 export const RenderMessages: FunctionComponent<{
   msgHistory: ReturnType<typeof usePaginatedCursorQuery<ResMsgsHistory>>;
   targetDenom: string | ((msg: ResMsgsHistory["msgs"][0]["msg"]) => string);
-}> = observer(({ msgHistory, targetDenom }) => {
+  isInAllActivitiesPage?: boolean;
+}> = observer(({ msgHistory, targetDenom, isInAllActivitiesPage }) => {
   const { chainStore } = useStore();
 
   const msgsPerDaily: {
@@ -121,6 +122,7 @@ export const RenderMessages: FunctionComponent<{
                     msg={msg.msg}
                     prices={msg.prices}
                     targetDenom={denom}
+                    isInAllActivitiesPage={isInAllActivitiesPage}
                   />
                 );
               })}

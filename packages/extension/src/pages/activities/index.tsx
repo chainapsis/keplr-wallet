@@ -332,13 +332,31 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
             <RenderMessages
               msgHistory={msgHistory}
               targetDenom={(msg) => {
-                // 백엔드에서 denoms는 무조건 한개 오도록 보장한다.
+                // "custom/merged-claim-rewards"는 예외임
+                if (msg.relation === "custom/merged-claim-rewards") {
+                  if (!msg.denoms || msg.denoms.length === 0) {
+                    throw new Error(`Invalid denoms: ${msg.denoms})`);
+                  }
+                  const chainInfo = chainStore.getChain(msg.chainId);
+                  if (chainInfo.stakeCurrency) {
+                    if (
+                      msg.denoms.includes(
+                        chainInfo.stakeCurrency.coinMinimalDenom
+                      )
+                    ) {
+                      return chainInfo.stakeCurrency.coinMinimalDenom;
+                    }
+                  }
+                  return msg.denoms[0];
+                }
                 if (!msg.denoms || msg.denoms.length !== 1) {
+                  // 백엔드에서 denoms는 무조건 한개 오도록 보장한다.
                   throw new Error(`Invalid denoms: ${msg.denoms})`);
                 }
 
                 return msg.denoms[0];
               }}
+              isInAllActivitiesPage={true}
             />
           );
         })()}
