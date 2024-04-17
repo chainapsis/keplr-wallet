@@ -6,7 +6,8 @@ export const usePaginatedCursorQuery = <R>(
   initialUriFn: () => string,
   nextCursorQueryString: (page: number, prev: R) => Record<string, string>,
   isEndedFn: (prev: R) => boolean,
-  refreshKey?: string
+  refreshKey?: string,
+  deferInitialFetch?: () => Promise<void>
 ): {
   isFetching: boolean;
   pages: {
@@ -43,37 +44,61 @@ export const usePaginatedCursorQuery = <R>(
 
   // 어차피 바로 useEffect에 의해서 fetch되기 때문에 true로 시작...
   const [isFetching, setIsFetching] = useState(true);
-  const initialFetch = useCallback(() => {
-    const querySeq = currentQuerySeq.current;
-    simpleFetch<R>(baseURLRef.current, initialUriFnRef.current())
-      .then((r) => {
-        if (querySeq === currentQuerySeq.current) {
-          setPages([
-            {
-              response: r.data,
-            },
-          ]);
-        }
-      })
-      .catch((e) => {
-        if (querySeq === currentQuerySeq.current) {
-          setPages([
-            {
-              response: undefined,
-              error: e,
-            },
-          ]);
-        }
-      })
-      .finally(() => {
-        if (querySeq === currentQuerySeq.current) {
-          setIsFetching(false);
-        }
-      });
-  }, []);
+  const _initialFetchIsDuringDeferred = useRef(false);
+  const _initialFetch = () => {
+    const fetch = (setDefer: boolean) => {
+      if (_initialFetchIsDuringDeferred.current) {
+        return;
+      }
+
+      if (setDefer) {
+        _initialFetchIsDuringDeferred.current = true;
+      }
+
+      const querySeq = currentQuerySeq.current;
+      simpleFetch<R>(baseURLRef.current, initialUriFnRef.current())
+        .then((r) => {
+          if (querySeq === currentQuerySeq.current) {
+            setPages([
+              {
+                response: r.data,
+              },
+            ]);
+          }
+        })
+        .catch((e) => {
+          if (querySeq === currentQuerySeq.current) {
+            setPages([
+              {
+                response: undefined,
+                error: e,
+              },
+            ]);
+          }
+        })
+        .finally(() => {
+          if (querySeq === currentQuerySeq.current) {
+            setIsFetching(false);
+          }
+        });
+    };
+
+    if (deferInitialFetch) {
+      deferInitialFetch()
+        .then(() => {
+          fetch(true);
+        })
+        .finally(() => {
+          _initialFetchIsDuringDeferred.current = false;
+        });
+    } else {
+      fetch(false);
+    }
+  };
+  const initialFetchRef = useRef(_initialFetch);
+  initialFetchRef.current = _initialFetch;
   useEffect(() => {
-    initialFetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    initialFetchRef.current();
   }, []);
   const [prevRefreshKey, setPrevRefreshKey] = useState(refreshKey);
   useEffect(() => {
@@ -83,12 +108,11 @@ export const usePaginatedCursorQuery = <R>(
     if (prevRefreshKey !== refreshKey) {
       setPages([]);
       setIsFetching(true);
-      initialFetch();
+      initialFetchRef.current();
 
       setPrevRefreshKey(refreshKey);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshKey]);
+  }, [prevRefreshKey, refreshKey]);
 
   const next = useCallback(() => {
     if (isFetching || pages.length === 0) {

@@ -16,10 +16,81 @@ import { Dropdown } from "../../components/dropdown";
 import { EmptyView } from "../../components/empty-view";
 import { Subtitle3 } from "../../components/typography";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
+import {
+  IAccountStore,
+  IChainInfoImpl,
+  IChainStore,
+} from "@keplr-wallet/stores";
+import { action, autorun, computed, makeObservable, observable } from "mobx";
+import { Bech32Address } from "@keplr-wallet/cosmos";
+import { Buffer } from "buffer/";
+
+// React hook으로 처리하기 귀찮은 부분이 많아서
+// 그냥 대충 mobx로...
+class OtherBech32Addresses {
+  @observable.ref
+  protected supportedChainList: IChainInfoImpl[] = [];
+
+  constructor(
+    protected readonly chainStore: IChainStore,
+    protected readonly accountStore: IAccountStore,
+    protected readonly baseChainId: string
+  ) {
+    makeObservable(this);
+  }
+
+  @action
+  setSupportedChainList(chainInfos: IChainInfoImpl[]) {
+    this.supportedChainList = chainInfos;
+  }
+
+  @computed
+  get otherBech32Addresses(): {
+    chainIdentifier: string;
+    bech32Address: string;
+  }[] {
+    const baseAddress = this.accountStore.getAccount(
+      this.baseChainId
+    ).bech32Address;
+    if (baseAddress) {
+      return this.supportedChainList
+        .filter((chainInfo) => {
+          return chainInfo.chainId !== this.baseChainId;
+        })
+        .filter((chainInfo) => {
+          const baseAccount = this.accountStore.getAccount(this.baseChainId);
+          const account = this.accountStore.getAccount(chainInfo.chainId);
+          if (!account.bech32Address) {
+            return false;
+          }
+          return (
+            Buffer.from(
+              Bech32Address.fromBech32(account.bech32Address).address
+            ).toString("hex") !==
+            Buffer.from(
+              Bech32Address.fromBech32(baseAccount.bech32Address).address
+            ).toString("hex")
+          );
+        })
+        .map((chainInfo) => {
+          const account = this.accountStore.getAccount(chainInfo.chainId);
+          return {
+            chainIdentifier: chainInfo.chainIdentifier,
+            bech32Address: account.bech32Address,
+          };
+        });
+    }
+
+    return [];
+  }
+}
 
 export const ActivitiesPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, priceStore, queriesStore } = useStore();
 
+  const [otherBech32Addresses] = useState(
+    () => new OtherBech32Addresses(chainStore, accountStore, "cosmoshub")
+  );
   const account = accountStore.getAccount("cosmoshub");
 
   const [selectedKey, setSelectedKey] = useState<string>("__all__");
@@ -40,6 +111,8 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
     });
   }, [chainStore.chainInfosInListUI, querySupported.response?.data]);
 
+  otherBech32Addresses.setSupportedChainList(supportedChainList);
+
   const msgHistory = usePaginatedCursorQuery<ResMsgsHistory>(
     process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"],
     () => {
@@ -47,14 +120,23 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
         account.bech32Address
       }&chainIdentifiers=${(() => {
         if (selectedKey === "__all__") {
-          return chainStore.chainInfosInListUI
+          return supportedChainList
             .map((chainInfo) => chainInfo.chainId)
             .join(",");
         }
         return selectedKey;
       })()}&relations=${Relations.join(",")}&vsCurrencies=${
         priceStore.defaultVsCurrency
-      }&limit=${PaginationLimit}`;
+      }&limit=${PaginationLimit}${(() => {
+        if (otherBech32Addresses.otherBech32Addresses.length === 0) {
+          return "";
+        }
+        return `&otherBech32Addresses=${otherBech32Addresses.otherBech32Addresses
+          .map(
+            (address) => `${address.chainIdentifier}:${address.bech32Address}`
+          )
+          .join(",")}`;
+      })()}`;
     },
     (_, prev) => {
       return {
@@ -67,7 +149,34 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
       }
       return false;
     },
-    selectedKey
+    `${selectedKey}/${supportedChainList
+      .map((chainInfo) => chainInfo.chainId)
+      .join(",")}/${otherBech32Addresses.otherBech32Addresses
+      .map((address) => `${address.chainIdentifier}:${address.bech32Address}`)
+      .join(",")}`,
+    () => {
+      // querySupported는 최초에는 undefined 였다가 local에서 cache를 불러오거나 response가 왔을때 변화된다...
+      // 그래서 따로 처리가 없으면 쿼리가 최초에 무조건 두번 발생해서 비효율이 발생한다...
+      // 그래서 querySupported가 response가 있을때까지 기다리도록 한다.
+      // account의 경우는 init 시점에서 account가 다 load되도록 최대한 보장하기 때문에 상관없다.
+      if (querySupported.response) {
+        return Promise.resolve();
+      }
+      return new Promise<void>((resolve) => {
+        if (querySupported.response) {
+          resolve();
+          return;
+        }
+        const disposal = autorun(() => {
+          if (querySupported.response) {
+            if (disposal) {
+              disposal();
+            }
+            resolve();
+          }
+        });
+      });
+    }
   );
 
   const theme = useTheme();
