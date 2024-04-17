@@ -377,6 +377,7 @@
   "page.sign.cosmos.tx.warning-paragraph": "오류: SIGN_MODE_DIRECT는 렛저에서 서명할 수 없습니다. 이슈 해결을 위해 해당 웹 앱의 관리자에게 연락하시길 바랍니다.",
   "page.sign.cosmos.tx.readonly-memo.empty": "(비어있음)",
   "page.sign.cosmos.tx.view-data-button": "데이터 조회",
+  "page.sign.cosmos.tx.high-fee-warning": "트랜잭션 수수료가 평소보다 높습니다.{br}그래도 계속 진행하겠습니다.",
   "page.sign.cosmos.icns.title": "ICNS 등록 요청",
   "page.sign.adr36.title": "소유권 증명",
   "page.sign.adr36.prove-account-ownership-to": "아래의 웹사이트에 계정 소유자임을 증명합니다.",
