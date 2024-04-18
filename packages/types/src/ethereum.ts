@@ -40,3 +40,8 @@ export interface EthTxReceipt {
   type: number;
   status?: EthTxStatus;
 }
+
+export interface EVMInfo {
+  chainId: number;
+  rpc: string;
+}

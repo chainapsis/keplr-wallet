@@ -231,7 +231,8 @@ export function init(
     );
 
   const jsonRpcEthereumService = new JsonRpcEthereum.JsonRpcEthereumService(
-    chainsService
+    chainsService,
+    keyRingV2Service
   );
 
   Interaction.init(router, interactionService);

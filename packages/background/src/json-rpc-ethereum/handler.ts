@@ -32,8 +32,17 @@ export const getHandler: (
 const handleRequestMsg: (
   service: JsonRpcEthereumService,
   permissionInteractionService: PermissionInteractiveService
-) => InternalHandler<RequestJsonRpcEthereum> = (service, _) => {
-  return async (_, msg) => {
-    return await service.request(msg.method, msg.params);
+) => InternalHandler<RequestJsonRpcEthereum> = (
+  service,
+  permissionInteractionService
+) => {
+  return async (env, msg) => {
+    const defaultChainId =
+      await permissionInteractionService.checkEVMPermissionAndGetDefaultChainId(
+        env,
+        msg.origin
+      );
+
+    return await service.request(defaultChainId, msg.method, msg.params);
   };
 };

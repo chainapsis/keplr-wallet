@@ -5,6 +5,7 @@ import {
   ClearAllPermissionsMsg,
   ClearOriginPermissionMsg,
   GetAllPermissionDataPerOriginMsg,
+  RemoveEVMPermissionOriginMsg,
   RemoveGlobalPermissionOriginMsg,
   RemovePermissionOrigin,
 } from "@keplr-wallet/background";
@@ -48,7 +49,9 @@ export class PermissionManagerStore {
     for (const [origin, perms] of Object.entries(this._permissionData)) {
       if (
         perms &&
-        (perms.permissions.length > 0 || perms.globalPermissions.length > 0)
+        (perms.permissions.length > 0 ||
+          perms.globalPermissions.length > 0 ||
+          perms.evmPermissions.length > 0)
       ) {
         trimmed[origin] = perms;
       }
@@ -108,6 +111,21 @@ export class PermissionManagerStore {
       });
 
       const msg = new RemoveGlobalPermissionOriginMsg(type, origin);
+      await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    }
+  }
+
+  async removeEVMPermission(origin: string, type: string) {
+    const perms = this._permissionData[origin];
+    const i = perms
+      ? perms.evmPermissions.findIndex((perm) => perm.type === type)
+      : -1;
+    if (i >= 0 && perms) {
+      runInAction(() => {
+        perms.evmPermissions.splice(i, 1);
+      });
+
+      const msg = new RemoveEVMPermissionOriginMsg(type, origin);
       await this.requester.sendMessage(BACKGROUND_PORT, msg);
     }
   }

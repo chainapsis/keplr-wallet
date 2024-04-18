@@ -54,4 +54,15 @@ export class PermissionInteractiveService {
       origin
     );
   }
+
+  async checkEVMPermissionAndGetDefaultChainId(
+    env: Env,
+    origin: string
+  ): Promise<string> {
+    await this.keyRingService.ensureUnlockInteractive(env);
+
+    await this.permissionService.checkOrGrantEVMPermission(env, origin);
+
+    return this.permissionService.getDefaultChainIdPermittedOrigin(origin);
+  }
 }

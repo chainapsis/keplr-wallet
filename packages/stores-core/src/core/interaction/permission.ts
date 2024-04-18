@@ -1,8 +1,9 @@
 import { InteractionStore } from "./interaction";
 import {
-  GlobalPermissionData,
+  EVMPermissionData,
   INTERACTION_TYPE_GLOBAL_PERMISSION,
   INTERACTION_TYPE_PERMISSION,
+  INTERACTION_TYPE_EVM_PERMISSION,
   PermissionData,
 } from "@keplr-wallet/background";
 import { MessageRequester } from "@keplr-wallet/router";
@@ -40,6 +41,7 @@ export class PermissionStore {
     }
 
     const first = data[0];
+
     const res: {
       ids: string[];
     } & PermissionData = {
@@ -48,6 +50,7 @@ export class PermissionStore {
       type: first.data.type,
       origins: first.data.origins,
     };
+
     for (let i = 1; i < data.length; i++) {
       const d = data[i];
       if (d.data.type !== first.data.type) {
@@ -74,9 +77,21 @@ export class PermissionStore {
   }
 
   get waitingGlobalPermissionDatas() {
-    return this.interactionStore.getAllData<GlobalPermissionData>(
+    return this.interactionStore.getAllData<EVMPermissionData>(
       INTERACTION_TYPE_GLOBAL_PERMISSION
     );
+  }
+
+  get waitingEVMPermissionData() {
+    if (this.waitingEVMPermissionDatas.length > 0) {
+      return this.waitingEVMPermissionDatas[0];
+    }
+  }
+
+  get waitingEVMPermissionDatas() {
+    return this.interactionStore.getAllData<
+      EVMPermissionData & { defaultChainId: string }
+    >(INTERACTION_TYPE_EVM_PERMISSION);
   }
 
   async approvePermissionWithProceedNext(
@@ -113,6 +128,24 @@ export class PermissionStore {
 
   async rejectGlobalPermissionAll() {
     await this.interactionStore.rejectAll(INTERACTION_TYPE_GLOBAL_PERMISSION);
+  }
+
+  async approveEVMPermissionWithProceedNext(
+    id: string,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    await this.interactionStore.approveWithProceedNextV2(id, {}, afterFn);
+  }
+
+  async rejectEVMPermissionWithProceedNext(
+    id: string,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    await this.interactionStore.rejectWithProceedNextV2(id, afterFn);
+  }
+
+  async rejectEVMPermissionAll() {
+    await this.interactionStore.rejectAll(INTERACTION_TYPE_EVM_PERMISSION);
   }
 
   isObsoleteInteraction(id: string | undefined): boolean {

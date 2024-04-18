@@ -6,6 +6,7 @@ import {
   GetGlobalPermissionOriginsMsg,
   GetOriginPermittedChainsMsg,
   GetPermissionOriginsMsg,
+  RemoveEVMPermissionOriginMsg,
   RemoveGlobalPermissionOriginMsg,
   RemovePermissionOrigin,
 } from "./messages";
@@ -52,6 +53,11 @@ export const getHandler: (service: PermissionService) => Handler = (
         return handleRemoveGlobalPermissionOrigin(service)(
           env,
           msg as RemoveGlobalPermissionOriginMsg
+        );
+      case RemoveEVMPermissionOriginMsg:
+        return handleRemoveEVMPermissionOrigin(service)(
+          env,
+          msg as RemoveEVMPermissionOriginMsg
         );
       case ClearOriginPermissionMsg:
         return handleClearOriginPermissionMsg(service)(
@@ -131,12 +137,23 @@ const handleRemoveGlobalPermissionOrigin: (
   };
 };
 
+const handleRemoveEVMPermissionOrigin: (
+  service: PermissionService
+) => InternalHandler<RemoveEVMPermissionOriginMsg> = (service) => {
+  return (_, msg) => {
+    return service.removeEVMPermission(msg.permissionType, [
+      msg.permissionOrigin,
+    ]);
+  };
+};
+
 const handleClearOriginPermissionMsg: (
   service: PermissionService
 ) => InternalHandler<ClearOriginPermissionMsg> = (service) => {
   return (_, msg) => {
     service.removeAllTypePermission([msg.permissionOrigin]);
     service.removeAllTypeGlobalPermission([msg.permissionOrigin]);
+    service.removeAllTypeEVMPermission([msg.permissionOrigin]);
   };
 };
 

@@ -10,6 +10,7 @@ import {
   ClearOriginPermissionMsg,
   ClearAllPermissionsMsg,
   GetAllPermissionDataPerOriginMsg,
+  RemoveEVMPermissionOriginMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -21,6 +22,7 @@ export function init(router: Router, service: PermissionService): void {
   router.registerMessage(RemovePermissionOrigin);
   router.registerMessage(GetGlobalPermissionOriginsMsg);
   router.registerMessage(RemoveGlobalPermissionOriginMsg);
+  router.registerMessage(RemoveEVMPermissionOriginMsg);
   router.registerMessage(ClearOriginPermissionMsg);
   router.registerMessage(ClearAllPermissionsMsg);
   router.registerMessage(GetAllPermissionDataPerOriginMsg);
