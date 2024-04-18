@@ -14,7 +14,7 @@ import { useTheme } from "styled-components";
 import { Gutter } from "../../components/gutter";
 import { Dropdown } from "../../components/dropdown";
 import { EmptyView } from "../../components/empty-view";
-import { Subtitle3 } from "../../components/typography";
+import { H4, Subtitle3 } from "../../components/typography";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
 import {
   IAccountStore,
@@ -24,6 +24,7 @@ import {
 import { action, autorun, computed, makeObservable, observable } from "mobx";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
+import { FormattedMessage } from "react-intl";
 
 // React hook으로 처리하기 귀찮은 부분이 많아서
 // 그냥 대충 mobx로...
@@ -213,8 +214,28 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
   }, [globalSimpleBar.ref, msgHistory]);
 
   return (
-    <MainHeaderLayout>
+    <MainHeaderLayout
+      headerContainerStyle={{
+        borderBottomStyle: "solid",
+        borderBottomWidth: "1px",
+        borderBottomColor:
+          theme.mode === "light"
+            ? ColorPalette["gray-100"]
+            : ColorPalette["gray-500"],
+      }}
+    >
       <Box>
+        <Box alignX="center" alignY="center" paddingY="1.25rem">
+          <H4
+            color={
+              theme.mode === "light"
+                ? ColorPalette["black"]
+                : ColorPalette["white"]
+            }
+          >
+            <FormattedMessage id="page.activity.title" />
+          </H4>
+        </Box>
         <Box paddingX="0.75rem">
           <Dropdown
             size="large"

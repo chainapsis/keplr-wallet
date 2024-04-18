@@ -79,6 +79,7 @@ import { useTheme } from "styled-components";
 import { PageChangeScrollTop } from "./use-page-change-scroll-top";
 import { IBCSwapPage } from "./pages/ibc-swap";
 import {
+  BottomTabActivityIcon,
   BottomTabHomeIcon,
   BottomTabSettingIcon,
   BottomTabsRouteProvider,
@@ -304,8 +305,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
           },
           {
             pathname: "/activities",
-            icon: <BottomTabSwapIcon width="1.75rem" height="1.75rem" />,
-            text: "test",
+            icon: <BottomTabActivityIcon width="1.75rem" height="1.75rem" />,
+            text: intl.formatMessage({
+              id: "bottom-tabs.activity",
+            }),
           },
           {
             pathname: "/setting",
