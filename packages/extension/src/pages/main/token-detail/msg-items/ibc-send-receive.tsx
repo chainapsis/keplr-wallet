@@ -5,12 +5,9 @@ import { useStore } from "../../../../stores";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { MsgItemBase } from "./base";
 import { ItemLogo } from "./logo";
-import { ChainInfo } from "@keplr-wallet/types";
-import { ChainImageFallback } from "../../../../components/image";
 import { isValidCoinStr, parseCoinStr } from "@keplr-wallet/common";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
-import { UnknownChainImage } from "./unknown-chain-image";
 
 export const MsgRelationIBCSendReceive: FunctionComponent<{
   msg: MsgHistory;
@@ -54,46 +51,6 @@ export const MsgRelationIBCSendReceive: FunctionComponent<{
     }
   })();
 
-  const sourceChain: ChainInfo | undefined = (() => {
-    if (!msg.ibcTracking) {
-      return undefined;
-    }
-
-    try {
-      for (const path of msg.ibcTracking.paths) {
-        if (!path.chainId) {
-          return undefined;
-        }
-        if (!chainStore.hasChain(path.chainId)) {
-          return undefined;
-        }
-
-        if (!path.clientChainId) {
-          return undefined;
-        }
-        if (!chainStore.hasChain(path.clientChainId)) {
-          return undefined;
-        }
-      }
-
-      if (msg.ibcTracking.paths.length > 0) {
-        const path = msg.ibcTracking.paths[0];
-        if (!path.chainId) {
-          return undefined;
-        }
-        if (!chainStore.hasChain(path.chainId)) {
-          return undefined;
-        }
-        return chainStore.getChain(path.chainId);
-      }
-
-      return undefined;
-    } catch (e) {
-      console.log(e);
-      return undefined;
-    }
-  })();
-
   return (
     <MsgItemBase
       logo={
@@ -114,13 +71,6 @@ export const MsgRelationIBCSendReceive: FunctionComponent<{
                 d="M13 3L3 13m0 0h7.5M3 13V5.5"
               />
             </svg>
-          }
-          deco={
-            sourceChain ? (
-              <ChainImageFallback chainInfo={sourceChain} size="0.875rem" />
-            ) : (
-              <UnknownChainImage size="0.875rem" />
-            )
           }
         />
       }

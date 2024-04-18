@@ -7,9 +7,6 @@ import { CoinPretty } from "@keplr-wallet/unit";
 import { MsgItemBase } from "./base";
 import { ItemLogo } from "./logo";
 import { Buffer } from "buffer/";
-import { ChainInfo } from "@keplr-wallet/types";
-import { ChainImageFallback } from "../../../../components/image";
-import { UnknownChainImage } from "./unknown-chain-image";
 
 export const MsgRelationIBCSend: FunctionComponent<{
   msg: MsgHistory;
@@ -68,38 +65,6 @@ export const MsgRelationIBCSend: FunctionComponent<{
     }
   })();
 
-  const destinationChain: ChainInfo | undefined = (() => {
-    if (!msg.ibcTracking) {
-      return undefined;
-    }
-
-    try {
-      let res: ChainInfo | undefined = undefined;
-      for (const path of msg.ibcTracking.paths) {
-        if (!path.chainId) {
-          return undefined;
-        }
-        if (!chainStore.hasChain(path.chainId)) {
-          return undefined;
-        }
-
-        if (!path.clientChainId) {
-          return undefined;
-        }
-        if (!chainStore.hasChain(path.clientChainId)) {
-          return undefined;
-        }
-
-        res = chainStore.getChain(path.clientChainId);
-      }
-
-      return res;
-    } catch (e) {
-      console.log(e);
-      return undefined;
-    }
-  })();
-
   return (
     <MsgItemBase
       logo={
@@ -120,16 +85,6 @@ export const MsgRelationIBCSend: FunctionComponent<{
                 d="M3 13.5l10-10m0 0H5.5m7.5 0V11"
               />
             </svg>
-          }
-          deco={
-            destinationChain ? (
-              <ChainImageFallback
-                chainInfo={destinationChain}
-                size="0.875rem"
-              />
-            ) : (
-              <UnknownChainImage size="0.875rem" />
-            )
           }
         />
       }

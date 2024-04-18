@@ -6,9 +6,7 @@ import { CoinPretty } from "@keplr-wallet/unit";
 import { MsgItemBase } from "./base";
 import { ItemLogo } from "./logo";
 import { ChainInfo } from "@keplr-wallet/types";
-import { ChainImageFallback } from "../../../../components/image";
 import { isValidCoinStr, parseCoinStr } from "@keplr-wallet/common";
-import { UnknownChainImage } from "./unknown-chain-image";
 import { Buffer } from "buffer/";
 
 export const MsgRelationIBCSwapReceive: FunctionComponent<{
@@ -222,17 +220,6 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
               />
             </svg>
           }
-          deco={(() => {
-            if (!msg.ibcTracking) {
-              return undefined;
-            }
-
-            return sourceChain ? (
-              <ChainImageFallback chainInfo={sourceChain} size="0.875rem" />
-            ) : (
-              <UnknownChainImage size="0.875rem" />
-            );
-          })()}
         />
       }
       chainId={msg.chainId}
