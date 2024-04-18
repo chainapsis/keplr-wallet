@@ -18,4 +18,5 @@ export interface DropdownProps {
   menuContainerMaxHeight?: string;
 
   allowSearch?: boolean;
+  searchExcludedKeys?: string[];
 }
