@@ -359,6 +359,16 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
                     throw new Error(`Invalid denoms: ${msg.denoms})`);
                   }
                   const chainInfo = chainStore.getChain(msg.chainId);
+                  if (chainInfo.chainIdentifier === "dydx-mainnet") {
+                    // dydx는 USDC에 우선권을 줌
+                    if (
+                      msg.denoms.includes(
+                        "ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5"
+                      )
+                    ) {
+                      return "ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5";
+                    }
+                  }
                   if (chainInfo.stakeCurrency) {
                     if (
                       msg.denoms.includes(
