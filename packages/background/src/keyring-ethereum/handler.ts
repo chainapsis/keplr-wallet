@@ -5,7 +5,7 @@ import {
   KeplrError,
   Message,
 } from "@keplr-wallet/router";
-import { RequestSignEthereumMsg } from "./messages";
+import { RequestSignEthereumMsg, RequestJsonRpcToEvmMsg } from "./messages";
 import { KeyRingEthereumService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
 
@@ -23,6 +23,11 @@ export const getHandler: (
           service,
           permissionInteractionService
         )(env, msg as RequestSignEthereumMsg);
+      case RequestJsonRpcToEvmMsg:
+        return handleRequestJsonRpcToEvmMsg(
+          service,
+          permissionInteractionService
+        )(env, msg as RequestJsonRpcToEvmMsg);
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -51,5 +56,23 @@ const handleRequestSignEthereumMsg: (
       msg.message,
       msg.signType
     );
+  };
+};
+
+const handleRequestJsonRpcToEvmMsg: (
+  service: KeyRingEthereumService,
+  permissionInteractionService: PermissionInteractiveService
+) => InternalHandler<RequestJsonRpcToEvmMsg> = (
+  service,
+  permissionInteractionService
+) => {
+  return async (env, msg) => {
+    const defaultChainId =
+      await permissionInteractionService.checkEVMPermissionAndGetDefaultChainId(
+        env,
+        msg.origin
+      );
+
+    return await service.request(defaultChainId, msg.method, msg.params);
   };
 };

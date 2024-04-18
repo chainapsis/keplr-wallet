@@ -3,7 +3,7 @@ import { KeyRingService } from "../keyring";
 import { InteractionService } from "../interaction";
 import { AnalyticsService } from "../analytics";
 import { Env } from "@keplr-wallet/router";
-import { ChainInfo, EthSignType } from "@keplr-wallet/types";
+import { ChainInfo, EthSignType, EVMInfo } from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
 import {
@@ -13,8 +13,14 @@ import {
   messageHash,
 } from "../keyring-cosmos";
 import { serialize } from "@ethersproject/transactions";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { getAddress as getEthAddressWithMixedCaseChecksum } from "@ethersproject/address";
 
 export class KeyRingEthereumService {
+  static evmInfo(chainInfo: ChainInfo): EVMInfo | undefined {
+    return chainInfo.evm;
+  }
+
   constructor(
     protected readonly chainsService: ChainsService,
     protected readonly keyRingService: KeyRingService,
@@ -193,7 +199,50 @@ export class KeyRingEthereumService {
     );
   }
 
-  static evmInfo(chainInfo: ChainInfo): ChainInfo["evm"] | undefined {
-    return chainInfo.evm;
+  async request(
+    defaultChainId: string,
+    method: string,
+    params?: any[]
+  ): Promise<any> {
+    const chainInfo = this.chainsService.getChainInfo(defaultChainId);
+    if (chainInfo === undefined || chainInfo.evm === undefined) {
+      throw new Error("No chain info or EVM info provided");
+    }
+
+    const pubkey = await this.keyRingService.getPubKeySelected(
+      chainInfo.chainId
+    );
+    const ethereumHexAddress = getEthAddressWithMixedCaseChecksum(
+      `0x${Buffer.from(pubkey.getEthAddress()).toString("hex")}`
+    );
+    const evmInfo = chainInfo.evm;
+
+    switch (method) {
+      case "eth_chainId":
+        return `0x${evmInfo.chainId.toString(16)}`;
+      case "eth_accounts":
+      case "eth_requestAccounts":
+        return [ethereumHexAddress];
+      default:
+        return (
+          await simpleFetch<{
+            jsonrpc: string;
+            id: number;
+            result: any;
+            error?: Error;
+          }>(evmInfo.rpc, {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+            },
+            body: JSON.stringify({
+              jsonrpc: "2.0",
+              method,
+              params,
+              id: 1,
+            }),
+          })
+        ).data.result;
+    }
   }
 }

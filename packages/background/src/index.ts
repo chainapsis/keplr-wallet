@@ -26,7 +26,6 @@ import * as KeyRingEthereum from "./keyring-ethereum/internal";
 import * as PermissionInteractive from "./permission-interactive/internal";
 import * as TokenScan from "./token-scan/internal";
 import * as RecentSendHistory from "./recent-send-history/internal";
-import * as JsonRpcEthereum from "./json-rpc-ethereum/internal";
 
 export * from "./chains";
 export * from "./chains-ui";
@@ -48,7 +47,6 @@ export * from "./keyring-ethereum";
 export * from "./keyring-keystone";
 export * from "./token-scan";
 export * from "./recent-send-history";
-export * from "./json-rpc-ethereum";
 
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
@@ -230,11 +228,6 @@ export function init(
       notification
     );
 
-  const jsonRpcEthereumService = new JsonRpcEthereum.JsonRpcEthereumService(
-    chainsService,
-    keyRingV2Service
-  );
-
   Interaction.init(router, interactionService);
   Permission.init(router, permissionService);
   Chains.init(
@@ -276,11 +269,6 @@ export function init(
   SecretWasm.init(router, secretWasmService, permissionInteractiveService);
   TokenScan.init(router, tokenScanService);
   RecentSendHistory.init(router, recentSendHistoryService);
-  JsonRpcEthereum.init(
-    router,
-    jsonRpcEthereumService,
-    permissionInteractiveService
-  );
 
   return {
     initFn: async () => {
@@ -310,8 +298,6 @@ export function init(
       await recentSendHistoryService.init();
 
       await chainsService.afterInit();
-
-      await jsonRpcEthereumService.init();
     },
     keyRingService: keyRingV2Service,
   };

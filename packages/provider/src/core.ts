@@ -664,8 +664,8 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     return await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
-      "json-rpc-ethereum",
-      "request-json-rpc-ethereum",
+      "keyring-ethereum",
+      "request-json-rpc-to-evm",
       {
         method,
         params,
