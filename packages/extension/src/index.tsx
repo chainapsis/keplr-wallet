@@ -79,6 +79,7 @@ import { useTheme } from "styled-components";
 import { PageChangeScrollTop } from "./use-page-change-scroll-top";
 import { IBCSwapPage } from "./pages/ibc-swap";
 import {
+  BottomTabActivityIcon,
   BottomTabHomeIcon,
   BottomTabSettingIcon,
   BottomTabsRouteProvider,
@@ -87,6 +88,7 @@ import {
 import { IBCSwapDestinationSelectAssetPage } from "./pages/ibc-swap/select-asset";
 import { RoutePageAnalytics } from "./route-page-analytics";
 import { useIntl } from "react-intl";
+import { ActivitiesPage } from "./pages/activities";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -302,6 +304,13 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             }),
           },
           {
+            pathname: "/activities",
+            icon: <BottomTabActivityIcon width="1.75rem" height="1.75rem" />,
+            text: intl.formatMessage({
+              id: "bottom-tabs.activity",
+            }),
+          },
+          {
             pathname: "/setting",
             icon: <BottomTabSettingIcon width="1.75rem" height="1.75rem" />,
             text: intl.formatMessage({
@@ -332,6 +341,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
                 path="/ibc-swap/select-destination"
                 element={<IBCSwapDestinationSelectAssetPage />}
               />
+              <Route path="/activities" element={<ActivitiesPage />} />
               <Route path="/setting" element={<SettingPage />} />
               <Route path="/setting/general" element={<SettingGeneralPage />} />
               <Route

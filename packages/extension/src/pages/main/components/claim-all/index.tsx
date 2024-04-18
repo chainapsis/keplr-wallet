@@ -65,6 +65,9 @@ const Styles = {
 
     cursor: pointer;
 
+    border-bottom-left-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+
     ${({ viewTokenCount }) => {
       if (viewTokenCount === 0) {
         return css`
@@ -76,7 +79,7 @@ const Styles = {
         :hover {
           background-color: ${(props) =>
             props.theme.mode === "light"
-              ? ColorPalette["gray-50"]
+              ? ColorPalette["gray-10"]
               : Color(ColorPalette["gray-500"]).alpha(0.5).toString()};
         }
 
@@ -84,7 +87,7 @@ const Styles = {
           background-color: ${(props) =>
             props.theme.mode === "light"
               ? ColorPalette["gray-50"]
-              : Color(ColorPalette["gray-500"]).alpha(0.2).toString()};
+              : ColorPalette["gray-500"]};
         }
       `;
     }};

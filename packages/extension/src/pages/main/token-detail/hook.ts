@@ -5,7 +5,9 @@ export const usePaginatedCursorQuery = <R>(
   baseURL: string,
   initialUriFn: () => string,
   nextCursorQueryString: (page: number, prev: R) => Record<string, string>,
-  isEndedFn: (prev: R) => boolean
+  isEndedFn: (prev: R) => boolean,
+  refreshKey?: string,
+  deferInitialFetch?: () => Promise<void>
 ): {
   isFetching: boolean;
   pages: {
@@ -30,29 +32,87 @@ export const usePaginatedCursorQuery = <R>(
   const isEndedFnRef = useRef(isEndedFn);
   isEndedFnRef.current = isEndedFn;
 
+  // refresh를 할때 이전에 쿼리가 진행 중이면
+  // 두 쿼리 중에 뭐가 먼저 끝나느냐에 따라서 결과가 달라진다...
+  // 쿼리는 cancel하는게 맞겠지만
+  // 귀찮으니 그냥 seq를 이용해서 처리한다.
+  const currentQuerySeq = useRef(0);
+  useEffect(() => {
+    currentQuerySeq.current++;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshKey]);
+
   // 어차피 바로 useEffect에 의해서 fetch되기 때문에 true로 시작...
   const [isFetching, setIsFetching] = useState(true);
+  const _initialFetchIsDuringDeferred = useRef(false);
+  const _initialFetch = () => {
+    const fetch = (setDefer: boolean) => {
+      if (_initialFetchIsDuringDeferred.current) {
+        return;
+      }
+
+      if (setDefer) {
+        _initialFetchIsDuringDeferred.current = true;
+      }
+
+      const querySeq = currentQuerySeq.current;
+      simpleFetch<R>(baseURLRef.current, initialUriFnRef.current())
+        .then((r) => {
+          if (querySeq === currentQuerySeq.current) {
+            setPages([
+              {
+                response: r.data,
+              },
+            ]);
+          }
+        })
+        .catch((e) => {
+          if (querySeq === currentQuerySeq.current) {
+            setPages([
+              {
+                response: undefined,
+                error: e,
+              },
+            ]);
+          }
+        })
+        .finally(() => {
+          if (querySeq === currentQuerySeq.current) {
+            setIsFetching(false);
+          }
+        });
+    };
+
+    if (deferInitialFetch) {
+      deferInitialFetch()
+        .then(() => {
+          fetch(true);
+        })
+        .finally(() => {
+          _initialFetchIsDuringDeferred.current = false;
+        });
+    } else {
+      fetch(false);
+    }
+  };
+  const initialFetchRef = useRef(_initialFetch);
+  initialFetchRef.current = _initialFetch;
   useEffect(() => {
-    simpleFetch<R>(baseURLRef.current, initialUriFnRef.current())
-      .then((r) => {
-        setPages([
-          {
-            response: r.data,
-          },
-        ]);
-      })
-      .catch((e) => {
-        setPages([
-          {
-            response: undefined,
-            error: e,
-          },
-        ]);
-      })
-      .finally(() => {
-        setIsFetching(false);
-      });
+    initialFetchRef.current();
   }, []);
+  const [prevRefreshKey, setPrevRefreshKey] = useState(refreshKey);
+  useEffect(() => {
+    // 위에서 빈 deps의 useEffect에 의해서 처음에 쿼리가 발생한다.
+    // prevRefreshKey 로직이 없으면 이 로직도 실행되면서 쿼리가 두번 발생한다.
+    // 이 문제를 해결하려고 prevRefreshKey를 사용한다.
+    if (prevRefreshKey !== refreshKey) {
+      setPages([]);
+      setIsFetching(true);
+      initialFetchRef.current();
+
+      setPrevRefreshKey(refreshKey);
+    }
+  }, [prevRefreshKey, refreshKey]);
 
   const next = useCallback(() => {
     if (isFetching || pages.length === 0) {
@@ -78,28 +138,35 @@ export const usePaginatedCursorQuery = <R>(
     }
 
     setIsFetching(true);
+    const querySeq = currentQuerySeq.current;
     simpleFetch<R>(baseURLRef.current, uri)
       .then((r) => {
-        setPages((prev) => {
-          const newPages = prev.slice();
-          newPages.push({
-            response: r.data,
+        if (querySeq === currentQuerySeq.current) {
+          setPages((prev) => {
+            const newPages = prev.slice();
+            newPages.push({
+              response: r.data,
+            });
+            return newPages;
           });
-          return newPages;
-        });
+        }
       })
       .catch((e) => {
-        setPages((prev) => {
-          const newPages = prev.slice();
-          newPages.push({
-            response: undefined,
-            error: e,
+        if (querySeq === currentQuerySeq.current) {
+          setPages((prev) => {
+            const newPages = prev.slice();
+            newPages.push({
+              response: undefined,
+              error: e,
+            });
+            return newPages;
           });
-          return newPages;
-        });
+        }
       })
       .finally(() => {
-        setIsFetching(false);
+        if (querySeq === currentQuerySeq.current) {
+          setIsFetching(false);
+        }
       });
   }, [isFetching, pages]);
 

@@ -5,14 +5,12 @@ import { useTheme } from "styled-components";
 
 export const ItemLogo: FunctionComponent<{
   center: React.ReactElement;
-  deco?: React.ReactElement;
   backgroundColor?: string;
-}> = ({ center, deco, backgroundColor }) => {
+}> = ({ center, backgroundColor }) => {
   const theme = useTheme();
 
   return (
     <Box
-      position="relative"
       width="2rem"
       height="2rem"
       backgroundColor={
@@ -28,21 +26,6 @@ export const ItemLogo: FunctionComponent<{
       <Box alignX="center" alignY="center" color={ColorPalette["gray-200"]}>
         {center}
       </Box>
-      {deco ? (
-        <div
-          style={{
-            position: "absolute",
-            bottom: "-0.125rem",
-            right: "-0.125rem",
-
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          {deco}
-        </div>
-      ) : null}
     </Box>
   );
 };

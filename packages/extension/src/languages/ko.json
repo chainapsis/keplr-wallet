@@ -25,6 +25,7 @@
 
   "bottom-tabs.home": "홈",
   "bottom-tabs.swap": "스왑",
+  "bottom-tabs.activity": "활동내역",
   "bottom-tabs.settings": "설정",
 
   "pages.register.components.header.intro-title": "내 손 안의 인터체인",
@@ -378,6 +379,8 @@
   "page.ibc-swap.components.slippage-modal.title": "슬리피지 설정",
   "page.ibc-swap.components.slippage-modal.label.slippage-tolerance": "슬리피지 허용치",
   "page.ibc-swap.components.slippage-modal.label.slippage-custom": "커스텀 설정",
+
+  "page.activity.title": "활동내역",
 
   "page.permission.unknown-permission": "알수없는 권한",
   "page.permission.requesting-connection-title": "연결 요청",

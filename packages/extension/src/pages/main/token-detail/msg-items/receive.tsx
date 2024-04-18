@@ -8,11 +8,11 @@ import { MsgItemBase } from "./base";
 import { ItemLogo } from "./logo";
 
 export const MsgRelationReceive: FunctionComponent<{
-  explorerUrl: string;
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = observer(({ explorerUrl, msg, prices, targetDenom }) => {
+  isInAllActivitiesPage: boolean | undefined;
+}> = observer(({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
   const { chainStore } = useStore();
 
   const chainInfo = chainStore.getChain(msg.chainId);
@@ -43,7 +43,6 @@ export const MsgRelationReceive: FunctionComponent<{
 
   return (
     <MsgItemBase
-      explorerUrl={explorerUrl}
       logo={
         <ItemLogo
           center={
@@ -76,6 +75,7 @@ export const MsgRelationReceive: FunctionComponent<{
         color: "green",
         prefix: "plus",
       }}
+      isInAllActivitiesPage={isInAllActivitiesPage}
     />
   );
 });

@@ -10,11 +10,11 @@ import { ItemLogo } from "./logo";
 import { useTheme } from "styled-components";
 
 export const MsgRelationUndelegate: FunctionComponent<{
-  explorerUrl: string;
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = observer(({ explorerUrl, msg, prices, targetDenom }) => {
+  isInAllActivitiesPage: boolean | undefined;
+}> = observer(({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
   const { chainStore, queriesStore } = useStore();
 
   const theme = useTheme();
@@ -71,7 +71,6 @@ export const MsgRelationUndelegate: FunctionComponent<{
 
   return (
     <MsgItemBase
-      explorerUrl={explorerUrl}
       logo={
         <ItemLogo
           center={
@@ -102,6 +101,7 @@ export const MsgRelationUndelegate: FunctionComponent<{
       prices={prices || {}}
       msg={msg}
       targetDenom={targetDenom}
+      isInAllActivitiesPage={isInAllActivitiesPage}
     />
   );
 });

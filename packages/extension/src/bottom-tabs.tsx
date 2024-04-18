@@ -183,6 +183,27 @@ export const BottomTabSwapIcon: FunctionComponent<{
   );
 };
 
+export const BottomTabActivityIcon: FunctionComponent<{
+  width: string;
+  height: string;
+}> = ({ width, height }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      fill="none"
+      stroke="none"
+      viewBox="0 0 28 28"
+    >
+      <path
+        fill="currentColor"
+        d="M17.584 6.167h-9.75V23.5h13V9.417h-3.25v-3.25zM7.834 4h10.833L23 8.334V23.5a2.166 2.166 0 01-2.166 2.167h-13A2.167 2.167 0 015.667 23.5V6.167A2.167 2.167 0 017.834 4zM10 13.75h8.667v2.167H10V13.75zm0 4.334h8.667v2.166H10v-2.166z"
+      />
+    </svg>
+  );
+};
+
 export const BottomTabSettingIcon: FunctionComponent<{
   width: string;
   height: string;
