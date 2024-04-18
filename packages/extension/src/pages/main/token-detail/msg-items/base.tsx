@@ -9,6 +9,7 @@ import { useStore } from "../../../../stores";
 import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
 import { MsgHistory } from "../types";
 import { useTheme } from "styled-components";
+import { ChainImageFallback } from "../../../../components/image";
 
 export const MsgItemBase: FunctionComponent<{
   logo: React.ReactElement;
@@ -26,6 +27,7 @@ export const MsgItemBase: FunctionComponent<{
     prefix: "none" | "plus" | "minus";
     color: "none" | "green";
   };
+  isInAllActivitiesPage: boolean | undefined;
 }> = observer(
   ({
     logo,
@@ -40,6 +42,7 @@ export const MsgItemBase: FunctionComponent<{
     msg,
     targetDenom,
     amountDeco,
+    isInAllActivitiesPage,
   }) => {
     const { chainStore, priceStore, queriesStore } = useStore();
 
@@ -124,7 +127,31 @@ export const MsgItemBase: FunctionComponent<{
         >
           <XAxis alignY="center">
             <Box marginRight="0.75rem">
-              <XAxis alignY="center">{logo}</XAxis>
+              <XAxis alignY="center">
+                <Box position="relative">
+                  {logo}
+                  {isInAllActivitiesPage ? (
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: "-0.125rem",
+                        right: "-0.125rem",
+
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      {
+                        <ChainImageFallback
+                          chainInfo={chainInfo}
+                          size="0.875rem"
+                        />
+                      }
+                    </div>
+                  ) : null}
+                </Box>
+              </XAxis>
             </Box>
             <div
               style={{

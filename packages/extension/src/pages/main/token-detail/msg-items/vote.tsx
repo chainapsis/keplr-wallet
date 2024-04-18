@@ -10,7 +10,8 @@ export const MsgRelationVote: FunctionComponent<{
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = observer(({ msg, prices, targetDenom }) => {
+  isInAllActivitiesPage: boolean | undefined;
+}> = observer(({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
   const theme = useTheme();
 
   const proposal: {
@@ -126,6 +127,7 @@ export const MsgRelationVote: FunctionComponent<{
       prices={prices || {}}
       msg={msg}
       targetDenom={targetDenom}
+      isInAllActivitiesPage={isInAllActivitiesPage}
     />
   );
 });

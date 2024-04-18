@@ -13,7 +13,8 @@ export const MsgRelationIBCSendReceive: FunctionComponent<{
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = observer(({ msg, prices, targetDenom }) => {
+  isInAllActivitiesPage: boolean | undefined;
+}> = observer(({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
   const { chainStore } = useStore();
 
   const chainInfo = chainStore.getChain(msg.chainId);
@@ -85,6 +86,7 @@ export const MsgRelationIBCSendReceive: FunctionComponent<{
         color: "green",
         prefix: "plus",
       }}
+      isInAllActivitiesPage={isInAllActivitiesPage}
     />
   );
 });

@@ -47,7 +47,12 @@ const MsgItemRenderInner: FunctionComponent<{
   switch (msg.relation) {
     case "send": {
       return (
-        <MsgRelationSend msg={msg} prices={prices} targetDenom={targetDenom} />
+        <MsgRelationSend
+          msg={msg}
+          prices={prices}
+          targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
+        />
       );
     }
     case "receive": {
@@ -56,6 +61,7 @@ const MsgItemRenderInner: FunctionComponent<{
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
@@ -65,6 +71,7 @@ const MsgItemRenderInner: FunctionComponent<{
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
@@ -74,6 +81,7 @@ const MsgItemRenderInner: FunctionComponent<{
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
@@ -83,6 +91,7 @@ const MsgItemRenderInner: FunctionComponent<{
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
@@ -92,6 +101,7 @@ const MsgItemRenderInner: FunctionComponent<{
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
@@ -101,6 +111,7 @@ const MsgItemRenderInner: FunctionComponent<{
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
@@ -110,6 +121,7 @@ const MsgItemRenderInner: FunctionComponent<{
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
@@ -119,6 +131,7 @@ const MsgItemRenderInner: FunctionComponent<{
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
@@ -128,6 +141,7 @@ const MsgItemRenderInner: FunctionComponent<{
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
@@ -137,6 +151,7 @@ const MsgItemRenderInner: FunctionComponent<{
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
@@ -146,12 +161,18 @@ const MsgItemRenderInner: FunctionComponent<{
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
     case "vote": {
       return (
-        <MsgRelationVote msg={msg} prices={prices} targetDenom={targetDenom} />
+        <MsgRelationVote
+          msg={msg}
+          prices={prices}
+          targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
+        />
       );
     }
     case "custom/merged-claim-rewards": {

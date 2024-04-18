@@ -13,7 +13,8 @@ export const MsgRelationUndelegate: FunctionComponent<{
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = observer(({ msg, prices, targetDenom }) => {
+  isInAllActivitiesPage: boolean | undefined;
+}> = observer(({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
   const { chainStore, queriesStore } = useStore();
 
   const theme = useTheme();
@@ -100,6 +101,7 @@ export const MsgRelationUndelegate: FunctionComponent<{
       prices={prices || {}}
       msg={msg}
       targetDenom={targetDenom}
+      isInAllActivitiesPage={isInAllActivitiesPage}
     />
   );
 });

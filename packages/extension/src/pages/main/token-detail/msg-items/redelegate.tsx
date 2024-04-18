@@ -11,7 +11,8 @@ export const MsgRelationRedelegate: FunctionComponent<{
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = observer(({ msg, prices, targetDenom }) => {
+  isInAllActivitiesPage: boolean | undefined;
+}> = observer(({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
   const { chainStore, queriesStore } = useStore();
 
   const chainInfo = chainStore.getChain(msg.chainId);
@@ -125,6 +126,7 @@ export const MsgRelationRedelegate: FunctionComponent<{
       prices={prices || {}}
       msg={msg}
       targetDenom={targetDenom}
+      isInAllActivitiesPage={isInAllActivitiesPage}
     />
   );
 });

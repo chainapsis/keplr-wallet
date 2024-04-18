@@ -20,7 +20,7 @@ export const MsgRelationMergedClaimRewards: FunctionComponent<{
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-  isInAllActivitiesPage?: boolean;
+  isInAllActivitiesPage: boolean | undefined;
 }> = observer(({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
   const { chainStore } = useStore();
   const theme = useTheme();
@@ -122,6 +122,7 @@ export const MsgRelationMergedClaimRewards: FunctionComponent<{
           }
         }
       })()}
+      isInAllActivitiesPage={isInAllActivitiesPage}
     />
   );
 });
