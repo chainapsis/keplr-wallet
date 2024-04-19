@@ -7,7 +7,7 @@ export const usePaginatedCursorQuery = <R>(
   nextCursorQueryString: (page: number, prev: R) => Record<string, string>,
   isEndedFn: (prev: R) => boolean,
   refreshKey?: string,
-  deferInitialFetch?: () => Promise<void>
+  isValidKey?: (key: string) => boolean
 ): {
   isFetching: boolean;
   pages: {
@@ -32,6 +32,9 @@ export const usePaginatedCursorQuery = <R>(
   const isEndedFnRef = useRef(isEndedFn);
   isEndedFnRef.current = isEndedFn;
 
+  const isValidKeyRef = useRef(isValidKey);
+  isValidKeyRef.current = isValidKey;
+
   // refresh를 할때 이전에 쿼리가 진행 중이면
   // 두 쿼리 중에 뭐가 먼저 끝나느냐에 따라서 결과가 달라진다...
   // 쿼리는 cancel하는게 맞겠지만
@@ -46,13 +49,9 @@ export const usePaginatedCursorQuery = <R>(
   const [isFetching, setIsFetching] = useState(true);
   const _initialFetchIsDuringDeferred = useRef(false);
   const _initialFetch = () => {
-    const fetch = (setDefer: boolean) => {
+    const fetch = () => {
       if (_initialFetchIsDuringDeferred.current) {
         return;
-      }
-
-      if (setDefer) {
-        _initialFetchIsDuringDeferred.current = true;
       }
 
       const querySeq = currentQuerySeq.current;
@@ -83,22 +82,19 @@ export const usePaginatedCursorQuery = <R>(
         });
     };
 
-    if (deferInitialFetch) {
-      deferInitialFetch()
-        .then(() => {
-          fetch(true);
-        })
-        .finally(() => {
-          _initialFetchIsDuringDeferred.current = false;
-        });
-    } else {
-      fetch(false);
-    }
+    fetch();
   };
   const initialFetchRef = useRef(_initialFetch);
   initialFetchRef.current = _initialFetch;
   useEffect(() => {
-    initialFetchRef.current();
+    if (
+      !isValidKeyRef.current ||
+      !refreshKey ||
+      isValidKeyRef.current(refreshKey)
+    ) {
+      initialFetchRef.current();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [prevRefreshKey, setPrevRefreshKey] = useState(refreshKey);
   useEffect(() => {
@@ -106,9 +102,15 @@ export const usePaginatedCursorQuery = <R>(
     // prevRefreshKey 로직이 없으면 이 로직도 실행되면서 쿼리가 두번 발생한다.
     // 이 문제를 해결하려고 prevRefreshKey를 사용한다.
     if (prevRefreshKey !== refreshKey) {
-      setPages([]);
-      setIsFetching(true);
-      initialFetchRef.current();
+      if (
+        !isValidKeyRef.current ||
+        !refreshKey ||
+        isValidKeyRef.current(refreshKey)
+      ) {
+        setPages([]);
+        setIsFetching(true);
+        initialFetchRef.current();
+      }
 
       setPrevRefreshKey(refreshKey);
     }
