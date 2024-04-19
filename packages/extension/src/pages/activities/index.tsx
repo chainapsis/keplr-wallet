@@ -21,7 +21,7 @@ import {
   IChainInfoImpl,
   IChainStore,
 } from "@keplr-wallet/stores";
-import { action, autorun, computed, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
 import { FormattedMessage } from "react-intl";
@@ -155,28 +155,10 @@ export const ActivitiesPage: FunctionComponent = observer(() => {
       .join(",")}/${otherBech32Addresses.otherBech32Addresses
       .map((address) => `${address.chainIdentifier}:${address.bech32Address}`)
       .join(",")}`,
-    () => {
-      // querySupported는 최초에는 undefined 였다가 local에서 cache를 불러오거나 response가 왔을때 변화된다...
-      // 그래서 따로 처리가 없으면 쿼리가 최초에 무조건 두번 발생해서 비효율이 발생한다...
-      // 그래서 querySupported가 response가 있을때까지 기다리도록 한다.
-      // account의 경우는 init 시점에서 account가 다 load되도록 최대한 보장하기 때문에 상관없다.
-      if (querySupported.response) {
-        return Promise.resolve();
-      }
-      return new Promise<void>((resolve) => {
-        if (querySupported.response) {
-          resolve();
-          return;
-        }
-        const disposal = autorun(() => {
-          if (querySupported.response) {
-            if (disposal) {
-              disposal();
-            }
-            resolve();
-          }
-        });
-      });
+    (key: string) => {
+      // key가 아래와 같으면 querySupported나 account 중 하나도 load되지 않은 경우다.
+      // 이런 경우 query를 할 필요가 없다.
+      return key !== `${selectedKey}//`;
     }
   );
 
