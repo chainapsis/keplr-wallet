@@ -238,15 +238,36 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
           }
 
           if (method === "ethereum") {
-            if (
-              message.ethereumProviderMethod === undefined ||
-              typeof keplr.ethereum[message.ethereumProviderMethod] !==
-                "function"
-            ) {
-              throw new Error("Invalid Ethereum provider method");
+            const ethereumProviderMethod = message.ethereumProviderMethod;
+
+            if (ethereumProviderMethod === "chainId") {
+              throw new Error("chainId is not function");
             }
 
-            const ethereumProviderMethod = message.ethereumProviderMethod;
+            if (ethereumProviderMethod === "selectedAddress") {
+              throw new Error("selectedAddress is not function");
+            }
+
+            if (ethereumProviderMethod === "networkVersion") {
+              throw new Error("networkVersion is not function");
+            }
+
+            if (ethereumProviderMethod === "isKeplr") {
+              throw new Error("isKeplr is not function");
+            }
+
+            if (ethereumProviderMethod === "isMetaMask") {
+              throw new Error("isMetaMask is not function");
+            }
+
+            if (
+              ethereumProviderMethod === undefined ||
+              typeof keplr.ethereum[ethereumProviderMethod] !== "function"
+            ) {
+              throw new Error(
+                `${message.ethereumProviderMethod} is not function or invalid Ethereum provider method`
+              );
+            }
 
             if (ethereumProviderMethod === "request") {
               return await keplr.ethereum.request(
@@ -798,6 +819,16 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
 }
 
 class EthereumProvider extends EventEmitter implements IEthereumProvider {
+  chainId: string | null = null;
+  selectedAddress: string | null = null;
+
+  networkVersion: string | null = null;
+
+  isKeplr = true;
+  isMetaMask = true;
+
+  protected _isConnected = false;
+
   constructor(
     protected readonly eventListener: {
       addMessageListener: (fn: (e: any) => void) => void;
@@ -816,7 +847,21 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     super();
   }
 
-  protected requestMethod(
+  protected async init() {
+    const initialState: {
+      chainId: string;
+      selectedAddress: string;
+      networkVersion: string;
+    } = await this.requestMethod("request", {
+      method: "keplr_initEthereumProvider",
+    });
+
+    this.chainId = initialState.chainId;
+    this.selectedAddress = initialState.selectedAddress;
+    this.networkVersion = initialState.networkVersion;
+  }
+
+  protected async requestMethod(
     method: keyof IEthereumProvider,
     args: Record<string, any>
   ): Promise<any> {
@@ -872,6 +917,10 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     });
   }
 
+  isConnected(): boolean {
+    return this._isConnected;
+  }
+
   async request<T>({
     method,
     params,
@@ -879,6 +928,29 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     method: string;
     params?: unknown[] | Record<string, unknown>;
   }): Promise<T> {
+    if (!this._isConnected) {
+      await this.init();
+      this._isConnected = true;
+    }
+
     return await this.requestMethod("request", { method, params });
+  }
+
+  async enable(): Promise<string[]> {
+    if (!this._isConnected) {
+      await this.init();
+      this._isConnected = true;
+    }
+
+    return await this.requestMethod("enable", []);
+  }
+
+  async net_version(): Promise<string> {
+    if (!this._isConnected) {
+      await this.init();
+      this._isConnected = true;
+    }
+
+    return await this.requestMethod("net_version", []);
   }
 }

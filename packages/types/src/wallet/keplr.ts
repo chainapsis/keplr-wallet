@@ -241,6 +241,16 @@ export interface Keplr {
 }
 
 export interface IEthereumProvider extends EventEmitter {
+  readonly chainId: string | null;
+  readonly selectedAddress: string | null;
+
+  readonly networkVersion: string | null;
+
+  readonly isKeplr: boolean;
+  readonly isMetaMask: boolean;
+
+  isConnected(): boolean;
+
   request<T>({
     method,
     params,
@@ -248,4 +258,7 @@ export interface IEthereumProvider extends EventEmitter {
     method: string;
     params?: unknown[] | Record<string, unknown>;
   }): Promise<T>;
+
+  enable(): Promise<string[]>;
+  net_version(): Promise<string>;
 }

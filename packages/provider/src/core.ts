@@ -650,8 +650,19 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
 }
 
 class EthereumProvider extends EventEmitter implements IEthereumProvider {
+  chainId: string | null = null;
+  selectedAddress: string | null = null;
+  networkVersion: string | null = null;
+
+  isKeplr: boolean = true;
+  isMetaMask: boolean = true;
+
   constructor(protected readonly requester: MessageRequester) {
     super();
+  }
+
+  isConnected(): boolean {
+    return true;
   }
 
   async request<T>({
@@ -669,6 +680,34 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
       {
         method,
         params,
+      }
+    );
+  }
+
+  /**
+   * Legacy methods
+   */
+
+  async enable(): Promise<string[]> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-ethereum",
+      "request-json-rpc-to-evm",
+      {
+        method: "eth_requestAccounts",
+      }
+    );
+  }
+
+  async net_version(): Promise<string> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-ethereum",
+      "request-json-rpc-to-evm",
+      {
+        method: "net_version",
       }
     );
   }

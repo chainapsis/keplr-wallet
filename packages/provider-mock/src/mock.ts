@@ -375,8 +375,20 @@ export class MockKeplr implements Keplr {
 }
 
 class MockEthereumProvider extends EventEmitter implements IEthereumProvider {
+  readonly chainId: string | null = null;
+  readonly selectedAddress: string | null = null;
+
+  readonly networkVersion: string | null = null;
+
+  readonly isKeplr: boolean = true;
+  readonly isMetaMask: boolean = true;
+
   constructor() {
     super();
+  }
+
+  isConnected(): boolean {
+    throw new Error("Method not implemented.");
   }
 
   request<T>({}: {
@@ -384,5 +396,13 @@ class MockEthereumProvider extends EventEmitter implements IEthereumProvider {
     params?: unknown[] | Record<string, unknown> | undefined;
   }): Promise<T> {
     throw new Error("Not yet implemented");
+  }
+
+  enable(): Promise<string[]> {
+    throw new Error("Method not implemented.");
+  }
+
+  net_version(): Promise<string> {
+    throw new Error("Method not implemented.");
   }
 }

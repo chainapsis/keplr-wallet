@@ -35,6 +35,28 @@ export class KeyRingEthereumService {
     // TODO: ?
   }
 
+  async initEthereumProvider(defaultChainId: string): Promise<{
+    chainId: string;
+    selectedAddress: string;
+    networkVersion: string;
+  }> {
+    const chainInfo = this.chainsService.getChainInfo(defaultChainId);
+    if (chainInfo === undefined || chainInfo.evm === undefined) {
+      throw new Error("No chain info or EVM info provided");
+    }
+
+    const pubkey = await this.keyRingService.getPubKeySelected(defaultChainId);
+    const ethereumHexAddress = getEthAddressWithMixedCaseChecksum(
+      `0x${Buffer.from(pubkey.getEthAddress()).toString("hex")}`
+    );
+
+    return {
+      chainId: defaultChainId,
+      selectedAddress: ethereumHexAddress,
+      networkVersion: chainInfo.evm.chainId.toString(10),
+    };
+  }
+
   async signEthereumSelected(
     env: Env,
     origin: string,
@@ -218,6 +240,8 @@ export class KeyRingEthereumService {
     const evmInfo = chainInfo.evm;
 
     switch (method) {
+      case "keplr_initEthereumProvider":
+        return this.initEthereumProvider(defaultChainId);
       case "eth_chainId":
         return `0x${evmInfo.chainId.toString(16)}`;
       case "eth_accounts":
