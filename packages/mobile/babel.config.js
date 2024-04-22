@@ -49,6 +49,8 @@ module.exports = {
           'KEPLR_EXT_MOONPAY_API_KEY',
           'KEPLR_EXT_KADO_API_KEY',
           'KEPLR_EXT_CHAIN_REGISTRY_URL',
+          'KEPLR_EXT_TOKEN_FACTORY_BASE_URL',
+          'KEPLR_EXT_TOKEN_FACTORY_URI',
           'WC_PROJECT_ID',
         ],
       },
