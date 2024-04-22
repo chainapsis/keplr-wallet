@@ -55,18 +55,34 @@ export class PermissionService {
         }
       });
     } else {
-      const saved = await this.kvStore.get<Record<string, true | undefined>>(
-        "permissionMap/v1"
-      );
-      if (saved) {
+      const savedPermissionMap = await this.kvStore.get<
+        Record<string, true | undefined>
+      >("permissionMap/v1");
+      if (savedPermissionMap) {
         runInAction(() => {
-          for (const key of Object.keys(saved)) {
-            const granted = saved[key];
+          for (const key of Object.keys(savedPermissionMap)) {
+            const granted = savedPermissionMap[key];
             if (granted) {
               this.permissionMap.set(key, true);
             }
           }
         });
+
+        const savedDefaultChainIdPermittedOriginMap = await this.kvStore.get<
+          Record<string, string>
+        >("defaultChainIdPermittedOriginMap/v1");
+        if (savedDefaultChainIdPermittedOriginMap) {
+          runInAction(() => {
+            for (const key of Object.keys(
+              savedDefaultChainIdPermittedOriginMap
+            )) {
+              this.defaultChainIdPermittedOriginMap.set(
+                key,
+                savedDefaultChainIdPermittedOriginMap[key]
+              );
+            }
+          });
+        }
       }
     }
 
@@ -74,6 +90,10 @@ export class PermissionService {
       this.kvStore.set(
         "permissionMap/v1",
         Object.fromEntries(this.permissionMap)
+      );
+      this.kvStore.set(
+        "defaultChainIdPermittedOriginMap/v1",
+        Object.fromEntries(this.defaultChainIdPermittedOriginMap)
       );
     });
   }
@@ -272,6 +292,7 @@ export class PermissionService {
 
     const chainInfos = this.chainsService.getChainInfos();
     // If the defaultChainId is not provided, find the first chain info that has EVM info.
+    // TODO: Provide from interaction data or UI
     defaultChainId =
       defaultChainId ??
       chainInfos.find((chainInfo) => chainInfo.evm !== undefined)?.chainId;
@@ -404,7 +425,7 @@ export class PermissionService {
     }
 
     return (
-      (!!this.permissionMap.get(
+      (this.permissionMap.get(
         PermissionKeyHelper.getEVMPermissionKey(
           getEVMAccessPermissionType(),
           origin

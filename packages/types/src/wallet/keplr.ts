@@ -22,6 +22,7 @@ export interface Key {
   readonly pubKey: Uint8Array;
   readonly address: Uint8Array;
   readonly bech32Address: string;
+  readonly ethereumHexAddress: string;
   // Indicate whether the selected account is from the nano ledger.
   // Because current cosmos app in the nano ledger doesn't support the direct (proto) format msgs,
   // this can be used to select the amino or direct signer.
@@ -241,10 +242,12 @@ export interface Keplr {
 }
 
 export interface IEthereumProvider extends EventEmitter {
+  // It must be in the hexadecimal format used in EVM-based chains, not the format used in Tendermint nodes.
   readonly chainId: string | null;
-  readonly selectedAddress: string | null;
-
+  // It must be in the decimal format of chainId.
   readonly networkVersion: string | null;
+
+  readonly selectedAddress: string | null;
 
   readonly isKeplr: boolean;
   readonly isMetaMask: boolean;

@@ -129,6 +129,7 @@ export class KeyRingCosmosService {
       bech32Address: bech32Address.toBech32(
         chainInfo.bech32Config.bech32PrefixAccAddr
       ),
+      ethereumHexAddress: bech32Address.toHex(false),
       isNanoLedger: keyInfo.type === "ledger",
       isKeystone: keyInfo.type === "keystone",
     };

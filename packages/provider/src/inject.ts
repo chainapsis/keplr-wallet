@@ -815,14 +815,20 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     return await this.requestMethod("suggestERC20", [chainId, contractAddress]);
   }
 
-  public readonly ethereum = new EthereumProvider(this.eventListener);
+  public readonly ethereum = new EthereumProvider(
+    this,
+    this.eventListener,
+    this.parseMessage
+  );
 }
 
 class EthereumProvider extends EventEmitter implements IEthereumProvider {
+  // It must be in the hexadecimal format used in EVM-based chains, not the format used in Tendermint nodes.
   chainId: string | null = null;
-  selectedAddress: string | null = null;
-
+  // It must be in the decimal format of chainId.
   networkVersion: string | null = null;
+
+  selectedAddress: string | null = null;
 
   isKeplr = true;
   isMetaMask = true;
@@ -830,6 +836,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
   protected _isConnected = false;
 
   constructor(
+    protected readonly injectedKeplr: InjectedKeplr,
     protected readonly eventListener: {
       addMessageListener: (fn: (e: any) => void) => void;
       removeMessageListener: (fn: (e: any) => void) => void;
@@ -845,20 +852,22 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     protected readonly parseMessage?: (message: any) => any
   ) {
     super();
-  }
 
-  protected async init() {
-    const initialState: {
-      chainId: string;
-      selectedAddress: string;
-      networkVersion: string;
-    } = await this.requestMethod("request", {
-      method: "keplr_initEthereumProvider",
+    window.addEventListener("keplr_keystorechange", async () => {
+      if (this.chainId) {
+        const chainInfos = await injectedKeplr.getChainInfosWithoutEndpoints();
+        const chainInfo = chainInfos.find(
+          (chainInfo) => chainInfo.evm?.chainId === Number(this.chainId)
+        );
+
+        if (chainInfo) {
+          const selectedAddress = (
+            await injectedKeplr.getKey(chainInfo.chainId)
+          ).ethereumHexAddress;
+          this.handleAccountsChanged(selectedAddress);
+        }
+      }
     });
-
-    this.chainId = initialState.chainId;
-    this.selectedAddress = initialState.selectedAddress;
-    this.networkVersion = initialState.networkVersion;
   }
 
   protected async requestMethod(
@@ -917,6 +926,54 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     });
   }
 
+  protected async handleConnect(evmChainId?: string) {
+    if (!this._isConnected) {
+      const { defaultEvmChainId, selectedAddress } = await this.requestMethod(
+        "request",
+        {
+          method: "keplr_connect",
+          ...(evmChainId && { params: [evmChainId] }),
+        }
+      );
+
+      this._isConnected = true;
+      this.chainId = defaultEvmChainId;
+      this.networkVersion = parseInt(defaultEvmChainId).toString(10);
+      this.selectedAddress = selectedAddress;
+
+      this.emit("connect", { chainId: defaultEvmChainId });
+    }
+  }
+
+  protected async handleDisconnect() {
+    if (this._isConnected) {
+      await this.requestMethod("request", {
+        method: "keplr_disconnect",
+      });
+
+      this._isConnected = false;
+      this.chainId = null;
+      this.selectedAddress = null;
+      this.networkVersion = null;
+
+      this.emit("disconnect");
+    }
+  }
+
+  protected async handleChainChanged(evmChainId: string) {
+    await this.handleConnect(evmChainId);
+
+    this.emit("chainChanged", evmChainId);
+  }
+
+  protected async handleAccountsChanged(selectedAddress: string) {
+    if (this._isConnected) {
+      this.selectedAddress = selectedAddress;
+
+      this.emit("accountsChanged", [selectedAddress]);
+    }
+  }
+
   isConnected(): boolean {
     return this._isConnected;
   }
@@ -929,28 +986,21 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     params?: unknown[] | Record<string, unknown>;
   }): Promise<T> {
     if (!this._isConnected) {
-      await this.init();
-      this._isConnected = true;
+      await this.handleConnect();
     }
 
     return await this.requestMethod("request", { method, params });
   }
 
   async enable(): Promise<string[]> {
-    if (!this._isConnected) {
-      await this.init();
-      this._isConnected = true;
-    }
-
-    return await this.requestMethod("enable", []);
+    return await this.requestMethod("request", {
+      method: "eth_requestAccounts",
+    });
   }
 
   async net_version(): Promise<string> {
-    if (!this._isConnected) {
-      await this.init();
-      this._isConnected = true;
-    }
-
-    return await this.requestMethod("net_version", []);
+    return await this.requestMethod("request", {
+      method: "net_version",
+    });
   }
 }

@@ -14,7 +14,7 @@ import {
 } from "../keyring-cosmos";
 import { serialize } from "@ethersproject/transactions";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
-import { getAddress as getEthAddressWithMixedCaseChecksum } from "@ethersproject/address";
+import { getEVMAccessPermissionType, PermissionService } from "../permission";
 
 export class KeyRingEthereumService {
   static evmInfo(chainInfo: ChainInfo): EVMInfo | undefined {
@@ -28,33 +28,12 @@ export class KeyRingEthereumService {
     //      keyring-cosmos의 기능들도 사용한다.
     protected readonly keyRingCosmosService: KeyRingCosmosService,
     protected readonly interactionService: InteractionService,
-    protected readonly analyticsService: AnalyticsService
+    protected readonly analyticsService: AnalyticsService,
+    protected readonly permissionService: PermissionService
   ) {}
 
   async init() {
     // TODO: ?
-  }
-
-  async initEthereumProvider(defaultChainId: string): Promise<{
-    chainId: string;
-    selectedAddress: string;
-    networkVersion: string;
-  }> {
-    const chainInfo = this.chainsService.getChainInfo(defaultChainId);
-    if (chainInfo === undefined || chainInfo.evm === undefined) {
-      throw new Error("No chain info or EVM info provided");
-    }
-
-    const pubkey = await this.keyRingService.getPubKeySelected(defaultChainId);
-    const ethereumHexAddress = getEthAddressWithMixedCaseChecksum(
-      `0x${Buffer.from(pubkey.getEthAddress()).toString("hex")}`
-    );
-
-    return {
-      chainId: defaultChainId,
-      selectedAddress: ethereumHexAddress,
-      networkVersion: chainInfo.evm.chainId.toString(10),
-    };
   }
 
   async signEthereumSelected(
@@ -223,6 +202,7 @@ export class KeyRingEthereumService {
 
   async request(
     defaultChainId: string,
+    origin: string,
     method: string,
     params?: any[]
   ): Promise<any> {
@@ -234,14 +214,22 @@ export class KeyRingEthereumService {
     const pubkey = await this.keyRingService.getPubKeySelected(
       chainInfo.chainId
     );
-    const ethereumHexAddress = getEthAddressWithMixedCaseChecksum(
-      `0x${Buffer.from(pubkey.getEthAddress()).toString("hex")}`
-    );
+    const ethereumHexAddress = `0x${Buffer.from(
+      pubkey.getEthAddress()
+    ).toString("hex")}`;
     const evmInfo = chainInfo.evm;
 
     switch (method) {
-      case "keplr_initEthereumProvider":
-        return this.initEthereumProvider(defaultChainId);
+      case "keplr_connect":
+        return {
+          defaultEvmChainId: `0x${evmInfo.chainId.toString(16)}`,
+          selectedAddress: ethereumHexAddress,
+        };
+      case "keplr_disconnect":
+        return this.permissionService.removeEVMPermission(
+          getEVMAccessPermissionType(),
+          [origin]
+        );
       case "eth_chainId":
         return `0x${evmInfo.chainId.toString(16)}`;
       case "eth_accounts":

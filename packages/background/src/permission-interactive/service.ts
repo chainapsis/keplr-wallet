@@ -1,6 +1,6 @@
 import { KeyRingService } from "../keyring";
 import { Env } from "@keplr-wallet/router";
-import { PermissionService } from "../permission";
+import { getBasicAccessPermissionType, PermissionService } from "../permission";
 
 export class PermissionInteractiveService {
   constructor(
@@ -63,6 +63,16 @@ export class PermissionInteractiveService {
 
     await this.permissionService.checkOrGrantEVMPermission(env, origin);
 
-    return this.permissionService.getDefaultChainIdPermittedOrigin(origin);
+    const defaultChainId =
+      this.permissionService.getDefaultChainIdPermittedOrigin(origin);
+
+    this.permissionService.addPermission(
+      [defaultChainId],
+      getBasicAccessPermissionType(),
+      [origin]
+    );
+    this.permissionService.addGlobalPermission("get-chain-infos", [origin]);
+
+    return defaultChainId;
   }
 }

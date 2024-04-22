@@ -73,6 +73,11 @@ const handleRequestJsonRpcToEvmMsg: (
         msg.origin
       );
 
-    return await service.request(defaultChainId, msg.method, msg.params);
+    return await service.request(
+      defaultChainId,
+      msg.origin,
+      msg.method,
+      msg.params
+    );
   };
 };

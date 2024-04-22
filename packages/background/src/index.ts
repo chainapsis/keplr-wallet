@@ -187,7 +187,8 @@ export function init(
     keyRingV2Service,
     keyRingCosmosService,
     interactionService,
-    analyticsService
+    analyticsService,
+    permissionService
   );
   const autoLockAccountService = new AutoLocker.AutoLockAccountService(
     storeCreator("auto-lock-account"),
