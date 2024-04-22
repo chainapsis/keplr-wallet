@@ -35,7 +35,7 @@ import {
   SendTxAndRecordMsg,
 } from '@keplr-wallet/background';
 import {RNMessageRequesterInternal} from '../../../router';
-import {StackNavProp} from '../../../navigation';
+import {RootStackParamList, StackNavProp} from '../../../navigation';
 import {useNotification} from '../../../hooks/notification';
 import {useFocusAfterRouting} from '../../../hooks/use-focus';
 import {LayeredHorizontalRadioGroup} from '../../../components/radio-group';
@@ -52,12 +52,8 @@ import {Text} from 'react-native';
 export const SendAmountScreen: FunctionComponent = observer(() => {
   const {chainStore, accountStore, queriesStore, skipQueriesStore, priceStore} =
     useStore();
-  const route: RouteProp<{
-    params: {
-      chainId?: string;
-      coinMinimalDenom?: string;
-    };
-  }> = useRoute();
+  const route = useRoute<RouteProp<RootStackParamList, 'Send'>>();
+
   const navigation = useNavigation<StackNavProp>();
   const intl = useIntl();
   const style = useStyle();
@@ -66,6 +62,7 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
 
   const initialChainId = route.params['chainId'];
   const initialCoinMinimalDenom = route.params['coinMinimalDenom'];
+  const initialRecipientAddress = route.params['recipientAddress'];
 
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
   const coinMinimalDenom =
@@ -114,6 +111,10 @@ export const SendAmountScreen: FunctionComponent = observer(() => {
   );
 
   sendConfigs.amountConfig.setCurrency(currency);
+
+  useEffect(() => {
+    sendConfigs.recipientConfig.setValue(initialRecipientAddress || '');
+  }, [initialRecipientAddress, sendConfigs.recipientConfig]);
 
   const gasSimulatorKey = useMemo(() => {
     if (sendConfigs.amountConfig.currency) {

@@ -28,7 +28,6 @@ import {DepositModal} from '../home/components/deposit-modal/deposit-modal';
 import {useStore} from '../../stores';
 import {
   RouteProp,
-  StackActions,
   useFocusEffect,
   useIsFocused,
   useNavigation,
@@ -117,14 +116,12 @@ export const CameraScreen: FunctionComponent = observer(() => {
                   chainInfo =>
                     chainInfo.bech32Config.bech32PrefixAccAddr === prefix,
                 );
+
                 if (chainInfo) {
-                  // TODO: StackActions 제거해서 진행해야함
-                  navigation.dispatch({
-                    ...StackActions.replace('Send', {
-                      chainId: chainInfo.chainId,
-                      coinMinimalDenom:
-                        chainInfo.currencies[0].coinMinimalDenom,
-                    }),
+                  navigation.replace('Send', {
+                    chainId: chainInfo.chainId,
+                    coinMinimalDenom: chainInfo.currencies[0].coinMinimalDenom,
+                    recipientAddress: data,
                   });
                 } else {
                   navigation.reset({routes: [{name: 'Home'}]});
