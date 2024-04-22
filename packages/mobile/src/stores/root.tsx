@@ -18,6 +18,7 @@ import {
   LSMCurrencyRegistrar,
   AgoricQueries,
   CosmwasmAccount,
+  TokenFactoryCurrencyRegistrar,
 } from '@keplr-wallet/stores';
 import {
   ChainSuggestStore,
@@ -99,6 +100,7 @@ export class RootStore {
   >;
   public readonly uiConfigStore: UIConfigStore;
 
+  public readonly tokenFactoryRegistrar: TokenFactoryCurrencyRegistrar;
   public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
   public readonly lsmCurrencyRegistrar: LSMCurrencyRegistrar;
   public readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegistrar;
@@ -356,6 +358,14 @@ export class RootStore {
       this.priceStore,
     );
 
+    this.tokenFactoryRegistrar = new TokenFactoryCurrencyRegistrar(
+      new AsyncKVStore('store_token_factory_currency_registrar'),
+      24 * 3600 * 1000,
+      process.env['KEPLR_EXT_TOKEN_FACTORY_BASE_URL'] || '',
+      process.env['KEPLR_EXT_TOKEN_FACTORY_URI'] || '',
+      this.chainStore,
+      this.queriesStore,
+    );
     this.ibcCurrencyRegistrar = new IBCCurrencyRegistrar(
       new AsyncKVStore('store_ibc_curreny_registrar'),
       24 * 3600 * 1000,
