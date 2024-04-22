@@ -2396,7 +2396,6 @@ export const EmbedChainInfos: ChainInfo[] = [
         },
       },
     ],
-    features: ["eth-address-gen", "eth-key-sign"],
   },
   {
     chainId: "chihuahua-1",
