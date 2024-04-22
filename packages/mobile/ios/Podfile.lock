@@ -1125,13 +1125,13 @@ PODS:
     - React-Core
   - RNFS (2.20.0):
     - React-Core
-  - RNGestureHandler (2.14.1):
+  - RNGestureHandler (2.16.0):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
   - RNKeychain (8.1.2):
     - React-Core
-  - RNReanimated (3.6.3):
+  - RNReanimated (3.8.1):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
@@ -1516,9 +1516,9 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: c913ede1fa163a71cea118ed4670bbaaa4b511bb
   RNDeviceInfo: bf8a32acbcb875f568217285d1793b0e8588c974
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
-  RNGestureHandler: 15c6ef51acba34c49ff03003806cf5dd6098f383
+  RNGestureHandler: bc2cdb2dc42facdf34992ae364b8a728e19a3686
   RNKeychain: a65256b6ca6ba6976132cc4124b238a5b13b3d9c
-  RNReanimated: f6b02d8f5eaa2830296411d4ec3b8ef5442dd13d
+  RNReanimated: 8a4d86eb951a4a99d8e86266dc71d7735c0c30a9
   RNScreens: 17e2f657f1b09a71ec3c821368a04acbb7ebcb46
   RNSVG: ba3e7232f45e34b7b47e74472386cf4e1a676d0a
   SDWebImage: 750adf017a315a280c60fde706ab1e552a3ae4e9
