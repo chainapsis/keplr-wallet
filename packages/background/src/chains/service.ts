@@ -3,7 +3,7 @@ import {
   PrefixKVStore,
   sortedJsonByKeyStringify,
 } from "@keplr-wallet/common";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ChainInfoWithoutEndpoints } from "@keplr-wallet/types";
 import {
   action,
   autorun,
@@ -267,12 +267,18 @@ export class ChainsService {
   );
 
   getChainInfosWithoutEndpoints = computedFn(
-    (): Omit<ChainInfo, "rpc" | "rest">[] => {
+    (): ChainInfoWithoutEndpoints[] => {
       return this.mergeChainInfosWithDynamics(
         this.embedChainInfos.concat(this.suggestedChainInfos)
       ).map((chainInfo) => {
         return {
           ...chainInfo,
+          ...(chainInfo.evm !== undefined && {
+            evm: {
+              ...chainInfo.evm,
+              rpc: undefined,
+            },
+          }),
           rpc: undefined,
           rest: undefined,
           nodeProvider: undefined,

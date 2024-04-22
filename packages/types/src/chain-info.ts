@@ -50,5 +50,7 @@ export interface ChainInfo {
 
 export type ChainInfoWithoutEndpoints = Omit<
   ChainInfo,
-  "rest" | "rpc" | "nodeProvider"
->;
+  "rest" | "rpc" | "nodeProvider" | "evm"
+> & {
+  evm?: Omit<EVMInfo, "rpc">;
+};
