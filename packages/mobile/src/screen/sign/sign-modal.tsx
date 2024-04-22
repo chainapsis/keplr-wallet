@@ -14,7 +14,7 @@ import {
   useZeroAllowedGasConfig,
 } from '@keplr-wallet/hooks';
 import {unescapeHTML} from '@keplr-wallet/common';
-import {CoinPretty, Int} from '@keplr-wallet/unit';
+import {CoinPretty, Dec, Int} from '@keplr-wallet/unit';
 import {MsgGrant} from '@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx';
 import {defaultProtoCodec} from '@keplr-wallet/cosmos';
 import {GenericAuthorization} from '@keplr-wallet/stores/build/query/cosmos/authz/types';
@@ -43,12 +43,14 @@ import {ScrollView} from '../../components/scroll-view/common-scroll-view';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {useLedgerBLE} from '../../provider/ledger-ble';
 import {FeeSummary} from './components/fee-summary';
+import {HighFeeWarning} from './components/high-fee-warning';
 
 export const SignModal = registerCardModal(
   observer<{
     interactionData: NonNullable<SignInteractionStore['waitingData']>;
   }>(({interactionData}) => {
-    const {chainStore, signInteractionStore, queriesStore} = useStore();
+    const {chainStore, signInteractionStore, queriesStore, priceStore} =
+      useStore();
 
     const intl = useIntl();
     const style = useStyle();
@@ -293,11 +295,36 @@ export const SignModal = registerCardModal(
       Error | undefined
     >(undefined);
 
+    const isHighFee = (() => {
+      if (feeConfig.fees) {
+        let sumPrice = new Dec(0);
+        for (const fee of feeConfig.fees) {
+          const currency = chainStore
+            .getChain(chainId)
+            .findCurrency(fee.currency.coinMinimalDenom);
+          if (currency && currency.coinGeckoId) {
+            const price = priceStore.calculatePrice(
+              new CoinPretty(currency, fee.toCoin().amount),
+              'usd',
+            );
+            if (price) {
+              sumPrice = sumPrice.add(price.toDec());
+            }
+          }
+        }
+        return sumPrice.gte(new Dec(5));
+      }
+      return false;
+    })();
+
+    const [isHighFeeApproved, setIsHighFeeApproved] = useState(false);
+
     const buttonDisabled =
       txConfigsValidate.interactionBlocked ||
       !signDocHelper.signDocWrapper ||
       isLedgerAndDirect ||
-      (isSendAuthzGrant && !isSendAuthzGrantChecked);
+      (isSendAuthzGrant && !isSendAuthzGrantChecked) ||
+      (isHighFee && !isHighFeeApproved);
 
     const ledgerBLE = useLedgerBLE();
 
@@ -443,6 +470,17 @@ export const SignModal = registerCardModal(
         })()}
 
         <Gutter size={12} />
+
+        {isHighFee ? (
+          <React.Fragment>
+            <HighFeeWarning
+              checked={isHighFeeApproved}
+              onChange={v => setIsHighFeeApproved(v)}
+            />
+
+            <Gutter size={12} />
+          </React.Fragment>
+        ) : null}
 
         {isSendAuthzGrant ? (
           <React.Fragment>
