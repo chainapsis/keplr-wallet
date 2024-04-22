@@ -12,6 +12,7 @@ import { toGenerator } from "@keplr-wallet/common";
 import { HasMapStore } from "../map";
 import { makeURL, simpleFetch } from "@keplr-wallet/simple-fetch";
 import { QuerySharedContext } from "./context";
+import { PromiseQueue } from "./promise-queue";
 
 export type QueryOptions = {
   // millisec
@@ -179,6 +180,10 @@ export interface IObservableQuery<T = unknown, E = unknown> {
   waitResponse(): Promise<Readonly<QueryResponse<T>> | undefined>;
   waitFreshResponse(): Promise<Readonly<QueryResponse<T>> | undefined>;
 }
+
+const fetchQueue = new PromiseQueue({
+  concurrency: 40,
+});
 
 /**
  * Base of the observable query classes.
@@ -424,7 +429,7 @@ export abstract class ObservableQuery<T = unknown, E = unknown>
         this.queryCanceler.callOrCanceled(
           () => {
             hasStarted = true;
-            return this.fetchResponse(abortController);
+            return fetchQueue.run(() => this.fetchResponse(abortController));
           },
           () => {
             if (hasStarted) {
@@ -464,7 +469,7 @@ export abstract class ObservableQuery<T = unknown, E = unknown>
           this.queryCanceler.callOrCanceled(
             () => {
               hasStarted = true;
-              return this.fetchResponse(abortController);
+              return fetchQueue.run(() => this.fetchResponse(abortController));
             },
             () => {
               if (hasStarted) {
