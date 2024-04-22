@@ -65,6 +65,9 @@ export class KeyRingEthereumService {
     signType: EthSignType
   ): Promise<Uint8Array> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    if (chainInfo.hideInUI) {
+      throw new Error("Can't sign for hidden chain");
+    }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
     const evmInfo = KeyRingEthereumService.evmInfo(chainInfo);
 

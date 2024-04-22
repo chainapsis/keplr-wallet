@@ -6,17 +6,15 @@ import { CoinPretty } from "@keplr-wallet/unit";
 import { MsgItemBase } from "./base";
 import { ItemLogo } from "./logo";
 import { ChainInfo } from "@keplr-wallet/types";
-import { ChainImageFallback } from "../../../../components/image";
 import { isValidCoinStr, parseCoinStr } from "@keplr-wallet/common";
-import { UnknownChainImage } from "./unknown-chain-image";
 import { Buffer } from "buffer/";
 
 export const MsgRelationIBCSwapReceive: FunctionComponent<{
-  explorerUrl: string;
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = observer(({ explorerUrl, msg, prices, targetDenom }) => {
+  isInAllActivitiesPage: boolean | undefined;
+}> = observer(({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
   const { chainStore, queriesStore } = useStore();
 
   const chainInfo = chainStore.getChain(msg.chainId);
@@ -204,7 +202,6 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
 
   return (
     <MsgItemBase
-      explorerUrl={explorerUrl}
       logo={
         <ItemLogo
           center={
@@ -224,17 +221,6 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
               />
             </svg>
           }
-          deco={(() => {
-            if (!msg.ibcTracking) {
-              return undefined;
-            }
-
-            return sourceChain ? (
-              <ChainImageFallback chainInfo={sourceChain} size="0.875rem" />
-            ) : (
-              <UnknownChainImage size="0.875rem" />
-            );
-          })()}
         />
       }
       chainId={msg.chainId}
@@ -259,6 +245,7 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
         color: "green",
         prefix: "plus",
       }}
+      isInAllActivitiesPage={isInAllActivitiesPage}
     />
   );
 });

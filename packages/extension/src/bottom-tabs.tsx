@@ -3,6 +3,9 @@ import { GlobalSimpleBarProvider } from "./hooks/global-simplebar";
 import { Link, useLocation } from "react-router-dom";
 import { ColorPalette } from "./styles";
 import { useTheme } from "styled-components";
+import { YAxis } from "./components/axis";
+import { Caption2 } from "./components/typography";
+import { Box } from "./components/box";
 
 export const BottomTabsHeightRem = "3.75rem";
 
@@ -12,6 +15,7 @@ export const BottomTabsRouteProvider: FunctionComponent<{
   tabs: {
     pathname: string;
     icon: React.ReactNode;
+    text: string;
   }[];
 
   forceHideBottomTabs?: boolean;
@@ -67,26 +71,61 @@ export const BottomTabsRouteProvider: FunctionComponent<{
             const isActive = tab.pathname === location.pathname;
 
             return (
-              <Link to={tab.pathname} key={i}>
-                <div
+              <Box
+                key={i}
+                style={{
+                  // text의 길이와 상관없이 모든 tab이 균등하게 나눠져야 하므로 상위에 width: 1px를 주는 trick을 사용한다.
+                  width: "1px",
+                }}
+              >
+                <Link
+                  to={tab.pathname}
                   style={{
-                    opacity: isNotReady ? 0 : 1,
-                    color: (() => {
-                      if (theme.mode === "light") {
-                        return isActive
-                          ? ColorPalette["blue-400"]
-                          : ColorPalette["gray-100"];
-                      }
-
-                      return isActive
-                        ? ColorPalette["gray-100"]
-                        : ColorPalette["gray-400"];
-                    })(),
+                    textDecoration: "none",
                   }}
                 >
-                  {tab.icon}
-                </div>
-              </Link>
+                  <div
+                    style={{
+                      opacity: isNotReady ? 0 : 1,
+                      color: (() => {
+                        if (theme.mode === "light") {
+                          return isActive
+                            ? ColorPalette["blue-400"]
+                            : ColorPalette["gray-100"];
+                        }
+
+                        return isActive
+                          ? ColorPalette["gray-100"]
+                          : ColorPalette["gray-400"];
+                      })(),
+                    }}
+                  >
+                    <YAxis alignX="center">
+                      <Box>{tab.icon}</Box>
+                      <Caption2
+                        style={{
+                          textDecoration: "none",
+                          whiteSpace: "nowrap",
+                          wordBreak: "keep-all",
+                        }}
+                        color={(() => {
+                          if (theme.mode === "light") {
+                            return isActive
+                              ? ColorPalette["blue-400"]
+                              : ColorPalette["gray-200"];
+                          }
+
+                          return isActive
+                            ? ColorPalette["gray-100"]
+                            : ColorPalette["gray-300"];
+                        })()}
+                      >
+                        {tab.text}
+                      </Caption2>
+                    </YAxis>
+                  </div>
+                </Link>
+              </Box>
             );
           })}
         </div>
@@ -140,6 +179,27 @@ export const BottomTabSwapIcon: FunctionComponent<{
           <path fill="#fff" d="M0 0H28V28H0z" />
         </clipPath>
       </defs>
+    </svg>
+  );
+};
+
+export const BottomTabActivityIcon: FunctionComponent<{
+  width: string;
+  height: string;
+}> = ({ width, height }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      fill="none"
+      stroke="none"
+      viewBox="0 0 28 28"
+    >
+      <path
+        fill="currentColor"
+        d="M17.584 6.167h-9.75V23.5h13V9.417h-3.25v-3.25zM7.834 4h10.833L23 8.334V23.5a2.166 2.166 0 01-2.166 2.167h-13A2.167 2.167 0 015.667 23.5V6.167A2.167 2.167 0 017.834 4zM10 13.75h8.667v2.167H10V13.75zm0 4.334h8.667v2.166H10v-2.166z"
+      />
     </svg>
   );
 };

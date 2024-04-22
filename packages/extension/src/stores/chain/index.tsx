@@ -159,14 +159,43 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @computed
   get chainInfosInUI() {
     return this.chainInfos.filter((chainInfo) => {
+      if (chainInfo.hideInUI) {
+        return false;
+      }
       const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
       return this.enabledChainIdentifiesMap.get(chainIdentifier);
+    });
+  }
+
+  // chain info들을 list로 보여줄때 hideInUI인 얘들은 빼고 보여줘야한다
+  // property 이름이 얘매해서 일단 이렇게 지었다.
+  @computed
+  get chainInfosInListUI() {
+    return this.chainInfos.filter((chainInfo) => {
+      return !chainInfo.hideInUI;
     });
   }
 
   isEnabledChain(chainId: string): boolean {
     const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
     return this.enabledChainIdentifiesMap.get(chainIdentifier) === true;
+  }
+
+  @computed
+  protected get chainInfosInListUIMap(): Map<string, true> {
+    const map = new Map<string, true>();
+    for (const chainInfo of this.chainInfosInListUI) {
+      map.set(chainInfo.chainIdentifier, true);
+    }
+    return map;
+  }
+
+  isInChainInfosInListUI(chainId: string): boolean {
+    return (
+      this.chainInfosInListUIMap.get(
+        ChainIdHelper.parse(chainId).identifier
+      ) === true
+    );
   }
 
   @flow

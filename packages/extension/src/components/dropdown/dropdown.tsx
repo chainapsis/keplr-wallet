@@ -19,6 +19,7 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
   label,
   menuContainerMaxHeight,
   allowSearch,
+  searchExcludedKeys,
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const wrapperRef = useRef<HTMLInputElement>(null);
@@ -62,13 +63,14 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
       if (trimmedSearchText.length > 0) {
         return (
           typeof item.label === "string" &&
-          item.label.toLowerCase().includes(trimmedSearchText.toLowerCase())
+          item.label.toLowerCase().includes(trimmedSearchText.toLowerCase()) &&
+          (!searchExcludedKeys || !searchExcludedKeys.includes(item.key))
         );
       }
 
       return true;
     });
-  }, [allowSearch, items, searchText]);
+  }, [allowSearch, items, searchText, searchExcludedKeys]);
 
   return (
     <Styles.Container ref={wrapperRef}>

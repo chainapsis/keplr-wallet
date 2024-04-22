@@ -8,9 +8,10 @@ import {
   QueryError,
 } from "@keplr-wallet/stores";
 import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
-import { computed, makeObservable } from "mobx";
+import { action, autorun, computed } from "mobx";
 import { DenomHelper } from "@keplr-wallet/common";
 import { computedFn } from "mobx-utils";
+import { BinarySortArray } from "./sort";
 
 interface ViewToken {
   chainInfo: IChainInfoImpl;
@@ -30,25 +31,95 @@ interface ViewToken {
 export class HugeQueriesStore {
   protected static zeroDec = new Dec(0);
 
+  protected balanceBinarySort: BinarySortArray<ViewToken>;
+  protected delegationBinarySort: BinarySortArray<ViewToken>;
+  protected unbondingBinarySort: BinarySortArray<{
+    viewToken: ViewToken;
+    completeTime: string;
+  }>;
+  protected claimableRewardsBinarySort: BinarySortArray<ViewToken>;
+
   constructor(
     protected readonly chainStore: ChainStore,
     protected readonly queriesStore: IQueriesStore<CosmosQueries>,
     protected readonly accountStore: IAccountStore,
     protected readonly priceStore: CoinGeckoPriceStore
   ) {
-    makeObservable(this);
+    let balanceDisposal: (() => void) | undefined;
+    this.balanceBinarySort = new BinarySortArray<ViewToken>(
+      this.sortByPrice,
+      () => {
+        balanceDisposal = autorun(() => {
+          this.updateBalances();
+        });
+      },
+      () => {
+        if (balanceDisposal) {
+          balanceDisposal();
+        }
+      }
+    );
+    let delegationDisposal: (() => void) | undefined;
+    this.delegationBinarySort = new BinarySortArray<ViewToken>(
+      this.sortByPrice,
+      () => {
+        delegationDisposal = autorun(() => {
+          this.updateDelegations();
+        });
+      },
+      () => {
+        if (delegationDisposal) {
+          delegationDisposal();
+        }
+      }
+    );
+    let unbondingDisposal: (() => void) | undefined;
+    this.unbondingBinarySort = new BinarySortArray<{
+      viewToken: ViewToken;
+      completeTime: string;
+    }>(
+      (a, b) => {
+        return this.sortByPrice(a.viewToken, b.viewToken);
+      },
+      () => {
+        unbondingDisposal = autorun(() => {
+          this.updateUnbondings();
+        });
+      },
+      () => {
+        if (unbondingDisposal) {
+          unbondingDisposal();
+        }
+      }
+    );
+    let claimableRewardsDisposal: (() => void) | undefined;
+    this.claimableRewardsBinarySort = new BinarySortArray<ViewToken>(
+      this.sortByPrice,
+      () => {
+        claimableRewardsDisposal = autorun(() => {
+          this.updateClaimableRewards();
+        });
+      },
+      () => {
+        if (claimableRewardsDisposal) {
+          claimableRewardsDisposal();
+        }
+      }
+    );
   }
 
-  // Key: {chainIdentifier}/{coinMinimalDenom}
-  @computed
-  protected get allKnownBalancesMap(): Map<string, ViewToken> {
-    const map = new Map<string, ViewToken>();
+  @action
+  protected updateBalances() {
+    const keysUsed = new Map<string, boolean>();
+    const prevKeyMap = new Map(this.balanceBinarySort.indexForKeyMap());
 
     for (const chainInfo of this.chainStore.chainInfosInUI) {
       const account = this.accountStore.getAccount(chainInfo.chainId);
+
       if (account.bech32Address === "") {
         continue;
       }
+      const queries = this.queriesStore.get(chainInfo.chainId);
 
       const currencies = [...chainInfo.currencies];
       if (chainInfo.stakeCurrency) {
@@ -56,7 +127,6 @@ export class HugeQueriesStore {
       }
       for (const currency of currencies) {
         const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-        const queries = this.queriesStore.get(chainInfo.chainId);
         const queryBalance =
           this.chainStore.isEvmChain(chainInfo.chainId) &&
           denomHelper.type === "erc20"
@@ -68,7 +138,7 @@ export class HugeQueriesStore {
               );
 
         const key = `${chainInfo.chainIdentifier}/${currency.coinMinimalDenom}`;
-        if (!map.has(key)) {
+        if (!keysUsed.get(key)) {
           if (
             chainInfo.stakeCurrency?.coinMinimalDenom ===
             currency.coinMinimalDenom
@@ -83,7 +153,9 @@ export class HugeQueriesStore {
             //   continue;
             // }
 
-            map.set(key, {
+            keysUsed.set(key, true);
+            prevKeyMap.delete(key);
+            this.balanceBinarySort.pushAndSort(key, {
               chainInfo,
               token: balance,
               price: currency.coinGeckoId
@@ -103,7 +175,9 @@ export class HugeQueriesStore {
                 continue;
               }
 
-              map.set(key, {
+              keysUsed.set(key, true);
+              prevKeyMap.delete(key);
+              this.balanceBinarySort.pushAndSort(key, {
                 chainInfo,
                 token: balance.balance,
                 price: currency.coinGeckoId
@@ -118,56 +192,43 @@ export class HugeQueriesStore {
       }
     }
 
-    return map;
+    for (const removedKey of prevKeyMap.keys()) {
+      this.balanceBinarySort.remove(removedKey);
+    }
   }
 
   @computed
-  get allKnownBalances(): ViewToken[] {
-    return Array.from(this.allKnownBalancesMap.values());
+  get allKnownBalances(): ReadonlyArray<ViewToken> {
+    return this.balanceBinarySort.arr;
   }
 
-  protected sortByPrice = (a: ViewToken, b: ViewToken) => {
-    const aPrice =
-      this.priceStore.calculatePrice(a.token)?.toDec() ??
-      HugeQueriesStore.zeroDec;
-    const bPrice =
-      this.priceStore.calculatePrice(b.token)?.toDec() ??
-      HugeQueriesStore.zeroDec;
+  getAllBalances = computedFn(
+    (allowIBCToken: boolean): ReadonlyArray<ViewToken> => {
+      const keys: Map<string, boolean> = new Map();
+      for (const chainInfo of this.chainStore.chainInfosInUI) {
+        for (const currency of chainInfo.currencies) {
+          const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+          if (
+            !allowIBCToken &&
+            denomHelper.type === "native" &&
+            denomHelper.denom.startsWith("ibc/")
+          ) {
+            continue;
+          }
 
-    if (aPrice.equals(bPrice)) {
-      return 0;
-    } else if (aPrice.gt(bPrice)) {
-      return -1;
-    } else {
-      return 1;
-    }
-  };
-
-  getAllBalances = computedFn((allowIBCToken: boolean): ViewToken[] => {
-    const res: ViewToken[] = [];
-    for (const chainInfo of this.chainStore.chainInfosInUI) {
-      for (const currency of chainInfo.currencies) {
-        const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-        if (
-          !allowIBCToken &&
-          denomHelper.type === "native" &&
-          denomHelper.denom.startsWith("ibc/")
-        ) {
-          continue;
-        }
-
-        const key = `${chainInfo.chainIdentifier}/${currency.coinMinimalDenom}`;
-        const viewToken = this.allKnownBalancesMap.get(key);
-        if (viewToken) {
-          res.push(viewToken);
+          const key = `${chainInfo.chainIdentifier}/${currency.coinMinimalDenom}`;
+          keys.set(key, true);
         }
       }
+      return this.balanceBinarySort.arr.filter((viewToken) => {
+        const key = viewToken[BinarySortArray.SymbolKey];
+        return keys.get(key);
+      });
     }
-    return res.sort(this.sortByPrice);
-  });
+  );
 
   filterLowBalanceTokens = computedFn(
-    (viewTokens: ViewToken[]): ViewToken[] => {
+    (viewTokens: ReadonlyArray<ViewToken>): ViewToken[] => {
       return viewTokens.filter((viewToken) => {
         // Hide the unknown ibc tokens.
         if (
@@ -195,23 +256,23 @@ export class HugeQueriesStore {
 
   @computed
   get stakables(): ViewToken[] {
-    const res: ViewToken[] = [];
+    const keys: Map<string, boolean> = new Map();
     for (const chainInfo of this.chainStore.chainInfosInUI) {
       if (!chainInfo.stakeCurrency) {
         continue;
       }
       const key = `${chainInfo.chainIdentifier}/${chainInfo.stakeCurrency.coinMinimalDenom}`;
-      const viewToken = this.allKnownBalancesMap.get(key);
-      if (viewToken) {
-        res.push(viewToken);
-      }
+      keys.set(key, true);
     }
-    return res.sort(this.sortByPrice);
+    return this.balanceBinarySort.arr.filter((viewToken) => {
+      const key = viewToken[BinarySortArray.SymbolKey];
+      return keys.get(key);
+    });
   }
 
   @computed
   get notStakbles(): ViewToken[] {
-    const res: ViewToken[] = [];
+    const keys: Map<string, boolean> = new Map();
     for (const chainInfo of this.chainStore.chainInfosInUI) {
       for (const currency of chainInfo.currencies) {
         if (
@@ -229,18 +290,18 @@ export class HugeQueriesStore {
         }
 
         const key = `${chainInfo.chainIdentifier}/${currency.coinMinimalDenom}`;
-        const viewToken = this.allKnownBalancesMap.get(key);
-        if (viewToken) {
-          res.push(viewToken);
-        }
+        keys.set(key, true);
       }
     }
-    return res.sort(this.sortByPrice);
+    return this.balanceBinarySort.arr.filter((viewToken) => {
+      const key = viewToken[BinarySortArray.SymbolKey];
+      return keys.get(key);
+    });
   }
 
   @computed
   get ibcTokens(): ViewToken[] {
-    const res: ViewToken[] = [];
+    const keys: Map<string, boolean> = new Map();
     for (const chainInfo of this.chainStore.chainInfosInUI) {
       for (const currency of chainInfo.currencies) {
         const denomHelper = new DenomHelper(currency.coinMinimalDenom);
@@ -249,19 +310,20 @@ export class HugeQueriesStore {
           denomHelper.denom.startsWith("ibc/")
         ) {
           const key = `${chainInfo.chainIdentifier}/${currency.coinMinimalDenom}`;
-          const viewToken = this.allKnownBalancesMap.get(key);
-          if (viewToken) {
-            res.push(viewToken);
-          }
+          keys.set(key, true);
         }
       }
     }
-    return res.sort(this.sortByPrice);
+    return this.balanceBinarySort.arr.filter((viewToken) => {
+      const key = viewToken[BinarySortArray.SymbolKey];
+      return keys.get(key);
+    });
   }
 
-  @computed
-  get delegations(): ViewToken[] {
-    const res: ViewToken[] = [];
+  @action
+  protected updateDelegations(): void {
+    const prevKeyMap = new Map(this.delegationBinarySort.indexForKeyMap());
+
     for (const chainInfo of this.chainStore.chainInfosInUI) {
       const account = this.accountStore.getAccount(chainInfo.chainId);
       if (account.bech32Address === "") {
@@ -272,12 +334,13 @@ export class HugeQueriesStore {
         queries.cosmos.queryDelegations.getQueryBech32Address(
           account.bech32Address
         );
-
       if (!queryDelegation.total) {
         continue;
       }
 
-      res.push({
+      const key = `${chainInfo.chainId}/${account.bech32Address}`;
+      prevKeyMap.delete(key);
+      this.delegationBinarySort.pushAndSort(key, {
         chainInfo,
         token: queryDelegation.total,
         price: this.priceStore.calculatePrice(queryDelegation.total),
@@ -285,18 +348,21 @@ export class HugeQueriesStore {
         error: queryDelegation.error,
       });
     }
-    return res.sort(this.sortByPrice);
+
+    for (const removedKey of prevKeyMap.keys()) {
+      this.delegationBinarySort.remove(removedKey);
+    }
   }
 
   @computed
-  get unbondings(): {
-    viewToken: ViewToken;
-    completeTime: string;
-  }[] {
-    const res: {
-      viewToken: ViewToken;
-      completeTime: string;
-    }[] = [];
+  get delegations(): ReadonlyArray<ViewToken> {
+    return this.delegationBinarySort.arr;
+  }
+
+  @action
+  protected updateUnbondings(): void {
+    const prevKeyMap = new Map(this.unbondingBinarySort.indexForKeyMap());
+
     for (const chainInfo of this.chainStore.chainInfosInUI) {
       const account = this.accountStore.getAccount(chainInfo.chainId);
       if (account.bech32Address === "") {
@@ -308,8 +374,10 @@ export class HugeQueriesStore {
           account.bech32Address
         );
 
-      for (const unbonding of queryUnbonding.unbondings) {
-        for (const entry of unbonding.entries) {
+      for (let i = 0; i < queryUnbonding.unbondings.length; i++) {
+        const unbonding = queryUnbonding.unbondings[i];
+        for (let j = 0; j < unbonding.entries.length; j++) {
+          const entry = unbonding.entries[j];
           if (!chainInfo.stakeCurrency) {
             continue;
           }
@@ -317,7 +385,10 @@ export class HugeQueriesStore {
             chainInfo.stakeCurrency,
             entry.balance
           );
-          res.push({
+
+          const key = `${chainInfo.chainId}/${account.bech32Address}/${i}/${j}`;
+          prevKeyMap.delete(key);
+          this.unbondingBinarySort.pushAndSort(key, {
             viewToken: {
               chainInfo,
               token: balance,
@@ -330,6 +401,72 @@ export class HugeQueriesStore {
         }
       }
     }
-    return res;
+
+    for (const removedKey of prevKeyMap.keys()) {
+      this.unbondingBinarySort.remove(removedKey);
+    }
+  }
+
+  @computed
+  get unbondings(): ReadonlyArray<{
+    viewToken: ViewToken;
+    completeTime: string;
+  }> {
+    return this.unbondingBinarySort.arr;
+  }
+
+  @action
+  protected updateClaimableRewards(): void {
+    const prevKeyMap = new Map(
+      this.claimableRewardsBinarySort.indexForKeyMap()
+    );
+
+    for (const chainInfo of this.chainStore.chainInfosInUI) {
+      const account = this.accountStore.getAccount(chainInfo.chainId);
+      if (account.bech32Address === "") {
+        continue;
+      }
+      const queries = this.queriesStore.get(chainInfo.chainId);
+      const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
+        account.bech32Address
+      );
+
+      if (
+        queryRewards.stakableReward &&
+        queryRewards.stakableReward.toDec().gt(new Dec(0))
+      ) {
+        const key = `${chainInfo.chainId}/${account.bech32Address}`;
+        prevKeyMap.delete(key);
+        this.claimableRewardsBinarySort.pushAndSort(key, {
+          chainInfo,
+          token: queryRewards.stakableReward,
+          price: this.priceStore.calculatePrice(queryRewards.stakableReward),
+          isFetching: queryRewards.isFetching,
+          error: queryRewards.error,
+        });
+      }
+    }
+
+    for (const removedKey of prevKeyMap.keys()) {
+      this.claimableRewardsBinarySort.remove(removedKey);
+    }
+  }
+
+  @computed
+  get claimableRewards(): ReadonlyArray<ViewToken> {
+    return this.claimableRewardsBinarySort.arr;
+  }
+
+  protected sortByPrice(a: ViewToken, b: ViewToken): number {
+    const aPrice = a.price?.toDec() ?? HugeQueriesStore.zeroDec;
+    const bPrice = b.price?.toDec() ?? HugeQueriesStore.zeroDec;
+
+    if (aPrice.equals(bPrice)) {
+      return 0;
+    } else if (aPrice.gt(bPrice)) {
+      return -1;
+    } else {
+      return 1;
+    }
   }
 }

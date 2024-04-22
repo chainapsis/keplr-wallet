@@ -45,6 +45,8 @@ export interface ChainInfo {
 
   readonly chainSymbolImageUrl?: string;
 
+  readonly hideInUI?: boolean;
+
   readonly evm?: EVMInfo;
 }
 

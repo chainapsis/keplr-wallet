@@ -28,7 +28,7 @@ const router = new ExtensionRouter(ExtensionEnv.produceEnv);
 router.addGuard(ExtensionGuards.checkOriginIsValid);
 router.addGuard(ExtensionGuards.checkMessageIsInternal);
 
-const { initFn, keyRingService } = init(
+const { initFn, keyRingService, analyticsService } = init(
   router,
   (prefix: string) => new ExtensionKVStore(prefix),
   new ContentScriptMessageRequester(),
@@ -348,6 +348,16 @@ router.listen(BACKGROUND_PORT, initFn).then(() => {
           url: "/register.html#",
         });
       }
+    }
+  });
+
+  kvStore.get("installed_analytics").then((v) => {
+    if (!v) {
+      kvStore.set("installed_analytics", true);
+
+      analyticsService.logEvent("installed", {
+        version: browser.runtime.getManifest().version,
+      });
     }
   });
 });

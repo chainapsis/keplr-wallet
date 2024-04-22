@@ -21,6 +21,7 @@ import { MessageRequester } from "@keplr-wallet/router";
 import manifest from "../../manifest.v2.json";
 import { IBCSwapConfig } from "./ibc-swap";
 import { NewChainSuggestionConfig } from "./new-chain";
+import { ChangelogConfig } from "./changelog";
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
@@ -38,6 +39,7 @@ export class UIConfigStore {
   public readonly copyAddressConfig: CopyAddressConfig;
   public readonly addressBookConfig: AddressBookConfig;
   public readonly ibcSwapConfig: IBCSwapConfig;
+  public readonly changelogConfig: ChangelogConfig;
   public readonly newChainSuggestionConfig: NewChainSuggestionConfig;
 
   @observable
@@ -100,9 +102,11 @@ export class UIConfigStore {
       keyRingStore
     );
     this.ibcSwapConfig = new IBCSwapConfig(kvStores.kvStore, chainStore);
+    this.changelogConfig = new ChangelogConfig(kvStores.kvStore);
     this.newChainSuggestionConfig = new NewChainSuggestionConfig(
       kvStores.kvStore,
-      chainStore
+      chainStore,
+      this.changelogConfig
     );
 
     this._icnsInfo = _icnsInfo;
@@ -117,13 +121,13 @@ export class UIConfigStore {
   }
 
   protected async init() {
+    const lastVersion = await this.kvStore.get<string>("lastVersion");
     {
       this._currentVersion = manifest.version;
 
       const installedVersion = await this.kvStore.get<string>(
         "installedVersion"
       );
-      const lastVersion = await this.kvStore.get<string>("lastVersion");
       if (!installedVersion) {
         if (lastVersion) {
           // installedVersion은 처음부터 존재했던게 아니라 중간에 추가되었기 때문에 정확하게 알 수 없다.
@@ -170,6 +174,10 @@ export class UIConfigStore {
       this.copyAddressConfig.init(),
       this.addressBookConfig.init(),
       this.ibcSwapConfig.init(),
+      this.changelogConfig.init(
+        lastVersion || this._currentVersion,
+        this._currentVersion
+      ),
       this.newChainSuggestionConfig.init(
         this._installedVersion,
         this._currentVersion

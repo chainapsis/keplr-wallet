@@ -1,5 +1,4 @@
 import {
-  ChainGetter,
   HasMapStore,
   ObservableQuery,
   QuerySharedContext,
@@ -7,6 +6,7 @@ import {
 import { AssetsResponse } from "./types";
 import { computed, makeObservable } from "mobx";
 import Joi from "joi";
+import { ChainStore } from "../chain";
 
 const Schema = Joi.object<AssetsResponse>({
   chain_to_assets_map: Joi.object().pattern(
@@ -27,7 +27,7 @@ const Schema = Joi.object<AssetsResponse>({
 export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> {
   constructor(
     sharedContext: QuerySharedContext,
-    protected readonly chainGetter: ChainGetter,
+    protected readonly chainStore: ChainStore,
     skipURL: string,
     public readonly chainId: string
   ) {
@@ -55,11 +55,14 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
       return [];
     }
 
-    if (!this.chainGetter.hasChain(this.chainId)) {
+    if (!this.chainStore.hasChain(this.chainId)) {
       return [];
     }
 
-    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const chainInfo = this.chainStore.getChain(this.chainId);
+    if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
+      return [];
+    }
 
     const assetsInResponse =
       this.response.data.chain_to_assets_map[chainInfo.chainId];
@@ -73,8 +76,8 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
 
       for (const asset of assetsInResponse.assets) {
         if (
-          this.chainGetter.hasChain(asset.chain_id) &&
-          this.chainGetter.hasChain(asset.origin_chain_id)
+          this.chainStore.hasChain(asset.chain_id) &&
+          this.chainStore.hasChain(asset.origin_chain_id)
         ) {
           // IBC asset일 경우 그냥 넣는다.
           if (asset.denom.startsWith("ibc/")) {
@@ -126,13 +129,13 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
 export class ObservableQueryAssets extends HasMapStore<ObservableQueryAssetsInner> {
   constructor(
     protected readonly sharedContext: QuerySharedContext,
-    protected readonly chainGetter: ChainGetter,
+    protected readonly chainStore: ChainStore,
     protected readonly skipURL: string
   ) {
     super((chainId) => {
       return new ObservableQueryAssetsInner(
         this.sharedContext,
-        this.chainGetter,
+        this.chainStore,
         this.skipURL,
         chainId
       );

@@ -336,6 +336,10 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
     return this._embedded.evm;
   }
 
+  get hideInUI(): boolean | undefined {
+    return this._embedded.hideInUI;
+  }
+
   hasFeature(feature: string): boolean {
     return !!(
       this._embedded.features && this._embedded.features.includes(feature)
