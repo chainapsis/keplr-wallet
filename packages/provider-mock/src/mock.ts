@@ -116,6 +116,9 @@ export class MockKeplr implements Keplr {
         this.chainInfos.find((c) => c.chainId === chainId)!.bech32Config
           .bech32PrefixAccAddr
       ),
+      ethereumHexAddress: new Bech32Address(
+        wallet.getPubKey().getCosmosAddress()
+      ).toHex(false),
       isNanoLedger: false,
       isKeystone: false,
     };
@@ -138,6 +141,9 @@ export class MockKeplr implements Keplr {
             this.chainInfos.find((c) => c.chainId === chainId)!.bech32Config
               .bech32PrefixAccAddr
           ),
+          ethereumHexAddress: new Bech32Address(
+            wallet.getPubKey().getCosmosAddress()
+          ).toHex(false),
           isNanoLedger: false,
           isKeystone: false,
         },
