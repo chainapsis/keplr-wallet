@@ -26,6 +26,7 @@
   "error.not-read-simulate-tx": "트랜잭션을 시뮬레이션할 준비가 되지 않았습니다.",
   "error.simulating-secret-wasm-not-supported": "시크릿와즘의 시뮬레이션은 지원되지 않습니다.",
   "page.governance.proposal-list.empty-text": "아직 등록된 프로포절이 없습니다.",
+  "page.governance.proposal-list.cosmos-hub-warning-text": "코스모스 허브에서 투표하려면 최소 1 ATOM을 스테이킹해야 합니다.",
   "page.governance.main.empty-title": "투표할 프로포절이 없습니다.",
   "page.governance.main.empty-text": "거버넌스 투표에 참여하려면, 자산을 스테이킹해야 합니다. 스테이킹한 양에 따라 내 투표권의 규모가 정해집니다.",
   "page.governance.main.info-modal.title": "어떤 프로포절에 투표할 수 있나요?",

@@ -15,6 +15,7 @@ import {useStyle} from '../../../styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {FlatList} from '../../../components/flat-list';
 import {Box} from '../../../components/box';
+import {GuideBox} from '../../../components/guide-box';
 
 const DEFAULT_PARAMS = {
   'pagination.offset': 0,
@@ -107,6 +108,18 @@ export const GovernanceListScreen: FunctionComponent = observer(() => {
         <React.Fragment>
           <Gutter size={12} />
           {/* TODO 나중에 show spam proposal 토글넣어야함 */}
+
+          {ChainIdHelper.parse(chainId).identifier === 'cosmoshub' ? (
+            <React.Fragment>
+              <GuideBox
+                title={intl.formatMessage({
+                  id: 'page.governance.proposal-list.cosmos-hub-warning-text',
+                })}
+              />
+
+              <Gutter size={12} />
+            </React.Fragment>
+          ) : null}
         </React.Fragment>
       }
       keyExtractor={proposal => proposal.id}

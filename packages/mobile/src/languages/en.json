@@ -26,6 +26,7 @@
   "error.not-read-simulate-tx": "Not ready to simulate tx",
   "error.simulating-secret-wasm-not-supported": "Simulating secret wasm not supported",
   "page.governance.proposal-list.empty-text": "No records of past or ongoing proposals found on this chain.",
+  "page.governance.proposal-list.cosmos-hub-warning-text": "Cosmos Hub requires you to have at least 1 ATOM staked to vote.",
   "page.governance.main.empty-title": "No Proposals Awaiting Your Vote",
   "page.governance.main.empty-text": "Stake your assets first to start voting on proposals. Your voting power is determined by the amount of staked tokens.",
   "page.governance.main.info-modal.title": "Active Proposals",
