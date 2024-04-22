@@ -13,6 +13,7 @@ import {Buffer} from 'buffer/';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../../stores';
 import {Platform} from 'react-native';
+import Bugsnag from '@bugsnag/react-native';
 
 export const RegisterAppleSignInScreen: FunctionComponent = observer(() => {
   const {uiConfigStore} = useStore();
@@ -61,6 +62,20 @@ export const RegisterAppleSignInScreen: FunctionComponent = observer(() => {
         setKey(res);
       } catch (e) {
         console.log(e);
+        if (e instanceof Error) {
+          Bugsnag.notify(e);
+        } else if (typeof e === 'string') {
+          Bugsnag.notify(new Error(e));
+        } else {
+          if (
+            e &&
+            typeof e === 'object' &&
+            e.message &&
+            typeof e.message === 'string'
+          ) {
+            Bugsnag.notify(new Error(e.message));
+          }
+        }
         navigation.goBack();
       } finally {
         if (Platform.OS === 'ios') {

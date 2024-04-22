@@ -13,6 +13,7 @@ import {Buffer} from 'buffer/';
 import {Platform} from 'react-native';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../../stores';
+import Bugsnag from '@bugsnag/react-native';
 
 export const RegisterGoogleSignInScreen: FunctionComponent = observer(() => {
   const {uiConfigStore} = useStore();
@@ -60,6 +61,20 @@ export const RegisterGoogleSignInScreen: FunctionComponent = observer(() => {
         setKey(res);
       } catch (e) {
         console.log(e);
+        if (e instanceof Error) {
+          Bugsnag.notify(e);
+        } else if (typeof e === 'string') {
+          Bugsnag.notify(new Error(e));
+        } else {
+          if (
+            e &&
+            typeof e === 'object' &&
+            e.message &&
+            typeof e.message === 'string'
+          ) {
+            Bugsnag.notify(new Error(e.message));
+          }
+        }
         navigation.goBack();
       } finally {
         if (Platform.OS === 'ios') {
