@@ -58,7 +58,7 @@ import {
   GravityBridgeCurrencyRegistrar,
   KeplrETCQueries,
 } from '@keplr-wallet/stores-etc';
-import {SkipQueries} from '@keplr-wallet/extension/src/stores/skip';
+import {SkipQueries} from './skip';
 import {DeepLinkStore} from './deep-link';
 
 export class RootStore {

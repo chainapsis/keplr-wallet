@@ -10,7 +10,12 @@ import {Gutter} from '../../../components/gutter';
 import {Column, Columns} from '../../../components/column';
 import {Text} from 'react-native';
 import {Checkbox} from '../../../components/checkbox';
-import {StackActions, useNavigation} from '@react-navigation/native';
+import {
+  RouteProp,
+  StackActions,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {
   BoundaryScrollView,
@@ -20,20 +25,23 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Box} from '../../../components/box';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {EmptyView, EmptyViewText} from '../../../components/empty-view';
+import {RootStackParamList, StackNavProp} from '../../../navigation.tsx';
 
 export const SendSelectAssetScreen: FunctionComponent = observer(() => {
   const style = useStyle();
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavProp>();
   const intl = useIntl();
+  const route = useRoute<RouteProp<RootStackParamList, 'Send.SelectAsset'>>();
+  const paramIsIBCSwap = route.params?.isIBCSwap;
 
-  const {hugeQueriesStore} = useStore();
+  const {hugeQueriesStore, skipQueriesStore} = useStore();
 
   const [search, setSearch] = useState('');
   const [hideIBCToken, setHideIBCToken] = useState(false);
 
   const tokens = hugeQueriesStore.getAllBalances(!hideIBCToken);
 
-  const filteredTokens = useMemo(() => {
+  const _filteredTokens = useMemo(() => {
     const zeroDec = new Dec(0);
     const newTokens = tokens.filter(token => {
       return token.token.toDec().gt(zeroDec);
@@ -45,7 +53,7 @@ export const SendSelectAssetScreen: FunctionComponent = observer(() => {
       return newTokens;
     }
 
-    const filtered = newTokens.filter(token => {
+    return newTokens.filter(token => {
       return (
         token.chainInfo.chainName
           .toLowerCase()
@@ -55,9 +63,19 @@ export const SendSelectAssetScreen: FunctionComponent = observer(() => {
           .includes(trimSearch.toLowerCase())
       );
     });
-
-    return filtered;
   }, [search, tokens]);
+
+  const filteredTokens = _filteredTokens.filter(token => {
+    if (paramIsIBCSwap) {
+      // skipQueriesStore.queryIBCSwap.isSwappableCurrency는 useMemo 안에 들어가면 observation이 안되서 따로 빼야한다...
+      return skipQueriesStore.queryIBCSwap.isSwappableCurrency(
+        token.chainInfo.chainId,
+        token.token.currency,
+      );
+    }
+
+    return true;
+  });
 
   const safeAreaInsets = useSafeAreaInsets();
 
@@ -120,12 +138,26 @@ export const SendSelectAssetScreen: FunctionComponent = observer(() => {
                 <TokenItem
                   viewToken={token}
                   onClick={() => {
-                    navigation.dispatch({
-                      ...StackActions.replace('Send', {
-                        chainId: token.chainInfo.chainId,
-                        coinMinimalDenom: token.token.currency.coinMinimalDenom,
-                      }),
-                    });
+                    if (paramIsIBCSwap) {
+                      navigation.navigate({
+                        name: 'Swap',
+                        params: {
+                          ...route.params,
+                          chainId: token.chainInfo.chainId,
+                          coinMinimalDenom:
+                            token.token.currency.coinMinimalDenom,
+                        },
+                        merge: true,
+                      });
+                    } else {
+                      navigation.dispatch({
+                        ...StackActions.replace('Send', {
+                          chainId: token.chainInfo.chainId,
+                          coinMinimalDenom:
+                            token.token.currency.coinMinimalDenom,
+                        }),
+                      });
+                    }
                   }}
                 />
               );

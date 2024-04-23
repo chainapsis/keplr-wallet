@@ -108,6 +108,9 @@ import {
   FinalizeImportFromExtensionScreen,
   DecryptedKeyRingDatasResponse,
 } from './screen/register/import-from-extension';
+import {SwapIcon} from './components/icon/swap.tsx';
+import {IBCSwapScreen} from './screen/ibc-swap';
+import {IBCSwapDestinationSelectAssetScreen} from './screen/ibc-swap/select-asset';
 
 type DefaultRegisterParams = {
   hideBackButton?: boolean;
@@ -224,7 +227,13 @@ export type RootStackParamList = {
     password?: string;
   };
   Send: {chainId: string; coinMinimalDenom: string; recipientAddress?: string};
-  'Send.SelectAsset': undefined;
+  'Send.SelectAsset': {
+    isIBCSwap?: boolean;
+    chainId?: string;
+    coinMinimalDenom?: string;
+    outChainId?: string;
+    outCoinMinimalDenom?: string;
+  };
   'Setting.Intro': undefined;
 
   'Setting.General': undefined;
@@ -286,6 +295,37 @@ export type RootStackParamList = {
   TxFail: {
     chainId: string;
     txHash: string;
+  };
+  Swap: {
+    chainId?: string;
+    coinMinimalDenom?: string;
+    outChainId?: string;
+    outCoinMinimalDenom?: string;
+    initialAmountFraction?: string;
+    initialAmount?: string;
+    initialRecipient?: string;
+    initialMemo?: string;
+    initialFeeCurrency?: string;
+    initialFeeType?: string;
+    initialGasAmount?: string;
+    initialGasAdjustment?: string;
+    tempSwitchAmount?: string;
+  };
+  'Swap.SelectAsset': {
+    excludeKey: string;
+    chainId?: string;
+    coinMinimalDenom?: string;
+    outChainId?: string;
+    outCoinMinimalDenom?: string;
+    initialAmountFraction?: string;
+    initialAmount?: string;
+    initialRecipient?: string;
+    initialMemo?: string;
+    initialFeeCurrency?: string;
+    initialFeeType?: string;
+    initialGasAmount?: string;
+    initialGasAdjustment?: string;
+    tempSwitchAmount?: string;
   };
 };
 
@@ -510,7 +550,11 @@ export const MainTabNavigation: FunctionComponent = () => {
   useEffect(() => {
     // When the focused screen is not "Home" screen and the drawer is open,
     // try to close the drawer forcely.
-    if (focusedScreen.name !== 'Home' && isDrawerOpen) {
+    if (
+      focusedScreen.name !== 'Home' &&
+      focusedScreen.name !== 'Swap' &&
+      isDrawerOpen
+    ) {
       navigation.dispatch(DrawerActions.toggleDrawer());
     }
   }, [focusedScreen.name, isDrawerOpen, navigation]);
@@ -524,6 +568,8 @@ export const MainTabNavigation: FunctionComponent = () => {
           switch (route.name) {
             case 'Home':
               return <WalletIcon size={size} color={color} />;
+            case 'Swap':
+              return <SwapIcon size={size} color={color} />;
             case 'WebTab':
               return <BrowserIcon size={size} color={color} />;
             case 'Settings':
@@ -549,6 +595,14 @@ export const MainTabNavigation: FunctionComponent = () => {
           ...homeHeaderOptions,
         }}
         component={HomeScreen}
+      />
+      <Tab.Screen
+        name="Swap"
+        options={{
+          headerTitle: HomeScreenHeaderTitleFunc,
+          ...homeHeaderOptions,
+        }}
+        component={IBCSwapScreen}
       />
       <Tab.Screen
         name="WebTab"
@@ -1147,6 +1201,16 @@ export const AppNavigation: FunctionComponent = observer(() => {
             name="TxFail"
             options={{headerShown: false}}
             component={TxFailedResultScreen}
+          />
+          <Stack.Screen
+            name="Swap.SelectAsset"
+            options={{
+              title: intl.formatMessage({
+                id: 'page.send.select-asset.title',
+              }),
+              ...defaultHeaderOptions,
+            }}
+            component={IBCSwapDestinationSelectAssetScreen}
           />
         </Stack.Navigator>
 
