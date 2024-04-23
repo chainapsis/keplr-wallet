@@ -8332,9 +8332,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/extension@workspace:packages/extension":
+"@keplr-wallet/extension@workspace:apps/extension":
   version: 0.0.0-use.local
-  resolution: "@keplr-wallet/extension@workspace:packages/extension"
+  resolution: "@keplr-wallet/extension@workspace:apps/extension"
   dependencies:
     "@amplitude/analytics-browser": ^1.10.3
     "@babel/core": ^7.19.3
@@ -28805,9 +28805,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"keplr-wallet-private@file:./noop-keplr-wallet-private::locator=%40keplr-wallet%2Fextension%40workspace%3Apackages%2Fextension":
+"keplr-wallet-private@file:./noop-keplr-wallet-private::locator=%40keplr-wallet%2Fextension%40workspace%3Aapps%2Fextension":
   version: 0.0.1
-  resolution: "keplr-wallet-private@file:./noop-keplr-wallet-private#./noop-keplr-wallet-private::hash=62d7fb&locator=%40keplr-wallet%2Fextension%40workspace%3Apackages%2Fextension"
+  resolution: "keplr-wallet-private@file:./noop-keplr-wallet-private#./noop-keplr-wallet-private::hash=62d7fb&locator=%40keplr-wallet%2Fextension%40workspace%3Aapps%2Fextension"
   peerDependencies:
     react: ^16.8.0 || ^17 || ^18
     styled-components: "*"

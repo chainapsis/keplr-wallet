@@ -16,7 +16,7 @@ node_modules
 dist/*
 prod/*
 build/*
-packages/extension/noop-keplr-wallet-private/build
+apps/extension/noop-keplr-wallet-private/build
 
 yarn.lock
 Podfile.lock
