@@ -138,7 +138,8 @@ export class NewMnemonicKeyMsg extends Message<{
     public readonly mnemonic: string,
     public readonly bip44HDPath: BIP44HDPath,
     public readonly name: string,
-    public readonly password?: string
+    public readonly password?: string,
+    public readonly meta?: PlainObject
   ) {
     super();
   }
@@ -612,5 +613,81 @@ export class CheckLegacyKeyRingPasswordMsg extends Message<void> {
 
   type(): string {
     return CheckLegacyKeyRingPasswordMsg.type();
+  }
+}
+
+export class GetLegacyKeyRingInfosMsg extends Message<
+  Legacy.KeyStore[] | undefined
+> {
+  public static type() {
+    return "GetLegacyKeyRingInfos";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetLegacyKeyRingInfosMsg.type();
+  }
+}
+
+export class ShowSensitiveLegacyKeyRingDataMsg extends Message<string> {
+  public static type() {
+    return "ShowSensitiveLegacyKeyRingData";
+  }
+
+  constructor(public readonly index: string, public readonly password: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.index) {
+      throw new Error("index not set");
+    }
+
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ShowSensitiveLegacyKeyRingDataMsg.type();
+  }
+}
+
+export class CheckPasswordMsg extends Message<boolean> {
+  public static type() {
+    return "check-keyring-password";
+  }
+
+  constructor(public readonly password: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return CheckPasswordMsg.type();
   }
 }

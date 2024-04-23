@@ -25,23 +25,25 @@ describe("Test auto lock account service", () => {
     const mockListener = jest.fn().mockImplementation((fn) => {
       event.addListener("onStateChanged", fn);
     });
-    global.browser = {
-      idle: {
-        onStateChanged: {
-          addListener: mockListener,
-        },
-      },
-    } as any;
 
     const keyRingService = new MockKeyRingService();
     const service = new AutoLockAccountService(
       new MemoryKVStore("test"),
-      keyRingService as any
+      keyRingService as any,
+      (callback) => {
+        mockListener((state: any) => {
+          if (state === "locked") {
+            callback();
+          }
+        });
+      }
     );
     await service.init();
 
     expect(mockListener).toBeCalledTimes(1);
     jest.restoreAllMocks();
+
+    event.removeAllListeners("onStateChanged");
   });
 
   it("test restore", async () => {
@@ -50,29 +52,44 @@ describe("Test auto lock account service", () => {
     const mockListener = jest.fn().mockImplementation((fn) => {
       event.addListener("onStateChanged", fn);
     });
-    global.browser = {
-      idle: {
-        onStateChanged: {
-          addListener: mockListener,
-        },
-      },
-    } as any;
 
     const keyRingService = new MockKeyRingService();
     const memStore = new MemoryKVStore("test");
-    let service = new AutoLockAccountService(memStore, keyRingService as any);
+    let service = new AutoLockAccountService(
+      memStore,
+      keyRingService as any,
+      (callback) => {
+        mockListener((state: any) => {
+          if (state === "locked") {
+            callback();
+          }
+        });
+      }
+    );
     await service.init();
 
     // Set duration.
     await service.setDuration(1000);
     expect(service.getAutoLockDuration()).toBe(1000);
 
-    service = new AutoLockAccountService(memStore, keyRingService as any);
+    service = new AutoLockAccountService(
+      memStore,
+      keyRingService as any,
+      (callback) => {
+        mockListener((state: any) => {
+          if (state === "locked") {
+            callback();
+          }
+        });
+      }
+    );
     await service.init();
 
     expect(service.getAutoLockDuration()).toBe(1000);
 
     jest.restoreAllMocks();
+
+    event.removeAllListeners("onStateChanged");
   });
 
   it("test device sleep", async () => {
@@ -81,18 +98,18 @@ describe("Test auto lock account service", () => {
     const mockListener = jest.fn().mockImplementation((fn) => {
       event.addListener("onStateChanged", fn);
     });
-    global.browser = {
-      idle: {
-        onStateChanged: {
-          addListener: mockListener,
-        },
-      },
-    } as any;
 
     const keyRingService = new MockKeyRingService();
     const service = new AutoLockAccountService(
       new MemoryKVStore("test"),
-      keyRingService as any
+      keyRingService as any,
+      (callback) => {
+        mockListener((state: any) => {
+          if (state === "locked") {
+            callback();
+          }
+        });
+      }
     );
     await service.init();
 
@@ -103,6 +120,8 @@ describe("Test auto lock account service", () => {
 
     expect(mockListener).toBeCalledTimes(1);
     jest.restoreAllMocks();
+
+    event.removeAllListeners("onStateChanged");
   });
 
   it("test device sleep 2", async () => {
@@ -111,18 +130,18 @@ describe("Test auto lock account service", () => {
     const mockListener = jest.fn().mockImplementation((fn) => {
       event.addListener("onStateChanged", fn);
     });
-    global.browser = {
-      idle: {
-        onStateChanged: {
-          addListener: mockListener,
-        },
-      },
-    } as any;
 
     const keyRingService = new MockKeyRingService();
     const service = new AutoLockAccountService(
       new MemoryKVStore("test"),
-      keyRingService as any
+      keyRingService as any,
+      (callback) => {
+        mockListener((state: any) => {
+          if (state === "locked") {
+            callback();
+          }
+        });
+      }
     );
     await service.init();
 
@@ -135,5 +154,7 @@ describe("Test auto lock account service", () => {
 
     expect(mockListener).toBeCalledTimes(1);
     jest.restoreAllMocks();
+
+    event.removeAllListeners("onStateChanged");
   });
 });

@@ -19,7 +19,9 @@
     "@keplr-wallet/crypto": "0.12.82",
     "@keplr-wallet/types": "0.12.82",
     "buffer": "^6.0.3",
-    "delay": "^4.4.0",
-    "mobx": "^6.1.7"
+    "delay": "^4.4.0"
+  },
+  "peerDependencies": {
+    "mobx": "^6"
   }
 }
