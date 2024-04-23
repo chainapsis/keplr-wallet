@@ -48,8 +48,8 @@ import semver from "semver";
 
         const directory =
           targetPlatform === "android"
-            ? `${__dirname}/../../apps/mobile/android/fastlane`
-            : `${__dirname}/../../apps/mobile/ios/fastlane`;
+            ? `${__dirname}/../../packages/mobile/android/fastlane`
+            : `${__dirname}/../../packages/mobile/ios/fastlane`;
 
         if (isCodepush) {
           await $`cd ${directory} && bundle exec fastlane deploy_codepush version:${semantic.raw}`;

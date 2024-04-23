@@ -7,9 +7,9 @@ const fs = require('fs');
 
 const currentPath = __dirname;
 const rootPath = (() => {
-  const i = currentPath.lastIndexOf('/apps/mobile');
+  const i = currentPath.lastIndexOf('/packages/mobile');
   if (i < 0) {
-    throw new Error('Could not find apps/mobile in path');
+    throw new Error('Could not find packages/mobile in path');
   }
 
   return currentPath.slice(0, i);
@@ -20,27 +20,17 @@ const packages = (() => {
 
   const dirs = fs.readdirSync(`${rootPath}/packages/`);
   for (const dir of dirs) {
+    if (dir === 'mobile') {
+      // 당근 자기 자신은 무시한다.
+      continue;
+    }
+
     const stat = fs.statSync(`${rootPath}/packages/${dir}`);
     if (
       stat.isDirectory() &&
       fs.existsSync(`${rootPath}/packages/${dir}/package.json`)
     ) {
       res.push(`/packages/${dir}`);
-    }
-  }
-  const dirs2 = fs.readdirSync(`${rootPath}/apps/`);
-  for (const dir of dirs2) {
-    if (dir === 'mobile') {
-      // 당근 자기 자신은 무시한다.
-      continue;
-    }
-
-    const stat = fs.statSync(`${rootPath}/apps/${dir}`);
-    if (
-        stat.isDirectory() &&
-        fs.existsSync(`${rootPath}/apps/${dir}/package.json`)
-    ) {
-      res.push(`/apps/${dir}`);
     }
   }
 
@@ -108,7 +98,7 @@ const config = {
       ...(() => {
         const res = {};
         for (const lib of shouldNohoistLibs) {
-          res[lib] = `${rootPath}/apps/mobile/node_modules/${lib}`;
+          res[lib] = `${rootPath}/packages/mobile/node_modules/${lib}`;
         }
         return res;
       })(),

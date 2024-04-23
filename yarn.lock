@@ -8486,9 +8486,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/mobile@workspace:apps/mobile":
+"@keplr-wallet/mobile@workspace:packages/mobile":
   version: 0.0.0-use.local
-  resolution: "@keplr-wallet/mobile@workspace:apps/mobile"
+  resolution: "@keplr-wallet/mobile@workspace:packages/mobile"
   dependencies:
     "@babel/core": ^7.20.0
     "@babel/preset-env": ^7.20.0
@@ -23276,9 +23276,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-standard-web-crypto@file:./crypto-polyfill::locator=%40keplr-wallet%2Fmobile%40workspace%3Aapps%2Fmobile":
+"expo-standard-web-crypto@file:./crypto-polyfill::locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile":
   version: 0.0.1
-  resolution: "expo-standard-web-crypto@file:./crypto-polyfill#./crypto-polyfill::hash=b2305a&locator=%40keplr-wallet%2Fmobile%40workspace%3Aapps%2Fmobile"
+  resolution: "expo-standard-web-crypto@file:./crypto-polyfill#./crypto-polyfill::hash=b2305a&locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile"
   dependencies:
     browserify-cipher: ^1.0.1
     create-hash: ^1.2.0
@@ -28798,9 +28798,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"keplr-wallet-mobile-private@file:./noop-keplr-wallet-mobile-private::locator=%40keplr-wallet%2Fmobile%40workspace%3Aapps%2Fmobile":
+"keplr-wallet-mobile-private@file:./noop-keplr-wallet-mobile-private::locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile":
   version: 0.0.1
-  resolution: "keplr-wallet-mobile-private@file:./noop-keplr-wallet-mobile-private#./noop-keplr-wallet-mobile-private::hash=d65a79&locator=%40keplr-wallet%2Fmobile%40workspace%3Aapps%2Fmobile"
+  resolution: "keplr-wallet-mobile-private@file:./noop-keplr-wallet-mobile-private#./noop-keplr-wallet-mobile-private::hash=d65a79&locator=%40keplr-wallet%2Fmobile%40workspace%3Apackages%2Fmobile"
   checksum: cb1ddbf5e4fde8235addae46d7203c7f61dc9b23de6bd4ff476a1b295d61642ff274706dffcc507e0a201f45e85a0de8487c85d1e5af49daf5c3a36314ea5ef6
   languageName: node
   linkType: hard
