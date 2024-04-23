@@ -6,15 +6,33 @@ import fs from "fs";
 function getPackageJsons() {
   const res = [];
 
-  const packageDirs = fs.readdirSync(`${__dirname}/../packages/`);
+  const packageDirs = [];
+  const _packages = fs.readdirSync(`${__dirname}/../packages/`);
+  for (const dir of _packages) {
+    packageDirs.push({
+      p: "packages",
+      dir,
+    });
+  }
+  const _apps = fs.readdirSync(`${__dirname}/../apps/`);
+  for (const dir of _apps) {
+    packageDirs.push({
+      p: "apps",
+      dir,
+    });
+  }
+
   for (const dir of packageDirs) {
-    const stat = fs.statSync(`${__dirname}/../packages/${dir}`);
+    const stat = fs.statSync(`${__dirname}/../${dir.p}/${dir.dir}`);
     if (
       stat.isDirectory() &&
-      fs.existsSync(`${__dirname}/../packages/${dir}/package.json`)
+      fs.existsSync(`${__dirname}/../${dir.p}/${dir.dir}/package.json`)
     ) {
       const packageJson = JSON.parse(
-        fs.readFileSync(`${__dirname}/../packages/${dir}/package.json`, "utf8")
+        fs.readFileSync(
+          `${__dirname}/../${dir.p}/${dir.dir}/package.json`,
+          "utf8"
+        )
       );
 
       res.push(packageJson);
