@@ -1,5 +1,6 @@
 import React, {
   FunctionComponent,
+  PropsWithChildren,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -16,7 +17,7 @@ import SimpleBar from "simplebar-react";
 
 const AnimatedSimpleBar = animated(SimpleBar);
 
-export const Modal: FunctionComponent<ModalProps> = ({
+export const Modal: FunctionComponent<PropsWithChildren<ModalProps>> = ({
   isOpen,
   close,
   align,
@@ -104,20 +105,22 @@ export const Modal: FunctionComponent<ModalProps> = ({
   );
 };
 
-const ModalChild: FunctionComponent<{
-  transition: ReturnType<typeof useSpringValue<number>>;
+const ModalChild: FunctionComponent<
+  PropsWithChildren<{
+    transition: ReturnType<typeof useSpringValue<number>>;
 
-  isOpen: boolean;
-  close: () => void;
-  align: "center" | "bottom" | "left" | "right";
+    isOpen: boolean;
+    close: () => void;
+    align: "center" | "bottom" | "left" | "right";
 
-  maxHeight?: string;
+    maxHeight?: string;
 
-  onCloseTransitionEnd: () => void;
-  forceNotUseSimplebar?: boolean;
-  forceNotOverflowAuto?: boolean;
-  disableBackdrop?: boolean;
-}> = ({
+    onCloseTransitionEnd: () => void;
+    forceNotUseSimplebar?: boolean;
+    forceNotOverflowAuto?: boolean;
+    disableBackdrop?: boolean;
+  }>
+> = ({
   children,
   transition,
   align,

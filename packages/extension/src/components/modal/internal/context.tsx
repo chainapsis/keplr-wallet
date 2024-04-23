@@ -1,6 +1,7 @@
 import React, {
   createContext,
   FunctionComponent,
+  PropsWithChildren,
   useEffect,
   useMemo,
   useState,
@@ -17,7 +18,9 @@ export interface ModalRoot {
 
 export const ModalRootContext = createContext<ModalRoot | null>(null);
 
-export const ModalRootProvider: FunctionComponent = ({ children }) => {
+export const ModalRootProvider: FunctionComponent<PropsWithChildren> = ({
+  children,
+}) => {
   const [generateId] = useState(() => {
     let id = 0;
     return () => {

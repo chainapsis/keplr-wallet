@@ -157,6 +157,7 @@ export class RootStore {
 
     this.permissionStore = new PermissionStore(
       this.interactionStore,
+      this.permissionManagerStore,
       new InExtensionMessageRequester()
     );
     this.signInteractionStore = new SignInteractionStore(this.interactionStore);

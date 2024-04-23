@@ -1,4 +1,4 @@
-import React, { ErrorInfo, FunctionComponent } from "react";
+import React, { ErrorInfo, FunctionComponent, PropsWithChildren } from "react";
 import { MsgHistory } from "../types";
 import { MsgRelationSend } from "./send";
 import { MsgRelationReceive } from "./receive";
@@ -263,12 +263,12 @@ const UnknownMsgItem: FunctionComponent<{
 };
 
 class ErrorBoundary extends React.Component<
-  unknown,
+  PropsWithChildren,
   {
     hasError: boolean;
   }
 > {
-  constructor(props: unknown) {
+  constructor(props: PropsWithChildren) {
     super(props);
     this.state = { hasError: false };
   }

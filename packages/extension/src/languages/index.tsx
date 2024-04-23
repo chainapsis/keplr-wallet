@@ -1,6 +1,7 @@
 import React, {
   createContext,
   FunctionComponent,
+  PropsWithChildren,
   useContext,
   useLayoutEffect,
   useState,
@@ -68,7 +69,9 @@ export const useLanguage = (): Language => {
   return lang;
 };
 
-export const AppIntlProvider: FunctionComponent = ({ children }) => {
+export const AppIntlProvider: FunctionComponent<PropsWithChildren> = ({
+  children,
+}) => {
   const [language, _setLanguage] = useState<string>(() => initLanguage());
   const [messages, setMessages] = useState(getMessages(language));
 

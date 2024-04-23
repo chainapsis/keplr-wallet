@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, PropsWithChildren } from "react";
 import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { IEthTxRenderRegistry, IEthTxRenderer } from "./types";
@@ -38,7 +38,7 @@ export class EthTxRenderRegistry implements IEthTxRenderRegistry {
   }
 }
 
-const UnknownContent: FunctionComponent = ({ children }) => {
+const UnknownContent: FunctionComponent<PropsWithChildren> = ({ children }) => {
   const theme = useTheme();
   return (
     <pre

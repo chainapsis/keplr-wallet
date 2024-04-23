@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useLayoutEffect, useRef } from "react";
+import React, {
+  FunctionComponent,
+  PropsWithChildren,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import styled, { css } from "styled-components";
 import { HeaderProps } from "./types";
 import { Subtitle1 } from "../../components/typography";
@@ -163,7 +168,9 @@ const Styles = {
   `,
 };
 
-export const HeaderLayout: FunctionComponent<HeaderProps> = ({
+export const HeaderLayout: FunctionComponent<
+  PropsWithChildren<HeaderProps>
+> = ({
   title,
   left,
   right,

@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, PropsWithChildren } from "react";
 import { observer } from "mobx-react-lite";
 import { RegisterSceneBox } from "../components/register-scene-box";
 import { Box } from "../../../components/box";
@@ -136,7 +136,7 @@ export const BackUpPrivateKeyScene: FunctionComponent<{
   );
 });
 
-const BlurBackdrop: FunctionComponent = ({ children }) => {
+const BlurBackdrop: FunctionComponent<PropsWithChildren> = ({ children }) => {
   const theme = useTheme();
 
   return (

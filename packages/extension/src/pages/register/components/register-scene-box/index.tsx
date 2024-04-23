@@ -1,11 +1,13 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, PropsWithChildren } from "react";
 import { Box } from "../../../../components/box";
 import styled from "styled-components";
 import { ColorPalette } from "../../../../styles";
 
-export const RegisterSceneBox: FunctionComponent<{
-  style?: React.CSSProperties;
-}> = ({ children, style }) => {
+export const RegisterSceneBox: FunctionComponent<
+  PropsWithChildren<{
+    style?: React.CSSProperties;
+  }>
+> = ({ children, style }) => {
   return (
     <Box paddingX="3.25rem" paddingY="3rem" style={style}>
       {children}
@@ -25,7 +27,9 @@ const Styles = {
   `,
 };
 
-export const RegisterSceneBoxHeader: FunctionComponent = ({ children }) => {
+export const RegisterSceneBoxHeader: FunctionComponent<PropsWithChildren> = ({
+  children,
+}) => {
   return (
     <Styles.RegisterSceneBoxHeader>{children}</Styles.RegisterSceneBoxHeader>
   );
