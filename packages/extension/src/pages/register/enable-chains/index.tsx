@@ -34,7 +34,7 @@ import { useNavigate } from "react-router";
 import { ChainImageFallback } from "../../../components/image";
 import { Checkbox } from "../../../components/checkbox";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
-import { WalletStatus } from "@keplr-wallet/stores";
+import { IChainInfoImpl, WalletStatus } from "@keplr-wallet/stores";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TextButton } from "../../../components/button-text";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -315,6 +315,24 @@ export const EnableChainsScene: FunctionComponent<{
         const enabledChainIdentifiers: string[] =
           chainStore.enabledChainIdentifiers;
 
+        // noble도 default로 활성화되어야 한다.
+        // 근데 enable-chains가 처음 register일때가 아니라
+        // manage chain visibility로부터 왔을수도 있다
+        // 이 경우 candidateAddresses의 length는 로직상 0일 수밖에 없기 때문에
+        // 이를 통해서 상황을 구분한다.
+        if (
+          candidateAddresses.length > 0 &&
+          enabledChainIdentifiers.length === 1 &&
+          enabledChainIdentifiers[0] ===
+            chainStore.chainInfos[0].chainIdentifier
+        ) {
+          if (
+            chainStore.chainInfos.find((c) => c.chainIdentifier === "noble")
+          ) {
+            enabledChainIdentifiers.push("noble");
+          }
+        }
+
         for (const candidateAddress of candidateAddresses) {
           const queries = queriesStore.get(candidateAddress.chainId);
           const chainInfo = chainStore.getChain(candidateAddress.chainId);
@@ -340,7 +358,20 @@ export const EnableChainsScene: FunctionComponent<{
               if (
                 data.balances &&
                 Array.isArray(data.balances) &&
-                data.balances.length > 0
+                data.balances.length > 0 &&
+                // nomic은 지들이 대충 구현한 가짜 rest를 쓰는데...
+                // 얘네들이 구현한게 cosmos-sdk의 실제 동작과 약간 차이가 있음
+                // cosmos-sdk에서는 balacne가 0인거는 response에 포함되지 않지만
+                // nomic은 대충 만들어서 balance가 0인거도 response에 포함됨
+                // 그래서 밑의 줄이 없으면 nomic이 무조건 enable된채로 시작되기 때문에
+                // 이 문제를 해결하기 위해서 로직을 추가함
+                data.balances.find((bal: any) => {
+                  return (
+                    bal.amount &&
+                    typeof bal.amount === "string" &&
+                    bal.amount !== "0"
+                  );
+                })
               ) {
                 enabledChainIdentifiers.push(chainInfo.chainIdentifier);
                 break;
@@ -358,7 +389,7 @@ export const EnableChainsScene: FunctionComponent<{
           }
         }
 
-        return enabledChainIdentifiers;
+        return [...new Set(enabledChainIdentifiers)];
       }
     );
 
@@ -657,7 +688,19 @@ export const EnableChainsScene: FunctionComponent<{
                     !!chainInfo.features?.includes("eth-address-gen") ||
                     !!chainInfo.features?.includes("eth-key-sign");
 
-                  if (isEthermintLike) {
+                  const supported = (() => {
+                    try {
+                      // 처리가능한 체인만 true를 반환한다.
+                      KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+                        chainInfo.chainId
+                      );
+                      return true;
+                    } catch {
+                      return false;
+                    }
+                  })();
+
+                  if (isEthermintLike && supported) {
                     return (
                       <NextStepEvmChainItem
                         key={chainInfo.chainId}
@@ -908,7 +951,7 @@ export const EnableChainsScene: FunctionComponent<{
 );
 
 const ChainItem: FunctionComponent<{
-  chainInfo: ChainInfo;
+  chainInfo: IChainInfoImpl;
   balance: CoinPretty;
 
   enabled: boolean;
@@ -952,7 +995,16 @@ const ChainItem: FunctionComponent<{
             <Gutter size="0.5rem" />
 
             <YAxis>
-              <Subtitle2>{chainInfo.chainName}</Subtitle2>
+              <Subtitle2>
+                {(() => {
+                  // Noble의 경우만 약간 특수하게 표시해줌
+                  if (chainInfo.chainIdentifier === "noble") {
+                    return `${chainInfo.chainName} (USDC)`;
+                  }
+
+                  return chainInfo.chainName;
+                })()}
+              </Subtitle2>
             </YAxis>
           </XAxis>
           <Column weight={1} />

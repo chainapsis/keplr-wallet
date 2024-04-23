@@ -25,6 +25,8 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
   @observable
   protected _sessionIdTimestamp: number = 0;
 
+  protected isFirefox: boolean = false;
+
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly apiKey: string,
@@ -36,6 +38,18 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
   }
 
   protected async init() {
+    // Disable on firefox
+    if (typeof browser.runtime.getBrowserInfo === "function") {
+      const browserInfo = await browser.runtime.getBrowserInfo();
+      if (browserInfo.name === "Firefox") {
+        this.isFirefox = true;
+        runInAction(() => {
+          this.isInitialized = true;
+        });
+        return;
+      }
+    }
+
     const userId = await this.kvStore.get<string>("user_id");
     if (userId) {
       runInAction(() => {
@@ -87,6 +101,11 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
   }
 
   protected async ensureInit(): Promise<void> {
+    // Disable on firefox
+    if (this.isFirefox) {
+      return;
+    }
+
     if (this.isInitialized && this._userId) {
       return;
     }
@@ -146,11 +165,26 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
 
   @action
   public setUserId(userId: string): void {
+    // Disable on firefox
+    if (this.isFirefox) {
+      return;
+    }
+
     this._userId = userId;
   }
 
   public logEvent(eventName: string, eventProperties?: Properties): void {
+    // Disable on firefox
+    if (this.isFirefox) {
+      return;
+    }
+
     this.ensureInit().then(() => {
+      // Disable on firefox
+      if (this.isFirefox) {
+        return;
+      }
+
       simpleFetch(
         `https://www.google-analytics.com`,
         `/mp/collect?measurement_id=${this.measurementId}&api_secret=${this.apiKey}`,
@@ -202,6 +236,11 @@ export class ExtensionAnalyticsClient implements AnalyticsClient {
 
   @action
   public setUserProperties(properties: Properties): void {
+    // Disable on firefox
+    if (this.isFirefox) {
+      return;
+    }
+
     this._userProperties = {
       ...this._userProperties,
       ...properties,

@@ -3,7 +3,7 @@ import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { computedFn } from "mobx-utils";
 import { Channel } from "./types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { IChainStore } from "../chain";
+import { IChainStore } from "@keplr-wallet/stores";
 
 /**
  * IBCChannelStore saves the IBC channel infomations to the storage.

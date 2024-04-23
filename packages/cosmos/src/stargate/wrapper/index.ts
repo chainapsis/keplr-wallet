@@ -1,6 +1,9 @@
 import { ProtoSignDocDecoder } from "../decoder";
 import { Coin, StdSignDoc } from "@keplr-wallet/types";
-import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import {
+  SignDoc,
+  SignDocDirectAux,
+} from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { checkAndValidateADR36AminoSignDoc } from "../../adr-36";
 
 export class SignDocWrapper {
@@ -10,11 +13,19 @@ export class SignDocWrapper {
 
   public readonly mode: "amino" | "direct";
 
-  constructor(protected readonly signDoc: StdSignDoc | SignDoc) {
+  public readonly isDirectAux: boolean = false;
+
+  constructor(
+    protected readonly signDoc: StdSignDoc | SignDoc | SignDocDirectAux
+  ) {
     if ("msgs" in signDoc) {
       this.mode = "amino";
     } else {
+      // direct나 direct aux나 사실 비슷비슷하다.
+      // 기존의 로직을 활용하기 위해서 direct aux도 기본적으로는 direct로 취급한다.
       this.mode = "direct";
+
+      this.isDirectAux = !("authInfoBytes" in signDoc);
     }
 
     if (this.mode === "amino") {
@@ -38,8 +49,16 @@ export class SignDocWrapper {
     return new SignDocWrapper(signDoc);
   }
 
+  static fromDirectAuxSignDoc(signDoc: SignDocDirectAux) {
+    return new SignDocWrapper(signDoc);
+  }
+
   static fromDirectSignDocBytes(signDocBytes: Uint8Array) {
     return new SignDocWrapper(SignDoc.decode(signDocBytes));
+  }
+
+  static fromDirectAuxSignDocBytes(signDocBytes: Uint8Array) {
+    return new SignDocWrapper(SignDocDirectAux.decode(signDocBytes));
   }
 
   clone(): SignDocWrapper {

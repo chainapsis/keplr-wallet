@@ -9,6 +9,7 @@ export const CosmosMethods = [
   'keplr_signDirect',
   'keplr_signArbitrary',
   'keplr_enable',
+  'keplr_signEthereum',
 ];
 // https://docs.walletconnect.com/2.0/javascript/web3wallet/wallet-usage#emit-session-events
 // On docs, it describes only about ethereum.

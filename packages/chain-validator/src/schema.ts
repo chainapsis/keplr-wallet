@@ -5,6 +5,7 @@ import {
   ChainInfo,
   Currency,
   CW20Currency,
+  ERC20Currency,
   FeeCurrency,
   Secret20Currency,
   WithGasPriceStep,
@@ -72,6 +73,30 @@ export const Secret20CurrencySchema = (
     }
   });
 
+export const ERC20CurrencySchema = (
+  CurrencySchema as ObjectSchema<ERC20Currency>
+)
+  .keys({
+    type: Joi.string().equal("erc20").required(),
+    contractAddress: Joi.string()
+      .pattern(/^(0x)[0-9a-fA-F]{40}$/)
+      .required(),
+  })
+  .custom((value: Secret20Currency) => {
+    if (
+      value.coinMinimalDenom.startsWith(
+        `${value.type}:${value.contractAddress}:`
+      )
+    ) {
+      return value;
+    } else {
+      return {
+        ...value,
+        coinMinimalDenom: `${value.type}:${value.contractAddress}`,
+      };
+    }
+  });
+
 const GasPriceStepSchema = Joi.object<{
   readonly low: number;
   readonly average: number;
@@ -132,6 +157,18 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
       return value;
     })
     .required(),
+  evm: Joi.object({
+    chainId: Joi.number().required(),
+    rpc: Joi.string()
+      .custom((value: string) => {
+        if (value.includes("?")) {
+          throw new Error("evm rpc should not have query string");
+        }
+
+        return value;
+      })
+      .required(),
+  }).unknown(true),
   nodeProvider: Joi.object({
     name: Joi.string().min(1).max(30).required(),
     email: Joi.string()

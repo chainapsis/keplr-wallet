@@ -21,6 +21,7 @@ export const Modal: FunctionComponent<PropsWithChildren<ModalProps>> = ({
   isOpen,
   close,
   align,
+  maxHeight,
   onCloseTransitionEnd,
   forceNotUseSimplebar,
   children,
@@ -78,6 +79,7 @@ export const Modal: FunctionComponent<PropsWithChildren<ModalProps>> = ({
         isOpen={isOpen}
         close={close}
         align={align}
+        maxHeight={maxHeight}
         onCloseTransitionEnd={() => {
           setForceNotDetach(false);
 
@@ -100,12 +102,15 @@ const ModalChild: FunctionComponent<
     close: () => void;
     align: "center" | "bottom" | "left";
 
+    maxHeight?: string;
+
     onCloseTransitionEnd: () => void;
     forceNotUseSimplebar?: boolean;
   }>
 > = ({
   children,
   align,
+  maxHeight,
   isOpen,
   close,
   onCloseTransitionEnd,
@@ -207,7 +212,7 @@ const ModalChild: FunctionComponent<
           // 화면을 다 가릴수는 없게 만든다.
           // align이 left일때는 (사실은 sidebar에서만 left align이 사용됨)
           // 그냥 냅두고 알아서 처리하게 한다.
-          maxHeight: align !== "left" ? "85vh" : undefined,
+          maxHeight: align !== "left" ? maxHeight || "85vh" : undefined,
 
           overflow: "auto",
 

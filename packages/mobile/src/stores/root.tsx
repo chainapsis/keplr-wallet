@@ -12,20 +12,20 @@ import {
   OsmosisQueries,
   ICNSQueries,
   SecretAccount,
-  IBCChannelStore,
-  IBCCurrencyRegistrar,
   QuerySharedContext,
   LSMCurrencyRegistrar,
   AgoricQueries,
   CosmwasmAccount,
   TokenFactoryCurrencyRegistrar,
 } from '@keplr-wallet/stores';
+import {IBCChannelStore, IBCCurrencyRegistrar} from '@keplr-wallet/stores-ibc';
 import {
   ChainSuggestStore,
   InteractionStore,
   KeyRingStore,
   PermissionManagerStore,
   PermissionStore,
+  SignEthereumInteractionStore,
   SignInteractionStore,
   TokensStore,
 } from '@keplr-wallet/stores-core';
@@ -60,6 +60,7 @@ import {
 } from '@keplr-wallet/stores-etc';
 import {SkipQueries} from './skip';
 import {DeepLinkStore} from './deep-link';
+import {EthereumQueries, EthereumAccountStore} from '@keplr-wallet/stores-eth';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
@@ -75,6 +76,7 @@ export class RootStore {
   public readonly interactionStore: InteractionStore;
   public readonly permissionStore: PermissionStore;
   public readonly signInteractionStore: SignInteractionStore;
+  public readonly signEthereumInteractionStore: SignEthereumInteractionStore;
   public readonly chainSuggestStore: ChainSuggestStore;
 
   public readonly favoriteWebpageStore: FavoriteWebpageStore;
@@ -92,12 +94,14 @@ export class RootStore {
       AprQueries,
       CosmosGovernanceQueries,
       CosmosGovernanceQueriesV1,
+      EthereumQueries,
     ]
   >;
   public readonly skipQueriesStore: SkipQueries;
   public readonly accountStore: AccountStore<
     [CosmosAccount, CosmwasmAccount, SecretAccount]
   >;
+  public readonly ethereumAccountStore: EthereumAccountStore;
   public readonly uiConfigStore: UIConfigStore;
 
   public readonly tokenFactoryRegistrar: TokenFactoryCurrencyRegistrar;
@@ -152,6 +156,9 @@ export class RootStore {
       new RNMessageRequesterInternal(),
     );
     this.signInteractionStore = new SignInteractionStore(this.interactionStore);
+    this.signEthereumInteractionStore = new SignEthereumInteractionStore(
+      this.interactionStore,
+    );
     this.chainSuggestStore = new ChainSuggestStore(
       this.interactionStore,
       CommunityChainInfoRepo,
@@ -183,6 +190,7 @@ export class RootStore {
       }),
       CosmosGovernanceQueries.use(),
       CosmosGovernanceQueriesV1.use(),
+      EthereumQueries.use(),
     );
 
     this.skipQueriesStore = new SkipQueries(
@@ -334,6 +342,11 @@ export class RootStore {
           }
         },
       }),
+    );
+
+    this.ethereumAccountStore = new EthereumAccountStore(
+      this.chainStore,
+      getKeplrFromWindow,
     );
 
     this.priceStore = new CoinGeckoPriceStore(

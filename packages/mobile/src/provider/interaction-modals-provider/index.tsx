@@ -12,12 +12,14 @@ import {
 import {BackHandler, Platform} from 'react-native';
 import {WCMessageRequester} from '../../stores/wallet-connect/msg-requester';
 import {ADR36SignModal} from '../../screen/sign/sign-adr36-modal';
+import {SignEthereumModal} from '../../screen/sign/sign-ethereum-modal';
 import {LoadingModal} from '../../components/modal/loading';
 
 export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
   observer(({children}) => {
     const {
       signInteractionStore,
+      signEthereumInteractionStore,
       permissionStore,
       chainSuggestStore,
       walletConnectStore,
@@ -54,6 +56,19 @@ export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
           <ADR36SignModal
             isOpen={true}
             setIsOpen={() => signInteractionStore.rejectAll()}
+          />
+        ) : null}
+
+        {signEthereumInteractionStore.waitingData ? (
+          <SignEthereumModal
+            isOpen={true}
+            setIsOpen={() => {
+              signEthereumInteractionStore.rejectWithProceedNext(
+                signEthereumInteractionStore.waitingData?.id!,
+                () => {},
+              );
+            }}
+            interactionData={signEthereumInteractionStore.waitingData}
           />
         ) : null}
 

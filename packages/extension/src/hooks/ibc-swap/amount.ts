@@ -1,6 +1,6 @@
 import { AmountConfig, ISenderConfig, UIProperties } from "@keplr-wallet/hooks";
 import { AppCurrency } from "@keplr-wallet/types";
-import { CoinPretty, Dec, RatePretty } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, Int, RatePretty } from "@keplr-wallet/unit";
 import {
   ChainGetter,
   CosmosAccount,
@@ -137,7 +137,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
   async getTx(
     slippageTolerancePercent: number,
     affiliateFeeReceiver: string,
-    swapRouterKey?: string
+    priorOutAmount?: Int
   ): Promise<MakeTxResponse> {
     const queryIBCSwap = this.getQueryIBCSwap();
     if (!queryIBCSwap) {
@@ -213,7 +213,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
       throw new Error("Tx is not ready");
     }
 
-    if (swapRouterKey) {
+    if (priorOutAmount) {
       const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
         chainIdsToAddresses,
         slippageTolerancePercent,
@@ -223,17 +223,21 @@ export class IBCSwapAmountConfig extends AmountConfig {
         throw new Error("Can't happen: queryMsgsDirect is not ready");
       }
 
-      const key = this.createSwapRouteKeyFromMsgsDirectResponse(
-        queryMsgsDirect.response.data
+      const currentAmountOut = new Int(
+        queryMsgsDirect.response.data.route.amount_out
       );
 
-      if (swapRouterKey !== key) {
-        console.log({
-          swapRouterKey,
-          key,
-        });
+      if (
+        currentAmountOut.lt(priorOutAmount) &&
+        currentAmountOut
+          .sub(priorOutAmount)
+          .abs()
+          .toDec()
+          .quo(priorOutAmount.toDec())
+          .gte(new Dec(0.01))
+      ) {
         throw new Error(
-          "Route and msgs_direct are not matched. Please try again."
+          "Price change has been detected while building your transaction. Please try again"
         );
       }
     }

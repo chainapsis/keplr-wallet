@@ -16,6 +16,7 @@ import {
   ChainInfoWithoutEndpoints,
   SecretUtils,
   SettledResponses,
+  DirectAuxSignResponse,
 } from "@keplr-wallet/types";
 import {
   Bech32Address,
@@ -278,6 +279,34 @@ export class MockKeplr implements Keplr {
     };
   }
 
+  signDirectAux(
+    _chainId: string,
+    _signer: string,
+    _signDoc: {
+      bodyBytes?: Uint8Array | null;
+      publicKey?: {
+        typeUrl: string;
+        value: Uint8Array;
+      } | null;
+      chainId?: string | null;
+      accountNumber?: Long | null;
+      sequence?: Long | null;
+      tip?: {
+        amount: {
+          denom: string;
+          amount: string;
+        }[];
+        tipper: string;
+      } | null;
+    },
+    _signOptions?: Exclude<
+      KeplrSignOptions,
+      "preferNoSetFee" | "disableBalanceCheck"
+    >
+  ): Promise<DirectAuxSignResponse> {
+    throw new Error("Not implemented");
+  }
+
   suggestToken(): Promise<void> {
     throw new Error("Not implemented");
   }
@@ -329,6 +358,14 @@ export class MockKeplr implements Keplr {
     defaultName: string;
     editable?: boolean | undefined;
   }): Promise<string> {
+    throw new Error("Not yet implemented");
+  }
+
+  sendEthereumTx(_chainId: string, _tx: Uint8Array): Promise<string> {
+    throw new Error("Not yet implemented");
+  }
+
+  suggestERC20(_chainId: string, _contractAddress: string): Promise<void> {
     throw new Error("Not yet implemented");
   }
 }

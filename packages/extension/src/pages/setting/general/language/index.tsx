@@ -60,6 +60,18 @@ export const SettingGeneralLanguagePage: FunctionComponent = observer(() => {
               navigate(-1);
             }}
           />
+          <PageButton
+            title={language.getLanguageFullName("zh-cn")}
+            endIcon={
+              !language.automatic && language.language === "zh-cn" ? (
+                <CheckIcon width="1.25rem" height="1.25rem" />
+              ) : null
+            }
+            onClick={() => {
+              language.setLanguage("zh-cn");
+              navigate(-1);
+            }}
+          />
         </Stack>
       </Box>
     </HeaderLayout>

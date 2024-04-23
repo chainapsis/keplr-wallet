@@ -19,6 +19,7 @@ import {
   ChainInfoWithoutEndpoints,
   SecretUtils,
   SettledResponses,
+  DirectAuxSignResponse,
 } from "@keplr-wallet/types";
 import { Result, JSONUint8Array } from "@keplr-wallet/router";
 import { KeplrEnigmaUtils } from "./enigma";
@@ -155,45 +156,92 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
           throw new Error("GetEnigmaUtils method can't be proxy request");
         }
 
-        const result =
-          message.method === "signDirect"
-            ? await (async () => {
-                const receivedSignDoc: {
-                  bodyBytes?: Uint8Array | null;
-                  authInfoBytes?: Uint8Array | null;
-                  chainId?: string | null;
-                  accountNumber?: string | null;
-                } = message.args[2];
+        const method = message.method;
+        const result = await (async () => {
+          if (method === "signDirect") {
+            return await (async () => {
+              const receivedSignDoc: {
+                bodyBytes?: Uint8Array | null;
+                authInfoBytes?: Uint8Array | null;
+                chainId?: string | null;
+                accountNumber?: string | null;
+              } = message.args[2];
 
-                const result = await keplr.signDirect(
-                  message.args[0],
-                  message.args[1],
-                  {
-                    bodyBytes: receivedSignDoc.bodyBytes,
-                    authInfoBytes: receivedSignDoc.authInfoBytes,
-                    chainId: receivedSignDoc.chainId,
-                    accountNumber: receivedSignDoc.accountNumber
-                      ? Long.fromString(receivedSignDoc.accountNumber)
-                      : null,
-                  },
-                  message.args[3]
-                );
-
-                return {
-                  signed: {
-                    bodyBytes: result.signed.bodyBytes,
-                    authInfoBytes: result.signed.authInfoBytes,
-                    chainId: result.signed.chainId,
-                    accountNumber: result.signed.accountNumber.toString(),
-                  },
-                  signature: result.signature,
-                };
-              })()
-            : await keplr[message.method](
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                ...JSONUint8Array.unwrap(message.args)
+              const result = await keplr.signDirect(
+                message.args[0],
+                message.args[1],
+                {
+                  bodyBytes: receivedSignDoc.bodyBytes,
+                  authInfoBytes: receivedSignDoc.authInfoBytes,
+                  chainId: receivedSignDoc.chainId,
+                  accountNumber: receivedSignDoc.accountNumber
+                    ? Long.fromString(receivedSignDoc.accountNumber)
+                    : null,
+                },
+                message.args[3]
               );
+
+              return {
+                signed: {
+                  bodyBytes: result.signed.bodyBytes,
+                  authInfoBytes: result.signed.authInfoBytes,
+                  chainId: result.signed.chainId,
+                  accountNumber: result.signed.accountNumber.toString(),
+                },
+                signature: result.signature,
+              };
+            })();
+          }
+
+          if (method === "signDirectAux") {
+            return await (async () => {
+              const receivedSignDoc: {
+                bodyBytes?: Uint8Array | null;
+                publicKey?: {
+                  typeUrl: string;
+                  value: Uint8Array;
+                } | null;
+                chainId?: string | null;
+                accountNumber?: string | null;
+                sequence?: string | null;
+              } = message.args[2];
+
+              const result = await keplr.signDirectAux(
+                message.args[0],
+                message.args[1],
+                {
+                  bodyBytes: receivedSignDoc.bodyBytes,
+                  publicKey: receivedSignDoc.publicKey,
+                  chainId: receivedSignDoc.chainId,
+                  accountNumber: receivedSignDoc.accountNumber
+                    ? Long.fromString(receivedSignDoc.accountNumber)
+                    : null,
+                  sequence: receivedSignDoc.sequence
+                    ? Long.fromString(receivedSignDoc.sequence)
+                    : null,
+                },
+                message.args[3]
+              );
+
+              return {
+                signed: {
+                  bodyBytes: result.signed.bodyBytes,
+                  publicKey: result.signed.publicKey,
+                  chainId: result.signed.chainId,
+                  accountNumber: result.signed.accountNumber.toString(),
+                  sequence: result.signed.sequence.toString(),
+                },
+                signature: result.signature,
+              };
+            })();
+          }
+
+          return await keplr[method](
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            ...JSONUint8Array.unwrap(message.args)
+          );
+        })();
 
         const proxyResponse: ProxyRequestResponse = {
           type: "proxy-request-response",
@@ -442,6 +490,71 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     };
   }
 
+  async signDirectAux(
+    chainId: string,
+    signer: string,
+    signDoc: {
+      bodyBytes?: Uint8Array | null;
+      publicKey?: {
+        typeUrl: string;
+        value: Uint8Array;
+      } | null;
+      chainId?: string | null;
+      accountNumber?: Long | null;
+      sequence?: Long | null;
+    },
+    signOptions: Exclude<
+      KeplrSignOptions,
+      "preferNoSetFee" | "disableBalanceCheck"
+    > = {}
+  ): Promise<DirectAuxSignResponse> {
+    const result = await this.requestMethod("signDirectAux", [
+      chainId,
+      signer,
+      // We can't send the `Long` with remaing the type.
+      // Receiver should change the `string` to `Long`.
+      {
+        bodyBytes: signDoc.bodyBytes,
+        publicKey: signDoc.publicKey,
+        chainId: signDoc.chainId,
+        accountNumber: signDoc.accountNumber
+          ? signDoc.accountNumber.toString()
+          : null,
+        sequence: signDoc.sequence ? signDoc.sequence.toString() : null,
+      },
+      deepmerge(
+        {
+          preferNoSetMemo: this.defaultOptions.sign?.preferNoSetMemo,
+        },
+        signOptions
+      ),
+    ]);
+
+    const signed: {
+      bodyBytes: Uint8Array;
+      publicKey?: {
+        typeUrl: string;
+        value: Uint8Array;
+      } | null;
+      chainId: string;
+      accountNumber: string;
+      sequence: string;
+    } = result.signed;
+
+    return {
+      signed: {
+        bodyBytes: signed.bodyBytes,
+        publicKey: signed.publicKey || undefined,
+        chainId: signed.chainId,
+        // We can't send the `Long` with remaing the type.
+        // Sender should change the `Long` to `string`.
+        accountNumber: Long.fromString(signed.accountNumber),
+        sequence: Long.fromString(signed.sequence),
+      },
+      signature: result.signature,
+    };
+  }
+
   async signArbitrary(
     chainId: string,
     signer: string,
@@ -652,5 +765,13 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
       signer,
       signDoc,
     ]);
+  }
+
+  async sendEthereumTx(chainId: string, tx: Uint8Array): Promise<string> {
+    return await this.requestMethod("sendEthereumTx", [chainId, tx]);
+  }
+
+  async suggestERC20(chainId: string, contractAddress: string): Promise<void> {
+    return await this.requestMethod("suggestERC20", [chainId, contractAddress]);
   }
 }

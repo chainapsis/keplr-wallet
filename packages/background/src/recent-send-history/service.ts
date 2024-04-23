@@ -490,6 +490,11 @@ export class RecentSendHistoryService {
                   firstChannel.portId,
                   firstChannel.channelId
                 );
+                firstChannel.dstChannelId = this.getDstChannelIdFromTx(
+                  tx,
+                  firstChannel.portId,
+                  firstChannel.channelId
+                );
 
                 onFulfill();
                 this.trackIBCPacketForwardingRecursive(id);
@@ -569,7 +574,7 @@ export class RecentSendHistoryService {
         if (chainInfo) {
           const queryEvents: any = {
             // "recv_packet.packet_src_port": targetChannel.portId,
-            "recv_packet.packet_src_channel": targetChannel.channelId,
+            "recv_packet.packet_dst_channel": targetChannel.dstChannelId,
             "recv_packet.packet_sequence": targetChannel.sequence,
           };
 
@@ -644,6 +649,12 @@ export class RecentSendHistoryService {
 
                       if (nextChannel) {
                         nextChannel.sequence = this.getIBCPacketSequenceFromTx(
+                          tx,
+                          nextChannel.portId,
+                          nextChannel.channelId,
+                          index
+                        );
+                        nextChannel.dstChannelId = this.getDstChannelIdFromTx(
                           tx,
                           nextChannel.portId,
                           nextChannel.channelId,
@@ -1530,6 +1541,104 @@ export class RecentSendHistoryService {
         return Buffer.from(sequenceAttr.value, "base64").toString();
       } else {
         return sequenceAttr.value;
+      }
+    }
+
+    throw new Error("Invalid tx");
+  }
+
+  protected getDstChannelIdFromTx(
+    tx: any,
+    sourcePortId: string,
+    sourceChannelId: string,
+    startingEventIndex = 0
+  ): string {
+    let events = tx.events;
+    if (!events) {
+      throw new Error("Invalid tx");
+    }
+    if (!Array.isArray(events)) {
+      throw new Error("Invalid tx");
+    }
+
+    // In injective, events from tendermint rpc is not encoded as base64.
+    // I don't know that this is the difference from tendermint version, or just custom from injective.
+    const compareStringWithBase64OrPlain = (
+      target: string,
+      value: string
+    ): [boolean, boolean] => {
+      if (target === value) {
+        return [true, false];
+      }
+
+      if (target === Buffer.from(value).toString("base64")) {
+        return [true, true];
+      }
+
+      return [false, false];
+    };
+
+    events = events.slice(startingEventIndex);
+
+    const packetEvent = events.find((event: any) => {
+      if (event.type !== "send_packet") {
+        return false;
+      }
+      const sourcePortAttr = event.attributes.find((attr: { key: string }) => {
+        return compareStringWithBase64OrPlain(attr.key, "packet_src_port")[0];
+      });
+      if (!sourcePortAttr) {
+        return false;
+      }
+      let isBase64 = false;
+      const sourceChannelAttr = event.attributes.find(
+        (attr: { key: string }) => {
+          const c = compareStringWithBase64OrPlain(
+            attr.key,
+            "packet_src_channel"
+          );
+          isBase64 = c[1];
+          return c[0];
+        }
+      );
+      if (!sourceChannelAttr) {
+        return false;
+      }
+      if (isBase64) {
+        return (
+          sourcePortAttr.value ===
+            Buffer.from(sourcePortId).toString("base64") &&
+          sourceChannelAttr.value ===
+            Buffer.from(sourceChannelId).toString("base64")
+        );
+      } else {
+        return (
+          sourcePortAttr.value === sourcePortId &&
+          sourceChannelAttr.value === sourceChannelId
+        );
+      }
+    });
+
+    let isBase64 = false;
+    if (packetEvent) {
+      const dstChannelIdAttr = packetEvent.attributes.find(
+        (attr: { key: string }) => {
+          const c = compareStringWithBase64OrPlain(
+            attr.key,
+            "packet_dst_channel"
+          );
+          isBase64 = c[1];
+          return c[0];
+        }
+      );
+      if (!dstChannelIdAttr) {
+        throw new Error("Invalid tx");
+      }
+
+      if (isBase64) {
+        return Buffer.from(dstChannelIdAttr.value, "base64").toString();
+      } else {
+        return dstChannelIdAttr.value;
       }
     }
 

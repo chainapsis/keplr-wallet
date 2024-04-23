@@ -11,8 +11,12 @@ import { Toggle } from "../../../components/toggle";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { SetDisableAnalyticsMsg } from "@keplr-wallet/background";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../stores";
 
-export const SettingSecurityPage: FunctionComponent = () => {
+export const SettingSecurityPage: FunctionComponent = observer(() => {
+  const { uiConfigStore } = useStore();
+
   const navigate = useNavigate();
   const intl = useIntl();
 
@@ -54,41 +58,43 @@ export const SettingSecurityPage: FunctionComponent = () => {
             onClick={() => navigate("/setting/security/change-password")}
           />
 
-          <PageButton
-            title={intl.formatMessage({
-              id: "page.setting.security.analytics-title",
-            })}
-            paragraph={intl.formatMessage({
-              id: "page.setting.security.analytics-paragraph",
-            })}
-            endIcon={
-              <Box marginLeft="0.5rem">
-                <Toggle
-                  isOpen={!disableAnalytics}
-                  setIsOpen={() => {
-                    const disableAnalytics =
-                      localStorage.getItem("disable-analytics") === "true";
+          {uiConfigStore.platform === "firefox" ? null : (
+            <PageButton
+              title={intl.formatMessage({
+                id: "page.setting.security.analytics-title",
+              })}
+              paragraph={intl.formatMessage({
+                id: "page.setting.security.analytics-paragraph",
+              })}
+              endIcon={
+                <Box marginLeft="0.5rem">
+                  <Toggle
+                    isOpen={!disableAnalytics}
+                    setIsOpen={() => {
+                      const disableAnalytics =
+                        localStorage.getItem("disable-analytics") === "true";
 
-                    new InExtensionMessageRequester()
-                      .sendMessage(
-                        BACKGROUND_PORT,
-                        new SetDisableAnalyticsMsg(!disableAnalytics)
-                      )
-                      .then((analyticsDisabled) => {
-                        localStorage.setItem(
-                          "disable-analytics",
-                          analyticsDisabled ? "true" : "false"
-                        );
+                      new InExtensionMessageRequester()
+                        .sendMessage(
+                          BACKGROUND_PORT,
+                          new SetDisableAnalyticsMsg(!disableAnalytics)
+                        )
+                        .then((analyticsDisabled) => {
+                          localStorage.setItem(
+                            "disable-analytics",
+                            analyticsDisabled ? "true" : "false"
+                          );
 
-                        setDisableAnalytics(analyticsDisabled);
-                      });
-                  }}
-                />
-              </Box>
-            }
-          />
+                          setDisableAnalytics(analyticsDisabled);
+                        });
+                    }}
+                  />
+                </Box>
+              }
+            />
+          )}
         </Stack>
       </Box>
     </HeaderLayout>
   );
-};
+});

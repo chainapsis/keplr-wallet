@@ -129,6 +129,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     chainStore,
     accountStore,
     keyRingStore,
+    tokenFactoryRegistrar,
     ibcCurrencyRegistrar,
     lsmCurrencyRegistrar,
     ibcChannelStore,
@@ -194,6 +195,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
           }
         }
       }
+    }
+
+    if (!tokenFactoryRegistrar.isInitialized) {
+      return false;
     }
 
     if (!ibcCurrencyRegistrar.isInitialized) {

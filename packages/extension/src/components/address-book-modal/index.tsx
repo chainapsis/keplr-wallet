@@ -9,7 +9,7 @@ import { YAxis } from "../axis";
 import { Stack } from "../stack";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { Key } from "@keplr-wallet/types";
+import { AppCurrency, Key } from "@keplr-wallet/types";
 import { IMemoConfig, IRecipientConfig } from "@keplr-wallet/hooks";
 import { Bleed } from "../bleed";
 import { RecentSendHistory } from "@keplr-wallet/background";
@@ -17,6 +17,8 @@ import { AddressItem } from "../address-item";
 import SimpleBar from "simplebar-react";
 import styled, { useTheme } from "styled-components";
 import { FormattedMessage, useIntl } from "react-intl";
+import { Bech32Address } from "@keplr-wallet/cosmos";
+import { DenomHelper } from "@keplr-wallet/common";
 
 type Type = "recent" | "contacts" | "accounts";
 
@@ -35,6 +37,7 @@ export const AddressBookModal: FunctionComponent<{
   historyType: string;
   recipientConfig: IRecipientConfig;
   memoConfig: IMemoConfig;
+  currency: AppCurrency;
 
   permitSelfKeyInfo?: boolean;
 }> = observer(
@@ -44,9 +47,11 @@ export const AddressBookModal: FunctionComponent<{
     historyType,
     recipientConfig,
     memoConfig,
+    currency,
     permitSelfKeyInfo,
   }) => {
-    const { analyticsStore, uiConfigStore, keyRingStore } = useStore();
+    const { analyticsStore, uiConfigStore, keyRingStore, chainStore } =
+      useStore();
     const intl = useIntl();
     const theme = useTheme();
 
@@ -94,6 +99,10 @@ export const AddressBookModal: FunctionComponent<{
       uiConfigStore.addressBookConfig,
     ]);
 
+    const chainInfo = chainStore.getChain(recipientConfig.chainId);
+    const isEvmChain = chainInfo.evm !== undefined;
+    const isErc20 = new DenomHelper(currency.coinMinimalDenom).type === "erc20";
+
     const datas: {
       timestamp?: number;
       name?: string;
@@ -104,13 +113,21 @@ export const AddressBookModal: FunctionComponent<{
     }[] = (() => {
       switch (type) {
         case "recent": {
-          return recents.map((recent) => {
-            return {
-              timestamp: recent.timestamp,
-              address: recent.recipient,
-              memo: recent.memo,
-            };
-          });
+          return recents
+            .map((recent) => {
+              return {
+                timestamp: recent.timestamp,
+                address: recent.recipient,
+                memo: recent.memo,
+              };
+            })
+            .filter((recent) => {
+              if (isErc20 && !recent.address.startsWith("0x")) {
+                return false;
+              }
+
+              return true;
+            });
         }
         case "contacts": {
           return uiConfigStore.addressBookConfig
@@ -121,19 +138,42 @@ export const AddressBookModal: FunctionComponent<{
                 address: addressData.address,
                 memo: addressData.memo,
               };
+            })
+            .filter((contact) => {
+              if (isErc20 && !contact.address.startsWith("0x")) {
+                return false;
+              }
+
+              return true;
             });
         }
         case "accounts": {
-          return accounts.map((account) => {
+          return accounts.reduce<
+            { name: string; address: string; isSelf: boolean }[]
+          >((acc, account) => {
             const isSelf = keyRingStore.selectedKeyInfo?.id === account.vaultId;
 
-            return {
-              name: account.name,
-              address: account.bech32Address,
+            if (!isErc20) {
+              acc.push({
+                name: account.name,
+                address: account.bech32Address,
+                isSelf,
+              });
+            }
 
-              isSelf,
-            };
-          });
+            if (isEvmChain) {
+              const hexAddress = Bech32Address.fromBech32(
+                account.bech32Address
+              ).toHex(true);
+              acc.push({
+                name: account.name,
+                address: hexAddress,
+                isSelf,
+              });
+            }
+
+            return acc;
+          }, []);
         }
         default: {
           return [];

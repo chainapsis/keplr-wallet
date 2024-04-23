@@ -68,7 +68,8 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     return chainStore.chainInfos.filter((chainInfo) => {
       return (
         chainInfo.features?.includes("cosmwasm") ||
-        chainInfo.features?.includes("secretwasm")
+        chainInfo.features?.includes("secretwasm") ||
+        chainInfo.evm !== undefined
       );
     });
   }, [chainStore.chainInfos]);
@@ -122,7 +123,9 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     };
   }, [accountStore, chainId]);
 
-  const isSecretWasm = chainStore.getChain(chainId).hasFeature("secretwasm");
+  const chainInfo = chainStore.getChain(chainId);
+  const isSecretWasm = chainInfo.hasFeature("secretwasm");
+  const isEvmChain = chainInfo.evm !== undefined;
   const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] =
     useState(false);
 
@@ -135,7 +138,13 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
 
   const contractAddress = watch("contractAddress").trim();
   const queryContract = (() => {
-    if (isSecretWasm) {
+    if (isEvmChain) {
+      return queriesStore
+        .get(chainId)
+        .ethereum.queryEthereumERC20ContractInfo.getQueryContract(
+          contractAddress
+        );
+    } else if (isSecretWasm) {
       return queriesStore
         .get(chainId)
         .secret.querySecret20ContractInfo.getQueryContract(contractAddress);
@@ -199,7 +208,15 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         if (queryContract.tokenInfo) {
           let currency: AppCurrency;
 
-          if (isSecretWasm) {
+          if (!("name" in queryContract.tokenInfo) || isEvmChain) {
+            currency = {
+              type: "erc20",
+              contractAddress: contractAddress,
+              coinMinimalDenom: `erc20:${contractAddress}`,
+              coinDenom: queryContract.tokenInfo.symbol,
+              coinDecimals: queryContract.tokenInfo.decimals,
+            };
+          } else if (isSecretWasm) {
             let viewingKey = data.viewingKey;
 
             if (!viewingKey && !isOpenSecret20ViewingKey) {
@@ -325,24 +342,27 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
             required: true,
             validate: (value): string | undefined => {
               try {
-                const chainInfo = chainStore.getChain(chainId);
-                Bech32Address.validate(
-                  value,
-                  chainInfo.bech32Config.bech32PrefixAccAddr
-                );
+                if (!isEvmChain) {
+                  Bech32Address.validate(
+                    value,
+                    chainInfo.bech32Config.bech32PrefixAccAddr
+                  );
+                }
               } catch (e) {
                 return e.message || e.toString();
               }
             },
           })}
         />
-        <TextInput
-          label={intl.formatMessage({
-            id: "page.setting.token.add.name-label",
-          })}
-          value={queryContract.tokenInfo?.name || "-"}
-          disabled
-        />
+        {queryContract.tokenInfo && "name" in queryContract.tokenInfo && (
+          <TextInput
+            label={intl.formatMessage({
+              id: "page.setting.token.add.name-label",
+            })}
+            value={queryContract.tokenInfo?.name || "-"}
+            disabled
+          />
+        )}
         <TextInput
           label={intl.formatMessage({
             id: "page.setting.token.add.symbol-label",

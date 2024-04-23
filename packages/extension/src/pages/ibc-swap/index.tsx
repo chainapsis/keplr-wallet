@@ -28,13 +28,13 @@ import { useSearchParams } from "react-router-dom";
 import { useTxConfigsQueryString } from "../../hooks/use-tx-config-query-string";
 import { MainHeaderLayout } from "../main/layouts/header";
 import { XAxis } from "../../components/axis";
-import { H4, Subtitle4 } from "../../components/typography";
+import { Caption2, H4, Subtitle4 } from "../../components/typography";
 import { SlippageModal } from "./components/slippage-modal";
 import { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
-import { Dec, DecUtils } from "@keplr-wallet/unit";
+import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
 import {
@@ -492,19 +492,16 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           const swapReceiver: string[] = [];
 
           try {
-            let swapRouteKey = "";
+            let priorOutAmount: Int | undefined = undefined;
             if (queryRoute.response) {
-              swapRouteKey =
-                ibcSwapConfigs.amountConfig.createSwapRouteKeyFromRouteResponse(
-                  queryRoute.response.data
-                );
+              priorOutAmount = new Int(queryRoute.response.data.amount_out);
             }
 
             const [_tx] = await Promise.all([
               ibcSwapConfigs.amountConfig.getTx(
                 uiConfigStore.ibcSwapConfig.slippageNum,
                 SwapFeeBps.receiver,
-                swapRouteKey
+                priorOutAmount
               ),
               // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.
               // /msgs_direct로도 얻을 순 있지만 따로 데이터를 해석해야되기 때문에 좀 힘들다...
@@ -868,6 +865,17 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 Beta
               </Subtitle4>
             </Box>
+
+            <Gutter size="0.5rem" />
+
+            <Caption2
+              color={ColorPalette["gray-300"]}
+              style={{
+                fontSize: "0.75rem",
+              }}
+            >
+              Powered by Skip API
+            </Caption2>
 
             <div style={{ flex: 1 }} />
             <Box

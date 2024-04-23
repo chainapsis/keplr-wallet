@@ -80,6 +80,14 @@ export class AnalyticsService {
       return;
     }
 
+    // Disable on firefox
+    if (typeof browser.runtime.getBrowserInfo === "function") {
+      const browserInfo = await browser.runtime.getBrowserInfo();
+      if (browserInfo.name === "Firefox") {
+        return;
+      }
+    }
+
     if (this.disabled) {
       return;
     }
