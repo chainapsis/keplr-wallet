@@ -23,6 +23,11 @@
   "error.outdated-cosmos-sdk": "Not supported: outdated version of cosmos-sdk",
   "error.can-not-find-fee-for-claim-all": "Can't find fee currency to pay",
 
+  "bottom-tabs.home": "Home",
+  "bottom-tabs.swap": "Swap",
+  "bottom-tabs.activity": "Activity",
+  "bottom-tabs.settings": "Settings",
+
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
   "pages.register.components.help-desk-button.title": "Help Desk",
@@ -380,6 +385,8 @@
   "page.ibc-swap.components.slippage-modal.title": "Slippage Settings",
   "page.ibc-swap.components.slippage-modal.label.slippage-tolerance": "Slippage Tolerance",
   "page.ibc-swap.components.slippage-modal.label.slippage-custom": "Custom Slippage",
+
+  "page.activity.title": "Activity",
 
   "page.permission.unknown-permission": "Unknown permission",
   "page.permission.requesting-connection-title": "Requesting Connection",

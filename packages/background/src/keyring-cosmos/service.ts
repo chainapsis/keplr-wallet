@@ -221,6 +221,9 @@ export class KeyRingCosmosService {
     signOptions: KeplrSignOptions
   ): Promise<AminoSignResponse> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    if (chainInfo.hideInUI) {
+      throw new Error("Can't sign for hidden chain");
+    }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
@@ -347,6 +350,9 @@ export class KeyRingCosmosService {
     }
 
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    if (chainInfo.hideInUI) {
+      throw new Error("Can't sign for hidden chain");
+    }
 
     const vaultId = this.keyRingService.selectedVaultId;
 
@@ -444,6 +450,9 @@ export class KeyRingCosmosService {
     }
 
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    if (chainInfo.hideInUI) {
+      throw new Error("Can't sign for hidden chain");
+    }
 
     const vaultId = this.keyRingService.selectedVaultId;
 
@@ -562,6 +571,9 @@ export class KeyRingCosmosService {
     }
   ): Promise<AminoSignResponse> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    if (chainInfo.hideInUI) {
+      throw new Error("Can't sign for hidden chain");
+    }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
@@ -655,6 +667,9 @@ export class KeyRingCosmosService {
     signOptions: KeplrSignOptions
   ): Promise<DirectSignResponse> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    if (chainInfo.hideInUI) {
+      throw new Error("Can't sign for hidden chain");
+    }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
@@ -770,6 +785,9 @@ export class KeyRingCosmosService {
     >
   ): Promise<DirectAuxSignResponse> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    if (chainInfo.hideInUI) {
+      throw new Error("Can't sign for hidden chain");
+    }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
@@ -973,6 +991,9 @@ export class KeyRingCosmosService {
     signOptions: KeplrSignOptions
   ): Promise<AminoSignResponse> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    if (chainInfo.hideInUI) {
+      throw new Error("Can't sign for hidden chain");
+    }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
 
     if (!isEthermintLike) {
@@ -1130,6 +1151,9 @@ export class KeyRingCosmosService {
     {
       // Do this on other code block to avoid variable conflict.
       const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+      if (chainInfo.hideInUI) {
+        throw new Error("Can't sign for hidden chain");
+      }
 
       Bech32Address.validate(
         contractAddress,

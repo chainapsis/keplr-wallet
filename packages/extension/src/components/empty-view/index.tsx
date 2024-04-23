@@ -22,11 +22,13 @@ const Styles = {
 export const EmptyView: FunctionComponent<{
   subject?: string;
   altSvg?: React.ReactElement;
-}> = ({ subject, altSvg, children }) => {
+
+  style?: React.CSSProperties;
+}> = ({ subject, altSvg, style, children }) => {
   const theme = useTheme();
 
   return (
-    <Styles.Container>
+    <Styles.Container style={style}>
       <Styles.Icon>
         {altSvg ? (
           altSvg

@@ -89,6 +89,10 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       };
     }
   ): Promise<void> {
+    if (chainInfo.hideInUI) {
+      throw new Error("hideInUI is not allowed");
+    }
+
     if (chainInfo.gasPriceStep) {
       // Gas price step in ChainInfo is legacy format.
       // Try to change the recent format for backward-compatibility.

@@ -21,167 +21,167 @@ import { MsgRelationCancelUndelegate } from "./cancel-undelegate";
 import { MsgRelationIBCSwapRefunded } from "./ibc-swap-refunded";
 
 export const MsgItemRender: FunctionComponent<{
-  explorerUrl: string;
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = ({ explorerUrl, msg, prices, targetDenom }) => {
+  isInAllActivitiesPage?: boolean;
+}> = ({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
   return (
     <ErrorBoundary>
       <MsgItemRenderInner
-        explorerUrl={explorerUrl}
         msg={msg}
         prices={prices}
         targetDenom={targetDenom}
+        isInAllActivitiesPage={isInAllActivitiesPage}
       />
     </ErrorBoundary>
   );
 };
 
 const MsgItemRenderInner: FunctionComponent<{
-  explorerUrl: string;
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
-}> = ({ explorerUrl, msg, prices, targetDenom }) => {
+  isInAllActivitiesPage?: boolean;
+}> = ({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
   switch (msg.relation) {
     case "send": {
       return (
         <MsgRelationSend
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
     case "receive": {
       return (
         <MsgRelationReceive
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
     case "ibc-send": {
       return (
         <MsgRelationIBCSend
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
     case "ibc-send-receive": {
       return (
         <MsgRelationIBCSendReceive
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
     case "ibc-send-refunded": {
       return (
         <MsgRelationIBCSendRefunded
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
     case "ibc-swap-skip-osmosis": {
       return (
         <MsgRelationIBCSwap
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
     case "ibc-swap-skip-osmosis-receive": {
       return (
         <MsgRelationIBCSwapReceive
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
     case "ibc-swap-skip-osmosis-refunded": {
       return (
         <MsgRelationIBCSwapRefunded
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
     case "delegate": {
       return (
         <MsgRelationDelegate
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
     case "undelegate": {
       return (
         <MsgRelationUndelegate
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
     case "redelegate": {
       return (
         <MsgRelationRedelegate
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
     case "cancel-undelegate": {
       return (
         <MsgRelationCancelUndelegate
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
     case "vote": {
       return (
         <MsgRelationVote
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }
     case "custom/merged-claim-rewards": {
       return (
         <MsgRelationMergedClaimRewards
-          explorerUrl={explorerUrl}
           msg={msg}
           prices={prices}
           targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
         />
       );
     }

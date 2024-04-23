@@ -36,8 +36,12 @@ export class Bech32Address {
     return prefix + "1" + former + "..." + latter;
   }
 
-  static fromBech32(bech32Address: string, prefix?: string): Bech32Address {
-    const decoded = bech32.decode(bech32Address);
+  static fromBech32(
+    bech32Address: string,
+    prefix?: string,
+    limit?: number
+  ): Bech32Address {
+    const decoded = bech32.decode(bech32Address, limit);
     if (prefix && decoded.prefix !== prefix) {
       throw new Error("Unmatched prefix");
     }
@@ -45,8 +49,8 @@ export class Bech32Address {
     return new Bech32Address(new Uint8Array(fromWords(decoded.words)));
   }
 
-  static validate(bech32Address: string, prefix?: string) {
-    const { prefix: decodedPrefix } = bech32.decode(bech32Address);
+  static validate(bech32Address: string, prefix?: string, limit?: number) {
+    const { prefix: decodedPrefix } = bech32.decode(bech32Address, limit);
     if (prefix && prefix !== decodedPrefix) {
       throw new Error(
         `Unexpected prefix (expected: ${prefix}, actual: ${decodedPrefix})`
@@ -75,9 +79,9 @@ export class Bech32Address {
 
   constructor(public readonly address: Uint8Array) {}
 
-  toBech32(prefix: string): string {
+  toBech32(prefix: string, limit?: number): string {
     const words = bech32.toWords(this.address);
-    return bech32.encode(prefix, words);
+    return bech32.encode(prefix, words, limit);
   }
 
   toHex(mixedCaseChecksum: boolean = true): string {

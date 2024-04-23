@@ -82,6 +82,7 @@ export function init(
 ): {
   initFn: () => Promise<void>;
   keyRingService: KeyRingV2.KeyRingService;
+  analyticsService: Analytics.AnalyticsService;
 } {
   const interactionService = new Interaction.InteractionService(
     eventMsgRequester
@@ -301,5 +302,6 @@ export function init(
       await chainsService.afterInit();
     },
     keyRingService: keyRingV2Service,
+    analyticsService: analyticsService,
   };
 }
