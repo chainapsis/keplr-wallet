@@ -13,11 +13,11 @@ export const EmbedChainInfos = [
       coinGeckoId: "cosmos",
     },
     walletUrl:
-      process.env.NODE_ENV === "production"
+      process.env["NODE_ENV"] === "production"
         ? "https://wallet.keplr.app/chains/cosmos-hub"
         : "http://localhost:8081/chains/cosmos-hub",
     walletUrlForStaking:
-      process.env.NODE_ENV === "production"
+      process.env["NODE_ENV"] === "production"
         ? "https://wallet.keplr.app/chains/cosmos-hub"
         : "http://localhost:8081/chains/cosmos-hub",
     bip44: {
@@ -55,11 +55,11 @@ export const EmbedChainInfos = [
       coinGeckoId: "osmosis",
     },
     walletUrl:
-      process.env.NODE_ENV === "production"
+      process.env["NODE_ENV"] === "production"
         ? "https://app.osmosis.zone"
         : "https://app.osmosis.zone",
     walletUrlForStaking:
-      process.env.NODE_ENV === "production"
+      process.env["NODE_ENV"] === "production"
         ? "https://wallet.keplr.app/chains/osmosis"
         : "http://localhost:8081/chains/osmosis",
     bip44: { coinType: 118 },
