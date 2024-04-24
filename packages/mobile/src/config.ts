@@ -2537,6 +2537,48 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
   },
+  {
+    chainId: 'seda-1',
+    chainName: 'SEDA',
+    rpc: 'https://rpc-seda.keplr.app',
+    rest: 'https://lcd-seda.keplr.app',
+    stakeCurrency: {
+      coinDenom: 'SEDA',
+      coinMinimalDenom: 'aseda',
+      coinDecimals: 18,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: 'seda',
+      bech32PrefixAccPub: 'sedapub',
+      bech32PrefixValAddr: 'sedavaloper',
+      bech32PrefixValPub: 'sedavaloperpub',
+      bech32PrefixConsAddr: 'sedavalcons',
+      bech32PrefixConsPub: 'sedavalconspub',
+    },
+    currencies: [
+      {
+        coinDenom: 'SEDA',
+        coinMinimalDenom: 'aseda',
+        coinDecimals: 18,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: 'SEDA',
+        coinMinimalDenom: 'aseda',
+        coinDecimals: 18,
+        gasPriceStep: {
+          low: 10000000000,
+          average: 15000000000,
+          high: 20000000000,
+        },
+      },
+    ],
+    features: ['cosmwasm'],
+  },
 ];
 
 // TODO: 원격으로 변경할 수 있도록 나중에 네트워크에서 이 정보를 가져오는 방식으로 변경될 수 있음
