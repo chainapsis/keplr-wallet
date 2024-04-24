@@ -1,5 +1,5 @@
-import React, {FunctionComponent} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import React, {FunctionComponent, useState} from 'react';
+import {StyleSheet, Text} from 'react-native';
 import {useStyle} from '../../../../styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Svg, {Path} from 'react-native-svg';
@@ -11,6 +11,10 @@ import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../../navigation';
 import {Box} from '../../../../components/box';
 import {Columns} from '../../../../components/column';
+import {AddFavoriteModal} from '../add-favorite-modal';
+import {XAxis} from '../../../../components/axis';
+import {Gutter} from '../../../../components/gutter';
+import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 const ArrowLeftIcon: FunctionComponent<{
   size: number;
@@ -96,14 +100,16 @@ const HomeIcon: FunctionComponent<{
 
 export const OnScreenWebpageScreenHeader: FunctionComponent = observer(() => {
   const style = useStyle();
-  const {favoriteWebpageStore} = useStore();
+  const {webpageStore} = useStore();
   const safeAreaInsets = useSafeAreaInsets();
-  const headerHeight = 48;
+  const headerHeight = 58;
   const navigation = useNavigation<StackNavProp>();
   const route = useRoute<RouteProp<RootStackParamList, 'Web'>>();
   const {isExternal} = route.params;
 
   const webViewState = useWebViewState();
+  const [isOpenModal, setIsOpenModal] = useState(false);
+
   return (
     <Box
       paddingTop={safeAreaInsets.top + 6}
@@ -113,74 +119,81 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = observer(() => {
       alignY="center"
       alignX="center"
       backgroundColor={style.get('color-gray-600').color}>
-      <View
-        style={style.flatten(['flex-row', 'justify-between', 'width-full'])}>
-        <Columns sum={1} alignY="center" gutter={12}>
-          <RectButton
-            style={style.flatten(['border-radius-4'])}
-            rippleColor={style.get('color-gray-550').color}
-            underlayColor={style.get('color-gray-550').color}
-            activeOpacity={1}
-            onPress={() => {
-              if (!webViewState.canGoBack) {
-                navigation.goBack();
-              } else if (webViewState.webView) {
-                webViewState.webView.goBack();
-              }
-            }}>
-            <ArrowLeftIcon
-              size={32}
-              color={style.flatten(['color-gray-100']).color}
-            />
-          </RectButton>
-          <RectButton
-            style={style.flatten(['border-radius-4'])}
-            rippleColor={style.get('color-gray-550').color}
-            underlayColor={style.get('color-gray-550').color}
-            activeOpacity={1}
-            onPress={() => {
-              if (webViewState.webView) {
-                webViewState.webView.goForward();
-              }
-            }}>
-            <ArrowRightIcon
-              size={32}
-              color={style.flatten(['color-gray-100']).color}
-            />
-          </RectButton>
-        </Columns>
+      <Columns sum={1} alignY="center" gutter={12}>
         <RectButton
+          style={style.flatten(['border-radius-4'])}
           rippleColor={style.get('color-gray-550').color}
           underlayColor={style.get('color-gray-550').color}
           activeOpacity={1}
-          style={style.flatten([
-            'border-radius-4',
-            'flex-1',
-            'padding-x-12',
-            'height-36',
-            'justify-center',
-          ])}
           onPress={() => {
-            if (webViewState.webView) {
-              webViewState.webView.reload();
+            if (!webViewState.canGoBack) {
+              navigation.goBack();
+            } else if (webViewState.webView) {
+              webViewState.webView.goBack();
             }
           }}>
-          <Columns sum={1} alignY="center" gutter={8} columnAlign="center">
-            <Text
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              style={StyleSheet.flatten([
-                style.flatten(['subtitle3', 'color-gray-50']),
-                {maxWidth: '87%'},
-              ])}>
-              {webViewState.name}
-            </Text>
-            <RefreshIcon
-              size={20}
-              color={style.flatten(['color-gray-300']).color}
-            />
-          </Columns>
+          <ArrowLeftIcon
+            size={36}
+            color={style.flatten(['color-gray-100']).color}
+          />
         </RectButton>
+
+        <RectButton
+          style={style.flatten(['border-radius-4'])}
+          rippleColor={style.get('color-gray-550').color}
+          underlayColor={style.get('color-gray-550').color}
+          activeOpacity={1}
+          onPress={() => {
+            if (webViewState.webView) {
+              webViewState.webView.goForward();
+            }
+          }}>
+          <ArrowRightIcon
+            size={36}
+            color={style.flatten(['color-gray-100']).color}
+          />
+        </RectButton>
+
+        <Box
+          alignY="center"
+          padding={12}
+          style={style.flatten([
+            'flex-1',
+            'border-radius-4',
+            'background-color-gray-500',
+          ])}>
+          <XAxis alignY="center">
+            <Box style={style.flatten(['flex-1'])}>
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  navigation.navigate('WebTab', {screen: 'Web.Search'});
+                }}>
+                <Text
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={StyleSheet.flatten([
+                    style.flatten(['subtitle3', 'color-gray-50']),
+                  ])}>
+                  {webViewState.url}
+                </Text>
+              </TouchableWithoutFeedback>
+            </Box>
+
+            <Gutter size={8} />
+
+            <TouchableWithoutFeedback
+              onPress={() => {
+                if (webViewState.webView) {
+                  webViewState.webView.reload();
+                }
+              }}>
+              <RefreshIcon
+                size={20}
+                color={style.flatten(['color-gray-300']).color}
+              />
+            </TouchableWithoutFeedback>
+          </XAxis>
+        </Box>
 
         <Columns sum={1} alignY="center" gutter={12}>
           <RectButton
@@ -189,17 +202,17 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = observer(() => {
             underlayColor={style.get('color-gray-550').color}
             activeOpacity={1}
             onPress={() => {
-              if (favoriteWebpageStore.isSaved(webViewState.url)) {
-                favoriteWebpageStore.removeUrl(webViewState.url);
+              if (webpageStore.isFavoriteUrlSaved(webViewState.url)) {
+                webpageStore.removeFavoriteUrl(webViewState.url);
               } else {
-                favoriteWebpageStore.addUrl(webViewState.url);
+                setIsOpenModal(true);
               }
             }}>
             <StarIcon
               size={32}
               color={
                 style.flatten([
-                  favoriteWebpageStore.isSaved(webViewState.url)
+                  webpageStore.isFavoriteUrlSaved(webViewState.url)
                     ? 'color-blue-400'
                     : 'color-gray-300',
                 ]).color
@@ -222,7 +235,13 @@ export const OnScreenWebpageScreenHeader: FunctionComponent = observer(() => {
             </RectButton>
           ) : null}
         </Columns>
-      </View>
+      </Columns>
+
+      <AddFavoriteModal
+        isOpen={isOpenModal}
+        setIsOpen={setIsOpenModal}
+        url={webViewState.url}
+      />
     </Box>
   );
 });

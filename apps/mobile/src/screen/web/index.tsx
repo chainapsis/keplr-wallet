@@ -4,23 +4,27 @@ import {useStyle} from '../../styles';
 import {PageWithScrollView} from '../../components/page';
 import {Dimensions, Image, Platform, StyleSheet, Text} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {TextInput} from '../../components/input';
-import {validURL} from './util';
 import {Gutter} from '../../components/gutter';
 import {useNavigation} from '@react-navigation/native';
-import {StackNavProp} from '../../navigation';
 import {Columns} from '../../components/column';
 import {useStore} from '../../stores';
 import {RectButton} from '../../components/rect-button';
-import {GlobeIcon} from '../../components/icon/globe';
 import {Box} from '../../components/box';
-import {CloseIcon, StarIcon} from '../../components/icon';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+import {SearchIcon, StarIcon} from '../../components/icon';
+import {
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from 'react-native-gesture-handler';
 import {RectButton as NativeRectButton} from 'react-native-gesture-handler';
 import {FormattedMessage, useIntl} from 'react-intl';
+import {EllipsisIcon} from '../../components/icon/ellipsis.tsx';
+import {MenuModal} from '../../components/modal/menu-modal.tsx';
+import {StackNavProp} from '../../navigation.tsx';
+import {XAxis} from '../../components/axis';
+import {FavoriteUrl} from '../../stores/webpage/types.ts';
 
 export const WebScreen: FunctionComponent = observer(() => {
-  const {favoriteWebpageStore} = useStore();
+  const {webpageStore} = useStore();
   const style = useStyle();
   const navigation = useNavigation<StackNavProp>();
   const intl = useIntl();
@@ -28,8 +32,9 @@ export const WebScreen: FunctionComponent = observer(() => {
   const dAppPageUrl = 'https://explore.keplr.app';
   const safeAreaInsets = useSafeAreaInsets();
 
-  const [uri, setURI] = useState('');
-  const [uriError, setURIError] = useState('');
+  const [isOpenMenuModal, setIsOpenMenuModal] = useState(false);
+  const [selectedFavoriteUrl, setSelectedFavoriteUrl] =
+    useState<FavoriteUrl | null>(null);
 
   return (
     <PageWithScrollView
@@ -52,37 +57,32 @@ export const WebScreen: FunctionComponent = observer(() => {
 
       <Gutter size={20} />
 
-      <TextInput
-        returnKeyType="go"
-        value={uri}
-        error={uriError}
-        placeholder={intl.formatMessage({id: 'page.browser.input-placeholder'})}
-        placeholderTextColor={style.flatten(['color-gray-300']).color}
-        onChangeText={text => {
-          setURI(text);
-          setURIError('');
-        }}
-        onSubmitEditing={() => {
-          if (validURL(uri) || uri.includes('localhost')) {
-            setURIError('');
-            navigation.navigate('WebTab', {
-              screen: 'Web.WebPage',
-              params: {url: uri},
-            });
-            setURI('');
-          } else {
-            setURIError('Invalid URL');
-          }
-        }}
-        style={style.flatten([
-          'background-color-white',
-          'border-radius-6',
-          'color-black',
-        ])}
-        autoCorrect={false}
-        autoCapitalize="none"
-        autoComplete="off"
-      />
+      <TouchableWithoutFeedback
+        onPress={() =>
+          navigation.navigate('WebTab', {
+            screen: 'Web.Search',
+          })
+        }>
+        <Box
+          borderRadius={8}
+          style={style.flatten([
+            'background-color-white',
+            'padding-x-16',
+            'padding-y-12',
+          ])}>
+          <XAxis alignY="center">
+            <Text style={style.flatten(['body2', 'color-gray-300'])}>
+              <FormattedMessage id="page.browser.input-placeholder" />
+            </Text>
+
+            <Box style={style.flatten(['flex-1'])} />
+
+            <Box padding={6}>
+              <SearchIcon size={15} color={style.get('color-gray-100').color} />
+            </Box>
+          </XAxis>
+        </Box>
+      </TouchableWithoutFeedback>
 
       <Gutter size={20} />
       <Box
@@ -134,16 +134,16 @@ export const WebScreen: FunctionComponent = observer(() => {
             'margin-right-4',
             'color-blue-400',
           ])}>
-          {favoriteWebpageStore.urls.length}
+          {webpageStore.favoriteUrls.length}
         </Text>
       </Columns>
       <Gutter size={12} />
 
-      {favoriteWebpageStore.urls.length > 0 ? (
-        favoriteWebpageStore.urls.map(url => {
+      {webpageStore.favoriteUrls.length > 0 ? (
+        webpageStore.favoriteUrls.map(favoriteUrl => {
           return (
             <RectButton
-              key={url}
+              key={favoriteUrl.url}
               style={style.flatten([
                 'flex-row',
                 'items-center',
@@ -155,13 +155,13 @@ export const WebScreen: FunctionComponent = observer(() => {
               onPress={() => {
                 navigation.navigate('WebTab', {
                   screen: 'Web.WebPage',
-                  params: {url},
+                  params: {url: favoriteUrl.url},
                 });
               }}>
               <Box marginRight={16}>
-                <GlobeIcon
-                  size={24}
-                  color={style.flatten(['color-blue-400']).color}
+                <StarIcon
+                  size={20}
+                  color={style.flatten(['color-blue-300']).color}
                 />
               </Box>
               <Text
@@ -172,19 +172,17 @@ export const WebScreen: FunctionComponent = observer(() => {
                   'color-text-high',
                   'flex-1',
                 ])}>
-                {url
-                  .replace('https://', '')
-                  .replace('http://', '')
-                  .replace('www.', '')}
+                {favoriteUrl.name}
               </Text>
               <TouchableOpacity
                 style={style.flatten(['padding-12'])}
                 onPress={() => {
-                  favoriteWebpageStore.removeUrl(url);
+                  setSelectedFavoriteUrl(favoriteUrl);
+                  setIsOpenMenuModal(true);
                 }}>
-                <CloseIcon
-                  color={style.get('color-text-low').color}
+                <EllipsisIcon
                   size={24}
+                  color={style.get('color-gray-10').color}
                 />
               </TouchableOpacity>
             </RectButton>
@@ -217,6 +215,43 @@ export const WebScreen: FunctionComponent = observer(() => {
       )}
 
       <Gutter size={20} />
+
+      <MenuModal
+        isOpen={isOpenMenuModal}
+        setIsOpen={setIsOpenMenuModal}
+        modalMenuItems={[
+          {
+            key: 'favorite-url-edit',
+            label: intl.formatMessage({
+              id: 'page.browser.menu-favorite.modal.edit-item.label',
+            }),
+            onSelect: () => {
+              if (selectedFavoriteUrl) {
+                navigation.navigate('WebTab', {
+                  screen: 'Web.EditFavorite',
+                  params: {
+                    url: selectedFavoriteUrl,
+                  },
+                });
+              }
+
+              setIsOpenMenuModal(false);
+            },
+          },
+          {
+            key: 'favorite-url-delete',
+            label: intl.formatMessage({
+              id: 'page.browser.menu-favorite.modal.delete-item.label',
+            }),
+            onSelect: () => {
+              if (selectedFavoriteUrl && selectedFavoriteUrl.url) {
+                webpageStore.removeFavoriteUrl(selectedFavoriteUrl.url);
+              }
+              setIsOpenMenuModal(false);
+            },
+          },
+        ]}
+      />
     </PageWithScrollView>
   );
 });

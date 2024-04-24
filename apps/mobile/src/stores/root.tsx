@@ -51,7 +51,6 @@ import {CosmosGovernanceQueries} from './governance/quries';
 import {CosmosGovernanceQueriesV1} from './governance/v1/quries';
 import {ScamProposalStore} from './scam-proposal';
 import {KeychainStore} from './keychain';
-import {FavoriteWebpageStore} from './favorite';
 import {WalletConnectStore} from './wallet-connect';
 import {
   AxelarEVMBridgeCurrencyRegistrar,
@@ -61,6 +60,7 @@ import {
 import {SkipQueries} from './skip';
 import {DeepLinkStore} from './deep-link';
 import {EthereumQueries, EthereumAccountStore} from '@keplr-wallet/stores-eth';
+import {WebpageStore} from './webpage';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
@@ -79,7 +79,7 @@ export class RootStore {
   public readonly signEthereumInteractionStore: SignEthereumInteractionStore;
   public readonly chainSuggestStore: ChainSuggestStore;
 
-  public readonly favoriteWebpageStore: FavoriteWebpageStore;
+  public readonly webpageStore: WebpageStore;
 
   public readonly queriesStore: QueriesStore<
     [
@@ -443,9 +443,9 @@ export class RootStore {
       this.keyRingStore,
     );
 
-    this.favoriteWebpageStore = new FavoriteWebpageStore(
-      new AsyncKVStore('store_favorite_url'),
-    );
+    this.webpageStore = new WebpageStore(new AsyncKVStore('store_webpage'), {
+      kvStore: new AsyncKVStore('store_favorite_url'),
+    });
 
     this.walletConnectStore = new WalletConnectStore(
       new AsyncKVStore('store_wallet_connect_v2'),

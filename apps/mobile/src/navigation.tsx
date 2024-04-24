@@ -111,6 +111,9 @@ import {
 import {SwapIcon} from './components/icon/swap.tsx';
 import {IBCSwapScreen} from './screen/ibc-swap';
 import {IBCSwapDestinationSelectAssetScreen} from './screen/ibc-swap/select-asset';
+import {EditFavoriteUrlScreen} from './screen/web/edit-favorite';
+import {SearchUrlScreen} from './screen/web/search';
+import {FavoriteUrl} from './stores/webpage/types.ts';
 
 type DefaultRegisterParams = {
   hideBackButton?: boolean;
@@ -384,6 +387,8 @@ export type GovernanceNavigation = {
 export type WebStackNavigation = {
   'Web.Intro': undefined;
   'Web.WebPage': {url: string};
+  'Web.EditFavorite': {url: FavoriteUrl};
+  'Web.Search': undefined;
 };
 
 export type StackNavProp = StackNavigationProp<RootStackParamList>;
@@ -622,6 +627,8 @@ export const MainTabNavigation: FunctionComponent = () => {
 };
 
 const WebNavigation = () => {
+  const intl = useIntl();
+
   return (
     <WebStack.Navigator
       initialRouteName="Web.Intro"
@@ -638,6 +645,26 @@ const WebNavigation = () => {
         options={{headerShown: false}}
         component={WebpageScreen}
       />
+
+      <WebStack.Screen
+        name="Web.EditFavorite"
+        options={{
+          title: intl.formatMessage({
+            id: 'page.browser.edit-favorite.title',
+          }),
+          ...defaultHeaderOptions,
+        }}
+        component={EditFavoriteUrlScreen}
+      />
+
+      <WebStack.Group
+        screenOptions={{...TransitionPresets.ModalSlideFromBottomIOS}}>
+        <WebStack.Screen
+          name="Web.Search"
+          options={{headerShown: false}}
+          component={SearchUrlScreen}
+        />
+      </WebStack.Group>
     </WebStack.Navigator>
   );
 };
