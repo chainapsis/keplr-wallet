@@ -2518,6 +2518,48 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
   },
+  {
+    chainId: "seda-1",
+    chainName: "SEDA",
+    rpc: "https://rpc-seda.keplr.app",
+    rest: "https://lcd-seda.keplr.app",
+    stakeCurrency: {
+      coinDenom: "SEDA",
+      coinMinimalDenom: "aseda",
+      coinDecimals: 18,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "seda",
+      bech32PrefixAccPub: "sedapub",
+      bech32PrefixValAddr: "sedavaloper",
+      bech32PrefixValPub: "sedavaloperpub",
+      bech32PrefixConsAddr: "sedavalcons",
+      bech32PrefixConsPub: "sedavalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "SEDA",
+        coinMinimalDenom: "aseda",
+        coinDecimals: 18,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "SEDA",
+        coinMinimalDenom: "aseda",
+        coinDecimals: 18,
+        gasPriceStep: {
+          low: 25000000000,
+          average: 25000000000,
+          high: 40000000000,
+        },
+      },
+    ],
+    features: ["cosmwasm"],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
