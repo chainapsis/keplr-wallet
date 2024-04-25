@@ -37,8 +37,8 @@ const packages = (() => {
 
     const stat = fs.statSync(`${rootPath}/apps/${dir}`);
     if (
-        stat.isDirectory() &&
-        fs.existsSync(`${rootPath}/apps/${dir}/package.json`)
+      stat.isDirectory() &&
+      fs.existsSync(`${rootPath}/apps/${dir}/package.json`)
     ) {
       res.push(`/apps/${dir}`);
     }
