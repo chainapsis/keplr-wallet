@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {IBCSwapAmountConfig} from '../../../../hooks/ibc-swap';
+import {IBCSwapAmountConfig} from '@keplr-wallet/hooks-internal';
 import {observer} from 'mobx-react-lite';
 import {Box} from '../../../../components/box';
 import {useStyle} from '../../../../styles';

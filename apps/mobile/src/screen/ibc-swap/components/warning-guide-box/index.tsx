@@ -4,7 +4,7 @@ import {useStyle} from '../../../../styles';
 import {VerticalCollapseTransition} from '../../../../components/transition';
 import {Box} from '../../../../components/box';
 import {Text} from 'react-native';
-import {IBCSwapAmountConfig} from '../../../../hooks/ibc-swap';
+import {IBCSwapAmountConfig} from '@keplr-wallet/hooks-internal';
 import {EmptyAmountError, ZeroAmountError} from '@keplr-wallet/hooks';
 import {FormattedMessage} from 'react-intl';
 

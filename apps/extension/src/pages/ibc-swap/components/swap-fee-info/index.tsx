@@ -10,7 +10,7 @@ import {
 import { autorun } from "mobx";
 import { Dec, PricePretty } from "@keplr-wallet/unit";
 import { useStore } from "../../../../stores";
-import { IBCSwapAmountConfig } from "../../../../hooks/ibc-swap";
+import { IBCSwapAmountConfig } from "@keplr-wallet/hooks-internal";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
 import { Gutter } from "../../../../components/gutter";

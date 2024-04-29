@@ -16,7 +16,7 @@ import {
 } from '@keplr-wallet/hooks';
 import {autorun} from 'mobx';
 import {Dec, PricePretty} from '@keplr-wallet/unit';
-import {IBCSwapAmountConfig} from '../../../../hooks/ibc-swap';
+import {IBCSwapAmountConfig} from '@keplr-wallet/hooks-internal';
 import {TransactionFeeModal} from '../../../../components/input/fee-control/transaction-fee-modal.tsx';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {SVGLoadingIcon} from '../../../../components/spinner';

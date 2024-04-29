@@ -18,7 +18,7 @@ import {WarningGuideBox} from './components/warning-guide-box';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../navigation.tsx';
 import {SlippageModal} from './components/slippage-modal';
-import {useIBCSwapConfig} from '../../hooks/ibc-swap';
+import {useIBCSwapConfig} from '@keplr-wallet/hooks-internal';
 import {useStore} from '../../stores';
 import {SwapFeeBps} from '../../config.ui.ts';
 import {useGasSimulator, useTxConfigsValidate} from '@keplr-wallet/hooks';

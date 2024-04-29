@@ -8349,6 +8349,7 @@ __metadata:
     "@keplr-wallet/cosmos": 0.12.82
     "@keplr-wallet/crypto": 0.12.82
     "@keplr-wallet/hooks": 0.12.82
+    "@keplr-wallet/hooks-internal": 0.12.82
     "@keplr-wallet/ledger-cosmos": 0.12.82
     "@keplr-wallet/popup": 0.12.82
     "@keplr-wallet/proto-types": 0.12.82
@@ -8453,7 +8454,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/hooks-internal@workspace:apps/hooks-internal":
+"@keplr-wallet/hooks-internal@0.12.82, @keplr-wallet/hooks-internal@workspace:apps/hooks-internal":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/hooks-internal@workspace:apps/hooks-internal"
   dependencies:

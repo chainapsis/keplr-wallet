@@ -11,7 +11,7 @@ import {ChainImageFallback} from '../../../../components/image';
 import {ArrowDownFillIcon} from '../../../../components/icon/arrow-donw-fill.tsx';
 import {SettingIcon} from '../../../../components/icon';
 import {ISenderConfig} from '@keplr-wallet/hooks';
-import {IBCSwapAmountConfig} from '../../../../hooks/ibc-swap';
+import {IBCSwapAmountConfig} from '@keplr-wallet/hooks-internal';
 import {useStore} from '../../../../stores';
 import {AppCurrency} from '@keplr-wallet/types';
 import {useEffectOnce} from '../../../../hooks';

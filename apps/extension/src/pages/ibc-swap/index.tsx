@@ -8,7 +8,10 @@ import { observer } from "mobx-react-lite";
 import { Box } from "../../components/box";
 import { useStore } from "../../stores";
 import { useNavigate } from "react-router";
-import { IBCSwapAmountConfig, useIBCSwapConfig } from "../../hooks/ibc-swap";
+import {
+  IBCSwapAmountConfig,
+  useIBCSwapConfig,
+} from "@keplr-wallet/hooks-internal";
 import { SwapAssetInfo } from "./components/swap-asset-info";
 import { SwapFeeInfo } from "./components/swap-fee-info";
 import { Gutter } from "../../components/gutter";

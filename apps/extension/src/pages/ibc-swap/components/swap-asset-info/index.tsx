@@ -20,7 +20,7 @@ import {
   RawImageFallback,
 } from "../../../../components/image";
 import { AppCurrency } from "@keplr-wallet/types";
-import { IBCSwapAmountConfig } from "../../../../hooks/ibc-swap";
+import { IBCSwapAmountConfig } from "@keplr-wallet/hooks-internal";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
 import { LoadingIcon } from "../../../../components/icon";
