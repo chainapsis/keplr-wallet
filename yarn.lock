@@ -8453,6 +8453,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@keplr-wallet/hooks-internal@workspace:apps/hooks-internal":
+  version: 0.0.0-use.local
+  resolution: "@keplr-wallet/hooks-internal@workspace:apps/hooks-internal"
+  dependencies:
+    "@keplr-wallet/hooks": 0.12.82
+    "@keplr-wallet/stores": 0.12.82
+    "@keplr-wallet/stores-internal": 0.12.82
+    "@keplr-wallet/types": 0.12.82
+    "@keplr-wallet/unit": 0.12.82
+  peerDependencies:
+    mobx: ^6
+    mobx-utils: ^6
+    react: ^16.8.0 || ^17 || ^18
+  languageName: unknown
+  linkType: soft
+
 "@keplr-wallet/hooks@0.12.82, @keplr-wallet/hooks@workspace:packages/hooks":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/hooks@workspace:packages/hooks"

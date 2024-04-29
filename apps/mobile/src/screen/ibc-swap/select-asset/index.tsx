@@ -22,7 +22,7 @@ import {Gutter} from '../../../components/gutter';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation.tsx';
 import {HugeQueriesStore} from '../../../stores/huge-queries';
-import {ObservableQueryIbcSwap} from '../../../stores/skip/ibc-swap.ts';
+import {ObservableQueryIbcSwap} from '@keplr-wallet/stores-internal';
 import {computed, makeObservable} from 'mobx';
 import {Currency} from '@keplr-wallet/types';
 import {IChainInfoImpl} from '@keplr-wallet/stores';
