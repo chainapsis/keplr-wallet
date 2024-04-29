@@ -8,7 +8,7 @@ import { computed, makeObservable } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { computedFn } from "mobx-utils";
 import Joi from "joi";
-import { ChainStore } from "../chain";
+import { InternalChainStore } from "../internal";
 
 const Schema = Joi.object<ChainsResponse>({
   chains: Joi.array().items(
@@ -23,7 +23,7 @@ const Schema = Joi.object<ChainsResponse>({
 export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
   constructor(
     sharedContext: QuerySharedContext,
-    protected readonly chainStore: ChainStore,
+    protected readonly chainStore: InternalChainStore,
     protected readonly skipURL: string
   ) {
     super(sharedContext, skipURL, "/v1/info/chains");

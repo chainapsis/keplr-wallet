@@ -15,7 +15,7 @@ import { useIntl } from "react-intl";
 import { HugeQueriesStore } from "../../../stores/huge-queries";
 import { ViewToken } from "../../main";
 import { computed, makeObservable } from "mobx";
-import { ObservableQueryIbcSwap } from "../../../stores/skip/ibc-swap";
+import { ObservableQueryIbcSwap } from "@keplr-wallet/stores-internal";
 import { Currency } from "@keplr-wallet/types";
 import { IChainInfoImpl } from "@keplr-wallet/stores";
 

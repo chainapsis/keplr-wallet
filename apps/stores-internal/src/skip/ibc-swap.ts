@@ -13,11 +13,11 @@ import { computedFn } from "mobx-utils";
 import { ObservableQueryIbcPfmTransfer } from "./ibc-pfm-transfer";
 import { ObservableQueryAssetsFromSource } from "./assets-from-source";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { ChainStore } from "../chain";
+import { InternalChainStore } from "../internal";
 
 export class ObservableQueryIBCSwapInner {
   constructor(
-    protected readonly chainStore: ChainStore,
+    protected readonly chainStore: InternalChainStore,
     protected readonly queryRoute: ObservableQueryRoute,
     protected readonly queryMsgsDirect: ObservableQueryMsgsDirect,
     public readonly amountInDenom: string,
@@ -78,7 +78,7 @@ export class ObservableQueryIBCSwapInner {
 
 export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapInner> {
   constructor(
-    protected readonly chainStore: ChainStore,
+    protected readonly chainStore: InternalChainStore,
     protected readonly queryAssets: ObservableQueryAssets,
     protected readonly queryAssetsFromSource: ObservableQueryAssetsFromSource,
     protected readonly queryChains: ObservableQueryChains,

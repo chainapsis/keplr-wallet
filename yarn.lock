@@ -8361,6 +8361,7 @@ __metadata:
     "@keplr-wallet/stores-etc": 0.12.82
     "@keplr-wallet/stores-eth": 0.12.82
     "@keplr-wallet/stores-ibc": 0.12.82
+    "@keplr-wallet/stores-internal": 0.12.82
     "@keplr-wallet/types": 0.12.82
     "@keplr-wallet/unit": 0.12.82
     "@keystonehq/animated-qr": ^0.8.6
@@ -8406,7 +8407,7 @@ __metadata:
     html-webpack-plugin: ^5.5.0
     https-browserify: ^1.0.0
     identity-obj-proxy: ^3.0.0
-    joi: ^17.2.1
+    joi: ^17.5.0
     js-yaml: ^4.1.0
     keplr-wallet-private: "file:./noop-keplr-wallet-private"
     lottie-web: ^5.10.2
@@ -8727,6 +8728,23 @@ __metadata:
     "@keplr-wallet/types": 0.12.82
     mobx: ^6.1.7
     mobx-utils: ^6.0.3
+  languageName: unknown
+  linkType: soft
+
+"@keplr-wallet/stores-internal@0.12.82, @keplr-wallet/stores-internal@workspace:apps/stores-internal":
+  version: 0.0.0-use.local
+  resolution: "@keplr-wallet/stores-internal@workspace:apps/stores-internal"
+  dependencies:
+    "@keplr-wallet/cosmos": 0.12.82
+    "@keplr-wallet/simple-fetch": 0.12.82
+    "@keplr-wallet/stores": 0.12.82
+    "@keplr-wallet/types": 0.12.82
+    "@keplr-wallet/unit": 0.12.82
+    joi: ^17.5.0
+    utility-types: ^3.10.0
+  peerDependencies:
+    mobx: ^6
+    mobx-utils: ^6
   languageName: unknown
   linkType: soft
 

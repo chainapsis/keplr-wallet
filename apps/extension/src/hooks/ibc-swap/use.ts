@@ -12,7 +12,7 @@ import {
   useSenderConfig,
 } from "@keplr-wallet/hooks";
 import { useIBCSwapAmountConfig } from "./amount";
-import { SkipQueries } from "../../stores/skip";
+import { SkipQueries } from "@keplr-wallet/stores-internal";
 import { AppCurrency } from "@keplr-wallet/types";
 
 export const useIBCSwapConfig = (

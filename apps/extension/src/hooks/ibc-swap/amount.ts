@@ -16,8 +16,8 @@ import {
   MsgsDirectResponse,
   RouteResponse,
   SkipQueries,
-} from "../../stores/skip";
-import { ObservableQueryIBCSwapInner } from "../../stores/skip/ibc-swap";
+  ObservableQueryIBCSwapInner,
+} from "@keplr-wallet/stores-internal";
 
 export class IBCSwapAmountConfig extends AmountConfig {
   @observable

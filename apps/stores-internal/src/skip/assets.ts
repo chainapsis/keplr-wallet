@@ -6,7 +6,7 @@ import {
 import { AssetsResponse } from "./types";
 import { computed, makeObservable } from "mobx";
 import Joi from "joi";
-import { ChainStore } from "../chain";
+import { InternalChainStore } from "../internal";
 
 const Schema = Joi.object<AssetsResponse>({
   chain_to_assets_map: Joi.object().pattern(
@@ -27,7 +27,7 @@ const Schema = Joi.object<AssetsResponse>({
 export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> {
   constructor(
     sharedContext: QuerySharedContext,
-    protected readonly chainStore: ChainStore,
+    protected readonly chainStore: InternalChainStore,
     skipURL: string,
     public readonly chainId: string
   ) {
@@ -129,7 +129,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
 export class ObservableQueryAssets extends HasMapStore<ObservableQueryAssetsInner> {
   constructor(
     protected readonly sharedContext: QuerySharedContext,
-    protected readonly chainStore: ChainStore,
+    protected readonly chainStore: InternalChainStore,
     protected readonly skipURL: string
   ) {
     super((chainId) => {

@@ -2,11 +2,11 @@ import { ObservableQueryAssetsFromSource } from "./assets-from-source";
 import { ObservableQueryChains } from "./chains";
 import { computedFn } from "mobx-utils";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { ChainStore } from "../chain";
+import { InternalChainStore } from "../internal";
 
 export class ObservableQueryIbcPfmTransfer {
   constructor(
-    protected readonly chainStore: ChainStore,
+    protected readonly chainStore: InternalChainStore,
     protected readonly queryChains: ObservableQueryChains,
     protected readonly queryAssetsFromSource: ObservableQueryAssetsFromSource
   ) {}

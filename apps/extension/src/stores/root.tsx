@@ -9,6 +9,7 @@ import {
   TokenContractListURL,
   GoogleMeasurementId,
   GoogleAPIKeyForMeasurement,
+  SwapVenue,
 } from "../config.ui";
 import {
   AccountStore,
@@ -67,7 +68,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { HugeQueriesStore } from "./huge-queries";
 import { ExtensionAnalyticsClient } from "../analytics";
 import { TokenContractsQueries } from "./token-contracts";
-import { SkipQueries } from "./skip";
+import { SkipQueries } from "@keplr-wallet/stores-internal";
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
@@ -194,7 +195,8 @@ export class RootStore {
     );
     this.skipQueriesStore = new SkipQueries(
       this.queriesStore.sharedContext,
-      this.chainStore
+      this.chainStore,
+      SwapVenue
     );
 
     this.accountStore = new AccountStore(

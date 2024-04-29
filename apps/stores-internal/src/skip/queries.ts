@@ -7,8 +7,7 @@ import { ObservableQueryIbcPfmTransfer } from "./ibc-pfm-transfer";
 import { ObservableQueryAssets } from "./assets";
 import { ObservableQueryIbcSwap } from "./ibc-swap";
 import { ObservableQueryMsgsDirect } from "./msgs-direct";
-import { SwapVenue } from "../../config.ui";
-import { ChainStore } from "../chain";
+import { InternalChainStore } from "../internal";
 
 export class SkipQueries {
   public readonly queryChains: DeepReadonly<ObservableQueryChains>;
@@ -21,7 +20,14 @@ export class SkipQueries {
   public readonly queryIBCPacketForwardingTransfer: DeepReadonly<ObservableQueryIbcPfmTransfer>;
   public readonly queryIBCSwap: DeepReadonly<ObservableQueryIbcSwap>;
 
-  constructor(sharedContext: QuerySharedContext, chainStore: ChainStore) {
+  constructor(
+    sharedContext: QuerySharedContext,
+    chainStore: InternalChainStore,
+    swapVenue: {
+      name: string;
+      chainId: string;
+    }
+  ) {
     this.queryChains = new ObservableQueryChains(
       sharedContext,
       chainStore,
@@ -62,7 +68,7 @@ export class SkipQueries {
       this.queryRoute,
       this.queryMsgsDirect,
       this.queryIBCPacketForwardingTransfer,
-      SwapVenue
+      swapVenue
     );
   }
 }

@@ -8,7 +8,7 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { computed, makeObservable } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import Joi from "joi";
-import { ChainStore } from "../chain";
+import { InternalChainStore } from "../internal";
 
 const Schema = Joi.object<AssetsFromSourceResponse>({
   dest_assets: Joi.object()
@@ -31,7 +31,7 @@ const Schema = Joi.object<AssetsFromSourceResponse>({
 export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<AssetsFromSourceResponse> {
   constructor(
     sharedContext: QuerySharedContext,
-    protected readonly chainStore: ChainStore,
+    protected readonly chainStore: InternalChainStore,
     skipURL: string,
     public readonly chainId: string,
     public readonly denom: string
@@ -159,7 +159,7 @@ export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<Assets
 export class ObservableQueryAssetsFromSource extends HasMapStore<ObservableQueryAssetsFromSourceInner> {
   constructor(
     protected readonly sharedContext: QuerySharedContext,
-    protected readonly chainStore: ChainStore,
+    protected readonly chainStore: InternalChainStore,
     protected readonly skipURL: string
   ) {
     super((str) => {
