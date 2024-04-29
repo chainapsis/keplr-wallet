@@ -76,7 +76,7 @@ export function getWCKeplr(): Promise<Keplr> {
         description: "WC Test Dapp",
         url: "http://localhost:1234/",
         icons: [
-          "https://raw.githubusercontent.com/chainapsis/keplr-wallet/master/packages/extension/src/public/assets/logo-256.png",
+          "https://raw.githubusercontent.com/chainapsis/keplr-wallet/master/apps/extension/src/public/assets/logo-256.png",
         ],
       },
     });

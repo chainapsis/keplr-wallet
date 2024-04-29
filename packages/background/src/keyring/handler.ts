@@ -24,6 +24,9 @@ import {
   ExportKeyRingDataMsg,
   CheckLegacyKeyRingPasswordMsg,
   NewKeystoneKeyMsg,
+  CheckPasswordMsg,
+  GetLegacyKeyRingInfosMsg,
+  ShowSensitiveLegacyKeyRingDataMsg,
   ExportKeyRingVaultsMsg,
 } from "./messages";
 import { KeyRingService } from "./service";
@@ -102,6 +105,18 @@ export const getHandler: (service: KeyRingService) => Handler = (
           env,
           msg as CheckLegacyKeyRingPasswordMsg
         );
+      case GetLegacyKeyRingInfosMsg:
+        return handleGetLegacyKeyRingInfosMsg(service)(
+          env,
+          msg as GetLegacyKeyRingInfosMsg
+        );
+      case ShowSensitiveLegacyKeyRingDataMsg:
+        return handleShowSensitiveLegacyKeyRingDataMsg(service)(
+          env,
+          msg as ShowSensitiveLegacyKeyRingDataMsg
+        );
+      case CheckPasswordMsg:
+        return handleCheckPasswordMsg(service)(env, msg as CheckPasswordMsg);
       case ExportKeyRingVaultsMsg:
         return handleExportKeyRingVaultsMsg(service)(
           env,
@@ -191,7 +206,8 @@ const handleNewMnemonicKeyMsg: (
       msg.mnemonic,
       msg.bip44HDPath,
       msg.name,
-      msg.password
+      msg.password,
+      msg.meta
     );
     return {
       vaultId,
@@ -339,6 +355,33 @@ const handleCheckLegacyKeyRingPasswordMsg: (
 ) => InternalHandler<CheckLegacyKeyRingPasswordMsg> = (service) => {
   return async (_, msg) => {
     return await service.checkLegacyKeyRingPassword(msg.password);
+  };
+};
+
+const handleGetLegacyKeyRingInfosMsg: (
+  service: KeyRingService
+) => InternalHandler<GetLegacyKeyRingInfosMsg> = (service) => {
+  return async () => {
+    return await service.getLegacyKeyringInfos();
+  };
+};
+
+const handleShowSensitiveLegacyKeyRingDataMsg: (
+  service: KeyRingService
+) => InternalHandler<ShowSensitiveLegacyKeyRingDataMsg> = (service) => {
+  return async (_, msg) => {
+    return await service.showSensitiveLegacyKeyringData(
+      msg.index,
+      msg.password
+    );
+  };
+};
+
+const handleCheckPasswordMsg: (
+  service: KeyRingService
+) => InternalHandler<CheckPasswordMsg> = (service) => {
+  return async (_, msg) => {
+    return await service.checkUserPassword(msg.password);
   };
 };
 

@@ -7,6 +7,7 @@ import {
   RemoveTokenMsg,
   RemoveERC20TokenMsg,
   TokenInfo,
+  InteractionWaitingData,
 } from "@keplr-wallet/background";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { AppCurrency } from "@keplr-wallet/types";
@@ -251,7 +252,13 @@ export class TokensStore {
     });
   }
 
-  get waitingSuggestedToken() {
+  get waitingSuggestedToken():
+    | InteractionWaitingData<{
+        chainId: string;
+        contractAddress: string;
+        viewingKey?: string;
+      }>
+    | undefined {
     const cw20Datas = this.interactionStore.getAllData<{
       chainId: string;
       contractAddress: string;
