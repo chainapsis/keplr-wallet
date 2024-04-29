@@ -44,6 +44,7 @@ import {
   FiatCurrencies,
   TokenContractListURL,
   EthereumEndpoint,
+  SwapVenue,
 } from '../config.ui';
 import {TokenContractsQueries} from './token-contracts';
 import {AprQueries} from './aprs';
@@ -57,7 +58,7 @@ import {
   GravityBridgeCurrencyRegistrar,
   KeplrETCQueries,
 } from '@keplr-wallet/stores-etc';
-import {SkipQueries} from './skip';
+import {SkipQueries} from '@keplr-wallet/stores-internal';
 import {DeepLinkStore} from './deep-link';
 import {EthereumQueries, EthereumAccountStore} from '@keplr-wallet/stores-eth';
 import {WebpageStore} from './webpage';
@@ -196,6 +197,7 @@ export class RootStore {
     this.skipQueriesStore = new SkipQueries(
       this.queriesStore.sharedContext,
       this.chainStore,
+      SwapVenue,
     );
 
     this.accountStore = new AccountStore(

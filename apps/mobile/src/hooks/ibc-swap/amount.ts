@@ -11,13 +11,13 @@ import {
   MsgsDirectResponse,
   RouteResponse,
   SkipQueries,
-} from '../../stores/skip';
+  ObservableQueryIBCSwapInner,
+} from '@keplr-wallet/stores-internal';
 import {AmountConfig, ISenderConfig, UIProperties} from '@keplr-wallet/hooks';
 import {AppCurrency} from '@keplr-wallet/types';
 import {useState} from 'react';
 import {action, makeObservable, observable, override} from 'mobx';
 import {CoinPretty, Dec, Int, RatePretty} from '@keplr-wallet/unit';
-import {ObservableQueryIBCSwapInner} from '../../stores/skip/ibc-swap.ts';
 
 export class IBCSwapAmountConfig extends AmountConfig {
   @observable

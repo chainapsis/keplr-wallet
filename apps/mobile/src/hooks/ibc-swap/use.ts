@@ -5,7 +5,7 @@ import {
   IAccountStoreWithInjects,
   IQueriesStore,
 } from '@keplr-wallet/stores';
-import {SkipQueries} from '../../stores/skip';
+import {SkipQueries} from '@keplr-wallet/stores-internal';
 import {AppCurrency} from '@keplr-wallet/types';
 import {
   useFeeConfig,
