@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { ComponentStory } from "@storybook/react";
 import { Button } from "./button";
 import { ButtonColor, ButtonProps } from "./types";

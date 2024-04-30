@@ -1,16 +1,20 @@
+import { dirname, join } from "path";
 const { ProvidePlugin } = require("webpack");
 
 module.exports = {
   stories: ["../src/**/*.stories.mdx", "../src/**/*.stories.@(js|jsx|ts|tsx)"],
+
   addons: [
-    "@storybook/addon-links",
-    "@storybook/addon-essentials",
-    "@storybook/addon-interactions",
+    getAbsolutePath("@storybook/addon-links"),
+    getAbsolutePath("@storybook/addon-essentials"),
+    getAbsolutePath("@storybook/addon-interactions"),
   ],
-  framework: "@storybook/react",
-  core: {
-    builder: "@storybook/builder-webpack5",
+
+  framework: {
+    name: getAbsolutePath("@storybook/react-webpack5"),
+    options: {},
   },
+
   webpackFinal: async (config) => {
     config.resolve.fallback = {
       os: require.resolve("os-browserify/browser"),
@@ -36,4 +40,12 @@ module.exports = {
 
     return config;
   },
+
+  docs: {
+    autodocs: true,
+  },
 };
+
+function getAbsolutePath(value) {
+  return dirname(require.resolve(join(value, "package.json")));
+}
