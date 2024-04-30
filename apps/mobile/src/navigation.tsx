@@ -1256,25 +1256,57 @@ export const DeepLinkNavigationComponent: FunctionComponent = observer(() => {
 
   (async () => {
     if (keyRingStore.status === 'unlocked' && deepLinkStore.needToNavigation) {
-      if (!chainStore.isEnabledChain(deepLinkStore.needToNavigation.chainId)) {
-        await chainStore.enableChainInfoInUI(
-          deepLinkStore.needToNavigation.chainId,
-        );
+      // DeepLink, Applink, UniversalLink 등을 통해서 들어온 경우 체인이 enable 되어 있지 않으면 자동으로 enable 하도록 함.
+      if (deepLinkStore.needToNavigation.params['chainId']) {
+        if (
+          !chainStore.isEnabledChain(
+            deepLinkStore.needToNavigation.params['chainId'] as string,
+          )
+        ) {
+          await chainStore.enableChainInfoInUI(
+            deepLinkStore.needToNavigation.params['chainId'] as string,
+          );
+        }
       }
 
       // Wait for the navigation to be completed.
       setTimeout(() => {
         if (deepLinkStore.needToNavigation) {
-          navigation.navigate('Stake', {
-            screen: 'Stake.ValidateList',
-            params: {
-              chainId: deepLinkStore.needToNavigation.chainId,
-              fromDeepLink: {
-                userIdentifier: deepLinkStore.needToNavigation.userIdentifier,
-                activityName: deepLinkStore.needToNavigation.activityName,
-              },
-            },
-          });
+          switch (deepLinkStore.needToNavigation.route) {
+            case 'Coinbase.Staking.ValidateList': {
+              navigation.navigate('Stake', {
+                screen: 'Stake.ValidateList',
+                params: {
+                  chainId: deepLinkStore.needToNavigation.params[
+                    'chainId'
+                  ] as string,
+                  fromDeepLink: {
+                    userIdentifier: deepLinkStore.needToNavigation.params[
+                      'userIdentifier'
+                    ] as string,
+                    activityName: deepLinkStore.needToNavigation.params[
+                      'activityName'
+                    ] as string,
+                  },
+                },
+              });
+              break;
+            }
+            case 'Staking.ValidateDetail': {
+              navigation.navigate('Stake', {
+                screen: 'Stake.ValidateDetail',
+                params: {
+                  chainId: deepLinkStore.needToNavigation.params[
+                    'chainId'
+                  ] as string,
+                  validatorAddress: deepLinkStore.needToNavigation.params[
+                    'validatorAddress'
+                  ] as string,
+                },
+              });
+              break;
+            }
+          }
         }
 
         deepLinkStore.clearNeedToNavigation();

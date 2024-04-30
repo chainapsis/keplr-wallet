@@ -2,10 +2,11 @@ import {AppState, Linking} from 'react-native';
 import {action, makeObservable, observable, runInAction} from 'mobx';
 import {WalletConnectStore} from '../wallet-connect';
 
-type StakingDeepLinkParams = {
-  chainId: string;
-  userIdentifier: string;
-  activityName: string;
+type DeepLinkRoute = 'Coinbase.Staking.ValidateList' | 'Staking.ValidateDetail';
+
+type DeepLinkParams = {
+  route: DeepLinkRoute;
+  params: Record<string, string | number | undefined>;
 };
 
 export class DeepLinkStore {
@@ -16,9 +17,9 @@ export class DeepLinkStore {
   }
 
   @observable
-  protected _needToNavigation: StakingDeepLinkParams | undefined = undefined;
+  protected _needToNavigation: DeepLinkParams | undefined = undefined;
 
-  get needToNavigation(): StakingDeepLinkParams | undefined {
+  get needToNavigation(): DeepLinkParams | undefined {
     return this._needToNavigation;
   }
 
@@ -61,7 +62,12 @@ export class DeepLinkStore {
         await this.walletConnectStore.processDeepLinkURL(url);
       }
 
-      if (url.protocol === 'keplrwallet:' && url.host === 'staking') {
+      // url.host === 'staking' is from Deeplink keplrwallet://staking?
+      // url.host === 'deeplink.keplr.app' is from applink or universal link https://deeplink.keplr.app/staking
+      if (
+        (url.protocol === 'keplrwallet:' && url.host === 'staking') ||
+        (url.host === 'deeplink.keplr.app' && url.pathname === '/staking')
+      ) {
         this.processStakingLinkURL(url);
       }
     } catch (e) {
@@ -82,9 +88,24 @@ export class DeepLinkStore {
       ) {
         runInAction(() => {
           this._needToNavigation = {
-            chainId: urlParams.get('chainId') as string,
-            userIdentifier: urlParams.get('userIdentifier') as string,
-            activityName: urlParams.get('activityName') as string,
+            route: 'Coinbase.Staking.ValidateList',
+            params: {
+              chainId: urlParams.get('chainId') as string,
+              userIdentifier: urlParams.get('userIdentifier') as string,
+              activityName: urlParams.get('activityName') as string,
+            },
+          };
+        });
+      }
+
+      if (urlParams.has('chainId') && urlParams.has('validatorAddress')) {
+        runInAction(() => {
+          this._needToNavigation = {
+            route: 'Staking.ValidateDetail',
+            params: {
+              chainId: urlParams.get('chainId') as string,
+              validatorAddress: urlParams.get('validatorAddress') as string,
+            },
           };
         });
       }
