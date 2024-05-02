@@ -15,6 +15,7 @@ export type IntPrettyOptions = {
   inequalitySymbol: boolean;
   inequalitySymbolSeparator: string;
   sign: boolean;
+  roundTo: number | undefined;
 };
 
 export class IntPretty {
@@ -30,6 +31,7 @@ export class IntPretty {
     inequalitySymbol: false,
     inequalitySymbolSeparator: " ",
     sign: false,
+    roundTo: undefined,
   };
 
   constructor(num: Dec | { toDec(): Dec } | bigInteger.BigNumber) {
@@ -133,6 +135,12 @@ export class IntPretty {
     return pretty;
   }
 
+  roundTo(roundTo: number | undefined): IntPretty {
+    const pretty = this.clone();
+    pretty._options.roundTo = roundTo;
+    return pretty;
+  }
+
   /**
    * Ready indicates the actual value is ready to show the users.
    * Even if the ready option is false, it expects that the value can be shown to users (probably as 0).
@@ -227,7 +235,14 @@ export class IntPretty {
   }
 
   toStringWithSymbols(prefix: string, suffix: string): string {
-    const dec = this.toDec();
+    let dec = this.toDec();
+    if (
+      this._options.roundTo != null &&
+      this._options.roundTo >= 1 &&
+      this._options.roundTo <= 19
+    ) {
+      dec = dec.roundTo(this._options.roundTo);
+    }
 
     if (
       this._options.inequalitySymbol &&

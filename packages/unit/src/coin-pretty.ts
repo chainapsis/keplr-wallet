@@ -159,6 +159,12 @@ export class CoinPretty {
     return pretty;
   }
 
+  roundTo(roundTo: number | undefined): CoinPretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.roundTo(roundTo);
+    return pretty;
+  }
+
   /**
    * Ready indicates the actual value is ready to show the users.
    * Even if the ready option is false, it expects that the value can be shown to users (probably as 0).

@@ -100,6 +100,12 @@ export class RatePretty {
     return pretty;
   }
 
+  sign(sign: boolean): RatePretty {
+    const pretty = this.clone();
+    pretty.intPretty = pretty.intPretty.sign(sign);
+    return pretty;
+  }
+
   /**
    * Ready indicates the actual value is ready to show the users.
    * Even if the ready option is false, it expects that the value can be shown to users (probably as 0).

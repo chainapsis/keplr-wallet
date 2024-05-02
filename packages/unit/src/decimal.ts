@@ -257,7 +257,7 @@ export class Dec {
   }
 
   public mul(d2: Dec): Dec {
-    return new Dec(this.mulRaw(d2).chopPrecisionAndRound(), Dec.precision);
+    return new Dec(this.mulRaw(d2).chopPrecisionAndRound(1), Dec.precision);
   }
 
   public mulTruncate(d2: Dec): Dec {
@@ -273,7 +273,7 @@ export class Dec {
   }
 
   public quo(d2: Dec): Dec {
-    return new Dec(this.quoRaw(d2).chopPrecisionAndRound(), Dec.precision);
+    return new Dec(this.quoRaw(d2).chopPrecisionAndRound(1), Dec.precision);
   }
 
   public quoTruncate(d2: Dec): Dec {
@@ -301,15 +301,15 @@ export class Dec {
    * Remove a Precision amount of rightmost digits and perform bankers rounding
    * on the remainder (gaussian rounding) on the digits which have been removed.
    */
-  protected chopPrecisionAndRound(): bigInteger.BigInteger {
+  protected chopPrecisionAndRound(decimalPlace: number): bigInteger.BigInteger {
     // Remove the negative and add it back when returning
     if (this.isNegative()) {
       const absoulteDec = this.abs();
-      const choped = absoulteDec.chopPrecisionAndRound();
+      const choped = absoulteDec.chopPrecisionAndRound(decimalPlace);
       return choped.negate();
     }
 
-    const precision = Dec.calcPrecisionMultiplier(0);
+    const precision = Dec.calcPrecisionMultiplier(decimalPlace - 1);
     const fivePrecision = precision.divide(bigInteger(2));
 
     // Get the truncated quotient and remainder
@@ -392,7 +392,11 @@ export class Dec {
   }
 
   public round(): Int {
-    return new Int(this.chopPrecisionAndRound());
+    return new Int(this.chopPrecisionAndRound(1));
+  }
+
+  public roundTo(decimalPlace: number): Dec {
+    return new Dec(this.chopPrecisionAndRound(decimalPlace), decimalPlace - 1);
   }
 
   public roundUp(): Int {
@@ -404,7 +408,7 @@ export class Dec {
   }
 
   public roundDec(): Dec {
-    return new Dec(this.chopPrecisionAndRound(), 0);
+    return new Dec(this.chopPrecisionAndRound(1), 0);
   }
 
   public roundUpDec(): Dec {
