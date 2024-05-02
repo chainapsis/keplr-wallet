@@ -476,6 +476,7 @@ export const TokenDetailModal: FunctionComponent<{
                     text += ` (${price24HChange
                       .maxDecimals(2)
                       .trim(false)
+                      .shrink(true)
                       .sign(true)
                       .inequalitySymbol(false)
                       .toString()})`;
