@@ -11,6 +11,7 @@ export const TokenInfos: FunctionComponent<{
   infos: {
     title: string;
     text: string;
+    textDeco?: "green";
   }[];
 }> = ({ title, infos }) => {
   const theme = useTheme();
@@ -59,11 +60,17 @@ export const TokenInfos: FunctionComponent<{
                 </Subtitle3>
                 <div style={{ flex: 1 }} />
                 <Subtitle3
-                  color={
-                    theme.mode === "light"
+                  color={(() => {
+                    if (info.textDeco === "green") {
+                      return theme.mode === "light"
+                        ? ColorPalette["green-500"]
+                        : ColorPalette["green-400"];
+                    }
+
+                    return theme.mode === "light"
                       ? ColorPalette["black"]
-                      : ColorPalette["white"]
-                  }
+                      : ColorPalette["white"];
+                  })()}
                 >
                   {info.text}
                 </Subtitle3>

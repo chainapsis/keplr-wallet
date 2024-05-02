@@ -19,7 +19,7 @@ import { RenderMessages } from "./messages";
 import { Modal } from "../../../components/modal";
 import { BuyCryptoModal } from "../components";
 import { useBuy } from "../../../hooks/use-buy";
-import { CoinPretty, DecUtils } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { CircleButton } from "./circle-button";
 import { AddressChip, QRCodeChip } from "./address-chip";
 import { ReceiveModal } from "./receive-modal";
@@ -68,6 +68,7 @@ export const TokenDetailModal: FunctionComponent<{
     accountStore,
     queriesStore,
     priceStore,
+    price24HChangesStore,
     skipQueriesStore,
   } = useStore();
 
@@ -92,6 +93,12 @@ export const TokenDetailModal: FunctionComponent<{
       accountStore.getAccount(chainId).bech32Address
     )
     .getBalance(currency);
+  const price24HChange = (() => {
+    if (!currency.coinGeckoId) {
+      return undefined;
+    }
+    return price24HChangesStore.get24HChange(currency.coinGeckoId);
+  })();
 
   const navigate = useNavigate();
 
@@ -441,6 +448,7 @@ export const TokenDetailModal: FunctionComponent<{
             const infos: {
               title: string;
               text: string;
+              textDeco?: "green";
             }[] = [];
 
             if (currency.coinGeckoId) {
@@ -451,15 +459,43 @@ export const TokenDetailModal: FunctionComponent<{
                 )
               );
               if (price) {
+                let textDeco: "green" | undefined = undefined;
+                let text = price.toString();
+                if (price24HChange) {
+                  // Max decimals가 2인데 이 경우 숫자가 0.00123%같은 경우면 +0.00% 같은식으로 표시될 수 있다.
+                  // 이 경우는 오차를 무시하고 0.00%로 생각한다.
+                  if (
+                    price24HChange
+                      .toDec()
+                      .abs()
+                      // 백분율을 고려해야되기 때문에 -2가 아니라 -4임
+                      .lte(DecUtils.getTenExponentN(-4))
+                  ) {
+                    text += " (0.00%)";
+                  } else {
+                    text += ` (${price24HChange
+                      .maxDecimals(2)
+                      .trim(false)
+                      .sign(true)
+                      .inequalitySymbol(false)
+                      .toString()})`;
+
+                    if (price24HChange.toDec().gt(Dec.zero)) {
+                      textDeco = "green";
+                    }
+                  }
+                }
                 if ("originCurrency" in currency && currency.originCurrency) {
                   infos.push({
                     title: `${currency.originCurrency.coinDenom} Price`,
-                    text: price.toString(),
+                    text,
+                    textDeco,
                   });
                 } else {
                   infos.push({
                     title: `${currency.coinDenom} Price`,
-                    text: price.toString(),
+                    text,
+                    textDeco,
                   });
                 }
               }
