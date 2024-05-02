@@ -8827,11 +8827,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/stores-internal@workspace:apps/stores-internal"
   dependencies:
+    "@keplr-wallet/common": 0.12.84-rc.0
     "@keplr-wallet/cosmos": 0.12.84-rc.0
     "@keplr-wallet/simple-fetch": 0.12.84-rc.0
     "@keplr-wallet/stores": 0.12.84-rc.0
     "@keplr-wallet/types": 0.12.84-rc.0
     "@keplr-wallet/unit": 0.12.84-rc.0
+    deepmerge: ^4.2.2
     joi: ^17.5.0
     utility-types: ^3.10.0
   peerDependencies:

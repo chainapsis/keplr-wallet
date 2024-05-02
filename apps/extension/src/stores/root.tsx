@@ -68,7 +68,10 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { HugeQueriesStore } from "./huge-queries";
 import { ExtensionAnalyticsClient } from "../analytics";
 import { TokenContractsQueries } from "./token-contracts";
-import { SkipQueries } from "@keplr-wallet/stores-internal";
+import {
+  SkipQueries,
+  Price24HChangesStore,
+} from "@keplr-wallet/stores-internal";
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
@@ -105,6 +108,7 @@ export class RootStore {
   >;
   public readonly ethereumAccountStore: EthereumAccountStore;
   public readonly priceStore: CoinGeckoPriceStore;
+  public readonly price24HChangesStore: Price24HChangesStore;
   public readonly hugeQueriesStore: HugeQueriesStore;
 
   public readonly tokensStore: TokensStore;
@@ -346,6 +350,13 @@ export class RootStore {
       {
         baseURL: CoinGeckoAPIEndPoint,
         uri: CoinGeckoGetPrice,
+      }
+    );
+    this.price24HChangesStore = new Price24HChangesStore(
+      new ExtensionKVStore("store_prices_changes_24h"),
+      {
+        baseURL: process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"],
+        uri: "/price/changes/24h",
       }
     );
 

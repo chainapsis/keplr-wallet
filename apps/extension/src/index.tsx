@@ -139,6 +139,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     gravityBridgeCurrencyRegistrar,
     axelarEVMBridgeCurrencyRegistrar,
     priceStore,
+    price24HChangesStore,
     uiConfigStore,
   } = useStore();
 
@@ -213,6 +214,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     }
 
     if (!priceStore.isInitialized) {
+      return false;
+    }
+
+    if (!price24HChangesStore.isInitialized) {
       return false;
     }
 
