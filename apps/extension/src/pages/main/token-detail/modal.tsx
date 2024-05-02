@@ -460,7 +460,7 @@ export const TokenDetailModal: FunctionComponent<{
               );
               if (price) {
                 let textDeco: "green" | undefined = undefined;
-                let text = price.toString();
+                let text = price.roundTo(3).toString();
                 if (price24HChange) {
                   // Max decimals가 2인데 이 경우 숫자가 0.00123%같은 경우면 +0.00% 같은식으로 표시될 수 있다.
                   // 이 경우는 오차를 무시하고 0.00%로 생각한다.
