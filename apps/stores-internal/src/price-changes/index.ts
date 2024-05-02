@@ -1,7 +1,6 @@
 import { ObservableQuery, QuerySharedContext } from "@keplr-wallet/stores";
 import { ResPrice24hChanges } from "./types";
 import { KVStore } from "@keplr-wallet/common";
-import deepmerge from "deepmerge";
 import { autorun, makeObservable } from "mobx";
 import { makeURL } from "@keplr-wallet/simple-fetch";
 import { Dec, RatePretty } from "@keplr-wallet/unit";
@@ -243,19 +242,6 @@ export class Price24HChangesStore extends ObservableQuery<ResPrice24hChanges> {
 
   protected override canFetch(): boolean {
     return this._coinIds.values.length > 0;
-  }
-
-  protected override async fetchResponse(
-    abortController: AbortController
-  ): Promise<{ headers: any; data: ResPrice24hChanges }> {
-    const { data, headers } = await super.fetchResponse(abortController);
-    // Because this store only queries the price of the tokens that have been requested from start,
-    // it will remove the prior prices that have not been requested to just return the fetching result.
-    // So, to prevent this problem, merge the prior response and current response with retaining the prior response's price.
-    return {
-      headers,
-      data: deepmerge(this.response ? this.response.data : {}, data),
-    };
   }
 
   protected updateURL(coinIds: string[], forceSetUrl: boolean = false) {
