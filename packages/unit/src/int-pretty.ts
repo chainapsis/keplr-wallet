@@ -14,6 +14,7 @@ export type IntPrettyOptions = {
   // If this is true, toString() will return the string with prefix like < 0.001 if a value cannot be expressed with a max decimals.
   inequalitySymbol: boolean;
   inequalitySymbolSeparator: string;
+  sign: boolean;
 };
 
 export class IntPretty {
@@ -28,6 +29,7 @@ export class IntPretty {
     locale: true,
     inequalitySymbol: false,
     inequalitySymbolSeparator: " ",
+    sign: false,
   };
 
   constructor(num: Dec | { toDec(): Dec } | bigInteger.BigNumber) {
@@ -122,6 +124,12 @@ export class IntPretty {
   locale(locale: boolean): IntPretty {
     const pretty = this.clone();
     pretty._options.locale = locale;
+    return pretty;
+  }
+
+  sign(sign: boolean): IntPretty {
+    const pretty = this.clone();
+    pretty._options.sign = sign;
     return pretty;
   }
 
@@ -228,12 +236,18 @@ export class IntPretty {
     ) {
       const isNeg = dec.isNegative();
 
-      return `${isNeg ? ">" : "<"}${this._options.inequalitySymbolSeparator}${
-        isNeg ? "-" : ""
-      }${prefix}${DecUtils.getTenExponentN(-this._options.maxDecimals).toString(
-        this._options.maxDecimals,
-        this._options.locale
-      )}${suffix}`;
+      let sign = "";
+      if (isNeg) {
+        sign = "-";
+      } else if (this._options.sign && !dec.isZero()) {
+        sign = "+";
+      }
+
+      return `${isNeg ? ">" : "<"}${
+        this._options.inequalitySymbolSeparator
+      }${sign}${prefix}${DecUtils.getTenExponentN(
+        -this._options.maxDecimals
+      ).toString(this._options.maxDecimals, this._options.locale)}${suffix}`;
     }
 
     let result: string;
@@ -254,6 +268,8 @@ export class IntPretty {
     const isNeg = result.charAt(0) === "-";
     if (isNeg) {
       result = result.slice(1);
+    } else if (this._options.sign && !dec.isZero()) {
+      result = `+${result}`;
     }
 
     return `${isNeg ? "-" : ""}${prefix}${result}${suffix}`;

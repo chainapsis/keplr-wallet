@@ -720,4 +720,78 @@ describe("Test IntPretty", () => {
         .toStringWithSymbols("$", "SUFFIX")
     ).toBe("< $0.1SUFFIX");
   });
+
+  it("Test sign option of IntPretty", () => {
+    const tests: {
+      base: IntPretty;
+      resStr: string;
+    }[] = [
+      {
+        base: new IntPretty(new Dec("123")).sign(true),
+        resStr: "+123",
+      },
+      {
+        base: new IntPretty(new Dec("0")).maxDecimals(3).sign(true),
+        resStr: "0.000",
+      },
+      {
+        base: new IntPretty(new Dec("-0")).maxDecimals(3).sign(true),
+        resStr: "0.000",
+      },
+      {
+        base: new IntPretty(new Dec("0.1")).maxDecimals(3).sign(true),
+        resStr: "+0.100",
+      },
+      {
+        base: new IntPretty(new Dec("1234.123456")).maxDecimals(3).sign(true),
+        resStr: "+1,234.123",
+      },
+      {
+        base: new IntPretty(new Dec("0.123456"))
+          .maxDecimals(3)
+          .moveDecimalPointLeft(2)
+          .sign(true),
+        resStr: "+0.001",
+      },
+      {
+        base: new IntPretty(new Dec("0.123456"))
+          .maxDecimals(3)
+          .inequalitySymbol(true)
+          .moveDecimalPointLeft(3)
+          .sign(true),
+        resStr: "< +0.001",
+      },
+      {
+        base: new IntPretty(new Dec("-123")).sign(true),
+        resStr: "-123",
+      },
+      {
+        base: new IntPretty(new Dec("-0.1")).maxDecimals(3).sign(true),
+        resStr: "-0.100",
+      },
+      {
+        base: new IntPretty(new Dec("-1234.123456")).maxDecimals(3).sign(true),
+        resStr: "-1,234.123",
+      },
+      {
+        base: new IntPretty(new Dec("-0.123456"))
+          .maxDecimals(3)
+          .moveDecimalPointLeft(2)
+          .sign(true),
+        resStr: "-0.001",
+      },
+      {
+        base: new IntPretty(new Dec("-0.123456"))
+          .maxDecimals(3)
+          .inequalitySymbol(true)
+          .moveDecimalPointLeft(3)
+          .sign(true),
+        resStr: "> -0.001",
+      },
+    ];
+
+    for (const test of tests) {
+      expect(test.base.toString()).toBe(test.resStr);
+    }
+  });
 });
