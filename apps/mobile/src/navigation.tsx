@@ -114,6 +114,7 @@ import {IBCSwapDestinationSelectAssetScreen} from './screen/ibc-swap/select-asse
 import {EditFavoriteUrlScreen} from './screen/web/edit-favorite';
 import {SearchUrlScreen} from './screen/web/search';
 import {FavoriteUrl} from './stores/webpage/types.ts';
+import {Text} from 'react-native';
 
 type DefaultRegisterParams = {
   hideBackButton?: boolean;
@@ -546,6 +547,42 @@ export const MainTabNavigationWithDrawer: FunctionComponent = () => {
   );
 };
 
+const DrawerBottomTabLabel: FunctionComponent<{
+  routeName: string;
+  color: string;
+}> = ({routeName, color}) => {
+  const intl = useIntl();
+
+  switch (routeName) {
+    case 'Home':
+      return (
+        <Text style={{color}}>
+          {intl.formatMessage({id: 'bottom-tabs.home'})}
+        </Text>
+      );
+    case 'Swap':
+      return (
+        <Text style={{color}}>
+          {intl.formatMessage({id: 'bottom-tabs.swap'})}
+        </Text>
+      );
+    case 'WebTab':
+      return (
+        <Text style={{color}}>
+          {intl.formatMessage({id: 'bottom-tabs.browser'})}
+        </Text>
+      );
+    case 'Settings':
+      return (
+        <Text style={{color}}>
+          {intl.formatMessage({id: 'bottom-tabs.settings'})}
+        </Text>
+      );
+  }
+
+  return <></>;
+};
+
 const HomeScreenHeaderTitleFunc = () => <HomeScreenHeaderTitle />;
 export const MainTabNavigation: FunctionComponent = () => {
   const style = useStyle();
@@ -584,6 +621,8 @@ export const MainTabNavigation: FunctionComponent = () => {
               return <SettingIcon size={size} color={color} />;
           }
         },
+        tabBarLabel: ({color}) =>
+          DrawerBottomTabLabel({routeName: route.name, color}),
         tabBarActiveTintColor: style.flatten(['color-gray-50']).color,
         tabBarInactiveTintColor: style.flatten(['color-gray-400']).color,
         tabBarStyle: {
@@ -594,7 +633,6 @@ export const MainTabNavigation: FunctionComponent = () => {
           paddingLeft: 30,
           paddingRight: 30,
         },
-        tabBarShowLabel: false,
       })}>
       <Tab.Screen
         name="Home"

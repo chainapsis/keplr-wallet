@@ -25,6 +25,13 @@
   "error.send-currency-not-set": "Send currency not set",
   "error.not-read-simulate-tx": "Not ready to simulate tx",
   "error.simulating-secret-wasm-not-supported": "Simulating secret wasm not supported",
+
+  "bottom-tabs.home": "Home",
+  "bottom-tabs.swap": "Swap",
+  "bottom-tabs.browser": "Browser",
+  "bottom-tabs.activity": "Activity",
+  "bottom-tabs.settings": "Settings",
+
   "page.governance.proposal-list.empty-text": "No records of past or ongoing proposals found on this chain.",
   "page.governance.proposal-list.cosmos-hub-warning-text": "Cosmos Hub requires you to have at least 1 ATOM staked to vote.",
   "page.governance.main.empty-title": "No Proposals Awaiting Your Vote",
