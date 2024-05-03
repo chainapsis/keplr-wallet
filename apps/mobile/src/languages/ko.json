@@ -25,6 +25,13 @@
   "error.send-currency-not-set": "송금 토큰이 설정되지 않음",
   "error.not-read-simulate-tx": "트랜잭션을 시뮬레이션할 준비가 되지 않았습니다.",
   "error.simulating-secret-wasm-not-supported": "시크릿와즘의 시뮬레이션은 지원되지 않습니다.",
+
+  "bottom-tabs.home": "홈",
+  "bottom-tabs.swap": "스왑",
+  "bottom-tabs.browser": "브라우저",
+  "bottom-tabs.activity": "활동내역",
+  "bottom-tabs.settings": "설정",
+
   "page.governance.proposal-list.empty-text": "아직 등록된 프로포절이 없습니다.",
   "page.governance.proposal-list.cosmos-hub-warning-text": "코스모스 허브에서 투표하려면 최소 1 ATOM을 스테이킹해야 합니다.",
   "page.governance.main.empty-title": "투표할 프로포절이 없습니다.",
