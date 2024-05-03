@@ -15,6 +15,7 @@ import { Column, Columns } from "../../../../components/column";
 import { observer } from "mobx-react-lite";
 import { ViewToken } from "../../index";
 import {
+  BaseTypography,
   Caption1,
   Caption2,
   Subtitle2,
@@ -31,7 +32,6 @@ import styled, { css, useTheme } from "styled-components";
 import { CurrencyImageFallback } from "../../../../components/image";
 import { Tooltip } from "../../../../components/tooltip";
 import { DenomHelper } from "@keplr-wallet/common";
-import { Tag } from "../../../../components/tag";
 import { XAxis } from "../../../../components/axis";
 import { Gutter } from "../../../../components/gutter";
 import Color from "color";
@@ -317,15 +317,6 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 </Subtitle2>
               </Skeleton>
 
-              {tag ? (
-                <React.Fragment>
-                  <Gutter size="0.25rem" />
-                  <Box alignY="center" height="1px">
-                    <Tag text={tag.text} tooltip={tag.tooltip} />
-                  </Box>
-                </React.Fragment>
-              ) : null}
-
               {price24HChange ? (
                 <React.Fragment>
                   <Gutter size="0.25rem" />
@@ -392,6 +383,15 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                     : viewToken.chainInfo.chainName}
                 </Caption1>
               </Skeleton>
+
+              {tag ? (
+                <React.Fragment>
+                  <Gutter size="0.25rem" />
+                  <Box alignY="center" height="1px">
+                    <TokenTag text={tag.text} tooltip={tag.tooltip} />
+                  </Box>
+                </React.Fragment>
+              ) : null}
 
               {!isNotReady && copyAddress ? (
                 <Box alignY="center" height="1px">
@@ -939,6 +939,44 @@ const CopyAddressButton: FunctionComponent<{
   );
 };
 
+const TokenTag: FunctionComponent<{
+  text: string;
+  tooltip?: string;
+}> = ({ text, tooltip }) => {
+  const theme = useTheme();
+
+  return (
+    <Tooltip enabled={!!tooltip} content={tooltip}>
+      <Box
+        alignX="center"
+        alignY="center"
+        backgroundColor={
+          theme.mode === "light"
+            ? ColorPalette["blue-50"]
+            : ColorPalette["gray-500"]
+        }
+        borderRadius="0.375rem"
+        height="1rem"
+        paddingX="0.375rem"
+      >
+        <BaseTypography
+          style={{
+            fontWeight: 400,
+            fontSize: "0.6875rem",
+          }}
+          color={
+            theme.mode === "light"
+              ? ColorPalette["blue-400"]
+              : ColorPalette["gray-200"]
+          }
+        >
+          {text}
+        </BaseTypography>
+      </Box>
+    </Tooltip>
+  );
+};
+
 const PriceChangeTag: FunctionComponent<{
   rate: RatePretty;
 }> = ({ rate }) => {
@@ -979,8 +1017,8 @@ const PriceChangeTag: FunctionComponent<{
 
   return (
     <Box
-      height="1.25rem"
-      minHeight="1.25rem"
+      height="1.125rem"
+      minHeight="1.125rem"
       borderRadius="0.375rem"
       paddingX="0.25rem"
       alignY="center"
