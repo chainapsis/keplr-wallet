@@ -472,7 +472,7 @@ export const RegisterNavigation: FunctionComponent = () => {
         component={RegisterGoogleSignInScreen}
         options={{
           title: intl.formatMessage({
-            id: 'pages.register.intro-new-user.sign-up-apple-button',
+            id: 'pages.register.intro-new-user.sign-up-google-button',
           }),
           ...registerHeaderOptions,
         }}
