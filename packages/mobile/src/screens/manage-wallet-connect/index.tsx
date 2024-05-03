@@ -1,13 +1,13 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
-import { PageWithScrollView } from "../../components/page";
+import { useStore } from "stores/index";
+import { PageWithScrollView } from "components/page";
 import { Text, View, ViewStyle } from "react-native";
-import { useStyle } from "../../styles";
-import { WCAppLogo } from "../../components/wallet-connect";
-import { UnconnectIcon } from "../../components/icon";
+import { useStyle } from "styles/index";
+import { WCAppLogo } from "components/wallet-connect";
+import { UnconnectIcon } from "components/icon";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { useConfirmModal } from "../../providers/confirm-modal";
+import { useConfirmModal } from "providers/confirm-modal";
 import { ImageStyle } from "react-native-fast-image";
 
 export const ManageWalletConnectScreen: FunctionComponent = observer(() => {

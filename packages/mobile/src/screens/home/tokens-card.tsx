@@ -1,12 +1,12 @@
 import React, { FunctionComponent } from "react";
-import { Card, CardBody, CardHeader } from "../../components/card";
+import { Card, CardBody, CardHeader } from "components/card";
 import { Text, View, ViewStyle } from "react-native";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
-import { useStyle } from "../../styles";
-import { TokenItem } from "../tokens";
-import { useSmartNavigation } from "../../navigation";
-import { RectButton } from "../../components/rect-button";
+import { useStore } from "stores/index";
+import { useStyle } from "styles/index";
+import { useSmartNavigation } from "navigation/smart-navigation";
+import { RectButton } from "components/rect-button";
+import { TokenItem } from "screens/tokens";
 
 export const TokensCard: FunctionComponent<{
   containerStyle?: ViewStyle;

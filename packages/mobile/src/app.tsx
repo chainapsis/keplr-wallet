@@ -1,20 +1,21 @@
 import React, { FunctionComponent } from "react";
 import { StoreProvider } from "./stores";
-import { StyleProvider, useStyle } from "./styles";
-import { AppNavigation } from "./navigation";
+import { StyleProvider } from "./styles";
 import { IntlProvider } from "react-intl";
-import { ModalsProvider } from "./modals/base";
-import { Platform, StatusBar } from "react-native";
+import { ModalsProvider } from "modals/base";
+import { Platform, StatusBar, View } from "react-native";
 
 import codePush from "react-native-code-push";
-import { InteractionModalsProivder } from "./providers/interaction-modals-provider";
+import { InteractionModalsProivder } from "providers/interaction-modals-provider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { LoadingScreenProvider } from "./providers/loading-screen";
+import { LoadingScreenProvider } from "providers/loading-screen";
 import * as SplashScreen from "expo-splash-screen";
-import { ConfirmModalProvider } from "./providers/confirm-modal";
+import { ConfirmModalProvider } from "providers/confirm-modal";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
 import { BaseToastProps } from "react-native-toast-message/lib/src/types";
+import { AppNavigation } from "navigation/navigation";
+import { XmarkIcon } from "components/new/icon/xmark";
 //import Bugsnag from "@bugsnag/react-native";
 
 if (Platform.OS === "android") {
@@ -67,13 +68,11 @@ SplashScreen.preventAutoHideAsync()
   .catch(console.warn);
 
 const ThemeStatusBar: FunctionComponent = () => {
-  const style = useStyle();
-
   return (
     <StatusBar
       translucent={true}
-      backgroundColor="#fff"
-      barStyle={style.get("status-bar-style")}
+      backgroundColor="#ffffff00"
+      barStyle={"light-content"}
     />
   );
 };
@@ -84,14 +83,46 @@ const toastConfig = {
     by modifying the existing `BaseToast` component
   */
   success: (props: BaseToastProps) => (
-    <BaseToast {...props} text1NumberOfLines={2} text2NumberOfLines={2} />
+    <BaseToast
+      {...props}
+      text1NumberOfLines={2}
+      text2NumberOfLines={2}
+      renderTrailingIcon={() => (
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            marginHorizontal: 12,
+          }}
+        >
+          <XmarkIcon color={"black"} />
+        </View>
+      )}
+      onPress={Toast.hide}
+    />
   ),
   /*
     Overwrite 'error' type,
     by modifying the existing `ErrorToast` component
   */
   error: (props: BaseToastProps) => (
-    <ErrorToast {...props} text1NumberOfLines={2} text2NumberOfLines={2} />
+    <ErrorToast
+      {...props}
+      text1NumberOfLines={2}
+      text2NumberOfLines={2}
+      renderTrailingIcon={() => (
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            marginHorizontal: 12,
+          }}
+        >
+          <XmarkIcon color={"black"} />
+        </View>
+      )}
+      onPress={Toast.hide}
+    />
   ),
 };
 

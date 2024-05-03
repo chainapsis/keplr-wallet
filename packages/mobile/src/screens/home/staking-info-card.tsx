@@ -1,10 +1,10 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
-import { Card, CardBody, CardHeaderFullButton } from "../../components/card";
+import { Card, CardBody, CardHeaderFullButton } from "components/card";
 import { Text, View, ViewStyle } from "react-native";
-import { useStore } from "../../stores";
-import { useStyle } from "../../styles";
-import { useSmartNavigation } from "../../navigation";
+import { useStore } from "stores/index";
+import { useStyle } from "styles/index";
+import { useSmartNavigation } from "navigation/smart-navigation";
 
 export const StakingInfoCard: FunctionComponent<{
   containerStyle?: ViewStyle;

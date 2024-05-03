@@ -30,15 +30,27 @@ export const formatTokenName = (name: string) => {
   return name;
 };
 
-export const shortenNumber = (value: string) => {
-  const number = parseFloat(value) / 10 ** 18;
+export const shortenNumber = (value: string, decimal = 18) => {
+  const number = Math.abs(parseFloat(value)) / 10 ** decimal;
   let result = "";
   if (number >= 1000000) {
-    result = (number / 1000000).toFixed(1) + "M";
+    result = (number / 1000000).toFixed(2) + " M";
   } else if (number >= 1000) {
-    result = (number / 1000).toFixed(1) + "K";
+    result = (number / 1000).toFixed(2) + " K";
+  } else if (number >= 1) {
+    result = number.toFixed(2) + " ";
+  } else if (number >= 10 ** -3) {
+    result = (number * 1000).toFixed(2) + " m";
+  } else if (number >= 10 ** -6) {
+    result = (number * 10 ** 6).toFixed(2) + " u";
+  } else if (number >= 10 ** -9) {
+    result = (number * 10 ** 9).toFixed(2) + " n";
+  } else if (number >= 10 ** -12) {
+    result = (number * 10 ** 9).toFixed(3) + " n";
+  } else if (number >= 10 ** -18) {
+    result = (number * 10 ** 18).toFixed(0) + " a";
   } else {
-    result = number.toFixed(0);
+    result = number.toFixed(2) + " ";
   }
 
   return result;
@@ -46,6 +58,10 @@ export const shortenNumber = (value: string) => {
 
 export const formatActivityHash = (address: string) => {
   if (address?.length > 12) return address.substring(0, 10) + "...";
+  else return address;
+};
+export const formatString = (address: string) => {
+  if (address?.length > 30) return address.substring(0, 30) + "...";
   else return address;
 };
 
@@ -101,6 +117,27 @@ export const formatAmount = (amount: string) => {
     " " +
     amount.split(" ")[1];
   return formattedAmount;
+};
+
+export const separateNumericAndDenom = (value: any) => {
+  const [numericPart, denomPart] = value ? value.split(" ") : ["", ""];
+  return { numericPart, denomPart };
+};
+
+export const parseDollarAmount = (dollarString: any) => {
+  const match = dollarString.match(/[0-9.]+/);
+  if (match) {
+    return parseFloat(match[0]);
+  }
+  return NaN;
+};
+
+export const parseExponential = (amount: string, decimal: number): string => {
+  if (amount.includes("e")) {
+    return parseFloat(amount).toFixed(decimal);
+  } else {
+    return amount;
+  }
 };
 
 export const formatTime = (timestamp: number): string => {

@@ -7,7 +7,7 @@ import {
   StyleSheet,
   ViewStyle,
 } from "react-native";
-import { useStyle } from "../../styles";
+import { useStyle } from "styles/index";
 import { KeyboardAwareSectionList } from "react-native-keyboard-aware-scroll-view";
 import { usePageRegisterScrollYValue, useSetFocusedScreen } from "./utils";
 import { BackgroundMode, ScreenBackground } from "./background";
@@ -20,6 +20,7 @@ export const PageWithSectionList: FunctionComponent<
   SectionListProps<any, any> & {
     containerStyle?: ViewStyle;
     backgroundMode: BackgroundMode;
+    isTransparentHeader?: boolean;
   }
 > = (props) => {
   const style = useStyle();
@@ -33,12 +34,16 @@ export const PageWithSectionList: FunctionComponent<
     containerStyle,
     backgroundMode,
     indicatorStyle,
+    isTransparentHeader,
     ...restProps
   } = props;
 
   return (
     <React.Fragment>
-      <ScreenBackground backgroundMode={backgroundMode} />
+      <ScreenBackground
+        backgroundMode={backgroundMode}
+        isTransparentHeader={isTransparentHeader}
+      />
       <SafeAreaView
         style={StyleSheet.flatten([
           style.flatten(

@@ -10,12 +10,12 @@ import {
   IRecipientConfigWithICNS,
 } from "@keplr-wallet/hooks";
 import { TextStyle, View, ViewStyle } from "react-native";
-import { TextInput } from "./input";
-import { LoadingSpinner } from "../spinner";
-import { useStyle } from "../../styles";
-import { AddressBookIcon } from "../icon";
+import { LoadingSpinner } from "components/spinner";
+import { useStyle } from "styles/index";
+import { AddressBookIcon } from "components/icon";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { useSmartNavigation } from "../../navigation";
+import { useSmartNavigation } from "navigation/smart-navigation";
+import { InputCardView } from "components/new/card-view/input-card";
 
 function numOfCharacter(str: string, c: string): number {
   return str.split(c).length - 1;
@@ -90,7 +90,7 @@ export const AddressInput: FunctionComponent<
     })();
 
     return (
-      <TextInput
+      <InputCardView
         label={label}
         labelStyle={labelStyle}
         containerStyle={containerStyle}
@@ -98,7 +98,7 @@ export const AddressInput: FunctionComponent<
         errorLabelStyle={errorLabelStyle}
         error={errorText}
         value={recipientConfig.rawRecipient}
-        onChangeText={(text) => {
+        onChangeText={(text: any) => {
           if (
             // If icns is possible and users enters ".", complete bech32 prefix automatically.
             "isICNSEnabled" in recipientConfig &&

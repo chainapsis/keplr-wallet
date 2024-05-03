@@ -5,12 +5,15 @@
     width: 100%;
     height: $header-height;
 
-    position: relative;
+    // position: relative;
     z-index: 100;
-    background-color: #f8f9fe;
-
+    background: transparent;
+    backdrop-filter: blur(10px);
+    font-size: 16px;
+    color: white;
     &.fixed {
-      position: fixed;
+      // position: fixed;
+      background: transparent;
     }
   }
 

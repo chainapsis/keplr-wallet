@@ -1,13 +1,13 @@
 import LottieView from "lottie-react-native";
-import { PageWithView } from "../page";
-import { Button } from "../button";
-import { useStyle } from "../../styles";
+import { PageWithView } from "components/page";
+import { Button } from "components/button";
+import { useStyle } from "styles/index";
 import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import React, { FunctionComponent } from "react";
-import { HeaderLeftButton } from "../header";
-import { HeaderBackButtonIcon } from "../header/icon";
 import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { HeaderLeftButton } from "components/header";
+import { HeaderBackButtonIcon } from "components/header/icon";
 
 export const CameraPermissionView: FunctionComponent<{
   onPress?: () => void;
@@ -50,7 +50,7 @@ export const CameraPermissionView: FunctionComponent<{
           }}
         >
           <LottieView
-            source={require("../../assets/lottie/camera.json")}
+            source={require("assets/lottie/camera.json")}
             autoPlay
             loop={true}
           />

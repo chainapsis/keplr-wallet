@@ -109,6 +109,9 @@ umbral_init_replacement="\/\/ $umbral_init"
 sed -i'' -e "s|$umbral_init_replacement|$umbral_init|g" "$file_path"
 sed -i'' -e "s|$umbral_init|$umbral_init_replacement|g" "$file_path"
 
+# Removing index.ts-e file
+rm -rf "${DIR}/../../background/src/index.ts-e"
+
 # Check if the replacement was successful
 if [ $? -eq 0 ]; then
   echo "Unsupported feat updates completed successfully."

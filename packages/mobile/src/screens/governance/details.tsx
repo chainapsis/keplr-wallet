@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { PageWithScrollView } from "../../components/page";
+import { PageWithScrollView } from "components/page";
 import {
   Platform,
   StyleSheet,
@@ -9,19 +9,19 @@ import {
   ViewStyle,
   Linking,
 } from "react-native";
-import { Card, CardBody } from "../../components/card";
-import { useStyle } from "../../styles";
-import { Button } from "../../components/button";
-import { useStore } from "../../stores";
+import { Card, CardBody } from "components/card";
+import { useStyle } from "styles/index";
+import { Button } from "components/button";
+import { useStore } from "stores/index";
 import { useRoute, RouteProp } from "@react-navigation/native";
-import { LoadingSpinner } from "../../components/spinner";
+import { LoadingSpinner } from "components/spinner";
 import { Governance } from "@keplr-wallet/stores";
 import { GovernanceProposalStatusChip } from "./card";
 import { IntPretty } from "@keplr-wallet/unit";
 import { useIntl } from "react-intl";
-import { registerModal } from "../../modals/base";
-import { RectButton } from "../../components/rect-button";
-import { useSmartNavigation } from "../../navigation";
+import { registerModal } from "modals/base";
+import { RectButton } from "components/rect-button";
+import { useSmartNavigation } from "navigation/smart-navigation";
 import { MarkdownView } from "react-native-markdown-view";
 import { dateToLocalStringFormatGMT } from "./utils";
 

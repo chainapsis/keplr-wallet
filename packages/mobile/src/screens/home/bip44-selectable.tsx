@@ -1,15 +1,14 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
+import { useStore } from "stores/index";
 import { KeyRingStatus } from "@keplr-wallet/background";
-import { LoadingScreenModal } from "../../providers/loading-screen/modal";
+import { LoadingScreenModal } from "providers/loading-screen/modal";
 import { Dec } from "@keplr-wallet/unit";
 import { Text, View, ViewStyle } from "react-native";
-import { registerModal } from "../../modals/base";
-import { CardModal } from "../../modals/card";
-import { useStyle } from "../../styles";
-import { RectButton } from "../../components/rect-button";
-import { Button } from "../../components/button";
+import { CardModal } from "modals/card";
+import { useStyle } from "styles/index";
+import { RectButton } from "components/rect-button";
+import { Button } from "components/button";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { WalletIcon } from "../setting/components";
 
@@ -159,135 +158,134 @@ export const BIP44Selectable: FunctionComponent = observer(() => {
 export const BIP44SelectableModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
-}> = registerModal(
-  observer(() => {
-    const { chainStore, keyRingStore, queriesStore } = useStore();
+}> = observer((isOpen) => {
+  const { chainStore, keyRingStore, queriesStore } = useStore();
 
-    const queries = queriesStore.get(chainStore.current.chainId);
+  const queries = queriesStore.get(chainStore.current.chainId);
 
-    const style = useStyle();
+  const style = useStyle();
 
-    const selectables = keyRingStore.getKeyStoreSelectables(
-      chainStore.current.chainId
-    );
+  const selectables = keyRingStore.getKeyStoreSelectables(
+    chainStore.current.chainId
+  );
 
-    const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
 
-    return (
-      <CardModal title="Select your account" disableGesture={true}>
-        {selectables.selectables.map((selectable, i) => {
-          return (
-            <RectButton
-              key={selectable.bech32Address}
-              style={
-                style.flatten(
-                  [
-                    "padding-20",
-                    "background-color-white",
-                    "dark:background-color-platinum-600",
-                    "border-radius-8",
-                    "border-width-1",
-                    "dark:border-width-2",
-                    "border-color-gray-100",
-                    "dark:border-color-platinum-500",
-                    "margin-bottom-12",
-                  ],
-                  [
-                    selectedIndex === i && "border-color-blue-400",
-                    selectedIndex === i && "dark:background-color-platinum-500",
-                  ]
-                ) as ViewStyle
-              }
-              onPress={() => {
-                setSelectedIndex(i);
-              }}
-            >
-              <View style={style.flatten(["flex-row", "items-center"])}>
-                <View style={style.flatten(["margin-right-16"]) as ViewStyle}>
-                  <WalletIcon
-                    color={style.get("color-text-middle").color}
-                    height={44}
-                  />
-                </View>
-                <View>
-                  <Text
-                    style={
-                      style.flatten([
-                        "subtitle3",
-                        "color-text-low",
-                        "margin-bottom-4",
-                      ]) as ViewStyle
-                    }
-                  >{`m/44'/${selectable.path.coinType}'`}</Text>
-                  <Text style={style.flatten(["body2", "color-text-high"])}>
-                    {Bech32Address.shortenAddress(selectable.bech32Address, 26)}
-                  </Text>
-                </View>
+  return (
+    <CardModal
+      // isOpen={isOpen}
+      title="Select your account"
+      disableGesture={true}
+    >
+      {selectables.selectables.map((selectable, i) => {
+        return (
+          <RectButton
+            key={selectable.bech32Address}
+            style={
+              style.flatten(
+                [
+                  "padding-20",
+                  "background-color-white",
+                  "dark:background-color-platinum-600",
+                  "border-radius-8",
+                  "border-width-1",
+                  "dark:border-width-2",
+                  "border-color-gray-100",
+                  "dark:border-color-platinum-500",
+                  "margin-bottom-12",
+                ],
+                [
+                  selectedIndex === i && "border-color-blue-400",
+                  selectedIndex === i && "dark:background-color-platinum-500",
+                ]
+              ) as ViewStyle
+            }
+            onPress={() => {
+              setSelectedIndex(i);
+            }}
+          >
+            <View style={style.flatten(["flex-row", "items-center"])}>
+              <View style={style.flatten(["margin-right-16"]) as ViewStyle}>
+                <WalletIcon
+                  color={style.get("color-text-middle").color}
+                  height={44}
+                />
               </View>
-              <View
-                style={
-                  style.flatten([
-                    "height-1",
-                    "background-color-gray-100",
-                    "dark:background-color-platinum-500",
-                    "margin-y-16",
-                  ]) as ViewStyle
-                }
-              />
-              <View
-                style={
-                  style.flatten([
-                    "flex-row",
-                    "items-center",
-                    "margin-bottom-4",
-                  ]) as ViewStyle
-                }
-              >
-                <Text style={style.flatten(["subtitle2", "color-text-middle"])}>
-                  Balance
-                </Text>
-                <View style={style.get("flex-1")} />
-                <Text style={style.flatten(["body2", "color-text-middle"])}>
-                  {queries.queryBalances
-                    .getQueryBech32Address(selectable.bech32Address)
-                    .stakable.balance.shrink(true)
-                    .trim(true)
-                    .maxDecimals(6)
-                    .toString()}
-                </Text>
-              </View>
-              <View style={style.flatten(["flex-row", "items-center"])}>
-                <Text style={style.flatten(["subtitle2", "color-text-middle"])}>
-                  Previous txs
-                </Text>
-                <View style={style.get("flex-1")} />
-                <Text style={style.flatten(["body2", "color-text-middle"])}>
-                  {
-                    queries.cosmos.queryAccount.getQueryBech32Address(
-                      selectable.bech32Address
-                    ).sequence
+              <View>
+                <Text
+                  style={
+                    style.flatten([
+                      "subtitle3",
+                      "color-text-low",
+                      "margin-bottom-4",
+                    ]) as ViewStyle
                   }
+                >{`m/44'/${selectable.path.coinType}'`}</Text>
+                <Text style={style.flatten(["body2", "color-text-high"])}>
+                  {Bech32Address.shortenAddress(selectable.bech32Address, 26)}
                 </Text>
               </View>
-            </RectButton>
+            </View>
+            <View
+              style={
+                style.flatten([
+                  "height-1",
+                  "background-color-gray-100",
+                  "dark:background-color-platinum-500",
+                  "margin-y-16",
+                ]) as ViewStyle
+              }
+            />
+            <View
+              style={
+                style.flatten([
+                  "flex-row",
+                  "items-center",
+                  "margin-bottom-4",
+                ]) as ViewStyle
+              }
+            >
+              <Text style={style.flatten(["subtitle2", "color-text-middle"])}>
+                Balance
+              </Text>
+              <View style={style.get("flex-1")} />
+              <Text style={style.flatten(["body2", "color-text-middle"])}>
+                {queries.queryBalances
+                  .getQueryBech32Address(selectable.bech32Address)
+                  .stakable.balance.shrink(true)
+                  .trim(true)
+                  .maxDecimals(6)
+                  .toString()}
+              </Text>
+            </View>
+            <View style={style.flatten(["flex-row", "items-center"])}>
+              <Text style={style.flatten(["subtitle2", "color-text-middle"])}>
+                Previous txs
+              </Text>
+              <View style={style.get("flex-1")} />
+              <Text style={style.flatten(["body2", "color-text-middle"])}>
+                {
+                  queries.cosmos.queryAccount.getQueryBech32Address(
+                    selectable.bech32Address
+                  ).sequence
+                }
+              </Text>
+            </View>
+          </RectButton>
+        );
+      })}
+      <Button
+        size="large"
+        text="Select Account"
+        containerStyle={style.flatten(["margin-top-12"]) as ViewStyle}
+        disabled={selectedIndex < 0}
+        onPress={() => {
+          keyRingStore.setKeyStoreCoinType(
+            chainStore.current.chainId,
+            selectables.selectables[selectedIndex].path.coinType
           );
-        })}
-        <Button
-          size="large"
-          text="Select Account"
-          containerStyle={style.flatten(["margin-top-12"]) as ViewStyle}
-          disabled={selectedIndex < 0}
-          onPress={() => {
-            keyRingStore.setKeyStoreCoinType(
-              chainStore.current.chainId,
-              selectables.selectables[selectedIndex].path.coinType
-            );
-          }}
-        />
-      </CardModal>
-    );
-  }),
-  {
-    disableSafeArea: true,
-  }
-);
+        }}
+      />
+    </CardModal>
+  );
+});

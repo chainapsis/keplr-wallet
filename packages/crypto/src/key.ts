@@ -1,21 +1,14 @@
-import { ec } from "elliptic";
 import CryptoJS from "crypto-js";
-import {
-  SecretKey as SecretKeyBlst,
-  PublicKey as PublicKeyBlst,
-  Signature as SignatureBlst,
-  verify as verifyBlst,
-} from "@fetchai/blst-ts";
+import { ec } from "elliptic";
 
 import { Buffer } from "buffer/";
 import { Hash } from "./hash";
 
 export const KeyCurves: Record<KeyCurve, KeyCurve> = {
   secp256k1: "secp256k1",
-  bls12381: "bls12381",
 };
 
-export type KeyCurve = "secp256k1" | "bls12381";
+export type KeyCurve = "secp256k1";
 
 export interface PublicKey {
   toBytes(): Uint8Array;
@@ -160,62 +153,5 @@ export class PubKeySecp256k1 {
       },
       this.toKeyPair()
     );
-  }
-}
-
-export class SecretKeyBls12381 implements SecretKey {
-  readonly curve: KeyCurve = "bls12381";
-  protected secretKey: SecretKeyBlst;
-
-  constructor(secretKeyBytes: Uint8Array) {
-    this.secretKey = SecretKeyBlst.fromBytes(secretKeyBytes);
-  }
-
-  toBytes(): Uint8Array {
-    return this.secretKey.toBytes();
-  }
-
-  getPubKey(): PublicKey {
-    return PublicKeyBls12381.fromPublicKey(this.secretKey.toPublicKey());
-  }
-
-  sign(message: Uint8Array): Uint8Array {
-    return this.secretKey.sign(message).toBytes();
-  }
-
-  signDigest32(digest: Uint8Array): Uint8Array {
-    return this.sign(digest);
-  }
-}
-
-export class PublicKeyBls12381 implements PublicKey {
-  protected publicKey: PublicKeyBlst;
-
-  constructor(publicKeyBytes: Uint8Array) {
-    this.publicKey = PublicKeyBlst.fromBytes(publicKeyBytes);
-  }
-
-  static fromPublicKey(publicKey: PublicKeyBlst): PublicKeyBls12381 {
-    return new PublicKeyBls12381(publicKey.toBytes());
-  }
-
-  toBytes(): Uint8Array {
-    return this.publicKey.toBytes();
-  }
-
-  // TODO: the notion of address is likely different in the
-  //  group module context and may be N/A.
-  getAddress(): Uint8Array {
-    let hash = CryptoJS.SHA256(
-      CryptoJS.lib.WordArray.create(this.toBytes() as any)
-    ).toString();
-    hash = CryptoJS.RIPEMD160(CryptoJS.enc.Hex.parse(hash)).toString();
-
-    return new Uint8Array(Buffer.from(hash, "hex"));
-  }
-
-  verify(message: Uint8Array, signature: Uint8Array): boolean {
-    const blsSignature = SignatureBlst.fromBytes(signature);
-    return verifyBlst(message, this.publicKey, blsSignature);
   }
 }

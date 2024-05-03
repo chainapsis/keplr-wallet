@@ -17,7 +17,7 @@ export const WarningView: FunctionComponent<{
     (e: MouseEvent) => {
       e.preventDefault();
 
-      navigate(`/setting/export/${index}`);
+      navigate(`/more/export/${index}`);
     },
     [navigate, index]
   );

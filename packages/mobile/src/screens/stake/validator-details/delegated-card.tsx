@@ -1,11 +1,11 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../stores";
-import { Card, CardBody } from "../../../components/card";
+import { useStore } from "stores/index";
+import { Card, CardBody } from "components/card";
 import { Text, View, ViewStyle } from "react-native";
-import { useStyle } from "../../../styles";
-import { Button } from "../../../components/button";
-import { useSmartNavigation } from "../../../navigation";
+import { useStyle } from "styles/index";
+import { Button } from "components/button";
+import { useSmartNavigation } from "navigation/smart-navigation";
 
 export const DelegatedCard: FunctionComponent<{
   containerStyle?: ViewStyle;

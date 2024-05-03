@@ -6,7 +6,7 @@ import { AppCurrency, Currency } from "@keplr-wallet/types";
 import yaml from "js-yaml";
 import { CoinPrimitive } from "@keplr-wallet/stores";
 import { Text, ViewStyle } from "react-native";
-import { useStyle } from "../../styles";
+import { useStyle } from "styles/index";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -14,7 +14,7 @@ import Hypher from "hypher";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import english from "hyphenation.en-us";
-import { useStore } from "../../stores";
+import { useStore } from "stores/index";
 import { Buffer } from "buffer/";
 import { observer } from "mobx-react-lite";
 

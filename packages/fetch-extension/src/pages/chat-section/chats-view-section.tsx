@@ -20,6 +20,7 @@ import { NewUserSection } from "./new-user-section";
 import style from "./style.module.scss";
 import { ChatInputSection } from "@components/chat-input-section";
 import { observer } from "mobx-react-lite";
+import { useNotification } from "@components/notification";
 export const ChatsViewSection = observer(
   ({
     isNewUser,
@@ -68,6 +69,7 @@ export const ChatsViewSection = observer(
     const messagesStartRef: any = createRef();
     const messagesScrollRef: any = useRef(null);
     const isOnScreen = useOnScreen(messagesStartRef);
+    const notification = useNotification();
 
     useEffect(() => {
       const updatedMessages = Object.values(preLoadedChats?.messages).sort(
@@ -292,6 +294,16 @@ export const ChatsViewSection = observer(
             chatStore.messagesStore
           );
         } catch (error) {
+          notification.push({
+            type: "warning",
+            placement: "top-center",
+            duration: 5,
+            content: "Something went wrong, Please try again later",
+            canDelete: true,
+            transition: {
+              duration: 0.25,
+            },
+          });
           console.log("failed to send : ", error);
         } finally {
           enterKeyCount = 0;

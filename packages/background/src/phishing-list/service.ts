@@ -1,4 +1,4 @@
-import Axios, { AxiosResponse } from "axios";
+import { SimpleFetchResponse, simpleFetch } from "@keplr-wallet/simple-fetch";
 import { parseDomain } from "./utils";
 
 class IntervalFetcher<R> {
@@ -13,7 +13,7 @@ class IntervalFetcher<R> {
       readonly retryIntervalMs: number;
       readonly allowTimeoutMs: number;
     },
-    protected readonly handler: (data: AxiosResponse<R>) => void
+    protected readonly handler: (data: SimpleFetchResponse<R>) => void
   ) {}
 
   get hasInited(): boolean {
@@ -44,7 +44,7 @@ class IntervalFetcher<R> {
 
     let failed = false;
     try {
-      const res = await Axios.get<R>(this.opts.url);
+      const res = await simpleFetch<R>(this.opts.url);
 
       this.handler(res);
 

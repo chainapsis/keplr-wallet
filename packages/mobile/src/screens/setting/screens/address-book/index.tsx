@@ -1,35 +1,31 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { PageWithScrollView } from "../../../../components/page";
-import { useStyle } from "../../../../styles";
-import { Text, View, ViewStyle } from "react-native";
-import { useSmartNavigation } from "../../../../navigation";
+import { PageWithScrollView } from "components/page";
+import { useStyle } from "styles/index";
+import { Image, Text, View, ViewStyle } from "react-native";
+import { useSmartNavigation } from "navigation/smart-navigation";
 import {
   IMemoConfig,
   IRecipientConfig,
   useAddressBookConfig,
 } from "@keplr-wallet/hooks";
 import { AsyncKVStore } from "../../../../common";
-import { useStore } from "../../../../stores";
-import { EditIcon, TrashCanIcon } from "../../../../components/icon";
-import { Bech32Address } from "@keplr-wallet/cosmos";
+import { useStore } from "stores/index";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import { RectButton } from "../../../../components/rect-button";
-import { TouchableOpacity } from "react-native-gesture-handler";
-import { HeaderRightButton } from "../../../../components/header";
-import { HeaderAddIcon } from "../../../../components/header/icon";
-import { AddressBookIcon } from "../../../../components/icon";
-import { useConfirmModal } from "../../../../providers/confirm-modal";
-
-const addressBookItemComponent = {
-  inTransaction: RectButton,
-  inSetting: View,
-};
+import { HeaderRightButton } from "components/header";
+import { HeaderAddIcon } from "components/header/icon";
+import { IconButton } from "components/new/button/icon";
+import { BlurBackground } from "components/new/blur-background/blur-background";
+import { ThreeDotIcon } from "components/new/icon/three-dot";
+import {
+  ManageAddressCardModel,
+  ManageAddressOption,
+} from "components/new/addressbook-card/manage-address-card";
+import { ConfirmCardModel } from "components/new/confirm-modal";
+import { Button } from "components/button";
 
 export const AddressBookScreen: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
-
-  const confirmModal = useConfirmModal();
 
   const route = useRoute<
     RouteProp<
@@ -73,6 +69,9 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
     }
   );
 
+  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [showConfirmModal, setConfirmModal] = useState(false);
+
   useEffect(() => {
     smartNavigation.setOptions({
       // eslint-disable-next-line react/display-name
@@ -85,32 +84,49 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
             });
           }}
         >
-          <HeaderAddIcon />
+          <IconButton
+            icon={<HeaderAddIcon size={19} color="white" />}
+            backgroundBlur={false}
+            iconStyle={
+              style.flatten([
+                "width-54",
+                "border-width-1",
+                "border-color-white@20%",
+                "padding-x-12",
+                "padding-y-6",
+                "justify-center",
+                "items-center",
+              ]) as ViewStyle
+            }
+          />
         </HeaderRightButton>
       ),
     });
   }, [addressBookConfig, chainId, chainStore, smartNavigation, style]);
 
   const isInTransaction = recipientConfig != null || memoConfig != null;
-  const AddressBookItem =
-    addressBookItemComponent[isInTransaction ? "inTransaction" : "inSetting"];
 
   return addressBookConfig.addressBookDatas.length > 0 ? (
-    <PageWithScrollView backgroundMode="secondary">
+    <PageWithScrollView
+      backgroundMode="image"
+      contentContainerStyle={style.get("flex-grow-1")}
+      style={style.flatten(["padding-x-page"]) as ViewStyle}
+    >
       <View style={style.flatten(["height-card-gap"]) as ViewStyle} />
       {addressBookConfig.addressBookDatas.map((data, i) => {
         return (
           <React.Fragment key={i.toString()}>
-            <AddressBookItem
-              style={
+            <BlurBackground
+              borderRadius={12}
+              blurIntensity={14}
+              containerStyle={
                 style.flatten([
-                  "background-color-white",
-                  "dark:background-color-platinum-600",
                   "padding-x-18",
                   "padding-y-14",
+                  "margin-y-6",
                 ]) as ViewStyle
               }
-              enabled={isInTransaction}
+              // enabled={isInTransaction}
               onPress={() => {
                 if (isInTransaction) {
                   addressBookConfig.selectAddressAt(i);
@@ -125,12 +141,12 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
                   "items-center",
                 ])}
               >
-                <View style={{ maxWidth: "85%" }}>
+                <View style={style.flatten(["flex-8"]) as ViewStyle}>
                   <Text
                     style={
                       style.flatten([
                         "subtitle2",
-                        "color-text-middle",
+                        "color-white",
                         "margin-bottom-4",
                       ]) as ViewStyle
                     }
@@ -154,111 +170,104 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
                     style={style.flatten([
                       "text-caption1",
                       "font-medium",
-                      "color-blue-400",
+                      "color-white",
                     ])}
                   >
-                    {Bech32Address.shortenAddress(data.address, 30)}
+                    {/* {Bech32Address.shortenAddress(data.address, 35)} */}
+                    {data.address}
                   </Text>
                 </View>
-                <View
-                  style={
-                    style.flatten([
-                      "padding-left-8",
-                      "padding-right-8",
-                    ]) as ViewStyle
-                  }
-                >
-                  <TouchableOpacity
-                    style={style.flatten(["padding-y-6"]) as ViewStyle}
-                    onPress={async () => {
-                      smartNavigation.navigateSmart("EditAddressBook", {
-                        chainId,
-                        addressBookConfig,
-                        i,
-                      });
-                    }}
-                  >
-                    <EditIcon
-                      color={
-                        style.flatten([
-                          "color-black",
-                          "dark:color-platinum-300",
-                        ]).color
+                <View style={style.flatten(["flex-1"]) as ViewStyle}>
+                  <IconButton
+                    backgroundBlur={false}
+                    icon={<ThreeDotIcon />}
+                    iconStyle={style.flatten(["padding-12"]) as ViewStyle}
+                    onPress={() => setIsOpenModal(true)}
+                  />
+                  <ManageAddressCardModel
+                    isOpen={isOpenModal}
+                    title="Manage address"
+                    close={() => setIsOpenModal(false)}
+                    onSelectWallet={(option: ManageAddressOption) => {
+                      switch (option) {
+                        case ManageAddressOption.renameAddress:
+                          setIsOpenModal(false);
+                          smartNavigation.navigateSmart("EditAddressBook", {
+                            chainId,
+                            addressBookConfig,
+                            i,
+                          });
+                          break;
+
+                        case ManageAddressOption.deleteAddress:
+                          setConfirmModal(true);
+                          // deleteAddress(i);
+                          setIsOpenModal(false);
+                          break;
                       }
-                      size={24}
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={style.flatten(["padding-y-6"]) as ViewStyle}
-                    onPress={async () => {
-                      if (
-                        await confirmModal.confirm({
-                          title: "Remove Address",
-                          paragraph:
-                            "Are you sure you want to remove this address?",
-                          yesButtonText: "Remove",
-                          noButtonText: "Cancel",
-                        })
-                      ) {
+                    }}
+                  />
+                  <ConfirmCardModel
+                    isOpen={showConfirmModal}
+                    close={() => setConfirmModal(false)}
+                    title={"Delete address"}
+                    subtitle={"Are you sure you want to delete this address?"}
+                    select={(confirm: boolean) => {
+                      if (confirm) {
                         addressBookConfig.removeAddressBook(i);
                       }
                     }}
-                  >
-                    <TrashCanIcon
-                      color={
-                        style.flatten([
-                          "color-black",
-                          "dark:color-platinum-300",
-                        ]).color
-                      }
-                      size={24}
-                    />
-                  </TouchableOpacity>
+                  />
                 </View>
               </View>
-            </AddressBookItem>
-            {addressBookConfig.addressBookDatas.length - 1 !== i ? (
-              <View
-                style={
-                  style.flatten([
-                    "height-1",
-                    "background-color-gray-50",
-                    "dark:background-color-platinum-500",
-                  ]) as ViewStyle
-                }
-              />
-            ) : null}
+            </BlurBackground>
           </React.Fragment>
         );
       })}
     </PageWithScrollView>
   ) : (
     <PageWithScrollView
-      backgroundMode="secondary"
+      backgroundMode="image"
       contentContainerStyle={style.flatten(["flex-grow-1"])}
+      style={style.flatten(["padding-x-page"]) as ViewStyle}
       scrollEnabled={false}
     >
       <View style={style.flatten(["flex-1"])} />
       <View style={style.flatten(["justify-center", "items-center"])}>
         <View style={style.flatten(["margin-bottom-21"]) as ViewStyle}>
-          <AddressBookIcon
-            color={
-              style.flatten(["color-gray-200", "dark:color-platinum-300"]).color
-            }
-            height={56}
+          <Image
+            style={{ width: 240, height: 60 }}
+            source={require("assets/image/emptystate-addressbook.png")}
+            fadeDuration={0}
+            resizeMode="contain"
           />
         </View>
         <Text
           style={style.flatten([
-            "subtitle2",
+            "h3",
+            "font-medium",
             "color-gray-100",
             "dark:color-platinum-300",
+            "text-center",
           ])}
         >
-          Address book is empty
+          {"You haven’t saved any\naddresses yet"}
         </Text>
       </View>
       <View style={style.flatten(["margin-top-68", "flex-1"]) as ViewStyle} />
+      <Button
+        text="Add an address"
+        size="large"
+        containerStyle={style.flatten(["border-radius-32"]) as ViewStyle}
+        textStyle={style.flatten(["body2", "font-normal"]) as ViewStyle}
+        onPress={() => {
+          smartNavigation.navigateSmart("AddAddressBook", {
+            chainId,
+            addressBookConfig,
+          });
+        }}
+      />
+      <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
     </PageWithScrollView>
   );
 });

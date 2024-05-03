@@ -1,16 +1,16 @@
 import React, { FunctionComponent, useState } from "react";
-import { PageWithScrollView } from "../../../components/page";
+import { PageWithScrollView } from "components/page";
 import { observer } from "mobx-react-lite";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { RegisterConfig } from "@keplr-wallet/hooks";
-import { useStyle } from "../../../styles";
-import { useSmartNavigation } from "../../../navigation";
+import { useStyle } from "styles/index";
+import { useSmartNavigation } from "navigation/smart-navigation";
 import { Controller, useForm } from "react-hook-form";
-import { TextInput } from "../../../components/input";
+import { TextInput } from "components/input";
 import { StyleSheet, View, ViewStyle } from "react-native";
-import { Button } from "../../../components/button";
+import { Button } from "components/button";
 import * as Clipboard from "expo-clipboard";
-import { useStore } from "../../../stores";
+import { useStore } from "stores/index";
 import { BIP44AdvancedButton, useBIP44Option } from "../bip44";
 import { Buffer } from "buffer/";
 
@@ -268,6 +268,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
               return (
                 <TextInput
                   label="Password"
+                  keyboardType={"default"}
                   returnKeyType="next"
                   secureTextEntry={true}
                   onSubmitEditing={() => {

@@ -1,0 +1,32 @@
+@import "../../../styles/var";
+.btn {
+  color: var(--Indigo-Indigo-900---Fetch-navy, #000d3d);
+  font-family: Lexend;
+  font-size: 15px;
+  border-radius: 100px;
+  margin-top: 18px;
+  border: none;
+  padding: 10px 12px;
+  width: 100%;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  cursor: pointer;
+}
+.btn:disabled {
+  cursor: not-allowed;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--Grey-White, #fff);
+  font-family: Lexend;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  opacity: 0.4;
+}
+.gradient {
+  background: $gradient;
+  -webkit-background-clip: text;
+  color: transparent;
+}

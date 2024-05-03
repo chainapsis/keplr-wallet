@@ -1,17 +1,16 @@
-import React, { FunctionComponent } from "react";
-import { PageWithScrollView } from "../../../../components/page";
+import React, { FunctionComponent, useState } from "react";
+import { PageWithScrollView } from "components/page";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../../stores";
-import { StyleSheet, Text, View, ViewStyle } from "react-native";
+import { useStore } from "stores/index";
+import { Text, View, ViewStyle } from "react-native";
 import { CoinPretty } from "@keplr-wallet/unit";
-import { useStyle } from "../../../../styles";
-import { TrashCanIcon } from "../../../../components/icon";
-import { Card } from "../../../../components/card";
+import { useStyle } from "styles/index";
+import { TrashCanIcon } from "components/icon";
 import { Currency } from "@keplr-wallet/types";
-import { TokenSymbol } from "../../../../components/token-symbol";
 import { BorderlessButton } from "react-native-gesture-handler";
-import { useConfirmModal } from "../../../../providers/confirm-modal";
 import { useNavigation } from "@react-navigation/native";
+import { BlurBackground } from "components/new/blur-background/blur-background";
+import { ConfirmCardModel } from "components/new/confirm-modal";
 
 export const SettingManageTokensScreen: FunctionComponent = observer(() => {
   const { chainStore, queriesStore, accountStore, tokensStore } = useStore();
@@ -27,10 +26,14 @@ export const SettingManageTokensScreen: FunctionComponent = observer(() => {
     );
 
   return (
-    <PageWithScrollView backgroundMode="secondary">
-      {tokensOf.tokens.length > 0 ? (
-        <Card style={style.flatten(["padding-bottom-14"]) as ViewStyle}>
-          {tokensOf.tokens.map((token) => {
+    <PageWithScrollView
+      backgroundMode="image"
+      contentContainerStyle={style.get("flex-grow-1")}
+      style={style.flatten(["padding-x-page"]) as ViewStyle}
+    >
+      <View style={style.flatten(["height-card-gap"]) as ViewStyle} />
+      {tokensOf.tokens.length > 0
+        ? tokensOf.tokens.map((token) => {
             const balance = queryBalances.getBalanceFromCurrency(token);
 
             return (
@@ -40,9 +43,9 @@ export const SettingManageTokensScreen: FunctionComponent = observer(() => {
                 balance={balance}
               />
             );
-          })}
-        </Card>
-      ) : null}
+          })
+        : null}
+      <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
     </PageWithScrollView>
   );
 });
@@ -54,7 +57,7 @@ export const ManageTokenItem: FunctionComponent<{
     stakeCurrency: Currency;
   };
   balance: CoinPretty;
-}> = observer(({ containerStyle, chainInfo, balance }) => {
+}> = observer(({ containerStyle, balance }) => {
   const { chainStore, tokensStore } = useStore();
 
   const style = useStyle();
@@ -63,71 +66,35 @@ export const ManageTokenItem: FunctionComponent<{
 
   const navigation = useNavigation();
 
-  const confirmModal = useConfirmModal();
+  const [showConfirmModal, setConfirmModal] = useState(false);
 
   // The IBC currency could have long denom (with the origin chain/channel information).
   // Because it is shown in the title, there is no need to show such long denom twice in the actual balance.
-  const balanceCoinDenom = (() => {
-    if (
-      "originCurrency" in balance.currency &&
-      balance.currency.originCurrency
-    ) {
-      return balance.currency.originCurrency.coinDenom;
-    }
-    return balance.currency.coinDenom;
-  })();
 
   return (
-    <View
-      style={StyleSheet.flatten([
-        style.flatten([
-          "flex-row",
-          "items-center",
-          "padding-x-card-horizontal",
-          "padding-y-14",
-        ]) as ViewStyle,
-        containerStyle,
-      ])}
+    <BlurBackground
+      borderRadius={12}
+      blurIntensity={14}
+      containerStyle={
+        [
+          style.flatten([
+            "padding-x-18",
+            "padding-y-20",
+            "margin-y-6",
+            "flex-row",
+            "items-center",
+          ]),
+          containerStyle,
+        ] as ViewStyle
+      }
     >
-      <TokenSymbol
-        style={style.flatten(["margin-right-12"]) as ViewStyle}
-        size={44}
-        chainInfo={chainInfo}
-        currency={balance.currency}
-      />
-      <View>
-        <Text
-          style={
-            style.flatten([
-              "subtitle3",
-              "color-text-low",
-              "margin-bottom-4",
-              "uppercase",
-            ]) as ViewStyle
-          }
-        >
-          {balance.currency.coinDenom}
-        </Text>
-        <Text
-          style={
-            style.flatten([
-              "h5",
-              "color-text-middle",
-              "max-width-240",
-            ]) as ViewStyle
-          }
-          numberOfLines={1}
-          ellipsizeMode="tail"
-        >
-          {`${balance
-            .trim(true)
-            .shrink(true)
-            .maxDecimals(6)
-            .upperCase(true)
-            .hideDenom(true)
-            .toString()} ${balanceCoinDenom}`}
-        </Text>
-      </View>
+      <Text
+        style={
+          style.flatten(["subtitle3", "color-white", "uppercase"]) as ViewStyle
+        }
+      >
+        {balance.currency.coinDenom}
+      </Text>
       <View style={style.get("flex-1")} />
       <View
         style={{
@@ -145,24 +112,25 @@ export const ManageTokenItem: FunctionComponent<{
             alignItems: "center",
             justifyContent: "center",
           }}
-          onPress={async () => {
-            if (
-              await confirmModal.confirm({
-                title: "Delete this token?",
-                paragraph:
-                  "You won't see this token in your wallet until it is added again",
-                yesButtonText: "Delete",
-                noButtonText: "Cancel",
-              })
-            ) {
-              await tokensOf.removeToken(balance.currency);
+          onPress={() => {
+            setConfirmModal(true);
 
-              if (tokensOf.tokens.length === 0 && navigation.canGoBack()) {
-                navigation.goBack();
-              }
+            if (tokensOf.tokens.length === 0 && navigation.canGoBack()) {
+              navigation.goBack();
             }
           }}
         >
+          <ConfirmCardModel
+            isOpen={showConfirmModal}
+            close={() => setConfirmModal(false)}
+            title={"Delete token"}
+            subtitle={"Are you sure you want to delete this token?"}
+            select={async (confirm: boolean) => {
+              if (confirm) {
+                await tokensOf.removeToken(balance.currency);
+              }
+            }}
+          />
           <TrashCanIcon
             size={28}
             color={
@@ -171,6 +139,6 @@ export const ManageTokenItem: FunctionComponent<{
           />
         </BorderlessButton>
       </View>
-    </View>
+    </BlurBackground>
   );
 });

@@ -1,0 +1,11 @@
+@import "../../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard/custom/functions";
+@import "../../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard/custom/mixins";
+@import "../../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard/custom/variables";
+
+.input {
+  box-shadow: $input-alternative-box-shadow !important;
+
+  &:focus {
+    box-shadow: $input-focus-alternative-box-shadow !important;
+  }
+}

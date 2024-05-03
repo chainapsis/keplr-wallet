@@ -1,15 +1,15 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
-import { PageWithView } from "../../components/page";
+import { useStore } from "stores/index";
+import { PageWithView } from "components/page";
 import { Text, View, Animated, StyleSheet, ViewStyle } from "react-native";
-import { Button } from "../../components/button";
-import { useStyle } from "../../styles";
-import { useSmartNavigation } from "../../navigation";
-import { RightArrowIcon } from "../../components/icon";
+import { Button } from "components/button";
+import { useStyle } from "styles/index";
+import { useSmartNavigation } from "navigation/smart-navigation";
+import { RightArrowIcon } from "components/icon";
 import LottieView from "lottie-react-native";
 import * as WebBrowser from "expo-web-browser";
-import { SimpleGradient } from "../../components/svg";
+import { SimpleGradient } from "components/svg";
 import { RouteProp, useRoute } from "@react-navigation/native";
 
 export const TxFailedResultScreen: FunctionComponent = observer(() => {
@@ -85,7 +85,7 @@ export const TxFailedResultScreen: FunctionComponent = observer(() => {
           }}
         >
           <LottieView
-            source={require("../../assets/lottie/failed.json")}
+            source={require("assets/lottie/failed.json")}
             colorFilters={[
               {
                 keypath: "Error Icon",

@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useState, useEffect, useMemo } from "react";
-import { HeaderLayout } from "@layouts/index";
+import { HeaderLayout } from "@layouts-v2/header-layout";
 
 import { useNavigate, useParams } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -64,6 +64,8 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
+      showTopMenu={true}
+      smallTitle={true}
       showChainName={false}
       canChangeChainInfo={false}
       alternativeTitle={intl.formatMessage({

@@ -1,0 +1,18 @@
+.container {
+  display: flex;
+  flex-direction: column;
+
+  height: 100%;
+}
+.input {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+}
+.input:focus {
+  background: rgba(255, 255, 255, 0.2);
+  color: white !important;
+}
+.label {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}

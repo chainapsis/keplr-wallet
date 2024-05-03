@@ -1,0 +1,91 @@
+@import "../../styles/var";
+
+.bottomNavContainer {
+  display: flex;
+  height: 86px;
+  filter: drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.1));
+  width: 354px;
+  overflow: hidden;
+  margin-left: 5px;
+  padding: 0px 12px 0px 12px;
+}
+
+.tab {
+  font-size: $xs;
+  color: #fff;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  gap: 4px;
+
+  img {
+    object-fit: contain;
+  }
+  .tab-icon {
+    width: 60px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+
+    &.active {
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  .title {
+    color: #fff;
+    font-size: $xs;
+    font-weight: 600;
+    &.active {
+      color: rgba(255, 255, 255, 0.6);
+    }
+  }
+}
+
+.disabled {
+  cursor: not-allowed;
+}
+
+.bellDot {
+  height: 10px;
+  width: 10px;
+  background-color: #d027e5;
+  margin-left: 8px;
+  border-radius: 50px;
+  position: absolute;
+  right: 215px;
+  top: 5px;
+}
+.actions {
+  display: flex;
+  justify-content: space-around;
+}
+
+.toggle,
+.toggle:hover {
+  z-index: 300;
+  width: 335px;
+  border: 0px;
+  background: transparent;
+  padding: 0px;
+}
+.toggle:focus {
+  border: 0px;
+  background: transparent;
+  padding: 0px;
+}
+.overlay {
+  overflow: hidden;
+  opacity: 0.9;
+  width: 116%;
+  height: 278%;
+  position: absolute;
+  top: -392px;
+  left: -11px;
+  z-index: 200;
+  backdrop-filter: blur(2px);
+}

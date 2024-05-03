@@ -84,10 +84,19 @@
 	<false/>
 	<key>XSAppIconAssets</key>
 	<string>Images.xcassets/AppIcon.appiconset</string>
-	<key>bugsnag</key>
-	<dict>
-		<key>apiKey</key>
-		<string>f07be1dce2391227e818fbe3e4235bf4</string>
-	</dict>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Lexend-Black.ttf</string>
+		<string>Lexend-Bold.ttf</string>
+		<string>Lexend-ExtraBold.ttf</string>
+		<string>Lexend-ExtraLight.ttf</string>
+		<string>Lexend-Light.ttf</string>
+		<string>Lexend-Medium.ttf</string>
+		<string>Lexend-Regular.ttf</string>
+		<string>Lexend-SemiBold.ttf</string>
+		<string>Lexend-Thin.ttf</string>
+	</array>
 </dict>
 </plist>

@@ -39,7 +39,7 @@ const ViewContactOption = () => {
     <div
       onClick={() => {
         analyticsStore.logEvent("address_book_click", { pageName: "Chat DM" });
-        navigate("/setting/address-book");
+        navigate("/more/address-book");
       }}
     >
       View in address book
@@ -57,7 +57,7 @@ const AddContactOption = () => {
         analyticsStore.logEvent("add_new_address_click", {
           pageName: "Chat DM",
         });
-        navigate("/setting/address-book", {
+        navigate("/more/address-book", {
           state: {
             openModal: true,
             addressInputValue: userName,

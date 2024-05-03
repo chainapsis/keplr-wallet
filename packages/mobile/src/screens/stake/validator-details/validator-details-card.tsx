@@ -1,14 +1,14 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { observer } from "mobx-react-lite";
-import { Card, CardBody } from "../../../components/card";
-import { useStore } from "../../../stores";
+import { Card, CardBody } from "components/card";
+import { useStore } from "stores/index";
 import { Staking } from "@keplr-wallet/stores";
 import { Linking, Text, View, ViewStyle } from "react-native";
-import { useStyle } from "../../../styles";
+import { useStyle } from "styles/index";
 import { CoinPretty, Dec, IntPretty } from "@keplr-wallet/unit";
-import { Button } from "../../../components/button";
-import { useSmartNavigation } from "../../../navigation";
-import { ValidatorThumbnail } from "../../../components/thumbnail";
+import { Button } from "components/button";
+import { useSmartNavigation } from "navigation/smart-navigation";
+import { ValidatorThumbnail } from "components/thumbnail";
 import { MarkdownView } from "react-native-markdown-view";
 
 export const ValidatorDetailsCard: FunctionComponent<{

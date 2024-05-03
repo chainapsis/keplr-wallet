@@ -1,0 +1,57 @@
+.title {
+  color: var(--grey-white, #fff);
+  font-family: Lexend;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+.card {
+  color: #fff;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 18px;
+}
+.heading {
+  font-family: Lexend;
+  margin-bottom: 24px;
+}
+.doughnut-graph {
+  display: block;
+  height: 120px;
+  width: 240px;
+  position: fixed;
+  right: -35px;
+  top: 257px;
+}
+.legend {
+  display: flex;
+  gap: 6px;
+}
+
+.legends {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+}
+.label {
+  color: rgba(255, 255, 255, 0.6);
+  font-family: Lexend;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+.value {
+  color: #fff;
+  font-family: Lexend;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}

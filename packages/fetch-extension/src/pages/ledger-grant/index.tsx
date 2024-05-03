@@ -1,3 +1,4 @@
+/* eslint-disable react/no-deprecated */
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import React, { FunctionComponent, useState } from "react";

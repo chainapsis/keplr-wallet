@@ -4,7 +4,7 @@ import React, {
   useEffect,
   useRef,
 } from "react";
-import { PageWithScrollViewInBottomTabView } from "../../components/page";
+import { PageWithScrollViewInBottomTabView } from "components/page";
 import { AccountCard } from "./account-card";
 import {
   AppState,
@@ -14,14 +14,14 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import { useStore } from "../../stores";
+import { useStore } from "stores/index";
 import { StakingInfoCard } from "./staking-info-card";
-import { useStyle } from "../../styles";
+import { useStyle } from "styles/index";
 import { GovernanceCard } from "./governance-card";
 import { observer } from "mobx-react-lite";
 import { MyRewardCard } from "./my-reward-card";
 import { TokensCard } from "./tokens-card";
-import { usePrevious } from "../../hooks";
+import { usePrevious } from "hooks/use-previous";
 import { BIP44Selectable } from "./bip44-selectable";
 import { useFocusEffect } from "@react-navigation/native";
 import { Dec } from "@keplr-wallet/unit";

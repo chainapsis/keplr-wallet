@@ -1,19 +1,19 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../../stores";
-import { PageWithScrollViewInBottomTabView } from "../../../../components/page";
-import { KeyStoreItem, KeyStoreSectionTitle } from "../../components";
+import { useStore } from "stores/index";
+import { PageWithScrollViewInBottomTabView } from "components/page";
 import Svg, { Path } from "react-native-svg";
-import { useStyle } from "../../../../styles";
-import { useLoadingScreen } from "../../../../providers/loading-screen";
+import { useStyle } from "styles/index";
+import { useLoadingScreen } from "providers/loading-screen";
 import {
   MultiKeyStoreInfoElem,
   MultiKeyStoreInfoWithSelectedElem,
 } from "@keplr-wallet/background";
 import { TouchableOpacity, View, ViewStyle } from "react-native";
-import { useSmartNavigation } from "../../../../navigation";
-import { EditAccountNameModal } from "../../../../modals/edit-account-name.tsx";
-import { EditIcon } from "../../../../components/icon";
+import { useSmartNavigation } from "navigation/smart-navigation";
+import { EditAccountNameModal } from "modals/edit-account-name.tsx";
+import { EditIcon } from "components/icon";
+import { KeyStoreItem, KeyStoreSectionTitle } from "screens/setting/components";
 
 const CheckIcon: FunctionComponent<{
   color: string;

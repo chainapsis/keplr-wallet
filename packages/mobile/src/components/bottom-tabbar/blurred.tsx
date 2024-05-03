@@ -2,8 +2,8 @@ import React, { FunctionComponent } from "react";
 import { BottomTabBar, BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Platform, StyleSheet, View, ViewStyle } from "react-native";
 import { BlurView } from "@react-native-community/blur";
-import { useFocusedScreen } from "../../providers/focused-screen";
-import { useStyle } from "../../styles";
+import { useFocusedScreen } from "providers/focused-screen";
+import { useStyle } from "styles/index";
 
 interface BlurredBottomTabBarProps extends BottomTabBarProps {
   style?: ViewStyle; // Add the 'style' prop to the interface

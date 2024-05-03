@@ -1,0 +1,71 @@
+@import "../../styles/var";
+
+.header {
+  background: rgba(0, 13, 61, 0.6);
+  backdrop-filter: blur(10px);
+}
+
+.menuContainer {
+  height: $header-height;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: $layout-margin;
+}
+
+.menuImg {
+  cursor: pointer;
+}
+
+.chainListContainer {
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  .title {
+    font-size: 24px;
+
+    margin-right: 6px;
+
+    &.small {
+      font-size: 16px;
+    }
+  }
+
+  .titleIconContainer {
+    width: 0;
+    height: 16px;
+
+    .titleIcon {
+      width: 16px;
+      height: 16px;
+
+      margin-top: -6px;
+      fill: #8f8f8f;
+    }
+  }
+
+  &:hover {
+    .title {
+      // color: $primary-color;
+    }
+
+    .titleIcon {
+      // fill: $primary-color;
+    }
+  }
+}
+
+:global(.show) {
+  .chainListContainer {
+    .title {
+      // color: $primary-color;
+    }
+
+    .titleIcon {
+      // fill: $primary-color;
+    }
+  }
+}

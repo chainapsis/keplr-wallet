@@ -1,18 +1,18 @@
 import React, { FunctionComponent, useEffect } from "react";
-import { PageWithScrollView } from "../../components/page";
+import { PageWithScrollView } from "components/page";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
+import { useStore } from "stores/index";
 import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import { CoinPretty } from "@keplr-wallet/unit";
-import { useStyle } from "../../styles";
-import { useSmartNavigation } from "../../navigation";
-import { RightArrowIcon } from "../../components/icon";
-import { Card } from "../../components/card";
-import { RectButton } from "../../components/rect-button";
+import { useStyle } from "styles/index";
+import { useSmartNavigation } from "navigation/smart-navigation";
+import { RightArrowIcon } from "components/icon";
+import { Card } from "components/card";
+import { RectButton } from "components/rect-button";
 import { Currency } from "@keplr-wallet/types";
-import { TokenSymbol } from "../../components/token-symbol";
-import { HeaderRightButton } from "../../components/header";
-import { HeaderAddIcon } from "../../components/header/icon";
+import { HeaderRightButton } from "components/header";
+import { HeaderAddIcon } from "components/header/icon";
+import { TokenSymbolUsingChainInfo } from "components/token-symbol/token-symbol-chain";
 
 export const TokensScreen: FunctionComponent = observer(() => {
   const { chainStore, queriesStore, accountStore } = useStore();
@@ -134,7 +134,7 @@ export const TokenItem: FunctionComponent<{
         });
       }}
     >
-      <TokenSymbol
+      <TokenSymbolUsingChainInfo
         style={style.flatten(["margin-right-12"]) as ViewStyle}
         size={44}
         chainInfo={chainInfo}

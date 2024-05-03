@@ -1,0 +1,28 @@
+@import "../../styles/var";
+
+*::-webkit-scrollbar {
+  width: 0px;
+  background: transparent !important;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #000d3d;
+  background-image: url("../../public/assets/svg/wireframe/bg.svg");
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
+.innerContainer {
+  flex: 1;
+  margin: 10px 12px 16px 12px;
+  overflow-x: hidden;
+}
+.BottomNav {
+  align-self: flex-end;
+}

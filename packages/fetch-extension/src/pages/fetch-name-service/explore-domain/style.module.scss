@@ -78,7 +78,7 @@
   color: #0b1742;
   font-size: 15px;
   position: absolute;
-  margin-top: 12px;
+  margin-top: 20px;
   right: 24px;
   border: none;
   cursor: pointer;
@@ -137,11 +137,12 @@
 }
 .invalidText {
   width: 320px;
-  color: red;
+  color: orangered;
   position: fixed;
-  top: 45%;
+  top: 56%;
   text-align: center;
   font-size: 14px;
+  left: -11%;
 }
 .bottomContent {
   position: absolute;

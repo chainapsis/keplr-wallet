@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 import WalletConnect from "@walletconnect/client";
 import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import { ImageStyle } from "react-native-fast-image";
-import { useStyle } from "../../styles";
+import { useStyle } from "styles/index";
 import { WCAppLogo } from "./app-logo";
 
 export const WCAppLogoAndName: FunctionComponent<{

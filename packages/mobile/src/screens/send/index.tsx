@@ -1,8 +1,8 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { useSendTxConfig } from "@keplr-wallet/hooks";
-import { useStore } from "../../stores";
-import { PageWithScrollView } from "../../components/page";
+import { useStore } from "stores/index";
+import { PageWithScrollView } from "components/page";
 import { View, ViewStyle } from "react-native";
 import {
   AddressInput,
@@ -10,11 +10,11 @@ import {
   MemoInput,
   CurrencySelector,
   FeeButtons,
-} from "../../components/input";
-import { useStyle } from "../../styles";
-import { Button } from "../../components/button";
+} from "components/input";
+import { useStyle } from "styles/index";
+import { Button } from "components/button";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import { useSmartNavigation } from "../../navigation";
+import { useSmartNavigation } from "navigation/smart-navigation";
 import { Buffer } from "buffer/";
 
 export const SendScreen: FunctionComponent = observer(() => {

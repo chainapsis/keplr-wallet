@@ -1,17 +1,17 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { RouteProp, useIsFocused, useRoute } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
-import { PageWithView } from "../../components/page";
+import { useStore } from "stores/index";
+import { PageWithView } from "components/page";
 import { Text, View, StyleSheet, ViewStyle } from "react-native";
-import { Button } from "../../components/button";
-import { useStyle } from "../../styles";
-import { useSmartNavigation } from "../../navigation";
-import { RightArrowIcon } from "../../components/icon";
+import { Button } from "components/button";
+import { useStyle } from "styles/index";
+import { useSmartNavigation } from "navigation/smart-navigation";
+import { RightArrowIcon } from "components/icon";
 import { TendermintTxTracer } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
 import LottieView from "lottie-react-native";
-import { SimpleGradient } from "../../components/svg";
+import { SimpleGradient } from "components/svg";
 
 export const TxPendingResultScreen: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
@@ -116,7 +116,7 @@ export const TxPendingResultScreen: FunctionComponent = observer(() => {
           }}
         >
           <LottieView
-            source={require("../../assets/lottie/pending.json")}
+            source={require("assets/lottie/pending.json")}
             colorFilters={[
               {
                 keypath: "#dot01",

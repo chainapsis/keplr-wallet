@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { observer } from "mobx-react-lite";
-import { TextInput } from "./input";
+import { TextInput } from "components/input";
 import { Platform, TextStyle, View, ViewStyle } from "react-native";
 import {
   EmptyAmountError,
@@ -10,8 +10,8 @@ import {
   NegativeAmountError,
   ZeroAmountError,
 } from "@keplr-wallet/hooks";
-import { Button } from "../button";
-import { useStyle } from "../../styles";
+import { Button } from "components/button";
+import { useStyle } from "styles/index";
 import * as RNLocalize from "react-native-localize";
 
 export const AmountInput: FunctionComponent<{

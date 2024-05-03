@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { IMemoConfig } from "@keplr-wallet/hooks";
 import { TextStyle, ViewStyle } from "react-native";
-import { TextInput } from "./input";
+import { TextInput } from "components/input";
 
 export const MemoInput: FunctionComponent<{
   labelStyle?: TextStyle;

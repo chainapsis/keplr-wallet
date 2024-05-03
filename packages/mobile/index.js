@@ -38,5 +38,7 @@ LogBox.ignoreLogs([
   "Non-serializable values were found in the navigation state",
   "Require cycle: ../stores/build/common/query/index.js -> ../stores/build/common/query/json-rpc.js -> ../stores/build/common/query/index.js",
   "Require cycle: ../hooks/build/tx/index.js",
+  `new NativeEventEmitter()`,
+  "invoking a computedFn from outside an reactive context won't be memoized, unless keepAlive is set",
 ]);
 AppRegistry.registerComponent(appName, () => App);

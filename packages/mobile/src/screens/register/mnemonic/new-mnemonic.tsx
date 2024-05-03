@@ -1,20 +1,19 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { Text, View, ViewStyle } from "react-native";
+import React, { FunctionComponent } from "react";
+import { FlatList, Text, View, ViewStyle } from "react-native";
 import { observer } from "mobx-react-lite";
-import { RouteProp, useIsFocused, useRoute } from "@react-navigation/native";
+import { RouteProp, useRoute } from "@react-navigation/native";
 import { RegisterConfig } from "@keplr-wallet/hooks";
 import { useNewMnemonicConfig } from "./hook";
-import { PageWithScrollView } from "../../../components/page";
-import { CheckIcon } from "../../../components/icon";
-import { useStyle } from "../../../styles";
-import { WordChip } from "../../../components/mnemonic";
-import { Button } from "../../../components/button";
+import { PageWithScrollView } from "components/page";
+import { CheckIcon } from "components/icon";
+import { useStyle } from "styles/index";
+import { Button } from "components/button";
 import * as Clipboard from "expo-clipboard";
-import { TextInput } from "../../../components/input";
-import { Controller, useForm } from "react-hook-form";
-import { useSmartNavigation } from "../../../navigation";
-import { useSimpleTimer } from "../../../hooks";
-import { BIP44AdvancedButton, useBIP44Option } from "../bip44";
+import { useForm } from "react-hook-form";
+import { useSmartNavigation } from "navigation/smart-navigation";
+import { useBIP44Option } from "../bip44";
+import { useSimpleTimer } from "hooks/use-simple-timer";
+import { WordChip } from "components/mnemonic";
 
 interface FormData {
   name: string;
@@ -43,21 +42,12 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
   const bip44Option = useBIP44Option();
 
   const newMnemonicConfig = useNewMnemonicConfig(registerConfig);
-  const [mode] = useState(registerConfig.mode);
 
   const words = newMnemonicConfig.mnemonic.split(" ");
 
-  const {
-    control,
-    handleSubmit,
-    setFocus,
-    getValues,
-    formState: { errors },
-  } = useForm<FormData>();
+  const { handleSubmit } = useForm<FormData>();
 
   const submit = handleSubmit(() => {
-    newMnemonicConfig.setName(getValues("name"));
-    newMnemonicConfig.setPassword(getValues("password"));
     smartNavigation.navigateSmart("Register.VerifyMnemonic", {
       registerConfig,
       newMnemonicConfig,
@@ -67,7 +57,7 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView
-      backgroundMode="tertiary"
+      backgroundMode="image"
       contentContainerStyle={style.get("flex-grow-1")}
       style={style.flatten(["padding-x-page"]) as ViewStyle}
     >
@@ -86,106 +76,6 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
         Backup your mnemonic securely
       </Text>
       <WordsCard words={words} />
-      <Controller
-        control={control}
-        rules={{
-          required: "Name is required",
-        }}
-        render={({ field: { onChange, onBlur, value, ref } }) => {
-          return (
-            <TextInput
-              label="Wallet nickname"
-              containerStyle={style.flatten(["padding-bottom-6"]) as ViewStyle}
-              returnKeyType={mode === "add" ? "done" : "next"}
-              onSubmitEditing={() => {
-                if (mode === "add") {
-                  submit();
-                }
-                if (mode === "create") {
-                  setFocus("password");
-                }
-              }}
-              error={errors.name?.message}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-              maxLength={30}
-              ref={ref}
-            />
-          );
-        }}
-        name="name"
-        defaultValue=""
-      />
-      <BIP44AdvancedButton bip44Option={bip44Option} />
-      {mode === "create" ? (
-        <React.Fragment>
-          <Controller
-            control={control}
-            rules={{
-              required: "Password is required",
-              validate: (value: string) => {
-                if (value.length < 8) {
-                  return "Password must be longer than 8 characters";
-                }
-              },
-            }}
-            render={({ field: { onChange, onBlur, value, ref } }) => {
-              return (
-                <TextInput
-                  label="Password"
-                  returnKeyType="next"
-                  secureTextEntry={true}
-                  onSubmitEditing={() => {
-                    setFocus("confirmPassword");
-                  }}
-                  error={errors.password?.message}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  ref={ref}
-                />
-              );
-            }}
-            name="password"
-            defaultValue=""
-          />
-          <Controller
-            control={control}
-            rules={{
-              required: "Confirm password is required",
-              validate: (value: string) => {
-                if (value.length < 8) {
-                  return "Password must be longer than 8 characters";
-                }
-
-                if (getValues("password") !== value) {
-                  return "Password doesn't match";
-                }
-              },
-            }}
-            render={({ field: { onChange, onBlur, value, ref } }) => {
-              return (
-                <TextInput
-                  label="Confirm password"
-                  returnKeyType="done"
-                  secureTextEntry={true}
-                  onSubmitEditing={() => {
-                    submit();
-                  }}
-                  error={errors.confirmPassword?.message}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  ref={ref}
-                />
-              );
-            }}
-            name="confirmPassword"
-            defaultValue=""
-          />
-        </React.Fragment>
-      ) : null}
       <View style={style.flatten(["flex-1"])} />
       <Button text="Next" size="large" onPress={submit} />
       {/* Mock element for bottom padding */}
@@ -204,48 +94,32 @@ const WordsCard: FunctionComponent<{
     On IOS, user can peek the words by right side gesture from the verifying mnemonic screen.
     To prevent this, hide the words if the screen lost the focus.
    */
-  const [hideWord, setHideWord] = useState(false);
-  const isFocused = useIsFocused();
+  // const isFocused = useIsFocused();
 
-  useEffect(() => {
-    if (isFocused) {
-      setHideWord(false);
-    } else {
-      const timeout = setTimeout(() => {
-        setHideWord(true);
-      }, 500);
+  // useEffect(() => {
+  //   if (isFocused) {
+  //     setHideWord(false);
+  //   } else {
+  //     const timeout = setTimeout(() => {
+  //       setHideWord(true);
+  //     }, 500);
 
-      return () => clearTimeout(timeout);
-    }
-  }, [isFocused]);
+  //     return () => clearTimeout(timeout);
+  //   }
+  // }, [isFocused]);
+
+  const renderItem = ({ item, index }: any) => {
+    return <WordChip key={index.toString()} word={item} />;
+  };
 
   return (
-    <View
-      style={
-        style.flatten([
-          "margin-top-14",
-          "margin-bottom-16",
-          "padding-24",
-          "padding-x-28",
-          "padding-bottom-12",
-          "background-color-white",
-          "dark:background-color-platinum-700",
-          "border-radius-8",
-          "flex-row",
-          "flex-wrap",
-        ]) as ViewStyle
-      }
-    >
-      {words.map((word, i) => {
-        return (
-          <WordChip
-            key={i.toString()}
-            index={i + 1}
-            word={word}
-            hideWord={hideWord}
-          />
-        );
-      })}
+    <View>
+      <FlatList
+        data={words}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={renderItem}
+        numColumns={3}
+      />
       <View style={style.flatten(["width-full"]) as ViewStyle}>
         <Button
           textStyle={style.flatten(

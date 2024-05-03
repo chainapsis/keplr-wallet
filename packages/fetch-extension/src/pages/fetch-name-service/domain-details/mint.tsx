@@ -6,9 +6,9 @@ import { useNavigate } from "react-router";
 import { useLanguage } from "../../../languages";
 import { mintDomain } from "../../../name-service/fns-apis";
 import { useStore } from "../../../stores";
-import { shortenNumber } from "../../activity/native/activity-row";
 import { TooltipForDomainNames } from "./index";
 import style from "./style.module.scss";
+import { shortenNumber } from "@utils/format";
 type MintProps = {
   domainPrice: any;
   domainName: string;

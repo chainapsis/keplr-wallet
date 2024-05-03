@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import React, { useState } from "react";
 import {
   Platform,
@@ -8,15 +9,15 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import { useStyle } from "../../styles";
+import { useStyle } from "styles/index";
 
-// eslint-disable-next-line react/display-name
 export const TextInput = React.forwardRef<
   NativeTextInput,
   React.ComponentProps<typeof NativeTextInput> & {
     labelStyle?: TextStyle;
     containerStyle?: ViewStyle;
     inputContainerStyle?: ViewStyle;
+    innerInputContainerStyle?: ViewStyle;
     errorLabelStyle?: TextStyle;
 
     label?: string;
@@ -38,6 +39,7 @@ export const TextInput = React.forwardRef<
     labelStyle,
     containerStyle,
     inputContainerStyle,
+    innerInputContainerStyle,
     errorLabelStyle,
     label,
     error,
@@ -79,23 +81,23 @@ export const TextInput = React.forwardRef<
         style={StyleSheet.flatten([
           style.flatten(
             [
-              "background-color-white",
-              "dark:background-color-platinum-700",
-              "padding-x-11",
-              "padding-y-12",
-              "border-radius-6",
+              "background-color-transparent",
+              "border-color-gray-200",
+              "padding-x-15",
+              "padding-y-20",
+              "border-radius-12",
               "border-width-1",
-              "border-color-gray-100@20%",
+              "border-color-gray-100@50%",
               "dark:border-color-platinum-600@50%",
             ],
             [
               // The order is important.
               // The border color has different priority according to state.
               // The more in front, the lower the priority.
-              isFocused ? "border-color-blue-400" : undefined,
+              isFocused ? "border-color-gray-200" : undefined,
               isFocused ? "dark:border-color-platinum-100" : undefined,
               error ? "border-color-red-200" : undefined,
-              error ? "dark:border-color-red-400" : undefined,
+              error ? "dark:border-color-red-250" : undefined,
               !(props.editable ?? true) && "background-color-gray-50",
               !(props.editable ?? true) && "dark:background-color-platinum-500",
             ]
@@ -104,13 +106,18 @@ export const TextInput = React.forwardRef<
         ])}
       >
         {topInInputContainer}
-        <View style={style.flatten(["flex-row", "items-center"])}>
+        <View
+          style={[
+            style.flatten(["flex-row", "items-center"]),
+            innerInputContainerStyle,
+          ]}
+        >
           {inputLeft}
           <NativeTextInput
             placeholderTextColor={
               props.placeholderTextColor ??
               style.flatten(
-                ["color-gray-300", "dark:color-platinum-500"],
+                ["color-white@60%"],
                 [!(props.editable ?? true) && "dark:color-platinum-200"]
               ).color
             }
@@ -119,14 +126,11 @@ export const TextInput = React.forwardRef<
                 [
                   "padding-0",
                   "body2-in-text-input",
-                  "color-gray-600",
+                  "color-gray-200",
                   "dark:color-platinum-50",
                   "flex-1",
                 ],
-                [
-                  !(props.editable ?? true) && "color-gray-300",
-                  !(props.editable ?? true) && "dark:color-platinum-200",
-                ]
+                [!(props.editable ?? true) && "color-gray-300"]
               ),
               Platform.select({
                 ios: {},
@@ -189,7 +193,7 @@ export const TextInput = React.forwardRef<
               style.flatten([
                 "absolute",
                 "text-caption2",
-                "color-red-400",
+                "color-red-250",
                 "margin-top-2",
                 "margin-left-4",
               ]) as ViewStyle,

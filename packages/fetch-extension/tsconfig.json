@@ -10,7 +10,9 @@
       "@new-components/*": ["src/new-components/*"],
       "@new-layouts/*": ["src/new-layouts/*"],
       "@components/*": ["src/components/*"],
+      "@components-v2/*": ["src/components-v2/*"],
       "@layouts/*": ["src/layouts/*"],
+      "@layouts-v2/*": ["src/layouts-v2/*"],
       "@graphQL/*": ["src/graphQL/*"],
       "@chatTypes": ["src/@types/chat"],
       "@notificationTypes": ["src/@types/notification"],
@@ -23,8 +25,9 @@
       "./node_modules/@types",
       "../../node_modules/@types",
       "./@types"
+
     ]
   },
   "include": ["src/**/*", "window.d.ts", "src/import-svg.d.ts"],
-  "excluded": ["**/*.wasm"]
+  "excluded": ["src/**/*.stories.*","**/*.wasm"]
 }

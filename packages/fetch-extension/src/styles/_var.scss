@@ -1,7 +1,8 @@
 $background-color: #fafbfd;
+$primary-color: #000d3d;
 
 $popup-size-width: 360px;
-$popup-size-height: 580px;
+$popup-size-height: 600px;
 
 $header-height: 64px;
 
@@ -9,3 +10,35 @@ $layout-padding: 12px;
 $layout-margin: 12px;
 
 $main-card-padding: 16px;
+
+// Wallet Colours
+$bg-index: #73879e;
+$bg-primary: #000d3d;
+$bg-primary-50: #000d3d80;
+$bg-primary-40: #000d3d66;
+$bg-primary-90: #000d3de6;
+$primary: #000d3d;
+$gradient: var(
+  --gradients-warm-gradient,
+  linear-gradient(270deg, #f9774b 14.08%, #cf447b 50.82%, #5f38fb 86.24%)
+);
+
+// Font Sizes
+$xs: 14px;
+$sm: 16px;
+$md: 18px;
+$lg: 24px;
+$xl: 30px;
+
+// Paddings
+$p-xs: 6px;
+$p-md: 12px;
+$p-lg: 18px;
+$p-xl: 24px;
+$p-lg2: 20px;
+
+//margin
+$m: 10px;
+$m1: 12px;
+$m2: 18px;
+$m3: 24px;

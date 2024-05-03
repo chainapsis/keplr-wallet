@@ -1,5 +1,3 @@
-import { Platform } from "react-native";
-
 type FontWeightNumbers =
   | "100"
   | "200"
@@ -34,6 +32,47 @@ const FontWeightTypesMap: { [key in FontWeightTypes]: FontWeightNumbers } = {
   black: "900",
 };
 
+export function getPlatformFontFamily(
+  fontWeight: FontWeightTypes | FontWeightNumbers
+) {
+  let font: string;
+
+  switch (fontWeight) {
+    case "100":
+      font = "Lexend-Thin";
+      break;
+    case "200":
+    // 200 doesn't exist on Android (Roboto).
+    // 200 should be 300
+    case "300":
+      font = "Lexend-Light";
+      break;
+
+    case "600":
+    // 600 doesn't exist on Android (Roboto).
+    // 600 should be 500
+    case "500":
+      font = "Lexend-Medium";
+      break;
+    case "800":
+    // 800 doesn't exist on Android (Roboto).
+    // 800 should be 700
+    case "700":
+      font = "Lexend-Regular";
+      break;
+    case "900":
+      font = "Lexend-Black";
+      break;
+
+    case "400":
+    default:
+      font = "Lexend-Regular";
+      break;
+  }
+
+  return font;
+}
+
 export function getPlatformFontWeight(
   fontWeight: FontWeightTypes | FontWeightNumbers
 ): {
@@ -44,14 +83,10 @@ export function getPlatformFontWeight(
     fontWeight = FontWeightTypesMap[fontWeight as FontWeightTypes];
   }
 
-  if (Platform.OS !== "android") {
-    return { fontWeight: fontWeight as FontWeightNumbers };
-  }
-
   switch (fontWeight) {
     case "100":
       return {
-        fontFamily: "sans-serif-thin",
+        fontFamily: "Lexend-Thin",
         fontWeight: "100",
       };
     case "200":
@@ -59,12 +94,12 @@ export function getPlatformFontWeight(
     // 200 should be 300
     case "300":
       return {
-        fontFamily: "sans-serif-light",
+        fontFamily: "Lexend-Light",
         fontWeight: "300",
       };
     case "400":
       return {
-        fontFamily: "sans-serif",
+        fontFamily: "Lexend-Regular",
         fontWeight: "400",
       };
     case "600":
@@ -72,7 +107,7 @@ export function getPlatformFontWeight(
     // 600 should be 500
     case "500":
       return {
-        fontFamily: "sans-serif-medium",
+        fontFamily: "Lexend-Medium",
         fontWeight: "500",
       };
     case "800":
@@ -80,12 +115,12 @@ export function getPlatformFontWeight(
     // 800 should be 700
     case "700":
       return {
-        fontFamily: "sans-serif",
+        fontFamily: "Lexend-Regular",
         fontWeight: "700",
       };
     case "900":
       return {
-        fontFamily: "sans-serif-black",
+        fontFamily: "Lexend-Black",
         fontWeight: "900",
       };
   }

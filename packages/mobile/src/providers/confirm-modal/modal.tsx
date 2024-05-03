@@ -1,8 +1,8 @@
 import React, { FunctionComponent } from "react";
-import { registerModal } from "../../modals/base";
-import { useStyle } from "../../styles";
+import { registerModal } from "modals/base";
+import { useStyle } from "styles/index";
 import { Text, View, ViewStyle } from "react-native";
-import { Button } from "../../components/button";
+import { Button } from "components/button";
 
 export const ConfirmModal: FunctionComponent<{
   isOpen: boolean;

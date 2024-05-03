@@ -46,4 +46,11 @@
 .unsupportedKeyIcon {
   width: 100%;
   text-align: center;
+  display: flex;
+}
+.walletRejected {
+  display: flex;
+  gap: 10px;
+  color: orangered;
+  font-size: 14px;
 }

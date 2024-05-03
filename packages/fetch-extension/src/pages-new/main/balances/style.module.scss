@@ -1,0 +1,134 @@
+@import "../../../styles/var";
+
+.balance-card {
+  margin-top: 32px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  align-self: stretch;
+}
+
+.balance-field {
+  display: flex;
+  flex-direction: column;
+}
+.priceChangesGreen {
+  color: var(--green-green-500-vibrant-green, #2de376);
+
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+}
+.priceChangesOrange {
+  color: orange;
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+}
+.balance {
+  font-size: $xl;
+  display: flex;
+  gap: 8px;
+  font-family: Lexend;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  justify-content: center;
+}
+
+.denom {
+  color: var(--grey-grey-700, #556578);
+}
+
+.portfolio,
+.portfolio:hover {
+  padding: 0px;
+  cursor: pointer;
+  width: 128px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  font-size: 14px;
+  border-radius: 100px;
+  color: #fff;
+  background: transparent;
+}
+
+.portfolio:focus {
+  color: #fff;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.inUsd {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+}
+
+.reward {
+  font-size: $xl;
+  cursor: pointer;
+}
+
+.view-details {
+  cursor: pointer;
+  height: 27px;
+  display: flex;
+  padding: 6px 12px;
+  align-items: center;
+  gap: 5px;
+  border-radius: 100px;
+  backdrop-filter: blur(10px);
+  background: transparent;
+  border: 0px;
+  color: white;
+  box-shadow: none;
+  width: 95px;
+  font-size: 12px;
+}
+
+.day {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}
+
+.changeInDollars-green {
+  color: var(--green-green-500-vibrant-green, #2de376);
+}
+
+.changeInDollars-orange {
+  color: orange;
+}
+
+.increaseInDollarsGreen {
+  color: var(--green-green-500-vibrant-green, #2de376);
+}
+
+.increaseInDollarsOrange {
+  color: orange;
+}
+
+.increaseInPer {
+  color: white;
+}
+
+.positive {
+  color: var(--green-green-500-vibrant-green, #2de376);
+}
+
+.negative {
+  color: orange;
+}

@@ -1,0 +1,63 @@
+.tokenTitle {
+  font-weight: 600;
+  font-size: 20px;
+  color: white;
+  margin-bottom: 18px;
+}
+.tokenContainerInner {
+  margin-top: 18px;
+}
+.tokenCard {
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  justify-content: space-between;
+  align-self: stretch;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  margin-bottom: 6px;
+}
+
+.tokenContainer {
+  display: flex;
+  align-items: center;
+  .tokenImg {
+    width: 24px;
+    height: 24px;
+    margin-right: 15px;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 25px;
+  }
+  .tokenDetails {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    .tokenName {
+      font-size: 14px;
+      font-weight: 400;
+      color: white;
+      max-width: 160px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tokenBalance {
+      font-size: 14px;
+      color: #808da0;
+      margin-right: 20px;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+  .tokenBalanceInUsd {
+    font-size: 14px;
+    color: white;
+    margin-left: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: bold;
+  }
+}

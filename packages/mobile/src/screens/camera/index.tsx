@@ -1,32 +1,52 @@
 import React, { FunctionComponent, useCallback, useState } from "react";
-import { useStyle } from "../../styles";
-import { PageWithView } from "../../components/page";
+import { useStyle } from "styles/index";
+import { PageWithView } from "components/page";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
-import { useSmartNavigation } from "../../navigation";
-import { Button } from "../../components/button";
+import { useStore } from "stores/index";
+import { useSmartNavigation } from "navigation/smart-navigation";
+import { Button } from "components/button";
 import { Share, StyleSheet, View, ViewStyle } from "react-native";
-import { ChainSelectorModal } from "../../components/chain-selector";
-import { registerModal } from "../../modals/base";
-import { CardModal } from "../../modals/card";
-import { AddressCopyable } from "../../components/address-copyable";
+import { ChainSelectorModal } from "components/chain-selector";
+import { CardModal } from "modals/card";
+import { AddressCopyable } from "components/address-copyable";
 import QRCode from "react-native-qrcode-svg";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { FullScreenCameraView } from "../../components/camera";
+import { FullScreenCameraView } from "components/camera";
+
 import {
-  importFromExtension,
-  parseQRCodeDataForImportFromExtension,
-  registerExportedAddressBooks,
-  registerExportedKeyRingDatas,
-} from "../../utils/import-from-extension";
-import { AddressBookConfigMap, useRegisterConfig } from "@keplr-wallet/hooks";
-import { AsyncKVStore } from "../../common";
-import { useFocusEffect } from "@react-navigation/native";
+  IRecipientConfig,
+  IRecipientConfigWithICNS,
+} from "@keplr-wallet/hooks";
+import {
+  RouteProp,
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import { CameraType } from "expo-camera/src/Camera.types";
 import { BarCodeScanner } from "expo-barcode-scanner";
+import { CHAIN_ID_DORADO } from "../../config";
+import Toast from "react-native-toast-message";
 
 export const CameraScreen: FunctionComponent = observer(() => {
-  const { chainStore, walletConnectStore, keyRingStore } = useStore();
+  const route = useRoute<
+    RouteProp<
+      Record<
+        string,
+        {
+          showMyQRButton?: boolean;
+          recipientConfig?: IRecipientConfig | IRecipientConfigWithICNS;
+        }
+      >,
+      string
+    >
+  >();
+
+  const showQRButton = route.params.showMyQRButton ? true : false;
+
+  const { chainStore, walletConnectStore } = useStore();
+
+  const navigation = useNavigation();
 
   const style = useStyle();
 
@@ -51,12 +71,6 @@ export const CameraScreen: FunctionComponent = observer(() => {
     useState(false);
   const [showingAddressQRCodeChainId, setShowingAddressQRCodeChainId] =
     useState(chainStore.current.chainId);
-
-  const registerConfig = useRegisterConfig(keyRingStore, []);
-
-  const [addressBookConfigMap] = useState(
-    () => new AddressBookConfigMap(new AsyncKVStore("address_book"), chainStore)
-  );
 
   return (
     <PageWithView disableSafeArea={true} backgroundMode={null}>
@@ -89,53 +103,38 @@ export const CameraScreen: FunctionComponent = observer(() => {
 
                 if (isBech32Address) {
                   const prefix = data.slice(0, data.indexOf("1"));
-                  const chainInfo = chainStore.chainInfosInUI.find(
-                    (chainInfo) =>
-                      chainInfo.bech32Config.bech32PrefixAccAddr === prefix
-                  );
-                  if (chainInfo) {
-                    smartNavigation.pushSmart("Send", {
-                      chainId: chainInfo.chainId,
-                      recipient: data,
-                    });
+                  let chainId: string | undefined;
+                  if (
+                    prefix.toLowerCase() === "fetch" &&
+                    chainStore.current.chainId === CHAIN_ID_DORADO
+                  ) {
+                    chainId = chainStore.current.chainId;
+                  } else {
+                    const chainInfo = chainStore.chainInfosInUI.find(
+                      (chainInfo) =>
+                        chainInfo.bech32Config.bech32PrefixAccAddr === prefix
+                    );
+                    chainId = chainInfo?.chainId;
+                  }
+
+                  if (chainId) {
+                    if (route.params.recipientConfig) {
+                      route.params.recipientConfig.setRawRecipient(data);
+                      navigation.goBack();
+                    } else {
+                      smartNavigation.pushSmart("SendNew", {
+                        chainId: chainId,
+                        recipient: data,
+                      });
+                    }
                   } else {
                     smartNavigation.navigateSmart("Home", {});
                   }
                 } else {
-                  const sharedData =
-                    parseQRCodeDataForImportFromExtension(data);
-
-                  const improted = await importFromExtension(
-                    sharedData,
-                    chainStore.chainInfosInUI.map(
-                      (chainInfo) => chainInfo.chainId
-                    )
-                  );
-
-                  // In this case, there are other accounts definitely.
-                  // So, there is no need to consider the password.
-                  await registerExportedKeyRingDatas(
-                    keyRingStore,
-                    registerConfig,
-                    improted.KeyRingDatas,
-                    ""
-                  );
-
-                  await registerExportedAddressBooks(
-                    addressBookConfigMap,
-                    improted.addressBooks
-                  );
-
-                  smartNavigation.reset({
-                    index: 0,
-                    routes: [
-                      {
-                        name: "Register",
-                        params: {
-                          screen: "Register.End",
-                        },
-                      },
-                    ],
+                  navigation.goBack();
+                  Toast.show({
+                    type: "error",
+                    text1: "Please scan valid QR",
                   });
                 }
               }
@@ -149,22 +148,24 @@ export const CameraScreen: FunctionComponent = observer(() => {
           }
         }}
         containerBottom={
-          <Button
-            text="Show my QR code"
-            mode="light"
-            size="large"
-            containerStyle={
-              style.flatten([
-                "margin-top-64",
-                "border-radius-64",
-                "opacity-90",
-              ]) as ViewStyle
-            }
-            style={style.flatten(["padding-x-52"]) as ViewStyle}
-            onPress={() => {
-              setIsSelectChainModalOpen(true);
-            }}
-          />
+          showQRButton ? (
+            <Button
+              text="Show my QR code"
+              mode="light"
+              size="large"
+              containerStyle={
+                style.flatten([
+                  "margin-top-64",
+                  "border-radius-64",
+                  "opacity-90",
+                ]) as ViewStyle
+              }
+              style={style.flatten(["padding-x-52"]) as ViewStyle}
+              onPress={() => {
+                setIsSelectChainModalOpen(true);
+              }}
+            />
+          ) : undefined
         }
       />
       <ChainSelectorModal
@@ -192,67 +193,62 @@ export const AddressQRCodeModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
   chainId: string;
-}> = registerModal(
-  observer(({ chainId, isOpen }) => {
-    const { accountStore } = useStore();
+}> = observer(({ chainId, isOpen }) => {
+  const { accountStore } = useStore();
 
-    const account = accountStore.getAccount(chainId);
+  const account = accountStore.getAccount(chainId);
 
-    const style = useStyle();
+  const style = useStyle();
 
-    if (!isOpen) {
-      return null;
-    }
-
-    return (
-      <CardModal title="Scan QR code">
-        <View style={style.flatten(["items-center"])}>
-          <AddressCopyable address={account.bech32Address} maxCharacters={22} />
-          <View style={style.flatten(["margin-y-32"]) as ViewStyle}>
-            {account.bech32Address ? (
-              <View
-                style={
-                  style.flatten([
-                    "padding-8",
-                    "dark:background-color-white",
-                  ]) as ViewStyle
-                }
-              >
-                <QRCode size={200} value={account.bech32Address} />
-              </View>
-            ) : (
-              <View
-                style={StyleSheet.flatten([
-                  {
-                    width: 200,
-                    height: 200,
-                  },
-                  style.flatten(["background-color-gray-400"]),
-                ])}
-              />
-            )}
-          </View>
-          <View style={style.flatten(["flex-row"])}>
-            <Button
-              containerStyle={style.flatten(["flex-1"])}
-              text="Share Address"
-              mode="light"
-              size="large"
-              loading={account.bech32Address === ""}
-              onPress={() => {
-                Share.share({
-                  message: account.bech32Address,
-                }).catch((e) => {
-                  console.log(e);
-                });
-              }}
-            />
-          </View>
-        </View>
-      </CardModal>
-    );
-  }),
-  {
-    disableSafeArea: true,
+  if (!isOpen) {
+    return null;
   }
-);
+
+  return (
+    <CardModal isOpen={isOpen} title="Scan QR code">
+      <View style={style.flatten(["items-center"])}>
+        <AddressCopyable address={account.bech32Address} maxCharacters={22} />
+        <View style={style.flatten(["margin-y-32"]) as ViewStyle}>
+          {account.bech32Address ? (
+            <View
+              style={
+                style.flatten([
+                  "padding-8",
+                  "dark:background-color-white",
+                ]) as ViewStyle
+              }
+            >
+              <QRCode size={200} value={account.bech32Address} />
+            </View>
+          ) : (
+            <View
+              style={StyleSheet.flatten([
+                {
+                  width: 200,
+                  height: 200,
+                },
+                style.flatten(["background-color-gray-400"]),
+              ])}
+            />
+          )}
+        </View>
+        <View style={style.flatten(["flex-row"])}>
+          <Button
+            containerStyle={style.flatten(["flex-1"])}
+            text="Share Address"
+            mode="light"
+            size="large"
+            loading={account.bech32Address === ""}
+            onPress={() => {
+              Share.share({
+                message: account.bech32Address,
+              }).catch((e) => {
+                console.log(e);
+              });
+            }}
+          />
+        </View>
+      </View>
+    </CardModal>
+  );
+});

@@ -1,0 +1,84 @@
+@import "../../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard/custom/functions";
+@import "../../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard/custom/mixins";
+@import "../../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard/custom/variables";
+
+.fullModal {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+
+  &:global(.modal-content) {
+    box-shadow: none;
+  }
+}
+
+.input {
+  font-size: 14px;
+  box-shadow: none !important;
+  background: transparent !important;
+  border: none;
+  margin-top: -4px;
+
+  &:focus {
+    box-shadow: none !important;
+    background: transparent !important;
+    border: none;
+    color: white !important;
+    font-weight: bold;
+  }
+}
+.input::placeholder {
+  color: white;
+  opacity: 1 !important;
+}
+.addressBookButton {
+  background: white;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-width: 0;
+
+  box-shadow: $input-alternative-box-shadow !important;
+
+  &:hover {
+    box-shadow: $input-focus-alternative-box-shadow !important;
+  }
+}
+.errorText {
+  color: #fb8c72;
+  font-size: 12px;
+}
+
+.infoText {
+  color: grey;
+  font-size: 12px;
+  margin: 3px;
+}
+
+.righContentButtons {
+  border: none !important;
+  padding: 0px;
+  background: transparent !important;
+}
+.righContentButtons:disabled {
+  border: none !important;
+  padding: 0px;
+  background: transparent !important;
+  cursor: not-allowed;
+}
+.righContent {
+  display: flex;
+}
+.label {
+  color: #fff;
+  font-family: Lexend;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px;
+  opacity: 0.6;
+  margin-bottom: 2px;
+}

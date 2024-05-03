@@ -1,6 +1,6 @@
 import { StyleSheet, View, ViewStyle } from "react-native";
 import React, { FunctionComponent } from "react";
-import { useStyle } from "../../styles";
+import { useStyle } from "styles/index";
 
 export const ProgressBar: FunctionComponent<{
   progress: number;

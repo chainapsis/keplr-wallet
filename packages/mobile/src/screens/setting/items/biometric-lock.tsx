@@ -1,15 +1,17 @@
 import React, { FunctionComponent, useState } from "react";
-import { SettingItem } from "../components";
-import { Toggle } from "../../../components/toggle";
+import { SettingItem } from "screens/setting/components";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../stores";
+import { useStore } from "stores/index";
 import delay from "delay";
-import { PasswordInputModal } from "../../../modals/password-input/modal";
+import { PasswordInputModal } from "modals/password-input/modal";
+import { Platform, Switch, ViewStyle } from "react-native";
+import { useStyle } from "styles/index";
+import { FingerPrintIconWithoutCircle } from "components/new/icon/finger-print";
 
-export const SettingBiometricLockItem: FunctionComponent<{
-  topBorder?: boolean;
-}> = observer(({ topBorder }) => {
+export const SettingBiometricLockItem: FunctionComponent = observer(() => {
   const { keychainStore } = useStore();
+
+  const style = useStyle();
 
   const [isOpenModal, setIsOpenModal] = useState(false);
   /*
@@ -47,10 +49,23 @@ export const SettingBiometricLockItem: FunctionComponent<{
       />
       <SettingItem
         label="Use biometric authentication"
+        left={<FingerPrintIconWithoutCircle size={16} />}
         right={
-          <Toggle
-            on={keychainStore.isBiometryOn}
-            onChange={async (value) => {
+          <Switch
+            trackColor={{
+              false: "#767577",
+              true: Platform.OS === "ios" ? "#ffffff00" : "#767577",
+            }}
+            thumbColor={keychainStore.isBiometryOn ? "#5F38FB" : "#D0BCFF66"}
+            style={[
+              {
+                borderRadius: 16,
+                borderWidth: 1,
+                // transform: [{ scaleX: 1.1 }, { scaleY: 1.1 }],
+              },
+              style.flatten(["border-color-pink-light@40%"]),
+            ]}
+            onValueChange={async (value) => {
               if (value) {
                 setIsOpenModal(true);
                 setIsTurnOffBiometryFallback(false);
@@ -64,9 +79,10 @@ export const SettingBiometricLockItem: FunctionComponent<{
                 }
               }
             }}
+            value={keychainStore.isBiometryOn}
           />
         }
-        topBorder={topBorder}
+        style={style.flatten(["height-72", "padding-18"]) as ViewStyle}
       />
     </React.Fragment>
   );

@@ -7,20 +7,20 @@ import React, {
 } from "react";
 import { Image, Text, TouchableOpacity, View, ViewStyle } from "react-native";
 import { observer } from "mobx-react-lite";
-import { useStyle } from "../../styles";
+import { useStyle } from "styles/index";
 import * as SplashScreen from "expo-splash-screen";
-import { TextInput } from "../../components/input";
-import { Button } from "../../components/button";
+import { TextInput } from "components/input";
+import { Button } from "components/button";
 import delay from "delay";
-import { useStore } from "../../stores";
+import { useStore } from "stores/index";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { StackActions, useNavigation } from "@react-navigation/native";
 import { KeyRingStatus } from "@keplr-wallet/background";
-import { KeychainStore } from "../../stores/keychain";
+import { KeychainStore } from "stores/keychain";
 import { IAccountStore } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
-import { SimpleGradient } from "../../components/svg";
-import { FingerprintIcon } from "../../components/icon/fingerprint";
+import { SimpleGradient } from "components/svg";
+import { FingerprintIcon } from "components/icon/fingerprint";
 
 let splashScreenHided = false;
 async function hideSplashScreen() {
@@ -220,11 +220,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
           <View style={style.get("flex-3")} />
           <View style={style.flatten(["flex-5", "items-center"]) as ViewStyle}>
             <Image
-              source={
-                style.theme === "dark"
-                  ? require("../../assets/logo/logo-name.png")
-                  : require("../../assets/logo/logo-name.png")
-              }
+              source={require("assets/logo/logo-name.png")}
               style={{
                 height: 45,
               }}
@@ -246,6 +242,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
                 ]) as ViewStyle
               }
               label="Password"
+              keyboardType={"default"}
               returnKeyType="done"
               secureTextEntry={true}
               value={password}

@@ -1,14 +1,14 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { PageWithScrollView } from "../../../components/page";
-import { useStyle } from "../../../styles";
+import { PageWithScrollView } from "components/page";
+import { useStyle } from "styles/index";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { View, ViewStyle } from "react-native";
-import { useStore } from "../../../stores";
+import { useStore } from "stores/index";
 import { useDelegateTxConfig } from "@keplr-wallet/hooks";
-import { AmountInput, FeeButtons, MemoInput } from "../../../components/input";
-import { Button } from "../../../components/button";
-import { useSmartNavigation } from "../../../navigation";
+import { AmountInput, FeeButtons, MemoInput } from "components/input";
+import { Button } from "components/button";
+import { useSmartNavigation } from "navigation/smart-navigation";
 import { Staking } from "@keplr-wallet/stores";
 
 export const DelegateScreen: FunctionComponent = observer(() => {

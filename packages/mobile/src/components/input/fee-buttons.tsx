@@ -7,7 +7,7 @@ import {
   ViewProps,
   ViewStyle,
 } from "react-native";
-import { useStyle } from "../../styles";
+import { useStyle } from "styles/index";
 import { observer } from "mobx-react-lite";
 import { action, makeObservable, observable } from "mobx";
 import {
@@ -17,10 +17,10 @@ import {
   NotLoadedFeeError,
 } from "@keplr-wallet/hooks";
 import { GasInput } from "./gas";
-import { useStore } from "../../stores";
+import { useStore } from "stores/index";
 import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
-import { LoadingSpinner } from "../spinner";
-import { RectButton } from "../rect-button";
+import { LoadingSpinner } from "components/spinner";
+import { RectButton } from "components/rect-button";
 
 export interface FeeButtonsProps {
   labelStyle?: TextStyle;
@@ -334,7 +334,7 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
                 style.flatten([
                   "absolute",
                   "text-caption1",
-                  "color-red-400",
+                  "color-red-250",
                   "margin-top-2",
                   "margin-left-4",
                 ]) as ViewStyle,

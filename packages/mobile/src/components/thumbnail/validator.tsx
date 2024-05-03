@@ -1,8 +1,8 @@
 import React, { FunctionComponent } from "react";
 import { StyleSheet, View, ViewStyle } from "react-native";
 import FastImage from "react-native-fast-image";
-import { useStyle } from "../../styles";
-import { PersonIcon } from "../icon";
+import { useStyle } from "styles/index";
+import { PersonIcon } from "components/icon";
 
 export const ValidatorThumbnail: FunctionComponent<{
   style?: ViewStyle;

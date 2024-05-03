@@ -208,7 +208,7 @@ const KeyRingToolsIcon: FunctionComponent<{
                     : "view_private_key_click"
                 );
 
-                navigate(`/setting/export/${index}?type=${keyStore.type}`);
+                navigate(`/more/export/${index}?type=${keyStore.type}`);
               }}
             >
               <FormattedMessage

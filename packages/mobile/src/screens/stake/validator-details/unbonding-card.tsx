@@ -1,11 +1,11 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../stores";
-import { Card, CardBody } from "../../../components/card";
+import { useStore } from "stores/index";
+import { Card, CardBody } from "components/card";
 import { Text, ViewStyle, View } from "react-native";
-import { useStyle } from "../../../styles";
+import { useStyle } from "styles/index";
 import { useIntl } from "react-intl";
-import { ProgressBar } from "../../../components/progress-bar";
+import { ProgressBar } from "components/progress-bar";
 
 export const UnbondingCard: FunctionComponent<{
   containerStyle?: ViewStyle;

@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useRef, useState } from "react";
-import { PageWithScrollViewInBottomTabView } from "../../components/page";
+import { PageWithScrollViewInBottomTabView } from "components/page";
 import {
   Image,
   ImageSourcePropType,
@@ -8,10 +8,10 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import { useStyle } from "../../styles";
-import { useSmartNavigation } from "../../navigation";
+import { useStyle } from "styles/index";
+import { useSmartNavigation } from "navigation/smart-navigation";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { RectButton } from "../../components/rect-button";
+import { RectButton } from "components/rect-button";
 import Svg, { Path, G, Defs, ClipPath } from "react-native-svg";
 
 export const WebScreen: FunctionComponent = () => {
@@ -46,21 +46,21 @@ export const WebScreen: FunctionComponent = () => {
       </Text>
       <WebpageImageButton
         name="Osmosis"
-        source={require("../../assets/image/webpage/osmosis.png")}
+        source={require("assets/image/webpage/osmosis.png")}
         onPress={() => {
           smartNavigation.pushSmart("Web.Osmosis", {});
         }}
       />
       <WebpageImageButton
         name="Stargaze"
-        source={require("../../assets/image/webpage/stargaze.png")}
+        source={require("assets/image/webpage/stargaze.png")}
         onPress={() => {
           smartNavigation.pushSmart("Web.Stargaze", {});
         }}
       />
       <WebpageImageButton
         name="Junoswap"
-        source={require("../../assets/image/webpage/junoswap.png")}
+        source={require("assets/image/webpage/junoswap.png")}
         nameContainerStyle={style.flatten(["flex-row"])}
         onPress={() => {
           smartNavigation.pushSmart("Web.Junoswap", {});
@@ -68,12 +68,12 @@ export const WebScreen: FunctionComponent = () => {
       />
       <WebpageImageButton
         name="Osmosis"
-        source={require("../../assets/image/webpage/osmosis-frontier.png")}
+        source={require("assets/image/webpage/osmosis-frontier.png")}
         nameContainerStyle={style.flatten(["flex-row"])}
         nameAppend={
           <View style={style.flatten(["justify-end"])}>
             <Image
-              source={require("../../assets/image/webpage/osmosis-frontier-text.png")}
+              source={require("assets/image/webpage/osmosis-frontier-text.png")}
               style={{
                 width: 52.8,
                 height: 18,

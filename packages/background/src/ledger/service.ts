@@ -101,6 +101,10 @@ export class LedgerService {
       ledgerApp,
       async (ledger, retryCount: number) => {
         try {
+          this.interactionService.dispatchEvent(APP_PORT, "ledger-sign", {
+            event: "sign-txn-guide",
+            isShow: true,
+          });
           const pubKey = await ledger.getPublicKey(ledgerApp, bip44HDPath);
           if (
             Buffer.from(expectedPubKey).toString("hex") !==
@@ -111,6 +115,10 @@ export class LedgerService {
           // Cosmos App on Ledger doesn't support the coin type other than 118.
           const signature: Uint8Array = await ledger.sign(bip44HDPath, message);
           // Notify UI Ledger signing succeeded only when Ledger initialization is tried again.
+          this.interactionService.dispatchEvent(APP_PORT, "ledger-sign", {
+            event: "sign-txn-guide",
+            isShow: false,
+          });
           if (retryCount > 0) {
             this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
               event: "sign",
@@ -119,6 +127,10 @@ export class LedgerService {
           }
           return signature;
         } catch (e) {
+          this.interactionService.dispatchEvent(APP_PORT, "ledger-sign", {
+            event: "sign-txn-guide",
+            isShow: false,
+          });
           // Notify UI Ledger signing failed only when Ledger initialization is tried again.
           if (retryCount > 0) {
             this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
@@ -147,6 +159,10 @@ export class LedgerService {
       ledgerApp,
       async (ledger, retryCount: number) => {
         try {
+          this.interactionService.dispatchEvent(APP_PORT, "ledger-sign", {
+            event: "sign-txn-guide",
+            isShow: true,
+          });
           const pubKey = await ledger.getPublicKey(ledgerApp, bip44HDPath);
           if (
             Buffer.from(expectedPubKey).toString("hex") !==
@@ -160,6 +176,10 @@ export class LedgerService {
             message
           );
           // Notify UI Ledger signing succeeded only when Ledger initialization is tried again.
+          this.interactionService.dispatchEvent(APP_PORT, "ledger-sign", {
+            event: "sign-txn-guide",
+            isShow: false,
+          });
           if (retryCount > 0) {
             this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
               event: "sign",
@@ -168,6 +188,10 @@ export class LedgerService {
           }
           return signature;
         } catch (e) {
+          this.interactionService.dispatchEvent(APP_PORT, "ledger-sign", {
+            event: "sign-txn-guide",
+            isShow: false,
+          });
           // Notify UI Ledger signing failed only when Ledger initialization is tried again.
           if (retryCount > 0) {
             this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {

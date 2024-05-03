@@ -7,19 +7,19 @@ import React, {
 } from "react";
 import { BackHandler, Platform, ViewStyle } from "react-native";
 import WebView, { WebViewMessageEvent } from "react-native-webview";
-import { useStyle } from "../../../../styles";
+import { useStyle } from "styles/index";
 import { Keplr } from "@keplr-wallet/provider";
 import { RNMessageRequesterExternal } from "../../../../router";
 import { RNInjectedKeplr } from "../../../../injected/injected-provider";
 import RNFS from "react-native-fs";
 import EventEmitter from "eventemitter3";
-import { PageWithViewInBottomTabView } from "../../../../components/page";
+import { PageWithScrollView } from "components/page";
 import { OnScreenWebpageScreenHeader } from "../header";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { WebViewStateContext } from "../context";
 import { URL } from "react-native-url-polyfill";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../../stores";
+import { useStore } from "stores/index";
 import { AppCurrency, ChainInfo, KeplrMode } from "@keplr-wallet/types";
 import { MessageRequester } from "@keplr-wallet/router";
 import { autorun } from "mobx";
@@ -261,8 +261,8 @@ export const WebpageScreen: FunctionComponent<
   const { name, forceDarkOn, ...restProps } = props;
 
   return (
-    <PageWithViewInBottomTabView
-      backgroundMode={null}
+    <PageWithScrollView
+      backgroundMode={"image"}
       style={style.flatten(["padding-0"]) as ViewStyle}
     >
       <WebViewStateContext.Provider
@@ -314,7 +314,7 @@ export const WebpageScreen: FunctionComponent<
           {...restProps}
         />
       ) : null}
-    </PageWithViewInBottomTabView>
+    </PageWithScrollView>
   );
 });
 

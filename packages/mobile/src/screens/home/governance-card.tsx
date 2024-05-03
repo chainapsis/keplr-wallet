@@ -1,11 +1,11 @@
 import React, { FunctionComponent, useMemo } from "react";
-import { Card, CardDivider, CardHeaderFullButton } from "../../components/card";
+import { Card, CardDivider, CardHeaderFullButton } from "components/card";
 import { ViewStyle } from "react-native";
 import { observer } from "mobx-react-lite";
 import { GovernanceCardBody } from "../governance";
-import { useStore } from "../../stores";
+import { useStore } from "stores/index";
 import { ObservableQueryProposal, Governance } from "@keplr-wallet/stores";
-import { useSmartNavigation } from "../../navigation";
+import { useSmartNavigation } from "navigation/smart-navigation";
 
 export const GovernanceCard: FunctionComponent<{
   containerStyle?: ViewStyle;

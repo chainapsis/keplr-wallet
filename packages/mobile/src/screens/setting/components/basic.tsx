@@ -1,8 +1,8 @@
 import React, { FunctionComponent } from "react";
-import { useStyle } from "../../../styles";
+import { useStyle } from "styles/index";
 import { StyleSheet, Text, TextStyle, View, ViewStyle } from "react-native";
-import { RightArrowIcon } from "../../../components/icon";
-import { RectButton } from "../../../components/rect-button";
+import { RectButton } from "components/rect-button";
+import { BlurBackground } from "components/new/blur-background/blur-background";
 
 export const SettingSectionTitle: FunctionComponent<{
   title: string;
@@ -10,20 +10,8 @@ export const SettingSectionTitle: FunctionComponent<{
   const style = useStyle();
 
   return (
-    <View
-      style={
-        style.flatten([
-          "padding-x-20",
-          "padding-top-16",
-          "padding-bottom-4",
-        ]) as ViewStyle
-      }
-    >
-      <Text
-        style={style.flatten(["text-caption1", "color-text-low", "uppercase"])}
-      >
-        {title}
-      </Text>
+    <View style={style.flatten(["padding-y-12"]) as ViewStyle}>
+      <Text style={style.flatten(["body3", "color-text-low"])}>{title}</Text>
     </View>
   );
 };
@@ -41,12 +29,13 @@ export const SettingItem: FunctionComponent<{
 
   onPress?: () => void;
 
-  topBorder?: boolean;
+  bottomBorder?: boolean;
   borderColor?: string;
 
   rippleColor?: string;
   underlayColor?: string;
   activeOpacity?: number;
+  backgroundBlur?: boolean;
 }> = ({
   containerStyle,
   style: propStyle,
@@ -57,22 +46,27 @@ export const SettingItem: FunctionComponent<{
   left,
   right,
   onPress,
-  topBorder,
+  bottomBorder,
   borderColor,
   rippleColor,
   underlayColor,
   activeOpacity,
+  backgroundBlur,
 }) => {
   const style = useStyle();
 
   const renderChildren = () => {
     return (
       <React.Fragment>
-        {left}
+        {left ? (
+          <View style={style.flatten(["margin-right-14"]) as ViewStyle}>
+            {left}
+          </View>
+        ) : null}
         <View>
           <Text
             style={StyleSheet.flatten([
-              style.flatten(["body1", "color-text-middle"]),
+              style.flatten(["body3", "color-white"]),
               labelStyle,
             ])}
           >
@@ -100,27 +94,20 @@ export const SettingItem: FunctionComponent<{
   };
 
   return (
-    <View style={containerStyle}>
-      {topBorder ? (
-        <View
-          style={StyleSheet.flatten([
-            style.flatten([
-              "height-1",
-              "background-color-gray-50",
-              "dark:background-color-platinum-500@75%",
-            ]) as ViewStyle,
-            borderColor ? { backgroundColor: borderColor } : {},
-          ])}
-        />
-      ) : null}
+    <BlurBackground
+      borderRadius={12}
+      blurIntensity={16}
+      backgroundBlur={backgroundBlur}
+      containerStyle={
+        [style.flatten(["margin-y-2"]), containerStyle] as ViewStyle
+      }
+    >
       {onPress ? (
         <RectButton
           style={StyleSheet.flatten([
             style.flatten([
-              "background-color-white",
-              "dark:background-color-platinum-600",
-              "height-62",
-              "padding-x-20",
+              "padding-x-12",
+              "padding-y-18",
               "flex-row",
               "items-center",
             ]) as ViewStyle,
@@ -137,9 +124,7 @@ export const SettingItem: FunctionComponent<{
         <View
           style={StyleSheet.flatten([
             style.flatten([
-              "background-color-white",
-              "dark:background-color-platinum-600",
-              "height-62",
+              "height-56",
               "padding-x-20",
               "flex-row",
               "items-center",
@@ -150,21 +135,22 @@ export const SettingItem: FunctionComponent<{
           {renderChildren()}
         </View>
       )}
-      <View
-        style={StyleSheet.flatten([
-          style.flatten([
-            "height-1",
-            "background-color-gray-50",
-            "dark:background-color-platinum-500@75%",
-          ]) as ViewStyle,
-          borderColor ? { backgroundColor: borderColor } : {},
-        ])}
-      />
-    </View>
+      {bottomBorder ? (
+        <View
+          style={StyleSheet.flatten([
+            style.flatten([
+              "height-1",
+              "background-color-white@20%",
+            ]) as ViewStyle,
+            borderColor ? { backgroundColor: borderColor } : {},
+          ])}
+        />
+      ) : null}
+    </BlurBackground>
   );
 };
 
-export const RightArrow: FunctionComponent<{
+export const Right: FunctionComponent<{
   paragraph?: string;
 }> = ({ paragraph }) => {
   const style = useStyle();
@@ -172,19 +158,10 @@ export const RightArrow: FunctionComponent<{
   return (
     <React.Fragment>
       {paragraph ? (
-        <Text
-          style={
-            style.flatten([
-              "body1",
-              "color-text-low",
-              "margin-right-16",
-            ]) as ViewStyle
-          }
-        >
+        <Text style={style.flatten(["body3", "color-text-low"]) as ViewStyle}>
           {paragraph}
         </Text>
       ) : null}
-      <RightArrowIcon color={style.get("color-text-low").color} height={15} />
     </React.Fragment>
   );
 };

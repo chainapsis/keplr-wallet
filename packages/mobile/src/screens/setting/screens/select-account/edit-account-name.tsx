@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { PageWithScrollView } from "../../../../components/page";
-import { useStyle } from "../../../../styles";
+import { PageWithScrollView } from "components/page";
+import { useStyle } from "styles/index";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import {
   AddressBookConfig,
@@ -9,14 +9,10 @@ import {
 } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { View, ViewStyle } from "react-native";
-import { useStore } from "../../../../stores";
-import {
-  AddressInput,
-  MemoInput,
-  TextInput,
-} from "../../../../components/input";
-import { Button } from "../../../../components/button";
-import { useSmartNavigation } from "../../../../navigation";
+import { useStore } from "stores/index";
+import { AddressInput, MemoInput, TextInput } from "components/input";
+import { Button } from "components/button";
+import { useSmartNavigation } from "navigation/smart-navigation";
 
 export const EditAccountNameScreen: FunctionComponent = observer(() => {
   const route = useRoute<

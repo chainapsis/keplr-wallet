@@ -1,3 +1,4 @@
+/* eslint-disable react/no-deprecated */
 // Shim ------------
 
 import { ErrorBoundary } from "./error-boundary";
@@ -15,22 +16,20 @@ import { HashRouter, Route, Routes } from "react-router-dom";
 
 import { AccessPage, Secret20ViewingKeyAccessPage } from "./pages/access";
 import { NotificationPage } from "./pages/notification";
-import { IBCTransferPage } from "./pages/ibc-transfer";
-import { LockPage } from "./pages/lock";
-import { MainPage } from "./pages/main";
-import { MorePage } from "./pages/more";
-import { RegisterPage } from "./pages/register";
-import { SendPage } from "./pages/send";
+import { IBCTransferPage } from "./pages-new/more/ibc-transfer";
+
+import { MainPage } from "./pages-new/main";
+import { RegisterPage } from "./pages-new/register";
+import { SendPage } from "./pages-new/send";
 import { SetKeyRingPage } from "./pages/setting/keyring";
-
 import { Banner } from "@components/banner";
-
 import { ConfirmProvider } from "@components/confirm";
 import { LoadingIndicatorProvider } from "@components/loading-indicator";
 import {
   NotificationProvider,
   NotificationStoreProvider,
 } from "@components/notification";
+import { LockPage } from "./pages-new/lock";
 
 import { configure } from "mobx";
 import { observer } from "mobx-react-lite";
@@ -40,73 +39,79 @@ import {
   StartAutoLockMonitoringMsg,
 } from "@keplr-wallet/background";
 import Modal from "react-modal";
-import { LedgerGrantPage } from "./pages/ledger";
-import { SettingPage } from "./pages/setting";
-import { AddressBookPage } from "./pages/setting/address-book";
-import { ClearPage } from "./pages/setting/clear";
+import { AddressBookPage } from "./pages-new/more/address-book";
+import { CurrencyPge } from "./pages-new/more/currency";
 import {
   SettingConnectionsPage,
   SettingSecret20ViewingKeyConnectionsPage,
-} from "./pages/setting/connections";
-import { ExportPage } from "./pages/setting/export";
-import { SettingFiatPage } from "./pages/setting/fiat";
-import { ChangeNamePage } from "./pages/setting/keyring/change";
-import { SettingLanguagePage } from "./pages/setting/language";
-import { AddTokenPage } from "./pages/setting/token/add";
-import { ManageTokenPage } from "./pages/setting/token/manage";
+} from "./pages-new/more/security-privacy/connections";
+import { AddTokenPage } from "./pages-new/more/token/add";
+import { ManageTokenPage } from "./pages-new/more/token/manage";
+import { LedgerGrantPage } from "./pages/ledger";
+import { SettingPage } from "./pages/setting";
+import { ClearPage } from "./pages/setting/clear";
 import { StoreProvider, useStore } from "./stores";
 
 import { AdditionalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
 
+import { ChatStoreProvider } from "@components/chat/store";
 import { Keplr } from "@keplr-wallet/provider";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import manifest from "./manifest.v2.json";
+import { ActivityPage } from "./pages-new/activity";
+import { ActivityDetails } from "./pages-new/activity/activity-details";
+import { AssetView } from "./pages-new/asset-view";
+import { AxelarBridgeCosmos } from "./pages-new/axelar-bridge/axelar-bridge-cosmos";
+import { AxelarBridgeEVM } from "./pages-new/axelar-bridge/axelar-bridge-evm";
+import { BridgePage } from "./pages-new/bridge";
+import { ChangeNamePageV2 } from "./pages-new/keyring-dev/change";
+import { MorePage } from "./pages-new/more";
+import { AppVersion } from "./pages-new/more/app-version";
+import { MoreLanguagePage } from "./pages-new/more/language";
+import { MoreNotifications } from "./pages-new/more/notification";
+import { NotificationOrganizations } from "./pages-new/more/notification/notiphy-notification/notification-organizations";
+import { NotificationTopics } from "./pages-new/more/notification/notiphy-notification/notification-topics";
+import { SecurityPrivacyPage } from "./pages-new/more/security-privacy";
+import { AutoLockPage } from "./pages-new/more/security-privacy/autolock";
+import { PermissionsGetChainInfosPage } from "./pages-new/more/security-privacy/permissions/get-chain-infos";
+import { ExportPage } from "./pages-new/more/view-mnemonic-seed";
+import { Portfolio } from "./pages-new/portfolio";
+import { Receive } from "./pages-new/receive";
+import { SignPageV2 } from "./pages-new/sign";
+import { AgentChatSection } from "./pages/agent-chat-section";
+import { AuthZPage } from "./pages/authz";
+import { BridgeHistoryView } from "./pages/bridge/bridge-history";
+import { ChainSuggestedPage } from "./pages/chain/suggest";
 import { ChatPage } from "./pages/chat";
 import { ChatSection } from "./pages/chat-section";
-import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
-import { BACKGROUND_PORT } from "@keplr-wallet/router";
-import { ChatStoreProvider } from "@components/chat/store";
+import { FetchnameService } from "./pages/fetch-name-service";
+import { DomainDetails } from "./pages/fetch-name-service/domain-details";
+import { AddMember } from "./pages/group-chat/add-member";
+import { GroupChatSection } from "./pages/group-chat/chat-section";
+import { CreateGroupChat } from "./pages/group-chat/create-group-chat";
+import { EditMember } from "./pages/group-chat/edit-member";
+import { ReviewGroupChat } from "./pages/group-chat/review-details";
+import { ICNSAdr36SignPage } from "./pages/icns/sign";
+import { KeystoneImportPubkeyPage } from "./pages/keystone";
+import { KeystoneSignPage } from "./pages/keystone/sign";
 import { NewChat } from "./pages/new-chat";
+import { ReviewNotification } from "./pages/notiphy-notification/review-notification";
+import { GrantGlobalPermissionGetChainInfosPage } from "./pages/permission/grant";
+import { Proposals } from "./pages/proposals";
+import { ProposalDetail } from "./pages/proposals/proposal-detail";
+import { PropsalVoteStatus } from "./pages/proposals/proposal-vote-status";
+import { AddEvmChain } from "./pages/setting/addEvmChain";
+import { ChainActivePage } from "./pages/setting/chain-active";
 import { ChatSettings } from "./pages/setting/chat";
 import { BlockList } from "./pages/setting/chat/block";
 import { Privacy } from "./pages/setting/chat/privacy";
 import { ReadRecipt } from "./pages/setting/chat/readRecipt";
-import { CreateGroupChat } from "./pages/group-chat/create-group-chat";
-import { AddMember } from "./pages/group-chat/add-member";
-import { ReviewGroupChat } from "./pages/group-chat/review-details";
-import { GroupChatSection } from "./pages/group-chat/chat-section";
-import { EditMember } from "./pages/group-chat/edit-member";
-import { AgentChatSection } from "./pages/agent-chat-section";
-import { NotificationOrganizations } from "./pages/notiphy-notification/notification-organizations";
-import { NotificationTopics } from "./pages/notiphy-notification/notification-topics";
-import { SettingNotifications } from "./pages/setting/notification";
-import { ReviewNotification } from "./pages/notiphy-notification/review-notification";
-import { KeystoneImportPubkeyPage } from "./pages/keystone";
-import { KeystoneSignPage } from "./pages/keystone/sign";
 import { SettingEndpointsPage } from "./pages/setting/endpoints";
-import { SettingAutoLockPage } from "./pages/setting/autolock";
-import { SettingSecurityPrivacyPage } from "./pages/setting/security-privacy";
-import { ChainActivePage } from "./pages/setting/chain-active";
-import { SettingPermissionsGetChainInfosPage } from "./pages/setting/security-privacy/permissions/get-chain-infos";
-import { AuthZPage } from "./pages/authz";
-import { ICNSAdr36SignPage } from "./pages/icns/sign";
-import { SignPage } from "./pages/sign";
-import { ChainSuggestedPage } from "./pages/chain/suggest";
-import { GrantGlobalPermissionGetChainInfosPage } from "./pages/permission/grant";
-import { ValidatorList } from "./pages/validator-list";
+import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
 import { Validator } from "./pages/validator";
+import { ValidatorList } from "./pages/validator-list";
 import { StakeComplete } from "./pages/validator/stake-complete";
-import { ActivityPage } from "./pages/activity";
-import { Proposals } from "./pages/proposals";
-import { ProposalDetail } from "./pages/proposals/proposal-detail";
-import { PropsalVoteStatus } from "./pages/proposals/proposal-vote-status";
-import { FetchnameService } from "./pages/fetch-name-service";
-import { DomainDetails } from "./pages/fetch-name-service/domain-details";
-import { BridgePage } from "./pages/bridge";
-import { BridgeHistoryView } from "./pages/bridge/bridge-history";
-import { AddEvmChain } from "./pages/setting/addEvmChain";
-import { AxelarBridgeEVM } from "./pages/axelar-bridge/axelar-bridge-evm";
-import { AxelarBridgeCosmos } from "./pages/axelar-bridge/axelar-bridge-cosmos";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -115,7 +120,7 @@ window.keplr = new Keplr(
 );
 
 // Make sure that icon file will be included in bundle
-require("@assets/logo-256.svg");
+require("@assets/svg/wireframe/LogoV2.svg");
 require("@assets/icon/icon-16.png");
 require("@assets/icon/icon-48.png");
 require("@assets/icon/icon-128.png");
@@ -175,11 +180,14 @@ const StateRenderer: FunctionComponent = observer(() => {
     );
   } else if (keyRingStore.status === KeyRingStatus.NOTLOADED) {
     return (
-      <div style={{ height: "100%" }}>
-        <Banner
-          icon={require("@assets/logo-256.svg")}
-          logo={require("@assets/brand-text.png")}
-        />
+      <div
+        style={{
+          height: "100%",
+          backgroundColor: "#030e3b",
+          backgroundImage: `url(${require("@assets/svg/wireframe/bg-onboarding.svg")})`,
+        }}
+      >
+        <Banner icon={require("@assets/svg/wireframe/LogoV2.svg")} logo={""} />
       </div>
     );
   } else {
@@ -208,6 +216,10 @@ ReactDOM.render(
                         path="/access/viewing-key"
                         element={<Secret20ViewingKeyAccessPage />}
                       />
+                      <Route
+                        path="/activity-details"
+                        element={<ActivityDetails />}
+                      />
                       <Route path="/register" element={<RegisterPage />} />
                       <Route path="/send" element={<SendPage />} />
                       <Route
@@ -228,28 +240,31 @@ ReactDOM.render(
                         path="/keystone/sign"
                         element={<KeystoneSignPage />}
                       />
+                      <Route path="/app-version" element={<AppVersion />} />
                       <Route
                         path="/ledger-grant"
                         element={<LedgerGrantPage />}
                       />
+                      <Route path="/more" element={<MorePage />} />
                       <Route
-                        path="/setting/language"
-                        element={<SettingLanguagePage />}
+                        path="/more/language"
+                        element={<MoreLanguagePage />}
                       />
                       <Route
-                        path="/setting/fiat"
-                        element={<SettingFiatPage />}
+                        path="/more/export/:index"
+                        element={<ExportPage />}
                       />
+                      <Route path="/more/currency" element={<CurrencyPge />} />
                       <Route
-                        path="/setting/connections"
+                        path="more/security-privacy/connections"
                         element={<SettingConnectionsPage />}
                       />
                       <Route
-                        path="/setting/connections/viewing-key/:contractAddress"
+                        path="/more/connections/viewing-key/:contractAddress"
                         element={<SettingSecret20ViewingKeyConnectionsPage />}
                       />
                       <Route
-                        path="/setting/address-book"
+                        path="/more/address-book"
                         element={<AddressBookPage />}
                       />
                       <Route path="/activity" element={<ActivityPage />} />
@@ -270,23 +285,19 @@ ReactDOM.render(
                         element={<SetKeyRingPage />}
                       />
                       <Route
-                        path="/setting/export/:index"
-                        element={<ExportPage />}
-                      />
-                      <Route
                         path="/setting/clear/:index"
                         element={<ClearPage />}
                       />
                       <Route
                         path="/setting/keyring/change/name/:index"
-                        element={<ChangeNamePage />}
+                        element={<ChangeNamePageV2 />}
                       />
                       <Route
-                        path="/setting/token/add"
+                        path="/more/token/add"
                         element={<AddTokenPage />}
                       />
                       <Route
-                        path="/setting/token/manage"
+                        path="/more/token/manage"
                         element={<ManageTokenPage />}
                       />
                       <Route
@@ -294,14 +305,16 @@ ReactDOM.render(
                         element={<SettingEndpointsPage />}
                       />
                       <Route
-                        path="/setting/autolock"
-                        element={<SettingAutoLockPage />}
+                        path="/more/security-privacy/autolock"
+                        element={<AutoLockPage />}
                       />
                       <Route
-                        path="/setting/security-privacy"
-                        element={<SettingSecurityPrivacyPage />}
+                        path="/more/security-privacy"
+                        element={<SecurityPrivacyPage />}
                       />
-                      <Route path="/sign" element={<SignPage />} />
+                      {/* <Route path="/sign" element={<SignPage />} /> */}
+                      <Route path="/sign" element={<SignPageV2 />} />
+
                       <Route
                         path="/icns/adr36-signatures"
                         element={<ICNSAdr36SignPage />}
@@ -323,8 +336,8 @@ ReactDOM.render(
                         element={<GrantGlobalPermissionGetChainInfosPage />}
                       />
                       <Route
-                        path="/setting/permissions/get-chain-infos"
-                        element={<SettingPermissionsGetChainInfosPage />}
+                        path="/more/permissions/get-chain-infos"
+                        element={<PermissionsGetChainInfosPage />}
                       />
                       <Route
                         path="/setting/chain-active"
@@ -374,10 +387,9 @@ ReactDOM.render(
                         path="/chat/agent/:name"
                         element={<AgentChatSection />}
                       />
-                      <Route path="/more" element={<MorePage />} />
                       <Route
-                        path="/setting/notifications"
-                        element={<SettingNotifications />}
+                        path="/more/notifications"
+                        element={<MoreNotifications />}
                       />
                       <Route path="/setting/chat" element={<ChatSettings />} />
                       <Route
@@ -417,6 +429,10 @@ ReactDOM.render(
                         path="/setting/addEvmChain"
                         element={<AddEvmChain />}
                       />
+                      <Route path="/receive" element={<Receive />} />
+                      <Route path="/portfolio" element={<Portfolio />} />
+                      <Route path="/asset" element={<AssetView />} />
+
                       <Route path="*" element={<StateRenderer />} />
                     </Routes>
                   </ChatStoreProvider>

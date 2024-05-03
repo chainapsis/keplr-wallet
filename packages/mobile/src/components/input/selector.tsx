@@ -7,9 +7,9 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import { useStyle } from "../../styles";
-import { registerModal } from "../../modals/base";
-import { RectButton } from "../rect-button";
+import { useStyle } from "styles/index";
+import { registerModal } from "modals/base";
+import { RectButton } from "components/rect-button";
 
 export const SelectorModal: FunctionComponent<{
   isOpen: boolean;

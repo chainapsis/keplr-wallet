@@ -1,17 +1,24 @@
 import React, { FunctionComponent, ReactElement, isValidElement } from "react";
-import { useStyle } from "../../styles";
 import { Text, StyleSheet, TextStyle, View, ViewStyle } from "react-native";
-import { LoadingSpinner } from "../spinner";
-import { RectButton } from "../rect-button";
+import Svg, {
+  Defs,
+  LinearGradient,
+  Stop,
+  Text as TextSvg,
+} from "react-native-svg";
+import { useStyle } from "styles/index";
+import { RectButton } from "components/rect-button";
+import LottieView from "lottie-react-native";
 
 export const Button: FunctionComponent<{
-  color?: "primary" | "danger";
+  color?: "primary" | "danger" | "gradient";
   mode?: "fill" | "light" | "outline" | "text";
-  size?: "default" | "small" | "large";
+  size?: "default" | "small" | "large" | "xlarge";
   text: string;
   leftIcon?: ReactElement | ((color: string) => ReactElement);
   rightIcon?: ReactElement | ((color: string) => ReactElement);
   loading?: boolean;
+  loaderColor?: string;
   disabled?: boolean;
 
   onPress?: () => void;
@@ -41,48 +48,35 @@ export const Button: FunctionComponent<{
   const style = useStyle();
 
   const backgroundColorDefinitions: string[] = (() => {
-    const baseColor = color === "primary" ? "blue" : "red";
+    const baseColor = color === "primary" ? "white" : "red";
 
     switch (mode) {
       case "fill":
         if (disabled) {
           if (color === "primary") {
             return [
-              `background-color-${baseColor}-200`,
-              `dark:background-color-${baseColor}-600`,
+              "background-color-transparent",
+              "border-color-white@20%",
+              "border-width-1",
             ];
           } else {
-            return [
-              `background-color-${baseColor}-100`,
-              `dark:background-color-${baseColor}-700`,
-            ];
+            return [`background-color-${baseColor}-300`];
           }
         } else {
-          return [`background-color-${baseColor}-400`];
+          return [`background-color-${baseColor}`];
         }
       case "light":
         if (disabled) {
           if (color === "primary") {
-            return [
-              `background-color-${baseColor}-50`,
-              "dark:background-color-platinum-500",
-            ];
+            return [`background-color-${baseColor}-50`];
           } else {
-            return [
-              `background-color-${baseColor}-100`,
-              `dark:background-color-${baseColor}-700`,
-            ];
+            return [`background-color-${baseColor}-100`];
           }
         } else {
-          return [
-            `background-color-${baseColor}-100`,
-            color === "primary"
-              ? "dark:background-color-platinum-400"
-              : `dark:background-color-${baseColor}-600`,
-          ];
+          return [`background-color-${baseColor}-100`];
         }
       case "outline":
-        return ["background-color-transparent"];
+        return ["background-color-transparent", "border-color-gray-200"];
       default:
         return ["background-color-transparent"];
     }
@@ -90,10 +84,12 @@ export const Button: FunctionComponent<{
 
   const textDefinition = (() => {
     switch (size) {
+      case "xlarge":
+        return "text-button0";
       case "large":
         return "text-button1";
       case "small":
-        return "text-button3";
+        return "text-caption2";
       default:
         return "text-button2";
     }
@@ -106,23 +102,23 @@ export const Button: FunctionComponent<{
       case "fill":
         if (disabled) {
           if (color === "primary") {
-            return ["color-white", "dark:color-platinum-200"];
+            return ["color-white@20%"];
           } else {
-            return [`color-${baseColor}-200`, `dark:color-${baseColor}-500`];
+            return [`color-${baseColor}-200`];
           }
         }
 
         if (color === "primary") {
-          return ["color-white", `dark:color-${baseColor}-50`];
+          return ["color-indigo-900"];
         } else {
-          return ["color-white"];
+          return ["color-indigo-900"];
         }
       case "light":
         if (disabled) {
           if (color === "primary") {
-            return [`color-${baseColor}-200`, "dark:color-platinum-200"];
+            return [`color-${baseColor}-200`];
           } else {
-            return [`color-${baseColor}-200`, `dark:color-${baseColor}-500`];
+            return [`color-${baseColor}-200`];
           }
         }
 
@@ -134,23 +130,23 @@ export const Button: FunctionComponent<{
         ];
       case "outline":
         if (disabled) {
-          return [`color-${baseColor}-200`, `dark:color-${baseColor}-600`];
+          return [`color-${baseColor}-200`];
         }
 
         return [`color-${baseColor}-400`];
       case "text":
         if (disabled) {
           if (color === "primary") {
-            return ["color-gray-200", "dark:color-platinum-300"];
+            return ["color-gray-200"];
           } else {
-            return [`color-${baseColor}-200`, `dark:color-${baseColor}-600`];
+            return [`color-${baseColor}-200`];
           }
         }
 
         if (color === "primary") {
-          return [`color-${baseColor}-400`, "dark:color-platinum-50"];
+          return [`color-${baseColor}-400`];
         } else {
-          return [`color-${baseColor}-400`, `dark:color-${baseColor}-300`];
+          return [`color-${baseColor}-400`];
         }
     }
   })();
@@ -296,17 +292,61 @@ export const Button: FunctionComponent<{
                 )}
           </View>
         </View>
-        <Text
-          style={StyleSheet.flatten([
-            style.flatten(
-              [textDefinition, "text-center", ...(textColorDefinition as any)],
-              [loading && "opacity-transparent"]
-            ),
-            textStyle,
-          ])}
-        >
-          {text}
-        </Text>
+        {color === "gradient" ? (
+          <Svg
+            width="100%"
+            height="26"
+            style={StyleSheet.flatten([
+              style.flatten(
+                [
+                  textDefinition,
+                  "text-center",
+                  ...(textColorDefinition as any),
+                ],
+                [loading && "opacity-transparent"]
+              ),
+              textStyle,
+            ])}
+          >
+            <Defs>
+              <LinearGradient
+                id="customGradient"
+                x1="37.86%"
+                y1="0%"
+                x2="78.96%"
+                y2="100%"
+              >
+                <Stop offset="0%" stopColor="#0B1742" />
+                <Stop offset="100%" stopColor="#F9774B" />
+              </LinearGradient>
+            </Defs>
+            <TextSvg
+              x="50%"
+              y="70%"
+              textAnchor="middle"
+              fill="url(#customGradient)"
+            >
+              {text}
+            </TextSvg>
+          </Svg>
+        ) : (
+          <Text
+            style={StyleSheet.flatten([
+              style.flatten(
+                [
+                  textDefinition,
+                  "text-center",
+                  ...(textColorDefinition as any),
+                ],
+                [loading && "opacity-transparent"]
+              ),
+              textStyle,
+            ])}
+          >
+            {text}
+          </Text>
+        )}
+
         <View
           style={
             style.flatten(
@@ -331,12 +371,11 @@ export const Button: FunctionComponent<{
               "items-center",
             ])}
           >
-            <LoadingSpinner
-              color={
-                // TODO: Color for loading spinner in button is not yet determined.
-                style.flatten([...(textColorDefinition as any)]).color
-              }
-              size={20}
+            <LottieView
+              source={require("assets/lottie/loading.json")}
+              autoPlay
+              loop
+              style={style.flatten(["width-24", "height-24"]) as ViewStyle}
             />
           </View>
         ) : null}

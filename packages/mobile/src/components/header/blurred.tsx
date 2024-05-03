@@ -4,12 +4,13 @@ import {
   StackHeaderProps,
   TransitionPresets,
 } from "@react-navigation/stack";
-import { Animated, Platform, StyleSheet, View } from "react-native";
+import { Animated, Platform, StyleSheet, View, ViewStyle } from "react-native";
 import { BlurView } from "@react-native-community/blur";
-import { usePageScrollPosition } from "../../providers/page-scroll-position";
+import { usePageScrollPosition } from "providers/page-scroll-position";
 import { useRoute } from "@react-navigation/native";
-import { HeaderLeftBackButton } from "./button";
-import { useStyle } from "../../styles";
+import { HeaderLeftBackButton, HeaderLeftBackBlurButton } from "./button";
+import { useStyle } from "styles/index";
+import { BlurBackground } from "components/new/blur-background/blur-background";
 
 type HeaderBackgroundMode =
   | "gradient"
@@ -34,10 +35,10 @@ const getBlurredHeaderScreenOptionsPreset = (
       return <BlurredHeader {...props} backgroundMode={backgroundMode} />;
     },
     headerLeftContainerStyle: {
-      marginLeft: 10,
+      paddingLeft: 20,
     },
     headerRightContainerStyle: {
-      marginRight: 10,
+      paddingRight: 20,
     },
     // eslint-disable-next-line react/display-name
     headerLeft: (props: any) => <HeaderLeftBackButton {...props} />,
@@ -71,13 +72,38 @@ export const TransparentHeaderOptionsPreset = {
     return <TransparentHeader {...props} />;
   },
   headerLeftContainerStyle: {
-    marginLeft: 10,
+    paddingLeft: 20,
   },
   headerRightContainerStyle: {
-    marginRight: 10,
+    paddingRight: 20,
   },
   // eslint-disable-next-line react/display-name
-  headerLeft: (props: any) => <HeaderLeftBackButton {...props} />,
+  headerLeft: (props: any) => <HeaderLeftBackBlurButton {...props} />,
+  ...TransitionPresets.SlideFromRightIOS,
+};
+
+export const BlurHeaderOptionsPreset = {
+  headerTitleAlign: "center" as "left" | "center",
+  headerStyle: {
+    backgroundColor: "transparent",
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  headerTitleStyle: { color: "white" },
+  headerBackground: undefined,
+  headerBackTitleVisible: false,
+  // eslint-disable-next-line react/display-name
+  header: (props: any) => {
+    return <BlurHeader {...props} />;
+  },
+  headerLeftContainerStyle: {
+    paddingLeft: 20,
+  },
+  headerRightContainerStyle: {
+    paddingRight: 20,
+  },
+  // eslint-disable-next-line react/display-name
+  headerLeft: (props: any) => <HeaderLeftBackBlurButton {...props} />,
   ...TransitionPresets.SlideFromRightIOS,
 };
 
@@ -190,7 +216,7 @@ const TransparentHeader: FunctionComponent<StackHeaderProps> = (props) => {
   const { ...restProps } = props;
 
   return (
-    <View>
+    <View style={{ paddingVertical: 6 }}>
       <View
         style={StyleSheet.flatten([
           {
@@ -206,5 +232,27 @@ const TransparentHeader: FunctionComponent<StackHeaderProps> = (props) => {
       />
       <Header {...restProps} />
     </View>
+  );
+};
+
+const BlurHeader: FunctionComponent<StackHeaderProps> = (props) => {
+  const { ...restProps } = props;
+  const style = useStyle();
+
+  return (
+    <BlurBackground
+      backgroundBlur={true}
+      borderRadius={0}
+      blurIntensity={40}
+      blurType="dark"
+      containerStyle={
+        style.flatten([
+          "padding-y-8",
+          "background-color-indigo-900@60%",
+        ]) as ViewStyle
+      }
+    >
+      <Header {...restProps} />
+    </BlurBackground>
   );
 };

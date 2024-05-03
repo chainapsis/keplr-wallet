@@ -1,0 +1,26 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .gasAdjustmentContainer {
+    display: flex;
+    gap: 16px;
+
+    .multiplyIcon {
+      margin: 42px 8px 0;
+    }
+  }
+}
+.input,
+.input:hover,
+.input:focus {
+  background: transparent;
+  color: white !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding-left: 0px;
+  padding-right: 0px;
+  height: 25px;
+  font-weight: bold !important;
+}

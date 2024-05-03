@@ -194,41 +194,35 @@ export const deliverMessages = async (
   targetAddress: string,
   messagesStore: MessagesStore
 ) => {
-  try {
-    if (newMessage) {
-      const encryptedData = await encryptAllData(
-        accessToken,
-        chainId,
-        newMessage,
-        senderAddress,
-        targetAddress
-      );
-      const { data } = await client.mutate({
-        mutation: gql(sendMessages),
-        variables: {
-          messages: [
-            {
-              contents: `${encryptedData}`,
-            },
-          ],
-        },
-        context: {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
+  if (newMessage) {
+    const encryptedData = await encryptAllData(
+      accessToken,
+      chainId,
+      newMessage,
+      senderAddress,
+      targetAddress
+    );
+    const { data } = await client.mutate({
+      mutation: gql(sendMessages),
+      variables: {
+        messages: [
+          {
+            contents: `${encryptedData}`,
           },
+        ],
+      },
+      context: {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
         },
-      });
+      },
+    });
 
-      if (data?.dispatchMessages?.length > 0) {
-        messagesStore.updateLatestSentMessage(data?.dispatchMessages[0]);
-      }
-      return null;
+    if (data?.dispatchMessages?.length > 0) {
+      messagesStore.updateLatestSentMessage(data?.dispatchMessages[0]);
     }
-  } catch (e: any) {
     return {
-      type: "delivery",
-      message: e?.message || "Something went wrong, Message can't be delivered",
-      level: 1,
+      status: "delivered",
     };
   }
 };

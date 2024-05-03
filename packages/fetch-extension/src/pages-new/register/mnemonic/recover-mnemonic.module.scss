@@ -1,0 +1,153 @@
+.container {
+  .title {
+    display: flex;
+    align-items: end;
+  }
+
+  .dropdown {
+    min-width: 160px;
+    height: 46px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+
+    button {
+      min-width: 160px;
+      text-align: left;
+      font-weight: normal;
+      // background: rgba(255, 255, 255, 0.1);
+      // color: white;
+    }
+
+    :global(.dropdown-toggle) {
+      border: 0px solid transparent;
+
+      &:hover,
+      &:active,
+      &.show {
+        border: 1px solid var(--Indigo-Indigo-400, #7655fc);
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+
+      &::after {
+        border-radius: 2px;
+        display: block;
+        height: 0.625em;
+        margin-top: -0.4375em;
+        pointer-events: none;
+        position: absolute;
+        top: 50%;
+        transform: rotate(-45deg);
+        transform-origin: center;
+        width: 0.625em;
+        border: 0 solid black;
+        border-bottom-width: 3px;
+        border-left-width: 3px;
+        right: 1.125em;
+        z-index: 4;
+      }
+    }
+
+    :global(.dropdown-menu.show) {
+      min-width: 160px;
+      z-index: 2000;
+    }
+  }
+
+  .alert {
+    text-align: center;
+
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 22px;
+    color: #fd5778;
+    background: #fff7f8;
+    border: 1px solid #fd5778;
+    border-radius: 16px;
+
+    padding: 16px 0;
+
+    margin-bottom: 1.5rem;
+  }
+}
+
+.mnemonicContainer {
+  display: grid;
+  color: white;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  &.private-key {
+    grid-template-columns: 1fr;
+    margin-left: 170px;
+
+    .mnemonicWordFormGroup {
+      flex: 1;
+    }
+  }
+
+  column-gap: 5px;
+  row-gap: 5px;
+
+  margin-bottom: 1.5rem;
+
+  .mnemonicWordContainer {
+    display: flex;
+    align-items: center;
+
+    .order {
+      width: 40px;
+    }
+
+    .mnemonicWordFormGroup {
+      margin-bottom: 0;
+    }
+
+    .mnemonicWord {
+      border-radius: 0.375rem !important;
+      padding-right: 10px;
+    }
+  }
+}
+
+.formInnerContainer {
+  width: 335px;
+  margin: auto;
+  margin-bottom: 0px;
+}
+.tabsContainer {
+  width: 390px;
+  margin-left: 143px;
+}
+
+.backButtonContainer {
+  margin-left: 170px;
+}
+
+.title {
+  color: white;
+  font-size: 32px;
+  margin-left: 170px;
+}
+.addressInput {
+  height: 53px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  width: 333px !important;
+}
+.addressInput:hover {
+  border: 1px solid var(--Indigo-Indigo-400, #7655fc);
+}
+.addressInput:focus {
+  border: 1px solid var(--Indigo-Indigo-400, #7655fc);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+.mainpageBackButton {
+  margin-right: 300px;
+}
+.addressErrorText {
+  color: #fb6340;
+  font-size: 13px;
+  margin-top: -20px;
+}

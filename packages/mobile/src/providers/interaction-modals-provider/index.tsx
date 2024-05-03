@@ -1,14 +1,17 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
-import { SignModal } from "../../modals/sign";
-import { LedgerGranterModal } from "../../modals/ledger";
-import { WalletConnectApprovalModal } from "../../modals/wallet-connect-approval";
-import { WCMessageRequester } from "../../stores/wallet-connect/msg-requester";
-import { WCGoBackToBrowserModal } from "../../modals/wc-go-back-to-browser";
+import { useStore } from "stores/index";
+import { SignModal } from "modals/sign";
+import { LedgerGranterModal } from "modals/ledger";
+import { WalletConnectApprovalModal } from "modals/wallet-connect-approval";
+import { WCMessageRequester } from "stores/wallet-connect/msg-requester";
+import { WCGoBackToBrowserModal } from "modals/wc-go-back-to-browser";
 import { BackHandler, Platform } from "react-native";
 import { LoadingScreenModal } from "../loading-screen/modal";
 import { KeyRingStatus } from "@keplr-wallet/background";
+import { NetworkErrorModal } from "modals/network";
+import { useNetInfo } from "@react-native-community/netinfo";
+import { LedgerTransectionGuideModel } from "modals/ledger/ledger-transection";
 
 export const InteractionModalsProivder: FunctionComponent = observer(
   ({ children }) => {
@@ -19,6 +22,21 @@ export const InteractionModalsProivder: FunctionComponent = observer(
       signInteractionStore,
       walletConnectStore,
     } = useStore();
+
+    const netInfo = useNetInfo();
+
+    const [openNetworkModel, setIsNetworkModel] = useState(false);
+    const [showLedgerGuide, setShowLedgerGuide] = useState(false);
+
+    useEffect(() => {
+      setShowLedgerGuide(ledgerInitStore.isShowSignTxnGuide);
+    }, [ledgerInitStore.isShowSignTxnGuide]);
+
+    useEffect(() => {
+      const networkIsConnected =
+        typeof netInfo.isConnected !== "boolean" || netInfo.isConnected;
+      setIsNetworkModel(!networkIsConnected);
+    }, [netInfo.isConnected]);
 
     useEffect(() => {
       if (walletConnectStore.needGoBackToBrowser && Platform.OS === "android") {
@@ -73,10 +91,6 @@ export const InteractionModalsProivder: FunctionComponent = observer(
             }}
           />
         ) : null*/}
-        <LedgerGranterModal
-          isOpen={ledgerInitStore.isInitNeeded}
-          close={() => ledgerInitStore.abortAll()}
-        />
         {permissionStore.waitingDatas.map((data) => {
           if (data.data.origins.length === 1) {
             if (
@@ -101,12 +115,34 @@ export const InteractionModalsProivder: FunctionComponent = observer(
 
           return null;
         })}
-        <SignModal
-          isOpen={signInteractionStore.waitingData !== undefined}
-          close={() => {
-            signInteractionStore.rejectAll();
-          }}
-        />
+        {
+          <SignModal
+            isOpen={signInteractionStore.waitingData !== undefined}
+            close={() => {
+              signInteractionStore.rejectAll();
+            }}
+          />
+        }
+        {
+          <LedgerGranterModal
+            isOpen={ledgerInitStore.isInitNeeded}
+            close={() => ledgerInitStore.abortAll()}
+          />
+        }
+        {
+          <LedgerTransectionGuideModel
+            isOpen={showLedgerGuide}
+            close={() => setShowLedgerGuide(false)}
+          />
+        }
+        {
+          <NetworkErrorModal
+            isOpen={openNetworkModel}
+            close={() => {
+              setIsNetworkModel(false);
+            }}
+          />
+        }
         {children}
       </React.Fragment>
     );

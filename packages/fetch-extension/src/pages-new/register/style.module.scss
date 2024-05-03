@@ -1,0 +1,411 @@
+@import "../../styles/var";
+
+$container-width: 390px;
+
+// Used only on the mnemonic recover page.
+// The overall design refactoring is needed, but now the refactoring has been delayed for various reasons.
+// For now, it is handled roughly.
+$large-container-width: 680px;
+
+html[data-register-page="true"] {
+  height: 100%;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  background: #000d3d;
+  background-image: url("../../public/assets/svg/wireframe/bg-register.svg");
+  background-size: cover;
+}
+
+html[data-register-page="true"] body {
+  height: 100%;
+  background-color: transparent !important;
+  overflow: visible !important;
+}
+
+html[data-register-page="true"] #app {
+  height: 100%;
+}
+
+html[data-register-page="true"] #app .container {
+  display: flex;
+  flex-direction: column;
+  background-color: transparent !important;
+}
+
+.container {
+  width: $container-width;
+  margin-left: ($popup-size-width - $container-width) / 2;
+
+  &:global(.large) {
+    width: $large-container-width;
+    margin-left: ($popup-size-width - $large-container-width) / 2;
+  }
+
+  display: flex;
+  flex-direction: column;
+  background-color: transparent !important;
+
+  :global(.btn) {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  :global(.btn-block + .btn-block) {
+    margin-top: 14px;
+  }
+
+  .logoContainer {
+    // margin-top: 40px;
+
+    display: flex;
+    flex-direction: column;
+
+    .logoInnerContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      &.justify-center {
+        justify-content: center;
+      }
+
+      .icon {
+        height: 100px;
+        width: 109px;
+        // position: absolute;
+        // top: 5px;
+        // right: 45%;
+      }
+
+      .logo {
+        width: 200px;
+        margin-left: 218px;
+        filter: invert(100%);
+        opacity: 0.3;
+      }
+
+      .logoInnerContainer {
+        margin-top: 8px;
+        margin-left: 20px;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+        align-items: start;
+
+        .logo {
+          height: 100px;
+        }
+
+        .paragraph {
+          font-size: 16px;
+          line-height: 1;
+        }
+
+        .brandText {
+          height: 80px;
+          margin-left: 18px;
+        }
+      }
+    }
+
+    .introBrandSubTextContainer {
+      margin-top: 16px;
+      height: 14px;
+
+      .introBrandSubText {
+        display: block;
+        width: auto;
+        height: 100%;
+        margin: 0 auto;
+      }
+    }
+  }
+
+  .title {
+    font-size: 24px;
+    letter-spacing: -1.07px;
+    margin-bottom: 24px;
+
+    color: #525f7f;
+  }
+  .newMnemonicContainer {
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: lexend;
+  }
+  .copyImage {
+    cursor: pointer;
+    margin-right: 20px;
+  }
+  .newMnemonic {
+    font-family: Lexend;
+    font-size: 16px;
+    letter-spacing: -0.36px;
+    background: linear-gradient(270deg, #f9774b 3.16%, #cf447b 86.63%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    padding: 20px 30px;
+  }
+  .addressInput {
+    height: 53px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    width: 333px !important;
+  }
+  .addressInput:hover {
+    border: 1px solid var(--Indigo-Indigo-400, #7655fc);
+  }
+
+  .advanced {
+    color: var(--Grey-White, #fff);
+    width: 114px;
+    display: flex;
+    height: 32px;
+    padding: 6px 18px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    border-radius: 100px;
+    background: rgba(255, 255, 255, 0.2);
+  }
+  .advanced:hover {
+    color: var(--Grey-White, #fff);
+    border: 1px solid var(--Indigo---Fetch, #5f38fb);
+  }
+  .checkbox {
+    font-family: Lexend;
+    font-size: 16px;
+    color: white;
+  }
+  .mnemonic {
+    font-family: Lexend;
+    font-size: 16px;
+    letter-spacing: -0.36px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px 30px;
+    text-align: center;
+    color: white;
+
+    &:read-only {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    &[readonly] {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    &::placeholder {
+      font-family: "Nunito Sans", sans-serif;
+
+      body[data-lang="ko"] & {
+        font-family: "Nanum Barun Gothic", sans-serif !important;
+      }
+    }
+  }
+  .input {
+    font-family: Lexend;
+    border-radius: 12px;
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    &:focus {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  .subContent {
+    margin-top: 34px;
+
+    font-size: 14px;
+    font-weight: 300;
+    text-align: center;
+    color: #9092b6;
+  }
+
+  hr {
+    width: 100%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+}
+
+.formContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.buttons {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+}
+
+.button {
+  height: 48px;
+  display: flex;
+  padding: 12px 18px;
+  align-items: center;
+  gap: 24px;
+  flex: 1 0 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  width: 124px;
+  color: white;
+  justify-content: center;
+  margin-bottom: 5px;
+  border: transparent;
+}
+.button:hover {
+  color: white;
+  background: transparent;
+  border: 1px solid var(--Indigo-Indigo-400, #7655fc);
+}
+.button:focus {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+.btn2 {
+  width: 91.5px;
+  height: 32px;
+  background: transparent;
+  color: white;
+  border: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn2:hover {
+  color: white;
+  background: transparent !important;
+  border: 1px solid var(--Indigo-Indigo-400, #7655fc);
+}
+.btn2:disabled {
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.6;
+  background: transparent !important;
+  border: 1px solid var(--Indigo-Indigo-400, #7655fc);
+}
+
+.introIcon {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  margin-top: -16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  &:hover {
+    background: #485cce;
+  }
+}
+
+.dialog {
+  position: fixed;
+  z-index: 10;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(10, 14, 27, 0.5);
+  .content {
+    width: 420px;
+    box-sizing: border-box;
+    padding: 20px 30px;
+    border-radius: 8px;
+    border: 1px solid #f5f5f5;
+    background: #fff;
+    text-align: center;
+  }
+}
+.titleText {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  font-size: 18px;
+  margin-bottom: 27px;
+  margin-top: 9px;
+}
+.card {
+  display: flex;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  border-radius: 15px;
+  align-items: flex-start;
+  gap: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 390px;
+}
+.cardTitle {
+  font-weight: bold;
+}
+.cardText {
+  width: 280px;
+  font-size: 16px;
+}
+.mainpageContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.migrateContainer {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 390px;
+  margin-left: 22%;
+}
+
+.mainpageTitle {
+  font-size: 32px;
+  font-weight: 500;
+  color: white;
+  margin-right: 38px;
+}
+.backButton {
+  display: flex;
+  text-align: left;
+  padding: 0px;
+}
+.pageTitle {
+  font-size: 32px;
+  color: #fff;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.newMnemonicText {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 10px;
+}
+.ledgerContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 333px;
+  margin-left: 25%;
+}

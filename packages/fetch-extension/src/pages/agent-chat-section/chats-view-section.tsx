@@ -211,6 +211,16 @@ export const ChatsViewSection = observer(
             analyticsStore.logEvent(commandFound.eventName);
           }
         } catch (error) {
+          notification.push({
+            type: "warning",
+            placement: "top-center",
+            duration: 5,
+            content: "Something went wrong, Please try again later",
+            canDelete: true,
+            transition: {
+              duration: 0.25,
+            },
+          });
           console.log("failed to send : ", error);
         }
     };

@@ -1,7 +1,7 @@
 import { createStyleProvider } from "./builder";
 import { EnumTextTransform, EnumTextDecorationLine } from "./builder/types";
 import { PixelRatio, Platform, StatusBarStyle } from "react-native";
-import { getPlatformFontWeight } from "./builder/utils";
+import { getPlatformFontFamily } from "./builder/utils";
 import { BlurViewProps } from "@react-native-community/blur";
 
 function handleImageHighRes(image: any, highResImage: any): any {
@@ -48,16 +48,19 @@ export const ColorPalette = {
   "green-400": "#2DD98F",
   "green-500": "#22AC71",
   "green-600": "#136844",
+  "vibrant-green-500": "#2DE376",
   staking: "#11cdef",
 
   "red-50": "#FFF7F8",
   "red-100": "#FFD8E0",
   "red-200": "#FC91A6",
+  "red-250": "#F36B6B",
   "red-300": "#FD5778",
   "red-400": "#F5365C",
   "red-500": "#BF2342",
   "red-600": "#911830",
   "red-700": "#440B17",
+  "coral-red": "#FF3E3E",
 
   "pink-50": "#FDF4F9",
   "pink-100": "#FFE9F4",
@@ -74,6 +77,16 @@ export const ColorPalette = {
   "purple-800": "#0A0314",
 
   white: "#FFFFFF",
+  "white-10": "#F8F9FC",
+  "white-50": "#F2F2F7",
+  "white-100": "#DCDCE3",
+  "white-200": "#C6C6CD",
+  "white-300": "#9A9AA2",
+  "white-400": "#64646D",
+  "white-500": "#37373E",
+  "white-600": "#1E1E24",
+  "white-700": "#09090A",
+  "white-transparent-100": "#f9f9f900",
 
   "gray-10": "#F8F9FC",
   "gray-50": "#F2F2F7",
@@ -84,10 +97,28 @@ export const ColorPalette = {
   "gray-500": "#37373E",
   "gray-600": "#1E1E24",
   "gray-700": "#09090A",
+  "new-gray-700": "#556578",
 
   black: "#000000",
 
+  linear: "#CF447B",
+
+  cardColor: "#4BA1E7",
+
   transparent: "rgba(255,255,255,0)",
+
+  "dark-blue": "#06103d",
+  "pink-light": "#D0BCFF",
+
+  indigo: "#5F38FB",
+  "indigo-100": "#5f38fb12",
+  "indigo-200": "#fbfaff40",
+  "indigo-400": "#000D3D",
+  "indigo-800": "#270E8D",
+  "indigo-900": "#000D3D",
+  "indigo-backdrop": "#270e8dcc",
+
+  "orange-400": "#fa8f6b",
 };
 
 export const TextColors = {
@@ -139,116 +170,123 @@ export const { StyleProvider, useStyle, useStyleThemeController } =
       custom: {
         h1: {
           fontSize: 32,
-          lineHeight: 56,
           letterSpacing: 0.3,
-          ...getPlatformFontWeight("700"),
+          fontFamily: getPlatformFontFamily("700"),
+          fontWeight: "700",
         },
         h2: {
           fontSize: 28,
-          lineHeight: 36,
           letterSpacing: 0.3,
-          ...getPlatformFontWeight("700"),
+          fontFamily: getPlatformFontFamily("700"),
+          fontWeight: "700",
         },
         h3: {
           fontSize: 24,
-          lineHeight: 32,
           letterSpacing: 0.3,
-          ...getPlatformFontWeight("700"),
+          fontFamily: getPlatformFontFamily("700"),
+          fontWeight: "700",
         },
         h4: {
           fontSize: 20,
-          lineHeight: 28,
           letterSpacing: 0.3,
-          ...getPlatformFontWeight("600"),
+          fontFamily: getPlatformFontFamily("600"),
+          fontWeight: "600",
         },
         h5: {
           fontSize: 18,
-          lineHeight: 24,
           letterSpacing: 0.3,
-          ...getPlatformFontWeight("600"),
+          fontFamily: getPlatformFontFamily("600"),
+          fontWeight: "600",
         },
         h6: {
           fontSize: 16,
-          lineHeight: 22,
           letterSpacing: 0.2,
-          ...getPlatformFontWeight("600"),
+          fontFamily: getPlatformFontFamily("600"),
+          fontWeight: "600",
         },
         h7: {
           fontSize: 14,
-          lineHeight: 20,
           letterSpacing: 0.2,
-          ...getPlatformFontWeight("600"),
+          fontFamily: getPlatformFontFamily("600"),
+          fontWeight: "600",
         },
         subtitle1: {
           fontSize: 18,
-          lineHeight: 24,
-          ...getPlatformFontWeight("500"),
+          fontFamily: getPlatformFontFamily("500"),
+          fontWeight: "500",
         },
         subtitle2: {
           fontSize: 16,
-          lineHeight: 22,
-          ...getPlatformFontWeight("500"),
+          fontFamily: getPlatformFontFamily("500"),
+          fontWeight: "500",
         },
         subtitle3: {
           fontSize: 14,
-          lineHeight: 21,
           letterSpacing: 0.1,
-          ...getPlatformFontWeight("500"),
+          fontFamily: getPlatformFontFamily("500"),
+          fontWeight: "500",
         },
         body1: {
           fontSize: 18,
-          lineHeight: 26,
-          ...getPlatformFontWeight("400"),
+          fontFamily: getPlatformFontFamily("400"),
+          fontWeight: "400",
         },
         body2: {
           fontSize: 16,
-          lineHeight: 22,
           letterSpacing: 0.1,
-          ...getPlatformFontWeight("400"),
+          fontFamily: getPlatformFontFamily("400"),
+          fontWeight: "400",
         },
         body3: {
           fontSize: 14,
-          lineHeight: 20,
           letterSpacing: 0.1,
-          ...getPlatformFontWeight("400"),
+          fontFamily: getPlatformFontFamily("400"),
+          fontWeight: "400",
+        },
+        "text-button0": {
+          fontSize: 20,
+          letterSpacing: 0.2,
+          textTransform: "capitalize" as EnumTextTransform,
+          fontFamily: getPlatformFontFamily("600"),
+          fontWeight: "600",
         },
         "text-button1": {
           fontSize: 18,
-          lineHeight: 20,
           letterSpacing: 0.2,
-          ...getPlatformFontWeight("600"),
+          fontFamily: getPlatformFontFamily("600"),
+          fontWeight: "600",
         },
         "text-button2": {
           fontSize: 16,
-          lineHeight: 19,
           letterSpacing: 0.2,
-          ...getPlatformFontWeight("600"),
+          fontFamily: getPlatformFontFamily("600"),
+          fontWeight: "600",
         },
         "text-button3": {
           fontSize: 14,
-          lineHeight: 18,
           letterSpacing: 0.2,
           textTransform: "capitalize" as EnumTextTransform,
-          ...getPlatformFontWeight("600"),
+          fontFamily: getPlatformFontFamily("600"),
+          fontWeight: "600",
         },
         "text-caption1": {
           fontSize: 13,
-          lineHeight: 18,
           letterSpacing: 0.3,
-          ...getPlatformFontWeight("400"),
+          fontFamily: getPlatformFontFamily("400"),
+          fontWeight: "400",
         },
         "text-caption2": {
           fontSize: 12,
-          lineHeight: 18,
           letterSpacing: 0.3,
-          ...getPlatformFontWeight("400"),
+          fontFamily: getPlatformFontFamily("400"),
+          fontWeight: "400",
         },
         "text-overline": {
           fontSize: 11,
-          lineHeight: 16,
           letterSpacing: 0.5,
           textTransform: "uppercase" as EnumTextTransform,
-          ...getPlatformFontWeight("400"),
+          fontFamily: getPlatformFontFamily("400"),
+          fontWeight: "400",
         },
         "text-underline": {
           textDecorationLine: "underline" as EnumTextDecorationLine,
@@ -259,17 +297,17 @@ export const { StyleProvider, useStyle, useStyleThemeController } =
         "body2-in-text-input": Platform.select({
           ios: {
             fontSize: 16,
-            lineHeight: 19,
             letterSpacing: 0.25,
             paddingTop: 1.5,
             paddingBottom: 1.5,
-            ...getPlatformFontWeight("400"),
+            fontFamily: getPlatformFontFamily("400"),
+            fontWeight: "400",
           },
           android: {
-            fontSize: 16,
-            lineHeight: 22,
+            fontSize: 20,
             letterSpacing: 0.25,
-            ...getPlatformFontWeight("400"),
+            fontFamily: getPlatformFontFamily("400"),
+            fontWeight: "400",
           },
         }),
         "background-gradient": {
@@ -288,8 +326,8 @@ export const { StyleProvider, useStyle, useStyleThemeController } =
           // Since there is no effective way to solve this problem,
           // provides an option to stretch the bitmap image and show it.
           fallbackAndroidImage: handleImageHighRes(
-            () => require("../assets/gradients/gradient-background.png"),
-            () => require("../assets/gradients/gradient-background-3x.png")
+            () => require("assets/gradients/gradient-background.png"),
+            () => require("assets/gradients/gradient-background-3x.png")
           ),
         },
 
@@ -370,8 +408,8 @@ export const { StyleProvider, useStyle, useStyleThemeController } =
             },
           ],
           fallbackAndroidImage: handleImageHighRes(
-            () => require("../assets/gradients/unlock-screen.png"),
-            () => require("../assets/gradients/unlock-screen-3x.png")
+            () => require("assets/gradients/unlock-screen.png"),
+            () => require("assets/gradients/unlock-screen-3x.png")
           ),
         },
 
@@ -388,8 +426,8 @@ export const { StyleProvider, useStyle, useStyleThemeController } =
             },
           ],
           fallbackAndroidImage: handleImageHighRes(
-            () => require("../assets/gradients/tx-result-screen-pending.png"),
-            () => require("../assets/gradients/tx-result-screen-pending-3x.png")
+            () => require("assets/gradients/tx-result-screen-pending.png"),
+            () => require("assets/gradients/tx-result-screen-pending-3x.png")
           ),
         },
 
@@ -406,8 +444,8 @@ export const { StyleProvider, useStyle, useStyleThemeController } =
             },
           ],
           fallbackAndroidImage: handleImageHighRes(
-            () => require("../assets/gradients/tx-result-screen-success.png"),
-            () => require("../assets/gradients/tx-result-screen-success-3x.png")
+            () => require("assets/gradients/tx-result-screen-success.png"),
+            () => require("assets/gradients/tx-result-screen-success-3x.png")
           ),
         },
 
@@ -424,8 +462,8 @@ export const { StyleProvider, useStyle, useStyleThemeController } =
             },
           ],
           fallbackAndroidImage: handleImageHighRes(
-            () => require("../assets/gradients/tx-result-screen-failed.png"),
-            () => require("../assets/gradients/tx-result-screen-failed-3x.png")
+            () => require("assets/gradients/tx-result-screen-failed.png"),
+            () => require("assets/gradients/tx-result-screen-failed-3x.png")
           ),
         },
       },
@@ -438,7 +476,7 @@ export const { StyleProvider, useStyle, useStyleThemeController } =
           "blurred-tabbar-background": BackgroundColors["card"],
 
           // Belows are for the button props and may not be used as styles.
-          "rect-button-default-ripple": ColorPalette["gray-100"],
+          "rect-button-default-ripple": ColorPalette["indigo"],
           // Active opacity is 0.2 by default.
           "rect-button-default-underlay": ColorPalette["gray-300"],
 
@@ -467,8 +505,10 @@ export const { StyleProvider, useStyle, useStyleThemeController } =
         "58": 58,
         "72": 72,
         "80": 80,
+        "90": 90,
         "122": 122,
         "160": 160,
+        "180": 180,
         "240": 240,
         "292": 292,
         "300": 300,
@@ -511,6 +551,7 @@ export const { StyleProvider, useStyle, useStyleThemeController } =
         "104": 104,
         "116": 116,
         "122": 122,
+        "180": 180,
         "214": 214,
         "400": 400,
         "600": 600,
@@ -522,6 +563,7 @@ export const { StyleProvider, useStyle, useStyleThemeController } =
 
         "card-gap": 12,
         "page-pad": 20,
+        "page-double-pad": 40,
       },
       paddingSizes: {
         "0": 0,
@@ -664,9 +706,8 @@ export const { StyleProvider, useStyle, useStyleThemeController } =
               },
             ],
             fallbackAndroidImage: handleImageHighRes(
-              () => require("../assets/gradients/gradient-background-dark.png"),
-              () =>
-                require("../assets/gradients/gradient-background-dark-3x.png")
+              () => require("assets/gradients/gradient-background-dark.png"),
+              () => require("assets/gradients/gradient-background-dark-3x.png")
             ),
           },
 
@@ -747,8 +788,8 @@ export const { StyleProvider, useStyle, useStyleThemeController } =
               },
             ],
             fallbackAndroidImage: handleImageHighRes(
-              () => require("../assets/gradients/unlock-screen-dark.png"),
-              () => require("../assets/gradients/unlock-screen-dark-3x.png")
+              () => require("assets/gradients/unlock-screen-dark.png"),
+              () => require("assets/gradients/unlock-screen-dark-3x.png")
             ),
           },
 

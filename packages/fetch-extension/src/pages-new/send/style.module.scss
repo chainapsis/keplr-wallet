@@ -1,0 +1,87 @@
+.formInnerContainer {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.cardContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fullModal {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+
+  &:global(.modal-content) {
+    box-shadow: none;
+  }
+}
+
+.addressBookButton {
+  background: white;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-width: 0;
+}
+.editCard {
+  display: flex;
+  padding: 12px 18px;
+  align-items: center;
+  gap: 24px;
+  align-self: stretch;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.edit {
+  display: flex;
+  height: 36px;
+  padding: 6px 16px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  background: transparent;
+  color: white;
+}
+.edit:hover {
+  display: flex;
+  height: 36px;
+  padding: 6px 16px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  background: transparent;
+  color: white;
+}
+.amountInUsd {
+  margin-bottom: 4px;
+  color: #fff;
+  font-family: Lexend;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.amount {
+  color: #fff;
+  font-family: Lexend;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  opacity: 0.6;
+}

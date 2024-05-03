@@ -1,10 +1,10 @@
 import React, { FunctionComponent } from "react";
-import { PageWithScrollView } from "../../../components/page";
+import { PageWithScrollView } from "components/page";
 import { MyRewardCard } from "./reward-card";
 import { DelegationsCard } from "./delegations-card";
 import { UndelegationsCard } from "./undelegations-card";
-import { useStyle } from "../../../styles";
-import { useStore } from "../../../stores";
+import { useStyle } from "styles/index";
+import { useStore } from "stores/index";
 import { ViewStyle } from "react-native";
 
 export const StakingDashboardScreen: FunctionComponent = () => {

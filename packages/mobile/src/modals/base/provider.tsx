@@ -4,7 +4,6 @@ import {
   BackHandler,
   Platform,
   StyleSheet,
-  TouchableWithoutFeedback,
   View,
   ViewStyle,
 } from "react-native";
@@ -12,7 +11,7 @@ import { action, makeObservable, observable } from "mobx";
 import { observer } from "mobx-react-lite";
 import { ModalBase } from "./base";
 import { ModalContext, useModalState } from "./hooks";
-import { useStyle } from "../../styles";
+import { useStyle } from "styles/index";
 import { ModalTransisionProvider } from "./transition";
 import { BlurView } from "@react-native-community/blur";
 import Animated from "react-native-reanimated";
@@ -289,34 +288,26 @@ const ModalBackdrop: FunctionComponent = () => {
   return (
     <React.Fragment>
       {!modal.disableBackdrop && !closeBackdrop ? (
-        <TouchableWithoutFeedback
-          // disabled={modal.disableClosingOnBackdropPress}
-          onPress={() => {
-            modal.close();
-            setCloseBackdrop(true);
-          }}
+        <Animated.View
+          style={StyleSheet.flatten([
+            style.flatten(
+              ["absolute-fill"],
+              [
+                !blurBackdropOnIOS && "background-color-gray-700@50%",
+                !blurBackdropOnIOS && "dark:background-color-gray-700@75%",
+              ]
+            ),
+          ])}
         >
-          <Animated.View
-            style={StyleSheet.flatten([
-              style.flatten(
-                ["absolute-fill"],
-                [
-                  !blurBackdropOnIOS && "background-color-gray-700@50%",
-                  !blurBackdropOnIOS && "dark:background-color-gray-700@75%",
-                ]
-              ),
-            ])}
-          >
-            {blurBackdropOnIOS ? (
-              <BlurView
-                style={style.flatten(["absolute-fill"])}
-                blurType="dark"
-                blurAmount={style.theme === "dark" ? 25 : 10}
-                reducedTransparencyFallbackColor="black"
-              />
-            ) : null}
-          </Animated.View>
-        </TouchableWithoutFeedback>
+          {blurBackdropOnIOS ? (
+            <BlurView
+              style={style.flatten(["absolute-fill"])}
+              blurType="dark"
+              blurAmount={style.theme === "dark" ? 25 : 10}
+              reducedTransparencyFallbackColor="black"
+            />
+          ) : null}
+        </Animated.View>
       ) : null}
     </React.Fragment>
   );

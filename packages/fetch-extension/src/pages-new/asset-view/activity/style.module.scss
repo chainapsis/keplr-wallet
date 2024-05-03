@@ -1,0 +1,52 @@
+.block {
+  font-weight: bold;
+  display: flex;
+  color: black;
+  align-items: center;
+  font-size: 15px;
+}
+
+.container {
+  padding: 16px;
+  background: transparent;
+  margin: 0px -12px;
+}
+
+.title {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 20px;
+  padding-bottom: 16px;
+}
+
+.tabContainer {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 10px;
+}
+
+.tab {
+  padding-top: 8px;
+  width: 50%;
+  text-align: center;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 8px;
+  font-weight: 500;
+  font-size: 16px;
+  color: #000000;
+}
+
+.tab.active {
+  border-bottom: 2px solid #d43bf6;
+  color: #d43bf6;
+}
+
+.activityMessage {
+  color: white;
+  font-size: small;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}

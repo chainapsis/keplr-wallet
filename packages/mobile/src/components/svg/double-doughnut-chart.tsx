@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { View } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
-import { ColorPalette } from "../../styles";
+import { ColorPalette } from "styles/index";
 
 export const DoubleDoughnutChart: FunctionComponent<{
   size?: number;

@@ -19,7 +19,7 @@ export const NotificationPage: FunctionComponent = () => {
   const accountInfo = accountStore.getAccount(current.chainId);
 
   const navigateToSettingsHandler = () => {
-    navigate("/setting/notifications");
+    navigate("/more/notifications");
     analyticsStore.logEvent("settings_click", { pageName: "Notification Tab" });
   };
 

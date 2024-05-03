@@ -1,21 +1,25 @@
 import React, { FunctionComponent } from "react";
 import { StyleSheet, View, ViewStyle } from "react-native";
-import { useStyle } from "../../styles";
+import { useStyle } from "styles/index";
 
 export const CardDivider: FunctionComponent<{
   style?: ViewStyle;
-}> = ({ style: propStyle }) => {
+  vertical?: boolean;
+}> = ({ style: propStyle, vertical = false }) => {
   const style = useStyle();
 
   return (
     <View
       style={StyleSheet.flatten([
-        style.flatten([
-          "height-1",
-          "margin-x-card-horizontal",
-          "background-color-gray-200@40%",
-          "dark:background-color-platinum-400@40%",
-        ]) as ViewStyle,
+        style.flatten(
+          [
+            "background-color-gray-200@40%",
+            "dark:background-color-platinum-400@40%",
+          ],
+          vertical
+            ? ["height-full", "width-1"]
+            : ["height-1", "margin-x-card-horizontal"]
+        ) as ViewStyle,
         propStyle,
       ])}
     />

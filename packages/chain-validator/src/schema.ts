@@ -16,7 +16,7 @@ import Joi, { ObjectSchema } from "joi";
 
 export const CurrencySchema = Joi.object<
   Currency & {
-    type?: undefined;
+    type?: string | undefined;
   }
 >({
   coinDenom: Joi.string().required(),

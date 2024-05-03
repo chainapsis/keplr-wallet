@@ -1,22 +1,22 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import { useStore } from "../../../stores";
-import { useStyle } from "../../../styles";
+import { useStore } from "stores/index";
+import { useStyle } from "styles/index";
 import { Staking } from "@keplr-wallet/stores";
 import { useRedelegateTxConfig } from "@keplr-wallet/hooks";
-import { PageWithScrollView } from "../../../components/page";
-import { Card, CardBody, CardDivider } from "../../../components/card";
+import { PageWithScrollView } from "components/page";
+import { Card, CardBody, CardDivider } from "components/card";
 import { Text, View, ViewStyle } from "react-native";
-import { ValidatorThumbnail } from "../../../components/thumbnail";
+import { ValidatorThumbnail } from "components/thumbnail";
 import {
   AmountInput,
   FeeButtons,
   MemoInput,
   SelectorButtonWithoutModal,
-} from "../../../components/input";
-import { Button } from "../../../components/button";
-import { useSmartNavigation } from "../../../navigation";
+} from "components/input";
+import { Button } from "components/button";
+import { useSmartNavigation } from "navigation/smart-navigation";
 
 export const RedelegateScreen: FunctionComponent = observer(() => {
   const route = useRoute<

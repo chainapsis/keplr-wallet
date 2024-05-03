@@ -18,6 +18,7 @@ export const PageWithScrollViewInBottomTabView = React.forwardRef<
       containerStyle?: ViewStyle;
 
       backgroundMode: BackgroundMode;
+      isTransparentHeader?: boolean;
     }
   >
 >((props, ref) => {

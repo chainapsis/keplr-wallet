@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 import Svg, { Path, Rect } from "react-native-svg";
 
 export const CopyIcon: FunctionComponent<{
-  color: string;
+  color?: string;
   size: number;
 }> = ({ color, size = 16 }) => {
   return (

@@ -1,13 +1,21 @@
 import React, { FunctionComponent } from "react";
-import { View } from "react-native";
-import { SimpleGradient } from "../svg";
-import { useStyle } from "../../styles";
+import { ImageBackground, View } from "react-native";
+import { useStyle } from "styles/index";
+import { BlurBackground } from "components/new/blur-background/blur-background";
+import { SimpleGradient } from "components/svg";
 
-export type BackgroundMode = "gradient" | "secondary" | "tertiary" | null;
+export type BackgroundMode =
+  | "image"
+  | "gradient"
+  | "secondary"
+  | "tertiary"
+  | null;
 
 export const ScreenBackground: FunctionComponent<{
   backgroundMode: BackgroundMode;
-}> = ({ backgroundMode }) => {
+  backgroundBlur?: boolean;
+  isTransparentHeader?: boolean;
+}> = ({ backgroundMode, backgroundBlur, isTransparentHeader = false }) => {
   const style = useStyle();
 
   return backgroundMode ? (
@@ -16,8 +24,8 @@ export const ScreenBackground: FunctionComponent<{
         position: "absolute",
         left: 0,
         right: 0,
-        top: -100,
-        bottom: -100,
+        top: isTransparentHeader ? -200 : -225,
+        bottom: isTransparentHeader ? -200 : -100,
       }}
     >
       {backgroundMode === "gradient" ? (
@@ -28,6 +36,30 @@ export const ScreenBackground: FunctionComponent<{
             style.get("background-gradient").fallbackAndroidImage
           }
         />
+      ) : backgroundMode === "image" ? (
+        <ImageBackground
+          source={require("assets/bg.png")}
+          resizeMode="contain"
+          style={style.flatten([
+            "flex-1",
+            "justify-center",
+            "background-color-indigo-900",
+          ])}
+        >
+          <BlurBackground
+            backgroundBlur={backgroundBlur}
+            borderRadius={0}
+            blurType="dark"
+            blurIntensity={10}
+            containerStyle={{
+              position: "absolute",
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+            }}
+          />
+        </ImageBackground>
       ) : backgroundMode === "secondary" ? (
         <View
           style={{

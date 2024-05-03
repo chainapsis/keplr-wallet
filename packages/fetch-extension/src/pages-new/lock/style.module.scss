@@ -1,0 +1,93 @@
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.capslockTooltipArrow {
+  left: 10px !important;
+}
+.layout {
+  height: 100%;
+  background-color: #030e3b;
+  box-shadow: 3.172px 3.172px 15.859px 0px rgba(255, 255, 255, 0.1) inset;
+  background-image: url("../../public/assets/svg/wireframe/bg-returning-user.svg");
+}
+.banner {
+  margin-top: 15px;
+  width: 108.996px;
+  height: 18px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 122.5px;
+}
+.password-field {
+  margin-top: 110px;
+  display: flex;
+  flex-direction: column;
+}
+.text {
+  color: #fff;
+  font-family: Lexend;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 160%; /* 25.6px */
+  opacity: 0.6;
+}
+.welcome-text {
+  font-family: Lexend;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 120%;
+  letter-spacing: -0.48px;
+
+  font-size: 24px;
+  background: white;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sign-in {
+  color: var(--Fetch-Navy, #0b1742);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 40px;
+  gap: 5px;
+  z-index: 1111;
+  position: relative;
+  overflow: hidden;
+}
+
+.racing-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.racing-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  background: linear-gradient(90deg, #cf447b, #f9774b);
+  border-radius: 10px;
+  animation: moveTrack 5s linear infinite;
+}
+
+@keyframes moveTrack {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}

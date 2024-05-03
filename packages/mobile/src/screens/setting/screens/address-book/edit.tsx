@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { PageWithScrollView } from "../../../../components/page";
-import { useStyle } from "../../../../styles";
+import { PageWithScrollView } from "components/page";
+import { useStyle } from "styles/index";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import {
   AddressBookConfig,
@@ -9,15 +9,13 @@ import {
 } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { View, ViewStyle } from "react-native";
-import { useStore } from "../../../../stores";
-import {
-  AddressInput,
-  MemoInput,
-  TextInput,
-} from "../../../../components/input";
-import { Button } from "../../../../components/button";
-import { useSmartNavigation } from "../../../../navigation";
+import { useStore } from "stores/index";
+import { AddressInput } from "components/input";
+import { Button } from "components/button";
+import { useSmartNavigation } from "navigation/smart-navigation";
 import Toast from "react-native-toast-message";
+import { InputCardView } from "components/new/card-view/input-card";
+import { MemoInputView } from "components/new/card-view/memo-input";
 
 export const EditAddressBookScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -84,15 +82,16 @@ export const EditAddressBookScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView
-      backgroundMode="tertiary"
+      backgroundMode="image"
       contentContainerStyle={style.get("flex-grow-1")}
       style={style.flatten(["padding-x-page"]) as ViewStyle}
     >
       <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
-      <TextInput
+      <InputCardView
         label="Nickname"
+        containerStyle={style.flatten(["margin-y-4"]) as ViewStyle}
+        onChangeText={(text: string) => setName(text)}
         value={name}
-        onChangeText={(text) => setName(text)}
       />
       <AddressInput
         label="Address"
@@ -100,11 +99,16 @@ export const EditAddressBookScreen: FunctionComponent = observer(() => {
         memoConfig={memoConfig}
         disableAddressBook={true}
       />
-      <MemoInput label="Default memo (optional)" memoConfig={memoConfig} />
+      <MemoInputView
+        label="Default memo (optional)"
+        memoConfig={memoConfig}
+        containerStyle={style.flatten(["margin-y-8"]) as ViewStyle}
+      />
       <View style={style.flatten(["flex-1"])} />
       <Button
         text="Save"
         size="large"
+        containerStyle={style.flatten(["border-radius-32"]) as ViewStyle}
         disabled={checkButtonDisable()}
         onPress={async () => {
           if (

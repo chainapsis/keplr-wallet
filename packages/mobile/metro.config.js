@@ -40,16 +40,20 @@ module.exports = (async () => {
       // and use the only react in the root project.
       blacklistRE: blacklist([/packages\/mobile\/node_modules\/react\/.*/]),
       extraNodeModules: {
-        crypto: path.resolve(
-          __dirname,
-          "./node_modules/react-native-crypto-polyfill"
-        ),
+        components: path.resolve(__dirname, "./src/components"),
+        navigation: path.resolve(__dirname, "./src/navigation"),
+        screens: path.resolve(__dirname, "./src/screens"),
+        hooks: path.resolve(__dirname, "./src/hooks"),
+        assets: path.resolve(__dirname, "./src/assets"),
+        styles: path.resolve(__dirname, "./src/styles"),
+        modals: path.resolve(__dirname, "./src/modals"),
+        providers: path.resolve(__dirname, "./src/providers"),
+        stores: path.resolve(__dirname, "./src/stores"),
+        utils: path.resolve(__dirname, "./src/utils"),
+        crypto: path.resolve(__dirname, "./node_modules/react-native-crypto-polyfill"),
         buffer: path.resolve(__dirname, "../../node_modules/buffer"),
         stream: path.resolve(__dirname, "../../node_modules/stream-browserify"),
-        string_decoder: path.resolve(
-          __dirname,
-          "../../node_modules/string_decoder"
-        ),
+        string_decoder: path.resolve(__dirname, "../../node_modules/string_decoder"),
         path: path.resolve(__dirname, "../../node_modules/path-browserify"),
         http: path.resolve(__dirname, "../../node_modules/http-browserify"),
         https: path.resolve(__dirname, "../../node_modules/https-browserify"),

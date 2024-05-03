@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react";
 import Svg, { Path } from "react-native-svg";
-import { useStyle } from "../../../styles";
+import { useStyle } from "styles/index";
 
 export const HeaderBackButtonIcon: FunctionComponent<{
   color?: string;

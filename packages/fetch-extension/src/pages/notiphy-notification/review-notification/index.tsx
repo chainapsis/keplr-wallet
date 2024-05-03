@@ -105,7 +105,7 @@ export const ReviewNotification: FunctionComponent = () => {
         <div className={style["reviewButtonContainer"]}>
           <Button
             className={style["button"] + " " + style["invertedButton"]}
-            onClick={() => navigate("/setting/notifications")}
+            onClick={() => navigate("/more/notifications")}
           >
             Settings
           </Button>

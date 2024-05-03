@@ -1,12 +1,12 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../stores";
-import { Card, CardBody } from "../../../components/card";
+import { useStore } from "stores/index";
+import { Card, CardBody } from "components/card";
 import { Text, ViewStyle, View, StyleSheet } from "react-native";
-import { useStyle } from "../../../styles";
+import { useStyle } from "styles/index";
 import { useIntl } from "react-intl";
-import { ValidatorThumbnail } from "../../../components/thumbnail";
-import { ProgressBar } from "../../../components/progress-bar";
+import { ValidatorThumbnail } from "components/thumbnail";
+import { ProgressBar } from "components/progress-bar";
 import { Staking } from "@keplr-wallet/stores";
 
 export const UndelegationsCard: FunctionComponent<{

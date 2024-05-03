@@ -291,7 +291,7 @@ export const NewChat: FunctionComponent = observer(() => {
                   analyticsStore.logEvent("address_book_click", {
                     pageName: "New Chat",
                   });
-                  navigate("/setting/address-book");
+                  navigate("/more/address-book");
                 }}
               />
             </div>

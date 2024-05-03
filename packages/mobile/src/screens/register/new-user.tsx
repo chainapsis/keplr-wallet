@@ -1,8 +1,8 @@
 import React, { FunctionComponent } from "react";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { PageWithScrollView } from "../../components/page";
-import { GoogleIcon, AppleIcon } from "../../components/icon";
-import { useStyle } from "../../styles";
+import { PageWithScrollView } from "components/page";
+import { GoogleIcon, AppleIcon } from "components/icon";
+import { useStyle } from "styles/index";
 import {
   View,
   Text,
@@ -12,11 +12,11 @@ import {
   Image,
   ViewStyle,
 } from "react-native";
-import { Button } from "../../components/button";
-import { useSmartNavigation } from "../../navigation";
+import { Button } from "components/button";
+import { useSmartNavigation } from "navigation/smart-navigation";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
+import { useStore } from "stores/index";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const RegisterNewUserScreen: FunctionComponent = observer(() => {
@@ -55,11 +55,7 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
         }
       >
         <Image
-          source={
-            style.theme === "dark"
-              ? require("../../assets/logo/logo.png")
-              : require("../../assets/logo/logo.png")
-          }
+          source={require("assets/logo/logo.png")}
           style={{
             height: 90,
             aspectRatio: 2.977,

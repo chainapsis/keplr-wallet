@@ -1,4 +1,7 @@
 @charset "utf-8";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 $theme-colors: (
   "primary": #3b82f6,
@@ -103,7 +106,9 @@ body {
   position: absolute;
   width: auto;
 }
-
+.invalid-feedback {
+  margin-top: 20px;
+}
 .form-control {
   color: black;
 

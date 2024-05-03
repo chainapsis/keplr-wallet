@@ -1,8 +1,8 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
-import { RightArrow, SettingItem } from "../components";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../stores";
-import { SelectorModal } from "../../../components/input";
+import { useStore } from "stores/index";
+import { SelectorModal } from "components/input";
+import { RightArrow, SettingItem } from "screens/setting/components";
 
 export const SettingFiatCurrencyItem: FunctionComponent<{
   topBorder?: boolean;

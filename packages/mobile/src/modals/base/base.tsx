@@ -5,7 +5,7 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { useStyle } from "../../styles";
+import { useStyle } from "styles/index";
 import { useModalTransision } from "./transition";
 // import {
 //   DefaultAcceleration,

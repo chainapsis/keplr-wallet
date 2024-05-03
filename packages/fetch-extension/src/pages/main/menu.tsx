@@ -9,7 +9,7 @@ import { FormattedMessage } from "react-intl";
 import { useNavigate } from "react-router";
 
 export const Menu: FunctionComponent = observer(() => {
-  const { chainStore, keyRingStore, analyticsStore } = useStore();
+  const { keyRingStore, analyticsStore } = useStore();
   const navigate = useNavigate();
   return (
     <div className={styleMenu["container"]}>
@@ -18,7 +18,7 @@ export const Menu: FunctionComponent = observer(() => {
         onClick={() => {
           analyticsStore.logEvent("address_book_click", { pageName: "drawer" });
           navigate({
-            pathname: "/setting/address-book",
+            pathname: "/more/address-book",
           });
         }}
       >
@@ -44,42 +44,6 @@ export const Menu: FunctionComponent = observer(() => {
       >
         <FormattedMessage id="main.menu.guide" />
       </a>
-      {(chainStore.current.features ?? []).find(
-        (feature) =>
-          feature === "cosmwasm" ||
-          feature === "secretwasm" ||
-          feature === "evm"
-      ) ? (
-        <div
-          className={styleMenu["item"]}
-          onClick={() => {
-            navigate({
-              pathname: "/setting/token/add",
-            });
-            analyticsStore.logEvent("add_token_click");
-          }}
-        >
-          <FormattedMessage id="setting.token.add" />
-        </div>
-      ) : null}
-      {(chainStore.current.features ?? []).find(
-        (feature) =>
-          feature === "cosmwasm" ||
-          feature === "secretwasm" ||
-          feature === "evm"
-      ) ? (
-        <div
-          className={styleMenu["item"]}
-          onClick={() => {
-            navigate({
-              pathname: "/setting/token/manage",
-            });
-            analyticsStore.logEvent("token_list_click");
-          }}
-        >
-          <FormattedMessage id="main.menu.token-list" />
-        </div>
-      ) : null}
       {/* Empty div for separating last item */}
       <div style={{ flex: 1 }} />
       <div

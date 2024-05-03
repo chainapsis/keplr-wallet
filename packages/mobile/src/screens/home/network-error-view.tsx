@@ -1,11 +1,11 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { Text, View, ViewStyle } from "react-native";
-import { AlertIcon, RefreshIcon } from "../../components/icon";
-import { useStyle } from "../../styles";
+import { AlertIcon, RefreshIcon } from "components/icon";
+import { useStyle } from "styles/index";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
+import { useStore } from "stores/index";
 import { ObservableQuery } from "@keplr-wallet/stores";
 import Animated, {
   Easing,
@@ -14,7 +14,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { useSpinAnimated } from "../../components/spinner";
+import { useSpinAnimated } from "components/spinner";
 
 export const NetworkErrorView: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore } = useStore();

@@ -14,6 +14,10 @@ export type LedgerInitDataType =
       success: boolean;
     }
   | {
+      event: "sign-txn-guide";
+      isShow: boolean;
+    }
+  | {
       event: "sign";
       success: boolean;
     }
@@ -83,6 +87,21 @@ export class LedgerInitStore {
   @computed
   get isSignCompleted(): boolean {
     return this.isSignSucceeded || this.isSignRejected;
+  }
+
+  @computed
+  get isShowSignTxnGuide(): boolean {
+    const datas =
+      this.interactionStore.getEvents<LedgerInitDataType>("ledger-sign");
+
+    if (datas.length > 0) {
+      const data = datas[datas.length - 1];
+      if (data.data.event === "sign-txn-guide" && data.data.isShow) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   @computed

@@ -1,12 +1,12 @@
 /**
- * getKeplrExtensionRouterId returns the `window.keplrExtensionRouterId`.
- * If the `window.keplrExtensionRouterId` is not initialized, it will be initialized and returned.
+ * getKeplrExtensionRouterId returns the `globalThis.keplrExtensionRouterId`.
+ * If the `globalThis.keplrExtensionRouterId` is not initialized, it will be initialized and returned.
  */
 export function getKeplrExtensionRouterId(): number {
-  if (window.keplrExtensionRouterId == null) {
-    window.keplrExtensionRouterId = Math.floor(
+  if (globalThis.keplrExtensionRouterId == null) {
+    globalThis.keplrExtensionRouterId = Math.floor(
       Math.random() * Number.MAX_SAFE_INTEGER
     );
   }
-  return window.keplrExtensionRouterId;
+  return globalThis.keplrExtensionRouterId;
 }

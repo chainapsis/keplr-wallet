@@ -1,0 +1,19 @@
+.toggleBotton {
+  color: white;
+  margin-top: 24px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  height: 32px;
+  padding: 6px 18px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border: 0px;
+}
+
+.toggleBotton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+}

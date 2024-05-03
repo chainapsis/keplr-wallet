@@ -1,0 +1,63 @@
+@import "../../styles/var";
+
+.right {
+  height: $header-height;
+  padding-right: $layout-padding;
+
+  display: flex;
+  flex-direction: column;
+
+  .signOut {
+    font-size: 20px;
+    padding: 0 8px;
+
+    i {
+      cursor: pointer;
+      color: #8f8f8f;
+
+      &:hover {
+        color: black;
+      }
+    }
+  }
+}
+
+.containerAccountInner {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  // height: 360px - 2 * $main-card-padding;
+}
+
+.card {
+  margin-bottom: $layout-margin;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+
+  :global(.card-body) {
+    padding: $main-card-padding;
+  }
+}
+
+.title {
+  color: var(--Grey-White, #fff);
+  font-family: Lexend;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: 22px;
+  margin-top: 10px;
+}
+.subTitle {
+  color: #fff;
+  font-family: Lexend;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  opacity: 0.6;
+  margin-bottom: 10px;
+}

@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import { useStyle } from "../../styles";
+import { useStyle } from "styles/index";
 import { Text, View } from "react-native";
 
 export const Chip: FunctionComponent<{

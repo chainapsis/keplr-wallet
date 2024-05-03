@@ -17,7 +17,7 @@ import { CommunityChainInfoRepo, EmbedChainInfos } from "../config";
 import {
   getLastUsedLedgerDeviceId,
   setLastUsedLedgerDeviceId,
-} from "../utils/ledger";
+} from "utils/ledger";
 
 const router = new RNRouterBackground(RNEnv.produceEnv);
 

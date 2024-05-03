@@ -41,7 +41,7 @@
   "main.menu.address-book": "Address Book",
   "main.menu.axl-bridge": "Axelar Bridge",
   "main.menu.address-available": "Address is already available in the Address Book",
-  "main.menu.token-list": "Token List",
+  "main.menu.token-list": "Manage tokens",
   "main.menu.activity": "Activity",
   "main.menu.fetch-name-service": ".FET Domain",
 
@@ -83,7 +83,7 @@
   "setting.permissions.get-chain-infos.paragraph": "Websites that can access your active chain list",
 
   "setting.address-book.button.add": "Add New",
-  "setting.address-book.add-address.title": "Add Address",
+  "setting.address-book.add-address.title": "Add an Address",
   "setting.address-book.edit-address.title": "Edit Address",
   "setting.address-book.name": "Name",
   "setting.address-book.address": "Address",
@@ -148,7 +148,7 @@
   "setting.clear.input.password.error.invalid": "Invalid password",
   "setting.clear.button.confirm": "Confirm",
 
-  "setting.token.add": "Add Token",
+  "setting.token.add": "Add a Token",
   "setting.token.add.contract-address": "Contract Address",
   "setting.token.add.name": "Name",
   "setting.token.add.symbol": "Symbol",
@@ -303,7 +303,7 @@
 
   "sign.tab.details": "Details",
   "sign.tab.data": "Data",
-  "sign.list.messages.label": "Messages",
+  "sign.list.messages.label": "Message",
   "sign.info.fee": "Fee",
   "sign.info.memo": "Memo",
   "sign.info.warning.empty-memo": "(Empty memo)",

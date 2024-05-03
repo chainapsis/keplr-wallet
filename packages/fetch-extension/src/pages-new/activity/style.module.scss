@@ -1,0 +1,83 @@
+.block {
+  font-weight: bold;
+  display: flex;
+  color: black;
+  align-items: center;
+  font-size: 15px;
+}
+
+.container {
+  padding: 16px;
+  margin: 0px -12px;
+}
+
+.title {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 23px;
+  /* padding-bottom: 16px; */
+  /* margin-bottom: 16px; */
+  margin-top: 12px;
+  color: white;
+}
+
+.tabContainer {
+  width: 227px;
+  margin-bottom: 10px;
+}
+
+.activityMessage {
+  color: #808da0;
+  font-size: small;
+  text-align: center;
+  height: 50%;
+  width: 85%;
+  display: flex;
+  position: fixed;
+  align-items: center;
+  justify-content: center;
+}
+.noActivityContainer {
+  display: inline-flex;
+  height: 391px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  margin: 0 auto;
+}
+.noActivityTitle {
+  color: #fff;
+  text-align: center;
+  font-family: Lexend;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 34px;
+}
+.content {
+  color: #fff;
+  text-align: center;
+  font-family: Lexend;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 160%;
+  opacity: 0.8;
+}
+
+.selectAll {
+  display: flex;
+  height: 32px;
+  padding: 6px 12px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex: 1 0 0;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  margin-bottom: 24px;
+}

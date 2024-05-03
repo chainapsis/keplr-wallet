@@ -1,11 +1,11 @@
 import React, { FunctionComponent } from "react";
-import { PageWithScrollView } from "../../../components/page";
+import { PageWithScrollView } from "components/page";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { ValidatorDetailsCard } from "./validator-details-card";
-import { useStyle } from "../../../styles";
+import { useStyle } from "styles/index";
 import { DelegatedCard } from "./delegated-card";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../stores";
+import { useStore } from "stores/index";
 import { Dec } from "@keplr-wallet/unit";
 import { UnbondingCard } from "./unbonding-card";
 import { ViewStyle } from "react-native";

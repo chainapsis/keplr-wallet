@@ -75,6 +75,9 @@ umbral_init='await umbralService.init(keyRingService, permissionService);'
 umbral_init_replacement="\/\/ $umbral_init"
 sed -i'' -e "s|$umbral_init_replacement|$umbral_init|g" "$file_path"
 
+# Removing index.ts-e file
+rm -rf "${DIR}/../../background/src/index.ts-e"
+
 # Check if the replacement was successful
 if [ $? -eq 0 ]; then
   echo "Supported feat updates completed successfully."

@@ -2612,3 +2612,49 @@ export const CommunityChainInfoRepo = {
   repoName: "keplr-chain-registry",
   branchName: "main",
 };
+
+export const CHAIN_ID_DORADO = "dorado-1";
+export const CHAIN_ID_FETCHHUB = "fetchhub-4";
+
+let SUBSCRIPTION_SERVER, MESSAGING_SERVER;
+export let NOTYPHI_BASE_URL: string;
+
+if (process.env["NODE_ENV"] === "production") {
+  SUBSCRIPTION_SERVER = "wss://messaging-server.prod.fetch-ai.com/subscription";
+  MESSAGING_SERVER = "https://messaging-server.prod.fetch-ai.com/graphql";
+  NOTYPHI_BASE_URL = "https://api.notyphi.com/v1";
+} else {
+  SUBSCRIPTION_SERVER =
+    "wss://messaging-server.sandbox-london-b.fetch-ai.com/subscription";
+  MESSAGING_SERVER =
+    "https://messaging-server.sandbox-london-b.fetch-ai.com/graphql";
+  NOTYPHI_BASE_URL = "https://api-staging.notyphi.com/v1";
+}
+
+const ACTIVITY_SERVER: { [key: string]: string } = {
+  [CHAIN_ID_DORADO]: "https://subquery-dorado.fetch.ai/",
+  [CHAIN_ID_FETCHHUB]: "https://subquery.fetch.ai/",
+};
+export const GRAPHQL_URL = {
+  SUBSCRIPTION_SERVER,
+  MESSAGING_SERVER,
+  ACTIVITY_SERVER,
+};
+
+let FETCHHUB_AGENT, DORADO_AGENT;
+
+if (process.env["NODE_ENV"] === "production") {
+  FETCHHUB_AGENT =
+    "agent1qvmfez9k6fycllzqc6p7telhwyzzj709n32sc5x2q0ss62ehqc3e52qgna7";
+  DORADO_AGENT =
+    "agent1qdhydny2mmdntqn6dx3d3wpyukaq855j2yexl2f0z07d5esl76932mctpvf";
+} else {
+  FETCHHUB_AGENT =
+    "agent1qv5rmumv0xe0fqlmm3k4lxu4mhmz9aluy07tgp5lmzr2z0mccttcyjksf7r";
+  DORADO_AGENT =
+    "agent1qtvyuq8gkywtymym00n83llwcj6dscwfaz9dgdhm2dw0e9tqmkzq7tesse9";
+}
+export const AGENT_ADDRESS: { [key: string]: string } = {
+  [CHAIN_ID_FETCHHUB]: FETCHHUB_AGENT,
+  [CHAIN_ID_DORADO]: DORADO_AGENT,
+};

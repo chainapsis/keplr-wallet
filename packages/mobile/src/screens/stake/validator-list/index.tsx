@@ -1,18 +1,18 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../stores";
-import { PageWithSectionList } from "../../../components/page";
+import { useStore } from "stores/index";
+import { PageWithSectionList } from "components/page";
 import { Text, View, ViewStyle } from "react-native";
 import { Staking } from "@keplr-wallet/stores";
-import { useStyle } from "../../../styles";
-import { SelectorModal, TextInput } from "../../../components/input";
-import { useSmartNavigation } from "../../../navigation";
+import { useStyle } from "styles/index";
+import { SelectorModal, TextInput } from "components/input";
+import { useSmartNavigation } from "navigation/smart-navigation";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
-import { RightArrowIcon } from "../../../components/icon";
+import { RightArrowIcon } from "components/icon";
 import Svg, { Path } from "react-native-svg";
-import { ValidatorThumbnail } from "../../../components/thumbnail";
+import { ValidatorThumbnail } from "components/thumbnail";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import { RectButton } from "../../../components/rect-button";
+import { RectButton } from "components/rect-button";
 
 type Sort = "APY" | "Voting Power" | "Name";
 

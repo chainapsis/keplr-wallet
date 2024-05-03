@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import Svg, { Circle } from "react-native-svg";
 import Animated from "react-native-reanimated";
-import { useSpinAnimated } from "./hooks";
+import { useSpinAnimated } from "components/spinner/hooks";
 
 export const SVGLoadingIcon: FunctionComponent<{
   color: string;

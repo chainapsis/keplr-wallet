@@ -1,0 +1,19 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+  font-size: 14px;
+  font-family: Lexend;
+  margin: 5px;
+  height: 50px;
+}
+.version {
+  opacity: 0.6;
+}
+
+.hr {
+  border: none;
+  height: 0.5px;
+  background-color: rgba(255, 255, 255, 0.2);
+}

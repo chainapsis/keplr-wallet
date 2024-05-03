@@ -26,10 +26,17 @@ export const transactions = `query TransactionsFromAddress($after: Cursor, $addr
         nodes {
           id
           balanceOffset
+          block {
+             timestamp
+          }
           transaction{
+            gasUsed
+            memo
+            fees
             status
             id
             signerAddress
+            timeoutHeight
             messages {
               nodes {
                 json

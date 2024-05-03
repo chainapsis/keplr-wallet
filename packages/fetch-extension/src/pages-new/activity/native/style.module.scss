@@ -1,0 +1,118 @@
+.container {
+  padding: 16px;
+  margin: 0px -12px;
+  width: 333px;
+  color: #fff;
+  text-align: center;
+  font-family: Lexend;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.title {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 20px;
+  padding-bottom: 16px;
+}
+
+.activityCol {
+  font-size: small;
+  display: flex;
+  align-items: center;
+  margin: 3px;
+}
+
+.activityRow {
+  font-style: Lexend;
+  color: white;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  justify-content: space-between;
+  height: 83px;
+}
+.heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+  color: white;
+  font-size: 18px;
+}
+.middleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: baseline;
+}
+.rowTitle {
+  font-size: 14px;
+  font-family: Lexend;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+.rowSubtitle {
+  color: rgba(255, 255, 255, 0.6);
+  font-family: Lexend;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+.confirmed {
+  color: var(--green-green-500-vibrant-green, #2de376);
+  text-align: center;
+  font-size: 14px;
+  font-style: Lexend;
+  font-weight: 400;
+  line-height: normal;
+}
+.error {
+  color: orange;
+  text-align: center;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+.container {
+  background: transparent;
+}
+.activityCol {
+  font-size: small;
+  display: flex;
+  align-items: center;
+  margin: 3px;
+}
+
+.hr {
+  border: none;
+  height: 0.5px;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+.amountWrapper {
+  display: flex;
+  gap: 4px;
+  font-family: Lexend;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+.amountNumber {
+  color: white;
+}
+
+.amountAlphabetic {
+  color: rgba(255, 255, 255, 0.6);
+}
+.img {
+  width: 40px;
+}

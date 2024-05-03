@@ -1,0 +1,87 @@
+.activityRow {
+  color: white;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 18px 6px;
+  justify-content: space-between;
+  gap: 12px;
+}
+.heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+  color: white;
+  font-size: 18px;
+}
+.middleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: baseline;
+}
+.title {
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+.confirmed {
+  color: var(--green-green-500-vibrant-green, #2de376);
+  text-align: center;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+.error {
+  color: orange;
+  text-align: center;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+.container {
+  background: transparent;
+}
+.activityCol {
+  font-size: small;
+  display: flex;
+  align-items: center;
+  margin: 3px;
+}
+.leftImage {
+  display: flex;
+  width: 32px;
+  height: 32px;
+  /* padding: 12px 24px; */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* gap: 10px; */
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.1);
+}
+.img {
+  width: 12px;
+  height: 12px;
+}
+.hr {
+  border: none;
+  height: 0.5px;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+.amountWrapper {
+  display: flex;
+  gap: 4px;
+}
+.amountNumber {
+  color: white;
+}
+
+.amountAlphabetic {
+  color: rgba(255, 255, 255, 0.6);
+}

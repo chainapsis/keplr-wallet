@@ -1,16 +1,16 @@
 import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
-import { useStyle } from "../../styles";
+import { useStore } from "stores/index";
+import { useStyle } from "styles/index";
 import { Governance, ObservableQueryProposal } from "@keplr-wallet/stores";
-import { Chip } from "../../components/chip";
-import { CardBody } from "../../components/card";
+import { Chip } from "components/chip";
+import { CardBody } from "components/card";
 import { Text, View, ViewStyle } from "react-native";
-import { LoadingSpinner } from "../../components/spinner";
+import { LoadingSpinner } from "components/spinner";
 import { useIntl } from "react-intl";
 import { dateToLocalString } from "./utils";
-import { useSmartNavigation } from "../../navigation";
-import { RectButton } from "../../components/rect-button";
+import { useSmartNavigation } from "navigation/smart-navigation";
+import { RectButton } from "components/rect-button";
 
 export const GovernanceProposalStatusChip: FunctionComponent<{
   status: Governance.ProposalStatus;

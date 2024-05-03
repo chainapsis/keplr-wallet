@@ -1,8 +1,8 @@
 import React, { FunctionComponent, useState } from "react";
-import { FullScreenCameraView } from "../../../components/camera";
-import { useSmartNavigation } from "../../../navigation";
+import { FullScreenCameraView } from "components/camera";
+import { useSmartNavigation } from "navigation/smart-navigation";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../stores";
+import { useStore } from "stores/index";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import {
   AddressBookConfigMap,
@@ -14,7 +14,7 @@ import {
   importFromExtension,
   registerExportedAddressBooks,
   registerExportedKeyRingDatas,
-} from "../../../utils/import-from-extension";
+} from "utils/import-from-extension";
 import { AsyncKVStore } from "../../../common";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import { CameraType } from "expo-camera/src/Camera.types";

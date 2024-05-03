@@ -1,19 +1,22 @@
 import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { Card, CardBody } from "../../components/card";
+import { Card, CardBody } from "components/card";
 import { Image, StyleSheet, Text, View, ViewStyle } from "react-native";
-import { useStore } from "../../stores";
-import { useStyle } from "../../styles";
-import { AddressCopyable } from "../../components/address-copyable";
-import { Button } from "../../components/button";
-import { LoadingSpinner } from "../../components/spinner";
-import { StakedTokenSymbol, TokenSymbol } from "../../components/token-symbol";
-import { useSmartNavigation } from "../../navigation";
+import { useStore } from "stores/index";
+import { useStyle } from "styles/index";
+import { AddressCopyable } from "components/address-copyable";
+import { Button } from "components/button";
+import { LoadingSpinner } from "components/spinner";
+import { useSmartNavigation } from "navigation/smart-navigation";
 import { NetworkErrorView } from "./network-error-view";
 import { Dec } from "@keplr-wallet/unit";
-import { DoubleDoughnutChart } from "../../components/svg";
+import { DoubleDoughnutChart } from "components/svg";
 import { AddressQRCodeModal } from "../camera";
 import { useNetInfo } from "@react-native-community/netinfo";
+import {
+  StakedTokenSymbol,
+  TokenSymbolUsingChainInfo,
+} from "components/token-symbol/token-symbol-chain";
 
 export const AccountCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -161,7 +164,7 @@ export const AccountCard: FunctionComponent<{
               <View style={style.flatten(["items-center", "justify-center"])}>
                 <Image
                   style={{ height: 150, width: 150 }}
-                  source={require("../../assets/image/wallet.png")}
+                  source={require("assets/image/wallet.png")}
                 />
               </View>
               <View style={style.flatten(["margin-20"]) as ViewStyle}>
@@ -189,7 +192,11 @@ export const AccountCard: FunctionComponent<{
                     text="Buy"
                     size="large"
                     disabled={!networkIsConnected}
-                    onPress={() => smartNavigation.pushSmart("Fetchhub", {})}
+                    onPress={() =>
+                      smartNavigation.pushSmart("WebView", {
+                        url: "https://fetch.ai/get-fet",
+                      })
+                    }
                   />
                 </View>
               ) : null}
@@ -210,7 +217,7 @@ export const AccountCard: FunctionComponent<{
                 ]) as ViewStyle
               }
             >
-              <TokenSymbol
+              <TokenSymbolUsingChainInfo
                 size={44}
                 chainInfo={chainStore.current}
                 currency={chainStore.current.stakeCurrency}

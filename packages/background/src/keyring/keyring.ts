@@ -7,7 +7,6 @@ import {
   PrivKeySecp256k1,
   PubKeySecp256k1,
   SecretKey,
-  SecretKeyBls12381,
 } from "@keplr-wallet/crypto";
 import { KVStore } from "@keplr-wallet/common";
 import { LedgerApp, LedgerService } from "../ledger";
@@ -882,8 +881,6 @@ export class KeyRing {
       switch (this.keyStore.curve) {
         case KeyCurves.secp256k1:
           return new PrivKeySecp256k1(privKey);
-        case KeyCurves.bls12381:
-          return new SecretKeyBls12381(privKey);
         default:
           throw new Error(`Unexpected key curve: "${this.keyStore.curve}"`);
       }
@@ -899,8 +896,6 @@ export class KeyRing {
       switch (this.keyStore.curve) {
         case KeyCurves.secp256k1:
           return new PrivKeySecp256k1(this.privateKey);
-        case KeyCurves.bls12381:
-          return new SecretKeyBls12381(this.privateKey);
         default:
           throw new Error(`Unexpected key curve: "${this.keyStore.curve}"`);
       }

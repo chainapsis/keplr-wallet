@@ -1,0 +1,44 @@
+.cardContainer {
+  display: flex;
+  align-items: center;
+  color: white;
+  padding: 12px 18px;
+  font-size: 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-bottom: 2px;
+}
+.cardContainer:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.heading {
+  word-break: break-all;
+  font-weight: bold;
+}
+.subHeading {
+  font-size: 12px;
+  opacity: 0.8;
+}
+.middleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.leftImage {
+  width: 26px;
+  height: 24px;
+  margin-right: 12px;
+  border-radius: 1000px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.rightImage {
+  width: 14px;
+  height: 16px;
+}
+.rightText {
+  font-weight: bold;
+}

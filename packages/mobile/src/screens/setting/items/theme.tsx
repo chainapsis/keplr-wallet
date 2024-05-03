@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
-import { SelectorModal } from "../../../components/input";
-import { RightArrow, SettingItem } from "../components";
-import { useStyleThemeController } from "../../../styles";
+import { SelectorModal } from "components/input";
+import { RightArrow, SettingItem } from "screens/setting/components";
+import { useStyleThemeController } from "styles/index";
 
 export const SettingThemeItem: FunctionComponent<{
   topBorder?: boolean;

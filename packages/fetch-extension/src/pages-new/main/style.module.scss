@@ -1,0 +1,194 @@
+@import "../../styles/var";
+
+.wallet-details {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 10px 10px 50px 0px rgba(255, 255, 255, 0.1) inset;
+  backdrop-filter: blur(25px);
+  padding: $p-lg;
+  width: 100%;
+  border-radius: $p-lg;
+  color: white;
+  font-size: $xs;
+  position: relative;
+  img {
+    height: 12px;
+    width: 12px;
+  }
+}
+.wallet-name,
+.address {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.address {
+  opacity: 0.6;
+  display: flex;
+  flex-direction: column;
+}
+
+.chain-select {
+  margin-top: 3px;
+  color: white;
+  display: flex;
+  height: 32px;
+  padding: 6px 12px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  background: transparent;
+  font-size: 14px;
+}
+.view-details {
+  cursor: pointer;
+  height: 27px;
+  display: flex;
+  padding: 6px 12px;
+  align-items: center;
+  gap: 5px;
+  border-radius: 100px;
+  backdrop-filter: blur(10px);
+  background: transparent;
+  border: 0px;
+  color: white;
+  box-shadow: none;
+  width: 95px;
+  font-size: 12px;
+}
+.chain-select:hover,
+.change-net,
+.change-net:hover {
+  cursor: pointer;
+  border-color: white;
+  color: white;
+  background: transparent !important;
+  box-shadow: none;
+}
+.change-net {
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0px;
+  border: 0px;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+}
+.chat-button,
+.chat-button:hover {
+  border: 0px;
+  background: transparent !important;
+  padding: 0px;
+  box-shadow: none;
+}
+
+.chat-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.wallet-detail-card {
+  font-size: 14px;
+  padding: 12px 18px;
+  gap: 12px;
+  align-self: stretch;
+  color: #fff;
+
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 10px 10px 50px 0px rgba(255, 255, 255, 0.1) inset;
+  backdrop-filter: blur(25px);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.wallet-address {
+  font-weight: bold;
+}
+.tab {
+  font-weight: 400;
+  padding: 6px 12px;
+  text-align: center;
+  cursor: pointer;
+  color: #fff;
+}
+
+.tab1-container {
+  display: flex;
+  cursor: pointer;
+  padding: 8px 0px;
+  margin-bottom: 18px;
+}
+
+.tab1 {
+  font-size: $xs;
+  font-weight: 400;
+  text-align: center;
+  cursor: pointer;
+  color: #fff;
+  padding: 6px 12px;
+  height: 33px;
+}
+
+.tab.active,
+.tab1.active {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.2);
+}
+.inUsd {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}
+.reward {
+  font-size: $xl;
+  cursor: pointer;
+}
+.actions {
+  color: #fff;
+  font-size: $xs;
+  margin: 32px 0px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+.action {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 0px;
+}
+.action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.your-assets {
+  font-size: $lg;
+  margin-bottom: 12px;
+  font-weight: 400;
+  color: #fff;
+}
+
+.unsupportedKeyIcon {
+  width: 100%;
+  text-align: center;
+  display: flex;
+}
+
+.walletRejected {
+  display: flex;
+  gap: 10px;
+  color: orangered;
+  font-size: 14px;
+}

@@ -73,7 +73,7 @@ export const EIP712DomainTypeValidator = Joi.array()
   });
 
 export const EIP712MessageValidator = Joi.object<{
-  types: Record<string, unknown>;
+  types: Record<string, { name: string; type: string }[]>;
   primaryType: string;
   domain: Record<string, unknown>;
   message: Record<string, unknown>;

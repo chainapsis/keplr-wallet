@@ -1,0 +1,79 @@
+.dropdown {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  color: #fff;
+  margin-bottom: 24px;
+  color: #fff;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.dropdownToggle {
+  padding: 0 10px;
+  height: 20px;
+  position: relative;
+  color: #000000;
+  cursor: pointer;
+  z-index: 1;
+}
+.dropdownHeading {
+  font-size: 12px;
+  color: #fff;
+  display: flex;
+  height: 32px;
+  padding: 6px 12px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+}
+
+.dropdownHeading:hover {
+  border: 1px solid white;
+}
+.dropdownMenuPopup {
+  font-size: 12px;
+  position: absolute;
+  top: 166%;
+  left: -34px;
+  width: 136px;
+  background-color: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(4px);
+  border-radius: 0 0 4px 4px;
+}
+
+.dropdownMenu {
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+}
+
+.dropdownItem {
+  align-items: center;
+  display: flex;
+  padding: 10px 0px;
+  font-size: 14px;
+  font-family: "Lexend";
+  border-radius: 10px;
+}
+.dropdownItem:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.select {
+  padding: 2px 5px 0 2px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.select div:hover {
+  color: #3b82f6;
+}

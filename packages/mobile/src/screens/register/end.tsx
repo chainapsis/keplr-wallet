@@ -1,13 +1,13 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { PageWithView } from "../../components/page";
-import { useStyle } from "../../styles";
+import { PageWithView } from "components/page";
+import { useStyle } from "styles/index";
 import { View, Text, ViewStyle, Image } from "react-native";
-import { Button } from "../../components/button";
-import { useSmartNavigation } from "../../navigation";
+import { Button } from "components/button";
+import { useSmartNavigation } from "navigation/smart-navigation";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
-import { Toggle } from "../../components/toggle";
+import { useStore } from "stores/index";
+import { Toggle } from "components/toggle";
 import delay from "delay";
 
 export const RegisterEndScreen: FunctionComponent = observer(() => {
@@ -51,14 +51,14 @@ export const RegisterEndScreen: FunctionComponent = observer(() => {
         {style.theme === "dark" ? (
           <Image
             style={{ width: 400, height: 260, marginRight: -80 }}
-            source={require("../../assets/image/wallet.png")}
+            source={require("assets/image/wallet.png")}
             fadeDuration={0}
             resizeMode="stretch"
           />
         ) : (
           <Image
             style={{ width: 400, height: 260, marginRight: -80 }}
-            source={require("../../assets/image/all-set.png")}
+            source={require("assets/image/all-set.png")}
             fadeDuration={0}
             resizeMode="contain"
           />

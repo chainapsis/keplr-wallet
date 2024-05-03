@@ -1,9 +1,9 @@
 import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { SettingItem } from "../components";
-import { useStyle } from "../../../styles";
-import { PasswordInputModal } from "../../../modals/password-input/modal";
-import { useStore } from "../../../stores";
+import { SettingItem } from "screens/setting/components";
+import { useStyle } from "styles/index";
+import { PasswordInputModal } from "modals/password-input/modal";
+import { useStore } from "stores/index";
 import { useNavigation } from "@react-navigation/native";
 import { ViewStyle } from "react-native";
 

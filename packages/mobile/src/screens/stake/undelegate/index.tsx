@@ -1,18 +1,18 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import { useStore } from "../../../stores";
-import { useStyle } from "../../../styles";
+import { useStore } from "stores/index";
+import { useStyle } from "styles/index";
 import { useUndelegateTxConfig } from "@keplr-wallet/hooks";
-import { PageWithScrollView } from "../../../components/page";
-import { AmountInput, FeeButtons, MemoInput } from "../../../components/input";
+import { PageWithScrollView } from "components/page";
+import { AmountInput, FeeButtons, MemoInput } from "components/input";
 import { Text, View, ViewStyle } from "react-native";
-import { Button } from "../../../components/button";
-import { Card, CardBody, CardDivider } from "../../../components/card";
+import { Button } from "components/button";
+import { Card, CardBody, CardDivider } from "components/card";
 import { Staking } from "@keplr-wallet/stores";
-import { ValidatorThumbnail } from "../../../components/thumbnail";
+import { ValidatorThumbnail } from "components/thumbnail";
 import { Buffer } from "buffer/";
-import { useSmartNavigation } from "../../../navigation";
+import { useSmartNavigation } from "navigation/smart-navigation";
 
 export const UndelegateScreen: FunctionComponent = observer(() => {
   const route = useRoute<

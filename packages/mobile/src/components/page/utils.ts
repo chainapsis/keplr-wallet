@@ -1,8 +1,8 @@
 import { useIsFocused, useRoute } from "@react-navigation/native";
-import { usePageScrollPosition } from "../../providers/page-scroll-position";
+import { usePageScrollPosition } from "providers/page-scroll-position";
 import { useEffect } from "react";
 import { Animated } from "react-native";
-import { useFocusedScreen } from "../../providers/focused-screen";
+import { useFocusedScreen } from "providers/focused-screen";
 
 export const usePageRegisterScrollYValue = () => {
   const route = useRoute();

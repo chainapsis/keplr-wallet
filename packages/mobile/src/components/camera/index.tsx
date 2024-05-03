@@ -1,21 +1,14 @@
 import React, { FunctionComponent } from "react";
-import { Camera, CameraProps, PermissionStatus } from "expo-camera";
+import { Camera, CameraProps } from "expo-camera";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
-import { useStyle } from "../../styles";
-import {
-  Linking,
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-  ViewStyle,
-} from "react-native";
+import { useStyle } from "styles/index";
+import { StyleSheet, Text, View, ViewStyle } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { CloseIcon } from "../icon";
 import Svg, { Path } from "react-native-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LoadingSpinner } from "../spinner";
-import { CameraPermissionView } from "./camera-permission-view";
+import { LoadingSpinner } from "components/spinner";
+import { IconButton } from "components/new/button/icon";
+import { XmarkIcon } from "components/new/icon/xmark";
 
 interface CameraProp extends CameraProps {
   containerBottom?: React.ReactElement;
@@ -31,38 +24,6 @@ export const FullScreenCameraView: FunctionComponent<CameraProp> = (props) => {
 
   const { children, containerBottom, isLoading, ...rest } = props;
 
-  const [permission, requestPermission] = Camera.useCameraPermissions();
-
-  const handleOpenSettings = async () => {
-    if (Platform.OS === "ios") {
-      await Linking.openURL("app-settings:");
-    } else {
-      await Linking.openSettings();
-    }
-  };
-
-  if (!permission) {
-    // Camera permissions are still loading
-    return <View />;
-  }
-
-  if (!permission.granted) {
-    // Camera permissions are not granted yet
-    return (
-      <CameraPermissionView
-        onPress={async () => {
-          const permissionStatus = await requestPermission();
-          if (
-            !permission?.granted &&
-            permissionStatus.status === PermissionStatus.DENIED
-          ) {
-            await handleOpenSettings();
-          }
-        }}
-      />
-    );
-  }
-
   return (
     <React.Fragment>
       {isFocused ? (
@@ -72,7 +33,29 @@ export const FullScreenCameraView: FunctionComponent<CameraProp> = (props) => {
         />
       ) : null}
       <SafeAreaView style={style.flatten(["absolute-fill", "items-center"])}>
-        <View style={style.flatten(["flex-row"])}>
+        <View
+          style={
+            style.flatten([
+              "flex-row",
+              "margin-top-10",
+              "margin-x-16",
+              "items-center",
+            ]) as ViewStyle
+          }
+        >
+          <View style={style.get("flex-1")} />
+          <Text
+            style={
+              style.flatten([
+                "justify-center",
+                "color-white",
+                "subtitle2",
+                "margin-left-32",
+              ]) as ViewStyle
+            }
+          >
+            Scan QR Code
+          </Text>
           <View style={style.get("flex-1")} />
           {navigation.canGoBack() ? (
             <TouchableOpacity
@@ -80,30 +63,22 @@ export const FullScreenCameraView: FunctionComponent<CameraProp> = (props) => {
                 navigation.goBack();
               }}
             >
-              <View
-                style={
+              <IconButton
+                icon={<XmarkIcon color={"white"} />}
+                backgroundBlur={false}
+                blurIntensity={20}
+                borderRadius={50}
+                iconStyle={
                   style.flatten([
-                    "width-38",
-                    "height-38",
-                    "border-radius-64",
-                    "background-color-blue-100",
-                    "dark:background-color-platinum-500",
-                    "opacity-90",
-                    "margin-top-8",
-                    "margin-right-16",
+                    "width-32",
+                    "height-32",
                     "items-center",
                     "justify-center",
+                    "border-width-1",
+                    "border-color-white@20%",
                   ]) as ViewStyle
                 }
-              >
-                <CloseIcon
-                  size={28}
-                  color={
-                    style.flatten(["color-blue-400", "dark:color-platinum-50"])
-                      .color
-                  }
-                />
-              </View>
+              />
             </TouchableOpacity>
           ) : null}
         </View>
@@ -111,7 +86,7 @@ export const FullScreenCameraView: FunctionComponent<CameraProp> = (props) => {
         <View>
           <Svg width="217" height="217" fill="none" viewBox="0 0 217 217">
             <Path
-              stroke={style.get("color-blue-400").color}
+              stroke={style.get("color-indigo-900").color}
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="6"
@@ -140,16 +115,13 @@ export const FullScreenCameraView: FunctionComponent<CameraProp> = (props) => {
               >
                 <LoadingSpinner
                   size={42}
-                  color={
-                    style.flatten(["color-blue-400", "dark:color-platinum-100"])
-                      .color
-                  }
+                  color={style.flatten(["color-indigo-900"]).color}
                 />
                 <Text
                   style={
                     style.flatten([
                       "subtitle1",
-                      "color-text-low",
+                      "color-indigo-900",
                       "margin-top-34",
                     ]) as ViewStyle
                   }

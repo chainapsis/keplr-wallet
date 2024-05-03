@@ -1,0 +1,7 @@
+@import "../../../styles/var";
+.actions {
+  font-size: $xs;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

@@ -1,16 +1,16 @@
 import React, { FunctionComponent, useEffect } from "react";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
-import { PageWithView } from "../../components/page";
+import { useStore } from "stores/index";
+import { PageWithView } from "components/page";
 import { Text, View, Animated, StyleSheet, ViewStyle } from "react-native";
-import { Button } from "../../components/button";
-import { useStyle } from "../../styles";
-import { useSmartNavigation } from "../../navigation";
-import { RightArrowIcon } from "../../components/icon";
+import { Button } from "components/button";
+import { useStyle } from "styles/index";
+import { useSmartNavigation } from "navigation/smart-navigation";
+import { RightArrowIcon } from "components/icon";
 import LottieView from "lottie-react-native";
 import * as WebBrowser from "expo-web-browser";
-import { SimpleGradient } from "../../components/svg";
+import { SimpleGradient } from "components/svg";
 
 export const TxSuccessResultScreen: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
@@ -93,7 +93,7 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
         }
       >
         <LottieView
-          source={require("../../assets/lottie/pangpare.json")}
+          source={require("assets/lottie/pangpare.json")}
           progress={pangpareAnimProgress}
           style={
             style.flatten([
@@ -113,7 +113,7 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
           }}
         >
           <LottieView
-            source={require("../../assets/lottie/success.json")}
+            source={require("assets/lottie/success.json")}
             colorFilters={[
               {
                 keypath: "Success Icon",
