@@ -708,10 +708,13 @@
   "button.vote": "투표하기",
   "button.stake": "스테이킹",
   "button.reject": "승인 안함",
+  "button.cancel": "취소",
   "text-button.select-all": "전체 선택",
   "text-button.view-all-proposals": "모든 체인의 프로포절 보기",
   "notification.transaction-success": "트랜잭션 성공",
   "wallet-connect.information-text": "{appName} 에서 당신의 {chainIds} 케플러 계정에 연결을 요청했습니다.",
   "hooks.confirm.cancel-button": "취소",
-  "hooks.confirm.yes-button": "예"
+  "hooks.confirm.yes-button": "예",
+  "save-image-modal.save-image-item": "이미지 저장",
+  "save-image-modal.save-success": "이미지가 저장되었습니다."
 }

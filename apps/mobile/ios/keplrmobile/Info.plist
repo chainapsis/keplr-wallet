@@ -95,6 +95,12 @@
 		<string>fba0f81f121c1a15f7195bb269428911</string>
 	</dict>
 	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
+    <false/>
+	<key>NSCameraUsageDescription</key>
+    <string>$(PRODUCT_NAME) uses camera for uploading images</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>$(PRODUCT_NAME) uses photo library for uploading images</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>$(PRODUCT_NAME) uses photo library for uploading images</string>
 </dict>
 </plist>

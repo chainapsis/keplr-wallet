@@ -8600,6 +8600,7 @@ __metadata:
     "@ledgerhq/hw-app-eth": ^6.29.3
     "@ledgerhq/react-native-hw-transport-ble": =6.20.0
     "@react-native-async-storage/async-storage": ^1.19.3
+    "@react-native-camera-roll/camera-roll": ^7.6.1
     "@react-native-community/blur": ^4.3.2
     "@react-native-community/netinfo": ^11.2.1
     "@react-native/babel-preset": 0.73.21
@@ -8671,6 +8672,7 @@ __metadata:
     react-native-vision-camera: ^3.9.0
     react-native-webview: ^13.8.1
     react-test-renderer: 18.2.0
+    rn-fetch-blob: 0.13.0-beta.2
     semver: ^7.6.0
     setimmediate: ^1.0.5
     stream-browserify: ^3.0.0
@@ -11510,6 +11512,15 @@ __metadata:
   peerDependencies:
     react-native: ^0.0.0-0 || 0.60 - 0.72 || 1000.0.0
   checksum: d849e5c8bb08d2130d95cc246749dae820cc1996b6b31defa063a1b67070524d72aed5a0e57ce2fafe3c3726712c09a5a3babaed1358182060ce7cfd8bd2c1a3
+  languageName: node
+  linkType: hard
+
+"@react-native-camera-roll/camera-roll@npm:^7.6.1":
+  version: 7.6.1
+  resolution: "@react-native-camera-roll/camera-roll@npm:7.6.1"
+  peerDependencies:
+    react-native: ">=0.59"
+  checksum: e445217e94f3a49bba5cae197d25f142a830cd87c987b74136a45061b80db8113c8f5d7ff9a2ad4df73b57d0724a25e9dd03fdd42f441472d77451b6579ba346
   languageName: node
   linkType: hard
 
@@ -17347,7 +17358,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"base-64@npm:^0.1.0":
+"base-64@npm:0.1.0, base-64@npm:^0.1.0":
   version: 0.1.0
   resolution: "base-64@npm:0.1.0"
   checksum: 5a42938f82372ab5392cbacc85a5a78115cbbd9dbef9f7540fa47d78763a3a8bd7d598475f0d92341f66285afd377509851a9bb5c67bbecb89686e9255d5b3eb
@@ -25131,6 +25142,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"glob@npm:7.0.6":
+  version: 7.0.6
+  resolution: "glob@npm:7.0.6"
+  dependencies:
+    fs.realpath: ^1.0.0
+    inflight: ^1.0.4
+    inherits: 2
+    minimatch: ^3.0.2
+    once: ^1.3.0
+    path-is-absolute: ^1.0.0
+  checksum: 6ad065f51982f9a76f7052984121c95bca376ea02060b21200ad62b400422b05f0dc331f72da89a73c21a2451cbe9bec16bb17dcf37a516dc51bbbb6efe462a1
+  languageName: node
+  linkType: hard
+
 "glob@npm:7.1.6, glob@npm:^7.0.0, glob@npm:^7.1.1, glob@npm:^7.1.3, glob@npm:^7.1.4, glob@npm:^7.1.6":
   version: 7.1.6
   resolution: "glob@npm:7.1.6"
@@ -29691,6 +29716,13 @@ __metadata:
   version: 4.5.0
   resolution: "lodash.uniq@npm:4.5.0"
   checksum: a4779b57a8d0f3c441af13d9afe7ecff22dd1b8ce1129849f71d9bbc8e8ee4e46dfb4b7c28f7ad3d67481edd6e51126e4e2a6ee276e25906d10f7140187c392d
+  languageName: node
+  linkType: hard
+
+"lodash@npm:4.17.15":
+  version: 4.17.15
+  resolution: "lodash@npm:4.17.15"
+  checksum: bb689bc88c0645b7002a045cdbe32292ae51d5d2a6f6a5272cb5a5ace9b06700bb3d30c6be6ecfae9a70f9c943f60e90765033fc7ff706cf9219374eeda314ad
   languageName: node
   linkType: hard
 
@@ -38268,6 +38300,17 @@ __metadata:
   bin:
     rlp: bin/rlp
   checksum: 2601225df0fe7aa3b497b33a12fd9fbaf8fb1d2989ecc5c091918ed93ee77d1c3fab20ddd3891a9ca66a8ba66d993e6079be6fb31f450fcf38ba30873102ca46
+  languageName: node
+  linkType: hard
+
+"rn-fetch-blob@npm:0.13.0-beta.2":
+  version: 0.13.0-beta.2
+  resolution: "rn-fetch-blob@npm:0.13.0-beta.2"
+  dependencies:
+    base-64: 0.1.0
+    glob: 7.0.6
+    lodash: 4.17.15
+  checksum: 3e58430c6330d615fed35e70dcc9e0db87db02373e56601726eee65c4054ff765222508ba4fa48893f380289b93b6b6e29f62544bf8ea0a31b03a437ab1da184
   languageName: node
   linkType: hard
 

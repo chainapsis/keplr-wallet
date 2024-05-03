@@ -721,10 +721,13 @@
   "button.vote": "Vote",
   "button.stake": "Stake",
   "button.reject": "Reject",
+  "button.cancel": "Cancel",
   "text-button.select-all": "Select All",
   "text-button.view-all-proposals": "View All Proposals",
   "notification.transaction-success": "Transaction Success",
   "wallet-connect.information-text": "{appName} is requesting to connect to your Keplr account on {chainIds}",
   "hooks.confirm.cancel-button": "Cancel",
-  "hooks.confirm.yes-button": "Yes"
+  "hooks.confirm.yes-button": "Yes",
+  "save-image-modal.save-image-item": "Save Image",
+  "save-image-modal.save-success": "Image saved successfully"
 }
