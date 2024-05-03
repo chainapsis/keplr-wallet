@@ -135,6 +135,7 @@ export class KeyRingStore {
   protected selectablesMap: Map<string, KeyRingSelectablesStore> = new Map();
 
   protected keyStoreChangedListeners: (() => void)[] = [];
+  protected walletStatusChangedListeners: (() => void)[] = [];
 
   constructor(
     protected readonly eventDispatcher: {
@@ -209,6 +210,8 @@ export class KeyRingStore {
     );
     this.status = result.status;
     this.multiKeyStoreInfo = result.multiKeyStoreInfo;
+
+    this.dispatchWalletStatusChangeEvent();
   }
 
   @flow
@@ -224,6 +227,8 @@ export class KeyRingStore {
     );
     this.status = result.status;
     this.multiKeyStoreInfo = result.multiKeyStoreInfo;
+
+    this.dispatchWalletStatusChangeEvent();
   }
 
   @flow
@@ -239,6 +244,8 @@ export class KeyRingStore {
     );
     this.status = result.status;
     this.multiKeyStoreInfo = result.multiKeyStoreInfo;
+
+    this.dispatchWalletStatusChangeEvent();
   }
 
   @flow
@@ -261,6 +268,8 @@ export class KeyRingStore {
     );
     this.status = result.status;
     this.multiKeyStoreInfo = result.multiKeyStoreInfo;
+
+    this.dispatchWalletStatusChangeEvent();
   }
 
   @flow
@@ -332,6 +341,7 @@ export class KeyRingStore {
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
     this.status = result.status;
+    this.dispatchWalletStatusChangeEvent();
   }
 
   @flow
@@ -348,6 +358,7 @@ export class KeyRingStore {
     }
 
     this.dispatchKeyStoreChangeEvent();
+    this.dispatchWalletStatusChangeEvent();
     this.selectablesMap.forEach((selectables) => selectables.refresh());
   }
 
@@ -364,6 +375,7 @@ export class KeyRingStore {
     );
     this.status = result.status;
     this.multiKeyStoreInfo = result.multiKeyStoreInfo;
+    this.dispatchWalletStatusChangeEvent();
   }
 
   async showKeyRing(index: number, password: string) {
@@ -382,6 +394,7 @@ export class KeyRingStore {
     );
     this.status = result.status;
     this.multiKeyStoreInfo = result.multiKeyStoreInfo;
+    this.dispatchWalletStatusChangeEvent();
 
     // Selected keystore may be changed if the selected one is deleted.
     if (selectedIndex === index) {
@@ -448,6 +461,7 @@ export class KeyRingStore {
     )).multiKeyStoreInfo;
 
     this.status = status;
+    this.dispatchWalletStatusChangeEvent();
 
     // Emit the key store changed event manually.
     this.dispatchKeyStoreChangeEvent();
@@ -477,6 +491,25 @@ export class KeyRingStore {
     const i = this.keyStoreChangedListeners.indexOf(listener);
     if (i >= 0) {
       this.keyStoreChangedListeners.splice(i, 1);
+    }
+  }
+
+  protected dispatchWalletStatusChangeEvent() {
+    this.eventDispatcher.dispatchEvent("keplr_walletstatuschange");
+
+    for (const listener of this.walletStatusChangedListeners) {
+      listener();
+    }
+  }
+
+  addWalletStatusChangeListener(listener: () => void) {
+    this.walletStatusChangedListeners.push(listener);
+  }
+
+  removeWalletStatusChangeListener(listener: () => void) {
+    const i = this.walletStatusChangedListeners.indexOf(listener);
+    if (i >= 0) {
+      this.walletStatusChangedListeners.splice(i, 1);
     }
   }
 }

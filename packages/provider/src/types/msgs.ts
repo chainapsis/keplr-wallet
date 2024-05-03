@@ -1,3 +1,9 @@
+import {
+  Account,
+  AddressBookEntry,
+  NetworkConfig,
+  WalletStatus,
+} from "@fetchai/wallet-types";
 import { Message } from "@keplr-wallet/router";
 import {
   ChainInfo,
@@ -705,5 +711,905 @@ export class ChangeKeyRingNameMsg extends Message<string> {
 
   type(): string {
     return ChangeKeyRingNameMsg.type();
+  }
+}
+
+export class StatusMsg extends Message<WalletStatus> {
+  public static type() {
+    return "status-msg";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return StatusMsg.type();
+  }
+}
+
+export class UnlockWalletMsg extends Message<void> {
+  public static type() {
+    return "unlock-wallet-msg";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return UnlockWalletMsg.type();
+  }
+}
+
+export class LockWalletMsg extends Message<void> {
+  public static type() {
+    return "lock-wallet-msg";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return LockWalletMsg.type();
+  }
+}
+
+export class RestoreWalletMsg extends Message<WalletStatus> {
+  public static type() {
+    return "restore-wallet";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return RestoreWalletMsg.type();
+  }
+}
+
+export class CurrentAccountMsg extends Message<Account> {
+  public static type() {
+    return "current-account-msg";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    //noop
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return CurrentAccountMsg.type();
+  }
+}
+
+export class SwitchAccountMsg extends Message<void> {
+  public static type() {
+    return "switch-account-msg";
+  }
+
+  constructor(public readonly address: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.address) {
+      throw new Error("address is empty");
+    }
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return SwitchAccountMsg.type();
+  }
+}
+
+export class ListAccountsMsg extends Message<Account[]> {
+  public static type() {
+    return "list-account-msg";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return ListAccountsMsg.type();
+  }
+}
+
+export class GetAccountMsg extends Message<Account | null> {
+  public static type() {
+    return "get-account-msg";
+  }
+
+  constructor(public readonly address: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.address) {
+      throw new Error("address is empty");
+    }
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return GetAccountMsg.type();
+  }
+}
+
+export class GetNetworkMsg extends Message<NetworkConfig> {
+  public static type() {
+    return "current-network-msg";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    //noop
+  }
+
+  route(): string {
+    return "chains";
+  }
+
+  type(): string {
+    return GetNetworkMsg.type();
+  }
+}
+
+export class ListNetworksMsg extends Message<NetworkConfig[]> {
+  public static type() {
+    return "list-network-msg";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return "chains";
+  }
+
+  type(): string {
+    return ListNetworksMsg.type();
+  }
+}
+
+export class GetKeyMsgFetchSigning extends Message<Account> {
+  public static type() {
+    return "get-key-fetch-signing";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return GetKeyMsgFetchSigning.type();
+  }
+}
+
+export class RequestSignAminoMsgFetchSigning extends Message<AminoSignResponse> {
+  public static type() {
+    return "request-sign-amino-fetch-signing";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly signDoc: StdSignDoc,
+    public readonly signOptions: KeplrSignOptions & {
+      // Hack option field to detect the sign arbitrary for string
+      isADR36WithString?: boolean;
+      ethSignType?: EthSignType;
+    } = {}
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.signer) {
+      throw new Error("signer not set");
+    }
+
+    // It is not important to check this on the client side as opposed to increasing the bundle size.
+    // Validate bech32 address.
+    // Bech32Address.validate(this.signer);
+
+    const signDoc = this.signDoc;
+
+    // Check that the sign doc is for ADR-36,
+    // the validation should be performed on the background.
+    const hasOnlyMsgSignData = (() => {
+      if (
+        signDoc &&
+        signDoc.msgs &&
+        Array.isArray(signDoc.msgs) &&
+        signDoc.msgs.length === 1
+      ) {
+        const msg = signDoc.msgs[0];
+        return msg.type === "sign/MsgSignData";
+      } else {
+        return false;
+      }
+    })();
+
+    // If the sign doc is expected to be for ADR-36,
+    // it doesn't have to have the chain id in the sign doc.
+    if (!hasOnlyMsgSignData && signDoc.chain_id !== this.chainId) {
+      throw new Error(
+        "Chain id in the message is not matched with the requested chain id"
+      );
+    }
+
+    if (!this.signOptions) {
+      throw new Error("Sign options are null");
+    }
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return RequestSignAminoMsgFetchSigning.type();
+  }
+}
+
+export class RequestSignDirectMsgFetchSigning extends Message<{
+  readonly signed: {
+    bodyBytes: Uint8Array;
+    authInfoBytes: Uint8Array;
+    chainId: string;
+    accountNumber: string;
+  };
+  readonly signature: StdSignature;
+}> {
+  public static type() {
+    return "request-sign-direct-fetch-signing";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly signDoc: {
+      bodyBytes?: Uint8Array | null;
+      authInfoBytes?: Uint8Array | null;
+      chainId?: string | null;
+      accountNumber?: string | null;
+    },
+    public readonly signOptions: KeplrSignOptions = {}
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.signer) {
+      throw new Error("signer not set");
+    }
+
+    // It is not important to check this on the client side as opposed to increasing the bundle size.
+    // Validate bech32 address.
+    // Bech32Address.validate(this.signer);
+
+    // const signDoc = cosmos.tx.v1beta1.SignDoc.create({
+    //   bodyBytes: this.signDoc.bodyBytes,
+    //   authInfoBytes: this.signDoc.authInfoBytes,
+    //   chainId: this.signDoc.chainId,
+    //   accountNumber: this.signDoc.accountNumber
+    //     ? Long.fromString(this.signDoc.accountNumber)
+    //     : undefined,
+    // });
+    //
+    // if (signDoc.chainId !== this.chainId) {
+    //   throw new Error(
+    //     "Chain id in the message is not matched with the requested chain id"
+    //   );
+    // }
+
+    if (!this.signOptions) {
+      throw new Error("Sign options are null");
+    }
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return RequestSignDirectMsgFetchSigning.type();
+  }
+}
+
+export class RequestVerifyADR36AminoSignDocFetchSigning extends Message<boolean> {
+  public static type() {
+    return "request-verify-adr-36-amino-doc-fetch-signing";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly data: Uint8Array,
+    public readonly signature: StdSignature
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.signer) {
+      throw new Error("signer not set");
+    }
+
+    if (!this.signature) {
+      throw new Error("Signature not set");
+    }
+
+    // It is not important to check this on the client side as opposed to increasing the bundle size.
+    // Validate bech32 address.
+    // Bech32Address.validate(this.signer);
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return RequestVerifyADR36AminoSignDocFetchSigning.type();
+  }
+}
+
+export class AddNetworkAndSwitchMsg extends Message<void> {
+  public static type() {
+    return "add-chain-by-network";
+  }
+
+  constructor(public readonly network: NetworkConfig) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.network) {
+      throw new Error("chain info not set");
+    }
+  }
+
+  route(): string {
+    return "chains";
+  }
+
+  type(): string {
+    return AddNetworkAndSwitchMsg.type();
+  }
+}
+
+export class SwitchNetworkByChainIdMsg extends Message<void> {
+  public static type() {
+    return "switch-network-by-chainid";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chainId is empty");
+    }
+  }
+
+  route(): string {
+    return "chains";
+  }
+
+  type(): string {
+    return SwitchNetworkByChainIdMsg.type();
+  }
+}
+
+export class SubscribeOnStatusChangeMsg extends Message<void> {
+  public static type() {
+    return "subscribe-on-status-changed";
+  }
+
+  constructor(public readonly handler: any) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.handler) {
+      throw new Error("handler is empty");
+    }
+  }
+
+  route(): string {
+    return "events";
+  }
+
+  type(): string {
+    return SubscribeOnStatusChangeMsg.type();
+  }
+}
+
+export class UnsubscribeOnStatusChangeMsg extends Message<void> {
+  public static type() {
+    return "unsubscribe-on-status-changed";
+  }
+
+  constructor(public readonly handler: any) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.handler) {
+      throw new Error("handler is empty");
+    }
+  }
+
+  route(): string {
+    return "events";
+  }
+
+  type(): string {
+    return UnsubscribeOnStatusChangeMsg.type();
+  }
+}
+
+export class SubscribeOnNetworkChangeMsg extends Message<void> {
+  public static type() {
+    return "subscribe-on-network-changed";
+  }
+
+  constructor(public readonly handler: any) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.handler) {
+      throw new Error("handler is empty");
+    }
+  }
+
+  route(): string {
+    return "events";
+  }
+
+  type(): string {
+    return SubscribeOnNetworkChangeMsg.type();
+  }
+}
+
+export class UnsubscribeOnNetworkChangeMsg extends Message<void> {
+  public static type() {
+    return "unsubscribe-on-network-changed";
+  }
+
+  constructor(public readonly handler: any) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.handler) {
+      throw new Error("handler is empty");
+    }
+  }
+
+  route(): string {
+    return "events";
+  }
+
+  type(): string {
+    return UnsubscribeOnNetworkChangeMsg.type();
+  }
+}
+
+export class SubscribeOnAccountChangeMsg extends Message<void> {
+  public static type() {
+    return "subscribe-on-account-changed";
+  }
+
+  constructor(public readonly handler: any) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.handler) {
+      throw new Error("handler is empty");
+    }
+  }
+
+  route(): string {
+    return "events";
+  }
+
+  type(): string {
+    return SubscribeOnAccountChangeMsg.type();
+  }
+}
+
+export class UnsubscribeOnAccountChangeMsg extends Message<void> {
+  public static type() {
+    return "unsubscribe-on-account-changed";
+  }
+
+  constructor(public readonly handler: any) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.handler) {
+      throw new Error("handler is empty");
+    }
+  }
+
+  route(): string {
+    return "events";
+  }
+
+  type(): string {
+    return UnsubscribeOnAccountChangeMsg.type();
+  }
+}
+
+export class SubscribeOnTxFailedMsg extends Message<void> {
+  public static type() {
+    return "subscribe-on-tx-failed";
+  }
+
+  constructor(public readonly handler: any) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.handler) {
+      throw new Error("handler is empty");
+    }
+  }
+
+  route(): string {
+    return "events";
+  }
+
+  type(): string {
+    return SubscribeOnTxFailedMsg.type();
+  }
+}
+
+export class UnsubscribeOnTxFailedMsg extends Message<void> {
+  public static type() {
+    return "unsubscribe-on-tx-failed";
+  }
+
+  constructor(public readonly handler: any) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.handler) {
+      throw new Error("handler is empty");
+    }
+  }
+
+  route(): string {
+    return "events";
+  }
+
+  type(): string {
+    return UnsubscribeOnTxFailedMsg.type();
+  }
+}
+
+export class SubscribeOnTxSuccessfulMsg extends Message<void> {
+  public static type() {
+    return "subscribe-on-tx-successful";
+  }
+
+  constructor(public readonly handler: any) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.handler) {
+      throw new Error("handler is empty");
+    }
+  }
+
+  route(): string {
+    return "events";
+  }
+
+  type(): string {
+    return SubscribeOnTxSuccessfulMsg.type();
+  }
+}
+
+export class UnsubscribeOnTxSuccessfulMsg extends Message<void> {
+  public static type() {
+    return "unsubscribe-on-tx-successful";
+  }
+
+  constructor(public readonly handler: any) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.handler) {
+      throw new Error("handler is empty");
+    }
+  }
+
+  route(): string {
+    return "events";
+  }
+
+  type(): string {
+    return UnsubscribeOnTxSuccessfulMsg.type();
+  }
+}
+
+export class SubscribeOnEVMTxFailedMsg extends Message<void> {
+  public static type() {
+    return "subscribe-on-evm-tx-failed";
+  }
+
+  constructor(public readonly handler: any) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.handler) {
+      throw new Error("handler is empty");
+    }
+  }
+
+  route(): string {
+    return "events";
+  }
+
+  type(): string {
+    return SubscribeOnEVMTxFailedMsg.type();
+  }
+}
+
+export class UnsubscribeOnEVMTxFailedMsg extends Message<void> {
+  public static type() {
+    return "unsubscribe-on-evm-tx-failed";
+  }
+
+  constructor(public readonly handler: any) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.handler) {
+      throw new Error("handler is empty");
+    }
+  }
+
+  route(): string {
+    return "events";
+  }
+
+  type(): string {
+    return UnsubscribeOnEVMTxFailedMsg.type();
+  }
+}
+
+export class SubscribeOnEVMTxSuccessfulMsg extends Message<void> {
+  public static type() {
+    return "subscribe-on-evm-tx-successful";
+  }
+
+  constructor(public readonly handler: any) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.handler) {
+      throw new Error("handler is empty");
+    }
+  }
+
+  route(): string {
+    return "events";
+  }
+
+  type(): string {
+    return SubscribeOnEVMTxSuccessfulMsg.type();
+  }
+}
+
+export class UnsubscribeOnEVMTxSuccessfulMsg extends Message<void> {
+  public static type() {
+    return "unsubscribe-on-evm-tx-successful";
+  }
+
+  constructor(public readonly handler: any) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.handler) {
+      throw new Error("handler is empty");
+    }
+  }
+
+  route(): string {
+    return "events";
+  }
+
+  type(): string {
+    return UnsubscribeOnEVMTxSuccessfulMsg.type();
+  }
+}
+
+export class ListEntriesMsg extends Message<AddressBookEntry[]> {
+  public static type() {
+    return "list-entries-msg";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return "address-book";
+  }
+
+  type(): string {
+    return ListEntriesMsg.type();
+  }
+}
+
+export class AddEntryMsg extends Message<void> {
+  public static type() {
+    return "add-entry-msg";
+  }
+
+  constructor(public readonly entry: AddressBookEntry) {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return "address-book";
+  }
+
+  type(): string {
+    return AddEntryMsg.type();
+  }
+}
+
+export class UpdateEntryMsg extends Message<void> {
+  public static type() {
+    return "update-entry-msg";
+  }
+
+  constructor(public readonly entry: AddressBookEntry) {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return "address-book";
+  }
+
+  type(): string {
+    return UpdateEntryMsg.type();
+  }
+}
+export class DeleteEntryMsg extends Message<void> {
+  public static type() {
+    return "delete-entry-msg";
+  }
+
+  constructor(public readonly address: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return "address-book";
+  }
+
+  type(): string {
+    return DeleteEntryMsg.type();
   }
 }

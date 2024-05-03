@@ -1,10 +1,15 @@
 import { Env, Handler, InternalHandler, Message } from "@keplr-wallet/router";
 import { ChainsService } from "./service";
 import {
+  GetNetworkMsg,
   GetChainInfosMsg,
   GetChainInfosWithoutEndpointsMsg,
   RemoveSuggestedChainInfoMsg,
   SuggestChainInfoMsg,
+  ListNetworksMsg,
+  AddNetworkAndSwitchMsg,
+  SwitchNetworkByChainIdMsg,
+  SetSelectedChainMsg,
 } from "./messages";
 import { ChainInfo } from "@keplr-wallet/types";
 
@@ -25,11 +30,30 @@ export const getHandler: (service: ChainsService) => Handler = (service) => {
           env,
           msg as SuggestChainInfoMsg
         );
+      case SetSelectedChainMsg:
+        return handleSetSelectedChainMsg(service)(
+          env,
+          msg as SetSelectedChainMsg
+        );
+      case AddNetworkAndSwitchMsg:
+        return handleAddNetworkAndSwitch(service)(
+          env,
+          msg as AddNetworkAndSwitchMsg
+        );
+      case SwitchNetworkByChainIdMsg:
+        return handleSwitchNetworkByChainId(service)(
+          env,
+          msg as SwitchNetworkByChainIdMsg
+        );
       case RemoveSuggestedChainInfoMsg:
         return handleRemoveSuggestedChainInfoMsg(service)(
           env,
           msg as RemoveSuggestedChainInfoMsg
         );
+      case GetNetworkMsg:
+        return handleGetNetworkMsg(service)(env, msg as GetNetworkMsg);
+      case ListNetworksMsg:
+        return handleListNetworksMsg(service)(env, msg as ListNetworksMsg);
       default:
         throw new Error("Unknown msg type");
     }
@@ -65,6 +89,14 @@ const handleGetChainInfosWithoutEndpointsMsg: (
   };
 };
 
+const handleSetSelectedChainMsg: (
+  service: ChainsService
+) => InternalHandler<SetSelectedChainMsg> = (service) => {
+  return async (_, msg) => {
+    service.setSelectedChain(msg.chainId);
+  };
+};
+
 const handleSuggestChainInfoMsg: (
   service: ChainsService
 ) => InternalHandler<SuggestChainInfoMsg> = (service) => {
@@ -88,5 +120,54 @@ const handleRemoveSuggestedChainInfoMsg: (
   return async (_, msg) => {
     await service.removeChainInfo(msg.chainId);
     return await service.getChainInfos();
+  };
+};
+
+const handleGetNetworkMsg: (
+  service: ChainsService
+) => InternalHandler<GetNetworkMsg> = (service) => {
+  return async () => {
+    const chainId = await service.getSelectedChain();
+    const chainInfo = await service.getChainInfo(chainId);
+    return service.getNetworkConfig(chainInfo);
+  };
+};
+
+const handleListNetworksMsg: (
+  service: ChainsService
+) => InternalHandler<ListNetworksMsg> = (service) => {
+  return async (env, msg) => {
+    await service.permissionService.checkOrGrantGlobalPermission(
+      env,
+      "/permissions/grant/get-chain-infos",
+      "get-chain-infos",
+      msg.origin
+    );
+
+    return await service.getAllNetworks();
+  };
+};
+
+const handleAddNetworkAndSwitch: (
+  service: ChainsService
+) => InternalHandler<AddNetworkAndSwitchMsg> = (service) => {
+  return async (env, msg) => {
+    if (await service.hasChainInfo(msg.network.chainId)) {
+      // If suggested chain info is already registered, just return.
+      return;
+    }
+
+    await service.addChainByNetwork(env, msg.network, msg.origin);
+  };
+};
+
+const handleSwitchNetworkByChainId: (
+  service: ChainsService
+) => InternalHandler<SwitchNetworkByChainIdMsg> = (service) => {
+  return async (env, msg) => {
+    if (await service.hasChainInfo(msg.chainId)) {
+      // If suggested chain info is registered then switch else just return.
+      await service.switchChainByChainId(env, msg.chainId, msg.origin);
+    }
   };
 };

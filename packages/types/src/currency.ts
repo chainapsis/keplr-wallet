@@ -1,3 +1,22 @@
+export interface DenomUnit {
+  /**
+   * The name of the unit
+   */
+  name: string;
+
+  /**
+   * The exponent for the number of units in the form 10^{exponent}.
+   *
+   * For FET which has a precision of 10^18 this value would be 18
+   */
+  exponent: number;
+
+  /**
+   * An optional set of aliases for the unit
+   */
+  aliases?: string[];
+}
+
 /**
  * The currency that is supported on the chain natively.
  */
@@ -11,6 +30,10 @@ export interface Currency {
    */
   readonly coinGeckoId?: string;
   readonly coinImageUrl?: string;
+  readonly display?: string;
+  readonly description?: string;
+  readonly name?: string;
+  readonly denomUnits?: DenomUnit[];
 }
 
 /**
@@ -52,7 +75,6 @@ export interface IBCCurrency extends Currency {
   readonly originCurrency:
     | Currency
     | CW20Currency
-    | Erc20Currency
     | Secret20Currency
     | undefined;
 }

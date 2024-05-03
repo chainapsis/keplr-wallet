@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { SignDocHelper } from "@keplr-wallet/hooks";
 
@@ -9,17 +9,14 @@ export const DataTab: FunctionComponent<{
   signDocHelper: SignDocHelper;
   ethSignType?: EthSignType;
 }> = observer(({ signDocHelper, ethSignType }) => {
-  const content = useMemo(() => {
-    if (
-      ethSignType !== EthSignType.TRANSACTION ||
-      !signDocHelper.signDocWrapper ||
-      signDocHelper.signDocWrapper.aminoSignDoc.msgs.length !== 1 ||
-      signDocHelper.signDocWrapper.aminoSignDoc.msgs[0].type !==
-        "sign/MsgSignData"
-    ) {
-      return JSON.stringify(signDocHelper.signDocJson, undefined, 2);
-    }
-
+  if (
+    ethSignType === EthSignType.TRANSACTION &&
+    signDocHelper.signDocWrapper &&
+    signDocHelper.signDocWrapper.mode === "amino" &&
+    signDocHelper.signDocWrapper.aminoSignDoc.msgs.length === 1 &&
+    signDocHelper.signDocWrapper.aminoSignDoc.msgs[0].type ===
+      "sign/MsgSignData"
+  ) {
     const decoder = new TextDecoder();
     const jsonStr = decoder.decode(
       Buffer.from(
@@ -27,8 +24,10 @@ export const DataTab: FunctionComponent<{
         "base64"
       )
     );
-    return JSON.stringify(JSON.parse(jsonStr), undefined, 2);
-  }, [signDocHelper.signDocWrapper?.aminoSignDoc.msgs, ethSignType]);
+    const ethPayload = JSON.stringify(JSON.parse(jsonStr), undefined, 2);
+    return <pre className={style["message"]}>{ethPayload}</pre>;
+  }
 
+  const content = JSON.stringify(signDocHelper.signDocJson, undefined, 2);
   return <pre className={style["message"]}>{content}</pre>;
 });

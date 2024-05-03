@@ -13,7 +13,8 @@ import classNames from "classnames";
 import { GithubIcon, InformationCircleOutline } from "@components/icon";
 
 export const ChainSuggestedPage: FunctionComponent = observer(() => {
-  const { chainSuggestStore, analyticsStore, uiConfigStore } = useStore();
+  const { chainSuggestStore, analyticsStore, uiConfigStore, chainStore } =
+    useStore();
   const [updateFromRepoDisabled, setUpdateFromRepoDisabled] = useState(false);
   const [isLoadingPlaceholder, setIsLoadingPlaceholder] = useState(true);
   const navigate = useNavigate();
@@ -386,6 +387,8 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
                     ...chainInfo,
                     updateFromRepoDisabled,
                   });
+                  chainStore.selectChain(chainInfo.chainId);
+                  chainStore.saveLastViewChainId();
                 }
 
                 if (

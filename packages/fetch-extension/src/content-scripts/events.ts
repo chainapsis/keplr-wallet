@@ -36,8 +36,17 @@ export function initEvents(router: Router) {
     switch (msg.constructor) {
       case PushEventDataMsg:
         if ((msg as PushEventDataMsg).data.type === "keystore-changed") {
-          window.dispatchEvent(new Event("keplr_keystorechange"));
+          window.dispatchEvent(new Event("fetchwallet_keystorechange"));
         }
+
+        if ((msg as PushEventDataMsg).data.type === "status-changed") {
+          window.dispatchEvent(new Event("fetchwallet_walletstatuschange"));
+        }
+
+        if ((msg as PushEventDataMsg).data.type === "network-changed") {
+          window.dispatchEvent(new Event("fetchwallet_networkchange"));
+        }
+
         return;
       default:
         throw new Error("Unknown msg type");

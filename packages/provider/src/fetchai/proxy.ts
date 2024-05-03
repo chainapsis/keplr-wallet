@@ -63,6 +63,52 @@ export function toProxyResponse(obj: any): ProxyResponse | undefined {
   }
 }
 
+export function requestViaProxy(
+  method: Method,
+  args: any[],
+  proxy: Proxy
+): Promise<any> {
+  const proxyRequest = createProxyRequest(method, args);
+
+  return new Promise((resolve, reject) => {
+    const messageHandler = (e: any) => {
+      const proxyResponse = toProxyResponse(e.data);
+      if (proxyResponse === undefined) {
+        return;
+      }
+
+      if (
+        !proxyResponse ||
+        proxyResponse.type !== "fetchai:proxy-response-v1"
+      ) {
+        return;
+      }
+
+      if (proxyResponse.id !== proxyRequest.id) {
+        return;
+      }
+
+      proxy.removeMessageHandler(messageHandler);
+
+      const result = JSONUint8Array.unwrap(proxyResponse.result);
+      if (!result) {
+        reject(new Error("Result is null"));
+        return;
+      }
+
+      if (result.error) {
+        reject(new Error(result.error));
+        return;
+      }
+
+      resolve(result.return);
+    };
+
+    proxy.addMessageHandler(messageHandler);
+    proxy.sendMessage(proxyRequest);
+  });
+}
+
 export interface Proxy {
   addMessageHandler: (handler: (e: any) => void) => void;
   removeMessageHandler: (handler: (e: any) => void) => void;

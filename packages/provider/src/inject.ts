@@ -40,7 +40,11 @@ export interface ProxyRequestResponse {
   result: Result | undefined;
 }
 
-function defineUnwritablePropertyIfPossible(o: any, p: string, value: any) {
+export function defineUnwritablePropertyIfPossible(
+  o: any,
+  p: string,
+  value: any
+) {
   const descriptor = Object.getOwnPropertyDescriptor(o, p);
   if (!descriptor || descriptor.writable) {
     if (!descriptor || descriptor.configurable) {

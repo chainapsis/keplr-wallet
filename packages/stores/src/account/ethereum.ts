@@ -28,6 +28,7 @@ import {
 import { isAddress } from "@ethersproject/address";
 import { KVStore } from "@keplr-wallet/common";
 import { BigNumber } from "@ethersproject/bignumber";
+
 export interface EthereumAccount {
   ethereum: EthereumAccountImpl;
 }
@@ -400,6 +401,7 @@ export class EthereumAccountImpl {
       if (txList === undefined || !txList.find((txn) => txn.hash === hash)) {
         return;
       }
+      console.log("updateTransactionStatus", status);
 
       // Find and update the transaction status by hash
       const updatedTxList = txList.map((txn) =>

@@ -119,7 +119,7 @@ export class TokensStore<
         );
 
         const inner = this.getTokensOf(chainInfoInner.chainId);
-        chainInfoInner.addCurrencies(...inner.tokens);
+        chainInfoInner.addCurrencies(...(inner.tokens as AppCurrency[]));
 
         this.prevTokens.set(
           chainIdentifier.identifier,

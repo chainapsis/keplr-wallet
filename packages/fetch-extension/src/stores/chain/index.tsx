@@ -16,6 +16,7 @@ import {
   SetChainEndpointsMsg,
   ResetChainEndpointsMsg,
   SuggestChainInfoMsg,
+  SetSelectedChainMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
@@ -159,6 +160,8 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       this.deferChainIdSelect = chainId;
     }
     this._selectedChainId = chainId;
+    const msg = new SetSelectedChainMsg(this._selectedChainId);
+    this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
   @computed

@@ -49,7 +49,7 @@ import { KeyCurve, KeyCurves } from "@keplr-wallet/crypto";
 import { Buffer } from "buffer/";
 import { trimAminoSignDoc } from "./amino-sign-doc";
 import { KeystoneService } from "../keystone";
-import { RequestICNSAdr36SignaturesMsg } from "./messages";
+import { RequestICNSAdr36SignaturesMsg, SwitchAccountMsg } from "./messages";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { closePopupWindow } from "@keplr-wallet/popup";
 import { Msg } from "@keplr-wallet/types/build";
@@ -85,6 +85,7 @@ export class KeyRingService {
       this.kvStore,
       ledgerService,
       keystoneService,
+      interactionService,
       this.crypto
     );
 
@@ -264,7 +265,6 @@ export class KeyRingService {
   async getKey(chainId: string): Promise<Key> {
     const ethereumKeyFeatures =
       await this.chainsService.getChainEthereumKeyFeatures(chainId);
-
     const isEvm =
       (await this.chainsService.getChainInfo(chainId)).features?.includes(
         "evm"
@@ -1031,5 +1031,30 @@ Salt: ${salt}`;
     await this.updateNameKeyRing(index, newName);
 
     return newName;
+  }
+
+  async switchAccountByAddress(
+    env: Env,
+    address: string,
+    origin: string
+  ): Promise<void> {
+    (await this.interactionService.waitApprove(
+      env,
+      "/switch-account-by-address",
+      SwitchAccountMsg.type(),
+      {
+        address,
+        origin,
+      }
+    )) as string;
+  }
+
+  async getKeys(chainId: string): Promise<(Key & { name: string })[]> {
+    const isEvm =
+      (await this.chainsService.getChainInfo(chainId)).features?.includes(
+        "evm"
+      ) ?? false;
+
+    return await this.keyRing.getKeys(chainId, isEvm);
   }
 }

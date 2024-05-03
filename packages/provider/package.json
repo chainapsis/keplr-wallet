@@ -16,8 +16,9 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@fetchai/umbral-types": "^0.1.1",
+    "@cosmjs/launchpad": "^0.27.1",
     "@fetchai/wallet-types": "^0.1.1",
+    "@keplr-wallet/cosmos": "0.12.12",
     "@keplr-wallet/router": "0.12.12",
     "@keplr-wallet/types": "0.12.12",
     "buffer": "^6.0.3",

@@ -1,9 +1,52 @@
-export enum Method {
-  UMBRAL_V1_GET_PUBLIC_KEY = 1,
-  UMBRAL_V1_GET_SIGNING_KEY,
-  UMBRAL_V1_ENCRYPT,
-  UMBRAL_V1_GENERATE_KEY_FRAGMENTS,
-  UMBRAL_V1_DECRYPT,
-  UMBRAL_V1_DECRYPT_REENCRYPTED,
-  UMBRAL_V1_VERIFY_CAPSULE_FRAGMENT,
-}
+export type Method = `wallet.${FetchWalletApiMethod}`;
+
+export type FetchWalletApiMethod =
+  | WalletMethod
+  | `signing.${WalletSigningMethod}`
+  | `networks.${NetworksApiMethod}`
+  | `accounts.${AccountsApiMethod}`
+  | `addressBook.${AddressBookApiMethods}`;
+
+export type FetchWalletMethod =
+  | WalletMethod
+  | WalletSigningMethod
+  | NetworksApiMethod
+  | AccountsApiMethod
+  | AddressBookApiMethods;
+
+export type WalletSigningMethod =
+  | "getCurrentKey"
+  | "signAmino"
+  | "signDirect"
+  | "signArbitrary"
+  | "verifyArbitrary"
+  | "getOfflineSigner"
+  | "getOfflineDirectSigner"
+  | "getOfflineAminoSigner"
+  | "signEthereum";
+
+export type WalletMethod =
+  | "status"
+  | "lockWallet"
+  | "unlockWallet"
+  | "restoreWallet"
+  | "enable"
+  | "disable";
+
+export type NetworksApiMethod =
+  | "getNetwork"
+  | "switchToNetwork"
+  | "switchToNetworkByChainId"
+  | "listNetworks";
+
+export type AccountsApiMethod =
+  | "currentAccount"
+  | "switchAccount"
+  | "listAccounts"
+  | "getAccount";
+
+export type AddressBookApiMethods =
+  | "listEntries"
+  | "addEntry"
+  | "updateEntry"
+  | "deleteEntry";

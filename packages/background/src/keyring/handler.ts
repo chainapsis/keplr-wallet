@@ -28,10 +28,25 @@ import {
   AddKeystoneKeyMsg,
   RequestICNSAdr36SignaturesMsg,
   ChangeKeyRingNameMsg,
+  StatusMsg,
+  LockWalletMsg,
+  UnlockWalletMsg,
+  CurrentAccountMsg,
+  RequestSignAminoMsgFetchSigning,
+  RequestSignDirectMsgFetchSigning,
+  RequestVerifyADR36AminoSignDocFetchSigning,
+  SwitchAccountMsg,
+  ListAccountsMsg,
+  GetAccountMsg,
+  RestoreWalletMsg,
+  GetKeyMsgFetchSigning,
 } from "./messages";
 import { KeyRingService } from "./service";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import { KeyRingStatus } from "./keyring";
+import { ExtensionKVStore } from "@keplr-wallet/common";
+import { Account, WalletStatus } from "@fetchai/wallet-types";
 
 export const getHandler: (service: KeyRingService) => Handler = (
   service: KeyRingService
@@ -83,6 +98,8 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleUnlockKeyRingMsg(service)(env, msg as UnlockKeyRingMsg);
       case GetKeyMsg:
         return handleGetKeyMsg(service)(env, msg as GetKeyMsg);
+      case GetAccountMsg:
+        return handleGetAccountMsg(service)(env, msg as GetAccountMsg);
       case RequestSignAminoMsg:
         return handleRequestSignAminoMsg(service)(
           env,
@@ -141,6 +158,40 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleChangeKeyNameMsg(service)(
           env,
           msg as ChangeKeyRingNameMsg
+        );
+      case StatusMsg:
+        return handleStatusMsg(service)(env, msg as StatusMsg);
+      case RestoreWalletMsg:
+        return handleRestoreWalletMsg(service)(env, msg as StatusMsg);
+      case LockWalletMsg:
+        return handleLockWallet(service)(env, msg as LockWalletMsg);
+      case UnlockWalletMsg:
+        return handleUnlockWallet(service)(env, msg as UnlockWalletMsg);
+      case CurrentAccountMsg:
+        return handleCurrentAccountMsg(service)(env, msg as CurrentAccountMsg);
+      case SwitchAccountMsg:
+        return handleSwitchAccountMsg(service)(env, msg as SwitchAccountMsg);
+      case ListAccountsMsg:
+        return handleListAccountsMsg(service)(env, msg as ListAccountsMsg);
+      case GetKeyMsgFetchSigning:
+        return handleGetKeyMsgFetchSigning(service)(
+          env,
+          msg as GetKeyMsgFetchSigning
+        );
+      case RequestSignAminoMsgFetchSigning:
+        return handleRequestSignAminoMsgFetchSigning(service)(
+          env,
+          msg as RequestSignAminoMsgFetchSigning
+        );
+      case RequestSignDirectMsgFetchSigning:
+        return handleRequestSignDirectMsgFetchSigning(service)(
+          env,
+          msg as RequestSignDirectMsgFetchSigning
+        );
+      case RequestVerifyADR36AminoSignDocFetchSigning:
+        return handleRequestVerifyADR36AminoSignDocFetchSigning(service)(
+          env,
+          msg as RequestVerifyADR36AminoSignDocFetchSigning
         );
       default:
         throw new Error("Unknown msg type");
@@ -287,9 +338,10 @@ const handleAddLedgerKeyMsg: (
 const handleLockKeyRingMsg: (
   service: KeyRingService
 ) => InternalHandler<LockKeyRingMsg> = (service) => {
+  const status = service.lock();
   return () => {
     return {
-      status: service.lock(),
+      status,
     };
   };
 };
@@ -298,8 +350,9 @@ const handleUnlockKeyRingMsg: (
   service: KeyRingService
 ) => InternalHandler<UnlockKeyRingMsg> = (service) => {
   return async (_, msg) => {
+    const status = await service.unlock(msg.password);
     return {
-      status: await service.unlock(msg.password),
+      status,
     };
   };
 };
@@ -315,7 +368,6 @@ const handleGetKeyMsg: (
     );
 
     const key = await service.getKey(msg.chainId);
-
     return {
       name: service.getKeyStoreMeta("name"),
       algo: "secp256k1",
@@ -533,5 +585,320 @@ const handleChangeKeyNameMsg: (
       defaultName: msg.defaultName,
       editable: msg.editable,
     });
+  };
+};
+
+const handleRestoreWalletMsg: (
+  service: KeyRingService
+) => InternalHandler<RestoreWalletMsg> = (service) => {
+  return async () => {
+    const { status } = await service.restore();
+    if (status === KeyRingStatus.EMPTY) {
+      return WalletStatus.EMPTY;
+    } else if (status === KeyRingStatus.LOCKED) {
+      return WalletStatus.LOCKED;
+    } else if (status === KeyRingStatus.NOTLOADED) {
+      return WalletStatus.NOTLOADED;
+    } else if (status === KeyRingStatus.UNLOCKED) {
+      return WalletStatus.UNLOCKED;
+    } else return WalletStatus.NOTLOADED;
+  };
+};
+
+const handleStatusMsg: (
+  service: KeyRingService
+) => InternalHandler<StatusMsg> = (service) => {
+  return () => {
+    const status = service.keyRingStatus;
+    if (status === KeyRingStatus.EMPTY) {
+      return WalletStatus.EMPTY;
+    } else if (status === KeyRingStatus.LOCKED) {
+      return WalletStatus.LOCKED;
+    } else if (status === KeyRingStatus.NOTLOADED) {
+      return WalletStatus.NOTLOADED;
+    } else if (status === KeyRingStatus.UNLOCKED) {
+      return WalletStatus.UNLOCKED;
+    } else return WalletStatus.NOTLOADED;
+  };
+};
+
+const handleLockWallet: (
+  service: KeyRingService
+) => InternalHandler<LockWalletMsg> = (service) => {
+  return () => {
+    service.lock();
+  };
+};
+
+const handleUnlockWallet: (
+  service: KeyRingService
+) => InternalHandler<UnlockWalletMsg> = (service) => {
+  return async (env, _) => {
+    await service.enable(env);
+  };
+};
+
+const handleCurrentAccountMsg: (
+  service: KeyRingService
+) => InternalHandler<CurrentAccountMsg> = (service) => {
+  return async (env, msg) => {
+    const chainId = await service.chainsService.getSelectedChain();
+    await service.permissionService.checkBasicAccessPermission(
+      env,
+      [chainId],
+      msg.origin
+    );
+
+    const key = await service.getKey(chainId);
+
+    const chainInfo = await service.chainsService.getChainInfo(chainId);
+    const isEVM = chainInfo.features?.includes("evm");
+    const bech32Add = new Bech32Address(key.address).toBech32(
+      chainInfo.bech32Config.bech32PrefixAccAddr
+    );
+
+    const hexadd = Bech32Address.fromBech32(
+      bech32Add,
+      chainInfo.bech32Config.bech32PrefixAccAddr
+    ).toHex(true);
+
+    const acc: Account = {
+      name: service.getKeyStoreMeta("name"),
+      algo: key.algo,
+      pubKey: key.pubKey,
+      address: key.address,
+      bech32Address: isEVM ? "" : bech32Add,
+      isNanoLedger: key.isNanoLedger,
+      isKeystone: key.isKeystone,
+      EVMAddress: isEVM ? hexadd : "",
+    };
+    return acc;
+  };
+};
+
+const handleSwitchAccountMsg: (
+  service: KeyRingService
+) => InternalHandler<SwitchAccountMsg> = (service) => {
+  return async (env, msg) => {
+    const chainId = await service.chainsService.getSelectedChain();
+    await service.permissionService.checkBasicAccessPermission(
+      env,
+      [chainId],
+      msg.origin
+    );
+
+    await service.switchAccountByAddress(env, msg.address, msg.origin);
+  };
+};
+
+const handleListAccountsMsg: (
+  service: KeyRingService
+) => InternalHandler<ListAccountsMsg> = (service) => {
+  return async (env, msg) => {
+    const chainId = await service.chainsService.getSelectedChain();
+    await service.permissionService.checkBasicAccessPermission(
+      env,
+      [chainId],
+      msg.origin
+    );
+
+    const keys = await service.getKeys(chainId);
+    const chainInfo = await service.chainsService.getChainInfo(chainId);
+    const isEVM = chainInfo.features?.includes("evm");
+    const returnData: Account[] = [];
+
+    keys.forEach((key) => {
+      const bech32Add = new Bech32Address(key.address).toBech32(
+        chainInfo.bech32Config.bech32PrefixAccAddr
+      );
+      returnData.push({
+        name: key.name,
+        algo: key.algo,
+        pubKey: key.pubKey,
+        address: key.address,
+        bech32Address: isEVM ? "" : bech32Add,
+        isNanoLedger: key.isNanoLedger,
+        isKeystone: key.isKeystone,
+        EVMAddress: isEVM
+          ? Bech32Address.fromBech32(
+              bech32Add,
+              chainInfo.bech32Config.bech32PrefixAccAddr
+            ).toHex(true)
+          : "",
+      });
+    });
+
+    return returnData;
+  };
+};
+
+const handleRequestSignAminoMsgFetchSigning: (
+  service: KeyRingService
+) => InternalHandler<RequestSignAminoMsgFetchSigning> = (service) => {
+  return async (env, msg) => {
+    await service.permissionService.checkBasicAccessPermission(
+      env,
+      [msg.chainId],
+      msg.origin
+    );
+
+    return await service.requestSignAmino(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.signer,
+      msg.signDoc,
+      msg.signOptions
+    );
+  };
+};
+
+const handleRequestSignDirectMsgFetchSigning: (
+  service: KeyRingService
+) => InternalHandler<RequestSignDirectMsgFetchSigning> = (service) => {
+  return async (env, msg) => {
+    await service.permissionService.checkBasicAccessPermission(
+      env,
+      [msg.chainId],
+      msg.origin
+    );
+
+    const signDoc = SignDoc.fromPartial({
+      bodyBytes:
+        msg.signDoc.bodyBytes === null ? undefined : msg.signDoc.bodyBytes,
+      authInfoBytes:
+        msg.signDoc.authInfoBytes === null
+          ? undefined
+          : msg.signDoc.authInfoBytes,
+      chainId: msg.signDoc.chainId === null ? undefined : msg.signDoc.chainId,
+      accountNumber:
+        msg.signDoc.accountNumber === null
+          ? undefined
+          : msg.signDoc.accountNumber,
+    });
+
+    const response = await service.requestSignDirect(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.signer,
+      signDoc,
+      msg.signOptions
+    );
+
+    return {
+      signed: {
+        bodyBytes: response.signed.bodyBytes,
+        authInfoBytes: response.signed.authInfoBytes,
+        chainId: response.signed.chainId,
+        accountNumber: response.signed.accountNumber.toString(),
+      },
+      signature: response.signature,
+    };
+  };
+};
+
+const handleRequestVerifyADR36AminoSignDocFetchSigning: (
+  service: KeyRingService
+) => InternalHandler<RequestVerifyADR36AminoSignDocFetchSigning> = (
+  service
+) => {
+  return async (env, msg) => {
+    await service.permissionService.checkBasicAccessPermission(
+      env,
+      [msg.chainId],
+      msg.origin
+    );
+
+    return await service.verifyADR36AminoSignDoc(
+      msg.chainId,
+      msg.signer,
+      msg.data,
+      msg.signature
+    );
+  };
+};
+
+const handleGetAccountMsg: (
+  service: KeyRingService
+) => InternalHandler<GetAccountMsg> = (service) => {
+  return async (env, msg) => {
+    const kvStore = new ExtensionKVStore("store_chain_config");
+    const chainId = await kvStore.get<string>("extension_last_view_chain_id");
+    if (!chainId) {
+      throw Error("could not detect current chainId");
+    }
+
+    await service.permissionService.checkBasicAccessPermission(
+      env,
+      [chainId],
+      msg.origin
+    );
+
+    const keys = await service.getKeys(chainId);
+
+    const chainInfo = await service.chainsService.getChainInfo(chainId);
+    const isEVM = chainInfo.features?.includes("evm");
+    let foundAccount: Account | null = null;
+    keys.forEach((key) => {
+      const bech32Add = new Bech32Address(key.address).toBech32(
+        chainInfo.bech32Config.bech32PrefixAccAddr
+      );
+      const hexAdd = Bech32Address.fromBech32(
+        bech32Add,
+        chainInfo.bech32Config.bech32PrefixAccAddr
+      ).toHex(true);
+      if (msg.address === bech32Add || msg.address === hexAdd) {
+        foundAccount = {
+          name: key.name,
+          algo: key.algo,
+          pubKey: key.pubKey,
+          address: key.address,
+          bech32Address: isEVM ? "" : bech32Add,
+          isNanoLedger: key.isNanoLedger,
+          isKeystone: key.isKeystone,
+          EVMAddress: isEVM ? hexAdd : "",
+        } as Account;
+      }
+    });
+    return foundAccount;
+  };
+};
+
+const handleGetKeyMsgFetchSigning: (
+  service: KeyRingService
+) => InternalHandler<GetKeyMsgFetchSigning> = (service) => {
+  return async (env, msg) => {
+    const chainId = await service.chainsService.getSelectedChain();
+    await service.permissionService.checkBasicAccessPermission(
+      env,
+      [chainId],
+      msg.origin
+    );
+
+    const key = await service.getKey(chainId);
+
+    const chainInfo = await service.chainsService.getChainInfo(chainId);
+    const isEVM = chainInfo.features?.includes("evm");
+    const bech32Add = new Bech32Address(key.address).toBech32(
+      chainInfo.bech32Config.bech32PrefixAccAddr
+    );
+
+    const hexadd = Bech32Address.fromBech32(
+      bech32Add,
+      chainInfo.bech32Config.bech32PrefixAccAddr
+    ).toHex(true);
+
+    const acc: Account = {
+      name: service.getKeyStoreMeta("name"),
+      algo: key.algo,
+      pubKey: key.pubKey,
+      address: key.address,
+      bech32Address: isEVM ? "" : bech32Add,
+      isNanoLedger: key.isNanoLedger,
+      isKeystone: key.isKeystone,
+      EVMAddress: isEVM ? hexadd : "",
+    };
+    return acc;
   };
 };

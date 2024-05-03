@@ -334,7 +334,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     nonce: Uint8Array
   ): Promise<Uint8Array> {
     if (!ciphertext || ciphertext.length === 0) {
-      return new Uint8Array();
+      return new Uint8Array(0);
     }
 
     return await this.requester.sendMessage(

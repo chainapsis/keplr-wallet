@@ -17,6 +17,7 @@ import manifest from "../manifest.v2.json";
 
 const messageRequester = new InExtensionMessageRequester();
 const coreKeplr = new Keplr(manifest.version, "core", messageRequester);
+
 const coreFetchWallet = new ExtensionCoreFetchWallet(
   coreKeplr,
   manifest.version,

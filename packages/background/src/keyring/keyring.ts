@@ -1,4 +1,5 @@
 import { Crypto, KeyStore } from "./crypto";
+// import { App, AppCoinType } from "@keplr-wallet/ledger-cosmos";
 import {
   KeyCurve,
   KeyCurves,
@@ -17,7 +18,7 @@ import {
   SignMode,
 } from "./types";
 import { ChainInfo, EthSignType } from "@keplr-wallet/types";
-import { Env } from "@keplr-wallet/router";
+import { Env, WEBPAGE_PORT } from "@keplr-wallet/router";
 
 import { Buffer } from "buffer/";
 import { ChainIdHelper, EthermintChainIdHelper } from "@keplr-wallet/cosmos";
@@ -30,6 +31,7 @@ import { domainHash, messageHash } from "./utils";
 import { KeystoneService } from "../keystone";
 import { publicKeyConvert } from "secp256k1";
 import { KeystoneKeyringData } from "../keystone/cosmos-keyring";
+import { InteractionService } from "../interaction";
 
 export enum KeyRingStatus {
   NOTLOADED,
@@ -90,6 +92,7 @@ export class KeyRing {
     // TODO: use an interface instead of `LedgerService` class for easier testing.
     private readonly ledgerKeeper: LedgerService,
     private readonly keystoneService: KeystoneService,
+    private readonly interactionService: InteractionService,
     private readonly crypto: CommonCrypto
   ) {
     this.loaded = false;
@@ -303,6 +306,7 @@ export class KeyRing {
     this.multiKeyStore.push(this.keyStore);
 
     await this.save();
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "status-changed", {});
 
     return {
       status: this.status,
@@ -337,6 +341,7 @@ export class KeyRing {
     this.multiKeyStore.push(this.keyStore);
 
     await this.save();
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "status-changed", {});
 
     return {
       status: this.status,
@@ -379,6 +384,7 @@ export class KeyRing {
     this.keystonePublicKey = publicKey;
 
     await this.save();
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "status-changed", {});
 
     return {
       status: this.status,
@@ -436,7 +442,7 @@ export class KeyRing {
     this.ledgerPublicKeyCache = pubKeys;
 
     await this.save();
-
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "status-changed", {});
     return {
       status: this.status,
       multiKeyStoreInfo: this.getMultiKeyStoreInfo(),
@@ -453,6 +459,8 @@ export class KeyRing {
     this.ledgerPublicKeyCache = undefined;
     this.keystonePublicKey = undefined;
     this.password = "";
+
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "status-changed", {});
   }
 
   public async unlock(password: string) {
@@ -515,6 +523,7 @@ export class KeyRing {
     }
 
     this.password = password;
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "status-changed", {});
   }
 
   public async save() {
@@ -572,6 +581,7 @@ export class KeyRing {
     }
 
     this.loaded = true;
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "status-changed", {});
   }
 
   private updateLegacyKeyStore(keyStore: KeyStore) {
@@ -1632,5 +1642,207 @@ export class KeyRing {
     this.save();
 
     return pubKey;
+  }
+
+  public async getKeys(
+    chainId: string,
+    useEthereumAddress: boolean
+  ): Promise<(Key & { name: string })[]> {
+    const keys: (Key & { name: string })[] = [];
+
+    if (!this.password) {
+      throw new Error("Keyring is locked");
+    }
+
+    for (const keyStore of this.multiKeyStore) {
+      // const type = keyStore.type ?? "mnemonic";
+      const defaultCoinType = useEthereumAddress ? 60 : 118;
+      const coinType = keyStore.coinTypeForChain
+        ? keyStore.coinTypeForChain[ChainIdHelper.parse(chainId).identifier] ??
+          defaultCoinType
+        : defaultCoinType;
+
+      switch (keyStore.type) {
+        case "mnemonic": {
+          const mnemonic = Buffer.from(
+            await Crypto.decrypt(this.crypto, keyStore, this.password)
+          ).toString();
+
+          const path = `m/44'/${coinType}'/${keyStore.bip44HDPath?.account}'/${keyStore.bip44HDPath?.change}/${keyStore.bip44HDPath?.addressIndex}`;
+          const mnemonicMasterSeed =
+            Mnemonic.generateMasterSeedFromMnemonic(mnemonic);
+          const _privKey = Mnemonic.generatePrivateKeyFromMasterSeed(
+            mnemonicMasterSeed,
+            path
+          );
+          let privKey;
+
+          switch (keyStore.curve) {
+            case KeyCurves.secp256k1:
+              privKey = new PrivKeySecp256k1(_privKey);
+              break;
+            default:
+              throw new Error(`Unexpected key curve: "${keyStore.curve}"`);
+          }
+          const pubKey = privKey.getPubKey();
+
+          if (useEthereumAddress) {
+            // For Ethereum Key-Gen Only:
+            const wallet = new Wallet(privKey.toBytes());
+            keys.push({
+              name: keyStore.meta ? keyStore.meta["name"] : "Unnamed Account",
+              algo: "ethsecp256k1",
+              pubKey: pubKey.toBytes(),
+              address: Buffer.from(wallet.address.replace("0x", ""), "hex"),
+              isKeystone: false,
+              isNanoLedger: false,
+            });
+          } else {
+            keys.push({
+              name: keyStore.meta ? keyStore.meta["name"] : "Unnamed Account",
+              algo: "secp256k1",
+              pubKey: pubKey.toBytes(),
+              address: pubKey.getAddress(),
+              isNanoLedger: false,
+              isKeystone: false,
+            });
+          }
+          break;
+        }
+        case "privateKey": {
+          let privKey;
+          const privateKey = Buffer.from(
+            Buffer.from(
+              await Crypto.decrypt(this.crypto, keyStore, this.password)
+            ).toString(),
+            "hex"
+          );
+          switch (keyStore.curve) {
+            case KeyCurves.secp256k1:
+              privKey = new PrivKeySecp256k1(privateKey);
+              break;
+            default:
+              throw new Error(`Unexpected key curve: "${keyStore.curve}"`);
+          }
+          const pubKey = privKey.getPubKey();
+
+          if (useEthereumAddress) {
+            // For Ethereum Key-Gen Only:
+            const wallet = new Wallet(privKey.toBytes());
+
+            keys.push({
+              name: keyStore.meta ? keyStore.meta["name"] : "Unnamed Account",
+              algo: "ethsecp256k1",
+              pubKey: pubKey.toBytes(),
+              address: Buffer.from(wallet.address.replace("0x", ""), "hex"),
+              isKeystone: false,
+              isNanoLedger: false,
+            });
+          } else {
+            keys.push({
+              name: keyStore.meta ? keyStore.meta["name"] : "Unnamed Account",
+              algo: "secp256k1",
+              pubKey: pubKey.toBytes(),
+              address: pubKey.getAddress(),
+              isNanoLedger: false,
+              isKeystone: false,
+            });
+          }
+          break;
+        }
+        case "keystone": {
+          const cipherText = await Crypto.decrypt(
+            this.crypto,
+            keyStore,
+            this.password
+          );
+          const key = JSON.parse(Buffer.from(cipherText).toString());
+
+          if (!key) {
+            throw new Error("CoinType is not available");
+          }
+          if (useEthereumAddress) {
+            const pubKey = publicKeyConvert(
+              Buffer.from(key.pubKey, "hex"),
+              true
+            );
+            const address = computeAddress(pubKey);
+            keys.push({
+              name: keyStore.meta ? keyStore.meta["name"] : "Unnamed Account",
+              algo: "ethsecp256k1",
+              pubKey,
+              address: Buffer.from(address.replace(/^0x/, ""), "hex"),
+              isKeystone: true,
+              isNanoLedger: false,
+            });
+          } else {
+            const pubKey = new PubKeySecp256k1(Buffer.from(key.pubKey, "hex"));
+            keys.push({
+              name: keyStore.meta ? keyStore.meta["name"] : "Unnamed Account",
+              algo: "secp256k1",
+              pubKey: pubKey.toBytes(),
+              address: pubKey.getAddress(),
+              isKeystone: true,
+              isNanoLedger: false,
+            });
+          }
+          break;
+        }
+        case "ledger": {
+          const cipherText = await Crypto.decrypt(
+            this.crypto,
+            keyStore,
+            this.password
+          );
+
+          const pubKeys: Record<string, Uint8Array> = {};
+
+          try {
+            const encodedPubkeys = JSON.parse(
+              Buffer.from(cipherText).toString()
+            );
+            Object.keys(encodedPubkeys).forEach(
+              (k) => (pubKeys[k] = Buffer.from(encodedPubkeys[k], "hex"))
+            );
+          } catch (e) {
+            // Decode as bytes (Legacy representation)
+            pubKeys[LedgerApp.Cosmos] = Buffer.from(
+              Buffer.from(cipherText).toString(),
+              "hex"
+            );
+          }
+
+          if (useEthereumAddress) {
+            const pubKey = pubKeys[LedgerApp.Ethereum];
+            // Generate the Ethereum address for this public key
+            const address = computeAddress(pubKey);
+
+            keys.push({
+              name: keyStore.meta ? keyStore.meta["name"] : "Unnamed Account",
+              algo: "ethsecp256k1",
+              pubKey: pubKey,
+              address: Buffer.from(address.replace("0x", ""), "hex"),
+              isKeystone: false,
+              isNanoLedger: true,
+            });
+          } else {
+            const pubKey = new PubKeySecp256k1(pubKeys[LedgerApp.Cosmos]);
+
+            keys.push({
+              name: keyStore.meta ? keyStore.meta["name"] : "Unnamed Account",
+              algo: KeyCurves.secp256k1,
+              pubKey: pubKey.toBytes(),
+              address: pubKey.getAddress(),
+              isKeystone: false,
+              isNanoLedger: true,
+            });
+          }
+          break;
+        }
+        default:
+          throw new Error(`Unexpected keyStore type: "${keyStore.type}"`);
+      }
+    }
+    return keys;
   }
 }

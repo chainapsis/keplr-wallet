@@ -174,6 +174,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   walletUrl: Joi.string().uri(),
   walletUrlForStaking: Joi.string().uri(),
   explorerUrl: Joi.string().uri(),
+  grpcUrl: Joi.string().uri(),
   bip44: SuggestingBIP44Schema.required(),
   alternativeBIP44s: Joi.array()
     .items(SuggestingBIP44Schema)
@@ -224,6 +225,8 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
     .required(),
   coinType: Joi.number().strict().integer(),
   beta: Joi.boolean(),
+  type: Joi.string().allow("mainnet", "testnet"),
+  status: Joi.string().allow("alpha", "beta", "production"),
   features: Joi.array()
     .items(Joi.string().valid(...SupportedChainFeatures))
     .unique()

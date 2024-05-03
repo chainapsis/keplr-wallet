@@ -6771,6 +6771,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cosmjs/amino@npm:0.27.1":
+  version: 0.27.1
+  resolution: "@cosmjs/amino@npm:0.27.1"
+  dependencies:
+    "@cosmjs/crypto": 0.27.1
+    "@cosmjs/encoding": 0.27.1
+    "@cosmjs/math": 0.27.1
+    "@cosmjs/utils": 0.27.1
+  checksum: c558332edae18c182224314dd31a47383d5edfd1f7e594202be587349b45cdeed12c8958b8c85f1d38a604fa46fa5589b35fbfd8f20f4541e80f1315537b9346
+  languageName: node
+  linkType: hard
+
 "@cosmjs/amino@npm:0.28.13, @cosmjs/amino@npm:^0.28.13":
   version: 0.28.13
   resolution: "@cosmjs/amino@npm:0.28.13"
@@ -6847,6 +6859,24 @@ __metadata:
     long: ^4.0.0
     pako: ^2.0.2
   checksum: 738b2499e9df6b698187f87f4db3a10b8ff7d2232e4c3b39dd382bf0bb7fbddbd23ccc64f56de45d36ac0050d3df6ffc9dae21aabbcd20473b6ec9211e1e5881
+  languageName: node
+  linkType: hard
+
+"@cosmjs/crypto@npm:0.27.1":
+  version: 0.27.1
+  resolution: "@cosmjs/crypto@npm:0.27.1"
+  dependencies:
+    "@cosmjs/encoding": 0.27.1
+    "@cosmjs/math": 0.27.1
+    "@cosmjs/utils": 0.27.1
+    bip39: ^3.0.2
+    bn.js: ^5.2.0
+    elliptic: ^6.5.3
+    js-sha3: ^0.8.0
+    libsodium-wrappers: ^0.7.6
+    ripemd160: ^2.0.2
+    sha.js: ^2.4.11
+  checksum: d1773147a4f57da572483d28286983cca4907e18071296c707581461b0fbe8a3bb6d1591a81dc724c19b2ca3c728726a1f7309a74bf9536a261f4cf1098d1508
   languageName: node
   linkType: hard
 
@@ -7049,6 +7079,21 @@ __metadata:
     "@cosmjs/stream": ^0.31.3
     xstream: ^11.14.0
   checksum: 6f050cf0d02f2a4f9df5391cc77e661684e5c7cc1df0fb71ae903984cb4f10cc765c08e866e417323910cbc63b91e30c38b7f2585ef5e473a8b086cddacc882a
+  languageName: node
+  linkType: hard
+
+"@cosmjs/launchpad@npm:^0.27.1":
+  version: 0.27.1
+  resolution: "@cosmjs/launchpad@npm:0.27.1"
+  dependencies:
+    "@cosmjs/amino": 0.27.1
+    "@cosmjs/crypto": 0.27.1
+    "@cosmjs/encoding": 0.27.1
+    "@cosmjs/math": 0.27.1
+    "@cosmjs/utils": 0.27.1
+    axios: ^0.21.2
+    fast-deep-equal: ^3.1.3
+  checksum: 7707a7a551eda8cc2cffac3683cd6a4241b5ca796aad60a5d745b233c270444e7f5ee43f00806d84940d628473d7a155cac7863edc860fbe30f9a1a9d43f073e
   languageName: node
   linkType: hard
 
@@ -7417,6 +7462,13 @@ __metadata:
     readonly-date: ^1.0.0
     xstream: ^11.14.0
   checksum: 6c9e4eaec763b3a1a8179c0987a3d7262524e089f62b967fd03b3ae19495a1b54714a1812024916f3272b96e3a4aa6b3acc109c6d81e2c848cd6e0f67ce261a8
+  languageName: node
+  linkType: hard
+
+"@cosmjs/utils@npm:0.27.1":
+  version: 0.27.1
+  resolution: "@cosmjs/utils@npm:0.27.1"
+  checksum: b48466efd7ec714520fe684e028754a6b5ca5b686d117b2078cac7ed824dd953fac09a9efc2bc5805fa270c151f5a53baa181cfb9f498697152d522d27565205
   languageName: node
   linkType: hard
 
@@ -9294,20 +9346,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@fetchai/umbral-types@npm:^0.1.1":
-  version: 0.1.1
-  resolution: "@fetchai/umbral-types@npm:0.1.1"
-  dependencies:
-    "@keplr-wallet/router": ^0.9.6
-  checksum: 75bcaa13dd5bb7950a51d4270e477f1a9ef464ed901dc7e75343a6efc643a8d1510e297d1eede72cd056432dc8f7288613300ee0547b4f8ba8476b6e89176b68
-  languageName: node
-  linkType: hard
-
 "@fetchai/wallet-types@^0.1.1, @fetchai/wallet-types@workspace:packages/wallet-types":
   version: 0.0.0-use.local
   resolution: "@fetchai/wallet-types@workspace:packages/wallet-types"
   dependencies:
-    "@fetchai/umbral-types": ^0.1.1
+    "@cosmjs/launchpad": ^0.27.1
     "@keplr-wallet/types": 0.12.12
     long: ^4.0.0
   languageName: unknown
@@ -10711,6 +10754,7 @@ __metadata:
     "@ethersproject/hash": ^5.7.0
     "@ethersproject/transactions": ^5.7.0
     "@ethersproject/wallet": ^5.7.0
+    "@fetchai/wallet-types": ^0.1.1
     "@keplr-wallet/chain-validator": 0.12.12
     "@keplr-wallet/common": 0.12.12
     "@keplr-wallet/cosmos": 0.12.12
@@ -11053,8 +11097,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/provider@workspace:packages/provider"
   dependencies:
-    "@fetchai/umbral-types": ^0.1.1
+    "@cosmjs/launchpad": ^0.27.1
     "@fetchai/wallet-types": ^0.1.1
+    "@keplr-wallet/cosmos": 0.12.12
     "@keplr-wallet/router": 0.12.12
     "@keplr-wallet/types": 0.12.12
     buffer: ^6.0.3
@@ -11086,13 +11131,6 @@ __metadata:
   resolution: "@keplr-wallet/router@workspace:packages/router"
   languageName: unknown
   linkType: soft
-
-"@keplr-wallet/router@npm:^0.9.6":
-  version: 0.9.6
-  resolution: "@keplr-wallet/router@npm:0.9.6"
-  checksum: 22c3519683615f11a07532c937d9430a5bd268c69ac5fa95ef285bea510dbb419714ac272e5dc768824df0d79689f193b4b447faeb7bd8a568dbacabf949f881
-  languageName: node
-  linkType: hard
 
 "@keplr-wallet/simple-fetch@0.12.12, @keplr-wallet/simple-fetch@workspace:packages/simple-fetch":
   version: 0.0.0-use.local

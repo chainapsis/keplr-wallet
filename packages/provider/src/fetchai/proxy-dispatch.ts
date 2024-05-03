@@ -7,12 +7,67 @@ import {
   ProxyResponse,
   toProxyRequest,
 } from "./proxy";
+import {
+  AccountsApiMethod,
+  AddressBookApiMethods,
+  NetworksApiMethod,
+  WalletMethod,
+  WalletSigningMethod,
+} from "./types";
 
 async function dispatchRequest(
   _fetchApi: FetchBrowserWallet,
   request: ProxyRequest
 ): Promise<any> {
-  throw new Error(`Unable to resolve request method ${request.method}`);
+  const methodArray = request.method.split(".");
+
+  const api = methodArray[0];
+  if (request.method !== undefined) {
+    if (api === "wallet") {
+      if (methodArray[1] === "signing") {
+        return await _fetchApi.wallet.signing[
+          methodArray[methodArray.length - 1] as WalletSigningMethod
+        ](
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          ...JSONUint8Array.unwrap(request.args)
+        );
+      } else if (methodArray[1] === "networks") {
+        return await _fetchApi.wallet.networks[
+          methodArray[methodArray.length - 1] as NetworksApiMethod
+        ](
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          ...JSONUint8Array.unwrap(request.args)
+        );
+      } else if (methodArray[1] === "accounts") {
+        return await _fetchApi.wallet.accounts[
+          methodArray[methodArray.length - 1] as AccountsApiMethod
+        ](
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          ...JSONUint8Array.unwrap(request.args)
+        );
+      } else if (methodArray[1] === "addressBook") {
+        return await _fetchApi.wallet.addressBook[
+          methodArray[methodArray.length - 1] as AddressBookApiMethods
+        ](
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          ...JSONUint8Array.unwrap(request.args)
+        );
+      } else {
+        const method = methodArray[methodArray.length - 1] as WalletMethod;
+        return await _fetchApi.wallet[method](
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          ...JSONUint8Array.unwrap(request.args)
+        );
+      }
+    }
+  } else {
+    throw new Error(`Unable to resolve request method ${request.method}`);
+  }
 }
 
 async function proxyRequestHandler(

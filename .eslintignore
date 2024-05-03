@@ -36,3 +36,5 @@ packages/proto-types/!(proto-types-gen)/**/*.mjs
 packages/proto-types/!(proto-types-gen)/**/*.cjs
 packages/proto-types/!(proto-types-gen)/**/*.map
 packages/proto-types/outputHash
+
+packages/mobile

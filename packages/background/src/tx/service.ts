@@ -123,7 +123,6 @@ export class BackgroundTxService {
           throw new Error(log);
         }
       }
-
       notification.create({
         iconRelativeUrl: "assets/logo-256.png",
         title: "Tx succeeds",

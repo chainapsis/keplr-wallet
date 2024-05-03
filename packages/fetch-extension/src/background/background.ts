@@ -25,7 +25,7 @@ import {
 
 const router = new ExtensionRouter(ExtensionEnv.produceEnv);
 router.addGuard(ExtensionGuards.checkOriginIsValid);
-router.addGuard(ExtensionGuards.checkMessageIsInternal);
+// router.addGuard(ExtensionGuards.checkMessageIsInternal);
 
 const { initFn } = init(
   router,

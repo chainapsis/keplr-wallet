@@ -15,6 +15,7 @@ import * as PhishingList from "./phishing-list/internal";
 import * as AutoLocker from "./auto-lock-account/internal";
 import * as Analytics from "./analytics/internal";
 import * as Messaging from "./messaging/internal";
+import * as AddressBook from "./address-book/internal";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
 import { CommonCrypto } from "./keyring";
@@ -35,6 +36,7 @@ export * from "./permission";
 export * from "./phishing-list";
 export * from "./auto-lock-account";
 export * from "./analytics";
+export * from "./address-book";
 
 export function init(
   router: Router,
@@ -84,6 +86,11 @@ export function init(
   const permissionService = new Permission.PermissionService(
     storeCreator("permission"),
     privilegedOrigins
+  );
+
+  const addressBookService = new AddressBook.AddressBookService(
+    chainsService,
+    permissionService
   );
 
   const backgroundTxService = new BackgroundTx.BackgroundTxService(
@@ -140,6 +147,7 @@ export function init(
   PersistentMemory.init(router, persistentMemoryService);
   Permission.init(router, permissionService);
   Chains.init(router, chainsService);
+  AddressBook.init(router, addressBookService);
   BackgroundTx.init(router, backgroundTxService);
   PhishingList.init(router, phishingListService);
   AutoLocker.init(router, autoLockAccountService);

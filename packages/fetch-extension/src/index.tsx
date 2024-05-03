@@ -112,6 +112,9 @@ import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
 import { Validator } from "./pages/validator";
 import { ValidatorList } from "./pages/validator-list";
 import { StakeComplete } from "./pages/validator/stake-complete";
+import { ApproveAddChainByNetworkPage } from "./pages/approveAddChainByNetwork";
+import { ApproveSwitchChainPage } from "./pages/approveSwitchChainPage";
+import { ApproveSwitchAccountByAddressPage } from "./pages/approveSwitchAccountPage";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -322,6 +325,18 @@ ReactDOM.render(
                       <Route
                         path="/suggest-chain"
                         element={<ChainSuggestedPage />}
+                      />
+                      <Route
+                        path="/add-chain-by-network"
+                        element={<ApproveAddChainByNetworkPage />}
+                      />
+                      <Route
+                        path="/switch-chain-by-chainid"
+                        element={<ApproveSwitchChainPage />}
+                      />
+                      <Route
+                        path="/switch-account-by-address"
+                        element={<ApproveSwitchAccountByAddressPage />}
                       />
                       <Route
                         path="/axl-bridge-evm"
