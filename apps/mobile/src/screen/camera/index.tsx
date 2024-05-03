@@ -98,35 +98,90 @@ export const CameraScreen: FunctionComponent = observer(() => {
               }
 
               navigation.reset({routes: [{name: 'Home'}]});
-            } else {
-              const isBech32Address = (() => {
-                try {
-                  // Check that the data is bech32 address.
-                  // If this is not valid bech32 address, it will throw an error.
-                  Bech32Address.validate(data);
-                } catch {
-                  return false;
-                }
-                return true;
-              })();
+              return;
+            }
 
-              if (isBech32Address) {
-                const prefix = data.slice(0, data.indexOf('1'));
-                const chainInfo = chainStore.chainInfosInUI.find(
-                  chainInfo =>
-                    chainInfo.bech32Config.bech32PrefixAccAddr === prefix,
-                );
+            if (isBech32Address(data)) {
+              const prefix = data.slice(0, data.indexOf('1'));
+              const chainInfo = chainStore.chainInfosInUI.find(
+                chainInfo =>
+                  chainInfo.bech32Config.bech32PrefixAccAddr === prefix,
+              );
 
-                if (chainInfo) {
-                  navigation.replace('Send', {
-                    chainId: chainInfo.chainId,
-                    coinMinimalDenom: chainInfo.currencies[0].coinMinimalDenom,
-                    recipientAddress: data,
-                  });
-                } else {
-                  navigation.reset({routes: [{name: 'Home'}]});
+              if (chainInfo) {
+                navigation.replace('Send', {
+                  chainId: chainInfo.chainId,
+                  coinMinimalDenom: chainInfo.currencies[0].coinMinimalDenom,
+                  recipientAddress: data,
+                });
+              } else {
+                navigation.reset({routes: [{name: 'Home'}]});
+              }
+              return;
+            }
+
+            if (isValidHttpUrl(data)) {
+              const response = await fetch(data);
+              const originUrl = new URL(response.url);
+
+              if (originUrl.hostname === 'deeplink.keplr.app') {
+                if (originUrl.pathname === '/staking') {
+                  // Coinbase Staking Logic
+                  if (
+                    originUrl.searchParams.get('chainId') &&
+                    originUrl.searchParams.get('userIdentifier') &&
+                    originUrl.searchParams.get('activityName')
+                  ) {
+                    // If the chain is not enabled, enable it.
+                    if (
+                      !chainStore.isEnabledChain(
+                        originUrl.searchParams.get('chainId') as string,
+                      )
+                    ) {
+                      await chainStore.enableChainInfoInUI(
+                        originUrl.searchParams.get('chainId') as string,
+                      );
+                    }
+
+                    navigation.replace('Stake', {
+                      screen: 'Stake.ValidateList',
+                      params: {
+                        chainId: originUrl.searchParams.get(
+                          'chainId',
+                        ) as string,
+                        fromDeepLink: {
+                          userIdentifier: originUrl.searchParams.get(
+                            'userIdentifier',
+                          ) as string,
+                          activityName: originUrl.searchParams.get(
+                            'activityName',
+                          ) as string,
+                        },
+                      },
+                    });
+                  }
+
+                  // Keplr Staking Logic
+                  if (
+                    originUrl.searchParams.get('chainId') &&
+                    originUrl.searchParams.get('validatorAddress')
+                  ) {
+                    navigation.replace('Stake', {
+                      screen: 'Stake.ValidateDetail',
+                      params: {
+                        chainId: originUrl.searchParams.get(
+                          'chainId',
+                        ) as string,
+                        validatorAddress: originUrl.searchParams.get(
+                          'validatorAddress',
+                        ) as string,
+                      },
+                    });
+                  }
                 }
               }
+
+              return;
             }
 
             setIsCompleted(true);
@@ -275,4 +330,27 @@ const AimIcon: FunctionComponent = () => {
       <Path d="M213 182.147V213H182.147" stroke="#FEFEFE" strokeWidth="6" />
     </Svg>
   );
+};
+
+const isValidHttpUrl = (data: string) => {
+  let url;
+
+  try {
+    url = new URL(data);
+  } catch (_) {
+    return false;
+  }
+
+  return url.protocol === 'http:' || url.protocol === 'https:';
+};
+
+const isBech32Address = (data: string) => {
+  try {
+    // Check that the data is bech32 address.
+    // If this is not valid bech32 address, it will throw an error.
+    Bech32Address.validate(data);
+  } catch {
+    return false;
+  }
+  return true;
 };
