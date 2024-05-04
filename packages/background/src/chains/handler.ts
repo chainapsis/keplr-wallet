@@ -16,6 +16,7 @@ import {
   GetChainOriginalEndpointsMsg,
   ClearAllSuggestedChainInfosMsg,
   ClearAllChainEndpointsMsg,
+  GetChainInfoWithoutEndpointsMsg,
 } from "./messages";
 import { ChainInfo } from "@keplr-wallet/types";
 import { getBasicAccessPermissionType, PermissionService } from "../permission";
@@ -44,6 +45,11 @@ export const getHandler: (
           chainsService,
           permissionInteractiveService
         )(env, msg as GetChainInfosWithoutEndpointsMsg);
+      case GetChainInfoWithoutEndpointsMsg:
+        return handleGetChainInfoWithoutEndpointsMsg(
+          chainsService,
+          permissionInteractiveService
+        )(env, msg as GetChainInfoWithoutEndpointsMsg);
       case SuggestChainInfoMsg:
         return handleSuggestChainInfoMsg(chainsService, permissionService)(
           env,
@@ -111,6 +117,28 @@ const handleGetChainInfosWithoutEndpointsMsg: (
     const chainInfos = service.getChainInfosWithoutEndpoints();
     return {
       chainInfos,
+    };
+  };
+};
+
+const handleGetChainInfoWithoutEndpointsMsg: (
+  service: ChainsService,
+  permissionInteractiveService: PermissionInteractiveService
+) => InternalHandler<GetChainInfoWithoutEndpointsMsg> = (
+  service,
+  permissionInteractiveService
+) => {
+  return async (env, msg) => {
+    await permissionInteractiveService.ensureEnabled(
+      env,
+      [msg.chainId],
+      msg.origin
+    );
+
+    const chainInfo = service.getChainInfoWithoutEndpoints(msg.chainId);
+
+    return {
+      chainInfo,
     };
   };
 };

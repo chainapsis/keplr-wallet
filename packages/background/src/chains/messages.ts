@@ -1,6 +1,9 @@
 import { KeplrError, Message } from "@keplr-wallet/router";
-import { ChainInfoWithCoreTypes } from "./types";
-import { ChainInfo, ChainInfoWithoutEndpoints } from "@keplr-wallet/types";
+import {
+  ChainInfo,
+  ChainInfoWithCoreTypes,
+  ChainInfoWithoutEndpoints,
+} from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
 
 export class GetChainInfosWithCoreTypesMsg extends Message<{
@@ -44,6 +47,34 @@ export class GetChainInfosWithoutEndpointsMsg extends Message<{
 
   type(): string {
     return GetChainInfosWithoutEndpointsMsg.type();
+  }
+}
+
+export class GetChainInfoWithoutEndpointsMsg extends Message<{
+  chainInfo: ChainInfoWithoutEndpoints | undefined;
+}> {
+  public static type() {
+    return "get-chain-info-without-endpoints";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetChainInfoWithoutEndpointsMsg.type();
   }
 }
 

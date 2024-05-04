@@ -50,9 +50,22 @@ export interface ChainInfo {
   readonly evm?: EVMInfo;
 }
 
+export type ChainInfoWithSuggestedOptions = ChainInfo & {
+  readonly updateFromRepoDisabled?: boolean;
+};
+
+export type ChainInfoWithCoreTypes = ChainInfoWithSuggestedOptions & {
+  readonly embedded?: boolean;
+};
+
 export type ChainInfoWithoutEndpoints = Omit<
-  ChainInfo,
+  ChainInfoWithCoreTypes,
   "rest" | "rpc" | "nodeProvider" | "evm"
 > & {
-  evm?: Omit<EVMInfo, "rpc">;
+  readonly rest: undefined;
+  readonly rpc: undefined;
+  readonly nodeProvider: undefined;
+  readonly evm?: Omit<EVMInfo, "rpc"> & {
+    readonly rpc: undefined;
+  };
 };

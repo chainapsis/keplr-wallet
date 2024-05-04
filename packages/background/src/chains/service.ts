@@ -3,7 +3,12 @@ import {
   PrefixKVStore,
   sortedJsonByKeyStringify,
 } from "@keplr-wallet/common";
-import { ChainInfo, ChainInfoWithoutEndpoints } from "@keplr-wallet/types";
+import {
+  ChainInfo,
+  ChainInfoWithCoreTypes,
+  ChainInfoWithSuggestedOptions,
+  ChainInfoWithoutEndpoints,
+} from "@keplr-wallet/types";
 import {
   action,
   autorun,
@@ -14,7 +19,6 @@ import {
   toJS,
 } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { ChainInfoWithCoreTypes, ChainInfoWithSuggestedOptions } from "./types";
 import { computedFn } from "mobx-utils";
 import {
   checkChainFeatures,
@@ -273,19 +277,51 @@ export class ChainsService {
       ).map((chainInfo) => {
         return {
           ...chainInfo,
-          ...(chainInfo.evm !== undefined && {
-            evm: {
-              ...chainInfo.evm,
-              rpc: undefined,
-            },
-          }),
           rpc: undefined,
           rest: undefined,
           nodeProvider: undefined,
           updateFromRepoDisabled: undefined,
           embedded: undefined,
+          evm:
+            chainInfo.evm !== undefined
+              ? {
+                  ...chainInfo.evm,
+                  rpc: undefined,
+                }
+              : undefined,
         };
       });
+    },
+    {
+      keepAlive: true,
+    }
+  );
+
+  getChainInfoWithoutEndpoints = computedFn(
+    (chainId: string): ChainInfoWithoutEndpoints | undefined => {
+      const chainInfo = this.chainInfoMapWithCoreTypes.get(
+        ChainIdHelper.parse(chainId).identifier
+      );
+
+      if (chainInfo === undefined) {
+        return undefined;
+      }
+
+      return {
+        ...chainInfo,
+        rpc: undefined,
+        rest: undefined,
+        nodeProvider: undefined,
+        updateFromRepoDisabled: undefined,
+        embedded: undefined,
+        evm:
+          chainInfo.evm !== undefined
+            ? {
+                ...chainInfo.evm,
+                rpc: undefined,
+              }
+            : undefined,
+      };
     },
     {
       keepAlive: true,

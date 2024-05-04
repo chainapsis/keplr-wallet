@@ -772,6 +772,12 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     return await this.requestMethod("getChainInfosWithoutEndpoints", []);
   }
 
+  async getChainInfoWithoutEndpoints(
+    chainId: string
+  ): Promise<ChainInfoWithoutEndpoints> {
+    return await this.requestMethod("getChainInfoWithoutEndpoints", [chainId]);
+  }
+
   __core__getAnalyticsId(): Promise<string> {
     return this.requestMethod("__core__getAnalyticsId", []);
   }

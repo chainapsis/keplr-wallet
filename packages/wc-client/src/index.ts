@@ -337,6 +337,12 @@ export class KeplrWalletConnectV2 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
+  getChainInfoWithoutEndpoints(
+    _chainId: string
+  ): Promise<ChainInfoWithoutEndpoints> {
+    throw new Error("Not yet implemented");
+  }
+
   getEnigmaPubKey(_chainId: string): Promise<Uint8Array> {
     throw new Error("Not yet implemented");
   }
