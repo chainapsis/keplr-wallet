@@ -226,6 +226,7 @@ export class KeyRingEthereumService {
       case "keplr_connect":
         return {
           defaultEvmChainId: `0x${evmInfo.chainId.toString(16)}`,
+          defaultTendermintChainId: chainInfo.chainId,
           selectedAddress: ethereumHexAddress,
         };
       case "keplr_disconnect":

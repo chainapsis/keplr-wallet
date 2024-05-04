@@ -844,6 +844,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
   isMetaMask = true;
 
   protected _isConnected = false;
+  protected _tendermintChainId: string | null = null;
 
   constructor(
     protected readonly injectedKeplr: InjectedKeplr,
@@ -864,15 +865,14 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     super();
 
     window.addEventListener("keplr_keystorechange", async () => {
-      if (this.chainId) {
-        const chainInfos = await injectedKeplr.getChainInfosWithoutEndpoints();
-        const chainInfo = chainInfos.find(
-          (chainInfo) => chainInfo.evm?.chainId === Number(this.chainId)
+      if (this._tendermintChainId) {
+        const chainInfo = await injectedKeplr.getChainInfoWithoutEndpoints(
+          this._tendermintChainId
         );
 
         if (chainInfo) {
           const selectedAddress = (
-            await injectedKeplr.getKey(chainInfo.chainId)
+            await injectedKeplr.getKey(this._tendermintChainId)
           ).ethereumHexAddress;
           this.handleAccountsChanged(selectedAddress);
         }
@@ -938,15 +938,14 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
 
   protected async handleConnect(evmChainId?: string) {
     if (!this._isConnected) {
-      const { defaultEvmChainId, selectedAddress } = await this.requestMethod(
-        "request",
-        {
+      const { defaultEvmChainId, defaultTendermintChainId, selectedAddress } =
+        await this.requestMethod("request", {
           method: "keplr_connect",
           ...(evmChainId && { params: [evmChainId] }),
-        }
-      );
+        });
 
       this._isConnected = true;
+      this._tendermintChainId = defaultTendermintChainId;
       this.chainId = defaultEvmChainId;
       this.networkVersion = parseInt(defaultEvmChainId).toString(10);
       this.selectedAddress = selectedAddress;
