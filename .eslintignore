@@ -16,7 +16,7 @@ node_modules
 dist/*
 prod/*
 build/*
-packages/extension/noop-keplr-wallet-private/build
+apps/extension/noop-keplr-wallet-private/build
 
 yarn.lock
 Podfile.lock
@@ -36,3 +36,6 @@ packages/proto-types/!(proto-types-gen)/**/*.mjs
 packages/proto-types/!(proto-types-gen)/**/*.cjs
 packages/proto-types/!(proto-types-gen)/**/*.map
 packages/proto-types/outputHash
+
+android
+ios

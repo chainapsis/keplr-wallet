@@ -8,7 +8,7 @@ import FolderHash from "folder-hash";
     const root = path.join(__dirname, "..");
 
     const path1 = path.join(root, "build/firefox");
-    const path2 = path.join(root, "packages/extension/build/firefox");
+    const path2 = path.join(root, "apps/extension/build/firefox");
 
     const dist1 = path1;
     const dist2 = path2;

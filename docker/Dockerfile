@@ -48,4 +48,4 @@ VOLUME /data
 
 WORKDIR /data
 
-CMD mkdir -p ./build && cd ./build && find . -type f -delete && cp -r /app/packages/extension/build /data
+CMD mkdir -p ./build && cd ./build && find . -type f -delete && cp -r /app/apps/extension/build /data

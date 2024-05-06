@@ -14,6 +14,8 @@ export type IntPrettyOptions = {
   // If this is true, toString() will return the string with prefix like < 0.001 if a value cannot be expressed with a max decimals.
   inequalitySymbol: boolean;
   inequalitySymbolSeparator: string;
+  sign: boolean;
+  roundTo: number | undefined;
 };
 
 export class IntPretty {
@@ -28,6 +30,8 @@ export class IntPretty {
     locale: true,
     inequalitySymbol: false,
     inequalitySymbolSeparator: " ",
+    sign: false,
+    roundTo: undefined,
   };
 
   constructor(num: Dec | { toDec(): Dec } | bigInteger.BigNumber) {
@@ -125,6 +129,18 @@ export class IntPretty {
     return pretty;
   }
 
+  sign(sign: boolean): IntPretty {
+    const pretty = this.clone();
+    pretty._options.sign = sign;
+    return pretty;
+  }
+
+  roundTo(roundTo: number | undefined): IntPretty {
+    const pretty = this.clone();
+    pretty._options.roundTo = roundTo;
+    return pretty;
+  }
+
   /**
    * Ready indicates the actual value is ready to show the users.
    * Even if the ready option is false, it expects that the value can be shown to users (probably as 0).
@@ -219,7 +235,14 @@ export class IntPretty {
   }
 
   toStringWithSymbols(prefix: string, suffix: string): string {
-    const dec = this.toDec();
+    let dec = this.toDec();
+    if (
+      this._options.roundTo != null &&
+      this._options.roundTo >= 1 &&
+      this._options.roundTo <= 19
+    ) {
+      dec = dec.roundTo(this._options.roundTo);
+    }
 
     if (
       this._options.inequalitySymbol &&
@@ -228,12 +251,18 @@ export class IntPretty {
     ) {
       const isNeg = dec.isNegative();
 
-      return `${isNeg ? ">" : "<"}${this._options.inequalitySymbolSeparator}${
-        isNeg ? "-" : ""
-      }${prefix}${DecUtils.getTenExponentN(-this._options.maxDecimals).toString(
-        this._options.maxDecimals,
-        this._options.locale
-      )}${suffix}`;
+      let sign = "";
+      if (isNeg) {
+        sign = "-";
+      } else if (this._options.sign && !dec.isZero()) {
+        sign = "+";
+      }
+
+      return `${isNeg ? ">" : "<"}${
+        this._options.inequalitySymbolSeparator
+      }${sign}${prefix}${DecUtils.getTenExponentN(
+        -this._options.maxDecimals
+      ).toString(this._options.maxDecimals, this._options.locale)}${suffix}`;
     }
 
     let result: string;
@@ -254,6 +283,8 @@ export class IntPretty {
     const isNeg = result.charAt(0) === "-";
     if (isNeg) {
       result = result.slice(1);
+    } else if (this._options.sign && !dec.isZero()) {
+      result = `+${result}`;
     }
 
     return `${isNeg ? "-" : ""}${prefix}${result}${suffix}`;

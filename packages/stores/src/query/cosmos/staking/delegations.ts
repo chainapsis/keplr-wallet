@@ -99,7 +99,9 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delega
       return [];
     }
 
-    return this.response.data.delegation_responses;
+    return this.response.data.delegation_responses.filter((del) => {
+      return new Int(del.balance.amount).gt(new Int(0));
+    });
   }
 
   readonly getDelegationTo = computedFn(

@@ -33,6 +33,7 @@ module.exports = {
       "error",
       {
         case: "kebabCase",
+        ignore: [/\._stories.tsx?$/],
       },
     ],
     "import/no-extraneous-dependencies": [

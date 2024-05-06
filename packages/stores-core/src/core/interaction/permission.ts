@@ -1,16 +1,19 @@
 import { InteractionStore } from "./interaction";
 import {
+  GetOriginPermittedChainsMsg,
   GlobalPermissionData,
   INTERACTION_TYPE_GLOBAL_PERMISSION,
   INTERACTION_TYPE_PERMISSION,
   PermissionData,
 } from "@keplr-wallet/background";
-import { MessageRequester } from "@keplr-wallet/router";
+import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import { computed, makeObservable } from "mobx";
+import { PermissionManagerStore } from "../permission-manager";
 
 export class PermissionStore {
   constructor(
     protected readonly interactionStore: InteractionStore,
+    protected readonly permissionManagerStore: PermissionManagerStore,
     protected readonly requester: MessageRequester
   ) {
     makeObservable(this);
@@ -84,6 +87,8 @@ export class PermissionStore {
     afterFn: (proceedNext: boolean) => void | Promise<void>
   ) {
     await this.interactionStore.approveWithProceedNextV2(id, {}, afterFn);
+
+    await this.permissionManagerStore.syncPermissionsFromBackground();
   }
 
   async rejectPermissionWithProceedNext(
@@ -102,6 +107,8 @@ export class PermissionStore {
     afterFn: (proceedNext: boolean) => void | Promise<void>
   ) {
     await this.interactionStore.approveWithProceedNextV2(id, {}, afterFn);
+
+    await this.permissionManagerStore.syncPermissionsFromBackground();
   }
 
   async rejectGlobalPermissionWithProceedNext(
@@ -117,5 +124,15 @@ export class PermissionStore {
 
   isObsoleteInteraction(id: string | undefined): boolean {
     return this.interactionStore.isObsoleteInteraction(id);
+  }
+
+  async getOriginPermittedChains(
+    origin: string,
+    type: string
+  ): Promise<string[]> {
+    return await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new GetOriginPermittedChainsMsg(origin, type)
+    );
   }
 }
