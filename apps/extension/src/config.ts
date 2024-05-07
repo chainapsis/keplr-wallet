@@ -2560,6 +2560,51 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["cosmwasm"],
   },
+  {
+    rpc: "https://rpc-dimension.keplr.app",
+    rest: "https://lcd-dimension.keplr.app",
+    chainId: "dimension_37-1",
+    chainName: "XPLA",
+    stakeCurrency: {
+      coinDenom: "XPLA",
+      coinMinimalDenom: "axpla",
+      coinDecimals: 18,
+      coinGeckoId: "xpla",
+    },
+    bip44: {
+      coinType: 60,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "xpla",
+      bech32PrefixAccPub: "xplapub",
+      bech32PrefixValAddr: "xplavaloper",
+      bech32PrefixValPub: "xplavaloperpub",
+      bech32PrefixConsAddr: "xplavalcons",
+      bech32PrefixConsPub: "xplavalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "XPLA",
+        coinMinimalDenom: "axpla",
+        coinDecimals: 18,
+        coinGeckoId: "xpla",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "XPLA",
+        coinMinimalDenom: "axpla",
+        coinDecimals: 18,
+        coinGeckoId: "xpla",
+        gasPriceStep: {
+          low: 850000000000,
+          average: 1147500000000,
+          high: 1487500000000,
+        },
+      },
+    ],
+    features: ["eth-address-gen", "eth-key-sign", "cosmwasm"],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
