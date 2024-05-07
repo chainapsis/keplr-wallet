@@ -156,6 +156,43 @@ export class KeyRingService {
     );
   }
 
+  async getLegacyKeyringInfos(): Promise<Legacy.KeyStore[] | undefined> {
+    const multiKeyStore = await this.migrations.kvStore.get<Legacy.KeyStore[]>(
+      "key-multi-store"
+    );
+
+    return multiKeyStore;
+  }
+
+  async showSensitiveLegacyKeyringData(
+    index: string,
+    password: string
+  ): Promise<string> {
+    const multiKeyStore = await this.migrations.kvStore.get<Legacy.KeyStore[]>(
+      "key-multi-store"
+    );
+
+    if (!multiKeyStore) {
+      throw new Error("No key store");
+    }
+
+    const keyIndex = multiKeyStore.findIndex(
+      (keyStore) => keyStore.meta?.["__id__"] === index
+    );
+
+    if (keyIndex < 0) {
+      throw new Error("Key not found");
+    }
+
+    return Buffer.from(
+      await Legacy.Crypto.decrypt(
+        this.migrations.commonCrypto,
+        multiKeyStore[keyIndex],
+        password
+      )
+    ).toString();
+  }
+
   protected async migrate(password: string): Promise<void> {
     if (!this._needMigration) {
       throw new Error("Migration is not needed");
@@ -625,7 +662,8 @@ export class KeyRingService {
     mnemonic: string,
     bip44Path: BIP44HDPath,
     name: string,
-    password?: string
+    password?: string,
+    meta?: PlainObject
   ): Promise<string> {
     if (!this.vaultService.isSignedUp) {
       if (!password) {
@@ -662,6 +700,7 @@ export class KeyRingService {
         ...coinTypes,
         keyRingName: name,
         keyRingType: keyRing.supportedKeyRingType(),
+        keyRingMeta: meta,
       },
       vaultData.sensitive
     );
@@ -1136,6 +1175,16 @@ export class KeyRingService {
         throw new Error("Unsupported keyRing type to show sensitive data");
       }
     }
+  }
+
+  async checkUserPassword(password: string): Promise<boolean> {
+    try {
+      await this.vaultService.checkUserPassword(password);
+    } catch (e) {
+      return false;
+    }
+
+    return true;
   }
 
   async changeUserPassword(

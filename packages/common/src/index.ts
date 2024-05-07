@@ -8,3 +8,4 @@ export * from "./icns";
 export * from "./retry";
 export * from "./sleep";
 export * from "./mnemonic";
+export * from "./coin";

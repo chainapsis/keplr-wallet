@@ -1,0 +1,44 @@
+import { Canvas, Meta, Story } from "@storybook/addon-docs";
+
+import { Button } from "./button";
+import { Template } from "./helper._stories";
+
+<Meta
+  title="Components/Button"
+  component={Button}
+  argTypes={{
+    mode: {
+      control: false,
+    },
+    color: {
+      control: false,
+    },
+    className: {
+      control: false,
+    },
+    style: {
+      control: false,
+    },
+  }}
+  decorators={[(story) => <div style={{ margin: "3em" }}>{story()}</div>]}
+/>
+
+# Button
+
+그냥 버튼이다.<br/>
+색은 세개를 지원한다. (Primary, Danger, Info) 모드는 세개가있다.<br/>
+(Fill, Light, Text) Text 모드의 경우는 다른 모드의 버튼들과 Container의 width는 동일하지만 실제 내부의 button은 width가 더 작고 터치 영역도 작다. 이건 디자인적인 요소로써 디자이너와 합의된 사항이다.<br/>
+
+## Fill
+
+<Canvas>
+  <Story
+    name="Fill"
+    args={{
+      color: "primary",
+      mode: "fill",
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>

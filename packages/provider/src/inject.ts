@@ -94,16 +94,19 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     keplr: IKeplr & KeplrCoreTypes,
     eventListener: {
       addMessageListener: (fn: (e: any) => void) => void;
+      removeMessageListener: (fn: (e: any) => void) => void;
       postMessage: (message: any) => void;
     } = {
       addMessageListener: (fn: (e: any) => void) =>
         window.addEventListener("message", fn),
+      removeMessageListener: (fn: (e: any) => void) =>
+        window.removeEventListener("message", fn),
       postMessage: (message) =>
         window.postMessage(message, window.location.origin),
     },
     parseMessage?: (message: any) => any
-  ) {
-    eventListener.addMessageListener(async (e: any) => {
+  ): () => void {
+    const fn = async (e: any) => {
       const message: ProxyRequest = parseMessage
         ? parseMessage(e.data)
         : e.data;
@@ -260,7 +263,13 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
 
         eventListener.postMessage(proxyResponse);
       }
-    });
+    };
+
+    eventListener.addMessageListener(fn);
+
+    return () => {
+      eventListener.removeMessageListener(fn);
+    };
   }
 
   protected requestMethod(
@@ -386,6 +395,10 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
   }
 
   async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
+    if (chainInfo.hideInUI) {
+      throw new Error("hideInUI is not allowed");
+    }
+
     if (
       chainInfo.features?.includes("stargate") ||
       chainInfo.features?.includes("no-legacy-stdTx")

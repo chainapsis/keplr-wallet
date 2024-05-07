@@ -99,6 +99,11 @@ export class TokenScanService {
       return;
     }
 
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    if (chainInfo.hideInUI) {
+      return;
+    }
+
     const vaultIds = this.keyRingService
       .getKeyInfos()
       .map((keyInfo) => keyInfo.id)
@@ -123,6 +128,11 @@ export class TokenScanService {
 
   async scan(vaultId: string, chainId: string): Promise<void> {
     if (this.keyRingService.keyRingStatus !== "unlocked") {
+      return;
+    }
+
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    if (chainInfo.hideInUI) {
       return;
     }
 
@@ -221,6 +231,9 @@ export class TokenScanService {
     }
 
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    if (chainInfo.hideInUI) {
+      return;
+    }
 
     if (this.chainsUIService.isEnabled(vaultId, chainId)) {
       return;

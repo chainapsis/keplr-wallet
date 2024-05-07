@@ -14,6 +14,7 @@ import {
   ChangeKeyRingNameMsg,
   ChangeUserPasswordMsg,
   CheckLegacyKeyRingPasswordMsg,
+  CheckPasswordMsg,
   ComputeNotFinalizedKeyAddressesMsg,
   DeleteKeyRingMsg,
   FinalizeKeyCoinTypeMsg,
@@ -200,9 +201,16 @@ export class KeyRingStore {
     mnemonic: string,
     bip44HDPath: BIP44HDPath,
     name: string,
-    password: string | undefined
+    password: string | undefined,
+    meta?: PlainObject
   ) {
-    const msg = new NewMnemonicKeyMsg(mnemonic, bip44HDPath, name, password);
+    const msg = new NewMnemonicKeyMsg(
+      mnemonic,
+      bip44HDPath,
+      name,
+      password,
+      meta
+    );
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -349,6 +357,11 @@ export class KeyRingStore {
 
   async checkLegacyKeyRingPassword(password: string): Promise<void> {
     const msg = new CheckLegacyKeyRingPasswordMsg(password);
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async checkPassword(password: string): Promise<boolean> {
+    const msg = new CheckPasswordMsg(password);
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 }

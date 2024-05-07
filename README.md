@@ -40,7 +40,7 @@ Clone this repo and run:
 yarn && yarn build
 ```
 
-You can find the build output of Keplr Extension in packages/extension/build/manifest-v3. This output only works on Chrome now, so we recommend using other build outputs (in packages/extension/build/manifest-v2 or packages/extension/build/firefox) for other browsers. You can visit [this page](https://developer.chrome.com/docs/extensions/mv3/getstarted/development-basics/#load-unpacked) for instructions on loading the build output on Chrome.
+You can find the build output of Keplr Extension in apps/extension/build/manifest-v3. This output only works on Chrome now, so we recommend using other build outputs (in apps/extension/build/manifest-v2 or apps/extension/build/firefox) for other browsers. You can visit [this page](https://developer.chrome.com/docs/extensions/mv3/getstarted/development-basics/#load-unpacked) for instructions on loading the build output on Chrome.
 
 ## Building mobile app locally
 
