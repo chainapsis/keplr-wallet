@@ -12,9 +12,10 @@ import {
   KeyRingCosmosService,
   messageHash,
 } from "../keyring-cosmos";
-import { serialize } from "@ethersproject/transactions";
+import { serialize, UnsignedTransaction } from "@ethersproject/transactions";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { getEVMAccessPermissionType, PermissionService } from "../permission";
+import { BackgroundTxEthereumService } from "../tx-ethereum";
 
 export class KeyRingEthereumService {
   static evmInfo(chainInfo: ChainInfo): EVMInfo | undefined {
@@ -29,7 +30,8 @@ export class KeyRingEthereumService {
     protected readonly keyRingCosmosService: KeyRingCosmosService,
     protected readonly interactionService: InteractionService,
     protected readonly analyticsService: AnalyticsService,
-    protected readonly permissionService: PermissionService
+    protected readonly permissionService: PermissionService,
+    protected readonly backgroundTxEthereumService: BackgroundTxEthereumService
   ) {}
 
   async init() {
@@ -151,11 +153,20 @@ export class KeyRingEthereumService {
               ]);
             }
             case EthSignType.TRANSACTION: {
-              const tx = JSON.parse(Buffer.from(message).toString());
+              const unsignedTx = JSON.parse(Buffer.from(message).toString());
+              const isEIP1559 =
+                !!unsignedTx.maxFeePerGas || !!unsignedTx.maxPriorityFeePerGas;
+
+              if (isEIP1559) {
+                unsignedTx.type = 2;
+              }
+
+              delete unsignedTx.from;
+
               const signature = await this.keyRingService.sign(
                 chainId,
                 vaultId,
-                Buffer.from(serialize(tx).replace("0x", ""), "hex"),
+                Buffer.from(serialize(unsignedTx).replace("0x", ""), "hex"),
                 "keccak256"
               );
               return Buffer.concat([
@@ -204,8 +215,9 @@ export class KeyRingEthereumService {
   }
 
   async request(
-    defaultChainId: string,
+    env: Env,
     origin: string,
+    defaultChainId: string,
     method: string,
     params?: any[]
   ): Promise<any> {
@@ -217,9 +229,9 @@ export class KeyRingEthereumService {
     const pubkey = await this.keyRingService.getPubKeySelected(
       chainInfo.chainId
     );
-    const ethereumHexAddress = `0x${Buffer.from(
-      pubkey.getEthAddress()
-    ).toString("hex")}`;
+    const selectedAddress = `0x${Buffer.from(pubkey.getEthAddress()).toString(
+      "hex"
+    )}`;
     const evmInfo = chainInfo.evm;
 
     switch (method) {
@@ -227,7 +239,7 @@ export class KeyRingEthereumService {
         return {
           defaultEvmChainId: `0x${evmInfo.chainId.toString(16)}`,
           defaultTendermintChainId: chainInfo.chainId,
-          selectedAddress: ethereumHexAddress,
+          selectedAddress,
         };
       case "keplr_disconnect":
         return this.permissionService.removeEVMPermission(
@@ -238,7 +250,63 @@ export class KeyRingEthereumService {
         return `0x${evmInfo.chainId.toString(16)}`;
       case "eth_accounts":
       case "eth_requestAccounts":
-        return [ethereumHexAddress];
+        return [selectedAddress];
+      case "eth_sendTransaction":
+        const tx = params?.[0];
+        if (!tx) {
+          throw new Error("No transaction provided");
+        }
+
+        const transactionCountResponse = await simpleFetch<{
+          result: string;
+        }>(evmInfo.rpc, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            method: "eth_getTransactionCount",
+            params: [selectedAddress, "pending"],
+            id: 1,
+          }),
+        });
+        const nonce = transactionCountResponse.data.result;
+
+        const unsignedTx: UnsignedTransaction = {
+          ...tx,
+          chainId: evmInfo.chainId,
+          nonce,
+        };
+
+        const sender = tx.from;
+        const signature = await this.signEthereumSelected(
+          env,
+          origin,
+          defaultChainId,
+          sender,
+          Buffer.from(JSON.stringify(unsignedTx)),
+          EthSignType.TRANSACTION
+        );
+
+        const isEIP1559 =
+          !!unsignedTx.maxFeePerGas || !!unsignedTx.maxPriorityFeePerGas;
+        if (isEIP1559) {
+          unsignedTx.type = 2;
+        }
+
+        const signedTx = Buffer.from(
+          serialize(unsignedTx, signature).replace("0x", ""),
+          "hex"
+        );
+
+        const txHash = await this.backgroundTxEthereumService.sendEthereumTx(
+          defaultChainId,
+          signedTx,
+          {}
+        );
+
+        return txHash;
       default:
         return (
           await simpleFetch<{

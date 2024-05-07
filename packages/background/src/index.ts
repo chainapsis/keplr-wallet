@@ -188,7 +188,8 @@ export function init(
     keyRingCosmosService,
     interactionService,
     analyticsService,
-    permissionService
+    permissionService,
+    backgroundTxEthereumService
   );
   const autoLockAccountService = new AutoLocker.AutoLockAccountService(
     storeCreator("auto-lock-account"),
