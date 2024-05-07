@@ -9,23 +9,38 @@ const version = require("../lerna.json").version;
   try {
     const sementic = semver.parse(version);
     if (sementic.prerelease.length === 0) {
-      const packages = fs.readdirSync(`${__dirname}/../packages/`);
+      const packages = [];
+      const _packages = fs.readdirSync(`${__dirname}/../packages/`);
+      for (const dir of _packages) {
+        packages.push({
+          p: "packages",
+          dir,
+        });
+      }
+      const _apps = fs.readdirSync(`${__dirname}/../apps/`);
+      for (const dir of _apps) {
+        packages.push({
+          p: "apps",
+          dir,
+        });
+      }
+
       for (const pack of packages) {
-        const stat = fs.statSync(`${__dirname}/../packages/${pack}`);
+        const stat = fs.statSync(`${__dirname}/../${pack.p}/${pack.dir}`);
         if (
           stat.isDirectory() &&
-          fs.existsSync(`${__dirname}/../packages/${pack}/package.json`)
+          fs.existsSync(`${__dirname}/../${pack.p}/${pack.dir}/package.json`)
         ) {
           const packageJson = JSON.parse(
             fs.readFileSync(
-              `${__dirname}/../packages/${pack}/package.json`,
+              `${__dirname}/../${pack.p}/${pack.dir}/package.json`,
               "utf8"
             )
           );
           const sem = semver.parse(packageJson.version);
           if (sem.prerelease.length !== 0) {
             throw new Error(
-              `The root version doesn't have prelease, but some packages have a prelease. Suggest you to use "lerna version --conventional-commits --conventional-graduate --no-changelog": ${pack}`
+              `The root version doesn't have prelease, but some packages have a prelease. Suggest you to use "lerna version --conventional-commits --conventional-graduate --no-changelog": ${pack.dir}`
             );
           }
         }

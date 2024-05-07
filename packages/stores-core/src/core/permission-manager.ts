@@ -60,6 +60,14 @@ export class PermissionManagerStore {
     return trimmed;
   }
 
+  async syncPermissionsFromBackground() {
+    const msg = new GetAllPermissionDataPerOriginMsg();
+    const result = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    runInAction(() => {
+      this._permissionData = result;
+    });
+  }
+
   async clearAllPermissions() {
     runInAction(() => {
       this._permissionData = {};

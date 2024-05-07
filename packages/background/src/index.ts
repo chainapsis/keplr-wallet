@@ -69,10 +69,15 @@ export function init(
     readonly alternativeURL?: string;
   },
   notification: Notification,
+  addDeviceLockedListener: (callback: () => void) => void,
   blocklistPageURL: string,
   keyRingMigrations: {
     commonCrypto: KeyRingLegacy.CommonCrypto;
     readonly getDisabledChainIdentifiers: () => Promise<string[]>;
+  },
+  analyticsOptions: {
+    platform: string;
+    mobileOS: string;
   },
   afterInitFn?: (
     service: Chains.ChainsService,
@@ -143,7 +148,8 @@ export function init(
   );
   const analyticsService = new Analytics.AnalyticsService(
     storeCreator("background.analytics"),
-    analyticsPrivilegedOrigins
+    analyticsPrivilegedOrigins,
+    analyticsOptions
   );
 
   const vaultService = new Vault.VaultService(storeCreator("vault"));
@@ -193,7 +199,8 @@ export function init(
   );
   const autoLockAccountService = new AutoLocker.AutoLockAccountService(
     storeCreator("auto-lock-account"),
-    keyRingV2Service
+    keyRingV2Service,
+    addDeviceLockedListener
   );
   const permissionInteractiveService =
     new PermissionInteractive.PermissionInteractiveService(

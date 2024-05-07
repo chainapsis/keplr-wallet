@@ -16,7 +16,8 @@ export class AutoLockAccountService {
 
   constructor(
     protected readonly kvStore: KVStore,
-    protected readonly keyRingService: KeyRingService
+    protected readonly keyRingService: KeyRingService,
+    protected readonly addDeviceLockedListener: (callback: () => void) => void
   ) {
     makeObservable(this);
   }
@@ -48,19 +49,17 @@ export class AutoLockAccountService {
       this.kvStore.set<boolean>("lockOnSleep", this.lockOnSleep);
     });
 
-    browser.idle.onStateChanged.addListener((idle) => {
-      this.stateChangedHandler(idle);
+    this.addDeviceLockedListener(() => {
+      this.onDeviceLocked();
     });
   }
 
-  private stateChangedHandler(newState: browser.idle.IdleState) {
-    if ((newState as any) === "locked") {
-      if (this.autoLockDuration > 0) {
-        this.stopAutoLockTimer();
-        this.lock();
-      } else if (this.lockOnSleep) {
-        this.lock();
-      }
+  private onDeviceLocked() {
+    if (this.autoLockDuration > 0) {
+      this.stopAutoLockTimer();
+      this.lock();
+    } else if (this.lockOnSleep) {
+      this.lock();
     }
   }
 

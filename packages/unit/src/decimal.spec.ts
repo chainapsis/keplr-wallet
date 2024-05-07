@@ -465,6 +465,83 @@ describe("Test decimals", () => {
     }
   });
 
+  it("dec should be round to decimal place properly", () => {
+    const tests: {
+      d1: Dec;
+      exp: Dec;
+      decimalPlace: number;
+    }[] = [
+      {
+        d1: new Dec("0"),
+        exp: new Dec("0"),
+        decimalPlace: 3,
+      },
+      {
+        d1: new Dec("0.25"),
+        exp: new Dec("0"),
+        decimalPlace: 1,
+      },
+      {
+        d1: new Dec("0.123456"),
+        exp: new Dec("0.123"),
+        decimalPlace: 4,
+      },
+      {
+        d1: new Dec("1"),
+        exp: new Dec("1"),
+        decimalPlace: 2,
+      },
+      {
+        d1: new Dec("0.75"),
+        exp: new Dec("0.8"),
+        decimalPlace: 2,
+      },
+      {
+        d1: new Dec("0.53"),
+        exp: new Dec("0.5"),
+        decimalPlace: 2,
+      },
+      {
+        d1: new Dec("7.5997"),
+        exp: new Dec("7.6"),
+        decimalPlace: 4,
+      },
+      {
+        d1: new Dec("0.545"),
+        exp: new Dec("1"),
+        decimalPlace: 1,
+      },
+      {
+        d1: new Dec("1.545"),
+        exp: new Dec("1.55"),
+        decimalPlace: 3,
+      },
+      {
+        d1: new Dec("0.545123"),
+        exp: new Dec("0.5451"),
+        decimalPlace: 5,
+      },
+      {
+        d1: new Dec("0.123456789123456789"),
+        exp: new Dec("0.12345678912345679"),
+        decimalPlace: 18,
+      },
+      {
+        d1: new Dec("0.123456789123456789"),
+        exp: new Dec("0.123456789123456789"),
+        decimalPlace: 19,
+      },
+    ];
+
+    for (const test of tests) {
+      const resNeg = test.d1.neg().roundTo(test.decimalPlace);
+      expect(resNeg.toString()).toBe(test.exp.neg().toString());
+
+      const resPos = test.d1.roundTo(test.decimalPlace);
+      expect(resPos.toString()).toBe(test.exp.toString());
+    }
+  });
+
   it("dec should be truncated properly", () => {
     const tests: {
       d1: Dec;

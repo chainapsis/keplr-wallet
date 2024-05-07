@@ -1382,7 +1382,9 @@ Salt: ${salt}`;
     if (
       !chainId.startsWith("evmos_") &&
       !chainId.startsWith("injective") &&
-      !chainId.startsWith("dymension_")
+      !chainId.startsWith("dymension_") &&
+      !chainId.startsWith("nim_") &&
+      !chainId.startsWith("dimension_")
     ) {
       throw new KeplrError(
         "keyring",

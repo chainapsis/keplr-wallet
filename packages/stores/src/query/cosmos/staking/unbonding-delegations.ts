@@ -109,7 +109,19 @@ export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQue
       return [];
     }
 
-    return this.response.data.unbonding_responses;
+    const res: UnbondingDelegation[] = [];
+
+    for (const unbonding of this.response.data.unbonding_responses) {
+      const u = {
+        ...unbonding,
+      };
+      u.entries = u.entries.filter((entry) => {
+        return new Int(entry.balance).gt(new Int(0));
+      });
+      res.push(u);
+    }
+
+    return res;
   }
 }
 
