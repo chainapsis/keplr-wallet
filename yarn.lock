@@ -8769,8 +8769,9 @@ __metadata:
     "@keplr-wallet/stores": 0.12.86
     "@keplr-wallet/types": 0.12.86
     buffer: ^6.0.3
-    mobx: ^6.1.7
-    mobx-utils: ^6.0.3
+  peerDependencies:
+    mobx: ^6
+    mobx-utils: ^6
   languageName: unknown
   linkType: soft
 
@@ -8784,9 +8785,10 @@ __metadata:
     "@keplr-wallet/stores": 0.12.86
     "@keplr-wallet/types": 0.12.86
     "@keplr-wallet/unit": 0.12.86
-    mobx: ^6.1.7
-    mobx-utils: ^6.0.3
     utility-types: ^3.10.0
+  peerDependencies:
+    mobx: ^6
+    mobx-utils: ^6
   languageName: unknown
   linkType: soft
 
@@ -8805,9 +8807,10 @@ __metadata:
     "@keplr-wallet/types": 0.12.86
     "@keplr-wallet/unit": 0.12.86
     big-integer: ^1.6.48
-    mobx: ^6.1.7
-    mobx-utils: ^6.0.3
     utility-types: ^3.10.0
+  peerDependencies:
+    mobx: ^6
+    mobx-utils: ^6
   languageName: unknown
   linkType: soft
 
@@ -8820,8 +8823,9 @@ __metadata:
     "@keplr-wallet/stores": 0.12.86
     "@keplr-wallet/stores-eth": 0.12.86
     "@keplr-wallet/types": 0.12.86
-    mobx: ^6.1.7
-    mobx-utils: ^6.0.3
+  peerDependencies:
+    mobx: ^6
+    mobx-utils: ^6
   languageName: unknown
   linkType: soft
 
@@ -31853,19 +31857,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mobx-utils@npm:^6.0.3, mobx-utils@npm:^6.0.8":
+"mobx-utils@npm:^6.0.8":
   version: 6.0.8
   resolution: "mobx-utils@npm:6.0.8"
   peerDependencies:
     mobx: ^6.0.0
   checksum: 3cab9a858d6b19b2f5c4d5c39fcef7c171fe37c2b5e9f899e0988b475521e0ad0d52af290c04bcb694d8974f8bfac3ca6ee3340a0aeadd9efd770cfee3f44e4e
-  languageName: node
-  linkType: hard
-
-"mobx@npm:^6.1.7":
-  version: 6.12.0
-  resolution: "mobx@npm:6.12.0"
-  checksum: 482914d39199cadc8808907a2b9dbc634c74534d6c6d6cb34984c199aa94665ce07e7d183c0e97d54f4b06c8e42fec0a48c79484f4bbeac04a4dfd0f160290c6
   languageName: node
   linkType: hard
 
