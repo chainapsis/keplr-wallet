@@ -13,6 +13,7 @@ yarn-error.log
 **/coverage
 
 !apps/extension/noop-keplr-wallet-private/build
+!apps/mobile/noop-keplr-wallet-mobile-private/build
 
 packages/proto-types/**/*.ts
 packages/proto-types/**/*.js

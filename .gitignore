@@ -25,7 +25,7 @@ yarn-error.log
 build
 
 !apps/extension/noop-keplr-wallet-private/build
-!packages/mobile/noop-keplr-wallet-mobile-private/build
+!apps/mobile/noop-keplr-wallet-mobile-private/build
 
 .cache
 
