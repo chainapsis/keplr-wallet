@@ -70,6 +70,7 @@ const {initFn} = init(
     platform: 'mobile',
     mobileOS: Platform.OS,
   },
+  true,
 );
 
 router.listen(BACKGROUND_PORT, initFn);

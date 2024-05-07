@@ -94,6 +94,7 @@ const { initFn, keyRingService, analyticsService } = init(
     platform: "extension",
     mobileOS: "nono",
   },
+  false,
   async (chainsService, lastEmbedChainInfos) => {
     if (lastEmbedChainInfos.find((c) => c.chainId === "ixo-4")) {
       await chainsService.addSuggestedChainInfo({
