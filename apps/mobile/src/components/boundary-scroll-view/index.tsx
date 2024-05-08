@@ -60,13 +60,17 @@ export const BoundaryScrollView: FunctionComponent<ScrollViewProps> = ({
 export const BoundaryScrollViewBoundary: FunctionComponent<
   BoxProps & {
     itemHeight: number;
-    items: React.ReactNode[];
+    data: any[];
+    renderItem: (item: any, index: number) => React.ReactNode;
+    keyExtractor: (item: any, index: number) => string;
     initialNumItemsToRender?: number;
     floodNumItemsToRender?: number;
     gap: number;
   }
 > = ({
-  items,
+  data,
+  renderItem,
+  keyExtractor,
   itemHeight,
   initialNumItemsToRender = 14,
   floodNumItemsToRender = 6,
@@ -88,8 +92,8 @@ export const BoundaryScrollViewBoundary: FunctionComponent<
   const [mockBottomViewHeight, setMockBottomViewHeight] = React.useState(
     Math.max(
       0,
-      (items.length - renderIndex[1]) * itemHeight +
-        (items.length - renderIndex[1] - 1) * gap,
+      (data.length - renderIndex[1]) * itemHeight +
+        (data.length - renderIndex[1] - 1) * gap,
     ),
   );
 
@@ -130,7 +134,7 @@ export const BoundaryScrollViewBoundary: FunctionComponent<
   };
 
   useEffect(() => {
-    if (items.length === 0) {
+    if (data.length === 0) {
       setRenderIndex([0, 0]);
       setMockTopViewHeight(0);
       setMockBottomViewHeight(0);
@@ -156,7 +160,7 @@ export const BoundaryScrollViewBoundary: FunctionComponent<
               (h.index - prevOffsetIndex - (differentHeightExists ? 1 : 0)) *
               (itemHeight + gap);
             let d = h.height;
-            if (h.index !== items.length - 1) {
+            if (h.index !== data.length - 1) {
               d += gap;
             }
             offset += d;
@@ -206,11 +210,11 @@ export const BoundaryScrollViewBoundary: FunctionComponent<
           }
           startIndex = Math.min(
             Math.max(startIndex - floodNumItemsToRender, 0),
-            items.length - 1,
+            data.length - 1,
           );
           endIndex = Math.min(
             endIndex + floodNumItemsToRender + 1,
-            items.length,
+            data.length,
           );
           setRenderIndex([startIndex, endIndex]);
 
@@ -230,8 +234,8 @@ export const BoundaryScrollViewBoundary: FunctionComponent<
             Math.max(
               0,
               mockBottomViewHeightDelta +
-                ((items.length - endIndex) * itemHeight +
-                  (items.length - endIndex - 1) * gap),
+                ((data.length - endIndex) * itemHeight +
+                  (data.length - endIndex - 1) * gap),
             ),
           );
         },
@@ -244,11 +248,9 @@ export const BoundaryScrollViewBoundary: FunctionComponent<
     floodNumItemsToRender,
     itemHeight,
     gap,
-    items.length,
+    data.length,
   ]);
 
-  const itemsRenderIndexKey = useRef(0);
-  itemsRenderIndexKey.current = 0;
   return (
     <React.Fragment>
       <View
@@ -263,19 +265,18 @@ export const BoundaryScrollViewBoundary: FunctionComponent<
             height: mockTopViewHeight,
           }}
         />
-        {items.map((item, index) => {
+        {data.map((d, index) => {
           if (index >= renderIndex[0] && index < renderIndex[1]) {
-            const key = itemsRenderIndexKey.current;
-            itemsRenderIndexKey.current++;
+            const key = keyExtractor(d, index);
             return (
               <React.Fragment key={key}>
                 <View
                   onLayout={e => {
                     setItemHeight(index, e.nativeEvent.layout.height);
                   }}>
-                  {item}
+                  {renderItem(d, index)}
                 </View>
-                {index !== items.length - 1 ? (
+                {index !== data.length - 1 ? (
                   <View style={{height: gap}} />
                 ) : null}
               </React.Fragment>
