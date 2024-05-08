@@ -6,13 +6,21 @@ import {
   Message,
 } from "@keplr-wallet/router";
 import { ChainsUpdateService } from "./service";
-import { TryUpdateEnabledChainInfosMsg } from "./messages";
+import {
+  TryUpdateAllChainInfosMsg,
+  TryUpdateEnabledChainInfosMsg,
+} from "./messages";
 
 export const getHandler: (service: ChainsUpdateService) => Handler = (
   service
 ) => {
   return (env: Env, msg: Message<unknown>) => {
     switch (msg.constructor) {
+      case TryUpdateAllChainInfosMsg:
+        return handleTryUpdateAllChainInfosMsg(service)(
+          env,
+          msg as TryUpdateAllChainInfosMsg
+        );
       case TryUpdateEnabledChainInfosMsg:
         return handleTryUpdateEnabledChainInfosMsg(service)(
           env,
@@ -21,6 +29,14 @@ export const getHandler: (service: ChainsUpdateService) => Handler = (
       default:
         throw new KeplrError("chains-update", 110, "Unknown msg type");
     }
+  };
+};
+
+const handleTryUpdateAllChainInfosMsg: (
+  service: ChainsUpdateService
+) => InternalHandler<TryUpdateAllChainInfosMsg> = (service) => {
+  return async () => {
+    return await service.tryUpdateAllChainInfos();
   };
 };
 
