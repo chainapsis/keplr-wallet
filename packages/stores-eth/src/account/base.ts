@@ -12,9 +12,9 @@ import { erc20ContractInterface } from "../constants";
 import { hexValue } from "@ethersproject/bytes";
 import { parseUnits } from "@ethersproject/units";
 import {
+  TransactionTypes,
   UnsignedTransaction,
   serialize,
-  TransactionTypes,
 } from "@ethersproject/transactions";
 import { getAddress as getEthAddress } from "@ethersproject/address";
 import { action, makeObservable, observable } from "mobx";
@@ -162,7 +162,6 @@ export class EthereumAccountBase {
       switch (denomHelper.type) {
         case "erc20":
           return {
-            type: TransactionTypes.eip1559,
             chainId: evmInfo.chainId,
             nonce: Number(transactionCountResponse.data.result),
             gasLimit: hexValue(gasLimit),
@@ -177,7 +176,6 @@ export class EthereumAccountBase {
           };
         default:
           return {
-            type: TransactionTypes.eip1559,
             chainId: evmInfo.chainId,
             nonce: Number(transactionCountResponse.data.result),
             gasLimit: hexValue(gasLimit),
@@ -217,6 +215,12 @@ export class EthereumAccountBase {
         JSON.stringify(unsignedTx),
         EthSignType.TRANSACTION
       );
+
+      const isEIP1559 =
+        !!unsignedTx.maxFeePerGas || !!unsignedTx.maxPriorityFeePerGas;
+      if (isEIP1559) {
+        unsignedTx.type = TransactionTypes.eip1559;
+      }
 
       const signedTx = Buffer.from(
         serialize(unsignedTx, signature).replace("0x", ""),

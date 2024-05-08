@@ -12,7 +12,11 @@ import {
   KeyRingCosmosService,
   messageHash,
 } from "../keyring-cosmos";
-import { serialize, UnsignedTransaction } from "@ethersproject/transactions";
+import {
+  serialize,
+  TransactionTypes,
+  UnsignedTransaction,
+} from "@ethersproject/transactions";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { getEVMAccessPermissionType, PermissionService } from "../permission";
 import { BackgroundTxEthereumService } from "../tx-ethereum";
@@ -154,11 +158,11 @@ export class KeyRingEthereumService {
             }
             case EthSignType.TRANSACTION: {
               const unsignedTx = JSON.parse(Buffer.from(message).toString());
+
               const isEIP1559 =
                 !!unsignedTx.maxFeePerGas || !!unsignedTx.maxPriorityFeePerGas;
-
               if (isEIP1559) {
-                unsignedTx.type = 2;
+                unsignedTx.type = TransactionTypes.eip1559;
               }
 
               delete unsignedTx.from;
@@ -292,7 +296,7 @@ export class KeyRingEthereumService {
         const isEIP1559 =
           !!unsignedTx.maxFeePerGas || !!unsignedTx.maxPriorityFeePerGas;
         if (isEIP1559) {
-          unsignedTx.type = 2;
+          unsignedTx.type = TransactionTypes.eip1559;
         }
 
         const signedTx = Buffer.from(
