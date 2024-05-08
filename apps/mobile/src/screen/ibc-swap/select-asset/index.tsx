@@ -233,8 +233,42 @@ export const IBCSwapDestinationSelectAssetScreen: FunctionComponent = observer(
           <BoundaryScrollViewBoundary
             itemHeight={74}
             gap={8}
-            items={[
-              ...filteredTokens.map(viewToken => {
+            data={(
+              filteredTokens.map(viewToken => ({
+                type: 'filtered',
+                viewToken,
+              })) as (
+                | {
+                    type: 'filtered';
+                    viewToken: ViewToken;
+                  }
+                | {
+                    type: 'remaining';
+                    chainInfo: IChainInfoImpl;
+                    currency: Currency;
+                  }
+              )[]
+            ).concat(
+              filteredRemaining.map(remaining => ({
+                type: 'remaining',
+                chainInfo: remaining.chainInfo,
+                currency: remaining.currency,
+              })),
+            )}
+            renderItem={(
+              d:
+                | {
+                    type: 'filtered';
+                    viewToken: ViewToken;
+                  }
+                | {
+                    type: 'remaining';
+                    chainInfo: IChainInfoImpl;
+                    currency: Currency;
+                  },
+            ) => {
+              if (d.type === 'filtered') {
+                const viewToken = d.viewToken;
                 return (
                   <TokenItem
                     viewToken={viewToken}
@@ -253,32 +287,54 @@ export const IBCSwapDestinationSelectAssetScreen: FunctionComponent = observer(
                     }}
                   />
                 );
-              }),
-              ...filteredRemaining.map(item => {
+              } else if (d.type === 'remaining') {
+                const currency = d.currency;
+                const chainInfo = d.chainInfo;
+
                 return (
                   <TokenItem
                     viewToken={{
-                      chainInfo: item.chainInfo,
-                      token: new CoinPretty(item.currency, new Dec(0)),
+                      chainInfo: chainInfo,
+                      token: new CoinPretty(currency, new Dec(0)),
                       isFetching: false,
                       error: undefined,
                     }}
-                    key={`${item.chainInfo.chainId}-${item.currency.coinMinimalDenom}`}
+                    key={`${chainInfo.chainId}-${currency.coinMinimalDenom}`}
                     onClick={() => {
                       navigation.navigate({
                         name: 'Swap',
                         params: {
                           ...route.params,
-                          outChainId: item.chainInfo.chainId,
-                          outCoinMinimalDenom: item.currency.coinMinimalDenom,
+                          outChainId: chainInfo.chainId,
+                          outCoinMinimalDenom: currency.coinMinimalDenom,
                         },
                         merge: true,
                       });
                     }}
                   />
                 );
-              }),
-            ]}
+              }
+            }}
+            keyExtractor={(
+              d:
+                | {
+                    type: 'filtered';
+                    viewToken: ViewToken;
+                  }
+                | {
+                    type: 'remaining';
+                    chainInfo: IChainInfoImpl;
+                    currency: Currency;
+                  },
+            ) => {
+              if (d.type === 'filtered') {
+                return `${d.viewToken.chainInfo.chainId}-${d.viewToken.token.currency.coinMinimalDenom}`;
+              } else if (d.type === 'remaining') {
+                return `${d.chainInfo.chainId}-${d.currency.coinMinimalDenom}`;
+              }
+
+              return "Can't happen";
+            }}
           />
         </BoundaryScrollView>
       </Box>

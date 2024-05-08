@@ -3,7 +3,7 @@ import React, {FunctionComponent, useMemo, useState} from 'react';
 import {useStyle} from '../../../styles';
 import {useStore} from '../../../stores';
 import {Dec} from '@keplr-wallet/unit';
-import {TokenItem} from '../../../components/token-view';
+import {TokenItem, ViewToken} from '../../../components/token-view';
 import {SearchIcon} from '../../../components/icon';
 import {TextInput} from '../../../components/input';
 import {Gutter} from '../../../components/gutter';
@@ -133,7 +133,11 @@ export const SendSelectAssetScreen: FunctionComponent = observer(() => {
           <BoundaryScrollViewBoundary
             itemHeight={71.3}
             gap={8}
-            items={filteredTokens.map(token => {
+            data={filteredTokens}
+            keyExtractor={(token: ViewToken) =>
+              `${token.chainInfo.chainId}-${token.token.currency.coinMinimalDenom}`
+            }
+            renderItem={(token: ViewToken) => {
               return (
                 <TokenItem
                   viewToken={token}
@@ -161,7 +165,7 @@ export const SendSelectAssetScreen: FunctionComponent = observer(() => {
                   }}
                 />
               );
-            })}
+            }}
           />
         </BoundaryScrollView>
       ) : (

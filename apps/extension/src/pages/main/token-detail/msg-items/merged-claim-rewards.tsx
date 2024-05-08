@@ -75,25 +75,22 @@ export const MsgRelationMergedClaimRewards: FunctionComponent<{
     <MsgItemBase
       logo={
         <ItemLogo
-          backgroundColor={ColorPalette["green-400"]}
           center={
             <svg
-              style={{
-                marginTop: "0.2rem",
-              }}
               xmlns="http://www.w3.org/2000/svg"
-              width="19"
-              height="15"
+              width="32"
+              height="32"
               fill="none"
-              viewBox="0 0 19 15"
+              stroke="none"
+              viewBox="0 0 32 32"
             >
               <path
                 fill={
                   theme.mode === "light"
-                    ? ColorPalette["white"]
-                    : ColorPalette["gray-600"]
+                    ? ColorPalette["green-400"]
+                    : ColorPalette["green-400"]
                 }
-                d="M18.08 3.14L6.8 14.42 0 7.62l2.24-2.24L6.8 9.94 15.84.9l2.24 2.24z"
+                d="M25.08 12.14L13.8 23.42 7 16.62l2.24-2.24 4.56 4.56 9.04-9.04 2.24 2.24z"
               />
             </svg>
           }

@@ -12,14 +12,17 @@ export class ChainsUpdateService {
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly chainsService: ChainsService,
-    protected readonly chainsUIService: ChainsUIService
+    protected readonly chainsUIService: ChainsUIService,
+    protected readonly disableUpdateLoop: boolean
   ) {}
 
   async init(): Promise<void> {
     // noop
 
     // must not wait
-    this.startUpdateLoop();
+    if (!this.disableUpdateLoop) {
+      this.startUpdateLoop();
+    }
 
     this.chainsService.addChainSuggestedHandler((chainInfo) => {
       this.updateChainInfo(chainInfo.chainId).catch((e) => {
@@ -76,6 +79,31 @@ export class ChainsUpdateService {
         });
       }
     }
+  }
+
+  async tryUpdateAllChainInfos(): Promise<boolean> {
+    let updated = false;
+
+    const promises: Promise<void>[] = [];
+
+    const chainIdentifiers = this.chainsService
+      .getChainInfos()
+      .map((c) => c.chainId);
+    for (const chainIdentifier of chainIdentifiers) {
+      // No need to wait
+      promises.push(
+        (async () => {
+          const u = await this.updateChainInfo(chainIdentifier);
+          if (u) {
+            updated = true;
+          }
+        })()
+      );
+    }
+
+    await Promise.allSettled(promises);
+
+    return updated;
   }
 
   async tryUpdateEnabledChainInfos(): Promise<boolean> {

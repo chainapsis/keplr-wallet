@@ -20,8 +20,10 @@
     "@keplr-wallet/cosmos": "0.12.86",
     "@keplr-wallet/stores": "0.12.86",
     "@keplr-wallet/stores-eth": "0.12.86",
-    "@keplr-wallet/types": "0.12.86",
-    "mobx": "^6.1.7",
-    "mobx-utils": "^6.0.3"
+    "@keplr-wallet/types": "0.12.86"
+  },
+  "peerDependencies": {
+    "mobx": "^6",
+    "mobx-utils": "^6"
   }
 }

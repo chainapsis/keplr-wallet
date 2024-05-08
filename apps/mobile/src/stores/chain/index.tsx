@@ -30,6 +30,7 @@ import {
   SetChainEndpointsMsg,
   ToggleChainsMsg,
   TokenScan,
+  TryUpdateAllChainInfosMsg,
   TryUpdateEnabledChainInfosMsg,
 } from '@keplr-wallet/background';
 import {BACKGROUND_PORT, MessageRequester} from '@keplr-wallet/router';
@@ -296,7 +297,20 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     this._isInitializing = false;
 
     // Must not wait!!
-    this.tryUpdateEnabledChainInfos();
+    this.tryUpdateAllChainInfos();
+    // mobile은 background가 persistent하게 존재할 수 없기 때문에
+    // 체인 정보에 대한 업데이트를 UI 단에서 관리한다.
+    setInterval(() => {
+      this.tryUpdateAllChainInfos();
+    }, 10 * 60 * 1000);
+  }
+
+  async tryUpdateAllChainInfos(): Promise<void> {
+    const msg = new TryUpdateAllChainInfosMsg();
+    const updated = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    if (updated) {
+      await this.updateChainInfosFromBackground();
+    }
   }
 
   async tryUpdateEnabledChainInfos(): Promise<void> {

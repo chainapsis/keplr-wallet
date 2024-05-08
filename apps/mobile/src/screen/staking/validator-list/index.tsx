@@ -171,7 +171,8 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
           <BoundaryScrollViewBoundary
             itemHeight={filterOption === 'Voting Power' ? 70 : 64}
             gap={8}
-            items={filteredValidators.map(validator => {
+            data={filteredValidators}
+            renderItem={(validator: Staking.Validator) => {
               return (
                 <ValidatorListItem
                   filterOption={filterOption}
@@ -206,7 +207,8 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
                   }}
                 />
               );
-            })}
+            }}
+            keyExtractor={item => item.operator_address}
           />
         )}
       </BoundaryScrollView>

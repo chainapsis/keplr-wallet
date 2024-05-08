@@ -80,6 +80,7 @@ export function init(
     platform: string;
     mobileOS: string;
   },
+  disableUpdateLoop: boolean,
   afterInitFn?: (
     service: Chains.ChainsService,
     lastEmbedChainInfos: ChainInfoWithCoreTypes[]
@@ -210,7 +211,8 @@ export function init(
   const chainsUpdateService = new ChainsUpdate.ChainsUpdateService(
     storeCreator("chains-update"),
     chainsService,
-    chainsUIService
+    chainsUIService,
+    disableUpdateLoop
   );
 
   const secretWasmService = new SecretWasm.SecretWasmService(
