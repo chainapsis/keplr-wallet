@@ -163,6 +163,11 @@ export class WalletConnectStore {
           return;
         }
         if (this.sessionProposalResolverMap.has(topic)) {
+          runInAction(() => {
+            // 엄밀하게 말하면 확신할 수 있는건 아니지만
+            // 이미 pairing된 uri로 wc 요청이 들어오면 request 처리일 확률이 높음.
+            this._isPendingWcCallFromDeepLinkClient = true;
+          });
           // Already requested. Do nothing.
           return;
         }
@@ -176,12 +181,6 @@ export class WalletConnectStore {
           const signClient = await this.ensureInit();
           if (!signClient.pairing.keys.includes(topic)) {
             await this.pair(params, true);
-          } else {
-            runInAction(() => {
-              // 엄밀하게 말하면 확신할 수 있는건 아니지만
-              // 이미 pairing된 uri로 wc 요청이 들어오면 request 처리일 확률이 높음.
-              this._isPendingWcCallFromDeepLinkClient = true;
-            });
           }
         } catch (e) {
           console.log('Failed to init wallet connect v2 client', e);
