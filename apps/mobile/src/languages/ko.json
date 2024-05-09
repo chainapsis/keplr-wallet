@@ -188,6 +188,8 @@
   "page.setting.general.language-title": "언어",
   "page.setting.general.currency-title": "통화",
   "page.setting.general.contacts-title": "연락처",
+  "page.setting.general.show-24h-price-changes-title": "24시간 가격변동률 표시",
+  "page.setting.general.show-24h-price-changes-paragraph": "각 토큰의 24시간 가격변동률을 표시하는 기능입니다.",
   "page.setting.general.theme-title": "테마",
   "page.setting.general.manage-authz-title": "AuthZ 관리",
   "page.setting.general.link-kpelr-mobile-title": "케플러 모바일과 연결하기",

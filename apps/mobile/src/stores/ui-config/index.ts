@@ -26,6 +26,7 @@ export interface UIConfigOptions {
   hideLowBalance: boolean;
   rememberLastFeeOption: boolean;
   lastFeeOption: 'low' | 'average' | 'high' | false;
+  show24HChangesInMagePage: boolean;
 
   useWebHIDLedger: boolean;
 }
@@ -52,6 +53,7 @@ export class UIConfigStore {
     hideLowBalance: false,
     rememberLastFeeOption: false,
     lastFeeOption: false,
+    show24HChangesInMagePage: true,
 
     useWebHIDLedger: false,
   };
@@ -212,6 +214,16 @@ export class UIConfigStore {
 
   get lastFeeOption(): 'low' | 'average' | 'high' | false {
     return this.options.lastFeeOption;
+  }
+
+  @action
+  toggleShow24HChangesInMagePage() {
+    this.options.show24HChangesInMagePage =
+      !this.options.show24HChangesInMagePage;
+  }
+
+  get show24HChangesInMagePage(): boolean {
+    return this.options.show24HChangesInMagePage;
   }
 
   @computed

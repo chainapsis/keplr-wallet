@@ -20,12 +20,11 @@ import {WrongViewingKeyError} from '@keplr-wallet/stores';
 import {StyleSheet, Text, ViewStyle} from 'react-native';
 import {ViewToken} from '../../index';
 import {RectButton} from '../../../../components/rect-button';
-import {Tag} from '../../../../components/tag';
 import {SVGLoadingIcon} from '../../../../components/spinner';
 import {Path, Svg} from 'react-native-svg';
 import {ArrowRightIcon} from '../../../../components/icon/arrow-right';
 import {InformationOutlinedIcon} from '../../../../components/icon/information-outlined';
-import {IntPretty} from '@keplr-wallet/unit';
+import {DecUtils, IntPretty, RatePretty} from '@keplr-wallet/unit';
 import {formatAprString} from '../../utils';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 
@@ -80,6 +79,7 @@ interface TokenItemProps {
   hasApr?: boolean;
   // For remaining unbonding time.
   altSentence?: string | React.ReactElement;
+  showPrice24HChange?: boolean;
 }
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
   ({
@@ -91,8 +91,9 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     altSentence,
     hasApr,
     onClickError,
+    showPrice24HChange,
   }) => {
-    const {priceStore} = useStore();
+    const {priceStore, price24HChangesStore} = useStore();
     const style = useStyle();
     const pricePretty = priceStore.calculatePrice(viewToken.token);
 
@@ -132,6 +133,22 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         };
       }
     }, [viewToken.token.currency]);
+
+    // 얘가 값이 있냐 없냐에 따라서 price change를 보여줄지 말지를 결정한다.
+    // prop에서 showPrice24HChange가 null 또는 false거나
+    // currency에 coingeckoId가 없다면 보여줄 수 없다.
+    // 또한 잘못된 coingeckoId일때는 response에 값이 있을 수 없으므로 안보여준다.
+    const price24HChange = (() => {
+      if (!showPrice24HChange) {
+        return undefined;
+      }
+      if (!viewToken.token.currency.coinGeckoId) {
+        return undefined;
+      }
+      return price24HChangesStore.get24HChange(
+        viewToken.token.currency.coinGeckoId,
+      );
+    })();
 
     const containerStyle: ViewStyle = {
       backgroundColor: style.get('color-card-default').color,
@@ -208,12 +225,11 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                     {coinDenom}
                   </Text>
                 </Skeleton>
-                {tag ? (
+                {price24HChange ? (
                   <React.Fragment>
                     <Gutter size={4} />
-                    <Box alignY="center" height={1}>
-                      <Tag text={tag.text} />
-                    </Box>
+
+                    <PriceChangeTag rate={price24HChange} />
                   </React.Fragment>
                 ) : null}
                 {viewToken.isFetching ? (
@@ -250,6 +266,15 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                       : viewToken.chainInfo.chainName}
                   </Text>
                 </Skeleton>
+
+                {tag ? (
+                  <React.Fragment>
+                    <Gutter size={4} />
+                    <Box alignY="center" height={1}>
+                      <TokenTag text={tag.text} />
+                    </Box>
+                  </React.Fragment>
+                ) : null}
               </XAxis>
             </Stack>
           </Column>
@@ -347,4 +372,114 @@ const DelayedLoadingRender: FunctionComponent<
   }
 
   return <React.Fragment>{children}</React.Fragment>;
+};
+
+const TokenTag: FunctionComponent<{
+  text: string;
+}> = ({text}) => {
+  const style = useStyle();
+
+  return (
+    <Box
+      alignX="center"
+      alignY="center"
+      backgroundColor={style.get('color-gray-500').color}
+      borderRadius={6}
+      paddingX={6}
+      paddingY={2}
+      height={18}>
+      <Text
+        style={{
+          color: style.get('color-gray-200').color,
+          fontSize: 11,
+          fontWeight: '400',
+        }}>
+        {text}
+      </Text>
+    </Box>
+  );
+};
+
+const PriceChangeTag: FunctionComponent<{
+  rate: RatePretty;
+}> = ({rate}) => {
+  const style = useStyle();
+
+  const info: {
+    text: string;
+    isNeg: boolean;
+  } = (() => {
+    // Max decimals가 2인데 이 경우 숫자가 0.00123%같은 경우면 +0.00% 같은식으로 표시될 수 있다.
+    // 이 경우는 오차를 무시하고 0.00%로 생각한다.
+    if (
+      rate
+        .toDec()
+        .abs()
+        // 백분율을 고려해야되기 때문에 -2가 아니라 -4임
+        .lte(DecUtils.getTenExponentN(-4))
+    ) {
+      return {
+        text: '0.00%',
+        isNeg: false,
+      };
+    } else {
+      const res = rate
+        .maxDecimals(2)
+        .trim(false)
+        .shrink(true)
+        .inequalitySymbol(false)
+        .toString();
+
+      const isNeg = res.startsWith('-');
+      return {
+        text: isNeg ? res.replace('-', '') : res,
+        isNeg,
+      };
+    }
+  })();
+
+  const fontColor = info.isNeg ? 'color-orange-400' : 'color-green-400';
+
+  return (
+    <Box
+      alignX="center"
+      alignY="center"
+      paddingX={4}
+      paddingY={2}
+      borderRadius={6}
+      backgroundColor={
+        info.isNeg ? 'rgba(88, 39, 11, 0.4)' : 'rgba(19, 104, 68, 0.2)'
+      }>
+      <XAxis alignY="center">
+        {info.isNeg ? (
+          <DownIcon color={style.get(fontColor).color} />
+        ) : (
+          <UpIcon color={style.get(fontColor).color} />
+        )}
+        <Text style={style.flatten(['text-caption2', fontColor])}>
+          {info.text}
+        </Text>
+      </XAxis>
+    </Box>
+  );
+};
+
+const UpIcon: FunctionComponent<{
+  color: string;
+}> = ({color}) => {
+  return (
+    <Svg width={12} height={10} fill="none" viewBox="0 0 12 10">
+      <Path stroke={color} d="M1 9l4-5.5 2.667 3L11 1" />
+    </Svg>
+  );
+};
+
+const DownIcon: FunctionComponent<{
+  color: string;
+}> = ({color}) => {
+  return (
+    <Svg width={12} height={10} fill="none" viewBox="0 0 12 10">
+      <Path stroke={color} d="M1 1l4 5.5 2.667-3L11 9" />
+    </Svg>
+  );
 };

@@ -10,6 +10,7 @@ import {StackNavProp} from '../../../../navigation';
 import {useStore} from '../../../../stores';
 import {observer} from 'mobx-react-lite';
 import {useLanguage} from '../../../../languages';
+import {Toggle} from '../../../../components/toggle';
 
 export const SettingGeneralScreen: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -63,6 +64,21 @@ export const SettingGeneralScreen: FunctionComponent = observer(() => {
               />
             }
             onClick={() => navigate.navigate('Setting.General.ContactList')}
+          />
+
+          <PageButton
+            title={intl.formatMessage({
+              id: 'page.setting.general.show-24h-price-changes-title',
+            })}
+            paragraph={intl.formatMessage({
+              id: 'page.setting.general.show-24h-price-changes-paragraph',
+            })}
+            endIcon={
+              <Toggle
+                isOpen={uiConfigStore.show24HChangesInMagePage}
+                setIsOpen={() => uiConfigStore.toggleShow24HChangesInMagePage()}
+              />
+            }
           />
 
           <PageButton
