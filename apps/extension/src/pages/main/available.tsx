@@ -285,7 +285,9 @@ export const AvailableTabView: FunctionComponent<{
                             viewToken.chainInfo.chainId
                           ).bech32Address;
                         })()}
-                        showPrice24HChange={true}
+                        showPrice24HChange={
+                          uiConfigStore.show24HChangesInMagePage
+                        }
                       />
                     ))}
                   />
