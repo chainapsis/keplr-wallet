@@ -239,23 +239,27 @@ export class KeyRingEthereumService {
     const evmInfo = chainInfo.evm;
 
     switch (method) {
-      case "keplr_connect":
+      case "keplr_connect": {
         return {
           defaultEvmChainId: `0x${evmInfo.chainId.toString(16)}`,
           defaultTendermintChainId: chainInfo.chainId,
           selectedAddress,
         };
-      case "keplr_disconnect":
+      }
+      case "keplr_disconnect": {
         return this.permissionService.removeEVMPermission(
           getEVMAccessPermissionType(),
           [origin]
         );
-      case "eth_chainId":
+      }
+      case "eth_chainId": {
         return `0x${evmInfo.chainId.toString(16)}`;
+      }
       case "eth_accounts":
-      case "eth_requestAccounts":
+      case "eth_requestAccounts": {
         return [selectedAddress];
-      case "eth_sendTransaction":
+      }
+      case "eth_sendTransaction": {
         const tx = params?.[0];
         if (!tx) {
           throw new Error("No transaction provided");
@@ -311,6 +315,33 @@ export class KeyRingEthereumService {
         );
 
         return txHash;
+      }
+      case "personal_sign": {
+        const message = params?.[0];
+        if (!message) {
+          throw new Error(
+            "Invalid parameters: must provide a stringified message."
+          );
+        }
+
+        const signer = params?.[1];
+        if (!signer || (signer && !signer.match(/^0x[0-9A-Fa-f]*$/))) {
+          throw new Error(
+            "Invalid parameters: must provide an Ethereum address."
+          );
+        }
+
+        const signature = await this.signEthereumSelected(
+          env,
+          origin,
+          defaultChainId,
+          signer,
+          Buffer.from(message),
+          EthSignType.MESSAGE
+        );
+
+        return `0x${Buffer.from(signature).toString("hex")}`;
+      }
       default:
         return (
           await simpleFetch<{
