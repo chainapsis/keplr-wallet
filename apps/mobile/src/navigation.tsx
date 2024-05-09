@@ -26,7 +26,13 @@ import {
   FocusedScreenProvider,
   useFocusedScreen,
 } from './provider/focused-screen';
-import {WalletIcon, BrowserIcon, SettingIcon} from './components/icon';
+import {
+  BrowserIcon,
+  SettingIcon,
+  HomeFilledIcon,
+  HomeOutlinedIcon,
+  SettingOutlinedIcon,
+} from './components/icon';
 import {
   HomeScreenHeaderTitle,
   defaultHeaderOptions,
@@ -607,17 +613,25 @@ export const MainTabNavigation: FunctionComponent = () => {
     <Tab.Navigator
       screenOptions={({route}) => ({
         // eslint-disable-next-line react/no-unstable-nested-components
-        tabBarIcon: ({color}) => {
-          const size = 24;
+        tabBarIcon: ({focused, color}) => {
+          const size = 28;
           switch (route.name) {
             case 'Home':
-              return <WalletIcon size={size} color={color} />;
+              return focused ? (
+                <HomeFilledIcon size={size} color={color} />
+              ) : (
+                <HomeOutlinedIcon size={size} color={color} />
+              );
             case 'Swap':
               return <SwapIcon size={size} color={color} />;
             case 'WebTab':
               return <BrowserIcon size={size} color={color} />;
             case 'Settings':
-              return <SettingIcon size={size} color={color} />;
+              return focused ? (
+                <SettingIcon size={size} color={color} />
+              ) : (
+                <SettingOutlinedIcon size={size} color={color} />
+              );
           }
         },
         tabBarLabel: ({color}) =>
