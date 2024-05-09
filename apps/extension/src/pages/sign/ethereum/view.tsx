@@ -52,23 +52,25 @@ export const EthereumSigningView: FunctionComponent<{
   const chainInfo = chainStore.getChain(interactionData.data.chainId);
 
   const signingDataText = useMemo(() => {
+    const messageBuff = Buffer.from(interactionData.data.message);
+
     switch (interactionData.data.signType) {
       case EthSignType.MESSAGE:
-        return Buffer.from(interactionData.data.message).toString("hex");
+        // If the message is 32 bytes, it's probably a hash.
+        if (messageBuff.length === 32) {
+          return messageBuff.toString("hex");
+        } else {
+          const text = messageBuff.toString("utf8");
+
+          // If the text contains RTL mark, escape it.
+          return text.replace(/\u202E/giu, "\\u202E");
+        }
       case EthSignType.TRANSACTION:
-        return JSON.stringify(
-          JSON.parse(Buffer.from(interactionData.data.message).toString()),
-          null,
-          2
-        );
+        return JSON.stringify(JSON.parse(messageBuff.toString()), null, 2);
       case EthSignType.EIP712:
-        return JSON.stringify(
-          JSON.parse(Buffer.from(interactionData.data.message).toString()),
-          null,
-          2
-        );
+        return JSON.stringify(JSON.parse(messageBuff.toString()), null, 2);
       default:
-        return Buffer.from(interactionData.data.message).toString("hex");
+        return messageBuff.toString("hex");
     }
   }, [interactionData.data]);
   const isTxSigning = interactionData.data.signType === EthSignType.TRANSACTION;
