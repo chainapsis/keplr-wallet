@@ -157,6 +157,7 @@ const handleSetChainEndpointsMsg: (
     service.setEndpoint(msg.chainId, {
       rpc: msg.rpc,
       rest: msg.rest,
+      evmRpc: msg.evmRpc,
     });
     return service.getChainInfosWithCoreTypes();
   };
