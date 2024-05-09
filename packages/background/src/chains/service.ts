@@ -47,6 +47,7 @@ export class ChainsService {
     chainId: string;
     rpc?: string;
     rest?: string;
+    evmRpc?: string;
   }[] = [];
   protected endpointsKVStore: KVStore;
 
