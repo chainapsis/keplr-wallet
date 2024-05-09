@@ -98,7 +98,8 @@ export const InteractionModalsProvider: FunctionComponent<PropsWithChildren> =
         ) : null}
 
         {keyRingStore.status === 'unlocked' &&
-        walletConnectStore.isPendingClientFromDeepLink ? (
+        (walletConnectStore.isPendingClientFromDeepLink ||
+          walletConnectStore.isPendingWcCallFromDeepLinkClient) ? (
           <LoadingModal isOpen={true} setIsOpen={() => {}} />
         ) : null}
 

@@ -87,7 +87,8 @@ export class WalletConnectStore {
   /*
    Check that there is a wallet connect call from the client that was connected by deep link.
    */
-  protected isPendingWcCallFromDeepLinkClient = false;
+  @observable
+  protected _isPendingWcCallFromDeepLinkClient = false;
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -175,6 +176,12 @@ export class WalletConnectStore {
           const signClient = await this.ensureInit();
           if (!signClient.pairing.keys.includes(topic)) {
             await this.pair(params, true);
+          } else {
+            runInAction(() => {
+              // 엄밀하게 말하면 확신할 수 있는건 아니지만
+              // 이미 pairing된 uri로 wc 요청이 들어오면 request 처리일 확률이 높음.
+              this._isPendingWcCallFromDeepLinkClient = true;
+            });
           }
         } catch (e) {
           console.log('Failed to init wallet connect v2 client', e);
@@ -191,6 +198,10 @@ export class WalletConnectStore {
 
   get isPendingClientFromDeepLink(): boolean {
     return this._isPendingClientFromDeepLink;
+  }
+
+  get isPendingWcCallFromDeepLinkClient(): boolean {
+    return this._isPendingWcCallFromDeepLinkClient;
   }
 
   /**
@@ -605,6 +616,13 @@ export class WalletConnectStore {
 
     this.wcCallCount++;
 
+    // 인터렉션이 필수적인 method의 경우
+    // ios에서는 웹브라우저로 돌아가라는 모달을 보여주고
+    // 안드로이드에서는 앱을 kill 해버린다.
+    // enable, getKey같은 method는 인터렉션이 필요한지 아닌지 구분하기 힘들다.
+    // sign과 같이 인터렉션이 필수적인 얘들의 경우 true로 설정해줘야한다.
+    let interactionNeeded = false;
+
     try {
       let chainId = event.params.chainId as string;
       if (!chainId.startsWith('cosmos:')) {
@@ -618,7 +636,9 @@ export class WalletConnectStore {
       }
 
       if (await this.getFromDeepLinkByTopic(topic)) {
-        this.isPendingWcCallFromDeepLinkClient = true;
+        runInAction(() => {
+          this._isPendingWcCallFromDeepLinkClient = true;
+        });
       }
 
       // Store permitted chains before processing request.
@@ -651,6 +671,7 @@ export class WalletConnectStore {
           break;
         }
         case 'cosmos_signAmino': {
+          interactionNeeded = true;
           const res = await keplr.signAmino(
             chainId,
             params.signerAddress,
@@ -671,6 +692,7 @@ export class WalletConnectStore {
           break;
         }
         case 'cosmos_signDirect': {
+          interactionNeeded = true;
           const res = await keplr.signDirect(chainId, params.signerAddress, {
             bodyBytes: Buffer.from(params.signDoc.bodyBytes, 'base64'),
             authInfoBytes: Buffer.from(params.signDoc.authInfoBytes, 'base64'),
@@ -719,6 +741,7 @@ export class WalletConnectStore {
           break;
         }
         case 'keplr_signAmino': {
+          interactionNeeded = true;
           const res = await keplr.signAmino(
             params.chainId,
             params.signer,
@@ -738,6 +761,7 @@ export class WalletConnectStore {
           break;
         }
         case 'keplr_signDirect': {
+          interactionNeeded = true;
           const res = await keplr.signDirect(params.chainId, params.signer, {
             bodyBytes: Buffer.from(params.signDoc.bodyBytes, 'base64'),
             authInfoBytes: Buffer.from(params.signDoc.authInfoBytes, 'base64'),
@@ -768,6 +792,7 @@ export class WalletConnectStore {
           break;
         }
         case 'keplr_signArbitrary': {
+          interactionNeeded = true;
           const res = await keplr.signArbitrary(
             params.chainId,
             params.signer,
@@ -801,6 +826,7 @@ export class WalletConnectStore {
           break;
         }
         case 'keplr_signEthereum': {
+          interactionNeeded = true;
           const res = await keplr.signEthereum(
             params.chainId,
             params.signer,
@@ -837,6 +863,11 @@ export class WalletConnectStore {
       ) {
         // No need to wait.
         this.accountMayChangedSession(topic);
+
+        // 새로운 permission이 추가되었을 경우
+        // 웹페이지에서 앱이 열려있도록 보장하기 위해서 deep link를 썻을 확률이 높기 때문에
+        // 인터렉션이 필요한 경우라고 가정한다.
+        interactionNeeded = true;
       }
     } catch (e) {
       console.log(e);
@@ -854,8 +885,14 @@ export class WalletConnectStore {
     } finally {
       this.wcCallCount--;
 
-      if (this.wcCallCount === 0 && this.isPendingWcCallFromDeepLinkClient) {
-        this.isPendingWcCallFromDeepLinkClient = false;
+      if (
+        interactionNeeded &&
+        this.wcCallCount === 0 &&
+        this._isPendingWcCallFromDeepLinkClient
+      ) {
+        runInAction(() => {
+          this._isPendingWcCallFromDeepLinkClient = false;
+        });
 
         if (AppState.currentState === 'active') {
           runInAction(() => {
