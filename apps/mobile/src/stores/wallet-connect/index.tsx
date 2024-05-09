@@ -171,7 +171,11 @@ export class WalletConnectStore {
         });
 
         try {
-          await this.pair(params, true);
+          const topic = this.getTopicFromURI(params);
+          const signClient = await this.ensureInit();
+          if (!signClient.pairing.keys.includes(topic)) {
+            await this.pair(params, true);
+          }
         } catch (e) {
           console.log('Failed to init wallet connect v2 client', e);
         } finally {
@@ -574,9 +578,11 @@ export class WalletConnectStore {
         resolver.fromDeepLink &&
         this.pendingSessionProposalMetadataMap.size === 0
       ) {
-        runInAction(() => {
-          this._needGoBackToBrowser = true;
-        });
+        if (AppState.currentState === 'active') {
+          runInAction(() => {
+            this._needGoBackToBrowser = true;
+          });
+        }
       }
     }
   }
@@ -872,7 +878,11 @@ export class WalletConnectStore {
         reject,
       });
 
-      signClient.pair({uri});
+      signClient.pair({uri}).catch(e => {
+        reject(e);
+
+        this.sessionProposalResolverMap.delete(topic);
+      });
 
       setTimeout(() => {
         reject(new Error('Timeout'));
