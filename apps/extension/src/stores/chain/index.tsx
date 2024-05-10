@@ -424,9 +424,10 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   *setChainEndpoints(
     chainId: string,
     rpc: string | undefined,
-    rest: string | undefined
+    rest: string | undefined,
+    evmRpc: string | undefined
   ) {
-    const msg = new SetChainEndpointsMsg(chainId, rpc, rest);
+    const msg = new SetChainEndpointsMsg(chainId, rpc, rest, evmRpc);
     const newChainInfos = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );

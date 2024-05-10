@@ -410,7 +410,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   protected canEIP1559TxFeesAndReady(): boolean {
-    if (this.chainInfo.evm) {
+    if (this.chainInfo.evm && this.senderConfig.sender.startsWith("0x")) {
       const queries = this.queriesStore.get(this.chainId);
       if (!queries.ethereum) {
         console.log("Chain supports EVM. But no ethereum queries provided.");

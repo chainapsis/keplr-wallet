@@ -148,3 +148,41 @@ export async function checkRestConnectivity(
     );
   }
 }
+
+export async function checkEvmRpcConnectivity(
+  evmChainId: number,
+  evmRpc: string
+) {
+  let resultEvmChainId: SimpleFetchResponse<{
+    result: string;
+  }>;
+
+  try {
+    // get the EVM chain id.
+    resultEvmChainId = await simpleFetch<{
+      result: string;
+    }>(evmRpc, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "eth_chainId",
+        params: [],
+        id: 1,
+      }),
+    });
+  } catch (e) {
+    console.log(e);
+    throw new Error("Failed to get response eth_chainId from EVM RPC endpoint");
+  }
+
+  const evmChainIdFromResult = Number(resultEvmChainId.data.result);
+
+  if (evmChainIdFromResult !== evmChainId) {
+    throw new Error(
+      `EVM RPC endpoint has different chain id (expected: ${evmChainId}, actual: ${evmChainIdFromResult})`
+    );
+  }
+}

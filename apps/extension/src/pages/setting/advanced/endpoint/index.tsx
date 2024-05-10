@@ -13,6 +13,7 @@ import { Box } from "../../../../components/box";
 import { TextInput } from "../../../../components/input";
 import { useForm } from "react-hook-form";
 import {
+  checkEvmRpcConnectivity,
   checkRestConnectivity,
   checkRPCConnectivity,
   DifferentChainVersionError,
@@ -27,6 +28,7 @@ import { StakeWithKeplrDashboardButton } from "../../../main/components";
 import { ColorPalette } from "../../../../styles";
 import { ArrowTopRightOnSquareIcon } from "../../../../components/icon";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { Gutter } from "../../../../components/gutter";
 
 const Styles = {
   Container: styled(Stack)`
@@ -52,18 +54,22 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
     | {
         rpc: string;
         rest: string;
+        evmRpc?: string;
       }
     | undefined
   >();
   const [isLoading, setIsLoading] = useState(false);
 
+  const chainInfo = chainStore.getChain(chainId);
   const { setValue, watch, register, handleSubmit } = useForm<{
     rpc: string;
     lcd: string;
+    evmRpc?: string;
   }>({
     defaultValues: {
       rpc: chainStore.getChain(chainId).rpc,
       lcd: chainStore.getChain(chainId).rest,
+      evmRpc: chainStore.getChain(chainId).evm?.rpc,
     },
   });
 
@@ -75,9 +81,9 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
   });
 
   useEffect(() => {
-    const chainInfo = chainStore.getChain(chainId);
     setValue("rpc", chainInfo.rpc);
     setValue("lcd", chainInfo.rest);
+    setValue("evmRpc", chainInfo.evm?.rpc);
 
     const msg = new GetChainOriginalEndpointsMsg(chainId);
     new InExtensionMessageRequester()
@@ -90,7 +96,7 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
 
         setOriginalEndpoint(undefined);
       });
-  }, [chainId, chainStore, setValue]);
+  }, [chainId, chainInfo, setValue]);
 
   return (
     <HeaderLayout
@@ -107,8 +113,9 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
         size: "large",
         isLoading,
         disabled:
-          chainStore.getChain(chainId).rpc === watch("rpc") &&
-          chainStore.getChain(chainId).rest === watch("lcd"),
+          chainInfo.rpc === watch("rpc") &&
+          chainInfo.rest === watch("lcd") &&
+          chainInfo.evm?.rpc === watch("evmRpc"),
       }}
       onSubmit={handleSubmit(async (data) => {
         setIsLoading(true);
@@ -117,7 +124,8 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
           if (
             !originalEndpoint ||
             originalEndpoint.rpc !== data.rpc ||
-            originalEndpoint.rpc !== data.lcd
+            originalEndpoint.rpc !== data.lcd ||
+            originalEndpoint.evmRpc !== data.evmRpc
           ) {
             try {
               if (originalEndpoint?.rpc !== data.rpc) {
@@ -142,6 +150,7 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
                   }
                 }
               }
+
               if (originalEndpoint?.rest !== data.lcd) {
                 try {
                   await checkRestConnectivity(chainId, data.lcd);
@@ -164,6 +173,17 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
                   }
                 }
               }
+
+              if (
+                data.evmRpc !== undefined &&
+                chainInfo.evm !== undefined &&
+                originalEndpoint?.evmRpc !== data.evmRpc
+              ) {
+                await checkEvmRpcConnectivity(
+                  chainInfo.evm.chainId,
+                  data.evmRpc
+                );
+              }
             } catch (e) {
               console.error(e);
 
@@ -180,11 +200,17 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
           if (
             originalEndpoint &&
             originalEndpoint.rpc == data.rpc &&
-            originalEndpoint.rest == data.lcd
+            originalEndpoint.rest == data.lcd &&
+            originalEndpoint.evmRpc == data.evmRpc
           ) {
             await chainStore.resetChainEndpoints(chainId);
           } else {
-            await chainStore.setChainEndpoints(chainId, data.rpc, data.lcd);
+            await chainStore.setChainEndpoints(
+              chainId,
+              data.rpc,
+              data.lcd,
+              data.evmRpc
+            );
           }
 
           await confirm.confirm(
@@ -232,13 +258,15 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
 
               return (
                 originalEndpoint.rpc === watch("rpc") &&
-                originalEndpoint.rest === watch("lcd")
+                originalEndpoint.rest === watch("lcd") &&
+                originalEndpoint.evmRpc === watch("evmRpc")
               );
             })()}
             onClick={() => {
               if (originalEndpoint) {
                 setValue("rpc", originalEndpoint.rpc);
                 setValue("lcd", originalEndpoint.rest);
+                setValue("evmRpc", originalEndpoint.evmRpc);
               }
             }}
           />
@@ -246,6 +274,12 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
 
         <TextInput label="RPC" {...register("rpc")} />
         <TextInput label="LCD" {...register("lcd")} />
+        {chainInfo.evm && (
+          <React.Fragment>
+            <TextInput label="EVM RPC" {...register("evmRpc")} />
+            <Gutter size="0" />
+          </React.Fragment>
+        )}
 
         {ChainIdHelper.parse(chainId).identifier === "axelar-dojo" ? (
           <StakeWithKeplrDashboardButton

@@ -32,6 +32,9 @@
   "bottom-tabs.activity": "Activity",
   "bottom-tabs.settings": "Settings",
 
+  "modal.walletconnect.go-back-to-browser-title": "Return to Browser",
+  "modal.walletconnect.go-back-to-browser-paragraph": "Open and check your mobile web browser",
+
   "page.governance.proposal-list.empty-text": "No records of past or ongoing proposals found on this chain.",
   "page.governance.proposal-list.cosmos-hub-warning-text": "Cosmos Hub requires you to have at least 1 ATOM staked to vote.",
   "page.governance.main.empty-title": "No Proposals Awaiting Your Vote",
