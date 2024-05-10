@@ -258,13 +258,15 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
 
               return (
                 originalEndpoint.rpc === watch("rpc") &&
-                originalEndpoint.rest === watch("lcd")
+                originalEndpoint.rest === watch("lcd") &&
+                originalEndpoint.evmRpc === watch("evmRpc")
               );
             })()}
             onClick={() => {
               if (originalEndpoint) {
                 setValue("rpc", originalEndpoint.rpc);
                 setValue("lcd", originalEndpoint.rest);
+                setValue("evmRpc", originalEndpoint.evmRpc);
               }
             }}
           />
