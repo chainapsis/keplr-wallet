@@ -342,6 +342,32 @@ export class KeyRingEthereumService {
 
         return `0x${Buffer.from(signature).toString("hex")}`;
       }
+      case "eth_signTypedData_v3":
+      case "eth_signTypedData_v4": {
+        const signer = params?.[0];
+        if (!signer || (signer && !signer.match(/^0x[0-9A-Fa-f]*$/))) {
+          throw new Error(
+            "Invalid parameters: must provide an Ethereum address."
+          );
+        }
+
+        const typedData = params?.[1];
+
+        const signature = await this.signEthereumSelected(
+          env,
+          origin,
+          defaultChainId,
+          signer,
+          Buffer.from(
+            typeof typedData === "string"
+              ? typedData
+              : JSON.stringify(typedData)
+          ),
+          EthSignType.EIP712
+        );
+
+        return `0x${Buffer.from(signature).toString("hex")}`;
+      }
       default:
         return (
           await simpleFetch<{
