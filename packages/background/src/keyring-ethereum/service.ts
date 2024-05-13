@@ -18,7 +18,11 @@ import {
   UnsignedTransaction,
 } from "@ethersproject/transactions";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
-import { getEVMAccessPermissionType, PermissionService } from "../permission";
+import {
+  getBasicAccessPermissionType,
+  getEVMAccessPermissionType,
+  PermissionService,
+} from "../permission";
 import { BackgroundTxEthereumService } from "../tx-ethereum";
 
 export class KeyRingEthereumService {
@@ -368,7 +372,35 @@ export class KeyRingEthereumService {
 
         return `0x${Buffer.from(signature).toString("hex")}`;
       }
-      default:
+      case "wallet_switchEthereumChain": {
+        const evmChainId = params?.[0]?.chainId;
+        if (!evmChainId) {
+          throw new Error("No chain id provided");
+        }
+
+        const chainInfos = this.chainsService.getChainInfos();
+
+        const newChainInfo = chainInfos.find(
+          (chainInfo) => chainInfo.evm?.chainId === parseInt(evmChainId, 16)
+        );
+        if (!newChainInfo) {
+          throw new Error("No matched chain found");
+        }
+
+        await this.permissionService.checkOrGrantPermission(
+          env,
+          [newChainInfo.chainId],
+          getBasicAccessPermissionType(),
+          origin
+        );
+
+        return this.permissionService.updateDefaultChainIdPermittedOrigin(
+          env,
+          origin,
+          newChainInfo.chainId
+        );
+      }
+      default: {
         return (
           await simpleFetch<{
             jsonrpc: string;
@@ -388,6 +420,7 @@ export class KeyRingEthereumService {
             }),
           })
         ).data.result;
+      }
     }
   }
 }

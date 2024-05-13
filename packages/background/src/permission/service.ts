@@ -682,4 +682,21 @@ export class PermissionService {
 
     return defaultChainId;
   }
+
+  @action
+  updateDefaultChainIdPermittedOrigin(
+    env: Env,
+    origin: string,
+    newDefaultChainId: string
+  ): void {
+    this.checkEVMPermission(env, origin);
+    this.checkPermission(
+      env,
+      newDefaultChainId,
+      getBasicAccessPermissionType(),
+      origin
+    );
+
+    this.defaultChainIdPermittedOriginMap.set(origin, newDefaultChainId);
+  }
 }
