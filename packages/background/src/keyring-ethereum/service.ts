@@ -229,7 +229,7 @@ export class KeyRingEthereumService {
     origin: string,
     defaultChainId: string,
     method: string,
-    params?: any
+    params?: unknown[] | Record<string, unknown>
   ): Promise<any> {
     const chainInfo = this.chainsService.getChainInfo(defaultChainId);
     if (chainInfo === undefined || chainInfo.evm === undefined) {
@@ -266,7 +266,12 @@ export class KeyRingEthereumService {
         return [selectedAddress];
       }
       case "eth_sendTransaction": {
-        const tx = params?.[0];
+        const tx =
+          (Array.isArray(params) &&
+            (params?.[0] as UnsignedTransaction & {
+              from: string;
+            })) ||
+          null;
         if (!tx) {
           throw new Error("No transaction provided");
         }
@@ -285,7 +290,7 @@ export class KeyRingEthereumService {
             id: 1,
           }),
         });
-        const nonce = transactionCountResponse.data.result;
+        const nonce = parseInt(transactionCountResponse.data.result, 16);
 
         const unsignedTx: UnsignedTransaction = {
           ...tx,
@@ -323,14 +328,16 @@ export class KeyRingEthereumService {
         return txHash;
       }
       case "personal_sign": {
-        const message = params?.[0];
+        const message =
+          (Array.isArray(params) && (params?.[0] as string)) || undefined;
         if (!message) {
           throw new Error(
             "Invalid parameters: must provide a stringified message."
           );
         }
 
-        const signer = params?.[1];
+        const signer =
+          (Array.isArray(params) && (params?.[1] as string)) || undefined;
         if (!signer || (signer && !signer.match(/^0x[0-9A-Fa-f]*$/))) {
           throw new Error(
             "Invalid parameters: must provide an Ethereum address."
@@ -350,14 +357,16 @@ export class KeyRingEthereumService {
       }
       case "eth_signTypedData_v3":
       case "eth_signTypedData_v4": {
-        const signer = params?.[0];
+        const signer =
+          (Array.isArray(params) && (params?.[0] as string)) || undefined;
         if (!signer || (signer && !signer.match(/^0x[0-9A-Fa-f]*$/))) {
           throw new Error(
             "Invalid parameters: must provide an Ethereum address."
           );
         }
 
-        const typedData = params?.[1];
+        const typedData =
+          (Array.isArray(params) && (params?.[1] as any)) || undefined;
 
         const signature = await this.signEthereumSelected(
           env,
@@ -375,15 +384,17 @@ export class KeyRingEthereumService {
         return `0x${Buffer.from(signature).toString("hex")}`;
       }
       case "wallet_switchEthereumChain": {
-        const evmChainId = params?.[0]?.chainId;
-        if (!evmChainId) {
+        const param =
+          (Array.isArray(params) && (params?.[0] as { chainId: string })) ||
+          undefined;
+        if (!param?.chainId) {
           throw new Error("No chain id provided");
         }
 
         const chainInfos = this.chainsService.getChainInfos();
 
         const newChainInfo = chainInfos.find(
-          (chainInfo) => chainInfo.evm?.chainId === parseInt(evmChainId, 16)
+          (chainInfo) => chainInfo.evm?.chainId === parseInt(param.chainId, 16)
         );
         if (!newChainInfo) {
           throw new Error("No matched chain found");
@@ -407,12 +418,23 @@ export class KeyRingEthereumService {
         return [{ parentCapability: "eth_accounts" }];
       }
       case "wallet_watchAsset": {
-        const type = params?.type;
-        if (!type || type !== "ERC20") {
+        const param = params as
+          | {
+              type: string;
+              options: {
+                address: string;
+                symbol?: string;
+                decimals?: number;
+                image?: string;
+                tokenId?: string;
+              };
+            }
+          | undefined;
+        if (param?.type !== "ERC20") {
           throw new Error("Not a supported asset type");
         }
 
-        const contractAddress = params?.options?.address;
+        const contractAddress = param?.options.address;
 
         await this.tokenERC20Service.suggestERC20Token(
           env,

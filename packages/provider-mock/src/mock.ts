@@ -405,7 +405,7 @@ class MockEthereumProvider extends EventEmitter implements IEthereumProvider {
 
   request<T>({}: {
     method: string;
-    params?: unknown[] | Record<string, unknown> | undefined;
+    params?: unknown[] | Record<string, unknown>;
   }): Promise<T> {
     throw new Error("Not yet implemented");
   }

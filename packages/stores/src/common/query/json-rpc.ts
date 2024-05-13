@@ -14,14 +14,14 @@ export class ObservableJsonRPCQuery<
   E = unknown
 > extends ObservableQuery<T, E> {
   @observable.ref
-  protected _params: readonly any[];
+  protected _params?: readonly unknown[] | Record<string, unknown>;
 
   constructor(
     sharedContext: QuerySharedContext,
     baseURL: string,
     url: string,
     protected readonly method: string,
-    params: readonly any[],
+    params?: readonly unknown[] | Record<string, unknown>,
     options: Partial<QueryOptions> = {}
   ) {
     super(sharedContext, baseURL, url, options);
@@ -31,12 +31,12 @@ export class ObservableJsonRPCQuery<
     makeObservable(this);
   }
 
-  get params(): readonly any[] {
+  get params(): readonly unknown[] | Record<string, unknown> | undefined {
     return this._params;
   }
 
   @action
-  protected setParams(params: readonly any[]) {
+  protected setParams(params?: readonly unknown[] | Record<string, unknown>) {
     this._params = params;
     this.fetch();
   }

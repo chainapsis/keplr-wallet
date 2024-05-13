@@ -60,7 +60,10 @@ export class RequestJsonRpcToEvmMsg extends Message<void> {
     return "request-json-rpc-to-evm";
   }
 
-  constructor(public readonly method: string, public readonly params?: any) {
+  constructor(
+    public readonly method: string,
+    public readonly params?: unknown[] | Record<string, unknown>
+  ) {
     super();
   }
 

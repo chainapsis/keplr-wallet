@@ -690,7 +690,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     params,
   }: {
     method: string;
-    params: any[];
+    params: unknown[] | Record<string, unknown>;
   }): Promise<T> {
     return await sendSimpleMessage(
       this.requester,

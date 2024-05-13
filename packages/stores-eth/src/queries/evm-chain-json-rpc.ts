@@ -18,7 +18,7 @@ export class ObservableEvmChainJsonRpcQuery<
     chainId: string,
     chainGetter: ChainGetter,
     method: string,
-    params: any[]
+    params: unknown[] | Record<string, unknown>
   ) {
     const chainInfo = chainGetter.getChain(chainId);
 
