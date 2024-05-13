@@ -400,6 +400,10 @@ export class KeyRingEthereumService {
           newChainInfo.chainId
         );
       }
+      case "wallet_getPermissions":
+      case "wallet_requestPermissions": {
+        return [{ parentCapability: "eth_accounts" }];
+      }
       default: {
         return (
           await simpleFetch<{
