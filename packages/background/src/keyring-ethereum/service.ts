@@ -24,6 +24,7 @@ import {
   PermissionService,
 } from "../permission";
 import { BackgroundTxEthereumService } from "../tx-ethereum";
+import { TokenERC20Service } from "../token-erc20";
 
 export class KeyRingEthereumService {
   static evmInfo(chainInfo: ChainInfo): EVMInfo | undefined {
@@ -39,7 +40,8 @@ export class KeyRingEthereumService {
     protected readonly interactionService: InteractionService,
     protected readonly analyticsService: AnalyticsService,
     protected readonly permissionService: PermissionService,
-    protected readonly backgroundTxEthereumService: BackgroundTxEthereumService
+    protected readonly backgroundTxEthereumService: BackgroundTxEthereumService,
+    protected readonly tokenERC20Service: TokenERC20Service
   ) {}
 
   async init() {
@@ -227,7 +229,7 @@ export class KeyRingEthereumService {
     origin: string,
     defaultChainId: string,
     method: string,
-    params?: any[]
+    params?: any
   ): Promise<any> {
     const chainInfo = this.chainsService.getChainInfo(defaultChainId);
     if (chainInfo === undefined || chainInfo.evm === undefined) {
@@ -403,6 +405,22 @@ export class KeyRingEthereumService {
       case "wallet_getPermissions":
       case "wallet_requestPermissions": {
         return [{ parentCapability: "eth_accounts" }];
+      }
+      case "wallet_watchAsset": {
+        const type = params?.type;
+        if (!type || type !== "ERC20") {
+          throw new Error("Not a supported asset type");
+        }
+
+        const contractAddress = params?.options?.address;
+
+        await this.tokenERC20Service.suggestERC20Token(
+          env,
+          defaultChainId,
+          contractAddress
+        );
+
+        return true;
       }
       default: {
         return (

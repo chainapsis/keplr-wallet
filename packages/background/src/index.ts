@@ -196,7 +196,8 @@ export function init(
     interactionService,
     analyticsService,
     permissionService,
-    backgroundTxEthereumService
+    backgroundTxEthereumService,
+    tokenERC20Service
   );
   const autoLockAccountService = new AutoLocker.AutoLockAccountService(
     storeCreator("auto-lock-account"),
