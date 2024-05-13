@@ -35,8 +35,17 @@ export function initEvents(router: Router) {
   router.addHandler("interaction-foreground", (_, msg) => {
     switch (msg.constructor) {
       case PushEventDataMsg:
-        if ((msg as PushEventDataMsg).data.type === "keystore-changed") {
-          window.dispatchEvent(new Event("keplr_keystorechange"));
+        switch ((msg as PushEventDataMsg).data.type) {
+          case "keystore-changed":
+            return window.dispatchEvent(new Event("keplr_keystorechange"));
+          case "keplr_chainChanged":
+            return window.dispatchEvent(
+              new CustomEvent("keplr_chainChanged", {
+                detail: {
+                  chainId: (msg as PushEventDataMsg).data.data,
+                },
+              })
+            );
         }
         return;
       default:

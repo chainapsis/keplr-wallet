@@ -2,7 +2,7 @@ import { ChainsService } from "../chains";
 import { KeyRingService } from "../keyring";
 import { InteractionService } from "../interaction";
 import { AnalyticsService } from "../analytics";
-import { Env } from "@keplr-wallet/router";
+import { Env, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { ChainInfo, EthSignType, EVMInfo } from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
@@ -391,10 +391,15 @@ export class KeyRingEthereumService {
           throw new Error("No chain id provided");
         }
 
+        const newEvmChainId = parseInt(param.chainId, 16);
+        if (newEvmChainId === evmInfo.chainId) {
+          return;
+        }
+
         const chainInfos = this.chainsService.getChainInfos();
 
         const newChainInfo = chainInfos.find(
-          (chainInfo) => chainInfo.evm?.chainId === parseInt(param.chainId, 16)
+          (chainInfo) => chainInfo.evm?.chainId === newEvmChainId
         );
         if (!newChainInfo) {
           throw new Error("No matched chain found");
@@ -407,10 +412,16 @@ export class KeyRingEthereumService {
           origin
         );
 
-        return this.permissionService.updateDefaultChainIdPermittedOrigin(
+        await this.permissionService.updateDefaultChainIdPermittedOrigin(
           env,
           origin,
           newChainInfo.chainId
+        );
+
+        return this.interactionService.dispatchEvent(
+          WEBPAGE_PORT,
+          "keplr_chainChanged",
+          param.chainId
         );
       }
       case "wallet_getPermissions":
