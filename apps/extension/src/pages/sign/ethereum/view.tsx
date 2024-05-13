@@ -60,13 +60,19 @@ export const EthereumSigningView: FunctionComponent<{
         if (messageBuff.length === 32) {
           return messageBuff.toString("hex");
         } else {
-          const text = messageBuff.toString("utf8");
+          const text = (() => {
+            const string = messageBuff.toString("utf8");
+            if (string.startsWith("0x")) {
+              return Buffer.from(string.slice(2), "hex").toString("utf8");
+            }
+
+            return string;
+          })();
 
           // If the text contains RTL mark, escape it.
           return text.replace(/\u202E/giu, "\\u202E");
         }
       case EthSignType.TRANSACTION:
-        return JSON.stringify(JSON.parse(messageBuff.toString()), null, 2);
       case EthSignType.EIP712:
         return JSON.stringify(JSON.parse(messageBuff.toString()), null, 2);
       default:
