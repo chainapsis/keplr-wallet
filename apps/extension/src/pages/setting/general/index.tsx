@@ -10,6 +10,7 @@ import { useStore } from "../../../stores";
 import { Box } from "../../../components/box";
 import { useLanguage } from "../../../languages";
 import { useIntl } from "react-intl";
+import { Toggle } from "../../../components/toggle";
 
 export const SettingGeneralPage: FunctionComponent = observer(() => {
   const { keyRingStore, uiConfigStore } = useStore();
@@ -76,6 +77,21 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
             })}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/link-keplr-mobile")}
+          />
+
+          <PageButton
+            title={intl.formatMessage({
+              id: "page.setting.general.show-24h-price-changes-title",
+            })}
+            paragraph={intl.formatMessage({
+              id: "page.setting.general.show-24h-price-changes-paragraph",
+            })}
+            endIcon={
+              <Toggle
+                isOpen={uiConfigStore.show24HChangesInMagePage}
+                setIsOpen={() => uiConfigStore.toggleShow24HChangesInMagePage()}
+              />
+            }
           />
 
           <PageButton

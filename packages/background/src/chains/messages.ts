@@ -140,7 +140,8 @@ export class SetChainEndpointsMsg extends Message<ChainInfoWithCoreTypes[]> {
   constructor(
     public readonly chainId: string,
     public readonly rpc: string | undefined,
-    public readonly rest: string | undefined
+    public readonly rest: string | undefined,
+    public readonly evmRpc: string | undefined
   ) {
     super();
   }
@@ -162,6 +163,13 @@ export class SetChainEndpointsMsg extends Message<ChainInfoWithCoreTypes[]> {
       const url = new URL(this.rest);
       if (url.protocol !== "http:" && url.protocol !== "https:") {
         throw new Error(`LCD has invalid protocol: ${url.protocol}`);
+      }
+    }
+    if (this.evmRpc) {
+      // Make sure that evm rpc is valid url form
+      const url = new URL(this.evmRpc);
+      if (url.protocol !== "http:" && url.protocol !== "https:") {
+        throw new Error(`EVM RPC has invalid protocol: ${url.protocol}`);
       }
     }
   }

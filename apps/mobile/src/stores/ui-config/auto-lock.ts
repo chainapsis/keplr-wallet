@@ -16,7 +16,9 @@ export class AutoLockConfig {
 
   async init(): Promise<void> {
     const saved = await this.kvStore.get<boolean>('auto-lock');
-    this._isEnableAutoLock = saved || false;
+    runInAction(() => {
+      this._isEnableAutoLock = saved || false;
+    });
     autorun(() => {
       this.kvStore.set('auto-lock', this._isEnableAutoLock);
     });

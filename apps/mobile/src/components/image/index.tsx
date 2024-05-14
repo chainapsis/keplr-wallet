@@ -22,6 +22,7 @@ export const Image = forwardRef<
       placeholder={defaultSrc}
       style={style}
       autoplay={false}
+      recyclingKey={propSrc}
     />
   );
 });
@@ -44,6 +45,7 @@ export const ChainImageFallback = forwardRef<
       source={src ? src : require('../../public/assets/img/chain-icon-alt.png')}
       contentFit="contain"
       autoplay={false}
+      recyclingKey={src}
     />
   );
 });

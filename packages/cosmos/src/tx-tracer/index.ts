@@ -341,7 +341,7 @@ export class TendermintTxTracer {
 
       const params = {
         query:
-          `tm.event='Tx' and ` +
+          `tm.event='Tx' AND ` +
           Object.keys(query)
             .map((key) => {
               return {
@@ -354,7 +354,7 @@ export class TendermintTxTracer {
                 typeof obj.value === "string" ? `'${obj.value}'` : obj.value
               }`;
             })
-            .join(" and "),
+            .join(" AND "),
         page: "1",
         per_page: "1",
         order_by: "asc",
@@ -410,7 +410,7 @@ export class TendermintTxTracer {
               typeof obj.value === "string" ? `'${obj.value}'` : obj.value
             }`;
           })
-          .join(" and "),
+          .join(" AND "),
         page: "1",
         per_page: "1",
         order_by: "asc",

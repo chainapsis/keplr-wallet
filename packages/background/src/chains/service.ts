@@ -51,6 +51,7 @@ export class ChainsService {
     chainId: string;
     rpc?: string;
     rest?: string;
+    evmRpc?: string;
   }[] = [];
   protected endpointsKVStore: KVStore;
 
@@ -152,6 +153,7 @@ export class ChainsService {
           const endpoints = await this.migrationKVStore.updaterKVStore.get<{
             rpc: string | undefined;
             rest: string | undefined;
+            evmRpc: string | undefined;
           }>("chain-info-endpoints/" + chainIdentifier);
 
           if (endpoints) {
@@ -226,6 +228,7 @@ export class ChainsService {
           chainId: string;
           rpc?: string;
           rest?: string;
+          evmRpc?: string;
         }[]
       >("endpoints");
       if (endpoints) {
@@ -715,6 +718,7 @@ export class ChainsService {
     endpoint: {
       rpc?: string;
       rest?: string;
+      evmRpc?: string;
     }
   ): void {
     const trim = {
@@ -727,6 +731,9 @@ export class ChainsService {
     }
     if (!trim.rest) {
       delete trim.rest;
+    }
+    if (!trim.evmRpc) {
+      delete trim.evmRpc;
     }
 
     const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
@@ -776,6 +783,7 @@ export class ChainsService {
     ): {
       rpc: string;
       rest: string;
+      evmRpc?: string;
     } => {
       const identifier = ChainIdHelper.parse(chainId).identifier;
       const originalChainInfos = this.embedChainInfos.concat(
@@ -788,6 +796,7 @@ export class ChainsService {
         return {
           rpc: chainInfo.rpc,
           rest: chainInfo.rest,
+          evmRpc: chainInfo.evm?.rpc,
         };
       }
 
@@ -803,6 +812,7 @@ export class ChainsService {
         chainId: string;
         rpc?: string;
         rest?: string;
+        evmRpc?: string;
       }
     | undefined {
     return this.endpointMap.get(ChainIdHelper.parse(chainId).identifier);
@@ -817,6 +827,7 @@ export class ChainsService {
       chainId: string;
       rpc?: string;
       rest?: string;
+      evmRpc?: string;
     }
   > {
     const map: Map<
@@ -825,6 +836,7 @@ export class ChainsService {
         chainId: string;
         rpc?: string;
         rest?: string;
+        evmRpc?: string;
       }
     > = new Map();
     for (const endpoint of this.endpoints) {
@@ -886,6 +898,13 @@ export class ChainsService {
           ...newChainInfo,
           rpc: endpoint.rpc || newChainInfo.rpc,
           rest: endpoint.rest || newChainInfo.rest,
+          ...(endpoint.evmRpc &&
+            newChainInfo.evm && {
+              evm: {
+                ...newChainInfo.evm,
+                rpc: endpoint.evmRpc,
+              },
+            }),
         };
       }
 
