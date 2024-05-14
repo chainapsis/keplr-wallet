@@ -478,7 +478,27 @@ export class KeyRingEthereumService {
 
         return true;
       }
-      default: {
+      case "eth_call":
+      case "eth_estimateGas":
+      case "eth_getTransactionCount":
+      case "eth_getTransactionByHash":
+      case "eth_getTransactionByBlockHashAndIndex":
+      case "eth_getTransactionByBlockNumberAndIndex":
+      case "eth_getTransactionByHash":
+      case "eth_getTransactionReceipt":
+      case "eth_protocolVersion":
+      case "eth_syncing":
+      case "eth_getCode":
+      case "eth_getLogs":
+      case "eth_getProof":
+      case "eth_getStorageAt":
+      case "eth_getBalance":
+      case "eth_blockNumber":
+      case "eth_getBlockByHash":
+      case "eth_getBlockByNumber":
+      case "eth_gasPrice":
+      case "eth_feeHistory":
+      case "eth_maxPriorityFeePerGas": {
         return (
           await simpleFetch<{
             jsonrpc: string;
@@ -498,6 +518,9 @@ export class KeyRingEthereumService {
             }),
           })
         ).data.result;
+      }
+      default: {
+        throw new Error(`The method "${method}" is not supported`);
       }
     }
   }
