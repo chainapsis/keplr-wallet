@@ -84,6 +84,9 @@ export function injectKeplrToWindow(keplr: IKeplr): void {
     "getEnigmaUtils",
     keplr.getEnigmaUtils
   );
+
+  // TODO: Enable this after the ethereum provider is fully supported.
+  // defineUnwritablePropertyIfPossible(window, "ethereum", keplr.ethereum);
 }
 
 /**
@@ -886,6 +889,11 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
           this.handleAccountsChanged(selectedAddress);
         }
       }
+    });
+
+    window.addEventListener("keplr_chainChanged", (event) => {
+      const evmChainId = (event as CustomEvent).detail.chainId;
+      this.handleChainChanged(evmChainId);
     });
   }
 
