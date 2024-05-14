@@ -45,3 +45,8 @@ export interface EVMInfo {
   chainId: number;
   rpc: string;
 }
+
+export interface EthereumSignResponse {
+  signingData: Uint8Array;
+  signature: Uint8Array;
+}

@@ -3,7 +3,12 @@ import { KeyRingService } from "../keyring";
 import { InteractionService } from "../interaction";
 import { AnalyticsService } from "../analytics";
 import { Env, WEBPAGE_PORT } from "@keplr-wallet/router";
-import { ChainInfo, EthSignType, EVMInfo } from "@keplr-wallet/types";
+import {
+  ChainInfo,
+  EthereumSignResponse,
+  EthSignType,
+  EVMInfo,
+} from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
 import {
@@ -25,7 +30,6 @@ import {
 } from "../permission";
 import { BackgroundTxEthereumService } from "../tx-ethereum";
 import { TokenERC20Service } from "../token-erc20";
-
 export class KeyRingEthereumService {
   static evmInfo(chainInfo: ChainInfo): EVMInfo | undefined {
     return chainInfo.evm;
@@ -55,7 +59,7 @@ export class KeyRingEthereumService {
     signer: string,
     message: Uint8Array,
     signType: EthSignType
-  ): Promise<Uint8Array> {
+  ): Promise<EthereumSignResponse> {
     return await this.signEthereum(
       env,
       origin,
@@ -75,7 +79,7 @@ export class KeyRingEthereumService {
     signer: string,
     message: Uint8Array,
     signType: EthSignType
-  ): Promise<Uint8Array> {
+  ): Promise<EthereumSignResponse> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
     if (chainInfo.hideInUI) {
       throw new Error("Can't sign for hidden chain");
@@ -134,12 +138,15 @@ export class KeyRingEthereumService {
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
       },
-      async (res: { signature?: Uint8Array }) => {
+      async (res: { signingData: Uint8Array; signature?: Uint8Array }) => {
         if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
           if (!res.signature || res.signature.length === 0) {
             throw new Error("Frontend should provide signature");
           }
-          return res.signature;
+          return {
+            signingData: res.signingData,
+            signature: res.signature,
+          };
         } else {
           switch (signType) {
             case EthSignType.MESSAGE: {
@@ -148,22 +155,27 @@ export class KeyRingEthereumService {
                 vaultId,
                 Buffer.concat([
                   Buffer.from("\x19Ethereum Signed Message:\n"),
-                  Buffer.from(message.length.toString()),
-                  message,
+                  Buffer.from(res.signingData.length.toString()),
+                  res.signingData,
                 ]),
                 "keccak256"
               );
-              return Buffer.concat([
-                signature.r,
-                signature.s,
-                // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
-                signature.v
-                  ? Buffer.from("1c", "hex")
-                  : Buffer.from("1b", "hex"),
-              ]);
+              return {
+                signingData: res.signingData,
+                signature: Buffer.concat([
+                  signature.r,
+                  signature.s,
+                  // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
+                  signature.v
+                    ? Buffer.from("1c", "hex")
+                    : Buffer.from("1b", "hex"),
+                ]),
+              };
             }
             case EthSignType.TRANSACTION: {
-              const unsignedTx = JSON.parse(Buffer.from(message).toString());
+              const unsignedTx = JSON.parse(
+                Buffer.from(res.signingData).toString()
+              );
 
               const isEIP1559 =
                 !!unsignedTx.maxFeePerGas || !!unsignedTx.maxPriorityFeePerGas;
@@ -179,18 +191,22 @@ export class KeyRingEthereumService {
                 Buffer.from(serialize(unsignedTx).replace("0x", ""), "hex"),
                 "keccak256"
               );
-              return Buffer.concat([
-                signature.r,
-                signature.s,
-                // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
-                signature.v
-                  ? Buffer.from("1c", "hex")
-                  : Buffer.from("1b", "hex"),
-              ]);
+
+              return {
+                signingData: res.signingData,
+                signature: Buffer.concat([
+                  signature.r,
+                  signature.s,
+                  // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
+                  signature.v
+                    ? Buffer.from("1c", "hex")
+                    : Buffer.from("1b", "hex"),
+                ]),
+              };
             }
             case EthSignType.EIP712: {
               const data = await EIP712MessageValidator.validateAsync(
-                JSON.parse(Buffer.from(message).toString())
+                JSON.parse(Buffer.from(res.signingData).toString())
               );
               // Since ethermint eip712 tx uses non-standard format, it cannot pass validation of ethersjs.
               // Therefore, it should be handled at a slightly lower level.
@@ -207,14 +223,17 @@ export class KeyRingEthereumService {
                 ]),
                 "keccak256"
               );
-              return Buffer.concat([
-                signature.r,
-                signature.s,
-                // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
-                signature.v
-                  ? Buffer.from("1c", "hex")
-                  : Buffer.from("1b", "hex"),
-              ]);
+              return {
+                signingData: res.signingData,
+                signature: Buffer.concat([
+                  signature.r,
+                  signature.s,
+                  // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
+                  signature.v
+                    ? Buffer.from("1c", "hex")
+                    : Buffer.from("1b", "hex"),
+                ]),
+              };
             }
             default:
               throw new Error(`Unknown sign type: ${signType}`);
@@ -270,6 +289,7 @@ export class KeyRingEthereumService {
           (Array.isArray(params) &&
             (params?.[0] as UnsignedTransaction & {
               from: string;
+              gas?: string;
             })) ||
           null;
         if (!tx) {
@@ -292,14 +312,15 @@ export class KeyRingEthereumService {
         });
         const nonce = parseInt(transactionCountResponse.data.result, 16);
 
+        const { from: sender, gas, ...restTx } = tx;
         const unsignedTx: UnsignedTransaction = {
-          ...tx,
+          ...restTx,
+          gasLimit: restTx?.gasLimit ?? gas,
           chainId: evmInfo.chainId,
           nonce,
         };
 
-        const sender = tx.from;
-        const signature = await this.signEthereumSelected(
+        const { signingData, signature } = await this.signEthereumSelected(
           env,
           origin,
           defaultChainId,
@@ -308,14 +329,16 @@ export class KeyRingEthereumService {
           EthSignType.TRANSACTION
         );
 
+        const signingTx = JSON.parse(Buffer.from(signingData).toString());
+
         const isEIP1559 =
-          !!unsignedTx.maxFeePerGas || !!unsignedTx.maxPriorityFeePerGas;
+          !!signingTx.maxFeePerGas || !!signingTx.maxPriorityFeePerGas;
         if (isEIP1559) {
-          unsignedTx.type = TransactionTypes.eip1559;
+          signingTx.type = TransactionTypes.eip1559;
         }
 
         const signedTx = Buffer.from(
-          serialize(unsignedTx, signature).replace("0x", ""),
+          serialize(signingTx, signature).replace("0x", ""),
           "hex"
         );
 
@@ -344,7 +367,7 @@ export class KeyRingEthereumService {
           );
         }
 
-        const signature = await this.signEthereumSelected(
+        const { signature } = await this.signEthereumSelected(
           env,
           origin,
           defaultChainId,
@@ -368,7 +391,7 @@ export class KeyRingEthereumService {
         const typedData =
           (Array.isArray(params) && (params?.[1] as any)) || undefined;
 
-        const signature = await this.signEthereumSelected(
+        const { signature } = await this.signEthereumSelected(
           env,
           origin,
           defaultChainId,

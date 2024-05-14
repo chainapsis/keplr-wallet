@@ -48,14 +48,16 @@ const handleRequestSignEthereumMsg: (
       msg.origin
     );
 
-    return await service.signEthereumSelected(
-      env,
-      msg.origin,
-      msg.chainId,
-      msg.signer,
-      msg.message,
-      msg.signType
-    );
+    return (
+      await service.signEthereumSelected(
+        env,
+        msg.origin,
+        msg.chainId,
+        msg.signer,
+        msg.message,
+        msg.signType
+      )
+    ).signature;
   };
 };
 
