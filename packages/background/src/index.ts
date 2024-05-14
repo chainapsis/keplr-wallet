@@ -90,6 +90,12 @@ export function init(
   keyRingService: KeyRingV2.KeyRingService;
   analyticsService: Analytics.AnalyticsService;
 } {
+  const analyticsService = new Analytics.AnalyticsService(
+    storeCreator("background.analytics"),
+    analyticsPrivilegedOrigins,
+    analyticsOptions
+  );
+
   const interactionService = new Interaction.InteractionService(
     eventMsgRequester
   );
@@ -102,6 +108,7 @@ export function init(
     },
     embedChainInfos,
     communityChainInfoRepo,
+    analyticsService,
     interactionService,
     afterInitFn
   );
@@ -147,11 +154,6 @@ export function init(
       allowTimeoutMs: 10 * 60 * 1000, // 10 mins,,
     },
     blocklistPageURL
-  );
-  const analyticsService = new Analytics.AnalyticsService(
-    storeCreator("background.analytics"),
-    analyticsPrivilegedOrigins,
-    analyticsOptions
   );
 
   const vaultService = new Vault.VaultService(storeCreator("vault"));
