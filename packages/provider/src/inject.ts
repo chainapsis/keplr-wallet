@@ -892,8 +892,12 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     });
 
     window.addEventListener("keplr_chainChanged", (event) => {
-      const evmChainId = (event as CustomEvent).detail.chainId;
-      this.handleChainChanged(evmChainId);
+      const origin = (event as CustomEvent).detail.origin;
+
+      if (origin === window.location.origin) {
+        const evmChainId = (event as CustomEvent).detail.evmChainId;
+        this.handleChainChanged(evmChainId);
+      }
     });
   }
 

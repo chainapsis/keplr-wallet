@@ -1,6 +1,6 @@
 import { Message, Router } from "@keplr-wallet/router";
 
-class PushEventDataMsg extends Message<void> {
+class PushEventDataMsg<D = unknown> extends Message<void> {
   public static type() {
     return "push-event-data";
   }
@@ -8,7 +8,7 @@ class PushEventDataMsg extends Message<void> {
   constructor(
     public readonly data: {
       type: string;
-      data: unknown;
+      data: D;
     }
   ) {
     super();
@@ -42,7 +42,12 @@ export function initEvents(router: Router) {
             return window.dispatchEvent(
               new CustomEvent("keplr_chainChanged", {
                 detail: {
-                  chainId: (msg as PushEventDataMsg).data.data,
+                  ...(
+                    msg as PushEventDataMsg<{
+                      origin: string;
+                      evmChainId: string;
+                    }>
+                  ).data.data,
                 },
               })
             );

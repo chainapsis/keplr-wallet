@@ -444,7 +444,10 @@ export class KeyRingEthereumService {
         return this.interactionService.dispatchEvent(
           WEBPAGE_PORT,
           "keplr_chainChanged",
-          param.chainId
+          {
+            origin,
+            evmChainId: param.chainId,
+          }
         );
       }
       case "wallet_getPermissions":
