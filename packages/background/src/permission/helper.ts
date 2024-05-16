@@ -2,7 +2,6 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class PermissionKeyHelper {
   static globalKey = "_global__permission_";
-  static evmKey = "_evm__permission_";
   static splitter = "!&$";
 
   protected static throwIfReserved(...keys: (string | number)[]) {
