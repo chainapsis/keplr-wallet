@@ -177,32 +177,4 @@ export class PermissionKeyHelper {
       key
     );
   }
-
-  static getEVMPermissionKey(type: string, origin: string) {
-    return PermissionKeyHelper._getPermissionKey(
-      PermissionKeyHelper.evmKey,
-      type,
-      origin
-    );
-  }
-
-  static getOriginFromEVMPermissionKey(
-    type: string,
-    key: string
-  ): string | undefined {
-    return PermissionKeyHelper._getOriginFromPermissionKey(
-      PermissionKeyHelper.evmKey,
-      type,
-      key
-    );
-  }
-
-  static getTypeAndOriginFromEVMPermissionKey(
-    key: string
-  ): { type: string; origin: string } | undefined {
-    return PermissionKeyHelper._getTypeAndOriginFromPermissionKey(
-      PermissionKeyHelper.evmKey,
-      key
-    );
-  }
 }

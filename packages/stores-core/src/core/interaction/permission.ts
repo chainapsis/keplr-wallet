@@ -1,10 +1,9 @@
 import { InteractionStore } from "./interaction";
 import {
-  EVMPermissionData,
   GetOriginPermittedChainsMsg,
+  GlobalPermissionData,
   INTERACTION_TYPE_GLOBAL_PERMISSION,
   INTERACTION_TYPE_PERMISSION,
-  INTERACTION_TYPE_EVM_PERMISSION,
   PermissionData,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
@@ -80,21 +79,9 @@ export class PermissionStore {
   }
 
   get waitingGlobalPermissionDatas() {
-    return this.interactionStore.getAllData<EVMPermissionData>(
+    return this.interactionStore.getAllData<GlobalPermissionData>(
       INTERACTION_TYPE_GLOBAL_PERMISSION
     );
-  }
-
-  get waitingEVMPermissionData() {
-    if (this.waitingEVMPermissionDatas.length > 0) {
-      return this.waitingEVMPermissionDatas[0];
-    }
-  }
-
-  get waitingEVMPermissionDatas() {
-    return this.interactionStore.getAllData<
-      EVMPermissionData & { defaultChainId: string }
-    >(INTERACTION_TYPE_EVM_PERMISSION);
   }
 
   async approvePermissionWithProceedNext(
@@ -135,24 +122,6 @@ export class PermissionStore {
 
   async rejectGlobalPermissionAll() {
     await this.interactionStore.rejectAll(INTERACTION_TYPE_GLOBAL_PERMISSION);
-  }
-
-  async approveEVMPermissionWithProceedNext(
-    id: string,
-    afterFn: (proceedNext: boolean) => void | Promise<void>
-  ) {
-    await this.interactionStore.approveWithProceedNextV2(id, {}, afterFn);
-  }
-
-  async rejectEVMPermissionWithProceedNext(
-    id: string,
-    afterFn: (proceedNext: boolean) => void | Promise<void>
-  ) {
-    await this.interactionStore.rejectWithProceedNextV2(id, afterFn);
-  }
-
-  async rejectEVMPermissionAll() {
-    await this.interactionStore.rejectAll(INTERACTION_TYPE_EVM_PERMISSION);
   }
 
   isObsoleteInteraction(id: string | undefined): boolean {

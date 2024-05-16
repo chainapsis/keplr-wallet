@@ -191,37 +191,6 @@ export class RemoveGlobalPermissionOriginMsg extends Message<void> {
   }
 }
 
-export class RemoveEVMPermissionOriginMsg extends Message<void> {
-  public static type() {
-    return "remove-evm-permission-origin";
-  }
-
-  constructor(
-    public readonly permissionType: string,
-    public readonly permissionOrigin: string
-  ) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.permissionType) {
-      throw new KeplrError("permission", 110, "empty permission type");
-    }
-
-    if (!this.permissionOrigin) {
-      throw new KeplrError("permission", 111, "empty permission origin");
-    }
-  }
-
-  route(): string {
-    return ROUTE;
-  }
-
-  type(): string {
-    return RemoveEVMPermissionOriginMsg.type();
-  }
-}
-
 export class ClearOriginPermissionMsg extends Message<void> {
   public static type() {
     return "clear-origin-permission";

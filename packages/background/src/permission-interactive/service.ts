@@ -1,6 +1,6 @@
 import { KeyRingService } from "../keyring";
 import { Env } from "@keplr-wallet/router";
-import { getBasicAccessPermissionType, PermissionService } from "../permission";
+import { PermissionService } from "../permission";
 
 export class PermissionInteractiveService {
   constructor(
@@ -24,6 +24,24 @@ export class PermissionInteractiveService {
       chainIds,
       origin
     );
+  }
+
+  async ensureEnabledAndGetCurrentChainId(
+    env: Env,
+    origin: string
+  ): Promise<string> {
+    await this.keyRingService.ensureUnlockInteractive(env);
+
+    const currentChainId =
+      this.permissionService.getCurrentChainIdForEVM(origin);
+
+    await this.permissionService.checkOrGrantBasicAccessPermission(
+      env,
+      [currentChainId],
+      origin
+    );
+
+    return currentChainId;
   }
 
   disable(chainIds: string[], origin: string) {
@@ -53,26 +71,5 @@ export class PermissionInteractiveService {
       "get-chain-infos",
       origin
     );
-  }
-
-  async checkEVMPermissionAndGetDefaultChainId(
-    env: Env,
-    origin: string
-  ): Promise<string> {
-    await this.keyRingService.ensureUnlockInteractive(env);
-
-    await this.permissionService.checkOrGrantEVMPermission(env, origin);
-
-    const defaultChainId =
-      this.permissionService.getDefaultChainIdPermittedOrigin(origin);
-
-    this.permissionService.addPermission(
-      [defaultChainId],
-      getBasicAccessPermissionType(),
-      [origin]
-    );
-    this.permissionService.addGlobalPermission("get-chain-infos", [origin]);
-
-    return defaultChainId;
   }
 }

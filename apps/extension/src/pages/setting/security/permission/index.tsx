@@ -135,7 +135,6 @@ const OriginView: FunctionComponent<{
     | {
         permissions: { chainIdentifier: string; type: string }[];
         globalPermissions: { type: string }[];
-        evmPermissions: { type: string }[];
       }
     | undefined;
 }> = observer(({ origin, value }) => {
@@ -181,8 +180,7 @@ const OriginView: FunctionComponent<{
           <Columns sum={1} alignY="center" gutter="0.5rem">
             <Body1>
               {(value?.permissions.length ?? 0) +
-                (value?.globalPermissions.length ?? 0) +
-                (value?.evmPermissions.length ?? 0)}
+                (value?.globalPermissions.length ?? 0)}
             </Body1>
             {isCollapsed ? (
               <ArrowDownIcon width="1.25rem" height="1.25rem" />
@@ -285,62 +283,6 @@ const OriginView: FunctionComponent<{
                             return "Get chain infos";
                           default:
                             return `Unknown: ${globalPermission.type}`;
-                        }
-                      })()}
-                    </Body2>
-                    <Box
-                      cursor="pointer"
-                      style={{
-                        color:
-                          theme.mode === "light"
-                            ? ColorPalette["gray-200"]
-                            : ColorPalette["gray-300"],
-                      }}
-                    >
-                      <CloseIcon width="1rem" height="1rem" />
-                    </Box>
-                  </Columns>
-                </OriginStyle.Item>
-              </Columns>
-            );
-          })}
-          {value.evmPermissions.map((evmPermission) => {
-            return (
-              <Columns sum={1} key={evmPermission.type}>
-                <TreeIcon
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-200"]
-                      : ColorPalette["gray-400"]
-                  }
-                />
-                <OriginStyle.Item
-                  cursor="pointer"
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    await permissionManagerStore.removeEVMPermission(
-                      origin,
-                      evmPermission.type
-                    );
-                  }}
-                >
-                  <Columns sum={1} gutter="0.75rem" alignY="center">
-                    <Body2
-                      style={{
-                        color:
-                          theme.mode === "light"
-                            ? ColorPalette["gray-700"]
-                            : ColorPalette["gray-100"],
-                      }}
-                    >
-                      {(() => {
-                        switch (evmPermission.type) {
-                          case "evm-access":
-                            return "All EVM chains";
-                          default:
-                            return `Unknown: ${evmPermission.type}`;
                         }
                       })()}
                     </Body2>

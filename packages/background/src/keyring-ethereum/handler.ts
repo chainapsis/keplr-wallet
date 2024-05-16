@@ -69,8 +69,8 @@ const handleRequestJsonRpcToEvmMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    const defaultChainId =
-      await permissionInteractionService.checkEVMPermissionAndGetDefaultChainId(
+    const currentChainId =
+      await permissionInteractionService.ensureEnabledAndGetCurrentChainId(
         env,
         msg.origin
       );
@@ -78,7 +78,7 @@ const handleRequestJsonRpcToEvmMsg: (
     return await service.request(
       env,
       msg.origin,
-      defaultChainId,
+      currentChainId,
       msg.method,
       msg.params
     );

@@ -23,11 +23,7 @@ import {
   UnsignedTransaction,
 } from "@ethersproject/transactions";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
-import {
-  getBasicAccessPermissionType,
-  getEVMAccessPermissionType,
-  PermissionService,
-} from "../permission";
+import { getBasicAccessPermissionType, PermissionService } from "../permission";
 import { BackgroundTxEthereumService } from "../tx-ethereum";
 import { TokenERC20Service } from "../token-erc20";
 export class KeyRingEthereumService {
@@ -246,39 +242,40 @@ export class KeyRingEthereumService {
   async request(
     env: Env,
     origin: string,
-    defaultChainId: string,
+    currentChainId: string,
     method: string,
     params?: unknown[] | Record<string, unknown>
   ): Promise<any> {
-    const chainInfo = this.chainsService.getChainInfo(defaultChainId);
-    if (chainInfo === undefined || chainInfo.evm === undefined) {
-      throw new Error("No chain info or EVM info provided");
+    const currentChainInfo = this.chainsService.getChainInfo(currentChainId);
+    if (currentChainInfo === undefined || currentChainInfo.evm === undefined) {
+      throw new Error("No current chain info or EVM info provided");
     }
 
     const pubkey = await this.keyRingService.getPubKeySelected(
-      chainInfo.chainId
+      currentChainInfo.chainId
     );
     const selectedAddress = `0x${Buffer.from(pubkey.getEthAddress()).toString(
       "hex"
     )}`;
-    const evmInfo = chainInfo.evm;
+    const currentChainEVMInfo = currentChainInfo.evm;
 
     switch (method) {
       case "keplr_connect": {
         return {
-          defaultEvmChainId: `0x${evmInfo.chainId.toString(16)}`,
-          defaultTendermintChainId: chainInfo.chainId,
+          defaultEvmChainId: `0x${currentChainEVMInfo.chainId.toString(16)}`,
+          defaultTendermintChainId: currentChainEVMInfo.chainId,
           selectedAddress,
         };
       }
       case "keplr_disconnect": {
-        return this.permissionService.removeEVMPermission(
-          getEVMAccessPermissionType(),
+        return this.permissionService.removePermission(
+          currentChainId,
+          getBasicAccessPermissionType(),
           [origin]
         );
       }
       case "eth_chainId": {
-        return `0x${evmInfo.chainId.toString(16)}`;
+        return `0x${currentChainEVMInfo.chainId.toString(16)}`;
       }
       case "eth_accounts":
       case "eth_requestAccounts": {
@@ -298,7 +295,7 @@ export class KeyRingEthereumService {
 
         const transactionCountResponse = await simpleFetch<{
           result: string;
-        }>(evmInfo.rpc, {
+        }>(currentChainEVMInfo.rpc, {
           method: "POST",
           headers: {
             "content-type": "application/json",
@@ -316,14 +313,14 @@ export class KeyRingEthereumService {
         const unsignedTx: UnsignedTransaction = {
           ...restTx,
           gasLimit: restTx?.gasLimit ?? gas,
-          chainId: evmInfo.chainId,
+          chainId: currentChainEVMInfo.chainId,
           nonce,
         };
 
         const { signingData, signature } = await this.signEthereumSelected(
           env,
           origin,
-          defaultChainId,
+          currentChainId,
           sender,
           Buffer.from(JSON.stringify(unsignedTx)),
           EthSignType.TRANSACTION
@@ -343,7 +340,7 @@ export class KeyRingEthereumService {
         );
 
         const txHash = await this.backgroundTxEthereumService.sendEthereumTx(
-          defaultChainId,
+          currentChainId,
           signedTx,
           {}
         );
@@ -370,7 +367,7 @@ export class KeyRingEthereumService {
         const { signature } = await this.signEthereumSelected(
           env,
           origin,
-          defaultChainId,
+          currentChainId,
           signer,
           Buffer.from(message),
           EthSignType.MESSAGE
@@ -394,7 +391,7 @@ export class KeyRingEthereumService {
         const { signature } = await this.signEthereumSelected(
           env,
           origin,
-          defaultChainId,
+          currentChainId,
           signer,
           Buffer.from(
             typeof typedData === "string"
@@ -415,30 +412,30 @@ export class KeyRingEthereumService {
         }
 
         const newEvmChainId = parseInt(param.chainId, 16);
-        if (newEvmChainId === evmInfo.chainId) {
+        if (newEvmChainId === currentChainEVMInfo.chainId) {
           return;
         }
 
         const chainInfos = this.chainsService.getChainInfos();
 
-        const newChainInfo = chainInfos.find(
+        const newCurrentChainInfo = chainInfos.find(
           (chainInfo) => chainInfo.evm?.chainId === newEvmChainId
         );
-        if (!newChainInfo) {
+        if (!newCurrentChainInfo) {
           throw new Error("No matched chain found");
         }
 
         await this.permissionService.checkOrGrantPermission(
           env,
-          [newChainInfo.chainId],
+          [newCurrentChainInfo.chainId],
           getBasicAccessPermissionType(),
           origin
         );
 
-        await this.permissionService.updateDefaultChainIdPermittedOrigin(
+        await this.permissionService.updateCurrentChainIdForEVM(
           env,
           origin,
-          newChainInfo.chainId
+          newCurrentChainInfo.chainId
         );
 
         return this.interactionService.dispatchEvent(
@@ -475,7 +472,7 @@ export class KeyRingEthereumService {
 
         await this.tokenERC20Service.suggestERC20Token(
           env,
-          defaultChainId,
+          currentChainId,
           contractAddress
         );
 
@@ -508,7 +505,7 @@ export class KeyRingEthereumService {
             id: number;
             result: any;
             error?: Error;
-          }>(evmInfo.rpc, {
+          }>(currentChainEVMInfo.rpc, {
             method: "POST",
             headers: {
               "content-type": "application/json",

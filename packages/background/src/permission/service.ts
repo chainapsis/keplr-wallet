@@ -2,13 +2,10 @@ import { InteractionService } from "../interaction";
 import { Env, KeplrError } from "@keplr-wallet/router";
 import {
   AllPermissionDataPerOrigin,
-  EVMPermissionData,
   getBasicAccessPermissionType,
-  getEVMAccessPermissionType,
   GlobalPermissionData,
   INTERACTION_TYPE_GLOBAL_PERMISSION,
   INTERACTION_TYPE_PERMISSION,
-  INTERACTION_TYPE_EVM_PERMISSION,
   PermissionData,
 } from "./types";
 import { KVStore } from "@keplr-wallet/common";
@@ -26,7 +23,7 @@ export class PermissionService {
   protected privilegedOrigins: Map<string, boolean> = new Map();
 
   @observable
-  protected defaultChainIdPermittedOriginMap: Map<string, string> = new Map();
+  protected currentChainIdForEVMByOriginMap: Map<string, string> = new Map();
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -68,17 +65,17 @@ export class PermissionService {
           }
         });
 
-        const savedDefaultChainIdPermittedOriginMap = await this.kvStore.get<
+        const savedCurrentChainIdForEVMByOriginMap = await this.kvStore.get<
           Record<string, string>
-        >("defaultChainIdPermittedOriginMap/v1");
-        if (savedDefaultChainIdPermittedOriginMap) {
+        >("currentChainIdForEVMByOriginMap/v1");
+        if (savedCurrentChainIdForEVMByOriginMap) {
           runInAction(() => {
             for (const key of Object.keys(
-              savedDefaultChainIdPermittedOriginMap
+              savedCurrentChainIdForEVMByOriginMap
             )) {
-              this.defaultChainIdPermittedOriginMap.set(
+              this.currentChainIdForEVMByOriginMap.set(
                 key,
-                savedDefaultChainIdPermittedOriginMap[key]
+                savedCurrentChainIdForEVMByOriginMap[key]
               );
             }
           });
@@ -92,8 +89,8 @@ export class PermissionService {
         Object.fromEntries(this.permissionMap)
       );
       this.kvStore.set(
-        "defaultChainIdPermittedOriginMap/v1",
-        Object.fromEntries(this.defaultChainIdPermittedOriginMap)
+        "currentChainIdForEVMByOriginMap/v1",
+        Object.fromEntries(this.currentChainIdForEVMByOriginMap)
       );
     });
   }
@@ -113,7 +110,6 @@ export class PermissionService {
         data[origin] = {
           permissions: [],
           globalPermissions: [],
-          evmPermissions: [],
         };
       }
 
@@ -121,11 +117,6 @@ export class PermissionService {
         case getBasicAccessPermissionType():
           data[origin]!.permissions.push({
             chainIdentifier: split.chainIdentifier!,
-            type: split.type,
-          });
-          break;
-        case getEVMAccessPermissionType():
-          data[origin]!.evmPermissions.push({
             type: split.type,
           });
           break;
@@ -143,7 +134,7 @@ export class PermissionService {
   @action
   clearAllPermissions() {
     this.permissionMap.clear();
-    this.defaultChainIdPermittedOriginMap.clear();
+    this.currentChainIdForEVMByOriginMap.clear();
   }
 
   async checkOrGrantBasicAccessPermission(
@@ -201,18 +192,6 @@ export class PermissionService {
     }
 
     this.checkGlobalPermission(env, type, origin);
-  }
-
-  async checkOrGrantEVMPermission(
-    env: Env,
-    origin: string,
-    defaultChainId?: string
-  ) {
-    if (!this.hasEVMPermission(origin)) {
-      await this.grantEVMPermission(env, [origin], defaultChainId);
-    }
-
-    this.checkEVMPermission(env, origin);
   }
 
   async grantPermission(
@@ -281,43 +260,6 @@ export class PermissionService {
     );
   }
 
-  async grantEVMPermission(
-    env: Env,
-    origins: string[],
-    defaultChainId?: string
-  ) {
-    if (env.isInternalMsg) {
-      return;
-    }
-
-    const chainInfos = this.chainsService.getChainInfos();
-    // If the defaultChainId is not provided, find the first chain info that has EVM info.
-    // TODO: Provide from interaction data or UI
-    defaultChainId =
-      defaultChainId ??
-      chainInfos.find((chainInfo) => chainInfo.evm !== undefined)?.chainId;
-
-    if (!defaultChainId) {
-      throw new Error("No EVM chain info provided");
-    }
-
-    const evmPermissionData: EVMPermissionData = {
-      type: getEVMAccessPermissionType(),
-      origins,
-    };
-
-    await this.interactionService.waitApproveV2(
-      env,
-      "/permission",
-      INTERACTION_TYPE_EVM_PERMISSION,
-      { ...evmPermissionData, defaultChainId },
-      (
-        (defaultChainId: string) => () =>
-          this.addEVMPermission(origins, defaultChainId)
-      )(defaultChainId)
-    );
-  }
-
   checkPermission(env: Env, chainId: string, type: string, origin: string) {
     if (env.isInternalMsg) {
       return;
@@ -382,16 +324,6 @@ export class PermissionService {
     }
   }
 
-  checkEVMPermission(env: Env, origin: string) {
-    if (env.isInternalMsg) {
-      return;
-    }
-
-    if (!this.hasEVMPermission(origin)) {
-      throw new KeplrError("permission", 130, `${origin} is not permitted`);
-    }
-  }
-
   hasPermission(chainId: string, type: string, origin: string): boolean {
     // Privileged origin can pass the any permission.
     if (this.privilegedOrigins.get(origin)) {
@@ -415,24 +347,6 @@ export class PermissionService {
       this.permissionMap.get(
         PermissionKeyHelper.getGlobalPermissionKey(type, origin)
       ) ?? false
-    );
-  }
-
-  hasEVMPermission(origin: string): boolean {
-    // Privileged origin can pass the any permission.
-    if (this.privilegedOrigins.get(origin)) {
-      return true;
-    }
-
-    return (
-      (this.permissionMap.get(
-        PermissionKeyHelper.getEVMPermissionKey(
-          getEVMAccessPermissionType(),
-          origin
-        )
-      ) &&
-        !!this.defaultChainIdPermittedOriginMap.get(origin)) ??
-      false
     );
   }
 
@@ -524,20 +438,6 @@ export class PermissionService {
   }
 
   @action
-  addEVMPermission(origins: string[], defaultChainId: string) {
-    for (const origin of origins) {
-      this.permissionMap.set(
-        PermissionKeyHelper.getEVMPermissionKey(
-          getEVMAccessPermissionType(),
-          origin
-        ),
-        true
-      );
-      this.defaultChainIdPermittedOriginMap.set(origin, defaultChainId);
-    }
-  }
-
-  @action
   removePermission(chainId: string, type: string, origins: string[]) {
     for (const origin of origins) {
       this.permissionMap.delete(
@@ -621,44 +521,6 @@ export class PermissionService {
   }
 
   @action
-  removeEVMPermission(type: string, origins: string[]) {
-    const deletes: string[] = [];
-
-    for (const key of this.permissionMap.keys()) {
-      const typeAndOrigin =
-        PermissionKeyHelper.getTypeAndOriginFromEVMPermissionKey(key);
-      if (
-        typeAndOrigin &&
-        typeAndOrigin.type === type &&
-        origins.includes(typeAndOrigin.origin)
-      ) {
-        deletes.push(key);
-      }
-    }
-
-    for (const key of deletes) {
-      this.permissionMap.delete(key);
-    }
-  }
-
-  @action
-  removeAllTypeEVMPermission(origins: string[]) {
-    const deletes: string[] = [];
-
-    for (const key of this.permissionMap.keys()) {
-      const typeAndOrigin =
-        PermissionKeyHelper.getTypeAndOriginFromEVMPermissionKey(key);
-      if (typeAndOrigin && origins.includes(typeAndOrigin.origin)) {
-        deletes.push(key);
-      }
-    }
-
-    for (const key of deletes) {
-      this.permissionMap.delete(key);
-    }
-  }
-
-  @action
   removeAllPermissions(chainId: string) {
     const deletes: string[] = [];
 
@@ -673,30 +535,41 @@ export class PermissionService {
     }
   }
 
-  getDefaultChainIdPermittedOrigin(origin: string): string {
-    const defaultChainId = this.defaultChainIdPermittedOriginMap.get(origin);
+  getCurrentChainIdForEVM(origin: string): string {
+    const currentChainId = this.currentChainIdForEVMByOriginMap.get(origin);
 
-    if (!defaultChainId) {
-      throw new Error("The origin has never been granted permission");
+    if (!currentChainId) {
+      const chainInfos = this.chainsService.getChainInfos();
+      // If currentChainId is not saved, Make Evmos current chain.
+      // TODO: Provide from interaction data or UI
+      const evmosChainId = chainInfos.find(
+        (chainInfo) =>
+          chainInfo.evm !== undefined && chainInfo.chainId.startsWith("evmos_")
+      )?.chainId;
+
+      if (!evmosChainId) {
+        throw new Error("The Evmos chain info is not found");
+      }
+
+      return evmosChainId;
     }
 
-    return defaultChainId;
+    return currentChainId;
   }
 
   @action
-  updateDefaultChainIdPermittedOrigin(
+  updateCurrentChainIdForEVM(
     env: Env,
     origin: string,
-    newDefaultChainId: string
+    newCurrentChainId: string
   ): void {
-    this.checkEVMPermission(env, origin);
     this.checkPermission(
       env,
-      newDefaultChainId,
+      newCurrentChainId,
       getBasicAccessPermissionType(),
       origin
     );
 
-    this.defaultChainIdPermittedOriginMap.set(origin, newDefaultChainId);
+    this.currentChainIdForEVMByOriginMap.set(origin, newCurrentChainId);
   }
 }
