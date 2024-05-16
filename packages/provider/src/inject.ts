@@ -957,21 +957,24 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     });
   }
 
-  protected async handleConnect(evmChainId?: string) {
+  protected async handleConnect(evmChainId?: number) {
     if (!this._isConnected) {
-      const { defaultEvmChainId, defaultTendermintChainId, selectedAddress } =
+      const { currentEvmChainId, currentTendermintChainId, selectedAddress } =
         await this.requestMethod("request", {
           method: "keplr_connect",
           ...(evmChainId && { params: [evmChainId] }),
         });
 
       this._isConnected = true;
-      this._tendermintChainId = defaultTendermintChainId;
-      this.chainId = defaultEvmChainId;
-      this.networkVersion = parseInt(defaultEvmChainId).toString(10);
+      this._tendermintChainId = currentTendermintChainId;
+
+      const currentChainIdHex = `0x${currentEvmChainId.toString(16)}`;
+      this.chainId = currentChainIdHex;
+      this.networkVersion = currentEvmChainId.toString(10);
+
       this.selectedAddress = selectedAddress;
 
-      this.emit("connect", { chainId: defaultEvmChainId });
+      this.emit("connect", { chainId: currentChainIdHex });
     }
   }
 
@@ -990,10 +993,12 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     }
   }
 
-  protected async handleChainChanged(evmChainId: string) {
+  protected async handleChainChanged(evmChainId: number) {
     await this.handleConnect(evmChainId);
 
-    this.emit("chainChanged", evmChainId);
+    const evmChainIdHex = `0x${evmChainId.toString(16)}`;
+
+    this.emit("chainChanged", evmChainIdHex);
   }
 
   protected async handleAccountsChanged(selectedAddress: string) {

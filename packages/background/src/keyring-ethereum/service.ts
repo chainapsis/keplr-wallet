@@ -248,7 +248,7 @@ export class KeyRingEthereumService {
   ): Promise<any> {
     const currentChainInfo = this.chainsService.getChainInfo(currentChainId);
     if (currentChainInfo === undefined || currentChainInfo.evm === undefined) {
-      throw new Error("No current chain info or EVM info provided");
+      throw new Error("No current chain info or EVM info provided.");
     }
 
     const pubkey = await this.keyRingService.getPubKeySelected(
@@ -262,8 +262,8 @@ export class KeyRingEthereumService {
     switch (method) {
       case "keplr_connect": {
         return {
-          defaultEvmChainId: `0x${currentChainEVMInfo.chainId.toString(16)}`,
-          defaultTendermintChainId: currentChainEVMInfo.chainId,
+          currentEvmChainId: `0x${currentChainEVMInfo.chainId.toString(16)}`,
+          currentTendermintChainId: currentChainEVMInfo.chainId,
           selectedAddress,
         };
       }
@@ -284,13 +284,34 @@ export class KeyRingEthereumService {
       case "eth_sendTransaction": {
         const tx =
           (Array.isArray(params) &&
-            (params?.[0] as UnsignedTransaction & {
+            (params?.[0] as {
+              chainId?: string | number;
               from: string;
               gas?: string;
+              gasLimit?: string;
             })) ||
           null;
         if (!tx) {
-          throw new Error("No transaction provided");
+          throw new Error("Invalid parameters: must provide a transaction.");
+        }
+
+        if (tx.chainId) {
+          let evmChainIdFromTx: number;
+          if (typeof tx.chainId === "string") {
+            if (tx.chainId.startsWith("0x")) {
+              evmChainIdFromTx = parseInt(tx.chainId, 16);
+            } else {
+              evmChainIdFromTx = parseInt(tx.chainId, 10);
+            }
+          } else {
+            evmChainIdFromTx = tx.chainId;
+          }
+
+          if (evmChainIdFromTx !== currentChainEVMInfo.chainId) {
+            throw new Error(
+              "The current active chain id does not match the one in the transaction."
+            );
+          }
         }
 
         const transactionCountResponse = await simpleFetch<{
@@ -408,7 +429,7 @@ export class KeyRingEthereumService {
           (Array.isArray(params) && (params?.[0] as { chainId: string })) ||
           undefined;
         if (!param?.chainId) {
-          throw new Error("No chain id provided");
+          throw new Error("Invalid parameters: must provide a chain id.");
         }
 
         const newEvmChainId = parseInt(param.chainId, 16);
@@ -422,7 +443,7 @@ export class KeyRingEthereumService {
           (chainInfo) => chainInfo.evm?.chainId === newEvmChainId
         );
         if (!newCurrentChainInfo) {
-          throw new Error("No matched chain found");
+          throw new Error("No matched EVM chain found in Keplr.");
         }
 
         await this.permissionService.checkOrGrantPermission(
@@ -443,7 +464,7 @@ export class KeyRingEthereumService {
           "keplr_chainChanged",
           {
             origin,
-            evmChainId: param.chainId,
+            evmChainId: newEvmChainId,
           }
         );
       }
@@ -465,7 +486,7 @@ export class KeyRingEthereumService {
             }
           | undefined;
         if (param?.type !== "ERC20") {
-          throw new Error("Not a supported asset type");
+          throw new Error("Not a supported asset type.");
         }
 
         const contractAddress = param?.options.address;
@@ -520,7 +541,7 @@ export class KeyRingEthereumService {
         ).data.result;
       }
       default: {
-        throw new Error(`The method "${method}" is not supported`);
+        throw new Error(`The method "${method}" is not supported.`);
       }
     }
   }

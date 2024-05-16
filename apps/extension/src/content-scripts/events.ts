@@ -45,7 +45,7 @@ export function initEvents(router: Router) {
                   ...(
                     msg as PushEventDataMsg<{
                       origin: string;
-                      evmChainId: string;
+                      evmChainId: number;
                     }>
                   ).data.data,
                 },
