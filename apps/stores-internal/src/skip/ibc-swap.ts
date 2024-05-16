@@ -214,7 +214,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
 
           const destinationCurrency = this.chainStore
             .getChain(asset.chainId)
-            .findCurrency(asset.denom);
+            .findCurrencyWithoutReaction(asset.denom);
 
           if (!destinationCurrency) {
             return false;
@@ -396,7 +396,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
 
       const currency = this.chainStore
         .getChain(chainId)
-        .findCurrency(asset.denom);
+        .findCurrencyWithoutReaction(asset.denom);
 
       if (currency) {
         // If ibc currency is well known.
