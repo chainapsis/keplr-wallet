@@ -109,6 +109,7 @@ import {
   DecryptedKeyRingDatasResponse,
 } from './screen/register/import-from-extension';
 import {SwapIcon} from './components/icon/swap.tsx';
+import {IBCSwapScreen} from './screen/ibc-swap';
 import {IBCSwapDestinationSelectAssetScreen} from './screen/ibc-swap/select-asset';
 import {EditFavoriteUrlScreen} from './screen/web/edit-favorite';
 import {SearchUrlScreen} from './screen/web/search';
@@ -641,14 +642,14 @@ export const MainTabNavigation: FunctionComponent = () => {
         }}
         component={HomeScreen}
       />
-      {/*<Tab.Screen*/}
-      {/*  name="Swap"*/}
-      {/*  options={{*/}
-      {/*    headerTitle: HomeScreenHeaderTitleFunc,*/}
-      {/*    ...homeHeaderOptions,*/}
-      {/*  }}*/}
-      {/*  component={IBCSwapScreen}*/}
-      {/*/>*/}
+      <Tab.Screen
+        name="Swap"
+        options={{
+          headerTitle: HomeScreenHeaderTitleFunc,
+          ...homeHeaderOptions,
+        }}
+        component={IBCSwapScreen}
+      />
       <Tab.Screen
         name="WebTab"
         options={{headerShown: false}}
