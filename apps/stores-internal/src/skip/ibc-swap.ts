@@ -366,7 +366,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     const swapChainInfo = this.chainStore.getChain(this.swapVenue.chainId);
 
     const queryAssets = this.queryAssets.getAssets(swapChainInfo.chainId);
-    const assets = queryAssets.assetsOnlySwapUsages;
+    const assets = queryAssets.assets;
 
     // Key is chain identifier
     const res = new Map<

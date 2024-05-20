@@ -233,8 +233,6 @@ export const IBCSwapDestinationSelectAssetScreen: FunctionComponent = observer(
           <BoundaryScrollViewBoundary
             itemHeight={74}
             gap={8}
-            initialNumItemsToRender={99999}
-            floodNumItemsToRender={99999}
             data={(
               filteredTokens.map(viewToken => ({
                 type: 'filtered',

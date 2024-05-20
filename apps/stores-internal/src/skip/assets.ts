@@ -7,7 +7,6 @@ import { AssetsResponse } from "./types";
 import { computed, makeObservable } from "mobx";
 import Joi from "joi";
 import { InternalChainStore } from "../internal";
-import { SwapUsageQueries } from "../swap-usage";
 
 const Schema = Joi.object<AssetsResponse>({
   chain_to_assets_map: Joi.object().pattern(
@@ -29,7 +28,6 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
   constructor(
     sharedContext: QuerySharedContext,
     protected readonly chainStore: InternalChainStore,
-    protected readonly swapUsageQueries: SwapUsageQueries,
     skipURL: string,
     public readonly chainId: string
   ) {
@@ -107,79 +105,6 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
     return [];
   }
 
-  @computed
-  get assetsOnlySwapUsages(): {
-    denom: string;
-    chainId: string;
-    originDenom: string;
-    originChainId: string;
-  }[] {
-    if (
-      !this.response ||
-      !this.response.data ||
-      !this.response.data.chain_to_assets_map
-    ) {
-      return [];
-    }
-
-    if (!this.chainStore.hasChain(this.chainId)) {
-      return [];
-    }
-
-    const chainInfo = this.chainStore.getChain(this.chainId);
-    if (!this.chainStore.isInChainInfosInListUI(chainInfo.chainId)) {
-      return [];
-    }
-
-    const assetsInResponse =
-      this.response.data.chain_to_assets_map[chainInfo.chainId];
-    if (assetsInResponse) {
-      const res: {
-        denom: string;
-        chainId: string;
-        originDenom: string;
-        originChainId: string;
-      }[] = [];
-
-      for (const asset of assetsInResponse.assets) {
-        if (
-          this.chainStore.hasChain(asset.chain_id) &&
-          this.chainStore.hasChain(asset.origin_chain_id)
-        ) {
-          if (
-            !this.swapUsageQueries.querySwapUsage
-              .getSwapUsage(this.chainId)
-              .isSwappable(asset.denom)
-          ) {
-            continue;
-          }
-
-          // IBC asset일 경우 그냥 넣는다.
-          if (asset.denom.startsWith("ibc/")) {
-            res.push({
-              denom: asset.denom,
-              chainId: asset.chain_id,
-              originDenom: asset.origin_denom,
-              originChainId: asset.origin_chain_id,
-            });
-            // IBC asset이 아니라면 알고있는 currency만 넣는다.
-          } else if (chainInfo.findCurrencyWithoutReaction(asset.denom)) {
-            res.push({
-              denom: asset.denom,
-              chainId: asset.chain_id,
-              originDenom: asset.origin_denom,
-              originChainId: asset.origin_chain_id,
-            });
-          }
-        }
-      }
-
-      return res;
-    }
-
-    return [];
-  }
-
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: AssetsResponse }> {
@@ -205,14 +130,12 @@ export class ObservableQueryAssets extends HasMapStore<ObservableQueryAssetsInne
   constructor(
     protected readonly sharedContext: QuerySharedContext,
     protected readonly chainStore: InternalChainStore,
-    protected readonly swapUsageQueries: SwapUsageQueries,
     protected readonly skipURL: string
   ) {
     super((chainId) => {
       return new ObservableQueryAssetsInner(
         this.sharedContext,
         this.chainStore,
-        this.swapUsageQueries,
         this.skipURL,
         chainId
       );

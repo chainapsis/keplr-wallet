@@ -58,7 +58,7 @@ import {
   GravityBridgeCurrencyRegistrar,
   KeplrETCQueries,
 } from '@keplr-wallet/stores-etc';
-import {SkipQueries, SwapUsageQueries} from '@keplr-wallet/stores-internal';
+import {SkipQueries} from '@keplr-wallet/stores-internal';
 import {DeepLinkStore} from './deep-link';
 import {EthereumQueries, EthereumAccountStore} from '@keplr-wallet/stores-eth';
 import {WebpageStore} from './webpage';
@@ -98,7 +98,6 @@ export class RootStore {
       EthereumQueries,
     ]
   >;
-  public readonly swapUsageQueries: SwapUsageQueries;
   public readonly skipQueriesStore: SkipQueries;
   public readonly accountStore: AccountStore<
     [CosmosAccount, CosmwasmAccount, SecretAccount]
@@ -195,14 +194,9 @@ export class RootStore {
       EthereumQueries.use(),
     );
 
-    this.swapUsageQueries = new SwapUsageQueries(
-      this.queriesStore.sharedContext,
-      'https://satellite-develop.keplr.app',
-    );
     this.skipQueriesStore = new SkipQueries(
       this.queriesStore.sharedContext,
       this.chainStore,
-      this.swapUsageQueries,
       SwapVenue,
     );
 
