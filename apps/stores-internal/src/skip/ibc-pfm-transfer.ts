@@ -87,10 +87,10 @@ export class ObservableQueryIbcPfmTransfer {
 
               const currency = this.chainStore
                 .getChain(chainId)
-                .findCurrency(denom);
+                .findCurrencyWithoutReaction(denom);
               const destinationCurrency = this.chainStore
                 .getChain(asset.chainId)
-                .findCurrency(asset.denom);
+                .findCurrencyWithoutReaction(asset.denom);
 
               if (
                 currency &&

@@ -375,7 +375,7 @@ export class RootStore {
 
     this.tokenFactoryRegistrar = new TokenFactoryCurrencyRegistrar(
       new AsyncKVStore('store_token_factory_currency_registrar'),
-      24 * 3600 * 1000,
+      7 * 24 * 3600 * 1000,
       process.env['KEPLR_EXT_TOKEN_FACTORY_BASE_URL'] || '',
       process.env['KEPLR_EXT_TOKEN_FACTORY_URI'] || '',
       this.chainStore,
@@ -383,27 +383,27 @@ export class RootStore {
     );
     this.ibcCurrencyRegistrar = new IBCCurrencyRegistrar(
       new AsyncKVStore('store_ibc_curreny_registrar'),
-      24 * 3600 * 1000,
+      7 * 24 * 3600 * 1000,
       this.chainStore,
       this.accountStore,
       this.queriesStore,
     );
     this.lsmCurrencyRegistrar = new LSMCurrencyRegistrar(
       new AsyncKVStore('store_lsm_currency_registrar'),
-      24 * 3600 * 1000,
+      7 * 24 * 3600 * 1000,
       this.chainStore,
       this.queriesStore,
     );
     this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegistrar(
       new AsyncKVStore('store_gravity_bridge_currency_registrar'),
-      24 * 3600 * 1000,
+      7 * 24 * 3600 * 1000,
       this.chainStore,
       this.queriesStore,
     );
     this.axelarEVMBridgeCurrencyRegistrar =
       new AxelarEVMBridgeCurrencyRegistrar(
         new AsyncKVStore('store_axelar_evm_bridge_currency_registrar'),
-        24 * 3600 * 1000,
+        7 * 24 * 3600 * 1000,
         this.chainStore,
         this.queriesStore,
         'ethereum',

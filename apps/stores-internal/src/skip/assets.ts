@@ -88,7 +88,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
               originChainId: asset.origin_chain_id,
             });
             // IBC asset이 아니라면 알고있는 currency만 넣는다.
-          } else if (chainInfo.findCurrency(asset.denom)) {
+          } else if (chainInfo.findCurrencyWithoutReaction(asset.denom)) {
             res.push({
               denom: asset.denom,
               chainId: asset.chain_id,
