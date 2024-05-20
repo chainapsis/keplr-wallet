@@ -29,13 +29,18 @@ export interface IChainStore<C extends ChainInfo = ChainInfo>
 
 export interface IChainInfoImpl<C extends ChainInfo = ChainInfo> {
   addUnknownDenoms(...coinMinimalDenoms: string[]): void;
+  addUnknownDenomsWithoutReaction(...coinMinimalDenoms: string[]): void;
   findCurrency(
     coinMinimalDenom:
       | string
       | ((coinMinimalDenom: string) => boolean | null | undefined)
   ): AppCurrency | undefined;
+  findCurrencyWithoutReaction(
+    coinMinimalDenom: string
+  ): AppCurrency | undefined;
   findCurrencyAsync(coinMinimalDenom: string): Promise<AppCurrency | undefined>;
   forceFindCurrency(coinMinimalDenom: string): AppCurrency;
+  forceFindCurrencyWithoutReaction(coinMinimalDenom: string): AppCurrency;
   hasFeature(feature: string): boolean;
   removeCurrencies(...coinMinimalDenoms: string[]): void;
   addCurrencies(...currencies: AppCurrency[]): void;

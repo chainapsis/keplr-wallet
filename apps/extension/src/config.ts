@@ -2605,6 +2605,43 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["eth-address-gen", "eth-key-sign", "cosmwasm"],
   },
+  {
+    rpc: "https://rpc-pryzm.keplr.app",
+    rest: "https://lcd-pryzm.keplr.app",
+    chainId: "pryzm-1",
+    chainName: "Pryzm",
+    stakeCurrency: {
+      coinDenom: "PRYZM",
+      coinMinimalDenom: "upryzm",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "pryzm",
+      bech32PrefixAccPub: "pryzmpub",
+      bech32PrefixValAddr: "pryzmvaloper",
+      bech32PrefixValPub: "pryzmvaloperpub",
+      bech32PrefixConsAddr: "pryzmvalcons",
+      bech32PrefixConsPub: "pryzmvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "PRYZM",
+        coinMinimalDenom: "upryzm",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "PRYZM",
+        coinMinimalDenom: "upryzm",
+        coinDecimals: 6,
+      },
+    ],
+    features: ["cosmwasm"],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
