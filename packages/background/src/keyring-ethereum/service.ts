@@ -469,6 +469,8 @@ export class KeyRingEthereumService {
         );
       }
       case "wallet_getPermissions":
+      // This `request` method can be executed if the basic access permission is granted.
+      // So, it's not necessary to check or grant the permission here.
       case "wallet_requestPermissions": {
         return [{ parentCapability: "eth_accounts" }];
       }
