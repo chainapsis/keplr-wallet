@@ -2624,6 +2624,43 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ['eth-address-gen', 'eth-key-sign', 'cosmwasm'],
   },
+  {
+    rpc: 'https://rpc-pryzm.keplr.app',
+    rest: 'https://lcd-pryzm.keplr.app',
+    chainId: 'pryzm-1',
+    chainName: 'Pryzm',
+    stakeCurrency: {
+      coinDenom: 'PRYZM',
+      coinMinimalDenom: 'upryzm',
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: 'pryzm',
+      bech32PrefixAccPub: 'pryzmpub',
+      bech32PrefixValAddr: 'pryzmvaloper',
+      bech32PrefixValPub: 'pryzmvaloperpub',
+      bech32PrefixConsAddr: 'pryzmvalcons',
+      bech32PrefixConsPub: 'pryzmvalconspub',
+    },
+    currencies: [
+      {
+        coinDenom: 'PRYZM',
+        coinMinimalDenom: 'upryzm',
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: 'PRYZM',
+        coinMinimalDenom: 'upryzm',
+        coinDecimals: 6,
+      },
+    ],
+    features: ['cosmwasm'],
+  },
 ];
 
 // TODO: 원격으로 변경할 수 있도록 나중에 네트워크에서 이 정보를 가져오는 방식으로 변경될 수 있음
