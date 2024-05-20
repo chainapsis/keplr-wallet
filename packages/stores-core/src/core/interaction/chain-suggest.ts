@@ -1,6 +1,9 @@
 import { InteractionStore } from "./interaction";
-import { ChainInfo, ChainInfoWithSuggestedOptions } from "@keplr-wallet/types";
-import { SuggestChainInfoMsg } from "@keplr-wallet/background";
+import { ChainInfo } from "@keplr-wallet/types";
+import {
+  ChainInfoWithSuggestedOptions,
+  SuggestChainInfoMsg,
+} from "@keplr-wallet/background";
 import { flow, makeObservable, observable } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { toGenerator } from "@keplr-wallet/common";

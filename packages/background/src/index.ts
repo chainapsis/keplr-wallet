@@ -49,8 +49,9 @@ export * from "./token-scan";
 export * from "./recent-send-history";
 
 import { KVStore } from "@keplr-wallet/common";
-import { ChainInfo, ChainInfoWithCoreTypes } from "@keplr-wallet/types";
+import { ChainInfo } from "@keplr-wallet/types";
 import { Notification } from "./tx";
+import { ChainInfoWithCoreTypes } from "./chains";
 
 export function init(
   router: Router,

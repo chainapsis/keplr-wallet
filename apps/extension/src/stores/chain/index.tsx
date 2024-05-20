@@ -7,7 +7,7 @@ import {
   runInAction,
 } from "mobx";
 
-import { ChainInfo, ChainInfoWithCoreTypes } from "@keplr-wallet/types";
+import { ChainInfo } from "@keplr-wallet/types";
 import {
   ChainStore as BaseChainStore,
   IChainInfoImpl,
@@ -15,6 +15,7 @@ import {
 import { KeyRingStore } from "@keplr-wallet/stores-core";
 
 import {
+  ChainInfoWithCoreTypes,
   ClearAllChainEndpointsMsg,
   ClearAllSuggestedChainInfosMsg,
   ClearChainEndpointsMsg,
