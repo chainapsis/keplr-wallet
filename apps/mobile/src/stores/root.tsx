@@ -197,7 +197,7 @@ export class RootStore {
 
     this.swapUsageQueries = new SwapUsageQueries(
       this.queriesStore.sharedContext,
-      'https://satellite-develop.keplr.app',
+      'https://satellite.keplr.app',
     );
     this.skipQueriesStore = new SkipQueries(
       this.queriesStore.sharedContext,
