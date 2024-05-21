@@ -5,7 +5,13 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import {LayoutRectangle, ScrollView, ScrollViewProps, View} from 'react-native';
+import {
+  LayoutRectangle,
+  Platform,
+  ScrollView,
+  ScrollViewProps,
+  View,
+} from 'react-native';
 import {Box, BoxProps} from '../box';
 import {BinarySortArray} from '../../common';
 
@@ -73,7 +79,7 @@ export const BoundaryScrollViewBoundary: FunctionComponent<
   keyExtractor,
   itemHeight,
   initialNumItemsToRender = 14,
-  floodNumItemsToRender = 6,
+  floodNumItemsToRender = Platform.OS === 'android' ? 15 : 6,
   gap,
   ...boxProps
 }) => {
