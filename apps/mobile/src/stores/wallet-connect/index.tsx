@@ -107,7 +107,8 @@ export class WalletConnectStore {
   }
 
   protected async init(): Promise<void> {
-    const projectId = process.env['WC_PROJECT_ID'];
+    const projectId =
+      process.env['WC_PROJECT_ID'] || 'a9fd98e67c49a9930d59cbb301be4583';
     if (!projectId) {
       return;
     }
@@ -845,6 +846,30 @@ export class WalletConnectStore {
           });
           break;
         }
+        case 'keplr_experimentalSuggestChain': {
+          await keplr.experimentalSuggestChain(params.chainInfo);
+          await signClient.respond({
+            topic,
+            response: {
+              id,
+              jsonrpc: '2.0',
+              result: {},
+            },
+          });
+          break;
+        }
+        case 'keplr_suggestToken': {
+          await keplr.suggestToken(params.chainId, params.contractAddress);
+          await signClient.respond({
+            topic,
+            response: {
+              id,
+              jsonrpc: '2.0',
+              result: {},
+            },
+          });
+          break;
+        }
         default:
           throw new Error('Unknown request method');
       }
@@ -1006,9 +1031,7 @@ export class WalletConnectStore {
     await this.kvStore.set(`topic-to-from-deep-link:${ackTopic}`, fromDeepLink);
   }
 
-  protected async getTopicByRandomId(
-    randomId: string,
-  ): Promise<string | undefined> {
+  async getTopicByRandomId(randomId: string): Promise<string | undefined> {
     return await this.kvStore.get(`id-to-topic:${randomId}`);
   }
 

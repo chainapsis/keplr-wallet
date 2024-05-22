@@ -54,6 +54,10 @@ export class KeplrWalletConnectV2 implements Keplr {
   readonly version: string = "0.12.20";
   readonly mode: KeplrMode = "walletconnect";
   protected readonly storeKey = "keplr_wallet_connect_v2_key";
+  protected readonly storeSuggestChainKey =
+    "keplr_wallet_connect_v2_suggest_chain_key";
+  protected readonly storeSuggestTokenKey =
+    "keplr_wallet_connect_v2_suggest_token_key";
 
   constructor(
     public readonly signClient: SignClient,
@@ -180,6 +184,106 @@ export class KeplrWalletConnectV2 implements Keplr {
     [chainId: string]: KeplrGetKeyWalletConnectV2Response | undefined;
   }) {
     localStorage.setItem(this.getKeyLastSeenKey(), JSON.stringify(data));
+  }
+
+  protected getSuggestChainKey() {
+    const topic = this.getCurrentTopic();
+    return `${this.storeSuggestChainKey}/${topic}-key`;
+  }
+
+  protected getRegisteredSuggestChain(chainId: string): ChainInfo | undefined {
+    const saved = this.getAllRegisteredSuggestChain();
+
+    if (!saved) {
+      return undefined;
+    }
+
+    return saved[chainId];
+  }
+
+  protected getAllRegisteredSuggestChain() {
+    const data = localStorage.getItem(this.getSuggestChainKey());
+    if (!data) {
+      return undefined;
+    }
+
+    return JSON.parse(data);
+  }
+
+  protected saveRegisteredSuggestChain(chainInfo: ChainInfo) {
+    let saved = this.getAllRegisteredSuggestChain();
+
+    if (!saved) {
+      saved = {};
+    }
+
+    saved[chainInfo.chainId] = chainInfo;
+
+    this.saveAllRegisteredSuggestChain(saved);
+  }
+
+  protected saveAllRegisteredSuggestChain(data: {
+    [chainId: string]: ChainInfo | undefined;
+  }) {
+    localStorage.setItem(this.getSuggestChainKey(), JSON.stringify(data));
+  }
+
+  protected getSuggestTokenKey() {
+    const topic = this.getCurrentTopic();
+    return `${this.storeSuggestTokenKey}/${topic}-key`;
+  }
+
+  protected getRegisteredSuggestToken(
+    contractAddress: string
+  ): ChainInfo | undefined {
+    const saved = this.getAllRegisteredSuggestToken();
+
+    if (!saved) {
+      return undefined;
+    }
+
+    return saved[contractAddress];
+  }
+
+  protected getAllRegisteredSuggestToken() {
+    const data = localStorage.getItem(this.getSuggestTokenKey());
+    if (!data) {
+      return undefined;
+    }
+
+    return JSON.parse(data);
+  }
+
+  protected saveRegisteredSuggestToken(
+    chainId: string,
+    contractAddress: string,
+    viewingKey?: string
+  ) {
+    let saved = this.getAllRegisteredSuggestToken();
+
+    if (!saved) {
+      saved = {};
+    }
+
+    saved[contractAddress] = {
+      chainId,
+      contractAddress,
+      viewingKey,
+    };
+
+    this.saveAllRegisteredSuggestToken(saved);
+  }
+
+  protected saveAllRegisteredSuggestToken(data: {
+    [contractAddress: string]:
+      | {
+          chainId: string;
+          contractAddress: string;
+          viewingKey?: string;
+        }
+      | undefined;
+  }) {
+    localStorage.setItem(this.getSuggestTokenKey(), JSON.stringify(data));
   }
 
   protected async sendCustomRequest<T>(
@@ -324,8 +428,40 @@ export class KeplrWalletConnectV2 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  experimentalSuggestChain(_chainInfo: ChainInfo): Promise<void> {
-    throw new Error("Not yet implemented");
+  async experimentalSuggestChain(_chainInfo: ChainInfo): Promise<void> {
+    if (
+      _chainInfo.features?.includes("stargate") ||
+      _chainInfo.features?.includes("no-legacy-stdTx")
+    ) {
+      console.warn(
+        "“stargate”, “no-legacy-stdTx” feature has been deprecated. The launchpad is no longer supported, thus works without the two features. We would keep the aforementioned two feature for a while, but the upcoming update would potentially cause errors. Remove the two feature."
+      );
+    }
+
+    const registeredChainInfo = this.getRegisteredSuggestChain(
+      _chainInfo.chainId
+    );
+    if (registeredChainInfo) {
+      return;
+    }
+
+    this.checkDeepLink();
+
+    const topic = this.getCurrentTopic();
+    const param = {
+      topic,
+      chainId: this.getNamespaceChainId(),
+      request: {
+        method: "keplr_experimentalSuggestChain",
+        params: {
+          chainInfo: _chainInfo,
+        },
+      },
+    };
+
+    await this.sendCustomRequest(param);
+
+    this.saveRegisteredSuggestChain(_chainInfo);
   }
 
   getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
@@ -654,12 +790,35 @@ export class KeplrWalletConnectV2 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  suggestToken(
+  async suggestToken(
     _chainId: string,
     _contractAddress: string,
     _viewingKey?: string
   ): Promise<void> {
-    throw new Error("Not yet implemented");
+    const registeredToken = this.getRegisteredSuggestToken(_contractAddress);
+    if (registeredToken) {
+      return;
+    }
+
+    this.checkDeepLink();
+
+    const topic = this.getCurrentTopic();
+    const param = {
+      topic,
+      chainId: this.getNamespaceChainId(),
+      request: {
+        method: "keplr_suggestToken",
+        params: {
+          chainId: _chainId,
+          contractAddress: _contractAddress,
+          viewingKey: _viewingKey,
+        },
+      },
+    };
+
+    await this.sendCustomRequest(param);
+
+    this.saveRegisteredSuggestToken(_chainId, _contractAddress, _viewingKey);
   }
 
   verifyArbitrary(
