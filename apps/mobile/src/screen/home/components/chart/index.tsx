@@ -133,7 +133,7 @@ export const DualChart: FunctionComponent<{
   const animatedPathProps = useAnimatedProps(() => {
     if (Math.abs(arcStartAngle.value - arcEndAngle.value) <= 0.05) {
       return {
-        d: 'M 0 0',
+        d: '',
       };
     }
 
