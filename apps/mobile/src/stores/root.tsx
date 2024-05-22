@@ -58,7 +58,11 @@ import {
   GravityBridgeCurrencyRegistrar,
   KeplrETCQueries,
 } from '@keplr-wallet/stores-etc';
-import {SkipQueries, SwapUsageQueries} from '@keplr-wallet/stores-internal';
+import {
+  SkipQueries,
+  SwapUsageQueries,
+  Price24HChangesStore,
+} from '@keplr-wallet/stores-internal';
 import {DeepLinkStore} from './deep-link';
 import {EthereumQueries, EthereumAccountStore} from '@keplr-wallet/stores-eth';
 import {WebpageStore} from './webpage';
@@ -72,6 +76,7 @@ export class RootStore {
 
   public readonly hugeQueriesStore: HugeQueriesStore;
   public readonly priceStore: CoinGeckoPriceStore;
+  public readonly price24HChangesStore: Price24HChangesStore;
   public readonly tokensStore: TokensStore;
 
   public readonly interactionStore: InteractionStore;
@@ -197,7 +202,7 @@ export class RootStore {
 
     this.swapUsageQueries = new SwapUsageQueries(
       this.queriesStore.sharedContext,
-      'https://satellite.keplr.app',
+      process.env['KEPLR_EXT_TX_HISTORY_BASE_URL'] || '',
     );
     this.skipQueriesStore = new SkipQueries(
       this.queriesStore.sharedContext,
@@ -369,6 +374,13 @@ export class RootStore {
       {
         baseURL: CoinGeckoAPIEndPoint,
         uri: CoinGeckoGetPrice,
+      },
+    );
+    this.price24HChangesStore = new Price24HChangesStore(
+      new AsyncKVStore('store_prices_changes_24h'),
+      {
+        baseURL: process.env['KEPLR_EXT_TX_HISTORY_BASE_URL'] || '',
+        uri: '/price/changes/24h',
       },
     );
 
