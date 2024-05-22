@@ -80,6 +80,8 @@ export class KeplrWalletConnectV2 implements Keplr {
 
     signClient.on("session_delete", async () => {
       localStorage.removeItem(this.getKeyLastSeenKey());
+      localStorage.removeItem(this.getSuggestChainKey());
+      localStorage.removeItem(this.getSuggestTokenKey());
     });
   }
 
