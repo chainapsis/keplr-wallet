@@ -691,3 +691,27 @@ export class CheckPasswordMsg extends Message<boolean> {
     return CheckPasswordMsg.type();
   }
 }
+
+export class SearchKeyRingsMsg extends Message<KeyInfo[]> {
+  public static type() {
+    return "search-keyrings";
+  }
+
+  constructor(public readonly searchText: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (this.searchText == null) {
+      throw new Error("searchText not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return SearchKeyRingsMsg.type();
+  }
+}

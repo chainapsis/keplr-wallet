@@ -28,6 +28,7 @@ import {
   NewMnemonicKeyMsg,
   NewPrivateKeyKeyMsg,
   PlainObject,
+  SearchKeyRingsMsg,
   SelectKeyRingMsg,
   ShowSensitiveKeyRingDataMsg,
   UnlockKeyRingMsg,
@@ -362,6 +363,11 @@ export class KeyRingStore {
 
   async checkPassword(password: string): Promise<boolean> {
     const msg = new CheckPasswordMsg(password);
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async searchKeyRings(searchText: string): Promise<KeyInfo[]> {
+    const msg = new SearchKeyRingsMsg(searchText);
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 }
