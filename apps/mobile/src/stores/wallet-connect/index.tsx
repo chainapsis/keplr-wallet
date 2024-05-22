@@ -107,8 +107,7 @@ export class WalletConnectStore {
   }
 
   protected async init(): Promise<void> {
-    const projectId =
-      process.env['WC_PROJECT_ID'] || 'a9fd98e67c49a9930d59cbb301be4583';
+    const projectId = process.env['WC_PROJECT_ID'];
     if (!projectId) {
       return;
     }
