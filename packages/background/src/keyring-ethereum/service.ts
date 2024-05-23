@@ -99,15 +99,10 @@ export class KeyRingEthereumService {
     }
 
     const key = await this.keyRingCosmosService.getKey(vaultId, chainId);
-    const bech32Prefix = chainInfo.bech32Config?.bech32PrefixAccAddr;
-    const bech32Address = new Bech32Address(key.address).toBech32(
-      bech32Prefix ?? ""
-    );
-    const ethereumHexAddress = Bech32Address.fromBech32(
-      bech32Address,
-      bech32Prefix
-    ).toHex(false);
-    if (signer !== bech32Address && signer !== ethereumHexAddress) {
+    if (
+      signer !== key.bech32Address &&
+      signer !== key.ethereumHexAddress.toLowerCase()
+    ) {
       throw new Error("Signer mismatched");
     }
 

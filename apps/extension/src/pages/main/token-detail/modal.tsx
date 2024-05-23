@@ -27,6 +27,7 @@ import { StakedBalance } from "./staked-balance";
 import { MsgItemSkeleton } from "./msg-items/skeleton";
 import { Stack } from "../../../components/stack";
 import { EmptyView } from "../../../components/empty-view";
+import { DenomHelper } from "@keplr-wallet/common";
 
 const Styles = {
   Container: styled.div`
@@ -74,8 +75,14 @@ export const TokenDetailModal: FunctionComponent<{
 
   const theme = useTheme();
 
+  const account = accountStore.getAccount(chainId);
   const chainInfo = chainStore.getChain(chainId);
   const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
+  const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+  const isERC20 = denomHelper.type === "erc20";
+  const isMainCurrency =
+    (chainInfo.stakeCurrency || chainInfo.currencies[0]).coinMinimalDenom ===
+    currency.coinMinimalDenom;
 
   const isIBCCurrency = "paths" in currency;
 
@@ -87,12 +94,16 @@ export const TokenDetailModal: FunctionComponent<{
     (serviceInfo) => !!serviceInfo.buyUrl
   );
 
-  const balance = queriesStore
-    .get(chainId)
-    .queryBalances.getQueryBech32Address(
-      accountStore.getAccount(chainId).bech32Address
-    )
-    .getBalance(currency);
+  const queryBalances = queriesStore.get(chainId).queryBalances;
+  const balance =
+    chainStore.isEvmChain(chainId) && (isMainCurrency || isERC20)
+      ? queryBalances
+          .getQueryEthereumHexAddress(account.ethereumHexAddress)
+          .getBalance(currency)
+      : queryBalances
+          .getQueryBech32Address(account.bech32Address)
+          .getBalance(currency);
+
   const price24HChange = (() => {
     if (!currency.coinGeckoId) {
       return undefined;
