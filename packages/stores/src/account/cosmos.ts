@@ -992,7 +992,9 @@ export class CosmosAccountImpl {
             );
 
             const account = accountStore.getAccount(destChainInfo.chainId);
-            account.init();
+            if (account.walletStatus !== WalletStatus.Loaded) {
+              account.init();
+            }
             if (account.walletStatus === WalletStatus.Loading) {
               await (() => {
                 return new Promise<void>((resolve) => {
