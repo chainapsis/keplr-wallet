@@ -17,7 +17,7 @@ import {
 } from '../../../components/boundary-scroll-view';
 import {useStyle} from '../../../styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {TokenItem} from '../../home/components/token';
+import {TokenItem} from '../../../components/token-view';
 import {Gutter} from '../../../components/gutter';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList, StackNavProp} from '../../../navigation.tsx';
@@ -231,7 +231,7 @@ export const IBCSwapDestinationSelectAssetScreen: FunctionComponent = observer(
             paddingBottom: safeAreaInsets.bottom,
           }}>
           <BoundaryScrollViewBoundary
-            itemHeight={74}
+            itemHeight={71.3}
             gap={8}
             data={(
               filteredTokens.map(viewToken => ({

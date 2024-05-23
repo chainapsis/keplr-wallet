@@ -8,6 +8,7 @@ import { ObservableQueryAssets } from "./assets";
 import { ObservableQueryIbcSwap } from "./ibc-swap";
 import { ObservableQueryMsgsDirect } from "./msgs-direct";
 import { InternalChainStore } from "../internal";
+import { SwapUsageQueries } from "../swap-usage";
 
 export class SkipQueries {
   public readonly queryChains: DeepReadonly<ObservableQueryChains>;
@@ -23,6 +24,7 @@ export class SkipQueries {
   constructor(
     sharedContext: QuerySharedContext,
     chainStore: InternalChainStore,
+    swapUsageQueries: SwapUsageQueries,
     swapVenue: {
       name: string;
       chainId: string;
@@ -36,6 +38,7 @@ export class SkipQueries {
     this.queryAssets = new ObservableQueryAssets(
       sharedContext,
       chainStore,
+      swapUsageQueries,
       "https://api.skip.money"
     );
     this.queryAssetsFromSource = new ObservableQueryAssetsFromSource(

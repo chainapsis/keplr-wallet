@@ -386,6 +386,10 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     }
   }
 
+  async ping(): Promise<void> {
+    await this.requestMethod("ping", []);
+  }
+
   async enable(chainIds: string | string[]): Promise<void> {
     await this.requestMethod("enable", [chainIds]);
   }

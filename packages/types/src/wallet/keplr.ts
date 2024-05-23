@@ -61,6 +61,8 @@ export interface Keplr {
   readonly mode: KeplrMode;
   defaultOptions: KeplrIntereactionOptions;
 
+  ping(): Promise<void>;
+
   experimentalSuggestChain(chainInfo: ChainInfo): Promise<void>;
   enable(chainIds: string | string[]): Promise<void>;
   /**
