@@ -54,6 +54,32 @@ export class Keplr implements IKeplr {
     method: keyof IKeplr,
     args: any[]
   ): Promise<any> {
+    const isMobile = "ReactNativeWebView" in window;
+    const postMessage: (message: any) => void = isMobile
+      ? (message) => {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          window.ReactNativeWebView.postMessage(JSON.stringify(message));
+        }
+      : (message) => {
+          window.postMessage(message, window.location.origin);
+        };
+    const parseMessage: (message: any) => any = isMobile
+      ? (message) => {
+          if (message && typeof message === "string") {
+            try {
+              return JSON.parse(message);
+            } catch {
+              // noop
+            }
+          }
+
+          return message;
+        }
+      : (message) => {
+          return message;
+        };
+
     const bytes = new Uint8Array(8);
     const id: string = Array.from(crypto.getRandomValues(bytes))
       .map((value) => {
@@ -70,7 +96,7 @@ export class Keplr implements IKeplr {
 
     return new Promise((resolve, reject) => {
       const receiveResponse = (e: any) => {
-        const proxyResponse: ProxyRequestResponse = e.data;
+        const proxyResponse: ProxyRequestResponse = parseMessage(e.data);
 
         if (!proxyResponse || proxyResponse.type !== "proxy-request-response") {
           return;
@@ -99,7 +125,7 @@ export class Keplr implements IKeplr {
 
       window.addEventListener("message", receiveResponse);
 
-      window.postMessage(proxyMessage, window.location.origin);
+      postMessage(proxyMessage);
     });
   }
 
