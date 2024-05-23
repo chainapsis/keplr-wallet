@@ -50,7 +50,10 @@ export interface ProxyRequestResponse {
 }
 
 export class Keplr implements IKeplr {
-  protected requestMethod(method: keyof IKeplr, args: any[]): Promise<any> {
+  protected static requestMethod(
+    method: keyof IKeplr,
+    args: any[]
+  ): Promise<any> {
     const bytes = new Uint8Array(8);
     const id: string = Array.from(crypto.getRandomValues(bytes))
       .map((value) => {
@@ -107,12 +110,29 @@ export class Keplr implements IKeplr {
 
   public defaultOptions: KeplrIntereactionOptions = {};
 
+  static getKeplr(pingTimeout: number = 1500): Promise<Keplr | undefined> {
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => {
+        resolve(undefined);
+      }, pingTimeout);
+
+      Keplr.requestMethod("ping", []).then(() => {
+        clearTimeout(timeout);
+        resolve(new Keplr());
+      });
+    });
+  }
+
+  async ping(): Promise<void> {
+    await Keplr.requestMethod("ping", []);
+  }
+
   async enable(chainIds: string | string[]): Promise<void> {
-    await this.requestMethod("enable", [chainIds]);
+    await Keplr.requestMethod("enable", [chainIds]);
   }
 
   async disable(chainIds?: string | string[]): Promise<void> {
-    await this.requestMethod("disable", [chainIds]);
+    await Keplr.requestMethod("disable", [chainIds]);
   }
 
   async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
@@ -129,15 +149,15 @@ export class Keplr implements IKeplr {
       );
     }
 
-    await this.requestMethod("experimentalSuggestChain", [chainInfo]);
+    await Keplr.requestMethod("experimentalSuggestChain", [chainInfo]);
   }
 
   async getKey(chainId: string): Promise<Key> {
-    return await this.requestMethod("getKey", [chainId]);
+    return await Keplr.requestMethod("getKey", [chainId]);
   }
 
   async getKeysSettled(chainIds: string[]): Promise<SettledResponses<Key>> {
-    return await this.requestMethod("getKeysSettled", [chainIds]);
+    return await Keplr.requestMethod("getKeysSettled", [chainIds]);
   }
 
   async sendTx(
@@ -151,7 +171,7 @@ export class Keplr implements IKeplr {
       );
     }
 
-    return await this.requestMethod("sendTx", [chainId, tx, mode]);
+    return await Keplr.requestMethod("sendTx", [chainId, tx, mode]);
   }
 
   async signAmino(
@@ -160,7 +180,7 @@ export class Keplr implements IKeplr {
     signDoc: StdSignDoc,
     signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
-    return await this.requestMethod("signAmino", [
+    return await Keplr.requestMethod("signAmino", [
       chainId,
       signer,
       signDoc,
@@ -179,7 +199,7 @@ export class Keplr implements IKeplr {
     },
     signOptions: KeplrSignOptions = {}
   ): Promise<DirectSignResponse> {
-    const result = await this.requestMethod("signDirect", [
+    const result = await Keplr.requestMethod("signDirect", [
       chainId,
       signer,
       // We can't send the `Long` with remaing the type.
@@ -233,7 +253,7 @@ export class Keplr implements IKeplr {
       "preferNoSetFee" | "disableBalanceCheck"
     > = {}
   ): Promise<DirectAuxSignResponse> {
-    const result = await this.requestMethod("signDirectAux", [
+    const result = await Keplr.requestMethod("signDirectAux", [
       chainId,
       signer,
       // We can't send the `Long` with remaing the type.
@@ -285,7 +305,7 @@ export class Keplr implements IKeplr {
     signer: string,
     data: string | Uint8Array
   ): Promise<StdSignature> {
-    return await this.requestMethod("signArbitrary", [chainId, signer, data]);
+    return await Keplr.requestMethod("signArbitrary", [chainId, signer, data]);
   }
 
   signICNSAdr36(
@@ -295,7 +315,7 @@ export class Keplr implements IKeplr {
     username: string,
     addressChainIds: string[]
   ): Promise<ICNSAdr36Signatures> {
-    return this.requestMethod("signICNSAdr36", [
+    return Keplr.requestMethod("signICNSAdr36", [
       chainId,
       contractAddress,
       owner,
@@ -310,7 +330,7 @@ export class Keplr implements IKeplr {
     data: string | Uint8Array,
     signature: StdSignature
   ): Promise<boolean> {
-    return await this.requestMethod("verifyArbitrary", [
+    return await Keplr.requestMethod("verifyArbitrary", [
       chainId,
       signer,
       data,
@@ -324,7 +344,7 @@ export class Keplr implements IKeplr {
     data: string | Uint8Array,
     type: EthSignType
   ): Promise<Uint8Array> {
-    return await this.requestMethod("signEthereum", [
+    return await Keplr.requestMethod("signEthereum", [
       chainId,
       signer,
       data,
@@ -362,7 +382,7 @@ export class Keplr implements IKeplr {
     contractAddress: string,
     viewingKey?: string
   ): Promise<void> {
-    return await this.requestMethod("suggestToken", [
+    return await Keplr.requestMethod("suggestToken", [
       chainId,
       contractAddress,
       viewingKey,
@@ -373,21 +393,21 @@ export class Keplr implements IKeplr {
     chainId: string,
     contractAddress: string
   ): Promise<string> {
-    return await this.requestMethod("getSecret20ViewingKey", [
+    return await Keplr.requestMethod("getSecret20ViewingKey", [
       chainId,
       contractAddress,
     ]);
   }
 
   async getEnigmaPubKey(chainId: string): Promise<Uint8Array> {
-    return await this.requestMethod("getEnigmaPubKey", [chainId]);
+    return await Keplr.requestMethod("getEnigmaPubKey", [chainId]);
   }
 
   async getEnigmaTxEncryptionKey(
     chainId: string,
     nonce: Uint8Array
   ): Promise<Uint8Array> {
-    return await this.requestMethod("getEnigmaTxEncryptionKey", [
+    return await Keplr.requestMethod("getEnigmaTxEncryptionKey", [
       chainId,
       nonce,
     ]);
@@ -399,7 +419,7 @@ export class Keplr implements IKeplr {
     // eslint-disable-next-line @typescript-eslint/ban-types
     msg: object
   ): Promise<Uint8Array> {
-    return await this.requestMethod("enigmaEncrypt", [
+    return await Keplr.requestMethod("enigmaEncrypt", [
       chainId,
       contractCodeHash,
       msg,
@@ -411,7 +431,7 @@ export class Keplr implements IKeplr {
     ciphertext: Uint8Array,
     nonce: Uint8Array
   ): Promise<Uint8Array> {
-    return await this.requestMethod("enigmaDecrypt", [
+    return await Keplr.requestMethod("enigmaDecrypt", [
       chainId,
       ciphertext,
       nonce,
@@ -440,7 +460,7 @@ export class Keplr implements IKeplr {
     signDoc: StdSignDoc,
     signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
-    return await this.requestMethod("experimentalSignEIP712CosmosTx_v0", [
+    return await Keplr.requestMethod("experimentalSignEIP712CosmosTx_v0", [
       chainId,
       signer,
       eip712,
@@ -450,7 +470,7 @@ export class Keplr implements IKeplr {
   }
 
   async getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
-    return await this.requestMethod("getChainInfosWithoutEndpoints", []);
+    return await Keplr.requestMethod("getChainInfosWithoutEndpoints", []);
   }
 
   async changeKeyRingName({
@@ -460,16 +480,19 @@ export class Keplr implements IKeplr {
     defaultName: string;
     editable?: boolean;
   }): Promise<string> {
-    return await this.requestMethod("changeKeyRingName", [
+    return await Keplr.requestMethod("changeKeyRingName", [
       { defaultName, editable },
     ]);
   }
 
   async sendEthereumTx(chainId: string, tx: Uint8Array): Promise<string> {
-    return await this.requestMethod("sendEthereumTx", [chainId, tx]);
+    return await Keplr.requestMethod("sendEthereumTx", [chainId, tx]);
   }
 
   async suggestERC20(chainId: string, contractAddress: string): Promise<void> {
-    return await this.requestMethod("suggestERC20", [chainId, contractAddress]);
+    return await Keplr.requestMethod("suggestERC20", [
+      chainId,
+      contractAddress,
+    ]);
   }
 }

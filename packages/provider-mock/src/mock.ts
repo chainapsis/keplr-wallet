@@ -75,6 +75,11 @@ export class MockKeplr implements Keplr {
     public readonly mnemonic: string
   ) {}
 
+  ping(): Promise<void> {
+    // noop.
+    return Promise.resolve();
+  }
+
   enable(): Promise<void> {
     // noop.
     return Promise.resolve(undefined);

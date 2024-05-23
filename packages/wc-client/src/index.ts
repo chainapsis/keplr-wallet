@@ -322,6 +322,10 @@ export class KeplrWalletConnectV2 implements Keplr {
     }
   }
 
+  ping(): Promise<void> {
+    return Promise.resolve();
+  }
+
   changeKeyRingName(_opts: {
     defaultName: string;
     editable?: boolean | undefined;
