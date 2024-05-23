@@ -6,6 +6,28 @@ import {
 } from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
 
+export class PingMsg extends Message<void> {
+  public static type() {
+    return "keplr-ping";
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  type(): string {
+    return PingMsg.type();
+  }
+}
+
 export class GetChainInfosWithCoreTypesMsg extends Message<{
   chainInfos: ChainInfoWithCoreTypes[];
 }> {

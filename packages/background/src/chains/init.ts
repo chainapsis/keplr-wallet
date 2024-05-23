@@ -1,5 +1,6 @@
 import { Router } from "@keplr-wallet/router";
 import {
+  PingMsg,
   GetChainInfosWithCoreTypesMsg,
   SuggestChainInfoMsg,
   RemoveSuggestedChainInfoMsg,
@@ -23,6 +24,7 @@ export function init(
   permissionService: PermissionService,
   permissionInteractiveService: PermissionInteractiveService
 ): void {
+  router.registerMessage(PingMsg);
   router.registerMessage(GetChainInfosWithCoreTypesMsg);
   router.registerMessage(GetChainInfosWithoutEndpointsMsg);
   router.registerMessage(GetChainInfoWithoutEndpointsMsg);

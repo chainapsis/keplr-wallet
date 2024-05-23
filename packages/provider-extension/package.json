@@ -1,0 +1,24 @@
+{
+  "name": "@keplr-wallet/provider-extension",
+  "version": "0.12.94",
+  "main": "build/index.js",
+  "author": "chainapsis",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rm -rf node_modules; rm -rf build",
+    "build": "tsc",
+    "dev": "tsc -w",
+    "test": "jest --passWithNoTests",
+    "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
+    "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\"",
+    "version": "zx ./scripts/lerna-lifecyle-version.mjs"
+  },
+  "dependencies": {
+    "@keplr-wallet/types": "0.12.94",
+    "deepmerge": "^4.2.2",
+    "long": "^4.0.0"
+  }
+}

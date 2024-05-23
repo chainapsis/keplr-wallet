@@ -27,10 +27,15 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
   protected _embedded: C;
 
   @observable.shallow
-  protected unknownDenoms: string[] = [];
+  protected unknownDenoms: {
+    denom: string;
+    reaction: boolean;
+  }[] = [];
 
   @observable.shallow
   protected registeredCurrencies: AppCurrency[] = [];
+  @observable.shallow
+  protected registeredCurrenciesNoReaction: AppCurrency[] = [];
 
   @observable.shallow
   protected registrationInProgressCurrencyMap: Map<string, boolean> = new Map();
@@ -58,24 +63,56 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
    * 하지만 이 메소드를 action 안에서 호출하면 여전히 immediate로 실행되지 않으므로, 이 경우도 고려해야한다.
    */
   addUnknownDenoms(...coinMinimalDenoms: string[]) {
+    this.addUnknownDenomsImpl(coinMinimalDenoms, true);
+  }
+
+  addUnknownDenomsWithoutReaction(...coinMinimalDenoms: string[]) {
+    this.addUnknownDenomsImpl(coinMinimalDenoms, false);
+  }
+
+  protected addUnknownDenomsImpl(
+    coinMinimalDenoms: string[],
+    reaction: boolean
+  ) {
     for (const coinMinimalDenom of coinMinimalDenoms) {
-      if (this.unknownDenomMap.get(coinMinimalDenom)) {
-        continue;
+      let found = false;
+      const prior = this.unknownDenomMap.get(coinMinimalDenom);
+      if (prior) {
+        if (prior.reaction === reaction) {
+          continue;
+        } else if (reaction) {
+          found = true;
+          // 로직상 reaction은 reactive할 필요가 없기 때문에
+          // 그냥 여기서 바꾼다.
+          prior.reaction = reaction;
+        }
       }
 
       if (this.currencyMap.has(coinMinimalDenom)) {
         continue;
       }
 
-      runInAction(() => {
-        this.unknownDenoms.push(coinMinimalDenom);
-        this.registrationInProgressCurrencyMap.set(coinMinimalDenom, true);
-      });
+      if (this.currencyNoReactionMap.has(coinMinimalDenom)) {
+        continue;
+      }
+
+      if (!found) {
+        runInAction(() => {
+          this.unknownDenoms.push({
+            denom: coinMinimalDenom,
+            reaction,
+          });
+          this.registrationInProgressCurrencyMap.set(coinMinimalDenom, true);
+        });
+      }
 
       let i = 0;
+      let disposed = false;
       const disposer = autorun(() => {
         i++;
         const dispose = () => {
+          disposed = true;
+
           if (i === 1) {
             setTimeout(() => {
               if (disposer) {
@@ -88,6 +125,10 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
             }
           }
         };
+
+        if (disposed) {
+          return;
+        }
 
         const generator = this.currencyRegistry.getCurrencyRegistrar(
           this.chainId,
@@ -105,13 +146,26 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
 
             if (currency) {
               const index = this.unknownDenoms.findIndex(
-                (denom) => denom === currency.coinMinimalDenom
+                (denom) => denom.denom === currency.coinMinimalDenom
               );
+              let prev:
+                | {
+                    denom: string;
+                    reaction: boolean;
+                  }
+                | undefined;
               if (index >= 0) {
-                this.unknownDenoms.splice(index, 1);
+                prev = this.unknownDenoms[index];
+                if (generator.done) {
+                  this.unknownDenoms.splice(index, 1);
+                }
               }
 
-              this.addOrReplaceCurrency(currency);
+              if (!prev || prev.reaction) {
+                this.addOrReplaceCurrency(currency);
+              } else {
+                this.addOrReplaceCurrencyNoReaction(currency);
+              }
             }
 
             if (generator.done) {
@@ -163,10 +217,40 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
   }
 
   @computed
-  protected get unknownDenomMap(): Map<string, boolean> {
-    const result: Map<string, boolean> = new Map();
+  protected get currencyNoReactionMap(): Map<string, AppCurrency> {
+    const result: Map<string, AppCurrency> = new Map();
+    for (const currency of this.registeredCurrenciesNoReaction) {
+      result.set(currency.coinMinimalDenom, currency);
+    }
+    return result;
+  }
+
+  @action
+  protected moveNoReactionCurrencyToReaction(coinMinimalDenom: string) {
+    const index = this.registeredCurrenciesNoReaction.findIndex(
+      (cur) => cur.coinMinimalDenom === coinMinimalDenom
+    );
+    if (index >= 0) {
+      const currency = this.registeredCurrenciesNoReaction[index];
+      this.registeredCurrenciesNoReaction.splice(index, 1);
+      this.registeredCurrencies.push(currency);
+    }
+  }
+
+  @computed
+  protected get unknownDenomMap(): Map<
+    string,
+    { denom: string; reaction: boolean }
+  > {
+    const result: Map<
+      string,
+      {
+        denom: string;
+        reaction: boolean;
+      }
+    > = new Map();
     for (const denom of this.unknownDenoms) {
-      result.set(denom, true);
+      result.set(denom.denom, denom);
     }
     return result;
   }
@@ -210,12 +294,41 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
     if (this.currencyMap.has(coinMinimalDenom)) {
       return this.currencyMap.get(coinMinimalDenom);
     }
+    if (this.currencyNoReactionMap.has(coinMinimalDenom)) {
+      this.moveNoReactionCurrencyToReaction(coinMinimalDenom);
+      return this.currencyNoReactionMap.get(coinMinimalDenom);
+    }
     this.addUnknownDenoms(coinMinimalDenom);
 
     // Unknown denom can be registered synchronously in some cases.
     // For this case, re-try to get currency.
     if (this.currencyMap.has(coinMinimalDenom)) {
       return this.currencyMap.get(coinMinimalDenom);
+    }
+    if (this.currencyNoReactionMap.has(coinMinimalDenom)) {
+      this.moveNoReactionCurrencyToReaction(coinMinimalDenom);
+      return this.currencyNoReactionMap.get(coinMinimalDenom);
+    }
+  }
+
+  findCurrencyWithoutReaction(
+    coinMinimalDenom: string
+  ): AppCurrency | undefined {
+    if (this.currencyMap.has(coinMinimalDenom)) {
+      return this.currencyMap.get(coinMinimalDenom);
+    }
+    if (this.currencyNoReactionMap.has(coinMinimalDenom)) {
+      return this.currencyNoReactionMap.get(coinMinimalDenom);
+    }
+    this.addUnknownDenomsWithoutReaction(coinMinimalDenom);
+
+    // Unknown denom can be registered synchronously in some cases.
+    // For this case, re-try to get currency.
+    if (this.currencyMap.has(coinMinimalDenom)) {
+      return this.currencyMap.get(coinMinimalDenom);
+    }
+    if (this.currencyNoReactionMap.has(coinMinimalDenom)) {
+      return this.currencyNoReactionMap.get(coinMinimalDenom);
     }
   }
 
@@ -260,6 +373,18 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
     return currency;
   }
 
+  forceFindCurrencyWithoutReaction(coinMinimalDenom: string): AppCurrency {
+    const currency = this.findCurrencyWithoutReaction(coinMinimalDenom);
+    if (!currency) {
+      return {
+        coinMinimalDenom,
+        coinDenom: coinMinimalDenom,
+        coinDecimals: 0,
+      };
+    }
+    return currency;
+  }
+
   @action
   protected addOrReplaceCurrency(currency: AppCurrency) {
     if (this.currencyMap.has(currency.coinMinimalDenom)) {
@@ -277,6 +402,26 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
       }
     } else {
       this.registeredCurrencies.push(currency);
+    }
+  }
+
+  @action
+  protected addOrReplaceCurrencyNoReaction(currency: AppCurrency) {
+    if (this.currencyNoReactionMap.has(currency.coinMinimalDenom)) {
+      const index = this.registeredCurrenciesNoReaction.findIndex(
+        (cur) => cur.coinMinimalDenom === currency.coinMinimalDenom
+      );
+      if (index >= 0) {
+        const prev = this.registeredCurrenciesNoReaction[index];
+        if (
+          // If same, do nothing
+          sortedJsonByKeyStringify(prev) !== sortedJsonByKeyStringify(currency)
+        ) {
+          this.registeredCurrenciesNoReaction.splice(index, 1, currency);
+        }
+      }
+    } else {
+      this.registeredCurrenciesNoReaction.push(currency);
     }
   }
 

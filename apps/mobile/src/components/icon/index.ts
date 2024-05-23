@@ -30,3 +30,6 @@ export * from './warning';
 export * from './warning-fill';
 export * from './link';
 export * from './plus';
+export * from './home-filled';
+export * from './home-outlined';
+export * from './setting-outlined';

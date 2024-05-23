@@ -134,7 +134,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     isIBCTransfer,
     {
       allowHexAddressToBech32Address:
-        !isEvmChain &&
+        !isEvmTx &&
         !chainStore.getChain(chainId).chainId.startsWith("injective"),
       allowHexAddressOnly: isEvmTx,
       icns: ICNSInfo,
@@ -241,18 +241,28 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   );
 
   useEffect(() => {
-    const newIsEvmTx =
-      new DenomHelper(sendConfigs.amountConfig.currency.coinMinimalDenom)
-        .type === "erc20" ||
-      (isEvmChain && sendConfigs.recipientConfig.isRecipientEthereumHexAddress);
+    if (isEvmChain) {
+      const sendingDenomHelper = new DenomHelper(
+        sendConfigs.amountConfig.currency.coinMinimalDenom
+      );
+      const isERC20 = sendingDenomHelper.type === "erc20";
+      const isSendingNativeToken =
+        sendingDenomHelper.type === "native" &&
+        (chainInfo.stakeCurrency?.coinMinimalDenom ??
+          chainInfo.currencies[0].coinMinimalDenom) ===
+          sendingDenomHelper.denom;
+      const newIsEvmTx =
+        sendConfigs.recipientConfig.isRecipientEthereumHexAddress &&
+        (isERC20 || isSendingNativeToken);
 
-    const newSenderAddress = newIsEvmTx
-      ? account.ethereumHexAddress
-      : account.bech32Address;
+      const newSenderAddress = newIsEvmTx
+        ? account.ethereumHexAddress
+        : account.bech32Address;
 
-    sendConfigs.senderConfig.setValue(newSenderAddress);
-    setIsEvmTx(newIsEvmTx);
-    ethereumAccount.setIsSendingTx(false);
+      sendConfigs.senderConfig.setValue(newSenderAddress);
+      setIsEvmTx(newIsEvmTx);
+      ethereumAccount.setIsSendingTx(false);
+    }
   }, [
     account,
     ethereumAccount,
@@ -260,6 +270,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     sendConfigs.amountConfig.currency.coinMinimalDenom,
     sendConfigs.recipientConfig.isRecipientEthereumHexAddress,
     sendConfigs.senderConfig,
+    chainInfo.stakeCurrency?.coinMinimalDenom,
+    chainInfo.currencies,
   ]);
 
   useEffect(() => {

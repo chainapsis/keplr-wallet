@@ -28,6 +28,7 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { InteractionService } from "../interaction";
 import { Env } from "@keplr-wallet/router";
 import { SuggestChainInfoMsg } from "./messages";
+import { AnalyticsService } from "../analytics";
 
 type ChainRemovedHandler = (chainInfo: ChainInfo) => void;
 type ChainSuggestedHandler = (chainInfo: ChainInfo) => void | Promise<void>;
@@ -72,6 +73,7 @@ export class ChainsService {
       readonly branchName: string;
       readonly alternativeURL?: string;
     },
+    protected readonly analyticsService: AnalyticsService,
     protected readonly interactionService: InteractionService,
     protected readonly afterInitFn:
       | ((
@@ -241,6 +243,22 @@ export class ChainsService {
         this.endpointsKVStore.set("endpoints", this.endpoints);
       });
     }
+
+    const coinTypes = new Map<number, boolean>();
+    const chainInfos = this.getChainInfos();
+    for (const chainInfo of chainInfos) {
+      if (chainInfo.bip44.coinType !== 118 && chainInfo.bip44.coinType !== 60) {
+        coinTypes.set(chainInfo.bip44.coinType, true);
+      }
+      for (const alternative of chainInfo.alternativeBIP44s ?? []) {
+        if (alternative.coinType !== 118 && alternative.coinType !== 60) {
+          coinTypes.set(alternative.coinType, true);
+        }
+      }
+    }
+    this.analyticsService.logEventIgnoreError("test-cointypes", {
+      coinTypes: Array.from(coinTypes.keys()),
+    });
   }
 
   /**

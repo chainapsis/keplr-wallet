@@ -82,7 +82,11 @@ export const SearchUrlScreen: FunctionComponent = observer(() => {
                   id: 'page.browser.input-placeholder',
                 })}
                 placeholderTextColor={style.flatten(['color-gray-300']).color}
-                style={style.flatten(['color-gray-50', 'flex-1'])}
+                style={style.flatten([
+                  'color-gray-50',
+                  'flex-1',
+                  'min-height-44',
+                ])}
                 onChangeText={text => {
                   setSearch(text);
                 }}

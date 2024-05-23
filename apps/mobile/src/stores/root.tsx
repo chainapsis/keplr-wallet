@@ -58,7 +58,11 @@ import {
   GravityBridgeCurrencyRegistrar,
   KeplrETCQueries,
 } from '@keplr-wallet/stores-etc';
-import {SkipQueries} from '@keplr-wallet/stores-internal';
+import {
+  SkipQueries,
+  SwapUsageQueries,
+  Price24HChangesStore,
+} from '@keplr-wallet/stores-internal';
 import {DeepLinkStore} from './deep-link';
 import {EthereumQueries, EthereumAccountStore} from '@keplr-wallet/stores-eth';
 import {WebpageStore} from './webpage';
@@ -72,6 +76,7 @@ export class RootStore {
 
   public readonly hugeQueriesStore: HugeQueriesStore;
   public readonly priceStore: CoinGeckoPriceStore;
+  public readonly price24HChangesStore: Price24HChangesStore;
   public readonly tokensStore: TokensStore;
 
   public readonly interactionStore: InteractionStore;
@@ -98,6 +103,7 @@ export class RootStore {
       EthereumQueries,
     ]
   >;
+  public readonly swapUsageQueries: SwapUsageQueries;
   public readonly skipQueriesStore: SkipQueries;
   public readonly accountStore: AccountStore<
     [CosmosAccount, CosmwasmAccount, SecretAccount]
@@ -194,9 +200,14 @@ export class RootStore {
       EthereumQueries.use(),
     );
 
+    this.swapUsageQueries = new SwapUsageQueries(
+      this.queriesStore.sharedContext,
+      process.env['KEPLR_EXT_TX_HISTORY_BASE_URL'] || '',
+    );
     this.skipQueriesStore = new SkipQueries(
       this.queriesStore.sharedContext,
       this.chainStore,
+      this.swapUsageQueries,
       SwapVenue,
     );
 
@@ -365,6 +376,13 @@ export class RootStore {
         uri: CoinGeckoGetPrice,
       },
     );
+    this.price24HChangesStore = new Price24HChangesStore(
+      new AsyncKVStore('store_prices_changes_24h'),
+      {
+        baseURL: process.env['KEPLR_EXT_TX_HISTORY_BASE_URL'] || '',
+        uri: '/price/changes/24h',
+      },
+    );
 
     this.hugeQueriesStore = new HugeQueriesStore(
       this.chainStore,
@@ -375,7 +393,7 @@ export class RootStore {
 
     this.tokenFactoryRegistrar = new TokenFactoryCurrencyRegistrar(
       new AsyncKVStore('store_token_factory_currency_registrar'),
-      24 * 3600 * 1000,
+      7 * 24 * 3600 * 1000,
       process.env['KEPLR_EXT_TOKEN_FACTORY_BASE_URL'] || '',
       process.env['KEPLR_EXT_TOKEN_FACTORY_URI'] || '',
       this.chainStore,
@@ -383,27 +401,27 @@ export class RootStore {
     );
     this.ibcCurrencyRegistrar = new IBCCurrencyRegistrar(
       new AsyncKVStore('store_ibc_curreny_registrar'),
-      24 * 3600 * 1000,
+      7 * 24 * 3600 * 1000,
       this.chainStore,
       this.accountStore,
       this.queriesStore,
     );
     this.lsmCurrencyRegistrar = new LSMCurrencyRegistrar(
       new AsyncKVStore('store_lsm_currency_registrar'),
-      24 * 3600 * 1000,
+      7 * 24 * 3600 * 1000,
       this.chainStore,
       this.queriesStore,
     );
     this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegistrar(
       new AsyncKVStore('store_gravity_bridge_currency_registrar'),
-      24 * 3600 * 1000,
+      7 * 24 * 3600 * 1000,
       this.chainStore,
       this.queriesStore,
     );
     this.axelarEVMBridgeCurrencyRegistrar =
       new AxelarEVMBridgeCurrencyRegistrar(
         new AsyncKVStore('store_axelar_evm_bridge_currency_registrar'),
-        24 * 3600 * 1000,
+        7 * 24 * 3600 * 1000,
         this.chainStore,
         this.queriesStore,
         'ethereum',

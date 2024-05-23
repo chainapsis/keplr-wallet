@@ -71,6 +71,7 @@ import { TokenContractsQueries } from "./token-contracts";
 import {
   SkipQueries,
   Price24HChangesStore,
+  SwapUsageQueries,
 } from "@keplr-wallet/stores-internal";
 
 export class RootStore {
@@ -102,6 +103,7 @@ export class RootStore {
       EthereumQueries
     ]
   >;
+  public readonly swapUsageQueries: SwapUsageQueries;
   public readonly skipQueriesStore: SkipQueries;
   public readonly accountStore: AccountStore<
     [CosmosAccount, CosmwasmAccount, SecretAccount]
@@ -197,9 +199,14 @@ export class RootStore {
       }),
       EthereumQueries.use()
     );
+    this.swapUsageQueries = new SwapUsageQueries(
+      this.queriesStore.sharedContext,
+      process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"]
+    );
     this.skipQueriesStore = new SkipQueries(
       this.queriesStore.sharedContext,
       this.chainStore,
+      this.swapUsageQueries,
       SwapVenue
     );
 

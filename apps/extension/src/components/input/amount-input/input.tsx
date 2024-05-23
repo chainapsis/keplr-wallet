@@ -39,6 +39,26 @@ export const AmountInput: FunctionComponent<{
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  useEffect(() => {
+    // it frustrating when scrolling inside a number input field unintentionally changes its value
+    // we should prevent default behavior of the wheel event
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+    };
+
+    if (inputRef.current) {
+      inputRef.current.addEventListener("wheel", handleWheel, {
+        passive: false,
+      });
+    }
+
+    return () => {
+      if (inputRef.current) {
+        inputRef.current.removeEventListener("wheel", handleWheel);
+      }
+    };
+  }, []);
+
   // Price symbol의 collapsed transition을 기다리기 위해서 사용됨.
   const [renderPriceSymbol, setRenderPriceSymbol] = useState(isPriceBased);
   useEffect(() => {

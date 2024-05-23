@@ -47,6 +47,16 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     protected readonly requester: MessageRequester
   ) {}
 
+  async ping(): Promise<void> {
+    await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "chains",
+      "keplr-ping",
+      {}
+    );
+  }
+
   async enable(chainIds: string | string[]): Promise<void> {
     if (typeof chainIds === "string") {
       chainIds = [chainIds];

@@ -51,6 +51,7 @@ module.exports = {
           'KEPLR_EXT_CHAIN_REGISTRY_URL',
           'KEPLR_EXT_TOKEN_FACTORY_BASE_URL',
           'KEPLR_EXT_TOKEN_FACTORY_URI',
+          'KEPLR_EXT_TX_HISTORY_BASE_URL',
           'WC_PROJECT_ID',
         ],
       },
