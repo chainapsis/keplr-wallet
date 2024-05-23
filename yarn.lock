@@ -8699,6 +8699,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@keplr-wallet/provider-extension@workspace:packages/provider-extension":
+  version: 0.0.0-use.local
+  resolution: "@keplr-wallet/provider-extension@workspace:packages/provider-extension"
+  dependencies:
+    "@keplr-wallet/types": 0.12.90
+    deepmerge: ^4.2.2
+    long: ^4.0.0
+  languageName: unknown
+  linkType: soft
+
 "@keplr-wallet/provider-mock@0.12.90, @keplr-wallet/provider-mock@workspace:packages/provider-mock":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/provider-mock@workspace:packages/provider-mock"
