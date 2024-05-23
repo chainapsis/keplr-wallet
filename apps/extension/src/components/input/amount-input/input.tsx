@@ -64,6 +64,11 @@ export const AmountInput: FunctionComponent<{
           return amountConfig.value;
         }
       })()}
+      onWheel={(e) => {
+        // it frustrating when scrolling inside a number input field unintentionally changes its value
+        // we should prevent default behavior of the wheel event
+        e.preventDefault();
+      }}
       onChange={(e) => {
         e.preventDefault();
 
