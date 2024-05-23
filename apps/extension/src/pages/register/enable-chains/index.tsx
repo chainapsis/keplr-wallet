@@ -336,6 +336,9 @@ export const EnableChainsScene: FunctionComponent<{
         for (const candidateAddress of candidateAddresses) {
           const queries = queriesStore.get(candidateAddress.chainId);
           const chainInfo = chainStore.getChain(candidateAddress.chainId);
+          const mainCurrency =
+            chainInfo.stakeCurrency || chainInfo.currencies[0];
+          const account = accountStore.getAccount(chainInfo.chainId);
 
           // hideInUI인 chain은 UI 상에서 enable이 되지 않아야한다.
           // 정말 만약의 수로 왜인지 그 체인에 유저가 자산등을 가지고 있을수도 있으니
@@ -354,14 +357,19 @@ export const EnableChainsScene: FunctionComponent<{
           for (const bech32Address of candidateAddress.bech32Addresses) {
             // Check that the account has some assets or delegations.
             // If so, enable it by default
-            const queryBalance = queries.queryBalances
-              .getQueryBech32Address(bech32Address.address)
-              .getBalance(chainInfo.stakeCurrency || chainInfo.currencies[0]);
+            const queryBalance = chainStore.isEvmChain(chainInfo.chainId)
+              ? queries.queryBalances.getQueryEthereumHexAddress(
+                  account.ethereumHexAddress
+                )
+              : queries.queryBalances.getQueryBech32Address(
+                  account.bech32Address
+                );
+            const balance = queryBalance.getBalance(mainCurrency);
 
-            if (queryBalance?.response?.data) {
+            if (balance?.response?.data) {
               // A bit tricky. The stake coin is currently only native, and in this case,
               // we can check whether the asset exists or not by checking the response.
-              const data = queryBalance.response.data as any;
+              const data = balance.response.data as any;
               if (
                 data.balances &&
                 Array.isArray(data.balances) &&
@@ -502,38 +510,48 @@ export const EnableChainsScene: FunctionComponent<{
       const aBalance = (() => {
         const addresses = candidateAddressesMap.get(a.chainIdentifier);
         const chainInfo = chainStore.getChain(a.chainId);
+        const queries = queriesStore.get(a.chainId);
+
+        const mainCurrency = chainInfo.stakeCurrency || chainInfo.currencies[0];
+        const account = accountStore.getAccount(chainInfo.chainId);
+
         if (addresses && addresses.length > 0) {
-          const queryBal = queriesStore
-            .get(a.chainId)
-            .queryBalances.getQueryBech32Address(addresses[0].address)
-            .getBalance(chainInfo.stakeCurrency || chainInfo.currencies[0]);
-          if (queryBal) {
-            return queryBal.balance;
+          const queryBalance = chainStore.isEvmChain(chainInfo.chainId)
+            ? queries.queryBalances.getQueryEthereumHexAddress(
+                account.ethereumHexAddress
+              )
+            : queries.queryBalances.getQueryBech32Address(addresses[0].address);
+          const balance = queryBalance.getBalance(mainCurrency)?.balance;
+
+          if (balance) {
+            return balance;
           }
         }
 
-        return new CoinPretty(
-          chainInfo.stakeCurrency || chainInfo.currencies[0],
-          "0"
-        );
+        return new CoinPretty(mainCurrency, "0");
       })();
       const bBalance = (() => {
         const addresses = candidateAddressesMap.get(b.chainIdentifier);
         const chainInfo = chainStore.getChain(b.chainId);
+        const queries = queriesStore.get(b.chainId);
+
+        const mainCurrency = chainInfo.stakeCurrency || chainInfo.currencies[0];
+        const account = accountStore.getAccount(chainInfo.chainId);
+
         if (addresses && addresses.length > 0) {
-          const queryBal = queriesStore
-            .get(b.chainId)
-            .queryBalances.getQueryBech32Address(addresses[0].address)
-            .getBalance(chainInfo.stakeCurrency || chainInfo.currencies[0]);
-          if (queryBal) {
-            return queryBal.balance;
+          const queryBalance = chainStore.isEvmChain(chainInfo.chainId)
+            ? queries.queryBalances.getQueryEthereumHexAddress(
+                account.ethereumHexAddress
+              )
+            : queries.queryBalances.getQueryBech32Address(addresses[0].address);
+          const balance = queryBalance.getBalance(mainCurrency)?.balance;
+
+          if (balance) {
+            return balance;
           }
         }
 
-        return new CoinPretty(
-          chainInfo.stakeCurrency || chainInfo.currencies[0],
-          "0"
-        );
+        return new CoinPretty(mainCurrency, "0");
       })();
 
       const aPrice = priceStore.calculatePrice(aBalance)?.toDec() ?? new Dec(0);
@@ -626,19 +644,25 @@ export const EnableChainsScene: FunctionComponent<{
           <Stack gutter="0.5rem">
             {chainInfos.map((chainInfo) => {
               const account = accountStore.getAccount(chainInfo.chainId);
-
               const queries = queriesStore.get(chainInfo.chainId);
+              const mainCurrency =
+                chainInfo.stakeCurrency || chainInfo.currencies[0];
 
               const balance = (() => {
-                const currency =
-                  chainInfo.stakeCurrency || chainInfo.currencies[0];
-                const queryBal = queries.queryBalances
-                  .getQueryBech32Address(account.bech32Address)
-                  .getBalance(currency);
-                if (queryBal) {
-                  return queryBal.balance;
+                const queryBalance = chainStore.isEvmChain(chainInfo.chainId)
+                  ? queries.queryBalances.getQueryEthereumHexAddress(
+                      account.ethereumHexAddress
+                    )
+                  : queries.queryBalances.getQueryBech32Address(
+                      account.bech32Address
+                    );
+                const balance = queryBalance.getBalance(mainCurrency);
+
+                if (balance) {
+                  return balance.balance;
                 }
-                return new CoinPretty(currency, "0");
+
+                return new CoinPretty(mainCurrency, "0");
               })();
 
               const enabled =
