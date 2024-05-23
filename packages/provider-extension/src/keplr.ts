@@ -111,15 +111,27 @@ export class Keplr implements IKeplr {
   public defaultOptions: KeplrIntereactionOptions = {};
 
   static getKeplr(pingTimeout: number = 1500): Promise<Keplr | undefined> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         resolve(undefined);
       }, pingTimeout);
 
-      Keplr.requestMethod("ping", []).then(() => {
-        clearTimeout(timeout);
-        resolve(new Keplr());
-      });
+      Keplr.requestMethod("ping", [])
+        .then(() => {
+          clearTimeout(timeout);
+          resolve(new Keplr());
+        })
+        .catch((e) => {
+          // if legacy version.
+          if (e?.message?.includes("Invalid method: ping")) {
+            getKeplrFromWindow().then((keplr) => {
+              clearTimeout(timeout);
+              resolve(keplr);
+            });
+          } else {
+            reject(e);
+          }
+        });
     });
   }
 
@@ -496,3 +508,31 @@ export class Keplr implements IKeplr {
     ]);
   }
 }
+
+const getKeplrFromWindow: () => Promise<Keplr | undefined> = async () => {
+  if (typeof window === "undefined") {
+    return undefined;
+  }
+
+  if ((window as any).keplr) {
+    return (window as any).keplr;
+  }
+
+  if (document.readyState === "complete") {
+    return (window as any).keplr;
+  }
+
+  return new Promise((resolve) => {
+    const documentStateChange = (event: Event) => {
+      if (
+        event.target &&
+        (event.target as Document).readyState === "complete"
+      ) {
+        resolve((window as any).keplr);
+        document.removeEventListener("readystatechange", documentStateChange);
+      }
+    };
+
+    document.addEventListener("readystatechange", documentStateChange);
+  });
+};
