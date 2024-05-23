@@ -117,7 +117,8 @@ export class SecretAccountImpl {
 
       Bech32Address.validate(
         recipient,
-        this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+        this.chainGetter.getChain(this.chainId).bech32Config
+          ?.bech32PrefixAccAddr
       );
 
       return this.makeExecuteSecretContractTx(
@@ -205,7 +206,7 @@ export class SecretAccountImpl {
   ) {
     Bech32Address.validate(
       contractAddress,
-      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+      this.chainGetter.getChain(this.chainId).bech32Config?.bech32PrefixAccAddr
     );
 
     let encryptedMsg: Uint8Array;

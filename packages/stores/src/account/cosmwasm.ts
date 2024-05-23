@@ -112,7 +112,8 @@ export class CosmwasmAccountImpl {
 
       Bech32Address.validate(
         recipient,
-        this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+        this.chainGetter.getChain(this.chainId).bech32Config
+          ?.bech32PrefixAccAddr
       );
 
       return this.makeExecuteContractTx(
@@ -161,7 +162,7 @@ export class CosmwasmAccountImpl {
   ) {
     Bech32Address.validate(
       contractAddress,
-      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+      this.chainGetter.getChain(this.chainId).bech32Config?.bech32PrefixAccAddr
     );
 
     const msg = {

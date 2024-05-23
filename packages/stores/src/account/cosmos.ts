@@ -198,7 +198,8 @@ export class CosmosAccountImpl {
 
       Bech32Address.validate(
         recipient,
-        this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+        this.chainGetter.getChain(this.chainId).bech32Config
+          ?.bech32PrefixAccAddr
       );
 
       const msg = {
@@ -971,7 +972,7 @@ export class CosmosAccountImpl {
 
     Bech32Address.validate(
       recipient,
-      destinationChainInfo.bech32Config.bech32PrefixAccAddr
+      destinationChainInfo.bech32Config?.bech32PrefixAccAddr
     );
 
     return this.makeIBCTransferTxWithAsyncMemoConstructor(
@@ -980,7 +981,7 @@ export class CosmosAccountImpl {
       currency,
       Bech32Address.fromBech32(recipient).toBech32(
         this.chainGetter.getChain(channels[0].counterpartyChainId).bech32Config
-          .bech32PrefixAccAddr
+          ?.bech32PrefixAccAddr ?? ""
       ),
       async () => {
         const memo: any = {};
@@ -1402,7 +1403,7 @@ export class CosmosAccountImpl {
   makeRevokeMsg(grantee: string, messageType: string) {
     Bech32Address.validate(
       grantee,
-      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+      this.chainGetter.getChain(this.chainId).bech32Config?.bech32PrefixAccAddr
     );
 
     const chainInfo = this.chainGetter.getChain(this.chainId);
@@ -1451,7 +1452,7 @@ export class CosmosAccountImpl {
   makeDelegateTx(amount: string, validatorAddress: string) {
     Bech32Address.validate(
       validatorAddress,
-      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixValAddr
+      this.chainGetter.getChain(this.chainId).bech32Config?.bech32PrefixValAddr
     );
 
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
@@ -1601,7 +1602,7 @@ export class CosmosAccountImpl {
   makeUndelegateTx(amount: string, validatorAddress: string) {
     Bech32Address.validate(
       validatorAddress,
-      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixValAddr
+      this.chainGetter.getChain(this.chainId).bech32Config?.bech32PrefixValAddr
     );
 
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
@@ -1678,11 +1679,11 @@ export class CosmosAccountImpl {
   ) {
     Bech32Address.validate(
       srcValidatorAddress,
-      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixValAddr
+      this.chainGetter.getChain(this.chainId).bech32Config?.bech32PrefixValAddr
     );
     Bech32Address.validate(
       dstValidatorAddress,
-      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixValAddr
+      this.chainGetter.getChain(this.chainId).bech32Config?.bech32PrefixValAddr
     );
 
     const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
@@ -1756,7 +1757,8 @@ export class CosmosAccountImpl {
     for (const validatorAddress of validatorAddresses) {
       Bech32Address.validate(
         validatorAddress,
-        this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixValAddr
+        this.chainGetter.getChain(this.chainId).bech32Config
+          ?.bech32PrefixValAddr
       );
     }
 

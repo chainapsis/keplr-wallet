@@ -433,7 +433,7 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
     return this._embedded.alternativeBIP44s;
   }
 
-  get bech32Config(): Bech32Config {
+  get bech32Config(): Bech32Config | undefined {
     return this._embedded.bech32Config;
   }
 

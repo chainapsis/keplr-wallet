@@ -114,7 +114,7 @@ export const CameraScreen: FunctionComponent = observer(() => {
                 const prefix = data.slice(0, data.indexOf('1'));
                 const chainInfo = chainStore.chainInfosInUI.find(
                   chainInfo =>
-                    chainInfo.bech32Config.bech32PrefixAccAddr === prefix,
+                    chainInfo.bech32Config?.bech32PrefixAccAddr === prefix,
                 );
 
                 if (chainInfo) {

@@ -42,9 +42,10 @@ export const useUndelegateTxConfig = (
   amountConfig.setFeeConfig(feeConfig);
 
   const recipientConfig = useRecipientConfig(chainGetter, chainId);
-  recipientConfig.setBech32Prefix(
-    chainGetter.getChain(chainId).bech32Config.bech32PrefixValAddr
-  );
+  const chainInfo = chainGetter.getChain(chainId);
+  if (chainInfo.bech32Config) {
+    recipientConfig.setBech32Prefix(chainInfo.bech32Config.bech32PrefixValAddr);
+  }
   recipientConfig.setValue(validatorAddress);
   amountConfig.setCurrency(chainGetter.getChain(chainId).stakeCurrency);
 

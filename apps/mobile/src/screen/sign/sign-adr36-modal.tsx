@@ -206,7 +206,7 @@ export const ADR36SignModal = registerCardModal(
                   signDocWrapper.aminoSignDoc,
                   chainStore.getChain(
                     signInteractionStore.waitingData.data.chainId,
-                  ).bech32Config.bech32PrefixAccAddr,
+                  ).bech32Config?.bech32PrefixAccAddr,
                 )
               ) {
                 throw new Error('Invalid sign doc for adr36');

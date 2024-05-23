@@ -68,7 +68,7 @@ export class RecipientConfig
   @computed
   get bech32Prefix(): string {
     if (!this._bech32Prefix) {
-      return this.chainInfo.bech32Config.bech32PrefixAccAddr;
+      return this.chainInfo.bech32Config?.bech32PrefixAccAddr ?? "";
     }
 
     return this._bech32Prefix;
