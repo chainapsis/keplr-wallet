@@ -4,7 +4,7 @@ import {
   SettledResponse,
   SettledResponses,
 } from "@keplr-wallet/types";
-import { DebounceActionTimer } from "@keplr-wallet/common";
+import { DebounceActionTimer } from "@keplr-wallet/mobx-utils";
 
 export class AccountSharedContext {
   protected suggestChainDebounceTimer = new DebounceActionTimer<
