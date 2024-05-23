@@ -13,7 +13,8 @@
     "dev": "tsc -w",
     "test": "jest --passWithNoTests",
     "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
-    "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
+    "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\"",
+    "version": "zx ./scripts/lerna-lifecyle-version.mjs"
   },
   "dependencies": {
     "@keplr-wallet/types": "0.12.91-rc.1",
