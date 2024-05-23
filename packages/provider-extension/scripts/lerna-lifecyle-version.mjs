@@ -11,7 +11,7 @@ const version = require("../package.json").version;
 
     const versionPath = path.join(__dirname, "../src/version.ts");
     //export const BUILD_VERSION = "0.12.90";
-    await $`sed 's/export const BUILD_VERSION = "[0-9.]*";/const BUILD_VERSION = "${versionWithoutPrerelease}";/' ${versionPath} > version.ts.temp`;
+    await $`sed 's/export const BUILD_VERSION = "[0-9.]*";/export const BUILD_VERSION = "${versionWithoutPrerelease}";/' ${versionPath} > version.ts.temp`;
     await $`mv version.ts.temp ${versionPath}`;
 
     await $`git add ${versionPath}`;
