@@ -136,7 +136,11 @@ export class Keplr implements IKeplr {
 
   public defaultOptions: KeplrIntereactionOptions = {};
 
-  static getKeplr(pingTimeout: number = 1500): Promise<Keplr | undefined> {
+  static async getKeplr(
+    pingTimeout: number = 1500
+  ): Promise<Keplr | undefined> {
+    await waitDocumentReady();
+
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         resolve(undefined);
@@ -532,3 +536,23 @@ export class Keplr implements IKeplr {
     ]);
   }
 }
+
+const waitDocumentReady = (): Promise<void> => {
+  if (document.readyState === "complete") {
+    return Promise.resolve();
+  }
+
+  return new Promise<void>((resolve) => {
+    const documentStateChange = (event: Event) => {
+      if (
+        event.target &&
+        (event.target as Document).readyState === "complete"
+      ) {
+        resolve();
+        document.removeEventListener("readystatechange", documentStateChange);
+      }
+    };
+
+    document.addEventListener("readystatechange", documentStateChange);
+  });
+};
