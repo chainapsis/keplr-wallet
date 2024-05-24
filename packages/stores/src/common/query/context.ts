@@ -1,9 +1,5 @@
-import {
-  DebounceActionTimer,
-  KVStore,
-  MultiGet,
-  WrapMultiGetKVStore,
-} from "@keplr-wallet/common";
+import { KVStore, MultiGet, WrapMultiGetKVStore } from "@keplr-wallet/common";
+import { DebounceActionTimer } from "@keplr-wallet/mobx-utils";
 import { SettledResponse } from "@keplr-wallet/types";
 
 export class QuerySharedContext {

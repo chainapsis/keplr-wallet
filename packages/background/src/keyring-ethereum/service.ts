@@ -249,7 +249,7 @@ export class KeyRingEthereumService {
       case "keplr_connect": {
         return {
           currentEvmChainId: `0x${currentChainEVMInfo.chainId.toString(16)}`,
-          currentTendermintChainId: currentChainEVMInfo.chainId,
+          currentTendermintChainId: currentChainInfo.chainId,
           selectedAddress,
         };
       }
@@ -455,6 +455,8 @@ export class KeyRingEthereumService {
         );
       }
       case "wallet_getPermissions":
+      // This `request` method can be executed if the basic access permission is granted.
+      // So, it's not necessary to check or grant the permission here.
       case "wallet_requestPermissions": {
         return [{ parentCapability: "eth_accounts" }];
       }

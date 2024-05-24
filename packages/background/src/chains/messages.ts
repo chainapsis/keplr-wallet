@@ -1,10 +1,7 @@
 import { KeplrError, Message } from "@keplr-wallet/router";
-import {
-  ChainInfo,
-  ChainInfoWithCoreTypes,
-  ChainInfoWithoutEndpoints,
-} from "@keplr-wallet/types";
+import { ChainInfo, ChainInfoWithoutEndpoints } from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
+import { ChainInfoWithCoreTypes } from "./types";
 
 export class PingMsg extends Message<void> {
   public static type() {

@@ -82,6 +82,9 @@ export const WasmMessageView: FunctionComponent<{
         <Button
           size="extra-small"
           color="secondary"
+          containerStyle={{
+            backgroundColor: style.get('color-gray-400').color,
+          }}
           text={
             isOpen
               ? intl.formatMessage({

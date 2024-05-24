@@ -123,7 +123,7 @@ export class MockKeplr implements Keplr {
       ),
       ethereumHexAddress: new Bech32Address(
         wallet.getPubKey().getCosmosAddress()
-      ).toHex(false),
+      ).toHex(true),
       isNanoLedger: false,
       isKeystone: false,
     };
@@ -148,7 +148,7 @@ export class MockKeplr implements Keplr {
           ),
           ethereumHexAddress: new Bech32Address(
             wallet.getPubKey().getCosmosAddress()
-          ).toHex(false),
+          ).toHex(true),
           isNanoLedger: false,
           isKeystone: false,
         },

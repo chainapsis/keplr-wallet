@@ -5,8 +5,6 @@ import {
 } from "@keplr-wallet/common";
 import {
   ChainInfo,
-  ChainInfoWithCoreTypes,
-  ChainInfoWithSuggestedOptions,
   ChainInfoWithoutEndpoints,
   EVMInfo,
 } from "@keplr-wallet/types";
@@ -29,6 +27,7 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { InteractionService } from "../interaction";
 import { Env } from "@keplr-wallet/router";
 import { SuggestChainInfoMsg } from "./messages";
+import { ChainInfoWithCoreTypes, ChainInfoWithSuggestedOptions } from "./types";
 import { AnalyticsService } from "../analytics";
 
 type ChainRemovedHandler = (chainInfo: ChainInfo) => void;
@@ -325,29 +324,9 @@ export class ChainsService {
 
   getChainInfoWithoutEndpoints = computedFn(
     (chainId: string): ChainInfoWithoutEndpoints | undefined => {
-      const chainInfo = this.chainInfoMapWithCoreTypes.get(
-        ChainIdHelper.parse(chainId).identifier
+      return this.getChainInfosWithoutEndpoints().find(
+        (chainInfo) => chainInfo.chainId === chainId
       );
-
-      if (chainInfo === undefined) {
-        return undefined;
-      }
-
-      return {
-        ...chainInfo,
-        rpc: undefined,
-        rest: undefined,
-        nodeProvider: undefined,
-        updateFromRepoDisabled: undefined,
-        embedded: undefined,
-        evm:
-          chainInfo.evm !== undefined
-            ? {
-                ...chainInfo.evm,
-                rpc: undefined,
-              }
-            : undefined,
-      };
     },
     {
       keepAlive: true,

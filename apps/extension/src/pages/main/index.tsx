@@ -48,10 +48,12 @@ import { DepositModal } from "./components/deposit-modal";
 import { MainHeaderLayout } from "./layouts/header";
 import { amountToAmbiguousAverage } from "../../utils";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
-import { LogAnalyticsEventMsg } from "@keplr-wallet/background";
+import {
+  ChainInfoWithCoreTypes,
+  LogAnalyticsEventMsg,
+} from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { useBuy } from "../../hooks/use-buy";
-import { ChainInfoWithCoreTypes } from "@keplr-wallet/types";
 
 export interface ViewToken {
   token: CoinPretty;
