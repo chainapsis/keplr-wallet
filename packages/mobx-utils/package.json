@@ -1,5 +1,5 @@
 {
-  "name": "@keplr-wallet/wc-client",
+  "name": "@keplr-wallet/mobx-utils",
   "version": "0.12.95",
   "main": "build/index.js",
   "author": "chainapsis",
@@ -16,14 +16,9 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr-wallet/provider": "0.12.95",
-    "@keplr-wallet/types": "0.12.95",
-    "buffer": "^6.0.3",
-    "deepmerge": "^4.2.2",
-    "long": "^3 || ^4 || ^5"
+    "@keplr-wallet/types": "0.12.95"
   },
   "peerDependencies": {
-    "@walletconnect/sign-client": "^2",
-    "@walletconnect/types": "^2"
+    "mobx": "^6"
   }
 }

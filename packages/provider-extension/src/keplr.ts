@@ -136,7 +136,11 @@ export class Keplr implements IKeplr {
 
   public defaultOptions: KeplrIntereactionOptions = {};
 
-  static getKeplr(pingTimeout: number = 1500): Promise<Keplr | undefined> {
+  static async getKeplr(
+    pingTimeout: number = 1500
+  ): Promise<Keplr | undefined> {
+    await waitDocumentReady();
+
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         resolve(undefined);
@@ -150,10 +154,8 @@ export class Keplr implements IKeplr {
         .catch((e) => {
           // if legacy version.
           if (e?.message?.includes("Invalid method: ping")) {
-            getKeplrFromWindow().then((keplr) => {
-              clearTimeout(timeout);
-              resolve(keplr);
-            });
+            clearTimeout(timeout);
+            resolve(new Keplr());
           } else {
             reject(e);
           }
@@ -535,26 +537,18 @@ export class Keplr implements IKeplr {
   }
 }
 
-const getKeplrFromWindow: () => Promise<Keplr | undefined> = async () => {
-  if (typeof window === "undefined") {
-    return undefined;
-  }
-
-  if ((window as any).keplr) {
-    return (window as any).keplr;
-  }
-
+const waitDocumentReady = (): Promise<void> => {
   if (document.readyState === "complete") {
-    return (window as any).keplr;
+    return Promise.resolve();
   }
 
-  return new Promise((resolve) => {
+  return new Promise<void>((resolve) => {
     const documentStateChange = (event: Event) => {
       if (
         event.target &&
         (event.target as Document).readyState === "complete"
       ) {
-        resolve((window as any).keplr);
+        resolve();
         document.removeEventListener("readystatechange", documentStateChange);
       }
     };
