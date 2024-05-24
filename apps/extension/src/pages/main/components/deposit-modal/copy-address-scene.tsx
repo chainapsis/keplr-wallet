@@ -29,7 +29,6 @@ import {
   useSceneTransition,
 } from "../../../../components/transition";
 import { IChainInfoImpl } from "@keplr-wallet/stores";
-import Color from "color";
 
 export const CopyAddressScene: FunctionComponent<{
   close: () => void;
@@ -87,13 +86,19 @@ export const CopyAddressScene: FunctionComponent<{
 
   const addresses: {
     chainInfo: IChainInfoImpl;
-    bech32Address: string;
+    bech32Address?: string;
     ethereumAddress?: string;
   }[] = chainStore.chainInfosInUI
     .map((chainInfo) => {
       const accountInfo = accountStore.getAccount(chainInfo.chainId);
 
-      const bech32Address = accountInfo.bech32Address;
+      const bech32Address = (() => {
+        if (chainInfo.chainId.startsWith("eip155")) {
+          return undefined;
+        }
+
+        return accountInfo.bech32Address;
+      })();
       const ethereumAddress = (() => {
         if (chainInfo.chainId.startsWith("injective")) {
           return undefined;
@@ -111,10 +116,6 @@ export const CopyAddressScene: FunctionComponent<{
       };
     })
     .filter((address) => {
-      if (address.bech32Address.length === 0) {
-        return false;
-      }
-
       const s = search.trim().toLowerCase();
       if (s.length === 0) {
         return true;
@@ -126,10 +127,13 @@ export const CopyAddressScene: FunctionComponent<{
       if (address.chainInfo.chainName.toLowerCase().includes(s)) {
         return true;
       }
-      const bech32Split = address.bech32Address.split("1");
-      if (bech32Split.length > 0) {
-        if (bech32Split[0].toLowerCase().includes(s)) {
-          return true;
+
+      if (address.bech32Address) {
+        const bech32Split = address.bech32Address.split("1");
+        if (bech32Split.length > 0) {
+          if (bech32Split[0].toLowerCase().includes(s)) {
+            return true;
+          }
         }
       }
 
@@ -277,7 +281,7 @@ export const CopyAddressScene: FunctionComponent<{
               // CopyAddressItem 컴포넌트는 ethereumAddress가 있냐 없냐에 따라서 다르게 동작한다.
               // ethereumAddress가 있으면 두개의 CopyAddressItem 컴포넌트를 각각 렌더링하기 위해서
               // ethereumAddress가 있으면 두개의 address로 쪼개서 리턴하고 flat으로 펼져서 렌더링한다.
-              if (address.ethereumAddress) {
+              if (address.ethereumAddress && address.bech32Address) {
                 return [
                   {
                     chainInfo: address.chainInfo,
@@ -317,7 +321,7 @@ export const CopyAddressScene: FunctionComponent<{
 const CopyAddressItem: FunctionComponent<{
   address: {
     chainInfo: IChainInfoImpl;
-    bech32Address: string;
+    bech32Address?: string;
     ethereumAddress?: string;
   };
   close: () => void;
@@ -393,7 +397,7 @@ const CopyAddressItem: FunctionComponent<{
               e.preventDefault();
 
               await navigator.clipboard.writeText(
-                address.ethereumAddress || address.bech32Address
+                address.ethereumAddress || address.bech32Address || ""
               );
               setHasCopied(true);
               setBlockInteraction(true);
@@ -514,10 +518,12 @@ const CopyAddressItem: FunctionComponent<{
                         : address.ethereumAddress;
                     }
 
-                    return Bech32Address.shortenAddress(
-                      address.bech32Address,
-                      20
-                    );
+                    if (address.bech32Address) {
+                      return Bech32Address.shortenAddress(
+                        address.bech32Address,
+                        20
+                      );
+                    }
                   })()}
                 </Caption1>
               </YAxis>
@@ -560,29 +566,22 @@ const CopyAddressItem: FunctionComponent<{
                   ? ColorPalette["gray-50"]
                   : ColorPalette["gray-500"]
               }
-              disabled={hasCopied || !!address.ethereumAddress}
+              disabled={hasCopied}
               onClick={() => {
                 sceneTransition.push("qr-code", {
                   chainId: address.chainInfo.chainId,
-                  bech32Address: address.bech32Address,
+                  address: address.ethereumAddress || address.bech32Address,
                 });
               }}
             >
               <QRCodeIcon
                 width="1.25rem"
                 height="1.25rem"
-                color={(() => {
-                  const color =
-                    theme.mode === "light"
-                      ? ColorPalette["gray-300"]
-                      : ColorPalette.white;
-
-                  if (address.ethereumAddress) {
-                    return Color(color).alpha(0.3).toString();
-                  }
-
-                  return color;
-                })()}
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette.white
+                }
               />
             </IconButton>
             <Gutter size="0.75rem" direction="horizontal" />
