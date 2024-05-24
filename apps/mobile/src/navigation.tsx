@@ -26,7 +26,13 @@ import {
   FocusedScreenProvider,
   useFocusedScreen,
 } from './provider/focused-screen';
-import {WalletIcon, BrowserIcon, SettingIcon} from './components/icon';
+import {
+  BrowserIcon,
+  SettingIcon,
+  HomeFilledIcon,
+  HomeOutlinedIcon,
+  SettingOutlinedIcon,
+} from './components/icon';
 import {
   HomeScreenHeaderTitle,
   defaultHeaderOptions,
@@ -109,6 +115,7 @@ import {
   DecryptedKeyRingDatasResponse,
 } from './screen/register/import-from-extension';
 import {SwapIcon} from './components/icon/swap.tsx';
+import {IBCSwapScreen} from './screen/ibc-swap';
 import {IBCSwapDestinationSelectAssetScreen} from './screen/ibc-swap/select-asset';
 import {EditFavoriteUrlScreen} from './screen/web/edit-favorite';
 import {SearchUrlScreen} from './screen/web/search';
@@ -607,17 +614,25 @@ export const MainTabNavigation: FunctionComponent = () => {
     <Tab.Navigator
       screenOptions={({route}) => ({
         // eslint-disable-next-line react/no-unstable-nested-components
-        tabBarIcon: ({color}) => {
-          const size = 24;
+        tabBarIcon: ({focused, color}) => {
+          const size = 28;
           switch (route.name) {
             case 'Home':
-              return <WalletIcon size={size} color={color} />;
+              return focused ? (
+                <HomeFilledIcon size={size} color={color} />
+              ) : (
+                <HomeOutlinedIcon size={size} color={color} />
+              );
             case 'Swap':
               return <SwapIcon size={size} color={color} />;
             case 'WebTab':
               return <BrowserIcon size={size} color={color} />;
             case 'Settings':
-              return <SettingIcon size={size} color={color} />;
+              return focused ? (
+                <SettingIcon size={size} color={color} />
+              ) : (
+                <SettingOutlinedIcon size={size} color={color} />
+              );
           }
         },
         tabBarLabel: ({color}) =>
@@ -641,14 +656,14 @@ export const MainTabNavigation: FunctionComponent = () => {
         }}
         component={HomeScreen}
       />
-      {/*<Tab.Screen*/}
-      {/*  name="Swap"*/}
-      {/*  options={{*/}
-      {/*    headerTitle: HomeScreenHeaderTitleFunc,*/}
-      {/*    ...homeHeaderOptions,*/}
-      {/*  }}*/}
-      {/*  component={IBCSwapScreen}*/}
-      {/*/>*/}
+      <Tab.Screen
+        name="Swap"
+        options={{
+          headerTitle: HomeScreenHeaderTitleFunc,
+          ...homeHeaderOptions,
+        }}
+        component={IBCSwapScreen}
+      />
       <Tab.Screen
         name="WebTab"
         options={{headerShown: false}}

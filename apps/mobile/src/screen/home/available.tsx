@@ -270,6 +270,9 @@ export const AvailableTabView: FunctionComponent<{
                           }),
                         });
                       }}
+                      showPrice24HChange={
+                        uiConfigStore.show24HChangesInMagePage
+                      }
                     />
                   ))}
                 />

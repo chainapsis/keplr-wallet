@@ -17,6 +17,7 @@ import {
   ClearAllSuggestedChainInfosMsg,
   ClearAllChainEndpointsMsg,
   GetChainInfoWithoutEndpointsMsg,
+  PingMsg,
 } from "./messages";
 import { ChainInfo } from "@keplr-wallet/types";
 import { getBasicAccessPermissionType, PermissionService } from "../permission";
@@ -35,6 +36,8 @@ export const getHandler: (
 ) => {
   return (env: Env, msg: Message<unknown>) => {
     switch (msg.constructor) {
+      case PingMsg:
+        return {};
       case GetChainInfosWithCoreTypesMsg:
         return handleGetInfosWithCoreTypesMsg(chainsService)(
           env,

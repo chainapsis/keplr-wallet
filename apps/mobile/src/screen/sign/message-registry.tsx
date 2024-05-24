@@ -12,6 +12,7 @@ import {UndelegateMessage} from './undelegate';
 import {RedelegateMessage} from './redelegate';
 import {VoteMessage} from './renders/vote';
 import {ExecuteContractMessage} from './renders/execute-contract';
+import {TransferMessage} from './transfer.tsx';
 
 export class MessageRenderRegistry implements IMessageRenderRegistry {
   protected renderers: IMessageRenderer[] = [];
@@ -71,6 +72,7 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
 export const defaultRegistry = new MessageRenderRegistry();
 defaultRegistry.register(ClaimRewardsMessage);
 defaultRegistry.register(SendMessage);
+defaultRegistry.register(TransferMessage);
 defaultRegistry.register(DelegateMessage);
 defaultRegistry.register(UndelegateMessage);
 defaultRegistry.register(RedelegateMessage);

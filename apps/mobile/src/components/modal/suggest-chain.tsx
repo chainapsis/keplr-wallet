@@ -20,6 +20,7 @@ import {RectButton} from '../rect-button';
 import * as WebBrowser from 'expo-web-browser';
 import {ScrollView} from '../scroll-view/common-scroll-view';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
+import {WCMessageRequester} from '../../stores/wallet-connect/msg-requester.ts';
 
 export const SuggestChainModal = registerCardModal(
   observer(() => {
@@ -44,8 +45,10 @@ const SuggestChainPageImpl: FunctionComponent<{
 }> = observer(({waitingData}) => {
   const intl = useIntl();
 
-  const {chainSuggestStore, chainStore, keyRingStore} = useStore();
+  const {chainSuggestStore, chainStore, keyRingStore, walletConnectStore} =
+    useStore();
   const [isLoadingPlaceholder, setIsLoadingPlaceholder] = useState(true);
+  const [originUrl, setOriginUrl] = useState<string>('');
 
   const queryCommunityChainInfo = chainSuggestStore.getCommunityChainInfo(
     waitingData.data.chainInfo.chainId,
@@ -70,6 +73,26 @@ const SuggestChainPageImpl: FunctionComponent<{
   };
 
   useEffect(() => {
+    (async () => {
+      if (WCMessageRequester.isVirtualURL(waitingData.data.origin)) {
+        const id = WCMessageRequester.getIdFromVirtualURL(
+          waitingData.data.origin,
+        );
+
+        const topic = await walletConnectStore.getTopicByRandomId(id);
+        if (topic) {
+          const session = walletConnectStore.getSession(topic);
+          setOriginUrl(session?.peer.metadata.url ?? '');
+        } else {
+          setOriginUrl(waitingData.data.origin);
+        }
+      } else {
+        setOriginUrl(waitingData.data.origin);
+      }
+    })();
+  }, [waitingData.data.origin, walletConnectStore]);
+
+  useEffect(() => {
     if (!queryCommunityChainInfo.isLoading) {
       setIsLoadingPlaceholder(false);
     }
@@ -88,7 +111,7 @@ const SuggestChainPageImpl: FunctionComponent<{
           return (
             <CommunityInfo
               isNotReady={isLoadingPlaceholder}
-              origin={waitingData.data.origin}
+              origin={originUrl}
               chainInfo={waitingData.data.chainInfo}
             />
           );
@@ -98,7 +121,7 @@ const SuggestChainPageImpl: FunctionComponent<{
           return (
             <CommunityInfo
               isNotReady={false}
-              origin={waitingData.data.origin}
+              origin={originUrl}
               chainInfo={communityChainInfo}
               communityChainInfoUrl={chainSuggestStore.getCommunityChainInfoUrl(
                 communityChainInfo.chainId,
@@ -109,7 +132,8 @@ const SuggestChainPageImpl: FunctionComponent<{
 
         return (
           <RawInfo
-            waitingData={waitingData}
+            origin={originUrl}
+            chainInfo={waitingData.data.chainInfo}
             communityChainInfoRepoUrl={
               chainSuggestStore.communityChainInfoRepoUrl
             }
@@ -245,15 +269,12 @@ const CommunityInfo: FunctionComponent<{
 };
 
 const RawInfo: FunctionComponent<{
-  waitingData: InteractionWaitingData<{
-    chainInfo: ChainInfo;
-    origin: string;
-  }>;
+  origin: string;
+  chainInfo: ChainInfo;
   communityChainInfoRepoUrl: string;
-}> = ({waitingData, communityChainInfoRepoUrl}) => {
+}> = ({origin, chainInfo, communityChainInfoRepoUrl}) => {
   const intl = useIntl();
   const style = useStyle();
-  const chainInfo = waitingData.data.chainInfo;
 
   return (
     <Box alignY="center" alignX="center">
@@ -266,7 +287,7 @@ const RawInfo: FunctionComponent<{
 
       <Gutter size={16} />
 
-      <Chip text={waitingData.data.origin} />
+      <Chip text={origin} />
 
       <Gutter size={16} />
 
