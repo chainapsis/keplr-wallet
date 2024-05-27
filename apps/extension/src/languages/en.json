@@ -614,6 +614,7 @@
   "components.address-book-modal.empty-view-default": "No Data Yet",
   "components.address-item.sent-on-date": "Sent on {date}",
   "components.address-item.empty-memo": "(Empty Memo)",
+  "components.address-book-modal.my-account-tab.input.search.placeholder": "Search wallet name or address",
 
   "components.collapsible-list.view-more-tokens": "View {remain} more tokens",
   "components.collapsible-list.collapse": "Collapse",

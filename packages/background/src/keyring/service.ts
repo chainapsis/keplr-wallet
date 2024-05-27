@@ -1345,7 +1345,10 @@ export class KeyRingService {
     throw new Error(`Unsupported keyRing ${type}`);
   }
 
-  searchKeyRings(searchText: string): KeyInfo[] {
+  searchKeyRings(
+    searchText: string,
+    ignoreChainEnabled: boolean = false
+  ): KeyInfo[] {
     searchText = searchText.trim();
 
     const keyInfos = this.getKeyInfos();
@@ -1384,7 +1387,7 @@ export class KeyRingService {
               evmEnabled = true;
             }
           }
-          if (!evmEnabled) {
+          if (!evmEnabled && !ignoreChainEnabled) {
             return false;
           }
 
@@ -1421,10 +1424,12 @@ export class KeyRingService {
         })();
         let bz =
           KeyRingService.unsafeDecodeBech32AddressForSearchText(searchText);
-        if (bz.length > 0) {
-          // 어차피 address는 20bytes이다.
-          // checksum은 신경쓰지 않고 자른다.
-          bz = bz.slice(0, 20);
+        // 어차피 address는 20bytes이다.
+        // checksum은 신경쓰지 않고 자른다.
+        bz = bz.slice(0, 20);
+        // bz가 너무 작은 바이트이면 사실상 검색의 의미가 없다.
+        // 대충 매직넘버로 3바이트는 넘어야지 검색한다.
+        if (bz.length >= 3) {
           const bzHex = Buffer.from(bz).toString("hex").toLowerCase();
 
           bech32AddressSearchKeyInfos = keyInfos.filter((keyInfo) => {
@@ -1433,6 +1438,7 @@ export class KeyRingService {
             }
 
             if (
+              !ignoreChainEnabled &&
               !this.chainsUIService.isEnabled(
                 keyInfo.id,
                 targetChainInfo.chainId

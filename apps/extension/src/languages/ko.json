@@ -598,6 +598,7 @@
   "components.address-book-modal.empty-view-default": "데이터가 없습니다.",
   "components.address-item.sent-on-date": "{date}에 사용됨",
   "components.address-item.empty-memo": "(메모없음)",
+  "components.address-book-modal.my-account-tab.input.search.placeholder": "지갑 이름이나 주소로 검색",
 
   "components.collapsible-list.view-more-tokens": "{remain}개의 토큰 더보기",
   "components.collapsible-list.collapse": "접기",
