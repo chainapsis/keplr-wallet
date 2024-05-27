@@ -51,7 +51,7 @@ export const MsgRelationVote: FunctionComponent<{
           color: style.get('color-gray-10').color,
         };
     }
-  }, [msg.msg]);
+  }, [msg.msg, style]);
 
   return (
     <MsgItemBase
