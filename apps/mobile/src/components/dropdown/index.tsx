@@ -3,10 +3,12 @@ import {StyleSheet, Text, TextInput, View, ViewStyle} from 'react-native';
 import {useStyle} from '../../styles';
 import {Box} from '../box';
 import {Label} from '../input/label';
-import {Columns} from '../column';
 import {ArrowDownFillIcon} from '../icon/arrow-down-fill';
-import {FlatList} from '../flat-list';
-import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
+import {
+  TouchableWithoutFeedback,
+  ScrollView,
+} from 'react-native-gesture-handler';
+import {XAxis} from '../axis';
 
 export interface DropdownItemProps {
   key: string;
@@ -24,6 +26,7 @@ export interface DropdownProps {
   size?: 'small' | 'large';
   label?: string;
   allowSearch?: boolean;
+  searchExcludedKeys?: string[];
 
   itemContainerStyle?: ViewStyle;
   listContainerStyle?: ViewStyle;
@@ -40,6 +43,7 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
   allowSearch,
   itemContainerStyle,
   listContainerStyle,
+  searchExcludedKeys,
 }) => {
   const style = useStyle();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -67,13 +71,14 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
       if (trimmedSearchText.length > 0) {
         return (
           typeof item.label === 'string' &&
-          item.label.toLowerCase().includes(trimmedSearchText.toLowerCase())
+          item.label.toLowerCase().includes(trimmedSearchText.toLowerCase()) &&
+          (!searchExcludedKeys || !searchExcludedKeys.includes(item.key))
         );
       }
 
       return true;
     });
-  }, [allowSearch, items, searchText]);
+  }, [allowSearch, items, searchText, searchExcludedKeys]);
 
   return (
     <Box zIndex={1}>
@@ -98,83 +103,85 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
               : style.get('color-gray-500').color
           }
           style={StyleSheet.flatten([itemContainerStyle])}>
-          <Columns sum={1}>
-            <Box style={{flex: 1}}>
-              <Box
-                position="absolute"
+          <XAxis alignY="center">
+            <Box
+              position="absolute"
+              style={{
+                opacity: !isOpen || !allowSearch ? 0 : 1,
+                pointerEvents: !isOpen || !allowSearch ? 'none' : 'auto',
+              }}>
+              <TextInput
+                ref={searchInputRef}
+                value={searchText}
+                onChangeText={text => {
+                  setSearchText(text);
+                }}
+                selectionColor={style.get('color-gray-50').color}
                 style={{
-                  opacity: !isOpen || !allowSearch ? 0 : 1,
-                  pointerEvents: !isOpen || !allowSearch ? 'none' : 'auto',
-                }}>
-                <TextInput
-                  ref={searchInputRef}
-                  value={searchText}
-                  onChangeText={text => {
-                    setSearchText(text);
-                  }}
-                  selectionColor={style.get('color-gray-50').color}
-                  style={{
-                    padding: 0,
-                    borderWidth: 1,
-                    backgroundColor: style.get('color-red-400').color,
-                    color: selectedItemKey
-                      ? style.get('color-gray-50').color
-                      : style.get('color-gray-300').color,
-                  }}
-                />
-              </Box>
-
-              <Text
-                style={style.flatten([
-                  selectedItemKey ? 'color-gray-50' : 'color-gray-300',
-                  isOpen && allowSearch ? 'display-none' : 'opacity-100',
-                  'flex-1',
-                ])}>
-                {selectedItemKey
-                  ? items.find(item => item.key === selectedItemKey)?.label ??
-                    placeholder
-                  : placeholder}
-              </Text>
+                  padding: 0,
+                  borderWidth: 1,
+                  color: selectedItemKey
+                    ? style.get('color-gray-50').color
+                    : style.get('color-gray-300').color,
+                }}
+              />
             </Box>
+
+            <Text
+              style={style.flatten([
+                'body2',
+                selectedItemKey ? 'color-gray-50' : 'color-gray-300',
+                isOpen && allowSearch ? 'display-none' : 'opacity-100',
+              ])}>
+              {selectedItemKey
+                ? items.find(item => item.key === selectedItemKey)?.label ??
+                  placeholder
+                : placeholder}
+            </Text>
+
+            <Box style={{flex: 1}} />
 
             <ArrowDownFillIcon
               size={24}
               color={style.get('color-white').color}
             />
-          </Columns>
+          </XAxis>
         </Box>
       </TouchableWithoutFeedback>
       <View>
-        <Box
-          position="absolute"
-          backgroundColor={style.get('color-gray-600').color}
-          borderColor={style.get('color-gray-500').color}
-          borderWidth={1}
-          borderRadius={6}
-          maxHeight={180}
+        <ScrollView
           style={StyleSheet.flatten([
-            style.flatten([
-              'flex-1',
-              'width-full',
-              'overflow-hidden',
-              isOpen && filteredItems.length > 0 ? 'flex' : 'display-none',
-            ]),
+            {
+              ...style.flatten([
+                'flex-1',
+                'width-full',
+                'overflow-hidden',
+                isOpen && filteredItems.length > 0 ? 'flex' : 'display-none',
+                'background-color-gray-600',
+                'border-width-1',
+                'border-color-gray-500',
+                'border-radius-6',
+              ]),
+              maxHeight: 160,
+              position: 'absolute',
+            },
             listContainerStyle,
           ])}>
-          <FlatList
-            isGestureFlatList={true}
-            data={filteredItems}
-            keyExtractor={item => item.key}
-            renderItem={({item}) => (
-              <DropdownItem
-                item={item}
-                onSelect={onSelect}
-                closeDropdown={() => setIsOpen(!isOpen)}
-              />
-            )}
-            ItemSeparatorComponent={Divider}
-          />
-        </Box>
+          {filteredItems.map((item, index) => {
+            return (
+              <React.Fragment>
+                <DropdownItem
+                  key={item.key}
+                  item={item}
+                  onSelect={onSelect}
+                  closeDropdown={() => setIsOpen(!isOpen)}
+                />
+
+                {filteredItems.length - 1 > index ? <Divider /> : null}
+              </React.Fragment>
+            );
+          })}
+        </ScrollView>
       </View>
     </Box>
   );
@@ -195,6 +202,7 @@ const DropdownItem: FunctionComponent<{
 
   return (
     <TouchableWithoutFeedback
+      style={{zIndex: 2}}
       onPress={() => {
         onSelect(item.key);
         closeDropdown();

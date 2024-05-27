@@ -174,9 +174,6 @@ export const TransactionFeeModal = registerCardModal(
           <Gutter size={12} />
 
           <Dropdown
-            listContainerStyle={{
-              maxHeight: isGasSimulatorUsable ? 200 : 160,
-            }}
             label={intl.formatMessage({
               id: 'components.input.fee-control.modal.fee-token-dropdown-label',
             })}
