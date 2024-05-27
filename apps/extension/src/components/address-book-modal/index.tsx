@@ -19,6 +19,7 @@ import styled, { useTheme } from "styled-components";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { DenomHelper } from "@keplr-wallet/common";
+import { SearchTextInput } from "../input";
 
 type Type = "recent" | "contacts" | "accounts";
 
@@ -57,6 +58,19 @@ export const AddressBookModal: FunctionComponent<{
 
     const [type, setType] = useState<Type>("recent");
 
+    const [accountsSearchText, setAccountsSearchText] = useState("");
+    const [debounceAccountsSearchText, setDebounceAccountsSearchText] =
+      useState<string>("");
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setDebounceAccountsSearchText(accountsSearchText);
+      }, 300);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }, [accountsSearchText]);
+
     const [recents, setRecents] = useState<RecentSendHistory[]>([]);
     const [accounts, setAccounts] = useState<
       (Key & {
@@ -73,30 +87,39 @@ export const AddressBookModal: FunctionComponent<{
     }, [historyType, recipientConfig.chainId, uiConfigStore.addressBookConfig]);
 
     useEffect(() => {
-      uiConfigStore.addressBookConfig
-        .getVaultCosmosKeysSettled(
-          recipientConfig.chainId,
-          permitSelfKeyInfo ? undefined : keyRingStore.selectedKeyInfo?.id
-        )
-        .then((keys) => {
-          setAccounts(
-            keys
-              .filter((res) => {
-                return res.status === "fulfilled";
-              })
-              .map((res) => {
-                if (res.status === "fulfilled") {
-                  return res.value;
-                }
-                throw new Error("Unexpected status");
-              })
+      (() => {
+        if (!debounceAccountsSearchText.trim()) {
+          return uiConfigStore.addressBookConfig.getVaultCosmosKeysSettled(
+            recipientConfig.chainId,
+            permitSelfKeyInfo ? undefined : keyRingStore.selectedKeyInfo?.id
           );
-        });
+        } else {
+          return uiConfigStore.addressBookConfig.getVaultCosmosKeysWithSearchSettled(
+            debounceAccountsSearchText,
+            recipientConfig.chainId,
+            permitSelfKeyInfo ? undefined : keyRingStore.selectedKeyInfo?.id
+          );
+        }
+      })().then((keys) => {
+        setAccounts(
+          keys
+            .filter((res) => {
+              return res.status === "fulfilled";
+            })
+            .map((res) => {
+              if (res.status === "fulfilled") {
+                return res.value;
+              }
+              throw new Error("Unexpected status");
+            })
+        );
+      });
     }, [
       keyRingStore.selectedKeyInfo?.id,
       permitSelfKeyInfo,
       recipientConfig.chainId,
       uiConfigStore.addressBookConfig,
+      debounceAccountsSearchText,
     ]);
 
     const chainInfo = chainStore.getChain(recipientConfig.chainId);
@@ -182,7 +205,7 @@ export const AddressBookModal: FunctionComponent<{
     })();
 
     return (
-      <Modal isOpen={isOpen} close={close} align="bottom">
+      <Modal isOpen={isOpen} close={close} align="bottom" maxHeight="95vh">
         <Box
           backgroundColor={
             theme.mode === "light"
@@ -233,6 +256,21 @@ export const AddressBookModal: FunctionComponent<{
           </YAxis>
 
           <Gutter size="0.75rem" />
+
+          {type === "accounts" ? (
+            <React.Fragment>
+              <SearchTextInput
+                value={accountsSearchText}
+                onChange={(e) => {
+                  setAccountsSearchText(e.target.value);
+                }}
+                placeholder={intl.formatMessage({
+                  id: "components.address-book-modal.my-account-tab.input.search.placeholder",
+                })}
+              />
+              <Gutter size="0.75rem" />
+            </React.Fragment>
+          ) : null}
 
           {datas.length > 0 ? (
             <SimpleBar

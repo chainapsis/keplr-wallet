@@ -580,6 +580,58 @@ export class GetCosmosKeysForEachVaultSettledMsg extends Message<
   }
 }
 
+export class GetCosmosKeysForEachVaultWithSearchSettledMsg extends Message<
+  SettledResponses<
+    Key & {
+      vaultId: string;
+    }
+  >
+> {
+  public static type() {
+    return "GetCosmosKeysForEachVaultWithSearchSettledMsg";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly vaultIds: string[],
+    public readonly searchText: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.vaultIds || this.vaultIds.length === 0) {
+      throw new Error("vaultIds are not set");
+    }
+
+    const seen = new Map<string, boolean>();
+
+    for (const vaultId of this.vaultIds) {
+      if (seen.get(vaultId)) {
+        throw new Error(`vaultId ${vaultId} is duplicated`);
+      }
+
+      seen.set(vaultId, true);
+    }
+
+    if (this.searchText == null) {
+      throw new Error("searchText not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetCosmosKeysForEachVaultWithSearchSettledMsg.type();
+  }
+}
+
 export class RequestSignEIP712CosmosTxMsg_v0 extends Message<AminoSignResponse> {
   public static type() {
     return "request-sign-eip-712-cosmos-tx-v0";

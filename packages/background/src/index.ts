@@ -174,6 +174,7 @@ export function init(
       chainsUIService,
     },
     chainsService,
+    chainsUIService,
     interactionService,
     vaultService,
     analyticsService,

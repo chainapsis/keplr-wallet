@@ -1,4 +1,4 @@
-import { VaultService, Vault, PlainObject } from "../vault";
+import { PlainObject, Vault, VaultService } from "../vault";
 import {
   BIP44HDPath,
   ExportedKeyRingVault,
@@ -19,6 +19,7 @@ import * as Legacy from "./legacy";
 import { ChainsUIService } from "../chains-ui";
 import { MultiAccounts } from "../keyring-keystone";
 import { AnalyticsService } from "../analytics";
+import { Primitive } from "utility-types";
 
 export class KeyRingService {
   protected _needMigration = false;
@@ -36,6 +37,7 @@ export class KeyRingService {
       readonly getDisabledChainIdentifiers: () => Promise<string[]>;
     },
     protected readonly chainsService: ChainsService,
+    protected readonly chainsUIService: ChainsUIService,
     protected readonly interactionService: InteractionService,
     protected readonly vaultService: VaultService,
     protected readonly analyticsService: AnalyticsService,
@@ -1341,6 +1343,214 @@ export class KeyRingService {
     }
 
     throw new Error(`Unsupported keyRing ${type}`);
+  }
+
+  searchKeyRings(
+    searchText: string,
+    ignoreChainEnabled: boolean = false
+  ): KeyInfo[] {
+    searchText = searchText.trim();
+
+    const keyInfos = this.getKeyInfos();
+
+    if (!searchText) {
+      return keyInfos;
+    }
+
+    const nameSearchKeyInfos = keyInfos.filter((keyInfo) => {
+      return keyInfo.name.toLowerCase().includes(searchText.toLowerCase());
+    });
+
+    let bech32AddressSearchKeyInfos: KeyInfo[] = [];
+    let hexAddressSearchKeyInfos: KeyInfo[] = [];
+    if (searchText.length > 8) {
+      const isHex = (() => {
+        if (searchText.startsWith("0x")) {
+          return true;
+        }
+        try {
+          const s = Buffer.from(searchText, "hex");
+          return s.toString().toLowerCase() === searchText.toLowerCase();
+        } catch {
+          return false;
+        }
+      })();
+
+      if (isHex) {
+        hexAddressSearchKeyInfos = keyInfos.filter((keyInfo) => {
+          const chainInfos = this.chainsUIService.enabledChainInfosForVault(
+            keyInfo.id
+          );
+          let evmEnabled = false;
+          for (const chainInfo of chainInfos) {
+            if (KeyRingService.isEthermintLike(chainInfo)) {
+              evmEnabled = true;
+            }
+          }
+          if (!evmEnabled && !ignoreChainEnabled) {
+            return false;
+          }
+
+          for (const [_, value] of Object.entries(keyInfo.insensitive)) {
+            try {
+              const hexAddress = KeyRingService.getAddressHexStringFromKeyInfo(
+                keyInfo,
+                value,
+                true
+              );
+
+              if (
+                hexAddress.includes(searchText.replace("0x", "").toLowerCase())
+              ) {
+                return true;
+              }
+            } catch {
+              // noop
+            }
+          }
+        });
+      } else if (searchText.includes("1")) {
+        const targetChainInfo: ChainInfo | undefined = (() => {
+          const i = searchText.indexOf("1");
+          if (i < 0) {
+            return;
+          }
+          const prefix = searchText.slice(0, i);
+          for (const chainInfo of this.chainsService.getChainInfos()) {
+            if (chainInfo.bech32Config?.bech32PrefixAccAddr === prefix) {
+              return chainInfo;
+            }
+          }
+        })();
+        let bz =
+          KeyRingService.unsafeDecodeBech32AddressForSearchText(searchText);
+        // 어차피 address는 20bytes이다.
+        // checksum은 신경쓰지 않고 자른다.
+        bz = bz.slice(0, 20);
+        // bz가 너무 작은 바이트이면 사실상 검색의 의미가 없다.
+        // 대충 매직넘버로 3바이트는 넘어야지 검색한다.
+        if (bz.length >= 3) {
+          const bzHex = Buffer.from(bz).toString("hex").toLowerCase();
+
+          bech32AddressSearchKeyInfos = keyInfos.filter((keyInfo) => {
+            if (!targetChainInfo) {
+              return false;
+            }
+
+            if (
+              !ignoreChainEnabled &&
+              !this.chainsUIService.isEnabled(
+                keyInfo.id,
+                targetChainInfo.chainId
+              )
+            ) {
+              return false;
+            }
+
+            const isEVM = KeyRingService.isEthermintLike(targetChainInfo);
+
+            for (const [_, value] of Object.entries(keyInfo.insensitive)) {
+              try {
+                const hexAddress =
+                  KeyRingService.getAddressHexStringFromKeyInfo(
+                    keyInfo,
+                    value,
+                    isEVM
+                  );
+
+                if (hexAddress.includes(bzHex)) {
+                  return true;
+                }
+              } catch {
+                // noop
+              }
+            }
+          });
+        }
+      }
+    }
+
+    const exists = new Map<string, boolean>();
+    for (const keyInfo of nameSearchKeyInfos) {
+      exists.set(keyInfo.id, true);
+    }
+    for (const keyInfo of bech32AddressSearchKeyInfos) {
+      exists.set(keyInfo.id, true);
+    }
+    for (const keyInfo of hexAddressSearchKeyInfos) {
+      exists.set(keyInfo.id, true);
+    }
+
+    return keyInfos.filter((keyInfo) => exists.get(keyInfo.id));
+  }
+
+  protected static unsafeDecodeBech32AddressForSearchText(
+    searchText: string
+  ): Uint8Array {
+    const i = searchText.indexOf("1");
+    const bech32WithoutPrefix = i >= 0 ? searchText.slice(i + 1) : searchText;
+    const data = [];
+    for (let i = 0; i < bech32WithoutPrefix.length; i++) {
+      const d = "qpzry9x8gf2tvdw0s3jn54khce6mua7l".indexOf(
+        bech32WithoutPrefix[i].toLowerCase()
+      );
+      if (d === -1) {
+        return new Uint8Array();
+      }
+      data.push(d);
+    }
+
+    let value = 0;
+    let bits = 0;
+    const maxV = (1 << 8) - 1;
+
+    const result: number[] = [];
+    for (let i = 0; i < data.length; ++i) {
+      value = (value << 5) | data[i];
+      bits += 5;
+
+      while (bits >= 8) {
+        bits -= 8;
+        result.push((value >> bits) & maxV);
+      }
+    }
+
+    // pad는 무시한다
+    // if (bits > 0) {
+    //   result.push((value << (8 - bits)) & maxV);
+    // }
+
+    return new Uint8Array(result);
+  }
+
+  protected static getAddressHexStringFromKeyInfo(
+    keyInfo: KeyInfo,
+    value: PlainObject | Primitive | undefined,
+    isEVM: boolean
+  ): string {
+    let publicKeyText: string = "";
+    if (keyInfo.type === "ledger") {
+      if (
+        value &&
+        typeof value === "object" &&
+        value["pubKey"] &&
+        typeof value["pubKey"] === "string"
+      ) {
+        publicKeyText = value["pubKey"];
+      }
+    } else if (typeof value === "string") {
+      publicKeyText = value;
+    }
+    if (!publicKeyText) {
+      throw new Error("no public key text");
+    }
+    const publicKey = new PubKeySecp256k1(
+      Buffer.from(publicKeyText.replace("0x", ""), "hex")
+    );
+    const address = isEVM
+      ? publicKey.getEthAddress()
+      : publicKey.getCosmosAddress();
+    return Buffer.from(address).toString("hex").toLowerCase();
   }
 
   static parseBIP44Path(bip44Path: string): {

@@ -20,6 +20,7 @@ import {
   EnableVaultsWithCosmosAddressMsg,
   PrivilegeCosmosSignAminoDelegateMsg,
   RequestCosmosSignDirectAuxMsg,
+  GetCosmosKeysForEachVaultWithSearchSettledMsg,
 } from "./messages";
 import { KeyRingCosmosService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
@@ -86,6 +87,11 @@ export const getHandler: (
         return handleGetCosmosKeysForEachVaultSettledMsg(service)(
           env,
           msg as GetCosmosKeysForEachVaultSettledMsg
+        );
+      case GetCosmosKeysForEachVaultWithSearchSettledMsg:
+        return handleGetCosmosKeysForEachVaultWithSearchSettledMsg(service)(
+          env,
+          msg as GetCosmosKeysForEachVaultWithSearchSettledMsg
         );
       case RequestSignEIP712CosmosTxMsg_v0:
         return handleRequestSignEIP712CosmosTxMsg_v0(
@@ -312,6 +318,38 @@ const handleGetCosmosKeysForEachVaultSettledMsg: (
   return async (_, msg) => {
     return await Promise.allSettled(
       msg.vaultIds.map((vaultId) =>
+        (async () => {
+          const key = await service.getKey(vaultId, msg.chainId);
+          return {
+            vaultId,
+            ...key,
+          };
+        })()
+      )
+    );
+  };
+};
+
+const handleGetCosmosKeysForEachVaultWithSearchSettledMsg: (
+  service: KeyRingCosmosService
+) => InternalHandler<GetCosmosKeysForEachVaultWithSearchSettledMsg> = (
+  service
+) => {
+  return async (_, msg) => {
+    const searched = service.keyRingService.searchKeyRings(
+      msg.searchText,
+      true
+    );
+
+    const searchedMap = new Map<string, boolean>();
+    for (const s of searched) {
+      searchedMap.set(s.id, true);
+    }
+
+    const vaultIds = msg.vaultIds.filter((vaultId) => searchedMap.has(vaultId));
+
+    return await Promise.allSettled(
+      vaultIds.map((vaultId) =>
         (async () => {
           const key = await service.getKey(vaultId, msg.chainId);
           return {
