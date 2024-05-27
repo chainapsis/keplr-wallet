@@ -17,9 +17,9 @@ export const AddressChip: FunctionComponent<{
   // modal 안에서는 배경색을 바꿈
   inModal?: boolean;
 }> = observer(({ chainId, inModal }) => {
-  const { accountStore } = useStore();
+  const { accountStore, chainStore } = useStore();
 
-  const isEVMOnlyChain = chainId.startsWith("eip155");
+  const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
 
   const theme = useTheme();
 

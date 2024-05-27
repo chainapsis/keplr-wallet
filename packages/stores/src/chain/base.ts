@@ -594,4 +594,8 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
     const chainInfo = this.getChain(chainId);
     return chainInfo.evm !== undefined;
   }
+
+  isEvmOnlyChain(chainId: string): boolean {
+    return this.isEvmChain(chainId) && chainId.split(":")[0] === "eip155";
+  }
 }

@@ -85,7 +85,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
   const chainInfo = chainStore.getChain(chainId);
   const isEvmChain = chainStore.isEvmChain(chainId);
-  const isEVMOnlyChain = isEvmChain && chainId.split(":")[0] === "eip155";
+  const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
 
   const coinMinimalDenom =
     initialCoinMinimalDenom ||

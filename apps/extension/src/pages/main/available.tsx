@@ -284,8 +284,9 @@ export const AvailableTabView: FunctionComponent<{
                           const account = accountStore.getAccount(
                             viewToken.chainInfo.chainId
                           );
-                          const isEVMOnlyChain =
-                            viewToken.chainInfo.chainId.startsWith("eip155");
+                          const isEVMOnlyChain = chainStore.isEvmOnlyChain(
+                            viewToken.chainInfo.chainId
+                          );
 
                           return isEVMOnlyChain
                             ? account.ethereumHexAddress

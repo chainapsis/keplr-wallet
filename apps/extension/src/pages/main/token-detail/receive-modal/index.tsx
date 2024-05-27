@@ -22,7 +22,7 @@ export const ReceiveModal: FunctionComponent<{
 
   const chainInfo = chainStore.getChain(chainId);
   const account = accountStore.getAccount(chainId);
-  const isEVMOnlyChain = chainId.startsWith("eip155");
+  const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
 
   return (
     <Box

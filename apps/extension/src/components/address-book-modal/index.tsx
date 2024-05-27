@@ -100,7 +100,7 @@ export const AddressBookModal: FunctionComponent<{
 
     const chainInfo = chainStore.getChain(recipientConfig.chainId);
     const isEVMChain = chainInfo.evm !== undefined;
-    const isEVMOnlyChain = chainInfo.chainId.startsWith("eip155");
+    const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainInfo.chainId);
     const isERC20 = new DenomHelper(currency.coinMinimalDenom).type === "erc20";
 
     const datas: {
