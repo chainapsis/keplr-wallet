@@ -9,10 +9,15 @@ export function isBasicAccessPermissionType(type: string) {
   return type === getBasicAccessPermissionType();
 }
 
+export interface PermissionOptions {
+  isUnableChangeChainInUI: boolean;
+}
+
 export interface PermissionData {
   chainIds: string[];
   type: string;
   origins: string[];
+  options?: PermissionOptions;
 }
 
 export interface GlobalPermissionData {

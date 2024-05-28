@@ -51,6 +51,7 @@ export class PermissionStore {
       chainIds: first.data.chainIds,
       type: first.data.type,
       origins: first.data.origins,
+      options: first.data.options,
     };
 
     for (let i = 1; i < data.length; i++) {
@@ -86,9 +87,10 @@ export class PermissionStore {
 
   async approvePermissionWithProceedNext(
     id: string | string[],
-    afterFn: (proceedNext: boolean) => void | Promise<void>
+    afterFn: (proceedNext: boolean) => void | Promise<void>,
+    result?: unknown
   ) {
-    await this.interactionStore.approveWithProceedNextV2(id, {}, afterFn);
+    await this.interactionStore.approveWithProceedNextV2(id, result, afterFn);
 
     await this.permissionManagerStore.syncPermissionsFromBackground();
   }

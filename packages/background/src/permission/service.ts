@@ -7,6 +7,7 @@ import {
   INTERACTION_TYPE_GLOBAL_PERMISSION,
   INTERACTION_TYPE_PERMISSION,
   PermissionData,
+  PermissionOptions,
 } from "./types";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainsService } from "../chains";
@@ -140,7 +141,8 @@ export class PermissionService {
   async checkOrGrantBasicAccessPermission(
     env: Env,
     chainIds: string | string[],
-    origin: string
+    origin: string,
+    options?: PermissionOptions
   ) {
     if (typeof chainIds === "string") {
       chainIds = [chainIds];
@@ -156,7 +158,12 @@ export class PermissionService {
     }
 
     if (ungrantedChainIds.length > 0) {
-      await this.grantBasicAccessPermission(env, ungrantedChainIds, [origin]);
+      await this.grantBasicAccessPermission(
+        env,
+        ungrantedChainIds,
+        [origin],
+        options
+      );
     }
 
     this.checkBasicAccessPermission(env, chainIds, origin);
@@ -166,7 +173,8 @@ export class PermissionService {
     env: Env,
     chainIds: string[],
     type: string,
-    origin: string
+    origin: string,
+    options?: PermissionOptions
   ) {
     // TODO: Merge with `checkOrGrantBasicAccessPermission` method
 
@@ -178,7 +186,13 @@ export class PermissionService {
     }
 
     if (ungrantedChainIds.length > 0) {
-      await this.grantPermission(env, ungrantedChainIds, type, [origin]);
+      await this.grantPermission(
+        env,
+        ungrantedChainIds,
+        type,
+        [origin],
+        options
+      );
     }
 
     for (const chainId of chainIds) {
@@ -198,7 +212,8 @@ export class PermissionService {
     env: Env,
     chainIds: string[],
     type: string,
-    origins: string[]
+    origins: string[],
+    options?: PermissionOptions
   ) {
     if (env.isInternalMsg) {
       return;
@@ -208,6 +223,7 @@ export class PermissionService {
       chainIds,
       type,
       origins,
+      options,
     };
 
     await this.interactionService.waitApproveV2(
@@ -215,8 +231,15 @@ export class PermissionService {
       "/permission",
       INTERACTION_TYPE_PERMISSION,
       permissionData,
-      () => {
-        this.addPermission(chainIds, type, origins);
+      (newCurrentChainIdForEVM: string) => {
+        if (newCurrentChainIdForEVM) {
+          this.chainsService.getChainInfoOrThrow(newCurrentChainIdForEVM);
+
+          this.addPermission([newCurrentChainIdForEVM], type, origins);
+          this.setCurrentChainIdForEVM(env, origins, newCurrentChainIdForEVM);
+        } else {
+          this.addPermission(chainIds, type, origins);
+        }
       }
     );
   }
@@ -224,7 +247,8 @@ export class PermissionService {
   async grantBasicAccessPermission(
     env: Env,
     chainIds: string[],
-    origins: string[]
+    origins: string[],
+    options?: PermissionOptions
   ) {
     for (const chainId of chainIds) {
       // Make sure that the chain info is registered.
@@ -235,7 +259,8 @@ export class PermissionService {
       env,
       chainIds,
       getBasicAccessPermissionType(),
-      origins
+      origins,
+      options
     );
   }
 
@@ -558,18 +583,15 @@ export class PermissionService {
   }
 
   @action
-  updateCurrentChainIdForEVM(
+  setCurrentChainIdForEVM(
     env: Env,
-    origin: string,
+    origins: string[],
     newCurrentChainId: string
   ): void {
-    this.checkPermission(
-      env,
-      newCurrentChainId,
-      getBasicAccessPermissionType(),
-      origin
-    );
+    for (const origin of origins) {
+      this.checkBasicAccessPermission(env, [newCurrentChainId], origin);
 
-    this.currentChainIdForEVMByOriginMap.set(origin, newCurrentChainId);
+      this.currentChainIdForEVMByOriginMap.set(origin, newCurrentChainId);
+    }
   }
 }

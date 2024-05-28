@@ -432,16 +432,26 @@ export class KeyRingEthereumService {
           throw new Error("No matched EVM chain found in Keplr.");
         }
 
-        await this.permissionService.checkOrGrantPermission(
-          env,
-          [newCurrentChainInfo.chainId],
-          getBasicAccessPermissionType(),
-          origin
-        );
+        if (
+          !this.permissionService.hasBasicAccessPermission(
+            env,
+            [newCurrentChainInfo.chainId],
+            origin
+          )
+        ) {
+          await this.permissionService.grantBasicAccessPermission(
+            env,
+            [newCurrentChainInfo.chainId],
+            [origin],
+            {
+              isUnableChangeChainInUI: true,
+            }
+          );
+        }
 
-        await this.permissionService.updateCurrentChainIdForEVM(
+        this.permissionService.setCurrentChainIdForEVM(
           env,
-          origin,
+          [origin],
           newCurrentChainInfo.chainId
         );
 

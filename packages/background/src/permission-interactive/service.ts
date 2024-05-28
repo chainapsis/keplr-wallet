@@ -35,13 +35,21 @@ export class PermissionInteractiveService {
     const currentChainId =
       this.permissionService.getCurrentChainIdForEVM(origin);
 
-    await this.permissionService.checkOrGrantBasicAccessPermission(
-      env,
-      [currentChainId],
-      origin
-    );
+    if (
+      !this.permissionService.hasBasicAccessPermission(
+        env,
+        [currentChainId],
+        origin
+      )
+    ) {
+      await this.permissionService.grantBasicAccessPermission(
+        env,
+        [currentChainId],
+        [origin]
+      );
+    }
 
-    return currentChainId;
+    return this.permissionService.getCurrentChainIdForEVM(origin);
   }
 
   disable(chainIds: string[], origin: string) {
