@@ -20,6 +20,7 @@
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+  margin-bottom: 4px;
 }
 .price-in-usd {
   color: #fff;
@@ -28,6 +29,7 @@
   font-style: normal;
   font-weight: 500;
   line-height: normal;
+  margin-bottom: 4px;
 }
 .asset-info {
   display: flex;
@@ -66,4 +68,48 @@
 .inUsd {
   color: rgba(255, 255, 255, 0.6);
   font-size: 14px;
+}
+
+.priceChangesGreen {
+  color: var(--green-green-500-vibrant-green, #2de376);
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+}
+.priceChangesOrange {
+  color: #f9774b;
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.changeInDollars-green {
+  color: var(--green-green-500-vibrant-green, #2de376);
+}
+
+.changeInDollars-orange {
+  color: #f9774b;
+}
+
+.increaseInDollarsGreen {
+  color: var(--green-green-500-vibrant-green, #2de376);
+}
+
+.increaseInDollarsOrange {
+  color: #f9774b;
+}
+
+.day {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}
+
+.increaseInPer {
+  color: white;
 }

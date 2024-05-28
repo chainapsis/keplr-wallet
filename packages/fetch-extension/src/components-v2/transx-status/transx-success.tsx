@@ -15,13 +15,15 @@ export const TransxSuccess = () => {
       <div className={style["title"]}>Transaction Successful</div>
       <div className={style["text"]}>
         {" "}
-        Transaction has been broadcasted to blockchain and pending confirmation
+        Congratulations! <br /> Your transaction has been completed and
+        confirmed by the blockchain
       </div>
       <ButtonV2
         styleProps={{
           color: "white",
           background: "transparent",
           border: "1px solid rgba(255,255,255,0.6)",
+          height: "56px",
         }}
         onClick={() => navigate("/")}
         text={"Go to homescreen"}

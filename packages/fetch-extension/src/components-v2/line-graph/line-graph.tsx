@@ -39,6 +39,7 @@ export const LineGraph: React.FC<LineGraphProps> = ({
 
   useEffect(() => {
     const fetchPrices = async () => {
+      setLoading(true);
       try {
         let newPrices: any[] = [];
         if (cachedPrices) {
@@ -118,8 +119,8 @@ export const LineGraph: React.FC<LineGraphProps> = ({
             0, // Change this to 0
             chartArea.bottom
           );
-          gradient.addColorStop(0, "#5F38FB"); // Start color
-          gradient.addColorStop(1, "#F9774B"); // End color
+          gradient.addColorStop(0, "#F9774B"); // Start color
+          gradient.addColorStop(1, "#5F38FB"); // End color
 
           return gradient;
         },
@@ -137,11 +138,7 @@ export const LineGraph: React.FC<LineGraphProps> = ({
             <div>{error}</div>
           ) : (
             <div>
-              Loading...
-              <i
-                className="fas fa-spinner fa-spin ml-2"
-                style={{ color: "white" }}
-              />
+              <div className={style["loadingText"]}>Updating the chart</div>
             </div>
           )}
         </div>

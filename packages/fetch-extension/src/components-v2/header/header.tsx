@@ -17,8 +17,18 @@ export const Header: FunctionComponent<HeaderProps> = ({
   children,
   notification,
 }) => {
+  const headerStyle = {
+    backdropFilter: "none",
+    background: children ? "rgba(0,13,61,0.9)" : "transparent",
+  };
+
   return (
-    <div className={classnames(["header", { fixed }])}>
+    <div
+      style={{
+        ...headerStyle,
+      }}
+      className={classnames(["header", { fixed }])}
+    >
       <div className="headerMenuLeft">{left}</div>
       <div className="headerSection">{children}</div>
       <div className="headerMenuRight">

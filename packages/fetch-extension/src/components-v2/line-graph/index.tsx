@@ -57,11 +57,13 @@ export const LineGraphView: React.FC<LineGraphViewProps> = ({
         setLoading={setLoading}
       />
       {tokenState?.diff && (
-        <TabsPanel
-          tabs={tabs}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        />
+        <div style={{ marginBottom: "-18px" }}>
+          <TabsPanel
+            tabs={tabs}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
+        </div>
       )}
     </div>
   );

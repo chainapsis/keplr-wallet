@@ -58,9 +58,20 @@ export const Input = forwardRef<
   });
 
   return (
-    <FormGroup className={formGroupClassName}>
+    <FormGroup
+      className={formGroupClassName}
+      style={{
+        marginBottom: "0px",
+      }}
+    >
       {label ? (
-        <Label for={inputId} className="form-control-label">
+        <Label
+          for={inputId}
+          className="form-control-label"
+          style={{
+            fontWeight: 400,
+          }}
+        >
           {label}
         </Label>
       ) : null}
@@ -80,7 +91,9 @@ export const Input = forwardRef<
         {append}
       </InputGroup>
       {error ? (
-        <FormFeedback style={{ display: "block" }}>{error}</FormFeedback>
+        <FormFeedback style={{ display: "block", marginTop: "3px" }}>
+          {error}
+        </FormFeedback>
       ) : text ? (
         <FormText>{text}</FormText>
       ) : null}

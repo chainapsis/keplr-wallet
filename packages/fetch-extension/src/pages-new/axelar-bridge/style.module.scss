@@ -6,7 +6,7 @@
 .entries {
   display: flex;
   justify-content: space-between;
-  font-weight: bold;
+  font-weight: 500;
 }
 .errorText {
   color: red;
@@ -32,7 +32,7 @@
 .label {
   color: #525f7f;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 400;
 }
 .chain-container {
   display: flex;

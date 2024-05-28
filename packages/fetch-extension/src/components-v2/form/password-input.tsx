@@ -10,12 +10,14 @@ interface PasswordInputProps
     "type" | "onKeyUp" | "onKeyDown"
   > {
   passwordLabel?: string;
+  labelStyle?: any;
+  inputStyle?: any;
 }
 
 // eslint-disable-next-line react/display-name
 export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
   (props, ref) => {
-    const { passwordLabel, ...rest } = props;
+    const { passwordLabel, labelStyle, inputStyle, ...rest } = props;
     const otherRef = useRef<HTMLInputElement | null>(null);
 
     const [isOnCapsLock, setIsOnCapsLock] = useState(false);
@@ -23,7 +25,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
 
     return (
       <React.Fragment>
-        <div className={stylePasswordInput["text"]}>
+        <div className={stylePasswordInput["text"]} style={{ ...labelStyle }}>
           {passwordLabel || "Password"}
         </div>
         <div className={stylePasswordInput["password-input-container"]}>
@@ -32,7 +34,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
               width: "285px",
               margin: "none",
               display: "flex",
-              top: "12px",
+              ...inputStyle,
             }}
             className={stylePasswordInput["input"]}
             {...rest}

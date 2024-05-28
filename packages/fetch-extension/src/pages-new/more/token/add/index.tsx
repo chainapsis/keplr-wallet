@@ -161,6 +161,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
               navigate(-1);
             }
       }
+      showBottomMenu={false}
     >
       <Form
         className={style["container"]}
@@ -395,6 +396,9 @@ export const AddTokenPage: FunctionComponent = observer(() => {
           data-loading={
             accountInfo.txTypeInProgress === "createSecret20ViewingKey"
           }
+          styleProps={{
+            height: "56px",
+          }}
         >
           <FormattedMessage id="setting.token.add.button.submit" />
         </ButtonV2>

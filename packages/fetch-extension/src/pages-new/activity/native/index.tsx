@@ -13,29 +13,39 @@ import { UnsupportedNetwork } from "../unsupported-network";
 import { CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB } from "../../../config.ui.var";
 import { ErrorActivity } from "../error-activity";
 const options = [
-  { value: "/cosmos.bank.v1beta1.MsgSend", label: "Funds transfers" },
   {
+    icon: require("@assets/svg/wireframe/arrow-down.svg"),
+    value: "/cosmos.bank.v1beta1.MsgSend",
+    label: "Funds transfers",
+  },
+  {
+    icon: require("@assets/svg/wireframe/stake.svg"),
     value: "/cosmos.staking.v1beta1.MsgDelegate",
     label: "Staked Funds",
   },
   {
+    icon: require("@assets/svg/wireframe/hand-holding-seedling.svg"),
     value: "/cosmos.staking.v1beta1.MsgUndelegate",
     label: "Unstaked Funds",
   },
   {
+    icon: require("@assets/svg/wireframe/rename.svg"),
     value: "/cosmos.staking.v1beta1.MsgBeginRedelegate",
     label: "Redelegate Funds",
   },
   {
+    icon: require("@assets/svg/wireframe/contract-integration-transparent.svg"),
     value:
       "/cosmos.authz.v1beta1.MsgExec,/cosmwasm.wasm.v1.MsgExecuteContract,/cosmos.authz.v1beta1.MsgRevoke",
     label: "Contract Interactions",
   },
   {
+    icon: require("@assets/svg/wireframe/gem.svg"),
     value: "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
     label: "Claim Rewards",
   },
   {
+    icon: require("@assets/svg/wireframe/arrow-down-up-across-line.svg"),
     value: "/ibc.applications.transfer.v1.MsgTransfer",
     label: "IBC transfers",
   },

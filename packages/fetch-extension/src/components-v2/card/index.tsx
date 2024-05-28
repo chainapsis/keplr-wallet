@@ -10,9 +10,11 @@ export interface CardProps {
   isActive?: boolean;
   style?: any;
   subheadingStyle?: any;
+  headingStyle?: any;
   onClick?: any;
   rightContentOnClick?: any;
   rightContentStyle?: any;
+  inActiveBackground?: any;
 }
 
 export const Card: React.FC<CardProps> = ({
@@ -25,11 +27,17 @@ export const Card: React.FC<CardProps> = ({
   isActive,
   style,
   subheadingStyle,
+  headingStyle,
   onClick,
   rightContentOnClick,
+  inActiveBackground,
 }) => {
   const containerStyle: React.CSSProperties = {
-    backgroundColor: isActive ? "var(--Indigo---Fetch, #5F38FB)" : "",
+    backgroundColor: isActive
+      ? "var(--Indigo---Fetch, #5F38FB)"
+      : inActiveBackground
+      ? inActiveBackground
+      : "rgba(255,255,255,0.1)",
     cursor: onClick || rightContentOnClick ? "pointer" : "default",
     ...style,
   };
@@ -63,7 +71,10 @@ export const Card: React.FC<CardProps> = ({
         }}
       >
         <div className={styles["middleSection"]}>
-          <div className={`${styles["heading"]} ${styles["wordBreak"]}`}>
+          <div
+            style={{ ...headingStyle }}
+            className={`${styles["heading"]} ${styles["wordBreak"]}`}
+          >
             {heading}
           </div>
           {subheading && (

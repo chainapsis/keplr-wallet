@@ -58,7 +58,7 @@ export const AddAddress: FunctionComponent<{
       <HeaderLayout
         smallTitle={true}
         showTopMenu={true}
-        showBottomMenu={true}
+        showBottomMenu={false}
         showChainName={false}
         canChangeChainInfo={false}
         alternativeTitle={
@@ -82,7 +82,6 @@ export const AddAddress: FunctionComponent<{
             {intl.formatMessage({ id: "setting.address-book.name" })}
           </Label>
           <Input
-            placeholder="Wallet Name"
             className={style["input"]}
             type="text"
             autoComplete="off"
@@ -163,6 +162,9 @@ export const AddAddress: FunctionComponent<{
               closeModal();
             }}
             text={""}
+            styleProps={{
+              height: "56px",
+            }}
           >
             <FormattedMessage id={"setting.address-book.button.save"} />
           </ButtonV2>

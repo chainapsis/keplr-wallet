@@ -29,7 +29,7 @@ export const TabsPanel: React.FC<TabsProps> = ({
                   isSelected ? style["selected"] : ""
                 }`}
                 style={{
-                  color: `${isSelected ? "#FFF" : "#FFF"}`,
+                  color: `${isSelected ? "#FFF" : "rgba(255,255,255,0.6)"}`,
                   background: `${
                     isSelected ? "rgba(255,255,255,0.1)" : "transparent"
                   }`,

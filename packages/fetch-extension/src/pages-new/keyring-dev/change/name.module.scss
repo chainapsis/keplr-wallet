@@ -1,18 +1,28 @@
 .container {
   display: flex;
   flex-direction: column;
-
   height: 100%;
 }
 .input {
   background: rgba(255, 255, 255, 0.1) !important;
   color: white !important;
+  margin-bottom: 16px;
 }
+
+.input:read-only {
+  border: 0px !important;
+}
+
 .input:focus {
   background: rgba(255, 255, 255, 0.2);
   color: white !important;
+  border: 1px solid #7655fc;
 }
 .label {
   color: rgba(255, 255, 255, 0.6);
+  font-family: Lexend;
   font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px;
 }

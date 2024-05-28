@@ -27,6 +27,7 @@ export const CurrencyPge: FunctionComponent = observer(() => {
       showTopMenu={true}
       canChangeChainInfo={false}
       smallTitle={true}
+      showBottomMenu={false}
       alternativeTitle={intl.formatMessage({
         id: "setting.fiat",
       })}

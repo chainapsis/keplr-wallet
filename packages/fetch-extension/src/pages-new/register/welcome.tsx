@@ -6,7 +6,7 @@ import { ButtonV2 } from "@components-v2/buttons/button";
 
 export const WelcomePage: FunctionComponent = () => {
   return (
-    <div style={{ paddingTop: "20px", marginLeft: "-27px" }}>
+    <div style={{ marginLeft: "-27px" }}>
       <img
         className={styleWelcome["pinWalletArrow"]}
         src={require("@assets/svg/wireframe/pin-arrow.svg")}
@@ -24,6 +24,9 @@ export const WelcomePage: FunctionComponent = () => {
         />
       </div>
       <ButtonV2
+        styleProps={{
+          height: "56px",
+        }}
         onClick={() => {
           if (typeof browser !== "undefined") {
             browser.tabs.getCurrent().then((tab) => {

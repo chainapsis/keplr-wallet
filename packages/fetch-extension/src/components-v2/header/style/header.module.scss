@@ -5,12 +5,14 @@
     width: 100%;
     height: $header-height;
     z-index: 100;
-    background: transparent;
-    backdrop-filter: blur(10px);
+    background: rgba(0, 13, 61, 0.4);
+    // backdrop-filter: blur(10px);
+    position: fixed;
+    top: 0;
     font-size: 16px;
     color: white;
     &.fixed {
-      background: transparent;
+      background: rgba(0, 13, 61, 0.4);
     }
   }
 

@@ -25,7 +25,7 @@
   font-size: 14px;
 }
 .priceChangesOrange {
-  color: orange;
+  color: #f9774b;
   display: flex;
   gap: 4px;
   justify-content: center;
@@ -47,8 +47,7 @@
   color: var(--grey-grey-700, #556578);
 }
 
-.portfolio,
-.portfolio:hover {
+.portfolio {
   padding: 0px;
   cursor: pointer;
   width: 128px;
@@ -62,6 +61,14 @@
   border-radius: 100px;
   color: #fff;
   background: transparent;
+}
+
+.portfolio:hover {
+  border-color: white;
+  color: white;
+  background: transparent !important;
+  box-shadow: none;
+  // padding-top: 1px; can be used with Button
 }
 
 .portfolio:focus {
@@ -110,7 +117,7 @@
 }
 
 .changeInDollars-orange {
-  color: orange;
+  color: #f9774b;
 }
 
 .increaseInDollarsGreen {
@@ -118,7 +125,7 @@
 }
 
 .increaseInDollarsOrange {
-  color: orange;
+  color: #f9774b;
 }
 
 .increaseInPer {
@@ -130,5 +137,5 @@
 }
 
 .negative {
-  color: orange;
+  color: #f9774b;
 }

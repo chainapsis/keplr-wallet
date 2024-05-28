@@ -22,6 +22,7 @@ import { AdvancedBIP44Option, useBIP44Option } from "../advanced-bip44";
 import { Buffer } from "buffer/";
 import { useStore } from "../../../stores";
 import classnames from "classnames";
+import { NewMnemonicStep } from "src/pages-new/register/mnemonic";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
@@ -154,13 +155,13 @@ export const RecoverMnemonicPage: FunctionComponent<{
   const seedTypeToParagraph = (seedType: SeedType) => {
     switch (seedType) {
       case SeedType.WORDS12: {
-        return "12 words";
+        return NewMnemonicStep.WORDS12;
       }
       case SeedType.WORDS24: {
-        return "24 words";
+        return NewMnemonicStep.WORDS24;
       }
       case SeedType.PRIVATE_KEY: {
-        return "Private key";
+        return NewMnemonicStep.PRIVATEKEY;
       }
       default: {
         return "Unknown";

@@ -10,6 +10,7 @@ import {
   FeeButtons,
   IBCChannelRegistrar,
   MemoInput,
+  TokenSelectorDropdown,
 } from "@components-v2/form";
 import { useNotification } from "@components/notification";
 import { ExtensionKVStore } from "@keplr-wallet/common";
@@ -26,9 +27,12 @@ import {
 } from "@keplr-wallet/hooks";
 import { HeaderLayout } from "@layouts-v2/header-layout";
 import { FormattedMessage, useIntl } from "react-intl";
-import { Alert } from "reactstrap";
+import { Alert, Label } from "reactstrap";
 import { useStore } from "../../../stores";
 import style from "./style.module.scss";
+import { Card } from "@components-v2/card";
+import { Dropdown } from "@components-v2/dropdown";
+import { SetKeyRingPage } from "../../keyring-dev";
 
 export const IBCTransferPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
@@ -106,6 +110,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
         isIBCRegisterPageOpen ? "Add IBC Chain" : "IBC Transfer"
       }
       canChangeChainInfo={false}
+      showBottomMenu={false}
       onBackButton={() => {
         isIBCRegisterPageOpen
           ? setIsIBCRegisterPageOpen(false)
@@ -218,7 +223,12 @@ export const IBCTransferPageChannel: FunctionComponent<{
     const isChannelSet = channelConfig.channel != null;
     return (
       <form className={style["formContainer"]}>
-        <div className={style["formInnerContainer"]}>
+        <div
+          style={{
+            height: "100%",
+          }}
+          className={style["formInnerContainer"]}
+        >
           {isIBCRegisterPageOpen ? (
             <IBCChannelRegistrar
               isOpen={isIBCRegisterPageOpen}
@@ -228,7 +238,7 @@ export const IBCTransferPageChannel: FunctionComponent<{
               }
             />
           ) : (
-            <React.Fragment>
+            <div style={{ height: "100%" }}>
               <DestinationChainSelector
                 ibcChannelConfig={channelConfig}
                 setIsIBCRegisterPageOpen={setIsIBCRegisterPageOpen}
@@ -244,6 +254,7 @@ export const IBCTransferPageChannel: FunctionComponent<{
                 value={""}
                 // pageName={"IBC Transfer"}
               />
+
               <MemoInput
                 label={intl.formatMessage({
                   id: "send.input.memo",
@@ -263,6 +274,9 @@ export const IBCTransferPageChannel: FunctionComponent<{
                 </div>
               </Alert>
               <ButtonV2
+                styleProps={{
+                  height: "56px",
+                }}
                 text=""
                 disabled={!isValid}
                 onClick={(e: any) => {
@@ -272,7 +286,7 @@ export const IBCTransferPageChannel: FunctionComponent<{
               >
                 <FormattedMessage id="ibc.transfer.next" />
               </ButtonV2>
-            </React.Fragment>
+            </div>
           )}
         </div>
       </form>
@@ -292,13 +306,19 @@ export const IBCTransferPageAmount: FunctionComponent<{
     const { accountStore, chainStore, priceStore } = useStore();
     const accountInfo = accountStore.getAccount(chainStore.current.chainId);
     const [loading, setLoading] = useState(false);
+    const [isChangeWalletOpen, setIsChangeWalletOpen] = useState(false);
     const isValid =
       amountConfig.error == null &&
       feeConfig.error == null &&
       gasConfig.error == null;
 
     return (
-      <form className={style["formContainer"]}>
+      <form
+        style={{
+          height: "142%",
+        }}
+        className={style["formContainer"]}
+      >
         <div className={style["formInnerContainer"]}>
           <CoinInput
             label={intl.formatMessage({
@@ -307,7 +327,34 @@ export const IBCTransferPageAmount: FunctionComponent<{
             amountConfig={amountConfig}
             // pageName={"IBC Transfer"}
           />
-          <div style={{ flex: 1 }} />
+
+          <TokenSelectorDropdown amountConfig={amountConfig} />
+          <Label
+            style={{
+              fontSize: "14px",
+              color: "rgba(255,255,255,0.6)",
+              marginTop: "16px",
+            }}
+          >
+            Send from
+          </Label>
+          <Card
+            style={{
+              background: "rgba(255, 255, 255, 0.10)",
+              color: "rgba(255, 255, 255, 0.6)",
+              fontSize: "14px",
+              padding: "12px 18px",
+            }}
+            headingStyle={{
+              fontSize: "14px",
+              color: "white",
+              fontWeight: "400",
+              opacity: "1",
+            }}
+            heading={accountInfo.name}
+            rightContent={require("@assets/svg/wireframe/chevron-down.svg")}
+            onClick={() => setIsChangeWalletOpen(!isChangeWalletOpen)}
+          />
           <FeeButtons
             label={intl.formatMessage({
               id: "send.input.fee",
@@ -334,9 +381,18 @@ export const IBCTransferPageAmount: FunctionComponent<{
             }}
             styleProps={{
               marginTop: "12px",
+              height: "56px",
             }}
           />
         </div>
+        <Dropdown
+          isOpen={isChangeWalletOpen}
+          setIsOpen={setIsChangeWalletOpen}
+          title="Select Wallet"
+          closeClicked={() => setIsChangeWalletOpen(false)}
+        >
+          <SetKeyRingPage navigateTo={"/send"} />
+        </Dropdown>
       </form>
     );
   }

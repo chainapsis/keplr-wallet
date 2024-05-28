@@ -34,7 +34,12 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
   font-weight: bold;
 }
 
-$font-family-base: "Nunito Sans", sans-serif;
+@font-face {
+  font-family: Lexand;
+  src: url(../public/assets/font/Lexend-VariableFont_wght.ttf);
+}
+
+$font-family-base: "Lexand", sans-serif;
 $body-color: black;
 @import "../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard-react";
 

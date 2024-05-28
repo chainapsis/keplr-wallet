@@ -28,11 +28,11 @@
     background: transparent !important;
     border: none;
     color: white !important;
-    font-weight: bold;
+    font-weight: 400;
   }
 }
 .input::placeholder {
-  color: white;
+  color: rgba(255, 255, 255, 0.6);
   opacity: 1 !important;
 }
 .addressBookButton {
@@ -80,5 +80,5 @@
   font-weight: 400;
   line-height: 24px;
   opacity: 0.6;
-  margin-bottom: 2px;
+  margin-bottom: 8px;
 }

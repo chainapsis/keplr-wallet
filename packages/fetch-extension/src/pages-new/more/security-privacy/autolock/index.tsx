@@ -70,9 +70,7 @@ export const AutoLockPage: FunctionComponent = () => {
       showChainName={false}
       canChangeChainInfo={false}
       smallTitle={true}
-      alternativeTitle={intl.formatMessage({
-        id: "setting.autolock",
-      })}
+      showBottomMenu={false}
       onBackButton={() => {
         analyticsStore.logEvent("back_click", {
           pageName: "Autolock Timer",
@@ -116,7 +114,13 @@ export const AutoLockPage: FunctionComponent = () => {
             pattern="[0-9]*"
             error={errors.duration && errors.duration.message}
           />
-          <ButtonV2 data-loading={isLoading} text={""}>
+          <ButtonV2
+            styleProps={{
+              height: "56px",
+            }}
+            data-loading={isLoading}
+            text={""}
+          >
             <FormattedMessage id="setting.endpoints.button.confirm" />
           </ButtonV2>
         </Form>

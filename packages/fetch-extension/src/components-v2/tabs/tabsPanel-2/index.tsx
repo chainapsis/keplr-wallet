@@ -62,7 +62,7 @@ export const TabsPanel: React.FC<TabsProps> = ({
                     ? "transparent"
                     : "white"
                 }`,
-                borderRadius: `${tab.id === selectedTab ? "12px" : "0px"}`,
+                borderRadius: `${tab.id === selectedTab ? "10px" : "0px"}`,
               }}
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}

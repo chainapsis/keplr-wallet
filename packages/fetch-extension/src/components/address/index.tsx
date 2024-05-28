@@ -35,6 +35,9 @@ export const Address: FunctionComponent<
       <ToolTip
         trigger="hover"
         options={{ placement: "top" }}
+        tooltipStyle={{
+          background: "#5F38FB",
+        }}
         tooltip={
           <div
             className="address-tooltip"
@@ -50,6 +53,9 @@ export const Address: FunctionComponent<
               : tooltipAddress}
           </div>
         }
+        childrenStyle={{
+          opacity: 0.6,
+        }}
       >
         {props.iconClass ? <i className={iconClass} /> : ""}
         {Bech32Address.shortenAddress(children, props.maxCharacters)}

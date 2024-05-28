@@ -21,6 +21,7 @@ export const MoreLanguagePage: FunctionComponent = () => {
       showChainName={false}
       canChangeChainInfo={false}
       smallTitle={true}
+      showBottomMenu={false}
       alternativeTitle={intl.formatMessage({
         id: "setting.language",
       })}

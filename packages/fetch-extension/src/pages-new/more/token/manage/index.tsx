@@ -16,6 +16,8 @@ import { useIntl } from "react-intl";
 import { ToolTip } from "@components/tooltip";
 import { HeaderLayout } from "@layouts-v2/header-layout";
 import { Card } from "@components-v2/card";
+import { NoToken } from "./no-token";
+import { ButtonV2 } from "@components-v2/buttons/button";
 
 export const ManageTokenPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
@@ -59,6 +61,7 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
       smallTitle={true}
       showTopMenu={true}
       showChainName={false}
+      showBottomMenu={false}
       canChangeChainInfo={false}
       alternativeTitle={intl.formatMessage({
         id: "main.menu.token-list",
@@ -80,48 +83,15 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
       }
     >
       <div className={style["container"]}>
-        {appCurrencies.map((currency) => {
-          const cosmwasmToken = currency as
-            | CW20Currency
-            | Secret20Currency
-            | Erc20Currency;
+        {appCurrencies.length > 0 ? (
+          appCurrencies.map((currency) => {
+            const cosmwasmToken = currency as
+              | CW20Currency
+              | Secret20Currency
+              | Erc20Currency;
 
-          const icons: React.ReactElement[] = [];
+            const icons: React.ReactElement[] = [];
 
-          icons.push(
-            <ToolTip
-              trigger="hover"
-              options={{
-                placement: "top-end",
-              }}
-              childrenStyle={{ display: "flex" }}
-              tooltip={
-                <div>
-                  {intl.formatMessage({
-                    id: "setting.token.manage.notification.contract-address.copy.hover",
-                  })}
-                </div>
-              }
-            >
-              <i
-                key="copy"
-                className="fas fa-copy"
-                style={{
-                  cursor: "pointer",
-                }}
-                onClick={async (e) => {
-                  e.preventDefault();
-
-                  await copyText(
-                    cosmwasmToken.contractAddress,
-                    "setting.token.manage.notification.contract-address.copy"
-                  );
-                }}
-              />
-            </ToolTip>
-          );
-
-          if ("viewingKey" in cosmwasmToken) {
             icons.push(
               <ToolTip
                 trigger="hover"
@@ -132,14 +102,14 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
                 tooltip={
                   <div>
                     {intl.formatMessage({
-                      id: "setting.token.manage.notification.viewing-key.copy.hover",
+                      id: "setting.token.manage.notification.contract-address.copy.hover",
                     })}
                   </div>
                 }
               >
                 <i
-                  key="key"
-                  className="fas fa-key"
+                  key="copy"
+                  className="fas fa-copy"
                   style={{
                     cursor: "pointer",
                   }}
@@ -147,61 +117,117 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
                     e.preventDefault();
 
                     await copyText(
-                      cosmwasmToken.viewingKey,
-                      "setting.token.manage.notification.viewing-key.copy"
+                      cosmwasmToken.contractAddress,
+                      "setting.token.manage.notification.contract-address.copy"
                     );
                   }}
                 />
               </ToolTip>
             );
-          }
-          cosmwasmToken.coinDenom !== "FET" &&
-            icons.push(
-              <i
-                key="trash"
-                className="fas fa-trash-alt"
-                style={{
-                  cursor: "pointer",
-                }}
-                onClick={async (e) => {
-                  e.preventDefault();
 
-                  if (
-                    await confirm.confirm({
-                      paragraph: intl.formatMessage({
-                        id: "setting.token.manage.confirm.remove-token",
-                      }),
-                    })
-                  ) {
-                    await tokensStore
-                      .getTokensOf(chainStore.current.chainId)
-                      .removeToken(cosmwasmToken);
+            if ("viewingKey" in cosmwasmToken) {
+              icons.push(
+                <ToolTip
+                  trigger="hover"
+                  options={{
+                    placement: "top-end",
+                  }}
+                  childrenStyle={{ display: "flex" }}
+                  tooltip={
+                    <div>
+                      {intl.formatMessage({
+                        id: "setting.token.manage.notification.viewing-key.copy.hover",
+                      })}
+                    </div>
                   }
+                >
+                  <i
+                    key="key"
+                    className="fas fa-key"
+                    style={{
+                      cursor: "pointer",
+                    }}
+                    onClick={async (e) => {
+                      e.preventDefault();
+
+                      await copyText(
+                        cosmwasmToken.viewingKey,
+                        "setting.token.manage.notification.viewing-key.copy"
+                      );
+                    }}
+                  />
+                </ToolTip>
+              );
+            }
+            cosmwasmToken.coinDenom !== "FET" &&
+              icons.push(
+                <i
+                  key="trash"
+                  className="fas fa-trash-alt"
+                  style={{
+                    cursor: "pointer",
+                  }}
+                  onClick={async (e) => {
+                    e.preventDefault();
+
+                    if (
+                      await confirm.confirm({
+                        paragraph: intl.formatMessage({
+                          id: "setting.token.manage.confirm.remove-token",
+                        }),
+                      })
+                    ) {
+                      await tokensStore
+                        .getTokensOf(chainStore.current.chainId)
+                        .removeToken(cosmwasmToken);
+                    }
+                  }}
+                />
+              );
+
+            return (
+              <Card
+                key={cosmwasmToken.contractAddress}
+                style={{
+                  background: "rgba(255,255,255,0.1)",
+                  width: "92%",
                 }}
+                heading={cosmwasmToken.coinDenom}
+                subheading={Bech32Address.shortenAddress(
+                  cosmwasmToken.contractAddress,
+                  30,
+                  cosmwasmToken.type === "erc20"
+                )}
+                rightContent={
+                  <div className={style["edit"]} style={{ display: "flex" }}>
+                    {icons}
+                  </div>
+                }
               />
             );
-
-          return (
-            <Card
-              key={cosmwasmToken.contractAddress}
-              style={{
-                background: "rgba(255,255,255,0.1)",
-                width: "92%",
+          })
+        ) : (
+          <div
+            style={{
+              width: "90%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "column",
+            }}
+          >
+            <NoToken />
+            <ButtonV2
+              styleProps={{
+                height: "56px",
               }}
-              heading={cosmwasmToken.coinDenom}
-              subheading={Bech32Address.shortenAddress(
-                cosmwasmToken.contractAddress,
-                30,
-                cosmwasmToken.type === "erc20"
-              )}
-              rightContent={
-                <div className={style["edit"]} style={{ display: "flex" }}>
-                  {icons}
-                </div>
-              }
+              text="Add Token"
+              onClick={() => {
+                navigate("/more/token/add");
+              }}
             />
-          );
-        })}
+          </div>
+        )}
       </div>
     </HeaderLayout>
   );

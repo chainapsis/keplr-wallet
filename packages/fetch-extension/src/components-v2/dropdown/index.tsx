@@ -37,7 +37,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
                 closeClicked();
                 setIsOpen(false);
               }}
-              src={require("@assets/svg/wireframe/close.svg")}
+              src={require("@assets/svg/wireframe/xmark.svg")}
             />
           )}
         </div>

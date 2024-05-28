@@ -173,7 +173,11 @@ export const NotificationOrganizations: FunctionComponent = observer(() => {
       }}
     >
       <Card
-        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "24px" }}
+        style={{
+          background: "rgba(255,255,255,0.1)",
+          marginBottom: "24px",
+          padding: "12px 18px",
+        }}
         heading={
           <input
             className={style["searchInput"]}
@@ -260,6 +264,9 @@ export const NotificationOrganizations: FunctionComponent = observer(() => {
             Object.keys(followUnfollowObj.current).length === 0
           }
           onClick={handleNextPage}
+          styleProps={{
+            height: "56px",
+          }}
         >
           {isBtnLoading ? (
             <i className="fa fa-spinner fa-spin fa-fw" />

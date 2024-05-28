@@ -1,8 +1,7 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
-import { FormFeedback, Input } from "reactstrap";
 import { IMemoConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
-import { Card } from "../card";
+import React, { FunctionComponent, useMemo, useState } from "react";
+import { FormFeedback, Input } from "reactstrap";
 import style from "./memo.module.scss";
 export interface MemoInputProps {
   memoConfig: IMemoConfig;
@@ -34,31 +33,33 @@ export const MemoInput: FunctionComponent<MemoInputProps> = observer(
     return (
       <React.Fragment>
         <div className={style["label"]}>Memo</div>
-        <Card
-          heading={""}
-          subheading={
-            <Input
-              className={style["input"]}
-              id={inputId}
-              placeholder="Optional"
-              type="textarea"
-              rows={rows ? rows : 2}
-              value={memoConfig.memo}
-              onChange={(e) => {
-                memoConfig.setMemo(e.target.value.substring(0, 256));
-                e.preventDefault();
-              }}
-              autoComplete="off"
-              disabled={disabled}
-            />
-          }
+        <div
           style={{
-            opacity: "0.8",
-            fontWeight: "400",
-            background: "rgba(255, 255, 255, 0.1)",
+            height: "48px",
+            marginBottom: "24px",
           }}
-          subheadingStyle={{ fontSize: "14px" }}
-        />
+        >
+          <Input
+            className={style["input"]}
+            style={{
+              fontWeight: 400,
+              background: "rgba(255, 255, 255, 0.1)",
+              padding: "12px 18px",
+              marginBottom: "24px",
+            }}
+            id={inputId}
+            placeholder="Optional"
+            type="textarea"
+            rows={rows ? rows : 2}
+            value={memoConfig.memo}
+            onChange={(e) => {
+              memoConfig.setMemo(e.target.value.substring(0, 256));
+              e.preventDefault();
+            }}
+            autoComplete="off"
+            disabled={disabled}
+          />
+        </div>
         {errorText != null ? (
           <FormFeedback style={{ display: "block" }}>{errorText}</FormFeedback>
         ) : null}

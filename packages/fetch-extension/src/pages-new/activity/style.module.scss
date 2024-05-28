@@ -14,8 +14,8 @@
 .title {
   display: flex;
   justify-content: space-between;
-  font-weight: 700;
-  font-size: 23px;
+  font-weight: 400;
+  font-size: 32px;
   /* padding-bottom: 16px; */
   /* margin-bottom: 16px; */
   margin-top: 12px;
@@ -40,7 +40,7 @@
 }
 .noActivityContainer {
   display: inline-flex;
-  height: 391px;
+  height: 310px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -58,14 +58,13 @@
   line-height: 34px;
 }
 .content {
-  color: #fff;
+  color: rgba(255, 255, 255, 0.8);
   text-align: center;
   font-family: Lexend;
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
   line-height: 160%;
-  opacity: 0.8;
 }
 
 .selectAll {

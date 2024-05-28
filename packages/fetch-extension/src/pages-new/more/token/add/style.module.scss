@@ -29,7 +29,8 @@
   opacity: 0.6;
   font-size: 14px;
   margin-bottom: 8px;
-  font-weight: 600;
+  font-weight: 400;
+  margin-top: 16px;
 }
 .input {
   color: white;
@@ -52,6 +53,7 @@
   gap: 24px;
   align-self: stretch;
   height: 43px;
+  border: 1px solid #7655fc !important;
 }
 .error {
   color: red;

@@ -209,8 +209,11 @@ export const Stats = () => {
       </div>
       <ButtonV2
         onClick={handleClaimRewards}
-        text="Claim"
-        gradientText="Rewards"
+        styleProps={{
+          background: "linear-gradient(269deg, #F9774B 0%, #CF447B 99.29%)",
+          color: "white",
+        }}
+        text="Claim rewards"
         disabled={rewardsBal === "0.000000000000000000 FET"}
       />
     </div>

@@ -105,7 +105,11 @@ export const NotificationTopics: FunctionComponent = () => {
       }}
     >
       <Card
-        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "24px" }}
+        style={{
+          background: "rgba(255,255,255,0.1)",
+          marginBottom: "24px",
+          padding: "12px 18px",
+        }}
         heading={
           <input
             className={style["searchInput"]}
@@ -164,6 +168,9 @@ export const NotificationTopics: FunctionComponent = () => {
             text={type === pageOptions.add ? "Finish" : "Save"}
             onClick={handleNextPage}
             disabled={type === pageOptions.edit && disabled}
+            styleProps={{
+              height: "56px",
+            }}
           />
         </div>
       </div>

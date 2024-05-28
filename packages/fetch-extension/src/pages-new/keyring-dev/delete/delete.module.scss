@@ -1,0 +1,133 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  height: 100%;
+}
+.inputField,
+.inputField:focus {
+  display: flex;
+  padding: 12px 18px;
+  align-items: center;
+  align-self: stretch;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.innerContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .imgLock {
+    height: 64px;
+    width: 62.93px;
+    margin-bottom: 24px;
+  }
+
+  p {
+    color: #fff;
+    text-align: center;
+    font-family: Lexend;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 160%;
+    opacity: 0.8;
+    width: 255px;
+  }
+}
+.heading {
+  color: #fff;
+  text-align: center;
+  font-family: Lexend;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 34px;
+  margin-bottom: 6px;
+}
+
+.alert {
+  display: flex;
+  padding: 12px;
+  align-items: baseline;
+  gap: 6px;
+  align-self: stretch;
+  border-radius: 12px;
+  background: rgba(255, 62, 62, 0.25);
+  border: 1px solid rgba(255, 62, 62, 0.25);
+  color: white;
+  margin-bottom: 15px;
+
+  i {
+    font-size: 24px;
+    margin-right: 8px;
+  }
+
+  h1 {
+    font-size: 16px;
+    font-weight: bold;
+    color: #32325d;
+    margin-bottom: 4px;
+  }
+
+  p {
+    font-size: 14px;
+    line-height: 1.57;
+    margin: 0;
+  }
+  .text {
+    color: #fff;
+    font-family: Lexend;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 160%; /* 22.4px */
+  }
+}
+
+.confimation-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+}
+
+.confimation-text-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  text-align: center;
+
+  .confirmation-title {
+    color: #fff;
+    text-align: center;
+    font-family: Lexend;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 160%; /* 28.8px */
+  }
+
+  .confirmation-subTitle {
+    color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    font-family: Lexend;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 160%; /* 22.4px */
+  }
+}
+
+.confirmation-button-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}

@@ -7,64 +7,79 @@ import { Card } from "@components-v2/card";
 import { useNavigate } from "react-router";
 
 export const MorePage: FunctionComponent = () => {
-  const { chainStore, analyticsStore } = useStore();
+  const { chainStore, analyticsStore, keyRingStore } = useStore();
   const navigate = useNavigate();
   const isAxlViewVisible = CHAINS.some((chain) => {
     return chain.chainId?.toString() === chainStore.current.chainId;
   });
   const isEvm = chainStore.current.features?.includes("evm") ?? false;
   return (
-    <HeaderLayout showChainName={true} canChangeChainInfo={true}>
+    <HeaderLayout
+      innerStyle={{
+        marginTop: "0px",
+        marginBottom: "0px",
+      }}
+      showChainName={true}
+      canChangeChainInfo={true}
+      showBottomMenu={true}
+    >
       <div className={style["title"]}>More</div>
       <div className={style["subTitle"]}>Account</div>
       <Card
         leftImageStyle={{ background: "transparent" }}
-        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "5px" }}
+        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "6px" }}
         leftImage={require("@assets/svg/wireframe/currency.svg")}
         heading={"Currency"}
         onClick={() => navigate("/more/currency")}
       />
       <Card
         leftImageStyle={{ background: "transparent" }}
-        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "5px" }}
+        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "6px" }}
         leftImage={require("@assets/svg/wireframe/manage-tokens.svg")}
         heading={"Manage Tokens"}
         onClick={() => navigate("/more/token/manage")}
       />
       <Card
         leftImageStyle={{ background: "transparent", height: "18px" }}
-        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "5px" }}
+        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "6px" }}
         leftImage={require("@assets/svg/wireframe/at.svg")}
         heading={"Address Book"}
         onClick={() => navigate("/more/address-book")}
       />
       <Card
         leftImageStyle={{ background: "transparent" }}
-        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "5px" }}
+        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "6px" }}
         leftImage={require("@assets/svg/wireframe/language.svg")}
         heading={"Language"}
         onClick={() => navigate("/more/language")}
       />
       <Card
         leftImageStyle={{ background: "transparent" }}
-        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "5px" }}
+        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "6px" }}
         leftImage={require("@assets/svg/wireframe/notification.svg")}
         heading={"Notifications"}
         onClick={() => navigate("/more/notifications")}
       />
       <Card
         leftImageStyle={{ background: "transparent" }}
-        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "5px" }}
+        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "6px" }}
         leftImage={require("@assets/svg/wireframe/security.svg")}
         heading={"Security & privacy"}
         onClick={() => navigate("/more/security-privacy")}
       />
 
-      <div className={style["subTitle"]}>Others</div>
+      <div
+        style={{
+          marginTop: "12px",
+        }}
+        className={style["subTitle"]}
+      >
+        Others
+      </div>
       <Card
         leftImageStyle={{ background: "transparent", height: "16px" }}
-        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "5px" }}
-        leftImage={require("@assets/svg/wireframe/ibc-transfer.svg")}
+        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "8px" }}
+        leftImage={require("@assets/svg/wireframe/ibc-transfer-v2.svg")}
         heading={"IBC Transfer"}
         onClick={(e: any) => {
           e.preventDefault();
@@ -77,7 +92,7 @@ export const MorePage: FunctionComponent = () => {
       {chainStore.current.govUrl && (
         <Card
           leftImageStyle={{ background: "transparent" }}
-          style={{ background: "rgba(255,255,255,0.1)", marginBottom: "5px" }}
+          style={{ background: "rgba(255,255,255,0.1)", marginBottom: "8px" }}
           leftImage={require("@assets/svg/wireframe/proposal.svg")}
           heading={"Proposals"}
           onClick={(e: any) => {
@@ -89,7 +104,7 @@ export const MorePage: FunctionComponent = () => {
       )}
       <Card
         leftImageStyle={{ background: "transparent" }}
-        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "5px" }}
+        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "8px" }}
         leftImage={require("@assets/svg/wireframe/guide.svg")}
         heading={"Guide"}
         onClick={() =>
@@ -103,7 +118,7 @@ export const MorePage: FunctionComponent = () => {
         chainStore.current.chainId === "dorado-1") && (
         <Card
           leftImageStyle={{ background: "transparent" }}
-          style={{ background: "rgba(255,255,255,0.1)", marginBottom: "5px" }}
+          style={{ background: "rgba(255,255,255,0.1)", marginBottom: "8px" }}
           leftImage={require("@assets/svg/wireframe/fns.svg")}
           heading={".FET Domains"}
           onClick={() => navigate("/fetch-name-service/explore")}
@@ -112,7 +127,7 @@ export const MorePage: FunctionComponent = () => {
       {isAxlViewVisible && (
         <Card
           leftImageStyle={{ background: "transparent" }}
-          style={{ background: "rgba(255,255,255,0.1)", marginBottom: "5px" }}
+          style={{ background: "rgba(255,255,255,0.1)", marginBottom: "8px" }}
           leftImage={require("@assets/svg/wireframe/axl-bridge.svg")}
           heading={"Axelar Bridge"}
           onClick={() =>
@@ -127,6 +142,27 @@ export const MorePage: FunctionComponent = () => {
         heading={"Fetch Wallet version"}
         onClick={() => navigate("/app-version")}
       /> */}
+
+      <Card
+        leftImageStyle={{
+          background: "transparent",
+          height: "16px",
+          width: "24px",
+        }}
+        style={{ background: "rgba(255,255,255,0.1)", marginBottom: "8px" }}
+        leftImage={require("@assets/svg/wireframe/sign-out.svg")}
+        heading={"Sign out"}
+        onClick={() => {
+          keyRingStore.lock();
+          analyticsStore.logEvent("sign_out_click");
+          navigate("/");
+        }}
+      />
+      <div
+        style={{
+          marginBottom: "20px",
+        }}
+      />
     </HeaderLayout>
   );
 };

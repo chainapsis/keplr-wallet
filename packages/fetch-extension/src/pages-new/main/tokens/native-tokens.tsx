@@ -122,7 +122,20 @@ export const NativeTokens = observer(() => {
               search: `?tokenDetails=${NativeTokenDetailsString}&balance=${NativeTokenBalanceString}`,
             });
           }}
-          rightContent={totalPrice && <div>{totalPrice.toString()}</div>}
+          rightContent={
+            totalPrice && (
+              <div>
+                {totalPrice.toString()}{" "}
+                <span
+                  style={{
+                    color: "rgba(255,255,255,0.4)",
+                  }}
+                >
+                  USD
+                </span>
+              </div>
+            )
+          }
         />
       )}
     </React.Fragment>

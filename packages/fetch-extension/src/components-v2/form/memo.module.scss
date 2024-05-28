@@ -6,16 +6,20 @@
   font-weight: 400;
   line-height: 24px;
   opacity: 0.6;
-  margin-bottom: 2px;
+  margin-bottom: 8px;
 }
 .input {
   resize: none;
   box-shadow: none !important;
-  background: transparent !important;
   border: none !important;
-  color: white !important;
-  height: 32px !important;
-  padding-left: 0px !important;
-  margin-top: -14px !important;
-  font-weight: bold !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  height: 48px !important;
+  font-weight: 400 !important;
+  border-radius: 12px;
+}
+
+.input:focus {
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid #7655fc !important;
 }

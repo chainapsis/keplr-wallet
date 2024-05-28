@@ -282,7 +282,12 @@ export const FeeButtonsInner: FunctionComponent<
         <ButtonGroup id={inputId} className={styleFeeButtons["buttons"]}>
           {label ? (
             <div
-              style={{ marginTop: "20px", color: "white", fontSize: "14px" }}
+              style={{
+                marginTop: "0px",
+                marginBottom: "12px",
+                color: "white",
+                fontSize: "14px",
+              }}
             >
               {label}
             </div>
@@ -291,6 +296,10 @@ export const FeeButtonsInner: FunctionComponent<
             onClick={(e: MouseEvent) => {
               feeConfig.setFeeType("low");
               e.preventDefault();
+            }}
+            style={{
+              padding: "18px 16px",
+              height: "48px",
             }}
             heading={
               <div>
@@ -316,6 +325,7 @@ export const FeeButtonsInner: FunctionComponent<
                 {lowFee.hideIBCMetadata(true).trim(true).toMetricPrefix(isEvm)}
               </div>
             }
+            inActiveBackground={"transparent"}
           />
           <Card
             isActive={feeConfig.feeType === "average"}
@@ -339,6 +349,10 @@ export const FeeButtonsInner: FunctionComponent<
               feeConfig.setFeeType("average");
               e.preventDefault();
             }}
+            style={{
+              padding: "18px 16px",
+              height: "48px",
+            }}
             rightContent={
               <div
                 style={{ fontSize: "12px", fontWeight: 400, opacity: "0.6" }}
@@ -349,6 +363,7 @@ export const FeeButtonsInner: FunctionComponent<
                   .toMetricPrefix(isEvm)}
               </div>
             }
+            inActiveBackground={"transparent"}
           />
           <Card
             isActive={feeConfig.feeType === "high"}
@@ -372,6 +387,10 @@ export const FeeButtonsInner: FunctionComponent<
               feeConfig.setFeeType("high");
               e.preventDefault();
             }}
+            style={{
+              padding: "18px 16px",
+              height: "48px",
+            }}
             rightContent={
               <div
                 style={{ fontSize: "12px", fontWeight: 400, opacity: "0.6" }}
@@ -379,6 +398,7 @@ export const FeeButtonsInner: FunctionComponent<
                 {highFee.hideIBCMetadata(true).trim(true).toMetricPrefix(isEvm)}
               </div>
             }
+            inActiveBackground={"transparent"}
           />
         </ButtonGroup>
         {errorText != null ? (
@@ -392,7 +412,16 @@ export const FeeButtonsInner: FunctionComponent<
             size="sm"
             color="link"
             style={
-              feeButtonState.isGasInputOpen ? { border: "1px solid white" } : {}
+              feeButtonState.isGasInputOpen
+                ? {
+                    border: "1px solid var(--Indigo---Fetch, #5F38FB)",
+                    background: "rgba(255, 255, 255, 0.15)",
+                  }
+                : {
+                    border: "1px solid rgba(255, 255, 255, 0.40)",
+                    backdropFilter: "blur(10px)",
+                    background: "transparent",
+                  }
             }
             onClick={(e) => {
               e.preventDefault();
@@ -400,7 +429,7 @@ export const FeeButtonsInner: FunctionComponent<
             }}
           >
             {/* XXX: In fact, it is not only set gas, but fee currency can also be set depending on the option. */}
-            advanced settings
+            Advanced settings
           </Button>
         </div>
       </FormGroup>

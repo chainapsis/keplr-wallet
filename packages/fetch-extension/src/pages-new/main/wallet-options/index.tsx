@@ -22,7 +22,7 @@ export const WalletOptions = observer(
     return (
       <div className={style["container"]}>
         <Card
-          heading={"Add new Account"}
+          heading={"Add new Wallet"}
           leftImage={require("@assets/svg/wireframe/plus.svg")}
           leftImageStyle={{
             backgroundColor: "transparent",
@@ -40,7 +40,7 @@ export const WalletOptions = observer(
         />
 
         <Card
-          heading={"Change Account"}
+          heading={"Change Wallet"}
           leftImage={require("@assets/svg/wireframe/change.svg")}
           leftImageStyle={{
             backgroundColor: "transparent",
@@ -53,7 +53,7 @@ export const WalletOptions = observer(
           }}
         />
         <Card
-          heading={"Rename Account"}
+          heading={"Rename Wallet"}
           leftImage={require("@assets/svg/wireframe/rename.svg")}
           leftImageStyle={{
             backgroundColor: "transparent",
@@ -67,7 +67,7 @@ export const WalletOptions = observer(
           }}
         />
         <Card
-          heading={"Delete Account"}
+          heading={"Delete Wallet"}
           leftImage={require("@assets/svg/wireframe/delete.svg")}
           leftImageStyle={{
             backgroundColor: "transparent",
@@ -78,6 +78,10 @@ export const WalletOptions = observer(
             e.preventDefault();
             e.stopPropagation();
             navigate(`/setting/clear/${accountIndex}`);
+          }}
+          headingStyle={{
+            fontSize: "16px",
+            fontWeight: 400,
           }}
           style={{ color: "var(--orange-orange-400, #FA8F6B)" }}
         />

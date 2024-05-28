@@ -3,7 +3,7 @@ import { NotificationOption } from "@components-v2/notification-option";
 import { HeaderLayout } from "@layouts-v2/header-layout";
 import { NotificationSetup } from "@notificationTypes";
 import { observer } from "mobx-react-lite";
-import React, { useMemo } from "react";
+import React from "react";
 import { useNavigate } from "react-router";
 import { useStore } from "../../../stores";
 import style from "./style.module.scss";
@@ -22,9 +22,7 @@ export const MoreNotifications = observer(() => {
       JSON.stringify([])
   );
 
-  const topicSuffix = topicInfo.length > 1 ? "s" : "";
   const orgInfo = Object.values(notificationInfo.organisations);
-  const orgSuffix = orgInfo.length > 1 ? "s" : "";
 
   const handleOnChange = () => {
     analyticsStore.logEvent(
@@ -44,10 +42,6 @@ export const MoreNotifications = observer(() => {
     });
   };
 
-  const icon = useMemo(
-    () => [<i key="next" className="fas fa-chevron-right" />],
-    []
-  );
   return (
     <HeaderLayout
       showTopMenu={true}
@@ -80,20 +74,38 @@ export const MoreNotifications = observer(() => {
         <React.Fragment>
           <Card
             heading="Organisations"
-            subheading={`${orgInfo.length} organisation${orgSuffix} followed`}
-            rightContent={icon}
+            rightContent={
+              <div
+                style={{
+                  color: "rgba(255,255,255,0.6)",
+                }}
+              >
+                {orgInfo.length}
+              </div>
+            }
             onClick={() => {
               analyticsStore.logEvent("organisations_click", {
                 action: "Edit",
               });
               navigate("/notification/organisations/edit");
             }}
+            inActiveBackground={"rgba(255,255,255,0.1)"}
+            style={{
+              height: "60px",
+            }}
           />
 
           <Card
             heading="Topics"
-            subheading={`${topicInfo.length} topic${topicSuffix} followed`}
-            rightContent={icon}
+            rightContent={
+              <div
+                style={{
+                  color: "rgba(255,255,255,0.6)",
+                }}
+              >
+                {topicInfo.length}
+              </div>
+            }
             onClick={() => {
               analyticsStore.logEvent("topics_click", {
                 action: "Edit",
@@ -103,6 +115,10 @@ export const MoreNotifications = observer(() => {
                   isUpdating: true,
                 },
               });
+            }}
+            inActiveBackground={"rgba(255,255,255,0.1)"}
+            style={{
+              height: "60px",
             }}
           />
         </React.Fragment>

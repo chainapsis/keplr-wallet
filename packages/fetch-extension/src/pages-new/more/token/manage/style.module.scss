@@ -27,3 +27,32 @@
   display: flex;
   gap: 6px;
 }
+
+.noTokenContainer {
+  display: inline-flex;
+  height: 434px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  margin: 0 auto;
+}
+.noTokenTitle {
+  color: #fff;
+  text-align: center;
+  font-family: Lexend;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 34px;
+}
+.content {
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  font-family: Lexend;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 160%;
+}

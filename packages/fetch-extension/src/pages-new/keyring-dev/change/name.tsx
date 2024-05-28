@@ -73,6 +73,7 @@ export const ChangeNamePageV2: FunctionComponent = observer(() => {
       onBackButton={() => {
         navigate(-1);
       }}
+      showBottomMenu={false}
     >
       <Form
         className={styleName["container"]}
@@ -114,6 +115,7 @@ export const ChangeNamePageV2: FunctionComponent = observer(() => {
           className={styleName["input"]}
           value={keyStore?.meta?.["name"] ?? ""}
           readOnly={true}
+          style={{ opacity: 0.6 }}
         />
 
         <Label className={styleName["label"]}>
@@ -131,6 +133,7 @@ export const ChangeNamePageV2: FunctionComponent = observer(() => {
             }),
           })}
           maxLength={20}
+          autoFocus
           readOnly={waitingNameData !== undefined && !waitingNameData?.editable}
         />
 
@@ -145,6 +148,9 @@ export const ChangeNamePageV2: FunctionComponent = observer(() => {
               <FormattedMessage id="setting.keyring.change.name.button.save" />
             )
           }
+          styleProps={{
+            height: "56px",
+          }}
         />
       </Form>
     </HeaderLayout>

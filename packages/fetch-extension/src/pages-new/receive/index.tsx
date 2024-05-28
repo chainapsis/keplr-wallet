@@ -56,7 +56,7 @@ export const Receive: FunctionComponent = () => {
         <div className={StyleQrCode["depositModal"]}>
           <h3
             className={StyleQrCode["depositTitle"]}
-            style={{ marginBottom: "8px" }}
+            style={{ marginBottom: "6px" }}
           >
             Deposit to your address <br /> to receive tokens
             <br />
@@ -71,7 +71,13 @@ export const Receive: FunctionComponent = () => {
           </div>
         </div>
         <Card
-          style={{ background: "rgba(255, 255, 255, 0.10)" }}
+          style={{
+            background: "rgba(255, 255, 255, 0.10)",
+            marginBottom: "24px",
+          }}
+          headingStyle={{
+            width: "270px",
+          }}
           heading={accountInfo.bech32Address}
           rightContent={require("@assets/svg/wireframe/copy.svg")}
           rightContentOnClick={() => copyAddress(accountInfo.bech32Address)}

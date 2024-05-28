@@ -279,6 +279,7 @@ export const SignPageV2: FunctionComponent = observer(() => {
                         position: "fixed",
                         bottom: "12px",
                         width: "94%",
+                        height: "56px",
                       }}
                       disabled={
                         approveIsDisabled || signInteractionStore.isLoading

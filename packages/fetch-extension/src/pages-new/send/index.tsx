@@ -224,6 +224,7 @@ export const SendPage: FunctionComponent = observer(() => {
       smallTitle={true}
       alternativeTitle="Send"
       canChangeChainInfo={false}
+      showBottomMenu={false}
       onBackButton={
         isDetachedPage
           ? undefined
@@ -237,55 +238,55 @@ export const SendPage: FunctionComponent = observer(() => {
             style={{
               height: "64px",
               display: "flex",
-              flexDirection: "row",
+              justifyContent: "center",
               alignItems: "center",
-              paddingRight: "20px",
+              paddingRight: "18px",
             }}
           >
-            <i
-              className="fas fa-external-link-alt"
-              style={{
-                cursor: "pointer",
-                padding: "4px",
-                color: "#8B8B9A",
-              }}
-              onClick={async (e) => {
-                e.preventDefault();
+            <div className={style["external-link-div"]}>
+              <img
+                src={require("@assets/svg/wireframe/external-link.svg")}
+                onClick={async (e) => {
+                  e.preventDefault();
 
-                const windowInfo = await browser.windows.getCurrent();
+                  const windowInfo = await browser.windows.getCurrent();
 
-                let queryString = `?detached=true&defaultDenom=${sendConfigs.amountConfig.sendCurrency.coinMinimalDenom}`;
-                if (sendConfigs.recipientConfig.rawRecipient) {
-                  queryString += `&defaultRecipient=${sendConfigs.recipientConfig.rawRecipient}`;
-                }
-                if (sendConfigs.amountConfig.amount) {
-                  queryString += `&defaultAmount=${sendConfigs.amountConfig.amount}`;
-                }
-                if (sendConfigs.memoConfig.memo) {
-                  queryString += `&defaultMemo=${sendConfigs.memoConfig.memo}`;
-                }
-
-                await openPopupWindow(
-                  browser.runtime.getURL(`/popup.html#/send${queryString}`),
-                  undefined,
-                  {
-                    top: (windowInfo.top || 0) + 80,
-                    left:
-                      (windowInfo.left || 0) +
-                      (windowInfo.width || 0) -
-                      PopupSize.width -
-                      20,
+                  let queryString = `?detached=true&defaultDenom=${sendConfigs.amountConfig.sendCurrency.coinMinimalDenom}`;
+                  if (sendConfigs.recipientConfig.rawRecipient) {
+                    queryString += `&defaultRecipient=${sendConfigs.recipientConfig.rawRecipient}`;
                   }
-                );
-                window.close();
-              }}
-            />
+                  if (sendConfigs.amountConfig.amount) {
+                    queryString += `&defaultAmount=${sendConfigs.amountConfig.amount}`;
+                  }
+                  if (sendConfigs.memoConfig.memo) {
+                    queryString += `&defaultMemo=${sendConfigs.memoConfig.memo}`;
+                  }
+
+                  await openPopupWindow(
+                    browser.runtime.getURL(`/popup.html#/send${queryString}`),
+                    undefined,
+                    {
+                      top: (windowInfo.top || 0) + 80,
+                      left:
+                        (windowInfo.left || 0) +
+                        (windowInfo.width || 0) -
+                        PopupSize.width -
+                        20,
+                    }
+                  );
+                  window.close();
+                }}
+              />
+            </div>
           </div>
         )
       }
     >
       <form
         className={style["formContainer"]}
+        style={{
+          height: "100%",
+        }}
         onSubmit={async (e) => {
           e.preventDefault();
 

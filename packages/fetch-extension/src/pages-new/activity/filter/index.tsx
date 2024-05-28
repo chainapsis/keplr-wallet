@@ -86,13 +86,25 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
         {options.map((option: any) => (
           <label key={option.value} className={styles["dropdownItem"]}>
             <Card
+              leftImage={option.icon}
+              leftImageStyle={{
+                backgroundColor: "transparent",
+                height: "18px",
+                width: "18px",
+                borderRadius: 0,
+                padding: "1px",
+              }}
               style={
                 selectedFilter.includes(option.value)
                   ? {
                       width: "333px",
                       background: "var(--Indigo---Fetch, #5F38FB)",
                     }
-                  : { width: "333px", background: "rgba(255,255,255,0.1)" }
+                  : {
+                      width: "333px",
+                      background: "rgba(255,255,255,0.1)",
+                      cursor: "pointer",
+                    }
               }
               rightContent={
                 <React.Fragment>
@@ -117,6 +129,9 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
         ))}
       </div>
       <ButtonV2
+        styleProps={{
+          minHeight: "56px",
+        }}
         disabled={isSaveChangesButtonDisabled}
         onClick={handleSaveChanges}
         text="Save Changes"

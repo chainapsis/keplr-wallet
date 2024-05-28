@@ -3,7 +3,7 @@ import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import classnames from "classnames";
 import styleCoinInput from "./coin-input.module.scss";
 
-import { Button, FormGroup, Label } from "reactstrap";
+import { FormGroup, Label } from "reactstrap";
 import { observer } from "mobx-react-lite";
 import {
   EmptyAmountError,
@@ -174,7 +174,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
             ) : null}
           </div>
           <div className={styleCoinInput["right-widgets"]}>
-            <Button
+            <button
               style={{ margin: "0px" }}
               className={styleCoinInput["widgetButton"]}
               onClick={isClicked}
@@ -182,9 +182,9 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
             >
               <img src={require("@assets/svg/wireframe/chevron.svg")} alt="" />
               Change to USD
-            </Button>
+            </button>
             {!disableAllBalance ? (
-              <Button
+              <button
                 style={{ margin: "0px" }}
                 className={styleCoinInput["widgetButton"]}
                 onClick={(e) => {
@@ -193,7 +193,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
                 }}
               >
                 Use max available
-              </Button>
+              </button>
             ) : null}
           </div>
         </FormGroup>
@@ -263,12 +263,21 @@ export const TokenSelectorDropdown: React.FC<TokenDropdownProps> = ({
         Asset
       </Label>
       <Card
-        style={{ backgroundColor: "rgba(255,255,255,0.1)" }}
+        style={{
+          backgroundColor: "rgba(255,255,255,0.1)",
+          padding: "12px 18px",
+          marginBottom: "0px",
+        }}
         onClick={() => setIsOpenTokenSelector(!isOpenTokenSelector)}
         heading={<div>{amountConfig.sendCurrency.coinDenom}</div>}
         rightContent={require("@assets/svg/wireframe/chevron-down.svg")}
         subheading={
-          <div>
+          <div
+            style={{
+              color: "rgba(255,255,255,0.6)",
+              fontSize: "12px",
+            }}
+          >
             {" "}
             {`Available: ${balance.shrink(true).maxDecimals(6).toString()} `}
             {inputInUsd && `(${inputInUsd} USD)`}

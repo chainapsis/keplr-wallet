@@ -61,7 +61,7 @@
   gap: 8px;
 }
 .input-error {
-  color: #f36b6b;
+  color: var(--Red-Red-400, #f36b6b);
 }
 .input::placeholder {
   color: white !important;
@@ -93,7 +93,7 @@ input::-webkit-inner-spin-button {
 
     background: white;
     text-align: left;
-    font-weight: normal;
+    font-weight: 400;
   }
 
   :global(.dropdown-toggle) {
@@ -138,11 +138,15 @@ input::-webkit-inner-spin-button {
   border: 1px solid rgba(255, 255, 255, 0.4);
   display: flex;
   align-items: center;
-  font-size: 14px;
+  font-size: 12px;
   margin: 0px;
-  gap: 3px;
+  gap: 8px;
   color: white;
+  padding: 6px 24px;
+  font-weight: 400;
+  height: 48px;
 }
+
 .widgetButton:focus {
   margin: 0px;
 }
@@ -153,7 +157,7 @@ input::-webkit-inner-spin-button {
 }
 .balance {
   float: right;
-  font-weight: normal;
+  font-weight: 400;
   color: #555555;
 
   &.clickable {
@@ -171,13 +175,13 @@ input::-webkit-inner-spin-button {
 }
 .errorText {
   margin-top: 8px;
-  color: #fb8c72;
+  color: var(--Red-Red-400, #f36b6b);
   font-size: 14px;
 }
 
 .right-widgets {
-  gap: 4px;
-  font-size: 14px;
+  gap: 8px;
+  font-size: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;

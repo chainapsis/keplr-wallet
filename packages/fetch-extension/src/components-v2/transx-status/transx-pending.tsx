@@ -18,6 +18,7 @@ export const TransxPending = () => {
           color: "white",
           background: "transparent",
           border: "1px solid rgba(255,255,255,0.6)",
+          height: "56px",
         }}
         onClick={() => navigate("/")}
         text={"Go to homescreen"}

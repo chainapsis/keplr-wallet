@@ -1,15 +1,20 @@
 .pinWalletArrow {
   position: absolute;
-  right: 15%;
-  top: 3%;
+  right: 18%;
+  top: 1%;
 }
 .pinWallet {
   position: absolute;
-  right: 15%;
+  right: 5%;
   top: 55px;
-  height: 200px;
+  height: 291px;
+  width: 347px;
 }
 .content {
-  height: 450px;
-  margin-left: 3.5%;
+  // height: 534px;
+  padding-top: 48px;
+  padding-bottom: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

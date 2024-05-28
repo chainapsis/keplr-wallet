@@ -133,11 +133,12 @@ html[data-register-page="true"] #app .container {
   .newMnemonicContainer {
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.1);
-    margin-bottom: 20px;
+    margin-top: 24px;
+    margin-bottom: 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-family: lexend;
+    font-family: Lexand;
   }
   .copyImage {
     cursor: pointer;
@@ -176,6 +177,9 @@ html[data-register-page="true"] #app .container {
     gap: 8px;
     border-radius: 100px;
     background: rgba(255, 255, 255, 0.2);
+    font-weight: 400;
+    font-size: 12px;
+    width: 152px;
   }
   .advanced:hover {
     color: var(--Grey-White, #fff);
@@ -205,10 +209,10 @@ html[data-register-page="true"] #app .container {
     }
 
     &::placeholder {
-      font-family: "Nunito Sans", sans-serif;
+      font-family: "Lexand", sans-serif;
 
       body[data-lang="ko"] & {
-        font-family: "Nanum Barun Gothic", sans-serif !important;
+        font-family: "Lexand", sans-serif !important;
       }
     }
   }
@@ -251,7 +255,7 @@ html[data-register-page="true"] #app .container {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 5px;
+  gap: 8px;
 }
 
 .button {
@@ -262,16 +266,16 @@ html[data-register-page="true"] #app .container {
   gap: 24px;
   flex: 1 0 0;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
   width: 124px;
   color: white;
   justify-content: center;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
   border: transparent;
 }
 .button:hover {
   color: white;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.15);
   border: 1px solid var(--Indigo-Indigo-400, #7655fc);
 }
 .button:focus {
@@ -285,22 +289,23 @@ html[data-register-page="true"] #app .container {
   color: white;
   border: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 25px;
+  border-radius: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 4px;
 }
 .btn2:hover {
   color: white;
   background: transparent !important;
-  border: 1px solid var(--Indigo-Indigo-400, #7655fc);
+  border: 1px solid white;
 }
 .btn2:disabled {
   color: white;
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.2;
   background: transparent !important;
-  border: 1px solid var(--Indigo-Indigo-400, #7655fc);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .introIcon {
@@ -342,35 +347,48 @@ html[data-register-page="true"] #app .container {
 }
 .titleText {
   color: rgba(255, 255, 255, 0.9);
-  font-weight: 500;
+  font-weight: 400;
   font-size: 18px;
   margin-bottom: 27px;
   margin-top: 9px;
 }
 .card {
   display: flex;
-  padding: 12px;
+  padding: 18px;
   background: rgba(255, 255, 255, 0.1);
   cursor: pointer;
-  border-radius: 15px;
+  border-radius: 12px;
   align-items: flex-start;
   gap: 14px;
   color: rgba(255, 255, 255, 0.9);
   max-width: 390px;
 }
 .cardTitle {
-  font-weight: bold;
+  font-weight: 500;
+  font-size: 16px;
+  margin-bottom: 6px;
 }
 .cardText {
-  width: 280px;
-  font-size: 16px;
+  width: 252px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 400;
 }
+
+.mainpageOuterContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .mainpageContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 24px;
+  width: 390px;
+  padding: 0px;
 }
 .migrateContainer {
   display: flex;
@@ -382,9 +400,9 @@ html[data-register-page="true"] #app .container {
 
 .mainpageTitle {
   font-size: 32px;
-  font-weight: 500;
+  font-weight: 400;
   color: white;
-  margin-right: 38px;
+  width: 390px;
 }
 .backButton {
   display: flex;
@@ -396,16 +414,20 @@ html[data-register-page="true"] #app .container {
   color: #fff;
   margin-top: 10px;
   margin-bottom: 10px;
+  font-weight: 400;
 }
 .newMnemonicText {
   font-size: 18px;
   color: rgba(255, 255, 255, 0.8);
   margin-bottom: 10px;
+  font-weight: 400;
 }
 .ledgerContainer {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  width: 333px;
-  margin-left: 25%;
+  justify-content: "center";
+  align-items: "start";
+  width: 390px;
+  height: 100%;
+  position: relative;
 }

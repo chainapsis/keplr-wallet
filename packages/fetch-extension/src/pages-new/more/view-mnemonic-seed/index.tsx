@@ -40,6 +40,7 @@ export const ExportPage: FunctionComponent = observer(() => {
 
   const [loading, setLoading] = useState(false);
   const [keyRing, setKeyRing] = useState("");
+  const [displayKeyRing, setDisplayKeyRing] = useState<string[]>([]);
 
   const {
     register,
@@ -57,6 +58,12 @@ export const ExportPage: FunctionComponent = observer(() => {
       throw new Error("Invalid index");
     }
   }, [index]);
+
+  useEffect(() => {
+    if (keyRing) {
+      setDisplayKeyRing(keyRing.split(" "));
+    }
+  }, [keyRing]);
 
   const copyMnemonic = useCallback(
     async (address: string) => {
@@ -80,6 +87,7 @@ export const ExportPage: FunctionComponent = observer(() => {
       smallTitle={true}
       showTopMenu={true}
       showChainName={false}
+      showBottomMenu={false}
       canChangeChainInfo={false}
       alternativeTitle={intl.formatMessage({
         id:
@@ -100,13 +108,32 @@ export const ExportPage: FunctionComponent = observer(() => {
               [style["altHex"]]: type !== "mnemonic",
             })}
           >
-            {keyRing}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "6px",
+                marginBottom: "30px",
+              }}
+            >
+              {displayKeyRing.map((key) => (
+                <div
+                  style={{
+                    fontSize: "26px",
+                  }}
+                  key={key}
+                >
+                  {key}
+                </div>
+              ))}
+            </div>
             <ButtonV2
               styleProps={{
-                position: "absolute",
-                width: "333px",
-                bottom: 86,
+                position: "fixed",
+                bottom: "12px",
                 right: "4%",
+                width: "333px",
+                height: "56px",
               }}
               text={"Copy to clipboard"}
               onClick={() => copyMnemonic(keyRing)}
@@ -152,6 +179,9 @@ export const ExportPage: FunctionComponent = observer(() => {
                     <FormattedMessage id="setting.export.button.confirm" />
                   )
                 }
+                styleProps={{
+                  height: "56px",
+                }}
                 data-loading={loading}
                 disabled={loading}
               />

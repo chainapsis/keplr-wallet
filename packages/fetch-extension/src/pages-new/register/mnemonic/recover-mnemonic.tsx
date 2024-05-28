@@ -20,9 +20,15 @@ import { TabsPanel } from "@components-v2/tabs/tabsPanel-2";
 import { Card } from "@components-v2/card";
 import { ImportLedgerPage } from "../ledger";
 import { MigrateEthereumAddressPage } from "../migration";
+import { NewMnemonicStep } from "./hook";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
+
+const enum AccountSetupType {
+  MIGRATE_ETH = "migrate-eth",
+  CONNECT_HARDWARE = "connect-hardware",
+}
 
 export function isPrivateKey(str: string): boolean {
   if (str.startsWith("0x")) {
@@ -69,7 +75,7 @@ export const RecoverMnemonicIntro: FunctionComponent<{
   return (
     <React.Fragment>
       <div
-        style={{ marginTop: "10px", alignItems: "center" }}
+        style={{ marginTop: "12px" }}
         className={style["card"]}
         onClick={(e: any) => {
           e.preventDefault();
@@ -103,7 +109,7 @@ export const RecoverMnemonicMainPage: FunctionComponent<{
 }> = ({ registerConfig, setSelectedCard }) => {
   const { analyticsStore } = useStore();
   return (
-    <div>
+    <div className={style["mainpageOuterContainer"]}>
       <div className={style["mainpageContainer"]}>
         <div className={styleRecoverMnemonic["mainpageBackButton"]}>
           <BackButton
@@ -113,85 +119,79 @@ export const RecoverMnemonicMainPage: FunctionComponent<{
           />
         </div>
         <div className={style["mainpageTitle"]}>Import existing wallet</div>
-        <Card
-          leftImageStyle={{
-            width: "32px",
-            height: "32px",
-          }}
-          style={{
-            backgroundColor: "rgba(255,255,255,0.1)",
-            height: "60px",
-            fontSize: "14px",
-          }}
-          onClick={(e: any) => {
-            e.preventDefault();
-            setSelectedCard("recover");
-            registerConfig.setType(TypeRecoverMnemonic);
-            analyticsStore.logEvent("Import account started", {
-              registerType: "seed",
-            });
-          }}
-          leftImage={keyIcon}
-          rightContent={
-            <div className={style["cardText"]}>
-              Use a seed phrase or a private key
-            </div>
-          }
-          heading={undefined}
-        />
-        <Card
-          leftImageStyle={{
-            width: "32px",
-            height: "32px",
-          }}
-          style={{
-            backgroundColor: "rgba(255,255,255,0.1)",
-            height: "60px",
-            fontSize: "14px",
-          }}
-          onClick={(e: any) => {
-            e.preventDefault();
-            setSelectedCard("connect-hardware");
-            registerConfig.setType(TypeRecoverMnemonic);
-            analyticsStore.logEvent("Import account started", {
-              registerType: "seed",
-            });
-          }}
-          leftImage={require("@assets/svg/wireframe/hardware.svg")}
-          heading={undefined}
-          rightContent={
-            <div>
-              <div className={style["cardText"]}>Connect hardware wallet</div>
-              <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "12px" }}>
-                Requires bluetooth access to pair
-              </div>
-            </div>
-          }
-        />
-        <Card
-          leftImageStyle={{
-            width: "32px",
-            height: "32px",
-          }}
-          style={{
-            backgroundColor: "rgba(255,255,255,0.1)",
-            height: "60px",
-            fontSize: "14px",
-          }}
-          onClick={(e: any) => {
-            e.preventDefault();
-            setSelectedCard("migrate-eth");
-            registerConfig.setType(TypeRecoverMnemonic);
-            analyticsStore.logEvent("Import account started", {
-              registerType: "seed",
-            });
-          }}
-          leftImage={require("@assets/svg/wireframe/metamask-icon.svg")}
-          rightContent={
-            <div className={style["cardText"]}>Migrate from ETH</div>
-          }
-          heading={undefined}
-        />
+        <div style={{ width: "390px" }}>
+          <Card
+            leftImageStyle={{
+              width: "32px",
+              height: "32px",
+            }}
+            style={{
+              backgroundColor: "rgba(255,255,255,0.1)",
+              height: "78px",
+              fontSize: "14px",
+              padding: "18px",
+            }}
+            onClick={(e: any) => {
+              e.preventDefault();
+              setSelectedCard("recover");
+              registerConfig.setType(TypeRecoverMnemonic);
+              analyticsStore.logEvent("Import account started", {
+                registerType: "seed",
+              });
+            }}
+            leftImage={keyIcon}
+            heading={"Use a seed phrase or a private key"}
+          />
+          <Card
+            leftImageStyle={{
+              width: "32px",
+              height: "32px",
+            }}
+            style={{
+              backgroundColor: "rgba(255,255,255,0.1)",
+              height: "78px",
+              fontSize: "14px",
+              padding: "18px",
+            }}
+            onClick={(e: any) => {
+              e.preventDefault();
+              setSelectedCard(AccountSetupType.CONNECT_HARDWARE);
+              registerConfig.setType(TypeRecoverMnemonic);
+              analyticsStore.logEvent("Import account started", {
+                registerType: "seed",
+              });
+            }}
+            leftImage={require("@assets/svg/wireframe/hardware.svg")}
+            heading={"Connect hardware wallet"}
+            subheading={"Requires bluetooth access to pair"}
+            subheadingStyle={{
+              fontSize: "14px",
+              opacity: 0.6,
+            }}
+          />
+          <Card
+            leftImageStyle={{
+              width: "32px",
+              height: "32px",
+            }}
+            style={{
+              backgroundColor: "rgba(255,255,255,0.1)",
+              height: "78px",
+              fontSize: "14px",
+              padding: "18px",
+            }}
+            onClick={(e: any) => {
+              e.preventDefault();
+              setSelectedCard(AccountSetupType.MIGRATE_ETH);
+              registerConfig.setType(TypeRecoverMnemonic);
+              analyticsStore.logEvent("Import account started", {
+                registerType: "seed",
+              });
+            }}
+            leftImage={require("@assets/svg/wireframe/metamask-icon.svg")}
+            heading={"Migrate from ETH"}
+          />
+        </div>
       </div>
     </div>
   );
@@ -349,17 +349,21 @@ export const RecoverMnemonicPage: FunctionComponent<{
       return undefined;
     }
   };
-  const tabs = [{ id: "12 words" }, { id: "24 words" }, { id: "Private key" }];
-  const [activeTab, setActiveTab] = useState(tabs[0]);
+  const tabs = [
+    { id: NewMnemonicStep.WORDS12 },
+    { id: NewMnemonicStep.WORDS24 },
+    { id: NewMnemonicStep.PRIVATEKEY },
+  ];
+  const [activeTab, setActiveTab] = useState(tabs[0].id);
   const [selectedCard, setSelectedCard] = useState("main");
 
   useEffect(() => {
     const handleTabChange = (activeTab: any) => {
-      if (activeTab === "12 words") {
+      if (activeTab === NewMnemonicStep.WORDS12) {
         setSeedType(SeedType.WORDS12);
-      } else if (activeTab === "24 words") {
+      } else if (activeTab === NewMnemonicStep.WORDS24) {
         setSeedType(SeedType.WORDS24);
-      } else if (activeTab === "Private key") {
+      } else if (activeTab === NewMnemonicStep.PRIVATEKEY) {
         setSeedType(SeedType.PRIVATE_KEY);
       }
     };
@@ -450,7 +454,7 @@ export const RecoverMnemonicPage: FunctionComponent<{
             >
               <div
                 style={{
-                  ...(activeTab.id === "12 words"
+                  ...(activeTab === NewMnemonicStep.WORDS12
                     ? { gridTemplateColumns: "1fr 1fr 1fr" }
                     : {}),
                   ...(seedType === SeedType.PRIVATE_KEY
@@ -522,7 +526,7 @@ export const RecoverMnemonicPage: FunctionComponent<{
                           <div
                             style={{
                               position: "absolute",
-                              right: "8px",
+                              right: "18px",
                               height: "100%",
                               display: "flex",
                               alignItems: "center",
@@ -540,9 +544,9 @@ export const RecoverMnemonicPage: FunctionComponent<{
                             }}
                           >
                             {shownMnemonicIndex === index ? (
-                              <IconOpenEye />
+                              <IconOpenEye height={16} width={16} />
                             ) : (
-                              <IconClosedEye />
+                              <IconClosedEye height={16} width={16} />
                             )}
                           </div>
                         }
@@ -587,7 +591,7 @@ export const RecoverMnemonicPage: FunctionComponent<{
                   for="name"
                   style={{
                     color: "rgba(255,255,255,0.6)",
-                    fontWeight: 550,
+                    fontWeight: 400,
                     fontSize: "15px",
                   }}
                 >
@@ -662,6 +666,7 @@ export const RecoverMnemonicPage: FunctionComponent<{
                   }
                   styleProps={{
                     marginBottom: "20px",
+                    height: "56px",
                   }}
                   data-loading={registerConfig.isLoading}
                   disabled={registerConfig.isLoading}
@@ -671,13 +676,15 @@ export const RecoverMnemonicPage: FunctionComponent<{
           </div>
         </React.Fragment>
       )}
-      {selectedCard == "connect-hardware" && (
-        <ImportLedgerPage
-          registerConfig={registerConfig}
-          setSelectedCard={setSelectedCard}
-        />
+      {selectedCard == AccountSetupType.CONNECT_HARDWARE && (
+        <div style={{ height: "720px" }}>
+          <ImportLedgerPage
+            registerConfig={registerConfig}
+            setSelectedCard={setSelectedCard}
+          />
+        </div>
       )}
-      {selectedCard == "migrate-eth" && (
+      {selectedCard == AccountSetupType.MIGRATE_ETH && (
         <MigrateEthereumAddressPage
           registerConfig={registerConfig}
           setSelectedCard={setSelectedCard}

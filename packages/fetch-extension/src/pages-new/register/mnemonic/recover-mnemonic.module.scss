@@ -84,8 +84,8 @@
     }
   }
 
-  column-gap: 5px;
-  row-gap: 5px;
+  column-gap: 8px;
+  row-gap: 8px;
 
   margin-bottom: 1.5rem;
 
@@ -99,11 +99,15 @@
 
     .mnemonicWordFormGroup {
       margin-bottom: 0;
+      width: 100%;
     }
 
     .mnemonicWord {
-      border-radius: 0.375rem !important;
+      border-radius: 12px !important;
       padding-right: 10px;
+    }
+    .mnemonicWord:focus {
+      border: 1px solid var(--Indigo---Fetch, #5f38fb);
     }
   }
 }
@@ -120,12 +124,14 @@
 
 .backButtonContainer {
   margin-left: 170px;
+  margin-bottom: 24px;
 }
 
 .title {
   color: white;
   font-size: 32px;
   margin-left: 170px;
+  font-weight: 400;
 }
 .addressInput {
   height: 53px;
@@ -144,7 +150,7 @@
   color: white;
 }
 .mainpageBackButton {
-  margin-right: 300px;
+  width: 390px;
 }
 .addressErrorText {
   color: #fb6340;

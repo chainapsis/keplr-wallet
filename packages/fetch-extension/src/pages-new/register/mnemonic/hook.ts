@@ -10,6 +10,12 @@ export enum NumWords {
   WORDS24,
 }
 
+export enum NewMnemonicStep {
+  WORDS12 = "12 words",
+  WORDS24 = "24 words",
+  PRIVATEKEY = "Private key",
+}
+
 export class NewMnemonicConfig {
   @observable
   protected _mode: NewMnemonicMode = "generate";

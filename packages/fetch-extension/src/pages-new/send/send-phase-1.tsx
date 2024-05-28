@@ -72,23 +72,29 @@ export const SendPhase1: React.FC<SendPhase1Props> = observer(
           })()}
         />
         <TokenSelectorDropdown amountConfig={sendConfigs.amountConfig} />
-        <Label style={{ fontSize: "14px", color: "rgba(255,255,255,0.6)" }}>
-          Wallet
+        <Label
+          style={{
+            fontSize: "14px",
+            color: "rgba(255,255,255,0.6)",
+            marginTop: "16px",
+          }}
+        >
+          Send from
         </Label>
         <Card
           style={{
             background: "rgba(255, 255, 255, 0.10)",
             color: "rgba(255, 255, 255, 0.6)",
             fontSize: "14px",
+            padding: "12px 18px",
           }}
-          subheadingStyle={{
+          headingStyle={{
             fontSize: "14px",
             color: "white",
-            fontWeight: "bold",
+            fontWeight: "400",
             opacity: "1",
           }}
-          heading={""}
-          subheading={accountInfo.name}
+          heading={accountInfo.name}
           rightContent={require("@assets/svg/wireframe/chevron-down.svg")}
           onClick={() => setIsChangeWalletOpen(!isChangeWalletOpen)}
         />
@@ -101,6 +107,9 @@ export const SendPhase1: React.FC<SendPhase1Props> = observer(
           onClick={() => {
             setIsNext(true);
             navigate("/send", { state: { isFromPhase1: true } });
+          }}
+          styleProps={{
+            height: "56px",
           }}
         />
         <Dropdown

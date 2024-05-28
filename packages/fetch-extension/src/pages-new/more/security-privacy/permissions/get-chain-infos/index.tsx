@@ -42,6 +42,7 @@ export const PermissionsGetChainInfosPage: FunctionComponent = () => {
       showTopMenu={true}
       showChainName={false}
       canChangeChainInfo={false}
+      showBottomMenu={false}
       smallTitle={true}
       alternativeTitle={intl.formatMessage({
         id: "setting.permissions.get-chain-infos",

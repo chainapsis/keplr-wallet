@@ -1,3 +1,7 @@
+.formContainer {
+  height: 100%;
+}
+
 .formInnerContainer {
   height: 100%;
   display: flex;
@@ -61,7 +65,7 @@
   align-items: center;
   gap: 5px;
   border-radius: 100px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 1);
   backdrop-filter: blur(10px);
   background: transparent;
   color: white;
@@ -84,4 +88,28 @@
   font-weight: 400;
   line-height: normal;
   opacity: 0.6;
+}
+
+.external-link-div {
+  display: flex;
+  width: 48px;
+  height: 32px;
+  padding: 6px 12px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  border-radius: 100px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+}
+
+.external-link-div:hover {
+  border: 1px solid white;
+}
+
+.external-link-div:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }

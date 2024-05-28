@@ -1,8 +1,8 @@
 .switch {
   position: relative;
   display: inline-block;
-  width: 42px;
-  height: 24px;
+  width: 51px;
+  height: 31px;
   margin: 0px;
   input {
     opacity: 0;
@@ -10,7 +10,8 @@
     height: 0;
 
     &:checked + .slider {
-      background-color: #3b82f6;
+      background-color: #5f38fb;
+      border: 1px solid transparent;
     }
 
     &:checked + .slider::before {
@@ -31,20 +32,19 @@
     -webkit-transition: 0.4s;
     transition: 0.4s;
     border-radius: 34px;
-    border: 2px solid #3b82f6;
+    border: 1px solid #5f38fb;
 
     &::before {
       position: absolute;
-      width: 18px;
+      width: 27px;
       content: "";
-      height: 18px;
-      left: 1px;
+      height: 27px;
+      left: 3px;
       top: 1px;
       background-color: white;
       -webkit-transition: 0.4s;
       transition: 0.4s;
       border-radius: 50%;
-      background-color: #3b82f6;
     }
   }
 }

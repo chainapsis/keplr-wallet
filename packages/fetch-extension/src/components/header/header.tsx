@@ -18,7 +18,7 @@ export const Header: FunctionComponent<HeaderProps> = ({
   notification,
 }) => {
   return (
-    <div className={classnames(["header", { fixed }])}>
+    <div className={classnames(["headerMain", { fixed }])}>
       <div className="headerMenuLeft">{left}</div>
       <div className="headerSection">{children}</div>
       <div className="headerMenuRight">

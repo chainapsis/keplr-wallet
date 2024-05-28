@@ -17,3 +17,15 @@
   margin-top: 44px;
   color: #fa8f6b;
 }
+
+.loadingText {
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  padding: 6px 12px;
+  font-weight: 400;
+  border-radius: 8px;
+  background: var(--Indigo-Indigo-800, #270e8d);
+}

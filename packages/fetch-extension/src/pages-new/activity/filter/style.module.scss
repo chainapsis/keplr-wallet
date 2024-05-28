@@ -34,7 +34,7 @@
   border-radius: 100px;
   border: 1px solid rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(10px);
-  margin-bottom: 10px;
+  margin-bottom: 24px;
 }
 .hidden {
   position: absolute;
@@ -45,4 +45,8 @@
   margin: -1px;
   padding: 0;
   border: 0;
+}
+
+.dropdownItem {
+  margin-bottom: 0;
 }

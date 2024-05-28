@@ -15,6 +15,7 @@
     width: 12px;
   }
 }
+
 .wallet-name,
 .address {
   display: flex;
@@ -43,6 +44,7 @@
   backdrop-filter: blur(10px);
   background: transparent;
   font-size: 14px;
+  font-weight: 400;
 }
 .view-details {
   cursor: pointer;
@@ -79,18 +81,33 @@
   align-items: center;
   justify-content: end;
 }
-.chat-button,
+.chat-button {
+  display: flex;
+  width: 48px;
+  height: 32px;
+  padding: 6px 12px;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  border-radius: 100px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+
+  img {
+    margin-top: 2px;
+  }
+}
+
 .chat-button:hover {
-  border: 0px;
-  background: transparent !important;
-  padding: 0px;
-  box-shadow: none;
+  border: 1px solid white;
 }
 
 .chat-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
+
 .wallet-detail-card {
   font-size: 14px;
   padding: 12px 18px;
@@ -109,7 +126,7 @@
   align-items: center;
 }
 .wallet-address {
-  font-weight: bold;
+  font-weight: 400;
 }
 .tab {
   font-weight: 400;

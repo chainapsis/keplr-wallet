@@ -1,5 +1,5 @@
 .block {
-  font-weight: bold;
+  font-weight: 500;
   display: flex;
   color: black;
   align-items: center;
@@ -15,7 +15,7 @@
 .title {
   display: flex;
   justify-content: space-between;
-  font-weight: 700;
+  font-weight: 500;
   font-size: 20px;
   padding-bottom: 16px;
 }
@@ -33,7 +33,7 @@
   cursor: pointer;
   border-bottom: 2px solid transparent;
   padding-bottom: 8px;
-  font-weight: 500;
+  font-weight: 400;
   font-size: 16px;
   color: #000000;
 }

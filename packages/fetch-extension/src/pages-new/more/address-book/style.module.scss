@@ -40,6 +40,7 @@
 }
 .container {
   background: transparent !important;
+  position: relative;
 }
 .fullModal {
   width: 100%;
@@ -90,4 +91,36 @@
 .input:focus {
   background: rgba(255, 255, 255, 0.1);
   color: white;
+  border: 1px solid #7655fc !important;
+}
+
+.noAddressContainer {
+  display: inline-flex;
+  height: 436px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.noAddressTitle {
+  color: #fff;
+  text-align: center;
+  font-family: Lexend;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 34px;
+}
+.content {
+  color: #fff;
+  text-align: center;
+  font-family: Lexend;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 160%;
+  opacity: 0.8;
 }
