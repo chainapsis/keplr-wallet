@@ -1,11 +1,13 @@
 import { KeyRingService } from "../keyring";
 import { Env } from "@keplr-wallet/router";
 import { PermissionService } from "../permission";
+import { ChainsService } from "../chains";
 
 export class PermissionInteractiveService {
   constructor(
     protected readonly permissionService: PermissionService,
-    protected readonly keyRingService: KeyRingService
+    protected readonly keyRingService: KeyRingService,
+    protected readonly chainsService: ChainsService
   ) {}
 
   async init(): Promise<void> {
@@ -26,30 +28,49 @@ export class PermissionInteractiveService {
     );
   }
 
-  async ensureEnabledAndGetCurrentChainId(
+  async ensureEnabledAndGetCurrentChainIdForEVM(
     env: Env,
     origin: string
   ): Promise<string> {
     await this.keyRingService.ensureUnlockInteractive(env);
 
-    const currentChainId =
-      this.permissionService.getCurrentChainIdForEVM(origin);
+    const currentChainIdForEVM =
+      this.permissionService.getCurrentChainIdForEVM(origin) ??
+      (() => {
+        const chainInfos = this.chainsService.getChainInfos();
+        // If currentChainId is not saved, Make Evmos current chain.
+        const evmosChainId = chainInfos.find(
+          (chainInfo) =>
+            chainInfo.evm !== undefined &&
+            chainInfo.chainId.startsWith("evmos_")
+        )?.chainId;
+
+        if (!evmosChainId) {
+          throw new Error("The Evmos chain info is not found");
+        }
+
+        return evmosChainId;
+      })();
 
     if (
       !this.permissionService.hasBasicAccessPermission(
         env,
-        [currentChainId],
+        [currentChainIdForEVM],
         origin
       )
     ) {
       await this.permissionService.grantBasicAccessPermission(
         env,
-        [currentChainId],
+        [currentChainIdForEVM],
         [origin]
       );
     }
 
-    return this.permissionService.getCurrentChainIdForEVM(origin);
+    // `currentChainIdForEVM` can be changed on UI, so call `getCurrentChainIdForEVM` again.
+    return (
+      this.permissionService.getCurrentChainIdForEVM(origin) ??
+      currentChainIdForEVM
+    );
   }
 
   disable(chainIds: string[], origin: string) {

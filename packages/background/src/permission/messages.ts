@@ -258,3 +258,27 @@ export class GetAllPermissionDataPerOriginMsg extends Message<AllPermissionDataP
     return GetAllPermissionDataPerOriginMsg.type();
   }
 }
+
+export class GetCurrentChainIdForEVMMsg extends Message<string | undefined> {
+  public static type() {
+    return "get-current-chain-id-for-evm";
+  }
+
+  constructor(public readonly permissionOrigin: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.permissionOrigin) {
+      throw new KeplrError("permission", 111, "empty permission origin");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetCurrentChainIdForEVMMsg.type();
+  }
+}

@@ -234,7 +234,6 @@ export class PermissionService {
       (newCurrentChainIdForEVM: string) => {
         if (newCurrentChainIdForEVM) {
           this.chainsService.getChainInfoOrThrow(newCurrentChainIdForEVM);
-
           this.addPermission([newCurrentChainIdForEVM], type, origins);
           this.setCurrentChainIdForEVM(env, origins, newCurrentChainIdForEVM);
         } else {
@@ -560,26 +559,8 @@ export class PermissionService {
     }
   }
 
-  getCurrentChainIdForEVM(origin: string): string {
-    const currentChainId = this.currentChainIdForEVMByOriginMap.get(origin);
-
-    if (!currentChainId) {
-      const chainInfos = this.chainsService.getChainInfos();
-      // If currentChainId is not saved, Make Evmos current chain.
-      // TODO: Provide from interaction data or UI
-      const evmosChainId = chainInfos.find(
-        (chainInfo) =>
-          chainInfo.evm !== undefined && chainInfo.chainId.startsWith("evmos_")
-      )?.chainId;
-
-      if (!evmosChainId) {
-        throw new Error("The Evmos chain info is not found");
-      }
-
-      return evmosChainId;
-    }
-
-    return currentChainId;
+  getCurrentChainIdForEVM(origin: string): string | undefined {
+    return this.currentChainIdForEVMByOriginMap.get(origin);
   }
 
   @action

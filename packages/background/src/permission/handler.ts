@@ -3,6 +3,7 @@ import {
   ClearAllPermissionsMsg,
   ClearOriginPermissionMsg,
   GetAllPermissionDataPerOriginMsg,
+  GetCurrentChainIdForEVMMsg,
   GetGlobalPermissionOriginsMsg,
   GetOriginPermittedChainsMsg,
   GetPermissionOriginsMsg,
@@ -67,6 +68,11 @@ export const getHandler: (service: PermissionService) => Handler = (
         return handleGetAllPermissionDataPerOriginMsg(service)(
           env,
           msg as GetAllPermissionDataPerOriginMsg
+        );
+      case GetCurrentChainIdForEVMMsg:
+        return handleGetCurrentChainIdForEVMMsg(service)(
+          env,
+          msg as GetCurrentChainIdForEVMMsg
         );
       default:
         throw new KeplrError("permission", 120, "Unknown msg type");
@@ -153,5 +159,13 @@ const handleGetAllPermissionDataPerOriginMsg: (
 ) => InternalHandler<GetAllPermissionDataPerOriginMsg> = (service) => {
   return () => {
     return service.getAllPermissionDataPerOrigin();
+  };
+};
+
+const handleGetCurrentChainIdForEVMMsg: (
+  service: PermissionService
+) => InternalHandler<GetCurrentChainIdForEVMMsg> = (service) => {
+  return (_, msg) => {
+    return service.getCurrentChainIdForEVM(msg.permissionOrigin);
   };
 };
