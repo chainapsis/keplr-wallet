@@ -1,8 +1,8 @@
-import React, { FunctionComponent, PropsWithChildren } from "react";
+import React, { FunctionComponent, PropsWithChildren, useEffect } from "react";
 import { Columns } from "../../../components/column";
 import { Box } from "../../../components/box";
 import { Tooltip } from "../../../components/tooltip";
-import { Image } from "../../../components/image";
+import { ChainImageFallback, Image } from "../../../components/image";
 import { MenuIcon } from "../../../components/icon";
 import { ProfileButton } from "../../../layouts/header/components";
 import { observer } from "mobx-react-lite";
@@ -18,6 +18,10 @@ import { Body2, Subtitle3 } from "../../../components/typography";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Gutter } from "../../../components/gutter";
 import { Button } from "../../../components/button";
+import { getActiveTabOrigin } from "../../../utils/browser-api";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { GetCurrentChainIdForEVMMsg } from "@keplr-wallet/background";
 
 export const MainHeaderLayout: FunctionComponent<
   PropsWithChildren<
@@ -61,6 +65,25 @@ export const MainHeaderLayout: FunctionComponent<
   const intl = useIntl();
 
   const [isOpenMenu, setIsOpenMenu] = React.useState(false);
+
+  const [currentChainIdForEVM, setCurrentChainIdForEVM] = React.useState<
+    string | undefined
+  >();
+  useEffect(() => {
+    (async () => {
+      const activeTabOrigin = await getActiveTabOrigin();
+
+      if (activeTabOrigin) {
+        const msg = new GetCurrentChainIdForEVMMsg(activeTabOrigin);
+        const newCurrentChainIdForEVM =
+          await new InExtensionMessageRequester().sendMessage(
+            BACKGROUND_PORT,
+            msg
+          );
+        setCurrentChainIdForEVM(newCurrentChainIdForEVM);
+      }
+    })();
+  }, []);
 
   const openMenu = () => {
     setIsOpenMenu(true);
@@ -187,7 +210,40 @@ export const MainHeaderLayout: FunctionComponent<
           </Box>
         </React.Fragment>
       }
-      right={<ProfileButton />}
+      right={
+        <Columns sum={1} alignY="center" gutter="0.875rem">
+          {currentChainIdForEVM !== undefined && (
+            <Box borderRadius="99999px" style={{ position: "relative" }}>
+              <ChainImageFallback
+                chainInfo={chainStore.getChain(currentChainIdForEVM)}
+                size="1.25rem"
+              />
+              <Box
+                backgroundColor={
+                  theme.mode === "light"
+                    ? ColorPalette["light-gradient"]
+                    : ColorPalette["gray-700"]
+                }
+                width="0.625rem"
+                height="0.625rem"
+                borderRadius="99999px"
+                position="absolute"
+                style={{ right: "-3px", bottom: "-2px" }}
+                alignX="center"
+                alignY="center"
+              >
+                <Box
+                  backgroundColor={ColorPalette["green-400"]}
+                  width="0.375rem"
+                  height="0.375rem"
+                  borderRadius="99999px"
+                />
+              </Box>
+            </Box>
+          )}
+          <ProfileButton />
+        </Columns>
+      }
       {...otherProps}
     >
       {children}
