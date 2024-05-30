@@ -106,7 +106,8 @@ export const PermissionBasicAccessPage: FunctionComponent<{
           }}
           borderRadius="0.5rem"
         >
-          {isConnectingOneEVMChain && !data.options?.isUnableChangeChainInUI ? (
+          {isConnectingOneEVMChain &&
+          !data.options?.isUnableToChangeChainInUI ? (
             <Box style={{ paddingTop: "1.125rem" }}>
               <Body2
                 color={

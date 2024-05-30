@@ -1,9 +1,14 @@
-import React, { FunctionComponent, PropsWithChildren, useEffect } from "react";
+import React, {
+  FunctionComponent,
+  PropsWithChildren,
+  useEffect,
+  useRef,
+} from "react";
 import { Columns } from "../../../components/column";
 import { Box } from "../../../components/box";
 import { Tooltip } from "../../../components/tooltip";
 import { ChainImageFallback, Image } from "../../../components/image";
-import { MenuIcon } from "../../../components/icon";
+import { CheckIcon, MenuIcon } from "../../../components/icon";
 import { ProfileButton } from "../../../layouts/header/components";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
@@ -21,7 +26,17 @@ import { Button } from "../../../components/button";
 import { getActiveTabOrigin } from "../../../utils/browser-api";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
-import { GetCurrentChainIdForEVMMsg } from "@keplr-wallet/background";
+import {
+  GetCurrentChainIdForEVMMsg,
+  UpdateCurrentChainIdForEVMMsg,
+} from "@keplr-wallet/background";
+import {
+  autoPlacement,
+  autoUpdate,
+  offset,
+  useFloating,
+} from "@floating-ui/react-dom";
+import SimpleBar from "simplebar-react";
 
 export const MainHeaderLayout: FunctionComponent<
   PropsWithChildren<
@@ -64,9 +79,10 @@ export const MainHeaderLayout: FunctionComponent<
   const theme = useTheme();
   const intl = useIntl();
 
-  const [isOpenMenu, setIsOpenMenu] = React.useState(false);
-
   const [currentChainIdForEVM, setCurrentChainIdForEVM] = React.useState<
+    string | undefined
+  >();
+  const [activeTabOrigin, setActiveTabOrigin] = React.useState<
     string | undefined
   >();
   useEffect(() => {
@@ -81,9 +97,19 @@ export const MainHeaderLayout: FunctionComponent<
             msg
           );
         setCurrentChainIdForEVM(newCurrentChainIdForEVM);
+        setActiveTabOrigin(activeTabOrigin);
       }
     })();
   }, []);
+  const [isHoveredCurrenctChainIcon, setIsHoveredCurrenctChainIcon] =
+    React.useState(false);
+  const [isOpenCurrentChainDropdown, setIsOpenCurrentChainDropdown] =
+    React.useState(false);
+  const evmChainInfos = chainStore.chainInfos.filter((chainInfo) =>
+    chainStore.isEvmChain(chainInfo.chainId)
+  );
+
+  const [isOpenMenu, setIsOpenMenu] = React.useState(false);
 
   const openMenu = () => {
     setIsOpenMenu(true);
@@ -212,35 +238,70 @@ export const MainHeaderLayout: FunctionComponent<
       }
       right={
         <Columns sum={1} alignY="center" gutter="0.875rem">
-          {currentChainIdForEVM !== undefined && (
-            <Box borderRadius="99999px" style={{ position: "relative" }}>
-              <ChainImageFallback
-                chainInfo={chainStore.getChain(currentChainIdForEVM)}
-                size="1.25rem"
-              />
-              <Box
-                backgroundColor={
-                  theme.mode === "light"
-                    ? ColorPalette["light-gradient"]
-                    : ColorPalette["gray-700"]
-                }
-                width="0.625rem"
-                height="0.625rem"
-                borderRadius="99999px"
-                position="absolute"
-                style={{ right: "-3px", bottom: "-2px" }}
-                alignX="center"
-                alignY="center"
+          {currentChainIdForEVM !== undefined &&
+            activeTabOrigin !== undefined && (
+              <EVMChainSelector
+                isOpen={isOpenCurrentChainDropdown}
+                close={() => setIsOpenCurrentChainDropdown(false)}
+                items={evmChainInfos.map((chainInfo) => ({
+                  key: chainInfo.chainId,
+                  content: (
+                    <Columns sum={1} alignY="center" gutter="0.5rem">
+                      <ChainImageFallback chainInfo={chainInfo} size="2rem" />
+                      <Subtitle3>{chainInfo.chainName}</Subtitle3>
+                    </Columns>
+                  ),
+                  onSelect: async (key) => {
+                    const msg = new UpdateCurrentChainIdForEVMMsg(
+                      activeTabOrigin,
+                      key
+                    );
+                    await new InExtensionMessageRequester().sendMessage(
+                      BACKGROUND_PORT,
+                      msg
+                    );
+                    setCurrentChainIdForEVM(key);
+                  },
+                }))}
+                selectedItemKey={currentChainIdForEVM}
+                activeTabOrigin={activeTabOrigin}
               >
                 <Box
-                  backgroundColor={ColorPalette["green-400"]}
-                  width="0.375rem"
-                  height="0.375rem"
                   borderRadius="99999px"
-                />
-              </Box>
-            </Box>
-          )}
+                  position="relative"
+                  cursor="pointer"
+                  onHoverStateChange={setIsHoveredCurrenctChainIcon}
+                  onClick={() => setIsOpenCurrentChainDropdown(true)}
+                >
+                  <ChainImageFallback
+                    chainInfo={chainStore.getChain(currentChainIdForEVM)}
+                    size="1.25rem"
+                    style={{ opacity: isHoveredCurrenctChainIcon ? 0.8 : 1 }}
+                  />
+                  <Box
+                    backgroundColor={
+                      theme.mode === "light"
+                        ? ColorPalette["light-gradient"]
+                        : ColorPalette["gray-700"]
+                    }
+                    width="0.625rem"
+                    height="0.625rem"
+                    borderRadius="99999px"
+                    position="absolute"
+                    style={{ right: "-3px", bottom: "-2px" }}
+                    alignX="center"
+                    alignY="center"
+                  >
+                    <Box
+                      backgroundColor={ColorPalette["green-400"]}
+                      width="0.375rem"
+                      height="0.375rem"
+                      borderRadius="99999px"
+                    />
+                  </Box>
+                </Box>
+              </EVMChainSelector>
+            )}
           <ProfileButton />
         </Columns>
       }
@@ -258,3 +319,165 @@ export const MainHeaderLayout: FunctionComponent<
     </HeaderLayout>
   );
 });
+
+const EVMChainSelector: FunctionComponent<
+  PropsWithChildren<{
+    isOpen: boolean;
+    close: () => void;
+    items: {
+      key: string;
+      content: React.ReactNode;
+      onSelect: (key: string) => void;
+    }[];
+    selectedItemKey: string;
+    activeTabOrigin: string;
+  }>
+> = observer(
+  ({ children, isOpen, close, items, selectedItemKey, activeTabOrigin }) => {
+    const { x, y, strategy, refs } = useFloating({
+      placement: "bottom-end",
+      middleware: [
+        autoPlacement({
+          allowedPlacements: ["bottom-end"],
+        }),
+        offset({
+          mainAxis: 10,
+          crossAxis: 10,
+        }),
+      ],
+      whileElementsMounted: autoUpdate,
+      open: isOpen,
+    });
+
+    const closeRef = useRef(close);
+    closeRef.current = close;
+    useEffect(() => {
+      function handleClickOutside(event: MouseEvent) {
+        const floatingRef = refs.floating;
+        if (
+          floatingRef.current &&
+          "contains" in floatingRef.current &&
+          !floatingRef.current.contains(event.target as Node)
+        ) {
+          closeRef.current();
+        }
+      }
+      document.addEventListener("mousedown", handleClickOutside);
+
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, [refs.floating]);
+
+    return (
+      <React.Fragment>
+        <div ref={refs.setReference}>{children}</div>
+        {isOpen && (
+          <div
+            ref={refs.setFloating}
+            style={{
+              position: strategy,
+              top: y ?? 0,
+              left: x ?? 0,
+
+              minWidth: "19rem",
+              backgroundColor: ColorPalette["gray-600"],
+              borderRadius: "0.375rem",
+              borderStyle: "solid",
+              borderWidth: "1px",
+              borderColor: ColorPalette["gray-500"],
+            }}
+          >
+            <Box
+              alignX="left"
+              alignY="center"
+              paddingX="1rem"
+              paddingY="1.25rem"
+              color={ColorPalette["gray-200"]}
+              backgroundColor={ColorPalette["gray-600"]}
+              style={{
+                borderTopLeftRadius: "0.375rem",
+                borderTopRightRadius: "0.375rem",
+                borderBottomStyle: "solid",
+                borderBottomWidth: "1px",
+                borderBottomColor: ColorPalette["gray-500"],
+              }}
+            >
+              <Columns sum={1} alignY="center" gutter="0.5rem">
+                <Box
+                  backgroundColor={ColorPalette["green-400"]}
+                  width="0.375rem"
+                  height="0.375rem"
+                  borderRadius="99999px"
+                />
+                <Body2>{activeTabOrigin}</Body2>
+              </Columns>
+            </Box>
+            <SimpleBar
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                maxHeight: "16rem",
+                overflowY: "auto",
+              }}
+            >
+              {items.map((item) => {
+                const isSelectedItem = selectedItemKey === item.key;
+
+                return (
+                  <Box
+                    key={item.key}
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                    paddingX="1rem"
+                    paddingY="0.75rem"
+                    cursor="pointer"
+                    color={ColorPalette["white"]}
+                    backgroundColor={
+                      ColorPalette[isSelectedItem ? "gray-650" : "gray-600"]
+                    }
+                    hover={{
+                      backgroundColor: ColorPalette["gray-550"],
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault();
+
+                      item.onSelect(item.key);
+
+                      close();
+                    }}
+                  >
+                    {item.content}
+                    {isSelectedItem && <CheckIcon />}
+                  </Box>
+                );
+              })}
+            </SimpleBar>
+            <Box
+              alignX="left"
+              alignY="center"
+              paddingX="1rem"
+              paddingY="1.25rem"
+              color={ColorPalette["gray-200"]}
+              backgroundColor={ColorPalette["gray-600"]}
+              style={{
+                borderBottomLeftRadius: "0.375rem",
+                borderBottomRightRadius: "0.375rem",
+              }}
+            >
+              <Body2>
+                {"EVM compatible chains require users to"}
+                <br /> {"manually switch between networks in"}
+                <br />
+                {"their wallets."}
+              </Body2>
+            </Box>
+          </div>
+        )}
+      </React.Fragment>
+    );
+  }
+);
