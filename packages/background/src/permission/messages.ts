@@ -282,3 +282,34 @@ export class GetCurrentChainIdForEVMMsg extends Message<string | undefined> {
     return GetCurrentChainIdForEVMMsg.type();
   }
 }
+
+export class UpdateCurrentChainIdForEVMMsg extends Message<void> {
+  public static type() {
+    return "update-current-chain-id-for-evm";
+  }
+
+  constructor(
+    public readonly permissionOrigin: string,
+    public readonly chainId: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.permissionOrigin) {
+      throw new KeplrError("permission", 111, "empty permission origin");
+    }
+
+    if (!this.chainId) {
+      throw new KeplrError("permission", 100, "chain id not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return UpdateCurrentChainIdForEVMMsg.type();
+  }
+}

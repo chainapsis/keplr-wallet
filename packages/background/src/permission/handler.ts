@@ -9,6 +9,7 @@ import {
   GetPermissionOriginsMsg,
   RemoveGlobalPermissionOriginMsg,
   RemovePermissionOrigin,
+  UpdateCurrentChainIdForEVMMsg,
 } from "./messages";
 import {
   Env,
@@ -73,6 +74,11 @@ export const getHandler: (service: PermissionService) => Handler = (
         return handleGetCurrentChainIdForEVMMsg(service)(
           env,
           msg as GetCurrentChainIdForEVMMsg
+        );
+      case UpdateCurrentChainIdForEVMMsg:
+        return handleUpdateCurrentChainIdForEVMMsg(service)(
+          env,
+          msg as UpdateCurrentChainIdForEVMMsg
         );
       default:
         throw new KeplrError("permission", 120, "Unknown msg type");
@@ -167,5 +173,13 @@ const handleGetCurrentChainIdForEVMMsg: (
 ) => InternalHandler<GetCurrentChainIdForEVMMsg> = (service) => {
   return (_, msg) => {
     return service.getCurrentChainIdForEVM(msg.permissionOrigin);
+  };
+};
+
+const handleUpdateCurrentChainIdForEVMMsg: (
+  service: PermissionService
+) => InternalHandler<UpdateCurrentChainIdForEVMMsg> = (service) => {
+  return (env, msg) => {
+    service.updateCurrentChainIdForEVM(env, msg.permissionOrigin, msg.chainId);
   };
 };

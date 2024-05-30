@@ -1,5 +1,5 @@
 import { InteractionService } from "../interaction";
-import { Env, KeplrError } from "@keplr-wallet/router";
+import { Env, KeplrError, WEBPAGE_PORT } from "@keplr-wallet/router";
 import {
   AllPermissionDataPerOrigin,
   getBasicAccessPermissionType,
@@ -216,6 +216,9 @@ export class PermissionService {
     options?: PermissionOptions
   ) {
     if (env.isInternalMsg) {
+      if (options?.isEnableToPermitForInternalMsg) {
+        this.addPermission(chainIds, type, origins);
+      }
       return;
     }
 
@@ -231,11 +234,11 @@ export class PermissionService {
       "/permission",
       INTERACTION_TYPE_PERMISSION,
       permissionData,
-      (newCurrentChainIdForEVM: string) => {
-        if (newCurrentChainIdForEVM) {
-          this.chainsService.getChainInfoOrThrow(newCurrentChainIdForEVM);
-          this.addPermission([newCurrentChainIdForEVM], type, origins);
-          this.setCurrentChainIdForEVM(env, origins, newCurrentChainIdForEVM);
+      (newChainId: string) => {
+        if (newChainId) {
+          this.chainsService.getChainInfoOrThrow(newChainId);
+          this.addPermission([newChainId], type, origins);
+          this.setCurrentChainIdForEVM(origins, newChainId);
         } else {
           this.addPermission(chainIds, type, origins);
         }
@@ -564,15 +567,29 @@ export class PermissionService {
   }
 
   @action
-  setCurrentChainIdForEVM(
-    env: Env,
-    origins: string[],
-    newCurrentChainId: string
-  ): void {
+  setCurrentChainIdForEVM(origins: string[], chainId: string) {
     for (const origin of origins) {
-      this.checkBasicAccessPermission(env, [newCurrentChainId], origin);
-
-      this.currentChainIdForEVMByOriginMap.set(origin, newCurrentChainId);
+      this.currentChainIdForEVMByOriginMap.set(origin, chainId);
     }
+  }
+
+  @action
+  updateCurrentChainIdForEVM(env: Env, origin: string, chainId: string) {
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    if (chainInfo.evm === undefined) {
+      throw new Error("The chain is not provided EVM info");
+    }
+
+    this.checkOrGrantBasicAccessPermission(env, [chainId], origin, {
+      isUnableToChangeChainInUI: true,
+      isEnableToPermitForInternalMsg: true,
+    });
+
+    this.currentChainIdForEVMByOriginMap.set(origin, chainId);
+
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "keplr_chainChanged", {
+      origin,
+      evmChainId: chainInfo.evm.chainId,
+    });
   }
 }
