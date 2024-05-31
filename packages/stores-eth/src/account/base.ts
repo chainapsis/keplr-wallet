@@ -2,7 +2,6 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { ChainGetter } from "@keplr-wallet/stores";
 import {
   AppCurrency,
-  ChainInfo,
   EthSignType,
   EthTxReceipt,
   Keplr,
@@ -31,10 +30,6 @@ export class EthereumAccountBase {
     makeObservable(this);
   }
 
-  static evmInfo(chainInfo: ChainInfo): ChainInfo["evm"] | undefined {
-    return chainInfo.evm;
-  }
-
   @action
   setIsSendingTx(value: boolean) {
     this._isSendingTx = value;
@@ -56,7 +51,7 @@ export class EthereumAccountBase {
     recipient: string;
   }) {
     const chainInfo = this.chainGetter.getChain(this.chainId);
-    const evmInfo = EthereumAccountBase.evmInfo(chainInfo);
+    const evmInfo = chainInfo.evm;
     if (!evmInfo) {
       throw new Error("No EVM chain info provided");
     }
@@ -134,7 +129,7 @@ export class EthereumAccountBase {
     maxPriorityFeePerGas: string;
   }): Promise<UnsignedTransaction> {
     const chainInfo = this.chainGetter.getChain(this.chainId);
-    const evmInfo = EthereumAccountBase.evmInfo(chainInfo);
+    const evmInfo = chainInfo.evm;
     if (!evmInfo) {
       throw new Error("No EVM chain info provided");
     }
@@ -201,7 +196,7 @@ export class EthereumAccountBase {
   ) {
     try {
       const chainInfo = this.chainGetter.getChain(this.chainId);
-      const evmInfo = EthereumAccountBase.evmInfo(chainInfo);
+      const evmInfo = chainInfo.evm;
       if (!evmInfo) {
         throw new Error("No EVM info provided");
       }

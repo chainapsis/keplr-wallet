@@ -281,9 +281,16 @@ export const AvailableTabView: FunctionComponent<{
                             return undefined;
                           }
 
-                          return accountStore.getAccount(
+                          const account = accountStore.getAccount(
                             viewToken.chainInfo.chainId
-                          ).bech32Address;
+                          );
+                          const isEVMOnlyChain = chainStore.isEvmOnlyChain(
+                            viewToken.chainInfo.chainId
+                          );
+
+                          return isEVMOnlyChain
+                            ? account.ethereumHexAddress
+                            : account.bech32Address;
                         })()}
                         showPrice24HChange={
                           uiConfigStore.show24HChangesInMagePage

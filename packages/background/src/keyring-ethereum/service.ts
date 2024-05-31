@@ -3,12 +3,7 @@ import { KeyRingService } from "../keyring";
 import { InteractionService } from "../interaction";
 import { AnalyticsService } from "../analytics";
 import { Env, WEBPAGE_PORT } from "@keplr-wallet/router";
-import {
-  ChainInfo,
-  EthereumSignResponse,
-  EthSignType,
-  EVMInfo,
-} from "@keplr-wallet/types";
+import { EthereumSignResponse, EthSignType } from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
 import {
@@ -27,10 +22,6 @@ import { getBasicAccessPermissionType, PermissionService } from "../permission";
 import { BackgroundTxEthereumService } from "../tx-ethereum";
 import { TokenERC20Service } from "../token-erc20";
 export class KeyRingEthereumService {
-  static evmInfo(chainInfo: ChainInfo): EVMInfo | undefined {
-    return chainInfo.evm;
-  }
-
   constructor(
     protected readonly chainsService: ChainsService,
     protected readonly keyRingService: KeyRingService,
@@ -81,7 +72,7 @@ export class KeyRingEthereumService {
       throw new Error("Can't sign for hidden chain");
     }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
-    const evmInfo = KeyRingEthereumService.evmInfo(chainInfo);
+    const evmInfo = ChainsService.getEVMInfo(chainInfo);
 
     if (!isEthermintLike && !evmInfo) {
       throw new Error("Not ethermint like and EVM chain");
@@ -108,15 +99,10 @@ export class KeyRingEthereumService {
     }
 
     const key = await this.keyRingCosmosService.getKey(vaultId, chainId);
-    const bech32Prefix =
-      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        .bech32PrefixAccAddr;
-    const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
-    const ethereumHexAddress = Bech32Address.fromBech32(
-      bech32Address,
-      bech32Prefix
-    ).toHex(false);
-    if (signer !== bech32Address && signer !== ethereumHexAddress) {
+    if (
+      signer !== key.bech32Address &&
+      signer !== key.ethereumHexAddress.toLowerCase()
+    ) {
       throw new Error("Signer mismatched");
     }
 

@@ -17,7 +17,9 @@ export const AddressChip: FunctionComponent<{
   // modal 안에서는 배경색을 바꿈
   inModal?: boolean;
 }> = observer(({ chainId, inModal }) => {
-  const { accountStore } = useStore();
+  const { accountStore, chainStore } = useStore();
+
+  const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
 
   const theme = useTheme();
 
@@ -72,7 +74,9 @@ export const AddressChip: FunctionComponent<{
         e.preventDefault();
 
         // copy address
-        navigator.clipboard.writeText(account.bech32Address);
+        navigator.clipboard.writeText(
+          isEVMOnlyChain ? account.ethereumHexAddress : account.bech32Address
+        );
         setAnimCheck(true);
       }}
       onHoverStateChange={setIsHover}
@@ -85,7 +89,12 @@ export const AddressChip: FunctionComponent<{
               : ColorPalette["gray-200"]
           }
         >
-          {Bech32Address.shortenAddress(account.bech32Address, 16)}
+          {isEVMOnlyChain
+            ? `${account.ethereumHexAddress.slice(
+                0,
+                10
+              )}...${account.ethereumHexAddress.slice(32)}`
+            : Bech32Address.shortenAddress(account.bech32Address, 16)}
         </Body3>
         <Gutter size="0.4rem" />
         {!animCheck ? (

@@ -3,7 +3,11 @@ import {
   PrefixKVStore,
   sortedJsonByKeyStringify,
 } from "@keplr-wallet/common";
-import { ChainInfo, ChainInfoWithoutEndpoints } from "@keplr-wallet/types";
+import {
+  ChainInfo,
+  ChainInfoWithoutEndpoints,
+  EVMInfo,
+} from "@keplr-wallet/types";
 import {
   action,
   autorun,
@@ -31,6 +35,10 @@ type ChainSuggestedHandler = (chainInfo: ChainInfo) => void | Promise<void>;
 type UpdatedChainInfo = Pick<ChainInfo, "chainId" | "features">;
 
 export class ChainsService {
+  static getEVMInfo(chainInfo: ChainInfo): EVMInfo | undefined {
+    return chainInfo.evm;
+  }
+
   @observable.ref
   protected updatedChainInfos: UpdatedChainInfo[] = [];
   protected updatedChainInfoKVStore: KVStore;

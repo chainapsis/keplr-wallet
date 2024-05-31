@@ -141,14 +141,14 @@ export class RecentSendHistoryService {
       this.chainsService.getChainInfoOrThrow(sourceChainId);
     Bech32Address.validate(
       sender,
-      sourceChainInfo.bech32Config.bech32PrefixAccAddr
+      sourceChainInfo.bech32Config?.bech32PrefixAccAddr
     );
 
     const destinationChainInfo =
       this.chainsService.getChainInfoOrThrow(destinationChainId);
     Bech32Address.validate(
       recipient,
-      destinationChainInfo.bech32Config.bech32PrefixAccAddr
+      destinationChainInfo.bech32Config?.bech32PrefixAccAddr
     );
 
     const txHash = await this.txService.sendTx(sourceChainId, tx, mode, {
@@ -218,7 +218,7 @@ export class RecentSendHistoryService {
       this.chainsService.getChainInfoOrThrow(sourceChainId);
     Bech32Address.validate(
       sender,
-      sourceChainInfo.bech32Config.bech32PrefixAccAddr
+      sourceChainInfo.bech32Config?.bech32PrefixAccAddr
     );
 
     this.chainsService.getChainInfoOrThrow(destinationChainId);

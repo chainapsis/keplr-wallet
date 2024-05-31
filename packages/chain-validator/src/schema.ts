@@ -131,6 +131,40 @@ export const Bech32ConfigSchema = Joi.object<Bech32Config>({
   bech32PrefixConsPub: Joi.string().required(),
 });
 
+// This EIP-155 Chain ID follows the format defined in CAIP-2
+// https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-2.md
+export const EIP155ChainIdSchema = Joi.string().custom((value: string) => {
+  if (!value.includes(":")) {
+    throw new Error("EIP155 chain id should have colon as defined in CAIP-2");
+  } else {
+    const splits = value.split(":");
+    if (splits.length !== 2) {
+      throw new Error(
+        "EIP155 chain id should have only one colon as defined in CAIP-2"
+      );
+    }
+
+    const [namespace, reference] = splits;
+    if (namespace !== "eip155") {
+      throw new Error("Namespace for EIP155 chain id should be 'eip155'");
+    }
+
+    const referenceFound = reference.match(/^[1-9]{1,32}$/);
+    if (!referenceFound) {
+      throw new Error(
+        "Reference for EIP155 chain id should be 1~32 characters of number"
+      );
+    }
+  }
+
+  return value;
+});
+
+export const ChainIdSchema = Joi.alternatives().try(
+  Joi.string().min(1).max(30),
+  EIP155ChainIdSchema
+);
+
 export const SuggestingBIP44Schema = Joi.object<{ coinType: number }>({
   coinType: Joi.number().strict().integer().min(0).required(),
   // Alow the any keys for compatibility of cosmosJS's BIP44 (for legacy).
@@ -180,7 +214,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
       .required(),
     website: Joi.string().uri(),
   }),
-  chainId: Joi.string().required().min(1).max(30),
+  chainId: ChainIdSchema.required(),
   chainName: Joi.string().required().min(1).max(30),
   stakeCurrency: CurrencySchema,
   walletUrl: Joi.string().uri(),
@@ -200,7 +234,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
 
       return values;
     }),
-  bech32Config: Bech32ConfigSchema.required(),
+  bech32Config: Bech32ConfigSchema,
   currencies: Joi.array()
     .min(1)
     .items(CurrencySchema, CW20CurrencySchema, Secret20CurrencySchema)
@@ -264,6 +298,22 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
     throw new Error(
       `stake currency ${value.stakeCurrency.coinMinimalDenom} is not included in currencies`
     );
+  }
+
+  if (!value.bech32Config) {
+    if (value.bip44.coinType !== 60) {
+      throw new Error("If bech32Config is undefined, coin type should be 60");
+    }
+
+    if (!value.evm) {
+      throw new Error("If bech32Config is undefined, evm should be provided");
+    }
+
+    if (EIP155ChainIdSchema.validate(value.chainId).error) {
+      throw new Error(
+        "If bech32Config is undefined, chainId should be EIP155 chain id defined in CAIP-2"
+      );
+    }
   }
 
   return value;

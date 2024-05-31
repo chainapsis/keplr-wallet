@@ -433,7 +433,7 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
     return this._embedded.alternativeBIP44s;
   }
 
-  get bech32Config(): Bech32Config {
+  get bech32Config(): Bech32Config | undefined {
     return this._embedded.bech32Config;
   }
 
@@ -593,5 +593,9 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
   isEvmChain(chainId: string): boolean {
     const chainInfo = this.getChain(chainId);
     return chainInfo.evm !== undefined;
+  }
+
+  isEvmOnlyChain(chainId: string): boolean {
+    return this.isEvmChain(chainId) && chainId.split(":")[0] === "eip155";
   }
 }

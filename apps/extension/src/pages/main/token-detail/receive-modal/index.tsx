@@ -22,6 +22,7 @@ export const ReceiveModal: FunctionComponent<{
 
   const chainInfo = chainStore.getChain(chainId);
   const account = accountStore.getAccount(chainId);
+  const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
 
   return (
     <Box
@@ -63,7 +64,11 @@ export const ReceiveModal: FunctionComponent<{
           padding="0.75rem"
         >
           <QRCodeSVG
-            value={account.bech32Address}
+            value={
+              isEVMOnlyChain
+                ? account.ethereumHexAddress
+                : account.bech32Address
+            }
             size={176}
             level="M"
             bgColor={ColorPalette.white}

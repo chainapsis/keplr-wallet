@@ -84,7 +84,11 @@ export class LSMCurrencyRegistrar {
     }
 
     if (
-      !coinMinimalDenom.startsWith(chainInfo.bech32Config.bech32PrefixValAddr)
+      !chainInfo.bech32Config ||
+      (chainInfo.bech32Config &&
+        !coinMinimalDenom.startsWith(
+          chainInfo.bech32Config.bech32PrefixValAddr
+        ))
     ) {
       return;
     }
@@ -98,7 +102,7 @@ export class LSMCurrencyRegistrar {
     try {
       Bech32Address.validate(
         valAddress,
-        chainInfo.bech32Config.bech32PrefixValAddr
+        chainInfo.bech32Config?.bech32PrefixValAddr
       );
     } catch {
       // noop

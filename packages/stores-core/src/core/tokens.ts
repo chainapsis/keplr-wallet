@@ -166,7 +166,7 @@ export class TokensStore {
       ? Buffer.from(
           Bech32Address.fromBech32(
             bech32Address,
-            chainInfo.bech32Config.bech32PrefixAccAddr
+            chainInfo.bech32Config?.bech32PrefixAccAddr
           ).address
         ).toString("hex")
       : "";
@@ -196,7 +196,7 @@ export class TokensStore {
     const associatedAccountAddress = Buffer.from(
       Bech32Address.fromBech32(
         bech32Address,
-        chainInfo.bech32Config.bech32PrefixAccAddr
+        chainInfo.bech32Config?.bech32PrefixAccAddr
       ).address
     ).toString("hex");
 

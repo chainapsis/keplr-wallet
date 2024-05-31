@@ -85,6 +85,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
   const chainInfo = chainStore.getChain(chainId);
   const isEvmChain = chainStore.isEvmChain(chainId);
+  const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
+
   const coinMinimalDenom =
     initialCoinMinimalDenom ||
     chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
@@ -113,7 +115,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
   }, [navigate, initialChainId, initialCoinMinimalDenom]);
 
-  const [isEvmTx, setIsEvmTx] = useState(isErc20);
+  const [isEvmTx, setIsEvmTx] = useState(isErc20 || isEVMOnlyChain);
 
   const account = accountStore.getAccount(chainId);
   const ethereumAccount = ethereumAccountStore.getAccount(chainId);
@@ -252,8 +254,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           chainInfo.currencies[0].coinMinimalDenom) ===
           sendingDenomHelper.denom;
       const newIsEvmTx =
-        sendConfigs.recipientConfig.isRecipientEthereumHexAddress &&
-        (isERC20 || isSendingNativeToken);
+        isEVMOnlyChain ||
+        (sendConfigs.recipientConfig.isRecipientEthereumHexAddress &&
+          (isERC20 || isSendingNativeToken));
 
       const newSenderAddress = newIsEvmTx
         ? account.ethereumHexAddress
@@ -267,6 +270,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     account,
     ethereumAccount,
     isEvmChain,
+    isEVMOnlyChain,
     sendConfigs.amountConfig.currency.coinMinimalDenom,
     sendConfigs.recipientConfig.isRecipientEthereumHexAddress,
     sendConfigs.senderConfig,
@@ -759,7 +763,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             />
           </YAxis>
 
-          {!isErc20 && (
+          {!isErc20 && !isEVMOnlyChain && (
             <LayeredHorizontalRadioGroup
               size="large"
               selectedKey={isIBCTransfer ? "ibc-transfer" : "send"}

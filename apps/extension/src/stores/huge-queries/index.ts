@@ -115,6 +115,7 @@ export class HugeQueriesStore {
 
     for (const chainInfo of this.chainStore.chainInfosInUI) {
       const account = this.accountStore.getAccount(chainInfo.chainId);
+      const mainCurrency = chainInfo.stakeCurrency || chainInfo.currencies[0];
 
       if (account.bech32Address === "") {
         continue;
@@ -127,9 +128,12 @@ export class HugeQueriesStore {
       }
       for (const currency of currencies) {
         const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+        const isERC20 = denomHelper.type === "erc20";
+        const isMainCurrency =
+          mainCurrency.coinMinimalDenom === currency.coinMinimalDenom;
         const queryBalance =
           this.chainStore.isEvmChain(chainInfo.chainId) &&
-          denomHelper.type === "erc20"
+          (isMainCurrency || isERC20)
             ? queries.queryBalances.getQueryEthereumHexAddress(
                 account.ethereumHexAddress
               )

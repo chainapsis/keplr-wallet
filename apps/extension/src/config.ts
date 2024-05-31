@@ -2642,6 +2642,43 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["cosmwasm"],
   },
+  // For test
+  {
+    rpc: "https://mainnet.infura.io/v3/37b42f2d421b43f481788b4e18807191",
+    rest: "https://mainnet.infura.io/v3/37b42f2d421b43f481788b4e18807191",
+    evm: {
+      chainId: 1,
+      rpc: "https://mainnet.infura.io/v3/37b42f2d421b43f481788b4e18807191",
+    },
+    chainId: "eip155:1",
+    chainName: "Ethereum",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+      },
+    ],
+    features: ["eth-address-gen", "eth-key-sign"],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
