@@ -860,7 +860,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
   isMetaMask = true;
 
   protected _isConnected = false;
-  protected _tendermintChainId: string | null = null;
+  protected _currentChainId: string | null = null;
 
   constructor(
     protected readonly injectedKeplr: InjectedKeplr,
@@ -881,14 +881,14 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     super();
 
     window.addEventListener("keplr_keystorechange", async () => {
-      if (this._tendermintChainId) {
+      if (this._currentChainId) {
         const chainInfo = await injectedKeplr.getChainInfoWithoutEndpoints(
-          this._tendermintChainId
+          this._currentChainId
         );
 
         if (chainInfo) {
           const selectedAddress = (
-            await injectedKeplr.getKey(this._tendermintChainId)
+            await injectedKeplr.getKey(this._currentChainId)
           ).ethereumHexAddress;
           this.handleAccountsChanged(selectedAddress);
         }
@@ -963,22 +963,21 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
 
   protected async handleConnect(evmChainId?: number) {
     if (!this._isConnected) {
-      const { currentEvmChainId, currentTendermintChainId, selectedAddress } =
+      const { currentEvmChainId, currentChainId, selectedAddress } =
         await this.requestMethod("request", {
           method: "keplr_connect",
           ...(evmChainId && { params: [evmChainId] }),
         });
 
       this._isConnected = true;
-      this._tendermintChainId = currentTendermintChainId;
+      this._currentChainId = currentChainId;
 
-      const currentChainIdHex = `0x${currentEvmChainId.toString(16)}`;
-      this.chainId = currentChainIdHex;
+      this.chainId = `0x${currentEvmChainId.toString(16)}`;
       this.networkVersion = currentEvmChainId.toString(10);
 
       this.selectedAddress = selectedAddress;
 
-      this.emit("connect", { chainId: currentChainIdHex });
+      this.emit("connect", { chainId: this.chainId });
     }
   }
 
