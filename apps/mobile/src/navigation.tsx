@@ -121,6 +121,9 @@ import {EditFavoriteUrlScreen} from './screen/web/edit-favorite';
 import {SearchUrlScreen} from './screen/web/search';
 import {FavoriteUrl} from './stores/webpage/types.ts';
 import {Text} from 'react-native';
+import {ActivitiesScreen} from './screen/activities';
+import {DocumentFillIcon} from './components/icon/document-fill.tsx';
+import {DocumentOutlinedIcon} from './components/icon/document-outliend.tsx';
 
 type DefaultRegisterParams = {
   hideBackButton?: boolean;
@@ -340,6 +343,8 @@ export type RootStackParamList = {
     initialGasAdjustment?: string;
     tempSwitchAmount?: string;
   };
+
+  Activities: undefined;
 };
 
 export type StakeNavigation = {
@@ -584,6 +589,12 @@ const DrawerBottomTabLabel: FunctionComponent<{
           {intl.formatMessage({id: 'bottom-tabs.settings'})}
         </Text>
       );
+    case 'Activities':
+      return (
+        <Text style={{color}}>
+          {intl.formatMessage({id: 'bottom-tabs.activity'})}
+        </Text>
+      );
   }
 
   return <></>;
@@ -604,6 +615,7 @@ export const MainTabNavigation: FunctionComponent = () => {
     if (
       focusedScreen.name !== 'Home' &&
       focusedScreen.name !== 'Swap' &&
+      focusedScreen.name !== 'Activities' &&
       isDrawerOpen
     ) {
       navigation.dispatch(DrawerActions.toggleDrawer());
@@ -632,6 +644,12 @@ export const MainTabNavigation: FunctionComponent = () => {
                 <SettingIcon size={size} color={color} />
               ) : (
                 <SettingOutlinedIcon size={size} color={color} />
+              );
+            case 'Activities':
+              return focused ? (
+                <DocumentFillIcon size={size} color={color} />
+              ) : (
+                <DocumentOutlinedIcon size={size} color={color} />
               );
           }
         },
@@ -668,6 +686,14 @@ export const MainTabNavigation: FunctionComponent = () => {
         name="WebTab"
         options={{headerShown: false}}
         component={WebNavigation}
+      />
+      <Tab.Screen
+        name="Activities"
+        options={{
+          headerTitle: HomeScreenHeaderTitleFunc,
+          ...homeHeaderOptions,
+        }}
+        component={ActivitiesScreen}
       />
       <Tab.Screen
         name="Settings"
