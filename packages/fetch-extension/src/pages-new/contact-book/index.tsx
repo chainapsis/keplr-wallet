@@ -16,7 +16,6 @@ import { useIntl } from "react-intl";
 import { useLocation, useNavigate } from "react-router";
 import { Modal, ModalBody } from "reactstrap";
 import { useStore } from "../../stores";
-import { AddAddressModal } from "./add-address-modal";
 import {
   default as style,
   default as styleAddressBook,
@@ -24,15 +23,18 @@ import {
 import { ButtonV2 } from "@components-v2/buttons/button";
 import { SearchBar } from "@components-v2/search-bar";
 import { getFilteredAddressValues } from "@utils/filters";
+import { AddAddress } from "../more/address-book/add-address";
 
 export interface chatSectionParams {
   openModal: boolean;
   addressInputValue: string;
 }
+
 export const defaultParamValues: chatSectionParams = {
   openModal: false,
   addressInputValue: "",
 };
+
 export const ContactBookPage: FunctionComponent<{
   onBackButton?: () => void;
   selectHandler?: AddressBookSelectHandler;
@@ -175,7 +177,7 @@ export const ContactBookPage: FunctionComponent<{
         contentClassName={styleAddressBook["fullModal"]}
       >
         <ModalBody className={styleAddressBook["fullModal"]}>
-          <AddAddressModal
+          <AddAddress
             closeModal={() => closeModal()}
             recipientConfig={recipientConfig}
             memoConfig={memoConfig}
@@ -194,6 +196,7 @@ export const ContactBookPage: FunctionComponent<{
             searchTerm={searchTerm}
             onSearchTermChange={setSearchTerm}
             filterFunction={getFilteredAddressValues}
+            disabled={addressBookConfig.addressBookDatas.length === 0}
             renderResult={(data, i) => (
               <Card
                 key={i.toString()}
@@ -219,19 +222,14 @@ export const ContactBookPage: FunctionComponent<{
             {addressBookConfig.addressBookDatas.length === 0 && (
               <div
                 style={{
+                  fontSize: "14px",
+                  fontWeight: 400,
+                  opacity: 0.8,
                   textAlign: "center",
                   color: "white",
                 }}
               >
-                <div
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: 400,
-                    opacity: 0.8,
-                  }}
-                >
-                  You haven’t saved any addresses yet
-                </div>
+                You haven’t saved any addresses yet
               </div>
             )}
           </div>

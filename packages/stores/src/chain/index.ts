@@ -278,6 +278,10 @@ export class ChainInfoInner<C extends ChainInfo = ChainInfo>
     return this.raw.walletUrlForStaking;
   }
 
+  get hideInUI(): boolean | undefined {
+    return this.raw.hideInUI;
+  }
+
   get govUrl(): string | undefined {
     return this.raw.govUrl;
   }

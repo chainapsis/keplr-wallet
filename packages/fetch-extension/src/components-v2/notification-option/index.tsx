@@ -6,14 +6,23 @@ interface Props {
   name: string;
   isChecked: boolean;
   handleOnChange: () => void;
+  cardStyles?: any;
+  inActiveBackground?: any;
 }
 
 export const NotificationOption: FunctionComponent<Props> = (props) => {
-  const { name, isChecked, handleOnChange } = props;
+  const { name, isChecked, handleOnChange, cardStyles, inActiveBackground } =
+    props;
 
   return (
     <Card
       heading={name}
+      style={{
+        ...cardStyles,
+      }}
+      inActiveBackground={
+        inActiveBackground ? inActiveBackground : "transparent"
+      }
       rightContent={
         <label className={style["switch"]}>
           <input

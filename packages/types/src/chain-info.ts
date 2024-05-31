@@ -67,7 +67,7 @@ export interface ChainInfo {
   readonly grpcUrl?: string;
 
   readonly type?: "mainnet" | "testnet";
-
+  readonly hideInUI?: boolean;
   readonly status?: "alpha" | "beta" | "production";
   readonly txExplorer?: {
     readonly name: string;

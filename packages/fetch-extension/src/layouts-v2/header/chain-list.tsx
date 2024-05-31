@@ -13,7 +13,7 @@ import { useNavigate } from "react-router";
 import { useStore } from "../../stores";
 import style from "./chain-list.module.scss";
 import { getFilteredChainValues } from "@utils/filters";
-
+import { NotificationOption } from "@components-v2/notification-option";
 interface ChainListProps {
   showAddress?: boolean;
 }
@@ -35,6 +35,7 @@ export const ChainList: FunctionComponent<ChainListProps> = observer(
     const intl = useIntl();
     const navigate = useNavigate();
     const confirm = useConfirm();
+
     const mainChainList = chainStore.chainInfosInUI.filter(
       (chainInfo) => !chainInfo.beta && !chainInfo.features?.includes("evm")
     );
@@ -46,22 +47,66 @@ export const ChainList: FunctionComponent<ChainListProps> = observer(
     const betaChainList = chainStore.chainInfosInUI.filter(
       (chainInfo) => chainInfo.beta
     );
+
+    const cosmosMainList = mainChainList.filter(
+      (chainInfo) => chainInfo.raw.type !== "testnet"
+    );
+
+    const evmMainList = evmChainList.filter(
+      (chainInfo) => chainInfo.raw.type !== "testnet"
+    );
+
+    const cosmosList = chainStore.showTestnet ? mainChainList : cosmosMainList;
+    const evmList = chainStore.showTestnet ? evmChainList : evmMainList;
+
     const tabs = [
       {
         id: "Cosmos",
         component: (
           <div>
+            <NotificationOption
+              name="Show testnet"
+              isChecked={chainStore.showTestnet}
+              handleOnChange={() =>
+                chainStore.toggleShowTestnet(!chainStore.showTestnet)
+              }
+              cardStyles={{
+                background: "transparent",
+                padding: "0px",
+                marginBottom: "24px",
+              }}
+            />
+
             <SearchBar
               onSearchTermChange={setCosmosSearchTerm}
               searchTerm={cosmosSearchTerm}
-              valuesArray={mainChainList}
+              valuesArray={cosmosList}
               itemsStyleProp={{ overflow: "auto", height: "360px" }}
               filterFunction={getFilteredChainValues}
+              midElement={
+                <ButtonV2
+                  styleProps={{
+                    height: "48px",
+                    marginTop: "0px",
+                    background: "transparent",
+                    color: "white",
+                    border: "1px solid rgba(255,255,255,0.4)",
+                    fontSize: "14px",
+                  }}
+                  onClick={(e: any) => {
+                    e.preventDefault();
+                    navigate("/manage-networks");
+                  }}
+                  text={"Manage networks"}
+                />
+              }
               renderResult={(chainInfo, index) => (
                 <Card
                   key={index}
                   leftImage={
-                    chainInfo.chainName
+                    chainInfo.raw.chainSymbolImageUrl !== undefined
+                      ? chainInfo.raw.chainSymbolImageUrl
+                      : chainInfo.chainName
                       ? chainInfo.chainName[0].toUpperCase()
                       : ""
                   }
@@ -114,7 +159,9 @@ export const ChainList: FunctionComponent<ChainListProps> = observer(
               <Card
                 key={chainInfo.chainId}
                 leftImage={
-                  chainInfo.chainName
+                  chainInfo.raw.chainSymbolImageUrl !== undefined
+                    ? chainInfo.raw.chainSymbolImageUrl
+                    : chainInfo.chainName
                     ? chainInfo.chainName[0].toUpperCase()
                     : ""
                 }
@@ -194,16 +241,47 @@ export const ChainList: FunctionComponent<ChainListProps> = observer(
         id: "EVM",
         component: (
           <div>
+            <NotificationOption
+              name="Show testnet"
+              isChecked={chainStore.showTestnet}
+              handleOnChange={() =>
+                chainStore.toggleShowTestnet(!chainStore.showTestnet)
+              }
+              cardStyles={{
+                background: "transparent",
+                padding: "0px",
+                marginBottom: "24px",
+              }}
+            />
             <SearchBar
               searchTerm={evmSearchTerm}
               onSearchTermChange={setEvmSearchTerm}
-              valuesArray={evmChainList}
+              valuesArray={evmList}
               filterFunction={getFilteredChainValues}
+              midElement={
+                <ButtonV2
+                  styleProps={{
+                    height: "48px",
+                    marginTop: "0px",
+                    background: "transparent",
+                    color: "white",
+                    border: "1px solid rgba(255,255,255,0.4)",
+                    fontSize: "14px",
+                  }}
+                  onClick={(e: any) => {
+                    e.preventDefault();
+                    navigate("/manage-networks");
+                  }}
+                  text={"Manage networks"}
+                />
+              }
               renderResult={(chainInfo, index) => (
                 <Card
                   key={index}
                   leftImage={
-                    chainInfo.chainName
+                    chainInfo.raw.chainSymbolImageUrl !== undefined
+                      ? chainInfo.raw.chainSymbolImageUrl
+                      : chainInfo.chainName
                       ? chainInfo.chainName[0].toUpperCase()
                       : ""
                   }
@@ -248,24 +326,6 @@ export const ChainList: FunctionComponent<ChainListProps> = observer(
                 />
               )}
             />
-            <div style={{ position: "absolute", bottom: "5px", width: "94%" }}>
-              <ButtonV2
-                styleProps={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "338px",
-                  top: "150px",
-                  position: "absolute",
-                }}
-                onClick={(e: any) => {
-                  e.preventDefault();
-                  navigate("/setting/addEvmChain");
-                }}
-                gradientText={""}
-                text={"Add custom EVM network"}
-              />
-            </div>
           </div>
         ),
       },

@@ -11,6 +11,8 @@ interface Props {
   onSearchTermChange: (term: string) => void;
   itemsStyleProp?: any;
   filterFunction: any;
+  midElement?: React.ReactNode;
+  disabled?: boolean;
 }
 
 export const SearchBar: React.FC<Props> = ({
@@ -20,6 +22,8 @@ export const SearchBar: React.FC<Props> = ({
   onSearchTermChange,
   itemsStyleProp,
   filterFunction,
+  midElement,
+  disabled,
 }) => {
   const [suggestedValues, setSuggestedValues] = useState<
     any[] | _DeepReadonlyArray<AddressBookData>
@@ -51,18 +55,42 @@ export const SearchBar: React.FC<Props> = ({
             id="searchInput"
             placeholder="Search"
             value={searchTerm}
+            disabled={disabled}
             onChange={(e) => onSearchTermChange(e.target.value)}
           />
         }
         rightContent={require("@assets/svg/wireframe/search.svg")}
       />
+      {midElement && (
+        <div
+          style={{
+            marginBottom: "24px",
+          }}
+        >
+          {midElement}
+        </div>
+      )}
 
-      {suggestedValues.length > 0 && (
+      {suggestedValues.length > 0 ? (
         <div style={itemsStyleProp}>
           {suggestedValues.map((value, index) => (
             <div key={index}>{renderResult(value, index)}</div>
           ))}
         </div>
+      ) : (
+        searchTerm.length > 0 && (
+          <div
+            style={{
+              textAlign: "center",
+              color: "white",
+              fontSize: "14px",
+              fontWeight: 400,
+              opacity: 1,
+            }}
+          >
+            No results found!
+          </div>
+        )
       )}
     </div>
   );

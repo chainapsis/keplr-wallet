@@ -116,6 +116,7 @@ import { DeleteWallet } from "./pages-new/keyring-dev/delete";
 import { AxelarBridgeEVM } from "./pages-unused/axelar-bridge/axelar-bridge-evm";
 import { AxelarBridgeCosmos } from "./pages-unused/axelar-bridge/axelar-bridge-cosmos";
 import { BridgePage } from "./pages/bridge";
+import { ManageNetworks } from "./pages-new/more/manage-networks";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -448,6 +449,10 @@ ReactDOM.render(
                       <Route path="/receive" element={<Receive />} />
                       <Route path="/portfolio" element={<Portfolio />} />
                       <Route path="/asset" element={<AssetView />} />
+                      <Route
+                        path="/manage-networks"
+                        element={<ManageNetworks />}
+                      />
 
                       <Route path="*" element={<StateRenderer />} />
                     </Routes>

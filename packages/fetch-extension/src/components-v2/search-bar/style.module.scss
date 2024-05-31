@@ -8,3 +8,7 @@
     color: white;
   }
 }
+
+.searchInput:disabled {
+  cursor: not-allowed;
+}
