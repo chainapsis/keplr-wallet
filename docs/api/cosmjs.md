@@ -62,7 +62,7 @@ Also, `keplr.getOfflineSignerAuto(chainId: string): Promise<OfflineSigner | Offl
 Keplr's `OfflineSigner` implements the `OfflineDirectSigner` interface. Use `SigningStargateClient` with Keplr's `OfflineSigner`, and Keplr will sign the transaction in Proto sign doc format.
 
 ### Example
-Refer to the [keplr-example](https://github.com/chainapsis/keplr-example/blob/master/src/main.js) repository for example code on how to integrate Keplr with CosmJS.
+Refer to the [keplr-example](https://github.com/chainapsis/keplr-example/blob/master/src/App.tsx) repository for example code on how to integrate Keplr with CosmJS.
 
 ### Interaction Options
 You can use Keplr native API’s to set interaction options even when using CosmJS. Please refer to [this section](./#interaction-options).
