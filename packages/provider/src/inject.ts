@@ -1031,13 +1031,13 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
   }
 
   async enable(): Promise<string[]> {
-    return await this.requestMethod("request", {
+    return await this.request({
       method: "eth_requestAccounts",
     });
   }
 
   async net_version(): Promise<string> {
-    return await this.requestMethod("request", {
+    return await this.request({
       method: "net_version",
     });
   }
