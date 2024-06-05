@@ -248,8 +248,8 @@ export class KeyRingEthereumService {
     switch (method) {
       case "keplr_connect": {
         return {
-          currentEvmChainId: `0x${currentChainEVMInfo.chainId.toString(16)}`,
-          currentTendermintChainId: currentChainInfo.chainId,
+          currentEvmChainId: currentChainEVMInfo.chainId,
+          currentChainId: currentChainInfo.chainId,
           selectedAddress,
         };
       }

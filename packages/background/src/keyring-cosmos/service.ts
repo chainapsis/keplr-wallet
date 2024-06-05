@@ -37,7 +37,7 @@ import { ChainsUIService } from "../chains-ui";
 export class KeyRingCosmosService {
   constructor(
     protected readonly chainsService: ChainsService,
-    protected readonly keyRingService: KeyRingService,
+    public readonly keyRingService: KeyRingService,
     protected readonly interactionService: InteractionService,
     protected readonly chainsUIService: ChainsUIService,
     protected readonly analyticsService: AnalyticsService,

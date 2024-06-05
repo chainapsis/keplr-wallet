@@ -846,6 +846,8 @@ export class WalletConnectStore {
           break;
         }
         case 'keplr_experimentalSuggestChain': {
+          interactionNeeded = true;
+
           await keplr.experimentalSuggestChain(params.chainInfo);
           await signClient.respond({
             topic,
@@ -858,6 +860,8 @@ export class WalletConnectStore {
           break;
         }
         case 'keplr_suggestToken': {
+          interactionNeeded = true;
+
           await keplr.suggestToken(params.chainId, params.contractAddress);
           await signClient.respond({
             topic,

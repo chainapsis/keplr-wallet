@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { KeyInfo } from "@keplr-wallet/background";
 import { useStore } from "../../../stores";
@@ -18,6 +18,7 @@ import styled, { useTheme } from "styled-components";
 import { FloatingDropdown } from "../../../components/dropdown";
 import { useIntl } from "react-intl";
 import { App, AppCoinType } from "@keplr-wallet/ledger-cosmos";
+import { SearchTextInput } from "../../../components/input";
 
 const Styles = {
   Container: styled(Stack)`
@@ -25,7 +26,7 @@ const Styles = {
   `,
   AddButton: styled.div`
     position: absolute;
-    top: 4.625rem;
+    top: 8.125rem;
     right: 0.75rem;
   `,
   Content: styled(Stack)`
@@ -37,14 +38,53 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
   const intl = useIntl();
 
+  const [searchText, setSearchText] = useState<string>("");
+  const [debounceSearchText, setDebounceSearchText] = useState<string>("");
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebounceSearchText(searchText);
+    }, 300);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [searchText]);
+
+  const [searchedKeyInfos, setSearchedKeyInfos] = useState<
+    KeyInfo[] | undefined
+  >(undefined);
+  useEffect(() => {
+    if (debounceSearchText.trim().length === 0) {
+      setSearchedKeyInfos(undefined);
+      return;
+    }
+
+    let exposed = false;
+
+    keyRingStore
+      .searchKeyRings(debounceSearchText)
+      .then((keyInfos) => {
+        if (!exposed) {
+          setSearchedKeyInfos(keyInfos);
+        }
+      })
+      .catch(console.log);
+
+    return () => {
+      exposed = true;
+    };
+  }, [debounceSearchText, keyRingStore]);
+
+  const keyInfos = searchedKeyInfos ?? keyRingStore.keyInfos;
+
   const mnemonicKeys = useMemo(() => {
-    return keyRingStore.keyInfos.filter((keyInfo) => {
+    return keyInfos.filter((keyInfo) => {
       return keyInfo.type === "mnemonic";
     });
-  }, [keyRingStore.keyInfos]);
+  }, [keyInfos]);
 
   const socialPrivateKeyInfos = useMemo(() => {
-    return keyRingStore.keyInfos.filter((keyInfo) => {
+    return keyInfos.filter((keyInfo) => {
       if (
         keyInfo.type === "private-key" &&
         typeof keyInfo.insensitive === "object" &&
@@ -61,28 +101,28 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
 
       return false;
     });
-  }, [keyRingStore.keyInfos]);
+  }, [keyInfos]);
 
   const privateKeyInfos = useMemo(() => {
-    return keyRingStore.keyInfos.filter((keyInfo) => {
+    return keyInfos.filter((keyInfo) => {
       return (
         keyInfo.type === "private-key" &&
         !socialPrivateKeyInfos.some((k) => k.id === keyInfo.id)
       );
     });
-  }, [keyRingStore.keyInfos, socialPrivateKeyInfos]);
+  }, [keyInfos, socialPrivateKeyInfos]);
 
   const ledgerKeys = useMemo(() => {
-    return keyRingStore.keyInfos.filter((keyInfo) => {
+    return keyInfos.filter((keyInfo) => {
       return keyInfo.type === "ledger";
     });
-  }, [keyRingStore.keyInfos]);
+  }, [keyInfos]);
 
   const keystoneKeys = useMemo(() => {
-    return keyRingStore.keyInfos.filter((keyInfo) => {
+    return keyInfos.filter((keyInfo) => {
       return keyInfo.type === "keystone";
     });
-  }, [keyRingStore.keyInfos]);
+  }, [keyInfos]);
 
   const unknownKeys = useMemo(() => {
     const knownKeys = mnemonicKeys
@@ -90,11 +130,11 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
       .concat(privateKeyInfos)
       .concat(socialPrivateKeyInfos)
       .concat(keystoneKeys);
-    return keyRingStore.keyInfos.filter((keyInfo) => {
+    return keyInfos.filter((keyInfo) => {
       return !knownKeys.find((k) => k.id === keyInfo.id);
     });
   }, [
-    keyRingStore.keyInfos,
+    keyInfos,
     ledgerKeys,
     mnemonicKeys,
     privateKeyInfos,
@@ -155,6 +195,19 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
       left={<BackButton />}
     >
       <Styles.Container>
+        <Box marginBottom="0.25rem">
+          <SearchTextInput
+            value={searchText}
+            placeholder={intl.formatMessage({
+              id: "page.wallet.input.search.placeholder",
+            })}
+            onChange={(e) => {
+              e.preventDefault();
+
+              setSearchText(e.target.value);
+            }}
+          />
+        </Box>
         <Styles.AddButton>
           <Button
             text={intl.formatMessage({ id: "page.wallet.add-wallet-button" })}
