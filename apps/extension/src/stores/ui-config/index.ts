@@ -22,6 +22,7 @@ import manifest from "../../manifest.v2.json";
 import { IBCSwapConfig } from "./ibc-swap";
 import { NewChainSuggestionConfig } from "./new-chain";
 import { ChangelogConfig } from "./changelog";
+import { SelectWalletConfig } from "./select-wallet";
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
@@ -42,6 +43,7 @@ export class UIConfigStore {
   public readonly ibcSwapConfig: IBCSwapConfig;
   public readonly changelogConfig: ChangelogConfig;
   public readonly newChainSuggestionConfig: NewChainSuggestionConfig;
+  public readonly selectWalletConfig: SelectWalletConfig;
 
   @observable
   protected _isInitialized: boolean = false;
@@ -110,6 +112,7 @@ export class UIConfigStore {
       chainStore,
       this.changelogConfig
     );
+    this.selectWalletConfig = new SelectWalletConfig(kvStores.kvStore);
 
     this._icnsInfo = _icnsInfo;
 
@@ -204,6 +207,7 @@ export class UIConfigStore {
           });
         }
       })(),
+      this.selectWalletConfig.init(),
     ]);
 
     runInAction(() => {
