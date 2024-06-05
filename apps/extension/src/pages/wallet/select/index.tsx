@@ -11,7 +11,12 @@ import { useStore } from "../../../stores";
 import { BackButton } from "../../../layouts/header/components";
 import { HeaderLayout } from "../../../layouts/header";
 import { Box } from "../../../components/box";
-import { Body2, Subtitle2, Subtitle4 } from "../../../components/typography";
+import {
+  Body2,
+  Subtitle2,
+  Subtitle3,
+  Subtitle4,
+} from "../../../components/typography";
 import { XAxis, YAxis } from "../../../components/axis";
 import { ColorPalette } from "../../../styles";
 import { Gutter } from "../../../components/gutter";
@@ -22,12 +27,13 @@ import { EllipsisIcon } from "../../../components/icon";
 import { Button } from "../../../components/button";
 import styled, { useTheme } from "styled-components";
 import { FloatingDropdown } from "../../../components/dropdown";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { App, AppCoinType } from "@keplr-wallet/ledger-cosmos";
 import { SearchTextInput } from "../../../components/input";
 import { SpringValue, animated, to, useSpringValue } from "@react-spring/web";
 import { defaultSpringConfig } from "../../../styles/spring";
 import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
+import { EmptyView } from "../../../components/empty-view";
 
 const AnimatedBox = animated(Box);
 
@@ -232,70 +238,85 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
           />
         </Styles.AddButton>
 
-        <Styles.Content gutter="1.25rem">
-          {mnemonicKeys.length > 0 ? (
-            <KeyInfoList
-              sortKey="sort-mnemonic"
-              title={intl.formatMessage({
-                id: "page.wallet.recovery-phrase-title",
-              })}
-              keyInfos={mnemonicKeys}
-            />
-          ) : null}
-
-          {socialPrivateKeyInfoByType.map((info) => {
-            return (
+        {searchText.trim().length > 0 && keyInfos.length === 0 ? (
+          <Box marginTop="6rem">
+            <EmptyView>
+              <Stack alignX="center" gutter="0.1rem">
+                <Subtitle3 style={{ fontWeight: 700 }}>
+                  <FormattedMessage id="page.main.available.search-empty-view-title" />
+                </Subtitle3>
+                <Subtitle3>
+                  <FormattedMessage id="page.main.available.search-empty-view-paragraph" />
+                </Subtitle3>
+              </Stack>
+            </EmptyView>
+          </Box>
+        ) : (
+          <Styles.Content gutter="1.25rem">
+            {mnemonicKeys.length > 0 ? (
               <KeyInfoList
-                key={info.type}
-                sortKey={`sort-social-${info.type}`}
-                title={intl.formatMessage(
-                  { id: "page.wallet.connect-with-social-account-title" },
-                  {
-                    social:
-                      info.type.length > 0
-                        ? info.type[0].toUpperCase() + info.type.slice(1)
-                        : info.type,
-                  }
-                )}
-                keyInfos={info.keyInfos}
+                sortKey="sort-mnemonic"
+                title={intl.formatMessage({
+                  id: "page.wallet.recovery-phrase-title",
+                })}
+                keyInfos={mnemonicKeys}
               />
-            );
-          })}
+            ) : null}
 
-          {privateKeyInfos.length > 0 ? (
-            <KeyInfoList
-              sortKey="sort-private-key"
-              title={intl.formatMessage({
-                id: "page.wallet.private-key-title",
-              })}
-              keyInfos={privateKeyInfos}
-            />
-          ) : null}
+            {socialPrivateKeyInfoByType.map((info) => {
+              return (
+                <KeyInfoList
+                  key={info.type}
+                  sortKey={`sort-social-${info.type}`}
+                  title={intl.formatMessage(
+                    { id: "page.wallet.connect-with-social-account-title" },
+                    {
+                      social:
+                        info.type.length > 0
+                          ? info.type[0].toUpperCase() + info.type.slice(1)
+                          : info.type,
+                    }
+                  )}
+                  keyInfos={info.keyInfos}
+                />
+              );
+            })}
 
-          {ledgerKeys.length > 0 ? (
-            <KeyInfoList
-              sortKey="sort-ledger"
-              title={intl.formatMessage({ id: "page.wallet.ledger-title" })}
-              keyInfos={ledgerKeys}
-            />
-          ) : null}
+            {privateKeyInfos.length > 0 ? (
+              <KeyInfoList
+                sortKey="sort-private-key"
+                title={intl.formatMessage({
+                  id: "page.wallet.private-key-title",
+                })}
+                keyInfos={privateKeyInfos}
+              />
+            ) : null}
 
-          {keystoneKeys.length > 0 ? (
-            <KeyInfoList
-              sortKey="sort-keystone"
-              title="Keystone"
-              keyInfos={keystoneKeys}
-            />
-          ) : null}
+            {ledgerKeys.length > 0 ? (
+              <KeyInfoList
+                sortKey="sort-ledger"
+                title={intl.formatMessage({ id: "page.wallet.ledger-title" })}
+                keyInfos={ledgerKeys}
+              />
+            ) : null}
 
-          {unknownKeys.length > 0 ? (
-            <KeyInfoList
-              sortKey="sort-unknown"
-              title={intl.formatMessage({ id: "page.wallet.unknown-title" })}
-              keyInfos={unknownKeys}
-            />
-          ) : null}
-        </Styles.Content>
+            {keystoneKeys.length > 0 ? (
+              <KeyInfoList
+                sortKey="sort-keystone"
+                title="Keystone"
+                keyInfos={keystoneKeys}
+              />
+            ) : null}
+
+            {unknownKeys.length > 0 ? (
+              <KeyInfoList
+                sortKey="sort-unknown"
+                title={intl.formatMessage({ id: "page.wallet.unknown-title" })}
+                keyInfos={unknownKeys}
+              />
+            ) : null}
+          </Styles.Content>
+        )}
       </Styles.Container>
     </HeaderLayout>
   );
