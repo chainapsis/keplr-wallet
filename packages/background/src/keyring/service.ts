@@ -11,7 +11,7 @@ import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { ChainsService } from "../chains";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { InteractionService } from "../interaction";
 import { ChainInfo } from "@keplr-wallet/types";
 import { Buffer } from "buffer/";
@@ -27,6 +27,9 @@ export class KeyRingService {
 
   @observable
   protected _selectedVaultId: string | undefined = undefined;
+
+  // key: {bech32_prefix}/{hex}
+  protected cacheKeySearchHexToBech32 = new Map<string, string>();
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -1363,7 +1366,7 @@ export class KeyRingService {
 
     let bech32AddressSearchKeyInfos: KeyInfo[] = [];
     let hexAddressSearchKeyInfos: KeyInfo[] = [];
-    if (searchText.length > 8) {
+    if (searchText.length >= 8) {
       const isHex = (() => {
         if (searchText.startsWith("0x")) {
           return true;
@@ -1409,45 +1412,64 @@ export class KeyRingService {
             }
           }
         });
-      } else if (searchText.includes("1")) {
-        const targetChainInfo: ChainInfo | undefined = (() => {
+      }
+    }
+
+    if (searchText.length >= 3) {
+      const isHex = (() => {
+        if (searchText.startsWith("0x")) {
+          return true;
+        }
+        try {
+          const s = Buffer.from(searchText, "hex");
+          return s.toString().toLowerCase() === searchText.toLowerCase();
+        } catch {
+          return false;
+        }
+      })();
+
+      if (!isHex) {
+        const targetChainInfos: ChainInfo[] = (() => {
           const i = searchText.indexOf("1");
           if (i < 0) {
-            return;
+            return [];
           }
           const prefix = searchText.slice(0, i);
+          const result: ChainInfo[] = [];
           for (const chainInfo of this.chainsService.getChainInfos()) {
             if (chainInfo.bech32Config?.bech32PrefixAccAddr === prefix) {
-              return chainInfo;
+              result.push(chainInfo);
             }
           }
+          return result;
         })();
-        let bz =
-          KeyRingService.unsafeDecodeBech32AddressForSearchText(searchText);
-        // 어차피 address는 20bytes이다.
-        // checksum은 신경쓰지 않고 자른다.
-        bz = bz.slice(0, 20);
-        // bz가 너무 작은 바이트이면 사실상 검색의 의미가 없다.
-        // 대충 매직넘버로 3바이트는 넘어야지 검색한다.
-        if (bz.length >= 3) {
-          const bzHex = Buffer.from(bz).toString("hex").toLowerCase();
 
-          bech32AddressSearchKeyInfos = keyInfos.filter((keyInfo) => {
-            if (!targetChainInfo) {
-              return false;
+        bech32AddressSearchKeyInfos = keyInfos.filter((keyInfo) => {
+          if (
+            !ignoreChainEnabled &&
+            targetChainInfos.length > 0 &&
+            targetChainInfos.find(
+              (chainInfo) =>
+                !this.chainsUIService.isEnabled(keyInfo.id, chainInfo.chainId)
+            )
+          ) {
+            return false;
+          }
+
+          const chainInfos = (() => {
+            if (ignoreChainEnabled) {
+              return this.chainsService.getChainInfos();
+            }
+            return targetChainInfos.length > 0
+              ? targetChainInfos
+              : this.chainsUIService.enabledChainInfosForVault(keyInfo.id);
+          })();
+          for (const chainInfo of chainInfos) {
+            if (!chainInfo.bech32Config) {
+              continue;
             }
 
-            if (
-              !ignoreChainEnabled &&
-              !this.chainsUIService.isEnabled(
-                keyInfo.id,
-                targetChainInfo.chainId
-              )
-            ) {
-              return false;
-            }
-
-            const isEVM = KeyRingService.isEthermintLike(targetChainInfo);
+            const isEVM = KeyRingService.isEthermintLike(chainInfo);
 
             for (const [_, value] of Object.entries(keyInfo.insensitive)) {
               try {
@@ -1458,15 +1480,19 @@ export class KeyRingService {
                     isEVM
                   );
 
-                if (hexAddress.includes(bzHex)) {
+                const bech32Address = this.getKeySearchBech32FromHex(
+                  chainInfo.bech32Config.bech32PrefixAccAddr,
+                  hexAddress
+                );
+                if (bech32Address.includes(searchText.toLowerCase())) {
                   return true;
                 }
               } catch {
                 // noop
               }
             }
-          });
-        }
+          }
+        });
       }
     }
 
@@ -1484,43 +1510,15 @@ export class KeyRingService {
     return keyInfos.filter((keyInfo) => exists.get(keyInfo.id));
   }
 
-  protected static unsafeDecodeBech32AddressForSearchText(
-    searchText: string
-  ): Uint8Array {
-    const i = searchText.indexOf("1");
-    const bech32WithoutPrefix = i >= 0 ? searchText.slice(i + 1) : searchText;
-    const data = [];
-    for (let i = 0; i < bech32WithoutPrefix.length; i++) {
-      const d = "qpzry9x8gf2tvdw0s3jn54khce6mua7l".indexOf(
-        bech32WithoutPrefix[i].toLowerCase()
-      );
-      if (d === -1) {
-        return new Uint8Array();
-      }
-      data.push(d);
+  protected getKeySearchBech32FromHex(prefix: string, hex: string): string {
+    const key = `${prefix}/${hex}`;
+    const cache = this.cacheKeySearchHexToBech32.get(key);
+    if (cache) {
+      return cache;
     }
-
-    let value = 0;
-    let bits = 0;
-    const maxV = (1 << 8) - 1;
-
-    const result: number[] = [];
-    for (let i = 0; i < data.length; ++i) {
-      value = (value << 5) | data[i];
-      bits += 5;
-
-      while (bits >= 8) {
-        bits -= 8;
-        result.push((value >> bits) & maxV);
-      }
-    }
-
-    // pad는 무시한다
-    // if (bits > 0) {
-    //   result.push((value << (8 - bits)) & maxV);
-    // }
-
-    return new Uint8Array(result);
+    const value = new Bech32Address(Buffer.from(hex, "hex")).toBech32(prefix);
+    this.cacheKeySearchHexToBech32.set(key, value);
+    return value;
   }
 
   protected static getAddressHexStringFromKeyInfo(
