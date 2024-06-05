@@ -174,6 +174,7 @@ export function init(
       chainsUIService,
     },
     chainsService,
+    chainsUIService,
     interactionService,
     vaultService,
     analyticsService,
@@ -197,7 +198,10 @@ export function init(
     keyRingV2Service,
     keyRingCosmosService,
     interactionService,
-    analyticsService
+    analyticsService,
+    permissionService,
+    backgroundTxEthereumService,
+    tokenERC20Service
   );
   const autoLockAccountService = new AutoLocker.AutoLockAccountService(
     storeCreator("auto-lock-account"),

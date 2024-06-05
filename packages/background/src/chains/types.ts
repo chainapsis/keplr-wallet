@@ -4,6 +4,6 @@ export type ChainInfoWithSuggestedOptions = ChainInfo & {
   readonly updateFromRepoDisabled?: boolean;
 };
 
-export type ChainInfoWithCoreTypes = ChainInfo & {
+export type ChainInfoWithCoreTypes = ChainInfoWithSuggestedOptions & {
   readonly embedded?: boolean;
-} & ChainInfoWithSuggestedOptions;
+};

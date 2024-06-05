@@ -19,6 +19,7 @@ import {
   SecretUtils,
   SettledResponses,
   DirectAuxSignResponse,
+  IEthereumProvider,
 } from "@keplr-wallet/types";
 import {
   BACKGROUND_PORT,
@@ -33,6 +34,7 @@ import deepmerge from "deepmerge";
 import Long from "long";
 import { Buffer } from "buffer/";
 import { KeplrCoreTypes } from "./core-types";
+import EventEmitter from "events";
 
 export class Keplr implements IKeplr, KeplrCoreTypes {
   protected enigmaUtils: Map<string, SecretUtils> = new Map();
@@ -177,6 +179,22 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         {}
       )
     ).chainInfos;
+  }
+
+  async getChainInfoWithoutEndpoints(
+    chainId: string
+  ): Promise<ChainInfoWithoutEndpoints> {
+    return (
+      await sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "chains",
+        "get-chain-info-without-endpoints",
+        {
+          chainId,
+        }
+      )
+    ).chainInfo;
   }
 
   async sendTx(
@@ -654,6 +672,72 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       {
         chainId,
         contractAddress,
+      }
+    );
+  }
+
+  public readonly ethereum = new EthereumProvider(this.requester);
+}
+
+class EthereumProvider extends EventEmitter implements IEthereumProvider {
+  chainId: string | null = null;
+  selectedAddress: string | null = null;
+  networkVersion: string | null = null;
+
+  isKeplr: boolean = true;
+  isMetaMask: boolean = true;
+
+  constructor(protected readonly requester: MessageRequester) {
+    super();
+  }
+
+  isConnected(): boolean {
+    return true;
+  }
+
+  async request<T>({
+    method,
+    params,
+  }: {
+    method: string;
+    params: unknown[] | Record<string, unknown>;
+  }): Promise<T> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-ethereum",
+      "request-json-rpc-to-evm",
+      {
+        method,
+        params,
+      }
+    );
+  }
+
+  /**
+   * Legacy methods
+   */
+
+  async enable(): Promise<string[]> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-ethereum",
+      "request-json-rpc-to-evm",
+      {
+        method: "eth_requestAccounts",
+      }
+    );
+  }
+
+  async net_version(): Promise<string> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-ethereum",
+      "request-json-rpc-to-evm",
+      {
+        method: "net_version",
       }
     );
   }

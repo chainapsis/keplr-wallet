@@ -2,8 +2,13 @@ import { ChainsService } from "../chains";
 import { KeyRingService } from "../keyring";
 import { InteractionService } from "../interaction";
 import { AnalyticsService } from "../analytics";
-import { Env } from "@keplr-wallet/router";
-import { ChainInfo, EthSignType } from "@keplr-wallet/types";
+import { Env, WEBPAGE_PORT } from "@keplr-wallet/router";
+import {
+  ChainInfo,
+  EthereumSignResponse,
+  EthSignType,
+  EVMInfo,
+} from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
 import {
@@ -12,9 +17,20 @@ import {
   KeyRingCosmosService,
   messageHash,
 } from "../keyring-cosmos";
-import { serialize } from "@ethersproject/transactions";
-
+import {
+  serialize,
+  TransactionTypes,
+  UnsignedTransaction,
+} from "@ethersproject/transactions";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { getBasicAccessPermissionType, PermissionService } from "../permission";
+import { BackgroundTxEthereumService } from "../tx-ethereum";
+import { TokenERC20Service } from "../token-erc20";
 export class KeyRingEthereumService {
+  static evmInfo(chainInfo: ChainInfo): EVMInfo | undefined {
+    return chainInfo.evm;
+  }
+
   constructor(
     protected readonly chainsService: ChainsService,
     protected readonly keyRingService: KeyRingService,
@@ -22,7 +38,10 @@ export class KeyRingEthereumService {
     //      keyring-cosmos의 기능들도 사용한다.
     protected readonly keyRingCosmosService: KeyRingCosmosService,
     protected readonly interactionService: InteractionService,
-    protected readonly analyticsService: AnalyticsService
+    protected readonly analyticsService: AnalyticsService,
+    protected readonly permissionService: PermissionService,
+    protected readonly backgroundTxEthereumService: BackgroundTxEthereumService,
+    protected readonly tokenERC20Service: TokenERC20Service
   ) {}
 
   async init() {
@@ -36,7 +55,7 @@ export class KeyRingEthereumService {
     signer: string,
     message: Uint8Array,
     signType: EthSignType
-  ): Promise<Uint8Array> {
+  ): Promise<EthereumSignResponse> {
     return await this.signEthereum(
       env,
       origin,
@@ -56,7 +75,7 @@ export class KeyRingEthereumService {
     signer: string,
     message: Uint8Array,
     signType: EthSignType
-  ): Promise<Uint8Array> {
+  ): Promise<EthereumSignResponse> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
     if (chainInfo.hideInUI) {
       throw new Error("Can't sign for hidden chain");
@@ -115,12 +134,15 @@ export class KeyRingEthereumService {
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
       },
-      async (res: { signature?: Uint8Array }) => {
+      async (res: { signingData: Uint8Array; signature?: Uint8Array }) => {
         if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
           if (!res.signature || res.signature.length === 0) {
             throw new Error("Frontend should provide signature");
           }
-          return res.signature;
+          return {
+            signingData: res.signingData,
+            signature: res.signature,
+          };
         } else {
           switch (signType) {
             case EthSignType.MESSAGE: {
@@ -129,40 +151,58 @@ export class KeyRingEthereumService {
                 vaultId,
                 Buffer.concat([
                   Buffer.from("\x19Ethereum Signed Message:\n"),
-                  Buffer.from(message.length.toString()),
-                  message,
+                  Buffer.from(res.signingData.length.toString()),
+                  res.signingData,
                 ]),
                 "keccak256"
               );
-              return Buffer.concat([
-                signature.r,
-                signature.s,
-                // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
-                signature.v
-                  ? Buffer.from("1c", "hex")
-                  : Buffer.from("1b", "hex"),
-              ]);
+              return {
+                signingData: res.signingData,
+                signature: Buffer.concat([
+                  signature.r,
+                  signature.s,
+                  // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
+                  signature.v
+                    ? Buffer.from("1c", "hex")
+                    : Buffer.from("1b", "hex"),
+                ]),
+              };
             }
             case EthSignType.TRANSACTION: {
-              const tx = JSON.parse(Buffer.from(message).toString());
+              const unsignedTx = JSON.parse(
+                Buffer.from(res.signingData).toString()
+              );
+
+              const isEIP1559 =
+                !!unsignedTx.maxFeePerGas || !!unsignedTx.maxPriorityFeePerGas;
+              if (isEIP1559) {
+                unsignedTx.type = TransactionTypes.eip1559;
+              }
+
+              delete unsignedTx.from;
+
               const signature = await this.keyRingService.sign(
                 chainId,
                 vaultId,
-                Buffer.from(serialize(tx).replace("0x", ""), "hex"),
+                Buffer.from(serialize(unsignedTx).replace("0x", ""), "hex"),
                 "keccak256"
               );
-              return Buffer.concat([
-                signature.r,
-                signature.s,
-                // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
-                signature.v
-                  ? Buffer.from("1c", "hex")
-                  : Buffer.from("1b", "hex"),
-              ]);
+
+              return {
+                signingData: res.signingData,
+                signature: Buffer.concat([
+                  signature.r,
+                  signature.s,
+                  // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
+                  signature.v
+                    ? Buffer.from("1c", "hex")
+                    : Buffer.from("1b", "hex"),
+                ]),
+              };
             }
             case EthSignType.EIP712: {
               const data = await EIP712MessageValidator.validateAsync(
-                JSON.parse(Buffer.from(message).toString())
+                JSON.parse(Buffer.from(res.signingData).toString())
               );
               // Since ethermint eip712 tx uses non-standard format, it cannot pass validation of ethersjs.
               // Therefore, it should be handled at a slightly lower level.
@@ -179,14 +219,17 @@ export class KeyRingEthereumService {
                 ]),
                 "keccak256"
               );
-              return Buffer.concat([
-                signature.r,
-                signature.s,
-                // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
-                signature.v
-                  ? Buffer.from("1c", "hex")
-                  : Buffer.from("1b", "hex"),
-              ]);
+              return {
+                signingData: res.signingData,
+                signature: Buffer.concat([
+                  signature.r,
+                  signature.s,
+                  // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
+                  signature.v
+                    ? Buffer.from("1c", "hex")
+                    : Buffer.from("1b", "hex"),
+                ]),
+              };
             }
             default:
               throw new Error(`Unknown sign type: ${signType}`);
@@ -196,7 +239,312 @@ export class KeyRingEthereumService {
     );
   }
 
-  static evmInfo(chainInfo: ChainInfo): ChainInfo["evm"] | undefined {
-    return chainInfo.evm;
+  async request(
+    env: Env,
+    origin: string,
+    currentChainId: string,
+    method: string,
+    params?: unknown[] | Record<string, unknown>
+  ): Promise<any> {
+    const currentChainInfo = this.chainsService.getChainInfo(currentChainId);
+    if (currentChainInfo === undefined || currentChainInfo.evm === undefined) {
+      throw new Error("No current chain info or EVM info provided.");
+    }
+
+    const pubkey = await this.keyRingService.getPubKeySelected(
+      currentChainInfo.chainId
+    );
+    const selectedAddress = `0x${Buffer.from(pubkey.getEthAddress()).toString(
+      "hex"
+    )}`;
+    const currentChainEVMInfo = currentChainInfo.evm;
+
+    switch (method) {
+      case "keplr_connect": {
+        return {
+          currentEvmChainId: currentChainEVMInfo.chainId,
+          currentChainId: currentChainInfo.chainId,
+          selectedAddress,
+        };
+      }
+      case "keplr_disconnect": {
+        return this.permissionService.removePermission(
+          currentChainId,
+          getBasicAccessPermissionType(),
+          [origin]
+        );
+      }
+      case "eth_chainId": {
+        return `0x${currentChainEVMInfo.chainId.toString(16)}`;
+      }
+      case "eth_accounts":
+      case "eth_requestAccounts": {
+        return [selectedAddress];
+      }
+      case "eth_sendTransaction": {
+        const tx =
+          (Array.isArray(params) &&
+            (params?.[0] as {
+              chainId?: string | number;
+              from: string;
+              gas?: string;
+              gasLimit?: string;
+            })) ||
+          null;
+        if (!tx) {
+          throw new Error("Invalid parameters: must provide a transaction.");
+        }
+
+        if (tx.chainId) {
+          let evmChainIdFromTx: number;
+          if (typeof tx.chainId === "string") {
+            if (tx.chainId.startsWith("0x")) {
+              evmChainIdFromTx = parseInt(tx.chainId, 16);
+            } else {
+              evmChainIdFromTx = parseInt(tx.chainId, 10);
+            }
+          } else {
+            evmChainIdFromTx = tx.chainId;
+          }
+
+          if (evmChainIdFromTx !== currentChainEVMInfo.chainId) {
+            throw new Error(
+              "The current active chain id does not match the one in the transaction."
+            );
+          }
+        }
+
+        const transactionCountResponse = await simpleFetch<{
+          result: string;
+        }>(currentChainEVMInfo.rpc, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            method: "eth_getTransactionCount",
+            params: [selectedAddress, "pending"],
+            id: 1,
+          }),
+        });
+        const nonce = parseInt(transactionCountResponse.data.result, 16);
+
+        const { from: sender, gas, ...restTx } = tx;
+        const unsignedTx: UnsignedTransaction = {
+          ...restTx,
+          gasLimit: restTx?.gasLimit ?? gas,
+          chainId: currentChainEVMInfo.chainId,
+          nonce,
+        };
+
+        const { signingData, signature } = await this.signEthereumSelected(
+          env,
+          origin,
+          currentChainId,
+          sender,
+          Buffer.from(JSON.stringify(unsignedTx)),
+          EthSignType.TRANSACTION
+        );
+
+        const signingTx = JSON.parse(Buffer.from(signingData).toString());
+
+        const isEIP1559 =
+          !!signingTx.maxFeePerGas || !!signingTx.maxPriorityFeePerGas;
+        if (isEIP1559) {
+          signingTx.type = TransactionTypes.eip1559;
+        }
+
+        const signedTx = Buffer.from(
+          serialize(signingTx, signature).replace("0x", ""),
+          "hex"
+        );
+
+        const txHash = await this.backgroundTxEthereumService.sendEthereumTx(
+          currentChainId,
+          signedTx,
+          {}
+        );
+
+        return txHash;
+      }
+      case "personal_sign": {
+        const message =
+          (Array.isArray(params) && (params?.[0] as string)) || undefined;
+        if (!message) {
+          throw new Error(
+            "Invalid parameters: must provide a stringified message."
+          );
+        }
+
+        const signer =
+          (Array.isArray(params) && (params?.[1] as string)) || undefined;
+        if (!signer || (signer && !signer.match(/^0x[0-9A-Fa-f]*$/))) {
+          throw new Error(
+            "Invalid parameters: must provide an Ethereum address."
+          );
+        }
+
+        const { signature } = await this.signEthereumSelected(
+          env,
+          origin,
+          currentChainId,
+          signer,
+          Buffer.from(message),
+          EthSignType.MESSAGE
+        );
+
+        return `0x${Buffer.from(signature).toString("hex")}`;
+      }
+      case "eth_signTypedData_v3":
+      case "eth_signTypedData_v4": {
+        const signer =
+          (Array.isArray(params) && (params?.[0] as string)) || undefined;
+        if (!signer || (signer && !signer.match(/^0x[0-9A-Fa-f]*$/))) {
+          throw new Error(
+            "Invalid parameters: must provide an Ethereum address."
+          );
+        }
+
+        const typedData =
+          (Array.isArray(params) && (params?.[1] as any)) || undefined;
+
+        const { signature } = await this.signEthereumSelected(
+          env,
+          origin,
+          currentChainId,
+          signer,
+          Buffer.from(
+            typeof typedData === "string"
+              ? typedData
+              : JSON.stringify(typedData)
+          ),
+          EthSignType.EIP712
+        );
+
+        return `0x${Buffer.from(signature).toString("hex")}`;
+      }
+      case "wallet_switchEthereumChain": {
+        const param =
+          (Array.isArray(params) && (params?.[0] as { chainId: string })) ||
+          undefined;
+        if (!param?.chainId) {
+          throw new Error("Invalid parameters: must provide a chain id.");
+        }
+
+        const newEvmChainId = parseInt(param.chainId, 16);
+        if (newEvmChainId === currentChainEVMInfo.chainId) {
+          return;
+        }
+
+        const chainInfos = this.chainsService.getChainInfos();
+
+        const newCurrentChainInfo = chainInfos.find(
+          (chainInfo) => chainInfo.evm?.chainId === newEvmChainId
+        );
+        if (!newCurrentChainInfo) {
+          throw new Error("No matched EVM chain found in Keplr.");
+        }
+
+        await this.permissionService.checkOrGrantPermission(
+          env,
+          [newCurrentChainInfo.chainId],
+          getBasicAccessPermissionType(),
+          origin
+        );
+
+        await this.permissionService.updateCurrentChainIdForEVM(
+          env,
+          origin,
+          newCurrentChainInfo.chainId
+        );
+
+        return this.interactionService.dispatchEvent(
+          WEBPAGE_PORT,
+          "keplr_chainChanged",
+          {
+            origin,
+            evmChainId: newEvmChainId,
+          }
+        );
+      }
+      case "wallet_getPermissions":
+      // This `request` method can be executed if the basic access permission is granted.
+      // So, it's not necessary to check or grant the permission here.
+      case "wallet_requestPermissions": {
+        return [{ parentCapability: "eth_accounts" }];
+      }
+      case "wallet_watchAsset": {
+        const param = params as
+          | {
+              type: string;
+              options: {
+                address: string;
+                symbol?: string;
+                decimals?: number;
+                image?: string;
+                tokenId?: string;
+              };
+            }
+          | undefined;
+        if (param?.type !== "ERC20") {
+          throw new Error("Not a supported asset type.");
+        }
+
+        const contractAddress = param?.options.address;
+
+        await this.tokenERC20Service.suggestERC20Token(
+          env,
+          currentChainId,
+          contractAddress
+        );
+
+        return true;
+      }
+      case "eth_call":
+      case "eth_estimateGas":
+      case "eth_getTransactionCount":
+      case "eth_getTransactionByHash":
+      case "eth_getTransactionByBlockHashAndIndex":
+      case "eth_getTransactionByBlockNumberAndIndex":
+      case "eth_getTransactionByHash":
+      case "eth_getTransactionReceipt":
+      case "eth_protocolVersion":
+      case "eth_syncing":
+      case "eth_getCode":
+      case "eth_getLogs":
+      case "eth_getProof":
+      case "eth_getStorageAt":
+      case "eth_getBalance":
+      case "eth_blockNumber":
+      case "eth_getBlockByHash":
+      case "eth_getBlockByNumber":
+      case "eth_gasPrice":
+      case "eth_feeHistory":
+      case "eth_maxPriorityFeePerGas": {
+        return (
+          await simpleFetch<{
+            jsonrpc: string;
+            id: number;
+            result: any;
+            error?: Error;
+          }>(currentChainEVMInfo.rpc, {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+            },
+            body: JSON.stringify({
+              jsonrpc: "2.0",
+              method,
+              params,
+              id: 1,
+            }),
+          })
+        ).data.result;
+      }
+      default: {
+        throw new Error(`The method "${method}" is not supported.`);
+      }
+    }
   }
 }

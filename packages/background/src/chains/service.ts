@@ -3,7 +3,7 @@ import {
   PrefixKVStore,
   sortedJsonByKeyStringify,
 } from "@keplr-wallet/common";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ChainInfoWithoutEndpoints } from "@keplr-wallet/types";
 import {
   action,
   autorun,
@@ -14,7 +14,6 @@ import {
   toJS,
 } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { ChainInfoWithCoreTypes, ChainInfoWithSuggestedOptions } from "./types";
 import { computedFn } from "mobx-utils";
 import {
   checkChainFeatures,
@@ -24,6 +23,7 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { InteractionService } from "../interaction";
 import { Env } from "@keplr-wallet/router";
 import { SuggestChainInfoMsg } from "./messages";
+import { ChainInfoWithCoreTypes, ChainInfoWithSuggestedOptions } from "./types";
 import { AnalyticsService } from "../analytics";
 
 type ChainRemovedHandler = (chainInfo: ChainInfo) => void;
@@ -288,9 +288,7 @@ export class ChainsService {
   );
 
   getChainInfosWithoutEndpoints = computedFn(
-    (): (Omit<ChainInfo, "rpc" | "rest" | "evm"> & {
-      evm?: { chainId: number };
-    })[] => {
+    (): ChainInfoWithoutEndpoints[] => {
       return this.mergeChainInfosWithDynamics(
         this.embedChainInfos.concat(this.suggestedChainInfos)
       ).map((chainInfo) => {
@@ -301,14 +299,26 @@ export class ChainsService {
           nodeProvider: undefined,
           updateFromRepoDisabled: undefined,
           embedded: undefined,
-          ...(chainInfo.evm && {
-            evm: {
-              ...chainInfo.evm,
-              rpc: undefined,
-            },
-          }),
+          evm:
+            chainInfo.evm !== undefined
+              ? {
+                  ...chainInfo.evm,
+                  rpc: undefined,
+                }
+              : undefined,
         };
       });
+    },
+    {
+      keepAlive: true,
+    }
+  );
+
+  getChainInfoWithoutEndpoints = computedFn(
+    (chainId: string): ChainInfoWithoutEndpoints | undefined => {
+      return this.getChainInfosWithoutEndpoints().find(
+        (chainInfo) => chainInfo.chainId === chainId
+      );
     },
     {
       keepAlive: true,

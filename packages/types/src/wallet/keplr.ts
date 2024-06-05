@@ -13,6 +13,7 @@ import { SecretUtils } from "../secretjs";
 import Long from "long";
 import { SettledResponses } from "../settled";
 import { DirectAuxSignResponse } from "../cosmjs-alt";
+import EventEmitter from "events";
 
 export interface Key {
   // Name of the selected key store.
@@ -21,6 +22,7 @@ export interface Key {
   readonly pubKey: Uint8Array;
   readonly address: Uint8Array;
   readonly bech32Address: string;
+  readonly ethereumHexAddress: string;
   // Indicate whether the selected account is from the nano ledger.
   // Because current cosmos app in the nano ledger doesn't support the direct (proto) format msgs,
   // this can be used to select the amino or direct signer.
@@ -227,6 +229,9 @@ export interface Keplr {
   ): Promise<AminoSignResponse>;
 
   getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]>;
+  getChainInfoWithoutEndpoints(
+    chainId: string
+  ): Promise<ChainInfoWithoutEndpoints>;
 
   /** Change wallet extension user name **/
   changeKeyRingName(opts: {
@@ -237,4 +242,31 @@ export interface Keplr {
   sendEthereumTx(chainId: string, tx: Uint8Array): Promise<string>;
 
   suggestERC20(chainId: string, contractAddress: string): Promise<void>;
+
+  readonly ethereum: IEthereumProvider;
+}
+
+export interface IEthereumProvider extends EventEmitter {
+  // It must be in the hexadecimal format used in EVM-based chains, not the format used in Tendermint nodes.
+  readonly chainId: string | null;
+  // It must be in the decimal format of chainId.
+  readonly networkVersion: string | null;
+
+  readonly selectedAddress: string | null;
+
+  readonly isKeplr: boolean;
+  readonly isMetaMask: boolean;
+
+  isConnected(): boolean;
+
+  request<T>({
+    method,
+    params,
+  }: {
+    method: string;
+    params?: unknown[] | Record<string, unknown>;
+  }): Promise<T>;
+
+  enable(): Promise<string[]>;
+  net_version(): Promise<string>;
 }

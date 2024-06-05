@@ -324,6 +324,9 @@
   "page.unlock.bottom-section.guide-paragraph": "계정이 여러 개인 경우 몇 분 이상 소요될 수 있습니다.",
 
   "page.wallet.title": "지갑 선택",
+  "page.wallet.input.search.placeholder": "지갑 이름이나 주소로 검색",
+  "page.wallet.search-empty-view-title": "앗!",
+  "page.wallet.search-empty-view-paragraph": "검색 결과가 없어요",
   "page.wallet.add-wallet-button": "지갑 추가",
   "page.wallet.recovery-phrase-title": "복구 문구 기반",
   "page.wallet.connect-with-social-account-title": "{social} 계정으로 연결",
@@ -409,6 +412,7 @@
   "page.sign.ethereum.tx.title": "트랜잭션 확인",
   "page.sign.ethereum.tx.summary": "트랜잭션 요약",
   "page.sign.ethereum.tx.send.paragraph": "<b>{fromAddress}</b>로부터 <b>{toAddress}</b>에게 <b>{amount}</b>를 보냅니다.",
+  "page.sign.ethereum.message": "서명할 메시지",
 
   "page.sign.components.fee-summary.fee": "수수료",
 
@@ -597,6 +601,7 @@
   "components.address-book-modal.empty-view-default": "데이터가 없습니다.",
   "components.address-item.sent-on-date": "{date}에 사용됨",
   "components.address-item.empty-memo": "(메모없음)",
+  "components.address-book-modal.my-account-tab.input.search.placeholder": "지갑 이름이나 주소로 검색",
 
   "components.collapsible-list.view-more-tokens": "{remain}개의 토큰 더보기",
   "components.collapsible-list.collapse": "접기",

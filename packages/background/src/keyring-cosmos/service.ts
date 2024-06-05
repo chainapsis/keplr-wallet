@@ -37,7 +37,7 @@ import { ChainsUIService } from "../chains-ui";
 export class KeyRingCosmosService {
   constructor(
     protected readonly chainsService: ChainsService,
-    protected readonly keyRingService: KeyRingService,
+    public readonly keyRingService: KeyRingService,
     protected readonly interactionService: InteractionService,
     protected readonly chainsUIService: ChainsUIService,
     protected readonly analyticsService: AnalyticsService,
@@ -129,6 +129,7 @@ export class KeyRingCosmosService {
       bech32Address: bech32Address.toBech32(
         chainInfo.bech32Config.bech32PrefixAccAddr
       ),
+      ethereumHexAddress: bech32Address.toHex(true),
       isNanoLedger: keyInfo.type === "ledger",
       isKeystone: keyInfo.type === "keystone",
     };

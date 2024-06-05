@@ -43,6 +43,7 @@ export class PermissionStore {
     }
 
     const first = data[0];
+
     const res: {
       ids: string[];
     } & PermissionData = {
@@ -51,6 +52,7 @@ export class PermissionStore {
       type: first.data.type,
       origins: first.data.origins,
     };
+
     for (let i = 1; i < data.length; i++) {
       const d = data[i];
       if (d.data.type !== first.data.type) {

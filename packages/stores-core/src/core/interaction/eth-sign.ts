@@ -38,6 +38,7 @@ export class SignEthereumInteractionStore {
 
   async approveWithProceedNext(
     id: string,
+    signingData: Uint8Array,
     signature: Uint8Array | undefined,
     afterFn: (proceedNext: boolean) => void | Promise<void>,
     options: {
@@ -47,6 +48,7 @@ export class SignEthereumInteractionStore {
     await this.interactionStore.approveWithProceedNextV2(
       id,
       {
+        signingData,
         signature,
       },
       afterFn,

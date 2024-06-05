@@ -330,6 +330,9 @@
   "page.unlock.bottom-section.guide-paragraph": "Migration for users with many accounts can take up to several minutes.",
 
   "page.wallet.title": "Select Wallet",
+  "page.wallet.input.search.placeholder": "Search wallet name or address",
+  "page.wallet.search-empty-view-title": "Oops!",
+  "page.wallet.search-empty-view-paragraph": "No Result Found",
   "page.wallet.add-wallet-button": "Add Wallet",
   "page.wallet.recovery-phrase-title": "Recovery Phrase",
   "page.wallet.connect-with-social-account-title": "Connected with {social} Account",
@@ -417,6 +420,7 @@
   "page.sign.ethereum.tx.title": "Confirm Transaction",
   "page.sign.ethereum.tx.summary": "Transaction Summary",
   "page.sign.ethereum.tx.send.paragraph": "Send <b>{amount}</b> from <b>{fromAddress}</b> to <b>{toAddress}</b>",
+  "page.sign.ethereum.message": "Signing Message",
 
   "page.sign.components.fee-summary.fee": "Tx Fee",
 
@@ -613,6 +617,7 @@
   "components.address-book-modal.empty-view-default": "No Data Yet",
   "components.address-item.sent-on-date": "Sent on {date}",
   "components.address-item.empty-memo": "(Empty Memo)",
+  "components.address-book-modal.my-account-tab.input.search.placeholder": "Search wallet name or address",
 
   "components.collapsible-list.view-more-tokens": "View {remain} more tokens",
   "components.collapsible-list.collapse": "Collapse",

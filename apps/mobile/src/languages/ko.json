@@ -377,6 +377,9 @@
   "page.ibc-swap.components.slippage-modal.title": "슬리피지 설정",
   "page.ibc-swap.components.slippage-modal.label.slippage-tolerance": "슬리피지 허용치",
   "page.ibc-swap.components.slippage-modal.label.slippage-custom": "커스텀 설정",
+
+  "page.activity.title": "활동내역",
+
   "page.permission.unknown-permission": "알수없는 권한",
   "page.permission.requesting-connection-title": "연결 요청",
   "page.permission.paragraph": "승인시 해당 웹사이트에서 아래와 같은 권한을 받습니다 :{br}• 유저의 케플러 지갑에 있는 모든 체인 리스트 조회, 사용",
@@ -402,6 +405,7 @@
   "page.sign.ethereum.tx.title": "트랜잭션 확인",
   "page.sign.ethereum.tx.summary": "트랜잭션 요약",
   "page.sign.ethereum.tx.send.paragraph": "<b>{fromAddress}</b>로부터 <b>{toAddress}</b>에게 <b>{amount}</b>를 보냅니다.",
+  "page.sign.ethereum.message": "서명할 메시지",
 
   "page.sign.components.fee-summary.fee": "수수료",
 

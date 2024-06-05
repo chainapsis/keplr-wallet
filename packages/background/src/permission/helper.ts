@@ -4,9 +4,9 @@ export class PermissionKeyHelper {
   static globalKey = "_global__permission_";
   static splitter = "!&$";
 
-  protected static throwIfReserved(...keys: string[]) {
+  protected static throwIfReserved(...keys: (string | number)[]) {
     for (const key of keys) {
-      if (key.includes(PermissionKeyHelper.splitter)) {
+      if (String(key).includes(PermissionKeyHelper.splitter)) {
         throw new Error(`Has reserved word: ${key}`);
       }
     }

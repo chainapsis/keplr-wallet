@@ -22,6 +22,9 @@ export class PermissionService {
 
   protected privilegedOrigins: Map<string, boolean> = new Map();
 
+  @observable
+  protected currentChainIdForEVMByOriginMap: Map<string, string> = new Map();
+
   constructor(
     protected readonly kvStore: KVStore,
     privilegedOrigins: string[],
@@ -49,18 +52,34 @@ export class PermissionService {
         }
       });
     } else {
-      const saved = await this.kvStore.get<Record<string, true | undefined>>(
-        "permissionMap/v1"
-      );
-      if (saved) {
+      const savedPermissionMap = await this.kvStore.get<
+        Record<string, true | undefined>
+      >("permissionMap/v1");
+      if (savedPermissionMap) {
         runInAction(() => {
-          for (const key of Object.keys(saved)) {
-            const granted = saved[key];
+          for (const key of Object.keys(savedPermissionMap)) {
+            const granted = savedPermissionMap[key];
             if (granted) {
               this.permissionMap.set(key, true);
             }
           }
         });
+
+        const savedCurrentChainIdForEVMByOriginMap = await this.kvStore.get<
+          Record<string, string>
+        >("currentChainIdForEVMByOriginMap/v1");
+        if (savedCurrentChainIdForEVMByOriginMap) {
+          runInAction(() => {
+            for (const key of Object.keys(
+              savedCurrentChainIdForEVMByOriginMap
+            )) {
+              this.currentChainIdForEVMByOriginMap.set(
+                key,
+                savedCurrentChainIdForEVMByOriginMap[key]
+              );
+            }
+          });
+        }
       }
     }
 
@@ -68,6 +87,10 @@ export class PermissionService {
       this.kvStore.set(
         "permissionMap/v1",
         Object.fromEntries(this.permissionMap)
+      );
+      this.kvStore.set(
+        "currentChainIdForEVMByOriginMap/v1",
+        Object.fromEntries(this.currentChainIdForEVMByOriginMap)
       );
     });
   }
@@ -90,15 +113,18 @@ export class PermissionService {
         };
       }
 
-      if (!split.chainIdentifier) {
-        data[origin]!.globalPermissions.push({
-          type: split.type,
-        });
-      } else {
-        data[origin]!.permissions.push({
-          chainIdentifier: split.chainIdentifier,
-          type: split.type,
-        });
+      switch (split.type) {
+        case getBasicAccessPermissionType():
+          data[origin]!.permissions.push({
+            chainIdentifier: split.chainIdentifier!,
+            type: split.type,
+          });
+          break;
+        default:
+          data[origin]!.globalPermissions.push({
+            type: split.type,
+          });
+          break;
       }
     }
 
@@ -108,6 +134,7 @@ export class PermissionService {
   @action
   clearAllPermissions() {
     this.permissionMap.clear();
+    this.currentChainIdForEVMByOriginMap.clear();
   }
 
   async checkOrGrantBasicAccessPermission(
@@ -506,5 +533,43 @@ export class PermissionService {
     for (const key of deletes) {
       this.permissionMap.delete(key);
     }
+  }
+
+  getCurrentChainIdForEVM(origin: string): string {
+    const currentChainId = this.currentChainIdForEVMByOriginMap.get(origin);
+
+    if (!currentChainId) {
+      const chainInfos = this.chainsService.getChainInfos();
+      // If currentChainId is not saved, Make Evmos current chain.
+      // TODO: Provide from interaction data or UI
+      const evmosChainId = chainInfos.find(
+        (chainInfo) =>
+          chainInfo.evm !== undefined && chainInfo.chainId.startsWith("evmos_")
+      )?.chainId;
+
+      if (!evmosChainId) {
+        throw new Error("The Evmos chain info is not found");
+      }
+
+      return evmosChainId;
+    }
+
+    return currentChainId;
+  }
+
+  @action
+  updateCurrentChainIdForEVM(
+    env: Env,
+    origin: string,
+    newCurrentChainId: string
+  ): void {
+    this.checkPermission(
+      env,
+      newCurrentChainId,
+      getBasicAccessPermissionType(),
+      origin
+    );
+
+    this.currentChainIdForEVMByOriginMap.set(origin, newCurrentChainId);
   }
 }

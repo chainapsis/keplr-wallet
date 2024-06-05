@@ -88,6 +88,16 @@ export class ChainsUIService {
     }
   );
 
+  readonly enabledChainInfosForVault = computedFn(
+    (vaultId: string): ReadonlyArray<ChainInfo> => {
+      return this.enabledChainIdentifiersForVault(vaultId).map(
+        (chainIdentifier) => {
+          return this.chainsService.getChainInfoOrThrow(chainIdentifier);
+        }
+      );
+    }
+  );
+
   protected readonly enabledChainIdentifierMapForVault = computedFn(
     (vaultId: string): Map<string, boolean> => {
       const chainIdentifiers = this.enabledChainIdentifiersForVault(vaultId);

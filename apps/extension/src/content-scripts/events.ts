@@ -1,6 +1,6 @@
 import { Message, Router } from "@keplr-wallet/router";
 
-class PushEventDataMsg extends Message<void> {
+class PushEventDataMsg<D = unknown> extends Message<void> {
   public static type() {
     return "push-event-data";
   }
@@ -8,7 +8,7 @@ class PushEventDataMsg extends Message<void> {
   constructor(
     public readonly data: {
       type: string;
-      data: unknown;
+      data: D;
     }
   ) {
     super();
@@ -35,8 +35,22 @@ export function initEvents(router: Router) {
   router.addHandler("interaction-foreground", (_, msg) => {
     switch (msg.constructor) {
       case PushEventDataMsg:
-        if ((msg as PushEventDataMsg).data.type === "keystore-changed") {
-          window.dispatchEvent(new Event("keplr_keystorechange"));
+        switch ((msg as PushEventDataMsg).data.type) {
+          case "keystore-changed":
+            return window.dispatchEvent(new Event("keplr_keystorechange"));
+          case "keplr_chainChanged":
+            return window.dispatchEvent(
+              new CustomEvent("keplr_chainChanged", {
+                detail: {
+                  ...(
+                    msg as PushEventDataMsg<{
+                      origin: string;
+                      evmChainId: number;
+                    }>
+                  ).data.data,
+                },
+              })
+            );
         }
         return;
       default:

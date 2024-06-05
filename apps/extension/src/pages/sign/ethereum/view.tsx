@@ -30,6 +30,15 @@ import { defaultRegistry } from "../components/eth-tx/registry";
 import { ChainImageFallback } from "../../../components/image";
 import { Gutter } from "../../../components/gutter";
 import { useUnmount } from "../../../hooks/use-unmount";
+import { FeeSummary } from "../components/fee-summary";
+import { FeeControl } from "../../../components/input/fee-control";
+import {
+  useAmountConfig,
+  useFeeConfig,
+  useSenderConfig,
+  useZeroAllowedGasConfig,
+} from "@keplr-wallet/hooks";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
 
 /**
  * CosmosTxView의 주석을 꼭 참고하셈
@@ -40,8 +49,12 @@ import { useUnmount } from "../../../hooks/use-unmount";
 export const EthereumSigningView: FunctionComponent<{
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>;
 }> = observer(({ interactionData }) => {
-  const { chainStore, uiConfigStore, signEthereumInteractionStore } =
-    useStore();
+  const {
+    chainStore,
+    uiConfigStore,
+    signEthereumInteractionStore,
+    queriesStore,
+  } = useStore();
   const intl = useIntl();
   const theme = useTheme();
 
@@ -51,27 +64,105 @@ export const EthereumSigningView: FunctionComponent<{
 
   const chainInfo = chainStore.getChain(interactionData.data.chainId);
 
+  const senderConfig = useSenderConfig(
+    chainStore,
+    interactionData.data.chainId,
+    interactionData.data.signer
+  );
+  const gasConfig = useZeroAllowedGasConfig(chainStore, chainInfo.chainId, 0);
+  const amountConfig = useAmountConfig(
+    chainStore,
+    queriesStore,
+    chainInfo.chainId,
+    senderConfig
+  );
+  const feeConfig = useFeeConfig(
+    chainStore,
+    queriesStore,
+    chainInfo.chainId,
+    senderConfig,
+    amountConfig,
+    gasConfig
+  );
+
+  const isTxSigning = interactionData.data.signType === EthSignType.TRANSACTION;
+
+  const eip1559TxFee = (() => {
+    if (isTxSigning) {
+      const { maxFeePerGas, maxPriorityFeePerGas } = feeConfig.getEIP1559TxFees(
+        feeConfig.type === "manual"
+          ? uiConfigStore.lastFeeOption || "average"
+          : feeConfig.type
+      );
+
+      return {
+        maxFeePerGas: `0x${parseInt(maxFeePerGas.toString()).toString(16)}`,
+        maxPriorityFeePerGas: `0x${parseInt(
+          maxPriorityFeePerGas.toString()
+        ).toString(16)}`,
+      };
+    }
+  })();
+
   const signingDataText = useMemo(() => {
+    const messageBuff = Buffer.from(interactionData.data.message);
+
     switch (interactionData.data.signType) {
       case EthSignType.MESSAGE:
-        return Buffer.from(interactionData.data.message).toString("hex");
+        // If the message is 32 bytes, it's probably a hash.
+        if (messageBuff.length === 32) {
+          return messageBuff.toString("hex");
+        } else {
+          const text = (() => {
+            const string = messageBuff.toString("utf8");
+            if (string.startsWith("0x")) {
+              return Buffer.from(string.slice(2), "hex").toString("utf8");
+            }
+
+            return string;
+          })();
+
+          // If the text contains RTL mark, escape it.
+          return text.replace(/\u202E/giu, "\\u202E");
+        }
       case EthSignType.TRANSACTION:
-        return JSON.stringify(
-          JSON.parse(Buffer.from(interactionData.data.message).toString()),
-          null,
-          2
-        );
+        const unsignedTx = JSON.parse(
+          messageBuff.toString()
+        ) as UnsignedTransaction;
+
+        const gasLimit = parseInt(String(unsignedTx.gasLimit) ?? "0");
+        gasConfig.setValue(gasLimit);
+        if (unsignedTx.maxFeePerGas && feeConfig.type === "manual") {
+          feeConfig.setFee(
+            new CoinPretty(
+              chainInfo.feeCurrencies[0],
+              new Dec(parseInt(String(unsignedTx.maxFeePerGas ?? "0"))).mul(
+                new Dec(gasLimit)
+              )
+            )
+          );
+        } else {
+          if (eip1559TxFee) {
+            unsignedTx.maxFeePerGas = eip1559TxFee.maxFeePerGas;
+            unsignedTx.maxPriorityFeePerGas = eip1559TxFee.maxPriorityFeePerGas;
+          }
+        }
+
+        return JSON.stringify(unsignedTx, null, 2);
       case EthSignType.EIP712:
-        return JSON.stringify(
-          JSON.parse(Buffer.from(interactionData.data.message).toString()),
-          null,
-          2
-        );
+        return JSON.stringify(JSON.parse(messageBuff.toString()), null, 2);
       default:
-        return Buffer.from(interactionData.data.message).toString("hex");
+        return messageBuff.toString("hex");
     }
-  }, [interactionData.data]);
-  const isTxSigning = interactionData.data.signType === EthSignType.TRANSACTION;
+  }, [
+    chainInfo.feeCurrencies,
+    eip1559TxFee?.maxFeePerGas,
+    eip1559TxFee?.maxPriorityFeePerGas,
+    feeConfig.type,
+    gasConfig,
+    interactionData.data.message,
+    interactionData.data.signType,
+  ]);
 
   const [isViewData, setIsViewData] = useState(false);
 
@@ -153,6 +244,7 @@ export const EthereumSigningView: FunctionComponent<{
 
             await signEthereumInteractionStore.approveWithProceedNext(
               interactionData.id,
+              Buffer.from(signingDataText),
               signature,
               async (proceedNext) => {
                 if (!proceedNext) {
@@ -245,7 +337,7 @@ export const EthereumSigningView: FunctionComponent<{
         height="100%"
         padding="0.75rem"
         paddingTop="0.5rem"
-        paddingBottom="0"
+        paddingBottom="4rem"
         style={{
           overflow: "auto",
         }}
@@ -261,35 +353,43 @@ export const EthereumSigningView: FunctionComponent<{
                       : ColorPalette["gray-50"],
                 }}
               >
-                <FormattedMessage id="page.sign.ethereum.tx.summary" />
+                <FormattedMessage
+                  id={
+                    isTxSigning
+                      ? "page.sign.ethereum.tx.summary"
+                      : "page.sign.ethereum.message"
+                  }
+                />
               </H5>
             </XAxis>
             <Column weight={1} />
-            <ViewDataButton
-              isViewData={isViewData}
-              setIsViewData={setIsViewData}
-            />
+            {isTxSigning && (
+              <ViewDataButton
+                isViewData={isViewData}
+                setIsViewData={setIsViewData}
+              />
+            )}
           </Columns>
         </Box>
-        {isTxSigning ? (
-          <SimpleBar
-            autoHide={false}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              flex: !isViewData ? "0 1 auto" : 1,
-              overflow: "auto",
-              borderRadius: "0.375rem",
-              backgroundColor:
-                theme.mode === "light"
-                  ? ColorPalette.white
-                  : ColorPalette["gray-600"],
-              boxShadow:
-                theme.mode === "light"
-                  ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-                  : "none",
-            }}
-          >
+        <SimpleBar
+          autoHide={false}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            flex: !isViewData ? "0 1 auto" : 1,
+            overflow: "auto",
+            borderRadius: "0.375rem",
+            backgroundColor:
+              theme.mode === "light"
+                ? ColorPalette.white
+                : ColorPalette["gray-600"],
+            boxShadow:
+              theme.mode === "light"
+                ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+                : "none",
+          }}
+        >
+          {isTxSigning ? (
             <Box>
               {isViewData ? (
                 <Box
@@ -328,26 +428,41 @@ export const EthereumSigningView: FunctionComponent<{
                 </Box>
               )}
             </Box>
-          </SimpleBar>
-        ) : (
-          <Box
-            as={"pre"}
-            padding="1rem"
-            // Remove normalized style of pre tag
-            margin="0"
-            style={{
-              width: "fit-content",
-              color:
-                theme.mode === "light"
-                  ? ColorPalette["gray-400"]
-                  : ColorPalette["gray-200"],
-            }}
-          >
-            {signingDataText}
-          </Box>
-        )}
+          ) : (
+            <Box
+              as={"pre"}
+              padding="1rem"
+              // Remove normalized style of pre tag
+              margin="0"
+              style={{
+                width: "fit-content",
+                color:
+                  theme.mode === "light"
+                    ? ColorPalette["gray-400"]
+                    : ColorPalette["gray-200"],
+              }}
+            >
+              {signingDataText}
+            </Box>
+          )}
+        </SimpleBar>
 
         <div style={{ flex: 1 }} />
+
+        {isTxSigning &&
+          (() => {
+            if (interactionData.isInternal) {
+              return <FeeSummary feeConfig={feeConfig} gasConfig={gasConfig} />;
+            }
+
+            return (
+              <FeeControl
+                feeConfig={feeConfig}
+                senderConfig={senderConfig}
+                gasConfig={gasConfig}
+              />
+            );
+          })()}
 
         <LedgerGuideBox
           data={{

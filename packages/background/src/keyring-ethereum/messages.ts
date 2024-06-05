@@ -54,3 +54,30 @@ export class RequestSignEthereumMsg extends Message<Uint8Array> {
     return RequestSignEthereumMsg.type();
   }
 }
+
+export class RequestJsonRpcToEvmMsg extends Message<void> {
+  public static type() {
+    return "request-json-rpc-to-evm";
+  }
+
+  constructor(
+    public readonly method: string,
+    public readonly params?: unknown[] | Record<string, unknown>
+  ) {
+    super();
+  }
+
+  validateBasic(): void {}
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestJsonRpcToEvmMsg.type();
+  }
+}

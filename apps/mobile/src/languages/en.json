@@ -380,6 +380,9 @@
   "page.ibc-swap.components.slippage-modal.title": "Slippage Settings",
   "page.ibc-swap.components.slippage-modal.label.slippage-tolerance": "Slippage Tolerance",
   "page.ibc-swap.components.slippage-modal.label.slippage-custom": "Custom Slippage",
+
+  "page.activity.title": "Activity",
+
   "page.permission.unknown-permission": "Unknown permission",
   "page.permission.requesting-connection-title": "Requesting Connection",
   "page.permission.paragraph": "By approving this request, the website will:{br}• Get the list of all chain on your Keplr Wallet",
@@ -405,6 +408,7 @@
   "page.sign.ethereum.tx.title": "Confirm Transaction",
   "page.sign.ethereum.tx.summary": "Transaction Summary",
   "page.sign.ethereum.tx.send.paragraph": "Send <b>{amount}</b> from <b>{fromAddress}</b> to <b>{toAddress}</b>",
+  "page.sign.ethereum.message": "Signing Message",
 
   "page.sign.components.fee-summary.fee": "Tx Fee",
 

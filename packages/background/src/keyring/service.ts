@@ -1,4 +1,4 @@
-import { VaultService, Vault, PlainObject } from "../vault";
+import { PlainObject, Vault, VaultService } from "../vault";
 import {
   BIP44HDPath,
   ExportedKeyRingVault,
@@ -11,7 +11,7 @@ import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { ChainsService } from "../chains";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { InteractionService } from "../interaction";
 import { ChainInfo } from "@keplr-wallet/types";
 import { Buffer } from "buffer/";
@@ -19,6 +19,7 @@ import * as Legacy from "./legacy";
 import { ChainsUIService } from "../chains-ui";
 import { MultiAccounts } from "../keyring-keystone";
 import { AnalyticsService } from "../analytics";
+import { Primitive } from "utility-types";
 
 export class KeyRingService {
   protected _needMigration = false;
@@ -26,6 +27,9 @@ export class KeyRingService {
 
   @observable
   protected _selectedVaultId: string | undefined = undefined;
+
+  // key: {bech32_prefix}/{hex}
+  protected cacheKeySearchHexToBech32 = new Map<string, string>();
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -36,6 +40,7 @@ export class KeyRingService {
       readonly getDisabledChainIdentifiers: () => Promise<string[]>;
     },
     protected readonly chainsService: ChainsService,
+    protected readonly chainsUIService: ChainsUIService,
     protected readonly interactionService: InteractionService,
     protected readonly vaultService: VaultService,
     protected readonly analyticsService: AnalyticsService,
@@ -1341,6 +1346,209 @@ export class KeyRingService {
     }
 
     throw new Error(`Unsupported keyRing ${type}`);
+  }
+
+  searchKeyRings(
+    searchText: string,
+    ignoreChainEnabled: boolean = false
+  ): KeyInfo[] {
+    searchText = searchText.trim();
+
+    const keyInfos = this.getKeyInfos();
+
+    if (!searchText) {
+      return keyInfos;
+    }
+
+    const nameSearchKeyInfos = keyInfos.filter((keyInfo) => {
+      return keyInfo.name.toLowerCase().includes(searchText.toLowerCase());
+    });
+
+    let bech32AddressSearchKeyInfos: KeyInfo[] = [];
+    let hexAddressSearchKeyInfos: KeyInfo[] = [];
+    if (searchText.length >= 8) {
+      const isHex = (() => {
+        if (searchText.startsWith("0x")) {
+          return true;
+        }
+        try {
+          const s = Buffer.from(searchText, "hex");
+          return s.toString().toLowerCase() === searchText.toLowerCase();
+        } catch {
+          return false;
+        }
+      })();
+
+      if (isHex) {
+        hexAddressSearchKeyInfos = keyInfos.filter((keyInfo) => {
+          const chainInfos = this.chainsUIService.enabledChainInfosForVault(
+            keyInfo.id
+          );
+          let evmEnabled = false;
+          for (const chainInfo of chainInfos) {
+            if (KeyRingService.isEthermintLike(chainInfo)) {
+              evmEnabled = true;
+            }
+          }
+          if (!evmEnabled && !ignoreChainEnabled) {
+            return false;
+          }
+
+          for (const [_, value] of Object.entries(keyInfo.insensitive)) {
+            try {
+              const hexAddress = KeyRingService.getAddressHexStringFromKeyInfo(
+                keyInfo,
+                value,
+                true
+              );
+
+              if (
+                hexAddress.includes(searchText.replace("0x", "").toLowerCase())
+              ) {
+                return true;
+              }
+            } catch {
+              // noop
+            }
+          }
+        });
+      }
+    }
+
+    if (searchText.length >= 3) {
+      const isHex = (() => {
+        if (searchText.startsWith("0x")) {
+          return true;
+        }
+        try {
+          const s = Buffer.from(searchText, "hex");
+          return s.toString().toLowerCase() === searchText.toLowerCase();
+        } catch {
+          return false;
+        }
+      })();
+
+      if (!isHex) {
+        const targetChainInfos: ChainInfo[] = (() => {
+          const i = searchText.indexOf("1");
+          if (i < 0) {
+            return [];
+          }
+          const prefix = searchText.slice(0, i);
+          const result: ChainInfo[] = [];
+          for (const chainInfo of this.chainsService.getChainInfos()) {
+            if (chainInfo.bech32Config?.bech32PrefixAccAddr === prefix) {
+              result.push(chainInfo);
+            }
+          }
+          return result;
+        })();
+
+        bech32AddressSearchKeyInfos = keyInfos.filter((keyInfo) => {
+          if (
+            !ignoreChainEnabled &&
+            targetChainInfos.length > 0 &&
+            targetChainInfos.find(
+              (chainInfo) =>
+                !this.chainsUIService.isEnabled(keyInfo.id, chainInfo.chainId)
+            )
+          ) {
+            return false;
+          }
+
+          const chainInfos = (() => {
+            if (ignoreChainEnabled) {
+              return this.chainsService.getChainInfos();
+            }
+            return targetChainInfos.length > 0
+              ? targetChainInfos
+              : this.chainsUIService.enabledChainInfosForVault(keyInfo.id);
+          })();
+          for (const chainInfo of chainInfos) {
+            if (!chainInfo.bech32Config) {
+              continue;
+            }
+
+            const isEVM = KeyRingService.isEthermintLike(chainInfo);
+
+            for (const [_, value] of Object.entries(keyInfo.insensitive)) {
+              try {
+                const hexAddress =
+                  KeyRingService.getAddressHexStringFromKeyInfo(
+                    keyInfo,
+                    value,
+                    isEVM
+                  );
+
+                const bech32Address = this.getKeySearchBech32FromHex(
+                  chainInfo.bech32Config.bech32PrefixAccAddr,
+                  hexAddress
+                );
+                if (bech32Address.includes(searchText.toLowerCase())) {
+                  return true;
+                }
+              } catch {
+                // noop
+              }
+            }
+          }
+        });
+      }
+    }
+
+    const exists = new Map<string, boolean>();
+    for (const keyInfo of nameSearchKeyInfos) {
+      exists.set(keyInfo.id, true);
+    }
+    for (const keyInfo of bech32AddressSearchKeyInfos) {
+      exists.set(keyInfo.id, true);
+    }
+    for (const keyInfo of hexAddressSearchKeyInfos) {
+      exists.set(keyInfo.id, true);
+    }
+
+    return keyInfos.filter((keyInfo) => exists.get(keyInfo.id));
+  }
+
+  protected getKeySearchBech32FromHex(prefix: string, hex: string): string {
+    const key = `${prefix}/${hex}`;
+    const cache = this.cacheKeySearchHexToBech32.get(key);
+    if (cache) {
+      return cache;
+    }
+    const value = new Bech32Address(Buffer.from(hex, "hex")).toBech32(prefix);
+    this.cacheKeySearchHexToBech32.set(key, value);
+    return value;
+  }
+
+  protected static getAddressHexStringFromKeyInfo(
+    keyInfo: KeyInfo,
+    value: PlainObject | Primitive | undefined,
+    isEVM: boolean
+  ): string {
+    let publicKeyText: string = "";
+    if (keyInfo.type === "ledger") {
+      if (
+        value &&
+        typeof value === "object" &&
+        value["pubKey"] &&
+        typeof value["pubKey"] === "string"
+      ) {
+        publicKeyText = value["pubKey"];
+      }
+    } else if (typeof value === "string") {
+      publicKeyText = value;
+    }
+    if (!publicKeyText) {
+      throw new Error("no public key text");
+    }
+    const publicKey = new PubKeySecp256k1(
+      Buffer.from(publicKeyText.replace("0x", ""), "hex")
+    );
+    const address = isEVM
+      ? publicKey.getEthAddress()
+      : publicKey.getCosmosAddress();
+    return Buffer.from(address).toString("hex").toLowerCase();
   }
 
   static parseBIP44Path(bip44Path: string): {

@@ -7,6 +7,7 @@ import {
   DirectSignResponse,
   EthSignType,
   ICNSAdr36Signatures,
+  IEthereumProvider,
   Keplr,
   KeplrIntereactionOptions,
   KeplrMode,
@@ -27,6 +28,7 @@ import {
 import { Buffer } from "buffer/";
 import { ProposalTypes, SessionTypes } from "@walletconnect/types";
 import Long from "long";
+import EventEmitter from "events";
 
 interface RequestParams {
   topic: string;
@@ -45,6 +47,7 @@ interface KeplrGetKeyWalletConnectV2Response {
   readonly pubKey: string;
   readonly address: string;
   readonly bech32Address: string;
+  readonly ethereumHexAddress: string;
   readonly isNanoLedger: boolean;
 }
 
@@ -111,6 +114,7 @@ export class KeplrWalletConnectV2 implements Keplr {
       !data.hasOwnProperty("pubKey") ||
       !data.hasOwnProperty("address") ||
       !data.hasOwnProperty("bech32Address") ||
+      !data.hasOwnProperty("ethereumHexAddress") ||
       !data.hasOwnProperty("isNanoLedger")
     ) {
       throw new Error("Invalid data");
@@ -122,6 +126,7 @@ export class KeplrWalletConnectV2 implements Keplr {
       pubKey: data.pubKey as string,
       address: data.address as string,
       bech32Address: data.bech32Address as string,
+      ethereumHexAddress: data.ethereumHexAddress as string,
       isNanoLedger: data.isNanoLedger === "true",
     };
   }
@@ -474,6 +479,12 @@ export class KeplrWalletConnectV2 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
+  getChainInfoWithoutEndpoints(
+    _chainId: string
+  ): Promise<ChainInfoWithoutEndpoints> {
+    throw new Error("Not yet implemented");
+  }
+
   getEnigmaPubKey(_chainId: string): Promise<Uint8Array> {
     throw new Error("Not yet implemented");
   }
@@ -496,6 +507,7 @@ export class KeplrWalletConnectV2 implements Keplr {
       return {
         algo: lastSeenKey.algo,
         bech32Address: lastSeenKey.bech32Address,
+        ethereumHexAddress: lastSeenKey.ethereumHexAddress,
         address: Buffer.from(lastSeenKey.address, "base64"),
         name: lastSeenKey.name,
         pubKey: Buffer.from(lastSeenKey.pubKey, "base64"),
@@ -513,6 +525,8 @@ export class KeplrWalletConnectV2 implements Keplr {
         return {
           algo: lastSession.sessionProperties["algo"],
           bech32Address: lastSession.sessionProperties["bech32Address"],
+          ethereumHexAddress:
+            lastSession.sessionProperties["ethereumHexAddress"],
           address: Buffer.from(
             lastSession.sessionProperties["address"],
             "base64"
@@ -548,6 +562,7 @@ export class KeplrWalletConnectV2 implements Keplr {
       pubKey: string;
       address: string;
       bech32Address: string;
+      ethereumHexAddress: string;
       isNanoLedger: boolean;
     }>(param);
 
@@ -842,5 +857,40 @@ export class KeplrWalletConnectV2 implements Keplr {
 
   suggestERC20(_chainId: string, _contractAddress: string): Promise<void> {
     throw new Error("Not yet implemented");
+  }
+
+  public readonly ethereum = new MockEthereumProvider();
+}
+
+class MockEthereumProvider extends EventEmitter implements IEthereumProvider {
+  readonly chainId: string | null = null;
+  readonly selectedAddress: string | null = null;
+
+  readonly networkVersion: string | null = null;
+
+  readonly isKeplr: boolean = true;
+  readonly isMetaMask: boolean = true;
+
+  constructor() {
+    super();
+  }
+
+  isConnected(): boolean {
+    throw new Error("Method not implemented.");
+  }
+
+  request<T>({}: {
+    method: string;
+    params?: unknown[] | Record<string, unknown>;
+  }): Promise<T> {
+    throw new Error("Not yet implemented");
+  }
+
+  enable(): Promise<string[]> {
+    throw new Error("Method not implemented.");
+  }
+
+  net_version(): Promise<string> {
+    throw new Error("Method not implemented.");
   }
 }

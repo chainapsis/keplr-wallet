@@ -1,6 +1,7 @@
 import { Currency, AppCurrency, FeeCurrency } from "./currency";
 import { BIP44 } from "./bip44";
 import { Bech32Config } from "./bech32";
+import { EVMInfo } from "./ethereum";
 
 export interface ChainInfo {
   readonly rpc: string;
@@ -46,17 +47,17 @@ export interface ChainInfo {
 
   readonly hideInUI?: boolean;
 
-  readonly evm?: {
-    chainId: number;
-    rpc: string;
-  };
+  readonly evm?: EVMInfo;
 }
 
 export type ChainInfoWithoutEndpoints = Omit<
   ChainInfo,
   "rest" | "rpc" | "nodeProvider" | "evm"
 > & {
-  evm?: {
-    chainId: number;
+  readonly rest: undefined;
+  readonly rpc: undefined;
+  readonly nodeProvider: undefined;
+  readonly evm?: Omit<EVMInfo, "rpc"> & {
+    readonly rpc: undefined;
   };
 };

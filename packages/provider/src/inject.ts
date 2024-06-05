@@ -20,6 +20,7 @@ import {
   SecretUtils,
   SettledResponses,
   DirectAuxSignResponse,
+  IEthereumProvider,
 } from "@keplr-wallet/types";
 import { Result, JSONUint8Array } from "@keplr-wallet/router";
 import { KeplrEnigmaUtils } from "./enigma";
@@ -27,12 +28,14 @@ import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
 import Long from "long";
 import { KeplrCoreTypes } from "./core-types";
+import EventEmitter from "events";
 
 export interface ProxyRequest {
   type: "proxy-request";
   id: string;
   method: keyof (Keplr & KeplrCoreTypes);
   args: any[];
+  ethereumProviderMethod?: keyof IEthereumProvider;
 }
 
 export interface ProxyRequestResponse {
@@ -81,6 +84,9 @@ export function injectKeplrToWindow(keplr: IKeplr): void {
     "getEnigmaUtils",
     keplr.getEnigmaUtils
   );
+
+  // TODO: Enable this after the ethereum provider is fully supported.
+  // defineUnwritablePropertyIfPossible(window, "ethereum", keplr.ethereum);
 }
 
 /**
@@ -133,7 +139,8 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
 
         if (
           !keplr[message.method] ||
-          typeof keplr[message.method] !== "function"
+          (message.method !== "ethereum" &&
+            typeof keplr[message.method] !== "function")
         ) {
           throw new Error(`Invalid method: ${message.method}`);
         }
@@ -234,6 +241,51 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
                 signature: result.signature,
               };
             })();
+          }
+
+          if (method === "ethereum") {
+            const ethereumProviderMethod = message.ethereumProviderMethod;
+
+            if (ethereumProviderMethod === "chainId") {
+              throw new Error("chainId is not function");
+            }
+
+            if (ethereumProviderMethod === "selectedAddress") {
+              throw new Error("selectedAddress is not function");
+            }
+
+            if (ethereumProviderMethod === "networkVersion") {
+              throw new Error("networkVersion is not function");
+            }
+
+            if (ethereumProviderMethod === "isKeplr") {
+              throw new Error("isKeplr is not function");
+            }
+
+            if (ethereumProviderMethod === "isMetaMask") {
+              throw new Error("isMetaMask is not function");
+            }
+
+            if (
+              ethereumProviderMethod === undefined ||
+              typeof keplr.ethereum[ethereumProviderMethod] !== "function"
+            ) {
+              throw new Error(
+                `${message.ethereumProviderMethod} is not function or invalid Ethereum provider method`
+              );
+            }
+
+            if (ethereumProviderMethod === "request") {
+              return await keplr.ethereum.request(
+                JSONUint8Array.unwrap(message.args)
+              );
+            }
+
+            return await keplr.ethereum[ethereumProviderMethod](
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              ...JSONUint8Array.unwrap(message.args)
+            );
           }
 
           return await keplr[method](
@@ -736,6 +788,12 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     return await this.requestMethod("getChainInfosWithoutEndpoints", []);
   }
 
+  async getChainInfoWithoutEndpoints(
+    chainId: string
+  ): Promise<ChainInfoWithoutEndpoints> {
+    return await this.requestMethod("getChainInfoWithoutEndpoints", [chainId]);
+  }
+
   __core__getAnalyticsId(): Promise<string> {
     return this.requestMethod("__core__getAnalyticsId", []);
   }
@@ -781,5 +839,206 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
 
   async suggestERC20(chainId: string, contractAddress: string): Promise<void> {
     return await this.requestMethod("suggestERC20", [chainId, contractAddress]);
+  }
+
+  public readonly ethereum = new EthereumProvider(
+    this,
+    this.eventListener,
+    this.parseMessage
+  );
+}
+
+class EthereumProvider extends EventEmitter implements IEthereumProvider {
+  // It must be in the hexadecimal format used in EVM-based chains, not the format used in Tendermint nodes.
+  chainId: string | null = null;
+  // It must be in the decimal format of chainId.
+  networkVersion: string | null = null;
+
+  selectedAddress: string | null = null;
+
+  isKeplr = true;
+  isMetaMask = true;
+
+  protected _isConnected = false;
+  protected _currentChainId: string | null = null;
+
+  constructor(
+    protected readonly injectedKeplr: InjectedKeplr,
+    protected readonly eventListener: {
+      addMessageListener: (fn: (e: any) => void) => void;
+      removeMessageListener: (fn: (e: any) => void) => void;
+      postMessage: (message: any) => void;
+    } = {
+      addMessageListener: (fn: (e: any) => void) =>
+        window.addEventListener("message", fn),
+      removeMessageListener: (fn: (e: any) => void) =>
+        window.removeEventListener("message", fn),
+      postMessage: (message) =>
+        window.postMessage(message, window.location.origin),
+    },
+    protected readonly parseMessage?: (message: any) => any
+  ) {
+    super();
+
+    window.addEventListener("keplr_keystorechange", async () => {
+      if (this._currentChainId) {
+        const chainInfo = await injectedKeplr.getChainInfoWithoutEndpoints(
+          this._currentChainId
+        );
+
+        if (chainInfo) {
+          const selectedAddress = (
+            await injectedKeplr.getKey(this._currentChainId)
+          ).ethereumHexAddress;
+          this.handleAccountsChanged(selectedAddress);
+        }
+      }
+    });
+
+    window.addEventListener("keplr_chainChanged", (event) => {
+      const origin = (event as CustomEvent).detail.origin;
+
+      if (origin === window.location.origin) {
+        const evmChainId = (event as CustomEvent).detail.evmChainId;
+        this.handleChainChanged(evmChainId);
+      }
+    });
+  }
+
+  protected async requestMethod(
+    method: keyof IEthereumProvider,
+    args: Record<string, any>
+  ): Promise<any> {
+    const bytes = new Uint8Array(8);
+    const id: string = Array.from(crypto.getRandomValues(bytes))
+      .map((value) => {
+        return value.toString(16);
+      })
+      .join("");
+
+    const proxyMessage: ProxyRequest = {
+      type: "proxy-request",
+      id,
+      method: "ethereum",
+      args: JSONUint8Array.wrap(args),
+      ethereumProviderMethod: method,
+    };
+
+    return new Promise((resolve, reject) => {
+      const receiveResponse = (e: any) => {
+        const proxyResponse: ProxyRequestResponse = this.parseMessage
+          ? this.parseMessage(e.data)
+          : e.data;
+
+        if (!proxyResponse || proxyResponse.type !== "proxy-request-response") {
+          return;
+        }
+
+        if (proxyResponse.id !== id) {
+          return;
+        }
+
+        this.eventListener.removeMessageListener(receiveResponse);
+
+        const result = JSONUint8Array.unwrap(proxyResponse.result);
+
+        if (!result) {
+          reject(new Error("Result is null"));
+          return;
+        }
+
+        if (result.error) {
+          reject(new Error(result.error));
+          return;
+        }
+
+        resolve(result.return);
+      };
+
+      this.eventListener.addMessageListener(receiveResponse);
+
+      this.eventListener.postMessage(proxyMessage);
+    });
+  }
+
+  protected async handleConnect(evmChainId?: number) {
+    if (!this._isConnected) {
+      const { currentEvmChainId, currentChainId, selectedAddress } =
+        await this.requestMethod("request", {
+          method: "keplr_connect",
+          ...(evmChainId && { params: [evmChainId] }),
+        });
+
+      this._isConnected = true;
+      this._currentChainId = currentChainId;
+
+      this.chainId = `0x${currentEvmChainId.toString(16)}`;
+      this.networkVersion = currentEvmChainId.toString(10);
+
+      this.selectedAddress = selectedAddress;
+
+      this.emit("connect", { chainId: this.chainId });
+    }
+  }
+
+  protected async handleDisconnect() {
+    if (this._isConnected) {
+      await this.requestMethod("request", {
+        method: "keplr_disconnect",
+      });
+
+      this._isConnected = false;
+      this.chainId = null;
+      this.selectedAddress = null;
+      this.networkVersion = null;
+
+      this.emit("disconnect");
+    }
+  }
+
+  protected async handleChainChanged(evmChainId: number) {
+    await this.handleConnect(evmChainId);
+
+    const evmChainIdHex = `0x${evmChainId.toString(16)}`;
+
+    this.emit("chainChanged", evmChainIdHex);
+  }
+
+  protected async handleAccountsChanged(selectedAddress: string) {
+    if (this._isConnected) {
+      this.selectedAddress = selectedAddress;
+
+      this.emit("accountsChanged", [selectedAddress]);
+    }
+  }
+
+  isConnected(): boolean {
+    return this._isConnected;
+  }
+
+  async request<T>({
+    method,
+    params,
+  }: {
+    method: string;
+    params?: unknown[] | Record<string, unknown>;
+  }): Promise<T> {
+    if (!this._isConnected) {
+      await this.handleConnect();
+    }
+
+    return await this.requestMethod("request", { method, params });
+  }
+
+  async enable(): Promise<string[]> {
+    return await this.request({
+      method: "eth_requestAccounts",
+    });
+  }
+
+  async net_version(): Promise<string> {
+    return await this.request({
+      method: "net_version",
+    });
   }
 }

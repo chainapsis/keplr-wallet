@@ -26,6 +26,24 @@ export class PermissionInteractiveService {
     );
   }
 
+  async ensureEnabledAndGetCurrentChainId(
+    env: Env,
+    origin: string
+  ): Promise<string> {
+    await this.keyRingService.ensureUnlockInteractive(env);
+
+    const currentChainId =
+      this.permissionService.getCurrentChainIdForEVM(origin);
+
+    await this.permissionService.checkOrGrantBasicAccessPermission(
+      env,
+      [currentChainId],
+      origin
+    );
+
+    return currentChainId;
+  }
+
   disable(chainIds: string[], origin: string) {
     // Delete permissions granted to origin.
     // If chain ids are specified, only the permissions granted to each chain id are deleted (In this case, permissions such as getChainInfosWithoutEndpoints() are not deleted).
