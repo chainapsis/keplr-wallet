@@ -1,16 +1,22 @@
 # Security Policy
 
-This document outlines security procedures and general policies for the `Fetch Wallet` project.
+Security is very important for Fetch.ai and its community. This document outlines security procedures and general policies for the `Fetch Wallet` library.
 
-## Reporting a Vulnerability
+## How to Report
 
-The `Fetch Wallet` team and community take all security bugs in `Fetch Wallet` seriously. We appreciate your efforts and responsible disclosure and will make every effort to acknowledge your contributions.
+Please follow the steps listed below to report your bug:
 
-Report security bugs by emailing `developer@fetch.ai`.
+- In an email, describe the issue clearly with reference to the underlying source code and indicate whether the bug is **Critical** or **Non-critical**.
+- Attach all relevant information that is required to reproduce the bug in a test environment.
+- Include the relevant version information associated with the faulty software of the components along with any other relevant system information such as OS versions.
+- Include suggested solutions and/or mitigations (if known).
+- Send this email to [security@fetch.ai](mailto:security@fetch.ai) and start the subject with your classification **Critical** or **Non-critical** followed by a short title of the bug.
 
-The lead maintainer will acknowledge your email within 48 hours, and will send a more detailed response within 48 hours indicating the next steps in handling your report. After the initial reply to your report, the security team will endeavour to keep you informed of the progress towards a fix and full announcement, and may ask for additional information or guidance.
+The Fetch team will review your information and your classification of the bug.
 
-Report security bugs in third-party modules to the person or team maintaining the module.
+For non-critical bugs, the Fetch team will create an issue or a pull request allowing you to follow the progress on the bug fix.
+
+For critical bugs that can result in loss of funds, it is important that the Fetch team has an opportunity to deploy a patched version before the exploit is acknowledged publicly. Hence, critical bugs and their fixes will be shared after the code is patched to prevent the targeting of such exploits.
 
 ## Disclosure Policy
 
@@ -24,14 +30,12 @@ When the security team receives a security bug report, they will assign it to a 
 
 If you have suggestions on how this process could be improved please submit a pull request.
 
-## Bug Bounty
-
-We have a [**bug bounty program**](https://docs.fetch.ai/bug_bounty/). Please report any security issues you find, or reach out to `developer@fetch.ai`. Please try to be as explicit as possible, describing all the steps and example code to reproduce the security issue.
-
-Critical bug fixes will be backported to past major releases.
-
 ## Public Discussions
 
 Please restrain from publicly discussing a potential security vulnerability. 🙊
 
 It's better to discuss privately and try to find a solution first, to limit the potential impact as much as possible.
+
+---
+
+Thanks for your help!
