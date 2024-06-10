@@ -8510,6 +8510,7 @@ __metadata:
     swiper: ^8.4.4
     ts-loader: ^9.4.2
     utility-types: ^3.10.0
+    uuid: ^10.0.0
     webextension-polyfill: ^0.10.0
     webpack: ^5.74.0
     webpack-bundle-analyzer: ^4.5.0
@@ -42856,6 +42857,15 @@ __metadata:
   bin:
     uuid: dist/bin/uuid
   checksum: f5b7b5cc28accac68d5c083fd51cca64896639ebd4cca88c6cfb363801aaa83aa439c86dfc8446ea250a7a98d17afd2ad9e88d9d4958c79a412eccb93bae29de
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "uuid@npm:10.0.0"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: 4b81611ade2885d2313ddd8dc865d93d8dccc13ddf901745edca8f86d99bc46d7a330d678e7532e7ebf93ce616679fb19b2e3568873ac0c14c999032acb25869
   languageName: node
   linkType: hard
 

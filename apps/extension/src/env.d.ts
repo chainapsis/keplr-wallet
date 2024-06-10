@@ -5,5 +5,8 @@ declare namespace NodeJS {
 
     KEPLR_EXT_TX_HISTORY_BASE_URL: string;
     KEPLR_EXT_CONFIG_SERVER: string;
+    KEPLR_EXT_EIP6963_PROVIDER_INFO_NAME: string;
+    KEPLR_EXT_EIP6963_PROVIDER_INFO_RDNS: string;
+    KEPLR_EXT_EIP6963_PROVIDER_INFO_ICON: string;
   }
 }

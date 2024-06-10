@@ -21,6 +21,9 @@ import {
   SettledResponses,
   DirectAuxSignResponse,
   IEthereumProvider,
+  EIP6963EventNames,
+  EIP6963ProviderInfo,
+  EIP6963ProviderDetail,
 } from "@keplr-wallet/types";
 import { Result, JSONUint8Array } from "@keplr-wallet/router";
 import { KeplrEnigmaUtils } from "./enigma";
@@ -398,7 +401,8 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
       postMessage: (message) =>
         window.postMessage(message, window.location.origin),
     },
-    protected readonly parseMessage?: (message: any) => any
+    protected readonly parseMessage?: (message: any) => any,
+    protected readonly eip6963ProviderInfo?: EIP6963ProviderInfo
   ) {
     // Freeze fields/method except for "defaultOptions"
     // Intentionally, "defaultOptions" can be mutated to allow a webpage to change the options with cosmjs usage.
@@ -844,7 +848,8 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
   public readonly ethereum = new EthereumProvider(
     this,
     this.eventListener,
-    this.parseMessage
+    this.parseMessage,
+    this.eip6963ProviderInfo
   );
 }
 
@@ -876,7 +881,8 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
       postMessage: (message) =>
         window.postMessage(message, window.location.origin),
     },
-    protected readonly parseMessage?: (message: any) => any
+    protected readonly parseMessage?: (message: any) => any,
+    protected readonly eip6963ProviderInfo?: EIP6963ProviderInfo
   ) {
     super();
 
@@ -903,6 +909,22 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         this.handleChainChanged(evmChainId);
       }
     });
+
+    if (this.eip6963ProviderInfo) {
+      const announceEvent = new CustomEvent<EIP6963ProviderDetail>(
+        EIP6963EventNames.Announce,
+        {
+          detail: Object.freeze({
+            info: this.eip6963ProviderInfo,
+            provider: this,
+          }),
+        }
+      );
+      window.addEventListener(EIP6963EventNames.Request, () =>
+        window.dispatchEvent(announceEvent)
+      );
+      window.dispatchEvent(announceEvent);
+    }
   }
 
   protected async requestMethod(
