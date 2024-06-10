@@ -1394,21 +1394,28 @@ export class KeyRingService {
             return false;
           }
 
-          for (const [_, value] of Object.entries(keyInfo.insensitive)) {
-            try {
-              const hexAddress = KeyRingService.getAddressHexStringFromKeyInfo(
-                keyInfo,
-                value,
-                true
-              );
+          for (const [key, value] of Object.entries(keyInfo.insensitive)) {
+            for (const chainInfo of chainInfos) {
+              try {
+                const hexAddress =
+                  KeyRingService.getAddressHexStringFromKeyInfo(
+                    chainInfo,
+                    keyInfo,
+                    key,
+                    value,
+                    true
+                  );
 
-              if (
-                hexAddress.includes(searchText.replace("0x", "").toLowerCase())
-              ) {
-                return true;
+                if (
+                  hexAddress.includes(
+                    searchText.replace("0x", "").toLowerCase()
+                  )
+                ) {
+                  return true;
+                }
+              } catch {
+                // noop
               }
-            } catch {
-              // noop
             }
           }
         });
@@ -1464,18 +1471,17 @@ export class KeyRingService {
               ? targetChainInfos
               : this.chainsUIService.enabledChainInfosForVault(keyInfo.id);
           })();
+
           for (const chainInfo of chainInfos) {
-            if (!chainInfo.bech32Config) {
-              continue;
-            }
-
-            const isEVM = KeyRingService.isEthermintLike(chainInfo);
-
-            for (const [_, value] of Object.entries(keyInfo.insensitive)) {
+            for (const [key, value] of Object.entries(keyInfo.insensitive)) {
               try {
+                const isEVM = KeyRingService.isEthermintLike(chainInfo);
+
                 const hexAddress =
                   KeyRingService.getAddressHexStringFromKeyInfo(
+                    chainInfo,
                     keyInfo,
+                    key,
                     value,
                     isEVM
                   );
@@ -1522,7 +1528,9 @@ export class KeyRingService {
   }
 
   protected static getAddressHexStringFromKeyInfo(
+    chainInfo: ChainInfo,
     keyInfo: KeyInfo,
+    key: string,
     value: PlainObject | Primitive | undefined,
     isEVM: boolean
   ): string {
@@ -1536,8 +1544,40 @@ export class KeyRingService {
       ) {
         publicKeyText = value["pubKey"];
       }
-    } else if (typeof value === "string") {
+    } else if (
+      typeof value === "string" &&
+      keyInfo.type === "private-key" &&
+      key === "publicKey"
+    ) {
       publicKeyText = value;
+    } else if (
+      typeof value === "string" &&
+      keyInfo.type === "mnemonic" &&
+      key.startsWith("pubKey-m/")
+    ) {
+      // if mnemonic
+      const coinType = (() => {
+        const coinTypeTag = `keyRing-${
+          ChainIdHelper.parse(chainInfo.chainId).identifier
+        }-coinType`;
+
+        if (keyInfo.insensitive[coinTypeTag]) {
+          return keyInfo.insensitive[coinTypeTag] as number;
+        }
+
+        return chainInfo.bip44.coinType;
+      })();
+
+      const bip44Path = keyInfo.insensitive["bip44Path"] as
+        | BIP44HDPath
+        | undefined;
+      if (
+        bip44Path &&
+        key ===
+          `pubKey-m/44'/${coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`
+      ) {
+        publicKeyText = value;
+      }
     }
     if (!publicKeyText) {
       throw new Error("no public key text");
