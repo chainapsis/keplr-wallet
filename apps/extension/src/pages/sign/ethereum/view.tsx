@@ -39,6 +39,7 @@ import {
   useZeroAllowedGasConfig,
 } from "@keplr-wallet/hooks";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
+import { EthTxBase } from "../components/eth-tx/render/tx-base";
 
 /**
  * CosmosTxView의 주석을 꼭 참고하셈
@@ -416,14 +417,24 @@ export const EthereumSigningView: FunctionComponent<{
                         : ColorPalette["gray-100"]
                     }
                   >
-                    {
-                      defaultRegistry.render(
+                    {(() => {
+                      const { icon, title, content } = defaultRegistry.render(
                         interactionData.data.chainId,
                         JSON.parse(
                           Buffer.from(interactionData.data.message).toString()
                         ) as UnsignedTransaction
-                      ).content
-                    }
+                      );
+
+                      if (icon !== undefined && title !== undefined) {
+                        return (
+                          <EthTxBase
+                            icon={icon}
+                            title={title}
+                            content={content}
+                          />
+                        );
+                      }
+                    })()}
                   </Body2>
                 </Box>
               )}

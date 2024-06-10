@@ -7,6 +7,8 @@ export interface IEthTxRenderer {
     unsignedTx: UnsignedTransaction
   ):
     | {
+        icon?: React.ReactElement;
+        title?: string | React.ReactElement;
         content: string | React.ReactElement;
       }
     | undefined;
@@ -19,6 +21,8 @@ export interface IEthTxRenderRegistry {
     chainId: string,
     unsignedTx: UnsignedTransaction
   ): {
+    icon?: React.ReactElement;
+    title?: string | React.ReactElement;
     content: string | React.ReactElement;
   };
 }
