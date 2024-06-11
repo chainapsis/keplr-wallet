@@ -3,7 +3,11 @@ import { KeyRingService } from "../keyring";
 import { InteractionService } from "../interaction";
 import { AnalyticsService } from "../analytics";
 import { Env, WEBPAGE_PORT } from "@keplr-wallet/router";
-import { EthereumSignResponse, EthSignType } from "@keplr-wallet/types";
+import {
+  ChainInfo,
+  EthereumSignResponse,
+  EthSignType,
+} from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
 import {
@@ -21,6 +25,7 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { getBasicAccessPermissionType, PermissionService } from "../permission";
 import { BackgroundTxEthereumService } from "../tx-ethereum";
 import { TokenERC20Service } from "../token-erc20";
+import { validateEVMChainId } from "./helper";
 export class KeyRingEthereumService {
   constructor(
     protected readonly chainsService: ChainsService,
@@ -453,6 +458,78 @@ export class KeyRingEthereumService {
             evmChainId: newEvmChainId,
           }
         );
+      }
+      case "wallet_addEthereumChain": {
+        const param =
+          Array.isArray(params) &&
+          (params?.[0] as {
+            chainId: string;
+            chainName: string;
+            nativeCurrency: {
+              name: string;
+              symbol: string;
+              decimals: number;
+            };
+            rpcUrls: string[];
+            iconUrls?: string[];
+          });
+        if (!param || typeof param !== "object") {
+          throw new Error(
+            "Invalid parameters: must provide a single object parameter."
+          );
+        }
+
+        const evmChainId = validateEVMChainId(parseInt(param.chainId, 16));
+        // Skip the validation for these parameters because they will be validated in the `suggestChainInfo` method.
+        const { chainName, nativeCurrency, rpcUrls, iconUrls } = param;
+
+        const addingChainInfo = {
+          rpc: rpcUrls[0],
+          rest: rpcUrls[0],
+          chainId: `eip155:${evmChainId}`,
+          bip44: {
+            coinType: 60,
+          },
+          chainName,
+          stakeCurrency: {
+            coinDenom: nativeCurrency.symbol,
+            coinMinimalDenom: nativeCurrency.symbol,
+            coinDecimals: nativeCurrency.decimals,
+          },
+          currencies: [
+            {
+              coinDenom: nativeCurrency.symbol,
+              coinMinimalDenom: nativeCurrency.symbol,
+              coinDecimals: nativeCurrency.decimals,
+            },
+          ],
+          feeCurrencies: [
+            {
+              coinDenom: nativeCurrency.symbol,
+              coinMinimalDenom: nativeCurrency.symbol,
+              coinDecimals: nativeCurrency.decimals,
+            },
+          ],
+          evm: {
+            chainId: evmChainId,
+            rpc: param.rpcUrls[0],
+          },
+          features: ["eth-address-gen", "eth-key-sign"],
+          chainSymbolImageUrl: iconUrls?.[0],
+          beta: true,
+        } as ChainInfo;
+
+        await this.chainsService.suggestChainInfo(env, addingChainInfo, origin);
+
+        this.permissionService.addPermission(
+          [addingChainInfo.chainId],
+          getBasicAccessPermissionType(),
+          [origin]
+        );
+
+        // TODO: Switch current chain to the added chain.
+
+        return null;
       }
       case "wallet_getPermissions":
       // This `request` method can be executed if the basic access permission is granted.

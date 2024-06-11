@@ -618,7 +618,11 @@ export class ChainsService {
         const updated = this.mergeChainInfosWithDynamics([chainInfo])[0];
 
         for (const handler of this.onChainSuggestedHandlers) {
-          await handler(updated);
+          try {
+            await handler(updated);
+          } catch (e) {
+            console.error(e);
+          }
         }
       }
     } else {
@@ -991,5 +995,23 @@ export class ChainsService {
 
   addChainSuggestedHandler(handler: ChainRemovedHandler) {
     this.onChainSuggestedHandlers.push(handler);
+  }
+
+  isEvmChain(chainId: string): boolean {
+    const chainInfo = this.getChainInfoOrThrow(chainId);
+    return chainInfo.evm !== undefined;
+  }
+
+  isEvmOnlyChain(chainId: string): boolean {
+    return this.isEvmChain(chainId) && chainId.split(":")[0] === "eip155";
+  }
+
+  getEVMInfoOrThrow(chainId: string): EVMInfo {
+    const chainInfo = this.getChainInfoOrThrow(chainId);
+    if (chainInfo.evm === undefined) {
+      throw new Error(`There is no EVM info for ${chainId}`);
+    }
+
+    return chainInfo.evm;
   }
 }
