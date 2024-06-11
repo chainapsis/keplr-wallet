@@ -267,6 +267,9 @@ export class KeyRingEthereumService {
       case "eth_chainId": {
         return `0x${currentChainEVMInfo.chainId.toString(16)}`;
       }
+      case "net_version": {
+        return currentChainEVMInfo.chainId.toString();
+      }
       case "eth_accounts":
       case "eth_requestAccounts": {
         return [selectedAddress];
