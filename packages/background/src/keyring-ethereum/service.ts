@@ -237,10 +237,10 @@ export class KeyRingEthereumService {
     method: string,
     params?: unknown[] | Record<string, unknown>
   ): Promise<any> {
-    const currentChainInfo = this.chainsService.getChainInfo(currentChainId);
-    if (currentChainInfo === undefined || currentChainInfo.evm === undefined) {
-      throw new Error("No current chain info or EVM info provided.");
-    }
+    const currentChainInfo =
+      this.chainsService.getChainInfoOrThrow(currentChainId);
+    const currentChainEVMInfo =
+      this.chainsService.getEVMInfoOrThrow(currentChainId);
 
     const pubkey = await this.keyRingService.getPubKeySelected(
       currentChainInfo.chainId
@@ -248,7 +248,6 @@ export class KeyRingEthereumService {
     const selectedAddress = `0x${Buffer.from(pubkey.getEthAddress()).toString(
       "hex"
     )}`;
-    const currentChainEVMInfo = currentChainInfo.evm;
 
     switch (method) {
       case "keplr_connect": {
@@ -287,17 +286,19 @@ export class KeyRingEthereumService {
         }
 
         if (tx.chainId) {
-          let evmChainIdFromTx: number;
-          if (typeof tx.chainId === "string") {
-            if (tx.chainId.startsWith("0x")) {
-              evmChainIdFromTx = parseInt(tx.chainId, 16);
-            } else {
-              evmChainIdFromTx = parseInt(tx.chainId, 10);
-            }
-          } else {
-            evmChainIdFromTx = tx.chainId;
-          }
-
+          const evmChainIdFromTx: number = validateEVMChainId(
+            (() => {
+              if (typeof tx.chainId === "string") {
+                if (tx.chainId.startsWith("0x")) {
+                  return parseInt(tx.chainId, 16);
+                } else {
+                  return parseInt(tx.chainId, 10);
+                }
+              } else {
+                return tx.chainId;
+              }
+            })()
+          );
           if (evmChainIdFromTx !== currentChainEVMInfo.chainId) {
             throw new Error(
               "The current active chain id does not match the one in the transaction."
@@ -423,7 +424,7 @@ export class KeyRingEthereumService {
           throw new Error("Invalid parameters: must provide a chain id.");
         }
 
-        const newEvmChainId = parseInt(param.chainId, 16);
+        const newEvmChainId = validateEVMChainId(parseInt(param.chainId, 16));
         if (newEvmChainId === currentChainEVMInfo.chainId) {
           return;
         }
