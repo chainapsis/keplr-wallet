@@ -2,6 +2,7 @@
   "error.not-supported-error": "暂不支持",
   "error.bip44-path-required": "需要提供BIP44路径",
   "error.too-short-mnemonic": "助记词太短",
+  "error.wrong-mnemonic-word": "助记词错误。请仔细检查这些单词：{index}.",
   "error.invalid-mnemonic": "无效的助记词",
   "error.failed-to-set-endpoints": "连接点设置失败",
   "error.transaction-failed": "交易失败",
@@ -21,6 +22,11 @@
   "error.claimable-reward-is-smaller-than-the-required-fee": "你可提取的收益小于所需费用。",
   "error.outdated-cosmos-sdk": "不支持：cosmos-sdk 版本过低",
   "error.can-not-find-fee-for-claim-all": "找不到要支付的费用币种",
+
+  "bottom-tabs.home": "首页",
+  "bottom-tabs.swap": "兑换",
+  "bottom-tabs.activity": "活动",
+  "bottom-tabs.settings": "设置",
 
   "pages.register.components.header.intro-title": "你的跨链网关",
   "pages.register.components.header.header-step.title": "步骤",
@@ -215,6 +221,7 @@
   "page.setting.advanced.endpoint.reset-button": "重置",
   "page.setting.advanced.endpoint.guide-title": "实验性功能",
   "page.setting.advanced.endpoint.guide-paragraph": "请与连接点提供商联系，以解决连接点更改可能引起的任何问题。{br}{br}重启Keplr以应用更改。",
+  "page.setting.advanced.endpoint.lava-link-button": "让我们进入Lava 🌋🧡",
 
   "page.setting.general.language-title": "语言",
   "page.setting.general.currency-title": "法定货币",
@@ -222,6 +229,8 @@
   "page.setting.general.theme-title": "主题",
   "page.setting.general.manage-authz-title": "管理AuthZ",
   "page.setting.general.link-kpelr-mobile-title": "连接Keplr移动端",
+  "page.setting.general.show-24h-price-changes-title": "显示24小时价格变化",
+  "page.setting.general.show-24h-price-changes-paragraph": "开启或关闭24小时币种价格变化显示",
   "page.setting.advanced.manage-non-native-chains-title": "移除自定义链",
   "page.setting.advanced.manage-non-native-chains-paragraph": "应首先将非原生链添加到Keplr以管理其可见性。",
   "page.setting.general.manage-chain-visibility-title": "添加/删除链",
@@ -326,9 +335,12 @@
   "page.suggest-chain.title": "把{chainName}添加到Keplr",
   "page.suggest-chain.community-info-view.community-driven-chip": "社区驱动",
   "page.suggest-chain.community-info-view.paragraph": "<b>{origin}</b>想要把<b>{chainId}</b>链添加到Keplr。",
+  "page.suggest-chain.community-info-view.add-chain-as-suggested-button": "按建议添加链",
   "page.suggest-chain.raw-info-view.guide-title": "在你确认之前",
   "page.suggest-chain.raw-info-view.guide-paragraph": "这条链的信息不在Keplr链注册表上。Keplr建议你使用由社区管理的“建议链”信息。",
   "page.suggest-chain.raw-info-view.chain-registry-link-text": "点击这里更新Github上的链信息",
+  "page.suggest-chain.origin-info-view.guide-title": "在你确认之前",
+  "page.suggest-chain.origin-info-view.guide-paragraph": "正在添加这条链的信息来自一个不受Keplr管理的网站。",
 
   "page.unlock.star-migration-button": "开始迁移",
   "page.unlock.upgrade-in-progress": "升级正在进行中",
@@ -343,6 +355,9 @@
   "page.unlock.bottom-section.guide-paragraph": "拥有多个帐户的用户的迁移过程可能需要几分钟的时间。",
 
   "page.wallet.title": "选择钱包",
+  "page.wallet.input.search.placeholder": "搜索钱包名称或地址",
+  "page.wallet.search-empty-view-title": "额！",
+  "page.wallet.search-empty-view-paragraph": "没有找到任何结果。",
   "page.wallet.add-wallet-button": "添加钱包",
   "page.wallet.recovery-phrase-title": "助记词",
   "page.wallet.connect-with-social-account-title": "连接{social}账号",
@@ -401,6 +416,8 @@
   "page.ibc-swap.components.swap-not-available-modal.title": "兑换不可用",
   "page.ibc-swap.components.swap-not-available-modal.paragraph": "当前无法兑换此代币。",
 
+  "page.activity.title": "活动",
+
   "page.permission.unknown-permission": "未知权限",
   "page.permission.requesting-connection-title": "请求连接",
   "page.permission.paragraph": "通过允许此请求，网站将：{br}• 获取你的Keplr钱包上的所有链的列表",
@@ -419,7 +436,10 @@
   "page.sign.cosmos.tx.warning-paragraph": "错误：SIGN_MODE_DIRECT无法在Ledger上签名。请联系网络应用提供商来解决此问题。",
   "page.sign.cosmos.tx.readonly-memo.empty": "（空）",
   "page.sign.cosmos.tx.view-data-button": "查看数据",
+  "page.sign.cosmos.tx.high-fee-warning": "交易费用异常高。{br}尽管如此，我确认并同意继续。",
   "page.sign.cosmos.icns.title": "请求注册",
+  "page.sign.cosmos.lava.guide.title": "🌋 正在使用Lava连接点",
+  "page.sign.cosmos.lava.guide.paragraph": "你正在使用的连接点由Lava提供。",
 
   "page.sign.adr36.title": "签名申请",
   "page.sign.adr36.title.from-keplr": "使用 Keplr 登录",
@@ -434,7 +454,7 @@
   "page.sign.adr36.warning-paragraph": "错误：SIGN_MODE_DIRECT无法在Ledger上签名。请联系网络应用提供商来解决此问题。",
 
   "page.sign.ethereum.title": "签以太坊",
-  "page.sign.ethereum.requested-network": "请求的网络",
+  "page.sign.ethereum.requested-network": "在 {network}",
   "page.sign.ethereum.transaction.title": "确认交易",
   "page.sign.ethereum.transaction.summary": "交易摘要",
   "page.sign.ethereum.transaction.send.title": "发送令牌",
@@ -572,8 +592,8 @@
   "page.main.staked.empty-view-paragraph": "质押你的资产以获得收益并为维护网络做出贡献！",
   "page.main.staked.go-to-dashboard-button": "前往Dashboard",
 
-  "page.main.components.ibc-history-view.item.pending": "IBC交易失败。",
-  "page.main.components.ibc-history-view.item.succeed": "IBC交易成功。",
+  "page.main.components.ibc-history-view.item.pending": "正在通过IBC转账。",
+  "page.main.components.ibc-history-view.item.succeed": "IBC转账成功。",
   "page.main.components.ibc-history-view.ibc-swap.item.pending": "正在兑换。",
   "page.main.components.ibc-history-view.ibc-swap.item.succeed": "兑换成功。",
   "page.main.components.ibc-history-view.ibc-swap.item.refund.pending": "正在退款。",
@@ -636,8 +656,10 @@
   "page.main.layouts.header.new-chain.title": "✨ {chains} 现已集成!",
   "page.main.layouts.header.new-chain.paragraph": "要显示此帐户上的链及其资产，请访问“管理链可见性”",
   "page.main.layouts.header.new-chain.button": "知道了！",
+
   "page.ledger-grant.title": "允许浏览器连接Ledger",
   "page.ledger-grant.paragraph": "你需要重新检查与Ledger的连接。选择正确的应用程序，在成功连接到你的Ledger设备后，关闭此页面并重试你以前的交易（签名中）。",
+
   "components.empty-view.text": "还没{subject}",
   "components.input.recipient-input.wallet-address-only-label": "钱包地址",
   "components.input.recipient-input.wallet-address-label": "钱包地址或者ICNS",
@@ -654,9 +676,11 @@
   "components.input.fee-control.max-fee": "最高费用: {assets}",
   "components.input.fee-control.fee-rate": "费用率: {feeRate} sat/vB",
   "components.input.fee-control.error.insufficient-fee": "费用不足",
+  "components.input.fee-control.tooltip.external-fee-set": "交易费用由网站设定",
   "components.input.fee-control.error.unable-to-find-proper-utxos": "无法找到合适的UTXO组合",
   "components.input.fee-control.modal.title": "费用选项",
   "components.input.fee-control.modal.fee-title": "费用",
+  "components.input.fee-control.modal.remember-last-fee-option": "记住我的选择",
   "components.input.fee-control.modal.fee-token-dropdown-label": "费用币种",
   "components.input.fee-control.modal.auto-title": "自动",
   "components.input.fee-control.modal.guide-title": "交易模拟失败",
@@ -681,6 +705,7 @@
   "components.address-book-modal.empty-view-default": "没有数据",
   "components.address-item.sent-on-date": "发送于：{date}",
   "components.address-item.empty-memo": "（备注为空）",
+  "components.address-book-modal.my-account-tab.input.search.placeholder": "搜索钱包名称或地址",
 
   "components.collapsible-list.view-more-tokens": "查看 {remain} 的更多币种",
   "components.collapsible-list.collapse": "折叠",
