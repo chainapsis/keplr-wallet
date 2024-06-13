@@ -81,10 +81,11 @@ export function init(
     mobileOS: string;
   },
   disableUpdateLoop: boolean,
-  afterInitFn?: (
+  chainsAfterInitFn?: (
     service: Chains.ChainsService,
     lastEmbedChainInfos: ChainInfoWithCoreTypes[]
-  ) => void | Promise<void>
+  ) => void | Promise<void>,
+  vaultAfterInitFn?: (service: Vault.VaultService) => void | Promise<void>
 ): {
   initFn: () => Promise<void>;
   keyRingService: KeyRingV2.KeyRingService;
@@ -110,7 +111,7 @@ export function init(
     communityChainInfoRepo,
     analyticsService,
     interactionService,
-    afterInitFn
+    chainsAfterInitFn
   );
 
   const tokenCW20Service = new TokenCW20.TokenCW20Service(
@@ -313,6 +314,9 @@ export function init(
 
       await recentSendHistoryService.init();
 
+      if (vaultAfterInitFn) {
+        await vaultAfterInitFn(vaultService);
+      }
       await chainsService.afterInit();
     },
     keyRingService: keyRingV2Service,

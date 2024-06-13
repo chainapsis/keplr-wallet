@@ -1436,7 +1436,7 @@ export class KeyRingService {
       })();
 
       if (!isHex) {
-        const targetChainInfos: ChainInfo[] = (() => {
+        let targetChainInfos: ChainInfo[] = (() => {
           const i = searchText.indexOf("1");
           if (i < 0) {
             return [];
@@ -1452,15 +1452,13 @@ export class KeyRingService {
         })();
 
         bech32AddressSearchKeyInfos = keyInfos.filter((keyInfo) => {
-          if (
-            !ignoreChainEnabled &&
-            targetChainInfos.length > 0 &&
-            targetChainInfos.find(
-              (chainInfo) =>
-                !this.chainsUIService.isEnabled(keyInfo.id, chainInfo.chainId)
-            )
-          ) {
-            return false;
+          if (!ignoreChainEnabled) {
+            targetChainInfos = targetChainInfos.filter((chainInfo) => {
+              return this.chainsUIService.isEnabled(
+                keyInfo.id,
+                chainInfo.chainId
+              );
+            });
           }
 
           const chainInfos = (() => {

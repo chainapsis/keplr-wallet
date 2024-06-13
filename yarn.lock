@@ -8286,7 +8286,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@keplr-wallet/analytics@0.12.101, @keplr-wallet/analytics@workspace:packages/analytics":
+"@keplr-wallet/analytics@0.12.102-rc.1, @keplr-wallet/analytics@workspace:packages/analytics":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/analytics@workspace:packages/analytics"
   dependencies:
@@ -8294,7 +8294,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/background@0.12.101, @keplr-wallet/background@workspace:packages/background":
+"@keplr-wallet/background@0.12.102-rc.1, @keplr-wallet/background@workspace:packages/background":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/background@workspace:packages/background"
   dependencies:
@@ -8304,17 +8304,17 @@ __metadata:
     "@ethersproject/hash": ^5.7.0
     "@ethersproject/transactions": ^5.7.0
     "@ethersproject/wallet": ^5.7.0
-    "@keplr-wallet/chain-validator": 0.12.101
-    "@keplr-wallet/common": 0.12.101
-    "@keplr-wallet/cosmos": 0.12.101
-    "@keplr-wallet/crypto": 0.12.101
-    "@keplr-wallet/ledger-cosmos": 0.12.101
-    "@keplr-wallet/popup": 0.12.101
-    "@keplr-wallet/proto-types": 0.12.101
-    "@keplr-wallet/router": 0.12.101
-    "@keplr-wallet/simple-fetch": 0.12.101
-    "@keplr-wallet/types": 0.12.101
-    "@keplr-wallet/unit": 0.12.101
+    "@keplr-wallet/chain-validator": 0.12.102-rc.1
+    "@keplr-wallet/common": 0.12.102-rc.1
+    "@keplr-wallet/cosmos": 0.12.102-rc.1
+    "@keplr-wallet/crypto": 0.12.102-rc.1
+    "@keplr-wallet/ledger-cosmos": 0.12.102-rc.1
+    "@keplr-wallet/popup": 0.12.102-rc.1
+    "@keplr-wallet/proto-types": 0.12.102-rc.1
+    "@keplr-wallet/router": 0.12.102-rc.1
+    "@keplr-wallet/simple-fetch": 0.12.102-rc.1
+    "@keplr-wallet/types": 0.12.102-rc.1
+    "@keplr-wallet/unit": 0.12.102-rc.1
     "@ledgerhq/hw-app-eth": ^6.29.3
     "@ledgerhq/hw-transport": ^6.20.0
     "@ledgerhq/hw-transport-webhid": ^6.20.0
@@ -8342,40 +8342,40 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/chain-validator@0.12.101, @keplr-wallet/chain-validator@workspace:packages/chain-validator":
+"@keplr-wallet/chain-validator@0.12.102-rc.1, @keplr-wallet/chain-validator@workspace:packages/chain-validator":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/chain-validator@workspace:packages/chain-validator"
   dependencies:
-    "@keplr-wallet/cosmos": 0.12.101
-    "@keplr-wallet/simple-fetch": 0.12.101
-    "@keplr-wallet/types": 0.12.101
+    "@keplr-wallet/cosmos": 0.12.102-rc.1
+    "@keplr-wallet/simple-fetch": 0.12.102-rc.1
+    "@keplr-wallet/types": 0.12.102-rc.1
     joi: ^17.5.0
     utility-types: ^3.10.0
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/common@0.12.101, @keplr-wallet/common@workspace:packages/common":
+"@keplr-wallet/common@0.12.102-rc.1, @keplr-wallet/common@workspace:packages/common":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/common@workspace:packages/common"
   dependencies:
-    "@keplr-wallet/crypto": 0.12.101
-    "@keplr-wallet/types": 0.12.101
+    "@keplr-wallet/crypto": 0.12.102-rc.1
+    "@keplr-wallet/types": 0.12.102-rc.1
     buffer: ^6.0.3
     delay: ^4.4.0
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/cosmos@0.12.101, @keplr-wallet/cosmos@workspace:packages/cosmos":
+"@keplr-wallet/cosmos@0.12.102-rc.1, @keplr-wallet/cosmos@workspace:packages/cosmos":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/cosmos@workspace:packages/cosmos"
   dependencies:
     "@ethersproject/address": ^5.6.0
-    "@keplr-wallet/common": 0.12.101
-    "@keplr-wallet/crypto": 0.12.101
-    "@keplr-wallet/proto-types": 0.12.101
-    "@keplr-wallet/simple-fetch": 0.12.101
-    "@keplr-wallet/types": 0.12.101
-    "@keplr-wallet/unit": 0.12.101
+    "@keplr-wallet/common": 0.12.102-rc.1
+    "@keplr-wallet/crypto": 0.12.102-rc.1
+    "@keplr-wallet/proto-types": 0.12.102-rc.1
+    "@keplr-wallet/simple-fetch": 0.12.102-rc.1
+    "@keplr-wallet/types": 0.12.102-rc.1
+    "@keplr-wallet/unit": 0.12.102-rc.1
     bech32: ^1.1.4
     buffer: ^6.0.3
     long: ^4.0.0
@@ -8383,7 +8383,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/crypto@0.12.101, @keplr-wallet/crypto@workspace:packages/crypto":
+"@keplr-wallet/crypto@0.12.102-rc.1, @keplr-wallet/crypto@workspace:packages/crypto":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/crypto@workspace:packages/crypto"
   dependencies:
@@ -8414,29 +8414,29 @@ __metadata:
     "@ethersproject/transactions": ^5.7.0
     "@floating-ui/react": ^0.23.0
     "@floating-ui/react-dom": ^1.3.0
-    "@keplr-wallet/analytics": 0.12.101
-    "@keplr-wallet/background": 0.12.101
-    "@keplr-wallet/chain-validator": 0.12.101
-    "@keplr-wallet/common": 0.12.101
-    "@keplr-wallet/cosmos": 0.12.101
-    "@keplr-wallet/crypto": 0.12.101
-    "@keplr-wallet/hooks": 0.12.101
-    "@keplr-wallet/hooks-internal": 0.12.101
-    "@keplr-wallet/ledger-cosmos": 0.12.101
-    "@keplr-wallet/popup": 0.12.101
-    "@keplr-wallet/proto-types": 0.12.101
-    "@keplr-wallet/provider": 0.12.101
-    "@keplr-wallet/router": 0.12.101
-    "@keplr-wallet/router-extension": 0.12.101
-    "@keplr-wallet/simple-fetch": 0.12.101
-    "@keplr-wallet/stores": 0.12.101
-    "@keplr-wallet/stores-core": 0.12.101
-    "@keplr-wallet/stores-etc": 0.12.101
-    "@keplr-wallet/stores-eth": 0.12.101
-    "@keplr-wallet/stores-ibc": 0.12.101
-    "@keplr-wallet/stores-internal": 0.12.101
-    "@keplr-wallet/types": 0.12.101
-    "@keplr-wallet/unit": 0.12.101
+    "@keplr-wallet/analytics": 0.12.102-rc.1
+    "@keplr-wallet/background": 0.12.102-rc.1
+    "@keplr-wallet/chain-validator": 0.12.102-rc.1
+    "@keplr-wallet/common": 0.12.102-rc.1
+    "@keplr-wallet/cosmos": 0.12.102-rc.1
+    "@keplr-wallet/crypto": 0.12.102-rc.1
+    "@keplr-wallet/hooks": 0.12.102-rc.1
+    "@keplr-wallet/hooks-internal": 0.12.102-rc.1
+    "@keplr-wallet/ledger-cosmos": 0.12.102-rc.1
+    "@keplr-wallet/popup": 0.12.102-rc.1
+    "@keplr-wallet/proto-types": 0.12.102-rc.1
+    "@keplr-wallet/provider": 0.12.102-rc.1
+    "@keplr-wallet/router": 0.12.102-rc.1
+    "@keplr-wallet/router-extension": 0.12.102-rc.1
+    "@keplr-wallet/simple-fetch": 0.12.102-rc.1
+    "@keplr-wallet/stores": 0.12.102-rc.1
+    "@keplr-wallet/stores-core": 0.12.102-rc.1
+    "@keplr-wallet/stores-etc": 0.12.102-rc.1
+    "@keplr-wallet/stores-eth": 0.12.102-rc.1
+    "@keplr-wallet/stores-ibc": 0.12.102-rc.1
+    "@keplr-wallet/stores-internal": 0.12.102-rc.1
+    "@keplr-wallet/types": 0.12.102-rc.1
+    "@keplr-wallet/unit": 0.12.102-rc.1
     "@keystonehq/animated-qr": ^0.8.6
     "@keystonehq/keystone-sdk": ^0.2.3
     "@ledgerhq/devices": ^6.20.0
@@ -8451,10 +8451,10 @@ __metadata:
     "@toruslabs/fetch-node-details": =11.0.1
     "@toruslabs/torus.js": =6.4.1
     "@types/babel__preset-env": ^7
-    "@types/chrome": 0.0.88
+    "@types/chrome": 0.0.268
     "@types/classnames": ^2.3.1
     "@types/color": ^3.0.3
-    "@types/firefox-webext-browser": ^70.0.1
+    "@types/firefox-webext-browser": ^120.0.3
     "@types/js-yaml": ^4
     "@types/react-is": ^16.7.2
     "@types/resize-observer-browser": ^0.1.7
@@ -8527,15 +8527,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/hooks-internal@0.12.101, @keplr-wallet/hooks-internal@workspace:apps/hooks-internal":
+"@keplr-wallet/hooks-internal@0.12.102-rc.1, @keplr-wallet/hooks-internal@workspace:apps/hooks-internal":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/hooks-internal@workspace:apps/hooks-internal"
   dependencies:
-    "@keplr-wallet/hooks": 0.12.101
-    "@keplr-wallet/stores": 0.12.101
-    "@keplr-wallet/stores-internal": 0.12.101
-    "@keplr-wallet/types": 0.12.101
-    "@keplr-wallet/unit": 0.12.101
+    "@keplr-wallet/hooks": 0.12.102-rc.1
+    "@keplr-wallet/stores": 0.12.102-rc.1
+    "@keplr-wallet/stores-internal": 0.12.102-rc.1
+    "@keplr-wallet/types": 0.12.102-rc.1
+    "@keplr-wallet/unit": 0.12.102-rc.1
   peerDependencies:
     mobx: ^6
     mobx-utils: ^6
@@ -8543,22 +8543,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/hooks@0.12.101, @keplr-wallet/hooks@workspace:packages/hooks":
+"@keplr-wallet/hooks@0.12.102-rc.1, @keplr-wallet/hooks@workspace:packages/hooks":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/hooks@workspace:packages/hooks"
   dependencies:
     "@ethersproject/address": ^5.6.0
-    "@keplr-wallet/background": 0.12.101
-    "@keplr-wallet/common": 0.12.101
-    "@keplr-wallet/cosmos": 0.12.101
-    "@keplr-wallet/crypto": 0.12.101
-    "@keplr-wallet/proto-types": 0.12.101
-    "@keplr-wallet/simple-fetch": 0.12.101
-    "@keplr-wallet/stores": 0.12.101
-    "@keplr-wallet/stores-etc": 0.12.101
-    "@keplr-wallet/stores-eth": 0.12.101
-    "@keplr-wallet/types": 0.12.101
-    "@keplr-wallet/unit": 0.12.101
+    "@keplr-wallet/background": 0.12.102-rc.1
+    "@keplr-wallet/common": 0.12.102-rc.1
+    "@keplr-wallet/cosmos": 0.12.102-rc.1
+    "@keplr-wallet/crypto": 0.12.102-rc.1
+    "@keplr-wallet/proto-types": 0.12.102-rc.1
+    "@keplr-wallet/simple-fetch": 0.12.102-rc.1
+    "@keplr-wallet/stores": 0.12.102-rc.1
+    "@keplr-wallet/stores-etc": 0.12.102-rc.1
+    "@keplr-wallet/stores-eth": 0.12.102-rc.1
+    "@keplr-wallet/types": 0.12.102-rc.1
+    "@keplr-wallet/unit": 0.12.102-rc.1
     buffer: ^6.0.3
     long: ^4.0.0
     utility-types: ^3.10.0
@@ -8569,7 +8569,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/ledger-cosmos@0.12.101, @keplr-wallet/ledger-cosmos@workspace:packages/ledger-cosmos":
+"@keplr-wallet/ledger-cosmos@0.12.102-rc.1, @keplr-wallet/ledger-cosmos@workspace:packages/ledger-cosmos":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/ledger-cosmos@workspace:packages/ledger-cosmos"
   dependencies:
@@ -8681,23 +8681,23 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/mobx-utils@0.12.101, @keplr-wallet/mobx-utils@workspace:packages/mobx-utils":
+"@keplr-wallet/mobx-utils@0.12.102-rc.1, @keplr-wallet/mobx-utils@workspace:packages/mobx-utils":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/mobx-utils@workspace:packages/mobx-utils"
   dependencies:
-    "@keplr-wallet/types": 0.12.101
+    "@keplr-wallet/types": 0.12.102-rc.1
   peerDependencies:
     mobx: ^6
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/popup@0.12.101, @keplr-wallet/popup@workspace:packages/popup":
+"@keplr-wallet/popup@0.12.102-rc.1, @keplr-wallet/popup@workspace:packages/popup":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/popup@workspace:packages/popup"
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/proto-types@0.12.101, @keplr-wallet/proto-types@workspace:packages/proto-types":
+"@keplr-wallet/proto-types@0.12.102-rc.1, @keplr-wallet/proto-types@workspace:packages/proto-types":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/proto-types@workspace:packages/proto-types"
   dependencies:
@@ -8711,46 +8711,46 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/provider-extension@workspace:packages/provider-extension"
   dependencies:
-    "@keplr-wallet/types": 0.12.101
+    "@keplr-wallet/types": 0.12.102-rc.1
     deepmerge: ^4.2.2
     long: ^4.0.0
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/provider-mock@0.12.101, @keplr-wallet/provider-mock@workspace:packages/provider-mock":
+"@keplr-wallet/provider-mock@0.12.102-rc.1, @keplr-wallet/provider-mock@workspace:packages/provider-mock":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/provider-mock@workspace:packages/provider-mock"
   dependencies:
-    "@keplr-wallet/cosmos": 0.12.101
-    "@keplr-wallet/crypto": 0.12.101
-    "@keplr-wallet/proto-types": 0.12.101
-    "@keplr-wallet/provider": 0.12.101
-    "@keplr-wallet/router": 0.12.101
-    "@keplr-wallet/types": 0.12.101
+    "@keplr-wallet/cosmos": 0.12.102-rc.1
+    "@keplr-wallet/crypto": 0.12.102-rc.1
+    "@keplr-wallet/proto-types": 0.12.102-rc.1
+    "@keplr-wallet/provider": 0.12.102-rc.1
+    "@keplr-wallet/router": 0.12.102-rc.1
+    "@keplr-wallet/types": 0.12.102-rc.1
     buffer: ^6.0.3
     deepmerge: ^4.2.2
     long: ^4.0.0
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/provider@0.12.101, @keplr-wallet/provider@workspace:packages/provider":
+"@keplr-wallet/provider@0.12.102-rc.1, @keplr-wallet/provider@workspace:packages/provider":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/provider@workspace:packages/provider"
   dependencies:
-    "@keplr-wallet/router": 0.12.101
-    "@keplr-wallet/types": 0.12.101
+    "@keplr-wallet/router": 0.12.102-rc.1
+    "@keplr-wallet/types": 0.12.102-rc.1
     buffer: ^6.0.3
     deepmerge: ^4.2.2
     long: ^4.0.0
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/router-extension@0.12.101, @keplr-wallet/router-extension@workspace:packages/router-extension":
+"@keplr-wallet/router-extension@0.12.102-rc.1, @keplr-wallet/router-extension@workspace:packages/router-extension":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/router-extension@workspace:packages/router-extension"
   dependencies:
-    "@keplr-wallet/popup": 0.12.101
-    "@keplr-wallet/router": 0.12.101
+    "@keplr-wallet/popup": 0.12.102-rc.1
+    "@keplr-wallet/router": 0.12.102-rc.1
   languageName: unknown
   linkType: soft
 
@@ -8758,34 +8758,34 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/router-mock@workspace:packages/router-mock"
   dependencies:
-    "@keplr-wallet/router": 0.12.101
-    "@keplr-wallet/router-extension": 0.12.101
+    "@keplr-wallet/router": 0.12.102-rc.1
+    "@keplr-wallet/router-extension": 0.12.102-rc.1
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/router@0.12.101, @keplr-wallet/router@workspace:packages/router":
+"@keplr-wallet/router@0.12.102-rc.1, @keplr-wallet/router@workspace:packages/router":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/router@workspace:packages/router"
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/simple-fetch@0.12.101, @keplr-wallet/simple-fetch@workspace:packages/simple-fetch":
+"@keplr-wallet/simple-fetch@0.12.102-rc.1, @keplr-wallet/simple-fetch@workspace:packages/simple-fetch":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/simple-fetch@workspace:packages/simple-fetch"
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/stores-core@0.12.101, @keplr-wallet/stores-core@workspace:packages/stores-core":
+"@keplr-wallet/stores-core@0.12.102-rc.1, @keplr-wallet/stores-core@workspace:packages/stores-core":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/stores-core@workspace:packages/stores-core"
   dependencies:
-    "@keplr-wallet/background": 0.12.101
-    "@keplr-wallet/common": 0.12.101
-    "@keplr-wallet/cosmos": 0.12.101
-    "@keplr-wallet/router": 0.12.101
-    "@keplr-wallet/simple-fetch": 0.12.101
-    "@keplr-wallet/stores": 0.12.101
-    "@keplr-wallet/types": 0.12.101
+    "@keplr-wallet/background": 0.12.102-rc.1
+    "@keplr-wallet/common": 0.12.102-rc.1
+    "@keplr-wallet/cosmos": 0.12.102-rc.1
+    "@keplr-wallet/router": 0.12.102-rc.1
+    "@keplr-wallet/simple-fetch": 0.12.102-rc.1
+    "@keplr-wallet/stores": 0.12.102-rc.1
+    "@keplr-wallet/types": 0.12.102-rc.1
     buffer: ^6.0.3
   peerDependencies:
     mobx: ^6
@@ -8793,16 +8793,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/stores-etc@0.12.101, @keplr-wallet/stores-etc@workspace:packages/stores-etc":
+"@keplr-wallet/stores-etc@0.12.102-rc.1, @keplr-wallet/stores-etc@workspace:packages/stores-etc":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/stores-etc@workspace:packages/stores-etc"
   dependencies:
     "@ethersproject/abi": ^5.6.0
-    "@keplr-wallet/common": 0.12.101
-    "@keplr-wallet/simple-fetch": 0.12.101
-    "@keplr-wallet/stores": 0.12.101
-    "@keplr-wallet/types": 0.12.101
-    "@keplr-wallet/unit": 0.12.101
+    "@keplr-wallet/common": 0.12.102-rc.1
+    "@keplr-wallet/simple-fetch": 0.12.102-rc.1
+    "@keplr-wallet/stores": 0.12.102-rc.1
+    "@keplr-wallet/types": 0.12.102-rc.1
+    "@keplr-wallet/unit": 0.12.102-rc.1
     utility-types: ^3.10.0
   peerDependencies:
     mobx: ^6
@@ -8810,7 +8810,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/stores-eth@0.12.101, @keplr-wallet/stores-eth@workspace:packages/stores-eth":
+"@keplr-wallet/stores-eth@0.12.102-rc.1, @keplr-wallet/stores-eth@workspace:packages/stores-eth":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/stores-eth@workspace:packages/stores-eth"
   dependencies:
@@ -8819,11 +8819,11 @@ __metadata:
     "@ethersproject/bytes": ^5.7.0
     "@ethersproject/transactions": ^5.7.0
     "@ethersproject/units": ^5.7.0
-    "@keplr-wallet/common": 0.12.101
-    "@keplr-wallet/simple-fetch": 0.12.101
-    "@keplr-wallet/stores": 0.12.101
-    "@keplr-wallet/types": 0.12.101
-    "@keplr-wallet/unit": 0.12.101
+    "@keplr-wallet/common": 0.12.102-rc.1
+    "@keplr-wallet/simple-fetch": 0.12.102-rc.1
+    "@keplr-wallet/stores": 0.12.102-rc.1
+    "@keplr-wallet/types": 0.12.102-rc.1
+    "@keplr-wallet/unit": 0.12.102-rc.1
     big-integer: ^1.6.48
     utility-types: ^3.10.0
   peerDependencies:
@@ -8832,31 +8832,31 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/stores-ibc@0.12.101, @keplr-wallet/stores-ibc@workspace:packages/stores-ibc":
+"@keplr-wallet/stores-ibc@0.12.102-rc.1, @keplr-wallet/stores-ibc@workspace:packages/stores-ibc":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/stores-ibc@workspace:packages/stores-ibc"
   dependencies:
-    "@keplr-wallet/common": 0.12.101
-    "@keplr-wallet/cosmos": 0.12.101
-    "@keplr-wallet/stores": 0.12.101
-    "@keplr-wallet/stores-eth": 0.12.101
-    "@keplr-wallet/types": 0.12.101
+    "@keplr-wallet/common": 0.12.102-rc.1
+    "@keplr-wallet/cosmos": 0.12.102-rc.1
+    "@keplr-wallet/stores": 0.12.102-rc.1
+    "@keplr-wallet/stores-eth": 0.12.102-rc.1
+    "@keplr-wallet/types": 0.12.102-rc.1
   peerDependencies:
     mobx: ^6
     mobx-utils: ^6
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/stores-internal@0.12.101, @keplr-wallet/stores-internal@workspace:apps/stores-internal":
+"@keplr-wallet/stores-internal@0.12.102-rc.1, @keplr-wallet/stores-internal@workspace:apps/stores-internal":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/stores-internal@workspace:apps/stores-internal"
   dependencies:
-    "@keplr-wallet/common": 0.12.101
-    "@keplr-wallet/cosmos": 0.12.101
-    "@keplr-wallet/simple-fetch": 0.12.101
-    "@keplr-wallet/stores": 0.12.101
-    "@keplr-wallet/types": 0.12.101
-    "@keplr-wallet/unit": 0.12.101
+    "@keplr-wallet/common": 0.12.102-rc.1
+    "@keplr-wallet/cosmos": 0.12.102-rc.1
+    "@keplr-wallet/simple-fetch": 0.12.102-rc.1
+    "@keplr-wallet/stores": 0.12.102-rc.1
+    "@keplr-wallet/types": 0.12.102-rc.1
+    "@keplr-wallet/unit": 0.12.102-rc.1
     joi: ^17.5.0
     utility-types: ^3.10.0
   peerDependencies:
@@ -8865,19 +8865,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/stores@0.12.101, @keplr-wallet/stores@workspace:packages/stores":
+"@keplr-wallet/stores@0.12.102-rc.1, @keplr-wallet/stores@workspace:packages/stores":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/stores@workspace:packages/stores"
   dependencies:
-    "@keplr-wallet/common": 0.12.101
-    "@keplr-wallet/cosmos": 0.12.101
-    "@keplr-wallet/crypto": 0.12.101
-    "@keplr-wallet/mobx-utils": 0.12.101
-    "@keplr-wallet/proto-types": 0.12.101
-    "@keplr-wallet/provider-mock": 0.12.101
-    "@keplr-wallet/simple-fetch": 0.12.101
-    "@keplr-wallet/types": 0.12.101
-    "@keplr-wallet/unit": 0.12.101
+    "@keplr-wallet/common": 0.12.102-rc.1
+    "@keplr-wallet/cosmos": 0.12.102-rc.1
+    "@keplr-wallet/crypto": 0.12.102-rc.1
+    "@keplr-wallet/mobx-utils": 0.12.102-rc.1
+    "@keplr-wallet/proto-types": 0.12.102-rc.1
+    "@keplr-wallet/provider-mock": 0.12.102-rc.1
+    "@keplr-wallet/simple-fetch": 0.12.102-rc.1
+    "@keplr-wallet/types": 0.12.102-rc.1
+    "@keplr-wallet/unit": 0.12.102-rc.1
     buffer: ^6.0.3
     deepmerge: ^4.2.2
     eventemitter3: ^4.0.7
@@ -8890,7 +8890,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/types@0.12.101, @keplr-wallet/types@workspace:packages/types":
+"@keplr-wallet/types@0.12.102-rc.1, @keplr-wallet/types@workspace:packages/types":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/types@workspace:packages/types"
   dependencies:
@@ -8898,11 +8898,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/unit@0.12.101, @keplr-wallet/unit@workspace:packages/unit":
+"@keplr-wallet/unit@0.12.102-rc.1, @keplr-wallet/unit@workspace:packages/unit":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/unit@workspace:packages/unit"
   dependencies:
-    "@keplr-wallet/types": 0.12.101
+    "@keplr-wallet/types": 0.12.102-rc.1
     big-integer: ^1.6.48
     utility-types: ^3.10.0
   languageName: unknown
@@ -8912,13 +8912,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/wc-client-example@workspace:packages/wc-client-example"
   dependencies:
-    "@keplr-wallet/common": 0.12.101
-    "@keplr-wallet/cosmos": 0.12.101
-    "@keplr-wallet/simple-fetch": 0.12.101
-    "@keplr-wallet/stores": 0.12.101
-    "@keplr-wallet/types": 0.12.101
-    "@keplr-wallet/wc-client": 0.12.101
-    "@keplr-wallet/wc-qrcode-modal": 0.12.101
+    "@keplr-wallet/common": 0.12.102-rc.1
+    "@keplr-wallet/cosmos": 0.12.102-rc.1
+    "@keplr-wallet/simple-fetch": 0.12.102-rc.1
+    "@keplr-wallet/stores": 0.12.102-rc.1
+    "@keplr-wallet/types": 0.12.102-rc.1
+    "@keplr-wallet/wc-client": 0.12.102-rc.1
+    "@keplr-wallet/wc-qrcode-modal": 0.12.102-rc.1
     "@walletconnect/sign-client": 2.5.2
     "@walletconnect/types": 2.5.2
     buffer: ^6.0.3
@@ -8930,12 +8930,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/wc-client@0.12.101, @keplr-wallet/wc-client@workspace:packages/wc-client":
+"@keplr-wallet/wc-client@0.12.102-rc.1, @keplr-wallet/wc-client@workspace:packages/wc-client":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/wc-client@workspace:packages/wc-client"
   dependencies:
-    "@keplr-wallet/provider": 0.12.101
-    "@keplr-wallet/types": 0.12.101
+    "@keplr-wallet/provider": 0.12.102-rc.1
+    "@keplr-wallet/types": 0.12.102-rc.1
     buffer: ^6.0.3
     deepmerge: ^4.2.2
     long: ^3 || ^4 || ^5
@@ -8945,7 +8945,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/wc-qrcode-modal@0.12.101, @keplr-wallet/wc-qrcode-modal@workspace:packages/wc-qrcode-modal":
+"@keplr-wallet/wc-qrcode-modal@0.12.102-rc.1, @keplr-wallet/wc-qrcode-modal@workspace:packages/wc-qrcode-modal":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/wc-qrcode-modal@workspace:packages/wc-qrcode-modal"
   dependencies:
@@ -13751,12 +13751,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chrome@npm:0.0.88":
-  version: 0.0.88
-  resolution: "@types/chrome@npm:0.0.88"
+"@types/chrome@npm:0.0.268":
+  version: 0.0.268
+  resolution: "@types/chrome@npm:0.0.268"
   dependencies:
     "@types/filesystem": "*"
-  checksum: 89cb5a9fcb89f61b4284c9e94d881616be1f27f13f52361c0f1696033e5f6975432168968e03638eb919519513236bcb940f08075d56743263ee652e67e8991c
+    "@types/har-format": "*"
+  checksum: c7ae2479b225beea673681df0a6022f251e98bdf1c162c84363d52efb32edf5d26cf8007d6ed92d497837212a1c2cfa6ad9c3c1c0d0169e0a5189fa084555ee4
   languageName: node
   linkType: hard
 
@@ -13994,10 +13995,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/firefox-webext-browser@npm:^70.0.1":
-  version: 70.0.1
-  resolution: "@types/firefox-webext-browser@npm:70.0.1"
-  checksum: bf048884995b8f5a482fa2c5749460fa1466e7ed7a59e0b0d8f045d337039c525b48f84baa417ce28372b0bdb08515e38c264bc7d2bbd1a885c81d3e231fdbcd
+"@types/firefox-webext-browser@npm:^120.0.3":
+  version: 120.0.3
+  resolution: "@types/firefox-webext-browser@npm:120.0.3"
+  checksum: 31f2205d7f07efcc7a8ca6067626dcc2dcc12973064849b6a435f53db619b85fe1bde76af97a74973c36c98ddd23b30fe4584b855427f92557a6867d07dc529a
   languageName: node
   linkType: hard
 
@@ -14033,6 +14034,13 @@ __metadata:
   version: 2.0.41
   resolution: "@types/hammerjs@npm:2.0.41"
   checksum: d16fbd688fc9b18cc270abe8dea8d4c50ef7bd8375e593d92c233d299387933a6b003c8db69819344833052458bc5f9ef1b472001277a49f095928d184356006
+  languageName: node
+  linkType: hard
+
+"@types/har-format@npm:*":
+  version: 1.2.15
+  resolution: "@types/har-format@npm:1.2.15"
+  checksum: e3e8197e0ac74747736d13e0b54ec862e55ecf57cc962e1a24c801c7940b7b829d281dddc67f297877f1c4bc014b4ac29d35b2c6a9a1e6bc26bcff5fd7f835b0
   languageName: node
   linkType: hard
 
@@ -20145,7 +20153,7 @@ __metadata:
   resolution: "cosmjs-test@workspace:packages/cosmjs-test"
   dependencies:
     "@cosmjs/stargate": ^0.29.3
-    "@keplr-wallet/provider-mock": 0.12.101
+    "@keplr-wallet/provider-mock": 0.12.102-rc.1
     secretjs: ^1.6.0
   languageName: unknown
   linkType: soft

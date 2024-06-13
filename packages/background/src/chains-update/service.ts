@@ -1,7 +1,8 @@
-import { KVStore } from "@keplr-wallet/common";
+import { KVStore, isServiceWorker } from "@keplr-wallet/common";
 import { ChainsService } from "../chains";
 import { ChainsUIService } from "../chains-ui";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { autorun, makeObservable, observable, runInAction, toJS } from "mobx";
 
 /**
  * 체인 정보에 대한 업데이트 스케줄을 관리한다.
@@ -9,15 +10,52 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 export class ChainsUpdateService {
   protected readonly lastUpdateStartTimeMap = new Map<string, number>();
 
+  protected readonly windowsMap = new Map<number, boolean>();
+  @observable
+  protected onInitUpdateDate:
+    | {
+        date: Date;
+      }
+    | undefined = undefined;
+
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly chainsService: ChainsService,
     protected readonly chainsUIService: ChainsUIService,
     protected readonly disableUpdateLoop: boolean
-  ) {}
+  ) {
+    makeObservable(this);
+  }
 
   async init(): Promise<void> {
-    // noop
+    const saved = await this.kvStore.get<
+      | {
+          date: string;
+        }
+      | undefined
+    >("onInitUpdateDate");
+    if (saved) {
+      runInAction(() => {
+        this.onInitUpdateDate = {
+          date: new Date(saved.date),
+        };
+      });
+    } else {
+      runInAction(() => {
+        this.onInitUpdateDate = undefined;
+      });
+    }
+    autorun(() => {
+      const js = toJS(this.onInitUpdateDate);
+      if (js) {
+        this.kvStore.set("onInitUpdateDate", {
+          ...js,
+          date: js.date.toISOString(),
+        });
+      } else {
+        this.kvStore.set("onInitUpdateDate", null);
+      }
+    });
 
     // must not wait
     if (!this.disableUpdateLoop) {
@@ -35,6 +73,27 @@ export class ChainsUpdateService {
         console.log(e);
       });
     });
+
+    if (isServiceWorker()) {
+      browser.windows.onCreated.addListener((window) => {
+        if (window.id != null) {
+          this.windowsMap.set(window.id, true);
+        }
+      });
+      browser.windows.onRemoved.addListener((windowId) => {
+        let exist = false;
+        if (this.windowsMap.get(windowId)) {
+          exist = true;
+        }
+        this.windowsMap.delete(windowId);
+
+        if (this.windowsMap.size === 0 && !exist) {
+          runInAction(() => {
+            this.onInitUpdateDate = undefined;
+          });
+        }
+      });
+    }
   }
 
   protected startUpdateLoop() {
@@ -45,17 +104,43 @@ export class ChainsUpdateService {
   }
 
   protected async startUpdateChainInfosLoop(): Promise<void> {
+    let isFirst = true;
     while (true) {
-      // 6시간마다 모든 chain info를 업데이트한다.
-      // init()에서 먼저 모든 chain info에 대한 업데이트를 실행하도록 하는게 의도이다.
-      // 그러므로 delay를 나중에 준다.
-      const chainInfos = this.chainsService.getChainInfos();
-      for (const chainInfo of chainInfos) {
-        // No need to wait
-        this.updateChainInfo(chainInfo.chainId).catch((e) => {
-          console.log(e);
-        });
+      let skip = false;
+      if (isFirst && isServiceWorker()) {
+        // service worker는 여러 문제로 inactive 되었다가 다시 active될 수 있다.
+        // 이 경우는 마지막으로 업데이트한 시간이 3시간을 넘지 않으면 초기 업데이트를 실행하지 않도록한다.
+        // onInitUpdateDate는 웹브라우저 자체가 꺼지면 undefined가 되므로 웹브라우저를 껏다 켰을때는 이 로직을 무시하고 업데이트를 시도한다.
+        if (this.onInitUpdateDate) {
+          const diff = Date.now() - this.onInitUpdateDate.date.getTime();
+          if (diff < 3 * 60 * 60 * 1000) {
+            skip = true;
+          }
+        }
       }
+
+      if (!skip) {
+        if (isServiceWorker()) {
+          runInAction(() => {
+            this.onInitUpdateDate = {
+              date: new Date(),
+            };
+          });
+        }
+
+        // 6시간마다 모든 chain info를 업데이트한다.
+        // init()에서 먼저 모든 chain info에 대한 업데이트를 실행하도록 하는게 의도이다.
+        // 그러므로 delay를 나중에 준다.
+        const chainInfos = this.chainsService.getChainInfos();
+        for (const chainInfo of chainInfos) {
+          // No need to wait
+          this.updateChainInfo(chainInfo.chainId).catch((e) => {
+            console.log(e);
+          });
+        }
+      }
+
+      isFirst = false;
       await new Promise((resolve) => {
         setTimeout(resolve, 6 * 60 * 60 * 1000);
       });
