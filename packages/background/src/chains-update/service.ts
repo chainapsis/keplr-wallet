@@ -1,4 +1,4 @@
-import { KVStore } from "@keplr-wallet/common";
+import { KVStore, isServiceWorker } from "@keplr-wallet/common";
 import { ChainsService } from "../chains";
 import { ChainsUIService } from "../chains-ui";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
@@ -74,7 +74,7 @@ export class ChainsUpdateService {
       });
     });
 
-    if (this.isServiceWorker()) {
+    if (isServiceWorker()) {
       browser.windows.onCreated.addListener((window) => {
         if (window.id != null) {
           this.windowsMap.set(window.id, true);
@@ -107,7 +107,7 @@ export class ChainsUpdateService {
     let isFirst = true;
     while (true) {
       let skip = false;
-      if (isFirst && this.isServiceWorker()) {
+      if (isFirst && isServiceWorker()) {
         // service worker는 여러 문제로 inactive 되었다가 다시 active될 수 있다.
         // 이 경우는 마지막으로 업데이트한 시간이 3시간을 넘지 않으면 초기 업데이트를 실행하지 않도록한다.
         // onInitUpdateDate는 웹브라우저 자체가 꺼지면 undefined가 되므로 웹브라우저를 껏다 켰을때는 이 로직을 무시하고 업데이트를 시도한다.
@@ -120,7 +120,7 @@ export class ChainsUpdateService {
       }
 
       if (!skip) {
-        if (this.isServiceWorker()) {
+        if (isServiceWorker()) {
           runInAction(() => {
             this.onInitUpdateDate = {
               date: new Date(),
@@ -251,17 +251,5 @@ export class ChainsUpdateService {
     );
 
     return updated1 || updated2;
-  }
-
-  protected isServiceWorker(): boolean {
-    return (
-      typeof self !== "undefined" &&
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      typeof ServiceWorkerGlobalScope !== "undefined" &&
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      self instanceof ServiceWorkerGlobalScope
-    );
   }
 }
