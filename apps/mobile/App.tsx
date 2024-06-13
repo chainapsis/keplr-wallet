@@ -11,7 +11,14 @@ import {StoreProvider} from './src/stores';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {StyleProvider, useStyle} from './src/styles';
 import {AppNavigation} from './src/navigation';
-import {I18nManager, Platform, Settings, StatusBar} from 'react-native';
+import {
+  I18nManager,
+  Linking,
+  PermissionsAndroid,
+  Platform,
+  Settings,
+  StatusBar,
+} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {AppIntlProvider} from './src/languages';
 import codePush from 'react-native-code-push';
@@ -46,6 +53,9 @@ import {ImportFromExtensionProvider} from 'keplr-wallet-mobile-private';
 import {AsyncKVStore} from './src/common';
 import {AutoLock} from './src/components/unlock-modal';
 import {setJSExceptionHandler} from 'react-native-exception-handler';
+import messaging from '@react-native-firebase/messaging';
+import notifee, {EventType} from '@notifee/react-native';
+
 const semver = require('semver');
 
 const ThemeStatusBar: FunctionComponent = () => {
@@ -125,6 +135,10 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
   };
 
   protected lastTimeout?: number;
+
+  protected firebaseForegroundNotification?: () => void;
+  protected notifeeForegroundNotification?: () => void;
+  protected firebaseOpenApp?: () => void;
 
   override componentDidMount() {
     // Ensure that any CodePush updates which are
@@ -248,6 +262,7 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
   protected async init(): Promise<void> {
     this.crawlStoreUpdate();
     this.crawlCodepushUpdate();
+    this.initPushNotification();
   }
 
   protected async crawlStoreUpdate(): Promise<void> {
@@ -385,6 +400,93 @@ class AppUpdateWrapper extends Component<{}, AppUpdateWrapperState> {
       }
     } catch (e) {
       console.log(e);
+    }
+  }
+
+  protected async initPushNotification(): Promise<void> {
+    let enabled = false;
+
+    // 각 플랫폼별로 권한을 요청함.
+    if (Platform.OS === 'android') {
+      const status = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS['POST_NOTIFICATIONS'],
+      );
+
+      if (status === 'granted') {
+        enabled = true;
+      }
+    }
+
+    if (Platform.OS === 'ios') {
+      const authStatus = await messaging().requestPermission();
+      enabled =
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+    }
+
+    if (enabled) {
+      this.firebaseForegroundNotification = messaging().onMessage(
+        async remoteMessage => {
+          // Create a channel (required for Android)
+          const channelId = await notifee.createChannel({
+            id: 'default',
+            name: 'Default Channel',
+          });
+
+          if (
+            remoteMessage.notification?.title &&
+            remoteMessage.notification?.body
+          ) {
+            // Firebase를 통해 노티가 왔을 때 Notifee를 통해 노티를 띄움
+            await notifee.displayNotification({
+              title: remoteMessage.notification?.title,
+              body: remoteMessage.notification?.body,
+              android: {
+                channelId,
+              },
+            });
+          }
+        },
+      );
+
+      this.notifeeForegroundNotification = notifee.onForegroundEvent(
+        ({type}) => {
+          if (type === EventType.PRESS) {
+            // 유저가 내부 알림을 눌렀을 때 딥링크 테스트
+            Linking.openURL(
+              'keplrwallet://staking?chainId=cosmoshub-4&validatorAddress=cosmosvaloper1gf3dm2mvqhymts6ksrstlyuu2m8pw6dhfp9md2',
+            );
+          }
+        },
+      );
+
+      this.firebaseOpenApp = messaging().onNotificationOpenedApp(
+        notification => {
+          console.log(
+            'Notification opened by tapping on the notification',
+            JSON.stringify(notification),
+          );
+
+          // 유저가 백그라운드 알람을 눌렀을 때 딥링크 테스트
+          Linking.openURL(
+            'keplrwallet://staking?chainId=cosmoshub-4&validatorAddress=cosmosvaloper1gf3dm2mvqhymts6ksrstlyuu2m8pw6dhfp9md2',
+          );
+        },
+      );
+    }
+  }
+
+  override componentWillUnmount() {
+    if (this.firebaseForegroundNotification) {
+      this.firebaseForegroundNotification();
+    }
+
+    if (this.notifeeForegroundNotification) {
+      this.notifeeForegroundNotification();
+    }
+
+    if (this.firebaseOpenApp) {
+      this.firebaseOpenApp();
     }
   }
 

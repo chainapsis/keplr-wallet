@@ -38,6 +38,9 @@ target 'keplrmobile' do
   end
   config = use_native_modules!
 
+  use_frameworks! :linkage => :static
+  $RNFirebaseAsStaticFramework = true
+
   use_react_native!(
     :path => config[:reactNativePath],
     # Hermes is now enabled by default. Disable by setting this flag to false.
