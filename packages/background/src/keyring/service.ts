@@ -20,6 +20,7 @@ import { ChainsUIService } from "../chains-ui";
 import { MultiAccounts } from "../keyring-keystone";
 import { AnalyticsService } from "../analytics";
 import { Primitive } from "utility-types";
+import { runIfOnlyAppStart } from "../utils";
 
 export class KeyRingService {
   protected _needMigration = false;
@@ -78,6 +79,13 @@ export class KeyRingService {
       }
     });
 
+    // service worker가 active 상태가 되는 경우라면
+    // 첫번째 autorun에서 analytics는 무시되어야한다.
+    let isStarted = false;
+    await runIfOnlyAppStart("analytics/keyring-service", async () => {
+      isStarted = true;
+    });
+    let autorunFirst = true;
     autorun(() => {
       const vaults = this.getKeyRingVaults();
       const numPerTypes: Record<string, number> = {};
@@ -100,10 +108,14 @@ export class KeyRingService {
         }
       }
 
-      this.analyticsService.logEvent("user_properties", {
-        keyring_num: vaults.length,
-        ...numPerTypes,
-      });
+      if (isStarted || !autorunFirst) {
+        this.analyticsService.logEvent("user_properties", {
+          keyring_num: vaults.length,
+          ...numPerTypes,
+        });
+      }
+
+      autorunFirst = false;
     });
   }
 
