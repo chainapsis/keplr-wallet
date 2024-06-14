@@ -1,6 +1,6 @@
 ---
 title: Suggest Chain
-order: 4
+order: 6
 ---
 
 ### Suggest Chain
