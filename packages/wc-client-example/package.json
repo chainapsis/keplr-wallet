@@ -15,8 +15,8 @@
     "@keplr-wallet/types": "0.12.96-rc.1",
     "@keplr-wallet/wc-client": "0.12.96-rc.1",
     "@keplr-wallet/wc-qrcode-modal": "0.12.96-rc.1",
-    "@walletconnect/sign-client": "2.13.0",
-    "@walletconnect/types": "2.13.0",
+    "@walletconnect/sign-client": "^2.13.3",
+    "@walletconnect/types": "^2.13.3",
     "buffer": "^6.0.3"
   },
   "devDependencies": {
