@@ -910,6 +910,18 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
       }
     });
 
+    window.addEventListener("keplr_ethSubscription", (event: Event) => {
+      const origin = (event as CustomEvent).detail.origin;
+
+      if (origin === window.location.origin) {
+        const data = (event as CustomEvent).detail.data;
+        this.emit("message", {
+          type: "eth_subscription",
+          data,
+        });
+      }
+    });
+
     if (this.eip6963ProviderInfo) {
       const announceEvent = new CustomEvent<EIP6963ProviderDetail>(
         EIP6963EventNames.Announce,

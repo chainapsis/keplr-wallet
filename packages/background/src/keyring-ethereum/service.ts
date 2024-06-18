@@ -26,7 +26,11 @@ import { getBasicAccessPermissionType, PermissionService } from "../permission";
 import { BackgroundTxEthereumService } from "../tx-ethereum";
 import { TokenERC20Service } from "../token-erc20";
 import { validateEVMChainId } from "./helper";
+import { observable, runInAction } from "mobx";
 export class KeyRingEthereumService {
+  @observable
+  protected websocketSubscriptionMap = new Map<string, WebSocket>();
+
   constructor(
     protected readonly chainsService: ChainsService,
     protected readonly keyRingService: KeyRingService,
@@ -418,6 +422,146 @@ export class KeyRingEthereumService {
         );
 
         return `0x${Buffer.from(signature).toString("hex")}`;
+      }
+      case "eth_subscribe": {
+        if (!currentChainEVMInfo.websocket) {
+          throw new Error(
+            `WebSocket endpoint for current chain has not been provided to Keplr.`
+          );
+        }
+
+        const ws = new WebSocket(currentChainEVMInfo.websocket);
+        const subscriptionId: string = await new Promise((resolve, reject) => {
+          const handleOpen = () => {
+            ws.send(
+              JSON.stringify({
+                jsonrpc: "2.0",
+                id: 1,
+                method,
+                params,
+              })
+            );
+          };
+          const handleMessage = (event: MessageEvent) => {
+            const eventData = JSON.parse(event.data);
+            if (eventData.error) {
+              ws.close();
+
+              reject(eventData.error);
+            } else {
+              if (eventData.method === "eth_subscription") {
+                this.interactionService.dispatchEvent(
+                  WEBPAGE_PORT,
+                  "keplr_ethSubscription",
+                  {
+                    origin,
+                    data: {
+                      subscription: eventData.params.subscription,
+                      result: eventData.params.result,
+                    },
+                  }
+                );
+              } else {
+                resolve(eventData.result);
+              }
+            }
+          };
+          const handleError = () => {
+            ws.close();
+
+            reject(
+              new Error("Something went wrong with the WebSocket connection")
+            );
+          };
+
+          ws.addEventListener("open", handleOpen);
+          ws.addEventListener("message", handleMessage);
+          ws.addEventListener("error", handleError);
+          ws.addEventListener(
+            "close",
+            () => {
+              ws.removeEventListener("open", handleOpen);
+              ws.removeEventListener("message", handleMessage);
+              ws.removeEventListener("error", handleError);
+            },
+            { once: true }
+          );
+        });
+        runInAction(() => {
+          this.websocketSubscriptionMap.set(subscriptionId, ws);
+        });
+
+        return subscriptionId;
+      }
+      case "eth_unsubscribe": {
+        const subscriptionId =
+          (Array.isArray(params) && (params?.[0] as string)) || undefined;
+        if (!subscriptionId) {
+          throw new Error(
+            "Invalid parameters: must provide a subscription id."
+          );
+        }
+
+        if (!currentChainEVMInfo.websocket) {
+          throw new Error(
+            `WebSocket endpoint for current chain has not been provided to Keplr.`
+          );
+        }
+
+        const subscribedWs = this.websocketSubscriptionMap.get(subscriptionId);
+        if (!subscribedWs) {
+          return false;
+        }
+
+        const ws = new WebSocket(currentChainEVMInfo.websocket);
+        const result = await new Promise((resolve, reject) => {
+          const handleOpen = () => {
+            ws.send(
+              JSON.stringify({
+                jsonrpc: "2.0",
+                id: 1,
+                method,
+                params,
+              })
+            );
+          };
+          const handleMessage = (event: MessageEvent) => {
+            ws.close();
+
+            const eventData = JSON.parse(event.data);
+            if (eventData.error) {
+              reject(eventData.error);
+            } else {
+              subscribedWs.close();
+              runInAction(() => {
+                this.websocketSubscriptionMap.delete(subscriptionId);
+              });
+              resolve(eventData.result);
+            }
+          };
+          const handleError = () => {
+            ws.close();
+
+            reject(
+              new Error("Something went wrong with the WebSocket connection")
+            );
+          };
+
+          ws.addEventListener("open", handleOpen);
+          ws.addEventListener("message", handleMessage);
+          ws.addEventListener("error", handleError);
+          ws.addEventListener(
+            "close",
+            () => {
+              ws.removeEventListener("open", handleOpen);
+              ws.removeEventListener("message", handleMessage);
+              ws.removeEventListener("error", handleError);
+            },
+            { once: true }
+          );
+        });
+
+        return result;
       }
       case "wallet_switchEthereumChain": {
         const param =
