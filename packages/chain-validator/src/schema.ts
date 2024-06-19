@@ -300,18 +300,32 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
     );
   }
 
-  if (!value.bech32Config) {
+  if (!EIP155ChainIdSchema.validate(value.chainId).error) {
     if (value.bip44.coinType !== 60) {
-      throw new Error("If bech32Config is undefined, coin type should be 60");
+      throw new Error(
+        "if chainId is EIP-155 chain id defined in CAIP-2, coin type should be 60"
+      );
     }
 
     if (!value.evm) {
-      throw new Error("If bech32Config is undefined, evm should be provided");
+      throw new Error(
+        "if chainId is EIP-155 chain id defined in CAIP-2, evm should be provided"
+      );
+    }
+  }
+
+  if (!value.bech32Config) {
+    if (value.bip44.coinType !== 60) {
+      throw new Error("if bech32Config is undefined, coin type should be 60");
+    }
+
+    if (!value.evm) {
+      throw new Error("if bech32Config is undefined, evm should be provided");
     }
 
     if (EIP155ChainIdSchema.validate(value.chainId).error) {
       throw new Error(
-        "If bech32Config is undefined, chainId should be EIP155 chain id defined in CAIP-2"
+        "if bech32Config is undefined, chainId should be EIP-155 chain id defined in CAIP-2"
       );
     }
   }

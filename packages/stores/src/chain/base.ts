@@ -596,6 +596,11 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
   }
 
   isEvmOnlyChain(chainId: string): boolean {
-    return this.isEvmChain(chainId) && chainId.split(":")[0] === "eip155";
+    const chainIdLikeCAIP2 = chainId.split(":");
+    return (
+      this.isEvmChain(chainId) &&
+      chainIdLikeCAIP2.length === 2 &&
+      chainIdLikeCAIP2[0] === "eip155"
+    );
   }
 }
