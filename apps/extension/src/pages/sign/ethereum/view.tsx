@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useMemo, useRef, useState } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { SignEthereumInteractionStore } from "@keplr-wallet/stores-core";
 import { Box } from "../../../components/box";
 import { XAxis } from "../../../components/axis";
@@ -35,11 +41,14 @@ import { FeeControl } from "../../../components/input/fee-control";
 import {
   useAmountConfig,
   useFeeConfig,
+  useGasSimulator,
   useSenderConfig,
   useZeroAllowedGasConfig,
 } from "@keplr-wallet/hooks";
-import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { EthTxBase } from "../components/eth-tx/render/tx-base";
+import { erc20ContractInterface } from "@keplr-wallet/stores-eth";
+import { ExtensionKVStore } from "@keplr-wallet/common";
+import { CoinPretty, Dec, Int, IntPretty } from "@keplr-wallet/unit";
 
 /**
  * CosmosTxView의 주석을 꼭 참고하셈
@@ -54,6 +63,8 @@ export const EthereumSigningView: FunctionComponent<{
     chainStore,
     uiConfigStore,
     signEthereumInteractionStore,
+    accountStore,
+    ethereumAccountStore,
     queriesStore,
   } = useStore();
   const intl = useIntl();
@@ -63,59 +74,157 @@ export const EthereumSigningView: FunctionComponent<{
     signEthereumInteractionStore.rejectAll();
   });
 
-  const chainInfo = chainStore.getChain(interactionData.data.chainId);
+  const { message, signType, signer, chainId } = interactionData.data;
 
-  const senderConfig = useSenderConfig(
-    chainStore,
-    interactionData.data.chainId,
-    interactionData.data.signer
-  );
-  const gasConfig = useZeroAllowedGasConfig(chainStore, chainInfo.chainId, 0);
+  const account = accountStore.getAccount(chainId);
+  const ethereumAccount = ethereumAccountStore.getAccount(chainId);
+  const chainInfo = chainStore.getChain(chainId);
+
+  const senderConfig = useSenderConfig(chainStore, chainId, signer);
+  const gasConfig = useZeroAllowedGasConfig(chainStore, chainId, 0);
   const amountConfig = useAmountConfig(
     chainStore,
     queriesStore,
-    chainInfo.chainId,
+    chainId,
     senderConfig
   );
   const feeConfig = useFeeConfig(
     chainStore,
     queriesStore,
-    chainInfo.chainId,
+    chainId,
     senderConfig,
     amountConfig,
     gasConfig
   );
 
-  const isTxSigning = interactionData.data.signType === EthSignType.TRANSACTION;
+  const [signingDataBuff, setSigningDataBuff] = useState(Buffer.from(message));
+  const isTxSigning = signType === EthSignType.TRANSACTION;
 
-  const eip1559TxFee = (() => {
+  const gasSimulator = useGasSimulator(
+    new ExtensionKVStore("gas-simulator.ethereum.sign"),
+    chainStore,
+    chainInfo.chainId,
+    gasConfig,
+    feeConfig,
+    "evm/native",
+    () => {
+      const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
+
+      const { currency, recipient, amount } = (() => {
+        if (unsignedTx.data) {
+          const dataDecodedValues = erc20ContractInterface.decodeFunctionData(
+            "transfer",
+            unsignedTx.data
+          );
+          const erc20ContractAddress = unsignedTx.to;
+          const currency = chainInfo.forceFindCurrency(
+            `erc20:${erc20ContractAddress}`
+          );
+          const recipient = dataDecodedValues[0];
+          const amount = new IntPretty(new Dec(parseInt(dataDecodedValues[1])))
+            .moveDecimalPointLeft(currency.coinDecimals)
+            .toString();
+
+          return { currency, recipient, amount };
+        } else {
+          const currency = chainInfo.currencies[0];
+          const recipient = unsignedTx.to;
+          const amount = new IntPretty(new Dec(parseInt(unsignedTx.value)))
+            .moveDecimalPointLeft(currency.coinDecimals)
+            .toString();
+
+          return {
+            currency,
+            recipient,
+            amount,
+          };
+        }
+      })();
+
+      return {
+        simulate: () =>
+          ethereumAccount.simulateGas({
+            sender: account.ethereumHexAddress,
+            currency,
+            amount,
+            recipient,
+          }),
+      };
+    }
+  );
+
+  const maxPriorityFeePerGas = (() => {
     if (isTxSigning) {
-      const { maxFeePerGas, maxPriorityFeePerGas } = feeConfig.getEIP1559TxFees(
+      const { maxPriorityFeePerGas } = feeConfig.getEIP1559TxFees(
         feeConfig.type === "manual"
           ? uiConfigStore.lastFeeOption || "average"
           : feeConfig.type
       );
 
-      return {
-        maxFeePerGas: `0x${parseInt(maxFeePerGas.toString()).toString(16)}`,
-        maxPriorityFeePerGas: `0x${parseInt(
-          maxPriorityFeePerGas.toString()
-        ).toString(16)}`,
-      };
+      return `0x${parseInt(maxPriorityFeePerGas.toString()).toString(16)}`;
     }
   })();
 
-  const signingDataText = useMemo(() => {
-    const messageBuff = Buffer.from(interactionData.data.message);
+  const [isFeeSelectedOnSelector, setIsFeeSelectedOnSelector] = useState(false);
 
-    switch (interactionData.data.signType) {
+  useEffect(() => {
+    if (isTxSigning) {
+      const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
+
+      const gasLimitFromTx = unsignedTx.gasLimit ?? unsignedTx.gas;
+      if (gasLimitFromTx) {
+        gasSimulator.setEnabled(false);
+        gasConfig.setValue(parseInt(gasLimitFromTx));
+      }
+
+      if (
+        gasConfig.gas > 0 &&
+        unsignedTx.maxFeePerGas &&
+        isFeeSelectedOnSelector === false
+      ) {
+        feeConfig.setFee(
+          new CoinPretty(
+            chainInfo.currencies[0],
+            new Dec(gasConfig.gas).mul(
+              new Dec(parseInt(unsignedTx.maxFeePerGas))
+            )
+          )
+        );
+        setIsFeeSelectedOnSelector(true);
+      }
+
+      unsignedTx.gasLimit = `0x${gasConfig.gas.toString(16)}`;
+      unsignedTx.maxFeePerGas = `0x${new Int(
+        feeConfig.getFeePrimitive()[0].amount
+      )
+        .div(new Int(gasConfig.gas))
+        .toBigNumber()
+        .toString(16)}`;
+      unsignedTx.maxPriorityFeePerGas =
+        unsignedTx.maxPriorityFeePerGas ?? maxPriorityFeePerGas;
+      setSigningDataBuff(Buffer.from(JSON.stringify(unsignedTx), "utf8"));
+    }
+  }, [
+    gasConfig.gas,
+    isTxSigning,
+    message,
+    maxPriorityFeePerGas,
+    gasSimulator,
+    gasConfig,
+    feeConfig,
+    chainInfo.currencies,
+    isFeeSelectedOnSelector,
+  ]);
+
+  const signingDataText = useMemo(() => {
+    switch (signType) {
       case EthSignType.MESSAGE:
         // If the message is 32 bytes, it's probably a hash.
-        if (messageBuff.length === 32) {
-          return messageBuff.toString("hex");
+        if (signingDataBuff.length === 32) {
+          return signingDataBuff.toString("hex");
         } else {
           const text = (() => {
-            const string = messageBuff.toString("utf8");
+            const string = signingDataBuff.toString("utf8");
             if (string.startsWith("0x")) {
               return Buffer.from(string.slice(2), "hex").toString("utf8");
             }
@@ -127,43 +236,17 @@ export const EthereumSigningView: FunctionComponent<{
           return text.replace(/\u202E/giu, "\\u202E");
         }
       case EthSignType.TRANSACTION:
-        const unsignedTx = JSON.parse(
-          messageBuff.toString()
-        ) as UnsignedTransaction;
-
-        const gasLimit = parseInt(String(unsignedTx.gasLimit) ?? "0");
-        gasConfig.setValue(gasLimit);
-        if (unsignedTx.maxFeePerGas && feeConfig.type === "manual") {
-          feeConfig.setFee(
-            new CoinPretty(
-              chainInfo.feeCurrencies[0],
-              new Dec(parseInt(String(unsignedTx.maxFeePerGas ?? "0"))).mul(
-                new Dec(gasLimit)
-              )
-            )
-          );
-        } else {
-          if (eip1559TxFee) {
-            unsignedTx.maxFeePerGas = eip1559TxFee.maxFeePerGas;
-            unsignedTx.maxPriorityFeePerGas = eip1559TxFee.maxPriorityFeePerGas;
-          }
-        }
-
-        return JSON.stringify(unsignedTx, null, 2);
+        return JSON.stringify(
+          JSON.parse(signingDataBuff.toString("utf8")),
+          null,
+          2
+        );
       case EthSignType.EIP712:
-        return JSON.stringify(JSON.parse(messageBuff.toString()), null, 2);
+        return JSON.stringify(JSON.parse(signingDataBuff.toString()), null, 2);
       default:
-        return messageBuff.toString("hex");
+        return signingDataBuff.toString("hex");
     }
-  }, [
-    chainInfo.feeCurrencies,
-    eip1559TxFee?.maxFeePerGas,
-    eip1559TxFee?.maxPriorityFeePerGas,
-    feeConfig.type,
-    gasConfig,
-    interactionData.data.message,
-    interactionData.data.signType,
-  ]);
+  }, [signingDataBuff, signType]);
 
   const [isViewData, setIsViewData] = useState(false);
 
@@ -471,6 +554,7 @@ export const EthereumSigningView: FunctionComponent<{
                 feeConfig={feeConfig}
                 senderConfig={senderConfig}
                 gasConfig={gasConfig}
+                gasSimulator={gasSimulator}
               />
             );
           })()}
