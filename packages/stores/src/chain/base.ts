@@ -592,7 +592,7 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
 
   isEvmChain(chainId: string): boolean {
     const chainInfo = this.getChain(chainId);
-    return chainInfo.evm !== undefined;
+    return chainInfo.evm != null;
   }
 
   isEvmOnlyChain(chainId: string): boolean {

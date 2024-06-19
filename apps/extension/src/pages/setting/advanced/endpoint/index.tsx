@@ -175,8 +175,8 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
               }
 
               if (
-                data.evmRpc !== undefined &&
-                chainInfo.evm !== undefined &&
+                data.evmRpc != null &&
+                chainStore.isEvmChain(chainInfo.chainId) &&
                 originalEndpoint?.evmRpc !== data.evmRpc
               ) {
                 await checkEvmRpcConnectivity(

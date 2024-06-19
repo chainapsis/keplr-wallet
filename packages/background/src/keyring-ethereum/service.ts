@@ -233,12 +233,12 @@ export class KeyRingEthereumService {
   ): Promise<any> {
     const currentChainId =
       this.permissionService.getCurrentChainIdForEVM(origin);
-    if (currentChainId === undefined) {
+    if (currentChainId == null) {
       throw new Error("The origin is not permitted.");
     }
 
     const currentChainInfo = this.chainsService.getChainInfo(currentChainId);
-    if (currentChainInfo === undefined || currentChainInfo.evm === undefined) {
+    if (currentChainInfo == null || currentChainInfo.evm == null) {
       throw new Error("No current chain info or EVM info provided.");
     }
 
