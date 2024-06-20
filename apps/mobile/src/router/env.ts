@@ -8,9 +8,9 @@ export class RNEnv {
     return {
       isInternalMsg,
       requestInteraction: async (_, msg) => {
-        // Url is not used in the mobile envirment.
-        // Url is neccessary to open the popup to interact with user in the extension environment.
-        // But, in mobile environment, the background and frontend are running in the same proccess.
+        // Url is not used in the mobile environment.
+        // Url is necessary to open the popup to interact with user in the extension environment.
+        // But, in mobile environment, the background and frontend are running in the same process.
         // So, there is no need to open the popup from background.
         // The interaction should be handled via the interaction stores.
         return await new RNMessageRequesterInternalToUI().sendMessage(
