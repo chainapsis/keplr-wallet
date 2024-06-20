@@ -206,6 +206,7 @@ export const TransactionFeeModal: FunctionComponent<{
             label={intl.formatMessage({
               id: "components.input.fee-control.modal.fee-token-dropdown-label",
             })}
+            menuContainerMaxHeight="10rem"
             items={feeConfig.selectableFeeCurrencies
               .filter((cur, i) => {
                 if (i === 0) {
