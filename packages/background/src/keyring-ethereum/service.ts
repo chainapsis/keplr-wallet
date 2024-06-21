@@ -26,9 +26,8 @@ import { getBasicAccessPermissionType, PermissionService } from "../permission";
 import { BackgroundTxEthereumService } from "../tx-ethereum";
 import { TokenERC20Service } from "../token-erc20";
 import { validateEVMChainId } from "./helper";
-import { observable, runInAction } from "mobx";
+import { runInAction } from "mobx";
 export class KeyRingEthereumService {
-  @observable
   protected websocketSubscriptionMap = new Map<string, WebSocket>();
 
   constructor(
@@ -628,12 +627,32 @@ export class KeyRingEthereumService {
         }
 
         const evmChainId = validateEVMChainId(parseInt(param.chainId, 16));
+        const rpc = param.rpcUrls.find((url) => {
+          try {
+            const urlObject = new URL(url);
+            return (
+              urlObject.protocol === "http:" || urlObject.protocol === "https:"
+            );
+          } catch {
+            return false;
+          }
+        });
+        const websocket = param.rpcUrls.find((url) => {
+          try {
+            const urlObject = new URL(url);
+            return (
+              urlObject.protocol === "ws:" || urlObject.protocol === "wss:"
+            );
+          } catch {
+            return false;
+          }
+        });
         // Skip the validation for these parameters because they will be validated in the `suggestChainInfo` method.
-        const { chainName, nativeCurrency, rpcUrls, iconUrls } = param;
+        const { chainName, nativeCurrency, iconUrls } = param;
 
         const addingChainInfo = {
-          rpc: rpcUrls[0],
-          rest: rpcUrls[0],
+          rpc,
+          rest: rpc,
           chainId: `eip155:${evmChainId}`,
           bip44: {
             coinType: 60,
@@ -660,7 +679,8 @@ export class KeyRingEthereumService {
           ],
           evm: {
             chainId: evmChainId,
-            rpc: param.rpcUrls[0],
+            rpc,
+            websocket,
           },
           features: ["eth-address-gen", "eth-key-sign"],
           chainSymbolImageUrl: iconUrls?.[0],
