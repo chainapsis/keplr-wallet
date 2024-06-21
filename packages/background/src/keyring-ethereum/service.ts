@@ -437,7 +437,7 @@ export class KeyRingEthereumService {
           throw new Error("No matched EVM chain found in Keplr.");
         }
 
-        return this.permissionService.updateCurrentChainIdForEVM(
+        return await this.permissionService.updateCurrentChainIdForEVM(
           env,
           origin,
           newCurrentChainInfo.chainId

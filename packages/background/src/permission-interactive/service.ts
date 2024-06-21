@@ -1,6 +1,6 @@
 import { KeyRingService } from "../keyring";
 import { Env } from "@keplr-wallet/router";
-import { getBasicAccessPermissionType, PermissionService } from "../permission";
+import { PermissionService } from "../permission";
 import { ChainsService } from "../chains";
 
 export class PermissionInteractiveService {
@@ -32,8 +32,10 @@ export class PermissionInteractiveService {
     await this.keyRingService.ensureUnlockInteractive(env);
 
     const currentChainIdForEVM =
-      this.permissionService.getCurrentChainIdForEVM(origin) ??
-      (() => {
+      this.permissionService.getCurrentChainIdForEVM(origin);
+
+    if (!currentChainIdForEVM) {
+      const defaultChainIdForEVM = (() => {
         const chainInfos = this.chainsService.getChainInfos();
         // If currentChainId is not saved, Make Evmos current chain.
         const evmosChainId = chainInfos.find(
@@ -49,17 +51,13 @@ export class PermissionInteractiveService {
         return evmosChainId;
       })();
 
-    if (
-      !this.permissionService.hasPermission(
-        currentChainIdForEVM,
-        getBasicAccessPermissionType(),
-        origin
-      )
-    ) {
       await this.permissionService.grantBasicAccessPermission(
         env,
-        [currentChainIdForEVM],
-        [origin]
+        [defaultChainIdForEVM],
+        [origin],
+        {
+          isForEVM: true,
+        }
       );
     }
   }

@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { PermissionData } from "@keplr-wallet/background";
 import { useStore } from "../../../stores";
@@ -6,12 +6,11 @@ import { useInteractionInfo } from "../../../hooks";
 import { HeaderLayout } from "../../../layouts/header";
 import { Box } from "../../../components/box";
 import { Image } from "../../../components/image";
-import { Body1, Body2, H2, Subtitle3 } from "../../../components/typography";
+import { Body1, H2, Subtitle3 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { Gutter } from "../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
-import { Dropdown } from "../../../components/dropdown";
 
 export const PermissionBasicAccessPage: FunctionComponent<{
   data: {
@@ -23,12 +22,6 @@ export const PermissionBasicAccessPage: FunctionComponent<{
   const theme = useTheme();
 
   const interactionInfo = useInteractionInfo();
-
-  const isConnectingOneEVMChain =
-    data.chainIds.length === 1 && chainStore.isEvmChain(data.chainIds[0]);
-  const [currentChainIdForEVM, setCurrentChainIdForEVM] = useState<
-    string | undefined
-  >(isConnectingOneEVMChain ? data.chainIds[0] : undefined);
 
   return (
     <HeaderLayout
@@ -60,8 +53,7 @@ export const PermissionBasicAccessPage: FunctionComponent<{
                 window.close();
               }
             }
-          },
-          currentChainIdForEVM
+          }
         );
       }}
     >
@@ -106,99 +98,52 @@ export const PermissionBasicAccessPage: FunctionComponent<{
           }}
           borderRadius="0.5rem"
         >
-          {isConnectingOneEVMChain &&
-          !data.options?.isUnableToChangeChainInUI ? (
-            <Box style={{ paddingTop: "1.125rem" }}>
-              <Body2
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-300"]
-                    : ColorPalette["gray-200"]
-                }
-                style={{ paddingLeft: "0.5rem", paddingBottom: "0.5rem" }}
-              >
-                Connect
-              </Body2>
-              <Dropdown
-                items={chainStore.chainInfos
-                  .filter((chainInfo) =>
-                    chainStore.isEvmChain(chainInfo.chainId)
-                  )
-                  .map((chainInfo) => ({
-                    key: `${chainInfo.chainId}`,
-                    label: chainInfo.chainName,
-                  }))}
-                onSelect={(chainId) => setCurrentChainIdForEVM(chainId)}
-                selectedItemKey={currentChainIdForEVM}
-                style={{ padding: "1rem", height: "auto" }}
-              />
-              <Body2
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-300"]
-                    : ColorPalette["gray-200"]
-                }
-                style={{
-                  marginTop: "2.375rem",
-                  textAlign: "center",
-                }}
-              >
-                {"You are connecting to an EVM compatible chain."}
-                <br />
-                <br />
-                {
-                  "Please select from the dropdown which chain you'd like to connect for the application."
-                }
-              </Body2>
-            </Box>
-          ) : (
-            <Box>
-              {data.chainIds.map((chainId, index) => {
-                const chainInfo = chainStore.getChain(chainId);
+          <Box>
+            {data.chainIds.map((chainId, index) => {
+              const chainInfo = chainStore.getChain(chainId);
 
-                const isLast = index === data.chainIds.length - 1;
+              const isLast = index === data.chainIds.length - 1;
 
-                return (
-                  <Box
-                    key={chainId}
-                    backgroundColor={
-                      theme.mode === "light"
-                        ? ColorPalette.white
-                        : ColorPalette["gray-600"]
-                    }
-                    style={{
-                      overflow: "hidden",
-                      borderBottomLeftRadius: isLast ? "0.5rem" : undefined,
-                      borderBottomRightRadius: isLast ? "0.5rem" : undefined,
-                    }}
-                  >
-                    <Box alignY="center" paddingX="1.5rem" minHeight="4.25rem">
-                      <Subtitle3
-                        color={
-                          theme.mode === "light"
-                            ? ColorPalette["gray-400"]
-                            : ColorPalette["gray-50"]
-                        }
-                      >
-                        {chainInfo.chainName}
-                      </Subtitle3>
-                    </Box>
-
-                    {isLast ? null : (
-                      <Box
-                        height="1px"
-                        backgroundColor={
-                          theme.mode === "light"
-                            ? ColorPalette["gray-50"]
-                            : ColorPalette["gray-500"]
-                        }
-                      />
-                    )}
+              return (
+                <Box
+                  key={chainId}
+                  backgroundColor={
+                    theme.mode === "light"
+                      ? ColorPalette.white
+                      : ColorPalette["gray-600"]
+                  }
+                  style={{
+                    overflow: "hidden",
+                    borderBottomLeftRadius: isLast ? "0.5rem" : undefined,
+                    borderBottomRightRadius: isLast ? "0.5rem" : undefined,
+                  }}
+                >
+                  <Box alignY="center" paddingX="1.5rem" minHeight="4.25rem">
+                    <Subtitle3
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-400"]
+                          : ColorPalette["gray-50"]
+                      }
+                    >
+                      {chainInfo.chainName}
+                    </Subtitle3>
                   </Box>
-                );
-              })}
-            </Box>
-          )}
+
+                  {isLast ? null : (
+                    <Box
+                      height="1px"
+                      backgroundColor={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-50"]
+                          : ColorPalette["gray-500"]
+                      }
+                    />
+                  )}
+                </Box>
+              );
+            })}
+          </Box>
         </Box>
       </Box>
     </HeaderLayout>

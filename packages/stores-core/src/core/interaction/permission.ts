@@ -37,7 +37,53 @@ export class PermissionStore {
         ids: string[];
       } & PermissionData)
     | undefined {
-    const data = this.waitingPermissionDatas;
+    const data = this.waitingPermissionDatas.filter(
+      (data) => !data.data.options?.isForEVM
+    );
+    if (data.length === 0) {
+      return;
+    }
+
+    const first = data[0];
+
+    const res: {
+      ids: string[];
+    } & PermissionData = {
+      ids: [first.id],
+      chainIds: first.data.chainIds,
+      type: first.data.type,
+      origins: first.data.origins,
+      options: first.data.options,
+    };
+
+    for (let i = 1; i < data.length; i++) {
+      const d = data[i];
+      if (d.data.type !== first.data.type) {
+        break;
+      }
+      if (d.data.origins.join(",") !== first.data.origins.join(",")) {
+        break;
+      }
+
+      res.ids.push(d.id);
+      res.chainIds.push(...d.data.chainIds);
+    }
+
+    // Remove duplicated chain ids.
+    res.chainIds = [...new Set(res.chainIds)];
+
+    return res;
+  }
+
+  @computed
+  get waitingPermissionMergedDataForEVM():
+    | ({
+        ids: string[];
+      } & PermissionData)
+    | undefined {
+    const data = this.waitingPermissionDatas.filter(
+      (data) => !!data.data.options?.isForEVM
+    );
     if (data.length === 0) {
       return;
     }
@@ -88,7 +134,7 @@ export class PermissionStore {
   async approvePermissionWithProceedNext(
     id: string | string[],
     afterFn: (proceedNext: boolean) => void | Promise<void>,
-    result?: unknown
+    result?: string
   ) {
     await this.interactionStore.approveWithProceedNextV2(id, result, afterFn);
 

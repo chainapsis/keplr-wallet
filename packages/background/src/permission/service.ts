@@ -216,9 +216,6 @@ export class PermissionService {
     options?: PermissionOptions
   ) {
     if (env.isInternalMsg) {
-      if (options?.isEnableToPermitForInternalMsg) {
-        this.addPermission(chainIds, type, origins);
-      }
       return;
     }
 
@@ -574,16 +571,39 @@ export class PermissionService {
   }
 
   @action
-  updateCurrentChainIdForEVM(env: Env, origin: string, chainId: string) {
+  async updateCurrentChainIdForEVM(env: Env, origin: string, chainId: string) {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
     if (chainInfo.evm === undefined) {
       throw new Error("The chain is not provided EVM info");
     }
 
-    this.checkOrGrantBasicAccessPermission(env, [chainId], origin, {
-      isUnableToChangeChainInUI: true,
-      isEnableToPermitForInternalMsg: true,
-    });
+    const type = getBasicAccessPermissionType();
+    if (!this.hasPermission(chainId, type, origin)) {
+      const chainIds = [chainId];
+      const origins = [origin];
+      const permissionData: PermissionData = {
+        chainIds,
+        type,
+        origins,
+        options: { isForEVM: true, isUnableToChangeChainInUI: true },
+      };
+
+      await this.interactionService.waitApproveV2(
+        env,
+        "/permission",
+        INTERACTION_TYPE_PERMISSION,
+        permissionData,
+        (newChainId: string) => {
+          if (newChainId) {
+            this.chainsService.getChainInfoOrThrow(newChainId);
+            this.addPermission([newChainId], type, origins);
+            this.setCurrentChainIdForEVM(origins, newChainId);
+          } else {
+            this.addPermission(chainIds, type, origins);
+          }
+        }
+      );
+    }
 
     this.currentChainIdForEVMByOriginMap.set(origin, chainId);
 
