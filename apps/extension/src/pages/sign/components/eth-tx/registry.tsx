@@ -16,6 +16,8 @@ export class EthTxRenderRegistry implements IEthTxRenderRegistry {
     chainId: string,
     unsignedTx: UnsignedTransaction
   ): {
+    icon?: React.ReactElement;
+    title?: string | React.ReactElement;
     content: string | React.ReactElement;
   } {
     try {
