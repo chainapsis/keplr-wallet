@@ -47,7 +47,7 @@ import {
 } from "@keplr-wallet/hooks";
 import { EthTxBase } from "../components/eth-tx/render/tx-base";
 import { erc20ContractInterface } from "@keplr-wallet/stores-eth";
-import { ExtensionKVStore } from "@keplr-wallet/common";
+import { MemoryKVStore } from "@keplr-wallet/common";
 import { CoinPretty, Dec, Int, IntPretty } from "@keplr-wallet/unit";
 
 /**
@@ -101,7 +101,7 @@ export const EthereumSigningView: FunctionComponent<{
   const isTxSigning = signType === EthSignType.TRANSACTION;
 
   const gasSimulator = useGasSimulator(
-    new ExtensionKVStore("gas-simulator.ethereum.sign"),
+    new MemoryKVStore("gas-simulator.ethereum.sign"),
     chainStore,
     chainInfo.chainId,
     gasConfig,
