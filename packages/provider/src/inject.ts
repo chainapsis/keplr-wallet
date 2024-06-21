@@ -912,8 +912,12 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
 
     window.addEventListener("keplr_ethSubscription", (event: Event) => {
       const origin = (event as CustomEvent).detail.origin;
+      const providerId = (event as CustomEvent).detail.providerId;
 
-      if (origin === window.location.origin) {
+      if (
+        origin === window.location.origin &&
+        providerId === this.eip6963ProviderInfo?.uuid
+      ) {
         const data = (event as CustomEvent).detail.data;
         this.emit("message", {
           type: "eth_subscription",
@@ -1061,7 +1065,11 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
       await this.handleConnect();
     }
 
-    return await this.requestMethod("request", { method, params });
+    return await this.requestMethod("request", {
+      method,
+      params,
+      providerId: this.eip6963ProviderInfo?.uuid,
+    });
   }
 
   async enable(): Promise<string[]> {

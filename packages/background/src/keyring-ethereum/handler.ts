@@ -71,6 +71,12 @@ const handleRequestJsonRpcToEvmMsg: (
   return async (env, msg) => {
     await permissionInteractionService.ensureEnabledForEVM(env, msg.origin);
 
-    return await service.request(env, msg.origin, msg.method, msg.params);
+    return await service.request(
+      env,
+      msg.origin,
+      msg.method,
+      msg.params,
+      msg.providerId
+    );
   };
 };

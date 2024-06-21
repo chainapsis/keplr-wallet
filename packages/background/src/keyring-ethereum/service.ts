@@ -237,7 +237,8 @@ export class KeyRingEthereumService {
     env: Env,
     origin: string,
     method: string,
-    params?: unknown[] | Record<string, unknown>
+    params?: unknown[] | Record<string, unknown>,
+    providerId?: string
   ): Promise<any> {
     const currentChainId =
       this.permissionService.getCurrentChainIdForEVM(origin);
@@ -245,7 +246,8 @@ export class KeyRingEthereumService {
       throw new Error("The origin is not permitted.");
     }
 
-    const currentChainInfo = this.chainsService.getChainInfo(currentChainId);
+    const currentChainInfo =
+      this.chainsService.getChainInfoOrThrow(currentChainId);
     const currentChainEVMInfo =
       this.chainsService.getEVMInfoOrThrow(currentChainId);
 
@@ -458,6 +460,7 @@ export class KeyRingEthereumService {
                   "keplr_ethSubscription",
                   {
                     origin,
+                    providerId,
                     data: {
                       subscription: eventData.params.subscription,
                       result: eventData.params.result,
@@ -491,7 +494,8 @@ export class KeyRingEthereumService {
           );
         });
         runInAction(() => {
-          this.websocketSubscriptionMap.set(subscriptionId, ws);
+          const key = `${subscriptionId}/${providerId}`;
+          this.websocketSubscriptionMap.set(key, ws);
         });
 
         return subscriptionId;
@@ -537,7 +541,8 @@ export class KeyRingEthereumService {
             } else {
               subscribedWs.close();
               runInAction(() => {
-                this.websocketSubscriptionMap.delete(subscriptionId);
+                const key = `${subscriptionId}/${providerId}`;
+                this.websocketSubscriptionMap.delete(key);
               });
               resolve(eventData.result);
             }
