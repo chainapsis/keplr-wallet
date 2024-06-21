@@ -149,7 +149,7 @@ export const EIP155ChainIdSchema = Joi.string().custom((value: string) => {
       throw new Error("Namespace for EIP155 chain id should be 'eip155'");
     }
 
-    const referenceFound = reference.match(/^[1-9]{1,32}$/);
+    const referenceFound = reference.match(/^[1-9]\d{0,31}$/);
     if (!referenceFound) {
       throw new Error(
         "Reference for EIP155 chain id should be 1~32 characters of number"
