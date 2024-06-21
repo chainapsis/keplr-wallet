@@ -254,6 +254,35 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             return cur1.coinMinimalDenom < cur2.coinMinimalDenom ? -1 : 1;
           });
       }
+    } else if (this.canFeeMarketTxFeesAndReady()) {
+      const queryCosmos = this.queriesStore.get(this.chainId).cosmos;
+      if (queryCosmos) {
+        const gasPrices = queryCosmos.queryFeeMarketGasPrices.gasPrices;
+
+        const found: FeeCurrency[] = [];
+        for (const gasPrice of gasPrices) {
+          const cur = this.chainInfo.findCurrency(gasPrice.denom);
+          if (cur) {
+            found.push(cur);
+          }
+        }
+
+        const firstFeeDenom =
+          this.chainInfo.feeCurrencies.length > 0
+            ? this.chainInfo.feeCurrencies[0].coinMinimalDenom
+            : "";
+        return found.sort((cur1, cur2) => {
+          // firstFeeDenom should be the first.
+          // others should be sorted in alphabetical order.
+          if (cur1.coinMinimalDenom === firstFeeDenom) {
+            return -1;
+          }
+          if (cur2.coinMinimalDenom === firstFeeDenom) {
+            return 1;
+          }
+          return cur1.coinDenom < cur2.coinDenom ? -1 : 1;
+        });
+      }
     }
 
     const res: FeeCurrency[] = [];
@@ -409,6 +438,38 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     return false;
   }
 
+  protected canFeeMarketTxFeesAndReady(): boolean {
+    if (this.chainInfo.hasFeature("feemarket")) {
+      const queries = this.queriesStore.get(this.chainId);
+      if (!queries.cosmos) {
+        console.log(
+          "Chain has feemarket feature. But no cosmos queries provided."
+        );
+        return false;
+      }
+
+      const queryFeeMarketGasPrices = queries.cosmos.queryFeeMarketGasPrices;
+
+      if (queryFeeMarketGasPrices.gasPrices.length === 0) {
+        return false;
+      }
+
+      for (let i = 0; i < queryFeeMarketGasPrices.gasPrices.length; i++) {
+        const gasPrice = queryFeeMarketGasPrices.gasPrices[i];
+        // 일단 모든 currency에 대해서 find를 시도한다.
+        this.chainInfo.findCurrency(gasPrice.denom);
+      }
+
+      return (
+        queryFeeMarketGasPrices.gasPrices.find((gasPrice) =>
+          this.chainInfo.findCurrency(gasPrice.denom)
+        ) != null
+      );
+    }
+
+    return false;
+  }
+
   protected canEIP1559TxFeesAndReady(): boolean {
     if (this.chainInfo.evm && this.senderConfig.sender.startsWith("0x")) {
       const queries = this.queriesStore.get(this.chainId);
@@ -546,6 +607,81 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             feeCurrency.coinMinimalDenom === baseFeeCurrency.coinMinimalDenom
           ) {
             return this.populateGasPriceStep(baseFeeCurrency, feeType);
+          }
+        }
+      } else if (this.canFeeMarketTxFeesAndReady()) {
+        const queryCosmos = this.queriesStore.get(this.chainId).cosmos;
+        if (queryCosmos) {
+          const gasPrices = queryCosmos.queryFeeMarketGasPrices.gasPrices;
+
+          const gasPrice = gasPrices.find(
+            (gasPrice) => gasPrice.denom === feeCurrency.coinMinimalDenom
+          );
+          if (gasPrice) {
+            let multiplication = {
+              low: 1.1,
+              average: 1.2,
+              high: 1.3,
+            };
+
+            const multificationConfig = this.queriesStore.simpleQuery.queryGet<{
+              [str: string]:
+                | {
+                    low: number;
+                    average: number;
+                    high: number;
+                  }
+                | undefined;
+            }>(
+              "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws",
+              "/feemarket/info.json"
+            );
+
+            if (multificationConfig.response) {
+              const _default = multificationConfig.response.data["__default__"];
+              if (
+                _default &&
+                _default.low != null &&
+                typeof _default.low === "number" &&
+                _default.average != null &&
+                typeof _default.average === "number" &&
+                _default.high != null &&
+                typeof _default.high === "number"
+              ) {
+                multiplication = {
+                  low: _default.low,
+                  average: _default.average,
+                  high: _default.high,
+                };
+              }
+              const specific =
+                multificationConfig.response.data[
+                  this.chainInfo.chainIdentifier
+                ];
+              if (
+                specific &&
+                specific.low != null &&
+                typeof specific.low === "number" &&
+                specific.average != null &&
+                typeof specific.average === "number" &&
+                specific.high != null &&
+                typeof specific.high === "number"
+              ) {
+                multiplication = {
+                  low: specific.low,
+                  average: specific.average,
+                  high: specific.high,
+                };
+              }
+            }
+            switch (feeType) {
+              case "low":
+                return new Dec(multiplication.low).mul(gasPrice.amount);
+              case "average":
+                return new Dec(multiplication.average).mul(gasPrice.amount);
+              case "high":
+                return new Dec(multiplication.high).mul(gasPrice.amount);
+            }
           }
         }
       }
@@ -716,6 +852,26 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         if (queryBaseFee.error) {
           return {
             warning: new Error("Failed to fetch base fee"),
+          };
+        }
+      }
+    } else if (this.canFeeMarketTxFeesAndReady()) {
+      const queryCosmos = this.queriesStore.get(this.chainId).cosmos;
+      if (queryCosmos) {
+        const queryFeeMarketGasPrices = queryCosmos.queryFeeMarketGasPrices;
+        if (queryFeeMarketGasPrices.error) {
+          return {
+            warning: new Error("Failed to fetch gas prices"),
+          };
+        }
+        if (!queryFeeMarketGasPrices.response) {
+          return {
+            loadingState: "loading-block",
+          };
+        }
+        if (queryFeeMarketGasPrices.isFetching) {
+          return {
+            loadingState: "loading",
           };
         }
       }
