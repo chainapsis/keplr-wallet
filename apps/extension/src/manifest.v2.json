@@ -24,7 +24,8 @@
     "identity",
     "idle",
     "alarms",
-    "unlimitedStorage"
+    "unlimitedStorage",
+    "activeTab"
   ],
   "content_scripts": [
     {

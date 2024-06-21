@@ -1,11 +1,13 @@
 import { KeyRingService } from "../keyring";
 import { Env } from "@keplr-wallet/router";
 import { PermissionService } from "../permission";
+import { ChainsService } from "../chains";
 
 export class PermissionInteractiveService {
   constructor(
     protected readonly permissionService: PermissionService,
-    protected readonly keyRingService: KeyRingService
+    protected readonly keyRingService: KeyRingService,
+    protected readonly chainsService: ChainsService
   ) {}
 
   async init(): Promise<void> {
@@ -26,22 +28,38 @@ export class PermissionInteractiveService {
     );
   }
 
-  async ensureEnabledAndGetCurrentChainId(
-    env: Env,
-    origin: string
-  ): Promise<string> {
+  async ensureEnabledForEVM(env: Env, origin: string): Promise<void> {
     await this.keyRingService.ensureUnlockInteractive(env);
 
-    const currentChainId =
+    const currentChainIdForEVM =
       this.permissionService.getCurrentChainIdForEVM(origin);
 
-    await this.permissionService.checkOrGrantBasicAccessPermission(
-      env,
-      [currentChainId],
-      origin
-    );
+    if (!currentChainIdForEVM) {
+      const defaultChainIdForEVM = (() => {
+        const chainInfos = this.chainsService.getChainInfos();
+        // If currentChainId is not saved, Make Evmos current chain.
+        const evmosChainId = chainInfos.find(
+          (chainInfo) =>
+            chainInfo.evm !== undefined &&
+            chainInfo.chainId.startsWith("evmos_")
+        )?.chainId;
 
-    return currentChainId;
+        if (!evmosChainId) {
+          throw new Error("The Evmos chain info is not found");
+        }
+
+        return evmosChainId;
+      })();
+
+      await this.permissionService.grantBasicAccessPermission(
+        env,
+        [defaultChainIdForEVM],
+        [origin],
+        {
+          isForEVM: true,
+        }
+      );
+    }
   }
 
   disable(chainIds: string[], origin: string) {

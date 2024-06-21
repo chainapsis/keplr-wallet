@@ -1,5 +1,5 @@
 import { InteractionService } from "../interaction";
-import { Env, KeplrError } from "@keplr-wallet/router";
+import { Env, KeplrError, WEBPAGE_PORT } from "@keplr-wallet/router";
 import {
   AllPermissionDataPerOrigin,
   getBasicAccessPermissionType,
@@ -7,6 +7,7 @@ import {
   INTERACTION_TYPE_GLOBAL_PERMISSION,
   INTERACTION_TYPE_PERMISSION,
   PermissionData,
+  PermissionOptions,
 } from "./types";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainsService } from "../chains";
@@ -140,7 +141,8 @@ export class PermissionService {
   async checkOrGrantBasicAccessPermission(
     env: Env,
     chainIds: string | string[],
-    origin: string
+    origin: string,
+    options?: PermissionOptions
   ) {
     if (typeof chainIds === "string") {
       chainIds = [chainIds];
@@ -156,7 +158,12 @@ export class PermissionService {
     }
 
     if (ungrantedChainIds.length > 0) {
-      await this.grantBasicAccessPermission(env, ungrantedChainIds, [origin]);
+      await this.grantBasicAccessPermission(
+        env,
+        ungrantedChainIds,
+        [origin],
+        options
+      );
     }
 
     this.checkBasicAccessPermission(env, chainIds, origin);
@@ -166,7 +173,8 @@ export class PermissionService {
     env: Env,
     chainIds: string[],
     type: string,
-    origin: string
+    origin: string,
+    options?: PermissionOptions
   ) {
     // TODO: Merge with `checkOrGrantBasicAccessPermission` method
 
@@ -178,7 +186,13 @@ export class PermissionService {
     }
 
     if (ungrantedChainIds.length > 0) {
-      await this.grantPermission(env, ungrantedChainIds, type, [origin]);
+      await this.grantPermission(
+        env,
+        ungrantedChainIds,
+        type,
+        [origin],
+        options
+      );
     }
 
     for (const chainId of chainIds) {
@@ -198,7 +212,8 @@ export class PermissionService {
     env: Env,
     chainIds: string[],
     type: string,
-    origins: string[]
+    origins: string[],
+    options?: PermissionOptions
   ) {
     if (env.isInternalMsg) {
       return;
@@ -208,6 +223,7 @@ export class PermissionService {
       chainIds,
       type,
       origins,
+      options,
     };
 
     await this.interactionService.waitApproveV2(
@@ -215,8 +231,14 @@ export class PermissionService {
       "/permission",
       INTERACTION_TYPE_PERMISSION,
       permissionData,
-      () => {
-        this.addPermission(chainIds, type, origins);
+      (newChainId: string) => {
+        if (newChainId) {
+          this.chainsService.getChainInfoOrThrow(newChainId);
+          this.addPermission([newChainId], type, origins);
+          this.setCurrentChainIdForEVM(origins, newChainId);
+        } else {
+          this.addPermission(chainIds, type, origins);
+        }
       }
     );
   }
@@ -224,7 +246,8 @@ export class PermissionService {
   async grantBasicAccessPermission(
     env: Env,
     chainIds: string[],
-    origins: string[]
+    origins: string[],
+    options?: PermissionOptions
   ) {
     for (const chainId of chainIds) {
       // Make sure that the chain info is registered.
@@ -235,7 +258,8 @@ export class PermissionService {
       env,
       chainIds,
       getBasicAccessPermissionType(),
-      origins
+      origins,
+      options
     );
   }
 
@@ -535,41 +559,57 @@ export class PermissionService {
     }
   }
 
-  getCurrentChainIdForEVM(origin: string): string {
-    const currentChainId = this.currentChainIdForEVMByOriginMap.get(origin);
-
-    if (!currentChainId) {
-      const chainInfos = this.chainsService.getChainInfos();
-      // If currentChainId is not saved, Make Evmos current chain.
-      // TODO: Provide from interaction data or UI
-      const evmosChainId = chainInfos.find(
-        (chainInfo) =>
-          chainInfo.evm !== undefined && chainInfo.chainId.startsWith("evmos_")
-      )?.chainId;
-
-      if (!evmosChainId) {
-        throw new Error("The Evmos chain info is not found");
-      }
-
-      return evmosChainId;
-    }
-
-    return currentChainId;
+  getCurrentChainIdForEVM(origin: string): string | undefined {
+    return this.currentChainIdForEVMByOriginMap.get(origin);
   }
 
   @action
-  updateCurrentChainIdForEVM(
-    env: Env,
-    origin: string,
-    newCurrentChainId: string
-  ): void {
-    this.checkPermission(
-      env,
-      newCurrentChainId,
-      getBasicAccessPermissionType(),
-      origin
-    );
+  setCurrentChainIdForEVM(origins: string[], chainId: string) {
+    for (const origin of origins) {
+      this.currentChainIdForEVMByOriginMap.set(origin, chainId);
+    }
+  }
 
-    this.currentChainIdForEVMByOriginMap.set(origin, newCurrentChainId);
+  @action
+  async updateCurrentChainIdForEVM(env: Env, origin: string, chainId: string) {
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    if (chainInfo.evm === undefined) {
+      throw new Error("The chain is not provided EVM info");
+    }
+
+    const type = getBasicAccessPermissionType();
+    if (!this.hasPermission(chainId, type, origin)) {
+      const chainIds = [chainId];
+      const origins = [origin];
+      const permissionData: PermissionData = {
+        chainIds,
+        type,
+        origins,
+        options: { isForEVM: true, isUnableToChangeChainInUI: true },
+      };
+
+      await this.interactionService.waitApproveV2(
+        env,
+        "/permission",
+        INTERACTION_TYPE_PERMISSION,
+        permissionData,
+        (newChainId: string) => {
+          if (newChainId) {
+            this.chainsService.getChainInfoOrThrow(newChainId);
+            this.addPermission([newChainId], type, origins);
+            this.setCurrentChainIdForEVM(origins, newChainId);
+          } else {
+            this.addPermission(chainIds, type, origins);
+          }
+        }
+      );
+    }
+
+    this.currentChainIdForEVMByOriginMap.set(origin, chainId);
+
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "keplr_chainChanged", {
+      origin,
+      evmChainId: chainInfo.evm.chainId,
+    });
   }
 }
