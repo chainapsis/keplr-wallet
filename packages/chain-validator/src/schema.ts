@@ -312,6 +312,12 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
         "if chainId is EIP-155 chain id defined in CAIP-2, evm should be provided"
       );
     }
+
+    if (value.bech32Config != null) {
+      throw new Error(
+        "if chainId is EIP-155 chain id defined in CAIP-2, bech32Config should be undefined"
+      );
+    }
   }
 
   if (!value.bech32Config) {
