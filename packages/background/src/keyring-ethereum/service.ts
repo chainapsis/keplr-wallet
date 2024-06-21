@@ -620,75 +620,87 @@ export class KeyRingEthereumService {
         }
 
         const evmChainId = validateEVMChainId(parseInt(param.chainId, 16));
-        const rpc = param.rpcUrls.find((url) => {
-          try {
-            const urlObject = new URL(url);
-            return (
-              urlObject.protocol === "http:" || urlObject.protocol === "https:"
-            );
-          } catch {
-            return false;
-          }
-        });
-        const websocket = param.rpcUrls.find((url) => {
-          try {
-            const urlObject = new URL(url);
-            return (
-              urlObject.protocol === "ws:" || urlObject.protocol === "wss:"
-            );
-          } catch {
-            return false;
-          }
-        });
-        // Skip the validation for these parameters because they will be validated in the `suggestChainInfo` method.
-        const { chainName, nativeCurrency, iconUrls } = param;
+        const chainId = `eip155:${evmChainId}`;
+        if (this.chainsService.getChainInfo(chainId) == null) {
+          const rpc = param.rpcUrls.find((url) => {
+            try {
+              const urlObject = new URL(url);
+              return (
+                urlObject.protocol === "http:" ||
+                urlObject.protocol === "https:"
+              );
+            } catch {
+              return false;
+            }
+          });
+          const websocket = param.rpcUrls.find((url) => {
+            try {
+              const urlObject = new URL(url);
+              return (
+                urlObject.protocol === "ws:" || urlObject.protocol === "wss:"
+              );
+            } catch {
+              return false;
+            }
+          });
+          // Skip the validation for these parameters because they will be validated in the `suggestChainInfo` method.
+          const { chainName, nativeCurrency, iconUrls } = param;
 
-        const addingChainInfo = {
-          rpc,
-          rest: rpc,
-          chainId: `eip155:${evmChainId}`,
-          bip44: {
-            coinType: 60,
-          },
-          chainName,
-          stakeCurrency: {
-            coinDenom: nativeCurrency.symbol,
-            coinMinimalDenom: nativeCurrency.symbol,
-            coinDecimals: nativeCurrency.decimals,
-          },
-          currencies: [
-            {
-              coinDenom: nativeCurrency.symbol,
-              coinMinimalDenom: nativeCurrency.symbol,
-              coinDecimals: nativeCurrency.decimals,
-            },
-          ],
-          feeCurrencies: [
-            {
-              coinDenom: nativeCurrency.symbol,
-              coinMinimalDenom: nativeCurrency.symbol,
-              coinDecimals: nativeCurrency.decimals,
-            },
-          ],
-          evm: {
-            chainId: evmChainId,
+          const addingChainInfo = {
             rpc,
-            websocket,
-          },
-          features: ["eth-address-gen", "eth-key-sign"],
-          chainSymbolImageUrl: iconUrls?.[0],
-          beta: true,
-        } as ChainInfo;
+            rest: rpc,
+            chainId,
+            bip44: {
+              coinType: 60,
+            },
+            chainName,
+            stakeCurrency: {
+              coinDenom: nativeCurrency.symbol,
+              coinMinimalDenom: nativeCurrency.symbol,
+              coinDecimals: nativeCurrency.decimals,
+            },
+            currencies: [
+              {
+                coinDenom: nativeCurrency.symbol,
+                coinMinimalDenom: nativeCurrency.symbol,
+                coinDecimals: nativeCurrency.decimals,
+              },
+            ],
+            feeCurrencies: [
+              {
+                coinDenom: nativeCurrency.symbol,
+                coinMinimalDenom: nativeCurrency.symbol,
+                coinDecimals: nativeCurrency.decimals,
+              },
+            ],
+            evm: {
+              chainId: evmChainId,
+              rpc,
+              websocket,
+            },
+            features: ["eth-address-gen", "eth-key-sign"],
+            chainSymbolImageUrl: iconUrls?.[0],
+            beta: true,
+          } as ChainInfo;
 
-        await this.chainsService.suggestChainInfo(env, addingChainInfo, origin);
+          await this.chainsService.suggestChainInfo(
+            env,
+            addingChainInfo,
+            origin
+          );
+        }
 
         this.permissionService.addPermission(
-          [addingChainInfo.chainId],
+          [chainId],
           getBasicAccessPermissionType(),
           [origin]
         );
 
-        // TODO: Switch current chain to the added chain.
+        await this.permissionService.updateCurrentChainIdForEVM(
+          env,
+          origin,
+          chainId
+        );
 
         return null;
       }
