@@ -2,7 +2,7 @@ import { ChainsService } from "../chains";
 import { KeyRingService } from "../keyring";
 import { InteractionService } from "../interaction";
 import { AnalyticsService } from "../analytics";
-import { Env, WEBPAGE_PORT } from "@keplr-wallet/router";
+import { Env } from "@keplr-wallet/router";
 import { EthereumSignResponse, EthSignType } from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
@@ -228,12 +228,17 @@ export class KeyRingEthereumService {
   async request(
     env: Env,
     origin: string,
-    currentChainId: string,
     method: string,
     params?: unknown[] | Record<string, unknown>
   ): Promise<any> {
+    const currentChainId =
+      this.permissionService.getCurrentChainIdForEVM(origin);
+    if (currentChainId == null) {
+      throw new Error("The origin is not permitted.");
+    }
+
     const currentChainInfo = this.chainsService.getChainInfo(currentChainId);
-    if (currentChainInfo === undefined || currentChainInfo.evm === undefined) {
+    if (currentChainInfo == null || currentChainInfo.evm == null) {
       throw new Error("No current chain info or EVM info provided.");
     }
 
@@ -432,26 +437,10 @@ export class KeyRingEthereumService {
           throw new Error("No matched EVM chain found in Keplr.");
         }
 
-        await this.permissionService.checkOrGrantPermission(
-          env,
-          [newCurrentChainInfo.chainId],
-          getBasicAccessPermissionType(),
-          origin
-        );
-
-        await this.permissionService.updateCurrentChainIdForEVM(
+        return await this.permissionService.updateCurrentChainIdForEVM(
           env,
           origin,
           newCurrentChainInfo.chainId
-        );
-
-        return this.interactionService.dispatchEvent(
-          WEBPAGE_PORT,
-          "keplr_chainChanged",
-          {
-            origin,
-            evmChainId: newEvmChainId,
-          }
         );
       }
       case "wallet_getPermissions":

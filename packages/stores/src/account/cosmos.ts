@@ -975,13 +975,19 @@ export class CosmosAccountImpl {
       destinationChainInfo.bech32Config?.bech32PrefixAccAddr
     );
 
+    const counterpartyChainBech32Config = this.chainGetter.getChain(
+      channels[0].counterpartyChainId
+    ).bech32Config;
+    if (counterpartyChainBech32Config == null) {
+      throw new Error("Counterparty chain bech32 config is not set");
+    }
+
     return this.makeIBCTransferTxWithAsyncMemoConstructor(
       channels[0],
       amount,
       currency,
       Bech32Address.fromBech32(recipient).toBech32(
-        this.chainGetter.getChain(channels[0].counterpartyChainId).bech32Config
-          ?.bech32PrefixAccAddr ?? ""
+        counterpartyChainBech32Config.bech32PrefixAccAddr
       ),
       async () => {
         const memo: any = {};
