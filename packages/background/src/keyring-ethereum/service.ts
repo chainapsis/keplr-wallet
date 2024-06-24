@@ -2,8 +2,12 @@ import { ChainsService } from "../chains";
 import { KeyRingService } from "../keyring";
 import { InteractionService } from "../interaction";
 import { AnalyticsService } from "../analytics";
-import { Env } from "@keplr-wallet/router";
-import { EthereumSignResponse, EthSignType } from "@keplr-wallet/types";
+import { Env, WEBPAGE_PORT } from "@keplr-wallet/router";
+import {
+  ChainInfo,
+  EthereumSignResponse,
+  EthSignType,
+} from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
 import {
@@ -21,7 +25,11 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { getBasicAccessPermissionType, PermissionService } from "../permission";
 import { BackgroundTxEthereumService } from "../tx-ethereum";
 import { TokenERC20Service } from "../token-erc20";
+import { validateEVMChainId } from "./helper";
+import { runInAction } from "mobx";
 export class KeyRingEthereumService {
+  protected websocketSubscriptionMap = new Map<string, WebSocket>();
+
   constructor(
     protected readonly chainsService: ChainsService,
     protected readonly keyRingService: KeyRingService,
@@ -229,7 +237,8 @@ export class KeyRingEthereumService {
     env: Env,
     origin: string,
     method: string,
-    params?: unknown[] | Record<string, unknown>
+    params?: unknown[] | Record<string, unknown>,
+    providerId?: string
   ): Promise<any> {
     const currentChainId =
       this.permissionService.getCurrentChainIdForEVM(origin);
@@ -237,10 +246,10 @@ export class KeyRingEthereumService {
       throw new Error("The origin is not permitted.");
     }
 
-    const currentChainInfo = this.chainsService.getChainInfo(currentChainId);
-    if (currentChainInfo == null || currentChainInfo.evm == null) {
-      throw new Error("No current chain info or EVM info provided.");
-    }
+    const currentChainInfo =
+      this.chainsService.getChainInfoOrThrow(currentChainId);
+    const currentChainEVMInfo =
+      this.chainsService.getEVMInfoOrThrow(currentChainId);
 
     const pubkey = await this.keyRingService.getPubKeySelected(
       currentChainInfo.chainId
@@ -248,7 +257,6 @@ export class KeyRingEthereumService {
     const selectedAddress = `0x${Buffer.from(pubkey.getEthAddress()).toString(
       "hex"
     )}`;
-    const currentChainEVMInfo = currentChainInfo.evm;
 
     switch (method) {
       case "keplr_connect": {
@@ -267,6 +275,9 @@ export class KeyRingEthereumService {
       }
       case "eth_chainId": {
         return `0x${currentChainEVMInfo.chainId.toString(16)}`;
+      }
+      case "net_version": {
+        return currentChainEVMInfo.chainId.toString();
       }
       case "eth_accounts":
       case "eth_requestAccounts": {
@@ -287,17 +298,19 @@ export class KeyRingEthereumService {
         }
 
         if (tx.chainId) {
-          let evmChainIdFromTx: number;
-          if (typeof tx.chainId === "string") {
-            if (tx.chainId.startsWith("0x")) {
-              evmChainIdFromTx = parseInt(tx.chainId, 16);
-            } else {
-              evmChainIdFromTx = parseInt(tx.chainId, 10);
-            }
-          } else {
-            evmChainIdFromTx = tx.chainId;
-          }
-
+          const evmChainIdFromTx: number = validateEVMChainId(
+            (() => {
+              if (typeof tx.chainId === "string") {
+                if (tx.chainId.startsWith("0x")) {
+                  return parseInt(tx.chainId, 16);
+                } else {
+                  return parseInt(tx.chainId, 10);
+                }
+              } else {
+                return tx.chainId;
+              }
+            })()
+          );
           if (evmChainIdFromTx !== currentChainEVMInfo.chainId) {
             throw new Error(
               "The current active chain id does not match the one in the transaction."
@@ -415,6 +428,149 @@ export class KeyRingEthereumService {
 
         return `0x${Buffer.from(signature).toString("hex")}`;
       }
+      case "eth_subscribe": {
+        if (!currentChainEVMInfo.websocket) {
+          throw new Error(
+            `WebSocket endpoint for current chain has not been provided to Keplr.`
+          );
+        }
+
+        const ws = new WebSocket(currentChainEVMInfo.websocket);
+        const subscriptionId: string = await new Promise((resolve, reject) => {
+          const handleOpen = () => {
+            ws.send(
+              JSON.stringify({
+                jsonrpc: "2.0",
+                id: 1,
+                method,
+                params,
+              })
+            );
+          };
+          const handleMessage = (event: MessageEvent) => {
+            const eventData = JSON.parse(event.data);
+            if (eventData.error) {
+              ws.close();
+
+              reject(eventData.error);
+            } else {
+              if (eventData.method === "eth_subscription") {
+                this.interactionService.dispatchEvent(
+                  WEBPAGE_PORT,
+                  "keplr_ethSubscription",
+                  {
+                    origin,
+                    providerId,
+                    data: {
+                      subscription: eventData.params.subscription,
+                      result: eventData.params.result,
+                    },
+                  }
+                );
+              } else {
+                resolve(eventData.result);
+              }
+            }
+          };
+          const handleError = () => {
+            ws.close();
+
+            reject(
+              new Error("Something went wrong with the WebSocket connection")
+            );
+          };
+
+          ws.addEventListener("open", handleOpen);
+          ws.addEventListener("message", handleMessage);
+          ws.addEventListener("error", handleError);
+          ws.addEventListener(
+            "close",
+            () => {
+              ws.removeEventListener("open", handleOpen);
+              ws.removeEventListener("message", handleMessage);
+              ws.removeEventListener("error", handleError);
+            },
+            { once: true }
+          );
+        });
+        runInAction(() => {
+          const key = `${subscriptionId}/${providerId}`;
+          this.websocketSubscriptionMap.set(key, ws);
+        });
+
+        return subscriptionId;
+      }
+      case "eth_unsubscribe": {
+        const subscriptionId =
+          (Array.isArray(params) && (params?.[0] as string)) || undefined;
+        if (!subscriptionId) {
+          throw new Error(
+            "Invalid parameters: must provide a subscription id."
+          );
+        }
+
+        if (!currentChainEVMInfo.websocket) {
+          throw new Error(
+            `WebSocket endpoint for current chain has not been provided to Keplr.`
+          );
+        }
+
+        const subscribedWs = this.websocketSubscriptionMap.get(subscriptionId);
+        if (!subscribedWs) {
+          return false;
+        }
+
+        const ws = new WebSocket(currentChainEVMInfo.websocket);
+        const result = await new Promise((resolve, reject) => {
+          const handleOpen = () => {
+            ws.send(
+              JSON.stringify({
+                jsonrpc: "2.0",
+                id: 1,
+                method,
+                params,
+              })
+            );
+          };
+          const handleMessage = (event: MessageEvent) => {
+            ws.close();
+
+            const eventData = JSON.parse(event.data);
+            if (eventData.error) {
+              reject(eventData.error);
+            } else {
+              subscribedWs.close();
+              runInAction(() => {
+                const key = `${subscriptionId}/${providerId}`;
+                this.websocketSubscriptionMap.delete(key);
+              });
+              resolve(eventData.result);
+            }
+          };
+          const handleError = () => {
+            ws.close();
+
+            reject(
+              new Error("Something went wrong with the WebSocket connection")
+            );
+          };
+
+          ws.addEventListener("open", handleOpen);
+          ws.addEventListener("message", handleMessage);
+          ws.addEventListener("error", handleError);
+          ws.addEventListener(
+            "close",
+            () => {
+              ws.removeEventListener("open", handleOpen);
+              ws.removeEventListener("message", handleMessage);
+              ws.removeEventListener("error", handleError);
+            },
+            { once: true }
+          );
+        });
+
+        return result;
+      }
       case "wallet_switchEthereumChain": {
         const param =
           (Array.isArray(params) && (params?.[0] as { chainId: string })) ||
@@ -423,7 +579,7 @@ export class KeyRingEthereumService {
           throw new Error("Invalid parameters: must provide a chain id.");
         }
 
-        const newEvmChainId = parseInt(param.chainId, 16);
+        const newEvmChainId = validateEVMChainId(parseInt(param.chainId, 16));
         if (newEvmChainId === currentChainEVMInfo.chainId) {
           return;
         }
@@ -442,6 +598,111 @@ export class KeyRingEthereumService {
           origin,
           newCurrentChainInfo.chainId
         );
+      }
+      case "wallet_addEthereumChain": {
+        const param =
+          Array.isArray(params) &&
+          (params?.[0] as {
+            chainId: string;
+            chainName: string;
+            nativeCurrency: {
+              name: string;
+              symbol: string;
+              decimals: number;
+            };
+            rpcUrls: string[];
+            iconUrls?: string[];
+          });
+        if (!param || typeof param !== "object") {
+          throw new Error(
+            "Invalid parameters: must provide a single object parameter."
+          );
+        }
+
+        const evmChainId = validateEVMChainId(parseInt(param.chainId, 16));
+        const chainId = `eip155:${evmChainId}`;
+        if (this.chainsService.getChainInfo(chainId) == null) {
+          const rpc = param.rpcUrls.find((url) => {
+            try {
+              const urlObject = new URL(url);
+              return (
+                urlObject.protocol === "http:" ||
+                urlObject.protocol === "https:"
+              );
+            } catch {
+              return false;
+            }
+          });
+          const websocket = param.rpcUrls.find((url) => {
+            try {
+              const urlObject = new URL(url);
+              return (
+                urlObject.protocol === "ws:" || urlObject.protocol === "wss:"
+              );
+            } catch {
+              return false;
+            }
+          });
+          // Skip the validation for these parameters because they will be validated in the `suggestChainInfo` method.
+          const { chainName, nativeCurrency, iconUrls } = param;
+
+          const addingChainInfo = {
+            rpc,
+            rest: rpc,
+            chainId,
+            bip44: {
+              coinType: 60,
+            },
+            chainName,
+            stakeCurrency: {
+              coinDenom: nativeCurrency.symbol,
+              coinMinimalDenom: nativeCurrency.symbol,
+              coinDecimals: nativeCurrency.decimals,
+            },
+            currencies: [
+              {
+                coinDenom: nativeCurrency.symbol,
+                coinMinimalDenom: nativeCurrency.symbol,
+                coinDecimals: nativeCurrency.decimals,
+              },
+            ],
+            feeCurrencies: [
+              {
+                coinDenom: nativeCurrency.symbol,
+                coinMinimalDenom: nativeCurrency.symbol,
+                coinDecimals: nativeCurrency.decimals,
+              },
+            ],
+            evm: {
+              chainId: evmChainId,
+              rpc,
+              websocket,
+            },
+            features: ["eth-address-gen", "eth-key-sign"],
+            chainSymbolImageUrl: iconUrls?.[0],
+            beta: true,
+          } as ChainInfo;
+
+          await this.chainsService.suggestChainInfo(
+            env,
+            addingChainInfo,
+            origin
+          );
+        }
+
+        this.permissionService.addPermission(
+          [chainId],
+          getBasicAccessPermissionType(),
+          [origin]
+        );
+
+        await this.permissionService.updateCurrentChainIdForEVM(
+          env,
+          origin,
+          chainId
+        );
+
+        return null;
       }
       case "wallet_getPermissions":
       // This `request` method can be executed if the basic access permission is granted.

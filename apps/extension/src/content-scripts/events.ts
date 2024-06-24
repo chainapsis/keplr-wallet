@@ -51,6 +51,19 @@ export function initEvents(router: Router) {
                 },
               })
             );
+          case "keplr_ethSubscription":
+            return window.dispatchEvent(
+              new CustomEvent("keplr_ethSubscription", {
+                detail: {
+                  ...(
+                    msg as PushEventDataMsg<{
+                      origin: string;
+                      data: { subscription: string; result: any };
+                    }>
+                  ).data.data,
+                },
+              })
+            );
         }
         return;
       default:

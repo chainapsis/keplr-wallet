@@ -149,7 +149,7 @@ export const EIP155ChainIdSchema = Joi.string().custom((value: string) => {
       throw new Error("Namespace for EIP155 chain id should be 'eip155'");
     }
 
-    const referenceFound = reference.match(/^[1-9]{1,32}$/);
+    const referenceFound = reference.match(/^[1-9]\d{0,31}$/);
     if (!referenceFound) {
       throw new Error(
         "Reference for EIP155 chain id should be 1~32 characters of number"
@@ -310,6 +310,12 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
     if (!value.evm) {
       throw new Error(
         "if chainId is EIP-155 chain id defined in CAIP-2, evm should be provided"
+      );
+    }
+
+    if (value.bech32Config != null) {
+      throw new Error(
+        "if chainId is EIP-155 chain id defined in CAIP-2, bech32Config should be undefined"
       );
     }
   }

@@ -2649,6 +2649,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     evm: {
       chainId: 1,
       rpc: "https://mainnet.infura.io/v3/37b42f2d421b43f481788b4e18807191",
+      websocket:
+        "wss://mainnet.infura.io/ws/v3/37b42f2d421b43f481788b4e18807191",
     },
     chainId: "eip155:1",
     chainName: "Ethereum",
