@@ -467,6 +467,11 @@ export class PermissionService {
       this.permissionMap.delete(
         PermissionKeyHelper.getPermissionKey(chainId, type, origin)
       );
+
+      const currentChainIdForEVM = this.getCurrentChainIdForEVM(origin);
+      if (chainId === currentChainIdForEVM) {
+        this.currentChainIdForEVMByOriginMap.delete(origin);
+      }
     }
   }
 
@@ -481,11 +486,9 @@ export class PermissionService {
         if (typeAndOrigin) {
           deletes.push(key);
         }
-      }
-    }
 
-    for (const key of deletes) {
-      this.permissionMap.delete(key);
+        this.currentChainIdForEVMByOriginMap.delete(origin);
+      }
     }
   }
 
@@ -503,6 +506,13 @@ export class PermissionService {
 
     for (const key of deletes) {
       this.permissionMap.delete(key);
+    }
+
+    for (const origin of origins) {
+      const currentChainIdForEVM = this.getCurrentChainIdForEVM(origin);
+      if (chainId === currentChainIdForEVM) {
+        this.currentChainIdForEVMByOriginMap.delete(origin);
+      }
     }
   }
 
@@ -557,10 +567,25 @@ export class PermissionService {
     for (const key of deletes) {
       this.permissionMap.delete(key);
     }
+
+    this.currentChainIdForEVMByOriginMap.clear();
   }
 
   getCurrentChainIdForEVM(origin: string): string | undefined {
-    return this.currentChainIdForEVMByOriginMap.get(origin);
+    const currentChainId = this.currentChainIdForEVMByOriginMap.get(origin);
+    if (
+      currentChainId &&
+      !this.hasPermission(
+        currentChainId,
+        getBasicAccessPermissionType(),
+        origin
+      )
+    ) {
+      this.currentChainIdForEVMByOriginMap.delete(origin);
+      return;
+    }
+
+    return currentChainId;
   }
 
   @action
@@ -581,28 +606,32 @@ export class PermissionService {
     if (!this.hasPermission(chainId, type, origin)) {
       const chainIds = [chainId];
       const origins = [origin];
-      const permissionData: PermissionData = {
-        chainIds,
-        type,
-        origins,
-        options: { isForEVM: true, isUnableToChangeChainInUI: true },
-      };
+      if (env.isInternalMsg) {
+        this.addPermission(chainIds, type, origins);
+      } else {
+        const permissionData: PermissionData = {
+          chainIds,
+          type,
+          origins,
+          options: { isForEVM: true, isUnableToChangeChainInUI: true },
+        };
 
-      await this.interactionService.waitApproveV2(
-        env,
-        "/permission",
-        INTERACTION_TYPE_PERMISSION,
-        permissionData,
-        (newChainId: string) => {
-          if (newChainId) {
-            this.chainsService.getChainInfoOrThrow(newChainId);
-            this.addPermission([newChainId], type, origins);
-            this.setCurrentChainIdForEVM(origins, newChainId);
-          } else {
-            this.addPermission(chainIds, type, origins);
+        await this.interactionService.waitApproveV2(
+          env,
+          "/permission",
+          INTERACTION_TYPE_PERMISSION,
+          permissionData,
+          (newChainId: string) => {
+            if (newChainId) {
+              this.chainsService.getChainInfoOrThrow(newChainId);
+              this.addPermission([newChainId], type, origins);
+              this.setCurrentChainIdForEVM(origins, newChainId);
+            } else {
+              this.addPermission(chainIds, type, origins);
+            }
           }
-        }
-      );
+        );
+      }
     }
 
     this.currentChainIdForEVMByOriginMap.set(origin, chainId);
