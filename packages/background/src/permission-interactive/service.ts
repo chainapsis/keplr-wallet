@@ -37,18 +37,17 @@ export class PermissionInteractiveService {
     if (!currentChainIdForEVM) {
       const defaultChainIdForEVM = (() => {
         const chainInfos = this.chainsService.getChainInfos();
-        // If currentChainId is not saved, Make Evmos current chain.
-        const evmosChainId = chainInfos.find(
+        // If currentChainId is not saved, Make Ethereum current chain.
+        const ethereumChainId = chainInfos.find(
           (chainInfo) =>
-            chainInfo.evm !== undefined &&
-            chainInfo.chainId.startsWith("evmos_")
+            chainInfo.evm !== undefined && chainInfo.chainId === "eip155:1"
         )?.chainId;
 
-        if (!evmosChainId) {
-          throw new Error("The Evmos chain info is not found");
+        if (!ethereumChainId) {
+          throw new Error("The Ethereum chain info is not found");
         }
 
-        return evmosChainId;
+        return ethereumChainId;
       })();
 
       await this.permissionService.grantBasicAccessPermission(
