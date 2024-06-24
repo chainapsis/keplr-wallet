@@ -1496,6 +1496,10 @@ export class KeyRingService {
                     isEVM
                   );
 
+                if (chainInfo.bech32Config == null) {
+                  return false;
+                }
+
                 const bech32Address = this.getKeySearchBech32FromHex(
                   chainInfo.bech32Config.bech32PrefixAccAddr,
                   hexAddress
