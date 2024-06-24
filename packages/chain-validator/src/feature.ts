@@ -22,6 +22,7 @@ export const SupportedChainFeatures = [
   "ibc-pfm",
   "authz-msg-revoke-fixed",
   "osmosis-base-fee-beta",
+  "feemarket",
 ];
 
 /**
@@ -149,6 +150,18 @@ export const RecognizableChainFeaturesMethod: {
       );
 
       return result.status === 400;
+    },
+  },
+  {
+    feature: "feemarket",
+    fetch: async (_features, _rpc, rest) => {
+      const result = await simpleFetch<{
+        params: {
+          enabled: boolean;
+        };
+      }>(rest, "/feemarket/v1/params");
+
+      return result.data.params.enabled;
     },
   },
 ];

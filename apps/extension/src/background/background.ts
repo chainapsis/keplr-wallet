@@ -12,7 +12,7 @@ import {
   ExtensionEnv,
   ContentScriptMessageRequester,
 } from "@keplr-wallet/router-extension";
-import { ExtensionKVStore } from "@keplr-wallet/common";
+import { ExtensionKVStore, isServiceWorker } from "@keplr-wallet/common";
 import { init } from "@keplr-wallet/background";
 import scrypt from "scrypt-js";
 import { Buffer } from "buffer/";
@@ -342,6 +342,11 @@ const { initFn, keyRingService, analyticsService } = init(
         ],
         features: ["cosmwasm", "ibc-transfer", "ibc-go", "wasmd_0.24+"],
       });
+    }
+  },
+  async (vaultService) => {
+    if (isServiceWorker()) {
+      await vaultService.unlockWithSessionPasswordIfPossible();
     }
   }
 );

@@ -36,7 +36,7 @@ export interface BoxProps {
   alignX?: BoxAlignX;
   alignY?: BoxAlignY;
 
-  cursor?: "pointer" | "not-allowed" | "progress";
+  cursor?: "pointer" | "not-allowed" | "progress" | "grab" | "grabbing";
 
   className?: string;
   style?: CSSProperties;
@@ -44,6 +44,9 @@ export interface BoxProps {
   as?: React.ElementType;
 
   onClick?: MouseEventHandler<HTMLDivElement>;
+  onMouseDown?: MouseEventHandler<HTMLDivElement>;
+  onMouseMove?: MouseEventHandler<HTMLDivElement>;
+  onMouseUp?: MouseEventHandler<HTMLDivElement>;
 
   onHoverStateChange?: (isHover: boolean) => void;
 
