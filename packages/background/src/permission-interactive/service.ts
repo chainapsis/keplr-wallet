@@ -32,10 +32,8 @@ export class PermissionInteractiveService {
     await this.keyRingService.ensureUnlockInteractive(env);
 
     const currentChainIdForEVM =
-      this.permissionService.getCurrentChainIdForEVM(origin);
-
-    if (!currentChainIdForEVM) {
-      const defaultChainIdForEVM = (() => {
+      this.permissionService.getCurrentChainIdForEVM(origin) ??
+      (() => {
         const chainInfos = this.chainsService.getChainInfos();
         // If currentChainId is not saved, Make Ethereum current chain.
         const ethereumChainId = chainInfos.find(
@@ -50,15 +48,14 @@ export class PermissionInteractiveService {
         return ethereumChainId;
       })();
 
-      await this.permissionService.grantBasicAccessPermission(
-        env,
-        [defaultChainIdForEVM],
-        [origin],
-        {
-          isForEVM: true,
-        }
-      );
-    }
+    await this.permissionService.checkOrGrantBasicAccessPermission(
+      env,
+      [currentChainIdForEVM],
+      origin,
+      {
+        isForEVM: true,
+      }
+    );
   }
 
   disable(chainIds: string[], origin: string) {

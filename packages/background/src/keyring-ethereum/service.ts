@@ -593,11 +593,13 @@ export class KeyRingEthereumService {
           throw new Error("No matched EVM chain found in Keplr.");
         }
 
-        return await this.permissionService.updateCurrentChainIdForEVM(
+        await this.permissionService.updateCurrentChainIdForEVM(
           env,
           origin,
           newCurrentChainInfo.chainId
         );
+
+        return null;
       }
       case "wallet_addEthereumChain": {
         const param =
