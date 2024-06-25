@@ -39,7 +39,43 @@ export class EthereumAccountBase {
     return this._isSendingTx;
   }
 
-  async simulateGas({
+  async simulateGas(sender: string, unsignedTx: UnsignedTransaction) {
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const evmInfo = chainInfo.evm;
+    if (!evmInfo) {
+      throw new Error("No EVM chain info provided");
+    }
+
+    const { to, value, data } = unsignedTx;
+
+    const estimateGasResponse = await simpleFetch<{
+      result: string;
+    }>(evmInfo.rpc, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "eth_estimateGas",
+        params: [
+          {
+            from: sender,
+            to,
+            value,
+            data,
+          },
+        ],
+        id: 1,
+      }),
+    });
+
+    return {
+      gasUsed: Number(estimateGasResponse.data.result),
+    };
+  }
+
+  async simulateGasForSendTokenTx({
     currency,
     amount,
     sender,
@@ -50,16 +86,6 @@ export class EthereumAccountBase {
     sender: string;
     recipient: string;
   }) {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    const evmInfo = chainInfo.evm;
-    if (!evmInfo) {
-      throw new Error("No EVM chain info provided");
-    }
-
-    if (!EthereumAccountBase.isEthereumHexAddressWithChecksum(sender)) {
-      throw new Error("Invalid sender address");
-    }
-
     // If the recipient address is invalid, the sender address will be used as the recipient for gas estimating gas.
     const tempRecipient = EthereumAccountBase.isEthereumHexAddressWithChecksum(
       recipient
@@ -74,7 +100,6 @@ export class EthereumAccountBase {
       switch (denomHelper.type) {
         case "erc20":
           return {
-            from: sender,
             to: denomHelper.contractAddress,
             value: "0x0",
             data: erc20ContractInterface.encodeFunctionData("transfer", [
@@ -84,31 +109,13 @@ export class EthereumAccountBase {
           };
         default:
           return {
-            from: sender,
             to: tempRecipient,
             value: hexValue(parsedAmount),
           };
       }
     })();
 
-    const estimateGasResponse = await simpleFetch<{
-      result: string;
-    }>(evmInfo.rpc, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        method: "eth_estimateGas",
-        params: [unsignedTx],
-        id: 1,
-      }),
-    });
-
-    return {
-      gasUsed: Number(estimateGasResponse.data.result),
-    };
+    return this.simulateGas(sender, unsignedTx);
   }
 
   async makeSendTokenTx({

@@ -225,7 +225,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       if (isEvmTx) {
         return {
           simulate: () =>
-            ethereumAccount.simulateGas({
+            ethereumAccount.simulateGasForSendTokenTx({
               currency: sendConfigs.amountConfig.amount[0].currency,
               amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
               sender: sendConfigs.senderConfig.sender,
