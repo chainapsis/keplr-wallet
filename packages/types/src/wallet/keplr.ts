@@ -259,13 +259,13 @@ export interface IEthereumProvider extends EventEmitter {
 
   isConnected(): boolean;
 
-  request<T>({
+  request({
     method,
     params,
   }: {
     method: string;
     params?: unknown[] | Record<string, unknown>;
-  }): Promise<T>;
+  }): Promise<unknown>;
 
   enable(): Promise<string[]>;
   net_version(): Promise<string>;
