@@ -295,6 +295,8 @@ export const EthereumSigningView: FunctionComponent<{
               );
             }
 
+            console.log("tx", signingDataText);
+
             await signEthereumInteractionStore.approveWithProceedNext(
               interactionData.id,
               Buffer.from(signingDataText),
@@ -517,7 +519,14 @@ export const EthereumSigningView: FunctionComponent<{
         {isTxSigning &&
           (() => {
             if (interactionData.isInternal) {
-              return <FeeSummary feeConfig={feeConfig} gasConfig={gasConfig} />;
+              return (
+                <FeeSummary
+                  feeConfig={feeConfig}
+                  gasConfig={gasConfig}
+                  gasSimulator={gasSimulator}
+                  isForEVMTx
+                />
+              );
             }
 
             return (

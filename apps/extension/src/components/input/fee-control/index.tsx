@@ -215,6 +215,8 @@ export const FeeControl: FunctionComponent<{
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    const isShowingEstimatedFee = isForEVMTx && !!gasSimulator?.enabled;
+
     return (
       <Box>
         <YAxis alignX="center">
@@ -272,6 +274,18 @@ export const FeeControl: FunctionComponent<{
                       })()
                         .map((fee) =>
                           fee
+                            .quo(
+                              new Dec(
+                                isShowingEstimatedFee ? gasConfig?.gas || 1 : 1
+                              )
+                            )
+                            .mul(
+                              new Dec(
+                                isShowingEstimatedFee
+                                  ? gasSimulator?.gasEstimated || 1
+                                  : 1
+                              )
+                            )
                             .maxDecimals(6)
                             .inequalitySymbol(true)
                             .trim(true)
@@ -304,7 +318,21 @@ export const FeeControl: FunctionComponent<{
                       hasUnknown = true;
                       break;
                     } else {
-                      const price = priceStore.calculatePrice(fee);
+                      const price = priceStore.calculatePrice(
+                        fee
+                          .quo(
+                            new Dec(
+                              isShowingEstimatedFee ? gasConfig?.gas || 1 : 1
+                            )
+                          )
+                          .mul(
+                            new Dec(
+                              isShowingEstimatedFee
+                                ? gasSimulator?.gasEstimated || 1
+                                : 1
+                            )
+                          )
+                      );
                       if (price) {
                         if (!total) {
                           total = price;

@@ -212,58 +212,62 @@ export const TransactionFeeModal: FunctionComponent<{
           </Stack>
 
           {isShowingMaxFee && (
-            <XAxis>
-              <Body3
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-400"]
-                    : ColorPalette["gray-100"]
-                }
-              >
-                <b>
-                  <FormattedMessage id="components.input.fee-control.modal.max-fee" />
-                </b>
-                {`: ${feeConfig.fees[0]
-                  .maxDecimals(6)
-                  .inequalitySymbol(true)
-                  .trim(true)
-                  .hideIBCMetadata(true)
-                  .toString()}`}
-              </Body3>
-              <Body3
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-300"]
-                    : ColorPalette["gray-300"]
-                }
-                style={{
-                  whiteSpace: "pre-wrap",
-                }}
-              >
-                {` ${(() => {
-                  let total: PricePretty | undefined;
-                  let hasUnknown = false;
-                  const maxFee = feeConfig.fees[0];
-                  if (!maxFee.currency.coinGeckoId) {
-                    hasUnknown = true;
-                  } else {
-                    const price = priceStore.calculatePrice(maxFee);
-                    if (price) {
-                      if (!total) {
-                        total = price;
-                      } else {
-                        total = total.add(price);
+            <React.Fragment>
+              <Gutter size="0.5rem" />
+              <XAxis>
+                <Body3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-400"]
+                      : ColorPalette["gray-100"]
+                  }
+                >
+                  <b>
+                    <FormattedMessage id="components.input.fee-control.modal.max-fee" />
+                  </b>
+                  {`: ${feeConfig.fees[0]
+                    .maxDecimals(6)
+                    .inequalitySymbol(true)
+                    .trim(true)
+                    .hideIBCMetadata(true)
+                    .toString()}`}
+                </Body3>
+                <Body3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette["gray-300"]
+                  }
+                  style={{
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
+                  {` ${(() => {
+                    let total: PricePretty | undefined;
+                    let hasUnknown = false;
+                    const maxFee = feeConfig.fees[0];
+                    if (!maxFee.currency.coinGeckoId) {
+                      hasUnknown = true;
+                    } else {
+                      const price = priceStore.calculatePrice(maxFee);
+                      if (price) {
+                        if (!total) {
+                          total = price;
+                        } else {
+                          total = total.add(price);
+                        }
                       }
                     }
-                  }
 
-                  if (hasUnknown || !total) {
-                    return "";
-                  }
-                  return `(${total.toString()})`;
-                })()}`}
-              </Body3>
-            </XAxis>
+                    if (hasUnknown || !total) {
+                      return "";
+                    }
+                    return `(${total.toString()})`;
+                  })()}`}
+                </Body3>
+              </XAxis>
+              <Gutter size="1rem" />
+            </React.Fragment>
           )}
 
           <Dropdown
