@@ -132,35 +132,32 @@ export const EthereumSigningView: FunctionComponent<{
     }
   })();
 
-  const [isFeeSelectedOnSelector, setIsFeeSelectedOnSelector] = useState(false);
-
   useEffect(() => {
     if (isTxSigning) {
       const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
 
-      console.log("tx", unsignedTx);
-
       const gasLimitFromTx = unsignedTx.gasLimit ?? unsignedTx.gas;
       if (gasLimitFromTx && parseInt(gasLimitFromTx) > 0) {
-        gasSimulator.setEnabled(false);
         gasConfig.setValue(parseInt(gasLimitFromTx));
-      }
 
-      if (
-        gasConfig.gas > 0 &&
-        unsignedTx.maxFeePerGas &&
-        isFeeSelectedOnSelector === false
-      ) {
-        feeConfig.setFee(
-          new CoinPretty(
-            chainInfo.currencies[0],
-            new Dec(gasConfig.gas).mul(
-              new Dec(parseInt(unsignedTx.maxFeePerGas))
+        if (unsignedTx.maxFeePerGas && parseInt(unsignedTx.maxFeePerGas) > 0) {
+          feeConfig.setFee(
+            new CoinPretty(
+              chainInfo.currencies[0],
+              new Dec(gasConfig.gas).mul(
+                new Dec(parseInt(unsignedTx.maxFeePerGas))
+              )
             )
-          )
-        );
-        setIsFeeSelectedOnSelector(true);
+          );
+        }
       }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (isTxSigning) {
+      const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
 
       if (gasConfig.gas > 0) {
         unsignedTx.gasLimit = `0x${gasConfig.gas.toString(16)}`;
@@ -183,8 +180,6 @@ export const EthereumSigningView: FunctionComponent<{
     gasSimulator,
     gasConfig,
     feeConfig,
-    chainInfo.currencies,
-    isFeeSelectedOnSelector,
   ]);
 
   const signingDataText = useMemo(() => {
@@ -531,6 +526,7 @@ export const EthereumSigningView: FunctionComponent<{
                 senderConfig={senderConfig}
                 gasConfig={gasConfig}
                 gasSimulator={gasSimulator}
+                isForEVMTx
               />
             );
           })()}

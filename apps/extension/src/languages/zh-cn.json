@@ -574,6 +574,7 @@
   "components.input.fee-control.modal.fee-selector.low": "低",
   "components.input.fee-control.modal.fee-selector.average": "中",
   "components.input.fee-control.modal.fee-selector.high": "高",
+  "components.input.fee-control.modal.max-fee": "最高收费",
 
   "components.address-book-modal.title": "地址目录",
   "components.address-book-modal.recent-tab": "最近",

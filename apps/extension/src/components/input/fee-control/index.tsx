@@ -178,6 +178,7 @@ export const FeeControl: FunctionComponent<{
   gasSimulator?: IGasSimulator;
 
   disableAutomaticFeeSet?: boolean;
+  isForEVMTx?: boolean;
 }> = observer(
   ({
     senderConfig,
@@ -185,6 +186,7 @@ export const FeeControl: FunctionComponent<{
     gasConfig,
     gasSimulator,
     disableAutomaticFeeSet,
+    isForEVMTx,
   }) => {
     const {
       analyticsStore,
@@ -469,6 +471,7 @@ export const FeeControl: FunctionComponent<{
             gasConfig={gasConfig}
             gasSimulator={gasSimulator}
             disableAutomaticFeeSet={disableAutomaticFeeSet}
+            isForEVMTx={isForEVMTx}
           />
         </Modal>
       </Box>
