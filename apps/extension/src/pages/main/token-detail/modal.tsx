@@ -611,7 +611,7 @@ export const TokenDetailModal: FunctionComponent<{
                           }}
                         >
                           {`We're actively working on expanding our support for
-                        natvie chains.`}
+                        native chains.`}
                         </Subtitle3>
                       </Stack>
                     </Box>
