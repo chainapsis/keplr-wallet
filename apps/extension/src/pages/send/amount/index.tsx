@@ -132,7 +132,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     chainId,
     sender,
     // TODO: 이 값을 config 밑으로 빼자
-    300000,
+    isEvmTx ? 21000 : 300000,
     isIBCTransfer,
     {
       allowHexAddressToBech32Address:
@@ -154,7 +154,13 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       );
 
       if (denomHelper.type !== "native") {
-        if (denomHelper.type === "cw20" || denomHelper.type === "erc20") {
+        if (denomHelper.type === "erc20") {
+          return `${txType}/${denomHelper.type}/${
+            denomHelper.contractAddress
+          }/${sendConfigs.amountConfig.amount[0].toDec().toString()}`;
+        }
+
+        if (denomHelper.type === "cw20") {
           // Probably, the gas can be different per cw20 according to how the contract implemented.
           return `${txType}/${denomHelper.type}/${denomHelper.contractAddress}`;
         }
@@ -164,7 +170,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
 
     return `${txType}/native`;
-  }, [isEvmTx, sendConfigs.amountConfig.currency]);
+  }, [
+    isEvmTx,
+    sendConfigs.amountConfig.amount,
+    sendConfigs.amountConfig.currency,
+  ]);
 
   const gasSimulator = useGasSimulator(
     new ExtensionKVStore("gas-simulator.main.send"),
@@ -220,8 +230,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         );
       }
 
-      const isEvmTx =
-        isEvmChain && sendConfigs.recipientConfig.isRecipientEthereumHexAddress;
       if (isEvmTx) {
         return {
           simulate: () =>
@@ -875,6 +883,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             feeConfig={sendConfigs.feeConfig}
             gasConfig={sendConfigs.gasConfig}
             gasSimulator={gasSimulator}
+            isForEVMTx={isEvmTx}
           />
         </Stack>
       </Box>
