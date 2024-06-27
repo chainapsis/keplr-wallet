@@ -32,7 +32,7 @@ import { FeeControl } from "../../../components/input/fee-control";
 import { useNotification } from "../../../hooks/notification";
 import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
 import { ICNSInfo } from "../../../config.ui";
-import { CoinPretty, DecUtils } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
@@ -287,6 +287,41 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   ]);
 
   useEffect(() => {
+    (async () => {
+      if (chainInfo.features.includes("op-stack-l1-data-fee")) {
+        const { maxFeePerGas, maxPriorityFeePerGas } =
+          sendConfigs.feeConfig.getEIP1559TxFees(sendConfigs.feeConfig.type);
+
+        const { to, gasLimit, value, data, chainId } =
+          ethereumAccount.makeSendTokenTx({
+            currency: sendConfigs.amountConfig.amount[0].currency,
+            amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
+            to: sendConfigs.recipientConfig.recipient,
+            gasLimit: sendConfigs.gasConfig.gas,
+            maxFeePerGas: maxFeePerGas.toString(),
+            maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+          });
+
+        const l1DataFee = await ethereumAccount.simulateOpStackL1Fee({
+          to,
+          gasLimit,
+          value,
+          data,
+          chainId,
+        });
+        sendConfigs.feeConfig.setL1DataFee(new Dec(parseInt(l1DataFee)));
+      }
+    })();
+  }, [
+    chainInfo.features,
+    ethereumAccount,
+    sendConfigs.amountConfig.amount,
+    sendConfigs.feeConfig,
+    sendConfigs.gasConfig.gas,
+    sendConfigs.recipientConfig.recipient,
+  ]);
+
+  useEffect(() => {
     // To simulate secretwasm, we need to include the signature in the tx.
     // With the current structure, this approach is not possible.
     if (
@@ -431,17 +466,16 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
         if (!txConfigsValidate.interactionBlocked) {
           try {
-            if (isEvmTx && sendConfigs.feeConfig.type !== "manual") {
+            if (isEvmTx) {
               ethereumAccount.setIsSendingTx(true);
               const { maxFeePerGas, maxPriorityFeePerGas } =
                 sendConfigs.feeConfig.getEIP1559TxFees(
                   sendConfigs.feeConfig.type
                 );
 
-              const unsignedTx = await ethereumAccount.makeSendTokenTx({
+              const unsignedTx = ethereumAccount.makeSendTokenTx({
                 currency: sendConfigs.amountConfig.amount[0].currency,
                 amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
-                from: sender,
                 to: sendConfigs.recipientConfig.recipient,
                 gasLimit: sendConfigs.gasConfig.gas,
                 maxFeePerGas: maxFeePerGas.toString(),

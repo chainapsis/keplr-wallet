@@ -17,6 +17,35 @@ import {
 } from "@ethersproject/transactions";
 import { getAddress as getEthAddress } from "@ethersproject/address";
 import { action, makeObservable, observable } from "mobx";
+import { Interface } from "@ethersproject/abi";
+
+const opStackGasPriceOracleProxyAddress =
+  "0x420000000000000000000000000000000000000F";
+const opStackGasPriceOracleProxyABI = new Interface([
+  {
+    constant: true,
+    inputs: [],
+    name: "implementation",
+    outputs: [
+      {
+        name: "",
+        type: "address",
+      },
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function",
+  },
+]);
+const opStackGasPriceOracleABI = new Interface([
+  {
+    inputs: [{ internalType: "bytes", name: "_data", type: "bytes" }],
+    name: "getL1Fee",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+]);
 
 export class EthereumAccountBase {
   @observable
@@ -118,30 +147,18 @@ export class EthereumAccountBase {
     return this.simulateGas(sender, unsignedTx);
   }
 
-  async makeSendTokenTx({
-    currency,
-    amount,
-    from,
-    to,
-    gasLimit,
-    maxFeePerGas,
-    maxPriorityFeePerGas,
-  }: {
-    currency: AppCurrency;
-    amount: string;
-    from: string;
-    to: string;
-    gasLimit: number;
-    maxFeePerGas: string;
-    maxPriorityFeePerGas: string;
-  }): Promise<UnsignedTransaction> {
+  async simulateOpStackL1Fee(unsignedTx: UnsignedTransaction): Promise<string> {
     const chainInfo = this.chainGetter.getChain(this.chainId);
+    if (!chainInfo.features.includes("op-stack-l1-data-fee")) {
+      throw new Error("The chain isn't built with OP Stack");
+    }
+
     const evmInfo = chainInfo.evm;
     if (!evmInfo) {
       throw new Error("No EVM chain info provided");
     }
 
-    const transactionCountResponse = await simpleFetch<{
+    const implementationResponse = await simpleFetch<{
       result: string;
     }>(evmInfo.rpc, {
       method: "POST",
@@ -150,12 +167,66 @@ export class EthereumAccountBase {
       },
       body: JSON.stringify({
         jsonrpc: "2.0",
-        method: "eth_getTransactionCount",
-        params: [from, "pending"],
+        method: "eth_call",
+        params: [
+          {
+            to: opStackGasPriceOracleProxyAddress,
+            data: opStackGasPriceOracleProxyABI.encodeFunctionData(
+              "implementation"
+            ),
+          },
+        ],
         id: 1,
       }),
     });
 
+    const gasPriceOracleContractAddress =
+      "0x" + implementationResponse.data.result.slice(26);
+    const getL1FeeResponse = await simpleFetch<{
+      result: string;
+    }>(evmInfo.rpc, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "eth_call",
+        params: [
+          {
+            to: gasPriceOracleContractAddress,
+            data: opStackGasPriceOracleABI.encodeFunctionData("getL1Fee", [
+              serialize(unsignedTx),
+            ]),
+          },
+        ],
+        id: 1,
+      }),
+    });
+
+    return getL1FeeResponse.data.result;
+  }
+
+  makeSendTokenTx({
+    currency,
+    amount,
+    to,
+    gasLimit,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+  }: {
+    currency: AppCurrency;
+    amount: string;
+    to: string;
+    gasLimit: number;
+    maxFeePerGas: string;
+    maxPriorityFeePerGas: string;
+  }): UnsignedTransaction {
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const evmInfo = chainInfo.evm;
+    if (!evmInfo) {
+      throw new Error("No EVM chain info provided");
+    }
     const parsedAmount = parseUnits(amount, currency.coinDecimals);
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
 
@@ -165,7 +236,6 @@ export class EthereumAccountBase {
         case "erc20":
           return {
             chainId: evmInfo.chainId,
-            nonce: Number(transactionCountResponse.data.result),
             gasLimit: hexValue(gasLimit),
             maxFeePerGas: hexValue(Number(maxFeePerGas)),
             maxPriorityFeePerGas: hexValue(Number(maxPriorityFeePerGas)),
@@ -179,7 +249,6 @@ export class EthereumAccountBase {
         default:
           return {
             chainId: evmInfo.chainId,
-            nonce: Number(transactionCountResponse.data.result),
             gasLimit: hexValue(gasLimit),
             maxFeePerGas: hexValue(Number(maxFeePerGas)),
             maxPriorityFeePerGas: hexValue(Number(maxPriorityFeePerGas)),
@@ -210,7 +279,28 @@ export class EthereumAccountBase {
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const keplr = (await this.getKeplr())!;
+
+      const transactionCountResponse = await simpleFetch<{
+        result: string;
+      }>(evmInfo.rpc, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "eth_getTransactionCount",
+          params: [sender, "pending"],
+          id: 1,
+        }),
+      });
+      unsignedTx = {
+        ...unsignedTx,
+        nonce: Number(transactionCountResponse.data.result),
+      };
+
       const signEthereum = keplr.signEthereum.bind(keplr);
+
       const signature = await signEthereum(
         this.chainId,
         sender,

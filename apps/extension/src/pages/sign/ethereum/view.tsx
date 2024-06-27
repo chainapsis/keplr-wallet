@@ -182,6 +182,24 @@ export const EthereumSigningView: FunctionComponent<{
     feeConfig,
   ]);
 
+  useEffect(() => {
+    (async () => {
+      if (isTxSigning && chainInfo.features.includes("op-stack-l1-data-fee")) {
+        const { to, gasLimit, value, data, chainId }: UnsignedTransaction =
+          JSON.parse(Buffer.from(message).toString("utf8"));
+
+        const l1DataFee = await ethereumAccount.simulateOpStackL1Fee({
+          to,
+          gasLimit,
+          value,
+          data,
+          chainId,
+        });
+        feeConfig.setL1DataFee(new Dec(parseInt(l1DataFee)));
+      }
+    })();
+  }, [chainInfo.features, ethereumAccount, feeConfig, isTxSigning, message]);
+
   const signingDataText = useMemo(() => {
     switch (signType) {
       case EthSignType.MESSAGE:

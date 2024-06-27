@@ -2725,7 +2725,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://opt-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
     evm: {
       chainId: 10,
-      rpc: "https://eth-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+      rpc: "https://opt-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
       websocket:
         "wss://opt-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
     },

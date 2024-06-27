@@ -1,5 +1,5 @@
 import { AppCurrency, FeeCurrency, StdFee } from "@keplr-wallet/types";
-import { CoinPretty } from "@keplr-wallet/unit";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
 
 export interface ITxChainSetter {
   chainId: string;
@@ -66,6 +66,9 @@ export interface IFeeConfig extends ITxChainSetter {
     currency: FeeCurrency,
     feeType: FeeType
   ): CoinPretty;
+
+  l1DataFee: Dec | undefined;
+  setL1DataFee(fee: Dec): void;
 
   uiProperties: UIProperties;
 }
