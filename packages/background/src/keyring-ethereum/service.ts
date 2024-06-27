@@ -243,7 +243,9 @@ export class KeyRingEthereumService {
     const currentChainId =
       this.permissionService.getCurrentChainIdForEVM(origin);
     if (currentChainId == null) {
-      throw new Error("The origin is not permitted.");
+      throw new Error(
+        "The website is not permitted. Please disconnect and reconnect to the website."
+      );
     }
 
     const currentChainInfo =
