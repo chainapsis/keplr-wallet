@@ -107,6 +107,10 @@ export const EthereumSigningView: FunctionComponent<{
     feeConfig,
     "evm/native",
     () => {
+      if (interactionData.isInternal) {
+        gasSimulator.setEnabled(false);
+      }
+
       const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
 
       return {
@@ -156,7 +160,7 @@ export const EthereumSigningView: FunctionComponent<{
   }, []);
 
   useEffect(() => {
-    if (isTxSigning) {
+    if (isTxSigning && !interactionData.isInternal) {
       const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
 
       if (gasConfig.gas > 0) {
@@ -180,6 +184,7 @@ export const EthereumSigningView: FunctionComponent<{
     gasSimulator,
     gasConfig,
     feeConfig,
+    interactionData.isInternal,
   ]);
 
   useEffect(() => {
@@ -312,8 +317,6 @@ export const EthereumSigningView: FunctionComponent<{
                 }
               );
             }
-
-            console.log("tx", signingDataText);
 
             await signEthereumInteractionStore.approveWithProceedNext(
               interactionData.id,

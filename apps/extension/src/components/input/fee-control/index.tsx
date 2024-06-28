@@ -215,7 +215,7 @@ export const FeeControl: FunctionComponent<{
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const isShowingEstimatedFee = isForEVMTx && !!gasSimulator?.enabled;
+    const isShowingEstimatedFee = isForEVMTx && !!gasSimulator?.gasEstimated;
 
     return (
       <Box>

@@ -143,7 +143,7 @@ export const TransactionFeeModal: FunctionComponent<{
       isGasSimulatorEnabled,
     ]);
 
-    const isShowingMaxFee = isForEVMTx && !!gasSimulator?.enabled;
+    const isShowingMaxFee = isForEVMTx && !!gasSimulator?.gasEstimated;
 
     return (
       <Styles.Container>
@@ -515,7 +515,7 @@ const FeeSelector: FunctionComponent<{
     return null;
   }
 
-  const isShowingGasEstimatedOnly = isForEVMTx && !!gasSimulator?.enabled;
+  const isShowingGasEstimatedOnly = isForEVMTx && !!gasSimulator?.gasEstimated;
 
   return (
     <Columns sum={3}>
