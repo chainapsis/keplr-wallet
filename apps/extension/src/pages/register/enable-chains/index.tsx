@@ -393,7 +393,7 @@ export const EnableChainsScene: FunctionComponent<{
                 break;
               }
 
-              if (isEVMOnlyChain && !isNaN(parseInt(data))) {
+              if (isEVMOnlyChain && balance.balance.toDec().gt(new Dec(0))) {
                 enabledChainIdentifiers.push(chainInfo.chainIdentifier);
                 break;
               }

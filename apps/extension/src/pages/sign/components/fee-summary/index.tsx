@@ -97,6 +97,7 @@ export const FeeSummary: FunctionComponent<{
                   .maxDecimals(6)
                   .inequalitySymbol(true)
                   .trim(true)
+                  .shrink(true)
                   .hideIBCMetadata(true)
                   .toString()
               )

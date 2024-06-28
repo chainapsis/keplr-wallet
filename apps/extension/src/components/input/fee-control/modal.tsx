@@ -229,6 +229,7 @@ export const TransactionFeeModal: FunctionComponent<{
                     .maxDecimals(6)
                     .inequalitySymbol(true)
                     .trim(true)
+                    .shrink(true)
                     .hideIBCMetadata(true)
                     .toString()}`}
                 </Body3>
@@ -351,37 +352,35 @@ export const TransactionFeeModal: FunctionComponent<{
           })()}
 
           {isGasSimulatorEnabled ? (
-            <React.Fragment>
-              <TextInput
-                label={intl.formatMessage({
-                  id: "components.input.fee-control.modal.gas-adjustment-label",
-                })}
-                value={gasSimulator?.gasAdjustmentValue}
-                onChange={(e) => {
-                  e.preventDefault();
+            <TextInput
+              label={intl.formatMessage({
+                id: "components.input.fee-control.modal.gas-adjustment-label",
+              })}
+              value={gasSimulator?.gasAdjustmentValue}
+              onChange={(e) => {
+                e.preventDefault();
 
-                  gasSimulator?.setGasAdjustmentValue(e.target.value);
-                }}
-                rightLabel={
-                  isGasSimulatorUsable && gasSimulator ? (
-                    <Box marginBottom="0.375rem">
-                      <XAxis alignY="center">
-                        <Subtitle3 color={ColorPalette["gray-200"]}>
-                          <FormattedMessage id="components.input.fee-control.modal.auto-title" />
-                        </Subtitle3>
-                        <Gutter size="0.5rem" />
-                        <Toggle
-                          isOpen={gasSimulator.enabled}
-                          setIsOpen={(isOpen) => {
-                            gasSimulator?.setEnabled(isOpen);
-                          }}
-                        />
-                      </XAxis>
-                    </Box>
-                  ) : null
-                }
-              />
-            </React.Fragment>
+                gasSimulator?.setGasAdjustmentValue(e.target.value);
+              }}
+              rightLabel={
+                isGasSimulatorUsable && gasSimulator ? (
+                  <Box marginBottom="0.375rem">
+                    <XAxis alignY="center">
+                      <Subtitle3 color={ColorPalette["gray-200"]}>
+                        <FormattedMessage id="components.input.fee-control.modal.auto-title" />
+                      </Subtitle3>
+                      <Gutter size="0.5rem" />
+                      <Toggle
+                        isOpen={gasSimulator.enabled}
+                        setIsOpen={(isOpen) => {
+                          gasSimulator?.setEnabled(isOpen);
+                        }}
+                      />
+                    </XAxis>
+                  </Box>
+                ) : null
+              }
+            />
           ) : (
             <TextInput
               label={intl.formatMessage({
@@ -580,6 +579,7 @@ const FeeSelector: FunctionComponent<{
                 .maxDecimals(6)
                 .inequalitySymbol(true)
                 .trim(true)
+                .shrink(true)
                 .hideIBCMetadata(true)
                 .toString()}
             </FeeSelectorStyle.Amount>
@@ -640,6 +640,7 @@ const FeeSelector: FunctionComponent<{
                 .maxDecimals(6)
                 .inequalitySymbol(true)
                 .trim(true)
+                .shrink(true)
                 .hideIBCMetadata(true)
                 .toString()}
             </FeeSelectorStyle.Amount>
@@ -708,6 +709,7 @@ const FeeSelector: FunctionComponent<{
                 .maxDecimals(6)
                 .inequalitySymbol(true)
                 .trim(true)
+                .shrink(true)
                 .hideIBCMetadata(true)
                 .toString()}
             </FeeSelectorStyle.Amount>

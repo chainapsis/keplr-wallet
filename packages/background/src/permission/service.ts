@@ -490,6 +490,10 @@ export class PermissionService {
         this.currentChainIdForEVMByOriginMap.delete(origin);
       }
     }
+
+    for (const key of deletes) {
+      this.permissionMap.delete(key);
+    }
   }
 
   @action
