@@ -502,6 +502,8 @@
   "page.main.components.ibc-history-view.item.succeed": "IBC 전송 성공",
   "page.main.components.ibc-history-view.ibc-swap.item.pending": "토큰 교환 진행중",
   "page.main.components.ibc-history-view.ibc-swap.item.succeed": "토큰 교환 성공",
+  "page.main.components.ibc-history-view.ibc-swap.item.refund.pending": "환불 진행중",
+  "page.main.components.ibc-history-view.ibc-swap.item.refund.succeed": "환불 완료",
   "page.main.components.ibc-history-view.paragraph": "{sourceChain}에서 {destinationChain}(으)로 {assets} 보내기",
   "page.main.components.ibc-history-view.ibc-swap.paragraph": "{assets}을 {destinationDenom}로 교환 중",
   "page.main.components.ibc-history-view.ibc-swap.succeed.paragraph": "{assets}을 받았습니다",

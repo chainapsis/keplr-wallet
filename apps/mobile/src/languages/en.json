@@ -515,6 +515,8 @@
   "page.main.components.ibc-history-view.item.succeed": "IBC Transfer Successful",
   "page.main.components.ibc-history-view.ibc-swap.item.pending": "Swap in Progress",
   "page.main.components.ibc-history-view.ibc-swap.item.succeed": "Swap Successful",
+  "page.main.components.ibc-history-view.ibc-swap.item.refund.pending": "Refund in Progress",
+  "page.main.components.ibc-history-view.ibc-swap.item.refund.succeed": "Refund Completed",
   "page.main.components.ibc-history-view.paragraph": "Transfer {assets} from {sourceChain} to {destinationChain}",
   "page.main.components.ibc-history-view.ibc-swap.paragraph": "Swapping {assets} to {destinationDenom}",
   "page.main.components.ibc-history-view.ibc-swap.succeed.paragraph": "You received {assets}",
