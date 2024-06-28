@@ -590,6 +590,7 @@
   "components.input.fee-control.modal.fee-selector.high": "빠름",
   "components.input.fee-control.modal.guide.external-fee-set": "웹사이트/어플리케이션에 의해 설정된 수수료입니다. 임의로 변경할 경우 트랜잭션이 처리되지 않을 수 있습니다.",
   "components.input.fee-control.modal.notification.changes-applied": "변경사항이 적용되었습니다.",
+  "components.input.fee-control.modal.max-fee": "최대 수수료",
 
   "components.address-book-modal.title": "주소록",
   "components.address-book-modal.recent-tab": "최근",

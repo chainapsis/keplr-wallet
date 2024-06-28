@@ -2,6 +2,7 @@ import React, { FunctionComponent } from "react";
 import {
   IFeeConfig,
   IGasConfig,
+  IGasSimulator,
   InsufficientFeeError,
 } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
@@ -19,12 +20,16 @@ import { FormattedMessage, useIntl } from "react-intl";
 export const FeeSummary: FunctionComponent<{
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
-}> = observer(({ feeConfig, gasConfig }) => {
+  gasSimulator?: IGasSimulator;
+  isForEVMTx?: boolean;
+}> = observer(({ feeConfig, gasConfig, gasSimulator, isForEVMTx }) => {
   const { priceStore, chainStore } = useStore();
 
   const intl = useIntl();
 
   const theme = useTheme();
+
+  const isShowingGasEstimatedOnly = isForEVMTx && !!gasSimulator?.gasEstimated;
 
   return (
     <Box>
@@ -62,19 +67,33 @@ export const FeeSummary: FunctionComponent<{
 
           <YAxis>
             {(() => {
-              if (feeConfig.fees.length > 0) {
-                return feeConfig.fees;
+              if (
+                feeConfig.fees.length === 0 ||
+                (isForEVMTx && !gasSimulator?.gasEstimated)
+              ) {
+                const chainInfo = chainStore.getChain(feeConfig.chainId);
+                return [
+                  new CoinPretty(
+                    chainInfo.stakeCurrency || chainInfo.currencies[0],
+                    new Dec(0)
+                  ),
+                ];
               }
-              const chainInfo = chainStore.getChain(feeConfig.chainId);
-              return [
-                new CoinPretty(
-                  chainInfo.stakeCurrency || chainInfo.currencies[0],
-                  new Dec(0)
-                ),
-              ];
+
+              return feeConfig.fees;
             })()
               .map((fee) =>
                 fee
+                  .quo(
+                    new Dec(isShowingGasEstimatedOnly ? gasConfig?.gas || 1 : 1)
+                  )
+                  .mul(
+                    new Dec(
+                      isShowingGasEstimatedOnly
+                        ? gasSimulator?.gasEstimated || 1
+                        : 1
+                    )
+                  )
                   .maxDecimals(6)
                   .inequalitySymbol(true)
                   .trim(true)
@@ -114,7 +133,21 @@ export const FeeSummary: FunctionComponent<{
                   hasUnknown = true;
                   break;
                 } else {
-                  const price = priceStore.calculatePrice(fee);
+                  const price = priceStore.calculatePrice(
+                    fee
+                      .quo(
+                        new Dec(
+                          isShowingGasEstimatedOnly ? gasConfig?.gas || 1 : 1
+                        )
+                      )
+                      .mul(
+                        new Dec(
+                          isShowingGasEstimatedOnly
+                            ? gasSimulator?.gasEstimated || 1
+                            : 1
+                        )
+                      )
+                  );
                   if (price) {
                     if (!total) {
                       total = price;

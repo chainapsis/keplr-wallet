@@ -46,9 +46,8 @@ import {
   useZeroAllowedGasConfig,
 } from "@keplr-wallet/hooks";
 import { EthTxBase } from "../components/eth-tx/render/tx-base";
-import { erc20ContractInterface } from "@keplr-wallet/stores-eth";
 import { MemoryKVStore } from "@keplr-wallet/common";
-import { CoinPretty, Dec, Int, IntPretty } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 
 /**
  * CosmosTxView의 주석을 꼭 참고하셈
@@ -110,44 +109,12 @@ export const EthereumSigningView: FunctionComponent<{
     () => {
       const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
 
-      const { currency, recipient, amount } = (() => {
-        if (unsignedTx.data) {
-          const dataDecodedValues = erc20ContractInterface.decodeFunctionData(
-            "transfer",
-            unsignedTx.data
-          );
-          const erc20ContractAddress = unsignedTx.to;
-          const currency = chainInfo.forceFindCurrency(
-            `erc20:${erc20ContractAddress}`
-          );
-          const recipient = dataDecodedValues[0];
-          const amount = new IntPretty(new Dec(parseInt(dataDecodedValues[1])))
-            .moveDecimalPointLeft(currency.coinDecimals)
-            .toString();
-
-          return { currency, recipient, amount };
-        } else {
-          const currency = chainInfo.currencies[0];
-          const recipient = unsignedTx.to;
-          const amount = new IntPretty(new Dec(parseInt(unsignedTx.value)))
-            .moveDecimalPointLeft(currency.coinDecimals)
-            .toString();
-
-          return {
-            currency,
-            recipient,
-            amount,
-          };
-        }
-      })();
-
       return {
         simulate: () =>
-          ethereumAccount.simulateGas({
-            sender: account.ethereumHexAddress,
-            currency,
-            amount,
-            recipient,
+          ethereumAccount.simulateGas(account.ethereumHexAddress, {
+            to: unsignedTx.to,
+            data: unsignedTx.data,
+            value: unsignedTx.value,
           }),
       };
     }
@@ -165,44 +132,50 @@ export const EthereumSigningView: FunctionComponent<{
     }
   })();
 
-  const [isFeeSelectedOnSelector, setIsFeeSelectedOnSelector] = useState(false);
-
   useEffect(() => {
     if (isTxSigning) {
+      // Disable gas simulator from setting gas, because gasLimit is already set.
+      if (interactionData.isInternal) {
+        gasSimulator.setEnabled(false);
+      }
+
       const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
 
       const gasLimitFromTx = unsignedTx.gasLimit ?? unsignedTx.gas;
-      if (gasLimitFromTx) {
-        gasSimulator.setEnabled(false);
+      if (gasLimitFromTx && parseInt(gasLimitFromTx) > 0) {
         gasConfig.setValue(parseInt(gasLimitFromTx));
-      }
 
-      if (
-        gasConfig.gas > 0 &&
-        unsignedTx.maxFeePerGas &&
-        isFeeSelectedOnSelector === false
-      ) {
-        feeConfig.setFee(
-          new CoinPretty(
-            chainInfo.currencies[0],
-            new Dec(gasConfig.gas).mul(
-              new Dec(parseInt(unsignedTx.maxFeePerGas))
+        if (unsignedTx.maxFeePerGas && parseInt(unsignedTx.maxFeePerGas) > 0) {
+          feeConfig.setFee(
+            new CoinPretty(
+              chainInfo.currencies[0],
+              new Dec(gasConfig.gas).mul(
+                new Dec(parseInt(unsignedTx.maxFeePerGas))
+              )
             )
-          )
-        );
-        setIsFeeSelectedOnSelector(true);
+          );
+        }
       }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-      unsignedTx.gasLimit = `0x${gasConfig.gas.toString(16)}`;
-      unsignedTx.maxFeePerGas = `0x${new Int(
-        feeConfig.getFeePrimitive()[0].amount
-      )
-        .div(new Int(gasConfig.gas))
-        .toBigNumber()
-        .toString(16)}`;
-      unsignedTx.maxPriorityFeePerGas =
-        unsignedTx.maxPriorityFeePerGas ?? maxPriorityFeePerGas;
-      setSigningDataBuff(Buffer.from(JSON.stringify(unsignedTx), "utf8"));
+  useEffect(() => {
+    if (isTxSigning && !interactionData.isInternal) {
+      const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
+
+      if (gasConfig.gas > 0) {
+        unsignedTx.gasLimit = `0x${gasConfig.gas.toString(16)}`;
+        unsignedTx.maxFeePerGas = `0x${new Int(
+          feeConfig.getFeePrimitive()[0].amount
+        )
+          .div(new Int(gasConfig.gas))
+          .toBigNumber()
+          .toString(16)}`;
+        unsignedTx.maxPriorityFeePerGas =
+          unsignedTx.maxPriorityFeePerGas ?? maxPriorityFeePerGas;
+        setSigningDataBuff(Buffer.from(JSON.stringify(unsignedTx), "utf8"));
+      }
     }
   }, [
     gasConfig.gas,
@@ -212,9 +185,26 @@ export const EthereumSigningView: FunctionComponent<{
     gasSimulator,
     gasConfig,
     feeConfig,
-    chainInfo.currencies,
-    isFeeSelectedOnSelector,
+    interactionData.isInternal,
   ]);
+
+  useEffect(() => {
+    (async () => {
+      if (isTxSigning && chainInfo.features.includes("op-stack-l1-data-fee")) {
+        const { to, gasLimit, value, data, chainId }: UnsignedTransaction =
+          JSON.parse(Buffer.from(message).toString("utf8"));
+
+        const l1DataFee = await ethereumAccount.simulateOpStackL1Fee({
+          to,
+          gasLimit,
+          value,
+          data,
+          chainId,
+        });
+        feeConfig.setL1DataFee(new Dec(parseInt(l1DataFee)));
+      }
+    })();
+  }, [chainInfo.features, ethereumAccount, feeConfig, isTxSigning, message]);
 
   const signingDataText = useMemo(() => {
     switch (signType) {
@@ -277,6 +267,9 @@ export const EthereumSigningView: FunctionComponent<{
   useUnmount(() => {
     unmountPromise.resolver();
   });
+
+  const [isUnknownContractExecution, setIsUnknownContractExecution] =
+    useState(false);
 
   return (
     <HeaderLayout
@@ -473,7 +466,7 @@ export const EthereumSigningView: FunctionComponent<{
                 : "none",
           }}
         >
-          {isTxSigning ? (
+          {isTxSigning && !isUnknownContractExecution ? (
             <Box>
               {isViewData ? (
                 <Box
@@ -517,6 +510,8 @@ export const EthereumSigningView: FunctionComponent<{
                           />
                         );
                       }
+
+                      setIsUnknownContractExecution(true);
                     })()}
                   </Body2>
                 </Box>
@@ -546,7 +541,14 @@ export const EthereumSigningView: FunctionComponent<{
         {isTxSigning &&
           (() => {
             if (interactionData.isInternal) {
-              return <FeeSummary feeConfig={feeConfig} gasConfig={gasConfig} />;
+              return (
+                <FeeSummary
+                  feeConfig={feeConfig}
+                  gasConfig={gasConfig}
+                  gasSimulator={gasSimulator}
+                  isForEVMTx
+                />
+              );
             }
 
             return (
@@ -555,6 +557,7 @@ export const EthereumSigningView: FunctionComponent<{
                 senderConfig={senderConfig}
                 gasConfig={gasConfig}
                 gasSimulator={gasSimulator}
+                isForEVMTx
               />
             );
           })()}

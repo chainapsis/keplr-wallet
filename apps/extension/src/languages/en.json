@@ -606,6 +606,7 @@
   "components.input.fee-control.modal.fee-selector.high": "High",
   "components.input.fee-control.modal.guide.external-fee-set": "Transaction fee was set by the website/dApp. The transaction may not be processed if you change the setting.",
   "components.input.fee-control.modal.notification.changes-applied": "Changes have been applied",
+  "components.input.fee-control.modal.max-fee": "Max Fee",
 
   "components.address-book-modal.title": "Address Book",
   "components.address-book-modal.recent-tab": "Recent",

@@ -21,8 +21,13 @@ export class ObservableQueryEthereumFeeHistoryInner extends ObservableEvmChainJs
     newestBlock: string,
     rewardPercentiles: number[]
   ) {
+    const hexBlockCount =
+      typeof blockCount === "string"
+        ? blockCount
+        : `0x${blockCount.toString(16)}`;
+
     super(sharedContext, chainId, chainGetter, "eth_feeHistory", [
-      blockCount,
+      hexBlockCount,
       newestBlock,
       rewardPercentiles,
     ]);

@@ -2644,13 +2644,13 @@ export const EmbedChainInfos: ChainInfo[] = [
   },
   // For test
   {
-    rpc: "https://mainnet.infura.io/v3/37b42f2d421b43f481788b4e18807191",
-    rest: "https://mainnet.infura.io/v3/37b42f2d421b43f481788b4e18807191",
+    rpc: "https://eth-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    rest: "https://eth-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
     evm: {
       chainId: 1,
-      rpc: "https://mainnet.infura.io/v3/37b42f2d421b43f481788b4e18807191",
+      rpc: "https://eth-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
       websocket:
-        "wss://mainnet.infura.io/ws/v3/37b42f2d421b43f481788b4e18807191",
+        "wss://eth-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
     },
     chainId: "eip155:1",
     chainName: "Ethereum",
@@ -2680,6 +2680,83 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     features: ["eth-address-gen", "eth-key-sign"],
+  },
+  // For test
+  {
+    rpc: "https://base-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    rest: "https://base-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    evm: {
+      chainId: 8453,
+      rpc: "https://base-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+      websocket:
+        "wss://base-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    },
+    chainId: "eip155:8453",
+    chainName: "Base",
+    chainSymbolImageUrl: "https://icons.llamao.fi/icons/chains/rsz_base.jpg",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+      },
+    ],
+    features: ["eth-address-gen", "eth-key-sign", "op-stack-l1-data-fee"],
+  },
+  // For test
+  {
+    rpc: "https://opt-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    rest: "https://opt-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    evm: {
+      chainId: 10,
+      rpc: "https://opt-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+      websocket:
+        "wss://opt-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    },
+    chainId: "eip155:10",
+    chainName: "Optimism",
+    chainSymbolImageUrl:
+      "https://avatars.githubusercontent.com/u/58791460?s=200&v=4",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+      },
+    ],
+    features: ["eth-address-gen", "eth-key-sign", "op-stack-l1-data-fee"],
   },
 ];
 

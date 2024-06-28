@@ -231,11 +231,11 @@ export class PermissionService {
       "/permission",
       INTERACTION_TYPE_PERMISSION,
       permissionData,
-      (newChainId: string) => {
-        if (newChainId) {
-          this.chainsService.getChainInfoOrThrow(newChainId);
-          this.addPermission([newChainId], type, origins);
-          this.setCurrentChainIdForEVM(origins, newChainId);
+      (newChainId?: string) => {
+        if (options?.isForEVM) {
+          const chainId = newChainId ?? chainIds[0];
+          this.addPermission([chainId], type, origins);
+          this.setCurrentChainIdForEVM(origins, chainId);
         } else {
           this.addPermission(chainIds, type, origins);
         }
@@ -467,6 +467,11 @@ export class PermissionService {
       this.permissionMap.delete(
         PermissionKeyHelper.getPermissionKey(chainId, type, origin)
       );
+
+      const currentChainIdForEVM = this.getCurrentChainIdForEVM(origin);
+      if (chainId === currentChainIdForEVM) {
+        this.currentChainIdForEVMByOriginMap.delete(origin);
+      }
     }
   }
 
@@ -481,6 +486,8 @@ export class PermissionService {
         if (typeAndOrigin) {
           deletes.push(key);
         }
+
+        this.currentChainIdForEVMByOriginMap.delete(origin);
       }
     }
 
@@ -503,6 +510,13 @@ export class PermissionService {
 
     for (const key of deletes) {
       this.permissionMap.delete(key);
+    }
+
+    for (const origin of origins) {
+      const currentChainIdForEVM = this.getCurrentChainIdForEVM(origin);
+      if (chainId === currentChainIdForEVM) {
+        this.currentChainIdForEVMByOriginMap.delete(origin);
+      }
     }
   }
 
@@ -557,59 +571,63 @@ export class PermissionService {
     for (const key of deletes) {
       this.permissionMap.delete(key);
     }
+
+    this.currentChainIdForEVMByOriginMap.clear();
   }
 
   getCurrentChainIdForEVM(origin: string): string | undefined {
-    return this.currentChainIdForEVMByOriginMap.get(origin);
+    const currentChainId = this.currentChainIdForEVMByOriginMap.get(origin);
+    if (
+      currentChainId &&
+      !this.hasPermission(
+        currentChainId,
+        getBasicAccessPermissionType(),
+        origin
+      )
+    ) {
+      this.currentChainIdForEVMByOriginMap.delete(origin);
+      return;
+    }
+
+    return currentChainId;
   }
 
   @action
   setCurrentChainIdForEVM(origins: string[], chainId: string) {
     for (const origin of origins) {
       this.currentChainIdForEVMByOriginMap.set(origin, chainId);
+
+      const evmInfo = this.chainsService.getEVMInfoOrThrow(chainId);
+
+      this.interactionService.dispatchEvent(
+        WEBPAGE_PORT,
+        "keplr_chainChanged",
+        {
+          origin,
+          evmChainId: evmInfo.chainId,
+        }
+      );
     }
   }
 
   @action
   async updateCurrentChainIdForEVM(env: Env, origin: string, chainId: string) {
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    if (chainInfo.evm === undefined) {
-      throw new Error("The chain is not provided EVM info");
-    }
-
     const type = getBasicAccessPermissionType();
+    const chainIds = [chainId];
+    const origins = [origin];
+
     if (!this.hasPermission(chainId, type, origin)) {
-      const chainIds = [chainId];
-      const origins = [origin];
-      const permissionData: PermissionData = {
-        chainIds,
-        type,
-        origins,
-        options: { isForEVM: true, isUnableToChangeChainInUI: true },
-      };
-
-      await this.interactionService.waitApproveV2(
-        env,
-        "/permission",
-        INTERACTION_TYPE_PERMISSION,
-        permissionData,
-        (newChainId: string) => {
-          if (newChainId) {
-            this.chainsService.getChainInfoOrThrow(newChainId);
-            this.addPermission([newChainId], type, origins);
-            this.setCurrentChainIdForEVM(origins, newChainId);
-          } else {
-            this.addPermission(chainIds, type, origins);
-          }
-        }
-      );
+      if (env.isInternalMsg) {
+        this.addPermission(chainIds, type, origins);
+        this.setCurrentChainIdForEVM(origins, chainId);
+      } else {
+        await this.grantPermission(env, chainIds, type, origins, {
+          isForEVM: true,
+          isUnableToChangeChainInUI: true,
+        });
+      }
+    } else {
+      this.setCurrentChainIdForEVM(origins, chainId);
     }
-
-    this.currentChainIdForEVMByOriginMap.set(origin, chainId);
-
-    this.interactionService.dispatchEvent(WEBPAGE_PORT, "keplr_chainChanged", {
-      origin,
-      evmChainId: chainInfo.evm.chainId,
-    });
   }
 }

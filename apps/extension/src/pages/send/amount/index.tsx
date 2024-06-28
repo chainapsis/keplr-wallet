@@ -32,7 +32,7 @@ import { FeeControl } from "../../../components/input/fee-control";
 import { useNotification } from "../../../hooks/notification";
 import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
 import { ICNSInfo } from "../../../config.ui";
-import { CoinPretty, DecUtils } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
@@ -132,7 +132,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     chainId,
     sender,
     // TODO: 이 값을 config 밑으로 빼자
-    300000,
+    isEvmTx ? 21000 : 300000,
     isIBCTransfer,
     {
       allowHexAddressToBech32Address:
@@ -154,7 +154,15 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       );
 
       if (denomHelper.type !== "native") {
-        if (denomHelper.type === "cw20" || denomHelper.type === "erc20") {
+        if (denomHelper.type === "erc20") {
+          // XXX: This logic causes gas simulation to run even if `gasSimulatorKey` is the same, it needs to be figured out why.
+          const amountHexDigits = parseInt(
+            sendConfigs.amountConfig.amount[0].toCoin().amount
+          ).toString(16).length;
+          return `${txType}/${denomHelper.type}/${denomHelper.contractAddress}/${amountHexDigits}`;
+        }
+
+        if (denomHelper.type === "cw20") {
           // Probably, the gas can be different per cw20 according to how the contract implemented.
           return `${txType}/${denomHelper.type}/${denomHelper.contractAddress}`;
         }
@@ -164,7 +172,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
 
     return `${txType}/native`;
-  }, [isEvmTx, sendConfigs.amountConfig.currency]);
+  }, [
+    isEvmTx,
+    sendConfigs.amountConfig.amount,
+    sendConfigs.amountConfig.currency,
+  ]);
 
   const gasSimulator = useGasSimulator(
     new ExtensionKVStore("gas-simulator.main.send"),
@@ -220,12 +232,10 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         );
       }
 
-      const isEvmTx =
-        isEvmChain && sendConfigs.recipientConfig.isRecipientEthereumHexAddress;
       if (isEvmTx) {
         return {
           simulate: () =>
-            ethereumAccount.simulateGas({
+            ethereumAccount.simulateGasForSendTokenTx({
               currency: sendConfigs.amountConfig.amount[0].currency,
               amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
               sender: sendConfigs.senderConfig.sender,
@@ -276,6 +286,41 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     sendConfigs.senderConfig,
     chainInfo.stakeCurrency?.coinMinimalDenom,
     chainInfo.currencies,
+  ]);
+
+  useEffect(() => {
+    (async () => {
+      if (chainInfo.features.includes("op-stack-l1-data-fee")) {
+        const { maxFeePerGas, maxPriorityFeePerGas } =
+          sendConfigs.feeConfig.getEIP1559TxFees(sendConfigs.feeConfig.type);
+
+        const { to, gasLimit, value, data, chainId } =
+          ethereumAccount.makeSendTokenTx({
+            currency: sendConfigs.amountConfig.amount[0].currency,
+            amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
+            to: sendConfigs.recipientConfig.recipient,
+            gasLimit: sendConfigs.gasConfig.gas,
+            maxFeePerGas: maxFeePerGas.toString(),
+            maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+          });
+
+        const l1DataFee = await ethereumAccount.simulateOpStackL1Fee({
+          to,
+          gasLimit,
+          value,
+          data,
+          chainId,
+        });
+        sendConfigs.feeConfig.setL1DataFee(new Dec(parseInt(l1DataFee)));
+      }
+    })();
+  }, [
+    chainInfo.features,
+    ethereumAccount,
+    sendConfigs.amountConfig.amount,
+    sendConfigs.feeConfig,
+    sendConfigs.gasConfig.gas,
+    sendConfigs.recipientConfig.recipient,
   ]);
 
   useEffect(() => {
@@ -423,17 +468,16 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
         if (!txConfigsValidate.interactionBlocked) {
           try {
-            if (isEvmTx && sendConfigs.feeConfig.type !== "manual") {
+            if (isEvmTx) {
               ethereumAccount.setIsSendingTx(true);
               const { maxFeePerGas, maxPriorityFeePerGas } =
                 sendConfigs.feeConfig.getEIP1559TxFees(
                   sendConfigs.feeConfig.type
                 );
 
-              const unsignedTx = await ethereumAccount.makeSendTokenTx({
+              const unsignedTx = ethereumAccount.makeSendTokenTx({
                 currency: sendConfigs.amountConfig.amount[0].currency,
                 amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
-                from: sender,
                 to: sendConfigs.recipientConfig.recipient,
                 gasLimit: sendConfigs.gasConfig.gas,
                 maxFeePerGas: maxFeePerGas.toString(),
@@ -875,6 +919,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             feeConfig={sendConfigs.feeConfig}
             gasConfig={sendConfigs.gasConfig}
             gasSimulator={gasSimulator}
+            isForEVMTx={isEvmTx}
           />
         </Stack>
       </Box>

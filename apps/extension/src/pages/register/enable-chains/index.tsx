@@ -357,7 +357,8 @@ export const EnableChainsScene: FunctionComponent<{
           for (const bech32Address of candidateAddress.bech32Addresses) {
             // Check that the account has some assets or delegations.
             // If so, enable it by default
-            const queryBalance = chainStore.isEvmChain(chainInfo.chainId)
+            const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainInfo.chainId);
+            const queryBalance = isEVMOnlyChain
               ? queries.queryBalances.getQueryEthereumHexAddress(
                   account.ethereumHexAddress
                 )
@@ -391,15 +392,22 @@ export const EnableChainsScene: FunctionComponent<{
                 enabledChainIdentifiers.push(chainInfo.chainIdentifier);
                 break;
               }
+
+              if (isEVMOnlyChain && balance.balance.toDec().gt(new Dec(0))) {
+                enabledChainIdentifiers.push(chainInfo.chainIdentifier);
+                break;
+              }
             }
 
-            const queryDelegations =
-              queries.cosmos.queryDelegations.getQueryBech32Address(
-                bech32Address.address
-              );
-            if (queryDelegations.delegationBalances.length > 0) {
-              enabledChainIdentifiers.push(chainInfo.chainIdentifier);
-              break;
+            if (!isEVMOnlyChain) {
+              const queryDelegations =
+                queries.cosmos.queryDelegations.getQueryBech32Address(
+                  bech32Address.address
+                );
+              if (queryDelegations.delegationBalances.length > 0) {
+                enabledChainIdentifiers.push(chainInfo.chainIdentifier);
+                break;
+              }
             }
           }
         }
@@ -516,7 +524,7 @@ export const EnableChainsScene: FunctionComponent<{
         const account = accountStore.getAccount(chainInfo.chainId);
 
         if (addresses && addresses.length > 0) {
-          const queryBalance = chainStore.isEvmChain(chainInfo.chainId)
+          const queryBalance = chainStore.isEvmOnlyChain(chainInfo.chainId)
             ? queries.queryBalances.getQueryEthereumHexAddress(
                 account.ethereumHexAddress
               )
@@ -539,7 +547,7 @@ export const EnableChainsScene: FunctionComponent<{
         const account = accountStore.getAccount(chainInfo.chainId);
 
         if (addresses && addresses.length > 0) {
-          const queryBalance = chainStore.isEvmChain(chainInfo.chainId)
+          const queryBalance = chainStore.isEvmOnlyChain(chainInfo.chainId)
             ? queries.queryBalances.getQueryEthereumHexAddress(
                 account.ethereumHexAddress
               )
@@ -649,7 +657,9 @@ export const EnableChainsScene: FunctionComponent<{
                 chainInfo.stakeCurrency || chainInfo.currencies[0];
 
               const balance = (() => {
-                const queryBalance = chainStore.isEvmChain(chainInfo.chainId)
+                const queryBalance = chainStore.isEvmOnlyChain(
+                  chainInfo.chainId
+                )
                   ? queries.queryBalances.getQueryEthereumHexAddress(
                       account.ethereumHexAddress
                     )

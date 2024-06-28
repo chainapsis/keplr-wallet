@@ -243,7 +243,9 @@ export class KeyRingEthereumService {
     const currentChainId =
       this.permissionService.getCurrentChainIdForEVM(origin);
     if (currentChainId == null) {
-      throw new Error("The origin is not permitted.");
+      throw new Error(
+        "The website is not permitted. Please disconnect and reconnect to the website."
+      );
     }
 
     const currentChainInfo =
@@ -593,11 +595,13 @@ export class KeyRingEthereumService {
           throw new Error("No matched EVM chain found in Keplr.");
         }
 
-        return await this.permissionService.updateCurrentChainIdForEVM(
+        await this.permissionService.updateCurrentChainIdForEVM(
           env,
           origin,
           newCurrentChainInfo.chainId
         );
+
+        return null;
       }
       case "wallet_addEthereumChain": {
         const param =

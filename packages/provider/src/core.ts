@@ -695,7 +695,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     return true;
   }
 
-  async request<T>({
+  async request({
     method,
     params,
     providerId,
@@ -703,7 +703,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     method: string;
     params?: unknown[] | Record<string, unknown>;
     providerId?: string;
-  }): Promise<T> {
+  }): Promise<unknown> {
     return await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
