@@ -5,16 +5,12 @@ import {registerCardModal} from '../../../../components/modal/card';
 import {HorizontalSimpleScene} from '../../../../components/transition';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../../../stores';
-import {BuyModal} from './buy-modal';
-import {StackNavProp} from '../../../../navigation';
 
 export const DepositModal = registerCardModal<{
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-
-  navigation: StackNavProp;
 }>(
-  observer(({isOpen, setIsOpen, navigation}) => {
+  observer(({isOpen, setIsOpen}) => {
     const {chainStore} = useStore();
 
     const [qrChainId, setQRChainId] = useState<string>(
@@ -34,10 +30,6 @@ export const DepositModal = registerCardModal<{
             key: 'QR',
             element: QRScene,
           },
-          {
-            key: 'Buy',
-            element: BuyModal,
-          },
         ]}
         transitionAlign="bottom"
         currentSceneKey={currentScene}
@@ -50,7 +42,6 @@ export const DepositModal = registerCardModal<{
           setQRChainId,
           qrBech32Address,
           setQRBech32Address,
-          navigation,
         }}
       />
     );
