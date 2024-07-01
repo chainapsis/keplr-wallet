@@ -13,9 +13,8 @@ export const DepositModal = registerCardModal<{
   setIsOpen: (isOpen: boolean) => void;
 
   navigation: StackNavProp;
-  disableBuyCrypto?: boolean;
 }>(
-  observer(({isOpen, setIsOpen, navigation, disableBuyCrypto}) => {
+  observer(({isOpen, setIsOpen, navigation}) => {
     const {chainStore} = useStore();
 
     const [qrChainId, setQRChainId] = useState<string>(
@@ -52,7 +51,6 @@ export const DepositModal = registerCardModal<{
           qrBech32Address,
           setQRBech32Address,
           navigation,
-          disableBuyCrypto,
         }}
       />
     );
