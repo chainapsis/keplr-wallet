@@ -29,7 +29,6 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native-gesture-handler';
 import {Defs, LinearGradient, Path, Rect, Stop, Svg} from 'react-native-svg';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 export const CopyAddressScene: FunctionComponent<{
   setIsOpen: (isOpen: boolean) => void;
@@ -135,8 +134,6 @@ export const CopyAddressScene: FunctionComponent<{
       });
 
     const [blockInteraction, setBlockInteraction] = useState(false);
-
-    const safeAreaInsets = useSafeAreaInsets();
 
     return (
       <Box backgroundColor={style.get('color-gray-600').color}>
@@ -308,12 +305,6 @@ export const CopyAddressScene: FunctionComponent<{
                 );
               })}
           </Box>
-
-          <View
-            style={{
-              height: safeAreaInsets.bottom,
-            }}
-          />
         </ScrollView>
       </Box>
     );

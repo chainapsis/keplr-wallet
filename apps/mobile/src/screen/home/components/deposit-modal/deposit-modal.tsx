@@ -55,7 +55,4 @@ export const DepositModal = registerCardModal<{
       />
     );
   }),
-  {
-    disabledSafeArea: true,
-  },
 );

@@ -11,7 +11,6 @@ import {YAxis} from '../../../../components/axis';
 import QRCode from 'react-native-qrcode-svg';
 import {Text} from 'react-native';
 import {useStore} from '../../../../stores';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 //NOTE - navigation에서 기본으로 제공해주는 뒤로가기 버튼으로 할때는 뒤로 간뒤 넓어지는 애니메이션이 진행되는데
 // 커스텀 버튼을 만들어서 goBack을 실행하면 뒤로 가면서 애니메이션이 실행되서 일단 이렇게 진행
@@ -24,10 +23,8 @@ export const QRScene = observer<{
   const chainInfo = chainStore.getChain(qrChainId);
   const style = useStyle();
 
-  const safeAreaInsets = useSafeAreaInsets();
-
   return (
-    <Box paddingBottom={safeAreaInsets.bottom}>
+    <Box>
       <Columns alignY="center" sum={2}>
         <Gutter size={12} />
         <IconButton
