@@ -1,4 +1,5 @@
 import {
+  EthereumProviderRpcError,
   KeplrError,
   Message,
   MessageRequester,
@@ -33,7 +34,7 @@ export class RNMessageRequesterBase implements MessageRequester {
     const sender = this.getSender();
 
     // Set message's origin.
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
     // @ts-ignore
     msg['origin'] = sender.origin;
 
@@ -67,11 +68,21 @@ export class RNMessageRequesterBase implements MessageRequester {
       if (typeof result.error === 'string') {
         throw new Error(result.error);
       } else {
-        throw new KeplrError(
-          result.error.module,
-          result.error.code,
-          result.error.message,
-        );
+        if ('module' in result.error) {
+          if (typeof result.error.module === 'string') {
+            throw new KeplrError(
+              result.error.module,
+              result.error.code,
+              result.error.message,
+            );
+          }
+        } else {
+          throw new EthereumProviderRpcError(
+            result.error.code,
+            result.error.message,
+            result.error.data,
+          );
+        }
       }
     }
 
