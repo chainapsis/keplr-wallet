@@ -51,6 +51,7 @@ import {
 import {
   EthereumQueries,
   EthereumAccountStore,
+  ERC20CurrencyRegistrar,
 } from "@keplr-wallet/stores-eth";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
@@ -120,6 +121,7 @@ export class RootStore {
   public readonly lsmCurrencyRegistrar: LSMCurrencyRegistrar;
   public readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegistrar;
   public readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar;
+  public readonly erc20CurrencyRegistrar: ERC20CurrencyRegistrar;
 
   public readonly analyticsStore: AnalyticsStore;
 
@@ -430,6 +432,12 @@ export class RootStore {
         this.queriesStore,
         "ethereum"
       );
+    this.erc20CurrencyRegistrar = new ERC20CurrencyRegistrar(
+      new ExtensionKVStore("store_erc20_currency_registrar"),
+      24 * 3600 * 1000,
+      this.chainStore,
+      this.queriesStore
+    );
 
     // XXX: Remember that userId would be set by `StoreProvider`
     this.analyticsStore = new AnalyticsStore(
