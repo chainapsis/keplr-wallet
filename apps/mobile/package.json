@@ -78,6 +78,7 @@
     "react-native-ble-plx": "^2.0.3",
     "react-native-code-push": "^8.2.1",
     "react-native-device-info": "^10.11.0",
+    "react-native-draggable-flatlist": "^4.0.1",
     "react-native-exception-handler": "^2.10.10",
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "2.16.0",
