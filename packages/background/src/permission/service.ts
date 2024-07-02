@@ -166,7 +166,9 @@ export class PermissionService {
       );
     }
 
-    this.checkBasicAccessPermission(env, chainIds, origin);
+    if (!options?.isForEVM) {
+      this.checkBasicAccessPermission(env, chainIds, origin);
+    }
   }
 
   async checkOrGrantPermission(
