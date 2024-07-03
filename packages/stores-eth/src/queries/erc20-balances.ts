@@ -12,23 +12,30 @@ import {
   QuerySharedContext,
 } from "@keplr-wallet/stores";
 import { EthereumAccountBase } from "../account";
-import { alchemySupportedChainIds } from "../constants";
+import { ankrSupportedChainIdMap } from "../constants";
 
-interface AlchemyERC20Balances {
-  address: string;
-  tokenBalances: [
+interface AnkrERC20Balances {
+  assets: [
     {
+      balance: string;
+      balanceRawInteger: string;
+      balanceUsd: string;
+      blockchain: string;
       contractAddress: string;
-      tokenBalance: string;
-      error: {
-        code: number;
-        message: string;
-      };
+      holderAddress: string;
+      thumbnail: string;
+      tokenDecimals: string;
+      tokenName: string;
+      tokenPrice: string;
+      tokenSymbol: string;
+      tokenType: string;
     }
   ];
+  nextPageToken: string;
+  totalBalanceUsd: string;
 }
 
-export class ObservableQueryAlchemyERC20BalancesImplParent extends ObservableJsonRPCQuery<AlchemyERC20Balances> {
+export class ObservableQueryThirdpartyERC20BalancesImplParent extends ObservableJsonRPCQuery<AnkrERC20Balances> {
   // XXX: See comments below.
   //      The reason why this field is here is that I don't know if it's mobx's bug or intention,
   //      but fetch can be executed twice by observation of parent and child by `onBecomeObserved`,
@@ -39,14 +46,19 @@ export class ObservableQueryAlchemyERC20BalancesImplParent extends ObservableJso
     sharedContext: QuerySharedContext,
     protected readonly chainId: string,
     protected readonly chainGetter: ChainGetter,
-    protected readonly denomHelper: DenomHelper,
-    protected readonly ethereumURL: string,
     protected readonly ethereumHexAddress: string
   ) {
-    super(sharedContext, ethereumURL, "", "alchemy_getTokenBalances", [
-      ethereumHexAddress,
-      "erc20",
-    ]);
+    super(
+      sharedContext,
+      // For test
+      "https://rpc.ankr.com",
+      "/multichain/2ad9881cb349f83d184dd4656da1e682821b1e8d65afe2a9381e8148a8a91dd1",
+      "ankr_getAccountBalance",
+      {
+        blockchain: Object.keys(ankrSupportedChainIdMap),
+        walletAddress: ethereumHexAddress,
+      }
+    );
 
     makeObservable(this);
   }
@@ -57,23 +69,32 @@ export class ObservableQueryAlchemyERC20BalancesImplParent extends ObservableJso
   }
 
   protected override onReceiveResponse(
-    response: Readonly<QueryResponse<AlchemyERC20Balances>>
+    response: Readonly<QueryResponse<AnkrERC20Balances>>
   ) {
     super.onReceiveResponse(response);
 
     const chainInfo = this.chainGetter.getChain(this.chainId);
-    const denoms = response.data.tokenBalances.map(
-      (bal) => `erc20:${bal.contractAddress}`
-    );
-    chainInfo.addUnknownDenoms(...denoms);
+    const erc20Currencies: AppCurrency[] = response.data.assets
+      .filter(
+        (asset) =>
+          asset.contractAddress &&
+          ankrSupportedChainIdMap[asset.blockchain] === this.chainId
+      )
+      .map((asset) => ({
+        coinMinimalDenom: `erc20:${asset.contractAddress}`,
+        coinDecimals: parseInt(asset.tokenDecimals),
+        coinDenom: asset.tokenSymbol,
+        coinImageUrl: asset.thumbnail,
+      }));
+    chainInfo.addCurrencies(...erc20Currencies);
   }
 }
 
-export class ObservableQueryAlchemyERC20BalancesImpl
+export class ObservableQueryThirdpartyERC20BalancesImpl
   implements IObservableQueryBalanceImpl
 {
   constructor(
-    protected readonly parent: ObservableQueryAlchemyERC20BalancesImplParent,
+    protected readonly parent: ObservableQueryThirdpartyERC20BalancesImplParent,
     protected readonly chainId: string,
     protected readonly chainGetter: ChainGetter,
     protected readonly denomHelper: DenomHelper
@@ -90,14 +111,17 @@ export class ObservableQueryAlchemyERC20BalancesImpl
     }
 
     const contractAddress = this.denomHelper.denom.replace("erc20:", "");
-    const tokenBalance = this.response.data.tokenBalances.find(
+    const tokenBalance = this.response.data.assets.find(
       (bal) => bal.contractAddress === contractAddress
     );
     if (!tokenBalance) {
       return new CoinPretty(currency, new Int(0)).ready(false);
     }
 
-    return new CoinPretty(currency, new Int(BigInt(tokenBalance.tokenBalance)));
+    return new CoinPretty(
+      currency,
+      new Int(BigInt(tokenBalance.balanceRawInteger))
+    );
   }
 
   @computed
@@ -120,7 +144,7 @@ export class ObservableQueryAlchemyERC20BalancesImpl
   get isStarted(): boolean {
     return this.parent.isStarted;
   }
-  get response(): Readonly<QueryResponse<AlchemyERC20Balances>> | undefined {
+  get response(): Readonly<QueryResponse<AnkrERC20Balances>> | undefined {
     return this.parent.response;
   }
 
@@ -165,12 +189,12 @@ export class ObservableQueryAlchemyERC20BalancesImpl
   }
 }
 
-export class ObservableQueryAlchemyERC20BalanceRegistry
+export class ObservableQueryThirdpartyERC20BalanceRegistry
   implements BalanceRegistry
 {
   protected parentMap: Map<
     string,
-    ObservableQueryAlchemyERC20BalancesImplParent
+    ObservableQueryThirdpartyERC20BalancesImplParent
   > = new Map();
 
   constructor(protected readonly sharedContext: QuerySharedContext) {}
@@ -180,13 +204,14 @@ export class ObservableQueryAlchemyERC20BalanceRegistry
     chainGetter: ChainGetter,
     address: string,
     minimalDenom: string
-  ): ObservableQueryAlchemyERC20BalancesImpl | undefined {
+  ): ObservableQueryThirdpartyERC20BalancesImpl | undefined {
     const denomHelper = new DenomHelper(minimalDenom);
     const chainInfo = chainGetter.getChain(chainId);
     const isHexAddress =
       EthereumAccountBase.isEthereumHexAddressWithChecksum(address);
     if (
-      !alchemySupportedChainIds.includes(chainId) ||
+      !Object.values(ankrSupportedChainIdMap).includes(chainId) ||
+      denomHelper.type !== "erc20" ||
       !isHexAddress ||
       !chainInfo.evm
     ) {
@@ -197,18 +222,16 @@ export class ObservableQueryAlchemyERC20BalanceRegistry
     if (!this.parentMap.has(key)) {
       this.parentMap.set(
         key,
-        new ObservableQueryAlchemyERC20BalancesImplParent(
+        new ObservableQueryThirdpartyERC20BalancesImplParent(
           this.sharedContext,
           chainId,
           chainGetter,
-          denomHelper,
-          chainInfo.evm.rpc,
           address
         )
       );
     }
 
-    return new ObservableQueryAlchemyERC20BalancesImpl(
+    return new ObservableQueryThirdpartyERC20BalancesImpl(
       this.parentMap.get(key)!,
       chainId,
       chainGetter,

@@ -4,6 +4,7 @@ import {
   ChainGetter,
   IObservableQueryBalanceImpl,
   ObservableJsonRPCQuery,
+  QueryResponse,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
@@ -11,6 +12,8 @@ import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
 import bigInteger from "big-integer";
 import { EthereumAccountBase } from "../account";
+import { ankrSupportedChainIdMap } from "../constants";
+import { ObservableQueryThirdpartyERC20BalancesImplParent } from "./erc20-balances";
 
 export class ObservableQueryEthAccountBalanceImpl
   extends ObservableJsonRPCQuery<string>
@@ -29,6 +32,40 @@ export class ObservableQueryEthAccountBalanceImpl
       "latest",
     ]);
     makeObservable(this);
+  }
+
+  protected override onReceiveResponse(
+    response: Readonly<QueryResponse<string>>
+  ) {
+    super.onReceiveResponse(response);
+
+    if (Object.values(ankrSupportedChainIdMap).includes(this.chainId)) {
+      const impleParent = new ObservableQueryThirdpartyERC20BalancesImplParent(
+        this.sharedContext,
+        this.chainId,
+        this.chainGetter,
+        this.ethereumeHexAddress
+      );
+      const chainInfo = this.chainGetter.getChain(this.chainId);
+
+      impleParent.waitResponse().then((response) => {
+        const erc20Currencies = response?.data.assets
+          .filter(
+            (asset) =>
+              asset.contractAddress &&
+              ankrSupportedChainIdMap[asset.blockchain] === this.chainId
+          )
+          .map((asset) => ({
+            coinMinimalDenom: `erc20:${asset.contractAddress}`,
+            coinDecimals: parseInt(asset.tokenDecimals),
+            coinDenom: asset.tokenSymbol,
+            coinImageUrl: asset.thumbnail,
+          }));
+        if (erc20Currencies) {
+          chainInfo.addCurrencies(...erc20Currencies);
+        }
+      });
+    }
   }
 
   @computed
@@ -62,7 +99,6 @@ export class ObservableQueryEthAccountBalanceImpl
     return chainInfo.forceFindCurrency(denom);
   }
 }
-
 export class ObservableQueryEthAccountBalanceRegistry
   implements BalanceRegistry
 {

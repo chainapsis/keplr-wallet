@@ -2758,6 +2758,81 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["eth-address-gen", "eth-key-sign", "op-stack-l1-data-fee"],
   },
+  // For test
+  {
+    rpc: "https://arb-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    rest: "https://arb-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    evm: {
+      chainId: 42161,
+      rpc: "https://arb-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+      websocket:
+        "wss://arb-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    },
+    chainId: "eip155:42161",
+    chainName: "Arbitrum",
+    chainSymbolImageUrl:
+      "https://icons.llamao.fi/icons/chains/rsz_arbitrum.jpg",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+      },
+    ],
+    features: ["eth-address-gen", "eth-key-sign"],
+  },
+  // For test
+  {
+    rpc: "https://polygon-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    rest: "https://polygon-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    evm: {
+      chainId: 137,
+      rpc: "https://polygon-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+      websocket:
+        "wss://polygon-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    },
+    chainId: "eip155:137",
+    chainName: "Polygon",
+    chainSymbolImageUrl: "https://icons.llamao.fi/icons/chains/rsz_polygon.jpg",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "MATIC",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "matic-network",
+        coinImageUrl: "https://icons.llamao.fi/icons/chains/rsz_polygon.jpg",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "MATIC",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "matic-network",
+        coinImageUrl: "https://icons.llamao.fi/icons/chains/rsz_polygon.jpg",
+      },
+    ],
+    features: ["eth-address-gen", "eth-key-sign"],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.

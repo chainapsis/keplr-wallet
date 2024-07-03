@@ -278,3 +278,11 @@ export const alchemySupportedChainIds = [
   "eip155:8453",
   "eip155:42161",
 ];
+
+export const ankrSupportedChainIdMap: Record<string, string> = {
+  eth: "eip155:1",
+  optimism: "eip155:10",
+  polygon: "eip:137",
+  base: "eip155:8453",
+  arbitrum: "eip155:42161",
+};
