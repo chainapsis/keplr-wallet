@@ -1,5 +1,3 @@
-// import { sha256 } from "sha.js";
-
 export type Properties = Record<
   string,
   string | number | boolean | Array<string | number> | undefined | null

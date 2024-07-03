@@ -6536,16 +6536,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/keccak256@npm:^5.5.0":
-  version: 5.5.0
-  resolution: "@ethersproject/keccak256@npm:5.5.0"
-  dependencies:
-    "@ethersproject/bytes": ^5.5.0
-    js-sha3: 0.8.0
-  checksum: 587590c8448f3e1db52320d4fecc807d94a8ee83253110c076c7f8ce3b3127f7fd56c302f1ee80e6bc2764a4949a490ee5143344fabfad2a65020dc2f5896a85
-  languageName: node
-  linkType: hard
-
 "@ethersproject/keccak256@npm:^5.6.0":
   version: 5.6.0
   resolution: "@ethersproject/keccak256@npm:5.6.0"
@@ -8289,8 +8279,6 @@ __metadata:
 "@keplr-wallet/analytics@0.12.107, @keplr-wallet/analytics@workspace:packages/analytics":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/analytics@workspace:packages/analytics"
-  dependencies:
-    sha.js: ^2.4.11
   languageName: unknown
   linkType: soft
 
@@ -8387,16 +8375,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/crypto@workspace:packages/crypto"
   dependencies:
-    "@ethersproject/keccak256": ^5.5.0
     "@noble/curves": ^1.4.2
-    "@types/crypto-js": ^4.0.1
-    "@types/sha.js": ^2.4.0
+    "@noble/hashes": ^1.4.0
     bip32: ^2.0.6
     bip39: ^3.0.3
     bs58check: ^2.1.2
     buffer: ^6.0.3
-    crypto-js: ^4.0.0
-    sha.js: ^2.4.11
   languageName: unknown
   linkType: soft
 
@@ -10213,7 +10197,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/hashes@npm:1.4.0":
+"@noble/hashes@npm:1.4.0, @noble/hashes@npm:^1.4.0":
   version: 1.4.0
   resolution: "@noble/hashes@npm:1.4.0"
   checksum: 8ba816ae26c90764b8c42493eea383716396096c5f7ba6bea559993194f49d80a73c081f315f4c367e51bd2d5891700bcdfa816b421d24ab45b41cb03e4f3342
@@ -13825,13 +13809,6 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: b4172927cd1387cf037c3ade785ef46c87537b7bc2803d7f6663b4904d0c5d6f726415d1adb2fee4fecb21746738f11336076449265d46be4ce110cc3a8c8436
-  languageName: node
-  linkType: hard
-
-"@types/crypto-js@npm:^4.0.1":
-  version: 4.0.1
-  resolution: "@types/crypto-js@npm:4.0.1"
-  checksum: 73b04d36607bc100a348340a62b1c9047d2a63167f0de0afe497c406bb6049e02b4392ec1422fa6f9dade748899588926cacb59f9210edb1ed61590ecbaf715b
   languageName: node
   linkType: hard
 
@@ -20322,13 +20299,6 @@ __metadata:
     randombytes: ^2.0.0
     randomfill: ^1.0.3
   checksum: c1609af82605474262f3eaa07daa0b2140026bd264ab316d4bf1170272570dbe02f0c49e29407fe0d3634f96c507c27a19a6765fb856fed854a625f9d15618e2
-  languageName: node
-  linkType: hard
-
-"crypto-js@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "crypto-js@npm:4.0.0"
-  checksum: f769e9331f037d79873061656a26d21cae7a04dde0a64f37b9a6af45989ef0cd1461e64e0e72e6b842b3c865473489f55dfd05653609b90306baf3ea79d7c250
   languageName: node
   linkType: hard
 
