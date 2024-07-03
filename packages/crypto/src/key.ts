@@ -1,4 +1,5 @@
-import { ec } from "elliptic";
+import { secp256k1 } from "@noble/curves/secp256k1";
+import * as utils from "@noble/curves/abstract/utils";
 import CryptoJS from "crypto-js";
 
 import { Buffer } from "buffer/";
@@ -6,11 +7,7 @@ import { Hash } from "./hash";
 
 export class PrivKeySecp256k1 {
   static generateRandomKey(): PrivKeySecp256k1 {
-    const secp256k1 = new ec("secp256k1");
-
-    return new PrivKeySecp256k1(
-      Buffer.from(secp256k1.genKeyPair().getPrivate().toArray())
-    );
+    return new PrivKeySecp256k1(secp256k1.utils.randomPrivateKey());
   }
 
   constructor(protected readonly privKey: Uint8Array) {}
@@ -20,13 +17,7 @@ export class PrivKeySecp256k1 {
   }
 
   getPubKey(): PubKeySecp256k1 {
-    const secp256k1 = new ec("secp256k1");
-
-    const key = secp256k1.keyFromPrivate(this.privKey);
-
-    return new PubKeySecp256k1(
-      new Uint8Array(key.getPublic().encodeCompressed("array"))
-    );
+    return new PubKeySecp256k1(secp256k1.getPublicKey(this.privKey, true));
   }
 
   signDigest32(digest: Uint8Array): {
@@ -38,17 +29,14 @@ export class PrivKeySecp256k1 {
       throw new Error(`Invalid length of digest to sign: ${digest.length}`);
     }
 
-    const secp256k1 = new ec("secp256k1");
-    const key = secp256k1.keyFromPrivate(this.privKey);
-
-    const signature = key.sign(digest, {
-      canonical: true,
+    const signature = secp256k1.sign(digest, this.privKey, {
+      lowS: true,
     });
 
     return {
-      r: new Uint8Array(signature.r.toArray("be", 32)),
-      s: new Uint8Array(signature.s.toArray("be", 32)),
-      v: signature.recoveryParam,
+      r: utils.numberToBytesBE(signature.r, 32),
+      s: utils.numberToBytesBE(signature.s, 32),
+      v: signature.recovery,
     };
   }
 }
@@ -68,15 +56,14 @@ export class PubKeySecp256k1 {
       return this.pubKey;
     }
 
-    const keyPair = this.toKeyPair();
     if (uncompressed) {
-      return new Uint8Array(
-        Buffer.from(keyPair.getPublic().encode("hex", false), "hex")
-      );
+      return secp256k1.ProjectivePoint.fromHex(
+        Buffer.from(this.pubKey).toString("hex")
+      ).toRawBytes(false);
     } else {
-      return new Uint8Array(
-        Buffer.from(keyPair.getPublic().encodeCompressed("hex"), "hex")
-      );
+      return secp256k1.ProjectivePoint.fromHex(
+        Buffer.from(this.pubKey).toString("hex")
+      ).toRawBytes(true);
     }
   }
 
@@ -104,15 +91,6 @@ export class PubKeySecp256k1 {
     return Hash.keccak256(this.toBytes(true).slice(1)).slice(-20);
   }
 
-  toKeyPair(): ec.KeyPair {
-    const secp256k1 = new ec("secp256k1");
-
-    return secp256k1.keyFromPublic(
-      Buffer.from(this.pubKey).toString("hex"),
-      "hex"
-    );
-  }
-
   verifyDigest32(digest: Uint8Array, signature: Uint8Array): boolean {
     if (digest.length !== 32) {
       throw new Error(`Invalid length of digest to verify: ${digest.length}`);
@@ -122,18 +100,16 @@ export class PubKeySecp256k1 {
       throw new Error(`Invalid length of signature: ${signature.length}`);
     }
 
-    const secp256k1 = new ec("secp256k1");
-
     const r = signature.slice(0, 32);
     const s = signature.slice(32);
 
     return secp256k1.verify(
-      digest,
       {
-        r: Buffer.from(r).toString("hex"),
-        s: Buffer.from(s).toString("hex"),
+        r: utils.bytesToNumberBE(r),
+        s: utils.bytesToNumberBE(s),
       },
-      this.toKeyPair()
+      digest,
+      this.pubKey
     );
   }
 }
