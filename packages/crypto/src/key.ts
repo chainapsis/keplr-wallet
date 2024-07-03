@@ -1,7 +1,7 @@
 import { secp256k1 } from "@noble/curves/secp256k1";
 import * as utils from "@noble/curves/abstract/utils";
-import CryptoJS from "crypto-js";
-
+import { sha256 } from "@noble/hashes/sha2";
+import { ripemd160 } from "@noble/hashes/ripemd160";
 import { Buffer } from "buffer/";
 import { Hash } from "./hash";
 
@@ -75,12 +75,7 @@ export class PubKeySecp256k1 {
   }
 
   getCosmosAddress(): Uint8Array {
-    let hash = CryptoJS.SHA256(
-      CryptoJS.lib.WordArray.create(this.toBytes(false) as any)
-    ).toString();
-    hash = CryptoJS.RIPEMD160(CryptoJS.enc.Hex.parse(hash)).toString();
-
-    return new Uint8Array(Buffer.from(hash, "hex"));
+    return ripemd160(sha256(this.toBytes(false)));
   }
 
   getEthAddress(): Uint8Array {
