@@ -2644,13 +2644,13 @@ export const EmbedChainInfos: ChainInfo[] = [
   },
   // For test
   {
-    rpc: "https://eth-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
-    rest: "https://eth-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    rpc: "https://winter-yolo-flower.quiknode.pro/3adb944d1f3f0e3f528dc6297b9bc1c0e8541217",
+    rest: "https://winter-yolo-flower.quiknode.pro/3adb944d1f3f0e3f528dc6297b9bc1c0e8541217/",
     evm: {
       chainId: 1,
-      rpc: "https://eth-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+      rpc: "https://winter-yolo-flower.quiknode.pro/3adb944d1f3f0e3f528dc6297b9bc1c0e8541217/",
       websocket:
-        "wss://eth-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+        "wss://winter-yolo-flower.quiknode.pro/3adb944d1f3f0e3f528dc6297b9bc1c0e8541217",
     },
     chainId: "eip155:1",
     chainName: "Ethereum",

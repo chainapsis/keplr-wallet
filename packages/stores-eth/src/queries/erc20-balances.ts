@@ -13,29 +13,9 @@ import {
 } from "@keplr-wallet/stores";
 import { EthereumAccountBase } from "../account";
 import { ankrSupportedChainIdMap } from "../constants";
+import { AnkrTokenBalance } from "../types";
 
-interface AnkrERC20Balances {
-  assets: [
-    {
-      balance: string;
-      balanceRawInteger: string;
-      balanceUsd: string;
-      blockchain: string;
-      contractAddress: string;
-      holderAddress: string;
-      thumbnail: string;
-      tokenDecimals: string;
-      tokenName: string;
-      tokenPrice: string;
-      tokenSymbol: string;
-      tokenType: string;
-    }
-  ];
-  nextPageToken: string;
-  totalBalanceUsd: string;
-}
-
-export class ObservableQueryThirdpartyERC20BalancesImplParent extends ObservableJsonRPCQuery<AnkrERC20Balances> {
+export class ObservableQueryThirdpartyERC20BalancesImplParent extends ObservableJsonRPCQuery<AnkrTokenBalance> {
   // XXX: See comments below.
   //      The reason why this field is here is that I don't know if it's mobx's bug or intention,
   //      but fetch can be executed twice by observation of parent and child by `onBecomeObserved`,
@@ -46,19 +26,13 @@ export class ObservableQueryThirdpartyERC20BalancesImplParent extends Observable
     sharedContext: QuerySharedContext,
     protected readonly chainId: string,
     protected readonly chainGetter: ChainGetter,
-    protected readonly ethereumHexAddress: string
+    protected readonly ethereumHexAddress: string,
+    protected readonly thirdpartyEndpoint: string
   ) {
-    super(
-      sharedContext,
-      // For test
-      "https://rpc.ankr.com",
-      "/multichain/2ad9881cb349f83d184dd4656da1e682821b1e8d65afe2a9381e8148a8a91dd1",
-      "ankr_getAccountBalance",
-      {
-        blockchain: Object.keys(ankrSupportedChainIdMap),
-        walletAddress: ethereumHexAddress,
-      }
-    );
+    super(sharedContext, thirdpartyEndpoint, "", "ankr_getAccountBalance", {
+      blockchain: ankrSupportedChainIdMap[chainId],
+      walletAddress: ethereumHexAddress,
+    });
 
     makeObservable(this);
   }
@@ -66,27 +40,6 @@ export class ObservableQueryThirdpartyERC20BalancesImplParent extends Observable
   protected override canFetch(): boolean {
     // If ethereum hex address is empty, it will always fail, so don't need to fetch it.
     return this.ethereumHexAddress.length > 0;
-  }
-
-  protected override onReceiveResponse(
-    response: Readonly<QueryResponse<AnkrERC20Balances>>
-  ) {
-    super.onReceiveResponse(response);
-
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    const erc20Currencies: AppCurrency[] = response.data.assets
-      .filter(
-        (asset) =>
-          asset.contractAddress &&
-          ankrSupportedChainIdMap[asset.blockchain] === this.chainId
-      )
-      .map((asset) => ({
-        coinMinimalDenom: `erc20:${asset.contractAddress}`,
-        coinDecimals: parseInt(asset.tokenDecimals),
-        coinDenom: asset.tokenSymbol,
-        coinImageUrl: asset.thumbnail,
-      }));
-    chainInfo.addCurrencies(...erc20Currencies);
   }
 }
 
@@ -197,7 +150,10 @@ export class ObservableQueryThirdpartyERC20BalanceRegistry
     ObservableQueryThirdpartyERC20BalancesImplParent
   > = new Map();
 
-  constructor(protected readonly sharedContext: QuerySharedContext) {}
+  constructor(
+    protected readonly sharedContext: QuerySharedContext,
+    protected readonly thirdpartyEndpoint: string
+  ) {}
 
   getBalanceImpl(
     chainId: string,
@@ -210,7 +166,7 @@ export class ObservableQueryThirdpartyERC20BalanceRegistry
     const isHexAddress =
       EthereumAccountBase.isEthereumHexAddressWithChecksum(address);
     if (
-      !Object.values(ankrSupportedChainIdMap).includes(chainId) ||
+      !Object.keys(ankrSupportedChainIdMap).includes(chainId) ||
       denomHelper.type !== "erc20" ||
       !isHexAddress ||
       !chainInfo.evm
@@ -226,7 +182,8 @@ export class ObservableQueryThirdpartyERC20BalanceRegistry
           this.sharedContext,
           chainId,
           chainGetter,
-          address
+          address,
+          this.thirdpartyEndpoint
         )
       );
     }

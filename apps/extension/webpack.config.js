@@ -185,6 +185,7 @@ module.exports = {
         "src/public/assets/icon/icon-128.png",
         "base64"
       )}`,
+      KEPLR_EXT_ANKR_ENDPOINT: "",
     }),
     new ForkTsCheckerWebpackPlugin(),
     new CopyWebpackPlugin({
