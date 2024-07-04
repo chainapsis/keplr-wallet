@@ -5,7 +5,6 @@ import {
 } from "@keplr-wallet/stores";
 import { ObservableQueryEVMChainERC20MetadataInner } from "./erc20-metadata";
 import { computed } from "mobx";
-import { ERC20ContractInfo } from "../types";
 
 export class ObservableQueryERC20ContactInfoInner extends ObservableQueryEVMChainERC20MetadataInner {
   constructor(
@@ -18,19 +17,14 @@ export class ObservableQueryERC20ContactInfoInner extends ObservableQueryEVMChai
   }
 
   @computed
-  get tokenInfo(): ERC20ContractInfo | undefined {
-    if (
-      this.symbol === undefined ||
-      this.decimals === undefined ||
-      this.name === undefined
-    ) {
+  get tokenInfo(): { decimals: number; symbol: string } | undefined {
+    if (this.symbol === undefined || this.decimals === undefined) {
       return undefined;
     }
 
     return {
       decimals: this.decimals,
       symbol: this.symbol,
-      name: this.name,
     };
   }
 

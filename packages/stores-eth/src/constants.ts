@@ -271,14 +271,6 @@ export const erc20ContractInterface: Interface = new Interface([
   },
 ]);
 
-export const alchemySupportedChainIds = [
-  "eip155:1",
-  "eip155:10",
-  "eip:137",
-  "eip155:8453",
-  "eip155:42161",
-];
-
 export const ankrSupportedChainIdMap: Record<string, string> = {
   "eip155:1": "eth",
   "eip155:10": "optimism",

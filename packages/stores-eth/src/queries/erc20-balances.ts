@@ -97,7 +97,7 @@ export class ObservableQueryThirdpartyERC20BalancesImpl
   get isStarted(): boolean {
     return this.parent.isStarted;
   }
-  get response(): Readonly<QueryResponse<AnkrERC20Balances>> | undefined {
+  get response(): Readonly<QueryResponse<AnkrTokenBalance>> | undefined {
     return this.parent.response;
   }
 

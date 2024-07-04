@@ -15,7 +15,6 @@ export class ERC20CurrencyRegistrar {
       symbol: string;
       decimals: number;
       timestamp: number;
-      logoURI?: string;
     }
   > = new Map();
 
@@ -43,7 +42,6 @@ export class ERC20CurrencyRegistrar {
           symbol: string;
           decimals: number;
           timestamp: number;
-          logoURI?: string;
         }
       >
     >(key);
@@ -67,7 +65,6 @@ export class ERC20CurrencyRegistrar {
             symbol: string;
             decimals: number;
             timestamp: number;
-            logoURI?: string;
           }
         >
       >(key, obj);
@@ -112,7 +109,6 @@ export class ERC20CurrencyRegistrar {
             coinMinimalDenom: denomHelper.denom,
             coinDenom: cached.symbol,
             coinDecimals: cached.decimals,
-            coinImageUrl: cached.logoURI,
           },
           done: true,
         };
@@ -135,7 +131,6 @@ export class ERC20CurrencyRegistrar {
             symbol: erc20Metadata.symbol!,
             decimals: erc20Metadata.decimals!,
             timestamp: Date.now(),
-            logoURI: erc20Metadata.logoURI,
           });
         });
       }
@@ -145,7 +140,6 @@ export class ERC20CurrencyRegistrar {
           coinMinimalDenom: denomHelper.denom,
           coinDenom: erc20Metadata.symbol,
           coinDecimals: erc20Metadata.decimals,
-          coinImageUrl: erc20Metadata.logoURI,
         },
         done:
           !erc20Metadata.querySymbol.isFetching &&
