@@ -166,6 +166,8 @@ export class PermissionService {
       );
     }
 
+    // Skip the permission check `chainIds` if the permission for EVM chain.
+    // Because the chain id for this permission can be changed, so it may not be the same as `chainIds`.
     if (!options?.isForEVM) {
       this.checkBasicAccessPermission(env, chainIds, origin);
     }

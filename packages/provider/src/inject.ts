@@ -317,11 +317,11 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
           result: {
             error:
               e.code && !e.module
-                ? JSONUint8Array.wrap({
+                ? {
                     code: e.code,
                     message: e.message,
                     data: e.data,
-                  })
+                  }
                 : e.message || e.toString(),
           },
         };
@@ -996,13 +996,13 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         }
 
         if (result.error) {
-          const error = JSONUint8Array.unwrap(result.error);
+          const error = result.error;
           reject(
-            error.code
+            error.code && !error.module
               ? new EthereumProviderRpcError(
                   error.code,
                   error.message,
-                  error.dat
+                  error.data
                 )
               : new Error(error)
           );
