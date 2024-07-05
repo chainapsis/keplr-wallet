@@ -98,7 +98,7 @@ export class ObservableQueryEthAccountBalanceImpl
           // If the response data is string, it means that the data is from EVM endpoint not thirdparty.
           typeof this.response.data === "string"
             ? this.response.data
-            : this.response.data.assets[0].balanceRawInteger
+            : this.response.data.assets[0]?.balanceRawInteger ?? "0"
         )
       )
     );
