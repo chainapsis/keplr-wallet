@@ -2644,11 +2644,11 @@ export const EmbedChainInfos: ChainInfo[] = [
   },
   // For test
   {
-    rpc: "https://winter-yolo-flower.quiknode.pro/3adb944d1f3f0e3f528dc6297b9bc1c0e8541217",
-    rest: "https://winter-yolo-flower.quiknode.pro/3adb944d1f3f0e3f528dc6297b9bc1c0e8541217/",
+    rpc: "https://site1.moralis-nodes.com/eth/2d9795c1d54e41828075869008bd3b42",
+    rest: "https://site1.moralis-nodes.com/eth/2d9795c1d54e41828075869008bd3b42",
     evm: {
       chainId: 1,
-      rpc: "https://winter-yolo-flower.quiknode.pro/3adb944d1f3f0e3f528dc6297b9bc1c0e8541217/",
+      rpc: "https://site1.moralis-nodes.com/eth/2d9795c1d54e41828075869008bd3b42",
       websocket:
         "wss://winter-yolo-flower.quiknode.pro/3adb944d1f3f0e3f528dc6297b9bc1c0e8541217",
     },

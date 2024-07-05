@@ -174,4 +174,5 @@ export const SwapFeeBps = {
   receiver: "osmo1my4tk420gjmhggqwvvha6ey9390gqwfree2p4u",
 };
 
-export const AnkrAPIEndpoint = process.env["KEPLR_EXT_ANKR_ENDPOINT"] || "";
+export const ThirdpartyTokenAPIURL =
+  process.env["KEPLR_EXT_THIRDPARTY_TOKEN_API_URL"] || "";

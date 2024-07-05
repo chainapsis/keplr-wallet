@@ -19,3 +19,16 @@ export interface AnkrTokenBalance {
   nextPageToken: string;
   totalBalanceUsd: string;
 }
+
+export interface AlchemyTokenBalance {
+  address: string;
+  tokenBalances: {
+    contractAddress: string;
+    tokenBalance: string | null;
+    error: {
+      code: number;
+      message: string;
+    } | null;
+  }[];
+  pageKey: string;
+}

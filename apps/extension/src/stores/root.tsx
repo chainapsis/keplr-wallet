@@ -10,7 +10,7 @@ import {
   GoogleMeasurementId,
   GoogleAPIKeyForMeasurement,
   SwapVenue,
-  AnkrAPIEndpoint,
+  ThirdpartyTokenAPIURL,
 } from "../config.ui";
 import {
   AccountStore,
@@ -201,7 +201,7 @@ export class RootStore {
         tokenContractListURL: TokenContractListURL,
       }),
       EthereumQueries.use({
-        thirdpartyEndpoint: AnkrAPIEndpoint,
+        thirdpartyEndpoint: ThirdpartyTokenAPIURL,
       })
     );
     this.swapUsageQueries = new SwapUsageQueries(

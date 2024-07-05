@@ -12,10 +12,10 @@ import {
   QuerySharedContext,
 } from "@keplr-wallet/stores";
 import { EthereumAccountBase } from "../account";
-import { ankrSupportedChainIdMap } from "../constants";
-import { AnkrTokenBalance } from "../types";
+import { thirdparySupportedChainIdMap } from "../constants";
+import { AlchemyTokenBalance } from "../types";
 
-export class ObservableQueryThirdpartyERC20BalancesImplParent extends ObservableJsonRPCQuery<AnkrTokenBalance> {
+export class ObservableQueryThirdpartyERC20BalancesImplParent extends ObservableJsonRPCQuery<AlchemyTokenBalance> {
   // XXX: See comments below.
   //      The reason why this field is here is that I don't know if it's mobx's bug or intention,
   //      but fetch can be executed twice by observation of parent and child by `onBecomeObserved`,
@@ -29,10 +29,17 @@ export class ObservableQueryThirdpartyERC20BalancesImplParent extends Observable
     protected readonly ethereumHexAddress: string,
     protected readonly thirdpartyEndpoint: string
   ) {
-    super(sharedContext, thirdpartyEndpoint, "", "ankr_getAccountBalance", {
-      blockchain: ankrSupportedChainIdMap[chainId],
-      walletAddress: ethereumHexAddress,
-    });
+    const thirdpartyEndpointByChain = thirdpartyEndpoint.replace(
+      "eth",
+      thirdparySupportedChainIdMap[chainId]
+    );
+    super(
+      sharedContext,
+      thirdpartyEndpointByChain,
+      "",
+      "alchemy_getTokenBalances",
+      [ethereumHexAddress]
+    );
 
     makeObservable(this);
   }
@@ -64,17 +71,14 @@ export class ObservableQueryThirdpartyERC20BalancesImpl
     }
 
     const contractAddress = this.denomHelper.denom.replace("erc20:", "");
-    const tokenBalance = this.response.data.assets.find(
+    const tokenBalance = this.response.data.tokenBalances.find(
       (bal) => bal.contractAddress === contractAddress
     );
-    if (!tokenBalance) {
+    if (tokenBalance?.tokenBalance == null) {
       return new CoinPretty(currency, new Int(0)).ready(false);
     }
 
-    return new CoinPretty(
-      currency,
-      new Int(BigInt(tokenBalance.balanceRawInteger))
-    );
+    return new CoinPretty(currency, new Int(BigInt(tokenBalance.tokenBalance)));
   }
 
   @computed
@@ -97,7 +101,7 @@ export class ObservableQueryThirdpartyERC20BalancesImpl
   get isStarted(): boolean {
     return this.parent.isStarted;
   }
-  get response(): Readonly<QueryResponse<AnkrTokenBalance>> | undefined {
+  get response(): Readonly<QueryResponse<AlchemyTokenBalance>> | undefined {
     return this.parent.response;
   }
 
@@ -166,7 +170,7 @@ export class ObservableQueryThirdpartyERC20BalanceRegistry
     const isHexAddress =
       EthereumAccountBase.isEthereumHexAddressWithChecksum(address);
     if (
-      !Object.keys(ankrSupportedChainIdMap).includes(chainId) ||
+      !Object.keys(thirdparySupportedChainIdMap).includes(chainId) ||
       denomHelper.type !== "erc20" ||
       !isHexAddress ||
       !chainInfo.evm
