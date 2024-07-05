@@ -7,6 +7,7 @@ import {observer} from 'mobx-react-lite';
 import {useStore} from '../../../../stores';
 import {BuyModal} from './buy-modal';
 import {StackNavProp} from '../../../../navigation';
+import {useBuy} from '../../../../hooks/use-buy.ts';
 
 export const DepositModal = registerCardModal<{
   isOpen: boolean;
@@ -23,6 +24,8 @@ export const DepositModal = registerCardModal<{
     );
     const [qrBech32Address, setQRBech32Address] = useState<string>('');
     const [currentScene, setCurrentScene] = useState('List');
+
+    const buySupportServiceInfos = useBuy();
 
     return (
       <HorizontalSimpleScene
@@ -53,6 +56,7 @@ export const DepositModal = registerCardModal<{
           setQRBech32Address,
           navigation,
           disableBuyCrypto,
+          buySupportServiceInfos,
         }}
       />
     );

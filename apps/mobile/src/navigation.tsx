@@ -124,6 +124,7 @@ import {Text} from 'react-native';
 import {ActivitiesScreen} from './screen/activities';
 import {DocumentFillIcon} from './components/icon/document-fill.tsx';
 import {DocumentOutlinedIcon} from './components/icon/document-outliend.tsx';
+import {TokenDetailScreen} from './screen/token-detail';
 
 type DefaultRegisterParams = {
   hideBackButton?: boolean;
@@ -343,8 +344,11 @@ export type RootStackParamList = {
     initialGasAdjustment?: string;
     tempSwitchAmount?: string;
   };
-
   Activities: undefined;
+  TokenDetail: {
+    chainId: string;
+    coinMinimalDenom: string;
+  };
 };
 
 export type StakeNavigation = {
@@ -1320,6 +1324,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
             }}
             component={IBCSwapDestinationSelectAssetScreen}
           />
+          <Stack.Screen name="TokenDetail" component={TokenDetailScreen} />
         </Stack.Navigator>
 
         <DeepLinkNavigationComponent />

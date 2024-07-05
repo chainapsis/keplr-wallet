@@ -1,4 +1,4 @@
-import {FunctionComponent, useMemo} from 'react';
+import React, {FunctionComponent, useMemo} from 'react';
 import {observer} from 'mobx-react-lite';
 import {MsgHistory} from '../types.ts';
 import {useStore} from '../../../stores';
@@ -8,7 +8,7 @@ import {CoinPretty} from '@keplr-wallet/unit';
 import {ChainInfo} from '@keplr-wallet/types';
 import {Buffer} from 'buffer';
 import {MsgItemBase} from './base.tsx';
-import {ArrowRightLeftIcon} from './ibc-swap.tsx';
+import {MessageSwapIcon} from '../../../components/icon';
 
 export const MsgRelationIBCSwapReceive: FunctionComponent<{
   msg: MsgHistory;
@@ -206,10 +206,7 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
   return (
     <MsgItemBase
       logo={
-        <ArrowRightLeftIcon
-          size={16}
-          color={style.get('color-gray-200').color}
-        />
+        <MessageSwapIcon size={40} color={style.get('color-gray-200').color} />
       }
       chainId={msg.chainId}
       title="Swap Completed"
