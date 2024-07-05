@@ -20,7 +20,7 @@ import {
   EIP712MessageValidator,
   messageHash,
 } from "@keplr-wallet/background";
-import { serialize } from "@ethersproject/transactions";
+import { serialize, TransactionTypes } from "@ethersproject/transactions";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import {
   KeystoneKeys,
@@ -229,6 +229,10 @@ export const connectAndSignEthWithLedger = async (
         }
         case EthSignType.TRANSACTION: {
           const tx = JSON.parse(Buffer.from(message).toString());
+          const isEIP1559 = !!tx.maxFeePerGas || !!tx.maxPriorityFeePerGas;
+          if (isEIP1559) {
+            tx.type = TransactionTypes.eip1559;
+          }
           const rlpArray = serialize(tx).replace("0x", "");
           return ethSignatureToBytes(
             await ethApp.signTransaction(
