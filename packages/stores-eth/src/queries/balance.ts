@@ -11,13 +11,17 @@ import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
 import { EthereumAccountBase } from "../account";
-import { ankrSupportedChainIdMap } from "../constants";
-import { AnkrTokenBalance } from "../types";
+import { ObservableQueryThirdpartyERC20BalancesImplParent } from "./erc20-balances";
+import { thirdparySupportedChainIdMap } from "../constants";
 
 export class ObservableQueryEthAccountBalanceImpl
-  extends ObservableJsonRPCQuery<AnkrTokenBalance | string>
+  extends ObservableJsonRPCQuery<string>
   implements IObservableQueryBalanceImpl
 {
+  protected readonly _queryThirdpartyERC20Balances:
+    | ObservableQueryThirdpartyERC20BalancesImplParent
+    | undefined = undefined;
+
   constructor(
     sharedContext: QuerySharedContext,
     protected readonly chainId: string,
@@ -27,52 +31,42 @@ export class ObservableQueryEthAccountBalanceImpl
     protected readonly ethereumHexAddress: string,
     protected readonly thirdpartyEndpoint: string
   ) {
-    const isThirdpartySupported = Object.keys(ankrSupportedChainIdMap).includes(
-      chainId
-    );
+    super(sharedContext, ethereumURL, "", "eth_getBalance", [
+      ethereumHexAddress,
+      "latest",
+    ]);
 
-    super(
-      sharedContext,
-      isThirdpartySupported ? thirdpartyEndpoint : ethereumURL,
-      "",
-      isThirdpartySupported ? "ankr_getAccountBalance" : "eth_getBalance",
-      isThirdpartySupported
-        ? {
-            blockchain: ankrSupportedChainIdMap[chainId],
-            walletAddress: ethereumHexAddress,
-            // This option make native network token first in array of response data.
-            nativeFirst: true,
-          }
-        : [ethereumHexAddress, "latest"]
-    );
+    if (Object.keys(thirdparySupportedChainIdMap).includes(this.chainId)) {
+      this._queryThirdpartyERC20Balances =
+        new ObservableQueryThirdpartyERC20BalancesImplParent(
+          sharedContext,
+          chainId,
+          chainGetter,
+          ethereumHexAddress,
+          thirdpartyEndpoint
+        );
+    }
 
     makeObservable(this);
   }
 
   protected override onReceiveResponse(
-    response: Readonly<QueryResponse<AnkrTokenBalance | string>>
+    response: Readonly<QueryResponse<string>>
   ) {
     super.onReceiveResponse(response);
 
-    const isThirdpartySupported = Object.keys(ankrSupportedChainIdMap).includes(
-      this.chainId
-    );
     // If the response is from thirdparty, it makes to initiate getting ERC20 balances.
-    if (isThirdpartySupported && typeof response.data !== "string") {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
+    if (this._queryThirdpartyERC20Balances != null) {
+      this._queryThirdpartyERC20Balances.waitResponse().then((response) => {
+        const chainInfo = this.chainGetter.getChain(this.chainId);
 
-      const erc20Currencies = response?.data.assets
-        .filter((asset) => !!asset.contractAddress)
-        .map((asset) => ({
-          coinMinimalDenom: `erc20:${asset.contractAddress}`,
-          coinDecimals: parseInt(asset.tokenDecimals),
-          coinDenom: asset.tokenSymbol,
-          coinImageUrl: asset.thumbnail,
-        }));
-
-      if (erc20Currencies) {
-        chainInfo.addCurrencies(...erc20Currencies);
-      }
+        const erc20Denoms = response?.data.tokenBalances
+          .filter((tokenBalance) => tokenBalance.tokenBalance != null)
+          .map((tokenBalance) => `erc20:${tokenBalance.contractAddress}`);
+        if (erc20Denoms) {
+          chainInfo.addUnknownDenoms(...erc20Denoms);
+        }
+      });
     }
   }
 
@@ -91,17 +85,7 @@ export class ObservableQueryEthAccountBalanceImpl
       return new CoinPretty(currency, new Int(0)).ready(false);
     }
 
-    return new CoinPretty(
-      currency,
-      new Int(
-        BigInt(
-          // If the response data is string, it means that the data is from EVM endpoint not thirdparty.
-          typeof this.response.data === "string"
-            ? this.response.data
-            : this.response.data.assets[0]?.balanceRawInteger ?? "0"
-        )
-      )
-    );
+    return new CoinPretty(currency, new Int(BigInt(this.response.data)));
   }
 
   @computed
