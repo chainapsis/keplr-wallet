@@ -60,7 +60,7 @@ export const EthSendTokenTx: IEthTxRenderer = {
               }
             />
           ),
-          title: "Send",
+          title: "Send Token",
           content: (
             <EthSendTokenTxPretty
               chainId={chainId}
@@ -110,7 +110,7 @@ export const EthSendTokenTx: IEthTxRenderer = {
             }
           />
         ),
-        title: "Send",
+        title: "Send Token",
         content: (
           <EthSendTokenTxPretty
             chainId={chainId}

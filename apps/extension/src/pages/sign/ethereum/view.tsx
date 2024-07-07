@@ -313,8 +313,6 @@ export const EthereumSigningView: FunctionComponent<{
               );
             }
 
-            console.log("tx", signingDataText);
-
             await signEthereumInteractionStore.approveWithProceedNext(
               interactionData.id,
               Buffer.from(signingDataText),
