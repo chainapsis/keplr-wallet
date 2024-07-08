@@ -9,7 +9,6 @@ import { computed, makeObservable } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import Joi from "joi";
 import { InternalChainStore } from "../internal";
-import * as process from "node:process";
 
 const Schema = Joi.object<AssetsFromSourceResponse>({
   dest_assets: Joi.object()

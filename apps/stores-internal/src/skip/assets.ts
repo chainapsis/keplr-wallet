@@ -9,7 +9,6 @@ import Joi from "joi";
 import { InternalChainStore } from "../internal";
 import { SwapUsageQueries } from "../swap-usage";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
-import process from "node:process";
 
 const Schema = Joi.object<AssetsResponse>({
   chain_to_assets_map: Joi.object().pattern(

@@ -10,7 +10,6 @@ import { computedFn } from "mobx-utils";
 import Joi from "joi";
 import { InternalChainStore } from "../internal";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
-import process from "node:process";
 
 const Schema = Joi.object<ChainsResponse>({
   chains: Joi.array().items(

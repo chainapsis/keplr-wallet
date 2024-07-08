@@ -9,7 +9,6 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { computed, makeObservable } from "mobx";
 import { CoinPretty, Dec, RatePretty } from "@keplr-wallet/unit";
 import Joi from "joi";
-import process from "node:process";
 
 const Schema = Joi.object<RouteResponse>({
   source_asset_denom: Joi.string().required(),
