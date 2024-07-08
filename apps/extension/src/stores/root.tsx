@@ -201,7 +201,8 @@ export class RootStore {
         tokenContractListURL: TokenContractListURL,
       }),
       EthereumQueries.use({
-        thirdpartyEndpoint: ThirdpartyTokenAPIURL,
+        thirdpartyTokenAPIURL: ThirdpartyTokenAPIURL,
+        coingeckoAPIURL: CoinGeckoAPIEndPoint,
       })
     );
     this.swapUsageQueries = new SwapUsageQueries(

@@ -4,19 +4,19 @@ import { DenomHelper, KVStore } from "@keplr-wallet/common";
 import { autorun, makeObservable, observable, runInAction, toJS } from "mobx";
 import { EthereumQueries } from "./queries";
 
+interface CurrencyCache {
+  symbol: string;
+  decimals: number;
+  coingeckoId?: string;
+  logoURI?: string;
+  timestamp: number;
+}
 export class ERC20CurrencyRegistrar {
   @observable
   public _isInitialized = false;
 
   @observable.shallow
-  protected cacheERC20Metadata: Map<
-    string,
-    {
-      symbol: string;
-      decimals: number;
-      timestamp: number;
-    }
-  > = new Map();
+  protected cacheERC20Metadata: Map<string, CurrencyCache> = new Map();
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -35,16 +35,7 @@ export class ERC20CurrencyRegistrar {
 
   async init(): Promise<void> {
     const key = `cacheERC20Metadata`;
-    const saved = await this.kvStore.get<
-      Record<
-        string,
-        {
-          symbol: string;
-          decimals: number;
-          timestamp: number;
-        }
-      >
-    >(key);
+    const saved = await this.kvStore.get<Record<string, CurrencyCache>>(key);
     if (saved) {
       runInAction(() => {
         for (const [key, value] of Object.entries(saved)) {
@@ -58,16 +49,7 @@ export class ERC20CurrencyRegistrar {
     autorun(() => {
       const js = toJS(this.cacheERC20Metadata);
       const obj = Object.fromEntries(js);
-      this.kvStore.set<
-        Record<
-          string,
-          {
-            symbol: string;
-            decimals: number;
-            timestamp: number;
-          }
-        >
-      >(key, obj);
+      this.kvStore.set<Record<string, CurrencyCache>>(key, obj);
     });
 
     runInAction(() => {
@@ -109,6 +91,8 @@ export class ERC20CurrencyRegistrar {
             coinMinimalDenom: denomHelper.denom,
             coinDenom: cached.symbol,
             coinDecimals: cached.decimals,
+            coinGeckoId: cached.coingeckoId,
+            coinImageUrl: cached.logoURI,
           },
           done: true,
         };
@@ -119,17 +103,18 @@ export class ERC20CurrencyRegistrar {
       }
     }
 
-    const erc20Metadata =
-      queries.ethereum.queryEthereumERC20Metadata.get(contractAddress);
-    if (erc20Metadata.symbol && erc20Metadata.decimals != null) {
-      if (
-        !erc20Metadata.querySymbol.isFetching &&
-        !erc20Metadata.queryDecimals.isFetching
-      ) {
+    const tokenInfoQuery =
+      queries.ethereum.queryEthereumCoingeckoTokenInfo.getQueryContract(
+        contractAddress
+      );
+    if (tokenInfoQuery?.symbol != null && tokenInfoQuery?.decimals != null) {
+      if (!tokenInfoQuery.isFetching) {
         runInAction(() => {
           this.cacheERC20Metadata.set(contractAddress, {
-            symbol: erc20Metadata.symbol!,
-            decimals: erc20Metadata.decimals!,
+            symbol: tokenInfoQuery.symbol!,
+            decimals: tokenInfoQuery.decimals!,
+            coingeckoId: tokenInfoQuery.coingeckoId,
+            logoURI: tokenInfoQuery.logoURI,
             timestamp: Date.now(),
           });
         });
@@ -138,19 +123,16 @@ export class ERC20CurrencyRegistrar {
       return {
         value: {
           coinMinimalDenom: denomHelper.denom,
-          coinDenom: erc20Metadata.symbol,
-          coinDecimals: erc20Metadata.decimals,
+          coinDenom: tokenInfoQuery.symbol,
+          coinDecimals: tokenInfoQuery.decimals,
+          coinGeckoId: tokenInfoQuery.coingeckoId,
+          coinImageUrl: tokenInfoQuery.logoURI,
         },
-        done:
-          !erc20Metadata.querySymbol.isFetching &&
-          !erc20Metadata.queryDecimals.isFetching,
+        done: !tokenInfoQuery.isFetching,
       };
     }
 
-    if (
-      erc20Metadata.querySymbol.isFetching ||
-      erc20Metadata.queryDecimals.isFetching
-    ) {
+    if (tokenInfoQuery?.isFetching) {
       return {
         value: undefined,
         done: false,

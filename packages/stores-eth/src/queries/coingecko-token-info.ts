@@ -1,0 +1,98 @@
+import {
+  ChainGetter,
+  HasMapStore,
+  ObservableQuery,
+  QuerySharedContext,
+} from "@keplr-wallet/stores";
+import { makeObservable } from "mobx";
+
+const coingeckoChainIdMap: Record<string, string> = {
+  "eip155:1": "ethereum",
+  "eip155:10": "optimistic-ethereum",
+  "eip155:137": "polygon-pos",
+  "eip155:8453": "base",
+  "eip155:42161": "arbitrum-one",
+};
+
+export class ObservableQueryCoingeckoTokenInfoInner extends ObservableQuery<{
+  id: string;
+  symbol: string;
+  name: string;
+  web_slug: string;
+  asset_platform_id: string;
+  image: {
+    thumb: string;
+    small: string;
+    large: string;
+  };
+  contract_address: string;
+  detail_platforms: Record<
+    string,
+    {
+      decimal_place: number;
+      contract_address: string;
+    }
+  >;
+}> {
+  constructor(
+    sharedContext: QuerySharedContext,
+    coingeckoAPIURL: string,
+    protected readonly coingeckoChainId: string,
+    contractAddress: string
+  ) {
+    super(
+      sharedContext,
+      coingeckoAPIURL,
+      `/coingecko-token-info/coins/${coingeckoChainId}/contract/${contractAddress}`
+    );
+
+    makeObservable(this);
+  }
+
+  get symbol(): string | undefined {
+    return this.response?.data?.symbol.toUpperCase();
+  }
+
+  get decimals(): number | undefined {
+    return this.response?.data?.detail_platforms[this.coingeckoChainId]
+      ?.decimal_place;
+  }
+
+  get coingeckoId(): string | undefined {
+    return this.response?.data?.id;
+  }
+
+  get logoURI(): string | undefined {
+    return this.response?.data?.image.small;
+  }
+}
+
+export class ObservableQueryCoingeckoTokenInfo extends HasMapStore<
+  ObservableQueryCoingeckoTokenInfoInner | undefined
+> {
+  constructor(
+    protected readonly sharedContext: QuerySharedContext,
+    protected readonly chainId: string,
+    protected readonly chainGetter: ChainGetter,
+    protected readonly coingeckoAPIURL: string
+  ) {
+    const coingeckoChainId = coingeckoChainIdMap[chainId];
+
+    super((contractAddress: string) => {
+      if (coingeckoChainId != null) {
+        return new ObservableQueryCoingeckoTokenInfoInner(
+          this.sharedContext,
+          coingeckoAPIURL,
+          coingeckoChainId,
+          contractAddress
+        );
+      }
+    });
+  }
+
+  getQueryContract(
+    contractAddress: string
+  ): ObservableQueryCoingeckoTokenInfoInner | undefined {
+    return this.get(contractAddress) as ObservableQueryCoingeckoTokenInfoInner;
+  }
+}

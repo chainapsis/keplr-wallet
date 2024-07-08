@@ -10,6 +10,7 @@ import { ObservableQueryEthereumFeeHistory } from "./fee-histroy";
 import { ObservableQueryEVMChainERC20Metadata } from "./erc20-metadata";
 import { ObservableQueryERC20ContractInfo } from "./erc20-contract-info";
 import { ObservableQueryThirdpartyERC20BalanceRegistry } from "./erc20-balances";
+import { ObservableQueryCoingeckoTokenInfo } from "./coingecko-token-info";
 
 export interface EthereumQueries {
   ethereum: EthereumQueriesImpl;
@@ -17,7 +18,8 @@ export interface EthereumQueries {
 
 export const EthereumQueries = {
   use(options: {
-    thirdpartyEndpoint: string;
+    thirdpartyTokenAPIURL: string;
+    coingeckoAPIURL: string;
   }): (
     queriesSetBase: QueriesSetBase,
     sharedContext: QuerySharedContext,
@@ -36,7 +38,8 @@ export const EthereumQueries = {
           sharedContext,
           chainId,
           chainGetter,
-          options.thirdpartyEndpoint
+          options.thirdpartyTokenAPIURL,
+          options.coingeckoAPIURL
         ),
       };
     };
@@ -48,24 +51,26 @@ export class EthereumQueriesImpl {
   public readonly queryEthereumFeeHistory: DeepReadonly<ObservableQueryEthereumFeeHistory>;
   public readonly queryEthereumERC20Metadata: DeepReadonly<ObservableQueryEVMChainERC20Metadata>;
   public readonly queryEthereumERC20ContractInfo: DeepReadonly<ObservableQueryERC20ContractInfo>;
+  public readonly queryEthereumCoingeckoTokenInfo: DeepReadonly<ObservableQueryCoingeckoTokenInfo>;
 
   constructor(
     base: QueriesSetBase,
     sharedContext: QuerySharedContext,
     protected chainId: string,
     protected chainGetter: ChainGetter,
-    protected thirdpartyEndpoint: string
+    protected thirdpartyTokenAPIURL: string,
+    protected coingeckoAPIURL: string
   ) {
     base.queryBalances.addBalanceRegistry(
       new ObservableQueryThirdpartyERC20BalanceRegistry(
         sharedContext,
-        thirdpartyEndpoint
+        thirdpartyTokenAPIURL
       )
     );
     base.queryBalances.addBalanceRegistry(
       new ObservableQueryEthAccountBalanceRegistry(
         sharedContext,
-        thirdpartyEndpoint
+        thirdpartyTokenAPIURL
       )
     );
 
@@ -92,5 +97,13 @@ export class EthereumQueriesImpl {
       chainId,
       chainGetter
     );
+
+    this.queryEthereumCoingeckoTokenInfo =
+      new ObservableQueryCoingeckoTokenInfo(
+        sharedContext,
+        chainId,
+        chainGetter,
+        coingeckoAPIURL
+      );
   }
 }

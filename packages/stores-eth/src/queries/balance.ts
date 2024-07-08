@@ -29,7 +29,7 @@ export class ObservableQueryEthAccountBalanceImpl
     protected readonly denomHelper: DenomHelper,
     protected readonly ethereumURL: string,
     protected readonly ethereumHexAddress: string,
-    protected readonly thirdpartyEndpoint: string
+    protected readonly thirdpartyTokenAPIURL: string
   ) {
     super(sharedContext, ethereumURL, "", "eth_getBalance", [
       ethereumHexAddress,
@@ -43,7 +43,7 @@ export class ObservableQueryEthAccountBalanceImpl
           chainId,
           chainGetter,
           ethereumHexAddress,
-          thirdpartyEndpoint
+          thirdpartyTokenAPIURL
         );
     }
 
@@ -101,7 +101,7 @@ export class ObservableQueryEthAccountBalanceRegistry
 {
   constructor(
     protected readonly sharedContext: QuerySharedContext,
-    protected readonly thirdpartyEndpoint: string
+    protected readonly thirdpartyTokenAPIURL: string
   ) {}
 
   getBalanceImpl(
@@ -125,7 +125,7 @@ export class ObservableQueryEthAccountBalanceRegistry
       denomHelper,
       chainInfo.evm.rpc,
       address,
-      this.thirdpartyEndpoint
+      this.thirdpartyTokenAPIURL
     );
   }
 }
