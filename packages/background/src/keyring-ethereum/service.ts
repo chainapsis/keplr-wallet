@@ -2,7 +2,11 @@ import { ChainsService } from "../chains";
 import { KeyRingService } from "../keyring";
 import { InteractionService } from "../interaction";
 import { AnalyticsService } from "../analytics";
-import { Env, WEBPAGE_PORT } from "@keplr-wallet/router";
+import {
+  Env,
+  EthereumProviderRpcError,
+  WEBPAGE_PORT,
+} from "@keplr-wallet/router";
 import {
   ChainInfo,
   EthereumSignResponse,
@@ -27,6 +31,7 @@ import { BackgroundTxEthereumService } from "../tx-ethereum";
 import { TokenERC20Service } from "../token-erc20";
 import { validateEVMChainId } from "./helper";
 import { runInAction } from "mobx";
+
 export class KeyRingEthereumService {
   protected websocketSubscriptionMap = new Map<string, WebSocket>();
 
@@ -583,7 +588,7 @@ export class KeyRingEthereumService {
 
         const newEvmChainId = validateEVMChainId(parseInt(param.chainId, 16));
         if (newEvmChainId === currentChainEVMInfo.chainId) {
-          return;
+          return null;
         }
 
         const chainInfos = this.chainsService.getChainInfos();
@@ -592,7 +597,10 @@ export class KeyRingEthereumService {
           (chainInfo) => chainInfo.evm?.chainId === newEvmChainId
         );
         if (!newCurrentChainInfo) {
-          throw new Error("No matched EVM chain found in Keplr.");
+          throw new EthereumProviderRpcError(
+            4902,
+            `Unrecognized chain ID "${param.chainId}". Try adding the chain using wallet_addEthereumChain first.`
+          );
         }
 
         await this.permissionService.updateCurrentChainIdForEVM(
