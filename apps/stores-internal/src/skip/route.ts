@@ -177,10 +177,11 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: RouteResponse }> {
-    const result = await simpleFetch<RouteResponse>(this.baseURL, this.url, {
+    const _result = await simpleFetch<RouteResponse>(this.baseURL, this.url, {
       method: "POST",
       headers: {
         "content-type": "application/json",
+        authorization: process.env["SKIP_API_KEY"] || "",
       },
       body: JSON.stringify({
         amount_in: this.sourceAmount,
@@ -196,6 +197,10 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
       }),
       signal: abortController.signal,
     });
+    const result = {
+      headers: _result.headers,
+      data: _result.data,
+    };
 
     const validated = Schema.validate(result.data);
     if (validated.error) {

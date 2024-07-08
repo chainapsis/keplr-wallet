@@ -9,6 +9,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { computedFn } from "mobx-utils";
 import Joi from "joi";
 import { InternalChainStore } from "../internal";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 const Schema = Joi.object<ChainsResponse>({
   chains: Joi.array().items(
@@ -34,16 +35,25 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: ChainsResponse }> {
-    const res = await super.fetchResponse(abortController);
+    const _result = await simpleFetch(this.baseURL, this.url, {
+      signal: abortController.signal,
+      headers: {
+        authorization: process.env["SKIP_API_KEY"] || "",
+      },
+    });
+    const result = {
+      headers: _result.headers,
+      data: _result.data,
+    };
 
-    const validated = Schema.validate(res.data);
+    const validated = Schema.validate(result.data);
     if (validated.error) {
       console.log("Failed to validate chains response", validated.error);
       throw validated.error;
     }
 
     return {
-      headers: res.headers,
+      headers: result.headers,
       data: validated.value,
     };
   }
