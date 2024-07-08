@@ -10,7 +10,6 @@ import {
   GoogleMeasurementId,
   GoogleAPIKeyForMeasurement,
   SwapVenue,
-  ThirdpartyTokenAPIURL,
 } from "../config.ui";
 import {
   AccountStore,
@@ -201,7 +200,6 @@ export class RootStore {
         tokenContractListURL: TokenContractListURL,
       }),
       EthereumQueries.use({
-        thirdpartyTokenAPIURL: ThirdpartyTokenAPIURL,
         coingeckoAPIURL: CoinGeckoAPIEndPoint,
       })
     );

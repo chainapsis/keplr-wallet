@@ -18,7 +18,6 @@ export interface EthereumQueries {
 
 export const EthereumQueries = {
   use(options: {
-    thirdpartyTokenAPIURL: string;
     coingeckoAPIURL: string;
   }): (
     queriesSetBase: QueriesSetBase,
@@ -38,7 +37,6 @@ export const EthereumQueries = {
           sharedContext,
           chainId,
           chainGetter,
-          options.thirdpartyTokenAPIURL,
           options.coingeckoAPIURL
         ),
       };
@@ -58,20 +56,13 @@ export class EthereumQueriesImpl {
     sharedContext: QuerySharedContext,
     protected chainId: string,
     protected chainGetter: ChainGetter,
-    protected thirdpartyTokenAPIURL: string,
     protected coingeckoAPIURL: string
   ) {
     base.queryBalances.addBalanceRegistry(
-      new ObservableQueryThirdpartyERC20BalanceRegistry(
-        sharedContext,
-        thirdpartyTokenAPIURL
-      )
+      new ObservableQueryThirdpartyERC20BalanceRegistry(sharedContext)
     );
     base.queryBalances.addBalanceRegistry(
-      new ObservableQueryEthAccountBalanceRegistry(
-        sharedContext,
-        thirdpartyTokenAPIURL
-      )
+      new ObservableQueryEthAccountBalanceRegistry(sharedContext)
     );
 
     this.queryEthereumBlock = new ObservableQueryEthereumBlock(

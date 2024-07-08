@@ -185,7 +185,6 @@ module.exports = {
         "src/public/assets/icon/icon-128.png",
         "base64"
       )}`,
-      KEPLR_EXT_THIRDPARTY_TOKEN_API_URL: "",
     }),
     new ForkTsCheckerWebpackPlugin(),
     new CopyWebpackPlugin({

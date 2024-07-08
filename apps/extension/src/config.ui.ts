@@ -173,6 +173,3 @@ export const SwapFeeBps = {
   value: 0,
   receiver: "osmo1my4tk420gjmhggqwvvha6ey9390gqwfree2p4u",
 };
-
-export const ThirdpartyTokenAPIURL =
-  process.env["KEPLR_EXT_THIRDPARTY_TOKEN_API_URL"] || "";

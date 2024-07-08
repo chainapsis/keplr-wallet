@@ -2642,15 +2642,13 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["cosmwasm"],
   },
-  // For test
   {
-    rpc: "https://site1.moralis-nodes.com/eth/2d9795c1d54e41828075869008bd3b42",
-    rest: "https://site1.moralis-nodes.com/eth/2d9795c1d54e41828075869008bd3b42",
+    rpc: "https://evm-1.keplr.app",
+    rest: "https://evm-1.keplr.app",
     evm: {
       chainId: 1,
-      rpc: "https://site1.moralis-nodes.com/eth/2d9795c1d54e41828075869008bd3b42",
-      websocket:
-        "wss://winter-yolo-flower.quiknode.pro/3adb944d1f3f0e3f528dc6297b9bc1c0e8541217",
+      rpc: "https://evm-1.keplr.app",
+      websocket: "wss://evm-1.keplr.app/websocket",
     },
     chainId: "eip155:1",
     chainName: "Ethereum",
@@ -2681,15 +2679,13 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["eth-address-gen", "eth-key-sign"],
   },
-  // For test
   {
-    rpc: "https://base-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
-    rest: "https://base-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    rpc: "https://evm-8453.keplr.app",
+    rest: "https://evm-8453.keplr.app",
     evm: {
       chainId: 8453,
-      rpc: "https://base-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
-      websocket:
-        "wss://base-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+      rpc: "https://evm-8453.keplr.app",
+      websocket: "wss://evm-1.keplr.app/websocket",
     },
     chainId: "eip155:8453",
     chainName: "Base",
@@ -2719,15 +2715,13 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["eth-address-gen", "eth-key-sign", "op-stack-l1-data-fee"],
   },
-  // For test
   {
-    rpc: "https://opt-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
-    rest: "https://opt-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    rpc: "https://evm-10.keplr.app",
+    rest: "https://evm-10.keplr.app",
     evm: {
       chainId: 10,
-      rpc: "https://opt-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
-      websocket:
-        "wss://opt-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+      rpc: "https://evm-8453.keplr.app",
+      websocket: "wss://evm-8453.keplr.app/websocket",
     },
     chainId: "eip155:10",
     chainName: "Optimism",
@@ -2758,15 +2752,13 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["eth-address-gen", "eth-key-sign", "op-stack-l1-data-fee"],
   },
-  // For test
   {
-    rpc: "https://arb-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
-    rest: "https://arb-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    rpc: "https://evm-42161.keplr.app",
+    rest: "https://evm-42161.keplr.app",
     evm: {
       chainId: 42161,
-      rpc: "https://arb-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
-      websocket:
-        "wss://arb-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+      rpc: "https://evm-42161.keplr.app",
+      websocket: "wss://evm-42161.keplr.app/websocket",
     },
     chainId: "eip155:42161",
     chainName: "Arbitrum",
@@ -2797,15 +2789,13 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["eth-address-gen", "eth-key-sign"],
   },
-  // For test
   {
-    rpc: "https://polygon-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
-    rest: "https://polygon-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    rpc: "https://evm-137.keplr.app",
+    rest: "https://evm-137.keplr.app",
     evm: {
       chainId: 137,
-      rpc: "https://polygon-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
-      websocket:
-        "wss://polygon-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+      rpc: "https://evm-137.keplr.app",
+      websocket: "wss://evm-137.keplr.app/websocket",
     },
     chainId: "eip155:137",
     chainName: "Polygon",

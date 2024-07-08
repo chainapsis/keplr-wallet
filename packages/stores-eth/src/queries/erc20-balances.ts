@@ -26,20 +26,12 @@ export class ObservableQueryThirdpartyERC20BalancesImplParent extends Observable
     sharedContext: QuerySharedContext,
     protected readonly chainId: string,
     protected readonly chainGetter: ChainGetter,
-    protected readonly ethereumHexAddress: string,
-    protected readonly thirdpartyTokenAPIURL: string
+    protected readonly ethereumURL: string,
+    protected readonly ethereumHexAddress: string
   ) {
-    const thirdpartyTokenAPIURLByChain = thirdpartyTokenAPIURL.replace(
-      "eth",
-      thirdparySupportedChainIdMap[chainId]
-    );
-    super(
-      sharedContext,
-      thirdpartyTokenAPIURLByChain,
-      "",
-      "alchemy_getTokenBalances",
-      [ethereumHexAddress]
-    );
+    super(sharedContext, ethereumURL, "/api", "alchemy_getTokenBalances", [
+      ethereumHexAddress,
+    ]);
 
     makeObservable(this);
   }
@@ -154,10 +146,7 @@ export class ObservableQueryThirdpartyERC20BalanceRegistry
     ObservableQueryThirdpartyERC20BalancesImplParent
   > = new Map();
 
-  constructor(
-    protected readonly sharedContext: QuerySharedContext,
-    protected readonly thirdpartyTokenAPIURL: string
-  ) {}
+  constructor(protected readonly sharedContext: QuerySharedContext) {}
 
   getBalanceImpl(
     chainId: string,
@@ -186,8 +175,8 @@ export class ObservableQueryThirdpartyERC20BalanceRegistry
           this.sharedContext,
           chainId,
           chainGetter,
-          address,
-          this.thirdpartyTokenAPIURL
+          chainInfo.evm.rpc,
+          address
         )
       );
     }
