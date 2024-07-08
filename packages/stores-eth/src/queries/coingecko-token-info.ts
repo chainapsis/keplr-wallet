@@ -36,14 +36,17 @@ export class ObservableQueryCoingeckoTokenInfoInner extends ObservableQuery<{
 }> {
   constructor(
     sharedContext: QuerySharedContext,
-    coingeckoAPIURL: string,
+    coingeckoAPIBaseURL: string,
+    coingeckoAPIURI: string,
     protected readonly coingeckoChainId: string,
     contractAddress: string
   ) {
     super(
       sharedContext,
-      coingeckoAPIURL,
-      `/coingecko-token-info/coins/${coingeckoChainId}/contract/${contractAddress}`
+      coingeckoAPIBaseURL,
+      coingeckoAPIURI
+        .replace("{coingeckoChainId}", coingeckoChainId)
+        .replace("{contractAddress}", contractAddress)
     );
 
     makeObservable(this);
@@ -74,7 +77,8 @@ export class ObservableQueryCoingeckoTokenInfo extends HasMapStore<
     protected readonly sharedContext: QuerySharedContext,
     protected readonly chainId: string,
     protected readonly chainGetter: ChainGetter,
-    protected readonly coingeckoAPIURL: string
+    protected readonly coingeckoAPIBaseURL: string,
+    protected readonly coingeckoAPIURI: string
   ) {
     const coingeckoChainId = coingeckoChainIdMap[chainId];
 
@@ -82,7 +86,8 @@ export class ObservableQueryCoingeckoTokenInfo extends HasMapStore<
       if (coingeckoChainId != null) {
         return new ObservableQueryCoingeckoTokenInfoInner(
           this.sharedContext,
-          coingeckoAPIURL,
+          coingeckoAPIBaseURL,
+          coingeckoAPIURI,
           coingeckoChainId,
           contractAddress
         );

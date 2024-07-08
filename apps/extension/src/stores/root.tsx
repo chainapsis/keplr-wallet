@@ -10,6 +10,7 @@ import {
   GoogleMeasurementId,
   GoogleAPIKeyForMeasurement,
   SwapVenue,
+  CoinGeckoCoinDataByTokenAddress,
 } from "../config.ui";
 import {
   AccountStore,
@@ -200,7 +201,8 @@ export class RootStore {
         tokenContractListURL: TokenContractListURL,
       }),
       EthereumQueries.use({
-        coingeckoAPIURL: CoinGeckoAPIEndPoint,
+        coingeckoAPIBaseURL: CoinGeckoAPIEndPoint,
+        coingeckoAPIURI: CoinGeckoCoinDataByTokenAddress,
       })
     );
     this.swapUsageQueries = new SwapUsageQueries(
