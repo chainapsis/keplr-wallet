@@ -129,7 +129,9 @@ export const EthereumSigningView: FunctionComponent<{
           : feeConfig.type
       );
 
-      return `0x${parseInt(maxPriorityFeePerGas.toString()).toString(16)}`;
+      return `0x${BigInt(maxPriorityFeePerGas.truncate().toString()).toString(
+        16
+      )}`;
     }
   })();
 
@@ -142,17 +144,16 @@ export const EthereumSigningView: FunctionComponent<{
 
       const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
 
-      const gasLimitFromTx = unsignedTx.gasLimit ?? unsignedTx.gas;
-      if (gasLimitFromTx && parseInt(gasLimitFromTx) > 0) {
-        gasConfig.setValue(parseInt(gasLimitFromTx));
+      const gasLimitFromTx = BigInt(unsignedTx.gasLimit ?? unsignedTx.gas ?? 0);
+      if (gasLimitFromTx > 0) {
+        gasConfig.setValue(gasLimitFromTx.toString());
 
-        if (unsignedTx.maxFeePerGas && parseInt(unsignedTx.maxFeePerGas) > 0) {
+        const maxFeePerGasFromTx = BigInt(unsignedTx.maxFeePerGas ?? 0);
+        if (maxFeePerGasFromTx > 0) {
           feeConfig.setFee(
             new CoinPretty(
               chainInfo.currencies[0],
-              new Dec(gasConfig.gas).mul(
-                new Dec(parseInt(unsignedTx.maxFeePerGas))
-              )
+              new Dec(gasConfig.gas).mul(new Dec(maxFeePerGasFromTx))
             )
           );
         }
@@ -202,7 +203,7 @@ export const EthereumSigningView: FunctionComponent<{
           data,
           chainId,
         });
-        feeConfig.setL1DataFee(new Dec(parseInt(l1DataFee)));
+        feeConfig.setL1DataFee(new Dec(BigInt(l1DataFee)));
       }
     })();
   }, [chainInfo.features, ethereumAccount, feeConfig, isTxSigning, message]);

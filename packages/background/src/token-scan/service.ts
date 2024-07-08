@@ -275,10 +275,7 @@ export class TokenScanService {
           assets: [
             {
               currency: chainInfo.stakeCurrency ?? chainInfo.currencies[0],
-              amount: parseInt(
-                res.data.result.replace("0x", ""),
-                16
-              ).toString(),
+              amount: BigInt(res.data.result).toString(10),
             },
           ],
         });
