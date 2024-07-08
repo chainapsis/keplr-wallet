@@ -2685,7 +2685,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     evm: {
       chainId: 8453,
       rpc: "https://evm-8453.keplr.app",
-      websocket: "wss://evm-1.keplr.app/websocket",
+      websocket: "wss://evm-8453.keplr.app/websocket",
     },
     chainId: "eip155:8453",
     chainName: "Base",
@@ -2720,8 +2720,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://evm-10.keplr.app",
     evm: {
       chainId: 10,
-      rpc: "https://evm-8453.keplr.app",
-      websocket: "wss://evm-8453.keplr.app/websocket",
+      rpc: "https://evm-10.keplr.app",
+      websocket: "wss://evm-10.keplr.app/websocket",
     },
     chainId: "eip155:10",
     chainName: "Optimism",
