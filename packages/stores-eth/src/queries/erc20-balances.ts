@@ -12,7 +12,14 @@ import {
   QuerySharedContext,
 } from "@keplr-wallet/stores";
 import { EthereumAccountBase } from "../account";
-import { thirdparySupportedChainIdMap } from "../constants";
+
+const thirdparySupportedChainIdMap: Record<string, string> = {
+  "eip155:1": "eth",
+  "eip155:10": "opt",
+  "eip155:137": "polygon",
+  "eip155:8453": "base",
+  "eip155:42161": "arb",
+};
 
 interface ThirdpartyERC20TokenBalance {
   address: string;
@@ -58,6 +65,20 @@ export class ObservableQueryThirdpartyERC20BalancesImplParent extends Observable
   protected override canFetch(): boolean {
     // If ethereum hex address is empty, it will always fail, so don't need to fetch it.
     return this.ethereumHexAddress.length > 0;
+  }
+
+  protected override onReceiveResponse(
+    response: Readonly<QueryResponse<ThirdpartyERC20TokenBalance>>
+  ) {
+    super.onReceiveResponse(response);
+
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const erc20Denoms = response.data.tokenBalances
+      .filter((tokenBalance) => tokenBalance.tokenBalance != null)
+      .map((tokenBalance) => `erc20:${tokenBalance.contractAddress}`);
+    if (erc20Denoms) {
+      chainInfo.addUnknownDenoms(...erc20Denoms);
+    }
   }
 }
 

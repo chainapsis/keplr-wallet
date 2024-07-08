@@ -6,18 +6,23 @@ import {
 import { ObservableQueryEVMChainERC20MetadataInner } from "./erc20-metadata";
 import { computed } from "mobx";
 
+interface ERC20ContractInfo {
+  decimals: number;
+  symbol: string;
+}
+
 export class ObservableQueryERC20ContactInfoInner extends ObservableQueryEVMChainERC20MetadataInner {
   constructor(
     sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
-    contractAddress: string
+    protected readonly contractAddress: string
   ) {
     super(sharedContext, chainId, chainGetter, contractAddress);
   }
 
   @computed
-  get tokenInfo(): { decimals: number; symbol: string } | undefined {
+  get tokenInfo(): ERC20ContractInfo | undefined {
     if (this.symbol === undefined || this.decimals === undefined) {
       return undefined;
     }
