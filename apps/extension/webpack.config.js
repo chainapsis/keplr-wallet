@@ -179,6 +179,7 @@ module.exports = {
       KEPLR_EXT_TX_HISTORY_BASE_URL: "",
       KEPLR_EXT_CONFIG_SERVER: "",
       WC_PROJECT_ID: "",
+      SKIP_API_KEY: "",
     }),
     new ForkTsCheckerWebpackPlugin(),
     new CopyWebpackPlugin({

@@ -9,6 +9,7 @@ import { computed, makeObservable } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import Joi from "joi";
 import { InternalChainStore } from "../internal";
+import * as process from "node:process";
 
 const Schema = Joi.object<AssetsFromSourceResponse>({
   dest_assets: Joi.object()
@@ -120,13 +121,14 @@ export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<Assets
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: AssetsFromSourceResponse }> {
-    const result = await simpleFetch<AssetsFromSourceResponse>(
+    const _result = await simpleFetch<AssetsFromSourceResponse>(
       this.baseURL,
       this.url,
       {
         method: "POST",
         headers: {
           "content-type": "application/json",
+          authorization: process.env["SKIP_API_KEY"] || "",
         },
         body: JSON.stringify({
           source_asset_chain_id: this.chainId,
@@ -135,6 +137,10 @@ export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<Assets
         signal: abortController.signal,
       }
     );
+    const result = {
+      headers: _result.headers,
+      data: _result.data,
+    };
 
     const validated = Schema.validate(result.data);
     if (validated.error) {

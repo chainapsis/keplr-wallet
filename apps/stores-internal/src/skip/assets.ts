@@ -8,6 +8,8 @@ import { computed, makeObservable } from "mobx";
 import Joi from "joi";
 import { InternalChainStore } from "../internal";
 import { SwapUsageQueries } from "../swap-usage";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import process from "node:process";
 
 const Schema = Joi.object<AssetsResponse>({
   chain_to_assets_map: Joi.object().pattern(
@@ -183,7 +185,16 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: AssetsResponse }> {
-    const result = await super.fetchResponse(abortController);
+    const _result = await simpleFetch(this.baseURL, this.url, {
+      signal: abortController.signal,
+      headers: {
+        authorization: process.env["SKIP_API_KEY"] || "",
+      },
+    });
+    const result = {
+      headers: _result.headers,
+      data: _result.data,
+    };
 
     const validated = Schema.validate(result.data);
     if (validated.error) {
