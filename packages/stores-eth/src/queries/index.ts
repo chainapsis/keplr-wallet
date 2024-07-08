@@ -11,6 +11,7 @@ import { ObservableQueryEVMChainERC20Metadata } from "./erc20-metadata";
 import { ObservableQueryERC20ContractInfo } from "./erc20-contract-info";
 import { ObservableQueryThirdpartyERC20BalanceRegistry } from "./erc20-balances";
 import { ObservableQueryCoingeckoTokenInfo } from "./coingecko-token-info";
+import { ObservableQueryEthereumERC20BalanceRegistry } from "./erc20-balance";
 
 export interface EthereumQueries {
   ethereum: EthereumQueriesImpl;
@@ -61,6 +62,9 @@ export class EthereumQueriesImpl {
     protected coingeckoAPIBaseURL: string,
     protected coingeckoAPIURI: string
   ) {
+    base.queryBalances.addBalanceRegistry(
+      new ObservableQueryEthereumERC20BalanceRegistry(sharedContext)
+    );
     base.queryBalances.addBalanceRegistry(
       new ObservableQueryThirdpartyERC20BalanceRegistry(sharedContext)
     );
