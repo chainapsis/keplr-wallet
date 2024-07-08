@@ -9,7 +9,6 @@ import {
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
-import bigInteger from "big-integer";
 import { EthereumAccountBase } from "../account";
 
 export class ObservableQueryEthAccountBalanceImpl
@@ -22,24 +21,28 @@ export class ObservableQueryEthAccountBalanceImpl
     protected readonly chainGetter: ChainGetter,
     protected readonly denomHelper: DenomHelper,
     protected readonly ethereumURL: string,
-    protected readonly ethereumeHexAddress: string
+    protected readonly ethereumHexAddress: string
   ) {
     super(sharedContext, ethereumURL, "", "eth_getBalance", [
-      ethereumeHexAddress,
+      ethereumHexAddress,
       "latest",
     ]);
+
     makeObservable(this);
+  }
+
+  protected override canFetch(): boolean {
+    // If ethereum hex address is empty, it will always fail, so don't need to fetch it.
+    return this.ethereumHexAddress.length > 0;
   }
 
   @computed
   get balance(): CoinPretty {
     const denom = this.denomHelper.denom;
-
     const chainInfo = this.chainGetter.getChain(this.chainId);
     const currency = chainInfo.currencies.find(
       (cur) => cur.coinMinimalDenom === denom
     );
-
     if (!currency) {
       throw new Error(`Unknown currency: ${denom}`);
     }
@@ -48,10 +51,7 @@ export class ObservableQueryEthAccountBalanceImpl
       return new CoinPretty(currency, new Int(0)).ready(false);
     }
 
-    return new CoinPretty(
-      currency,
-      new Int(bigInteger(this.response.data.replace("0x", ""), 16).toString())
-    );
+    return new CoinPretty(currency, new Int(BigInt(this.response.data)));
   }
 
   @computed
@@ -62,7 +62,6 @@ export class ObservableQueryEthAccountBalanceImpl
     return chainInfo.forceFindCurrency(denom);
   }
 }
-
 export class ObservableQueryEthAccountBalanceRegistry
   implements BalanceRegistry
 {

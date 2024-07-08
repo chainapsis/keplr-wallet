@@ -2642,15 +2642,13 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["cosmwasm"],
   },
-  // For test
   {
-    rpc: "https://eth-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
-    rest: "https://eth-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    rpc: "https://evm-1.keplr.app",
+    rest: "https://evm-1.keplr.app",
     evm: {
       chainId: 1,
-      rpc: "https://eth-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
-      websocket:
-        "wss://eth-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+      rpc: "https://evm-1.keplr.app",
+      websocket: "wss://evm-1.keplr.app/websocket",
     },
     chainId: "eip155:1",
     chainName: "Ethereum",
@@ -2668,6 +2666,14 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinImageUrl:
           "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
       },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        coinDecimals: 6,
+        coinGeckoId: "usd-coin",
+        coinImageUrl:
+          "https://coin-images.coingecko.com/coins/images/6319/small/usdc.png?1696506694",
+      },
     ],
     feeCurrencies: [
       {
@@ -2681,15 +2687,13 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["eth-address-gen", "eth-key-sign"],
   },
-  // For test
   {
-    rpc: "https://base-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
-    rest: "https://base-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    rpc: "https://evm-8453.keplr.app",
+    rest: "https://evm-8453.keplr.app",
     evm: {
       chainId: 8453,
-      rpc: "https://base-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
-      websocket:
-        "wss://base-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+      rpc: "https://evm-8453.keplr.app",
+      websocket: "wss://evm-8453.keplr.app/websocket",
     },
     chainId: "eip155:8453",
     chainName: "Base",
@@ -2706,6 +2710,14 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinImageUrl:
           "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
       },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "erc20:0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+        coinDecimals: 6,
+        coinGeckoId: "usd-coin",
+        coinImageUrl:
+          "https://coin-images.coingecko.com/coins/images/6319/small/usdc.png?1696506694",
+      },
     ],
     feeCurrencies: [
       {
@@ -2719,15 +2731,13 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["eth-address-gen", "eth-key-sign", "op-stack-l1-data-fee"],
   },
-  // For test
   {
-    rpc: "https://opt-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
-    rest: "https://opt-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+    rpc: "https://evm-10.keplr.app",
+    rest: "https://evm-10.keplr.app",
     evm: {
       chainId: 10,
-      rpc: "https://opt-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
-      websocket:
-        "wss://opt-mainnet.g.alchemy.com/v2/7TKiKPhKpm-IZ9Qs2wgs4XSahVzC7JYH",
+      rpc: "https://evm-10.keplr.app",
+      websocket: "wss://evm-10.keplr.app/websocket",
     },
     chainId: "eip155:10",
     chainName: "Optimism",
@@ -2745,6 +2755,14 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinImageUrl:
           "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
       },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "erc20:0x0b2c639c533813f4aa9d7837caf62653d097ff85",
+        coinDecimals: 6,
+        coinGeckoId: "usd-coin",
+        coinImageUrl:
+          "https://coin-images.coingecko.com/coins/images/6319/small/usdc.png?1696506694",
+      },
     ],
     feeCurrencies: [
       {
@@ -2757,6 +2775,93 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     features: ["eth-address-gen", "eth-key-sign", "op-stack-l1-data-fee"],
+  },
+  {
+    rpc: "https://evm-42161.keplr.app",
+    rest: "https://evm-42161.keplr.app",
+    evm: {
+      chainId: 42161,
+      rpc: "https://evm-42161.keplr.app",
+      websocket: "wss://evm-42161.keplr.app/websocket",
+    },
+    chainId: "eip155:42161",
+    chainName: "Arbitrum",
+    chainSymbolImageUrl:
+      "https://icons.llamao.fi/icons/chains/rsz_arbitrum.jpg",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+      },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "erc20:0xaf88d065e77c8cc2239327c5edb3a432268e5831",
+        coinDecimals: 6,
+        coinGeckoId: "usd-coin",
+        coinImageUrl:
+          "https://coin-images.coingecko.com/coins/images/6319/small/usdc.png?1696506694",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+      },
+    ],
+    features: ["eth-address-gen", "eth-key-sign"],
+  },
+  {
+    rpc: "https://evm-137.keplr.app",
+    rest: "https://evm-137.keplr.app",
+    evm: {
+      chainId: 137,
+      rpc: "https://evm-137.keplr.app",
+      websocket: "wss://evm-137.keplr.app/websocket",
+    },
+    chainId: "eip155:137",
+    chainName: "Polygon",
+    chainSymbolImageUrl: "https://icons.llamao.fi/icons/chains/rsz_polygon.jpg",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "MATIC",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "matic-network",
+        coinImageUrl: "https://icons.llamao.fi/icons/chains/rsz_polygon.jpg",
+      },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "erc20:0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
+        coinDecimals: 6,
+        coinGeckoId: "usd-coin",
+        coinImageUrl:
+          "https://coin-images.coingecko.com/coins/images/6319/small/usdc.png?1696506694",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "MATIC",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "matic-network",
+        coinImageUrl: "https://icons.llamao.fi/icons/chains/rsz_polygon.jpg",
+      },
+    ],
+    features: ["eth-address-gen", "eth-key-sign"],
   },
 ];
 

@@ -29,7 +29,7 @@ export const FeeSummary: FunctionComponent<{
 
   const theme = useTheme();
 
-  const isShowingGasEstimatedOnly = isForEVMTx && !!gasSimulator?.enabled;
+  const isShowingGasEstimatedOnly = isForEVMTx && !!gasSimulator?.gasEstimated;
 
   return (
     <Box>
@@ -67,22 +67,37 @@ export const FeeSummary: FunctionComponent<{
 
           <YAxis>
             {(() => {
-              if (feeConfig.fees.length > 0) {
-                return feeConfig.fees;
+              if (
+                feeConfig.fees.length === 0 ||
+                (isForEVMTx && !gasSimulator?.gasEstimated)
+              ) {
+                const chainInfo = chainStore.getChain(feeConfig.chainId);
+                return [
+                  new CoinPretty(
+                    chainInfo.stakeCurrency || chainInfo.currencies[0],
+                    new Dec(0)
+                  ),
+                ];
               }
-              const chainInfo = chainStore.getChain(feeConfig.chainId);
-              return [
-                new CoinPretty(
-                  chainInfo.stakeCurrency || chainInfo.currencies[0],
-                  new Dec(0)
-                ),
-              ];
+
+              return feeConfig.fees;
             })()
               .map((fee) =>
                 fee
+                  .quo(
+                    new Dec(isShowingGasEstimatedOnly ? gasConfig?.gas || 1 : 1)
+                  )
+                  .mul(
+                    new Dec(
+                      isShowingGasEstimatedOnly
+                        ? gasSimulator?.gasEstimated || 1
+                        : 1
+                    )
+                  )
                   .maxDecimals(6)
                   .inequalitySymbol(true)
                   .trim(true)
+                  .shrink(true)
                   .hideIBCMetadata(true)
                   .toString()
               )

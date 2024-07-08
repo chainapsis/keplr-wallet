@@ -25,7 +25,11 @@ import {
   EIP6963ProviderInfo,
   EIP6963ProviderDetail,
 } from "@keplr-wallet/types";
-import { Result, JSONUint8Array } from "@keplr-wallet/router";
+import {
+  Result,
+  JSONUint8Array,
+  EthereumProviderRpcError,
+} from "@keplr-wallet/router";
 import { KeplrEnigmaUtils } from "./enigma";
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
@@ -311,7 +315,14 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
           type: "proxy-request-response",
           id: message.id,
           result: {
-            error: e.message || e.toString(),
+            error:
+              e.code && !e.module
+                ? {
+                    code: e.code,
+                    message: e.message,
+                    data: e.data,
+                  }
+                : e.message || e.toString(),
           },
         };
 
@@ -985,7 +996,16 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         }
 
         if (result.error) {
-          reject(new Error(result.error));
+          const error = result.error;
+          reject(
+            error.code && !error.module
+              ? new EthereumProviderRpcError(
+                  error.code,
+                  error.message,
+                  error.data
+                )
+              : new Error(error)
+          );
           return;
         }
 

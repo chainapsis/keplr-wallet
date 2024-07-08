@@ -135,6 +135,11 @@ export const EthereumSigningView: FunctionComponent<{
 
   useEffect(() => {
     if (isTxSigning) {
+      // Disable gas simulator from setting gas, because gasLimit is already set.
+      if (interactionData.isInternal) {
+        gasSimulator.setEnabled(false);
+      }
+
       const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
 
       const gasLimitFromTx = unsignedTx.gasLimit ?? unsignedTx.gas;
@@ -157,7 +162,7 @@ export const EthereumSigningView: FunctionComponent<{
   }, []);
 
   useEffect(() => {
-    if (isTxSigning) {
+    if (isTxSigning && !interactionData.isInternal) {
       const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
 
       if (gasConfig.gas > 0) {
@@ -181,6 +186,7 @@ export const EthereumSigningView: FunctionComponent<{
     gasSimulator,
     gasConfig,
     feeConfig,
+    interactionData.isInternal,
   ]);
 
   useEffect(() => {

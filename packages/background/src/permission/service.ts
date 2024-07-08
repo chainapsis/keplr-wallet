@@ -166,7 +166,11 @@ export class PermissionService {
       );
     }
 
-    this.checkBasicAccessPermission(env, chainIds, origin);
+    // Skip the permission check `chainIds` if the permission for EVM chain.
+    // Because the chain id for this permission can be changed, so it may not be the same as `chainIds`.
+    if (!options?.isForEVM) {
+      this.checkBasicAccessPermission(env, chainIds, origin);
+    }
   }
 
   async checkOrGrantPermission(
@@ -489,6 +493,10 @@ export class PermissionService {
 
         this.currentChainIdForEVMByOriginMap.delete(origin);
       }
+    }
+
+    for (const key of deletes) {
+      this.permissionMap.delete(key);
     }
   }
 

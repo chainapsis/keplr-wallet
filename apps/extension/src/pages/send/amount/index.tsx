@@ -155,9 +155,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
       if (denomHelper.type !== "native") {
         if (denomHelper.type === "erc20") {
-          return `${txType}/${denomHelper.type}/${
-            denomHelper.contractAddress
-          }/${sendConfigs.amountConfig.amount[0].toDec().toString()}`;
+          // XXX: This logic causes gas simulation to run even if `gasSimulatorKey` is the same, it needs to be figured out why.
+          const amountHexDigits = parseInt(
+            sendConfigs.amountConfig.amount[0].toCoin().amount
+          ).toString(16).length;
+          return `${txType}/${denomHelper.type}/${denomHelper.contractAddress}/${amountHexDigits}`;
         }
 
         if (denomHelper.type === "cw20") {

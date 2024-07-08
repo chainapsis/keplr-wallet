@@ -133,6 +133,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     accountStore,
     keyRingStore,
     tokenFactoryRegistrar,
+    erc20CurrencyRegistrar,
     ibcCurrencyRegistrar,
     lsmCurrencyRegistrar,
     ibcChannelStore,
@@ -239,6 +240,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
       return false;
     }
 
+    if (!erc20CurrencyRegistrar.isInitialized) {
+      return false;
+    }
+
     return true;
   }, [
     keyRingStore.status,
@@ -247,6 +252,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     chainStore.chainInfos,
     isURLUnlockPage,
     tokenFactoryRegistrar.isInitialized,
+    erc20CurrencyRegistrar.isInitialized,
     ibcCurrencyRegistrar.isInitialized,
     lsmCurrencyRegistrar.isInitialized,
     priceStore.isInitialized,
