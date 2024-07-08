@@ -397,6 +397,12 @@
 
   "page.sign.ethereum.title": "签以太坊",
   "page.sign.ethereum.requested-network": "请求的网络",
+  "page.sign.ethereum.transaction.title": "确认交易",
+  "page.sign.ethereum.transaction.summary": "交易摘要",
+  "page.sign.ethereum.transaction.send.paragraph": "Send <b>{amount}</b> from <b>{fromAddress}</b> to <b>{toAddress}</b>",
+  "page.sign.ethereum.message": "签署信息",
+  "page.sign.ethereum.message.title": "标志信息",
+  "page.sign.ethereum.eip-712.title": "签署键入数据",
 
   "page.sign.components.messages.agoric.provision.title": "配置智能钱包",
   "page.sign.components.messages.agoric.provision.message": "为地址<b>{address}</b>配置智能钱包",

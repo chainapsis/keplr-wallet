@@ -417,10 +417,12 @@
 
   "page.sign.ethereum.title": "Sign Ethereum",
   "page.sign.ethereum.requested-network": "on {network}",
-  "page.sign.ethereum.tx.title": "Confirm Transaction",
-  "page.sign.ethereum.tx.summary": "Transaction Summary",
-  "page.sign.ethereum.tx.send.paragraph": "Send <b>{amount}</b> from <b>{fromAddress}</b> to <b>{toAddress}</b>",
+  "page.sign.ethereum.transaction.title": "Confirm Transaction",
+  "page.sign.ethereum.transaction.summary": "Transaction Summary",
+  "page.sign.ethereum.transaction.send.paragraph": "Send <b>{amount}</b> from <b>{fromAddress}</b> to <b>{toAddress}</b>",
   "page.sign.ethereum.message": "Signing Message",
+  "page.sign.ethereum.message.title": "Sign Message",
+  "page.sign.ethereum.eip-712.title": "Sign Typed Data",
 
   "page.sign.components.fee-summary.fee": "Tx Fee",
 

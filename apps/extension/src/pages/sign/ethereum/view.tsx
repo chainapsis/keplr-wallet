@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { SignEthereumInteractionStore } from "@keplr-wallet/stores-core";
 import { Box } from "../../../components/box";
-import { XAxis } from "../../../components/axis";
+import { XAxis, YAxis } from "../../../components/axis";
 import { Body2, Body3, H5 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { observer } from "mobx-react-lite";
@@ -29,7 +29,6 @@ import { ErrModuleKeystoneSign, KeystoneUR } from "../utils/keystone";
 import { KeystoneSign } from "../components/keystone";
 import { useTheme } from "styled-components";
 import SimpleBar from "simplebar-react";
-import { Column, Columns } from "../../../components/column";
 import { ViewDataButton } from "../components/view-data-button";
 import { UnsignedTransaction } from "@ethersproject/transactions";
 import { defaultRegistry } from "../components/eth-tx/registry";
@@ -48,6 +47,8 @@ import {
 import { EthTxBase } from "../components/eth-tx/render/tx-base";
 import { MemoryKVStore } from "@keplr-wallet/common";
 import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
+import { Image } from "../../../components/image";
+import { Column, Columns } from "../../../components/column";
 
 /**
  * CosmosTxView의 주석을 꼭 참고하셈
@@ -268,9 +269,7 @@ export const EthereumSigningView: FunctionComponent<{
   return (
     <HeaderLayout
       title={intl.formatMessage({
-        id: isTxSigning
-          ? "page.sign.ethereum.tx.title"
-          : "page.sign.ethereum.title",
+        id: `page.sign.ethereum.${signType}.title`,
       })}
       fixedHeight={true}
       left={
@@ -366,89 +365,132 @@ export const EthereumSigningView: FunctionComponent<{
       }}
     >
       <Box
-        marginTop="0.75rem"
-        marginBottom="1.25rem"
-        alignX="center"
-        alignY="center"
-      >
-        <Box
-          padding="0.375rem 0.625rem 0.375rem 0.75rem"
-          backgroundColor={
-            theme.mode === "light"
-              ? ColorPalette.white
-              : ColorPalette["gray-600"]
-          }
-          borderRadius="20rem"
-        >
-          <XAxis alignY="center">
-            <Body3
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-500"]
-                  : ColorPalette["gray-200"]
-              }
-            >
-              <FormattedMessage
-                id="page.sign.ethereum.requested-network"
-                values={{
-                  network: chainInfo.chainName,
-                }}
-              />
-            </Body3>
-            <Gutter direction="horizontal" size="0.5rem" />
-            <ChainImageFallback
-              size="1.25rem"
-              chainInfo={chainInfo}
-              alt={chainInfo.chainName}
-            />
-          </XAxis>
-        </Box>
-      </Box>
-      <Box
         height="100%"
         padding="0.75rem"
-        paddingTop="0.5rem"
-        paddingBottom="4rem"
+        paddingBottom="0"
         style={{
           overflow: "auto",
         }}
       >
-        <Box marginBottom="0.5rem">
-          <Columns sum={1} alignY="center">
-            <XAxis>
-              <H5
-                style={{
-                  color:
+        {isTxSigning ? (
+          <Box marginBottom="0.5rem" alignX="center" alignY="center">
+            <Box
+              padding="0.375rem 0.625rem 0.375rem 0.75rem"
+              backgroundColor={
+                theme.mode === "light"
+                  ? ColorPalette.white
+                  : ColorPalette["gray-600"]
+              }
+              borderRadius="20rem"
+            >
+              <XAxis alignY="center">
+                <Body3
+                  color={
                     theme.mode === "light"
                       ? ColorPalette["gray-500"]
-                      : ColorPalette["gray-50"],
-                }}
-              >
-                <FormattedMessage
-                  id={
-                    isTxSigning
-                      ? "page.sign.ethereum.tx.summary"
-                      : "page.sign.ethereum.message"
+                      : ColorPalette["gray-200"]
                   }
+                >
+                  <FormattedMessage
+                    id="page.sign.ethereum.requested-network"
+                    values={{
+                      network: chainInfo.chainName,
+                    }}
+                  />
+                </Body3>
+                <Gutter direction="horizontal" size="0.5rem" />
+                <ChainImageFallback
+                  size="1.25rem"
+                  chainInfo={chainInfo}
+                  alt={chainInfo.chainName}
                 />
-              </H5>
+              </XAxis>
+            </Box>
+          </Box>
+        ) : (
+          <Box
+            padding="1rem"
+            backgroundColor={
+              theme.mode === "light"
+                ? ColorPalette.white
+                : ColorPalette["gray-600"]
+            }
+            borderRadius="0.375rem"
+            style={{
+              boxShadow:
+                theme.mode === "light"
+                  ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+                  : "none",
+            }}
+          >
+            <XAxis alignY="center">
+              <Image
+                alt="sign-custom-image"
+                src={require("../../../public/assets/img/sign-adr36.png")}
+                style={{ width: "3rem", height: "3rem" }}
+              />
+              <Gutter size="0.75rem" />
+              <YAxis>
+                <H5
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-500"]
+                      : ColorPalette["gray-10"]
+                  }
+                >
+                  <FormattedMessage id="Prove account ownership to" />
+                </H5>
+                <Gutter size="2px" />
+                <Body3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette["gray-200"]
+                  }
+                >
+                  {interactionData?.data.origin || ""}
+                </Body3>
+              </YAxis>
             </XAxis>
-            <Column weight={1} />
-            {isTxSigning && (
+          </Box>
+        )}
+
+        <Gutter size="0.75rem" />
+
+        {isTxSigning && (
+          <Box marginBottom="0.5rem">
+            <Columns sum={1} alignY="center">
+              <XAxis>
+                <H5
+                  style={{
+                    color:
+                      theme.mode === "light"
+                        ? ColorPalette["gray-500"]
+                        : ColorPalette["gray-50"],
+                  }}
+                >
+                  <FormattedMessage
+                    id={"page.sign.ethereum.transaction.summary"}
+                  />
+                </H5>
+              </XAxis>
+              <Column weight={1} />
+
               <ViewDataButton
                 isViewData={isViewData}
                 setIsViewData={setIsViewData}
               />
-            )}
-          </Columns>
-        </Box>
+            </Columns>
+          </Box>
+        )}
         <SimpleBar
           autoHide={false}
           style={{
             display: "flex",
             flexDirection: "column",
             flex: !isViewData ? "0 1 auto" : 1,
-            overflow: "auto",
+            overflowY: "auto",
+            overflowX: "hidden",
             borderRadius: "0.375rem",
             backgroundColor:
               theme.mode === "light"
@@ -474,6 +516,8 @@ export const EthereumSigningView: FunctionComponent<{
                       theme.mode === "light"
                         ? ColorPalette["gray-400"]
                         : ColorPalette["gray-200"],
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-all",
                   }}
                 >
                   {signingDataText}
@@ -523,6 +567,8 @@ export const EthereumSigningView: FunctionComponent<{
                   theme.mode === "light"
                     ? ColorPalette["gray-400"]
                     : ColorPalette["gray-200"],
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-all",
               }}
             >
               {signingDataText}
@@ -530,7 +576,9 @@ export const EthereumSigningView: FunctionComponent<{
           )}
         </SimpleBar>
 
-        <div style={{ flex: 1 }} />
+        <Box height="0" minHeight="0.75rem" />
+
+        {!isViewData ? <div style={{ flex: 1 }} /> : null}
 
         {isTxSigning &&
           (() => {
