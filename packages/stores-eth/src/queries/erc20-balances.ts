@@ -13,9 +13,22 @@ import {
 } from "@keplr-wallet/stores";
 import { EthereumAccountBase } from "../account";
 import { thirdparySupportedChainIdMap } from "../constants";
-import { AlchemyTokenBalance } from "../types";
 
-export class ObservableQueryThirdpartyERC20BalancesImplParent extends ObservableJsonRPCQuery<AlchemyTokenBalance> {
+interface ThirdpartyERC20TokenBalance {
+  address: string;
+  tokenBalances: {
+    contractAddress: string;
+    tokenBalance: string | null;
+    error: {
+      code: number;
+      message: string;
+    } | null;
+  }[];
+  // TODO: Support pagination.
+  pageKey: string;
+}
+
+export class ObservableQueryThirdpartyERC20BalancesImplParent extends ObservableJsonRPCQuery<ThirdpartyERC20TokenBalance> {
   // XXX: See comments below.
   //      The reason why this field is here is that I don't know if it's mobx's bug or intention,
   //      but fetch can be executed twice by observation of parent and child by `onBecomeObserved`,
@@ -31,6 +44,12 @@ export class ObservableQueryThirdpartyERC20BalancesImplParent extends Observable
   ) {
     super(sharedContext, ethereumURL, "/api", "alchemy_getTokenBalances", [
       ethereumHexAddress,
+      "erc20",
+      {
+        // TODO: Support pagination.
+        // The maximum count of token balances is 100.
+        maxCount: 100,
+      },
     ]);
 
     makeObservable(this);
@@ -93,12 +112,14 @@ export class ObservableQueryThirdpartyERC20BalancesImpl
   get isStarted(): boolean {
     return this.parent.isStarted;
   }
-  get response(): Readonly<QueryResponse<AlchemyTokenBalance>> | undefined {
+  get response():
+    | Readonly<QueryResponse<ThirdpartyERC20TokenBalance>>
+    | undefined {
     return this.parent.response;
   }
 
   fetch(): Promise<void> {
-    // XXX: The ERC20 balances via Alchemy token API can share the result of one endpoint.
+    // XXX: The ERC20 balances via thirdparty token API can share the result of one endpoint.
     //      This class is implemented for this optimization.
     //      But the problem is that the query store can't handle these process properly right now.
     //      Currently, this is the only use-case,
