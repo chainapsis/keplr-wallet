@@ -39,7 +39,7 @@ export const EthTxBase: FunctionComponent<{
             {title}
           </H5>
 
-          <Gutter size="0.75rem" />
+          <Gutter size="0.25rem" />
 
           <Body3
             color={
