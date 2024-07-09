@@ -530,7 +530,7 @@ export const EthereumSigningView: FunctionComponent<{
                   {signingDataText}
                 </Box>
               ) : (
-                <Box padding="1rem" minHeight="7.5rem">
+                <Box padding="1rem">
                   <Body2
                     color={
                       theme.mode === "light"
