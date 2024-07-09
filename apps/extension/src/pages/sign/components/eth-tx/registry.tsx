@@ -4,6 +4,7 @@ import { ColorPalette } from "../../../../styles";
 import { IEthTxRenderRegistry, IEthTxRenderer } from "./types";
 import { UnsignedTransaction } from "@ethersproject/transactions";
 import { EthSendTokenTx } from "./render";
+import { EthExecuteContractTx } from "./render/execute-contract";
 
 export class EthTxRenderRegistry implements IEthTxRenderRegistry {
   protected renderers: IEthTxRenderer[] = [];
@@ -60,3 +61,4 @@ const UnknownContent: FunctionComponent<PropsWithChildren> = ({ children }) => {
 export const defaultRegistry = new EthTxRenderRegistry();
 
 defaultRegistry.register(EthSendTokenTx);
+defaultRegistry.register(EthExecuteContractTx);

@@ -171,10 +171,11 @@ export class HugeQueriesStore {
           } else {
             const balance = queryBalance.getBalance(currency);
             if (balance) {
-              // If the balance is zero and currency is "native", don't show it.
+              const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+              // If the balance is zero and currency is "native" or "erc20", don't show it.
               if (
                 balance.balance.toDec().equals(HugeQueriesStore.zeroDec) &&
-                new DenomHelper(currency.coinMinimalDenom).type === "native"
+                (denomHelper.type === "native" || denomHelper.type === "erc20")
               ) {
                 continue;
               }

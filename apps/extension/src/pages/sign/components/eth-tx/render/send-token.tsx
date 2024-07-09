@@ -13,6 +13,7 @@ import { Gutter } from "../../../../../components/gutter";
 import { Columns } from "../../../../../components/column";
 import { Stack } from "../../../../../components/stack";
 import { useTheme } from "styled-components";
+import { FormattedMessage } from "react-intl";
 
 export const EthSendTokenTx: IEthTxRenderer = {
   process(chainId, unsignedTx) {
@@ -60,7 +61,9 @@ export const EthSendTokenTx: IEthTxRenderer = {
               }
             />
           ),
-          title: "Send",
+          title: (
+            <FormattedMessage id="page.sign.ethereum.transaction.send.title" />
+          ),
           content: (
             <EthSendTokenTxPretty
               chainId={chainId}
@@ -110,7 +113,9 @@ export const EthSendTokenTx: IEthTxRenderer = {
             }
           />
         ),
-        title: "Send",
+        title: (
+          <FormattedMessage id="page.sign.ethereum.transaction.send.title" />
+        ),
         content: (
           <EthSendTokenTxPretty
             chainId={chainId}
@@ -184,7 +189,7 @@ export const EthSendTokenTxPretty: React.FunctionComponent<{
                   : ColorPalette["gray-200"]
               }
             >
-              From
+              <FormattedMessage id="page.sign.ethereum.transaction.send.from" />
             </Subtitle4>
             <Body1
               color={
@@ -202,7 +207,7 @@ export const EthSendTokenTxPretty: React.FunctionComponent<{
                   : ColorPalette["gray-200"]
               }
             >
-              To
+              <FormattedMessage id="page.sign.ethereum.transaction.send.to" />
             </Subtitle4>
             <Body1
               color={

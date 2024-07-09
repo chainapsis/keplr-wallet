@@ -74,7 +74,11 @@ export class ObservableQueryThirdpartyERC20BalancesImplParent extends Observable
 
     const chainInfo = this.chainGetter.getChain(this.chainId);
     const erc20Denoms = response.data.tokenBalances
-      .filter((tokenBalance) => tokenBalance.tokenBalance != null)
+      .filter(
+        (tokenBalance) =>
+          tokenBalance.tokenBalance != null &&
+          BigInt(tokenBalance.tokenBalance) > 0
+      )
       .map((tokenBalance) => `erc20:${tokenBalance.contractAddress}`);
     if (erc20Denoms) {
       chainInfo.addUnknownDenoms(...erc20Denoms);

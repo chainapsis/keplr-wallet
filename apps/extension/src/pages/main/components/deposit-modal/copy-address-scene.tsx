@@ -341,7 +341,8 @@ const CopyAddressItem: FunctionComponent<{
     setBlockInteraction,
     setSortPriorities,
   }) => {
-    const { analyticsStore, keyRingStore, uiConfigStore } = useStore();
+    const { analyticsStore, keyRingStore, uiConfigStore, chainStore } =
+      useStore();
 
     const theme = useTheme();
 
@@ -358,6 +359,8 @@ const CopyAddressItem: FunctionComponent<{
 
     const [isCopyContainerHover, setIsCopyContainerHover] = useState(false);
     const [isBookmarkHover, setIsBookmarkHover] = useState(false);
+
+    const isEVMOnlyChain = chainStore.isEvmOnlyChain(address.chainInfo.chainId);
 
     // 클릭 영역 문제로 레이아웃이 복잡해졌다.
     // 알아서 잘 해결하자
@@ -416,7 +419,8 @@ const CopyAddressItem: FunctionComponent<{
             <XAxis alignY="center">
               <Box
                 cursor={
-                  blockInteraction || address.ethereumAddress
+                  blockInteraction ||
+                  (!isEVMOnlyChain && address.ethereumAddress)
                     ? undefined
                     : "pointer"
                 }
@@ -424,8 +428,11 @@ const CopyAddressItem: FunctionComponent<{
                   setIsBookmarkHover(isHover);
                 }}
                 style={{
-                  opacity: address.ethereumAddress ? 0 : 1,
-                  pointerEvents: address.ethereumAddress ? "none" : undefined,
+                  opacity: !isEVMOnlyChain && address.ethereumAddress ? 0 : 1,
+                  pointerEvents:
+                    !isEVMOnlyChain && address.ethereumAddress
+                      ? "none"
+                      : undefined,
                   color: (() => {
                     if (isBookmarked) {
                       if (!blockInteraction && isBookmarkHover) {

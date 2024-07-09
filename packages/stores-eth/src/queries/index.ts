@@ -9,6 +9,7 @@ import { ObservableQueryEthereumBlock } from "./block";
 import { ObservableQueryEthereumFeeHistory } from "./fee-histroy";
 import { ObservableQueryEVMChainERC20Metadata } from "./erc20-metadata";
 import { ObservableQueryERC20ContractInfo } from "./erc20-contract-info";
+import { ObservableQueryEthereumMaxPriorityFee } from "./max-priority-fee";
 import { ObservableQueryThirdpartyERC20BalanceRegistry } from "./erc20-balances";
 import { ObservableQueryCoingeckoTokenInfo } from "./coingecko-token-info";
 import { ObservableQueryEthereumERC20BalanceRegistry } from "./erc20-balance";
@@ -52,6 +53,7 @@ export class EthereumQueriesImpl {
   public readonly queryEthereumFeeHistory: DeepReadonly<ObservableQueryEthereumFeeHistory>;
   public readonly queryEthereumERC20Metadata: DeepReadonly<ObservableQueryEVMChainERC20Metadata>;
   public readonly queryEthereumERC20ContractInfo: DeepReadonly<ObservableQueryERC20ContractInfo>;
+  public readonly queryEthereumMaxPriorityFee: DeepReadonly<ObservableQueryEthereumMaxPriorityFee>;
   public readonly queryEthereumCoingeckoTokenInfo: DeepReadonly<ObservableQueryCoingeckoTokenInfo>;
 
   constructor(
@@ -95,6 +97,13 @@ export class EthereumQueriesImpl {
       chainId,
       chainGetter
     );
+
+    this.queryEthereumMaxPriorityFee =
+      new ObservableQueryEthereumMaxPriorityFee(
+        sharedContext,
+        chainId,
+        chainGetter
+      );
 
     this.queryEthereumCoingeckoTokenInfo =
       new ObservableQueryCoingeckoTokenInfo(
