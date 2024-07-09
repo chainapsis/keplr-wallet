@@ -36,8 +36,15 @@ export const CopyAddressScene: FunctionComponent<{
   setCurrentScene: (scene: string) => void;
   setQRChainId: (value: string) => void;
   setQRBech32Address: (value: string) => void;
+  disableBuyCrypto?: boolean;
 }> = observer(
-  ({setIsOpen, setCurrentScene, setQRChainId, setQRBech32Address}) => {
+  ({
+    setIsOpen,
+    setCurrentScene,
+    setQRChainId,
+    setQRBech32Address,
+    disableBuyCrypto,
+  }) => {
     const {chainStore, accountStore, keyRingStore, uiConfigStore} = useStore();
     const [search, setSearch] = useState('');
     const style = useStyle();
@@ -151,74 +158,77 @@ export const CopyAddressScene: FunctionComponent<{
               flex: 1,
             }}
           />
-          <RectButton
-            style={{
-              marginRight: 20,
-              borderRadius: 9999,
-            }}
-            rippleColor={style.get('color-gray-400').color}
-            underlayColor={style.get('color-gray-500').color}
-            activeOpacity={1}
-            onPress={() => {
-              setCurrentScene('Buy');
-            }}>
-            <Box
-              position="relative"
-              height={36}
-              paddingX={16}
-              alignX="center"
-              alignY="center"
-              borderRadius={9999}>
-              <XAxis>
-                <Text style={style.flatten(['text-caption2', 'color-gray-10'])}>
-                  Buy Crypto
-                </Text>
-                <Gutter size={4} />
-                <Svg width="16" height="16" fill="none" viewBox="0 0 16 16">
-                  <Path
-                    stroke={style.get('color-gray-10').color}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.667"
-                    d="M3 8h10m0 0L8.5 3.5M13 8l-4.5 4.5"
-                  />
-                </Svg>
-              </XAxis>
-              <View
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                }}>
-                <Svg width="100%" height="100%">
-                  <Defs>
-                    <LinearGradient id="Gradient">
-                      <Stop offset="0" stopColor="#00C2FF" />
-                      <Stop offset="1" stopColor="#DB00FF" />
-                    </LinearGradient>
-                  </Defs>
-                  {/* react native에서 svg rect의 stroke를 inside로 설정할 방법이 없는 것 같다.
+          {!disableBuyCrypto ? (
+            <RectButton
+              style={{
+                marginRight: 20,
+                borderRadius: 9999,
+              }}
+              rippleColor={style.get('color-gray-400').color}
+              underlayColor={style.get('color-gray-500').color}
+              activeOpacity={1}
+              onPress={() => {
+                setCurrentScene('Buy');
+              }}>
+              <Box
+                position="relative"
+                height={36}
+                paddingX={16}
+                alignX="center"
+                alignY="center"
+                borderRadius={9999}>
+                <XAxis>
+                  <Text
+                    style={style.flatten(['text-caption2', 'color-gray-10'])}>
+                    Buy Crypto
+                  </Text>
+                  <Gutter size={4} />
+                  <Svg width="16" height="16" fill="none" viewBox="0 0 16 16">
+                    <Path
+                      stroke={style.get('color-gray-10').color}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.667"
+                      d="M3 8h10m0 0L8.5 3.5M13 8l-4.5 4.5"
+                    />
+                  </Svg>
+                </XAxis>
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                  }}>
+                  <Svg width="100%" height="100%">
+                    <Defs>
+                      <LinearGradient id="Gradient">
+                        <Stop offset="0" stopColor="#00C2FF" />
+                        <Stop offset="1" stopColor="#DB00FF" />
+                      </LinearGradient>
+                    </Defs>
+                    {/* react native에서 svg rect의 stroke를 inside로 설정할 방법이 없는 것 같다.
                      그러므로 border width 1일때 양옆 각각 0.5씩을 고려해야한다
                      height의 경우는 1을 빼주고 y를 0.5로 하면 된다
                      근데 width는 딱히 방법이 없으므로 x를 0.5로하고 width를 대충 99%로 줘서 해결한다*/}
-                  <Rect
-                    x={0.5}
-                    y={0.5}
-                    width="99%"
-                    height={35}
-                    fill="transparent"
-                    strokeWidth={1}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    stroke="url(#Gradient)"
-                    rx="18"
-                  />
-                </Svg>
-              </View>
-            </Box>
-          </RectButton>
+                    <Rect
+                      x={0.5}
+                      y={0.5}
+                      width="99%"
+                      height={35}
+                      fill="transparent"
+                      strokeWidth={1}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      stroke="url(#Gradient)"
+                      rx="18"
+                    />
+                  </Svg>
+                </View>
+              </Box>
+            </RectButton>
+          ) : null}
         </XAxis>
         <Gutter size={12} />
         <Box paddingX={12}>

@@ -259,6 +259,8 @@ export const CameraScreen: FunctionComponent = observer(() => {
       <DepositModal
         isOpen={isDepositModalOpen}
         setIsOpen={setIsDepositModalOpen}
+        navigation={navigation}
+        disableBuyCrypto={true}
       />
     </React.Fragment>
   );
