@@ -2642,6 +2642,48 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["cosmwasm"],
   },
+  {
+    rpc: "https://rpc-zetachain.keplr.app",
+    rest: "https://lcd-zetachain.keplr.app",
+    chainId: "zetachain_7000-1",
+    chainName: "ZetaChain",
+    stakeCurrency: {
+      coinDenom: "ZETA",
+      coinMinimalDenom: "azeta",
+      coinDecimals: 18,
+    },
+    bip44: {
+      coinType: 60,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "zeta",
+      bech32PrefixAccPub: "zetapub",
+      bech32PrefixValAddr: "zetavaloper",
+      bech32PrefixValPub: "zetavaloperpub",
+      bech32PrefixConsAddr: "ezetaalcons",
+      bech32PrefixConsPub: "zetavalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "ZETA",
+        coinMinimalDenom: "azeta",
+        coinDecimals: 18,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ZETA",
+        coinMinimalDenom: "azeta",
+        coinDecimals: 18,
+        gasPriceStep: {
+          low: 80000000000,
+          average: 80000000000,
+          high: 80000000000,
+        },
+      },
+    ],
+    features: ["eth-address-gen", "eth-key-sign"],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.

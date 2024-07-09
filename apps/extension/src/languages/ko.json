@@ -325,6 +325,8 @@
 
   "page.wallet.title": "지갑 선택",
   "page.wallet.input.search.placeholder": "지갑 이름이나 주소로 검색",
+  "page.wallet.search-empty-view-title": "앗!",
+  "page.wallet.search-empty-view-paragraph": "검색 결과가 없어요",
   "page.wallet.add-wallet-button": "지갑 추가",
   "page.wallet.recovery-phrase-title": "복구 문구 기반",
   "page.wallet.connect-with-social-account-title": "{social} 계정으로 연결",

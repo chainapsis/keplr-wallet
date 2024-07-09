@@ -138,7 +138,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
             interaction: interactionInfo.interaction,
             interactionInternal: interactionInfo.interactionInternal,
           },
-          new URL(browser.extension.getURL("/")).origin
+          window.location.origin
         );
       }
 

@@ -331,6 +331,8 @@
 
   "page.wallet.title": "Select Wallet",
   "page.wallet.input.search.placeholder": "Search wallet name or address",
+  "page.wallet.search-empty-view-title": "Oops!",
+  "page.wallet.search-empty-view-paragraph": "No Result Found",
   "page.wallet.add-wallet-button": "Add Wallet",
   "page.wallet.recovery-phrase-title": "Recovery Phrase",
   "page.wallet.connect-with-social-account-title": "Connected with {social} Account",

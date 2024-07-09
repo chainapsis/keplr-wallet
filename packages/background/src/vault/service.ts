@@ -1,4 +1,4 @@
-import { KVStore } from "@keplr-wallet/common";
+import { isServiceWorker, KVStore } from "@keplr-wallet/common";
 import { JSONUint8Array } from "@keplr-wallet/router";
 import {
   action,
@@ -186,6 +186,10 @@ export class VaultService {
   lock() {
     this.password = new Uint8Array(0);
     this.decryptedCache = new Map();
+
+    if (isServiceWorker()) {
+      this.setSessionPassword(undefined);
+    }
   }
 
   async unlock(userPassword: string): Promise<void> {
@@ -223,6 +227,13 @@ export class VaultService {
       this.aesCounterSalt,
       Buffer.from(aesCounterCipher, "hex")
     );
+
+    if (isServiceWorker()) {
+      await this.setSessionPassword({
+        password: this.password,
+        aesCounter: this.aesCounter,
+      });
+    }
   }
 
   get isLocked(): boolean {
@@ -422,6 +433,10 @@ export class VaultService {
       this.kvStore.set("aesCounterCipher", null),
     ]);
 
+    if (isServiceWorker()) {
+      await this.setSessionPassword(undefined);
+    }
+
     for (const prev of prevVaults) {
       for (const handler of this.onVaultRemovedHandlers) {
         handler(prev.type, prev.id);
@@ -543,5 +558,65 @@ export class VaultService {
 
   addVaultRemovedHandler(handler: VaultRemovedHandler) {
     this.onVaultRemovedHandlers.push(handler);
+  }
+
+  protected async setSessionPassword(
+    password:
+      | {
+          password: Uint8Array;
+          aesCounter: Uint8Array;
+        }
+      | undefined
+  ): Promise<void> {
+    try {
+      if (
+        password != null &&
+        password.password.length > 0 &&
+        password.aesCounter.length > 0
+      ) {
+        await browser.storage.session.set({
+          ["vault.password"]: Buffer.from(password.password).toString("hex"),
+          ["vault.aesCounter"]: Buffer.from(password.aesCounter).toString(
+            "hex"
+          ),
+        });
+      } else {
+        await browser.storage.session.remove("vault.password");
+        await browser.storage.session.remove("vault.aesCounter");
+      }
+    } catch (e) {
+      console.log(
+        `Failed to save to session storage: ${e.message || e.toString()}`
+      );
+    }
+  }
+
+  async unlockWithSessionPasswordIfPossible(): Promise<void> {
+    try {
+      const passwordHex = await browser.storage.session.get("vault.password");
+      const aesCounterHex = await browser.storage.session.get(
+        "vault.aesCounter"
+      );
+      if (
+        passwordHex &&
+        passwordHex["vault.password"] &&
+        aesCounterHex &&
+        aesCounterHex["vault.aesCounter"]
+      ) {
+        const password = Buffer.from(passwordHex["vault.password"], "hex");
+        const aesCounter = Buffer.from(
+          aesCounterHex["vault.aesCounter"],
+          "hex"
+        );
+        if (password.length > 0 && aesCounter.length > 0) {
+          this.password = password;
+          this.aesCounter = aesCounter;
+        }
+      }
+    } catch (e) {
+      console.log(
+        `Failed to load from session storage: ${e.message || e.toString()}`
+      );
+    }
   }
 }
