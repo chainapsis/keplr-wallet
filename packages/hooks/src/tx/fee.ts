@@ -451,17 +451,24 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         return false;
       }
 
-      const maxPriorityFee =
-        queries.ethereum.queryEthereumMaxPriorityFee.maxPriorityFeePerGas;
       const feeHistory =
         queries.ethereum.queryEthereumFeeHistory.getQueryByFeeHistoryParams(
           ETH_FEE_HISTRORY_BLOCK_COUNT,
           ETH_FEE_HISTORY_NEWEST_BLOCK,
           ETH_FEE_HISTORY_REWARD_PERCENTILES
         ).feeHistory;
-
-      if (maxPriorityFee != null && feeHistory != null) {
+      if (feeHistory != null) {
         return true;
+      } else {
+        const block =
+          queries.ethereum.queryEthereumBlock.getQueryByBlockNumberOrTag(
+            ETH_FEE_HISTORY_NEWEST_BLOCK
+          ).block;
+        const maxPriorityFeePerGas =
+          queries.ethereum.queryEthereumMaxPriorityFee.maxPriorityFeePerGas;
+        if (block != null && maxPriorityFeePerGas != null) {
+          return true;
+        }
       }
     }
 
@@ -688,15 +695,13 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       const ethereumQueries = this.queriesStore.get(this.chainId).ethereum;
       if (ethereumQueries && this.canEIP1559TxFeesAndReady()) {
         const feeHistory =
-          ethereumQueries?.queryEthereumFeeHistory.getQueryByFeeHistoryParams(
+          ethereumQueries.queryEthereumFeeHistory.getQueryByFeeHistoryParams(
             ETH_FEE_HISTRORY_BLOCK_COUNT,
             ETH_FEE_HISTORY_NEWEST_BLOCK,
             ETH_FEE_HISTORY_REWARD_PERCENTILES
           ).feeHistory;
         if (feeHistory != null) {
-          const minMaxPriorityFeePerGas =
-            ethereumQueries.queryEthereumMaxPriorityFee.maxPriorityFeePerGas;
-          const latestBaseFeePerGas = parseInt(
+          const latestBaseFeePerGas = BigInt(
             feeHistory.baseFeePerGas?.[feeHistory.baseFeePerGas.length - 1] ??
               "0"
           );
@@ -714,17 +719,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
               ]
           );
           const medianOfPriorityFeesPerGas =
-            priorityFeesPerGas?.sort((a, b) => parseInt(a) - parseInt(b))?.[
+            priorityFeesPerGas?.sort((a, b) => Number(BigInt(a) - BigInt(b)))?.[
               Math.floor((priorityFeesPerGas.length - 1) / 2)
             ] ?? "0";
           const maxPriorityFeePerGasDec = new Dec(
-            Math.max(
-              parseInt(medianOfPriorityFeesPerGas),
-              minMaxPriorityFeePerGas ? parseInt(minMaxPriorityFeePerGas) : 0
-            )
-          ).mul(
-            ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType]
-              .priorityFeePercentageMultiplier
+            BigInt(medianOfPriorityFeesPerGas)
           );
           const maxFeePerGas = baseFeePerGasDec.add(maxPriorityFeePerGasDec);
 
@@ -732,6 +731,27 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             maxPriorityFeePerGas: maxPriorityFeePerGasDec.truncateDec(),
             maxFeePerGas: maxFeePerGas.truncateDec(),
           };
+        } else {
+          const block =
+            ethereumQueries.queryEthereumBlock.getQueryByBlockNumberOrTag(
+              ETH_FEE_HISTORY_NEWEST_BLOCK
+            ).block;
+          const maxPriorityFeePerGas =
+            ethereumQueries.queryEthereumMaxPriorityFee.maxPriorityFeePerGas;
+          if (block != null && maxPriorityFeePerGas != null) {
+            const baseFeePerGasDec = new Dec(BigInt(block.baseFeePerGas)).mul(
+              ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType].baseFeePercentageMultiplier
+            );
+            const maxPriorityFeePerGasDec = new Dec(
+              BigInt(maxPriorityFeePerGas)
+            );
+            const maxFeePerGas = baseFeePerGasDec.add(maxPriorityFeePerGasDec);
+
+            return {
+              maxPriorityFeePerGas: maxPriorityFeePerGasDec.truncateDec(),
+              maxFeePerGas: maxFeePerGas.truncateDec(),
+            };
+          }
         }
       }
 
@@ -1015,23 +1035,19 @@ const ETH_FEE_SETTINGS_BY_FEE_TYPE: Record<
   {
     percentile: number;
     baseFeePercentageMultiplier: Dec;
-    priorityFeePercentageMultiplier: Dec;
   }
 > = {
   low: {
     percentile: 10,
     baseFeePercentageMultiplier: new Dec(1),
-    priorityFeePercentageMultiplier: new Dec(0.94),
   },
   average: {
-    percentile: 20,
+    percentile: 40,
     baseFeePercentageMultiplier: new Dec(1.125),
-    priorityFeePercentageMultiplier: new Dec(0.97),
   },
   high: {
-    percentile: 30,
+    percentile: 70,
     baseFeePercentageMultiplier: new Dec(1.25),
-    priorityFeePercentageMultiplier: new Dec(1),
   },
 };
 const ETH_FEE_HISTRORY_BLOCK_COUNT = 3;
