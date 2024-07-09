@@ -21,6 +21,7 @@ import {FormattedMessage, useIntl} from 'react-intl';
 import {Column, Columns} from '../../../../components/column';
 import {ArrowLeftIcon} from '../../../../components/icon';
 import {IconButton} from '../../../../components/icon-button';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 export const BuyModal = observer<{
   setCurrentScene: (key: string) => void;
@@ -30,6 +31,8 @@ export const BuyModal = observer<{
   const {accountStore, chainStore} = useStore();
   const style = useStyle();
   const intl = useIntl();
+
+  const safeAreaInsets = useSafeAreaInsets();
 
   const [fiatOnRampServiceInfos, setFiatOnRampServiceInfos] = useState(
     FiatOnRampServiceInfos,
@@ -176,7 +179,7 @@ export const BuyModal = observer<{
   });
 
   return (
-    <Box paddingX={12} paddingBottom={12}>
+    <Box paddingX={12} paddingBottom={12 + safeAreaInsets.bottom}>
       <Columns alignY="center" sum={2}>
         <IconButton
           onPress={() => {
