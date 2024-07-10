@@ -156,19 +156,35 @@ export const StakedBalance: FunctionComponent<{
         <Box style={{flex: 1}} />
 
         <XAxis alignY="center">
-          <Button
-            text={stakeBalanceIsZero ? 'Stake' : 'Stake More'}
-            onPress={() => {
-              if (chainStore.getChain(chainId).walletUrlForStaking) {
-                navigation.navigate('Stake', {
-                  screen: 'Stake.ValidateList',
-                  params: {
-                    chainId: chainId,
-                  },
-                });
-              }
-            }}
-          />
+          {stakeBalanceIsZero ? (
+            <Button
+              text={'Stake'}
+              onPress={() => {
+                if (chainStore.getChain(chainId).walletUrlForStaking) {
+                  navigation.navigate('Stake', {
+                    screen: 'Stake.ValidateList',
+                    params: {
+                      chainId: chainId,
+                    },
+                  });
+                }
+              }}
+            />
+          ) : (
+            <Button
+              text={'Stake More'}
+              onPress={() => {
+                if (chainStore.getChain(chainId).walletUrlForStaking) {
+                  navigation.navigate('Stake', {
+                    screen: 'Stake.Dashboard',
+                    params: {
+                      chainId,
+                    },
+                  });
+                }
+              }}
+            />
+          )}
         </XAxis>
       </XAxis>
     </Box>
