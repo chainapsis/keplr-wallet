@@ -3,8 +3,8 @@ module.exports = {
   title: "Keplr wallet",
   locales: {
     "/": {
-      lang: "en-US",
-    },
+      lang: "en-US"
+    }
   },
   base: process.env.VUEPRESS_BASE || "/",
   head: [
@@ -17,14 +17,14 @@ module.exports = {
       {
         property: "og:description",
         content:
-          "Keplr is a non-custodial blockchain wallets for webpages that allow users to interact with blockchain applications.",
-      },
+          "Keplr is a non-custodial blockchain wallets for webpages that allow users to interact with blockchain applications."
+      }
     ],
     [
       "meta",
-      { property: "og:image", content: "https://docs.keplr.app/og-image.png" },
+      { property: "og:image", content: "https://docs.keplr.app/og-image.png" }
     ],
-    ["meta", { name: "twitter:card", content: "summary_large_image" }],
+    ["meta", { name: "twitter:card", content: "summary_large_image" }]
   ],
   themeConfig: {
     custom: true,
@@ -33,10 +33,10 @@ module.exports = {
     docsRepo: "chainapsis/keplr-wallet",
     docsDir: "docs",
     logo: {
-      src: "/Keplr_Black.png",
+      src: "/Keplr_Black.png"
     },
     topbar: {
-      banner: false,
+      banner: false
     },
     sidebar: {
       auto: false,
@@ -47,24 +47,29 @@ module.exports = {
             {
               title: "Keplr API",
               directory: true,
-              path: "/api",
+              path: "/api"
             },
-          ],
-        },
-      ],
-    },
+            {
+              title: "Keplr Mobile API",
+              directory: true,
+              path: "/mobile-api"
+            }
+          ]
+        }
+      ]
+    }
   },
   plugins: [
     [
       "sitemap",
       {
-        hostname: "https://docs.keplr.app",
-      },
-    ],
+        hostname: "https://docs.keplr.app"
+      }
+    ]
   ],
   markdown: {
-    extendMarkdown: (md) => {
+    extendMarkdown: md => {
       md.use(require("markdown-it-container"), "suggest-chain-example-table");
-    },
-  },
+    }
+  }
 };
