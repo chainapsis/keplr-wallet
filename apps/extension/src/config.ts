@@ -2653,7 +2653,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     chainId: "eip155:1",
     chainName: "Ethereum",
     chainSymbolImageUrl:
-      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
     bip44: {
       coinType: 60,
     },
@@ -2664,7 +2664,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: "ethereum",
         coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
       },
       {
         coinDenom: "USDC",
@@ -2682,7 +2682,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: "ethereum",
         coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
       },
     ],
     features: ["eth-address-gen", "eth-key-sign"],
@@ -2697,7 +2697,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     },
     chainId: "eip155:8453",
     chainName: "Base",
-    chainSymbolImageUrl: "https://icons.llamao.fi/icons/chains/rsz_base.jpg",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:8453/chain.png",
     bip44: {
       coinType: 60,
     },
@@ -2708,7 +2709,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: "ethereum",
         coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
       },
       {
         coinDenom: "USDC",
@@ -2726,7 +2727,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: "ethereum",
         coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
       },
     ],
     features: ["eth-address-gen", "eth-key-sign", "op-stack-l1-data-fee"],
@@ -2742,7 +2743,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     chainId: "eip155:10",
     chainName: "Optimism",
     chainSymbolImageUrl:
-      "https://avatars.githubusercontent.com/u/58791460?s=200&v=4",
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:10/chain.png",
     bip44: {
       coinType: 60,
     },
@@ -2753,7 +2754,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: "ethereum",
         coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
       },
       {
         coinDenom: "USDC",
@@ -2771,7 +2772,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: "ethereum",
         coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
       },
     ],
     features: ["eth-address-gen", "eth-key-sign", "op-stack-l1-data-fee"],
@@ -2787,7 +2788,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     chainId: "eip155:42161",
     chainName: "Arbitrum",
     chainSymbolImageUrl:
-      "https://icons.llamao.fi/icons/chains/rsz_arbitrum.jpg",
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:42161/chain.png",
     bip44: {
       coinType: 60,
     },
@@ -2798,7 +2799,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: "ethereum",
         coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
       },
       {
         coinDenom: "USDC",
@@ -2816,7 +2817,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: "ethereum",
         coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/centauri/eth.png",
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
       },
     ],
     features: ["eth-address-gen", "eth-key-sign"],
@@ -2831,7 +2832,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     },
     chainId: "eip155:137",
     chainName: "Polygon",
-    chainSymbolImageUrl: "https://icons.llamao.fi/icons/chains/rsz_polygon.jpg",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:137/chain.png",
     bip44: {
       coinType: 60,
     },
@@ -2841,7 +2843,8 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "wei",
         coinDecimals: 18,
         coinGeckoId: "matic-network",
-        coinImageUrl: "https://icons.llamao.fi/icons/chains/rsz_polygon.jpg",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:137/chain.png",
       },
       {
         coinDenom: "USDC",
@@ -2858,10 +2861,154 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "wei",
         coinDecimals: 18,
         coinGeckoId: "matic-network",
-        coinImageUrl: "https://icons.llamao.fi/icons/chains/rsz_polygon.jpg",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:137/chain.png",
       },
     ],
     features: ["eth-address-gen", "eth-key-sign"],
+  },
+  {
+    rpc: "https://evm-56.keplr.app",
+    rest: "https://evm-56.keplr.app",
+    evm: {
+      chainId: 56,
+      rpc: "https://evm-56.keplr.app",
+      websocket: "wss://evm-56.keplr.app/websocket",
+    },
+    chainId: "eip155:56",
+    chainName: "BNB Smart Chain",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:56/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "BNB",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "binancecoin",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:56/chain.png",
+      },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "erc20:0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+        coinDecimals: 6,
+        coinGeckoId: "usd-coin",
+        coinImageUrl:
+          "https://coin-images.coingecko.com/coins/images/6319/small/usdc.png?1696506694",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "BNB",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "binancecoin",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:56/chain.png",
+      },
+    ],
+    features: ["eth-address-gen", "eth-key-sign"],
+  },
+  {
+    rpc: "https://evm-43114.keplr.app",
+    rest: "https://evm-43114.keplr.app",
+    evm: {
+      chainId: 43114,
+      rpc: "https://evm-43114.keplr.app",
+      websocket: "wss://evm-43114.keplr.app/websocket",
+    },
+    chainId: "eip155:43114",
+    chainName: "Avalanche",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:43114/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "AVAX",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "avalanche-2",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:43114/chain.png",
+      },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "erc20:0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e",
+        coinDecimals: 6,
+        coinGeckoId: "usd-coin",
+        coinImageUrl:
+          "https://coin-images.coingecko.com/coins/images/6319/small/usdc.png?1696506694",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "AVAX",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "avalanche-2",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:43114/chain.png",
+      },
+    ],
+    features: ["eth-address-gen", "eth-key-sign"],
+  },
+  {
+    rpc: "https://evm-81457.keplr.app",
+    rest: "https://evm-81457.keplr.app",
+    evm: {
+      chainId: 81457,
+      rpc: "https://evm-81457.keplr.app",
+      websocket: "wss://evm-81457.keplr.app/websocket",
+    },
+    chainId: "eip155:81457",
+    chainName: "Blast",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:81457/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+      },
+      {
+        coinDenom: "USDB",
+        coinMinimalDenom: "erc20:0x4300000000000000000000000000000000000003",
+        coinDecimals: 18,
+        coinGeckoId: "usdb",
+        coinImageUrl:
+          "https://coin-images.coingecko.com/coins/images/35595/small/65c67f0ebf2f6a1bd0feb13c_usdb-icon-yellow.png?1709255427",
+      },
+      {
+        coinDenom: "BLAST",
+        coinMinimalDenom: "erc20:0xb1a5700fa2358173fe465e6ea4ff52e36e88e2ad",
+        coinDecimals: 18,
+        coinGeckoId: "blast",
+        coinImageUrl:
+          "https://coin-images.coingecko.com/coins/images/35494/small/Blast.jpg?1719385662",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+      },
+    ],
+    features: ["eth-address-gen", "eth-key-sign", "op-stack-l1-data-fee"],
   },
 ];
 
