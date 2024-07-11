@@ -134,106 +134,205 @@ export class KeyRingEthereumService {
         keyInsensitive: keyInfo.insensitive,
       },
       async (res: { signingData: Uint8Array; signature?: Uint8Array }) => {
-        if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
-          if (!res.signature || res.signature.length === 0) {
-            throw new Error("Frontend should provide signature");
-          }
-          return {
-            signingData: res.signingData,
-            signature: res.signature,
-          };
-        } else {
-          switch (signType) {
-            case EthSignType.MESSAGE: {
-              const signature = await this.keyRingService.sign(
-                chainId,
-                vaultId,
-                Buffer.concat([
-                  Buffer.from("\x19Ethereum Signed Message:\n"),
-                  Buffer.from(res.signingData.length.toString()),
-                  res.signingData,
-                ]),
-                "keccak256"
-              );
-              return {
-                signingData: res.signingData,
-                signature: Buffer.concat([
-                  signature.r,
-                  signature.s,
-                  // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
-                  signature.v
-                    ? Buffer.from("1c", "hex")
-                    : Buffer.from("1b", "hex"),
-                ]),
-              };
+        const { signature, signingData } = await (async () => {
+          if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
+            if (!res.signature || res.signature.length === 0) {
+              throw new Error("Frontend should provide signature");
             }
-            case EthSignType.TRANSACTION: {
-              const unsignedTx = JSON.parse(
-                Buffer.from(res.signingData).toString()
-              );
 
-              const isEIP1559 =
-                !!unsignedTx.maxFeePerGas || !!unsignedTx.maxPriorityFeePerGas;
-              if (isEIP1559) {
-                unsignedTx.type = TransactionTypes.eip1559;
+            this.analyticsService.logEventIgnoreError("evm_tx_signed", {
+              chainId,
+              isInternal: env.isInternalMsg,
+              origin,
+              ethSignType: signType,
+              keyType: keyInfo.type,
+            });
+
+            return {
+              signingData: res.signingData,
+              signature: res.signature,
+            };
+          } else {
+            switch (signType) {
+              case EthSignType.MESSAGE: {
+                const signature = await this.keyRingService.sign(
+                  chainId,
+                  vaultId,
+                  Buffer.concat([
+                    Buffer.from("\x19Ethereum Signed Message:\n"),
+                    Buffer.from(res.signingData.length.toString()),
+                    res.signingData,
+                  ]),
+                  "keccak256"
+                );
+
+                this.analyticsService.logEventIgnoreError("evm_tx_signed", {
+                  chainId,
+                  isInternal: env.isInternalMsg,
+                  origin,
+                  ethsignType: signType,
+                  keyType: keyInfo.type,
+                });
+
+                return {
+                  signingData: res.signingData,
+                  signature: Buffer.concat([
+                    signature.r,
+                    signature.s,
+                    // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
+                    signature.v
+                      ? Buffer.from("1c", "hex")
+                      : Buffer.from("1b", "hex"),
+                  ]),
+                };
               }
+              case EthSignType.TRANSACTION: {
+                const unsignedTx = JSON.parse(
+                  Buffer.from(res.signingData).toString()
+                );
 
-              delete unsignedTx.from;
+                const isEIP1559 =
+                  !!unsignedTx.maxFeePerGas ||
+                  !!unsignedTx.maxPriorityFeePerGas;
+                if (isEIP1559) {
+                  unsignedTx.type = TransactionTypes.eip1559;
+                }
 
-              const signature = await this.keyRingService.sign(
-                chainId,
-                vaultId,
-                Buffer.from(serialize(unsignedTx).replace("0x", ""), "hex"),
-                "keccak256"
-              );
+                delete unsignedTx.from;
 
-              return {
-                signingData: res.signingData,
-                signature: Buffer.concat([
-                  signature.r,
-                  signature.s,
-                  // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
-                  signature.v
-                    ? Buffer.from("1c", "hex")
-                    : Buffer.from("1b", "hex"),
-                ]),
-              };
+                const signature = await this.keyRingService.sign(
+                  chainId,
+                  vaultId,
+                  Buffer.from(serialize(unsignedTx).replace("0x", ""), "hex"),
+                  "keccak256"
+                );
+
+                return {
+                  signingData: res.signingData,
+                  signature: Buffer.concat([
+                    signature.r,
+                    signature.s,
+                    // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
+                    signature.v
+                      ? Buffer.from("1c", "hex")
+                      : Buffer.from("1b", "hex"),
+                  ]),
+                };
+              }
+              case EthSignType.EIP712: {
+                const data = await EIP712MessageValidator.validateAsync(
+                  JSON.parse(Buffer.from(res.signingData).toString())
+                );
+                // Since ethermint eip712 tx uses non-standard format, it cannot pass validation of ethersjs.
+                // Therefore, it should be handled at a slightly lower level.
+                const signature = await this.keyRingService.sign(
+                  chainId,
+                  vaultId,
+                  Buffer.concat([
+                    // eth separator
+                    Buffer.from("19", "hex"),
+                    // Version: 1
+                    Buffer.from("01", "hex"),
+                    Buffer.from(domainHash(data).replace("0x", ""), "hex"),
+                    Buffer.from(messageHash(data).replace("0x", ""), "hex"),
+                  ]),
+                  "keccak256"
+                );
+
+                this.analyticsService.logEventIgnoreError("evm_tx_signed", {
+                  chainId,
+                  isInternal: env.isInternalMsg,
+                  origin,
+                  ethsignType: signType,
+                  keyType: keyInfo.type,
+                });
+
+                return {
+                  signingData: res.signingData,
+                  signature: Buffer.concat([
+                    signature.r,
+                    signature.s,
+                    // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
+                    signature.v
+                      ? Buffer.from("1c", "hex")
+                      : Buffer.from("1b", "hex"),
+                  ]),
+                };
+              }
+              default:
+                throw new Error(`Unknown sign type: ${signType}`);
             }
-            case EthSignType.EIP712: {
-              const data = await EIP712MessageValidator.validateAsync(
-                JSON.parse(Buffer.from(res.signingData).toString())
-              );
-              // Since ethermint eip712 tx uses non-standard format, it cannot pass validation of ethersjs.
-              // Therefore, it should be handled at a slightly lower level.
-              const signature = await this.keyRingService.sign(
-                chainId,
-                vaultId,
-                Buffer.concat([
-                  // eth separator
-                  Buffer.from("19", "hex"),
-                  // Version: 1
-                  Buffer.from("01", "hex"),
-                  Buffer.from(domainHash(data).replace("0x", ""), "hex"),
-                  Buffer.from(messageHash(data).replace("0x", ""), "hex"),
-                ]),
-                "keccak256"
-              );
-              return {
-                signingData: res.signingData,
-                signature: Buffer.concat([
-                  signature.r,
-                  signature.s,
-                  // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
-                  signature.v
-                    ? Buffer.from("1c", "hex")
-                    : Buffer.from("1b", "hex"),
-                ]),
-              };
-            }
-            default:
-              throw new Error(`Unknown sign type: ${signType}`);
           }
+        })();
+
+        try {
+          const tx =
+            signType === EthSignType.TRANSACTION
+              ? JSON.parse(Buffer.from(signingData).toString())
+              : undefined;
+          const ethTxType = await (async () => {
+            if (signType !== EthSignType.TRANSACTION) {
+              return;
+            }
+
+            if (tx.to == null || tx.to === "0x") {
+              return "deploy-contract";
+            }
+
+            const evmInfo = this.chainsService.getEVMInfoOrThrow(chainId);
+            const getCodeResponse = await simpleFetch<{
+              result?: string;
+              error?: Error;
+            }>(evmInfo.rpc, "", {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+              },
+              body: JSON.stringify({
+                jsonrpc: "2.0",
+                method: "eth_getCode",
+                params: [tx.to, "latest"],
+                id: 1,
+              }),
+            });
+            if (
+              (tx.data == null || tx.data === "0x") &&
+              BigInt(tx.value) > 0 &&
+              getCodeResponse.data.result === "0x"
+            ) {
+              return "send-native";
+            }
+
+            if (tx.data?.startsWith("0xa9059cbb")) {
+              return "execute-contract/send-erc20";
+            }
+
+            return "execute-contract";
+          })();
+
+          this.analyticsService.logEventIgnoreError("evm_tx_signed", {
+            chainId,
+            isInternal: env.isInternalMsg,
+            origin,
+            keyType: keyInfo.type,
+            ethSignType: signType,
+            ...(signType === EthSignType.TRANSACTION && {
+              ethTxType,
+            }),
+            ...(ethTxType &&
+              ethTxType.startsWith("execute-contract") &&
+              tx && {
+                contractAddress: tx.to,
+              }),
+          });
+        } catch (e) {
+          console.log(e);
         }
+
+        return {
+          signingData,
+          signature,
+        };
       }
     );
   }
