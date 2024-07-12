@@ -102,7 +102,7 @@ export const SwapAssetInfo: FunctionComponent<{
 
             {type === 'to' ? (
               <TouchableWithoutFeedback
-                style={{padding: 4}}
+                hitSlop={{top: 4, bottom: 4, left: 4, right: 4}}
                 onPress={() => {
                   setIsInfoModalOpen(true);
                 }}>
