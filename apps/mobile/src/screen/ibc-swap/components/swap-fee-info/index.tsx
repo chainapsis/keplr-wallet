@@ -22,7 +22,6 @@ import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {SVGLoadingIcon} from '../../../../components/spinner';
 import {InformationOutlinedIcon} from '../../../../components/icon/information-outlined.tsx';
 import {InformationModal} from '../../../../components/modal/infoModal.tsx';
-import {SwapFeeBps} from '../../../../config.ui.ts';
 
 export const SwapFeeInfo: FunctionComponent<{
   senderConfig: ISenderConfig;
