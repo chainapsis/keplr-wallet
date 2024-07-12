@@ -6,8 +6,8 @@ import {CoinPretty} from '@keplr-wallet/unit';
 import {Bech32Address} from '@keplr-wallet/cosmos';
 import {Buffer} from 'buffer';
 import {MsgItemBase} from './base.tsx';
-import {ArrowUpRightIcon} from './send.tsx';
 import {useStyle} from '../../../styles';
+import {MessageSendIcon} from '../../../components/icon';
 
 export const MsgRelationIBCSend: FunctionComponent<{
   msg: MsgHistory;
@@ -72,7 +72,7 @@ export const MsgRelationIBCSend: FunctionComponent<{
   return (
     <MsgItemBase
       logo={
-        <ArrowUpRightIcon size={16} color={style.get('color-gray-200').color} />
+        <MessageSendIcon size={40} color={style.get('color-gray-200').color} />
       }
       chainId={msg.chainId}
       title="Send"

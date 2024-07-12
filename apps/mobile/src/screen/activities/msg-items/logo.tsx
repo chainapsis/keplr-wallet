@@ -10,9 +10,11 @@ export const ItemLogo: FunctionComponent<{
 
   return (
     <Box
-      width={32}
-      height={32}
-      backgroundColor={backgroundColor || style.get('color-gray-500').color}
+      width={40}
+      height={40}
+      backgroundColor={backgroundColor}
+      borderWidth={1}
+      borderColor={style.get('color-gray-400').color}
       borderRadius={999999}
       alignX="center"
       alignY="center">

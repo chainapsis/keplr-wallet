@@ -78,7 +78,7 @@ export const RenderMessages: FunctionComponent<{
       {msgsPerDaily.map((msgs, i) => {
         return (
           <React.Fragment key={i.toString()}>
-            <Box paddingTop={12} paddingBottom={4} paddingX={6}>
+            <Box paddingTop={12} paddingBottom={8} paddingX={6}>
               <Text style={style.flatten(['subtitle4', 'color-gray-200'])}>
                 <FormattedDate
                   value={new Date(msgs.year, msgs.month, msgs.day)}

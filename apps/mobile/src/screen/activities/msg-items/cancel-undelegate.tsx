@@ -5,9 +5,8 @@ import {useStore} from '../../../stores';
 import {CoinPretty} from '@keplr-wallet/unit';
 import {Staking} from '@keplr-wallet/stores';
 import {MsgItemBase} from './base.tsx';
-import {IconProps} from '../../../components/icon/types.ts';
-import {Path, Svg} from 'react-native-svg';
 import {useStyle} from '../../../styles';
+import {MessageCancelUndelegateIcon} from '../../../components/icon';
 
 export const MsgRelationCancelUndelegate: FunctionComponent<{
   msg: MsgHistory;
@@ -72,8 +71,8 @@ export const MsgRelationCancelUndelegate: FunctionComponent<{
   return (
     <MsgItemBase
       logo={
-        <CancelRedelegateIcon
-          size={16}
+        <MessageCancelUndelegateIcon
+          size={40}
           color={style.get('color-gray-200').color}
         />
       }
@@ -88,20 +87,3 @@ export const MsgRelationCancelUndelegate: FunctionComponent<{
     />
   );
 });
-
-export const CancelRedelegateIcon: FunctionComponent<IconProps> = ({
-  size,
-  color,
-}) => {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 16 16" fill="none">
-      <Path
-        d="M6.5 6.5L9.5 9.5M9.5 6.5L6.5 9.5M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2C11.3137 2 14 4.68629 14 8Z"
-        stroke={color || 'currentColor'}
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-};
