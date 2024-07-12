@@ -136,9 +136,11 @@ export class UIConfigStore {
 
   protected async init() {
     let lastVersion = await this.kvStore.get<string>('lastVersion');
-    if (lastVersion === '0') {
-      // 이전에 version 처리가 명확하지 않았던 때에 "0"로 일단 넣어놨었다...
-      // 근데 "0"는 정상 버전일리가 없기 때문에 일단 대충 "2.0.0"으로 취급한다.
+    // 여기서 number 0가 나올 수 있는건 일종의 실수이다.
+    // 이전에 version 처리가 명확하지 않았던 때에 0로 일단 넣어놨었다...
+    // 근데 0은 정상 버전일리가 없기 때문에 일단 대충 "2.0.0"으로 취급한다.
+    // @ts-ignore
+    if (lastVersion === 0) {
       lastVersion = '2.0.0';
     }
     {
