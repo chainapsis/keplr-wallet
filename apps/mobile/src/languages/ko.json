@@ -550,6 +550,11 @@
   "page.main.components.token-found-modal.add-token-on-injective-and-evmos": "인젝티브와 이브모스의 토큰 추가하기",
   "page.main.components.token-found-modal.add-chains": "체인 추가",
   "page.main.components.token-item.copy-address.copied": "복사됨",
+
+  "page.main.layouts.header.new-chain.title": "{chains} 체인이 추가되었습니다!",
+  "page.main.layouts.header.new-chain.paragraph": "\"체인 표시\"에서 신규 체인을 활성화하면 이 계정에서 사용할 수 있습니다.",
+  "page.main.layouts.header.new-chain.button": "좋아요!",
+
   "page.main.components.error-modal-title": "앗! 문제가 생겼어요.",
   "page.main.components.secret-error-modal-button": "뷰잉키 설정하러 가기",
   "page.main.components.staking-chain-modal.title": "사용 가능한 자산",
