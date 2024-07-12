@@ -20,6 +20,8 @@ import {IBCSwapAmountConfig} from '@keplr-wallet/hooks-internal';
 import {TransactionFeeModal} from '../../../../components/input/fee-control/transaction-fee-modal.tsx';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {SVGLoadingIcon} from '../../../../components/spinner';
+import {InformationOutlinedIcon} from '../../../../components/icon/information-outlined.tsx';
+import {InformationModal} from '../../../../components/modal/infoModal.tsx';
 
 export const SwapFeeInfo: FunctionComponent<{
   senderConfig: ISenderConfig;
@@ -33,6 +35,7 @@ export const SwapFeeInfo: FunctionComponent<{
     const style = useStyle();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
     const {uiConfigStore, queriesStore, chainStore, priceStore} = useStore();
 
@@ -327,6 +330,17 @@ export const SwapFeeInfo: FunctionComponent<{
               <FormattedMessage id="page.ibc-swap.components.swap-fee-info.button.service-fee" />
             </Text>
 
+            <TouchableWithoutFeedback
+              style={{padding: 4}}
+              onPress={() => {
+                setIsInfoModalOpen(true);
+              }}>
+              <InformationOutlinedIcon
+                size={20}
+                color={style.get('color-gray-300').color}
+              />
+            </TouchableWithoutFeedback>
+
             {amountConfig.isFetching ? (
               <React.Fragment>
                 <Gutter size={4} />
@@ -372,6 +386,17 @@ export const SwapFeeInfo: FunctionComponent<{
           feeConfig={feeConfig}
           gasConfig={gasConfig}
           gasSimulator={gasSimulator}
+        />
+
+        <InformationModal
+          isOpen={isInfoModalOpen}
+          setIsOpen={setIsInfoModalOpen}
+          title={intl.formatMessage({
+            id: 'page.ibc-swap.components.swap-fee-info.keplr-swap-fee-information.title',
+          })}
+          paragraph={intl.formatMessage({
+            id: 'page.ibc-swap.components.swap-fee-info.keplr-swap-fee-information.paragraph',
+          })}
         />
       </React.Fragment>
     );

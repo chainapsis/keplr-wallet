@@ -3,7 +3,7 @@ import {observer} from 'mobx-react-lite';
 import {Box} from '../../../../components/box';
 import {StyleSheet, Text, TextInput, View} from 'react-native';
 import {useStyle} from '../../../../styles';
-import {FormattedMessage} from 'react-intl';
+import {FormattedMessage, useIntl} from 'react-intl';
 import {XAxis} from '../../../../components/axis';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {Gutter} from '../../../../components/gutter';
@@ -23,6 +23,8 @@ import Svg, {Path} from 'react-native-svg';
 import {IconProps} from '../../../../components/icon/types.ts';
 import {VerticalCollapseTransition} from '../../../../components/transition';
 import {SelectDestinationChainModal} from '../select-destination-chain-modal';
+import {InformationOutlinedIcon} from '../../../../components/icon/information-outlined.tsx';
+import {InformationModal} from '../../../../components/modal/infoModal.tsx';
 
 export const SwapAssetInfo: FunctionComponent<{
   type: 'from' | 'to';
@@ -35,6 +37,7 @@ export const SwapAssetInfo: FunctionComponent<{
   ) => void;
 }> = observer(
   ({type, senderConfig, amountConfig, onDestinationChainSelect}) => {
+    const intl = useIntl();
     const style = useStyle();
     const navigation = useNavigation<StackNavProp>();
     const route = useRoute<RouteProp<RootStackParamList, 'Swap'>>();
@@ -78,6 +81,7 @@ export const SwapAssetInfo: FunctionComponent<{
 
     const [isSelectDestinationModalOpen, setIsSelectDestinationModalOpen] =
       useState(false);
+    const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
     return (
       <Box
@@ -95,6 +99,19 @@ export const SwapAssetInfo: FunctionComponent<{
                 <FormattedMessage id="page.ibc-swap.components.swap-asset-info.to" />
               )}
             </Text>
+
+            {type === 'to' ? (
+              <TouchableWithoutFeedback
+                style={{padding: 4}}
+                onPress={() => {
+                  setIsInfoModalOpen(true);
+                }}>
+                <InformationOutlinedIcon
+                  size={20}
+                  color={style.get('color-gray-300').color}
+                />
+              </TouchableWithoutFeedback>
+            ) : null}
 
             <Gutter size={4} />
 
@@ -490,6 +507,17 @@ export const SwapAssetInfo: FunctionComponent<{
               // noop
             })
           }
+        />
+
+        <InformationModal
+          isOpen={isInfoModalOpen}
+          setIsOpen={setIsInfoModalOpen}
+          title={intl.formatMessage({
+            id: 'page.ibc-swap.components.swap-asset-info.quote-slippage-information-title',
+          })}
+          paragraph={intl.formatMessage({
+            id: 'page.ibc-swap.components.swap-asset-info.quote-slippage-information-paragraph',
+          })}
         />
       </Box>
     );
