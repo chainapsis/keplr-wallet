@@ -18,7 +18,7 @@ import {TokenFoundModal} from './components/token-found-modal';
 import {LookingForChains} from './components/looking-for-chains';
 import {Gutter} from '../../components/gutter';
 import * as ExpoImage from 'expo-image';
-import {StackActions, useNavigation} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {Toggle} from '../../components/toggle';
 import {
@@ -262,12 +262,13 @@ export const AvailableTabView: FunctionComponent<{
                         setIsSecretErrorModalOpen(true);
                       }}
                       onClick={() => {
-                        navigation.dispatch({
-                          ...StackActions.push('Send', {
+                        navigation.navigate({
+                          name: 'TokenDetail',
+                          params: {
                             chainId: viewToken.chainInfo.chainId,
                             coinMinimalDenom:
                               viewToken.token.currency.coinMinimalDenom,
-                          }),
+                          },
                         });
                       }}
                       showPrice24HChange={

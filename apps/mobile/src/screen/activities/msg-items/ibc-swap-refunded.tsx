@@ -1,12 +1,12 @@
-import {FunctionComponent, useMemo} from 'react';
+import React, {FunctionComponent, useMemo} from 'react';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../../stores';
 import {isValidCoinStr, parseCoinStr} from '@keplr-wallet/common';
 import {CoinPretty} from '@keplr-wallet/unit';
 import {MsgItemBase} from './base.tsx';
-import {ArrowDownLeftIcon} from './receive.tsx';
 import {useStyle} from '../../../styles';
 import {MsgHistory} from '../types.ts';
+import {MessageReceiveIcon} from '../../../components/icon';
 
 export const MsgRelationIBCSwapRefunded: FunctionComponent<{
   msg: MsgHistory;
@@ -39,8 +39,8 @@ export const MsgRelationIBCSwapRefunded: FunctionComponent<{
   return (
     <MsgItemBase
       logo={
-        <ArrowDownLeftIcon
-          size={16}
+        <MessageReceiveIcon
+          size={40}
           color={style.get('color-gray-200').color}
         />
       }
