@@ -22,6 +22,7 @@ import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {SVGLoadingIcon} from '../../../../components/spinner';
 import {InformationOutlinedIcon} from '../../../../components/icon/information-outlined.tsx';
 import {InformationModal} from '../../../../components/modal/infoModal.tsx';
+import {SwapFeeBps} from '../../../../config.ui.ts';
 
 export const SwapFeeInfo: FunctionComponent<{
   senderConfig: ISenderConfig;
@@ -394,9 +395,14 @@ export const SwapFeeInfo: FunctionComponent<{
           title={intl.formatMessage({
             id: 'page.ibc-swap.components.swap-fee-info.keplr-swap-fee-information.title',
           })}
-          paragraph={intl.formatMessage({
-            id: 'page.ibc-swap.components.swap-fee-info.keplr-swap-fee-information.paragraph',
-          })}
+          paragraph={intl.formatMessage(
+            {
+              id: 'page.ibc-swap.components.swap-fee-info.keplr-swap-fee-information.paragraph',
+            },
+            {
+              swapFeePercent: `${SwapFeeBps.value / 100}%`,
+            },
+          )}
         />
       </React.Fragment>
     );
