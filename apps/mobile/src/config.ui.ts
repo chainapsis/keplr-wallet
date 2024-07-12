@@ -2,6 +2,7 @@
 import {FiatCurrency} from '@keplr-wallet/types';
 
 export const HelpDeskUrl = 'https://help.keplr.app';
+export const TermsOfUseUrl = 'https://terms-of-use.keplr.app';
 
 export const CoinGeckoAPIEndPoint =
   process.env['KEPLR_EXT_COINGECKO_ENDPOINT'] ||
