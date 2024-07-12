@@ -1384,6 +1384,16 @@ export const DeepLinkNavigationComponent: FunctionComponent = observer(() => {
               });
               break;
             }
+
+            case 'Web.WebPage': {
+              navigation.navigate('WebTab', {
+                screen: 'Web.WebPage',
+                params: {
+                  url: deepLinkStore.needToNavigation.params['url'] as string,
+                },
+              });
+              break;
+            }
           }
         }
 

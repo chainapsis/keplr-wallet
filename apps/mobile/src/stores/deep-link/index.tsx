@@ -2,7 +2,10 @@ import {AppState, Linking} from 'react-native';
 import {action, makeObservable, observable, runInAction} from 'mobx';
 import {WalletConnectStore} from '../wallet-connect';
 
-type DeepLinkRoute = 'Coinbase.Staking.ValidateList' | 'Staking.ValidateDetail';
+type DeepLinkRoute =
+  | 'Coinbase.Staking.ValidateList'
+  | 'Staking.ValidateDetail'
+  | 'Web.WebPage';
 
 type DeepLinkParams = {
   route: DeepLinkRoute;
@@ -70,6 +73,13 @@ export class DeepLinkStore {
       ) {
         this.processStakingLinkURL(url);
       }
+
+      if (
+        (url.protocol === 'keplrwallet:' && url.host === 'web-browser') ||
+        (url.host === 'deeplink.keplr.app' && url.pathname === '/web-browser')
+      ) {
+        this.processWebBrowserLinkURL(url);
+      }
     } catch (e) {
       console.log(e);
     }
@@ -105,6 +115,27 @@ export class DeepLinkStore {
             params: {
               chainId: urlParams.get('chainId') as string,
               validatorAddress: urlParams.get('validatorAddress') as string,
+            },
+          };
+        });
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  protected processWebBrowserLinkURL(_url: URL) {
+    try {
+      // If deep link, uri can be escaped.
+      const params = decodeURIComponent(_url.search);
+      const urlParams = new URLSearchParams(params);
+
+      if (urlParams.has('url')) {
+        runInAction(() => {
+          this._needToNavigation = {
+            route: 'Web.WebPage',
+            params: {
+              url: urlParams.get('url') as string,
             },
           };
         });
