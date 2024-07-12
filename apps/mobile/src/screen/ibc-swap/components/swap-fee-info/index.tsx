@@ -332,6 +332,7 @@ export const SwapFeeInfo: FunctionComponent<{
             </Text>
 
             <TouchableWithoutFeedback
+              style={{paddingLeft: 4}}
               hitSlop={{top: 4, bottom: 4, left: 4, right: 4}}
               onPress={() => {
                 setIsInfoModalOpen(true);
@@ -400,7 +401,7 @@ export const SwapFeeInfo: FunctionComponent<{
               id: 'page.ibc-swap.components.swap-fee-info.keplr-swap-fee-information.paragraph',
             },
             {
-              swapFeePercent: `${SwapFeeBps.value / 100}%`,
+              swapFeePercent: `${amountConfig.swapFeeBps / 100}%`,
             },
           )}
         />
