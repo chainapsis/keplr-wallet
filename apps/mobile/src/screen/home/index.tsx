@@ -43,6 +43,8 @@ import {
   UpdateNotePageData,
 } from './components/update-note-modal';
 import {NewChainModal} from './components/new-chain-modal';
+import {useBuy} from '../../hooks/use-buy.ts';
+import {BuyModal} from './buy-modal.tsx';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -85,6 +87,9 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const [selectModalIsOpen, setSelectModalIsOpen] = useState(false);
   const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
   const [isNewChainModalOpen, setIsNewChainModalOpen] = useState(false);
+  const [isOpenBuy, setIsOpenBuy] = React.useState(false);
+
+  const buySupportServiceInfos = useBuy();
 
   const hasBalance = (() => {
     if (tabStatus === 'available') {
@@ -316,6 +321,21 @@ export const HomeScreen: FunctionComponent = observer(() => {
                 <Skeleton isNotReady={isNotReady} layer={1} type="button">
                   <Button
                     text={intl.formatMessage({
+                      id: 'page.main.components.buttons.buy-button',
+                    })}
+                    size="large"
+                    color="secondary"
+                    onPress={() => {
+                      setIsOpenBuy(true);
+                    }}
+                  />
+                </Skeleton>
+              </Column>
+
+              <Column weight={1}>
+                <Skeleton isNotReady={isNotReady} layer={1} type="button">
+                  <Button
+                    text={intl.formatMessage({
                       id: 'page.main.components.buttons.send-button',
                     })}
                     size="large"
@@ -448,6 +468,13 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
           return res;
         })()}
+      />
+
+      <BuyModal
+        isOpen={isOpenBuy}
+        navigation={navigation}
+        setIsOpen={setIsOpenBuy}
+        buySupportServiceInfos={buySupportServiceInfos}
       />
     </PageWithScrollView>
   );
