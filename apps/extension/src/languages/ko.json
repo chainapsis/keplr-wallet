@@ -380,10 +380,12 @@
   "page.ibc-swap.components.swap-asset-info.modal.search.placeholder": "체인 검색",
   "page.ibc-swap.components.swap-fee-info.button.transaction-fee": "트랜잭션 수수료",
   "page.ibc-swap.components.swap-fee-info.button.service-fee": "케플러 수수료",
-  "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph": "런칭 이벤트: 2023년 말까지 케플러 서비스 수수료 0%로 운영됩니다.",
+  "page.ibc-swap.components.swap-asset-info.quote-slippage-information-paragraph": "해당 견적은 추산된 가격입니다. 실제로 받는 토큰의 양은 변동될 수 있으며, 슬리피지를 낮추면 가격 변동을 줄일 순 있으나 스왑이 실패할 확률이 높아집니다.",
+  "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph": "이 견적에는 {rate}%의 스왑 수수료가 반영되어 있습니다. 이 수수료는 케플러 팀과 제 3자 유동성 인프라 제공자들에게 지급됩니다.",
   "page.ibc-swap.components.slippage-modal.title": "슬리피지 설정",
   "page.ibc-swap.components.slippage-modal.label.slippage-tolerance": "슬리피지 허용치",
   "page.ibc-swap.components.slippage-modal.label.slippage-custom": "커스텀 설정",
+  "page.ibc-swap.button.terms-of-use.title": "이용약관",
 
   "page.activity.title": "활동내역",
 
