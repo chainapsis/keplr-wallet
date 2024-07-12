@@ -30,10 +30,9 @@ import {MsgItemSkeleton} from '../activities/msg-items/skeleton.tsx';
 import {EmptyView} from '../../components/empty-view';
 import Svg, {Path} from 'react-native-svg';
 import {RenderMessages} from '../activities/messages.tsx';
-import {BuyModal} from '../home/components/deposit-modal/buy-modal.tsx';
 import {useBuy} from '../../hooks/use-buy.ts';
-import {registerCardModal} from '../../components/modal/card';
 import {IconProps} from '../../components/icon/types.ts';
+import {BuyModal} from '../home/buy-modal.tsx';
 
 export const TokenDetailScreen: FunctionComponent = observer(() => {
   const {
@@ -511,7 +510,7 @@ export const TokenDetailScreen: FunctionComponent = observer(() => {
         chainId={chainId}
       />
 
-      <TokenBuyModal
+      <BuyModal
         isOpen={isOpenBuy}
         navigation={navigation}
         setIsOpen={setIsOpenBuy}
@@ -520,8 +519,6 @@ export const TokenDetailScreen: FunctionComponent = observer(() => {
     </PageWithScrollView>
   );
 });
-
-const TokenBuyModal = registerCardModal(BuyModal);
 
 const BuyIcon: FunctionComponent<IconProps> = ({size, color}) => {
   return (
