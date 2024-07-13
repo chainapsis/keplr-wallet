@@ -201,6 +201,7 @@
   "page.setting.advanced.endpoint.reset-button": "초기화",
   "page.setting.advanced.endpoint.guide-title": "실험적 기능",
   "page.setting.advanced.endpoint.guide-paragraph": "노드 주소를 변경한 후 생기는 문제들은 노드 주소 제공자에게 연락해서 해결해야 합니다.{br}{br}변경 사항을 적용하려면 케플러를 다시 시작해주세요.",
+  "page.setting.advanced.endpoint.lava-link-button": "용암에 빠지자 🌋🧡",
 
   "page.setting.general.language-title": "언어",
   "page.setting.general.currency-title": "통화",
@@ -285,6 +286,11 @@
   "page.setting.token.add.viewing-key-info-title": "뷰잉키가 이미 있습니다.",
   "page.setting.token.add.viewing-key-info-paragraph": "이미 뷰잉키를 알고있는 경우, 해당 뷰잉키를 사용하여 토큰을 추가할 수 있습니다.",
   "page.setting.token.add.viewing-key-label": "뷰잉키",
+  "page.setting.token.add.contract-address-book-modal.title": "계약 주소",
+  "page.setting.token.add.contract-address-book-modal.search-placeholder": "토큰 이름이나 티커로 검색",
+  "page.setting.token.add.contract-address-book-modal.no-search-data": "검색 결과 없음",
+  "page.setting.token.add.contract-address-book-modal.link": "이 <link>repo</link>에서 가져옴",
+  "page.setting.token.add.contract-item.select-button": "선택",
 
   "page.setting.contacts.list.add-new-button": "새 연락처 추가",
   "page.setting.contacts.list.dropdown.edit-contact-label": "연락처 편집",
@@ -400,6 +406,8 @@
   "page.sign.cosmos.tx.view-data-button": "데이터 조회",
   "page.sign.cosmos.tx.high-fee-warning": "트랜잭션 수수료가 평소보다 높습니다.{br}그래도 계속 진행하겠습니다.",
   "page.sign.cosmos.icns.title": "ICNS 등록 요청",
+  "page.sign.cosmos.lava.guide.title": "🌋 라바 엔드포인트 사용",
+  "page.sign.cosmos.lava.guide.paragraph": "현재 라바에서 제공하는 엔드포인트를 사용 중입니다.",
 
   "page.sign.adr36.title": "소유권 증명",
   "page.sign.adr36.prove-account-ownership-to": "아래의 웹사이트에 계정 소유자임을 증명합니다.",
@@ -416,6 +424,15 @@
 
   "page.sign.components.fee-summary.fee": "수수료",
 
+  "page.sign.components.messages.agoric.provision.title": "스마트 지갑 제공",
+  "page.sign.components.messages.agoric.provision.message": "주소 <b>{address}</b>에 스마트 지갑을 제공하십시오",
+  "page.sign.components.messages.agoric.wallet-spend-action.execute-offer": "다음 매개변수로 제안을 실행하십시오:",
+  "page.sign.components.messages.agoric.wallet-spend-action.exit-offer": "ID <b>{offerId}</b>로 제안 종료",
+  "page.sign.components.messages.agoric.wallet-spend-action.offer-args": "제안 인수",
+  "page.sign.components.messages.agoric.wallet-spend-action.invitation-spec": "초대 사양",
+  "page.sign.components.messages.agoric.wallet-spend-action.give": "주기",
+  "page.sign.components.messages.agoric.wallet-spend-action.title": "지갑 지출 작업",
+  "page.sign.components.messages.agoric.wallet-spend-action.want": "원함",
   "page.sign.components.messages.custom.title": "커스텀",
   "page.sign.components.messages.claim-rewards.title": "리워드 받기",
   "page.sign.components.messages.claim-rewards.paragraph": "<b>{validator}</b>로부터 스테이킹 리워드를 받습니다.",
