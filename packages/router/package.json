@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/router",
-  "version": "0.12.111-rc.0",
+  "version": "0.12.111",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
