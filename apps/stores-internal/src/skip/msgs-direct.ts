@@ -174,7 +174,14 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
         method: "POST",
         headers: {
           "content-type": "application/json",
-          authorization: process.env["SKIP_API_KEY"] || "",
+          ...(() => {
+            const res: { authorization?: string } = {};
+            if (process.env["SKIP_API_KEY"]) {
+              res.authorization = process.env["SKIP_API_KEY"];
+            }
+
+            return res;
+          })(),
         },
         body: JSON.stringify({
           source_asset_denom: this.amountInDenom,

@@ -101,6 +101,7 @@
     "@types/react": "^18.2.19",
     "@types/react-dom": "^18.2.7",
     "@iov/crypto": "2.1.0",
+    "@walletconnect/jsonrpc-types": "^1.0.4",
     "axios": "^0.27.2",
     "libsodium": "file:./etc/noop",
     "libsodium-wrappers": "file:./etc/noop",

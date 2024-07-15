@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/mobile",
-  "version": "0.12.110",
+  "version": "0.12.111-rc.0",
   "private": true,
   "installConfig": {
     "hoistingLimits": "workspaces"
@@ -46,8 +46,8 @@
     "@react-navigation/stack": "^6.3.21",
     "@toruslabs/fetch-node-details": "=11.0.1",
     "@toruslabs/torus.js": "=6.4.1",
-    "@walletconnect/react-native-compat": "=2.10.5",
-    "@walletconnect/sign-client": "=2.10.5",
+    "@walletconnect/react-native-compat": "^2.13.3",
+    "@walletconnect/sign-client": "^2.13.3",
     "appcenter": "^5.0.1",
     "appcenter-analytics": "^5.0.1",
     "buffer": "^6.0.3",
@@ -78,6 +78,7 @@
     "react-native-ble-plx": "^2.0.3",
     "react-native-code-push": "^8.2.1",
     "react-native-device-info": "^10.11.0",
+    "react-native-draggable-flatlist": "^4.0.1",
     "react-native-exception-handler": "^2.10.10",
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "2.16.0",

@@ -187,7 +187,14 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
     const _result = await simpleFetch(this.baseURL, this.url, {
       signal: abortController.signal,
       headers: {
-        authorization: process.env["SKIP_API_KEY"] || "",
+        ...(() => {
+          const res: { authorization?: string } = {};
+          if (process.env["SKIP_API_KEY"]) {
+            res.authorization = process.env["SKIP_API_KEY"];
+          }
+
+          return res;
+        })(),
       },
     });
     const result = {

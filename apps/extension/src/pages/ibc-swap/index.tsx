@@ -25,7 +25,7 @@ import {
 } from "@keplr-wallet/hooks";
 import { useNotification } from "../../hooks/notification";
 import { FormattedMessage, useIntl } from "react-intl";
-import { SwapFeeBps } from "../../config.ui";
+import { SwapFeeBps, TermsOfUseUrl } from "../../config.ui";
 import { BottomTabsHeightRem } from "../../bottom-tabs";
 import { useSearchParams } from "react-router-dom";
 import { useTxConfigsQueryString } from "../../hooks/use-tx-config-query-string";
@@ -33,7 +33,7 @@ import { MainHeaderLayout } from "../main/layouts/header";
 import { XAxis } from "../../components/axis";
 import { Caption2, H4, Subtitle4 } from "../../components/typography";
 import { SlippageModal } from "./components/slippage-modal";
-import { useTheme } from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
@@ -50,6 +50,59 @@ import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { useEffectOnce } from "../../hooks/use-effect-once";
 import { amountToAmbiguousAverage, amountToAmbiguousString } from "../../utils";
+import { Button } from "../../components/button";
+import { TextButtonProps } from "../../components/button-text";
+
+const TextButtonStyles = {
+  Container: styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  `,
+
+  Button: styled.button<Omit<TextButtonProps, "onClick">>`
+    width: 100%;
+    height: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    overflow: hidden;
+
+    // Default font style.
+    // Override these in "buttonStyleFromColorAndMode" if needed.
+    font-weight: 500;
+    font-size: ${({ size }) => {
+      switch (size) {
+        case "large":
+          return "1rem";
+        default:
+          return "0.875rem";
+      }
+    }};
+    letter-spacing: 0.2px;
+
+    white-space: nowrap;
+
+    border: 0;
+    padding: 0 1rem;
+
+    color: ${({ theme }) =>
+      theme.mode === "light"
+        ? ColorPalette["gray-200"]
+        : ColorPalette["gray-300"]};
+    :hover {
+      color: ${({ theme }) =>
+        theme.mode === "light"
+          ? ColorPalette["gray-300"]
+          : ColorPalette["gray-200"]};
+    }
+    background-color: transparent;
+
+    position: relative;
+  `,
+};
 
 export const IBCSwapPage: FunctionComponent = observer(() => {
   const {
@@ -456,17 +509,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   return (
     <MainHeaderLayout
       additionalPaddingBottom={BottomTabsHeightRem}
-      bottomButton={{
-        disabled: interactionBlocked,
-        text: intl.formatMessage({
-          id: "page.ibc-swap.button.next",
-        }),
-        color: "primary",
-        size: "large",
-        isLoading:
-          isTxLoading ||
-          accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap",
-      }}
       headerContainerStyle={{
         borderBottomStyle: "solid",
         borderBottomWidth: "1px",
@@ -1058,6 +1100,40 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             }
           })()}
         />
+
+        <Gutter size="0.75rem" />
+
+        <Button
+          type="submit"
+          disabled={interactionBlocked}
+          text={intl.formatMessage({
+            id: "page.ibc-swap.button.next",
+          })}
+          color="primary"
+          size="large"
+          isLoading={
+            isTxLoading ||
+            accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
+          }
+        />
+
+        <Gutter size="0.75rem" />
+
+        <TextButtonStyles.Container>
+          <TextButtonStyles.Button
+            onClick={(e) => {
+              e.preventDefault();
+
+              browser.tabs.create({
+                url: TermsOfUseUrl,
+              });
+            }}
+          >
+            <FormattedMessage id="page.ibc-swap.button.terms-of-use.title" />
+          </TextButtonStyles.Button>
+        </TextButtonStyles.Container>
+
+        <Gutter size="0.75rem" />
       </Box>
 
       <SlippageModal

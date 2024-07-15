@@ -8,7 +8,7 @@ import {
   ISenderConfig,
 } from "@keplr-wallet/hooks";
 import { autorun } from "mobx";
-import { Dec, PricePretty } from "@keplr-wallet/unit";
+import { Dec, IntPretty, PricePretty } from "@keplr-wallet/unit";
 import { useStore } from "../../../../stores";
 import { IBCSwapAmountConfig } from "@keplr-wallet/hooks-internal";
 import { Box } from "../../../../components/box";
@@ -21,6 +21,7 @@ import { TransactionFeeModal } from "../../../../components/input/fee-control/mo
 import { Modal } from "../../../../components/modal";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
+import { Tooltip } from "../../../../components/tooltip";
 
 export const SwapFeeInfo: FunctionComponent<{
   senderConfig: ISenderConfig;
@@ -398,36 +399,36 @@ export const SwapFeeInfo: FunctionComponent<{
             >
               <FormattedMessage id="page.ibc-swap.components.swap-fee-info.button.service-fee" />
             </Subtitle4>
-            {/*<Gutter size="0.2rem" />*/}
-            {/*<Tooltip*/}
-            {/*  content={intl.formatMessage(*/}
-            {/*    {*/}
-            {/*      id: "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph",*/}
-            {/*    },*/}
-            {/*    {*/}
-            {/*      rate: (() => {*/}
-            {/*        const feeRatioPretty = new IntPretty(*/}
-            {/*          amountConfig.swapFeeBps*/}
-            {/*        ).moveDecimalPointLeft(2);*/}
-            {/*        return feeRatioPretty*/}
-            {/*          .trim(true)*/}
-            {/*          .maxDecimals(4)*/}
-            {/*          .inequalitySymbol(true)*/}
-            {/*          .toString();*/}
-            {/*      })(),*/}
-            {/*    }*/}
-            {/*  )}*/}
-            {/*>*/}
-            {/*  <InfoIcon*/}
-            {/*    width="1rem"*/}
-            {/*    height="1rem"*/}
-            {/*    color={*/}
-            {/*      theme.mode === "light"*/}
-            {/*        ? ColorPalette["blue-400"]*/}
-            {/*        : ColorPalette["blue-200"]*/}
-            {/*    }*/}
-            {/*  />*/}
-            {/*</Tooltip>*/}
+            <Gutter size="0.2rem" />
+            <Tooltip
+              content={intl.formatMessage(
+                {
+                  id: "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph",
+                },
+                {
+                  rate: (() => {
+                    const feeRatioPretty = new IntPretty(
+                      amountConfig.swapFeeBps
+                    ).moveDecimalPointLeft(2);
+                    return feeRatioPretty
+                      .trim(true)
+                      .maxDecimals(4)
+                      .inequalitySymbol(true)
+                      .toString();
+                  })(),
+                }
+              )}
+            >
+              <InfoIcon
+                width="1rem"
+                height="1rem"
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-200"]
+                    : ColorPalette["gray-300"]
+                }
+              />
+            </Tooltip>
             {amountConfig.isFetching ? (
               <Box
                 height="1px"
@@ -510,27 +511,27 @@ export const SwapFeeInfo: FunctionComponent<{
   }
 );
 
-// const InfoIcon: FunctionComponent<{
-//   width: string;
-//   height: string;
-//   color: string;
-// }> = ({ width, height, color }) => {
-//   return (
-//     <svg
-//       xmlns="http://www.w3.org/2000/svg"
-//       width={width}
-//       height={height}
-//       fill="none"
-//       stroke="none"
-//       viewBox="0 0 16 16"
-//     >
-//       <path
-//         fill={color || "currentColor"}
-//         d="M8 1.333A6.67 6.67 0 001.333 8 6.669 6.669 0 008 14.667 6.67 6.67 0 0014.667 8 6.67 6.67 0 008 1.333zm.667 10H7.333v-4h1.334v4zm0-5.333H7.333V4.667h1.334V6z"
-//       />
-//     </svg>
-//   );
-// };
+const InfoIcon: FunctionComponent<{
+  width: string;
+  height: string;
+  color: string;
+}> = ({ width, height, color }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="none"
+    >
+      <path
+        d="M7.33325 4.66665H8.66659V5.99998H7.33325V4.66665ZM7.33325 7.33331H8.66659V11.3333H7.33325V7.33331ZM7.99992 1.33331C4.31992 1.33331 1.33325 4.31998 1.33325 7.99998C1.33325 11.68 4.31992 14.6666 7.99992 14.6666C11.6799 14.6666 14.6666 11.68 14.6666 7.99998C14.6666 4.31998 11.6799 1.33331 7.99992 1.33331ZM7.99992 13.3333C5.05992 13.3333 2.66659 10.94 2.66659 7.99998C2.66659 5.05998 5.05992 2.66665 7.99992 2.66665C10.9399 2.66665 13.3333 5.05998 13.3333 7.99998C13.3333 10.94 10.9399 13.3333 7.99992 13.3333Z"
+        fill={color || "currentColor"}
+      />
+    </svg>
+  );
+};
 
 const noop = (..._args: any[]) => {
   // noop

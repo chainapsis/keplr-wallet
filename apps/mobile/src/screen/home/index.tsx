@@ -1,4 +1,10 @@
-import React, {FunctionComponent, useMemo, useRef, useState} from 'react';
+import React, {
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {Text, TextInput as NativeTextInput, RefreshControl} from 'react-native';
 import {observer} from 'mobx-react-lite';
 import {useStyle} from '../../styles';
@@ -13,7 +19,11 @@ import {YAxis} from '../../components/axis';
 import {Stack} from '../../components/stack';
 import {Column, Columns} from '../../components/column';
 import {DepositModal} from './components/deposit-modal/deposit-modal';
-import {StackActions, useNavigation} from '@react-navigation/native';
+import {
+  DrawerActions,
+  StackActions,
+  useNavigation,
+} from '@react-navigation/native';
 import {SearchTextInput} from '../../components/input/search-text-input';
 import {AvailableTabView} from './available';
 import {ChainInfo} from '@keplr-wallet/types';
@@ -28,6 +38,13 @@ import {useIntl} from 'react-intl';
 import {AppUpdateTopLabel} from './app-update';
 import {DualChart} from './components/chart';
 import {IbcHistoryView} from './components/ibc-history-view';
+import {
+  UpdateNoteModal,
+  UpdateNotePageData,
+} from './components/update-note-modal';
+import {NewChainModal} from './components/new-chain-modal';
+import {useBuy} from '../../hooks/use-buy.ts';
+import {BuyModal} from './buy-modal.tsx';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -54,14 +71,25 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
   const isNotReady = useIsNotReady();
 
-  const {hugeQueriesStore, priceStore, chainStore, accountStore, queriesStore} =
-    useStore();
+  const {
+    hugeQueriesStore,
+    priceStore,
+    chainStore,
+    accountStore,
+    queriesStore,
+    uiConfigStore,
+  } = useStore();
 
   const navigation = useNavigation<StackNavProp>();
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>('available');
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [selectModalIsOpen, setSelectModalIsOpen] = useState(false);
+  const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
+  const [isNewChainModalOpen, setIsNewChainModalOpen] = useState(false);
+  const [isOpenBuy, setIsOpenBuy] = React.useState(false);
+
+  const buySupportServiceInfos = useBuy();
 
   const hasBalance = (() => {
     if (tabStatus === 'available') {
@@ -160,6 +188,18 @@ export const HomeScreen: FunctionComponent = observer(() => {
       queryDelegation.fetch();
     }
   };
+
+  useEffect(() => {
+    if (uiConfigStore.changelogConfig.showingInfo.length > 0) {
+      setIsChangelogModalOpen(true);
+    }
+  }, [uiConfigStore.changelogConfig.showingInfo.length]);
+
+  useEffect(() => {
+    if (uiConfigStore.newChainSuggestionConfig.newSuggestionChains.length > 0) {
+      setIsNewChainModalOpen(true);
+    }
+  }, [uiConfigStore.newChainSuggestionConfig.newSuggestionChains.length]);
 
   return (
     <PageWithScrollView
@@ -281,6 +321,21 @@ export const HomeScreen: FunctionComponent = observer(() => {
                 <Skeleton isNotReady={isNotReady} layer={1} type="button">
                   <Button
                     text={intl.formatMessage({
+                      id: 'page.main.components.buttons.buy-button',
+                    })}
+                    size="large"
+                    color="secondary"
+                    onPress={() => {
+                      setIsOpenBuy(true);
+                    }}
+                  />
+                </Skeleton>
+              </Column>
+
+              <Column weight={1}>
+                <Skeleton isNotReady={isNotReady} layer={1} type="button">
+                  <Button
+                    text={intl.formatMessage({
                       id: 'page.main.components.buttons.send-button',
                     })}
                     size="large"
@@ -370,6 +425,56 @@ export const HomeScreen: FunctionComponent = observer(() => {
         isOpen={isDepositModalOpen}
         setIsOpen={setIsDepositModalOpen}
         navigation={navigation}
+      />
+
+      <NewChainModal
+        isOpen={isNewChainModalOpen}
+        setIsOpen={setIsNewChainModalOpen}
+        afterConfirm={() => {
+          navigation.dispatch(DrawerActions.toggleDrawer());
+        }}
+      />
+
+      <UpdateNoteModal
+        isOpen={isChangelogModalOpen}
+        setIsOpen={(isOpen: boolean) => {
+          // close 할 때 1초 뒤에 마지막 정보를 지워준다. 1초를 기다리는 이유는 애니메이션이 끝나기 전에 지우면 애니메이션이 끝나지 않는 문제가 있음.
+          if (!isOpen) {
+            setTimeout(() => {
+              uiConfigStore.changelogConfig.clearLastInfo();
+            }, 1000);
+          }
+
+          setIsChangelogModalOpen(isOpen);
+        }}
+        updateNotePageData={(() => {
+          const res: UpdateNotePageData[] = [];
+          for (const info of uiConfigStore.changelogConfig.showingInfo) {
+            for (const scene of info.scenes) {
+              res.push({
+                title: scene.title,
+                image:
+                  scene.image && scene.aspectRatio
+                    ? {
+                        default: scene.image.default,
+                        light: scene.image.light,
+                        aspectRatio: scene.aspectRatio,
+                      }
+                    : undefined,
+                paragraph: scene.paragraph,
+              });
+            }
+          }
+
+          return res;
+        })()}
+      />
+
+      <BuyModal
+        isOpen={isOpenBuy}
+        navigation={navigation}
+        setIsOpen={setIsOpenBuy}
+        buySupportServiceInfos={buySupportServiceInfos}
       />
     </PageWithScrollView>
   );

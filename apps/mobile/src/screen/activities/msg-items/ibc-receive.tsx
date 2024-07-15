@@ -7,8 +7,8 @@ import {CoinPretty} from '@keplr-wallet/unit';
 import {Buffer} from 'buffer';
 import {Bech32Address} from '@keplr-wallet/cosmos';
 import {MsgItemBase} from './base.tsx';
-import {ArrowDownLeftIcon} from './receive.tsx';
 import {useStyle} from '../../../styles';
+import {MessageReceiveIcon} from '../../../components/icon';
 
 export const MsgRelationIBCSendReceive: FunctionComponent<{
   msg: MsgHistory;
@@ -58,8 +58,8 @@ export const MsgRelationIBCSendReceive: FunctionComponent<{
   return (
     <MsgItemBase
       logo={
-        <ArrowDownLeftIcon
-          size={16}
+        <MessageReceiveIcon
+          size={40}
           color={style.get('color-gray-200').color}
         />
       }

@@ -2,8 +2,8 @@ import React, {FunctionComponent, useEffect, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {PageWithScrollView} from '../../components/page';
 import {useStyle} from '../../styles';
-import {XAxis} from '../../components/axis';
-import {Text} from 'react-native';
+import {XAxis, YAxis} from '../../components/axis';
+import {Linking, Text} from 'react-native';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {SettingIcon} from '../../components/icon';
 import {IconButton} from '../../components/icon-button';
@@ -20,7 +20,7 @@ import {RootStackParamList, StackNavProp} from '../../navigation.tsx';
 import {SlippageModal} from './components/slippage-modal';
 import {useIBCSwapConfig} from '@keplr-wallet/hooks-internal';
 import {useStore} from '../../stores';
-import {SwapFeeBps} from '../../config.ui.ts';
+import {SwapFeeBps, TermsOfUseUrl} from '../../config.ui.ts';
 import {useGasSimulator, useTxConfigsValidate} from '@keplr-wallet/hooks';
 import {AsyncKVStore} from '../../common';
 import {autorun} from 'mobx';
@@ -912,6 +912,20 @@ export const IBCSwapScreen: FunctionComponent = observer(() => {
           }
         }}
       />
+
+      <Gutter size={12} />
+
+      <YAxis alignX="center">
+        <TouchableWithoutFeedback
+          style={{paddingVertical: 8, paddingHorizontal: 16}}
+          onPress={() => {
+            Linking.openURL(TermsOfUseUrl);
+          }}>
+          <Text style={style.flatten(['text-button1', 'color-gray-300'])}>
+            <FormattedMessage id="page.ibc-swap.button.terms-of-use.title" />
+          </Text>
+        </TouchableWithoutFeedback>
+      </YAxis>
 
       <SlippageModal
         // uiConfigStore.ibcSwapConfig.slippageIsValid에 대해서도 확인한다.
