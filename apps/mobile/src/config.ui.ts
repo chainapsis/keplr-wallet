@@ -156,6 +156,6 @@ export const SwapVenue: {
   chainId: 'osmosis-1',
 };
 export const SwapFeeBps = {
-  value: 0,
+  value: 85,
   receiver: 'osmo1my4tk420gjmhggqwvvha6ey9390gqwfree2p4u',
 };
