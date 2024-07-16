@@ -443,7 +443,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     return false;
   }
 
-  protected canEIP1559TxFeesAndReady(): boolean {
+  protected canEIP1559TxFeesAndReady(isRefresh?: boolean): boolean {
     if (this.chainInfo.evm && this.senderConfig.sender.startsWith("0x")) {
       const queries = this.queriesStore.get(this.chainId);
       if (!queries.ethereum) {
@@ -451,22 +451,32 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         return false;
       }
 
-      const feeHistory =
+      const feeHistoryQuery =
         queries.ethereum.queryEthereumFeeHistory.getQueryByFeeHistoryParams(
           ETH_FEE_HISTRORY_BLOCK_COUNT,
           ETH_FEE_HISTORY_NEWEST_BLOCK,
           ETH_FEE_HISTORY_REWARD_PERCENTILES
-        ).feeHistory;
-      if (feeHistory != null) {
+        );
+      if (feeHistoryQuery.feeHistory != null) {
+        if (isRefresh) {
+          feeHistoryQuery.waitFreshResponse();
+        }
         return true;
       } else {
-        const block =
+        const blockQuery =
           queries.ethereum.queryEthereumBlock.getQueryByBlockNumberOrTag(
             ETH_FEE_HISTORY_NEWEST_BLOCK
-          ).block;
-        const maxPriorityFeePerGas =
-          queries.ethereum.queryEthereumMaxPriorityFee.maxPriorityFeePerGas;
-        if (block != null && maxPriorityFeePerGas != null) {
+          );
+        const maxPriorityFeePerGasQuery =
+          queries.ethereum.queryEthereumMaxPriorityFee;
+        if (
+          blockQuery.block != null &&
+          maxPriorityFeePerGasQuery.maxPriorityFeePerGas != null
+        ) {
+          if (isRefresh) {
+            blockQuery.waitFreshResponse();
+            maxPriorityFeePerGasQuery.waitFreshResponse();
+          }
           return true;
         }
       }
@@ -686,6 +696,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return this.populateGasPriceStep(feeCurrency, feeType);
     }
   );
+
+  refreshEIP1559TxFees() {
+    this.canEIP1559TxFeesAndReady(true);
+  }
 
   readonly getEIP1559TxFees = computedFn(
     (feeTypeOrManual: FeeType | "manual") => {
@@ -922,6 +936,57 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             return {
               error,
               loadingState,
+            };
+          }
+        }
+      }
+    }
+
+    if (this.canEIP1559TxFeesAndReady()) {
+      const ethereumQueries = this.queriesStore.get(this.chainId).ethereum;
+      if (ethereumQueries) {
+        const feeHistoryQuery =
+          ethereumQueries.queryEthereumFeeHistory.getQueryByFeeHistoryParams(
+            ETH_FEE_HISTRORY_BLOCK_COUNT,
+            ETH_FEE_HISTORY_NEWEST_BLOCK,
+            ETH_FEE_HISTORY_REWARD_PERCENTILES
+          );
+
+        if (feeHistoryQuery.error) {
+          return {
+            warning: new Error("Failed to fetch fee history"),
+          };
+        }
+
+        if (feeHistoryQuery.isFetching) {
+          return {
+            loadingState: "loading",
+          };
+        }
+
+        if (!feeHistoryQuery.response) {
+          const blockQuery =
+            ethereumQueries.queryEthereumBlock.getQueryByBlockNumberOrTag(
+              ETH_FEE_HISTORY_NEWEST_BLOCK
+            );
+          const maxPriorityFeePerGasQuery =
+            ethereumQueries.queryEthereumMaxPriorityFee;
+
+          if (blockQuery.error || maxPriorityFeePerGasQuery.error) {
+            return {
+              warning: new Error("Failed to fetch block or max priority fee"),
+            };
+          }
+
+          if (blockQuery.isFetching || maxPriorityFeePerGasQuery.isFetching) {
+            return {
+              loadingState: "loading",
+            };
+          }
+
+          if (!blockQuery.response || !maxPriorityFeePerGasQuery.response) {
+            return {
+              loadingState: "loading-block",
             };
           }
         }
