@@ -1080,7 +1080,6 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     params?: readonly unknown[] | Record<string, unknown>;
     chainId?: string;
   }): Promise<T> {
-    console.log("request", method, params);
     if (!this._isConnected) {
       if (method === "eth_accounts") {
         return [] as T;
