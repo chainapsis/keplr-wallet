@@ -43,22 +43,23 @@ export const EthSendTokenTx: IEthTxRenderer = {
             <ItemLogo
               center={
                 <svg
-                  width="44"
-                  height="44"
-                  viewBox="0 0 44 44"
+                  width="22"
+                  height="22"
+                  viewBox="0 0 22 22"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <rect width="44" height="44" rx="22" fill="#2E2E32" />
                   <path
-                    d="M13.875 30.125L30.125 13.875M30.125 13.875L17.9375 13.875M30.125 13.875V26.0625"
-                    stroke="#FEFEFE"
-                    strokeWidth="2"
+                    d="M4.125 17.875L17.875 4.125M17.875 4.125L7.5625 4.125M17.875 4.125V14.4375"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                 </svg>
               }
+              width="2.75rem"
+              height="2.75rem"
             />
           ),
           title: (
@@ -95,22 +96,23 @@ export const EthSendTokenTx: IEthTxRenderer = {
           <ItemLogo
             center={
               <svg
-                width="44"
-                height="44"
-                viewBox="0 0 44 44"
+                width="22"
+                height="22"
+                viewBox="0 0 22 22"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <rect width="44" height="44" rx="22" fill="#2E2E32" />
                 <path
-                  d="M13.875 30.125L30.125 13.875M30.125 13.875L17.9375 13.875M30.125 13.875V26.0625"
-                  stroke="#FEFEFE"
-                  strokeWidth="2"
+                  d="M4.125 17.875L17.875 4.125M17.875 4.125L7.5625 4.125M17.875 4.125V14.4375"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
               </svg>
             }
+            width="2.75rem"
+            height="2.75rem"
           />
         ),
         title: (

@@ -258,6 +258,7 @@ export class TokenScanService {
         method: "POST",
         headers: {
           "content-type": "application/json",
+          "request-source": new URL(browser.runtime.getURL("/")).origin,
         },
         body: JSON.stringify({
           jsonrpc: "2.0",

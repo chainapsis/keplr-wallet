@@ -695,15 +695,17 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     return true;
   }
 
-  async request({
+  async request<T = unknown>({
     method,
     params,
     providerId,
+    chainId,
   }: {
     method: string;
-    params?: unknown[] | Record<string, unknown>;
+    params?: readonly unknown[] | Record<string, unknown>;
     providerId?: string;
-  }): Promise<unknown> {
+    chainId?: string;
+  }): Promise<T> {
     return await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
@@ -713,6 +715,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         method,
         params,
         providerId,
+        chainId,
       }
     );
   }

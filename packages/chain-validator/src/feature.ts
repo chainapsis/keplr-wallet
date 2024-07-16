@@ -175,6 +175,7 @@ export const RecognizableChainFeaturesMethod: {
         method: "POST",
         headers: {
           "content-type": "application/json",
+          "request-source:": "keplr-wallet-extension/chain-validator",
         },
         body: JSON.stringify({
           jsonrpc: "2.0",

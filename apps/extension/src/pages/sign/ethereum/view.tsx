@@ -208,6 +208,17 @@ export const EthereumSigningView: FunctionComponent<{
     })();
   }, [chainInfo.features, ethereumAccount, feeConfig, isTxSigning, message]);
 
+  useEffect(() => {
+    if (isTxSigning) {
+      // Refresh EIP-1559 fee every 12 seconds.
+      const intervalId = setInterval(() => {
+        feeConfig.refreshEIP1559TxFees();
+      }, 12000);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [isTxSigning, feeConfig]);
+
   const signingDataText = useMemo(() => {
     switch (signType) {
       case EthSignType.MESSAGE:

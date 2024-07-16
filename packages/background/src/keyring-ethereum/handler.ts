@@ -76,7 +76,8 @@ const handleRequestJsonRpcToEvmMsg: (
       msg.origin,
       msg.method,
       msg.params,
-      msg.providerId
+      msg.providerId,
+      msg.chainId
     );
   };
 };

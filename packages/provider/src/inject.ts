@@ -91,8 +91,6 @@ export function injectKeplrToWindow(keplr: IKeplr): void {
     "getEnigmaUtils",
     keplr.getEnigmaUtils
   );
-
-  defineUnwritablePropertyIfPossible(window, "ethereum", keplr.ethereum);
 }
 
 /**
@@ -1073,16 +1071,18 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     return this._isConnected;
   }
 
-  async request({
+  async request<T = unknown>({
     method,
     params,
+    chainId,
   }: {
     method: string;
-    params?: unknown[] | Record<string, unknown>;
-  }): Promise<unknown> {
+    params?: readonly unknown[] | Record<string, unknown>;
+    chainId?: string;
+  }): Promise<T> {
     if (!this._isConnected) {
       if (method === "eth_accounts") {
-        return [];
+        return [] as T;
       }
 
       await this.handleConnect();
@@ -1092,6 +1092,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
       method,
       params,
       providerId: this.eip6963ProviderInfo?.uuid,
+      chainId,
     });
   }
 

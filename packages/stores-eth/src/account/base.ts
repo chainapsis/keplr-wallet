@@ -1,4 +1,3 @@
-import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { ChainGetter } from "@keplr-wallet/stores";
 import {
   AppCurrency,
@@ -77,30 +76,23 @@ export class EthereumAccountBase {
 
     const { to, value, data } = unsignedTx;
 
-    const estimateGasResponse = await simpleFetch<{
-      result: string;
-    }>(evmInfo.rpc, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        method: "eth_estimateGas",
-        params: [
-          {
-            from: sender,
-            to,
-            value,
-            data,
-          },
-        ],
-        id: 1,
-      }),
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const keplr = (await this.getKeplr())!;
+    const gasEstimated = await keplr.ethereum.request<string>({
+      method: "eth_estimateGas",
+      params: [
+        {
+          from: sender,
+          to,
+          value,
+          data,
+        },
+      ],
+      chainId: this.chainId,
     });
 
     return {
-      gasUsed: Number(estimateGasResponse.data.result),
+      gasUsed: parseInt(gasEstimated),
     };
   }
 
@@ -158,53 +150,37 @@ export class EthereumAccountBase {
       throw new Error("No EVM chain info provided");
     }
 
-    const implementationResponse = await simpleFetch<{
-      result: string;
-    }>(evmInfo.rpc, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        method: "eth_call",
-        params: [
-          {
-            to: opStackGasPriceOracleProxyAddress,
-            data: opStackGasPriceOracleProxyABI.encodeFunctionData(
-              "implementation"
-            ),
-          },
-        ],
-        id: 1,
-      }),
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const keplr = (await this.getKeplr())!;
+    const implementationAddress = await keplr.ethereum.request<string>({
+      method: "eth_call",
+      params: [
+        {
+          to: opStackGasPriceOracleProxyAddress,
+          data: opStackGasPriceOracleProxyABI.encodeFunctionData(
+            "implementation"
+          ),
+        },
+      ],
+      chainId: this.chainId,
     });
-
     const gasPriceOracleContractAddress =
-      "0x" + implementationResponse.data.result.slice(26);
-    const getL1FeeResponse = await simpleFetch<{
-      result: string;
-    }>(evmInfo.rpc, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        method: "eth_call",
-        params: [
-          {
-            to: gasPriceOracleContractAddress,
-            data: opStackGasPriceOracleABI.encodeFunctionData("getL1Fee", [
-              serialize(unsignedTx),
-            ]),
-          },
-        ],
-        id: 1,
-      }),
+      "0x" + implementationAddress.slice(26);
+
+    const l1Fee = await keplr.ethereum.request<string>({
+      method: "eth_call",
+      params: [
+        {
+          to: gasPriceOracleContractAddress,
+          data: opStackGasPriceOracleABI.encodeFunctionData("getL1Fee", [
+            serialize(unsignedTx),
+          ]),
+        },
+      ],
+      chainId: this.chainId,
     });
 
-    return getL1FeeResponse.data.result;
+    return l1Fee;
   }
 
   makeSendTokenTx({
@@ -280,23 +256,14 @@ export class EthereumAccountBase {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const keplr = (await this.getKeplr())!;
 
-      const transactionCountResponse = await simpleFetch<{
-        result: string;
-      }>(evmInfo.rpc, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          method: "eth_getTransactionCount",
-          params: [sender, "pending"],
-          id: 1,
-        }),
+      const transactionCount = await keplr.ethereum.request<string>({
+        method: "eth_getTransactionCount",
+        params: [sender, "pending"],
+        chainId: this.chainId,
       });
       unsignedTx = {
         ...unsignedTx,
-        nonce: Number(transactionCountResponse.data.result),
+        nonce: parseInt(transactionCount),
       };
 
       const signEthereum = keplr.signEthereum.bind(keplr);
@@ -332,28 +299,11 @@ export class EthereumAccountBase {
       retry(
         () => {
           return new Promise<void>(async (resolve, reject) => {
-            const txReceiptResponse = await simpleFetch<{
-              result: EthTxReceipt | null;
-              error?: Error;
-            }>(evmInfo.rpc, {
-              method: "POST",
-              headers: {
-                "content-type": "application/json",
-              },
-              body: JSON.stringify({
-                jsonrpc: "2.0",
-                method: "eth_getTransactionReceipt",
-                params: [txHash],
-                id: 1,
-              }),
+            const txReceipt = await keplr.ethereum.request<EthTxReceipt>({
+              method: "eth_getTransactionReceipt",
+              params: [txHash],
+              chainId: this.chainId,
             });
-
-            if (txReceiptResponse.data.error) {
-              console.error(txReceiptResponse.data.error);
-              resolve();
-            }
-
-            const txReceipt = txReceiptResponse.data.result;
             if (txReceipt) {
               onTxEvents?.onFulfill?.(txReceipt);
               resolve();

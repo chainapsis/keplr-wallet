@@ -15,6 +15,7 @@ export class BackgroundTxEthereumService {
   }
 
   async sendEthereumTx(
+    origin: string,
     chainId: string,
     tx: Uint8Array,
     options: {
@@ -45,6 +46,7 @@ export class BackgroundTxEthereumService {
         method: "POST",
         headers: {
           "content-type": "application/json",
+          "request-source": origin,
         },
         body: JSON.stringify({
           jsonrpc: "2.0",
@@ -72,6 +74,7 @@ export class BackgroundTxEthereumService {
               method: "POST",
               headers: {
                 "content-type": "application/json",
+                "request-source": origin,
               },
               body: JSON.stringify({
                 jsonrpc: "2.0",

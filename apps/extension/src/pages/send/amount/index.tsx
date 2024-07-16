@@ -324,6 +324,17 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   ]);
 
   useEffect(() => {
+    if (isEvmTx) {
+      // Refresh EIP-1559 fee every 12 seconds.
+      const intervalId = setInterval(() => {
+        sendConfigs.feeConfig.refreshEIP1559TxFees();
+      }, 12000);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [isEvmTx, sendConfigs.feeConfig]);
+
+  useEffect(() => {
     // To simulate secretwasm, we need to include the signature in the tx.
     // With the current structure, this approach is not possible.
     if (
