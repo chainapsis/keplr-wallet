@@ -93,8 +93,15 @@ const EthExecuteContractTxPretty: React.FunctionComponent<{
     "https://www.4byte.directory",
     `/api/v1/signatures?hex_signature=${txData.slice(0, 10)}`
   );
-  const functionName =
-    functionNameResult.response?.data.results[0]?.text_signature.split("(")[0];
+  // Convert the function name to Title Case
+  const functionName = functionNameResult.response?.data.results[
+    (functionNameResult.response?.data.results.length ?? 0) - 1
+  ]?.text_signature
+    .split("(")[0]
+    .replace(/([-_][a-z])/g, (group) =>
+      group.toUpperCase().replace("-", "").replace("_", "")
+    )
+    .replace(/([A-Z])/g, " $1");
 
   return (
     <React.Fragment>
