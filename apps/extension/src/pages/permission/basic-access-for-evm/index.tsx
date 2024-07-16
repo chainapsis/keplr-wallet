@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { PermissionData } from "@keplr-wallet/background";
 import { useStore } from "../../../stores";
@@ -24,9 +24,14 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
 
   const interactionInfo = useInteractionInfo();
 
-  const [currentChainIdForEVM, setCurrentChainIdForEVM] = useState<
-    string | undefined
-  >(!data.options?.isUnableToChangeChainInUI ? data.chainIds[0] : undefined);
+  const [currentChainIdForEVM, setCurrentChainIdForEVM] = useState<string>(
+    data.chainIds[0]
+  );
+
+  // 페이지가 언마운트 되지 않고 data만 바뀌는 경우가 있어서 이렇게 처리함
+  useEffect(() => {
+    setCurrentChainIdForEVM(data.chainIds[0]);
+  }, [data.chainIds]);
 
   return (
     <HeaderLayout
