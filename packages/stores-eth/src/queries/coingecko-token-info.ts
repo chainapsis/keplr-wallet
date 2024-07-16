@@ -5,15 +5,6 @@ import {
   QuerySharedContext,
 } from "@keplr-wallet/stores";
 import { makeObservable } from "mobx";
-
-const coingeckoChainIdMap: Record<string, string> = {
-  "eip155:1": "ethereum",
-  "eip155:10": "optimistic-ethereum",
-  "eip155:137": "polygon-pos",
-  "eip155:8453": "base",
-  "eip155:42161": "arbitrum-one",
-};
-
 export class ObservableQueryCoingeckoTokenInfoInner extends ObservableQuery<{
   id: string;
   symbol: string;
@@ -101,3 +92,11 @@ export class ObservableQueryCoingeckoTokenInfo extends HasMapStore<
     return this.get(contractAddress) as ObservableQueryCoingeckoTokenInfoInner;
   }
 }
+
+const coingeckoChainIdMap: Record<string, string> = {
+  "eip155:1": "ethereum",
+  "eip155:10": "optimistic-ethereum",
+  "eip155:137": "polygon-pos",
+  "eip155:8453": "base",
+  "eip155:42161": "arbitrum-one",
+};

@@ -64,7 +64,10 @@ export class ObservableQueryThirdpartyERC20BalancesImplParent extends Observable
 
   protected override canFetch(): boolean {
     // If ethereum hex address is empty, it will always fail, so don't need to fetch it.
-    return this.ethereumHexAddress.length > 0;
+    return (
+      this.ethereumHexAddress.length > 0 &&
+      thirdparySupportedChainIdMap[this.chainId] != null
+    );
   }
 
   protected override onReceiveResponse(

@@ -2,7 +2,6 @@ import {
   BalanceRegistry,
   ChainGetter,
   IObservableQueryBalanceImpl,
-  ObservableJsonRPCQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
@@ -12,21 +11,21 @@ import bigInteger from "big-integer";
 import { erc20ContractInterface } from "../constants";
 import { DenomHelper } from "@keplr-wallet/common";
 import { EthereumAccountBase } from "../account";
+import { ObservableEvmChainJsonRpcQuery } from "./evm-chain-json-rpc";
 
 export class ObservableQueryEthereumERC20BalanceImpl
-  extends ObservableJsonRPCQuery<string>
+  extends ObservableEvmChainJsonRpcQuery<string>
   implements IObservableQueryBalanceImpl
 {
   constructor(
     sharedContext: QuerySharedContext,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter,
+    chainId: string,
+    chainGetter: ChainGetter,
     protected readonly denomHelper: DenomHelper,
-    protected readonly ethereumURL: string,
     protected readonly ethereumHexAddress: string,
     protected readonly contractAddress: string
   ) {
-    super(sharedContext, ethereumURL, "", "eth_call", [
+    super(sharedContext, chainId, chainGetter, "eth_call", [
       {
         to: contractAddress,
         data: erc20ContractInterface.encodeFunctionData("balanceOf", [
@@ -86,7 +85,11 @@ export class ObservableQueryEthereumERC20BalanceRegistry
     const chainInfo = chainGetter.getChain(chainId);
     const isHexAddress =
       EthereumAccountBase.isEthereumHexAddressWithChecksum(address);
-    if (denomHelper.type !== "erc20" || !isHexAddress || !chainInfo.evm) {
+    if (
+      denomHelper.type !== "erc20" ||
+      !isHexAddress ||
+      chainInfo.evm == null
+    ) {
       return;
     }
 
@@ -95,7 +98,6 @@ export class ObservableQueryEthereumERC20BalanceRegistry
       chainId,
       chainGetter,
       denomHelper,
-      chainInfo.evm.rpc,
       address,
       denomHelper.contractAddress
     );

@@ -279,22 +279,14 @@ export class KeyRingEthereumService {
               return "deploy-contract";
             }
 
-            const evmInfo = this.chainsService.getEVMInfoOrThrow(chainId);
-            const getCodeResponse = await simpleFetch<{
-              result?: string;
-              error?: Error;
-            }>(evmInfo.rpc, "", {
-              method: "POST",
-              headers: {
-                "content-type": "application/json",
-              },
-              body: JSON.stringify({
-                jsonrpc: "2.0",
-                method: "eth_getCode",
-                params: [tx.to, "latest"],
-                id: 1,
-              }),
-            });
+            const getCodeResponse = await this.request(
+              env,
+              origin,
+              "eth_getCode",
+              [tx.to, "latest"],
+              undefined,
+              chainId
+            );
             if (
               (tx.data == null || tx.data === "0x") &&
               BigInt(tx.value) > 0 &&
@@ -337,15 +329,22 @@ export class KeyRingEthereumService {
     );
   }
 
-  async request(
+  async request<T = any>(
     env: Env,
     origin: string,
     method: string,
     params?: unknown[] | Record<string, unknown>,
-    providerId?: string
-  ): Promise<any> {
+    providerId?: string,
+    chainId?: string
+  ): Promise<T> {
+    if (env.isInternalMsg && chainId == null) {
+      throw new Error(
+        "The chain id must be provided for the internal message."
+      );
+    }
+
     const currentChainId =
-      this.permissionService.getCurrentChainIdForEVM(origin);
+      this.permissionService.getCurrentChainIdForEVM(origin) ?? chainId;
     if (currentChainId == null) {
       throw new Error(
         "The website is not permitted. Please disconnect and reconnect to the website."
@@ -364,534 +363,539 @@ export class KeyRingEthereumService {
       "hex"
     )}`;
 
-    switch (method) {
-      case "keplr_connect": {
-        return {
-          currentEvmChainId: currentChainEVMInfo.chainId,
-          currentChainId: currentChainInfo.chainId,
-          selectedAddress,
-        };
-      }
-      case "keplr_disconnect": {
-        return this.permissionService.removePermission(
-          currentChainId,
-          getBasicAccessPermissionType(),
-          [origin]
-        );
-      }
-      case "eth_chainId": {
-        return `0x${currentChainEVMInfo.chainId.toString(16)}`;
-      }
-      case "net_version": {
-        return currentChainEVMInfo.chainId.toString();
-      }
-      case "eth_accounts":
-      case "eth_requestAccounts": {
-        return [selectedAddress];
-      }
-      case "eth_sendTransaction": {
-        const tx =
-          (Array.isArray(params) &&
-            (params?.[0] as {
-              chainId?: string | number;
-              from: string;
-              gas?: string;
-              gasLimit?: string;
-            })) ||
-          null;
-        if (!tx) {
-          throw new Error("Invalid parameters: must provide a transaction.");
+    const result = (await (async () => {
+      switch (method) {
+        case "keplr_connect": {
+          return {
+            currentEvmChainId: currentChainEVMInfo.chainId,
+            currentChainId: currentChainInfo.chainId,
+            selectedAddress,
+          };
         }
-
-        if (tx.chainId) {
-          const evmChainIdFromTx: number = validateEVMChainId(
-            (() => {
-              if (typeof tx.chainId === "string") {
-                if (tx.chainId.startsWith("0x")) {
-                  return parseInt(tx.chainId, 16);
-                } else {
-                  return parseInt(tx.chainId, 10);
-                }
-              } else {
-                return tx.chainId;
-              }
-            })()
+        case "keplr_disconnect": {
+          return this.permissionService.removePermission(
+            currentChainId,
+            getBasicAccessPermissionType(),
+            [origin]
           );
-          if (evmChainIdFromTx !== currentChainEVMInfo.chainId) {
+        }
+        case "eth_chainId": {
+          return `0x${currentChainEVMInfo.chainId.toString(16)}`;
+        }
+        case "net_version": {
+          return currentChainEVMInfo.chainId.toString();
+        }
+        case "eth_accounts":
+        case "eth_requestAccounts": {
+          return [selectedAddress];
+        }
+        case "eth_sendTransaction": {
+          const tx =
+            (Array.isArray(params) &&
+              (params?.[0] as {
+                chainId?: string | number;
+                from: string;
+                gas?: string;
+                gasLimit?: string;
+              })) ||
+            null;
+          if (!tx) {
+            throw new Error("Invalid parameters: must provide a transaction.");
+          }
+
+          if (tx.chainId) {
+            const evmChainIdFromTx: number = validateEVMChainId(
+              (() => {
+                if (typeof tx.chainId === "string") {
+                  if (tx.chainId.startsWith("0x")) {
+                    return parseInt(tx.chainId, 16);
+                  } else {
+                    return parseInt(tx.chainId, 10);
+                  }
+                } else {
+                  return tx.chainId;
+                }
+              })()
+            );
+            if (evmChainIdFromTx !== currentChainEVMInfo.chainId) {
+              throw new Error(
+                "The current active chain id does not match the one in the transaction."
+              );
+            }
+          }
+
+          const transactionCount = await this.request(
+            env,
+            origin,
+            "eth_getTransactionCount",
+            [selectedAddress, "pending"],
+            providerId,
+            chainId
+          );
+          const nonce = parseInt(transactionCount, 16);
+
+          const { from: sender, gas, ...restTx } = tx;
+          const unsignedTx: UnsignedTransaction = {
+            ...restTx,
+            gasLimit: restTx?.gasLimit ?? gas,
+            chainId: currentChainEVMInfo.chainId,
+            nonce,
+          };
+
+          const { signingData, signature } = await this.signEthereumSelected(
+            env,
+            origin,
+            currentChainId,
+            sender,
+            Buffer.from(JSON.stringify(unsignedTx)),
+            EthSignType.TRANSACTION
+          );
+
+          const signingTx = JSON.parse(Buffer.from(signingData).toString());
+
+          const isEIP1559 =
+            !!signingTx.maxFeePerGas || !!signingTx.maxPriorityFeePerGas;
+          if (isEIP1559) {
+            signingTx.type = TransactionTypes.eip1559;
+          }
+
+          const signedTx = Buffer.from(
+            serialize(signingTx, signature).replace("0x", ""),
+            "hex"
+          );
+
+          const txHash = await this.backgroundTxEthereumService.sendEthereumTx(
+            origin,
+            currentChainId,
+            signedTx,
+            {}
+          );
+
+          return txHash;
+        }
+        case "personal_sign": {
+          const message =
+            (Array.isArray(params) && (params?.[0] as string)) || undefined;
+          if (!message) {
             throw new Error(
-              "The current active chain id does not match the one in the transaction."
+              "Invalid parameters: must provide a stringified message."
             );
           }
-        }
 
-        const transactionCountResponse = await simpleFetch<{
-          result: string;
-        }>(currentChainEVMInfo.rpc, {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({
-            jsonrpc: "2.0",
-            method: "eth_getTransactionCount",
-            params: [selectedAddress, "pending"],
-            id: 1,
-          }),
-        });
-        const nonce = parseInt(transactionCountResponse.data.result, 16);
-
-        const { from: sender, gas, ...restTx } = tx;
-        const unsignedTx: UnsignedTransaction = {
-          ...restTx,
-          gasLimit: restTx?.gasLimit ?? gas,
-          chainId: currentChainEVMInfo.chainId,
-          nonce,
-        };
-
-        const { signingData, signature } = await this.signEthereumSelected(
-          env,
-          origin,
-          currentChainId,
-          sender,
-          Buffer.from(JSON.stringify(unsignedTx)),
-          EthSignType.TRANSACTION
-        );
-
-        const signingTx = JSON.parse(Buffer.from(signingData).toString());
-
-        const isEIP1559 =
-          !!signingTx.maxFeePerGas || !!signingTx.maxPriorityFeePerGas;
-        if (isEIP1559) {
-          signingTx.type = TransactionTypes.eip1559;
-        }
-
-        const signedTx = Buffer.from(
-          serialize(signingTx, signature).replace("0x", ""),
-          "hex"
-        );
-
-        const txHash = await this.backgroundTxEthereumService.sendEthereumTx(
-          currentChainId,
-          signedTx,
-          {}
-        );
-
-        return txHash;
-      }
-      case "personal_sign": {
-        const message =
-          (Array.isArray(params) && (params?.[0] as string)) || undefined;
-        if (!message) {
-          throw new Error(
-            "Invalid parameters: must provide a stringified message."
-          );
-        }
-
-        const signer =
-          (Array.isArray(params) && (params?.[1] as string)) || undefined;
-        if (!signer || (signer && !signer.match(/^0x[0-9A-Fa-f]*$/))) {
-          throw new Error(
-            "Invalid parameters: must provide an Ethereum address."
-          );
-        }
-
-        const { signature } = await this.signEthereumSelected(
-          env,
-          origin,
-          currentChainId,
-          signer,
-          Buffer.from(message),
-          EthSignType.MESSAGE
-        );
-
-        return `0x${Buffer.from(signature).toString("hex")}`;
-      }
-      case "eth_signTypedData_v3":
-      case "eth_signTypedData_v4": {
-        const signer =
-          (Array.isArray(params) && (params?.[0] as string)) || undefined;
-        if (!signer || (signer && !signer.match(/^0x[0-9A-Fa-f]*$/))) {
-          throw new Error(
-            "Invalid parameters: must provide an Ethereum address."
-          );
-        }
-
-        const typedData =
-          (Array.isArray(params) && (params?.[1] as any)) || undefined;
-
-        const { signature } = await this.signEthereumSelected(
-          env,
-          origin,
-          currentChainId,
-          signer,
-          Buffer.from(
-            typeof typedData === "string"
-              ? typedData
-              : JSON.stringify(typedData)
-          ),
-          EthSignType.EIP712
-        );
-
-        return `0x${Buffer.from(signature).toString("hex")}`;
-      }
-      case "eth_subscribe": {
-        if (!currentChainEVMInfo.websocket) {
-          throw new Error(
-            `WebSocket endpoint for current chain has not been provided to Keplr.`
-          );
-        }
-
-        const ws = new WebSocket(currentChainEVMInfo.websocket);
-        const subscriptionId: string = await new Promise((resolve, reject) => {
-          const handleOpen = () => {
-            ws.send(
-              JSON.stringify({
-                jsonrpc: "2.0",
-                id: 1,
-                method,
-                params,
-              })
+          const signer =
+            (Array.isArray(params) && (params?.[1] as string)) || undefined;
+          if (!signer || (signer && !signer.match(/^0x[0-9A-Fa-f]*$/))) {
+            throw new Error(
+              "Invalid parameters: must provide an Ethereum address."
             );
-          };
-          const handleMessage = (event: MessageEvent) => {
-            const eventData = JSON.parse(event.data);
-            if (eventData.error) {
+          }
+
+          const { signature } = await this.signEthereumSelected(
+            env,
+            origin,
+            currentChainId,
+            signer,
+            Buffer.from(message),
+            EthSignType.MESSAGE
+          );
+
+          return `0x${Buffer.from(signature).toString("hex")}`;
+        }
+        case "eth_signTypedData_v3":
+        case "eth_signTypedData_v4": {
+          const signer =
+            (Array.isArray(params) && (params?.[0] as string)) || undefined;
+          if (!signer || (signer && !signer.match(/^0x[0-9A-Fa-f]*$/))) {
+            throw new Error(
+              "Invalid parameters: must provide an Ethereum address."
+            );
+          }
+
+          const typedData =
+            (Array.isArray(params) && (params?.[1] as any)) || undefined;
+
+          const { signature } = await this.signEthereumSelected(
+            env,
+            origin,
+            currentChainId,
+            signer,
+            Buffer.from(
+              typeof typedData === "string"
+                ? typedData
+                : JSON.stringify(typedData)
+            ),
+            EthSignType.EIP712
+          );
+
+          return `0x${Buffer.from(signature).toString("hex")}`;
+        }
+        case "eth_subscribe": {
+          if (!currentChainEVMInfo.websocket) {
+            throw new Error(
+              `WebSocket endpoint for current chain has not been provided to Keplr.`
+            );
+          }
+
+          const ws = new WebSocket(currentChainEVMInfo.websocket);
+          const subscriptionId: string = await new Promise(
+            (resolve, reject) => {
+              const handleOpen = () => {
+                ws.send(
+                  JSON.stringify({
+                    jsonrpc: "2.0",
+                    id: 1,
+                    method,
+                    params,
+                  })
+                );
+              };
+              const handleMessage = (event: MessageEvent) => {
+                const eventData = JSON.parse(event.data);
+                if (eventData.error) {
+                  ws.close();
+
+                  reject(eventData.error);
+                } else {
+                  if (eventData.method === "eth_subscription") {
+                    this.interactionService.dispatchEvent(
+                      WEBPAGE_PORT,
+                      "keplr_ethSubscription",
+                      {
+                        origin,
+                        providerId,
+                        data: {
+                          subscription: eventData.params.subscription,
+                          result: eventData.params.result,
+                        },
+                      }
+                    );
+                  } else {
+                    resolve(eventData.result);
+                  }
+                }
+              };
+              const handleError = () => {
+                ws.close();
+
+                reject(
+                  new Error(
+                    "Something went wrong with the WebSocket connection"
+                  )
+                );
+              };
+
+              ws.addEventListener("open", handleOpen);
+              ws.addEventListener("message", handleMessage);
+              ws.addEventListener("error", handleError);
+              ws.addEventListener(
+                "close",
+                () => {
+                  ws.removeEventListener("open", handleOpen);
+                  ws.removeEventListener("message", handleMessage);
+                  ws.removeEventListener("error", handleError);
+                },
+                { once: true }
+              );
+            }
+          );
+          runInAction(() => {
+            const key = `${subscriptionId}/${providerId}`;
+            this.websocketSubscriptionMap.set(key, ws);
+          });
+
+          return subscriptionId;
+        }
+        case "eth_unsubscribe": {
+          const subscriptionId =
+            (Array.isArray(params) && (params?.[0] as string)) || undefined;
+          if (!subscriptionId) {
+            throw new Error(
+              "Invalid parameters: must provide a subscription id."
+            );
+          }
+
+          if (!currentChainEVMInfo.websocket) {
+            throw new Error(
+              `WebSocket endpoint for current chain has not been provided to Keplr.`
+            );
+          }
+
+          const subscribedWs =
+            this.websocketSubscriptionMap.get(subscriptionId);
+          if (!subscribedWs) {
+            return false;
+          }
+
+          const ws = new WebSocket(currentChainEVMInfo.websocket);
+          const result = await new Promise((resolve, reject) => {
+            const handleOpen = () => {
+              ws.send(
+                JSON.stringify({
+                  jsonrpc: "2.0",
+                  id: 1,
+                  method,
+                  params,
+                })
+              );
+            };
+            const handleMessage = (event: MessageEvent) => {
               ws.close();
 
-              reject(eventData.error);
-            } else {
-              if (eventData.method === "eth_subscription") {
-                this.interactionService.dispatchEvent(
-                  WEBPAGE_PORT,
-                  "keplr_ethSubscription",
-                  {
-                    origin,
-                    providerId,
-                    data: {
-                      subscription: eventData.params.subscription,
-                      result: eventData.params.result,
-                    },
-                  }
-                );
+              const eventData = JSON.parse(event.data);
+              if (eventData.error) {
+                reject(eventData.error);
               } else {
+                subscribedWs.close();
+                runInAction(() => {
+                  const key = `${subscriptionId}/${providerId}`;
+                  this.websocketSubscriptionMap.delete(key);
+                });
                 resolve(eventData.result);
               }
-            }
-          };
-          const handleError = () => {
-            ws.close();
+            };
+            const handleError = () => {
+              ws.close();
 
-            reject(
-              new Error("Something went wrong with the WebSocket connection")
+              reject(
+                new Error("Something went wrong with the WebSocket connection")
+              );
+            };
+
+            ws.addEventListener("open", handleOpen);
+            ws.addEventListener("message", handleMessage);
+            ws.addEventListener("error", handleError);
+            ws.addEventListener(
+              "close",
+              () => {
+                ws.removeEventListener("open", handleOpen);
+                ws.removeEventListener("message", handleMessage);
+                ws.removeEventListener("error", handleError);
+              },
+              { once: true }
             );
-          };
+          });
 
-          ws.addEventListener("open", handleOpen);
-          ws.addEventListener("message", handleMessage);
-          ws.addEventListener("error", handleError);
-          ws.addEventListener(
-            "close",
-            () => {
-              ws.removeEventListener("open", handleOpen);
-              ws.removeEventListener("message", handleMessage);
-              ws.removeEventListener("error", handleError);
-            },
-            { once: true }
-          );
-        });
-        runInAction(() => {
-          const key = `${subscriptionId}/${providerId}`;
-          this.websocketSubscriptionMap.set(key, ws);
-        });
-
-        return subscriptionId;
-      }
-      case "eth_unsubscribe": {
-        const subscriptionId =
-          (Array.isArray(params) && (params?.[0] as string)) || undefined;
-        if (!subscriptionId) {
-          throw new Error(
-            "Invalid parameters: must provide a subscription id."
-          );
+          return result;
         }
+        case "wallet_switchEthereumChain": {
+          const param =
+            (Array.isArray(params) && (params?.[0] as { chainId: string })) ||
+            undefined;
+          if (!param?.chainId) {
+            throw new Error("Invalid parameters: must provide a chain id.");
+          }
 
-        if (!currentChainEVMInfo.websocket) {
-          throw new Error(
-            `WebSocket endpoint for current chain has not been provided to Keplr.`
+          const newEvmChainId = validateEVMChainId(parseInt(param.chainId, 16));
+          if (newEvmChainId === currentChainEVMInfo.chainId) {
+            return null;
+          }
+
+          const chainInfos = this.chainsService.getChainInfos();
+
+          const newCurrentChainInfo = chainInfos.find(
+            (chainInfo) => chainInfo.evm?.chainId === newEvmChainId
           );
-        }
-
-        const subscribedWs = this.websocketSubscriptionMap.get(subscriptionId);
-        if (!subscribedWs) {
-          return false;
-        }
-
-        const ws = new WebSocket(currentChainEVMInfo.websocket);
-        const result = await new Promise((resolve, reject) => {
-          const handleOpen = () => {
-            ws.send(
-              JSON.stringify({
-                jsonrpc: "2.0",
-                id: 1,
-                method,
-                params,
-              })
+          if (!newCurrentChainInfo) {
+            throw new EthereumProviderRpcError(
+              4902,
+              `Unrecognized chain ID "${param.chainId}". Try adding the chain using wallet_addEthereumChain first.`
             );
-          };
-          const handleMessage = (event: MessageEvent) => {
-            ws.close();
+          }
 
-            const eventData = JSON.parse(event.data);
-            if (eventData.error) {
-              reject(eventData.error);
-            } else {
-              subscribedWs.close();
-              runInAction(() => {
-                const key = `${subscriptionId}/${providerId}`;
-                this.websocketSubscriptionMap.delete(key);
-              });
-              resolve(eventData.result);
-            }
-          };
-          const handleError = () => {
-            ws.close();
-
-            reject(
-              new Error("Something went wrong with the WebSocket connection")
-            );
-          };
-
-          ws.addEventListener("open", handleOpen);
-          ws.addEventListener("message", handleMessage);
-          ws.addEventListener("error", handleError);
-          ws.addEventListener(
-            "close",
-            () => {
-              ws.removeEventListener("open", handleOpen);
-              ws.removeEventListener("message", handleMessage);
-              ws.removeEventListener("error", handleError);
-            },
-            { once: true }
+          await this.permissionService.updateCurrentChainIdForEVM(
+            env,
+            origin,
+            newCurrentChainInfo.chainId
           );
-        });
 
-        return result;
-      }
-      case "wallet_switchEthereumChain": {
-        const param =
-          (Array.isArray(params) && (params?.[0] as { chainId: string })) ||
-          undefined;
-        if (!param?.chainId) {
-          throw new Error("Invalid parameters: must provide a chain id.");
-        }
-
-        const newEvmChainId = validateEVMChainId(parseInt(param.chainId, 16));
-        if (newEvmChainId === currentChainEVMInfo.chainId) {
           return null;
         }
-
-        const chainInfos = this.chainsService.getChainInfos();
-
-        const newCurrentChainInfo = chainInfos.find(
-          (chainInfo) => chainInfo.evm?.chainId === newEvmChainId
-        );
-        if (!newCurrentChainInfo) {
-          throw new EthereumProviderRpcError(
-            4902,
-            `Unrecognized chain ID "${param.chainId}". Try adding the chain using wallet_addEthereumChain first.`
-          );
-        }
-
-        await this.permissionService.updateCurrentChainIdForEVM(
-          env,
-          origin,
-          newCurrentChainInfo.chainId
-        );
-
-        return null;
-      }
-      case "wallet_addEthereumChain": {
-        const param =
-          Array.isArray(params) &&
-          (params?.[0] as {
-            chainId: string;
-            chainName: string;
-            nativeCurrency: {
-              name: string;
-              symbol: string;
-              decimals: number;
-            };
-            rpcUrls: string[];
-            iconUrls?: string[];
-          });
-        if (!param || typeof param !== "object") {
-          throw new Error(
-            "Invalid parameters: must provide a single object parameter."
-          );
-        }
-
-        const evmChainId = validateEVMChainId(parseInt(param.chainId, 16));
-        const chainId = `eip155:${evmChainId}`;
-        if (this.chainsService.getChainInfo(chainId) == null) {
-          const rpc = param.rpcUrls.find((url) => {
-            try {
-              const urlObject = new URL(url);
-              return (
-                urlObject.protocol === "http:" ||
-                urlObject.protocol === "https:"
-              );
-            } catch {
-              return false;
-            }
-          });
-          const websocket = param.rpcUrls.find((url) => {
-            try {
-              const urlObject = new URL(url);
-              return (
-                urlObject.protocol === "ws:" || urlObject.protocol === "wss:"
-              );
-            } catch {
-              return false;
-            }
-          });
-          // Skip the validation for these parameters because they will be validated in the `suggestChainInfo` method.
-          const { chainName, nativeCurrency, iconUrls } = param;
-
-          const addingChainInfo = {
-            rpc,
-            rest: rpc,
-            chainId,
-            bip44: {
-              coinType: 60,
-            },
-            chainName,
-            stakeCurrency: {
-              coinDenom: nativeCurrency.symbol,
-              coinMinimalDenom: nativeCurrency.symbol,
-              coinDecimals: nativeCurrency.decimals,
-            },
-            currencies: [
-              {
-                coinDenom: nativeCurrency.symbol,
-                coinMinimalDenom: nativeCurrency.symbol,
-                coinDecimals: nativeCurrency.decimals,
-              },
-            ],
-            feeCurrencies: [
-              {
-                coinDenom: nativeCurrency.symbol,
-                coinMinimalDenom: nativeCurrency.symbol,
-                coinDecimals: nativeCurrency.decimals,
-              },
-            ],
-            evm: {
-              chainId: evmChainId,
-              rpc,
-              websocket,
-            },
-            features: ["eth-address-gen", "eth-key-sign"],
-            chainSymbolImageUrl: iconUrls?.[0],
-            beta: true,
-          } as ChainInfo;
-
-          await this.chainsService.suggestChainInfo(
-            env,
-            addingChainInfo,
-            origin
-          );
-        }
-
-        this.permissionService.addPermission(
-          [chainId],
-          getBasicAccessPermissionType(),
-          [origin]
-        );
-
-        await this.permissionService.updateCurrentChainIdForEVM(
-          env,
-          origin,
-          chainId
-        );
-
-        return null;
-      }
-      case "wallet_getPermissions":
-      // This `request` method can be executed if the basic access permission is granted.
-      // So, it's not necessary to check or grant the permission here.
-      case "wallet_requestPermissions": {
-        return [{ parentCapability: "eth_accounts" }];
-      }
-      case "wallet_watchAsset": {
-        const param = params as
-          | {
-              type: string;
-              options: {
-                address: string;
-                symbol?: string;
-                decimals?: number;
-                image?: string;
-                tokenId?: string;
+        case "wallet_addEthereumChain": {
+          const param =
+            Array.isArray(params) &&
+            (params?.[0] as {
+              chainId: string;
+              chainName: string;
+              nativeCurrency: {
+                name: string;
+                symbol: string;
+                decimals: number;
               };
-            }
-          | undefined;
-        if (param?.type !== "ERC20") {
-          throw new Error("Not a supported asset type.");
+              rpcUrls: string[];
+              iconUrls?: string[];
+            });
+          if (!param || typeof param !== "object") {
+            throw new Error(
+              "Invalid parameters: must provide a single object parameter."
+            );
+          }
+
+          const evmChainId = validateEVMChainId(parseInt(param.chainId, 16));
+          const chainId = `eip155:${evmChainId}`;
+          if (this.chainsService.getChainInfo(chainId) == null) {
+            const rpc = param.rpcUrls.find((url) => {
+              try {
+                const urlObject = new URL(url);
+                return (
+                  urlObject.protocol === "http:" ||
+                  urlObject.protocol === "https:"
+                );
+              } catch {
+                return false;
+              }
+            });
+            const websocket = param.rpcUrls.find((url) => {
+              try {
+                const urlObject = new URL(url);
+                return (
+                  urlObject.protocol === "ws:" || urlObject.protocol === "wss:"
+                );
+              } catch {
+                return false;
+              }
+            });
+            // Skip the validation for these parameters because they will be validated in the `suggestChainInfo` method.
+            const { chainName, nativeCurrency, iconUrls } = param;
+
+            const addingChainInfo = {
+              rpc,
+              rest: rpc,
+              chainId,
+              bip44: {
+                coinType: 60,
+              },
+              chainName,
+              stakeCurrency: {
+                coinDenom: nativeCurrency.symbol,
+                coinMinimalDenom: nativeCurrency.symbol,
+                coinDecimals: nativeCurrency.decimals,
+              },
+              currencies: [
+                {
+                  coinDenom: nativeCurrency.symbol,
+                  coinMinimalDenom: nativeCurrency.symbol,
+                  coinDecimals: nativeCurrency.decimals,
+                },
+              ],
+              feeCurrencies: [
+                {
+                  coinDenom: nativeCurrency.symbol,
+                  coinMinimalDenom: nativeCurrency.symbol,
+                  coinDecimals: nativeCurrency.decimals,
+                },
+              ],
+              evm: {
+                chainId: evmChainId,
+                rpc,
+                websocket,
+              },
+              features: ["eth-address-gen", "eth-key-sign"],
+              chainSymbolImageUrl: iconUrls?.[0],
+              beta: true,
+            } as ChainInfo;
+
+            await this.chainsService.suggestChainInfo(
+              env,
+              addingChainInfo,
+              origin
+            );
+          }
+
+          this.permissionService.addPermission(
+            [chainId],
+            getBasicAccessPermissionType(),
+            [origin]
+          );
+
+          await this.permissionService.updateCurrentChainIdForEVM(
+            env,
+            origin,
+            chainId
+          );
+
+          return null;
         }
+        case "wallet_getPermissions":
+        // This `request` method can be executed if the basic access permission is granted.
+        // So, it's not necessary to check or grant the permission here.
+        case "wallet_requestPermissions": {
+          return [{ parentCapability: "eth_accounts" }];
+        }
+        case "wallet_watchAsset": {
+          const param = params as
+            | {
+                type: string;
+                options: {
+                  address: string;
+                  symbol?: string;
+                  decimals?: number;
+                  image?: string;
+                  tokenId?: string;
+                };
+              }
+            | undefined;
+          if (param?.type !== "ERC20") {
+            throw new Error("Not a supported asset type.");
+          }
 
-        const contractAddress = param?.options.address;
+          const contractAddress = param?.options.address;
 
-        await this.tokenERC20Service.suggestERC20Token(
-          env,
-          currentChainId,
-          contractAddress
-        );
+          await this.tokenERC20Service.suggestERC20Token(
+            env,
+            currentChainId,
+            contractAddress
+          );
 
-        return true;
+          return true;
+        }
+        case "eth_call":
+        case "eth_estimateGas":
+        case "eth_getTransactionCount":
+        case "eth_getTransactionByHash":
+        case "eth_getTransactionByBlockHashAndIndex":
+        case "eth_getTransactionByBlockNumberAndIndex":
+        case "eth_getTransactionByHash":
+        case "eth_getTransactionReceipt":
+        case "eth_protocolVersion":
+        case "eth_syncing":
+        case "eth_getCode":
+        case "eth_getLogs":
+        case "eth_getProof":
+        case "eth_getStorageAt":
+        case "eth_getBalance":
+        case "eth_blockNumber":
+        case "eth_getBlockByHash":
+        case "eth_getBlockByNumber":
+        case "eth_gasPrice":
+        case "eth_feeHistory":
+        case "eth_maxPriorityFeePerGas": {
+          return (
+            await simpleFetch<{
+              jsonrpc: string;
+              id: number;
+              result: any;
+              error?: Error;
+            }>(currentChainEVMInfo.rpc, {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+                "request-source": origin,
+              },
+              body: JSON.stringify({
+                jsonrpc: "2.0",
+                method,
+                params,
+                id: 1,
+              }),
+            })
+          ).data.result;
+        }
+        default: {
+          throw new Error(`The method "${method}" is not supported.`);
+        }
       }
-      case "eth_call":
-      case "eth_estimateGas":
-      case "eth_getTransactionCount":
-      case "eth_getTransactionByHash":
-      case "eth_getTransactionByBlockHashAndIndex":
-      case "eth_getTransactionByBlockNumberAndIndex":
-      case "eth_getTransactionByHash":
-      case "eth_getTransactionReceipt":
-      case "eth_protocolVersion":
-      case "eth_syncing":
-      case "eth_getCode":
-      case "eth_getLogs":
-      case "eth_getProof":
-      case "eth_getStorageAt":
-      case "eth_getBalance":
-      case "eth_blockNumber":
-      case "eth_getBlockByHash":
-      case "eth_getBlockByNumber":
-      case "eth_gasPrice":
-      case "eth_feeHistory":
-      case "eth_maxPriorityFeePerGas": {
-        return (
-          await simpleFetch<{
-            jsonrpc: string;
-            id: number;
-            result: any;
-            error?: Error;
-          }>(currentChainEVMInfo.rpc, {
-            method: "POST",
-            headers: {
-              "content-type": "application/json",
-            },
-            body: JSON.stringify({
-              jsonrpc: "2.0",
-              method,
-              params,
-              id: 1,
-            }),
-          })
-        ).data.result;
-      }
-      default: {
-        throw new Error(`The method "${method}" is not supported.`);
-      }
-    }
+    })()) as T;
+
+    return result;
   }
 }

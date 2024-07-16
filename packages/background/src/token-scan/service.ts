@@ -258,6 +258,7 @@ export class TokenScanService {
         method: "POST",
         headers: {
           "content-type": "application/json",
+          "request-source": "keplr-wallet-extension",
         },
         body: JSON.stringify({
           jsonrpc: "2.0",

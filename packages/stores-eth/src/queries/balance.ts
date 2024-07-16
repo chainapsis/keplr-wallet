@@ -3,27 +3,26 @@ import {
   BalanceRegistry,
   ChainGetter,
   IObservableQueryBalanceImpl,
-  ObservableJsonRPCQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
 import { EthereumAccountBase } from "../account";
+import { ObservableEvmChainJsonRpcQuery } from "./evm-chain-json-rpc";
 
 export class ObservableQueryEthAccountBalanceImpl
-  extends ObservableJsonRPCQuery<string>
+  extends ObservableEvmChainJsonRpcQuery<string>
   implements IObservableQueryBalanceImpl
 {
   constructor(
     sharedContext: QuerySharedContext,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter,
+    chainId: string,
+    chainGetter: ChainGetter,
     protected readonly denomHelper: DenomHelper,
-    protected readonly ethereumURL: string,
     protected readonly ethereumHexAddress: string
   ) {
-    super(sharedContext, ethereumURL, "", "eth_getBalance", [
+    super(sharedContext, chainId, chainGetter, "eth_getBalance", [
       ethereumHexAddress,
       "latest",
     ]);
@@ -77,7 +76,11 @@ export class ObservableQueryEthAccountBalanceRegistry
     const chainInfo = chainGetter.getChain(chainId);
     const isHexAddress =
       EthereumAccountBase.isEthereumHexAddressWithChecksum(address);
-    if (denomHelper.type !== "native" || !isHexAddress || !chainInfo.evm) {
+    if (
+      denomHelper.type !== "native" ||
+      !isHexAddress ||
+      chainInfo.evm == null
+    ) {
       return;
     }
 
@@ -86,7 +89,6 @@ export class ObservableQueryEthAccountBalanceRegistry
       chainId,
       chainGetter,
       denomHelper,
-      chainInfo.evm.rpc,
       address
     );
   }
