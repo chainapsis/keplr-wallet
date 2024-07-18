@@ -679,30 +679,43 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   }
 
   async tryOpenSidePanelIfEnabled(): Promise<void> {
-    // TODO: side panel option이 켜져있는지 확인하기 & content script에서 실행되고 있는지 확인하기
-    const isEnabled = await sendSimpleMessage<{
-      enabled: boolean;
-    }>(
-      this.requester,
-      BACKGROUND_PORT,
-      "side-panel",
-      "GetSidePanelEnabledMsg",
-      {}
-    );
+    let isInContentScript = false;
+    // 이 provider가 content script 위에서 동작하고 있는지 아닌지 구분해야한다.
+    // content script일때만 side panel을 열도록 시도해볼 가치가 있다.
+    // 근데 js 자체적으로 api등을 통해서는 이를 알아낼 방법이 없다.
+    // extension 상에서 content script에서 keplr provider proxy를 시작하기 전에 window에 밑의 field를 알아서 주입하는 방식으로 처리한다.
+    if (
+      typeof window !== "undefined" &&
+      (window as any).__keplr_content_script === true
+    ) {
+      isInContentScript = true;
+    }
 
-    if (isEnabled.enabled) {
-      try {
-        // IMPORTANT: "tryOpenSidePanelIfEnabled"는 다른 msg system과 아예 분리되어있고 다르게 동작한다.
-        //            router-extension package의 src/router/extension.ts에 있는 주석을 참고할 것.
-        return await sendSimpleMessage(
-          this.requester,
-          BACKGROUND_PORT,
-          "router-extension/src/router/extension.ts",
-          "tryOpenSidePanelIfEnabled",
-          {}
-        );
-      } catch (e) {
-        console.log(e);
+    if (isInContentScript) {
+      const isEnabled = await sendSimpleMessage<{
+        enabled: boolean;
+      }>(
+        this.requester,
+        BACKGROUND_PORT,
+        "side-panel",
+        "GetSidePanelEnabledMsg",
+        {}
+      );
+
+      if (isEnabled.enabled) {
+        try {
+          // IMPORTANT: "tryOpenSidePanelIfEnabled"는 다른 msg system과 아예 분리되어있고 다르게 동작한다.
+          //            router-extension package의 src/router/extension.ts에 있는 주석을 참고할 것.
+          return await sendSimpleMessage(
+            this.requester,
+            BACKGROUND_PORT,
+            "router-extension/src/router/extension.ts",
+            "tryOpenSidePanelIfEnabled",
+            {}
+          );
+        } catch (e) {
+          console.log(e);
+        }
       }
     }
   }
