@@ -15,7 +15,7 @@
     "default_title": "Keplr"
   },
   "side_panel": {
-    "default_path": "popup.html"
+    "default_path": "sidePanel.html"
   },
   "background": {
     "service_worker": "background.bundle.js"

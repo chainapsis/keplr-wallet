@@ -22,7 +22,12 @@ import React, {
 import ReactDOM from "react-dom";
 import { HashRouter, Route, Routes, useLocation } from "react-router-dom";
 import { StoreProvider, useStore } from "./stores";
-import { GlobalPopupStyle, GlobalStyle, ScrollBarStyle } from "./styles";
+import {
+  GlobalPopupStyle,
+  GlobalSidePanelStyle,
+  GlobalStyle,
+  ScrollBarStyle,
+} from "./styles";
 import { configure } from "mobx";
 import { observer } from "mobx-react-lite";
 import { Keplr } from "@keplr-wallet/provider";
@@ -89,6 +94,7 @@ import { IBCSwapDestinationSelectAssetPage } from "./pages/ibc-swap/select-asset
 import { RoutePageAnalytics } from "./route-page-analytics";
 import { useIntl } from "react-intl";
 import { ActivitiesPage } from "./pages/activities";
+import { isRunningInSidePanel } from "./utils";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -496,7 +502,15 @@ const App: FunctionComponent = () => {
             <ConfirmProvider>
               <NotificationProvider>
                 <GlobalStyle />
-                <GlobalPopupStyle />
+                {
+                  // isRunningInSidePanel()은 반응형이 아니지만 어차피 popup <-> sidePanel은 실행시점에 정해지고
+                  // UI가 작동중에 변경될 수 없기 때문에 이렇게 해도 괜찮다.
+                  isRunningInSidePanel() ? (
+                    <GlobalSidePanelStyle />
+                  ) : (
+                    <GlobalPopupStyle />
+                  )
+                }
                 <ScrollBarStyle />
                 <ErrorBoundary>
                   <RoutesAfterReady />
