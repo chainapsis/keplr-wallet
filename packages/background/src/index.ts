@@ -26,6 +26,7 @@ import * as KeyRingEthereum from "./keyring-ethereum/internal";
 import * as PermissionInteractive from "./permission-interactive/internal";
 import * as TokenScan from "./token-scan/internal";
 import * as RecentSendHistory from "./recent-send-history/internal";
+import * as SidePanel from "./side-panel/internal";
 
 export * from "./chains";
 export * from "./chains-ui";
@@ -47,6 +48,7 @@ export * from "./keyring-ethereum";
 export * from "./keyring-keystone";
 export * from "./token-scan";
 export * from "./recent-send-history";
+export * from "./side-panel";
 
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
@@ -245,6 +247,10 @@ export function init(
       notification
     );
 
+  const sidePanelService = new SidePanel.SidePanelService(
+    storeCreator("side-panel")
+  );
+
   Interaction.init(router, interactionService);
   Permission.init(router, permissionService);
   Chains.init(
@@ -286,6 +292,7 @@ export function init(
   SecretWasm.init(router, secretWasmService, permissionInteractiveService);
   TokenScan.init(router, tokenScanService);
   RecentSendHistory.init(router, recentSendHistoryService);
+  SidePanel.init(router, sidePanelService);
 
   return {
     initFn: async () => {
@@ -313,6 +320,8 @@ export function init(
       await tokenScanService.init();
 
       await recentSendHistoryService.init();
+
+      await sidePanelService.init();
 
       if (vaultAfterInitFn) {
         await vaultAfterInitFn(vaultService);

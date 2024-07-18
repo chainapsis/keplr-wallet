@@ -392,7 +392,3 @@ browser.alarms.onAlarm.addListener((alarm) => {
     // https://developer.chrome.com/blog/longer-esw-lifetimes/
   }
 });
-
-chrome.sidePanel
-  .setPanelBehavior({ openPanelOnActionClick: true })
-  .catch((error) => console.error(error));

@@ -680,18 +680,30 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
 
   async tryOpenSidePanelIfEnabled(): Promise<void> {
     // TODO: side panel option이 켜져있는지 확인하기 & content script에서 실행되고 있는지 확인하기
-    try {
-      // IMPORTANT: "tryOpenSidePanelIfEnabled"는 다른 msg system과 아예 분리되어있고 다르게 동작한다.
-      //            router-extension package의 src/router/extension.ts에 있는 주석을 참고할 것.
-      return await sendSimpleMessage(
-        this.requester,
-        BACKGROUND_PORT,
-        "router-extension/src/router/extension.ts",
-        "tryOpenSidePanelIfEnabled",
-        {}
-      );
-    } catch (e) {
-      console.log(e);
+    const isEnabled = await sendSimpleMessage<{
+      enabled: boolean;
+    }>(
+      this.requester,
+      BACKGROUND_PORT,
+      "side-panel",
+      "GetSidePanelEnabledMsg",
+      {}
+    );
+
+    if (isEnabled.enabled) {
+      try {
+        // IMPORTANT: "tryOpenSidePanelIfEnabled"는 다른 msg system과 아예 분리되어있고 다르게 동작한다.
+        //            router-extension package의 src/router/extension.ts에 있는 주석을 참고할 것.
+        return await sendSimpleMessage(
+          this.requester,
+          BACKGROUND_PORT,
+          "router-extension/src/router/extension.ts",
+          "tryOpenSidePanelIfEnabled",
+          {}
+        );
+      } catch (e) {
+        console.log(e);
+      }
     }
   }
 
