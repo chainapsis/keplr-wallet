@@ -139,7 +139,10 @@ export class RootStore {
     // Order is important.
     this.interactionStore = new InteractionStore(
       router,
-      new InExtensionMessageRequester()
+      new InExtensionMessageRequester(),
+      (next) => {
+        console.log(next);
+      }
     );
 
     this.keyRingStore = new KeyRingStore(

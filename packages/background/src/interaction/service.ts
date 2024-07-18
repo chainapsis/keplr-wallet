@@ -7,6 +7,7 @@ import {
 } from "@keplr-wallet/router";
 import { PushEventDataMsg, PushInteractionDataMsg } from "./foreground";
 import { Buffer } from "buffer/";
+import { SidePanelService } from "../side-panel";
 
 export class InteractionService {
   protected waitingMap: Map<string, InteractionWaitingData> = new Map();
@@ -22,9 +23,12 @@ export class InteractionService {
     }[]
   > = new Map();
 
-  constructor(protected readonly eventMsgRequester: MessageRequester) {}
+  constructor(
+    protected readonly eventMsgRequester: MessageRequester,
+    protected readonly sidePanelService: SidePanelService
+  ) {}
 
-  init() {
+  async init(): Promise<void> {
     // noop
   }
 
@@ -63,9 +67,7 @@ export class InteractionService {
       data
     );
 
-    const msg = new PushInteractionDataMsg(interactionWaitingData);
-
-    return await this.wait(env, url, msg, options);
+    return await this.wait(env, url, interactionWaitingData, options);
   }
 
   async waitApproveV2<Return, Response>(
@@ -87,10 +89,13 @@ export class InteractionService {
       data
     );
 
-    const msg = new PushInteractionDataMsg(interactionWaitingData);
-
     try {
-      const response: any = await this.wait(env, url, msg, options);
+      const response: any = await this.wait(
+        env,
+        url,
+        interactionWaitingData,
+        options
+      );
       return returnFn(response);
     } finally {
       const resolvers = this.resolverV2Map.get(interactionWaitingData.id);
@@ -106,9 +111,11 @@ export class InteractionService {
   protected async wait(
     env: Env,
     url: string,
-    msg: PushInteractionDataMsg,
+    data: InteractionWaitingData,
     options?: Omit<FnRequestInteractionOptions, "unstableOnClose">
   ): Promise<unknown> {
+    const msg = new PushInteractionDataMsg(url, data);
+
     const id = msg.data.id;
     if (this.resolverMap.has(id)) {
       throw new KeplrError("interaction", 100, "Id is aleady in use");

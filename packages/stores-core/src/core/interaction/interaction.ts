@@ -18,7 +18,7 @@ import { computedFn } from "mobx-utils";
 
 export class InteractionStore implements InteractionForegroundHandler {
   @observable.shallow
-  protected data: InteractionWaitingData[] = [];
+  protected data: (InteractionWaitingData & { uri: string })[] = [];
   // 원래 obsolete에 대한 정보를 data 밑의 field에 포함시켰는데
   // obsolete 처리가 추가되기 전에는 data는 한번 받으면 그 이후에 변화되지 않는다는 가정으로 다른 로직이 짜여졌었다.
   // ref도 변하면 안됐기 때문에 obsolete가 data 밑에 있으면 이러한 요구사항을 이루면서 처리할 수가 없다.
@@ -29,7 +29,10 @@ export class InteractionStore implements InteractionForegroundHandler {
 
   constructor(
     protected readonly router: Router,
-    protected readonly msgRequester: MessageRequester
+    protected readonly msgRequester: MessageRequester,
+    protected readonly afterInteraction?: (
+      next: (InteractionWaitingData & { uri: string }) | undefined
+    ) => void
   ) {
     makeObservable(this);
 
@@ -52,8 +55,11 @@ export class InteractionStore implements InteractionForegroundHandler {
   );
 
   @action
-  onInteractionDataReceived(data: InteractionWaitingData) {
-    this.data.push(data);
+  onInteractionDataReceived(uri: string, data: InteractionWaitingData) {
+    this.data.push({
+      ...data,
+      uri,
+    });
   }
 
   @action
@@ -90,6 +96,11 @@ export class InteractionStore implements InteractionForegroundHandler {
     yield this.delay(100);
     yield afterFn(this.hasOtherData(id));
     this.removeData(id);
+
+    if (this.afterInteraction) {
+      const next = this.data[0];
+      this.afterInteraction(next);
+    }
   }
 
   /**
@@ -150,6 +161,11 @@ export class InteractionStore implements InteractionForegroundHandler {
     }
     yield afterFn(this.hasOtherData(ids));
     this.removeData(ids);
+
+    if (this.afterInteraction) {
+      const next = this.data[0];
+      this.afterInteraction(next);
+    }
   }
 
   /**
@@ -179,6 +195,11 @@ export class InteractionStore implements InteractionForegroundHandler {
     yield this.delay(100);
     yield afterFn(this.hasOtherData(id));
     this.removeData(id);
+
+    if (this.afterInteraction) {
+      const next = this.data[0];
+      this.afterInteraction(next);
+    }
   }
 
   /**
@@ -227,6 +248,11 @@ export class InteractionStore implements InteractionForegroundHandler {
     yield this.delay(50);
     yield afterFn(this.hasOtherData(ids));
     this.removeData(ids);
+
+    if (this.afterInteraction) {
+      const next = this.data[0];
+      this.afterInteraction(next);
+    }
   }
 
   protected delay(ms: number): Promise<void> {

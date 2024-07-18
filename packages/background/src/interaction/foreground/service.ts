@@ -4,8 +4,8 @@ import { InteractionWaitingData } from "../types";
 export class InteractionForegroundService {
   constructor(protected handler: InteractionForegroundHandler) {}
 
-  pushData(data: InteractionWaitingData): void {
-    this.handler.onInteractionDataReceived(data);
+  pushData(uri: string, data: InteractionWaitingData): void {
+    this.handler.onInteractionDataReceived(uri, data);
   }
 
   pushEvent(data: Omit<InteractionWaitingData, "id" | "isInternal">): void {

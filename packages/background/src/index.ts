@@ -99,8 +99,13 @@ export function init(
     analyticsOptions
   );
 
+  const sidePanelService = new SidePanel.SidePanelService(
+    storeCreator("side-panel")
+  );
+
   const interactionService = new Interaction.InteractionService(
-    eventMsgRequester
+    eventMsgRequester,
+    sidePanelService
   );
 
   const chainsService = new Chains.ChainsService(
@@ -247,10 +252,6 @@ export function init(
       notification
     );
 
-  const sidePanelService = new SidePanel.SidePanelService(
-    storeCreator("side-panel")
-  );
-
   Interaction.init(router, interactionService);
   Permission.init(router, permissionService);
   Chains.init(
@@ -297,6 +298,8 @@ export function init(
   return {
     initFn: async () => {
       await analyticsService.init();
+      await sidePanelService.init();
+      await interactionService.init();
 
       await chainsService.init();
       await vaultService.init();
@@ -320,8 +323,6 @@ export function init(
       await tokenScanService.init();
 
       await recentSendHistoryService.init();
-
-      await sidePanelService.init();
 
       if (vaultAfterInitFn) {
         await vaultAfterInitFn(vaultService);

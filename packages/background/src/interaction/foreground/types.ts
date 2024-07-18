@@ -1,7 +1,10 @@
 import { InteractionWaitingData } from "../types";
 
 export interface InteractionForegroundHandler {
-  onInteractionDataReceived: (data: InteractionWaitingData) => void;
+  onInteractionDataReceived: (
+    uri: string,
+    data: InteractionWaitingData
+  ) => void;
   onEventDataReceived: (
     data: Omit<InteractionWaitingData, "id" | "isInternal">
   ) => void;
