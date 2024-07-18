@@ -156,7 +156,17 @@ export class ExtensionEnv {
           url = url.slice(1);
         }
 
-        url = browser.runtime.getURL("/popup.html#/" + url);
+        let isFromSidePanel = false;
+        if (sender.url) {
+          isFromSidePanel = new URL(sender.url).pathname === "/sidePanel.html";
+        } else {
+          console.warn(
+            "No way to determine that the sender is from popup or side panel due to empty sender url. Fallback to popup"
+          );
+        }
+        url = browser.runtime.getURL(
+          `/${isFromSidePanel ? "sidePanel" : "popup"}.html#/` + url
+        );
 
         if (url.includes("?")) {
           url += "&" + queryString;
