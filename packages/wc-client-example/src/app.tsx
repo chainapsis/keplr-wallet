@@ -32,6 +32,8 @@ export const App: FunctionComponent = observer(() => {
       })}
       <button
         onClick={() => {
+          (window as any).keplr.ping();
+
           const chainInfo = chainStore.chainInfos[0];
           const account = accountStore.getAccount(chainInfo.chainId);
           const counterpartyAccount = accountStore.getAccount(

@@ -14,6 +14,9 @@
     "default_popup": "popup.html",
     "default_title": "Keplr"
   },
+  "side_panel": {
+    "default_path": "popup.html"
+  },
   "background": {
     "service_worker": "background.bundle.js"
   },
@@ -23,7 +26,8 @@
     "identity",
     "idle",
     "alarms",
-    "unlimitedStorage"
+    "unlimitedStorage",
+    "sidePanel"
   ],
   "content_scripts": [
     {
