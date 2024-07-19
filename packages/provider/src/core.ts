@@ -76,10 +76,33 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         .then(resolve)
         .catch(reject);
 
-      setTimeout(() => {
-        this.tryOpenSidePanelIfEnabled();
-      }, 100);
+      this.isEnabled(chainIds).then((enabled) => {
+        if (!enabled) {
+          setTimeout(() => {
+            this.protectedTryOpenSidePanelIfEnabled();
+          }, 100);
+        }
+      });
     });
+  }
+
+  // TODO: side panel이 있을때 enable의 처리를 위해서 추가해준건데... (permission 처리가 필요할때만 side panel을 열어야하고 이걸 provider에서 미리 알아야 하므로...)
+  //       일반 웹페이지에서도 필요할수도 있을 것 같으니 나중에 keplr의 API로 추가해준다.
+  //       지금은 귀찮아서 일단 core에만 넣는다.
+  async isEnabled(chainIds: string | string[]): Promise<boolean> {
+    if (typeof chainIds === "string") {
+      chainIds = [chainIds];
+    }
+
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "permission-interactive",
+      "is-enabled-access",
+      {
+        chainIds,
+      }
+    );
   }
 
   async disable(chainIds?: string | string[]): Promise<void> {
@@ -155,6 +178,10 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   }
 
   async getKey(chainId: string): Promise<Key> {
+    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    await this.enable(chainId);
+
     return await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
@@ -248,7 +275,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         .catch(reject);
 
       setTimeout(() => {
-        this.tryOpenSidePanelIfEnabled();
+        this.protectedTryOpenSidePanelIfEnabled();
       }, 100);
     });
   }
@@ -694,7 +721,10 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     );
   }
 
-  async tryOpenSidePanelIfEnabled(): Promise<void> {
+  // IMPORTANT: protected로 시작하는 method는 InjectedKeplr.startProxy()에서 injected 쪽에서 event system으로도 호출할 수 없도록 막혀있다.
+  //            protected로 시작하지 않는 method는 injected keplr에 없어도 event system을 통하면 호출 할 수 있다.
+  //            이를 막기 위해서 method 이름을 protected로 시작하게 한다.
+  async protectedTryOpenSidePanelIfEnabled(): Promise<void> {
     let isInContentScript = false;
     // 이 provider가 content script 위에서 동작하고 있는지 아닌지 구분해야한다.
     // content script일때만 side panel을 열도록 시도해볼 가치가 있다.
