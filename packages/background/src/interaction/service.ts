@@ -146,12 +146,19 @@ export class InteractionService {
         //      extension UI 자체에서 url 전환을 해결해야한다.
         //      popup의 경우도 side panel과 로직을 동일하게 가져가게 하기 위해서
         //      이런식으로 처리해야한다.
-        env.requestInteraction("", msg, {
-          ...options,
-          unstableOnClose: () => {
-            this.reject(id);
-          },
-        });
+        if (this.sidePanelService.getIsEnabled()) {
+          // noop
+          // 위의 주석을 참고.
+          // side panel이 enabled면 baackground에서 side panel을 열어줄 방법이 없다.
+          // side panel을 여는건 provider에서 처리해야만 한다.
+        } else {
+          env.requestInteraction("", msg, {
+            ...options,
+            unstableOnClose: () => {
+              this.reject(id);
+            },
+          });
+        }
       }
     });
   }

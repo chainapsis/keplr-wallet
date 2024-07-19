@@ -55,24 +55,31 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       "keplr-ping",
       {}
     );
-
-    await this.tryOpenSidePanelIfEnabled();
   }
 
-  async enable(chainIds: string | string[]): Promise<void> {
+  enable(chainIds: string | string[]): Promise<void> {
     if (typeof chainIds === "string") {
       chainIds = [chainIds];
     }
 
-    await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "permission-interactive",
-      "enable-access",
-      {
-        chainIds,
-      }
-    );
+    // TODO: 전혀 정상적인 해결법이 아니다. 일단 빠른 테스팅을 위해서 대충 처리한 것이다. 꼭 개선해야함.
+    return new Promise((resolve, reject) => {
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "permission-interactive",
+        "enable-access",
+        {
+          chainIds,
+        }
+      )
+        .then(resolve)
+        .catch(reject);
+
+      setTimeout(() => {
+        this.tryOpenSidePanelIfEnabled();
+      }, 100);
+    });
   }
 
   async disable(chainIds?: string | string[]): Promise<void> {
@@ -217,24 +224,33 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     );
   }
 
-  async signAmino(
+  signAmino(
     chainId: string,
     signer: string,
     signDoc: StdSignDoc,
     signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-cosmos",
-      "request-cosmos-sign-amino",
-      {
-        chainId,
-        signer,
-        signDoc,
-        signOptions: deepmerge(this.defaultOptions.sign ?? {}, signOptions),
-      }
-    );
+    // TODO: 전혀 정상적인 해결법이 아니다. 일단 빠른 테스팅을 위해서 대충 처리한 것이다. 꼭 개선해야함.
+    return new Promise((resolve, reject) => {
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-cosmos",
+        "request-cosmos-sign-amino",
+        {
+          chainId,
+          signer,
+          signDoc,
+          signOptions: deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+        }
+      )
+        .then(resolve)
+        .catch(reject);
+
+      setTimeout(() => {
+        this.tryOpenSidePanelIfEnabled();
+      }, 100);
+    });
   }
 
   async signDirect(

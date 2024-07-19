@@ -32,7 +32,7 @@ export const App: FunctionComponent = observer(() => {
       })}
       <button
         onClick={() => {
-          (window as any).keplr.ping();
+          (window as any).keplr.enable(["cosmoshub-4", "osmosis-1"]);
 
           const chainInfo = chainStore.chainInfos[0];
           const account = accountStore.getAccount(chainInfo.chainId);
