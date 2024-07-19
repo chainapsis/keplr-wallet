@@ -23,6 +23,7 @@ export type FnRequestInteraction = <M extends Message<unknown>>(
 export interface Env {
   readonly isInternalMsg: boolean;
   readonly requestInteraction: FnRequestInteraction;
+  readonly sender: MessageSender;
 }
 
 export type EnvProducer = (

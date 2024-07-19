@@ -7,7 +7,7 @@ export class InteractionPingMsg extends Message<boolean> {
     return "interaction-ping";
   }
 
-  constructor() {
+  constructor(public readonly windowId: number | undefined) {
     super();
   }
 
@@ -56,7 +56,7 @@ export class PushEventDataMsg extends Message<void> {
   constructor(
     public readonly data: Omit<
       InteractionWaitingData,
-      "id" | "uri" | "isInternal"
+      "id" | "uri" | "isInternal" | "windowId"
     >
   ) {
     super();

@@ -4,7 +4,9 @@ import { InteractionWaitingData } from "../types";
 export class InteractionForegroundService {
   constructor(
     protected handler: InteractionForegroundHandler,
-    public readonly pingHandler?: () => boolean
+    public readonly pingHandler?: (
+      windowId: number | undefined
+    ) => Promise<boolean>
   ) {}
 
   pushData(data: InteractionWaitingData): void {
@@ -12,7 +14,7 @@ export class InteractionForegroundService {
   }
 
   pushEvent(
-    data: Omit<InteractionWaitingData, "id" | "uri" | "isInternal">
+    data: Omit<InteractionWaitingData, "id" | "uri" | "isInternal" | "windowId">
   ): void {
     this.handler.onEventDataReceived(data);
   }

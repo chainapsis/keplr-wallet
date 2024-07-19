@@ -149,6 +149,23 @@ export class RootStore {
           setInteractionDataHref(next);
         }
       },
+      async (data) => {
+        const url = new URL(window.location.href);
+        // popup 또는 side panel에서만 interaction을 처리할 수 있다...
+        // XXX: register.html 등에서는 interaction을 처리할 수 없기 때문에
+        //      이러한 경우를 막기 위해서 여기서 pathname을 확실하게 확인해야한다.
+        if (url.pathname === "/popup.html") {
+          // popup이면 케플러가 여러 window 상에 동시에 존재하는게 힘들기 때문에 다 받아준다.
+          return data;
+        }
+        if (url.pathname === "/sidePanel.html") {
+          // side panel일 경우 window id도 동일해야한다.
+          // 유저가 window를 여러개 킨 상태로 각 window에서 side panel을 열어놨다고 생각해보자...
+          const windowId = await getSidePanelWindowId();
+          return data.filter((d) => d.windowId === windowId);
+        }
+        return [];
+      },
       (old, fresh) => {
         // interaction에 대한 요청이 생기면 uri를 바꿔줘야한다...
         // side panel의 경우 background에서 uri를 설정할 수 없기 때문에 이 방식이 필수이다.
@@ -161,17 +178,22 @@ export class RootStore {
           setInteractionDataHref(fresh[0]);
         }
       },
-      () => {
+      async (windowId: number | undefined) => {
         const url = new URL(window.location.href);
         // popup 또는 side panel에서만 interaction을 처리할 수 있다...
         // interaction을 처리할 수 있는 UI가 존재하는 경우
         // background의 interaction service에 처리할 수 있는 UI가 있다고 알려준다.
-        if (
-          url.pathname === "/popup.html" ||
-          url.pathname === "/sidePanel.html"
-        ) {
+        // XXX: register.html 등에서는 interaction을 처리할 수 없기 때문에
+        //      이러한 경우를 막기 위해서 여기서 pathname을 확실하게 확인해야한다.
+        if (url.pathname === "/popup.html") {
           return true;
         }
+        if (url.pathname === "/sidePanel.html") {
+          // side panel일 경우 window id도 동일해야한다.
+          // 유저가 window를 여러개 킨 상태로 각 window에서 side panel을 열어놨다고 생각해보자...
+          return windowId === (await getSidePanelWindowId());
+        }
+
         return false;
       }
     );
@@ -517,3 +539,20 @@ export class RootStore {
 export function createRootStore() {
   return new RootStore();
 }
+
+let _sidePanelWindowId: number | undefined;
+async function getSidePanelWindowId(): Promise<number | undefined> {
+  if (_sidePanelWindowId != null) {
+    return _sidePanelWindowId;
+  }
+
+  const current = await browser.windows.getCurrent();
+  _sidePanelWindowId = current.id;
+  return _sidePanelWindowId;
+}
+// 실행되는 순간 바로 window id를 초기화한다.
+// 현재 실행되는 ui의 window id를 알아내야 하는데
+// 문제는 extension api에 그런 기능을 찾을수가 없다.
+// 대충 유저가 사용하고 있는 window에서 side panel이 열리는게 당연하니
+// 일단 이렇게 처리한다.
+getSidePanelWindowId();

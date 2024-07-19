@@ -47,7 +47,7 @@ export class SignInteractionStore {
     InteractionWaitingData<
       SignInteractionData & { signDocWrapper: SignDocWrapper }
     >,
-    "uri"
+    "uri" | "windowId"
   >[] {
     return this.interactionStore
       .getAllData<SignInteractionData>("request-sign-cosmos")
@@ -77,7 +77,7 @@ export class SignInteractionStore {
         InteractionWaitingData<
           SignInteractionData & { signDocWrapper: SignDocWrapper }
         >,
-        "uri"
+        "uri" | "windowId"
       >
     | undefined {
     const datas = this.waitingDatas;

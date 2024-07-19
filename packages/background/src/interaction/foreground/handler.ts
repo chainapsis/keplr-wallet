@@ -51,10 +51,10 @@ const handlePushEventDataMsg: (
 const handleInteractionPing: (
   service: InteractionForegroundService
 ) => InternalHandler<InteractionPingMsg> = (service) => {
-  return (_env, _msg) => {
+  return (_env, msg) => {
     if (!service.pingHandler) {
       return false;
     }
-    return service.pingHandler();
+    return service.pingHandler(msg.windowId);
   };
 };

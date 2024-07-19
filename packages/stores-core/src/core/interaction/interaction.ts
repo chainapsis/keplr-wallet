@@ -45,11 +45,16 @@ export class InteractionStore implements InteractionForegroundHandler {
     protected readonly afterInteraction?: (
       next: (InteractionWaitingData & { uri: string }) | undefined
     ) => void,
+    protected readonly onDataReceived?: (
+      data: InteractionWaitingData[]
+    ) => Promise<InteractionWaitingData[]>,
     protected readonly onDataChanged?: (
       old: InteractionWaitingData[],
       fresh: InteractionWaitingData[]
     ) => void,
-    protected readonly pingHandler?: () => boolean
+    protected readonly pingHandler?: (
+      windowId: number | undefined
+    ) => Promise<boolean>
   ) {
     makeObservable(this);
 
@@ -76,10 +81,13 @@ export class InteractionStore implements InteractionForegroundHandler {
     // id는 겹칠 수 없기 때문에 이걸 key로 사용한다.
     // refresh한 이후에 값이 바뀐게 아니라면 ref도 바꾸지 않기 위해서 값 자체를 바꾸지 않는다.
     const prevKey = this.data.map((d) => d.id).join("/");
-    const data = await this.msgRequester.sendMessage(
+    let data = await this.msgRequester.sendMessage(
       BACKGROUND_PORT,
       new GetInteractionWaitingDataArrayMsg()
     );
+    if (this.onDataReceived) {
+      data = await this.onDataReceived(data);
+    }
     const newKey = data.map((d) => d.id).join("/");
     if (prevKey !== newKey) {
       const prev = this.data.slice();

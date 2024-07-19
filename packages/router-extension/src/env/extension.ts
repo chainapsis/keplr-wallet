@@ -139,6 +139,7 @@ export class ExtensionEnv {
       return {
         isInternalMsg,
         requestInteraction: openAndSendMsg,
+        sender,
       };
     } else {
       // If msg is from the extension itself, it can send the msg back to the extension itself.
@@ -188,6 +189,7 @@ export class ExtensionEnv {
       return {
         isInternalMsg,
         requestInteraction,
+        sender,
       };
     }
   };

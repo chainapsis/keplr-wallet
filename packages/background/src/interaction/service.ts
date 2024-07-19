@@ -74,6 +74,7 @@ export class InteractionService {
     const interactionWaitingData = this.addDataToMap(
       type,
       env.isInternalMsg,
+      await this.getWindowIdFromEnvOrCurrentWindowId(env),
       uri,
       data
     );
@@ -97,6 +98,7 @@ export class InteractionService {
     const interactionWaitingData = this.addDataToMap(
       type,
       env.isInternalMsg,
+      await this.getWindowIdFromEnvOrCurrentWindowId(env),
       uri,
       data
     );
@@ -231,6 +233,7 @@ export class InteractionService {
   protected addDataToMap(
     type: string,
     isInternal: boolean,
+    windowId: number | undefined,
     uri: string,
     data: unknown
   ): InteractionWaitingData {
@@ -242,6 +245,7 @@ export class InteractionService {
       id,
       type,
       isInternal,
+      windowId,
       data,
       uri,
     };
@@ -261,46 +265,112 @@ export class InteractionService {
       // waiting data를 처리하려면 당연히 UI가 있어야한다.
       // 근데 side panel의 경우 UI가 꺼졌는지 아닌지 쉽게 알 방법이 없다...
       // 그래서 UI가 꺼졌는지 아닌지를 판단하기 위해서 ping을 보내서 UI가 살아있는지 확인한다.
+      // 추가로 side panel의 경우는 window id까지 고려한다...
+      // 유저가 여러 window를 켜놨고 각 window마다 side panel을 열어놨다고 생각해보자...
       // ping이 일단 최소한 한번은 성공해야지 이러한 처리를 해준다.
       // 왜냐면 어쩌다가 interaction이 추가된 이후에 UI가 늦게 열리면
       // UI가 늦게 열렸다는 이유로 실패할 수 있는데 이건 이상하기 때문에...
       // 그리고 모바일에서는 어차피 이러한 처리가 필요없기 때문에 모바일 쪽 UI에서는 ping을 받아줄 필요가 없다.
       // 그래서 모바일에서는 어차피 ping이 성공하지 않기 때문에 아무런 처리도 안되도록 한다.
-      let wasPingSucceeded = false;
+      // TODO: window id와 상관없이 그냥 interaction을 처리할 UI가 남지 않게 되면 전부다 reject하는 로직도 추가하자...
+      const pingStateMap = new Map<
+        number,
+        {
+          wasPingSucceeded: boolean;
+        }
+      >();
       (async () => {
         while (this.waitingMap.size > 0) {
           await new Promise((resolve) => setTimeout(resolve, 200));
 
-          let succeeded = false;
-          try {
-            const res = await new InExtensionMessageRequester().sendMessage(
-              APP_PORT,
-              new InteractionPingMsg()
+          const windowIds = this.sidePanelService.getIsEnabled()
+            ? new Set(
+                Array.from(this.waitingMap.values()).map((w) => w.windowId)
+              )
+            : // 로직 짜기가 귀찮아서 side panel이 아닌 경우는 그냥 window id를 다 0으로 처리한다...
+              new Set([-1]);
+
+          for (const windowId of windowIds) {
+            // XXX: window id를 찾지 못하는 경우는 개발 중에는 없었는데...
+            //      일단 타이핑 상 undefined일수도 있다.
+            //      이 경우는 일단 아무것도 안하고 넘어간다.
+            if (windowId == null) {
+              continue;
+            }
+
+            const data = Array.from(this.waitingMap.values()).filter(
+              (w) => w.windowId === windowId
             );
-            if (res) {
-              succeeded = true;
+            const wasPingSucceeded = (() => {
+              if (pingStateMap.has(windowId)) {
+                return pingStateMap.get(windowId)!.wasPingSucceeded;
+              } else {
+                pingStateMap.set(windowId, {
+                  wasPingSucceeded: false,
+                });
+                return false;
+              }
+            })();
+            let succeeded = false;
+            try {
+              const res = await new InExtensionMessageRequester().sendMessage(
+                APP_PORT,
+                // XXX: popup에서는 위에 로직에서 window id를 -1로 대충 처리 했었다.
+                new InteractionPingMsg(windowId === -1 ? undefined : windowId)
+              );
+              if (res) {
+                succeeded = true;
+              }
+            } catch (e) {
+              console.log(e);
             }
-          } catch (e) {
-            console.log(e);
-          }
 
-          if (wasPingSucceeded && !succeeded) {
-            // UI가 꺼진 것으로 판단한다.
-            // 그래서 모든 interaction을 reject한다.
-            for (const id of this.waitingMap.keys()) {
-              this.rejectV2(id);
+            if (wasPingSucceeded && !succeeded) {
+              // UI가 꺼진 것으로 판단한다.
+              // 그래서 모든 interaction을 reject한다.
+              for (const d of data) {
+                this.rejectV2(d.id);
+              }
+              break;
             }
-            break;
-          }
 
-          if (!wasPingSucceeded && succeeded) {
-            wasPingSucceeded = true;
+            if (!wasPingSucceeded && succeeded) {
+              pingStateMap.set(windowId, {
+                wasPingSucceeded: true,
+              });
+            }
           }
         }
       })();
     }
 
     return interactionWaitingData;
+  }
+
+  // extension에서 env.sender로부터 요청된 message의 window id를 찾는다.
+  // 근데 문제는 popup이나 side panel같은 내부의 UI에서 보낸 message의 경우
+  // sender에 tab 정보가 없다...
+  // 그래서 tab 정보가 없는 경우에는 현재 window id를 반환한다.
+  // 대충 현재의 window에서 유저가 무엇인가를 했을테니 별 문제는 안될 것이다...
+  // mobile에서는 어차피 이러한 처리가 필요 없기 때문에 무조건 undefined를 반환한다.
+  protected async getWindowIdFromEnvOrCurrentWindowId(
+    env: Env
+  ): Promise<number | undefined> {
+    if (
+      typeof browser === "undefined" ||
+      typeof browser.windows === "undefined" ||
+      typeof browser.tabs === "undefined"
+    ) {
+      return;
+    }
+
+    const current = (await browser.windows.getCurrent()).id;
+    if (!env.sender.tab || !env.sender.tab.id) {
+      return current;
+    }
+
+    const tab = await browser.tabs.get(env.sender.tab.id);
+    return tab.windowId || current;
   }
 
   protected removeDataFromMap(id: string) {
