@@ -3,4 +3,5 @@ export interface InteractionWaitingData<T = unknown> {
   type: string;
   isInternal: boolean;
   data: T;
+  uri: string;
 }

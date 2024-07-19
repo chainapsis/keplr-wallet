@@ -1,5 +1,30 @@
 import { Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
+import { InteractionWaitingData } from "./types";
+
+export class GetInteractionWaitingDataArrayMsg extends Message<
+  InteractionWaitingData[]
+> {
+  public static type() {
+    return "GetInteractionWaitingDataArrayMsg";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetInteractionWaitingDataArrayMsg.type();
+  }
+}
 
 export class ApproveInteractionMsg extends Message<void> {
   public static type() {

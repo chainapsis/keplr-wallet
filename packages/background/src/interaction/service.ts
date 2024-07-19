@@ -32,6 +32,10 @@ export class InteractionService {
     // noop
   }
 
+  getInteractionWaitingDataArray(): InteractionWaitingData[] {
+    return Array.from(this.waitingMap.values());
+  }
+
   // Dispatch the event to the frontend. Don't wait any interaction.
   // And, don't ensure that the event is delivered successfully, just ignore the any errors.
   dispatchEvent(port: string, type: string, data: unknown) {
@@ -51,7 +55,7 @@ export class InteractionService {
 
   async waitApprove(
     env: Env,
-    url: string,
+    uri: string,
     type: string,
     data: unknown,
     options?: Omit<FnRequestInteractionOptions, "unstableOnClose">
@@ -64,15 +68,16 @@ export class InteractionService {
     const interactionWaitingData = this.addDataToMap(
       type,
       env.isInternalMsg,
+      uri,
       data
     );
 
-    return await this.wait(env, url, interactionWaitingData, options);
+    return await this.wait(env, interactionWaitingData, options);
   }
 
   async waitApproveV2<Return, Response>(
     env: Env,
-    url: string,
+    uri: string,
     type: string,
     data: unknown,
     returnFn: (response: Response) => Promise<Return> | Return,
@@ -86,13 +91,13 @@ export class InteractionService {
     const interactionWaitingData = this.addDataToMap(
       type,
       env.isInternalMsg,
+      uri,
       data
     );
 
     try {
       const response: any = await this.wait(
         env,
-        url,
         interactionWaitingData,
         options
       );
@@ -110,11 +115,10 @@ export class InteractionService {
 
   protected async wait(
     env: Env,
-    url: string,
     data: InteractionWaitingData,
     options?: Omit<FnRequestInteractionOptions, "unstableOnClose">
   ): Promise<unknown> {
-    const msg = new PushInteractionDataMsg(url, data);
+    const msg = new PushInteractionDataMsg(data);
 
     const id = msg.data.id;
     if (this.resolverMap.has(id)) {
@@ -127,12 +131,28 @@ export class InteractionService {
         onReject: reject,
       });
 
-      env.requestInteraction(url, msg, {
-        ...options,
-        unstableOnClose: () => {
-          this.reject(id);
-        },
-      });
+      if (env.isInternalMsg) {
+        env.requestInteraction(data.uri, msg, {
+          ...options,
+          unstableOnClose: () => {
+            this.reject(id);
+          },
+        });
+      } else {
+        // XXX: internal msg의 경우엔 extension popup(side panel)에서 요청된 것이기 때문에
+        //      그대로 페이지의 uri 자체를 백그라운드에서 바꾼다
+        //      하지만 internal msg가 아닌 경우는 외부 웹페이지에서 요청된 것인데
+        //      side panel의 경우 특정 extension url에 대해서 백그라운드에서 처리할 수 없기 때문에
+        //      extension UI 자체에서 url 전환을 해결해야한다.
+        //      popup의 경우도 side panel과 로직을 동일하게 가져가게 하기 위해서
+        //      이런식으로 처리해야한다.
+        env.requestInteraction("", msg, {
+          ...options,
+          unstableOnClose: () => {
+            this.reject(id);
+          },
+        });
+      }
     });
   }
 
@@ -195,6 +215,7 @@ export class InteractionService {
   protected addDataToMap(
     type: string,
     isInternal: boolean,
+    uri: string,
     data: unknown
   ): InteractionWaitingData {
     const bytes = new Uint8Array(12);
@@ -206,6 +227,7 @@ export class InteractionService {
       type,
       isInternal,
       data,
+      uri,
     };
 
     if (this.waitingMap.has(id)) {

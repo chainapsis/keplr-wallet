@@ -73,6 +73,7 @@ import {
   Price24HChangesStore,
   SwapUsageQueries,
 } from "@keplr-wallet/stores-internal";
+import { setInteractionDataHref } from "../utils";
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
@@ -141,7 +142,12 @@ export class RootStore {
       router,
       new InExtensionMessageRequester(),
       (next) => {
-        console.log(next);
+        if (next) {
+          // TODO: 여기서 internal과 external인 경우를 구분할 필요가 있다.
+          //       사실 일반 유저의 interaction으로는 internal과 external이 섞이지 않을 것 같긴 하지만...
+          //       로직의 엄밀함을 위해서는 처리할 필요가 있어보인다.
+          setInteractionDataHref(next);
+        }
       }
     );
 

@@ -94,7 +94,7 @@ import { IBCSwapDestinationSelectAssetPage } from "./pages/ibc-swap/select-asset
 import { RoutePageAnalytics } from "./route-page-analytics";
 import { useIntl } from "react-intl";
 import { ActivitiesPage } from "./pages/activities";
-import { isRunningInSidePanel } from "./utils";
+import { isRunningInSidePanel, setInteractionDataHref } from "./utils";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -146,6 +146,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     axelarEVMBridgeCurrencyRegistrar,
     priceStore,
     price24HChangesStore,
+    interactionStore,
     uiConfigStore,
   } = useStore();
 
@@ -156,6 +157,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
   const isURLUnlockPage = useIsURLUnlockPage();
   const openRegisterOnce = useRef(false);
   const initAccountsOnce = useRef(false);
+  const initInteractionSetURIOnce = useRef(false);
 
   const _isReady: boolean = useMemo(() => {
     if (keyRingStore.status === "not-loaded") {
@@ -245,6 +247,19 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
       return false;
     }
 
+    if (!interactionStore.isInitialized) {
+      return false;
+    } else if (!initInteractionSetURIOnce.current) {
+      initInteractionSetURIOnce.current = true;
+
+      // TODO: 여기서 interactionStore.data가 바꿀때마다 이 effect가 실행되게 되는데...
+      //       이 문제는 막고싶으니 좀 더 생각해보고 해결한다.
+      if (interactionStore.data.length > 0) {
+        const first = interactionStore.data[0];
+        setInteractionDataHref(first);
+      }
+    }
+
     return true;
   }, [
     keyRingStore.status,
@@ -261,6 +276,8 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     uiConfigStore.isDeveloper,
     gravityBridgeCurrencyRegistrar.isInitialized,
     axelarEVMBridgeCurrencyRegistrar.isInitialized,
+    interactionStore.isInitialized,
+    interactionStore.data,
     accountStore,
     ibcChannelStore.isInitialized,
   ]);

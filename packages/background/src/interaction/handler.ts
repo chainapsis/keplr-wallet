@@ -10,6 +10,7 @@ import {
   RejectInteractionMsg,
   ApproveInteractionV2Msg,
   RejectInteractionV2Msg,
+  GetInteractionWaitingDataArrayMsg,
 } from "./messages";
 import { InteractionService } from "./service";
 
@@ -18,6 +19,11 @@ export const getHandler: (service: InteractionService) => Handler = (
 ) => {
   return (env: Env, msg: Message<unknown>) => {
     switch (msg.constructor) {
+      case GetInteractionWaitingDataArrayMsg:
+        return handleGetInteractionWaitingDataArrayMsg(service)(
+          env,
+          msg as GetInteractionWaitingDataArrayMsg
+        );
       case ApproveInteractionMsg:
         return handleApproveInteractionMsg(service)(
           env,
@@ -41,6 +47,14 @@ export const getHandler: (service: InteractionService) => Handler = (
       default:
         throw new KeplrError("interaction", 100, "Unknown msg type");
     }
+  };
+};
+
+const handleGetInteractionWaitingDataArrayMsg: (
+  service: InteractionService
+) => InternalHandler<GetInteractionWaitingDataArrayMsg> = (service) => {
+  return (_env, _msg) => {
+    return service.getInteractionWaitingDataArray();
   };
 };
 

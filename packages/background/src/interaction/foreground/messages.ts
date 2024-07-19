@@ -7,18 +7,11 @@ export class PushInteractionDataMsg extends Message<void> {
     return "push-interaction-data";
   }
 
-  constructor(
-    public readonly uri: string,
-    public readonly data: InteractionWaitingData
-  ) {
+  constructor(public readonly data: InteractionWaitingData) {
     super();
   }
 
   validateBasic(): void {
-    if (!this.uri) {
-      throw new KeplrError("interaction", 101, "URI should not be empty");
-    }
-
     if (!this.data.type) {
       throw new KeplrError("interaction", 101, "Type should not be empty");
     }
@@ -39,7 +32,10 @@ export class PushEventDataMsg extends Message<void> {
   }
 
   constructor(
-    public readonly data: Omit<InteractionWaitingData, "id" | "isInternal">
+    public readonly data: Omit<
+      InteractionWaitingData,
+      "id" | "uri" | "isInternal"
+    >
   ) {
     super();
   }
