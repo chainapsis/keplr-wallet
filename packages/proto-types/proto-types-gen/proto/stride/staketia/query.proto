@@ -1,0 +1,118 @@
+
+syntax = "proto3";
+package stride.staketia;
+
+import "stride/staketia/staketia.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+
+option go_package = "github.com/Stride-Labs/stride/v22/x/staketia/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Queries the host zone struct
+  rpc HostZone(QueryHostZoneRequest) returns (QueryHostZoneResponse) {
+    option (google.api.http).get = "/Stride-Labs/stride/staketia/host_zone";
+  }
+
+  // Queries the delegation records with an optional to include archived records
+  // Ex:
+  // - /delegation_records
+  // - /delegation_records?include_archived=true
+  rpc DelegationRecords(QueryDelegationRecordsRequest)
+      returns (QueryDelegationRecordsResponse) {
+    option (google.api.http).get =
+        "/Stride-Labs/stride/staketia/delegation_records";
+  }
+
+  // Queries the unbonding records with an optional to include archived records
+  // Ex:
+  // - /unbonding_records
+  // - /unbonding_records?include_archived=true
+  rpc UnbondingRecords(QueryUnbondingRecordsRequest)
+      returns (QueryUnbondingRecordsResponse) {
+    option (google.api.http).get =
+        "/Stride-Labs/stride/staketia/unbonding_records";
+  }
+
+  // Queries a single user redemption record
+  rpc RedemptionRecord(QueryRedemptionRecordRequest)
+      returns (QueryRedemptionRecordResponse) {
+    option (google.api.http).get =
+        "/Stride-Labs/stride/staketia/redemption_record/{unbonding_record_id}/"
+        "{address}";
+  }
+
+  // Queries all redemption records with optional filters
+  // Ex:
+  // - /redemption_records
+  // - /redemption_records?address=strideXXX
+  // - /redemption_records?unbonding_record_id=100
+  rpc RedemptionRecords(QueryRedemptionRecordsRequest)
+      returns (QueryRedemptionRecordsResponse) {
+    option (google.api.http).get =
+        "/Stride-Labs/stride/staketia/redemption_records";
+  }
+
+  // Queries slash records
+  rpc SlashRecords(QuerySlashRecordsRequest)
+      returns (QuerySlashRecordsResponse) {
+    option (google.api.http).get = "/Stride-Labs/stride/staketia/slash_records";
+  }
+}
+
+// Host Zone
+message QueryHostZoneRequest {};
+message QueryHostZoneResponse { HostZone host_zone = 1; }
+
+// All Delegation Records
+message QueryDelegationRecordsRequest { bool include_archived = 1; };
+message QueryDelegationRecordsResponse {
+  repeated DelegationRecord delegation_records = 1
+      [ (gogoproto.nullable) = false ];
+}
+
+// All Unbonding Records
+message QueryUnbondingRecordsRequest { bool include_archived = 1; };
+message QueryUnbondingRecordsResponse {
+  repeated UnbondingRecord unbonding_records = 1
+      [ (gogoproto.nullable) = false ];
+}
+
+// Single Redemption Record
+message QueryRedemptionRecordRequest {
+  uint64 unbonding_record_id = 1;
+  string address = 2;
+};
+message QueryRedemptionRecordResponse {
+  RedemptionRecordResponse redemption_record_response = 1;
+}
+
+// All Redemption Records
+message QueryRedemptionRecordsRequest {
+  string address = 1;
+  uint64 unbonding_record_id = 2;
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+};
+message QueryRedemptionRecordsResponse {
+  repeated RedemptionRecordResponse redemption_record_responses = 1
+      [ (gogoproto.nullable) = false ];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// All Slash Records
+message QuerySlashRecordsRequest {};
+message QuerySlashRecordsResponse {
+  repeated SlashRecord slash_records = 1 [ (gogoproto.nullable) = false ];
+}
+
+// Data structure for frontend to consume
+message RedemptionRecordResponse {
+  // Redemption record
+  RedemptionRecord redemption_record = 1;
+
+  // The Unix timestamp (in seconds) at which the unbonding for the UR
+  // associated with this RR completes
+  uint64 unbonding_completion_time_seconds = 2;
+}

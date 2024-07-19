@@ -1,0 +1,236 @@
+
+syntax = "proto3";
+package stride.stakedym;
+
+import "cosmos/msg/v1/msg.proto";
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
+import "stride/stakedym/stakedym.proto";
+
+option go_package = "github.com/Stride-Labs/stride/v22/x/stakedym/types";
+
+enum OverwritableRecordType {
+  option (gogoproto.goproto_enum_prefix) = false;
+
+  RECORD_TYPE_DELEGATION = 0;
+  RECORD_TYPE_UNBONDING = 1;
+  RECORD_TYPE_REDEMPTION = 2;
+}
+
+// Msg defines the Msg service.
+service Msg {
+  // User transaction to liquid stake native tokens into stTokens
+  rpc LiquidStake(MsgLiquidStake) returns (MsgLiquidStakeResponse);
+
+  // User transaction to redeem stake stTokens into native tokens
+  rpc RedeemStake(MsgRedeemStake) returns (MsgRedeemStakeResponse);
+
+  // Operator transaction to confirm a delegation was submitted
+  // on the host chain
+  rpc ConfirmDelegation(MsgConfirmDelegation)
+      returns (MsgConfirmDelegationResponse);
+
+  // Operator transaction to confirm an undelegation was submitted
+  // on the host chain
+  rpc ConfirmUndelegation(MsgConfirmUndelegation)
+      returns (MsgConfirmUndelegationResponse);
+
+  // Operator transaction to confirm unbonded tokens were transferred back to
+  // stride
+  rpc ConfirmUnbondedTokenSweep(MsgConfirmUnbondedTokenSweep)
+      returns (MsgConfirmUnbondedTokenSweepResponse);
+
+  // Operator transaction to adjust the delegated balance after a validator was
+  // slashed
+  rpc AdjustDelegatedBalance(MsgAdjustDelegatedBalance)
+      returns (MsgAdjustDelegatedBalanceResponse);
+
+  // Adjusts the inner redemption rate bounds on the host zone
+  rpc UpdateInnerRedemptionRateBounds(MsgUpdateInnerRedemptionRateBounds)
+      returns (MsgUpdateInnerRedemptionRateBoundsResponse);
+
+  // Unhalts the host zone if redemption rates were exceeded
+  rpc ResumeHostZone(MsgResumeHostZone) returns (MsgResumeHostZoneResponse);
+
+  // Trigger updating the redemption rate
+  rpc RefreshRedemptionRate(MsgRefreshRedemptionRate)
+      returns (MsgRefreshRedemptionRateResponse);
+
+  // Overwrites a delegation record
+  rpc OverwriteDelegationRecord(MsgOverwriteDelegationRecord)
+      returns (MsgOverwriteDelegationRecordResponse);
+
+  // Overwrites a unbonding record
+  rpc OverwriteUnbondingRecord(MsgOverwriteUnbondingRecord)
+      returns (MsgOverwriteUnbondingRecordResponse);
+
+  // Overwrites a redemption record
+  rpc OverwriteRedemptionRecord(MsgOverwriteRedemptionRecord)
+      returns (MsgOverwriteRedemptionRecordResponse);
+
+  // Sets the operator address
+  rpc SetOperatorAddress(MsgSetOperatorAddress)
+      returns (MsgSetOperatorAddressResponse);
+}
+
+// LiquidStake
+message MsgLiquidStake {
+  option (cosmos.msg.v1.signer) = "staker";
+  option (amino.name) = "stakedym/MsgLiquidStake";
+
+  string staker = 1;
+  string native_amount = 2 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
+}
+message MsgLiquidStakeResponse {
+  cosmos.base.v1beta1.Coin st_token = 1 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// RedeemStake
+message MsgRedeemStake {
+  option (cosmos.msg.v1.signer) = "redeemer";
+  option (amino.name) = "stakedym/MsgRedeemStake";
+
+  string redeemer = 1;
+  string st_token_amount = 2 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
+}
+message MsgRedeemStakeResponse {
+  cosmos.base.v1beta1.Coin native_token = 1 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// ConfirmDelegation
+message MsgConfirmDelegation {
+  option (cosmos.msg.v1.signer) = "operator";
+  option (amino.name) = "stakedym/MsgConfirmDelegation";
+
+  string operator = 1;
+  uint64 record_id = 2;
+  string tx_hash = 3;
+}
+message MsgConfirmDelegationResponse {}
+
+// ConfirmUndelegation
+message MsgConfirmUndelegation {
+  option (cosmos.msg.v1.signer) = "operator";
+  option (amino.name) = "stakedym/MsgConfirmUndelegation";
+
+  string operator = 1;
+  uint64 record_id = 2;
+  string tx_hash = 3;
+}
+message MsgConfirmUndelegationResponse {}
+
+// ConfirmUnbondedTokenSweep
+message MsgConfirmUnbondedTokenSweep {
+  option (cosmos.msg.v1.signer) = "operator";
+  option (amino.name) = "stakedym/MsgConfirmUnbondedTokenSweep";
+
+  string operator = 1;
+  uint64 record_id = 2;
+  string tx_hash = 3;
+}
+message MsgConfirmUnbondedTokenSweepResponse {}
+
+// AdjustDelegatedBalance
+message MsgAdjustDelegatedBalance {
+  option (cosmos.msg.v1.signer) = "operator";
+  option (amino.name) = "stakedym/MsgAdjustDelegatedBalance";
+
+  string operator = 1;
+  string delegation_offset = 2 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
+  string validator_address = 3;
+}
+message MsgAdjustDelegatedBalanceResponse {}
+
+// UpdateInnerRedemptionRate
+message MsgUpdateInnerRedemptionRateBounds {
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name) = "stakedym/MsgUpdateRedemptionRateBounds";
+
+  string creator = 1;
+  string min_inner_redemption_rate = 2 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+  string max_inner_redemption_rate = 3 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+}
+message MsgUpdateInnerRedemptionRateBoundsResponse {}
+
+// ResumeHostZone
+message MsgResumeHostZone {
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name) = "stakedym/MsgResumeHostZone";
+
+  string creator = 1;
+}
+message MsgResumeHostZoneResponse {}
+
+// RefreshRedemptionRate
+message MsgRefreshRedemptionRate {
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name) = "stakedym/MsgRefreshRedemptionRate";
+
+  string creator = 1;
+}
+message MsgRefreshRedemptionRateResponse {}
+
+// OverwriteDelegationRecord
+message MsgOverwriteDelegationRecord {
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name) = "stakedym/MsgOverwriteDelegationRecord";
+
+  string creator = 1;
+  DelegationRecord delegation_record = 2;
+}
+message MsgOverwriteDelegationRecordResponse {}
+
+// OverwriteUnbondingRecord
+message MsgOverwriteUnbondingRecord {
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name) = "stakedym/MsgOverwriteUnbondingRecord";
+
+  string creator = 1;
+  UnbondingRecord unbonding_record = 2;
+}
+message MsgOverwriteUnbondingRecordResponse {}
+
+// OverwriteRedemptionRecord
+message MsgOverwriteRedemptionRecord {
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name) = "stakedym/MsgOverwriteRedemptionRecord";
+
+  string creator = 1;
+  RedemptionRecord redemption_record = 2;
+}
+message MsgOverwriteRedemptionRecordResponse {}
+
+// SetOperatorAddress
+message MsgSetOperatorAddress {
+  option (cosmos.msg.v1.signer) = "signer";
+  option (amino.name) = "stakedym/MsgSetOperatorAddress";
+
+  string signer = 1;
+  string operator = 2;
+}
+message MsgSetOperatorAddressResponse {}

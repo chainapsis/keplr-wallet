@@ -1,0 +1,37 @@
+syntax = "proto3";
+package stride.staketia;
+
+import "gogoproto/gogo.proto";
+import "stride/staketia/staketia.proto";
+
+option go_package = "github.com/Stride-Labs/stride/v22/x/staketia/types";
+
+// Params defines the staketia module parameters.
+message Params {}
+
+// TransferInProgressRecordIds stores record IDs for delegation records
+// that have a transfer in progress
+message TransferInProgressRecordIds {
+  string channel_id = 1;
+  uint64 sequence = 2;
+  uint64 record_id = 3;
+}
+
+// GenesisState defines the staketia module's genesis state.
+message GenesisState {
+  Params params = 1 [
+    (gogoproto.moretags) = "yaml:\"params\"",
+    (gogoproto.nullable) = false
+  ];
+
+  HostZone host_zone = 2 [ (gogoproto.nullable) = false ];
+  repeated DelegationRecord delegation_records = 3
+      [ (gogoproto.nullable) = false ];
+  repeated UnbondingRecord unbonding_records = 4
+      [ (gogoproto.nullable) = false ];
+  repeated RedemptionRecord redemption_records = 5
+      [ (gogoproto.nullable) = false ];
+  repeated SlashRecord slash_records = 6 [ (gogoproto.nullable) = false ];
+  repeated TransferInProgressRecordIds transfer_in_progress_record_ids = 7
+      [ (gogoproto.nullable) = false ];
+}
