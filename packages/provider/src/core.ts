@@ -166,15 +166,37 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       delete (chainInfo as any).coinType;
     }
 
-    return await sendSimpleMessage(
+    const hasChain = await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
       "chains",
-      "suggest-chain-info",
+      "HasChainMsg",
       {
-        chainInfo,
+        chainId: chainInfo.chainId,
       }
     );
+    if (hasChain) {
+      return;
+    }
+
+    // TODO: 전혀 정상적인 해결법이 아니다. 일단 빠른 테스팅을 위해서 대충 처리한 것이다. 꼭 개선해야함.
+    return new Promise((resolve, reject) => {
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "chains",
+        "suggest-chain-info",
+        {
+          chainInfo,
+        }
+      )
+        .then(resolve)
+        .catch(reject);
+
+      setTimeout(() => {
+        this.protectedTryOpenSidePanelIfEnabled();
+      }, 100);
+    });
   }
 
   async getKey(chainId: string): Promise<Key> {
@@ -194,6 +216,10 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   }
 
   async getKeysSettled(chainIds: string[]): Promise<SettledResponses<Key>> {
+    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    await this.enable(chainIds);
+
     return await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
@@ -238,6 +264,10 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     tx: StdTx | Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array> {
+    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    await this.enable(chainId);
+
     return await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
@@ -251,12 +281,16 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     );
   }
 
-  signAmino(
+  async signAmino(
     chainId: string,
     signer: string,
     signDoc: StdSignDoc,
     signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
+    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    await this.enable(chainId);
+
     // TODO: 전혀 정상적인 해결법이 아니다. 일단 빠른 테스팅을 위해서 대충 처리한 것이다. 꼭 개선해야함.
     return new Promise((resolve, reject) => {
       sendSimpleMessage(
@@ -291,6 +325,10 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     },
     signOptions: KeplrSignOptions = {}
   ): Promise<DirectSignResponse> {
+    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    await this.enable(chainId);
+
     const response = await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
@@ -340,6 +378,10 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       "preferNoSetFee" | "disableBalanceCheck"
     > = {}
   ): Promise<DirectAuxSignResponse> {
+    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    await this.enable(chainId);
+
     const response = await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
@@ -383,6 +425,10 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     signer: string,
     data: string | Uint8Array
   ): Promise<StdSignature> {
+    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    await this.enable(chainId);
+
     return await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
@@ -405,6 +451,10 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     data: string | Uint8Array,
     signature: StdSignature
   ): Promise<boolean> {
+    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    await this.enable(chainId);
+
     if (typeof data === "string") {
       data = Buffer.from(data);
     }
@@ -429,6 +479,10 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     message: string | Uint8Array,
     signType: EthSignType
   ): Promise<Uint8Array> {
+    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    await this.enable(chainId);
+
     return await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
@@ -450,6 +504,10 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     username: string,
     addressChainIds: string[]
   ): Promise<ICNSAdr36Signatures> {
+    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    await this.enable(chainId);
+
     return await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
@@ -495,6 +553,10 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     contractAddress: string,
     viewingKey?: string
   ): Promise<void> {
+    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    await this.enable(chainId);
+
     return await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
@@ -615,6 +677,10 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     signDoc: StdSignDoc,
     signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
+    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    await this.enable(chainId);
+
     return await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
@@ -696,6 +762,10 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   }
 
   async sendEthereumTx(chainId: string, tx: Uint8Array): Promise<string> {
+    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    await this.enable(chainId);
+
     return await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
@@ -709,6 +779,10 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   }
 
   async suggestERC20(chainId: string, contractAddress: string): Promise<void> {
+    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    await this.enable(chainId);
+
     return await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
