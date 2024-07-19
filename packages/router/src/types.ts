@@ -12,8 +12,6 @@ export type FnRequestInteractionOptions = {
   // In the case of a detached popup, it is not guaranteed that any logic will be executed when it is closed.
   // To solve this problem, the callback below is used.
   unstableOnClose?: () => void;
-  forceOpenWindow?: boolean;
-  channel?: string;
 };
 
 export type FnRequestInteraction = <M extends Message<unknown>>(

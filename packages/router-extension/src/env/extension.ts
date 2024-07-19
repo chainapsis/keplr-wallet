@@ -91,7 +91,7 @@ export class ExtensionEnv {
         url += "?" + queryString;
       }
 
-      const windowId = await openPopupWindow(url, options?.channel);
+      const windowId = await openPopupWindow(url);
       const window = await browser.windows.get(windowId, {
         populate: true,
       });
@@ -143,15 +143,7 @@ export class ExtensionEnv {
     } else {
       // If msg is from the extension itself, it can send the msg back to the extension itself.
       // In this case, this expects that there is only one extension popup have been opened.
-      const requestInteraction: FnRequestInteraction = async (
-        url,
-        msg,
-        options
-      ) => {
-        if (options?.forceOpenWindow) {
-          return await openAndSendMsg(url, msg, options);
-        }
-
+      const requestInteraction: FnRequestInteraction = async (url, msg) => {
         if (url.startsWith("/")) {
           url = url.slice(1);
         }
