@@ -148,6 +148,31 @@ export class RootStore {
           //       로직의 엄밀함을 위해서는 처리할 필요가 있어보인다.
           setInteractionDataHref(next);
         }
+      },
+      (old, fresh) => {
+        // interaction에 대한 요청이 생기면 uri를 바꿔줘야한다...
+        // side panel의 경우 background에서 uri를 설정할 수 없기 때문에 이 방식이 필수이다.
+        // popup의 경우도 side panel 기능이 추가되면서 background에서 uri를 설정할 수 없도록 바꿨기 때문에 이 방식이 필요하다.
+        // internal의 경우 background에서 uri를 바꿔버리지만 어차피 밑의 처리에서도 동일한 uri가 나올 것이기 때문에 아무것도 안한것과 같아서 괜찮다.
+        if (old.length === 0 && fresh.length > 0) {
+          // TODO: 여기서 internal과 external인 경우를 구분할 필요가 있다.
+          //       사실 일반 유저의 interaction으로는 internal과 external이 섞이지 않을 것 같긴 하지만...
+          //       로직의 엄밀함을 위해서는 처리할 필요가 있어보인다.
+          setInteractionDataHref(fresh[0]);
+        }
+      },
+      () => {
+        const url = new URL(window.location.href);
+        // popup 또는 side panel에서만 interaction을 처리할 수 있다...
+        // interaction을 처리할 수 있는 UI가 존재하는 경우
+        // background의 interaction service에 처리할 수 있는 UI가 있다고 알려준다.
+        if (
+          url.pathname === "/popup.html" ||
+          url.pathname === "/sidePanel.html"
+        ) {
+          return true;
+        }
+        return false;
       }
     );
 

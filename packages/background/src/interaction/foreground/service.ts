@@ -2,7 +2,10 @@ import { InteractionForegroundHandler } from "./types";
 import { InteractionWaitingData } from "../types";
 
 export class InteractionForegroundService {
-  constructor(protected handler: InteractionForegroundHandler) {}
+  constructor(
+    protected handler: InteractionForegroundHandler,
+    public readonly pingHandler?: () => boolean
+  ) {}
 
   pushData(data: InteractionWaitingData): void {
     this.handler.onInteractionDataReceived(data);

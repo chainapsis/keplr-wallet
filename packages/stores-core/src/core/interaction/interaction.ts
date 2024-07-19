@@ -44,11 +44,16 @@ export class InteractionStore implements InteractionForegroundHandler {
     protected readonly msgRequester: MessageRequester,
     protected readonly afterInteraction?: (
       next: (InteractionWaitingData & { uri: string }) | undefined
-    ) => void
+    ) => void,
+    protected readonly onDataChanged?: (
+      old: InteractionWaitingData[],
+      fresh: InteractionWaitingData[]
+    ) => void,
+    protected readonly pingHandler?: () => boolean
   ) {
     makeObservable(this);
 
-    const service = new InteractionForegroundService(this);
+    const service = new InteractionForegroundService(this, pingHandler);
     interactionForegroundInit(router, service);
 
     this.init();
@@ -77,9 +82,14 @@ export class InteractionStore implements InteractionForegroundHandler {
     );
     const newKey = data.map((d) => d.id).join("/");
     if (prevKey !== newKey) {
+      const prev = this.data.slice();
       runInAction(() => {
         this.data = data;
       });
+
+      if (this.onDataChanged) {
+        this.onDataChanged(prev, data.slice());
+      }
     }
   }
 
