@@ -31,6 +31,7 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { ContractAddressBookModal } from "../../../../components/contract-address-book-modal";
 import { IconButton } from "../../../../components/icon-button";
 import { MenuIcon } from "../../../../components/icon";
+import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
 
 const Styles = {
   Container: styled(Stack)`
@@ -270,7 +271,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
                     interactionInfo.interaction &&
                     !interactionInfo.interactionInternal
                   ) {
-                    window.close();
+                    handleExternalInteractionWithNoProceedNext();
                   }
                 }
 

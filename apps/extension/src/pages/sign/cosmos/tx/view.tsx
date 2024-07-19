@@ -45,6 +45,7 @@ import { Checkbox } from "../../../../components/checkbox";
 import { FeeSummary } from "../../components/fee-summary";
 import { FeeControl } from "../../../../components/input/fee-control";
 import { HighFeeWarning } from "../../components/high-fee-warning";
+import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -417,7 +418,7 @@ export const CosmosTxView: FunctionComponent<{
                 interactionInfo.interaction &&
                 !interactionInfo.interactionInternal
               ) {
-                window.close();
+                handleExternalInteractionWithNoProceedNext();
               }
             }
 

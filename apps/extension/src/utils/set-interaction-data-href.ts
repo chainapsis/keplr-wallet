@@ -4,6 +4,8 @@ import { isRunningInSidePanel } from "./side-panel";
 export const setInteractionDataHref = (
   interactionData: InteractionWaitingData
 ) => {
+  const wasInteraction = window.location.href.includes("interaction=true");
+
   const queryString = `interaction=true&interactionInternal=${interactionData.isInternal}`;
 
   let uri = interactionData.uri;
@@ -22,5 +24,9 @@ export const setInteractionDataHref = (
     url += "?" + queryString;
   }
 
-  window.location.href = url;
+  if (wasInteraction) {
+    window.location.replace(url);
+  } else {
+    window.location.href = url;
+  }
 };

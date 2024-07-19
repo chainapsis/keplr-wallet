@@ -5,3 +5,15 @@ export const isRunningInSidePanel = (): boolean => {
   // 단순히 파일 이름만 다르게 분리되어있다.
   return new URL(window.location.href).pathname === "/sidePanel.html";
 };
+
+export const handleExternalInteractionWithNoProceedNext = () => {
+  if (window.isStartFromInteractionWithSidePanelEnabled) {
+    window.close();
+  } else {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.close();
+    }
+  }
+};

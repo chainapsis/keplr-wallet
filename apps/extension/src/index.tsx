@@ -271,9 +271,22 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     ibcChannelStore.isInitialized,
   ]);
 
+  const checkIsStartFromInteractionWithSidePanelEnabledOnce = useRef(false);
+
   const isReady: boolean = (() => {
     if (!_isReady) {
       return false;
+    }
+
+    if (!checkIsStartFromInteractionWithSidePanelEnabledOnce.current) {
+      checkIsStartFromInteractionWithSidePanelEnabledOnce.current = true;
+      // side panel에서 돌아가고 있으면서 최초의 isReady 상태일때 interaction이 있었는지 확인한다.
+      // 만약 내부의 interaction이라면 UI가 보이기도 전에 뭔가가 요청됐을리가 없으므로
+      // 최초로 interaction을 가지고 시작했다면 외부의 요청에 의한 interaction이다.
+      console.log(isRunningInSidePanel(), interactionStore.data.length);
+      if (isRunningInSidePanel() && interactionStore.data.length !== 0) {
+        window.isStartFromInteractionWithSidePanelEnabled = true;
+      }
     }
 
     if (isURLUnlockPage) {

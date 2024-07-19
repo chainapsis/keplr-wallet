@@ -22,6 +22,7 @@ import { ErrModuleKeystoneSign, KeystoneUR } from "../utils/keystone";
 import { KeystoneSign } from "../components/keystone";
 import { useTheme } from "styled-components";
 import { KeyRingService } from "@keplr-wallet/background";
+import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
   const { chainStore, signInteractionStore, uiConfigStore } = useStore();
@@ -195,7 +196,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
                       interactionInfo.interaction &&
                       !interactionInfo.interactionInternal
                     ) {
-                      window.close();
+                      handleExternalInteractionWithNoProceedNext();
                     }
                   }
                 }

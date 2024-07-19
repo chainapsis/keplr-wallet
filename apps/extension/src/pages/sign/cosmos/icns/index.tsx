@@ -11,6 +11,7 @@ import { useInteractionInfo } from "../../../../hooks";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
+import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
 
 export const SignCosmosICNSPage: FunctionComponent = observer(() => {
   const { icnsInteractionStore } = useStore();
@@ -52,7 +53,7 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
                   interactionInfo.interaction &&
                   !interactionInfo.interactionInternal
                 ) {
-                  window.close();
+                  handleExternalInteractionWithNoProceedNext();
                 }
               }
             }

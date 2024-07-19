@@ -39,6 +39,7 @@ import {
   useZeroAllowedGasConfig,
 } from "@keplr-wallet/hooks";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
+import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
 
 /**
  * CosmosTxView의 주석을 꼭 참고하셈
@@ -252,7 +253,7 @@ export const EthereumSigningView: FunctionComponent<{
                     interactionInfo.interaction &&
                     !interactionInfo.interactionInternal
                   ) {
-                    window.close();
+                    handleExternalInteractionWithNoProceedNext();
                   }
                 }
 
