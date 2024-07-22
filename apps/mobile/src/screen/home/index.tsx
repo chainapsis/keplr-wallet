@@ -21,8 +21,10 @@ import {Column, Columns} from '../../components/column';
 import {DepositModal} from './components/deposit-modal/deposit-modal';
 import {
   DrawerActions,
+  RouteProp,
   StackActions,
   useNavigation,
+  useRoute,
 } from '@react-navigation/native';
 import {SearchTextInput} from '../../components/input/search-text-input';
 import {AvailableTabView} from './available';
@@ -30,7 +32,7 @@ import {ChainInfo} from '@keplr-wallet/types';
 import {StakedTabView} from './staked';
 import {ClaimAll} from './components/claim-all';
 import {Box} from '../../components/box';
-import {StackNavProp} from '../../navigation';
+import {RootStackParamList, StackNavProp} from '../../navigation';
 import {Skeleton} from '../../components/skeleton';
 import {StakingIcon} from '../../components/icon/stacking';
 import {VoteIcon} from '../../components/icon';
@@ -45,6 +47,7 @@ import {
 import {NewChainModal} from './components/new-chain-modal';
 import {useBuy} from '../../hooks/use-buy.ts';
 import {BuyModal} from './buy-modal.tsx';
+import {CopyAddressModal} from '../../components/modal';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -81,6 +84,9 @@ export const HomeScreen: FunctionComponent = observer(() => {
   } = useStore();
 
   const navigation = useNavigation<StackNavProp>();
+  const route = useRoute<RouteProp<RootStackParamList, 'Home'>>();
+
+  const deeplinkChainId = route.params?.chainId;
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>('available');
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
@@ -88,6 +94,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
   const [isNewChainModalOpen, setIsNewChainModalOpen] = useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
+  const [isCopyAddressModalOpen, setIsCopyAddressModalOpen] = useState(false);
 
   const buySupportServiceInfos = useBuy();
 
@@ -200,6 +207,20 @@ export const HomeScreen: FunctionComponent = observer(() => {
       setIsNewChainModalOpen(true);
     }
   }, [uiConfigStore.newChainSuggestionConfig.newSuggestionChains.length]);
+
+  useEffect(() => {
+    if (deeplinkChainId) {
+      setIsCopyAddressModalOpen(true);
+    }
+  }, [deeplinkChainId]);
+
+  useEffect(() => {
+    // deep link로 들어온 copy address modal을 닫았을 때 navigation param을 초기화합니다.
+    // 다시 웹페이지로 돌아가 show address 딥링크로 들어왔을 때 모달이 다시 뜨지 않아 문제가 생기기 때문입니다.
+    if (!isCopyAddressModalOpen) {
+      navigation.setParams({chainId: undefined});
+    }
+  }, [isCopyAddressModalOpen, navigation]);
 
   return (
     <PageWithScrollView
@@ -476,6 +497,14 @@ export const HomeScreen: FunctionComponent = observer(() => {
         setIsOpen={setIsOpenBuy}
         buySupportServiceInfos={buySupportServiceInfos}
       />
+
+      {deeplinkChainId ? (
+        <CopyAddressModal
+          chainId={deeplinkChainId}
+          isOpen={isCopyAddressModalOpen}
+          setIsOpen={setIsCopyAddressModalOpen}
+        />
+      ) : null}
     </PageWithScrollView>
   );
 });
