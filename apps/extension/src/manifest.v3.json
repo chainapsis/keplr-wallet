@@ -27,7 +27,9 @@
     "idle",
     "alarms",
     "unlimitedStorage",
-    "sidePanel"
+    "sidePanel",
+    "activeTab",
+    "scripting"
   ],
   "content_scripts": [
     {

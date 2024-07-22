@@ -858,6 +858,38 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
           );
         } catch (e) {
           console.log(e);
+
+          if (
+            e.message &&
+            e.message.includes("in response to a user gesture")
+          ) {
+            if (!document.getElementById("__open_keplr_side_panel__")) {
+              const button = document.createElement("div");
+              button.id = "__open_keplr_side_panel__";
+              button.textContent =
+                "대강 케플러가 요청을 처리할 수 없어서 이걸 눌러서 케플러를 수동으로 켜야한다는 버튼";
+              button.style.position = "absolute";
+              button.style.right = "0";
+              button.style.top = "50%";
+              button.style.transform = "translateY(-50%)";
+              button.style.padding = "1rem 1.5rem";
+              button.style.zIndex = "2147483647"; // 페이지 상의 다른 요소보다 버튼이 위에 오도록 함
+              button.style.fontSize = "1rem";
+              button.style.color = "white";
+              button.style.cursor = "pointer";
+              button.style.background = "blue";
+
+              // 버튼을 body에 추가
+              document.body.appendChild(button);
+
+              // 버튼 클릭 이벤트 추가 (필요한 동작을 정의)
+              button.addEventListener("click", () => {
+                this.protectedTryOpenSidePanelIfEnabled();
+
+                button.remove();
+              });
+            }
+          }
         }
       }
     }
