@@ -42,6 +42,13 @@ export class ChainSuggestStore {
     }
   }
 
+  get waitingSuggestedChainInfos() {
+    return this.interactionStore.getAllData<{
+      chainInfo: ChainInfo;
+      origin: string;
+    }>(SuggestChainInfoMsg.type());
+  }
+
   get communityChainInfoRepoUrl(): string {
     return `https://github.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}`;
   }
@@ -113,12 +120,12 @@ export class ChainSuggestStore {
   }
 
   async approveWithProceedNext(
-    id: string,
+    ids: string | string[],
     chainInfo: ChainInfoWithSuggestedOptions,
     afterFn: (proceedNext: boolean) => void | Promise<void>
   ) {
     await this.interactionStore.approveWithProceedNextV2(
-      id,
+      ids,
       chainInfo,
       afterFn
     );

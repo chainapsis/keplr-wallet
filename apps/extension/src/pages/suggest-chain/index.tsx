@@ -102,8 +102,18 @@ const SuggestChainPageImpl: FunctionComponent<{
               ? communityChainInfo
               : waitingData.data.chainInfo;
 
+          const ids = new Set([waitingData.id]);
+          for (const data of chainSuggestStore.waitingSuggestedChainInfos) {
+            if (
+              data.data.chainInfo.chainId ===
+                waitingData.data.chainInfo.chainId &&
+              data.data.origin === waitingData.data.origin
+            ) {
+              ids.add(data.id);
+            }
+          }
           await chainSuggestStore.approveWithProceedNext(
-            waitingData.id,
+            Array.from(ids),
             {
               ...chainInfo,
               updateFromRepoDisabled,
