@@ -76,8 +76,19 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         .then(resolve)
         .catch(reject);
 
-      this.isEnabled(chainIds).then((enabled) => {
-        if (!enabled) {
+      Promise.all([
+        (async () => {
+          return await sendSimpleMessage<boolean>(
+            this.requester,
+            BACKGROUND_PORT,
+            "keyring-v2",
+            "GetIsLockedMsg",
+            {}
+          );
+        })(),
+        this.isEnabled(chainIds),
+      ]).then(([isLocked, enabled]) => {
+        if (isLocked || !enabled) {
           setTimeout(() => {
             this.protectedTryOpenSidePanelIfEnabled();
           }, 100);

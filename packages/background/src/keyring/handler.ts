@@ -6,6 +6,7 @@ import {
   Message,
 } from "@keplr-wallet/router";
 import {
+  GetIsLockedMsg,
   ChangeKeyRingNameMsg,
   DeleteKeyRingMsg,
   FinalizeKeyCoinTypeMsg,
@@ -37,6 +38,8 @@ export const getHandler: (service: KeyRingService) => Handler = (
 ) => {
   return (env: Env, msg: Message<unknown>) => {
     switch (msg.constructor) {
+      case GetIsLockedMsg:
+        return handleGetIsLockedMsg(service)(env, msg as GetIsLockedMsg);
       case GetKeyRingStatusMsg:
         return handleGetKeyRingStatusMsg(service)(
           env,
@@ -128,6 +131,14 @@ export const getHandler: (service: KeyRingService) => Handler = (
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
+  };
+};
+
+const handleGetIsLockedMsg: (
+  service: KeyRingService
+) => InternalHandler<GetIsLockedMsg> = (service) => {
+  return () => {
+    return service.keyRingStatus === "locked";
   };
 };
 
