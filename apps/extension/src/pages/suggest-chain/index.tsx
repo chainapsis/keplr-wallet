@@ -36,7 +36,7 @@ const SuggestChainPageImpl: FunctionComponent<{
     origin: string;
   }>;
 }> = observer(({ waitingData }) => {
-  const { chainSuggestStore } = useStore();
+  const { chainSuggestStore, permissionStore } = useStore();
   const [isLoadingPlaceholder, setIsLoadingPlaceholder] = useState(true);
   const [updateFromRepoDisabled, setUpdateFromRepoDisabled] = useState(false);
 
@@ -95,6 +95,7 @@ const SuggestChainPageImpl: FunctionComponent<{
         text: intl.formatMessage({ id: "button.approve" }),
         size: "large",
         color: "primary",
+        isLoading: permissionStore.isObsoleteInteraction(waitingData.id),
         onClick: async () => {
           const chainInfo =
             communityChainInfo && !updateFromRepoDisabled
