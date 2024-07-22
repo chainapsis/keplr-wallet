@@ -64,6 +64,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
 
     // TODO: 전혀 정상적인 해결법이 아니다. 일단 빠른 테스팅을 위해서 대충 처리한 것이다. 꼭 개선해야함.
     return new Promise((resolve, reject) => {
+      let f = false;
       sendSimpleMessage(
         this.requester,
         BACKGROUND_PORT,
@@ -74,7 +75,8 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         }
       )
         .then(resolve)
-        .catch(reject);
+        .catch(reject)
+        .finally(() => (f = true));
 
       Promise.all([
         (async () => {
@@ -88,10 +90,12 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         })(),
         this.isEnabled(chainIds),
       ]).then(([isLocked, enabled]) => {
-        if (isLocked || !enabled) {
-          setTimeout(() => {
-            this.protectedTryOpenSidePanelIfEnabled();
-          }, 100);
+        if (!f) {
+          if (isLocked || !enabled) {
+            setTimeout(() => {
+              this.protectedTryOpenSidePanelIfEnabled();
+            }, 100);
+          }
         }
       });
     });
@@ -192,6 +196,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
 
     // TODO: 전혀 정상적인 해결법이 아니다. 일단 빠른 테스팅을 위해서 대충 처리한 것이다. 꼭 개선해야함.
     return new Promise((resolve, reject) => {
+      let f = false;
       sendSimpleMessage(
         this.requester,
         BACKGROUND_PORT,
@@ -202,10 +207,13 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         }
       )
         .then(resolve)
-        .catch(reject);
+        .catch(reject)
+        .finally(() => (f = true));
 
       setTimeout(() => {
-        this.protectedTryOpenSidePanelIfEnabled();
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
       }, 100);
     });
   }
@@ -304,6 +312,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
 
     // TODO: 전혀 정상적인 해결법이 아니다. 일단 빠른 테스팅을 위해서 대충 처리한 것이다. 꼭 개선해야함.
     return new Promise((resolve, reject) => {
+      let f = false;
       sendSimpleMessage(
         this.requester,
         BACKGROUND_PORT,
@@ -317,10 +326,13 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         }
       )
         .then(resolve)
-        .catch(reject);
+        .catch(reject)
+        .finally(() => (f = true));
 
       setTimeout(() => {
-        this.protectedTryOpenSidePanelIfEnabled();
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
       }, 100);
     });
   }
