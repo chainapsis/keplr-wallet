@@ -54,6 +54,8 @@
           <data android:scheme="keplrwallet" android:host="wcV1"/>
           <data android:scheme="keplrwallet" android:host="wcV2"/>
           <data android:scheme="keplrwallet" android:host="staking"/>
+          <data android:scheme="keplrwallet" android:host="web-browser"/>
+          <data android:scheme="keplrwallet" android:host="show-address"/>
         </intent-filter>
         <intent-filter android:autoVerify="true">
           <action android:name="android.intent.action.VIEW" />
@@ -64,6 +66,8 @@
           <data android:scheme="http" />
           <data android:host="deeplink.keplr.app" />
           <data android:pathPrefix="/staking" />
+          <data android:pathPrefix="/web-browser" />
+          <data android:pathPrefix="/show-address" />
         </intent-filter>
         <intent-filter android:autoVerify="true">
           <action android:name="android.intent.action.VIEW" />
@@ -75,6 +79,7 @@
           <data android:host="deeplink.keplr.app" />
           <data android:pathPrefix="/staking" />
           <data android:pathPrefix="/web-browser" />
+          <data android:pathPrefix="/show-address" />
         </intent-filter>
       </activity>
       <meta-data android:name="com.bugsnag.android.API_KEY" android:value="fba0f81f121c1a15f7195bb269428911" />
