@@ -95,6 +95,7 @@ export const IBCSwapScreen: FunctionComponent = observer(() => {
     return uiConfigStore.ibcSwapConfig.getAmountOutCurrency();
   })();
 
+  const [swapFeeBps, setSwapFeeBps] = useState(SwapFeeBps.value);
   const ibcSwapConfigs = useIBCSwapConfig(
     chainStore,
     queriesStore,
@@ -106,8 +107,113 @@ export const IBCSwapScreen: FunctionComponent = observer(() => {
     200000,
     outChainId,
     outCurrency,
-    SwapFeeBps.value,
+    swapFeeBps,
   );
+  const querySwapFeeBps = queriesStore.simpleQuery.queryGet<{
+    pairs?: {
+      [key: string]: number | undefined;
+    };
+    swapFeeBps?: 50;
+  }>(process.env['KEPLR_EXT_CONFIG_SERVER'] || '', '/swap-fee/info.json');
+  useEffect(() => {
+    const defaultSwapFeeBps = SwapFeeBps.value;
+    if (querySwapFeeBps.response) {
+      let inOut: [
+        {
+          chainId: string;
+          coinMinimalDenom: string;
+        },
+        {
+          chainId: string;
+          coinMinimalDenom: string;
+        },
+      ] = [
+        (() => {
+          const currency = ibcSwapConfigs.amountConfig.amount[0].currency;
+          if (
+            'originChainId' in currency &&
+            'originCurrency' in currency &&
+            currency.originChainId &&
+            currency.originCurrency
+          ) {
+            return {
+              chainId: currency.originChainId,
+              coinMinimalDenom: currency.originCurrency.coinMinimalDenom,
+            };
+          }
+          return {
+            chainId: ibcSwapConfigs.amountConfig.chainId,
+            coinMinimalDenom: currency.coinMinimalDenom,
+          };
+        })(),
+        (() => {
+          const currency = ibcSwapConfigs.amountConfig.outCurrency;
+          if (
+            'originChainId' in currency &&
+            'originCurrency' in currency &&
+            currency.originChainId &&
+            currency.originCurrency
+          ) {
+            return {
+              chainId: currency.originChainId,
+              coinMinimalDenom: currency.originCurrency.coinMinimalDenom,
+            };
+          }
+          return {
+            chainId: ibcSwapConfigs.amountConfig.outChainId,
+            coinMinimalDenom: currency.coinMinimalDenom,
+          };
+        })(),
+      ];
+
+      inOut = inOut.sort((a, b) => {
+        const aChainIdentifier = chainStore.getChain(a.chainId).chainIdentifier;
+        const bChainIdentifier = chainStore.getChain(b.chainId).chainIdentifier;
+
+        if (aChainIdentifier === bChainIdentifier) {
+          return 0;
+        }
+        return aChainIdentifier < bChainIdentifier ? -1 : 1;
+      });
+
+      const key = inOut
+        .map(
+          v =>
+            `${chainStore.getChain(v.chainId).chainIdentifier}/${
+              v.coinMinimalDenom
+            }`,
+        )
+        .join('/');
+
+      if (
+        querySwapFeeBps.response.data['pairs'] &&
+        querySwapFeeBps.response.data['pairs'][key] != null
+      ) {
+        const fee = querySwapFeeBps.response.data['pairs'][key];
+        if (fee != null) {
+          setSwapFeeBps(fee);
+        }
+      } else {
+        if (querySwapFeeBps.response.data['swapFeeBps'] != null) {
+          const fee = querySwapFeeBps.response.data['swapFeeBps'];
+          if (fee != null) {
+            setSwapFeeBps(fee);
+          }
+        } else {
+          setSwapFeeBps(defaultSwapFeeBps);
+        }
+      }
+    } else {
+      setSwapFeeBps(defaultSwapFeeBps);
+    }
+  }, [
+    chainStore,
+    ibcSwapConfigs.amountConfig.amount,
+    ibcSwapConfigs.amountConfig.chainId,
+    ibcSwapConfigs.amountConfig.outChainId,
+    ibcSwapConfigs.amountConfig.outCurrency,
+    querySwapFeeBps.response,
+  ]);
 
   ibcSwapConfigs.amountConfig.setCurrency(inCurrency);
 
