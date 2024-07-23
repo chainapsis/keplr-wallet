@@ -538,18 +538,6 @@ export const IBCSwapScreen: FunctionComponent = observer(() => {
             <FormattedMessage id="page.ibc-swap.title.swap" />
           </Text>
 
-          <Gutter size={4} />
-
-          <Box
-            backgroundColor={style.get('color-gray-500').color}
-            paddingX={5}
-            paddingY={2.5}
-            borderRadius={4}>
-            <Text style={style.flatten(['text-caption2', 'color-gray-100'])}>
-              Beta
-            </Text>
-          </Box>
-
           <Gutter size={8} />
 
           <Text style={style.flatten(['text-caption2', 'color-text-low'])}>
