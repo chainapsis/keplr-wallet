@@ -4,6 +4,7 @@ import {WalletConnectStore} from '../wallet-connect';
 
 type DeepLinkRoute =
   | 'Coinbase.Staking.ValidateList'
+  | 'Coinbase.ShowAddress'
   | 'Staking.ValidateDetail'
   | 'Web.WebPage';
 
@@ -80,6 +81,13 @@ export class DeepLinkStore {
       ) {
         this.processWebBrowserLinkURL(url);
       }
+
+      if (
+        (url.protocol === 'keplrwallet:' && url.host === 'show-address') ||
+        (url.host === 'deeplink.keplr.app' && url.pathname === '/show-address')
+      ) {
+        this.processShowAddressLinkURL(url);
+      }
     } catch (e) {
       console.log(e);
     }
@@ -136,6 +144,26 @@ export class DeepLinkStore {
             route: 'Web.WebPage',
             params: {
               url: urlParams.get('url') as string,
+            },
+          };
+        });
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  protected processShowAddressLinkURL(_url: URL) {
+    try {
+      const params = decodeURIComponent(_url.search);
+      const urlParams = new URLSearchParams(params);
+
+      if (urlParams.has('chainId')) {
+        runInAction(() => {
+          this._needToNavigation = {
+            route: 'Coinbase.ShowAddress',
+            params: {
+              chainId: urlParams.get('chainId') as string,
             },
           };
         });
