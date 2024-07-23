@@ -131,7 +131,7 @@ type DefaultRegisterParams = {
 };
 
 export type RootStackParamList = {
-  Home: {chainId?: string};
+  Home?: {chainId?: string};
   'Home.Main': undefined;
   'Home.Stake.Dashboard': {chainId: string};
   Camera?: {
