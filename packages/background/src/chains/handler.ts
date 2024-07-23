@@ -18,7 +18,6 @@ import {
   ClearAllChainEndpointsMsg,
   GetChainInfoWithoutEndpointsMsg,
   PingMsg,
-  HasChainMsg,
 } from "./messages";
 import { ChainInfo } from "@keplr-wallet/types";
 import { getBasicAccessPermissionType, PermissionService } from "../permission";
@@ -89,8 +88,6 @@ export const getHandler: (
           env,
           msg as ClearAllChainEndpointsMsg
         );
-      case HasChainMsg:
-        return handleHasChainMsg(chainsService)(env, msg as HasChainMsg);
       default:
         throw new KeplrError("chains", 110, "Unknown msg type");
     }
@@ -227,13 +224,5 @@ const handleClearAllChainEndpointsMsg: (
 ) => InternalHandler<ClearAllChainEndpointsMsg> = (service) => {
   return () => {
     return service.clearAllEndpoints();
-  };
-};
-
-const handleHasChainMsg: (
-  service: ChainsService
-) => InternalHandler<HasChainMsg> = (service) => {
-  return (_, msg) => {
-    return service.hasChainInfo(msg.chainId);
   };
 };

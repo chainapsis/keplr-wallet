@@ -296,31 +296,3 @@ export class ClearAllChainEndpointsMsg extends Message<void> {
     return ClearAllChainEndpointsMsg.type();
   }
 }
-
-export class HasChainMsg extends Message<boolean> {
-  public static type() {
-    return "HasChainMsg";
-  }
-
-  constructor(public readonly chainId: string) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.chainId) {
-      throw new KeplrError("chains", 101, "Chain id not set");
-    }
-  }
-
-  override approveExternal(): boolean {
-    return true;
-  }
-
-  route(): string {
-    return ROUTE;
-  }
-
-  type(): string {
-    return HasChainMsg.type();
-  }
-}

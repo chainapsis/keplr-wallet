@@ -11,7 +11,6 @@ import {
   ClearAllSuggestedChainInfosMsg,
   ClearAllChainEndpointsMsg,
   GetChainInfoWithoutEndpointsMsg,
-  HasChainMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -36,7 +35,6 @@ export function init(
   router.registerMessage(GetChainOriginalEndpointsMsg);
   router.registerMessage(ClearAllSuggestedChainInfosMsg);
   router.registerMessage(ClearAllChainEndpointsMsg);
-  router.registerMessage(HasChainMsg);
 
   router.addHandler(
     ROUTE,

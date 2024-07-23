@@ -62,7 +62,6 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       chainIds = [chainIds];
     }
 
-    // TODO: 전혀 정상적인 해결법이 아니다. 일단 빠른 테스팅을 위해서 대충 처리한 것이다. 꼭 개선해야함.
     return new Promise((resolve, reject) => {
       let f = false;
       sendSimpleMessage(
@@ -78,32 +77,15 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         .catch(reject)
         .finally(() => (f = true));
 
-      Promise.all([
-        (async () => {
-          return await sendSimpleMessage<boolean>(
-            this.requester,
-            BACKGROUND_PORT,
-            "keyring-v2",
-            "GetIsLockedMsg",
-            {}
-          );
-        })(),
-        this.isEnabled(chainIds),
-      ]).then(([isLocked, enabled]) => {
+      setTimeout(() => {
         if (!f) {
-          if (isLocked || !enabled) {
-            setTimeout(() => {
-              this.protectedTryOpenSidePanelIfEnabled();
-            }, 100);
-          }
+          this.protectedTryOpenSidePanelIfEnabled();
         }
-      });
+      }, 100);
     });
   }
 
-  // TODO: side panel이 있을때 enable의 처리를 위해서 추가해준건데... (permission 처리가 필요할때만 side panel을 열어야하고 이걸 provider에서 미리 알아야 하므로...)
-  //       일반 웹페이지에서도 필요할수도 있을 것 같으니 나중에 keplr의 API로 추가해준다.
-  //       지금은 귀찮아서 일단 core에만 넣는다.
+  // TODO: 웹페이지에서도 필요할수도 있을 것 같으니 나중에 keplr의 API로 추가해준다.
   async isEnabled(chainIds: string | string[]): Promise<boolean> {
     if (typeof chainIds === "string") {
       chainIds = [chainIds];
@@ -125,15 +107,27 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       chainIds = [chainIds];
     }
 
-    await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "permission-interactive",
-      "disable-access",
-      {
-        chainIds: chainIds ?? [],
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "permission-interactive",
+        "disable-access",
+        {
+          chainIds: chainIds ?? [],
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async experimentalSuggestChain(
@@ -181,20 +175,6 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       delete (chainInfo as any).coinType;
     }
 
-    const hasChain = await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "chains",
-      "HasChainMsg",
-      {
-        chainId: chainInfo.chainId,
-      }
-    );
-    if (hasChain) {
-      return;
-    }
-
-    // TODO: 전혀 정상적인 해결법이 아니다. 일단 빠른 테스팅을 위해서 대충 처리한 것이다. 꼭 개선해야함.
     return new Promise((resolve, reject) => {
       let f = false;
       sendSimpleMessage(
@@ -219,54 +199,81 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   }
 
   async getKey(chainId: string): Promise<Key> {
-    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
-    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
-    await this.enable(chainId);
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-cosmos",
+        "get-cosmos-key",
+        {
+          chainId,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
 
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-cosmos",
-      "get-cosmos-key",
-      {
-        chainId,
-      }
-    );
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async getKeysSettled(chainIds: string[]): Promise<SettledResponses<Key>> {
-    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
-    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
-    await this.enable(chainIds);
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-cosmos",
+        "get-cosmos-keys-settled",
+        {
+          chainIds,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
 
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-cosmos",
-      "get-cosmos-keys-settled",
-      {
-        chainIds,
-      }
-    );
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
-    return (
-      await sendSimpleMessage(
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
         this.requester,
         BACKGROUND_PORT,
         "chains",
         "get-chain-infos-without-endpoints",
         {}
       )
-    ).chainInfos;
+        .then((r) => resolve(r.chainInfos))
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async getChainInfoWithoutEndpoints(
     chainId: string
   ): Promise<ChainInfoWithoutEndpoints> {
-    return (
-      await sendSimpleMessage(
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
         this.requester,
         BACKGROUND_PORT,
         "chains",
@@ -275,7 +282,16 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
           chainId,
         }
       )
-    ).chainInfo;
+        .then((r) => resolve(r.chainInfos))
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async sendTx(
@@ -283,8 +299,9 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     tx: StdTx | Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array> {
-    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
-    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    // XXX: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //      side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    //      sendTx의 경우는 일종의 쿼리이기 때문에 언제 결과가 올지 알 수 없다. 그러므로 미리 권한 처리를 해야한다.
     await this.enable(chainId);
 
     return await sendSimpleMessage(
@@ -306,11 +323,6 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     signDoc: StdSignDoc,
     signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
-    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
-    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
-    await this.enable(chainId);
-
-    // TODO: 전혀 정상적인 해결법이 아니다. 일단 빠른 테스팅을 위해서 대충 처리한 것이다. 꼭 개선해야함.
     return new Promise((resolve, reject) => {
       let f = false;
       sendSimpleMessage(
@@ -348,39 +360,47 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     },
     signOptions: KeplrSignOptions = {}
   ): Promise<DirectSignResponse> {
-    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
-    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
-    await this.enable(chainId);
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-cosmos",
+        "request-cosmos-sign-direct",
+        {
+          chainId,
+          signer,
+          signDoc: {
+            bodyBytes: signDoc.bodyBytes,
+            authInfoBytes: signDoc.authInfoBytes,
+            chainId: signDoc.chainId,
+            accountNumber: signDoc.accountNumber
+              ? signDoc.accountNumber.toString()
+              : null,
+          },
+          signOptions: deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+        }
+      )
+        .then((r) =>
+          resolve({
+            signed: {
+              bodyBytes: r.signed.bodyBytes,
+              authInfoBytes: r.signed.authInfoBytes,
+              chainId: r.signed.chainId,
+              accountNumber: Long.fromString(r.signed.accountNumber),
+            },
+            signature: r.signature,
+          })
+        )
+        .catch(reject)
+        .finally(() => (f = true));
 
-    const response = await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-cosmos",
-      "request-cosmos-sign-direct",
-      {
-        chainId,
-        signer,
-        signDoc: {
-          bodyBytes: signDoc.bodyBytes,
-          authInfoBytes: signDoc.authInfoBytes,
-          chainId: signDoc.chainId,
-          accountNumber: signDoc.accountNumber
-            ? signDoc.accountNumber.toString()
-            : null,
-        },
-        signOptions: deepmerge(this.defaultOptions.sign ?? {}, signOptions),
-      }
-    );
-
-    return {
-      signed: {
-        bodyBytes: response.signed.bodyBytes,
-        authInfoBytes: response.signed.authInfoBytes,
-        chainId: response.signed.chainId,
-        accountNumber: Long.fromString(response.signed.accountNumber),
-      },
-      signature: response.signature,
-    };
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async signDirectAux(
@@ -401,46 +421,54 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       "preferNoSetFee" | "disableBalanceCheck"
     > = {}
   ): Promise<DirectAuxSignResponse> {
-    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
-    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
-    await this.enable(chainId);
-
-    const response = await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-cosmos",
-      "request-cosmos-sign-direct-aux",
-      {
-        chainId,
-        signer,
-        signDoc: {
-          bodyBytes: signDoc.bodyBytes,
-          publicKey: signDoc.publicKey,
-          chainId: signDoc.chainId,
-          accountNumber: signDoc.accountNumber
-            ? signDoc.accountNumber.toString()
-            : null,
-          sequence: signDoc.sequence ? signDoc.sequence.toString() : null,
-        },
-        signOptions: deepmerge(
-          {
-            preferNoSetMemo: this.defaultOptions.sign?.preferNoSetMemo,
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-cosmos",
+        "request-cosmos-sign-direct-aux",
+        {
+          chainId,
+          signer,
+          signDoc: {
+            bodyBytes: signDoc.bodyBytes,
+            publicKey: signDoc.publicKey,
+            chainId: signDoc.chainId,
+            accountNumber: signDoc.accountNumber
+              ? signDoc.accountNumber.toString()
+              : null,
+            sequence: signDoc.sequence ? signDoc.sequence.toString() : null,
           },
-          signOptions
-        ),
-      }
-    );
+          signOptions: deepmerge(
+            {
+              preferNoSetMemo: this.defaultOptions.sign?.preferNoSetMemo,
+            },
+            signOptions
+          ),
+        }
+      )
+        .then((r) =>
+          resolve({
+            signed: {
+              bodyBytes: r.signed.bodyBytes,
+              publicKey: r.signed.publicKey,
+              chainId: r.signed.chainId,
+              accountNumber: Long.fromString(r.signed.accountNumber),
+              sequence: Long.fromString(r.signed.sequence),
+            },
+            signature: r.signature,
+          })
+        )
+        .catch(reject)
+        .finally(() => (f = true));
 
-    return {
-      signed: {
-        bodyBytes: response.signed.bodyBytes,
-        publicKey: response.signed.publicKey,
-        chainId: response.signed.chainId,
-        accountNumber: Long.fromString(response.signed.accountNumber),
-        sequence: Long.fromString(response.signed.sequence),
-      },
-      signature: response.signature,
-    };
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async signArbitrary(
@@ -448,24 +476,32 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     signer: string,
     data: string | Uint8Array
   ): Promise<StdSignature> {
-    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
-    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
-    await this.enable(chainId);
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-cosmos",
+        "request-cosmos-sign-amino-adr-36",
+        {
+          chainId,
+          signer,
+          data: typeof data === "string" ? Buffer.from(data) : data,
+          signOptions: {
+            isADR36WithString: typeof data === "string",
+          },
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
 
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-cosmos",
-      "request-cosmos-sign-amino-adr-36",
-      {
-        chainId,
-        signer,
-        data: typeof data === "string" ? Buffer.from(data) : data,
-        signOptions: {
-          isADR36WithString: typeof data === "string",
-        },
-      }
-    );
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async verifyArbitrary(
@@ -474,26 +510,34 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     data: string | Uint8Array,
     signature: StdSignature
   ): Promise<boolean> {
-    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
-    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
-    await this.enable(chainId);
-
     if (typeof data === "string") {
       data = Buffer.from(data);
     }
 
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-cosmos",
-      "verify-cosmos-sign-amino-adr-36",
-      {
-        chainId,
-        signer,
-        data,
-        signature,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-cosmos",
+        "verify-cosmos-sign-amino-adr-36",
+        {
+          chainId,
+          signer,
+          data,
+          signature,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async signEthereum(
@@ -502,22 +546,30 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     message: string | Uint8Array,
     signType: EthSignType
   ): Promise<Uint8Array> {
-    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
-    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
-    await this.enable(chainId);
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-ethereum",
+        "request-sign-ethereum",
+        {
+          chainId,
+          signer,
+          message: typeof message === "string" ? Buffer.from(message) : message,
+          signType,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
 
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-ethereum",
-      "request-sign-ethereum",
-      {
-        chainId,
-        signer,
-        message: typeof message === "string" ? Buffer.from(message) : message,
-        signType,
-      }
-    );
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async signICNSAdr36(
@@ -527,23 +579,31 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     username: string,
     addressChainIds: string[]
   ): Promise<ICNSAdr36Signatures> {
-    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
-    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
-    await this.enable(chainId);
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-cosmos",
+        "request-icns-adr-36-signatures-v2",
+        {
+          chainId,
+          contractAddress,
+          owner,
+          username,
+          addressChainIds,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
 
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-cosmos",
-      "request-icns-adr-36-signatures-v2",
-      {
-        chainId,
-        contractAddress,
-        owner,
-        username,
-        addressChainIds,
-      }
-    );
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   getOfflineSigner(
@@ -576,65 +636,109 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     contractAddress: string,
     viewingKey?: string
   ): Promise<void> {
-    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
-    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
-    await this.enable(chainId);
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "token-cw20",
+        "SuggestTokenMsg",
+        {
+          chainId,
+          contractAddress,
+          viewingKey,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
 
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "token-cw20",
-      "SuggestTokenMsg",
-      {
-        chainId,
-        contractAddress,
-        viewingKey,
-      }
-    );
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async getSecret20ViewingKey(
     chainId: string,
     contractAddress: string
   ): Promise<string> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "token-cw20",
-      "get-secret20-viewing-key",
-      {
-        chainId,
-        contractAddress,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "token-cw20",
+        "get-secret20-viewing-key",
+        {
+          chainId,
+          contractAddress,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async getEnigmaPubKey(chainId: string): Promise<Uint8Array> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "secret-wasm",
-      "get-pubkey-msg",
-      {
-        chainId,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "secret-wasm",
+        "get-pubkey-msg",
+        {
+          chainId,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async getEnigmaTxEncryptionKey(
     chainId: string,
     nonce: Uint8Array
   ): Promise<Uint8Array> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "secret-wasm",
-      "get-tx-encryption-key-msg",
-      {
-        chainId,
-        nonce,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "secret-wasm",
+        "get-tx-encryption-key-msg",
+        {
+          chainId,
+          nonce,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async enigmaEncrypt(
@@ -643,17 +747,29 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     // eslint-disable-next-line @typescript-eslint/ban-types
     msg: object
   ): Promise<Uint8Array> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "secret-wasm",
-      "request-encrypt-msg",
-      {
-        chainId,
-        contractCodeHash,
-        msg,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "secret-wasm",
+        "request-encrypt-msg",
+        {
+          chainId,
+          contractCodeHash,
+          msg,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async enigmaDecrypt(
@@ -665,17 +781,29 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       return new Uint8Array();
     }
 
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "secret-wasm",
-      "request-decrypt-msg",
-      {
-        chainId,
-        cipherText,
-        nonce,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "secret-wasm",
+        "request-decrypt-msg",
+        {
+          chainId,
+          cipherText,
+          nonce,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   getEnigmaUtils(chainId: string): SecretUtils {
@@ -700,23 +828,31 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     signDoc: StdSignDoc,
     signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
-    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
-    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
-    await this.enable(chainId);
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-cosmos",
+        "request-sign-eip-712-cosmos-tx-v0",
+        {
+          chainId,
+          signer,
+          eip712,
+          signDoc,
+          signOptions: deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
 
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-cosmos",
-      "request-sign-eip-712-cosmos-tx-v0",
-      {
-        chainId,
-        signer,
-        eip712,
-        signDoc,
-        signOptions: deepmerge(this.defaultOptions.sign ?? {}, signOptions),
-      }
-    );
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async __core__getAnalyticsId(): Promise<string> {
@@ -736,16 +872,28 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     defaultName: string;
     editable?: boolean;
   }): Promise<string> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-v2",
-      "change-keyring-name-interactive",
-      {
-        defaultName,
-        editable,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-v2",
+        "change-keyring-name-interactive",
+        {
+          defaultName,
+          editable,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async __core__privilageSignAminoWithdrawRewards(
@@ -785,8 +933,9 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   }
 
   async sendEthereumTx(chainId: string, tx: Uint8Array): Promise<string> {
-    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
-    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    // XXX: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //      side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    //      sendTx의 경우는 일종의 쿼리이기 때문에 언제 결과가 올지 알 수 없다. 그러므로 미리 권한 처리를 해야한다.
     await this.enable(chainId);
 
     return await sendSimpleMessage(
@@ -802,20 +951,28 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   }
 
   async suggestERC20(chainId: string, contractAddress: string): Promise<void> {
-    // TODO: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
-    //       side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
-    await this.enable(chainId);
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "token-erc20",
+        "SuggestERC20TokenMsg",
+        {
+          chainId,
+          contractAddress,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
 
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "token-erc20",
-      "SuggestERC20TokenMsg",
-      {
-        chainId,
-        contractAddress,
-      }
-    );
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   // IMPORTANT: protected로 시작하는 method는 InjectedKeplr.startProxy()에서 injected 쪽에서 event system으로도 호출할 수 없도록 막혀있다.
