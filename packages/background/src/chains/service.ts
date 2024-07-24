@@ -410,16 +410,36 @@ export class ChainsService {
     }
 
     const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+    const isEvmOnlyChain = this.isEvmOnlyChain(chainId);
 
-    const res = await simpleFetch<ChainInfo>(
+    const res = await simpleFetch<
+      (Omit<ChainInfo, "rest"> & { websocket: string }) | ChainInfo
+    >(
       this.communityChainInfoRepo.alternativeURL
-        ? this.communityChainInfoRepo.alternativeURL.replace(
-            "{chain_identifier}",
-            chainIdentifier
-          )
-        : `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/${this.communityChainInfoRepo.branchName}/cosmos/${chainIdentifier}.json`
+        ? this.communityChainInfoRepo.alternativeURL
+            .replace("{chain_identifier}", chainIdentifier)
+            .replace("/cosmos/", isEvmOnlyChain ? "/evm/" : "/cosmos/")
+        : `https://raw.githubusercontent.com/${
+            this.communityChainInfoRepo.organizationName
+          }/${this.communityChainInfoRepo.repoName}/${
+            this.communityChainInfoRepo.branchName
+          }/${isEvmOnlyChain ? "evm" : "cosmos"}/${chainIdentifier}.json`
     );
-    let chainInfo: ChainInfo = res.data;
+    let chainInfo: ChainInfo =
+      "rest" in res.data
+        ? res.data
+        : {
+            ...res.data,
+            rest: res.data.rpc,
+            evm: {
+              chainId: parseInt(res.data.chainId.replace("eip155:", ""), 10),
+              rpc: res.data.rpc,
+              websocket: res.data.websocket,
+            },
+            features: ["eth-address-gen", "eth-key-sign"].concat(
+              res.data.features ?? []
+            ),
+          };
 
     const fetchedChainIdentifier = ChainIdHelper.parse(
       chainInfo.chainId
