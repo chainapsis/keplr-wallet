@@ -212,9 +212,11 @@ export class EthereumAccountBase {
         ? {
             maxFeePerGas: hexValue(Number(maxFeePerGas)),
             maxPriorityFeePerGas: hexValue(Number(maxPriorityFeePerGas)),
+            gasLimit: hexValue(gasLimit),
           }
         : {
             gasPrice: hexValue(Number(gasPrice ?? "0")),
+            gasLimit: hexValue(gasLimit),
           };
 
     // Support EIP-1559 transaction only.
@@ -229,7 +231,6 @@ export class EthereumAccountBase {
               to,
               hexValue(parsedAmount),
             ]),
-            gasLimit: hexValue(gasLimit),
             ...feeObject,
           };
         default:
