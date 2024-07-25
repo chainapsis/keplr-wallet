@@ -13,6 +13,7 @@ import { ObservableQueryEthereumMaxPriorityFee } from "./max-priority-fee";
 import { ObservableQueryThirdpartyERC20BalanceRegistry } from "./erc20-balances";
 import { ObservableQueryCoingeckoTokenInfo } from "./coingecko-token-info";
 import { ObservableQueryEthereumERC20BalanceRegistry } from "./erc20-balance";
+import { ObservableQueryEthereumGasPrice } from "./gas-price";
 
 export interface EthereumQueries {
   ethereum: EthereumQueriesImpl;
@@ -55,6 +56,7 @@ export class EthereumQueriesImpl {
   public readonly queryEthereumERC20ContractInfo: DeepReadonly<ObservableQueryERC20ContractInfo>;
   public readonly queryEthereumMaxPriorityFee: DeepReadonly<ObservableQueryEthereumMaxPriorityFee>;
   public readonly queryEthereumCoingeckoTokenInfo: DeepReadonly<ObservableQueryCoingeckoTokenInfo>;
+  public readonly queryEthereumGasPrice: DeepReadonly<ObservableQueryEthereumGasPrice>;
 
   constructor(
     base: QueriesSetBase,
@@ -113,5 +115,11 @@ export class EthereumQueriesImpl {
         coingeckoAPIBaseURL,
         coingeckoAPIURI
       );
+
+    this.queryEthereumGasPrice = new ObservableQueryEthereumGasPrice(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
   }
 }

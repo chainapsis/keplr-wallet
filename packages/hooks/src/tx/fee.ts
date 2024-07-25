@@ -457,7 +457,12 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           ETH_FEE_HISTORY_NEWEST_BLOCK,
           ETH_FEE_HISTORY_REWARD_PERCENTILES
         );
-      if (feeHistoryQuery.feeHistory != null) {
+      const latestBaseFeePerGas = parseInt(
+        feeHistoryQuery.feeHistory?.baseFeePerGas?.[
+          feeHistoryQuery.feeHistory?.baseFeePerGas.length - 1
+        ] ?? "0"
+      );
+      if (feeHistoryQuery.feeHistory != null && latestBaseFeePerGas !== 0) {
         if (isRefresh) {
           feeHistoryQuery.waitFreshResponse();
         }
@@ -467,10 +472,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           queries.ethereum.queryEthereumBlock.getQueryByBlockNumberOrTag(
             ETH_FEE_HISTORY_NEWEST_BLOCK
           );
+        const latestBaseFeePerGas = parseInt(
+          blockQuery.block?.baseFeePerGas ?? "0"
+        );
         const maxPriorityFeePerGasQuery =
           queries.ethereum.queryEthereumMaxPriorityFee;
         if (
           blockQuery.block != null &&
+          latestBaseFeePerGas !== 0 &&
           maxPriorityFeePerGasQuery.maxPriorityFeePerGas != null
         ) {
           if (isRefresh) {
@@ -478,6 +487,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             maxPriorityFeePerGasQuery.waitFreshResponse();
           }
           return true;
+        } else {
+          const gasPriceQuery = queries.ethereum.queryEthereumGasPrice;
+          if (gasPriceQuery.gasPrice != null) {
+            if (isRefresh) {
+              feeHistoryQuery.waitFreshResponse();
+            }
+            return true;
+          }
         }
       }
     }
@@ -686,9 +703,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       }
 
       if (this.canEIP1559TxFeesAndReady()) {
-        const { maxFeePerGas } = this.getEIP1559TxFees(feeType);
+        const { maxFeePerGas, gasPrice } = this.getEIP1559TxFees(feeType);
 
-        return maxFeePerGas;
+        return maxFeePerGas ?? gasPrice;
       }
 
       // TODO: Handle terra classic fee
@@ -714,11 +731,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             ETH_FEE_HISTORY_NEWEST_BLOCK,
             ETH_FEE_HISTORY_REWARD_PERCENTILES
           ).feeHistory;
-        if (feeHistory != null) {
-          const latestBaseFeePerGas = BigInt(
-            feeHistory.baseFeePerGas?.[feeHistory.baseFeePerGas.length - 1] ??
-              "0"
-          );
+        const latestBaseFeePerGas = parseInt(
+          feeHistory?.baseFeePerGas?.[feeHistory?.baseFeePerGas.length - 1] ??
+            "0"
+        );
+        if (feeHistory != null && latestBaseFeePerGas !== 0) {
           const baseFeePerGasDec = new Dec(latestBaseFeePerGas).mul(
             ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType].baseFeePercentageMultiplier
           );
@@ -750,10 +767,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             ethereumQueries.queryEthereumBlock.getQueryByBlockNumberOrTag(
               ETH_FEE_HISTORY_NEWEST_BLOCK
             ).block;
+          const latestBaseFeePerGas = parseInt(block?.baseFeePerGas ?? "0");
           const maxPriorityFeePerGas =
             ethereumQueries.queryEthereumMaxPriorityFee.maxPriorityFeePerGas;
-          if (block != null && maxPriorityFeePerGas != null) {
-            const baseFeePerGasDec = new Dec(BigInt(block.baseFeePerGas)).mul(
+          if (
+            block != null &&
+            latestBaseFeePerGas !== 0 &&
+            maxPriorityFeePerGas != null
+          ) {
+            const baseFeePerGasDec = new Dec(latestBaseFeePerGas).mul(
               ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType].baseFeePercentageMultiplier
             );
             const maxPriorityFeePerGasDec = new Dec(
@@ -765,13 +787,25 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
               maxPriorityFeePerGas: maxPriorityFeePerGasDec.truncateDec(),
               maxFeePerGas: maxFeePerGas.truncateDec(),
             };
+          } else {
+            const gasPrice = ethereumQueries.queryEthereumGasPrice.gasPrice;
+
+            if (gasPrice != null) {
+              const multipliedGasPrice = new Dec(BigInt(gasPrice)).mul(
+                ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType]
+                  .baseFeePercentageMultiplier
+              );
+
+              return {
+                gasPrice: multipliedGasPrice,
+              };
+            }
           }
         }
       }
 
       return {
-        maxPriorityFeePerGas: new Dec(0),
-        maxFeePerGas: new Dec(0),
+        gasPrice: new Dec(0),
       };
     }
   );

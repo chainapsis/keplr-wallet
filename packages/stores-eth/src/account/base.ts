@@ -190,13 +190,15 @@ export class EthereumAccountBase {
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
+    gasPrice,
   }: {
     currency: AppCurrency;
     amount: string;
     to: string;
     gasLimit: number;
-    maxFeePerGas: string;
-    maxPriorityFeePerGas: string;
+    maxFeePerGas?: string;
+    maxPriorityFeePerGas?: string;
+    gasPrice?: string;
   }): UnsignedTransaction {
     const chainInfo = this.chainGetter.getChain(this.chainId);
     const evmInfo = chainInfo.evm;
@@ -205,6 +207,15 @@ export class EthereumAccountBase {
     }
     const parsedAmount = parseUnits(amount, currency.coinDecimals);
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+    const feeObject =
+      maxFeePerGas && maxPriorityFeePerGas
+        ? {
+            maxFeePerGas: hexValue(Number(maxFeePerGas)),
+            maxPriorityFeePerGas: hexValue(Number(maxPriorityFeePerGas)),
+          }
+        : {
+            gasPrice: hexValue(Number(gasPrice ?? "0")),
+          };
 
     // Support EIP-1559 transaction only.
     const unsignedTx: UnsignedTransaction = (() => {
@@ -212,24 +223,21 @@ export class EthereumAccountBase {
         case "erc20":
           return {
             chainId: evmInfo.chainId,
-            gasLimit: hexValue(gasLimit),
-            maxFeePerGas: hexValue(Number(maxFeePerGas)),
-            maxPriorityFeePerGas: hexValue(Number(maxPriorityFeePerGas)),
             to: denomHelper.contractAddress,
             value: "0x0",
             data: erc20ContractInterface.encodeFunctionData("transfer", [
               to,
               hexValue(parsedAmount),
             ]),
+            gasLimit: hexValue(gasLimit),
+            ...feeObject,
           };
         default:
           return {
             chainId: evmInfo.chainId,
-            gasLimit: hexValue(gasLimit),
-            maxFeePerGas: hexValue(Number(maxFeePerGas)),
-            maxPriorityFeePerGas: hexValue(Number(maxPriorityFeePerGas)),
             to,
             value: hexValue(parsedAmount),
+            ...feeObject,
           };
       }
     })();
