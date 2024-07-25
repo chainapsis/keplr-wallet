@@ -268,7 +268,7 @@ export class TokenScanService {
         }),
       });
 
-      if (res.status === 200) {
+      if (res.status === 200 && BigInt(res.data.result).toString(10) !== "0") {
         tokenScan.infos.push({
           bech32Address: "",
           ethereumHexAddress,
