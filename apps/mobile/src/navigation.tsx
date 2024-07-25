@@ -131,7 +131,7 @@ type DefaultRegisterParams = {
 };
 
 export type RootStackParamList = {
-  Home?: {chainId?: string};
+  Home?: {showAddressChainId?: string};
   'Home.Main': undefined;
   'Home.Stake.Dashboard': {chainId: string};
   Camera?: {
@@ -1377,8 +1377,8 @@ export const DeepLinkNavigationComponent: FunctionComponent = observer(() => {
             }
             case 'Coinbase.ShowAddress': {
               navigation.navigate('Home', {
-                chainId: deepLinkStore.needToNavigation.params[
-                  'chainId'
+                showAddressChainId: deepLinkStore.needToNavigation.params[
+                  'showAddressChainId'
                 ] as string,
               });
 

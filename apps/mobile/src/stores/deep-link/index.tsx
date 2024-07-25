@@ -163,7 +163,7 @@ export class DeepLinkStore {
           this._needToNavigation = {
             route: 'Coinbase.ShowAddress',
             params: {
-              chainId: urlParams.get('chainId') as string,
+              showAddressChainId: urlParams.get('chainId') as string,
             },
           };
         });

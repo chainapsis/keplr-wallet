@@ -86,7 +86,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const navigation = useNavigation<StackNavProp>();
   const route = useRoute<RouteProp<RootStackParamList, 'Home'>>();
 
-  const deeplinkChainId = route.params?.chainId;
+  const showAddressChainId = route.params?.showAddressChainId;
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>('available');
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
@@ -209,10 +209,10 @@ export const HomeScreen: FunctionComponent = observer(() => {
   }, [uiConfigStore.newChainSuggestionConfig.newSuggestionChains.length]);
 
   useEffect(() => {
-    if (deeplinkChainId) {
+    if (showAddressChainId) {
       setIsCopyAddressModalOpen(true);
     }
-  }, [deeplinkChainId]);
+  }, [showAddressChainId]);
 
   useEffect(() => {
     // deep link로 들어온 copy address modal을 닫았을 때 navigation param을 초기화합니다.
@@ -498,9 +498,9 @@ export const HomeScreen: FunctionComponent = observer(() => {
         buySupportServiceInfos={buySupportServiceInfos}
       />
 
-      {deeplinkChainId ? (
+      {showAddressChainId ? (
         <CopyAddressModal
-          chainId={deeplinkChainId}
+          chainId={showAddressChainId}
           isOpen={isCopyAddressModalOpen}
           setIsOpen={setIsCopyAddressModalOpen}
         />
