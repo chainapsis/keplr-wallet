@@ -728,6 +728,12 @@ export class KeyRingEthereumService {
           }
 
           const evmChainId = validateEVMChainId(parseInt(param.chainId, 16));
+
+          // Sei는 coin type을 118과 60 둘 다 사용하는데, coin type이 60인 경우엔 118도 동시에 지원할 수 없다. 그리고 SEI 토큰 decimal도 coin type 118 일 땐 6을 쓰고 60일 땐 18을 쓰기 때문에 당장 EVM 기능을 사용할 수 없기 때문에 에러를 뱉는다.
+          if (evmChainId === 1329) {
+            throw new Error("Sei is not supported.");
+          }
+
           const chainInfo =
             this.chainsService.getChainInfoByEVMChainId(evmChainId) ??
             (await (async () => {
