@@ -218,7 +218,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
     // deep link로 들어온 copy address modal을 닫았을 때 navigation param을 초기화합니다.
     // 다시 웹페이지로 돌아가 show address 딥링크로 들어왔을 때 모달이 다시 뜨지 않아 문제가 생기기 때문입니다.
     if (!isCopyAddressModalOpen) {
-      navigation.setParams({chainId: undefined});
+      navigation.setParams({showAddressChainId: undefined});
     }
   }, [isCopyAddressModalOpen, navigation]);
 
