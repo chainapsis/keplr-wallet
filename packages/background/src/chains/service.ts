@@ -348,6 +348,17 @@ export class ChainsService {
     }
   );
 
+  getChainInfoByEVMChainId = computedFn(
+    (evmChainId: number): ChainInfo | undefined => {
+      return this.getChainInfos().find(
+        (chainInfo) => chainInfo.evm && chainInfo.evm.chainId === evmChainId
+      );
+    },
+    {
+      keepAlive: true,
+    }
+  );
+
   hasChainInfo(chainId: string): boolean {
     return this.getChainInfo(chainId) != null;
   }
