@@ -20,7 +20,7 @@ import {
   EIP712MessageValidator,
   messageHash,
 } from "@keplr-wallet/background";
-import { serialize } from "@ethersproject/transactions";
+import { serialize, TransactionTypes } from "@ethersproject/transactions";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import {
   KeystoneKeys,
@@ -100,6 +100,22 @@ export const handleEthereumPreSignByKeystone = async (
     interactionData.data.message,
     interactionData.data.signType
   ).toString("hex");
+  const evmChainId = (() => {
+    try {
+      return EthermintChainIdHelper.parse(interactionData.data.chainId)
+        .ethChainId;
+    } catch (e) {
+      const chainIdLikeCAIP2 = interactionData.data.chainId.split(":");
+      const evmChainId = parseInt(chainIdLikeCAIP2[1]);
+      const isEVMOnlyChain =
+        chainIdLikeCAIP2.length === 2 && chainIdLikeCAIP2[0] === "eip155";
+      if (isEVMOnlyChain && !isNaN(evmChainId)) {
+        return evmChainId;
+      }
+
+      throw e;
+    }
+  })();
   const ur = keystoneSDK.eth.generateSignRequest({
     requestId,
     signData,
@@ -109,8 +125,7 @@ export const handleEthereumPreSignByKeystone = async (
     ),
     path,
     xfp: interactionData.data.keyInsensitive["xfp"] as string,
-    chainId: EthermintChainIdHelper.parse(interactionData.data.chainId)
-      .ethChainId,
+    chainId: evmChainId,
     address,
   });
   await options.displayQRCode({
@@ -229,6 +244,10 @@ export const connectAndSignEthWithLedger = async (
         }
         case EthSignType.TRANSACTION: {
           const tx = JSON.parse(Buffer.from(message).toString());
+          const isEIP1559 = !!tx.maxFeePerGas || !!tx.maxPriorityFeePerGas;
+          if (isEIP1559) {
+            tx.type = TransactionTypes.eip1559;
+          }
           const rlpArray = serialize(tx).replace("0x", "");
           return ethSignatureToBytes(
             await ethApp.signTransaction(
