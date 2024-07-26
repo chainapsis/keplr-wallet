@@ -17,7 +17,6 @@ import { AddressItem } from "../address-item";
 import SimpleBar from "simplebar-react";
 import styled, { useTheme } from "styled-components";
 import { FormattedMessage, useIntl } from "react-intl";
-import { Bech32Address } from "@keplr-wallet/cosmos";
 import { DenomHelper } from "@keplr-wallet/common";
 import { SearchTextInput } from "../input";
 
@@ -123,8 +122,9 @@ export const AddressBookModal: FunctionComponent<{
     ]);
 
     const chainInfo = chainStore.getChain(recipientConfig.chainId);
-    const isEvmChain = chainInfo.evm !== undefined;
-    const isErc20 = new DenomHelper(currency.coinMinimalDenom).type === "erc20";
+    const isEVMChain = chainStore.isEvmChain(chainInfo.chainId);
+    const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainInfo.chainId);
+    const isERC20 = new DenomHelper(currency.coinMinimalDenom).type === "erc20";
 
     const datas: {
       timestamp?: number;
@@ -145,7 +145,7 @@ export const AddressBookModal: FunctionComponent<{
               };
             })
             .filter((recent) => {
-              if (isErc20 && !recent.address.startsWith("0x")) {
+              if (isERC20 && !recent.address.startsWith("0x")) {
                 return false;
               }
 
@@ -163,7 +163,7 @@ export const AddressBookModal: FunctionComponent<{
               };
             })
             .filter((contact) => {
-              if (isErc20 && !contact.address.startsWith("0x")) {
+              if (isERC20 && !contact.address.startsWith("0x")) {
                 return false;
               }
 
@@ -176,7 +176,7 @@ export const AddressBookModal: FunctionComponent<{
           >((acc, account) => {
             const isSelf = keyRingStore.selectedKeyInfo?.id === account.vaultId;
 
-            if (!isErc20) {
+            if (!isERC20 && !isEVMOnlyChain) {
               acc.push({
                 name: account.name,
                 address: account.bech32Address,
@@ -184,13 +184,10 @@ export const AddressBookModal: FunctionComponent<{
               });
             }
 
-            if (isEvmChain) {
-              const hexAddress = Bech32Address.fromBech32(
-                account.bech32Address
-              ).toHex(true);
+            if (isEVMChain) {
               acc.push({
                 name: account.name,
-                address: hexAddress,
+                address: account.ethereumHexAddress,
                 isSelf,
               });
             }

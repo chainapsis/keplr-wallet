@@ -4,6 +4,7 @@ import {
   Result,
   JSONUint8Array,
   KeplrError,
+  EthereumProviderRpcError,
 } from '@keplr-wallet/router';
 import EventEmitter from 'eventemitter3';
 
@@ -72,11 +73,21 @@ export class WCMessageRequester implements MessageRequester {
       if (typeof result.error === 'string') {
         throw new Error(result.error);
       } else {
-        throw new KeplrError(
-          result.error.module,
-          result.error.code,
-          result.error.message,
-        );
+        if ('module' in result.error) {
+          if (typeof result.error.module === 'string') {
+            throw new KeplrError(
+              result.error.module,
+              result.error.code,
+              result.error.message,
+            );
+          }
+        } else {
+          throw new EthereumProviderRpcError(
+            result.error.code,
+            result.error.message,
+            result.error.data,
+          );
+        }
       }
     }
 

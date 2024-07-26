@@ -16,6 +16,7 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
+    "@ethersproject/abi": "^5.7.0",
     "@keplr-wallet/cosmos": "0.12.114",
     "@keplr-wallet/simple-fetch": "0.12.114",
     "@keplr-wallet/types": "0.12.114",

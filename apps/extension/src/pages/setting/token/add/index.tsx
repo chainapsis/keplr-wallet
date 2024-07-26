@@ -69,7 +69,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
       return (
         chainInfo.features?.includes("cosmwasm") ||
         chainInfo.features?.includes("secretwasm") ||
-        chainInfo.evm !== undefined
+        chainInfo.evm != null
       );
     });
   }, [chainStore.chainInfosInListUI]);
@@ -125,7 +125,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
 
   const chainInfo = chainStore.getChain(chainId);
   const isSecretWasm = chainInfo.hasFeature("secretwasm");
-  const isEvmChain = chainInfo.evm !== undefined;
+  const isEvmChain = chainStore.isEvmChain(chainId);
   const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] =
     useState(false);
 
@@ -345,7 +345,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
                 if (!isEvmChain) {
                   Bech32Address.validate(
                     value,
-                    chainInfo.bech32Config.bech32PrefixAccAddr
+                    chainInfo.bech32Config?.bech32PrefixAccAddr
                   );
                 }
               } catch (e) {

@@ -6,13 +6,15 @@ import { useTheme } from "styled-components";
 export const ItemLogo: FunctionComponent<{
   center: React.ReactElement;
   backgroundColor?: string;
-}> = ({ center, backgroundColor }) => {
+  width?: string;
+  height?: string;
+}> = ({ center, backgroundColor, width, height }) => {
   const theme = useTheme();
 
   return (
     <Box
-      width="2rem"
-      height="2rem"
+      width={width || "2rem"}
+      height={height || "2rem"}
       backgroundColor={
         backgroundColor ||
         (theme.mode === "light"

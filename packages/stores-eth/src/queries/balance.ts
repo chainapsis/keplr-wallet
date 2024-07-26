@@ -3,43 +3,45 @@ import {
   BalanceRegistry,
   ChainGetter,
   IObservableQueryBalanceImpl,
-  ObservableJsonRPCQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
-import bigInteger from "big-integer";
 import { EthereumAccountBase } from "../account";
+import { ObservableEvmChainJsonRpcQuery } from "./evm-chain-json-rpc";
 
 export class ObservableQueryEthAccountBalanceImpl
-  extends ObservableJsonRPCQuery<string>
+  extends ObservableEvmChainJsonRpcQuery<string>
   implements IObservableQueryBalanceImpl
 {
   constructor(
     sharedContext: QuerySharedContext,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter,
+    chainId: string,
+    chainGetter: ChainGetter,
     protected readonly denomHelper: DenomHelper,
-    protected readonly ethereumURL: string,
-    protected readonly ethereumeHexAddress: string
+    protected readonly ethereumHexAddress: string
   ) {
-    super(sharedContext, ethereumURL, "", "eth_getBalance", [
-      ethereumeHexAddress,
+    super(sharedContext, chainId, chainGetter, "eth_getBalance", [
+      ethereumHexAddress,
       "latest",
     ]);
+
     makeObservable(this);
+  }
+
+  protected override canFetch(): boolean {
+    // If ethereum hex address is empty, it will always fail, so don't need to fetch it.
+    return this.ethereumHexAddress.length > 0;
   }
 
   @computed
   get balance(): CoinPretty {
     const denom = this.denomHelper.denom;
-
     const chainInfo = this.chainGetter.getChain(this.chainId);
     const currency = chainInfo.currencies.find(
       (cur) => cur.coinMinimalDenom === denom
     );
-
     if (!currency) {
       throw new Error(`Unknown currency: ${denom}`);
     }
@@ -48,10 +50,7 @@ export class ObservableQueryEthAccountBalanceImpl
       return new CoinPretty(currency, new Int(0)).ready(false);
     }
 
-    return new CoinPretty(
-      currency,
-      new Int(bigInteger(this.response.data.replace("0x", ""), 16).toString())
-    );
+    return new CoinPretty(currency, new Int(BigInt(this.response.data)));
   }
 
   @computed
@@ -62,7 +61,6 @@ export class ObservableQueryEthAccountBalanceImpl
     return chainInfo.forceFindCurrency(denom);
   }
 }
-
 export class ObservableQueryEthAccountBalanceRegistry
   implements BalanceRegistry
 {
@@ -78,7 +76,11 @@ export class ObservableQueryEthAccountBalanceRegistry
     const chainInfo = chainGetter.getChain(chainId);
     const isHexAddress =
       EthereumAccountBase.isEthereumHexAddressWithChecksum(address);
-    if (denomHelper.type !== "native" || !isHexAddress || !chainInfo.evm) {
+    if (
+      denomHelper.type !== "native" ||
+      !isHexAddress ||
+      chainInfo.evm == null
+    ) {
       return;
     }
 
@@ -87,7 +89,6 @@ export class ObservableQueryEthAccountBalanceRegistry
       chainId,
       chainGetter,
       denomHelper,
-      chainInfo.evm.rpc,
       address
     );
   }

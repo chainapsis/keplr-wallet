@@ -2077,6 +2077,298 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["eth-address-gen", "eth-key-sign"],
   },
+  {
+    rpc: "https://evm-1.keplr.app",
+    rest: "https://evm-1.keplr.app",
+    evm: {
+      chainId: 1,
+      rpc: "https://evm-1.keplr.app",
+      websocket: "wss://evm-1.keplr.app/websocket",
+    },
+    chainId: "eip155:1",
+    chainName: "Ethereum",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "ethereum-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "ethereum-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://evm-8453.keplr.app",
+    rest: "https://evm-8453.keplr.app",
+    evm: {
+      chainId: 8453,
+      rpc: "https://evm-8453.keplr.app",
+      websocket: "wss://evm-8453.keplr.app/websocket",
+    },
+    chainId: "eip155:8453",
+    chainName: "Base",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:8453/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "base-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "base-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+      },
+    ],
+    features: ["op-stack-l1-data-fee"],
+  },
+  {
+    rpc: "https://evm-10.keplr.app",
+    rest: "https://evm-10.keplr.app",
+    evm: {
+      chainId: 10,
+      rpc: "https://evm-10.keplr.app",
+      websocket: "wss://evm-10.keplr.app/websocket",
+    },
+    chainId: "eip155:10",
+    chainName: "Optimism",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:10/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "optimism-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "optimism-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+      },
+    ],
+    features: ["op-stack-l1-data-fee"],
+  },
+  {
+    rpc: "https://evm-42161.keplr.app",
+    rest: "https://evm-42161.keplr.app",
+    evm: {
+      chainId: 42161,
+      rpc: "https://evm-42161.keplr.app",
+      websocket: "wss://evm-42161.keplr.app/websocket",
+    },
+    chainId: "eip155:42161",
+    chainName: "Arbitrum",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:42161/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "arbitrum-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "arbitrum-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+      },
+    ],
+    features: ["eth-address-gen", "eth-key-sign"],
+  },
+  {
+    rpc: "https://evm-137.keplr.app",
+    rest: "https://evm-137.keplr.app",
+    evm: {
+      chainId: 137,
+      rpc: "https://evm-137.keplr.app",
+      websocket: "wss://evm-137.keplr.app/websocket",
+    },
+    chainId: "eip155:137",
+    chainName: "Polygon",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:137/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "MATIC",
+        coinMinimalDenom: "polygon-native",
+        coinDecimals: 18,
+        coinGeckoId: "matic-network",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:137/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "MATIC",
+        coinMinimalDenom: "polygon-native",
+        coinDecimals: 18,
+        coinGeckoId: "matic-network",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:137/chain.png",
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://evm-56.keplr.app",
+    rest: "https://evm-56.keplr.app",
+    evm: {
+      chainId: 56,
+      rpc: "https://evm-56.keplr.app",
+      websocket: "wss://evm-56.keplr.app/websocket",
+    },
+    chainId: "eip155:56",
+    chainName: "BNB Smart Chain",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:56/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "BNB",
+        coinMinimalDenom: "binance-native",
+        coinDecimals: 18,
+        coinGeckoId: "binancecoin",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:56/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "BNB",
+        coinMinimalDenom: "binance-native",
+        coinDecimals: 18,
+        coinGeckoId: "binancecoin",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:56/chain.png",
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://evm-43114.keplr.app",
+    rest: "https://evm-43114.keplr.app",
+    evm: {
+      chainId: 43114,
+      rpc: "https://evm-43114.keplr.app",
+      websocket: "wss://evm-43114.keplr.app/websocket",
+    },
+    chainId: "eip155:43114",
+    chainName: "Avalanche",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:43114/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "AVAX",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "avalanche-2",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:43114/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "AVAX",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "avalanche-2",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:43114/chain.png",
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://evm-81457.keplr.app",
+    rest: "https://evm-81457.keplr.app",
+    evm: {
+      chainId: 81457,
+      rpc: "https://evm-81457.keplr.app",
+      websocket: "wss://evm-81457.keplr.app/websocket",
+    },
+    chainId: "eip155:81457",
+    chainName: "Blast",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:81457/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "blast-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "blast-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+      },
+    ],
+    features: ["op-stack-l1-data-fee"],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.

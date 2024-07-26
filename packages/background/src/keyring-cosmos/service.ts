@@ -99,6 +99,7 @@ export class KeyRingCosmosService {
     const pubKey = await this.keyRingService.getPubKey(chainId, vaultId);
 
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const evmInfo = ChainsService.getEVMInfo(chainInfo);
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
@@ -112,7 +113,7 @@ export class KeyRingCosmosService {
     }
 
     const address = (() => {
-      if (isEthermintLike) {
+      if (isEthermintLike || evmInfo !== undefined) {
         return pubKey.getEthAddress();
       }
 
@@ -127,7 +128,7 @@ export class KeyRingCosmosService {
       pubKey: pubKey.toBytes(),
       address,
       bech32Address: bech32Address.toBech32(
-        chainInfo.bech32Config.bech32PrefixAccAddr
+        chainInfo.bech32Config?.bech32PrefixAccAddr ?? ""
       ),
       ethereumHexAddress: bech32Address.toHex(true),
       isNanoLedger: keyInfo.type === "ledger",
@@ -184,7 +185,7 @@ export class KeyRingCosmosService {
       res.push({
         coinType,
         bech32Address: bech32Address.toBech32(
-          chainInfo.bech32Config.bech32PrefixAccAddr
+          chainInfo.bech32Config?.bech32PrefixAccAddr ?? ""
         ),
       });
     }
@@ -248,7 +249,7 @@ export class KeyRingCosmosService {
     const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        .bech32PrefixAccAddr;
+        ?.bech32PrefixAccAddr ?? "";
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
@@ -380,7 +381,7 @@ export class KeyRingCosmosService {
     const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        .bech32PrefixAccAddr;
+        ?.bech32PrefixAccAddr ?? "";
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
@@ -480,7 +481,7 @@ export class KeyRingCosmosService {
     const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        .bech32PrefixAccAddr;
+        ?.bech32PrefixAccAddr ?? "";
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
@@ -590,7 +591,7 @@ export class KeyRingCosmosService {
     const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        .bech32PrefixAccAddr;
+        ?.bech32PrefixAccAddr ?? "";
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
@@ -686,7 +687,7 @@ export class KeyRingCosmosService {
     const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        .bech32PrefixAccAddr;
+        ?.bech32PrefixAccAddr ?? "";
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
@@ -804,7 +805,7 @@ export class KeyRingCosmosService {
     const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        .bech32PrefixAccAddr;
+        ?.bech32PrefixAccAddr ?? "";
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
@@ -926,7 +927,7 @@ export class KeyRingCosmosService {
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
 
     const key = await this.getKey(vaultId, chainId);
-    const bech32Prefix = chainInfo.bech32Config.bech32PrefixAccAddr;
+    const bech32Prefix = chainInfo.bech32Config?.bech32PrefixAccAddr ?? "";
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
@@ -1026,7 +1027,7 @@ export class KeyRingCosmosService {
     const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        .bech32PrefixAccAddr;
+        ?.bech32PrefixAccAddr ?? "";
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
@@ -1157,12 +1158,12 @@ export class KeyRingCosmosService {
 
       Bech32Address.validate(
         contractAddress,
-        chainInfo.bech32Config.bech32PrefixAccAddr
+        chainInfo.bech32Config?.bech32PrefixAccAddr
       );
 
       const key = await this.getKey(vaultId, chainId);
       const bech32Address = new Bech32Address(key.address).toBech32(
-        chainInfo.bech32Config.bech32PrefixAccAddr
+        chainInfo.bech32Config?.bech32PrefixAccAddr ?? ""
       );
 
       if (bech32Address !== owner) {
@@ -1179,12 +1180,12 @@ export class KeyRingCosmosService {
       const key = await this.getKey(vaultId, chainId);
 
       const bech32Address = new Bech32Address(key.address).toBech32(
-        chainInfo.bech32Config.bech32PrefixAccAddr
+        chainInfo.bech32Config?.bech32PrefixAccAddr ?? ""
       );
 
       interactionInfo.accountInfos.push({
         chainId: chainInfo.chainId,
-        bech32Prefix: chainInfo.bech32Config.bech32PrefixAccAddr,
+        bech32Prefix: chainInfo.bech32Config?.bech32PrefixAccAddr ?? "",
         bech32Address: bech32Address,
         pubKey: key.pubKey,
       });
@@ -1319,7 +1320,7 @@ Salt: ${salt}`;
 
     Bech32Address.validate(
       bech32Address,
-      chainInfo.bech32Config.bech32PrefixAccAddr
+      chainInfo.bech32Config?.bech32PrefixAccAddr
     );
 
     const changedVaults = new Set<string>();
@@ -1385,7 +1386,8 @@ Salt: ${salt}`;
       !chainId.startsWith("dymension_") &&
       !chainId.startsWith("nim_") &&
       !chainId.startsWith("dimension_") &&
-      !chainId.startsWith("zetachain_")
+      !chainId.startsWith("zetachain_") &&
+      !chainId.startsWith("eip155:")
     ) {
       throw new KeplrError(
         "keyring",

@@ -16,7 +16,7 @@ export class ObservableQueryERC20ContactInfoInner extends ObservableQueryEVMChai
     sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
-    contractAddress: string
+    protected readonly contractAddress: string
   ) {
     super(sharedContext, chainId, chainGetter, contractAddress);
   }

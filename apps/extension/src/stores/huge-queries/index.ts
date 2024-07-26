@@ -115,6 +115,7 @@ export class HugeQueriesStore {
 
     for (const chainInfo of this.chainStore.chainInfosInUI) {
       const account = this.accountStore.getAccount(chainInfo.chainId);
+      const mainCurrency = chainInfo.stakeCurrency || chainInfo.currencies[0];
 
       if (account.bech32Address === "") {
         continue;
@@ -127,9 +128,12 @@ export class HugeQueriesStore {
       }
       for (const currency of currencies) {
         const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+        const isERC20 = denomHelper.type === "erc20";
+        const isMainCurrency =
+          mainCurrency.coinMinimalDenom === currency.coinMinimalDenom;
         const queryBalance =
           this.chainStore.isEvmChain(chainInfo.chainId) &&
-          denomHelper.type === "erc20"
+          (isMainCurrency || isERC20)
             ? queries.queryBalances.getQueryEthereumHexAddress(
                 account.ethereumHexAddress
               )
@@ -168,9 +172,11 @@ export class HugeQueriesStore {
             const balance = queryBalance.getBalance(currency);
             if (balance) {
               if (balance.balance.toDec().equals(HugeQueriesStore.zeroDec)) {
-                // If the balance is zero and currency is "native", don't show it.
+                const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+                // If the balance is zero and currency is "native" or "erc20", don't show it.
                 if (
-                  new DenomHelper(currency.coinMinimalDenom).type === "native"
+                  denomHelper.type === "native" ||
+                  denomHelper.type === "erc20"
                 ) {
                   // However, if currency is native currency and not ibc, and same with currencies[0],
                   // just show it as 0 balance.

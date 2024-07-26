@@ -3,40 +3,9 @@ import {
   HasMapStore,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
-import { Interface } from "@ethersproject/abi";
 import { computed, makeObservable } from "mobx";
 import { ObservableEvmChainJsonRpcQuery } from "./evm-chain-json-rpc";
-
-const erc20MetadataInterface: Interface = new Interface([
-  {
-    constant: true,
-    inputs: [],
-    name: "symbol",
-    outputs: [
-      {
-        name: "",
-        type: "string",
-      },
-    ],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "decimals",
-    outputs: [
-      {
-        name: "",
-        type: "uint8",
-      },
-    ],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-]);
+import { erc20ContractInterface } from "../constants";
 
 export class ObservableQueryEVMChainERC20MetadataSymbol extends ObservableEvmChainJsonRpcQuery<string> {
   constructor(
@@ -48,7 +17,7 @@ export class ObservableQueryEVMChainERC20MetadataSymbol extends ObservableEvmCha
     super(sharedContext, chainId, chainGetter, "eth_call", [
       {
         to: contractAddress,
-        data: erc20MetadataInterface.encodeFunctionData("symbol"),
+        data: erc20ContractInterface.encodeFunctionData("symbol"),
       },
       "latest",
     ]);
@@ -67,7 +36,7 @@ export class ObservableQueryEVMChainERC20MetadataSymbol extends ObservableEvmCha
     }
 
     try {
-      return erc20MetadataInterface.decodeFunctionResult(
+      return erc20ContractInterface.decodeFunctionResult(
         "symbol",
         this.response.data
       )[0];
@@ -88,7 +57,7 @@ export class ObservableQueryEVMChainERC20MetadataDecimals extends ObservableEvmC
     super(sharedContext, chainId, chainGetter, "eth_call", [
       {
         to: contractAddress,
-        data: erc20MetadataInterface.encodeFunctionData("decimals"),
+        data: erc20ContractInterface.encodeFunctionData("decimals"),
       },
       "latest",
     ]);
@@ -107,7 +76,7 @@ export class ObservableQueryEVMChainERC20MetadataDecimals extends ObservableEvmC
     }
 
     try {
-      return erc20MetadataInterface.decodeFunctionResult(
+      return erc20ContractInterface.decodeFunctionResult(
         "decimals",
         this.response.data
       )[0];

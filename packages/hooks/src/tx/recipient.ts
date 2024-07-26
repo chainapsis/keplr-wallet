@@ -68,7 +68,7 @@ export class RecipientConfig
   @computed
   get bech32Prefix(): string {
     if (!this._bech32Prefix) {
-      return this.chainInfo.bech32Config.bech32PrefixAccAddr;
+      return this.chainInfo.bech32Config?.bech32PrefixAccAddr ?? "";
     }
 
     return this._bech32Prefix;
@@ -182,7 +182,7 @@ export class RecipientConfig
     }
 
     const chainInfo = this.chainInfo;
-    const isEvmChain = !!EthereumAccountBase.evmInfo(this.chainInfo);
+    const isEvmChain = !!this.chainInfo.evm;
     const hasEthereumAddress =
       chainInfo.bip44.coinType === 60 ||
       !!chainInfo.features?.includes("eth-address-gen") ||
@@ -258,7 +258,7 @@ export class RecipientConfig
     }
 
     const chainInfo = this.chainInfo;
-    const isEvmChain = !!EthereumAccountBase.evmInfo(this.chainInfo);
+    const isEvmChain = !!this.chainInfo.evm;
     const hasEthereumAddress =
       chainInfo.bip44.coinType === 60 ||
       !!chainInfo.features?.includes("eth-address-gen") ||

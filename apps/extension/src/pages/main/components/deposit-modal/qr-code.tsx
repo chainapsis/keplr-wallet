@@ -16,8 +16,8 @@ import { YAxis } from "../../../../components/axis";
 
 export const QRCodeScene: FunctionComponent<{
   chainId: string;
-  bech32Address: string;
-}> = observer(({ chainId, bech32Address }) => {
+  address?: string;
+}> = observer(({ chainId, address }) => {
   const { chainStore } = useStore();
 
   const theme = useTheme();
@@ -25,6 +25,10 @@ export const QRCodeScene: FunctionComponent<{
   const chainInfo = chainStore.getChain(chainId);
 
   const sceneTransition = useSceneTransition();
+
+  if (!address) {
+    return null;
+  }
 
   return (
     <Box
@@ -79,7 +83,7 @@ export const QRCodeScene: FunctionComponent<{
             padding="0.75rem"
           >
             <QRCodeSVG
-              value={bech32Address}
+              value={address}
               size={176}
               level="M"
               bgColor={ColorPalette.white}

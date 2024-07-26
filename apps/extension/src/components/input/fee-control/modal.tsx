@@ -24,7 +24,7 @@ import {
 } from "@keplr-wallet/hooks";
 import { useStore } from "../../../stores";
 import { GuideBox } from "../../guide-box";
-import { Dec } from "@keplr-wallet/unit";
+import { Dec, PricePretty } from "@keplr-wallet/unit";
 import { Box } from "../../box";
 import { FormattedMessage, useIntl } from "react-intl";
 import { XAxis } from "../../axis";
@@ -56,6 +56,7 @@ export const TransactionFeeModal: FunctionComponent<{
   gasConfig: IGasConfig;
   gasSimulator?: IGasSimulator;
   disableAutomaticFeeSet?: boolean;
+  isForEVMTx?: boolean;
 }> = observer(
   ({
     close,
@@ -64,8 +65,9 @@ export const TransactionFeeModal: FunctionComponent<{
     gasConfig,
     gasSimulator,
     disableAutomaticFeeSet,
+    isForEVMTx,
   }) => {
-    const { queriesStore, uiConfigStore } = useStore();
+    const { queriesStore, uiConfigStore, priceStore } = useStore();
     const intl = useIntl();
     const theme = useTheme();
 
@@ -141,6 +143,8 @@ export const TransactionFeeModal: FunctionComponent<{
       isGasSimulatorEnabled,
     ]);
 
+    const isShowingMaxFee = isForEVMTx && !!gasSimulator?.gasEstimated;
+
     return (
       <Styles.Container>
         <Box marginBottom="1.25rem" marginLeft="0.5rem" paddingY="0.4rem">
@@ -199,8 +203,73 @@ export const TransactionFeeModal: FunctionComponent<{
               </XAxis>
             </Box>
 
-            <FeeSelector feeConfig={feeConfig} />
+            <FeeSelector
+              feeConfig={feeConfig}
+              gasConfig={gasConfig}
+              gasSimulator={gasSimulator}
+              isForEVMTx={isForEVMTx}
+            />
           </Stack>
+
+          {isShowingMaxFee && (
+            <React.Fragment>
+              <Gutter size="0.5rem" />
+              <XAxis>
+                <Body3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-400"]
+                      : ColorPalette["gray-100"]
+                  }
+                >
+                  <b>
+                    <FormattedMessage id="components.input.fee-control.modal.max-fee" />
+                  </b>
+                  {`: ${feeConfig.fees[0]
+                    .maxDecimals(6)
+                    .inequalitySymbol(true)
+                    .trim(true)
+                    .shrink(true)
+                    .hideIBCMetadata(true)
+                    .toString()}`}
+                </Body3>
+                <Body3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette["gray-300"]
+                  }
+                  style={{
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
+                  {` ${(() => {
+                    let total: PricePretty | undefined;
+                    let hasUnknown = false;
+                    const maxFee = feeConfig.fees[0];
+                    if (!maxFee.currency.coinGeckoId) {
+                      hasUnknown = true;
+                    } else {
+                      const price = priceStore.calculatePrice(maxFee);
+                      if (price) {
+                        if (!total) {
+                          total = price;
+                        } else {
+                          total = total.add(price);
+                        }
+                      }
+                    }
+
+                    if (hasUnknown || !total) {
+                      return "";
+                    }
+                    return `(${total.toString()})`;
+                  })()}`}
+                </Body3>
+              </XAxis>
+              <Gutter size="1rem" />
+            </React.Fragment>
+          )}
 
           <Dropdown
             label={intl.formatMessage({
@@ -429,7 +498,10 @@ const FeeSelectorStyle = {
 
 const FeeSelector: FunctionComponent<{
   feeConfig: IFeeConfig;
-}> = observer(({ feeConfig }) => {
+  gasConfig?: IGasConfig;
+  gasSimulator?: IGasSimulator;
+  isForEVMTx?: boolean;
+}> = observer(({ feeConfig, gasConfig, gasSimulator, isForEVMTx }) => {
   const { priceStore } = useStore();
   const theme = useTheme();
 
@@ -441,6 +513,8 @@ const FeeSelector: FunctionComponent<{
   if (!feeCurrency) {
     return null;
   }
+
+  const isShowingGasEstimatedOnly = isForEVMTx && !!gasSimulator?.gasEstimated;
 
   return (
     <Columns sum={3}>
@@ -471,7 +545,20 @@ const FeeSelector: FunctionComponent<{
               <FeeSelectorStyle.Price selected={feeConfig.type === "low"}>
                 {priceStore
                   .calculatePrice(
-                    feeConfig.getFeeTypePrettyForFeeCurrency(feeCurrency, "low")
+                    feeConfig
+                      .getFeeTypePrettyForFeeCurrency(feeCurrency, "low")
+                      .quo(
+                        new Dec(
+                          isShowingGasEstimatedOnly ? gasConfig?.gas || 1 : 1
+                        )
+                      )
+                      .mul(
+                        new Dec(
+                          isShowingGasEstimatedOnly
+                            ? gasSimulator?.gasEstimated || 1
+                            : 1
+                        )
+                      )
                   )
                   ?.toString() || "-"}
               </FeeSelectorStyle.Price>
@@ -479,9 +566,20 @@ const FeeSelector: FunctionComponent<{
             <FeeSelectorStyle.Amount selected={feeConfig.type === "low"}>
               {feeConfig
                 .getFeeTypePrettyForFeeCurrency(feeCurrency, "low")
+                .quo(
+                  new Dec(isShowingGasEstimatedOnly ? gasConfig?.gas || 1 : 1)
+                )
+                .mul(
+                  new Dec(
+                    isShowingGasEstimatedOnly
+                      ? gasSimulator?.gasEstimated || 1
+                      : 1
+                  )
+                )
                 .maxDecimals(6)
                 .inequalitySymbol(true)
                 .trim(true)
+                .shrink(true)
                 .hideIBCMetadata(true)
                 .toString()}
             </FeeSelectorStyle.Amount>
@@ -508,10 +606,20 @@ const FeeSelector: FunctionComponent<{
               <FeeSelectorStyle.Price selected={feeConfig.type === "average"}>
                 {priceStore
                   .calculatePrice(
-                    feeConfig.getFeeTypePrettyForFeeCurrency(
-                      feeCurrency,
-                      "average"
-                    )
+                    feeConfig
+                      .getFeeTypePrettyForFeeCurrency(feeCurrency, "average")
+                      .quo(
+                        new Dec(
+                          isShowingGasEstimatedOnly ? gasConfig?.gas || 1 : 1
+                        )
+                      )
+                      .mul(
+                        new Dec(
+                          isShowingGasEstimatedOnly
+                            ? gasSimulator?.gasEstimated || 1
+                            : 1
+                        )
+                      )
                   )
                   ?.toString() || "-"}
               </FeeSelectorStyle.Price>
@@ -519,9 +627,20 @@ const FeeSelector: FunctionComponent<{
             <FeeSelectorStyle.Amount selected={feeConfig.type === "average"}>
               {feeConfig
                 .getFeeTypePrettyForFeeCurrency(feeCurrency, "average")
+                .quo(
+                  new Dec(isShowingGasEstimatedOnly ? gasConfig?.gas || 1 : 1)
+                )
+                .mul(
+                  new Dec(
+                    isShowingGasEstimatedOnly
+                      ? gasSimulator?.gasEstimated || 1
+                      : 1
+                  )
+                )
                 .maxDecimals(6)
                 .inequalitySymbol(true)
                 .trim(true)
+                .shrink(true)
                 .hideIBCMetadata(true)
                 .toString()}
             </FeeSelectorStyle.Amount>
@@ -556,10 +675,20 @@ const FeeSelector: FunctionComponent<{
               <FeeSelectorStyle.Price selected={feeConfig.type === "high"}>
                 {priceStore
                   .calculatePrice(
-                    feeConfig.getFeeTypePrettyForFeeCurrency(
-                      feeCurrency,
-                      "high"
-                    )
+                    feeConfig
+                      .getFeeTypePrettyForFeeCurrency(feeCurrency, "high")
+                      .quo(
+                        new Dec(
+                          isShowingGasEstimatedOnly ? gasConfig?.gas || 1 : 1
+                        )
+                      )
+                      .mul(
+                        new Dec(
+                          isShowingGasEstimatedOnly
+                            ? gasSimulator?.gasEstimated || 1
+                            : 1
+                        )
+                      )
                   )
                   ?.toString() || "-"}
               </FeeSelectorStyle.Price>
@@ -567,9 +696,20 @@ const FeeSelector: FunctionComponent<{
             <FeeSelectorStyle.Amount selected={feeConfig.type === "high"}>
               {feeConfig
                 .getFeeTypePrettyForFeeCurrency(feeCurrency, "high")
+                .quo(
+                  new Dec(isShowingGasEstimatedOnly ? gasConfig?.gas || 1 : 1)
+                )
+                .mul(
+                  new Dec(
+                    isShowingGasEstimatedOnly
+                      ? gasSimulator?.gasEstimated || 1
+                      : 1
+                  )
+                )
                 .maxDecimals(6)
                 .inequalitySymbol(true)
                 .trim(true)
+                .shrink(true)
                 .hideIBCMetadata(true)
                 .toString()}
             </FeeSelectorStyle.Amount>
