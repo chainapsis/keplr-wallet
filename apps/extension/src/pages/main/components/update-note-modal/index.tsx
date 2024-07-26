@@ -13,6 +13,7 @@ import {
 } from "../../../../components/transition";
 import { Image as CompImage } from "../../../../components/image";
 import { FormattedMessage, useIntl } from "react-intl";
+import SimpleBar from "simplebar-react";
 
 export type UpdateNotePageData = {
   title: string;
@@ -80,7 +81,7 @@ export const UpdateNoteModal: FunctionComponent<{
       <Box
         position="relative"
         width="95%"
-        maxWidth="18.75rem"
+        maxWidth="20rem"
         paddingTop="1.5rem"
         paddingBottom="1.25rem"
         paddingX={updateNotePageData.length > 1 ? "1.75rem" : "1.25rem"}
@@ -198,7 +199,14 @@ const CarouselPage: FunctionComponent<{
   const theme = useTheme();
 
   return (
-    <Box>
+    <SimpleBar
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        overflowY: "auto",
+        maxHeight: "24rem",
+      }}
+    >
       <Box alignX="center">
         <H5
           color={
@@ -212,6 +220,7 @@ const CarouselPage: FunctionComponent<{
             defaultMessage={notePageData.title}
             values={{
               br: <br />,
+              b: (...chunks: any) => <b>{chunks}</b>,
             }}
           />
         </H5>
@@ -248,10 +257,11 @@ const CarouselPage: FunctionComponent<{
             defaultMessage={notePageData.paragraph}
             values={{
               br: <br />,
+              b: (...chunks: any) => <b>{chunks}</b>,
             }}
           />
         </Body2>
       </Box>
-    </Box>
+    </SimpleBar>
   );
 };
