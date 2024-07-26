@@ -395,14 +395,25 @@ export const SwapFeeInfo: FunctionComponent<{
           title={intl.formatMessage({
             id: 'page.ibc-swap.components.swap-fee-info.keplr-swap-fee-information.title',
           })}
-          paragraph={intl.formatMessage(
-            {
-              id: 'page.ibc-swap.components.swap-fee-info.keplr-swap-fee-information.paragraph',
-            },
-            {
-              swapFeePercent: `${amountConfig.swapFeeBps / 100}%`,
-            },
-          )}
+          paragraph={
+            amountConfig.swapFeeBps === 10
+              ? intl.formatMessage(
+                  {
+                    id: 'page.ibc-swap.components.swap-fee-info.keplr-swap-fee-stable-coin-information.paragraph',
+                  },
+                  {
+                    swapFeePercent: `${amountConfig.swapFeeBps / 100}%`,
+                  },
+                )
+              : intl.formatMessage(
+                  {
+                    id: 'page.ibc-swap.components.swap-fee-info.keplr-swap-fee-information.paragraph',
+                  },
+                  {
+                    swapFeePercent: `${amountConfig.swapFeeBps / 100}%`,
+                  },
+                )
+          }
         />
       </React.Fragment>
     );

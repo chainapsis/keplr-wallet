@@ -24,10 +24,6 @@ import { GetChainOriginalEndpointsMsg } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { FormattedMessage, useIntl } from "react-intl";
-import { StakeWithKeplrDashboardButton } from "../../../main/components";
-import { ColorPalette } from "../../../../styles";
-import { ArrowTopRightOnSquareIcon } from "../../../../components/icon";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Gutter } from "../../../../components/gutter";
 
 const Styles = {
@@ -280,25 +276,6 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
             <Gutter size="0" />
           </React.Fragment>
         )}
-
-        {ChainIdHelper.parse(chainId).identifier === "axelar-dojo" ? (
-          <StakeWithKeplrDashboardButton
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-
-              browser.tabs.create({
-                url: "https://points.lavanet.xyz/register?code=KEPLR",
-              });
-            }}
-          >
-            <FormattedMessage id="page.setting.advanced.endpoint.lava-link-button" />
-
-            <Box color={ColorPalette["gray-300"]} marginLeft="0.5rem">
-              <ArrowTopRightOnSquareIcon width="1rem" height="1rem" />
-            </Box>
-          </StakeWithKeplrDashboardButton>
-        ) : null}
 
         <Styles.Flex1 />
 

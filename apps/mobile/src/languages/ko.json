@@ -381,6 +381,7 @@
   "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph": "런칭 이벤트: 첫달동안 케플러 서비스 수수료 0%로 운영됩니다.",
   "page.ibc-swap.components.swap-fee-info.keplr-swap-fee-information.title": "케플러 스왑 수수료",
   "page.ibc-swap.components.swap-fee-info.keplr-swap-fee-information.paragraph": "이 견적에는 {swapFeePercent}의 스왑 수수료가 반영되어 있습니다. 이 수수료는 케플러 팀과 제 3자 유동성 인프라 제공자들에게 지급됩니다.",
+  "page.ibc-swap.components.swap-fee-info.keplr-swap-fee-stable-coin-information.paragraph": "이 견적에는 스테이블 코인 스왑을 위해 할인된 케플러 수수료 {swapFeePercent}가 포함되어 있습니다. 이 수수료는 케플러 팀과 제 3자 유동성 인프라 제공자들에게 지급됩니다.",
   "page.ibc-swap.components.slippage-modal.title": "슬리피지 설정",
   "page.ibc-swap.components.slippage-modal.label.slippage-tolerance": "슬리피지 허용치",
   "page.ibc-swap.components.slippage-modal.label.slippage-custom": "커스텀 설정",

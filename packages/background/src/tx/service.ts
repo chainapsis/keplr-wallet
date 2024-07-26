@@ -117,6 +117,9 @@ export class BackgroundTxService {
               txTracer.close();
 
               if (options.onFulfill) {
+                if (!tx.hash) {
+                  tx.hash = txHash;
+                }
                 options.onFulfill(tx);
               }
 
