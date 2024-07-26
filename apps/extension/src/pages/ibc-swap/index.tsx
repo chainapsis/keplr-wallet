@@ -747,7 +747,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           denom: amount.currency.coinMinimalDenom,
                         };
                       }),
-                      ibcSwapConfigs.memoConfig.memo
+                      ibcSwapConfigs.memoConfig.memo,
+                      true
                     ).withIBCPacketForwarding(channels, {
                       currencies: chainStore.getChain(chainId).currencies,
                     });
@@ -784,7 +785,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       ibcSwapConfigs.memoConfig.memo,
                       {
                         currencies: chainStore.getChain(outChainId).currencies,
-                      }
+                      },
+                      true
                     );
 
                     return await new InExtensionMessageRequester().sendMessage(

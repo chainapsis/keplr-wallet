@@ -787,6 +787,7 @@ export const IBCSwapScreen: FunctionComponent = observer(() => {
                           };
                         }),
                         ibcSwapConfigs.memoConfig.memo,
+                        true,
                       ).withIBCPacketForwarding(channels, {
                         currencies: chainStore.getChain(chainId).currencies,
                       });
@@ -825,6 +826,7 @@ export const IBCSwapScreen: FunctionComponent = observer(() => {
                           currencies:
                             chainStore.getChain(outChainId).currencies,
                         },
+                        true,
                       );
 
                       return await new RNMessageRequesterInternal().sendMessage(
