@@ -97,7 +97,7 @@ export class ChainSuggestStore {
         )
       );
       const chainInfo: ChainInfo =
-        "rest" in response.data
+        "rest" in response.data && !isEvmOnlyChain
           ? response.data
           : {
               ...response.data,
@@ -108,7 +108,9 @@ export class ChainSuggestStore {
                   10
                 ),
                 rpc: response.data.rpc,
-                websocket: response.data.websocket,
+                ...("websocket" in response.data && {
+                  websocket: response.data.websocket,
+                }),
               },
               features: ["eth-address-gen", "eth-key-sign"].concat(
                 response.data.features ?? []

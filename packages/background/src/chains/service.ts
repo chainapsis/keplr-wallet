@@ -437,7 +437,7 @@ export class ChainsService {
           }/${isEvmOnlyChain ? "evm" : "cosmos"}/${chainIdentifier}.json`
     );
     let chainInfo: ChainInfo =
-      "rest" in res.data
+      "rest" in res.data && !isEvmOnlyChain
         ? res.data
         : {
             ...res.data,
@@ -445,7 +445,7 @@ export class ChainsService {
             evm: {
               chainId: parseInt(res.data.chainId.replace("eip155:", ""), 10),
               rpc: res.data.rpc,
-              websocket: res.data.websocket,
+              ...("websocket" in res.data && { websocket: res.data.websocket }),
             },
             features: ["eth-address-gen", "eth-key-sign"].concat(
               res.data.features ?? []
