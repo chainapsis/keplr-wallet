@@ -14,6 +14,7 @@ require("./public/assets/icon/icon-beta-128.png");
 
 import React, {
   FunctionComponent,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -295,6 +296,37 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
   const [mainPageIsNotReady, setMainPageIsNotReady] = useState(false);
 
   const intl = useIntl();
+
+  // Enable new EVM chains by default for a specific version.
+  useEffect(() => {
+    const newEVMChainsEnabledLocalStorageKey = "new-evm-chain-enabled";
+    const newEVMChainsEnabled = localStorage.getItem(
+      newEVMChainsEnabledLocalStorageKey
+    );
+    if (
+      isReady &&
+      newEVMChainsEnabled !== "true" &&
+      uiConfigStore.changelogConfig.showingInfo.some(
+        (info) => info.version === "0.12.115"
+      )
+    ) {
+      for (const keyInfo of keyRingStore.keyInfos) {
+        chainStore.enableChainInfoInUIWithVaultId(
+          keyInfo.id,
+          ...chainStore.chainInfos
+            .filter((chainInfo) => chainInfo.chainId.startsWith("eip155:"))
+            .map((chainInfo) => chainInfo.chainId)
+        );
+      }
+      localStorage.setItem(newEVMChainsEnabledLocalStorageKey, "true");
+    }
+  }, [
+    chainStore,
+    isReady,
+    keyRingStore.keyInfos,
+    uiConfigStore.changelogConfig.showingInfo,
+    uiConfigStore.newChainSuggestionConfig.newSuggestionChains,
+  ]);
 
   return (
     <HashRouter>
