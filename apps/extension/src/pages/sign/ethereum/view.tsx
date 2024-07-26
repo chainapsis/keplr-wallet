@@ -121,18 +121,39 @@ export const EthereumSigningView: FunctionComponent<{
     }
   );
 
-  const maxPriorityFeePerGas = (() => {
+  const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } = (() => {
     if (isTxSigning) {
-      const { maxPriorityFeePerGas } = feeConfig.getEIP1559TxFees(
-        feeConfig.type === "manual"
-          ? uiConfigStore.lastFeeOption || "average"
-          : feeConfig.type
-      );
+      const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
+        feeConfig.getEIP1559TxFees(
+          feeConfig.type === "manual"
+            ? uiConfigStore.lastFeeOption || "average"
+            : feeConfig.type
+        );
 
-      return `0x${BigInt(maxPriorityFeePerGas.truncate().toString()).toString(
-        16
-      )}`;
+      return maxFeePerGas && maxPriorityFeePerGas
+        ? {
+            maxFeePerGas: `0x${BigInt(
+              maxFeePerGas.truncate().toString()
+            ).toString(16)}`,
+            maxPriorityFeePerGas: `0x${BigInt(
+              maxPriorityFeePerGas.truncate().toString()
+            ).toString(16)}`,
+            gasPrice: undefined,
+          }
+        : {
+            maxFeePerGas: undefined,
+            maxPriorityFeePerGas: undefined,
+            gasPrice: `0x${BigInt(
+              gasPrice?.truncate().toString() ?? 0
+            ).toString(16)}`,
+          };
     }
+
+    return {
+      maxFeePerGas: undefined,
+      maxPriorityFeePerGas: undefined,
+      gasPrice: undefined,
+    };
   })();
 
   useEffect(() => {
@@ -148,12 +169,14 @@ export const EthereumSigningView: FunctionComponent<{
       if (gasLimitFromTx > 0) {
         gasConfig.setValue(gasLimitFromTx.toString());
 
-        const maxFeePerGasFromTx = BigInt(unsignedTx.maxFeePerGas ?? 0);
-        if (maxFeePerGasFromTx > 0) {
+        const gasPriceFromTx = BigInt(
+          unsignedTx.maxFeePerGas ?? unsignedTx.gasPrice ?? 0
+        );
+        if (gasPriceFromTx > 0) {
           feeConfig.setFee(
             new CoinPretty(
               chainInfo.currencies[0],
-              new Dec(gasConfig.gas).mul(new Dec(maxFeePerGasFromTx))
+              new Dec(gasConfig.gas).mul(new Dec(gasPriceFromTx))
             )
           );
         }
@@ -168,14 +191,19 @@ export const EthereumSigningView: FunctionComponent<{
 
       if (gasConfig.gas > 0) {
         unsignedTx.gasLimit = `0x${gasConfig.gas.toString(16)}`;
-        unsignedTx.maxFeePerGas = `0x${new Int(
-          feeConfig.getFeePrimitive()[0].amount
-        )
-          .div(new Int(gasConfig.gas))
-          .toBigNumber()
-          .toString(16)}`;
-        unsignedTx.maxPriorityFeePerGas =
-          unsignedTx.maxPriorityFeePerGas ?? maxPriorityFeePerGas;
+        if (maxFeePerGas && maxPriorityFeePerGas) {
+          unsignedTx.maxFeePerGas = `0x${new Int(
+            feeConfig.getFeePrimitive()[0].amount
+          )
+            .div(new Int(gasConfig.gas))
+            .toBigNumber()
+            .toString(16)}`;
+          unsignedTx.maxPriorityFeePerGas =
+            unsignedTx.maxPriorityFeePerGas ?? maxPriorityFeePerGas;
+        } else {
+          unsignedTx.gasPrice = gasPrice;
+        }
+
         setSigningDataBuff(Buffer.from(JSON.stringify(unsignedTx), "utf8"));
       }
     }
@@ -183,7 +211,9 @@ export const EthereumSigningView: FunctionComponent<{
     gasConfig.gas,
     isTxSigning,
     message,
+    maxFeePerGas,
     maxPriorityFeePerGas,
+    gasPrice,
     gasSimulator,
     gasConfig,
     feeConfig,

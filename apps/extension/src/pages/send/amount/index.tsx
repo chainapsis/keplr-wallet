@@ -298,7 +298,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   useEffect(() => {
     (async () => {
       if (chainInfo.features.includes("op-stack-l1-data-fee")) {
-        const { maxFeePerGas, maxPriorityFeePerGas } =
+        const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
           sendConfigs.feeConfig.getEIP1559TxFees(sendConfigs.feeConfig.type);
 
         const { to, gasLimit, value, data, chainId } =
@@ -307,8 +307,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
             to: sendConfigs.recipientConfig.recipient,
             gasLimit: sendConfigs.gasConfig.gas,
-            maxFeePerGas: maxFeePerGas.toString(),
-            maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+            maxFeePerGas: maxFeePerGas?.toString(),
+            maxPriorityFeePerGas: maxPriorityFeePerGas?.toString(),
+            gasPrice: gasPrice?.toString(),
           });
 
         const l1DataFee = await ethereumAccount.simulateOpStackL1Fee({
@@ -488,7 +489,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           try {
             if (isEvmTx) {
               ethereumAccount.setIsSendingTx(true);
-              const { maxFeePerGas, maxPriorityFeePerGas } =
+              const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
                 sendConfigs.feeConfig.getEIP1559TxFees(
                   sendConfigs.feeConfig.type
                 );
@@ -498,8 +499,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
                 to: sendConfigs.recipientConfig.recipient,
                 gasLimit: sendConfigs.gasConfig.gas,
-                maxFeePerGas: maxFeePerGas.toString(),
-                maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+                maxFeePerGas: maxFeePerGas?.toString(),
+                maxPriorityFeePerGas: maxPriorityFeePerGas?.toString(),
+                gasPrice: gasPrice?.toString(),
               });
               await ethereumAccount.sendEthereumTx(sender, unsignedTx, {
                 onFulfill: (txReceipt) => {

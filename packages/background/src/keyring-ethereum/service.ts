@@ -690,11 +690,8 @@ export class KeyRingEthereumService {
             return null;
           }
 
-          const chainInfos = this.chainsService.getChainInfos();
-
-          const newCurrentChainInfo = chainInfos.find(
-            (chainInfo) => chainInfo.evm?.chainId === newEvmChainId
-          );
+          const newCurrentChainInfo =
+            this.chainsService.getChainInfoByEVMChainId(newEvmChainId);
           if (!newCurrentChainInfo) {
             throw new EthereumProviderRpcError(
               4902,
@@ -731,78 +728,88 @@ export class KeyRingEthereumService {
           }
 
           const evmChainId = validateEVMChainId(parseInt(param.chainId, 16));
-          const chainId = `eip155:${evmChainId}`;
-          if (this.chainsService.getChainInfo(chainId) == null) {
-            const rpc = param.rpcUrls.find((url) => {
-              try {
-                const urlObject = new URL(url);
-                return (
-                  urlObject.protocol === "http:" ||
-                  urlObject.protocol === "https:"
-                );
-              } catch {
-                return false;
-              }
-            });
-            const websocket = param.rpcUrls.find((url) => {
-              try {
-                const urlObject = new URL(url);
-                return (
-                  urlObject.protocol === "ws:" || urlObject.protocol === "wss:"
-                );
-              } catch {
-                return false;
-              }
-            });
-            // Skip the validation for these parameters because they will be validated in the `suggestChainInfo` method.
-            const { chainName, nativeCurrency, iconUrls } = param;
 
-            const addingChainInfo = {
-              rpc,
-              rest: rpc,
-              chainId,
-              bip44: {
-                coinType: 60,
-              },
-              chainName,
-              stakeCurrency: {
-                coinDenom: nativeCurrency.symbol,
-                coinMinimalDenom: nativeCurrency.symbol,
-                coinDecimals: nativeCurrency.decimals,
-              },
-              currencies: [
-                {
-                  coinDenom: nativeCurrency.symbol,
-                  coinMinimalDenom: nativeCurrency.symbol,
-                  coinDecimals: nativeCurrency.decimals,
-                },
-              ],
-              feeCurrencies: [
-                {
-                  coinDenom: nativeCurrency.symbol,
-                  coinMinimalDenom: nativeCurrency.symbol,
-                  coinDecimals: nativeCurrency.decimals,
-                },
-              ],
-              evm: {
-                chainId: evmChainId,
-                rpc,
-                websocket,
-              },
-              features: ["eth-address-gen", "eth-key-sign"],
-              chainSymbolImageUrl: iconUrls?.[0],
-              beta: true,
-            } as ChainInfo;
-
-            await this.chainsService.suggestChainInfo(
-              env,
-              addingChainInfo,
-              origin
-            );
+          // Sei는 coin type을 118과 60 둘 다 사용하는데, coin type이 60인 경우엔 118도 동시에 지원할 수 없다. 그리고 SEI 토큰 decimal도 coin type 118 일 땐 6을 쓰고 60일 땐 18을 쓰기 때문에 당장 EVM 기능을 사용할 수 없기 때문에 에러를 뱉는다.
+          if (evmChainId === 1329) {
+            throw new Error("Sei is not supported.");
           }
 
+          const chainInfo =
+            this.chainsService.getChainInfoByEVMChainId(evmChainId) ??
+            (await (async () => {
+              const rpc = param.rpcUrls.find((url) => {
+                try {
+                  const urlObject = new URL(url);
+                  return (
+                    urlObject.protocol === "http:" ||
+                    urlObject.protocol === "https:"
+                  );
+                } catch {
+                  return false;
+                }
+              });
+              const websocket = param.rpcUrls.find((url) => {
+                try {
+                  const urlObject = new URL(url);
+                  return (
+                    urlObject.protocol === "ws:" ||
+                    urlObject.protocol === "wss:"
+                  );
+                } catch {
+                  return false;
+                }
+              });
+              // Skip the validation for these parameters because they will be validated in the `suggestChainInfo` method.
+              const { chainName, nativeCurrency, iconUrls } = param;
+
+              const addingChainInfo = {
+                rpc,
+                rest: rpc,
+                chainId: `eip155:${evmChainId}`,
+                bip44: {
+                  coinType: 60,
+                },
+                chainName,
+                stakeCurrency: {
+                  coinDenom: nativeCurrency.symbol,
+                  coinMinimalDenom: nativeCurrency.symbol,
+                  coinDecimals: nativeCurrency.decimals,
+                },
+                currencies: [
+                  {
+                    coinDenom: nativeCurrency.symbol,
+                    coinMinimalDenom: nativeCurrency.symbol,
+                    coinDecimals: nativeCurrency.decimals,
+                  },
+                ],
+                feeCurrencies: [
+                  {
+                    coinDenom: nativeCurrency.symbol,
+                    coinMinimalDenom: nativeCurrency.symbol,
+                    coinDecimals: nativeCurrency.decimals,
+                  },
+                ],
+                evm: {
+                  chainId: evmChainId,
+                  rpc,
+                  websocket,
+                },
+                features: ["eth-address-gen", "eth-key-sign"],
+                chainSymbolImageUrl: iconUrls?.[0],
+                beta: true,
+              } as ChainInfo;
+
+              await this.chainsService.suggestChainInfo(
+                env,
+                addingChainInfo,
+                origin
+              );
+
+              return addingChainInfo;
+            })());
+
           this.permissionService.addPermission(
-            [chainId],
+            [chainInfo.chainId],
             getBasicAccessPermissionType(),
             [origin]
           );
@@ -810,7 +817,7 @@ export class KeyRingEthereumService {
           await this.permissionService.updateCurrentChainIdForEVM(
             env,
             origin,
-            chainId
+            chainInfo.chainId
           );
 
           return null;

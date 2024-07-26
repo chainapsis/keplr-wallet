@@ -315,7 +315,7 @@ export const EnableChainsScene: FunctionComponent<{
         const enabledChainIdentifiers: string[] =
           chainStore.enabledChainIdentifiers;
 
-        // noble도 default로 활성화되어야 한다.
+        // noble과 ethereum도 default로 활성화되어야 한다.
         // 근데 enable-chains가 처음 register일때가 아니라
         // manage chain visibility로부터 왔을수도 있다
         // 이 경우 candidateAddresses의 length는 로직상 0일 수밖에 없기 때문에
@@ -330,6 +330,12 @@ export const EnableChainsScene: FunctionComponent<{
             chainStore.chainInfos.find((c) => c.chainIdentifier === "noble")
           ) {
             enabledChainIdentifiers.push("noble");
+          }
+
+          if (
+            chainStore.chainInfos.find((c) => c.chainIdentifier === "eip155:1")
+          ) {
+            enabledChainIdentifiers.push("eip155:1");
           }
         }
 

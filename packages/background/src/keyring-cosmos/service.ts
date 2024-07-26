@@ -1386,7 +1386,8 @@ Salt: ${salt}`;
       !chainId.startsWith("dymension_") &&
       !chainId.startsWith("nim_") &&
       !chainId.startsWith("dimension_") &&
-      !chainId.startsWith("zetachain_")
+      !chainId.startsWith("zetachain_") &&
+      !chainId.startsWith("eip155:")
     ) {
       throw new KeplrError(
         "keyring",
