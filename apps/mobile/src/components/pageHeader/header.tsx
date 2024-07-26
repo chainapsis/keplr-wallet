@@ -114,7 +114,7 @@ const DefaultScreenHeaderTitle: FunctionComponent<PropsWithChildren> = ({
     </Text>
   );
 };
-const DefaultScreenHeaderLeft: FunctionComponent = () => {
+export const DefaultScreenHeaderLeft: FunctionComponent = () => {
   const style = useStyle();
   const nav = useNavigation();
   const isSettingIntro =

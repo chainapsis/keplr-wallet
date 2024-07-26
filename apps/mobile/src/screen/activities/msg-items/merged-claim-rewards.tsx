@@ -18,6 +18,7 @@ import {Text} from 'react-native';
 import {Gutter} from '../../../components/gutter';
 import {VerticalCollapseTransition} from '../../../components/transition';
 import {ItemLogo} from './logo.tsx';
+import {MessageClaimRewardIcon} from '../../../components/icon';
 
 export const MsgRelationMergedClaimRewards: FunctionComponent<{
   msg: MsgHistory;
@@ -27,6 +28,7 @@ export const MsgRelationMergedClaimRewards: FunctionComponent<{
 }> = observer(({msg, prices, targetDenom, isInAllActivitiesPage}) => {
   const {chainStore} = useStore();
 
+  const style = useStyle();
   const chainInfo = chainStore.getChain(msg.chainId);
 
   const amountPretty = useMemo(() => {
@@ -75,7 +77,12 @@ export const MsgRelationMergedClaimRewards: FunctionComponent<{
 
   return (
     <MsgItemBase
-      logo={<CheckIcon />}
+      logo={
+        <MessageClaimRewardIcon
+          size={40}
+          color={style.get('color-gray-200').color}
+        />
+      }
       chainId={msg.chainId}
       title="Claim Reward"
       amount={amountPretty}

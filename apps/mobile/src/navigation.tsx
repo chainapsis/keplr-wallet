@@ -124,13 +124,14 @@ import {Text} from 'react-native';
 import {ActivitiesScreen} from './screen/activities';
 import {DocumentFillIcon} from './components/icon/document-fill.tsx';
 import {DocumentOutlinedIcon} from './components/icon/document-outliend.tsx';
+import {TokenDetailScreen} from './screen/token-detail';
 
 type DefaultRegisterParams = {
   hideBackButton?: boolean;
 };
 
 export type RootStackParamList = {
-  Home: undefined;
+  Home?: {showAddressChainId?: string};
   'Home.Main': undefined;
   'Home.Stake.Dashboard': {chainId: string};
   Camera?: {
@@ -343,8 +344,11 @@ export type RootStackParamList = {
     initialGasAdjustment?: string;
     tempSwitchAmount?: string;
   };
-
   Activities: undefined;
+  TokenDetail: {
+    chainId: string;
+    coinMinimalDenom: string;
+  };
 };
 
 export type StakeNavigation = {
@@ -1320,6 +1324,7 @@ export const AppNavigation: FunctionComponent = observer(() => {
             }}
             component={IBCSwapDestinationSelectAssetScreen}
           />
+          <Stack.Screen name="TokenDetail" component={TokenDetailScreen} />
         </Stack.Navigator>
 
         <DeepLinkNavigationComponent />
@@ -1370,6 +1375,15 @@ export const DeepLinkNavigationComponent: FunctionComponent = observer(() => {
               });
               break;
             }
+            case 'Coinbase.ShowAddress': {
+              navigation.navigate('Home', {
+                showAddressChainId: deepLinkStore.needToNavigation.params[
+                  'showAddressChainId'
+                ] as string,
+              });
+
+              break;
+            }
             case 'Staking.ValidateDetail': {
               navigation.navigate('Stake', {
                 screen: 'Stake.ValidateDetail',
@@ -1380,6 +1394,16 @@ export const DeepLinkNavigationComponent: FunctionComponent = observer(() => {
                   validatorAddress: deepLinkStore.needToNavigation.params[
                     'validatorAddress'
                   ] as string,
+                },
+              });
+              break;
+            }
+
+            case 'Web.WebPage': {
+              navigation.navigate('WebTab', {
+                screen: 'Web.WebPage',
+                params: {
+                  url: deepLinkStore.needToNavigation.params['url'] as string,
                 },
               });
               break;

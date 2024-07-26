@@ -120,13 +120,21 @@ export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<Assets
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: AssetsFromSourceResponse }> {
-    const result = await simpleFetch<AssetsFromSourceResponse>(
+    const _result = await simpleFetch<AssetsFromSourceResponse>(
       this.baseURL,
       this.url,
       {
         method: "POST",
         headers: {
           "content-type": "application/json",
+          ...(() => {
+            const res: { authorization?: string } = {};
+            if (process.env["SKIP_API_KEY"]) {
+              res.authorization = process.env["SKIP_API_KEY"];
+            }
+
+            return res;
+          })(),
         },
         body: JSON.stringify({
           source_asset_chain_id: this.chainId,
@@ -135,6 +143,10 @@ export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<Assets
         signal: abortController.signal,
       }
     );
+    const result = {
+      headers: _result.headers,
+      data: _result.data,
+    };
 
     const validated = Schema.validate(result.data);
     if (validated.error) {

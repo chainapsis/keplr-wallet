@@ -88,7 +88,9 @@ export const MsgItemBase: FunctionComponent<{
     const clickable = !!explorerUrl;
 
     return (
-      <Box borderRadius={6} backgroundColor={style.get('color-gray-600').color}>
+      <Box
+        borderRadius={6}
+        backgroundColor={style.get('color-card-default').color}>
         <RectButton
           disabled={!clickable}
           onPress={() => {
@@ -110,8 +112,8 @@ export const MsgItemBase: FunctionComponent<{
                 <ExpoImage.Image
                   style={{
                     position: 'absolute',
-                    width: 14,
-                    height: 14,
+                    width: 18,
+                    height: 18,
                     bottom: 0,
                     right: 0,
                     borderRadius: 999999,

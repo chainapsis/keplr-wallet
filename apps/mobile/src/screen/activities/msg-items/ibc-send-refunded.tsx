@@ -4,9 +4,9 @@ import {useStore} from '../../../stores';
 import {isValidCoinStr, parseCoinStr} from '@keplr-wallet/common';
 import {CoinPretty} from '@keplr-wallet/unit';
 import {MsgItemBase} from './base.tsx';
-import {ArrowDownLeftIcon} from './receive.tsx';
 import {useStyle} from '../../../styles';
 import {MsgHistory} from '../types.ts';
+import {MessageReceiveIcon} from '../../../components/icon';
 
 export const MsgRelationIBCSendRefunded: FunctionComponent<{
   msg: MsgHistory;
@@ -39,8 +39,8 @@ export const MsgRelationIBCSendRefunded: FunctionComponent<{
   return (
     <MsgItemBase
       logo={
-        <ArrowDownLeftIcon
-          size={16}
+        <MessageReceiveIcon
+          size={40}
           color={style.get('color-gray-200').color}
         />
       }

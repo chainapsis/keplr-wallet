@@ -289,6 +289,19 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
     throw new Error(`coin type ${value.bip44.coinType} is duplicated`);
   }
 
+  if (value.bip44.coinType === 60) {
+    if (value.alternativeBIP44s && value.alternativeBIP44s.length > 0) {
+      throw new Error(`coin type 60 can't have alternative BIP44s`);
+    }
+  } else {
+    if (
+      value.alternativeBIP44s &&
+      value.alternativeBIP44s.find((bip44) => bip44.coinType === 60)
+    ) {
+      throw new Error(`coin type 60 can't be alternative BIP44`);
+    }
+  }
+
   if (
     value.stakeCurrency &&
     !value.currencies.find(

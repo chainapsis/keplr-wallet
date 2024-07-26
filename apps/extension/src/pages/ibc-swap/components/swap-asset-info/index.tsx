@@ -32,6 +32,7 @@ import SimpleBar from "simplebar-react";
 import { SearchTextInput } from "../../../../components/input";
 import { useFocusOnMount } from "../../../../hooks/use-focus-on-mount";
 import { FormattedMessage, useIntl } from "react-intl";
+import { Tooltip } from "../../../../components/tooltip";
 
 const Styles = {
   TextInput: styled.input`
@@ -162,6 +163,31 @@ export const SwapAssetInfo: FunctionComponent<{
                   id: "page.ibc-swap.components.swap-asset-info.to",
                 })}
           </Subtitle3>
+          {type === "to" ? (
+            <React.Fragment>
+              <Gutter size="0.25rem" />
+              <Box height="1px" alignX="center" alignY="center">
+                <Tooltip
+                  content={intl.formatMessage({
+                    id: "page.ibc-swap.components.swap-asset-info.quote-slippage-information-paragraph",
+                  })}
+                >
+                  <Box width="1rem" height="1rem">
+                    <InfoIcon
+                      width="1rem"
+                      height="1rem"
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-200"]
+                          : ColorPalette["gray-300"]
+                      }
+                    />
+                  </Box>
+                </Tooltip>
+              </Box>
+            </React.Fragment>
+          ) : null}
+
           {(() => {
             if (type === "to") {
               if (amountConfig.isFetching) {
@@ -939,6 +965,28 @@ const CogIcon: FunctionComponent<{
         fillRule="evenodd"
         d="M5.488 1.263A.7.7 0 016.174.7h1.652a.7.7 0 01.687.563l.231 1.156c.493.188.948.453 1.35.78l1.119-.378a.7.7 0 01.83.314l.826 1.43a.7.7 0 01-.144.876l-.887.78a4.933 4.933 0 010 1.558l.887.78a.7.7 0 01.144.876l-.826 1.43a.7.7 0 01-.83.313l-1.12-.378a4.895 4.895 0 01-1.349.78l-.231 1.157a.7.7 0 01-.687.563H6.174a.7.7 0 01-.686-.563l-.232-1.156a4.895 4.895 0 01-1.35-.78l-1.118.378a.7.7 0 01-.83-.313L1.13 9.434a.7.7 0 01.144-.876l.887-.78a4.935 4.935 0 010-1.558l-.887-.78a.7.7 0 01-.144-.876l.826-1.43a.7.7 0 01.83-.314l1.12.379a4.895 4.895 0 011.35-.78l.23-1.157zM7 9.1a2.1 2.1 0 100-4.2 2.1 2.1 0 000 4.2z"
         clipRule="evenodd"
+      />
+    </svg>
+  );
+};
+
+const InfoIcon: FunctionComponent<{
+  width: string;
+  height: string;
+  color: string;
+}> = ({ width, height, color }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="none"
+    >
+      <path
+        d="M7.33325 4.66665H8.66659V5.99998H7.33325V4.66665ZM7.33325 7.33331H8.66659V11.3333H7.33325V7.33331ZM7.99992 1.33331C4.31992 1.33331 1.33325 4.31998 1.33325 7.99998C1.33325 11.68 4.31992 14.6666 7.99992 14.6666C11.6799 14.6666 14.6666 11.68 14.6666 7.99998C14.6666 4.31998 11.6799 1.33331 7.99992 1.33331ZM7.99992 13.3333C5.05992 13.3333 2.66659 10.94 2.66659 7.99998C2.66659 5.05998 5.05992 2.66665 7.99992 2.66665C10.9399 2.66665 13.3333 5.05998 13.3333 7.99998C13.3333 10.94 10.9399 13.3333 7.99992 13.3333Z"
+        fill={color || "currentColor"}
       />
     </svg>
   );

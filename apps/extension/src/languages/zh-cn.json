@@ -371,7 +371,6 @@
   "page.ibc-swap.components.swap-asset-info.modal.search.placeholder": "搜索链",
   "page.ibc-swap.components.swap-fee-info.button.transaction-fee": "交易费",
   "page.ibc-swap.components.swap-fee-info.button.service-fee": "Keplr兑换费",
-  "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph": "启动活动：2023年底前Keplr兑换费为0%",
   "page.ibc-swap.components.slippage-modal.title": "滑价设置",
   "page.ibc-swap.components.slippage-modal.label.slippage-tolerance": "滑价容差",
   "page.ibc-swap.components.slippage-modal.label.slippage-custom": "自定义滑价",

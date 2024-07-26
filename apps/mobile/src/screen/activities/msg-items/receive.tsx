@@ -2,12 +2,11 @@ import React, {FunctionComponent, useMemo} from 'react';
 import {observer} from 'mobx-react-lite';
 import {MsgItemBase} from './base.tsx';
 import {useStore} from '../../../stores';
-import {IconProps} from '../../../components/icon/types.ts';
-import {Path, Svg} from 'react-native-svg';
 import {useStyle} from '../../../styles';
 import {CoinPretty} from '@keplr-wallet/unit';
 import {Bech32Address} from '@keplr-wallet/cosmos';
 import {MsgHistory} from '../types.ts';
+import {MessageReceiveIcon} from '../../../components/icon';
 
 export const MsgRelationReceive: FunctionComponent<{
   msg: MsgHistory;
@@ -48,8 +47,8 @@ export const MsgRelationReceive: FunctionComponent<{
   return (
     <MsgItemBase
       logo={
-        <ArrowDownLeftIcon
-          size={16}
+        <MessageReceiveIcon
+          size={40}
           color={style.get('color-gray-200').color}
         />
       }
@@ -68,20 +67,3 @@ export const MsgRelationReceive: FunctionComponent<{
     />
   );
 });
-
-export const ArrowDownLeftIcon: FunctionComponent<IconProps> = ({
-  size,
-  color,
-}) => {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 16 16" fill="none">
-      <Path
-        d="M13 3L3 13M3 13L10.5 13M3 13L3 5.5"
-        stroke={color || 'currentColor'}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.87"
-      />
-    </Svg>
-  );
-};

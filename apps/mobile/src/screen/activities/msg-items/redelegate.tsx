@@ -5,9 +5,8 @@ import {MsgHistory} from '../types.ts';
 import {CoinPretty} from '@keplr-wallet/unit';
 import {Staking} from '@keplr-wallet/stores';
 import {MsgItemBase} from './base.tsx';
-import {IconProps} from '../../../components/icon/types.ts';
-import {Path, Svg} from 'react-native-svg';
 import {useStyle} from '../../../styles';
+import {MessageRedelegateIcon} from '../../../components/icon';
 
 export const MsgRelationRedelegate: FunctionComponent<{
   msg: MsgHistory;
@@ -95,7 +94,10 @@ export const MsgRelationRedelegate: FunctionComponent<{
   return (
     <MsgItemBase
       logo={
-        <RedelegateIcon size={16} color={style.get('color-gray-200').color} />
+        <MessageRedelegateIcon
+          size={40}
+          color={style.get('color-gray-200').color}
+        />
       }
       chainId={msg.chainId}
       title="Switch Validator"
@@ -113,17 +115,3 @@ export const MsgRelationRedelegate: FunctionComponent<{
     />
   );
 });
-
-export const RedelegateIcon: FunctionComponent<IconProps> = ({size, color}) => {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 18 16" fill="none">
-      <Path
-        d="M9 3L14 8L9 13M5 3L10 8L5 13"
-        stroke={color || 'currentColor'}
-        strokeWidth="1.66667"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-};

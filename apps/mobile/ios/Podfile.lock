@@ -946,7 +946,7 @@ PODS:
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - react-native-compat (2.10.5):
+  - react-native-compat (2.13.3):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
@@ -1501,7 +1501,7 @@ SPEC CHECKSUMS:
   react-native-ble-plx: f10240444452dfb2d2a13a0e4f58d7783e92d76e
   react-native-blur: cfdad7b3c01d725ab62a8a729f42ea463998afa2
   react-native-cameraroll: cb0d0a2b76a9d56461ea0ab5782f69e694544840
-  react-native-compat: 85c3e9833701f7a40f4aa1085ce238d1bef36db4
+  react-native-compat: b770968205a7e199e0cdfb99b0c1979144dccc43
   react-native-netinfo: 8a7fd3f7130ef4ad2fb4276d5c9f8d3f28d2df3d
   react-native-safe-area-context: 0ee144a6170530ccc37a0fd9388e28d06f516a89
   react-native-webview: 05fa0e766f1c408e8c293cbcb84b2c199711cfd1

@@ -5,9 +5,8 @@ import {useStore} from '../../../stores';
 import {CoinPretty} from '@keplr-wallet/unit';
 import {Bech32Address} from '@keplr-wallet/cosmos';
 import {MsgItemBase} from './base.tsx';
-import {IconProps} from '../../../components/icon/types.ts';
-import {Path, Svg} from 'react-native-svg';
 import {useStyle} from '../../../styles';
+import {MessageSendIcon} from '../../../components/icon';
 
 export const MsgRelationSend: FunctionComponent<{
   msg: MsgHistory;
@@ -48,7 +47,7 @@ export const MsgRelationSend: FunctionComponent<{
   return (
     <MsgItemBase
       logo={
-        <ArrowUpRightIcon size={16} color={style.get('color-gray-200').color} />
+        <MessageSendIcon size={40} color={style.get('color-gray-200').color} />
       }
       chainId={msg.chainId}
       title="Send"
@@ -65,20 +64,3 @@ export const MsgRelationSend: FunctionComponent<{
     />
   );
 });
-
-export const ArrowUpRightIcon: FunctionComponent<IconProps> = ({
-  size,
-  color,
-}) => {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 16 16" fill="none">
-      <Path
-        d="M3 13.5l10-10m0 0H5.5m7.5 0V11"
-        stroke={color || 'currentColor'}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.87"
-      />
-    </Svg>
-  );
-};

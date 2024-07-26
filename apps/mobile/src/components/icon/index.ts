@@ -33,3 +33,13 @@ export * from './plus';
 export * from './home-filled';
 export * from './home-outlined';
 export * from './setting-outlined';
+
+export * from './msg-send';
+export * from './msg-receive';
+export * from './msg-claim-reward';
+export * from './msg-delegate';
+export * from './msg-undelegate';
+export * from './msg-redelegate';
+export * from './msg-cancel-undelegate';
+export * from './msg-swap';
+export * from './msg-vote';

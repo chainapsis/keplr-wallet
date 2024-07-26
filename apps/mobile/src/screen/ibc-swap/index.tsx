@@ -2,8 +2,8 @@ import React, {FunctionComponent, useEffect, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {PageWithScrollView} from '../../components/page';
 import {useStyle} from '../../styles';
-import {XAxis} from '../../components/axis';
-import {Text} from 'react-native';
+import {XAxis, YAxis} from '../../components/axis';
+import {Linking, Text} from 'react-native';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {SettingIcon} from '../../components/icon';
 import {IconButton} from '../../components/icon-button';
@@ -20,7 +20,7 @@ import {RootStackParamList, StackNavProp} from '../../navigation.tsx';
 import {SlippageModal} from './components/slippage-modal';
 import {useIBCSwapConfig} from '@keplr-wallet/hooks-internal';
 import {useStore} from '../../stores';
-import {SwapFeeBps} from '../../config.ui.ts';
+import {SwapFeeBps, TermsOfUseUrl} from '../../config.ui.ts';
 import {useGasSimulator, useTxConfigsValidate} from '@keplr-wallet/hooks';
 import {AsyncKVStore} from '../../common';
 import {autorun} from 'mobx';
@@ -95,6 +95,7 @@ export const IBCSwapScreen: FunctionComponent = observer(() => {
     return uiConfigStore.ibcSwapConfig.getAmountOutCurrency();
   })();
 
+  const [swapFeeBps, setSwapFeeBps] = useState(SwapFeeBps.value);
   const ibcSwapConfigs = useIBCSwapConfig(
     chainStore,
     queriesStore,
@@ -106,8 +107,113 @@ export const IBCSwapScreen: FunctionComponent = observer(() => {
     200000,
     outChainId,
     outCurrency,
-    SwapFeeBps.value,
+    swapFeeBps,
   );
+  const querySwapFeeBps = queriesStore.simpleQuery.queryGet<{
+    pairs?: {
+      [key: string]: number | undefined;
+    };
+    swapFeeBps?: 50;
+  }>(process.env['KEPLR_EXT_CONFIG_SERVER'] || '', '/swap-fee/info.json');
+  useEffect(() => {
+    const defaultSwapFeeBps = SwapFeeBps.value;
+    if (querySwapFeeBps.response) {
+      let inOut: [
+        {
+          chainId: string;
+          coinMinimalDenom: string;
+        },
+        {
+          chainId: string;
+          coinMinimalDenom: string;
+        },
+      ] = [
+        (() => {
+          const currency = ibcSwapConfigs.amountConfig.amount[0].currency;
+          if (
+            'originChainId' in currency &&
+            'originCurrency' in currency &&
+            currency.originChainId &&
+            currency.originCurrency
+          ) {
+            return {
+              chainId: currency.originChainId,
+              coinMinimalDenom: currency.originCurrency.coinMinimalDenom,
+            };
+          }
+          return {
+            chainId: ibcSwapConfigs.amountConfig.chainId,
+            coinMinimalDenom: currency.coinMinimalDenom,
+          };
+        })(),
+        (() => {
+          const currency = ibcSwapConfigs.amountConfig.outCurrency;
+          if (
+            'originChainId' in currency &&
+            'originCurrency' in currency &&
+            currency.originChainId &&
+            currency.originCurrency
+          ) {
+            return {
+              chainId: currency.originChainId,
+              coinMinimalDenom: currency.originCurrency.coinMinimalDenom,
+            };
+          }
+          return {
+            chainId: ibcSwapConfigs.amountConfig.outChainId,
+            coinMinimalDenom: currency.coinMinimalDenom,
+          };
+        })(),
+      ];
+
+      inOut = inOut.sort((a, b) => {
+        const aChainIdentifier = chainStore.getChain(a.chainId).chainIdentifier;
+        const bChainIdentifier = chainStore.getChain(b.chainId).chainIdentifier;
+
+        if (aChainIdentifier === bChainIdentifier) {
+          return 0;
+        }
+        return aChainIdentifier < bChainIdentifier ? -1 : 1;
+      });
+
+      const key = inOut
+        .map(
+          v =>
+            `${chainStore.getChain(v.chainId).chainIdentifier}/${
+              v.coinMinimalDenom
+            }`,
+        )
+        .join('/');
+
+      if (
+        querySwapFeeBps.response.data['pairs'] &&
+        querySwapFeeBps.response.data['pairs'][key] != null
+      ) {
+        const fee = querySwapFeeBps.response.data['pairs'][key];
+        if (fee != null) {
+          setSwapFeeBps(fee);
+        }
+      } else {
+        if (querySwapFeeBps.response.data['swapFeeBps'] != null) {
+          const fee = querySwapFeeBps.response.data['swapFeeBps'];
+          if (fee != null) {
+            setSwapFeeBps(fee);
+          }
+        } else {
+          setSwapFeeBps(defaultSwapFeeBps);
+        }
+      }
+    } else {
+      setSwapFeeBps(defaultSwapFeeBps);
+    }
+  }, [
+    chainStore,
+    ibcSwapConfigs.amountConfig.amount,
+    ibcSwapConfigs.amountConfig.chainId,
+    ibcSwapConfigs.amountConfig.outChainId,
+    ibcSwapConfigs.amountConfig.outCurrency,
+    querySwapFeeBps.response,
+  ]);
 
   ibcSwapConfigs.amountConfig.setCurrency(inCurrency);
 
@@ -431,18 +537,6 @@ export const IBCSwapScreen: FunctionComponent = observer(() => {
           <Text style={style.flatten(['h4', 'color-text-high'])}>
             <FormattedMessage id="page.ibc-swap.title.swap" />
           </Text>
-
-          <Gutter size={4} />
-
-          <Box
-            backgroundColor={style.get('color-gray-500').color}
-            paddingX={5}
-            paddingY={2.5}
-            borderRadius={4}>
-            <Text style={style.flatten(['text-caption2', 'color-gray-100'])}>
-              Beta
-            </Text>
-          </Box>
 
           <Gutter size={8} />
 
@@ -912,6 +1006,20 @@ export const IBCSwapScreen: FunctionComponent = observer(() => {
           }
         }}
       />
+
+      <Gutter size={12} />
+
+      <YAxis alignX="center">
+        <TouchableWithoutFeedback
+          style={{paddingVertical: 8, paddingHorizontal: 16}}
+          onPress={() => {
+            Linking.openURL(TermsOfUseUrl);
+          }}>
+          <Text style={style.flatten(['text-button1', 'color-gray-300'])}>
+            <FormattedMessage id="page.ibc-swap.button.terms-of-use.title" />
+          </Text>
+        </TouchableWithoutFeedback>
+      </YAxis>
 
       <SlippageModal
         // uiConfigStore.ibcSwapConfig.slippageIsValid에 대해서도 확인한다.

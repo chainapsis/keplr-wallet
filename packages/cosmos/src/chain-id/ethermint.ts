@@ -8,6 +8,13 @@ export class EthermintChainIdHelper {
   } {
     const cosmosChainId = ChainIdHelper.parse(chainId);
 
+    if (chainId === "carbon-1") {
+      return {
+        ethChainId: 9790,
+        ...cosmosChainId,
+      };
+    }
+
     if (chainId.startsWith("injective")) {
       const injectiveTestnetChainIds = ["injective-777", "injective-888"];
 
