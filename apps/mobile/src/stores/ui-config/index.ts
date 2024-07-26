@@ -20,6 +20,10 @@ import {AddressBookConfig} from './address-book';
 import {MessageRequester} from '@keplr-wallet/router';
 import {AutoLockConfig} from './auto-lock';
 import {IBCSwapConfig} from './ibc-swap.ts';
+import {SelectWalletConfig} from './select-wallet.ts';
+import {ChangelogConfig} from './changelog.ts';
+import {APP_VERSION} from '../../../constants.ts';
+import {NewChainSuggestionConfig} from './new-chain.ts';
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
@@ -43,6 +47,9 @@ export class UIConfigStore {
   public readonly addressBookConfig: AddressBookConfig;
   public readonly autoLockConfig: AutoLockConfig;
   public readonly ibcSwapConfig: IBCSwapConfig;
+  public readonly selectWalletConfig: SelectWalletConfig;
+  public readonly changelogConfig: ChangelogConfig;
+  public readonly newChainSuggestionConfig: NewChainSuggestionConfig;
 
   @observable
   protected _isInitialized: boolean = false;
@@ -59,6 +66,9 @@ export class UIConfigStore {
   };
 
   protected _platform: 'mobile' = 'mobile';
+
+  protected _installedVersion: string = '';
+  protected _currentVersion: string = '';
 
   @observable
   protected _languageOptions: LanguageOption = {
@@ -105,6 +115,13 @@ export class UIConfigStore {
       keyRingStore,
     );
     this.ibcSwapConfig = new IBCSwapConfig(kvStores.kvStore, chainStore);
+    this.selectWalletConfig = new SelectWalletConfig(kvStores.kvStore);
+    this.changelogConfig = new ChangelogConfig(kvStores.kvStore);
+    this.newChainSuggestionConfig = new NewChainSuggestionConfig(
+      kvStores.kvStore,
+      chainStore,
+      this.changelogConfig,
+    );
 
     this._icnsInfo = _icnsInfo;
 
@@ -118,10 +135,36 @@ export class UIConfigStore {
   }
 
   protected async init() {
-    // Set the last version to the kv store.
-    // At present, this is not used at all.
-    // For the future, this can be used to show the changelog.
-    await this.kvStore.set('lastVersion', 0);
+    let lastVersion = await this.kvStore.get<string>('lastVersion');
+    // 여기서 number 0가 나올 수 있는건 일종의 실수이다.
+    // 이전에 version 처리가 명확하지 않았던 때에 0로 일단 넣어놨었다...
+    // 근데 0은 정상 버전일리가 없기 때문에 일단 대충 "2.0.0"으로 취급한다.
+    // @ts-ignore
+    if (lastVersion === 0) {
+      lastVersion = '2.0.0';
+    }
+    {
+      this._currentVersion = APP_VERSION;
+
+      const installedVersion = await this.kvStore.get<string>(
+        'installedVersion',
+      );
+      if (!installedVersion) {
+        if (lastVersion) {
+          // installedVersion은 처음부터 존재했던게 아니라 중간에 추가되었기 때문에 정확하게 알 수 없다.
+          // 유저가 실제로 install 했던 버전이거나 installedVersion이 추가되기 직전에 유저가 마지막으로 사용했던 버전을 나타낸다.
+          await this.kvStore.set('installedVersion', lastVersion);
+          this._installedVersion = lastVersion;
+        } else {
+          await this.kvStore.set('installedVersion', this._currentVersion);
+          this._installedVersion = this._currentVersion;
+        }
+      } else {
+        this._installedVersion = installedVersion;
+      }
+
+      await this.kvStore.set('lastVersion', this._currentVersion);
+    }
 
     {
       const saved = await this.kvStore.get<string>('fiatCurrency');
@@ -165,6 +208,15 @@ export class UIConfigStore {
       this.addressBookConfig.init(),
       this.autoLockConfig.init(),
       this.ibcSwapConfig.init(),
+      this.selectWalletConfig.init(),
+      this.changelogConfig.init(
+        lastVersion || this._currentVersion,
+        this._currentVersion,
+      ),
+      this.newChainSuggestionConfig.init(
+        this._installedVersion,
+        this._currentVersion,
+      ),
     ]);
 
     runInAction(() => {
@@ -273,5 +325,6 @@ export class UIConfigStore {
 
   async removeStatesWhenErrorOccurredDuringRending() {
     await this.ibcSwapConfig.removeStatesWhenErrorOccurredDuringRendering();
+    await this.newChainSuggestionConfig.removeStatesWhenErrorOccurredDuringRendering();
   }
 }

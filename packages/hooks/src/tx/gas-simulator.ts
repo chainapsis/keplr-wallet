@@ -329,6 +329,7 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     // Even though the implementation is not intuitive, the goals are
     // - Every time the observable used in simulateGasFn is updated, the simulation is refreshed.
     // - The simulation is refreshed only when changing from zero fee to paying fee or vice versa.
+    // - feemarket 등에서 문제를 일으켜서 fee의 currency 자체가 바뀔때도 refresh 하도록 수정되었다. 이 경우 원활한 처리를 위해서 (귀찮아서) storeKey setter에서 적용된다.
     this._disposers.push(
       autorun(() => {
         if (!this.enabled) {
@@ -515,7 +516,11 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
   @computed
   protected get storeKey(): string {
     const chainIdentifier = ChainIdHelper.parse(this.chainId);
-    return `${chainIdentifier.identifier}/${this.key}`;
+    const fees = this.feeConfig
+      .toStdFee()
+      .amount.map((coin) => coin.denom)
+      .join("/");
+    return `${chainIdentifier.identifier}/${fees}/${this.key}}`;
   }
 }
 

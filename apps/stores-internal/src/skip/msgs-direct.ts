@@ -167,13 +167,21 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: MsgsDirectResponse }> {
-    const result = await simpleFetch<MsgsDirectResponse>(
+    const _result = await simpleFetch<MsgsDirectResponse>(
       this.baseURL,
       this.url,
       {
         method: "POST",
         headers: {
           "content-type": "application/json",
+          ...(() => {
+            const res: { authorization?: string } = {};
+            if (process.env["SKIP_API_KEY"]) {
+              res.authorization = process.env["SKIP_API_KEY"];
+            }
+
+            return res;
+          })(),
         },
         body: JSON.stringify({
           source_asset_denom: this.amountInDenom,
@@ -200,6 +208,10 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
         signal: abortController.signal,
       }
     );
+    const result = {
+      headers: _result.headers,
+      data: _result.data,
+    };
 
     const validated = Schema.validate(result.data);
     if (validated.error) {

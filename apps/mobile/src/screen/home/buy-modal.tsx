@@ -1,185 +1,48 @@
-import {observer} from 'mobx-react-lite';
-import React, {FunctionComponent, useEffect, useState} from 'react';
-import {StyleSheet, Text} from 'react-native';
-import {FiatOnRampServiceInfo, FiatOnRampServiceInfos} from '../../config.ui';
-import {simpleFetch} from '@keplr-wallet/simple-fetch';
-import {useStore} from '../../stores';
-import {ChainInfo} from '@keplr-wallet/types';
-import {useStyle} from '../../styles';
-import {RectButton} from 'react-native-gesture-handler';
-import {Box} from '../../components/box';
-import {TransakSvg} from '../../components/icon/fiat/transak';
-import {KadoSvg} from '../../components/icon/fiat/kado';
-import {MoonpaySvg} from '../../components/icon/fiat/moonpay';
-import {Gutter} from '../../components/gutter';
-import {Button} from '../../components/button';
 import {registerCardModal} from '../../components/modal/card';
-import {StackNavProp} from '../../navigation';
+import {observer} from 'mobx-react-lite';
+import {StackNavProp} from '../../navigation.tsx';
+import {FiatOnRampServiceInfo} from '../../config.ui.ts';
+import {useStyle} from '../../styles';
 import {FormattedMessage, useIntl} from 'react-intl';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {Box} from '../../components/box';
+import {IconButton} from '../../components/icon-button';
+import {ArrowLeftIcon} from '../../components/icon';
+import {StyleSheet, Text} from 'react-native';
+import {Gutter} from '../../components/gutter';
+import React, {FunctionComponent} from 'react';
+import {Button} from '../../components/button';
+import {RectButton} from 'react-native-gesture-handler';
+import {MoonpaySvg} from '../../components/icon/fiat/moonpay.tsx';
+import {KadoSvg} from '../../components/icon/fiat/kado.tsx';
+import {TransakSvg} from '../../components/icon/fiat/transak.tsx';
 
 export const BuyModal = registerCardModal(
   observer<{
     navigation: StackNavProp;
-
-    isOpen: boolean;
+    buySupportServiceInfos: (FiatOnRampServiceInfo & {buyUrl?: string})[];
     setIsOpen: (isOpen: boolean) => void;
-  }>(({setIsOpen, navigation}) => {
-    const {accountStore, chainStore} = useStore();
+    setCurrentScene?: (key: string) => void;
+  }>(({setCurrentScene, navigation, setIsOpen, buySupportServiceInfos}) => {
     const style = useStyle();
     const intl = useIntl();
 
-    const [fiatOnRampServiceInfos, setFiatOnRampServiceInfos] = useState(
-      FiatOnRampServiceInfos,
-    );
-    useEffect(() => {
-      (async () => {
-        const response = await simpleFetch<{list: FiatOnRampServiceInfo[]}>(
-          'https://raw.githubusercontent.com/chainapsis/keplr-fiat-on-off-ramp-registry/main/fiat-on-off-ramp-list.json',
-        );
-
-        setFiatOnRampServiceInfos(response.data.list);
-      })();
-    }, []);
-
-    const buySupportServiceInfos = fiatOnRampServiceInfos.map(serviceInfo => {
-      const buySupportChainIds = Object.keys(
-        serviceInfo.buySupportCoinDenomsByChainId,
-      );
-
-      const buySupportDefaultChainInfo = (() => {
-        if (
-          buySupportChainIds.length > 0 &&
-          chainStore.hasChain(buySupportChainIds[0])
-        ) {
-          return chainStore.getChain(buySupportChainIds[0]);
-        }
-      })();
-
-      const buySupportChainAccounts = (() => {
-        const res: {
-          chainInfo: ChainInfo;
-          bech32Address: string;
-        }[] = [];
-
-        for (const chainId of buySupportChainIds) {
-          if (chainStore.hasChain(chainId)) {
-            res.push({
-              chainInfo: chainStore.getChain(chainId),
-              bech32Address: accountStore.getAccount(chainId).bech32Address,
-            });
-          }
-        }
-
-        return res;
-      })();
-
-      const buyUrlParams = (() => {
-        switch (serviceInfo.serviceId) {
-          case 'moonpay':
-            return {
-              apiKey:
-                process.env['KEPLR_EXT_MOONPAY_API_KEY'] ?? serviceInfo.apiKey,
-              showWalletAddressForm: 'true',
-              walletAddresses: encodeURIComponent(
-                JSON.stringify(
-                  buySupportChainAccounts.reduce(
-                    (acc, cur) => ({
-                      ...acc,
-                      [(
-                        cur.chainInfo.stakeCurrency ||
-                        cur.chainInfo.currencies[0]
-                      ).coinDenom.toLowerCase()]: cur.bech32Address,
-                    }),
-                    {},
-                  ),
-                ),
-              ),
-              ...(buySupportDefaultChainInfo && {
-                defaultCurrencyCode: (
-                  buySupportDefaultChainInfo.stakeCurrency ||
-                  buySupportDefaultChainInfo.currencies[0]
-                ).coinDenom.toLowerCase(),
-              }),
-            };
-          case 'transak':
-            return {
-              apiKey:
-                process.env['KEPLR_EXT_TRANSAK_API_KEY'] ?? serviceInfo.apiKey,
-              hideMenu: 'true',
-              walletAddressesData: encodeURIComponent(
-                JSON.stringify({
-                  coins: buySupportChainAccounts.reduce(
-                    (acc, cur) => ({
-                      ...acc,
-                      [(
-                        cur.chainInfo.stakeCurrency ||
-                        cur.chainInfo.currencies[0]
-                      ).coinDenom]: {
-                        address: cur.bech32Address,
-                      },
-                    }),
-                    {},
-                  ),
-                }),
-              ),
-              cryptoCurrencyList: buySupportChainAccounts
-                .map(
-                  chainAccount =>
-                    (
-                      chainAccount.chainInfo.stakeCurrency ||
-                      chainAccount.chainInfo.currencies[0]
-                    ).coinDenom,
-                )
-                .join(','),
-              ...(buySupportDefaultChainInfo && {
-                defaultCryptoCurrency: (
-                  buySupportDefaultChainInfo.stakeCurrency ||
-                  buySupportDefaultChainInfo.currencies[0]
-                ).coinDenom,
-              }),
-            };
-          case 'kado':
-            return {
-              apiKey:
-                process.env['KEPLR_EXT_KADO_API_KEY'] ?? serviceInfo.apiKey,
-              product: 'BUY',
-              networkList: buySupportChainAccounts.map(chainAccount =>
-                chainAccount.chainInfo.chainName.toUpperCase(),
-              ),
-              cryptoList: [
-                ...new Set(
-                  Object.values(
-                    serviceInfo.buySupportCoinDenomsByChainId,
-                  ).flat(),
-                ),
-              ],
-              ...(buySupportDefaultChainInfo && {
-                onRevCurrency:
-                  serviceInfo.buySupportCoinDenomsByChainId[
-                    buySupportDefaultChainInfo.chainId
-                  ]?.[0] ?? 'USDC',
-                network: buySupportDefaultChainInfo.chainName.toUpperCase(),
-              }),
-            };
-          default:
-            return;
-        }
-      })();
-      const buyUrl = buyUrlParams
-        ? `${serviceInfo.buyOrigin}?${Object.entries(buyUrlParams)
-            .map(paramKeyValue => paramKeyValue.join('='))
-            .join('&')}`
-        : undefined;
-
-      return {
-        ...serviceInfo,
-        buyUrl,
-      };
-    });
+    const safeAreaInsets = useSafeAreaInsets();
 
     return (
-      <Box paddingX={12} paddingBottom={12}>
-        <Box paddingY={8}>
+      <Box paddingX={12} paddingBottom={12 + safeAreaInsets.bottom}>
+        <Box paddingY={8} alignY="center">
+          {setCurrentScene ? (
+            <Box position="absolute" zIndex={1}>
+              <IconButton
+                onPress={() => {
+                  setCurrentScene('List');
+                }}
+                icon={color => <ArrowLeftIcon color={color} size={24} />}
+                containerStyle={style.flatten(['width-32', 'height-32'])}
+              />
+            </Box>
+          ) : null}
           <Text
             style={StyleSheet.flatten([
               style.flatten(['color-white', 'text-center', 'h4']),
@@ -187,8 +50,13 @@ export const BuyModal = registerCardModal(
             <FormattedMessage id="page.main.components.buy-crypto-modal.title" />
           </Text>
         </Box>
+
         <Gutter size={12} />
         {buySupportServiceInfos.map(serviceInfo => {
+          if (serviceInfo.buyUrl === undefined) {
+            return null;
+          }
+
           return (
             <React.Fragment key={serviceInfo.serviceId}>
               <ServiceItem

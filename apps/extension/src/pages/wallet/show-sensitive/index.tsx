@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { ColorPalette } from "../../../styles";
-import { Subtitle3 } from "../../../components/typography";
+import { Button1, Subtitle3 } from "../../../components/typography";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
 import { TextInput } from "../../../components/input";
@@ -14,7 +14,14 @@ import lottie from "lottie-web";
 import AniMnemonic from "../../../public/assets/lottie/wallet/mnemonic.json";
 import { useNavigate } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
-import { useTheme } from "styled-components";
+import styled, { useTheme } from "styled-components";
+import AnimCheckLight from "../../../public/assets/lottie/register/check-circle-icon-light.json";
+import AnimCheck from "../../../public/assets/lottie/register/check-circle-icon.json";
+import { Columns } from "../../../components/column";
+import {
+  TextButton,
+  Styles as TextButtonStyles,
+} from "../../../components/button-text";
 
 interface FormData {
   password: string;
@@ -198,9 +205,93 @@ export const WalletShowSensitivePage: FunctionComponent = observer(() => {
             >
               {sensitive}
             </Subtitle3>
+            <div style={{ flex: 1 }} />
+            <CopyToClipboard text={sensitive} />
           </Box>
         )}
       </Box>
     </HeaderLayout>
   );
 });
+
+const SVGNoneTextButton = styled(TextButton)`
+  svg {
+    fill: none;
+    stroke: none;
+  }
+
+  :hover {
+    svg {
+      fill: none;
+      stroke: none;
+    }
+  }
+
+  ${TextButtonStyles.Button} {
+    color: ${({ theme }) =>
+      theme.mode === "light"
+        ? ColorPalette["blue-400"]
+        : ColorPalette["gray-50"]};
+
+    :hover {
+      color: ${({ theme }) =>
+        theme.mode === "light"
+          ? ColorPalette["blue-500"]
+          : ColorPalette["gray-200"]};
+    }
+  }
+`;
+
+const CopyToClipboard: FunctionComponent<{ text: string }> = ({ text }) => {
+  const [hasCopied, setHasCopied] = useState(false);
+
+  const checkAnimDivRef = useRef<HTMLDivElement | null>(null);
+
+  const theme = useTheme();
+
+  useEffect(() => {
+    if (checkAnimDivRef.current) {
+      const anim = lottie.loadAnimation({
+        container: checkAnimDivRef.current,
+        renderer: "svg",
+        autoplay: true,
+        loop: false,
+        animationData: theme.mode === "light" ? AnimCheckLight : AnimCheck,
+      });
+
+      return () => {
+        anim.destroy();
+      };
+    }
+  }, [hasCopied]);
+
+  return (
+    <SVGNoneTextButton
+      text={
+        hasCopied ? (
+          <Columns sum={1} gutter="0.25rem">
+            <Button1 color={ColorPalette["green-400"]}>
+              <FormattedMessage id="pages.register.components.copy-to-clipboard.button-after" />
+            </Button1>
+            <div
+              style={{ width: "1.125rem", height: "1.125rem" }}
+              ref={checkAnimDivRef}
+            />
+          </Columns>
+        ) : (
+          <FormattedMessage id="pages.register.components.copy-to-clipboard.button-before" />
+        )
+      }
+      size="large"
+      onClick={async () => {
+        await navigator.clipboard.writeText(text);
+
+        setHasCopied(true);
+
+        setTimeout(() => {
+          setHasCopied(false);
+        }, 1000);
+      }}
+    />
+  );
+};

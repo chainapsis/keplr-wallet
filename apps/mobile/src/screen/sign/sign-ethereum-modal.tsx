@@ -27,6 +27,7 @@ import {EthSignType} from '@keplr-wallet/types';
 import {defaultRegistry} from './components/eth-tx/registry';
 import {UnsignedTransaction} from '@ethersproject/transactions';
 import {CoinPretty, Dec} from '@keplr-wallet/unit';
+import {Buffer} from 'buffer/';
 
 export const SignEthereumModal = registerCardModal(
   observer<{
@@ -114,6 +115,8 @@ export const SignEthereumModal = registerCardModal(
       try {
         await signEthereumInteractionStore.approveWithProceedNext(
           interactionData.id,
+          Buffer.from(signingDataText),
+          // TODO: Ledger support
           undefined,
           async () => {
             // noop

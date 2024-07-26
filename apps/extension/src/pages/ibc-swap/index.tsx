@@ -25,15 +25,15 @@ import {
 } from "@keplr-wallet/hooks";
 import { useNotification } from "../../hooks/notification";
 import { FormattedMessage, useIntl } from "react-intl";
-import { SwapFeeBps } from "../../config.ui";
+import { SwapFeeBps, TermsOfUseUrl } from "../../config.ui";
 import { BottomTabsHeightRem } from "../../bottom-tabs";
 import { useSearchParams } from "react-router-dom";
 import { useTxConfigsQueryString } from "../../hooks/use-tx-config-query-string";
 import { MainHeaderLayout } from "../main/layouts/header";
 import { XAxis } from "../../components/axis";
-import { Caption2, H4, Subtitle4 } from "../../components/typography";
+import { Caption2, H4 } from "../../components/typography";
 import { SlippageModal } from "./components/slippage-modal";
-import { useTheme } from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
@@ -50,6 +50,59 @@ import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { useEffectOnce } from "../../hooks/use-effect-once";
 import { amountToAmbiguousAverage, amountToAmbiguousString } from "../../utils";
+import { Button } from "../../components/button";
+import { TextButtonProps } from "../../components/button-text";
+
+const TextButtonStyles = {
+  Container: styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  `,
+
+  Button: styled.button<Omit<TextButtonProps, "onClick">>`
+    width: 100%;
+    height: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    overflow: hidden;
+
+    // Default font style.
+    // Override these in "buttonStyleFromColorAndMode" if needed.
+    font-weight: 500;
+    font-size: ${({ size }) => {
+      switch (size) {
+        case "large":
+          return "1rem";
+        default:
+          return "0.875rem";
+      }
+    }};
+    letter-spacing: 0.2px;
+
+    white-space: nowrap;
+
+    border: 0;
+    padding: 0 1rem;
+
+    color: ${({ theme }) =>
+      theme.mode === "light"
+        ? ColorPalette["gray-200"]
+        : ColorPalette["gray-300"]};
+    :hover {
+      color: ${({ theme }) =>
+        theme.mode === "light"
+          ? ColorPalette["gray-300"]
+          : ColorPalette["gray-200"]};
+    }
+    background-color: transparent;
+
+    position: relative;
+  `,
+};
 
 export const IBCSwapPage: FunctionComponent = observer(() => {
   const {
@@ -107,6 +160,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   })();
   // ----
 
+  const [swapFeeBps, setSwapFeeBps] = useState(SwapFeeBps.value);
   const ibcSwapConfigs = useIBCSwapConfig(
     chainStore,
     queriesStore,
@@ -118,8 +172,113 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     200000,
     outChainId,
     outCurrency,
-    SwapFeeBps.value
+    swapFeeBps
   );
+  const querySwapFeeBps = queriesStore.simpleQuery.queryGet<{
+    pairs?: {
+      [key: string]: number | undefined;
+    };
+    swapFeeBps?: 50;
+  }>(process.env["KEPLR_EXT_CONFIG_SERVER"], "/swap-fee/info.json");
+  useEffect(() => {
+    const defaultSwapFeeBps = SwapFeeBps.value;
+    if (querySwapFeeBps.response) {
+      let inOut: [
+        {
+          chainId: string;
+          coinMinimalDenom: string;
+        },
+        {
+          chainId: string;
+          coinMinimalDenom: string;
+        }
+      ] = [
+        (() => {
+          const currency = ibcSwapConfigs.amountConfig.amount[0].currency;
+          if (
+            "originChainId" in currency &&
+            "originCurrency" in currency &&
+            currency.originChainId &&
+            currency.originCurrency
+          ) {
+            return {
+              chainId: currency.originChainId,
+              coinMinimalDenom: currency.originCurrency.coinMinimalDenom,
+            };
+          }
+          return {
+            chainId: ibcSwapConfigs.amountConfig.chainId,
+            coinMinimalDenom: currency.coinMinimalDenom,
+          };
+        })(),
+        (() => {
+          const currency = ibcSwapConfigs.amountConfig.outCurrency;
+          if (
+            "originChainId" in currency &&
+            "originCurrency" in currency &&
+            currency.originChainId &&
+            currency.originCurrency
+          ) {
+            return {
+              chainId: currency.originChainId,
+              coinMinimalDenom: currency.originCurrency.coinMinimalDenom,
+            };
+          }
+          return {
+            chainId: ibcSwapConfigs.amountConfig.outChainId,
+            coinMinimalDenom: currency.coinMinimalDenom,
+          };
+        })(),
+      ];
+
+      inOut = inOut.sort((a, b) => {
+        const aChainIdentifier = chainStore.getChain(a.chainId).chainIdentifier;
+        const bChainIdentifier = chainStore.getChain(b.chainId).chainIdentifier;
+
+        if (aChainIdentifier === bChainIdentifier) {
+          return 0;
+        }
+        return aChainIdentifier < bChainIdentifier ? -1 : 1;
+      });
+
+      const key = inOut
+        .map(
+          (v) =>
+            `${chainStore.getChain(v.chainId).chainIdentifier}/${
+              v.coinMinimalDenom
+            }`
+        )
+        .join("/");
+
+      if (
+        querySwapFeeBps.response.data["pairs"] &&
+        querySwapFeeBps.response.data["pairs"][key] != null
+      ) {
+        const fee = querySwapFeeBps.response.data["pairs"][key];
+        if (fee != null) {
+          setSwapFeeBps(fee);
+        }
+      } else {
+        if (querySwapFeeBps.response.data["swapFeeBps"] != null) {
+          const fee = querySwapFeeBps.response.data["swapFeeBps"];
+          if (fee != null) {
+            setSwapFeeBps(fee);
+          }
+        } else {
+          setSwapFeeBps(defaultSwapFeeBps);
+        }
+      }
+    } else {
+      setSwapFeeBps(defaultSwapFeeBps);
+    }
+  }, [
+    chainStore,
+    ibcSwapConfigs.amountConfig.amount,
+    ibcSwapConfigs.amountConfig.chainId,
+    ibcSwapConfigs.amountConfig.outChainId,
+    ibcSwapConfigs.amountConfig.outCurrency,
+    querySwapFeeBps.response,
+  ]);
 
   ibcSwapConfigs.amountConfig.setCurrency(inCurrency);
 
@@ -456,17 +615,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   return (
     <MainHeaderLayout
       additionalPaddingBottom={BottomTabsHeightRem}
-      bottomButton={{
-        disabled: interactionBlocked,
-        text: intl.formatMessage({
-          id: "page.ibc-swap.button.next",
-        }),
-        color: "primary",
-        size: "large",
-        isLoading:
-          isTxLoading ||
-          accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap",
-      }}
       headerContainerStyle={{
         borderBottomStyle: "solid",
         borderBottomWidth: "1px",
@@ -842,33 +990,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               <FormattedMessage id="page.ibc-swap.title.swap" />
             </H4>
 
-            <Gutter size="0.25rem" />
-            <Box
-              height="1rem"
-              alignX="center"
-              alignY="center"
-              paddingX="0.35rem"
-              borderRadius="0.225rem"
-              backgroundColor={
-                theme.mode === "light"
-                  ? ColorPalette["blue-100"]
-                  : ColorPalette["gray-500"]
-              }
-            >
-              <Subtitle4
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["blue-400"]
-                    : ColorPalette["gray-100"]
-                }
-                style={{
-                  fontSize: "0.5625rem",
-                }}
-              >
-                Beta
-              </Subtitle4>
-            </Box>
-
             <Gutter size="0.5rem" />
 
             <Caption2
@@ -1058,6 +1179,40 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             }
           })()}
         />
+
+        <Gutter size="0.75rem" />
+
+        <Button
+          type="submit"
+          disabled={interactionBlocked}
+          text={intl.formatMessage({
+            id: "page.ibc-swap.button.next",
+          })}
+          color="primary"
+          size="large"
+          isLoading={
+            isTxLoading ||
+            accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
+          }
+        />
+
+        <Gutter size="0.75rem" />
+
+        <TextButtonStyles.Container>
+          <TextButtonStyles.Button
+            onClick={(e) => {
+              e.preventDefault();
+
+              browser.tabs.create({
+                url: TermsOfUseUrl,
+              });
+            }}
+          >
+            <FormattedMessage id="page.ibc-swap.button.terms-of-use.title" />
+          </TextButtonStyles.Button>
+        </TextButtonStyles.Container>
+
+        <Gutter size="0.75rem" />
       </Box>
 
       <SlippageModal

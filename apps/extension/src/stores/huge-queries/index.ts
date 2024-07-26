@@ -171,13 +171,26 @@ export class HugeQueriesStore {
           } else {
             const balance = queryBalance.getBalance(currency);
             if (balance) {
-              const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-              // If the balance is zero and currency is "native" or "erc20", don't show it.
-              if (
-                balance.balance.toDec().equals(HugeQueriesStore.zeroDec) &&
-                (denomHelper.type === "native" || denomHelper.type === "erc20")
-              ) {
-                continue;
+              if (balance.balance.toDec().equals(HugeQueriesStore.zeroDec)) {
+                const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+                // If the balance is zero and currency is "native" or "erc20", don't show it.
+                if (
+                  denomHelper.type === "native" ||
+                  denomHelper.type === "erc20"
+                ) {
+                  // However, if currency is native currency and not ibc, and same with currencies[0],
+                  // just show it as 0 balance.
+                  if (
+                    chainInfo.currencies.length > 0 &&
+                    chainInfo.currencies[0].coinMinimalDenom ===
+                      currency.coinMinimalDenom &&
+                    !currency.coinMinimalDenom.startsWith("ibc/")
+                  ) {
+                    // 위의 if 문을 뒤집기(?) 귀찮아서 그냥 빈 if-else로 처리한다...
+                  } else {
+                    continue;
+                  }
+                }
               }
 
               keysUsed.set(key, true);

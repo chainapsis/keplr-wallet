@@ -186,6 +186,7 @@ module.exports = {
         "src/public/assets/icon/icon-128.png",
         "base64"
       )}`,
+      SKIP_API_KEY: "",
     }),
     new ForkTsCheckerWebpackPlugin(),
     new CopyWebpackPlugin({

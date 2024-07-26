@@ -7,9 +7,8 @@ import {CoinPretty} from '@keplr-wallet/unit';
 import {ChainInfo} from '@keplr-wallet/types';
 import {Buffer} from 'buffer';
 import {MsgItemBase} from './base.tsx';
-import {IconProps} from '../../../components/icon/types.ts';
-import {Path, Svg} from 'react-native-svg';
 import {useStyle} from '../../../styles';
+import {MessageSwapIcon} from '../../../components/icon';
 
 export const MsgRelationIBCSwap: FunctionComponent<{
   msg: MsgHistory;
@@ -161,10 +160,7 @@ export const MsgRelationIBCSwap: FunctionComponent<{
   return (
     <MsgItemBase
       logo={
-        <ArrowRightLeftIcon
-          size={16}
-          color={style.get('color-gray-200').color}
-        />
+        <MessageSwapIcon size={40} color={style.get('color-gray-200').color} />
       }
       chainId={msg.chainId}
       title="Swap"
@@ -192,20 +188,3 @@ export const MsgRelationIBCSwap: FunctionComponent<{
     />
   );
 });
-
-export const ArrowRightLeftIcon: FunctionComponent<IconProps> = ({
-  size,
-  color,
-}) => {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 16 16" fill="none">
-      <Path
-        d="M5 14L2 11M2 11L5 8M2 11L11 11M11 2L14 5M14 5L11 8M14 5L5 5"
-        stroke={color || 'currentColor'}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.87"
-      />
-    </Svg>
-  );
-};
