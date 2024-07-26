@@ -43,6 +43,7 @@ export interface KeystoneOptions {
 
 export const handleEthereumPreSignByLedger = async (
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>,
+  signingMessage: Uint8Array,
   options?: LedgerOptions
 ): Promise<Uint8Array | undefined> => {
   const appData = interactionData.data.keyInsensitive;
@@ -71,13 +72,14 @@ export const handleEthereumPreSignByLedger = async (
     !!options?.useWebHID,
     publicKey,
     bip44Path,
-    interactionData.data.message,
+    signingMessage,
     interactionData.data.signType
   );
 };
 
 export const handleEthereumPreSignByKeystone = async (
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>,
+  signingMessage: Uint8Array,
   options: KeystoneOptions
 ): Promise<Uint8Array | undefined> => {
   const keystoneSDK = new KeystoneSDK({
@@ -97,7 +99,7 @@ export const handleEthereumPreSignByKeystone = async (
     random,
   });
   const signData = encodeEthMessage(
-    interactionData.data.message,
+    signingMessage,
     interactionData.data.signType
   ).toString("hex");
   const evmChainId = (() => {
@@ -121,7 +123,7 @@ export const handleEthereumPreSignByKeystone = async (
     signData,
     dataType: getEthDataTypeFromSignType(
       interactionData.data.signType,
-      interactionData.data.message
+      signingMessage
     ),
     path,
     xfp: interactionData.data.keyInsensitive["xfp"] as string,

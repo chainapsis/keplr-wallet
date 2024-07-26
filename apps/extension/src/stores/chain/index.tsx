@@ -231,9 +231,12 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @flow
   *enableChainInfoInUIWithVaultId(vaultId: string, ...chainIds: string[]) {
     const msg = new EnableChainsMsg(vaultId, chainIds);
-    this._enabledChainIdentifiers = yield* toGenerator(
+    const enabledChainIdentifiers = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
+    if (this.keyRingStore.selectedKeyInfo?.id === vaultId) {
+      this._enabledChainIdentifiers = enabledChainIdentifiers;
+    }
   }
 
   @flow
@@ -254,9 +257,12 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @flow
   *disableChainInfoInUIWithVaultId(vaultId: string, ...chainIds: string[]) {
     const msg = new DisableChainsMsg(vaultId, chainIds);
-    this._enabledChainIdentifiers = yield* toGenerator(
+    const enabledChainIdentifiers = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
+    if (this.keyRingStore.selectedKeyInfo?.id === vaultId) {
+      this._enabledChainIdentifiers = enabledChainIdentifiers;
+    }
   }
 
   @flow

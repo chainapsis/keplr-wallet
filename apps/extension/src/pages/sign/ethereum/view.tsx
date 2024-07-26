@@ -158,11 +158,6 @@ export const EthereumSigningView: FunctionComponent<{
 
   useEffect(() => {
     if (isTxSigning) {
-      // Disable gas simulator from setting gas, because gasLimit is already set.
-      if (interactionData.isInternal) {
-        gasSimulator.setEnabled(false);
-      }
-
       const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
 
       const gasLimitFromTx = BigInt(unsignedTx.gasLimit ?? unsignedTx.gas ?? 0);
@@ -341,13 +336,18 @@ export const EthereumSigningView: FunctionComponent<{
             if (interactionData.data.keyType === "ledger") {
               setIsLedgerInteracting(true);
               setLedgerInteractingError(undefined);
-              signature = await handleEthereumPreSignByLedger(interactionData, {
-                useWebHID: uiConfigStore.useWebHIDLedger,
-              });
+              signature = await handleEthereumPreSignByLedger(
+                interactionData,
+                Buffer.from(signingDataText),
+                {
+                  useWebHID: uiConfigStore.useWebHIDLedger,
+                }
+              );
             } else if (interactionData.data.keyType === "keystone") {
               setIsKeystoneInteracting(true);
               signature = await handleEthereumPreSignByKeystone(
                 interactionData,
+                Buffer.from(signingDataText),
                 {
                   displayQRCode: async (ur: KeystoneUR) => {
                     setKeystoneUR(ur);
