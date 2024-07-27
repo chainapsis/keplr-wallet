@@ -91,7 +91,6 @@
     "styled-normalize": "^8.0.7",
     "swiper": "^8.4.4",
     "utility-types": "^3.10.0",
-    "uuid": "^10.0.0",
     "webextension-polyfill": "^0.10.0"
   },
   "devDependencies": {

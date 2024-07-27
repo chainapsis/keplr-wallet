@@ -20,6 +20,9 @@ import {
   SettledResponses,
   DirectAuxSignResponse,
   IEthereumProvider,
+  EIP6963ProviderInfo,
+  EIP6963ProviderDetail,
+  EIP6963EventNames,
 } from "@keplr-wallet/types";
 import { JSONUint8Array } from "./uint8-array";
 import deepmerge from "deepmerge";
@@ -28,6 +31,7 @@ import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import { KeplrEnigmaUtils } from "./enigma";
 import { BUILD_VERSION } from "./version";
 import EventEmitter from "events";
+import fs from "fs";
 
 export interface ProxyRequest {
   type: "proxy-request";
@@ -44,6 +48,19 @@ export interface Result {
    */
   error?: string | { module: string; code: number; message: string };
   return?: any;
+}
+
+export class EthereumProviderRpcError extends Error {
+  public readonly code: number;
+  public readonly data?: unknown;
+
+  constructor(code: number, message: string, data?: unknown) {
+    super(message);
+    this.code = code;
+    this.data = data;
+
+    Object.setPrototypeOf(this, EthereumProviderRpcError.prototype);
+  }
 }
 
 export interface ProxyRequestResponse {
@@ -569,6 +586,16 @@ const waitDocumentReady = (): Promise<void> => {
 };
 
 class EthereumProvider extends EventEmitter implements IEthereumProvider {
+  protected readonly eip6963ProviderInfo?: EIP6963ProviderInfo = {
+    uuid: crypto.randomUUID(),
+    name: "Keplr",
+    rdns: "app.keplr",
+    icon: `data:image/png;base64,${fs.readFileSync(
+      "images/keplr-icon-128.png",
+      "base64"
+    )}`,
+  };
+
   // It must be in the hexadecimal format used in EVM-based chains, not the format used in Tendermint nodes.
   chainId: string | null = null;
   // It must be in the decimal format of chainId.
@@ -607,6 +634,38 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         this.handleChainChanged(evmChainId);
       }
     });
+
+    window.addEventListener("keplr_ethSubscription", (event: Event) => {
+      const origin = (event as CustomEvent).detail.origin;
+      const providerId = (event as CustomEvent).detail.providerId;
+
+      if (
+        origin === window.location.origin &&
+        providerId === this.eip6963ProviderInfo?.uuid
+      ) {
+        const data = (event as CustomEvent).detail.data;
+        this.emit("message", {
+          type: "eth_subscription",
+          data,
+        });
+      }
+    });
+
+    if (this.eip6963ProviderInfo) {
+      const announceEvent = new CustomEvent<EIP6963ProviderDetail>(
+        EIP6963EventNames.Announce,
+        {
+          detail: Object.freeze({
+            info: this.eip6963ProviderInfo,
+            provider: this,
+          }),
+        }
+      );
+      window.addEventListener(EIP6963EventNames.Request, () =>
+        window.dispatchEvent(announceEvent)
+      );
+      window.dispatchEvent(announceEvent);
+    }
   }
 
   protected static async requestMethod(
@@ -676,7 +735,16 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         }
 
         if (result.error) {
-          reject(new Error(result.error));
+          const error = result.error;
+          reject(
+            error.code && !error.module
+              ? new EthereumProviderRpcError(
+                  error.code,
+                  error.message,
+                  error.data
+                )
+              : new Error(error)
+          );
           return;
         }
 
@@ -744,18 +812,29 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     return this._isConnected;
   }
 
-  async request<T>({
+  async request<T = unknown>({
     method,
     params,
+    chainId,
   }: {
     method: string;
-    params?: unknown[] | Record<string, unknown>;
+    params?: readonly unknown[] | Record<string, unknown>;
+    chainId?: string;
   }): Promise<T> {
     if (!this._isConnected) {
+      if (method === "eth_accounts") {
+        return [] as T;
+      }
+
       await this.handleConnect();
     }
 
-    return await EthereumProvider.requestMethod("request", { method, params });
+    return await EthereumProvider.requestMethod("request", {
+      method,
+      params,
+      providerId: this.eip6963ProviderInfo?.uuid,
+      chainId,
+    });
   }
 
   async enable(): Promise<string[]> {
