@@ -46,10 +46,13 @@ export class ObservableQueryThirdpartyERC20BalancesImplParent extends Observable
     sharedContext: QuerySharedContext,
     protected readonly chainId: string,
     protected readonly chainGetter: ChainGetter,
-    protected readonly ethereumURL: string,
     protected readonly ethereumHexAddress: string
   ) {
-    super(sharedContext, ethereumURL, "/api", "alchemy_getTokenBalances", [
+    const tokenAPIURL = `https://evm-${chainId.replace(
+      "eip155:",
+      ""
+    )}.keplr.app/api`;
+    super(sharedContext, tokenAPIURL, "", "alchemy_getTokenBalances", [
       ethereumHexAddress,
       "erc20",
       {
@@ -224,7 +227,6 @@ export class ObservableQueryThirdpartyERC20BalanceRegistry
           this.sharedContext,
           chainId,
           chainGetter,
-          chainInfo.evm.rpc,
           address
         )
       );
