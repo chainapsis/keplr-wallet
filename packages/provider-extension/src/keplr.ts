@@ -31,7 +31,7 @@ import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import { KeplrEnigmaUtils } from "./enigma";
 import { BUILD_VERSION } from "./version";
 import EventEmitter from "events";
-import fs from "fs";
+import { KeplrLogoBase64 } from "./constants";
 
 export interface ProxyRequest {
   type: "proxy-request";
@@ -590,10 +590,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     uuid: crypto.randomUUID(),
     name: "Keplr",
     rdns: "app.keplr",
-    icon: `data:image/png;base64,${fs.readFileSync(
-      "images/keplr-icon-128.png",
-      "base64"
-    )}`,
+    icon: `data:image/png;base64,${KeplrLogoBase64}`,
   };
 
   // It must be in the hexadecimal format used in EVM-based chains, not the format used in Tendermint nodes.
