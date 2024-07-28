@@ -31,7 +31,7 @@ import { Gutter } from "../../../components/gutter";
 import { FeeControl } from "../../../components/input/fee-control";
 import { useNotification } from "../../../hooks/notification";
 import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
-import { ICNSInfo } from "../../../config.ui";
+import { ENSInfo, ICNSInfo } from "../../../config.ui";
 import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
@@ -140,6 +140,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         !chainStore.getChain(chainId).chainId.startsWith("injective"),
       allowHexAddressOnly: isEvmTx,
       icns: ICNSInfo,
+      ens: ENSInfo,
       computeTerraClassicTax: true,
     }
   );

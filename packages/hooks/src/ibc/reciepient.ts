@@ -65,6 +65,9 @@ export const useIBCRecipientConfig = (
       chainId: string;
       resolverContractAddress: string;
     };
+    ens?: {
+      chainId: string;
+    };
   } = {},
   isIBCTransfer: boolean
 ) => {
@@ -78,6 +81,7 @@ export const useIBCRecipientConfig = (
   );
   config.setAllowHexAddressOnly(options.allowHexAddressOnly);
   config.setICNS(options.icns);
+  config.setENS(options.ens);
   config.setIsIBCTransfer(isIBCTransfer);
 
   return config;

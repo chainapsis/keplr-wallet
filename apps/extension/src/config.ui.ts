@@ -121,6 +121,10 @@ export const ICNSInfo = {
     "osmo1xk0s8xgktn9x5vwcgtjdxqzadg88fgn33p8u9cnpdxwemvxscvast52cdd",
 };
 
+export const ENSInfo = {
+  chainId: "eip155:1",
+};
+
 export interface FiatOnRampServiceInfo {
   serviceId: string;
   serviceName: string;
