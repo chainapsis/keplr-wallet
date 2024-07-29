@@ -186,7 +186,7 @@ export class TokenCW20Service {
     // Validate the contract address.
     Bech32Address.validate(
       contractAddress,
-      chainInfo.bech32Config.bech32PrefixAccAddr
+      chainInfo.bech32Config?.bech32PrefixAccAddr
     );
 
     const params = {
@@ -393,7 +393,7 @@ export class TokenCW20Service {
     // Validate the contract address.
     Bech32Address.validate(
       currency.contractAddress,
-      chainInfo.bech32Config.bech32PrefixAccAddr
+      chainInfo.bech32Config?.bech32PrefixAccAddr
     );
 
     return currency;
@@ -409,7 +409,7 @@ export class TokenCW20Service {
     // Validate the contract address.
     Bech32Address.validate(
       currency.contractAddress,
-      chainInfo.bech32Config.bech32PrefixAccAddr
+      chainInfo.bech32Config?.bech32PrefixAccAddr
     );
 
     return currency;

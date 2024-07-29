@@ -118,8 +118,8 @@ export class MockKeplr implements Keplr {
       bech32Address: new Bech32Address(
         wallet.getPubKey().getCosmosAddress()
       ).toBech32(
-        this.chainInfos.find((c) => c.chainId === chainId)!.bech32Config
-          .bech32PrefixAccAddr
+        this.chainInfos.find((c) => c.chainId === chainId)?.bech32Config
+          ?.bech32PrefixAccAddr ?? ""
       ),
       ethereumHexAddress: new Bech32Address(
         wallet.getPubKey().getCosmosAddress()

@@ -5,51 +5,6 @@ import {
   ObservableEvmChainJsonRpcQueryMap,
 } from "./evm-chain-json-rpc";
 
-interface Transaction {
-  accessList?: string[];
-  blockHash: string;
-  blockNumber: string;
-  chainId: string;
-  from: string;
-  gas: string;
-  gasPrice: string;
-  hash: string;
-  input: string;
-  maxFeePerGas?: string;
-  maxPriorityFeePerGas?: string;
-  nonce: string;
-  r: string;
-  s: string;
-  to: string;
-  transactionIndex: string;
-  type: string;
-  v: string;
-  value: string;
-}
-
-interface EthereumBlock {
-  baseFeePerGas: string;
-  difficulty: string;
-  extraData: string;
-  gasLimit: string;
-  gasUsed: string;
-  hash: string;
-  logsBloom: string;
-  mixHash: string;
-  nonce: string;
-  number: string;
-  parentHash: string;
-  receiptsRoot: string;
-  sha3Uncles: string;
-  size: string;
-  stateRoot: string;
-  timestamp: string;
-  totalDifficulty: string;
-  transactions: Transaction[];
-  transactionsRoot: string;
-  uncles: string[];
-}
-
 export class ObservableQueryEthereumBlockInner extends ObservableEvmChainJsonRpcQuery<EthereumBlock> {
   constructor(
     sharedContext: QuerySharedContext,
@@ -108,4 +63,49 @@ export class ObservableQueryEthereumBlock extends ObservableEvmChainJsonRpcQuery
       blockNumberOrTagParam ?? "latest"
     ) as ObservableQueryEthereumBlockInner;
   }
+}
+
+interface Transaction {
+  accessList?: string[];
+  blockHash: string;
+  blockNumber: string;
+  chainId: string;
+  from: string;
+  gas: string;
+  gasPrice: string;
+  hash: string;
+  input: string;
+  maxFeePerGas?: string;
+  maxPriorityFeePerGas?: string;
+  nonce: string;
+  r: string;
+  s: string;
+  to: string;
+  transactionIndex: string;
+  type: string;
+  v: string;
+  value: string;
+}
+
+interface EthereumBlock {
+  baseFeePerGas: string;
+  difficulty: string;
+  extraData: string;
+  gasLimit: string;
+  gasUsed: string;
+  hash: string;
+  logsBloom: string;
+  mixHash: string;
+  nonce: string;
+  number: string;
+  parentHash: string;
+  receiptsRoot: string;
+  sha3Uncles: string;
+  size: string;
+  stateRoot: string;
+  timestamp: string;
+  totalDifficulty: string;
+  transactions: Transaction[];
+  transactionsRoot: string;
+  uncles: string[];
 }

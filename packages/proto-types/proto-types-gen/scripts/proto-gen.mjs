@@ -119,6 +119,8 @@ function setOutputHash(root, hash) {
       "ethermint/types/v1/web3.proto",
       "stride/stakeibc/validator.proto",
       "stride/stakeibc/tx.proto",
+      "stride/staketia/tx.proto",
+      "stride/stakedym/tx.proto",
     ];
 
     const thirdPartyInputs = ["tendermint/crypto/keys.proto"];

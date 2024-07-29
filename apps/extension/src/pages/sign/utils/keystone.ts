@@ -1,4 +1,4 @@
-import { serialize } from "@ethersproject/transactions";
+import { serialize, TransactionTypes } from "@ethersproject/transactions";
 import { EthSignType } from "@keplr-wallet/types";
 import { KeystoneEthereumSDK } from "@keystonehq/keystone-sdk";
 
@@ -38,6 +38,10 @@ export function getEthDataTypeFromSignType(
     case EthSignType.TRANSACTION:
       if (message) {
         const msg = JSON.parse(Buffer.from(message).toString());
+        const isEIP1559 = !!msg.maxFeePerGas || !!msg.maxPriorityFeePerGas;
+        if (isEIP1559) {
+          msg.type = TransactionTypes.eip1559;
+        }
         if (!msg.type) {
           return KeystoneEthereumSDK.DataType.transaction;
         }
@@ -58,6 +62,10 @@ export function encodeEthMessage(
   switch (signType) {
     case EthSignType.TRANSACTION:
       const tx = JSON.parse(Buffer.from(message).toString());
+      const isEIP1559 = !!tx.maxFeePerGas || !!tx.maxPriorityFeePerGas;
+      if (isEIP1559) {
+        tx.type = TransactionTypes.eip1559;
+      }
       if (typeof tx.type === "string") {
         tx.type = +tx.type.replace(/^0x/, "");
       }

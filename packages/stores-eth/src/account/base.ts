@@ -1,8 +1,6 @@
-import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { ChainGetter } from "@keplr-wallet/stores";
 import {
   AppCurrency,
-  ChainInfo,
   EthSignType,
   EthTxReceipt,
   Keplr,
@@ -18,6 +16,35 @@ import {
 } from "@ethersproject/transactions";
 import { getAddress as getEthAddress } from "@ethersproject/address";
 import { action, makeObservable, observable } from "mobx";
+import { Interface } from "@ethersproject/abi";
+
+const opStackGasPriceOracleProxyAddress =
+  "0x420000000000000000000000000000000000000F";
+const opStackGasPriceOracleProxyABI = new Interface([
+  {
+    constant: true,
+    inputs: [],
+    name: "implementation",
+    outputs: [
+      {
+        name: "",
+        type: "address",
+      },
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function",
+  },
+]);
+const opStackGasPriceOracleABI = new Interface([
+  {
+    inputs: [{ internalType: "bytes", name: "_data", type: "bytes" }],
+    name: "getL1Fee",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+]);
 
 export class EthereumAccountBase {
   @observable
@@ -31,10 +58,6 @@ export class EthereumAccountBase {
     makeObservable(this);
   }
 
-  static evmInfo(chainInfo: ChainInfo): ChainInfo["evm"] | undefined {
-    return chainInfo.evm;
-  }
-
   @action
   setIsSendingTx(value: boolean) {
     this._isSendingTx = value;
@@ -44,7 +67,36 @@ export class EthereumAccountBase {
     return this._isSendingTx;
   }
 
-  async simulateGas({
+  async simulateGas(sender: string, unsignedTx: UnsignedTransaction) {
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const evmInfo = chainInfo.evm;
+    if (!evmInfo) {
+      throw new Error("No EVM chain info provided");
+    }
+
+    const { to, value, data } = unsignedTx;
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const keplr = (await this.getKeplr())!;
+    const gasEstimated = await keplr.ethereum.request<string>({
+      method: "eth_estimateGas",
+      params: [
+        {
+          from: sender,
+          to,
+          value,
+          data,
+        },
+      ],
+      chainId: this.chainId,
+    });
+
+    return {
+      gasUsed: parseInt(gasEstimated),
+    };
+  }
+
+  async simulateGasForSendTokenTx({
     currency,
     amount,
     sender,
@@ -55,16 +107,6 @@ export class EthereumAccountBase {
     sender: string;
     recipient: string;
   }) {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    const evmInfo = EthereumAccountBase.evmInfo(chainInfo);
-    if (!evmInfo) {
-      throw new Error("No EVM chain info provided");
-    }
-
-    if (!EthereumAccountBase.isEthereumHexAddressWithChecksum(sender)) {
-      throw new Error("Invalid sender address");
-    }
-
     // If the recipient address is invalid, the sender address will be used as the recipient for gas estimating gas.
     const tempRecipient = EthereumAccountBase.isEthereumHexAddressWithChecksum(
       recipient
@@ -79,7 +121,6 @@ export class EthereumAccountBase {
       switch (denomHelper.type) {
         case "erc20":
           return {
-            from: sender,
             to: denomHelper.contractAddress,
             value: "0x0",
             data: erc20ContractInterface.encodeFunctionData("transfer", [
@@ -89,73 +130,94 @@ export class EthereumAccountBase {
           };
         default:
           return {
-            from: sender,
             to: tempRecipient,
             value: hexValue(parsedAmount),
           };
       }
     })();
 
-    const estimateGasResponse = await simpleFetch<{
-      result: string;
-    }>(evmInfo.rpc, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        method: "eth_estimateGas",
-        params: [unsignedTx],
-        id: 1,
-      }),
-    });
-
-    return {
-      gasUsed: Number(estimateGasResponse.data.result),
-    };
+    return this.simulateGas(sender, unsignedTx);
   }
 
-  async makeSendTokenTx({
-    currency,
-    amount,
-    from,
-    to,
-    gasLimit,
-    maxFeePerGas,
-    maxPriorityFeePerGas,
-  }: {
-    currency: AppCurrency;
-    amount: string;
-    from: string;
-    to: string;
-    gasLimit: number;
-    maxFeePerGas: string;
-    maxPriorityFeePerGas: string;
-  }): Promise<UnsignedTransaction> {
+  async simulateOpStackL1Fee(unsignedTx: UnsignedTransaction): Promise<string> {
     const chainInfo = this.chainGetter.getChain(this.chainId);
-    const evmInfo = EthereumAccountBase.evmInfo(chainInfo);
+    if (!chainInfo.features.includes("op-stack-l1-data-fee")) {
+      throw new Error("The chain isn't built with OP Stack");
+    }
+
+    const evmInfo = chainInfo.evm;
     if (!evmInfo) {
       throw new Error("No EVM chain info provided");
     }
 
-    const transactionCountResponse = await simpleFetch<{
-      result: string;
-    }>(evmInfo.rpc, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        method: "eth_getTransactionCount",
-        params: [from, "pending"],
-        id: 1,
-      }),
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const keplr = (await this.getKeplr())!;
+    const implementationAddress = await keplr.ethereum.request<string>({
+      method: "eth_call",
+      params: [
+        {
+          to: opStackGasPriceOracleProxyAddress,
+          data: opStackGasPriceOracleProxyABI.encodeFunctionData(
+            "implementation"
+          ),
+        },
+      ],
+      chainId: this.chainId,
+    });
+    const gasPriceOracleContractAddress =
+      "0x" + implementationAddress.slice(26);
+
+    const l1Fee = await keplr.ethereum.request<string>({
+      method: "eth_call",
+      params: [
+        {
+          to: gasPriceOracleContractAddress,
+          data: opStackGasPriceOracleABI.encodeFunctionData("getL1Fee", [
+            serialize(unsignedTx),
+          ]),
+        },
+      ],
+      chainId: this.chainId,
     });
 
+    return l1Fee;
+  }
+
+  makeSendTokenTx({
+    currency,
+    amount,
+    to,
+    gasLimit,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+    gasPrice,
+  }: {
+    currency: AppCurrency;
+    amount: string;
+    to: string;
+    gasLimit: number;
+    maxFeePerGas?: string;
+    maxPriorityFeePerGas?: string;
+    gasPrice?: string;
+  }): UnsignedTransaction {
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const evmInfo = chainInfo.evm;
+    if (!evmInfo) {
+      throw new Error("No EVM chain info provided");
+    }
     const parsedAmount = parseUnits(amount, currency.coinDecimals);
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+    const feeObject =
+      maxFeePerGas && maxPriorityFeePerGas
+        ? {
+            maxFeePerGas: hexValue(Number(maxFeePerGas)),
+            maxPriorityFeePerGas: hexValue(Number(maxPriorityFeePerGas)),
+            gasLimit: hexValue(gasLimit),
+          }
+        : {
+            gasPrice: hexValue(Number(gasPrice ?? "0")),
+            gasLimit: hexValue(gasLimit),
+          };
 
     // Support EIP-1559 transaction only.
     const unsignedTx: UnsignedTransaction = (() => {
@@ -163,26 +225,20 @@ export class EthereumAccountBase {
         case "erc20":
           return {
             chainId: evmInfo.chainId,
-            nonce: Number(transactionCountResponse.data.result),
-            gasLimit: hexValue(gasLimit),
-            maxFeePerGas: hexValue(Number(maxFeePerGas)),
-            maxPriorityFeePerGas: hexValue(Number(maxPriorityFeePerGas)),
             to: denomHelper.contractAddress,
             value: "0x0",
             data: erc20ContractInterface.encodeFunctionData("transfer", [
               to,
               hexValue(parsedAmount),
             ]),
+            ...feeObject,
           };
         default:
           return {
             chainId: evmInfo.chainId,
-            nonce: Number(transactionCountResponse.data.result),
-            gasLimit: hexValue(gasLimit),
-            maxFeePerGas: hexValue(Number(maxFeePerGas)),
-            maxPriorityFeePerGas: hexValue(Number(maxPriorityFeePerGas)),
             to,
             value: hexValue(parsedAmount),
+            ...feeObject,
           };
       }
     })();
@@ -201,14 +257,26 @@ export class EthereumAccountBase {
   ) {
     try {
       const chainInfo = this.chainGetter.getChain(this.chainId);
-      const evmInfo = EthereumAccountBase.evmInfo(chainInfo);
+      const evmInfo = chainInfo.evm;
       if (!evmInfo) {
         throw new Error("No EVM info provided");
       }
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const keplr = (await this.getKeplr())!;
+
+      const transactionCount = await keplr.ethereum.request<string>({
+        method: "eth_getTransactionCount",
+        params: [sender, "pending"],
+        chainId: this.chainId,
+      });
+      unsignedTx = {
+        ...unsignedTx,
+        nonce: parseInt(transactionCount),
+      };
+
       const signEthereum = keplr.signEthereum.bind(keplr);
+
       const signature = await signEthereum(
         this.chainId,
         sender,
@@ -240,28 +308,11 @@ export class EthereumAccountBase {
       retry(
         () => {
           return new Promise<void>(async (resolve, reject) => {
-            const txReceiptResponse = await simpleFetch<{
-              result: EthTxReceipt | null;
-              error?: Error;
-            }>(evmInfo.rpc, {
-              method: "POST",
-              headers: {
-                "content-type": "application/json",
-              },
-              body: JSON.stringify({
-                jsonrpc: "2.0",
-                method: "eth_getTransactionReceipt",
-                params: [txHash],
-                id: 1,
-              }),
+            const txReceipt = await keplr.ethereum.request<EthTxReceipt>({
+              method: "eth_getTransactionReceipt",
+              params: [txHash],
+              chainId: this.chainId,
             });
-
-            if (txReceiptResponse.data.error) {
-              console.error(txReceiptResponse.data.error);
-              resolve();
-            }
-
-            const txReceipt = txReceiptResponse.data.result;
             if (txReceipt) {
               onTxEvents?.onFulfill?.(txReceipt);
               resolve();

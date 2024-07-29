@@ -21,6 +21,9 @@ export const useSendTxConfig = (
       chainId: string;
       resolverContractAddress: string;
     };
+    ens?: {
+      chainId: string;
+    };
     computeTerraClassicTax?: boolean;
   } = {}
 ) => {

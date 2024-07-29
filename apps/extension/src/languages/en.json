@@ -420,10 +420,16 @@
 
   "page.sign.ethereum.title": "Sign Ethereum",
   "page.sign.ethereum.requested-network": "on {network}",
-  "page.sign.ethereum.tx.title": "Confirm Transaction",
-  "page.sign.ethereum.tx.summary": "Transaction Summary",
-  "page.sign.ethereum.tx.send.paragraph": "Send <b>{amount}</b> from <b>{fromAddress}</b> to <b>{toAddress}</b>",
+  "page.sign.ethereum.transaction.title": "Confirm Transaction",
+  "page.sign.ethereum.transaction.summary": "Transaction Summary",
+  "page.sign.ethereum.transaction.send.title": "Send Token",
+  "page.sign.ethereum.transaction.send.from": "From",
+  "page.sign.ethereum.transaction.send.to": "To",
+  "page.sign.ethereum.transaction.execute-contract.title": "Execute Contract",
+  "page.sign.ethereum.transaction.execute-contract.function": "Function",
   "page.sign.ethereum.message": "Signing Message",
+  "page.sign.ethereum.message.title": "Sign Message",
+  "page.sign.ethereum.eip-712.title": "Sign Typed Data",
 
   "page.sign.components.fee-summary.fee": "Tx Fee",
 
@@ -590,6 +596,8 @@
 
   "components.empty-view.text": "No {subject} Yet",
   "components.input.recipient-input.wallet-address-label": "Wallet Address or ICNS",
+  "components.input.recipient-input.wallet-address-label-ens": "Wallet Address or ENS",
+  "components.input.recipient-input.wallet-address-label-icns-ens": "Wallet Address or ICNS or ENS",
   "components.input.amount-input.amount-label": "Amount",
   "components.input.amount-input.max-button": "Max",
   "components.input.memo-input.memo-label": "Memo",
@@ -609,6 +617,7 @@
   "components.input.fee-control.modal.fee-selector.high": "High",
   "components.input.fee-control.modal.guide.external-fee-set": "Transaction fee was set by the website/dApp. The transaction may not be processed if you change the setting.",
   "components.input.fee-control.modal.notification.changes-applied": "Changes have been applied",
+  "components.input.fee-control.modal.max-fee": "Max Fee",
 
   "components.address-book-modal.title": "Address Book",
   "components.address-book-modal.recent-tab": "Recent",

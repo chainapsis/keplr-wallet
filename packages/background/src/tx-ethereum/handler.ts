@@ -43,7 +43,7 @@ const handleSendTxEthereumMsg: (
       msg.origin
     );
 
-    return await service.sendEthereumTx(msg.chainId, msg.tx, {
+    return await service.sendEthereumTx(msg.origin, msg.chainId, msg.tx, {
       silent: msg.silent,
     });
   };

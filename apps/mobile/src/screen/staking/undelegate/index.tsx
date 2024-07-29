@@ -63,12 +63,15 @@ export const SignUndelegateScreen: FunctionComponent = observer(() => {
   sendConfigs.amountConfig.setCurrency(chainInfo.stakeCurrency);
 
   useEffect(() => {
-    sendConfigs.recipientConfig.setBech32Prefix(
-      chainInfo.bech32Config.bech32PrefixValAddr,
-    );
+    if (chainInfo.bech32Config) {
+      sendConfigs.recipientConfig.setBech32Prefix(
+        chainInfo.bech32Config.bech32PrefixValAddr,
+      );
+    }
     sendConfigs.recipientConfig.setValue(validatorAddress);
   }, [
-    chainInfo.bech32Config.bech32PrefixValAddr,
+    chainInfo.bech32Config,
+    chainInfo.bech32Config?.bech32PrefixValAddr,
     sendConfigs.recipientConfig,
     validatorAddress,
   ]);

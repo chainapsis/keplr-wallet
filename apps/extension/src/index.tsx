@@ -14,6 +14,7 @@ require("./public/assets/icon/icon-beta-128.png");
 
 import React, {
   FunctionComponent,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -133,6 +134,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     accountStore,
     keyRingStore,
     tokenFactoryRegistrar,
+    erc20CurrencyRegistrar,
     ibcCurrencyRegistrar,
     lsmCurrencyRegistrar,
     ibcChannelStore,
@@ -239,6 +241,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
       return false;
     }
 
+    if (!erc20CurrencyRegistrar.isInitialized) {
+      return false;
+    }
+
     return true;
   }, [
     keyRingStore.status,
@@ -247,6 +253,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     chainStore.chainInfos,
     isURLUnlockPage,
     tokenFactoryRegistrar.isInitialized,
+    erc20CurrencyRegistrar.isInitialized,
     ibcCurrencyRegistrar.isInitialized,
     lsmCurrencyRegistrar.isInitialized,
     priceStore.isInitialized,
@@ -289,6 +296,37 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
   const [mainPageIsNotReady, setMainPageIsNotReady] = useState(false);
 
   const intl = useIntl();
+
+  // Enable new EVM chains by default for a specific version.
+  useEffect(() => {
+    const newEVMChainsEnabledLocalStorageKey = "new-evm-chain-enabled";
+    const newEVMChainsEnabled = localStorage.getItem(
+      newEVMChainsEnabledLocalStorageKey
+    );
+    if (
+      isReady &&
+      newEVMChainsEnabled !== "true" &&
+      uiConfigStore.changelogConfig.showingInfo.some(
+        (info) => info.version === "0.12.115"
+      )
+    ) {
+      for (const keyInfo of keyRingStore.keyInfos) {
+        chainStore.enableChainInfoInUIWithVaultId(
+          keyInfo.id,
+          ...chainStore.chainInfos
+            .filter((chainInfo) => chainInfo.chainId.startsWith("eip155:"))
+            .map((chainInfo) => chainInfo.chainId)
+        );
+      }
+      localStorage.setItem(newEVMChainsEnabledLocalStorageKey, "true");
+    }
+  }, [
+    chainStore,
+    isReady,
+    keyRingStore.keyInfos,
+    uiConfigStore.changelogConfig.showingInfo,
+    uiConfigStore.newChainSuggestionConfig.newSuggestionChains,
+  ]);
 
   return (
     <HashRouter>
