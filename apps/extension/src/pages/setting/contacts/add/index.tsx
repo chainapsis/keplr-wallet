@@ -15,6 +15,7 @@ import { useStore } from "../../../../stores";
 import { MemoInput } from "../../../../components/input/memo-input";
 import { useNavigate } from "react-router";
 import { useIntl } from "react-intl";
+import { ENSInfo } from "../../../../config.ui";
 
 const Styles = {
   Container: styled(Stack)`
@@ -39,6 +40,7 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
       .getChain(chainId)
       .chainId.startsWith("injective"),
     icns: uiConfigStore.icnsInfo,
+    ens: ENSInfo,
   });
   const memoConfig = useMemoConfig(chainStore, chainId);
 
