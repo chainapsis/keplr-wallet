@@ -596,6 +596,8 @@
 
   "components.empty-view.text": "No {subject} Yet",
   "components.input.recipient-input.wallet-address-label": "Wallet Address or ICNS",
+  "components.input.recipient-input.wallet-address-label-ens": "Wallet Address or ENS",
+  "components.input.recipient-input.wallet-address-label-icns-ens": "Wallet Address or ICNS or ENS",
   "components.input.amount-input.amount-label": "Amount",
   "components.input.amount-input.max-button": "Max",
   "components.input.memo-input.memo-label": "Memo",

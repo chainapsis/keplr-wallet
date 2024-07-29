@@ -579,6 +579,8 @@
 
   "components.empty-view.text": "{subject} 데이터가 없습니다.",
   "components.input.recipient-input.wallet-address-label": "지갑 주소 혹은 ICNS",
+  "components.input.recipient-input.wallet-address-label-ens": "지갑 주소 혹은 ENS",
+  "components.input.recipient-input.wallet-address-label-icns-ens": "지갑 주소 혹은 ICNS 혹은 ENS",
   "components.input.amount-input.amount-label": "수량",
   "components.input.amount-input.max-button": "최대",
   "components.input.memo-input.memo-label": "메모",

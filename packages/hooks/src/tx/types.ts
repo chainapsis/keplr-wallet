@@ -89,6 +89,13 @@ export interface IRecipientConfigWithICNS extends IRecipientConfig {
   readonly isICNSFetching: boolean;
 }
 
+export interface IRecipientConfigWithENS extends IRecipientConfig {
+  readonly isENSEnabled: boolean;
+  readonly isENSName: boolean;
+  readonly ensExpectedDomain: string;
+  readonly isENSFetching: boolean;
+}
+
 export interface IBaseAmountConfig extends ITxChainSetter {
   amount: CoinPretty[];
 
