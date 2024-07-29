@@ -140,14 +140,6 @@ export class KeyRingEthereumService {
               throw new Error("Frontend should provide signature");
             }
 
-            this.analyticsService.logEventIgnoreError("evm_tx_signed", {
-              chainId,
-              isInternal: env.isInternalMsg,
-              origin,
-              ethSignType: signType,
-              keyType: keyInfo.type,
-            });
-
             return {
               signingData: res.signingData,
               signature: res.signature,
@@ -165,14 +157,6 @@ export class KeyRingEthereumService {
                   ]),
                   "keccak256"
                 );
-
-                this.analyticsService.logEventIgnoreError("evm_tx_signed", {
-                  chainId,
-                  isInternal: env.isInternalMsg,
-                  origin,
-                  ethsignType: signType,
-                  keyType: keyInfo.type,
-                });
 
                 return {
                   signingData: res.signingData,
@@ -239,14 +223,6 @@ export class KeyRingEthereumService {
                   "keccak256"
                 );
 
-                this.analyticsService.logEventIgnoreError("evm_tx_signed", {
-                  chainId,
-                  isInternal: env.isInternalMsg,
-                  origin,
-                  ethsignType: signType,
-                  keyType: keyInfo.type,
-                });
-
                 return {
                   signingData: res.signingData,
                   signature: Buffer.concat([
@@ -279,7 +255,7 @@ export class KeyRingEthereumService {
               return "deploy-contract";
             }
 
-            const getCodeResponse = await this.request(
+            const contractBytecode = await this.request<string>(
               env,
               origin,
               "eth_getCode",
@@ -290,7 +266,7 @@ export class KeyRingEthereumService {
             if (
               (tx.data == null || tx.data === "0x") &&
               BigInt(tx.value) > 0 &&
-              getCodeResponse.data.result === "0x"
+              contractBytecode === "0x"
             ) {
               return "send-native";
             }
