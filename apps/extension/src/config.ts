@@ -2369,6 +2369,51 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["op-stack-l1-data-fee"],
   },
+  {
+    rpc: "https://rpc-lava.keplr.app",
+    rest: "https://lcd-lava.keplr.app",
+    chainId: "lava-mainnet-1",
+    chainName: "Lava",
+    stakeCurrency: {
+      coinDenom: "LAVA",
+      coinMinimalDenom: "ulava",
+      coinDecimals: 6,
+      coinGeckoId: "lava-network",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "lava@",
+      bech32PrefixAccPub: "lava@pub",
+      bech32PrefixValAddr: "lava@valoper",
+      bech32PrefixValPub: "lava@valoperpub",
+      bech32PrefixConsAddr: "lava@valcons",
+      bech32PrefixConsPub: "lava@valconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "LAVA",
+        coinMinimalDenom: "ulava",
+        coinDecimals: 6,
+        coinGeckoId: "lava-network",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "LAVA",
+        coinMinimalDenom: "ulava",
+        coinDecimals: 6,
+        coinGeckoId: "lava-network",
+        gasPriceStep: {
+          low: 0.00002,
+          average: 0.025,
+          high: 0.05,
+        },
+      },
+    ],
+    features: [],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
