@@ -1,6 +1,6 @@
 ---
 title: Use with CosmJs
-order: 2
+order: 5
 ---
 
 ## How to detect Keplr
