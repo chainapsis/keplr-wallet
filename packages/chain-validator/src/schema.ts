@@ -349,36 +349,40 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
     }
   }
 
-  if (value.evm) {
-    const firstCurrency = value.currencies[0];
-    if (firstCurrency.coinDecimals !== 18) {
-      throw new Error(
-        "The first currency's coin decimals should be 18 for EVM chain"
-      );
-    }
-    if (value.stakeCurrency) {
-      if (value.stakeCurrency.coinDecimals !== 18) {
+  // evm only chain이 아닌 ethermint같은 경우에만 위의 밸리데이션을 수행한다.
+  if (EIP155ChainIdSchema.validate(value.chainId).error) {
+    if (value.evm) {
+      const firstCurrency = value.currencies[0];
+      if (firstCurrency.coinDecimals !== 18) {
         throw new Error(
-          "The stake currency's coin decimals should be 18 for EVM chain"
+          "The first currency's coin decimals should be 18 for EVM chain"
         );
       }
-      const cur = value.currencies.find(
-        (cur) => cur.coinMinimalDenom === value.stakeCurrency?.coinMinimalDenom
-      );
-      if (cur) {
-        if (cur.coinDecimals !== 18) {
+      if (value.stakeCurrency) {
+        if (value.stakeCurrency.coinDecimals !== 18) {
           throw new Error(
             "The stake currency's coin decimals should be 18 for EVM chain"
           );
         }
+        const cur = value.currencies.find(
+          (cur) =>
+            cur.coinMinimalDenom === value.stakeCurrency?.coinMinimalDenom
+        );
+        if (cur) {
+          if (cur.coinDecimals !== 18) {
+            throw new Error(
+              "The stake currency's coin decimals should be 18 for EVM chain"
+            );
+          }
+        }
       }
-    }
 
-    const firstFeeCurrency = value.feeCurrencies[0];
-    if (firstFeeCurrency.coinDecimals !== 18) {
-      throw new Error(
-        "The first fee currency's coin decimals should be 18 for EVM chain"
-      );
+      const firstFeeCurrency = value.feeCurrencies[0];
+      if (firstFeeCurrency.coinDecimals !== 18) {
+        throw new Error(
+          "The first fee currency's coin decimals should be 18 for EVM chain"
+        );
+      }
     }
   }
 
