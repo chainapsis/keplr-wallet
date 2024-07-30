@@ -373,6 +373,13 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
         }
       }
     }
+
+    const firstFeeCurrency = value.feeCurrencies[0];
+    if (firstFeeCurrency.coinDecimals !== 18) {
+      throw new Error(
+        "The first fee currency's coin decimals should be 18 for EVM chain"
+      );
+    }
   }
 
   return value;
