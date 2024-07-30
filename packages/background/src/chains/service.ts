@@ -503,6 +503,11 @@ export class ChainsService {
 
     const chainInfo = this.getChainInfoOrThrow(chainId);
 
+    if (this.isEvmOnlyChain(chainInfo.chainId)) {
+      // TODO: evm 체인에서의 chain info 업데이트 로직에 대해서는 나중에 구현한다.
+      return false;
+    }
+
     let chainIdUpdated = false;
     const statusResponse = await simpleFetch<
       | {
