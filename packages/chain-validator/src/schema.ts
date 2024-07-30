@@ -349,5 +349,31 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
     }
   }
 
+  if (value.evm) {
+    const firstCurrency = value.currencies[0];
+    if (firstCurrency.coinDecimals !== 18) {
+      throw new Error(
+        "The first currency's coin decimals should be 18 for EVM chain"
+      );
+    }
+    if (value.stakeCurrency) {
+      if (value.stakeCurrency.coinDecimals !== 18) {
+        throw new Error(
+          "The stake currency's coin decimals should be 18 for EVM chain"
+        );
+      }
+      const cur = value.currencies.find(
+        (cur) => cur.coinMinimalDenom === value.stakeCurrency?.coinMinimalDenom
+      );
+      if (cur) {
+        if (cur.coinDecimals !== 18) {
+          throw new Error(
+            "The stake currency's coin decimals should be 18 for EVM chain"
+          );
+        }
+      }
+    }
+  }
+
   return value;
 });
