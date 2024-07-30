@@ -205,13 +205,12 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   }).unknown(true),
   nodeProvider: Joi.object({
     name: Joi.string().min(1).max(30).required(),
-    email: Joi.string()
-      .email({
-        tlds: {
-          allow: false,
-        },
-      })
-      .required(),
+    email: Joi.string().email({
+      tlds: {
+        allow: false,
+      },
+    }),
+    discord: Joi.string().uri(),
     website: Joi.string().uri(),
   }),
   chainId: ChainIdSchema.required(),
@@ -281,6 +280,12 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   chainSymbolImageUrl: Joi.string().uri(),
   hideInUI: Joi.boolean(),
 }).custom((value: ChainInfo) => {
+  if (value.nodeProvider) {
+    if (!value.nodeProvider.email && !value.nodeProvider.discord) {
+      throw new Error("email or discord should be provided");
+    }
+  }
+
   if (
     value.alternativeBIP44s?.find(
       (bip44) => bip44.coinType === value.bip44.coinType
@@ -346,6 +351,43 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
       throw new Error(
         "if bech32Config is undefined, chainId should be EIP-155 chain id defined in CAIP-2"
       );
+    }
+  }
+
+  // evm only chain이 아닌 ethermint같은 경우에만 위의 밸리데이션을 수행한다.
+  if (EIP155ChainIdSchema.validate(value.chainId).error) {
+    if (value.evm) {
+      const firstCurrency = value.currencies[0];
+      if (firstCurrency.coinDecimals !== 18) {
+        throw new Error(
+          "The first currency's coin decimals should be 18 for EVM chain"
+        );
+      }
+      if (value.stakeCurrency) {
+        if (value.stakeCurrency.coinDecimals !== 18) {
+          throw new Error(
+            "The stake currency's coin decimals should be 18 for EVM chain"
+          );
+        }
+        const cur = value.currencies.find(
+          (cur) =>
+            cur.coinMinimalDenom === value.stakeCurrency?.coinMinimalDenom
+        );
+        if (cur) {
+          if (cur.coinDecimals !== 18) {
+            throw new Error(
+              "The stake currency's coin decimals should be 18 for EVM chain"
+            );
+          }
+        }
+      }
+
+      const firstFeeCurrency = value.feeCurrencies[0];
+      if (firstFeeCurrency.coinDecimals !== 18) {
+        throw new Error(
+          "The first fee currency's coin decimals should be 18 for EVM chain"
+        );
+      }
     }
   }
 
