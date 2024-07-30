@@ -894,6 +894,8 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
   ) {
     super();
 
+    this.initiateLastConnectionState();
+
     window.addEventListener("keplr_keystorechange", async () => {
       if (this._currentChainId) {
         const chainInfo = await injectedKeplr.getChainInfoWithoutEndpoints(
@@ -1016,13 +1018,13 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     });
   }
 
-  protected async handleConnect(evmChainId?: number) {
-    if (!this._isConnected) {
+  protected initiateLastConnectionState() {
+    const lastConnectionState = localStorage.getItem(
+      "keplr_ethereum_last_connection_state"
+    );
+    if (!this._isConnected && lastConnectionState) {
       const { currentEvmChainId, currentChainId, selectedAddress } =
-        await this.requestMethod("request", {
-          method: "keplr_connect",
-          ...(evmChainId && { params: [evmChainId] }),
-        });
+        JSON.parse(lastConnectionState);
 
       this._isConnected = true;
       this._currentChainId = currentChainId;
@@ -1031,9 +1033,47 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
       this.networkVersion = currentEvmChainId.toString(10);
 
       this.selectedAddress = selectedAddress;
-
-      this.emit("connect", { chainId: this.chainId });
     }
+  }
+
+  protected updateLastConnectionState() {
+    if (
+      this._isConnected &&
+      this.chainId &&
+      this._currentChainId &&
+      this.selectedAddress
+    ) {
+      localStorage.setItem(
+        "keplr_ethereum_last_connection_state",
+        JSON.stringify({
+          currentEvmChainId: parseInt(this.chainId),
+          currentChainId: this._currentChainId,
+          selectedAddress: this.selectedAddress,
+        })
+      );
+    } else {
+      localStorage.removeItem("keplr_ethereum_last_connection_state");
+    }
+  }
+
+  protected async handleConnect(evmChainId?: number) {
+    const { currentEvmChainId, currentChainId, selectedAddress } =
+      await this.requestMethod("request", {
+        method: "keplr_connect",
+        ...(evmChainId && { params: [evmChainId] }),
+      });
+
+    this._isConnected = true;
+    this._currentChainId = currentChainId;
+
+    this.chainId = `0x${currentEvmChainId.toString(16)}`;
+    this.networkVersion = currentEvmChainId.toString(10);
+
+    this.selectedAddress = selectedAddress;
+
+    this.updateLastConnectionState();
+
+    this.emit("connect", { chainId: this.chainId });
   }
 
   protected async handleDisconnect() {
@@ -1046,6 +1086,8 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
       this.chainId = null;
       this.selectedAddress = null;
       this.networkVersion = null;
+
+      this.updateLastConnectionState();
 
       this.emit("disconnect");
     }
@@ -1062,6 +1104,8 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
   protected async handleAccountsChanged(selectedAddress: string) {
     if (this._isConnected) {
       this.selectedAddress = selectedAddress;
+
+      this.updateLastConnectionState();
 
       this.emit("accountsChanged", [selectedAddress]);
     }
