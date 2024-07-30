@@ -21,8 +21,15 @@ import {
   SettledResponses,
   DirectAuxSignResponse,
   IEthereumProvider,
+  EIP6963EventNames,
+  EIP6963ProviderInfo,
+  EIP6963ProviderDetail,
 } from "@keplr-wallet/types";
-import { Result, JSONUint8Array } from "@keplr-wallet/router";
+import {
+  Result,
+  JSONUint8Array,
+  EthereumProviderRpcError,
+} from "@keplr-wallet/router";
 import { KeplrEnigmaUtils } from "./enigma";
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
@@ -84,9 +91,6 @@ export function injectKeplrToWindow(keplr: IKeplr): void {
     "getEnigmaUtils",
     keplr.getEnigmaUtils
   );
-
-  // TODO: Enable this after the ethereum provider is fully supported.
-  // defineUnwritablePropertyIfPossible(window, "ethereum", keplr.ethereum);
 }
 
 /**
@@ -313,7 +317,14 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
           type: "proxy-request-response",
           id: message.id,
           result: {
-            error: e.message || e.toString(),
+            error:
+              e.code && !e.module
+                ? {
+                    code: e.code,
+                    message: e.message,
+                    data: e.data,
+                  }
+                : e.message || e.toString(),
           },
         };
 
@@ -402,7 +413,8 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
       postMessage: (message) =>
         window.postMessage(message, window.location.origin),
     },
-    protected readonly parseMessage?: (message: any) => any
+    protected readonly parseMessage?: (message: any) => any,
+    protected readonly eip6963ProviderInfo?: EIP6963ProviderInfo
   ) {
     // Freeze fields/method except for "defaultOptions"
     // Intentionally, "defaultOptions" can be mutated to allow a webpage to change the options with cosmjs usage.
@@ -848,7 +860,8 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
   public readonly ethereum = new EthereumProvider(
     this,
     this.eventListener,
-    this.parseMessage
+    this.parseMessage,
+    this.eip6963ProviderInfo
   );
 }
 
@@ -880,7 +893,8 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
       postMessage: (message) =>
         window.postMessage(message, window.location.origin),
     },
-    protected readonly parseMessage?: (message: any) => any
+    protected readonly parseMessage?: (message: any) => any,
+    protected readonly eip6963ProviderInfo?: EIP6963ProviderInfo
   ) {
     super();
 
@@ -907,6 +921,38 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         this.handleChainChanged(evmChainId);
       }
     });
+
+    window.addEventListener("keplr_ethSubscription", (event: Event) => {
+      const origin = (event as CustomEvent).detail.origin;
+      const providerId = (event as CustomEvent).detail.providerId;
+
+      if (
+        origin === window.location.origin &&
+        providerId === this.eip6963ProviderInfo?.uuid
+      ) {
+        const data = (event as CustomEvent).detail.data;
+        this.emit("message", {
+          type: "eth_subscription",
+          data,
+        });
+      }
+    });
+
+    if (this.eip6963ProviderInfo) {
+      const announceEvent = new CustomEvent<EIP6963ProviderDetail>(
+        EIP6963EventNames.Announce,
+        {
+          detail: Object.freeze({
+            info: this.eip6963ProviderInfo,
+            provider: this,
+          }),
+        }
+      );
+      window.addEventListener(EIP6963EventNames.Request, () =>
+        window.dispatchEvent(announceEvent)
+      );
+      window.dispatchEvent(announceEvent);
+    }
   }
 
   protected async requestMethod(
@@ -952,7 +998,16 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         }
 
         if (result.error) {
-          reject(new Error(result.error));
+          const error = result.error;
+          reject(
+            error.code && !error.module
+              ? new EthereumProviderRpcError(
+                  error.code,
+                  error.message,
+                  error.data
+                )
+              : new Error(error)
+          );
           return;
         }
 
@@ -1020,29 +1075,40 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     return this._isConnected;
   }
 
-  async request<T>({
+  async request<T = unknown>({
     method,
     params,
+    chainId,
   }: {
     method: string;
-    params?: unknown[] | Record<string, unknown>;
+    params?: readonly unknown[] | Record<string, unknown>;
+    chainId?: string;
   }): Promise<T> {
     if (!this._isConnected) {
+      if (method === "eth_accounts") {
+        return [] as T;
+      }
+
       await this.handleConnect();
     }
 
-    return await this.requestMethod("request", { method, params });
+    return await this.requestMethod("request", {
+      method,
+      params,
+      providerId: this.eip6963ProviderInfo?.uuid,
+      chainId,
+    });
   }
 
   async enable(): Promise<string[]> {
-    return await this.request({
+    return (await this.request({
       method: "eth_requestAccounts",
-    });
+    })) as string[];
   }
 
   async net_version(): Promise<string> {
-    return await this.request({
+    return (await this.request({
       method: "net_version",
-    });
+    })) as string;
   }
 }

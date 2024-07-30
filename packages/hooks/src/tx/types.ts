@@ -1,5 +1,5 @@
 import { AppCurrency, FeeCurrency, StdFee } from "@keplr-wallet/types";
-import { CoinPretty } from "@keplr-wallet/unit";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
 
 export interface ITxChainSetter {
   chainId: string;
@@ -67,6 +67,9 @@ export interface IFeeConfig extends ITxChainSetter {
     feeType: FeeType
   ): CoinPretty;
 
+  l1DataFee: Dec | undefined;
+  setL1DataFee(fee: Dec): void;
+
   uiProperties: UIProperties;
 }
 
@@ -84,6 +87,13 @@ export interface IRecipientConfigWithICNS extends IRecipientConfig {
   readonly isICNSName: boolean;
   readonly icnsExpectedBech32Prefix: string;
   readonly isICNSFetching: boolean;
+}
+
+export interface IRecipientConfigWithENS extends IRecipientConfig {
+  readonly isENSEnabled: boolean;
+  readonly isENSName: boolean;
+  readonly ensExpectedDomain: string;
+  readonly isENSFetching: boolean;
 }
 
 export interface IBaseAmountConfig extends ITxChainSetter {

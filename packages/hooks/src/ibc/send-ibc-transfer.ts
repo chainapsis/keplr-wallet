@@ -94,6 +94,9 @@ export const useSendMixedIBCTransferConfig = (
       chainId: string;
       resolverContractAddress: string;
     };
+    ens?: {
+      chainId: string;
+    };
     computeTerraClassicTax?: boolean;
   } = {}
 ) => {

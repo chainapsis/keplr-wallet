@@ -384,6 +384,7 @@
   "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph": "Launch Event: Swap with 0% Keplr fee for the first month",
   "page.ibc-swap.components.swap-fee-info.keplr-swap-fee-information.title": "Keplr Swap Fee",
   "page.ibc-swap.components.swap-fee-info.keplr-swap-fee-information.paragraph": "Keplr fee of {swapFeePercent} is priced into the quote. The fee is split between Keplr and third-party liquidity infrastructure providers.",
+  "page.ibc-swap.components.swap-fee-info.keplr-swap-fee-stable-coin-information.paragraph": "The quote includes the discounted Keplr fee of {swapFeePercent}, which applies to swaps between stablecoins. The fee is split between Keplr and third-party liquidity infrastructure providers.",
   "page.ibc-swap.components.slippage-modal.title": "Slippage Settings",
   "page.ibc-swap.components.slippage-modal.label.slippage-tolerance": "Slippage Tolerance",
   "page.ibc-swap.components.slippage-modal.label.slippage-custom": "Custom Slippage",

@@ -81,7 +81,9 @@ export class GetChainInfoWithoutEndpointsMsg extends Message<{
   }
 
   validateBasic(): void {
-    // noop
+    if (!this.chainId) {
+      throw new KeplrError("chains", 101, "Chain id not set");
+    }
   }
 
   override approveExternal(): boolean {

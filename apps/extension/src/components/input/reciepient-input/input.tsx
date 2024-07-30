@@ -5,6 +5,7 @@ import {
   EmptyAddressError,
   IMemoConfig,
   IRecipientConfig,
+  IRecipientConfigWithENS,
   IRecipientConfigWithICNS,
 } from "@keplr-wallet/hooks";
 import { ProfileIcon } from "../../icon";
@@ -19,7 +20,10 @@ import { AppCurrency } from "@keplr-wallet/types";
 
 export interface RecipientInputWithAddressBookProps {
   historyType: string;
-  recipientConfig: IRecipientConfig | IRecipientConfigWithICNS;
+  recipientConfig:
+    | IRecipientConfig
+    | IRecipientConfigWithICNS
+    | IRecipientConfigWithENS;
   memoConfig: IMemoConfig;
   currency: AppCurrency;
 
@@ -27,7 +31,10 @@ export interface RecipientInputWithAddressBookProps {
 }
 
 export interface RecipientInputWithoutAddressBookProps {
-  recipientConfig: IRecipientConfig | IRecipientConfigWithICNS;
+  recipientConfig:
+    | IRecipientConfig
+    | IRecipientConfigWithICNS
+    | IRecipientConfigWithENS;
   memoConfig?: undefined;
 
   hideAddressBookButton: true;
@@ -60,10 +67,34 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
       }
       return false;
     })();
-
+    const isICNSEnabled: boolean = (() => {
+      if ("isICNSEnabled" in recipientConfig) {
+        return recipientConfig.isICNSEnabled;
+      }
+      return false;
+    })();
     const isICNSFetching: boolean = (() => {
       if ("isICNSFetching" in recipientConfig) {
         return recipientConfig.isICNSFetching;
+      }
+      return false;
+    })();
+
+    const isENSName: boolean = (() => {
+      if ("isENSName" in recipientConfig) {
+        return recipientConfig.isENSName;
+      }
+      return false;
+    })();
+    const isENSEnabled: boolean = (() => {
+      if ("isENSEnabled" in recipientConfig) {
+        return recipientConfig.isENSEnabled;
+      }
+      return false;
+    })();
+    const isENSFetching: boolean = (() => {
+      if ("isENSFetching" in recipientConfig) {
+        return recipientConfig.isENSFetching;
       }
       return false;
     })();
@@ -73,7 +104,12 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
         <TextInput
           ref={ref}
           label={intl.formatMessage({
-            id: "components.input.recipient-input.wallet-address-label",
+            id:
+              isICNSEnabled && isENSEnabled
+                ? "components.input.recipient-input.wallet-address-label-icns-ens"
+                : isENSEnabled
+                ? "components.input.recipient-input.wallet-address-label-ens"
+                : "components.input.recipient-input.wallet-address-label",
           })}
           value={recipientConfig.value}
           autoComplete="off"
@@ -83,13 +119,25 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
             if (
               // If icns is possible and users enters ".", complete bech32 prefix automatically.
               "isICNSEnabled" in recipientConfig &&
-              recipientConfig.isICNSEnabled &&
+              isICNSEnabled &&
               value.length > 0 &&
               value[value.length - 1] === "." &&
               numOfCharacter(value, ".") === 1 &&
               numOfCharacter(recipientConfig.value, ".") === 0
             ) {
               value = value + recipientConfig.icnsExpectedBech32Prefix;
+            }
+
+            if (
+              // If ens is possible and users enters ".", append ens  domain automatically.
+              "isENSEnabled" in recipientConfig &&
+              isENSEnabled &&
+              value.length > 0 &&
+              value[value.length - 1] === "." &&
+              numOfCharacter(value, ".") === 1 &&
+              numOfCharacter(recipientConfig.value, ".") === 0
+            ) {
+              value = value + recipientConfig.ensExpectedDomain;
             }
 
             recipientConfig.setValue(value);
@@ -114,9 +162,12 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
               </IconButton>
             ) : null
           }
-          isLoading={isICNSFetching}
+          isLoading={isICNSFetching || isENSFetching}
           paragraph={(() => {
-            if (isICNSName && !recipientConfig.uiProperties.error) {
+            if (
+              (isICNSName || isENSName) &&
+              !recipientConfig.uiProperties.error
+            ) {
               return recipientConfig.recipient;
             }
           })()}

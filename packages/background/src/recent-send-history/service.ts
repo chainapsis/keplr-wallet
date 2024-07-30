@@ -19,6 +19,7 @@ import { IBCHistory, RecentSendHistory } from "./types";
 import { Buffer } from "buffer/";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 export class RecentSendHistoryService {
   // Key: {chain_identifier}/{type}
@@ -135,20 +136,21 @@ export class RecentSendHistoryService {
       | undefined,
     notificationInfo: {
       currencies: AppCurrency[];
-    }
+    },
+    isSkipTrack: boolean = false
   ): Promise<Uint8Array> {
     const sourceChainInfo =
       this.chainsService.getChainInfoOrThrow(sourceChainId);
     Bech32Address.validate(
       sender,
-      sourceChainInfo.bech32Config.bech32PrefixAccAddr
+      sourceChainInfo.bech32Config?.bech32PrefixAccAddr
     );
 
     const destinationChainInfo =
       this.chainsService.getChainInfoOrThrow(destinationChainId);
     Bech32Address.validate(
       recipient,
-      destinationChainInfo.bech32Config.bech32PrefixAccAddr
+      destinationChainInfo.bech32Config?.bech32PrefixAccAddr
     );
 
     const txHash = await this.txService.sendTx(sourceChainId, tx, mode, {
@@ -162,6 +164,40 @@ export class RecentSendHistoryService {
             memo,
             ibcChannels,
           });
+
+          if (tx.hash) {
+            if (isSkipTrack) {
+              // no wait
+              setTimeout(() => {
+                simpleFetch<any>("https://api.skip.build/", "/v2/tx/track", {
+                  method: "POST",
+                  headers: {
+                    "content-type": "application/json",
+                    ...(() => {
+                      const res: { authorization?: string } = {};
+                      if (process.env["SKIP_API_KEY"]) {
+                        res.authorization = process.env["SKIP_API_KEY"];
+                      }
+
+                      return res;
+                    })(),
+                  },
+                  body: JSON.stringify({
+                    tx_hash: Buffer.from(tx.hash).toString("hex"),
+                    chain_id: sourceChainId,
+                  }),
+                })
+                  .then((result) => {
+                    console.log(
+                      `Skip tx track result: ${JSON.stringify(result)}`
+                    );
+                  })
+                  .catch((e) => {
+                    console.log(e);
+                  });
+              }, 2000);
+            }
+          }
         }
       },
     });
@@ -212,19 +248,57 @@ export class RecentSendHistoryService {
     swapReceiver: string[],
     notificationInfo: {
       currencies: AppCurrency[];
-    }
+    },
+    isSkipTrack: boolean = false
   ): Promise<Uint8Array> {
     const sourceChainInfo =
       this.chainsService.getChainInfoOrThrow(sourceChainId);
     Bech32Address.validate(
       sender,
-      sourceChainInfo.bech32Config.bech32PrefixAccAddr
+      sourceChainInfo.bech32Config?.bech32PrefixAccAddr
     );
 
     this.chainsService.getChainInfoOrThrow(destinationChainId);
 
     const txHash = await this.txService.sendTx(sourceChainId, tx, mode, {
       silent,
+      onFulfill: (tx) => {
+        if (tx.code == null || tx.code === 0) {
+          if (tx.hash) {
+            if (isSkipTrack) {
+              setTimeout(() => {
+                // no wait
+                simpleFetch<any>("https://api.skip.build/", "/v2/tx/track", {
+                  method: "POST",
+                  headers: {
+                    "content-type": "application/json",
+                    ...(() => {
+                      const res: { authorization?: string } = {};
+                      if (process.env["SKIP_API_KEY"]) {
+                        res.authorization = process.env["SKIP_API_KEY"];
+                      }
+
+                      return res;
+                    })(),
+                  },
+                  body: JSON.stringify({
+                    tx_hash: Buffer.from(tx.hash).toString("hex"),
+                    chain_id: sourceChainId,
+                  }),
+                })
+                  .then((result) => {
+                    console.log(
+                      `Skip tx track result: ${JSON.stringify(result)}`
+                    );
+                  })
+                  .catch((e) => {
+                    console.log(e);
+                  });
+              }, 2000);
+            }
+          }
+        }
+      },
     });
 
     const id = this.addRecentIBCSwapHistory(

@@ -162,14 +162,17 @@ export class TokensStore {
   getTokens(chainId: string): ReadonlyArray<TokenInfo> {
     const bech32Address = this.accountStore.getAccount(chainId).bech32Address;
     const chainInfo = this.chainStore.getChain(chainId);
-    const associatedAccountAddress = bech32Address
-      ? Buffer.from(
-          Bech32Address.fromBech32(
-            bech32Address,
-            chainInfo.bech32Config.bech32PrefixAccAddr
-          ).address
-        ).toString("hex")
-      : "";
+
+    const hasBech32Config = chainInfo.bech32Config != null;
+    const associatedAccountAddress =
+      hasBech32Config && bech32Address
+        ? Buffer.from(
+            Bech32Address.fromBech32(
+              bech32Address,
+              chainInfo.bech32Config.bech32PrefixAccAddr
+            ).address
+          ).toString("hex")
+        : undefined;
 
     const tokens =
       this.tokenMap.get(ChainIdHelper.parse(chainId).identifier) ?? [];
@@ -177,6 +180,7 @@ export class TokensStore {
     return tokens.filter((token) => {
       if (
         token.associatedAccountAddress &&
+        associatedAccountAddress &&
         token.associatedAccountAddress !== associatedAccountAddress
       ) {
         return false;
@@ -192,13 +196,16 @@ export class TokensStore {
       throw new Error("Account not initialized");
     }
     const chainInfo = this.chainStore.getChain(chainId);
-    const isEvmChain = chainInfo.evm !== undefined;
-    const associatedAccountAddress = Buffer.from(
-      Bech32Address.fromBech32(
-        bech32Address,
-        chainInfo.bech32Config.bech32PrefixAccAddr
-      ).address
-    ).toString("hex");
+    const isEvmChain = chainInfo.evm != null;
+    const hasBech32Config = chainInfo.bech32Config != null;
+    const associatedAccountAddress = hasBech32Config
+      ? Buffer.from(
+          Bech32Address.fromBech32(
+            bech32Address,
+            chainInfo.bech32Config.bech32PrefixAccAddr
+          ).address
+        ).toString("hex")
+      : "";
 
     const msg = isEvmChain
       ? new AddERC20TokenMsg(chainId, currency)

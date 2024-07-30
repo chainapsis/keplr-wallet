@@ -219,7 +219,8 @@ export function init(
   const permissionInteractiveService =
     new PermissionInteractive.PermissionInteractiveService(
       permissionService,
-      keyRingV2Service
+      keyRingV2Service,
+      chainsService
     );
 
   const chainsUpdateService = new ChainsUpdate.ChainsUpdateService(

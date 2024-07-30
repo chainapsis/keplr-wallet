@@ -1,5 +1,6 @@
 import {
   ChainGetter,
+  getKeplrFromWindow,
   HasMapStore,
   ObservableJsonRPCQuery,
   QuerySharedContext,
@@ -18,7 +19,7 @@ export class ObservableEvmChainJsonRpcQuery<
     chainId: string,
     chainGetter: ChainGetter,
     method: string,
-    params: unknown[] | Record<string, unknown>
+    params?: unknown[] | Record<string, unknown>
   ) {
     const chainInfo = chainGetter.getChain(chainId);
 
@@ -26,6 +27,20 @@ export class ObservableEvmChainJsonRpcQuery<
 
     this._chainId = chainId;
     this.chainGetter = chainGetter;
+  }
+
+  protected override async fetchResponse(): Promise<{ headers: any; data: T }> {
+    const keplr = await getKeplrFromWindow();
+    const data = await keplr?.ethereum.request({
+      method: this.method,
+      params: this.params,
+      chainId: this._chainId,
+    });
+
+    return {
+      headers: {},
+      data: data as T,
+    };
   }
 
   get chainId(): string {

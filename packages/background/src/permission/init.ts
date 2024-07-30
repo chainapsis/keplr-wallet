@@ -10,6 +10,8 @@ import {
   ClearOriginPermissionMsg,
   ClearAllPermissionsMsg,
   GetAllPermissionDataPerOriginMsg,
+  GetCurrentChainIdForEVMMsg,
+  UpdateCurrentChainIdForEVMMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -24,6 +26,8 @@ export function init(router: Router, service: PermissionService): void {
   router.registerMessage(ClearOriginPermissionMsg);
   router.registerMessage(ClearAllPermissionsMsg);
   router.registerMessage(GetAllPermissionDataPerOriginMsg);
+  router.registerMessage(GetCurrentChainIdForEVMMsg);
+  router.registerMessage(UpdateCurrentChainIdForEVMMsg);
 
   router.addHandler(ROUTE, getHandler(service));
 }

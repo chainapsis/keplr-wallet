@@ -1,11 +1,13 @@
 import { KeyRingService } from "../keyring";
 import { Env } from "@keplr-wallet/router";
 import { PermissionService } from "../permission";
+import { ChainsService } from "../chains";
 
 export class PermissionInteractiveService {
   constructor(
     protected readonly permissionService: PermissionService,
-    protected readonly keyRingService: KeyRingService
+    protected readonly keyRingService: KeyRingService,
+    protected readonly chainsService: ChainsService
   ) {}
 
   async init(): Promise<void> {
@@ -26,22 +28,34 @@ export class PermissionInteractiveService {
     );
   }
 
-  async ensureEnabledAndGetCurrentChainId(
-    env: Env,
-    origin: string
-  ): Promise<string> {
+  async ensureEnabledForEVM(env: Env, origin: string): Promise<void> {
     await this.keyRingService.ensureUnlockInteractive(env);
 
-    const currentChainId =
-      this.permissionService.getCurrentChainIdForEVM(origin);
+    const currentChainIdForEVM =
+      this.permissionService.getCurrentChainIdForEVM(origin) ??
+      (() => {
+        const chainInfos = this.chainsService.getChainInfos();
+        // If currentChainId is not saved, Make Ethereum current chain.
+        const ethereumChainId = chainInfos.find(
+          (chainInfo) =>
+            chainInfo.evm !== undefined && chainInfo.chainId === "eip155:1"
+        )?.chainId;
+
+        if (!ethereumChainId) {
+          throw new Error("The Ethereum chain info is not found");
+        }
+
+        return ethereumChainId;
+      })();
 
     await this.permissionService.checkOrGrantBasicAccessPermission(
       env,
-      [currentChainId],
-      origin
+      [currentChainIdForEVM],
+      origin,
+      {
+        isForEVM: true,
+      }
     );
-
-    return currentChainId;
   }
 
   disable(chainIds: string[], origin: string) {

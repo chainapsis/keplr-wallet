@@ -293,513 +293,6 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer"],
   },
   {
-    rpc: "https://rpc-sifchain.keplr.app",
-    rest: "https://lcd-sifchain.keplr.app",
-    chainId: "sifchain-1",
-    chainName: "Sifchain",
-    stakeCurrency: {
-      coinDenom: "ROWAN",
-      coinMinimalDenom: "rowan",
-      coinDecimals: 18,
-      coinGeckoId: "sifchain",
-    },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/sifchain"
-        : "http://localhost:8080/chains/sifchain",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/sifchain"
-        : "http://localhost:8080/chains/sifchain",
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("sif"),
-    currencies: [
-      {
-        coinDenom: "ROWAN",
-        coinMinimalDenom: "rowan",
-        coinDecimals: 18,
-        coinGeckoId: "sifchain",
-      },
-      {
-        coinDenom: "Tether USDT",
-        coinMinimalDenom: "cusdt",
-        coinDecimals: 6,
-      },
-      {
-        coinDenom: "Ethereum",
-        coinMinimalDenom: "ceth",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Basic Attention Token",
-        coinMinimalDenom: "cbat",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Aragon",
-        coinMinimalDenom: "cant",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Bancor Network Token",
-        coinMinimalDenom: "cbnt",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "0x",
-        coinMinimalDenom: "czrx",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Chainlink",
-        coinMinimalDenom: "clink",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Decentraland",
-        coinMinimalDenom: "cmana",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Loopring",
-        coinMinimalDenom: "clrc",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Enjin Coin",
-        coinMinimalDenom: "cenj",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Synthetix Network Token",
-        coinMinimalDenom: "csnx",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "TrueUSD",
-        coinMinimalDenom: "ctusd",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Ocean Protocol",
-        coinMinimalDenom: "cocean",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Fantom",
-        coinMinimalDenom: "cftm",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "sUSD",
-        coinMinimalDenom: "csusd",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "USD Coin",
-        coinMinimalDenom: "cusdc",
-        coinDecimals: 6,
-      },
-      {
-        coinDenom: "Crypto com Coin",
-        coinMinimalDenom: "ccro",
-        coinDecimals: 8,
-      },
-      {
-        coinDenom: "Wrapped Bitcoin",
-        coinMinimalDenom: "cwbtc",
-        coinDecimals: 8,
-      },
-      {
-        coinDenom: "Swipe",
-        coinMinimalDenom: "csxp",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Band Protocol",
-        coinMinimalDenom: "cband",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Dai Stablecoin",
-        coinMinimalDenom: "cdai",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Compound",
-        coinMinimalDenom: "ccomp",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "UMA",
-        coinMinimalDenom: "cuma",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Balancer",
-        coinMinimalDenom: "cbal",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Yearn finance",
-        coinMinimalDenom: "cyfi",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Serum",
-        coinMinimalDenom: "csrm",
-        coinDecimals: 6,
-      },
-      {
-        coinDenom: "Cream",
-        coinMinimalDenom: "ccream",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "SAND",
-        coinMinimalDenom: "csand",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Sushi",
-        coinMinimalDenom: "csushi",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Empty Set Dollar",
-        coinMinimalDenom: "cesd",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Uniswap",
-        coinMinimalDenom: "cuni",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Aave",
-        coinMinimalDenom: "caave",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "BarnBridge",
-        coinMinimalDenom: "cbond",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Wrapped Filecoin",
-        coinMinimalDenom: "cwfil",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "The Graph",
-        coinMinimalDenom: "cgrt",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Tokenlon",
-        coinMinimalDenom: "clon",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "1inch",
-        coinMinimalDenom: "c1inch",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "THORChain ERC20",
-        coinMinimalDenom: "crune",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Secret ERC20",
-        coinMinimalDenom: "cwscrt",
-        coinDecimals: 6,
-      },
-      {
-        coinDenom: "IoTeX",
-        coinMinimalDenom: "ciotx",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Reef Finance",
-        coinMinimalDenom: "creef",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "COCOS BCX",
-        coinMinimalDenom: "ccocos",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Keep Network",
-        coinMinimalDenom: "ckeep",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Origin Protocol",
-        coinMinimalDenom: "cogn",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "ODAOfi",
-        coinMinimalDenom: "cdaofi",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Linear",
-        coinMinimalDenom: "clina",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "12Ships",
-        coinMinimalDenom: "ctshp",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "B.20",
-        coinMinimalDenom: "cb20",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Akropolis",
-        coinMinimalDenom: "cakro",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Rio Fuel Token",
-        coinMinimalDenom: "crfuel",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Rally",
-        coinMinimalDenom: "crly",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Convergence",
-        coinMinimalDenom: "cconv",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Render Token",
-        coinMinimalDenom: "crndr",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "PAID Network",
-        coinMinimalDenom: "cpaid",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Tidal",
-        coinMinimalDenom: "ctidal",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Axie Infinity",
-        coinMinimalDenom: "caxs",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "BitSong",
-        coinMinimalDenom: "cbtsg",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Cosmostarter",
-        coinMinimalDenom: "ccsms",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Dfyn Network",
-        coinMinimalDenom: "cdfyn",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "DinoSwap",
-        coinMinimalDenom: "cdino",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "DinoX",
-        coinMinimalDenom: "cdnxc",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Don-key",
-        coinMinimalDenom: "cdon",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Ethernity Chain",
-        coinMinimalDenom: "cern",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Frax",
-        coinMinimalDenom: "cfrax",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Frax Share",
-        coinMinimalDenom: "cfxs",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Knit Finance",
-        coinMinimalDenom: "ckft",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Lido DAO",
-        coinMinimalDenom: "cldo",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Doge Killer",
-        coinMinimalDenom: "cleash",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "LGCY Network",
-        coinMinimalDenom: "clgcy",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Polygon",
-        coinMinimalDenom: "cmatic",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Metis Token",
-        coinMinimalDenom: "cmetis",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Oh! Finance",
-        coinMinimalDenom: "coh",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Polkastarter",
-        coinMinimalDenom: "cpols",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Marlin",
-        coinMinimalDenom: "cpond",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Quickswap",
-        coinMinimalDenom: "cquick",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Railgun",
-        coinMinimalDenom: "crail",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "StaFi rATOM",
-        coinMinimalDenom: "cratom",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Saito",
-        coinMinimalDenom: "csaito",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Shiba Inu",
-        coinMinimalDenom: "cshib",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Tokemak",
-        coinMinimalDenom: "ctoke",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "UFO Gaming",
-        coinMinimalDenom: "cufo",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "UST (ERC-20)",
-        coinMinimalDenom: "cust",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "0chain",
-        coinMinimalDenom: "czcn",
-        coinDecimals: 18,
-      },
-      {
-        coinDenom: "Unizen",
-        coinMinimalDenom: "czcx",
-        coinDecimals: 18,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "ROWAN",
-        coinMinimalDenom: "rowan",
-        coinDecimals: 18,
-        coinGeckoId: "sifchain",
-        gasPriceStep: {
-          low: 1000000000000,
-          average: 1500000000000,
-          high: 2000000000000,
-        },
-      },
-    ],
-    features: [],
-  },
-  {
-    rpc: "https://rpc-certik.keplr.app",
-    rest: "https://lcd-certik.keplr.app",
-    chainId: "shentu-2.2",
-    chainName: "Shentu",
-    stakeCurrency: {
-      coinDenom: "CTK",
-      coinMinimalDenom: "uctk",
-      coinDecimals: 6,
-      coinGeckoId: "certik",
-    },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/shentu"
-        : "http://localhost:8080/chains/shentu",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/shentu"
-        : "http://localhost:8080/chains/shentu",
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("certik"),
-    currencies: [
-      {
-        coinDenom: "CTK",
-        coinMinimalDenom: "uctk",
-        coinDecimals: 6,
-        coinGeckoId: "certik",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "CTK",
-        coinMinimalDenom: "uctk",
-        coinDecimals: 6,
-        coinGeckoId: "certik",
-      },
-    ],
-    features: ["ibc-transfer", "ibc-go"],
-  },
-  {
     rpc: "https://rpc-iris.keplr.app",
     rest: "https://lcd-iris.keplr.app",
     chainId: "irishub-1",
@@ -1466,64 +959,6 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "ibc-go"],
   },
   {
-    rpc: "https://rpc-gravity-bridge.keplr.app",
-    rest: "https://lcd-gravity-bridge.keplr.app",
-    chainId: "gravity-bridge-3",
-    chainName: "Gravity Bridge",
-    stakeCurrency: {
-      coinDenom: "GRAV",
-      coinMinimalDenom: "ugraviton",
-      coinDecimals: 6,
-    },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/gravity-bridge"
-        : "http://localhost:8080/chains/gravity-bridge",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/gravity-bridge"
-        : "http://localhost:8080/chains/gravity-bridge",
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("gravity"),
-    currencies: [
-      {
-        coinDenom: "GRAV",
-        coinMinimalDenom: "ugraviton",
-        coinDecimals: 6,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "GRAV",
-        coinMinimalDenom: "ugraviton",
-        coinDecimals: 6,
-      },
-      {
-        coinDenom: "USDC",
-        coinMinimalDenom: "gravity0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 0.01 * 0.02,
-          average: 0.025 * 0.02,
-          high: 0.04 * 0.02,
-        },
-      },
-      {
-        coinDenom: "USDT",
-        coinMinimalDenom: "gravity0xdAC17F958D2ee523a2206206994597C13D831ec7",
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 0.01 * 0.02,
-          average: 0.025 * 0.02,
-          high: 0.04 * 0.02,
-        },
-      },
-    ],
-    features: ["ibc-transfer", "ibc-go"],
-  },
-  {
     rpc: "https://rpc-stride.keplr.app",
     rest: "https://lcd-stride.keplr.app",
     chainId: "stride-1",
@@ -2168,48 +1603,6 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: [],
   },
   {
-    rpc: "https://rpc-gitopia.keplr.app",
-    rest: "https://lcd-gitopia.keplr.app",
-    chainId: "gitopia",
-    chainName: "Gitopia",
-    stakeCurrency: {
-      coinDenom: "LORE",
-      coinMinimalDenom: "ulore",
-      coinDecimals: 6,
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: {
-      bech32PrefixAccAddr: "gitopia",
-      bech32PrefixAccPub: "gitopiapub",
-      bech32PrefixValAddr: "gitopiavaloper",
-      bech32PrefixValPub: "gitopiavaloperpub",
-      bech32PrefixConsAddr: "gitopiavalcons",
-      bech32PrefixConsPub: "gitopiavalconspub",
-    },
-    currencies: [
-      {
-        coinDenom: "LORE",
-        coinMinimalDenom: "ulore",
-        coinDecimals: 6,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "LORE",
-        coinMinimalDenom: "ulore",
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 0.0012,
-          average: 0.0016,
-          high: 0.0024,
-        },
-      },
-    ],
-    features: [],
-  },
-  {
     rpc: "https://rpc-likecoin.keplr.app",
     rest: "https://lcd-likecoin.keplr.app",
     chainId: "likecoin-mainnet-2",
@@ -2683,6 +2076,298 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     features: ["eth-address-gen", "eth-key-sign"],
+  },
+  {
+    rpc: "https://evm-1.keplr.app",
+    rest: "https://evm-1.keplr.app",
+    evm: {
+      chainId: 1,
+      rpc: "https://evm-1.keplr.app",
+      websocket: "wss://evm-1.keplr.app/websocket",
+    },
+    chainId: "eip155:1",
+    chainName: "Ethereum",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "ethereum-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "ethereum-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://evm-8453.keplr.app",
+    rest: "https://evm-8453.keplr.app",
+    evm: {
+      chainId: 8453,
+      rpc: "https://evm-8453.keplr.app",
+      websocket: "wss://evm-8453.keplr.app/websocket",
+    },
+    chainId: "eip155:8453",
+    chainName: "Base",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:8453/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "base-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "base-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+      },
+    ],
+    features: ["op-stack-l1-data-fee"],
+  },
+  {
+    rpc: "https://evm-10.keplr.app",
+    rest: "https://evm-10.keplr.app",
+    evm: {
+      chainId: 10,
+      rpc: "https://evm-10.keplr.app",
+      websocket: "wss://evm-10.keplr.app/websocket",
+    },
+    chainId: "eip155:10",
+    chainName: "Optimism",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:10/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "optimism-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "optimism-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+      },
+    ],
+    features: ["op-stack-l1-data-fee"],
+  },
+  {
+    rpc: "https://evm-42161.keplr.app",
+    rest: "https://evm-42161.keplr.app",
+    evm: {
+      chainId: 42161,
+      rpc: "https://evm-42161.keplr.app",
+      websocket: "wss://evm-42161.keplr.app/websocket",
+    },
+    chainId: "eip155:42161",
+    chainName: "Arbitrum",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:42161/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "arbitrum-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "arbitrum-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+      },
+    ],
+    features: ["eth-address-gen", "eth-key-sign"],
+  },
+  {
+    rpc: "https://evm-137.keplr.app",
+    rest: "https://evm-137.keplr.app",
+    evm: {
+      chainId: 137,
+      rpc: "https://evm-137.keplr.app",
+      websocket: "wss://evm-137.keplr.app/websocket",
+    },
+    chainId: "eip155:137",
+    chainName: "Polygon",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:137/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "MATIC",
+        coinMinimalDenom: "polygon-native",
+        coinDecimals: 18,
+        coinGeckoId: "matic-network",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:137/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "MATIC",
+        coinMinimalDenom: "polygon-native",
+        coinDecimals: 18,
+        coinGeckoId: "matic-network",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:137/chain.png",
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://evm-56.keplr.app",
+    rest: "https://evm-56.keplr.app",
+    evm: {
+      chainId: 56,
+      rpc: "https://evm-56.keplr.app",
+      websocket: "wss://evm-56.keplr.app/websocket",
+    },
+    chainId: "eip155:56",
+    chainName: "BNB Smart Chain",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:56/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "BNB",
+        coinMinimalDenom: "binance-native",
+        coinDecimals: 18,
+        coinGeckoId: "binancecoin",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:56/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "BNB",
+        coinMinimalDenom: "binance-native",
+        coinDecimals: 18,
+        coinGeckoId: "binancecoin",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:56/chain.png",
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://evm-43114.keplr.app",
+    rest: "https://evm-43114.keplr.app",
+    evm: {
+      chainId: 43114,
+      rpc: "https://evm-43114.keplr.app",
+      websocket: "wss://evm-43114.keplr.app/websocket",
+    },
+    chainId: "eip155:43114",
+    chainName: "Avalanche",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:43114/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "AVAX",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "avalanche-2",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:43114/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "AVAX",
+        coinMinimalDenom: "wei",
+        coinDecimals: 18,
+        coinGeckoId: "avalanche-2",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:43114/chain.png",
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://evm-81457.keplr.app",
+    rest: "https://evm-81457.keplr.app",
+    evm: {
+      chainId: 81457,
+      rpc: "https://evm-81457.keplr.app",
+      websocket: "wss://evm-81457.keplr.app/websocket",
+    },
+    chainId: "eip155:81457",
+    chainName: "Blast",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:81457/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "blast-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ETH",
+        coinMinimalDenom: "blast-native",
+        coinDecimals: 18,
+        coinGeckoId: "ethereum",
+      },
+    ],
+    features: ["op-stack-l1-data-fee"],
   },
 ];
 

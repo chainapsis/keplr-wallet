@@ -44,6 +44,7 @@ export interface EthTxReceipt {
 export interface EVMInfo {
   chainId: number;
   rpc: string;
+  websocket?: string;
 }
 
 export interface EthereumSignResponse {

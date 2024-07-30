@@ -131,6 +131,40 @@ export const Bech32ConfigSchema = Joi.object<Bech32Config>({
   bech32PrefixConsPub: Joi.string().required(),
 });
 
+// This EIP-155 Chain ID follows the format defined in CAIP-2
+// https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-2.md
+export const EIP155ChainIdSchema = Joi.string().custom((value: string) => {
+  if (!value.includes(":")) {
+    throw new Error("EIP155 chain id should have colon as defined in CAIP-2");
+  } else {
+    const splits = value.split(":");
+    if (splits.length !== 2) {
+      throw new Error(
+        "EIP155 chain id should have only one colon as defined in CAIP-2"
+      );
+    }
+
+    const [namespace, reference] = splits;
+    if (namespace !== "eip155") {
+      throw new Error("Namespace for EIP155 chain id should be 'eip155'");
+    }
+
+    const referenceFound = reference.match(/^[1-9]\d{0,31}$/);
+    if (!referenceFound) {
+      throw new Error(
+        "Reference for EIP155 chain id should be 1~32 characters of number"
+      );
+    }
+  }
+
+  return value;
+});
+
+export const ChainIdSchema = Joi.alternatives().try(
+  Joi.string().min(1).max(30),
+  EIP155ChainIdSchema
+);
+
 export const SuggestingBIP44Schema = Joi.object<{ coinType: number }>({
   coinType: Joi.number().strict().integer().min(0).required(),
   // Alow the any keys for compatibility of cosmosJS's BIP44 (for legacy).
@@ -171,16 +205,15 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   }).unknown(true),
   nodeProvider: Joi.object({
     name: Joi.string().min(1).max(30).required(),
-    email: Joi.string()
-      .email({
-        tlds: {
-          allow: false,
-        },
-      })
-      .required(),
+    email: Joi.string().email({
+      tlds: {
+        allow: false,
+      },
+    }),
+    discord: Joi.string().uri(),
     website: Joi.string().uri(),
   }),
-  chainId: Joi.string().required().min(1).max(30),
+  chainId: ChainIdSchema.required(),
   chainName: Joi.string().required().min(1).max(30),
   stakeCurrency: CurrencySchema,
   walletUrl: Joi.string().uri(),
@@ -200,7 +233,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
 
       return values;
     }),
-  bech32Config: Bech32ConfigSchema.required(),
+  bech32Config: Bech32ConfigSchema,
   currencies: Joi.array()
     .min(1)
     .items(CurrencySchema, CW20CurrencySchema, Secret20CurrencySchema)
@@ -247,12 +280,31 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   chainSymbolImageUrl: Joi.string().uri(),
   hideInUI: Joi.boolean(),
 }).custom((value: ChainInfo) => {
+  if (value.nodeProvider) {
+    if (!value.nodeProvider.email && !value.nodeProvider.discord) {
+      throw new Error("email or discord should be provided");
+    }
+  }
+
   if (
     value.alternativeBIP44s?.find(
       (bip44) => bip44.coinType === value.bip44.coinType
     )
   ) {
     throw new Error(`coin type ${value.bip44.coinType} is duplicated`);
+  }
+
+  if (value.bip44.coinType === 60) {
+    if (value.alternativeBIP44s && value.alternativeBIP44s.length > 0) {
+      throw new Error(`coin type 60 can't have alternative BIP44s`);
+    }
+  } else {
+    if (
+      value.alternativeBIP44s &&
+      value.alternativeBIP44s.find((bip44) => bip44.coinType === 60)
+    ) {
+      throw new Error(`coin type 60 can't be alternative BIP44`);
+    }
   }
 
   if (
@@ -264,6 +316,79 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
     throw new Error(
       `stake currency ${value.stakeCurrency.coinMinimalDenom} is not included in currencies`
     );
+  }
+
+  if (!EIP155ChainIdSchema.validate(value.chainId).error) {
+    if (value.bip44.coinType !== 60) {
+      throw new Error(
+        "if chainId is EIP-155 chain id defined in CAIP-2, coin type should be 60"
+      );
+    }
+
+    if (!value.evm) {
+      throw new Error(
+        "if chainId is EIP-155 chain id defined in CAIP-2, evm should be provided"
+      );
+    }
+
+    if (value.bech32Config != null) {
+      throw new Error(
+        "if chainId is EIP-155 chain id defined in CAIP-2, bech32Config should be undefined"
+      );
+    }
+  }
+
+  if (!value.bech32Config) {
+    if (value.bip44.coinType !== 60) {
+      throw new Error("if bech32Config is undefined, coin type should be 60");
+    }
+
+    if (!value.evm) {
+      throw new Error("if bech32Config is undefined, evm should be provided");
+    }
+
+    if (EIP155ChainIdSchema.validate(value.chainId).error) {
+      throw new Error(
+        "if bech32Config is undefined, chainId should be EIP-155 chain id defined in CAIP-2"
+      );
+    }
+  }
+
+  // evm only chain이 아닌 ethermint같은 경우에만 위의 밸리데이션을 수행한다.
+  if (EIP155ChainIdSchema.validate(value.chainId).error) {
+    if (value.evm) {
+      const firstCurrency = value.currencies[0];
+      if (firstCurrency.coinDecimals !== 18) {
+        throw new Error(
+          "The first currency's coin decimals should be 18 for EVM chain"
+        );
+      }
+      if (value.stakeCurrency) {
+        if (value.stakeCurrency.coinDecimals !== 18) {
+          throw new Error(
+            "The stake currency's coin decimals should be 18 for EVM chain"
+          );
+        }
+        const cur = value.currencies.find(
+          (cur) =>
+            cur.coinMinimalDenom === value.stakeCurrency?.coinMinimalDenom
+        );
+        if (cur) {
+          if (cur.coinDecimals !== 18) {
+            throw new Error(
+              "The stake currency's coin decimals should be 18 for EVM chain"
+            );
+          }
+        }
+      }
+
+      const firstFeeCurrency = value.feeCurrencies[0];
+      if (firstFeeCurrency.coinDecimals !== 18) {
+        throw new Error(
+          "The first fee currency's coin decimals should be 18 for EVM chain"
+        );
+      }
+    }
   }
 
   return value;

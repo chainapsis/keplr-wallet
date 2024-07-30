@@ -2,7 +2,6 @@ import { action, computed, flow, makeObservable, observable } from "mobx";
 import { AppCurrency, Keplr } from "@keplr-wallet/types";
 import { ChainGetter } from "../chain";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
-import { Bech32Address } from "@keplr-wallet/cosmos";
 import { MakeTxResponse } from "./types";
 import { AccountSharedContext } from "./context";
 
@@ -43,6 +42,8 @@ export class AccountSetBase {
 
   @observable
   protected _bech32Address: string = "";
+  @observable
+  protected _ethereumHexAddress: string = "";
   @observable
   protected _isNanoLedger: boolean = false;
   @observable
@@ -159,6 +160,7 @@ export class AccountSetBase {
       if (res.status === "fulfilled") {
         const key = res.value;
         this._bech32Address = key.bech32Address;
+        this._ethereumHexAddress = key.ethereumHexAddress;
         this._isNanoLedger = key.isNanoLedger;
         this._isKeystone = key.isKeystone;
         this._name = key.name;
@@ -170,6 +172,7 @@ export class AccountSetBase {
         // Caught error loading key
         // Reset properties, and set status to Rejected
         this._bech32Address = "";
+        this._ethereumHexAddress = "";
         this._isNanoLedger = false;
         this._isKeystone = false;
         this._name = "";
@@ -195,6 +198,7 @@ export class AccountSetBase {
       this.handleInit
     );
     this._bech32Address = "";
+    this._ethereumHexAddress = "";
     this._isNanoLedger = false;
     this._isKeystone = false;
     this._name = "";
@@ -288,22 +292,15 @@ export class AccountSetBase {
   get hasEthereumHexAddress(): boolean {
     const chainInfo = this.chainGetter.getChain(this.chainId);
     return (
+      chainInfo.evm != null ||
       chainInfo.bip44.coinType === 60 ||
       !!chainInfo.features?.includes("eth-address-gen") ||
       !!chainInfo.features?.includes("eth-key-sign")
     );
   }
 
-  @computed
   get ethereumHexAddress(): string {
-    if (this.bech32Address === "") {
-      return "";
-    }
-
-    return Bech32Address.fromBech32(
-      this.bech32Address,
-      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
-    ).toHex(true);
+    return this._ethereumHexAddress;
   }
 }
 

@@ -1,7 +1,6 @@
 import { ChainsService } from "../chains";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Notification } from "../tx/types";
-import { KeyRingEthereumService } from "../keyring-ethereum";
 import { EthTxReceipt } from "@keplr-wallet/types";
 import { retry } from "@keplr-wallet/common";
 
@@ -16,6 +15,7 @@ export class BackgroundTxEthereumService {
   }
 
   async sendEthereumTx(
+    origin: string,
     chainId: string,
     tx: Uint8Array,
     options: {
@@ -33,7 +33,7 @@ export class BackgroundTxEthereumService {
 
     try {
       const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-      const evmInfo = KeyRingEthereumService.evmInfo(chainInfo);
+      const evmInfo = ChainsService.getEVMInfo(chainInfo);
       if (!evmInfo) {
         throw new Error("No EVM info provided");
       }
@@ -46,6 +46,7 @@ export class BackgroundTxEthereumService {
         method: "POST",
         headers: {
           "content-type": "application/json",
+          "request-source": origin,
         },
         body: JSON.stringify({
           jsonrpc: "2.0",
@@ -73,6 +74,7 @@ export class BackgroundTxEthereumService {
               method: "POST",
               headers: {
                 "content-type": "application/json",
+                "request-source": origin,
               },
               body: JSON.stringify({
                 jsonrpc: "2.0",

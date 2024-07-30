@@ -178,6 +178,7 @@ export const FeeControl: FunctionComponent<{
   gasSimulator?: IGasSimulator;
 
   disableAutomaticFeeSet?: boolean;
+  isForEVMTx?: boolean;
 }> = observer(
   ({
     senderConfig,
@@ -185,6 +186,7 @@ export const FeeControl: FunctionComponent<{
     gasConfig,
     gasSimulator,
     disableAutomaticFeeSet,
+    isForEVMTx,
   }) => {
     const {
       analyticsStore,
@@ -212,6 +214,8 @@ export const FeeControl: FunctionComponent<{
     );
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const isShowingEstimatedFee = isForEVMTx && !!gasSimulator?.gasEstimated;
 
     return (
       <Box>
@@ -270,6 +274,18 @@ export const FeeControl: FunctionComponent<{
                       })()
                         .map((fee) =>
                           fee
+                            .quo(
+                              new Dec(
+                                isShowingEstimatedFee ? gasConfig?.gas || 1 : 1
+                              )
+                            )
+                            .mul(
+                              new Dec(
+                                isShowingEstimatedFee
+                                  ? gasSimulator?.gasEstimated || 1
+                                  : 1
+                              )
+                            )
                             .maxDecimals(6)
                             .inequalitySymbol(true)
                             .trim(true)
@@ -302,7 +318,21 @@ export const FeeControl: FunctionComponent<{
                       hasUnknown = true;
                       break;
                     } else {
-                      const price = priceStore.calculatePrice(fee);
+                      const price = priceStore.calculatePrice(
+                        fee
+                          .quo(
+                            new Dec(
+                              isShowingEstimatedFee ? gasConfig?.gas || 1 : 1
+                            )
+                          )
+                          .mul(
+                            new Dec(
+                              isShowingEstimatedFee
+                                ? gasSimulator?.gasEstimated || 1
+                                : 1
+                            )
+                          )
+                      );
                       if (price) {
                         if (!total) {
                           total = price;
@@ -469,6 +499,7 @@ export const FeeControl: FunctionComponent<{
             gasConfig={gasConfig}
             gasSimulator={gasSimulator}
             disableAutomaticFeeSet={disableAutomaticFeeSet}
+            isForEVMTx={isForEVMTx}
           />
         </Modal>
       </Box>

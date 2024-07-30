@@ -263,7 +263,7 @@ export const SettingTokenAddScreen: FunctionComponent = observer(() => {
                   if (!isEvmChain) {
                     Bech32Address.validate(
                       value,
-                      chainInfo.bech32Config.bech32PrefixAccAddr,
+                      chainInfo.bech32Config?.bech32PrefixAccAddr,
                     );
                   }
                 } catch (e) {

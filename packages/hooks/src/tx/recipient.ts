@@ -23,10 +23,17 @@ import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { useState } from "react";
 import { Buffer } from "buffer/";
 import { validateICNSName } from "@keplr-wallet/common";
+import { JsonRpcProvider } from "@ethersproject/providers";
 
 interface ICNSFetchData {
   isFetching: boolean;
   bech32Address?: string;
+  error?: Error;
+}
+
+interface ENSFetchData {
+  isFetching: boolean;
+  ethereumHexaddress?: string;
   error?: Error;
 }
 
@@ -59,6 +66,18 @@ export class RecipientConfig
   @observable.shallow
   protected _icnsFetchDataMap = new Map<string, ICNSFetchData>();
 
+  // Deep equal check is required to avoid infinite re-render.
+  @observable.struct
+  protected _ens:
+    | {
+        chainId: string;
+      }
+    | undefined = undefined;
+
+  // Key is {chain identifier of chain which resolver exists}/{ens username}
+  @observable.shallow
+  protected _ensFetchDataMap = new Map<string, ENSFetchData>();
+
   constructor(chainGetter: ChainGetter, initialChainId: string) {
     super(chainGetter, initialChainId);
 
@@ -68,7 +87,7 @@ export class RecipientConfig
   @computed
   get bech32Prefix(): string {
     if (!this._bech32Prefix) {
-      return this.chainInfo.bech32Config.bech32PrefixAccAddr;
+      return this.chainInfo.bech32Config?.bech32PrefixAccAddr ?? "";
     }
 
     return this._bech32Prefix;
@@ -145,7 +164,7 @@ export class RecipientConfig
   }
 
   get isICNSEnabled(): boolean {
-    return !!this._icns;
+    return !!this._icns && !!this.bech32Prefix;
   }
 
   @computed
@@ -170,6 +189,101 @@ export class RecipientConfig
     return this.bech32Prefix;
   }
 
+  protected getENSFetchData(username: string): ENSFetchData {
+    if (!this._ens) {
+      throw new Error("ENS info is not set");
+    }
+
+    if (!this.chainGetter.hasChain(this._ens.chainId)) {
+      throw new Error(`Can't find chain: ${this._ens.chainId}`);
+    }
+
+    const chainIdentifier = ChainIdHelper.parse(this._ens.chainId).identifier;
+    const key = `${chainIdentifier}/${username}`;
+
+    if (!this._ensFetchDataMap.has(key)) {
+      runInAction(() => {
+        this._ensFetchDataMap.set(key, {
+          isFetching: true,
+        });
+      });
+
+      new JsonRpcProvider(this.chainGetter.getChain(this._ens.chainId).rpc)
+        .getResolver(username)
+        .then((resolver) => {
+          if (resolver) {
+            resolver
+              .getAddress(60)
+              .then((res) => {
+                this._ensFetchDataMap.set(key, {
+                  isFetching: false,
+                  ethereumHexaddress: res,
+                });
+              })
+              .catch((error) => {
+                runInAction(() => {
+                  this._icnsFetchDataMap.set(key, {
+                    isFetching: false,
+                    error,
+                  });
+                });
+              });
+          } else {
+            this._ensFetchDataMap.set(key, {
+              isFetching: false,
+            });
+          }
+        })
+        .catch((error) => {
+          runInAction(() => {
+            this._icnsFetchDataMap.set(key, {
+              isFetching: false,
+              error,
+            });
+          });
+        });
+    }
+
+    return this._ensFetchDataMap.get(key)!;
+  }
+
+  @action
+  setENS(ens?: { chainId: string }) {
+    this._ens = ens;
+  }
+
+  @computed
+  get isENSEnabled(): boolean {
+    return (
+      !!this._ens &&
+      this.chainInfo.evm != null &&
+      this.chainInfo.bip44.coinType === 60
+    );
+  }
+
+  @computed
+  get isENSName(): boolean {
+    if (this._ens) {
+      const parsed = this.value.trim().split(".");
+      return parsed.length > 1 && parsed[parsed.length - 1] === "eth";
+    }
+
+    return false;
+  }
+
+  @computed
+  get isENSFetching(): boolean {
+    if (!this.isENSName || !this.isENSEnabled) {
+      return false;
+    }
+
+    return this.getENSFetchData(this.value.trim()).isFetching;
+  }
+
+  get ensExpectedDomain(): string {
+    return "eth";
+  }
+
   get recipient(): string {
     const rawRecipient = this.value.trim();
 
@@ -181,8 +295,16 @@ export class RecipientConfig
       }
     }
 
+    if (this.isENSName && this.isENSEnabled) {
+      try {
+        return this.getENSFetchData(rawRecipient).ethereumHexaddress || "";
+      } catch {
+        return "";
+      }
+    }
+
     const chainInfo = this.chainInfo;
-    const isEvmChain = !!EthereumAccountBase.evmInfo(this.chainInfo);
+    const isEvmChain = !!this.chainInfo.evm;
     const hasEthereumAddress =
       chainInfo.bip44.coinType === 60 ||
       !!chainInfo.features?.includes("eth-address-gen") ||
@@ -257,8 +379,40 @@ export class RecipientConfig
       }
     }
 
+    if (this.isENSName && this.isENSEnabled) {
+      try {
+        const fetched = this.getENSFetchData(rawRecipient);
+
+        if (fetched.isFetching) {
+          return {
+            loadingState: "loading-block",
+          };
+        }
+
+        if (!fetched.ethereumHexaddress) {
+          return {
+            error: new Error("Failed to fetch the address from ENS"),
+            loadingState: fetched.isFetching ? "loading-block" : undefined,
+          };
+        }
+
+        if (fetched.error) {
+          return {
+            error: new Error("Failed to fetch the address from ENS"),
+            loadingState: fetched.isFetching ? "loading-block" : undefined,
+          };
+        }
+
+        return {};
+      } catch (e) {
+        return {
+          error: e,
+        };
+      }
+    }
+
     const chainInfo = this.chainInfo;
-    const isEvmChain = !!EthereumAccountBase.evmInfo(this.chainInfo);
+    const isEvmChain = !!this.chainInfo.evm;
     const hasEthereumAddress =
       chainInfo.bip44.coinType === 60 ||
       !!chainInfo.features?.includes("eth-address-gen") ||
@@ -300,8 +454,7 @@ export class RecipientConfig
 
   @computed
   get isRecipientEthereumHexAddress(): boolean {
-    const rawRecipient = this.value.trim();
-    return EthereumAccountBase.isEthereumHexAddressWithChecksum(rawRecipient);
+    return EthereumAccountBase.isEthereumHexAddressWithChecksum(this.recipient);
   }
 }
 
@@ -315,6 +468,9 @@ export const useRecipientConfig = (
       chainId: string;
       resolverContractAddress: string;
     };
+    ens?: {
+      chainId: string;
+    };
   } = {}
 ) => {
   const [config] = useState(() => new RecipientConfig(chainGetter, chainId));
@@ -324,6 +480,7 @@ export const useRecipientConfig = (
   );
   config.setAllowHexAddressToBech32Address(options.allowHexAddressOnly);
   config.setICNS(options.icns);
+  config.setENS(options.ens);
 
   return config;
 };

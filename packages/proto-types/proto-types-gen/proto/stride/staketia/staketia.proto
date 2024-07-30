@@ -1,0 +1,208 @@
+syntax = "proto3";
+package stride.staketia;
+
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/Stride-Labs/stride/v22/x/staketia/types";
+
+message HostZone {
+  // Chain ID
+  string chain_id = 1;
+  // Native token denom on the host zone (e.g. utia)
+  string native_token_denom = 2;
+  // IBC denom of the native token as it lives on stride (e.g. ibc/...)
+  string native_token_ibc_denom = 3;
+  // Transfer channel ID from stride to the host zone
+  string transfer_channel_id = 4;
+
+  // Operator controlled delegation address on the host zone
+  string delegation_address = 5
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // Operator controlled reward address on the host zone
+  string reward_address = 6 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // Deposit address on stride
+  string deposit_address = 7 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // Redemption address on stride
+  string redemption_address = 8
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // Claim address on stride
+  string claim_address = 9 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // operator address set by safe, on stride
+  string operator_address_on_stride = 10
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // admin address set upon host zone creation,  on stride
+  string safe_address_on_stride = 11
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+
+  // Previous redemption rate
+  string last_redemption_rate = 12 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+  // Current redemption rate
+  string redemption_rate = 13 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+  // Min outer redemption rate - adjusted by governance
+  string min_redemption_rate = 14 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+  // Max outer redemption rate - adjusted by governance
+  string max_redemption_rate = 15 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+  // Min inner redemption rate - adjusted by controller
+  string min_inner_redemption_rate = 16 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+  // Max inner redemption rate - adjusted by controller
+  string max_inner_redemption_rate = 17 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+
+  // Total delegated balance on the host zone delegation account
+  string delegated_balance = 18 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
+
+  // The undelegation period for Celestia in days
+  uint64 unbonding_period_seconds = 19;
+  // Indicates whether the host zone has been halted
+  bool halted = 20;
+}
+
+// Status fields for a delegation record
+// Note: There is an important assumption here that tokens in the deposit
+// account should not be tracked by these records. The record is created as soon
+// as the tokens leave stride
+// Additionally, the GetActiveDelegationRecords query filters for records that
+// are either TRANSFER_IN_PROGERSS or DELEGATION_QUEUE. If a new active status
+// is added, the keeper must be modified
+enum DelegationRecordStatus {
+  option (gogoproto.goproto_enum_prefix) = false;
+
+  // TRANSFER_IN_PROGRESS indicates the native tokens are being sent from the
+  // deposit account to the delegation account
+  TRANSFER_IN_PROGRESS = 0;
+  // TRANSFER_FAILED indicates that the transfer either timed out or was an ack
+  // failure
+  TRANSFER_FAILED = 1;
+  // DELEGATION_QUEUE indicates the tokens have landed on the host zone and are
+  // ready to be delegated
+  DELEGATION_QUEUE = 2;
+  // DELEGATION_COMPLETE indicates the delegation has been completed
+  DELEGATION_COMPLETE = 3;
+}
+
+// Status fields for an unbonding record
+enum UnbondingRecordStatus {
+  option (gogoproto.goproto_enum_prefix) = false;
+
+  // ACCUMULATING_REDEMPTIONS indicates redemptions are still being accumulated
+  // on this record
+  ACCUMULATING_REDEMPTIONS = 0;
+  // UNBONDING_QUEUE indicates the unbond amount for this epoch has been froze
+  // and the tokens are ready to be unbonded on the host zone
+  UNBONDING_QUEUE = 1;
+  // UNBONDING_IN_PROGRESS indicates the unbonding is currently in progress on
+  // the host zone
+  UNBONDING_IN_PROGRESS = 2;
+  // UNBONDED indicates the unbonding is finished on the host zone and the
+  // tokens are still in the delegation account
+  UNBONDED = 3;
+  // CLAIMABLE indicates the unbonded tokens have been swept to stride and are
+  // ready to be distributed to users
+  CLAIMABLE = 4;
+  // CLAIMED indicates the full unbonding cycle has been completed
+  CLAIMED = 5;
+}
+
+// DelegationRecords track the aggregate liquid stakes and delegations
+// for a given epoch
+// Note: There is an important assumption here that tokens in the deposit
+// account should not be tracked by these records. The record is created as soon
+// as the tokens leave stride
+message DelegationRecord {
+  // Deposit record unique ID
+  uint64 id = 1;
+  // The amount of native tokens that should be delegated
+  string native_amount = 2 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
+  // The status indicating the point in the delegation's lifecycle
+  DelegationRecordStatus status = 3;
+  // The tx hash of the delegation on the host zone
+  string tx_hash = 4;
+}
+
+// UnbondingRecords track the aggregate unbondings across an epoch
+message UnbondingRecord {
+  // Unbonding record ID
+  uint64 id = 1;
+  // The status indicating the point in the delegation's lifecycle
+  UnbondingRecordStatus status = 2;
+  // The amount of stTokens that were redeemed
+  string st_token_amount = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
+  // The corresponding amount of native tokens that should be unbonded
+  string native_amount = 4 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
+  // The Unix timestamp (in seconds) at which the unbonding completes
+  uint64 unbonding_completion_time_seconds = 5;
+  // The tx hash of the undelegation on the host zone
+  string undelegation_tx_hash = 6;
+  // The tx hash of the unbonded token sweep on the host zone
+  string unbonded_token_sweep_tx_hash = 7;
+}
+
+// RedemptionRecords track an individual user's redemption claims
+message RedemptionRecord {
+  // Unbonding record ID
+  uint64 unbonding_record_id = 1;
+  // Redeemer
+  string redeemer = 2;
+  // The amount of stTokens that were redeemed
+  string st_token_amount = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
+  // The corresponding amount of native tokens that should be unbonded
+  string native_amount = 4 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// SlashRecords log adjustments to the delegated balance
+message SlashRecord {
+  // The slash record monotonically increasing ID
+  uint64 id = 1;
+  // The Unix timestamp (in seconds) when the slash adjustment was processed on
+  // stride
+  uint64 time = 2;
+  // The delta by which the total delegated amount changed from slash
+  string native_amount = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
+  // The address (or addresses) of the validator that was slashed
+  string validator_address = 4;
+}

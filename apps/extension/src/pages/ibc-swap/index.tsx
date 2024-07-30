@@ -31,7 +31,7 @@ import { useSearchParams } from "react-router-dom";
 import { useTxConfigsQueryString } from "../../hooks/use-tx-config-query-string";
 import { MainHeaderLayout } from "../main/layouts/header";
 import { XAxis } from "../../components/axis";
-import { Caption2, H4, Subtitle4 } from "../../components/typography";
+import { Caption2, H4 } from "../../components/typography";
 import { SlippageModal } from "./components/slippage-modal";
 import styled, { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
@@ -160,6 +160,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   })();
   // ----
 
+  const [swapFeeBps, setSwapFeeBps] = useState(SwapFeeBps.value);
   const ibcSwapConfigs = useIBCSwapConfig(
     chainStore,
     queriesStore,
@@ -171,8 +172,113 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     200000,
     outChainId,
     outCurrency,
-    SwapFeeBps.value
+    swapFeeBps
   );
+  const querySwapFeeBps = queriesStore.simpleQuery.queryGet<{
+    pairs?: {
+      [key: string]: number | undefined;
+    };
+    swapFeeBps?: 50;
+  }>(process.env["KEPLR_EXT_CONFIG_SERVER"], "/swap-fee/info.json");
+  useEffect(() => {
+    const defaultSwapFeeBps = SwapFeeBps.value;
+    if (querySwapFeeBps.response) {
+      let inOut: [
+        {
+          chainId: string;
+          coinMinimalDenom: string;
+        },
+        {
+          chainId: string;
+          coinMinimalDenom: string;
+        }
+      ] = [
+        (() => {
+          const currency = ibcSwapConfigs.amountConfig.amount[0].currency;
+          if (
+            "originChainId" in currency &&
+            "originCurrency" in currency &&
+            currency.originChainId &&
+            currency.originCurrency
+          ) {
+            return {
+              chainId: currency.originChainId,
+              coinMinimalDenom: currency.originCurrency.coinMinimalDenom,
+            };
+          }
+          return {
+            chainId: ibcSwapConfigs.amountConfig.chainId,
+            coinMinimalDenom: currency.coinMinimalDenom,
+          };
+        })(),
+        (() => {
+          const currency = ibcSwapConfigs.amountConfig.outCurrency;
+          if (
+            "originChainId" in currency &&
+            "originCurrency" in currency &&
+            currency.originChainId &&
+            currency.originCurrency
+          ) {
+            return {
+              chainId: currency.originChainId,
+              coinMinimalDenom: currency.originCurrency.coinMinimalDenom,
+            };
+          }
+          return {
+            chainId: ibcSwapConfigs.amountConfig.outChainId,
+            coinMinimalDenom: currency.coinMinimalDenom,
+          };
+        })(),
+      ];
+
+      inOut = inOut.sort((a, b) => {
+        const aChainIdentifier = chainStore.getChain(a.chainId).chainIdentifier;
+        const bChainIdentifier = chainStore.getChain(b.chainId).chainIdentifier;
+
+        if (aChainIdentifier === bChainIdentifier) {
+          return 0;
+        }
+        return aChainIdentifier < bChainIdentifier ? -1 : 1;
+      });
+
+      const key = inOut
+        .map(
+          (v) =>
+            `${chainStore.getChain(v.chainId).chainIdentifier}/${
+              v.coinMinimalDenom
+            }`
+        )
+        .join("/");
+
+      if (
+        querySwapFeeBps.response.data["pairs"] &&
+        querySwapFeeBps.response.data["pairs"][key] != null
+      ) {
+        const fee = querySwapFeeBps.response.data["pairs"][key];
+        if (fee != null) {
+          setSwapFeeBps(fee);
+        }
+      } else {
+        if (querySwapFeeBps.response.data["swapFeeBps"] != null) {
+          const fee = querySwapFeeBps.response.data["swapFeeBps"];
+          if (fee != null) {
+            setSwapFeeBps(fee);
+          }
+        } else {
+          setSwapFeeBps(defaultSwapFeeBps);
+        }
+      }
+    } else {
+      setSwapFeeBps(defaultSwapFeeBps);
+    }
+  }, [
+    chainStore,
+    ibcSwapConfigs.amountConfig.amount,
+    ibcSwapConfigs.amountConfig.chainId,
+    ibcSwapConfigs.amountConfig.outChainId,
+    ibcSwapConfigs.amountConfig.outCurrency,
+    querySwapFeeBps.response,
+  ]);
 
   ibcSwapConfigs.amountConfig.setCurrency(inCurrency);
 
@@ -641,7 +747,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           denom: amount.currency.coinMinimalDenom,
                         };
                       }),
-                      ibcSwapConfigs.memoConfig.memo
+                      ibcSwapConfigs.memoConfig.memo,
+                      true
                     ).withIBCPacketForwarding(channels, {
                       currencies: chainStore.getChain(chainId).currencies,
                     });
@@ -678,7 +785,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       ibcSwapConfigs.memoConfig.memo,
                       {
                         currencies: chainStore.getChain(outChainId).currencies,
-                      }
+                      },
+                      true
                     );
 
                     return await new InExtensionMessageRequester().sendMessage(
@@ -883,33 +991,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             >
               <FormattedMessage id="page.ibc-swap.title.swap" />
             </H4>
-
-            <Gutter size="0.25rem" />
-            <Box
-              height="1rem"
-              alignX="center"
-              alignY="center"
-              paddingX="0.35rem"
-              borderRadius="0.225rem"
-              backgroundColor={
-                theme.mode === "light"
-                  ? ColorPalette["blue-100"]
-                  : ColorPalette["gray-500"]
-              }
-            >
-              <Subtitle4
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["blue-400"]
-                    : ColorPalette["gray-100"]
-                }
-                style={{
-                  fontSize: "0.5625rem",
-                }}
-              >
-                Beta
-              </Subtitle4>
-            </Box>
 
             <Gutter size="0.5rem" />
 

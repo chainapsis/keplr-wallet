@@ -3,7 +3,11 @@ import {
   PrefixKVStore,
   sortedJsonByKeyStringify,
 } from "@keplr-wallet/common";
-import { ChainInfo, ChainInfoWithoutEndpoints } from "@keplr-wallet/types";
+import {
+  ChainInfo,
+  ChainInfoWithoutEndpoints,
+  EVMInfo,
+} from "@keplr-wallet/types";
 import {
   action,
   autorun,
@@ -32,6 +36,10 @@ type ChainSuggestedHandler = (chainInfo: ChainInfo) => void | Promise<void>;
 type UpdatedChainInfo = Pick<ChainInfo, "chainId" | "features">;
 
 export class ChainsService {
+  static getEVMInfo(chainInfo: ChainInfo): EVMInfo | undefined {
+    return chainInfo.evm;
+  }
+
   @observable.ref
   protected updatedChainInfos: UpdatedChainInfo[] = [];
   protected updatedChainInfoKVStore: KVStore;
@@ -340,6 +348,17 @@ export class ChainsService {
     }
   );
 
+  getChainInfoByEVMChainId = computedFn(
+    (evmChainId: number): ChainInfo | undefined => {
+      return this.getChainInfos().find(
+        (chainInfo) => chainInfo.evm && chainInfo.evm.chainId === evmChainId
+      );
+    },
+    {
+      keepAlive: true,
+    }
+  );
+
   hasChainInfo(chainId: string): boolean {
     return this.getChainInfo(chainId) != null;
   }
@@ -402,16 +421,36 @@ export class ChainsService {
     }
 
     const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+    const isEvmOnlyChain = this.isEvmOnlyChain(chainId);
 
-    const res = await simpleFetch<ChainInfo>(
+    const res = await simpleFetch<
+      (Omit<ChainInfo, "rest"> & { websocket: string }) | ChainInfo
+    >(
       this.communityChainInfoRepo.alternativeURL
-        ? this.communityChainInfoRepo.alternativeURL.replace(
-            "{chain_identifier}",
-            chainIdentifier
-          )
-        : `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/${this.communityChainInfoRepo.branchName}/cosmos/${chainIdentifier}.json`
+        ? this.communityChainInfoRepo.alternativeURL
+            .replace("{chain_identifier}", chainIdentifier)
+            .replace("/cosmos/", isEvmOnlyChain ? "/evm/" : "/cosmos/")
+        : `https://raw.githubusercontent.com/${
+            this.communityChainInfoRepo.organizationName
+          }/${this.communityChainInfoRepo.repoName}/${
+            this.communityChainInfoRepo.branchName
+          }/${isEvmOnlyChain ? "evm" : "cosmos"}/${chainIdentifier}.json`
     );
-    let chainInfo: ChainInfo = res.data;
+    let chainInfo: ChainInfo =
+      "rest" in res.data && !isEvmOnlyChain
+        ? res.data
+        : {
+            ...res.data,
+            rest: res.data.rpc,
+            evm: {
+              chainId: parseInt(res.data.chainId.replace("eip155:", ""), 10),
+              rpc: res.data.rpc,
+              ...("websocket" in res.data && { websocket: res.data.websocket }),
+            },
+            features: ["eth-address-gen", "eth-key-sign"].concat(
+              res.data.features ?? []
+            ),
+          };
 
     const fetchedChainIdentifier = ChainIdHelper.parse(
       chainInfo.chainId
@@ -621,7 +660,11 @@ export class ChainsService {
         const updated = this.mergeChainInfosWithDynamics([chainInfo])[0];
 
         for (const handler of this.onChainSuggestedHandlers) {
-          await handler(updated);
+          try {
+            await handler(updated);
+          } catch (e) {
+            console.error(e);
+          }
         }
       }
     } else {
@@ -994,5 +1037,23 @@ export class ChainsService {
 
   addChainSuggestedHandler(handler: ChainRemovedHandler) {
     this.onChainSuggestedHandlers.push(handler);
+  }
+
+  isEvmChain(chainId: string): boolean {
+    const chainInfo = this.getChainInfoOrThrow(chainId);
+    return chainInfo.evm !== undefined;
+  }
+
+  isEvmOnlyChain(chainId: string): boolean {
+    return this.isEvmChain(chainId) && chainId.split(":")[0] === "eip155";
+  }
+
+  getEVMInfoOrThrow(chainId: string): EVMInfo {
+    const chainInfo = this.getChainInfoOrThrow(chainId);
+    if (chainInfo.evm === undefined) {
+      throw new Error(`There is no EVM info for ${chainId}`);
+    }
+
+    return chainInfo.evm;
   }
 }

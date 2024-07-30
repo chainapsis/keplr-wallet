@@ -8,7 +8,8 @@ export interface ChainInfo {
   readonly rest: string;
   readonly nodeProvider?: {
     readonly name: string;
-    readonly email: string;
+    readonly email?: string;
+    readonly discord?: string;
     readonly website?: string;
   };
   readonly chainId: string;
@@ -22,7 +23,7 @@ export interface ChainInfo {
   readonly walletUrlForStaking?: string;
   readonly bip44: BIP44;
   readonly alternativeBIP44s?: BIP44[];
-  readonly bech32Config: Bech32Config;
+  readonly bech32Config?: Bech32Config;
 
   readonly currencies: AppCurrency[];
   /**

@@ -63,6 +63,36 @@ import {
   MsgUndelegateHost,
   MsgUpdateInnerRedemptionRateBounds,
 } from "@keplr-wallet/proto-types/stride/stakeibc/tx";
+import {
+  MsgLiquidStake as MsgLiquidStakeStakeTia,
+  MsgRedeemStake as MsgRedeemStakeStakeTia,
+  MsgConfirmDelegation,
+  MsgConfirmUndelegation,
+  MsgConfirmUnbondedTokenSweep,
+  MsgAdjustDelegatedBalance,
+  MsgUpdateInnerRedemptionRateBounds as MsgUpdateInnerRedemptionRateBoundsStakeTia,
+  MsgResumeHostZone,
+  MsgRefreshRedemptionRate,
+  MsgOverwriteDelegationRecord,
+  MsgOverwriteUnbondingRecord,
+  MsgOverwriteRedemptionRecord,
+  MsgSetOperatorAddress,
+} from "@keplr-wallet/proto-types/stride/staketia/tx";
+import {
+  MsgLiquidStake as MsgLiquidStakeStakeDym,
+  MsgRedeemStake as MsgRedeemStakeStakeDym,
+  MsgConfirmDelegation as MsgConfirmDelegationStakeDym,
+  MsgConfirmUndelegation as MsgConfirmUndelegationStakeDym,
+  MsgConfirmUnbondedTokenSweep as MsgConfirmUnbondedTokenSweepStakeDym,
+  MsgAdjustDelegatedBalance as MsgAdjustDelegatedBalanceStakeDym,
+  MsgUpdateInnerRedemptionRateBounds as MsgUpdateInnerRedemptionRateBoundsStakeDym,
+  MsgResumeHostZone as MsgResumeHostZoneStakeDym,
+  MsgRefreshRedemptionRate as MsgRefreshRedemptionRateStakeDym,
+  MsgOverwriteDelegationRecord as MsgOverwriteDelegationRecordStakeDym,
+  MsgOverwriteUnbondingRecord as MsgOverwriteUnbondingRecordStakeDym,
+  MsgOverwriteRedemptionRecord as MsgOverwriteRedemptionRecordStakeDym,
+  MsgSetOperatorAddress as MsgSetOperatorAddressStakeDym,
+} from "@keplr-wallet/proto-types/stride/stakedym/tx";
 import { Buffer } from "buffer/";
 
 export * from "./unknown";
@@ -374,4 +404,112 @@ defaultProtoCodec.registerAny(
 defaultProtoCodec.registerAny(
   "/stride.stakeibc.MsgUpdateInnerRedemptionRateBounds",
   MsgUpdateInnerRedemptionRateBounds
+);
+defaultProtoCodec.registerAny(
+  "/stride.staketia.MsgLiquidStake",
+  MsgLiquidStakeStakeTia
+);
+defaultProtoCodec.registerAny(
+  "/stride.staketia.MsgRedeemStake",
+  MsgRedeemStakeStakeTia
+);
+defaultProtoCodec.registerAny(
+  "/stride.staketia.MsgConfirmDelegation",
+  MsgConfirmDelegation
+);
+defaultProtoCodec.registerAny(
+  "/stride.staketia.MsgConfirmUndelegation",
+  MsgConfirmUndelegation
+);
+defaultProtoCodec.registerAny(
+  "/stride.staketia.MsgConfirmUnbondedTokenSweep",
+  MsgConfirmUnbondedTokenSweep
+);
+defaultProtoCodec.registerAny(
+  "/stride.staketia.MsgAdjustDelegatedBalance",
+  MsgAdjustDelegatedBalance
+);
+defaultProtoCodec.registerAny(
+  "/stride.staketia.MsgUpdateInnerRedemptionRateBounds",
+  MsgUpdateInnerRedemptionRateBoundsStakeTia
+);
+defaultProtoCodec.registerAny(
+  "/stride.staketia.MsgResumeHostZone",
+  MsgResumeHostZone
+);
+defaultProtoCodec.registerAny(
+  "/stride.staketia.MsgRefreshRedemptionRate",
+  MsgRefreshRedemptionRate
+);
+defaultProtoCodec.registerAny(
+  "/stride.staketia.MsgOverwriteDelegationRecord",
+  MsgOverwriteDelegationRecord
+);
+defaultProtoCodec.registerAny(
+  "/stride.staketia.MsgOverwriteUnbondingRecord",
+  MsgOverwriteUnbondingRecord
+);
+defaultProtoCodec.registerAny(
+  "/stride.staketia.MsgOverwriteRedemptionRecord",
+  MsgOverwriteRedemptionRecord
+);
+defaultProtoCodec.registerAny(
+  "/stride.staketia.MsgOverwriteRedemptionRecord",
+  MsgOverwriteRedemptionRecord
+);
+defaultProtoCodec.registerAny(
+  "/stride.staketia.MsgSetOperatorAddress",
+  MsgSetOperatorAddress
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakedym.MsgLiquidStake",
+  MsgLiquidStakeStakeDym
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakedym.MsgRedeemStake",
+  MsgRedeemStakeStakeDym
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakedym.MsgConfirmDelegation",
+  MsgConfirmDelegationStakeDym
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakedym.MsgConfirmUndelegation",
+  MsgConfirmUndelegationStakeDym
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakedym.MsgConfirmUnbondedTokenSweep",
+  MsgConfirmUnbondedTokenSweepStakeDym
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakedym.MsgAdjustDelegatedBalance",
+  MsgAdjustDelegatedBalanceStakeDym
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakedym.MsgUpdateInnerRedemptionRateBounds",
+  MsgUpdateInnerRedemptionRateBoundsStakeDym
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakedym.MsgResumeHostZone",
+  MsgResumeHostZoneStakeDym
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakedym.MsgRefreshRedemptionRate",
+  MsgRefreshRedemptionRateStakeDym
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakedym.MsgOverwriteDelegationRecord",
+  MsgOverwriteDelegationRecordStakeDym
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakedym.MsgOverwriteUnbondingRecord",
+  MsgOverwriteUnbondingRecordStakeDym
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakedym.MsgOverwriteRedemptionRecord",
+  MsgOverwriteRedemptionRecordStakeDym
+);
+defaultProtoCodec.registerAny(
+  "/stride.stakedym.MsgSetOperatorAddress",
+  MsgSetOperatorAddressStakeDym
 );

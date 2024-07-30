@@ -4,6 +4,7 @@ import {
   Result,
   EnvProducer,
   KeplrError,
+  EthereumProviderRpcError,
 } from "@keplr-wallet/router";
 import { getKeplrExtensionRouterId } from "../utils";
 
@@ -111,6 +112,14 @@ export class ExtensionRouter extends Router {
             code: e.code,
             module: e.module,
             message: e.message || e.toString(),
+          },
+        });
+      } else if (e instanceof EthereumProviderRpcError) {
+        return Promise.resolve({
+          error: {
+            code: e.code,
+            message: e.message || e.toString(),
+            data: e.data,
           },
         });
       } else if (e) {

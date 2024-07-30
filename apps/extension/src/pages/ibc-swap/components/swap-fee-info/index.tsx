@@ -401,23 +401,43 @@ export const SwapFeeInfo: FunctionComponent<{
             </Subtitle4>
             <Gutter size="0.2rem" />
             <Tooltip
-              content={intl.formatMessage(
-                {
-                  id: "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph",
-                },
-                {
-                  rate: (() => {
-                    const feeRatioPretty = new IntPretty(
-                      amountConfig.swapFeeBps
-                    ).moveDecimalPointLeft(2);
-                    return feeRatioPretty
-                      .trim(true)
-                      .maxDecimals(4)
-                      .inequalitySymbol(true)
-                      .toString();
-                  })(),
-                }
-              )}
+              content={
+                amountConfig.swapFeeBps === 10
+                  ? intl.formatMessage(
+                      {
+                        id: "page.ibc-swap.components.swap-fee-info.button.service-fee-stable-coin.paragraph",
+                      },
+                      {
+                        rate: (() => {
+                          const feeRatioPretty = new IntPretty(
+                            amountConfig.swapFeeBps
+                          ).moveDecimalPointLeft(2);
+                          return feeRatioPretty
+                            .trim(true)
+                            .maxDecimals(4)
+                            .inequalitySymbol(true)
+                            .toString();
+                        })(),
+                      }
+                    )
+                  : intl.formatMessage(
+                      {
+                        id: "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph",
+                      },
+                      {
+                        rate: (() => {
+                          const feeRatioPretty = new IntPretty(
+                            amountConfig.swapFeeBps
+                          ).moveDecimalPointLeft(2);
+                          return feeRatioPretty
+                            .trim(true)
+                            .maxDecimals(4)
+                            .inequalitySymbol(true)
+                            .toString();
+                        })(),
+                      }
+                    )
+              }
             >
               <InfoIcon
                 width="1rem"

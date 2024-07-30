@@ -166,7 +166,20 @@ const UpdateNoteScene: FunctionComponent<{
         <FormattedMessage
           id="update-node/paragraph/noop"
           defaultMessage={updateNotePageData[currentScene].title}
-          values={{br: '\n'}}
+          values={{
+            br: '\n',
+            b: (...chunks: any) => (
+              <Text
+                style={style.flatten([
+                  'h4',
+                  'color-text-high',
+                  'text-center',
+                  'font-bold',
+                ])}>
+                {chunks}
+              </Text>
+            ),
+          }}
         />
       </Text>
 
@@ -202,7 +215,20 @@ const UpdateNoteScene: FunctionComponent<{
         <FormattedMessage
           id="update-node/paragraph/noop"
           defaultMessage={updateNotePageData[currentScene].paragraph}
-          values={{br: '\n'}}
+          values={{
+            br: '\n',
+            b: (...chunks: any) => (
+              <Text
+                style={style.flatten([
+                  'h4',
+                  'color-text-high',
+                  'text-center',
+                  'font-bold',
+                ])}>
+                {chunks}
+              </Text>
+            ),
+          }}
         />
       </Text>
     </Box>

@@ -88,7 +88,8 @@ const handleSendTxAndRecordMsg: (
       undefined,
       {
         currencies: [],
-      }
+      },
+      msg.isSkipTrack
     );
   };
 };
@@ -132,7 +133,8 @@ const handleSendTxAndRecordWithIBCSwapMsg: (
       msg.destinationAsset,
       msg.swapChannelIndex,
       msg.swapReceiver,
-      msg.notificationInfo
+      msg.notificationInfo,
+      msg.isSkipTrack
     );
   };
 };
