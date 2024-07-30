@@ -8,7 +8,8 @@ export interface ChainInfo {
   readonly rest: string;
   readonly nodeProvider?: {
     readonly name: string;
-    readonly email: string;
+    readonly email?: string;
+    readonly discord?: string;
     readonly website?: string;
   };
   readonly chainId: string;

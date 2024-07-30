@@ -205,13 +205,12 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   }).unknown(true),
   nodeProvider: Joi.object({
     name: Joi.string().min(1).max(30).required(),
-    email: Joi.string()
-      .email({
-        tlds: {
-          allow: false,
-        },
-      })
-      .required(),
+    email: Joi.string().email({
+      tlds: {
+        allow: false,
+      },
+    }),
+    discord: Joi.string().uri(),
     website: Joi.string().uri(),
   }),
   chainId: ChainIdSchema.required(),
@@ -281,6 +280,12 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   chainSymbolImageUrl: Joi.string().uri(),
   hideInUI: Joi.boolean(),
 }).custom((value: ChainInfo) => {
+  if (value.nodeProvider) {
+    if (!value.nodeProvider.email && !value.nodeProvider.discord) {
+      throw new Error("email or discord should be provided");
+    }
+  }
+
   if (
     value.alternativeBIP44s?.find(
       (bip44) => bip44.coinType === value.bip44.coinType
