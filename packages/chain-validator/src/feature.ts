@@ -1,6 +1,5 @@
 import { ChainInfo } from "@keplr-wallet/types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
-import { Interface } from "@ethersproject/abi";
 
 /**
  * Indicate the features which keplr supports.
@@ -164,52 +163,6 @@ export const RecognizableChainFeaturesMethod: {
       }>(rest, "/feemarket/v1/params");
 
       return result.data.params.enabled;
-    },
-  },
-  {
-    feature: "op-stack-l1-data-fee",
-    fetch: async (_features, rpc, _rest) => {
-      const result = await simpleFetch<{
-        result: string;
-      }>(rpc, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "request-source:": "keplr-wallet-extension/chain-validator",
-        },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          method: "eth_call",
-          params: [
-            {
-              to: "0x420000000000000000000000000000000000000F",
-              data: new Interface([
-                {
-                  constant: true,
-                  inputs: [],
-                  name: "implementation",
-                  outputs: [
-                    {
-                      name: "",
-                      type: "address",
-                    },
-                  ],
-                  payable: false,
-                  stateMutability: "view",
-                  type: "function",
-                },
-              ]).encodeFunctionData("implementation"),
-            },
-          ],
-          id: 1,
-        }),
-      });
-
-      if (result.status === 200 && result.data.result != null) {
-        return true;
-      }
-
-      return false;
     },
   },
 ];
