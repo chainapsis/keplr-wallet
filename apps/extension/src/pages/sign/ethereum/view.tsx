@@ -108,6 +108,16 @@ export const EthereumSigningView: FunctionComponent<{
     feeConfig,
     "evm/native",
     () => {
+      if (!isTxSigning) {
+        throw new Error(
+          "Gas simulator is only working for transaction signing"
+        );
+      }
+
+      if (chainInfo.evm == null) {
+        throw new Error("Gas simulator is only working with EVM info");
+      }
+
       const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
 
       return {
@@ -186,21 +196,32 @@ export const EthereumSigningView: FunctionComponent<{
 
       if (gasConfig.gas > 0) {
         unsignedTx.gasLimit = `0x${gasConfig.gas.toString(16)}`;
-        if (maxFeePerGas && maxPriorityFeePerGas) {
+
+        if (!unsignedTx.maxFeePerGas) {
           unsignedTx.maxFeePerGas = `0x${new Int(
             feeConfig.getFeePrimitive()[0].amount
           )
             .div(new Int(gasConfig.gas))
             .toBigNumber()
             .toString(16)}`;
-          unsignedTx.maxPriorityFeePerGas =
-            unsignedTx.maxPriorityFeePerGas ?? maxPriorityFeePerGas;
-        } else {
-          unsignedTx.gasPrice = gasPrice;
         }
-
-        setSigningDataBuff(Buffer.from(JSON.stringify(unsignedTx), "utf8"));
       }
+
+      if (!unsignedTx.maxPriorityFeePerGas && maxPriorityFeePerGas) {
+        unsignedTx.maxPriorityFeePerGas =
+          unsignedTx.maxPriorityFeePerGas ?? maxPriorityFeePerGas;
+      }
+
+      if (
+        !unsignedTx.gasPrice &&
+        !unsignedTx.maxFeePerGas &&
+        !unsignedTx.maxPriorityFeePerGas &&
+        gasPrice
+      ) {
+        unsignedTx.gasPrice = gasPrice;
+      }
+
+      setSigningDataBuff(Buffer.from(JSON.stringify(unsignedTx), "utf8"));
     }
   }, [
     gasConfig.gas,
