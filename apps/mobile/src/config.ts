@@ -2703,6 +2703,51 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ['eth-address-gen', 'eth-key-sign'],
   },
+  {
+    rpc: 'https://rpc-lava.keplr.app',
+    rest: 'https://lcd-lava.keplr.app',
+    chainId: 'lava-mainnet-1',
+    chainName: 'Lava',
+    stakeCurrency: {
+      coinDenom: 'LAVA',
+      coinMinimalDenom: 'ulava',
+      coinDecimals: 6,
+      coinGeckoId: 'lava-network',
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: 'lava@',
+      bech32PrefixAccPub: 'lava@pub',
+      bech32PrefixValAddr: 'lava@valoper',
+      bech32PrefixValPub: 'lava@valoperpub',
+      bech32PrefixConsAddr: 'lava@valcons',
+      bech32PrefixConsPub: 'lava@valconspub',
+    },
+    currencies: [
+      {
+        coinDenom: 'LAVA',
+        coinMinimalDenom: 'ulava',
+        coinDecimals: 6,
+        coinGeckoId: 'lava-network',
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: 'LAVA',
+        coinMinimalDenom: 'ulava',
+        coinDecimals: 6,
+        coinGeckoId: 'lava-network',
+        gasPriceStep: {
+          low: 0.00002,
+          average: 0.025,
+          high: 0.05,
+        },
+      },
+    ],
+    features: [],
+  },
 ];
 
 // TODO: 원격으로 변경할 수 있도록 나중에 네트워크에서 이 정보를 가져오는 방식으로 변경될 수 있음
