@@ -50,15 +50,11 @@
       "matches": ["<all_urls>"]
     },
     {
-      "resources": ["assets/double-arrow-left.svg"],
-      "matches": ["<all_urls>"]
-    },
-    {
       "resources": ["assets/megaphone.svg"],
       "matches": ["<all_urls>"]
     },
     {
-      "resources": ["assets/locked-keplr-logo-48.png"],
+      "resources": ["assets/locked-keplr-logo-128.png"],
       "matches": ["<all_urls>"]
     }
   ]

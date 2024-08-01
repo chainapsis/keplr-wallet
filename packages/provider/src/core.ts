@@ -1029,6 +1029,16 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
                 {}
               );
 
+              const keplrThemeOption = await sendSimpleMessage<
+                "light" | "dark" | "auto"
+              >(
+                this.requester,
+                BACKGROUND_PORT,
+                "settings",
+                "GetThemeOptionMsg",
+                {}
+              );
+
               // extension에서 `web_accessible_resources`에 추가된 파일은 이렇게 접근이 가능함
               const fontUrl = chrome.runtime.getURL(
                 "/assets/Inter-SemiBold.ttf"
@@ -1070,7 +1080,12 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
                   
             `;
 
-              // 폰트를 위한 스타일 요소를 head에 추가
+              const isLightMode =
+                keplrThemeOption === "auto"
+                  ? !window.matchMedia("(prefers-color-scheme: dark)").matches
+                  : keplrThemeOption === "light";
+
+              // 폰트와 애니메이션을 위한 스타일 요소를 head에 추가
               const styleElement = document.createElement("style");
               styleElement.appendChild(
                 document.createTextNode(fontFaceAndKeyFrames)
@@ -1095,12 +1110,16 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
               button.style.fontWeight = "600";
 
               button.style.cursor = "pointer";
-              button.style.background = "#1D1D1F";
+              button.style.background = isLightMode ? "#FEFEFE" : "#1D1D1F";
+              if (isLightMode) {
+                button.style.boxShadow =
+                  "0px 0px 15.5px 0px rgba(0, 0, 0, 0.20)";
+              }
               button.addEventListener("mouseover", () => {
-                button.style.background = "#242428";
+                button.style.background = isLightMode ? "#F2F2F6" : "#242428";
               });
               button.addEventListener("mouseout", () => {
-                button.style.background = "#1D1D1F";
+                button.style.background = isLightMode ? "#FEFEFE" : "#1D1D1F";
               });
 
               const megaphoneWrapper = document.createElement("div");
@@ -1111,6 +1130,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
               megaphoneWrapper.style.padding = "6.5px 6px 5.5px";
               megaphoneWrapper.style.borderRadius = "255px";
               megaphoneWrapper.style.background = "#FC8441";
+
               const megaphone = document.createElement("img");
               const megaphoneUrl = chrome.runtime.getURL(
                 "/assets/megaphone.svg"
@@ -1123,7 +1143,9 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
 
               const keplrLogo = document.createElement("img");
               const keplrLogoUrl = chrome.runtime.getURL(
-                `/assets/${isKeplrLocked ? "locked-keplr-logo" : "icon"}-48.png`
+                `/assets/${
+                  isKeplrLocked ? "locked-keplr-logo" : "icon"
+                }-128.png`
               );
               keplrLogo.src = keplrLogoUrl;
               keplrLogo.style.width = "3rem";
@@ -1132,7 +1154,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
               const mainText = document.createElement("span");
               mainText.style.maxWidth = "9.125rem";
               mainText.style.fontSize = "1.125rem";
-              mainText.style.color = "#FEFEFE";
+              mainText.style.color = isLightMode ? "#020202" : "#FEFEFE";
               mainText.textContent = isKeplrLocked
                 ? "Unlock Keplr"
                 : "Approve request from the App";
@@ -1142,21 +1164,21 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
               arrowLeftOpenWrapper.style.alignItems = "center";
               arrowLeftOpenWrapper.style.padding = "0.5rem 0.75rem";
 
-              const doubleArrowLeftImage = document.createElement("img");
-              const doubleArrowLeftImageUrl = chrome.runtime.getURL(
-                "/assets/double-arrow-left.svg"
-              );
-
-              doubleArrowLeftImage.src = doubleArrowLeftImageUrl;
-              doubleArrowLeftImage.style.width = "1.5rem";
-              doubleArrowLeftImage.style.height = "1.5rem";
+              arrowLeftOpenWrapper.innerHTML = `
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 5L6.25 11.75L13 18.5" stroke=${
+                  isLightMode ? "#1633C0" : "#566FEC"
+                } stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M19.3333 5L12.5833 11.75L19.3333 18.5" stroke=${
+                  isLightMode ? "#1633C0" : "#566FEC"
+                }  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>`;
 
               const openText = document.createElement("span");
               openText.style.fontSize = "1rem";
-              openText.style.color = "#566FEC";
+              openText.style.color = isLightMode ? "#1633C0" : "#566FEC";
               openText.textContent = "OPEN";
 
-              arrowLeftOpenWrapper.appendChild(doubleArrowLeftImage);
               arrowLeftOpenWrapper.appendChild(openText);
 
               button.appendChild(megaphoneWrapper);
