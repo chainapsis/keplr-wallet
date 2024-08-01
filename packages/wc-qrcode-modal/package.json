@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/wc-qrcode-modal",
-  "version": "0.12.118",
+  "version": "0.12.119",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
