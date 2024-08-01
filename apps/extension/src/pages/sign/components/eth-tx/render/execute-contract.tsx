@@ -13,7 +13,11 @@ import { ItemLogo } from "../../../../main/token-detail/msg-items/logo";
 
 export const EthExecuteContractTx: IEthTxRenderer = {
   process(_, unsignedTx) {
-    if (unsignedTx.data != null && unsignedTx.to != null) {
+    if (
+      unsignedTx.data != null &&
+      unsignedTx.data !== "0x" &&
+      unsignedTx.to != null
+    ) {
       const contractAddress = unsignedTx.to;
 
       return {
