@@ -55,6 +55,10 @@
     {
       "resources": ["assets/double-arrow-left.svg"],
       "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["assets/megaphone.svg"],
+      "matches": ["<all_urls>"]
     }
   ]
 }

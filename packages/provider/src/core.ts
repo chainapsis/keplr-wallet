@@ -1025,26 +1025,57 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
               const fontUrl = chrome.runtime.getURL(
                 "/assets/Inter-SemiBold.ttf"
               );
-              const fontFaceRule = `
+              const fontFaceAndKeyFrames = `
                 @font-face {
-                    font-family: 'Inter-SemiBold-Keplr';
-                    src: url('${fontUrl}') format('truetype');
-                    font-weight: 600;
-                    font-style: normal;
+                  font-family: 'Inter-SemiBold-Keplr';
+                  src: url('${fontUrl}') format('truetype');
+                  font-weight: 600;
+                  font-style: normal;
                 }
+
+                @keyframes slide-left {
+                  0% {
+                    transform: translateY(-50%) translateX(100%);
+                  }
+                  100% {
+                    transform: translateY(-50%) translateX(0);
+                  }
+                }
+                    
+                @keyframes tada {
+                  0% {
+                    transform: scale3d(1, 1, 1);
+                  }
+                  10%, 20% {
+                    transform: scale3d(.9, .9, .9) rotate3d(0, 0, 1, -3deg);
+                  }
+                  30%, 50%, 70%, 90% {
+                    transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, 3deg);
+                  }
+                  40%, 60%, 80% {
+                    transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, -3deg);
+                  }
+                  100% {
+                    transform: scale3d(1, 1, 1);
+                  }
+                }
+                  
             `;
 
               // 폰트를 위한 스타일 요소를 head에 추가
               const styleElement = document.createElement("style");
-              styleElement.appendChild(document.createTextNode(fontFaceRule));
+              styleElement.appendChild(
+                document.createTextNode(fontFaceAndKeyFrames)
+              );
               document.head.appendChild(styleElement);
 
               const button = document.createElement("div");
               button.id = "__open_keplr_side_panel__";
+              button.style.animation = "slide-left 0.5s forwards";
               button.style.position = "fixed";
               button.style.right = "0";
               button.style.top = "50%";
-              button.style.transform = "translateY(-50%)";
+              button.style.transform = "translateY(-50%) translateX(100%)";
               button.style.padding = "1.25rem";
               button.style.zIndex = "2147483647"; // 페이지 상의 다른 요소보다 버튼이 위에 오도록 함
               button.style.borderRadius = "1.5rem 0px 0px 1.5rem";
@@ -1063,6 +1094,24 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
               button.addEventListener("mouseout", () => {
                 button.style.background = "#1D1D1F";
               });
+
+              const megaphoneWrapper = document.createElement("div");
+              megaphoneWrapper.style.display = "flex";
+              megaphoneWrapper.style.position = "absolute";
+              megaphoneWrapper.style.left = "-10px";
+              megaphoneWrapper.style.top = "-10px";
+              megaphoneWrapper.style.padding = "6.5px 6px 5.5px";
+              megaphoneWrapper.style.borderRadius = "255px";
+              megaphoneWrapper.style.background = "#FC8441";
+              const megaphone = document.createElement("img");
+              const megaphoneUrl = chrome.runtime.getURL(
+                "/assets/megaphone.svg"
+              );
+              megaphone.src = megaphoneUrl;
+              megaphone.style.width = "1.25rem";
+              megaphone.style.height = "1.25rem";
+              megaphone.style.animation = "tada 1s infinite";
+              megaphoneWrapper.appendChild(megaphone);
 
               const keplrLogo = document.createElement("img");
               const keplrLogoUrl = chrome.runtime.getURL("/assets/icon-48.png");
@@ -1098,6 +1147,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
               arrowLeftOpenWrapper.appendChild(doubleArrowLeftImage);
               arrowLeftOpenWrapper.appendChild(openText);
 
+              button.appendChild(megaphoneWrapper);
               button.appendChild(keplrLogo);
               button.appendChild(mainText);
               button.appendChild(arrowLeftOpenWrapper);

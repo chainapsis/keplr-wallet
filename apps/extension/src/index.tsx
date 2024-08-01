@@ -12,6 +12,7 @@ require("./public/assets/icon/icon-beta-16.png");
 require("./public/assets/icon/icon-beta-48.png");
 require("./public/assets/icon/icon-beta-128.png");
 require("./public/assets/svg/double-arrow-left.svg");
+require("./public/assets/svg/megaphone.svg");
 
 import React, {
   FunctionComponent,
