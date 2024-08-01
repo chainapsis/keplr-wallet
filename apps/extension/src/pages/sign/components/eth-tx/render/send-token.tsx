@@ -17,7 +17,7 @@ import { FormattedMessage } from "react-intl";
 
 export const EthSendTokenTx: IEthTxRenderer = {
   process(chainId, unsignedTx) {
-    if (unsignedTx.data) {
+    if (unsignedTx.data && unsignedTx.data !== "0x" && unsignedTx.to) {
       try {
         const dataDecodedValues = erc20ContractInterface.decodeFunctionData(
           "transfer",
