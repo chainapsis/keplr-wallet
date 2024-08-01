@@ -1021,20 +1021,86 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
             e.message.includes("in response to a user gesture")
           ) {
             if (!document.getElementById("__open_keplr_side_panel__")) {
+              // extension에서 `web_accessible_resources`에 추가된 파일은 이렇게 접근이 가능함
+              const fontUrl = chrome.runtime.getURL(
+                "/assets/Inter-SemiBold.ttf"
+              );
+              const fontFaceRule = `
+                @font-face {
+                    font-family: 'Inter-SemiBold-Keplr';
+                    src: url('${fontUrl}') format('truetype');
+                    font-weight: 600;
+                    font-style: normal;
+                }
+            `;
+
+              // 폰트를 위한 스타일 요소를 head에 추가
+              const styleElement = document.createElement("style");
+              styleElement.appendChild(document.createTextNode(fontFaceRule));
+              document.head.appendChild(styleElement);
+
               const button = document.createElement("div");
               button.id = "__open_keplr_side_panel__";
-              button.textContent =
-                "대강 케플러가 요청을 처리할 수 없어서 이걸 눌러서 케플러를 수동으로 켜야한다는 버튼";
-              button.style.position = "absolute";
+              button.style.position = "fixed";
               button.style.right = "0";
               button.style.top = "50%";
               button.style.transform = "translateY(-50%)";
-              button.style.padding = "1rem 1.5rem";
+              button.style.padding = "1.25rem";
               button.style.zIndex = "2147483647"; // 페이지 상의 다른 요소보다 버튼이 위에 오도록 함
-              button.style.fontSize = "1rem";
-              button.style.color = "white";
+              button.style.borderRadius = "1.5rem 0px 0px 1.5rem";
+              button.style.display = "flex";
+              button.style.alignItems = "center";
+              button.style.gap = "1rem";
+
+              button.style.fontFamily = "Inter-SemiBold-Keplr";
+              button.style.fontWeight = "600";
+
               button.style.cursor = "pointer";
-              button.style.background = "blue";
+              button.style.background = "#1D1D1F";
+              button.addEventListener("mouseover", () => {
+                button.style.background = "#242428";
+              });
+              button.addEventListener("mouseout", () => {
+                button.style.background = "#1D1D1F";
+              });
+
+              const keplrLogo = document.createElement("img");
+              const keplrLogoUrl = chrome.runtime.getURL("/assets/icon-48.png");
+              keplrLogo.src = keplrLogoUrl;
+              keplrLogo.style.width = "3rem";
+              keplrLogo.style.height = "3rem";
+
+              const mainText = document.createElement("span");
+              mainText.style.maxWidth = "9.125rem";
+              mainText.style.fontSize = "1.125rem";
+              mainText.style.color = "#FEFEFE";
+              mainText.textContent = "Approve request from the App";
+
+              const arrowLeftOpenWrapper = document.createElement("div");
+              arrowLeftOpenWrapper.style.display = "flex";
+              arrowLeftOpenWrapper.style.alignItems = "center";
+              arrowLeftOpenWrapper.style.padding = "0.5rem 0.75rem";
+
+              const doubleArrowLeftImage = document.createElement("img");
+              const doubleArrowLeftImageUrl = chrome.runtime.getURL(
+                "/assets/double-arrow-left.svg"
+              );
+
+              doubleArrowLeftImage.src = doubleArrowLeftImageUrl;
+              doubleArrowLeftImage.style.width = "1.5rem";
+              doubleArrowLeftImage.style.height = "1.5rem";
+
+              const openText = document.createElement("span");
+              openText.style.fontSize = "1rem";
+              openText.style.color = "#566FEC";
+              openText.textContent = "OPEN";
+
+              arrowLeftOpenWrapper.appendChild(doubleArrowLeftImage);
+              arrowLeftOpenWrapper.appendChild(openText);
+
+              button.appendChild(keplrLogo);
+              button.appendChild(mainText);
+              button.appendChild(arrowLeftOpenWrapper);
 
               // 버튼을 body에 추가
               document.body.appendChild(button);

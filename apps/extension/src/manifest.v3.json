@@ -43,6 +43,18 @@
     {
       "resources": ["injectedScript.bundle.js"],
       "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["assets/Inter-SemiBold.ttf"],
+      "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["assets/icon-48.png"],
+      "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["assets/double-arrow-left.svg"],
+      "matches": ["<all_urls>"]
     }
   ]
 }
