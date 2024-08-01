@@ -1021,6 +1021,14 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
             e.message.includes("in response to a user gesture")
           ) {
             if (!document.getElementById("__open_keplr_side_panel__")) {
+              const isKeplrLocked = await sendSimpleMessage<boolean>(
+                this.requester,
+                BACKGROUND_PORT,
+                "keyring",
+                "GetIsLockedMsg",
+                {}
+              );
+
               // extension에서 `web_accessible_resources`에 추가된 파일은 이렇게 접근이 가능함
               const fontUrl = chrome.runtime.getURL(
                 "/assets/Inter-SemiBold.ttf"
@@ -1114,7 +1122,9 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
               megaphoneWrapper.appendChild(megaphone);
 
               const keplrLogo = document.createElement("img");
-              const keplrLogoUrl = chrome.runtime.getURL("/assets/icon-48.png");
+              const keplrLogoUrl = chrome.runtime.getURL(
+                `/assets/${isKeplrLocked ? "locked-keplr-logo" : "icon"}-48.png`
+              );
               keplrLogo.src = keplrLogoUrl;
               keplrLogo.style.width = "3rem";
               keplrLogo.style.height = "3rem";
@@ -1123,7 +1133,9 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
               mainText.style.maxWidth = "9.125rem";
               mainText.style.fontSize = "1.125rem";
               mainText.style.color = "#FEFEFE";
-              mainText.textContent = "Approve request from the App";
+              mainText.textContent = isKeplrLocked
+                ? "Unlock Keplr"
+                : "Approve request from the App";
 
               const arrowLeftOpenWrapper = document.createElement("div");
               arrowLeftOpenWrapper.style.display = "flex";
@@ -1152,15 +1164,21 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
               button.appendChild(mainText);
               button.appendChild(arrowLeftOpenWrapper);
 
-              // 버튼을 body에 추가
-              document.body.appendChild(button);
+              const hasAlready = document.getElementById(
+                "__open_keplr_side_panel__"
+              );
 
-              // 버튼 클릭 이벤트 추가 (필요한 동작을 정의)
-              button.addEventListener("click", () => {
-                this.protectedTryOpenSidePanelIfEnabled();
+              if (!hasAlready) {
+                // 버튼을 body에 추가
+                document.body.appendChild(button);
 
-                button.remove();
-              });
+                // 버튼 클릭 이벤트 추가 (필요한 동작을 정의)
+                button.addEventListener("click", () => {
+                  this.protectedTryOpenSidePanelIfEnabled();
+
+                  button.remove();
+                });
+              }
             }
           }
         }
