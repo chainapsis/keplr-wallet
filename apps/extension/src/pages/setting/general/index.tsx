@@ -73,7 +73,7 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
 
           <PageButton
             title={intl.formatMessage({
-              id: "page.setting.general.link-kpelr-mobile-title",
+              id: "page.setting.general.link-keplr-mobile-title",
             })}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/link-keplr-mobile")}

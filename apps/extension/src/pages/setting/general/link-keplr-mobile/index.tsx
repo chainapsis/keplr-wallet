@@ -165,7 +165,7 @@ const EnterPasswordView: FunctionComponent<{
   return (
     <HeaderLayout
       title={intl.formatMessage({
-        id: "page.setting.general.link-kpelr-mobile-title",
+        id: "page.setting.general.link-keplr-mobile-title",
       })}
       left={<BackButton />}
       bottomButton={{
@@ -481,7 +481,7 @@ const QRCodeView: FunctionComponent<{
   return (
     <HeaderLayout
       title={intl.formatMessage({
-        id: "page.setting.general.link-kpelr-mobile-title",
+        id: "page.setting.general.link-keplr-mobile-title",
       })}
       left={<BackButton />}
     >

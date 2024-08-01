@@ -192,7 +192,7 @@
   "page.setting.general.show-24h-price-changes-paragraph": "각 토큰의 24시간 가격변동률을 표시하는 기능입니다.",
   "page.setting.general.theme-title": "테마",
   "page.setting.general.manage-authz-title": "AuthZ 관리",
-  "page.setting.general.link-kpelr-mobile-title": "케플러 모바일과 연결하기",
+  "page.setting.general.link-keplr-mobile-title": "케플러 모바일과 연결하기",
   "page.setting.general.manage-non-native-chains-title": "선택형 체인 관리",
   "page.setting.general.manage-non-native-chains-paragraph": "외부에서 관리되는 체인들 연결 추가/삭제하기",
   "page.setting.general.manage-chain-visibility-title": "체인 표시",
