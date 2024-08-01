@@ -136,6 +136,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     isIBCTransfer,
     {
       allowHexAddressToBech32Address:
+        !isEvmChain &&
         !isEvmTx &&
         !chainStore.getChain(chainId).chainId.startsWith("injective"),
       allowHexAddressOnly: isEvmTx,
