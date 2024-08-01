@@ -2,6 +2,7 @@ import { PermissionInteractiveService } from "./service";
 import { Env, Handler, InternalHandler, Message } from "@keplr-wallet/router";
 import {
   DisableAccessMsg,
+  EnableAccessForEVMMsg,
   EnableAccessMsg,
   IsEnabledAccessMsg,
 } from "./messages";
@@ -13,6 +14,11 @@ export const getHandler: (service: PermissionInteractiveService) => Handler = (
     switch (msg.constructor) {
       case EnableAccessMsg:
         return handleEnableAccessMsg(service)(env, msg as EnableAccessMsg);
+      case EnableAccessForEVMMsg:
+        return handleEnableAccessForEVMMsg(service)(
+          env,
+          msg as EnableAccessForEVMMsg
+        );
       case DisableAccessMsg:
         return handleDisableAccessMsg(service)(env, msg as DisableAccessMsg);
       case IsEnabledAccessMsg:
@@ -29,6 +35,14 @@ const handleEnableAccessMsg: (
 ) => InternalHandler<EnableAccessMsg> = (service) => {
   return async (env, msg) => {
     return await service.ensureEnabled(env, msg.chainIds, msg.origin);
+  };
+};
+
+const handleEnableAccessForEVMMsg: (
+  service: PermissionInteractiveService
+) => InternalHandler<EnableAccessForEVMMsg> = (service) => {
+  return async (env, msg) => {
+    return await service.ensureEnabledForEVM(env, msg.origin);
   };
 };
 

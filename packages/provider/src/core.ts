@@ -1052,9 +1052,8 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     }
   }
 
-  public readonly ethereum = new EthereumProvider(this.requester);
+  public readonly ethereum = new EthereumProvider(this, this.requester);
 }
-
 class EthereumProvider extends EventEmitter implements IEthereumProvider {
   chainId: string | null = null;
   selectedAddress: string | null = null;
@@ -1063,8 +1062,34 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
   isKeplr: boolean = true;
   isMetaMask: boolean = true;
 
-  constructor(protected readonly requester: MessageRequester) {
+  constructor(
+    protected readonly keplr: Keplr,
+    protected readonly requester: MessageRequester
+  ) {
     super();
+  }
+
+  protected async protectedEnableAccess(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      let f = false;
+
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "permission-interactive",
+        "enable-access-for-evm",
+        {}
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.keplr.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   isConnected(): boolean {
@@ -1082,18 +1107,35 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     providerId?: string;
     chainId?: string;
   }): Promise<T> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-ethereum",
-      "request-json-rpc-to-evm",
-      {
-        method,
-        params,
-        providerId,
-        chainId,
-      }
-    );
+    // XXX: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //      side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    //      request의 경우는 일종의 쿼리이기 때문에 언제 결과가 올지 알 수 없다. 그러므로 미리 권한 처리를 해야한다.
+    await this.protectedEnableAccess();
+
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-ethereum",
+        "request-json-rpc-to-evm",
+        {
+          method,
+          params,
+          providerId,
+          chainId,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f && sidePanelOpenNeededJSONRPCMethods.includes(method)) {
+          this.keplr.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   /**
@@ -1101,26 +1143,20 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
    */
 
   async enable(): Promise<string[]> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-ethereum",
-      "request-json-rpc-to-evm",
-      {
-        method: "eth_requestAccounts",
-      }
-    );
+    return await this.request({ method: "eth_requestAccounts" });
   }
 
   async net_version(): Promise<string> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-ethereum",
-      "request-json-rpc-to-evm",
-      {
-        method: "net_version",
-      }
-    );
+    return await this.request({ method: "net_version" });
   }
 }
+
+const sidePanelOpenNeededJSONRPCMethods = [
+  "eth_sendTransaction",
+  "personal_sign",
+  "eth_signTypedData_v3",
+  "eth_signTypedData_v4",
+  "wallet_addEthereumChain",
+  "wallet_switchEthereumChain",
+  "wallet_watchAsset",
+];

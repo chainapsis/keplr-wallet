@@ -29,6 +29,32 @@ export class EnableAccessMsg extends Message<void> {
   }
 }
 
+export class EnableAccessForEVMMsg extends Message<void> {
+  public static type() {
+    return "enable-access-for-evm";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  type(): string {
+    return EnableAccessForEVMMsg.type();
+  }
+}
+
 export class DisableAccessMsg extends Message<void> {
   public static type() {
     return "disable-access";
