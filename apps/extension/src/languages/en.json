@@ -209,6 +209,8 @@
   "page.setting.general.theme-title": "Theme",
   "page.setting.general.manage-authz-title": "Manage AuthZ",
   "page.setting.general.link-kpelr-mobile-title": "Link Keplr Mobile",
+  "page.setting.general.side-panel-title": "Switch to Side Panel",
+  "page.setting.general.side-panel-paragraph": "Open Keplr in a sidebar on your screen",
   "page.setting.general.show-24h-price-changes-title": "Show 24H price change",
   "page.setting.general.show-24h-price-changes-paragraph": "Enable or disable the display of 24H token price change",
   "page.setting.general.manage-non-native-chains-title": "Add/Remove Non-Native Chains",

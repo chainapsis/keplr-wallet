@@ -2,9 +2,8 @@ import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { isServiceWorker, KVStore } from "@keplr-wallet/common";
 
 export class SidePanelService {
-  // TODO: 기본값을 false로 수정. 일단은 테스트를 위해서 기본값을 true로 설정.
   @observable
-  protected _isEnabled: boolean = true;
+  protected _isEnabled: boolean = false;
 
   constructor(protected readonly kvStore: KVStore) {
     makeObservable(this);
@@ -50,7 +49,29 @@ export class SidePanelService {
       return false;
     }
 
-    // TODO: 웹브라우저에 대한 체크 추가. (chrome.sidePanel이 존재해도 웹브라우저에 따라서 안되는 경우가 있는 듯 하다)
+    try {
+      // navigator.userAgentData가 experimental이라서 any로 캐스팅해서 사용
+      const anyNavigator = navigator as any;
+      if ("userAgentData" in anyNavigator) {
+        const brandNames: string[] = anyNavigator.userAgentData.brands.map(
+          (brand: { brand: string; version: string }) => brand.brand
+        );
+
+        // side panel이 API가 있더라도 모든 웹브라우저에서 작동하는게 아니다...
+        // 일단 사용 가능한게 확인된 브라우저만 허용
+        if (
+          !brandNames.includes("Google Chrome") &&
+          !brandNames.includes("Microsoft Edge") &&
+          !brandNames.includes("Brave")
+        ) {
+          return false;
+        }
+      }
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
+
     return (
       typeof chrome !== "undefined" && typeof chrome.sidePanel !== "undefined"
     );
