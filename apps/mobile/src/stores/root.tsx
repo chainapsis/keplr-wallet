@@ -45,6 +45,7 @@ import {
   TokenContractListURL,
   EthereumEndpoint,
   SwapVenue,
+  CoinGeckoCoinDataByTokenAddress,
 } from '../config.ui';
 import {TokenContractsQueries} from './token-contracts';
 import {AprQueries} from './aprs';
@@ -66,7 +67,6 @@ import {
 import {DeepLinkStore} from './deep-link';
 import {EthereumQueries, EthereumAccountStore} from '@keplr-wallet/stores-eth';
 import {WebpageStore} from './webpage';
-import {CoinGeckoCoinDataByTokenAddress} from '@keplr-wallet/extension/src/config.ui.ts';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
