@@ -36,5 +36,26 @@
       "all_frames": true
     }
   ],
-  "web_accessible_resources": ["injectedScript.bundle.js"]
+  "web_accessible_resources": [
+    {
+      "resources": ["injectedScript.bundle.js"],
+      "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["assets/Inter-SemiBold.ttf"],
+      "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["assets/icon-128.png"],
+      "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["assets/megaphone.svg"],
+      "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["assets/locked-keplr-logo-128.png"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

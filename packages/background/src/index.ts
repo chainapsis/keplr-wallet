@@ -27,6 +27,7 @@ import * as PermissionInteractive from "./permission-interactive/internal";
 import * as TokenScan from "./token-scan/internal";
 import * as RecentSendHistory from "./recent-send-history/internal";
 import * as SidePanel from "./side-panel/internal";
+import * as Settings from "./settings/internal";
 
 export * from "./chains";
 export * from "./chains-ui";
@@ -49,6 +50,7 @@ export * from "./keyring-keystone";
 export * from "./token-scan";
 export * from "./recent-send-history";
 export * from "./side-panel";
+export * from "./settings";
 
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
@@ -253,6 +255,10 @@ export function init(
       notification
     );
 
+  const settingsService = new Settings.SettingsService(
+    storeCreator("settings")
+  );
+
   Interaction.init(router, interactionService);
   Permission.init(router, permissionService);
   Chains.init(
@@ -295,6 +301,7 @@ export function init(
   TokenScan.init(router, tokenScanService);
   RecentSendHistory.init(router, recentSendHistoryService);
   SidePanel.init(router, sidePanelService);
+  Settings.init(router, settingsService);
 
   return {
     initFn: async () => {
@@ -324,6 +331,7 @@ export function init(
       await tokenScanService.init();
 
       await recentSendHistoryService.init();
+      await settingsService.init();
 
       if (vaultAfterInitFn) {
         await vaultAfterInitFn(vaultService);

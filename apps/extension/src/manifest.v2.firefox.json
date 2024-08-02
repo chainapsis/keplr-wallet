@@ -9,5 +9,27 @@
     "16": "assets/icon-beta-16.png",
     "48": "assets/icon-beta-48.png",
     "128": "assets/icon-beta-128.png"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["injectedScript.bundle.js"],
+      "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["assets/Inter-SemiBold.ttf"],
+      "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["assets/icon-128.png"],
+      "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["assets/megaphone.svg"],
+      "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["assets/locked-keplr-logo-128.png"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

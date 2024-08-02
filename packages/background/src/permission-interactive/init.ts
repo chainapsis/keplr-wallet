@@ -4,6 +4,7 @@ import {
   EnableAccessMsg,
   DisableAccessMsg,
   IsEnabledAccessMsg,
+  EnableAccessForEVMMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -13,6 +14,7 @@ export function init(
   service: PermissionInteractiveService
 ): void {
   router.registerMessage(EnableAccessMsg);
+  router.registerMessage(EnableAccessForEVMMsg);
   router.registerMessage(DisableAccessMsg);
   router.registerMessage(IsEnabledAccessMsg);
 

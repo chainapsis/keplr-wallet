@@ -1021,30 +1021,187 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
             e.message.includes("in response to a user gesture")
           ) {
             if (!document.getElementById("__open_keplr_side_panel__")) {
+              const isKeplrLocked = await sendSimpleMessage<boolean>(
+                this.requester,
+                BACKGROUND_PORT,
+                "keyring",
+                "GetIsLockedMsg",
+                {}
+              );
+
+              const keplrThemeOption = await sendSimpleMessage<
+                "light" | "dark" | "auto"
+              >(
+                this.requester,
+                BACKGROUND_PORT,
+                "settings",
+                "GetThemeOptionMsg",
+                {}
+              );
+
+              // extension에서 `web_accessible_resources`에 추가된 파일은 이렇게 접근이 가능함
+              const fontUrl = chrome.runtime.getURL(
+                "/assets/Inter-SemiBold.ttf"
+              );
+              const fontFaceAndKeyFrames = `
+                @font-face {
+                  font-family: 'Inter-SemiBold-Keplr';
+                  src: url('${fontUrl}') format('truetype');
+                  font-weight: 600;
+                  font-style: normal;
+                }
+
+                @keyframes slide-left {
+                  0% {
+                    transform: translateY(-50%) translateX(100%);
+                  }
+                  100% {
+                    transform: translateY(-50%) translateX(0);
+                  }
+                }
+                    
+                @keyframes tada {
+                  0% {
+                    transform: scale3d(1, 1, 1);
+                  }
+                  10%, 20% {
+                    transform: scale3d(.9, .9, .9) rotate3d(0, 0, 1, -3deg);
+                  }
+                  30%, 50%, 70%, 90% {
+                    transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, 3deg);
+                  }
+                  40%, 60%, 80% {
+                    transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, -3deg);
+                  }
+                  100% {
+                    transform: scale3d(1, 1, 1);
+                  }
+                }
+                  
+            `;
+
+              const isLightMode =
+                keplrThemeOption === "auto"
+                  ? !window.matchMedia("(prefers-color-scheme: dark)").matches
+                  : keplrThemeOption === "light";
+
+              // 폰트와 애니메이션을 위한 스타일 요소를 head에 추가
+              const styleElement = document.createElement("style");
+              styleElement.appendChild(
+                document.createTextNode(fontFaceAndKeyFrames)
+              );
+              document.head.appendChild(styleElement);
+
               const button = document.createElement("div");
               button.id = "__open_keplr_side_panel__";
-              button.textContent =
-                "대강 케플러가 요청을 처리할 수 없어서 이걸 눌러서 케플러를 수동으로 켜야한다는 버튼";
-              button.style.position = "absolute";
+              button.style.animation = "slide-left 0.5s forwards";
+              button.style.position = "fixed";
               button.style.right = "0";
               button.style.top = "50%";
-              button.style.transform = "translateY(-50%)";
-              button.style.padding = "1rem 1.5rem";
+              button.style.transform = "translateY(-50%) translateX(100%)";
+              button.style.padding = "1.25rem";
               button.style.zIndex = "2147483647"; // 페이지 상의 다른 요소보다 버튼이 위에 오도록 함
-              button.style.fontSize = "1rem";
-              button.style.color = "white";
+              button.style.borderRadius = "1.5rem 0px 0px 1.5rem";
+              button.style.display = "flex";
+              button.style.alignItems = "center";
+              button.style.gap = "1rem";
+
+              button.style.fontFamily = "Inter-SemiBold-Keplr";
+              button.style.fontWeight = "600";
+
               button.style.cursor = "pointer";
-              button.style.background = "blue";
-
-              // 버튼을 body에 추가
-              document.body.appendChild(button);
-
-              // 버튼 클릭 이벤트 추가 (필요한 동작을 정의)
-              button.addEventListener("click", () => {
-                this.protectedTryOpenSidePanelIfEnabled();
-
-                button.remove();
+              button.style.background = isLightMode ? "#FEFEFE" : "#1D1D1F";
+              if (isLightMode) {
+                button.style.boxShadow =
+                  "0px 0px 15.5px 0px rgba(0, 0, 0, 0.20)";
+              }
+              button.addEventListener("mouseover", () => {
+                button.style.background = isLightMode ? "#F2F2F6" : "#242428";
               });
+              button.addEventListener("mouseout", () => {
+                button.style.background = isLightMode ? "#FEFEFE" : "#1D1D1F";
+              });
+
+              const megaphoneWrapper = document.createElement("div");
+              megaphoneWrapper.style.display = "flex";
+              megaphoneWrapper.style.position = "absolute";
+              megaphoneWrapper.style.left = "-10px";
+              megaphoneWrapper.style.top = "-10px";
+              megaphoneWrapper.style.padding = "6.5px 6px 5.5px";
+              megaphoneWrapper.style.borderRadius = "255px";
+              megaphoneWrapper.style.background = "#FC8441";
+
+              const megaphone = document.createElement("img");
+              const megaphoneUrl = chrome.runtime.getURL(
+                "/assets/megaphone.svg"
+              );
+              megaphone.src = megaphoneUrl;
+              megaphone.style.width = "1.25rem";
+              megaphone.style.height = "1.25rem";
+              megaphone.style.animation = "tada 1s infinite";
+              megaphoneWrapper.appendChild(megaphone);
+
+              const keplrLogo = document.createElement("img");
+              const keplrLogoUrl = chrome.runtime.getURL(
+                `/assets/${
+                  isKeplrLocked ? "locked-keplr-logo" : "icon"
+                }-128.png`
+              );
+              keplrLogo.src = keplrLogoUrl;
+              keplrLogo.style.width = "3rem";
+              keplrLogo.style.height = "3rem";
+
+              const mainText = document.createElement("span");
+              mainText.style.maxWidth = "9.125rem";
+              mainText.style.fontSize = "1.125rem";
+              mainText.style.color = isLightMode ? "#020202" : "#FEFEFE";
+              mainText.textContent = isKeplrLocked
+                ? "Unlock Keplr"
+                : "Approve request from the App";
+
+              const arrowLeftOpenWrapper = document.createElement("div");
+              arrowLeftOpenWrapper.style.display = "flex";
+              arrowLeftOpenWrapper.style.alignItems = "center";
+              arrowLeftOpenWrapper.style.padding = "0.5rem 0.75rem";
+
+              arrowLeftOpenWrapper.innerHTML = `
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 5L6.25 11.75L13 18.5" stroke=${
+                  isLightMode ? "#1633C0" : "#566FEC"
+                } stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M19.3333 5L12.5833 11.75L19.3333 18.5" stroke=${
+                  isLightMode ? "#1633C0" : "#566FEC"
+                }  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>`;
+
+              const openText = document.createElement("span");
+              openText.style.fontSize = "1rem";
+              openText.style.color = isLightMode ? "#1633C0" : "#566FEC";
+              openText.textContent = "OPEN";
+
+              arrowLeftOpenWrapper.appendChild(openText);
+
+              button.appendChild(megaphoneWrapper);
+              button.appendChild(keplrLogo);
+              button.appendChild(mainText);
+              button.appendChild(arrowLeftOpenWrapper);
+
+              // 버튼을 추가하기 전에 한 번 더 이미 추가된 버튼이 있는지 확인
+              const hasAlready = document.getElementById(
+                "__open_keplr_side_panel__"
+              );
+
+              if (!hasAlready) {
+                // 버튼을 body에 추가
+                document.body.appendChild(button);
+
+                // 버튼 클릭 이벤트 추가 (필요한 동작을 정의)
+                button.addEventListener("click", () => {
+                  this.protectedTryOpenSidePanelIfEnabled();
+
+                  button.remove();
+                });
+              }
             }
           }
         }
@@ -1052,9 +1209,8 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     }
   }
 
-  public readonly ethereum = new EthereumProvider(this.requester);
+  public readonly ethereum = new EthereumProvider(this, this.requester);
 }
-
 class EthereumProvider extends EventEmitter implements IEthereumProvider {
   chainId: string | null = null;
   selectedAddress: string | null = null;
@@ -1063,8 +1219,34 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
   isKeplr: boolean = true;
   isMetaMask: boolean = true;
 
-  constructor(protected readonly requester: MessageRequester) {
+  constructor(
+    protected readonly keplr: Keplr,
+    protected readonly requester: MessageRequester
+  ) {
     super();
+  }
+
+  protected async protectedEnableAccess(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      let f = false;
+
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "permission-interactive",
+        "enable-access-for-evm",
+        {}
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.keplr.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   isConnected(): boolean {
@@ -1082,18 +1264,35 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     providerId?: string;
     chainId?: string;
   }): Promise<T> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-ethereum",
-      "request-json-rpc-to-evm",
-      {
-        method,
-        params,
-        providerId,
-        chainId,
-      }
-    );
+    // XXX: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //      side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    //      request의 경우는 일종의 쿼리이기 때문에 언제 결과가 올지 알 수 없다. 그러므로 미리 권한 처리를 해야한다.
+    await this.protectedEnableAccess();
+
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-ethereum",
+        "request-json-rpc-to-evm",
+        {
+          method,
+          params,
+          providerId,
+          chainId,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f && sidePanelOpenNeededJSONRPCMethods.includes(method)) {
+          this.keplr.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   /**
@@ -1101,26 +1300,21 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
    */
 
   async enable(): Promise<string[]> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-ethereum",
-      "request-json-rpc-to-evm",
-      {
-        method: "eth_requestAccounts",
-      }
-    );
+    return await this.request({ method: "eth_requestAccounts" });
   }
 
   async net_version(): Promise<string> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-ethereum",
-      "request-json-rpc-to-evm",
-      {
-        method: "net_version",
-      }
-    );
+    return await this.request({ method: "net_version" });
   }
 }
+
+// IMPORTANT: 사이드 패널을 열어야하는 JSON-RPC 메소드들이 생길 때마다 여기에 추가해야한다.
+const sidePanelOpenNeededJSONRPCMethods = [
+  "eth_sendTransaction",
+  "personal_sign",
+  "eth_signTypedData_v3",
+  "eth_signTypedData_v4",
+  "wallet_addEthereumChain",
+  "wallet_switchEthereumChain",
+  "wallet_watchAsset",
+];
