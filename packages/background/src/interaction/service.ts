@@ -13,6 +13,7 @@ import {
 } from "./foreground";
 import { Buffer } from "buffer/";
 import { SidePanelService } from "../side-panel";
+import { autorun } from "mobx";
 
 export class InteractionService {
   protected waitingMap: Map<string, InteractionWaitingData> = new Map();
@@ -35,7 +36,24 @@ export class InteractionService {
   ) {}
 
   async init(): Promise<void> {
-    // noop
+    // side panel 모드가 켜지거나 꺼질때마다 모든 interaction을 강제로 reject한다.
+    // 어차피 UI 상의 로직에서 side panel 모드를 on/off 할때마다 기존의 view는 모두 꺼지도록 하기 때문에
+    // 더 이상 interaction을 할 수 없다.
+    // 확인되지 않은 경우로 위의 로직에 의해서 view가 꺼질때 interaction service에서 이를 감지하지 못해서
+    // reject가 되지 않는 경우가 있는 것으로 보이기 때문에
+    // autorun을 통해서도 강제 reject를 처리해준다.
+    let prevSidePanelEnabled = this.sidePanelService.getIsEnabled();
+    autorun(() => {
+      const enabled = this.sidePanelService.getIsEnabled();
+      if (prevSidePanelEnabled !== enabled) {
+        prevSidePanelEnabled = enabled;
+
+        const data = this.waitingMap.values();
+        for (const d of data) {
+          this.rejectV2(d.id);
+        }
+      }
+    });
   }
 
   getInteractionWaitingDataArray(): InteractionWaitingData[] {
