@@ -768,35 +768,44 @@ const KeyringItem: FunctionComponent<{
 
                   <Gutter size={8} />
 
-                  <Text
-                    numberOfLines={1}
-                    style={StyleSheet.flatten([
-                      style.flatten([
-                        'subtitle2',
-                        'dark:color-gray-700',
-                        'color-gray-10',
-                      ]),
-                      {maxWidth: '80%'},
-                    ])}>
-                    {keyInfo.name}
-                  </Text>
-                  {icnsPrimaryName ? (
-                    <React.Fragment>
-                      <Gutter size={8} />
-                      <ExpoImage.Image
-                        source={require('../../../public/assets/img/icns-icon.png')}
-                        style={style.flatten(['width-16', 'height-16'])}
-                      />
-                    </React.Fragment>
-                  ) : null}
+                  <Box style={{width: '100%'}}>
+                    <XAxis>
+                      <Text
+                        numberOfLines={1}
+                        style={StyleSheet.flatten([
+                          style.flatten([
+                            'subtitle2',
+                            'dark:color-gray-700',
+                            'color-gray-10',
+                          ]),
+                          {maxWidth: '80%'},
+                        ])}>
+                        {keyInfo.name}
+                      </Text>
+
+                      {icnsPrimaryName ? (
+                        <React.Fragment>
+                          <Gutter size={8} />
+                          <ExpoImage.Image
+                            source={require('../../../public/assets/img/icns-icon.png')}
+                            style={style.flatten(['width-16', 'height-16'])}
+                          />
+                        </React.Fragment>
+                      ) : null}
+                    </XAxis>
+
+                    {paragraph ? (
+                      <React.Fragment>
+                        <Gutter size={6} />
+
+                        <Text
+                          style={style.flatten(['body2', 'color-gray-300'])}>
+                          {paragraph}
+                        </Text>
+                      </React.Fragment>
+                    ) : null}
+                  </Box>
                 </XAxis>
-                {paragraph ? (
-                  <React.Fragment>
-                    <Text style={style.flatten(['body2', 'color-gray-300'])}>
-                      {paragraph}
-                    </Text>
-                  </React.Fragment>
-                ) : null}
               </Box>
               <Column weight={1} />
               <TouchableWithoutFeedback
