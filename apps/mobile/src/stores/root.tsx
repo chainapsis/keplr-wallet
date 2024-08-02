@@ -66,6 +66,7 @@ import {
 import {DeepLinkStore} from './deep-link';
 import {EthereumQueries, EthereumAccountStore} from '@keplr-wallet/stores-eth';
 import {WebpageStore} from './webpage';
+import {CoinGeckoCoinDataByTokenAddress} from '@keplr-wallet/extension/src/config.ui.ts';
 
 export class RootStore {
   public readonly keyRingStore: KeyRingStore;
@@ -197,7 +198,10 @@ export class RootStore {
       }),
       CosmosGovernanceQueries.use(),
       CosmosGovernanceQueriesV1.use(),
-      EthereumQueries.use(),
+      EthereumQueries.use({
+        coingeckoAPIBaseURL: CoinGeckoAPIEndPoint,
+        coingeckoAPIURI: CoinGeckoCoinDataByTokenAddress,
+      }),
     );
 
     this.swapUsageQueries = new SwapUsageQueries(
