@@ -124,7 +124,10 @@ export class InteractionService {
   protected async wait(
     env: Env,
     data: InteractionWaitingData,
-    options?: Omit<FnRequestInteractionOptions, "unstableOnClose">
+    options?: Omit<
+      FnRequestInteractionOptions,
+      "unstableOnClose" | "ignoreURIReplacement"
+    >
   ): Promise<unknown> {
     const msg = new PushInteractionDataMsg(data);
 
@@ -169,6 +172,7 @@ export class InteractionService {
             unstableOnClose: () => {
               this.reject(id);
             },
+            ignoreURIReplacement: true,
           });
         }
       }
@@ -271,8 +275,10 @@ export class InteractionService {
       // 그리고 모바일에서는 어차피 이러한 처리가 필요없기 때문에 모바일 쪽 UI에서는 ping을 받아줄 필요가 없다.
       // 그래서 모바일에서는 어차피 ping이 성공하지 않기 때문에 아무런 처리도 안되도록 한다.
       // should not wait
-      this.startCheckPingOnUIWithWindowId();
-      this.startCheckPingOnUI();
+      if (this.sidePanelService.getIsEnabled()) {
+        this.startCheckPingOnUIWithWindowId();
+        this.startCheckPingOnUI();
+      }
     }
 
     return interactionWaitingData;

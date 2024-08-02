@@ -978,7 +978,9 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   // IMPORTANT: protected로 시작하는 method는 InjectedKeplr.startProxy()에서 injected 쪽에서 event system으로도 호출할 수 없도록 막혀있다.
   //            protected로 시작하지 않는 method는 injected keplr에 없어도 event system을 통하면 호출 할 수 있다.
   //            이를 막기 위해서 method 이름을 protected로 시작하게 한다.
-  async protectedTryOpenSidePanelIfEnabled(): Promise<void> {
+  async protectedTryOpenSidePanelIfEnabled(
+    ignoreGestureFailure: boolean = false
+  ): Promise<void> {
     let isInContentScript = false;
     // 이 provider가 content script 위에서 동작하고 있는지 아닌지 구분해야한다.
     // content script일때만 side panel을 열도록 시도해볼 가치가 있다.
@@ -1017,6 +1019,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
           console.log(e);
 
           if (
+            !ignoreGestureFailure &&
             e.message &&
             e.message.includes("in response to a user gesture")
           ) {
@@ -1197,7 +1200,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
 
                 // 버튼 클릭 이벤트 추가 (필요한 동작을 정의)
                 button.addEventListener("click", () => {
-                  this.protectedTryOpenSidePanelIfEnabled();
+                  this.protectedTryOpenSidePanelIfEnabled(true);
 
                   button.remove();
                 });

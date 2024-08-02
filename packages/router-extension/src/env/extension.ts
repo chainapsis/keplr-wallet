@@ -59,9 +59,12 @@ const openPopupQueue = new PromiseQueue();
 // just open the popup one by one.
 async function openPopupWindow(
   url: string,
-  channel: string = "default"
+  channel: string = "default",
+  options: { ignoreURIReplacement?: boolean } = {}
 ): Promise<number> {
-  return await openPopupQueue.enqueue(() => openPopupWindowInner(url, channel));
+  return await openPopupQueue.enqueue(() =>
+    openPopupWindowInner(url, channel, options)
+  );
 }
 
 const MAX_RETRIES_TO_OPEN_WINDOW_AND_GET_TAB_ID = 2;
@@ -96,7 +99,9 @@ export class ExtensionEnv {
       let retries = 0;
       const openWindowAndGetTabId: () => Promise<number> = async () => {
         try {
-          const windowId = await openPopupWindow(url);
+          const windowId = await openPopupWindow(url, undefined, {
+            ignoreURIReplacement: options?.ignoreURIReplacement,
+          });
           const window = await browser.windows.get(windowId, {
             populate: true,
           });
