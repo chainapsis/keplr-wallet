@@ -2,6 +2,8 @@ import { KVStore } from "@keplr-wallet/common";
 import { autorun, makeObservable, observable, runInAction } from "mobx";
 
 export class SettingsService {
+  // The setting option name is key and the corresponding option value is value.
+  // Since it currently only have a string option value, so the type of value is string.
   @observable
   protected settingsMap: Map<string, string> = new Map();
 

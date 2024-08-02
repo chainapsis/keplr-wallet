@@ -1186,6 +1186,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
               button.appendChild(mainText);
               button.appendChild(arrowLeftOpenWrapper);
 
+              // 버튼을 추가하기 전에 한 번 더 이미 추가된 버튼이 있는지 확인
               const hasAlready = document.getElementById(
                 "__open_keplr_side_panel__"
               );
@@ -1307,6 +1308,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
   }
 }
 
+// IMPORTANT: 사이드 패널을 열어야하는 JSON-RPC 메소드들이 생길 때마다 여기에 추가해야한다.
 const sidePanelOpenNeededJSONRPCMethods = [
   "eth_sendTransaction",
   "personal_sign",

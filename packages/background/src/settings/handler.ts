@@ -25,7 +25,6 @@ const handleGetThemeOptionMsg: (
   service: SettingsService
 ) => InternalHandler<GetThemeOptionMsg> = (service) => {
   return () => {
-    console.log("nno");
     return service.getThemeOption();
   };
 };

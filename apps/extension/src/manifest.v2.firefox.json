@@ -20,7 +20,7 @@
       "matches": ["<all_urls>"]
     },
     {
-      "resources": ["assets/icon-48.png"],
+      "resources": ["assets/icon-128.png"],
       "matches": ["<all_urls>"]
     },
     {

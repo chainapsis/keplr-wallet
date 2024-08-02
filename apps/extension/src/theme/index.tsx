@@ -59,6 +59,7 @@ export const AppThemeProvider: FunctionComponent<PropsWithChildren> = ({
     return option;
   });
 
+  // Sync the theme option to the background script.
   useEffect(() => {
     new InExtensionMessageRequester().sendMessage(
       BACKGROUND_PORT,
