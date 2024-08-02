@@ -21,6 +21,7 @@ const {initFn} = init(
   router,
   (prefix: string) => new AsyncKVStore(prefix),
   new RNMessageRequesterInternalToUI(),
+  undefined,
   EmbedChainInfos,
   PrivilegedOrigins,
   PrivilegedOrigins,

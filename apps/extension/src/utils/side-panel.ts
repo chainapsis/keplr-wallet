@@ -10,8 +10,12 @@ export const handleExternalInteractionWithNoProceedNext = () => {
   if (window.isStartFromInteractionWithSidePanelEnabled) {
     window.close();
   } else {
-    if (window.history.length > 1) {
-      window.history.back();
+    if (isRunningInSidePanel()) {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.close();
+      }
     } else {
       window.close();
     }

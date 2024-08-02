@@ -7,7 +7,10 @@ export class InteractionPingMsg extends Message<boolean> {
     return "interaction-ping";
   }
 
-  constructor(public readonly windowId: number | undefined) {
+  constructor(
+    public readonly windowId: number | undefined,
+    public readonly ignoreWindowIdAndForcePing: boolean
+  ) {
     super();
   }
 

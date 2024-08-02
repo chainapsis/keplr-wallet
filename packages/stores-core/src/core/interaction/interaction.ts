@@ -53,7 +53,8 @@ export class InteractionStore implements InteractionForegroundHandler {
       fresh: InteractionWaitingData[]
     ) => void,
     protected readonly pingHandler?: (
-      windowId: number | undefined
+      windowId: number | undefined,
+      ignoreWindowIdAndForcePing: boolean
     ) => Promise<boolean>
   ) {
     makeObservable(this);

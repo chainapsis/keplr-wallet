@@ -181,7 +181,7 @@ export class RootStore {
           setInteractionDataHref(fresh[0]);
         }
       },
-      async (windowId: number | undefined) => {
+      async (windowId: number | undefined, ignoreWindowIdAndForcePing) => {
         const url = new URL(window.location.href);
         // popup 또는 side panel에서만 interaction을 처리할 수 있다...
         // interaction을 처리할 수 있는 UI가 존재하는 경우
@@ -192,6 +192,9 @@ export class RootStore {
           return true;
         }
         if (url.pathname === "/sidePanel.html") {
+          if (ignoreWindowIdAndForcePing) {
+            return true;
+          }
           // side panel일 경우 window id도 동일해야한다.
           // 유저가 window를 여러개 킨 상태로 각 window에서 side panel을 열어놨다고 생각해보자...
           return windowId === (await getSidePanelWindowId());

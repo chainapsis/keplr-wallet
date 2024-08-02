@@ -13,7 +13,6 @@ import {
 } from "./foreground";
 import { Buffer } from "buffer/";
 import { SidePanelService } from "../side-panel";
-import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 
 export class InteractionService {
   protected waitingMap: Map<string, InteractionWaitingData> = new Map();
@@ -31,7 +30,8 @@ export class InteractionService {
 
   constructor(
     protected readonly eventMsgRequester: MessageRequester,
-    protected readonly sidePanelService: SidePanelService
+    protected readonly sidePanelService: SidePanelService,
+    protected readonly extensionMessageRequesterToUI?: MessageRequester
   ) {}
 
   async init(): Promise<void> {
@@ -160,8 +160,9 @@ export class InteractionService {
           // side panel을 여는건 provider에서 처리해야만 한다.
           // side panel을 열 순 없지만 interaction이 UI에는 추가되어야하기 때문에
           // msg만 보내준다
-          // TODO: InExtensionMessageRequester를 직접 쓰면 당연히 모바일에서 안되기 때문에 이렇게 처리하면 안된다...
-          new InExtensionMessageRequester().sendMessage(APP_PORT, msg);
+          if (this.extensionMessageRequesterToUI) {
+            this.extensionMessageRequesterToUI.sendMessage(APP_PORT, msg);
+          }
         } else {
           env.requestInteraction("", msg, {
             ...options,
@@ -258,10 +259,7 @@ export class InteractionService {
 
     this.waitingMap.set(id, interactionWaitingData);
 
-    // TODO: 제대로 정리한다.
-    //       그리고 일단은 extension만 고려했기 때문에 InExtensionMessageRequester를 사용했는데
-    //       이러면 당연히 모바일에서 못 돌아가기 때문에 수정이 필요하다.
-    if (wasEmpty) {
+    if (wasEmpty && this.extensionMessageRequesterToUI) {
       // waiting data를 처리하려면 당연히 UI가 있어야한다.
       // 근데 side panel의 경우 UI가 꺼졌는지 아닌지 쉽게 알 방법이 없다...
       // 그래서 UI가 꺼졌는지 아닌지를 판단하기 위해서 ping을 보내서 UI가 살아있는지 확인한다.
@@ -272,79 +270,119 @@ export class InteractionService {
       // UI가 늦게 열렸다는 이유로 실패할 수 있는데 이건 이상하기 때문에...
       // 그리고 모바일에서는 어차피 이러한 처리가 필요없기 때문에 모바일 쪽 UI에서는 ping을 받아줄 필요가 없다.
       // 그래서 모바일에서는 어차피 ping이 성공하지 않기 때문에 아무런 처리도 안되도록 한다.
-      // TODO: window id와 상관없이 그냥 interaction을 처리할 UI가 남지 않게 되면 전부다 reject하는 로직도 추가하자...
-      const pingStateMap = new Map<
-        number,
-        {
-          wasPingSucceeded: boolean;
-        }
-      >();
-      (async () => {
-        while (this.waitingMap.size > 0) {
-          await new Promise((resolve) => setTimeout(resolve, 200));
-
-          const windowIds = this.sidePanelService.getIsEnabled()
-            ? new Set(
-                Array.from(this.waitingMap.values()).map((w) => w.windowId)
-              )
-            : // 로직 짜기가 귀찮아서 side panel이 아닌 경우는 그냥 window id를 다 0으로 처리한다...
-              new Set([-1]);
-
-          for (const windowId of windowIds) {
-            // XXX: window id를 찾지 못하는 경우는 개발 중에는 없었는데...
-            //      일단 타이핑 상 undefined일수도 있다.
-            //      이 경우는 일단 아무것도 안하고 넘어간다.
-            if (windowId == null) {
-              continue;
-            }
-
-            const data = Array.from(this.waitingMap.values()).filter(
-              (w) => w.windowId === windowId
-            );
-            const wasPingSucceeded = (() => {
-              if (pingStateMap.has(windowId)) {
-                return pingStateMap.get(windowId)!.wasPingSucceeded;
-              } else {
-                pingStateMap.set(windowId, {
-                  wasPingSucceeded: false,
-                });
-                return false;
-              }
-            })();
-            let succeeded = false;
-            try {
-              const res = await new InExtensionMessageRequester().sendMessage(
-                APP_PORT,
-                // XXX: popup에서는 위에 로직에서 window id를 -1로 대충 처리 했었다.
-                new InteractionPingMsg(windowId === -1 ? undefined : windowId)
-              );
-              if (res) {
-                succeeded = true;
-              }
-            } catch (e) {
-              console.log(e);
-            }
-
-            if (wasPingSucceeded && !succeeded) {
-              // UI가 꺼진 것으로 판단한다.
-              // 그래서 모든 interaction을 reject한다.
-              for (const d of data) {
-                this.rejectV2(d.id);
-              }
-              break;
-            }
-
-            if (!wasPingSucceeded && succeeded) {
-              pingStateMap.set(windowId, {
-                wasPingSucceeded: true,
-              });
-            }
-          }
-        }
-      })();
+      // should not wait
+      this.startCheckPingOnUIWithWindowId();
+      this.startCheckPingOnUI();
     }
 
     return interactionWaitingData;
+  }
+
+  protected async startCheckPingOnUIWithWindowId() {
+    const pingStateMap = new Map<
+      number,
+      {
+        wasPingSucceeded: boolean;
+      }
+    >();
+
+    while (this.waitingMap.size > 0 && this.extensionMessageRequesterToUI) {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      const windowIds = this.sidePanelService.getIsEnabled()
+        ? new Set(Array.from(this.waitingMap.values()).map((w) => w.windowId))
+        : // 로직 짜기가 귀찮아서 side panel이 아닌 경우는 그냥 window id를 다 0으로 처리한다...
+          new Set([-1]);
+
+      for (const windowId of windowIds) {
+        // XXX: window id를 찾지 못하는 경우는 개발 중에는 없었는데...
+        //      일단 타이핑 상 undefined일수도 있다.
+        //      이 경우는 일단 아무것도 안하고 넘어간다.
+        if (windowId == null) {
+          continue;
+        }
+
+        const data = Array.from(this.waitingMap.values()).filter(
+          (w) => w.windowId === windowId
+        );
+        const wasPingSucceeded = (() => {
+          if (pingStateMap.has(windowId)) {
+            return pingStateMap.get(windowId)!.wasPingSucceeded;
+          } else {
+            pingStateMap.set(windowId, {
+              wasPingSucceeded: false,
+            });
+            return false;
+          }
+        })();
+        let succeeded = false;
+        try {
+          const res = await this.extensionMessageRequesterToUI!.sendMessage(
+            APP_PORT,
+            // XXX: popup에서는 위에 로직에서 window id를 -1로 대충 처리 했었다.
+            new InteractionPingMsg(
+              windowId === -1 ? undefined : windowId,
+              false
+            )
+          );
+          if (res) {
+            succeeded = true;
+          }
+        } catch (e) {
+          console.log(e);
+        }
+
+        if (wasPingSucceeded && !succeeded) {
+          // UI가 꺼진 것으로 판단한다.
+          // 그래서 모든 interaction을 reject한다.
+          for (const d of data) {
+            this.rejectV2(d.id);
+          }
+          break;
+        }
+
+        if (!wasPingSucceeded && succeeded) {
+          pingStateMap.set(windowId, {
+            wasPingSucceeded: true,
+          });
+        }
+      }
+    }
+  }
+
+  protected async startCheckPingOnUI() {
+    let wasPingSucceeded = false;
+
+    while (this.waitingMap.size > 0 && this.extensionMessageRequesterToUI) {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      let succeeded = false;
+      try {
+        const res = await this.extensionMessageRequesterToUI!.sendMessage(
+          APP_PORT,
+          new InteractionPingMsg(0, true)
+        );
+        if (res) {
+          succeeded = true;
+        }
+      } catch (e) {
+        console.log(e);
+      }
+
+      if (wasPingSucceeded && !succeeded) {
+        const data = this.waitingMap.values();
+        // UI가 꺼진 것으로 판단한다.
+        // 그래서 모든 interaction을 reject한다.
+        for (const d of data) {
+          this.rejectV2(d.id);
+        }
+        break;
+      }
+
+      if (!wasPingSucceeded && succeeded) {
+        wasPingSucceeded = true;
+      }
+    }
   }
 
   // extension에서 env.sender로부터 요청된 message의 window id를 찾는다.

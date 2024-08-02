@@ -62,6 +62,7 @@ export function init(
   storeCreator: (prefix: string) => KVStore,
   // Message requester to the content script.
   eventMsgRequester: MessageRequester,
+  extensionMessageRequesterToUI: MessageRequester | undefined,
   embedChainInfos: ChainInfo[],
   // The origins that are able to pass any permission.
   privilegedOrigins: string[],
@@ -107,7 +108,8 @@ export function init(
 
   const interactionService = new Interaction.InteractionService(
     eventMsgRequester,
-    sidePanelService
+    sidePanelService,
+    extensionMessageRequesterToUI
   );
 
   const chainsService = new Chains.ChainsService(
