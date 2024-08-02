@@ -311,7 +311,7 @@ export class InteractionService {
     >();
 
     while (this.waitingMap.size > 0 && this.extensionMessageRequesterToUI) {
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const windowIds = this.sidePanelService.getIsEnabled()
         ? new Set(Array.from(this.waitingMap.values()).map((w) => w.windowId))
@@ -378,7 +378,7 @@ export class InteractionService {
     let wasPingSucceeded = false;
 
     while (this.waitingMap.size > 0 && this.extensionMessageRequesterToUI) {
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       let succeeded = false;
       try {
@@ -406,6 +406,32 @@ export class InteractionService {
       if (!wasPingSucceeded && succeeded) {
         wasPingSucceeded = true;
       }
+    }
+  }
+
+  async pingContentScriptTabHasOpenedSidePanel(
+    tabId: number
+  ): Promise<boolean> {
+    if (!this.sidePanelService.getIsEnabled()) {
+      return false;
+    }
+
+    if (!this.extensionMessageRequesterToUI) {
+      return false;
+    }
+
+    const tab = await browser.tabs.get(tabId);
+    if (tab.windowId == null) {
+      return false;
+    }
+
+    try {
+      return await this.extensionMessageRequesterToUI.sendMessage(
+        APP_PORT,
+        new InteractionPingMsg(tab.windowId, false)
+      );
+    } catch {
+      return false;
     }
   }
 

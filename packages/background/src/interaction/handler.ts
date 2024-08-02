@@ -11,6 +11,7 @@ import {
   ApproveInteractionV2Msg,
   RejectInteractionV2Msg,
   GetInteractionWaitingDataArrayMsg,
+  PingContentScriptTabHasOpenedSidePanelMsg,
 } from "./messages";
 import { InteractionService } from "./service";
 
@@ -43,6 +44,11 @@ export const getHandler: (service: InteractionService) => Handler = (
         return handleRejectInteractionV2Msg(service)(
           env,
           msg as RejectInteractionV2Msg
+        );
+      case PingContentScriptTabHasOpenedSidePanelMsg:
+        return handlePingContentScriptTabHasOpenedSidePanelMsg(service)(
+          env,
+          msg as PingContentScriptTabHasOpenedSidePanelMsg
         );
       default:
         throw new KeplrError("interaction", 100, "Unknown msg type");
@@ -87,5 +93,19 @@ const handleRejectInteractionV2Msg: (
 ) => InternalHandler<RejectInteractionV2Msg> = (service) => {
   return (_, msg) => {
     return service.rejectV2(msg.id);
+  };
+};
+
+const handlePingContentScriptTabHasOpenedSidePanelMsg: (
+  service: InteractionService
+) => InternalHandler<PingContentScriptTabHasOpenedSidePanelMsg> = (service) => {
+  return async (env) => {
+    if (!env.sender.tab || env.sender.tab.id == null) {
+      return false;
+    }
+
+    return await service.pingContentScriptTabHasOpenedSidePanel(
+      env.sender.tab.id
+    );
   };
 };

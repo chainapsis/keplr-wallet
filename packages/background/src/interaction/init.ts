@@ -5,6 +5,7 @@ import {
   RejectInteractionMsg,
   ApproveInteractionV2Msg,
   RejectInteractionV2Msg,
+  PingContentScriptTabHasOpenedSidePanelMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -16,6 +17,7 @@ export function init(router: Router, service: InteractionService): void {
   router.registerMessage(RejectInteractionMsg);
   router.registerMessage(ApproveInteractionV2Msg);
   router.registerMessage(RejectInteractionV2Msg);
+  router.registerMessage(PingContentScriptTabHasOpenedSidePanelMsg);
 
   router.addHandler(ROUTE, getHandler(service));
 }

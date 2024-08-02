@@ -1024,6 +1024,20 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
             e.message.includes("in response to a user gesture")
           ) {
             if (!document.getElementById("__open_keplr_side_panel__")) {
+              const sidePanelPing = await sendSimpleMessage<boolean>(
+                this.requester,
+                BACKGROUND_PORT,
+                "interaction",
+                "ping-content-script-tab-has-opened-side-panel",
+                {}
+              );
+
+              // 유저가 직접 side panel을 이미 열어논 상태일 수 있다.
+              // 이 경우는 무시하도록 한다.
+              if (sidePanelPing) {
+                return;
+              }
+
               const isKeplrLocked = await sendSimpleMessage<boolean>(
                 this.requester,
                 BACKGROUND_PORT,
@@ -1195,6 +1209,27 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
               );
 
               if (!hasAlready) {
+                let removed = false;
+                // 유저가 이 button이 아니라 다른 방식(직접 작업줄의 아이콘을 눌러서 등등)으로 side panel을 열수도 있다.
+                // 이 경우를 감지해서 side panel이 열렸으면 자동으로 이 버튼이 삭제되도록 한다.
+                const intervalId = setInterval(() => {
+                  sendSimpleMessage<boolean>(
+                    this.requester,
+                    BACKGROUND_PORT,
+                    "interaction",
+                    "ping-content-script-tab-has-opened-side-panel",
+                    {}
+                  ).then((sidePanelPing) => {
+                    if (sidePanelPing) {
+                      clearInterval(intervalId);
+                      if (!removed) {
+                        button.remove();
+                        removed = true;
+                      }
+                    }
+                  });
+                }, 300);
+
                 // 버튼을 body에 추가
                 document.body.appendChild(button);
 
@@ -1202,7 +1237,11 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
                 button.addEventListener("click", () => {
                   this.protectedTryOpenSidePanelIfEnabled(true);
 
-                  button.remove();
+                  clearInterval(intervalId);
+                  if (!removed) {
+                    button.remove();
+                    removed = true;
+                  }
                 });
               }
             }
