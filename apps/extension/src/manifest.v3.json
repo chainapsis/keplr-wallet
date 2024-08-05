@@ -59,6 +59,10 @@
     {
       "resources": ["assets/locked-keplr-logo-128.png"],
       "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["assets/icon-click-cursor.png"],
+      "matches": ["<all_urls>"]
     }
   ]
 }

@@ -13,6 +13,7 @@ require("./public/assets/icon/icon-beta-48.png");
 require("./public/assets/icon/icon-beta-128.png");
 require("./public/assets/svg/megaphone.svg");
 require("./public/assets/img/locked-keplr-logo-128.png");
+require("./public/assets/icon-click-cursor.png");
 
 import React, {
   FunctionComponent,
