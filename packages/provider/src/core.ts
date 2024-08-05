@@ -1111,6 +1111,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
 
               const button = document.createElement("div");
               button.id = "__open_keplr_side_panel__";
+              button.style.boxSizing = "border-box";
               button.style.animation = "slide-left 0.5s forwards";
               button.style.position = "fixed";
               button.style.right = "0";
@@ -1140,6 +1141,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
               });
 
               const megaphoneWrapper = document.createElement("div");
+              megaphoneWrapper.style.boxSizing = "border-box";
               megaphoneWrapper.style.display = "flex";
               megaphoneWrapper.style.position = "absolute";
               megaphoneWrapper.style.left = "-10px";
@@ -1165,10 +1167,12 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
                 }-128.png`
               );
               keplrLogo.src = keplrLogoUrl;
+              keplrLogo.style.boxSizing = "border-box";
               keplrLogo.style.width = "3rem";
               keplrLogo.style.height = "3rem";
 
               const mainText = document.createElement("span");
+              mainText.style.boxSizing = "border-box";
               mainText.style.maxWidth = "9.125rem";
               mainText.style.fontSize = "1.125rem";
               mainText.style.color = isLightMode ? "#020202" : "#FEFEFE";
@@ -1177,6 +1181,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
                 : "Approve request from the App";
 
               const arrowLeftOpenWrapper = document.createElement("div");
+              arrowLeftOpenWrapper.style.boxSizing = "border-box";
               arrowLeftOpenWrapper.style.display = "flex";
               arrowLeftOpenWrapper.style.alignItems = "center";
               arrowLeftOpenWrapper.style.padding = "0.5rem 0.75rem";
@@ -1192,6 +1197,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
               </svg>`;
 
               const openText = document.createElement("span");
+              openText.style.boxSizing = "border-box";
               openText.style.fontSize = "1rem";
               openText.style.color = isLightMode ? "#1633C0" : "#566FEC";
               openText.textContent = "OPEN";
