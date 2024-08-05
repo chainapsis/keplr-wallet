@@ -9,6 +9,9 @@ import {
 import { KVStore, PrefixKVStore } from "@keplr-wallet/common";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import Joi from "joi";
+import { GetSidePanelIsSupportedMsg } from "@keplr-wallet/background";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 interface VersionHistory {
   version: string;
@@ -21,6 +24,7 @@ interface VersionHistory {
     aspectRatio?: string;
     paragraph: string;
   }[];
+  isSidePanelBeta?: boolean;
 }
 
 const Schema = Joi.object<{
@@ -44,6 +48,7 @@ const Schema = Joi.object<{
           )
           .min(1)
           .required(),
+        isSidePanelBeta: Joi.boolean().optional(),
       })
     )
     .required(),
@@ -106,6 +111,29 @@ export class ChangelogConfig {
       );
 
       const validated = await Schema.validateAsync(res.data);
+
+      if (
+        validated.versions &&
+        validated.versions.find((v: any) => v.isSidePanelBeta === true)
+      ) {
+        const msg = new GetSidePanelIsSupportedMsg();
+        const res = await new InExtensionMessageRequester().sendMessage(
+          BACKGROUND_PORT,
+          msg
+        );
+        if (!res.supported) {
+          runInAction(() => {
+            this._lastInfo = {
+              lastVersion,
+              currentVersion,
+              cleared: true,
+              histories: [],
+            };
+          });
+          return;
+        }
+      }
+
       runInAction(() => {
         this._lastInfo = {
           lastVersion,

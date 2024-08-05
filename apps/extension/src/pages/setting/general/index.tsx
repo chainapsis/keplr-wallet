@@ -111,7 +111,7 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
           {sidePanelSupported ? (
             <PageButton
               title={
-                <XAxis>
+                <XAxis alignY="center">
                   <Subtitle2>
                     {intl.formatMessage({
                       id: "page.setting.general.side-panel-title",
