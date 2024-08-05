@@ -17,11 +17,12 @@ import { ErrModuleLedgerSign } from "../utils/ledger-types";
 import { LedgerGuideBox } from "../components/ledger-guide-box";
 import { GuideBox } from "../../../components/guide-box";
 import { FormattedMessage, useIntl } from "react-intl";
-import { Image } from "../../../components/image";
 import { ErrModuleKeystoneSign, KeystoneUR } from "../utils/keystone";
 import { KeystoneSign } from "../components/keystone";
 import { useTheme } from "styled-components";
 import { KeyRingService } from "@keplr-wallet/background";
+import { MessageAdr36Icon } from "../../../components/icon";
+import { ItemLogo } from "../../main/token-detail/msg-items/logo";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
   const { chainStore, signInteractionStore, uiConfigStore } = useStore();
@@ -264,10 +265,10 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
           }}
         >
           <XAxis alignY="center">
-            <Image
-              alt="sign-custom-image"
-              src={require("../../../public/assets/img/sign-adr36.png")}
-              style={{ width: "3rem", height: "3rem" }}
+            <ItemLogo
+              width="2.5rem"
+              height="2.5rem"
+              center={<MessageAdr36Icon width="2.5rem" height="2.5rem" />}
             />
             <Gutter size="0.75rem" />
             <YAxis>

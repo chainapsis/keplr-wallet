@@ -2,8 +2,9 @@ import { IMessageRenderer } from "../types";
 import React, { FunctionComponent } from "react";
 import { MsgVote } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/tx";
 import { VoteOption } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/gov";
-import { Image } from "../../../../../components/image";
 import { FormattedMessage, useIntl } from "react-intl";
+import { MessageVoteIcon } from "../../../../../components/icon";
+import { ItemLogo } from "../../../../main/token-detail/msg-items/logo";
 
 export const VoteMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -28,10 +29,10 @@ export const VoteMessage: IMessageRenderer = {
     if (d) {
       return {
         icon: (
-          <Image
-            alt="sign-vote-image"
-            src={require("../../../../../public/assets/img/sign-vote.png")}
-            style={{ width: "3rem", height: "3rem" }}
+          <ItemLogo
+            width="2.5rem"
+            height="2.5rem"
+            center={<MessageVoteIcon width="2.5rem" height="2.5rem" />}
           />
         ),
         title: (

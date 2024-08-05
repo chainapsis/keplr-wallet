@@ -5,12 +5,13 @@ import { useStore } from "../../../../../stores";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { MsgTransfer } from "@keplr-wallet/proto-types/ibc/applications/transfer/v1/tx";
 import { Coin, CoinPretty } from "@keplr-wallet/unit";
-import { Image } from "../../../../../components/image";
 import { FormattedMessage } from "react-intl";
 import { Gutter } from "../../../../../components/gutter";
 import { Box } from "../../../../../components/box";
 import { XAxis } from "../../../../../components/axis";
 import { Button } from "../../../../../components/button";
+import { MessageSendIcon } from "../../../../../components/icon";
+import { ItemLogo } from "../../../../main/token-detail/msg-items/logo";
 
 export const TransferMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -40,10 +41,10 @@ export const TransferMessage: IMessageRenderer = {
     if (d) {
       return {
         icon: (
-          <Image
-            alt="sign-ibc-transfer-image"
-            src={require("../../../../../public/assets/img/sign-ibc-transfer.png")}
-            style={{ width: "3rem", height: "3rem" }}
+          <ItemLogo
+            width="2.5rem"
+            height="2.5rem"
+            center={<MessageSendIcon width="2.5rem" height="2.5rem" />}
           />
         ),
         title: (

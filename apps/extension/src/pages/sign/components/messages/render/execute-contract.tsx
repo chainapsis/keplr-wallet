@@ -10,8 +10,9 @@ import { MsgExecuteContract as MsgExecuteSecretContract } from "@keplr-wallet/pr
 import { Buffer } from "buffer/";
 import { WasmMessageView } from "./wasm-message-view";
 import { Gutter } from "../../../../../components/gutter";
-import { Image } from "../../../../../components/image";
 import { FormattedMessage } from "react-intl";
+import { MessageExecuteContractIcon } from "../../../../../components/icon";
+import { ItemLogo } from "../../../../main/token-detail/msg-items/logo";
 
 export const ExecuteContractMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -47,10 +48,12 @@ export const ExecuteContractMessage: IMessageRenderer = {
     if (d) {
       return {
         icon: (
-          <Image
-            alt="sign-execute-contract-image"
-            src={require("../../../../../public/assets/img/sign-execute-contract.png")}
-            style={{ width: "3rem", height: "3rem" }}
+          <ItemLogo
+            width="2.5rem"
+            height="2.5rem"
+            center={
+              <MessageExecuteContractIcon width="2.5rem" height="2.5rem" />
+            }
           />
         ),
         title: (
