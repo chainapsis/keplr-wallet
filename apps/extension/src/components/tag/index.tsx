@@ -9,8 +9,10 @@ export const Tag: FunctionComponent<{
   text: string;
   tooltip?: string;
 
+  paddingX?: string;
+
   whiteSpace?: "normal" | "nowrap";
-}> = ({ text, tooltip, whiteSpace }) => {
+}> = ({ text, tooltip, paddingX, whiteSpace }) => {
   const theme = useTheme();
 
   return (
@@ -25,7 +27,7 @@ export const Tag: FunctionComponent<{
         }
         borderRadius="0.25rem"
         height="1.25rem"
-        paddingX="0.625rem"
+        paddingX={paddingX || "0.625rem"}
       >
         <Caption1
           color={

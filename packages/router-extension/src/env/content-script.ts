@@ -13,6 +13,7 @@ export class ContentScriptEnv {
           "ContentScriptEnv doesn't support `requestInteraction`"
         );
       },
+      sender,
     };
   };
 }

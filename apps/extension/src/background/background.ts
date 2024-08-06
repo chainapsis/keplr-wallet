@@ -11,6 +11,7 @@ import {
   ExtensionGuards,
   ExtensionEnv,
   ContentScriptMessageRequester,
+  InExtensionMessageRequester,
 } from "@keplr-wallet/router-extension";
 import { ExtensionKVStore, isServiceWorker } from "@keplr-wallet/common";
 import { init } from "@keplr-wallet/background";
@@ -32,6 +33,7 @@ const { initFn, keyRingService, analyticsService } = init(
   router,
   (prefix: string) => new ExtensionKVStore(prefix),
   new ContentScriptMessageRequester(),
+  new InExtensionMessageRequester(),
   EmbedChainInfos,
   PrivilegedOrigins,
   PrivilegedOrigins,

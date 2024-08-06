@@ -12,6 +12,7 @@ import { useNavigate } from "react-router";
 import { useInteractionInfo } from "../../../hooks";
 import { InteractionWaitingData } from "@keplr-wallet/background";
 import { useIntl } from "react-intl";
+import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
 
 const Styles = {
   Container: styled(Stack)`
@@ -116,7 +117,7 @@ export const WalletChangeNamePage: FunctionComponent = observer(() => {
                 data.name,
                 (proceedNext) => {
                   if (!proceedNext) {
-                    window.close();
+                    handleExternalInteractionWithNoProceedNext();
                   }
                 }
               );

@@ -25,7 +25,8 @@
     "idle",
     "alarms",
     "unlimitedStorage",
-    "activeTab"
+    "activeTab",
+    "scripting"
   ],
   "content_scripts": [
     {
@@ -35,5 +36,12 @@
       "all_frames": true
     }
   ],
-  "web_accessible_resources": ["injectedScript.bundle.js"]
+  "web_accessible_resources": [
+    "injectedScript.bundle.js",
+    "assets/Inter-SemiBold.ttf",
+    "assets/icon-128.png",
+    "assets/megaphone.svg",
+    "assets/locked-keplr-logo-128.png",
+    "assets/icon-click-cursor.png"
+  ]
 }

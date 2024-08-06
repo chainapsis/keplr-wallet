@@ -74,6 +74,14 @@ export class PermissionInteractiveService {
     }
   }
 
+  isEnabled(env: Env, chainIds: string[], origin: string): boolean {
+    return this.permissionService.hasBasicAccessPermission(
+      env,
+      chainIds,
+      origin
+    );
+  }
+
   async checkOrGrantGetChainInfosWithoutEndpointsPermission(
     env: Env,
     origin: string

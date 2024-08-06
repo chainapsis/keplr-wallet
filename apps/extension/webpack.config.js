@@ -214,9 +214,17 @@ module.exports = {
         },
       ],
     }),
+    // popup.html과 sidePanel.html은 사실 동일하다.
+    // 단지 popup에서 실행되었는지 sidePanel에서 실행되었는지를
+    // js에서 파일 이름으로 알아내기 위해서 분리했다.
     new HtmlWebpackPlugin({
       template: "./src/index.html",
       filename: "popup.html",
+      chunks: ["popup"],
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/index.html",
+      filename: "sidePanel.html",
       chunks: ["popup"],
     }),
     new HtmlWebpackPlugin({

@@ -14,6 +14,9 @@
     "default_popup": "popup.html",
     "default_title": "Keplr"
   },
+  "side_panel": {
+    "default_path": "sidePanel.html"
+  },
   "background": {
     "service_worker": "background.bundle.js"
   },
@@ -24,7 +27,9 @@
     "idle",
     "alarms",
     "unlimitedStorage",
-    "activeTab"
+    "sidePanel",
+    "activeTab",
+    "scripting"
   ],
   "content_scripts": [
     {
@@ -37,6 +42,26 @@
   "web_accessible_resources": [
     {
       "resources": ["injectedScript.bundle.js"],
+      "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["assets/Inter-SemiBold.ttf"],
+      "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["assets/icon-128.png"],
+      "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["assets/megaphone.svg"],
+      "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["assets/locked-keplr-logo-128.png"],
+      "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["assets/icon-click-cursor.png"],
       "matches": ["<all_urls>"]
     }
   ]

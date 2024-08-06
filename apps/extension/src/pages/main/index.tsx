@@ -640,6 +640,7 @@ export const MainPage: FunctionComponent<{
                         }
                       : undefined,
                   paragraph: scene.paragraph,
+                  isSidePanelBeta: info.isSidePanelBeta,
                 });
               }
             }

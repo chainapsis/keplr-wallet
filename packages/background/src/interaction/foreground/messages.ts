@@ -2,6 +2,31 @@ import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 import { InteractionWaitingData } from "../types";
 
+export class InteractionPingMsg extends Message<boolean> {
+  public static type() {
+    return "interaction-ping";
+  }
+
+  constructor(
+    public readonly windowId: number | undefined,
+    public readonly ignoreWindowIdAndForcePing: boolean
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return InteractionPingMsg.type();
+  }
+}
+
 export class PushInteractionDataMsg extends Message<void> {
   public static type() {
     return "push-interaction-data";
@@ -32,7 +57,10 @@ export class PushEventDataMsg extends Message<void> {
   }
 
   constructor(
-    public readonly data: Omit<InteractionWaitingData, "id" | "isInternal">
+    public readonly data: Omit<
+      InteractionWaitingData,
+      "id" | "uri" | "isInternal" | "windowId"
+    >
   ) {
     super();
   }

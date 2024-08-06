@@ -129,6 +129,10 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
           throw new Error("Empty id");
         }
 
+        if (message.method.startsWith("protected")) {
+          throw new Error("Rejected");
+        }
+
         if (message.method === "version") {
           throw new Error("Version is not function");
         }

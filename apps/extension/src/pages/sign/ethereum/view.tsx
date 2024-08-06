@@ -44,6 +44,7 @@ import {
   useSenderConfig,
   useZeroAllowedGasConfig,
 } from "@keplr-wallet/hooks";
+import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
 import { EthTxBase } from "../components/eth-tx/render/tx-base";
 import { MemoryKVStore } from "@keplr-wallet/common";
 import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
@@ -391,7 +392,7 @@ export const EthereumSigningView: FunctionComponent<{
                     interactionInfo.interaction &&
                     !interactionInfo.interactionInternal
                   ) {
-                    window.close();
+                    handleExternalInteractionWithNoProceedNext();
                   }
                 }
 

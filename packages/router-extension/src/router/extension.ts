@@ -55,6 +55,41 @@ export class ExtensionRouter extends Router {
       return;
     }
 
+    // IMPORTANT: 얘는 다른 msg system이랑 아예 분리되어있다.
+    //            여러가지 테스트를 해본 결과 content script -> background에서
+    //            chrome.sidePanel.open()은 호출 이전에 아무런 await도 없어야지 작동하고
+    //            그렇지 않으면 Error: `sidePanel.open()` may only be called in response to a user gesture. 오류가 발생한다.
+    //            근데 이것때메 기존 msg system을 다 갈아엎을수는 없고... 현재 상태에서 await이 없이 무엇인가를 호출할 수 있는 지점이 여기 뿐이다.
+    //            그러므로 여기서 type: "tryOpenSidePanelIfEnabled"에 대해서는 특별히 처리한다.
+    if (message.type === "tryOpenSidePanelIfEnabled") {
+      return new Promise((resolve) => {
+        if (
+          sender.tab?.id &&
+          typeof chrome !== "undefined" &&
+          typeof chrome.sidePanel !== "undefined"
+        ) {
+          chrome.sidePanel
+            .open({
+              tabId: sender.tab.id,
+            })
+            .then(() => {
+              resolve({
+                return: {},
+              });
+            })
+            .catch((e) => {
+              resolve({
+                error: e.message || e.toString(),
+              });
+            });
+        } else {
+          resolve({
+            error: "Side panel is not supported",
+          });
+        }
+      });
+    }
+
     return this.onMessageHandler(message, sender);
   };
 

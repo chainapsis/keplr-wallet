@@ -10,6 +10,8 @@ import {
   RejectInteractionMsg,
   ApproveInteractionV2Msg,
   RejectInteractionV2Msg,
+  GetInteractionWaitingDataArrayMsg,
+  PingContentScriptTabHasOpenedSidePanelMsg,
 } from "./messages";
 import { InteractionService } from "./service";
 
@@ -18,6 +20,11 @@ export const getHandler: (service: InteractionService) => Handler = (
 ) => {
   return (env: Env, msg: Message<unknown>) => {
     switch (msg.constructor) {
+      case GetInteractionWaitingDataArrayMsg:
+        return handleGetInteractionWaitingDataArrayMsg(service)(
+          env,
+          msg as GetInteractionWaitingDataArrayMsg
+        );
       case ApproveInteractionMsg:
         return handleApproveInteractionMsg(service)(
           env,
@@ -38,9 +45,22 @@ export const getHandler: (service: InteractionService) => Handler = (
           env,
           msg as RejectInteractionV2Msg
         );
+      case PingContentScriptTabHasOpenedSidePanelMsg:
+        return handlePingContentScriptTabHasOpenedSidePanelMsg(service)(
+          env,
+          msg as PingContentScriptTabHasOpenedSidePanelMsg
+        );
       default:
         throw new KeplrError("interaction", 100, "Unknown msg type");
     }
+  };
+};
+
+const handleGetInteractionWaitingDataArrayMsg: (
+  service: InteractionService
+) => InternalHandler<GetInteractionWaitingDataArrayMsg> = (service) => {
+  return (_env, _msg) => {
+    return service.getInteractionWaitingDataArray();
   };
 };
 
@@ -73,5 +93,19 @@ const handleRejectInteractionV2Msg: (
 ) => InternalHandler<RejectInteractionV2Msg> = (service) => {
   return (_, msg) => {
     return service.rejectV2(msg.id);
+  };
+};
+
+const handlePingContentScriptTabHasOpenedSidePanelMsg: (
+  service: InteractionService
+) => InternalHandler<PingContentScriptTabHasOpenedSidePanelMsg> = (service) => {
+  return async (env) => {
+    if (!env.sender.tab || env.sender.tab.id == null) {
+      return false;
+    }
+
+    return await service.pingContentScriptTabHasOpenedSidePanel(
+      env.sender.tab.id
+    );
   };
 };

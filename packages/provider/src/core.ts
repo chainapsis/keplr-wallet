@@ -57,16 +57,45 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     );
   }
 
-  async enable(chainIds: string | string[]): Promise<void> {
+  enable(chainIds: string | string[]): Promise<void> {
     if (typeof chainIds === "string") {
       chainIds = [chainIds];
     }
 
-    await sendSimpleMessage(
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "permission-interactive",
+        "enable-access",
+        {
+          chainIds,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
+  }
+
+  // TODO: 웹페이지에서도 필요할수도 있을 것 같으니 나중에 keplr의 API로 추가해준다.
+  async isEnabled(chainIds: string | string[]): Promise<boolean> {
+    if (typeof chainIds === "string") {
+      chainIds = [chainIds];
+    }
+
+    return await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
       "permission-interactive",
-      "enable-access",
+      "is-enabled-access",
       {
         chainIds,
       }
@@ -78,15 +107,27 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       chainIds = [chainIds];
     }
 
-    await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "permission-interactive",
-      "disable-access",
-      {
-        chainIds: chainIds ?? [],
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "permission-interactive",
+        "disable-access",
+        {
+          chainIds: chainIds ?? [],
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async experimentalSuggestChain(
@@ -134,58 +175,105 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       delete (chainInfo as any).coinType;
     }
 
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "chains",
-      "suggest-chain-info",
-      {
-        chainInfo,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "chains",
+        "suggest-chain-info",
+        {
+          chainInfo,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async getKey(chainId: string): Promise<Key> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-cosmos",
-      "get-cosmos-key",
-      {
-        chainId,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-cosmos",
+        "get-cosmos-key",
+        {
+          chainId,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async getKeysSettled(chainIds: string[]): Promise<SettledResponses<Key>> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-cosmos",
-      "get-cosmos-keys-settled",
-      {
-        chainIds,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-cosmos",
+        "get-cosmos-keys-settled",
+        {
+          chainIds,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
-    return (
-      await sendSimpleMessage(
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
         this.requester,
         BACKGROUND_PORT,
         "chains",
         "get-chain-infos-without-endpoints",
         {}
       )
-    ).chainInfos;
+        .then((r) => resolve(r.chainInfos))
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async getChainInfoWithoutEndpoints(
     chainId: string
   ): Promise<ChainInfoWithoutEndpoints> {
-    return (
-      await sendSimpleMessage(
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
         this.requester,
         BACKGROUND_PORT,
         "chains",
@@ -194,7 +282,16 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
           chainId,
         }
       )
-    ).chainInfo;
+        .then((r) => resolve(r.chainInfos))
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async sendTx(
@@ -202,6 +299,11 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     tx: StdTx | Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array> {
+    // XXX: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //      side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    //      sendTx의 경우는 일종의 쿼리이기 때문에 언제 결과가 올지 알 수 없다. 그러므로 미리 권한 처리를 해야한다.
+    await this.enable(chainId);
+
     return await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
@@ -221,18 +323,30 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     signDoc: StdSignDoc,
     signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-cosmos",
-      "request-cosmos-sign-amino",
-      {
-        chainId,
-        signer,
-        signDoc,
-        signOptions: deepmerge(this.defaultOptions.sign ?? {}, signOptions),
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-cosmos",
+        "request-cosmos-sign-amino",
+        {
+          chainId,
+          signer,
+          signDoc,
+          signOptions: deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async signDirect(
@@ -246,35 +360,47 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     },
     signOptions: KeplrSignOptions = {}
   ): Promise<DirectSignResponse> {
-    const response = await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-cosmos",
-      "request-cosmos-sign-direct",
-      {
-        chainId,
-        signer,
-        signDoc: {
-          bodyBytes: signDoc.bodyBytes,
-          authInfoBytes: signDoc.authInfoBytes,
-          chainId: signDoc.chainId,
-          accountNumber: signDoc.accountNumber
-            ? signDoc.accountNumber.toString()
-            : null,
-        },
-        signOptions: deepmerge(this.defaultOptions.sign ?? {}, signOptions),
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-cosmos",
+        "request-cosmos-sign-direct",
+        {
+          chainId,
+          signer,
+          signDoc: {
+            bodyBytes: signDoc.bodyBytes,
+            authInfoBytes: signDoc.authInfoBytes,
+            chainId: signDoc.chainId,
+            accountNumber: signDoc.accountNumber
+              ? signDoc.accountNumber.toString()
+              : null,
+          },
+          signOptions: deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+        }
+      )
+        .then((r) =>
+          resolve({
+            signed: {
+              bodyBytes: r.signed.bodyBytes,
+              authInfoBytes: r.signed.authInfoBytes,
+              chainId: r.signed.chainId,
+              accountNumber: Long.fromString(r.signed.accountNumber),
+            },
+            signature: r.signature,
+          })
+        )
+        .catch(reject)
+        .finally(() => (f = true));
 
-    return {
-      signed: {
-        bodyBytes: response.signed.bodyBytes,
-        authInfoBytes: response.signed.authInfoBytes,
-        chainId: response.signed.chainId,
-        accountNumber: Long.fromString(response.signed.accountNumber),
-      },
-      signature: response.signature,
-    };
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async signDirectAux(
@@ -295,42 +421,54 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       "preferNoSetFee" | "disableBalanceCheck"
     > = {}
   ): Promise<DirectAuxSignResponse> {
-    const response = await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-cosmos",
-      "request-cosmos-sign-direct-aux",
-      {
-        chainId,
-        signer,
-        signDoc: {
-          bodyBytes: signDoc.bodyBytes,
-          publicKey: signDoc.publicKey,
-          chainId: signDoc.chainId,
-          accountNumber: signDoc.accountNumber
-            ? signDoc.accountNumber.toString()
-            : null,
-          sequence: signDoc.sequence ? signDoc.sequence.toString() : null,
-        },
-        signOptions: deepmerge(
-          {
-            preferNoSetMemo: this.defaultOptions.sign?.preferNoSetMemo,
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-cosmos",
+        "request-cosmos-sign-direct-aux",
+        {
+          chainId,
+          signer,
+          signDoc: {
+            bodyBytes: signDoc.bodyBytes,
+            publicKey: signDoc.publicKey,
+            chainId: signDoc.chainId,
+            accountNumber: signDoc.accountNumber
+              ? signDoc.accountNumber.toString()
+              : null,
+            sequence: signDoc.sequence ? signDoc.sequence.toString() : null,
           },
-          signOptions
-        ),
-      }
-    );
+          signOptions: deepmerge(
+            {
+              preferNoSetMemo: this.defaultOptions.sign?.preferNoSetMemo,
+            },
+            signOptions
+          ),
+        }
+      )
+        .then((r) =>
+          resolve({
+            signed: {
+              bodyBytes: r.signed.bodyBytes,
+              publicKey: r.signed.publicKey,
+              chainId: r.signed.chainId,
+              accountNumber: Long.fromString(r.signed.accountNumber),
+              sequence: Long.fromString(r.signed.sequence),
+            },
+            signature: r.signature,
+          })
+        )
+        .catch(reject)
+        .finally(() => (f = true));
 
-    return {
-      signed: {
-        bodyBytes: response.signed.bodyBytes,
-        publicKey: response.signed.publicKey,
-        chainId: response.signed.chainId,
-        accountNumber: Long.fromString(response.signed.accountNumber),
-        sequence: Long.fromString(response.signed.sequence),
-      },
-      signature: response.signature,
-    };
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async signArbitrary(
@@ -338,20 +476,32 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     signer: string,
     data: string | Uint8Array
   ): Promise<StdSignature> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-cosmos",
-      "request-cosmos-sign-amino-adr-36",
-      {
-        chainId,
-        signer,
-        data: typeof data === "string" ? Buffer.from(data) : data,
-        signOptions: {
-          isADR36WithString: typeof data === "string",
-        },
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-cosmos",
+        "request-cosmos-sign-amino-adr-36",
+        {
+          chainId,
+          signer,
+          data: typeof data === "string" ? Buffer.from(data) : data,
+          signOptions: {
+            isADR36WithString: typeof data === "string",
+          },
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async verifyArbitrary(
@@ -364,18 +514,30 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       data = Buffer.from(data);
     }
 
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-cosmos",
-      "verify-cosmos-sign-amino-adr-36",
-      {
-        chainId,
-        signer,
-        data,
-        signature,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-cosmos",
+        "verify-cosmos-sign-amino-adr-36",
+        {
+          chainId,
+          signer,
+          data,
+          signature,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async signEthereum(
@@ -384,18 +546,30 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     message: string | Uint8Array,
     signType: EthSignType
   ): Promise<Uint8Array> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-ethereum",
-      "request-sign-ethereum",
-      {
-        chainId,
-        signer,
-        message: typeof message === "string" ? Buffer.from(message) : message,
-        signType,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-ethereum",
+        "request-sign-ethereum",
+        {
+          chainId,
+          signer,
+          message: typeof message === "string" ? Buffer.from(message) : message,
+          signType,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async signICNSAdr36(
@@ -405,19 +579,31 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     username: string,
     addressChainIds: string[]
   ): Promise<ICNSAdr36Signatures> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-cosmos",
-      "request-icns-adr-36-signatures-v2",
-      {
-        chainId,
-        contractAddress,
-        owner,
-        username,
-        addressChainIds,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-cosmos",
+        "request-icns-adr-36-signatures-v2",
+        {
+          chainId,
+          contractAddress,
+          owner,
+          username,
+          addressChainIds,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   getOfflineSigner(
@@ -450,61 +636,109 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     contractAddress: string,
     viewingKey?: string
   ): Promise<void> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "token-cw20",
-      "SuggestTokenMsg",
-      {
-        chainId,
-        contractAddress,
-        viewingKey,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "token-cw20",
+        "SuggestTokenMsg",
+        {
+          chainId,
+          contractAddress,
+          viewingKey,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async getSecret20ViewingKey(
     chainId: string,
     contractAddress: string
   ): Promise<string> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "token-cw20",
-      "get-secret20-viewing-key",
-      {
-        chainId,
-        contractAddress,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "token-cw20",
+        "get-secret20-viewing-key",
+        {
+          chainId,
+          contractAddress,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async getEnigmaPubKey(chainId: string): Promise<Uint8Array> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "secret-wasm",
-      "get-pubkey-msg",
-      {
-        chainId,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "secret-wasm",
+        "get-pubkey-msg",
+        {
+          chainId,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async getEnigmaTxEncryptionKey(
     chainId: string,
     nonce: Uint8Array
   ): Promise<Uint8Array> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "secret-wasm",
-      "get-tx-encryption-key-msg",
-      {
-        chainId,
-        nonce,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "secret-wasm",
+        "get-tx-encryption-key-msg",
+        {
+          chainId,
+          nonce,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async enigmaEncrypt(
@@ -513,17 +747,29 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     // eslint-disable-next-line @typescript-eslint/ban-types
     msg: object
   ): Promise<Uint8Array> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "secret-wasm",
-      "request-encrypt-msg",
-      {
-        chainId,
-        contractCodeHash,
-        msg,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "secret-wasm",
+        "request-encrypt-msg",
+        {
+          chainId,
+          contractCodeHash,
+          msg,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async enigmaDecrypt(
@@ -535,17 +781,29 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       return new Uint8Array();
     }
 
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "secret-wasm",
-      "request-decrypt-msg",
-      {
-        chainId,
-        cipherText,
-        nonce,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "secret-wasm",
+        "request-decrypt-msg",
+        {
+          chainId,
+          cipherText,
+          nonce,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   getEnigmaUtils(chainId: string): SecretUtils {
@@ -570,19 +828,31 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     signDoc: StdSignDoc,
     signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-cosmos",
-      "request-sign-eip-712-cosmos-tx-v0",
-      {
-        chainId,
-        signer,
-        eip712,
-        signDoc,
-        signOptions: deepmerge(this.defaultOptions.sign ?? {}, signOptions),
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-cosmos",
+        "request-sign-eip-712-cosmos-tx-v0",
+        {
+          chainId,
+          signer,
+          eip712,
+          signDoc,
+          signOptions: deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async __core__getAnalyticsId(): Promise<string> {
@@ -602,16 +872,28 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     defaultName: string;
     editable?: boolean;
   }): Promise<string> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-v2",
-      "change-keyring-name-interactive",
-      {
-        defaultName,
-        editable,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-v2",
+        "change-keyring-name-interactive",
+        {
+          defaultName,
+          editable,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   async __core__privilageSignAminoWithdrawRewards(
@@ -651,6 +933,11 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   }
 
   async sendEthereumTx(chainId: string, tx: Uint8Array): Promise<string> {
+    // XXX: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //      side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    //      sendTx의 경우는 일종의 쿼리이기 때문에 언제 결과가 올지 알 수 없다. 그러므로 미리 권한 처리를 해야한다.
+    await this.enable(chainId);
+
     return await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
@@ -664,21 +951,344 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   }
 
   async suggestERC20(chainId: string, contractAddress: string): Promise<void> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "token-erc20",
-      "SuggestERC20TokenMsg",
-      {
-        chainId,
-        contractAddress,
-      }
-    );
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "token-erc20",
+        "SuggestERC20TokenMsg",
+        {
+          chainId,
+          contractAddress,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
-  public readonly ethereum = new EthereumProvider(this.requester);
-}
+  // IMPORTANT: protected로 시작하는 method는 InjectedKeplr.startProxy()에서 injected 쪽에서 event system으로도 호출할 수 없도록 막혀있다.
+  //            protected로 시작하지 않는 method는 injected keplr에 없어도 event system을 통하면 호출 할 수 있다.
+  //            이를 막기 위해서 method 이름을 protected로 시작하게 한다.
+  async protectedTryOpenSidePanelIfEnabled(
+    ignoreGestureFailure: boolean = false
+  ): Promise<void> {
+    let isInContentScript = false;
+    // 이 provider가 content script 위에서 동작하고 있는지 아닌지 구분해야한다.
+    // content script일때만 side panel을 열도록 시도해볼 가치가 있다.
+    // 근데 js 자체적으로 api등을 통해서는 이를 알아낼 방법이 없다.
+    // extension 상에서 content script에서 keplr provider proxy를 시작하기 전에 window에 밑의 field를 알아서 주입하는 방식으로 처리한다.
+    if (
+      typeof window !== "undefined" &&
+      (window as any).__keplr_content_script === true
+    ) {
+      isInContentScript = true;
+    }
 
+    if (isInContentScript) {
+      const isEnabled = await sendSimpleMessage<{
+        enabled: boolean;
+      }>(
+        this.requester,
+        BACKGROUND_PORT,
+        "side-panel",
+        "GetSidePanelEnabledMsg",
+        {}
+      );
+
+      if (isEnabled.enabled) {
+        try {
+          // IMPORTANT: "tryOpenSidePanelIfEnabled"는 다른 msg system과 아예 분리되어있고 다르게 동작한다.
+          //            router-extension package의 src/router/extension.ts에 있는 주석을 참고할 것.
+          return await sendSimpleMessage(
+            this.requester,
+            BACKGROUND_PORT,
+            "router-extension/src/router/extension.ts",
+            "tryOpenSidePanelIfEnabled",
+            {}
+          );
+        } catch (e) {
+          console.log(e);
+
+          if (
+            !ignoreGestureFailure &&
+            e.message &&
+            e.message.includes("in response to a user gesture")
+          ) {
+            if (!document.getElementById("__open_keplr_side_panel__")) {
+              const sidePanelPing = await sendSimpleMessage<boolean>(
+                this.requester,
+                BACKGROUND_PORT,
+                "interaction",
+                "ping-content-script-tab-has-opened-side-panel",
+                {}
+              );
+
+              // 유저가 직접 side panel을 이미 열어논 상태일 수 있다.
+              // 이 경우는 무시하도록 한다.
+              if (sidePanelPing) {
+                return;
+              }
+
+              const isKeplrLocked = await sendSimpleMessage<boolean>(
+                this.requester,
+                BACKGROUND_PORT,
+                "keyring",
+                "GetIsLockedMsg",
+                {}
+              );
+
+              const keplrThemeOption = await sendSimpleMessage<
+                "light" | "dark" | "auto"
+              >(
+                this.requester,
+                BACKGROUND_PORT,
+                "settings",
+                "GetThemeOptionMsg",
+                {}
+              );
+
+              // extension에서 `web_accessible_resources`에 추가된 파일은 이렇게 접근이 가능함
+              const fontUrl = chrome.runtime.getURL(
+                "/assets/Inter-SemiBold.ttf"
+              );
+              const fontFaceAndKeyFrames = `
+                @font-face {
+                  font-family: 'Inter-SemiBold-Keplr';
+                  src: url('${fontUrl}') format('truetype');
+                  font-weight: 600;
+                  font-style: normal;
+                }
+
+                @keyframes slide-left {
+                  0% {
+                    transform: translateY(0%) translateX(100%);
+                  }
+                  100% {
+                    transform: translateY(0%) translateX(0);
+                  }
+                }
+                    
+                @keyframes tada {
+                  0% {
+                    transform: scale3d(1, 1, 1);
+                  }
+                  10%, 20% {
+                    transform: scale3d(.9, .9, .9) rotate3d(0, 0, 1, -3deg);
+                  }
+                  30%, 50%, 70%, 90% {
+                    transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, 3deg);
+                  }
+                  40%, 60%, 80% {
+                    transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, -3deg);
+                  }
+                  100% {
+                    transform: scale3d(1, 1, 1);
+                  }
+                }
+                  
+            `;
+
+              const isLightMode =
+                keplrThemeOption === "auto"
+                  ? !window.matchMedia("(prefers-color-scheme: dark)").matches
+                  : keplrThemeOption === "light";
+
+              // 폰트와 애니메이션을 위한 스타일 요소를 head에 추가
+              const styleElement = document.createElement("style");
+              styleElement.appendChild(
+                document.createTextNode(fontFaceAndKeyFrames)
+              );
+              document.head.appendChild(styleElement);
+
+              const button = document.createElement("div");
+              button.id = "__open_keplr_side_panel__";
+              button.style.boxSizing = "border-box";
+              button.style.animation = "slide-left 0.5s forwards";
+              button.style.position = "fixed";
+              button.style.right = "1.5rem";
+              button.style.top = "1.5rem";
+              button.style.padding = "1rem 1.75rem 1rem 0.75rem";
+              button.style.zIndex = "2147483647"; // 페이지 상의 다른 요소보다 버튼이 위에 오도록 함
+              button.style.borderRadius = "1rem";
+              button.style.display = "flex";
+              button.style.alignItems = "center";
+
+              button.style.fontFamily = "Inter-SemiBold-Keplr";
+              button.style.fontWeight = "600";
+
+              // button.style.cursor = "pointer";
+              button.style.background = isLightMode ? "#FEFEFE" : "#1D1D1F";
+              // if (isLightMode) {
+              //   button.style.boxShadow =
+              //     "0px 0px 15.5px 0px rgba(0, 0, 0, 0.20)";
+              // }
+              // button.addEventListener("mouseover", () => {
+              //   button.style.background = isLightMode ? "#F2F2F6" : "#242428";
+              // });
+              // button.addEventListener("mouseout", () => {
+              //   button.style.background = isLightMode ? "#FEFEFE" : "#1D1D1F";
+              // });
+
+              // const megaphoneWrapper = document.createElement("div");
+              // megaphoneWrapper.style.boxSizing = "border-box";
+              // megaphoneWrapper.style.display = "flex";
+              // megaphoneWrapper.style.position = "absolute";
+              // megaphoneWrapper.style.left = "-10px";
+              // megaphoneWrapper.style.top = "-10px";
+              // megaphoneWrapper.style.padding = "6.5px 6px 5.5px";
+              // megaphoneWrapper.style.borderRadius = "255px";
+              // megaphoneWrapper.style.background = "#FC8441";
+              //
+              // const megaphone = document.createElement("img");
+              // const megaphoneUrl = chrome.runtime.getURL(
+              //   "/assets/megaphone.svg"
+              // );
+              // megaphone.src = megaphoneUrl;
+              // megaphone.style.width = "1.25rem";
+              // megaphone.style.height = "1.25rem";
+              // megaphone.style.animation = "tada 1s infinite";
+              // megaphoneWrapper.appendChild(megaphone);
+
+              const arrowTop = document.createElement("div");
+              arrowTop.style.boxSizing = "border-box";
+              arrowTop.style.transform = "translateY(-0.65rem)";
+              arrowTop.style.marginRight = "0.35rem";
+              arrowTop.innerHTML = `
+                <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M30 29.7522C25.1484 31.0691 16.7109 27.1184 18.6093 18.3391C20.5078 9.55979 25.5703 11.5351 26.414 12.852C27.2578 14.1689 28.3125 22.2898 15.8672 19.2171C5.9109 16.7589 7.15625 6.04811 8 1M8 1L14 8M8 1L1 7.5" stroke="${
+                      isLightMode ? "#2C4BE2" : "#72747B"
+                    }"/>
+                </svg>
+              `;
+
+              const keplrLogoWrap = document.createElement("div");
+              keplrLogoWrap.style.boxSizing = "border-box";
+              keplrLogoWrap.style.position = "relative";
+              keplrLogoWrap.style.marginRight = "1rem";
+              const keplrLogo = document.createElement("img");
+              const keplrLogoUrl = chrome.runtime.getURL(
+                `/assets/${
+                  isKeplrLocked ? "locked-keplr-logo" : "icon"
+                }-128.png`
+              );
+              keplrLogo.src = keplrLogoUrl;
+              keplrLogo.style.boxSizing = "border-box";
+              keplrLogo.style.width = "3rem";
+              keplrLogo.style.height = "3rem";
+              keplrLogoWrap.appendChild(keplrLogo);
+
+              const logoClickCursor = document.createElement("img");
+              const logoClickCursorUrl = chrome.runtime.getURL(
+                "assets/icon-click-cursor.png"
+              );
+              logoClickCursor.src = logoClickCursorUrl;
+              logoClickCursor.style.boxSizing = "border-box";
+              logoClickCursor.style.position = "absolute";
+              logoClickCursor.style.right = "-0.2rem";
+              logoClickCursor.style.bottom = "-0.2rem";
+              logoClickCursor.style.aspectRatio = "78/98";
+              logoClickCursor.style.height = "1.375rem";
+              keplrLogoWrap.appendChild(logoClickCursor);
+
+              const mainText = document.createElement("span");
+              mainText.style.boxSizing = "border-box";
+              // mainText.style.maxWidth = "9.125rem";
+              mainText.style.fontSize = "1rem";
+              mainText.style.color = isLightMode ? "#020202" : "#FEFEFE";
+              mainText.textContent = isKeplrLocked
+                ? "Unlock Keplr to proceed"
+                : "Open Keplr to approve request(s)";
+
+              // const arrowLeftOpenWrapper = document.createElement("div");
+              // arrowLeftOpenWrapper.style.boxSizing = "border-box";
+              // arrowLeftOpenWrapper.style.display = "flex";
+              // arrowLeftOpenWrapper.style.alignItems = "center";
+              // arrowLeftOpenWrapper.style.padding = "0.5rem 0.75rem";
+              //
+              // arrowLeftOpenWrapper.innerHTML = `
+              // <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              //   <path d="M13 5L6.25 11.75L13 18.5" stroke=${
+              //     isLightMode ? "#1633C0" : "#566FEC"
+              //   } stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              //   <path d="M19.3333 5L12.5833 11.75L19.3333 18.5" stroke=${
+              //     isLightMode ? "#1633C0" : "#566FEC"
+              //   }  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              // </svg>`;
+              //
+              // const openText = document.createElement("span");
+              // openText.style.boxSizing = "border-box";
+              // openText.style.fontSize = "1rem";
+              // openText.style.color = isLightMode ? "#1633C0" : "#566FEC";
+              // openText.textContent = "OPEN";
+              //
+              // arrowLeftOpenWrapper.appendChild(openText);
+
+              // button.appendChild(megaphoneWrapper);
+              button.appendChild(arrowTop);
+              button.appendChild(keplrLogoWrap);
+              button.appendChild(mainText);
+              // button.appendChild(arrowLeftOpenWrapper);
+
+              // 버튼을 추가하기 전에 한 번 더 이미 추가된 버튼이 있는지 확인
+              const hasAlready = document.getElementById(
+                "__open_keplr_side_panel__"
+              );
+
+              if (!hasAlready) {
+                let removed = false;
+                // 유저가 이 button이 아니라 다른 방식(직접 작업줄의 아이콘을 눌러서 등등)으로 side panel을 열수도 있다.
+                // 이 경우를 감지해서 side panel이 열렸으면 자동으로 이 버튼이 삭제되도록 한다.
+                const intervalId = setInterval(() => {
+                  sendSimpleMessage<boolean>(
+                    this.requester,
+                    BACKGROUND_PORT,
+                    "interaction",
+                    "ping-content-script-tab-has-opened-side-panel",
+                    {}
+                  ).then((sidePanelPing) => {
+                    if (sidePanelPing) {
+                      clearInterval(intervalId);
+                      if (!removed) {
+                        button.remove();
+                        removed = true;
+                      }
+                    }
+                  });
+                }, 300);
+
+                // 버튼을 body에 추가
+                document.body.appendChild(button);
+
+                // XXX: 현재 크롬의 버그로 인해서 밑의 코드가 동작할 수 없기 때문에 일단 주석처리한다.
+                // 버튼 클릭 이벤트 추가 (필요한 동작을 정의)
+                // button.addEventListener("click", () => {
+                //   this.protectedTryOpenSidePanelIfEnabled(true);
+                //
+                //   clearInterval(intervalId);
+                //   if (!removed) {
+                //     button.remove();
+                //     removed = true;
+                //   }
+                // });
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  public readonly ethereum = new EthereumProvider(this, this.requester);
+}
 class EthereumProvider extends EventEmitter implements IEthereumProvider {
   chainId: string | null = null;
   selectedAddress: string | null = null;
@@ -687,8 +1297,34 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
   isKeplr: boolean = true;
   isMetaMask: boolean = true;
 
-  constructor(protected readonly requester: MessageRequester) {
+  constructor(
+    protected readonly keplr: Keplr,
+    protected readonly requester: MessageRequester
+  ) {
     super();
+  }
+
+  protected async protectedEnableAccess(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      let f = false;
+
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "permission-interactive",
+        "enable-access-for-evm",
+        {}
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.keplr.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   isConnected(): boolean {
@@ -706,18 +1342,35 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     providerId?: string;
     chainId?: string;
   }): Promise<T> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-ethereum",
-      "request-json-rpc-to-evm",
-      {
-        method,
-        params,
-        providerId,
-        chainId,
-      }
-    );
+    // XXX: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //      side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    //      request의 경우는 일종의 쿼리이기 때문에 언제 결과가 올지 알 수 없다. 그러므로 미리 권한 처리를 해야한다.
+    await this.protectedEnableAccess();
+
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-ethereum",
+        "request-json-rpc-to-evm",
+        {
+          method,
+          params,
+          providerId,
+          chainId,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f && sidePanelOpenNeededJSONRPCMethods.includes(method)) {
+          this.keplr.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
   }
 
   /**
@@ -725,26 +1378,21 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
    */
 
   async enable(): Promise<string[]> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-ethereum",
-      "request-json-rpc-to-evm",
-      {
-        method: "eth_requestAccounts",
-      }
-    );
+    return await this.request({ method: "eth_requestAccounts" });
   }
 
   async net_version(): Promise<string> {
-    return await sendSimpleMessage(
-      this.requester,
-      BACKGROUND_PORT,
-      "keyring-ethereum",
-      "request-json-rpc-to-evm",
-      {
-        method: "net_version",
-      }
-    );
+    return await this.request({ method: "net_version" });
   }
 }
+
+// IMPORTANT: 사이드 패널을 열어야하는 JSON-RPC 메소드들이 생길 때마다 여기에 추가해야한다.
+const sidePanelOpenNeededJSONRPCMethods = [
+  "eth_sendTransaction",
+  "personal_sign",
+  "eth_signTypedData_v3",
+  "eth_signTypedData_v4",
+  "wallet_addEthereumChain",
+  "wallet_switchEthereumChain",
+  "wallet_watchAsset",
+];

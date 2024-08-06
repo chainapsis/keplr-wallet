@@ -9,6 +9,7 @@ import { ChainInfo } from "@keplr-wallet/types";
 import { FormattedMessage, useIntl } from "react-intl";
 import { ArrowLeftIcon } from "../../components/icon";
 import { Box } from "../../components/box";
+import { handleExternalInteractionWithNoProceedNext } from "../../utils";
 
 export const SuggestChainPage: FunctionComponent = observer(() => {
   const { chainSuggestStore } = useStore();
@@ -35,7 +36,7 @@ const SuggestChainPageImpl: FunctionComponent<{
     origin: string;
   }>;
 }> = observer(({ waitingData }) => {
-  const { chainSuggestStore } = useStore();
+  const { chainSuggestStore, permissionStore } = useStore();
   const [isLoadingPlaceholder, setIsLoadingPlaceholder] = useState(true);
   const [updateFromRepoDisabled, setUpdateFromRepoDisabled] = useState(false);
 
@@ -94,14 +95,25 @@ const SuggestChainPageImpl: FunctionComponent<{
         text: intl.formatMessage({ id: "button.approve" }),
         size: "large",
         color: "primary",
+        isLoading: permissionStore.isObsoleteInteraction(waitingData.id),
         onClick: async () => {
           const chainInfo =
             communityChainInfo && !updateFromRepoDisabled
               ? communityChainInfo
               : waitingData.data.chainInfo;
 
+          const ids = new Set([waitingData.id]);
+          for (const data of chainSuggestStore.waitingSuggestedChainInfos) {
+            if (
+              data.data.chainInfo.chainId ===
+                waitingData.data.chainInfo.chainId &&
+              data.data.origin === waitingData.data.origin
+            ) {
+              ids.add(data.id);
+            }
+          }
           await chainSuggestStore.approveWithProceedNext(
-            waitingData.id,
+            Array.from(ids),
             {
               ...chainInfo,
               updateFromRepoDisabled,
@@ -112,7 +124,7 @@ const SuggestChainPageImpl: FunctionComponent<{
                   interactionInfo.interaction &&
                   !interactionInfo.interactionInternal
                 ) {
-                  window.close();
+                  handleExternalInteractionWithNoProceedNext();
                 }
               }
             }

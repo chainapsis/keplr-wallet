@@ -12,6 +12,7 @@ import { Gutter } from "../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { Dropdown } from "../../../components/dropdown";
+import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
 
 export const PermissionBasicAccessForEVMPage: FunctionComponent<{
   data: {
@@ -60,7 +61,7 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
                 interactionInfo.interaction &&
                 !interactionInfo.interactionInternal
               ) {
-                window.close();
+                handleExternalInteractionWithNoProceedNext();
               }
             }
           },

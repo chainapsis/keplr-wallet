@@ -10,6 +10,8 @@ import { initEvents } from "./events";
 
 import manifest from "../manifest.v2.json";
 
+(window as any).__keplr_content_script = true;
+
 InjectedKeplr.startProxy(
   new Keplr(manifest.version, "core", new InExtensionMessageRequester())
 );
