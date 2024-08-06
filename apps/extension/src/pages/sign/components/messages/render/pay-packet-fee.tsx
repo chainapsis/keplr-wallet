@@ -3,7 +3,6 @@ import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../../stores";
 import { CoinPretty } from "@keplr-wallet/unit";
-import { Image } from "../../../../../components/image";
 import { FormattedMessage } from "react-intl";
 import { Gutter } from "../../../../../components/gutter";
 import { Box } from "../../../../../components/box";
@@ -11,6 +10,7 @@ import { XAxis } from "../../../../../components/axis";
 import { Button } from "../../../../../components/button";
 import { MsgPayPacketFee } from "@keplr-wallet/proto-types/ibc/applications/fee/v1/tx";
 import { Bech32Address } from "@keplr-wallet/cosmos";
+import { CustomIcon } from "./custom-icon";
 
 export const PayPacketFeeMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -49,13 +49,7 @@ export const PayPacketFeeMessage: IMessageRenderer = {
 
     if (d) {
       return {
-        icon: (
-          <Image
-            alt="sign-pay-packet-fee-image"
-            src={require("../../../../../public/assets/img/sign-custom.png")}
-            style={{ width: "3rem", height: "3rem" }}
-          />
-        ),
+        icon: <CustomIcon />,
         title: (
           <FormattedMessage id="page.sign.components.messages.pay-packet-fee.title" />
         ),

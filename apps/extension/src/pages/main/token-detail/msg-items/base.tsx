@@ -88,7 +88,7 @@ export const MsgItemBase: FunctionComponent<{
         backgroundColor={
           theme.mode === "light"
             ? ColorPalette["white"]
-            : ColorPalette["gray-600"]
+            : ColorPalette["gray-650"]
         }
         style={{
           boxShadow:
@@ -121,7 +121,7 @@ export const MsgItemBase: FunctionComponent<{
             backgroundColor: clickable
               ? theme.mode === "light"
                 ? ColorPalette["gray-10"]
-                : ColorPalette["gray-550"]
+                : ColorPalette["gray-600"]
               : undefined,
           }}
         >

@@ -15,17 +15,26 @@ export const ItemLogo: FunctionComponent<{
     <Box
       width={width || "2rem"}
       height={height || "2rem"}
-      backgroundColor={
+      borderColor={
         backgroundColor ||
         (theme.mode === "light"
-          ? ColorPalette["gray-50"]
-          : ColorPalette["gray-500"])
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-400"])
       }
+      borderWidth="1"
       borderRadius="999999px"
       alignX="center"
       alignY="center"
     >
-      <Box alignX="center" alignY="center" color={ColorPalette["gray-200"]}>
+      <Box
+        alignX="center"
+        alignY="center"
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-200"]
+        }
+      >
         {center}
       </Box>
     </Box>

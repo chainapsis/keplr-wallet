@@ -1,12 +1,13 @@
 import React, { FunctionComponent } from "react";
-import { Image } from "../../../../../components/image";
+import { ItemLogo } from "../../../../main/token-detail/msg-items/logo";
+import { MessageCustomIcon } from "../../../../../components/icon";
 
 export const CustomIcon: FunctionComponent = () => {
   return (
-    <Image
-      alt="sign-custom-image"
-      src={require("../../../../../public/assets/img/sign-custom.png")}
-      style={{ width: "3rem", height: "3rem" }}
+    <ItemLogo
+      width="2.5rem"
+      height="2.5rem"
+      center={<MessageCustomIcon width="2.5rem" height="2.5rem" />}
     />
   );
 };

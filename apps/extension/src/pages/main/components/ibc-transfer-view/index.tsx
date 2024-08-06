@@ -23,7 +23,7 @@ export const IBCTransferView: FunctionComponent = () => {
   return (
     <Box
       backgroundColor={
-        theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
+        theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-650"]
       }
       borderRadius="0.375rem"
       padding="1rem"

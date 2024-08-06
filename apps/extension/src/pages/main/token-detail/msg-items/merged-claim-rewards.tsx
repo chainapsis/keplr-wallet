@@ -15,6 +15,7 @@ import { Body3, Button2, Subtitle3 } from "../../../../components/typography";
 import { XAxis, YAxis } from "../../../../components/axis";
 import { Gutter } from "../../../../components/gutter";
 import { AppCurrency } from "@keplr-wallet/types";
+import { MessageClaimRewardIcon } from "../../../../components/icon";
 
 export const MsgRelationMergedClaimRewards: FunctionComponent<{
   msg: MsgHistory;
@@ -23,7 +24,6 @@ export const MsgRelationMergedClaimRewards: FunctionComponent<{
   isInAllActivitiesPage: boolean | undefined;
 }> = observer(({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
   const { chainStore } = useStore();
-  const theme = useTheme();
 
   const chainInfo = chainStore.getChain(msg.chainId);
 
@@ -75,25 +75,7 @@ export const MsgRelationMergedClaimRewards: FunctionComponent<{
     <MsgItemBase
       logo={
         <ItemLogo
-          center={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
-              fill="none"
-              stroke="none"
-              viewBox="0 0 32 32"
-            >
-              <path
-                fill={
-                  theme.mode === "light"
-                    ? ColorPalette["green-400"]
-                    : ColorPalette["green-400"]
-                }
-                d="M25.08 12.14L13.8 23.42 7 16.62l2.24-2.24 4.56 4.56 9.04-9.04 2.24 2.24z"
-              />
-            </svg>
-          }
+          center={<MessageClaimRewardIcon width="2rem" height="2rem" />}
         />
       }
       chainId={msg.chainId}
@@ -229,27 +211,8 @@ const BottomExpandableOtherRewarsOnAllActivitiesPage: FunctionComponent<{
                 <Box marginRight="0.75rem">
                   <XAxis alignY="center">
                     <ItemLogo
-                      backgroundColor={ColorPalette["green-400"]}
                       center={
-                        <svg
-                          style={{
-                            marginTop: "0.2rem",
-                          }}
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="19"
-                          height="15"
-                          fill="none"
-                          viewBox="0 0 19 15"
-                        >
-                          <path
-                            fill={
-                              theme.mode === "light"
-                                ? ColorPalette["white"]
-                                : ColorPalette["gray-600"]
-                            }
-                            d="M18.08 3.14L6.8 14.42 0 7.62l2.24-2.24L6.8 9.94 15.84.9l2.24 2.24z"
-                          />
-                        </svg>
+                        <MessageClaimRewardIcon width="2rem" height="2rem" />
                       }
                     />
                   </XAxis>

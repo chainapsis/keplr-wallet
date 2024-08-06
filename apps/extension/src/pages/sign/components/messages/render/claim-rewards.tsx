@@ -5,8 +5,9 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../../stores";
 import { Staking } from "@keplr-wallet/stores";
-import { Image } from "../../../../../components/image";
 import { FormattedMessage } from "react-intl";
+import { ItemLogo } from "../../../../main/token-detail/msg-items/logo";
+import { MessageClaimRewardIcon } from "../../../../../components/icon";
 
 export const ClaimRewardsMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -35,10 +36,10 @@ export const ClaimRewardsMessage: IMessageRenderer = {
     if (d) {
       return {
         icon: (
-          <Image
-            alt="sign-claim-image"
-            src={require("../../../../../public/assets/img/sign-claim.png")}
-            style={{ width: "3rem", height: "3rem" }}
+          <ItemLogo
+            width="2.5rem"
+            height="2.5rem"
+            center={<MessageClaimRewardIcon width="2.5rem" height="2.5rem" />}
           />
         ),
         title: (

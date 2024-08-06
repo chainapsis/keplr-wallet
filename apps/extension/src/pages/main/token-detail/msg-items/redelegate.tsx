@@ -6,6 +6,7 @@ import { CoinPretty } from "@keplr-wallet/unit";
 import { MsgItemBase } from "./base";
 import { Staking } from "@keplr-wallet/stores";
 import { ItemLogo } from "./logo";
+import { MessageRedelegateIcon } from "../../../../components/icon";
 
 export const MsgRelationRedelegate: FunctionComponent<{
   msg: MsgHistory;
@@ -92,23 +93,7 @@ export const MsgRelationRedelegate: FunctionComponent<{
     <MsgItemBase
       logo={
         <ItemLogo
-          center={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              fill="none"
-              viewBox="0 0 18 18"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.401"
-                d="M5.625 15.75L2.25 12.375m0 0L5.625 9M2.25 12.375h10.125m0-10.125l3.375 3.375m0 0L12.375 9m3.375-3.375H5.625"
-              />
-            </svg>
-          }
+          center={<MessageRedelegateIcon width="2rem" height="2rem" />}
         />
       }
       chainId={msg.chainId}
