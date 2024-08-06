@@ -282,7 +282,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
           chainId,
         }
       )
-        .then((r) => resolve(r.chainInfos))
+        .then((r) => resolve(r.chainInfo))
         .catch(reject)
         .finally(() => (f = true));
 
