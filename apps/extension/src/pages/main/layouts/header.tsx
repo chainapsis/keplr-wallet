@@ -86,7 +86,7 @@ export const MainHeaderLayout: FunctionComponent<
     string | undefined
   >();
   useEffect(() => {
-    (async () => {
+    const updateActiveTabOrigin = async () => {
       const activeTabOrigin = await getActiveTabOrigin();
 
       if (activeTabOrigin) {
@@ -98,8 +98,18 @@ export const MainHeaderLayout: FunctionComponent<
           );
         setCurrentChainIdForEVM(newCurrentChainIdForEVM);
         setActiveTabOrigin(activeTabOrigin);
+      } else {
+        setCurrentChainIdForEVM(undefined);
+        setActiveTabOrigin(undefined);
       }
-    })();
+    };
+
+    browser.tabs.onActivated.addListener(updateActiveTabOrigin);
+    updateActiveTabOrigin();
+
+    return () => {
+      browser.tabs.onActivated.removeListener(updateActiveTabOrigin);
+    };
   }, []);
   const [isHoveredCurrenctChainIcon, setIsHoveredCurrenctChainIcon] =
     React.useState(false);
