@@ -1,7 +1,6 @@
 import {IMessageRenderer} from './types';
 import {MsgWithdrawDelegatorReward} from '@keplr-wallet/proto-types/cosmos/distribution/v1beta1/tx';
 import React, {FunctionComponent} from 'react';
-import * as ExpoImage from 'expo-image';
 import {FormattedMessage} from 'react-intl';
 import {observer} from 'mobx-react-lite';
 import {useStore} from '../../stores';
@@ -9,6 +8,8 @@ import {Staking} from '@keplr-wallet/stores';
 import {Bech32Address} from '@keplr-wallet/cosmos';
 import {Text} from 'react-native';
 import {useStyle} from '../../styles';
+import {MessageClaimRewardIcon} from '../../components/icon';
+import {ItemLogo} from '../activities/msg-items/logo.tsx';
 
 export const ClaimRewardsMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -37,9 +38,8 @@ export const ClaimRewardsMessage: IMessageRenderer = {
     if (d) {
       return {
         icon: (
-          <ExpoImage.Image
-            style={{width: 48, height: 48}}
-            source={require('../../public/assets/img/sign/sign-claim.png')}
+          <ItemLogo
+            center={<MessageClaimRewardIcon size={40} color="#DCDCE3" />}
           />
         ),
         title: (

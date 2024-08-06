@@ -10,11 +10,12 @@ import {Text} from 'react-native';
 import {useStyle} from '../../styles';
 import {BaseModalHeader} from '../../components/modal';
 import {FormattedMessage, useIntl} from 'react-intl';
-import * as ExpoImage from 'expo-image';
 import {Column, Columns} from '../../components/column';
 import {ViewDataButton} from './sign-modal';
 import {checkAndValidateADR36AminoSignDoc} from '@keplr-wallet/cosmos';
 import {ScrollView} from '../../components/scroll-view/common-scroll-view';
+import {ItemLogo} from '../activities/msg-items/logo.tsx';
+import {MessageAdr36Icon} from '../../components/icon/msg-adr36.tsx';
 
 export const ADR36SignModal = registerCardModal(
   observer<{
@@ -117,9 +118,13 @@ export const ADR36SignModal = registerCardModal(
           backgroundColor={style.get('color-gray-500').color}
           borderRadius={6}>
           <XAxis alignY="center">
-            <ExpoImage.Image
-              style={{width: 48, height: 48}}
-              source={require('../../public/assets/img/sign/sign-adr36.png')}
+            <ItemLogo
+              center={
+                <MessageAdr36Icon
+                  size={40}
+                  color={style.get('color-gray-100').color}
+                />
+              }
             />
 
             <Gutter size={12} />

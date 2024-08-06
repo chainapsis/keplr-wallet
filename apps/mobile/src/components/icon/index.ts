@@ -43,3 +43,4 @@ export * from './msg-redelegate';
 export * from './msg-cancel-undelegate';
 export * from './msg-swap';
 export * from './msg-vote';
+export * from './msg-execute-contract';

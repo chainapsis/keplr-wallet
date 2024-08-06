@@ -6,10 +6,11 @@ import {Bech32Address} from '@keplr-wallet/cosmos';
 import {CoinPretty} from '@keplr-wallet/unit';
 import {FormattedMessage} from 'react-intl';
 import {IMessageRenderer} from './types';
-import * as ExpoImage from 'expo-image';
 import {useStore} from '../../stores';
 import {Text} from 'react-native';
 import {useStyle} from '../../styles';
+import {MessageDelegateIcon} from '../../components/icon';
+import {ItemLogo} from '../activities/msg-items/logo.tsx';
 
 export const DelegateMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -37,9 +38,8 @@ export const DelegateMessage: IMessageRenderer = {
     if (d) {
       return {
         icon: (
-          <ExpoImage.Image
-            style={{width: 48, height: 48}}
-            source={require('../../public/assets/img/sign/sign-delegate.png')}
+          <ItemLogo
+            center={<MessageDelegateIcon size={40} color="#DCDCE3" />}
           />
         ),
         title: (

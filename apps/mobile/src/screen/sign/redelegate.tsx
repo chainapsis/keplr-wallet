@@ -8,9 +8,10 @@ import {CoinPretty} from '@keplr-wallet/unit';
 import {FormattedMessage} from 'react-intl';
 import {IMessageRenderer} from './types';
 import {useStore} from '../../stores';
-import * as ExpoImage from 'expo-image';
 import {Text} from 'react-native';
 import {useStyle} from '../../styles';
+import {MessageRedelegateIcon} from '../../components/icon';
+import {ItemLogo} from '../activities/msg-items/logo.tsx';
 
 export const RedelegateMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -40,9 +41,8 @@ export const RedelegateMessage: IMessageRenderer = {
     if (d) {
       return {
         icon: (
-          <ExpoImage.Image
-            style={{width: 48, height: 48}}
-            source={require('../../public/assets/img/sign/sign-delegate.png')}
+          <ItemLogo
+            center={<MessageRedelegateIcon size={40} color="#DCDCE3" />}
           />
         ),
         title: (

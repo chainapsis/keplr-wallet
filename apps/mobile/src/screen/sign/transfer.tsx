@@ -1,6 +1,5 @@
 import {IMessageRenderer} from './types.ts';
 import {MsgTransfer} from '@keplr-wallet/proto-types/ibc/applications/transfer/v1/tx';
-import * as ExpoImage from 'expo-image';
 import {FormattedMessage, useIntl} from 'react-intl';
 import React, {FunctionComponent, useState} from 'react';
 import {observer} from 'mobx-react-lite';
@@ -13,6 +12,8 @@ import {XAxis} from '../../components/axis';
 import {Button} from '../../components/button';
 import {Box} from '../../components/box';
 import {Gutter} from '../../components/gutter';
+import {MessageSendIcon} from '../../components/icon';
+import {ItemLogo} from '../activities/msg-items/logo.tsx';
 
 export const TransferMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -42,10 +43,7 @@ export const TransferMessage: IMessageRenderer = {
     if (d) {
       return {
         icon: (
-          <ExpoImage.Image
-            style={{width: 48, height: 48}}
-            source={require('../../public/assets/img/sign/sign-ibc-transfer.png')}
-          />
+          <ItemLogo center={<MessageSendIcon size={40} color="#DCDCE3" />} />
         ),
         title: (
           <FormattedMessage id="page.sign.components.messages.transfer.title" />

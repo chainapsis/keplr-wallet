@@ -7,10 +7,11 @@ import {Coin} from '@keplr-wallet/types';
 import {CoinPretty} from '@keplr-wallet/unit';
 import {FormattedMessage} from 'react-intl';
 import {IMessageRenderer} from './types';
-import * as ExpoImage from 'expo-image';
 import {useStore} from '../../stores';
 import {Text} from 'react-native';
 import {useStyle} from '../../styles';
+import {MessageUndelegateIcon} from '../../components/icon';
+import {ItemLogo} from '../activities/msg-items/logo.tsx';
 
 export const UndelegateMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -36,9 +37,8 @@ export const UndelegateMessage: IMessageRenderer = {
     if (d) {
       return {
         icon: (
-          <ExpoImage.Image
-            style={{width: 48, height: 48}}
-            source={require('../../public/assets/img/sign/sign-delegate.png')}
+          <ItemLogo
+            center={<MessageUndelegateIcon size={40} color="#DCDCE3" />}
           />
         ),
         title: (
