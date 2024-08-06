@@ -53,7 +53,7 @@ import { useIBCChannelConfigQueryString } from "../../../hooks/use-ibc-channel-c
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
 import { GuideBox } from "../../../components/guide-box";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { amountToAmbiguousAverage } from "../../../utils";
+import { amountToAmbiguousAverage, isRunningInSidePanel } from "../../../utils";
 import { EthTxStatus } from "@keplr-wallet/types";
 
 const Styles = {
@@ -455,7 +455,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       fixedMinHeight={true}
       left={<BackButton />}
       right={
-        !isDetachedMode ? (
+        // side panel 모드에서는 detach 모드가 필요가 없다...
+        isDetachedMode || isRunningInSidePanel() ? null : (
           <Box
             paddingRight="1rem"
             cursor="pointer"
@@ -471,7 +472,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           >
             <DetachIcon size="1.5rem" color={ColorPalette["gray-300"]} />
           </Box>
-        ) : null
+        )
       }
       bottomButton={{
         disabled: txConfigsValidate.interactionBlocked,

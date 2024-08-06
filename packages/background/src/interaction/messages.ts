@@ -1,5 +1,30 @@
 import { Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
+import { InteractionWaitingData } from "./types";
+
+export class GetInteractionWaitingDataArrayMsg extends Message<
+  InteractionWaitingData[]
+> {
+  public static type() {
+    return "GetInteractionWaitingDataArrayMsg";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetInteractionWaitingDataArrayMsg.type();
+  }
+}
 
 export class ApproveInteractionMsg extends Message<void> {
   public static type() {
@@ -86,5 +111,31 @@ export class RejectInteractionV2Msg extends Message<void> {
 
   type(): string {
     return RejectInteractionV2Msg.type();
+  }
+}
+
+export class PingContentScriptTabHasOpenedSidePanelMsg extends Message<boolean> {
+  public static type() {
+    return "ping-content-script-tab-has-opened-side-panel";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return PingContentScriptTabHasOpenedSidePanelMsg.type();
   }
 }

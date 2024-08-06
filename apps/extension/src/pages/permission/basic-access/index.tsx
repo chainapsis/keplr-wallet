@@ -11,6 +11,7 @@ import { ColorPalette } from "../../../styles";
 import { Gutter } from "../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
+import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
 
 export const PermissionBasicAccessPage: FunctionComponent<{
   data: {
@@ -50,7 +51,7 @@ export const PermissionBasicAccessPage: FunctionComponent<{
                 interactionInfo.interaction &&
                 !interactionInfo.interactionInternal
               ) {
-                window.close();
+                handleExternalInteractionWithNoProceedNext();
               }
             }
           }

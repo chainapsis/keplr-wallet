@@ -1,12 +1,16 @@
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import React, {
   createContext,
   FunctionComponent,
   PropsWithChildren,
   useContext,
+  useEffect,
   useLayoutEffect,
   useState,
 } from "react";
 import { ThemeProvider } from "styled-components";
+import { SetThemeOptionMsg } from "@keplr-wallet/background";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 export type ThemeOption = "dark" | "light" | "auto";
 
@@ -54,6 +58,14 @@ export const AppThemeProvider: FunctionComponent<PropsWithChildren> = ({
 
     return option;
   });
+
+  // Sync the theme option to the background script.
+  useEffect(() => {
+    new InExtensionMessageRequester().sendMessage(
+      BACKGROUND_PORT,
+      new SetThemeOptionMsg(option)
+    );
+  }, [option]);
 
   const setTheme = (option: ThemeOption) => {
     localStorage.setItem("theme-option", option);

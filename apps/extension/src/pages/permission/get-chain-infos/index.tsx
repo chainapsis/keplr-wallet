@@ -14,6 +14,7 @@ import { Body1, Body2, H2 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
+import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
 
 export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
   data: InteractionWaitingData<GlobalPermissionData>;
@@ -46,7 +47,7 @@ export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
                 interactionInfo.interaction &&
                 !interactionInfo.interactionInternal
               ) {
-                window.close();
+                handleExternalInteractionWithNoProceedNext();
               }
             }
           }

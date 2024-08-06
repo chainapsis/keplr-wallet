@@ -12,8 +12,9 @@ export type FnRequestInteractionOptions = {
   // In the case of a detached popup, it is not guaranteed that any logic will be executed when it is closed.
   // To solve this problem, the callback below is used.
   unstableOnClose?: () => void;
-  forceOpenWindow?: boolean;
-  channel?: string;
+  // extension에서 window가 이미 열려있다면 uri를 env 단에서 바꾸지 않는다.
+  // side panel 기능이 추가되면서 popup/side panel에서의 interaction system을 최대한 동일하게 가져가기 위해서 추가됨.
+  ignoreURIReplacement?: boolean;
 };
 
 export type FnRequestInteraction = <M extends Message<unknown>>(
@@ -25,6 +26,7 @@ export type FnRequestInteraction = <M extends Message<unknown>>(
 export interface Env {
   readonly isInternalMsg: boolean;
   readonly requestInteraction: FnRequestInteraction;
+  readonly sender: MessageSender;
 }
 
 export type EnvProducer = (

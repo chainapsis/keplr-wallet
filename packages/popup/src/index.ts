@@ -19,8 +19,12 @@ const lastWindowIds: Record<string, number | undefined> = {};
 export async function openPopupWindow(
   url: string,
   channel: string = "default",
-  options: Partial<Parameters<typeof browser.windows.create>[0]> = {}
+  options:
+    | Partial<Parameters<typeof browser.windows.create>[0]> & {
+        ignoreURIReplacement?: boolean;
+      } = {}
 ): Promise<number> {
+  const ignoreURIReplacement = options.ignoreURIReplacement;
   const windowInfo = await browser.windows.getCurrent();
   const option = {
     top: (windowInfo.top || 0) + 80,
@@ -34,6 +38,7 @@ export async function openPopupWindow(
     type: "popup" as const,
     ...options,
   };
+  delete option.ignoreURIReplacement;
 
   if (lastWindowIds[channel] !== undefined) {
     try {
@@ -46,7 +51,9 @@ export async function openPopupWindow(
       if (window?.tabs?.length) {
         const tab = window.tabs[0];
         if (tab?.id) {
-          await browser.tabs.update(tab.id, { active: true, url });
+          if (!ignoreURIReplacement) {
+            await browser.tabs.update(tab.id, { active: true, url });
+          }
         } else {
           throw new Error("Null window or tabs");
         }

@@ -26,6 +26,8 @@ import * as KeyRingEthereum from "./keyring-ethereum/internal";
 import * as PermissionInteractive from "./permission-interactive/internal";
 import * as TokenScan from "./token-scan/internal";
 import * as RecentSendHistory from "./recent-send-history/internal";
+import * as SidePanel from "./side-panel/internal";
+import * as Settings from "./settings/internal";
 
 export * from "./chains";
 export * from "./chains-ui";
@@ -47,6 +49,8 @@ export * from "./keyring-ethereum";
 export * from "./keyring-keystone";
 export * from "./token-scan";
 export * from "./recent-send-history";
+export * from "./side-panel";
+export * from "./settings";
 
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
@@ -58,6 +62,7 @@ export function init(
   storeCreator: (prefix: string) => KVStore,
   // Message requester to the content script.
   eventMsgRequester: MessageRequester,
+  extensionMessageRequesterToUI: MessageRequester | undefined,
   embedChainInfos: ChainInfo[],
   // The origins that are able to pass any permission.
   privilegedOrigins: string[],
@@ -97,8 +102,14 @@ export function init(
     analyticsOptions
   );
 
+  const sidePanelService = new SidePanel.SidePanelService(
+    storeCreator("side-panel")
+  );
+
   const interactionService = new Interaction.InteractionService(
-    eventMsgRequester
+    eventMsgRequester,
+    sidePanelService,
+    extensionMessageRequesterToUI
   );
 
   const chainsService = new Chains.ChainsService(
@@ -246,6 +257,10 @@ export function init(
       notification
     );
 
+  const settingsService = new Settings.SettingsService(
+    storeCreator("settings")
+  );
+
   Interaction.init(router, interactionService);
   Permission.init(router, permissionService);
   Chains.init(
@@ -287,10 +302,14 @@ export function init(
   SecretWasm.init(router, secretWasmService, permissionInteractiveService);
   TokenScan.init(router, tokenScanService);
   RecentSendHistory.init(router, recentSendHistoryService);
+  SidePanel.init(router, sidePanelService);
+  Settings.init(router, settingsService);
 
   return {
     initFn: async () => {
       await analyticsService.init();
+      await sidePanelService.init();
+      await interactionService.init();
 
       await chainsService.init();
       await vaultService.init();
@@ -314,6 +333,7 @@ export function init(
       await tokenScanService.init();
 
       await recentSendHistoryService.init();
+      await settingsService.init();
 
       if (vaultAfterInitFn) {
         await vaultAfterInitFn(vaultService);

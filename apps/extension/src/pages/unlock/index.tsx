@@ -3,7 +3,6 @@ import { TextInput } from "../../components/input";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { Button } from "../../components/button";
-import { useInteractionInfo } from "../../hooks";
 import { Gutter } from "../../components/gutter";
 import { Box } from "../../components/box";
 import { TextButton } from "../../components/button-text";
@@ -20,6 +19,7 @@ import { autorun } from "mobx";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { Buffer } from "buffer/";
+import { handleExternalInteractionWithNoProceedNext } from "../../utils";
 
 export const UnlockPage: FunctionComponent = observer(() => {
   const { keyRingStore, interactionStore } = useStore();
@@ -44,9 +44,6 @@ export const UnlockPage: FunctionComponent = observer(() => {
     }
   }, [isStartWithMigrating, keyRingStore.isMigrating]);
 
-  const interactionInfo = useInteractionInfo(() => {
-    interactionStore.rejectAll("unlock");
-  });
   const [password, setPassword] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
@@ -107,21 +104,24 @@ export const UnlockPage: FunctionComponent = observer(() => {
     try {
       setIsLoading(true);
 
-      await keyRingStore.unlock(password);
+      await keyRingStore.unlockWithoutSyncStatus(password);
 
       let closeWindowAfterProceedNext = false;
 
-      if (interactionInfo.interaction) {
-        // Approve all waiting interaction for the enabling key ring.
-        const interactions = interactionStore.getAllData("unlock");
+      // Approve all waiting interaction for the enabling key ring.
+      const interactions = interactionStore.getAllData("unlock");
+      if (interactions.length > 0) {
+        let onlyHasExternal = true;
+        for (const interaction of interactions) {
+          if (interaction.isInternal) {
+            onlyHasExternal = false;
+          }
+        }
         await interactionStore.approveWithProceedNextV2(
           interactions.map((interaction) => interaction.id),
           {},
           (proceedNext) => {
-            if (
-              interactionInfo.interaction &&
-              !interactionInfo.interactionInternal
-            ) {
+            if (onlyHasExternal) {
               if (!proceedNext) {
                 closeWindowAfterProceedNext = true;
               }
@@ -135,16 +135,16 @@ export const UnlockPage: FunctionComponent = observer(() => {
           {
             type: "__keplr_unlocked_from_view",
             viewId: viewPostMessageId,
-            interaction: interactionInfo.interaction,
-            interactionInternal: interactionInfo.interactionInternal,
           },
           window.location.origin
         );
       }
 
       if (closeWindowAfterProceedNext) {
-        window.close();
+        handleExternalInteractionWithNoProceedNext();
       }
+
+      await keyRingStore.refreshKeyRingStatus();
 
       setError(undefined);
     } catch (e) {
@@ -162,68 +162,38 @@ export const UnlockPage: FunctionComponent = observer(() => {
   // view가 여러개일때 (예를들어 extension popup의 unlock 창과 외부 요청에 의해 unlock window가 열린 상태일때
   // 한 곳에서 unlock이 완료되면 다른 view에서도 적절하게 처리해준다.
   useEffect(() => {
-    const handler = (e: MessageEvent) => {
+    const handler = async (e: MessageEvent) => {
       if (e.data?.type === "__keplr_unlocked_from_view") {
         if (e.data.viewId !== viewPostMessageId) {
-          const isFromInteraction = e.data.interaction;
-          if (isFromInteraction == null) {
-            return;
-          }
-          if (interactionInfo.interaction) {
-            if (isFromInteraction) {
-              // interaction이면 다른 view에서 위의 tryUnlock()에 의해서
-              // 이미 interaction은 다 approve 처리가 됐을 것이다.
-              // XXX: 현재로서는 어차피 keplr가 다른 종류의 interaction이 동시에 오면 제대로 처리 못한다...
-              //      일단 다른 종류의 interaction이 오는 경우 중에 제대로 된 use case는 없기 때문에
-              //      이 문제는 당장은 해결하지 않는다.
-              //      어차피 다음 다른 종류의 interaction은 제대로 처리될 수 없으므로 그냥 창을 닫는다.
-              if (interactionInfo.interactionInternal) {
-                window.close();
-              } else {
-                keyRingStore.refreshKeyRingStatus();
-              }
-            } else {
-              // Approve all waiting interaction for the enabling key ring.
-              const interactions = interactionStore.getAllData("unlock");
-              (async () => {
-                try {
-                  await interactionStore.approveWithProceedNextV2(
-                    interactions.map((interaction) => interaction.id),
-                    {},
-                    (proceedNext) => {
-                      if (!interactionInfo.interactionInternal) {
-                        if (!proceedNext) {
-                          window.close();
-                        }
-                      } else {
-                        keyRingStore.refreshKeyRingStatus();
-                      }
-                    },
-                    {
-                      // XXX: popup UI 본체에서 unlock이 되었을 경우
-                      //      interaction data가 빠른 시간 안에 전달되지 않아서 proceedNext가 무조건 false로 처리되는 문제가 있다.
-                      //      popup UI 에서 unlock되면 바로 main page로 가면서
-                      //      background에 popup UI가 많은 요청을 하기 때문에
-                      //      background에서 바빠서 빠르게 interaction data를 처리하지 못하는 것 같다.
-                      //      이 문제로 인해서 일단 popup UI에서 unlock이 되었을 경우에는
-                      //      unlock interaction이 이후의 interaction을 기다리지 않고 바로 닫히도록 만든다.
-                      postDelay: 0,
-                    }
-                  );
-                } catch (e) {
-                  console.log(e);
+          let closeWindowAfterProceedNext = false;
 
-                  if (!interactionInfo.interactionInternal) {
-                    window.close();
-                  } else {
-                    keyRingStore.refreshKeyRingStatus();
+          // Approve all waiting interaction for the enabling key ring.
+          const interactions = interactionStore.getAllData("unlock");
+          if (interactions.length > 0) {
+            let onlyHasExternal = true;
+            for (const interaction of interactions) {
+              if (interaction.isInternal) {
+                onlyHasExternal = false;
+              }
+            }
+            await interactionStore.approveWithProceedNextV2(
+              interactions.map((interaction) => interaction.id),
+              {},
+              (proceedNext) => {
+                if (onlyHasExternal) {
+                  if (!proceedNext) {
+                    closeWindowAfterProceedNext = true;
                   }
                 }
-              })();
-            }
-          } else {
-            keyRingStore.refreshKeyRingStatus();
+              }
+            );
           }
+
+          if (closeWindowAfterProceedNext) {
+            handleExternalInteractionWithNoProceedNext();
+          }
+
+          keyRingStore.refreshKeyRingStatus();
         }
       }
     };
@@ -233,13 +203,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
     return () => {
       window.removeEventListener("message", handler);
     };
-  }, [
-    interactionInfo.interaction,
-    interactionInfo.interactionInternal,
-    interactionStore,
-    keyRingStore,
-    viewPostMessageId,
-  ]);
+  }, [interactionStore, keyRingStore, viewPostMessageId]);
 
   return (
     <Box height="100vh" paddingX="1.5rem">
@@ -368,14 +332,12 @@ export const UnlockPage: FunctionComponent = observer(() => {
               isLoading={
                 isLoading ||
                 (() => {
-                  if (interactionInfo.interaction) {
-                    const interactions = interactionStore.getAllData("unlock");
-                    for (const interaction of interactions) {
-                      if (
-                        interactionStore.isObsoleteInteraction(interaction.id)
-                      ) {
-                        return true;
-                      }
+                  const interactions = interactionStore.getAllData("unlock");
+                  for (const interaction of interactions) {
+                    if (
+                      interactionStore.isObsoleteInteraction(interaction.id)
+                    ) {
+                      return true;
                     }
                   }
                   return false;

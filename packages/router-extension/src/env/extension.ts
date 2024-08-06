@@ -59,9 +59,12 @@ const openPopupQueue = new PromiseQueue();
 // just open the popup one by one.
 async function openPopupWindow(
   url: string,
-  channel: string = "default"
+  channel: string = "default",
+  options: { ignoreURIReplacement?: boolean } = {}
 ): Promise<number> {
-  return await openPopupQueue.enqueue(() => openPopupWindowInner(url, channel));
+  return await openPopupQueue.enqueue(() =>
+    openPopupWindowInner(url, channel, options)
+  );
 }
 
 const MAX_RETRIES_TO_OPEN_WINDOW_AND_GET_TAB_ID = 2;
@@ -96,8 +99,9 @@ export class ExtensionEnv {
       let retries = 0;
       const openWindowAndGetTabId: () => Promise<number> = async () => {
         try {
-          const windowId = await openPopupWindow(url, options?.channel);
-
+          const windowId = await openPopupWindow(url, undefined, {
+            ignoreURIReplacement: options?.ignoreURIReplacement,
+          });
           const window = await browser.windows.get(windowId, {
             populate: true,
           });
@@ -158,24 +162,27 @@ export class ExtensionEnv {
       return {
         isInternalMsg,
         requestInteraction: openAndSendMsg,
+        sender,
       };
     } else {
       // If msg is from the extension itself, it can send the msg back to the extension itself.
       // In this case, this expects that there is only one extension popup have been opened.
-      const requestInteraction: FnRequestInteraction = async (
-        url,
-        msg,
-        options
-      ) => {
-        if (options?.forceOpenWindow) {
-          return await openAndSendMsg(url, msg, options);
-        }
-
+      const requestInteraction: FnRequestInteraction = async (url, msg) => {
         if (url.startsWith("/")) {
           url = url.slice(1);
         }
 
-        url = browser.runtime.getURL("/popup.html#/" + url);
+        let isFromSidePanel = false;
+        if (sender.url) {
+          isFromSidePanel = new URL(sender.url).pathname === "/sidePanel.html";
+        } else {
+          console.warn(
+            "No way to determine that the sender is from popup or side panel due to empty sender url. Fallback to popup"
+          );
+        }
+        url = browser.runtime.getURL(
+          `/${isFromSidePanel ? "sidePanel" : "popup"}.html#/` + url
+        );
 
         if (url.includes("?")) {
           url += "&" + queryString;
@@ -205,6 +212,7 @@ export class ExtensionEnv {
       return {
         isInternalMsg,
         requestInteraction,
+        sender,
       };
     }
   };

@@ -12,6 +12,32 @@ import { PlainObject } from "../vault";
 import * as Legacy from "./legacy";
 import { MultiAccounts } from "../keyring-keystone";
 
+export class GetIsLockedMsg extends Message<boolean> {
+  public static type() {
+    return "GetIsLockedMsg";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetIsLockedMsg.type();
+  }
+}
+
 export class GetKeyRingStatusMsg extends Message<{
   status: KeyRingStatus;
   keyInfos: KeyInfo[];

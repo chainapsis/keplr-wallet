@@ -2,9 +2,9 @@ import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { useTheme } from "styled-components";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
-import { Body2, H5 } from "../../../../components/typography";
+import { Body2, Body3, H5, Subtitle4 } from "../../../../components/typography";
 import { Button } from "../../../../components/button";
-import { YAxis } from "../../../../components/axis";
+import { XAxis, YAxis } from "../../../../components/axis";
 import { Gutter } from "../../../../components/gutter";
 import { ArrowLeftIcon, ArrowRightIcon } from "../../../../components/icon";
 import {
@@ -14,6 +14,13 @@ import {
 import { Image as CompImage } from "../../../../components/image";
 import { FormattedMessage, useIntl } from "react-intl";
 import SimpleBar from "simplebar-react";
+import { Tag } from "../../../../components/tag";
+import { Toggle } from "../../../../components/toggle";
+import { SetSidePanelEnabledMsg } from "@keplr-wallet/background";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../../stores";
 
 export type UpdateNotePageData = {
   title: string;
@@ -25,6 +32,7 @@ export type UpdateNotePageData = {
       }
     | undefined;
   paragraph: string;
+  isSidePanelBeta?: boolean;
 };
 
 export const UpdateNoteModal: FunctionComponent<{
@@ -195,7 +203,9 @@ export const UpdateNoteModal: FunctionComponent<{
 
 const CarouselPage: FunctionComponent<{
   notePageData: UpdateNotePageData;
-}> = ({ notePageData }) => {
+}> = observer(({ notePageData }) => {
+  const { uiConfigStore } = useStore();
+
   const theme = useTheme();
 
   return (
@@ -262,6 +272,114 @@ const CarouselPage: FunctionComponent<{
           />
         </Body2>
       </Box>
+
+      {notePageData.isSidePanelBeta ? (
+        <Box
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette["gray-50"]
+              : ColorPalette["gray-550"]
+          }
+          borderRadius="0.375rem"
+          padding="1rem"
+          marginTop="1.125rem"
+        >
+          <XAxis alignY="center">
+            <YAxis>
+              <XAxis alignY="center">
+                <Subtitle4
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-700"]
+                      : ColorPalette["gray-10"]
+                  }
+                >
+                  Switch to Side Panel
+                </Subtitle4>
+                <Gutter size="0.375rem" />
+                <Tag text="Beta" paddingX="0.25rem" />
+              </XAxis>
+              <Gutter size="0.375rem" />
+              <Body3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-300"]
+                }
+              >
+                Open Keplr in a sidebar on your screen
+              </Body3>
+            </YAxis>
+
+            <Toggle
+              isOpen={false}
+              setIsOpen={(v) => {
+                if (v) {
+                  const msg = new SetSidePanelEnabledMsg(true);
+                  new InExtensionMessageRequester()
+                    .sendMessage(BACKGROUND_PORT, msg)
+                    .then((res) => {
+                      if (res.enabled) {
+                        if (
+                          typeof chrome !== "undefined" &&
+                          typeof chrome.sidePanel !== "undefined"
+                        ) {
+                          (async () => {
+                            const selfCloseId = Math.random() * 100000;
+                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                            // @ts-ignore
+                            window.__self_id_for_closing_view_side_panel =
+                              selfCloseId;
+                            // side panel을 열고 나서 기존의 popup view를 모두 지워야한다
+                            const viewsBefore = browser.extension.getViews();
+
+                            try {
+                              const activeTabs = await browser.tabs.query({
+                                active: true,
+                                currentWindow: true,
+                              });
+                              if (activeTabs.length > 0) {
+                                const id = activeTabs[0].id;
+                                if (id != null) {
+                                  await chrome.sidePanel.open({
+                                    tabId: id,
+                                  });
+                                }
+                              }
+                            } catch (e) {
+                              console.log(e);
+                            } finally {
+                              for (const view of viewsBefore) {
+                                if (
+                                  // 자기 자신은 제외해야한다.
+                                  // 다른거 끄기 전에 자기가 먼저 꺼지면 안되기 때문에...
+                                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                  // @ts-ignore
+                                  window.__self_id_for_closing_view_side_panel !==
+                                  selfCloseId
+                                ) {
+                                  view.window.close();
+                                }
+                              }
+
+                              uiConfigStore.changelogConfig.clearLastInfo();
+                              await new Promise((resolve) =>
+                                setTimeout(resolve, 300)
+                              );
+                              window.close();
+                            }
+                          })();
+                        } else {
+                          window.close();
+                        }
+                      }
+                    });
+                }
+              }}
+            />
+          </XAxis>
+        </Box>
+      ) : null}
     </SimpleBar>
   );
-};
+});
