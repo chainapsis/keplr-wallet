@@ -57,7 +57,7 @@ const Styles = {
         ? props.isNotReady
           ? ColorPalette["skeleton-layer-0"]
           : ColorPalette.white
-        : ColorPalette["gray-600"]};
+        : ColorPalette["gray-650"]};
     padding ${({ forChange }) =>
       forChange ? "0.875rem 0.25rem 0.875rem 1rem" : "1rem 0.875rem"};
     border-radius: 0.375rem;
@@ -81,7 +81,7 @@ const Styles = {
           &:hover {
             background-color: ${theme.mode === "light"
               ? ColorPalette["gray-10"]
-              : ColorPalette["gray-550"]};
+              : ColorPalette["gray-600"]};
           }
         `;
       }

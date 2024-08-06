@@ -6,6 +6,7 @@ import { CoinPretty } from "@keplr-wallet/unit";
 import { MsgItemBase } from "./base";
 import { Staking } from "@keplr-wallet/stores";
 import { ItemLogo } from "./logo";
+import { MessageCancelUndelegateIcon } from "../../../../components/icon";
 
 export const MsgRelationCancelUndelegate: FunctionComponent<{
   msg: MsgHistory;
@@ -69,23 +70,7 @@ export const MsgRelationCancelUndelegate: FunctionComponent<{
     <MsgItemBase
       logo={
         <ItemLogo
-          center={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="none"
-              viewBox="0 0 16 16"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.6"
-                d="M6.5 6.5l3 3m0-3l-3 3M14 8A6 6 0 112 8a6 6 0 0112 0z"
-              />
-            </svg>
-          }
+          center={<MessageCancelUndelegateIcon width="2rem" height="2rem" />}
         />
       }
       chainId={msg.chainId}

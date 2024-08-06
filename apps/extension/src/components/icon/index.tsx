@@ -52,3 +52,6 @@ export * from "./msg-custom";
 export * from "./msg-vote";
 export * from "./msg-execute-contract";
 export * from "./msg-adr36";
+export * from "./msg-receive";
+export * from "./msg-swap";
+export * from "./msg-cancel-undelegate";

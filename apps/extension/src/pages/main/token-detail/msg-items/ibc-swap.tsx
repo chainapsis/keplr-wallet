@@ -8,6 +8,7 @@ import { ItemLogo } from "./logo";
 import { ChainInfo } from "@keplr-wallet/types";
 import { isValidCoinStr, parseCoinStr } from "@keplr-wallet/common";
 import { Buffer } from "buffer/";
+import { MessageSwapIcon } from "../../../../components/icon";
 
 export const MsgRelationIBCSwap: FunctionComponent<{
   msg: MsgHistory;
@@ -157,25 +158,7 @@ export const MsgRelationIBCSwap: FunctionComponent<{
   return (
     <MsgItemBase
       logo={
-        <ItemLogo
-          center={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="none"
-              viewBox="0 0 16 16"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.87"
-                d="M3 13.5l10-10m0 0H5.5m7.5 0V11"
-              />
-            </svg>
-          }
-        />
+        <ItemLogo center={<MessageSwapIcon width="2rem" height="2rem" />} />
       }
       chainId={msg.chainId}
       title="Swap"
