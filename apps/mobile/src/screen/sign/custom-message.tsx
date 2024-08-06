@@ -1,13 +1,20 @@
 import React, {FunctionComponent, PropsWithChildren} from 'react';
-import * as ExpoImage from 'expo-image';
 import {Text} from 'react-native';
 import {useStyle} from '../../styles';
+import {ItemLogo} from '../activities/msg-items/logo.tsx';
+import {MessageCustomIcon} from '../../components/icon/msg-custom.tsx';
 
 export const CustomIcon: FunctionComponent = () => {
+  const style = useStyle();
+
   return (
-    <ExpoImage.Image
-      style={{width: 48, height: 48}}
-      source={require('../../public/assets/img/sign/sign-custom.png')}
+    <ItemLogo
+      center={
+        <MessageCustomIcon
+          size={40}
+          color={style.get('color-gray-100').color}
+        />
+      }
     />
   );
 };

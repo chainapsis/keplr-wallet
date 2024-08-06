@@ -3,9 +3,10 @@ import React, {FunctionComponent} from 'react';
 import {MsgVote} from '@keplr-wallet/proto-types/cosmos/gov/v1beta1/tx';
 import {VoteOption} from '@keplr-wallet/proto-types/cosmos/gov/v1beta1/gov';
 import {FormattedMessage, useIntl} from 'react-intl';
-import * as ExpoImage from 'expo-image';
 import {Text} from 'react-native';
 import {useStyle} from '../../../styles';
+import {MessageVoteIcon} from '../../../components/icon';
+import {ItemLogo} from '../../activities/msg-items/logo.tsx';
 
 export const VoteMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -30,10 +31,7 @@ export const VoteMessage: IMessageRenderer = {
     if (d) {
       return {
         icon: (
-          <ExpoImage.Image
-            style={{width: 48, height: 48}}
-            source={require('../../../public/assets/img/sign/sign-vote.png')}
-          />
+          <ItemLogo center={<MessageVoteIcon size={40} color="#DCDCE3" />} />
         ),
         title: (
           <FormattedMessage id="page.sign.components.messages.vote.title" />

@@ -5,11 +5,12 @@ import {observer} from 'mobx-react-lite';
 import {CoinPretty} from '@keplr-wallet/unit';
 import {Bech32Address} from '@keplr-wallet/cosmos';
 import {IMessageRenderer} from './types';
-import * as ExpoImage from 'expo-image';
 import {FormattedMessage} from 'react-intl';
 import {useStore} from '../../stores';
 import {Text} from 'react-native';
 import {useStyle} from '../../styles';
+import {MessageSendIcon} from '../../components/icon';
+import {ItemLogo} from '../activities/msg-items/logo.tsx';
 
 export const SendMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -34,10 +35,7 @@ export const SendMessage: IMessageRenderer = {
     if (d) {
       return {
         icon: (
-          <ExpoImage.Image
-            style={{width: 48, height: 48}}
-            source={require('../../public/assets/img/sign/sign-send.png')}
-          />
+          <ItemLogo center={<MessageSendIcon size={40} color="#DCDCE3" />} />
         ),
         title: (
           <FormattedMessage id="page.sign.components.messages.send.title" />
