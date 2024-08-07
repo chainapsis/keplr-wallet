@@ -295,8 +295,8 @@ export class InteractionService {
       // should not wait
       if (this.sidePanelService.getIsEnabled()) {
         this.startCheckPingOnUIWithWindowId();
-        this.startCheckPingOnUI();
       }
+      this.startCheckPingOnUI();
     }
 
     return interactionWaitingData;
