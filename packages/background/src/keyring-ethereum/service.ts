@@ -322,9 +322,17 @@ export class KeyRingEthereumService {
     const currentChainId =
       this.permissionService.getCurrentChainIdForEVM(origin) ?? chainId;
     if (currentChainId == null) {
-      throw new Error(
-        "The website is not permitted. Please disconnect and reconnect to the website."
-      );
+      if (method === "keplr_initProviderState") {
+        return {
+          currentEvmChainId: null,
+          currentChainId: null,
+          selectedAddress: null,
+        } as T;
+      } else {
+        throw new Error(
+          `${origin} is not permitted. Please disconnect and reconnect to the website.`
+        );
+      }
     }
 
     const currentChainInfo =
@@ -341,6 +349,7 @@ export class KeyRingEthereumService {
 
     const result = (await (async () => {
       switch (method) {
+        case "keplr_initProviderState":
         case "keplr_connect": {
           return {
             currentEvmChainId: currentChainEVMInfo.chainId,
