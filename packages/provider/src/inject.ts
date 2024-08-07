@@ -254,6 +254,10 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
           if (method === "ethereum") {
             const ethereumProviderMethod = message.ethereumProviderMethod;
 
+            if (ethereumProviderMethod?.startsWith("protected")) {
+              throw new Error("Rejected");
+            }
+
             if (ethereumProviderMethod === "chainId") {
               throw new Error("chainId is not function");
             }
