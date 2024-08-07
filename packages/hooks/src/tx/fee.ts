@@ -471,9 +471,19 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           feeHistoryQuery.feeHistory?.baseFeePerGas.length - 1
         ] ?? "0"
       );
+
       if (feeHistoryQuery.feeHistory != null && latestBaseFeePerGas !== 0) {
+        // Fetch `maxPriorityFeePerGas` in advance here, but it's not mandatory to make sure it's ready.
+        const maxPriorityFeePerGasQuery =
+          queries.ethereum.queryEthereumMaxPriorityFee;
+        maxPriorityFeePerGasQuery.maxPriorityFeePerGas;
+
         if (isRefresh) {
           feeHistoryQuery.waitFreshResponse();
+
+          if (maxPriorityFeePerGasQuery != null) {
+            maxPriorityFeePerGasQuery.waitFreshResponse();
+          }
         }
         return true;
       } else {
@@ -765,6 +775,24 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           const maxPriorityFeePerGasDec = new Dec(
             BigInt(medianOfPriorityFeesPerGas)
           );
+
+          if (maxPriorityFeePerGasDec.isZero()) {
+            const maxPriorityFeePerGas =
+              ethereumQueries.queryEthereumMaxPriorityFee.maxPriorityFeePerGas;
+            if (maxPriorityFeePerGas != null) {
+              const maxPriorityFeePerGasDec = new Dec(
+                BigInt(maxPriorityFeePerGas)
+              );
+              const maxFeePerGas = baseFeePerGasDec.add(
+                maxPriorityFeePerGasDec
+              );
+
+              return {
+                maxPriorityFeePerGas: maxPriorityFeePerGasDec.truncateDec(),
+                maxFeePerGas: maxFeePerGas.truncateDec(),
+              };
+            }
+          }
           const maxFeePerGas = baseFeePerGasDec.add(maxPriorityFeePerGasDec);
 
           return {

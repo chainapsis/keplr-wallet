@@ -449,6 +449,80 @@ export class KeyRingEthereumService {
 
           return txHash;
         }
+        case "eth_signTransaction": {
+          const tx =
+            (Array.isArray(params) &&
+              (params?.[0] as {
+                chainId?: string | number;
+                from: string;
+                gas?: string;
+                gasLimit?: string;
+              })) ||
+            null;
+          if (!tx) {
+            throw new Error("Invalid parameters: must provide a transaction.");
+          }
+
+          if (tx.chainId) {
+            const evmChainIdFromTx: number = validateEVMChainId(
+              (() => {
+                if (typeof tx.chainId === "string") {
+                  if (tx.chainId.startsWith("0x")) {
+                    return parseInt(tx.chainId, 16);
+                  } else {
+                    return parseInt(tx.chainId, 10);
+                  }
+                } else {
+                  return tx.chainId;
+                }
+              })()
+            );
+            if (evmChainIdFromTx !== currentChainEVMInfo.chainId) {
+              throw new Error(
+                "The current active chain id does not match the one in the transaction."
+              );
+            }
+          }
+
+          const transactionCount = await this.request(
+            env,
+            origin,
+            "eth_getTransactionCount",
+            [selectedAddress, "pending"],
+            providerId,
+            chainId
+          );
+          const nonce = parseInt(transactionCount, 16);
+
+          const { from: sender, gas, ...restTx } = tx;
+          const unsignedTx: UnsignedTransaction = {
+            ...restTx,
+            gasLimit: restTx?.gasLimit ?? gas,
+            chainId: currentChainEVMInfo.chainId,
+            nonce,
+          };
+
+          const { signingData, signature } = await this.signEthereumSelected(
+            env,
+            origin,
+            currentChainId,
+            sender,
+            Buffer.from(JSON.stringify(unsignedTx)),
+            EthSignType.TRANSACTION
+          );
+
+          const signingTx = JSON.parse(Buffer.from(signingData).toString());
+
+          const isEIP1559 =
+            !!signingTx.maxFeePerGas || !!signingTx.maxPriorityFeePerGas;
+          if (isEIP1559) {
+            signingTx.type = TransactionTypes.eip1559;
+          }
+
+          const signedTx = serialize(signingTx, signature);
+
+          return signedTx;
+        }
         case "personal_sign": {
           const message =
             (Array.isArray(params) && (params?.[0] as string)) || undefined;
@@ -834,6 +908,7 @@ export class KeyRingEthereumService {
         case "eth_getTransactionByBlockNumberAndIndex":
         case "eth_getTransactionByHash":
         case "eth_getTransactionReceipt":
+        case "eth_sendRawTransaction":
         case "eth_protocolVersion":
         case "eth_syncing":
         case "eth_getCode":
