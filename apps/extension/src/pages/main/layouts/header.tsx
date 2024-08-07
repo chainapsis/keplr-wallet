@@ -86,7 +86,7 @@ export const MainHeaderLayout: FunctionComponent<
     string | undefined
   >();
   useEffect(() => {
-    const updateActiveTabOrigin = async () => {
+    const updateCurrentChainIdForEVM = async () => {
       const activeTabOrigin = await getActiveTabOrigin();
 
       if (activeTabOrigin) {
@@ -104,11 +104,15 @@ export const MainHeaderLayout: FunctionComponent<
       }
     };
 
-    browser.tabs.onActivated.addListener(updateActiveTabOrigin);
-    updateActiveTabOrigin();
+    browser.tabs.onActivated.addListener(updateCurrentChainIdForEVM);
+    updateCurrentChainIdForEVM();
+    // Update current chain id for EVM every second.
+    // TODO: Make it sync with `chainChanged` event.
+    const intervalId = setInterval(updateCurrentChainIdForEVM, 1000);
 
     return () => {
-      browser.tabs.onActivated.removeListener(updateActiveTabOrigin);
+      browser.tabs.onActivated.removeListener(updateCurrentChainIdForEVM);
+      clearInterval(intervalId);
     };
   }, []);
   const [isHoveredCurrenctChainIcon, setIsHoveredCurrenctChainIcon] =
