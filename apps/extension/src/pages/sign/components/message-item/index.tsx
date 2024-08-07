@@ -17,16 +17,16 @@ export const MessageItem: FunctionComponent<{
     <Box padding="1rem">
       <Columns sum={1}>
         <Box
-          width="3rem"
-          minWidth="3rem"
-          height="3rem"
+          width="2.5rem"
+          minWidth="2.5rem"
+          height="2.5rem"
           alignX="center"
           alignY="center"
         >
           {icon}
         </Box>
 
-        <Gutter size="0.75rem" />
+        <Gutter size="0.5rem" />
 
         <Column weight={1}>
           <Box minHeight="3rem" alignY="center">
