@@ -49,7 +49,7 @@ const Styles = {
         ? props.isNotReady
           ? ColorPalette["skeleton-layer-0"]
           : ColorPalette.white
-        : ColorPalette["gray-600"]};
+        : ColorPalette["gray-650"]};
 
     box-shadow: ${(props) =>
       props.theme.mode === "light" && !props.isNotReady
@@ -81,7 +81,7 @@ const Styles = {
           background-color: ${(props) =>
             props.theme.mode === "light"
               ? ColorPalette["gray-10"]
-              : Color(ColorPalette["gray-500"]).alpha(0.5).toString()};
+              : Color(ColorPalette["gray-600"]).alpha(0.5).toString()};
         }
 
         :active {

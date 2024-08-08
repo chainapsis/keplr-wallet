@@ -6,6 +6,7 @@ import { useStore } from "../../../../stores";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { MsgItemBase } from "./base";
 import { ItemLogo } from "./logo";
+import { MessageReceiveIcon } from "../../../../components/icon";
 
 export const MsgRelationReceive: FunctionComponent<{
   msg: MsgHistory;
@@ -44,25 +45,7 @@ export const MsgRelationReceive: FunctionComponent<{
   return (
     <MsgItemBase
       logo={
-        <ItemLogo
-          center={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="none"
-              viewBox="0 0 16 16"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.87"
-                d="M13 3L3 13m0 0h7.5M3 13V5.5"
-              />
-            </svg>
-          }
-        />
+        <ItemLogo center={<MessageReceiveIcon width="2rem" height="2rem" />} />
       }
       chainId={msg.chainId}
       title="Receive"

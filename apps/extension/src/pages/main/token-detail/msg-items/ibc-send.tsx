@@ -7,6 +7,7 @@ import { CoinPretty } from "@keplr-wallet/unit";
 import { MsgItemBase } from "./base";
 import { ItemLogo } from "./logo";
 import { Buffer } from "buffer/";
+import { MessageSendIcon } from "../../../../components/icon";
 
 export const MsgRelationIBCSend: FunctionComponent<{
   msg: MsgHistory;
@@ -69,25 +70,7 @@ export const MsgRelationIBCSend: FunctionComponent<{
   return (
     <MsgItemBase
       logo={
-        <ItemLogo
-          center={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="none"
-              viewBox="0 0 16 16"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.87"
-                d="M3 13.5l10-10m0 0H5.5m7.5 0V11"
-              />
-            </svg>
-          }
-        />
+        <ItemLogo center={<MessageSendIcon width="2rem" height="2rem" />} />
       }
       chainId={msg.chainId}
       title="Send"

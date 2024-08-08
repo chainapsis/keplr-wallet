@@ -7,8 +7,9 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { MsgBeginRedelegate } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
 import { Coin } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
-import { Image } from "../../../../../components/image";
 import { FormattedMessage } from "react-intl";
+import { MessageRedelegateIcon } from "../../../../../components/icon";
+import { ItemLogo } from "../../../../main/token-detail/msg-items/logo";
 
 export const RedelegateMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -38,10 +39,10 @@ export const RedelegateMessage: IMessageRenderer = {
     if (d) {
       return {
         icon: (
-          <Image
-            alt="sign-redelegate-image"
-            src={require("../../../../../public/assets/img/sign-delegate.png")}
-            style={{ width: "3rem", height: "3rem" }}
+          <ItemLogo
+            width="2.5rem"
+            height="2.5rem"
+            center={<MessageRedelegateIcon width="2.5rem" height="2.5rem" />}
           />
         ),
         title: (

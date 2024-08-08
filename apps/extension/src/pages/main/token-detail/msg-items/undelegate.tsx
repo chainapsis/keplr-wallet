@@ -5,9 +5,8 @@ import { useStore } from "../../../../stores";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { MsgItemBase } from "./base";
 import { Staking } from "@keplr-wallet/stores";
-import { ColorPalette } from "../../../../styles";
 import { ItemLogo } from "./logo";
-import { useTheme } from "styled-components";
+import { MessageUndelegateIcon } from "../../../../components/icon";
 
 export const MsgRelationUndelegate: FunctionComponent<{
   msg: MsgHistory;
@@ -16,8 +15,6 @@ export const MsgRelationUndelegate: FunctionComponent<{
   isInAllActivitiesPage: boolean | undefined;
 }> = observer(({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
   const { chainStore, queriesStore } = useStore();
-
-  const theme = useTheme();
 
   const chainInfo = chainStore.getChain(msg.chainId);
 
@@ -73,25 +70,7 @@ export const MsgRelationUndelegate: FunctionComponent<{
     <MsgItemBase
       logo={
         <ItemLogo
-          center={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              fill="none"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fill={ColorPalette["gray-100"]}
-                d="M4.628 8.818l-1.167.599a.628.628 0 00-.005 1.164v.013l5.972 3.049.004-.003c.172.087.363.14.568.14.206 0 .396-.053.568-.14l.004.003 5.972-3.05v-.012a.628.628 0 00-.005-1.165l-1.167-.598c-1.83.938-4.33 2.213-4.359 2.224a2.468 2.468 0 01-2.03-.002c-.028-.01-2.524-1.284-4.355-2.222zm0 3.782l-1.167.598a.628.628 0 00-.005 1.165v.012l5.972 3.05.004-.003c.172.087.363.14.568.14.206 0 .396-.053.568-.14l.004.003 5.972-3.05v-.012a.628.628 0 00-.005-1.165l-1.167-.598c-1.83.937-4.33 2.213-4.359 2.223a2.468 2.468 0 01-2.03 0c-.028-.01-2.524-1.285-4.355-2.223z"
-              />
-              <path
-                fill={ColorPalette["gray-200"]}
-                d="M9.434 2.576c.17-.086.361-.14.566-.14.205 0 .396.054.566.14h.011l5.962 3.06a.628.628 0 01.005 1.164v.012l-5.972 3.05-.004-.003c-.172.087-.362.14-.568.14-.205 0-.396-.053-.568-.14l-.004.002-5.972-3.049V6.8a.628.628 0 01.005-1.165l5.962-3.06h.01z"
-                opacity={theme.mode === "light" ? "1" : "0.2"}
-              />
-            </svg>
-          }
+          center={<MessageUndelegateIcon width="2rem" height="2rem" />}
         />
       }
       chainId={msg.chainId}

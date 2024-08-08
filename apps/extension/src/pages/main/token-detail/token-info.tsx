@@ -37,7 +37,7 @@ export const TokenInfos: FunctionComponent<{
               backgroundColor={
                 theme.mode === "light"
                   ? ColorPalette["white"]
-                  : ColorPalette["gray-600"]
+                  : ColorPalette["gray-650"]
               }
               borderRadius="0.375rem"
               padding="1rem"

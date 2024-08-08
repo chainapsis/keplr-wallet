@@ -96,6 +96,11 @@ export const BottomTabsRouteProvider: FunctionComponent<
                 >
                   <div
                     style={{
+                      position: "relative",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
                       opacity: isNotReady ? 0 : 1,
                       color: (() => {
                         if (theme.mode === "light") {
@@ -110,6 +115,13 @@ export const BottomTabsRouteProvider: FunctionComponent<
                       })(),
                     }}
                   >
+                    <div
+                      style={{
+                        position: "absolute",
+                        minWidth: "2.875rem",
+                        height: "100%",
+                      }}
+                    />
                     <YAxis alignX="center">
                       <BottomTabActiveStateContext.Provider
                         value={{

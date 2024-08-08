@@ -480,6 +480,18 @@ export class HugeQueriesStore {
     const bPrice = b.price?.toDec() ?? HugeQueriesStore.zeroDec;
 
     if (aPrice.equals(bPrice)) {
+      if (aPrice.equals(HugeQueriesStore.zeroDec)) {
+        const aHasBalance = a.token.toDec().gt(HugeQueriesStore.zeroDec);
+        const bHasBalance = b.token.toDec().gt(HugeQueriesStore.zeroDec);
+
+        if (aHasBalance && !bHasBalance) {
+          return -1;
+        } else if (!aHasBalance && bHasBalance) {
+          return 1;
+        } else {
+          return 0;
+        }
+      }
       return 0;
     } else if (aPrice.gt(bPrice)) {
       return -1;

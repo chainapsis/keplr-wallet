@@ -7,8 +7,9 @@ import { useStore } from "../../../../../stores";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import { Coin } from "@keplr-wallet/types";
-import { Image } from "../../../../../components/image";
 import { FormattedMessage } from "react-intl";
+import { MessageSendIcon } from "../../../../../components/icon";
+import { ItemLogo } from "../../../../main/token-detail/msg-items/logo";
 
 export const SendMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -33,10 +34,10 @@ export const SendMessage: IMessageRenderer = {
     if (d) {
       return {
         icon: (
-          <Image
-            alt="sign-send-image"
-            src={require("../../../../../public/assets/img/sign-send.png")}
-            style={{ width: "3rem", height: "3rem" }}
+          <ItemLogo
+            width="2.5rem"
+            height="2.5rem"
+            center={<MessageSendIcon width="2.5rem" height="2.5rem" />}
           />
         ),
         title: (
