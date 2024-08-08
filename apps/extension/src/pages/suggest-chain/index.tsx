@@ -9,7 +9,7 @@ import { ChainInfo } from "@keplr-wallet/types";
 import { FormattedMessage, useIntl } from "react-intl";
 import { ArrowLeftIcon } from "../../components/icon";
 import { Box } from "../../components/box";
-import { handleExternalInteractionWithNoProceedNext } from "../../utils";
+import { handleExternalInteractionBeforeFnWithNoProceedNext } from "../../utils";
 
 export const SuggestChainPage: FunctionComponent = observer(() => {
   const { chainSuggestStore } = useStore();
@@ -36,7 +36,8 @@ const SuggestChainPageImpl: FunctionComponent<{
     origin: string;
   }>;
 }> = observer(({ waitingData }) => {
-  const { chainSuggestStore, permissionStore } = useStore();
+  const { chainSuggestStore, permissionStore, keyRingStore, chainStore } =
+    useStore();
   const [isLoadingPlaceholder, setIsLoadingPlaceholder] = useState(true);
   const [updateFromRepoDisabled, setUpdateFromRepoDisabled] = useState(false);
 
@@ -124,7 +125,13 @@ const SuggestChainPageImpl: FunctionComponent<{
                   interactionInfo.interaction &&
                   !interactionInfo.interactionInternal
                 ) {
-                  handleExternalInteractionWithNoProceedNext();
+                  handleExternalInteractionBeforeFnWithNoProceedNext(
+                    async () => {
+                      await keyRingStore.refreshKeyRingStatus();
+                      await chainStore.updateChainInfosFromBackground();
+                      await chainStore.updateEnabledChainIdentifiersFromBackground();
+                    }
+                  );
                 }
               }
             }
