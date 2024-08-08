@@ -882,6 +882,29 @@ export class KeyRingEthereumService {
         case "wallet_requestPermissions": {
           return [{ parentCapability: "eth_accounts" }];
         }
+        case "wallet_revokePermissions": {
+          const param =
+            Array.isArray(params) && (params?.[0] as Record<string, object>);
+          if (!param || typeof param !== "object") {
+            throw new Error(
+              "Invalid parameters: must provide a single object parameter."
+            );
+          }
+
+          if (param["eth_accounts"] == null) {
+            throw new Error(
+              "Invalid parameters: must provide a single object parameter with the key 'eth_accounts'."
+            );
+          }
+
+          await this.permissionService.removePermission(
+            currentChainId,
+            getBasicAccessPermissionType(),
+            [origin]
+          );
+
+          return null;
+        }
         case "wallet_watchAsset": {
           const param = params as
             | {
