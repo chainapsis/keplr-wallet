@@ -1104,6 +1104,10 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     params?: readonly unknown[] | Record<string, unknown>;
     chainId?: string;
   }): Promise<T> {
+    if (!this._isConnected) {
+      await this._initProviderState();
+    }
+
     if (method === "eth_accounts") {
       return (this.selectedAddress ? [this.selectedAddress] : []) as T;
     }

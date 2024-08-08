@@ -322,7 +322,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   }
 
   @flow
-  protected *updateEnabledChainIdentifiersFromBackground() {
+  *updateEnabledChainIdentifiersFromBackground() {
     if (!this.keyRingStore.selectedKeyInfo) {
       this._lastSyncedEnabledChainsVaultId = "";
       return;
