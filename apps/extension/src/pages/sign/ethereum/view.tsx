@@ -198,7 +198,7 @@ export const EthereumSigningView: FunctionComponent<{
       if (gasConfig.gas > 0) {
         unsignedTx.gasLimit = `0x${gasConfig.gas.toString(16)}`;
 
-        if (!unsignedTx.maxFeePerGas) {
+        if (!unsignedTx.maxFeePerGas && !unsignedTx.gasPrice) {
           unsignedTx.maxFeePerGas = `0x${new Int(
             feeConfig.getFeePrimitive()[0].amount
           )
@@ -208,7 +208,11 @@ export const EthereumSigningView: FunctionComponent<{
         }
       }
 
-      if (!unsignedTx.maxPriorityFeePerGas && maxPriorityFeePerGas) {
+      if (
+        !unsignedTx.maxPriorityFeePerGas &&
+        !unsignedTx.gasPrice &&
+        maxPriorityFeePerGas
+      ) {
         unsignedTx.maxPriorityFeePerGas =
           unsignedTx.maxPriorityFeePerGas ?? maxPriorityFeePerGas;
       }
