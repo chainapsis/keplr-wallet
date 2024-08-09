@@ -5,11 +5,16 @@ import {
   EnvProducer,
   KeplrError,
   EthereumProviderRpcError,
+  Message,
+  JSONUint8Array,
 } from "@keplr-wallet/router";
 import { getKeplrExtensionRouterId } from "../utils";
 
 export class ExtensionRouter extends Router {
-  constructor(envProducer: EnvProducer) {
+  constructor(
+    envProducer: EnvProducer,
+    protected msgIgnoreCheck?: (msg: Message<any>) => boolean
+  ) {
     super(envProducer);
   }
 
@@ -88,6 +93,13 @@ export class ExtensionRouter extends Router {
           });
         }
       });
+    }
+
+    if (this.msgIgnoreCheck) {
+      const msg = this.msgRegistry.parseMessage(JSONUint8Array.unwrap(message));
+      if (this.msgIgnoreCheck(msg)) {
+        return;
+      }
     }
 
     return this.onMessageHandler(message, sender);

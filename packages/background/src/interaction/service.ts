@@ -341,6 +341,17 @@ export class InteractionService {
         })();
         let succeeded = false;
         try {
+          // sendMessage는 처음에는 UI에서 background로 통신을 위한 용도 뿐이였기 때문에
+          // http 처럼 1:1 연결만 가능하고 보내는 쪽에서 결과를 받는 것만 가능했었다...
+          // background processs는 하나밖에 존재할 수 없기 때문에 지금까지는 문제가 없었지만
+          // side panel을 위해서 UI가 특정 window id 위에 켜져있는지 알려면
+          // background에서 ping msg를 UI로 보내는 형식으로 바뀌게 되면서 문제가 되었는데...
+          // window가 여러개 켜져있고 각각 window에 side panel이 열려있다고 생각해보면
+          // 어느 window의 side panel에서 handler가 먼저 발생하고 결과를 반환했느냐에 따라서
+          // 먼저 반환된 결과가 여기서 반환될 뿐이다...
+          // 이 문제를 해결하기 위해서 UI 쪽에 trick이 들어가 있다.
+          // extension의 store root.tsx에서 Router를 만드는 쪽을 참고
+          // 그 부분에 trick이 들어가 있다.
           const res = await this.extensionMessageRequesterToUI!.sendMessage(
             APP_PORT,
             // XXX: popup에서는 위에 로직에서 window id를 -1로 대충 처리 했었다.
@@ -382,6 +393,9 @@ export class InteractionService {
 
       let succeeded = false;
       try {
+        // 이 경우는 window id를 구분하지 않고 ping을 하기 때문에 window id 별로 구분할 필요가 없다.
+        // 어차피 아무것도 안켜져있으면 오류가 던져지고
+        // 하나라도 켜져있으면 무조건 true를 반환하게 되기 때문에 한번만 보내도 된다.
         const res = await this.extensionMessageRequesterToUI!.sendMessage(
           APP_PORT,
           new InteractionPingMsg(0, true)
@@ -426,6 +440,17 @@ export class InteractionService {
     }
 
     try {
+      // sendMessage는 처음에는 UI에서 background로 통신을 위한 용도 뿐이였기 때문에
+      // http 처럼 1:1 연결만 가능하고 보내는 쪽에서 결과를 받는 것만 가능했었다...
+      // background processs는 하나밖에 존재할 수 없기 때문에 지금까지는 문제가 없었지만
+      // side panel을 위해서 UI가 특정 window id 위에 켜져있는지 알려면
+      // background에서 ping msg를 UI로 보내는 형식으로 바뀌게 되면서 문제가 되었는데...
+      // window가 여러개 켜져있고 각각 window에 side panel이 열려있다고 생각해보면
+      // 어느 window의 side panel에서 handler가 먼저 발생하고 결과를 반환했느냐에 따라서
+      // 먼저 반환된 결과가 여기서 반환될 뿐이다...
+      // 이 문제를 해결하기 위해서 UI 쪽에 trick이 들어가 있다.
+      // extension의 store root.tsx에서 Router를 만드는 쪽을 참고
+      // 그 부분에 trick이 들어가 있다.
       return await this.extensionMessageRequesterToUI.sendMessage(
         APP_PORT,
         new InteractionPingMsg(tab.windowId, false)
