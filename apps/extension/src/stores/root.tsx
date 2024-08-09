@@ -76,6 +76,24 @@ import {
   SwapUsageQueries,
 } from "@keplr-wallet/stores-internal";
 import { setInteractionDataHref } from "../utils";
+import { InteractionPingMsg } from "@keplr-wallet/background";
+
+let _sidePanelWindowId: number | undefined;
+async function getSidePanelWindowId(): Promise<number | undefined> {
+  if (_sidePanelWindowId != null) {
+    return _sidePanelWindowId;
+  }
+
+  const current = await browser.windows.getCurrent();
+  _sidePanelWindowId = current.id;
+  return _sidePanelWindowId;
+}
+// 실행되는 순간 바로 window id를 초기화한다.
+// 현재 실행되는 ui의 window id를 알아내야 하는데
+// 문제는 extension api에 그런 기능을 찾을수가 없다.
+// 대충 유저가 사용하고 있는 window에서 side panel이 열리는게 당연하니
+// 일단 이렇게 처리한다.
+getSidePanelWindowId();
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
@@ -128,7 +146,33 @@ export class RootStore {
   public readonly analyticsStore: AnalyticsStore;
 
   constructor() {
-    const router = new ExtensionRouter(ContentScriptEnv.produceEnv);
+    const router = new ExtensionRouter(ContentScriptEnv.produceEnv, (msg) => {
+      // background에서 ping을 보낼때
+      // side panel이라면 window id를 구분해야한다.
+      // 하지만 이게 기존의 message system이 sender/receiver가 한개씩만 존재한다고 생각하고 만들었기 때문에
+      // background에서 여러 side panel에 ping을 보낼수는 없다. (보낼수는 있는데 sender에서 반환되는 값은 단순히 가장 먼저 반응한 receiver의 결과일 뿐이다...)
+      // 이 문제를 최소한의 변화로 해결하기 위해서
+      // side panel일 경우 ping message를 받았을때 window id를 체크해서 원하는 값이 아니라면 무시하도록 한다.
+      // XXX: _sidePanelWindowId는 처음에 undefined일 수 있다.
+      //      근데 그렇다고 이 함수를 promise로 바꾸는건 router 쪽에서 큰 변화가 필요하기 때문에
+      //      당장은 이 문제는 무시하도록 한다. _sidePanelWindowId의 값이 설정되는건 처음에 매우 빠를 것이고
+      //      background에서 이 ping msg를 보내는 것 자체가 interval로 보내면서 확인하는 용도이기 때문에
+      //      큰 문제가 되지는 않을 것이다.
+      if (
+        msg instanceof InteractionPingMsg &&
+        !msg.ignoreWindowIdAndForcePing
+      ) {
+        const url = new URL(window.location.href);
+        if (url.pathname === "/sidePanel.html") {
+          if (!_sidePanelWindowId) {
+            return true;
+          }
+          return msg.windowId !== _sidePanelWindowId;
+        }
+      }
+
+      return false;
+    });
     router.addGuard(ContentScriptGuards.checkMessageIsInternal);
 
     // Initialize the interaction addon service.
@@ -554,20 +598,3 @@ export class RootStore {
 export function createRootStore() {
   return new RootStore();
 }
-
-let _sidePanelWindowId: number | undefined;
-async function getSidePanelWindowId(): Promise<number | undefined> {
-  if (_sidePanelWindowId != null) {
-    return _sidePanelWindowId;
-  }
-
-  const current = await browser.windows.getCurrent();
-  _sidePanelWindowId = current.id;
-  return _sidePanelWindowId;
-}
-// 실행되는 순간 바로 window id를 초기화한다.
-// 현재 실행되는 ui의 window id를 알아내야 하는데
-// 문제는 extension api에 그런 기능을 찾을수가 없다.
-// 대충 유저가 사용하고 있는 window에서 side panel이 열리는게 당연하니
-// 일단 이렇게 처리한다.
-getSidePanelWindowId();
