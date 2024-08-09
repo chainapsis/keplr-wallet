@@ -393,9 +393,6 @@ export class InteractionService {
 
       let succeeded = false;
       try {
-        // 이 경우는 window id를 구분하지 않고 ping을 하기 때문에 window id 별로 구분할 필요가 없다.
-        // 어차피 아무것도 안켜져있으면 오류가 던져지고
-        // 하나라도 켜져있으면 무조건 true를 반환하게 되기 때문에 한번만 보내도 된다.
         const res = await this.extensionMessageRequesterToUI!.sendMessage(
           APP_PORT,
           new InteractionPingMsg(0, true)
