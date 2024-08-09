@@ -2422,6 +2422,16 @@ export const EmbedChainInfos: ChainInfo[] = [
       "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/carbon/chain.png",
     rpc: "https://tm-api.carbon.network",
     rest: "https://api.carbon.network",
+    evm: {
+      rpc: "https://evm-api.carbon.network",
+      chainId: 9790,
+      nativeCurrency: {
+        coinDenom: "SWTH",
+        coinMinimalDenom: "swth",
+        coinDecimals: 18,
+        coinGeckoId: "switcheo",
+      },
+    },
     nodeProvider: {
       name: "Switcheo Labs",
       email: "info@switcheo.network",
