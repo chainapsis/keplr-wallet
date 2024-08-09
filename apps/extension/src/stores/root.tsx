@@ -164,7 +164,7 @@ export class RootStore {
       ) {
         const url = new URL(window.location.href);
         if (url.pathname === "/sidePanel.html") {
-          if (!_sidePanelWindowId) {
+          if (_sidePanelWindowId == null) {
             return true;
           }
           return msg.windowId !== _sidePanelWindowId;
