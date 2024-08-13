@@ -194,6 +194,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   evm: Joi.object({
     chainId: Joi.number().required(),
     rpc: Joi.string()
+      .uri()
       .custom((value: string) => {
         if (value.includes("?")) {
           throw new Error("evm rpc should not have query string");
@@ -202,6 +203,16 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
         return value;
       })
       .required(),
+    websocket: Joi.string()
+      .uri()
+      .custom((value: string) => {
+        if (value.includes("?")) {
+          throw new Error("evm websocket should not have query string");
+        }
+
+        return value;
+      }),
+    nativeCurrency: CurrencySchema,
   }).unknown(true),
   nodeProvider: Joi.object({
     name: Joi.string().min(1).max(30).required(),
@@ -354,39 +365,51 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
     }
   }
 
-  // evm only chain이 아닌 ethermint같은 경우에만 위의 밸리데이션을 수행한다.
+  // evm only chain이 아닌 ethermint같은 경우에만 아래의 밸리데이션을 수행한다.
   if (EIP155ChainIdSchema.validate(value.chainId).error) {
     if (value.evm) {
+      const evmNativeCurency = value.evm.nativeCurrency;
       const firstCurrency = value.currencies[0];
-      if (firstCurrency.coinDecimals !== 18) {
+      if (
+        evmNativeCurency != null &&
+        firstCurrency.coinMinimalDenom === evmNativeCurency.coinMinimalDenom
+      ) {
         throw new Error(
-          "The first currency's coin decimals should be 18 for EVM chain"
+          "The first currency should not be same with EVM native currency"
         );
       }
-      if (value.stakeCurrency) {
-        if (value.stakeCurrency.coinDecimals !== 18) {
+
+      if (evmNativeCurency == null) {
+        if (firstCurrency.coinDecimals !== 18) {
           throw new Error(
-            "The stake currency's coin decimals should be 18 for EVM chain"
+            "The first currency's coin decimals should be 18 for EVM chain"
           );
         }
-        const cur = value.currencies.find(
-          (cur) =>
-            cur.coinMinimalDenom === value.stakeCurrency?.coinMinimalDenom
-        );
-        if (cur) {
-          if (cur.coinDecimals !== 18) {
+        if (value.stakeCurrency) {
+          if (value.stakeCurrency.coinDecimals !== 18) {
             throw new Error(
               "The stake currency's coin decimals should be 18 for EVM chain"
             );
           }
+          const cur = value.currencies.find(
+            (cur) =>
+              cur.coinMinimalDenom === value.stakeCurrency?.coinMinimalDenom
+          );
+          if (cur) {
+            if (cur.coinDecimals !== 18) {
+              throw new Error(
+                "The stake currency's coin decimals should be 18 for EVM chain"
+              );
+            }
+          }
         }
-      }
 
-      const firstFeeCurrency = value.feeCurrencies[0];
-      if (firstFeeCurrency.coinDecimals !== 18) {
-        throw new Error(
-          "The first fee currency's coin decimals should be 18 for EVM chain"
-        );
+        const firstFeeCurrency = value.feeCurrencies[0];
+        if (firstFeeCurrency.coinDecimals !== 18) {
+          throw new Error(
+            "The first fee currency's coin decimals should be 18 for EVM chain"
+          );
+        }
       }
     }
   }
