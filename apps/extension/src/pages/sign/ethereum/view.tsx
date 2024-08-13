@@ -181,7 +181,7 @@ export const EthereumSigningView: FunctionComponent<{
         if (gasPriceFromTx > 0) {
           feeConfig.setFee(
             new CoinPretty(
-              chainInfo.currencies[0],
+              chainInfo.evm?.nativeCurrency ?? chainInfo.currencies[0],
               new Dec(gasConfig.gas).mul(new Dec(gasPriceFromTx))
             )
           );

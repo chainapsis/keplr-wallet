@@ -142,7 +142,7 @@ export const EthSendTokenTxPretty: React.FunctionComponent<{
 
   const currency = erc20ContractAddress
     ? chainInfo.forceFindCurrency(`erc20:${erc20ContractAddress}`)
-    : chainInfo.currencies[0];
+    : chainInfo.evm?.nativeCurrency ?? chainInfo.currencies[0];
   const amountCoinPretty = new CoinPretty(currency, new Dec(Number(amount)));
 
   const theme = useTheme();
