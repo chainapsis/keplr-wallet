@@ -1,4 +1,4 @@
-import { Currency, AppCurrency, FeeCurrency } from "./currency";
+import { Currency, AppCurrency, FeeCurrency, ERC20Currency } from "./currency";
 import { BIP44 } from "./bip44";
 import { Bech32Config } from "./bech32";
 import { EVMInfo } from "./ethereum";
@@ -66,6 +66,7 @@ export type ChainInfoWithoutEndpoints = Omit<
 export interface StarknetChainInfo {
   chainId: string;
   rpc: string;
+  currencies: ERC20Currency[];
 }
 
 export type ModularChainInfo =

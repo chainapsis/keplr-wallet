@@ -9179,6 +9179,29 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@keplr-wallet/stores-starknet@workspace:packages/stores-starknet":
+  version: 0.0.0-use.local
+  resolution: "@keplr-wallet/stores-starknet@workspace:packages/stores-starknet"
+  dependencies:
+    "@ethersproject/abi": ^5.7.0
+    "@ethersproject/address": ^5.7.0
+    "@ethersproject/bytes": ^5.7.0
+    "@ethersproject/transactions": ^5.7.0
+    "@ethersproject/units": ^5.7.0
+    "@keplr-wallet/common": 0.12.121
+    "@keplr-wallet/simple-fetch": 0.12.121
+    "@keplr-wallet/stores": 0.12.121
+    "@keplr-wallet/types": 0.12.121
+    "@keplr-wallet/unit": 0.12.121
+    big-integer: ^1.6.48
+    utility-types: ^3.10.0
+  peerDependencies:
+    mobx: ^6
+    mobx-utils: ^6
+    starknet: ^6
+  languageName: unknown
+  linkType: soft
+
 "@keplr-wallet/stores@0.12.121, @keplr-wallet/stores@workspace:packages/stores":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/stores@workspace:packages/stores"

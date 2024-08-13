@@ -5,6 +5,7 @@ import {
   ChainInfo,
   Currency,
   FeeCurrency,
+  ModularChainInfo,
 } from "@keplr-wallet/types";
 
 export type CurrencyRegistrar = (
@@ -20,6 +21,9 @@ export type CurrencyRegistrar = (
 export interface ChainGetter<C extends ChainInfo = ChainInfo> {
   getChain(chainId: string): IChainInfoImpl<C>;
   hasChain(chainId: string): boolean;
+
+  getModularChain(chainId: string): ModularChainInfo;
+  hasModularChain(chainId: string): boolean;
 }
 
 export interface IChainStore<C extends ChainInfo = ChainInfo>
