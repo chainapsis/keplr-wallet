@@ -28,6 +28,8 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     | CoinPretty[]
     | undefined = undefined;
 
+  @observable.ref
+  protected _selectableFeeCurrencies: FeeCurrency[] | undefined = undefined;
   /**
    * `additionAmountToNeedFee` indicated that the fee config should consider the amount config's amount
    *  when checking that the fee is sufficient to send tx.
@@ -172,8 +174,20 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     }
   }
 
+  @action
+  setSelectableFeeCurrencies(currencies: FeeCurrency[]) {
+    this._selectableFeeCurrencies = currencies;
+  }
+
   @computed
   get selectableFeeCurrencies(): FeeCurrency[] {
+    if (
+      this._selectableFeeCurrencies &&
+      this._selectableFeeCurrencies.length > 0
+    ) {
+      return this._selectableFeeCurrencies;
+    }
+
     if (
       this.chainInfo.bip44.coinType === 60 ||
       this.chainInfo.hasFeature("eth-address-gen") ||
