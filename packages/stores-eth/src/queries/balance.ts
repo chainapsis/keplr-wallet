@@ -39,9 +39,10 @@ export class ObservableQueryEthAccountBalanceImpl
   get balance(): CoinPretty {
     const denom = this.denomHelper.denom;
     const chainInfo = this.chainGetter.getChain(this.chainId);
-    const currency = chainInfo.currencies.find(
-      (cur) => cur.coinMinimalDenom === denom
-    );
+    const currency =
+      chainInfo?.evm?.nativeCurrency ??
+      chainInfo.currencies.find((cur) => cur.coinMinimalDenom === denom);
+
     if (!currency) {
       throw new Error(`Unknown currency: ${denom}`);
     }
