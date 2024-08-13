@@ -4,6 +4,7 @@ import { sha256 } from "@noble/hashes/sha2";
 import { ripemd160 } from "@noble/hashes/ripemd160";
 import { Buffer } from "buffer/";
 import { Hash } from "./hash";
+import { hash as starknetHash } from "starknet";
 
 export class PrivKeySecp256k1 {
   static generateRandomKey(): PrivKeySecp256k1 {
@@ -84,6 +85,34 @@ export class PubKeySecp256k1 {
     // And hash by keccak256.
     // Use last 20 bytes.
     return Hash.keccak256(this.toBytes(true).slice(1)).slice(-20);
+  }
+
+  getStarknetAddress(salt: Uint8Array, classHash: Uint8Array): Uint8Array {
+    const pubBytes = this.toBytes(true).slice(1);
+    const xLow = pubBytes.slice(16, 32);
+    const xHigh = pubBytes.slice(0, 16);
+    const yLow = pubBytes.slice(48, 64);
+    const yHigh = pubBytes.slice(32, 48);
+
+    let calculated = starknetHash
+      .calculateContractAddressFromHash(
+        "0x" + Buffer.from(salt).toString("hex"),
+        "0x" + Buffer.from(classHash).toString("hex"),
+        [
+          "0x" + Buffer.from(xLow).toString("hex"),
+          "0x" + Buffer.from(xHigh).toString("hex"),
+          "0x" + Buffer.from(yLow).toString("hex"),
+          "0x" + Buffer.from(yHigh).toString("hex"),
+        ],
+        "0x00"
+      )
+      .replace("0x", "");
+
+    if (calculated.length % 2 !== 0) {
+      calculated = "0" + calculated;
+    }
+
+    return new Uint8Array(Buffer.from(calculated, "hex"));
   }
 
   verifyDigest32(digest: Uint8Array, signature: Uint8Array): boolean {

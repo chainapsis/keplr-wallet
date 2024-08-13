@@ -22,5 +22,8 @@
     "bip39": "^3.0.3",
     "bs58check": "^2.1.2",
     "buffer": "^6.0.3"
+  },
+  "peerDependencies": {
+    "starknet": "^6"
   }
 }
