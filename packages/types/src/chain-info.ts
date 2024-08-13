@@ -62,3 +62,18 @@ export type ChainInfoWithoutEndpoints = Omit<
     readonly rpc: undefined;
   };
 };
+
+export interface StarknetChainInfo {
+  chainId: string;
+  rpc: string;
+}
+
+export type ModularChainInfo =
+  | {
+      chainId: string;
+      cosmos: ChainInfo;
+    }
+  | {
+      chainId: string;
+      starknet: StarknetChainInfo;
+    };

@@ -14,6 +14,7 @@ import {
   ChainInfo,
   Currency,
   FeeCurrency,
+  ModularChainInfo,
 } from "@keplr-wallet/types";
 import { IChainInfoImpl, IChainStore, CurrencyRegistrar } from "./types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
@@ -508,11 +509,13 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
 {
   @observable.ref
   protected _chainInfos: ChainInfoImpl<C>[] = [];
+  @observable.ref
+  protected _modularChainInfos: ModularChainInfo[] = [];
 
   @observable
   protected currencyRegistrars: CurrencyRegistrar[] = [];
 
-  constructor(embedChainInfos: C[]) {
+  constructor(embedChainInfos: (C | ModularChainInfo)[]) {
     makeObservable(this);
 
     this.setEmbeddedChainInfos(embedChainInfos);
@@ -551,18 +554,65 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
     return this.chainInfoMap.has(chainIdentifier.identifier);
   }
 
-  @action
-  protected setEmbeddedChainInfos(chainInfos: C[]) {
-    this._chainInfos = chainInfos.map((chainInfo) => {
-      const prev = this.chainInfoMap.get(
-        ChainIdHelper.parse(chainInfo.chainId).identifier
-      );
-      if (prev) {
-        prev.setEmbeddedChainInfo(chainInfo);
-        return prev;
-      }
+  @computed
+  protected get modularChainInfoMap(): Map<string, ModularChainInfo> {
+    const result: Map<string, ModularChainInfo> = new Map();
+    for (const chainInfo of this._modularChainInfos) {
+      result.set(ChainIdHelper.parse(chainInfo.chainId).identifier, chainInfo);
+    }
+    return result;
+  }
 
-      return new ChainInfoImpl(chainInfo, this);
+  getModularChain(chainId: string): ModularChainInfo {
+    const chainIdentifier = ChainIdHelper.parse(chainId);
+
+    const chainInfo = this.modularChainInfoMap.get(chainIdentifier.identifier);
+
+    if (!chainInfo) {
+      throw new Error(`Unknown modular chain info: ${chainId}`);
+    }
+
+    return chainInfo;
+  }
+
+  hasModularChain(chainId: string): boolean {
+    const chainIdentifier = ChainIdHelper.parse(chainId);
+
+    return this.modularChainInfoMap.has(chainIdentifier.identifier);
+  }
+
+  @action
+  protected setEmbeddedChainInfos(chainInfos: (C | ModularChainInfo)[]) {
+    this._chainInfos = chainInfos
+      .filter((chainInfo) => "currencies" in chainInfo || "cosmos" in chainInfo)
+      .map((chainInfo) => {
+        if ("cosmos" in chainInfo) {
+          // TODO: 이거 타이핑이 불가능한데 일단 대충 넘어가도록 처리한 것임.
+          //       chainInfo.cosmos는 ChainInfo 타입이기 때문에 C를 만족할 수 없다.
+          chainInfo = chainInfo.cosmos as C;
+        }
+        if (!("currencies" in chainInfo)) {
+          throw new Error("Can't happen");
+        }
+
+        const prev = this.chainInfoMap.get(
+          ChainIdHelper.parse(chainInfo.chainId).identifier
+        );
+        if (prev) {
+          prev.setEmbeddedChainInfo(chainInfo);
+          return prev;
+        }
+
+        return new ChainInfoImpl(chainInfo, this);
+      });
+    this._modularChainInfos = chainInfos.map((chainInfo) => {
+      if ("currencies" in chainInfo) {
+        return {
+          chainId: chainInfo.chainId,
+          cosmos: chainInfo as C,
+        };
+      }
+      return chainInfo;
     });
   }
 
