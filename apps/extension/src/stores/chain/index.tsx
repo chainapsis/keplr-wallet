@@ -7,7 +7,7 @@ import {
   runInAction,
 } from "mobx";
 
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import {
   ChainStore as BaseChainStore,
   IChainInfoImpl,
@@ -49,7 +49,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   protected _tokenScans: TokenScan[] = [];
 
   constructor(
-    protected readonly embedChainInfos: ChainInfo[],
+    protected readonly embedChainInfos: (ModularChainInfo | ChainInfo)[],
     protected readonly keyRingStore: KeyRingStore,
     protected readonly requester: MessageRequester
   ) {

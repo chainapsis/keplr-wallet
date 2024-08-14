@@ -2,7 +2,7 @@ import { PlainObject, Vault } from "../vault";
 import { Buffer } from "buffer/";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { KeplrError } from "@keplr-wallet/router";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ModularChainInfo } from "@keplr-wallet/types";
 import { KeyRingService } from "../keyring";
 
 export class KeyRingLedgerService {
@@ -40,11 +40,18 @@ export class KeyRingLedgerService {
   getPubKey(
     vault: Vault,
     _coinType: number,
-    chainInfo: ChainInfo
+    modularChainInfo: ModularChainInfo
   ): PubKeySecp256k1 {
+    if (!("cosmos" in modularChainInfo)) {
+      // TODO: 나중에 starknet을 어떻게 지원할지 생각해본다.
+      throw new Error("Chain is not a cosmos chain");
+    }
+
     let app = "Cosmos";
 
-    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const isEthermintLike = KeyRingService.isEthermintLike(
+      modularChainInfo.cosmos
+    );
     if (isEthermintLike) {
       app = "Ethereum";
       if (!vault.insensitive[app]) {

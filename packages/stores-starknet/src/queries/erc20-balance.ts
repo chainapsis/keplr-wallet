@@ -1,5 +1,4 @@
 import {
-  BalanceRegistry,
   ChainGetter,
   IObservableQueryBalanceImpl,
   QuerySharedContext,
@@ -76,27 +75,31 @@ export class ObservableQueryStarknetERC20BalanceImpl
   }
 }
 
-export class ObservableQueryStarknetERC20BalanceRegistry
-  implements BalanceRegistry
-{
+export class ObservableQueryStarknetERC20Balance {
+  protected map: Map<string, ObservableQueryStarknetERC20BalanceImpl> =
+    new Map();
+
   constructor(protected readonly sharedContext: QuerySharedContext) {}
 
-  getBalanceImpl(
+  getBalance(
     chainId: string,
     chainGetter: ChainGetter<ChainInfo>,
     address: string,
     minimalDenom: string
   ): IObservableQueryBalanceImpl | undefined {
+    const key = `${chainId}/${address}/${minimalDenom}`;
+    const prior = this.map.get(key);
+    if (prior) {
+      return prior;
+    }
+
     const denomHelper = new DenomHelper(minimalDenom);
     const modularChainInfo = chainGetter.getModularChain(chainId);
-    if (
-      denomHelper.type !== "stark-erc20" ||
-      !("starknet" in modularChainInfo)
-    ) {
+    if (denomHelper.type !== "erc20" || !("starknet" in modularChainInfo)) {
       return;
     }
 
-    return new ObservableQueryStarknetERC20BalanceImpl(
+    const impl = new ObservableQueryStarknetERC20BalanceImpl(
       this.sharedContext,
       chainId,
       chainGetter,
@@ -104,5 +107,7 @@ export class ObservableQueryStarknetERC20BalanceRegistry
       address,
       denomHelper.contractAddress
     );
+    this.map.set(key, impl);
+    return impl;
   }
 }

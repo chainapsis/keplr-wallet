@@ -1,7 +1,7 @@
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 
-export const EmbedChainInfos: ChainInfo[] = [
+export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
   {
     rpc: "https://rpc-cosmoshub.keplr.app",
     rest: "https://lcd-cosmoshub.keplr.app",
@@ -2413,6 +2413,24 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     features: [],
+  },
+  {
+    chainId: "starknet:SN_SEPOLIA",
+    starknet: {
+      chainId: "starknet:SN_SEPOLIA",
+      rpc: "https://rpc.nethermind.io/sepolia-juno/?apikey=j1Q0xLaE6tGnTGgST6vHyVXJVKcLW7MGoxqWNh6DEY2TKYW9",
+      currencies: [
+        {
+          type: "erc20",
+          contractAddress:
+            "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+          coinDenom: "STRK",
+          coinMinimalDenom:
+            "erc20:0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+          coinDecimals: 6,
+        },
+      ],
+    },
   },
 ];
 

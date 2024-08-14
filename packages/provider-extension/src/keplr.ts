@@ -562,6 +562,24 @@ export class Keplr implements IKeplr {
     return await Keplr.requestMethod("getChainInfoWithoutEndpoints", [chainId]);
   }
 
+  async getStarknetKey(chainId: string): Promise<{
+    hexAddress: string;
+    pubKey: Uint8Array;
+    address: Uint8Array;
+  }> {
+    return await Keplr.requestMethod("getStarknetKey", [chainId]);
+  }
+
+  async getStarknetKeysSettled(chainIds: string[]): Promise<
+    SettledResponses<{
+      hexAddress: string;
+      pubKey: Uint8Array;
+      address: Uint8Array;
+    }>
+  > {
+    return await Keplr.requestMethod("getStarknetKeysSettled", [chainIds]);
+  }
+
   public readonly ethereum = new EthereumProvider(this);
 }
 

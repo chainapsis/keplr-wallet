@@ -8747,6 +8747,7 @@ __metadata:
     "@keplr-wallet/stores-eth": 0.12.121
     "@keplr-wallet/stores-ibc": 0.12.121
     "@keplr-wallet/stores-internal": 0.12.121
+    "@keplr-wallet/stores-starknet": 0.12.121
     "@keplr-wallet/types": 0.12.121
     "@keplr-wallet/unit": 0.12.121
     "@keystonehq/animated-qr": ^0.8.6
@@ -9179,7 +9180,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-wallet/stores-starknet@workspace:packages/stores-starknet":
+"@keplr-wallet/stores-starknet@0.12.121, @keplr-wallet/stores-starknet@workspace:packages/stores-starknet":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/stores-starknet@workspace:packages/stores-starknet"
   dependencies:

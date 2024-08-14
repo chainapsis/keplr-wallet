@@ -388,6 +388,22 @@ export class MockKeplr implements Keplr {
     throw new Error("Not yet implemented");
   }
 
+  getStarknetKey(
+    _chainId: string
+  ): Promise<{ hexAddress: string; pubKey: Uint8Array; address: Uint8Array }> {
+    throw new Error("Not implemented");
+  }
+
+  getStarknetKeysSettled(_chainIds: string[]): Promise<
+    SettledResponses<{
+      hexAddress: string;
+      pubKey: Uint8Array;
+      address: Uint8Array;
+    }>
+  > {
+    throw new Error("Not implemented");
+  }
+
   public readonly ethereum = new MockEthereumProvider();
 }
 

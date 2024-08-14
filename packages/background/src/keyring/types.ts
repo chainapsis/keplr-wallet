@@ -1,6 +1,6 @@
 import { PlainObject, Vault } from "../vault";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 
 export type KeyRingStatus = "empty" | "locked" | "unlocked";
 
@@ -27,7 +27,7 @@ export interface KeyRing {
   getPubKey(
     vault: Vault,
     coinType: number,
-    chainInfo: ChainInfo
+    modularChainInfo: ModularChainInfo
   ): PubKeySecp256k1 | Promise<PubKeySecp256k1>;
   sign(
     vault: Vault,

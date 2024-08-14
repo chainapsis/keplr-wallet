@@ -13,7 +13,7 @@ import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { InteractionService } from "../interaction";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { Buffer } from "buffer/";
 import * as Legacy from "./legacy";
 import { ChainsUIService } from "../chains-ui";
@@ -1015,7 +1015,8 @@ export class KeyRingService {
       throw new Error("KeyRing is locked");
     }
 
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    const modularChainInfo =
+      this.chainsService.getModularChainInfoOrThrow(chainId);
 
     const vault = this.vaultService.getVault("keyRing", vaultId);
     if (!vault) {
@@ -1031,10 +1032,20 @@ export class KeyRingService {
         return vault.insensitive[coinTypeTag] as number;
       }
 
-      return chainInfo.bip44.coinType;
+      if ("cosmos" in modularChainInfo) {
+        return modularChainInfo.cosmos.bip44.coinType;
+      }
+
+      // TODO: starknet에서는 일단 코인타입을 9004로 고정해서 쓴다.
+      //       일단은 임시조치인데 나중에 다른 방식으로 바뀔수도 있다.
+      if ("starknet" in modularChainInfo) {
+        return 9004;
+      }
+
+      throw new Error("Can't determine default coin type");
     })();
 
-    return this.getPubKeyWithVault(vault, coinType, chainInfo);
+    return this.getPubKeyWithVault(vault, coinType, modularChainInfo);
   }
 
   getPubKeyWithNotFinalizedCoinType(
@@ -1046,15 +1057,26 @@ export class KeyRingService {
       throw new Error("KeyRing is locked");
     }
 
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    const modularChainInfo =
+      this.chainsService.getModularChainInfoOrThrow(chainId);
 
-    if (
-      chainInfo.bip44.coinType !== coinType &&
-      !(chainInfo.alternativeBIP44s ?? []).find(
-        (path) => path.coinType === coinType
-      )
-    ) {
-      throw new Error("Coin type is not associated to chain");
+    if ("cosmos" in modularChainInfo) {
+      if (
+        modularChainInfo.cosmos.bip44.coinType !== coinType &&
+        !(modularChainInfo.cosmos.alternativeBIP44s ?? []).find(
+          (path) => path.coinType === coinType
+        )
+      ) {
+        throw new Error("Coin type is not associated to chain");
+      }
+    } else if ("starknet" in modularChainInfo) {
+      // TODO: starknet에서는 일단 코인타입을 9004로 고정해서 쓴다.
+      //       일단은 임시조치인데 나중에 다른 방식으로 바뀔수도 있다.
+      if (coinType !== 9004) {
+        throw new Error("Coin type is not associated to chain");
+      }
+    } else {
+      throw new Error("Can't know that the coin type is associated to chain");
     }
 
     const vault = this.vaultService.getVault("keyRing", vaultId);
@@ -1077,7 +1099,7 @@ export class KeyRingService {
       throw new Error("Coin type is already finalized");
     }
 
-    return this.getPubKeyWithVault(vault, coinType, chainInfo);
+    return this.getPubKeyWithVault(vault, coinType, modularChainInfo);
   }
 
   sign(
@@ -1131,7 +1153,7 @@ export class KeyRingService {
   getPubKeyWithVault(
     vault: Vault,
     coinType: number,
-    chainInfo: ChainInfo
+    modularChainInfo: ModularChainInfo
   ): Promise<PubKeySecp256k1> {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
@@ -1139,7 +1161,9 @@ export class KeyRingService {
 
     const keyRing = this.getVaultKeyRing(vault);
 
-    return Promise.resolve(keyRing.getPubKey(vault, coinType, chainInfo));
+    return Promise.resolve(
+      keyRing.getPubKey(vault, coinType, modularChainInfo)
+    );
   }
 
   signWithVault(

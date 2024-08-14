@@ -861,6 +861,24 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     return await this.requestMethod("suggestERC20", [chainId, contractAddress]);
   }
 
+  async getStarknetKey(chainId: string): Promise<{
+    hexAddress: string;
+    pubKey: Uint8Array;
+    address: Uint8Array;
+  }> {
+    return await this.requestMethod("getStarknetKey", [chainId]);
+  }
+
+  async getStarknetKeysSettled(chainIds: string[]): Promise<
+    SettledResponses<{
+      hexAddress: string;
+      pubKey: Uint8Array;
+      address: Uint8Array;
+    }>
+  > {
+    return await this.requestMethod("getStarknetKeysSettled", [chainIds]);
+  }
+
   public readonly ethereum = new EthereumProvider(
     this,
     this.eventListener,

@@ -255,7 +255,7 @@ export class PermissionService {
   ) {
     for (const chainId of chainIds) {
       // Make sure that the chain info is registered.
-      this.chainsService.getChainInfoOrThrow(chainId);
+      this.chainsService.getModularChainInfoOrThrow(chainId);
     }
 
     await this.grantPermission(
@@ -305,7 +305,7 @@ export class PermissionService {
 
     for (const chainId of chainIds) {
       // Make sure that the chain info is registered.
-      this.chainsService.getChainInfoOrThrow(chainId);
+      this.chainsService.getModularChainInfoOrThrow(chainId);
 
       this.checkPermission(
         env,
@@ -331,7 +331,7 @@ export class PermissionService {
 
     for (const chainId of chainIds) {
       // Make sure that the chain info is registered.
-      this.chainsService.getChainInfoOrThrow(chainId);
+      this.chainsService.getModularChainInfoOrThrow(chainId);
 
       if (
         !this.hasPermission(chainId, getBasicAccessPermissionType(), origin)

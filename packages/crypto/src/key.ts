@@ -108,8 +108,11 @@ export class PubKeySecp256k1 {
       )
       .replace("0x", "");
 
-    if (calculated.length % 2 !== 0) {
-      calculated = "0" + calculated;
+    const padZero = 64 - calculated.length;
+    if (padZero > 0) {
+      calculated = "0".repeat(padZero) + calculated;
+    } else if (padZero < 0) {
+      throw new Error("Invalid length of calculated address");
     }
 
     return new Uint8Array(Buffer.from(calculated, "hex"));

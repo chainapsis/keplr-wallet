@@ -77,6 +77,7 @@ import {
 } from "@keplr-wallet/stores-internal";
 import { setInteractionDataHref } from "../utils";
 import { InteractionPingMsg } from "@keplr-wallet/background";
+import { StarknetQueriesStore } from "@keplr-wallet/stores-starknet";
 
 let _sidePanelWindowId: number | undefined;
 async function getSidePanelWindowId(): Promise<number | undefined> {
@@ -126,6 +127,7 @@ export class RootStore {
   >;
   public readonly swapUsageQueries: SwapUsageQueries;
   public readonly skipQueriesStore: SkipQueries;
+  public readonly starknetQueriesStore: StarknetQueriesStore;
   public readonly accountStore: AccountStore<
     [CosmosAccount, CosmwasmAccount, SecretAccount]
   >;
@@ -318,6 +320,9 @@ export class RootStore {
       this.swapUsageQueries,
       SwapVenue
     );
+    this.starknetQueriesStore = new StarknetQueriesStore(
+      this.queriesStore.sharedContext
+    );
 
     this.accountStore = new AccountStore(
       window,
@@ -479,6 +484,7 @@ export class RootStore {
     this.hugeQueriesStore = new HugeQueriesStore(
       this.chainStore,
       this.queriesStore,
+      this.starknetQueriesStore,
       this.accountStore,
       this.priceStore
     );
