@@ -588,12 +588,27 @@ export const EnableChainsScene: FunctionComponent<{
 
       let numSelected = 0;
       for (const enabledChainIdentifier of enabledChainIdentifiers) {
-        if (chainInfoMap.has(enabledChainIdentifier)) {
-          numSelected++;
+        const enabledChainInfo = chainInfoMap.get(enabledChainIdentifier);
+        if (enabledChainInfo) {
+          const isEthermintLike =
+            enabledChainInfo.bip44.coinType === 60 ||
+            !!enabledChainInfo.features?.includes("eth-address-gen") ||
+            !!enabledChainInfo.features?.includes("eth-key-sign");
+
+          if (
+            (fallbackEthereumLedgerApp && isEthermintLike) ||
+            (!fallbackEthereumLedgerApp && !isEthermintLike)
+          ) {
+            numSelected++;
+          }
         }
       }
       return numSelected;
-    }, [chainStore.chainInfos, enabledChainIdentifiers]);
+    }, [
+      chainStore.chainInfos,
+      enabledChainIdentifiers,
+      fallbackEthereumLedgerApp,
+    ]);
 
     const replaceToWelcomePage = () => {
       if (skipWelcome) {
