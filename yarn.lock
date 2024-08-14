@@ -12885,6 +12885,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@starknet-io/types-js@npm:^0.7.7, starknet-types-07@npm:@starknet-io/types-js@^0.7.7":
+  version: 0.7.7
+  resolution: "@starknet-io/types-js@npm:0.7.7"
+  checksum: e5355042b06f96a19ee02a07cc12e321a636d0c7eaa605f85363775b036303a82896e6bcb2b244f97b125c83ae691f0fc162a5167e9866152a3b2108a9e28402
+  languageName: node
+  linkType: hard
+
 "@storybook/addon-actions@npm:7.6.18, @storybook/addon-actions@npm:^7.6.18":
   version: 7.6.18
   resolution: "@storybook/addon-actions@npm:7.6.18"
@@ -25181,6 +25188,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"get-starknet-core@npm:^4.0.0-next.3":
+  version: 4.0.0
+  resolution: "get-starknet-core@npm:4.0.0"
+  dependencies:
+    "@starknet-io/types-js": ^0.7.7
+  checksum: 06e4be1be945d8fb7ad3f0d77a5e92c2854ce43cae8091a9f9b5f3cc74d42cf7188de9e544d497f92c0cad316d6d0abc110520629987815be2aed26d0b9ab871
+  languageName: node
+  linkType: hard
+
 "get-stdin@npm:^4.0.1":
   version: 4.0.1
   resolution: "get-stdin@npm:4.0.1"
@@ -29376,7 +29392,7 @@ __metadata:
     react-dom: 18.2.0
     react-is: 18.2.0
     semver: ^7.6.0
-    starknet: ^6.11.0
+    starknet: =6.11.0
     ts-jest: ^29.0.5
     typescript: 5.0.4
     zx: ^4.2.0
@@ -39901,16 +39917,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"starknet-types-07@npm:@starknet-io/types-js@^0.7.7":
-  version: 0.7.7
-  resolution: "@starknet-io/types-js@npm:0.7.7"
-  checksum: e5355042b06f96a19ee02a07cc12e321a636d0c7eaa605f85363775b036303a82896e6bcb2b244f97b125c83ae691f0fc162a5167e9866152a3b2108a9e28402
-  languageName: node
-  linkType: hard
-
-"starknet@npm:^6.11.0":
-  version: 6.12.1
-  resolution: "starknet@npm:6.12.1"
+"starknet@npm:=6.11.0":
+  version: 6.11.0
+  resolution: "starknet@npm:6.11.0"
   dependencies:
     "@noble/curves": ~1.4.0
     "@noble/hashes": ^1.4.0
@@ -39918,13 +39927,14 @@ __metadata:
     "@scure/starknet": ~1.0.0
     abi-wan-kanabi: ^2.2.2
     fetch-cookie: ^3.0.0
+    get-starknet-core: ^4.0.0-next.3
     isomorphic-fetch: ^3.0.0
     lossless-json: ^4.0.1
     pako: ^2.0.4
     starknet-types-07: "npm:@starknet-io/types-js@^0.7.7"
     ts-mixer: ^6.0.3
     url-join: ^4.0.1
-  checksum: 58afeddde1e2fb0d8caae0cb615bd0b3d0aed04d27465af0607f77247731bbf7d1e4b2f0a99ff596e53175abfadf5d08353f4b838f96038f7a88b706c6bd0bb6
+  checksum: 997c4a9efad53b0c25d0402c2dcd4e334b83865389ea29791f72ac757e0d9a216cf4634c6fbd5d33154e26389d499d39d893cf52302ec6b4eb9d7f04c034b579
   languageName: node
   linkType: hard
 
