@@ -9,6 +9,16 @@ export function makeURL(baseURL: string, url: string): string {
     "/" +
     removeFirstSlashIfIs(url);
 
+  url =
+    url +
+    (() => {
+      if (url.includes("?")) {
+        return "&" + baseURLInstance.searchParams.toString();
+      } else {
+        return "?" + baseURLInstance.searchParams.toString();
+      }
+    })();
+
   return removeLastSlashIfIs(baseURL + "/" + removeFirstSlashIfIs(url));
 }
 
