@@ -75,6 +75,10 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
 
     if (paramIsIBCTransfer) {
       return filtered.filter((token) => {
+        if (!("currencies" in token.chainInfo)) {
+          return false;
+        }
+
         return token.chainInfo.hasFeature("ibc-transfer");
       });
     }

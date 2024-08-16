@@ -64,17 +64,21 @@ export type ChainInfoWithoutEndpoints = Omit<
 };
 
 export interface StarknetChainInfo {
-  chainId: string;
-  rpc: string;
-  currencies: ERC20Currency[];
+  readonly chainId: string;
+  readonly rpc: string;
+  readonly currencies: ERC20Currency[];
 }
 
 export type ModularChainInfo =
   | {
-      chainId: string;
-      cosmos: ChainInfo;
+      readonly chainId: string;
+      readonly chainName: string;
+      readonly chainSymbolImageUrl?: string;
+      readonly cosmos: ChainInfo;
     }
   | {
-      chainId: string;
-      starknet: StarknetChainInfo;
+      readonly chainId: string;
+      readonly chainName: string;
+      readonly chainSymbolImageUrl?: string;
+      readonly starknet: StarknetChainInfo;
     };

@@ -169,8 +169,8 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
         // XXX: Below logic not observe state changes on account store and it's inner state.
         //      This is intended because this logic is only for the first time and avoid global re-rendering.
         // Start init for registered chains so that users can see account address more quickly.
-        for (const chainInfo of chainStore.chainInfos) {
-          const account = accountStore.getAccount(chainInfo.chainId);
+        for (const modularChainInfo of chainStore.modularChainInfos) {
+          const account = accountStore.getAccount(modularChainInfo.chainId);
           // Because {autoInit: true} is given as the option on account store,
           // initialization for the account starts at this time just by using getAccount().
           // However, run safe check on current status and init if status is not inited.

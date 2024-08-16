@@ -2416,6 +2416,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
   },
   {
     chainId: "starknet:SN_SEPOLIA",
+    chainName: "STRK Sepolia",
     starknet: {
       chainId: "starknet:SN_SEPOLIA",
       rpc: "https://rpc.nethermind.io/sepolia-juno/?apikey=j1Q0xLaE6tGnTGgST6vHyVXJVKcLW7MGoxqWNh6DEY2TKYW9",
@@ -2427,7 +2428,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinDenom: "STRK",
           coinMinimalDenom:
             "erc20:0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
-          coinDecimals: 6,
+          coinDecimals: 18,
         },
       ],
     },

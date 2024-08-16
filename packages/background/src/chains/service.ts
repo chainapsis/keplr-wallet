@@ -100,6 +100,8 @@ export class ChainsService {
       if ("currencies" in modularChainInfo) {
         return {
           chainId: modularChainInfo.chainId,
+          chainName: modularChainInfo.chainName,
+          chainSymbolImageUrl: modularChainInfo.chainSymbolImageUrl,
           cosmos: modularChainInfo,
         };
       }

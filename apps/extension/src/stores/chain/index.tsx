@@ -152,6 +152,31 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     });
   }
 
+  @computed
+  override get modularChainInfos(): ModularChainInfo[] {
+    // Sort by chain name.
+    // The first chain has priority to be the first.
+    return super.modularChainInfos.sort((a, b) => {
+      const aChainIdentifier = ChainIdHelper.parse(a.chainId).identifier;
+      const bChainIdentifier = ChainIdHelper.parse(b.chainId).identifier;
+
+      if (
+        aChainIdentifier ===
+        ChainIdHelper.parse(this.embedChainInfos[0].chainId).identifier
+      ) {
+        return -1;
+      }
+      if (
+        bChainIdentifier ===
+        ChainIdHelper.parse(this.embedChainInfos[0].chainId).identifier
+      ) {
+        return 1;
+      }
+
+      return a.chainName.trim().localeCompare(b.chainName.trim());
+    });
+  }
+
   get enabledChainIdentifiers(): string[] {
     return this._enabledChainIdentifiers;
   }
@@ -163,6 +188,23 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
         return false;
       }
       const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
+      return this.enabledChainIdentifiesMap.get(chainIdentifier);
+    });
+  }
+
+  @computed
+  get modularChainInfosInUI() {
+    return this.modularChainInfos.filter((modularChainInfo) => {
+      if ("cosmos" in modularChainInfo && modularChainInfo.cosmos.hideInUI) {
+        return false;
+      }
+      const chainIdentifier = ChainIdHelper.parse(
+        modularChainInfo.chainId
+      ).identifier;
+      // TODO: 일단 background에서 starknet에 대한 enable/disable 기능이 아직 없으므로 테스트 중에는 강제로 활성화 시킨다...
+      if ("starknet" in modularChainInfo) {
+        return true;
+      }
       return this.enabledChainIdentifiesMap.get(chainIdentifier);
     });
   }

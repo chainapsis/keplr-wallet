@@ -527,6 +527,10 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
     return this._chainInfos;
   }
 
+  get modularChainInfos(): ModularChainInfo[] {
+    return this._modularChainInfos;
+  }
+
   @computed
   protected get chainInfoMap(): Map<string, ChainInfoImpl<C>> {
     const result: Map<string, ChainInfoImpl<C>> = new Map();
@@ -609,6 +613,8 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
       if ("currencies" in chainInfo) {
         return {
           chainId: chainInfo.chainId,
+          chainName: chainInfo.chainName,
+          chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
           cosmos: chainInfo as C,
         };
       }
