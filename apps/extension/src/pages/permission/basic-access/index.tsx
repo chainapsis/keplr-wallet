@@ -101,7 +101,13 @@ export const PermissionBasicAccessPage: FunctionComponent<{
         >
           <Box>
             {data.chainIds.map((chainId, index) => {
-              const chainInfo = chainStore.getChain(chainId);
+              const chainInfo = (() => {
+                try {
+                  return chainStore.getChain(chainId);
+                } catch (e) {
+                  return chainStore.getModularChain(chainId);
+                }
+              })();
 
               const isLast = index === data.chainIds.length - 1;
 
