@@ -273,9 +273,16 @@ export const TokenDetailModal: FunctionComponent<{
       ),
       text: "Send",
       onClick: () => {
-        navigate(
-          `/send?chainId=${chainId}&coinMinimalDenom=${coinMinimalDenom}`
-        );
+        if ("cosmos" in modularChainInfo) {
+          navigate(
+            `/send?chainId=${chainId}&coinMinimalDenom=${coinMinimalDenom}`
+          );
+        }
+        if ("starknet" in modularChainInfo) {
+          navigate(
+            `/starknet/send?chainId=${chainId}&coinMinimalDenom=${coinMinimalDenom}`
+          );
+        }
       },
     },
   ];
@@ -664,6 +671,7 @@ export const TokenDetailModal: FunctionComponent<{
             }
 
             if (msgHistory.pages[0].response?.isUnsupported || !isSupported) {
+              // TODO: 아직 cosmos 체인이 아니면 embedded인지 아닌지 구분할 수 없다.
               if ("cosmos" in modularChainInfo) {
                 const chainInfo = chainStore.getChain(chainId);
                 if (chainInfo.embedded.embedded) {
