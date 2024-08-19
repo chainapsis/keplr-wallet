@@ -177,24 +177,39 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
 
     return new Promise((resolve, reject) => {
       let f = false;
+
       sendSimpleMessage(
         this.requester,
         BACKGROUND_PORT,
         "chains",
-        "suggest-chain-info",
+        "need-suggest-chain-info-interaction",
         {
           chainInfo,
         }
-      )
-        .then(resolve)
-        .catch(reject)
-        .finally(() => (f = true));
-
-      setTimeout(() => {
-        if (!f) {
-          this.protectedTryOpenSidePanelIfEnabled();
+      ).then((needInteraction) => {
+        if (!needInteraction) {
+          f = true;
         }
-      }, 100);
+
+        sendSimpleMessage(
+          this.requester,
+          BACKGROUND_PORT,
+          "chains",
+          "suggest-chain-info",
+          {
+            chainInfo,
+          }
+        )
+          .then(resolve)
+          .catch(reject)
+          .finally(() => (f = true));
+
+        setTimeout(() => {
+          if (!f) {
+            this.protectedTryOpenSidePanelIfEnabled();
+          }
+        }, 100);
+      });
     });
   }
 

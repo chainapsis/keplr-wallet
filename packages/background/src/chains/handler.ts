@@ -11,6 +11,7 @@ import {
   GetChainInfosWithoutEndpointsMsg,
   RemoveSuggestedChainInfoMsg,
   SuggestChainInfoMsg,
+  NeedSuggestChainInfoInteractionMsg,
   SetChainEndpointsMsg,
   ClearChainEndpointsMsg,
   GetChainOriginalEndpointsMsg,
@@ -57,6 +58,11 @@ export const getHandler: (
         return handleSuggestChainInfoMsg(chainsService, permissionService)(
           env,
           msg as SuggestChainInfoMsg
+        );
+      case NeedSuggestChainInfoInteractionMsg:
+        return handleNeedSuggestChainInfoInteractionMsg(chainsService)(
+          env,
+          msg as NeedSuggestChainInfoInteractionMsg
         );
       case RemoveSuggestedChainInfoMsg:
         return handleRemoveSuggestedChainInfoMsg(chainsService)(
@@ -169,6 +175,19 @@ const handleSuggestChainInfoMsg: (
       getBasicAccessPermissionType(),
       [msg.origin]
     );
+  };
+};
+
+const handleNeedSuggestChainInfoInteractionMsg: (
+  chainsService: ChainsService
+) => InternalHandler<NeedSuggestChainInfoInteractionMsg> = (chainsService) => {
+  return async (_env, msg) => {
+    if (chainsService.getChainInfo(msg.chainInfo.chainId) != null) {
+      // If suggested chain info is already registered, just return.
+      return false;
+    }
+
+    return chainsService.needSuggestChainInfoInteraction(msg.origin);
   };
 };
 

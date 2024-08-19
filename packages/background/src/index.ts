@@ -68,6 +68,7 @@ export function init(
   privilegedOrigins: string[],
   analyticsPrivilegedOrigins: string[],
   msgPrivilegedOrigins: string[],
+  suggestChainPrivilegedOrigins: string[],
   communityChainInfoRepo: {
     readonly organizationName: string;
     readonly repoName: string;
@@ -119,6 +120,7 @@ export function init(
       updaterKVStore: storeCreator("updator"),
     },
     embedChainInfos,
+    suggestChainPrivilegedOrigins,
     communityChainInfoRepo,
     analyticsService,
     interactionService,

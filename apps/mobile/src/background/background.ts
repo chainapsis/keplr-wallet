@@ -26,6 +26,7 @@ const {initFn} = init(
   PrivilegedOrigins,
   PrivilegedOrigins,
   PrivilegedOrigins,
+  [],
   CommunityChainInfoRepo,
   {
     create: (_params: {
