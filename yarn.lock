@@ -9233,6 +9233,8 @@ __metadata:
   resolution: "@keplr-wallet/types@workspace:packages/types"
   dependencies:
     long: ^4.0.0
+  peerDependencies:
+    starknet: ^6
   languageName: unknown
   linkType: soft
 
