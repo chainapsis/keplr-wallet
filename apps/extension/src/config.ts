@@ -2419,7 +2419,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     chainName: "STRK Sepolia",
     starknet: {
       chainId: "starknet:SN_SEPOLIA",
-      rpc: "https://rpc.nethermind.io/sepolia-juno/?apikey=j1Q0xLaE6tGnTGgST6vHyVXJVKcLW7MGoxqWNh6DEY2TKYW9",
+      rpc: "https://starknet-sepolia.public.blastapi.io/rpc/v0_7",
       currencies: [
         {
           type: "erc20",
