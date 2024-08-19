@@ -42,9 +42,8 @@ const handleGetStarknetKeyMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    await permissionInteractionService.ensureEnabled(
+    await permissionInteractionService.ensureEnabledForStarknet(
       env,
-      [msg.chainId],
       msg.origin
     );
 
@@ -60,9 +59,8 @@ const handleGetStarknetKeysSettledMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    await permissionInteractionService.ensureEnabled(
+    await permissionInteractionService.ensureEnabledForStarknet(
       env,
-      msg.chainIds,
       msg.origin
     );
 

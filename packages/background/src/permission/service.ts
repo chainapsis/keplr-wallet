@@ -26,6 +26,10 @@ export class PermissionService {
   @observable
   protected currentChainIdForEVMByOriginMap: Map<string, string> = new Map();
 
+  @observable
+  protected currentChainIdForStarknetByOriginMap: Map<string, string> =
+    new Map();
+
   constructor(
     protected readonly kvStore: KVStore,
     privilegedOrigins: string[],
@@ -168,7 +172,7 @@ export class PermissionService {
 
     // Skip the permission check `chainIds` if the permission for EVM chain.
     // Because the chain id for this permission can be changed, so it may not be the same as `chainIds`.
-    if (!options?.isForEVM) {
+    if (!options?.isForEVM && !options?.isForStarknet) {
       this.checkBasicAccessPermission(env, chainIds, origin);
     }
   }
@@ -240,6 +244,10 @@ export class PermissionService {
           const chainId = newChainId ?? chainIds[0];
           this.addPermission([chainId], type, origins);
           this.setCurrentChainIdForEVM(origins, chainId);
+        } else if (options?.isForStarknet) {
+          const chainId = newChainId ?? chainIds[0];
+          this.addPermission([chainId], type, origins);
+          this.setCurrentChainIdForStarknet(origins, chainId);
         } else {
           this.addPermission(chainIds, type, origins);
         }
@@ -632,6 +640,66 @@ export class PermissionService {
       }
     } else {
       this.setCurrentChainIdForEVM(origins, chainId);
+    }
+  }
+
+  getCurrentChainIdForStarknet(origin: string): string | undefined {
+    const currentChainId =
+      this.currentChainIdForStarknetByOriginMap.get(origin);
+    if (
+      currentChainId &&
+      !this.hasPermission(
+        currentChainId,
+        getBasicAccessPermissionType(),
+        origin
+      )
+    ) {
+      this.currentChainIdForStarknetByOriginMap.delete(origin);
+      return;
+    }
+
+    return currentChainId;
+  }
+
+  @action
+  setCurrentChainIdForStarknet(origins: string[], chainId: string) {
+    for (const origin of origins) {
+      this.currentChainIdForStarknetByOriginMap.set(origin, chainId);
+
+      // TODO: Implement the event for starknet chain changed.
+      // this.interactionService.dispatchEvent(
+      //   WEBPAGE_PORT,
+      //   "keplr_chainChanged",
+      //   {
+      //     origin,
+      //     starknetChainId,
+      //   }
+      // );
+    }
+  }
+
+  @action
+  async updateCurrentChainIdForStarknet(
+    env: Env,
+    origin: string,
+    chainId: string
+  ) {
+    const type = getBasicAccessPermissionType();
+    const chainIds = [chainId];
+    const origins = [origin];
+
+    if (!this.hasPermission(chainId, type, origin)) {
+      if (env.isInternalMsg) {
+        this.addPermission(chainIds, type, origins);
+        this.setCurrentChainIdForStarknet(origins, chainId);
+      } else {
+        await this.grantPermission(env, chainIds, type, origins, {
+          isForStarknet: true,
+          isUnableToChangeChainInUI: true,
+        });
+      }
+    } else {
+      this.setCurrentChainIdForStarknet(origins, chainId);
     }
   }
 }

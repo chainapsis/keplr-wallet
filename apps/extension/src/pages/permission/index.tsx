@@ -8,6 +8,7 @@ import { GlobalPermissionGetChainInfosPage } from "./get-chain-infos";
 import { useInteractionInfo } from "../../hooks";
 import { FormattedMessage } from "react-intl";
 import { PermissionBasicAccessForEVMPage } from "./basic-access-for-evm";
+import { PermissionBasicAccessForStarknetPage } from "./basic-access-for-starknet";
 
 const UnknownPermissionPage: FunctionComponent<{
   data: {
@@ -47,9 +48,18 @@ export const PermissionPage: FunctionComponent = observer(() => {
 
   const mergedData = permissionStore.waitingPermissionMergedData;
   const mergedDataForEVM = permissionStore.waitingPermissionMergedDataForEVM;
+  const mergedDataForStarknet =
+    permissionStore.waitingPermissionMergedDataForStarknet;
   const globalPermissionData = permissionStore.waitingGlobalPermissionData;
 
-  if (!mergedData && !mergedDataForEVM && !globalPermissionData) {
+  console.log(mergedData, mergedDataForEVM, mergedDataForStarknet);
+
+  if (
+    !mergedData &&
+    !mergedDataForEVM &&
+    !mergedDataForStarknet &&
+    !globalPermissionData
+  ) {
     return <Splash />;
   }
 
@@ -71,6 +81,19 @@ export const PermissionPage: FunctionComponent = observer(() => {
       }
       default: {
         return <UnknownPermissionPage data={mergedDataForEVM} />;
+      }
+    }
+  }
+
+  if (mergedDataForStarknet) {
+    switch (mergedDataForStarknet.type) {
+      case "basic-access": {
+        return (
+          <PermissionBasicAccessForStarknetPage data={mergedDataForStarknet} />
+        );
+      }
+      default: {
+        return <UnknownPermissionPage data={mergedDataForStarknet} />;
       }
     }
   }
