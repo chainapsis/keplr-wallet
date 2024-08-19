@@ -12,11 +12,14 @@ export function makeURL(baseURL: string, url: string): string {
   url =
     url +
     (() => {
-      if (url.includes("?")) {
-        return "&" + baseURLInstance.searchParams.toString();
-      } else {
-        return "?" + baseURLInstance.searchParams.toString();
+      if (Array.from(baseURLInstance.searchParams.keys()).length > 0) {
+        if (url.includes("?")) {
+          return "&" + baseURLInstance.searchParams.toString();
+        } else {
+          return "?" + baseURLInstance.searchParams.toString();
+        }
       }
+      return "";
     })();
 
   return removeLastSlashIfIs(baseURL + "/" + removeFirstSlashIfIs(url));
