@@ -104,7 +104,8 @@ export function init(
   );
 
   const sidePanelService = new SidePanel.SidePanelService(
-    storeCreator("side-panel")
+    storeCreator("side-panel"),
+    analyticsService
   );
 
   const interactionService = new Interaction.InteractionService(
