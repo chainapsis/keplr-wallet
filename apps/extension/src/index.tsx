@@ -99,6 +99,7 @@ import { RoutePageAnalytics } from "./route-page-analytics";
 import { useIntl } from "react-intl";
 import { ActivitiesPage } from "./pages/activities";
 import { isRunningInSidePanel } from "./utils";
+import { StarknetSendPage } from "./pages/starknet/send";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -367,6 +368,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
                 element={<MainPage setIsNotReady={setMainPageIsNotReady} />}
               />
               <Route path="/send" element={<SendAmountPage />} />
+              <Route path="/starknet/send" element={<StarknetSendPage />} />
               <Route path="/ibc-swap" element={<IBCSwapPage />} />
               <Route
                 path="/send/select-asset"
