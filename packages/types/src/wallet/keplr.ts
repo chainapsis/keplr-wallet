@@ -14,6 +14,7 @@ import Long from "long";
 import { SettledResponses } from "../settled";
 import { DirectAuxSignResponse } from "../cosmjs-alt";
 import { IEthereumProvider } from "./ethereum";
+import { IStarknetProvider } from "./starknet";
 
 export interface Key {
   // Name of the selected key store.
@@ -258,4 +259,6 @@ export interface Keplr {
   >;
 
   readonly ethereum: IEthereumProvider;
+
+  readonly starknet: IStarknetProvider | undefined;
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   ChainInfo,
   EthSignType,
@@ -24,6 +25,9 @@ import {
   EIP6963EventNames,
   EIP6963ProviderInfo,
   EIP6963ProviderDetail,
+  IStarknetProvider,
+  RpcMessage,
+  WalletEvents,
 } from "@keplr-wallet/types";
 import {
   Result,
@@ -36,6 +40,7 @@ import deepmerge from "deepmerge";
 import Long from "long";
 import { KeplrCoreTypes } from "./core-types";
 import EventEmitter from "events";
+import { AccountInterface, ProviderInterface } from "starknet";
 
 export interface ProxyRequest {
   type: "proxy-request";
@@ -43,6 +48,7 @@ export interface ProxyRequest {
   method: keyof (Keplr & KeplrCoreTypes);
   args: any[];
   ethereumProviderMethod?: keyof IEthereumProvider;
+  starknetProviderMethod?: keyof IStarknetProvider;
 }
 
 export interface ProxyRequestResponse {
@@ -91,6 +97,11 @@ export function injectKeplrToWindow(keplr: IKeplr): void {
     "getEnigmaUtils",
     keplr.getEnigmaUtils
   );
+
+  defineUnwritablePropertyIfPossible(window, "starknet_keplr", keplr.starknet);
+
+  // TODO: Remove this after testing
+  defineUnwritablePropertyIfPossible(window, "starknet", keplr.starknet);
 }
 
 /**
@@ -148,6 +159,8 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
         if (
           !keplr[message.method] ||
           (message.method !== "ethereum" &&
+            typeof keplr[message.method] !== "function") ||
+          (message.method !== "starknet" &&
             typeof keplr[message.method] !== "function")
         ) {
           throw new Error(`Invalid method: ${message.method}`);
@@ -300,6 +313,71 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
             );
           }
 
+          if (method === "starknet") {
+            const starknetProviderMethod = message.starknetProviderMethod;
+
+            if (starknetProviderMethod?.startsWith("protected")) {
+              throw new Error("Rejected");
+            }
+
+            if (starknetProviderMethod === "id") {
+              throw new Error("id is not function");
+            }
+
+            if (starknetProviderMethod === "name") {
+              throw new Error("name is not function");
+            }
+
+            if (starknetProviderMethod === "version") {
+              throw new Error("version is not function");
+            }
+
+            if (starknetProviderMethod === "icon") {
+              throw new Error("icon is not function");
+            }
+
+            if (starknetProviderMethod === "chainId") {
+              throw new Error("chainId is not function");
+            }
+
+            if (starknetProviderMethod === "selectedAddress") {
+              throw new Error("selectedAddress is not function");
+            }
+
+            if (starknetProviderMethod === "isConnected") {
+              throw new Error("isConnected is not function");
+            }
+
+            if (starknetProviderMethod === "account") {
+              throw new Error("account is not function");
+            }
+
+            if (starknetProviderMethod === "provider") {
+              throw new Error("provider is not function");
+            }
+
+            if (
+              starknetProviderMethod === undefined ||
+              typeof keplr.starknet?.[starknetProviderMethod] !== "function"
+            ) {
+              throw new Error(
+                `${message.starknetProviderMethod} is not function or invalid Starknet provider method`
+              );
+            }
+
+            if (starknetProviderMethod === "request") {
+              return await keplr.starknet.request(
+                JSONUint8Array.unwrap(message.args)
+              );
+            }
+
+            return await keplr.starknet[starknetProviderMethod](
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              ...JSONUint8Array.unwrap(message.args)
+            );
+          }
+
           return await keplr[method](
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
@@ -418,7 +496,12 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
         window.postMessage(message, window.location.origin),
     },
     protected readonly parseMessage?: (message: any) => any,
-    protected readonly eip6963ProviderInfo?: EIP6963ProviderInfo
+    protected readonly eip6963ProviderInfo?: EIP6963ProviderInfo,
+    protected readonly starknetProviderInfo?: {
+      id: string;
+      name: string;
+      icon: string;
+    }
   ) {
     // Freeze fields/method except for "defaultOptions"
     // Intentionally, "defaultOptions" can be mutated to allow a webpage to change the options with cosmjs usage.
@@ -885,6 +968,15 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     this.parseMessage,
     this.eip6963ProviderInfo
   );
+
+  public readonly starknet = this.starknetProviderInfo
+    ? new StarknetProvider(
+        this.starknetProviderInfo.id,
+        this.starknetProviderInfo.name,
+        this.version,
+        this.starknetProviderInfo.icon
+      )
+    : undefined;
 }
 
 class EthereumProvider extends EventEmitter implements IEthereumProvider {
@@ -1148,5 +1240,44 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     return (await this.request({
       method: "net_version",
     })) as string;
+  }
+}
+
+class StarknetProvider implements IStarknetProvider {
+  isConnected: boolean = false;
+
+  chainId?: string | undefined;
+
+  selectedAddress?: string | undefined;
+
+  account?: AccountInterface;
+
+  provider?: ProviderInterface;
+
+  constructor(
+    public readonly id: string,
+    public readonly name: string,
+    public readonly version: string,
+    public readonly icon: string
+  ) {}
+
+  async request<T extends RpcMessage>(
+    _call: Omit<T, "result">
+  ): Promise<T["result"]> {
+    throw new Error("Method not implemented.");
+  }
+  async enable(_options?: {
+    starknetVersion?: "v4" | "v5";
+  }): Promise<string[]> {
+    throw new Error("Method not implemented.");
+  }
+  isPreauthorized(): Promise<boolean> {
+    throw new Error("Method not implemented.");
+  }
+  on<E extends WalletEvents>(_event: E["type"], _handleEvent: E["handler"]) {
+    throw new Error("Method not implemented.");
+  }
+  off<E extends WalletEvents>(_event: E["type"], _handleEvent: E["handler"]) {
+    throw new Error("Method not implemented.");
   }
 }

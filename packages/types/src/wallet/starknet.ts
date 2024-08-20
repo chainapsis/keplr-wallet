@@ -32,7 +32,6 @@ export interface AddStarknetChainParameters {
   baseUrl: string;
   rpcUrls?: string[];
   blockExplorerUrls?: string[];
-
   nativeCurrency?: {
     address: string; // Not part of the standard, but required by StarkNet as it can work with any ERC20 token as the fee token
     name: string;
@@ -68,6 +67,14 @@ export interface IStarknetProvider {
   name: string;
   version: string;
   icon: string;
+
+  isConnected: boolean;
+
+  account?: AccountInterface;
+  provider?: ProviderInterface;
+  selectedAddress?: string;
+  chainId?: string;
+
   request: <T extends RpcMessage>(
     call: Omit<T, "result">
   ) => Promise<T["result"]>;
@@ -81,9 +88,4 @@ export interface IStarknetProvider {
     event: E["type"],
     handleEvent: E["handler"]
   ) => void;
-  account?: AccountInterface;
-  provider?: ProviderInterface;
-  selectedAddress?: string;
-  chainId?: string;
-  isConnected: boolean;
 }

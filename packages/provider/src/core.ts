@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   ChainInfo,
   EthSignType,
@@ -20,6 +21,9 @@ import {
   SettledResponses,
   DirectAuxSignResponse,
   IEthereumProvider,
+  IStarknetProvider,
+  RpcMessage,
+  WalletEvents,
 } from "@keplr-wallet/types";
 import {
   BACKGROUND_PORT,
@@ -1346,6 +1350,8 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   }
 
   public readonly ethereum = new EthereumProvider(this, this.requester);
+
+  public readonly starknet = new StarknetProvider();
 }
 class EthereumProvider extends EventEmitter implements IEthereumProvider {
   chainId: string | null = null;
@@ -1456,3 +1462,41 @@ const sidePanelOpenNeededJSONRPCMethods = [
   "wallet_switchEthereumChain",
   "wallet_watchAsset",
 ];
+
+class StarknetProvider implements IStarknetProvider {
+  id: string = "";
+  name: string = "";
+  version: string = "";
+  icon: string = "";
+
+  isConnected: boolean = false;
+
+  chainId?: string | undefined;
+
+  selectedAddress?: string | undefined;
+
+  account?: any;
+
+  provider?: any;
+
+  constructor() {}
+  async request<T extends RpcMessage>(
+    _call: Omit<T, "result">
+  ): Promise<T["result"]> {
+    throw new Error("Method not implemented.");
+  }
+  async enable(_options?: {
+    starknetVersion?: "v4" | "v5";
+  }): Promise<string[]> {
+    throw new Error("Method not implemented.");
+  }
+  isPreauthorized(): Promise<boolean> {
+    throw new Error("Method not implemented.");
+  }
+  on<E extends WalletEvents>(_event: E["type"], _handleEvent: E["handler"]) {
+    throw new Error("Method not implemented.");
+  }
+  off<E extends WalletEvents>(_event: E["type"], _handleEvent: E["handler"]) {
+    throw new Error("Method not implemented.");
+  }
+}
