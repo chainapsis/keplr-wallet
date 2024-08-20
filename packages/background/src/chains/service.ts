@@ -72,6 +72,7 @@ export class ChainsService {
     },
     // embedChainInfos는 실행 이후에 변경되어서는 안된다.
     protected readonly embedChainInfos: ReadonlyArray<ChainInfoWithCoreTypes>,
+    protected readonly suggestChainPrivilegedOrigins: string[],
     protected readonly communityChainInfoRepo: {
       readonly organizationName: string;
       readonly repoName: string;
@@ -97,6 +98,12 @@ export class ChainsService {
     );
     this.repoChainInfoKVStore = new PrefixKVStore(kvStore, "repoChainInfo");
     this.endpointsKVStore = new PrefixKVStore(kvStore, "endpoints");
+
+    this.suggestChainPrivilegedOrigins = this.suggestChainPrivilegedOrigins.map(
+      (origin) => {
+        return new URL(origin).origin;
+      }
+    );
 
     makeObservable(this);
   }
@@ -420,53 +427,14 @@ export class ChainsService {
       return false;
     }
 
-    const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
     const isEvmOnlyChain = this.isEvmOnlyChain(chainId);
-
-    const res = await simpleFetch<
-      (Omit<ChainInfo, "rest"> & { websocket: string }) | ChainInfo
-    >(
-      this.communityChainInfoRepo.alternativeURL
-        ? this.communityChainInfoRepo.alternativeURL
-            .replace("{chain_identifier}", chainIdentifier)
-            .replace("/cosmos/", isEvmOnlyChain ? "/evm/" : "/cosmos/")
-        : `https://raw.githubusercontent.com/${
-            this.communityChainInfoRepo.organizationName
-          }/${this.communityChainInfoRepo.repoName}/${
-            this.communityChainInfoRepo.branchName
-          }/${isEvmOnlyChain ? "evm" : "cosmos"}/${chainIdentifier}.json`
-    );
-    let chainInfo: ChainInfo =
-      "rest" in res.data && !isEvmOnlyChain
-        ? res.data
-        : {
-            ...res.data,
-            rest: res.data.rpc,
-            evm: {
-              chainId: parseInt(res.data.chainId.replace("eip155:", ""), 10),
-              rpc: res.data.rpc,
-              ...("websocket" in res.data && { websocket: res.data.websocket }),
-            },
-            features: ["eth-address-gen", "eth-key-sign"].concat(
-              res.data.features ?? []
-            ),
-          };
-
-    const fetchedChainIdentifier = ChainIdHelper.parse(
-      chainInfo.chainId
-    ).identifier;
-    if (chainIdentifier !== fetchedChainIdentifier) {
-      throw new Error(
-        `The chainId is not valid.(${chainId} -> ${fetchedChainIdentifier})`
-      );
-    }
-
-    chainInfo = await validateBasicChainInfoType(chainInfo);
+    const chainInfo = await this.fetchFromRepo(chainId, isEvmOnlyChain);
 
     if (!this.hasChainInfo(chainId)) {
       throw new Error(`${chainId} became unregistered after fetching`);
     }
 
+    const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
     const prevChainInfoFromRepo = this.getRepoChainInfo(chainId);
     if (
       !prevChainInfoFromRepo ||
@@ -492,6 +460,53 @@ export class ChainsService {
     }
 
     return false;
+  }
+
+  protected async fetchFromRepo(
+    chainId: string,
+    isEvmOnlyChain: boolean
+  ): Promise<ChainInfo> {
+    const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+
+    const res = await simpleFetch<
+      (Omit<ChainInfo, "rest"> & { websocket: string }) | ChainInfo
+    >(
+      this.communityChainInfoRepo.alternativeURL
+        ? this.communityChainInfoRepo.alternativeURL
+            .replace("{chain_identifier}", chainIdentifier)
+            .replace("/cosmos/", isEvmOnlyChain ? "/evm/" : "/cosmos/")
+        : `https://raw.githubusercontent.com/${
+            this.communityChainInfoRepo.organizationName
+          }/${this.communityChainInfoRepo.repoName}/${
+            this.communityChainInfoRepo.branchName
+          }/${isEvmOnlyChain ? "evm" : "cosmos"}/${chainIdentifier}.json`
+    );
+    const chainInfo: ChainInfo =
+      "rest" in res.data && !isEvmOnlyChain
+        ? res.data
+        : {
+            ...res.data,
+            rest: res.data.rpc,
+            evm: {
+              chainId: parseInt(res.data.chainId.replace("eip155:", ""), 10),
+              rpc: res.data.rpc,
+              ...("websocket" in res.data && { websocket: res.data.websocket }),
+            },
+            features: ["eth-address-gen", "eth-key-sign"].concat(
+              res.data.features ?? []
+            ),
+          };
+
+    const fetchedChainIdentifier = ChainIdHelper.parse(
+      chainInfo.chainId
+    ).identifier;
+    if (chainIdentifier !== fetchedChainIdentifier) {
+      throw new Error(
+        `The chainId is not valid.(${chainId} -> ${fetchedChainIdentifier})`
+      );
+    }
+
+    return await validateBasicChainInfoType(chainInfo);
   }
 
   async tryUpdateChainInfoFromRpcOrRest(chainId: string): Promise<boolean> {
@@ -602,6 +617,10 @@ export class ChainsService {
     }
   }
 
+  async needSuggestChainInfoInteraction(origin: string): Promise<boolean> {
+    return !this.suggestChainPrivilegedOrigins.includes(origin);
+  }
+
   async suggestChainInfo(
     env: Env,
     chainInfo: ChainInfo,
@@ -609,39 +628,57 @@ export class ChainsService {
   ): Promise<void> {
     chainInfo = await validateBasicChainInfoType(chainInfo);
 
-    await this.interactionService.waitApproveV2(
-      env,
-      "/suggest-chain",
-      SuggestChainInfoMsg.type(),
-      {
-        chainInfo,
-        origin,
-      },
-      async (receivedChainInfo: ChainInfoWithSuggestedOptions) => {
-        // approve 이후에 이미 등록되어있으면 아무것도 하지 않는다...
-        if (this.hasChainInfo(receivedChainInfo.chainId)) {
-          return;
-        }
-
-        const validChainInfo = {
-          ...(await validateBasicChainInfoType(receivedChainInfo)),
-          beta: chainInfo.beta,
-          updateFromRepoDisabled: receivedChainInfo.updateFromRepoDisabled,
-        };
-
-        if (validChainInfo.updateFromRepoDisabled) {
-          console.log(
-            `Chain ${validChainInfo.chainName}(${validChainInfo.chainId}) added with updateFromRepoDisabled`
-          );
-        } else {
-          console.log(
-            `Chain ${validChainInfo.chainName}(${validChainInfo.chainId}) added`
-          );
-        }
-
-        await this.addSuggestedChainInfo(validChainInfo);
+    const onApprove = async (
+      receivedChainInfo: ChainInfoWithSuggestedOptions
+    ) => {
+      // approve 이후에 이미 등록되어있으면 아무것도 하지 않는다...
+      if (this.hasChainInfo(receivedChainInfo.chainId)) {
+        return;
       }
-    );
+
+      const validChainInfo = {
+        ...(await validateBasicChainInfoType(receivedChainInfo)),
+        beta: chainInfo.beta,
+        updateFromRepoDisabled: receivedChainInfo.updateFromRepoDisabled,
+      };
+
+      if (validChainInfo.updateFromRepoDisabled) {
+        console.log(
+          `Chain ${validChainInfo.chainName}(${validChainInfo.chainId}) added with updateFromRepoDisabled`
+        );
+      } else {
+        console.log(
+          `Chain ${validChainInfo.chainName}(${validChainInfo.chainId}) added`
+        );
+      }
+
+      await this.addSuggestedChainInfo(validChainInfo);
+    };
+
+    if (this.suggestChainPrivilegedOrigins.includes(origin)) {
+      try {
+        const isEvmOnlyChain =
+          chainInfo.evm !== undefined &&
+          chainInfo.chainId.split(":")[0] === "eip155";
+        chainInfo = await this.fetchFromRepo(chainInfo.chainId, isEvmOnlyChain);
+      } catch (e) {
+        console.log(e);
+      }
+      await onApprove(chainInfo);
+    } else {
+      await this.interactionService.waitApproveV2(
+        env,
+        "/suggest-chain",
+        SuggestChainInfoMsg.type(),
+        {
+          chainInfo,
+          origin,
+        },
+        async (receivedChainInfo: ChainInfoWithSuggestedOptions) => {
+          await onApprove(receivedChainInfo);
+        }
+      );
+    }
   }
 
   async addSuggestedChainInfo(

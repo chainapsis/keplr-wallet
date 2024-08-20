@@ -10,6 +10,7 @@ import { getKeplrFromWindow } from "@keplr-wallet/stores";
 import { Keplr } from "@keplr-wallet/types";
 import { autorun } from "mobx";
 import { PlainObject } from "@keplr-wallet/background";
+import { addGlobalEventListener } from "../utils/global-events";
 
 interface KeplrCoreTypes {
   __core__getAnalyticsId(): Promise<string>;
@@ -35,6 +36,104 @@ export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
       }
     );
   }, [stores.analyticsStore]);
+
+  useEffect(() => {
+    // XXX: side panel 기능이 추가되면서 extension UI가 여러개 존재할 수 있게 되었기 때문에
+    //      다른 UI에서의 상태변화에 따라서 현재 UI에서도 상태변화를 맞춰줘야할 필요가 생겼다.
+    //      원래 팝업에서는 이런 경우가 사실상 발생하기 어려웠기 때문에 이런걸 따로 처리할 구조를 가지고 있지 않았다.
+    //      어쩔 수 없으니 일단 그런 경우가 발생할 수 있다고 파악될 경우 수동으로 일일히 처리해준다...
+    const disposal1 = addGlobalEventListener(
+      "keplr_keyring_changed",
+      async () => {
+        await stores.keyRingStore.refreshKeyRingStatus();
+        await stores.chainStore.updateEnabledChainIdentifiersFromBackground();
+
+        for (const chainInfo of stores.chainStore.chainInfos) {
+          if (stores.accountStore.hasAccount(chainInfo.chainId)) {
+            stores.accountStore.getAccount(chainInfo.chainId).init();
+          }
+        }
+      }
+    );
+
+    const disposal2 = addGlobalEventListener(
+      "keplr_new_key_created",
+      async (newKeyId: string) => {
+        await stores.keyRingStore.refreshKeyRingStatus();
+        if (newKeyId && stores.keyRingStore.selectedKeyInfo?.id === newKeyId) {
+          await stores.chainStore.updateEnabledChainIdentifiersFromBackground();
+
+          for (const chainInfo of stores.chainStore.chainInfos) {
+            if (stores.accountStore.hasAccount(chainInfo.chainId)) {
+              stores.accountStore.getAccount(chainInfo.chainId).init();
+            }
+          }
+        }
+      }
+    );
+
+    const disposal3 = addGlobalEventListener(
+      "keplr_enabled_chain_changed",
+      async (keyId: string) => {
+        if (keyId && stores.keyRingStore.selectedKeyInfo?.id === keyId) {
+          await stores.chainStore.updateEnabledChainIdentifiersFromBackground();
+        }
+      }
+    );
+
+    const disposal4 = addGlobalEventListener(
+      "keplr_derivation_path_changed",
+      async (params: any) => {
+        await stores.keyRingStore.refreshKeyRingStatus();
+        if (params?.chainId) {
+          if (stores.accountStore.hasAccount(params.chainId)) {
+            stores.accountStore.getAccount(params.chainId).init();
+          }
+        }
+        if (
+          params?.keyId &&
+          stores.keyRingStore.selectedKeyInfo?.id === params.keyId
+        ) {
+          await stores.chainStore.updateEnabledChainIdentifiersFromBackground();
+        }
+      }
+    );
+
+    const disposal5 = addGlobalEventListener(
+      "keplr_suggested_chain_added",
+      async () => {
+        await stores.keyRingStore.refreshKeyRingStatus();
+        await stores.chainStore.updateChainInfosFromBackground();
+        await stores.chainStore.updateEnabledChainIdentifiersFromBackground();
+      }
+    );
+
+    const disposal6 = addGlobalEventListener(
+      "keplr_suggested_chain_removed",
+      async () => {
+        await stores.keyRingStore.refreshKeyRingStatus();
+        await stores.chainStore.updateChainInfosFromBackground();
+        await stores.chainStore.updateEnabledChainIdentifiersFromBackground();
+      }
+    );
+
+    const disposal7 = addGlobalEventListener(
+      "keplr_keyring_locked",
+      async () => {
+        await stores.keyRingStore.refreshKeyRingStatus();
+      }
+    );
+
+    return () => {
+      disposal1();
+      disposal2();
+      disposal3();
+      disposal4();
+      disposal5();
+      disposal6();
+      disposal7();
+    };
+  }, [stores]);
 
   useEffect(() => {
     const disposal = autorun(() => {

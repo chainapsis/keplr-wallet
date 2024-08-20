@@ -1,11 +1,15 @@
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { isServiceWorker, KVStore } from "@keplr-wallet/common";
+import { AnalyticsService } from "../analytics";
 
 export class SidePanelService {
   @observable
   protected _isEnabled: boolean = false;
 
-  constructor(protected readonly kvStore: KVStore) {
+  constructor(
+    protected readonly kvStore: KVStore,
+    protected readonly analyticsService: AnalyticsService
+  ) {
     makeObservable(this);
   }
 
@@ -28,6 +32,12 @@ export class SidePanelService {
         this.setPanelBehavior().catch(console.log);
       });
     }
+
+    autorun(() => {
+      this.analyticsService.logEventIgnoreError("side_panel", {
+        enabled: this.getIsEnabled(),
+      });
+    });
   }
 
   @action

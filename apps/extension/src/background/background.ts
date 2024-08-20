@@ -38,6 +38,7 @@ const { initFn, keyRingService, analyticsService } = init(
   PrivilegedOrigins,
   PrivilegedOrigins,
   PrivilegedOrigins,
+  ["https://testnet.keplr.app", "https://multisig.keplr.app"],
   CommunityChainInfoRepo,
   {
     create: (params: {

@@ -127,6 +127,34 @@ export class SuggestChainInfoMsg extends Message<void> {
   }
 }
 
+export class NeedSuggestChainInfoInteractionMsg extends Message<boolean> {
+  public static type() {
+    return "need-suggest-chain-info-interaction";
+  }
+
+  constructor(public readonly chainInfo: ChainInfo) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainInfo) {
+      throw new KeplrError("chains", 100, "Chain info not set");
+    }
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return NeedSuggestChainInfoInteractionMsg.type();
+  }
+}
+
 export class RemoveSuggestedChainInfoMsg extends Message<
   ChainInfoWithCoreTypes[]
 > {

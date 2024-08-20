@@ -16,6 +16,7 @@ import lottie from "lottie-web";
 import AnimSeed from "../../../public/assets/lottie/wallet/delete.json";
 import { YAxis } from "../../../components/axis";
 import { FormattedMessage, useIntl } from "react-intl";
+import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
 
 const Styles = {
   Container: styled(Stack)`
@@ -105,6 +106,8 @@ export const WalletDeletePage: FunctionComponent = observer(() => {
         try {
           if (vaultId) {
             await keyRingStore.deleteKeyRing(vaultId, data.password);
+
+            dispatchGlobalEventExceptSelf("keplr_keyring_changed");
 
             navigate(-1);
           }

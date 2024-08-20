@@ -11,6 +11,7 @@ import {
   GetChainInfosWithoutEndpointsMsg,
   RemoveSuggestedChainInfoMsg,
   SuggestChainInfoMsg,
+  NeedSuggestChainInfoInteractionMsg,
   SetChainEndpointsMsg,
   ClearChainEndpointsMsg,
   GetChainOriginalEndpointsMsg,
@@ -54,9 +55,15 @@ export const getHandler: (
           permissionInteractiveService
         )(env, msg as GetChainInfoWithoutEndpointsMsg);
       case SuggestChainInfoMsg:
-        return handleSuggestChainInfoMsg(chainsService, permissionService)(
+        return handleSuggestChainInfoMsg(
+          chainsService,
+          permissionService,
+          permissionInteractiveService
+        )(env, msg as SuggestChainInfoMsg);
+      case NeedSuggestChainInfoInteractionMsg:
+        return handleNeedSuggestChainInfoInteractionMsg(chainsService)(
           env,
-          msg as SuggestChainInfoMsg
+          msg as NeedSuggestChainInfoInteractionMsg
         );
       case RemoveSuggestedChainInfoMsg:
         return handleRemoveSuggestedChainInfoMsg(chainsService)(
@@ -148,16 +155,20 @@ const handleGetChainInfoWithoutEndpointsMsg: (
 
 const handleSuggestChainInfoMsg: (
   chainsService: ChainsService,
-  permissionService: PermissionService
+  permissionService: PermissionService,
+  permissionInteractiveService: PermissionInteractiveService
 ) => InternalHandler<SuggestChainInfoMsg> = (
   chainsService,
-  permissionService
+  permissionService,
+  permissionInteractiveService
 ) => {
   return async (env, msg) => {
     if (chainsService.getChainInfo(msg.chainInfo.chainId) != null) {
       // If suggested chain info is already registered, just return.
       return;
     }
+
+    await permissionInteractiveService.ensureKeyRingNotEmpty(env);
 
     const chainInfo = msg.chainInfo as Writeable<ChainInfo>;
     chainInfo.beta = true;
@@ -169,6 +180,19 @@ const handleSuggestChainInfoMsg: (
       getBasicAccessPermissionType(),
       [msg.origin]
     );
+  };
+};
+
+const handleNeedSuggestChainInfoInteractionMsg: (
+  chainsService: ChainsService
+) => InternalHandler<NeedSuggestChainInfoInteractionMsg> = (chainsService) => {
+  return async (_env, msg) => {
+    if (chainsService.getChainInfo(msg.chainInfo.chainId) != null) {
+      // If suggested chain info is already registered, just return.
+      return false;
+    }
+
+    return chainsService.needSuggestChainInfoInteraction(msg.origin);
   };
 };
 

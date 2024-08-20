@@ -20,6 +20,7 @@ import lottie from "lottie-web";
 import { PlainObject } from "@keplr-wallet/background";
 import { MultiAccounts } from "@keystonehq/keystone-sdk";
 import { useTheme } from "styled-components";
+import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
 
 /**
  * FinalizeKeyScene is used to create the key (account).
@@ -190,6 +191,8 @@ export const FinalizeKeyScene: FunctionComponent<{
             }
           }
         }
+
+        dispatchGlobalEventExceptSelf("keplr_new_key_created", vaultId);
 
         await Promise.allSettled(promises);
 

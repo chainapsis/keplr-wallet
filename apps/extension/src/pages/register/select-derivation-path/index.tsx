@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useRegisterHeader } from "../components/header";
 import {
@@ -31,6 +31,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { AppCurrency } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
+import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
 
 export const SelectDerivationPathScene: FunctionComponent<{
   // 한 scene 당 하나의 chain id만 다룬다.
@@ -77,6 +78,27 @@ export const SelectDerivationPathScene: FunctionComponent<{
   const chainId = chainIds[0];
   const chainInfo = chainStore.getChain(chainId);
 
+  const _goToNext = () => {
+    if (chainIds.length > 1) {
+      sceneTransition.replace("select-derivation-path", {
+        vaultId,
+        chainIds: chainIds.slice(1),
+
+        totalCount,
+      });
+    } else {
+      if (skipWelcome) {
+        window.close();
+      } else {
+        navigate("/welcome", {
+          replace: true,
+        });
+      }
+    }
+  };
+  const goToNext = useRef(_goToNext);
+  goToNext.current = _goToNext;
+
   const [selectedCoinType, setSelectedCoinType] = useState(-1);
 
   const [candidates, setCandidates] = useState<
@@ -91,11 +113,36 @@ export const SelectDerivationPathScene: FunctionComponent<{
       .then((res) => {
         setCandidates(res);
 
-        if (res.length > 0) {
+        if (res.length > 1) {
           setSelectedCoinType(res[0].coinType);
         }
+
+        if (res.length === 1) {
+          (async () => {
+            const chainInfo = chainStore.getChain(chainId);
+            if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
+              await keyRingStore.finalizeKeyCoinType(
+                vaultId,
+                chainId,
+                res[0].coinType
+              );
+            }
+            await chainStore.enableChainInfoInUIWithVaultId(vaultId, chainId);
+
+            dispatchGlobalEventExceptSelf("keplr_derivation_path_changed", {
+              chainId,
+              keyId: vaultId,
+            });
+
+            goToNext.current();
+          })();
+        }
+
+        if (res.length === 0) {
+          goToNext.current();
+        }
       });
-  }, [chainId, keyRingStore, vaultId]);
+  }, [chainId, chainStore, keyRingStore, vaultId]);
 
   const currency = chainInfo.stakeCurrency || chainInfo.currencies[0];
 
@@ -204,22 +251,12 @@ export const SelectDerivationPathScene: FunctionComponent<{
                   chainId
                 );
 
-                if (chainIds.length > 1) {
-                  sceneTransition.replace("select-derivation-path", {
-                    vaultId,
-                    chainIds: chainIds.slice(1),
+                dispatchGlobalEventExceptSelf("keplr_derivation_path_changed", {
+                  chainId,
+                  keyId: vaultId,
+                });
 
-                    totalCount,
-                  });
-                } else {
-                  if (skipWelcome) {
-                    window.close();
-                  } else {
-                    navigate("/welcome", {
-                      replace: true,
-                    });
-                  }
-                }
+                goToNext.current();
               }
             }}
           />

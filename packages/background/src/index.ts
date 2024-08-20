@@ -68,6 +68,7 @@ export function init(
   privilegedOrigins: string[],
   analyticsPrivilegedOrigins: string[],
   msgPrivilegedOrigins: string[],
+  suggestChainPrivilegedOrigins: string[],
   communityChainInfoRepo: {
     readonly organizationName: string;
     readonly repoName: string;
@@ -103,7 +104,8 @@ export function init(
   );
 
   const sidePanelService = new SidePanel.SidePanelService(
-    storeCreator("side-panel")
+    storeCreator("side-panel"),
+    analyticsService
   );
 
   const interactionService = new Interaction.InteractionService(
@@ -119,6 +121,7 @@ export function init(
       updaterKVStore: storeCreator("updator"),
     },
     embedChainInfos,
+    suggestChainPrivilegedOrigins,
     communityChainInfoRepo,
     analyticsService,
     interactionService,
@@ -222,6 +225,7 @@ export function init(
   );
   const permissionInteractiveService =
     new PermissionInteractive.PermissionInteractiveService(
+      storeCreator("permission-interactive"),
       permissionService,
       keyRingV2Service,
       chainsService

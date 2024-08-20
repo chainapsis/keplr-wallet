@@ -41,6 +41,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { Tag } from "../../../components/tag";
 import SimpleBar from "simplebar-react";
 import { useTheme } from "styled-components";
+import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -588,12 +589,27 @@ export const EnableChainsScene: FunctionComponent<{
 
       let numSelected = 0;
       for (const enabledChainIdentifier of enabledChainIdentifiers) {
-        if (chainInfoMap.has(enabledChainIdentifier)) {
-          numSelected++;
+        const enabledChainInfo = chainInfoMap.get(enabledChainIdentifier);
+        if (enabledChainInfo) {
+          const isEthermintLike =
+            enabledChainInfo.bip44.coinType === 60 ||
+            !!enabledChainInfo.features?.includes("eth-address-gen") ||
+            !!enabledChainInfo.features?.includes("eth-key-sign");
+
+          if (
+            (fallbackEthereumLedgerApp && isEthermintLike) ||
+            (!fallbackEthereumLedgerApp && !isEthermintLike)
+          ) {
+            numSelected++;
+          }
         }
       }
       return numSelected;
-    }, [chainStore.chainInfos, enabledChainIdentifiers]);
+    }, [
+      chainStore.chainInfos,
+      enabledChainIdentifiers,
+      fallbackEthereumLedgerApp,
+    ]);
 
     const replaceToWelcomePage = () => {
       if (skipWelcome) {
@@ -766,75 +782,71 @@ export const EnableChainsScene: FunctionComponent<{
           </Stack>
         </SimpleBar>
 
-        {!fallbackEthereumLedgerApp ? (
-          <React.Fragment>
-            <Gutter size="1.25rem" />
+        <React.Fragment>
+          <Gutter size="1.25rem" />
 
-            <YAxis alignX="center">
-              <Box
-                alignX="center"
-                cursor="pointer"
-                onClick={(e) => {
-                  e.preventDefault();
+          <YAxis alignX="center">
+            <Box
+              alignX="center"
+              cursor="pointer"
+              onClick={(e) => {
+                e.preventDefault();
 
-                  if (
-                    chainInfos.length === enabledChainIdentifiersInPage.length
-                  ) {
-                    if (preSelectedChainIdentifiers.length > 0) {
-                      setEnabledChainIdentifiers(preSelectedChainIdentifiers);
-                    } else {
-                      if (chainInfos.length > 0) {
-                        setEnabledChainIdentifiers([
-                          chainInfos[0].chainIdentifier,
-                        ]);
-                      }
-                    }
+                if (
+                  chainInfos.length === enabledChainIdentifiersInPage.length
+                ) {
+                  if (preSelectedChainIdentifiers.length > 0) {
+                    setEnabledChainIdentifiers(preSelectedChainIdentifiers);
                   } else {
-                    setPreSelectedChainIdentifiers([
-                      ...enabledChainIdentifiers,
-                    ]);
-                    const newEnabledChainIdentifiers: string[] =
-                      enabledChainIdentifiers.slice();
-                    for (const chainInfo of chainInfos) {
-                      if (
-                        !newEnabledChainIdentifiers.includes(
-                          chainInfo.chainIdentifier
-                        )
-                      ) {
-                        newEnabledChainIdentifiers.push(
-                          chainInfo.chainIdentifier
-                        );
-                      }
+                    if (chainInfos.length > 0) {
+                      setEnabledChainIdentifiers([
+                        chainInfos[0].chainIdentifier,
+                      ]);
                     }
-                    setEnabledChainIdentifiers(newEnabledChainIdentifiers);
                   }
-                }}
-              >
-                <XAxis alignY="center">
-                  <Body2
-                    color={
-                      theme.mode === "light"
-                        ? ColorPalette["gray-200"]
-                        : ColorPalette["gray-300"]
+                } else {
+                  setPreSelectedChainIdentifiers([...enabledChainIdentifiers]);
+                  const newEnabledChainIdentifiers: string[] =
+                    enabledChainIdentifiers.slice();
+                  for (const chainInfo of chainInfos) {
+                    if (
+                      !newEnabledChainIdentifiers.includes(
+                        chainInfo.chainIdentifier
+                      )
+                    ) {
+                      newEnabledChainIdentifiers.push(
+                        chainInfo.chainIdentifier
+                      );
                     }
-                  >
-                    <FormattedMessage id="text-button.select-all" />
-                  </Body2>
+                  }
+                  setEnabledChainIdentifiers(newEnabledChainIdentifiers);
+                }
+              }}
+            >
+              <XAxis alignY="center">
+                <Body2
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-200"]
+                      : ColorPalette["gray-300"]
+                  }
+                >
+                  <FormattedMessage id="text-button.select-all" />
+                </Body2>
 
-                  <Gutter size="0.25rem" />
+                <Gutter size="0.25rem" />
 
-                  <Checkbox
-                    size="small"
-                    checked={
-                      chainInfos.length === enabledChainIdentifiersInPage.length
-                    }
-                    onChange={() => {}}
-                  />
-                </XAxis>
-              </Box>
-            </YAxis>
-          </React.Fragment>
-        ) : null}
+                <Checkbox
+                  size="small"
+                  checked={
+                    chainInfos.length === enabledChainIdentifiersInPage.length
+                  }
+                  onChange={() => {}}
+                />
+              </XAxis>
+            </Box>
+          </YAxis>
+        </React.Fragment>
 
         <Gutter size="1.25rem" />
         <Box width="22.5rem" marginX="auto">
@@ -920,6 +932,11 @@ export const EnableChainsScene: FunctionComponent<{
                 })(),
               ]);
 
+              dispatchGlobalEventExceptSelf(
+                "keplr_enabled_chain_changed",
+                vaultId
+              );
+
               if (needFinalizeCoinType.length > 0) {
                 sceneMovedToSelectDerivation.current = true;
                 sceneTransition.replace("select-derivation-path", {
@@ -955,6 +972,10 @@ export const EnableChainsScene: FunctionComponent<{
                     if (keyInfo.insensitive["Ethereum"]) {
                       await chainStore.enableChainInfoInUI(
                         ...ledgerEthereumAppNeeds
+                      );
+                      dispatchGlobalEventExceptSelf(
+                        "keplr_enabled_chain_changed",
+                        keyInfo.id
                       );
                       replaceToWelcomePage();
                     } else {

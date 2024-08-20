@@ -2421,6 +2421,8 @@ export const PrivilegedOrigins: string[] = [
   "https://wallet.keplr.app",
   "https://validator.keplr.app",
   "https://chains.keplr.app",
+  "https://testnet.keplr.app",
+  "https://multisig.keplr.app",
 ];
 
 export const CommunityChainInfoRepo = {

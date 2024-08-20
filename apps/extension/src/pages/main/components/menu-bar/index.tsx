@@ -13,6 +13,8 @@ import { XAxis } from "../../../../components/axis";
 import { Bleed } from "../../../../components/bleed";
 import { FormattedMessage } from "react-intl";
 import { useLocation } from "react-router-dom";
+import { isRunningInSidePanel } from "../../../../utils";
+import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
 
 const Styles = {
   MenuItem: styled(H3)`
@@ -88,7 +90,11 @@ export const MenuBar: FunctionComponent<{
                   url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true`,
                 })
                 .then(() => {
-                  window.close();
+                  if (!isRunningInSidePanel()) {
+                    window.close();
+                  } else {
+                    close();
+                  }
                 });
             }
           }}
@@ -133,10 +139,12 @@ export const MenuBar: FunctionComponent<{
       <Styles.Flex1 />
 
       <Styles.MenuItem
-        onClick={(e) => {
+        onClick={async (e) => {
           e.preventDefault();
 
-          keyRingStore.lock();
+          await keyRingStore.lock();
+
+          dispatchGlobalEventExceptSelf("keplr_keyring_locked");
         }}
       >
         <FormattedMessage id="page.main.components.menu-bar.lock-wallet-title" />

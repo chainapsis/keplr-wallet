@@ -16,6 +16,7 @@ import { Gutter } from "../../../../components/gutter";
 import { Tooltip } from "../../../../components/tooltip";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
+import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
 
 export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
   () => {
@@ -47,8 +48,14 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
                   <ChainItem
                     key={chainInfo.chainIdentifier}
                     chainInfo={chainInfo}
-                    onClickClose={() => {
-                      chainStore.removeChainInfo(chainInfo.chainIdentifier);
+                    onClickClose={async () => {
+                      await chainStore.removeChainInfo(
+                        chainInfo.chainIdentifier
+                      );
+
+                      dispatchGlobalEventExceptSelf(
+                        "keplr_suggested_chain_removed"
+                      );
                     }}
                   />
                 );
