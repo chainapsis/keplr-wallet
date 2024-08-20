@@ -26,7 +26,6 @@ import {
   EIP6963ProviderInfo,
   EIP6963ProviderDetail,
   IStarknetProvider,
-  RpcMessage,
   WalletEvents,
 } from "@keplr-wallet/types";
 import {
@@ -159,8 +158,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
         if (
           !keplr[message.method] ||
           (message.method !== "ethereum" &&
-            typeof keplr[message.method] !== "function") ||
-          (message.method !== "starknet" &&
+            message.method !== "starknet" &&
             typeof keplr[message.method] !== "function")
         ) {
           throw new Error(`Invalid method: ${message.method}`);
@@ -974,7 +972,10 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
         this.starknetProviderInfo.id,
         this.starknetProviderInfo.name,
         this.version,
-        this.starknetProviderInfo.icon
+        this.starknetProviderInfo.icon,
+        this,
+        this.eventListener,
+        this.parseMessage
       )
     : undefined;
 }
@@ -1246,30 +1247,150 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
 class StarknetProvider implements IStarknetProvider {
   isConnected: boolean = false;
 
-  chainId?: string | undefined;
+  chainId?: string = undefined;
 
-  selectedAddress?: string | undefined;
+  selectedAddress?: string = undefined;
 
-  account?: AccountInterface;
+  account?: AccountInterface = undefined;
 
-  provider?: ProviderInterface;
+  provider?: ProviderInterface = undefined;
 
   constructor(
     public readonly id: string,
     public readonly name: string,
     public readonly version: string,
-    public readonly icon: string
-  ) {}
+    public readonly icon: string,
 
-  async request<T extends RpcMessage>(
-    _call: Omit<T, "result">
-  ): Promise<T["result"]> {
-    throw new Error("Method not implemented.");
+    protected readonly _injectedKeplr: InjectedKeplr,
+    protected readonly _eventListener: {
+      addMessageListener: (fn: (e: any) => void) => void;
+      removeMessageListener: (fn: (e: any) => void) => void;
+      postMessage: (message: any) => void;
+    } = {
+      addMessageListener: (fn: (e: any) => void) =>
+        window.addEventListener("message", fn),
+      removeMessageListener: (fn: (e: any) => void) =>
+        window.removeEventListener("message", fn),
+      postMessage: (message) =>
+        window.postMessage(message, window.location.origin),
+    },
+
+    protected readonly _parseMessage?: (message: any) => any
+  ) {
+    this._initProviderState();
+  }
+
+  protected async _requestMethod<T = unknown>(
+    method: keyof IStarknetProvider,
+    args: Record<string, any>
+  ): Promise<T> {
+    const bytes = new Uint8Array(8);
+    const id: string = Array.from(crypto.getRandomValues(bytes))
+      .map((value) => {
+        return value.toString(16);
+      })
+      .join("");
+
+    const proxyMessage: ProxyRequest = {
+      type: "proxy-request",
+      id,
+      method: "starknet",
+      args: JSONUint8Array.wrap(args),
+      starknetProviderMethod: method,
+    };
+
+    return new Promise<T>((resolve, reject) => {
+      const receiveResponse = (e: any) => {
+        const proxyResponse: ProxyRequestResponse = this._parseMessage
+          ? this._parseMessage(e.data)
+          : e.data;
+
+        if (!proxyResponse || proxyResponse.type !== "proxy-request-response") {
+          return;
+        }
+
+        if (proxyResponse.id !== id) {
+          return;
+        }
+
+        this._eventListener.removeMessageListener(receiveResponse);
+
+        const result = JSONUint8Array.unwrap(proxyResponse.result);
+
+        if (!result) {
+          reject(new Error("Result is null"));
+          return;
+        }
+
+        if (result.error) {
+          const error = result.error;
+          reject(
+            error.code && !error.module
+              ? new EthereumProviderRpcError(
+                  error.code,
+                  error.message,
+                  error.data
+                )
+              : new Error(error)
+          );
+          return;
+        }
+
+        resolve(result.return as T);
+      };
+
+      this._eventListener.addMessageListener(receiveResponse);
+
+      this._eventListener.postMessage(proxyMessage);
+    });
+  }
+
+  protected async _initProviderState() {
+    const initialProviderState = await this.request<{
+      currentChainId: string | null;
+      selectedAddress: string | null;
+    }>({
+      type: "keplr_initStarknetProviderState",
+    });
+
+    const { currentChainId, selectedAddress } = initialProviderState;
+
+    if (currentChainId != null && selectedAddress != null) {
+      this.chainId = currentChainId.replace("starknet:", "");
+      this.selectedAddress = selectedAddress;
+      this.isConnected = true;
+    }
+  }
+
+  async request<T = unknown>({
+    type,
+    params,
+  }: {
+    type: string;
+    params?: unknown[] | Record<string, unknown>;
+  }): Promise<T> {
+    console.log("request", type, params, window.location.origin);
+
+    return await this._requestMethod<T>("request", {
+      type,
+      params,
+    });
   }
   async enable(_options?: {
     starknetVersion?: "v4" | "v5";
   }): Promise<string[]> {
-    throw new Error("Method not implemented.");
+    const { currentChainId, selectedAddress } = await this.request<{
+      currentChainId: string;
+      selectedAddress: string;
+    }>({
+      type: "keplr_enableStarknetProvider",
+    });
+
+    this.chainId = currentChainId.replace("starknet:", "");
+    this.selectedAddress = selectedAddress;
+    this.isConnected = true;
+
+    return [selectedAddress];
   }
   isPreauthorized(): Promise<boolean> {
     throw new Error("Method not implemented.");

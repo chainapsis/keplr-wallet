@@ -45,23 +45,6 @@ export interface SwitchStarknetChainParameter {
   chainId: string; // A 0x-prefixed hexadecimal string
 }
 
-export type RpcMessage =
-  | {
-      type: "wallet_watchAsset";
-      params: WatchAssetParameters;
-      result: boolean;
-    }
-  | {
-      type: "wallet_addStarknetChain";
-      params: AddStarknetChainParameters;
-      result: boolean;
-    }
-  | {
-      type: "wallet_switchStarknetChain";
-      params: SwitchStarknetChainParameter;
-      result: boolean;
-    };
-
 export interface IStarknetProvider {
   id: string;
   name: string;
@@ -75,17 +58,18 @@ export interface IStarknetProvider {
   selectedAddress?: string;
   chainId?: string;
 
-  request: <T extends RpcMessage>(
-    call: Omit<T, "result">
-  ) => Promise<T["result"]>;
-  enable: (options?: { starknetVersion?: "v4" | "v5" }) => Promise<string[]>;
-  isPreauthorized: () => Promise<boolean>;
-  on: <E extends WalletEvents>(
+  request<T = unknown>({
+    type,
+    params,
+  }: {
+    type: string;
+    params?: readonly unknown[] | Record<string, unknown>;
+  }): Promise<T>;
+  enable(options?: { starknetVersion?: "v4" | "v5" }): Promise<string[]>;
+  isPreauthorized(): Promise<boolean>;
+  on<E extends WalletEvents>(event: E["type"], handleEvent: E["handler"]): void;
+  off<E extends WalletEvents>(
     event: E["type"],
     handleEvent: E["handler"]
-  ) => void;
-  off: <E extends WalletEvents>(
-    event: E["type"],
-    handleEvent: E["handler"]
-  ) => void;
+  ): void;
 }
