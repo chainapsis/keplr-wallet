@@ -111,6 +111,13 @@ export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
       }
     );
 
+    const disposal7 = addGlobalEventListener(
+      "keplr_keyring_locked",
+      async () => {
+        await stores.keyRingStore.refreshKeyRingStatus();
+      }
+    );
+
     return () => {
       disposal1();
       disposal2();
@@ -118,6 +125,7 @@ export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
       disposal4();
       disposal5();
       disposal6();
+      disposal7();
     };
   }, [stores]);
 
