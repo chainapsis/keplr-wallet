@@ -55,10 +55,11 @@ export const getHandler: (
           permissionInteractiveService
         )(env, msg as GetChainInfoWithoutEndpointsMsg);
       case SuggestChainInfoMsg:
-        return handleSuggestChainInfoMsg(chainsService, permissionService)(
-          env,
-          msg as SuggestChainInfoMsg
-        );
+        return handleSuggestChainInfoMsg(
+          chainsService,
+          permissionService,
+          permissionInteractiveService
+        )(env, msg as SuggestChainInfoMsg);
       case NeedSuggestChainInfoInteractionMsg:
         return handleNeedSuggestChainInfoInteractionMsg(chainsService)(
           env,
@@ -154,16 +155,20 @@ const handleGetChainInfoWithoutEndpointsMsg: (
 
 const handleSuggestChainInfoMsg: (
   chainsService: ChainsService,
-  permissionService: PermissionService
+  permissionService: PermissionService,
+  permissionInteractiveService: PermissionInteractiveService
 ) => InternalHandler<SuggestChainInfoMsg> = (
   chainsService,
-  permissionService
+  permissionService,
+  permissionInteractiveService
 ) => {
   return async (env, msg) => {
     if (chainsService.getChainInfo(msg.chainInfo.chainId) != null) {
       // If suggested chain info is already registered, just return.
       return;
     }
+
+    await permissionInteractiveService.ensureKeyRingNotEmpty(env);
 
     const chainInfo = msg.chainInfo as Writeable<ChainInfo>;
     chainInfo.beta = true;

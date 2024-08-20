@@ -225,6 +225,7 @@ export function init(
   );
   const permissionInteractiveService =
     new PermissionInteractive.PermissionInteractiveService(
+      storeCreator("permission-interactive"),
       permissionService,
       keyRingV2Service,
       chainsService
