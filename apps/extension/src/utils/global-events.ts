@@ -2,7 +2,7 @@ import { Buffer } from "buffer/";
 
 // 최초의 랜덤값이 필요하다.
 const viewPostMessageId = (() => {
-  const bytes = new Uint8Array(10);
+  const bytes = new Uint8Array(4);
   crypto.getRandomValues(bytes);
   return Buffer.from(bytes).toString("hex");
 })();
