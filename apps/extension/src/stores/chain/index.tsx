@@ -279,6 +279,12 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     autorun(() => {
       // Change the enabled chain identifiers when the selected key info is changed.
       if (this.keyRingStore.selectedKeyInfo) {
+        if (
+          this._lastSyncedEnabledChainsVaultId ===
+          this.keyRingStore.selectedKeyInfo.id
+        ) {
+          return;
+        }
         this.updateEnabledChainIdentifiersFromBackground();
       }
     });
@@ -325,13 +331,6 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   *updateEnabledChainIdentifiersFromBackground() {
     if (!this.keyRingStore.selectedKeyInfo) {
       this._lastSyncedEnabledChainsVaultId = "";
-      return;
-    }
-
-    if (
-      this._lastSyncedEnabledChainsVaultId ===
-      this.keyRingStore.selectedKeyInfo.id
-    ) {
       return;
     }
 

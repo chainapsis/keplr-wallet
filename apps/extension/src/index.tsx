@@ -249,8 +249,14 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
   ]);
 
   const checkIsStartFromInteractionWithSidePanelEnabledOnce = useRef(false);
+  const hasBeenReady = useRef(false);
 
   const isReady: boolean = (() => {
+    if (hasBeenReady.current) {
+      // 이미 ready 상태가 한번 되었다면 계속 강제로 ready 상태를 유지한다.
+      return true;
+    }
+
     if (!_isReady) {
       return false;
     }
@@ -278,6 +284,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
       }
     }
 
+    hasBeenReady.current = true;
     return true;
   })();
 

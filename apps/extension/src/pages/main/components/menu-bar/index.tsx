@@ -13,6 +13,7 @@ import { XAxis } from "../../../../components/axis";
 import { Bleed } from "../../../../components/bleed";
 import { FormattedMessage } from "react-intl";
 import { useLocation } from "react-router-dom";
+import { isRunningInSidePanel } from "../../../../utils";
 
 const Styles = {
   MenuItem: styled(H3)`
@@ -88,7 +89,11 @@ export const MenuBar: FunctionComponent<{
                   url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true`,
                 })
                 .then(() => {
-                  window.close();
+                  if (!isRunningInSidePanel()) {
+                    window.close();
+                  } else {
+                    close();
+                  }
                 });
             }
           }}

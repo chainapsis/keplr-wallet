@@ -10,6 +10,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { ArrowLeftIcon } from "../../components/icon";
 import { Box } from "../../components/box";
 import { handleExternalInteractionBeforeFnWithNoProceedNext } from "../../utils";
+import { dispatchGlobalEventExceptSelf } from "../../utils/global-events";
 
 export const SuggestChainPage: FunctionComponent = observer(() => {
   const { chainSuggestStore } = useStore();
@@ -130,6 +131,10 @@ const SuggestChainPageImpl: FunctionComponent<{
                       await keyRingStore.refreshKeyRingStatus();
                       await chainStore.updateChainInfosFromBackground();
                       await chainStore.updateEnabledChainIdentifiersFromBackground();
+
+                      dispatchGlobalEventExceptSelf(
+                        "keplr_suggested_chain_added"
+                      );
                     }
                   );
                 }

@@ -34,6 +34,7 @@ import { SpringValue, animated, to, useSpringValue } from "@react-spring/web";
 import { defaultSpringConfig } from "../../../styles/spring";
 import { useGlobarSimpleBar } from "../../../hooks/global-simplebar";
 import { EmptyView } from "../../../components/empty-view";
+import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
 
 const AnimatedBox = animated(Box);
 
@@ -1000,6 +1001,8 @@ const KeyringItem = observer<
 
             await keyRingStore.selectKeyRing(keyInfo.id);
             await chainStore.waitSyncedEnabledChains();
+
+            dispatchGlobalEventExceptSelf("keplr_keyring_changed");
 
             navigate(-1);
           }}

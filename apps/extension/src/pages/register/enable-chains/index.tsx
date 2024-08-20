@@ -41,6 +41,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { Tag } from "../../../components/tag";
 import SimpleBar from "simplebar-react";
 import { useTheme } from "styled-components";
+import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -931,6 +932,11 @@ export const EnableChainsScene: FunctionComponent<{
                 })(),
               ]);
 
+              dispatchGlobalEventExceptSelf(
+                "keplr_enabled_chain_changed",
+                vaultId
+              );
+
               if (needFinalizeCoinType.length > 0) {
                 sceneMovedToSelectDerivation.current = true;
                 sceneTransition.replace("select-derivation-path", {
@@ -966,6 +972,10 @@ export const EnableChainsScene: FunctionComponent<{
                     if (keyInfo.insensitive["Ethereum"]) {
                       await chainStore.enableChainInfoInUI(
                         ...ledgerEthereumAppNeeds
+                      );
+                      dispatchGlobalEventExceptSelf(
+                        "keplr_enabled_chain_changed",
+                        keyInfo.id
                       );
                       replaceToWelcomePage();
                     } else {
