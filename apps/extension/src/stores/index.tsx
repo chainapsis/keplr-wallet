@@ -62,6 +62,12 @@ export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
         await stores.keyRingStore.refreshKeyRingStatus();
         if (newKeyId && stores.keyRingStore.selectedKeyInfo?.id === newKeyId) {
           await stores.chainStore.updateEnabledChainIdentifiersFromBackground();
+
+          for (const chainInfo of stores.chainStore.chainInfos) {
+            if (stores.accountStore.hasAccount(chainInfo.chainId)) {
+              stores.accountStore.getAccount(chainInfo.chainId).init();
+            }
+          }
         }
       }
     );
