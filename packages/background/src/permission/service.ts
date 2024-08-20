@@ -85,6 +85,23 @@ export class PermissionService {
             }
           });
         }
+
+        const savedCurrentChainIdForStarknetByOriginMap =
+          await this.kvStore.get<Record<string, string>>(
+            "currentChainIdForStarknetByOriginMap/v1"
+          );
+        if (savedCurrentChainIdForStarknetByOriginMap) {
+          runInAction(() => {
+            for (const key of Object.keys(
+              savedCurrentChainIdForStarknetByOriginMap
+            )) {
+              this.currentChainIdForStarknetByOriginMap.set(
+                key,
+                savedCurrentChainIdForStarknetByOriginMap[key]
+              );
+            }
+          });
+        }
       }
     }
 
@@ -96,6 +113,10 @@ export class PermissionService {
       this.kvStore.set(
         "currentChainIdForEVMByOriginMap/v1",
         Object.fromEntries(this.currentChainIdForEVMByOriginMap)
+      );
+      this.kvStore.set(
+        "currentChainIdForStarknetByOriginMap/v1",
+        Object.fromEntries(this.currentChainIdForStarknetByOriginMap)
       );
     });
   }
