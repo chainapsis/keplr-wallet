@@ -34,9 +34,34 @@ export class SidePanelService {
     }
 
     autorun(() => {
-      this.analyticsService.logEventIgnoreError("side_panel", {
-        enabled: this.getIsEnabled(),
-      });
+      // _enabled가 observed되어야 하기 때문에 꼭 여기서 호출해야한다.
+      const enabled = this.getIsEnabled();
+
+      (async () => {
+        let skip = false;
+
+        // service worker에서는 background가 active/inactive 상태가 반복될 수 있으므로
+        // 이런 처리를 안해주면 계속해서 요청을 발생시킬 수 있다.
+        if (isServiceWorker()) {
+          const saved = await browser.storage.session.get(
+            "side_panel_analytics"
+          );
+          if (saved["side_panel_analytics"] === enabled) {
+            skip = true;
+          }
+        }
+
+        if (!skip) {
+          this.analyticsService.logEventIgnoreError("side_panel", {
+            enabled,
+          });
+          if (isServiceWorker()) {
+            await browser.storage.session.set({
+              ["side_panel_analytics"]: enabled,
+            });
+          }
+        }
+      })();
     });
   }
 
