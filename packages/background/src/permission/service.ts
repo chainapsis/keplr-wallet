@@ -687,15 +687,17 @@ export class PermissionService {
     for (const origin of origins) {
       this.currentChainIdForStarknetByOriginMap.set(origin, chainId);
 
-      // TODO: Implement the event for starknet chain changed.
-      // this.interactionService.dispatchEvent(
-      //   WEBPAGE_PORT,
-      //   "keplr_chainChanged",
-      //   {
-      //     origin,
-      //     starknetChainId,
-      //   }
-      // );
+      const starknetChainId =
+        "0x" + Buffer.from(chainId.replace("starknet:", "")).toString("hex");
+
+      this.interactionService.dispatchEvent(
+        WEBPAGE_PORT,
+        "keplr_starknetChainChanged",
+        {
+          origin,
+          starknetChainId,
+        }
+      );
     }
   }
 

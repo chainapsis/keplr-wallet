@@ -27,6 +27,8 @@ import {
   EIP6963ProviderDetail,
   IStarknetProvider,
   WalletEvents,
+  AccountChangeEventHandler,
+  NetworkChangeEventHandler,
 } from "@keplr-wallet/types";
 import {
   Result,
@@ -98,9 +100,6 @@ export function injectKeplrToWindow(keplr: IKeplr): void {
   );
 
   defineUnwritablePropertyIfPossible(window, "starknet_keplr", keplr.starknet);
-
-  // TODO: Remove this after testing
-  defineUnwritablePropertyIfPossible(window, "starknet", keplr.starknet);
 }
 
 /**
@@ -1247,6 +1246,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
 class StarknetProvider implements IStarknetProvider {
   isConnected: boolean = false;
 
+  // It must be in plain text format not hexadecimal string. e.g. "SN_MAIN"
   chainId?: string = undefined;
 
   selectedAddress?: string = undefined;
@@ -1254,6 +1254,11 @@ class StarknetProvider implements IStarknetProvider {
   account?: AccountInterface = undefined;
 
   provider?: ProviderInterface = undefined;
+
+  // It must be in the CAIP-2 chain ID format. e.g. "starknet:SN_MAIN"
+  protected _currentChainId?: string = undefined;
+
+  protected _userWalletEvents: WalletEvents[] = [];
 
   constructor(
     public readonly id: string,
@@ -1278,6 +1283,34 @@ class StarknetProvider implements IStarknetProvider {
     protected readonly _parseMessage?: (message: any) => any
   ) {
     this._initProviderState();
+
+    window.addEventListener("keplr_keystorechange", async () => {
+      if (this._currentChainId) {
+        const selectedAddress = (
+          await this._injectedKeplr.getStarknetKey(this._currentChainId)
+        ).hexAddress;
+
+        this._userWalletEvents.forEach((userWalletEvent) => {
+          if (userWalletEvent.type === "accountsChanged") {
+            userWalletEvent.handler([selectedAddress]);
+          }
+        });
+      }
+    });
+
+    window.addEventListener("keplr_starknetChainChanged", (event) => {
+      const origin = (event as CustomEvent).detail.origin;
+
+      if (origin === window.location.origin) {
+        this._userWalletEvents.forEach((userWalletEvent) => {
+          if (userWalletEvent.type === "networkChanged") {
+            const starknetChainId = (event as CustomEvent).detail
+              .starknetChainId;
+            userWalletEvent.handler(starknetChainId);
+          }
+        });
+      }
+    });
   }
 
   protected async _requestMethod<T = unknown>(
@@ -1354,6 +1387,7 @@ class StarknetProvider implements IStarknetProvider {
     });
 
     if (currentChainId != null && selectedAddress != null) {
+      this._currentChainId = currentChainId;
       this.chainId = currentChainId.replace("starknet:", "");
       this.selectedAddress = selectedAddress;
       this.isConnected = true;
@@ -1384,6 +1418,7 @@ class StarknetProvider implements IStarknetProvider {
       type: "keplr_enableStarknetProvider",
     });
 
+    this._currentChainId = currentChainId;
     this.chainId = currentChainId.replace("starknet:", "");
     this.selectedAddress = selectedAddress;
     this.isConnected = true;
@@ -1404,10 +1439,33 @@ class StarknetProvider implements IStarknetProvider {
 
     return false;
   }
-  on<E extends WalletEvents>(_event: E["type"], _handleEvent: E["handler"]) {
-    throw new Error("Method not implemented.");
+  on<E extends WalletEvents>(event: E["type"], handleEvent: E["handler"]) {
+    if (event === "accountsChanged") {
+      this._userWalletEvents.push({
+        type: "accountsChanged",
+        handler: handleEvent as AccountChangeEventHandler,
+      });
+    } else if (event === "networkChanged") {
+      this._userWalletEvents.push({
+        type: "networkChanged",
+        handler: handleEvent as NetworkChangeEventHandler,
+      });
+    } else {
+      throw new Error("Invalid event type");
+    }
   }
-  off<E extends WalletEvents>(_event: E["type"], _handleEvent: E["handler"]) {
-    throw new Error("Method not implemented.");
+  off<E extends WalletEvents>(event: E["type"], handleEvent: E["handler"]) {
+    if (event !== "accountsChanged" && event !== "networkChanged") {
+      throw new Error("Invalid event type");
+    }
+
+    const eventIndex = this._userWalletEvents.findIndex(
+      (userEvent) =>
+        userEvent.type === event && userEvent.handler === handleEvent
+    );
+
+    if (eventIndex >= 0) {
+      this._userWalletEvents.splice(eventIndex, 1);
+    }
   }
 }
