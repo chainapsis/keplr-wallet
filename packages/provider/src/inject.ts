@@ -1346,14 +1346,12 @@ class StarknetProvider implements IStarknetProvider {
   }
 
   protected async _initProviderState() {
-    const initialProviderState = await this.request<{
+    const { currentChainId, selectedAddress } = await this.request<{
       currentChainId: string | null;
       selectedAddress: string | null;
     }>({
       type: "keplr_initStarknetProviderState",
     });
-
-    const { currentChainId, selectedAddress } = initialProviderState;
 
     if (currentChainId != null && selectedAddress != null) {
       this.chainId = currentChainId.replace("starknet:", "");
@@ -1392,8 +1390,19 @@ class StarknetProvider implements IStarknetProvider {
 
     return [selectedAddress];
   }
-  isPreauthorized(): Promise<boolean> {
-    throw new Error("Method not implemented.");
+  async isPreauthorized(): Promise<boolean> {
+    const { currentChainId, selectedAddress } = await this.request<{
+      currentChainId: string | null;
+      selectedAddress: string | null;
+    }>({
+      type: "keplr_initStarknetProviderState",
+    });
+
+    if (currentChainId != null && selectedAddress != null) {
+      return true;
+    }
+
+    return false;
   }
   on<E extends WalletEvents>(_event: E["type"], _handleEvent: E["handler"]) {
     throw new Error("Method not implemented.");
