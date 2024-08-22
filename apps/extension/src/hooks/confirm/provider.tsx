@@ -30,6 +30,8 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
       paragraph: string | React.ReactNode;
       options: {
         forceYes?: boolean;
+        yesText?: string;
+        cancelText?: string;
       };
       resolver: (value: boolean) => void;
     }[]
@@ -41,6 +43,8 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
     paragraph: string | React.ReactNode,
     options?: {
       forceYes?: boolean;
+      yesText?: string;
+      cancelText?: string;
     }
   ) => Promise<boolean> = (title, paragraph, options = {}) => {
     return new Promise<boolean>((resolve) => {
@@ -172,7 +176,9 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
                           <TextButton
                             size="small"
                             text={
-                              <FormattedMessage id="hooks.confirm.cancel-button" />
+                              confirm.options.cancelText || (
+                                <FormattedMessage id="hooks.confirm.cancel-button" />
+                              )
                             }
                             style={{
                               minWidth: "4.875rem",
@@ -185,7 +191,9 @@ export const ConfirmProvider: FunctionComponent<PropsWithChildren> = ({
                       <Button
                         size="small"
                         text={
-                          <FormattedMessage id="hooks.confirm.yes-button" />
+                          confirm.options.yesText || (
+                            <FormattedMessage id="hooks.confirm.yes-button" />
+                          )
                         }
                         style={{
                           minWidth: "4.875rem",

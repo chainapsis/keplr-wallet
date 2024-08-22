@@ -287,6 +287,7 @@ const QRCodeView: FunctionComponent<{
           }),
           {
             forceYes: true,
+            yesText: "Ok",
           }
         )
         .then(() => {
