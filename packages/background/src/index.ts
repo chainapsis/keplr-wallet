@@ -220,7 +220,8 @@ export function init(
   const keyRingStarknetService = new KeyRingStarknet.KeyRingStarknetService(
     chainsService,
     keyRingV2Service,
-    permissionService
+    permissionService,
+    interactionService
   );
   const autoLockAccountService = new AutoLocker.AutoLockAccountService(
     storeCreator("auto-lock-account"),
