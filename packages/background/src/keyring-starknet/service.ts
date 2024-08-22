@@ -11,7 +11,6 @@ import {
   typedData as starknetTypedDataUtils,
   hash as starknetHashUtils,
   transaction as starknetTransactionUtils,
-  provider as starknetProvider,
   V2InvocationsSignerDetails,
   V3InvocationsSignerDetails,
   DeployAccountSignerDetails,
@@ -24,6 +23,10 @@ import {
   SignerInterface,
   Signature,
   TypedData,
+  ProviderInterface,
+  RpcProvider,
+  AccountInterface,
+  Account,
 } from "starknet";
 import { InteractionService } from "../interaction";
 
@@ -37,6 +40,43 @@ export class KeyRingStarknetService {
 
   async init() {
     // TODO: ?
+  }
+
+  generateAccountInterface(env: Env, origin: string): AccountInterface {
+    // TODO: custom된 AccountInterface를 반환하도록 수정
+
+    return new Account(
+      this.generateProviderInterface(env, origin),
+      "",
+      this.generateSignerInterface(env, origin),
+      "1"
+    );
+  }
+
+  generateSignerInterface(env: Env, origin: string): SignerInterface {
+    return new SignerInterfaceImpl(
+      env,
+      origin,
+      this.generateProviderInterface(env, origin),
+      this.keyRingService,
+      this.permissionService,
+      this
+    );
+  }
+
+  generateProviderInterface(_env: Env, _origin: string): ProviderInterface {
+    const chainId = this.permissionService.getCurrentChainIdForStarknet(origin);
+    if (!chainId) {
+      throw new Error("Chain id is not set");
+    }
+    const modularChainInfo =
+      this.chainsService.getModularChainInfoOrThrow(chainId);
+    if (!("starknet" in modularChainInfo)) {
+      throw new Error("Chain is not a starknet chain");
+    }
+    return new RpcProvider({
+      nodeUrl: modularChainInfo.starknet.rpc,
+    });
   }
 
   async getStarknetKeySelected(chainId: string): Promise<{
@@ -154,10 +194,7 @@ export class KeyRingStarknetService {
     signer: string,
     typedData: StarknetTypedData
   ): Promise<string[]> {
-    const key = await this.getStarknetKey(vaultId, chainId);
-    if (key.hexAddress !== signer) {
-      throw new Error("Invalid signer");
-    }
+    // TODO: tx에서 signer와 실제 계정 / chain id에 대해서 validation 넣기
 
     const msgHash = starknetTypedDataUtils.getMessageHash(typedData, signer);
 
@@ -174,7 +211,6 @@ export class KeyRingStarknetService {
     env: Env,
     origin: string,
     chainId: string,
-    signer: string,
     transactions: Call[],
     details: InvocationsSignerDetails
   ): Promise<string[]> {
@@ -183,7 +219,6 @@ export class KeyRingStarknetService {
       origin,
       this.keyRingService.selectedVaultId,
       chainId,
-      signer,
       transactions,
       details
     );
@@ -194,14 +229,10 @@ export class KeyRingStarknetService {
     _origin: string,
     vaultId: string,
     chainId: string,
-    signer: string,
     transactions: Call[],
     details: InvocationsSignerDetails
   ): Promise<string[]> {
-    const key = await this.getStarknetKey(vaultId, chainId);
-    if (key.hexAddress !== signer) {
-      throw new Error("Invalid signer");
-    }
+    // TODO: tx에서 signer와 실제 계정 / chain id에 대해서 validation 넣기
 
     const compiledCalldata = starknetTransactionUtils.getExecuteCalldata(
       transactions,
@@ -246,7 +277,6 @@ export class KeyRingStarknetService {
     env: Env,
     origin: string,
     chainId: string,
-    signer: string,
     details: DeployAccountSignerDetails
   ): Promise<string[]> {
     return await this.signStarknetDeployAccountTransaction(
@@ -254,7 +284,6 @@ export class KeyRingStarknetService {
       origin,
       this.keyRingService.selectedVaultId,
       chainId,
-      signer,
       details
     );
   }
@@ -264,13 +293,9 @@ export class KeyRingStarknetService {
     _origin: string,
     vaultId: string,
     chainId: string,
-    signer: string,
     details: DeployAccountSignerDetails
   ): Promise<string[]> {
-    const key = await this.getStarknetKey(vaultId, chainId);
-    if (key.hexAddress !== signer) {
-      throw new Error("Invalid signer");
-    }
+    // TODO: tx에서 signer와 실제 계정 / chain id에 대해서 validation 넣기
 
     const compiledConstructorCalldata = CallData.compile(
       details.constructorCalldata
@@ -314,7 +339,6 @@ export class KeyRingStarknetService {
     env: Env,
     origin: string,
     chainId: string,
-    signer: string,
     details: DeclareSignerDetails
   ): Promise<string[]> {
     return await this.signStarknetDeclareTransactionn(
@@ -322,7 +346,6 @@ export class KeyRingStarknetService {
       origin,
       this.keyRingService.selectedVaultId,
       chainId,
-      signer,
       details
     );
   }
@@ -332,14 +355,9 @@ export class KeyRingStarknetService {
     _origin: string,
     vaultId: string,
     chainId: string,
-    signer: string,
     details: DeclareSignerDetails
   ): Promise<string[]> {
-    const key = await this.getStarknetKey(vaultId, chainId);
-    if (key.hexAddress !== signer) {
-      throw new Error("Invalid signer");
-    }
-
+    // TODO: tx에서 signer와 실제 계정 / chain id에 대해서 validation 넣기
     let msgHash;
 
     if (Object.values(ETransactionVersion2).includes(details.version as any)) {
@@ -392,41 +410,81 @@ export class KeyRingStarknetService {
 
 class SignerInterfaceImpl extends SignerInterface {
   constructor(
-    protected readonly ProviderInterface: starknetProvider.Block,
+    protected readonly env: Env,
+    protected readonly origin: string,
+    protected readonly ProviderInterface: ProviderInterface,
     protected readonly keyRingService: KeyRingService,
+    protected readonly permissionService: PermissionService,
     protected readonly service: KeyRingStarknetService
   ) {
     super();
   }
 
-  getPubKey(): Promise<string> {
-    return this.service.getStarknetKey(this.keyRingService.selectedVaultId);
+  getChainId(): string {
+    const chainId = this.permissionService.getCurrentChainIdForStarknet(
+      this.origin
+    );
+    if (!chainId) {
+      throw new Error("Chain id is not set");
+    }
+    return chainId;
   }
 
-  signDeclareTransaction(
+  async getPubKey(): Promise<string> {
+    return (
+      "0x" +
+      Buffer.from(
+        (await this.service.getStarknetKeySelected(this.getChainId())).pubKey
+      ).toString("hex")
+    );
+  }
+
+  async signDeclareTransaction(
     transaction: DeclareSignerDetails
   ): Promise<Signature> {
-    return Promise.resolve(undefined);
+    return await this.service.signStarknetDeclareTransactionSelected(
+      this.env,
+      this.origin,
+      this.getChainId(),
+      transaction
+    );
   }
 
-  signDeployAccountTransaction(
+  async signDeployAccountTransaction(
     transaction: DeployAccountSignerDetails
   ): Promise<Signature> {
-    return Promise.resolve(undefined);
+    return await this.service.signStarknetDeployAccountTransactionSelected(
+      this.env,
+      this.origin,
+      this.getChainId(),
+      transaction
+    );
   }
 
-  signMessage(
+  async signMessage(
     typedData: TypedData,
     accountAddress: string
   ): Promise<Signature> {
-    return Promise.resolve(undefined);
+    return await this.service.signStarknetMessageSelected(
+      this.env,
+      this.origin,
+      this.getChainId(),
+      accountAddress,
+      typedData
+    );
   }
 
-  signTransaction(
+  async signTransaction(
     transactions: Call[],
     transactionsDetail: InvocationsSignerDetails
   ): Promise<Signature> {
-    return Promise.resolve(undefined);
+    return await this.service.signStarknetTransactionSelected(
+      this.env,
+      this.origin,
+      this.getChainId(),
+      transactions,
+      transactionsDetail
+    );
   }
 }
 
