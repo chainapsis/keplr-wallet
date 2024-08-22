@@ -5,6 +5,7 @@ import {
   DisableAccessMsg,
   IsEnabledAccessMsg,
   EnableAccessForEVMMsg,
+  EnableAccessForStarknetMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -15,6 +16,7 @@ export function init(
 ): void {
   router.registerMessage(EnableAccessMsg);
   router.registerMessage(EnableAccessForEVMMsg);
+  router.registerMessage(EnableAccessForStarknetMsg);
   router.registerMessage(DisableAccessMsg);
   router.registerMessage(IsEnabledAccessMsg);
 

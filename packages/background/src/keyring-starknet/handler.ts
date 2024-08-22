@@ -5,7 +5,11 @@ import {
   KeplrError,
   Message,
 } from "@keplr-wallet/router";
-import { GetStarknetKeyMsg, GetStarknetKeysSettledMsg } from "./messages";
+import {
+  GetStarknetKeyMsg,
+  GetStarknetKeysSettledMsg,
+  RequestJsonRpcToStarknetMsg,
+} from "./messages";
 import { KeyRingStarknetService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
 
@@ -28,6 +32,11 @@ export const getHandler: (
           service,
           permissionInteractionService
         )(env, msg as GetStarknetKeysSettledMsg);
+      case RequestJsonRpcToStarknetMsg:
+        return handleRequestJsonRpcToStarknetMsg(
+          service,
+          permissionInteractionService
+        )(env, msg as RequestJsonRpcToStarknetMsg);
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -42,9 +51,8 @@ const handleGetStarknetKeyMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    await permissionInteractionService.ensureEnabled(
+    await permissionInteractionService.ensureEnabledForStarknet(
       env,
-      [msg.chainId],
       msg.origin
     );
 
@@ -60,14 +68,38 @@ const handleGetStarknetKeysSettledMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    await permissionInteractionService.ensureEnabled(
+    await permissionInteractionService.ensureEnabledForStarknet(
       env,
-      msg.chainIds,
       msg.origin
     );
 
     return await Promise.allSettled(
       msg.chainIds.map((chainId) => service.getStarknetKeySelected(chainId))
+    );
+  };
+};
+
+const handleRequestJsonRpcToStarknetMsg: (
+  service: KeyRingStarknetService,
+  permissionInteractionService: PermissionInteractiveService
+) => InternalHandler<RequestJsonRpcToStarknetMsg> = (
+  service,
+  permissionInteractionService
+) => {
+  return async (env, msg) => {
+    if (msg.method !== "keplr_initStarknetProviderState") {
+      await permissionInteractionService.ensureEnabledForStarknet(
+        env,
+        msg.origin
+      );
+    }
+
+    return await service.request(
+      env,
+      msg.origin,
+      msg.method,
+      msg.params,
+      msg.chainId
     );
   };
 };

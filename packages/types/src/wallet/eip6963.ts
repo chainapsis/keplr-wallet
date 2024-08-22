@@ -1,4 +1,4 @@
-import { IEthereumProvider } from "./keplr";
+import { IEthereumProvider } from "./ethereum";
 
 export enum EIP6963EventNames {
   Announce = "eip6963:announceProvider",

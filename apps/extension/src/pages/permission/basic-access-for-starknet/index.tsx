@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { PermissionData } from "@keplr-wallet/background";
 import { useStore } from "../../../stores";
@@ -6,14 +6,15 @@ import { useInteractionInfo } from "../../../hooks";
 import { HeaderLayout } from "../../../layouts/header";
 import { Box } from "../../../components/box";
 import { Image } from "../../../components/image";
-import { Body1, H2, Subtitle3 } from "../../../components/typography";
+import { Body1, Body2, H2, Subtitle3 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { Gutter } from "../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
+import { Dropdown } from "../../../components/dropdown";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
 
-export const PermissionBasicAccessPage: FunctionComponent<{
+export const PermissionBasicAccessForStarknetPage: FunctionComponent<{
   data: {
     ids: string[];
   } & PermissionData;
@@ -23,6 +24,14 @@ export const PermissionBasicAccessPage: FunctionComponent<{
   const theme = useTheme();
 
   const interactionInfo = useInteractionInfo();
+
+  const [currentChainIdForStarknet, setCurrentChainIdForStarknet] =
+    useState<string>(data.chainIds[0]);
+
+  // 페이지가 언마운트 되지 않고 data만 바뀌는 경우가 있어서 이렇게 처리함
+  useEffect(() => {
+    setCurrentChainIdForStarknet(data.chainIds[0]);
+  }, [data.chainIds]);
 
   return (
     <HeaderLayout
@@ -54,7 +63,8 @@ export const PermissionBasicAccessPage: FunctionComponent<{
                 handleExternalInteractionWithNoProceedNext();
               }
             }
-          }
+          },
+          currentChainIdForStarknet
         );
       }}
     >
@@ -99,58 +109,66 @@ export const PermissionBasicAccessPage: FunctionComponent<{
           }}
           borderRadius="0.5rem"
         >
-          <Box>
-            {data.chainIds.map((chainId, index) => {
-              const chainInfo = (() => {
-                try {
-                  return chainStore.getChain(chainId);
-                } catch (e) {
-                  return chainStore.getModularChain(chainId);
+          {!data.options?.isUnableToChangeChainInUI ? (
+            <Box style={{ paddingTop: "1.125rem" }}>
+              <Body2
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-200"]
                 }
-              })();
-
-              const isLast = index === data.chainIds.length - 1;
-
-              return (
-                <Box
-                  key={chainId}
-                  backgroundColor={
+                style={{ paddingLeft: "0.5rem", paddingBottom: "0.5rem" }}
+              >
+                Connect
+              </Body2>
+              <Dropdown
+                items={chainStore.modularChainInfos
+                  .filter((chainInfo) =>
+                    chainInfo.chainId.startsWith("starknet:")
+                  )
+                  .map((chainInfo) => ({
+                    key: `${chainInfo.chainId}`,
+                    label: chainInfo.chainName,
+                  }))}
+                onSelect={(chainId) => setCurrentChainIdForStarknet(chainId)}
+                selectedItemKey={currentChainIdForStarknet}
+                style={{ padding: "1rem", height: "auto" }}
+              />
+            </Box>
+          ) : (
+            <Box
+              backgroundColor={
+                theme.mode === "light"
+                  ? ColorPalette.white
+                  : ColorPalette["gray-600"]
+              }
+              style={{
+                overflow: "hidden",
+                borderBottomLeftRadius: "0.5rem",
+                borderBottomRightRadius: "0.5rem",
+              }}
+            >
+              <Box alignY="center" paddingX="1.5rem" minHeight="4.25rem">
+                <Subtitle3
+                  color={
                     theme.mode === "light"
-                      ? ColorPalette.white
-                      : ColorPalette["gray-600"]
+                      ? ColorPalette["gray-400"]
+                      : ColorPalette["gray-50"]
                   }
-                  style={{
-                    overflow: "hidden",
-                    borderBottomLeftRadius: isLast ? "0.5rem" : undefined,
-                    borderBottomRightRadius: isLast ? "0.5rem" : undefined,
-                  }}
                 >
-                  <Box alignY="center" paddingX="1.5rem" minHeight="4.25rem">
-                    <Subtitle3
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["gray-400"]
-                          : ColorPalette["gray-50"]
-                      }
-                    >
-                      {chainInfo.chainName}
-                    </Subtitle3>
-                  </Box>
-
-                  {isLast ? null : (
-                    <Box
-                      height="1px"
-                      backgroundColor={
-                        theme.mode === "light"
-                          ? ColorPalette["gray-50"]
-                          : ColorPalette["gray-500"]
-                      }
-                    />
-                  )}
-                </Box>
-              );
-            })}
-          </Box>
+                  {chainStore.getModularChain(data.chainIds[0]).chainName}
+                </Subtitle3>
+              </Box>
+              <Box
+                height="1px"
+                backgroundColor={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-50"]
+                    : ColorPalette["gray-500"]
+                }
+              />
+            </Box>
+          )}
         </Box>
       </Box>
     </HeaderLayout>

@@ -1,11 +1,14 @@
+import { Env } from "@keplr-wallet/router";
 import { ChainsService } from "../chains";
 import { KeyRingService } from "../keyring";
 import { Buffer } from "buffer/";
+import { PermissionService } from "../permission";
 
 export class KeyRingStarknetService {
   constructor(
     protected readonly chainsService: ChainsService,
-    protected readonly keyRingService: KeyRingService
+    protected readonly keyRingService: KeyRingService,
+    protected readonly permissionService: PermissionService
   ) {}
 
   async init() {
@@ -52,5 +55,53 @@ export class KeyRingStarknetService {
       pubKey: pubKey.toBytes(),
       address,
     };
+  }
+
+  async request<T = any>(
+    env: Env,
+    origin: string,
+    type: string,
+    _params?: unknown[] | Record<string, unknown>,
+    chainId?: string
+  ): Promise<T> {
+    if (env.isInternalMsg && chainId == null) {
+      throw new Error(
+        "The chain id must be provided for the internal message."
+      );
+    }
+
+    const currentChainId =
+      this.permissionService.getCurrentChainIdForStarknet(origin) ?? chainId;
+    if (currentChainId == null) {
+      if (type === "keplr_initStarknetProviderState") {
+        return {
+          currentChainId: null,
+          selectedAddress: null,
+        } as T;
+      } else {
+        throw new Error(
+          `${origin} is not permitted. Please disconnect and reconnect to the website.`
+        );
+      }
+    }
+    const selectedAddress = (await this.getStarknetKeySelected(currentChainId))
+      .hexAddress;
+
+    const result = (await (async () => {
+      switch (type) {
+        case "keplr_initStarknetProviderState":
+        case "keplr_enableStarknetProvider": {
+          return {
+            currentChainId,
+            selectedAddress,
+          };
+        }
+        default: {
+          throw new Error(`The type "${type}" is not supported.`);
+        }
+      }
+    })()) as T;
+
+    return result;
   }
 }

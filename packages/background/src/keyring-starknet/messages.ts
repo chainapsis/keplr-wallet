@@ -77,3 +77,31 @@ export class GetStarknetKeysSettledMsg extends Message<
     return GetStarknetKeysSettledMsg.type();
   }
 }
+
+export class RequestJsonRpcToStarknetMsg extends Message<void> {
+  public static type() {
+    return "request-json-rpc-to-starknet";
+  }
+
+  constructor(
+    public readonly method: string,
+    public readonly params?: unknown[] | Record<string, unknown>,
+    public readonly chainId?: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {}
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestJsonRpcToStarknetMsg.type();
+  }
+}

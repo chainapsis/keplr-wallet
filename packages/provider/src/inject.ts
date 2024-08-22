@@ -24,6 +24,10 @@ import {
   EIP6963EventNames,
   EIP6963ProviderInfo,
   EIP6963ProviderDetail,
+  IStarknetProvider,
+  WalletEvents,
+  AccountChangeEventHandler,
+  NetworkChangeEventHandler,
 } from "@keplr-wallet/types";
 import {
   Result,
@@ -36,6 +40,7 @@ import deepmerge from "deepmerge";
 import Long from "long";
 import { KeplrCoreTypes } from "./core-types";
 import EventEmitter from "events";
+import { AccountInterface, ProviderInterface } from "starknet";
 
 export interface ProxyRequest {
   type: "proxy-request";
@@ -43,6 +48,7 @@ export interface ProxyRequest {
   method: keyof (Keplr & KeplrCoreTypes);
   args: any[];
   ethereumProviderMethod?: keyof IEthereumProvider;
+  starknetProviderMethod?: keyof IStarknetProvider;
 }
 
 export interface ProxyRequestResponse {
@@ -91,6 +97,8 @@ export function injectKeplrToWindow(keplr: IKeplr): void {
     "getEnigmaUtils",
     keplr.getEnigmaUtils
   );
+
+  defineUnwritablePropertyIfPossible(window, "starknet_keplr", keplr.starknet);
 }
 
 /**
@@ -148,6 +156,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
         if (
           !keplr[message.method] ||
           (message.method !== "ethereum" &&
+            message.method !== "starknet" &&
             typeof keplr[message.method] !== "function")
         ) {
           throw new Error(`Invalid method: ${message.method}`);
@@ -300,6 +309,71 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
             );
           }
 
+          if (method === "starknet") {
+            const starknetProviderMethod = message.starknetProviderMethod;
+
+            if (starknetProviderMethod?.startsWith("protected")) {
+              throw new Error("Rejected");
+            }
+
+            if (starknetProviderMethod === "id") {
+              throw new Error("id is not function");
+            }
+
+            if (starknetProviderMethod === "name") {
+              throw new Error("name is not function");
+            }
+
+            if (starknetProviderMethod === "version") {
+              throw new Error("version is not function");
+            }
+
+            if (starknetProviderMethod === "icon") {
+              throw new Error("icon is not function");
+            }
+
+            if (starknetProviderMethod === "chainId") {
+              throw new Error("chainId is not function");
+            }
+
+            if (starknetProviderMethod === "selectedAddress") {
+              throw new Error("selectedAddress is not function");
+            }
+
+            if (starknetProviderMethod === "isConnected") {
+              throw new Error("isConnected is not function");
+            }
+
+            if (starknetProviderMethod === "account") {
+              throw new Error("account is not function");
+            }
+
+            if (starknetProviderMethod === "provider") {
+              throw new Error("provider is not function");
+            }
+
+            if (
+              starknetProviderMethod === undefined ||
+              typeof keplr.starknet?.[starknetProviderMethod] !== "function"
+            ) {
+              throw new Error(
+                `${message.starknetProviderMethod} is not function or invalid Starknet provider method`
+              );
+            }
+
+            if (starknetProviderMethod === "request") {
+              return await keplr.starknet.request(
+                JSONUint8Array.unwrap(message.args)
+              );
+            }
+
+            return await keplr.starknet[starknetProviderMethod](
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              ...JSONUint8Array.unwrap(message.args)
+            );
+          }
+
           return await keplr[method](
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
@@ -418,7 +492,12 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
         window.postMessage(message, window.location.origin),
     },
     protected readonly parseMessage?: (message: any) => any,
-    protected readonly eip6963ProviderInfo?: EIP6963ProviderInfo
+    protected readonly eip6963ProviderInfo?: EIP6963ProviderInfo,
+    protected readonly starknetProviderInfo?: {
+      id: string;
+      name: string;
+      icon: string;
+    }
   ) {
     // Freeze fields/method except for "defaultOptions"
     // Intentionally, "defaultOptions" can be mutated to allow a webpage to change the options with cosmjs usage.
@@ -885,6 +964,18 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     this.parseMessage,
     this.eip6963ProviderInfo
   );
+
+  public readonly starknet = this.starknetProviderInfo
+    ? new StarknetProvider(
+        this.starknetProviderInfo.id,
+        this.starknetProviderInfo.name,
+        this.version,
+        this.starknetProviderInfo.icon,
+        this,
+        this.eventListener,
+        this.parseMessage
+      )
+    : undefined;
 }
 
 class EthereumProvider extends EventEmitter implements IEthereumProvider {
@@ -1148,5 +1239,230 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     return (await this.request({
       method: "net_version",
     })) as string;
+  }
+}
+
+class StarknetProvider implements IStarknetProvider {
+  isConnected: boolean = false;
+
+  // It must be in plain text format not hexadecimal string. e.g. "SN_MAIN"
+  chainId?: string = undefined;
+
+  selectedAddress?: string = undefined;
+
+  account?: AccountInterface = undefined;
+
+  provider?: ProviderInterface = undefined;
+
+  // It must be in the CAIP-2 chain ID format. e.g. "starknet:SN_MAIN"
+  protected _currentChainId?: string = undefined;
+
+  protected _userWalletEvents: WalletEvents[] = [];
+
+  constructor(
+    public readonly id: string,
+    public readonly name: string,
+    public readonly version: string,
+    public readonly icon: string,
+
+    protected readonly _injectedKeplr: InjectedKeplr,
+    protected readonly _eventListener: {
+      addMessageListener: (fn: (e: any) => void) => void;
+      removeMessageListener: (fn: (e: any) => void) => void;
+      postMessage: (message: any) => void;
+    } = {
+      addMessageListener: (fn: (e: any) => void) =>
+        window.addEventListener("message", fn),
+      removeMessageListener: (fn: (e: any) => void) =>
+        window.removeEventListener("message", fn),
+      postMessage: (message) =>
+        window.postMessage(message, window.location.origin),
+    },
+
+    protected readonly _parseMessage?: (message: any) => any
+  ) {
+    this._initProviderState();
+
+    window.addEventListener("keplr_keystorechange", async () => {
+      if (this._currentChainId) {
+        const selectedAddress = (
+          await this._injectedKeplr.getStarknetKey(this._currentChainId)
+        ).hexAddress;
+
+        this._userWalletEvents.forEach((userWalletEvent) => {
+          if (userWalletEvent.type === "accountsChanged") {
+            userWalletEvent.handler([selectedAddress]);
+          }
+        });
+      }
+    });
+
+    window.addEventListener("keplr_starknetChainChanged", (event) => {
+      const origin = (event as CustomEvent).detail.origin;
+
+      if (origin === window.location.origin) {
+        this._userWalletEvents.forEach((userWalletEvent) => {
+          if (userWalletEvent.type === "networkChanged") {
+            const starknetChainId = (event as CustomEvent).detail
+              .starknetChainId;
+            userWalletEvent.handler(starknetChainId);
+          }
+        });
+      }
+    });
+  }
+
+  protected async _requestMethod<T = unknown>(
+    method: keyof IStarknetProvider,
+    args: Record<string, any>
+  ): Promise<T> {
+    const bytes = new Uint8Array(8);
+    const id: string = Array.from(crypto.getRandomValues(bytes))
+      .map((value) => {
+        return value.toString(16);
+      })
+      .join("");
+
+    const proxyMessage: ProxyRequest = {
+      type: "proxy-request",
+      id,
+      method: "starknet",
+      args: JSONUint8Array.wrap(args),
+      starknetProviderMethod: method,
+    };
+
+    return new Promise<T>((resolve, reject) => {
+      const receiveResponse = (e: any) => {
+        const proxyResponse: ProxyRequestResponse = this._parseMessage
+          ? this._parseMessage(e.data)
+          : e.data;
+
+        if (!proxyResponse || proxyResponse.type !== "proxy-request-response") {
+          return;
+        }
+
+        if (proxyResponse.id !== id) {
+          return;
+        }
+
+        this._eventListener.removeMessageListener(receiveResponse);
+
+        const result = JSONUint8Array.unwrap(proxyResponse.result);
+
+        if (!result) {
+          reject(new Error("Result is null"));
+          return;
+        }
+
+        if (result.error) {
+          const error = result.error;
+          reject(
+            error.code && !error.module
+              ? new EthereumProviderRpcError(
+                  error.code,
+                  error.message,
+                  error.data
+                )
+              : new Error(error)
+          );
+          return;
+        }
+
+        resolve(result.return as T);
+      };
+
+      this._eventListener.addMessageListener(receiveResponse);
+
+      this._eventListener.postMessage(proxyMessage);
+    });
+  }
+
+  protected async _initProviderState() {
+    const { currentChainId, selectedAddress } = await this.request<{
+      currentChainId: string | null;
+      selectedAddress: string | null;
+    }>({
+      type: "keplr_initStarknetProviderState",
+    });
+
+    if (currentChainId != null && selectedAddress != null) {
+      this._currentChainId = currentChainId;
+      this.chainId = currentChainId.replace("starknet:", "");
+      this.selectedAddress = selectedAddress;
+      this.isConnected = true;
+    }
+  }
+
+  async request<T = unknown>({
+    type,
+    params,
+  }: {
+    type: string;
+    params?: unknown[] | Record<string, unknown>;
+  }): Promise<T> {
+    return await this._requestMethod<T>("request", {
+      type,
+      params,
+    });
+  }
+  async enable(_options?: {
+    starknetVersion?: "v4" | "v5";
+  }): Promise<string[]> {
+    const { currentChainId, selectedAddress } = await this.request<{
+      currentChainId: string;
+      selectedAddress: string;
+    }>({
+      type: "keplr_enableStarknetProvider",
+    });
+
+    this._currentChainId = currentChainId;
+    this.chainId = currentChainId.replace("starknet:", "");
+    this.selectedAddress = selectedAddress;
+    this.isConnected = true;
+
+    return [selectedAddress];
+  }
+  async isPreauthorized(): Promise<boolean> {
+    const { currentChainId, selectedAddress } = await this.request<{
+      currentChainId: string | null;
+      selectedAddress: string | null;
+    }>({
+      type: "keplr_initStarknetProviderState",
+    });
+
+    if (currentChainId != null && selectedAddress != null) {
+      return true;
+    }
+
+    return false;
+  }
+  on<E extends WalletEvents>(event: E["type"], handleEvent: E["handler"]) {
+    if (event === "accountsChanged") {
+      this._userWalletEvents.push({
+        type: "accountsChanged",
+        handler: handleEvent as AccountChangeEventHandler,
+      });
+    } else if (event === "networkChanged") {
+      this._userWalletEvents.push({
+        type: "networkChanged",
+        handler: handleEvent as NetworkChangeEventHandler,
+      });
+    } else {
+      throw new Error("Invalid event type");
+    }
+  }
+  off<E extends WalletEvents>(event: E["type"], handleEvent: E["handler"]) {
+    if (event !== "accountsChanged" && event !== "networkChanged") {
+      throw new Error("Invalid event type");
+    }
+
+    const eventIndex = this._userWalletEvents.findIndex(
+      (userEvent) =>
+        userEvent.type === event && userEvent.handler === handleEvent
+    );
+
+    if (eventIndex >= 0) {
+      this._userWalletEvents.splice(eventIndex, 1);
+    }
   }
 }
