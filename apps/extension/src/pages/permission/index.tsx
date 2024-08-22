@@ -52,8 +52,6 @@ export const PermissionPage: FunctionComponent = observer(() => {
     permissionStore.waitingPermissionMergedDataForStarknet;
   const globalPermissionData = permissionStore.waitingGlobalPermissionData;
 
-  console.log(mergedData, mergedDataForEVM, mergedDataForStarknet);
-
   if (
     !mergedData &&
     !mergedDataForEVM &&

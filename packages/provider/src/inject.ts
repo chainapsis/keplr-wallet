@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   ChainInfo,
   EthSignType,
@@ -1401,8 +1400,6 @@ class StarknetProvider implements IStarknetProvider {
     type: string;
     params?: unknown[] | Record<string, unknown>;
   }): Promise<T> {
-    console.log("request", type, params, window.location.origin);
-
     return await this._requestMethod<T>("request", {
       type,
       params,

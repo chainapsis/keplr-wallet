@@ -33,8 +33,6 @@ export const PermissionBasicAccessForStarknetPage: FunctionComponent<{
     setCurrentChainIdForStarknet(data.chainIds[0]);
   }, [data.chainIds]);
 
-  console.log("chainStore.modularChainInfos", chainStore.modularChainInfos);
-
   return (
     <HeaderLayout
       title=""

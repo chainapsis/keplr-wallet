@@ -61,7 +61,7 @@ export class KeyRingStarknetService {
     env: Env,
     origin: string,
     type: string,
-    params?: unknown[] | Record<string, unknown>,
+    _params?: unknown[] | Record<string, unknown>,
     chainId?: string
   ): Promise<T> {
     if (env.isInternalMsg && chainId == null) {
@@ -91,7 +91,6 @@ export class KeyRingStarknetService {
       switch (type) {
         case "keplr_initStarknetProviderState":
         case "keplr_enableStarknetProvider": {
-          console.log(params);
           return {
             currentChainId,
             selectedAddress,
