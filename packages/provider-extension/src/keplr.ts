@@ -23,6 +23,7 @@ import {
   EIP6963ProviderInfo,
   EIP6963ProviderDetail,
   EIP6963EventNames,
+  IStarknetProvider,
 } from "@keplr-wallet/types";
 import { JSONUint8Array } from "./uint8-array";
 import deepmerge from "deepmerge";
@@ -581,6 +582,9 @@ export class Keplr implements IKeplr {
   }
 
   public readonly ethereum = new EthereumProvider(this);
+
+  // TODO: Implement this if starknet provider is implemented.
+  public readonly starknet: IStarknetProvider | undefined;
 }
 
 const waitDocumentReady = (): Promise<void> => {

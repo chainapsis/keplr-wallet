@@ -876,6 +876,9 @@ export class KeplrWalletConnectV2 implements Keplr {
   }
 
   public readonly ethereum = new MockEthereumProvider();
+
+  // TODO: Implement this if starknet provider is implemented.
+  public readonly starknet = undefined;
 }
 
 class MockEthereumProvider extends EventEmitter implements IEthereumProvider {
