@@ -2,7 +2,7 @@ import { Env } from "@keplr-wallet/router";
 import { ChainsService } from "../chains";
 import { KeyRingService } from "../keyring";
 import { Buffer } from "buffer/";
-import { PermissionService } from "../permission";
+import { getBasicAccessPermissionType, PermissionService } from "../permission";
 import {
   CairoUint256,
   Call,
@@ -166,6 +166,82 @@ export class KeyRingStarknetService {
             currentChainId,
             selectedAddress,
           };
+        }
+        case "wallet_requestAccounts": {
+          return [
+            (await this.getStarknetKeySelected(currentChainId)).hexAddress,
+          ];
+        }
+        case "wallet_getPermissions": {
+          // TODO: 이거 반환값을 어떻게 줘야하는지 명확한게 아님
+          //       다시 확인해봐야함.
+          if (
+            this.permissionService.hasPermission(
+              currentChainId,
+              getBasicAccessPermissionType(),
+              origin
+            )
+          ) {
+            return ["accounts"];
+          }
+          return [""];
+        }
+        case "wallet_switchStarknetChain": {
+          const param =
+            (Array.isArray(params) && (params?.[0] as { chainId: string })) ||
+            undefined;
+          if (!param?.chainId) {
+            throw new Error("Invalid parameters: must provide a chain id.");
+          }
+
+          const newChainId = param.chainId;
+
+          // TODO: 인터페이스 상 얘는 boolean을 반환한다.
+          //       바꿀 체인을 찾을 수 없거나 바꿀 체인이 starknet이 아닌 경우
+          //       false를 반환할지 오류를 던질지 정해야한다.
+          const newCurrentChainInfo =
+            this.chainsService.getModularChainInfoOrThrow(newChainId);
+          if (!("starknet" in newCurrentChainInfo)) {
+            throw new Error("Chain is not a starknet chain");
+          }
+
+          await this.permissionService.updateCurrentChainIdForStarknet(
+            env,
+            origin,
+            newCurrentChainInfo.chainId
+          );
+
+          return true;
+        }
+        case "wallet_requestChainId": {
+          return currentChainId;
+        }
+        case "wallet_deploymentData": {
+          // TODO: 아직 먼 기능인지 이해 못함
+          throw new Error("Not implemented");
+        }
+        case "wallet_addInvokeTransaction": {
+          // TODO
+          throw new Error("Not implemented");
+        }
+        case "wallet_addDeclareTransaction": {
+          // TODO
+          throw new Error("Not implemented");
+        }
+        case "wallet_signTypedData": {
+          return await this.signStarknetMessageSelected(
+            env,
+            origin,
+            currentChainId,
+            (
+              await this.getStarknetKeySelected(currentChainId)
+            ).hexAddress,
+            params as any
+          );
+        }
+        case "wallet_supportedSpecs": {
+          // TODO: 멀 반환해야하지...?
+          return [];
         }
         case "starknet_addDeclareTransaction":
         case "starknet_addDeployAccountTransaction":
