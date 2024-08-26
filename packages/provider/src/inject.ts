@@ -1400,6 +1400,10 @@ class StarknetProvider implements IStarknetProvider {
     type: string;
     params?: unknown[] | Record<string, unknown>;
   }): Promise<T> {
+    if (type == null) {
+      throw new Error("type is required");
+    }
+
     return await this._requestMethod<T>("request", {
       type,
       params,
