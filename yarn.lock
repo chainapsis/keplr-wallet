@@ -8735,6 +8735,7 @@ __metadata:
     "@keplr-wallet/crypto": 0.12.121
     "@keplr-wallet/hooks": 0.12.121
     "@keplr-wallet/hooks-internal": 0.12.121
+    "@keplr-wallet/hooks-starknet": 0.12.121
     "@keplr-wallet/ledger-cosmos": 0.12.121
     "@keplr-wallet/popup": 0.12.121
     "@keplr-wallet/proto-types": 0.12.121
@@ -8850,6 +8851,34 @@ __metadata:
     "@keplr-wallet/stores-internal": 0.12.121
     "@keplr-wallet/types": 0.12.121
     "@keplr-wallet/unit": 0.12.121
+  peerDependencies:
+    mobx: ^6
+    mobx-utils: ^6
+    react: ^16.8.0 || ^17 || ^18
+  languageName: unknown
+  linkType: soft
+
+"@keplr-wallet/hooks-starknet@0.12.121, @keplr-wallet/hooks-starknet@workspace:packages/hooks-starknet":
+  version: 0.0.0-use.local
+  resolution: "@keplr-wallet/hooks-starknet@workspace:packages/hooks-starknet"
+  dependencies:
+    "@ethersproject/address": ^5.7.0
+    "@ethersproject/providers": ^5.7.0
+    "@keplr-wallet/background": 0.12.121
+    "@keplr-wallet/common": 0.12.121
+    "@keplr-wallet/cosmos": 0.12.121
+    "@keplr-wallet/crypto": 0.12.121
+    "@keplr-wallet/proto-types": 0.12.121
+    "@keplr-wallet/simple-fetch": 0.12.121
+    "@keplr-wallet/stores": 0.12.121
+    "@keplr-wallet/stores-etc": 0.12.121
+    "@keplr-wallet/stores-eth": 0.12.121
+    "@keplr-wallet/stores-starknet": 0.12.121
+    "@keplr-wallet/types": 0.12.121
+    "@keplr-wallet/unit": 0.12.121
+    buffer: ^6.0.3
+    long: ^4.0.0
+    utility-types: ^3.10.0
   peerDependencies:
     mobx: ^6
     mobx-utils: ^6

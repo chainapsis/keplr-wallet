@@ -34,6 +34,7 @@
     "@keplr-wallet/crypto": "0.12.121",
     "@keplr-wallet/hooks": "0.12.121",
     "@keplr-wallet/hooks-internal": "0.12.121",
+    "@keplr-wallet/hooks-starknet": "0.12.121",
     "@keplr-wallet/ledger-cosmos": "0.12.121",
     "@keplr-wallet/popup": "0.12.121",
     "@keplr-wallet/proto-types": "0.12.121",
