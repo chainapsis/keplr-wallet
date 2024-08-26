@@ -15,13 +15,13 @@ import {
   useTxConfigsValidate,
 } from "@keplr-wallet/hooks-starknet";
 import { useNavigate } from "react-router";
-import { AmountInput, RecipientInput } from "../../../components/input";
+import { AmountInput } from "../components/input/amount-input";
+import { RecipientInput } from "../components/input/reciepient-input";
 import { TokenItem } from "../../main/components";
 import { Subtitle3 } from "../../../components/typography";
 import { Box } from "../../../components/box";
 import { YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
-import { FeeControl } from "../../../components/input/fee-control";
 import { useNotification } from "../../../hooks/notification";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { CoinPretty } from "@keplr-wallet/unit";
@@ -270,12 +270,13 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
           <Styles.Flex1 />
           <Gutter size="0" />
 
-          <FeeControl
-            senderConfig={sendConfigs.senderConfig}
-            feeConfig={sendConfigs.feeConfig}
-            gasConfig={sendConfigs.gasConfig}
-            gasSimulator={gasSimulator}
-          />
+          {/* TODO */}
+          {/*<FeeControl*/}
+          {/*  senderConfig={sendConfigs.senderConfig}*/}
+          {/*  feeConfig={sendConfigs.feeConfig}*/}
+          {/*  gasConfig={sendConfigs.gasConfig}*/}
+          {/*  gasSimulator={gasSimulator}*/}
+          {/*/>*/}
         </Stack>
       </Box>
     </HeaderLayout>

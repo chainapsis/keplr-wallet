@@ -2,7 +2,7 @@ import { IRecipientConfig, UIProperties } from "./types";
 import { TxChainSetter } from "./chain";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
-import { InvalidHexError } from "./errors";
+import { EmptyAddressError, InvalidHexError } from "./errors";
 import { useState } from "react";
 import { Buffer } from "buffer/";
 
@@ -30,6 +30,12 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
   @computed
   get uiProperties(): UIProperties {
     const rawRecipient = this.value.trim();
+
+    if (!rawRecipient) {
+      return {
+        error: new EmptyAddressError("Address is empty"),
+      };
+    }
 
     if (!rawRecipient.startsWith("0x")) {
       return {
