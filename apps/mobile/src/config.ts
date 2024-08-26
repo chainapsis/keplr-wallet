@@ -187,6 +187,11 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: 'uakt',
         coinDecimals: 6,
         coinGeckoId: 'akash-network',
+        gasPriceStep: {
+          low: 0.00025,
+          average: 0.0025,
+          high: 0.025,
+        },
       },
     ],
     features: ['ibc-transfer'],
