@@ -29,6 +29,7 @@ import {
   Account,
 } from "starknet";
 import { InteractionService } from "../interaction";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 export class KeyRingStarknetService {
   constructor(
@@ -125,7 +126,7 @@ export class KeyRingStarknetService {
     env: Env,
     origin: string,
     type: string,
-    _params?: unknown[] | Record<string, unknown>,
+    params?: unknown[] | Record<string, unknown>,
     chainId?: string
   ): Promise<T> {
     if (env.isInternalMsg && chainId == null) {
@@ -151,6 +152,12 @@ export class KeyRingStarknetService {
     const selectedAddress = (await this.getStarknetKeySelected(currentChainId))
       .hexAddress;
 
+    const modularChainInfo =
+      this.chainsService.getModularChainInfoOrThrow(currentChainId);
+    if (!("starknet" in modularChainInfo)) {
+      throw new Error("Chain is not a starknet chain");
+    }
+
     const result = (await (async () => {
       switch (type) {
         case "keplr_initStarknetProviderState":
@@ -159,6 +166,44 @@ export class KeyRingStarknetService {
             currentChainId,
             selectedAddress,
           };
+        }
+        case "starknet_addDeclareTransaction":
+        case "starknet_addDeployAccountTransaction":
+        case "starknet_addInvokeTransaction":
+        case "starknet_blockHashAndNumber":
+        case "starknet_blockNumber":
+        case "starknet_call":
+        case "starknet_chainId":
+        case "starknet_estimateFee":
+        case "starknet_getBlockTransactionCount":
+        case "starknet_getBlockWithTxHashes":
+        case "starknet_getBlockWithTxs":
+        case "starknet_getClass":
+        case "starknet_getClassAt":
+        case "starknet_getClassHashAt":
+        case "starknet_getEvents":
+        case "starknet_getNonce":
+        case "starknet_getStateUpdate":
+        case "starknet_getStorageAt":
+        case "starknet_getTransactionByBlockIdAndIndex":
+        case "starknet_getTransactionByHash":
+        case "starknet_getTransactionReceipt":
+        case "starknet_pendingTransactions":
+        case "starknet_simulateTransactions":
+        case "starknet_specVersion":
+        case "starknet_syncing": {
+          return await simpleFetch(modularChainInfo.starknet.rpc, {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+            },
+            body: JSON.stringify({
+              id: 1,
+              jsonrpc: "2.0",
+              method: type,
+              params,
+            }),
+          });
         }
         default: {
           throw new Error(`The type "${type}" is not supported.`);
