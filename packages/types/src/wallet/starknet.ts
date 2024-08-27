@@ -63,7 +63,7 @@ export interface IStarknetProvider {
     params,
   }: {
     type: string;
-    params?: readonly unknown[] | Record<string, unknown>;
+    params?: any;
   }): Promise<T>;
   enable(options?: { starknetVersion?: "v4" | "v5" }): Promise<string[]>;
   isPreauthorized(): Promise<boolean>;

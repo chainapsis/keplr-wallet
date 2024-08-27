@@ -126,7 +126,7 @@ export class KeyRingStarknetService {
     env: Env,
     origin: string,
     type: string,
-    params?: unknown[] | Record<string, unknown>,
+    params?: any,
     chainId?: string
   ): Promise<T> {
     if (env.isInternalMsg && chainId == null) {
