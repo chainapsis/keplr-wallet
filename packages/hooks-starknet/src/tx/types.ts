@@ -35,6 +35,20 @@ export interface ISenderConfig extends ITxChainSetter {
 }
 
 export interface IFeeConfig extends ITxChainSetter {
+  type: "ETH" | "STRK";
+  setType(type: "ETH" | "STRK"): void;
+
+  fee: CoinPretty | undefined;
+  maxFee: CoinPretty | undefined;
+  setFee(
+    fee:
+      | {
+          fee: CoinPretty;
+          maxFee: CoinPretty;
+        }
+      | undefined
+  ): void;
+
   uiProperties: UIProperties;
 }
 

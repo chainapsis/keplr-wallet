@@ -317,13 +317,20 @@ export class KeyRingStarknetService {
   ): Promise<string[]> {
     // TODO: tx에서 signer와 실제 계정 / chain id에 대해서 validation 넣기
 
-    const msgHash = starknetTypedDataUtils.getMessageHash(typedData, signer);
+    let msgHash = starknetTypedDataUtils.getMessageHash(typedData, signer);
 
+    msgHash = msgHash.replace("0x", "");
+    const padZero = 64 - msgHash.length;
+    if (padZero > 0) {
+      msgHash = "0".repeat(padZero) + msgHash;
+    } else if (padZero < 0) {
+      throw new Error("Invalid length of msg hash");
+    }
     const sig = await this.keyRingService.sign(
       chainId,
       vaultId,
-      Buffer.from(msgHash.replace("0x", ""), "hex"),
-      "keccak256"
+      Buffer.from(msgHash, "hex"),
+      "noop"
     );
     return this.formatEthSignature(sig);
   }
@@ -346,8 +353,8 @@ export class KeyRingStarknetService {
   }
 
   async signStarknetTransaction(
-    _env: Env,
-    _origin: string,
+    env: Env,
+    origin: string,
     vaultId: string,
     chainId: string,
     transactions: Call[],
@@ -355,43 +362,70 @@ export class KeyRingStarknetService {
   ): Promise<string[]> {
     // TODO: tx에서 signer와 실제 계정 / chain id에 대해서 validation 넣기
 
-    const compiledCalldata = starknetTransactionUtils.getExecuteCalldata(
-      transactions,
-      details.cairoVersion
-    );
-    let msgHash;
+    return await this.interactionService.waitApproveV2(
+      env,
+      "/sign-starknet-tx",
+      "request-sign-starknet-tx",
+      {
+        origin,
+        vaultId,
+        chainId,
+        transactions,
+        details,
+      },
+      async (res: {
+        transactions: Call[];
+        details: InvocationsSignerDetails;
+      }) => {
+        const { transactions, details } = res;
+        const compiledCalldata = starknetTransactionUtils.getExecuteCalldata(
+          transactions,
+          details.cairoVersion
+        );
+        let msgHash;
 
-    if (Object.values(ETransactionVersion2).includes(details.version as any)) {
-      const det = details as V2InvocationsSignerDetails;
-      msgHash = starknetHashUtils.calculateInvokeTransactionHash({
-        ...det,
-        senderAddress: det.walletAddress,
-        compiledCalldata,
-        version: det.version,
-      });
-    } else if (
-      Object.values(ETransactionVersion3).includes(details.version as any)
-    ) {
-      const det = details as V3InvocationsSignerDetails;
-      msgHash = starknetHashUtils.calculateInvokeTransactionHash({
-        ...det,
-        senderAddress: det.walletAddress,
-        compiledCalldata,
-        version: det.version,
-        nonceDataAvailabilityMode: intDAM(det.nonceDataAvailabilityMode),
-        feeDataAvailabilityMode: intDAM(det.feeDataAvailabilityMode),
-      });
-    } else {
-      throw Error("unsupported signTransaction version");
-    }
+        if (
+          Object.values(ETransactionVersion2).includes(details.version as any)
+        ) {
+          const det = details as V2InvocationsSignerDetails;
+          msgHash = starknetHashUtils.calculateInvokeTransactionHash({
+            ...det,
+            senderAddress: det.walletAddress,
+            compiledCalldata,
+            version: det.version,
+          });
+        } else if (
+          Object.values(ETransactionVersion3).includes(details.version as any)
+        ) {
+          const det = details as V3InvocationsSignerDetails;
+          msgHash = starknetHashUtils.calculateInvokeTransactionHash({
+            ...det,
+            senderAddress: det.walletAddress,
+            compiledCalldata,
+            version: det.version,
+            nonceDataAvailabilityMode: intDAM(det.nonceDataAvailabilityMode),
+            feeDataAvailabilityMode: intDAM(det.feeDataAvailabilityMode),
+          });
+        } else {
+          throw Error("unsupported signTransaction version");
+        }
 
-    const sig = await this.keyRingService.sign(
-      chainId,
-      vaultId,
-      Buffer.from(msgHash.replace("0x", ""), "hex"),
-      "keccak256"
+        msgHash = msgHash.replace("0x", "");
+        const padZero = 64 - msgHash.length;
+        if (padZero > 0) {
+          msgHash = "0".repeat(padZero) + msgHash;
+        } else if (padZero < 0) {
+          throw new Error("Invalid length of msg hash");
+        }
+        const sig = await this.keyRingService.sign(
+          chainId,
+          vaultId,
+          Buffer.from(msgHash, "hex"),
+          "noop"
+        );
+        return this.formatEthSignature(sig);
+      }
     );
-    return this.formatEthSignature(sig);
   }
 
   async signStarknetDeployAccountTransactionSelected(
@@ -447,11 +481,18 @@ export class KeyRingStarknetService {
       throw Error("unsupported signDeployAccountTransaction version");
     }
 
+    msgHash = msgHash.replace("0x", "");
+    const padZero = 64 - msgHash.length;
+    if (padZero > 0) {
+      msgHash = "0".repeat(padZero) + msgHash;
+    } else if (padZero < 0) {
+      throw new Error("Invalid length of msg hash");
+    }
     const sig = await this.keyRingService.sign(
       chainId,
       vaultId,
-      Buffer.from(msgHash.replace("0x", ""), "hex"),
-      "keccak256"
+      Buffer.from(msgHash, "hex"),
+      "noop"
     );
     return this.formatEthSignature(sig);
   }
@@ -501,11 +542,18 @@ export class KeyRingStarknetService {
       throw Error("unsupported signDeclareTransaction version");
     }
 
+    msgHash = msgHash.replace("0x", "");
+    const padZero = 64 - msgHash.length;
+    if (padZero > 0) {
+      msgHash = "0".repeat(padZero) + msgHash;
+    } else if (padZero < 0) {
+      throw new Error("Invalid length of msg hash");
+    }
     const sig = await this.keyRingService.sign(
       chainId,
       vaultId,
-      Buffer.from(msgHash.replace("0x", ""), "hex"),
-      "keccak256"
+      Buffer.from(msgHash, "hex"),
+      "noop"
     );
     return this.formatEthSignature(sig);
   }

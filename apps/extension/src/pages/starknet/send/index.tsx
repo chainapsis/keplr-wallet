@@ -17,6 +17,7 @@ import {
 import { useNavigate } from "react-router";
 import { AmountInput } from "../components/input/amount-input";
 import { RecipientInput } from "../components/input/reciepient-input";
+import { FeeControl } from "../components/input/fee-control";
 import { TokenItem } from "../../main/components";
 import { Subtitle3 } from "../../../components/typography";
 import { Box } from "../../../components/box";
@@ -24,7 +25,7 @@ import { YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
 import { useNotification } from "../../../hooks/notification";
 import { ExtensionKVStore } from "@keplr-wallet/common";
-import { CoinPretty } from "@keplr-wallet/unit";
+import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -42,7 +43,7 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
     accountStore,
     chainStore,
     starknetQueriesStore,
-    priceStore,
+    starknetAccountStore,
   } = useStore();
   const addressRef = useRef<HTMLInputElement | null>(null);
 
@@ -138,15 +139,24 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
   sendConfigs.amountConfig.setCurrency(currency);
 
   const gasSimulatorKey = useMemo(() => {
-    if (sendConfigs.amountConfig.currency) {
-      const amountHexDigits = BigInt(
-        sendConfigs.amountConfig.amount[0].toCoin().amount
-      ).toString(16).length;
-      return amountHexDigits.toString();
-    }
+    const res = (() => {
+      if (sendConfigs.amountConfig.currency) {
+        const amountHexDigits = BigInt(
+          sendConfigs.amountConfig.amount[0].toCoin().amount
+        ).toString(16).length;
+        return amountHexDigits.toString();
+      }
 
-    return "0";
-  }, [sendConfigs.amountConfig.amount, sendConfigs.amountConfig.currency]);
+      return "0";
+    })();
+
+    // fee config의 type마다 다시 시뮬레이션하기 위한 임시조치...
+    return res + sendConfigs.feeConfig.type;
+  }, [
+    sendConfigs.amountConfig.amount,
+    sendConfigs.amountConfig.currency,
+    sendConfigs.feeConfig.type,
+  ]);
 
   const gasSimulator = useGasSimulator(
     new ExtensionKVStore("gas-simulator.starknet.send"),
@@ -156,8 +166,70 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
     sendConfigs.feeConfig,
     gasSimulatorKey,
     () => {
-      // TODO
-      throw new Error("!!!!");
+      if (!sendConfigs.amountConfig.currency) {
+        throw new Error("Send currency not set");
+      }
+
+      const currency = sendConfigs.amountConfig.amount[0].currency;
+      if (!("type" in currency) || currency.type !== "erc20") {
+        throw new Error(`Invalid currency: ${coinMinimalDenom}`);
+      }
+
+      // Prefer not to use the gas config or fee config,
+      // because gas simulator can change the gas config and fee config from the result of reaction,
+      // and it can make repeated reaction.
+      if (
+        sendConfigs.amountConfig.uiProperties.loadingState ===
+          "loading-block" ||
+        sendConfigs.amountConfig.uiProperties.error != null ||
+        sendConfigs.recipientConfig.uiProperties.loadingState ===
+          "loading-block" ||
+        sendConfigs.recipientConfig.uiProperties.error != null
+      ) {
+        throw new Error("Not ready to simulate tx");
+      }
+
+      // observed되어야 하므로 꼭 여기서 참조 해야함.
+      const type = sendConfigs.feeConfig.type;
+      const feeContractAddress =
+        type === "ETH"
+          ? starknet.ethContractAddress
+          : starknet.strkContractAddress;
+      const feeCurrency = starknet.currencies.find(
+        (cur) => cur.coinMinimalDenom === `erc20:${feeContractAddress}`
+      );
+      if (!feeCurrency) {
+        throw new Error("Can't find fee currency");
+      }
+
+      return {
+        simulate: async (): Promise<{
+          gasUsed: number;
+        }> => {
+          const res = await starknetAccountStore
+            .getAccount(chainId)
+            .estimateInvokeFeeForSendTokenTx(
+              {
+                currency: currency,
+                amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
+                sender: sendConfigs.senderConfig.sender,
+                recipient: sendConfigs.recipientConfig.recipient,
+              },
+              type === "ETH" ? "0x2" : "0x3"
+            );
+
+          const fee = new CoinPretty(feeCurrency, res.overall_fee);
+          const maxFee = new CoinPretty(feeCurrency, res.suggestedMaxFee);
+          sendConfigs.feeConfig.setFee({
+            fee,
+            maxFee,
+          });
+
+          return {
+            gasUsed: parseInt(res.gas_consumed.toString()),
+          };
+        },
+      };
     }
   );
 
@@ -225,7 +297,23 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
       onSubmit={async (e) => {
         e.preventDefault();
 
-        // TODO
+        if (sendConfigs.feeConfig.maxFee) {
+          starknetAccountStore
+            .getAccount(chainId)
+            .executeForSendTokenTx(
+              account.starknetHexAddress,
+              sendConfigs.amountConfig.amount[0].toDec().toString(),
+              sendConfigs.amountConfig.currency,
+              sendConfigs.recipientConfig.recipient,
+              {
+                maxFee: new Int(sendConfigs.feeConfig.maxFee.toCoin().amount),
+              },
+              "0x3"
+            )
+            .then(console.log)
+            .catch(console.log);
+          // TODO
+        }
       }}
     >
       <Box
@@ -270,13 +358,12 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
           <Styles.Flex1 />
           <Gutter size="0" />
 
-          {/* TODO */}
-          {/*<FeeControl*/}
-          {/*  senderConfig={sendConfigs.senderConfig}*/}
-          {/*  feeConfig={sendConfigs.feeConfig}*/}
-          {/*  gasConfig={sendConfigs.gasConfig}*/}
-          {/*  gasSimulator={gasSimulator}*/}
-          {/*/>*/}
+          <FeeControl
+            senderConfig={sendConfigs.senderConfig}
+            feeConfig={sendConfigs.feeConfig}
+            gasConfig={sendConfigs.gasConfig}
+            gasSimulator={gasSimulator}
+          />
         </Stack>
       </Box>
     </HeaderLayout>

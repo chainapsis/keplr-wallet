@@ -56,25 +56,27 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   @computed
   get value(): string {
     if (this.fraction > 0) {
-      const result = this.starknetQueriesStore
+      let result = this.starknetQueriesStore
         .get(this.chainId)
         .queryStarknetERC20Balance.getBalance(
-          this.senderConfig.sender,
+          this.chainId,
           this.chainGetter,
           this.senderConfig.sender,
           this.currency.coinMinimalDenom
-        );
-      // TODO
-      // if (this.feeConfig) {
-      //   for (const fee of this.feeConfig.fees) {
-      //     result = result.sub(fee);
-      //   }
-      // }
-      if (!result || result.balance.toDec().lte(new Dec(0))) {
+        )?.balance;
+      if (!result) {
+        return "0";
+      }
+      if (this.feeConfig) {
+        if (this.feeConfig.fee) {
+          result = result.sub(this.feeConfig.fee);
+        }
+      }
+      if (result.toDec().lte(new Dec(0))) {
         return "0";
       }
 
-      return result.balance
+      return result
         .mul(new Dec(this.fraction))
         .trim(true)
         .locale(false)
@@ -165,8 +167,8 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
 
     return (
       modularChainInfo.starknet.currencies.find(
-        (cur) => cur.coinMinimalDenom !== currency.coinMinimalDenom
-      ) !== undefined
+        (cur) => cur.coinMinimalDenom === currency.coinMinimalDenom
+      ) != null
     );
   }
 

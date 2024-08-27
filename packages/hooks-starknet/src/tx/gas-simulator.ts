@@ -127,7 +127,7 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
   protected _key: string;
 
   @observable
-  protected _gasAdjustmentValue: string = "1.3";
+  protected _gasAdjustmentValue: string = "1";
 
   @observable
   protected _enabled: boolean = false;

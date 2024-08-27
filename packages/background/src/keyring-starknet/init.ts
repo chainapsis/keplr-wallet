@@ -3,6 +3,7 @@ import { KeyRingStarknetService } from "./service";
 import {
   GetStarknetKeyMsg,
   GetStarknetKeysSettledMsg,
+  RequestSignStarknetTx,
   RequestJsonRpcToStarknetMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
@@ -16,6 +17,7 @@ export function init(
 ): void {
   router.registerMessage(GetStarknetKeyMsg);
   router.registerMessage(GetStarknetKeysSettledMsg);
+  router.registerMessage(RequestSignStarknetTx);
   router.registerMessage(RequestJsonRpcToStarknetMsg);
 
   router.addHandler(ROUTE, getHandler(service, permissionInteractionService));

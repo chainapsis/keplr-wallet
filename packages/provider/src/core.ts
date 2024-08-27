@@ -37,7 +37,12 @@ import Long from "long";
 import { Buffer } from "buffer/";
 import { KeplrCoreTypes } from "./core-types";
 import EventEmitter from "events";
-import { AccountInterface, ProviderInterface } from "starknet";
+import {
+  AccountInterface,
+  Call,
+  InvocationsSignerDetails,
+  ProviderInterface,
+} from "starknet";
 
 export class Keplr implements IKeplr, KeplrCoreTypes {
   protected enigmaUtils: Map<string, SecretUtils> = new Map();
@@ -1022,6 +1027,36 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         "get-starknet-keys-settled",
         {
           chainIds,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
+  }
+
+  async signStarknetTx(
+    chainId: string,
+    transactions: Call[],
+    details: InvocationsSignerDetails
+  ): Promise<string[]> {
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-starknet",
+        "request-sign-starknet-tx",
+        {
+          chainId,
+          transactions,
+          details,
         }
       )
         .then(resolve)

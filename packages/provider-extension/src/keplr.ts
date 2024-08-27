@@ -33,6 +33,7 @@ import { KeplrEnigmaUtils } from "./enigma";
 import { BUILD_VERSION } from "./version";
 import EventEmitter from "events";
 import { KeplrLogoBase64 } from "./constants";
+import { Call, InvocationsSignerDetails } from "starknet";
 
 export interface ProxyRequest {
   type: "proxy-request";
@@ -579,6 +580,18 @@ export class Keplr implements IKeplr {
     }>
   > {
     return await Keplr.requestMethod("getStarknetKeysSettled", [chainIds]);
+  }
+
+  async signStarknetTx(
+    chainId: string,
+    transactions: Call[],
+    details: InvocationsSignerDetails
+  ): Promise<string[]> {
+    return await Keplr.requestMethod("signStarknetTx", [
+      chainId,
+      transactions,
+      details,
+    ]);
   }
 
   public readonly ethereum = new EthereumProvider(this);

@@ -404,6 +404,10 @@ export class MockKeplr implements Keplr {
     throw new Error("Not implemented");
   }
 
+  signStarknetTx(): Promise<string[]> {
+    throw new Error("Not implemented");
+  }
+
   public readonly ethereum = new MockEthereumProvider();
 
   // TODO: 이거 마지막에 꼭 구현해야한다.

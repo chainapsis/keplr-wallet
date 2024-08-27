@@ -40,7 +40,12 @@ import deepmerge from "deepmerge";
 import Long from "long";
 import { KeplrCoreTypes } from "./core-types";
 import EventEmitter from "events";
-import { AccountInterface, ProviderInterface } from "starknet";
+import {
+  AccountInterface,
+  Call,
+  InvocationsSignerDetails,
+  ProviderInterface,
+} from "starknet";
 
 export interface ProxyRequest {
   type: "proxy-request";
@@ -956,6 +961,18 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     }>
   > {
     return await this.requestMethod("getStarknetKeysSettled", [chainIds]);
+  }
+
+  async signStarknetTx(
+    chainId: string,
+    transactions: Call[],
+    details: InvocationsSignerDetails
+  ): Promise<string[]> {
+    return await this.requestMethod("signStarknetTx", [
+      chainId,
+      transactions,
+      details,
+    ]);
   }
 
   public readonly ethereum = new EthereumProvider(

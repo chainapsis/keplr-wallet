@@ -10,8 +10,16 @@ import { ChainGetter } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { useState } from "react";
 import { StarknetQueriesStore } from "@keplr-wallet/stores-starknet";
+import { CoinPretty } from "@keplr-wallet/unit";
 
 export class FeeConfig extends TxChainSetter implements IFeeConfig {
+  @observable.ref
+  protected _fee: CoinPretty | undefined = undefined;
+  @observable.ref
+  protected _maxFee: CoinPretty | undefined = undefined;
+  @observable
+  protected _type: "ETH" | "STRK" = "STRK";
+
   @observable
   protected _disableBalanceCheck: boolean = false;
 
@@ -42,7 +50,48 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     if (this.disableBalanceCheck) {
       return {};
     }
+
+    if (!this._fee) {
+      return {
+        error: new Error("Fee is not set"),
+        loadingState: "loading-block",
+      };
+    }
+
     return {};
+  }
+
+  get fee(): CoinPretty | undefined {
+    return this._fee;
+  }
+
+  get maxFee(): CoinPretty | undefined {
+    return this._maxFee;
+  }
+
+  get type(): "ETH" | "STRK" {
+    return this._type;
+  }
+
+  @action
+  setFee(
+    fee:
+      | {
+          fee: CoinPretty;
+          maxFee: CoinPretty;
+        }
+      | undefined
+  ): void {
+    this._fee = fee?.fee;
+    this._maxFee = fee?.maxFee;
+  }
+
+  @action
+  setType(type: "ETH" | "STRK"): void {
+    if (this._type !== type) {
+      this._type = type;
+      this._fee = undefined;
+    }
   }
 }
 

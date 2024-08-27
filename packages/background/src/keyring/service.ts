@@ -615,15 +615,26 @@ export class KeyRingService {
       throw new Error("KeyRing is locked");
     }
 
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    const modularChainInfo =
+      this.chainsService.getModularChainInfoOrThrow(chainId);
 
-    if (
-      chainInfo.bip44.coinType !== coinType &&
-      !(chainInfo.alternativeBIP44s ?? []).find(
-        (path) => path.coinType === coinType
-      )
-    ) {
-      throw new Error("Coin type is not associated to chain");
+    if ("cosmos" in modularChainInfo) {
+      const chainInfo = modularChainInfo.cosmos;
+      if (
+        chainInfo.bip44.coinType !== coinType &&
+        !(chainInfo.alternativeBIP44s ?? []).find(
+          (path) => path.coinType === coinType
+        )
+      ) {
+        throw new Error("Coin type is not associated to chain");
+      }
+    }
+    if ("starknet" in modularChainInfo) {
+      // TODO: starknet에서는 일단 코인타입을 9004로 고정해서 쓴다.
+      //       일단은 임시조치인데 나중에 다른 방식으로 바뀔수도 있다.
+      if (coinType !== 9004) {
+        throw new Error("Coin type is not associated to chain");
+      }
     }
 
     const vault = this.vaultService.getVault("keyRing", vaultId);
@@ -1106,7 +1117,7 @@ export class KeyRingService {
     chainId: string,
     vaultId: string,
     data: Uint8Array,
-    digestMethod: "sha256" | "keccak256"
+    digestMethod: "sha256" | "keccak256" | "noop"
   ): Promise<{
     readonly r: Uint8Array;
     readonly s: Uint8Array;
@@ -1116,23 +1127,32 @@ export class KeyRingService {
       throw new Error("KeyRing is locked");
     }
 
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    const modularChainInfo =
+      this.chainsService.getModularChainInfoOrThrow(chainId);
 
     const vault = this.vaultService.getVault("keyRing", vaultId);
     if (!vault) {
       throw new Error("Vault is null");
     }
 
-    const coinTypeTag = `keyRing-${
-      ChainIdHelper.parse(chainId).identifier
-    }-coinType`;
-
     const coinType = (() => {
-      if (vault.insensitive[coinTypeTag]) {
-        return vault.insensitive[coinTypeTag] as number;
-      }
+      if ("cosmos" in modularChainInfo) {
+        const coinTypeTag = `keyRing-${
+          ChainIdHelper.parse(chainId).identifier
+        }-coinType`;
 
-      return chainInfo.bip44.coinType;
+        if (vault.insensitive[coinTypeTag]) {
+          return vault.insensitive[coinTypeTag] as number;
+        }
+
+        return modularChainInfo.cosmos.bip44.coinType;
+      } else if ("starknet" in modularChainInfo) {
+        // TODO: starknet에서는 일단 코인타입을 9004로 고정해서 쓴다.
+        //       일단은 임시조치인데 나중에 다른 방식으로 바뀔수도 있다.
+        return 9004;
+      } else {
+        throw new Error("Can't determine default coin type");
+      }
     })();
 
     const signature = this.signWithVault(
@@ -1140,7 +1160,7 @@ export class KeyRingService {
       coinType,
       data,
       digestMethod,
-      chainInfo
+      modularChainInfo
     );
 
     if (this.needKeyCoinTypeFinalize(vault.id, chainId)) {
@@ -1170,8 +1190,8 @@ export class KeyRingService {
     vault: Vault,
     coinType: number,
     data: Uint8Array,
-    digestMethod: "sha256" | "keccak256",
-    chainInfo: ChainInfo
+    digestMethod: "sha256" | "keccak256" | "noop",
+    modularChainInfo: ModularChainInfo
   ): Promise<{
     readonly r: Uint8Array;
     readonly s: Uint8Array;
@@ -1184,7 +1204,7 @@ export class KeyRingService {
     const keyRing = this.getVaultKeyRing(vault);
 
     return Promise.resolve(
-      keyRing.sign(vault, coinType, data, digestMethod, chainInfo)
+      keyRing.sign(vault, coinType, data, digestMethod, modularChainInfo)
     );
   }
 

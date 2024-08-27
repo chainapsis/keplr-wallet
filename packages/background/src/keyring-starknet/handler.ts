@@ -8,6 +8,7 @@ import {
 import {
   GetStarknetKeyMsg,
   GetStarknetKeysSettledMsg,
+  RequestSignStarknetTx,
   RequestJsonRpcToStarknetMsg,
 } from "./messages";
 import { KeyRingStarknetService } from "./service";
@@ -32,6 +33,11 @@ export const getHandler: (
           service,
           permissionInteractionService
         )(env, msg as GetStarknetKeysSettledMsg);
+      case RequestSignStarknetTx:
+        return handleRequestSignStarknetTx(
+          service,
+          permissionInteractionService
+        )(env, msg as RequestSignStarknetTx);
       case RequestJsonRpcToStarknetMsg:
         return handleRequestJsonRpcToStarknetMsg(
           service,
@@ -75,6 +81,29 @@ const handleGetStarknetKeysSettledMsg: (
 
     return await Promise.allSettled(
       msg.chainIds.map((chainId) => service.getStarknetKeySelected(chainId))
+    );
+  };
+};
+
+const handleRequestSignStarknetTx: (
+  service: KeyRingStarknetService,
+  permissionInteractionService: PermissionInteractiveService
+) => InternalHandler<RequestSignStarknetTx> = (
+  service,
+  permissionInteractionService
+) => {
+  return async (env, msg) => {
+    await permissionInteractionService.ensureEnabledForStarknet(
+      env,
+      msg.origin
+    );
+
+    return await service.signStarknetTransactionSelected(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.transactions,
+      msg.details
     );
   };
 };

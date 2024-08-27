@@ -9059,6 +9059,8 @@ __metadata:
     "@keplr-wallet/types": 0.12.121
     deepmerge: ^4.2.2
     long: ^4.0.0
+  peerDependencies:
+    starknet: ^6
   languageName: unknown
   linkType: soft
 
@@ -9137,6 +9139,7 @@ __metadata:
   peerDependencies:
     mobx: ^6
     mobx-utils: ^6
+    starknet: ^6
   languageName: unknown
   linkType: soft
 

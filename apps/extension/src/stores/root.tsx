@@ -77,7 +77,10 @@ import {
 } from "@keplr-wallet/stores-internal";
 import { setInteractionDataHref } from "../utils";
 import { InteractionPingMsg } from "@keplr-wallet/background";
-import { StarknetQueriesStore } from "@keplr-wallet/stores-starknet";
+import {
+  StarknetAccountStore,
+  StarknetQueriesStore,
+} from "@keplr-wallet/stores-starknet";
 
 let _sidePanelWindowId: number | undefined;
 async function getSidePanelWindowId(): Promise<number | undefined> {
@@ -132,6 +135,7 @@ export class RootStore {
     [CosmosAccount, CosmwasmAccount, SecretAccount]
   >;
   public readonly ethereumAccountStore: EthereumAccountStore;
+  public readonly starknetAccountStore: StarknetAccountStore;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly price24HChangesStore: Price24HChangesStore;
   public readonly hugeQueriesStore: HugeQueriesStore;
@@ -455,6 +459,10 @@ export class RootStore {
     );
 
     this.ethereumAccountStore = new EthereumAccountStore(
+      this.chainStore,
+      getKeplrFromWindow
+    );
+    this.starknetAccountStore = new StarknetAccountStore(
       this.chainStore,
       getKeplrFromWindow
     );
