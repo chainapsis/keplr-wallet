@@ -260,5 +260,5 @@ export interface Keplr {
 
   readonly ethereum: IEthereumProvider;
 
-  readonly starknet: IStarknetProvider | undefined;
+  readonly starknet: IStarknetProvider;
 }
