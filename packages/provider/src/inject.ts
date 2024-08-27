@@ -1109,6 +1109,10 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     params?: readonly unknown[] | Record<string, unknown>;
     chainId?: string;
   }): Promise<T> {
+    if (typeof method !== "string") {
+      throw new Error("Invalid paramater: `method` must be a string");
+    }
+
     if (!this._isConnected) {
       await this._initProviderState();
     }
