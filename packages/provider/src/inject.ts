@@ -287,16 +287,21 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
               );
             }
 
+            const messageArgs = JSONUint8Array.unwrap(message.args);
             if (ethereumProviderMethod === "request") {
               return await keplr.ethereum.request(
-                JSONUint8Array.unwrap(message.args)
+                typeof messageArgs === "string"
+                  ? JSON.parse(messageArgs)
+                  : messageArgs
               );
             }
 
             return await keplr.ethereum[ethereumProviderMethod](
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore
-              ...JSONUint8Array.unwrap(message.args)
+              ...(typeof messageArgs === "string"
+                ? JSON.parse(messageArgs)
+                : messageArgs)
             );
           }
 
