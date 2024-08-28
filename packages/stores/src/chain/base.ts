@@ -13,6 +13,7 @@ import {
   BIP44,
   ChainInfo,
   Currency,
+  ERC20Currency,
   FeeCurrency,
   ModularChainInfo,
 } from "@keplr-wallet/types";
@@ -504,6 +505,169 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
   }
 }
 
+export class ModularChainInfoImpl<
+  M extends ModularChainInfo = ModularChainInfo
+> {
+  @observable.ref
+  protected _embedded: M;
+
+  @observable.shallow
+  protected registeredCosmosCurrencies: AppCurrency[] = [];
+  @observable.shallow
+  protected registeredStarkentCurrencies: ERC20Currency[] = [];
+
+  constructor(
+    embedded: M,
+    protected readonly currencyRegistry: {
+      getCurrencyRegistrar: CurrencyRegistrar;
+    }
+  ) {
+    this._embedded = embedded;
+
+    makeObservable(this);
+
+    keepAlive(this, "cosmosCurrencyMap");
+    keepAlive(this, "starknetCurrencyMap");
+  }
+
+  get embedded(): M {
+    return this._embedded;
+  }
+
+  @action
+  setEmbeddedModularChainInfo(embedded: M) {
+    this._embedded = embedded;
+  }
+
+  get chainId(): string {
+    return this._embedded.chainId;
+  }
+
+  getCurrencies(module: string): AppCurrency[] {
+    switch (module) {
+      case "cosmos":
+        if (!("cosmos" in this._embedded)) {
+          throw new Error(`No cosmos module for this chain: ${this.chainId}`);
+        }
+
+        return this._embedded.cosmos.currencies.concat(
+          this.registeredCosmosCurrencies
+        );
+      case "starknet":
+        if (!("starknet" in this._embedded)) {
+          throw new Error(`No starknet module for this chain: ${this.chainId}`);
+        }
+
+        return this._embedded.starknet.currencies.concat(
+          this.registeredStarkentCurrencies
+        );
+      default:
+        throw new Error(`Unknown module: ${module}`);
+    }
+  }
+
+  @action
+  addCurrencies(module: string, currencies: AppCurrency[]) {
+    if (currencies.length === 0) {
+      return;
+    }
+
+    switch (module) {
+      case "cosmos":
+        if (!("cosmos" in this._embedded)) {
+          throw new Error(`No cosmos module for this chain: ${this.chainId}`);
+        }
+
+        for (const currency of currencies) {
+          if (!this.cosmosCurrencyMap.has(currency.coinMinimalDenom)) {
+            this.registeredCosmosCurrencies.push(currency);
+          }
+        }
+        break;
+      case "starknet":
+        if (!("starknet" in this._embedded)) {
+          throw new Error(`No starknet module for this chain: ${this.chainId}`);
+        }
+
+        for (const currency of currencies) {
+          if (
+            !this.starknetCurrencyMap.has(currency.coinMinimalDenom) &&
+            "type" in currency &&
+            currency.type === "erc20"
+          ) {
+            this.registeredStarkentCurrencies.push(currency);
+          }
+        }
+        break;
+      default:
+        throw new Error(`Unknown module: ${module}`);
+    }
+  }
+
+  @action
+  removeCurrencies(module: string, coinMinimalDenoms: string[]) {
+    if (coinMinimalDenoms.length === 0) {
+      return;
+    }
+
+    const map = new Map<string, boolean>();
+    for (const coinMinimalDenom of coinMinimalDenoms) {
+      map.set(coinMinimalDenom, true);
+    }
+
+    switch (module) {
+      case "cosmos":
+        if (!("cosmos" in this._embedded)) {
+          throw new Error(`No cosmos module for this chain: ${this.chainId}`);
+        }
+
+        this.registeredCosmosCurrencies =
+          this.registeredCosmosCurrencies.filter(
+            (currency) => !map.get(currency.coinMinimalDenom)
+          );
+        break;
+      case "starknet":
+        if (!("starknet" in this._embedded)) {
+          throw new Error(`No starknet module for this chain: ${this.chainId}`);
+        }
+
+        this.registeredStarkentCurrencies =
+          this.registeredStarkentCurrencies.filter(
+            (currency) => !map.get(currency.coinMinimalDenom)
+          );
+        break;
+      default:
+        throw new Error(`Unknown module: ${module}`);
+    }
+  }
+
+  @computed
+  protected get cosmosCurrencyMap(): Map<string, AppCurrency> {
+    const result: Map<string, AppCurrency> = new Map();
+    if (!("cosmos" in this._embedded)) {
+      throw new Error(`No cosmos module for this chain: ${this.chainId}`);
+    }
+
+    for (const currency of this._embedded.cosmos.currencies) {
+      result.set(currency.coinMinimalDenom, currency);
+    }
+    return result;
+  }
+
+  @computed
+  protected get starknetCurrencyMap(): Map<string, AppCurrency> {
+    const result: Map<string, AppCurrency> = new Map();
+    if (!("starknet" in this._embedded)) {
+      throw new Error(`No starknet module for this chain: ${this.chainId}`);
+    }
+
+    for (const currency of this._embedded.starknet.currencies) {
+      result.set(currency.coinMinimalDenom, currency);
+    }
+    return result;
+  }
+}
+
 export class ChainStore<C extends ChainInfo = ChainInfo>
   implements IChainStore<C>
 {
@@ -511,6 +675,9 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
   protected _chainInfos: ChainInfoImpl<C>[] = [];
   @observable.ref
   protected _modularChainInfos: ModularChainInfo[] = [];
+  @observable.ref
+  protected _modularChainInfoImpls: ModularChainInfoImpl<ModularChainInfo>[] =
+    [];
 
   @observable
   protected currencyRegistrars: CurrencyRegistrar[] = [];
@@ -579,6 +746,35 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
     return chainInfo;
   }
 
+  @computed
+  protected get modularChainInfoImplMap(): Map<
+    string,
+    ModularChainInfoImpl<ModularChainInfo>
+  > {
+    const result: Map<
+      string,
+      ModularChainInfoImpl<ModularChainInfo>
+    > = new Map();
+    for (const chainInfo of this._modularChainInfoImpls) {
+      result.set(ChainIdHelper.parse(chainInfo.chainId).identifier, chainInfo);
+    }
+    return result;
+  }
+
+  getModularChainImpl(chainId: string): ModularChainInfoImpl<ModularChainInfo> {
+    const chainIdentifier = ChainIdHelper.parse(chainId);
+
+    const modularChainInfoImpl = this.modularChainInfoImplMap.get(
+      chainIdentifier.identifier
+    );
+
+    if (!modularChainInfoImpl) {
+      throw new Error(`Unknown modular chain info: ${chainId}`);
+    }
+
+    return modularChainInfoImpl;
+  }
+
   hasModularChain(chainId: string): boolean {
     const chainIdentifier = ChainIdHelper.parse(chainId);
 
@@ -619,6 +815,27 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
         };
       }
       return chainInfo;
+    });
+    this._modularChainInfoImpls = chainInfos.map((chainInfo) => {
+      const modularChainInfo =
+        "currencies" in chainInfo
+          ? {
+              chainId: chainInfo.chainId,
+              chainName: chainInfo.chainName,
+              chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
+              cosmos: chainInfo as C,
+            }
+          : chainInfo;
+
+      const prev = this.modularChainInfoImplMap.get(
+        ChainIdHelper.parse(chainInfo.chainId).identifier
+      );
+      if (prev) {
+        prev.setEmbeddedModularChainInfo(modularChainInfo);
+        return prev;
+      }
+
+      return new ModularChainInfoImpl(modularChainInfo, this);
     });
   }
 

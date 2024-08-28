@@ -236,9 +236,10 @@ export class TokensStore {
       const res = await this.requester.sendMessage(BACKGROUND_PORT, msg);
       runInAction(() => {
         const newTokenMap = new Map(this.tokenMap);
-        const newTokens = res[chainId];
+        const chainIdentifier = ChainIdHelper.parse(modularChainInfo.chainId);
+        const newTokens = res[chainIdentifier.identifier];
         if (newTokens) {
-          newTokenMap.set(chainId, newTokens);
+          newTokenMap.set(chainIdentifier.identifier, newTokens);
         }
 
         this.tokenMap = newTokenMap;
@@ -291,9 +292,10 @@ export class TokensStore {
       runInAction(() => {
         // TODO: Remove 이후에는 chainInfod에 지워진 토큰에 대한 싱크를 맞추야 함.
         const newTokenMap = new Map(this.tokenMap);
-        const newTokens = res[chainId];
+        const chainIdentifier = ChainIdHelper.parse(modularChainInfo.chainId);
+        const newTokens = res[chainIdentifier.identifier];
         if (newTokens) {
-          newTokenMap.set(chainId, newTokens);
+          newTokenMap.set(chainIdentifier.identifier, newTokens);
         }
 
         this.tokenMap = newTokenMap;
