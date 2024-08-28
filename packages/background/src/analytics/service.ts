@@ -100,6 +100,13 @@ export class AnalyticsService {
         v2: true,
         platform: this.analyticsOptions.platform,
         mobileOS: this.analyticsOptions.mobileOS,
+        webdriver: (() => {
+          if (typeof navigator === "undefined") {
+            return false;
+          }
+          // 타이핑은 boolean인데 실제로는 nullable해서 무조건 boolean으로 반환하게 하기 위해서 이렇게 한거임.
+          return !!navigator.webdriver;
+        })(),
       })
     ).toString("base64");
     await simpleFetch(
