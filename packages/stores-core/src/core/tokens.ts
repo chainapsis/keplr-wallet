@@ -225,13 +225,13 @@ export class TokensStore {
   }
 
   async addToken(chainId: string, currency: AppCurrency): Promise<void> {
-    const bech32Address = this.accountStore.getAccount(chainId).bech32Address;
-    if (!bech32Address) {
-      throw new Error("Account not initialized");
-    }
-
     const modularChainInfo = this.chainStore.getModularChain(chainId);
     if ("cosmos" in modularChainInfo) {
+      const bech32Address = this.accountStore.getAccount(chainId).bech32Address;
+      if (!bech32Address) {
+        throw new Error("Account not initialized");
+      }
+
       const chainInfo = this.chainStore.getChain(chainId);
       const isEvmChain = chainInfo.evm != null;
       const hasBech32Config = chainInfo.bech32Config != null;
@@ -317,7 +317,10 @@ export class TokensStore {
 
       const res = await this.requester.sendMessage(BACKGROUND_PORT, msg);
       runInAction(() => {
-        // TODO: Remove 이후에는 chainInfod에 지워진 토큰에 대한 싱크를 맞추야 함.
+        // Remove 이후에는 지워진 토큰에 대한 싱크를 맞추기 위해서 clearTokensFromChainInfos를 호출한다.
+        // 그냥 다 지우고 다시 다 설정하는 방식임.
+        this.clearTokensFromChainInfos();
+
         const newTokenMap = new Map(this.tokenMap);
         const chainIdentifier = ChainIdHelper.parse(modularChainInfo.chainId);
         const newTokens = res[chainIdentifier.identifier];

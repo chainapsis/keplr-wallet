@@ -80,6 +80,13 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
       );
     });
   }, [chainStore.chainInfosInListUI]);
+  const starknetChainInfos = useMemo(() => {
+    return chainStore.modularChainInfosInUI.filter((modularChainInfo) => {
+      return (
+        "starknet" in modularChainInfo && modularChainInfo.starknet != null
+      );
+    });
+  }, [chainStore.modularChainInfosInUI]);
 
   const [chainId, setChainId] = useState<string>(() => {
     if (paramChainId) {
@@ -149,12 +156,21 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] =
     useState(false);
 
-  const items = supportedChainInfos.map((chainInfo) => {
-    return {
-      key: chainInfo.chainId,
-      label: chainInfo.chainName,
-    };
-  });
+  const items = supportedChainInfos
+    .map((chainInfo) => {
+      return {
+        key: chainInfo.chainId,
+        label: chainInfo.chainName,
+      };
+    })
+    .concat(
+      starknetChainInfos.map((modularChainInfo) => {
+        return {
+          key: modularChainInfo.chainId,
+          label: modularChainInfo.chainName,
+        };
+      })
+    );
 
   const contractAddress = watch("contractAddress").trim();
   const queryContract = (() => {
