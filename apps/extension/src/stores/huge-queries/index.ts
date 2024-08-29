@@ -231,8 +231,12 @@ export class HugeQueriesStore {
         if (account.starknetHexAddress === "") {
           continue;
         }
+
+        const modularChainInfoImpl = this.chainStore.getModularChainInfoImpl(
+          modularChainInfo.chainId
+        );
         const queries = this.starknetQueriesStore.get(modularChainInfo.chainId);
-        const currencies = [...modularChainInfo.starknet.currencies];
+        const currencies = modularChainInfoImpl.getCurrencies("starknet");
 
         for (const currency of currencies) {
           const queryBalance = queries.queryStarknetERC20Balance.getBalance(
@@ -301,7 +305,12 @@ export class HugeQueriesStore {
           }
         }
         if ("starknet" in modularChainInfo) {
-          for (const currency of modularChainInfo.starknet.currencies) {
+          const modularChainInfoImpl = this.chainStore.getModularChainInfoImpl(
+            modularChainInfo.chainId
+          );
+          for (const currency of modularChainInfoImpl.getCurrencies(
+            "starknet"
+          )) {
             const key = `${
               ChainIdHelper.parse(modularChainInfo.chainId).identifier
             }/${currency.coinMinimalDenom}`;

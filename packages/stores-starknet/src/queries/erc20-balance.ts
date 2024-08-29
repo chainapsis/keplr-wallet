@@ -60,9 +60,13 @@ export class ObservableQueryStarknetERC20BalanceImpl
     if (!("starknet" in modularChainInfo)) {
       throw new Error(`The chain (${this.chainId}) doesn't support starknet`);
     }
-    const currency = modularChainInfo.starknet.currencies.find(
-      (cur) => cur.coinMinimalDenom === denom
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
     );
+
+    const currency = modularChainInfoImpl
+      .getCurrencies("starknet")
+      .find((cur) => cur.coinMinimalDenom === denom);
 
     if (!currency) {
       throw new Error(`Unknown currency: ${this.contractAddress}`);

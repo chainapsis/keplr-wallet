@@ -69,6 +69,8 @@ export interface StarknetChainInfo {
   readonly currencies: ERC20Currency[];
 }
 
+export type ChainInfoModule = "cosmos" | "starknet";
+
 export type ModularChainInfo =
   | {
       readonly chainId: string;
