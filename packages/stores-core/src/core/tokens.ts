@@ -108,10 +108,16 @@ export class TokensStore {
 
       const prevTokens =
         this.prevTokenMap.get(chainIdentifier.identifier) ?? [];
-      modularChainInfoImpl.removeCurrencies(
-        "starknet",
-        ...prevTokens.map((token) => token.currency.coinMinimalDenom)
-      );
+
+      if (
+        "starknet" in modularChainInfoImpl &&
+        modularChainInfoImpl.starknet != null
+      ) {
+        modularChainInfoImpl.removeCurrencies(
+          "starknet",
+          ...prevTokens.map((token) => token.currency.coinMinimalDenom)
+        );
+      }
     }
   }
 
@@ -158,7 +164,12 @@ export class TokensStore {
         adds.push(token.currency);
       }
 
-      modularChainInfoImpl.addCurrencies("starknet", ...adds);
+      if (
+        "starknet" in modularChainInfoImpl &&
+        modularChainInfoImpl.starknet != null
+      ) {
+        modularChainInfoImpl.addCurrencies("starknet", ...adds);
+      }
     }
 
     this.prevTokenMap = this.tokenMap;
