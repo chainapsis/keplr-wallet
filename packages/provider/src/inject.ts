@@ -361,16 +361,21 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
               );
             }
 
+            const messageArgs = JSONUint8Array.unwrap(message.args);
             if (starknetProviderMethod === "request") {
               return await keplr.starknet.request(
-                JSONUint8Array.unwrap(message.args)
+                typeof messageArgs === "string"
+                  ? JSON.parse(messageArgs)
+                  : messageArgs
               );
             }
 
             return await keplr.starknet[starknetProviderMethod](
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore
-              ...JSONUint8Array.unwrap(message.args)
+              ...(typeof messageArgs === "string"
+                ? JSON.parse(messageArgs)
+                : messageArgs)
             );
           }
 
@@ -1400,6 +1405,10 @@ class StarknetProvider implements IStarknetProvider {
     type: string;
     params?: unknown[] | Record<string, unknown>;
   }): Promise<T> {
+    if (typeof type !== "string") {
+      throw new Error("Invalid parameter: `type` must be a string");
+    }
+
     return await this._requestMethod<T>("request", {
       type,
       params,

@@ -321,7 +321,9 @@ export class RootStore {
       SwapVenue
     );
     this.starknetQueriesStore = new StarknetQueriesStore(
-      this.queriesStore.sharedContext
+      this.queriesStore.sharedContext,
+      this.chainStore,
+      TokenContractListURL
     );
 
     this.accountStore = new AccountStore(

@@ -3,12 +3,15 @@ import { ChainsService } from "../chains";
 import { KeyRingService } from "../keyring";
 import { Buffer } from "buffer/";
 import { PermissionService } from "../permission";
+import { TokenERC20Service } from "../token-erc20";
+import { WatchAssetParameters } from "@keplr-wallet/types";
 
 export class KeyRingStarknetService {
   constructor(
     protected readonly chainsService: ChainsService,
     protected readonly keyRingService: KeyRingService,
-    protected readonly permissionService: PermissionService
+    protected readonly permissionService: PermissionService,
+    protected readonly tokenERC20Service: TokenERC20Service
   ) {}
 
   async init() {
@@ -61,7 +64,7 @@ export class KeyRingStarknetService {
     env: Env,
     origin: string,
     type: string,
-    _params?: unknown[] | Record<string, unknown>,
+    params?: unknown[] | Record<string, unknown>,
     chainId?: string
   ): Promise<T> {
     if (env.isInternalMsg && chainId == null) {
@@ -95,6 +98,22 @@ export class KeyRingStarknetService {
             currentChainId,
             selectedAddress,
           };
+        }
+        case "wallet_watchAsset": {
+          const param = params as WatchAssetParameters | undefined;
+          if (param?.type !== "ERC20") {
+            throw new Error("Not a supported asset type.");
+          }
+
+          const contractAddress = param.options.address;
+
+          await this.tokenERC20Service.suggestERC20Token(
+            env,
+            currentChainId,
+            contractAddress
+          );
+
+          return true;
         }
         default: {
           throw new Error(`The type "${type}" is not supported.`);
