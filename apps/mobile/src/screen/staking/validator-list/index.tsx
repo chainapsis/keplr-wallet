@@ -62,13 +62,14 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
         .delegations.map(del => del.delegation.validator_address),
     );
   }, [bech32Address, queries.cosmos.queryDelegations]);
-  const bondedValidators = (() => {
+  const bondedValidatorsQuery = queries.cosmos.queryValidators.getQueryStatus(
+    Staking.BondStatus.Bonded,
+  );
+  const stakingParamsQuery = queries.cosmos.queryStakingParams;
+  const bondedValidators = useMemo(() => {
     if (chainId.startsWith('cosmoshub')) {
-      const maxValidators = queries.cosmos.queryStakingParams.maxValidators;
-
-      return queries.cosmos.queryValidators
-        .getQueryStatus(Staking.BondStatus.Bonded)
-        .validators.sort((a, b) => {
+      return bondedValidatorsQuery.validators
+        .sort((a, b) => {
           const aTokens = new Dec(a.tokens);
           const bTokens = new Dec(b.tokens);
           if (aTokens.gt(bTokens)) {
@@ -79,13 +80,11 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
             return 1;
           }
         })
-        .slice(0, maxValidators ?? 180);
+        .slice(0, stakingParamsQuery.maxValidators ?? 180);
     } else {
-      return queries.cosmos.queryValidators.getQueryStatus(
-        Staking.BondStatus.Bonded,
-      ).validators;
+      return bondedValidatorsQuery.validators;
     }
-  })();
+  }, [chainId, bondedValidatorsQuery, stakingParamsQuery]);
   const safeAreaInsets = useSafeAreaInsets();
   const [isOpenSelectItemModal, setIsOpenSelectItemModal] = useState(false);
 
