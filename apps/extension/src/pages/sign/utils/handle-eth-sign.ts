@@ -251,12 +251,15 @@ export const connectAndSignEthWithLedger = async (
             tx.type = TransactionTypes.eip1559;
           }
           const rlpArray = serialize(tx).replace("0x", "");
-          return ethSignatureToBytes(
-            await ethApp.signTransaction(
-              `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`,
-              rlpArray
-            )
+          const sig = await ethApp.signTransaction(
+            `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`,
+            rlpArray
           );
+          return ethSignatureToBytes({
+            ...sig,
+            // Ledger returns v as chain id if tx is legacy, but ethers expects 0 or 1
+            v: sig.v ? "1c" : "1b",
+          });
         }
         case EthSignType.EIP712: {
           const data = await EIP712MessageValidator.validateAsync(
