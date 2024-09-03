@@ -65,26 +65,28 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
   const bondedValidatorsQuery = queries.cosmos.queryValidators.getQueryStatus(
     Staking.BondStatus.Bonded,
   );
-  const stakingParamsQuery = queries.cosmos.queryStakingParams;
   const bondedValidators = useMemo(() => {
     if (chainId.startsWith('cosmoshub')) {
-      return bondedValidatorsQuery.validators
-        .sort((a, b) => {
-          const aTokens = new Dec(a.tokens);
-          const bTokens = new Dec(b.tokens);
-          if (aTokens.gt(bTokens)) {
-            return -1;
-          } else if (aTokens.equals(bTokens)) {
-            return 0;
-          } else {
-            return 1;
-          }
-        })
-        .slice(0, stakingParamsQuery.maxValidators ?? 180);
+      return (
+        bondedValidatorsQuery.validators
+          .sort((a, b) => {
+            const aTokens = new Dec(a.tokens);
+            const bTokens = new Dec(b.tokens);
+            if (aTokens.gt(bTokens)) {
+              return -1;
+            } else if (aTokens.equals(bTokens)) {
+              return 0;
+            } else {
+              return 1;
+            }
+          })
+          // TODO: Change 180 to max_provider_consensus_validators
+          .slice(0, 180)
+      );
     } else {
       return bondedValidatorsQuery.validators;
     }
-  }, [chainId, bondedValidatorsQuery, stakingParamsQuery]);
+  }, [chainId, bondedValidatorsQuery.validators]);
   const safeAreaInsets = useSafeAreaInsets();
   const [isOpenSelectItemModal, setIsOpenSelectItemModal] = useState(false);
 
