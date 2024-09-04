@@ -62,15 +62,38 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
         .delegations.map(del => del.delegation.validator_address),
     );
   }, [bech32Address, queries.cosmos.queryDelegations]);
-  const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
+  const icsProviderParamsQuery = queries.cosmos.queryICSProviderParams;
+  const bondedValidatorsQuery = queries.cosmos.queryValidators.getQueryStatus(
     Staking.BondStatus.Bonded,
   );
+  const bondedValidators = useMemo(() => {
+    if (icsProviderParamsQuery.maxProviderConsensusValidators != null) {
+      return bondedValidatorsQuery.validators
+        .sort((a, b) => {
+          const aTokens = new Dec(a.tokens);
+          const bTokens = new Dec(b.tokens);
+          if (aTokens.gt(bTokens)) {
+            return -1;
+          } else if (aTokens.equals(bTokens)) {
+            return 0;
+          } else {
+            return 1;
+          }
+        })
+        .slice(0, icsProviderParamsQuery.maxProviderConsensusValidators);
+    } else {
+      return bondedValidatorsQuery.validators;
+    }
+  }, [
+    bondedValidatorsQuery.validators,
+    icsProviderParamsQuery.maxProviderConsensusValidators,
+  ]);
   const safeAreaInsets = useSafeAreaInsets();
   const [isOpenSelectItemModal, setIsOpenSelectItemModal] = useState(false);
 
   const sortedValidators = useMemo(() => {
     if (filterOption === 'Voting Power') {
-      return bondedValidators.validators.slice().sort((a, b) => {
+      return bondedValidators.slice().sort((a, b) => {
         const aTokens = new Dec(a.tokens);
         const bTokens = new Dec(b.tokens);
         if (aTokens.gt(bTokens)) {
@@ -83,7 +106,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
       });
     }
     if (filterOption === 'Commission') {
-      return bondedValidators.validators.slice().sort((a, b) => {
+      return bondedValidators.slice().sort((a, b) => {
         const aRate = new Dec(a.commission.commission_rates.rate);
         const bRate = new Dec(b.commission.commission_rates.rate);
         if (aRate.lt(bRate)) {
@@ -96,7 +119,7 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
       });
     }
     return [];
-  }, [bondedValidators.validators, filterOption]);
+  }, [bondedValidators, filterOption]);
 
   const filteredValidators = useMemo(() => {
     const _search = search.trim().toLowerCase();
