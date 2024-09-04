@@ -62,31 +62,32 @@ export const ValidatorListScreen: FunctionComponent = observer(() => {
         .delegations.map(del => del.delegation.validator_address),
     );
   }, [bech32Address, queries.cosmos.queryDelegations]);
+  const icsProviderParamsQuery = queries.cosmos.queryICSProviderParams;
   const bondedValidatorsQuery = queries.cosmos.queryValidators.getQueryStatus(
     Staking.BondStatus.Bonded,
   );
   const bondedValidators = useMemo(() => {
-    if (chainId.startsWith('cosmoshub')) {
-      return (
-        bondedValidatorsQuery.validators
-          .sort((a, b) => {
-            const aTokens = new Dec(a.tokens);
-            const bTokens = new Dec(b.tokens);
-            if (aTokens.gt(bTokens)) {
-              return -1;
-            } else if (aTokens.equals(bTokens)) {
-              return 0;
-            } else {
-              return 1;
-            }
-          })
-          // TODO: Change 180 to max_provider_consensus_validators
-          .slice(0, 180)
-      );
+    if (icsProviderParamsQuery.maxProviderConsensusValidators != null) {
+      return bondedValidatorsQuery.validators
+        .sort((a, b) => {
+          const aTokens = new Dec(a.tokens);
+          const bTokens = new Dec(b.tokens);
+          if (aTokens.gt(bTokens)) {
+            return -1;
+          } else if (aTokens.equals(bTokens)) {
+            return 0;
+          } else {
+            return 1;
+          }
+        })
+        .slice(0, icsProviderParamsQuery.maxProviderConsensusValidators);
     } else {
       return bondedValidatorsQuery.validators;
     }
-  }, [chainId, bondedValidatorsQuery.validators]);
+  }, [
+    bondedValidatorsQuery.validators,
+    icsProviderParamsQuery.maxProviderConsensusValidators,
+  ]);
   const safeAreaInsets = useSafeAreaInsets();
   const [isOpenSelectItemModal, setIsOpenSelectItemModal] = useState(false);
 

@@ -24,6 +24,7 @@ import { ObservableQueryRPCStatus } from "./status";
 import { ObservableQueryAuthZGranter } from "./authz";
 import { QuerySharedContext } from "../../common";
 import { ObservableQueryFeeMarketGasPrices } from "./feemarket";
+import { ObservableQueryICSProviderParams } from "./ics/provider/params";
 
 export interface CosmosQueries {
   cosmos: CosmosQueriesImpl;
@@ -74,6 +75,8 @@ export class CosmosQueriesImpl {
   public readonly queryAuthZGranter: DeepReadonly<ObservableQueryAuthZGranter>;
 
   public readonly queryFeeMarketGasPrices: DeepReadonly<ObservableQueryFeeMarketGasPrices>;
+
+  public readonly queryICSProviderParams: DeepReadonly<ObservableQueryICSProviderParams>;
 
   constructor(
     base: QueriesSetBase,
@@ -161,6 +164,12 @@ export class CosmosQueriesImpl {
     );
 
     this.queryFeeMarketGasPrices = new ObservableQueryFeeMarketGasPrices(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
+
+    this.queryICSProviderParams = new ObservableQueryICSProviderParams(
       sharedContext,
       chainId,
       chainGetter
