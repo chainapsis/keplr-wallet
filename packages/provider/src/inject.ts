@@ -866,6 +866,10 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     return await this.requestMethod("suggestERC20", [chainId, contractAddress]);
   }
 
+  async __core__webpageClosed(): Promise<void> {
+    return await this.requestMethod("__core__webpageClosed", []);
+  }
+
   public readonly ethereum = new EthereumProvider(
     this,
     this.eventListener,

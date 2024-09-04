@@ -59,7 +59,7 @@ export class PushEventDataMsg extends Message<void> {
   constructor(
     public readonly data: Omit<
       InteractionWaitingData,
-      "id" | "uri" | "isInternal" | "windowId"
+      "id" | "uri" | "isInternal" | "tabId" | "windowId"
     >
   ) {
     super();

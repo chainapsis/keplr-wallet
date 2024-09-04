@@ -114,6 +114,32 @@ export class RejectInteractionV2Msg extends Message<void> {
   }
 }
 
+export class InjectedWebpageClosedMsg extends Message<void> {
+  public static type() {
+    return "injected-webpage-closed";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return InjectedWebpageClosedMsg.type();
+  }
+}
+
 export class PingContentScriptTabHasOpenedSidePanelMsg extends Message<boolean> {
   public static type() {
     return "ping-content-script-tab-has-opened-side-panel";

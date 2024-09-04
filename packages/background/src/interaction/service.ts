@@ -29,6 +29,8 @@ export class InteractionService {
     }[]
   > = new Map();
 
+  protected isUIOpenedOnSidePanelMap: Map<string, boolean> = new Map();
+
   constructor(
     protected readonly eventMsgRequester: MessageRequester,
     protected readonly sidePanelService: SidePanelService,
@@ -92,6 +94,7 @@ export class InteractionService {
     const interactionWaitingData = this.addDataToMap(
       type,
       env.isInternalMsg,
+      env.sender.tab?.id,
       await this.getWindowIdFromEnvOrCurrentWindowId(env),
       uri,
       data
@@ -116,6 +119,7 @@ export class InteractionService {
     const interactionWaitingData = this.addDataToMap(
       type,
       env.isInternalMsg,
+      env.sender.tab?.id,
       await this.getWindowIdFromEnvOrCurrentWindowId(env),
       uri,
       data
@@ -256,6 +260,7 @@ export class InteractionService {
   protected addDataToMap(
     type: string,
     isInternal: boolean,
+    tabId: number | undefined,
     windowId: number | undefined,
     uri: string,
     data: unknown
@@ -268,6 +273,7 @@ export class InteractionService {
       id,
       type,
       isInternal,
+      tabId,
       windowId,
       data,
       uri,
@@ -380,6 +386,9 @@ export class InteractionService {
           pingStateMap.set(windowId, {
             wasPingSucceeded: true,
           });
+          for (const d of data) {
+            this.isUIOpenedOnSidePanelMap.set(d.id, true);
+          }
         }
       }
     }
@@ -416,6 +425,23 @@ export class InteractionService {
 
       if (!wasPingSucceeded && succeeded) {
         wasPingSucceeded = true;
+      }
+    }
+  }
+
+  // 웹페이지가 꺼질때
+  // side panel 모드에서 웹페이지에서 요쳥된 데이터 중에서
+  // UI가 열리지 않아 아직 pending 상태면서 interaction할 기회도 없었던 경우 자동으로 reject한다.
+  // UI가 열렸다면 UI에서 알아서 reject한다.
+  onInjectedWebpageClosed(env: Env) {
+    if (env.sender.tab?.id && this.sidePanelService.getIsEnabled()) {
+      for (const interaction of this.waitingMap.values()) {
+        if (
+          interaction.tabId === env.sender.tab.id &&
+          !this.isUIOpenedOnSidePanelMap.get(interaction.id)
+        ) {
+          this.rejectV2(interaction.id);
+        }
       }
     }
   }
@@ -485,5 +511,6 @@ export class InteractionService {
 
   protected removeDataFromMap(id: string) {
     this.waitingMap.delete(id);
+    this.isUIOpenedOnSidePanelMap.delete(id);
   }
 }
