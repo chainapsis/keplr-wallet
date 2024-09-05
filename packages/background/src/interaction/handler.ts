@@ -12,6 +12,7 @@ import {
   RejectInteractionV2Msg,
   GetInteractionWaitingDataArrayMsg,
   PingContentScriptTabHasOpenedSidePanelMsg,
+  InjectedWebpageClosedMsg,
 } from "./messages";
 import { InteractionService } from "./service";
 
@@ -44,6 +45,11 @@ export const getHandler: (service: InteractionService) => Handler = (
         return handleRejectInteractionV2Msg(service)(
           env,
           msg as RejectInteractionV2Msg
+        );
+      case InjectedWebpageClosedMsg:
+        return handleInjectedWebpageClosedMsg(service)(
+          env,
+          msg as InjectedWebpageClosedMsg
         );
       case PingContentScriptTabHasOpenedSidePanelMsg:
         return handlePingContentScriptTabHasOpenedSidePanelMsg(service)(
@@ -93,6 +99,14 @@ const handleRejectInteractionV2Msg: (
 ) => InternalHandler<RejectInteractionV2Msg> = (service) => {
   return (_, msg) => {
     return service.rejectV2(msg.id);
+  };
+};
+
+const handleInjectedWebpageClosedMsg: (
+  service: InteractionService
+) => InternalHandler<InjectedWebpageClosedMsg> = (service) => {
+  return (env) => {
+    return service.onInjectedWebpageClosed(env);
   };
 };
 

@@ -16,3 +16,7 @@ const keplr = new InjectedKeplr(
   }
 );
 injectKeplrToWindow(keplr);
+
+window.addEventListener("beforeunload", () => {
+  keplr.__core__webpageClosed();
+});

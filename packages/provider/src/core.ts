@@ -990,6 +990,16 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     });
   }
 
+  async __core__webpageClosed(): Promise<void> {
+    await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "interaction",
+      "injected-webpage-closed",
+      {}
+    );
+  }
+
   // IMPORTANT: protected로 시작하는 method는 InjectedKeplr.startProxy()에서 injected 쪽에서 event system으로도 호출할 수 없도록 막혀있다.
   //            protected로 시작하지 않는 method는 injected keplr에 없어도 event system을 통하면 호출 할 수 있다.
   //            이를 막기 위해서 method 이름을 protected로 시작하게 한다.

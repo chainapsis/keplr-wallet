@@ -15,7 +15,10 @@ export class InteractionForegroundService {
   }
 
   pushEvent(
-    data: Omit<InteractionWaitingData, "id" | "uri" | "isInternal" | "windowId">
+    data: Omit<
+      InteractionWaitingData,
+      "id" | "uri" | "isInternal" | "tabId" | "windowId"
+    >
   ): void {
     this.handler.onEventDataReceived(data);
   }

@@ -12,4 +12,6 @@ export interface KeplrCoreTypes {
     signer: string,
     signDoc: StdSignDoc
   ): Promise<AminoSignResponse>;
+
+  __core__webpageClosed(): Promise<void>;
 }
