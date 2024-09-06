@@ -86,7 +86,7 @@
     "mobx": "^6.10.0",
     "mobx-react-lite": "^3.4.3",
     "mobx-utils": "^6.0.8",
-    "node-gyp": "^9.3.1",
+    "node-gyp": "^10.2.0",
     "pre-commit": "^1.2.2",
     "prettier": "^2.8.4",
     "react": "18.2.0",
