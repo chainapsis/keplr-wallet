@@ -251,12 +251,21 @@ export const connectAndSignEthWithLedger = async (
             tx.type = TransactionTypes.eip1559;
           }
           const rlpArray = serialize(tx).replace("0x", "");
-          return ethSignatureToBytes(
-            await ethApp.signTransaction(
-              `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`,
-              rlpArray
-            )
+          const signature = await ethApp.signTransaction(
+            `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`,
+            rlpArray
           );
+
+          const numberSignatureV = parseInt(signature.v, 16);
+          return ethSignatureToBytes({
+            ...signature,
+            v:
+              numberSignatureV === 0
+                ? "1b"
+                : numberSignatureV === 1 || numberSignatureV % 2 === 0
+                ? "1c"
+                : "1b",
+          });
         }
         case EthSignType.EIP712: {
           const data = await EIP712MessageValidator.validateAsync(
