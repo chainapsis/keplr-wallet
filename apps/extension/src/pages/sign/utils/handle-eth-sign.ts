@@ -251,6 +251,7 @@ export const connectAndSignEthWithLedger = async (
             tx.type = TransactionTypes.eip1559;
           }
           const rlpArray = serialize(tx).replace("0x", "");
+
           return ethSignatureToBytes(
             await ethApp.signTransaction(
               `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`,
@@ -317,5 +318,10 @@ function ethSignatureToBytes(signature: {
     throw new Error("Unable to process signature: malformed fields");
   }
 
-  return Buffer.concat([r, s, Buffer.from([v])]);
+  return Buffer.concat([
+    r,
+    s,
+    // Make v 27 or 28 (EIP-155) to support all clients
+    Buffer.from([v === 0 || (v !== 1 && v % 2 === 1) ? 27 : 28]),
+  ]);
 }
