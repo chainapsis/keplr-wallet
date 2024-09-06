@@ -1,7 +1,7 @@
 # Keplr Wallet
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Twitter: Keplr Wallet](https://img.shields.io/twitter/follow/keplrwallet.svg?style=social)](https://twitter.com/keplrwallet)
+[![Twitter: Keplr Wallet](https://img.shields.io/twitter/follow/keplrwallet.svg?style=social)](https://x.com/keplrwallet)
 
 > The most powerful wallet for the Cosmos ecosystem and the Interchain.
 
