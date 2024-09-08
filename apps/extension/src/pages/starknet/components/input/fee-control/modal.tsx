@@ -79,9 +79,14 @@ export const TransactionFeeModal: FunctionComponent<{
                   type === "ETH"
                     ? starknet.ethContractAddress
                     : starknet.strkContractAddress;
-                const cur = starknet.currencies.find(
-                  (cur) => cur.contractAddress === contractAddress
-                );
+                const cur = chainStore
+                  .getModularChainInfoImpl(senderConfig.chainId)
+                  .getCurrencies("starknet")
+                  .find(
+                    (cur) =>
+                      "contractAddress" in cur &&
+                      cur.contractAddress === contractAddress
+                  );
                 if (!cur) {
                   return false;
                 }

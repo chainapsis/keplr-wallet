@@ -49,7 +49,6 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const notification = useNotification();
   const intl = useIntl();
 
   const initialChainId = searchParams.get("chainId");
@@ -83,9 +82,10 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
   const currency = (() => {
     // TODO: 대충 여기에다가 force currency 로직을 박아놓는다...
     //       나중에 이런 기능을 chain store 자체에다가 만들어야한다.
-    const res = starknet.currencies.find(
-      (cur) => cur.coinMinimalDenom === coinMinimalDenom
-    );
+    const res = chainStore
+      .getModularChainInfoImpl(chainId)
+      .getCurrencies("starknet")
+      .find((cur) => cur.coinMinimalDenom === coinMinimalDenom);
     if (res) {
       return res;
     }
@@ -195,9 +195,10 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
         type === "ETH"
           ? starknet.ethContractAddress
           : starknet.strkContractAddress;
-      const feeCurrency = starknet.currencies.find(
-        (cur) => cur.coinMinimalDenom === `erc20:${feeContractAddress}`
-      );
+      const feeCurrency = chainStore
+        .getModularChainInfoImpl(chainId)
+        .getCurrencies("starknet")
+        .find((cur) => cur.coinMinimalDenom === `erc20:${feeContractAddress}`);
       if (!feeCurrency) {
         throw new Error("Can't find fee currency");
       }
