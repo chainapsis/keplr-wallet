@@ -43,12 +43,14 @@ export class KeyRingStarknetService {
     // TODO: ?
   }
 
-  generateAccountInterface(env: Env, origin: string): AccountInterface {
-    // TODO: custom된 AccountInterface를 반환하도록 수정
-
+  generateAccountInterface(
+    env: Env,
+    origin: string,
+    address: string
+  ): AccountInterface {
     return new Account(
       this.generateProviderInterface(env, origin),
-      "",
+      address,
       this.generateSignerInterface(env, origin),
       "1"
     );
@@ -221,8 +223,13 @@ export class KeyRingStarknetService {
           throw new Error("Not implemented");
         }
         case "wallet_addInvokeTransaction": {
-          // TODO
-          throw new Error("Not implemented");
+          const account = this.generateAccountInterface(
+            env,
+            origin,
+            selectedAddress
+          );
+
+          return await account.execute(params.calls);
         }
         case "wallet_addDeclareTransaction": {
           // TODO
