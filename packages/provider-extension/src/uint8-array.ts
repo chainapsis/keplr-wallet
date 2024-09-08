@@ -17,6 +17,15 @@ export class JSONUint8Array {
         return fromHex(value.replace("__uint8array__", ""));
       }
 
+      if (
+        typeof BigInt !== "undefined" &&
+        value &&
+        typeof value === "string" &&
+        value.startsWith("__bigint__")
+      ) {
+        return BigInt(value.replace("__bigint__", ""));
+      }
+
       return value;
     });
   }
@@ -43,6 +52,10 @@ export class JSONUint8Array {
         return `__uint8array__${toHex(array)}`;
       }
 
+      if (typeof value === "bigint") {
+        return `__bigint__${value.toString()}`;
+      }
+
       return value;
     });
   }
@@ -56,6 +69,6 @@ export class JSONUint8Array {
   static unwrap(obj: any): any {
     if (obj === undefined) return undefined;
 
-    return JSONUint8Array.parse(JSON.stringify(obj));
+    return JSONUint8Array.parse(JSONUint8Array.stringify(obj));
   }
 }

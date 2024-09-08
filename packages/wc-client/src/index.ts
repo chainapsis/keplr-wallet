@@ -875,10 +875,15 @@ export class KeplrWalletConnectV2 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
+  signStarknetTx(): Promise<string[]> {
+    throw new Error("Not yet implemented");
+  }
+
   public readonly ethereum = new MockEthereumProvider();
 
-  // TODO: Implement this if starknet provider is implemented.
-  public readonly starknet = undefined;
+  // TODO: 이거 마지막에 꼭 구현해야한다.
+  //       일단은 다른게 더 급해서 일단 any로 처리
+  public readonly starknet = {} as any;
 }
 
 class MockEthereumProvider extends EventEmitter implements IEthereumProvider {

@@ -1,6 +1,7 @@
 import { Message } from "@keplr-wallet/router";
 import { SettledResponses } from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
+import { Call, InvocationsSignerDetails } from "starknet";
 
 export class GetStarknetKeyMsg extends Message<{
   hexAddress: string;
@@ -75,6 +76,46 @@ export class GetStarknetKeysSettledMsg extends Message<
 
   type(): string {
     return GetStarknetKeysSettledMsg.type();
+  }
+}
+
+export class RequestSignStarknetTx extends Message<string[]> {
+  public static type() {
+    return "request-sign-starknet-tx";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly transactions: Call[],
+    public readonly details: InvocationsSignerDetails
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chainId is not set");
+    }
+
+    if (!this.transactions) {
+      throw new Error("transactions are not set");
+    }
+
+    if (!this.details) {
+      throw new Error("details are not set");
+    }
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestSignStarknetTx.type();
   }
 }
 

@@ -100,6 +100,7 @@ import { useIntl } from "react-intl";
 import { ActivitiesPage } from "./pages/activities";
 import { isRunningInSidePanel } from "./utils";
 import { StarknetSendPage } from "./pages/starknet/send";
+import { SignStarknetTxPage } from "./pages/starknet/sign/tx";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -460,6 +461,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
                 element={<SignCosmosICNSPage />}
               />
               <Route path="/sign-ethereum" element={<SignEthereumTxPage />} />
+              <Route
+                path="/sign-starknet-tx"
+                element={<SignStarknetTxPage />}
+              />
               <Route path="/wallet/select" element={<WalletSelectPage />} />
               <Route path="/wallet/delete" element={<WalletDeletePage />} />
               <Route

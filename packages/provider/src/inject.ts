@@ -40,7 +40,12 @@ import deepmerge from "deepmerge";
 import Long from "long";
 import { KeplrCoreTypes } from "./core-types";
 import EventEmitter from "events";
-import { AccountInterface, ProviderInterface } from "starknet";
+import {
+  AccountInterface,
+  Call,
+  InvocationsSignerDetails,
+  ProviderInterface,
+} from "starknet";
 
 export interface ProxyRequest {
   type: "proxy-request";
@@ -496,9 +501,9 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
       postMessage: (message) =>
         window.postMessage(message, window.location.origin),
     },
-    protected readonly parseMessage?: (message: any) => any,
-    protected readonly eip6963ProviderInfo?: EIP6963ProviderInfo,
-    protected readonly starknetProviderInfo?: {
+    protected readonly parseMessage: ((message: any) => any) | undefined,
+    protected readonly eip6963ProviderInfo: EIP6963ProviderInfo | undefined,
+    protected readonly starknetProviderInfo: {
       id: string;
       name: string;
       icon: string;
@@ -963,6 +968,18 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     return await this.requestMethod("getStarknetKeysSettled", [chainIds]);
   }
 
+  async signStarknetTx(
+    chainId: string,
+    transactions: Call[],
+    details: InvocationsSignerDetails
+  ): Promise<string[]> {
+    return await this.requestMethod("signStarknetTx", [
+      chainId,
+      transactions,
+      details,
+    ]);
+  }
+
   public readonly ethereum = new EthereumProvider(
     this,
     this.eventListener,
@@ -970,17 +987,15 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     this.eip6963ProviderInfo
   );
 
-  public readonly starknet = this.starknetProviderInfo
-    ? new StarknetProvider(
-        this.starknetProviderInfo.id,
-        this.starknetProviderInfo.name,
-        this.version,
-        this.starknetProviderInfo.icon,
-        this,
-        this.eventListener,
-        this.parseMessage
-      )
-    : undefined;
+  public readonly starknet = new StarknetProvider(
+    this.starknetProviderInfo.id,
+    this.starknetProviderInfo.name,
+    this.version,
+    this.starknetProviderInfo.icon,
+    this,
+    this.eventListener,
+    this.parseMessage
+  );
 }
 
 class EthereumProvider extends EventEmitter implements IEthereumProvider {

@@ -221,7 +221,8 @@ export function init(
     chainsService,
     keyRingV2Service,
     permissionService,
-    tokenERC20Service
+    tokenERC20Service,
+    interactionService
   );
   const autoLockAccountService = new AutoLocker.AutoLockAccountService(
     storeCreator("auto-lock-account"),
