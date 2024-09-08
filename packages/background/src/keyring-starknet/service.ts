@@ -144,6 +144,7 @@ export class KeyRingStarknetService {
         return {
           currentChainId: null,
           selectedAddress: null,
+          rpc: null,
         } as T;
       } else {
         throw new Error(
@@ -167,6 +168,7 @@ export class KeyRingStarknetService {
           return {
             currentChainId,
             selectedAddress,
+            rpc: modularChainInfo.starknet.rpc,
           };
         }
         case "wallet_requestAccounts": {
