@@ -390,6 +390,8 @@ export class KeyRingStarknetService {
   ): Promise<string[]> {
     // TODO: tx에서 signer와 실제 계정 / chain id에 대해서 validation 넣기
 
+    const key = await this.getStarknetKeySelected(chainId);
+
     return await this.interactionService.waitApproveV2(
       env,
       "/sign-starknet-tx",
@@ -398,6 +400,7 @@ export class KeyRingStarknetService {
         origin,
         vaultId,
         chainId,
+        signer: key.hexAddress,
         transactions,
         details,
       },

@@ -6,6 +6,7 @@ export type SignStarknetTxInteractionData = {
   origin: string;
   vaultId: string;
   chainId: string;
+  signer: string;
   transactions: Call[];
   details: InvocationsSignerDetails;
 };

@@ -8,14 +8,129 @@ import { useUnmount } from "../../../../hooks/use-unmount";
 import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
 import { useIntl } from "react-intl";
+import { FeeControl } from "../../components/input/fee-control";
+import {
+  useFeeConfig,
+  useGasConfig,
+  useGasSimulator,
+  useNoopAmountConfig,
+  useSenderConfig,
+} from "@keplr-wallet/hooks-starknet";
+import { MemoryKVStore } from "@keplr-wallet/common";
+import { CoinPretty } from "@keplr-wallet/unit";
 
 export const SignStarknetTxView: FunctionComponent<{
   interactionData: NonNullable<SignStarknetTxInteractionStore["waitingData"]>;
 }> = observer(({ interactionData }) => {
-  const { signStarknetTxInteractionStore } = useStore();
+  const {
+    signStarknetTxInteractionStore,
+    starknetAccountStore,
+    starknetQueriesStore,
+  } = useStore();
+
+  const { chainStore } = useStore();
 
   const intl = useIntl();
   const interactionInfo = useInteractionInfo();
+
+  const chainId = interactionData.data.chainId;
+
+  const modularChainInfo = chainStore.getModularChain(chainId);
+  if (!("starknet" in modularChainInfo)) {
+    throw new Error(`${modularChainInfo.chainId} is not starknet chain`);
+  }
+  const starknet = modularChainInfo.starknet;
+
+  const senderConfig = useSenderConfig(
+    chainStore,
+    chainId,
+    interactionData.data.signer
+  );
+  const amountConfig = useNoopAmountConfig(chainStore, chainId, senderConfig);
+  const gasConfig = useGasConfig(
+    chainStore,
+    chainId,
+    (() => {
+      if ("resourceBounds" in interactionData.data.details) {
+        return parseInt(
+          interactionData.data.details.resourceBounds.l1_gas.max_amount
+        );
+      }
+    })()
+  );
+  const feeConfig = useFeeConfig(
+    chainStore,
+    starknetQueriesStore,
+    chainId,
+    senderConfig,
+    amountConfig,
+    gasConfig
+  );
+
+  const gasSimulator = useGasSimulator(
+    new MemoryKVStore("starknet.sign"),
+    chainStore,
+    chainId,
+    gasConfig,
+    feeConfig,
+    "noop",
+    () => {
+      if (!amountConfig.currency) {
+        throw new Error("Send currency not set");
+      }
+
+      // Prefer not to use the gas config or fee config,
+      // because gas simulator can change the gas config and fee config from the result of reaction,
+      // and it can make repeated reaction.
+      if (
+        amountConfig.uiProperties.loadingState === "loading-block" ||
+        amountConfig.uiProperties.error != null
+      ) {
+        throw new Error("Not ready to simulate tx");
+      }
+
+      // observed되어야 하므로 꼭 여기서 참조 해야함.
+      const type = feeConfig.type;
+      const feeContractAddress =
+        type === "ETH"
+          ? starknet.ethContractAddress
+          : starknet.strkContractAddress;
+      const feeCurrency = chainStore
+        .getModularChainInfoImpl(chainId)
+        .getCurrencies("starknet")
+        .find((cur) => cur.coinMinimalDenom === `erc20:${feeContractAddress}`);
+      if (!feeCurrency) {
+        throw new Error("Can't find fee currency");
+      }
+
+      const sender = senderConfig.sender;
+
+      return {
+        simulate: async (): Promise<{
+          gasUsed: number;
+        }> => {
+          const res = await starknetAccountStore
+            .getAccount(chainId)
+            .estimateInvokeFee(
+              sender,
+              interactionData.data.transactions,
+              type === "ETH" ? "0x2" : "0x3"
+            );
+
+          const fee = new CoinPretty(feeCurrency, res.overall_fee);
+          const maxFee = new CoinPretty(feeCurrency, res.suggestedMaxFee);
+          feeConfig.setFee({
+            fee,
+            maxFee,
+          });
+
+          return {
+            gasUsed: parseInt(res.gas_consumed.toString()),
+          };
+        },
+      };
+    }
+  );
 
   const [unmountPromise] = useState(() => {
     let resolver: () => void;
@@ -99,6 +214,12 @@ export const SignStarknetTxView: FunctionComponent<{
       }}
     >
       <div>TODO</div>
+      <FeeControl
+        senderConfig={senderConfig}
+        feeConfig={feeConfig}
+        gasConfig={gasConfig}
+        gasSimulator={gasSimulator}
+      />
     </HeaderLayout>
   );
 });
