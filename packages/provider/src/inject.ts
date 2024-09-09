@@ -489,6 +489,11 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
   constructor(
     public readonly version: string,
     public readonly mode: KeplrMode,
+    protected readonly onStarknetStateChange: (state: {
+      selectedAddress: string | null;
+      chainId: string | null;
+      rpc: string | null;
+    }) => void,
     protected readonly eventListener: {
       addMessageListener: (fn: (e: any) => void) => void;
       removeMessageListener: (fn: (e: any) => void) => void;
@@ -993,6 +998,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     this.version,
     this.starknetProviderInfo.icon,
     this,
+    this.onStarknetStateChange,
     this.eventListener,
     this.parseMessage
   );
@@ -1286,6 +1292,11 @@ class StarknetProvider implements IStarknetProvider {
     public readonly icon: string,
 
     protected readonly _injectedKeplr: InjectedKeplr,
+    protected readonly onStateChange: (state: {
+      selectedAddress: string | null;
+      chainId: string | null;
+      rpc: string | null;
+    }) => void,
     protected readonly _eventListener: {
       addMessageListener: (fn: (e: any) => void) => void;
       removeMessageListener: (fn: (e: any) => void) => void;
@@ -1398,18 +1409,31 @@ class StarknetProvider implements IStarknetProvider {
   }
 
   protected async _initProviderState() {
-    const { currentChainId, selectedAddress } = await this.request<{
+    const { currentChainId, selectedAddress, rpc } = await this.request<{
       currentChainId: string | null;
       selectedAddress: string | null;
+      rpc: string | null;
     }>({
       type: "keplr_initStarknetProviderState",
     });
 
-    if (currentChainId != null && selectedAddress != null) {
+    if (currentChainId != null && selectedAddress != null && rpc != null) {
+      this.onStateChange({
+        selectedAddress,
+        chainId: currentChainId,
+        rpc,
+      });
+
       this._currentChainId = currentChainId;
       this.chainId = currentChainId.replace("starknet:", "");
       this.selectedAddress = selectedAddress;
       this.isConnected = true;
+    } else {
+      this.onStateChange({
+        selectedAddress: null,
+        chainId: null,
+        rpc: null,
+      });
     }
   }
 
@@ -1432,11 +1456,18 @@ class StarknetProvider implements IStarknetProvider {
   async enable(_options?: {
     starknetVersion?: "v4" | "v5";
   }): Promise<string[]> {
-    const { currentChainId, selectedAddress } = await this.request<{
+    const { currentChainId, selectedAddress, rpc } = await this.request<{
       currentChainId: string;
       selectedAddress: string;
+      rpc: string;
     }>({
       type: "keplr_enableStarknetProvider",
+    });
+
+    this.onStateChange({
+      selectedAddress,
+      chainId: currentChainId,
+      rpc,
     });
 
     this._currentChainId = currentChainId;
