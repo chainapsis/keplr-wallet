@@ -39,9 +39,11 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
   const form = useFormNamePassword();
 
   const [connectTo, setConnectTo] = useState<string>("Cosmos");
-
-  const bip44PathState = useBIP44PathState(type === "ledger");
+  const bip44PathState = useBIP44PathState(true);
   const [isBIP44CardOpen, setIsBIP44CardOpen] = useState(false);
+
+  const [keystoneWay, setKeystoneWay] = useState<string>("USB");
+  const [isKeystoneUSB, setIsUSB] = useState(true);
 
   return (
     <RegisterSceneBox>
@@ -57,7 +59,16 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
               stepTotal: 3,
             });
           } else if (type === "keystone") {
-            sceneTransition.push("connect-keystone", {
+            if (isKeystoneUSB) {
+              return sceneTransition.push("connect-keystone-usb", {
+                name: data.name,
+                password: data.password,
+                bip44Path: isKeystoneUSB ? bip44PathState.getPath() : undefined,
+                stepPrevious: 1,
+                stepTotal: 3,
+              });
+            }
+            return sceneTransition.push("connect-keystone-qr", {
               name: data.name,
               password: data.password,
               stepPrevious: 1,
@@ -131,6 +142,70 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
                   }}
                 />
               </VerticalCollapseTransition>
+              <Gutter size="1.25rem" />
+            </React.Fragment>
+          ) : undefined}
+          {type === "keystone" ? (
+            <React.Fragment>
+              <Gutter size="1rem" />
+              <Label
+                content={intl.formatMessage({
+                  id: "pages.register.name-password-hardware.connect-keystone-way",
+                })}
+              />
+              <Dropdown
+                color="text-input"
+                size="large"
+                selectedItemKey={keystoneWay}
+                items={[
+                  {
+                    key: "USB",
+                    label: intl.formatMessage({
+                      id: "pages.register.name-password-hardware.connect-to-keystone-USB",
+                    }),
+                  },
+                  {
+                    key: "QR",
+                    label: intl.formatMessage({
+                      id: "pages.register.name-password-hardware.connect-to-keystone-QR",
+                    }),
+                  },
+                ]}
+                onSelect={(key) => {
+                  setKeystoneWay(key);
+                  setIsUSB(key === "USB");
+                }}
+              />
+              <Gutter size="1.625rem" />
+              {isKeystoneUSB && (
+                <React.Fragment>
+                  <VerticalCollapseTransition
+                    width="100%"
+                    collapsed={isBIP44CardOpen}
+                  >
+                    <Box alignX="center">
+                      <Button
+                        size="small"
+                        color="secondary"
+                        text={intl.formatMessage({
+                          id: "button.advanced",
+                        })}
+                        onClick={() => {
+                          setIsBIP44CardOpen(true);
+                        }}
+                      />
+                    </Box>
+                  </VerticalCollapseTransition>
+                  <VerticalCollapseTransition collapsed={!isBIP44CardOpen}>
+                    <SetBip44PathCard
+                      state={bip44PathState}
+                      onClose={() => {
+                        setIsBIP44CardOpen(false);
+                      }}
+                    />
+                  </VerticalCollapseTransition>
+                </React.Fragment>
+              )}
               <Gutter size="1.25rem" />
             </React.Fragment>
           ) : undefined}

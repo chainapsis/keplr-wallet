@@ -105,6 +105,10 @@
   "pages.register.name-password-hardware.connect-to-terra": "Terra app",
   "pages.register.name-password-hardware.connect-to-secret": "Secret app",
 
+  "pages.register.name-password-hardware.connect-keystone-way": "Connect Keystone via",
+  "pages.register.name-password-hardware.connect-to-keystone-USB": "USB",
+  "pages.register.name-password-hardware.connect-to-keystone-QR": "QR",
+
   "pages.register.recover-mnemonic.title": "Import Existing Wallet",
   "pages.register.recover-mnemonic.paragraph-1": "Enter your recovery phrase here to restore your wallet. Or click on any blank and paste the entire phrase.",
   "pages.register.recover-mnemonic.paragraph-2": "Enter the phrase in the right order without capitalization, punctuation symbols, or spaces.",
