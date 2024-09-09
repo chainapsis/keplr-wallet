@@ -201,10 +201,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       const chainIdentifier = ChainIdHelper.parse(
         modularChainInfo.chainId
       ).identifier;
-      // TODO: 일단 background에서 starknet에 대한 enable/disable 기능이 아직 없으므로 테스트 중에는 강제로 활성화 시킨다...
-      if ("starknet" in modularChainInfo) {
-        return true;
-      }
+
       return this.enabledChainIdentifiesMap.get(chainIdentifier);
     });
   }
@@ -215,6 +212,17 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   get chainInfosInListUI() {
     return this.chainInfos.filter((chainInfo) => {
       return !chainInfo.hideInUI;
+    });
+  }
+
+  @computed
+  get modularChainInfosInListUI() {
+    return this.modularChainInfos.filter((modularChainInfo) => {
+      if ("cosmos" in modularChainInfo && modularChainInfo.cosmos.hideInUI) {
+        return false;
+      }
+
+      return true;
     });
   }
 
