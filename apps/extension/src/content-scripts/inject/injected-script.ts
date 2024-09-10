@@ -1,9 +1,8 @@
 import { InjectedKeplr } from "@keplr-wallet/provider";
 import { injectKeplrToWindow } from "@keplr-wallet/provider";
-import { Account, RpcProvider } from "starknet";
+import { RpcProvider, WalletAccount } from "starknet";
 
 import manifest from "../../manifest.v2.json";
-import { SignerInterfaceImpl } from "./starknet-signer";
 
 const keplr = new InjectedKeplr(
   manifest.version,
@@ -25,10 +24,9 @@ const keplr = new InjectedKeplr(
     if (keplr.starknet.provider) {
       if (state.selectedAddress) {
         if (!keplr.starknet.account) {
-          keplr.starknet.account = new Account(
+          keplr.starknet.account = new WalletAccount(
             keplr.starknet.provider,
-            state.selectedAddress,
-            new SignerInterfaceImpl(keplr)
+            keplr.starknet as any
           );
         } else {
           keplr.starknet.account.address = state.selectedAddress;
