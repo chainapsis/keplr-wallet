@@ -17,7 +17,8 @@ import {
   useSenderConfig,
 } from "@keplr-wallet/hooks-starknet";
 import { MemoryKVStore } from "@keplr-wallet/common";
-import { CoinPretty } from "@keplr-wallet/unit";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
+import { num, InvocationsSignerDetails } from "starknet";
 
 export const SignStarknetTxView: FunctionComponent<{
   interactionData: NonNullable<SignStarknetTxInteractionStore["waitingData"]>;
@@ -73,7 +74,8 @@ export const SignStarknetTxView: FunctionComponent<{
     chainId,
     gasConfig,
     feeConfig,
-    "noop",
+    // fee type이 바뀔때마다 refresh 시켜야한다...
+    feeConfig.type,
     () => {
       if (!amountConfig.currency) {
         throw new Error("Send currency not set");
@@ -150,10 +152,76 @@ export const SignStarknetTxView: FunctionComponent<{
 
   const approve = async () => {
     try {
+      const type = feeConfig.type;
+      const feeContractAddress =
+        type === "ETH"
+          ? starknet.ethContractAddress
+          : starknet.strkContractAddress;
+      const feeCurrency = chainStore
+        .getModularChainInfoImpl(chainId)
+        .getCurrencies("starknet")
+        .find((cur) => cur.coinMinimalDenom === `erc20:${feeContractAddress}`);
+      if (!feeCurrency) {
+        throw new Error("Can't find fee currency");
+      }
+
+      const details: InvocationsSignerDetails = (() => {
+        if (type === "ETH") {
+          return {
+            version: "0x2",
+            walletAddress: interactionData.data.details.walletAddress,
+            nonce: interactionData.data.details.nonce,
+            chainId: interactionData.data.details.chainId,
+            cairoVersion: interactionData.data.details.cairoVersion,
+            skipValidate: false,
+
+            maxFee: feeConfig.maxFee
+              ? num.toHex(feeConfig.maxFee.toCoin().amount)
+              : "0x0",
+          };
+        } else {
+          return {
+            version: "0x3",
+            walletAddress: interactionData.data.details.walletAddress,
+            nonce: interactionData.data.details.nonce,
+            chainId: interactionData.data.details.chainId,
+            cairoVersion: interactionData.data.details.cairoVersion,
+            skipValidate: false,
+
+            resourceBounds: {
+              l1_gas: {
+                max_amount: num.toHex(gasConfig.gas.toString()),
+                max_price_per_unit: (() => {
+                  if (!feeConfig.maxFee) {
+                    return "0x0";
+                  }
+
+                  return num.toHex(
+                    new Dec(feeConfig.maxFee.toCoin().amount)
+                      .quo(new Dec(gasConfig.gas))
+                      .truncate()
+                      .toString()
+                  );
+                })(),
+              },
+              l2_gas: {
+                max_amount: "0x0",
+                max_price_per_unit: "0x0",
+              },
+            },
+            tip: "0x0",
+            paymasterData: ["0x0"],
+            accountDeploymentData: ["0x0"],
+            nonceDataAvailabilityMode: "L1",
+            feeDataAvailabilityMode: "L1",
+          };
+        }
+      })();
+
       await signStarknetTxInteractionStore.approveWithProceedNext(
         interactionData.id,
         interactionData.data.transactions,
-        interactionData.data.details,
+        details,
         async (proceedNext) => {
           if (!proceedNext) {
             if (
