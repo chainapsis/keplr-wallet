@@ -529,6 +529,7 @@ export const EnableChainsScene: FunctionComponent<{
             }
           } else if ("starknet" in modularChainInfo) {
             // TODO: Starknet ledger app 지원이 필요하면 여기에 로직을 추가한다.
+            return false;
           }
 
           return true;
