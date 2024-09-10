@@ -262,7 +262,11 @@ export interface Keplr {
     chainId: string,
     transactions: Call[],
     details: InvocationsSignerDetails
-  ): Promise<string[]>;
+  ): Promise<{
+    transactions: Call[];
+    details: InvocationsSignerDetails;
+    signature: string[];
+  }>;
 
   readonly ethereum: IEthereumProvider;
 

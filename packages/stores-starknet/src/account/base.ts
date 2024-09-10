@@ -3,7 +3,7 @@ import { ERC20Currency, Keplr } from "@keplr-wallet/types";
 import { action, makeObservable, observable } from "mobx";
 import { uint256, Call } from "starknet";
 import { StoreAccount } from "./internal";
-import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
+import { Dec, DecUtils } from "@keplr-wallet/unit";
 
 export class StarknetAccountBase {
   @observable
@@ -29,7 +29,7 @@ export class StarknetAccountBase {
   async estimateInvokeFee(
     sender: string,
     calls: Call[],
-    transactionVersion: "0x2" | "0x3"
+    feeType: "ETH" | "STRK"
   ) {
     const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
     if (!("starknet" in modularChainInfo)) {
@@ -39,12 +39,13 @@ export class StarknetAccountBase {
     const walletAccount = new StoreAccount(
       modularChainInfo.starknet.rpc,
       sender,
-      transactionVersion,
       this.chainId,
       this.getKeplr
     );
 
-    return await walletAccount.estimateInvokeFee(calls);
+    return await walletAccount.estimateInvokeFee(calls, {
+      version: feeType === "ETH" ? "0x1" : "0x3",
+    });
   }
 
   async estimateInvokeFeeForSendTokenTx(
@@ -59,7 +60,7 @@ export class StarknetAccountBase {
       sender: string;
       recipient: string;
     },
-    transactionVersion: "0x2" | "0x3"
+    feeType: "ETH" | "STRK"
   ) {
     const actualAmount = (() => {
       let dec = new Dec(amount);
@@ -78,17 +79,22 @@ export class StarknetAccountBase {
       },
     ];
 
-    return await this.estimateInvokeFee(sender, calls, transactionVersion);
+    return await this.estimateInvokeFee(sender, calls, feeType);
   }
 
   async execute(
     sender: string,
     calls: Call[],
-    fee: {
-      maxFee?: Int;
-      tip?: Int;
-    },
-    transactionVersion: "0x2" | "0x3"
+    fee:
+      | {
+          type: "ETH";
+          maxFee: string;
+        }
+      | {
+          type: "STRK";
+          gas: string;
+          maxGasPrice: string;
+        }
   ) {
     const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
     if (!("starknet" in modularChainInfo)) {
@@ -98,15 +104,11 @@ export class StarknetAccountBase {
     const walletAccount = new StoreAccount(
       modularChainInfo.starknet.rpc,
       sender,
-      transactionVersion,
       this.chainId,
       this.getKeplr
     );
 
-    return await walletAccount.execute(calls, {
-      maxFee: fee.maxFee?.toString(),
-      tip: fee.maxFee?.toString(),
-    });
+    return await walletAccount.executeWithFee(calls, fee);
   }
 
   async executeForSendTokenTx(
@@ -114,11 +116,16 @@ export class StarknetAccountBase {
     amount: string,
     currency: ERC20Currency,
     recipient: string,
-    fee: {
-      maxFee?: Int;
-      tip?: Int;
-    },
-    transactionVersion: "0x2" | "0x3"
+    fee:
+      | {
+          type: "ETH";
+          maxFee: string;
+        }
+      | {
+          type: "STRK";
+          gas: string;
+          maxGasPrice: string;
+        }
   ) {
     const actualAmount = (() => {
       let dec = new Dec(amount);
@@ -137,6 +144,6 @@ export class StarknetAccountBase {
       },
     ];
 
-    return await this.execute(sender, calls, fee, transactionVersion);
+    return await this.execute(sender, calls, fee);
   }
 }

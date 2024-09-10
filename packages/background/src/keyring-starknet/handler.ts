@@ -10,6 +10,7 @@ import {
   GetStarknetKeysSettledMsg,
   RequestSignStarknetTx,
   RequestJsonRpcToStarknetMsg,
+  GetStarknetKeysForEachVaultSettledMsg,
 } from "./messages";
 import { KeyRingStarknetService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
@@ -43,6 +44,11 @@ export const getHandler: (
           service,
           permissionInteractionService
         )(env, msg as RequestJsonRpcToStarknetMsg);
+      case GetStarknetKeysForEachVaultSettledMsg:
+        return handleGetStarknetKeysForEachVaultSettledMsg(service)(
+          env,
+          msg as GetStarknetKeysForEachVaultSettledMsg
+        );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -103,7 +109,8 @@ const handleRequestSignStarknetTx: (
       msg.origin,
       msg.chainId,
       msg.transactions,
-      msg.details
+      msg.details,
+      false
     );
   };
 };
@@ -129,6 +136,24 @@ const handleRequestJsonRpcToStarknetMsg: (
       msg.method,
       msg.params,
       msg.chainId
+    );
+  };
+};
+
+const handleGetStarknetKeysForEachVaultSettledMsg: (
+  service: KeyRingStarknetService
+) => InternalHandler<GetStarknetKeysForEachVaultSettledMsg> = (service) => {
+  return async (_, msg) => {
+    return await Promise.allSettled(
+      msg.vaultIds.map((vaultId) =>
+        (async () => {
+          const key = await service.getStarknetKey(vaultId, msg.chainId);
+          return {
+            vaultId,
+            ...key,
+          };
+        })()
+      )
     );
   };
 };

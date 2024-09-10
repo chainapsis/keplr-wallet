@@ -9,6 +9,7 @@ export type SignStarknetTxInteractionData = {
   signer: string;
   transactions: Call[];
   details: InvocationsSignerDetails;
+  noChangeTx: boolean;
 };
 
 export class SignStarknetTxInteractionStore {

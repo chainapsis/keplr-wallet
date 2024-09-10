@@ -981,7 +981,11 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     chainId: string,
     transactions: Call[],
     details: InvocationsSignerDetails
-  ): Promise<string[]> {
+  ): Promise<{
+    transactions: Call[];
+    details: InvocationsSignerDetails;
+    signature: string[];
+  }> {
     return await this.requestMethod("signStarknetTx", [
       chainId,
       transactions,

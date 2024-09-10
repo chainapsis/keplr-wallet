@@ -1045,7 +1045,11 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     chainId: string,
     transactions: Call[],
     details: InvocationsSignerDetails
-  ): Promise<string[]> {
+  ): Promise<{
+    transactions: Call[];
+    details: InvocationsSignerDetails;
+    signature: string[];
+  }> {
     return new Promise((resolve, reject) => {
       let f = false;
       sendSimpleMessage(

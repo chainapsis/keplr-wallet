@@ -25,11 +25,12 @@ import { YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
 import { useNotification } from "../../../hooks/notification";
 import { ExtensionKVStore } from "@keplr-wallet/common";
-import { CoinPretty, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
 import { FormattedMessage, useIntl } from "react-intl";
 import { isRunningInSidePanel } from "../../../utils";
+import { num } from "starknet";
 
 const Styles = {
   Flex1: styled.div`
@@ -50,6 +51,8 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const intl = useIntl();
+
+  const notification = useNotification();
 
   const initialChainId = searchParams.get("chainId");
   const initialCoinMinimalDenom = searchParams.get("coinMinimalDenom");
@@ -216,18 +219,21 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
                 sender: sendConfigs.senderConfig.sender,
                 recipient: sendConfigs.recipientConfig.recipient,
               },
-              type === "ETH" ? "0x2" : "0x3"
+              type
             );
 
           const fee = new CoinPretty(feeCurrency, res.overall_fee);
           const maxFee = new CoinPretty(feeCurrency, res.suggestedMaxFee);
-          sendConfigs.feeConfig.setFee({
-            fee,
-            maxFee,
+          sendConfigs.feeConfig.setGasPrice({
+            gasPrice: fee.quo(new Dec(res.gas_consumed)),
+            maxGasPrice: maxFee.quo(new Dec(res.gas_consumed)),
           });
 
           return {
-            gasUsed: parseInt(res.gas_consumed.toString()),
+            // * 1.2 + 1600은 매직너버임...
+            gasUsed: Math.ceil(
+              parseInt(res.gas_consumed.toString()) * 1.2 + 600
+            ),
           };
         },
       };
@@ -298,7 +304,22 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
       onSubmit={async (e) => {
         e.preventDefault();
 
-        if (sendConfigs.feeConfig.maxFee) {
+        if (sendConfigs.feeConfig.maxFee && sendConfigs.feeConfig.maxGasPrice) {
+          const type = sendConfigs.feeConfig.type;
+          const feeContractAddress =
+            type === "ETH"
+              ? starknet.ethContractAddress
+              : starknet.strkContractAddress;
+          const feeCurrency = chainStore
+            .getModularChainInfoImpl(chainId)
+            .getCurrencies("starknet")
+            .find(
+              (cur) => cur.coinMinimalDenom === `erc20:${feeContractAddress}`
+            );
+          if (!feeCurrency) {
+            throw new Error("Can't find fee currency");
+          }
+
           starknetAccountStore
             .getAccount(chainId)
             .executeForSendTokenTx(
@@ -306,14 +327,55 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
               sendConfigs.amountConfig.amount[0].toDec().toString(),
               sendConfigs.amountConfig.currency,
               sendConfigs.recipientConfig.recipient,
-              {
-                maxFee: new Int(sendConfigs.feeConfig.maxFee.toCoin().amount),
-              },
-              "0x3"
+              (() => {
+                if (type === "ETH") {
+                  return {
+                    type: "ETH",
+                    maxFee: sendConfigs.feeConfig.maxFee.toCoin().amount,
+                  };
+                } else if (type === "STRK") {
+                  return {
+                    type: "STRK",
+                    gas: sendConfigs.gasConfig.gas.toString(),
+                    maxGasPrice: num.toHex(
+                      sendConfigs.feeConfig.maxGasPrice.toCoin().amount
+                    ),
+                  };
+                } else {
+                  throw new Error("Invalid fee type");
+                }
+              })()
             )
-            .then(console.log)
-            .catch(console.log);
-          // TODO
+            .then(() => {
+              notification.show(
+                "success",
+                intl.formatMessage({
+                  id: "notification.transaction-success",
+                }),
+                ""
+              );
+
+              if (!isDetachedMode) {
+                navigate("/", {
+                  replace: true,
+                });
+              } else {
+                window.close();
+              }
+            })
+            .catch((e) => {
+              if (e?.message === "Request rejected") {
+                return;
+              }
+
+              console.log(e);
+
+              notification.show(
+                "failed",
+                intl.formatMessage({ id: "error.transaction-failed" }),
+                ""
+              );
+            });
         }
       }}
     >

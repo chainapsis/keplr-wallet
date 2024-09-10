@@ -13,7 +13,7 @@ import { YAxis } from "../../../../components/axis";
 import { Stack } from "../../../../components/stack";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
-import { AppCurrency, Key } from "@keplr-wallet/types";
+import { AppCurrency } from "@keplr-wallet/types";
 import { IRecipientConfig } from "@keplr-wallet/hooks";
 import { Bleed } from "../../../../components/bleed";
 import { RecentSendHistory } from "@keplr-wallet/background";
@@ -21,7 +21,6 @@ import { AddressItem } from "../address-item";
 import SimpleBar from "simplebar-react";
 import styled, { useTheme } from "styled-components";
 import { FormattedMessage, useIntl } from "react-intl";
-import { SearchTextInput } from "../../../../components/input";
 
 type Type = "recent" | "contacts" | "accounts";
 
@@ -58,22 +57,9 @@ export const AddressBookModal: FunctionComponent<{
 
     const [type, setType] = useState<Type>("recent");
 
-    const [accountsSearchText, setAccountsSearchText] = useState("");
-    const [debounceAccountsSearchText, setDebounceAccountsSearchText] =
-      useState<string>("");
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        setDebounceAccountsSearchText(accountsSearchText);
-      }, 300);
-
-      return () => {
-        clearTimeout(timer);
-      };
-    }, [accountsSearchText]);
-
     const [recents, setRecents] = useState<RecentSendHistory[]>([]);
     const [accounts, setAccounts] = useState<
-      (Key & {
+      ({ hexAddress: string; pubKey: Uint8Array; address: Uint8Array } & {
         vaultId: string;
       })[]
     >([]);
@@ -86,42 +72,32 @@ export const AddressBookModal: FunctionComponent<{
         });
     }, [historyType, recipientConfig.chainId, uiConfigStore.addressBookConfig]);
 
-    // TODO: starknet으로 변경
-    // useEffect(() => {
-    //   (() => {
-    //     if (!debounceAccountsSearchText.trim()) {
-    //       return uiConfigStore.addressBookConfig.getVaultCosmosKeysSettled(
-    //         recipientConfig.chainId,
-    //         permitSelfKeyInfo ? undefined : keyRingStore.selectedKeyInfo?.id
-    //       );
-    //     } else {
-    //       return uiConfigStore.addressBookConfig.getVaultCosmosKeysWithSearchSettled(
-    //         debounceAccountsSearchText,
-    //         recipientConfig.chainId,
-    //         permitSelfKeyInfo ? undefined : keyRingStore.selectedKeyInfo?.id
-    //       );
-    //     }
-    //   })().then((keys) => {
-    //     setAccounts(
-    //       keys
-    //         .filter((res) => {
-    //           return res.status === "fulfilled";
-    //         })
-    //         .map((res) => {
-    //           if (res.status === "fulfilled") {
-    //             return res.value;
-    //           }
-    //           throw new Error("Unexpected status");
-    //         })
-    //     );
-    //   });
-    // }, [
-    //   keyRingStore.selectedKeyInfo?.id,
-    //   permitSelfKeyInfo,
-    //   recipientConfig.chainId,
-    //   uiConfigStore.addressBookConfig,
-    //   debounceAccountsSearchText,
-    // ]);
+    useEffect(() => {
+      (() => {
+        return uiConfigStore.addressBookConfig.getVaultStarknetKeysSettled(
+          recipientConfig.chainId,
+          permitSelfKeyInfo ? undefined : keyRingStore.selectedKeyInfo?.id
+        );
+      })().then((keys) => {
+        setAccounts(
+          keys
+            .filter((res) => {
+              return res.status === "fulfilled";
+            })
+            .map((res) => {
+              if (res.status === "fulfilled") {
+                return res.value;
+              }
+              throw new Error("Unexpected status");
+            })
+        );
+      });
+    }, [
+      keyRingStore.selectedKeyInfo?.id,
+      permitSelfKeyInfo,
+      recipientConfig.chainId,
+      uiConfigStore.addressBookConfig,
+    ]);
 
     const modularChainInfo = chainStore.getModularChain(
       recipientConfig.chainId
@@ -177,15 +153,14 @@ export const AddressBookModal: FunctionComponent<{
         case "accounts": {
           return accounts.reduce<
             { name: string; address: string; isSelf: boolean }[]
-          >((acc, _account) => {
-            // TODO: starknet으로 변경
-            // const isSelf = keyRingStore.selectedKeyInfo?.id === account.vaultId;
-            //
-            // acc.push({
-            //   name: account.name,
-            //   address: account.ethereumHexAddress,
-            //   isSelf,
-            // });
+          >((acc, account) => {
+            const isSelf = keyRingStore.selectedKeyInfo?.id === account.vaultId;
+
+            acc.push({
+              name: account.name,
+              address: account.hexAddress,
+              isSelf,
+            });
 
             return acc;
           }, []);
@@ -248,21 +223,6 @@ export const AddressBookModal: FunctionComponent<{
           </YAxis>
 
           <Gutter size="0.75rem" />
-
-          {type === "accounts" ? (
-            <React.Fragment>
-              <SearchTextInput
-                value={accountsSearchText}
-                onChange={(e) => {
-                  setAccountsSearchText(e.target.value);
-                }}
-                placeholder={intl.formatMessage({
-                  id: "components.address-book-modal.my-account-tab.input.search.placeholder",
-                })}
-              />
-              <Gutter size="0.75rem" />
-            </React.Fragment>
-          ) : null}
 
           {datas.length > 0 ? (
             <SimpleBar

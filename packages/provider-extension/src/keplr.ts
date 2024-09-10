@@ -586,7 +586,11 @@ export class Keplr implements IKeplr {
     chainId: string,
     transactions: Call[],
     details: InvocationsSignerDetails
-  ): Promise<string[]> {
+  ): Promise<{
+    transactions: Call[];
+    details: InvocationsSignerDetails;
+    signature: string[];
+  }> {
     return await Keplr.requestMethod("signStarknetTx", [
       chainId,
       transactions,

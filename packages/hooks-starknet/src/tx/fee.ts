@@ -10,13 +10,13 @@ import { ChainGetter } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { useState } from "react";
 import { StarknetQueriesStore } from "@keplr-wallet/stores-starknet";
-import { CoinPretty } from "@keplr-wallet/unit";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
 
 export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable.ref
-  protected _fee: CoinPretty | undefined = undefined;
+  protected _gasPrice: CoinPretty | undefined = undefined;
   @observable.ref
-  protected _maxFee: CoinPretty | undefined = undefined;
+  protected _maxGasPrice: CoinPretty | undefined = undefined;
   @observable
   protected _type: "ETH" | "STRK" = "STRK";
 
@@ -51,7 +51,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return {};
     }
 
-    if (!this._fee) {
+    if (!this._gasPrice) {
+      return {
+        error: new Error("Fee is not set"),
+        loadingState: "loading-block",
+      };
+    }
+
+    if (!this._maxGasPrice) {
       return {
         error: new Error("Fee is not set"),
         loadingState: "loading-block",
@@ -61,12 +68,12 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     return {};
   }
 
-  get fee(): CoinPretty | undefined {
-    return this._fee;
+  get gasPrice(): CoinPretty | undefined {
+    return this._gasPrice;
   }
 
-  get maxFee(): CoinPretty | undefined {
-    return this._maxFee;
+  get maxGasPrice(): CoinPretty | undefined {
+    return this._maxGasPrice;
   }
 
   get type(): "ETH" | "STRK" {
@@ -74,24 +81,45 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   @action
-  setFee(
-    fee:
+  setGasPrice(
+    gasPrice:
       | {
-          fee: CoinPretty;
-          maxFee: CoinPretty;
+          gasPrice: CoinPretty;
+          maxGasPrice: CoinPretty;
         }
       | undefined
   ): void {
-    this._fee = fee?.fee;
-    this._maxFee = fee?.maxFee;
+    this._gasPrice = gasPrice?.gasPrice;
+    this._maxGasPrice = gasPrice?.maxGasPrice;
   }
 
   @action
   setType(type: "ETH" | "STRK"): void {
     if (this._type !== type) {
       this._type = type;
-      this._fee = undefined;
+      this._gasPrice = undefined;
+      this._maxGasPrice = undefined;
     }
+  }
+
+  @computed
+  get fee(): CoinPretty | undefined {
+    if (!this._gasPrice) {
+      return;
+    }
+
+    const gasDec = new Dec(this.gasConfig.gas);
+    return this._gasPrice.mul(gasDec);
+  }
+
+  @computed
+  get maxFee(): CoinPretty | undefined {
+    if (!this._maxGasPrice) {
+      return;
+    }
+
+    const gasDec = new Dec(this.gasConfig.gas);
+    return this._maxGasPrice.mul(gasDec);
   }
 }
 
@@ -101,19 +129,25 @@ export const useFeeConfig = (
   chainId: string,
   senderConfig: ISenderConfig,
   amountConfig: IAmountConfig,
-  gasConfig: IGasConfig
+  gasConfig: IGasConfig,
+  initialFn?: (config: FeeConfig) => void
 ) => {
-  const [config] = useState(
-    () =>
-      new FeeConfig(
-        chainGetter,
-        queriesStore,
-        chainId,
-        senderConfig,
-        amountConfig,
-        gasConfig
-      )
-  );
+  const [config] = useState(() => {
+    const config = new FeeConfig(
+      chainGetter,
+      queriesStore,
+      chainId,
+      senderConfig,
+      amountConfig,
+      gasConfig
+    );
+
+    if (initialFn) {
+      initialFn(config);
+    }
+
+    return config;
+  });
   config.setChain(chainId);
 
   return config;

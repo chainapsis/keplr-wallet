@@ -36,7 +36,7 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 export class KeyRingStarknetService {
   constructor(
     protected readonly chainsService: ChainsService,
-    protected readonly keyRingService: KeyRingService,
+    public readonly keyRingService: KeyRingService,
     protected readonly permissionService: PermissionService,
     protected readonly tokenERC20Service: TokenERC20Service,
     protected readonly interactionService: InteractionService
@@ -368,15 +368,21 @@ export class KeyRingStarknetService {
     origin: string,
     chainId: string,
     transactions: Call[],
-    details: InvocationsSignerDetails
-  ): Promise<string[]> {
+    details: InvocationsSignerDetails,
+    noChangeTx: boolean
+  ): Promise<{
+    transactions: Call[];
+    details: InvocationsSignerDetails;
+    signature: string[];
+  }> {
     return await this.signStarknetTransaction(
       env,
       origin,
       this.keyRingService.selectedVaultId,
       chainId,
       transactions,
-      details
+      details,
+      noChangeTx
     );
   }
 
@@ -386,8 +392,13 @@ export class KeyRingStarknetService {
     vaultId: string,
     chainId: string,
     transactions: Call[],
-    details: InvocationsSignerDetails
-  ): Promise<string[]> {
+    details: InvocationsSignerDetails,
+    noChangeTx: boolean
+  ): Promise<{
+    transactions: Call[];
+    details: InvocationsSignerDetails;
+    signature: string[];
+  }> {
     // TODO: tx에서 signer와 실제 계정 / chain id에 대해서 validation 넣기
 
     const key = await this.getStarknetKeySelected(chainId);
@@ -403,6 +414,7 @@ export class KeyRingStarknetService {
         signer: key.hexAddress,
         transactions,
         details,
+        noChangeTx,
       },
       async (res: {
         transactions: Call[];
@@ -416,7 +428,7 @@ export class KeyRingStarknetService {
         let msgHash;
 
         if (
-          Object.values(ETransactionVersion2).includes(details.version as any)
+          Object.values(ETransactionVersion1).includes(details.version as any)
         ) {
           const det = details as V2InvocationsSignerDetails;
           msgHash = starknetHashUtils.calculateInvokeTransactionHash({
@@ -454,7 +466,11 @@ export class KeyRingStarknetService {
           Buffer.from(msgHash, "hex"),
           "noop"
         );
-        return this.formatEthSignature(sig);
+        return {
+          transactions,
+          details,
+          signature: this.formatEthSignature(sig),
+        };
       }
     );
   }
@@ -488,7 +504,7 @@ export class KeyRingStarknetService {
     );
     let msgHash;
 
-    if (Object.values(ETransactionVersion2).includes(details.version as any)) {
+    if (Object.values(ETransactionVersion1).includes(details.version as any)) {
       const det = details as V2DeployAccountSignerDetails;
       msgHash = starknetHashUtils.calculateDeployAccountTransactionHash({
         ...det,
@@ -553,7 +569,7 @@ export class KeyRingStarknetService {
     // TODO: tx에서 signer와 실제 계정 / chain id에 대해서 validation 넣기
     let msgHash;
 
-    if (Object.values(ETransactionVersion2).includes(details.version as any)) {
+    if (Object.values(ETransactionVersion1).includes(details.version as any)) {
       const det = details as V2DeclareSignerDetails;
       msgHash = starknetHashUtils.calculateDeclareTransactionHash({
         ...det,
@@ -678,23 +694,22 @@ class SignerInterfaceImpl extends SignerInterface {
     transactions: Call[],
     transactionsDetail: InvocationsSignerDetails
   ): Promise<Signature> {
-    return await this.service.signStarknetTransactionSelected(
-      this.env,
-      this.origin,
-      this.getChainId(),
-      transactions,
-      transactionsDetail
-    );
+    return (
+      await this.service.signStarknetTransactionSelected(
+        this.env,
+        this.origin,
+        this.getChainId(),
+        transactions,
+        transactionsDetail,
+        true
+      )
+    ).signature;
   }
 }
 
-const ETransactionVersion2 = {
-  V0: "0x0" as const,
+const ETransactionVersion1 = {
   V1: "0x1" as const,
-  V2: "0x2" as const,
-  F0: "0x100000000000000000000000000000000" as const,
   F1: "0x100000000000000000000000000000001" as const,
-  F2: "0x100000000000000000000000000000002" as const,
 };
 
 const ETransactionVersion3 = {

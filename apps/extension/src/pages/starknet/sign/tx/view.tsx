@@ -15,6 +15,7 @@ import {
   useGasSimulator,
   useNoopAmountConfig,
   useSenderConfig,
+  useTxConfigsValidate,
 } from "@keplr-wallet/hooks-starknet";
 import { MemoryKVStore } from "@keplr-wallet/common";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
@@ -113,21 +114,20 @@ export const SignStarknetTxView: FunctionComponent<{
         }> => {
           const res = await starknetAccountStore
             .getAccount(chainId)
-            .estimateInvokeFee(
-              sender,
-              interactionData.data.transactions,
-              type === "ETH" ? "0x2" : "0x3"
-            );
+            .estimateInvokeFee(sender, interactionData.data.transactions, type);
 
           const fee = new CoinPretty(feeCurrency, res.overall_fee);
           const maxFee = new CoinPretty(feeCurrency, res.suggestedMaxFee);
-          feeConfig.setFee({
-            fee,
-            maxFee,
+          feeConfig.setGasPrice({
+            gasPrice: fee.quo(new Dec(res.gas_consumed)),
+            maxGasPrice: maxFee.quo(new Dec(res.gas_consumed)),
           });
 
           return {
-            gasUsed: parseInt(res.gas_consumed.toString()),
+            // * 1.2 + 1600은 매직너버임...
+            gasUsed: Math.ceil(
+              parseInt(res.gas_consumed.toString()) * 1.2 + 600
+            ),
           };
         },
       };
@@ -150,6 +150,15 @@ export const SignStarknetTxView: FunctionComponent<{
     unmountPromise.resolver();
   });
 
+  const txConfigsValidate = useTxConfigsValidate({
+    amountConfig,
+    senderConfig,
+    gasConfig,
+    feeConfig,
+  });
+
+  const buttonDisabled = txConfigsValidate.interactionBlocked;
+
   const approve = async () => {
     try {
       const type = feeConfig.type;
@@ -168,7 +177,7 @@ export const SignStarknetTxView: FunctionComponent<{
       const details: InvocationsSignerDetails = (() => {
         if (type === "ETH") {
           return {
-            version: "0x2",
+            version: "0x1",
             walletAddress: interactionData.data.details.walletAddress,
             nonce: interactionData.data.details.nonce,
             chainId: interactionData.data.details.chainId,
@@ -210,8 +219,8 @@ export const SignStarknetTxView: FunctionComponent<{
               },
             },
             tip: "0x0",
-            paymasterData: ["0x0"],
-            accountDeploymentData: ["0x0"],
+            paymasterData: [],
+            accountDeploymentData: [],
             nonceDataAvailabilityMode: "L1",
             feeDataAvailabilityMode: "L1",
           };
@@ -273,8 +282,7 @@ export const SignStarknetTxView: FunctionComponent<{
         isSpecial: true,
         text: intl.formatMessage({ id: "button.approve" }),
         size: "large",
-        // TODO
-        // disabled: buttonDisabled,
+        disabled: buttonDisabled,
         isLoading: signStarknetTxInteractionStore.isObsoleteInteraction(
           interactionData.id
         ),
