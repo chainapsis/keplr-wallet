@@ -1099,21 +1099,43 @@ export class ChainsService {
     return chainInfo.evm;
   }
 
-  hasModularChainInfo(chainId: string): boolean {
-    return this.modularChainInfos.some(
-      (modularChainInfo) =>
-        ChainIdHelper.parse(modularChainInfo.chainId).identifier ===
-        ChainIdHelper.parse(chainId).identifier
-    );
-  }
+  getModularChainInfos = computedFn(
+    (): ModularChainInfo[] => {
+      return this.modularChainInfos.slice().map((modularChainInfo) => {
+        if (this.hasChainInfo(modularChainInfo.chainId)) {
+          const cosmos = this.getChainInfoOrThrow(modularChainInfo.chainId);
+          return {
+            chainId: cosmos.chainId,
+            chainName: cosmos.chainName,
+            chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
+            cosmos,
+          };
+        }
+        return modularChainInfo;
+      });
+    },
+    {
+      keepAlive: true,
+    }
+  );
 
-  getModularChainInfo(chainId: string): ModularChainInfo | undefined {
-    return this.modularChainInfos.find(
+  hasModularChainInfo = computedFn((chainId: string): boolean => {
+    return this.getModularChainInfos().some(
       (modularChainInfo) =>
         ChainIdHelper.parse(modularChainInfo.chainId).identifier ===
         ChainIdHelper.parse(chainId).identifier
     );
-  }
+  });
+
+  getModularChainInfo = computedFn(
+    (chainId: string): ModularChainInfo | undefined => {
+      return this.getModularChainInfos().find(
+        (modularChainInfo) =>
+          ChainIdHelper.parse(modularChainInfo.chainId).identifier ===
+          ChainIdHelper.parse(chainId).identifier
+      );
+    }
+  );
 
   getModularChainInfoOrThrow(chainId: string): ModularChainInfo {
     const modularChainInfo = this.getModularChainInfo(chainId);

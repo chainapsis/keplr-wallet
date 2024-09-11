@@ -850,6 +850,72 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
     });
   }
 
+  @action
+  protected setEmbeddedChainInfosV2(infos: {
+    chainInfos: C[];
+    modulrChainInfos: ModularChainInfo[];
+  }) {
+    this._chainInfos = infos.chainInfos.map((chainInfo) => {
+      const prev = this.chainInfoMap.get(
+        ChainIdHelper.parse(chainInfo.chainId).identifier
+      );
+      if (prev) {
+        prev.setEmbeddedChainInfo(chainInfo);
+        return prev;
+      }
+
+      return new ChainInfoImpl(chainInfo, this);
+    });
+    this._modularChainInfos = infos.modulrChainInfos.map((chainInfo) => {
+      if ("currencies" in chainInfo) {
+        const cosmos = infos.chainInfos.find(
+          (c) => c.chainId === chainInfo.chainId
+        );
+        if (!cosmos) {
+          throw new Error("Can't find cosmos chain info");
+        }
+
+        return {
+          chainId: cosmos.chainId,
+          chainName: cosmos.chainName,
+          chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
+          cosmos,
+        };
+      }
+      return chainInfo;
+    });
+    this._modularChainInfoImpls = infos.modulrChainInfos.map((chainInfo) => {
+      const modularChainInfo = (() => {
+        if ("currencies" in chainInfo) {
+          const cosmos = infos.chainInfos.find(
+            (c) => c.chainId === chainInfo.chainId
+          );
+          if (!cosmos) {
+            throw new Error("Can't find cosmos chain info");
+          }
+
+          return {
+            chainId: cosmos.chainId,
+            chainName: cosmos.chainName,
+            chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
+            cosmos,
+          };
+        }
+        return chainInfo;
+      })();
+
+      const prev = this.modularChainInfoImplMap.get(
+        ChainIdHelper.parse(chainInfo.chainId).identifier
+      );
+      if (prev) {
+        prev.setEmbeddedModularChainInfo(modularChainInfo);
+        return prev;
+      }
+
+      return new ModularChainInfoImpl(modularChainInfo, this);
+    });
+  }
+
   getCurrencyRegistrar(
     chainId: string,
     coinMinimalDenom: string

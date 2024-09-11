@@ -322,8 +322,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     yield this.keyRingStore.waitUntilInitialized();
 
     yield Promise.all([
-      // TODO: 임시로 주석처리한거고 updateChainInfosFromBackground()를 작동되도록 수정해야함.
-      // this.updateChainInfosFromBackground(),
+      this.updateChainInfosFromBackground(),
       this.updateEnabledChainIdentifiersFromBackground(),
     ]);
 
@@ -354,7 +353,10 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
-    this.setEmbeddedChainInfos(result.chainInfos);
+    this.setEmbeddedChainInfosV2({
+      chainInfos: result.chainInfos,
+      modulrChainInfos: result.modulrChainInfos,
+    });
   }
 
   @flow
@@ -470,11 +472,14 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @flow
   *removeChainInfo(chainId: string) {
     const msg = new RemoveSuggestedChainInfoMsg(chainId);
-    const chainInfos = yield* toGenerator(
+    const res = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
 
-    this.setEmbeddedChainInfos(chainInfos);
+    this.setEmbeddedChainInfosV2({
+      chainInfos: res.chainInfos,
+      modulrChainInfos: res.modularChainInfos,
+    });
   }
 
   @flow
@@ -485,21 +490,27 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     evmRpc: string | undefined
   ) {
     const msg = new SetChainEndpointsMsg(chainId, rpc, rest, evmRpc);
-    const newChainInfos = yield* toGenerator(
+    const res = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
 
-    this.setEmbeddedChainInfos(newChainInfos);
+    this.setEmbeddedChainInfosV2({
+      chainInfos: res.chainInfos,
+      modulrChainInfos: res.modularChainInfos,
+    });
   }
 
   @flow
   *resetChainEndpoints(chainId: string) {
     const msg = new ClearChainEndpointsMsg(chainId);
-    const newChainInfos = yield* toGenerator(
+    const res = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
 
-    this.setEmbeddedChainInfos(newChainInfos);
+    this.setEmbeddedChainInfosV2({
+      chainInfos: res.chainInfos,
+      modulrChainInfos: res.modularChainInfos,
+    });
   }
 
   // I use Async, Await because it doesn't change the state value.
