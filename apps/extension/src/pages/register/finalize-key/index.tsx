@@ -74,6 +74,7 @@ export const FinalizeKeyScene: FunctionComponent<{
       keyRingStore,
       priceStore,
       analyticsStore,
+      starknetQueriesStore,
     } = useStore();
 
     const sceneTransition = useSceneTransition();
@@ -202,44 +203,61 @@ export const FinalizeKeyScene: FunctionComponent<{
         }[] = [];
 
         promises = [];
-        for (const chainInfo of chainStore.chainInfos) {
-          if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
-            promises.push(
-              (async () => {
-                const res = await keyRingStore.computeNotFinalizedKeyAddresses(
-                  vaultId,
-                  chainInfo.chainId
-                );
-
-                candidateAddresses.push({
-                  chainId: chainInfo.chainId,
-                  bech32Addresses: res.map((res) => {
-                    return {
-                      coinType: res.coinType,
-                      address: res.bech32Address,
-                    };
-                  }),
-                });
-              })()
+        for (const modularChainInfo of chainStore.modularChainInfos) {
+          if ("cosmos" in modularChainInfo) {
+            const chainInfo = chainStore.getChain(
+              modularChainInfo.cosmos.chainId
             );
-          } else {
-            const account = accountStore.getAccount(chainInfo.chainId);
+            if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
+              promises.push(
+                (async () => {
+                  const res =
+                    await keyRingStore.computeNotFinalizedKeyAddresses(
+                      vaultId,
+                      chainInfo.chainId
+                    );
+
+                  candidateAddresses.push({
+                    chainId: chainInfo.chainId,
+                    bech32Addresses: res.map((res) => {
+                      return {
+                        coinType: res.coinType,
+                        address: res.bech32Address,
+                      };
+                    }),
+                  });
+                })()
+              );
+            } else {
+              const account = accountStore.getAccount(chainInfo.chainId);
+              promises.push(
+                (async () => {
+                  if (account.walletStatus !== WalletStatus.Loaded) {
+                    await account.init();
+                  }
+
+                  if (account.bech32Address) {
+                    candidateAddresses.push({
+                      chainId: chainInfo.chainId,
+                      bech32Addresses: [
+                        {
+                          coinType: chainInfo.bip44.coinType,
+                          address: account.bech32Address,
+                        },
+                      ],
+                    });
+                  }
+                })()
+              );
+            }
+          } else if ("starknet" in modularChainInfo) {
+            const account = accountStore.getAccount(
+              modularChainInfo.starknet.chainId
+            );
             promises.push(
               (async () => {
                 if (account.walletStatus !== WalletStatus.Loaded) {
                   await account.init();
-                }
-
-                if (account.bech32Address) {
-                  candidateAddresses.push({
-                    chainId: chainInfo.chainId,
-                    bech32Addresses: [
-                      {
-                        coinType: chainInfo.bip44.coinType,
-                        address: account.bech32Address,
-                      },
-                    ],
-                  });
                 }
               })()
             );
@@ -258,6 +276,32 @@ export const FinalizeKeyScene: FunctionComponent<{
         // Should call once.
         (async () => {
           const promises: Promise<unknown>[] = [];
+
+          // 스타크넷 관련 체인들은 `candidateAddresses`에 추가되지 않으므로 여기서 처리한다.
+          for (const modularChainInfo of chainStore.modularChainInfosInListUI) {
+            if ("starknet" in modularChainInfo) {
+              const account = accountStore.getAccount(modularChainInfo.chainId);
+              const mainCurrency = modularChainInfo.starknet.currencies[0];
+
+              const queryBalance = starknetQueriesStore
+                .get(modularChainInfo.chainId)
+                .queryStarknetERC20Balance.getBalance(
+                  modularChainInfo.chainId,
+                  chainStore,
+                  account.starknetHexAddress,
+                  mainCurrency.coinMinimalDenom
+                );
+
+              if (queryBalance) {
+                promises.push(queryBalance.waitFreshResponse());
+
+                if (mainCurrency.coinGeckoId) {
+                  // Push coingecko id to priceStore.
+                  priceStore.getPrice(mainCurrency.coinGeckoId);
+                }
+              }
+            }
+          }
 
           for (const candidateAddress of candidateAddresses) {
             const account = accountStore.getAccount(candidateAddress.chainId);

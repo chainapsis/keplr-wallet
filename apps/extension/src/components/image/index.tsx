@@ -72,7 +72,7 @@ export const RawImageFallback: FunctionComponent<
 
 export const ChainImageFallback: FunctionComponent<
   Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "alt"> & {
-    chainInfo: ChainInfo;
+    chainInfo: ChainInfo | ModularChainInfo;
 
     size: string;
     alt?: string;
