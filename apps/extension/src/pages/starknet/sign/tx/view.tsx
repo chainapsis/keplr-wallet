@@ -8,14 +8,131 @@ import { useUnmount } from "../../../../hooks/use-unmount";
 import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
 import { useIntl } from "react-intl";
+import { FeeControl } from "../../components/input/fee-control";
+import {
+  useFeeConfig,
+  useGasConfig,
+  useGasSimulator,
+  useNoopAmountConfig,
+  useSenderConfig,
+  useTxConfigsValidate,
+} from "@keplr-wallet/hooks-starknet";
+import { MemoryKVStore } from "@keplr-wallet/common";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
+import { num, InvocationsSignerDetails } from "starknet";
 
 export const SignStarknetTxView: FunctionComponent<{
   interactionData: NonNullable<SignStarknetTxInteractionStore["waitingData"]>;
 }> = observer(({ interactionData }) => {
-  const { signStarknetTxInteractionStore } = useStore();
+  const {
+    signStarknetTxInteractionStore,
+    starknetAccountStore,
+    starknetQueriesStore,
+  } = useStore();
+
+  const { chainStore } = useStore();
 
   const intl = useIntl();
   const interactionInfo = useInteractionInfo();
+
+  const chainId = interactionData.data.chainId;
+
+  const modularChainInfo = chainStore.getModularChain(chainId);
+  if (!("starknet" in modularChainInfo)) {
+    throw new Error(`${modularChainInfo.chainId} is not starknet chain`);
+  }
+  const starknet = modularChainInfo.starknet;
+
+  const senderConfig = useSenderConfig(
+    chainStore,
+    chainId,
+    interactionData.data.signer
+  );
+  const amountConfig = useNoopAmountConfig(chainStore, chainId, senderConfig);
+  const gasConfig = useGasConfig(
+    chainStore,
+    chainId,
+    (() => {
+      if ("resourceBounds" in interactionData.data.details) {
+        return parseInt(
+          interactionData.data.details.resourceBounds.l1_gas.max_amount
+        );
+      }
+    })()
+  );
+  const feeConfig = useFeeConfig(
+    chainStore,
+    starknetQueriesStore,
+    chainId,
+    senderConfig,
+    amountConfig,
+    gasConfig
+  );
+
+  const gasSimulator = useGasSimulator(
+    new MemoryKVStore("starknet.sign"),
+    chainStore,
+    chainId,
+    gasConfig,
+    feeConfig,
+    // fee type이 바뀔때마다 refresh 시켜야한다...
+    feeConfig.type,
+    () => {
+      if (!amountConfig.currency) {
+        throw new Error("Send currency not set");
+      }
+
+      // Prefer not to use the gas config or fee config,
+      // because gas simulator can change the gas config and fee config from the result of reaction,
+      // and it can make repeated reaction.
+      if (
+        amountConfig.uiProperties.loadingState === "loading-block" ||
+        amountConfig.uiProperties.error != null
+      ) {
+        throw new Error("Not ready to simulate tx");
+      }
+
+      // observed되어야 하므로 꼭 여기서 참조 해야함.
+      const type = feeConfig.type;
+      const feeContractAddress =
+        type === "ETH"
+          ? starknet.ethContractAddress
+          : starknet.strkContractAddress;
+      const feeCurrency = chainStore
+        .getModularChainInfoImpl(chainId)
+        .getCurrencies("starknet")
+        .find((cur) => cur.coinMinimalDenom === `erc20:${feeContractAddress}`);
+      if (!feeCurrency) {
+        throw new Error("Can't find fee currency");
+      }
+
+      const sender = senderConfig.sender;
+
+      return {
+        simulate: async (): Promise<{
+          gasUsed: number;
+        }> => {
+          const res = await starknetAccountStore
+            .getAccount(chainId)
+            .estimateInvokeFee(sender, interactionData.data.transactions, type);
+
+          const fee = new CoinPretty(feeCurrency, res.overall_fee);
+          const maxFee = new CoinPretty(feeCurrency, res.suggestedMaxFee);
+          feeConfig.setGasPrice({
+            gasPrice: fee.quo(new Dec(res.gas_consumed)),
+            maxGasPrice: maxFee.quo(new Dec(res.gas_consumed)),
+          });
+
+          return {
+            // * 1.2 + 1600은 매직너버임...
+            gasUsed: Math.ceil(
+              parseInt(res.gas_consumed.toString()) * 1.2 + 600
+            ),
+          };
+        },
+      };
+    }
+  );
 
   const [unmountPromise] = useState(() => {
     let resolver: () => void;
@@ -33,12 +150,87 @@ export const SignStarknetTxView: FunctionComponent<{
     unmountPromise.resolver();
   });
 
+  const txConfigsValidate = useTxConfigsValidate({
+    amountConfig,
+    senderConfig,
+    gasConfig,
+    feeConfig,
+  });
+
+  const buttonDisabled = txConfigsValidate.interactionBlocked;
+
   const approve = async () => {
     try {
+      const type = feeConfig.type;
+      const feeContractAddress =
+        type === "ETH"
+          ? starknet.ethContractAddress
+          : starknet.strkContractAddress;
+      const feeCurrency = chainStore
+        .getModularChainInfoImpl(chainId)
+        .getCurrencies("starknet")
+        .find((cur) => cur.coinMinimalDenom === `erc20:${feeContractAddress}`);
+      if (!feeCurrency) {
+        throw new Error("Can't find fee currency");
+      }
+
+      const details: InvocationsSignerDetails = (() => {
+        if (type === "ETH") {
+          return {
+            version: "0x1",
+            walletAddress: interactionData.data.details.walletAddress,
+            nonce: interactionData.data.details.nonce,
+            chainId: interactionData.data.details.chainId,
+            cairoVersion: interactionData.data.details.cairoVersion,
+            skipValidate: false,
+
+            maxFee: feeConfig.maxFee
+              ? num.toHex(feeConfig.maxFee.toCoin().amount)
+              : "0x0",
+          };
+        } else {
+          return {
+            version: "0x3",
+            walletAddress: interactionData.data.details.walletAddress,
+            nonce: interactionData.data.details.nonce,
+            chainId: interactionData.data.details.chainId,
+            cairoVersion: interactionData.data.details.cairoVersion,
+            skipValidate: false,
+
+            resourceBounds: {
+              l1_gas: {
+                max_amount: num.toHex(gasConfig.gas.toString()),
+                max_price_per_unit: (() => {
+                  if (!feeConfig.maxFee) {
+                    return "0x0";
+                  }
+
+                  return num.toHex(
+                    new Dec(feeConfig.maxFee.toCoin().amount)
+                      .quo(new Dec(gasConfig.gas))
+                      .truncate()
+                      .toString()
+                  );
+                })(),
+              },
+              l2_gas: {
+                max_amount: "0x0",
+                max_price_per_unit: "0x0",
+              },
+            },
+            tip: "0x0",
+            paymasterData: [],
+            accountDeploymentData: [],
+            nonceDataAvailabilityMode: "L1",
+            feeDataAvailabilityMode: "L1",
+          };
+        }
+      })();
+
       await signStarknetTxInteractionStore.approveWithProceedNext(
         interactionData.id,
         interactionData.data.transactions,
-        interactionData.data.details,
+        details,
         async (proceedNext) => {
           if (!proceedNext) {
             if (
@@ -90,8 +282,7 @@ export const SignStarknetTxView: FunctionComponent<{
         isSpecial: true,
         text: intl.formatMessage({ id: "button.approve" }),
         size: "large",
-        // TODO
-        // disabled: buttonDisabled,
+        disabled: buttonDisabled,
         isLoading: signStarknetTxInteractionStore.isObsoleteInteraction(
           interactionData.id
         ),
@@ -99,6 +290,12 @@ export const SignStarknetTxView: FunctionComponent<{
       }}
     >
       <div>TODO</div>
+      <FeeControl
+        senderConfig={senderConfig}
+        feeConfig={feeConfig}
+        gasConfig={gasConfig}
+        gasSimulator={gasSimulator}
+      />
     </HeaderLayout>
   );
 });

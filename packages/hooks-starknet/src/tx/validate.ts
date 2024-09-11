@@ -1,4 +1,5 @@
 import {
+  IAmountConfig,
   IFeeConfig,
   IGasConfig,
   IGasSimulator,
@@ -8,6 +9,7 @@ import {
 
 // CONTRACT: Use with `observer`
 export const useTxConfigsValidate = (configs: {
+  amountConfig?: IAmountConfig;
   senderConfig?: ISenderConfig;
   recipientConfig?: IRecipientConfig;
   gasConfig?: IGasConfig;
@@ -16,6 +18,7 @@ export const useTxConfigsValidate = (configs: {
 }) => {
   const interactionBlocked = (() => {
     if (
+      configs.amountConfig?.uiProperties.error ||
       configs.senderConfig?.uiProperties.error ||
       configs.recipientConfig?.uiProperties.error ||
       configs.gasConfig?.uiProperties.error ||
@@ -26,6 +29,7 @@ export const useTxConfigsValidate = (configs: {
     }
 
     if (
+      configs.amountConfig?.uiProperties.loadingState === "loading-block" ||
       configs.senderConfig?.uiProperties.loadingState === "loading-block" ||
       configs.recipientConfig?.uiProperties.loadingState === "loading-block" ||
       configs.gasConfig?.uiProperties.loadingState === "loading-block" ||

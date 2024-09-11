@@ -984,6 +984,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   }
 
   async getStarknetKey(chainId: string): Promise<{
+    name: string;
     hexAddress: string;
     pubKey: Uint8Array;
     address: Uint8Array;
@@ -1045,7 +1046,11 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     chainId: string,
     transactions: Call[],
     details: InvocationsSignerDetails
-  ): Promise<string[]> {
+  ): Promise<{
+    transactions: Call[];
+    details: InvocationsSignerDetails;
+    signature: string[];
+  }> {
     return new Promise((resolve, reject) => {
       let f = false;
       sendSimpleMessage(

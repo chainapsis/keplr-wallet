@@ -32,6 +32,7 @@ import { Hash, Mnemonic, PrivKeySecp256k1 } from "@keplr-wallet/crypto";
 import Long from "long";
 import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import EventEmitter from "events";
+import { Call, InvocationsSignerDetails } from "starknet";
 
 export class MockKeplr implements Keplr {
   readonly version: string = "0.0.1";
@@ -390,7 +391,12 @@ export class MockKeplr implements Keplr {
 
   getStarknetKey(
     _chainId: string
-  ): Promise<{ hexAddress: string; pubKey: Uint8Array; address: Uint8Array }> {
+  ): Promise<{
+    name: string;
+    hexAddress: string;
+    pubKey: Uint8Array;
+    address: Uint8Array;
+  }> {
     throw new Error("Not implemented");
   }
 
@@ -404,7 +410,11 @@ export class MockKeplr implements Keplr {
     throw new Error("Not implemented");
   }
 
-  signStarknetTx(): Promise<string[]> {
+  signStarknetTx(): Promise<{
+    transactions: Call[];
+    details: InvocationsSignerDetails;
+    signature: string[];
+  }> {
     throw new Error("Not implemented");
   }
 

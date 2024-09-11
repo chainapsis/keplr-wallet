@@ -297,7 +297,9 @@ export const FeeControl: FunctionComponent<{
               <Box minWidth="0.875rem" height="1px" alignY="center">
                 {(() => {
                   if (
-                    feeConfig.uiProperties.loadingState ||
+                    (feeConfig.uiProperties.loadingState &&
+                      feeConfig.uiProperties.error?.message !==
+                        "Fee is not set") ||
                     gasSimulator?.uiProperties.loadingState
                   ) {
                     return (
@@ -347,7 +349,9 @@ export const FeeControl: FunctionComponent<{
           </Box>
         </YAxis>
         <VerticalResizeTransition transitionAlign="top">
-          {feeConfig.uiProperties.error || feeConfig.uiProperties.warning ? (
+          {(feeConfig.uiProperties.error &&
+            feeConfig.uiProperties.error.message !== "Fee is not set") ||
+          feeConfig.uiProperties.warning ? (
             <Box
               marginTop="1.04rem"
               borderRadius="0.5rem"

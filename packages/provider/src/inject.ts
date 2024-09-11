@@ -103,7 +103,11 @@ export function injectKeplrToWindow(keplr: IKeplr): void {
     keplr.getEnigmaUtils
   );
 
-  defineUnwritablePropertyIfPossible(window, "starknet_keplr", keplr.starknet);
+  defineUnwritablePropertyIfPossible(
+    window,
+    "starknet_braavos",
+    keplr.starknet
+  );
 }
 
 /**
@@ -956,6 +960,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
   }
 
   async getStarknetKey(chainId: string): Promise<{
+    name: string;
     hexAddress: string;
     pubKey: Uint8Array;
     address: Uint8Array;
@@ -977,7 +982,11 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     chainId: string,
     transactions: Call[],
     details: InvocationsSignerDetails
-  ): Promise<string[]> {
+  ): Promise<{
+    transactions: Call[];
+    details: InvocationsSignerDetails;
+    signature: string[];
+  }> {
     return await this.requestMethod("signStarknetTx", [
       chainId,
       transactions,

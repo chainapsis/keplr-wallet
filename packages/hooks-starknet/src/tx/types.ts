@@ -38,16 +38,19 @@ export interface IFeeConfig extends ITxChainSetter {
   type: "ETH" | "STRK";
   setType(type: "ETH" | "STRK"): void;
 
-  fee: CoinPretty | undefined;
-  maxFee: CoinPretty | undefined;
-  setFee(
-    fee:
+  gasPrice: CoinPretty | undefined;
+  maxGasPrice: CoinPretty | undefined;
+  setGasPrice(
+    gasPrice:
       | {
-          fee: CoinPretty;
-          maxFee: CoinPretty;
+          gasPrice: CoinPretty;
+          maxGasPrice: CoinPretty;
         }
       | undefined
   ): void;
+
+  fee: CoinPretty | undefined;
+  maxFee: CoinPretty | undefined;
 
   uiProperties: UIProperties;
 }

@@ -79,7 +79,11 @@ export class GetStarknetKeysSettledMsg extends Message<
   }
 }
 
-export class RequestSignStarknetTx extends Message<string[]> {
+export class RequestSignStarknetTx extends Message<{
+  transactions: Call[];
+  details: InvocationsSignerDetails;
+  signature: string[];
+}> {
   public static type() {
     return "request-sign-starknet-tx";
   }
@@ -144,5 +148,57 @@ export class RequestJsonRpcToStarknetMsg extends Message<void> {
 
   type(): string {
     return RequestJsonRpcToStarknetMsg.type();
+  }
+}
+
+export class GetStarknetKeysForEachVaultSettledMsg extends Message<
+  SettledResponses<
+    {
+      name: string;
+      hexAddress: string;
+      pubKey: Uint8Array;
+      address: Uint8Array;
+    } & {
+      vaultId: string;
+    }
+  >
+> {
+  public static type() {
+    return "GetStarknetKeysForEachVaultSettledMsg";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly vaultIds: string[]
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.vaultIds || this.vaultIds.length === 0) {
+      throw new Error("vaultIds are not set");
+    }
+
+    const seen = new Map<string, boolean>();
+
+    for (const vaultId of this.vaultIds) {
+      if (seen.get(vaultId)) {
+        throw new Error(`vaultId ${vaultId} is duplicated`);
+      }
+
+      seen.set(vaultId, true);
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetStarknetKeysForEachVaultSettledMsg.type();
   }
 }
