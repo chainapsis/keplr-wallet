@@ -66,7 +66,15 @@ export const SignStarknetTxView: FunctionComponent<{
     chainId,
     senderConfig,
     amountConfig,
-    gasConfig
+    gasConfig,
+    (feeConfig) => {
+      if (interactionData.data.details.version === "0x1") {
+        feeConfig.setType("ETH");
+      }
+      if (interactionData.data.details.version === "0x3") {
+        feeConfig.setType("STRK");
+      }
+    }
   );
 
   const gasSimulator = useGasSimulator(
