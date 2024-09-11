@@ -86,6 +86,7 @@ export class KeyRingStarknetService {
   }
 
   async getStarknetKeySelected(chainId: string): Promise<{
+    name: string;
     hexAddress: string;
     pubKey: Uint8Array;
     address: Uint8Array;
@@ -100,6 +101,7 @@ export class KeyRingStarknetService {
     vaultId: string,
     chainId: string
   ): Promise<{
+    name: string;
     hexAddress: string;
     pubKey: Uint8Array;
     address: Uint8Array;
@@ -121,6 +123,7 @@ export class KeyRingStarknetService {
     );
 
     return {
+      name: this.keyRingService.getKeyRingName(vaultId),
       hexAddress: `0x${Buffer.from(address).toString("hex")}`,
       pubKey: pubKey.toBytes(),
       address,

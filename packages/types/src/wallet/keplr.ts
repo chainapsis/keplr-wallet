@@ -245,8 +245,8 @@ export interface Keplr {
 
   suggestERC20(chainId: string, contractAddress: string): Promise<void>;
 
-  // TODO: ethereum처럼 따로 빼야할 것 같긴 함...
   getStarknetKey(chainId: string): Promise<{
+    name: string;
     hexAddress: string;
     pubKey: Uint8Array;
     address: Uint8Array;

@@ -391,7 +391,12 @@ export class MockKeplr implements Keplr {
 
   getStarknetKey(
     _chainId: string
-  ): Promise<{ hexAddress: string; pubKey: Uint8Array; address: Uint8Array }> {
+  ): Promise<{
+    name: string;
+    hexAddress: string;
+    pubKey: Uint8Array;
+    address: Uint8Array;
+  }> {
     throw new Error("Not implemented");
   }
 

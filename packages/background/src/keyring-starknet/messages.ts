@@ -153,7 +153,12 @@ export class RequestJsonRpcToStarknetMsg extends Message<void> {
 
 export class GetStarknetKeysForEachVaultSettledMsg extends Message<
   SettledResponses<
-    { hexAddress: string; pubKey: Uint8Array; address: Uint8Array } & {
+    {
+      name: string;
+      hexAddress: string;
+      pubKey: Uint8Array;
+      address: Uint8Array;
+    } & {
       vaultId: string;
     }
   >

@@ -960,6 +960,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
   }
 
   async getStarknetKey(chainId: string): Promise<{
+    name: string;
     hexAddress: string;
     pubKey: Uint8Array;
     address: Uint8Array;

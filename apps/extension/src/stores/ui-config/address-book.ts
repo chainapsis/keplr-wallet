@@ -152,7 +152,12 @@ export class AddressBookConfig {
     exceptVaultId?: string
   ): Promise<
     SettledResponses<
-      { hexAddress: string; pubKey: Uint8Array; address: Uint8Array } & {
+      {
+        name: string;
+        hexAddress: string;
+        pubKey: Uint8Array;
+        address: Uint8Array;
+      } & {
         vaultId: string;
       }
     >

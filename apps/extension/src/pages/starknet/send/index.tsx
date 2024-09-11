@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useEffect, useMemo, useRef } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
@@ -31,6 +37,9 @@ import { openPopupWindow } from "@keplr-wallet/popup";
 import { FormattedMessage, useIntl } from "react-intl";
 import { isRunningInSidePanel } from "../../../utils";
 import { num } from "starknet";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { AddRecentSendHistoryMsg } from "@keplr-wallet/background";
 
 const Styles = {
   Flex1: styled.div`
@@ -53,6 +62,8 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
   const intl = useIntl();
 
   const notification = useNotification();
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const initialChainId = searchParams.get("chainId");
   const initialCoinMinimalDenom = searchParams.get("coinMinimalDenom");
@@ -298,84 +309,109 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
         text: intl.formatMessage({ id: "button.next" }),
         color: "primary",
         size: "large",
-        // TODO
-        isLoading: false,
+        isLoading,
       }}
       onSubmit={async (e) => {
         e.preventDefault();
 
-        if (sendConfigs.feeConfig.maxFee && sendConfigs.feeConfig.maxGasPrice) {
-          const type = sendConfigs.feeConfig.type;
-          const feeContractAddress =
-            type === "ETH"
-              ? starknet.ethContractAddress
-              : starknet.strkContractAddress;
-          const feeCurrency = chainStore
-            .getModularChainInfoImpl(chainId)
-            .getCurrencies("starknet")
-            .find(
-              (cur) => cur.coinMinimalDenom === `erc20:${feeContractAddress}`
+        if (
+          !txConfigsValidate.interactionBlocked &&
+          sendConfigs.feeConfig.maxFee &&
+          sendConfigs.feeConfig.maxGasPrice
+        ) {
+          setIsLoading(true);
+          try {
+            const type = sendConfigs.feeConfig.type;
+            const feeContractAddress =
+              type === "ETH"
+                ? starknet.ethContractAddress
+                : starknet.strkContractAddress;
+            const feeCurrency = chainStore
+              .getModularChainInfoImpl(chainId)
+              .getCurrencies("starknet")
+              .find(
+                (cur) => cur.coinMinimalDenom === `erc20:${feeContractAddress}`
+              );
+            if (!feeCurrency) {
+              throw new Error("Can't find fee currency");
+            }
+
+            const sender = account.starknetHexAddress;
+            const recipient = sendConfigs.recipientConfig.recipient;
+            const currency = sendConfigs.amountConfig.currency;
+            const amount = {
+              amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
+              denom: currency.coinMinimalDenom,
+            };
+
+            await starknetAccountStore
+              .getAccount(chainId)
+              .executeForSendTokenTx(
+                sender,
+                amount.amount,
+                currency,
+                recipient,
+                (() => {
+                  if (type === "ETH") {
+                    return {
+                      type: "ETH",
+                      maxFee: sendConfigs.feeConfig.maxFee.toCoin().amount,
+                    };
+                  } else if (type === "STRK") {
+                    return {
+                      type: "STRK",
+                      gas: sendConfigs.gasConfig.gas.toString(),
+                      maxGasPrice: num.toHex(
+                        sendConfigs.feeConfig.maxGasPrice.toCoin().amount
+                      ),
+                    };
+                  } else {
+                    throw new Error("Invalid fee type");
+                  }
+                })()
+              );
+
+            notification.show(
+              "success",
+              intl.formatMessage({
+                id: "notification.transaction-success",
+              }),
+              ""
             );
-          if (!feeCurrency) {
-            throw new Error("Can't find fee currency");
+
+            new InExtensionMessageRequester().sendMessage(
+              BACKGROUND_PORT,
+              new AddRecentSendHistoryMsg(
+                chainId,
+                historyType,
+                sender,
+                recipient,
+                [amount],
+                "",
+                undefined
+              )
+            );
+
+            if (!isDetachedMode) {
+              navigate("/", {
+                replace: true,
+              });
+            } else {
+              window.close();
+            }
+          } catch (e) {
+            if (e?.message === "Request rejected") {
+              return;
+            }
+            console.log(e);
+            notification.show(
+              "failed",
+              intl.formatMessage({ id: "error.transaction-failed" }),
+              ""
+            );
+          } finally {
+            setIsLoading(false);
           }
-
-          starknetAccountStore
-            .getAccount(chainId)
-            .executeForSendTokenTx(
-              account.starknetHexAddress,
-              sendConfigs.amountConfig.amount[0].toDec().toString(),
-              sendConfigs.amountConfig.currency,
-              sendConfigs.recipientConfig.recipient,
-              (() => {
-                if (type === "ETH") {
-                  return {
-                    type: "ETH",
-                    maxFee: sendConfigs.feeConfig.maxFee.toCoin().amount,
-                  };
-                } else if (type === "STRK") {
-                  return {
-                    type: "STRK",
-                    gas: sendConfigs.gasConfig.gas.toString(),
-                    maxGasPrice: num.toHex(
-                      sendConfigs.feeConfig.maxGasPrice.toCoin().amount
-                    ),
-                  };
-                } else {
-                  throw new Error("Invalid fee type");
-                }
-              })()
-            )
-            .then(() => {
-              notification.show(
-                "success",
-                intl.formatMessage({
-                  id: "notification.transaction-success",
-                }),
-                ""
-              );
-
-              if (!isDetachedMode) {
-                navigate("/", {
-                  replace: true,
-                });
-              } else {
-                window.close();
-              }
-            })
-            .catch((e) => {
-              if (e?.message === "Request rejected") {
-                return;
-              }
-
-              console.log(e);
-
-              notification.show(
-                "failed",
-                intl.formatMessage({ id: "error.transaction-failed" }),
-                ""
-              );
-            });
         }
       }}
     >
@@ -413,7 +449,6 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
             ref={addressRef}
             historyType={historyType}
             recipientConfig={sendConfigs.recipientConfig}
-            currency={sendConfigs.amountConfig.currency}
           />
 
           <AmountInput amountConfig={sendConfigs.amountConfig} />

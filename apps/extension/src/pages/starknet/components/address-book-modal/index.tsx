@@ -13,7 +13,6 @@ import { YAxis } from "../../../../components/axis";
 import { Stack } from "../../../../components/stack";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
-import { AppCurrency } from "@keplr-wallet/types";
 import { IRecipientConfig } from "@keplr-wallet/hooks";
 import { Bleed } from "../../../../components/bleed";
 import { RecentSendHistory } from "@keplr-wallet/background";
@@ -38,18 +37,10 @@ export const AddressBookModal: FunctionComponent<{
 
   historyType: string;
   recipientConfig: IRecipientConfig;
-  currency: AppCurrency;
 
   permitSelfKeyInfo?: boolean;
 }> = observer(
-  ({
-    isOpen,
-    close,
-    historyType,
-    recipientConfig,
-    currency,
-    permitSelfKeyInfo,
-  }) => {
+  ({ isOpen, close, historyType, recipientConfig, permitSelfKeyInfo }) => {
     const { analyticsStore, uiConfigStore, keyRingStore, chainStore } =
       useStore();
     const intl = useIntl();
@@ -59,7 +50,12 @@ export const AddressBookModal: FunctionComponent<{
 
     const [recents, setRecents] = useState<RecentSendHistory[]>([]);
     const [accounts, setAccounts] = useState<
-      ({ hexAddress: string; pubKey: Uint8Array; address: Uint8Array } & {
+      ({
+        name: string;
+        hexAddress: string;
+        pubKey: Uint8Array;
+        address: Uint8Array;
+      } & {
         vaultId: string;
       })[]
     >([]);
@@ -120,7 +116,6 @@ export const AddressBookModal: FunctionComponent<{
               return {
                 timestamp: recent.timestamp,
                 address: recent.recipient,
-                memo: recent.memo,
               };
             })
             .filter((recent) => {
