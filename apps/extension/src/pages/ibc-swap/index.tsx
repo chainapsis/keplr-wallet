@@ -300,10 +300,13 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       // swap일 경우 웬만하면 swap 한번으로 충분할 확률이 높다.
       // 이 가정에 따라서 첫로드시에 gas를 restore하기 위해서 오스모시스 위에서 발생할 경우
       // 일단 swap-1로 설정한다.
+      // TODO: multi swap venue일 때 고려해야함.
       if (
-        ibcSwapConfigs.amountConfig.chainInfo.chainIdentifier ===
-        chainStore.getChain(skipQueriesStore.queryIBCSwap.swapVenue.chainId)
-          .chainIdentifier
+        skipQueriesStore.queryIBCSwap.swapVenues.some(
+          (swapVenue) =>
+            ibcSwapConfigs.amountConfig.chainInfo.chainIdentifier ===
+            chainStore.getChain(swapVenue.chainId).chainIdentifier
+        )
       ) {
         type = `swap-1`;
       }

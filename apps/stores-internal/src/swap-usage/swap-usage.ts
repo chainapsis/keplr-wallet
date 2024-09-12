@@ -14,7 +14,11 @@ export class ObservableQuerySwapUsageInner extends ObservableQuery<SwapUsageResp
     baseURL: string,
     chainIdentifier: string
   ) {
-    super(sharedContext, baseURL, `/swap-usage/denoms/${chainIdentifier}`);
+    super(
+      sharedContext,
+      "https://satellite.keplr.app" ?? baseURL,
+      `/swap-usage/denoms/${chainIdentifier}`
+    );
 
     makeObservable(this);
   }

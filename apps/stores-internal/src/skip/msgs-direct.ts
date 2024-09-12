@@ -14,10 +14,12 @@ const Schema = Joi.object<MsgsDirectResponse>({
   msgs: Joi.array()
     .items(
       Joi.object({
-        chain_id: Joi.string().required(),
-        path: Joi.array().items(Joi.string()).required(),
-        msg: Joi.string().required(),
-        msg_type_url: Joi.string().required(),
+        multi_chain_msg: Joi.object({
+          chain_id: Joi.string().required(),
+          path: Joi.array().items(Joi.string()).required(),
+          msg: Joi.string().required(),
+          msg_type_url: Joi.string().required(),
+        }).unknown(true),
       }).unknown(true)
     )
     .required(),
@@ -37,12 +39,12 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
     public readonly slippageTolerancePercent: number,
     public readonly affiliateFeeBps: number,
     public readonly affiliateFeeReceiver: string,
-    public readonly swapVenue: {
+    public readonly swapVenues: {
       readonly name: string;
       readonly chainId: string;
-    }
+    }[]
   ) {
-    super(sharedContext, skipURL, "/v1/fungible/msgs_direct");
+    super(sharedContext, skipURL, "/v2/fungible/msgs_direct");
 
     makeObservable(this);
   }
@@ -80,20 +82,25 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
 
     const msg = this.response.data.msgs[0];
     if (
-      msg.msg_type_url !== "/ibc.applications.transfer.v1.MsgTransfer" &&
-      msg.msg_type_url !== "/cosmwasm.wasm.v1.MsgExecuteContract"
+      msg.multi_chain_msg.msg_type_url !==
+        "/ibc.applications.transfer.v1.MsgTransfer" &&
+      msg.multi_chain_msg.msg_type_url !==
+        "/cosmwasm.wasm.v1.MsgExecuteContract"
     ) {
       return;
     }
 
-    const chainMsg = JSON.parse(msg.msg);
-    if (msg.msg_type_url === "/cosmwasm.wasm.v1.MsgExecuteContract") {
+    const chainMsg = JSON.parse(msg.multi_chain_msg.msg);
+    if (
+      msg.multi_chain_msg.msg_type_url ===
+      "/cosmwasm.wasm.v1.MsgExecuteContract"
+    ) {
       return {
         type: "MsgExecuteContract",
         funds: chainMsg.funds.map((fund: { denom: string; amount: string }) => {
           return new CoinPretty(
             this.chainGetter
-              .getChain(msg.chain_id)
+              .getChain(msg.multi_chain_msg.chain_id)
               .forceFindCurrency(fund.denom),
             fund.amount
           );
@@ -102,9 +109,10 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
         msg: chainMsg.msg,
       };
     } else if (
-      msg.msg_type_url === "/ibc.applications.transfer.v1.MsgTransfer"
+      msg.multi_chain_msg.msg_type_url ===
+      "/ibc.applications.transfer.v1.MsgTransfer"
     ) {
-      if (msg.path.length < 2) {
+      if (msg.multi_chain_msg.path.length < 2) {
         return;
       }
 
@@ -113,11 +121,11 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
         receiver: chainMsg.receiver,
         sourcePort: chainMsg.source_port,
         sourceChannel: chainMsg.source_channel,
-        counterpartyChainId: msg.path[1],
+        counterpartyChainId: msg.multi_chain_msg.path[1],
         timeoutTimestamp: chainMsg.timeout_timestamp,
         token: new CoinPretty(
           this.chainGetter
-            .getChain(msg.chain_id)
+            .getChain(msg.multi_chain_msg.chain_id)
             .forceFindCurrency(chainMsg.token.denom),
           chainMsg.token.amount
         ),
@@ -200,10 +208,7 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
                   },
                 ]
               : [],
-          swap_venue: {
-            name: this.swapVenue.name,
-            chain_id: this.swapVenue.chainId,
-          },
+          swap_venues: this.swapVenues,
         }),
         signal: abortController.signal,
       }
@@ -239,10 +244,7 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
       slippageTolerancePercent: this.slippageTolerancePercent,
       affiliateFeeBps: this.affiliateFeeBps,
       affiliateFeeReceiver: this.affiliateFeeReceiver,
-      swap_venue: {
-        name: this.swapVenue.name,
-        chain_id: this.swapVenue.chainId,
-      },
+      swap_venues: this.swapVenues,
     })}`;
   }
 }
@@ -268,7 +270,7 @@ export class ObservableQueryMsgsDirect extends HasMapStore<ObservableQueryMsgsDi
         parsed.slippageTolerancePercent,
         parsed.affiliateFeeBps,
         parsed.affiliateFeeReceiver,
-        parsed.swapVenue
+        parsed.swapVenues
       );
     });
   }
@@ -282,10 +284,10 @@ export class ObservableQueryMsgsDirect extends HasMapStore<ObservableQueryMsgsDi
     slippageTolerancePercent: number,
     affiliateFeeBps: number,
     affiliateFeeReceiver: string,
-    swapVenue: {
+    swapVenues: {
       readonly name: string;
       readonly chainId: string;
-    }
+    }[]
   ): ObservableQueryMsgsDirectInner {
     const amountInCoin = amountIn.toCoin();
     const str = JSON.stringify({
@@ -298,7 +300,7 @@ export class ObservableQueryMsgsDirect extends HasMapStore<ObservableQueryMsgsDi
       slippageTolerancePercent,
       affiliateFeeBps,
       affiliateFeeReceiver,
-      swapVenue,
+      swapVenues,
     });
     return this.get(str);
   }
