@@ -150,6 +150,10 @@ export const ConnectKeystoneUSBScene: FunctionComponent<{
           origin: "Keplr Extension",
         });
         accounts = sdk.parseMultiAccounts(res.toUR());
+        accounts = {
+          ...accounts,
+          connectionType: "USB",
+        };
       } else {
         for (const path of DEFAULT_KEYSTONE_PATHS) {
           const res = await baseApp.getURAccount(
@@ -170,6 +174,7 @@ export const ConnectKeystoneUSBScene: FunctionComponent<{
             deviceId,
             masterFingerprint,
             keys,
+            connectionType: "USB",
           };
         }
       }
@@ -182,7 +187,6 @@ export const ConnectKeystoneUSBScene: FunctionComponent<{
         keystone: accounts,
         stepPrevious: stepPrevious + 1,
         stepTotal,
-        type: "usb",
       });
     } catch (e) {
       console.log(e);
