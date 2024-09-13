@@ -133,6 +133,9 @@
   "pages.register.connect-ledger.use-hid-confirm-paragraph": "Please enable ‘experimental web platform features’ to use Web HID",
 
   "pages.register.connect-keystone.title": "Please Connect Your Hardware Wallet",
+  "pages.register.connect-keystone.paragraph": "Please unlock your Keystone device and connect it to your computer via USB.",
+  "pages.register.connect-keystone.connect-keystone-step-paragraph": "Connect and unlock your Keystone.",
+  "pages.register.connect-keystone.fetch-address-paragraph": "Fetching addresses from your Keystone device.",
   "pages.register.connect-keystone.step-text": "Step {num}",
   "pages.register.connect-keystone.step-1": "Tap “<span>Connect Software Wallet</span>” at the bottom left corner on the Keystone device.",
   "pages.register.connect-keystone.step-2": "Select “<span>Keplr Wallet</span>”.",

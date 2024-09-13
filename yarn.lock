@@ -6538,7 +6538,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethereumjs/tx@npm:^3.5.2":
+"@ethereumjs/rlp@npm:^5.0.2":
+  version: 5.0.2
+  resolution: "@ethereumjs/rlp@npm:5.0.2"
+  bin:
+    rlp: bin/rlp.cjs
+  checksum: b569061ddb1f4cf56a82f7a677c735ba37f9e94e2bbaf567404beb9e2da7aa1f595e72fc12a17c61f7aec67fd5448443efe542967c685a2fe0ffc435793dcbab
+  languageName: node
+  linkType: hard
+
+"@ethereumjs/tx@npm:^3.3.2, @ethereumjs/tx@npm:^3.5.2":
   version: 3.5.2
   resolution: "@ethereumjs/tx@npm:3.5.2"
   dependencies:
@@ -6556,6 +6565,16 @@ __metadata:
     ethereum-cryptography: ^2.0.0
     micro-ftch: ^0.3.1
   checksum: 9ae5dee8f12b0faf81cd83f06a41560e79b0ba96a48262771d897a510ecae605eb6d84f687da001ab8ccffd50f612ae50f988ef76e6312c752897f462f3ac08d
+  languageName: node
+  linkType: hard
+
+"@ethereumjs/util@npm:^9.0.3":
+  version: 9.1.0
+  resolution: "@ethereumjs/util@npm:9.1.0"
+  dependencies:
+    "@ethereumjs/rlp": ^5.0.2
+    ethereum-cryptography: ^2.2.1
+  checksum: 594e009c3001ca1ca658b4ded01b38e72f5dd5dd76389efd90cb020de099176a3327685557df268161ac3144333cfe8abaae68cda8ae035d9cc82409d386d79a
   languageName: node
   linkType: hard
 
@@ -8755,6 +8774,9 @@ __metadata:
     "@keplr-wallet/types": 0.12.125
     "@keplr-wallet/unit": 0.12.125
     "@keystonehq/animated-qr": ^0.8.6
+    "@keystonehq/hw-app-base": 0.1.1
+    "@keystonehq/hw-app-eth": ^0.4.4
+    "@keystonehq/hw-transport-webusb": ^0.4.0-beta.0
     "@keystonehq/keystone-sdk": ^0.2.3
     "@ledgerhq/devices": ^6.20.0
     "@react-spring/web": ^9.6.1
@@ -9360,6 +9382,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@keystonehq/bc-ur-registry-eth@npm:^0.8.1-alpha.0":
+  version: 0.8.1-alpha.0
+  resolution: "@keystonehq/bc-ur-registry-eth@npm:0.8.1-alpha.0"
+  dependencies:
+    "@keystonehq/bc-ur-registry": ^0.5.0-alpha.4
+    ethereumjs-util: ^7.0.8
+    hdkey: ^2.0.1
+    uuid: ^8.3.2
+  checksum: e7bd081a17a3f5d688d49ef96a44025c2262dd80c31813857b659ab2879659b41f9e8830832047da052eaeedb10de27dd4f6dba64e378e6054f7611f04b876d8
+  languageName: node
+  linkType: hard
+
 "@keystonehq/bc-ur-registry-evm@npm:^0.5.2":
   version: 0.5.2
   resolution: "@keystonehq/bc-ur-registry-evm@npm:0.5.2"
@@ -9423,6 +9457,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@keystonehq/bc-ur-registry@npm:0.7.0":
+  version: 0.7.0
+  resolution: "@keystonehq/bc-ur-registry@npm:0.7.0"
+  dependencies:
+    "@ngraveio/bc-ur": ^1.1.5
+    bs58check: ^2.1.2
+    tslib: ^2.3.0
+  checksum: d6017e8fda67fc01e28aa1c047b20cce8f07b026f110a5771920879fbd658b845f529b054d1dce2fbabadcfd8da47a2160ab50c73f0bd56678aab4d83899ffcc
+  languageName: node
+  linkType: hard
+
 "@keystonehq/bc-ur-registry@npm:^0.4.4":
   version: 0.4.4
   resolution: "@keystonehq/bc-ur-registry@npm:0.4.4"
@@ -9434,7 +9479,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@keystonehq/bc-ur-registry@npm:^0.5.4, @keystonehq/bc-ur-registry@npm:^0.5.5":
+"@keystonehq/bc-ur-registry@npm:^0.5.0-alpha.4, @keystonehq/bc-ur-registry@npm:^0.5.4, @keystonehq/bc-ur-registry@npm:^0.5.5":
   version: 0.5.5
   resolution: "@keystonehq/bc-ur-registry@npm:0.5.5"
   dependencies:
@@ -9453,6 +9498,65 @@ __metadata:
     bs58check: ^2.1.2
     tslib: ^2.3.0
   checksum: ff4d936eefdc1a25e7383a9668f4dcdacebf7acdb293bc9c18357a30c60b31404e83c457510b07d2610badd435da6af5a3b8352081f863516f0cfb8e88ed3cc0
+  languageName: node
+  linkType: hard
+
+"@keystonehq/hw-app-base@npm:0.1.1":
+  version: 0.1.1
+  resolution: "@keystonehq/hw-app-base@npm:0.1.1"
+  dependencies:
+    "@keystonehq/bc-ur-registry": 0.7.0
+    "@keystonehq/hw-transport-error": ^0.0.2
+    "@keystonehq/hw-transport-webusb": ^0.4.0-beta.0
+    "@ngraveio/bc-ur": ^1.1.6
+    uuid: ^8.3.2
+  checksum: 8f8b51f473d8f0998e0124dd73cfa2c212952e1e814369137e4788e2985a2fdd0f1d84e48ddafd70132e60c06ef2276a3637324c265a40eae9369b8d525a0fe7
+  languageName: node
+  linkType: hard
+
+"@keystonehq/hw-app-eth@npm:^0.4.4":
+  version: 0.4.4
+  resolution: "@keystonehq/hw-app-eth@npm:0.4.4"
+  dependencies:
+    "@ethereumjs/tx": ^3.3.2
+    "@ethereumjs/util": ^9.0.3
+    "@keystonehq/bc-ur-registry": 0.7.0
+    "@keystonehq/bc-ur-registry-eth": ^0.8.1-alpha.0
+    "@keystonehq/hw-transport-error": ^0.0.2
+    "@keystonehq/hw-transport-webusb": ^0.3.2
+    "@ngraveio/bc-ur": ^1.1.6
+    buffer: ^6.0.3
+    elliptic: ^6.5.7
+    rlp: ^2.2.6
+    uuid: ^8.3.2
+  checksum: c795021dc05bcc70c082f260ca7bc1d98c4bcf6711796f5afd50fb674cbcdf89c78151ebbd1ff9807175ecff8908e7c6a8ec5fe20d82769fae91464dce2f28d0
+  languageName: node
+  linkType: hard
+
+"@keystonehq/hw-transport-error@npm:^0.0.2":
+  version: 0.0.2
+  resolution: "@keystonehq/hw-transport-error@npm:0.0.2"
+  checksum: 681c3344fdd5e59b63ee522a4539fff926c0c050dc645070dfaa4ac73b5c913312667aa491ec2174252e553d83f4c7e90e2dad2a80e9cbcdb4fa40e86565ccf2
+  languageName: node
+  linkType: hard
+
+"@keystonehq/hw-transport-webusb@npm:^0.3.2":
+  version: 0.3.3
+  resolution: "@keystonehq/hw-transport-webusb@npm:0.3.3"
+  dependencies:
+    "@keystonehq/hw-transport-error": ^0.0.2
+    buffer: ^6.0.3
+  checksum: 2212d50cb5d6b59c41ab8797688af149a309adfc17f3010beab1f976f47aa3a36770049513c31854b34b683e54a8b40521f674bb676f02a5624f6f15404f21df
+  languageName: node
+  linkType: hard
+
+"@keystonehq/hw-transport-webusb@npm:^0.4.0-beta.0":
+  version: 0.4.0-beta.0
+  resolution: "@keystonehq/hw-transport-webusb@npm:0.4.0-beta.0"
+  dependencies:
+    "@keystonehq/hw-transport-error": ^0.0.2
+    buffer: ^6.0.3
+  checksum: 70c85917bb234ae6bd420ecb0744647ca8358f67b1eb043814f45567a0eb1b73ac6c8699cbdc877ad77f9d0a70d8ec5859b73aa4bfdfff8b29fad7dee2fce216
   languageName: node
   linkType: hard
 
@@ -10510,6 +10614,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/curves@npm:1.4.2, @noble/curves@npm:~1.4.0":
+  version: 1.4.2
+  resolution: "@noble/curves@npm:1.4.2"
+  dependencies:
+    "@noble/hashes": 1.4.0
+  checksum: c475a83c4263e2c970eaba728895b9b5d67e0ca880651e9c6e3efdc5f6a4f07ceb5b043bf71c399fc80fada0b8706e69d0772bffdd7b9de2483b988973a34cba
+  languageName: node
+  linkType: hard
+
 "@noble/hashes@npm:1.0.0":
   version: 1.0.0
   resolution: "@noble/hashes@npm:1.0.0"
@@ -10521,6 +10634,13 @@ __metadata:
   version: 1.3.0
   resolution: "@noble/hashes@npm:1.3.0"
   checksum: d7ddb6d7c60f1ce1f87facbbef5b724cdea536fc9e7f59ae96e0fc9de96c8f1a2ae2bdedbce10f7dcc621338dfef8533daa73c873f2b5c87fa1a4e05a95c2e2e
+  languageName: node
+  linkType: hard
+
+"@noble/hashes@npm:1.4.0, @noble/hashes@npm:~1.4.0":
+  version: 1.4.0
+  resolution: "@noble/hashes@npm:1.4.0"
+  checksum: 8ba816ae26c90764b8c42493eea383716396096c5f7ba6bea559993194f49d80a73c081f315f4c367e51bd2d5891700bcdfa816b421d24ab45b41cb03e4f3342
   languageName: node
   linkType: hard
 
@@ -12501,6 +12621,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@scure/base@npm:~1.1.6":
+  version: 1.1.8
+  resolution: "@scure/base@npm:1.1.8"
+  checksum: 1fc8a355ba68663c0eb430cf6a2c5ff5af790c347c1ba1953f344e8681ab37e37e2545e495f7f971b0245727d710fea8c1e57d232d0c6c543cbed4965c7596a1
+  languageName: node
+  linkType: hard
+
 "@scure/bip32@npm:1.3.0":
   version: 1.3.0
   resolution: "@scure/bip32@npm:1.3.0"
@@ -12512,6 +12639,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@scure/bip32@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@scure/bip32@npm:1.4.0"
+  dependencies:
+    "@noble/curves": ~1.4.0
+    "@noble/hashes": ~1.4.0
+    "@scure/base": ~1.1.6
+  checksum: eff491651cbf2bea8784936de75af5fc020fc1bbb9bcb26b2cfeefbd1fb2440ebfaf30c0733ca11c0ae1e272a2ef4c3c34ba5c9fb3e1091c3285a4272045b0c6
+  languageName: node
+  linkType: hard
+
 "@scure/bip39@npm:1.2.0":
   version: 1.2.0
   resolution: "@scure/bip39@npm:1.2.0"
@@ -12519,6 +12657,16 @@ __metadata:
     "@noble/hashes": ~1.3.0
     "@scure/base": ~1.1.0
   checksum: 980d761f53e63de04a9e4db840eb13bfb1bd1b664ecb04a71824c12c190f4972fd84146f3ed89b2a8e4c6bd2c17c15f8b592b7ac029e903323b0f9e2dae6916b
+  languageName: node
+  linkType: hard
+
+"@scure/bip39@npm:1.3.0":
+  version: 1.3.0
+  resolution: "@scure/bip39@npm:1.3.0"
+  dependencies:
+    "@noble/hashes": ~1.4.0
+    "@scure/base": ~1.1.6
+  checksum: dbb0b27df753eb6c6380010b25cc9a9ea31f9cb08864fc51e69e5880ff7e2b8f85b72caea1f1f28af165e83b72c48dd38617e43fc632779d025b50ba32ea759e
   languageName: node
   linkType: hard
 
@@ -22053,6 +22201,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"elliptic@npm:^6.5.7":
+  version: 6.5.7
+  resolution: "elliptic@npm:6.5.7"
+  dependencies:
+    bn.js: ^4.11.9
+    brorand: ^1.1.0
+    hash.js: ^1.0.0
+    hmac-drbg: ^1.0.1
+    inherits: ^2.0.4
+    minimalistic-assert: ^1.0.1
+    minimalistic-crypto-utils: ^1.0.1
+  checksum: af0ffddffdbc2fea4eeec74388cd73e62ed5a0eac6711568fb28071566319785df529c968b0bf1250ba4bc628e074b2d64c54a633e034aa6f0c6b152ceb49ab8
+  languageName: node
+  linkType: hard
+
 "emittery@npm:^0.13.1":
   version: 0.13.1
   resolution: "emittery@npm:0.13.1"
@@ -23396,6 +23559,18 @@ __metadata:
     "@scure/bip32": 1.3.0
     "@scure/bip39": 1.2.0
   checksum: 958f8aab2d1b32aa759fb27a27877b3647410e8bb9aca7d65d1d477db4864cf7fc46b918eb52a1e246c25e98ee0a35a632c88b496aeaefa13469ee767a76c8db
+  languageName: node
+  linkType: hard
+
+"ethereum-cryptography@npm:^2.2.1":
+  version: 2.2.1
+  resolution: "ethereum-cryptography@npm:2.2.1"
+  dependencies:
+    "@noble/curves": 1.4.2
+    "@noble/hashes": 1.4.0
+    "@scure/bip32": 1.4.0
+    "@scure/bip39": 1.3.0
+  checksum: 1466e4c417b315a6ac67f95088b769fafac8902b495aada3c6375d827e5a7882f9e0eea5f5451600d2250283d9198b8a3d4d996e374e07a80a324e29136f25c6
   languageName: node
   linkType: hard
 
@@ -38446,6 +38621,17 @@ __metadata:
   bin:
     rlp: bin/rlp
   checksum: 2601225df0fe7aa3b497b33a12fd9fbaf8fb1d2989ecc5c091918ed93ee77d1c3fab20ddd3891a9ca66a8ba66d993e6079be6fb31f450fcf38ba30873102ca46
+  languageName: node
+  linkType: hard
+
+"rlp@npm:^2.2.6":
+  version: 2.2.7
+  resolution: "rlp@npm:2.2.7"
+  dependencies:
+    bn.js: ^5.2.0
+  bin:
+    rlp: bin/rlp
+  checksum: 3db4dfe5c793f40ac7e0be689a1f75d05e6f2ca0c66189aeb62adab8c436b857ab4420a419251ee60370d41d957a55698fc5e23ab1e1b41715f33217bc4bb558
   languageName: node
   linkType: hard
 
