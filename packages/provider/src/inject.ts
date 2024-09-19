@@ -970,10 +970,10 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     }
   }
 
-  protected async _requestMethod(
+  protected _requestMethod = async (
     method: keyof IEthereumProvider,
     args: Record<string, any>
-  ): Promise<any> {
+  ): Promise<any> => {
     const bytes = new Uint8Array(8);
     const id: string = Array.from(crypto.getRandomValues(bytes))
       .map((value) => {
@@ -1033,9 +1033,9 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
 
       this.eventListener.postMessage(proxyMessage);
     });
-  }
+  };
 
-  protected async _initProviderState() {
+  protected _initProviderState = async () => {
     const initialProviderState = await this._requestMethod("request", {
       method: "keplr_initProviderState",
     });
@@ -1055,9 +1055,9 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         this._handleAccountsChanged(selectedAddress);
       }
     }
-  }
+  };
 
-  protected async _handleConnect(evmChainId: number) {
+  protected _handleConnect = async (evmChainId: number) => {
     if (!this._isConnected) {
       this._isConnected = true;
 
@@ -1065,9 +1065,9 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
 
       this.emit("connect", { chainId: evmChainIdHexString });
     }
-  }
+  };
 
-  protected async _handleDisconnect() {
+  protected _handleDisconnect = async () => {
     if (this._isConnected) {
       await this._requestMethod("request", {
         method: "keplr_disconnect",
@@ -1080,9 +1080,9 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
 
       this.emit("disconnect");
     }
-  }
+  };
 
-  protected async _handleChainChanged(evmChainId: number) {
+  protected _handleChainChanged = async (evmChainId: number) => {
     const evmChainIdHexString = `0x${evmChainId.toString(16)}`;
     if (evmChainIdHexString !== this.chainId) {
       this.chainId = evmChainIdHexString;
@@ -1090,21 +1090,21 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
 
       this.emit("chainChanged", evmChainIdHexString);
     }
-  }
+  };
 
-  protected async _handleAccountsChanged(selectedAddress: string) {
+  protected _handleAccountsChanged = async (selectedAddress: string) => {
     if (this.selectedAddress !== selectedAddress) {
       this.selectedAddress = selectedAddress;
 
       this.emit("accountsChanged", [selectedAddress]);
     }
-  }
+  };
 
   isConnected(): boolean {
     return this._isConnected;
   }
 
-  async request<T = unknown>({
+  request = async <T = unknown>({
     method,
     params,
     chainId,
@@ -1112,7 +1112,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     method: string;
     params?: readonly unknown[] | Record<string, unknown>;
     chainId?: string;
-  }): Promise<T> {
+  }): Promise<T> => {
     if (typeof method !== "string") {
       throw new Error("Invalid paramater: `method` must be a string");
     }
@@ -1131,17 +1131,17 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
       providerId: this.eip6963ProviderInfo?.uuid,
       chainId,
     });
-  }
+  };
 
-  async enable(): Promise<string[]> {
+  enable = async (): Promise<string[]> => {
     return (await this.request({
       method: "eth_requestAccounts",
     })) as string[];
-  }
+  };
 
-  async net_version(): Promise<string> {
+  net_version = async (): Promise<string> => {
     return (await this.request({
       method: "net_version",
     })) as string;
-  }
+  };
 }
