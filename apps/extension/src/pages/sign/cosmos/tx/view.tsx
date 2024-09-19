@@ -340,6 +340,7 @@ export const CosmosTxView: FunctionComponent<{
   >(undefined);
 
   const isKeystonUSB =
+    interactionData.data.keyType === "keystone" &&
     interactionData.data.keyInsensitive["connectionType"] === "USB";
 
   const [isKeystoneInteracting, setIsKeystoneInteracting] = useState(false);
