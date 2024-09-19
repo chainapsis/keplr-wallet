@@ -29,7 +29,11 @@ import { Buffer } from "buffer/";
 import { ProposalTypes, SessionTypes } from "@walletconnect/types";
 import Long from "long";
 import EventEmitter from "events";
-import { Call, InvocationsSignerDetails } from "starknet";
+import {
+  Call,
+  DeployAccountSignerDetails,
+  InvocationsSignerDetails,
+} from "starknet";
 
 interface RequestParams {
   topic: string;
@@ -860,9 +864,7 @@ export class KeplrWalletConnectV2 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  getStarknetKey(
-    _chainId: string
-  ): Promise<{
+  getStarknetKey(_chainId: string): Promise<{
     name: string;
     hexAddress: string;
     pubKey: Uint8Array;
@@ -884,6 +886,16 @@ export class KeplrWalletConnectV2 implements Keplr {
   signStarknetTx(): Promise<{
     transactions: Call[];
     details: InvocationsSignerDetails;
+    signature: string[];
+  }> {
+    throw new Error("Not yet implemented");
+  }
+
+  signStarknetDeployAccountTransaction(
+    _chainId: string,
+    _transaction: DeployAccountSignerDetails
+  ): Promise<{
+    transaction: DeployAccountSignerDetails;
     signature: string[];
   }> {
     throw new Error("Not yet implemented");

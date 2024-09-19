@@ -3,6 +3,7 @@ import { DeepReadonly } from "utility-types";
 import { ObservableQueryStarknetERC20Balance } from "./erc20-balance";
 import { ObservableQueryStarknetERC20ContractInfo } from "./erc20-contract-info";
 import { ObservableQueryTokenContracts } from "./token-contracts";
+import { ObservableQueryAccountNonce } from "./account-nonce";
 
 export class StarknetQueriesStore {
   protected map: Map<string, StarknetQueriesStoreImpl> = new Map();
@@ -37,6 +38,8 @@ class StarknetQueriesStoreImpl {
 
   public readonly queryTokenContracts: DeepReadonly<ObservableQueryTokenContracts>;
 
+  public readonly queryAccountNonce: DeepReadonly<ObservableQueryAccountNonce>;
+
   constructor(
     protected readonly sharedContext: QuerySharedContext,
     protected readonly chainId: string,
@@ -58,6 +61,12 @@ class StarknetQueriesStoreImpl {
       sharedContext,
       chainId,
       tokenContractListURL
+    );
+
+    this.queryAccountNonce = new ObservableQueryAccountNonce(
+      sharedContext,
+      chainId,
+      chainGetter
     );
   }
 }

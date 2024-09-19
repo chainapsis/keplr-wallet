@@ -112,21 +112,59 @@ export class KeyRingStarknetService {
     }
     const pubKey = await this.keyRingService.getPubKey(chainId, vaultId);
 
+    const salt = Buffer.from("11", "hex");
+    const classHash = Buffer.from(
+      "02203673e728fa07de1c2ea60405399ffefaf875f1b7ae54e747659e1e216d94",
+      "hex"
+    );
     // TODO: salt를 어떻게 할지 생각한다...
     //       class hash의 경우도 생각해야함...
-    const address = pubKey.getStarknetAddress(
-      Buffer.from("11", "hex"),
-      Buffer.from(
-        "02203673e728fa07de1c2ea60405399ffefaf875f1b7ae54e747659e1e216d94",
-        "hex"
-      )
-    );
+    const address = pubKey.getStarknetAddress(salt, classHash);
 
     return {
       name: this.keyRingService.getKeyRingName(vaultId),
       hexAddress: `0x${Buffer.from(address).toString("hex")}`,
       pubKey: pubKey.toBytes(),
       address,
+    };
+  }
+
+  async getStarknetKeyParams(chainId: string): Promise<{
+    pubKey: Uint8Array;
+    address: Uint8Array;
+    salt: Uint8Array;
+    classHash: Uint8Array;
+    xLow: Uint8Array;
+    xHigh: Uint8Array;
+    yLow: Uint8Array;
+    yHigh: Uint8Array;
+  }> {
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+    if (!("starknet" in chainInfo)) {
+      throw new Error("Chain is not a starknet chain");
+    }
+    const vaultId = this.keyRingService.selectedVaultId;
+    const pubKey = await this.keyRingService.getPubKey(chainId, vaultId);
+
+    const salt = Buffer.from("11", "hex");
+    const classHash = Buffer.from(
+      "02203673e728fa07de1c2ea60405399ffefaf875f1b7ae54e747659e1e216d94",
+      "hex"
+    );
+    // TODO: salt를 어떻게 할지 생각한다...
+    //       class hash의 경우도 생각해야함...
+    const address = pubKey.getStarknetAddress(salt, classHash);
+    const addressParams = pubKey.getStarknetAddressParams();
+
+    return {
+      pubKey: pubKey.toBytes(),
+      address,
+      salt,
+      classHash,
+      xLow: addressParams.xLow,
+      xHigh: addressParams.xHigh,
+      yLow: addressParams.yLow,
+      yHigh: addressParams.yHigh,
     };
   }
 
@@ -483,7 +521,10 @@ export class KeyRingStarknetService {
     origin: string,
     chainId: string,
     details: DeployAccountSignerDetails
-  ): Promise<string[]> {
+  ): Promise<{
+    transaction: DeployAccountSignerDetails;
+    signature: string[];
+  }> {
     return await this.signStarknetDeployAccountTransaction(
       env,
       origin,
@@ -499,7 +540,10 @@ export class KeyRingStarknetService {
     vaultId: string,
     chainId: string,
     details: DeployAccountSignerDetails
-  ): Promise<string[]> {
+  ): Promise<{
+    transaction: DeployAccountSignerDetails;
+    signature: string[];
+  }> {
     // TODO: tx에서 signer와 실제 계정 / chain id에 대해서 validation 넣기
 
     const compiledConstructorCalldata = CallData.compile(
@@ -544,7 +588,10 @@ export class KeyRingStarknetService {
       Buffer.from(msgHash, "hex"),
       "noop"
     );
-    return this.formatEthSignature(sig);
+    return {
+      transaction: details,
+      signature: this.formatEthSignature(sig),
+    };
   }
 
   async signStarknetDeclareTransactionSelected(
@@ -672,12 +719,14 @@ class SignerInterfaceImpl extends SignerInterface {
   async signDeployAccountTransaction(
     transaction: DeployAccountSignerDetails
   ): Promise<Signature> {
-    return await this.service.signStarknetDeployAccountTransactionSelected(
-      this.env,
-      this.origin,
-      this.getChainId(),
-      transaction
-    );
+    return (
+      await this.service.signStarknetDeployAccountTransactionSelected(
+        this.env,
+        this.origin,
+        this.getChainId(),
+        transaction
+      )
+    ).signature;
   }
 
   async signMessage(

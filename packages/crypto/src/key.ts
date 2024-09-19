@@ -118,6 +118,21 @@ export class PubKeySecp256k1 {
     return new Uint8Array(Buffer.from(calculated, "hex"));
   }
 
+  getStarknetAddressParams(): {
+    readonly xLow: Uint8Array;
+    readonly xHigh: Uint8Array;
+    readonly yLow: Uint8Array;
+    readonly yHigh: Uint8Array;
+  } {
+    const pubBytes = this.toBytes(true).slice(1);
+    return {
+      xLow: pubBytes.slice(16, 32),
+      xHigh: pubBytes.slice(0, 16),
+      yLow: pubBytes.slice(48, 64),
+      yHigh: pubBytes.slice(32, 48),
+    };
+  }
+
   verifyDigest32(digest: Uint8Array, signature: Uint8Array): boolean {
     if (digest.length !== 32) {
       throw new Error(`Invalid length of digest to verify: ${digest.length}`);

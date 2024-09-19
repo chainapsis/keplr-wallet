@@ -55,6 +55,7 @@ export const SignStarknetTxView: FunctionComponent<{
 
   const senderConfig = useSenderConfig(
     chainStore,
+    starknetQueriesStore,
     chainId,
     interactionData.data.signer
   );

@@ -33,7 +33,11 @@ import { KeplrEnigmaUtils } from "./enigma";
 import { BUILD_VERSION } from "./version";
 import EventEmitter from "events";
 import { KeplrLogoBase64 } from "./constants";
-import { Call, InvocationsSignerDetails } from "starknet";
+import {
+  Call,
+  DeployAccountSignerDetails,
+  InvocationsSignerDetails,
+} from "starknet";
 
 export interface ProxyRequest {
   type: "proxy-request";
@@ -596,6 +600,19 @@ export class Keplr implements IKeplr {
       chainId,
       transactions,
       details,
+    ]);
+  }
+
+  async signStarknetDeployAccountTransaction(
+    chainId: string,
+    transaction: DeployAccountSignerDetails
+  ): Promise<{
+    transaction: DeployAccountSignerDetails;
+    signature: string[];
+  }> {
+    return await Keplr.requestMethod("signStarknetDeployAccountTransaction", [
+      chainId,
+      transaction,
     ]);
   }
 

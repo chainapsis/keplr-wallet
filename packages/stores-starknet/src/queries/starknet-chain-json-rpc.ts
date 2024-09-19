@@ -26,10 +26,7 @@ export class ObservableStarknetChainJsonRpcQuery<
       url = modularChainInfo.starknet.rpc;
     }
 
-    super(sharedContext, url, "", method, {
-      request: params,
-      block_id: "latest",
-    });
+    super(sharedContext, url, "", method, { block_id: "latest", ...params });
 
     this._chainId = chainId;
     this.chainGetter = chainGetter;

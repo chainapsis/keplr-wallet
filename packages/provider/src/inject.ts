@@ -43,6 +43,7 @@ import EventEmitter from "events";
 import {
   AccountInterface,
   Call,
+  DeployAccountSignerDetails,
   InvocationsSignerDetails,
   ProviderInterface,
 } from "starknet";
@@ -991,6 +992,19 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
       chainId,
       transactions,
       details,
+    ]);
+  }
+
+  async signStarknetDeployAccountTransaction(
+    chainId: string,
+    transaction: DeployAccountSignerDetails
+  ): Promise<{
+    transaction: DeployAccountSignerDetails;
+    signature: string[];
+  }> {
+    return await this.requestMethod("signStarknetDeployAccountTransaction", [
+      chainId,
+      transaction,
     ]);
   }
 

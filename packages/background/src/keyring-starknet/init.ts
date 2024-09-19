@@ -4,8 +4,10 @@ import {
   GetStarknetKeyMsg,
   GetStarknetKeysSettledMsg,
   RequestSignStarknetTx,
+  RequestSignStarknetDeployAccountTx,
   RequestJsonRpcToStarknetMsg,
   GetStarknetKeysForEachVaultSettledMsg,
+  GetStarknetKeyParamsMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -19,8 +21,10 @@ export function init(
   router.registerMessage(GetStarknetKeyMsg);
   router.registerMessage(GetStarknetKeysSettledMsg);
   router.registerMessage(RequestSignStarknetTx);
+  router.registerMessage(RequestSignStarknetDeployAccountTx);
   router.registerMessage(RequestJsonRpcToStarknetMsg);
   router.registerMessage(GetStarknetKeysForEachVaultSettledMsg);
+  router.registerMessage(GetStarknetKeyParamsMsg);
 
   router.addHandler(ROUTE, getHandler(service, permissionInteractionService));
 }

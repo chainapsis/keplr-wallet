@@ -1,3 +1,11 @@
+export class AccountNotDeployed extends Error {
+  constructor(m: string) {
+    super(m);
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, AccountNotDeployed.prototype);
+  }
+}
+
 export class EmptyAddressError extends Error {
   constructor(m: string) {
     super(m);

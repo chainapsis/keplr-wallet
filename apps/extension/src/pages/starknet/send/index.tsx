@@ -40,6 +40,7 @@ import { num } from "starknet";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { AddRecentSendHistoryMsg } from "@keplr-wallet/background";
+import { AddressGenWarning } from "../components/address-gen-warning";
 
 const Styles = {
   Flex1: styled.div`
@@ -461,6 +462,12 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
             feeConfig={sendConfigs.feeConfig}
             gasConfig={sendConfigs.gasConfig}
             gasSimulator={gasSimulator}
+          />
+
+          <Gutter size="0" />
+          <AddressGenWarning
+            upperGutter="0.75rem"
+            senderConfig={sendConfigs.senderConfig}
           />
         </Stack>
       </Box>

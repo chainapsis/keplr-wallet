@@ -10,6 +10,10 @@ import {
   stark,
   InvocationsSignerDetails,
   transaction,
+  DeployAccountContractPayload,
+  DeployContractResponse,
+  CallData,
+  hash as starknetHash,
 } from "starknet";
 import { Keplr } from "@keplr-wallet/types";
 
@@ -21,6 +25,73 @@ export class StoreAccount extends Account {
     protected readonly getKeplr: () => Promise<Keplr | undefined>
   ) {
     super({ nodeUrl: rpc }, address, "", "1");
+  }
+
+  public override async deployAccount(
+    {
+      classHash,
+      constructorCalldata = [],
+      addressSalt = 0,
+      contractAddress: providedContractAddress,
+    }: DeployAccountContractPayload,
+    details: UniversalDetails = {}
+  ): Promise<DeployContractResponse> {
+    const version = details.version;
+    if (version !== "0x1" && version !== "0x3") {
+      throw new Error(`Invalid version: ${version}`);
+    }
+    const nonce = 0; // DEPLOY_ACCOUNT transaction will have a nonce zero as it is the first transaction in the account
+    const chainId = await this.getChainId();
+
+    const compiledCalldata = CallData.compile(constructorCalldata);
+    const contractAddress =
+      providedContractAddress ??
+      starknetHash.calculateContractAddressFromHash(
+        addressSalt,
+        classHash,
+        compiledCalldata,
+        0
+      );
+
+    const estimate = await this.getUniversalSuggestedFee(
+      version,
+      {
+        type: TransactionType.DEPLOY_ACCOUNT,
+        payload: {
+          classHash,
+          constructorCalldata: compiledCalldata,
+          addressSalt,
+          contractAddress,
+        },
+      },
+      details
+    );
+
+    const keplr = await this.getKeplr();
+    if (!keplr) {
+      throw new Error("Keplr is not initialized");
+    }
+    const { transaction: newTransaction, signature } =
+      await keplr.signStarknetDeployAccountTransaction(this.keplrChainId, {
+        ...stark.v3Details(details),
+        classHash,
+        constructorCalldata: compiledCalldata,
+        contractAddress,
+        addressSalt,
+        chainId,
+        resourceBounds: estimate.resourceBounds,
+        maxFee: estimate.maxFee,
+        version,
+        nonce,
+      });
+
+    return this.deployAccountContract(
+      { classHash, addressSalt, constructorCalldata, signature },
+      {
+        ...stark.v3Details(newTransaction),
+        ...newTransaction,
+      }
+    );
   }
 
   public override async execute(

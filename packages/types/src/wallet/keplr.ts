@@ -15,7 +15,11 @@ import { SettledResponses } from "../settled";
 import { DirectAuxSignResponse } from "../cosmjs-alt";
 import { IEthereumProvider } from "./ethereum";
 import { IStarknetProvider } from "./starknet";
-import { Call, InvocationsSignerDetails } from "starknet";
+import {
+  Call,
+  DeployAccountSignerDetails,
+  InvocationsSignerDetails,
+} from "starknet";
 
 export interface Key {
   // Name of the selected key store.
@@ -258,6 +262,13 @@ export interface Keplr {
       address: Uint8Array;
     }>
   >;
+  signStarknetDeployAccountTransaction(
+    chainId: string,
+    transaction: DeployAccountSignerDetails
+  ): Promise<{
+    transaction: DeployAccountSignerDetails;
+    signature: string[];
+  }>;
   signStarknetTx(
     chainId: string,
     transactions: Call[],

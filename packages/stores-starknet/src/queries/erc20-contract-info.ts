@@ -17,11 +17,13 @@ export class ObservableQueryStarknetERC20MetadataSymbol extends ObservableStarkn
     protected contractAddress: string
   ) {
     super(sharedContext, chainId, chainGetter, "starknet_call", {
-      contract_address: contractAddress,
-      calldata: [],
-      // selector.getSelectorFromName("symbol"),
-      entry_point_selector:
-        "0x216b05c387bab9ac31918a3e61672f4618601f3c598a2f3f2710f37053e1ea4",
+      request: {
+        contract_address: contractAddress,
+        calldata: [],
+        // selector.getSelectorFromName("symbol"),
+        entry_point_selector:
+          "0x216b05c387bab9ac31918a3e61672f4618601f3c598a2f3f2710f37053e1ea4",
+      },
     });
 
     makeObservable(this);
@@ -56,11 +58,13 @@ export class ObservableQueryStarknetERC20MetadataDecimals extends ObservableStar
     protected contractAddress: string
   ) {
     super(sharedContext, chainId, chainGetter, "starknet_call", {
-      contract_address: contractAddress,
-      calldata: [],
-      // selector.getSelectorFromName("decimals"),
-      entry_point_selector:
-        "0x4c4fb1ab068f6039d5780c68dd0fa2f8742cceb3426d19667778ca7f3518a9",
+      request: {
+        contract_address: contractAddress,
+        calldata: [],
+        // selector.getSelectorFromName("decimals"),
+        entry_point_selector:
+          "0x4c4fb1ab068f6039d5780c68dd0fa2f8742cceb3426d19667778ca7f3518a9",
+      },
     });
 
     makeObservable(this);

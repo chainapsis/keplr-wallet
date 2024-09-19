@@ -23,11 +23,13 @@ export class ObservableQueryStarknetERC20BalanceImpl
     protected readonly contractAddress: string
   ) {
     super(sharedContext, chainId, chainGetter, "starknet_call", {
-      contract_address: contractAddress,
-      calldata: [starknetHexAddress],
-      // selector.getSelectorFromName("balanceOf")
-      entry_point_selector:
-        "0x2e4263afad30923c891518314c3c95dbe830a16874e8abc5777a9a20b54c76e",
+      request: {
+        contract_address: contractAddress,
+        calldata: [starknetHexAddress],
+        // selector.getSelectorFromName("balanceOf")
+        entry_point_selector:
+          "0x2e4263afad30923c891518314c3c95dbe830a16874e8abc5777a9a20b54c76e",
+      },
     });
 
     makeObservable(this);

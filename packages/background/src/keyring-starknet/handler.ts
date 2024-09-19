@@ -9,8 +9,10 @@ import {
   GetStarknetKeyMsg,
   GetStarknetKeysSettledMsg,
   RequestSignStarknetTx,
+  RequestSignStarknetDeployAccountTx,
   RequestJsonRpcToStarknetMsg,
   GetStarknetKeysForEachVaultSettledMsg,
+  GetStarknetKeyParamsMsg,
 } from "./messages";
 import { KeyRingStarknetService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
@@ -39,6 +41,11 @@ export const getHandler: (
           service,
           permissionInteractionService
         )(env, msg as RequestSignStarknetTx);
+      case RequestSignStarknetDeployAccountTx:
+        return handleRequestSignStarknetDeployAccountTx(
+          service,
+          permissionInteractionService
+        )(env, msg as RequestSignStarknetDeployAccountTx);
       case RequestJsonRpcToStarknetMsg:
         return handleRequestJsonRpcToStarknetMsg(
           service,
@@ -48,6 +55,11 @@ export const getHandler: (
         return handleGetStarknetKeysForEachVaultSettledMsg(service)(
           env,
           msg as GetStarknetKeysForEachVaultSettledMsg
+        );
+      case GetStarknetKeyParamsMsg:
+        return handleGetStarknetKeyParamsMsg(service)(
+          env,
+          msg as GetStarknetKeyParamsMsg
         );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
@@ -115,6 +127,28 @@ const handleRequestSignStarknetTx: (
   };
 };
 
+const handleRequestSignStarknetDeployAccountTx: (
+  service: KeyRingStarknetService,
+  permissionInteractionService: PermissionInteractiveService
+) => InternalHandler<RequestSignStarknetDeployAccountTx> = (
+  service,
+  permissionInteractionService
+) => {
+  return async (env, msg) => {
+    await permissionInteractionService.ensureEnabledForStarknet(
+      env,
+      msg.origin
+    );
+
+    return await service.signStarknetDeployAccountTransactionSelected(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.transaction
+    );
+  };
+};
+
 const handleRequestJsonRpcToStarknetMsg: (
   service: KeyRingStarknetService,
   permissionInteractionService: PermissionInteractiveService
@@ -155,5 +189,13 @@ const handleGetStarknetKeysForEachVaultSettledMsg: (
         })()
       )
     );
+  };
+};
+
+const handleGetStarknetKeyParamsMsg: (
+  service: KeyRingStarknetService
+) => InternalHandler<GetStarknetKeyParamsMsg> = (service) => {
+  return async (_, msg) => {
+    return await service.getStarknetKeyParams(msg.chainId);
   };
 };

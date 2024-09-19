@@ -40,6 +40,7 @@ import EventEmitter from "events";
 import {
   AccountInterface,
   Call,
+  DeployAccountSignerDetails,
   InvocationsSignerDetails,
   ProviderInterface,
 } from "starknet";
@@ -1073,6 +1074,37 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
           this.protectedTryOpenSidePanelIfEnabled();
         }
       }, 100);
+    });
+  }
+
+  async signStarknetDeployAccountTransaction(
+    chainId: string,
+    transaction: DeployAccountSignerDetails
+  ): Promise<{
+    transaction: DeployAccountSignerDetails;
+    signature: string[];
+  }> {
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-starknet",
+        "request-sign-starknet-deploy-account-tx",
+        {
+          chainId,
+          transaction,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      });
     });
   }
 

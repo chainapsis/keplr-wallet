@@ -15,7 +15,12 @@ export const useSendTxConfig = (
   sender: string,
   initialGas: number
 ) => {
-  const senderConfig = useSenderConfig(chainGetter, chainId, sender);
+  const senderConfig = useSenderConfig(
+    chainGetter,
+    starknetQueriesStore,
+    chainId,
+    sender
+  );
 
   const amountConfig = useAmountConfig(
     chainGetter,

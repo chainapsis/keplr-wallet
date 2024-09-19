@@ -1,7 +1,11 @@
 import { Message } from "@keplr-wallet/router";
 import { SettledResponses } from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
-import { Call, InvocationsSignerDetails } from "starknet";
+import {
+  Call,
+  DeployAccountSignerDetails,
+  InvocationsSignerDetails,
+} from "starknet";
 
 export class GetStarknetKeyMsg extends Message<{
   hexAddress: string;
@@ -123,6 +127,44 @@ export class RequestSignStarknetTx extends Message<{
   }
 }
 
+export class RequestSignStarknetDeployAccountTx extends Message<{
+  transaction: DeployAccountSignerDetails;
+  signature: string[];
+}> {
+  public static type() {
+    return "request-sign-starknet-deploy-account-tx";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly transaction: DeployAccountSignerDetails
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chainId is not set");
+    }
+
+    if (!this.transaction) {
+      throw new Error("transaction is not set");
+    }
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestSignStarknetDeployAccountTx.type();
+  }
+}
+
 export class RequestJsonRpcToStarknetMsg extends Message<void> {
   public static type() {
     return "request-json-rpc-to-starknet";
@@ -200,5 +242,38 @@ export class GetStarknetKeysForEachVaultSettledMsg extends Message<
 
   type(): string {
     return GetStarknetKeysForEachVaultSettledMsg.type();
+  }
+}
+
+export class GetStarknetKeyParamsMsg extends Message<{
+  pubKey: Uint8Array;
+  address: Uint8Array;
+  salt: Uint8Array;
+  classHash: Uint8Array;
+  xLow: Uint8Array;
+  xHigh: Uint8Array;
+  yLow: Uint8Array;
+  yHigh: Uint8Array;
+}> {
+  public static type() {
+    return "get-starknet-key-params";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chainId is not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetStarknetKeyParamsMsg.type();
   }
 }
