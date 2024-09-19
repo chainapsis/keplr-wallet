@@ -7,7 +7,7 @@ import { useInteractionInfo } from "../../../../hooks";
 import { useUnmount } from "../../../../hooks/use-unmount";
 import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { FeeControl } from "../../components/input/fee-control";
 import {
   useFeeConfig,
@@ -20,6 +20,15 @@ import {
 import { MemoryKVStore } from "@keplr-wallet/common";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { num, InvocationsSignerDetails } from "starknet";
+import { Box } from "../../../../components/box";
+import { ColorPalette } from "../../../../styles";
+import SimpleBar from "simplebar-react";
+import { useTheme } from "styled-components";
+import { Column, Columns } from "../../../../components/column";
+import { Gutter } from "../../../../components/gutter";
+import { H5 } from "../../../../components/typography";
+import { XAxis } from "../../../../components/axis";
+import { Button } from "../../../../components/button";
 
 export const SignStarknetTxView: FunctionComponent<{
   interactionData: NonNullable<SignStarknetTxInteractionStore["waitingData"]>;
@@ -34,6 +43,7 @@ export const SignStarknetTxView: FunctionComponent<{
 
   const intl = useIntl();
   const interactionInfo = useInteractionInfo();
+  const theme = useTheme();
 
   const chainId = interactionData.data.chainId;
 
@@ -297,13 +307,123 @@ export const SignStarknetTxView: FunctionComponent<{
         onClick: approve,
       }}
     >
-      <div>TODO</div>
-      <FeeControl
-        senderConfig={senderConfig}
-        feeConfig={feeConfig}
-        gasConfig={gasConfig}
-        gasSimulator={gasSimulator}
-      />
+      <Box
+        height="100%"
+        padding="0.75rem"
+        paddingBottom="0"
+        style={{
+          overflow: "auto",
+        }}
+      >
+        <SimpleBar
+          autoHide={false}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            flex: "0 1 auto",
+            overflow: "auto",
+            borderRadius: "0.375rem",
+            backgroundColor:
+              theme.mode === "light"
+                ? ColorPalette.white
+                : ColorPalette["gray-600"],
+            boxShadow:
+              theme.mode === "light"
+                ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+                : "none",
+          }}
+        >
+          <DataView interactionData={interactionData} />
+        </SimpleBar>
+
+        <div style={{ flex: 1 }} />
+
+        <FeeControl
+          senderConfig={senderConfig}
+          feeConfig={feeConfig}
+          gasConfig={gasConfig}
+          gasSimulator={gasSimulator}
+        />
+      </Box>
     </HeaderLayout>
   );
 });
+
+const DataView: FunctionComponent<{
+  interactionData: NonNullable<SignStarknetTxInteractionStore["waitingData"]>;
+}> = ({ interactionData }) => {
+  const theme = useTheme();
+
+  const [isOpen, setIsOpen] = useState(false);
+  const toggleOpen = () => setIsOpen((isOpen) => !isOpen);
+
+  return (
+    <Box
+      style={{
+        width: "fit-content",
+        minWidth: "100%",
+      }}
+    >
+      {interactionData.data.transactions.map((tx, i) => {
+        return (
+          <Box padding="1rem" key={i}>
+            <Columns sum={1}>
+              <Column weight={1}>
+                <Box minHeight="3rem" alignY="center">
+                  <H5
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-500"]
+                        : ColorPalette["gray-10"]
+                    }
+                  >
+                    {tx.entrypoint}
+                  </H5>
+                  <Gutter size="2px" />
+                  {isOpen ? (
+                    <React.Fragment>
+                      <pre
+                        style={{
+                          width: "15rem",
+                          margin: "0",
+                          marginBottom: "0.5rem",
+                        }}
+                      >
+                        {isOpen
+                          ? JSON.stringify(
+                              {
+                                contractAddress: tx.contractAddress,
+                                calldata: tx.calldata,
+                              },
+                              null,
+                              2
+                            )
+                          : ""}
+                      </pre>
+                    </React.Fragment>
+                  ) : null}
+                  <XAxis>
+                    <Button
+                      size="extraSmall"
+                      color="secondary"
+                      text={
+                        isOpen ? (
+                          <FormattedMessage id="page.sign.components.messages.wasm-message-view.close-button" />
+                        ) : (
+                          <FormattedMessage id="page.sign.components.messages.wasm-message-view.details-button" />
+                        )
+                      }
+                      onClick={() => {
+                        toggleOpen();
+                      }}
+                    />
+                  </XAxis>
+                </Box>
+              </Column>
+            </Columns>
+          </Box>
+        );
+      })}
+    </Box>
+  );
+};
