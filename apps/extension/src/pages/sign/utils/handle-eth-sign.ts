@@ -2,6 +2,8 @@ import { SignEthereumInteractionStore } from "@keplr-wallet/stores-core";
 import { EthSignType } from "@keplr-wallet/types";
 import Transport from "@ledgerhq/hw-transport";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
+import { UREncoder } from "@keystonehq/keystone-sdk";
+import Base from "@keystonehq/hw-app-base";
 import { KeplrError } from "@keplr-wallet/router";
 import {
   ErrCodeDeviceLocked,
@@ -28,9 +30,12 @@ import {
   encodeEthMessage,
   getEthDataTypeFromSignType,
   getPathFromPubKey,
+  ErrModuleKeystoneSign,
+  ErrKeystoneUSBCommunication,
 } from "./keystone";
 import KeystoneSDK, { UR, utils } from "@keystonehq/keystone-sdk";
 import { EthermintChainIdHelper } from "@keplr-wallet/cosmos";
+import { createKeystoneTransport } from "../../../utils/keystone";
 
 export interface LedgerOptions {
   useWebHID: boolean;
@@ -130,13 +135,37 @@ export const handleEthereumPreSignByKeystone = async (
     chainId: evmChainId,
     address,
   });
-  await options.displayQRCode({
-    type: ur.type,
-    cbor: ur.cbor.toString("hex"),
-  });
-  const scanResult = await options.scanQRCode();
+
+  const isUSB = interactionData.data.keyInsensitive["connectionType"] === "USB";
+
+  let urResult: KeystoneUR;
+  if (isUSB) {
+    try {
+      const transport = await createKeystoneTransport();
+      const URString = new UREncoder(ur, Infinity).nextPart().toUpperCase();
+      const baseApp = new Base(transport as any);
+      const response = await baseApp.sendURRequest(URString);
+      urResult = {
+        type: response.type,
+        cbor: response.cbor.toString("hex"),
+      } as KeystoneUR;
+    } catch (e) {
+      throw new KeplrError(
+        ErrModuleKeystoneSign,
+        ErrKeystoneUSBCommunication,
+        "Keystone USB communication error, Please try again."
+      );
+    }
+  } else {
+    await options.displayQRCode({
+      type: ur.type,
+      cbor: ur.cbor.toString("hex"),
+    });
+    urResult = await options.scanQRCode();
+  }
+
   const signResult = keystoneSDK.eth.parseSignature(
-    new UR(Buffer.from(scanResult.cbor, "hex"), scanResult.type)
+    new UR(Buffer.from(urResult.cbor, "hex"), urResult.type)
   );
   if (signResult.requestId !== requestId) {
     throw new Error("Invalid request id");
