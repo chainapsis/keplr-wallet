@@ -12,11 +12,9 @@ import { Body1, H2 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { Stack } from "../../../components/stack";
 import { Button } from "../../../components/button";
-import {
-  TransportWebUSB,
-  getKeystoneDevices,
-} from "@keystonehq/hw-transport-webusb";
+import { TransportWebUSB } from "@keystonehq/hw-transport-webusb";
 import Base from "@keystonehq/hw-app-base";
+import { createKeystoneTransport } from "../../../utils/keystone";
 import { observer } from "mobx-react-lite";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
@@ -28,22 +26,6 @@ import { KeystoneIcon } from "../../../components/icon/keystone";
 import { IconProps } from "../../../components/icon/types";
 
 type Step = "unknown" | "connected" | "app";
-
-export async function createKeystoneTransport() {
-  if ((await getKeystoneDevices()).length <= 0) {
-    try {
-      await TransportWebUSB.requestPermission();
-    } catch (e) {
-      throw new Error("USB_PERMISSIONS_NOT_AVAILABLE");
-    }
-  }
-
-  const transport = await TransportWebUSB.connect({
-    timeout: 100000,
-  });
-  await transport.close();
-  return transport;
-}
 
 const DEFAULT_KEYSTONE_PATHS = [
   "m/44'/118'/0'/0/0", // cosmos path
