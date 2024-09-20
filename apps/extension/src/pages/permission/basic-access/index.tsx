@@ -12,6 +12,7 @@ import { Gutter } from "../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
+import SimpleBar from "simplebar-react";
 
 export const PermissionBasicAccessPage: FunctionComponent<{
   data: {
@@ -99,52 +100,54 @@ export const PermissionBasicAccessPage: FunctionComponent<{
           }}
           borderRadius="0.5rem"
         >
-          <Box>
-            {data.chainIds.map((chainId, index) => {
-              const chainInfo = chainStore.getChain(chainId);
+          <SimpleBar style={{ height: "100%" }}>
+            <Box>
+              {data.chainIds.map((chainId, index) => {
+                const chainInfo = chainStore.getChain(chainId);
 
-              const isLast = index === data.chainIds.length - 1;
+                const isLast = index === data.chainIds.length - 1;
 
-              return (
-                <Box
-                  key={chainId}
-                  backgroundColor={
-                    theme.mode === "light"
-                      ? ColorPalette.white
-                      : ColorPalette["gray-600"]
-                  }
-                  style={{
-                    overflow: "hidden",
-                    borderBottomLeftRadius: isLast ? "0.5rem" : undefined,
-                    borderBottomRightRadius: isLast ? "0.5rem" : undefined,
-                  }}
-                >
-                  <Box alignY="center" paddingX="1.5rem" minHeight="4.25rem">
-                    <Subtitle3
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["gray-400"]
-                          : ColorPalette["gray-50"]
-                      }
-                    >
-                      {chainInfo.chainName}
-                    </Subtitle3>
+                return (
+                  <Box
+                    key={chainId}
+                    backgroundColor={
+                      theme.mode === "light"
+                        ? ColorPalette.white
+                        : ColorPalette["gray-600"]
+                    }
+                    style={{
+                      overflow: "hidden",
+                      borderBottomLeftRadius: isLast ? "0.5rem" : undefined,
+                      borderBottomRightRadius: isLast ? "0.5rem" : undefined,
+                    }}
+                  >
+                    <Box alignY="center" paddingX="1.5rem" minHeight="4.25rem">
+                      <Subtitle3
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-400"]
+                            : ColorPalette["gray-50"]
+                        }
+                      >
+                        {chainInfo.chainName}
+                      </Subtitle3>
+                    </Box>
+
+                    {isLast ? null : (
+                      <Box
+                        height="1px"
+                        backgroundColor={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-50"]
+                            : ColorPalette["gray-500"]
+                        }
+                      />
+                    )}
                   </Box>
-
-                  {isLast ? null : (
-                    <Box
-                      height="1px"
-                      backgroundColor={
-                        theme.mode === "light"
-                          ? ColorPalette["gray-50"]
-                          : ColorPalette["gray-500"]
-                      }
-                    />
-                  )}
-                </Box>
-              );
-            })}
-          </Box>
+                );
+              })}
+            </Box>
+          </SimpleBar>
         </Box>
       </Box>
     </HeaderLayout>
