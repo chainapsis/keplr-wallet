@@ -86,9 +86,8 @@ export const AddressBookModal: FunctionComponent<{
     }, [historyType, recipientConfig.chainId, uiConfigStore.addressBookConfig]);
 
     useEffect(() => {
-      if (type !== "accounts") return;
       (() => {
-        if (!debounceTrimmedSearchText) {
+        if (type !== "accounts" || !debounceTrimmedSearchText) {
           return uiConfigStore.addressBookConfig.getVaultCosmosKeysSettled(
             recipientConfig.chainId,
             permitSelfKeyInfo ? undefined : keyRingStore.selectedKeyInfo?.id
