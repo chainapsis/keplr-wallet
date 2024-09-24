@@ -19,7 +19,7 @@ import { KeplrError } from "@keplr-wallet/router";
 import { ErrModuleLedgerSign } from "../utils/ledger-types";
 import { Buffer } from "buffer/";
 import { LedgerGuideBox } from "../components/ledger-guide-box";
-import { KeystoneUSBBox } from "../../components/keystone-usb-box";
+import { KeystoneUSBBox } from "../components/keystone-usb-box";
 import { EthSignType } from "@keplr-wallet/types";
 import {
   handleEthereumPreSignByKeystone,
@@ -699,7 +699,7 @@ export const EthereumSigningView: FunctionComponent<{
         {isKeystonUSB && (
           <KeystoneUSBBox
             isKeystoneInteracting={isKeystoneInteracting}
-            keystoneInteractingError={keystoneInteractingError}
+            KeystoneInteractingError={keystoneInteractingError}
           />
         )}
       </Box>
