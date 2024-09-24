@@ -57,18 +57,18 @@ export const AddressBookModal: FunctionComponent<{
 
     const [type, setType] = useState<Type>("recent");
 
-    const [accountsSearchText, setAccountsSearchText] = useState("");
-    const [debounceAccountsSearchText, setDebounceAccountsSearchText] =
+    const [searchText, setSearchText] = useState("");
+    const [debounceTrimmedSearchText, setDebounceTrimmedSearchText] =
       useState<string>("");
     useEffect(() => {
       const timer = setTimeout(() => {
-        setDebounceAccountsSearchText(accountsSearchText);
+        setDebounceTrimmedSearchText(searchText.trim());
       }, 300);
 
       return () => {
         clearTimeout(timer);
       };
-    }, [accountsSearchText]);
+    }, [searchText]);
 
     const [recents, setRecents] = useState<RecentSendHistory[]>([]);
     const [accounts, setAccounts] = useState<
@@ -87,14 +87,14 @@ export const AddressBookModal: FunctionComponent<{
 
     useEffect(() => {
       (() => {
-        if (!debounceAccountsSearchText.trim()) {
+        if (type !== "accounts" || !debounceTrimmedSearchText) {
           return uiConfigStore.addressBookConfig.getVaultCosmosKeysSettled(
             recipientConfig.chainId,
             permitSelfKeyInfo ? undefined : keyRingStore.selectedKeyInfo?.id
           );
         } else {
           return uiConfigStore.addressBookConfig.getVaultCosmosKeysWithSearchSettled(
-            debounceAccountsSearchText,
+            debounceTrimmedSearchText,
             recipientConfig.chainId,
             permitSelfKeyInfo ? undefined : keyRingStore.selectedKeyInfo?.id
           );
@@ -114,11 +114,12 @@ export const AddressBookModal: FunctionComponent<{
         );
       });
     }, [
+      type,
       keyRingStore.selectedKeyInfo?.id,
       permitSelfKeyInfo,
       recipientConfig.chainId,
       uiConfigStore.addressBookConfig,
-      debounceAccountsSearchText,
+      debounceTrimmedSearchText,
     ]);
 
     const chainInfo = chainStore.getChain(recipientConfig.chainId);
@@ -153,6 +154,10 @@ export const AddressBookModal: FunctionComponent<{
             });
         }
         case "contacts": {
+          const searchRegex = debounceTrimmedSearchText
+            ? new RegExp(debounceTrimmedSearchText, "i")
+            : null;
+
           return uiConfigStore.addressBookConfig
             .getAddressBook(recipientConfig.chainId)
             .map((addressData) => {
@@ -167,7 +172,14 @@ export const AddressBookModal: FunctionComponent<{
                 return false;
               }
 
-              return true;
+              if (!searchRegex) {
+                return true;
+              }
+
+              return (
+                searchRegex.test(contact.name) ||
+                searchRegex.test(contact.address)
+              );
             });
         }
         case "accounts": {
@@ -254,12 +266,12 @@ export const AddressBookModal: FunctionComponent<{
 
           <Gutter size="0.75rem" />
 
-          {type === "accounts" ? (
+          {type !== "recent" ? (
             <React.Fragment>
               <SearchTextInput
-                value={accountsSearchText}
+                value={searchText}
                 onChange={(e) => {
-                  setAccountsSearchText(e.target.value);
+                  setSearchText(e.target.value);
                 }}
                 placeholder={intl.formatMessage({
                   id: "components.address-book-modal.my-account-tab.input.search.placeholder",

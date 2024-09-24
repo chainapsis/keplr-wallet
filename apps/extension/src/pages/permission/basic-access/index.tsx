@@ -12,6 +12,7 @@ import { Gutter } from "../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
+import SimpleBar from "simplebar-react";
 
 export const PermissionBasicAccessPage: FunctionComponent<{
   data: {
@@ -92,12 +93,16 @@ export const PermissionBasicAccessPage: FunctionComponent<{
 
           <Gutter size="1rem" />
         </Box>
-        <Box
+        <SimpleBar
+          autoHide={false}
           style={{
+            display: "flex",
+            flexDirection: "column",
+
             flex: 1,
             overflow: "auto",
+            borderRadius: "0.5rem",
           }}
-          borderRadius="0.5rem"
         >
           <Box>
             {data.chainIds.map((chainId, index) => {
@@ -145,7 +150,7 @@ export const PermissionBasicAccessPage: FunctionComponent<{
               );
             })}
           </Box>
-        </Box>
+        </SimpleBar>
       </Box>
     </HeaderLayout>
   );
