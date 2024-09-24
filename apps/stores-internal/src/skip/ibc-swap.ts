@@ -71,7 +71,7 @@ export class ObservableQueryIBCSwapInner {
       this.destAssetChainId,
       this.destAssetDenom,
       this.affiliateFeeBps,
-      this.swapVenues[0]
+      this.swapVenues
     );
   }
 }

@@ -184,6 +184,22 @@ export const SwapVenues: {
   chainId: string;
 }[] = [
   {
+    name: "injective-astroport",
+    chainId: "injective-1",
+  },
+  {
+    name: "injective-helix",
+    chainId: "injective-1",
+  },
+  {
+    name: "injective-white-whale",
+    chainId: "injective-1",
+  },
+  {
+    name: "neutron-astroport",
+    chainId: "neutron-1",
+  },
+  {
     name: "osmosis-poolmanager",
     chainId: "osmosis-1",
   },

@@ -81,12 +81,12 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
     public readonly destChainId: string,
     public readonly destDenom: string,
     public readonly affiliateFeeBps: number,
-    public readonly swapVenue: {
+    public readonly swapVenues: {
       readonly name: string;
       readonly chainId: string;
-    }
+    }[]
   ) {
-    super(sharedContext, skipURL, "/v1/fungible/route");
+    super(sharedContext, skipURL, "/v2/fungible/route");
 
     makeObservable(this);
   }
@@ -197,10 +197,7 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
         dest_asset_denom: this.destDenom,
         dest_asset_chain_id: this.destChainId,
         cumulative_affiliate_fee_bps: this.affiliateFeeBps.toString(),
-        swap_venue: {
-          name: this.swapVenue.name,
-          chain_id: this.swapVenue.chainId,
-        },
+        swap_venues: this.swapVenues,
       }),
       signal: abortController.signal,
     });
@@ -232,10 +229,7 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
       dest_asset_denom: this.destDenom,
       dest_asset_chain_id: this.destChainId,
       affiliateFeeBps: this.affiliateFeeBps,
-      swap_venue: {
-        name: this.swapVenue.name,
-        chain_id: this.swapVenue.chainId,
-      },
+      swap_venue: this.swapVenues,
     })}`;
   }
 }
@@ -258,7 +252,7 @@ export class ObservableQueryRoute extends HasMapStore<ObservableQueryRouteInner>
         parsed.destChainId,
         parsed.destDenom,
         parsed.affiliateFeeBps,
-        parsed.swapVenue
+        parsed.swapVenues
       );
     });
   }
@@ -269,10 +263,10 @@ export class ObservableQueryRoute extends HasMapStore<ObservableQueryRouteInner>
     destChainId: string,
     destDenom: string,
     affiliateFeeBps: number,
-    swapVenue: {
+    swapVenues: {
       readonly name: string;
       readonly chainId: string;
-    }
+    }[]
   ): ObservableQueryRouteInner {
     const str = JSON.stringify({
       sourceChainId,
@@ -281,7 +275,7 @@ export class ObservableQueryRoute extends HasMapStore<ObservableQueryRouteInner>
       destChainId,
       destDenom,
       affiliateFeeBps,
-      swapVenue,
+      swapVenues,
     });
     return this.get(str);
   }
