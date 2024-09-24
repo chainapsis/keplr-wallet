@@ -254,7 +254,15 @@ export class HugeQueriesStore {
             ChainIdHelper.parse(modularChainInfo.chainId).identifier
           }/${currency.coinMinimalDenom}`;
           if (!keysUsed.get(key)) {
-            if (queryBalance.balance.toDec().equals(HugeQueriesStore.zeroDec)) {
+            const isNative =
+              currency.coinMinimalDenom ===
+                `erc20:${modularChainInfo.starknet.strkContractAddress}` ||
+              currency.coinMinimalDenom ===
+                `erc20:${modularChainInfo.starknet.ethContractAddress}`;
+            if (
+              !isNative &&
+              queryBalance.balance.toDec().equals(HugeQueriesStore.zeroDec)
+            ) {
               continue;
             }
 
