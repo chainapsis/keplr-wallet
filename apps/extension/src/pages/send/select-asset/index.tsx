@@ -24,7 +24,7 @@ const Styles = {
 };
 
 export const SendSelectAssetPage: FunctionComponent = observer(() => {
-  const { hugeQueriesStore, skipQueriesStore } = useStore();
+  const { hugeQueriesStore, skipQueriesStore, chainStore } = useStore();
   const navigate = useNavigate();
   const intl = useIntl();
   const theme = useTheme();
@@ -139,6 +139,11 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
         </Columns>
 
         {filteredTokens.map((viewToken) => {
+          const modularChainInfo = chainStore.getModularChain(
+            viewToken.chainInfo.chainId
+          );
+          const isStarknet =
+            "starknet" in modularChainInfo && modularChainInfo.starknet != null;
           return (
             <TokenItem
               viewToken={viewToken}
@@ -147,6 +152,7 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
                 if (paramNavigateTo) {
                   navigate(
                     paramNavigateTo
+                      .replace("/send", isStarknet ? "/starknet/send" : "/send")
                       .replace("{chainId}", viewToken.chainInfo.chainId)
                       .replace(
                         "{coinMinimalDenom}",
