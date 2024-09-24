@@ -21,7 +21,7 @@ export const KeystoneUSBBox: FunctionComponent<{
             <GuideBox
               color="warning"
               title={intl.formatMessage({
-                id: "page.sign.components.ledger-guide.box.unknown-error-title",
+                id: "page.sign.keystone.usb.box.unknown-error-title",
               })}
               paragraph={
                 KeystoneInteractingError.message ||
@@ -35,10 +35,10 @@ export const KeystoneUSBBox: FunctionComponent<{
           <GuideBox
             color="default"
             title={intl.formatMessage({
-              id: "page.sign.components.ledger-guide.box.sign-on-ledger-title",
+              id: "page.sign.keystone.usb.box.sign-on-keystone-title",
             })}
             paragraph={intl.formatMessage({
-              id: "page.sign.components.ledger-guide.box.sign-on-ledger-paragraph",
+              id: "page.sign.keystone.usb.box.sign-on-keystone-paragraph",
             })}
           />
         );

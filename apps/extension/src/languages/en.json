@@ -509,6 +509,10 @@
   "page.sign.keystone.invalid-qrcode": "Invalid QR code",
   "page.sign.keystone.select-valid-qrcode": "Please ensure you have selected a valid QR code from your Keystone device.",
 
+  "page.sign.keystone.usb.box.unknown-error-title": "Unknown error",
+  "page.sign.keystone.usb.box.sign-on-keystone-title": "Sign on Keystone",
+  "page.sign.keystone.usb.box.sign-on-keystone-paragraph": "To proceed, please review and approve the transaction on your Keystone device.",
+
   "page.send.select-asset.title": "Select Asset",
   "page.send.select-asset.search-placeholder": "Search for asset or chain",
   "page.send.select-asset.hide-ibc-token": "Hide IBC token",
