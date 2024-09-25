@@ -8776,7 +8776,7 @@ __metadata:
     "@keystonehq/animated-qr": ^0.8.6
     "@keystonehq/hw-app-base": 0.1.1
     "@keystonehq/hw-app-eth": ^0.4.4
-    "@keystonehq/hw-transport-webusb": ^0.4.0-beta.0
+    "@keystonehq/hw-transport-webusb": ^0.4.0
     "@keystonehq/keystone-sdk": ^0.2.3
     "@ledgerhq/devices": ^6.20.0
     "@react-spring/web": ^9.6.1
@@ -9547,6 +9547,16 @@ __metadata:
     "@keystonehq/hw-transport-error": ^0.0.2
     buffer: ^6.0.3
   checksum: 2212d50cb5d6b59c41ab8797688af149a309adfc17f3010beab1f976f47aa3a36770049513c31854b34b683e54a8b40521f674bb676f02a5624f6f15404f21df
+  languageName: node
+  linkType: hard
+
+"@keystonehq/hw-transport-webusb@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "@keystonehq/hw-transport-webusb@npm:0.4.0"
+  dependencies:
+    "@keystonehq/hw-transport-error": ^0.0.2
+    buffer: ^6.0.3
+  checksum: 7c56d7b9b73596306be50aae6b5661905a88fb018385b6074c0f18a04efbf5871f7fe93b957c6fe8f966f7c829ff085df444c9fbd23967c0ef2df4a7f9f7e4ae
   languageName: node
   linkType: hard
 

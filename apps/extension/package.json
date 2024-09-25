@@ -52,7 +52,7 @@
     "@keystonehq/animated-qr": "^0.8.6",
     "@keystonehq/hw-app-base": "0.1.1",
     "@keystonehq/hw-app-eth": "^0.4.4",
-    "@keystonehq/hw-transport-webusb": "^0.4.0-beta.0",
+    "@keystonehq/hw-transport-webusb": "^0.4.0",
     "@keystonehq/keystone-sdk": "^0.2.3",
     "@ledgerhq/devices": "^6.20.0",
     "@react-spring/web": "^9.6.1",
