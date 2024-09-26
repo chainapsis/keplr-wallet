@@ -480,6 +480,27 @@ export class PermissionService {
   }
 
   @action
+  removeAllSpecificTypePermission(origins: string[], type: string) {
+    const deletes: string[] = [];
+
+    for (const key of this.permissionMap.keys()) {
+      for (const origin of origins) {
+        const typeAndOrigin =
+          PermissionKeyHelper.getChainAndTypeFromPermissionKey(origin, key);
+        if (typeAndOrigin && typeAndOrigin.type === type) {
+          deletes.push(key);
+        }
+
+        this.currentChainIdForEVMByOriginMap.delete(origin);
+      }
+    }
+
+    for (const key of deletes) {
+      this.permissionMap.delete(key);
+    }
+  }
+
+  @action
   removeAllTypePermission(origins: string[]) {
     const deletes: string[] = [];
 

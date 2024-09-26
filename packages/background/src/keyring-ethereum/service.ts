@@ -31,7 +31,7 @@ import { BackgroundTxEthereumService } from "../tx-ethereum";
 import { TokenERC20Service } from "../token-erc20";
 import { validateEVMChainId } from "./helper";
 import { runInAction } from "mobx";
-import { PermissionInteractiveService } from "src/permission-interactive";
+import { PermissionInteractiveService } from "../permission-interactive";
 
 export class KeyRingEthereumService {
   protected websocketSubscriptionMap = new Map<string, WebSocket>();
@@ -334,7 +334,10 @@ export class KeyRingEthereumService {
         // 처음 방식은 dapp에서 disconnect하면 currentChainId에 해당하는 체인의 권한만 제거하는 방식이었어서
         // 특정 origin에서 권한을 지우는 요청이 왔어도 그 origin에 권한이 있는 체인이 하나라도 있으면 에러를 뱉는 방식이었다.
         // dapp 입장에선 체인당 권한이라는 개념을 모르기 때문에 그냥 그 origin의 모든 체인 권한을 없애고 다시 요청이 처리되도록 한다.
-        await this.permissionService.removeAllTypePermission([origin]);
+        await this.permissionService.removeAllSpecificTypePermission(
+          [origin],
+          getBasicAccessPermissionType()
+        );
 
         await this.permissionInteractiveService.ensureEnabledForEVM(
           env,
@@ -375,7 +378,10 @@ export class KeyRingEthereumService {
           };
         }
         case "keplr_disconnect": {
-          return this.permissionService.removeAllTypePermission([origin]);
+          return this.permissionService.removeAllSpecificTypePermission(
+            [origin],
+            getBasicAccessPermissionType()
+          );
         }
         case "eth_chainId": {
           return `0x${currentChainEVMInfo.chainId.toString(16)}`;
@@ -910,7 +916,10 @@ export class KeyRingEthereumService {
             );
           }
 
-          await this.permissionService.removeAllTypePermission([origin]);
+          await this.permissionService.removeAllSpecificTypePermission(
+            [origin],
+            getBasicAccessPermissionType()
+          );
 
           return null;
         }
