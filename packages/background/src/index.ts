@@ -208,16 +208,6 @@ export function init(
     analyticsService,
     msgPrivilegedOrigins
   );
-  const keyRingEthereumService = new KeyRingEthereum.KeyRingEthereumService(
-    chainsService,
-    keyRingV2Service,
-    keyRingCosmosService,
-    interactionService,
-    analyticsService,
-    permissionService,
-    backgroundTxEthereumService,
-    tokenERC20Service
-  );
   const autoLockAccountService = new AutoLocker.AutoLockAccountService(
     storeCreator("auto-lock-account"),
     keyRingV2Service,
@@ -231,6 +221,17 @@ export function init(
       chainsService
     );
 
+  const keyRingEthereumService = new KeyRingEthereum.KeyRingEthereumService(
+    chainsService,
+    keyRingV2Service,
+    keyRingCosmosService,
+    interactionService,
+    analyticsService,
+    permissionService,
+    permissionInteractiveService,
+    backgroundTxEthereumService,
+    tokenERC20Service
+  );
   const chainsUpdateService = new ChainsUpdate.ChainsUpdateService(
     storeCreator("chains-update"),
     chainsService,
