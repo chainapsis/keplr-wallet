@@ -1,19 +1,18 @@
-import { useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
 import {
   IAmountConfig,
   IFeeConfig,
   IGasConfig,
   IGasSimulator,
   IRecipientConfig,
-} from "./types";
+} from "@keplr-wallet/hooks-starknet";
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 
 export const useStarknetTxConfigsQueryString = (configs: {
   amountConfig: IAmountConfig;
   recipientConfig?: IRecipientConfig;
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
-
   gasSimulator: IGasSimulator;
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();

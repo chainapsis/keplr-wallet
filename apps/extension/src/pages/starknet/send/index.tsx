@@ -18,7 +18,6 @@ import { useStore } from "../../../stores";
 import {
   useGasSimulator,
   useSendTxConfig,
-  useStarknetTxConfigsQueryString,
   useTxConfigsValidate,
 } from "@keplr-wallet/hooks-starknet";
 import { useNavigate } from "react-router";
@@ -42,6 +41,7 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { AddRecentSendHistoryMsg } from "@keplr-wallet/background";
 import { AddressGenWarning } from "../components/address-gen-warning";
+import { useStarknetTxConfigsQueryString } from "../../../hooks/starknet/use-tx-configs-query-string";
 
 const Styles = {
   Flex1: styled.div`
