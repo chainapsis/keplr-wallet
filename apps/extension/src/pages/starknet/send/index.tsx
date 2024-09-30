@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { observer } from "mobx-react-lite";
+import { observer, useLocalObservable } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
 
@@ -41,6 +41,7 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { AddRecentSendHistoryMsg } from "@keplr-wallet/background";
 import { AddressGenWarning } from "../components/address-gen-warning";
+import { useStarknetTxConfigsQueryString } from "../../../hooks/starknet/use-tx-configs-query-string";
 
 const Styles = {
   Flex1: styled.div`
@@ -120,16 +121,15 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
     }
   }, []);
 
-  // TODO
-  // useEffect(() => {
-  //   if (!initialChainId || !initialCoinMinimalDenom) {
-  //     navigate(
-  //       `/send/select-asset?navigateReplace=true&navigateTo=${encodeURIComponent(
-  //         "/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
-  //       )}`
-  //     );
-  //   }
-  // }, [navigate, initialChainId, initialCoinMinimalDenom]);
+  useEffect(() => {
+    if (!initialChainId || !initialCoinMinimalDenom) {
+      navigate(
+        `/send/select-asset?navigateReplace=true&navigateTo=${encodeURIComponent(
+          "/starknet/send?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
+        )}`
+      );
+    }
+  }, [navigate, initialChainId, initialCoinMinimalDenom]);
 
   const account = accountStore.getAccount(chainId);
 
@@ -172,6 +172,23 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
     sendConfigs.amountConfig.currency,
     sendConfigs.feeConfig.type,
   ]);
+
+  const gasSimulationRefresher = useLocalObservable(() => ({
+    count: 0,
+    increaseCount() {
+      this.count++;
+    },
+  }));
+
+  useEffect(() => {
+    // Refresh gas simulation every 12 seconds.
+    const interval = setInterval(
+      () => gasSimulationRefresher.increaseCount(),
+      12000
+    );
+
+    return () => clearInterval(interval);
+  }, [gasSimulationRefresher]);
 
   const gasSimulator = useGasSimulator(
     new ExtensionKVStore("gas-simulator.starknet.send"),
@@ -222,6 +239,8 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
         simulate: async (): Promise<{
           gasUsed: number;
         }> => {
+          noop(gasSimulationRefresher.count);
+
           const res = await starknetAccountStore
             .getAccount(chainId)
             .estimateInvokeFeeForSendTokenTx(
@@ -252,23 +271,10 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
     }
   );
 
-  // TODO
-  // useEffect(() => {
-  //   if (isEvmTx) {
-  //     // Refresh EIP-1559 fee every 12 seconds.
-  //     const intervalId = setInterval(() => {
-  //       sendConfigs.feeConfig.refreshEIP1559TxFees();
-  //     }, 12000);
-  //
-  //     return () => clearInterval(intervalId);
-  //   }
-  // }, [isEvmTx, sendConfigs.feeConfig]);
-
-  // TODO
-  // useTxConfigsQueryString(chainId, {
-  //   ...sendConfigs,
-  //   gasSimulator,
-  // });
+  useStarknetTxConfigsQueryString({
+    ...sendConfigs,
+    gasSimulator,
+  });
 
   const txConfigsValidate = useTxConfigsValidate({
     ...sendConfigs,
@@ -496,4 +502,8 @@ const DetachIcon: FunctionComponent<{
       />
     </svg>
   );
+};
+
+const noop = (..._args: any[]) => {
+  // noop
 };

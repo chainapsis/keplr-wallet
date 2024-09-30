@@ -22,7 +22,7 @@ export const QRCodeScene: FunctionComponent<{
 
   const theme = useTheme();
 
-  const chainInfo = chainStore.getChain(chainId);
+  const modularChainInfo = chainStore.getModularChain(chainId);
 
   const sceneTransition = useSceneTransition();
 
@@ -64,9 +64,9 @@ export const QRCodeScene: FunctionComponent<{
 
           <Column weight={1} />
 
-          <ChainImageFallback chainInfo={chainInfo} size="2rem" />
+          <ChainImageFallback chainInfo={modularChainInfo} size="2rem" />
           <Gutter size="0.5rem" />
-          <Subtitle2>{chainInfo.chainName}</Subtitle2>
+          <Subtitle2>{modularChainInfo.chainName}</Subtitle2>
 
           <Column weight={1} />
           {/* 체인 아이콘과 이름을 중앙 정렬시키기 위해서 왼쪽과 맞춰야한다. 이를 위한 mock임 */}
