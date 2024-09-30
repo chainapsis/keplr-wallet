@@ -8879,7 +8879,6 @@ __metadata:
     "@keplr-wallet/unit": 0.12.121
     buffer: ^6.0.3
     long: ^4.0.0
-    react-router-dom: ^6.8.1
     utility-types: ^3.10.0
   peerDependencies:
     mobx: ^6
