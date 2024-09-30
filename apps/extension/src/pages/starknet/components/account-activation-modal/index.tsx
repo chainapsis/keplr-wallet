@@ -14,6 +14,7 @@ import {
   useGasSimulator,
   useNoopAmountConfig,
   useSenderConfig,
+  useTxConfigsValidate,
 } from "@keplr-wallet/hooks-starknet";
 import { Button } from "../../../../components/button";
 import { Column, Columns } from "../../../../components/column";
@@ -163,6 +164,12 @@ export const AccountActivationModal: FunctionComponent<{
     }
   );
 
+  const { interactionBlocked } = useTxConfigsValidate({
+    gasConfig,
+    feeConfig,
+    gasSimulator,
+  });
+
   return (
     <Styles.Container>
       <Box marginBottom="1.25rem" marginLeft="0.5rem" paddingY="0.4rem">
@@ -228,6 +235,7 @@ export const AccountActivationModal: FunctionComponent<{
                 id: "button.activate",
               })}
               size="large"
+              disabled={interactionBlocked}
               onClick={async () => {
                 const msg = new GetStarknetKeyParamsMsg(senderConfig.chainId);
                 const params =

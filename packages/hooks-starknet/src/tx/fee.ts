@@ -10,7 +10,8 @@ import { ChainGetter } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { useState } from "react";
 import { StarknetQueriesStore } from "@keplr-wallet/stores-starknet";
-import { CoinPretty, Dec } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
+import { InsufficientFeeError } from "./errors";
 
 export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable.ref
@@ -62,6 +63,58 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return {
         error: new Error("Fee is not set"),
         loadingState: "loading-block",
+      };
+    }
+
+    if (!this.fee) {
+      return {
+        error: new Error("Fee is not set"),
+        loadingState: "loading-block",
+      };
+    }
+
+    if (!this.maxFee) {
+      return {
+        error: new Error("Fee is not set"),
+        loadingState: "loading-block",
+      };
+    }
+
+    const fee = this.fee;
+
+    const bal = this.starknetQueriesStore
+      .get(this.chainId)
+      .queryStarknetERC20Balance.getBalance(
+        this.chainId,
+        this.chainGetter,
+        this.senderConfig.value,
+        fee.currency.coinMinimalDenom
+      );
+
+    if (!bal) {
+      return {
+        warning: new Error(
+          `Can't parse the balance for ${fee.currency.coinMinimalDenom}`
+        ),
+      };
+    }
+
+    if (bal.error) {
+      return {
+        warning: new Error("Failed to fetch balance"),
+      };
+    }
+
+    if (!bal.response) {
+      return {
+        loadingState: "loading-block",
+      };
+    }
+
+    if (new Int(bal.balance.toCoin().amount).lt(new Int(fee.toCoin().amount))) {
+      return {
+        error: new InsufficientFeeError("Insufficient fee"),
+        loadingState: bal.isFetching ? "loading" : undefined,
       };
     }
 
