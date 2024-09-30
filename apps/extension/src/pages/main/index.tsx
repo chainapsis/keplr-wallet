@@ -24,12 +24,13 @@ import {
   ArrowTopRightOnSquareIcon,
   EyeIcon,
   EyeSlashIcon,
+  LoadingIcon,
 } from "../../components/icon";
 import { Box } from "../../components/box";
 import { Modal } from "../../components/modal";
 import { DualChart } from "./components/chart";
 import { Gutter } from "../../components/gutter";
-import { H1, Subtitle3 } from "../../components/typography";
+import { H1, Subtitle3, Subtitle4 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
 import { AvailableTabView } from "./available";
 import { StakedTabView } from "./staked";
@@ -46,7 +47,7 @@ import { LayeredHorizontalRadioGroup } from "../../components/radio-group";
 import { XAxis, YAxis } from "../../components/axis";
 import { DepositModal } from "./components/deposit-modal";
 import { MainHeaderLayout } from "./layouts/header";
-import { amountToAmbiguousAverage } from "../../utils";
+import { amountToAmbiguousAverage, isRunningInSidePanel } from "../../utils";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import {
   ChainInfoWithCoreTypes,
@@ -54,6 +55,8 @@ import {
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { useBuy } from "../../hooks/use-buy";
+import { BottomTabsHeightRem } from "../../bottom-tabs";
+import { DenomHelper } from "@keplr-wallet/common";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -310,6 +313,7 @@ export const MainPage: FunctionComponent<{
 
   return (
     <MainHeaderLayout isNotReady={isNotReady}>
+      <RefreshButton visible={!isNotReady && isRunningInSidePanel()} />
       <Box paddingX="0.75rem" paddingBottom="1.5rem">
         <Stack gutter="0.75rem">
           <YAxis alignX="center">
@@ -669,3 +673,152 @@ const Styles = {
     }
   `,
 };
+
+const visibleTranslateY = -40;
+const invisibleTranslateY = 100;
+const RefreshButton: FunctionComponent<{
+  visible: boolean;
+}> = observer(({ visible }) => {
+  const { chainStore, queriesStore, accountStore, priceStore } = useStore();
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const refresh = async () => {
+    if (isLoading) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const promises: Promise<unknown>[] = [];
+
+      promises.push(priceStore.waitFreshResponse());
+      for (const chainInfo of chainStore.chainInfosInUI) {
+        const account = accountStore.getAccount(chainInfo.chainId);
+
+        if (
+          !chainStore.isEvmChain(chainInfo.chainId) &&
+          account.bech32Address !== ""
+        ) {
+          const queries = queriesStore.get(chainInfo.chainId);
+          const queryBalance = queries.queryBalances.getQueryBech32Address(
+            account.bech32Address
+          );
+          const queryRewards =
+            queries.cosmos.queryRewards.getQueryBech32Address(
+              account.bech32Address
+            );
+          // XXX: 얘는 구조상 waitFreshResponse()가 안되서 일단 쿼리가 끝인지 아닌지는 무시한다.
+          queryBalance.fetch();
+
+          promises.push(queryRewards.waitFreshResponse());
+        }
+
+        if (
+          chainStore.isEvmChain(chainInfo.chainId) &&
+          account.ethereumHexAddress
+        ) {
+          const queries = queriesStore.get(chainInfo.chainId);
+          const queryBalance = queries.queryBalances.getQueryEthereumHexAddress(
+            account.ethereumHexAddress
+          );
+          // XXX: 얘는 구조상 waitFreshResponse()가 안되서 일단 쿼리가 끝인지 아닌지는 무시한다.
+          queryBalance.fetch();
+
+          for (const currency of chainInfo.currencies) {
+            const query = queriesStore
+              .get(chainInfo.chainId)
+              .queryBalances.getQueryEthereumHexAddress(
+                account.ethereumHexAddress
+              );
+
+            const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+            if (denomHelper.type === "erc20") {
+              // XXX: 얘는 구조상 waitFreshResponse()가 안되서 일단 쿼리가 끝인지 아닌지는 무시한다.
+              query.fetch();
+            }
+          }
+        }
+      }
+
+      for (const chainInfo of chainStore.chainInfosInUI) {
+        const account = accountStore.getAccount(chainInfo.chainId);
+
+        if (account.bech32Address === "") {
+          continue;
+        }
+        const queries = queriesStore.get(chainInfo.chainId);
+        const queryUnbonding =
+          queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
+            account.bech32Address
+          );
+        const queryDelegation =
+          queries.cosmos.queryDelegations.getQueryBech32Address(
+            account.bech32Address
+          );
+
+        promises.push(queryUnbonding.waitFreshResponse());
+        promises.push(queryDelegation.waitFreshResponse());
+      }
+
+      await Promise.all(promises);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div
+      onClick={(e) => {
+        e.preventDefault();
+
+        refresh();
+      }}
+      style={{
+        position: "fixed",
+        marginBottom: BottomTabsHeightRem,
+        bottom: 0,
+        zIndex: 10,
+
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+
+        cursor: isLoading ? "progress" : "pointer",
+      }}
+    >
+      <div
+        style={{
+          padding: "0.75rem 1rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+
+          borderRadius: "999999px",
+          background: ColorPalette["gray-500"],
+          boxShadow: "0px 0px 24px 0px rgba(0, 0, 0, 0.25)",
+
+          transform: `translateY(${
+            visible ? visibleTranslateY : invisibleTranslateY
+          }%)`,
+        }}
+      >
+        <Subtitle4 color={ColorPalette["gray-50"]}>Refresh</Subtitle4>
+        {isLoading ? (
+          <React.Fragment>
+            <Gutter size="0.25rem" />
+            <LoadingIcon
+              width="1rem"
+              height="1rem"
+              color={ColorPalette["gray-50"]}
+            />
+          </React.Fragment>
+        ) : null}
+      </div>
+    </div>
+  );
+});
