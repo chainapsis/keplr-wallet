@@ -177,6 +177,7 @@ export const FeeControl: FunctionComponent<{
   gasSimulator?: IGasSimulator;
 
   disableAutomaticFeeSet?: boolean;
+  disableClick?: boolean;
 }> = observer(
   ({
     senderConfig,
@@ -184,6 +185,7 @@ export const FeeControl: FunctionComponent<{
     gasConfig,
     gasSimulator,
     disableAutomaticFeeSet,
+    disableClick,
   }) => {
     const {
       analyticsStore,
@@ -218,8 +220,11 @@ export const FeeControl: FunctionComponent<{
           <Box
             /* text underline의 offset을 수동으로 설정했기 때문에 그만큼 paddnig bottom을 넣어줘야 paret가 overflow: hidden이여도 밑줄이 보임 */
             paddingBottom="0.21rem"
-            cursor="pointer"
+            cursor={disableClick ? undefined : "pointer"}
             onClick={(e) => {
+              if (disableClick) {
+                return;
+              }
               e.preventDefault();
 
               analyticsStore.logEvent("click_txFeeSet");
@@ -245,8 +250,10 @@ export const FeeControl: FunctionComponent<{
                     : ColorPalette["white"];
                 })()}
                 style={{
-                  textDecoration: "underline",
-                  textUnderlineOffset: "0.2rem",
+                  ...(!disableClick && {
+                    textDecoration: "underline",
+                    textUnderlineOffset: "0.2rem",
+                  }),
                 }}
               >
                 {
@@ -277,9 +284,11 @@ export const FeeControl: FunctionComponent<{
                     : ColorPalette["gray-300"]
                 }
                 style={{
-                  textDecoration: "underline",
                   whiteSpace: "pre-wrap",
-                  textUnderlineOffset: "0.2rem",
+                  ...(!disableClick && {
+                    textDecoration: "underline",
+                    textUnderlineOffset: "0.2rem",
+                  }),
                 }}
               >
                 {` ${(() => {
