@@ -16,6 +16,7 @@ import { useSearchParams } from "react-router-dom";
 
 import { useStore } from "../../../stores";
 import {
+  AccountNotDeployed,
   useGasSimulator,
   useSendTxConfig,
   useTxConfigsValidate,
@@ -40,8 +41,9 @@ import { num } from "starknet";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { AddRecentSendHistoryMsg } from "@keplr-wallet/background";
-import { AddressGenWarning } from "../components/address-gen-warning";
 import { useStarknetTxConfigsQueryString } from "../../../hooks/starknet/use-tx-configs-query-string";
+import { Modal } from "../../../components/modal";
+import { AccountActivationModal } from "../components/account-activation-modal";
 
 const Styles = {
   Flex1: styled.div`
@@ -285,6 +287,16 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
 
   const historyType = "basic-send/starknet";
 
+  const isAccountNotDeployed =
+    sendConfigs.senderConfig.uiProperties.error instanceof AccountNotDeployed;
+  const [isAccountActivationModalOpen, setIsAccountActivationModalOpen] =
+    useState(false);
+  useEffect(() => {
+    if (isAccountNotDeployed) {
+      setIsAccountActivationModalOpen(true);
+    }
+  }, [isAccountNotDeployed]);
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.send.amount.title" })}
@@ -471,10 +483,18 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
           />
 
           <Gutter size="0" />
-          <AddressGenWarning
-            upperGutter="0.75rem"
-            senderConfig={sendConfigs.senderConfig}
-          />
+
+          <Modal
+            isOpen={isAccountActivationModalOpen}
+            align="bottom"
+            maxHeight="95vh"
+            close={() => navigate(-1)}
+          >
+            <AccountActivationModal
+              close={() => navigate(-1)}
+              chainId={chainId}
+            />
+          </Modal>
         </Stack>
       </Box>
     </HeaderLayout>
