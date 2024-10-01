@@ -253,19 +253,38 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
               type
             );
 
-          const fee = new CoinPretty(feeCurrency, res.overall_fee);
-          const maxFee = new CoinPretty(feeCurrency, res.suggestedMaxFee);
-          sendConfigs.feeConfig.setGasPrice({
-            gasPrice: fee.quo(new Dec(res.gas_consumed)),
-            maxGasPrice: maxFee.quo(new Dec(res.gas_consumed)),
-          });
+          if (type === "ETH") {
+            // ETH 타입에서 gas는 필요없기 때문에 대충 고정값으로 처리한다.
+            const gas = 100000;
+            const fee = new CoinPretty(feeCurrency, res.suggestedMaxFee);
+            const maxFee = new CoinPretty(
+              feeCurrency,
+              new Dec(res.suggestedMaxFee).mul(new Dec(1.1))
+            );
+            sendConfigs.feeConfig.setGasPrice({
+              gasPrice: fee.quo(new Dec(gas)),
+              maxGasPrice: maxFee.quo(new Dec(gas)),
+            });
 
-          return {
-            // * 1.2 + 1600은 매직너버임...
-            gasUsed: Math.ceil(
-              parseInt(res.gas_consumed.toString()) * 1.2 + 600
-            ),
-          };
+            return {
+              gasUsed: gas,
+            };
+          } else {
+            const gas = new Dec(
+              num.toBigInt(res.resourceBounds.l1_gas.max_amount)
+            ).mul(new Dec("1.1"));
+            const gasPrice = new Dec(
+              num.toBigInt(res.resourceBounds.l1_gas.max_price_per_unit)
+            );
+            const maxGasPrice = gasPrice.mul(new Dec("1.1"));
+            sendConfigs.feeConfig.setGasPrice({
+              gasPrice: new CoinPretty(feeCurrency, gasPrice),
+              maxGasPrice: new CoinPretty(feeCurrency, maxGasPrice),
+            });
+            return {
+              gasUsed: Math.ceil(parseFloat(gas.toString())),
+            };
+          }
         },
       };
     }
