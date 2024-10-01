@@ -1,219 +1,108 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { useStore } from "./stores";
-import { EthSignType } from "@keplr-wallet/types";
-
-const IBCChannel = "channel-141";
-const CounterpartyIBCChannel = "channel-0";
+import { AccountInterface, Call, Contract, ProviderInterface } from "starknet";
+import { compiledSierra } from "./sierra";
+import { Dec } from "@keplr-wallet/unit";
 
 export const App: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const [enabled, setEnabled] = useState(
+    false
+    //(window as any).keplr.starknet.isConnected
+  );
+
+  const [account, setAccount] = useState<AccountInterface | undefined>(
+    () => (window as any).keplr.starknet.account
+  );
+  const [provider, setProvider] = useState<ProviderInterface | undefined>(
+    () => (window as any).keplr.starknet.provider
+  );
+
+  const [erc20, setERC20] = useState<Contract | undefined>();
+  const [balance, setBalance] = useState<string | undefined>();
+
+  // account의 주소가 연결 직후에 빈배열로 뜨는 버그가 있음. 일단 나중에 해결한다치고 진행함
+  const [_, setT] = useState(0);
+  useEffect(() => {
+    setInterval(() => {
+      setT((t) => t + 1);
+    }, 1000);
+  }, []);
+
+  if (!enabled) {
+    return (
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+
+          (window as any).keplr.starknet.enable().then(() => {
+            setEnabled(true);
+            const account = (window as any).keplr.starknet.account;
+            setAccount(account);
+            const provider = (window as any).keplr.starknet.provider;
+            setProvider(provider);
+            const erc20 = new Contract(
+              compiledSierra.abi,
+              "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+              (window as any).keplr.starknet.provider
+            );
+            erc20.connect(account);
+            setERC20(erc20);
+
+            erc20["balanceOf"](account.address).then((balance: any) => {
+              const dec = new Dec(balance, 18);
+              setBalance(dec.toString());
+            });
+          });
+        }}
+      >
+        Enable
+      </button>
+    );
+  }
+  if (account == null || provider == null || erc20 == null) {
+    return (
+      <div>Some problem exist, account is null even if it was enabled</div>
+    );
+  }
 
   return (
     <div>
-      <p>
-        Name: {accountStore.getAccount(chainStore.chainInfos[0].chainId).name}
-      </p>
-      {chainStore.chainInfos.map((chainInfo) => {
-        const account = accountStore.getAccount(chainInfo.chainId);
-        const queries = queriesStore.get(chainInfo.chainId);
-
-        return (
-          <div key={chainInfo.chainId}>
-            <h4>{account.bech32Address}</h4>
-            <p>
-              {queries.queryBalances
-                .getQueryBech32Address(account.bech32Address)
-                .stakable?.balance.trim(true)
-                .toString()}
-            </p>
-          </div>
-        );
-      })}
+      <div>{account.address}</div>
       <button
-        onClick={() => {
-          (window as any).keplr.enable(["cosmoshub-4", "osmosis-1"]);
+        onClick={async (e) => {
+          e.preventDefault();
 
-          const chainInfo = chainStore.chainInfos[0];
-          const account = accountStore.getAccount(chainInfo.chainId);
-          const counterpartyAccount = accountStore.getAccount(
-            chainStore.chainInfos[1].chainId
-          );
-
-          account.cosmos.sendIBCTransferMsg(
-            {
-              portId: "transfer",
-              channelId: IBCChannel,
-              counterpartyChainId: chainStore.chainInfos[1].chainId,
-            },
-            "1",
-            chainInfo.currencies[0],
-            counterpartyAccount.bech32Address
-          );
-        }}
-      >
-        Test IBC
-      </button>
-      <button
-        onClick={() => {
-          const chainInfo = chainStore.chainInfos[1];
-          const account = accountStore.getAccount(chainInfo.chainId);
-          const counterpartyAccount = accountStore.getAccount(
-            chainStore.chainInfos[0].chainId
-          );
-
-          account.cosmos.sendIBCTransferMsg(
-            {
-              portId: "transfer",
-              channelId: CounterpartyIBCChannel,
-              counterpartyChainId: chainStore.chainInfos[0].chainId,
-            },
-            "1",
-            chainInfo.currencies[0],
-            counterpartyAccount.bech32Address
-          );
-        }}
-      >
-        Test IBC 2
-      </button>
-
-      <button
-        onClick={() => {
-          const chainInfo = chainStore.chainInfos[0];
-          const account = accountStore.getAccount(chainInfo.chainId);
-
-          const data =
-            "NDk2NDAxNmVkMWM4MDI1NjAxZWUzMDA5NjU2MGI3YzI4NTRmMGFjNjdiODA4ZjNm";
-
-          account.getKeplr().then((keplr) => {
-            keplr?.signArbitrary(
-              chainInfo.chainId,
-              account.bech32Address,
-              data
-            );
+          const transferCall: Call = erc20.populate("transfer", {
+            recipient:
+              "0x06add9cf97c3afd614cf14a152829e736c75addcf33cd6f1ff12641318f2560a",
+            amount: 10,
           });
+
+          const { transaction_hash: transferTxHash } = await account?.execute(
+            transferCall
+          );
+          console.log(transferTxHash);
+
+          // Wait for the invoke transaction to be accepted on Starknet
+          console.log(
+            `Waiting for Tx to be Accepted on Starknet - Transfer...`
+          );
+          await provider.waitForTransaction(transferTxHash);
+
+          // Check balance after transfer - should be 19 NIT
+          console.log(`Calling Starknet for account balance...`);
+          const balanceAfterTransfer = await erc20?.["balanceOf"](
+            account?.address
+          );
+          console.log("account0 has a balance of:", balanceAfterTransfer);
+          console.log("✅ Script completed.");
+          const dec = new Dec(balanceAfterTransfer, 18);
+          setBalance(dec.toString());
         }}
       >
-        Sign Abitrary
+        test
       </button>
-      <button
-        onClick={() => {
-          const evmosChainInfo = chainStore.getChain("evmos_9001-2");
-          const account = accountStore.getAccount(evmosChainInfo.chainId);
-
-          const ethereumTx = {
-            type: 2,
-            chainId: 9001,
-            nonce: 95,
-            gasLimit: "0xae3f",
-            maxFeePerGas: "0x5efeb1f00",
-            maxPriorityFeePerGas: "0x59682f00",
-            to: "0xD4949664cD82660AaE99bEdc034a0deA8A0bd517",
-            value: "0x0",
-            data: "0xa9059cbb0000000000000000000000007f7ec812297f74c80fc8bcaf11ac881dc88eb216000000000000000000000000000000000000000000000000002386f26fc10000",
-          };
-
-          account.getKeplr().then((keplr) => {
-            keplr
-              ?.signEthereum(
-                evmosChainInfo.chainId,
-                account.ethereumHexAddress,
-                JSON.stringify(ethereumTx),
-                EthSignType.TRANSACTION
-              )
-              .then((signature) => {
-                console.log("signature", signature);
-              });
-          });
-        }}
-      >
-        Sign Ethereum
-      </button>
-
-      <button
-        onClick={() => {
-          accountStore
-            .getAccount(chainStore.chainInfos[0].chainId)
-            .getKeplr()
-            .then((keplr) => {
-              keplr?.experimentalSuggestChain({
-                rpc: "https://rpc.testnet.osmosis.zone",
-                rest: "https://lcd.testnet.osmosis.zone",
-                chainId: "osmo-test-5",
-                chainName: "Osmosis Testnet",
-                chainSymbolImageUrl:
-                  "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/osmosis/chain.png",
-                bip44: {
-                  coinType: 118,
-                },
-                bech32Config: {
-                  bech32PrefixAccAddr: "osmo",
-                  bech32PrefixAccPub: "osmopub",
-                  bech32PrefixValAddr: "osmovaloper",
-                  bech32PrefixValPub: "osmovaloperpub",
-                  bech32PrefixConsAddr: "osmovalcons",
-                  bech32PrefixConsPub: "osmovalconspub",
-                },
-                stakeCurrency: {
-                  coinDenom: "OSMO",
-                  coinMinimalDenom: "uosmo",
-                  coinDecimals: 6,
-                  coinImageUrl:
-                    "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/osmosis/uosmo.png",
-                },
-                currencies: [
-                  {
-                    coinDenom: "OSMO",
-                    coinMinimalDenom: "uosmo",
-                    coinDecimals: 6,
-                    coinImageUrl:
-                      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/osmosis/uosmo.png",
-                  },
-                  {
-                    coinDenom: "ION",
-                    coinMinimalDenom: "uion",
-                    coinDecimals: 6,
-                    coinImageUrl:
-                      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/osmosis/uion.png",
-                  },
-                ],
-                feeCurrencies: [
-                  {
-                    coinDenom: "OSMO",
-                    coinMinimalDenom: "uosmo",
-                    coinDecimals: 6,
-                    coinImageUrl:
-                      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/osmosis/uosmo.png",
-                    gasPriceStep: {
-                      low: 0.0025,
-                      average: 0.025,
-                      high: 0.04,
-                    },
-                  },
-                ],
-                features: [],
-              });
-            });
-        }}
-      >
-        Suggest Chain
-      </button>
-
-      <button
-        onClick={() => {
-          accountStore
-            .getAccount(chainStore.chainInfos[0].chainId)
-            .getKeplr()
-            .then((keplr) => {
-              keplr?.suggestToken(
-                "juno-1",
-                "juno10vgf2u03ufcf25tspgn05l7j3tfg0j63ljgpffy98t697m5r5hmqaw95ux"
-              );
-            });
-        }}
-      >
-        Suggest Token
-      </button>
+      <div>{balance}</div>
     </div>
   );
 });
