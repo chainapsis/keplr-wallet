@@ -291,7 +291,23 @@ export class KeyRingStarknetService {
             selectedAddress
           );
 
-          return await account.execute(params.calls);
+          const calls: Call[] = [];
+          if (!Array.isArray(params.calls)) {
+            calls.push({
+              contractAddress: params.calls.contract_address,
+              entrypoint: params.calls.entry_point,
+              calldata: params.calls.calldata,
+            });
+          } else {
+            for (const call of params.calls) {
+              calls.push({
+                contractAddress: call.contract_address,
+                entrypoint: call.entry_point,
+                calldata: call.calldata,
+              });
+            }
+          }
+          return await account.execute(calls);
         }
         case "wallet_addDeclareTransaction": {
           // TODO
