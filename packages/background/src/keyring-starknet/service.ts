@@ -557,7 +557,7 @@ export class KeyRingStarknetService {
   }
 
   async signStarknetDeployAccountTransaction(
-    _env: Env,
+    env: Env,
     _origin: string,
     vaultId: string,
     chainId: string,
@@ -566,6 +566,12 @@ export class KeyRingStarknetService {
     transaction: DeployAccountSignerDetails;
     signature: string[];
   }> {
+    if (!env.isInternalMsg) {
+      throw new Error(
+        "This function is not yet allowed for the external message"
+      );
+    }
+
     // TODO: tx에서 signer와 실제 계정 / chain id에 대해서 validation 넣기
 
     const compiledConstructorCalldata = CallData.compile(
