@@ -1,3 +1,5 @@
+import { AppCurrency } from "./currency";
+
 export enum EthSignType {
   MESSAGE = "message",
   TRANSACTION = "transaction",
@@ -45,6 +47,7 @@ export interface EVMInfo {
   chainId: number;
   rpc: string;
   websocket?: string;
+  nativeCurrency?: AppCurrency;
 }
 
 export interface EthereumSignResponse {

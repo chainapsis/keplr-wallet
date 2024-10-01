@@ -4,6 +4,7 @@ import {
   BIP44,
   ChainInfo,
   Currency,
+  EVMInfo,
   FeeCurrency,
 } from "@keplr-wallet/types";
 
@@ -62,11 +63,6 @@ export interface IChainInfoImpl<C extends ChainInfo = ChainInfo> {
   readonly walletUrl: string | undefined;
   readonly walletUrlForStaking: string | undefined;
   readonly chainSymbolImageUrl: string | undefined;
-  readonly evm:
-    | {
-        chainId: number;
-        rpc: string;
-      }
-    | undefined;
+  readonly evm: EVMInfo | undefined;
   readonly hideInUI: boolean | undefined;
 }

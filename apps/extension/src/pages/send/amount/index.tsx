@@ -269,7 +269,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       const isERC20 = sendingDenomHelper.type === "erc20";
       const isSendingNativeToken =
         sendingDenomHelper.type === "native" &&
-        (chainInfo.stakeCurrency?.coinMinimalDenom ??
+        (chainInfo.evm?.nativeCurrency?.coinMinimalDenom ??
           chainInfo.currencies[0].coinMinimalDenom) ===
           sendingDenomHelper.denom;
       const newIsEvmTx =
@@ -281,7 +281,28 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         ? account.ethereumHexAddress
         : account.bech32Address;
 
+      if (sendConfigs.feeConfig.type !== "manual") {
+        if (newIsEvmTx && chainInfo.evm?.nativeCurrency != null) {
+          sendConfigs.feeConfig.setSelectableFeeCurrencies([
+            chainInfo.evm.nativeCurrency,
+          ]);
+          sendConfigs.feeConfig.setFee({
+            type: sendConfigs.feeConfig.type,
+            currency: chainInfo.evm.nativeCurrency,
+          });
+        } else {
+          sendConfigs.feeConfig.setSelectableFeeCurrencies(
+            chainInfo.feeCurrencies.slice(0, 1)
+          );
+          sendConfigs.feeConfig.setFee({
+            type: sendConfigs.feeConfig.type,
+            currency: sendConfigs.feeConfig.selectableFeeCurrencies[0],
+          });
+        }
+      }
+
       sendConfigs.senderConfig.setValue(newSenderAddress);
+
       setIsEvmTx(newIsEvmTx);
       ethereumAccount.setIsSendingTx(false);
     }
@@ -293,8 +314,10 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     sendConfigs.amountConfig.currency.coinMinimalDenom,
     sendConfigs.recipientConfig.isRecipientEthereumHexAddress,
     sendConfigs.senderConfig,
-    chainInfo.stakeCurrency?.coinMinimalDenom,
     chainInfo.currencies,
+    sendConfigs.feeConfig,
+    chainInfo.evm?.nativeCurrency,
+    chainInfo.feeCurrencies,
   ]);
 
   useEffect(() => {
