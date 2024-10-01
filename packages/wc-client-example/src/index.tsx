@@ -2,10 +2,13 @@
 import "regenerator-runtime/runtime";
 
 import ReactDOM from "react-dom";
+import { StoreProvider } from "./stores";
 import React from "react";
 import { App } from "./app";
-import { getKeplrFromWindow } from "@keplr-wallet/stores";
 
-getKeplrFromWindow().then(() => {
-  ReactDOM.render(<App />, document.getElementById("root"));
-});
+ReactDOM.render(
+  <StoreProvider>
+    <App />
+  </StoreProvider>,
+  document.getElementById("root")
+);
