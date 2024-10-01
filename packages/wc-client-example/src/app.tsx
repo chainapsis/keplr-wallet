@@ -1,17 +1,32 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { AccountInterface, Call, Contract, ProviderInterface } from "starknet";
 import { compiledSierra } from "./sierra";
 import { Dec } from "@keplr-wallet/unit";
 
 export const App: FunctionComponent = observer(() => {
-  const [enabled, setEnabled] = useState(false);
+  const [enabled, setEnabled] = useState(
+    false
+    //(window as any).keplr.starknet.isConnected
+  );
 
-  const [account, setAccount] = useState<AccountInterface | undefined>();
-  const [provider, setProvider] = useState<ProviderInterface | undefined>();
+  const [account, setAccount] = useState<AccountInterface | undefined>(
+    () => (window as any).keplr.starknet.account
+  );
+  const [provider, setProvider] = useState<ProviderInterface | undefined>(
+    () => (window as any).keplr.starknet.provider
+  );
 
   const [erc20, setERC20] = useState<Contract | undefined>();
   const [balance, setBalance] = useState<string | undefined>();
+
+  // account의 주소가 연결 직후에 빈배열로 뜨는 버그가 있음. 일단 나중에 해결한다치고 진행함
+  const [_, setT] = useState(0);
+  useEffect(() => {
+    setInterval(() => {
+      setT((t) => t + 1);
+    }, 1000);
+  }, []);
 
   if (!enabled) {
     return (
