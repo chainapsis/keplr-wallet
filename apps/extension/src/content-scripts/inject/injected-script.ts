@@ -28,6 +28,7 @@ const keplr = new InjectedKeplr(
             keplr.starknet.provider,
             keplr.starknet as any
           );
+          keplr.starknet.account.address = state.selectedAddress;
         } else {
           keplr.starknet.account.address = state.selectedAddress;
         }
