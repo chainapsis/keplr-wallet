@@ -27,11 +27,10 @@ import {
   TypedData,
   ProviderInterface,
   RpcProvider,
-  AccountInterface,
-  Account,
 } from "starknet";
 import { InteractionService } from "../interaction";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { AccountImpl } from "./account-impl";
 
 export class KeyRingStarknetService {
   constructor(
@@ -50,8 +49,8 @@ export class KeyRingStarknetService {
     env: Env,
     origin: string,
     address: string
-  ): AccountInterface {
-    return new Account(
+  ): AccountImpl {
+    return new AccountImpl(
       this.generateProviderInterface(env, origin),
       address,
       this.generateSignerInterface(env, origin),
@@ -307,7 +306,13 @@ export class KeyRingStarknetService {
               });
             }
           }
-          return await account.execute(calls);
+          return await account.executeWithSignUI(
+            env,
+            origin,
+            currentChainId,
+            this,
+            calls
+          );
         }
         case "wallet_addDeclareTransaction": {
           // TODO
@@ -420,6 +425,7 @@ export class KeyRingStarknetService {
     return this.formatEthSignature(sig);
   }
 
+  // TODO: noChangeTx 기능은 아직 작동하지 않음
   async signStarknetTransactionSelected(
     env: Env,
     origin: string,
