@@ -70,7 +70,7 @@ export class KeyRingStarknetService {
     );
   }
 
-  generateProviderInterface(_env: Env, _origin: string): ProviderInterface {
+  generateProviderInterface(_env: Env, origin: string): ProviderInterface {
     const chainId = this.permissionService.getCurrentChainIdForStarknet(origin);
     if (!chainId) {
       throw new Error("Chain id is not set");
