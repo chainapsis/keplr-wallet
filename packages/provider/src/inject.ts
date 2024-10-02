@@ -499,6 +499,9 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
       chainId: string | null;
       rpc: string | null;
     }) => void,
+    protected readonly onStarknetAccountChange: (state: {
+      selectedAddress: string | null;
+    }) => void,
     protected readonly eventListener: {
       addMessageListener: (fn: (e: any) => void) => void;
       removeMessageListener: (fn: (e: any) => void) => void;
@@ -1016,6 +1019,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
       this.starknetProviderInfo.icon,
       () => this,
       this.onStarknetStateChange,
+      this.onStarknetAccountChange,
       this.eventListener,
       this.parseMessage
     );
@@ -1324,6 +1328,9 @@ class StarknetProvider implements IStarknetProvider {
       chainId: string | null;
       rpc: string | null;
     }) => void,
+    protected readonly onAccountChange: (state: {
+      selectedAddress: string | null;
+    }) => void,
     protected readonly _eventListener: {
       addMessageListener: (fn: (e: any) => void) => void;
       removeMessageListener: (fn: (e: any) => void) => void;
@@ -1347,6 +1354,12 @@ class StarknetProvider implements IStarknetProvider {
           await this._injectedKeplr().getStarknetKey(this._currentChainId)
         ).hexAddress;
 
+        this.selectedAddress = selectedAddress;
+
+        this.onAccountChange({
+          selectedAddress,
+        });
+
         this._userWalletEvents.forEach((userWalletEvent) => {
           if (userWalletEvent.type === "accountsChanged") {
             userWalletEvent.handler([selectedAddress]);
@@ -1357,12 +1370,13 @@ class StarknetProvider implements IStarknetProvider {
 
     window.addEventListener("keplr_starknetChainChanged", (event) => {
       const origin = (event as CustomEvent).detail.origin;
+      const starknetChainId = (event as CustomEvent).detail.starknetChainId;
+
+      this.chainId = starknetChainId;
 
       if (origin === window.location.origin) {
         this._userWalletEvents.forEach((userWalletEvent) => {
           if (userWalletEvent.type === "networkChanged") {
-            const starknetChainId = (event as CustomEvent).detail
-              .starknetChainId;
             userWalletEvent.handler(starknetChainId);
           }
         });

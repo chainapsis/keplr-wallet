@@ -40,6 +40,13 @@ const keplr = new InjectedKeplr(
       keplr.starknet.account = undefined;
     }
   },
+  (state) => {
+    if (state.selectedAddress) {
+      if (keplr.starknet.account) {
+        keplr.starknet.account.address = state.selectedAddress;
+      }
+    }
+  },
   {
     addMessageListener: (fn: (e: any) => void) =>
       window.addEventListener("message", fn),
@@ -56,8 +63,8 @@ const keplr = new InjectedKeplr(
     rdns: process.env.KEPLR_EXT_EIP6963_PROVIDER_INFO_RDNS,
   },
   {
-    id: process.env.KEPLR_EXT_STARKNET_PROVIDER_INFO_ID,
-    name: process.env.KEPLR_EXT_STARKNET_PROVIDER_INFO_NAME,
+    id: "braavos",
+    name: "Braavos",
     icon: process.env.KEPLR_EXT_STARKNET_PROVIDER_INFO_ICON,
   }
 );
