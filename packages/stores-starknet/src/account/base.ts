@@ -1,13 +1,16 @@
 import { ChainGetter } from "@keplr-wallet/stores";
 import { ERC20Currency, Keplr } from "@keplr-wallet/types";
 import { action, makeObservable, observable } from "mobx";
-import { uint256, Call, RawArgs } from "starknet";
+import { uint256, Call, RawArgs, DeployContractResponse } from "starknet";
 import { StoreAccount } from "./internal";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 
 export class StarknetAccountBase {
   @observable
   protected _isSendingTx: boolean = false;
+
+  @observable
+  protected _isDeployingAccount: boolean = false;
 
   constructor(
     protected readonly chainGetter: ChainGetter,
@@ -24,6 +27,10 @@ export class StarknetAccountBase {
 
   get isSendingTx(): boolean {
     return this._isSendingTx;
+  }
+
+  get isDeployingAccount(): boolean {
+    return this._isDeployingAccount;
   }
 
   async estimateDeployAccount(
@@ -62,7 +69,14 @@ export class StarknetAccountBase {
     classHash: string,
     constructorCalldata: RawArgs,
     addressSalt: string,
-    feeType: "ETH" | "STRK"
+    feeType: "ETH" | "STRK",
+    {
+      onFulfilled,
+      onBroadcastFailed,
+    }: {
+      onFulfilled?: (res: DeployContractResponse) => void;
+      onBroadcastFailed?: (e?: Error) => void;
+    } = {}
   ) {
     const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
     if (!("starknet" in modularChainInfo)) {
@@ -76,16 +90,25 @@ export class StarknetAccountBase {
       this.getKeplr
     );
 
-    return await walletAccount.deployAccount(
-      {
-        classHash,
-        constructorCalldata,
-        addressSalt,
-      },
-      {
-        version: feeType === "ETH" ? "0x1" : "0x3",
-      }
-    );
+    try {
+      this._isDeployingAccount = true;
+      const res = await walletAccount.deployAccount(
+        {
+          classHash,
+          constructorCalldata,
+          addressSalt,
+        },
+        {
+          version: feeType === "ETH" ? "0x1" : "0x3",
+        }
+      );
+
+      this._isDeployingAccount = false;
+      onFulfilled?.(res);
+    } catch (e) {
+      this._isDeployingAccount = false;
+      onBroadcastFailed?.(e);
+    }
   }
 
   async estimateInvokeFee(

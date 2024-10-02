@@ -24,6 +24,8 @@ import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { FeeControl } from "../input/fee-control";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
+import { num } from "starknet";
+import { useNotification } from "../../../../hooks/notification";
 
 const Styles = {
   Container: styled.div`
@@ -44,8 +46,9 @@ const Styles = {
 
 export const AccountActivationModal: FunctionComponent<{
   close: () => void;
+  goBack: () => void;
   chainId: string;
-}> = observer(({ close, chainId }) => {
+}> = observer(({ close, goBack, chainId }) => {
   const {
     chainStore,
     accountStore,
@@ -146,19 +149,38 @@ export const AccountActivationModal: FunctionComponent<{
               feeConfig.type
             );
 
-          const fee = new CoinPretty(feeCurrency, res.overall_fee);
-          const maxFee = new CoinPretty(feeCurrency, res.suggestedMaxFee);
-          feeConfig.setGasPrice({
-            gasPrice: fee.quo(new Dec(res.gas_consumed)),
-            maxGasPrice: maxFee.quo(new Dec(res.gas_consumed)),
-          });
+          if (type === "ETH") {
+            // ETH 타입에서 gas는 필요없기 때문에 대충 고정값으로 처리한다.
+            const gas = 100000;
+            const fee = new CoinPretty(feeCurrency, res.suggestedMaxFee);
+            const maxFee = new CoinPretty(
+              feeCurrency,
+              new Dec(res.suggestedMaxFee).mul(new Dec(1.1))
+            );
+            feeConfig.setGasPrice({
+              gasPrice: fee.quo(new Dec(gas)),
+              maxGasPrice: maxFee.quo(new Dec(gas)),
+            });
 
-          return {
-            // * 1.2 + 1600은 매직너버임...
-            gasUsed: Math.ceil(
-              parseInt(res.gas_consumed.toString()) * 1.2 + 600
-            ),
-          };
+            return {
+              gasUsed: gas,
+            };
+          } else {
+            const gas = new Dec(
+              num.toBigInt(res.resourceBounds.l1_gas.max_amount)
+            ).mul(new Dec("1.1"));
+            const gasPrice = new Dec(
+              num.toBigInt(res.resourceBounds.l1_gas.max_price_per_unit)
+            );
+            const maxGasPrice = gasPrice.mul(new Dec("1.1"));
+            feeConfig.setGasPrice({
+              gasPrice: new CoinPretty(feeCurrency, gasPrice),
+              maxGasPrice: new CoinPretty(feeCurrency, maxGasPrice),
+            });
+            return {
+              gasUsed: Math.ceil(parseFloat(gas.toString())),
+            };
+          }
         },
       };
     }
@@ -169,6 +191,8 @@ export const AccountActivationModal: FunctionComponent<{
     feeConfig,
     gasSimulator,
   });
+
+  const notification = useNotification();
 
   return (
     <Styles.Container>
@@ -223,7 +247,7 @@ export const AccountActivationModal: FunctionComponent<{
               color="secondary"
               size="large"
               onClick={() => {
-                close();
+                goBack();
               }}
             />
           </Column>
@@ -237,30 +261,55 @@ export const AccountActivationModal: FunctionComponent<{
               size="large"
               disabled={interactionBlocked}
               onClick={async () => {
-                const msg = new GetStarknetKeyParamsMsg(senderConfig.chainId);
-                const params =
-                  await new InExtensionMessageRequester().sendMessage(
-                    BACKGROUND_PORT,
-                    msg
-                  );
+                try {
+                  const msg = new GetStarknetKeyParamsMsg(senderConfig.chainId);
+                  const params =
+                    await new InExtensionMessageRequester().sendMessage(
+                      BACKGROUND_PORT,
+                      msg
+                    );
 
-                starknetAccountStore
-                  .getAccount(senderConfig.chainId)
-                  .deployAccount(
-                    accountStore.getAccount(senderConfig.chainId)
-                      .starknetHexAddress,
-                    "0x" + Buffer.from(params.classHash).toString("hex"),
-                    [
-                      "0x" + Buffer.from(params.xLow).toString("hex"),
-                      "0x" + Buffer.from(params.xHigh).toString("hex"),
-                      "0x" + Buffer.from(params.yLow).toString("hex"),
-                      "0x" + Buffer.from(params.yHigh).toString("hex"),
-                    ],
-                    "0x" + Buffer.from(params.salt).toString("hex"),
-                    feeConfig.type
-                  )
-                  .then(console.log)
-                  .catch(console.log);
+                  starknetAccountStore
+                    .getAccount(senderConfig.chainId)
+                    .deployAccount(
+                      accountStore.getAccount(senderConfig.chainId)
+                        .starknetHexAddress,
+                      "0x" + Buffer.from(params.classHash).toString("hex"),
+                      [
+                        "0x" + Buffer.from(params.xLow).toString("hex"),
+                        "0x" + Buffer.from(params.xHigh).toString("hex"),
+                        "0x" + Buffer.from(params.yLow).toString("hex"),
+                        "0x" + Buffer.from(params.yHigh).toString("hex"),
+                      ],
+                      "0x" + Buffer.from(params.salt).toString("hex"),
+                      feeConfig.type,
+                      {
+                        onFulfilled: (res) => {
+                          console.log("res", res);
+                          notification.show(
+                            "success",
+                            intl.formatMessage({
+                              id: "notification.transaction-success",
+                            }),
+                            ""
+                          );
+                        },
+                        onBroadcastFailed: () => {
+                          notification.show(
+                            "failed",
+                            intl.formatMessage({
+                              id: "error.transaction-failed",
+                            }),
+                            ""
+                          );
+                        },
+                      }
+                    );
+
+                  close();
+                } catch (e) {
+                  console.log(e);
+                }
               }}
             />
           </Column>

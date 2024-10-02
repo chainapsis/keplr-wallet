@@ -647,7 +647,9 @@
   "button.save": "Save",
   "button.close": "Close",
   "button.back": "Back",
+  "button.activate-account": "Activate Account",
   "button.activate": "Activate",
+  "button.activating": "Activating",
   "text-button.select-all": "Select All",
 
   "notification.transaction-success": "Transaction Success",

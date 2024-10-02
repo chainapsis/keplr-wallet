@@ -44,6 +44,7 @@ import { AddRecentSendHistoryMsg } from "@keplr-wallet/background";
 import { useStarknetTxConfigsQueryString } from "../../../hooks/starknet/use-tx-configs-query-string";
 import { Modal } from "../../../components/modal";
 import { AccountActivationModal } from "../components/account-activation-modal";
+import { LoadingIcon } from "../../../components/icon";
 
 const Styles = {
   Flex1: styled.div`
@@ -134,6 +135,7 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
   }, [navigate, initialChainId, initialCoinMinimalDenom]);
 
   const account = accountStore.getAccount(chainId);
+  const starknetAccount = starknetAccountStore.getAccount(chainId);
 
   const sender = account.starknetHexAddress;
   const balance = starknetQueriesStore
@@ -243,17 +245,15 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
         }> => {
           noop(gasSimulationRefresher.count);
 
-          const res = await starknetAccountStore
-            .getAccount(chainId)
-            .estimateInvokeFeeForSendTokenTx(
-              {
-                currency: currency,
-                amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
-                sender: sendConfigs.senderConfig.sender,
-                recipient: sendConfigs.recipientConfig.recipient,
-              },
-              type
-            );
+          const res = await starknetAccount.estimateInvokeFeeForSendTokenTx(
+            {
+              currency: currency,
+              amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
+              sender: sendConfigs.senderConfig.sender,
+              recipient: sendConfigs.recipientConfig.recipient,
+            },
+            type
+          );
 
           if (type === "ETH") {
             // ETH 타입에서 gas는 필요없기 때문에 대충 고정값으로 처리한다.
@@ -343,14 +343,30 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
         )
       }
       bottomButton={{
-        disabled: txConfigsValidate.interactionBlocked,
-        text: intl.formatMessage({ id: "button.next" }),
+        disabled:
+          starknetAccount.isDeployingAccount ||
+          (!isAccountNotDeployed && txConfigsValidate.interactionBlocked),
+        left: starknetAccount.isDeployingAccount ? (
+          <Box marginRight="0.25rem">
+            <LoadingIcon width="1rem" height="1rem" />
+          </Box>
+        ) : undefined,
+        text: starknetAccount.isDeployingAccount
+          ? `${intl.formatMessage({ id: "button.activating" })}...`
+          : isAccountNotDeployed
+          ? intl.formatMessage({ id: "button.activate-account" })
+          : intl.formatMessage({ id: "button.next" }),
         color: "primary",
         size: "large",
         isLoading,
       }}
       onSubmit={async (e) => {
         e.preventDefault();
+
+        if (isAccountNotDeployed) {
+          setIsAccountActivationModalOpen(true);
+          return;
+        }
 
         if (
           !txConfigsValidate.interactionBlocked &&
@@ -510,7 +526,8 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
             close={() => navigate(-1)}
           >
             <AccountActivationModal
-              close={() => navigate(-1)}
+              close={() => setIsAccountActivationModalOpen(false)}
+              goBack={() => navigate(-1)}
               chainId={chainId}
             />
           </Modal>
