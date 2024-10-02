@@ -261,54 +261,91 @@ export const AccountActivationModal: FunctionComponent<{
               size="large"
               disabled={interactionBlocked}
               onClick={async () => {
-                try {
-                  const msg = new GetStarknetKeyParamsMsg(senderConfig.chainId);
-                  const params =
-                    await new InExtensionMessageRequester().sendMessage(
-                      BACKGROUND_PORT,
-                      msg
+                if (feeConfig.maxFee && feeConfig.maxGasPrice) {
+                  try {
+                    const msg = new GetStarknetKeyParamsMsg(
+                      senderConfig.chainId
                     );
+                    const params =
+                      await new InExtensionMessageRequester().sendMessage(
+                        BACKGROUND_PORT,
+                        msg
+                      );
 
-                  starknetAccountStore
-                    .getAccount(senderConfig.chainId)
-                    .deployAccount(
-                      accountStore.getAccount(senderConfig.chainId)
-                        .starknetHexAddress,
-                      "0x" + Buffer.from(params.classHash).toString("hex"),
-                      [
-                        "0x" + Buffer.from(params.xLow).toString("hex"),
-                        "0x" + Buffer.from(params.xHigh).toString("hex"),
-                        "0x" + Buffer.from(params.yLow).toString("hex"),
-                        "0x" + Buffer.from(params.yHigh).toString("hex"),
-                      ],
-                      "0x" + Buffer.from(params.salt).toString("hex"),
-                      feeConfig.type,
-                      {
-                        onFulfilled: (res) => {
-                          console.log("res", res);
-                          notification.show(
-                            "success",
-                            intl.formatMessage({
-                              id: "notification.transaction-success",
-                            }),
-                            ""
-                          );
-                        },
-                        onBroadcastFailed: () => {
-                          notification.show(
-                            "failed",
-                            intl.formatMessage({
-                              id: "error.transaction-failed",
-                            }),
-                            ""
-                          );
-                        },
-                      }
-                    );
+                    const type = feeConfig.type;
+                    const feeContractAddress =
+                      type === "ETH"
+                        ? starknet.ethContractAddress
+                        : starknet.strkContractAddress;
+                    const feeCurrency = chainStore
+                      .getModularChainInfoImpl(chainId)
+                      .getCurrencies("starknet")
+                      .find(
+                        (cur) =>
+                          cur.coinMinimalDenom === `erc20:${feeContractAddress}`
+                      );
+                    if (!feeCurrency) {
+                      throw new Error("Can't find fee currency");
+                    }
 
-                  close();
-                } catch (e) {
-                  console.log(e);
+                    starknetAccountStore
+                      .getAccount(senderConfig.chainId)
+                      .deployAccountWithFee(
+                        accountStore.getAccount(senderConfig.chainId)
+                          .starknetHexAddress,
+                        "0x" + Buffer.from(params.classHash).toString("hex"),
+                        [
+                          "0x" + Buffer.from(params.xLow).toString("hex"),
+                          "0x" + Buffer.from(params.xHigh).toString("hex"),
+                          "0x" + Buffer.from(params.yLow).toString("hex"),
+                          "0x" + Buffer.from(params.yHigh).toString("hex"),
+                        ],
+                        "0x" + Buffer.from(params.salt).toString("hex"),
+                        (() => {
+                          if (type === "ETH") {
+                            return {
+                              type: "ETH",
+                              maxFee: feeConfig.maxFee.toCoin().amount,
+                            };
+                          } else if (type === "STRK") {
+                            return {
+                              type: "STRK",
+                              gas: gasConfig.gas.toString(),
+                              maxGasPrice: num.toHex(
+                                feeConfig.maxGasPrice.toCoin().amount
+                              ),
+                            };
+                          } else {
+                            throw new Error("Invalid fee type");
+                          }
+                        })(),
+                        {
+                          onFulfilled: (res) => {
+                            console.log("res", res);
+                            notification.show(
+                              "success",
+                              intl.formatMessage({
+                                id: "notification.transaction-success",
+                              }),
+                              ""
+                            );
+                          },
+                          onBroadcastFailed: () => {
+                            notification.show(
+                              "failed",
+                              intl.formatMessage({
+                                id: "error.transaction-failed",
+                              }),
+                              ""
+                            );
+                          },
+                        }
+                      );
+
+                    close();
+                  } catch (e) {
+                    console.log(e);
+                  }
                 }
               }}
             />

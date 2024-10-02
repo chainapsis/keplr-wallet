@@ -14,6 +14,7 @@ import {
   DeployContractResponse,
   CallData,
   hash as starknetHash,
+  DeployAccountSignerDetails,
 } from "starknet";
 import { Keplr } from "@keplr-wallet/types";
 
@@ -84,6 +85,92 @@ export class StoreAccount extends Account {
         version,
         nonce,
       });
+
+    return this.deployAccountContract(
+      { classHash, addressSalt, constructorCalldata, signature },
+      {
+        ...stark.v3Details(newTransaction),
+        ...newTransaction,
+      }
+    );
+  }
+
+  public async deployAccountWithFee(
+    {
+      classHash,
+      constructorCalldata = [],
+      addressSalt = 0,
+      contractAddress: providedContractAddress,
+    }: DeployAccountContractPayload,
+    fee:
+      | {
+          type: "ETH";
+          maxFee: string;
+        }
+      | {
+          type: "STRK";
+          gas: string;
+          maxGasPrice: string;
+        }
+  ): Promise<DeployContractResponse> {
+    const nonce = 0; // DEPLOY_ACCOUNT transaction will have a nonce zero as it is the first transaction in the account
+    const chainId = await this.getChainId();
+
+    const compiledCalldata = CallData.compile(constructorCalldata);
+    const contractAddress =
+      providedContractAddress ??
+      starknetHash.calculateContractAddressFromHash(
+        addressSalt,
+        classHash,
+        compiledCalldata,
+        0
+      );
+
+    const signerDetails: DeployAccountSignerDetails = (() => {
+      switch (fee.type) {
+        case "ETH":
+          throw new Error("!!");
+        case "STRK":
+          return {
+            classHash,
+            constructorCalldata: compiledCalldata,
+            contractAddress,
+            addressSalt,
+
+            version: "0x3",
+            nonce: nonce,
+            chainId: chainId,
+
+            resourceBounds: {
+              l1_gas: {
+                max_amount: num.toHex(fee.gas),
+                max_price_per_unit: num.toHex(fee.maxGasPrice),
+              },
+              l2_gas: {
+                max_amount: "0x0",
+                max_price_per_unit: "0x0",
+              },
+            },
+            tip: "0x0",
+            paymasterData: [],
+            accountDeploymentData: [],
+            nonceDataAvailabilityMode: "L1",
+            feeDataAvailabilityMode: "L1",
+          };
+        default:
+          throw new Error("Invalid fee type");
+      }
+    })();
+
+    const keplr = await this.getKeplr();
+    if (!keplr) {
+      throw new Error("Keplr is not initialized");
+    }
+    const { transaction: newTransaction, signature } =
+      await keplr.signStarknetDeployAccountTransaction(
+        this.keplrChainId,
+        signerDetails
+      );
 
     return this.deployAccountContract(
       { classHash, addressSalt, constructorCalldata, signature },

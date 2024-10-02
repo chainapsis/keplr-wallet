@@ -111,6 +111,60 @@ export class StarknetAccountBase {
     }
   }
 
+  async deployAccountWithFee(
+    sender: string,
+    classHash: string,
+    constructorCalldata: RawArgs,
+    addressSalt: string,
+    fee:
+      | {
+          type: "ETH";
+          maxFee: string;
+        }
+      | {
+          type: "STRK";
+          gas: string;
+          maxGasPrice: string;
+        },
+    {
+      onFulfilled,
+      onBroadcastFailed,
+    }: {
+      onFulfilled?: (res: DeployContractResponse) => void;
+      onBroadcastFailed?: (e?: Error) => void;
+    } = {}
+  ) {
+    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("starknet" in modularChainInfo)) {
+      throw new Error(`${this.chainId} is not starknet chain`);
+    }
+
+    const walletAccount = new StoreAccount(
+      modularChainInfo.starknet.rpc,
+      sender,
+      this.chainId,
+      this.getKeplr
+    );
+
+    try {
+      this._isDeployingAccount = true;
+      const res = await walletAccount.deployAccountWithFee(
+        {
+          classHash,
+          constructorCalldata,
+          addressSalt,
+        },
+        fee
+      );
+
+      this._isDeployingAccount = false;
+      onFulfilled?.(res);
+    } catch (e) {
+      this._isDeployingAccount = false;
+      onBroadcastFailed?.(e);
+    }
+  }
+
   async estimateInvokeFee(
     sender: string,
     calls: Call[],
