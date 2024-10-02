@@ -1008,23 +1008,27 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     ]);
   }
 
+  generateStarknetProvider(): IStarknetProvider {
+    return new StarknetProvider(
+      this.starknetProviderInfo.id,
+      this.starknetProviderInfo.name,
+      this.version,
+      this.starknetProviderInfo.icon,
+      () => this,
+      this.onStarknetStateChange,
+      this.eventListener,
+      this.parseMessage
+    );
+  }
+
   public readonly ethereum = new EthereumProvider(
-    this,
+    () => this,
     this.eventListener,
     this.parseMessage,
     this.eip6963ProviderInfo
   );
 
-  public readonly starknet = new StarknetProvider(
-    this.starknetProviderInfo.id,
-    this.starknetProviderInfo.name,
-    this.version,
-    this.starknetProviderInfo.icon,
-    this,
-    this.onStarknetStateChange,
-    this.eventListener,
-    this.parseMessage
-  );
+  public readonly starknet = this.generateStarknetProvider();
 }
 
 class EthereumProvider extends EventEmitter implements IEthereumProvider {
@@ -1042,7 +1046,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
   protected _currentChainId: string | null = null;
 
   constructor(
-    protected readonly injectedKeplr: InjectedKeplr,
+    protected readonly injectedKeplr: () => InjectedKeplr,
     protected readonly eventListener: {
       addMessageListener: (fn: (e: any) => void) => void;
       removeMessageListener: (fn: (e: any) => void) => void;
@@ -1064,13 +1068,13 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
 
     window.addEventListener("keplr_keystorechange", async () => {
       if (this._currentChainId) {
-        const chainInfo = await injectedKeplr.getChainInfoWithoutEndpoints(
+        const chainInfo = await injectedKeplr().getChainInfoWithoutEndpoints(
           this._currentChainId
         );
 
         if (chainInfo) {
           const selectedAddress = (
-            await injectedKeplr.getKey(this._currentChainId)
+            await injectedKeplr().getKey(this._currentChainId)
           ).ethereumHexAddress;
           this._handleAccountsChanged(selectedAddress);
         }
@@ -1314,7 +1318,7 @@ class StarknetProvider implements IStarknetProvider {
     public readonly version: string,
     public readonly icon: string,
 
-    protected readonly _injectedKeplr: InjectedKeplr,
+    protected readonly _injectedKeplr: () => InjectedKeplr,
     protected readonly onStateChange: (state: {
       selectedAddress: string | null;
       chainId: string | null;
@@ -1340,7 +1344,7 @@ class StarknetProvider implements IStarknetProvider {
     window.addEventListener("keplr_keystorechange", async () => {
       if (this._currentChainId) {
         const selectedAddress = (
-          await this._injectedKeplr.getStarknetKey(this._currentChainId)
+          await this._injectedKeplr().getStarknetKey(this._currentChainId)
         ).hexAddress;
 
         this._userWalletEvents.forEach((userWalletEvent) => {

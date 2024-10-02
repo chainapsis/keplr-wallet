@@ -27,7 +27,7 @@ const keplr = new InjectedKeplr(
         if (!keplr.starknet.account) {
           keplr.starknet.account = new WalletAccount(
             keplr.starknet.provider,
-            keplr.starknet as any
+            keplr.generateStarknetProvider()
           );
           keplr.starknet.account.address = state.selectedAddress;
         } else {
