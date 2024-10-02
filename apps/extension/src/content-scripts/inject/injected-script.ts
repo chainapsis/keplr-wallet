@@ -27,7 +27,7 @@ const keplr = new InjectedKeplr(
         if (!keplr.starknet.account) {
           keplr.starknet.account = new WalletAccount(
             keplr.starknet.provider,
-            keplr.starknet as any
+            keplr.generateStarknetProvider()
           );
           keplr.starknet.account.address = state.selectedAddress;
         } else {
@@ -38,6 +38,13 @@ const keplr = new InjectedKeplr(
       }
     } else {
       keplr.starknet.account = undefined;
+    }
+  },
+  (state) => {
+    if (state.selectedAddress) {
+      if (keplr.starknet.account) {
+        keplr.starknet.account.address = state.selectedAddress;
+      }
     }
   },
   {
@@ -56,8 +63,8 @@ const keplr = new InjectedKeplr(
     rdns: process.env.KEPLR_EXT_EIP6963_PROVIDER_INFO_RDNS,
   },
   {
-    id: process.env.KEPLR_EXT_STARKNET_PROVIDER_INFO_ID,
-    name: process.env.KEPLR_EXT_STARKNET_PROVIDER_INFO_NAME,
+    id: "braavos",
+    name: "Braavos",
     icon: process.env.KEPLR_EXT_STARKNET_PROVIDER_INFO_ICON,
   }
 );

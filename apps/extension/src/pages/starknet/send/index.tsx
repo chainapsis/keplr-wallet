@@ -255,38 +255,20 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
             type
           );
 
-          if (type === "ETH") {
-            // ETH 타입에서 gas는 필요없기 때문에 대충 고정값으로 처리한다.
-            const gas = 100000;
-            const fee = new CoinPretty(feeCurrency, res.suggestedMaxFee);
-            const maxFee = new CoinPretty(
-              feeCurrency,
-              new Dec(res.suggestedMaxFee).mul(new Dec(1.1))
-            );
-            sendConfigs.feeConfig.setGasPrice({
-              gasPrice: fee.quo(new Dec(gas)),
-              maxGasPrice: maxFee.quo(new Dec(gas)),
-            });
+          // gas adjustment = 1.2, signature verification = 700
+          const gasConsumed = new Dec(res.gas_consumed);
+          const gasMax = gasConsumed.mul(new Dec(1.2)).add(new Dec(700));
+          const gasPrice = new CoinPretty(feeCurrency, res.gas_price);
+          const maxGasPrice = gasPrice.mul(new Dec(1.2));
 
-            return {
-              gasUsed: gas,
-            };
-          } else {
-            const gas = new Dec(
-              num.toBigInt(res.resourceBounds.l1_gas.max_amount)
-            ).mul(new Dec("1.1"));
-            const gasPrice = new Dec(
-              num.toBigInt(res.resourceBounds.l1_gas.max_price_per_unit)
-            );
-            const maxGasPrice = gasPrice.mul(new Dec("1.1"));
-            sendConfigs.feeConfig.setGasPrice({
-              gasPrice: new CoinPretty(feeCurrency, gasPrice),
-              maxGasPrice: new CoinPretty(feeCurrency, maxGasPrice),
-            });
-            return {
-              gasUsed: Math.ceil(parseFloat(gas.toString())),
-            };
-          }
+          sendConfigs.feeConfig.setGasPrice({
+            gasPrice: gasPrice,
+            maxGasPrice: maxGasPrice,
+          });
+
+          return {
+            gasUsed: parseInt(gasMax.truncate().toString()),
+          };
         },
       };
     }
