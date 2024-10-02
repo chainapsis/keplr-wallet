@@ -27,11 +27,10 @@ import {
   TypedData,
   ProviderInterface,
   RpcProvider,
-  AccountInterface,
-  Account,
 } from "starknet";
 import { InteractionService } from "../interaction";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { AccountImpl } from "./account-impl";
 
 export class KeyRingStarknetService {
   constructor(
@@ -50,8 +49,8 @@ export class KeyRingStarknetService {
     env: Env,
     origin: string,
     address: string
-  ): AccountInterface {
-    return new Account(
+  ): AccountImpl {
+    return new AccountImpl(
       this.generateProviderInterface(env, origin),
       address,
       this.generateSignerInterface(env, origin),
@@ -70,7 +69,7 @@ export class KeyRingStarknetService {
     );
   }
 
-  generateProviderInterface(_env: Env, _origin: string): ProviderInterface {
+  generateProviderInterface(_env: Env, origin: string): ProviderInterface {
     const chainId = this.permissionService.getCurrentChainIdForStarknet(origin);
     if (!chainId) {
       throw new Error("Chain id is not set");
@@ -291,7 +290,29 @@ export class KeyRingStarknetService {
             selectedAddress
           );
 
-          return await account.execute(params.calls);
+          const calls: Call[] = [];
+          if (!Array.isArray(params.calls)) {
+            calls.push({
+              contractAddress: params.calls.contract_address,
+              entrypoint: params.calls.entry_point,
+              calldata: params.calls.calldata,
+            });
+          } else {
+            for (const call of params.calls) {
+              calls.push({
+                contractAddress: call.contract_address,
+                entrypoint: call.entry_point,
+                calldata: call.calldata,
+              });
+            }
+          }
+          return await account.executeWithSignUI(
+            env,
+            origin,
+            currentChainId,
+            this,
+            calls
+          );
         }
         case "wallet_addDeclareTransaction": {
           // TODO
@@ -404,6 +425,7 @@ export class KeyRingStarknetService {
     return this.formatEthSignature(sig);
   }
 
+  // TODO: noChangeTx 기능은 아직 작동하지 않음
   async signStarknetTransactionSelected(
     env: Env,
     origin: string,
@@ -535,7 +557,7 @@ export class KeyRingStarknetService {
   }
 
   async signStarknetDeployAccountTransaction(
-    _env: Env,
+    env: Env,
     _origin: string,
     vaultId: string,
     chainId: string,
@@ -544,6 +566,12 @@ export class KeyRingStarknetService {
     transaction: DeployAccountSignerDetails;
     signature: string[];
   }> {
+    if (!env.isInternalMsg) {
+      throw new Error(
+        "This function is not yet allowed for the external message"
+      );
+    }
+
     // TODO: tx에서 signer와 실제 계정 / chain id에 대해서 validation 넣기
 
     const compiledConstructorCalldata = CallData.compile(
