@@ -24,7 +24,6 @@ import {
   ArrowTopRightOnSquareIcon,
   EyeIcon,
   EyeSlashIcon,
-  LoadingIcon,
 } from "../../components/icon";
 import { Box } from "../../components/box";
 import { Modal } from "../../components/modal";
@@ -41,7 +40,7 @@ import { IChainInfoImpl, QueryError } from "@keplr-wallet/stores";
 import { Skeleton } from "../../components/skeleton";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
-import styled, { useTheme } from "styled-components";
+import styled, { css, keyframes, useTheme } from "styled-components";
 import { IbcHistoryView } from "./components/ibc-history-view";
 import { LayeredHorizontalRadioGroup } from "../../components/radio-group";
 import { XAxis, YAxis } from "../../components/axis";
@@ -311,9 +310,67 @@ export const MainPage: FunctionComponent<{
     }
   }, [uiConfigStore.changelogConfig.showingInfo.length]);
 
+  const [isRefreshButtonVisible, setIsRefreshButtonVisible] = useState(false);
+  const [isRefreshButtonLoading, setIsRefreshButtonLoading] = useState(false);
+  useEffect(() => {
+    if (!isRunningInSidePanel()) {
+      return;
+    }
+
+    const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
+    if (scrollElement) {
+      // 최상단에선 안 보임
+      // 그러나 최상단에서 움직임 없이 5초 지나면 보임
+      // 스크롤 다운 하면 사라짐
+      // 스크롤 업 하면 보임
+      let lastScrollTop = 0;
+      let lastScrollTime = Date.now();
+      const listener = (e: Event) => {
+        if (e.target) {
+          const { scrollTop } = e.target as HTMLDivElement;
+
+          const gap = scrollTop - lastScrollTop;
+          if (gap > 0) {
+            setIsRefreshButtonVisible(false);
+          } else if (gap < 0) {
+            setIsRefreshButtonVisible(true);
+          }
+
+          lastScrollTop = scrollTop;
+          lastScrollTime = Date.now();
+        }
+      };
+      scrollElement.addEventListener("scroll", listener);
+
+      const interval = setInterval(() => {
+        if (lastScrollTop <= 10) {
+          if (Date.now() - lastScrollTime >= 5000) {
+            setIsRefreshButtonVisible(true);
+          }
+        }
+      }, 1000);
+
+      return () => {
+        scrollElement.removeEventListener("scroll", listener);
+        clearInterval(interval);
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <MainHeaderLayout isNotReady={isNotReady}>
-      <RefreshButton visible={!isNotReady && isRunningInSidePanel()} />
+      {/* side panel에서만 보여준다. 보여주는 로직은 isRefreshButtonVisible를 다루는 useEffect를 참고. refresh button이 로딩중이면 모조건 보여준다. */}
+      <RefreshButton
+        visible={
+          !isNotReady &&
+          isRunningInSidePanel() &&
+          (isRefreshButtonVisible || isRefreshButtonLoading)
+        }
+        onSetIsLoading={(isLoading) => {
+          setIsRefreshButtonLoading(isLoading);
+        }}
+      />
       <Box paddingX="0.75rem" paddingBottom="1.5rem">
         <Stack gutter="0.75rem">
           <YAxis alignX="center">
@@ -674,14 +731,55 @@ const Styles = {
   `,
 };
 
+const Rotate = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`;
+
+const RotateIcon = styled.svg<{
+  isLoading: boolean;
+}>`
+  ${({ isLoading }) => {
+    if (isLoading) {
+      return css`
+        animation: ${Rotate} 1.25s linear infinite;
+        animation-play-state: ${isLoading ? "running" : "paused"};
+      `;
+    }
+  }}
+`;
+
 const visibleTranslateY = -40;
 const invisibleTranslateY = 100;
 const RefreshButton: FunctionComponent<{
   visible: boolean;
-}> = observer(({ visible }) => {
+
+  onSetIsLoading: (isLoading: boolean) => void;
+}> = observer(({ visible, onSetIsLoading }) => {
   const { chainStore, queriesStore, accountStore, priceStore } = useStore();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const translateY = useSpringValue(
+    visible ? visibleTranslateY : invisibleTranslateY,
+    {
+      config: defaultSpringConfig,
+    }
+  );
+  useEffect(() => {
+    translateY.start(visible ? visibleTranslateY : invisibleTranslateY);
+  }, [translateY, visible]);
+
+  const onSetIsLoadingRef = useRef(onSetIsLoading);
+  onSetIsLoadingRef.current = onSetIsLoading;
+
+  const [isLoading, _setIsLoading] = useState(false);
+  const setIsLoading = (isLoading: boolean) => {
+    _setIsLoading(isLoading);
+    onSetIsLoadingRef.current(isLoading);
+  };
 
   const refresh = async () => {
     if (isLoading) {
@@ -762,7 +860,10 @@ const RefreshButton: FunctionComponent<{
         promises.push(queryDelegation.waitFreshResponse());
       }
 
-      await Promise.all(promises);
+      await Promise.all([
+        Promise.all(promises),
+        new Promise((resolve) => setTimeout(resolve, 2000)),
+      ]);
     } catch (e) {
       console.log(e);
     } finally {
@@ -791,7 +892,7 @@ const RefreshButton: FunctionComponent<{
         cursor: isLoading ? "progress" : "pointer",
       }}
     >
-      <div
+      <animated.div
         style={{
           padding: "0.75rem 1rem",
           display: "flex",
@@ -802,23 +903,29 @@ const RefreshButton: FunctionComponent<{
           background: ColorPalette["gray-500"],
           boxShadow: "0px 0px 24px 0px rgba(0, 0, 0, 0.25)",
 
-          transform: `translateY(${
-            visible ? visibleTranslateY : invisibleTranslateY
-          }%)`,
+          translateY: translateY.to((v) => `${v}%`),
         }}
       >
         <Subtitle4 color={ColorPalette["gray-50"]}>Refresh</Subtitle4>
-        {isLoading ? (
-          <React.Fragment>
-            <Gutter size="0.25rem" />
-            <LoadingIcon
-              width="1rem"
-              height="1rem"
-              color={ColorPalette["gray-50"]}
-            />
-          </React.Fragment>
-        ) : null}
-      </div>
+        <Gutter size="0.25rem" />
+        <RotateIcon
+          isLoading={isLoading}
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          fill="none"
+          stroke="none"
+          viewBox="0 0 16 16"
+        >
+          <path
+            stroke={ColorPalette["gray-50"]}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.33"
+            d="M11.182 6.232h3.328v0M2.49 13.095V9.768m0 0h3.328m-3.329 0l2.12 2.122a5.5 5.5 0 009.202-2.466M3.188 6.577a5.5 5.5 0 019.202-2.467l2.121 2.121m0-3.327V6.23"
+          />
+        </RotateIcon>
+      </animated.div>
     </div>
   );
 });
