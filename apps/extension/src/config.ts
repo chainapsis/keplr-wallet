@@ -2078,6 +2078,63 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["eth-address-gen", "eth-key-sign"],
   },
   {
+    rpc: 'https://rpc-nolus.keplr.app',
+    rest: 'https://lcd-nolus.keplr.app',
+    chainId: 'pirin-1',
+    chainName: 'Nolus',
+    chainSymbolImageUrl: 'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/pirin/nolus.png',
+    stakeCurrency: {
+      coinDenom: 'NLS',
+      coinMinimalDenom: 'unls',
+      coinDecimals: 6,
+      coinGeckoId: 'nolus',
+      coinImageUrl: 'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/pirin/nolus.png'
+    },
+    walletUrl:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/nolus'
+        : 'http://localhost:8080/chains/nolus',
+    walletUrlForStaking:
+      process.env.NODE_ENV === 'production'
+        ? 'https://wallet.keplr.app/chains/nolus'
+        : 'http://localhost:8080/chains/nolus',
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: 'nolus',
+      bech32PrefixAccPub: 'noluspub',
+      bech32PrefixValAddr: 'nolusvaloper',
+      bech32PrefixValPub: 'nolusvaloperpub',
+      bech32PrefixConsAddr: 'nolusvalcons',
+      bech32PrefixConsPub: 'nolusvalconspub'
+    },
+    currencies: [
+      {
+        coinDenom: 'NLS',
+        coinMinimalDenom: 'unls',
+        coinDecimals: 6,
+        coinGeckoId: 'nolus',
+        coinImageUrl: 'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/pirin/nolus.png'
+      }
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: 'NLS',
+        coinMinimalDenom: 'unls',
+        coinDecimals: 6,
+        coinGeckoId: 'nolus',
+        coinImageUrl: 'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/pirin/nolus.png',
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.025,
+          high: 0.05
+        }
+      }
+    ],
+    features: ['cosmwasm'],
+  },
+  {
     rpc: "https://evm-1.keplr.app",
     rest: "https://evm-1.keplr.app",
     evm: {
