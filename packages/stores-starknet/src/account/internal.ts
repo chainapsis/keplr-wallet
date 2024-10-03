@@ -129,7 +129,33 @@ export class StoreAccount extends Account {
     const signerDetails: DeployAccountSignerDetails = (() => {
       switch (fee.type) {
         case "ETH":
-          throw new Error("!!");
+          return {
+            classHash,
+            constructorCalldata: compiledCalldata,
+            contractAddress,
+            addressSalt,
+
+            version: "0x1",
+            nonce: nonce,
+            chainId: chainId,
+
+            maxFee: num.toHex(fee.maxFee),
+            resourceBounds: {
+              l1_gas: {
+                max_amount: "0x0",
+                max_price_per_unit: "0x0",
+              },
+              l2_gas: {
+                max_amount: "0x0",
+                max_price_per_unit: "0x0",
+              },
+            },
+            tip: "0x0",
+            paymasterData: [],
+            accountDeploymentData: [],
+            nonceDataAvailabilityMode: "L1",
+            feeDataAvailabilityMode: "L1",
+          };
         case "STRK":
           return {
             classHash,
