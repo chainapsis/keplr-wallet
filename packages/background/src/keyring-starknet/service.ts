@@ -31,6 +31,7 @@ import {
 import { InteractionService } from "../interaction";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { AccountImpl } from "./account-impl";
+import { BackgroundTxService } from "../tx";
 
 export class KeyRingStarknetService {
   constructor(
@@ -38,7 +39,8 @@ export class KeyRingStarknetService {
     public readonly keyRingService: KeyRingService,
     protected readonly permissionService: PermissionService,
     protected readonly tokenERC20Service: TokenERC20Service,
-    protected readonly interactionService: InteractionService
+    protected readonly interactionService: InteractionService,
+    protected readonly backgroundTxService: BackgroundTxService
   ) {}
 
   async init() {
@@ -306,13 +308,20 @@ export class KeyRingStarknetService {
               });
             }
           }
-          return await account.executeWithSignUI(
+          const invoked = await account.executeWithSignUI(
             env,
             origin,
             currentChainId,
             this,
             calls
           );
+          // no wait and ignore error.
+          this.backgroundTxService
+            .waitStarknetTransaction(currentChainId, invoked.transaction_hash)
+            .catch((e) => {
+              console.log(e);
+            });
+          return invoked;
         }
         case "wallet_addDeclareTransaction": {
           // TODO

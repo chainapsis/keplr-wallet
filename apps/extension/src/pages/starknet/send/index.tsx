@@ -40,7 +40,10 @@ import { isRunningInSidePanel } from "../../../utils";
 import { num } from "starknet";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
-import { AddRecentSendHistoryMsg } from "@keplr-wallet/background";
+import {
+  AddRecentSendHistoryMsg,
+  SubmitStarknetTxHashMsg,
+} from "@keplr-wallet/background";
 import { useStarknetTxConfigsQueryString } from "../../../hooks/starknet/use-tx-configs-query-string";
 import { Modal } from "../../../components/modal";
 import { AccountActivationModal } from "../components/account-activation-modal";
@@ -380,7 +383,7 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
               denom: currency.coinMinimalDenom,
             };
 
-            await starknetAccountStore
+            const { transaction_hash: txHash } = await starknetAccountStore
               .getAccount(chainId)
               .executeForSendTokenTx(
                 sender,
@@ -407,13 +410,25 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
                 })()
               );
 
-            notification.show(
-              "success",
-              intl.formatMessage({
-                id: "notification.transaction-success",
-              }),
-              ""
-            );
+            new InExtensionMessageRequester()
+              .sendMessage(
+                BACKGROUND_PORT,
+                new SubmitStarknetTxHashMsg(chainId, txHash)
+              )
+              .then(() => {
+                notification.show(
+                  "success",
+                  intl.formatMessage({
+                    id: "notification.transaction-success",
+                  }),
+                  ""
+                );
+              })
+              .catch((e) => {
+                // 이 경우에는 tx가 커밋된 이후의 오류이기 때문에 이미 페이지는 sign 페이지에서부터 전환된 상태다.
+                // 따로 멀 처리해줄 필요가 없다
+                console.log(e);
+              });
 
             new InExtensionMessageRequester().sendMessage(
               BACKGROUND_PORT,
@@ -445,6 +460,9 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
               intl.formatMessage({ id: "error.transaction-failed" }),
               ""
             );
+            navigate("/", {
+              replace: true,
+            });
           } finally {
             setIsLoading(false);
           }
