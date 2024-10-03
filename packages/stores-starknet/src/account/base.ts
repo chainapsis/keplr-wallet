@@ -125,14 +125,7 @@ export class StarknetAccountBase {
           type: "STRK";
           gas: string;
           maxGasPrice: string;
-        },
-    {
-      onFulfilled,
-      onBroadcastFailed,
-    }: {
-      onFulfilled?: (res: DeployContractResponse) => void;
-      onBroadcastFailed?: (e?: Error) => void;
-    } = {}
+        }
   ) {
     const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
     if (!("starknet" in modularChainInfo)) {
@@ -157,11 +150,23 @@ export class StarknetAccountBase {
         fee
       );
 
-      this._isDeployingAccount = false;
-      onFulfilled?.(res);
+      walletAccount
+        .waitForTransaction(res.transaction_hash, {
+          retryInterval: 1000,
+        })
+        .catch((e) => {
+          // 오류 처리는 무시한다.
+          console.log(e);
+        })
+        .finally(() => {
+          this._isDeployingAccount = false;
+        });
+
+      return res;
     } catch (e) {
       this._isDeployingAccount = false;
-      onBroadcastFailed?.(e);
+
+      throw e;
     }
   }
 

@@ -18,7 +18,10 @@ import {
 } from "@keplr-wallet/hooks-starknet";
 import { Button } from "../../../../components/button";
 import { Column, Columns } from "../../../../components/column";
-import { GetStarknetKeyParamsMsg } from "@keplr-wallet/background";
+import {
+  GetStarknetKeyParamsMsg,
+  SubmitStarknetTxHashMsg,
+} from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { FeeControl } from "../input/fee-control";
@@ -270,62 +273,61 @@ export const AccountActivationModal: FunctionComponent<{
                       throw new Error("Can't find fee currency");
                     }
 
-                    starknetAccountStore
-                      .getAccount(senderConfig.chainId)
-                      .deployAccountWithFee(
-                        accountStore.getAccount(senderConfig.chainId)
-                          .starknetHexAddress,
-                        "0x" + Buffer.from(params.classHash).toString("hex"),
-                        [
-                          "0x" + Buffer.from(params.xLow).toString("hex"),
-                          "0x" + Buffer.from(params.xHigh).toString("hex"),
-                          "0x" + Buffer.from(params.yLow).toString("hex"),
-                          "0x" + Buffer.from(params.yHigh).toString("hex"),
-                        ],
-                        "0x" + Buffer.from(params.salt).toString("hex"),
-                        (() => {
-                          if (type === "ETH") {
-                            return {
-                              type: "ETH",
-                              maxFee: feeConfig.maxFee.toCoin().amount,
-                            };
-                          } else if (type === "STRK") {
-                            return {
-                              type: "STRK",
-                              gas: gasConfig.gas.toString(),
-                              maxGasPrice: num.toHex(
-                                feeConfig.maxGasPrice.toCoin().amount
-                              ),
-                            };
-                          } else {
-                            throw new Error("Invalid fee type");
-                          }
-                        })(),
-                        {
-                          onFulfilled: (res) => {
-                            console.log("res", res);
-                            notification.show(
-                              "success",
-                              intl.formatMessage({
-                                id: "notification.transaction-success",
-                              }),
-                              ""
-                            );
-                          },
-                          onBroadcastFailed: (e) => {
-                            console.log(e);
-                            notification.show(
-                              "failed",
-                              intl.formatMessage({
-                                id: "error.transaction-failed",
-                              }),
-                              ""
-                            );
-                          },
-                        }
-                      );
+                    const { transaction_hash: txHash } =
+                      await starknetAccountStore
+                        .getAccount(senderConfig.chainId)
+                        .deployAccountWithFee(
+                          accountStore.getAccount(senderConfig.chainId)
+                            .starknetHexAddress,
+                          "0x" + Buffer.from(params.classHash).toString("hex"),
+                          [
+                            "0x" + Buffer.from(params.xLow).toString("hex"),
+                            "0x" + Buffer.from(params.xHigh).toString("hex"),
+                            "0x" + Buffer.from(params.yLow).toString("hex"),
+                            "0x" + Buffer.from(params.yHigh).toString("hex"),
+                          ],
+                          "0x" + Buffer.from(params.salt).toString("hex"),
+                          (() => {
+                            if (type === "ETH") {
+                              return {
+                                type: "ETH",
+                                maxFee: feeConfig.maxFee.toCoin().amount,
+                              };
+                            } else if (type === "STRK") {
+                              return {
+                                type: "STRK",
+                                gas: gasConfig.gas.toString(),
+                                maxGasPrice: num.toHex(
+                                  feeConfig.maxGasPrice.toCoin().amount
+                                ),
+                              };
+                            } else {
+                              throw new Error("Invalid fee type");
+                            }
+                          })()
+                        );
 
-                    close();
+                    new InExtensionMessageRequester()
+                      .sendMessage(
+                        BACKGROUND_PORT,
+                        new SubmitStarknetTxHashMsg(chainId, txHash)
+                      )
+                      .then(() => {
+                        notification.show(
+                          "success",
+                          intl.formatMessage({
+                            id: "notification.transaction-success",
+                          }),
+                          ""
+                        );
+
+                        close();
+                      })
+                      .catch((e) => {
+                        // 이 경우에는 tx가 커밋된 이후의 오류이기 때문에 이미 페이지는 sign 페이지에서부터 전환된 상태다.
+                        // 따로 멀 처리해줄 필요가 없다
+                        console.log(e);
+                      });
                   } catch (e) {
                     console.log(e);
                   }
