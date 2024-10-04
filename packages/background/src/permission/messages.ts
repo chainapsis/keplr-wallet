@@ -313,3 +313,60 @@ export class UpdateCurrentChainIdForEVMMsg extends Message<void> {
     return UpdateCurrentChainIdForEVMMsg.type();
   }
 }
+
+export class GetCurrentChainIdForStarknetMsg extends Message<
+  string | undefined
+> {
+  public static type() {
+    return "get-current-chain-id-for-starknet";
+  }
+
+  constructor(public readonly permissionOrigin: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.permissionOrigin) {
+      throw new KeplrError("permission", 111, "empty permission origin");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetCurrentChainIdForStarknetMsg.type();
+  }
+}
+
+export class UpdateCurrentChainIdForStarknetMsg extends Message<void> {
+  public static type() {
+    return "update-current-chain-id-for-starknet";
+  }
+
+  constructor(
+    public readonly permissionOrigin: string,
+    public readonly chainId: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.permissionOrigin) {
+      throw new KeplrError("permission", 111, "empty permission origin");
+    }
+
+    if (!this.chainId) {
+      throw new KeplrError("permission", 100, "chain id not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return UpdateCurrentChainIdForStarknetMsg.type();
+  }
+}

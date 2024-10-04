@@ -80,7 +80,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       };
     }
 
-    const fee = this.fee;
+    const maxFee = this.maxFee;
 
     const bal = this.starknetQueriesStore
       .get(this.chainId)
@@ -88,13 +88,13 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         this.chainId,
         this.chainGetter,
         this.senderConfig.value,
-        fee.currency.coinMinimalDenom
+        maxFee.currency.coinMinimalDenom
       );
 
     if (!bal) {
       return {
         warning: new Error(
-          `Can't parse the balance for ${fee.currency.coinMinimalDenom}`
+          `Can't parse the balance for ${maxFee.currency.coinMinimalDenom}`
         ),
       };
     }
@@ -111,7 +111,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       };
     }
 
-    if (new Int(bal.balance.toCoin().amount).lt(new Int(fee.toCoin().amount))) {
+    if (
+      new Int(bal.balance.toCoin().amount).lt(new Int(maxFee.toCoin().amount))
+    ) {
       return {
         error: new InsufficientFeeError("Insufficient fee"),
         loadingState: bal.isFetching ? "loading" : undefined,
@@ -160,8 +162,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     if (!this._gasPrice) {
       return;
     }
-
-    console.log(this.gasConfig.gas, this._gasPrice.toString());
 
     const gasDec = new Dec(this.gasConfig.gas);
     return this._gasPrice.mul(gasDec);

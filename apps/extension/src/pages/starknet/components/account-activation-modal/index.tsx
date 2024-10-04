@@ -179,6 +179,8 @@ export const AccountActivationModal: FunctionComponent<{
 
   const notification = useNotification();
 
+  const starknetAccount = starknetAccountStore.getAccount(chainId);
+
   return (
     <Styles.Container>
       <Box marginBottom="1.25rem" marginLeft="0.5rem" paddingY="0.4rem">
@@ -240,11 +242,19 @@ export const AccountActivationModal: FunctionComponent<{
           <Column weight={1}>
             <Button
               type="button"
-              text={intl.formatMessage({
-                id: "button.activate",
-              })}
+              text={
+                starknetAccount.isDeployingAccount
+                  ? `${intl.formatMessage({
+                      id: "button.activating",
+                    })}...`
+                  : intl.formatMessage({
+                      id: "button.activate",
+                    })
+              }
               size="large"
-              disabled={interactionBlocked}
+              disabled={
+                interactionBlocked || starknetAccount.isDeployingAccount
+              }
               onClick={async () => {
                 if (feeConfig.maxFee && feeConfig.maxGasPrice) {
                   try {
@@ -320,6 +330,21 @@ export const AccountActivationModal: FunctionComponent<{
                           }),
                           ""
                         );
+                        const starknetQueries =
+                          starknetQueriesStore.get(chainId);
+                        starknetQueries.queryAccountNonce
+                          .getNonce(account.starknetHexAddress)
+                          .fetch();
+                        if (feeConfig.fee != null) {
+                          starknetQueries.queryStarknetERC20Balance
+                            .getBalance(
+                              chainId,
+                              chainStore,
+                              account.starknetHexAddress,
+                              feeConfig.fee.currency.coinMinimalDenom
+                            )
+                            ?.fetch();
+                        }
 
                         close();
                       })
