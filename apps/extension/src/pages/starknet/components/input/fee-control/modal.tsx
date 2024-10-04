@@ -106,6 +106,40 @@ export const TransactionFeeModal: FunctionComponent<{
           />
 
           {(() => {
+            const trimMessage = (message: string): string => {
+              if (message) {
+                // 정규 표현식을 사용하여 execution_error 추출
+                const executionErrorMatch = message.match(
+                  /"execution_error":"(.+?)"/g
+                );
+
+                // execution_error 값이 존재하는 경우 출력
+                if (
+                  executionErrorMatch &&
+                  executionErrorMatch[0] &&
+                  executionErrorMatch[0].startsWith('"execution_error":')
+                ) {
+                  let m = executionErrorMatch[0].replace(
+                    '"execution_error":',
+                    ""
+                  );
+                  if (m.length >= 2) {
+                    m = m.substring(1, m.length - 1);
+                  }
+                  const match = m.match(/Failure reason:(.+)/g);
+                  if (
+                    match &&
+                    match[0] &&
+                    match[0].startsWith("Failure reason:")
+                  ) {
+                    message = match[0].replace("Failure reason:", "");
+                    message = message.replace(/\\n/g, "\n"); // 줄 바꿈 문자 처리
+                  }
+                }
+              }
+              return message;
+            };
+
             if (gasSimulator) {
               if (gasSimulator.uiProperties.error) {
                 return (
@@ -115,7 +149,7 @@ export const TransactionFeeModal: FunctionComponent<{
                       id: "components.input.fee-control.modal.guide-title",
                     })}
                     paragraph={
-                      gasSimulator.uiProperties.error.message ||
+                      trimMessage(gasSimulator.uiProperties.error.message) ||
                       gasSimulator.uiProperties.error.toString()
                     }
                   />
@@ -130,7 +164,7 @@ export const TransactionFeeModal: FunctionComponent<{
                       id: "components.input.fee-control.modal.guide-title",
                     })}
                     paragraph={
-                      gasSimulator.uiProperties.warning.message ||
+                      trimMessage(gasSimulator.uiProperties.warning.message) ||
                       gasSimulator.uiProperties.warning.toString()
                     }
                   />
