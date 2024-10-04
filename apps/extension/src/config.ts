@@ -2416,7 +2416,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
   },
   {
     chainId: "starknet:SN_SEPOLIA",
-    chainName: "STRK Sepolia",
+    chainName: "Starknet Sepolia",
     starknet: {
       chainId: "starknet:SN_SEPOLIA",
       rpc: "https://starknet-sepolia.public.blastapi.io/rpc/v0_7",
