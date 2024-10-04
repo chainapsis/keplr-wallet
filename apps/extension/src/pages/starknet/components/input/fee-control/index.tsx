@@ -9,7 +9,11 @@ import {
 } from "@keplr-wallet/hooks-starknet";
 import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../../styles";
-import { Body2, Subtitle4 } from "../../../../../components/typography";
+import {
+  Body2,
+  Caption1,
+  Subtitle4,
+} from "../../../../../components/typography";
 import { LoadingIcon } from "../../../../../components/icon";
 import { Modal } from "../../../../../components/modal";
 import { TransactionFeeModal } from "./modal";
@@ -354,6 +358,85 @@ export const FeeControl: FunctionComponent<{
                   return null;
                 })()}
               </Box>
+            </XAxis>
+          </Box>
+          <Box
+            marginTop="0.375rem"
+            padding="0.125rem 0.25rem"
+            backgroundColor={(() => {
+              if (
+                feeConfig.uiProperties.error ||
+                feeConfig.uiProperties.warning
+              ) {
+                return theme.mode === "light"
+                  ? ColorPalette["orange-800"]
+                  : ColorPalette["yellow-800"];
+              }
+
+              return theme.mode === "light"
+                ? ColorPalette["gray-50"]
+                : ColorPalette["gray-500"];
+            })()}
+            borderRadius="0.5rem"
+          >
+            <XAxis alignY="center">
+              <Caption1
+                color={(() => {
+                  if (
+                    feeConfig.uiProperties.error ||
+                    feeConfig.uiProperties.warning
+                  ) {
+                    return theme.mode === "light"
+                      ? ColorPalette["orange-300"]
+                      : ColorPalette["yellow-300"];
+                  }
+
+                  return theme.mode === "light"
+                    ? ColorPalette["blue-300"]
+                    : ColorPalette["gray-300"];
+                })()}
+              >
+                <FormattedMessage
+                  id="components.input.fee-control.max-fee"
+                  values={{
+                    assets: (() => {
+                      if (!feeConfig.maxFee) {
+                        return "-";
+                      }
+
+                      return feeConfig.maxFee
+                        .maxDecimals(6)
+                        .inequalitySymbol(true)
+                        .trim(true)
+                        .shrink(true)
+                        .hideIBCMetadata(true)
+                        .toString();
+                    })(),
+                  }}
+                />
+              </Caption1>
+              <Caption1
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-300"]
+                }
+                style={{
+                  whiteSpace: "pre-wrap",
+                }}
+              >
+                {` ${(() => {
+                  if (!feeConfig.maxFee) {
+                    return "";
+                  }
+                  if (!feeConfig.maxFee.currency.coinGeckoId) {
+                    return "";
+                  }
+                  return `(${(() => {
+                    return priceStore.calculatePrice(feeConfig.maxFee);
+                  })()})`;
+                })()}`}
+              </Caption1>
             </XAxis>
           </Box>
         </YAxis>

@@ -607,6 +607,7 @@
   "components.input.amount-input.max-button": "Max",
   "components.input.memo-input.memo-label": "Memo",
   "components.input.fee-control.fee": "Tx Fee: {assets}",
+  "components.input.fee-control.max-fee": "Max Fee: {assets}",
   "components.input.fee-control.error.insufficient-fee": "Insufficient balance to cover the fees",
   "components.input.fee-control.tooltip.external-fee-set": "Transaction fee was set by website",
   "components.input.fee-control.modal.title": "Fee Options",
