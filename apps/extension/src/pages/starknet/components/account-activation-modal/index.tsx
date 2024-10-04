@@ -322,7 +322,7 @@ export const AccountActivationModal: FunctionComponent<{
                         BACKGROUND_PORT,
                         new SubmitStarknetTxHashMsg(chainId, txHash)
                       )
-                      .then(async () => {
+                      .then(() => {
                         notification.show(
                           "success",
                           intl.formatMessage({
