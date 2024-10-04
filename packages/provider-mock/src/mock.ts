@@ -95,6 +95,10 @@ export class MockKeplr implements Keplr {
     throw new Error("Not implemented");
   }
 
+  enigmaIsNewApi(): Promise<boolean> {
+    throw new Error("Not implemented");
+  }
+
   experimentalSuggestChain(): Promise<void> {
     throw new Error("Not implemented");
   }

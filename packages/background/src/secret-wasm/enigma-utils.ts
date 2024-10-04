@@ -2,13 +2,18 @@ import { generateKeyPair, sharedKey as x25519 } from "curve25519-js";
 import { hkdf } from "@noble/hashes/hkdf";
 import { sha256 } from "@noble/hashes/sha256";
 import * as miscreant from "miscreant";
-import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import {
+  simpleFetch,
+  isSimpleFetchError,
+  SimpleFetchError,
+} from "@keplr-wallet/simple-fetch";
 import { Buffer } from "buffer/";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 const cryptoProvider = new miscreant.PolyfillCryptoProvider();
 
 export interface EncryptionUtils {
+  isNewApi: boolean;
   getPubkey: () => Promise<Uint8Array>;
   decrypt: (ciphertext: Uint8Array, nonce: Uint8Array) => Promise<Uint8Array>;
   encrypt: (contractCodeHash: string, msg: object) => Promise<Uint8Array>;
@@ -29,6 +34,7 @@ const secretConsensusIoPubKey = new Uint8Array(
 export class EnigmaUtils implements EncryptionUtils {
   private readonly privkey: Uint8Array;
   public readonly pubkey: Uint8Array;
+  public isNewApi: boolean;
   private consensusIoPubKey: Uint8Array = new Uint8Array(); // cache
 
   public constructor(
@@ -49,6 +55,7 @@ export class EnigmaUtils implements EncryptionUtils {
     if (ChainIdHelper.parse(chainId).identifier === "secret") {
       this.consensusIoPubKey = secretConsensusIoPubKey;
     }
+    this.isNewApi = false;
   }
 
   private static secureRandom(count: number): Uint8Array {
@@ -71,14 +78,36 @@ export class EnigmaUtils implements EncryptionUtils {
       return this.consensusIoPubKey;
     }
 
-    const response = await simpleFetch<{ result: { TxKey: string } }>(
-      this.url,
-      "/reg/tx-key"
-    );
+    // try to fetch from the old API
+    try {
+      const response = await simpleFetch<{ result: { TxKey: string } }>(
+        this.url,
+        "/reg/tx-key"
+      );
 
-    this.consensusIoPubKey = new Uint8Array(
-      Buffer.from(response.data.result.TxKey, "base64")
-    );
+      this.consensusIoPubKey = new Uint8Array(
+        Buffer.from(response.data.result.TxKey, "base64")
+      );
+    } catch (e: any) {
+      if (
+        !isSimpleFetchError(e) ||
+        !(e as SimpleFetchError).response ||
+        (e as SimpleFetchError).response?.status != 501
+      ) {
+        throw e;
+      }
+
+      // if old API is not implemented, use the new one
+      const response = await simpleFetch<{ key: string }>(
+        this.url,
+        "/registration/v1beta1/tx-key"
+      );
+
+      this.consensusIoPubKey = new Uint8Array(
+        Buffer.from(response.data.key, "base64")
+      );
+      this.isNewApi = true;
+    }
 
     return this.consensusIoPubKey;
   }
