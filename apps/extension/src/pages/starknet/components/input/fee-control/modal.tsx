@@ -13,7 +13,6 @@ import {
 } from "@keplr-wallet/hooks-starknet";
 import { useStore } from "../../../../../stores";
 import { GuideBox } from "../../../../../components/guide-box";
-import { Dec } from "@keplr-wallet/unit";
 import { Box } from "../../../../../components/box";
 import { FormattedMessage, useIntl } from "react-intl";
 
@@ -49,7 +48,7 @@ export const TransactionFeeModal: FunctionComponent<{
     gasSimulator,
     disableAutomaticFeeSet,
   }) => {
-    const { chainStore, starknetQueriesStore } = useStore();
+    const { chainStore } = useStore();
     const intl = useIntl();
     const theme = useTheme();
 
@@ -91,16 +90,7 @@ export const TransactionFeeModal: FunctionComponent<{
                   return false;
                 }
 
-                const balance = starknetQueriesStore
-                  .get(feeConfig.chainId)
-                  .queryStarknetERC20Balance.getBalance(
-                    feeConfig.chainId,
-                    chainStore,
-                    senderConfig.sender,
-                    cur.coinMinimalDenom
-                  );
-
-                return balance?.balance.toDec().gt(new Dec(0));
+                return true;
               })
               .map((type) => {
                 return {
