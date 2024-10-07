@@ -2415,11 +2415,11 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     features: [],
   },
   {
-    chainId: "starknet:SN_SEPOLIA",
-    chainName: "Starknet Sepolia",
+    chainId: "starknet:SN_MAIN",
+    chainName: "Starknet",
     starknet: {
-      chainId: "starknet:SN_SEPOLIA",
-      rpc: "https://starknet-sepolia.public.blastapi.io/rpc/v0_7",
+      chainId: "starknet:SN_MAIN",
+      rpc: "https://starknet-mainnet.public.blastapi.io/rpc/v0_7",
       currencies: [
         {
           type: "erc20",
@@ -2429,6 +2429,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinMinimalDenom:
             "erc20:0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
           coinDecimals: 18,
+          coinGeckoId: "ethereum",
         },
         {
           type: "erc20",
@@ -2438,6 +2439,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinMinimalDenom:
             "erc20:0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
           coinDecimals: 18,
+          coinGeckoId: "starknet",
         },
       ],
       ethContractAddress:
@@ -2447,11 +2449,11 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     },
   },
   {
-    chainId: "starknet:SN_MAIN",
-    chainName: "Starknet",
+    chainId: "starknet:SN_SEPOLIA",
+    chainName: "Starknet Sepolia",
     starknet: {
-      chainId: "starknet:SN_MAIN",
-      rpc: "https://starknet-mainnet.public.blastapi.io/rpc/v0_7",
+      chainId: "starknet:SN_SEPOLIA",
+      rpc: "https://starknet-sepolia.public.blastapi.io/rpc/v0_7",
       currencies: [
         {
           type: "erc20",
