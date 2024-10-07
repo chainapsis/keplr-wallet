@@ -407,13 +407,19 @@ export class KeyRingStarknetService {
   }
 
   async signStarknetMessage(
-    _env: Env,
+    env: Env,
     _origin: string,
     vaultId: string,
     chainId: string,
     signer: string,
     typedData: StarknetTypedData
   ): Promise<string[]> {
+    if (!env.isInternalMsg) {
+      throw new Error(
+        "This function is not yet allowed for the external message"
+      );
+    }
+
     // TODO: tx에서 signer와 실제 계정 / chain id에 대해서 validation 넣기
 
     let msgHash = starknetTypedDataUtils.getMessageHash(typedData, signer);
@@ -647,12 +653,18 @@ export class KeyRingStarknetService {
   }
 
   async signStarknetDeclareTransactionn(
-    _env: Env,
+    env: Env,
     _origin: string,
     vaultId: string,
     chainId: string,
     details: DeclareSignerDetails
   ): Promise<string[]> {
+    if (!env.isInternalMsg) {
+      throw new Error(
+        "This function is not yet allowed for the external message"
+      );
+    }
+
     // TODO: tx에서 signer와 실제 계정 / chain id에 대해서 validation 넣기
     let msgHash;
 
