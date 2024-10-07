@@ -238,8 +238,6 @@ export class KeyRingStarknetService {
           ];
         }
         case "wallet_getPermissions": {
-          // TODO: 이거 반환값을 어떻게 줘야하는지 명확한게 아님
-          //       다시 확인해봐야함.
           if (
             this.permissionService.hasPermission(
               currentChainId,
@@ -282,7 +280,6 @@ export class KeyRingStarknetService {
           return currentChainId;
         }
         case "wallet_deploymentData": {
-          // TODO: 아직 먼 기능인지 이해 못함
           throw new Error("Not implemented");
         }
         case "wallet_addInvokeTransaction": {
@@ -324,7 +321,6 @@ export class KeyRingStarknetService {
           return invoked;
         }
         case "wallet_addDeclareTransaction": {
-          // TODO
           throw new Error("Not implemented");
         }
         case "wallet_signTypedData": {
@@ -339,8 +335,24 @@ export class KeyRingStarknetService {
           );
         }
         case "wallet_supportedSpecs": {
-          // TODO: 멀 반환해야하지...?
-          return [];
+          return [
+            (
+              (
+                await simpleFetch(modularChainInfo.starknet.rpc, {
+                  method: "POST",
+                  headers: {
+                    "content-type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    id: 1,
+                    jsonrpc: "2.0",
+                    method: "starknet_specVersion",
+                    params,
+                  }),
+                })
+              ).data as any
+            ).result,
+          ];
         }
         case "starknet_addDeclareTransaction":
         case "starknet_addDeployAccountTransaction":
@@ -367,18 +379,22 @@ export class KeyRingStarknetService {
         case "starknet_simulateTransactions":
         case "starknet_specVersion":
         case "starknet_syncing": {
-          return await simpleFetch(modularChainInfo.starknet.rpc, {
-            method: "POST",
-            headers: {
-              "content-type": "application/json",
-            },
-            body: JSON.stringify({
-              id: 1,
-              jsonrpc: "2.0",
-              method: type,
-              params,
-            }),
-          });
+          return (
+            (
+              await simpleFetch(modularChainInfo.starknet.rpc, {
+                method: "POST",
+                headers: {
+                  "content-type": "application/json",
+                },
+                body: JSON.stringify({
+                  id: 1,
+                  jsonrpc: "2.0",
+                  method: type,
+                  params,
+                }),
+              })
+            ).data as any
+          ).result;
         }
         default: {
           throw new Error(`The type "${type}" is not supported.`);
