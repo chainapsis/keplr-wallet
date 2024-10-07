@@ -64,7 +64,7 @@ export class PermissionInteractiveService {
     // TODO: 런칭 전에 메인넷으로 수정해야함.
     const currentChainIdForStarknet =
       this.permissionService.getCurrentChainIdForStarknet(origin) ??
-      "starknet:SN_SEPOLIA";
+      "starknet:SN_MAIN";
 
     await this.permissionService.checkOrGrantBasicAccessPermission(
       env,

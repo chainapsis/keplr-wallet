@@ -185,8 +185,7 @@ export class AccountSetBase {
           this._starknetHexAddress = key.hexAddress;
           this._isNanoLedger = false;
           this._isKeystone = false;
-          // TODO: 아 실수로 name 반환하는거 까먹었는데 나중에 처리한다...
-          this._name = "TODO";
+          this._name = key.name;
           this._pubKey = key.pubKey;
         }
 

@@ -97,6 +97,7 @@ export class AccountSharedContext {
     [chainId: string, isStarknet: boolean],
     | Key
     | {
+        name: string;
         hexAddress: string;
         pubKey: Uint8Array;
         address: Uint8Array;
@@ -129,6 +130,7 @@ export class AccountSharedContext {
       SettledResponse<
         | Key
         | {
+            name: string;
             hexAddress: string;
             pubKey: Uint8Array;
             address: Uint8Array;
@@ -220,6 +222,7 @@ export class AccountSharedContext {
       res: SettledResponse<
         | Key
         | {
+            name: string;
             hexAddress: string;
             pubKey: Uint8Array;
             address: Uint8Array;

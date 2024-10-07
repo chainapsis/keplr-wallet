@@ -41,6 +41,7 @@ export class GetStarknetKeyMsg extends Message<{
 
 export class GetStarknetKeysSettledMsg extends Message<
   SettledResponses<{
+    name: string;
     hexAddress: string;
     pubKey: Uint8Array;
     address: Uint8Array;

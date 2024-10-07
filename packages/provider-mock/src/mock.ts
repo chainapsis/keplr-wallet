@@ -404,6 +404,7 @@ export class MockKeplr implements Keplr {
 
   getStarknetKeysSettled(_chainIds: string[]): Promise<
     SettledResponses<{
+      name: string;
       hexAddress: string;
       pubKey: Uint8Array;
       address: Uint8Array;
