@@ -9078,6 +9078,8 @@ __metadata:
     buffer: ^6.0.3
     deepmerge: ^4.2.2
     long: ^4.0.0
+  peerDependencies:
+    starknet: ^6
   languageName: unknown
   linkType: soft
 
@@ -9318,6 +9320,7 @@ __metadata:
   peerDependencies:
     "@walletconnect/sign-client": ^2
     "@walletconnect/types": ^2
+    starknet: ^6
   languageName: unknown
   linkType: soft
 
