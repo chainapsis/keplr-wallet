@@ -425,6 +425,8 @@
   "page.sign.ethereum.message.title": "메시지 서명",
   "page.sign.ethereum.eip-712.title": "타입 데이터 서명",
 
+  "page.sign.starknet.tx.calls": "실행할 호출",
+
   "page.sign.components.fee-summary.fee": "수수료",
 
   "page.sign.components.messages.custom.title": "커스텀",

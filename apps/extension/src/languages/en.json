@@ -433,6 +433,8 @@
   "page.sign.ethereum.message.title": "Sign Message",
   "page.sign.ethereum.eip-712.title": "Sign Typed Data",
 
+  "page.sign.starknet.tx.calls": "Calls",
+
   "page.sign.components.fee-summary.fee": "Tx Fee",
 
   "page.sign.components.messages.agoric.provision.title": "Provision Smart Wallet",

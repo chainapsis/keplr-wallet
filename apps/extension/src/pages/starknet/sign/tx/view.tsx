@@ -22,13 +22,13 @@ import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { num, InvocationsSignerDetails } from "starknet";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
-import SimpleBar from "simplebar-react";
 import { useTheme } from "styled-components";
-import { Column, Columns } from "../../../../components/column";
-import { Gutter } from "../../../../components/gutter";
 import { H5 } from "../../../../components/typography";
+import { ArrowDropDownIcon } from "../../../../components/icon";
+import { Column, Columns } from "../../../../components/column";
+import SimpleBar from "simplebar-react";
 import { XAxis } from "../../../../components/axis";
-import { Button } from "../../../../components/button";
+import { ViewDataButton } from "../../../sign/components/view-data-button";
 
 export const SignStarknetTxView: FunctionComponent<{
   interactionData: NonNullable<SignStarknetTxInteractionStore["waitingData"]>;
@@ -39,11 +39,12 @@ export const SignStarknetTxView: FunctionComponent<{
     starknetQueriesStore,
   } = useStore();
 
+  const theme = useTheme();
+
   const { chainStore } = useStore();
 
   const intl = useIntl();
   const interactionInfo = useInteractionInfo();
-  const theme = useTheme();
 
   const chainId = interactionData.data.chainId;
 
@@ -165,6 +166,8 @@ export const SignStarknetTxView: FunctionComponent<{
       resolver: resolver!,
     };
   });
+
+  const [isViewData, setIsViewData] = useState(false);
 
   useUnmount(() => {
     unmountPromise.resolver();
@@ -311,34 +314,101 @@ export const SignStarknetTxView: FunctionComponent<{
     >
       <Box
         height="100%"
-        padding="0.75rem"
-        paddingBottom="0"
         style={{
           overflow: "auto",
         }}
       >
-        <SimpleBar
-          autoHide={false}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            flex: "0 1 auto",
-            overflow: "auto",
-            borderRadius: "0.375rem",
-            backgroundColor:
-              theme.mode === "light"
-                ? ColorPalette.white
-                : ColorPalette["gray-600"],
-            boxShadow:
-              theme.mode === "light"
-                ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-                : "none",
-          }}
-        >
-          <DataView interactionData={interactionData} />
-        </SimpleBar>
+        <Box padding="0.75rem 0.75rem 0" marginBottom="0.5rem">
+          <Columns sum={1} alignY="center">
+            <XAxis>
+              <H5
+                style={{
+                  color: ColorPalette["blue-400"],
+                  marginRight: "0.25rem",
+                }}
+              >
+                {interactionData.data.transactions.length > 1
+                  ? interactionData.data.transactions.length
+                  : ""}
+              </H5>
+              <H5
+                style={{
+                  color:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-500"]
+                      : ColorPalette["gray-50"],
+                }}
+              >
+                {interactionData.data.transactions.length > 1 && (
+                  <FormattedMessage id="page.sign.starknet.tx.calls" />
+                )}
+              </H5>
+            </XAxis>
+            <Column weight={1} />
+            <ViewDataButton
+              isViewData={isViewData}
+              setIsViewData={setIsViewData}
+            />
+          </Columns>
+        </Box>
 
-        <div style={{ flex: 1 }} />
+        {isViewData ? (
+          <SimpleBar
+            autoHide={false}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              flex: "0 1 auto",
+              overflowY: "auto",
+              overflowX: "hidden",
+
+              boxShadow:
+                theme.mode === "light"
+                  ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+                  : "none",
+
+              margin: "0 0.75rem",
+
+              height: "fit-content",
+              maxHeight: "23rem",
+            }}
+          >
+            <Box
+              as={"pre"}
+              // Remove normalized style of pre tag
+              margin="0"
+              padding="1rem"
+              style={{
+                borderRadius: "0.375rem",
+                backgroundColor:
+                  theme.mode === "light"
+                    ? ColorPalette.white
+                    : ColorPalette["gray-600"],
+
+                color:
+                  theme.mode === "light"
+                    ? ColorPalette["gray-400"]
+                    : ColorPalette["gray-200"],
+                width: "fit-content",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-all",
+              }}
+            >
+              {JSON.stringify(
+                {
+                  calls: interactionData.data.transactions,
+                  details: interactionData.data.details,
+                },
+                null,
+                2
+              )}
+            </Box>
+          </SimpleBar>
+        ) : (
+          <DataByTransactionView interactionData={interactionData} />
+        )}
+
+        <div style={{ marginTop: "0.75rem", flex: 1 }} />
 
         <FeeControl
           senderConfig={senderConfig}
@@ -351,27 +421,58 @@ export const SignStarknetTxView: FunctionComponent<{
   );
 });
 
-const DataView: FunctionComponent<{
+const DataByTransactionView: FunctionComponent<{
   interactionData: NonNullable<SignStarknetTxInteractionStore["waitingData"]>;
 }> = ({ interactionData }) => {
   const theme = useTheme();
 
-  const [isOpen, setIsOpen] = useState(false);
-  const toggleOpen = () => setIsOpen((isOpen) => !isOpen);
+  const [openedItemIndex, setOpenedItemIndex] = useState<number | null>(null);
+  const toggleOpen = (index: number) =>
+    index === openedItemIndex
+      ? setOpenedItemIndex(null)
+      : setOpenedItemIndex(index);
 
   return (
-    <Box
+    <SimpleBar
+      autoHide={false}
       style={{
-        width: "fit-content",
-        minWidth: "100%",
+        display: "flex",
+        flexDirection: "column",
+        flex: "0 1 auto",
+        margin: "0 0.75rem",
+
+        overflowY: "auto",
+        overflowX: "hidden",
+        boxShadow:
+          theme.mode === "light"
+            ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+            : "none",
       }}
     >
       {interactionData.data.transactions.map((tx, i) => {
+        const isOpen = openedItemIndex === i;
         return (
-          <Box padding="1rem" key={i}>
-            <Columns sum={1}>
-              <Column weight={1}>
-                <Box minHeight="3rem" alignY="center">
+          <Box
+            key={i}
+            padding="1rem 0 0"
+            marginBottom={
+              i !== interactionData.data.transactions.length - 1
+                ? "0.5rem"
+                : undefined
+            }
+            backgroundColor={
+              theme.mode === "light"
+                ? ColorPalette.white
+                : ColorPalette["gray-600"]
+            }
+            borderRadius="0.375rem"
+            cursor="pointer"
+            height="100%"
+            onClick={() => toggleOpen(i)}
+          >
+            <Box padding="0 1rem 1rem">
+              <Columns sum={1} alignY="center">
+                <Column weight={1}>
                   <H5
                     color={
                       theme.mode === "light"
@@ -379,53 +480,69 @@ const DataView: FunctionComponent<{
                         : ColorPalette["gray-10"]
                     }
                   >
-                    {tx.entrypoint}
+                    {tx.entrypoint.charAt(0).toUpperCase() +
+                      tx.entrypoint.slice(1)}
                   </H5>
-                  <Gutter size="2px" />
-                  {isOpen ? (
-                    <React.Fragment>
-                      <pre
-                        style={{
-                          width: "15rem",
-                          margin: "0",
-                          marginBottom: "0.5rem",
-                        }}
-                      >
-                        {isOpen
-                          ? JSON.stringify(
-                              {
-                                contractAddress: tx.contractAddress,
-                                calldata: tx.calldata,
-                              },
-                              null,
-                              2
-                            )
-                          : ""}
-                      </pre>
-                    </React.Fragment>
-                  ) : null}
-                  <XAxis>
-                    <Button
-                      size="extraSmall"
-                      color="secondary"
-                      text={
-                        isOpen ? (
-                          <FormattedMessage id="page.sign.components.messages.wasm-message-view.close-button" />
-                        ) : (
-                          <FormattedMessage id="page.sign.components.messages.wasm-message-view.details-button" />
-                        )
-                      }
-                      onClick={() => {
-                        toggleOpen();
-                      }}
-                    />
-                  </XAxis>
+                </Column>
+                <Column weight={0}>
+                  <ArrowDropDownIcon
+                    width="1rem"
+                    height="1rem"
+                    color={ColorPalette["gray-300"]}
+                  />
+                </Column>
+              </Columns>
+            </Box>
+
+            <SimpleBar
+              autoHide={false}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                flex: "0 1 auto",
+                overflowY: "auto",
+                overflowX: "hidden",
+
+                padding: "0 1rem",
+
+                minWidth: "100%",
+
+                height: "fit-content",
+                minHeight: isOpen ? "3.125rem" : undefined,
+                maxHeight: "12.5rem",
+              }}
+            >
+              {isOpen ? (
+                <Box
+                  as="pre"
+                  style={{
+                    margin: "0 0 0.5rem",
+                    width: "fit-content",
+                    color:
+                      theme.mode === "light"
+                        ? ColorPalette["gray-400"]
+                        : ColorPalette["gray-200"],
+
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-all",
+                  }}
+                >
+                  {isOpen
+                    ? JSON.stringify(
+                        {
+                          contractAddress: tx.contractAddress,
+                          calldata: tx.calldata,
+                        },
+                        null,
+                        2
+                      )
+                    : ""}
                 </Box>
-              </Column>
-            </Columns>
+              ) : null}
+            </SimpleBar>
           </Box>
         );
       })}
-    </Box>
+    </SimpleBar>
   );
 };
