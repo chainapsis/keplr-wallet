@@ -537,7 +537,7 @@ export const EnableChainsScene: FunctionComponent<{
         });
       }
 
-      const trimSearch = search.trim();
+      const trimSearch = search.trim().toLowerCase();
       if (!trimSearch) {
         return modularChainInfos;
       } else {
@@ -552,10 +552,10 @@ export const EnableChainsScene: FunctionComponent<{
             );
             return (
               chainInfo.stakeCurrency || chainInfo.currencies[0]
-            ).coinDenom.includes(trimSearch.toLowerCase());
+            ).coinDenom.includes(trimSearch);
           } else if ("starknet" in modularChainInfo) {
             return modularChainInfo.starknet.currencies[0].coinDenom.includes(
-              trimSearch.toLowerCase()
+              trimSearch
             );
           }
         });

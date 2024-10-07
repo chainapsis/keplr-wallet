@@ -364,15 +364,6 @@ export const FeeControl: FunctionComponent<{
             marginTop="0.375rem"
             padding="0.125rem 0.25rem"
             backgroundColor={(() => {
-              if (
-                feeConfig.uiProperties.error ||
-                feeConfig.uiProperties.warning
-              ) {
-                return theme.mode === "light"
-                  ? ColorPalette["orange-800"]
-                  : ColorPalette["yellow-800"];
-              }
-
               return theme.mode === "light"
                 ? ColorPalette["gray-50"]
                 : ColorPalette["gray-500"];
