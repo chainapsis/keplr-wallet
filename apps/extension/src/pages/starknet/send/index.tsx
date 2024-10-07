@@ -17,9 +17,12 @@ import { useSearchParams } from "react-router-dom";
 import { useStore } from "../../../stores";
 import {
   AccountNotDeployed,
+  EmptyAddressError,
+  EmptyAmountError,
   useGasSimulator,
   useSendTxConfig,
   useTxConfigsValidate,
+  ZeroAmountError,
 } from "@keplr-wallet/hooks-starknet";
 import { useNavigate } from "react-router";
 import { AmountInput } from "../components/input/amount-input";
@@ -220,10 +223,24 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
       if (
         sendConfigs.amountConfig.uiProperties.loadingState ===
           "loading-block" ||
-        sendConfigs.amountConfig.uiProperties.error != null ||
+        // If the error is not empty amount error or zero amount error or empty address error,
+        // simulate fee anyway to show initial fee.
+        (sendConfigs.amountConfig.uiProperties.error != null &&
+          !(
+            sendConfigs.amountConfig.uiProperties.error instanceof
+            EmptyAmountError
+          ) &&
+          !(
+            sendConfigs.amountConfig.uiProperties.error instanceof
+            ZeroAmountError
+          )) ||
         sendConfigs.recipientConfig.uiProperties.loadingState ===
           "loading-block" ||
-        sendConfigs.recipientConfig.uiProperties.error != null
+        (sendConfigs.recipientConfig.uiProperties.error != null &&
+          !(
+            sendConfigs.recipientConfig.uiProperties.error instanceof
+            EmptyAddressError
+          ))
       ) {
         throw new Error("Not ready to simulate tx");
       }

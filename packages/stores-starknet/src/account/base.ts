@@ -215,10 +215,12 @@ export class StarknetAccountBase {
     })();
 
     const u256 = uint256.bnToUint256(actualAmount);
+
     const calls: Call[] = [
       {
         contractAddress: currency.contractAddress,
-        calldata: [recipient, u256],
+        // If the recipient address is empty, the sender address will be used as the recipient for estimating fee.
+        calldata: [recipient === "" ? sender : recipient, u256],
         entrypoint: "transfer",
       },
     ];
