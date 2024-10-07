@@ -1,7 +1,8 @@
 import React, { FunctionComponent, useLayoutEffect, useState } from "react";
-import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
+import { AppCurrency, ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 /**
  * 그냥 이미지 컴포넌트인데 오류 났을때 대체 이미지를 보여주는 기능이 있음
@@ -71,7 +72,7 @@ export const RawImageFallback: FunctionComponent<
 
 export const ChainImageFallback: FunctionComponent<
   Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "alt"> & {
-    chainInfo: ChainInfo;
+    chainInfo: ChainInfo | ModularChainInfo;
 
     size: string;
     alt?: string;
@@ -105,7 +106,7 @@ export const ChainImageFallback: FunctionComponent<
 
 export const CurrencyImageFallback: FunctionComponent<
   Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "alt"> & {
-    chainInfo: ChainInfo;
+    chainInfo: ChainInfo | ModularChainInfo;
     currency: AppCurrency;
 
     size: string;
@@ -167,7 +168,7 @@ export const CurrencyImageFallback: FunctionComponent<
             }
           } else {
             if (
-              chainStore.getChain(chainInfo.chainId).chainIdentifier ===
+              ChainIdHelper.parse(chainInfo.chainId).identifier ===
                 axelarChainIdentifier &&
               currency.coinMinimalDenom !== "uaxl"
             ) {

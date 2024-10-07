@@ -2,7 +2,6 @@ import React, { FunctionComponent, useMemo } from "react";
 import { CollapsibleList } from "../../components/collapsible-list";
 import { MainEmptyView, TokenItem, TokenTitleView } from "./components";
 import { Dec } from "@keplr-wallet/unit";
-import { ViewToken } from "./index";
 import { observer } from "mobx-react-lite";
 import { Stack } from "../../components/stack";
 import { useStore } from "../../stores";
@@ -10,13 +9,14 @@ import { TextButton } from "../../components/button-text";
 import { ArrowRightSolidIcon } from "../../components/icon";
 import { ColorPalette } from "../../styles";
 import { useIntl } from "react-intl";
+import { ViewTokenCosmosOnly } from "../../stores/huge-queries";
 
 export const StakedTabView: FunctionComponent = observer(() => {
   const { hugeQueriesStore, uiConfigStore } = useStore();
 
   const intl = useIntl();
 
-  const delegations: ViewToken[] = useMemo(
+  const delegations: ViewTokenCosmosOnly[] = useMemo(
     () =>
       hugeQueriesStore.delegations.filter((token) => {
         return token.token.toDec().gt(new Dec(0));
@@ -25,7 +25,7 @@ export const StakedTabView: FunctionComponent = observer(() => {
   );
 
   const unbondings: {
-    viewToken: ViewToken;
+    viewToken: ViewTokenCosmosOnly;
     altSentence: string;
   }[] = useMemo(
     () =>
@@ -50,9 +50,9 @@ export const StakedTabView: FunctionComponent = observer(() => {
   const TokenViewData: {
     title: string;
     balance:
-      | ViewToken[]
+      | ViewTokenCosmosOnly[]
       | {
-          viewToken: ViewToken;
+          viewToken: ViewTokenCosmosOnly;
           altSentence: string;
         }[];
     lenAlwaysShown: number;

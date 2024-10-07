@@ -13,8 +13,5 @@
     "dev": "tsc -w",
     "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
-  },
-  "dependencies": {
-    "sha.js": "^2.4.11"
   }
 }

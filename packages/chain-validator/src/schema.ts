@@ -79,7 +79,7 @@ export const ERC20CurrencySchema = (
   .keys({
     type: Joi.string().equal("erc20").required(),
     contractAddress: Joi.string()
-      .pattern(/^(0x)[0-9a-fA-F]{40}$/)
+      .pattern(/(^(0x)[0-9a-fA-F]{40}$)|(^(0x)[0-9a-fA-F]{64}$)/)
       .required(),
   })
   .custom((value: Secret20Currency) => {

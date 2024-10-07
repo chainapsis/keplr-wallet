@@ -14,7 +14,7 @@ import {
   useSceneEvents,
   useSceneTransition,
 } from "../../../components/transition";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { Box } from "../../../components/box";
 import { Column, Columns } from "../../../components/column";
@@ -34,7 +34,7 @@ import { useNavigate } from "react-router";
 import { ChainImageFallback } from "../../../components/image";
 import { Checkbox } from "../../../components/checkbox";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
-import { IChainInfoImpl, WalletStatus } from "@keplr-wallet/stores";
+import { WalletStatus } from "@keplr-wallet/stores";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TextButton } from "../../../components/button-text";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -77,8 +77,14 @@ export const EnableChainsScene: FunctionComponent<{
     skipWelcome,
     initialSearchValue,
   }) => {
-    const { chainStore, accountStore, queriesStore, priceStore, keyRingStore } =
-      useStore();
+    const {
+      chainStore,
+      accountStore,
+      queriesStore,
+      priceStore,
+      keyRingStore,
+      starknetQueriesStore,
+    } = useStore();
 
     const navigate = useNavigate();
     const intl = useIntl();
@@ -143,45 +149,61 @@ export const EnableChainsScene: FunctionComponent<{
           }[] = [];
 
           const promises: Promise<unknown>[] = [];
-          for (const chainInfo of chainStore.chainInfos) {
-            if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
-              promises.push(
-                (async () => {
-                  const res =
-                    await keyRingStore.computeNotFinalizedKeyAddresses(
-                      vaultId,
-                      chainInfo.chainId
-                    );
-
-                  candidateAddresses.push({
-                    chainId: chainInfo.chainId,
-                    bech32Addresses: res.map((res) => {
-                      return {
-                        coinType: res.coinType,
-                        address: res.bech32Address,
-                      };
-                    }),
-                  });
-                })()
+          for (const modularChainInfo of chainStore.modularChainInfos) {
+            if ("cosmos" in modularChainInfo) {
+              const chainInfo = chainStore.getChain(
+                modularChainInfo.cosmos.chainId
               );
-            } else {
-              const account = accountStore.getAccount(chainInfo.chainId);
+              if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
+                promises.push(
+                  (async () => {
+                    const res =
+                      await keyRingStore.computeNotFinalizedKeyAddresses(
+                        vaultId,
+                        chainInfo.chainId
+                      );
+
+                    candidateAddresses.push({
+                      chainId: chainInfo.chainId,
+                      bech32Addresses: res.map((res) => {
+                        return {
+                          coinType: res.coinType,
+                          address: res.bech32Address,
+                        };
+                      }),
+                    });
+                  })()
+                );
+              } else {
+                const account = accountStore.getAccount(chainInfo.chainId);
+                promises.push(
+                  (async () => {
+                    if (account.walletStatus !== WalletStatus.Loaded) {
+                      await account.init();
+                    }
+
+                    if (account.bech32Address) {
+                      candidateAddresses.push({
+                        chainId: chainInfo.chainId,
+                        bech32Addresses: [
+                          {
+                            coinType: chainInfo.bip44.coinType,
+                            address: account.bech32Address,
+                          },
+                        ],
+                      });
+                    }
+                  })()
+                );
+              }
+            } else if ("starknet" in modularChainInfo) {
+              const account = accountStore.getAccount(
+                modularChainInfo.starknet.chainId
+              );
               promises.push(
                 (async () => {
                   if (account.walletStatus !== WalletStatus.Loaded) {
                     await account.init();
-                  }
-
-                  if (account.bech32Address) {
-                    candidateAddresses.push({
-                      chainId: chainInfo.chainId,
-                      bech32Addresses: [
-                        {
-                          coinType: chainInfo.bip44.coinType,
-                          address: account.bech32Address,
-                        },
-                      ],
-                    });
                   }
                 })()
               );
@@ -340,6 +362,29 @@ export const EnableChainsScene: FunctionComponent<{
           }
         }
 
+        // 스타크넷 관련 체인들은 `candidateAddresses`에 추가되지 않으므로 여기서 enable 할지 판단한다.
+        for (const modularChainInfo of chainStore.modularChainInfosInListUI) {
+          if ("starknet" in modularChainInfo) {
+            const account = accountStore.getAccount(modularChainInfo.chainId);
+            const mainCurrency = modularChainInfo.starknet.currencies[0];
+
+            const queryBalance = starknetQueriesStore
+              .get(modularChainInfo.chainId)
+              .queryStarknetERC20Balance.getBalance(
+                modularChainInfo.chainId,
+                chainStore,
+                account.starknetHexAddress,
+                mainCurrency.coinMinimalDenom
+              );
+
+            if (queryBalance && queryBalance.balance.toDec().gt(new Dec(0))) {
+              enabledChainIdentifiers.push(
+                ChainIdHelper.parse(modularChainInfo.chainId).identifier
+              );
+            }
+          }
+        }
+
         for (const candidateAddress of candidateAddresses) {
           const queries = queriesStore.get(candidateAddress.chainId);
           const chainInfo = chainStore.getChain(candidateAddress.chainId);
@@ -445,39 +490,47 @@ export const EnableChainsScene: FunctionComponent<{
     // 그리고 이를 토대로 balance에 따른 sort를 진행한다.
     // queries store의 구조 문제로 useMemo 안에서 balance에 따른 sort를 진행하긴 힘들다.
     // 그래서 이를 위한 변수로 따로 둔다.
-    // 실제로는 chainInfos를 사용하면 된다.
-    const preSortChainInfos = useMemo(() => {
-      let chainInfos = chainStore.chainInfosInListUI.slice();
+    // 실제로는 modularChainInfos를 사용하면 된다.
+    const preSortModularChainInfos = useMemo(() => {
+      let modularChainInfos = chainStore.modularChainInfosInListUI.slice();
 
       if (keyType === "ledger") {
-        chainInfos = chainInfos.filter((chainInfo) => {
-          const isEthermintLike =
-            chainInfo.bip44.coinType === 60 ||
-            !!chainInfo.features?.includes("eth-address-gen") ||
-            !!chainInfo.features?.includes("eth-key-sign");
+        modularChainInfos = modularChainInfos.filter((modularChainInfo) => {
+          if ("cosmos" in modularChainInfo) {
+            const chainInfo = chainStore.getChain(
+              modularChainInfo.cosmos.chainId
+            );
+            const isEthermintLike =
+              chainInfo.bip44.coinType === 60 ||
+              !!chainInfo.features?.includes("eth-address-gen") ||
+              !!chainInfo.features?.includes("eth-key-sign");
 
-          // Ledger일 경우 ethereum app을 바로 처리할 수 없다.
-          // 이 경우 빼줘야한다.
-          if (isEthermintLike && !fallbackEthereumLedgerApp) {
+            // Ledger일 경우 ethereum app을 바로 처리할 수 없다.
+            // 이 경우 빼줘야한다.
+            if (isEthermintLike && !fallbackEthereumLedgerApp) {
+              return false;
+            }
+
+            // fallbackEthereumLedgerApp가 true이면 ethereum app이 필요없는 체인은 이전에 다 처리된 것이다.
+            // 이게 true이면 ethereum app이 필요하고 가능한 체인만 남기면 된다.
+            if (fallbackEthereumLedgerApp) {
+              if (!isEthermintLike) {
+                return false;
+              }
+
+              try {
+                // 처리가능한 체인만 true를 반환한다.
+                KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+                  chainInfo.chainId
+                );
+                return true;
+              } catch {
+                return false;
+              }
+            }
+          } else if ("starknet" in modularChainInfo) {
+            // TODO: Starknet ledger app 지원이 필요하면 여기에 로직을 추가한다.
             return false;
-          }
-
-          // fallbackEthereumLedgerApp가 true이면 ethereum app이 필요없는 체인은 이전에 다 처리된 것이다.
-          // 이게 true이면 ethereum app이 필요하고 가능한 체인만 남기면 된다.
-          if (fallbackEthereumLedgerApp) {
-            if (!isEthermintLike) {
-              return false;
-            }
-
-            try {
-              // 처리가능한 체인만 true를 반환한다.
-              KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
-                chainInfo.chainId
-              );
-              return true;
-            } catch {
-              return false;
-            }
           }
 
           return true;
@@ -485,116 +538,183 @@ export const EnableChainsScene: FunctionComponent<{
       }
 
       const trimSearch = search.trim();
-
       if (!trimSearch) {
-        return chainInfos;
+        return modularChainInfos;
       } else {
-        return chainInfos.filter((chainInfo) => {
-          return (
-            chainInfo.chainName
-              .toLowerCase()
-              .includes(trimSearch.toLowerCase()) ||
-            (chainInfo.stakeCurrency || chainInfo.currencies[0]).coinDenom
-              .toLowerCase()
-              .includes(trimSearch.toLowerCase())
-          );
+        return modularChainInfos.filter((modularChainInfo) => {
+          if (modularChainInfo.chainName.toLowerCase().includes(trimSearch)) {
+            return true;
+          }
+
+          if ("cosmos" in modularChainInfo) {
+            const chainInfo = chainStore.getChain(
+              modularChainInfo.cosmos.chainId
+            );
+            return (
+              chainInfo.stakeCurrency || chainInfo.currencies[0]
+            ).coinDenom.includes(trimSearch.toLowerCase());
+          } else if ("starknet" in modularChainInfo) {
+            return modularChainInfo.starknet.currencies[0].coinDenom.includes(
+              trimSearch.toLowerCase()
+            );
+          }
         });
       }
-    }, [
-      chainStore.chainInfosInListUI,
-      fallbackEthereumLedgerApp,
-      keyType,
-      search,
-    ]);
-    const chainInfos = preSortChainInfos.sort((a, b) => {
-      const aHasPriority = sortPriorityChainIdentifierMap.has(
-        a.chainIdentifier
-      );
-      const bHasPriority = sortPriorityChainIdentifierMap.has(
-        b.chainIdentifier
-      );
+    }, [chainStore, fallbackEthereumLedgerApp, keyType, search]);
 
-      if (aHasPriority && !bHasPriority) {
-        return -1;
-      }
+    const modularChainInfos = preSortModularChainInfos.sort(
+      (aModularChainInfo, bModularChainInfo) => {
+        const aChainIdentifier = ChainIdHelper.parse(
+          aModularChainInfo.chainId
+        ).identifier;
+        const bChainIdentifier = ChainIdHelper.parse(
+          bModularChainInfo.chainId
+        ).identifier;
+        const aHasPriority =
+          sortPriorityChainIdentifierMap.has(aChainIdentifier);
+        const bHasPriority =
+          sortPriorityChainIdentifierMap.has(bChainIdentifier);
 
-      if (!aHasPriority && bHasPriority) {
-        return 1;
-      }
-
-      const aBalance = (() => {
-        const addresses = candidateAddressesMap.get(a.chainIdentifier);
-        const chainInfo = chainStore.getChain(a.chainId);
-        const queries = queriesStore.get(a.chainId);
-
-        const mainCurrency = chainInfo.stakeCurrency || chainInfo.currencies[0];
-        const account = accountStore.getAccount(chainInfo.chainId);
-
-        if (addresses && addresses.length > 0) {
-          const queryBalance = chainStore.isEvmOnlyChain(chainInfo.chainId)
-            ? queries.queryBalances.getQueryEthereumHexAddress(
-                account.ethereumHexAddress
-              )
-            : queries.queryBalances.getQueryBech32Address(addresses[0].address);
-          const balance = queryBalance.getBalance(mainCurrency)?.balance;
-
-          if (balance) {
-            return balance;
-          }
+        if (aHasPriority && !bHasPriority) {
+          return -1;
         }
 
-        return new CoinPretty(mainCurrency, "0");
-      })();
-      const bBalance = (() => {
-        const addresses = candidateAddressesMap.get(b.chainIdentifier);
-        const chainInfo = chainStore.getChain(b.chainId);
-        const queries = queriesStore.get(b.chainId);
-
-        const mainCurrency = chainInfo.stakeCurrency || chainInfo.currencies[0];
-        const account = accountStore.getAccount(chainInfo.chainId);
-
-        if (addresses && addresses.length > 0) {
-          const queryBalance = chainStore.isEvmOnlyChain(chainInfo.chainId)
-            ? queries.queryBalances.getQueryEthereumHexAddress(
-                account.ethereumHexAddress
-              )
-            : queries.queryBalances.getQueryBech32Address(addresses[0].address);
-          const balance = queryBalance.getBalance(mainCurrency)?.balance;
-
-          if (balance) {
-            return balance;
-          }
+        if (!aHasPriority && bHasPriority) {
+          return 1;
         }
 
-        return new CoinPretty(mainCurrency, "0");
-      })();
+        const aBalance = (() => {
+          if ("cosmos" in aModularChainInfo) {
+            const addresses = candidateAddressesMap.get(aChainIdentifier);
+            const chainInfo = chainStore.getChain(aModularChainInfo.chainId);
+            const queries = queriesStore.get(aModularChainInfo.chainId);
 
-      const aPrice = priceStore.calculatePrice(aBalance)?.toDec() ?? new Dec(0);
-      const bPrice = priceStore.calculatePrice(bBalance)?.toDec() ?? new Dec(0);
+            const mainCurrency =
+              chainInfo.stakeCurrency || chainInfo.currencies[0];
+            const account = accountStore.getAccount(chainInfo.chainId);
 
-      if (!aPrice.equals(bPrice)) {
-        return aPrice.gt(bPrice) ? -1 : 1;
+            if (addresses && addresses.length > 0) {
+              const queryBalance = chainStore.isEvmOnlyChain(chainInfo.chainId)
+                ? queries.queryBalances.getQueryEthereumHexAddress(
+                    account.ethereumHexAddress
+                  )
+                : queries.queryBalances.getQueryBech32Address(
+                    addresses[0].address
+                  );
+              const balance = queryBalance.getBalance(mainCurrency)?.balance;
+
+              if (balance) {
+                return balance;
+              }
+            }
+
+            return new CoinPretty(mainCurrency, "0");
+          } else if ("starknet" in aModularChainInfo) {
+            const account = accountStore.getAccount(aModularChainInfo.chainId);
+            const mainCurrency = aModularChainInfo.starknet.currencies[0];
+
+            const queryBalance = starknetQueriesStore
+              .get(aModularChainInfo.chainId)
+              .queryStarknetERC20Balance.getBalance(
+                aModularChainInfo.chainId,
+                chainStore,
+                account.starknetHexAddress,
+                mainCurrency.coinMinimalDenom
+              );
+
+            if (queryBalance) {
+              return queryBalance.balance;
+            }
+          }
+        })();
+        const bBalance = (() => {
+          if ("cosmos" in bModularChainInfo) {
+            const addresses = candidateAddressesMap.get(bChainIdentifier);
+            const chainInfo = chainStore.getChain(bModularChainInfo.chainId);
+            const queries = queriesStore.get(bModularChainInfo.chainId);
+
+            const mainCurrency =
+              chainInfo.stakeCurrency || chainInfo.currencies[0];
+            const account = accountStore.getAccount(chainInfo.chainId);
+
+            if (addresses && addresses.length > 0) {
+              const queryBalance = chainStore.isEvmOnlyChain(chainInfo.chainId)
+                ? queries.queryBalances.getQueryEthereumHexAddress(
+                    account.ethereumHexAddress
+                  )
+                : queries.queryBalances.getQueryBech32Address(
+                    addresses[0].address
+                  );
+              const balance = queryBalance.getBalance(mainCurrency)?.balance;
+
+              if (balance) {
+                return balance;
+              }
+            }
+
+            return new CoinPretty(mainCurrency, "0");
+          } else if ("starknet" in bModularChainInfo) {
+            const account = accountStore.getAccount(bModularChainInfo.chainId);
+            const mainCurrency = bModularChainInfo.starknet.currencies[0];
+
+            const balance = starknetQueriesStore
+              .get(bModularChainInfo.chainId)
+              .queryStarknetERC20Balance.getBalance(
+                bModularChainInfo.chainId,
+                chainStore,
+                account.starknetHexAddress,
+                mainCurrency.coinMinimalDenom
+              )?.balance;
+
+            if (balance) {
+              return balance;
+            }
+          }
+        })();
+
+        const aPrice = aBalance
+          ? priceStore.calculatePrice(aBalance)?.toDec() ?? new Dec(0)
+          : new Dec(0);
+        const bPrice = bBalance
+          ? priceStore.calculatePrice(bBalance)?.toDec() ?? new Dec(0)
+          : new Dec(0);
+
+        if (!aPrice.equals(bPrice)) {
+          return aPrice.gt(bPrice) ? -1 : 1;
+        }
+
+        // balance의 fiat 기준으로 sort.
+        // 같으면 이름 기준으로 sort.
+        return aModularChainInfo.chainName.localeCompare(
+          bModularChainInfo.chainName
+        );
       }
-
-      // balance의 fiat 기준으로 sort.
-      // 같으면 이름 기준으로 sort.
-      return a.chainName.localeCompare(b.chainName);
-    });
+    );
 
     const numSelected = useMemo(() => {
-      const chainInfoMap = new Map<string, ChainInfo>();
-      for (const chanInfo of chainStore.chainInfos) {
-        chainInfoMap.set(chanInfo.chainIdentifier, chanInfo);
+      const modularChainInfoMap = new Map<string, ModularChainInfo>();
+      for (const modularChainInfo of chainStore.modularChainInfos) {
+        modularChainInfoMap.set(
+          ChainIdHelper.parse(modularChainInfo.chainId).identifier,
+          modularChainInfo
+        );
       }
 
       let numSelected = 0;
       for (const enabledChainIdentifier of enabledChainIdentifiers) {
-        const enabledChainInfo = chainInfoMap.get(enabledChainIdentifier);
-        if (enabledChainInfo) {
+        const enabledModularChainInfo = modularChainInfoMap.get(
+          enabledChainIdentifier
+        );
+        if (enabledModularChainInfo) {
           const isEthermintLike =
-            enabledChainInfo.bip44.coinType === 60 ||
-            !!enabledChainInfo.features?.includes("eth-address-gen") ||
-            !!enabledChainInfo.features?.includes("eth-key-sign");
+            "cosmos" in enabledModularChainInfo &&
+            (enabledModularChainInfo.cosmos.bip44.coinType === 60 ||
+              !!enabledModularChainInfo.cosmos.features?.includes(
+                "eth-address-gen"
+              ) ||
+              !!enabledModularChainInfo.cosmos.features?.includes(
+                "eth-key-sign"
+              ));
 
           if (
             (fallbackEthereumLedgerApp && isEthermintLike) ||
@@ -606,7 +726,7 @@ export const EnableChainsScene: FunctionComponent<{
       }
       return numSelected;
     }, [
-      chainStore.chainInfos,
+      chainStore.modularChainInfos,
       enabledChainIdentifiers,
       fallbackEthereumLedgerApp,
     ]);
@@ -623,11 +743,13 @@ export const EnableChainsScene: FunctionComponent<{
 
     const enabledChainIdentifiersInPage = useMemo(() => {
       return enabledChainIdentifiers.filter((chainIdentifier) =>
-        chainInfos.some(
-          (chainInfo) => chainIdentifier === chainInfo.chainIdentifier
+        modularChainInfos.some(
+          (modularChainInfo) =>
+            chainIdentifier ===
+            ChainIdHelper.parse(modularChainInfo.chainId).identifier
         )
       );
-    }, [enabledChainIdentifiers, chainInfos]);
+    }, [enabledChainIdentifiers, modularChainInfos]);
 
     const [preSelectedChainIdentifiers, setPreSelectedChainIdentifiers] =
       useState<string[]>([]);
@@ -672,34 +794,57 @@ export const EnableChainsScene: FunctionComponent<{
           }}
         >
           <Stack gutter="0.5rem">
-            {chainInfos.map((chainInfo) => {
-              const account = accountStore.getAccount(chainInfo.chainId);
-              const queries = queriesStore.get(chainInfo.chainId);
-              const mainCurrency =
-                chainInfo.stakeCurrency || chainInfo.currencies[0];
-
+            {modularChainInfos.map((modularChainInfo) => {
+              const account = accountStore.getAccount(modularChainInfo.chainId);
               const balance = (() => {
-                const queryBalance = chainStore.isEvmOnlyChain(
-                  chainInfo.chainId
-                )
-                  ? queries.queryBalances.getQueryEthereumHexAddress(
-                      account.ethereumHexAddress
-                    )
-                  : queries.queryBalances.getQueryBech32Address(
-                      account.bech32Address
+                if ("cosmos" in modularChainInfo) {
+                  const chainInfo = chainStore.getChain(
+                    modularChainInfo.cosmos.chainId
+                  );
+                  const queries = queriesStore.get(modularChainInfo.chainId);
+                  const mainCurrency =
+                    chainInfo.stakeCurrency || chainInfo.currencies[0];
+
+                  const queryBalance = chainStore.isEvmOnlyChain(
+                    chainInfo.chainId
+                  )
+                    ? queries.queryBalances.getQueryEthereumHexAddress(
+                        account.ethereumHexAddress
+                      )
+                    : queries.queryBalances.getQueryBech32Address(
+                        account.bech32Address
+                      );
+                  const balance = queryBalance.getBalance(mainCurrency);
+
+                  if (balance) {
+                    return balance.balance;
+                  }
+
+                  return new CoinPretty(mainCurrency, "0");
+                } else if ("starknet" in modularChainInfo) {
+                  const mainCurrency = modularChainInfo.starknet.currencies[0];
+                  const queryBalance = starknetQueriesStore
+                    .get(modularChainInfo.chainId)
+                    .queryStarknetERC20Balance.getBalance(
+                      modularChainInfo.chainId,
+                      chainStore,
+                      account.starknetHexAddress,
+                      mainCurrency.coinMinimalDenom
                     );
-                const balance = queryBalance.getBalance(mainCurrency);
 
-                if (balance) {
-                  return balance.balance;
+                  if (queryBalance) {
+                    return queryBalance.balance;
+                  }
+
+                  return new CoinPretty(mainCurrency, "0");
                 }
-
-                return new CoinPretty(mainCurrency, "0");
               })();
+              const chainIdentifier = ChainIdHelper.parse(
+                modularChainInfo.chainId
+              ).identifier;
 
               const enabled =
-                enabledChainIdentifierMap.get(chainInfo.chainIdentifier) ||
-                false;
+                enabledChainIdentifierMap.get(chainIdentifier) || false;
 
               // At least, one chain should be enabled.
               const blockInteraction =
@@ -707,26 +852,23 @@ export const EnableChainsScene: FunctionComponent<{
 
               return (
                 <ChainItem
-                  key={chainInfo.chainId}
-                  chainInfo={chainInfo}
+                  key={chainIdentifier}
+                  modularChainInfo={modularChainInfo}
                   balance={balance}
                   enabled={enabled}
                   blockInteraction={blockInteraction}
-                  isFresh={isFresh || account.bech32Address === ""}
+                  isFresh={isFresh ?? false}
                   onClick={() => {
-                    if (
-                      enabledChainIdentifierMap.get(chainInfo.chainIdentifier)
-                    ) {
+                    if (enabledChainIdentifierMap.get(chainIdentifier)) {
                       setEnabledChainIdentifiers(
                         enabledChainIdentifiers.filter(
-                          (chainIdentifier) =>
-                            chainIdentifier !== chainInfo.chainIdentifier
+                          (ci) => ci !== chainIdentifier
                         )
                       );
                     } else {
                       setEnabledChainIdentifiers([
                         ...enabledChainIdentifiers,
-                        chainInfo.chainIdentifier,
+                        chainIdentifier,
                       ]);
                     }
                   }}
@@ -781,7 +923,6 @@ export const EnableChainsScene: FunctionComponent<{
                 })}
           </Stack>
         </SimpleBar>
-
         <React.Fragment>
           <Gutter size="1.25rem" />
 
@@ -793,14 +934,16 @@ export const EnableChainsScene: FunctionComponent<{
                 e.preventDefault();
 
                 if (
-                  chainInfos.length === enabledChainIdentifiersInPage.length
+                  modularChainInfos.length ===
+                  enabledChainIdentifiersInPage.length
                 ) {
                   if (preSelectedChainIdentifiers.length > 0) {
                     setEnabledChainIdentifiers(preSelectedChainIdentifiers);
                   } else {
-                    if (chainInfos.length > 0) {
+                    if (modularChainInfos.length > 0) {
                       setEnabledChainIdentifiers([
-                        chainInfos[0].chainIdentifier,
+                        ChainIdHelper.parse(modularChainInfos[0].chainId)
+                          .identifier,
                       ]);
                     }
                   }
@@ -808,18 +951,14 @@ export const EnableChainsScene: FunctionComponent<{
                   setPreSelectedChainIdentifiers([...enabledChainIdentifiers]);
                   const newEnabledChainIdentifiers: string[] =
                     enabledChainIdentifiers.slice();
-                  for (const chainInfo of chainInfos) {
-                    if (
-                      !newEnabledChainIdentifiers.includes(
-                        chainInfo.chainIdentifier
-                      )
-                    ) {
-                      newEnabledChainIdentifiers.push(
-                        chainInfo.chainIdentifier
-                      );
+                  for (const modularChainInfo of modularChainInfos) {
+                    const chainIdentifier = ChainIdHelper.parse(
+                      modularChainInfo.chainId
+                    ).identifier;
+                    if (!newEnabledChainIdentifiers.includes(chainIdentifier)) {
+                      newEnabledChainIdentifiers.push(chainIdentifier);
                     }
                   }
-                  setEnabledChainIdentifiers(newEnabledChainIdentifiers);
                 }
               }}
             >
@@ -839,7 +978,8 @@ export const EnableChainsScene: FunctionComponent<{
                 <Checkbox
                   size="small"
                   checked={
-                    chainInfos.length === enabledChainIdentifiersInPage.length
+                    modularChainInfos.length ===
+                    enabledChainIdentifiersInPage.length
                   }
                   onChange={() => {}}
                 />
@@ -859,30 +999,37 @@ export const EnableChainsScene: FunctionComponent<{
               const enables: string[] = [];
               const disables: string[] = [];
 
-              for (const chainInfo of chainStore.chainInfos) {
+              for (const modularChainInfo of chainStore.modularChainInfos) {
+                const chainIdentifier = ChainIdHelper.parse(
+                  modularChainInfo.chainId
+                ).identifier;
                 const enabled =
-                  enabledChainIdentifierMap.get(chainInfo.chainIdentifier) ||
-                  false;
+                  enabledChainIdentifierMap.get(chainIdentifier) || false;
 
                 if (enabled) {
-                  enables.push(chainInfo.chainIdentifier);
+                  enables.push(chainIdentifier);
                 } else {
-                  disables.push(chainInfo.chainIdentifier);
+                  disables.push(chainIdentifier);
                 }
               }
 
               const needFinalizeCoinType: string[] = [];
               for (let i = 0; i < enables.length; i++) {
                 const enable = enables[i];
-                const chainInfo = chainStore.getChain(enable);
-                if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
-                  // Remove enable from enables
-                  enables.splice(i, 1);
-                  i--;
-                  // And push it disables
-                  disables.push(enable);
+                const modularChainInfo = chainStore.getModularChain(enable);
+                if ("cosmos" in modularChainInfo) {
+                  const chainInfo = chainStore.getChain(enable);
+                  if (
+                    keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)
+                  ) {
+                    // Remove enable from enables
+                    enables.splice(i, 1);
+                    i--;
+                    // And push it disables
+                    disables.push(enable);
 
-                  needFinalizeCoinType.push(enable);
+                    needFinalizeCoinType.push(enable);
+                  }
                 }
               }
 
@@ -893,23 +1040,26 @@ export const EnableChainsScene: FunctionComponent<{
                 }
 
                 const enable = enables[i];
+                const modularChainInfo = chainStore.getModularChain(enable);
 
-                const chainInfo = chainStore.getChain(enable);
-                const isEthermintLike =
-                  chainInfo.bip44.coinType === 60 ||
-                  !!chainInfo.features?.includes("eth-address-gen") ||
-                  !!chainInfo.features?.includes("eth-key-sign");
+                if ("cosmos" in modularChainInfo) {
+                  const chainInfo = chainStore.getChain(enable);
+                  const isEthermintLike =
+                    chainInfo.bip44.coinType === 60 ||
+                    !!chainInfo.features?.includes("eth-address-gen") ||
+                    !!chainInfo.features?.includes("eth-key-sign");
 
-                if (isEthermintLike) {
-                  // 참고로 위에서 chainInfos memo로 인해서 막혀있기 때문에
-                  // 여기서 throwErrorIfEthermintWithLedgerButNotSupported 확인은 생략한다.
-                  // Remove enable from enables
-                  enables.splice(i, 1);
-                  i--;
-                  // And push it disables
-                  disables.push(enable);
+                  if (isEthermintLike) {
+                    // 참고로 위에서 chainInfos memo로 인해서 막혀있기 때문에
+                    // 여기서 throwErrorIfEthermintWithLedgerButNotSupported 확인은 생략한다.
+                    // Remove enable from enables
+                    enables.splice(i, 1);
+                    i--;
+                    // And push it disables
+                    disables.push(enable);
 
-                  ledgerEthereumAppNeeds.push(enable);
+                    ledgerEthereumAppNeeds.push(enable);
+                  }
                 }
               }
 
@@ -1024,8 +1174,8 @@ export const EnableChainsScene: FunctionComponent<{
 );
 
 const ChainItem: FunctionComponent<{
-  chainInfo: IChainInfoImpl;
-  balance: CoinPretty;
+  modularChainInfo: ModularChainInfo;
+  balance?: CoinPretty;
 
   enabled: boolean;
   blockInteraction: boolean;
@@ -1034,11 +1184,22 @@ const ChainItem: FunctionComponent<{
 
   isFresh: boolean;
 }> = observer(
-  ({ chainInfo, balance, enabled, blockInteraction, onClick, isFresh }) => {
+  ({
+    modularChainInfo,
+    balance,
+    enabled,
+    blockInteraction,
+    onClick,
+    isFresh,
+  }) => {
     const { priceStore } = useStore();
     const theme = useTheme();
 
-    const price = priceStore.calculatePrice(balance);
+    const price = balance ? priceStore.calculatePrice(balance) : undefined;
+
+    const chainIdentifier = ChainIdHelper.parse(
+      modularChainInfo.chainId
+    ).identifier;
 
     return (
       <Box
@@ -1063,7 +1224,7 @@ const ChainItem: FunctionComponent<{
       >
         <Columns sum={1}>
           <XAxis alignY="center">
-            <ChainImageFallback chainInfo={chainInfo} size="3rem" />
+            <ChainImageFallback chainInfo={modularChainInfo} size="3rem" />
 
             <Gutter size="0.5rem" />
 
@@ -1071,18 +1232,18 @@ const ChainItem: FunctionComponent<{
               <Subtitle2>
                 {(() => {
                   // Noble의 경우만 약간 특수하게 표시해줌
-                  if (chainInfo.chainIdentifier === "noble") {
-                    return `${chainInfo.chainName} (USDC)`;
+                  if (chainIdentifier === "noble") {
+                    return `${modularChainInfo.chainName} (USDC)`;
                   }
 
-                  return chainInfo.chainName;
+                  return modularChainInfo.chainName;
                 })()}
               </Subtitle2>
             </YAxis>
           </XAxis>
           <Column weight={1} />
           <XAxis alignY="center">
-            {isFresh ? null : (
+            {isFresh || balance == null ? null : (
               <YAxis alignX="right">
                 <Subtitle3
                   color={

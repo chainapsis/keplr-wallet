@@ -8,6 +8,7 @@ import {
   RecentSendHistory,
   GetRecentSendHistoriesMsg,
   GetCosmosKeysForEachVaultWithSearchSettledMsg,
+  GetStarknetKeysForEachVaultSettledMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import { KeyRingStore } from "@keplr-wallet/stores-core";
@@ -143,6 +144,33 @@ export class AddressBookConfig {
     }
 
     const msg = new GetCosmosKeysForEachVaultSettledMsg(chainId, vaultIds);
+    return await this.messageRequester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async getVaultStarknetKeysSettled(
+    chainId: string,
+    exceptVaultId?: string
+  ): Promise<
+    SettledResponses<
+      {
+        name: string;
+        hexAddress: string;
+        pubKey: Uint8Array;
+        address: Uint8Array;
+      } & {
+        vaultId: string;
+      }
+    >
+  > {
+    const vaultIds = this.keyRingStore.keyInfos
+      .map((keyInfo) => keyInfo.id)
+      .filter((vault) => vault !== exceptVaultId);
+
+    if (vaultIds.length === 0) {
+      return [];
+    }
+
+    const msg = new GetStarknetKeysForEachVaultSettledMsg(chainId, vaultIds);
     return await this.messageRequester.sendMessage(BACKGROUND_PORT, msg);
   }
 

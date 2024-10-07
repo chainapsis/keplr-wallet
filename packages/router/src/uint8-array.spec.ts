@@ -3,6 +3,40 @@ import assert from "assert";
 import { JSONUint8Array } from "./uint8-array";
 
 describe("Test json with Uint8Array", () => {
+  it("should support bigint", () => {
+    const test = {
+      a: 1,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      b: 2n,
+      c: {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        d: 3n,
+      },
+    };
+
+    const text = JSONUint8Array.stringify(test);
+
+    assert.strictEqual(
+      text,
+      '{"a":1,"b":"__bigint__2","c":{"d":"__bigint__3"}}'
+    );
+
+    const obj = JSONUint8Array.parse(text);
+    assert.deepStrictEqual(obj, {
+      a: 1,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      b: 2n,
+      c: {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        d: 3n,
+      },
+    });
+  });
+
   it("should stringify properly with uint8array", () => {
     const test = {
       a: 1,

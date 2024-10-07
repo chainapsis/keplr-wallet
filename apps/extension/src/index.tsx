@@ -99,6 +99,8 @@ import { RoutePageAnalytics } from "./route-page-analytics";
 import { useIntl } from "react-intl";
 import { ActivitiesPage } from "./pages/activities";
 import { isRunningInSidePanel } from "./utils";
+import { StarknetSendPage } from "./pages/starknet/send";
+import { SignStarknetTxPage } from "./pages/starknet/sign/tx";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -169,8 +171,8 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
         // XXX: Below logic not observe state changes on account store and it's inner state.
         //      This is intended because this logic is only for the first time and avoid global re-rendering.
         // Start init for registered chains so that users can see account address more quickly.
-        for (const chainInfo of chainStore.chainInfos) {
-          const account = accountStore.getAccount(chainInfo.chainId);
+        for (const modularChainInfo of chainStore.modularChainInfos) {
+          const account = accountStore.getAccount(modularChainInfo.chainId);
           // Because {autoInit: true} is given as the option on account store,
           // initialization for the account starts at this time just by using getAccount().
           // However, run safe check on current status and init if status is not inited.
@@ -374,6 +376,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
                 element={<MainPage setIsNotReady={setMainPageIsNotReady} />}
               />
               <Route path="/send" element={<SendAmountPage />} />
+              <Route path="/starknet/send" element={<StarknetSendPage />} />
               <Route path="/ibc-swap" element={<IBCSwapPage />} />
               <Route
                 path="/send/select-asset"
@@ -465,6 +468,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
                 element={<SignCosmosICNSPage />}
               />
               <Route path="/sign-ethereum" element={<SignEthereumTxPage />} />
+              <Route
+                path="/sign-starknet-tx"
+                element={<SignStarknetTxPage />}
+              />
               <Route path="/wallet/select" element={<WalletSelectPage />} />
               <Route path="/wallet/delete" element={<WalletDeletePage />} />
               <Route

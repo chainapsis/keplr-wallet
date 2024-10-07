@@ -20,9 +20,14 @@ export const ReceiveModal: FunctionComponent<{
 
   const theme = useTheme();
 
-  const chainInfo = chainStore.getChain(chainId);
+  const modularChainInfo = chainStore.getModularChain(chainId);
   const account = accountStore.getAccount(chainId);
-  const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
+  const isStarknetChain =
+    "starknet" in modularChainInfo && modularChainInfo.starknet != null;
+  const isEVMOnlyChain =
+    "cosmos" in modularChainInfo &&
+    modularChainInfo.cosmos != null &&
+    chainStore.isEvmOnlyChain(chainId);
 
   return (
     <Box
@@ -43,7 +48,7 @@ export const ReceiveModal: FunctionComponent<{
         </H4>
         <Gutter size="1.25rem" />
         <XAxis alignY="center">
-          <ChainImageFallback chainInfo={chainInfo} size="2rem" />
+          <ChainImageFallback chainInfo={modularChainInfo} size="2rem" />
           <Gutter size="0.5rem" />
           <Subtitle3
             color={
@@ -52,7 +57,7 @@ export const ReceiveModal: FunctionComponent<{
                 : ColorPalette["gray-10"]
             }
           >
-            {chainInfo.chainName}
+            {modularChainInfo.chainName}
           </Subtitle3>
         </XAxis>
         <Gutter size="0.875rem" />
@@ -65,7 +70,9 @@ export const ReceiveModal: FunctionComponent<{
         >
           <QRCodeSVG
             value={
-              isEVMOnlyChain
+              isStarknetChain
+                ? account.starknetHexAddress
+                : isEVMOnlyChain
                 ? account.ethereumHexAddress
                 : account.bech32Address
             }

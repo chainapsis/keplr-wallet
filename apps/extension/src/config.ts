@@ -1,7 +1,7 @@
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 
-export const EmbedChainInfos: ChainInfo[] = [
+export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
   {
     rpc: "https://rpc-cosmoshub.keplr.app",
     rest: "https://lcd-cosmoshub.keplr.app",
@@ -2413,6 +2413,72 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     features: [],
+  },
+  {
+    chainId: "starknet:SN_MAIN",
+    chainName: "Starknet",
+    starknet: {
+      chainId: "starknet:SN_MAIN",
+      rpc: "https://starknet-mainnet.public.blastapi.io/rpc/v0_7",
+      currencies: [
+        {
+          type: "erc20",
+          contractAddress:
+            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          coinDenom: "ETH",
+          coinMinimalDenom:
+            "erc20:0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          coinDecimals: 18,
+          coinGeckoId: "ethereum",
+        },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+          coinDenom: "STRK",
+          coinMinimalDenom:
+            "erc20:0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+          coinDecimals: 18,
+          coinGeckoId: "starknet",
+        },
+      ],
+      ethContractAddress:
+        "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+      strkContractAddress:
+        "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+    },
+  },
+  {
+    chainId: "starknet:SN_SEPOLIA",
+    chainName: "Starknet Sepolia",
+    starknet: {
+      chainId: "starknet:SN_SEPOLIA",
+      rpc: "https://starknet-sepolia.public.blastapi.io/rpc/v0_7",
+      currencies: [
+        {
+          type: "erc20",
+          contractAddress:
+            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          coinDenom: "ETH",
+          coinMinimalDenom:
+            "erc20:0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          coinDecimals: 18,
+        },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+          coinDenom: "STRK",
+          coinMinimalDenom:
+            "erc20:0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+          coinDecimals: 18,
+        },
+      ],
+      ethContractAddress:
+        "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+      strkContractAddress:
+        "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+    },
   },
 ];
 

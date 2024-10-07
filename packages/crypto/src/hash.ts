@@ -1,14 +1,13 @@
-import { sha256 } from "sha.js";
-import { keccak256 } from "@ethersproject/keccak256";
-import { Buffer } from "buffer/";
+import { sha256 } from "@noble/hashes/sha2";
+import { keccak_256 } from "@noble/hashes/sha3";
 
 export class Hash {
   static sha256(data: Uint8Array): Uint8Array {
-    return new Uint8Array(new sha256().update(data).digest());
+    return sha256(data);
   }
 
   static keccak256(data: Uint8Array): Uint8Array {
-    return Buffer.from(keccak256(data).replace("0x", ""), "hex");
+    return keccak_256(data);
   }
 
   static truncHashPortion(

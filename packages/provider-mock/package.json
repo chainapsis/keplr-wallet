@@ -25,5 +25,8 @@
     "buffer": "^6.0.3",
     "deepmerge": "^4.2.2",
     "long": "^4.0.0"
+  },
+  "peerDependencies": {
+    "starknet": "^6"
   }
 }

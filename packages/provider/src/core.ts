@@ -20,6 +20,8 @@ import {
   SettledResponses,
   DirectAuxSignResponse,
   IEthereumProvider,
+  IStarknetProvider,
+  WalletEvents,
 } from "@keplr-wallet/types";
 import {
   BACKGROUND_PORT,
@@ -35,6 +37,13 @@ import Long from "long";
 import { Buffer } from "buffer/";
 import { KeplrCoreTypes } from "./core-types";
 import EventEmitter from "events";
+import {
+  AccountInterface,
+  Call,
+  DeployAccountSignerDetails,
+  InvocationsSignerDetails,
+  ProviderInterface,
+} from "starknet";
 
 export class Keplr implements IKeplr, KeplrCoreTypes {
   protected enigmaUtils: Map<string, SecretUtils> = new Map();
@@ -1000,6 +1009,131 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     );
   }
 
+  async getStarknetKey(chainId: string): Promise<{
+    name: string;
+    hexAddress: string;
+    pubKey: Uint8Array;
+    address: Uint8Array;
+  }> {
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-starknet",
+        "get-starknet-key",
+        {
+          chainId,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
+  }
+
+  async getStarknetKeysSettled(chainIds: string[]): Promise<
+    SettledResponses<{
+      name: string;
+      hexAddress: string;
+      pubKey: Uint8Array;
+      address: Uint8Array;
+    }>
+  > {
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-starknet",
+        "get-starknet-keys-settled",
+        {
+          chainIds,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
+  }
+
+  async signStarknetTx(
+    chainId: string,
+    transactions: Call[],
+    details: InvocationsSignerDetails
+  ): Promise<{
+    transactions: Call[];
+    details: InvocationsSignerDetails;
+    signature: string[];
+  }> {
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-starknet",
+        "request-sign-starknet-tx",
+        {
+          chainId,
+          transactions,
+          details,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
+  }
+
+  async signStarknetDeployAccountTransaction(
+    chainId: string,
+    transaction: DeployAccountSignerDetails
+  ): Promise<{
+    transaction: DeployAccountSignerDetails;
+    signature: string[];
+  }> {
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-starknet",
+        "request-sign-starknet-deploy-account-tx",
+        {
+          chainId,
+          transaction,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.protectedTryOpenSidePanelIfEnabled();
+        }
+      });
+    });
+  }
+
   // IMPORTANT: protected로 시작하는 method는 InjectedKeplr.startProxy()에서 injected 쪽에서 event system으로도 호출할 수 없도록 막혀있다.
   //            protected로 시작하지 않는 method는 injected keplr에 없어도 event system을 통하면 호출 할 수 있다.
   //            이를 막기 위해서 method 이름을 protected로 시작하게 한다.
@@ -1313,6 +1447,8 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   }
 
   public readonly ethereum = new EthereumProvider(this, this.requester);
+
+  public readonly starknet = new StarknetProvider(this, this.requester);
 }
 class EthereumProvider extends EventEmitter implements IEthereumProvider {
   chainId: string | null = null;
@@ -1427,3 +1563,105 @@ const sidePanelOpenNeededJSONRPCMethods = [
   "wallet_switchEthereumChain",
   "wallet_watchAsset",
 ];
+
+class StarknetProvider implements IStarknetProvider {
+  id: string = "";
+  name: string = "";
+  version: string = "";
+  icon: string = "";
+
+  isConnected: boolean = false;
+
+  chainId?: string | undefined;
+
+  selectedAddress?: string | undefined;
+
+  account?: AccountInterface;
+
+  provider?: ProviderInterface;
+
+  constructor(
+    protected readonly keplr: Keplr,
+    protected readonly requester: MessageRequester
+  ) {}
+
+  protected async protectedEnableAccess(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      let f = false;
+
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "permission-interactive",
+        "enable-access-for-starknet",
+        {}
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f) {
+          this.keplr.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
+  }
+
+  async request<T = unknown>({
+    type,
+    params,
+  }: {
+    type: string;
+    params?: unknown[] | Record<string, unknown>;
+  }): Promise<T> {
+    if (typeof type !== "string") {
+      throw new Error("Invalid parameter: `type` must be a string");
+    }
+
+    // XXX: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
+    //      side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
+    //      request의 경우는 일종의 쿼리이기 때문에 언제 결과가 올지 알 수 없다. 그러므로 미리 권한 처리를 해야한다.
+    if (type !== "keplr_initStarknetProviderState") {
+      await this.protectedEnableAccess();
+    }
+
+    return new Promise((resolve, reject) => {
+      let f = false;
+      sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "keyring-starknet",
+        "request-json-rpc-to-starknet",
+        {
+          // 메시지에서 type이라는 변수가 쓰이기 때문에 method로 변경한다.
+          method: type,
+          params,
+        }
+      )
+        .then(resolve)
+        .catch(reject)
+        .finally(() => (f = true));
+
+      setTimeout(() => {
+        if (!f && sidePanelOpenNeededJSONRPCMethods.includes(type)) {
+          this.keplr.protectedTryOpenSidePanelIfEnabled();
+        }
+      }, 100);
+    });
+  }
+  async enable(_options?: {
+    starknetVersion?: "v4" | "v5";
+  }): Promise<string[]> {
+    throw new Error("Method not implemented.");
+  }
+  isPreauthorized(): Promise<boolean> {
+    throw new Error("Method not implemented.");
+  }
+  on<E extends WalletEvents>(_event: E["type"], _handleEvent: E["handler"]) {
+    throw new Error("Method not implemented.");
+  }
+  off<E extends WalletEvents>(_event: E["type"], _handleEvent: E["handler"]) {
+    throw new Error("Method not implemented.");
+  }
+}

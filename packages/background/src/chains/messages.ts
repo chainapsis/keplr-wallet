@@ -1,5 +1,9 @@
 import { KeplrError, Message } from "@keplr-wallet/router";
-import { ChainInfo, ChainInfoWithoutEndpoints } from "@keplr-wallet/types";
+import {
+  ChainInfo,
+  ChainInfoWithoutEndpoints,
+  ModularChainInfo,
+} from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
 import { ChainInfoWithCoreTypes } from "./types";
 
@@ -27,6 +31,7 @@ export class PingMsg extends Message<void> {
 
 export class GetChainInfosWithCoreTypesMsg extends Message<{
   chainInfos: ChainInfoWithCoreTypes[];
+  modulrChainInfos: ModularChainInfo[];
 }> {
   public static type() {
     return "get-chain-infos-with-core-types";
@@ -155,9 +160,10 @@ export class NeedSuggestChainInfoInteractionMsg extends Message<boolean> {
   }
 }
 
-export class RemoveSuggestedChainInfoMsg extends Message<
-  ChainInfoWithCoreTypes[]
-> {
+export class RemoveSuggestedChainInfoMsg extends Message<{
+  chainInfos: ChainInfoWithCoreTypes[];
+  modularChainInfos: ModularChainInfo[];
+}> {
   public static type() {
     return "remove-suggested-chain-info";
   }
@@ -181,7 +187,10 @@ export class RemoveSuggestedChainInfoMsg extends Message<
   }
 }
 
-export class SetChainEndpointsMsg extends Message<ChainInfoWithCoreTypes[]> {
+export class SetChainEndpointsMsg extends Message<{
+  chainInfos: ChainInfoWithCoreTypes[];
+  modularChainInfos: ModularChainInfo[];
+}> {
   public static type() {
     return "set-chain-endpoints";
   }
@@ -232,7 +241,10 @@ export class SetChainEndpointsMsg extends Message<ChainInfoWithCoreTypes[]> {
   }
 }
 
-export class ClearChainEndpointsMsg extends Message<ChainInfoWithCoreTypes[]> {
+export class ClearChainEndpointsMsg extends Message<{
+  chainInfos: ChainInfoWithCoreTypes[];
+  modularChainInfos: ModularChainInfo[];
+}> {
   public static type() {
     return "clear-chain-endpoints";
   }
