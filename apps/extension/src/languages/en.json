@@ -635,6 +635,7 @@
 
   "components.collapsible-list.view-more-tokens": "View {remain} more tokens",
   "components.collapsible-list.collapse": "Collapse",
+  "components.collapsible-list.view-more": "View {remain} more",
 
   "button.confirm": "Confirm",
   "button.ok": "OK",

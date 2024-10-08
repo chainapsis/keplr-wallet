@@ -619,6 +619,7 @@
 
   "components.collapsible-list.view-more-tokens": "{remain}개의 토큰 더보기",
   "components.collapsible-list.collapse": "접기",
+  "components.collapsible-list.view-more": "{remain}개 더보기",
 
   "button.confirm": "확인",
   "button.ok": "확인",
