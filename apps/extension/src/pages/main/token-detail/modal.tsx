@@ -673,30 +673,32 @@ export const TokenDetailModal: FunctionComponent<{
 
             if (msgHistory.pages[0].response?.isUnsupported || !isSupported) {
               // TODO: 아직 cosmos 체인이 아니면 embedded인지 아닌지 구분할 수 없다.
-              if ("cosmos" in modularChainInfo) {
-                const chainInfo = chainStore.getChain(chainId);
-                if (chainInfo.embedded.embedded) {
-                  return (
-                    <EmptyView>
-                      <Box marginX="2rem">
-                        <Stack alignX="center" gutter="0.1rem">
-                          <Subtitle3 style={{ fontWeight: 700 }}>
-                            Unsupported Chain
-                          </Subtitle3>
-                          <Subtitle3
-                            style={{
-                              textAlign: "center",
-                            }}
-                          >
-                            {`We're actively working on expanding our support for
+              if (
+                ("cosmos" in modularChainInfo &&
+                  chainStore.getChain(chainId).embedded.embedded) ||
+                "starknet" in modularChainInfo
+              ) {
+                return (
+                  <EmptyView>
+                    <Box marginX="2rem">
+                      <Stack alignX="center" gutter="0.1rem">
+                        <Subtitle3 style={{ fontWeight: 700 }}>
+                          Unsupported Chain
+                        </Subtitle3>
+                        <Subtitle3
+                          style={{
+                            textAlign: "center",
+                          }}
+                        >
+                          {`We're actively working on expanding our support for
                         native chains.`}
-                          </Subtitle3>
-                        </Stack>
-                      </Box>
-                    </EmptyView>
-                  );
-                }
+                        </Subtitle3>
+                      </Stack>
+                    </Box>
+                  </EmptyView>
+                );
               }
+
               return (
                 <EmptyView>
                   <Box marginX="2rem">
