@@ -762,6 +762,8 @@ const RefreshButton: FunctionComponent<{
 }> = observer(({ visible, onSetIsLoading }) => {
   const { chainStore, queriesStore, accountStore, priceStore } = useStore();
 
+  const theme = useTheme();
+
   const translateY = useSpringValue(
     visible ? visibleTranslateY : invisibleTranslateY,
     {
@@ -900,13 +902,27 @@ const RefreshButton: FunctionComponent<{
           justifyContent: "center",
 
           borderRadius: "999999px",
-          background: ColorPalette["gray-500"],
-          boxShadow: "0px 0px 24px 0px rgba(0, 0, 0, 0.25)",
+          background:
+            theme.mode === "light"
+              ? ColorPalette["white"]
+              : ColorPalette["gray-500"],
+          boxShadow:
+            theme.mode === "light"
+              ? "0px 4px 12px 0px rgba(0, 0, 0, 0.12)"
+              : "0px 0px 24px 0px rgba(0, 0, 0, 0.25)",
 
           translateY: translateY.to((v) => `${v}%`),
         }}
       >
-        <Subtitle4 color={ColorPalette["gray-50"]}>Refresh</Subtitle4>
+        <Subtitle4
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-600"]
+              : ColorPalette["gray-50"]
+          }
+        >
+          Refresh
+        </Subtitle4>
         <Gutter size="0.25rem" />
         <RotateIcon
           isLoading={isLoading}
@@ -918,7 +934,11 @@ const RefreshButton: FunctionComponent<{
           viewBox="0 0 16 16"
         >
           <path
-            stroke={ColorPalette["gray-50"]}
+            stroke={
+              theme.mode === "light"
+                ? ColorPalette["gray-600"]
+                : ColorPalette["gray-50"]
+            }
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="1.33"
