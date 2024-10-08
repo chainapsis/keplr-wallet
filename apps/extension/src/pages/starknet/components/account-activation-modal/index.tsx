@@ -61,6 +61,7 @@ export const AccountActivationModal: FunctionComponent<{
 
   const intl = useIntl();
   const account = accountStore.getAccount(chainId);
+  const starknetQueries = starknetQueriesStore.get(chainId);
 
   const sender = account.starknetHexAddress;
   const senderConfig = useSenderConfig(
@@ -101,6 +102,22 @@ export const AccountActivationModal: FunctionComponent<{
 
     return () => clearInterval(interval);
   }, [gasSimulationRefresher]);
+
+  useEffect(() => {
+    starknetQueries.queryAccountNonce
+      .getNonce(account.starknetHexAddress)
+      .fetch();
+    if (feeConfig.fee != null) {
+      starknetQueries.queryStarknetERC20Balance
+        .getBalance(
+          chainId,
+          chainStore,
+          account.starknetHexAddress,
+          feeConfig.fee.currency.coinMinimalDenom
+        )
+        ?.fetch();
+    }
+  }, []);
 
   const gasSimulatorKey = feeConfig.type;
   const gasSimulator = useGasSimulator(
@@ -322,7 +339,6 @@ export const AccountActivationModal: FunctionComponent<{
                         new SubmitStarknetTxHashMsg(chainId, txHash)
                       )
                       .then(() => {
-                        starknetAccount.setIsDeployingAccount(false);
                         notification.show(
                           "success",
                           intl.formatMessage({
@@ -330,8 +346,8 @@ export const AccountActivationModal: FunctionComponent<{
                           }),
                           ""
                         );
-                        const starknetQueries =
-                          starknetQueriesStore.get(chainId);
+                        starknetAccount.setIsDeployingAccount(false);
+                        close();
                         starknetQueries.queryAccountNonce
                           .getNonce(account.starknetHexAddress)
                           .fetch();
@@ -350,12 +366,12 @@ export const AccountActivationModal: FunctionComponent<{
                       })
                       .catch((e) => {
                         starknetAccount.setIsDeployingAccount(false);
-                        // 이 경우에는 tx가 커밋된 이후의 오류이기 때문에 이미 페이지는 sign 페이지에서부터 전환된 상태다.
-                        // 따로 멀 처리해줄 필요가 없다
+                        close();
                         console.log(e);
                       });
                   } catch (e) {
                     starknetAccount.setIsDeployingAccount(false);
+                    goBack();
                     console.log(e);
                   }
                 }
