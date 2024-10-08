@@ -1450,6 +1450,18 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
 
   public readonly starknet = new StarknetProvider(this, this.requester);
 }
+
+// IMPORTANT: 사이드 패널을 열어야하는 JSON-RPC 메소드들이 생길 때마다 여기에 추가해야한다.
+const sidePanelOpenNeededJSONRPCMethods = [
+  "eth_sendTransaction",
+  "personal_sign",
+  "eth_signTypedData_v3",
+  "eth_signTypedData_v4",
+  "wallet_addEthereumChain",
+  "wallet_switchEthereumChain",
+  "wallet_watchAsset",
+];
+
 class EthereumProvider extends EventEmitter implements IEthereumProvider {
   chainId: string | null = null;
   selectedAddress: string | null = null;
@@ -1554,14 +1566,12 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
 }
 
 // IMPORTANT: 사이드 패널을 열어야하는 JSON-RPC 메소드들이 생길 때마다 여기에 추가해야한다.
-const sidePanelOpenNeededJSONRPCMethods = [
-  "eth_sendTransaction",
-  "personal_sign",
-  "eth_signTypedData_v3",
-  "eth_signTypedData_v4",
-  "wallet_addEthereumChain",
-  "wallet_switchEthereumChain",
+const sidePanelOpenNeededStarknetJSONRPCMethods = [
   "wallet_watchAsset",
+  "wallet_switchStarknetChain",
+  "wallet_addInvokeTransaction",
+  "wallet_addDeclareTransaction",
+  "wallet_signTypedData",
 ];
 
 class StarknetProvider implements IStarknetProvider {
@@ -1644,7 +1654,7 @@ class StarknetProvider implements IStarknetProvider {
         .finally(() => (f = true));
 
       setTimeout(() => {
-        if (!f && sidePanelOpenNeededJSONRPCMethods.includes(type)) {
+        if (!f && sidePanelOpenNeededStarknetJSONRPCMethods.includes(type)) {
           this.keplr.protectedTryOpenSidePanelIfEnabled();
         }
       }, 100);
