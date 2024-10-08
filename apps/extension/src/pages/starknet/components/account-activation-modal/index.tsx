@@ -25,7 +25,7 @@ import {
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { FeeControl } from "../input/fee-control";
-import { ExtensionKVStore } from "@keplr-wallet/common";
+import { ExtensionKVStore, sleep } from "@keplr-wallet/common";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { num } from "starknet";
 import { useNotification } from "../../../../hooks/notification";
@@ -346,23 +346,39 @@ export const AccountActivationModal: FunctionComponent<{
                           }),
                           ""
                         );
-                        starknetAccount.setIsDeployingAccount(false);
-                        close();
-                        starknetQueries.queryAccountNonce
-                          .getNonce(account.starknetHexAddress)
-                          .fetch();
-                        if (feeConfig.fee != null) {
-                          starknetQueries.queryStarknetERC20Balance
-                            .getBalance(
-                              chainId,
-                              chainStore,
-                              account.starknetHexAddress,
-                              feeConfig.fee.currency.coinMinimalDenom
-                            )
-                            ?.fetch();
-                        }
+                        const starknetQueries =
+                          starknetQueriesStore.get(chainId);
 
-                        close();
+                        (async () => {
+                          // tx commit 이후의 state sync 시점이 이싱해서 일단 성공할때까지 2초 쉬면서 refresh 해본다.
+                          const maxRetry = 15;
+                          let retry = 0;
+                          while (retry < maxRetry) {
+                            const res = await starknetQueries.queryAccountNonce
+                              .getNonce(account.starknetHexAddress)
+                              .waitFreshResponse();
+                            if (res?.data) {
+                              starknetAccount.setIsDeployingAccount(false);
+                             
+                              if (feeConfig.fee != null) {
+                                starknetQueries.queryStarknetERC20Balance
+                                  .getBalance(
+                                    chainId,
+                                    chainStore,
+                                    account.starknetHexAddress,
+                                    feeConfig.fee.currency.coinMinimalDenom
+                                  )
+                                  ?.fetch();
+                              }
+                              close();
+                              break;
+                            }
+
+                            retry++;
+
+                            await sleep(2000);
+                          }
+                        })();
                       })
                       .catch((e) => {
                         starknetAccount.setIsDeployingAccount(false);
