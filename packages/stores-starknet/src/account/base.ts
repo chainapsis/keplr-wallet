@@ -29,6 +29,11 @@ export class StarknetAccountBase {
     return this._isSendingTx;
   }
 
+  @action
+  setIsDeployingAccount(value: boolean) {
+    this._isDeployingAccount = value;
+  }
+
   get isDeployingAccount(): boolean {
     return this._isDeployingAccount;
   }
@@ -91,7 +96,6 @@ export class StarknetAccountBase {
     );
 
     try {
-      this._isDeployingAccount = true;
       const res = await walletAccount.deployAccount(
         {
           classHash,
@@ -103,10 +107,8 @@ export class StarknetAccountBase {
         }
       );
 
-      this._isDeployingAccount = false;
       onFulfilled?.(res);
     } catch (e) {
-      this._isDeployingAccount = false;
       onBroadcastFailed?.(e);
     }
   }
@@ -140,7 +142,6 @@ export class StarknetAccountBase {
     );
 
     try {
-      this._isDeployingAccount = true;
       const res = await walletAccount.deployAccountWithFee(
         {
           classHash,
@@ -150,22 +151,8 @@ export class StarknetAccountBase {
         fee
       );
 
-      walletAccount
-        .waitForTransaction(res.transaction_hash, {
-          retryInterval: 1000,
-        })
-        .catch((e) => {
-          // 오류 처리는 무시한다.
-          console.log(e);
-        })
-        .finally(() => {
-          this._isDeployingAccount = false;
-        });
-
       return res;
     } catch (e) {
-      this._isDeployingAccount = false;
-
       throw e;
     }
   }

@@ -142,16 +142,15 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
 
   const account = accountStore.getAccount(chainId);
   const starknetAccount = starknetAccountStore.getAccount(chainId);
+  const starknetQueries = starknetQueriesStore.get(chainId);
 
   const sender = account.starknetHexAddress;
-  const balance = starknetQueriesStore
-    .get(chainId)
-    .queryStarknetERC20Balance.getBalance(
-      chainId,
-      chainStore,
-      sender,
-      currency.coinMinimalDenom
-    );
+  const balance = starknetQueries.queryStarknetERC20Balance.getBalance(
+    chainId,
+    chainStore,
+    sender,
+    currency.coinMinimalDenom
+  );
 
   const sendConfigs = useSendTxConfig(
     chainStore,
@@ -313,9 +312,7 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
   const [isAccountActivationModalOpen, setIsAccountActivationModalOpen] =
     useState(false);
   useEffect(() => {
-    if (isAccountNotDeployed) {
-      setIsAccountActivationModalOpen(true);
-    }
+    setIsAccountActivationModalOpen(isAccountNotDeployed);
   }, [isAccountNotDeployed]);
 
   return (
@@ -433,6 +430,28 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
                 new SubmitStarknetTxHashMsg(chainId, txHash)
               )
               .then(() => {
+                starknetQueries.queryStarknetERC20Balance
+                  .getBalance(
+                    chainId,
+                    chainStore,
+                    account.starknetHexAddress,
+                    sendConfigs.amountConfig.amount[0].currency.coinMinimalDenom
+                  )
+                  ?.fetch();
+                if (
+                  sendConfigs.feeConfig.fee &&
+                  sendConfigs.feeConfig.fee.currency.coinMinimalDenom !==
+                    sendConfigs.amountConfig.amount[0].currency.coinMinimalDenom
+                ) {
+                  starknetQueries.queryStarknetERC20Balance
+                    .getBalance(
+                      chainId,
+                      chainStore,
+                      account.starknetHexAddress,
+                      sendConfigs.feeConfig.fee.currency.coinMinimalDenom
+                    )
+                    ?.fetch();
+                }
                 notification.show(
                   "success",
                   intl.formatMessage({
