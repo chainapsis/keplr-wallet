@@ -283,39 +283,38 @@ export const AccountActivationModal: FunctionComponent<{
                       throw new Error("Can't find fee currency");
                     }
 
+                    starknetAccount.setIsDeployingAccount(true);
                     const { transaction_hash: txHash } =
-                      await starknetAccountStore
-                        .getAccount(senderConfig.chainId)
-                        .deployAccountWithFee(
-                          accountStore.getAccount(senderConfig.chainId)
-                            .starknetHexAddress,
-                          "0x" + Buffer.from(params.classHash).toString("hex"),
-                          [
-                            "0x" + Buffer.from(params.xLow).toString("hex"),
-                            "0x" + Buffer.from(params.xHigh).toString("hex"),
-                            "0x" + Buffer.from(params.yLow).toString("hex"),
-                            "0x" + Buffer.from(params.yHigh).toString("hex"),
-                          ],
-                          "0x" + Buffer.from(params.salt).toString("hex"),
-                          (() => {
-                            if (type === "ETH") {
-                              return {
-                                type: "ETH",
-                                maxFee: feeConfig.maxFee.toCoin().amount,
-                              };
-                            } else if (type === "STRK") {
-                              return {
-                                type: "STRK",
-                                gas: gasConfig.gas.toString(),
-                                maxGasPrice: num.toHex(
-                                  feeConfig.maxGasPrice.toCoin().amount
-                                ),
-                              };
-                            } else {
-                              throw new Error("Invalid fee type");
-                            }
-                          })()
-                        );
+                      await starknetAccount.deployAccountWithFee(
+                        accountStore.getAccount(senderConfig.chainId)
+                          .starknetHexAddress,
+                        "0x" + Buffer.from(params.classHash).toString("hex"),
+                        [
+                          "0x" + Buffer.from(params.xLow).toString("hex"),
+                          "0x" + Buffer.from(params.xHigh).toString("hex"),
+                          "0x" + Buffer.from(params.yLow).toString("hex"),
+                          "0x" + Buffer.from(params.yHigh).toString("hex"),
+                        ],
+                        "0x" + Buffer.from(params.salt).toString("hex"),
+                        (() => {
+                          if (type === "ETH") {
+                            return {
+                              type: "ETH",
+                              maxFee: feeConfig.maxFee.toCoin().amount,
+                            };
+                          } else if (type === "STRK") {
+                            return {
+                              type: "STRK",
+                              gas: gasConfig.gas.toString(),
+                              maxGasPrice: num.toHex(
+                                feeConfig.maxGasPrice.toCoin().amount
+                              ),
+                            };
+                          } else {
+                            throw new Error("Invalid fee type");
+                          }
+                        })()
+                      );
 
                     new InExtensionMessageRequester()
                       .sendMessage(
@@ -323,6 +322,7 @@ export const AccountActivationModal: FunctionComponent<{
                         new SubmitStarknetTxHashMsg(chainId, txHash)
                       )
                       .then(() => {
+                        starknetAccount.setIsDeployingAccount(false);
                         notification.show(
                           "success",
                           intl.formatMessage({
@@ -349,11 +349,13 @@ export const AccountActivationModal: FunctionComponent<{
                         close();
                       })
                       .catch((e) => {
+                        starknetAccount.setIsDeployingAccount(false);
                         // 이 경우에는 tx가 커밋된 이후의 오류이기 때문에 이미 페이지는 sign 페이지에서부터 전환된 상태다.
                         // 따로 멀 처리해줄 필요가 없다
                         console.log(e);
                       });
                   } catch (e) {
+                    starknetAccount.setIsDeployingAccount(false);
                     console.log(e);
                   }
                 }
