@@ -34,13 +34,13 @@ import { ColorPalette } from "../../styles";
 import { AvailableTabView } from "./available";
 import { StakedTabView } from "./staked";
 import { SearchTextInput } from "../../components/input";
-import { animated, useSpringValue } from "@react-spring/web";
+import { animated, useSpringValue, easings } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
 import { IChainInfoImpl, QueryError } from "@keplr-wallet/stores";
 import { Skeleton } from "../../components/skeleton";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
-import styled, { css, keyframes, useTheme } from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { IbcHistoryView } from "./components/ibc-history-view";
 import { LayeredHorizontalRadioGroup } from "../../components/radio-group";
 import { XAxis, YAxis } from "../../components/axis";
@@ -731,28 +731,6 @@ const Styles = {
   `,
 };
 
-const Rotate = keyframes`
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-`;
-
-const RotateIcon = styled.svg<{
-  isLoading: boolean;
-}>`
-  ${({ isLoading }) => {
-    if (isLoading) {
-      return css`
-        animation: ${Rotate} 1.25s linear infinite;
-        animation-play-state: ${isLoading ? "running" : "paused"};
-      `;
-    }
-  }}
-`;
-
 const visibleTranslateY = -40;
 const invisibleTranslateY = 100;
 const RefreshButton: FunctionComponent<{
@@ -873,6 +851,41 @@ const RefreshButton: FunctionComponent<{
     }
   };
 
+  const rotate = useSpringValue(0, {
+    config: {
+      duration: 1250,
+      easing: easings.linear,
+    },
+  });
+  // 밑에서 onRest callback에서 isLoading을 써야하기 때문에 이러한 처리가 필요함.
+  const isLoadingRef = useRef(isLoading);
+  isLoadingRef.current = isLoading;
+  const prevIsLoading = useRef(isLoading);
+  useEffect(() => {
+    // 이 코드의 목적은 rotate animation을 실행하는데
+    // isLoading이 false가 되었을때 마지막 rotate까지는 끝내도록 하기 위해서 따로 작성된 것임.
+    if (prevIsLoading.current !== isLoading && isLoading) {
+      // prev 값과 비교하지 않으면 최초 mount 시점에서 0~360으로 바로 회전하게 된다.
+      if (isLoading) {
+        const onRest = () => {
+          if (isLoadingRef.current) {
+            rotate.start(360, {
+              from: 0,
+              onRest,
+            });
+          }
+        };
+
+        rotate.start(360, {
+          from: 0,
+          onRest,
+        });
+      }
+    }
+
+    prevIsLoading.current = isLoading;
+  }, [rotate, isLoading]);
+
   return (
     <div
       onClick={(e) => {
@@ -924,14 +937,16 @@ const RefreshButton: FunctionComponent<{
           Refresh
         </Subtitle4>
         <Gutter size="0.25rem" />
-        <RotateIcon
-          isLoading={isLoading}
+        <animated.svg
           xmlns="http://www.w3.org/2000/svg"
           width="16"
           height="16"
           fill="none"
           stroke="none"
           viewBox="0 0 16 16"
+          style={{
+            transform: rotate.to((v) => `rotate(${v}deg)`),
+          }}
         >
           <path
             stroke={
@@ -944,7 +959,7 @@ const RefreshButton: FunctionComponent<{
             strokeWidth="1.33"
             d="M11.182 6.232h3.328v0M2.49 13.095V9.768m0 0h3.328m-3.329 0l2.12 2.122a5.5 5.5 0 009.202-2.466M3.188 6.577a5.5 5.5 0 019.202-2.467l2.121 2.121m0-3.327V6.23"
           />
-        </RotateIcon>
+        </animated.svg>
       </animated.div>
     </div>
   );
