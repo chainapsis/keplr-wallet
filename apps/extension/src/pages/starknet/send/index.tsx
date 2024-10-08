@@ -312,9 +312,7 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
   const [isAccountActivationModalOpen, setIsAccountActivationModalOpen] =
     useState(false);
   useEffect(() => {
-    if (isAccountNotDeployed) {
-      setIsAccountActivationModalOpen(true);
-    }
+    setIsAccountActivationModalOpen(isAccountNotDeployed);
   }, [isAccountNotDeployed]);
 
   return (
