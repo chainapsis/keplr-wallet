@@ -213,6 +213,7 @@ export function init(
 
   const keyRingStarknetService = new KeyRingStarknet.KeyRingStarknetService(
     chainsService,
+    vaultService,
     keyRingV2Service,
     permissionService,
     tokenERC20Service,

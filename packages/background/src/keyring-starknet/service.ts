@@ -32,10 +32,16 @@ import { InteractionService } from "../interaction";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { AccountImpl } from "./account-impl";
 import { BackgroundTxService } from "../tx";
+import { VaultService } from "../vault";
+import { Hash } from "@keplr-wallet/crypto";
+
+const AccountClassHash =
+  "02203673e728fa07de1c2ea60405399ffefaf875f1b7ae54e747659e1e216d94";
 
 export class KeyRingStarknetService {
   constructor(
     protected readonly chainsService: ChainsService,
+    protected readonly vaultService: VaultService,
     public readonly keyRingService: KeyRingService,
     protected readonly permissionService: PermissionService,
     protected readonly tokenERC20Service: TokenERC20Service,
@@ -107,26 +113,12 @@ export class KeyRingStarknetService {
     pubKey: Uint8Array;
     address: Uint8Array;
   }> {
-    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
-    if (!("starknet" in chainInfo)) {
-      throw new Error("Chain is not a starknet chain");
-    }
-    const pubKey = await this.keyRingService.getPubKey(chainId, vaultId);
-
-    const salt = Buffer.from("11", "hex");
-    const classHash = Buffer.from(
-      "02203673e728fa07de1c2ea60405399ffefaf875f1b7ae54e747659e1e216d94",
-      "hex"
-    );
-    // TODO: salt를 어떻게 할지 생각한다...
-    //       class hash의 경우도 생각해야함...
-    const address = pubKey.getStarknetAddress(salt, classHash);
-
+    const params = await this.getStarknetKeyParams(chainId);
     return {
       name: this.keyRingService.getKeyRingName(vaultId),
-      hexAddress: `0x${Buffer.from(address).toString("hex")}`,
-      pubKey: pubKey.toBytes(),
-      address,
+      hexAddress: `0x${Buffer.from(params.address).toString("hex")}`,
+      pubKey: params.pubKey,
+      address: params.address,
     };
   }
 
@@ -147,13 +139,19 @@ export class KeyRingStarknetService {
     const vaultId = this.keyRingService.selectedVaultId;
     const pubKey = await this.keyRingService.getPubKey(chainId, vaultId);
 
-    const salt = Buffer.from("11", "hex");
-    const classHash = Buffer.from(
-      "02203673e728fa07de1c2ea60405399ffefaf875f1b7ae54e747659e1e216d94",
-      "hex"
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault not found");
+    }
+    const sig = await this.keyRingService.signWithVault(
+      vault,
+      9004,
+      Buffer.from("starknet_key_salt"),
+      "sha256",
+      chainInfo
     );
-    // TODO: salt를 어떻게 할지 생각한다...
-    //       class hash의 경우도 생각해야함...
+    const salt = Hash.sha256(Buffer.concat([sig.r, sig.s])).slice(0, 24);
+    const classHash = Buffer.from(AccountClassHash, "hex");
     const address = pubKey.getStarknetAddress(salt, classHash);
     const addressParams = pubKey.getStarknetAddressParams();
 
