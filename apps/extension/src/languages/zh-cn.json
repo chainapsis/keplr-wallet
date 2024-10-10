@@ -99,6 +99,10 @@
   "pages.register.name-password-hardware.connect-to-terra": "Terra应用",
   "pages.register.name-password-hardware.connect-to-secret": "Secret应用",
 
+  "pages.register.name-password-hardware.connect-keystone-way": "选择Keystone连接方式",
+  "pages.register.name-password-hardware.connect-to-keystone-USB": "USB",
+  "pages.register.name-password-hardware.connect-to-keystone-QR": "QR",
+
   "pages.register.recover-mnemonic.title": "导入已有钱包",
   "pages.register.recover-mnemonic.paragraph-1": "输入助记词，或点击任意输入框并粘贴整个助记词。",
   "pages.register.recover-mnemonic.paragraph-2": "按正确的顺序输入助记词，无需大写、标点符号或空格。",

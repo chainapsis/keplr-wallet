@@ -105,6 +105,10 @@
   "pages.register.name-password-hardware.connect-to-terra": "테라 앱",
   "pages.register.name-password-hardware.connect-to-secret": "시크릿 앱",
 
+  "pages.register.name-password-hardware.connect-keystone-way": "Keystone를 통해 연결하세요",
+  "pages.register.name-password-hardware.connect-to-keystone-USB": "USB",
+  "pages.register.name-password-hardware.connect-to-keystone-QR": "QR",
+
   "pages.register.recover-mnemonic.title": "기존 지갑 불러오기",
   "pages.register.recover-mnemonic.paragraph-1": "복구 문구를 통해 지갑을 불러올 수 있습니다. 아무 칸이나 선택해서 전체 복구 문구를 붙여 넣어보세요.",
   "pages.register.recover-mnemonic.paragraph-2": "복구 문구의 단어를 올바른 순서로, 정확한 대소문자, 구두점 기호 혹은 공백으로 기입해야만 지갑을 불러올 수 있습니다.",
