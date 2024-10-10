@@ -187,6 +187,14 @@ export const MenuBar: FunctionComponent<{
                 </H5>
                 <div style={{ flex: 1 }} />
                 <svg
+                  cursor="pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+
+                    browser.tabs.create({
+                      url: "https://help.keplr.app/articles/side-panel-mode",
+                    });
+                  }}
                   width="17"
                   height="17"
                   viewBox="0 0 17 17"
