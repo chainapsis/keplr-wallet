@@ -113,7 +113,7 @@ export class KeyRingStarknetService {
     pubKey: Uint8Array;
     address: Uint8Array;
   }> {
-    const params = await this.getStarknetKeyParams(chainId);
+    const params = await this.getStarknetKeyParams(vaultId, chainId);
     return {
       name: this.keyRingService.getKeyRingName(vaultId),
       hexAddress: `0x${Buffer.from(params.address).toString("hex")}`,
@@ -122,7 +122,26 @@ export class KeyRingStarknetService {
     };
   }
 
-  async getStarknetKeyParams(chainId: string): Promise<{
+  async getStarknetKeyParamsSelected(chainId: string): Promise<{
+    pubKey: Uint8Array;
+    address: Uint8Array;
+    salt: Uint8Array;
+    classHash: Uint8Array;
+    xLow: Uint8Array;
+    xHigh: Uint8Array;
+    yLow: Uint8Array;
+    yHigh: Uint8Array;
+  }> {
+    return await this.getStarknetKeyParams(
+      this.keyRingService.selectedVaultId,
+      chainId
+    );
+  }
+
+  async getStarknetKeyParams(
+    vaultId: string,
+    chainId: string
+  ): Promise<{
     pubKey: Uint8Array;
     address: Uint8Array;
     salt: Uint8Array;
@@ -136,7 +155,6 @@ export class KeyRingStarknetService {
     if (!("starknet" in chainInfo)) {
       throw new Error("Chain is not a starknet chain");
     }
-    const vaultId = this.keyRingService.selectedVaultId;
     const pubKey = await this.keyRingService.getPubKey(chainId, vaultId);
 
     const vault = this.vaultService.getVault("keyRing", vaultId);

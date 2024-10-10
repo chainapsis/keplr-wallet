@@ -19,8 +19,8 @@ import {
 import { Button } from "../../../../components/button";
 import { Column, Columns } from "../../../../components/column";
 import {
-  GetStarknetKeyParamsMsg,
   SubmitStarknetTxHashMsg,
+  GetStarknetKeyParamsSelectedMsg,
 } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
@@ -148,7 +148,7 @@ export const AccountActivationModal: FunctionComponent<{
         }> => {
           noop(gasSimulationRefresher.count);
 
-          const msg = new GetStarknetKeyParamsMsg(senderConfig.chainId);
+          const msg = new GetStarknetKeyParamsSelectedMsg(senderConfig.chainId);
           const params = await new InExtensionMessageRequester().sendMessage(
             BACKGROUND_PORT,
             msg
@@ -275,7 +275,7 @@ export const AccountActivationModal: FunctionComponent<{
               onClick={async () => {
                 if (feeConfig.maxFee && feeConfig.maxGasPrice) {
                   try {
-                    const msg = new GetStarknetKeyParamsMsg(
+                    const msg = new GetStarknetKeyParamsSelectedMsg(
                       senderConfig.chainId
                     );
                     const params =
@@ -359,7 +359,7 @@ export const AccountActivationModal: FunctionComponent<{
                               .waitFreshResponse();
                             if (res?.data) {
                               starknetAccount.setIsDeployingAccount(false);
-                             
+
                               if (feeConfig.fee != null) {
                                 starknetQueries.queryStarknetERC20Balance
                                   .getBalance(
