@@ -9,6 +9,15 @@ export const Styles = {
     position: relative;
   `,
 
+  DropdownContainer: styled.div<{
+    direction: "up" | "down";
+  }>`
+    display: flex;
+    flex-direction: ${(props) =>
+      props.direction === "down" ? "column" : "column-reverse"};
+    position: relative;
+  `,
+
   SelectedContainer: styled.div<{
     isOpen: boolean;
     size: string;
@@ -68,6 +77,8 @@ export const Styles = {
   `,
   MenuContainer: styled.div.withConfig<{
     isOpen: boolean;
+    direction: "up" | "down";
+    size: string;
   }>({
     shouldForwardProp: (prop) => {
       if (prop === "isOpen") {
@@ -77,10 +88,19 @@ export const Styles = {
     },
   })`
     position: absolute;
+    ${({ direction, size }) =>
+      direction === "down"
+        ? ""
+        : size === "small"
+        ? "bottom: 2.5rem;"
+        : "bottom: 3.25rem;"}
 
     width: 100%;
 
-    margin-top: 0.375rem;
+    ${({ direction }) =>
+      direction === "down"
+        ? "margin-top: 0.375rem"
+        : "margin-bottom: 0.375rem"};
 
     z-index: 1;
 
@@ -115,6 +135,13 @@ export const Styles = {
       }
     }};
   `,
+
+  MenuItemsContainer: styled.div<{ direction: "up" | "down" }>`
+    display: flex;
+    flex-direction: ${({ direction }) =>
+      direction === "down" ? "column" : "column-reverse"};
+  `,
+
   MenuContainerScroll: styled(SimpleBar).withConfig<{
     menuContainerMaxHeight?: string;
   }>({

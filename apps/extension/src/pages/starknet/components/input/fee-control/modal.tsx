@@ -103,6 +103,7 @@ export const TransactionFeeModal: FunctionComponent<{
               feeConfig.setType(key as "ETH" | "STRK");
             }}
             size="large"
+            direction="up"
           />
 
           {(() => {

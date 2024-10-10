@@ -399,7 +399,7 @@ export const SignStarknetTxView: FunctionComponent<{
                   calls: interactionData.data.transactions,
                   details: interactionData.data.details,
                 },
-                null,
+                (_, v) => (typeof v === "bigint" ? v.toString() : v),
                 2
               )}
             </Box>

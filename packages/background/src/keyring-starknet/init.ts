@@ -7,7 +7,7 @@ import {
   RequestSignStarknetDeployAccountTx,
   RequestJsonRpcToStarknetMsg,
   GetStarknetKeysForEachVaultSettledMsg,
-  GetStarknetKeyParamsMsg,
+  GetStarknetKeyParamsSelectedMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -24,7 +24,7 @@ export function init(
   router.registerMessage(RequestSignStarknetDeployAccountTx);
   router.registerMessage(RequestJsonRpcToStarknetMsg);
   router.registerMessage(GetStarknetKeysForEachVaultSettledMsg);
-  router.registerMessage(GetStarknetKeyParamsMsg);
+  router.registerMessage(GetStarknetKeyParamsSelectedMsg);
 
   router.addHandler(ROUTE, getHandler(service, permissionInteractionService));
 }

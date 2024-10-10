@@ -19,4 +19,6 @@ export interface DropdownProps {
 
   allowSearch?: boolean;
   searchExcludedKeys?: string[];
+
+  direction?: "up" | "down";
 }

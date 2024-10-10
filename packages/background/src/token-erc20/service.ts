@@ -95,7 +95,10 @@ export class TokenERC20Service {
     // Validate contract Address
     if (
       !contractAddress.match(/^0x[0-9A-Fa-f]*$/) ||
-      (contractAddress.length !== 42 && contractAddress.length !== 66)
+      (contractAddress.length !== 42 &&
+        // For Starknet, contract address length can be 65 or 66.
+        contractAddress.length !== 65 &&
+        contractAddress.length !== 66)
     ) {
       throw new Error("Contract address is not valid hex address");
     }

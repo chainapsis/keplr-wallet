@@ -246,7 +246,7 @@ export class GetStarknetKeysForEachVaultSettledMsg extends Message<
   }
 }
 
-export class GetStarknetKeyParamsMsg extends Message<{
+export class GetStarknetKeyParamsSelectedMsg extends Message<{
   pubKey: Uint8Array;
   address: Uint8Array;
   salt: Uint8Array;
@@ -257,7 +257,7 @@ export class GetStarknetKeyParamsMsg extends Message<{
   yHigh: Uint8Array;
 }> {
   public static type() {
-    return "get-starknet-key-params";
+    return "get-starknet-key-params-selected";
   }
 
   constructor(public readonly chainId: string) {
@@ -275,6 +275,6 @@ export class GetStarknetKeyParamsMsg extends Message<{
   }
 
   type(): string {
-    return GetStarknetKeyParamsMsg.type();
+    return GetStarknetKeyParamsSelectedMsg.type();
   }
 }
