@@ -2,6 +2,7 @@ import React, {
   FunctionComponent,
   PropsWithChildren,
   useEffect,
+  useImperativeHandle,
   useRef,
 } from "react";
 import { Columns } from "../../../components/column";
@@ -38,7 +39,15 @@ import {
 } from "@floating-ui/react-dom";
 import SimpleBar from "simplebar-react";
 
-export const MainHeaderLayout: FunctionComponent<
+export interface MainHeaderLayoutRef {
+  toggleSideMenu: () => void;
+  openSideMenu: () => void;
+  closeSideMenu: () => void;
+
+  setShowSidePanelRecommendationTooltip: (value: boolean) => void;
+}
+
+export const MainHeaderLayout = observer<
   PropsWithChildren<
     Pick<
       HeaderProps,
@@ -48,290 +57,341 @@ export const MainHeaderLayout: FunctionComponent<
       | "additionalPaddingBottom"
       | "onSubmit"
       | "headerContainerStyle"
+      | "fixedTop"
     >
-  >
-> = observer((props) => {
-  const { children, ...otherProps } = props;
+  >,
+  MainHeaderLayoutRef
+>(
+  (props, ref) => {
+    const { children, ...otherProps } = props;
 
-  const {
-    keyRingStore,
-    uiConfigStore,
-    chainStore,
-    accountStore,
-    queriesStore,
-  } = useStore();
+    const {
+      keyRingStore,
+      uiConfigStore,
+      chainStore,
+      accountStore,
+      queriesStore,
+    } = useStore();
 
-  const icnsPrimaryName = (() => {
-    if (
-      uiConfigStore.icnsInfo &&
-      chainStore.hasChain(uiConfigStore.icnsInfo.chainId)
-    ) {
-      const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
-      const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
-        uiConfigStore.icnsInfo.resolverContractAddress,
-        accountStore.getAccount(uiConfigStore.icnsInfo.chainId).bech32Address
-      );
+    const icnsPrimaryName = (() => {
+      if (
+        uiConfigStore.icnsInfo &&
+        chainStore.hasChain(uiConfigStore.icnsInfo.chainId)
+      ) {
+        const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
+        const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
+          uiConfigStore.icnsInfo.resolverContractAddress,
+          accountStore.getAccount(uiConfigStore.icnsInfo.chainId).bech32Address
+        );
 
-      return icnsQuery.primaryName.split(".")[0];
-    }
-  })();
+        return icnsQuery.primaryName.split(".")[0];
+      }
+    })();
 
-  const theme = useTheme();
-  const intl = useIntl();
+    const theme = useTheme();
+    const intl = useIntl();
 
-  const [currentChainIdForEVM, setCurrentChainIdForEVM] = React.useState<
-    string | undefined
-  >();
-  const [activeTabOrigin, setActiveTabOrigin] = React.useState<
-    string | undefined
-  >();
-  useEffect(() => {
-    const updateCurrentChainIdForEVM = async () => {
-      const activeTabOrigin = await getActiveTabOrigin();
+    const [currentChainIdForEVM, setCurrentChainIdForEVM] = React.useState<
+      string | undefined
+    >();
+    const [activeTabOrigin, setActiveTabOrigin] = React.useState<
+      string | undefined
+    >();
+    useEffect(() => {
+      const updateCurrentChainIdForEVM = async () => {
+        const activeTabOrigin = await getActiveTabOrigin();
 
-      if (activeTabOrigin) {
-        const msg = new GetCurrentChainIdForEVMMsg(activeTabOrigin);
-        const newCurrentChainIdForEVM =
-          await new InExtensionMessageRequester().sendMessage(
-            BACKGROUND_PORT,
-            msg
-          );
-        setCurrentChainIdForEVM(newCurrentChainIdForEVM);
-        setActiveTabOrigin(activeTabOrigin);
-      } else {
-        setCurrentChainIdForEVM(undefined);
-        setActiveTabOrigin(undefined);
+        if (activeTabOrigin) {
+          const msg = new GetCurrentChainIdForEVMMsg(activeTabOrigin);
+          const newCurrentChainIdForEVM =
+            await new InExtensionMessageRequester().sendMessage(
+              BACKGROUND_PORT,
+              msg
+            );
+          setCurrentChainIdForEVM(newCurrentChainIdForEVM);
+          setActiveTabOrigin(activeTabOrigin);
+        } else {
+          setCurrentChainIdForEVM(undefined);
+          setActiveTabOrigin(undefined);
+        }
+      };
+
+      browser.tabs.onActivated.addListener(updateCurrentChainIdForEVM);
+      updateCurrentChainIdForEVM();
+      // Update current chain id for EVM every second.
+      // TODO: Make it sync with `chainChanged` event.
+      const intervalId = setInterval(updateCurrentChainIdForEVM, 1000);
+
+      return () => {
+        browser.tabs.onActivated.removeListener(updateCurrentChainIdForEVM);
+        clearInterval(intervalId);
+      };
+    }, []);
+    const [isHoveredCurrenctChainIcon, setIsHoveredCurrenctChainIcon] =
+      React.useState(false);
+    const [isOpenCurrentChainDropdown, setIsOpenCurrentChainDropdown] =
+      React.useState(false);
+    const evmChainInfos = chainStore.chainInfos.filter((chainInfo) =>
+      chainStore.isEvmChain(chainInfo.chainId)
+    );
+
+    const [
+      showSidePanelRecommendationTooltip,
+      setShowSidePanelRecommendationTooltip,
+    ] = React.useState(false);
+
+    const [isOpenMenu, setIsOpenMenu] = React.useState(false);
+
+    const openMenu = () => {
+      setIsOpenMenu(true);
+
+      if (
+        uiConfigStore.newChainSuggestionConfig.newSuggestionChains.length > 0
+      ) {
+        uiConfigStore.newChainSuggestionConfig.turnOffSuggestionChains(
+          ...uiConfigStore.newChainSuggestionConfig.newSuggestionChains
+        );
       }
     };
 
-    browser.tabs.onActivated.addListener(updateCurrentChainIdForEVM);
-    updateCurrentChainIdForEVM();
-    // Update current chain id for EVM every second.
-    // TODO: Make it sync with `chainChanged` event.
-    const intervalId = setInterval(updateCurrentChainIdForEVM, 1000);
-
-    return () => {
-      browser.tabs.onActivated.removeListener(updateCurrentChainIdForEVM);
-      clearInterval(intervalId);
+    const closeMenu = () => {
+      setIsOpenMenu(false);
     };
-  }, []);
-  const [isHoveredCurrenctChainIcon, setIsHoveredCurrenctChainIcon] =
-    React.useState(false);
-  const [isOpenCurrentChainDropdown, setIsOpenCurrentChainDropdown] =
-    React.useState(false);
-  const evmChainInfos = chainStore.chainInfos.filter((chainInfo) =>
-    chainStore.isEvmChain(chainInfo.chainId)
-  );
 
-  const [isOpenMenu, setIsOpenMenu] = React.useState(false);
+    const openMenuRef = useRef(openMenu);
+    openMenuRef.current = openMenu;
+    const closeMenuRef = useRef(closeMenu);
+    closeMenuRef.current = closeMenu;
 
-  const openMenu = () => {
-    setIsOpenMenu(true);
+    useImperativeHandle(
+      ref,
+      () => ({
+        toggleSideMenu: () => {
+          if (isOpenMenu) {
+            closeMenuRef.current();
+          } else {
+            openMenuRef.current();
+          }
+        },
+        openSideMenu: () => {
+          openMenuRef.current();
+        },
+        closeSideMenu: () => {
+          closeMenuRef.current();
+        },
+        setShowSidePanelRecommendationTooltip: (value: boolean) => {
+          setShowSidePanelRecommendationTooltip(value);
+        },
+      }),
+      [isOpenMenu]
+    );
 
-    if (uiConfigStore.newChainSuggestionConfig.newSuggestionChains.length > 0) {
-      uiConfigStore.newChainSuggestionConfig.turnOffSuggestionChains(
-        ...uiConfigStore.newChainSuggestionConfig.newSuggestionChains
-      );
-    }
-  };
+    return (
+      <HeaderLayout
+        title={(() => {
+          const name = keyRingStore.selectedKeyInfo?.name || "Keplr Account";
 
-  return (
-    <HeaderLayout
-      title={(() => {
-        const name = keyRingStore.selectedKeyInfo?.name || "Keplr Account";
+          if (icnsPrimaryName !== "") {
+            return (
+              <Columns sum={1} alignY="center" gutter="0.25rem">
+                <Box>{name}</Box>
 
-        if (icnsPrimaryName !== "") {
-          return (
-            <Columns sum={1} alignY="center" gutter="0.25rem">
-              <Box>{name}</Box>
+                <Tooltip
+                  content={
+                    <div style={{ whiteSpace: "nowrap" }}>
+                      ICNS : {icnsPrimaryName}
+                    </div>
+                  }
+                >
+                  <Image
+                    alt="icns-icon"
+                    src={require(theme.mode === "light"
+                      ? "../../../public/assets/img/icns-icon-light.png"
+                      : "../../../public/assets/img/icns-icon.png")}
+                    style={{ width: "1rem", height: "1rem" }}
+                  />
+                </Tooltip>
+              </Columns>
+            );
+          }
 
+          return name;
+        })()}
+        left={
+          <React.Fragment>
+            {/* 일종의 padding left인데 cursor를 가지게 하면서 밑에서 tooltip도 함께 사용하기 위해서 다른 Box로 분리되어있음 */}
+            <Box
+              width="1rem"
+              height="1.5rem"
+              cursor="pointer"
+              onClick={openMenu}
+            />
+            <Box>
               <Tooltip
                 content={
-                  <div style={{ whiteSpace: "nowrap" }}>
-                    ICNS : {icnsPrimaryName}
-                  </div>
+                  <Box width="17rem" padding="0.375rem">
+                    <YAxis>
+                      <Subtitle3
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-700"]
+                            : ColorPalette["white"]
+                        }
+                      >
+                        <FormattedMessage
+                          id="page.main.layouts.header.new-chain.title"
+                          values={{
+                            chains:
+                              uiConfigStore.newChainSuggestionConfig.newSuggestionChains
+                                .map((chain) => {
+                                  return chainStore.getChain(chain).chainName;
+                                })
+                                .join(", "),
+                          }}
+                        />
+                      </Subtitle3>
+                      <Gutter size="0.75rem" />
+                      <Body2
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-300"]
+                            : ColorPalette["gray-200"]
+                        }
+                      >
+                        <FormattedMessage id="page.main.layouts.header.new-chain.paragraph" />
+                      </Body2>
+                      <Gutter size="0.75rem" />
+                      <YAxis alignX="right">
+                        <Button
+                          size="small"
+                          color="secondary"
+                          text={intl.formatMessage({
+                            id: "page.main.layouts.header.new-chain.button",
+                          })}
+                          onClick={openMenu}
+                        />
+                      </YAxis>
+                    </YAxis>
+                  </Box>
+                }
+                backgroundColor={
+                  theme.mode === "light"
+                    ? ColorPalette["white"]
+                    : ColorPalette["gray-500"]
+                }
+                hideBorder={theme.mode === "light"}
+                filter={
+                  theme.mode === "light"
+                    ? "drop-shadow(0px 1px 10px rgba(43, 39, 55, 0.20))"
+                    : undefined
+                }
+                enabled={
+                  uiConfigStore.newChainSuggestionConfig.newSuggestionChains
+                    .length > 0
+                }
+                isAlwaysOpen={
+                  uiConfigStore.newChainSuggestionConfig.newSuggestionChains
+                    .length > 0
                 }
               >
-                <Image
-                  alt="icns-icon"
-                  src={require(theme.mode === "light"
-                    ? "../../../public/assets/img/icns-icon-light.png"
-                    : "../../../public/assets/img/icns-icon.png")}
-                  style={{ width: "1rem", height: "1rem" }}
-                />
+                <Box onClick={openMenu} cursor="pointer">
+                  <MenuIcon />
+                </Box>
               </Tooltip>
-            </Columns>
-          );
+            </Box>
+          </React.Fragment>
         }
-
-        return name;
-      })()}
-      left={
-        <React.Fragment>
-          {/* 일종의 padding left인데 cursor를 가지게 하면서 밑에서 tooltip도 함께 사용하기 위해서 다른 Box로 분리되어있음 */}
-          <Box
-            width="1rem"
-            height="1.5rem"
-            cursor="pointer"
-            onClick={openMenu}
-          />
-          <Box>
-            <Tooltip
-              content={
-                <Box width="17rem" padding="0.375rem">
-                  <YAxis>
-                    <Subtitle3
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["gray-700"]
-                          : ColorPalette["white"]
-                      }
-                    >
-                      <FormattedMessage
-                        id="page.main.layouts.header.new-chain.title"
-                        values={{
-                          chains:
-                            uiConfigStore.newChainSuggestionConfig.newSuggestionChains
-                              .map((chain) => {
-                                return chainStore.getChain(chain).chainName;
-                              })
-                              .join(", "),
-                        }}
-                      />
-                    </Subtitle3>
-                    <Gutter size="0.75rem" />
-                    <Body2
-                      color={
-                        theme.mode === "light"
-                          ? ColorPalette["gray-300"]
-                          : ColorPalette["gray-200"]
-                      }
-                    >
-                      <FormattedMessage id="page.main.layouts.header.new-chain.paragraph" />
-                    </Body2>
-                    <Gutter size="0.75rem" />
-                    <YAxis alignX="right">
-                      <Button
-                        size="small"
-                        color="secondary"
-                        text={intl.formatMessage({
-                          id: "page.main.layouts.header.new-chain.button",
-                        })}
-                        onClick={openMenu}
-                      />
-                    </YAxis>
-                  </YAxis>
-                </Box>
-              }
-              backgroundColor={
-                theme.mode === "light"
-                  ? ColorPalette["white"]
-                  : ColorPalette["gray-500"]
-              }
-              hideBorder={theme.mode === "light"}
-              filter={
-                theme.mode === "light"
-                  ? "drop-shadow(0px 1px 10px rgba(43, 39, 55, 0.20))"
-                  : undefined
-              }
-              enabled={
-                uiConfigStore.newChainSuggestionConfig.newSuggestionChains
-                  .length > 0
-              }
-              isAlwaysOpen={
-                uiConfigStore.newChainSuggestionConfig.newSuggestionChains
-                  .length > 0
-              }
-            >
-              <Box onClick={openMenu} cursor="pointer">
-                <MenuIcon />
-              </Box>
-            </Tooltip>
-          </Box>
-        </React.Fragment>
-      }
-      right={
-        <Columns sum={1} alignY="center" gutter="0.875rem">
-          {currentChainIdForEVM != null && activeTabOrigin != null && (
-            <EVMChainSelector
-              isOpen={isOpenCurrentChainDropdown}
-              close={() => setIsOpenCurrentChainDropdown(false)}
-              items={evmChainInfos.map((chainInfo) => ({
-                key: chainInfo.chainId,
-                content: (
-                  <Columns sum={1} alignY="center" gutter="0.5rem">
-                    <ChainImageFallback chainInfo={chainInfo} size="2rem" />
-                    <Subtitle3>{chainInfo.chainName}</Subtitle3>
-                  </Columns>
-                ),
-                onSelect: async (key) => {
-                  const msg = new UpdateCurrentChainIdForEVMMsg(
-                    activeTabOrigin,
-                    key
-                  );
-                  await new InExtensionMessageRequester().sendMessage(
-                    BACKGROUND_PORT,
-                    msg
-                  );
-                  setCurrentChainIdForEVM(key);
-                },
-              }))}
-              selectedItemKey={currentChainIdForEVM}
-              activeTabOrigin={activeTabOrigin}
-            >
-              <Box
-                borderRadius="99999px"
-                position="relative"
-                cursor="pointer"
-                onHoverStateChange={setIsHoveredCurrenctChainIcon}
-                onClick={() => setIsOpenCurrentChainDropdown(true)}
+        right={
+          <Columns sum={1} alignY="center" gutter="0.875rem">
+            {currentChainIdForEVM != null && activeTabOrigin != null && (
+              <EVMChainSelector
+                isOpen={isOpenCurrentChainDropdown}
+                close={() => setIsOpenCurrentChainDropdown(false)}
+                items={evmChainInfos.map((chainInfo) => ({
+                  key: chainInfo.chainId,
+                  content: (
+                    <Columns sum={1} alignY="center" gutter="0.5rem">
+                      <ChainImageFallback chainInfo={chainInfo} size="2rem" />
+                      <Subtitle3>{chainInfo.chainName}</Subtitle3>
+                    </Columns>
+                  ),
+                  onSelect: async (key) => {
+                    const msg = new UpdateCurrentChainIdForEVMMsg(
+                      activeTabOrigin,
+                      key
+                    );
+                    await new InExtensionMessageRequester().sendMessage(
+                      BACKGROUND_PORT,
+                      msg
+                    );
+                    setCurrentChainIdForEVM(key);
+                  },
+                }))}
+                selectedItemKey={currentChainIdForEVM}
+                activeTabOrigin={activeTabOrigin}
               >
-                <ChainImageFallback
-                  chainInfo={chainStore.getChain(currentChainIdForEVM)}
-                  size="1.25rem"
-                  style={{ opacity: isHoveredCurrenctChainIcon ? 0.8 : 1 }}
-                />
                 <Box
-                  backgroundColor={
-                    theme.mode === "light"
-                      ? ColorPalette["light-gradient"]
-                      : ColorPalette["gray-700"]
-                  }
-                  width="0.625rem"
-                  height="0.625rem"
                   borderRadius="99999px"
-                  position="absolute"
-                  style={{ right: "-3px", bottom: "-2px" }}
-                  alignX="center"
-                  alignY="center"
+                  position="relative"
+                  cursor="pointer"
+                  onHoverStateChange={setIsHoveredCurrenctChainIcon}
+                  onClick={() => setIsOpenCurrentChainDropdown(true)}
                 >
-                  <Box
-                    backgroundColor={ColorPalette["green-400"]}
-                    width="0.375rem"
-                    height="0.375rem"
-                    borderRadius="99999px"
+                  <ChainImageFallback
+                    chainInfo={chainStore.getChain(currentChainIdForEVM)}
+                    size="1.25rem"
+                    style={{ opacity: isHoveredCurrenctChainIcon ? 0.8 : 1 }}
                   />
+                  <Box
+                    backgroundColor={
+                      theme.mode === "light"
+                        ? ColorPalette["light-gradient"]
+                        : ColorPalette["gray-700"]
+                    }
+                    width="0.625rem"
+                    height="0.625rem"
+                    borderRadius="99999px"
+                    position="absolute"
+                    style={{ right: "-3px", bottom: "-2px" }}
+                    alignX="center"
+                    alignY="center"
+                  >
+                    <Box
+                      backgroundColor={ColorPalette["green-400"]}
+                      width="0.375rem"
+                      height="0.375rem"
+                      borderRadius="99999px"
+                    />
+                  </Box>
                 </Box>
-              </Box>
-            </EVMChainSelector>
-          )}
-          <ProfileButton />
-        </Columns>
-      }
-      {...otherProps}
-    >
-      {children}
-
-      <Modal
-        isOpen={isOpenMenu}
-        align="left"
-        close={() => setIsOpenMenu(false)}
+              </EVMChainSelector>
+            )}
+            <ProfileButton />
+          </Columns>
+        }
+        {...otherProps}
       >
-        <MenuBar close={() => setIsOpenMenu(false)} />
-      </Modal>
-    </HeaderLayout>
-  );
-});
+        {children}
+
+        <Modal
+          isOpen={isOpenMenu}
+          align="left"
+          close={() => setIsOpenMenu(false)}
+        >
+          <MenuBar
+            close={() => setIsOpenMenu(false)}
+            showSidePanelRecommendationTooltip={
+              showSidePanelRecommendationTooltip
+            }
+          />
+        </Modal>
+      </HeaderLayout>
+    );
+  },
+  {
+    forwardRef: true,
+  }
+);
 
 const EVMChainSelector: FunctionComponent<
   PropsWithChildren<{

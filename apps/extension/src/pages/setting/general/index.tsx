@@ -121,9 +121,13 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
                 <Toggle
                   isOpen={sidePanelEnabled}
                   setIsOpen={() => {
-                    toggleSidePanelMode(!sidePanelEnabled, (res) =>
-                      setSidePanelEnabled(res)
-                    );
+                    toggleSidePanelMode(!sidePanelEnabled, (res) => {
+                      setSidePanelEnabled(res);
+
+                      if (res) {
+                        uiConfigStore.setShowNewSidePanelHeaderTop(false);
+                      }
+                    });
                   }}
                 />
               }

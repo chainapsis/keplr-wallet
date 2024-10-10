@@ -8,7 +8,13 @@ import { useNavigate } from "react-router";
 import { Gutter } from "../../../../components/gutter";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
-import { Button2, H3, H5, Subtitle4 } from "../../../../components/typography";
+import {
+  Button2,
+  Caption1,
+  H3,
+  H5,
+  Subtitle4,
+} from "../../../../components/typography";
 import { XAxis } from "../../../../components/axis";
 import { Bleed } from "../../../../components/bleed";
 import { FormattedMessage } from "react-intl";
@@ -39,8 +45,10 @@ const Styles = {
 
 export const MenuBar: FunctionComponent<{
   close: () => void;
-}> = observer(({ close }) => {
-  const { analyticsStore, keyRingStore } = useStore();
+
+  showSidePanelRecommendationTooltip?: boolean;
+}> = observer(({ close, showSidePanelRecommendationTooltip }) => {
+  const { analyticsStore, keyRingStore, uiConfigStore } = useStore();
 
   const location = useLocation();
 
@@ -220,10 +228,17 @@ export const MenuBar: FunctionComponent<{
                 <Column weight={1}>
                   <PanelModeItem
                     onClick={() => {
-                      toggleSidePanelMode(!sidePanelEnabled, (res) =>
-                        setSidePanelEnabled(res)
-                      );
+                      toggleSidePanelMode(!sidePanelEnabled, (res) => {
+                        setSidePanelEnabled(res);
+
+                        if (res) {
+                          uiConfigStore.setShowNewSidePanelHeaderTop(false);
+                        }
+                      });
                     }}
+                    showSidePanelRecommendationTooltip={
+                      showSidePanelRecommendationTooltip
+                    }
                     isSelected={sidePanelEnabled}
                     isSidePanel={true}
                     img={
@@ -263,9 +278,13 @@ export const MenuBar: FunctionComponent<{
                 <Column weight={1}>
                   <PanelModeItem
                     onClick={() => {
-                      toggleSidePanelMode(!sidePanelEnabled, (res) =>
-                        setSidePanelEnabled(res)
-                      );
+                      toggleSidePanelMode(!sidePanelEnabled, (res) => {
+                        setSidePanelEnabled(res);
+
+                        if (res) {
+                          uiConfigStore.setShowNewSidePanelHeaderTop(false);
+                        }
+                      });
                     }}
                     isSidePanel={false}
                     isSelected={!sidePanelEnabled}
@@ -382,7 +401,16 @@ const PanelModeItem: FunctionComponent<{
   isSidePanel: boolean;
   img: React.ReactElement;
   text: React.ReactElement;
-}> = ({ isSelected, onClick, isSidePanel, text, img }) => {
+
+  showSidePanelRecommendationTooltip?: boolean;
+}> = ({
+  isSelected,
+  onClick,
+  isSidePanel,
+  text,
+  img,
+  showSidePanelRecommendationTooltip,
+}) => {
   const theme = useTheme();
 
   return (
@@ -423,6 +451,59 @@ const PanelModeItem: FunctionComponent<{
         }
       }}
     >
+      {showSidePanelRecommendationTooltip ? (
+        <div
+          style={{
+            position: "absolute",
+            zIndex: 2,
+            bottom: "100%",
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+
+            whiteSpace: "nowrap",
+          }}
+        >
+          <Box
+            position="relative"
+            backgroundColor={ColorPalette["blue-300"]}
+            borderRadius="0.5rem"
+          >
+            <Box paddingX="0.75rem" paddingY="0.5rem">
+              <Caption1 color={ColorPalette["gray-50"]}>
+                Try the new mode ✨
+              </Caption1>
+            </Box>
+            <div
+              style={{
+                position: "absolute",
+                top: "99%",
+                left: "50%",
+                transform: "translateX(-50%)",
+
+                // 왜인지는 모르겠고 line height가 이 엘레먼트의 최소 하이트를 결정하더라...
+                // svg가 line height 기본값보다 작기 때문에 강제로 0으로 설정해준다.
+                lineHeight: 0,
+              }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="13"
+                height="7"
+                fill="none"
+                stroke="none"
+                viewBox="0 0 13 7"
+              >
+                <path
+                  fill={ColorPalette["blue-300"]}
+                  d="M4.9 5.867a2 2 0 003.2 0L12.5 0H.5l4.4 5.867z"
+                />
+              </svg>
+            </div>
+          </Box>
+        </div>
+      ) : null}
       {isSidePanel ? (
         <img
           src={
