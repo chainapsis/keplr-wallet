@@ -38,13 +38,12 @@ import {
   useFloating,
 } from "@floating-ui/react-dom";
 import SimpleBar from "simplebar-react";
+import { ExtensionKVStore } from "@keplr-wallet/common";
 
 export interface MainHeaderLayoutRef {
   toggleSideMenu: () => void;
   openSideMenu: () => void;
   closeSideMenu: () => void;
-
-  setShowSidePanelRecommendationTooltip: (value: boolean) => void;
 }
 
 export const MainHeaderLayout = observer<
@@ -135,12 +134,53 @@ export const MainHeaderLayout = observer<
       chainStore.isEvmChain(chainInfo.chainId)
     );
 
+    const [isOpenMenu, setIsOpenMenu] = React.useState(false);
+
     const [
       showSidePanelRecommendationTooltip,
       setShowSidePanelRecommendationTooltip,
     ] = React.useState(false);
 
-    const [isOpenMenu, setIsOpenMenu] = React.useState(false);
+    useEffect(() => {
+      const kvStore = new ExtensionKVStore(
+        "_side_menu_side_panel_recommendation_tooltip"
+      );
+      kvStore.get<boolean>("hasSeen").then((hasSeen) => {
+        if (hasSeen == null) {
+          // 한번도 side menu가 열린적이 없으면 tooltip을 보여준다.
+          setShowSidePanelRecommendationTooltip(true);
+        }
+      });
+    }, []);
+    const prevIsOpenMenu = useRef(isOpenMenu);
+    useEffect(() => {
+      if (showSidePanelRecommendationTooltip && isOpenMenu) {
+        // 한번이라도 side menu가 열린적이 있으면 tooltip을 보여주지 않는다.
+        const kvStore = new ExtensionKVStore(
+          "_side_menu_side_panel_recommendation_tooltip"
+        );
+        kvStore.set("hasSeen", true);
+      }
+
+      if (isOpenMenu !== prevIsOpenMenu.current) {
+        // side menu가 닫히는 순간에 tooltip을 없앤다.
+        if (
+          prevIsOpenMenu.current &&
+          !isOpenMenu &&
+          showSidePanelRecommendationTooltip
+        ) {
+          setShowSidePanelRecommendationTooltip(false);
+        }
+        prevIsOpenMenu.current = isOpenMenu;
+      }
+    }, [showSidePanelRecommendationTooltip, isOpenMenu]);
+
+    useEffect(() => {
+      // showNewSidePanelHeaderTop이 true면서 사이드 메뉴가 열렸으면 당연히 false로 바꿔줘야함
+      if (isOpenMenu && uiConfigStore.showNewSidePanelHeaderTop) {
+        uiConfigStore.setShowNewSidePanelHeaderTop(false);
+      }
+    }, [isOpenMenu, uiConfigStore]);
 
     const openMenu = () => {
       setIsOpenMenu(true);
@@ -178,9 +218,6 @@ export const MainHeaderLayout = observer<
         },
         closeSideMenu: () => {
           closeMenuRef.current();
-        },
-        setShowSidePanelRecommendationTooltip: (value: boolean) => {
-          setShowSidePanelRecommendationTooltip(value);
         },
       }),
       [isOpenMenu]
@@ -379,6 +416,7 @@ export const MainHeaderLayout = observer<
           close={() => setIsOpenMenu(false)}
         >
           <MenuBar
+            isOpen={isOpenMenu}
             close={() => setIsOpenMenu(false)}
             showSidePanelRecommendationTooltip={
               showSidePanelRecommendationTooltip

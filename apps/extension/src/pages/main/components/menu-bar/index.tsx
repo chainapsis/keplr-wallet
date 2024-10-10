@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { CloseIcon, LinkIcon } from "../../../../components/icon";
@@ -45,10 +45,11 @@ const Styles = {
 };
 
 export const MenuBar: FunctionComponent<{
+  isOpen: boolean;
   close: () => void;
 
   showSidePanelRecommendationTooltip?: boolean;
-}> = observer(({ close, showSidePanelRecommendationTooltip }) => {
+}> = observer(({ isOpen, close, showSidePanelRecommendationTooltip }) => {
   const { analyticsStore, keyRingStore, uiConfigStore } = useStore();
 
   const location = useLocation();
@@ -73,6 +74,26 @@ export const MenuBar: FunctionComponent<{
           });
       });
   }, []);
+
+  const [
+    animateSidePanelRecommendationTooltip,
+    setAnimateSidePanelRecommendationTooltip,
+  ] = useState(false);
+  const prevIsOpen = useRef(isOpen);
+  useEffect(() => {
+    if (showSidePanelRecommendationTooltip) {
+      // 좀 이상한데. Modal은 open될때 컴포넌트가 마운트되고 close되면 언마운트 되기 때문에
+      // 여기서 true, true인 경우가 맞음...
+      if (prevIsOpen.current && isOpen) {
+        setTimeout(() => {
+          setAnimateSidePanelRecommendationTooltip(true);
+        }, 500);
+      }
+    }
+    if (prevIsOpen.current !== isOpen) {
+      prevIsOpen.current = isOpen;
+    }
+  }, [isOpen, showSidePanelRecommendationTooltip]);
 
   return (
     <Box
@@ -237,8 +258,8 @@ export const MenuBar: FunctionComponent<{
                         }
                       });
                     }}
-                    showSidePanelRecommendationTooltip={
-                      showSidePanelRecommendationTooltip
+                    animateSidePanelRecommendationTooltip={
+                      animateSidePanelRecommendationTooltip
                     }
                     isSelected={sidePanelEnabled}
                     isSidePanel={true}
@@ -487,6 +508,15 @@ const PanelModeItemStylesContainer = styled(Box)<{
   }
 `;
 
+const PanelModeItemStylesTooltip = styled.div<{
+  isMounted: boolean;
+}>`
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  transform: ${(props) => (props.isMounted ? "scale(1)" : "scale(0)")};
+  transform-origin: 50% 95%;
+`;
+
 const PanelModeItem: FunctionComponent<{
   isSelected: boolean;
   onClick: () => void;
@@ -495,14 +525,14 @@ const PanelModeItem: FunctionComponent<{
   img: React.ReactElement;
   text: React.ReactElement;
 
-  showSidePanelRecommendationTooltip?: boolean;
+  animateSidePanelRecommendationTooltip?: boolean;
 }> = ({
   isSelected,
   onClick,
   isSidePanel,
   text,
   img,
-  showSidePanelRecommendationTooltip,
+  animateSidePanelRecommendationTooltip,
 }) => {
   const theme = useTheme();
 
@@ -521,59 +551,7 @@ const PanelModeItem: FunctionComponent<{
         }
       }}
     >
-      {showSidePanelRecommendationTooltip ? (
-        <div
-          style={{
-            position: "absolute",
-            zIndex: 2,
-            bottom: "100%",
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-
-            whiteSpace: "nowrap",
-          }}
-        >
-          <Box
-            position="relative"
-            backgroundColor={ColorPalette["blue-300"]}
-            borderRadius="0.5rem"
-          >
-            <Box paddingX="0.75rem" paddingY="0.5rem">
-              <Caption1 color={ColorPalette["gray-50"]}>
-                Try the new mode ✨
-              </Caption1>
-            </Box>
-            <div
-              style={{
-                position: "absolute",
-                top: "99%",
-                left: "50%",
-                transform: "translateX(-50%)",
-
-                // 왜인지는 모르겠고 line height가 이 엘레먼트의 최소 하이트를 결정하더라...
-                // svg가 line height 기본값보다 작기 때문에 강제로 0으로 설정해준다.
-                lineHeight: 0,
-              }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="13"
-                height="7"
-                fill="none"
-                stroke="none"
-                viewBox="0 0 13 7"
-              >
-                <path
-                  fill={ColorPalette["blue-300"]}
-                  d="M4.9 5.867a2 2 0 003.2 0L12.5 0H.5l4.4 5.867z"
-                />
-              </svg>
-            </div>
-          </Box>
-        </div>
-      ) : null}
+      {animateSidePanelRecommendationTooltip ? <AnimatedTooltip /> : null}
       {isSidePanel ? (
         <img
           src={
@@ -602,5 +580,68 @@ const PanelModeItem: FunctionComponent<{
         </PanelModeItemStylesTextContainer>
       </Box>
     </PanelModeItemStylesContainer>
+  );
+};
+
+const AnimatedTooltip: FunctionComponent = () => {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  return (
+    <PanelModeItemStylesTooltip
+      isMounted={isMounted}
+      style={{
+        position: "absolute",
+        zIndex: 2,
+        bottom: "100%",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+
+        whiteSpace: "nowrap",
+      }}
+    >
+      <Box
+        position="relative"
+        backgroundColor={ColorPalette["blue-300"]}
+        borderRadius="0.5rem"
+      >
+        <Box paddingX="0.75rem" paddingY="0.5rem">
+          <Caption1 color={ColorPalette["gray-50"]}>
+            Try the new mode ✨
+          </Caption1>
+        </Box>
+        <div
+          style={{
+            position: "absolute",
+            top: "99%",
+            left: "50%",
+            transform: "translateX(-50%)",
+
+            // 왜인지는 모르겠고 line height가 이 엘레먼트의 최소 하이트를 결정하더라...
+            // svg가 line height 기본값보다 작기 때문에 강제로 0으로 설정해준다.
+            lineHeight: 0,
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="13"
+            height="7"
+            fill="none"
+            stroke="none"
+            viewBox="0 0 13 7"
+          >
+            <path
+              fill={ColorPalette["blue-300"]}
+              d="M4.9 5.867a2 2 0 003.2 0L12.5 0H.5l4.4 5.867z"
+            />
+          </svg>
+        </div>
+      </Box>
+    </PanelModeItemStylesTooltip>
   );
 };

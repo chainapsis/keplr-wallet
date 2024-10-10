@@ -386,9 +386,6 @@ export const MainPage: FunctionComponent<{
                   uiConfigStore.setShowNewSidePanelHeaderTop(false);
 
                   if (mainHeaderLayoutRef.current) {
-                    mainHeaderLayoutRef.current.setShowSidePanelRecommendationTooltip(
-                      true
-                    );
                     mainHeaderLayoutRef.current.openSideMenu();
                   }
                 }}
