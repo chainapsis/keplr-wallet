@@ -434,13 +434,13 @@ const PanelModeItem: FunctionComponent<{
         boxShadow: (() => {
           if (theme.mode === "light") {
             return isSelected
-              ? `0 0 0 2px ${ColorPalette["blue-300"]} inset`
-              : `0 0 0 2px ${ColorPalette["gray-50"]} inset`;
+              ? `0 0 0 1px ${ColorPalette["blue-300"]} inset`
+              : `0 0 0 1px ${ColorPalette["gray-50"]} inset`;
           }
 
           return isSelected
-            ? `0 0 0 2px ${ColorPalette["blue-300"]} inset`
-            : "0 0 0 2px rgba(66, 66, 71, 0.20) inset";
+            ? `0 0 0 1px ${ColorPalette["blue-300"]} inset`
+            : "0 0 0 1px rgba(66, 66, 71, 0.20) inset";
         })(),
       }}
       onClick={(e) => {
@@ -517,8 +517,8 @@ const PanelModeItem: FunctionComponent<{
             zIndex: 1,
             aspectRatio: "1/1",
             width: "2.625rem",
-            top: "2px",
-            left: "2px",
+            top: "1px",
+            left: "1px",
           }}
         />
       ) : null}
