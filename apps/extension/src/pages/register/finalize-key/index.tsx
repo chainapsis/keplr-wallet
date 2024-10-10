@@ -54,7 +54,9 @@ export const FinalizeKeyScene: FunctionComponent<{
       addressIndex: number;
     };
   };
-  keystone?: MultiAccounts;
+  keystone?: MultiAccounts & {
+    connectionType?: "USB" | "QR";
+  };
   stepPrevious: number;
   stepTotal: number;
 }> = observer(

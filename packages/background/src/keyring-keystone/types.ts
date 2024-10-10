@@ -3,6 +3,7 @@ export interface MultiAccounts {
   keys: Account[];
   device?: string;
   deviceId?: string;
+  connectionType?: "USB" | "QR";
 }
 
 export interface Account {

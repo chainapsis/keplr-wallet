@@ -99,6 +99,10 @@
   "pages.register.name-password-hardware.connect-to-terra": "Terra应用",
   "pages.register.name-password-hardware.connect-to-secret": "Secret应用",
 
+  "pages.register.name-password-hardware.connect-keystone-way": "选择Keystone连接方式",
+  "pages.register.name-password-hardware.connect-to-keystone-USB": "USB",
+  "pages.register.name-password-hardware.connect-to-keystone-QR": "QR",
+
   "pages.register.recover-mnemonic.title": "导入已有钱包",
   "pages.register.recover-mnemonic.paragraph-1": "输入助记词，或点击任意输入框并粘贴整个助记词。",
   "pages.register.recover-mnemonic.paragraph-2": "按正确的顺序输入助记词，无需大写、标点符号或空格。",
@@ -138,6 +142,10 @@
   "pages.register.connect-keystone.select-valid-qrcode": "请确保你从Keystone设备中选择了有效的二维码。",
   "pages.register.connect-keystone.tutorial": "教程",
   "pages.register.connect-keystone.unsupported": "暂不支持",
+
+  "pages.register.connect-keystone.usb.title": "请连接您的硬件钱包",
+  "pages.register.connect-keystone.usb.step-1": "连接并解锁您的Keystone.",
+  "pages.register.connect-keystone.usb.step-2": "确保你的 Keystone 3 Pro 在主页上。",
 
   "pages.register.enable-chains.title": "选择链",
   "pages.register.enable-chains.paragraph": "不用担心，你可以随时在侧边栏菜单中的“管理链可见性”中更改你的选择。",
@@ -472,6 +480,10 @@
   "page.sign.keystone.enable-camera": "请通过【设置】允许摄像头访问权限",
   "page.sign.keystone.invalid-qrcode": "无效的二维码",
   "page.sign.keystone.select-valid-qrcode": "请确保你从Keystone设备中选择了正确的二维码。",
+
+  "page.sign.keystone.usb.box.unknown-error-title": "未知错误",
+  "page.sign.keystone.usb.box.sign-on-keystone-title": "Keystone 签名",
+  "page.sign.keystone.usb.box.sign-on-keystone-paragraph": "要继续，请在你的Keystone设备上查看并确认交易。",
 
   "page.send.select-asset.title": "选择资产",
   "page.send.select-asset.search-placeholder": "搜索资产或链",
