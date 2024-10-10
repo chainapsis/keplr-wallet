@@ -197,14 +197,18 @@ export class UIConfigStore {
         }
       }
 
-      autorun(() => {
-        runInAction(() => {
-          this.kvStore.set(
-            "showNewSidePanelHeaderTop",
-            this._showNewSidePanelHeaderTop
-          );
+      const pathname = new URL(window.location.href).pathname;
+      // popup 외에 register 등의 페이지도 존재하는데 이 페이지들은 sidePanel과 관련이 없으니 그 경우는 무시한다.
+      if (pathname === "/sidePanel.html" || pathname === "/popup.html") {
+        autorun(() => {
+          runInAction(() => {
+            this.kvStore.set(
+              "showNewSidePanelHeaderTop",
+              this._showNewSidePanelHeaderTop
+            );
+          });
         });
-      });
+      }
     }
 
     await Promise.all([
