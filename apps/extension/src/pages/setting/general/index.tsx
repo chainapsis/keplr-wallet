@@ -17,10 +17,7 @@ import {
 } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
-import { XAxis } from "../../../components/axis";
 import { Subtitle2 } from "../../../components/typography";
-import { Tag } from "../../../components/tag";
-import { Gutter } from "../../../components/gutter";
 import { toggleSidePanelMode } from "../../../utils";
 
 export const SettingGeneralPage: FunctionComponent = observer(() => {
@@ -111,15 +108,11 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
           {sidePanelSupported ? (
             <PageButton
               title={
-                <XAxis alignY="center">
-                  <Subtitle2>
-                    {intl.formatMessage({
-                      id: "page.setting.general.side-panel-title",
-                    })}
-                  </Subtitle2>
-                  <Gutter size="0.375rem" />
-                  <Tag text="Beta" paddingX="0.25rem" />
-                </XAxis>
+                <Subtitle2>
+                  {intl.formatMessage({
+                    id: "page.setting.general.side-panel-title",
+                  })}
+                </Subtitle2>
               }
               paragraph={intl.formatMessage({
                 id: "page.setting.general.side-panel-paragraph",
