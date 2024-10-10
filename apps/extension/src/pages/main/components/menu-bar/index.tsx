@@ -28,6 +28,7 @@ import {
 } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import Color from "color";
 
 const Styles = {
   MenuItem: styled(H3)`
@@ -394,6 +395,98 @@ export const MenuBar: FunctionComponent<{
   );
 });
 
+const PanelModeItemStylesImageContainer = styled.div<{
+  isSelected: boolean;
+}>`
+  transition: opacity 0.15s linear;
+
+  opacity: ${(props) =>
+    props.isSelected ? 1 : props.theme.mode === "light" ? 0.7 : 0.5};
+  mix-blend-mode: luminosity;
+`;
+
+const PanelModeItemStylesTextContainer = styled(Box)<{
+  isSelected: boolean;
+}>`
+  transition: color 0.15s linear;
+
+  color: ${(props) => {
+    if (props.theme.mode === "light") {
+      return props.isSelected
+        ? ColorPalette["blue-400"]
+        : ColorPalette["gray-300"];
+    }
+
+    return props.isSelected
+      ? ColorPalette["gray-50"]
+      : ColorPalette["gray-300"];
+  }};
+`;
+
+const PanelModeItemStylesContainer = styled(Box)<{
+  isSelected: boolean;
+}>`
+  transition: background-color 0.15s linear, box-shadow 0.15s linear;
+
+  background-color: ${(props) => {
+    if (props.theme.mode === "light") {
+      return props.isSelected
+        ? "rgba(86, 111, 236, 0.10)"
+        : ColorPalette["white"];
+    }
+
+    return props.isSelected
+      ? "rgba(86, 111, 236, 0.10)"
+      : ColorPalette["gray-450"];
+  }};
+
+  box-shadow: ${(props) => {
+    if (props.theme.mode === "light") {
+      return props.isSelected
+        ? `0 0 0 1px ${ColorPalette["blue-300"]} inset`
+        : `0 0 0 1px ${ColorPalette["gray-50"]} inset`;
+    }
+
+    return props.isSelected
+      ? `0 0 0 1px ${ColorPalette["blue-300"]} inset`
+      : "0 0 0 1px rgba(66, 66, 71, 0.20) inset";
+  }};
+
+  &:hover {
+    background-color: ${(props) => {
+      if (props.isSelected) {
+        return;
+      }
+
+      return Color(ColorPalette["blue-300"]).alpha(0.05).toString();
+    }};
+
+    box-shadow: ${(props) => {
+      if (props.isSelected) {
+        return;
+      }
+
+      return `0 0 0 1px ${Color(ColorPalette["blue-300"])
+        .alpha(0.5)
+        .toString()} inset`;
+    }};
+
+    ${PanelModeItemStylesImageContainer} {
+      opacity: 1;
+    }
+
+    ${PanelModeItemStylesTextContainer} {
+      color: ${(props) => {
+        if (props.theme.mode === "light") {
+          return ColorPalette["blue-400"];
+        }
+
+        return ColorPalette["gray-50"];
+      }};
+    }
+  }
+`;
+
 const PanelModeItem: FunctionComponent<{
   isSelected: boolean;
   onClick: () => void;
@@ -414,35 +507,12 @@ const PanelModeItem: FunctionComponent<{
   const theme = useTheme();
 
   return (
-    <Box
+    <PanelModeItemStylesContainer
       position="relative"
-      backgroundColor={(() => {
-        if (theme.mode === "light") {
-          return isSelected
-            ? "rgba(86, 111, 236, 0.10)"
-            : ColorPalette["white"];
-        }
-
-        return isSelected
-          ? "rgba(86, 111, 236, 0.10)"
-          : ColorPalette["gray-450"];
-      })()}
+      isSelected={isSelected}
       borderRadius="0.5rem"
       paddingY="0.5rem"
       cursor={isSelected ? undefined : "pointer"}
-      style={{
-        boxShadow: (() => {
-          if (theme.mode === "light") {
-            return isSelected
-              ? `0 0 0 1px ${ColorPalette["blue-300"]} inset`
-              : `0 0 0 1px ${ColorPalette["gray-50"]} inset`;
-          }
-
-          return isSelected
-            ? `0 0 0 1px ${ColorPalette["blue-300"]} inset`
-            : "0 0 0 1px rgba(66, 66, 71, 0.20) inset";
-        })(),
-      }}
       onClick={(e) => {
         e.preventDefault();
 
@@ -523,30 +593,14 @@ const PanelModeItem: FunctionComponent<{
         />
       ) : null}
       <Box alignX="center">
-        <div
-          style={{
-            opacity: isSelected ? 1 : theme.mode === "light" ? 0.7 : 0.5,
-          }}
-        >
+        <PanelModeItemStylesImageContainer isSelected={isSelected}>
           {img}
-        </div>
+        </PanelModeItemStylesImageContainer>
         <Gutter size="0.5rem" />
-        <Box
-          color={(() => {
-            if (theme.mode === "light") {
-              return isSelected
-                ? ColorPalette["blue-400"]
-                : ColorPalette["gray-300"];
-            }
-
-            return isSelected
-              ? ColorPalette["gray-50"]
-              : ColorPalette["gray-300"];
-          })()}
-        >
+        <PanelModeItemStylesTextContainer isSelected={isSelected}>
           <XAxis alignY="center">{text}</XAxis>
-        </Box>
+        </PanelModeItemStylesTextContainer>
       </Box>
-    </Box>
+    </PanelModeItemStylesContainer>
   );
 };
