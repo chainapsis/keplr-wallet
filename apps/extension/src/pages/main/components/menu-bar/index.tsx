@@ -87,7 +87,7 @@ export const MenuBar: FunctionComponent<{
       if (prevIsOpen.current && isOpen) {
         setTimeout(() => {
           setAnimateSidePanelRecommendationTooltip(true);
-        }, 500);
+        }, 750);
       }
     }
     if (prevIsOpen.current !== isOpen) {
