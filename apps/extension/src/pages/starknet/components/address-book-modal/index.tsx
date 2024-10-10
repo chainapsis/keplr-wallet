@@ -166,8 +166,6 @@ export const AddressBookModal: FunctionComponent<{
       }
     })();
 
-    console.log("accounts", accounts);
-
     return (
       <Modal isOpen={isOpen} close={close} align="bottom" maxHeight="95vh">
         <Box
