@@ -312,6 +312,7 @@ export const MainPage: FunctionComponent<{
 
   const [isRefreshButtonVisible, setIsRefreshButtonVisible] = useState(false);
   const [isRefreshButtonLoading, setIsRefreshButtonLoading] = useState(false);
+  const forcePreventScrollRefreshButtonVisible = useRef(false);
   useEffect(() => {
     if (!isRunningInSidePanel()) {
       return;
@@ -333,7 +334,9 @@ export const MainPage: FunctionComponent<{
           if (gap > 0) {
             setIsRefreshButtonVisible(false);
           } else if (gap < 0) {
-            setIsRefreshButtonVisible(true);
+            if (!forcePreventScrollRefreshButtonVisible.current) {
+              setIsRefreshButtonVisible(true);
+            }
           }
 
           lastScrollTop = scrollTop;
@@ -345,7 +348,11 @@ export const MainPage: FunctionComponent<{
       const interval = setInterval(() => {
         if (lastScrollTop <= 10) {
           if (Date.now() - lastScrollTime >= 5000) {
-            setIsRefreshButtonVisible(true);
+            if (!forcePreventScrollRefreshButtonVisible.current) {
+              setIsRefreshButtonVisible(true);
+            } else {
+              lastScrollTime = Date.now();
+            }
           }
         }
       }, 1000);
@@ -637,9 +644,30 @@ export const MainPage: FunctionComponent<{
               onClickGetStarted={() => {
                 setIsOpenDepositModal(true);
               }}
+              onMoreTokensClosed={() => {
+                // token list가 접히면서 scroll height가 작아지게 된다.
+                // scroll height가 작아지는 것은 위로 스크롤 하는 것과 같은 효과를 내기 때문에
+                // 아래와같은 처리가 없으면 token list를 접으면 refesh 버튼이 무조건 나타나게 된다.
+                // 이게 약간 어색해보이므로 token list를 접을때 1.5초 동안 refresh 버튼 기능을 없애버린다.
+                forcePreventScrollRefreshButtonVisible.current = true;
+                setTimeout(() => {
+                  forcePreventScrollRefreshButtonVisible.current = false;
+                }, 1500);
+              }}
             />
           ) : (
-            <StakedTabView />
+            <StakedTabView
+              onMoreTokensClosed={() => {
+                // token list가 접히면서 scroll height가 작아지게 된다.
+                // scroll height가 작아지는 것은 위로 스크롤 하는 것과 같은 효과를 내기 때문에
+                // 아래와같은 처리가 없으면 token list를 접으면 refesh 버튼이 무조건 나타나게 된다.
+                // 이게 약간 어색해보이므로 token list를 접을때 1.5초 동안 refresh 버튼 기능을 없애버린다.
+                forcePreventScrollRefreshButtonVisible.current = true;
+                setTimeout(() => {
+                  forcePreventScrollRefreshButtonVisible.current = false;
+                }, 1500);
+              }}
+            />
           )}
 
           {tabStatus === "available" &&
@@ -887,13 +915,19 @@ const RefreshButton: FunctionComponent<{
   }, [rotate, isLoading]);
 
   return (
-    <div
+    <animated.div
       onClick={(e) => {
         e.preventDefault();
 
         refresh();
       }}
       style={{
+        pointerEvents: translateY.to((v) =>
+          // visible이 false일때는 pointer-events를 none으로 해서 클릭을 막는다.
+          // visibleTranslateY / 2는 대충 정한 값임. 이 값보다 작으면 pointer-events를 none으로 해서 클릭을 막는다.
+          v >= visibleTranslateY / 2 ? "none" : "auto"
+        ),
+
         position: "fixed",
         marginBottom: BottomTabsHeightRem,
         bottom: 0,
@@ -961,6 +995,6 @@ const RefreshButton: FunctionComponent<{
           />
         </animated.svg>
       </animated.div>
-    </div>
+    </animated.div>
   );
 });

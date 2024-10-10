@@ -38,6 +38,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
   hideNumInTitle,
   notRenderHiddenItems,
   altViewMoreIntlTextId,
+  onCollapse,
 }) => {
   if (!lenAlwaysShown || lenAlwaysShown < 0) {
     lenAlwaysShown = items.length;
@@ -107,6 +108,9 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
             e.preventDefault();
 
             setIsCollapsed(!isCollapsed);
+            if (onCollapse) {
+              onCollapse(!isCollapsed);
+            }
             if (!isCollapsed) {
               setNotRenderHiddenItemsIsClosing(true);
             }

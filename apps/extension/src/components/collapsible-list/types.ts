@@ -14,4 +14,6 @@ export interface CollapsibleListProps {
   notRenderHiddenItems?: boolean;
 
   altViewMoreIntlTextId?: string;
+
+  onCollapse?: (isCollapsed: boolean) => void;
 }
