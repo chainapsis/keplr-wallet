@@ -477,6 +477,8 @@ export const FeeControl: FunctionComponent<{
           align="bottom"
           maxHeight="95vh"
           close={() => setIsModalOpen(false)}
+          forceNotUseSimplebar={true}
+          forceNotOverflowAuto={true}
         >
           <TransactionFeeModal
             close={() => setIsModalOpen(false)}
