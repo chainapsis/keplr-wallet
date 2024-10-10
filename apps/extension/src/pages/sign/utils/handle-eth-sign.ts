@@ -35,7 +35,10 @@ import {
 } from "./keystone";
 import KeystoneSDK, { UR, utils } from "@keystonehq/keystone-sdk";
 import { EthermintChainIdHelper } from "@keplr-wallet/cosmos";
-import { createKeystoneTransport } from "../../../utils/keystone";
+import {
+  createKeystoneTransport,
+  handleKeystoneUSBError,
+} from "../../../utils/keystone";
 
 export interface LedgerOptions {
   useWebHID: boolean;
@@ -153,7 +156,7 @@ export const handleEthereumPreSignByKeystone = async (
       throw new KeplrError(
         ErrModuleKeystoneSign,
         ErrKeystoneUSBCommunication,
-        "Keystone USB communication error, Please try again."
+        handleKeystoneUSBError(e)
       );
     }
   } else {

@@ -27,7 +27,10 @@ import {
   KeystoneUR,
   getPathFromPubKey,
 } from "./keystone";
-import { createKeystoneTransport } from "../../../utils/keystone";
+import {
+  createKeystoneTransport,
+  handleKeystoneUSBError,
+} from "../../../utils/keystone";
 import Base from "@keystonehq/hw-app-base";
 import { PlainObject } from "@keplr-wallet/background";
 import { KeplrError } from "@keplr-wallet/router";
@@ -204,7 +207,7 @@ export const handleCosmosPreSign = async (
           throw new KeplrError(
             ErrModuleKeystoneSign,
             ErrKeystoneUSBCommunication,
-            "Keystone USB communication error, Please try again."
+            handleKeystoneUSBError(e)
           );
         }
       } else {
