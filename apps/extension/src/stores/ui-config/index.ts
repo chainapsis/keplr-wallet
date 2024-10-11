@@ -182,31 +182,35 @@ export class UIConfigStore {
 
     {
       const saved = await this.kvStore.get<boolean>(
-        "showNewSidePanelHeaderTop"
+        "__showNewSidePanelHeaderTop"
       );
-      if (saved == null && !isRunningInSidePanel()) {
-        const msg = new GetSidePanelIsSupportedMsg();
-        const res = await this.messageRequester.sendMessage(
-          BACKGROUND_PORT,
-          msg
-        );
-        if (res.supported) {
-          runInAction(() => {
-            this._showNewSidePanelHeaderTop = true;
-          });
+      if (saved == null) {
+        if (!isRunningInSidePanel()) {
+          const msg = new GetSidePanelIsSupportedMsg();
+          const res = await this.messageRequester.sendMessage(
+            BACKGROUND_PORT,
+            msg
+          );
+          if (res.supported) {
+            runInAction(() => {
+              this._showNewSidePanelHeaderTop = true;
+            });
+          }
         }
+      } else {
+        runInAction(() => {
+          this._showNewSidePanelHeaderTop = saved;
+        });
       }
 
       const pathname = new URL(window.location.href).pathname;
       // popup 외에 register 등의 페이지도 존재하는데 이 페이지들은 sidePanel과 관련이 없으니 그 경우는 무시한다.
       if (pathname === "/sidePanel.html" || pathname === "/popup.html") {
         autorun(() => {
-          runInAction(() => {
-            this.kvStore.set(
-              "showNewSidePanelHeaderTop",
-              this._showNewSidePanelHeaderTop
-            );
-          });
+          this.kvStore.set(
+            "__showNewSidePanelHeaderTop",
+            this._showNewSidePanelHeaderTop
+          );
         });
       }
     }
