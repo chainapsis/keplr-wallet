@@ -1149,30 +1149,42 @@ export class ChainsService {
 
   getModularChainInfos = computedFn(
     (): ModularChainInfo[] => {
-      return this.modularChainInfos.slice().map((modularChainInfo) => {
-        if (this.hasChainInfo(modularChainInfo.chainId)) {
-          const cosmos = this.getChainInfoOrThrow(modularChainInfo.chainId);
-          return {
-            chainId: cosmos.chainId,
-            chainName: cosmos.chainName,
-            chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
-            cosmos,
-          };
-        }
+      return this.modularChainInfos
+        .slice()
+        .map((modularChainInfo) => {
+          if (this.hasChainInfo(modularChainInfo.chainId)) {
+            const cosmos = this.getChainInfoOrThrow(modularChainInfo.chainId);
+            return {
+              chainId: cosmos.chainId,
+              chainName: cosmos.chainName,
+              chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
+              cosmos,
+            };
+          }
 
-        // TODO: `mergeModularChainInfosWithDynamics` 같은 메소드로 빼기
-        if ("starknet" in modularChainInfo) {
-          const endpoint = this.getEndpoint(modularChainInfo.chainId);
-          return {
-            ...modularChainInfo,
-            starknet: {
-              ...modularChainInfo.starknet,
-              rpc: endpoint?.rpc || modularChainInfo.starknet.rpc,
-            },
-          };
-        }
-        return modularChainInfo;
-      });
+          // TODO: `mergeModularChainInfosWithDynamics` 같은 메소드로 빼기
+          if ("starknet" in modularChainInfo) {
+            const endpoint = this.getEndpoint(modularChainInfo.chainId);
+            return {
+              ...modularChainInfo,
+              starknet: {
+                ...modularChainInfo.starknet,
+                rpc: endpoint?.rpc || modularChainInfo.starknet.rpc,
+              },
+            };
+          }
+          return modularChainInfo;
+        })
+        .concat(
+          this.suggestedChainInfos.map((chainInfo) => {
+            return {
+              chainId: chainInfo.chainId,
+              chainName: chainInfo.chainName,
+              chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
+              cosmos: chainInfo,
+            };
+          })
+        );
     },
     {
       keepAlive: true,

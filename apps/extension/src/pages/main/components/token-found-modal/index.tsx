@@ -87,31 +87,41 @@ export const TokenFoundModal: FunctionComponent<{
     const tokenScans = chainStore.tokenScans.slice();
 
     for (const enable of enables) {
-      if (
-        keyRingStore.needKeyCoinTypeFinalize(
-          keyRingStore.selectedKeyInfo.id,
-          chainStore.getChain(enable)
-        )
-      ) {
+      if (chainStore.hasChain(enable)) {
+        if (
+          keyRingStore.needKeyCoinTypeFinalize(
+            keyRingStore.selectedKeyInfo.id,
+            chainStore.getChain(enable)
+          )
+        ) {
+          const tokenScan = tokenScans.find((tokenScan) => {
+            return ChainIdHelper.parse(tokenScan.chainId).identifier === enable;
+          });
+
+          if (tokenScan && tokenScan.infos.length > 1) {
+            needBIP44Selects.push(enable);
+            enables.splice(enables.indexOf(enable), 1);
+          }
+
+          if (
+            tokenScan &&
+            tokenScan.infos.length === 1 &&
+            tokenScan.infos[0].coinType != null
+          ) {
+            await keyRingStore.finalizeKeyCoinType(
+              keyRingStore.selectedKeyInfo.id,
+              enable,
+              tokenScan.infos[0].coinType
+            );
+          }
+        }
+      } else {
         const tokenScan = tokenScans.find((tokenScan) => {
           return ChainIdHelper.parse(tokenScan.chainId).identifier === enable;
         });
 
         if (tokenScan && tokenScan.infos.length > 1) {
-          needBIP44Selects.push(enable);
           enables.splice(enables.indexOf(enable), 1);
-        }
-
-        if (
-          tokenScan &&
-          tokenScan.infos.length === 1 &&
-          tokenScan.infos[0].coinType != null
-        ) {
-          await keyRingStore.finalizeKeyCoinType(
-            keyRingStore.selectedKeyInfo.id,
-            enable,
-            tokenScan.infos[0].coinType
-          );
         }
       }
     }
