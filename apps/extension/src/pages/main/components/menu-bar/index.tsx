@@ -596,7 +596,7 @@ const AnimatedTooltip: FunctionComponent = () => {
       style={{
         position: "absolute",
         zIndex: 2,
-        bottom: "100%",
+        bottom: "105%",
         width: "100%",
         display: "flex",
         flexDirection: "column",
