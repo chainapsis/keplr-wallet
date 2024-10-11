@@ -16,6 +16,7 @@ import {
   checkEvmRpcConnectivity,
   checkRestConnectivity,
   checkRPCConnectivity,
+  checkStarknetRpcConnectivity,
   DifferentChainVersionError,
 } from "@keplr-wallet/chain-validator";
 import { useNotification } from "../../../../hooks/notification";
@@ -144,13 +145,17 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
           if (
             !originalEndpoint ||
             originalEndpoint.rpc !== data.rpc ||
-            originalEndpoint.rpc !== data.lcd ||
+            originalEndpoint.rest !== data.lcd ||
             originalEndpoint.evmRpc !== data.evmRpc
           ) {
             try {
               if (originalEndpoint?.rpc !== data.rpc) {
                 try {
-                  await checkRPCConnectivity(chainId, data.rpc);
+                  if (chainId.startsWith("starknet:")) {
+                    await checkStarknetRpcConnectivity(chainId, data.rpc);
+                  } else {
+                    await checkRPCConnectivity(chainId, data.rpc);
+                  }
                 } catch (e) {
                   if (
                     // In the case of this error, the chain version is different.

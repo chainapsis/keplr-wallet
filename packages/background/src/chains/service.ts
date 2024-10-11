@@ -909,21 +909,32 @@ export class ChainsService {
       chainId: string
     ): {
       rpc: string;
-      rest: string;
+      rest?: string;
       evmRpc?: string;
     } => {
       const identifier = ChainIdHelper.parse(chainId).identifier;
       const originalChainInfos = this.embedChainInfos.concat(
         this.suggestedChainInfos
       );
-      const chainInfo = originalChainInfos.find(
-        (c) => ChainIdHelper.parse(c.chainId).identifier === identifier
-      );
+      const starknetChainInfos = this.modularChainInfos.reduce((acc, cur) => {
+        if ("starknet" in cur) {
+          acc.push(cur.starknet);
+        }
+        return acc;
+      }, [] as StarknetChainInfo[]);
+      const chainInfo =
+        originalChainInfos.find(
+          (c) => ChainIdHelper.parse(c.chainId).identifier === identifier
+        ) ||
+        starknetChainInfos.find(
+          (c) => ChainIdHelper.parse(c.chainId).identifier === identifier
+        );
       if (chainInfo) {
         return {
           rpc: chainInfo.rpc,
-          rest: chainInfo.rest,
-          evmRpc: chainInfo.evm?.rpc,
+          ...("rest" in chainInfo && { rest: chainInfo.rest }),
+          ...("evm" in chainInfo &&
+            chainInfo.evm != null && { evmRpc: chainInfo.evm.rpc }),
         };
       }
 
@@ -1146,6 +1157,18 @@ export class ChainsService {
             chainName: cosmos.chainName,
             chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
             cosmos,
+          };
+        }
+
+        // TODO: `mergeModularChainInfosWithDynamics` 같은 메소드로 빼기
+        if ("starknet" in modularChainInfo) {
+          const endpoint = this.getEndpoint(modularChainInfo.chainId);
+          return {
+            ...modularChainInfo,
+            starknet: {
+              ...modularChainInfo.starknet,
+              rpc: endpoint?.rpc || modularChainInfo.starknet.rpc,
+            },
           };
         }
         return modularChainInfo;

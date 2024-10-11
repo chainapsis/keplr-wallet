@@ -187,3 +187,47 @@ export async function checkEvmRpcConnectivity(
     );
   }
 }
+
+export async function checkStarknetRpcConnectivity(
+  chainId: string,
+  rpc: string
+) {
+  const starknetChainId = chainId.split(":")[1];
+  let resultStarknetChainId: SimpleFetchResponse<{
+    result: string;
+  }>;
+
+  try {
+    resultStarknetChainId = await simpleFetch<{
+      result: string;
+    }>(rpc, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "request-source": "keplr-wallet-extension/chain-validator",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "starknet_chainId",
+        params: [],
+        id: 1,
+      }),
+    });
+  } catch (e) {
+    console.log(e);
+    throw new Error(
+      "Failed to get response starknet_chainId from Starknet RPC endpoint"
+    );
+  }
+
+  const starknetChainIdFromResult = Buffer.from(
+    resultStarknetChainId.data.result.replace("0x", ""),
+    "hex"
+  ).toString();
+
+  if (starknetChainIdFromResult !== starknetChainId) {
+    throw new Error(
+      `Starknet RPC endpoint has different chain id (expected: ${starknetChainId}, actual: ${starknetChainIdFromResult})`
+    );
+  }
+}
