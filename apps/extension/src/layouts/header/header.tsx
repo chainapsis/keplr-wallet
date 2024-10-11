@@ -29,7 +29,9 @@ export const HeaderHeight = "3.75rem";
 const Styles = {
   Container: styled.div``,
 
-  HeaderContainer: styled.div`
+  HeaderContainer: styled.div<{
+    fixedTopHeight?: string;
+  }>`
     height: ${HeaderHeight};
 
     background: ${(props) =>
@@ -50,7 +52,7 @@ const Styles = {
         : ColorPalette["gray-10"]};
 
     position: fixed;
-    top: 0;
+    top: ${(props) => props.fixedTopHeight ?? "0"};
     left: 0;
     right: 0;
 
@@ -108,6 +110,7 @@ const Styles = {
     displayFlex: boolean;
     fixedHeight: boolean;
     fixedMinHeight: boolean;
+    fixedTopHeight?: string;
   }>`
     ${({ displayFlex }) => {
       if (displayFlex) {
@@ -119,7 +122,12 @@ const Styles = {
       return css``;
     }}
 
-    padding-top: ${HeaderHeight};
+    padding-top: ${(props) => {
+      if (!props.fixedTopHeight) {
+        return HeaderHeight;
+      }
+      return `calc(${HeaderHeight} + ${props.fixedTopHeight})`;
+    }};
     padding-bottom: ${({ bottomPadding }) => bottomPadding};
 
     ${({
@@ -183,6 +191,8 @@ export const HeaderLayout: FunctionComponent<
   isNotReady,
   additionalPaddingBottom,
   headerContainerStyle,
+
+  fixedTop,
 }) => {
   const [height, setHeight] = React.useState(() => pxToRem(600));
   const lastSetHeight = useRef(-1);
@@ -226,7 +236,15 @@ export const HeaderLayout: FunctionComponent<
 
   return (
     <Styles.Container as={onSubmit ? "form" : undefined} onSubmit={onSubmit}>
-      <Styles.HeaderContainer style={headerContainerStyle}>
+      {fixedTop ? (
+        <div style={{ width: "100%", position: "fixed", zIndex: 100 }}>
+          {fixedTop.element}
+        </div>
+      ) : null}
+      <Styles.HeaderContainer
+        style={headerContainerStyle}
+        fixedTopHeight={fixedTop?.height}
+      >
         {left && !isNotReady ? (
           <Styles.HeaderLeft>{left}</Styles.HeaderLeft>
         ) : null}
@@ -254,6 +272,7 @@ export const HeaderLayout: FunctionComponent<
         fixedHeight={fixedHeight || false}
         fixedMinHeight={fixedMinHeight || false}
         bottomPadding={bottomPadding}
+        fixedTopHeight={fixedTop?.height}
       >
         {children}
       </Styles.ContentContainer>

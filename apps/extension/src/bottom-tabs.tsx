@@ -75,6 +75,8 @@ export const BottomTabsRouteProvider: FunctionComponent<
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-evenly",
+
+            zIndex: 999999,
           }}
         >
           {tabs.map((tab, i) => {

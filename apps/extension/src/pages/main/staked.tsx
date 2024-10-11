@@ -11,7 +11,9 @@ import { ArrowRightSolidIcon } from "../../components/icon";
 import { ColorPalette } from "../../styles";
 import { useIntl } from "react-intl";
 
-export const StakedTabView: FunctionComponent = observer(() => {
+export const StakedTabView: FunctionComponent<{
+  onMoreTokensClosed: () => void;
+}> = observer(({ onMoreTokensClosed }) => {
   const { hugeQueriesStore, uiConfigStore } = useStore();
 
   const intl = useIntl();
@@ -92,6 +94,11 @@ export const StakedTabView: FunctionComponent = observer(() => {
             <CollapsibleList
               key={title}
               hideNumInTitle={uiConfigStore.isPrivacyMode}
+              onCollapse={(isCollapsed) => {
+                if (isCollapsed) {
+                  onMoreTokensClosed();
+                }
+              }}
               title={<TokenTitleView title={title} tooltip={tooltip} />}
               lenAlwaysShown={lenAlwaysShown}
               items={balance.map((viewToken) => {

@@ -55,375 +55,383 @@ export const AvailableTabView: FunctionComponent<{
   // 초기 유저에게 뜨는 alternative에서 get started 버튼을 누르면 copy address modal을 띄워야된다...
   // 근데 컴포넌트가 분리되어있는데 이거 하려고 context api 쓰긴 귀찮아서 그냥 prop으로 대충 처리한다.
   onClickGetStarted: () => void;
-}> = observer(({ search, isNotReady, onClickGetStarted }) => {
-  const { hugeQueriesStore, chainStore, accountStore, uiConfigStore } =
-    useStore();
-  const intl = useIntl();
-  const theme = useTheme();
+  onMoreTokensClosed: () => void;
+}> = observer(
+  ({ search, isNotReady, onClickGetStarted, onMoreTokensClosed }) => {
+    const { hugeQueriesStore, chainStore, accountStore, uiConfigStore } =
+      useStore();
+    const intl = useIntl();
+    const theme = useTheme();
 
-  const allBalances = hugeQueriesStore.getAllBalances(true);
-  const allBalancesNonZero = useMemo(() => {
-    return allBalances.filter((token) => {
-      return token.token.toDec().gt(zeroDec);
-    });
-  }, [allBalances]);
+    const allBalances = hugeQueriesStore.getAllBalances(true);
+    const allBalancesNonZero = useMemo(() => {
+      return allBalances.filter((token) => {
+        return token.token.toDec().gt(zeroDec);
+      });
+    }, [allBalances]);
 
-  const isFirstTime = allBalancesNonZero.length === 0;
-  const trimSearch = search.trim();
-  const _allBalancesSearchFiltered = useMemo(() => {
-    return allBalances.filter((token) => {
-      return (
-        token.chainInfo.chainName
-          .toLowerCase()
-          .includes(trimSearch.toLowerCase()) ||
-        token.token.currency.coinDenom
-          .toLowerCase()
-          .includes(trimSearch.toLowerCase())
-      );
-    });
-  }, [allBalances, trimSearch]);
+    const isFirstTime = allBalancesNonZero.length === 0;
+    const trimSearch = search.trim();
+    const _allBalancesSearchFiltered = useMemo(() => {
+      return allBalances.filter((token) => {
+        return (
+          token.chainInfo.chainName
+            .toLowerCase()
+            .includes(trimSearch.toLowerCase()) ||
+          token.token.currency.coinDenom
+            .toLowerCase()
+            .includes(trimSearch.toLowerCase())
+        );
+      });
+    }, [allBalances, trimSearch]);
 
-  const hasLowBalanceTokens =
-    hugeQueriesStore.filterLowBalanceTokens(allBalances).length > 0;
-  const lowBalanceFilteredAllBalancesSearchFiltered =
-    hugeQueriesStore.filterLowBalanceTokens(_allBalancesSearchFiltered);
-  const allBalancesSearchFiltered =
-    uiConfigStore.isHideLowBalance && hasLowBalanceTokens
-      ? lowBalanceFilteredAllBalancesSearchFiltered
-      : _allBalancesSearchFiltered;
+    const hasLowBalanceTokens =
+      hugeQueriesStore.filterLowBalanceTokens(allBalances).length > 0;
+    const lowBalanceFilteredAllBalancesSearchFiltered =
+      hugeQueriesStore.filterLowBalanceTokens(_allBalancesSearchFiltered);
+    const allBalancesSearchFiltered =
+      uiConfigStore.isHideLowBalance && hasLowBalanceTokens
+        ? lowBalanceFilteredAllBalancesSearchFiltered
+        : _allBalancesSearchFiltered;
 
-  const lookingForChains = (() => {
-    return chainStore.chainInfosInListUI.filter((chainInfo) => {
-      if (chainStore.isEnabledChain(chainInfo.chainId)) {
-        return false;
-      }
+    const lookingForChains = (() => {
+      return chainStore.chainInfosInListUI.filter((chainInfo) => {
+        if (chainStore.isEnabledChain(chainInfo.chainId)) {
+          return false;
+        }
 
-      const replacedSearchValue = trimSearch.replace(/ /g, "").toLowerCase();
+        const replacedSearchValue = trimSearch.replace(/ /g, "").toLowerCase();
 
-      if (replacedSearchValue.length < 3) {
-        return false;
-      }
+        if (replacedSearchValue.length < 3) {
+          return false;
+        }
 
-      const hasChainName =
-        chainInfo.chainName.replace(/ /gi, "").toLowerCase() ===
-        replacedSearchValue;
-      const hasCurrency = chainInfo.currencies.some(
-        (currency) =>
-          currency.coinDenom.replace(/ /gi, "").toLowerCase() ===
-          replacedSearchValue
-      );
-
-      const hasStakeCurrency =
-        chainInfo.stakeCurrency &&
-        chainInfo.stakeCurrency.coinDenom.replace(/ /gi, "").toLowerCase() ===
+        const hasChainName =
+          chainInfo.chainName.replace(/ /gi, "").toLowerCase() ===
           replacedSearchValue;
+        const hasCurrency = chainInfo.currencies.some(
+          (currency) =>
+            currency.coinDenom.replace(/ /gi, "").toLowerCase() ===
+            replacedSearchValue
+        );
 
-      return hasChainName || hasCurrency || hasStakeCurrency;
-    });
-  })();
+        const hasStakeCurrency =
+          chainInfo.stakeCurrency &&
+          chainInfo.stakeCurrency.coinDenom.replace(/ /gi, "").toLowerCase() ===
+            replacedSearchValue;
 
-  const TokenViewData: {
-    title: string;
-    balance: ViewToken[];
-    lenAlwaysShown: number;
-    tooltip?: string | React.ReactElement;
-  }[] = [
-    {
-      title: intl.formatMessage({
-        id: "page.main.available.available-balance-title",
-      }),
-      balance: allBalancesSearchFiltered,
-      lenAlwaysShown: 10,
-      tooltip: intl.formatMessage({
-        id: "page.main.available.available-balance-tooltip",
-      }),
-    },
-  ];
+        return hasChainName || hasCurrency || hasStakeCurrency;
+      });
+    })();
 
-  const numFoundToken = useMemo(() => {
-    if (chainStore.tokenScans.length === 0) {
-      return 0;
-    }
+    const TokenViewData: {
+      title: string;
+      balance: ViewToken[];
+      lenAlwaysShown: number;
+      tooltip?: string | React.ReactElement;
+    }[] = [
+      {
+        title: intl.formatMessage({
+          id: "page.main.available.available-balance-title",
+        }),
+        balance: allBalancesSearchFiltered,
+        lenAlwaysShown: 10,
+        tooltip: intl.formatMessage({
+          id: "page.main.available.available-balance-tooltip",
+        }),
+      },
+    ];
 
-    const set = new Set<string>();
+    const numFoundToken = useMemo(() => {
+      if (chainStore.tokenScans.length === 0) {
+        return 0;
+      }
 
-    for (const tokenScan of chainStore.tokenScans) {
-      for (const info of tokenScan.infos) {
-        for (const asset of info.assets) {
-          const key = `${ChainIdHelper.parse(tokenScan.chainId).identifier}/${
-            asset.currency.coinMinimalDenom
-          }`;
-          set.add(key);
+      const set = new Set<string>();
+
+      for (const tokenScan of chainStore.tokenScans) {
+        for (const info of tokenScan.infos) {
+          for (const asset of info.assets) {
+            const key = `${ChainIdHelper.parse(tokenScan.chainId).identifier}/${
+              asset.currency.coinMinimalDenom
+            }`;
+            set.add(key);
+          }
         }
       }
-    }
 
-    return Array.from(set).length;
-  }, [chainStore.tokenScans]);
+      return Array.from(set).length;
+    }, [chainStore.tokenScans]);
 
-  const [isFoundTokenModalOpen, setIsFoundTokenModalOpen] = useState(false);
+    const [isFoundTokenModalOpen, setIsFoundTokenModalOpen] = useState(false);
 
-  const isShowNotFound =
-    allBalancesSearchFiltered.length === 0 && trimSearch.length > 0;
+    const isShowNotFound =
+      allBalancesSearchFiltered.length === 0 && trimSearch.length > 0;
 
-  const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
 
-  const tokenDetailInfo: {
-    chainId: string | null;
-    coinMinimalDenom: string | null;
-    isTokenDetailModalOpen: boolean | null;
-  } = (() => {
-    return {
-      chainId: searchParams.get("tokenChainId"),
-      coinMinimalDenom: searchParams.get("tokenCoinMinimalDenom"),
-      // modal의 close transition을 유지하기 위해서는 위의 두 field가 존재하는지 만으로 판단하면 안된다...
-      // close transition이 끝난후에 위의 두 값을 지워줘야한다.
-      // close가 될 것인지는 밑의 값으로 판단한다.
-      isTokenDetailModalOpen:
-        searchParams.get("isTokenDetailModalOpen") === "true",
-    };
-  })();
+    const tokenDetailInfo: {
+      chainId: string | null;
+      coinMinimalDenom: string | null;
+      isTokenDetailModalOpen: boolean | null;
+    } = (() => {
+      return {
+        chainId: searchParams.get("tokenChainId"),
+        coinMinimalDenom: searchParams.get("tokenCoinMinimalDenom"),
+        // modal의 close transition을 유지하기 위해서는 위의 두 field가 존재하는지 만으로 판단하면 안된다...
+        // close transition이 끝난후에 위의 두 값을 지워줘야한다.
+        // close가 될 것인지는 밑의 값으로 판단한다.
+        isTokenDetailModalOpen:
+          searchParams.get("isTokenDetailModalOpen") === "true",
+      };
+    })();
 
-  return (
-    <React.Fragment>
-      {isNotReady ? (
-        <TokenItem
-          viewToken={{
-            token: new CoinPretty(
-              chainStore.chainInfos[0].currencies[0],
-              new Dec(0)
-            ),
-            chainInfo: chainStore.chainInfos[0],
-            isFetching: false,
-            error: undefined,
-          }}
-          isNotReady={isNotReady}
-        />
-      ) : (
-        <React.Fragment>
-          <Stack gutter="0.5rem">
-            {TokenViewData.map(
-              ({ title, balance, lenAlwaysShown, tooltip }) => {
-                if (balance.length === 0) {
-                  return null;
-                }
+    return (
+      <React.Fragment>
+        {isNotReady ? (
+          <TokenItem
+            viewToken={{
+              token: new CoinPretty(
+                chainStore.chainInfos[0].currencies[0],
+                new Dec(0)
+              ),
+              chainInfo: chainStore.chainInfos[0],
+              isFetching: false,
+              error: undefined,
+            }}
+            isNotReady={isNotReady}
+          />
+        ) : (
+          <React.Fragment>
+            <Stack gutter="0.5rem">
+              {TokenViewData.map(
+                ({ title, balance, lenAlwaysShown, tooltip }) => {
+                  if (balance.length === 0) {
+                    return null;
+                  }
 
-                return (
-                  <CollapsibleList
-                    key={title}
-                    hideNumInTitle={uiConfigStore.isPrivacyMode}
-                    notRenderHiddenItems={true}
-                    title={
-                      <TokenTitleView
-                        title={title}
-                        tooltip={tooltip}
-                        right={
-                          hasLowBalanceTokens ? (
-                            <React.Fragment>
-                              <Caption2
-                                style={{ cursor: "pointer" }}
-                                onClick={() => {
-                                  uiConfigStore.setHideLowBalance(
-                                    !uiConfigStore.isHideLowBalance
-                                  );
-                                }}
-                                color={ColorPalette["gray-300"]}
-                              >
-                                <FormattedMessage id="page.main.available.hide-low-balance" />
-                              </Caption2>
-
-                              <Gutter size="0.25rem" />
-
-                              <Checkbox
-                                size="extra-small"
-                                checked={uiConfigStore.isHideLowBalance}
-                                onChange={() => {
-                                  uiConfigStore.setHideLowBalance(
-                                    !uiConfigStore.isHideLowBalance
-                                  );
-                                }}
-                              />
-                            </React.Fragment>
-                          ) : undefined
+                  return (
+                    <CollapsibleList
+                      key={title}
+                      hideNumInTitle={uiConfigStore.isPrivacyMode}
+                      notRenderHiddenItems={true}
+                      onCollapse={(isCollapsed) => {
+                        if (isCollapsed) {
+                          onMoreTokensClosed();
                         }
-                      />
-                    }
-                    lenAlwaysShown={lenAlwaysShown}
-                    items={balance.map((viewToken) => (
-                      <TokenItem
-                        viewToken={viewToken}
-                        key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-                        onClick={() => {
-                          setSearchParams((prev) => {
-                            prev.set(
-                              "tokenChainId",
+                      }}
+                      title={
+                        <TokenTitleView
+                          title={title}
+                          tooltip={tooltip}
+                          right={
+                            hasLowBalanceTokens ? (
+                              <React.Fragment>
+                                <Caption2
+                                  style={{ cursor: "pointer" }}
+                                  onClick={() => {
+                                    uiConfigStore.setHideLowBalance(
+                                      !uiConfigStore.isHideLowBalance
+                                    );
+                                  }}
+                                  color={ColorPalette["gray-300"]}
+                                >
+                                  <FormattedMessage id="page.main.available.hide-low-balance" />
+                                </Caption2>
+
+                                <Gutter size="0.25rem" />
+
+                                <Checkbox
+                                  size="extra-small"
+                                  checked={uiConfigStore.isHideLowBalance}
+                                  onChange={() => {
+                                    uiConfigStore.setHideLowBalance(
+                                      !uiConfigStore.isHideLowBalance
+                                    );
+                                  }}
+                                />
+                              </React.Fragment>
+                            ) : undefined
+                          }
+                        />
+                      }
+                      lenAlwaysShown={lenAlwaysShown}
+                      items={balance.map((viewToken) => (
+                        <TokenItem
+                          viewToken={viewToken}
+                          key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+                          onClick={() => {
+                            setSearchParams((prev) => {
+                              prev.set(
+                                "tokenChainId",
+                                viewToken.chainInfo.chainId
+                              );
+                              prev.set(
+                                "tokenCoinMinimalDenom",
+                                viewToken.token.currency.coinMinimalDenom
+                              );
+                              prev.set("isTokenDetailModalOpen", "true");
+
+                              return prev;
+                            });
+                          }}
+                          copyAddress={(() => {
+                            // For only native tokens, show copy address button
+                            if (
+                              new DenomHelper(
+                                viewToken.token.currency.coinMinimalDenom
+                              ).type !== "native" ||
+                              viewToken.token.currency.coinMinimalDenom.startsWith(
+                                "ibc/"
+                              )
+                            ) {
+                              return undefined;
+                            }
+
+                            const account = accountStore.getAccount(
                               viewToken.chainInfo.chainId
                             );
-                            prev.set(
-                              "tokenCoinMinimalDenom",
-                              viewToken.token.currency.coinMinimalDenom
+                            const isEVMOnlyChain = chainStore.isEvmOnlyChain(
+                              viewToken.chainInfo.chainId
                             );
-                            prev.set("isTokenDetailModalOpen", "true");
 
-                            return prev;
-                          });
-                        }}
-                        copyAddress={(() => {
-                          // For only native tokens, show copy address button
-                          if (
-                            new DenomHelper(
-                              viewToken.token.currency.coinMinimalDenom
-                            ).type !== "native" ||
-                            viewToken.token.currency.coinMinimalDenom.startsWith(
-                              "ibc/"
-                            )
-                          ) {
-                            return undefined;
+                            return isEVMOnlyChain
+                              ? account.ethereumHexAddress
+                              : account.bech32Address;
+                          })()}
+                          showPrice24HChange={
+                            uiConfigStore.show24HChangesInMagePage
                           }
+                        />
+                      ))}
+                    />
+                  );
+                }
+              )}
+            </Stack>
 
-                          const account = accountStore.getAccount(
-                            viewToken.chainInfo.chainId
-                          );
-                          const isEVMOnlyChain = chainStore.isEvmOnlyChain(
-                            viewToken.chainInfo.chainId
-                          );
+            {lookingForChains.length > 0 ? (
+              <React.Fragment>
+                <Gutter size="0.5rem" direction="vertical" />
+                <LookingForChains chainInfos={lookingForChains} />
+              </React.Fragment>
+            ) : null}
 
-                          return isEVMOnlyChain
-                            ? account.ethereumHexAddress
-                            : account.bech32Address;
-                        })()}
-                        showPrice24HChange={
-                          uiConfigStore.show24HChangesInMagePage
-                        }
-                      />
-                    ))}
+            {isShowNotFound ? (
+              <Box marginY="2rem">
+                <EmptyView>
+                  <Stack alignX="center" gutter="0.1rem">
+                    <Subtitle3 style={{ fontWeight: 700 }}>
+                      <FormattedMessage id="page.main.available.search-empty-view-title" />
+                    </Subtitle3>
+                    <Subtitle3>
+                      <FormattedMessage id="page.main.available.search-empty-view-paragraph" />
+                    </Subtitle3>
+                  </Stack>
+                </EmptyView>
+              </Box>
+            ) : isFirstTime ? (
+              <MainEmptyView
+                image={
+                  <img
+                    src={require(theme.mode === "light"
+                      ? "../../public/assets/img/main-empty-balance-light.png"
+                      : "../../public/assets/img/main-empty-balance.png")}
+                    style={{
+                      width: "6.25rem",
+                      height: "6.25rem",
+                    }}
+                    alt="empty balance image"
                   />
-                );
-              }
-            )}
-          </Stack>
+                }
+                paragraph={intl.formatMessage({
+                  id: "page.main.available.empty-view-paragraph",
+                })}
+                title={intl.formatMessage({
+                  id: "page.main.available.empty-view-title",
+                })}
+                button={
+                  <Button
+                    text={intl.formatMessage({
+                      id: "page.main.available.get-started-button",
+                    })}
+                    color="primary"
+                    size="small"
+                    onClick={onClickGetStarted}
+                  />
+                }
+              />
+            ) : null}
 
-          {lookingForChains.length > 0 ? (
-            <React.Fragment>
-              <Gutter size="0.5rem" direction="vertical" />
-              <LookingForChains chainInfos={lookingForChains} />
-            </React.Fragment>
-          ) : null}
+            {numFoundToken > 0 ? (
+              <Box padding="0.75rem">
+                <YAxis alignX="center">
+                  <NewTokenFoundButton
+                    text={intl.formatMessage(
+                      { id: "page.main.available.new-token-found" },
+                      { numFoundToken }
+                    )}
+                    size="small"
+                    onClick={() => setIsFoundTokenModalOpen(true)}
+                  />
+                </YAxis>
+              </Box>
+            ) : null}
+          </React.Fragment>
+        )}
 
-          {isShowNotFound ? (
-            <Box marginY="2rem">
-              <EmptyView>
-                <Stack alignX="center" gutter="0.1rem">
-                  <Subtitle3 style={{ fontWeight: 700 }}>
-                    <FormattedMessage id="page.main.available.search-empty-view-title" />
-                  </Subtitle3>
-                  <Subtitle3>
-                    <FormattedMessage id="page.main.available.search-empty-view-paragraph" />
-                  </Subtitle3>
-                </Stack>
-              </EmptyView>
-            </Box>
-          ) : isFirstTime ? (
-            <MainEmptyView
-              image={
-                <img
-                  src={require(theme.mode === "light"
-                    ? "../../public/assets/img/main-empty-balance-light.png"
-                    : "../../public/assets/img/main-empty-balance.png")}
-                  style={{
-                    width: "6.25rem",
-                    height: "6.25rem",
-                  }}
-                  alt="empty balance image"
-                />
-              }
-              paragraph={intl.formatMessage({
-                id: "page.main.available.empty-view-paragraph",
-              })}
-              title={intl.formatMessage({
-                id: "page.main.available.empty-view-title",
-              })}
-              button={
-                <Button
-                  text={intl.formatMessage({
-                    id: "page.main.available.get-started-button",
-                  })}
-                  color="primary"
-                  size="small"
-                  onClick={onClickGetStarted}
-                />
-              }
-            />
-          ) : null}
+        <Modal
+          isOpen={isFoundTokenModalOpen && numFoundToken > 0}
+          align="bottom"
+          close={() => setIsFoundTokenModalOpen(false)}
+        >
+          <TokenFoundModal close={() => setIsFoundTokenModalOpen(false)} />
+        </Modal>
 
-          {numFoundToken > 0 ? (
-            <Box padding="0.75rem">
-              <YAxis alignX="center">
-                <NewTokenFoundButton
-                  text={intl.formatMessage(
-                    { id: "page.main.available.new-token-found" },
-                    { numFoundToken }
-                  )}
-                  size="small"
-                  onClick={() => setIsFoundTokenModalOpen(true)}
-                />
-              </YAxis>
-            </Box>
-          ) : null}
-        </React.Fragment>
-      )}
+        <Modal
+          isOpen={
+            tokenDetailInfo.chainId != null &&
+            tokenDetailInfo.chainId.length > 0 &&
+            tokenDetailInfo.coinMinimalDenom != null &&
+            tokenDetailInfo.coinMinimalDenom.length > 0 &&
+            tokenDetailInfo.isTokenDetailModalOpen === true
+          }
+          align="right"
+          close={() => {
+            setSearchParams((prev) => {
+              prev.delete("isTokenDetailModalOpen");
 
-      <Modal
-        isOpen={isFoundTokenModalOpen && numFoundToken > 0}
-        align="bottom"
-        close={() => setIsFoundTokenModalOpen(false)}
-      >
-        <TokenFoundModal close={() => setIsFoundTokenModalOpen(false)} />
-      </Modal>
+              return prev;
+            });
+          }}
+          onCloseTransitionEnd={() => {
+            setSearchParams((prev) => {
+              prev.delete("tokenChainId");
+              prev.delete("tokenCoinMinimalDenom");
 
-      <Modal
-        isOpen={
-          tokenDetailInfo.chainId != null &&
+              return prev;
+            });
+          }}
+          forceNotOverflowAuto={true}
+        >
+          {tokenDetailInfo.chainId != null &&
           tokenDetailInfo.chainId.length > 0 &&
           tokenDetailInfo.coinMinimalDenom != null &&
-          tokenDetailInfo.coinMinimalDenom.length > 0 &&
-          tokenDetailInfo.isTokenDetailModalOpen === true
-        }
-        align="right"
-        close={() => {
-          setSearchParams((prev) => {
-            prev.delete("isTokenDetailModalOpen");
+          tokenDetailInfo.coinMinimalDenom.length > 0 ? (
+            <TokenDetailModal
+              close={() => {
+                setSearchParams((prev) => {
+                  prev.delete("isTokenDetailModalOpen");
 
-            return prev;
-          });
-        }}
-        onCloseTransitionEnd={() => {
-          setSearchParams((prev) => {
-            prev.delete("tokenChainId");
-            prev.delete("tokenCoinMinimalDenom");
-
-            return prev;
-          });
-        }}
-        forceNotOverflowAuto={true}
-      >
-        {tokenDetailInfo.chainId != null &&
-        tokenDetailInfo.chainId.length > 0 &&
-        tokenDetailInfo.coinMinimalDenom != null &&
-        tokenDetailInfo.coinMinimalDenom.length > 0 ? (
-          <TokenDetailModal
-            close={() => {
-              setSearchParams((prev) => {
-                prev.delete("isTokenDetailModalOpen");
-
-                return prev;
-              });
-            }}
-            chainId={tokenDetailInfo.chainId}
-            coinMinimalDenom={tokenDetailInfo.coinMinimalDenom}
-          />
-        ) : null}
-      </Modal>
-    </React.Fragment>
-  );
-});
+                  return prev;
+                });
+              }}
+              chainId={tokenDetailInfo.chainId}
+              coinMinimalDenom={tokenDetailInfo.coinMinimalDenom}
+            />
+          ) : null}
+        </Modal>
+      </React.Fragment>
+    );
+  }
+);
