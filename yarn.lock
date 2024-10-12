@@ -8957,7 +8957,7 @@ __metadata:
     react-native-fs: ^2.20.0
     react-native-gesture-handler: 2.16.0
     react-native-keyboard-aware-scroll-view: ^0.9.5
-    react-native-keychain: ^8.1.2
+    react-native-keychain: ^9.0.0
     react-native-linear-gradient: ^2.8.3
     react-native-navigation-bar-color: ^2.0.2
     react-native-qrcode-svg: ^6.2.0
@@ -36380,10 +36380,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-keychain@npm:^8.1.2":
-  version: 8.1.2
-  resolution: "react-native-keychain@npm:8.1.2"
-  checksum: 0602f0c8c664ee73aedfe7704c5199e90ecf91d933c218d1d74f8a4ea2bfe39814abe2a65492ba19478f416f8ba2cccb82e56878ebf4618712aac0f5a9e6a855
+"react-native-keychain@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "react-native-keychain@npm:9.0.0"
+  checksum: 2d27892ea583cc9a3d41330f926e887266abf75f29a38fcc15c56581fac628ae39ad300a7cc218483b4c7fc02ace6755a06ded05c6a0fe96bfe95070d04b5a0b
   languageName: node
   linkType: hard
 

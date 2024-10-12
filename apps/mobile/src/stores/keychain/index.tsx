@@ -191,9 +191,7 @@ export class KeychainStore {
     // No need to await.
     this.restore();
 
-    const type = yield* toGenerator(
-      Keychain.getSupportedBiometryType(KeychainStore.defaultOptions),
-    );
+    const type = yield* toGenerator(Keychain.getSupportedBiometryType());
     this._isBiometrySupported = type != null;
   }
 
