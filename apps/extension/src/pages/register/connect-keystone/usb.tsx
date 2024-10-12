@@ -37,6 +37,8 @@ const DEFAULT_KEYSTONE_PATHS = [
   "m/44'/330'/0'/0/0",
 ];
 
+const DEFAULT_COIN_TYPE = [118, 60];
+
 const isDefaultPath = (bip44Path: {
   account: number;
   change: number;
@@ -47,6 +49,37 @@ const isDefaultPath = (bip44Path: {
     bip44Path.change === 0 &&
     bip44Path.addressIndex === 0
   );
+};
+
+const fetchRequiredAccountsFromKeystone = async (
+  baseApp: Base,
+  paths: string[]
+) => {
+  const keys = [];
+  let device;
+  let deviceId;
+  let masterFingerprint;
+  for (const path of paths) {
+    const res = await baseApp.getURAccount(
+      path,
+      Curve.secp256k1,
+      DerivationAlgorithm.slip10
+    );
+    const sdk = new KeystoneSDK({
+      origin: "Keplr Extension",
+    });
+    const account = sdk.parseMultiAccounts(res.toUR());
+    keys.push(account.keys[0]);
+    device = account.device;
+    deviceId = account.deviceId;
+    masterFingerprint = account.masterFingerprint;
+  }
+  return {
+    keys,
+    device,
+    deviceId,
+    masterFingerprint,
+  };
 };
 
 export const ConnectKeystoneUSBScene: FunctionComponent<{
@@ -109,52 +142,30 @@ export const ConnectKeystoneUSBScene: FunctionComponent<{
     }
 
     // step2: get the keystone accounts
-    const keys = [];
-    let device: string | undefined;
-    let masterFingerprint = "";
-    let deviceId: string | undefined;
     let accounts;
+    let paths = DEFAULT_KEYSTONE_PATHS;
 
     try {
       if (!isDefaultPath(bip44Path)) {
-        const setPath = `m/44'/118'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
-        const res = await baseApp.getURAccount(
-          setPath,
-          Curve.secp256k1,
-          DerivationAlgorithm.slip10
+        paths = DEFAULT_COIN_TYPE.map(
+          (each) =>
+            `m/44'/${each}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`
         );
-        const sdk = new KeystoneSDK({
-          origin: "Keplr Extension",
-        });
-        accounts = sdk.parseMultiAccounts(res.toUR());
-        accounts = {
-          ...accounts,
-          connectionType: "USB",
-        };
-      } else {
-        for (const path of DEFAULT_KEYSTONE_PATHS) {
-          const res = await baseApp.getURAccount(
-            path,
-            Curve.secp256k1,
-            DerivationAlgorithm.slip10
-          );
-          const sdk = new KeystoneSDK({
-            origin: "Keplr Extension",
-          });
-          const account = sdk.parseMultiAccounts(res.toUR());
-          keys.push(account.keys[0]);
-          device = account.device;
-          deviceId = account.deviceId;
-          masterFingerprint = account.masterFingerprint;
-          accounts = {
-            device,
-            deviceId,
-            masterFingerprint,
-            keys,
-            connectionType: "USB",
-          };
-        }
       }
+
+      const result = await fetchRequiredAccountsFromKeystone(baseApp, paths);
+      accounts = {
+        device: result?.device,
+        deviceId: result?.deviceId,
+        masterFingerprint: result?.masterFingerprint,
+        keys: result?.keys,
+        bip44Path: {
+          account: bip44Path.account ?? 0,
+          change: bip44Path.change ?? 0,
+          addressIndex: bip44Path.addressIndex ?? 0,
+        },
+        connectionType: "USB",
+      };
 
       setStep("app");
       //
