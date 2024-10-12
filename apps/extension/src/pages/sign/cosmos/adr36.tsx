@@ -109,7 +109,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     Error | undefined
   >(undefined);
 
-  const isKeystonUSB =
+  const isKeystoneUSB =
     signInteractionStore.waitingData?.data.keyType === "keystone" &&
     signInteractionStore.waitingData?.data.keyInsensitive["connectionType"] ===
       "USB";
@@ -424,14 +424,14 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
             isInternal={signInteractionStore.waitingData.isInternal}
           />
         ) : null}
-        {isKeystonUSB && (
+        {isKeystoneUSB && (
           <KeystoneUSBBox
             isKeystoneInteracting={isKeystoneInteracting}
             KeystoneInteractingError={keystoneInteractingError}
           />
         )}
       </Box>
-      {!isKeystonUSB && (
+      {!isKeystoneUSB && (
         <KeystoneSign
           ur={keystoneUR}
           isOpen={isKeystoneInteracting}

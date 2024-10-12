@@ -43,7 +43,7 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
   const [isBIP44CardOpen, setIsBIP44CardOpen] = useState(false);
 
   const [keystoneWay, setKeystoneWay] = useState<string>("USB");
-  const [isKeystoneUSB, setIsUSB] = useState(true);
+  const [isKeystoneUSB, setIsKeystoneUSB] = useState(true);
 
   return (
     <RegisterSceneBox>
@@ -173,7 +173,7 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
                 ]}
                 onSelect={(key) => {
                   setKeystoneWay(key);
-                  setIsUSB(key === "USB");
+                  setIsKeystoneUSB(key === "USB");
                 }}
               />
               <Gutter size="1.625rem" />
