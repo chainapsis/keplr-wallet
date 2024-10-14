@@ -57,10 +57,11 @@ import { useBuy } from "../../hooks/use-buy";
 import { BottomTabsHeightRem } from "../../bottom-tabs";
 import { DenomHelper } from "@keplr-wallet/common";
 import { NewSidePanelHeaderTop } from "./new-side-panel-header-top";
+import { ModularChainInfo } from "@keplr-wallet/types";
 
 export interface ViewToken {
   token: CoinPretty;
-  chainInfo: IChainInfoImpl;
+  chainInfo: IChainInfoImpl | ModularChainInfo;
   isFetching: boolean;
   error: QueryError<any> | undefined;
 }
@@ -115,6 +116,10 @@ export const MainPage: FunctionComponent<{
   const availableTotalPriceEmbedOnlyUSD = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.allKnownBalances) {
+      // TODO: 이거 starknet에서도 embedded를 확인할 수 있도록 수정해야함.
+      if (!("currencies" in bal.chainInfo)) {
+        continue;
+      }
       if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
         continue;
       }
@@ -168,6 +173,9 @@ export const MainPage: FunctionComponent<{
   const stakedTotalPriceEmbedOnlyUSD = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.delegations) {
+      if (!("currencies" in bal.chainInfo)) {
+        continue;
+      }
       if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
         continue;
       }
@@ -183,6 +191,9 @@ export const MainPage: FunctionComponent<{
       }
     }
     for (const bal of hugeQueriesStore.unbondings) {
+      if (!("currencies" in bal.viewToken.chainInfo)) {
+        continue;
+      }
       if (
         !(bal.viewToken.chainInfo.embedded as ChainInfoWithCoreTypes).embedded
       ) {

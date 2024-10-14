@@ -7,6 +7,8 @@ import {
   ChainInfo,
   ChainInfoWithoutEndpoints,
   EVMInfo,
+  ModularChainInfo,
+  StarknetChainInfo,
 } from "@keplr-wallet/types";
 import {
   action,
@@ -41,6 +43,11 @@ export class ChainsService {
   }
 
   @observable.ref
+  protected embedChainInfos: ReadonlyArray<ChainInfoWithCoreTypes>;
+  @observable.ref
+  protected modularChainInfos: ReadonlyArray<ModularChainInfo>;
+
+  @observable.ref
   protected updatedChainInfos: UpdatedChainInfo[] = [];
   protected updatedChainInfoKVStore: KVStore;
 
@@ -71,7 +78,9 @@ export class ChainsService {
       updaterKVStore: KVStore;
     },
     // embedChainInfos는 실행 이후에 변경되어서는 안된다.
-    protected readonly embedChainInfos: ReadonlyArray<ChainInfoWithCoreTypes>,
+    embedModularChainInfos: ReadonlyArray<
+      ModularChainInfo | ChainInfoWithCoreTypes
+    >,
     protected readonly suggestChainPrivilegedOrigins: string[],
     protected readonly communityChainInfoRepo: {
       readonly organizationName: string;
@@ -88,6 +97,34 @@ export class ChainsService {
         ) => void | Promise<void>)
       | undefined
   ) {
+    this.modularChainInfos = embedModularChainInfos.map((modularChainInfo) => {
+      if ("currencies" in modularChainInfo) {
+        return {
+          chainId: modularChainInfo.chainId,
+          chainName: modularChainInfo.chainName,
+          chainSymbolImageUrl: modularChainInfo.chainSymbolImageUrl,
+          cosmos: modularChainInfo,
+        };
+      }
+      return modularChainInfo;
+    });
+    this.embedChainInfos = embedModularChainInfos
+      .filter(
+        (modularChainInfo) =>
+          "currencies" in modularChainInfo || "cosmos" in modularChainInfo
+      )
+      .map((modularChainInfo) => {
+        if ("currencies" in modularChainInfo) {
+          return modularChainInfo;
+        }
+        if (!("cosmos" in modularChainInfo)) {
+          throw new Error("Can't be happen");
+        }
+        return {
+          ...modularChainInfo.cosmos,
+        };
+      });
+
     this.updatedChainInfoKVStore = new PrefixKVStore(
       kvStore,
       "updatedChainInfo"
@@ -872,21 +909,32 @@ export class ChainsService {
       chainId: string
     ): {
       rpc: string;
-      rest: string;
+      rest?: string;
       evmRpc?: string;
     } => {
       const identifier = ChainIdHelper.parse(chainId).identifier;
       const originalChainInfos = this.embedChainInfos.concat(
         this.suggestedChainInfos
       );
-      const chainInfo = originalChainInfos.find(
-        (c) => ChainIdHelper.parse(c.chainId).identifier === identifier
-      );
+      const starknetChainInfos = this.modularChainInfos.reduce((acc, cur) => {
+        if ("starknet" in cur) {
+          acc.push(cur.starknet);
+        }
+        return acc;
+      }, [] as StarknetChainInfo[]);
+      const chainInfo =
+        originalChainInfos.find(
+          (c) => ChainIdHelper.parse(c.chainId).identifier === identifier
+        ) ||
+        starknetChainInfos.find(
+          (c) => ChainIdHelper.parse(c.chainId).identifier === identifier
+        );
       if (chainInfo) {
         return {
           rpc: chainInfo.rpc,
-          rest: chainInfo.rest,
-          evmRpc: chainInfo.evm?.rpc,
+          ...("rest" in chainInfo && { rest: chainInfo.rest }),
+          ...("evm" in chainInfo &&
+            chainInfo.evm != null && { evmRpc: chainInfo.evm.rpc }),
         };
       }
 
@@ -1097,5 +1145,103 @@ export class ChainsService {
     }
 
     return chainInfo.evm;
+  }
+
+  getModularChainInfos = computedFn(
+    (): ModularChainInfo[] => {
+      return this.modularChainInfos
+        .slice()
+        .map((modularChainInfo) => {
+          if (this.hasChainInfo(modularChainInfo.chainId)) {
+            const cosmos = this.getChainInfoOrThrow(modularChainInfo.chainId);
+            return {
+              chainId: cosmos.chainId,
+              chainName: cosmos.chainName,
+              chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
+              cosmos,
+            };
+          }
+
+          // TODO: `mergeModularChainInfosWithDynamics` 같은 메소드로 빼기
+          if ("starknet" in modularChainInfo) {
+            const endpoint = this.getEndpoint(modularChainInfo.chainId);
+            return {
+              ...modularChainInfo,
+              starknet: {
+                ...modularChainInfo.starknet,
+                rpc: endpoint?.rpc || modularChainInfo.starknet.rpc,
+              },
+            };
+          }
+          return modularChainInfo;
+        })
+        .concat(
+          this.suggestedChainInfos.map((chainInfo) => {
+            return {
+              chainId: chainInfo.chainId,
+              chainName: chainInfo.chainName,
+              chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
+              cosmos: chainInfo,
+            };
+          })
+        );
+    },
+    {
+      keepAlive: true,
+    }
+  );
+
+  hasModularChainInfo = computedFn((chainId: string): boolean => {
+    return this.getModularChainInfos().some(
+      (modularChainInfo) =>
+        ChainIdHelper.parse(modularChainInfo.chainId).identifier ===
+        ChainIdHelper.parse(chainId).identifier
+    );
+  });
+
+  getModularChainInfo = computedFn(
+    (chainId: string): ModularChainInfo | undefined => {
+      return this.getModularChainInfos().find(
+        (modularChainInfo) =>
+          ChainIdHelper.parse(modularChainInfo.chainId).identifier ===
+          ChainIdHelper.parse(chainId).identifier
+      );
+    }
+  );
+
+  getModularChainInfoOrThrow(chainId: string): ModularChainInfo {
+    const modularChainInfo = this.getModularChainInfo(chainId);
+    if (!modularChainInfo) {
+      throw new Error(`There is no modular chain info for ${chainId}`);
+    }
+
+    return modularChainInfo;
+  }
+
+  hasStarknetChainInfo(chainId: string): boolean {
+    const modularChainInfo = this.getModularChainInfo(chainId);
+    if (!modularChainInfo) {
+      return false;
+    }
+    return "starknet" in modularChainInfo;
+  }
+
+  getStarknetChainInfo(chainId: string): StarknetChainInfo | undefined {
+    const modularChainInfo = this.getModularChainInfo(chainId);
+    if (!modularChainInfo) {
+      return undefined;
+    }
+    if ("starknet" in modularChainInfo) {
+      return modularChainInfo.starknet;
+    }
+  }
+
+  getStarknetChainInfoOrThrow(chainId: string): StarknetChainInfo {
+    const starknetChainInfo = this.getStarknetChainInfo(chainId);
+    if (!starknetChainInfo) {
+      throw new Error(`There is no starknet chain info for ${chainId}`);
+    }
+
+    return starknetChainInfo;
   }
 }

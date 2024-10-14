@@ -4,6 +4,7 @@ import { Notification } from "./types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Buffer } from "buffer/";
 import { retry } from "@keplr-wallet/common";
+import { GetTransactionReceiptResponse, RpcProvider } from "starknet";
 
 interface CosmosSdkError {
   codespace: string;
@@ -234,5 +235,49 @@ export class BackgroundTxService {
       title: "Tx failed",
       message,
     });
+  }
+
+  async waitStarknetTransaction(
+    chainId: string,
+    txHash: string
+  ): Promise<GetTransactionReceiptResponse> {
+    const modularChainInfo = this.chainsService.getModularChainInfo(chainId);
+    if (!modularChainInfo) {
+      throw new Error("Invalid chain id");
+    }
+    if (!("starknet" in modularChainInfo)) {
+      throw new Error("Chain is not for starknet");
+    }
+    const starknet = modularChainInfo.starknet;
+    const provider = new RpcProvider({
+      nodeUrl: starknet.rpc,
+    });
+
+    this.notification.create({
+      iconRelativeUrl: "assets/logo-256.png",
+      title: "Tx is pending...",
+      message: "Wait a second",
+    });
+
+    try {
+      const res = await provider.waitForTransaction(txHash, {
+        retryInterval: 1000,
+      });
+
+      this.notification.create({
+        iconRelativeUrl: "assets/logo-256.png",
+        title: "Tx succeeds",
+        message: "Congratulations!",
+      });
+      return res;
+    } catch (e) {
+      this.notification.create({
+        iconRelativeUrl: "assets/logo-256.png",
+        title: "Tx failed",
+        message: "",
+      });
+
+      throw e;
+    }
   }
 }

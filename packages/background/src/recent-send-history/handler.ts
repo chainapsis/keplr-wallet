@@ -7,6 +7,7 @@ import {
 } from "@keplr-wallet/router";
 import {
   GetRecentSendHistoriesMsg,
+  AddRecentSendHistoryMsg,
   SendTxAndRecordMsg,
   SendTxAndRecordWithIBCPacketForwardingMsg,
   SendTxAndRecordWithIBCSwapMsg,
@@ -25,6 +26,11 @@ export const getHandler: (service: RecentSendHistoryService) => Handler = (
         return handleGetRecentSendHistoriesMsg(service)(
           env,
           msg as GetRecentSendHistoriesMsg
+        );
+      case AddRecentSendHistoryMsg:
+        return handleAddRecentSendHistoryMsg(service)(
+          env,
+          msg as AddRecentSendHistoryMsg
         );
       case SendTxAndRecordMsg:
         return handleSendTxAndRecordMsg(service)(
@@ -91,6 +97,21 @@ const handleSendTxAndRecordMsg: (
       },
       msg.isSkipTrack
     );
+  };
+};
+
+const handleAddRecentSendHistoryMsg: (
+  service: RecentSendHistoryService
+) => InternalHandler<AddRecentSendHistoryMsg> = (service) => {
+  return (_env, msg) => {
+    return service.addRecentSendHistory(msg.chainId, msg.historyType, {
+      sender: msg.sender,
+      recipient: msg.recipient,
+      amount: msg.amount,
+      memo: msg.memo,
+
+      ibcChannels: msg.ibcChannels,
+    });
   };
 };
 

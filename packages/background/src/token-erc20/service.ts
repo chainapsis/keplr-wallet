@@ -71,8 +71,19 @@ export class TokenERC20Service {
   }
 
   async suggestERC20Token(env: Env, chainId: string, contractAddress: string) {
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    this.validateChainInfo(chainInfo);
+    const modularChainInfo =
+      this.chainsService.getModularChainInfoOrThrow(chainId);
+    if ("cosmos" in modularChainInfo) {
+      const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+
+      this.validateChainInfo(chainInfo);
+    } else if ("starknet" in modularChainInfo) {
+      if (modularChainInfo.starknet == null) {
+        throw new Error("Starknet chain info is not defined");
+      }
+    } else {
+      throw new Error(`Unsupported chain: ${chainId}`);
+    }
 
     const existing = this.getERC20Token(chainId, contractAddress);
 
@@ -84,7 +95,10 @@ export class TokenERC20Service {
     // Validate contract Address
     if (
       !contractAddress.match(/^0x[0-9A-Fa-f]*$/) ||
-      contractAddress.length !== 42
+      (contractAddress.length !== 42 &&
+        // For Starknet, contract address length can be 65 or 66.
+        contractAddress.length !== 65 &&
+        contractAddress.length !== 66)
     ) {
       throw new Error("Contract address is not valid hex address");
     }
@@ -121,8 +135,19 @@ export class TokenERC20Service {
   );
 
   async setERC20Token(chainId: string, currency: AppCurrency): Promise<void> {
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    this.validateChainInfo(chainInfo);
+    const modularChainInfo =
+      this.chainsService.getModularChainInfoOrThrow(chainId);
+    if ("cosmos" in modularChainInfo) {
+      const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+      this.validateChainInfo(chainInfo);
+    } else if ("starknet" in modularChainInfo) {
+      if (modularChainInfo.starknet == null) {
+        throw new Error("Starknet chain info is not defined");
+      }
+    } else {
+      throw new Error(`Unsupported chain: ${chainId}`);
+    }
+
     const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
 
     if (!this.tokenMap.has(chainIdentifier)) {

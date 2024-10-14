@@ -1,5 +1,5 @@
 import { Router } from "@keplr-wallet/router";
-import { SendTxMsg } from "./messages";
+import { SendTxMsg, SubmitStarknetTxHashMsg } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
 import { BackgroundTxService } from "./service";
@@ -11,6 +11,7 @@ export function init(
   permissionInteractionService: PermissionInteractiveService
 ): void {
   router.registerMessage(SendTxMsg);
+  router.registerMessage(SubmitStarknetTxHashMsg);
 
   router.addHandler(ROUTE, getHandler(service, permissionInteractionService));
 }

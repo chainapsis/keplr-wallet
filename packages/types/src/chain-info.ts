@@ -1,4 +1,4 @@
-import { Currency, AppCurrency, FeeCurrency } from "./currency";
+import { Currency, AppCurrency, FeeCurrency, ERC20Currency } from "./currency";
 import { BIP44 } from "./bip44";
 import { Bech32Config } from "./bech32";
 import { EVMInfo } from "./ethereum";
@@ -62,3 +62,27 @@ export type ChainInfoWithoutEndpoints = Omit<
     readonly rpc: undefined;
   };
 };
+
+export interface StarknetChainInfo {
+  readonly chainId: string;
+  readonly rpc: string;
+  readonly currencies: ERC20Currency[];
+  readonly ethContractAddress: string;
+  readonly strkContractAddress: string;
+}
+
+export type ChainInfoModule = "cosmos" | "starknet";
+
+export type ModularChainInfo =
+  | {
+      readonly chainId: string;
+      readonly chainName: string;
+      readonly chainSymbolImageUrl?: string;
+      readonly cosmos: ChainInfo;
+    }
+  | {
+      readonly chainId: string;
+      readonly chainName: string;
+      readonly chainSymbolImageUrl?: string;
+      readonly starknet: StarknetChainInfo;
+    };

@@ -28,7 +28,7 @@ import {
   useSceneEvents,
   useSceneTransition,
 } from "../../../../components/transition";
-import { IChainInfoImpl } from "@keplr-wallet/stores";
+import { ModularChainInfo } from "@keplr-wallet/types";
 
 export const CopyAddressScene: FunctionComponent<{
   close: () => void;
@@ -71,36 +71,45 @@ export const CopyAddressScene: FunctionComponent<{
       return {};
     }
     const res: Record<string, true | undefined> = {};
-    for (const chainInfo of chainStore.chainInfosInUI) {
+    for (const modularChainInfo of chainStore.modularChainInfosInUI) {
       if (
         uiConfigStore.copyAddressConfig.isBookmarkedChain(
           keyRingStore.selectedKeyInfo.id,
-          chainInfo.chainId
+          modularChainInfo.chainId
         )
       ) {
-        res[chainInfo.chainIdentifier] = true;
+        res[ChainIdHelper.parse(modularChainInfo.chainId).identifier] = true;
       }
     }
     return res;
   });
 
   const addresses: {
-    chainInfo: IChainInfoImpl;
+    modularChainInfo: ModularChainInfo;
     bech32Address?: string;
     ethereumAddress?: string;
-  }[] = chainStore.chainInfosInUI
-    .map((chainInfo) => {
-      const accountInfo = accountStore.getAccount(chainInfo.chainId);
+    starknetAddress?: string;
+  }[] = chainStore.modularChainInfosInUI
+    .map((modularChainInfo) => {
+      const accountInfo = accountStore.getAccount(modularChainInfo.chainId);
 
       const bech32Address = (() => {
-        if (chainInfo.chainId.startsWith("eip155")) {
+        if (!("cosmos" in modularChainInfo)) {
+          return undefined;
+        }
+
+        if (modularChainInfo.chainId.startsWith("eip155")) {
           return undefined;
         }
 
         return accountInfo.bech32Address;
       })();
       const ethereumAddress = (() => {
-        if (chainInfo.chainId.startsWith("injective")) {
+        if (!("cosmos" in modularChainInfo)) {
+          return undefined;
+        }
+
+        if (modularChainInfo.chainId.startsWith("injective")) {
           return undefined;
         }
 
@@ -108,28 +117,37 @@ export const CopyAddressScene: FunctionComponent<{
           ? accountInfo.ethereumHexAddress
           : undefined;
       })();
+      const starknetAddress = (() => {
+        if (!("starknet" in modularChainInfo)) {
+          return undefined;
+        }
+
+        return accountInfo.starknetHexAddress;
+      })();
 
       return {
-        chainInfo,
+        modularChainInfo,
         bech32Address,
         ethereumAddress,
+        starknetAddress,
       };
     })
-    .filter((address) => {
+    .filter(({ modularChainInfo, bech32Address }) => {
       const s = search.trim().toLowerCase();
       if (s.length === 0) {
         return true;
       }
 
-      if (address.chainInfo.chainId.toLowerCase().includes(s)) {
-        return true;
-      }
-      if (address.chainInfo.chainName.toLowerCase().includes(s)) {
+      if (modularChainInfo.chainId.toLowerCase().includes(s)) {
         return true;
       }
 
-      if (address.bech32Address) {
-        const bech32Split = address.bech32Address.split("1");
+      if (modularChainInfo.chainName.toLowerCase().includes(s)) {
+        return true;
+      }
+
+      if (bech32Address) {
+        const bech32Split = bech32Address.split("1");
         if (bech32Split.length > 0) {
           if (bech32Split[0].toLowerCase().includes(s)) {
             return true;
@@ -137,16 +155,30 @@ export const CopyAddressScene: FunctionComponent<{
         }
       }
 
-      if (address.chainInfo.stakeCurrency) {
-        if (
-          address.chainInfo.stakeCurrency.coinDenom.toLowerCase().includes(s)
-        ) {
-          return true;
+      if ("cosmos" in modularChainInfo && modularChainInfo.cosmos != null) {
+        const cosmosChainInfo = modularChainInfo.cosmos;
+        if (cosmosChainInfo.stakeCurrency) {
+          if (
+            cosmosChainInfo.stakeCurrency.coinDenom.toLowerCase().includes(s)
+          ) {
+            return true;
+          }
         }
-      }
-      if (address.chainInfo.currencies.length > 0) {
-        const currency = address.chainInfo.currencies[0];
-        if (!currency.coinMinimalDenom.startsWith("ibc/")) {
+        if (cosmosChainInfo.currencies.length > 0) {
+          const currency = cosmosChainInfo.currencies[0];
+          if (!currency.coinMinimalDenom.startsWith("ibc/")) {
+            if (currency.coinDenom.toLowerCase().includes(s)) {
+              return true;
+            }
+          }
+        }
+      } else if (
+        "starknet" in modularChainInfo &&
+        modularChainInfo.starknet != null
+      ) {
+        const starknetChainInfo = modularChainInfo.starknet;
+        if (starknetChainInfo.currencies.length > 0) {
+          const currency = starknetChainInfo.currencies[0];
           if (currency.coinDenom.toLowerCase().includes(s)) {
             return true;
           }
@@ -154,8 +186,15 @@ export const CopyAddressScene: FunctionComponent<{
       }
     })
     .sort((a, b) => {
-      const aPriority = sortPriorities[a.chainInfo.chainIdentifier];
-      const bPriority = sortPriorities[b.chainInfo.chainIdentifier];
+      const aChainIdentifier = ChainIdHelper.parse(
+        a.modularChainInfo.chainId
+      ).identifier;
+      const bChainIdentifier = ChainIdHelper.parse(
+        b.modularChainInfo.chainId
+      ).identifier;
+
+      const aPriority = sortPriorities[aChainIdentifier];
+      const bPriority = sortPriorities[bChainIdentifier];
 
       if (aPriority && bPriority) {
         return 0;
@@ -284,7 +323,7 @@ export const CopyAddressScene: FunctionComponent<{
               if (address.ethereumAddress && address.bech32Address) {
                 return [
                   {
-                    chainInfo: address.chainInfo,
+                    modularChainInfo: address.modularChainInfo,
                     bech32Address: address.bech32Address,
                   },
                   {
@@ -300,7 +339,8 @@ export const CopyAddressScene: FunctionComponent<{
               return (
                 <CopyAddressItem
                   key={
-                    address.chainInfo.chainIdentifier +
+                    ChainIdHelper.parse(address.modularChainInfo.chainId)
+                      .identifier +
                     address.bech32Address +
                     (address.ethereumAddress || "")
                   }
@@ -320,9 +360,10 @@ export const CopyAddressScene: FunctionComponent<{
 
 const CopyAddressItem: FunctionComponent<{
   address: {
-    chainInfo: IChainInfoImpl;
+    modularChainInfo: ModularChainInfo;
     bech32Address?: string;
     ethereumAddress?: string;
+    starknetAddress?: string;
   };
   close: () => void;
 
@@ -353,14 +394,17 @@ const CopyAddressItem: FunctionComponent<{
     const isBookmarked = keyRingStore.selectedKeyInfo
       ? uiConfigStore.copyAddressConfig.isBookmarkedChain(
           keyRingStore.selectedKeyInfo.id,
-          address.chainInfo.chainId
+          address.modularChainInfo.chainId
         )
       : false;
 
     const [isCopyContainerHover, setIsCopyContainerHover] = useState(false);
     const [isBookmarkHover, setIsBookmarkHover] = useState(false);
 
-    const isEVMOnlyChain = chainStore.isEvmOnlyChain(address.chainInfo.chainId);
+    const isEVMOnlyChain =
+      "cosmos" in address.modularChainInfo &&
+      address.modularChainInfo.cosmos != null &&
+      chainStore.isEvmOnlyChain(address.modularChainInfo.chainId);
 
     // 클릭 영역 문제로 레이아웃이 복잡해졌다.
     // 알아서 잘 해결하자
@@ -400,14 +444,17 @@ const CopyAddressItem: FunctionComponent<{
               e.preventDefault();
 
               await navigator.clipboard.writeText(
-                address.ethereumAddress || address.bech32Address || ""
+                address.starknetAddress ||
+                  address.ethereumAddress ||
+                  address.bech32Address ||
+                  ""
               );
               setHasCopied(true);
               setBlockInteraction(true);
 
               analyticsStore.logEvent("click_copyAddress_copy", {
-                chainId: address.chainInfo.chainId,
-                chainName: address.chainInfo.chainName,
+                chainId: address.modularChainInfo.chainId,
+                chainName: address.modularChainInfo.chainName,
               });
               setHasCopied(true);
 
@@ -466,8 +513,8 @@ const CopyAddressItem: FunctionComponent<{
                   const newIsBookmarked = !isBookmarked;
 
                   analyticsStore.logEvent("click_favoriteChain", {
-                    chainId: address.chainInfo.chainId,
-                    chainName: address.chainInfo.chainName,
+                    chainId: address.modularChainInfo.chainId,
+                    chainName: address.modularChainInfo.chainName,
                     isFavorite: newIsBookmarked,
                   });
 
@@ -475,17 +522,17 @@ const CopyAddressItem: FunctionComponent<{
                     if (newIsBookmarked) {
                       uiConfigStore.copyAddressConfig.bookmarkChain(
                         keyRingStore.selectedKeyInfo.id,
-                        address.chainInfo.chainId
+                        address.modularChainInfo.chainId
                       );
                     } else {
                       uiConfigStore.copyAddressConfig.unbookmarkChain(
                         keyRingStore.selectedKeyInfo.id,
-                        address.chainInfo.chainId
+                        address.modularChainInfo.chainId
                       );
 
                       setSortPriorities((priorities) => {
                         const identifier = ChainIdHelper.parse(
-                          address.chainInfo.chainId
+                          address.modularChainInfo.chainId
                         ).identifier;
                         const newPriorities = { ...priorities };
                         if (newPriorities[identifier]) {
@@ -501,7 +548,10 @@ const CopyAddressItem: FunctionComponent<{
               </Box>
               <Gutter size="0.5rem" />
 
-              <ChainImageFallback chainInfo={address.chainInfo} size="2rem" />
+              <ChainImageFallback
+                chainInfo={address.modularChainInfo}
+                size="2rem"
+              />
               <Gutter size="0.5rem" />
               <YAxis>
                 <Subtitle3
@@ -511,11 +561,18 @@ const CopyAddressItem: FunctionComponent<{
                       : ColorPalette["gray-10"]
                   }
                 >
-                  {address.chainInfo.chainName}
+                  {address.modularChainInfo.chainName}
                 </Subtitle3>
                 <Gutter size="0.25rem" />
                 <Caption1 color={ColorPalette["gray-300"]}>
                   {(() => {
+                    if (address.starknetAddress) {
+                      return `${address.starknetAddress.slice(
+                        0,
+                        10
+                      )}...${address.starknetAddress.slice(-8)}`;
+                    }
+
                     if (address.ethereumAddress) {
                       return address.ethereumAddress.length === 42
                         ? `${address.ethereumAddress.slice(
@@ -576,8 +633,11 @@ const CopyAddressItem: FunctionComponent<{
               disabled={hasCopied}
               onClick={() => {
                 sceneTransition.push("qr-code", {
-                  chainId: address.chainInfo.chainId,
-                  address: address.ethereumAddress || address.bech32Address,
+                  chainId: address.modularChainInfo.chainId,
+                  address:
+                    address.starknetAddress ||
+                    address.ethereumAddress ||
+                    address.bech32Address,
                 });
               }}
             >

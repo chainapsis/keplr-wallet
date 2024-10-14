@@ -13,7 +13,13 @@ import { SecretUtils } from "../secretjs";
 import Long from "long";
 import { SettledResponses } from "../settled";
 import { DirectAuxSignResponse } from "../cosmjs-alt";
-import EventEmitter from "events";
+import { IEthereumProvider } from "./ethereum";
+import { IStarknetProvider } from "./starknet";
+import {
+  Call,
+  DeployAccountSignerDetails,
+  InvocationsSignerDetails,
+} from "starknet";
 
 export interface Key {
   // Name of the selected key store.
@@ -243,32 +249,38 @@ export interface Keplr {
 
   suggestERC20(chainId: string, contractAddress: string): Promise<void>;
 
+  getStarknetKey(chainId: string): Promise<{
+    name: string;
+    hexAddress: string;
+    pubKey: Uint8Array;
+    address: Uint8Array;
+  }>;
+  getStarknetKeysSettled(chainIds: string[]): Promise<
+    SettledResponses<{
+      name: string;
+      hexAddress: string;
+      pubKey: Uint8Array;
+      address: Uint8Array;
+    }>
+  >;
+  signStarknetDeployAccountTransaction(
+    chainId: string,
+    transaction: DeployAccountSignerDetails
+  ): Promise<{
+    transaction: DeployAccountSignerDetails;
+    signature: string[];
+  }>;
+  signStarknetTx(
+    chainId: string,
+    transactions: Call[],
+    details: InvocationsSignerDetails
+  ): Promise<{
+    transactions: Call[];
+    details: InvocationsSignerDetails;
+    signature: string[];
+  }>;
+
   readonly ethereum: IEthereumProvider;
-}
 
-export interface IEthereumProvider extends EventEmitter {
-  // It must be in the hexadecimal format used in EVM-based chains, not the format used in Tendermint nodes.
-  readonly chainId: string | null;
-  // It must be in the decimal format of chainId.
-  readonly networkVersion: string | null;
-
-  readonly selectedAddress: string | null;
-
-  readonly isKeplr: boolean;
-  readonly isMetaMask: boolean;
-
-  isConnected(): boolean;
-
-  request<T = unknown>({
-    method,
-    params,
-    chainId,
-  }: {
-    method: string;
-    params?: readonly unknown[] | Record<string, unknown>;
-    chainId?: string;
-  }): Promise<T>;
-
-  enable(): Promise<string[]>;
-  net_version(): Promise<string>;
+  readonly starknet: IStarknetProvider;
 }

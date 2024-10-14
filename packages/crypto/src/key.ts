@@ -1,16 +1,14 @@
-import { ec } from "elliptic";
-import CryptoJS from "crypto-js";
-
+import { secp256k1 } from "@noble/curves/secp256k1";
+import * as utils from "@noble/curves/abstract/utils";
+import { sha256 } from "@noble/hashes/sha2";
+import { ripemd160 } from "@noble/hashes/ripemd160";
 import { Buffer } from "buffer/";
 import { Hash } from "./hash";
+import { hash as starknetHash } from "starknet";
 
 export class PrivKeySecp256k1 {
   static generateRandomKey(): PrivKeySecp256k1 {
-    const secp256k1 = new ec("secp256k1");
-
-    return new PrivKeySecp256k1(
-      Buffer.from(secp256k1.genKeyPair().getPrivate().toArray())
-    );
+    return new PrivKeySecp256k1(secp256k1.utils.randomPrivateKey());
   }
 
   constructor(protected readonly privKey: Uint8Array) {}
@@ -20,13 +18,7 @@ export class PrivKeySecp256k1 {
   }
 
   getPubKey(): PubKeySecp256k1 {
-    const secp256k1 = new ec("secp256k1");
-
-    const key = secp256k1.keyFromPrivate(this.privKey);
-
-    return new PubKeySecp256k1(
-      new Uint8Array(key.getPublic().encodeCompressed("array"))
-    );
+    return new PubKeySecp256k1(secp256k1.getPublicKey(this.privKey, true));
   }
 
   signDigest32(digest: Uint8Array): {
@@ -38,17 +30,14 @@ export class PrivKeySecp256k1 {
       throw new Error(`Invalid length of digest to sign: ${digest.length}`);
     }
 
-    const secp256k1 = new ec("secp256k1");
-    const key = secp256k1.keyFromPrivate(this.privKey);
-
-    const signature = key.sign(digest, {
-      canonical: true,
+    const signature = secp256k1.sign(digest, this.privKey, {
+      lowS: true,
     });
 
     return {
-      r: new Uint8Array(signature.r.toArray("be", 32)),
-      s: new Uint8Array(signature.s.toArray("be", 32)),
-      v: signature.recoveryParam,
+      r: utils.numberToBytesBE(signature.r, 32),
+      s: utils.numberToBytesBE(signature.s, 32),
+      v: signature.recovery,
     };
   }
 }
@@ -68,15 +57,14 @@ export class PubKeySecp256k1 {
       return this.pubKey;
     }
 
-    const keyPair = this.toKeyPair();
     if (uncompressed) {
-      return new Uint8Array(
-        Buffer.from(keyPair.getPublic().encode("hex", false), "hex")
-      );
+      return secp256k1.ProjectivePoint.fromHex(
+        Buffer.from(this.pubKey).toString("hex")
+      ).toRawBytes(false);
     } else {
-      return new Uint8Array(
-        Buffer.from(keyPair.getPublic().encodeCompressed("hex"), "hex")
-      );
+      return secp256k1.ProjectivePoint.fromHex(
+        Buffer.from(this.pubKey).toString("hex")
+      ).toRawBytes(true);
     }
   }
 
@@ -88,12 +76,7 @@ export class PubKeySecp256k1 {
   }
 
   getCosmosAddress(): Uint8Array {
-    let hash = CryptoJS.SHA256(
-      CryptoJS.lib.WordArray.create(this.toBytes(false) as any)
-    ).toString();
-    hash = CryptoJS.RIPEMD160(CryptoJS.enc.Hex.parse(hash)).toString();
-
-    return new Uint8Array(Buffer.from(hash, "hex"));
+    return ripemd160(sha256(this.toBytes(false)));
   }
 
   getEthAddress(): Uint8Array {
@@ -104,13 +87,50 @@ export class PubKeySecp256k1 {
     return Hash.keccak256(this.toBytes(true).slice(1)).slice(-20);
   }
 
-  toKeyPair(): ec.KeyPair {
-    const secp256k1 = new ec("secp256k1");
+  getStarknetAddress(salt: Uint8Array, classHash: Uint8Array): Uint8Array {
+    const pubBytes = this.toBytes(true).slice(1);
+    const xLow = pubBytes.slice(16, 32);
+    const xHigh = pubBytes.slice(0, 16);
+    const yLow = pubBytes.slice(48, 64);
+    const yHigh = pubBytes.slice(32, 48);
 
-    return secp256k1.keyFromPublic(
-      Buffer.from(this.pubKey).toString("hex"),
-      "hex"
-    );
+    let calculated = starknetHash
+      .calculateContractAddressFromHash(
+        "0x" + Buffer.from(salt).toString("hex"),
+        "0x" + Buffer.from(classHash).toString("hex"),
+        [
+          "0x" + Buffer.from(xLow).toString("hex"),
+          "0x" + Buffer.from(xHigh).toString("hex"),
+          "0x" + Buffer.from(yLow).toString("hex"),
+          "0x" + Buffer.from(yHigh).toString("hex"),
+        ],
+        "0x00"
+      )
+      .replace("0x", "");
+
+    const padZero = 64 - calculated.length;
+    if (padZero > 0) {
+      calculated = "0".repeat(padZero) + calculated;
+    } else if (padZero < 0) {
+      throw new Error("Invalid length of calculated address");
+    }
+
+    return new Uint8Array(Buffer.from(calculated, "hex"));
+  }
+
+  getStarknetAddressParams(): {
+    readonly xLow: Uint8Array;
+    readonly xHigh: Uint8Array;
+    readonly yLow: Uint8Array;
+    readonly yHigh: Uint8Array;
+  } {
+    const pubBytes = this.toBytes(true).slice(1);
+    return {
+      xLow: pubBytes.slice(16, 32),
+      xHigh: pubBytes.slice(0, 16),
+      yLow: pubBytes.slice(48, 64),
+      yHigh: pubBytes.slice(32, 48),
+    };
   }
 
   verifyDigest32(digest: Uint8Array, signature: Uint8Array): boolean {
@@ -122,18 +142,16 @@ export class PubKeySecp256k1 {
       throw new Error(`Invalid length of signature: ${signature.length}`);
     }
 
-    const secp256k1 = new ec("secp256k1");
-
     const r = signature.slice(0, 32);
     const s = signature.slice(32);
 
     return secp256k1.verify(
-      digest,
       {
-        r: Buffer.from(r).toString("hex"),
-        s: Buffer.from(s).toString("hex"),
+        r: utils.bytesToNumberBE(r),
+        s: utils.bytesToNumberBE(s),
       },
-      this.toKeyPair()
+      digest,
+      this.pubKey
     );
   }
 }

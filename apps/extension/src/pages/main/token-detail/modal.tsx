@@ -28,6 +28,7 @@ import { MsgItemSkeleton } from "./msg-items/skeleton";
 import { Stack } from "../../../components/stack";
 import { EmptyView } from "../../../components/empty-view";
 import { DenomHelper } from "@keplr-wallet/common";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 const Styles = {
   Container: styled.div`
@@ -68,6 +69,7 @@ export const TokenDetailModal: FunctionComponent<{
     chainStore,
     accountStore,
     queriesStore,
+    starknetQueriesStore,
     priceStore,
     price24HChangesStore,
     skipQueriesStore,
@@ -76,13 +78,38 @@ export const TokenDetailModal: FunctionComponent<{
   const theme = useTheme();
 
   const account = accountStore.getAccount(chainId);
-  const chainInfo = chainStore.getChain(chainId);
-  const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
+  const modularChainInfo = chainStore.getModularChain(chainId);
+  const currency = (() => {
+    if ("cosmos" in modularChainInfo) {
+      return chainStore.getChain(chainId).forceFindCurrency(coinMinimalDenom);
+    }
+    // TODO: 일단 cosmos가 아니면 대충에기에다가 force currency 로직을 박아놓는다...
+    //       나중에 이런 기능을 chain store 자체에다가 만들어야한다.
+    const modularChainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
+    const res = modularChainInfoImpl
+      .getCurrencies("starknet")
+      .find((cur) => cur.coinMinimalDenom === coinMinimalDenom);
+    if (res) {
+      return res;
+    }
+    return {
+      coinMinimalDenom,
+      coinDenom: coinMinimalDenom,
+      coinDecimals: 0,
+    };
+  })();
   const denomHelper = new DenomHelper(currency.coinMinimalDenom);
   const isERC20 = denomHelper.type === "erc20";
-  const isMainCurrency =
-    (chainInfo.stakeCurrency || chainInfo.currencies[0]).coinMinimalDenom ===
-    currency.coinMinimalDenom;
+  const isMainCurrency = (() => {
+    if ("cosmos" in modularChainInfo) {
+      const chainInfo = chainStore.getChain(chainId);
+      return (
+        (chainInfo.stakeCurrency || chainInfo.currencies[0])
+          .coinMinimalDenom === currency.coinMinimalDenom
+      );
+    }
+    return false;
+  })();
 
   const isIBCCurrency = "paths" in currency;
 
@@ -93,16 +120,26 @@ export const TokenDetailModal: FunctionComponent<{
   const isSomeBuySupport = buySupportServiceInfos.some(
     (serviceInfo) => !!serviceInfo.buyUrl
   );
-
-  const queryBalances = queriesStore.get(chainId).queryBalances;
-  const balance =
-    chainStore.isEvmChain(chainId) && (isMainCurrency || isERC20)
-      ? queryBalances
-          .getQueryEthereumHexAddress(account.ethereumHexAddress)
-          .getBalance(currency)
-      : queryBalances
-          .getQueryBech32Address(account.bech32Address)
-          .getBalance(currency);
+  const balance = (() => {
+    if ("cosmos" in modularChainInfo) {
+      const queryBalances = queriesStore.get(chainId).queryBalances;
+      return chainStore.isEvmChain(chainId) && (isMainCurrency || isERC20)
+        ? queryBalances
+            .getQueryEthereumHexAddress(account.ethereumHexAddress)
+            .getBalance(currency)
+        : queryBalances
+            .getQueryBech32Address(account.bech32Address)
+            .getBalance(currency);
+    }
+    return starknetQueriesStore
+      .get(chainId)
+      .queryStarknetERC20Balance.getBalance(
+        chainId,
+        chainStore,
+        account.starknetHexAddress,
+        currency.coinMinimalDenom
+      );
+  })();
 
   const price24HChange = (() => {
     if (!currency.coinGeckoId) {
@@ -119,13 +156,18 @@ export const TokenDetailModal: FunctionComponent<{
   );
 
   const isSupported: boolean = useMemo(() => {
-    const map = new Map<string, boolean>();
-    for (const chainIdentifier of querySupported.response?.data ?? []) {
-      map.set(chainIdentifier, true);
-    }
+    if ("cosmos" in modularChainInfo) {
+      const chainInfo = chainStore.getChain(modularChainInfo.chainId);
+      const map = new Map<string, boolean>();
+      for (const chainIdentifier of querySupported.response?.data ?? []) {
+        map.set(chainIdentifier, true);
+      }
 
-    return map.get(chainInfo.chainIdentifier) ?? false;
-  }, [chainInfo, querySupported.response]);
+      return map.get(chainInfo.chainIdentifier) ?? false;
+    }
+    // XXX: 어차피 cosmos 기반이 아니면 backend에서 지원하지 않음...
+    return false;
+  }, [chainStore, modularChainInfo, querySupported.response]);
 
   const buttons: {
     icon: React.ReactElement;
@@ -232,9 +274,16 @@ export const TokenDetailModal: FunctionComponent<{
       ),
       text: "Send",
       onClick: () => {
-        navigate(
-          `/send?chainId=${chainId}&coinMinimalDenom=${coinMinimalDenom}`
-        );
+        if ("cosmos" in modularChainInfo) {
+          navigate(
+            `/send?chainId=${chainId}&coinMinimalDenom=${coinMinimalDenom}`
+          );
+        }
+        if ("starknet" in modularChainInfo) {
+          navigate(
+            `/starknet/send?chainId=${chainId}&coinMinimalDenom=${coinMinimalDenom}`
+          );
+        }
       },
     },
   ];
@@ -242,9 +291,14 @@ export const TokenDetailModal: FunctionComponent<{
   const msgHistory = usePaginatedCursorQuery<ResMsgsHistory>(
     process.env["KEPLR_EXT_TX_HISTORY_BASE_URL"],
     () => {
-      return `/history/msgs/${chainInfo.chainIdentifier}/${
-        accountStore.getAccount(chainId).bech32Address
-      }?relations=${Relations.join(",")}&denoms=${encodeURIComponent(
+      return `/history/msgs/${
+        ChainIdHelper.parse(chainId).identifier
+      }/${(() => {
+        if ("cosmos" in modularChainInfo) {
+          return accountStore.getAccount(chainId).bech32Address;
+        }
+        return accountStore.getAccount(chainId).starknetHexAddress;
+      })()}?relations=${Relations.join(",")}&denoms=${encodeURIComponent(
         currency.coinMinimalDenom
       )}&vsCurrencies=${priceStore.defaultVsCurrency}&limit=${PaginationLimit}`;
     },
@@ -351,7 +405,7 @@ export const TokenDetailModal: FunctionComponent<{
                     : ColorPalette["gray-200"]
                 }
               >
-                {chainInfo.chainName}
+                {modularChainInfo.chainName}
               </Body1>
             </span>
             <div style={{ flex: 1 }} />
@@ -446,14 +500,24 @@ export const TokenDetailModal: FunctionComponent<{
             </XAxis>
           </YAxis>
 
-          {chainInfo.stakeCurrency &&
-          chainInfo.stakeCurrency.coinMinimalDenom ===
-            currency.coinMinimalDenom ? (
-            <React.Fragment>
-              <Gutter size="1.25rem" />
-              <StakedBalance chainId={chainId} />
-            </React.Fragment>
-          ) : null}
+          {(() => {
+            if ("cosmos" in modularChainInfo) {
+              const chainInfo = chainStore.getChain(chainId);
+              if (
+                chainInfo.stakeCurrency &&
+                chainInfo.stakeCurrency.coinMinimalDenom ===
+                  currency.coinMinimalDenom
+              ) {
+                return (
+                  <React.Fragment>
+                    <Gutter size="1.25rem" />
+                    <StakedBalance chainId={chainId} />
+                  </React.Fragment>
+                );
+              }
+            }
+            return null;
+          })()}
 
           {(() => {
             const infos: {
@@ -608,7 +672,12 @@ export const TokenDetailModal: FunctionComponent<{
             }
 
             if (msgHistory.pages[0].response?.isUnsupported || !isSupported) {
-              if (chainInfo.embedded.embedded) {
+              // TODO: 아직 cosmos 체인이 아니면 embedded인지 아닌지 구분할 수 없다.
+              if (
+                ("cosmos" in modularChainInfo &&
+                  chainStore.getChain(chainId).embedded.embedded) ||
+                "starknet" in modularChainInfo
+              ) {
                 return (
                   <EmptyView>
                     <Box marginX="2rem">
@@ -629,6 +698,7 @@ export const TokenDetailModal: FunctionComponent<{
                   </EmptyView>
                 );
               }
+
               return (
                 <EmptyView>
                   <Box marginX="2rem">
