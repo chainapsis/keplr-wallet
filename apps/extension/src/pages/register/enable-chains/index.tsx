@@ -959,6 +959,7 @@ export const EnableChainsScene: FunctionComponent<{
                       newEnabledChainIdentifiers.push(chainIdentifier);
                     }
                   }
+                  setEnabledChainIdentifiers(newEnabledChainIdentifiers);
                 }
               }}
             >
