@@ -587,6 +587,7 @@
   "page.starknet.components.account-activation-modal.description": "스타크넷의 다양한 기능을 이용하려면 계정을 활성화하세요!{br}계정 활성화에는 약간의 수수료가 필요합니다.",
 
   "components.empty-view.text": "{subject} 데이터가 없습니다.",
+  "components.input.recipient-input.wallet-address-only-label": "지갑 주소",
   "components.input.recipient-input.wallet-address-label": "지갑 주소 혹은 ICNS",
   "components.input.recipient-input.wallet-address-label-ens": "지갑 주소 혹은 ENS",
   "components.input.recipient-input.wallet-address-label-icns-ens": "지갑 주소 혹은 ICNS 혹은 ENS",
