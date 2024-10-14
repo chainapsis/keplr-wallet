@@ -27,6 +27,7 @@ import {
   TypedData,
   ProviderInterface,
   RpcProvider,
+  shortString,
 } from "starknet";
 import { InteractionService } from "../interaction";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
@@ -510,6 +511,12 @@ export class KeyRingStarknetService {
     signature: string[];
   }> {
     // TODO: tx에서 signer와 실제 계정 / chain id에 대해서 validation 넣기
+    if (
+      shortString.encodeShortString(chainId.replace("starknet:", "")) !==
+      details.chainId
+    ) {
+      throw new Error("Invalid chain id");
+    }
 
     const key = await this.getStarknetKeySelected(chainId);
 
