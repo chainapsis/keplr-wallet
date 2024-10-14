@@ -87,7 +87,8 @@ export const TokenFoundModal: FunctionComponent<{
     const tokenScans = chainStore.tokenScans.slice();
 
     for (const enable of enables) {
-      if (chainStore.hasChain(enable)) {
+      const modularChainInfo = chainStore.getModularChain(enable);
+      if ("cosmos" in modularChainInfo) {
         if (
           keyRingStore.needKeyCoinTypeFinalize(
             keyRingStore.selectedKeyInfo.id,
@@ -115,7 +116,7 @@ export const TokenFoundModal: FunctionComponent<{
             );
           }
         }
-      } else {
+      } else if ("starknet" in modularChainInfo) {
         const tokenScan = tokenScans.find((tokenScan) => {
           return ChainIdHelper.parse(tokenScan.chainId).identifier === enable;
         });
