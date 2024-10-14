@@ -60,6 +60,10 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
   const paramChainId = searchParams.get("chainId");
   const paramEditIndex = searchParams.get("editIndex");
 
+  const isStarknet =
+    chainStore.hasModularChain(chainId) &&
+    "starknet" in chainStore.getModularChain(chainId);
+
   useEffect(() => {
     if (labelRef.current) {
       labelRef.current.focus();
@@ -72,7 +76,11 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
     }
 
     setChainId(paramChainId);
-    recipientConfig.setChain(paramChainId);
+    if (isStarknet) {
+      recipientConfigForStarknet.setChain(paramChainId);
+    } else {
+      recipientConfig.setChain(paramChainId);
+    }
     memoConfig.setChain(paramChainId);
 
     if (paramEditIndex) {
@@ -83,7 +91,11 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
         setEditIndex(index);
         const data = addressBook[index];
         setName(data.name);
-        recipientConfig.setValue(data.address);
+        if (isStarknet) {
+          recipientConfigForStarknet.setValue(data.address);
+        } else {
+          recipientConfig.setValue(data.address);
+        }
         memoConfig.setValue(data.memo);
         return;
       }
@@ -92,25 +104,24 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
     setEditIndex(-1);
   }, [
     intl,
+    isStarknet,
     memoConfig,
     paramChainId,
     paramEditIndex,
     recipientConfig,
+    recipientConfigForStarknet,
     uiConfigStore.addressBookConfig,
   ]);
 
   const txConfigsValidate = useTxConfigsValidate({
     recipientConfig,
     memoConfig,
+    isIgnoringStarknet: isStarknet,
   });
 
   const txConfigsValidateForStarknet = useTxConfigsValidateForStarknet({
     recipientConfig: recipientConfigForStarknet,
   });
-
-  const isStarknet =
-    chainStore.hasModularChain(chainId) &&
-    "starknet" in chainStore.getModularChain(chainId);
 
   return (
     <HeaderLayout
@@ -126,13 +137,17 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
         if (editIndex < 0) {
           uiConfigStore.addressBookConfig.addAddressBook(chainId, {
             name,
-            address: recipientConfig.value,
+            address: isStarknet
+              ? recipientConfigForStarknet.value
+              : recipientConfig.value,
             memo: memoConfig.value,
           });
         } else {
           uiConfigStore.addressBookConfig.setAddressBookAt(chainId, editIndex, {
             name,
-            address: recipientConfig.value,
+            address: isStarknet
+              ? recipientConfigForStarknet.value
+              : recipientConfig.value,
             memo: memoConfig.value,
           });
         }
