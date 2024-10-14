@@ -135,6 +135,8 @@ export const TransactionFeeModal: FunctionComponent<{
                   ) {
                     message = match[0].replace("Failure reason:", "");
                     message = message.replace(/\\n/g, "\n"); // 줄 바꿈 문자 처리
+                  } else {
+                    message = "Transaction execution has failed";
                   }
                 }
               }
