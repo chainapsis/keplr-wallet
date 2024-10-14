@@ -716,10 +716,14 @@ export const EnableChainsScene: FunctionComponent<{
                 "eth-key-sign"
               ));
 
-          if (
-            (fallbackEthereumLedgerApp && isEthermintLike) ||
-            (!fallbackEthereumLedgerApp && !isEthermintLike)
-          ) {
+          if (keyType === "ledger") {
+            if (
+              (fallbackEthereumLedgerApp && isEthermintLike) ||
+              (!fallbackEthereumLedgerApp && !isEthermintLike)
+            ) {
+              numSelected++;
+            }
+          } else {
             numSelected++;
           }
         }
