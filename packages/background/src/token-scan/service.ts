@@ -9,7 +9,7 @@ import { Dec } from "@keplr-wallet/unit";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { VaultService } from "../vault";
 import { KVStore } from "@keplr-wallet/common";
-import { KeyRingStarknetService } from "src/keyring-starknet";
+import { KeyRingStarknetService } from "../keyring-starknet";
 import { CairoUint256 } from "starknet";
 
 export type TokenScan = {
