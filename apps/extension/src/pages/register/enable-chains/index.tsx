@@ -23,6 +23,7 @@ import { Gutter } from "../../../components/gutter";
 import { SearchTextInput } from "../../../components/input";
 import {
   Body2,
+  Body3,
   Subtitle2,
   Subtitle3,
   Subtitle4,
@@ -42,6 +43,7 @@ import { Tag } from "../../../components/tag";
 import SimpleBar from "simplebar-react";
 import { useTheme } from "styled-components";
 import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
+import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -992,6 +994,70 @@ export const EnableChainsScene: FunctionComponent<{
             </Box>
           </YAxis>
         </React.Fragment>
+
+        <VerticalCollapseTransition
+          collapsed={(() => {
+            for (const chainIdentifier of enabledChainIdentifiersInPage) {
+              const modularChainInfo =
+                chainStore.getModularChain(chainIdentifier);
+              if ("starknet" in modularChainInfo) {
+                return false;
+              }
+            }
+            return true;
+          })()}
+        >
+          <Gutter size="1.25rem" />
+          <Box
+            backgroundColor={
+              theme.mode === "light"
+                ? ColorPalette["gray-50"]
+                : ColorPalette["gray-500"]
+            }
+            borderRadius="0.5rem"
+            padding="1.125rem"
+          >
+            <XAxis alignY="center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="none"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-500"]
+                      : ColorPalette["gray-100"]
+                  }
+                  d="M10 1.667A8.336 8.336 0 001.667 10c0 4.6 3.733 8.333 8.333 8.333S18.333 14.6 18.333 10 14.6 1.667 10 1.667zm.833 12.5H9.166v-5h1.667v5zm0-6.667H9.166V5.833h1.667V7.5z"
+                />
+              </svg>
+              <Gutter size="0.5rem" />
+              <Subtitle4
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-500"]
+                    : ColorPalette["gray-100"]
+                }
+              >
+                <FormattedMessage id="pages.register.enable-chains.guide.starknet.title" />
+              </Subtitle4>
+            </XAxis>
+            <Gutter size="0.35rem" />
+            <Body3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-200"]
+              }
+            >
+              <FormattedMessage id="pages.register.enable-chains.guide.starknet.paragraph" />
+            </Body3>
+          </Box>
+        </VerticalCollapseTransition>
 
         <Gutter size="1.25rem" />
         <Box width="22.5rem" marginX="auto">
