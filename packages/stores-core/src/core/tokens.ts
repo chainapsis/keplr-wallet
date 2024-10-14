@@ -122,53 +122,55 @@ export class TokensStore {
   }
 
   protected updateChainInfos() {
-    const chainInfos = this.chainStore.chainInfos;
-    for (const chainInfo of chainInfos) {
-      const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId);
-
-      const tokens = this.tokenMap.get(chainIdentifier.identifier) ?? [];
-
-      const adds: AppCurrency[] = [];
-
-      for (const token of tokens) {
-        if (!token.associatedAccountAddress) {
-          adds.push(token.currency);
-        } else if (
-          this.keyRingStore.status === "unlocked" &&
-          this.accountStore.getAccount(chainInfo.chainId).bech32Address
-        ) {
-          if (
-            Buffer.from(
-              Bech32Address.fromBech32(
-                this.accountStore.getAccount(chainInfo.chainId).bech32Address
-              ).address
-            ).toString("hex") === token.associatedAccountAddress
-          ) {
-            adds.push(token.currency);
-          }
-        }
-      }
-
-      chainInfo.addCurrencies(...adds);
-    }
-
     const modularChainInfoImpls = this.chainStore.modularChainInfoImpls;
     for (const modularChainInfoImpl of modularChainInfoImpls) {
-      const chainIdentifier = ChainIdHelper.parse(modularChainInfoImpl.chainId);
+      if ("cosmos" in modularChainInfoImpl.embedded) {
+        const chainIdentifier = ChainIdHelper.parse(
+          modularChainInfoImpl.chainId
+        );
 
-      const tokens = this.tokenMap.get(chainIdentifier.identifier) ?? [];
+        const tokens = this.tokenMap.get(chainIdentifier.identifier) ?? [];
 
-      const adds: AppCurrency[] = [];
+        const adds: AppCurrency[] = [];
 
-      for (const token of tokens) {
-        adds.push(token.currency);
-      }
+        for (const token of tokens) {
+          if (!token.associatedAccountAddress) {
+            adds.push(token.currency);
+          } else if (
+            this.keyRingStore.status === "unlocked" &&
+            this.accountStore.getAccount(modularChainInfoImpl.chainId)
+              .bech32Address
+          ) {
+            if (
+              Buffer.from(
+                Bech32Address.fromBech32(
+                  this.accountStore.getAccount(modularChainInfoImpl.chainId)
+                    .bech32Address
+                ).address
+              ).toString("hex") === token.associatedAccountAddress
+            ) {
+              adds.push(token.currency);
+            }
+          }
+        }
 
-      if (
-        "starknet" in modularChainInfoImpl &&
-        modularChainInfoImpl.starknet != null
-      ) {
-        modularChainInfoImpl.addCurrencies("starknet", ...adds);
+        modularChainInfoImpl.addCurrencies("cosmos", ...adds);
+      } else if ("starknet" in modularChainInfoImpl.embedded) {
+        if ("starknet" in modularChainInfoImpl.embedded) {
+          const chainIdentifier = ChainIdHelper.parse(
+            modularChainInfoImpl.chainId
+          );
+
+          const tokens = this.tokenMap.get(chainIdentifier.identifier) ?? [];
+
+          const adds: AppCurrency[] = [];
+
+          for (const token of tokens) {
+            adds.push(token.currency);
+          }
+
+          modularChainInfoImpl.addCurrencies("starknet", ...adds);
+        }
       }
     }
 
