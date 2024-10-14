@@ -270,7 +270,8 @@ export class ClearChainEndpointsMsg extends Message<{
 
 export class GetChainOriginalEndpointsMsg extends Message<{
   rpc: string;
-  rest: string;
+  rest?: string;
+  evmRpc?: string;
 }> {
   public static type() {
     return "get-chain-original-endpoints";

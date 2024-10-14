@@ -118,7 +118,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @computed
   get tokenScans(): TokenScan[] {
     return this._tokenScans.filter((scan) => {
-      if (!this.hasChain(scan.chainId)) {
+      if (!this.hasChain(scan.chainId) && !this.hasModularChain(scan.chainId)) {
         return false;
       }
 
@@ -413,6 +413,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
         BACKGROUND_PORT,
         new RevalidateTokenScansMsg(id)
       );
+
       if (res.vaultId === this.keyRingStore.selectedKeyInfo?.id) {
         runInAction(() => {
           this._tokenScans = res.tokenScans;
