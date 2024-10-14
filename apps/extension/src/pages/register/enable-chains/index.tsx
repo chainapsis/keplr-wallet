@@ -539,6 +539,16 @@ export const EnableChainsScene: FunctionComponent<{
         });
       }
 
+      if (keyType === "keystone") {
+        modularChainInfos = modularChainInfos.filter((modularChainInfo) => {
+          // keystone은 스타크넷을 지원하지 않는다.
+          if ("starknet" in modularChainInfo) {
+            return false;
+          }
+          return true;
+        });
+      }
+
       const trimSearch = search.trim().toLowerCase();
       if (!trimSearch) {
         return modularChainInfos;
@@ -735,6 +745,7 @@ export const EnableChainsScene: FunctionComponent<{
       chainStore.modularChainInfos,
       enabledChainIdentifiers,
       fallbackEthereumLedgerApp,
+      keyType,
     ]);
 
     const replaceToWelcomePage = () => {
