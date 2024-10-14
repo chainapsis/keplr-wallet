@@ -69,6 +69,14 @@ export class AddressBookConfig {
       for (const chainInfo of this.chainStore.chainInfos) {
         chainIdentifierMap.set(chainInfo.chainIdentifier, true);
       }
+      for (const starknetChainInfo of this.chainStore.modularChainInfos.filter(
+        (modularChainInfo) => "starknet" in modularChainInfo
+      )) {
+        chainIdentifierMap.set(
+          ChainIdHelper.parse(starknetChainInfo.chainId).identifier,
+          true
+        );
+      }
       runInAction(() => {
         const chainIdentifiers = Array.from(this.addressBookMap.keys());
         for (const chainIdentifier of chainIdentifiers) {

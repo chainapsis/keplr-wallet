@@ -604,6 +604,7 @@
   "page.starknet.components.account-activation-modal.description": "Activate your account to access various features of Starknet!{br}A small fee applies for account activation.",
 
   "components.empty-view.text": "No {subject} Yet",
+  "components.input.recipient-input.wallet-address-only-label": "Wallet Address",
   "components.input.recipient-input.wallet-address-label": "Wallet Address or ICNS",
   "components.input.recipient-input.wallet-address-label-ens": "Wallet Address or ENS",
   "components.input.recipient-input.wallet-address-label-icns-ens": "Wallet Address or ICNS or ENS",

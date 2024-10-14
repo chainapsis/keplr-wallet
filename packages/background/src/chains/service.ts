@@ -1176,14 +1176,16 @@ export class ChainsService {
           return modularChainInfo;
         })
         .concat(
-          this.suggestedChainInfos.map((chainInfo) => {
-            return {
-              chainId: chainInfo.chainId,
-              chainName: chainInfo.chainName,
-              chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
-              cosmos: chainInfo,
-            };
-          })
+          this.mergeChainInfosWithDynamics(this.suggestedChainInfos).map(
+            (chainInfo) => {
+              return {
+                chainId: chainInfo.chainId,
+                chainName: chainInfo.chainName,
+                chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
+                cosmos: chainInfo,
+              };
+            }
+          )
         );
     },
     {
