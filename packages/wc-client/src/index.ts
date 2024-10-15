@@ -29,6 +29,11 @@ import { Buffer } from "buffer/";
 import { ProposalTypes, SessionTypes } from "@walletconnect/types";
 import Long from "long";
 import EventEmitter from "events";
+import {
+  Call,
+  DeployAccountSignerDetails,
+  InvocationsSignerDetails,
+} from "starknet";
 
 interface RequestParams {
   topic: string;
@@ -859,7 +864,49 @@ export class KeplrWalletConnectV2 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
+  getStarknetKey(_chainId: string): Promise<{
+    name: string;
+    hexAddress: string;
+    pubKey: Uint8Array;
+    address: Uint8Array;
+  }> {
+    throw new Error("Not yet implemented");
+  }
+
+  getStarknetKeysSettled(_chainIds: string[]): Promise<
+    SettledResponses<{
+      name: string;
+      hexAddress: string;
+      pubKey: Uint8Array;
+      address: Uint8Array;
+    }>
+  > {
+    throw new Error("Not yet implemented");
+  }
+
+  signStarknetTx(): Promise<{
+    transactions: Call[];
+    details: InvocationsSignerDetails;
+    signature: string[];
+  }> {
+    throw new Error("Not yet implemented");
+  }
+
+  signStarknetDeployAccountTransaction(
+    _chainId: string,
+    _transaction: DeployAccountSignerDetails
+  ): Promise<{
+    transaction: DeployAccountSignerDetails;
+    signature: string[];
+  }> {
+    throw new Error("Not yet implemented");
+  }
+
   public readonly ethereum = new MockEthereumProvider();
+
+  // TODO: 이거 마지막에 꼭 구현해야한다.
+  //       일단은 다른게 더 급해서 일단 any로 처리
+  public readonly starknet = {} as any;
 }
 
 class MockEthereumProvider extends EventEmitter implements IEthereumProvider {

@@ -9,12 +9,15 @@ import { Dec } from "@keplr-wallet/unit";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { VaultService } from "../vault";
 import { KVStore } from "@keplr-wallet/common";
+import { KeyRingStarknetService } from "../keyring-starknet";
+import { CairoUint256 } from "starknet";
 
 export type TokenScan = {
   chainId: string;
   infos: {
-    bech32Address: string;
+    bech32Address?: string;
     ethereumHexAddress?: string;
+    starknetHexAddress?: string;
     coinType?: number;
     assets: {
       currency: AppCurrency;
@@ -33,7 +36,8 @@ export class TokenScanService {
     protected readonly chainsUIService: ChainsUIService,
     protected readonly vaultService: VaultService,
     protected readonly keyRingService: KeyRingService,
-    protected readonly keyRingCosmosService: KeyRingCosmosService
+    protected readonly keyRingCosmosService: KeyRingCosmosService,
+    protected readonly keyRingStarknetService: KeyRingStarknetService
   ) {
     makeObservable(this);
   }
@@ -83,16 +87,17 @@ export class TokenScanService {
   }
 
   getTokenScans(vaultId: string): TokenScan[] {
-    return (this.vaultToMap.get(vaultId) ?? [])
-      .filter((tokenScan) => {
-        return this.chainsService.hasChainInfo(tokenScan.chainId);
-      })
-      .sort((a, b) => {
-        // Sort by chain name
-        const aChainInfo = this.chainsService.getChainInfoOrThrow(a.chainId);
-        const bChainInfo = this.chainsService.getChainInfoOrThrow(b.chainId);
-        return aChainInfo.chainName.localeCompare(bChainInfo.chainName);
-      });
+    return (this.vaultToMap.get(vaultId) ?? []).sort((a, b) => {
+      // Sort by chain name
+      const aChainInfo = this.chainsService.hasChainInfo(a.chainId)
+        ? this.chainsService.getChainInfoOrThrow(a.chainId)
+        : this.chainsService.getModularChainInfoOrThrow(a.chainId);
+      const bModualrChainInfo = this.chainsService.hasChainInfo(b.chainId)
+        ? this.chainsService.getChainInfoOrThrow(b.chainId)
+        : this.chainsService.getModularChainInfoOrThrow(b.chainId);
+
+      return aChainInfo.chainName.localeCompare(bModualrChainInfo.chainName);
+    });
   }
 
   protected async scanWithAllVaults(chainId: string): Promise<void> {
@@ -169,8 +174,8 @@ export class TokenScanService {
       return;
     }
 
-    const chainInfos = this.chainsService
-      .getChainInfos()
+    const modularChainInfos = this.chainsService
+      .getModularChainInfos()
       .filter(
         (chainInfo) =>
           !this.chainsUIService.isEnabled(vaultId, chainInfo.chainId)
@@ -178,12 +183,12 @@ export class TokenScanService {
 
     const tokenScans: TokenScan[] = [];
     const promises: Promise<void>[] = [];
-    for (const chainInfo of chainInfos) {
+    for (const modularChainInfo of modularChainInfos) {
       promises.push(
         (async () => {
           const tokenScan = await this.calculateTokenScan(
             vaultId,
-            chainInfo.chainId
+            modularChainInfo.chainId
           );
 
           if (tokenScan) {
@@ -231,11 +236,6 @@ export class TokenScanService {
       return;
     }
 
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    if (chainInfo.hideInUI) {
-      return;
-    }
-
     if (this.chainsUIService.isEnabled(vaultId, chainId)) {
       return;
     }
@@ -245,110 +245,179 @@ export class TokenScanService {
       infos: [],
     };
 
-    if (this.chainsService.isEvmOnlyChain(chainId)) {
-      const evmInfo = this.chainsService.getEVMInfoOrThrow(chainId);
-      const pubkey = await this.keyRingService.getPubKey(chainId, vaultId);
-      const ethereumHexAddress = `0x${Buffer.from(
-        pubkey.getEthAddress()
-      ).toString("hex")}`;
+    const modularChainInfo = this.chainsService.getModularChainInfo(chainId);
+    if (modularChainInfo == null) {
+      return;
+    }
 
-      const res = await simpleFetch<{
-        result: string;
-      }>(evmInfo.rpc, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "request-source": new URL(browser.runtime.getURL("/")).origin,
-        },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          method: "eth_getBalance",
-          params: [ethereumHexAddress, "latest"],
-          id: 1,
-        }),
-      });
-
-      if (res.status === 200 && BigInt(res.data.result).toString(10) !== "0") {
-        tokenScan.infos.push({
-          bech32Address: "",
-          ethereumHexAddress,
-          coinType: 60,
-          assets: [
-            {
-              currency: chainInfo.stakeCurrency ?? chainInfo.currencies[0],
-              amount: BigInt(res.data.result).toString(10),
-            },
-          ],
-        });
+    if ("cosmos" in modularChainInfo) {
+      const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+      if (chainInfo.hideInUI) {
+        return;
       }
-    } else {
-      const bech32Addresses: {
-        value: string;
-        coinType?: number;
-      }[] = await (async () => {
-        if (this.keyRingService.needKeyCoinTypeFinalize(vaultId, chainId)) {
-          return (
-            await this.keyRingCosmosService.computeNotFinalizedKeyAddresses(
-              vaultId,
-              chainId
-            )
-          ).map((addr) => {
-            return {
-              value: addr.bech32Address,
-              coinType: addr.coinType,
-            };
-          });
-        } else {
-          return [
-            {
-              value: (await this.keyRingCosmosService.getKey(vaultId, chainId))
-                .bech32Address,
-            },
-          ];
-        }
-      })();
 
-      for (const bech32Address of bech32Addresses) {
+      if (this.chainsService.isEvmOnlyChain(chainId)) {
+        const evmInfo = this.chainsService.getEVMInfoOrThrow(chainId);
+        const pubkey = await this.keyRingService.getPubKey(chainId, vaultId);
+        const ethereumHexAddress = `0x${Buffer.from(
+          pubkey.getEthAddress()
+        ).toString("hex")}`;
+
         const res = await simpleFetch<{
-          balances: { denom: string; amount: string }[];
-        }>(
-          chainInfo.rest,
-          `/cosmos/bank/v1beta1/balances/${bech32Address.value}?pagination.limit=1000`
-        );
+          result: string;
+        }>(evmInfo.rpc, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "request-source": new URL(browser.runtime.getURL("/")).origin,
+          },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            method: "eth_getBalance",
+            params: [ethereumHexAddress, "latest"],
+            id: 1,
+          }),
+        });
 
-        if (res.status === 200) {
-          const assets: TokenScan["infos"][number]["assets"] = [];
+        if (
+          res.status === 200 &&
+          BigInt(res.data.result).toString(10) !== "0"
+        ) {
+          tokenScan.infos.push({
+            bech32Address: "",
+            ethereumHexAddress,
+            coinType: 60,
+            assets: [
+              {
+                currency: chainInfo.stakeCurrency ?? chainInfo.currencies[0],
+                amount: BigInt(res.data.result).toString(10),
+              },
+            ],
+          });
+        }
+      } else {
+        const bech32Addresses: {
+          value: string;
+          coinType?: number;
+        }[] = await (async () => {
+          if (this.keyRingService.needKeyCoinTypeFinalize(vaultId, chainId)) {
+            return (
+              await this.keyRingCosmosService.computeNotFinalizedKeyAddresses(
+                vaultId,
+                chainId
+              )
+            ).map((addr) => {
+              return {
+                value: addr.bech32Address,
+                coinType: addr.coinType,
+              };
+            });
+          } else {
+            return [
+              {
+                value: (
+                  await this.keyRingCosmosService.getKey(vaultId, chainId)
+                ).bech32Address,
+              },
+            ];
+          }
+        })();
 
-          const balances = res.data?.balances ?? [];
-          for (const bal of balances) {
-            const currency = chainInfo.currencies.find(
-              (cur) => cur.coinMinimalDenom === bal.denom
-            );
-            if (currency) {
-              // validate
-              if (typeof bal.amount !== "string") {
-                throw new Error("Invalid amount");
-              }
+        for (const bech32Address of bech32Addresses) {
+          const res = await simpleFetch<{
+            balances: { denom: string; amount: string }[];
+          }>(
+            chainInfo.rest,
+            `/cosmos/bank/v1beta1/balances/${bech32Address.value}?pagination.limit=1000`
+          );
 
-              const dec = new Dec(bal.amount);
-              if (dec.gt(new Dec(0))) {
-                assets.push({
-                  currency,
-                  amount: bal.amount,
-                });
+          if (res.status === 200) {
+            const assets: TokenScan["infos"][number]["assets"] = [];
+
+            const balances = res.data?.balances ?? [];
+            for (const bal of balances) {
+              const currency = chainInfo.currencies.find(
+                (cur) => cur.coinMinimalDenom === bal.denom
+              );
+              if (currency) {
+                // validate
+                if (typeof bal.amount !== "string") {
+                  throw new Error("Invalid amount");
+                }
+
+                const dec = new Dec(bal.amount);
+                if (dec.gt(new Dec(0))) {
+                  assets.push({
+                    currency,
+                    amount: bal.amount,
+                  });
+                }
               }
             }
-          }
 
-          if (assets.length > 0) {
-            tokenScan.infos.push({
-              bech32Address: bech32Address.value,
-              coinType: bech32Address.coinType,
-              assets,
-            });
+            if (assets.length > 0) {
+              tokenScan.infos.push({
+                bech32Address: bech32Address.value,
+                coinType: bech32Address.coinType,
+                assets,
+              });
+            }
           }
         }
       }
+    } else if ("starknet" in modularChainInfo) {
+      const { hexAddress: starknetHexAddress } =
+        await this.keyRingStarknetService.getStarknetKey(vaultId, chainId);
+
+      await Promise.all(
+        modularChainInfo.starknet.currencies.map(async (currency) => {
+          const res = await simpleFetch<{
+            result: string[];
+          }>(modularChainInfo.starknet.rpc, {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+              "request-source": new URL(browser.runtime.getURL("/")).origin,
+            },
+            body: JSON.stringify({
+              jsonrpc: "2.0",
+              method: "starknet_call",
+              params: {
+                block_id: "latest",
+                request: {
+                  contract_address: currency.contractAddress,
+                  calldata: [starknetHexAddress],
+                  // selector.getSelectorFromName("balanceOf")
+                  entry_point_selector:
+                    "0x2e4263afad30923c891518314c3c95dbe830a16874e8abc5777a9a20b54c76e",
+                },
+              },
+              id: 1,
+            }),
+          });
+
+          if (res.status === 200) {
+            const amount = new CairoUint256({
+              low: res.data.result[0],
+              high: res.data.result[1],
+            })
+              .toBigInt()
+              .toString(10);
+
+            if (amount !== "0") {
+              tokenScan.infos.push({
+                starknetHexAddress,
+                assets: [
+                  {
+                    currency,
+                    amount,
+                  },
+                ],
+              });
+            }
+          }
+        })
+      );
     }
 
     if (tokenScan.infos.length > 0) {

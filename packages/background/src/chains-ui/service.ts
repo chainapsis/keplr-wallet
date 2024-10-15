@@ -71,7 +71,7 @@ export class ChainsUIService {
       const chainIdentifiers = (
         this.enabledChainIdentifiersMap.get(vaultId) ?? []
       ).filter((chainIdentifier) => {
-        return this.chainsService.hasChainInfo(chainIdentifier);
+        return this.chainsService.hasModularChainInfo(chainIdentifier);
       });
       if (chainIdentifiers.length === 0) {
         // Should be enabled at least one chain.
@@ -168,7 +168,7 @@ export class ChainsUIService {
         return ChainIdHelper.parse(chainId).identifier;
       })
       .filter((chainIdentifier) => {
-        return this.chainsService.hasChainInfo(chainIdentifier);
+        return this.chainsService.hasModularChainInfo(chainIdentifier);
       });
 
     const newIdentifiers =
@@ -202,7 +202,7 @@ export class ChainsUIService {
         return ChainIdHelper.parse(chainId).identifier;
       })
       .filter((chainIdentifier) => {
-        return this.chainsService.hasChainInfo(chainIdentifier);
+        return this.chainsService.hasModularChainInfo(chainIdentifier);
       });
 
     const newIdentifiers =

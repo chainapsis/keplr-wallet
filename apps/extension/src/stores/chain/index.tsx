@@ -7,7 +7,7 @@ import {
   runInAction,
 } from "mobx";
 
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import {
   ChainStore as BaseChainStore,
   IChainInfoImpl,
@@ -49,7 +49,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   protected _tokenScans: TokenScan[] = [];
 
   constructor(
-    protected readonly embedChainInfos: ChainInfo[],
+    protected readonly embedChainInfos: (ModularChainInfo | ChainInfo)[],
     protected readonly keyRingStore: KeyRingStore,
     protected readonly requester: MessageRequester
   ) {
@@ -118,7 +118,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @computed
   get tokenScans(): TokenScan[] {
     return this._tokenScans.filter((scan) => {
-      if (!this.hasChain(scan.chainId)) {
+      if (!this.hasChain(scan.chainId) && !this.hasModularChain(scan.chainId)) {
         return false;
       }
 
@@ -132,6 +132,31 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     // Sort by chain name.
     // The first chain has priority to be the first.
     return super.chainInfos.sort((a, b) => {
+      const aChainIdentifier = ChainIdHelper.parse(a.chainId).identifier;
+      const bChainIdentifier = ChainIdHelper.parse(b.chainId).identifier;
+
+      if (
+        aChainIdentifier ===
+        ChainIdHelper.parse(this.embedChainInfos[0].chainId).identifier
+      ) {
+        return -1;
+      }
+      if (
+        bChainIdentifier ===
+        ChainIdHelper.parse(this.embedChainInfos[0].chainId).identifier
+      ) {
+        return 1;
+      }
+
+      return a.chainName.trim().localeCompare(b.chainName.trim());
+    });
+  }
+
+  @computed
+  override get modularChainInfos(): ModularChainInfo[] {
+    // Sort by chain name.
+    // The first chain has priority to be the first.
+    return super.modularChainInfos.sort((a, b) => {
       const aChainIdentifier = ChainIdHelper.parse(a.chainId).identifier;
       const bChainIdentifier = ChainIdHelper.parse(b.chainId).identifier;
 
@@ -167,12 +192,37 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     });
   }
 
+  @computed
+  get modularChainInfosInUI() {
+    return this.modularChainInfos.filter((modularChainInfo) => {
+      if ("cosmos" in modularChainInfo && modularChainInfo.cosmos.hideInUI) {
+        return false;
+      }
+      const chainIdentifier = ChainIdHelper.parse(
+        modularChainInfo.chainId
+      ).identifier;
+
+      return this.enabledChainIdentifiesMap.get(chainIdentifier);
+    });
+  }
+
   // chain info들을 list로 보여줄때 hideInUI인 얘들은 빼고 보여줘야한다
   // property 이름이 얘매해서 일단 이렇게 지었다.
   @computed
   get chainInfosInListUI() {
     return this.chainInfos.filter((chainInfo) => {
       return !chainInfo.hideInUI;
+    });
+  }
+
+  @computed
+  get modularChainInfosInListUI() {
+    return this.modularChainInfos.filter((modularChainInfo) => {
+      if ("cosmos" in modularChainInfo && modularChainInfo.cosmos.hideInUI) {
+        return false;
+      }
+
+      return true;
     });
   }
 
@@ -309,7 +359,10 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
-    this.setEmbeddedChainInfos(result.chainInfos);
+    this.setEmbeddedChainInfosV2({
+      chainInfos: result.chainInfos,
+      modulrChainInfos: result.modulrChainInfos,
+    });
   }
 
   @flow
@@ -360,6 +413,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
         BACKGROUND_PORT,
         new RevalidateTokenScansMsg(id)
       );
+
       if (res.vaultId === this.keyRingStore.selectedKeyInfo?.id) {
         runInAction(() => {
           this._tokenScans = res.tokenScans;
@@ -418,11 +472,14 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @flow
   *removeChainInfo(chainId: string) {
     const msg = new RemoveSuggestedChainInfoMsg(chainId);
-    const chainInfos = yield* toGenerator(
+    const res = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
 
-    this.setEmbeddedChainInfos(chainInfos);
+    this.setEmbeddedChainInfosV2({
+      chainInfos: res.chainInfos,
+      modulrChainInfos: res.modularChainInfos,
+    });
   }
 
   @flow
@@ -433,21 +490,27 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     evmRpc: string | undefined
   ) {
     const msg = new SetChainEndpointsMsg(chainId, rpc, rest, evmRpc);
-    const newChainInfos = yield* toGenerator(
+    const res = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
 
-    this.setEmbeddedChainInfos(newChainInfos);
+    this.setEmbeddedChainInfosV2({
+      chainInfos: res.chainInfos,
+      modulrChainInfos: res.modularChainInfos,
+    });
   }
 
   @flow
   *resetChainEndpoints(chainId: string) {
     const msg = new ClearChainEndpointsMsg(chainId);
-    const newChainInfos = yield* toGenerator(
+    const res = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
 
-    this.setEmbeddedChainInfos(newChainInfos);
+    this.setEmbeddedChainInfosV2({
+      chainInfos: res.chainInfos,
+      modulrChainInfos: res.modularChainInfos,
+    });
   }
 
   // I use Async, Await because it doesn't change the state value.

@@ -49,12 +49,23 @@ export const SettingContactsList: FunctionComponent = observer(() => {
     }
   }, [chainStore.chainInfos, paramChainId, setSearchParams]);
 
-  const items = chainStore.chainInfos.map((chainInfo) => {
-    return {
-      key: chainInfo.chainId,
-      label: chainInfo.chainName,
-    };
-  });
+  const items = chainStore.chainInfos
+    .map((chainInfo) => {
+      return {
+        key: chainInfo.chainId,
+        label: chainInfo.chainName,
+      };
+    })
+    .concat(
+      chainStore.modularChainInfos
+        .filter((modularChainInfo) => "starknet" in modularChainInfo)
+        .map((modularChainInfo) => {
+          return {
+            key: modularChainInfo.chainId,
+            label: modularChainInfo.chainName,
+          };
+        })
+    );
 
   const addresses = uiConfigStore.addressBookConfig.getAddressBook(chainId);
 

@@ -56,6 +56,10 @@ class IBCSwapDestinationState {
         return token.token.toDec().gt(zeroDec);
       })
       .filter((token) => {
+        if (!("currencies" in token.chainInfo)) {
+          return false;
+        }
+
         const map = destinationMap.get(token.chainInfo.chainIdentifier);
         if (map) {
           return (
@@ -74,10 +78,12 @@ class IBCSwapDestinationState {
     const tokensKeyMap = new Map<string, boolean>();
 
     for (const token of tokens) {
-      tokensKeyMap.set(
-        `${token.chainInfo.chainIdentifier}/${token.token.currency.coinMinimalDenom}`,
-        true
-      );
+      if ("currencies" in token.chainInfo) {
+        tokensKeyMap.set(
+          `${token.chainInfo.chainIdentifier}/${token.token.currency.coinMinimalDenom}`,
+          true
+        );
+      }
     }
 
     for (const [chainIdentifier, map] of destinationMap) {
@@ -155,6 +161,10 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
 
     const filteredTokens = useMemo(() => {
       const filtered = tokens.filter((token) => {
+        if (!("currencies" in token.chainInfo)) {
+          return false;
+        }
+
         return (
           !excludeKey ||
           `${token.chainInfo.chainIdentifier}/${token.token.currency.coinMinimalDenom}` !==

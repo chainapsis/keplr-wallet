@@ -9,6 +9,7 @@
     ]
   },
   "scripts": {
+    "postinstall": "zx ./scripts/post-install.mjs",
     "bootstrap": "lerna bootstrap",
     "dev": "lerna run dev --parallel",
     "clean": "lerna run clean && rm -rf node_modules && rm -rf build",
@@ -93,6 +94,7 @@
     "react-dom": "18.2.0",
     "react-is": "18.2.0",
     "semver": "^7.6.0",
+    "starknet": "=6.11.0",
     "ts-jest": "^29.0.5",
     "typescript": "5.0.4",
     "zx": "^4.2.0"

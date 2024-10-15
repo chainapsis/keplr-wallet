@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/wc-client",
-  "version": "0.12.132",
+  "version": "0.12.133-rc.4",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -16,14 +16,15 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr-wallet/provider": "0.12.132",
-    "@keplr-wallet/types": "0.12.132",
+    "@keplr-wallet/provider": "0.12.133-rc.4",
+    "@keplr-wallet/types": "0.12.133-rc.4",
     "buffer": "^6.0.3",
     "deepmerge": "^4.2.2",
     "long": "^3 || ^4 || ^5"
   },
   "peerDependencies": {
     "@walletconnect/sign-client": "^2",
-    "@walletconnect/types": "^2"
+    "@walletconnect/types": "^2",
+    "starknet": "^6"
   }
 }

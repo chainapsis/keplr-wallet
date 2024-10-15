@@ -57,10 +57,11 @@ import { useBuy } from "../../hooks/use-buy";
 import { BottomTabsHeightRem } from "../../bottom-tabs";
 import { DenomHelper } from "@keplr-wallet/common";
 import { NewSidePanelHeaderTop } from "./new-side-panel-header-top";
+import { ModularChainInfo } from "@keplr-wallet/types";
 
 export interface ViewToken {
   token: CoinPretty;
-  chainInfo: IChainInfoImpl;
+  chainInfo: IChainInfoImpl | ModularChainInfo;
   isFetching: boolean;
   error: QueryError<any> | undefined;
 }
@@ -115,6 +116,10 @@ export const MainPage: FunctionComponent<{
   const availableTotalPriceEmbedOnlyUSD = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.allKnownBalances) {
+      // TODO: 이거 starknet에서도 embedded를 확인할 수 있도록 수정해야함.
+      if (!("currencies" in bal.chainInfo)) {
+        continue;
+      }
       if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
         continue;
       }
@@ -168,6 +173,9 @@ export const MainPage: FunctionComponent<{
   const stakedTotalPriceEmbedOnlyUSD = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.delegations) {
+      if (!("currencies" in bal.chainInfo)) {
+        continue;
+      }
       if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
         continue;
       }
@@ -183,6 +191,9 @@ export const MainPage: FunctionComponent<{
       }
     }
     for (const bal of hugeQueriesStore.unbondings) {
+      if (!("currencies" in bal.viewToken.chainInfo)) {
+        continue;
+      }
       if (
         !(bal.viewToken.chainInfo.embedded as ChainInfoWithCoreTypes).embedded
       ) {
@@ -797,7 +808,13 @@ const RefreshButton: FunctionComponent<{
 
   onSetIsLoading: (isLoading: boolean) => void;
 }> = observer(({ visible, onSetIsLoading }) => {
-  const { chainStore, queriesStore, accountStore, priceStore } = useStore();
+  const {
+    chainStore,
+    queriesStore,
+    starknetQueriesStore,
+    accountStore,
+    priceStore,
+  } = useStore();
 
   const theme = useTheme();
 
@@ -831,49 +848,75 @@ const RefreshButton: FunctionComponent<{
       const promises: Promise<unknown>[] = [];
 
       promises.push(priceStore.waitFreshResponse());
-      for (const chainInfo of chainStore.chainInfosInUI) {
-        const account = accountStore.getAccount(chainInfo.chainId);
+      for (const modularChainInfo of chainStore.modularChainInfosInUI) {
+        if ("cosmos" in modularChainInfo) {
+          const chainInfo = chainStore.getChain(modularChainInfo.chainId);
+          const account = accountStore.getAccount(chainInfo.chainId);
 
-        if (
-          !chainStore.isEvmChain(chainInfo.chainId) &&
-          account.bech32Address !== ""
-        ) {
-          const queries = queriesStore.get(chainInfo.chainId);
-          const queryBalance = queries.queryBalances.getQueryBech32Address(
-            account.bech32Address
-          );
-          const queryRewards =
-            queries.cosmos.queryRewards.getQueryBech32Address(
+          if (
+            !chainStore.isEvmChain(chainInfo.chainId) &&
+            account.bech32Address !== ""
+          ) {
+            const queries = queriesStore.get(chainInfo.chainId);
+            const queryBalance = queries.queryBalances.getQueryBech32Address(
               account.bech32Address
             );
-          // XXX: 얘는 구조상 waitFreshResponse()가 안되서 일단 쿼리가 끝인지 아닌지는 무시한다.
-          queryBalance.fetch();
+            const queryRewards =
+              queries.cosmos.queryRewards.getQueryBech32Address(
+                account.bech32Address
+              );
+            // XXX: 얘는 구조상 waitFreshResponse()가 안되서 일단 쿼리가 끝인지 아닌지는 무시한다.
+            queryBalance.fetch();
 
-          promises.push(queryRewards.waitFreshResponse());
-        }
+            promises.push(queryRewards.waitFreshResponse());
+          }
 
-        if (
-          chainStore.isEvmChain(chainInfo.chainId) &&
-          account.ethereumHexAddress
-        ) {
-          const queries = queriesStore.get(chainInfo.chainId);
-          const queryBalance = queries.queryBalances.getQueryEthereumHexAddress(
+          if (
+            chainStore.isEvmChain(chainInfo.chainId) &&
             account.ethereumHexAddress
-          );
-          // XXX: 얘는 구조상 waitFreshResponse()가 안되서 일단 쿼리가 끝인지 아닌지는 무시한다.
-          queryBalance.fetch();
-
-          for (const currency of chainInfo.currencies) {
-            const query = queriesStore
-              .get(chainInfo.chainId)
-              .queryBalances.getQueryEthereumHexAddress(
+          ) {
+            const queries = queriesStore.get(chainInfo.chainId);
+            const queryBalance =
+              queries.queryBalances.getQueryEthereumHexAddress(
                 account.ethereumHexAddress
               );
+            // XXX: 얘는 구조상 waitFreshResponse()가 안되서 일단 쿼리가 끝인지 아닌지는 무시한다.
+            queryBalance.fetch();
 
-            const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-            if (denomHelper.type === "erc20") {
-              // XXX: 얘는 구조상 waitFreshResponse()가 안되서 일단 쿼리가 끝인지 아닌지는 무시한다.
-              query.fetch();
+            for (const currency of chainInfo.currencies) {
+              const query = queriesStore
+                .get(chainInfo.chainId)
+                .queryBalances.getQueryEthereumHexAddress(
+                  account.ethereumHexAddress
+                );
+
+              const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+              if (denomHelper.type === "erc20") {
+                // XXX: 얘는 구조상 waitFreshResponse()가 안되서 일단 쿼리가 끝인지 아닌지는 무시한다.
+                query.fetch();
+              }
+            }
+          }
+        } else if ("starknet" in modularChainInfo) {
+          const account = accountStore.getAccount(modularChainInfo.chainId);
+
+          if (account.starknetHexAddress) {
+            const queries = starknetQueriesStore.get(modularChainInfo.chainId);
+
+            for (const currency of chainStore
+              .getModularChainInfoImpl(modularChainInfo.chainId)
+              .getCurrencies("starknet")) {
+              const query = queries.queryStarknetERC20Balance.getBalance(
+                modularChainInfo.chainId,
+                chainStore,
+                account.starknetHexAddress,
+                currency.coinMinimalDenom
+              );
+
+              if (query) {
+                // XXX: 얘는 구조상 waitFreshResponse()가 안되서 일단 쿼리가 끝인지 아닌지는 무시한다.
+                query.fetch();
+              }
             }
           }
         }

@@ -30,13 +30,10 @@ import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import {
   GetCurrentChainIdForEVMMsg,
   UpdateCurrentChainIdForEVMMsg,
+  GetCurrentChainIdForStarknetMsg,
+  UpdateCurrentChainIdForStarknetMsg,
 } from "@keplr-wallet/background";
-import {
-  autoPlacement,
-  autoUpdate,
-  offset,
-  useFloating,
-} from "@floating-ui/react-dom";
+import { autoUpdate, offset, shift, useFloating } from "@floating-ui/react-dom";
 import SimpleBar from "simplebar-react";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 
@@ -93,45 +90,75 @@ export const MainHeaderLayout = observer<
     const [currentChainIdForEVM, setCurrentChainIdForEVM] = React.useState<
       string | undefined
     >();
+    const [currentChainIdForStarknet, setCurrentChainIdForStarknet] =
+      React.useState<string | undefined>();
     const [activeTabOrigin, setActiveTabOrigin] = React.useState<
       string | undefined
     >();
     useEffect(() => {
-      const updateCurrentChainIdForEVM = async () => {
+      const updateCurrentChainId = async () => {
         const activeTabOrigin = await getActiveTabOrigin();
 
         if (activeTabOrigin) {
-          const msg = new GetCurrentChainIdForEVMMsg(activeTabOrigin);
+          const msgForEVM = new GetCurrentChainIdForEVMMsg(activeTabOrigin);
+          const msgForStarknet = new GetCurrentChainIdForStarknetMsg(
+            activeTabOrigin
+          );
           const newCurrentChainIdForEVM =
             await new InExtensionMessageRequester().sendMessage(
               BACKGROUND_PORT,
-              msg
+              msgForEVM
+            );
+          const newCurrentChainIdForStarknet =
+            await new InExtensionMessageRequester().sendMessage(
+              BACKGROUND_PORT,
+              msgForStarknet
             );
           setCurrentChainIdForEVM(newCurrentChainIdForEVM);
+          setCurrentChainIdForStarknet(newCurrentChainIdForStarknet);
           setActiveTabOrigin(activeTabOrigin);
         } else {
           setCurrentChainIdForEVM(undefined);
+          setCurrentChainIdForStarknet(undefined);
           setActiveTabOrigin(undefined);
         }
       };
 
-      browser.tabs.onActivated.addListener(updateCurrentChainIdForEVM);
-      updateCurrentChainIdForEVM();
-      // Update current chain id for EVM every second.
+      browser.tabs.onActivated.addListener(updateCurrentChainId);
+      updateCurrentChainId();
+      // Update current chain id for EVM and Starknet every second.
       // TODO: Make it sync with `chainChanged` event.
-      const intervalId = setInterval(updateCurrentChainIdForEVM, 1000);
+      const intervalId = setInterval(updateCurrentChainId, 1000);
 
       return () => {
-        browser.tabs.onActivated.removeListener(updateCurrentChainIdForEVM);
+        browser.tabs.onActivated.removeListener(updateCurrentChainId);
         clearInterval(intervalId);
       };
     }, []);
-    const [isHoveredCurrenctChainIcon, setIsHoveredCurrenctChainIcon] =
-      React.useState(false);
-    const [isOpenCurrentChainDropdown, setIsOpenCurrentChainDropdown] =
-      React.useState(false);
+    const [
+      isOpenCurrentChainSelectorForEVM,
+      setIsOpenCurrentChainSelectorForEVM,
+    ] = React.useState(false);
+    const [
+      isHoveredCurrenctChainIconForEVM,
+      setIsHoveredCurrenctChainIconForEVM,
+    ] = React.useState(false);
+
     const evmChainInfos = chainStore.chainInfos.filter((chainInfo) =>
       chainStore.isEvmChain(chainInfo.chainId)
+    );
+
+    const [
+      isOpenCurrentChainSelectorForStarknet,
+      setIsOpenCurrentChainSelectorForStarknet,
+    ] = React.useState(false);
+    const [
+      isHoveredCurrenctChainIconForStarknet,
+      setIsHoveredCurrenctChainIconForStarknet,
+    ] = React.useState(false);
+
+    const starknetChainInfos = chainStore.modularChainInfos.filter(
+      (modularChainInfo) => "starknet" in modularChainInfo
     );
 
     const [isOpenMenu, setIsOpenMenu] = React.useState(false);
@@ -340,10 +367,78 @@ export const MainHeaderLayout = observer<
         }
         right={
           <Columns sum={1} alignY="center" gutter="0.875rem">
+            {currentChainIdForStarknet != null && activeTabOrigin != null && (
+              <ChainSelector
+                isOpen={isOpenCurrentChainSelectorForStarknet}
+                close={() => setIsOpenCurrentChainSelectorForStarknet(false)}
+                items={starknetChainInfos.map((chainInfo) => ({
+                  key: chainInfo.chainId,
+                  content: (
+                    <Columns sum={1} alignY="center" gutter="0.5rem">
+                      <ChainImageFallback chainInfo={chainInfo} size="2rem" />
+                      <Subtitle3>{chainInfo.chainName}</Subtitle3>
+                    </Columns>
+                  ),
+                  onSelect: async (key) => {
+                    const msg = new UpdateCurrentChainIdForStarknetMsg(
+                      activeTabOrigin,
+                      key
+                    );
+                    await new InExtensionMessageRequester().sendMessage(
+                      BACKGROUND_PORT,
+                      msg
+                    );
+                    setCurrentChainIdForStarknet(key);
+                  },
+                }))}
+                selectedItemKey={currentChainIdForStarknet}
+                activeTabOrigin={activeTabOrigin}
+                isForStarknet={true}
+              >
+                <Box
+                  borderRadius="99999px"
+                  position="relative"
+                  cursor="pointer"
+                  onHoverStateChange={setIsHoveredCurrenctChainIconForStarknet}
+                  onClick={() => setIsOpenCurrentChainSelectorForStarknet(true)}
+                >
+                  <ChainImageFallback
+                    chainInfo={chainStore.getModularChain(
+                      currentChainIdForStarknet
+                    )}
+                    size="1.25rem"
+                    style={{
+                      opacity: isHoveredCurrenctChainIconForStarknet ? 0.8 : 1,
+                    }}
+                  />
+                  <Box
+                    backgroundColor={
+                      theme.mode === "light"
+                        ? ColorPalette["light-gradient"]
+                        : ColorPalette["gray-700"]
+                    }
+                    width="0.625rem"
+                    height="0.625rem"
+                    borderRadius="99999px"
+                    position="absolute"
+                    style={{ right: "-3px", bottom: "-2px" }}
+                    alignX="center"
+                    alignY="center"
+                  >
+                    <Box
+                      backgroundColor={ColorPalette["green-400"]}
+                      width="0.375rem"
+                      height="0.375rem"
+                      borderRadius="99999px"
+                    />
+                  </Box>
+                </Box>
+              </ChainSelector>
+            )}
             {currentChainIdForEVM != null && activeTabOrigin != null && (
-              <EVMChainSelector
-                isOpen={isOpenCurrentChainDropdown}
-                close={() => setIsOpenCurrentChainDropdown(false)}
+              <ChainSelector
+                isOpen={isOpenCurrentChainSelectorForEVM}
+                close={() => setIsOpenCurrentChainSelectorForEVM(false)}
                 items={evmChainInfos.map((chainInfo) => ({
                   key: chainInfo.chainId,
                   content: (
@@ -371,13 +466,15 @@ export const MainHeaderLayout = observer<
                   borderRadius="99999px"
                   position="relative"
                   cursor="pointer"
-                  onHoverStateChange={setIsHoveredCurrenctChainIcon}
-                  onClick={() => setIsOpenCurrentChainDropdown(true)}
+                  onHoverStateChange={setIsHoveredCurrenctChainIconForEVM}
+                  onClick={() => setIsOpenCurrentChainSelectorForEVM(true)}
                 >
                   <ChainImageFallback
                     chainInfo={chainStore.getChain(currentChainIdForEVM)}
                     size="1.25rem"
-                    style={{ opacity: isHoveredCurrenctChainIcon ? 0.8 : 1 }}
+                    style={{
+                      opacity: isHoveredCurrenctChainIconForEVM ? 0.8 : 1,
+                    }}
                   />
                   <Box
                     backgroundColor={
@@ -401,7 +498,7 @@ export const MainHeaderLayout = observer<
                     />
                   </Box>
                 </Box>
-              </EVMChainSelector>
+              </ChainSelector>
             )}
             <ProfileButton />
           </Columns>
@@ -431,7 +528,7 @@ export const MainHeaderLayout = observer<
   }
 );
 
-const EVMChainSelector: FunctionComponent<
+const ChainSelector: FunctionComponent<
   PropsWithChildren<{
     isOpen: boolean;
     close: () => void;
@@ -442,15 +539,22 @@ const EVMChainSelector: FunctionComponent<
     }[];
     selectedItemKey: string;
     activeTabOrigin: string;
+    isForStarknet?: boolean;
   }>
 > = observer(
-  ({ children, isOpen, close, items, selectedItemKey, activeTabOrigin }) => {
+  ({
+    children,
+    isOpen,
+    close,
+    items,
+    selectedItemKey,
+    activeTabOrigin,
+    isForStarknet,
+  }) => {
     const { x, y, strategy, refs } = useFloating({
       placement: "bottom-end",
       middleware: [
-        autoPlacement({
-          allowedPlacements: ["bottom-end"],
-        }),
+        shift(),
         offset({
           mainAxis: 10,
           crossAxis: 10,
@@ -580,7 +684,9 @@ const EVMChainSelector: FunctionComponent<
               }}
             >
               <Body2>
-                {"EVM compatible chains require users to"}
+                {`${
+                  isForStarknet ? "Starknet" : "EVM"
+                } compatible chains require users to`}
                 <br /> {"manually switch between networks in"}
                 <br />
                 {"their wallets."}

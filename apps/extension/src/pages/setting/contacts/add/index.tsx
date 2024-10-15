@@ -5,12 +5,18 @@ import { Stack } from "../../../../components/stack";
 import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
 import { RecipientInput, TextInput } from "../../../../components/input";
+import { RecipientInput as RecipientInputForStarknet } from "../../../starknet/components/input/reciepient-input";
+
 import { useSearchParams } from "react-router-dom";
 import {
   useMemoConfig,
   useRecipientConfig,
   useTxConfigsValidate,
 } from "@keplr-wallet/hooks";
+import {
+  useRecipientConfig as useRecipientConfigForStarknet,
+  useTxConfigsValidate as useTxConfigsValidateForStarknet,
+} from "@keplr-wallet/hooks-starknet";
 import { useStore } from "../../../../stores";
 import { MemoInput } from "../../../../components/input/memo-input";
 import { useNavigate } from "react-router";
@@ -36,18 +42,27 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
   const [name, setName] = useState("");
 
   const recipientConfig = useRecipientConfig(chainStore, chainId, {
-    allowHexAddressToBech32Address: !chainStore
-      .getChain(chainId)
-      .chainId.startsWith("injective"),
+    allowHexAddressToBech32Address:
+      chainStore.hasChain(chainId) &&
+      !chainStore.getChain(chainId).chainId.startsWith("injective"),
     icns: uiConfigStore.icnsInfo,
     ens: ENSInfo,
   });
+  const recipientConfigForStarknet = useRecipientConfigForStarknet(
+    chainStore,
+    chainId
+  );
+
   const memoConfig = useMemoConfig(chainStore, chainId);
 
   const [searchParams] = useSearchParams();
   // Param "chainId" is required.
   const paramChainId = searchParams.get("chainId");
   const paramEditIndex = searchParams.get("editIndex");
+
+  const isStarknet =
+    chainStore.hasModularChain(chainId) &&
+    "starknet" in chainStore.getModularChain(chainId);
 
   useEffect(() => {
     if (labelRef.current) {
@@ -61,7 +76,11 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
     }
 
     setChainId(paramChainId);
-    recipientConfig.setChain(paramChainId);
+    if (isStarknet) {
+      recipientConfigForStarknet.setChain(paramChainId);
+    } else {
+      recipientConfig.setChain(paramChainId);
+    }
     memoConfig.setChain(paramChainId);
 
     if (paramEditIndex) {
@@ -72,7 +91,11 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
         setEditIndex(index);
         const data = addressBook[index];
         setName(data.name);
-        recipientConfig.setValue(data.address);
+        if (isStarknet) {
+          recipientConfigForStarknet.setValue(data.address);
+        } else {
+          recipientConfig.setValue(data.address);
+        }
         memoConfig.setValue(data.memo);
         return;
       }
@@ -81,16 +104,23 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
     setEditIndex(-1);
   }, [
     intl,
+    isStarknet,
     memoConfig,
     paramChainId,
     paramEditIndex,
     recipientConfig,
+    recipientConfigForStarknet,
     uiConfigStore.addressBookConfig,
   ]);
 
   const txConfigsValidate = useTxConfigsValidate({
     recipientConfig,
     memoConfig,
+    isIgnoringStarknet: isStarknet,
+  });
+
+  const txConfigsValidateForStarknet = useTxConfigsValidateForStarknet({
+    recipientConfig: recipientConfigForStarknet,
   });
 
   return (
@@ -107,13 +137,17 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
         if (editIndex < 0) {
           uiConfigStore.addressBookConfig.addAddressBook(chainId, {
             name,
-            address: recipientConfig.value,
+            address: isStarknet
+              ? recipientConfigForStarknet.value
+              : recipientConfig.value,
             memo: memoConfig.value,
           });
         } else {
           uiConfigStore.addressBookConfig.setAddressBookAt(chainId, editIndex, {
             name,
-            address: recipientConfig.value,
+            address: isStarknet
+              ? recipientConfigForStarknet.value
+              : recipientConfig.value,
             memo: memoConfig.value,
           });
         }
@@ -126,7 +160,10 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
         }),
         color: "secondary",
         size: "large",
-        disabled: txConfigsValidate.interactionBlocked || name === "",
+        disabled:
+          (isStarknet
+            ? txConfigsValidateForStarknet.interactionBlocked
+            : txConfigsValidate.interactionBlocked) || name === "",
       }}
     >
       <Styles.Container gutter="1rem">
@@ -145,10 +182,17 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
             setName(e.target.value);
           }}
         />
-        <RecipientInput
-          recipientConfig={recipientConfig}
-          hideAddressBookButton={true}
-        />
+        {isStarknet ? (
+          <RecipientInputForStarknet
+            recipientConfig={recipientConfigForStarknet}
+            hideAddressBookButton={true}
+          />
+        ) : (
+          <RecipientInput
+            recipientConfig={recipientConfig}
+            hideAddressBookButton={true}
+          />
+        )}
         <MemoInput
           label={intl.formatMessage({
             id: "page.setting.contacts.add.memo-label",

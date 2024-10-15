@@ -19,7 +19,13 @@ export const AddressChip: FunctionComponent<{
 }> = observer(({ chainId, inModal }) => {
   const { accountStore, chainStore } = useStore();
 
-  const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
+  const modularChainInfo = chainStore.getModularChain(chainId);
+  const isEVMOnlyChain = (() => {
+    if ("cosmos" in modularChainInfo) {
+      return chainStore.isEvmOnlyChain(chainId);
+    }
+    return false;
+  })();
 
   const theme = useTheme();
 
@@ -73,10 +79,15 @@ export const AddressChip: FunctionComponent<{
       onClick={(e) => {
         e.preventDefault();
 
-        // copy address
-        navigator.clipboard.writeText(
-          isEVMOnlyChain ? account.ethereumHexAddress : account.bech32Address
-        );
+        if ("cosmos" in modularChainInfo) {
+          // copy address
+          navigator.clipboard.writeText(
+            isEVMOnlyChain ? account.ethereumHexAddress : account.bech32Address
+          );
+        } else {
+          // copy address
+          navigator.clipboard.writeText(account.starknetHexAddress);
+        }
         setAnimCheck(true);
       }}
       onHoverStateChange={setIsHover}
@@ -89,12 +100,20 @@ export const AddressChip: FunctionComponent<{
               : ColorPalette["gray-200"]
           }
         >
-          {isEVMOnlyChain
-            ? `${account.ethereumHexAddress.slice(
-                0,
-                10
-              )}...${account.ethereumHexAddress.slice(32)}`
-            : Bech32Address.shortenAddress(account.bech32Address, 16)}
+          {(() => {
+            if ("cosmos" in modularChainInfo) {
+              return isEVMOnlyChain
+                ? `${account.ethereumHexAddress.slice(
+                    0,
+                    10
+                  )}...${account.ethereumHexAddress.slice(32)}`
+                : Bech32Address.shortenAddress(account.bech32Address, 16);
+            }
+            return `${account.starknetHexAddress.slice(
+              0,
+              10
+            )}...${account.starknetHexAddress.slice(56)}`;
+          })()}
         </Body3>
         <Gutter size="0.4rem" />
         {!animCheck ? (
