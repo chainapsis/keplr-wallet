@@ -63,8 +63,8 @@ const keplr = new InjectedKeplr(
     rdns: process.env.KEPLR_EXT_EIP6963_PROVIDER_INFO_RDNS,
   },
   {
-    id: "braavos",
-    name: "Braavos",
+    id: "keplr",
+    name: "Keplr",
     icon: process.env.KEPLR_EXT_STARKNET_PROVIDER_INFO_ICON,
   }
 );
