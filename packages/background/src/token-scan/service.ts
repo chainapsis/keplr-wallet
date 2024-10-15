@@ -87,17 +87,24 @@ export class TokenScanService {
   }
 
   getTokenScans(vaultId: string): TokenScan[] {
-    return (this.vaultToMap.get(vaultId) ?? []).sort((a, b) => {
-      // Sort by chain name
-      const aChainInfo = this.chainsService.hasChainInfo(a.chainId)
-        ? this.chainsService.getChainInfoOrThrow(a.chainId)
-        : this.chainsService.getModularChainInfoOrThrow(a.chainId);
-      const bModualrChainInfo = this.chainsService.hasChainInfo(b.chainId)
-        ? this.chainsService.getChainInfoOrThrow(b.chainId)
-        : this.chainsService.getModularChainInfoOrThrow(b.chainId);
+    return (this.vaultToMap.get(vaultId) ?? [])
+      .filter((tokenScan) => {
+        return (
+          this.chainsService.hasChainInfo(tokenScan.chainId) ||
+          this.chainsService.hasModularChainInfo(tokenScan.chainId)
+        );
+      })
+      .sort((a, b) => {
+        // Sort by chain name
+        const aChainInfo = this.chainsService.hasChainInfo(a.chainId)
+          ? this.chainsService.getChainInfoOrThrow(a.chainId)
+          : this.chainsService.getModularChainInfoOrThrow(a.chainId);
+        const bModualrChainInfo = this.chainsService.hasChainInfo(b.chainId)
+          ? this.chainsService.getChainInfoOrThrow(b.chainId)
+          : this.chainsService.getModularChainInfoOrThrow(b.chainId);
 
-      return aChainInfo.chainName.localeCompare(bModualrChainInfo.chainName);
-    });
+        return aChainInfo.chainName.localeCompare(bModualrChainInfo.chainName);
+      });
   }
 
   protected async scanWithAllVaults(chainId: string): Promise<void> {
