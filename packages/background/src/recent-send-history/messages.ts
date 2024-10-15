@@ -34,6 +34,59 @@ export class GetRecentSendHistoriesMsg extends Message<RecentSendHistory[]> {
   }
 }
 
+export class AddRecentSendHistoryMsg extends Message<void> {
+  public static type() {
+    return "add-recent-send-history";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly historyType: string,
+    public readonly sender: string,
+    public readonly recipient: string,
+    public readonly amount: {
+      readonly amount: string;
+      readonly denom: string;
+    }[],
+    public readonly memo: string,
+    public readonly ibcChannels:
+      | {
+          portId: string;
+          channelId: string;
+          counterpartyChainId: string;
+        }[]
+      | undefined
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id is empty");
+    }
+
+    if (!this.historyType) {
+      throw new Error("type is empty");
+    }
+
+    if (!this.sender) {
+      throw new Error("sender is empty");
+    }
+
+    if (!this.recipient) {
+      throw new Error("recipient is empty");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return AddRecentSendHistoryMsg.type();
+  }
+}
+
 export class SendTxAndRecordMsg extends Message<Uint8Array> {
   public static type() {
     return "send-tx-and-record";

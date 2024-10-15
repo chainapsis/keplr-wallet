@@ -3,6 +3,7 @@ import { Env, Handler, InternalHandler, Message } from "@keplr-wallet/router";
 import {
   DisableAccessMsg,
   EnableAccessForEVMMsg,
+  EnableAccessForStarknetMsg,
   EnableAccessMsg,
   IsEnabledAccessMsg,
 } from "./messages";
@@ -16,6 +17,11 @@ export const getHandler: (service: PermissionInteractiveService) => Handler = (
         return handleEnableAccessMsg(service)(env, msg as EnableAccessMsg);
       case EnableAccessForEVMMsg:
         return handleEnableAccessForEVMMsg(service)(
+          env,
+          msg as EnableAccessForEVMMsg
+        );
+      case EnableAccessForStarknetMsg:
+        return handleEnableAccessForStarknetMsg(service)(
           env,
           msg as EnableAccessForEVMMsg
         );
@@ -43,6 +49,14 @@ const handleEnableAccessForEVMMsg: (
 ) => InternalHandler<EnableAccessForEVMMsg> = (service) => {
   return async (env, msg) => {
     return await service.ensureEnabledForEVM(env, msg.origin);
+  };
+};
+
+const handleEnableAccessForStarknetMsg: (
+  service: PermissionInteractiveService
+) => InternalHandler<EnableAccessForStarknetMsg> = (service) => {
+  return async (env, msg) => {
+    return await service.ensureEnabledForStarknet(env, msg.origin);
   };
 };
 

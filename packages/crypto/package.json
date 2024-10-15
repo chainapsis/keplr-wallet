@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/crypto",
-  "version": "0.12.127",
+  "version": "0.12.133-rc.2",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -15,19 +15,15 @@
     "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
-  "devDependencies": {
-    "@types/crypto-js": "^4.0.1",
-    "@types/elliptic": "^6.4.12",
-    "@types/sha.js": "^2.4.0"
-  },
   "dependencies": {
-    "@ethersproject/keccak256": "^5.5.0",
+    "@noble/curves": "^1.4.2",
+    "@noble/hashes": "^1.4.0",
     "bip32": "^2.0.6",
     "bip39": "^3.0.3",
     "bs58check": "^2.1.2",
-    "buffer": "^6.0.3",
-    "crypto-js": "^4.0.0",
-    "elliptic": "^6.5.3",
-    "sha.js": "^2.4.11"
+    "buffer": "^6.0.3"
+  },
+  "peerDependencies": {
+    "starknet": "^6"
   }
 }

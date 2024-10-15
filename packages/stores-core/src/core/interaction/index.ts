@@ -4,3 +4,4 @@ export * from "./sign";
 export * from "./chain-suggest";
 export * from "./icns";
 export * from "./eth-sign";
+export * from "./starknet-sign-tx";

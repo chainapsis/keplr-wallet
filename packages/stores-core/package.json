@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/stores-core",
-  "version": "0.12.127",
+  "version": "0.12.133-rc.2",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -16,17 +16,18 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr-wallet/background": "0.12.127",
-    "@keplr-wallet/common": "0.12.127",
-    "@keplr-wallet/cosmos": "0.12.127",
-    "@keplr-wallet/router": "0.12.127",
-    "@keplr-wallet/simple-fetch": "0.12.127",
-    "@keplr-wallet/stores": "0.12.127",
-    "@keplr-wallet/types": "0.12.127",
+    "@keplr-wallet/background": "0.12.133-rc.2",
+    "@keplr-wallet/common": "0.12.133-rc.2",
+    "@keplr-wallet/cosmos": "0.12.133-rc.2",
+    "@keplr-wallet/router": "0.12.133-rc.2",
+    "@keplr-wallet/simple-fetch": "0.12.133-rc.2",
+    "@keplr-wallet/stores": "0.12.133-rc.2",
+    "@keplr-wallet/types": "0.12.133-rc.2",
     "buffer": "^6.0.3"
   },
   "peerDependencies": {
     "mobx": "^6",
-    "mobx-utils": "^6"
+    "mobx-utils": "^6",
+    "starknet": "^6"
   }
 }

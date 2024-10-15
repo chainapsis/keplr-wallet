@@ -16,6 +16,7 @@ import {
   checkEvmRpcConnectivity,
   checkRestConnectivity,
   checkRPCConnectivity,
+  checkStarknetRpcConnectivity,
   DifferentChainVersionError,
 } from "@keplr-wallet/chain-validator";
 import { useNotification } from "../../../../hooks/notification";
@@ -44,32 +45,43 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
   const intl = useIntl();
 
   const [chainId, setChainId] = useState<string>(
-    chainStore.chainInfos[0].chainId
+    chainStore.modularChainInfos[0].chainId
   );
   const [originalEndpoint, setOriginalEndpoint] = useState<
     | {
         rpc: string;
-        rest: string;
+        rest?: string;
         evmRpc?: string;
       }
     | undefined
   >();
   const [isLoading, setIsLoading] = useState(false);
 
-  const chainInfo = chainStore.getChain(chainId);
+  const chainInfo = (() => {
+    const modularChainInfo = chainStore.getModularChain(chainId);
+
+    if ("starknet" in modularChainInfo) {
+      return modularChainInfo.starknet;
+    }
+
+    return chainStore.getChain(chainId);
+  })();
+  const hasRestEndpoint = "rest" in chainInfo;
+  const hasEvmEndpoint = "evm" in chainInfo && chainInfo.evm != null;
+
   const { setValue, watch, register, handleSubmit } = useForm<{
     rpc: string;
-    lcd: string;
+    lcd?: string;
     evmRpc?: string;
   }>({
     defaultValues: {
-      rpc: chainStore.getChain(chainId).rpc,
-      lcd: chainStore.getChain(chainId).rest,
-      evmRpc: chainStore.getChain(chainId).evm?.rpc,
+      rpc: chainInfo.rpc,
+      ...(hasRestEndpoint && { lcd: chainInfo.rest }),
+      ...(hasEvmEndpoint && { evmRpc: chainInfo.evm.rpc }),
     },
   });
 
-  const chainList = chainStore.chainInfosInUI.map((chainInfo) => {
+  const chainList = chainStore.modularChainInfosInUI.map((chainInfo) => {
     return {
       key: chainInfo.chainId,
       label: chainInfo.chainName,
@@ -78,8 +90,12 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
 
   useEffect(() => {
     setValue("rpc", chainInfo.rpc);
-    setValue("lcd", chainInfo.rest);
-    setValue("evmRpc", chainInfo.evm?.rpc);
+    if (hasRestEndpoint) {
+      setValue("lcd", chainInfo.rest);
+    }
+    if (hasEvmEndpoint) {
+      setValue("evmRpc", chainInfo.evm.rpc);
+    }
 
     const msg = new GetChainOriginalEndpointsMsg(chainId);
     new InExtensionMessageRequester()
@@ -92,7 +108,19 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
 
         setOriginalEndpoint(undefined);
       });
-  }, [chainId, chainInfo, setValue]);
+  }, [chainId, chainInfo, hasEvmEndpoint, hasRestEndpoint, setValue]);
+
+  const isEndpointNothingChanged = (() => {
+    const isRpcChanged = chainInfo.rpc !== watch("rpc");
+    const isLcdChanged = hasRestEndpoint
+      ? chainInfo.rest === watch("lcd")
+      : false;
+    const isEvmRpcChanged = hasEvmEndpoint
+      ? chainInfo.evm.rpc === watch("evmRpc")
+      : false;
+
+    return !isRpcChanged && !isLcdChanged && !isEvmRpcChanged;
+  })();
 
   return (
     <HeaderLayout
@@ -108,10 +136,7 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
         color: "primary",
         size: "large",
         isLoading,
-        disabled:
-          chainInfo.rpc === watch("rpc") &&
-          chainInfo.rest === watch("lcd") &&
-          chainInfo.evm?.rpc === watch("evmRpc"),
+        disabled: isEndpointNothingChanged,
       }}
       onSubmit={handleSubmit(async (data) => {
         setIsLoading(true);
@@ -120,13 +145,17 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
           if (
             !originalEndpoint ||
             originalEndpoint.rpc !== data.rpc ||
-            originalEndpoint.rpc !== data.lcd ||
+            originalEndpoint.rest !== data.lcd ||
             originalEndpoint.evmRpc !== data.evmRpc
           ) {
             try {
               if (originalEndpoint?.rpc !== data.rpc) {
                 try {
-                  await checkRPCConnectivity(chainId, data.rpc);
+                  if (chainId.startsWith("starknet:")) {
+                    await checkStarknetRpcConnectivity(chainId, data.rpc);
+                  } else {
+                    await checkRPCConnectivity(chainId, data.rpc);
+                  }
                 } catch (e) {
                   if (
                     // In the case of this error, the chain version is different.
@@ -147,7 +176,11 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
                 }
               }
 
-              if (originalEndpoint?.rest !== data.lcd) {
+              if (
+                hasRestEndpoint &&
+                data.lcd != undefined &&
+                originalEndpoint?.rest !== data.lcd
+              ) {
                 try {
                   await checkRestConnectivity(chainId, data.lcd);
                 } catch (e) {
@@ -171,8 +204,8 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
               }
 
               if (
+                hasEvmEndpoint &&
                 data.evmRpc != null &&
-                chainInfo.evm != null &&
                 originalEndpoint?.evmRpc !== data.evmRpc
               ) {
                 await checkEvmRpcConnectivity(
@@ -269,8 +302,8 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
         </Columns>
 
         <TextInput label="RPC" {...register("rpc")} />
-        <TextInput label="LCD" {...register("lcd")} />
-        {chainInfo.evm && (
+        {hasRestEndpoint && <TextInput label="LCD" {...register("lcd")} />}
+        {hasEvmEndpoint && (
           <React.Fragment>
             <TextInput label="EVM RPC" {...register("evmRpc")} />
             <Gutter size="0" />

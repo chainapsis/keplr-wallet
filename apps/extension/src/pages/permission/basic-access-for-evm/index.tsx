@@ -134,6 +134,7 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
                 onSelect={(chainId) => setCurrentChainIdForEVM(chainId)}
                 selectedItemKey={currentChainIdForEVM}
                 style={{ padding: "1rem", height: "auto" }}
+                allowSearch={true}
               />
               <Body2
                 color={

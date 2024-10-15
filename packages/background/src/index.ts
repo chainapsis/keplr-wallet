@@ -23,6 +23,7 @@ import * as KeyRingKeystone from "./keyring-keystone/internal";
 import * as KeyRingPrivateKey from "./keyring-private-key/internal";
 import * as KeyRingCosmos from "./keyring-cosmos/internal";
 import * as KeyRingEthereum from "./keyring-ethereum/internal";
+import * as KeyRingStarknet from "./keyring-starknet/internal";
 import * as PermissionInteractive from "./permission-interactive/internal";
 import * as TokenScan from "./token-scan/internal";
 import * as RecentSendHistory from "./recent-send-history/internal";
@@ -46,6 +47,7 @@ export * from "./keyring";
 export * from "./vault";
 export * from "./keyring-cosmos";
 export * from "./keyring-ethereum";
+export * from "./keyring-starknet";
 export * from "./keyring-keystone";
 export * from "./token-scan";
 export * from "./recent-send-history";
@@ -53,7 +55,7 @@ export * from "./side-panel";
 export * from "./settings";
 
 import { KVStore } from "@keplr-wallet/common";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { Notification } from "./tx";
 import { ChainInfoWithCoreTypes } from "./chains";
 
@@ -63,7 +65,7 @@ export function init(
   // Message requester to the content script.
   eventMsgRequester: MessageRequester,
   extensionMessageRequesterToUI: MessageRequester | undefined,
-  embedChainInfos: ChainInfo[],
+  embedChainInfos: (ChainInfo | ModularChainInfo)[],
   // The origins that are able to pass any permission.
   privilegedOrigins: string[],
   analyticsPrivilegedOrigins: string[],
@@ -208,16 +210,17 @@ export function init(
     analyticsService,
     msgPrivilegedOrigins
   );
-  const keyRingEthereumService = new KeyRingEthereum.KeyRingEthereumService(
+
+  const keyRingStarknetService = new KeyRingStarknet.KeyRingStarknetService(
     chainsService,
+    vaultService,
     keyRingV2Service,
-    keyRingCosmosService,
-    interactionService,
-    analyticsService,
     permissionService,
-    backgroundTxEthereumService,
-    tokenERC20Service
+    tokenERC20Service,
+    interactionService,
+    backgroundTxService
   );
+
   const autoLockAccountService = new AutoLocker.AutoLockAccountService(
     storeCreator("auto-lock-account"),
     keyRingV2Service,
@@ -231,6 +234,17 @@ export function init(
       chainsService
     );
 
+  const keyRingEthereumService = new KeyRingEthereum.KeyRingEthereumService(
+    chainsService,
+    keyRingV2Service,
+    keyRingCosmosService,
+    interactionService,
+    analyticsService,
+    permissionService,
+    permissionInteractiveService,
+    backgroundTxEthereumService,
+    tokenERC20Service
+  );
   const chainsUpdateService = new ChainsUpdate.ChainsUpdateService(
     storeCreator("chains-update"),
     chainsService,
@@ -250,7 +264,8 @@ export function init(
     chainsUIService,
     vaultService,
     keyRingV2Service,
-    keyRingCosmosService
+    keyRingCosmosService,
+    keyRingStarknetService
   );
 
   const recentSendHistoryService =
@@ -293,6 +308,11 @@ export function init(
     keyRingEthereumService,
     permissionInteractiveService
   );
+  KeyRingStarknet.init(
+    router,
+    keyRingStarknetService,
+    permissionInteractiveService
+  );
   PermissionInteractive.init(router, permissionInteractiveService);
   ChainsUI.init(router, chainsUIService);
   ChainsUpdate.init(router, chainsUpdateService);
@@ -322,6 +342,7 @@ export function init(
       await keyRingV2Service.init();
       await keyRingCosmosService.init();
       await keyRingEthereumService.init();
+      await keyRingStarknetService.init();
       await permissionService.init();
       await tokenCW20Service.init();
       await tokenERC20Service.init();

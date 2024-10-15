@@ -85,7 +85,7 @@ export class KeyRingMnemonicService {
     vault: Vault,
     coinType: number,
     data: Uint8Array,
-    digestMethod: "sha256" | "keccak256"
+    digestMethod: "sha256" | "keccak256" | "noop"
   ): {
     readonly r: Uint8Array;
     readonly s: Uint8Array;
@@ -100,6 +100,9 @@ export class KeyRingMnemonicService {
         break;
       case "keccak256":
         digest = Hash.keccak256(data);
+        break;
+      case "noop":
+        digest = data.slice();
         break;
       default:
         throw new Error(`Unknown digest method: ${digestMethod}`);

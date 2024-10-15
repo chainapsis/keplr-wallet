@@ -43,6 +43,7 @@ import {
   ICNSInteractionStore,
   PermissionManagerStore,
   SignEthereumInteractionStore,
+  SignStarknetTxInteractionStore,
 } from "@keplr-wallet/stores-core";
 import {
   KeplrETCQueries,
@@ -77,6 +78,10 @@ import {
 } from "@keplr-wallet/stores-internal";
 import { setInteractionDataHref } from "../utils";
 import { InteractionPingMsg } from "@keplr-wallet/background";
+import {
+  StarknetAccountStore,
+  StarknetQueriesStore,
+} from "@keplr-wallet/stores-starknet";
 
 let _sidePanelWindowId: number | undefined;
 async function getSidePanelWindowId(): Promise<number | undefined> {
@@ -108,6 +113,7 @@ export class RootStore {
   public readonly permissionStore: PermissionStore;
   public readonly signInteractionStore: SignInteractionStore;
   public readonly signEthereumInteractionStore: SignEthereumInteractionStore;
+  public readonly signStarknetTxInteractionStore: SignStarknetTxInteractionStore;
   public readonly chainSuggestStore: ChainSuggestStore;
   public readonly icnsInteractionStore: ICNSInteractionStore;
 
@@ -126,10 +132,12 @@ export class RootStore {
   >;
   public readonly swapUsageQueries: SwapUsageQueries;
   public readonly skipQueriesStore: SkipQueries;
+  public readonly starknetQueriesStore: StarknetQueriesStore;
   public readonly accountStore: AccountStore<
     [CosmosAccount, CosmwasmAccount, SecretAccount]
   >;
   public readonly ethereumAccountStore: EthereumAccountStore;
+  public readonly starknetAccountStore: StarknetAccountStore;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly price24HChangesStore: Price24HChangesStore;
   public readonly hugeQueriesStore: HugeQueriesStore;
@@ -277,6 +285,9 @@ export class RootStore {
     this.signEthereumInteractionStore = new SignEthereumInteractionStore(
       this.interactionStore
     );
+    this.signStarknetTxInteractionStore = new SignStarknetTxInteractionStore(
+      this.interactionStore
+    );
     this.chainSuggestStore = new ChainSuggestStore(
       this.interactionStore,
       CommunityChainInfoRepo
@@ -317,6 +328,11 @@ export class RootStore {
       this.chainStore,
       this.swapUsageQueries,
       SwapVenues
+    );
+    this.starknetQueriesStore = new StarknetQueriesStore(
+      this.queriesStore.sharedContext,
+      this.chainStore,
+      TokenContractListURL
     );
 
     this.accountStore = new AccountStore(
@@ -453,6 +469,10 @@ export class RootStore {
       this.chainStore,
       getKeplrFromWindow
     );
+    this.starknetAccountStore = new StarknetAccountStore(
+      this.chainStore,
+      getKeplrFromWindow
+    );
 
     this.priceStore = new CoinGeckoPriceStore(
       new ExtensionKVStore("store_prices"),
@@ -479,6 +499,7 @@ export class RootStore {
     this.hugeQueriesStore = new HugeQueriesStore(
       this.chainStore,
       this.queriesStore,
+      this.starknetQueriesStore,
       this.accountStore,
       this.priceStore
     );

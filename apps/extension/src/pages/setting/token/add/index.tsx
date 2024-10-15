@@ -46,7 +46,13 @@ interface FormData {
 }
 
 export const SettingTokenAddPage: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, queriesStore, tokensStore } = useStore();
+  const {
+    chainStore,
+    accountStore,
+    queriesStore,
+    tokensStore,
+    starknetQueriesStore,
+  } = useStore();
 
   const intl = useIntl();
   const theme = useTheme();
@@ -74,6 +80,13 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
       );
     });
   }, [chainStore.chainInfosInListUI]);
+  const starknetChainInfos = useMemo(() => {
+    return chainStore.modularChainInfosInUI.filter((modularChainInfo) => {
+      return (
+        "starknet" in modularChainInfo && modularChainInfo.starknet != null
+      );
+    });
+  }, [chainStore.modularChainInfosInUI]);
 
   const [chainId, setChainId] = useState<string>(() => {
     if (paramChainId) {
@@ -124,18 +137,40 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     };
   }, [accountStore, chainId]);
 
-  const chainInfo = chainStore.getChain(chainId);
-  const isSecretWasm = chainInfo.hasFeature("secretwasm");
-  const isEvmChain = chainStore.isEvmChain(chainId);
+  const { chainInfo, modularChainInfo } = (() => {
+    const modularChainInfo = chainStore.getModularChain(chainId);
+    if ("cosmos" in modularChainInfo) {
+      return { chainInfo: chainStore.getChain(chainId), modularChainInfo };
+    } else {
+      return { chainInfo: undefined, modularChainInfo };
+    }
+  })();
+
+  const isSecretWasm = chainInfo?.hasFeature("secretwasm");
+  const isEvmChain =
+    chainInfo != null && "evm" in chainInfo && chainInfo.evm != null;
+  const isStarknet =
+    modularChainInfo != null &&
+    "starknet" in modularChainInfo &&
+    modularChainInfo.starknet != null;
   const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] =
     useState(false);
 
-  const items = supportedChainInfos.map((chainInfo) => {
-    return {
-      key: chainInfo.chainId,
-      label: chainInfo.chainName,
-    };
-  });
+  const items = supportedChainInfos
+    .map((chainInfo) => {
+      return {
+        key: chainInfo.chainId,
+        label: chainInfo.chainName,
+      };
+    })
+    .concat(
+      starknetChainInfos.map((modularChainInfo) => {
+        return {
+          key: modularChainInfo.chainId,
+          label: modularChainInfo.chainName,
+        };
+      })
+    );
 
   const contractAddress = watch("contractAddress").trim();
   const queryContract = (() => {
@@ -145,6 +180,10 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         .ethereum.queryEthereumERC20ContractInfo.getQueryContract(
           contractAddress
         );
+    } else if (isStarknet) {
+      return starknetQueriesStore
+        .get(chainId)
+        .queryStarknetERC20ContractInfo.getQueryContract(contractAddress);
     } else if (isSecretWasm) {
       return queriesStore
         .get(chainId)
@@ -209,7 +248,11 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         if (queryContract.tokenInfo) {
           let currency: AppCurrency;
 
-          if (!("name" in queryContract.tokenInfo) || isEvmChain) {
+          if (
+            !("name" in queryContract.tokenInfo) ||
+            isEvmChain ||
+            isStarknet
+          ) {
             currency = {
               type: "erc20",
               contractAddress: contractAddress,
@@ -343,10 +386,10 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
             required: true,
             validate: (value): string | undefined => {
               try {
-                if (!isEvmChain) {
+                if (!isEvmChain && !isStarknet) {
                   Bech32Address.validate(
                     value,
-                    chainInfo.bech32Config?.bech32PrefixAccAddr
+                    chainInfo?.bech32Config?.bech32PrefixAccAddr
                   );
                 }
               } catch (e) {

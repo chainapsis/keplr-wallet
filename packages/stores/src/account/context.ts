@@ -93,6 +93,73 @@ export class AccountSharedContext {
 
     return requests.map((req) => settledMap.get(req.args[0])!);
   });
+  protected getKeyMixedDebounceTimer = new DebounceActionTimer<
+    [chainId: string, isStarknet: boolean],
+    | Key
+    | {
+        name: string;
+        hexAddress: string;
+        pubKey: Uint8Array;
+        address: Uint8Array;
+      }
+  >(0, async (requests) => {
+    const keplr = await this.getKeplr();
+
+    if (!keplr) {
+      return requests.map(() => {
+        return {
+          status: "rejected",
+          reason: new Error("Keplr is not installed"),
+        };
+      });
+    }
+
+    const cosmosReqs = requests.filter((req) => !req.args[1]);
+    const starknetReqs = requests.filter((req) => req.args[1]);
+    const cosmosChainIdSet = new Set<string>(
+      cosmosReqs.map((req) => req.args[0])
+    );
+    const cosmosChainIds = Array.from(cosmosChainIdSet);
+    const starknetChainIdSet = new Set<string>(
+      starknetReqs.map((req) => req.args[0])
+    );
+    const starknetChainIds = Array.from(starknetChainIdSet);
+
+    const settledMap = new Map<
+      string,
+      SettledResponse<
+        | Key
+        | {
+            name: string;
+            hexAddress: string;
+            pubKey: Uint8Array;
+            address: Uint8Array;
+          }
+      >
+    >();
+
+    if (cosmosChainIds.length > 0) {
+      const cosmosSettled = await keplr.getKeysSettled(cosmosChainIds);
+      for (let i = 0; i < cosmosChainIds.length; i++) {
+        const chainId = cosmosChainIds[i];
+        const res = cosmosSettled[i];
+        settledMap.set(chainId, res);
+      }
+    }
+
+    if (starknetChainIds.length > 0) {
+      const starknetSettled = await keplr.getStarknetKeysSettled(
+        starknetChainIds
+      );
+      for (let i = 0; i < starknetChainIds.length; i++) {
+        const chainId = starknetChainIds[i];
+        const res = starknetSettled[i];
+        settledMap.set(chainId, res);
+      }
+    }
+
+    return requests.map((req) => settledMap.get(req.args[0])!);
+  });
 
   protected promiseGetKeplr?: Promise<Keplr | undefined>;
 
@@ -146,5 +213,23 @@ export class AccountSharedContext {
     action: (res: SettledResponse<Key>) => void
   ): Promise<void> {
     return this.getKeyDebounceTimer.call([chainId], action);
+  }
+
+  getKeyMixed(
+    chainId: string,
+    isStarknet: boolean,
+    action: (
+      res: SettledResponse<
+        | Key
+        | {
+            name: string;
+            hexAddress: string;
+            pubKey: Uint8Array;
+            address: Uint8Array;
+          }
+      >
+    ) => void
+  ): Promise<void> {
+    return this.getKeyMixedDebounceTimer.call([chainId, isStarknet], action);
   }
 }

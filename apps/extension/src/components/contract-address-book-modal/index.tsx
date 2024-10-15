@@ -46,10 +46,13 @@ export const ContractAddressBookModal: FunctionComponent<{
   onSelect: (address: string) => void;
   close: () => void;
 }> = observer(({ isOpen, chainId, onSelect, close }) => {
-  const { queriesStore } = useStore();
+  const { chainStore, queriesStore, starknetQueriesStore } = useStore();
 
   const contracts =
-    queriesStore.get(chainId).tokenContracts.queryTokenContracts.tokenContracts;
+    "cosmos" in chainStore.getModularChain(chainId)
+      ? queriesStore.get(chainId).tokenContracts.queryTokenContracts
+          .tokenContracts
+      : starknetQueriesStore.get(chainId).queryTokenContracts.tokenContracts;
 
   const [search, setSearch] = useState("");
   const searchRef = useFocusOnMount<HTMLInputElement>();
