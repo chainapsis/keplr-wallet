@@ -37,7 +37,7 @@ import { VaultService } from "../vault";
 import { Hash } from "@keplr-wallet/crypto";
 
 const AccountClassHash =
-  "03940bc18abf1df6bc540cabadb1cad9486c6803b95801e57b6153ae21abfe06";
+  "06cc43e9a4a0036cd09d8a997c61df18d7e4fa9459c907a4664b4e56b679d187";
 
 export class KeyRingStarknetService {
   constructor(
