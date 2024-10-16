@@ -105,6 +105,10 @@
   "pages.register.name-password-hardware.connect-to-terra": "Terra app",
   "pages.register.name-password-hardware.connect-to-secret": "Secret app",
 
+  "pages.register.name-password-hardware.connect-keystone-way": "Connect Keystone via",
+  "pages.register.name-password-hardware.connect-to-keystone-USB": "USB",
+  "pages.register.name-password-hardware.connect-to-keystone-QR": "QR",
+
   "pages.register.recover-mnemonic.title": "Import Existing Wallet",
   "pages.register.recover-mnemonic.paragraph-1": "Enter your recovery phrase here to restore your wallet. Or click on any blank and paste the entire phrase.",
   "pages.register.recover-mnemonic.paragraph-2": "Enter the phrase in the right order without capitalization, punctuation symbols, or spaces.",
@@ -128,7 +132,7 @@
   "pages.register.connect-ledger.use-hid-confirm-title": "Unable to use Web HID",
   "pages.register.connect-ledger.use-hid-confirm-paragraph": "Please enable ‘experimental web platform features’ to use Web HID",
 
-  "pages.register.connect-keystone.title": "Please Connect Your Hardware Wallet",
+  "pages.register.connect-keystone.paragraph": "Please unlock your Keystone device and connect it to your computer via USB.",
   "pages.register.connect-keystone.step-text": "Step {num}",
   "pages.register.connect-keystone.step-1": "Tap “<span>Connect Software Wallet</span>” at the bottom left corner on the Keystone device.",
   "pages.register.connect-keystone.step-2": "Select “<span>Keplr Wallet</span>”.",
@@ -144,6 +148,10 @@
   "pages.register.connect-keystone.select-valid-qrcode": "Please ensure you have selected a valid QR code from your Keystone device.",
   "pages.register.connect-keystone.tutorial": "Tutorial",
   "pages.register.connect-keystone.unsupported": "Unsupported",
+
+  "pages.register.connect-keystone.usb.title": "Please Connect Your Hardware Wallet",
+  "pages.register.connect-keystone.usb.step-1": "Connect and unlock your Keystone.",
+  "pages.register.connect-keystone.usb.step-2": "Ensure your Keystone 3 Pro is on the homepage.",
 
   "pages.register.enable-chains.title": "Select Chains",
   "pages.register.enable-chains.paragraph": "Don’t worry, you can change your selections anytime in the Manage Chain Visibility in the sidebar menu.",
@@ -504,6 +512,10 @@
   "page.sign.keystone.enable-camera": "Please enable your camera permission via [Settings]",
   "page.sign.keystone.invalid-qrcode": "Invalid QR code",
   "page.sign.keystone.select-valid-qrcode": "Please ensure you have selected a valid QR code from your Keystone device.",
+
+  "page.sign.keystone.usb.box.unknown-error-title": "Unknown error",
+  "page.sign.keystone.usb.box.sign-on-keystone-title": "Sign on Keystone",
+  "page.sign.keystone.usb.box.sign-on-keystone-paragraph": "To proceed, please review and approve the transaction on your Keystone device.",
 
   "page.send.select-asset.title": "Select Asset",
   "page.send.select-asset.search-placeholder": "Search for asset or chain",

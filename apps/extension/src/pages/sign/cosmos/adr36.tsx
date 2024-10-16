@@ -24,6 +24,7 @@ import { KeyRingService } from "@keplr-wallet/background";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
 import { MessageAdr36Icon } from "../../../components/icon";
 import { ItemLogo } from "../../main/token-detail/msg-items/logo";
+import { KeystoneUSBBox } from "../components/keystone-usb-box";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
   const { chainStore, signInteractionStore, uiConfigStore } = useStore();
@@ -108,6 +109,11 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     Error | undefined
   >(undefined);
 
+  const isKeystoneUSB =
+    signInteractionStore.waitingData?.data.keyType === "keystone" &&
+    signInteractionStore.waitingData?.data.keyInsensitive["connectionType"] ===
+      "USB";
+
   const [isKeystoneInteracting, setIsKeystoneInteracting] = useState(false);
   const [keystoneUR, setKeystoneUR] = useState<KeystoneUR>();
   const keystoneScanResolve = useRef<(ur: KeystoneUR) => void>();
@@ -134,7 +140,9 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
         isLoading:
           signInteractionStore.isObsoleteInteraction(
             signInteractionStore.waitingData?.id
-          ) || isLedgerInteracting,
+          ) ||
+          isLedgerInteracting ||
+          isKeystoneInteracting,
         onClick: async () => {
           if (signInteractionStore.waitingData) {
             const signDocWrapper =
@@ -163,6 +171,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
               signInteractionStore.waitingData.data.keyType === "keystone"
             ) {
               setIsKeystoneInteracting(true);
+              setKeystoneInteractingError(undefined);
               const isEthSigning = KeyRingService.isEthermintLike(
                 chainStore.getChain(
                   signInteractionStore.waitingData.data.chainId
@@ -220,6 +229,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
               }
             } finally {
               setIsLedgerInteracting(false);
+              setIsKeystoneInteracting(false);
             }
           }
         },
@@ -414,27 +424,35 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
             isInternal={signInteractionStore.waitingData.isInternal}
           />
         ) : null}
+        {isKeystoneUSB && (
+          <KeystoneUSBBox
+            isKeystoneInteracting={isKeystoneInteracting}
+            KeystoneInteractingError={keystoneInteractingError}
+          />
+        )}
       </Box>
-      <KeystoneSign
-        ur={keystoneUR}
-        isOpen={isKeystoneInteracting}
-        close={() => {
-          setIsKeystoneInteracting(false);
-        }}
-        onScan={(ur) => {
-          if (keystoneScanResolve.current === undefined) {
-            throw new Error("Keystone Scan Error");
-          }
-          keystoneScanResolve.current(ur);
-        }}
-        error={keystoneInteractingError}
-        onCloseError={() => {
-          if (keystoneInteractingError) {
+      {!isKeystoneUSB && (
+        <KeystoneSign
+          ur={keystoneUR}
+          isOpen={isKeystoneInteracting}
+          close={() => {
             setIsKeystoneInteracting(false);
-          }
-          setKeystoneInteractingError(undefined);
-        }}
-      />
+          }}
+          onScan={(ur) => {
+            if (keystoneScanResolve.current === undefined) {
+              throw new Error("Keystone Scan Error");
+            }
+            keystoneScanResolve.current(ur);
+          }}
+          error={keystoneInteractingError}
+          onCloseError={() => {
+            if (keystoneInteractingError) {
+              setIsKeystoneInteracting(false);
+            }
+            setKeystoneInteractingError(undefined);
+          }}
+        />
+      )}
     </HeaderLayout>
   );
 });

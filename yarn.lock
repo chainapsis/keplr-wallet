@@ -8753,6 +8753,8 @@ __metadata:
     "@keplr-wallet/types": 0.12.138
     "@keplr-wallet/unit": 0.12.138
     "@keystonehq/animated-qr": ^0.8.6
+    "@keystonehq/hw-app-base": 0.1.1
+    "@keystonehq/hw-transport-webusb": 0.4.0
     "@keystonehq/keystone-sdk": ^0.2.3
     "@ledgerhq/devices": ^6.20.0
     "@react-spring/web": ^9.6.1
@@ -9483,6 +9485,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@keystonehq/bc-ur-registry@npm:0.7.0":
+  version: 0.7.0
+  resolution: "@keystonehq/bc-ur-registry@npm:0.7.0"
+  dependencies:
+    "@ngraveio/bc-ur": ^1.1.5
+    bs58check: ^2.1.2
+    tslib: ^2.3.0
+  checksum: d6017e8fda67fc01e28aa1c047b20cce8f07b026f110a5771920879fbd658b845f529b054d1dce2fbabadcfd8da47a2160ab50c73f0bd56678aab4d83899ffcc
+  languageName: node
+  linkType: hard
+
 "@keystonehq/bc-ur-registry@npm:^0.4.4":
   version: 0.4.4
   resolution: "@keystonehq/bc-ur-registry@npm:0.4.4"
@@ -9513,6 +9526,46 @@ __metadata:
     bs58check: ^2.1.2
     tslib: ^2.3.0
   checksum: ff4d936eefdc1a25e7383a9668f4dcdacebf7acdb293bc9c18357a30c60b31404e83c457510b07d2610badd435da6af5a3b8352081f863516f0cfb8e88ed3cc0
+  languageName: node
+  linkType: hard
+
+"@keystonehq/hw-app-base@npm:0.1.1":
+  version: 0.1.1
+  resolution: "@keystonehq/hw-app-base@npm:0.1.1"
+  dependencies:
+    "@keystonehq/bc-ur-registry": 0.7.0
+    "@keystonehq/hw-transport-error": ^0.0.2
+    "@keystonehq/hw-transport-webusb": ^0.4.0-beta.0
+    "@ngraveio/bc-ur": ^1.1.6
+    uuid: ^8.3.2
+  checksum: 8f8b51f473d8f0998e0124dd73cfa2c212952e1e814369137e4788e2985a2fdd0f1d84e48ddafd70132e60c06ef2276a3637324c265a40eae9369b8d525a0fe7
+  languageName: node
+  linkType: hard
+
+"@keystonehq/hw-transport-error@npm:^0.0.2":
+  version: 0.0.2
+  resolution: "@keystonehq/hw-transport-error@npm:0.0.2"
+  checksum: 681c3344fdd5e59b63ee522a4539fff926c0c050dc645070dfaa4ac73b5c913312667aa491ec2174252e553d83f4c7e90e2dad2a80e9cbcdb4fa40e86565ccf2
+  languageName: node
+  linkType: hard
+
+"@keystonehq/hw-transport-webusb@npm:0.4.0":
+  version: 0.4.0
+  resolution: "@keystonehq/hw-transport-webusb@npm:0.4.0"
+  dependencies:
+    "@keystonehq/hw-transport-error": ^0.0.2
+    buffer: ^6.0.3
+  checksum: 7c56d7b9b73596306be50aae6b5661905a88fb018385b6074c0f18a04efbf5871f7fe93b957c6fe8f966f7c829ff085df444c9fbd23967c0ef2df4a7f9f7e4ae
+  languageName: node
+  linkType: hard
+
+"@keystonehq/hw-transport-webusb@npm:^0.4.0-beta.0":
+  version: 0.4.0-beta.0
+  resolution: "@keystonehq/hw-transport-webusb@npm:0.4.0-beta.0"
+  dependencies:
+    "@keystonehq/hw-transport-error": ^0.0.2
+    buffer: ^6.0.3
+  checksum: 70c85917bb234ae6bd420ecb0744647ca8358f67b1eb043814f45567a0eb1b73ac6c8699cbdc877ad77f9d0a70d8ec5859b73aa4bfdfff8b29fad7dee2fce216
   languageName: node
   linkType: hard
 
