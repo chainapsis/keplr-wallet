@@ -322,7 +322,14 @@ export const MainHeaderLayout = observer<
                             : ColorPalette["gray-200"]
                         }
                       >
-                        <FormattedMessage id="page.main.layouts.header.new-chain.paragraph" />
+                        <FormattedMessage
+                          id="page.main.layouts.header.new-chain.paragraph"
+                          values={{
+                            count:
+                              uiConfigStore.newChainSuggestionConfig
+                                .newSuggestionChains.length,
+                          }}
+                        />
                       </Body2>
                       <Gutter size="0.75rem" />
                       <YAxis alignX="right">
