@@ -154,7 +154,9 @@ export class TokensStore {
           }
         }
 
-        modularChainInfoImpl.addCurrencies("cosmos", ...adds);
+        this.chainStore
+          .getChain(modularChainInfoImpl.chainId)
+          .addCurrencies(...adds);
       } else if ("starknet" in modularChainInfoImpl.embedded) {
         if ("starknet" in modularChainInfoImpl.embedded) {
           const chainIdentifier = ChainIdHelper.parse(
