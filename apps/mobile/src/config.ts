@@ -2141,6 +2141,59 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: [],
   },
+  {
+    chainId: 'mantra-1',
+    chainName: 'MANTRA',
+    chainSymbolImageUrl:
+      'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/mantra/chain.png',
+    rpc: 'https://rpc-mantra.keplr.app',
+    rest: 'https://lcd-mantra.keplr.app',
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: 'mantra',
+      bech32PrefixAccPub: 'mantrapub',
+      bech32PrefixValAddr: 'mantravaloper',
+      bech32PrefixValPub: 'mantravaloperpub',
+      bech32PrefixConsAddr: 'mantravalcons',
+      bech32PrefixConsPub: 'mantravalconspub',
+    },
+    currencies: [
+      {
+        coinDenom: 'OM',
+        coinMinimalDenom: 'uom',
+        coinDecimals: 6,
+        coinGeckoId: 'mantra-dao',
+        coinImageUrl:
+          'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/mantra/om.png',
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: 'OM',
+        coinMinimalDenom: 'uom',
+        coinDecimals: 6,
+        coinGeckoId: 'mantra-dao',
+        coinImageUrl:
+          'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/mantra/om.png',
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.025,
+          high: 0.03,
+        },
+      },
+    ],
+    stakeCurrency: {
+      coinDenom: 'OM',
+      coinMinimalDenom: 'uom',
+      coinDecimals: 6,
+      coinGeckoId: 'mantra-dao',
+      coinImageUrl:
+        'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/mantra/om.png',
+    },
+    features: ['cosmwasm'],
+  },
 ];
 
 // TODO: 원격으로 변경할 수 있도록 나중에 네트워크에서 이 정보를 가져오는 방식으로 변경될 수 있음
