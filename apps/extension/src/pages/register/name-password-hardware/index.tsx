@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { RegisterSceneBox } from "../components/register-scene-box";
 import { Box } from "../../../components/box";
 import { FormNamePassword, useFormNamePassword } from "../components/form";
@@ -22,6 +22,7 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
   const sceneTransition = useSceneTransition();
   const intl = useIntl();
 
+  const [headerHasSet, setHeaderHasSet] = useState(false);
   const header = useRegisterHeader();
   useSceneEvents({
     onWillVisible: () => {
@@ -33,17 +34,31 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
         stepCurrent: 1,
         stepTotal: type === "keystone" ? 4 : 3,
       });
+      setHeaderHasSet(true);
     },
   });
+
+  const [keystoneWay, setKeystoneWay] = useState<string>("USB");
+  const [isKeystoneUSB, setIsKeystoneUSB] = useState(true);
+  useEffect(() => {
+    if (headerHasSet && type === "keystone") {
+      const prev = header.header;
+      if ("stepTotal" in prev) {
+        if (isKeystoneUSB) {
+          // USB에서는 step 3개밖에 안 필요하더라...
+          header.setHeader({ ...prev, stepTotal: 3 });
+        } else {
+          header.setHeader({ ...prev, stepTotal: 4 });
+        }
+      }
+    }
+  }, [header, headerHasSet, isKeystoneUSB, type]);
 
   const form = useFormNamePassword();
 
   const [connectTo, setConnectTo] = useState<string>("Cosmos");
   const bip44PathState = useBIP44PathState(true);
   const [isBIP44CardOpen, setIsBIP44CardOpen] = useState(false);
-
-  const [keystoneWay, setKeystoneWay] = useState<string>("USB");
-  const [isKeystoneUSB, setIsKeystoneUSB] = useState(true);
 
   return (
     <RegisterSceneBox>
