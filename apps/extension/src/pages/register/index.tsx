@@ -35,10 +35,7 @@ import { useStore } from "../../stores";
 import { useSearchParams } from "react-router-dom";
 import * as KeplrWalletPrivate from "keplr-wallet-private";
 import { BackUpPrivateKeyScene } from "./back-up-private-key";
-import {
-  ConnectKeystoneQRScene,
-  ConnectKeystoneUSBScene,
-} from "./connect-keystone";
+import { ConnectKeystoneScene } from "./connect-keystone";
 import { ScanKeystoneScene } from "./connect-keystone/scan";
 
 const Container = styled.div`
@@ -233,13 +230,8 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
               width: "40rem",
             },
             {
-              name: "connect-keystone-qr",
-              element: ConnectKeystoneQRScene,
-              width: "40rem",
-            },
-            {
-              name: "connect-keystone-usb",
-              element: ConnectKeystoneUSBScene,
+              name: "connect-keystone",
+              element: ConnectKeystoneScene,
               width: "40rem",
             },
             {

@@ -31,8 +31,6 @@ export class KeyRingKeystoneService {
         device: multiAccounts.device,
         deviceId: multiAccounts.deviceId,
         keys,
-        bip44Path: multiAccounts.bip44Path,
-        connectionType: multiAccounts.connectionType,
       },
       sensitive: {},
     });

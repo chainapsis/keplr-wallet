@@ -14,7 +14,6 @@ import KeystoneSDK, {
   KeystoneEvmSDK,
   UR,
   utils,
-  UREncoder,
 } from "@keystonehq/keystone-sdk";
 import {
   ErrInvalidPublicKey,
@@ -22,16 +21,10 @@ import {
   ErrInvalidSignature,
   ErrInvalidSigner,
   ErrModuleKeystoneSign,
-  ErrKeystoneUSBCommunication,
   KeystoneKeys,
   KeystoneUR,
   getPathFromPubKey,
 } from "./keystone";
-import {
-  createKeystoneTransport,
-  handleKeystoneUSBError,
-} from "../../../utils/keystone";
-import Base from "@keystonehq/hw-app-base";
 import { PlainObject } from "@keplr-wallet/background";
 import { KeplrError } from "@keplr-wallet/router";
 
@@ -148,8 +141,6 @@ export const handleCosmosPreSign = async (
           : serializeSignDoc(signDocWrapper.aminoSignDoc)
       ).toString("hex");
       const xfp = interactionData.data.keyInsensitive["xfp"] as string;
-      const isUSB =
-        interactionData.data.keyInsensitive["connectionType"] === "USB";
       if (isEthSigning) {
         ur = keystoneSDK.evm.generateSignRequest({
           requestId,
@@ -190,40 +181,17 @@ export const handleCosmosPreSign = async (
           ],
         });
       }
-
-      // Keystone usb signing
-      let urResult: KeystoneUR;
-      if (isUSB) {
-        try {
-          const transport = await createKeystoneTransport();
-          const URString = new UREncoder(ur, Infinity).nextPart().toUpperCase();
-          const baseApp = new Base(transport as any);
-          const response = await baseApp.sendURRequest(URString);
-          urResult = {
-            type: response.type,
-            cbor: response.cbor.toString("hex"),
-          } as KeystoneUR;
-        } catch (e) {
-          throw new KeplrError(
-            ErrModuleKeystoneSign,
-            ErrKeystoneUSBCommunication,
-            handleKeystoneUSBError(e)
-          );
-        }
-      } else {
-        await keystoneOptions.displayQRCode({
-          type: ur.type,
-          cbor: ur.cbor.toString("hex"),
-        });
-        urResult = await keystoneOptions.scanQRCode();
-      }
-
+      await keystoneOptions.displayQRCode({
+        type: ur.type,
+        cbor: ur.cbor.toString("hex"),
+      });
+      const scanResult = await keystoneOptions.scanQRCode();
       let signResult;
       try {
         signResult = keystoneSDK[
           isEthSigning ? "evm" : "cosmos"
         ].parseSignature(
-          new UR(Buffer.from(urResult.cbor, "hex"), urResult.type)
+          new UR(Buffer.from(scanResult.cbor, "hex"), scanResult.type)
         );
       } catch (e) {
         throw new KeplrError(

@@ -57,11 +57,10 @@ export const ScanKeystoneScene: FunctionComponent<{
     const accounts = sdk.parseMultiAccounts(
       new UR(Buffer.from(ur.cbor, "hex"), ur.type)
     );
-    const enhancedAccounts = { ...accounts, connectionType: "QR" };
     sceneTransition.replaceAll("finalize-key", {
       name,
       password,
-      keystone: enhancedAccounts,
+      keystone: accounts,
       stepPrevious: stepPrevious + 1,
       stepTotal,
     });

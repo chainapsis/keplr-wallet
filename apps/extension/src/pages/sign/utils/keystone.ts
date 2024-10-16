@@ -81,4 +81,3 @@ export const ErrInvalidSigner = 1;
 export const ErrInvalidRequestId = 2;
 export const ErrInvalidPublicKey = 3;
 export const ErrInvalidSignature = 4;
-export const ErrKeystoneUSBCommunication = 5;

@@ -19,7 +19,6 @@ import { KeplrError } from "@keplr-wallet/router";
 import { ErrModuleLedgerSign } from "../utils/ledger-types";
 import { Buffer } from "buffer/";
 import { LedgerGuideBox } from "../components/ledger-guide-box";
-import { KeystoneUSBBox } from "../components/keystone-usb-box";
 import { EthSignType } from "@keplr-wallet/types";
 import {
   handleEthereumPreSignByKeystone,
@@ -310,10 +309,6 @@ export const EthereumSigningView: FunctionComponent<{
     Error | undefined
   >(undefined);
 
-  const isKeystonUSB =
-    interactionData.data.keyType === "keystone" &&
-    interactionData.data.keyInsensitive["connectionType"] === "USB";
-
   const [isKeystoneInteracting, setIsKeystoneInteracting] = useState(false);
   const [keystoneUR, setKeystoneUR] = useState<KeystoneUR>();
   const keystoneScanResolve = useRef<(ur: KeystoneUR) => void>();
@@ -360,9 +355,7 @@ export const EthereumSigningView: FunctionComponent<{
         isLoading:
           signEthereumInteractionStore.isObsoleteInteraction(
             interactionData.id
-          ) ||
-          isLedgerInteracting ||
-          isKeystoneInteracting,
+          ) || isLedgerInteracting,
         onClick: async () => {
           try {
             let signature;
@@ -378,7 +371,6 @@ export const EthereumSigningView: FunctionComponent<{
               );
             } else if (interactionData.data.keyType === "keystone") {
               setIsKeystoneInteracting(true);
-              setKeystoneInteractingError(undefined);
               signature = await handleEthereumPreSignByKeystone(
                 interactionData,
                 Buffer.from(signingDataText),
@@ -442,7 +434,6 @@ export const EthereumSigningView: FunctionComponent<{
             }
           } finally {
             setIsLedgerInteracting(false);
-            setIsKeystoneInteracting(false);
           }
         },
       }}
@@ -696,35 +687,27 @@ export const EthereumSigningView: FunctionComponent<{
           ledgerInteractingError={ledgerInteractingError}
           isInternal={interactionData.isInternal}
         />
-        {isKeystonUSB && (
-          <KeystoneUSBBox
-            isKeystoneInteracting={isKeystoneInteracting}
-            KeystoneInteractingError={keystoneInteractingError}
-          />
-        )}
       </Box>
-      {!isKeystonUSB && (
-        <KeystoneSign
-          ur={keystoneUR}
-          isOpen={isKeystoneInteracting}
-          close={() => {
+      <KeystoneSign
+        ur={keystoneUR}
+        isOpen={isKeystoneInteracting}
+        close={() => {
+          setIsKeystoneInteracting(false);
+        }}
+        onScan={(ur) => {
+          if (keystoneScanResolve.current === undefined) {
+            throw new Error("Keystone Scan Error");
+          }
+          keystoneScanResolve.current(ur);
+        }}
+        error={keystoneInteractingError}
+        onCloseError={() => {
+          if (keystoneInteractingError) {
             setIsKeystoneInteracting(false);
-          }}
-          onScan={(ur) => {
-            if (keystoneScanResolve.current === undefined) {
-              throw new Error("Keystone Scan Error");
-            }
-            keystoneScanResolve.current(ur);
-          }}
-          error={keystoneInteractingError}
-          onCloseError={() => {
-            if (keystoneInteractingError) {
-              setIsKeystoneInteracting(false);
-            }
-            setKeystoneInteractingError(undefined);
-          }}
-        />
-      )}
+          }
+          setKeystoneInteractingError(undefined);
+        }}
+      />
     </HeaderLayout>
   );
 });

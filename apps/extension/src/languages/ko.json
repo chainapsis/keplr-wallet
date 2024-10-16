@@ -105,10 +105,6 @@
   "pages.register.name-password-hardware.connect-to-terra": "테라 앱",
   "pages.register.name-password-hardware.connect-to-secret": "시크릿 앱",
 
-  "pages.register.name-password-hardware.connect-keystone-way": "Keystone를 통해 연결하세요",
-  "pages.register.name-password-hardware.connect-to-keystone-USB": "USB",
-  "pages.register.name-password-hardware.connect-to-keystone-QR": "QR",
-
   "pages.register.recover-mnemonic.title": "기존 지갑 불러오기",
   "pages.register.recover-mnemonic.paragraph-1": "복구 문구를 통해 지갑을 불러올 수 있습니다. 아무 칸이나 선택해서 전체 복구 문구를 붙여 넣어보세요.",
   "pages.register.recover-mnemonic.paragraph-2": "복구 문구의 단어를 올바른 순서로, 정확한 대소문자, 구두점 기호 혹은 공백으로 기입해야만 지갑을 불러올 수 있습니다.",
@@ -148,10 +144,6 @@
   "pages.register.connect-keystone.select-valid-qrcode": "키스톤 장치에서 유효한 QR 코드를 선택했는지 확인해주세요.",
   "pages.register.connect-keystone.tutorial": "튜토리얼",
   "pages.register.connect-keystone.unsupported": "미지원",
-
-  "pages.register.connect-keystone.usb.title": "하드웨어 지갑을 연결해 주세요.",
-  "pages.register.connect-keystone.usb.step-1": "키스톤을 연결하고 잠금을 해제하세요.",
-  "pages.register.connect-keystone.usb.step-2": "귀하의 Keystone 3 Pro가 홈페이지에 있도록 하십시오.",
 
   "pages.register.enable-chains.title": "체인 선택하기",
   "pages.register.enable-chains.paragraph": "걱정마세요! 언제든지 사이드바 메뉴에 있는 ‘체인 표시’를 방문해서 설정을 변경할 수 있습니다.",
@@ -495,10 +487,6 @@
   "page.sign.keystone.enable-camera": "[설정]에서 카메라 접근 권한을 켜주세요.",
   "page.sign.keystone.invalid-qrcode": "QR 코드가 유효하지 않습니다",
   "page.sign.keystone.select-valid-qrcode": "키스톤 장치에서 유효한 QR 코드를 선택했는지 확인해주세요.",
-
-  "page.sign.keystone.usb.box.unknown-error-title": "알 수 없는 오류",
-  "page.sign.keystone.usb.box.sign-on-keystone-title": "키스톤에 있는 표지판",
-  "page.sign.keystone.usb.box.sign-on-keystone-paragraph": "진행하려면, 귀하의 Keystone 기기에서 거래를 검토하고 승인해 주시기 바랍니다.",
 
   "page.send.select-asset.title": "자산 선택",
   "page.send.select-asset.search-placeholder": "자산이나 체인 이름 검색",
