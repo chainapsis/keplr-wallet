@@ -120,6 +120,8 @@ export const NamePasswordInput = observer(
                       id: 'pages.register.components.form.name-password.password-placeholder',
                     })}
                     secureTextEntry={true}
+                    /* ios의 password generation 기능을 없애기 위한 prop임 */
+                    textContentType="oneTimeCode"
                     onChangeText={onChange}
                     onBlur={onBlur}
                     value={value}
@@ -159,6 +161,8 @@ export const NamePasswordInput = observer(
                       id: 'pages.register.components.form.name-password.confirm-password-placeholder',
                     })}
                     secureTextEntry={true}
+                    /* ios의 password generation 기능을 없애기 위한 prop임 */
+                    textContentType="oneTimeCode"
                     onChangeText={onChange}
                     onBlur={onBlur}
                     value={value}
