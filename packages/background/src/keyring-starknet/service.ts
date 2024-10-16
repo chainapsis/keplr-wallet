@@ -294,7 +294,9 @@ export class KeyRingStarknetService {
           return true;
         }
         case "wallet_requestChainId": {
-          return currentChainId;
+          return shortString.encodeShortString(
+            currentChainId.replace("starknet:", "")
+          );
         }
         case "wallet_deploymentData": {
           throw new Error("Not implemented");

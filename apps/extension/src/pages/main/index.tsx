@@ -30,7 +30,7 @@ import { Modal } from "../../components/modal";
 import { DualChart } from "./components/chart";
 import { Gutter } from "../../components/gutter";
 import { H1, Subtitle3, Subtitle4 } from "../../components/typography";
-import { ColorPalette } from "../../styles";
+import { ColorPalette, SidePanelMaxWidth } from "../../styles";
 import { AvailableTabView } from "./available";
 import { StakedTabView } from "./staked";
 import { SearchTextInput } from "../../components/input";
@@ -1008,6 +1008,7 @@ const RefreshButton: FunctionComponent<{
         zIndex: 10,
 
         width: "100%",
+        maxWidth: SidePanelMaxWidth,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

@@ -1,5 +1,6 @@
 import { createGlobalStyle } from "styled-components";
 
+export const SidePanelMaxWidth = "540px";
 export const GlobalSidePanelStyle = createGlobalStyle`
   html {
     margin-left: auto;
@@ -17,6 +18,6 @@ export const GlobalSidePanelStyle = createGlobalStyle`
   
   #app {
     width: 100%;
-    max-width: 540px;
+    max-width: ${SidePanelMaxWidth};
   }
 `;
