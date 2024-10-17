@@ -48,9 +48,20 @@ export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
         await stores.keyRingStore.refreshKeyRingStatus();
         await stores.chainStore.updateEnabledChainIdentifiersFromBackground();
 
-        for (const chainInfo of stores.chainStore.chainInfos) {
-          if (stores.accountStore.hasAccount(chainInfo.chainId)) {
-            stores.accountStore.getAccount(chainInfo.chainId).init();
+        for (const modularChainInfo of stores.chainStore.modularChainInfos) {
+          if ("cosmos" in modularChainInfo) {
+            const chainInfo = stores.chainStore.getChain(
+              modularChainInfo.chainId
+            );
+            if (stores.accountStore.hasAccount(chainInfo.chainId)) {
+              stores.accountStore.getAccount(chainInfo.chainId).init();
+            }
+          } else if ("starknet" in modularChainInfo) {
+            if (
+              stores.starknetAccountStore.getAccount(modularChainInfo.chainId)
+            ) {
+              stores.accountStore.getAccount(modularChainInfo.chainId).init();
+            }
           }
         }
       }
@@ -63,9 +74,20 @@ export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
         if (newKeyId && stores.keyRingStore.selectedKeyInfo?.id === newKeyId) {
           await stores.chainStore.updateEnabledChainIdentifiersFromBackground();
 
-          for (const chainInfo of stores.chainStore.chainInfos) {
-            if (stores.accountStore.hasAccount(chainInfo.chainId)) {
-              stores.accountStore.getAccount(chainInfo.chainId).init();
+          for (const modularChainInfo of stores.chainStore.modularChainInfos) {
+            if ("cosmos" in modularChainInfo) {
+              const chainInfo = stores.chainStore.getChain(
+                modularChainInfo.chainId
+              );
+              if (stores.accountStore.hasAccount(chainInfo.chainId)) {
+                stores.accountStore.getAccount(chainInfo.chainId).init();
+              }
+            } else if ("starknet" in modularChainInfo) {
+              if (
+                stores.starknetAccountStore.getAccount(modularChainInfo.chainId)
+              ) {
+                stores.accountStore.getAccount(modularChainInfo.chainId).init();
+              }
             }
           }
         }
