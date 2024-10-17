@@ -1,9 +1,9 @@
 import { ChainGetter } from "@keplr-wallet/stores";
 import { ERC20Currency, Keplr } from "@keplr-wallet/types";
 import { action, makeObservable, observable } from "mobx";
-import { uint256, Call, RawArgs, DeployContractResponse } from "starknet";
+import { uint256, Call, RawArgs, DeployContractResponse, num } from "starknet";
 import { StoreAccount } from "./internal";
-import { Dec, DecUtils } from "@keplr-wallet/unit";
+import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
 
 export class StarknetAccountBase {
   @observable
@@ -278,5 +278,21 @@ export class StarknetAccountBase {
     ];
 
     return await this.execute(sender, calls, fee);
+  }
+
+  async getNonce(sender: string): Promise<Int> {
+    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("starknet" in modularChainInfo)) {
+      throw new Error(`${this.chainId} is not starknet chain`);
+    }
+
+    const walletAccount = new StoreAccount(
+      modularChainInfo.starknet.rpc,
+      sender,
+      this.chainId,
+      this.getKeplr
+    );
+
+    return new Int(num.toBigInt(await walletAccount.getNonce()));
   }
 }

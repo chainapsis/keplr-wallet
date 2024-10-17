@@ -1,7 +1,7 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { SignStarknetTxInteractionStore } from "@keplr-wallet/stores-core";
 import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
-import { observer } from "mobx-react-lite";
+import { observer, useLocalObservable } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { useInteractionInfo } from "../../../../hooks";
 import { useUnmount } from "../../../../hooks/use-unmount";
@@ -10,6 +10,7 @@ import { HeaderLayout } from "../../../../layouts/header";
 import { FormattedMessage, useIntl } from "react-intl";
 import { FeeControl } from "../../components/input/fee-control";
 import {
+  AccountNotDeployed,
   useFeeConfig,
   useGasConfig,
   useGasSimulator,
@@ -18,7 +19,7 @@ import {
   useTxConfigsValidate,
 } from "@keplr-wallet/hooks-starknet";
 import { MemoryKVStore } from "@keplr-wallet/common";
-import { CoinPretty, Dec } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { num, InvocationsSignerDetails } from "starknet";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
@@ -29,6 +30,8 @@ import { Column, Columns } from "../../../../components/column";
 import SimpleBar from "simplebar-react";
 import { XAxis } from "../../../../components/axis";
 import { ViewDataButton } from "../../../sign/components/view-data-button";
+import { AccountActivationModal } from "../../components/account-activation-modal";
+import { Modal } from "../../../../components/modal";
 
 export const SignStarknetTxView: FunctionComponent<{
   interactionData: NonNullable<SignStarknetTxInteractionStore["waitingData"]>;
@@ -89,6 +92,23 @@ export const SignStarknetTxView: FunctionComponent<{
     }
   );
 
+  const gasSimulationRefresher = useLocalObservable(() => ({
+    count: 0,
+    increaseCount() {
+      this.count++;
+    },
+  }));
+
+  useEffect(() => {
+    // Refresh gas simulation every 12 seconds.
+    const interval = setInterval(
+      () => gasSimulationRefresher.increaseCount(),
+      12000
+    );
+
+    return () => clearInterval(interval);
+  }, [gasSimulationRefresher]);
+
   const gasSimulator = useGasSimulator(
     new MemoryKVStore("starknet.sign"),
     chainStore,
@@ -132,6 +152,8 @@ export const SignStarknetTxView: FunctionComponent<{
         simulate: async (): Promise<{
           gasUsed: number;
         }> => {
+          noop(gasSimulationRefresher.count);
+
           const res = await starknetAccountStore
             .getAccount(chainId)
             .estimateInvokeFee(sender, interactionData.data.transactions, type);
@@ -169,6 +191,14 @@ export const SignStarknetTxView: FunctionComponent<{
 
   const [isViewData, setIsViewData] = useState(false);
 
+  const isAccountNotDeployed =
+    senderConfig.uiProperties.error instanceof AccountNotDeployed;
+  const [isAccountActivationModalOpen, setIsAccountActivationModalOpen] =
+    useState(false);
+  useEffect(() => {
+    setIsAccountActivationModalOpen(isAccountNotDeployed);
+  }, [isAccountNotDeployed]);
+
   useUnmount(() => {
     unmountPromise.resolver();
   });
@@ -184,6 +214,11 @@ export const SignStarknetTxView: FunctionComponent<{
 
   const approve = async () => {
     try {
+      if (isAccountNotDeployed) {
+        setIsAccountActivationModalOpen(true);
+        return;
+      }
+
       const type = feeConfig.type;
       const feeContractAddress =
         type === "ETH"
@@ -197,12 +232,21 @@ export const SignStarknetTxView: FunctionComponent<{
         throw new Error("Can't find fee currency");
       }
 
+      // XXX: 요청되었을때 계정이 deploy되어있지 않았다면 nonce는 0이다.
+      //      이 경우 keplr UI 쪽에서 계정을 deploy 했었을 것이기 때문에 nonce를 새롭게 받아와야한다.
+      let nonce = new Int(num.toBigInt(interactionData.data.details.nonce));
+      if (nonce.equals(new Int(0))) {
+        nonce = await starknetAccountStore
+          .getAccount(chainId)
+          .getNonce(senderConfig.sender);
+      }
+
       const details: InvocationsSignerDetails = (() => {
         if (type === "ETH") {
           return {
             version: "0x1",
             walletAddress: interactionData.data.details.walletAddress,
-            nonce: interactionData.data.details.nonce,
+            nonce: num.toBigInt(nonce.toString()),
             chainId: interactionData.data.details.chainId,
             cairoVersion: interactionData.data.details.cairoVersion,
             skipValidate: false,
@@ -215,7 +259,7 @@ export const SignStarknetTxView: FunctionComponent<{
           return {
             version: "0x3",
             walletAddress: interactionData.data.details.walletAddress,
-            nonce: interactionData.data.details.nonce,
+            nonce: num.toBigInt(nonce.toString()),
             chainId: interactionData.data.details.chainId,
             cairoVersion: interactionData.data.details.cairoVersion,
             skipValidate: false,
@@ -417,6 +461,54 @@ export const SignStarknetTxView: FunctionComponent<{
           gasSimulator={gasSimulator}
         />
       </Box>
+
+      <Modal
+        isOpen={isAccountActivationModalOpen}
+        align="bottom"
+        maxHeight="95vh"
+        close={() => {
+          // noop
+        }}
+      >
+        <AccountActivationModal
+          close={() => setIsAccountActivationModalOpen(false)}
+          onAccountDeployed={() => {
+            // account가 deploy 되었을때 gas simulator를 refresh한다.
+            gasSimulationRefresher.increaseCount();
+          }}
+          goBack={() => {
+            signStarknetTxInteractionStore.rejectWithProceedNext(
+              interactionData.id,
+              async (proceedNext) => {
+                if (!proceedNext) {
+                  if (
+                    interactionInfo.interaction &&
+                    !interactionInfo.interactionInternal
+                  ) {
+                    handleExternalInteractionWithNoProceedNext();
+                  }
+                }
+
+                if (
+                  interactionInfo.interaction &&
+                  interactionInfo.interactionInternal
+                ) {
+                  // XXX: 약간 난해한 부분인데
+                  //      내부의 tx의 경우에는 tx 이후의 routing을 요청한 쪽에서 처리한다.
+                  //      하지만 tx를 처리할때 tx broadcast 등의 과정이 있고
+                  //      서명 페이지에서는 이러한 과정이 끝났는지 아닌지를 파악하기 힘들다.
+                  //      만약에 밑과같은 처리를 하지 않으면 interaction data가 먼저 지워지면서
+                  //      화면이 깜빡거리는 문제가 발생한다.
+                  //      이 문제를 해결하기 위해서 내부의 tx는 보내는 쪽에서 routing을 잘 처리한다고 가정하고
+                  //      페이지를 벗어나고 나서야 data를 지우도록한다.
+                  await unmountPromise.promise;
+                }
+              }
+            );
+          }}
+          chainId={chainId}
+        />
+      </Modal>
     </HeaderLayout>
   );
 });
@@ -545,4 +637,8 @@ const DataByTransactionView: FunctionComponent<{
       })}
     </SimpleBar>
   );
+};
+
+const noop = (..._args: any[]) => {
+  // noop
 };

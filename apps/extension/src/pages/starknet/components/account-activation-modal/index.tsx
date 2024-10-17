@@ -51,7 +51,9 @@ export const AccountActivationModal: FunctionComponent<{
   close: () => void;
   goBack: () => void;
   chainId: string;
-}> = observer(({ close, goBack, chainId }) => {
+
+  onAccountDeployed?: () => void;
+}> = observer(({ close, goBack, chainId, onAccountDeployed }) => {
   const {
     chainStore,
     accountStore,
@@ -360,15 +362,44 @@ export const AccountActivationModal: FunctionComponent<{
                             if (res?.data) {
                               starknetAccount.setIsDeployingAccount(false);
 
-                              if (feeConfig.fee != null) {
-                                starknetQueries.queryStarknetERC20Balance
-                                  .getBalance(
-                                    chainId,
-                                    chainStore,
-                                    account.starknetHexAddress,
-                                    feeConfig.fee.currency.coinMinimalDenom
-                                  )
-                                  ?.fetch();
+                              const modularChainInfo =
+                                chainStore.getModularChain(chainId);
+                              if ("starknet" in modularChainInfo) {
+                                const starknet = modularChainInfo.starknet;
+                                const ethCurrency = starknet.currencies.find(
+                                  (cur) =>
+                                    cur.coinMinimalDenom ===
+                                    `erc20:${starknet.ethContractAddress}`
+                                );
+                                const strkCurrency = starknet.currencies.find(
+                                  (cur) =>
+                                    cur.coinMinimalDenom ===
+                                    `erc20:${starknet.strkContractAddress}`
+                                );
+                                if (ethCurrency) {
+                                  starknetQueries.queryStarknetERC20Balance
+                                    .getBalance(
+                                      chainId,
+                                      chainStore,
+                                      account.starknetHexAddress,
+                                      ethCurrency.coinMinimalDenom
+                                    )
+                                    ?.fetch();
+                                }
+                                if (strkCurrency) {
+                                  starknetQueries.queryStarknetERC20Balance
+                                    .getBalance(
+                                      chainId,
+                                      chainStore,
+                                      account.starknetHexAddress,
+                                      strkCurrency.coinMinimalDenom
+                                    )
+                                    ?.fetch();
+                                }
+                              }
+
+                              if (onAccountDeployed) {
+                                onAccountDeployed();
                               }
                               close();
                               break;
@@ -382,7 +413,7 @@ export const AccountActivationModal: FunctionComponent<{
                       })
                       .catch((e) => {
                         starknetAccount.setIsDeployingAccount(false);
-                        close();
+                        goBack();
                         console.log(e);
                       });
                   } catch (e) {
