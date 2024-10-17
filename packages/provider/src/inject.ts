@@ -104,11 +104,7 @@ export function injectKeplrToWindow(keplr: IKeplr): void {
     keplr.getEnigmaUtils
   );
 
-  defineUnwritablePropertyIfPossible(
-    window,
-    "starknet_braavos",
-    keplr.starknet
-  );
+  defineUnwritablePropertyIfPossible(window, "starknet_keplr", keplr.starknet);
 }
 
 /**
