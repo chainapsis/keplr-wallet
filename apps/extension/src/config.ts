@@ -1,7 +1,7 @@
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 
-export const EmbedChainInfos: ChainInfo[] = [
+export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
   {
     rpc: "https://rpc-cosmoshub.keplr.app",
     rest: "https://lcd-cosmoshub.keplr.app",
@@ -2413,6 +2413,197 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     features: [],
+  },
+  {
+    chainId: "starknet:SN_MAIN",
+    chainName: "Starknet",
+    chainSymbolImageUrl:
+      "https://keplr-ext-update-note-images.s3.amazonaws.com/token/starknet.png",
+    starknet: {
+      chainId: "starknet:SN_MAIN",
+      rpc: "https://rpc-starknet.keplr.app",
+      currencies: [
+        {
+          type: "erc20",
+          contractAddress:
+            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          coinDenom: "ETH",
+          coinMinimalDenom:
+            "erc20:0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          coinDecimals: 18,
+          coinGeckoId: "ethereum",
+          coinImageUrl:
+            "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/ethereum-native.png",
+        },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+          coinDenom: "STRK",
+          coinMinimalDenom:
+            "erc20:0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+          coinDecimals: 18,
+          coinGeckoId: "starknet",
+          coinImageUrl:
+            "https://keplr-ext-update-note-images.s3.amazonaws.com/token/starknet.png",
+        },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x3fe2b97c1fd336e750087d68b9b867997fd64a2661ff3ca5a7c771641e8e7ac",
+          coinDenom: "WBTC",
+          coinMinimalDenom:
+            "erc20:0x3fe2b97c1fd336e750087d68b9b867997fd64a2661ff3ca5a7c771641e8e7ac",
+          coinDecimals: 8,
+          coinGeckoId: "wrapped-bitcoin",
+          coinImageUrl:
+            "https://keplr-ext-update-note-images.s3.amazonaws.com/token/wbtc.png",
+        },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x42b8f0484674ca266ac5d08e4ac6a3fe65bd3129795def2dca5c34ecc5f96d2",
+          coinDenom: "wstETH",
+          coinMinimalDenom:
+            "erc20:0x42b8f0484674ca266ac5d08e4ac6a3fe65bd3129795def2dca5c34ecc5f96d2",
+          coinDecimals: 18,
+          coinGeckoId: "wrapped-steth",
+          coinImageUrl:
+            "https://keplr-ext-update-note-images.s3.amazonaws.com/token/wstETH.png",
+        },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x68f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8",
+          coinDenom: "USDT",
+          coinMinimalDenom:
+            "erc20:0x68f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8",
+          coinDecimals: 6,
+          coinGeckoId: "tether",
+          coinImageUrl:
+            "https://keplr-ext-update-note-images.s3.amazonaws.com/token/usdt.png",
+        },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8",
+          coinDenom: "USDC",
+          coinMinimalDenom:
+            "erc20:0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8",
+          coinDecimals: 6,
+          coinGeckoId: "usd-coin",
+          coinImageUrl:
+            "https://keplr-ext-update-note-images.s3.amazonaws.com/token/usdc.png",
+        },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x5574eb6b8789a91466f902c380d978e472db68170ff82a5b650b95a58ddf4ad",
+          coinDenom: "DAI",
+          coinMinimalDenom:
+            "erc20:0x5574eb6b8789a91466f902c380d978e472db68170ff82a5b650b95a58ddf4ad",
+          coinDecimals: 18,
+          coinGeckoId: "dai",
+          coinImageUrl:
+            "https://keplr-ext-update-note-images.s3.amazonaws.com/token/dai.png",
+        },
+      ],
+      ethContractAddress:
+        "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+      strkContractAddress:
+        "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+    },
+  },
+  {
+    chainId: "starknet:SN_SEPOLIA",
+    chainName: "Starknet Sepolia",
+    chainSymbolImageUrl:
+      "https://keplr-ext-update-note-images.s3.amazonaws.com/token/starknet.png",
+    starknet: {
+      chainId: "starknet:SN_SEPOLIA",
+      rpc: "https://rpc-starknet-sepolia.keplr.app",
+      currencies: [
+        {
+          type: "erc20",
+          contractAddress:
+            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          coinDenom: "ETH",
+          coinMinimalDenom:
+            "erc20:0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+          coinDecimals: 18,
+          coinImageUrl:
+            "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/ethereum-native.png",
+        },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+          coinDenom: "STRK",
+          coinMinimalDenom:
+            "erc20:0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+          coinDecimals: 18,
+          coinImageUrl:
+            "https://keplr-ext-update-note-images.s3.amazonaws.com/token/starknet.png",
+        },
+      ],
+      ethContractAddress:
+        "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+      strkContractAddress:
+        "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+    },
+  },
+  {
+    chainId: "mantra-1",
+    chainName: "MANTRA",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/mantra/chain.png",
+    rpc: "https://rpc-mantra.keplr.app",
+    rest: "https://lcd-mantra.keplr.app",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "mantra",
+      bech32PrefixAccPub: "mantrapub",
+      bech32PrefixValAddr: "mantravaloper",
+      bech32PrefixValPub: "mantravaloperpub",
+      bech32PrefixConsAddr: "mantravalcons",
+      bech32PrefixConsPub: "mantravalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "OM",
+        coinMinimalDenom: "uom",
+        coinDecimals: 6,
+        coinGeckoId: "mantra-dao",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/mantra/om.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "OM",
+        coinMinimalDenom: "uom",
+        coinDecimals: 6,
+        coinGeckoId: "mantra-dao",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/mantra/om.png",
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.025,
+          high: 0.03,
+        },
+      },
+    ],
+    stakeCurrency: {
+      coinDenom: "OM",
+      coinMinimalDenom: "uom",
+      coinDecimals: 6,
+      coinGeckoId: "mantra-dao",
+      coinImageUrl:
+        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/mantra/om.png",
+    },
+    features: ["cosmwasm"],
   },
 ];
 

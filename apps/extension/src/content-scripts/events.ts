@@ -51,6 +51,19 @@ export function initEvents(router: Router) {
                 },
               })
             );
+          case "keplr_starknetChainChanged":
+            return window.dispatchEvent(
+              new CustomEvent("keplr_starknetChainChanged", {
+                detail: {
+                  ...(
+                    msg as PushEventDataMsg<{
+                      origin: string;
+                      starknetChainId: string;
+                    }>
+                  ).data.data,
+                },
+              })
+            );
           case "keplr_ethSubscription":
             return window.dispatchEvent(
               new CustomEvent("keplr_ethSubscription", {

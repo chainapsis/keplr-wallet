@@ -19,8 +19,13 @@ export const useTxConfigsValidate = (configs: {
   memoConfig?: IMemoConfig;
   channelConfig?: IIBCChannelConfig;
   gasSimulator?: IGasSimulator;
+  isIgnoringStarknet?: boolean;
 }) => {
   const interactionBlocked = (() => {
+    if (configs.isIgnoringStarknet) {
+      return false;
+    }
+
     if (
       configs.senderConfig?.uiProperties.error ||
       configs.recipientConfig?.uiProperties.error ||

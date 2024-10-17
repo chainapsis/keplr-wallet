@@ -45,6 +45,8 @@ export class AccountSetBase {
   @observable
   protected _ethereumHexAddress: string = "";
   @observable
+  protected _starknetHexAddress: string = "";
+  @observable
   protected _isNanoLedger: boolean = false;
   @observable
   protected _isKeystone: boolean = false;
@@ -96,22 +98,29 @@ export class AccountSetBase {
   }
 
   protected async enable(chainId: string): Promise<void> {
-    const chainInfo = this.chainGetter.getChain(chainId);
+    const modularChainInfo = this.chainGetter.getModularChain(chainId);
 
-    if (this.opts.suggestChain) {
-      const keplr = await this.sharedContext.getKeplr();
-      if (this.opts.suggestChainFn) {
-        await this.sharedContext.suggestChain(async () => {
-          if (keplr && this.opts.suggestChainFn) {
-            await this.opts.suggestChainFn(keplr, chainInfo);
-          }
-        });
-      } else {
-        await this.sharedContext.suggestChain(async () => {
-          if (keplr) {
-            await keplr.experimentalSuggestChain(chainInfo.embedded);
-          }
-        });
+    if ("cosmos" in modularChainInfo) {
+      if (this.opts.suggestChain) {
+        const keplr = await this.sharedContext.getKeplr();
+        if (this.opts.suggestChainFn) {
+          await this.sharedContext.suggestChain(async () => {
+            if (keplr && this.opts.suggestChainFn) {
+              await this.opts.suggestChainFn(
+                keplr,
+                this.chainGetter.getChain(chainId)
+              );
+            }
+          });
+        } else {
+          await this.sharedContext.suggestChain(async () => {
+            if (keplr) {
+              await keplr.experimentalSuggestChain(
+                this.chainGetter.getChain(chainId).embedded
+              );
+            }
+          });
+        }
       }
     }
     await this.sharedContext.enable(chainId);
@@ -156,15 +165,29 @@ export class AccountSetBase {
       return;
     }
 
-    yield this.sharedContext.getKey(this.chainId, (res) => {
+    const isStarknet =
+      "starknet" in this.chainGetter.getModularChain(this.chainId);
+
+    yield this.sharedContext.getKeyMixed(this.chainId, isStarknet, (res) => {
       if (res.status === "fulfilled") {
         const key = res.value;
-        this._bech32Address = key.bech32Address;
-        this._ethereumHexAddress = key.ethereumHexAddress;
-        this._isNanoLedger = key.isNanoLedger;
-        this._isKeystone = key.isKeystone;
-        this._name = key.name;
-        this._pubKey = key.pubKey;
+        if ("bech32Address" in key) {
+          this._bech32Address = key.bech32Address;
+          this._ethereumHexAddress = key.ethereumHexAddress;
+          this._starknetHexAddress = "";
+          this._isNanoLedger = key.isNanoLedger;
+          this._isKeystone = key.isKeystone;
+          this._name = key.name;
+          this._pubKey = key.pubKey;
+        } else {
+          this._bech32Address = "";
+          this._ethereumHexAddress = "";
+          this._starknetHexAddress = key.hexAddress;
+          this._isNanoLedger = false;
+          this._isKeystone = false;
+          this._name = key.name;
+          this._pubKey = key.pubKey;
+        }
 
         // Set the wallet status as loaded after getting all necessary infos.
         this._walletStatus = WalletStatus.Loaded;
@@ -173,6 +196,7 @@ export class AccountSetBase {
         // Reset properties, and set status to Rejected
         this._bech32Address = "";
         this._ethereumHexAddress = "";
+        this._starknetHexAddress = "";
         this._isNanoLedger = false;
         this._isKeystone = false;
         this._name = "";
@@ -199,6 +223,7 @@ export class AccountSetBase {
     );
     this._bech32Address = "";
     this._ethereumHexAddress = "";
+    this._starknetHexAddress = "";
     this._isNanoLedger = false;
     this._isKeystone = false;
     this._name = "";
@@ -301,6 +326,10 @@ export class AccountSetBase {
 
   get ethereumHexAddress(): string {
     return this._ethereumHexAddress;
+  }
+
+  get starknetHexAddress(): string {
+    return this._starknetHexAddress;
   }
 }
 

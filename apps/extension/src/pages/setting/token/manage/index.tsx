@@ -53,6 +53,14 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
     });
   }, [chainStore.chainInfosInListUI]);
 
+  const supportedModuleChainInfos = useMemo(() => {
+    return chainStore.modularChainInfos.filter((modularChainInfo) => {
+      return (
+        "starknet" in modularChainInfo && modularChainInfo.starknet != null
+      );
+    });
+  }, [chainStore.modularChainInfos]);
+
   const [chainId, setChainId] = useState<string>(() => {
     if (supportedChainInfos.length > 0) {
       return supportedChainInfos[0].chainId;
@@ -77,12 +85,21 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
     };
   }, [accountStore, chainId]);
 
-  const items = supportedChainInfos.map((chainInfo) => {
-    return {
-      key: chainInfo.chainId,
-      label: chainInfo.chainName,
-    };
-  });
+  const items = supportedChainInfos
+    .map((chainInfo) => {
+      return {
+        key: chainInfo.chainId,
+        label: chainInfo.chainName,
+      };
+    })
+    .concat(
+      supportedModuleChainInfos.map((modularChainInfo) => {
+        return {
+          key: modularChainInfo.chainId,
+          label: modularChainInfo.chainName,
+        };
+      })
+    );
 
   const tokens = tokensStore.getTokens(chainId);
 

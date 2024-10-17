@@ -104,6 +104,24 @@ export class PermissionInteractiveService {
     );
   }
 
+  async ensureEnabledForStarknet(env: Env, origin: string): Promise<void> {
+    await this.keyRingService.ensureUnlockInteractive(env);
+
+    // TODO: 런칭 전에 메인넷으로 수정해야함.
+    const currentChainIdForStarknet =
+      this.permissionService.getCurrentChainIdForStarknet(origin) ??
+      "starknet:SN_MAIN";
+
+    await this.permissionService.checkOrGrantBasicAccessPermission(
+      env,
+      [currentChainIdForStarknet],
+      origin,
+      {
+        isForStarknet: true,
+      }
+    );
+  }
+
   disable(chainIds: string[], origin: string) {
     // Delete permissions granted to origin.
     // If chain ids are specified, only the permissions granted to each chain id are deleted (In this case, permissions such as getChainInfosWithoutEndpoints() are not deleted).

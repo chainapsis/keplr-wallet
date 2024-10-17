@@ -5,6 +5,8 @@ import {
   ChainInfo,
   Currency,
   FeeCurrency,
+  ModularChainInfo,
+  ChainInfoModule,
 } from "@keplr-wallet/types";
 
 export type CurrencyRegistrar = (
@@ -20,11 +22,18 @@ export type CurrencyRegistrar = (
 export interface ChainGetter<C extends ChainInfo = ChainInfo> {
   getChain(chainId: string): IChainInfoImpl<C>;
   hasChain(chainId: string): boolean;
+
+  getModularChain(chainId: string): ModularChainInfo;
+  hasModularChain(chainId: string): boolean;
+
+  getModularChainInfoImpl(chainId: string): IModularChainInfoImpl;
 }
 
 export interface IChainStore<C extends ChainInfo = ChainInfo>
   extends ChainGetter<C> {
   readonly chainInfos: IChainInfoImpl<C>[];
+  readonly modularChainInfos: ModularChainInfo[];
+  readonly modularChainInfoImpls: IModularChainInfoImpl[];
 }
 
 export interface IChainInfoImpl<C extends ChainInfo = ChainInfo> {
@@ -69,4 +78,18 @@ export interface IChainInfoImpl<C extends ChainInfo = ChainInfo> {
       }
     | undefined;
   readonly hideInUI: boolean | undefined;
+}
+
+export interface IModularChainInfoImpl<
+  M extends ModularChainInfo = ModularChainInfo
+> {
+  readonly embedded: M;
+  readonly chainId: string;
+
+  getCurrencies(module: ChainInfoModule): AppCurrency[];
+  addCurrencies(module: ChainInfoModule, ...currencies: AppCurrency[]): void;
+  removeCurrencies(
+    module: ChainInfoModule,
+    ...coinMinimalDenoms: string[]
+  ): void;
 }

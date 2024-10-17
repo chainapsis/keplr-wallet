@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/analytics",
-  "version": "0.12.130",
+  "version": "0.12.140",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -13,8 +13,5 @@
     "dev": "tsc -w",
     "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
-  },
-  "dependencies": {
-    "sha.js": "^2.4.11"
   }
 }

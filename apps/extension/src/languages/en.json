@@ -151,6 +151,8 @@
   "pages.register.enable-chains.chain-selected-count": "{numSelected} chain(s) selected",
   "pages.register.enable-chains.skip-button": "Skip",
   "pages.register.enable-chains.guide.can-select-evm-next-step": "You can select EVM chains in the next step.",
+  "pages.register.enable-chains.guide.starknet.title": "Note for Starknet Users",
+  "pages.register.enable-chains.guide.starknet.paragraph": "Importing from other wallets (e.g. Argent, Braavos) will create a new, different account in Keplr.",
 
   "pages.register.select-derivation-path.title": "Select Account Derivation Path",
   "pages.register.select-derivation-path.paragraph": "To use both paths, you need to go through the import process twice.",
@@ -433,6 +435,8 @@
   "page.sign.ethereum.message.title": "Sign Message",
   "page.sign.ethereum.eip-712.title": "Sign Typed Data",
 
+  "page.sign.starknet.tx.calls": "Calls",
+
   "page.sign.components.fee-summary.fee": "Tx Fee",
 
   "page.sign.components.messages.agoric.provision.title": "Provision Smart Wallet",
@@ -590,13 +594,17 @@
   "page.main.components.token-item.copy-address.copied": "Copied",
 
   "page.main.layouts.header.new-chain.title": "✨ {chains} Now Integrated!",
-  "page.main.layouts.header.new-chain.paragraph": "To show the chains and their assets on this account, visit \"Manage Chain Visibility\".",
+  "page.main.layouts.header.new-chain.paragraph": "To show the {count, plural, one {chain} other {chains}} and {count, plural, one {its} other {their}} assets on this account, visit \"Manage Chain Visibility\".",
   "page.main.layouts.header.new-chain.button": "Got it!",
 
   "page.ledger-grant.title": "Allow Browser to Connect to Ledger",
   "page.ledger-grant.paragraph": "You need to reapprove connection to your Ledger. Select the appropriate app, and after successfully connecting with your Ledger device, close this page and retry your previous transaction (signing).",
 
+  "page.starknet.components.account-activation-modal.title": "Activate Your Account",
+  "page.starknet.components.account-activation-modal.description": "Activate your account to access various features of Starknet!{br}A small fee applies for account activation.",
+
   "components.empty-view.text": "No {subject} Yet",
+  "components.input.recipient-input.wallet-address-only-label": "Wallet Address",
   "components.input.recipient-input.wallet-address-label": "Wallet Address or ICNS",
   "components.input.recipient-input.wallet-address-label-ens": "Wallet Address or ENS",
   "components.input.recipient-input.wallet-address-label-icns-ens": "Wallet Address or ICNS or ENS",
@@ -604,6 +612,7 @@
   "components.input.amount-input.max-button": "Max",
   "components.input.memo-input.memo-label": "Memo",
   "components.input.fee-control.fee": "Tx Fee: {assets}",
+  "components.input.fee-control.max-fee": "Max Fee: {assets}",
   "components.input.fee-control.error.insufficient-fee": "Insufficient balance to cover the fees",
   "components.input.fee-control.tooltip.external-fee-set": "Transaction fee was set by website",
   "components.input.fee-control.modal.title": "Fee Options",
@@ -635,6 +644,7 @@
 
   "components.collapsible-list.view-more-tokens": "View {remain} more tokens",
   "components.collapsible-list.collapse": "Collapse",
+  "components.collapsible-list.view-more": "View {remain} more",
 
   "button.confirm": "Confirm",
   "button.ok": "OK",
@@ -643,6 +653,10 @@
   "button.approve": "Approve",
   "button.save": "Save",
   "button.close": "Close",
+  "button.back": "Back",
+  "button.activate-account": "Activate Account",
+  "button.activate": "Activate",
+  "button.activating": "Activating",
   "text-button.select-all": "Select All",
 
   "notification.transaction-success": "Transaction Success",

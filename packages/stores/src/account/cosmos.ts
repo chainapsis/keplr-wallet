@@ -986,59 +986,130 @@ export class CosmosAccountImpl {
       channels[0],
       amount,
       currency,
-      Bech32Address.fromBech32(recipient).toBech32(
-        counterpartyChainBech32Config.bech32PrefixAccAddr
-      ),
+      async () => {
+        if (channels.length === 1) {
+          const chainInfo = this.chainGetter.getChain(
+            channels[0].counterpartyChainId
+          );
+          if (!chainInfo.bech32Config) {
+            throw new Error("Bech32 config is not set");
+          }
+          return Bech32Address.fromBech32(recipient).toBech32(
+            chainInfo.bech32Config.bech32PrefixAccAddr
+          );
+        }
+        const channel = channels[0];
+        const destChainInfo = this.chainGetter.getChain(
+          channel.counterpartyChainId
+        );
+
+        const account = accountStore.getAccount(destChainInfo.chainId);
+        if (account.walletStatus !== WalletStatus.Loaded) {
+          account.init();
+        }
+        if (account.walletStatus === WalletStatus.Loading) {
+          await (() => {
+            return new Promise<void>((resolve) => {
+              if (account.walletStatus === WalletStatus.Loaded) {
+                resolve();
+                return;
+              }
+              autorun(() => {
+                if (account.walletStatus === WalletStatus.Loaded) {
+                  resolve();
+                }
+              });
+            });
+          })();
+        }
+        if (account.walletStatus !== WalletStatus.Loaded) {
+          throw new Error(
+            `The account of ${destChainInfo.chainId} is not loaded: ${account.walletStatus}`
+          );
+        }
+        return account.bech32Address;
+      },
       async () => {
         const memo: any = {};
         let lastForward: any = undefined;
         if (channels.length > 1) {
-          for (const channel of channels.slice(1)) {
-            const destChainInfo = this.chainGetter.getChain(
-              channel.counterpartyChainId
-            );
+          const loopChannels = channels.slice(1);
+          for (let i = 0; i < loopChannels.length; i++) {
+            const channel = loopChannels[i];
+            if (i === loopChannels.length - 1) {
+              const chainInfo = this.chainGetter.getChain(
+                channel.counterpartyChainId
+              );
+              if (!chainInfo.bech32Config) {
+                throw new Error("Bech32 config is not set");
+              }
+              Bech32Address.validate(
+                recipient,
+                chainInfo.bech32Config.bech32PrefixAccAddr
+              );
+              const forward = {
+                receiver: recipient,
+                port: channel.portId,
+                channel: channel.channelId,
+                // TODO: Support timeout
+              };
 
-            const account = accountStore.getAccount(destChainInfo.chainId);
-            if (account.walletStatus !== WalletStatus.Loaded) {
-              account.init();
-            }
-            if (account.walletStatus === WalletStatus.Loading) {
-              await (() => {
-                return new Promise<void>((resolve) => {
-                  if (account.walletStatus === WalletStatus.Loaded) {
-                    resolve();
-                    return;
-                  }
-                  autorun(() => {
+              if (!lastForward) {
+                memo["forward"] = forward;
+              } else {
+                lastForward["next"] = {
+                  forward: forward,
+                };
+              }
+
+              lastForward = forward;
+            } else {
+              const destChainInfo = this.chainGetter.getChain(
+                channel.counterpartyChainId
+              );
+
+              const account = accountStore.getAccount(destChainInfo.chainId);
+              if (account.walletStatus !== WalletStatus.Loaded) {
+                account.init();
+              }
+              if (account.walletStatus === WalletStatus.Loading) {
+                await (() => {
+                  return new Promise<void>((resolve) => {
                     if (account.walletStatus === WalletStatus.Loaded) {
                       resolve();
+                      return;
                     }
+                    autorun(() => {
+                      if (account.walletStatus === WalletStatus.Loaded) {
+                        resolve();
+                      }
+                    });
                   });
-                });
-              })();
-            }
-            if (account.walletStatus !== WalletStatus.Loaded) {
-              throw new Error(
-                `The account of ${destChainInfo.chainId} is not loaded: ${account.walletStatus}`
-              );
-            }
+                })();
+              }
+              if (account.walletStatus !== WalletStatus.Loaded) {
+                throw new Error(
+                  `The account of ${destChainInfo.chainId} is not loaded: ${account.walletStatus}`
+                );
+              }
 
-            const forward = {
-              receiver: account.bech32Address,
-              port: channel.portId,
-              channel: channel.channelId,
-              // TODO: Support timeout
-            };
-
-            if (!lastForward) {
-              memo["forward"] = forward;
-            } else {
-              lastForward["next"] = {
-                forward: forward,
+              const forward = {
+                receiver: account.bech32Address,
+                port: channel.portId,
+                channel: channel.channelId,
+                // TODO: Support timeout
               };
-            }
 
-            lastForward = forward;
+              if (!lastForward) {
+                memo["forward"] = forward;
+              } else {
+                lastForward["next"] = {
+                  forward: forward,
+                };
+              }
+
+              lastForward = forward;
+            }
           }
         }
 
@@ -1075,7 +1146,7 @@ export class CosmosAccountImpl {
     },
     amount: string,
     currency: AppCurrency,
-    recipient: string,
+    recipient: string | (() => Promise<string>),
     memoConstructor: () => Promise<string | undefined>
   ) {
     if (new DenomHelper(currency.coinMinimalDenom).type !== "native") {
@@ -1130,6 +1201,9 @@ export class CosmosAccountImpl {
         const chainIsInjective = this.chainId.startsWith("injective");
 
         let memo = await memoConstructor();
+        if (typeof recipient === "function") {
+          recipient = await recipient();
+        }
 
         if (eip712Signing && chainIsInjective) {
           // I don't know why, but memo is required when injective and eip712

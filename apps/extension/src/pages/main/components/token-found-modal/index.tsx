@@ -87,31 +87,42 @@ export const TokenFoundModal: FunctionComponent<{
     const tokenScans = chainStore.tokenScans.slice();
 
     for (const enable of enables) {
-      if (
-        keyRingStore.needKeyCoinTypeFinalize(
-          keyRingStore.selectedKeyInfo.id,
-          chainStore.getChain(enable)
-        )
-      ) {
+      const modularChainInfo = chainStore.getModularChain(enable);
+      if ("cosmos" in modularChainInfo) {
+        if (
+          keyRingStore.needKeyCoinTypeFinalize(
+            keyRingStore.selectedKeyInfo.id,
+            chainStore.getChain(enable)
+          )
+        ) {
+          const tokenScan = tokenScans.find((tokenScan) => {
+            return ChainIdHelper.parse(tokenScan.chainId).identifier === enable;
+          });
+
+          if (tokenScan && tokenScan.infos.length > 1) {
+            needBIP44Selects.push(enable);
+            enables.splice(enables.indexOf(enable), 1);
+          }
+
+          if (
+            tokenScan &&
+            tokenScan.infos.length === 1 &&
+            tokenScan.infos[0].coinType != null
+          ) {
+            await keyRingStore.finalizeKeyCoinType(
+              keyRingStore.selectedKeyInfo.id,
+              enable,
+              tokenScan.infos[0].coinType
+            );
+          }
+        }
+      } else if ("starknet" in modularChainInfo) {
         const tokenScan = tokenScans.find((tokenScan) => {
           return ChainIdHelper.parse(tokenScan.chainId).identifier === enable;
         });
 
         if (tokenScan && tokenScan.infos.length > 1) {
-          needBIP44Selects.push(enable);
           enables.splice(enables.indexOf(enable), 1);
-        }
-
-        if (
-          tokenScan &&
-          tokenScan.infos.length === 1 &&
-          tokenScan.infos[0].coinType != null
-        ) {
-          await keyRingStore.finalizeKeyCoinType(
-            keyRingStore.selectedKeyInfo.id,
-            enable,
-            tokenScan.infos[0].coinType
-          );
         }
       }
     }
@@ -318,7 +329,11 @@ const FoundChainView: FunctionComponent<{
       <Columns sum={1} gutter="0.5rem" alignY="center">
         <Box width="2.25rem" height="2.25rem">
           <ChainImageFallback
-            chainInfo={chainStore.getChain(tokenScan.chainId)}
+            chainInfo={
+              chainStore.hasChain(tokenScan.chainId)
+                ? chainStore.getChain(tokenScan.chainId)
+                : chainStore.getModularChain(tokenScan.chainId)
+            }
             size="2rem"
             alt="Token Found Modal Chain Image"
           />
@@ -332,7 +347,12 @@ const FoundChainView: FunctionComponent<{
                 : ColorPalette["gray-10"]
             }
           >
-            {chainStore.getChain(tokenScan.chainId).chainName}
+            {
+              (chainStore.hasChain(tokenScan.chainId)
+                ? chainStore.getChain(tokenScan.chainId)
+                : chainStore.getModularChain(tokenScan.chainId)
+              ).chainName
+            }
           </Subtitle2>
           <Body3 color={ColorPalette["gray-300"]}>{numTokens} Tokens</Body3>
         </Stack>
@@ -391,7 +411,11 @@ const FoundTokenView: FunctionComponent<{
     <Columns sum={1} gutter="0.5rem" alignY="center">
       <Box width="1.75rem" height="1.75rem">
         <CurrencyImageFallback
-          chainInfo={chainStore.getChain(chainId)}
+          chainInfo={
+            chainStore.hasChain(chainId)
+              ? chainStore.getChain(chainId)
+              : chainStore.getModularChain(chainId)
+          }
           currency={asset.currency}
           size="1.75rem"
           alt="Token Found Modal Token Image"
@@ -405,11 +429,38 @@ const FoundTokenView: FunctionComponent<{
             : ColorPalette["gray-50"]
         }
       >
-        {
-          chainStore
-            .getChain(chainId)
-            .forceFindCurrency(asset.currency.coinMinimalDenom).coinDenom
-        }
+        {(() => {
+          if (chainStore.hasChain(chainId)) {
+            return chainStore
+              .getChain(chainId)
+              .forceFindCurrency(asset.currency.coinMinimalDenom).coinDenom;
+          } else {
+            const modularChainInfo = chainStore.getModularChain(chainId);
+            if ("starknet" in modularChainInfo) {
+              return (
+                chainStore
+                  .getModularChainInfoImpl(chainId)
+                  .getCurrencies("starknet")
+                  .find(
+                    (cur) =>
+                      cur.coinMinimalDenom === asset.currency.coinMinimalDenom
+                  )?.coinDenom ?? asset.currency.coinDenom
+              );
+            } else if ("cosmos" in modularChainInfo) {
+              return (
+                chainStore
+                  .getModularChainInfoImpl(chainId)
+                  .getCurrencies("cosmos")
+                  .find(
+                    (cur) =>
+                      cur.coinMinimalDenom === asset.currency.coinMinimalDenom
+                  )?.coinDenom ?? asset.currency.coinDenom
+              );
+            } else {
+              return asset.currency.coinDenom;
+            }
+          }
+        })()}
       </Subtitle3>
 
       <Column weight={1} />
@@ -421,20 +472,49 @@ const FoundTokenView: FunctionComponent<{
             : ColorPalette["gray-50"]
         }
       >
-        {uiConfigStore.hideStringIfPrivacyMode(
-          new CoinPretty(
-            chainStore
-              .getChain(chainId)
-              .forceFindCurrency(asset.currency.coinMinimalDenom),
-            asset.amount
-          )
-            .shrink(true)
-            .trim(true)
-            .maxDecimals(6)
-            .inequalitySymbol(true)
-            .toString(),
-          2
-        )}
+        {(() => {
+          const currency = (() => {
+            if (chainStore.hasChain(chainId)) {
+              return chainStore
+                .getChain(chainId)
+                .forceFindCurrency(asset.currency.coinMinimalDenom);
+            } else {
+              const modularChainInfo = chainStore.getModularChain(chainId);
+              if ("starknet" in modularChainInfo) {
+                return (
+                  chainStore
+                    .getModularChainInfoImpl(chainId)
+                    .getCurrencies("starknet")
+                    .find(
+                      (cur) =>
+                        cur.coinMinimalDenom === asset.currency.coinMinimalDenom
+                    ) ?? asset.currency
+                );
+              } else if ("cosmos" in modularChainInfo) {
+                return (
+                  chainStore
+                    .getModularChainInfoImpl(chainId)
+                    .getCurrencies("cosmos")
+                    .find(
+                      (cur) =>
+                        cur.coinMinimalDenom === asset.currency.coinMinimalDenom
+                    ) ?? asset.currency
+                );
+              } else {
+                return asset.currency;
+              }
+            }
+          })();
+          return uiConfigStore.hideStringIfPrivacyMode(
+            new CoinPretty(currency, asset.amount)
+              .shrink(true)
+              .trim(true)
+              .maxDecimals(6)
+              .inequalitySymbol(true)
+              .toString(),
+            2
+          );
+        })()}
       </Subtitle3>
     </Columns>
   );

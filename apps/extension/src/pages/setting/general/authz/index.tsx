@@ -190,6 +190,7 @@ export const SettingGeneralAuthZPage: FunctionComponent = observer(() => {
                     key={title}
                     title={<H4>{title}</H4>}
                     lenAlwaysShown={2}
+                    altViewMoreIntlTextId="components.collapsible-list.view-more"
                     items={grants.map((grant) => (
                       <GrantView
                         key={`${grant.authorization}-${grant.grantee}-${grant.expiration}`}

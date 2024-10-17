@@ -23,6 +23,7 @@ import {
   EIP6963ProviderInfo,
   EIP6963ProviderDetail,
   EIP6963EventNames,
+  IStarknetProvider,
 } from "@keplr-wallet/types";
 import { JSONUint8Array } from "./uint8-array";
 import deepmerge from "deepmerge";
@@ -32,6 +33,11 @@ import { KeplrEnigmaUtils } from "./enigma";
 import { BUILD_VERSION } from "./version";
 import EventEmitter from "events";
 import { KeplrLogoBase64 } from "./constants";
+import {
+  Call,
+  DeployAccountSignerDetails,
+  InvocationsSignerDetails,
+} from "starknet";
 
 export interface ProxyRequest {
   type: "proxy-request";
@@ -566,7 +572,60 @@ export class Keplr implements IKeplr {
     return await Keplr.requestMethod("getChainInfoWithoutEndpoints", [chainId]);
   }
 
+  async getStarknetKey(chainId: string): Promise<{
+    name: string;
+    hexAddress: string;
+    pubKey: Uint8Array;
+    address: Uint8Array;
+  }> {
+    return await Keplr.requestMethod("getStarknetKey", [chainId]);
+  }
+
+  async getStarknetKeysSettled(chainIds: string[]): Promise<
+    SettledResponses<{
+      name: string;
+      hexAddress: string;
+      pubKey: Uint8Array;
+      address: Uint8Array;
+    }>
+  > {
+    return await Keplr.requestMethod("getStarknetKeysSettled", [chainIds]);
+  }
+
+  async signStarknetTx(
+    chainId: string,
+    transactions: Call[],
+    details: InvocationsSignerDetails
+  ): Promise<{
+    transactions: Call[];
+    details: InvocationsSignerDetails;
+    signature: string[];
+  }> {
+    return await Keplr.requestMethod("signStarknetTx", [
+      chainId,
+      transactions,
+      details,
+    ]);
+  }
+
+  async signStarknetDeployAccountTransaction(
+    chainId: string,
+    transaction: DeployAccountSignerDetails
+  ): Promise<{
+    transaction: DeployAccountSignerDetails;
+    signature: string[];
+  }> {
+    return await Keplr.requestMethod("signStarknetDeployAccountTransaction", [
+      chainId,
+      transaction,
+    ]);
+  }
+
   public readonly ethereum = new EthereumProvider(this);
+
+  // TODO: 이거 마지막에 꼭 구현해야한다.
+  //       일단은 다른게 더 급해서 일단 any로 처리
+  public readonly starknet: IStarknetProvider = undefined as any;
 }
 
 const waitDocumentReady = (): Promise<void> => {
