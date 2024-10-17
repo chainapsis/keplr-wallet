@@ -38,7 +38,8 @@ export class AccountImpl extends Account {
     service: KeyRingStarknetService,
     transactions: Call[]
   ): Promise<InvokeFunctionResponse> {
-    const nonce = num.toBigInt(await this.getNonce());
+    // XXX: 계정이 deploy되어있지 않을때는 nonce가 0가 나올 수 있도록 getNonceSafe()를 사용한다.
+    const nonce = num.toBigInt(await this.getNonceSafe());
     const version = stark.toTransactionVersion(
       this.getPreferredVersion("0x1", "0x3") // TODO: does this depend on cairo version ?
     );
