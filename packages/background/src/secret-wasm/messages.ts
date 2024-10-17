@@ -145,3 +145,31 @@ export class GetTxEncryptionKeyMsg extends Message<Uint8Array> {
     return GetTxEncryptionKeyMsg.type();
   }
 }
+
+export class IsNewApiMsg extends Message<boolean> {
+  public static type() {
+    return "is-new-api-msg";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new KeplrError("secret-wasm", 100, "chain id not set");
+    }
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return IsNewApiMsg.type();
+  }
+}

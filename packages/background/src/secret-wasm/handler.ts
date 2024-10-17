@@ -10,6 +10,7 @@ import {
   GetTxEncryptionKeyMsg,
   ReqeustEncryptMsg,
   RequestDecryptMsg,
+  IsNewApiMsg,
 } from "./messages";
 import { SecretWasmService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
@@ -40,6 +41,11 @@ export const getHandler: (
           service,
           permissionInteractionService
         )(env, msg as GetTxEncryptionKeyMsg);
+      case IsNewApiMsg:
+        return handleIsNewApiMsg(service, permissionInteractionService)(
+          env,
+          msg as IsNewApiMsg
+        );
       default:
         throw new KeplrError("secret-wasm", 120, "Unknown msg type");
     }
@@ -61,6 +67,21 @@ const handleGetPubkeyMsg: (
     );
 
     return await service.getPubkey(msg.chainId);
+  };
+};
+
+const handleIsNewApiMsg: (
+  service: SecretWasmService,
+  permissionInteractionService: PermissionInteractiveService
+) => InternalHandler<IsNewApiMsg> = (service, permissionInteractionService) => {
+  return async (env, msg) => {
+    await permissionInteractionService.ensureEnabled(
+      env,
+      [msg.chainId],
+      msg.origin
+    );
+
+    return await service.isNewApi(msg.chainId);
   };
 };
 
