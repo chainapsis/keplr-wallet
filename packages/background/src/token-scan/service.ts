@@ -412,15 +412,28 @@ export class TokenScanService {
               .toString(10);
 
             if (amount !== "0") {
-              tokenScan.infos.push({
-                starknetHexAddress,
-                assets: [
-                  {
+              // XXX: Starknet의 경우는 여러 주소가 나올수가 없으므로
+              //      starknetHexAddress는 같은 값으로 나온다고 생각하고 처리한다.
+              if (tokenScan.infos.length === 0) {
+                tokenScan.infos.push({
+                  starknetHexAddress,
+                  assets: [
+                    {
+                      currency,
+                      amount,
+                    },
+                  ],
+                });
+              } else {
+                if (
+                  tokenScan.infos[0].starknetHexAddress === starknetHexAddress
+                ) {
+                  tokenScan.infos[0].assets.push({
                     currency,
                     amount,
-                  },
-                ],
-              });
+                  });
+                }
+              }
             }
           }
         })
