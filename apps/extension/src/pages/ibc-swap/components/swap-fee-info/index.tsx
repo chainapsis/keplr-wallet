@@ -40,46 +40,50 @@ export const SwapFeeInfo: FunctionComponent<{
       // even though it is not used in logic.
       noop(feeConfig.chainId);
 
-      // TODO: 이 로직은 FeeControl에서 가져온건데 다른 부분이 있음.
-      //       기존 FeeControl은 실수로 인해서 fee를 자동으로 average로 설정하는 로직이
-      //       체인이 바꼈을때는 작동하지 않음
-      //       사실 기존 send page는 체인이 바뀌려면 select-asset page를 통해서만 가능했기 때문에
-      //       이게 문제가 안됐는데 ibc-swap에서는 swtich in-out 등으로 인해서 체인이 동적으로 바뀔 수 있음
-      //       이 문제 때문에 일단 땜빵으로 해결함
-      //       이후에 FeeControl을 살펴보고 문제가 없는 방식을 찾아서 둘 다 수정하던가 해야함
-      const selectableFeeCurrenciesMap = new Map<string, boolean>();
-      for (const feeCurrency of feeConfig.selectableFeeCurrencies) {
-        selectableFeeCurrenciesMap.set(feeCurrency.coinMinimalDenom, true);
-      }
-
-      if (
-        feeConfig.selectableFeeCurrencies.length > 0 &&
-        (feeConfig.fees.length === 0 ||
-          feeConfig.fees.find(
-            (fee) =>
-              !selectableFeeCurrenciesMap.get(fee.currency.coinMinimalDenom)
-          ) != null)
-      ) {
-        if (
-          uiConfigStore.rememberLastFeeOption &&
-          uiConfigStore.lastFeeOption
-        ) {
-          feeConfig.setFee({
-            type: uiConfigStore.lastFeeOption,
-            currency: feeConfig.selectableFeeCurrencies[0],
-          });
-        } else {
-          feeConfig.setFee({
-            type: "average",
-            currency: feeConfig.selectableFeeCurrencies[0],
-          });
+      const disposer = autorun(() => {
+        // TODO: 이 로직은 FeeControl에서 가져온건데 다른 부분이 있음.
+        //       기존 FeeControl은 실수로 인해서 fee를 자동으로 average로 설정하는 로직이
+        //       체인이 바꼈을때는 작동하지 않음
+        //       사실 기존 send page는 체인이 바뀌려면 select-asset page를 통해서만 가능했기 때문에
+        //       이게 문제가 안됐는데 ibc-swap에서는 swtich in-out 등으로 인해서 체인이 동적으로 바뀔 수 있음
+        //       이 문제 때문에 일단 땜빵으로 해결함
+        //       이후에 FeeControl을 살펴보고 문제가 없는 방식을 찾아서 둘 다 수정하던가 해야함
+        const selectableFeeCurrenciesMap = new Map<string, boolean>();
+        for (const feeCurrency of feeConfig.selectableFeeCurrencies) {
+          selectableFeeCurrenciesMap.set(feeCurrency.coinMinimalDenom, true);
         }
-      }
+
+        if (
+          feeConfig.selectableFeeCurrencies.length > 0 &&
+          (feeConfig.fees.length === 0 ||
+            feeConfig.fees.find(
+              (fee) =>
+                !selectableFeeCurrenciesMap.get(fee.currency.coinMinimalDenom)
+            ) != null)
+        ) {
+          if (
+            uiConfigStore.rememberLastFeeOption &&
+            uiConfigStore.lastFeeOption
+          ) {
+            feeConfig.setFee({
+              type: uiConfigStore.lastFeeOption,
+              currency: feeConfig.selectableFeeCurrencies[0],
+            });
+          } else {
+            feeConfig.setFee({
+              type: "average",
+              currency: feeConfig.selectableFeeCurrencies[0],
+            });
+          }
+        }
+      });
+
+      return () => {
+        disposer();
+      };
     }, [
       feeConfig,
       feeConfig.chainId,
-      feeConfig.fees,
-      feeConfig.selectableFeeCurrencies,
       uiConfigStore.lastFeeOption,
       uiConfigStore.rememberLastFeeOption,
     ]);
@@ -129,6 +133,7 @@ export const SwapFeeInfo: FunctionComponent<{
             for (const feeCurrency of feeConfig.selectableFeeCurrencies) {
               const feeCurrencyBal =
                 queryBalances.getBalanceFromCurrency(feeCurrency);
+
               const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
                 feeCurrency,
                 feeConfig.type
