@@ -42,6 +42,11 @@ export class KeyRingLedgerService {
     _coinType: number,
     modularChainInfo: ModularChainInfo
   ): PubKeySecp256k1 {
+    if ("starknet" in modularChainInfo) {
+      throw new Error(
+        "Ledger support is not provided for this chain on Keplr yet"
+      );
+    }
     if (!("cosmos" in modularChainInfo)) {
       // TODO: 나중에 starknet을 어떻게 지원할지 생각해본다.
       throw new Error("Chain is not a cosmos chain");
