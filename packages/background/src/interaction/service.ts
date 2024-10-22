@@ -131,7 +131,7 @@ export class InteractionService {
         interactionWaitingData,
         options
       );
-      return returnFn(response);
+      return await returnFn(response);
     } finally {
       const resolvers = this.resolverV2Map.get(interactionWaitingData.id);
       if (resolvers) {
