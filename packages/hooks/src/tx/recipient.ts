@@ -416,13 +416,12 @@ export class RecipientConfig
     const hasEthereumAddress =
       chainInfo.bip44.coinType === 60 ||
       !!chainInfo.features?.includes("eth-address-gen") ||
-      !!chainInfo.features?.includes("eth-key-sign");
+      !!chainInfo.features?.includes("eth-key-sign") ||
+      isEvmChain;
+    const isHexAddressAllowed =
+      this._allowHexAddressOnly || this._allowHexAddressToBech32Address;
 
-    if (
-      (isEvmChain ||
-        (hasEthereumAddress && this._allowHexAddressToBech32Address)) &&
-      (rawRecipient.startsWith("0x") || this._allowHexAddressOnly)
-    ) {
+    if (hasEthereumAddress && isHexAddressAllowed) {
       if (EthereumAccountBase.isEthereumHexAddressWithChecksum(rawRecipient)) {
         return {};
       } else {
