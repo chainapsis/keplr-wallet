@@ -343,10 +343,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         throw new Error("Not ready to simulate tx");
       }
 
+      const swapFeeBpsReceiver =
+        SwapFeeBps.receivers.find(({ chainId }) => chainId === inChainId)
+          ?.address ?? SwapFeeBps.receivers[0].address;
+
       const tx = ibcSwapConfigs.amountConfig.getTxIfReady(
         // simulation 자체는 쉽게 통과시키기 위해서 슬리피지를 50으로 설정한다.
         50,
-        SwapFeeBps.receiver
+        swapFeeBpsReceiver
       );
       if (!tx) {
         throw new Error("Not ready to simulate tx");
@@ -651,10 +655,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               priorOutAmount = new Int(queryRoute.response.data.amount_out);
             }
 
+            const swapFeeBpsReceiver =
+              SwapFeeBps.receivers.find(({ chainId }) => chainId === inChainId)
+                ?.address ?? SwapFeeBps.receivers[0].address;
+
             const [_tx] = await Promise.all([
               ibcSwapConfigs.amountConfig.getTx(
                 uiConfigStore.ibcSwapConfig.slippageNum,
-                SwapFeeBps.receiver,
+                swapFeeBpsReceiver,
                 priorOutAmount
               ),
               // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.

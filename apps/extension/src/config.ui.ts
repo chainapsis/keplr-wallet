@@ -184,11 +184,15 @@ export const SwapVenues: {
   chainId: string;
 }[] = [
   {
-    name: "injective-astroport",
-    chainId: "injective-1",
+    name: "osmosis-poolmanager",
+    chainId: "osmosis-1",
   },
   {
     name: "injective-helix",
+    chainId: "injective-1",
+  },
+  {
+    name: "injective-astroport",
     chainId: "injective-1",
   },
   {
@@ -196,16 +200,62 @@ export const SwapVenues: {
     chainId: "injective-1",
   },
   {
+    name: "injective-dojoswap",
+    chainId: "injective-1",
+  },
+  {
+    name: "neutron-drop",
+    chainId: "neutron-1",
+  },
+  {
     name: "neutron-astroport",
     chainId: "neutron-1",
   },
   {
-    name: "osmosis-poolmanager",
-    chainId: "osmosis-1",
+    name: "neutron-lido-satellite",
+    chainId: "neutron-1",
+  },
+  {
+    name: "persistence-dexter",
+    chainId: "core-1",
+  },
+  {
+    name: "pryzm-native",
+    chainId: "pryzm-1",
+  },
+  {
+    name: "chihuahua-white-whale",
+    chainId: "chihuahua-1",
   },
 ];
 
 export const SwapFeeBps = {
   value: 75,
-  receiver: "osmo1my4tk420gjmhggqwvvha6ey9390gqwfree2p4u",
+  receivers: [
+    {
+      chainId: "osmosis-1",
+      address: "osmo1my4tk420gjmhggqwvvha6ey9390gqwfree2p4u",
+    },
+    // TODO: 여기 밑으론 실제 receiver 주소로 변경해야 함
+    {
+      chainId: "injective-1",
+      address: "inj10alvsy3f0a6vsr7ghjh3rtygrhygavsk45803c",
+    },
+    {
+      chainId: "neutron-1",
+      address: "neutron1xs55snr6lxsalaqrwc63cxlmgn437zzvlapu37",
+    },
+    {
+      chainId: "core-1",
+      address: "persistence1xs55snr6lxsalaqrwc63cxlmgn437zzv4wwd9a",
+    },
+    {
+      chainId: "pryzm-1",
+      address: "pryzm1xs55snr6lxsalaqrwc63cxlmgn437zzvrjle42",
+    },
+    {
+      chainId: "chihuahua-1",
+      address: "chihuahua1xs55snr6lxsalaqrwc63cxlmgn437zzvch9s2m",
+    },
+  ],
 };
