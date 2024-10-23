@@ -343,14 +343,28 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         throw new Error("Not ready to simulate tx");
       }
 
-      const swapFeeBpsReceiver =
-        SwapFeeBps.receivers.find(({ chainId }) => chainId === inChainId)
-          ?.address ?? SwapFeeBps.receivers[0].address;
+      const swapFeeBpsReceiver: string[] = [];
+      const queryRoute = ibcSwapConfigs.amountConfig
+        .getQueryIBCSwap()
+        ?.getQueryRoute();
+      if (queryRoute && queryRoute.response) {
+        if (queryRoute.response.data.operations.length > 0) {
+          for (const operation of queryRoute.response.data.operations) {
+            if ("swap" in operation) {
+              const swapFeeBpsReceiverAccount = accountStore.getAccount(
+                operation.swap.swap_in.swap_venue.chain_id
+              );
+              swapFeeBpsReceiver.push(swapFeeBpsReceiverAccount.bech32Address);
+            }
+          }
+        }
+      }
 
       const tx = ibcSwapConfigs.amountConfig.getTxIfReady(
         // simulation 자체는 쉽게 통과시키기 위해서 슬리피지를 50으로 설정한다.
         50,
-        swapFeeBpsReceiver
+        // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
+        swapFeeBpsReceiver[0]
       );
       if (!tx) {
         throw new Error("Not ready to simulate tx");
@@ -648,31 +662,20 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           }[] = [];
           let swapChannelIndex: number = -1;
           const swapReceiver: string[] = [];
+          const swapFeeBpsReceiver: string[] = [];
 
+          // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.
+          // /msgs_direct로도 얻을 순 있지만 따로 데이터를 해석해야되기 때문에 좀 힘들다...
+          // 엄밀히 말하면 각각의 엔드포인트이기 때문에 약간의 시간차 등으로 서로 일치하지 않는 값이 올수도 있다.
+          // 근데 현실에서는 그런 일 안 일어날듯 그냥 그런 문제는 무시하고 진행한다.
+          // queryRoute.waitFreshResponse(),
+          // 인데 사실 ibcSwapConfigs.amountConfig.getTx에서 queryRoute.waitFreshResponse()를 하도록 나중에 바껴서...
+          // 굳이 중복할 필요가 없어짐
           try {
             let priorOutAmount: Int | undefined = undefined;
             if (queryRoute.response) {
               priorOutAmount = new Int(queryRoute.response.data.amount_out);
             }
-
-            const swapFeeBpsReceiver =
-              SwapFeeBps.receivers.find(({ chainId }) => chainId === inChainId)
-                ?.address ?? SwapFeeBps.receivers[0].address;
-
-            const [_tx] = await Promise.all([
-              ibcSwapConfigs.amountConfig.getTx(
-                uiConfigStore.ibcSwapConfig.slippageNum,
-                swapFeeBpsReceiver,
-                priorOutAmount
-              ),
-              // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.
-              // /msgs_direct로도 얻을 순 있지만 따로 데이터를 해석해야되기 때문에 좀 힘들다...
-              // 엄밀히 말하면 각각의 엔드포인트이기 때문에 약간의 시간차 등으로 서로 일치하지 않는 값이 올수도 있다.
-              // 근데 현실에서는 그런 일 안 일어날듯 그냥 그런 문제는 무시하고 진행한다.
-              // queryRoute.waitFreshResponse(),
-              // 인데 사실 ibcSwapConfigs.amountConfig.getTx에서 queryRoute.waitFreshResponse()를 하도록 나중에 바껴서...
-              // 굳이 중복할 필요가 없어짐
-            ]);
 
             if (!queryRoute.response) {
               throw new Error("queryRoute.response is undefined");
@@ -702,6 +705,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   counterpartyChainId: queryClientState.clientChainId,
                 });
               } else if ("swap" in operation) {
+                const swapFeeBpsReceiverAccount = accountStore.getAccount(
+                  operation.swap.swap_in.swap_venue.chain_id
+                );
+                swapFeeBpsReceiver.push(
+                  swapFeeBpsReceiverAccount.bech32Address
+                );
                 swapChannelIndex = channels.length - 1;
               }
             }
@@ -720,6 +729,15 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               }
               swapReceiver.push(receiverAccount.bech32Address);
             }
+
+            const [_tx] = await Promise.all([
+              ibcSwapConfigs.amountConfig.getTx(
+                uiConfigStore.ibcSwapConfig.slippageNum,
+                // 코스모스 스왑은 스왑베뉴가 무조건 하나라고 해서 일단 처음걸 쓰기로 한다.
+                swapFeeBpsReceiver[0],
+                priorOutAmount
+              ),
+            ]);
 
             tx = _tx;
           } catch (e) {
