@@ -27,7 +27,7 @@ export class ObservableQueryChains extends ObservableQuery<ChainsResponse> {
     protected readonly chainStore: InternalChainStore,
     protected readonly skipURL: string
   ) {
-    super(sharedContext, skipURL, "/v1/info/chains");
+    super(sharedContext, skipURL, "/v2/info/chains");
 
     makeObservable(this);
   }
