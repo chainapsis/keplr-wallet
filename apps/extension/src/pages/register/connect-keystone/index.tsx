@@ -12,8 +12,9 @@ import { Button } from "../../../components/button";
 import { ColorPalette } from "../../../styles";
 import { useTheme } from "styled-components";
 import { FormattedMessage, useIntl } from "react-intl";
+export { ConnectKeystoneUSBScene } from "./usb";
 
-export const ConnectKeystoneScene: FunctionComponent<{
+export const ConnectKeystoneQRScene: FunctionComponent<{
   name: string;
   password: string;
   stepPrevious: number;

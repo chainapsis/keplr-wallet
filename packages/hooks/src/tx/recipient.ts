@@ -418,10 +418,10 @@ export class RecipientConfig
       !!chainInfo.features?.includes("eth-address-gen") ||
       !!chainInfo.features?.includes("eth-key-sign") ||
       isEvmChain;
-    if (
-      hasEthereumAddress &&
-      (rawRecipient.startsWith("0x") || this._allowHexAddressOnly)
-    ) {
+    const isHexAddressAllowed =
+      this._allowHexAddressOnly || this._allowHexAddressToBech32Address;
+
+    if (hasEthereumAddress && isHexAddressAllowed) {
       if (EthereumAccountBase.isEthereumHexAddressWithChecksum(rawRecipient)) {
         return {};
       } else {
@@ -478,7 +478,7 @@ export const useRecipientConfig = (
   config.setAllowHexAddressToBech32Address(
     options.allowHexAddressToBech32Address
   );
-  config.setAllowHexAddressToBech32Address(options.allowHexAddressOnly);
+  config.setAllowHexAddressOnly(options.allowHexAddressOnly);
   config.setICNS(options.icns);
   config.setENS(options.ens);
 

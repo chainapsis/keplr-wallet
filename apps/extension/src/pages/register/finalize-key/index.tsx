@@ -54,7 +54,14 @@ export const FinalizeKeyScene: FunctionComponent<{
       addressIndex: number;
     };
   };
-  keystone?: MultiAccounts;
+  keystone?: MultiAccounts & {
+    bip44Path: {
+      account: number;
+      change: number;
+      addressIndex: number;
+    };
+    connectionType?: "USB" | "QR";
+  };
   stepPrevious: number;
   stepTotal: number;
 }> = observer(
