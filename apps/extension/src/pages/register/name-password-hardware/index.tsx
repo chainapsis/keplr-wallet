@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { RegisterSceneBox } from "../components/register-scene-box";
 import { Box } from "../../../components/box";
 import { FormNamePassword, useFormNamePassword } from "../components/form";
@@ -22,6 +22,7 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
   const sceneTransition = useSceneTransition();
   const intl = useIntl();
 
+  const [headerHasSet, setHeaderHasSet] = useState(false);
   const header = useRegisterHeader();
   useSceneEvents({
     onWillVisible: () => {
@@ -33,14 +34,30 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
         stepCurrent: 1,
         stepTotal: type === "keystone" ? 4 : 3,
       });
+      setHeaderHasSet(true);
     },
   });
+
+  const [keystoneWay, setKeystoneWay] = useState<string>("USB");
+  const [isKeystoneUSB, setIsKeystoneUSB] = useState(true);
+  useEffect(() => {
+    if (headerHasSet && type === "keystone") {
+      const prev = header.header;
+      if ("stepTotal" in prev) {
+        if (isKeystoneUSB) {
+          // USB에서는 step 3개밖에 안 필요하더라...
+          header.setHeader({ ...prev, stepTotal: 3 });
+        } else {
+          header.setHeader({ ...prev, stepTotal: 4 });
+        }
+      }
+    }
+  }, [header, headerHasSet, isKeystoneUSB, type]);
 
   const form = useFormNamePassword();
 
   const [connectTo, setConnectTo] = useState<string>("Cosmos");
-
-  const bip44PathState = useBIP44PathState(type === "ledger");
+  const bip44PathState = useBIP44PathState(true);
   const [isBIP44CardOpen, setIsBIP44CardOpen] = useState(false);
 
   return (
@@ -57,7 +74,16 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
               stepTotal: 3,
             });
           } else if (type === "keystone") {
-            sceneTransition.push("connect-keystone", {
+            if (isKeystoneUSB) {
+              return sceneTransition.push("connect-keystone-usb", {
+                name: data.name,
+                password: data.password,
+                bip44Path: isKeystoneUSB ? bip44PathState.getPath() : undefined,
+                stepPrevious: 1,
+                stepTotal: 3,
+              });
+            }
+            return sceneTransition.push("connect-keystone-qr", {
               name: data.name,
               password: data.password,
               stepPrevious: 1,
@@ -131,6 +157,70 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
                   }}
                 />
               </VerticalCollapseTransition>
+              <Gutter size="1.25rem" />
+            </React.Fragment>
+          ) : undefined}
+          {type === "keystone" ? (
+            <React.Fragment>
+              <Gutter size="1rem" />
+              <Label
+                content={intl.formatMessage({
+                  id: "pages.register.name-password-hardware.connect-keystone-way",
+                })}
+              />
+              <Dropdown
+                color="text-input"
+                size="large"
+                selectedItemKey={keystoneWay}
+                items={[
+                  {
+                    key: "USB",
+                    label: intl.formatMessage({
+                      id: "pages.register.name-password-hardware.connect-to-keystone-USB",
+                    }),
+                  },
+                  {
+                    key: "QR",
+                    label: intl.formatMessage({
+                      id: "pages.register.name-password-hardware.connect-to-keystone-QR",
+                    }),
+                  },
+                ]}
+                onSelect={(key) => {
+                  setKeystoneWay(key);
+                  setIsKeystoneUSB(key === "USB");
+                }}
+              />
+              <Gutter size="1.625rem" />
+              {isKeystoneUSB && (
+                <React.Fragment>
+                  <VerticalCollapseTransition
+                    width="100%"
+                    collapsed={isBIP44CardOpen}
+                  >
+                    <Box alignX="center">
+                      <Button
+                        size="small"
+                        color="secondary"
+                        text={intl.formatMessage({
+                          id: "button.advanced",
+                        })}
+                        onClick={() => {
+                          setIsBIP44CardOpen(true);
+                        }}
+                      />
+                    </Box>
+                  </VerticalCollapseTransition>
+                  <VerticalCollapseTransition collapsed={!isBIP44CardOpen}>
+                    <SetBip44PathCard
+                      state={bip44PathState}
+                      onClose={() => {
+                        setIsBIP44CardOpen(false);
+                      }}
+                    />
+                  </VerticalCollapseTransition>
+                </React.Fragment>
+              )}
               <Gutter size="1.25rem" />
             </React.Fragment>
           ) : undefined}
