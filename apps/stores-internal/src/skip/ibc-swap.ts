@@ -374,11 +374,15 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       }
     >();
 
+    const isMobile = "ReactNativeWebView" in window;
+
     for (const swapVenue of this.swapVenues) {
       const swapChainInfo = this.chainStore.getChain(swapVenue.chainId);
 
       const queryAssets = this.queryAssets.getAssets(swapChainInfo.chainId);
-      const assets = queryAssets.assetsOnlySwapUsages;
+      const assets = isMobile
+        ? queryAssets.assetsOnlySwapUsages
+        : queryAssets.assets;
 
       const getMap = (chainId: string) => {
         const chainIdentifier =
@@ -430,14 +434,27 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
               // 오스모시스를 거쳐서 오기 때문에 ibc 모듈만 있다면 자산을 받을 수 있다.
               const originCurrency = currency.originCurrency;
               const inner = getMap(currency.originChainId);
-              inner.currencies.push(originCurrency);
+
+              if (
+                !inner.currencies.some(
+                  (c) => c.coinMinimalDenom === originCurrency.coinMinimalDenom
+                )
+              ) {
+                inner.currencies.push(originCurrency);
+              }
             }
           } else if (!("paths" in currency)) {
             // 현재 CW20같은 얘들은 처리할 수 없다.
             if (!("type" in currency)) {
               // if currency is not ibc currency
               const inner = getMap(chainId);
-              inner.currencies.push(currency);
+              if (
+                !inner.currencies.some(
+                  (c) => c.coinMinimalDenom === currency.coinMinimalDenom
+                )
+              ) {
+                inner.currencies.push(currency);
+              }
             }
           }
         }
