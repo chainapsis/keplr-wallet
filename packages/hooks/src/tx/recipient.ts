@@ -419,7 +419,8 @@ export class RecipientConfig
       !!chainInfo.features?.includes("eth-key-sign") ||
       isEvmChain;
     const isHexAddressAllowed =
-      this._allowHexAddressOnly || this._allowHexAddressToBech32Address;
+      this._allowHexAddressOnly ||
+      (rawRecipient.startsWith("0x") && this._allowHexAddressToBech32Address);
 
     if (hasEthereumAddress && isHexAddressAllowed) {
       if (EthereumAccountBase.isEthereumHexAddressWithChecksum(rawRecipient)) {
