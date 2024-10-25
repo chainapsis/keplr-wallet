@@ -209,6 +209,7 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
                 ]
               : [],
           swap_venues: this.swapVenues,
+          allow_unsafe: true,
         }),
         signal: abortController.signal,
       }

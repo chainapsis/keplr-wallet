@@ -198,6 +198,7 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
         dest_asset_chain_id: this.destChainId,
         cumulative_affiliate_fee_bps: this.affiliateFeeBps.toString(),
         swap_venues: this.swapVenues,
+        allow_unsafe: true,
       }),
       signal: abortController.signal,
     });
