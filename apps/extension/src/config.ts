@@ -2605,6 +2605,59 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     },
     features: ["cosmwasm"],
   },
+  {
+    rpc: "https://rpc-pirin.keplr.app",
+    rest: "https://lcd-pirin.keplr.app",
+    chainId: "pirin-1",
+    chainName: "Nolus",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/pirin/nolus.png",
+    stakeCurrency: {
+      coinDenom: "NLS",
+      coinMinimalDenom: "unls",
+      coinDecimals: 6,
+      coinGeckoId: "nolus",
+      coinImageUrl:
+        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/pirin/nolus.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "nolus",
+      bech32PrefixAccPub: "noluspub",
+      bech32PrefixValAddr: "nolusvaloper",
+      bech32PrefixValPub: "nolusvaloperpub",
+      bech32PrefixConsAddr: "nolusvalcons",
+      bech32PrefixConsPub: "nolusvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "NLS",
+        coinMinimalDenom: "unls",
+        coinDecimals: 6,
+        coinGeckoId: "nolus",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/pirin/nolus.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "NLS",
+        coinMinimalDenom: "unls",
+        coinDecimals: 6,
+        coinGeckoId: "nolus",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/pirin/nolus.png",
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.025,
+          high: 0.05,
+        },
+      },
+    ],
+    features: ["cosmwasm"],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
