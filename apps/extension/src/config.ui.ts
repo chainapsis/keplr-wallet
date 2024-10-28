@@ -239,23 +239,23 @@ export const SwapFeeBps = {
     // TODO: 여기 밑으론 실제 receiver 주소로 변경해야 함
     {
       chainId: "injective-1",
-      address: "inj10alvsy3f0a6vsr7ghjh3rtygrhygavsk45803c",
+      address: "inj1tfn0awxutuvrgqvme7g3e9nd2fe5r3uzqa4fjr",
     },
     {
       chainId: "neutron-1",
-      address: "neutron1xs55snr6lxsalaqrwc63cxlmgn437zzvlapu37",
+      address: "neutron1my4tk420gjmhggqwvvha6ey9390gqwfr4asnef",
     },
     {
       chainId: "core-1",
-      address: "persistence1xs55snr6lxsalaqrwc63cxlmgn437zzv4wwd9a",
+      address: "persistence1my4tk420gjmhggqwvvha6ey9390gqwfrlwlzd2",
     },
     {
       chainId: "pryzm-1",
-      address: "pryzm1xs55snr6lxsalaqrwc63cxlmgn437zzvrjle42",
+      address: "pryzm1my4tk420gjmhggqwvvha6ey9390gqwfrfjwkaa",
     },
     {
       chainId: "chihuahua-1",
-      address: "chihuahua1xs55snr6lxsalaqrwc63cxlmgn437zzvch9s2m",
+      address: "chihuahua1my4tk420gjmhggqwvvha6ey9390gqwfrjh5lzv",
     },
   ],
 };
