@@ -30,10 +30,12 @@ export interface AssetsResponse {
 
 export interface MsgsDirectResponse {
   msgs: {
-    chain_id: string;
-    path: string[];
-    msg: string;
-    msg_type_url: string;
+    multi_chain_msg: {
+      chain_id: string;
+      path: string[];
+      msg: string;
+      msg_type_url: string;
+    };
   }[];
   route: RouteResponse;
 }

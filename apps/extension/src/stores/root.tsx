@@ -9,8 +9,8 @@ import {
   TokenContractListURL,
   GoogleMeasurementId,
   GoogleAPIKeyForMeasurement,
-  SwapVenue,
   CoinGeckoCoinDataByTokenAddress,
+  SwapVenues,
 } from "../config.ui";
 import {
   AccountStore,
@@ -327,7 +327,7 @@ export class RootStore {
       this.queriesStore.sharedContext,
       this.chainStore,
       this.swapUsageQueries,
-      SwapVenue
+      SwapVenues
     );
     this.starknetQueriesStore = new StarknetQueriesStore(
       this.queriesStore.sharedContext,
