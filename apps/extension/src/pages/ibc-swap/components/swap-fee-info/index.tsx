@@ -36,11 +36,11 @@ export const SwapFeeInfo: FunctionComponent<{
     const theme = useTheme();
 
     useLayoutEffect(() => {
-      // Require to invoke effect whenever chain is changed,
-      // even though it is not used in logic.
-      noop(feeConfig.chainId);
-
       const disposer = autorun(() => {
+        // Require to invoke effect whenever chain is changed,
+        // even though it is not used in logic.
+        noop(feeConfig.chainId);
+
         // TODO: 이 로직은 FeeControl에서 가져온건데 다른 부분이 있음.
         //       기존 FeeControl은 실수로 인해서 fee를 자동으로 average로 설정하는 로직이
         //       체인이 바꼈을때는 작동하지 않음
@@ -81,12 +81,7 @@ export const SwapFeeInfo: FunctionComponent<{
       return () => {
         disposer();
       };
-    }, [
-      feeConfig,
-      feeConfig.chainId,
-      uiConfigStore.lastFeeOption,
-      uiConfigStore.rememberLastFeeOption,
-    ]);
+    }, [feeConfig, uiConfigStore]);
 
     useLayoutEffect(() => {
       // Require to invoke effect whenever chain is changed,
