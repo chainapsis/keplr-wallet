@@ -123,7 +123,20 @@ export const MsgRelationIBCSwap: FunctionComponent<{
           typeof obj.forward.port === "string" &&
           typeof obj.forward.channel === "string"
         ) {
-          obj = typeof obj.next === "string" ? JSON.parse(obj.next) : obj.next;
+          obj = (() => {
+            if (
+              obj.forward &&
+              typeof obj.forward === "object" &&
+              obj.forward.next
+            ) {
+              const next = obj.forward.next;
+              return typeof next === "string" ? JSON.parse(next) : next;
+            }
+
+            return typeof obj.next === "string"
+              ? JSON.parse(obj.next)
+              : obj.next;
+          })();
         } else if (
           obj.wasm?.msg?.swap_and_action?.user_swap?.swap_exact_asset_in
             ?.operations
@@ -143,7 +156,20 @@ export const MsgRelationIBCSwap: FunctionComponent<{
             }
           }
 
-          obj = typeof obj.next === "string" ? JSON.parse(obj.next) : obj.next;
+          obj = (() => {
+            if (
+              obj.forward &&
+              typeof obj.forward === "object" &&
+              obj.forward.next
+            ) {
+              const next = obj.forward.next;
+              return typeof next === "string" ? JSON.parse(next) : next;
+            }
+
+            return typeof obj.next === "string"
+              ? JSON.parse(obj.next)
+              : obj.next;
+          })();
           break;
         } else {
           break;
