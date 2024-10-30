@@ -26,10 +26,10 @@ export class ObservableQueryIBCSwapInner {
     public readonly destAssetDenom: string,
     public readonly destAssetChainId: string,
     public readonly affiliateFeeBps: number,
-    public readonly swapVenues: {
+    public readonly swapVenue: {
       readonly name: string;
       readonly chainId: string;
-    }[]
+    }
   ) {}
 
   getQueryMsgsDirect(
@@ -53,7 +53,7 @@ export class ObservableQueryIBCSwapInner {
       slippageTolerancePercent,
       this.affiliateFeeBps,
       affiliateFeeReceiver,
-      this.swapVenues
+      this.swapVenue
     );
   }
 
@@ -71,7 +71,7 @@ export class ObservableQueryIBCSwapInner {
       this.destAssetChainId,
       this.destAssetDenom,
       this.affiliateFeeBps,
-      this.swapVenues
+      this.swapVenue
     );
   }
 }
@@ -85,10 +85,10 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
     protected readonly queryRoute: ObservableQueryRoute,
     protected readonly queryMsgsDirect: ObservableQueryMsgsDirect,
     protected readonly queryIBCPacketForwardingTransfer: ObservableQueryIbcPfmTransfer,
-    public readonly swapVenues: {
+    public readonly swapVenue: {
       readonly name: string;
       readonly chainId: string;
-    }[]
+    }
   ) {
     super((str) => {
       const parsed = JSON.parse(str);
@@ -102,7 +102,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         parsed.destDenom,
         parsed.destChainId,
         parsed.affiliateFeeBps,
-        parsed.swapVenues
+        parsed.swapVenue
       );
     });
 
@@ -123,7 +123,7 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       destChainId,
       destDenom,
       affiliateFeeBps,
-      swapVenues: this.swapVenues,
+      swapVenue: this.swapVenue,
     });
     return this.get(str);
   }
@@ -161,69 +161,121 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         return false;
       }
 
-      for (const swapVenue of this.swapVenues) {
-        // osmosis 위에 있는 ibc 토큰은 그냥 통과시킨다.
+      // osmosis 위에 있는 ibc 토큰은 그냥 통과시킨다.
+      if (
+        ChainIdHelper.parse(chainId).identifier ===
+        this.chainStore.getChain(this.swapVenue.chainId).chainIdentifier
+      ) {
+        return true;
+      }
+
+      const assetsFromSource = this.queryAssetsFromSource.getSourceAsset(
+        chainId,
+        currency.coinMinimalDenom
+      ).assetsFromSource;
+
+      if (!assetsFromSource) {
+        return false;
+      }
+
+      const swapVenueChainId = this.chainStore.getChain(
+        this.swapVenue.chainId
+      ).chainId;
+
+      const assets = assetsFromSource[swapVenueChainId];
+
+      if (!assets) {
+        return false;
+      }
+
+      // TODO: 미래에는 assets가 두개 이상이 될수도 있다고 한다.
+      //       근데 지금은 한개로만 고정되어 있다고 한다...
+      //       나중에 두개 이상의 경우가 생기면 다시 생각해보자...
+      if (assets.assets.length > 0) {
+        const asset = assets.assets[0];
         if (
-          ChainIdHelper.parse(chainId).identifier ===
-          this.chainStore.getChain(swapVenue.chainId).chainIdentifier
+          asset.chainId === swapVenueChainId &&
+          this.chainStore.hasChain(asset.chainId) &&
+          this.chainStore.hasChain(asset.originChainId)
         ) {
-          return true;
-        }
+          const channels: {
+            portId: string;
+            channelId: string;
 
-        const assetsFromSource = this.queryAssetsFromSource.getSourceAsset(
-          chainId,
-          currency.coinMinimalDenom
-        ).assetsFromSource;
+            counterpartyChainId: string;
+          }[] = [];
 
-        if (!assetsFromSource) {
-          return false;
-        }
-
-        const swapVenueChainId = this.chainStore.getChain(
-          swapVenue.chainId
-        ).chainId;
-
-        const assets = assetsFromSource[swapVenueChainId];
-
-        if (!assets) {
-          return false;
-        }
-
-        // TODO: 미래에는 assets가 두개 이상이 될수도 있다고 한다.
-        //       근데 지금은 한개로만 고정되어 있다고 한다...
-        //       나중에 두개 이상의 경우가 생기면 다시 생각해보자...
-        if (assets.assets.length > 0) {
-          const asset = assets.assets[0];
           if (
-            asset.chainId === swapVenueChainId &&
-            this.chainStore.hasChain(asset.chainId) &&
-            this.chainStore.hasChain(asset.originChainId)
+            ChainIdHelper.parse(currency.originChainId).identifier !==
+            ChainIdHelper.parse(asset.originChainId).identifier
           ) {
-            const channels: {
-              portId: string;
-              channelId: string;
+            return false;
+          }
 
-              counterpartyChainId: string;
-            }[] = [];
+          const destinationCurrency = this.chainStore
+            .getChain(asset.chainId)
+            .findCurrencyWithoutReaction(asset.denom);
+
+          if (!destinationCurrency) {
+            return false;
+          }
+
+          if (
+            currency.paths.length === 0 ||
+            currency.paths.some((path) => {
+              return (
+                !path.portId ||
+                !path.channelId ||
+                !path.counterpartyPortId ||
+                !path.counterpartyChannelId ||
+                !path.clientChainId ||
+                !this.chainStore.hasChain(path.clientChainId)
+              );
+            })
+          ) {
+            return false;
+          }
+
+          const lastPath = currency.paths[currency.paths.length - 1];
+          if (
+            !lastPath.clientChainId ||
+            ChainIdHelper.parse(lastPath.clientChainId).identifier !==
+              ChainIdHelper.parse(asset.originChainId).identifier
+          ) {
+            return false;
+          }
+
+          // Path to the origin chain
+          channels.push(
+            ...currency.paths.map((path) => {
+              return {
+                portId: path.portId!,
+                channelId: path.channelId!,
+                counterpartyChainId: path.clientChainId!,
+              };
+            })
+          );
+
+          if ("paths" in destinationCurrency) {
+            if (
+              !destinationCurrency.originChainId ||
+              !destinationCurrency.originCurrency ||
+              !this.chainStore.hasChain(destinationCurrency.originChainId)
+            ) {
+              return false;
+            }
 
             if (
-              ChainIdHelper.parse(currency.originChainId).identifier !==
+              ChainIdHelper.parse(destinationCurrency.originChainId)
+                .identifier !==
               ChainIdHelper.parse(asset.originChainId).identifier
             ) {
               return false;
             }
 
-            const destinationCurrency = this.chainStore
-              .getChain(asset.chainId)
-              .findCurrencyWithoutReaction(asset.denom);
-
-            if (!destinationCurrency) {
-              return false;
-            }
-
             if (
-              currency.paths.length === 0 ||
-              currency.paths.some((path) => {
+              destinationCurrency.paths.length === 0 ||
+              destinationCurrency.paths.some((path) => {
                 return (
                   !path.portId ||
                   !path.channelId ||
@@ -237,112 +289,58 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
               return false;
             }
 
-            const lastPath = currency.paths[currency.paths.length - 1];
-            if (
-              !lastPath.clientChainId ||
-              ChainIdHelper.parse(lastPath.clientChainId).identifier !==
-                ChainIdHelper.parse(asset.originChainId).identifier
-            ) {
-              return false;
+            const reversedPaths = destinationCurrency.paths.slice().reverse();
+            for (let i = 0; i < reversedPaths.length; i++) {
+              const reversedPath = reversedPaths[i];
+              channels.push({
+                portId: reversedPath.counterpartyPortId!,
+                channelId: reversedPath.counterpartyChannelId!,
+                counterpartyChainId:
+                  reversedPaths.length > i + 1
+                    ? reversedPaths[i + 1].clientChainId!
+                    : asset.chainId,
+              });
             }
+          }
 
-            // Path to the origin chain
-            channels.push(
-              ...currency.paths.map((path) => {
-                return {
-                  portId: path.portId!,
-                  channelId: path.channelId!,
-                  counterpartyChainId: path.clientChainId!,
-                };
-              })
-            );
-
-            if ("paths" in destinationCurrency) {
+          let pfmPossibility = true;
+          if (channels.length > 0) {
+            // Only push if it is possible to transfer via packet forwarding.
+            // (If channel is only one, no need to check packet forwarding because it is direct transfer)
+            if (channels.length > 1) {
               if (
-                !destinationCurrency.originChainId ||
-                !destinationCurrency.originCurrency ||
-                !this.chainStore.hasChain(destinationCurrency.originChainId)
+                !this.chainStore.getChain(chainId).hasFeature("ibc-go") ||
+                !this.queryChains.isSupportsMemo(chainId)
               ) {
-                return false;
-              }
-
-              if (
-                ChainIdHelper.parse(destinationCurrency.originChainId)
-                  .identifier !==
-                ChainIdHelper.parse(asset.originChainId).identifier
-              ) {
-                return false;
-              }
-
-              if (
-                destinationCurrency.paths.length === 0 ||
-                destinationCurrency.paths.some((path) => {
-                  return (
-                    !path.portId ||
-                    !path.channelId ||
-                    !path.counterpartyPortId ||
-                    !path.counterpartyChannelId ||
-                    !path.clientChainId ||
-                    !this.chainStore.hasChain(path.clientChainId)
-                  );
-                })
-              ) {
-                return false;
-              }
-
-              const reversedPaths = destinationCurrency.paths.slice().reverse();
-              for (let i = 0; i < reversedPaths.length; i++) {
-                const reversedPath = reversedPaths[i];
-                channels.push({
-                  portId: reversedPath.counterpartyPortId!,
-                  channelId: reversedPath.counterpartyChannelId!,
-                  counterpartyChainId:
-                    reversedPaths.length > i + 1
-                      ? reversedPaths[i + 1].clientChainId!
-                      : asset.chainId,
-                });
-              }
-            }
-
-            let pfmPossibility = true;
-            if (channels.length > 0) {
-              // Only push if it is possible to transfer via packet forwarding.
-              // (If channel is only one, no need to check packet forwarding because it is direct transfer)
-              if (channels.length > 1) {
-                if (
-                  !this.chainStore.getChain(chainId).hasFeature("ibc-go") ||
-                  !this.queryChains.isSupportsMemo(chainId)
-                ) {
-                  pfmPossibility = false;
-                }
-
-                if (pfmPossibility) {
-                  for (let i = 0; i < channels.length - 1; i++) {
-                    const channel = channels[i];
-                    if (
-                      !this.chainStore
-                        .getChain(channel.counterpartyChainId)
-                        .hasFeature("ibc-go") ||
-                      !this.queryChains.isSupportsMemo(
-                        channel.counterpartyChainId
-                      ) ||
-                      !this.queryChains.isPFMEnabled(
-                        channel.counterpartyChainId
-                      ) ||
-                      !this.chainStore
-                        .getChain(channel.counterpartyChainId)
-                        .hasFeature("ibc-pfm")
-                    ) {
-                      pfmPossibility = false;
-                      break;
-                    }
-                  }
-                }
+                pfmPossibility = false;
               }
 
               if (pfmPossibility) {
-                return true;
+                for (let i = 0; i < channels.length - 1; i++) {
+                  const channel = channels[i];
+                  if (
+                    !this.chainStore
+                      .getChain(channel.counterpartyChainId)
+                      .hasFeature("ibc-go") ||
+                    !this.queryChains.isSupportsMemo(
+                      channel.counterpartyChainId
+                    ) ||
+                    !this.queryChains.isPFMEnabled(
+                      channel.counterpartyChainId
+                    ) ||
+                    !this.chainStore
+                      .getChain(channel.counterpartyChainId)
+                      .hasFeature("ibc-pfm")
+                  ) {
+                    pfmPossibility = false;
+                    break;
+                  }
+                }
               }
+            }
+
+            if (pfmPossibility) {
+              return true;
             }
           }
         }
@@ -365,6 +363,11 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       currencies: Currency[];
     }
   > {
+    const swapChainInfo = this.chainStore.getChain(this.swapVenue.chainId);
+
+    const queryAssets = this.queryAssets.getAssets(swapChainInfo.chainId);
+    const assets = queryAssets.assetsOnlySwapUsages;
+
     // Key is chain identifier
     const res = new Map<
       string,
@@ -374,88 +377,61 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
       }
     >();
 
-    const isMobile = "ReactNativeWebView" in window;
+    const getMap = (chainId: string) => {
+      const chainIdentifier = this.chainStore.getChain(chainId).chainIdentifier;
+      let inner = res.get(chainIdentifier);
+      if (!inner) {
+        inner = {
+          chainInfo: this.chainStore.getChain(chainId),
+          currencies: [],
+        };
+        res.set(chainIdentifier, inner);
+      }
 
-    for (const swapVenue of this.swapVenues) {
-      const swapChainInfo = this.chainStore.getChain(swapVenue.chainId);
+      return inner;
+    };
 
-      const queryAssets = this.queryAssets.getAssets(swapChainInfo.chainId);
-      const assets = isMobile
-        ? queryAssets.assetsOnlySwapUsages
-        : queryAssets.assets;
+    for (const asset of assets) {
+      const chainId = asset.chainId;
 
-      const getMap = (chainId: string) => {
-        const chainIdentifier =
-          this.chainStore.getChain(chainId).chainIdentifier;
-        let inner = res.get(chainIdentifier);
-        if (!inner) {
-          inner = {
-            chainInfo: this.chainStore.getChain(chainId),
-            currencies: [],
-          };
-          res.set(chainIdentifier, inner);
-        }
+      const currency = this.chainStore
+        .getChain(chainId)
+        .findCurrencyWithoutReaction(asset.denom);
 
-        return inner;
-      };
-
-      for (const asset of assets) {
-        const chainId = asset.chainId;
-
-        const currency = this.chainStore
-          .getChain(chainId)
-          .findCurrencyWithoutReaction(asset.denom);
-
-        if (currency) {
-          // If ibc currency is well known.
+      if (currency) {
+        // If ibc currency is well known.
+        if (
+          "originCurrency" in currency &&
+          currency.originCurrency &&
+          "originChainId" in currency &&
+          currency.originChainId &&
+          // XXX: multi-hop ibc currency는 getSwapDestinationCurrencyAlternativeChains에서 처리한다.
+          currency.paths.length === 1
+        ) {
           if (
-            "originCurrency" in currency &&
-            currency.originCurrency &&
-            "originChainId" in currency &&
-            currency.originChainId &&
-            // XXX: multi-hop ibc currency는 getSwapDestinationCurrencyAlternativeChains에서 처리한다.
-            currency.paths.length === 1
+            currency.originChainId.startsWith("gravity-bridge-") &&
+            currency.originCurrency.coinMinimalDenom !== "ugraviton"
           ) {
-            if (
-              currency.originChainId.startsWith("gravity-bridge-") &&
-              currency.originCurrency.coinMinimalDenom !== "ugraviton"
-            ) {
-              continue;
-            }
-            if (
-              !this.chainStore.isInChainInfosInListUI(currency.originChainId)
-            ) {
-              continue;
-            }
+            continue;
+          }
+          if (!this.chainStore.isInChainInfosInListUI(currency.originChainId)) {
+            continue;
+          }
 
-            // 현재 CW20같은 얘들은 처리할 수 없다.
-            if (!("type" in currency.originCurrency)) {
-              // 일단 현재는 복잡한 케이스는 생각하지 않는다.
-              // 오스모시스를 거쳐서 오기 때문에 ibc 모듈만 있다면 자산을 받을 수 있다.
-              const originCurrency = currency.originCurrency;
-              const inner = getMap(currency.originChainId);
-
-              if (
-                !inner.currencies.some(
-                  (c) => c.coinMinimalDenom === originCurrency.coinMinimalDenom
-                )
-              ) {
-                inner.currencies.push(originCurrency);
-              }
-            }
-          } else if (!("paths" in currency)) {
-            // 현재 CW20같은 얘들은 처리할 수 없다.
-            if (!("type" in currency)) {
-              // if currency is not ibc currency
-              const inner = getMap(chainId);
-              if (
-                !inner.currencies.some(
-                  (c) => c.coinMinimalDenom === currency.coinMinimalDenom
-                )
-              ) {
-                inner.currencies.push(currency);
-              }
-            }
+          // 현재 CW20같은 얘들은 처리할 수 없다.
+          if (!("type" in currency.originCurrency)) {
+            // 일단 현재는 복잡한 케이스는 생각하지 않는다.
+            // 오스모시스를 거쳐서 오기 때문에 ibc 모듈만 있다면 자산을 받을 수 있다.
+            const originCurrency = currency.originCurrency;
+            const inner = getMap(currency.originChainId);
+            inner.currencies.push(originCurrency);
+          }
+        } else if (!("paths" in currency)) {
+          // 현재 CW20같은 얘들은 처리할 수 없다.
+          if (!("type" in currency)) {
+            // if currency is not ibc currency
+            const inner = getMap(chainId);
+            inner.currencies.push(currency);
           }
         }
       }
@@ -517,14 +493,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
           const findSwapVenue = channels.find(
             (channel) =>
               channel.channels.length === 1 &&
-              this.swapVenues.some(
-                (swapVenue) =>
-                  this.chainStore.getChain(swapVenue.chainId)
-                    .chainIdentifier ===
-                  this.chainStore.getChain(
-                    channel.channels[0].counterpartyChainId
-                  ).chainIdentifier
-              )
+              this.chainStore.getChain(channel.channels[0].counterpartyChainId)
+                .chainIdentifier ===
+                this.chainStore.getChain(this.swapVenue.chainId).chainIdentifier
           );
           if (findSwapVenue) {
             return true;
@@ -607,13 +578,9 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         const findSwapVenue = channels.find(
           (channel) =>
             channel.channels.length === 1 &&
-            this.swapVenues.some(
-              (swapVenue) =>
-                this.chainStore.getChain(swapVenue.chainId).chainIdentifier ===
-                this.chainStore.getChain(
-                  channel.channels[0].counterpartyChainId
-                ).chainIdentifier
-            )
+            this.chainStore.getChain(channel.channels[0].counterpartyChainId)
+              .chainIdentifier ===
+              this.chainStore.getChain(this.swapVenue.chainId).chainIdentifier
         );
         if (findSwapVenue) {
           res.push({

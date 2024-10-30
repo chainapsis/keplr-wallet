@@ -152,9 +152,15 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
     const chainIdsToAddresses: Record<string, string> = {};
     const sourceAccount = this.accountStore.getAccount(this.chainId);
+    const swapAccount = this.accountStore.getAccount(
+      queryIBCSwap.swapVenue.chainId
+    );
     const destinationChainIds = queryRouteResponse.data.chain_ids;
     if (sourceAccount.walletStatus === WalletStatus.NotInit) {
       await sourceAccount.init();
+    }
+    if (swapAccount.walletStatus === WalletStatus.NotInit) {
+      await swapAccount.init();
     }
     for (const destinationChainId of destinationChainIds) {
       const destinationAccount =
@@ -167,6 +173,9 @@ export class IBCSwapAmountConfig extends AmountConfig {
     if (!sourceAccount.bech32Address) {
       throw new Error("Source account is not set");
     }
+    if (!swapAccount.bech32Address) {
+      throw new Error("Swap account is not set");
+    }
     for (const destinationChainId of destinationChainIds) {
       const destinationAccount =
         this.accountStore.getAccount(destinationChainId);
@@ -176,23 +185,13 @@ export class IBCSwapAmountConfig extends AmountConfig {
     }
 
     chainIdsToAddresses[this.chainId] = sourceAccount.bech32Address;
+    chainIdsToAddresses[queryIBCSwap.swapVenue.chainId] =
+      swapAccount.bech32Address;
     for (const destinationChainId of destinationChainIds) {
       const destinationAccount =
         this.accountStore.getAccount(destinationChainId);
       chainIdsToAddresses[destinationChainId] =
         destinationAccount.bech32Address;
-    }
-
-    for (const swapVenue of queryIBCSwap.swapVenues) {
-      const swapAccount = this.accountStore.getAccount(swapVenue.chainId);
-      if (swapAccount.walletStatus === WalletStatus.NotInit) {
-        await swapAccount.init();
-      }
-      if (!swapAccount.bech32Address) {
-        throw new Error("Swap account is not set");
-      }
-
-      chainIdsToAddresses[swapVenue.chainId] = swapAccount.bech32Address;
     }
 
     const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
@@ -274,10 +273,16 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
     const chainIdsToAddresses: Record<string, string> = {};
     const sourceAccount = this.accountStore.getAccount(this.chainId);
+    const swapAccount = this.accountStore.getAccount(
+      queryIBCSwap.swapVenue.chainId
+    );
     const destinationChainIds = queryRouteResponse.data.chain_ids;
 
     if (sourceAccount.walletStatus === WalletStatus.NotInit) {
       sourceAccount.init();
+    }
+    if (swapAccount.walletStatus === WalletStatus.NotInit) {
+      swapAccount.init();
     }
     for (const destinationChainId of destinationChainIds) {
       const destinationAccount =
@@ -290,6 +295,9 @@ export class IBCSwapAmountConfig extends AmountConfig {
     if (!sourceAccount.bech32Address) {
       return;
     }
+    if (!swapAccount.bech32Address) {
+      return;
+    }
     for (const destinationChainId of destinationChainIds) {
       const destinationAccount =
         this.accountStore.getAccount(destinationChainId);
@@ -299,23 +307,13 @@ export class IBCSwapAmountConfig extends AmountConfig {
     }
 
     chainIdsToAddresses[this.chainId] = sourceAccount.bech32Address;
+    chainIdsToAddresses[queryIBCSwap.swapVenue.chainId] =
+      swapAccount.bech32Address;
     for (const destinationChainId of destinationChainIds) {
       const destinationAccount =
         this.accountStore.getAccount(destinationChainId);
       chainIdsToAddresses[destinationChainId] =
         destinationAccount.bech32Address;
-    }
-
-    for (const swapVenue of queryIBCSwap.swapVenues) {
-      const swapAccount = this.accountStore.getAccount(swapVenue.chainId);
-      if (swapAccount.walletStatus === WalletStatus.NotInit) {
-        swapAccount.init();
-      }
-
-      if (!swapAccount.bech32Address) {
-        return;
-      }
-      chainIdsToAddresses[swapVenue.chainId] = swapAccount.bech32Address;
     }
 
     const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
@@ -376,11 +374,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
     let key = "";
 
     for (const msg of response.msgs) {
-      if (
-        msg.multi_chain_msg.msg_type_url ===
-        "/ibc.applications.transfer.v1.MsgTransfer"
-      ) {
-        const memo = JSON.parse(msg.multi_chain_msg.msg).memo;
+      if (msg.msg_type_url === "/ibc.applications.transfer.v1.MsgTransfer") {
+        const memo = JSON.parse(msg.msg).memo;
         if (memo) {
           const obj = JSON.parse(memo);
           const wasms: any = [];
@@ -432,11 +427,8 @@ export class IBCSwapAmountConfig extends AmountConfig {
           }
         }
       }
-      if (
-        msg.multi_chain_msg.msg_type_url ===
-        "/cosmwasm.wasm.v1.MsgExecuteContract"
-      ) {
-        const obj = JSON.parse(msg.multi_chain_msg.msg);
+      if (msg.msg_type_url === "/cosmwasm.wasm.v1.MsgExecuteContract") {
+        const obj = JSON.parse(msg.msg);
         for (const operation of obj.msg.swap_and_action.user_swap
           .swap_exact_asset_in.operations) {
           key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;

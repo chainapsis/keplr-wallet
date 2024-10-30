@@ -36,7 +36,7 @@ export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<Assets
     public readonly chainId: string,
     public readonly denom: string
   ) {
-    super(sharedContext, skipURL, "/v2/fungible/assets_from_source");
+    super(sharedContext, skipURL, "/v1/fungible/assets_from_source");
 
     makeObservable(this);
   }

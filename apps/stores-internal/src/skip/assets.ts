@@ -37,7 +37,7 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
     super(
       sharedContext,
       skipURL,
-      `/v2/fungible/assets?chain_id=${chainId}&native_only=false`
+      `/v1/fungible/assets?chain_id=${chainId}&native_only=false`
     );
 
     makeObservable(this);

@@ -25,10 +25,10 @@ export class SkipQueries {
     sharedContext: QuerySharedContext,
     chainStore: InternalChainStore,
     swapUsageQueries: SwapUsageQueries,
-    swapVenues: {
+    swapVenue: {
       name: string;
       chainId: string;
-    }[]
+    }
   ) {
     this.queryChains = new ObservableQueryChains(
       sharedContext,
@@ -71,7 +71,7 @@ export class SkipQueries {
       this.queryRoute,
       this.queryMsgsDirect,
       this.queryIBCPacketForwardingTransfer,
-      swapVenues
+      swapVenue
     );
   }
 }
