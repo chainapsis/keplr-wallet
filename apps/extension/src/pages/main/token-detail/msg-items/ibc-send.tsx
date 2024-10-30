@@ -57,7 +57,18 @@ export const MsgRelationIBCSend: FunctionComponent<{
         if (obj.receiver) {
           res = Bech32Address.shortenAddress(obj.receiver, 20);
         }
-        obj = typeof obj.next === "string" ? JSON.parse(obj.next) : obj.next;
+        obj = (() => {
+          if (
+            obj.forward &&
+            typeof obj.forward === "object" &&
+            obj.forward.next
+          ) {
+            const next = obj.forward.next;
+            return typeof next === "string" ? JSON.parse(next) : next;
+          }
+
+          return typeof obj.next === "string" ? JSON.parse(obj.next) : obj.next;
+        })();
       }
 
       return res;

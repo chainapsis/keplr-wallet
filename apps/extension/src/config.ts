@@ -2658,6 +2658,111 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     ],
     features: ["cosmwasm"],
   },
+  {
+    rpc: "https://rpc.forma.art",
+    rest: "https://rpc.forma.art",
+    evm: {
+      chainId: 984122,
+      rpc: "https://rpc.forma.art",
+      websocket: "wss://ws.forma.art",
+    },
+    chainId: "eip155:984122",
+    chainName: "Forma",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:984122/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "TIA",
+        coinMinimalDenom: "forma-native",
+        coinDecimals: 18,
+        coinGeckoId: "celestia",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:984122/utia.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "TIA",
+        coinMinimalDenom: "forma-native",
+        coinDecimals: 18,
+        coinGeckoId: "celestia",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:984122/utia.png",
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://rpc.flame.astria.org",
+    rest: "https://rpc.flame.astria.org",
+    evm: {
+      chainId: 253368190,
+      rpc: "https://rpc.flame.astria.org",
+      websocket: "wss://ws.flame.astria.org",
+    },
+    chainId: "eip155:253368190",
+    chainName: "Flame",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:253368190/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "TIA",
+        coinMinimalDenom: "flame-native",
+        coinDecimals: 18,
+        coinGeckoId: "celestia",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:253368190/utia.png",
+      },
+      {
+        coinDenom: "WTIA",
+        coinMinimalDenom: "erc20:0x61b7794b6a0cc383b367c327b91e5ba85915a071",
+        coinDecimals: 18,
+        coinGeckoId: "celestia",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:253368190/wtia.png",
+      },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "erc20:0x3f65144f387f6545bf4b19a1b39c94231e1c849f",
+        coinDecimals: 6,
+        coinGeckoId: "usd-coin",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:253368190/uusdc.png",
+      },
+      {
+        coinDenom: "stTIA",
+        coinMinimalDenom: "erc20:0xdf941d092b10ff07eab44bd174dee915c13feccd",
+        coinDecimals: 18,
+        coinGeckoId: "stride-staked-tia",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:253368190/sttia.png",
+      },
+      {
+        coinDenom: "milkTIA",
+        coinMinimalDenom: "erc20:0xcbb93e854aa4ef5db51c3b094f28952ef0dc67be",
+        coinDecimals: 18,
+        coinGeckoId: "milkyway-staked-tia",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:253368190/milktia.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "TIA",
+        coinMinimalDenom: "flame-native",
+        coinDecimals: 18,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:253368190/utia.png",
+      },
+    ],
+    features: [],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
