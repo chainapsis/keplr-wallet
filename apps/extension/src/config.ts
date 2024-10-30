@@ -2658,6 +2658,44 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     ],
     features: ["cosmwasm"],
   },
+  {
+    rpc: "https://rpc.forma.art",
+    rest: "https://rpc.forma.art",
+    evm: {
+      rpc: "https://rpc.forma.art",
+
+      websocket: "wss://ws.forma.art",
+      chainId: 984122,
+    },
+    chainId: "eip155:984122",
+    chainName: "Forma",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:984122/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "TIA",
+        coinMinimalDenom: "forma-native",
+        coinDecimals: 18,
+        coinGeckoId: "celestia",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:984122/utia.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "TIA",
+        coinMinimalDenom: "forma-native",
+        coinDecimals: 18,
+        coinGeckoId: "celestia",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:984122/utia.png",
+      },
+    ],
+    features: [],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
