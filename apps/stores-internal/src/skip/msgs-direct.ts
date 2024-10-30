@@ -200,7 +200,7 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
           chain_ids_to_addresses: this.chainIdsToAddresses,
           slippage_tolerance_percent: this.slippageTolerancePercent.toString(),
           affiliates:
-            this.affiliateFeeBps > 0
+            this.affiliateFeeBps > 0 && this.affiliateFeeReceiver
               ? [
                   {
                     basis_points_fee: this.affiliateFeeBps.toString(),
