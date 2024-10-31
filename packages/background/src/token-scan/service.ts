@@ -66,8 +66,10 @@ export class TokenScanService {
         }
       }
     );
-    this.chainsService.addChainSuggestedHandler(async (chainInfo) => {
-      await this.scanWithAllVaults(chainInfo.chainId);
+    this.chainsService.addChainSuggestedHandler((chainInfo) => {
+      // 여기서 await을 하면 suggest chain이 계정이 늘어날수록 늦어진다.
+      // 절대로 await을 하지않기...
+      this.scanWithAllVaults(chainInfo.chainId);
     });
     this.chainsUIService.addChainUIEnabledChangedHandler(
       (vaultId, chainIdentifiers) => {
