@@ -9,7 +9,7 @@ import { ChainInfo } from "@keplr-wallet/types";
 import { FormattedMessage, useIntl } from "react-intl";
 import { ArrowLeftIcon } from "../../components/icon";
 import { Box } from "../../components/box";
-import { handleExternalInteractionBeforeFnWithNoProceedNext } from "../../utils";
+import { handleExternalInteractionWithNoProceedNext } from "../../utils";
 import { dispatchGlobalEventExceptSelf } from "../../utils/global-events";
 
 export const SuggestChainPage: FunctionComponent = observer(() => {
@@ -120,23 +120,19 @@ const SuggestChainPageImpl: FunctionComponent<{
               ...chainInfo,
               updateFromRepoDisabled,
             },
-            (proceedNext) => {
+            async (proceedNext) => {
+              await keyRingStore.refreshKeyRingStatus();
+              await chainStore.updateChainInfosFromBackground();
+              await chainStore.updateEnabledChainIdentifiersFromBackground();
+
+              dispatchGlobalEventExceptSelf("keplr_suggested_chain_added");
+
               if (!proceedNext) {
                 if (
                   interactionInfo.interaction &&
                   !interactionInfo.interactionInternal
                 ) {
-                  handleExternalInteractionBeforeFnWithNoProceedNext(
-                    async () => {
-                      await keyRingStore.refreshKeyRingStatus();
-                      await chainStore.updateChainInfosFromBackground();
-                      await chainStore.updateEnabledChainIdentifiersFromBackground();
-
-                      dispatchGlobalEventExceptSelf(
-                        "keplr_suggested_chain_added"
-                      );
-                    }
-                  );
+                  handleExternalInteractionWithNoProceedNext();
                 }
               }
             }
