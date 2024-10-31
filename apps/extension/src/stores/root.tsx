@@ -348,17 +348,6 @@ export class RootStore {
       CosmosAccount.use({
         queriesStore: this.queriesStore,
         msgOptsCreator: (chainId) => {
-          // In certik, change the msg type of the MsgSend to "bank/MsgSend"
-          if (chainId.startsWith("shentu-")) {
-            return {
-              send: {
-                native: {
-                  type: "bank/MsgSend",
-                },
-              },
-            };
-          }
-
           // In akash or sifchain, increase the default gas for sending
           if (
             chainId.startsWith("akashnet-") ||
