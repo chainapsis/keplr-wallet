@@ -26,28 +26,6 @@ export const handleExternalInteractionWithNoProceedNext = () => {
   }
 };
 
-export const handleExternalInteractionBeforeFnWithNoProceedNext = async (
-  beforeFn: () => Promise<void>
-) => {
-  if (window.isStartFromInteractionWithSidePanelEnabled) {
-    await beforeFn();
-    window.close();
-  } else {
-    if (isRunningInSidePanel()) {
-      if (window.history.length > 1) {
-        await beforeFn();
-        window.history.back();
-      } else {
-        await beforeFn();
-        window.close();
-      }
-    } else {
-      await beforeFn();
-      window.close();
-    }
-  }
-};
-
 export const toggleSidePanelMode = async (
   enable: boolean,
   onRes: (enabled: boolean) => void
