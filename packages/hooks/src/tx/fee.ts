@@ -758,16 +758,20 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           const baseFeePerGasDec = new Dec(latestBaseFeePerGas).mul(
             ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType].baseFeePercentageMultiplier
           );
-          const priorityFeesPerGas = feeHistory.reward?.map(
-            (priorityFeeByRewardPercentileIndex) =>
-              priorityFeeByRewardPercentileIndex[
-                ETH_FEE_HISTORY_REWARD_PERCENTILES.findIndex(
-                  (percentile) =>
-                    percentile ===
-                    ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType].percentile
-                )
-              ]
-          );
+          const priorityFeesPerGas = feeHistory.reward
+            ?.map(
+              (priorityFeeByRewardPercentileIndex) =>
+                priorityFeeByRewardPercentileIndex[
+                  ETH_FEE_HISTORY_REWARD_PERCENTILES.findIndex(
+                    (percentile) =>
+                      percentile ===
+                      ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType].percentile
+                  )
+                ]
+            )
+            .map((priorityFee) =>
+              priorityFee.startsWith("-") ? "0x0" : priorityFee
+            );
           const medianOfPriorityFeesPerGas =
             priorityFeesPerGas?.sort((a, b) => Number(BigInt(a) - BigInt(b)))?.[
               Math.floor((priorityFeesPerGas.length - 1) / 2)
