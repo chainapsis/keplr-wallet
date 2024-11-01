@@ -95,6 +95,36 @@ const MsgItemRenderInner: FunctionComponent<{
         />
       );
     }
+    case "ibc-swap-skip": {
+      return (
+        <MsgRelationIBCSwap
+          msg={msg}
+          prices={prices}
+          targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
+        />
+      );
+    }
+    case "ibc-swap-skip-receive": {
+      return (
+        <MsgRelationIBCSwapReceive
+          msg={msg}
+          prices={prices}
+          targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
+        />
+      );
+    }
+    case "ibc-swap-skip-refunded": {
+      return (
+        <MsgRelationIBCSwapRefunded
+          msg={msg}
+          prices={prices}
+          targetDenom={targetDenom}
+          isInAllActivitiesPage={isInAllActivitiesPage}
+        />
+      );
+    }
     case "ibc-swap-skip-osmosis": {
       return (
         <MsgRelationIBCSwap
@@ -102,6 +132,7 @@ const MsgItemRenderInner: FunctionComponent<{
           prices={prices}
           targetDenom={targetDenom}
           isInAllActivitiesPage={isInAllActivitiesPage}
+          isLegacyOsmosis
         />
       );
     }
@@ -112,6 +143,7 @@ const MsgItemRenderInner: FunctionComponent<{
           prices={prices}
           targetDenom={targetDenom}
           isInAllActivitiesPage={isInAllActivitiesPage}
+          isLegacyOsmosis
         />
       );
     }

@@ -9,145 +9,107 @@ import { ChainInfo } from "@keplr-wallet/types";
 import { isValidCoinStr, parseCoinStr } from "@keplr-wallet/common";
 import { Buffer } from "buffer/";
 import { MessageSwapIcon } from "../../../../components/icon";
+import { SwapVenues } from "../../../../config.ui";
 
 export const MsgRelationIBCSwap: FunctionComponent<{
   msg: MsgHistory;
   prices?: Record<string, Record<string, number | undefined> | undefined>;
   targetDenom: string;
   isInAllActivitiesPage: boolean | undefined;
-}> = observer(({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
-  const { chainStore } = useStore();
+  isLegacyOsmosis?: boolean;
+}> = observer(
+  ({ msg, prices, targetDenom, isInAllActivitiesPage, isLegacyOsmosis }) => {
+    const { chainStore } = useStore();
 
-  const chainInfo = chainStore.getChain(msg.chainId);
-  const osmosisChainInfo = chainStore.getChain("osmosis");
+    const chainInfo = chainStore.getChain(msg.chainId);
 
-  const sendAmountPretty = useMemo(() => {
-    const currency = chainInfo.forceFindCurrency(targetDenom);
+    const sendAmountPretty = useMemo(() => {
+      const currency = chainInfo.forceFindCurrency(targetDenom);
 
-    const from = msg.meta["from"];
-    if (
-      from &&
-      Array.isArray(from) &&
-      from.length > 0 &&
-      typeof from[0] === "string"
-    ) {
-      for (const coinStr of from) {
-        if (isValidCoinStr(coinStr as string)) {
-          const coin = parseCoinStr(coinStr as string);
-          if (coin.denom === targetDenom) {
-            return new CoinPretty(currency, coin.amount);
-          }
-        }
-      }
-    }
-
-    return new CoinPretty(currency, "0");
-  }, [chainInfo, msg.meta, targetDenom]);
-
-  const destinationChain: ChainInfo | undefined = (() => {
-    if (!msg.ibcTracking) {
-      return undefined;
-    }
-
-    try {
-      let res: ChainInfo | undefined = undefined;
-      for (const path of msg.ibcTracking.paths) {
-        if (!path.chainId) {
-          return undefined;
-        }
-        if (!chainStore.hasChain(path.chainId)) {
-          return undefined;
-        }
-
-        if (!path.clientChainId) {
-          return undefined;
-        }
-        if (!chainStore.hasChain(path.clientChainId)) {
-          return undefined;
-        }
-
-        res = chainStore.getChain(path.clientChainId);
-      }
-
-      return res;
-    } catch (e) {
-      console.log(e);
-      return undefined;
-    }
-  })();
-
-  const destDenom: string | undefined = (() => {
-    try {
-      // osmosis가 시작 지점일 경우.
+      const from = msg.meta["from"];
       if (
-        (msg.msg as any)["@type"] === "/cosmwasm.wasm.v1.MsgExecuteContract"
+        from &&
+        Array.isArray(from) &&
+        from.length > 0 &&
+        typeof from[0] === "string"
       ) {
-        const operations = (msg.msg as any).msg?.swap_and_action?.user_swap
-          ?.swap_exact_asset_in?.operations;
-        if (operations && operations.length > 0) {
-          const minimalDenom = operations[operations.length - 1].denom_out;
-          const currency = chainInfo.findCurrency(minimalDenom);
-          if (currency) {
-            if ("originCurrency" in currency && currency.originCurrency) {
-              return currency.originCurrency.coinDenom;
+        for (const coinStr of from) {
+          if (isValidCoinStr(coinStr as string)) {
+            const coin = parseCoinStr(coinStr as string);
+            if (coin.denom === targetDenom) {
+              return new CoinPretty(currency, coin.amount);
             }
-            return currency.coinDenom;
           }
         }
       }
 
+      return new CoinPretty(currency, "0");
+    }, [chainInfo, msg.meta, targetDenom]);
+
+    const destinationChain: ChainInfo | undefined = (() => {
       if (!msg.ibcTracking) {
         return undefined;
       }
 
-      const parsed = JSON.parse(
-        Buffer.from(msg.ibcTracking.originPacket, "base64").toString()
-      );
-      let obj: any = (() => {
-        if (!parsed.memo) {
-          return undefined;
+      try {
+        let res: ChainInfo | undefined = undefined;
+        for (const path of msg.ibcTracking.paths) {
+          if (!path.chainId) {
+            return undefined;
+          }
+          if (!chainStore.hasChain(path.chainId)) {
+            return undefined;
+          }
+
+          if (!path.clientChainId) {
+            return undefined;
+          }
+          if (!chainStore.hasChain(path.clientChainId)) {
+            return undefined;
+          }
+
+          res = chainStore.getChain(path.clientChainId);
         }
 
-        return typeof parsed.memo === "string"
-          ? JSON.parse(parsed.memo)
-          : parsed.memo;
-      })();
+        return res;
+      } catch (e) {
+        console.log(e);
+        return undefined;
+      }
+    })();
 
-      // 일단 대충 wasm 관련 msg를 찾는다.
-      // 어차피 지금은 osmosis 밖에 지원 안하니까 대충 osmosis에서 실행된다고 가정하면 된다.
-      while (obj) {
+    const swapVenueChain = (() => {
+      if (isLegacyOsmosis) {
+        return chainStore.getChain("osmosis");
+      }
+
+      const swapVenue = msg.meta["swapVenue"];
+      if (swapVenue) {
+        const swapVenueChainId = SwapVenues.find(
+          (venue) => venue.name === swapVenue
+        )?.chainId;
+
+        if (swapVenueChainId) {
+          return chainStore.hasChain(swapVenueChainId)
+            ? chainStore.getChain(swapVenueChainId)
+            : undefined;
+        }
+      }
+
+      return undefined;
+    })();
+
+    const destDenom: string | undefined = (() => {
+      try {
+        // swap venue가 시작 지점일 경우.
         if (
-          obj.forward &&
-          obj.forward.port &&
-          obj.forward.channel &&
-          typeof obj.forward.port === "string" &&
-          typeof obj.forward.channel === "string"
+          (msg.msg as any)["@type"] === "/cosmwasm.wasm.v1.MsgExecuteContract"
         ) {
-          obj = (() => {
-            if (
-              obj.forward &&
-              typeof obj.forward === "object" &&
-              obj.forward.next
-            ) {
-              const next = obj.forward.next;
-              return typeof next === "string" ? JSON.parse(next) : next;
-            }
-
-            return typeof obj.next === "string"
-              ? JSON.parse(obj.next)
-              : obj.next;
-          })();
-        } else if (
-          obj.wasm?.msg?.swap_and_action?.user_swap?.swap_exact_asset_in
-            ?.operations
-        ) {
-          const operations =
-            obj.wasm.msg.swap_and_action?.user_swap?.swap_exact_asset_in
-              .operations;
-
-          if (operations && operations.length > 0) {
+          const operations = (msg.msg as any).msg?.swap_and_action?.user_swap
+            ?.swap_exact_asset_in?.operations;
+          if (operations && operations.length > 0 && swapVenueChain) {
             const minimalDenom = operations[operations.length - 1].denom_out;
-            const currency = osmosisChainInfo.findCurrency(minimalDenom);
+            const currency = swapVenueChain.findCurrency(minimalDenom);
             if (currency) {
               if ("originCurrency" in currency && currency.originCurrency) {
                 return currency.originCurrency.coinDenom;
@@ -155,60 +117,121 @@ export const MsgRelationIBCSwap: FunctionComponent<{
               return currency.coinDenom;
             }
           }
+        }
 
-          obj = (() => {
-            if (
-              obj.forward &&
-              typeof obj.forward === "object" &&
-              obj.forward.next
-            ) {
-              const next = obj.forward.next;
-              return typeof next === "string" ? JSON.parse(next) : next;
+        if (!msg.ibcTracking) {
+          return undefined;
+        }
+
+        const parsed = JSON.parse(
+          Buffer.from(msg.ibcTracking.originPacket, "base64").toString()
+        );
+        let obj: any = (() => {
+          if (!parsed.memo) {
+            return undefined;
+          }
+
+          return typeof parsed.memo === "string"
+            ? JSON.parse(parsed.memo)
+            : parsed.memo;
+        })();
+
+        // 일단 대충 wasm 관련 msg를 찾는다.
+        while (obj) {
+          if (
+            obj.forward &&
+            obj.forward.port &&
+            obj.forward.channel &&
+            typeof obj.forward.port === "string" &&
+            typeof obj.forward.channel === "string"
+          ) {
+            obj = (() => {
+              if (
+                obj.forward &&
+                typeof obj.forward === "object" &&
+                obj.forward.next
+              ) {
+                const next = obj.forward.next;
+                return typeof next === "string" ? JSON.parse(next) : next;
+              }
+
+              return typeof obj.next === "string"
+                ? JSON.parse(obj.next)
+                : obj.next;
+            })();
+          } else if (
+            obj.wasm?.msg?.swap_and_action?.user_swap?.swap_exact_asset_in
+              ?.operations
+          ) {
+            const operations =
+              obj.wasm.msg.swap_and_action?.user_swap?.swap_exact_asset_in
+                .operations;
+
+            if (operations && operations.length > 0 && swapVenueChain) {
+              const minimalDenom = operations[operations.length - 1].denom_out;
+              const currency = swapVenueChain.findCurrency(minimalDenom);
+              if (currency) {
+                if ("originCurrency" in currency && currency.originCurrency) {
+                  return currency.originCurrency.coinDenom;
+                }
+                return currency.coinDenom;
+              }
             }
 
-            return typeof obj.next === "string"
-              ? JSON.parse(obj.next)
-              : obj.next;
-          })();
-          break;
-        } else {
-          break;
-        }
-      }
-    } catch (e) {
-      console.log(e);
-      return undefined;
-    }
-  })();
+            obj = (() => {
+              if (
+                obj.forward &&
+                typeof obj.forward === "object" &&
+                obj.forward.next
+              ) {
+                const next = obj.forward.next;
+                return typeof next === "string" ? JSON.parse(next) : next;
+              }
 
-  return (
-    <MsgItemBase
-      logo={
-        <ItemLogo center={<MessageSwapIcon width="2rem" height="2rem" />} />
-      }
-      chainId={msg.chainId}
-      title="Swap"
-      paragraph={(() => {
-        if (destDenom) {
-          if (!msg.ibcTracking) {
-            return `To ${destDenom} on ${chainInfo.chainName}`;
-          }
-
-          if (destinationChain) {
-            return `To ${destDenom} on ${destinationChain.chainName}`;
+              return typeof obj.next === "string"
+                ? JSON.parse(obj.next)
+                : obj.next;
+            })();
+            break;
+          } else {
+            break;
           }
         }
-        return "Unknown";
-      })()}
-      amount={sendAmountPretty}
-      prices={prices || {}}
-      msg={msg}
-      targetDenom={targetDenom}
-      amountDeco={{
-        color: "none",
-        prefix: "minus",
-      }}
-      isInAllActivitiesPage={isInAllActivitiesPage}
-    />
-  );
-});
+      } catch (e) {
+        console.log(e);
+        return undefined;
+      }
+    })();
+
+    return (
+      <MsgItemBase
+        logo={
+          <ItemLogo center={<MessageSwapIcon width="2rem" height="2rem" />} />
+        }
+        chainId={msg.chainId}
+        title="Swap"
+        paragraph={(() => {
+          if (destDenom) {
+            if (!msg.ibcTracking) {
+              return `To ${destDenom} on ${chainInfo.chainName}`;
+            }
+
+            if (destinationChain) {
+              return `To ${destDenom} on ${destinationChain.chainName}`;
+            }
+          }
+          return "Unknown";
+        })()}
+        amount={sendAmountPretty}
+        prices={prices || {}}
+        msg={msg}
+        targetDenom={targetDenom}
+        amountDeco={{
+          color: "none",
+          prefix: "minus",
+        }}
+        isInAllActivitiesPage={isInAllActivitiesPage}
+      />
+    );
+  }
+);
