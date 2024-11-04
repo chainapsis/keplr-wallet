@@ -327,6 +327,7 @@ export const ActivitiesScreen: FunctionComponent = observer(() => {
           />
         );
       })()}
+      <Text>{process.env['KEPLR_EXT_TX_HISTORY_BASE_URL']}</Text>
     </PageWithScrollView>
   );
 });
