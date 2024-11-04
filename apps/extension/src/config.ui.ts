@@ -168,17 +168,6 @@ export const FiatOnRampServiceInfos: FiatOnRampServiceInfo[] = [
   },
 ];
 
-// 현재는 osmosis밖에 지원하지 않는다.
-// 코드 자체가 osmosis에 종속되어 있기 때문에, 다른 체인을 지원하려면 코드를 수정해야 한다.
-// 단지 미래에 달라질 가능성이 있어보여서 빼놨을 뿐임
-export const SwapVenue: {
-  name: string;
-  chainId: string;
-} = {
-  name: "osmosis-poolmanager",
-  chainId: "osmosis-1",
-};
-
 export const SwapVenues: {
   name: string;
   chainId: string;
