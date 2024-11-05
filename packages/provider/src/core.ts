@@ -1644,7 +1644,20 @@ class StarknetProvider implements IStarknetProvider {
     // XXX: 원래 enable을 미리하지 않아도 백그라운드에서 알아서 처리해주는 시스템이였는데...
     //      side panel에서는 불가능하기 때문에 이젠 provider에서 permission도 관리해줘야한다...
     //      request의 경우는 일종의 쿼리이기 때문에 언제 결과가 올지 알 수 없다. 그러므로 미리 권한 처리를 해야한다.
-    if (type !== "keplr_initStarknetProviderState") {
+    let skipEnable = false;
+    if (type === "keplr_initStarknetProviderState") {
+      skipEnable = true;
+    }
+    if (type === "wallet_getPermissions") {
+      skipEnable = true;
+    }
+    if (type === "wallet_requestAccounts") {
+      if (!Array.isArray(params) && params?.["silent_mode"]) {
+        skipEnable = true;
+      }
+    }
+
+    if (!skipEnable) {
       await this.protectedEnableAccess();
     }
 

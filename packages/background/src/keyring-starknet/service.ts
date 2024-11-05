@@ -208,6 +208,10 @@ export class KeyRingStarknetService {
           selectedAddress: null,
           rpc: null,
         } as T;
+      } else if (type === "wallet_getPermissions") {
+        // wallet_getPermissions는 permission 요청없이 처리되어야한다.
+        // handler.ts에서 permissino 요청이 생략되어있다는 점을 참고하자.
+        return [] as T;
       } else {
         throw new Error(
           `${origin} is not permitted. Please disconnect and reconnect to the website.`
