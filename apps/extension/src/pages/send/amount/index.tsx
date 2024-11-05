@@ -481,6 +481,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           text: intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
+          type: "submit",
           isLoading: isEvmTx
             ? ethereumAccount.isSendingTx
             : accountStore.getAccount(chainId).isSendingMsg ===

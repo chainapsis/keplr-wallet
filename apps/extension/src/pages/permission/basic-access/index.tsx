@@ -34,6 +34,7 @@ export const PermissionBasicAccessPage: FunctionComponent<{
           text: intl.formatMessage({
             id: "button.approve",
           }),
+          type: "submit",
           size: "large",
           isLoading: (() => {
             const obsolete = data.ids.find((id) => {

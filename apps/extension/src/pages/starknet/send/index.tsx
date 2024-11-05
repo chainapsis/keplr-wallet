@@ -358,6 +358,7 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
             : intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
+          type: "submit",
           isLoading,
         },
       ]}

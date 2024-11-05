@@ -35,6 +35,7 @@ export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
             id: "button.approve",
           }),
           size: "large",
+          type: "submit",
           isLoading: permissionStore.isObsoleteInteraction(data.id),
         },
       ]}

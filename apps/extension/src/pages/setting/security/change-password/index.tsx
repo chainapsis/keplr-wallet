@@ -46,6 +46,7 @@ export const SettingSecurityChangePasswordPage: FunctionComponent = observer(
             }),
             color: "secondary",
             size: "large",
+            type: "submit",
             isLoading,
           },
         ]}

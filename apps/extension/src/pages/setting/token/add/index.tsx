@@ -240,6 +240,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           }),
           color: "secondary",
           size: "large",
+          type: "submit",
           disabled:
             contractAddress.length === 0 ||
             !queryContract.tokenInfo ||

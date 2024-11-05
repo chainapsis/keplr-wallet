@@ -30,6 +30,7 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
         {
           text: intl.formatMessage({ id: "button.approve" }),
           size: "large",
+          type: "submit",
           isLoading: (() => {
             if (
               icnsInteractionStore.waitingData &&

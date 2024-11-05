@@ -161,6 +161,7 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
           }),
           color: "secondary",
           size: "large",
+          type: "submit",
           disabled:
             (isStarknet
               ? txConfigsValidateForStarknet.interactionBlocked

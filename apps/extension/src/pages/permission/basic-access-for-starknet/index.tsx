@@ -43,6 +43,7 @@ export const PermissionBasicAccessForStarknetPage: FunctionComponent<{
             id: "button.approve",
           }),
           size: "large",
+          type: "submit",
           isLoading: (() => {
             const obsolete = data.ids.find((id) => {
               return permissionStore.isObsoleteInteraction(id);

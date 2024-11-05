@@ -9,10 +9,15 @@ import { HeaderProps } from "./types";
 import { Subtitle1 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
 import { Box } from "../../components/box";
-import { Button, getButtonHeightRem } from "../../components/button";
+import {
+  Button,
+  ButtonProps,
+  getButtonHeightRem,
+} from "../../components/button";
 import { Skeleton } from "../../components/skeleton";
 import {
   SpecialButton,
+  SpecialButtonProps,
   getSpecialButtonHeightRem,
 } from "../../components/special-button";
 
@@ -183,6 +188,7 @@ export const HeaderLayout: FunctionComponent<
   left,
   right,
   bottomButtons,
+  bottomButtonsContainerStyle,
   displayFlex,
   fixedHeight,
   fixedMinHeight,
@@ -225,28 +231,38 @@ export const HeaderLayout: FunctionComponent<
       return "0";
     }
 
-    const specialButton = bottomButtons.find((button) => button.isSpecial);
+    const buttonHeights = bottomButtons.map((button) => {
+      return button.isSpecial
+        ? getSpecialButtonHeightRem(button.size)
+        : getButtonHeightRem(button.size);
+    });
 
-    if (!!specialButton) {
-      return (
-        bottomButtonPaddingRem * 2 +
-        getSpecialButtonHeightRem(specialButton.size) +
-        "rem"
-      );
+    const maxButtonHeightRem = Math.max(...buttonHeights);
+
+    return `${bottomButtonPaddingRem * 2 + maxButtonHeightRem}rem`;
+  })();
+
+  const renderButton = (
+    button:
+      | ({ isSpecial?: false } & ButtonProps)
+      | ({ isSpecial: true } & SpecialButtonProps),
+    index: number
+  ) => {
+    if (button.isSpecial) {
+      // isSpecial is not used.
+      const { isSpecial, ...other } = button;
+      return <SpecialButton key={index} {...other} />;
     }
 
-    const largestButton = bottomButtons.reduce((prev, current) => {
-      return getButtonHeightRem(prev.size) > getButtonHeightRem(current.size)
-        ? prev
-        : current;
-    }, bottomButtons[0]);
+    // isSpecial is not used.
+    const { isSpecial, ...other } = button;
 
     return (
-      bottomButtonPaddingRem * 2 +
-      getButtonHeightRem(largestButton.size) +
-      "rem"
+      <Skeleton isNotReady={isNotReady} type="button" key={index}>
+        <Button {...other} />
+      </Skeleton>
     );
-  })();
+  };
 
   return (
     <Styles.Container as={onSubmit ? "form" : undefined} onSubmit={onSubmit}>
@@ -303,7 +319,8 @@ export const HeaderLayout: FunctionComponent<
             gridTemplateColumns: hasMultipleBottomButton
               ? `repeat(${bottomButtons.length}, 1fr)`
               : undefined,
-            gap: hasMultipleBottomButton ? "12px" : undefined,
+            gap: hasMultipleBottomButton ? "0.75rem" : undefined,
+            ...bottomButtonsContainerStyle,
           }}
         >
           {/*
@@ -323,55 +340,7 @@ export const HeaderLayout: FunctionComponent<
               }}
             />
           ) : null}
-          {/* TODO: 코드 예쁘게 리팩토링하기 */}
-          {hasMultipleBottomButton
-            ? bottomButtons.map((button, index) => {
-                if (button.isSpecial) {
-                  // isSpecial is not used.
-                  const { isSpecial, ...other } = button;
-                  return <SpecialButton {...other} key={index} />;
-                } else {
-                  // isSpecial is not used.
-                  const { isSpecial, type, ...other } = button;
-
-                  // onSubmit prop이 존재한다면 기본적으로 type="submit"으로 설정한다
-
-                  const props = {
-                    ...other,
-                    type: type || onSubmit ? ("submit" as const) : undefined,
-                  };
-
-                  return (
-                    <Skeleton isNotReady={isNotReady} type="button" key={index}>
-                      <Button {...props} />
-                    </Skeleton>
-                  );
-                }
-              })
-            : (() => {
-                if (bottomButtons[0].isSpecial) {
-                  // isSpecial is not used.
-                  const { isSpecial, ...other } = bottomButtons[0];
-                  return <SpecialButton {...other} />;
-                } else {
-                  // isSpecial is not used.
-                  const { isSpecial, type, ...other } = bottomButtons[0];
-
-                  // onSubmit prop이 존재한다면 기본적으로 type="submit"으로 설정한다
-                  // TODO: 만약에 bottomButton이 배열을 받을 수 있도록 수정된다면 이 부분도 수정되어야함.
-
-                  const props = {
-                    ...other,
-                    type: type || onSubmit ? ("submit" as const) : undefined,
-                  };
-
-                  return (
-                    <Skeleton isNotReady={isNotReady} type="button">
-                      <Button {...props} />
-                    </Skeleton>
-                  );
-                }
-              })()}
+          {bottomButtons.map(renderButton)}
         </Box>
       ) : null}
     </Styles.Container>

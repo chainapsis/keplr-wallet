@@ -136,6 +136,7 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
           }),
           color: "primary",
           size: "large",
+          type: "submit",
           isLoading,
           disabled: isEndpointNothingChanged,
         },

@@ -12,6 +12,7 @@ export interface HeaderProps {
     | ({ isSpecial?: false } & ButtonProps)
     | ({ isSpecial: true } & SpecialButtonProps)
   )[];
+  bottomButtonsContainerStyle?: React.CSSProperties;
 
   displayFlex?: boolean;
   fixedHeight?: boolean;

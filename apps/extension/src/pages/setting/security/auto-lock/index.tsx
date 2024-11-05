@@ -99,6 +99,7 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
           }),
           color: "secondary",
           size: "large",
+          type: "submit",
           isLoading,
         },
       ]}

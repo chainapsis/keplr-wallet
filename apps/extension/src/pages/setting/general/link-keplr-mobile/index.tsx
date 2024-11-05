@@ -175,6 +175,7 @@ const EnterPasswordView: FunctionComponent<{
             id: "button.confirm",
           }),
           size: "large",
+          type: "submit",
           isLoading,
           disabled: password.length === 0,
         },
