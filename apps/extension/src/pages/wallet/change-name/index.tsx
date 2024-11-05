@@ -90,19 +90,21 @@ export const WalletChangeNamePage: FunctionComponent = observer(() => {
           }
         />
       }
-      bottomButton={{
-        text: intl.formatMessage({ id: "button.save" }),
-        color: "secondary",
-        size: "large",
-        type: "submit",
-        isLoading: (() => {
-          if (!interactionInfo.interaction) {
-            return false;
-          }
+      bottomButtons={[
+        {
+          text: intl.formatMessage({ id: "button.save" }),
+          color: "secondary",
+          size: "large",
+          type: "submit",
+          isLoading: (() => {
+            if (!interactionInfo.interaction) {
+              return false;
+            }
 
-          return interactionStore.isObsoleteInteraction(interactionData?.id);
-        })(),
-      }}
+            return interactionStore.isObsoleteInteraction(interactionData?.id);
+          })(),
+        },
+      ]}
       onSubmit={handleSubmit(async (data) => {
         try {
           if (vaultId) {

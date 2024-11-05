@@ -353,99 +353,101 @@ export const EthereumSigningView: FunctionComponent<{
           }
         />
       }
-      bottomButton={{
-        text: intl.formatMessage({ id: "button.approve" }),
-        color: "primary",
-        size: "large",
-        isLoading:
-          signEthereumInteractionStore.isObsoleteInteraction(
-            interactionData.id
-          ) ||
-          isLedgerInteracting ||
-          isKeystoneInteracting,
-        onClick: async () => {
-          try {
-            let signature;
-            if (interactionData.data.keyType === "ledger") {
-              setIsLedgerInteracting(true);
-              setLedgerInteractingError(undefined);
-              signature = await handleEthereumPreSignByLedger(
-                interactionData,
-                Buffer.from(signingDataText),
-                {
-                  useWebHID: uiConfigStore.useWebHIDLedger,
-                }
-              );
-            } else if (interactionData.data.keyType === "keystone") {
-              setIsKeystoneInteracting(true);
-              setKeystoneInteractingError(undefined);
-              signature = await handleEthereumPreSignByKeystone(
-                interactionData,
-                Buffer.from(signingDataText),
-                {
-                  displayQRCode: async (ur: KeystoneUR) => {
-                    setKeystoneUR(ur);
-                  },
-                  scanQRCode: () =>
-                    new Promise<KeystoneUR>((resolve) => {
-                      keystoneScanResolve.current = resolve;
-                    }),
-                }
-              );
-            }
+      bottomButtons={[
+        {
+          text: intl.formatMessage({ id: "button.approve" }),
+          color: "primary",
+          size: "large",
+          isLoading:
+            signEthereumInteractionStore.isObsoleteInteraction(
+              interactionData.id
+            ) ||
+            isLedgerInteracting ||
+            isKeystoneInteracting,
+          onClick: async () => {
+            try {
+              let signature;
+              if (interactionData.data.keyType === "ledger") {
+                setIsLedgerInteracting(true);
+                setLedgerInteractingError(undefined);
+                signature = await handleEthereumPreSignByLedger(
+                  interactionData,
+                  Buffer.from(signingDataText),
+                  {
+                    useWebHID: uiConfigStore.useWebHIDLedger,
+                  }
+                );
+              } else if (interactionData.data.keyType === "keystone") {
+                setIsKeystoneInteracting(true);
+                setKeystoneInteractingError(undefined);
+                signature = await handleEthereumPreSignByKeystone(
+                  interactionData,
+                  Buffer.from(signingDataText),
+                  {
+                    displayQRCode: async (ur: KeystoneUR) => {
+                      setKeystoneUR(ur);
+                    },
+                    scanQRCode: () =>
+                      new Promise<KeystoneUR>((resolve) => {
+                        keystoneScanResolve.current = resolve;
+                      }),
+                  }
+                );
+              }
 
-            await signEthereumInteractionStore.approveWithProceedNext(
-              interactionData.id,
-              Buffer.from(signingDataText),
-              signature,
-              async (proceedNext) => {
-                if (!proceedNext) {
+              await signEthereumInteractionStore.approveWithProceedNext(
+                interactionData.id,
+                Buffer.from(signingDataText),
+                signature,
+                async (proceedNext) => {
+                  if (!proceedNext) {
+                    if (
+                      interactionInfo.interaction &&
+                      !interactionInfo.interactionInternal
+                    ) {
+                      handleExternalInteractionWithNoProceedNext();
+                    }
+                  }
+
                   if (
                     interactionInfo.interaction &&
-                    !interactionInfo.interactionInternal
+                    interactionInfo.interactionInternal
                   ) {
-                    handleExternalInteractionWithNoProceedNext();
+                    // XXX: 약간 난해한 부분인데
+                    //      내부의 tx의 경우에는 tx 이후의 routing을 요청한 쪽에서 처리한다.
+                    //      하지만 tx를 처리할때 tx broadcast 등의 과정이 있고
+                    //      서명 페이지에서는 이러한 과정이 끝났는지 아닌지를 파악하기 힘들다.
+                    //      만약에 밑과같은 처리를 하지 않으면 interaction data가 먼저 지워지면서
+                    //      화면이 깜빡거리는 문제가 발생한다.
+                    //      이 문제를 해결하기 위해서 내부의 tx는 보내는 쪽에서 routing을 잘 처리한다고 가정하고
+                    //      페이지를 벗어나고 나서야 data를 지우도록한다.
+                    await unmountPromise.promise;
                   }
                 }
+              );
+            } catch (e) {
+              console.log(e);
 
-                if (
-                  interactionInfo.interaction &&
-                  interactionInfo.interactionInternal
-                ) {
-                  // XXX: 약간 난해한 부분인데
-                  //      내부의 tx의 경우에는 tx 이후의 routing을 요청한 쪽에서 처리한다.
-                  //      하지만 tx를 처리할때 tx broadcast 등의 과정이 있고
-                  //      서명 페이지에서는 이러한 과정이 끝났는지 아닌지를 파악하기 힘들다.
-                  //      만약에 밑과같은 처리를 하지 않으면 interaction data가 먼저 지워지면서
-                  //      화면이 깜빡거리는 문제가 발생한다.
-                  //      이 문제를 해결하기 위해서 내부의 tx는 보내는 쪽에서 routing을 잘 처리한다고 가정하고
-                  //      페이지를 벗어나고 나서야 data를 지우도록한다.
-                  await unmountPromise.promise;
+              if (e instanceof KeplrError) {
+                if (e.module === ErrModuleLedgerSign) {
+                  setLedgerInteractingError(e);
+                } else if (e.module === ErrModuleKeystoneSign) {
+                  setKeystoneInteractingError(e);
+                } else {
+                  setLedgerInteractingError(undefined);
+                  setKeystoneInteractingError(undefined);
                 }
-              }
-            );
-          } catch (e) {
-            console.log(e);
-
-            if (e instanceof KeplrError) {
-              if (e.module === ErrModuleLedgerSign) {
-                setLedgerInteractingError(e);
-              } else if (e.module === ErrModuleKeystoneSign) {
-                setKeystoneInteractingError(e);
               } else {
                 setLedgerInteractingError(undefined);
                 setKeystoneInteractingError(undefined);
               }
-            } else {
-              setLedgerInteractingError(undefined);
-              setKeystoneInteractingError(undefined);
+            } finally {
+              setIsLedgerInteracting(false);
+              setIsKeystoneInteracting(false);
             }
-          } finally {
-            setIsLedgerInteracting(false);
-            setIsKeystoneInteracting(false);
-          }
+          },
         },
-      }}
+      ]}
     >
       <Box
         height="100%"

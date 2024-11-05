@@ -29,13 +29,15 @@ export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
     <HeaderLayout
       title=""
       fixedHeight={true}
-      bottomButton={{
-        text: intl.formatMessage({
-          id: "button.approve",
-        }),
-        size: "large",
-        isLoading: permissionStore.isObsoleteInteraction(data.id),
-      }}
+      bottomButtons={[
+        {
+          text: intl.formatMessage({
+            id: "button.approve",
+          }),
+          size: "large",
+          isLoading: permissionStore.isObsoleteInteraction(data.id),
+        },
+      ]}
       onSubmit={async (e) => {
         e.preventDefault();
 

@@ -93,52 +93,54 @@ const SuggestChainPageImpl: FunctionComponent<{
           </Box>
         ) : undefined
       }
-      bottomButton={{
-        text: intl.formatMessage({ id: "button.approve" }),
-        size: "large",
-        color: "primary",
-        isLoading: permissionStore.isObsoleteInteraction(waitingData.id),
-        onClick: async () => {
-          const chainInfo =
-            communityChainInfo && !updateFromRepoDisabled
-              ? communityChainInfo
-              : waitingData.data.chainInfo;
+      bottomButtons={[
+        {
+          text: intl.formatMessage({ id: "button.approve" }),
+          size: "large",
+          color: "primary",
+          isLoading: permissionStore.isObsoleteInteraction(waitingData.id),
+          onClick: async () => {
+            const chainInfo =
+              communityChainInfo && !updateFromRepoDisabled
+                ? communityChainInfo
+                : waitingData.data.chainInfo;
 
-          const ids = new Set([waitingData.id]);
-          for (const data of chainSuggestStore.waitingSuggestedChainInfos) {
-            if (
-              data.data.chainInfo.chainId ===
-                waitingData.data.chainInfo.chainId &&
-              data.data.origin === waitingData.data.origin
-            ) {
-              ids.add(data.id);
-            }
-          }
-          await chainSuggestStore.approveWithProceedNext(
-            Array.from(ids),
-            {
-              ...chainInfo,
-              updateFromRepoDisabled,
-            },
-            async (proceedNext) => {
-              await keyRingStore.refreshKeyRingStatus();
-              await chainStore.updateChainInfosFromBackground();
-              await chainStore.updateEnabledChainIdentifiersFromBackground();
-
-              dispatchGlobalEventExceptSelf("keplr_suggested_chain_added");
-
-              if (!proceedNext) {
-                if (
-                  interactionInfo.interaction &&
-                  !interactionInfo.interactionInternal
-                ) {
-                  handleExternalInteractionWithNoProceedNext();
-                }
+            const ids = new Set([waitingData.id]);
+            for (const data of chainSuggestStore.waitingSuggestedChainInfos) {
+              if (
+                data.data.chainInfo.chainId ===
+                  waitingData.data.chainInfo.chainId &&
+                data.data.origin === waitingData.data.origin
+              ) {
+                ids.add(data.id);
               }
             }
-          );
+            await chainSuggestStore.approveWithProceedNext(
+              Array.from(ids),
+              {
+                ...chainInfo,
+                updateFromRepoDisabled,
+              },
+              async (proceedNext) => {
+                await keyRingStore.refreshKeyRingStatus();
+                await chainStore.updateChainInfosFromBackground();
+                await chainStore.updateEnabledChainIdentifiersFromBackground();
+
+                dispatchGlobalEventExceptSelf("keplr_suggested_chain_added");
+
+                if (!proceedNext) {
+                  if (
+                    interactionInfo.interaction &&
+                    !interactionInfo.interactionInternal
+                  ) {
+                    handleExternalInteractionWithNoProceedNext();
+                  }
+                }
+              }
+            );
+          },
         },
-      }}
+      ]}
     >
       {(() => {
         if (isLoadingPlaceholder) {

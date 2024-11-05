@@ -8,9 +8,10 @@ export interface HeaderProps {
   right?: ReactNode;
 
   // TODO: 나중에 아래 버튼이 여러개 필요해지면 배열로 만들자...
-  bottomButton?:
+  bottomButtons?: (
     | ({ isSpecial?: false } & ButtonProps)
-    | ({ isSpecial: true } & SpecialButtonProps);
+    | ({ isSpecial: true } & SpecialButtonProps)
+  )[];
 
   displayFlex?: boolean;
   fixedHeight?: boolean;

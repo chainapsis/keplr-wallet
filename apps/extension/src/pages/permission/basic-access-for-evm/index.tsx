@@ -38,18 +38,20 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
     <HeaderLayout
       title=""
       fixedHeight={true}
-      bottomButton={{
-        text: intl.formatMessage({
-          id: "button.approve",
-        }),
-        size: "large",
-        isLoading: (() => {
-          const obsolete = data.ids.find((id) => {
-            return permissionStore.isObsoleteInteraction(id);
-          });
-          return !!obsolete;
-        })(),
-      }}
+      bottomButtons={[
+        {
+          text: intl.formatMessage({
+            id: "button.approve",
+          }),
+          size: "large",
+          isLoading: (() => {
+            const obsolete = data.ids.find((id) => {
+              return permissionStore.isObsoleteInteraction(id);
+            });
+            return !!obsolete;
+          })(),
+        },
+      ]}
       onSubmit={async (e) => {
         e.preventDefault();
 

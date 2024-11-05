@@ -39,14 +39,16 @@ export const SettingSecurityChangePasswordPage: FunctionComponent = observer(
           id: "page.setting.security.change-password-title",
         })}
         left={<BackButton />}
-        bottomButton={{
-          text: intl.formatMessage({
-            id: "button.next",
-          }),
-          color: "secondary",
-          size: "large",
-          isLoading,
-        }}
+        bottomButtons={[
+          {
+            text: intl.formatMessage({
+              id: "button.next",
+            }),
+            color: "secondary",
+            size: "large",
+            isLoading,
+          },
+        ]}
         onSubmit={form.handleSubmit(async (data) => {
           setIsLoading(true);
 

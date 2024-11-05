@@ -132,108 +132,110 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
           }
         />
       }
-      bottomButton={{
-        text: intl.formatMessage({ id: "button.approve" }),
-        color: "primary",
-        size: "large",
-        disabled: signInteractionStore.waitingData == null,
-        isLoading:
-          signInteractionStore.isObsoleteInteraction(
-            signInteractionStore.waitingData?.id
-          ) ||
-          isLedgerInteracting ||
-          isKeystoneInteracting,
-        onClick: async () => {
-          if (signInteractionStore.waitingData) {
-            const signDocWrapper =
-              signInteractionStore.waitingData.data.signDocWrapper;
+      bottomButtons={[
+        {
+          text: intl.formatMessage({ id: "button.approve" }),
+          color: "primary",
+          size: "large",
+          disabled: signInteractionStore.waitingData == null,
+          isLoading:
+            signInteractionStore.isObsoleteInteraction(
+              signInteractionStore.waitingData?.id
+            ) ||
+            isLedgerInteracting ||
+            isKeystoneInteracting,
+          onClick: async () => {
+            if (signInteractionStore.waitingData) {
+              const signDocWrapper =
+                signInteractionStore.waitingData.data.signDocWrapper;
 
-            if (
-              signDocWrapper.mode !== "amino" ||
-              !checkAndValidateADR36AminoSignDoc(
-                signDocWrapper.aminoSignDoc,
-                chainStore.getChain(
-                  signInteractionStore.waitingData.data.chainId
-                ).bech32Config?.bech32PrefixAccAddr
-              )
-            ) {
-              throw new Error("Invalid sign doc for adr36");
-            }
-
-            let presignOptions;
-            if (signInteractionStore.waitingData.data.keyType === "ledger") {
-              setIsLedgerInteracting(true);
-              setLedgerInteractingError(undefined);
-              presignOptions = {
-                useWebHID: uiConfigStore.useWebHIDLedger,
-              };
-            } else if (
-              signInteractionStore.waitingData.data.keyType === "keystone"
-            ) {
-              setIsKeystoneInteracting(true);
-              setKeystoneInteractingError(undefined);
-              const isEthSigning = KeyRingService.isEthermintLike(
-                chainStore.getChain(
-                  signInteractionStore.waitingData.data.chainId
+              if (
+                signDocWrapper.mode !== "amino" ||
+                !checkAndValidateADR36AminoSignDoc(
+                  signDocWrapper.aminoSignDoc,
+                  chainStore.getChain(
+                    signInteractionStore.waitingData.data.chainId
+                  ).bech32Config?.bech32PrefixAccAddr
                 )
-              );
-              presignOptions = {
-                isEthSigning,
-                displayQRCode: async (ur: KeystoneUR) => {
-                  setKeystoneUR(ur);
-                },
-                scanQRCode: () =>
-                  new Promise<KeystoneUR>((resolve) => {
-                    keystoneScanResolve.current = resolve;
-                  }),
-              };
-            }
+              ) {
+                throw new Error("Invalid sign doc for adr36");
+              }
 
-            try {
-              const signature = await handleCosmosPreSign(
-                signInteractionStore.waitingData,
-                signDocWrapper,
-                presignOptions
-              );
+              let presignOptions;
+              if (signInteractionStore.waitingData.data.keyType === "ledger") {
+                setIsLedgerInteracting(true);
+                setLedgerInteractingError(undefined);
+                presignOptions = {
+                  useWebHID: uiConfigStore.useWebHIDLedger,
+                };
+              } else if (
+                signInteractionStore.waitingData.data.keyType === "keystone"
+              ) {
+                setIsKeystoneInteracting(true);
+                setKeystoneInteractingError(undefined);
+                const isEthSigning = KeyRingService.isEthermintLike(
+                  chainStore.getChain(
+                    signInteractionStore.waitingData.data.chainId
+                  )
+                );
+                presignOptions = {
+                  isEthSigning,
+                  displayQRCode: async (ur: KeystoneUR) => {
+                    setKeystoneUR(ur);
+                  },
+                  scanQRCode: () =>
+                    new Promise<KeystoneUR>((resolve) => {
+                      keystoneScanResolve.current = resolve;
+                    }),
+                };
+              }
 
-              await signInteractionStore.approveWithProceedNext(
-                signInteractionStore.waitingData.id,
-                signDocWrapper,
-                signature,
-                (proceedNext) => {
-                  if (!proceedNext) {
-                    if (
-                      interactionInfo.interaction &&
-                      !interactionInfo.interactionInternal
-                    ) {
-                      handleExternalInteractionWithNoProceedNext();
+              try {
+                const signature = await handleCosmosPreSign(
+                  signInteractionStore.waitingData,
+                  signDocWrapper,
+                  presignOptions
+                );
+
+                await signInteractionStore.approveWithProceedNext(
+                  signInteractionStore.waitingData.id,
+                  signDocWrapper,
+                  signature,
+                  (proceedNext) => {
+                    if (!proceedNext) {
+                      if (
+                        interactionInfo.interaction &&
+                        !interactionInfo.interactionInternal
+                      ) {
+                        handleExternalInteractionWithNoProceedNext();
+                      }
                     }
                   }
-                }
-              );
-            } catch (e) {
-              console.log(e);
+                );
+              } catch (e) {
+                console.log(e);
 
-              if (e instanceof KeplrError) {
-                if (e.module === ErrModuleLedgerSign) {
-                  setLedgerInteractingError(e);
-                } else if (e.module === ErrModuleKeystoneSign) {
-                  setKeystoneInteractingError(e);
+                if (e instanceof KeplrError) {
+                  if (e.module === ErrModuleLedgerSign) {
+                    setLedgerInteractingError(e);
+                  } else if (e.module === ErrModuleKeystoneSign) {
+                    setKeystoneInteractingError(e);
+                  } else {
+                    setLedgerInteractingError(undefined);
+                    setKeystoneInteractingError(undefined);
+                  }
                 } else {
                   setLedgerInteractingError(undefined);
                   setKeystoneInteractingError(undefined);
                 }
-              } else {
-                setLedgerInteractingError(undefined);
-                setKeystoneInteractingError(undefined);
+              } finally {
+                setIsLedgerInteracting(false);
+                setIsKeystoneInteracting(false);
               }
-            } finally {
-              setIsLedgerInteracting(false);
-              setIsKeystoneInteracting(false);
             }
-          }
+          },
         },
-      }}
+      ]}
     >
       <Box
         height="100%"

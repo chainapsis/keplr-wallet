@@ -475,16 +475,18 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           </Box>
         )
       }
-      bottomButton={{
-        disabled: txConfigsValidate.interactionBlocked,
-        text: intl.formatMessage({ id: "button.next" }),
-        color: "primary",
-        size: "large",
-        isLoading: isEvmTx
-          ? ethereumAccount.isSendingTx
-          : accountStore.getAccount(chainId).isSendingMsg ===
-            (!isIBCTransfer ? "send" : "ibcTransfer"),
-      }}
+      bottomButtons={[
+        {
+          disabled: txConfigsValidate.interactionBlocked,
+          text: intl.formatMessage({ id: "button.next" }),
+          color: "primary",
+          size: "large",
+          isLoading: isEvmTx
+            ? ethereumAccount.isSendingTx
+            : accountStore.getAccount(chainId).isSendingMsg ===
+              (!isIBCTransfer ? "send" : "ibcTransfer"),
+        },
+      ]}
       onSubmit={async (e) => {
         e.preventDefault();
 

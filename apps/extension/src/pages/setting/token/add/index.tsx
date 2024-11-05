@@ -233,17 +233,19 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           }
         />
       }
-      bottomButton={{
-        text: intl.formatMessage({
-          id: "page.setting.token.add.confirm-button",
-        }),
-        color: "secondary",
-        size: "large",
-        disabled:
-          contractAddress.length === 0 ||
-          !queryContract.tokenInfo ||
-          (isSecretWasm && !accountStore.getAccount(chainId).isReadyToSendTx),
-      }}
+      bottomButtons={[
+        {
+          text: intl.formatMessage({
+            id: "page.setting.token.add.confirm-button",
+          }),
+          color: "secondary",
+          size: "large",
+          disabled:
+            contractAddress.length === 0 ||
+            !queryContract.tokenInfo ||
+            (isSecretWasm && !accountStore.getAccount(chainId).isReadyToSendTx),
+        },
+      ]}
       onSubmit={handleSubmit(async (data) => {
         if (queryContract.tokenInfo) {
           let currency: AppCurrency;

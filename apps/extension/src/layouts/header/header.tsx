@@ -182,7 +182,7 @@ export const HeaderLayout: FunctionComponent<
   title,
   left,
   right,
-  bottomButton,
+  bottomButtons,
   displayFlex,
   fixedHeight,
   fixedMinHeight,
@@ -196,6 +196,9 @@ export const HeaderLayout: FunctionComponent<
 }) => {
   const [height, setHeight] = React.useState(() => pxToRem(600));
   const lastSetHeight = useRef(-1);
+
+  const hasBottomButton = bottomButtons && bottomButtons.length > 0;
+  const hasMultipleBottomButton = bottomButtons && bottomButtons.length > 1;
 
   useLayoutEffect(() => {
     function handleResize() {
@@ -216,21 +219,32 @@ export const HeaderLayout: FunctionComponent<
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // TODO: 버튼이 여러개일때의 처리를 해야한다.
   const bottomPadding = (() => {
-    if (!bottomButton) {
+    if (!hasBottomButton) {
       return "0";
     }
 
-    if (bottomButton.isSpecial) {
+    const specialButton = bottomButtons.find((button) => button.isSpecial);
+
+    if (!!specialButton) {
       return (
         bottomButtonPaddingRem * 2 +
-        getSpecialButtonHeightRem(bottomButton.size) +
+        getSpecialButtonHeightRem(specialButton.size) +
         "rem"
       );
     }
 
+    const largestButton = bottomButtons.reduce((prev, current) => {
+      return getButtonHeightRem(prev.size) > getButtonHeightRem(current.size)
+        ? prev
+        : current;
+    }, bottomButtons[0]);
+
     return (
-      bottomButtonPaddingRem * 2 + getButtonHeightRem(bottomButton.size) + "rem"
+      bottomButtonPaddingRem * 2 +
+      getButtonHeightRem(largestButton.size) +
+      "rem"
     );
   })();
 
@@ -277,7 +291,7 @@ export const HeaderLayout: FunctionComponent<
         {children}
       </Styles.ContentContainer>
 
-      {bottomButton ? (
+      {hasBottomButton ? (
         <Box
           padding={bottomButtonPaddingRem + "rem"}
           position="fixed"
@@ -285,6 +299,11 @@ export const HeaderLayout: FunctionComponent<
             left: 0,
             right: 0,
             bottom: additionalPaddingBottom || "0",
+            display: hasMultipleBottomButton ? "grid" : undefined,
+            gridTemplateColumns: hasMultipleBottomButton
+              ? `repeat(${bottomButtons.length}, 1fr)`
+              : undefined,
+            gap: hasMultipleBottomButton ? "12px" : undefined,
           }}
         >
           {/*
@@ -304,30 +323,55 @@ export const HeaderLayout: FunctionComponent<
               }}
             />
           ) : null}
-          {(() => {
-            if (bottomButton.isSpecial) {
-              // isSpecial is not used.
-              const { isSpecial, ...other } = bottomButton;
-              return <SpecialButton {...other} />;
-            } else {
-              // isSpecial is not used.
-              const { isSpecial, type, ...other } = bottomButton;
+          {/* TODO: 코드 예쁘게 리팩토링하기 */}
+          {hasMultipleBottomButton
+            ? bottomButtons.map((button, index) => {
+                if (button.isSpecial) {
+                  // isSpecial is not used.
+                  const { isSpecial, ...other } = button;
+                  return <SpecialButton {...other} key={index} />;
+                } else {
+                  // isSpecial is not used.
+                  const { isSpecial, type, ...other } = button;
 
-              // onSubmit prop이 존재한다면 기본적으로 type="submit"으로 설정한다
-              // TODO: 만약에 bottomButton이 배열을 받을 수 있도록 수정된다면 이 부분도 수정되어야함.
+                  // onSubmit prop이 존재한다면 기본적으로 type="submit"으로 설정한다
 
-              const props = {
-                ...other,
-                type: type || onSubmit ? ("submit" as const) : undefined,
-              };
+                  const props = {
+                    ...other,
+                    type: type || onSubmit ? ("submit" as const) : undefined,
+                  };
 
-              return (
-                <Skeleton isNotReady={isNotReady} type="button">
-                  <Button {...props} />
-                </Skeleton>
-              );
-            }
-          })()}
+                  return (
+                    <Skeleton isNotReady={isNotReady} type="button" key={index}>
+                      <Button {...props} />
+                    </Skeleton>
+                  );
+                }
+              })
+            : (() => {
+                if (bottomButtons[0].isSpecial) {
+                  // isSpecial is not used.
+                  const { isSpecial, ...other } = bottomButtons[0];
+                  return <SpecialButton {...other} />;
+                } else {
+                  // isSpecial is not used.
+                  const { isSpecial, type, ...other } = bottomButtons[0];
+
+                  // onSubmit prop이 존재한다면 기본적으로 type="submit"으로 설정한다
+                  // TODO: 만약에 bottomButton이 배열을 받을 수 있도록 수정된다면 이 부분도 수정되어야함.
+
+                  const props = {
+                    ...other,
+                    type: type || onSubmit ? ("submit" as const) : undefined,
+                  };
+
+                  return (
+                    <Skeleton isNotReady={isNotReady} type="button">
+                      <Button {...props} />
+                    </Skeleton>
+                  );
+                }
+              })()}
         </Box>
       ) : null}
     </Styles.Container>

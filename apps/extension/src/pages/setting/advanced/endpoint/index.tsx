@@ -129,15 +129,17 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
       })}
       fixedHeight={true}
       left={<BackButton />}
-      bottomButton={{
-        text: intl.formatMessage({
-          id: "button.confirm",
-        }),
-        color: "primary",
-        size: "large",
-        isLoading,
-        disabled: isEndpointNothingChanged,
-      }}
+      bottomButtons={[
+        {
+          text: intl.formatMessage({
+            id: "button.confirm",
+          }),
+          color: "primary",
+          size: "large",
+          isLoading,
+          disabled: isEndpointNothingChanged,
+        },
+      ]}
       onSubmit={handleSubmit(async (data) => {
         setIsLoading(true);
 

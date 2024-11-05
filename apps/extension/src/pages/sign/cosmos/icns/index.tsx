@@ -26,21 +26,23 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
     <HeaderLayout
       title=""
       fixedHeight={true}
-      bottomButton={{
-        text: intl.formatMessage({ id: "button.approve" }),
-        size: "large",
-        isLoading: (() => {
-          if (
-            icnsInteractionStore.waitingData &&
-            icnsInteractionStore.isObsoleteInteraction(
-              icnsInteractionStore.waitingData.id
-            )
-          ) {
-            return true;
-          }
-        })(),
-        disabled: icnsInteractionStore.waitingData == null,
-      }}
+      bottomButtons={[
+        {
+          text: intl.formatMessage({ id: "button.approve" }),
+          size: "large",
+          isLoading: (() => {
+            if (
+              icnsInteractionStore.waitingData &&
+              icnsInteractionStore.isObsoleteInteraction(
+                icnsInteractionStore.waitingData.id
+              )
+            ) {
+              return true;
+            }
+          })(),
+          disabled: icnsInteractionStore.waitingData == null,
+        },
+      ]}
       onSubmit={async (e) => {
         e.preventDefault();
 

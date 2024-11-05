@@ -92,14 +92,16 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
         id: "page.setting.security.auto-lock-title",
       })}
       left={<BackButton />}
-      bottomButton={{
-        text: intl.formatMessage({
-          id: "button.confirm",
-        }),
-        color: "secondary",
-        size: "large",
-        isLoading,
-      }}
+      bottomButtons={[
+        {
+          text: intl.formatMessage({
+            id: "button.confirm",
+          }),
+          color: "secondary",
+          size: "large",
+          isLoading,
+        },
+      ]}
       onSubmit={handleSubmit(async (data) => {
         setIsLoading(true);
 
