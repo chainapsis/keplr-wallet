@@ -157,7 +157,20 @@ const handleRequestJsonRpcToStarknetMsg: (
   permissionInteractionService
 ) => {
   return async (env, msg) => {
-    if (msg.method !== "keplr_initStarknetProviderState") {
+    let skipEnable = false;
+    if (msg.method === "keplr_initStarknetProviderState") {
+      skipEnable = true;
+    }
+    if (msg.method === "wallet_getPermissions") {
+      skipEnable = true;
+    }
+    if (msg.method === "wallet_requestAccounts") {
+      if (!Array.isArray(msg.params) && msg.params?.["silent_mode"]) {
+        skipEnable = true;
+      }
+    }
+
+    if (!skipEnable) {
       await permissionInteractionService.ensureEnabledForStarknet(
         env,
         msg.origin
