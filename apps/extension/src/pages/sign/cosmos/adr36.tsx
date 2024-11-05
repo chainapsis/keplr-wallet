@@ -25,11 +25,14 @@ import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
 import { MessageAdr36Icon } from "../../../components/icon";
 import { ItemLogo } from "../../main/token-detail/msg-items/logo";
 import { KeystoneUSBBox } from "../components/keystone-usb-box";
+import { useNavigate } from "react-router";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
   const { chainStore, signInteractionStore, uiConfigStore } = useStore();
   const intl = useIntl();
   const theme = useTheme();
+
+  const navigate = useNavigate();
 
   const [isViewData, setIsViewData] = useState(false);
 
@@ -133,6 +136,16 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
         />
       }
       bottomButtons={[
+        {
+          text: intl.formatMessage({
+            id: "button.reject",
+          }),
+          size: "large",
+          color: "secondary",
+          onClick: () => {
+            navigate("/", { replace: true });
+          },
+        },
         {
           text: intl.formatMessage({ id: "button.approve" }),
           color: "primary",

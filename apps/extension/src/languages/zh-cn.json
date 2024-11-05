@@ -619,6 +619,7 @@
   "button.next": "下一步",
   "button.advanced": "高级",
   "button.approve": "确认",
+  "button.reject": "拒绝",
   "button.save": "保存",
   "button.close": "关闭",
   "text-button.select-all": "全选",

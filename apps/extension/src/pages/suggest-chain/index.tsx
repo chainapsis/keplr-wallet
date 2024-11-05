@@ -11,6 +11,7 @@ import { ArrowLeftIcon } from "../../components/icon";
 import { Box } from "../../components/box";
 import { handleExternalInteractionWithNoProceedNext } from "../../utils";
 import { dispatchGlobalEventExceptSelf } from "../../utils/global-events";
+import { useNavigate } from "react-router";
 
 export const SuggestChainPage: FunctionComponent = observer(() => {
   const { chainSuggestStore } = useStore();
@@ -44,6 +45,8 @@ const SuggestChainPageImpl: FunctionComponent<{
 
   const intl = useIntl();
   const interactionInfo = useInteractionInfo();
+
+  const navigate = useNavigate();
 
   const queryCommunityChainInfo = chainSuggestStore.getCommunityChainInfo(
     waitingData.data.chainInfo.chainId
@@ -94,6 +97,16 @@ const SuggestChainPageImpl: FunctionComponent<{
         ) : undefined
       }
       bottomButtons={[
+        {
+          text: intl.formatMessage({
+            id: "button.reject",
+          }),
+          size: "large",
+          color: "secondary",
+          onClick: () => {
+            navigate("/", { replace: true });
+          },
+        },
         {
           text: intl.formatMessage({ id: "button.approve" }),
           size: "large",

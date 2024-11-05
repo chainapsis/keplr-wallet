@@ -12,11 +12,14 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
+import { useNavigate } from "react-router";
 
 export const SignCosmosICNSPage: FunctionComponent = observer(() => {
   const { icnsInteractionStore } = useStore();
   const intl = useIntl();
   const theme = useTheme();
+
+  const navigate = useNavigate();
 
   const interactionInfo = useInteractionInfo(() => {
     icnsInteractionStore.rejectAll();
@@ -27,6 +30,16 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
       title=""
       fixedHeight={true}
       bottomButtons={[
+        {
+          text: intl.formatMessage({
+            id: "button.reject",
+          }),
+          size: "large",
+          color: "secondary",
+          onClick: () => {
+            navigate("/", { replace: true });
+          },
+        },
         {
           text: intl.formatMessage({ id: "button.approve" }),
           size: "large",

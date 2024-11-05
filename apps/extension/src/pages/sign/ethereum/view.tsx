@@ -51,6 +51,7 @@ import { MemoryKVStore } from "@keplr-wallet/common";
 import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { Image } from "../../../components/image";
 import { Column, Columns } from "../../../components/column";
+import { useNavigate } from "react-router";
 
 /**
  * CosmosTxView의 주석을 꼭 참고하셈
@@ -71,6 +72,7 @@ export const EthereumSigningView: FunctionComponent<{
   } = useStore();
   const intl = useIntl();
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const interactionInfo = useInteractionInfo(() => {
     signEthereumInteractionStore.rejectAll();
@@ -354,6 +356,16 @@ export const EthereumSigningView: FunctionComponent<{
         />
       }
       bottomButtons={[
+        {
+          text: intl.formatMessage({
+            id: "button.reject",
+          }),
+          size: "large",
+          color: "secondary",
+          onClick: () => {
+            navigate("/", { replace: true });
+          },
+        },
         {
           text: intl.formatMessage({ id: "button.approve" }),
           color: "primary",

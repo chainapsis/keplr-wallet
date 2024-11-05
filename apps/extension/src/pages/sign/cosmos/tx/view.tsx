@@ -47,6 +47,7 @@ import { FeeSummary } from "../../components/fee-summary";
 import { FeeControl } from "../../../../components/input/fee-control";
 import { HighFeeWarning } from "../../components/high-fee-warning";
 import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
+import { useNavigate } from "react-router";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -72,6 +73,8 @@ export const CosmosTxView: FunctionComponent<{
 
   const intl = useIntl();
   const theme = useTheme();
+
+  const navigate = useNavigate();
 
   const [isViewData, setIsViewData] = useState(false);
 
@@ -500,6 +503,16 @@ export const CosmosTxView: FunctionComponent<{
       }
       // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
       bottomButtons={[
+        {
+          text: intl.formatMessage({
+            id: "button.reject",
+          }),
+          size: "large",
+          color: "secondary",
+          onClick: () => {
+            navigate("/", { replace: true });
+          },
+        },
         {
           isSpecial: true,
           text: intl.formatMessage({ id: "button.approve" }),

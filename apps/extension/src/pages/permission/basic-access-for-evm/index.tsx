@@ -13,6 +13,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { Dropdown } from "../../../components/dropdown";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
+import { useNavigate } from "react-router";
 
 export const PermissionBasicAccessForEVMPage: FunctionComponent<{
   data: {
@@ -24,6 +25,8 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
   const theme = useTheme();
 
   const interactionInfo = useInteractionInfo();
+
+  const navigate = useNavigate();
 
   const [currentChainIdForEVM, setCurrentChainIdForEVM] = useState<string>(
     data.chainIds[0]
@@ -39,6 +42,16 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
       title=""
       fixedHeight={true}
       bottomButtons={[
+        {
+          text: intl.formatMessage({
+            id: "button.reject",
+          }),
+          size: "large",
+          color: "secondary",
+          onClick: () => {
+            navigate("/", { replace: true });
+          },
+        },
         {
           text: intl.formatMessage({
             id: "button.approve",

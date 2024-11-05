@@ -13,6 +13,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { Dropdown } from "../../../components/dropdown";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
+import { useNavigate } from "react-router";
 
 export const PermissionBasicAccessForStarknetPage: FunctionComponent<{
   data: {
@@ -24,6 +25,8 @@ export const PermissionBasicAccessForStarknetPage: FunctionComponent<{
   const theme = useTheme();
 
   const interactionInfo = useInteractionInfo();
+
+  const navigate = useNavigate();
 
   const [currentChainIdForStarknet, setCurrentChainIdForStarknet] =
     useState<string>(data.chainIds[0]);
@@ -38,6 +41,16 @@ export const PermissionBasicAccessForStarknetPage: FunctionComponent<{
       title=""
       fixedHeight={true}
       bottomButtons={[
+        {
+          text: intl.formatMessage({
+            id: "button.reject",
+          }),
+          size: "large",
+          color: "secondary",
+          onClick: () => {
+            navigate("/", { replace: true });
+          },
+        },
         {
           text: intl.formatMessage({
             id: "button.approve",

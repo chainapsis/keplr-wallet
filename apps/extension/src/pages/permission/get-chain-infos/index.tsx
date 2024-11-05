@@ -15,6 +15,7 @@ import { ColorPalette } from "../../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
+import { useNavigate } from "react-router";
 
 export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
   data: InteractionWaitingData<GlobalPermissionData>;
@@ -25,11 +26,23 @@ export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
 
   const interactionInfo = useInteractionInfo();
 
+  const navigate = useNavigate();
+
   return (
     <HeaderLayout
       title=""
       fixedHeight={true}
       bottomButtons={[
+        {
+          text: intl.formatMessage({
+            id: "button.reject",
+          }),
+          size: "large",
+          color: "secondary",
+          onClick: () => {
+            navigate("/", { replace: true });
+          },
+        },
         {
           text: intl.formatMessage({
             id: "button.approve",

@@ -32,6 +32,7 @@ import { XAxis } from "../../../../components/axis";
 import { ViewDataButton } from "../../../sign/components/view-data-button";
 import { AccountActivationModal } from "../../components/account-activation-modal";
 import { Modal } from "../../../../components/modal";
+import { useNavigate } from "react-router";
 
 export const SignStarknetTxView: FunctionComponent<{
   interactionData: NonNullable<SignStarknetTxInteractionStore["waitingData"]>;
@@ -43,6 +44,7 @@ export const SignStarknetTxView: FunctionComponent<{
   } = useStore();
 
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const { chainStore } = useStore();
 
@@ -346,6 +348,16 @@ export const SignStarknetTxView: FunctionComponent<{
       }
       // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
       bottomButtons={[
+        {
+          text: intl.formatMessage({
+            id: "button.reject",
+          }),
+          size: "large",
+          color: "secondary",
+          onClick: () => {
+            navigate("/", { replace: true });
+          },
+        },
         {
           isSpecial: true,
           text: intl.formatMessage({ id: "button.approve" }),
