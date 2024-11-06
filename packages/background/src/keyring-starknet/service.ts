@@ -198,9 +198,9 @@ export class KeyRingStarknetService {
         "The chain id must be provided for the internal message."
       );
     }
-
     const currentChainId =
       this.permissionService.getCurrentChainIdForStarknet(origin) ?? chainId;
+
     if (currentChainId == null) {
       if (type === "keplr_initStarknetProviderState") {
         return {
@@ -447,36 +447,55 @@ export class KeyRingStarknetService {
 
   async signStarknetMessage(
     env: Env,
-    _origin: string,
+    origin: string,
     vaultId: string,
     chainId: string,
     signer: string,
     typedData: StarknetTypedData
   ): Promise<string[]> {
-    if (!env.isInternalMsg) {
-      throw new Error(
-        "This function is not yet allowed for the external message"
-      );
+    // TODO: chain id에 대해서 validation 넣기
+
+    const keyInfo = this.keyRingService.getKeyInfo(vaultId);
+    if (!keyInfo) {
+      throw new Error("Null key info");
     }
 
-    // TODO: tx에서 signer와 실제 계정 / chain id에 대해서 validation 넣기
-
-    let msgHash = starknetTypedDataUtils.getMessageHash(typedData, signer);
-
-    msgHash = msgHash.replace("0x", "");
-    const padZero = 64 - msgHash.length;
-    if (padZero > 0) {
-      msgHash = "0".repeat(padZero) + msgHash;
-    } else if (padZero < 0) {
-      throw new Error("Invalid length of msg hash");
+    const starknetKey = await this.getStarknetKey(vaultId, chainId);
+    if (starknetKey.hexAddress !== signer) {
+      throw new Error("Signer mismatched");
     }
-    const sig = await this.keyRingService.sign(
-      chainId,
-      vaultId,
-      Buffer.from(msgHash, "hex"),
-      "noop"
+
+    return await this.interactionService.waitApproveV2(
+      env,
+      "/sign-starknet-message",
+      "request-sign-starknet-message",
+      {
+        origin,
+        chainId,
+        signer,
+        typedData,
+      },
+      async () => {
+        let msgHash = starknetTypedDataUtils.getMessageHash(typedData, signer);
+
+        msgHash = msgHash.replace("0x", "");
+        const padZero = 64 - msgHash.length;
+        if (padZero > 0) {
+          msgHash = "0".repeat(padZero) + msgHash;
+        } else if (padZero < 0) {
+          throw new Error("Invalid length of msg hash");
+        }
+
+        const sig = await this.keyRingService.sign(
+          chainId,
+          vaultId,
+          Buffer.from(msgHash, "hex"),
+          "noop"
+        );
+
+        return this.formatEthSignature(sig);
+      }
     );
-    return this.formatEthSignature(sig);
   }
 
   // TODO: noChangeTx 기능은 아직 작동하지 않음
