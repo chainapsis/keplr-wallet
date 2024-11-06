@@ -9,7 +9,7 @@ import {
   toJS,
 } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { computedFn } from "mobx-utils";
 import { VaultService } from "../vault";
@@ -88,11 +88,11 @@ export class ChainsUIService {
     }
   );
 
-  readonly enabledChainInfosForVault = computedFn(
-    (vaultId: string): ReadonlyArray<ChainInfo> => {
+  readonly enabledModularChainInfosForVault = computedFn(
+    (vaultId: string): ReadonlyArray<ModularChainInfo> => {
       return this.enabledChainIdentifiersForVault(vaultId).map(
         (chainIdentifier) => {
-          return this.chainsService.getChainInfoOrThrow(chainIdentifier);
+          return this.chainsService.getModularChainInfoOrThrow(chainIdentifier);
         }
       );
     }

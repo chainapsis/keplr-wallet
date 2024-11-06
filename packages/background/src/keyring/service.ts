@@ -1437,9 +1437,18 @@ export class KeyRingService {
 
       if (isHex) {
         hexAddressSearchKeyInfos = keyInfos.filter((keyInfo) => {
-          const chainInfos = this.chainsUIService.enabledChainInfosForVault(
-            keyInfo.id
-          );
+          const modularChainInfos =
+            this.chainsUIService.enabledModularChainInfosForVault(keyInfo.id);
+          // TODO: 다른 체인도 지원하기
+          const chainInfos = modularChainInfos
+            .filter((c) => "cosmos" in c)
+            .map((c) => {
+              if (!("cosmos" in c)) {
+                throw new Error("Unsupported chain");
+              }
+              return c.cosmos;
+            });
+
           let evmEnabled = false;
           for (const chainInfo of chainInfos) {
             if (KeyRingService.isEthermintLike(chainInfo)) {
@@ -1523,7 +1532,21 @@ export class KeyRingService {
             }
             return targetChainInfos.length > 0
               ? targetChainInfos
-              : this.chainsUIService.enabledChainInfosForVault(keyInfo.id);
+              : (() => {
+                  const modularChainInfos =
+                    this.chainsUIService.enabledModularChainInfosForVault(
+                      keyInfo.id
+                    );
+                  // TODO: 다른 체인도 지원하기
+                  return modularChainInfos
+                    .filter((c) => "cosmos" in c)
+                    .map((c) => {
+                      if (!("cosmos" in c)) {
+                        throw new Error("Unsupported chain");
+                      }
+                      return c.cosmos;
+                    });
+                })();
           })();
 
           for (const chainInfo of chainInfos) {
