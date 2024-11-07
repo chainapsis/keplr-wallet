@@ -73,6 +73,7 @@ export const TokenDetailModal: FunctionComponent<{
     priceStore,
     price24HChangesStore,
     skipQueriesStore,
+    uiConfigStore,
   } = useStore();
 
   const theme = useTheme();
@@ -449,31 +450,29 @@ export const TokenDetailModal: FunctionComponent<{
                     : ColorPalette["gray-10"],
               }}
             >
-              {(() => {
-                if (!balance) {
-                  return `0 ${currency.coinDenom}`;
-                }
-
-                return balance.balance
-                  .maxDecimals(6)
-                  .inequalitySymbol(true)
-                  .shrink(true)
-                  .hideIBCMetadata(true)
-                  .toString();
-              })()}
+              {uiConfigStore.hideStringIfPrivacyMode(
+                balance
+                  ? balance.balance
+                      .maxDecimals(6)
+                      .inequalitySymbol(true)
+                      .shrink(true)
+                      .hideIBCMetadata(true)
+                      .toString()
+                  : `0 ${currency.coinDenom}`,
+                4
+              )}
             </Styles.Balance>
             <Gutter size="0.25rem" />
             <Subtitle3 color={ColorPalette["gray-300"]}>
-              {(() => {
-                if (!balance) {
-                  return "-";
-                }
-                const price = priceStore.calculatePrice(balance.balance);
-                if (price) {
-                  return price.toString();
-                }
-                return "-";
-              })()}
+              {uiConfigStore.hideStringIfPrivacyMode(
+                balance
+                  ? (() => {
+                      const price = priceStore.calculatePrice(balance.balance);
+                      return price ? price.toString() : "-";
+                    })()
+                  : "-",
+                2
+              )}
             </Subtitle3>
           </YAxis>
           <Gutter size="1.25rem" />
