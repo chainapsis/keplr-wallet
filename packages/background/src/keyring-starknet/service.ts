@@ -453,7 +453,7 @@ export class KeyRingStarknetService {
     signer: string,
     typedData: StarknetTypedData
   ): Promise<string[]> {
-    // TODO: chain id에 대해서 validation 넣기
+    this.chainsService.getModularChainInfoOrThrow(chainId);
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
