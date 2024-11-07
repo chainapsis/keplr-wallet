@@ -635,7 +635,12 @@ export const CosmosTxView: FunctionComponent<{
             </React.Fragment>
           ) : (
             <React.Fragment>
-              <MemoInput memoConfig={memoConfig} />
+              <MemoInput
+                memoConfig={memoConfig}
+                placeholder={intl.formatMessage({
+                  id: "components.input.memo-input.optional-placeholder",
+                })}
+              />
               <Gutter size="0.75rem" />
             </React.Fragment>
           )}

@@ -13,6 +13,7 @@ import {
 } from "@keplr-wallet/hooks";
 import { MemoInput } from "../../../components/input/memo-input";
 import { FeeControl } from "../../../components/input/fee-control";
+import { useIntl } from "react-intl";
 
 export const IBCTransferAmountView: FunctionComponent<{
   amountConfig: IAmountConfig;
@@ -30,6 +31,8 @@ export const IBCTransferAmountView: FunctionComponent<{
     gasConfig,
     gasSimulator,
   }) => {
+    const intl = useIntl();
+
     return (
       <Box
         paddingX="0.75rem"
@@ -40,7 +43,12 @@ export const IBCTransferAmountView: FunctionComponent<{
         <Stack gutter="0.75rem">
           <AmountInput amountConfig={amountConfig} />
 
-          <MemoInput memoConfig={memoConfig} />
+          <MemoInput
+            memoConfig={memoConfig}
+            placeholder={intl.formatMessage({
+              id: "components.input.memo-input.optional-placeholder",
+            })}
+          />
 
           <div style={{ flex: 1 }} />
           <FeeControl
