@@ -623,6 +623,7 @@
   "components.input.amount-input.amount-label": "Amount",
   "components.input.amount-input.max-button": "Max",
   "components.input.memo-input.memo-label": "Memo",
+  "components.input.memo-input.optional-placeholder": "Optional",
   "components.input.fee-control.fee": "Tx Fee: {assets}",
   "components.input.fee-control.max-fee": "Max Fee: {assets}",
   "components.input.fee-control.error.insufficient-fee": "Insufficient balance to cover the fees",

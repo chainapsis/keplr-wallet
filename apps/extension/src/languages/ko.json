@@ -606,6 +606,7 @@
   "components.input.amount-input.amount-label": "수량",
   "components.input.amount-input.max-button": "최대",
   "components.input.memo-input.memo-label": "메모",
+  "components.input.memo-input.optional-placeholder": "선택사항",
   "components.input.fee-control.title": "트랜잭션 수수료",
   "components.input.fee-control.fee": "수수료: {assets}",
   "components.input.fee-control.max-fee": "최대 수수료: {assets}",
