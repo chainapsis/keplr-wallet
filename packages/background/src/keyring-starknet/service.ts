@@ -473,7 +473,7 @@ export class KeyRingStarknetService {
         origin,
         chainId,
         signer,
-        typedData,
+        message: typedData,
       },
       async () => {
         let msgHash = starknetTypedDataUtils.getMessageHash(typedData, signer);

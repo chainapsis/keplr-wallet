@@ -101,6 +101,7 @@ import { ActivitiesPage } from "./pages/activities";
 import { isRunningInSidePanel } from "./utils";
 import { StarknetSendPage } from "./pages/starknet/send";
 import { SignStarknetTxPage } from "./pages/starknet/sign/tx";
+import { SignStarknetMessagePage } from "./pages/starknet/sign/message";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -471,6 +472,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               <Route
                 path="/sign-starknet-tx"
                 element={<SignStarknetTxPage />}
+              />
+              <Route
+                path="/sign-starknet-message"
+                element={<SignStarknetMessagePage />}
               />
               <Route path="/wallet/select" element={<WalletSelectPage />} />
               <Route path="/wallet/delete" element={<WalletDeletePage />} />
