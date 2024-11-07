@@ -682,15 +682,14 @@ export const TokenDetailModal: FunctionComponent<{
                     <Box marginX="2rem">
                       <Stack alignX="center" gutter="0.1rem">
                         <Subtitle3 style={{ fontWeight: 700 }}>
-                          Unsupported Chain
+                          Transaction History Unavailable
                         </Subtitle3>
                         <Subtitle3
                           style={{
                             textAlign: "center",
                           }}
                         >
-                          {`We're actively working on expanding our support for
-                        native chains.`}
+                          {`We're working on expanding the feature support for native chains.`}
                         </Subtitle3>
                       </Stack>
                     </Box>
