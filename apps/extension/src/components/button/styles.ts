@@ -138,13 +138,13 @@ const buttonStyleFromColorAndMode: Record<
     dark: {
       fill: {
         enabled: css`
-          background-color: ${ColorPalette["gray-400"]};
+          background-color: ${ColorPalette["gray-500"]};
 
           ${makeTextAndSvgColor(ColorPalette["white"])}
 
           :hover {
             ::after {
-              background-color: ${ColorPalette["gray-500"]};
+              background-color: ${ColorPalette["gray-600"]};
               opacity: 0.2;
             }
           }
