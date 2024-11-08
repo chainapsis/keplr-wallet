@@ -13,6 +13,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { Dropdown } from "../../../components/dropdown";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
+import { CheckIcon, XMarkIcon } from "../../../components/icon";
 import { useNavigate } from "react-router";
 
 export const PermissionBasicAccessForEVMPage: FunctionComponent<{
@@ -23,14 +24,20 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
   const { chainStore, permissionStore } = useStore();
   const intl = useIntl();
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const interactionInfo = useInteractionInfo();
-
-  const navigate = useNavigate();
 
   const [currentChainIdForEVM, setCurrentChainIdForEVM] = useState<string>(
     data.chainIds[0]
   );
+
+  const isLoading = (() => {
+    const obsolete = data.ids.find((id) => {
+      return permissionStore.isObsoleteInteraction(id);
+    });
+    return !!obsolete;
+  })();
 
   // 페이지가 언마운트 되지 않고 data만 바뀌는 경우가 있어서 이렇게 처리함
   useEffect(() => {
@@ -43,13 +50,33 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
       fixedHeight={true}
       bottomButtons={[
         {
-          text: intl.formatMessage({
-            id: "button.reject",
-          }),
+          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
           size: "large",
           color: "secondary",
-          onClick: () => {
-            navigate("/", { replace: true });
+          style: {
+            width: "3.25rem",
+          },
+          onClick: async () => {
+            await permissionStore.rejectPermissionWithProceedNext(
+              data.ids,
+              (proceedNext) => {
+                if (!proceedNext) {
+                  if (
+                    interactionInfo.interaction &&
+                    !interactionInfo.interactionInternal
+                  ) {
+                    handleExternalInteractionWithNoProceedNext();
+                  } else if (
+                    interactionInfo.interaction &&
+                    interactionInfo.interactionInternal
+                  ) {
+                    window.history.length > 1 ? navigate(-1) : navigate("/");
+                  } else {
+                    navigate("/", { replace: true });
+                  }
+                }
+              }
+            );
           },
         },
         {
@@ -58,12 +85,8 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
           }),
           size: "large",
           type: "submit",
-          isLoading: (() => {
-            const obsolete = data.ids.find((id) => {
-              return permissionStore.isObsoleteInteraction(id);
-            });
-            return !!obsolete;
-          })(),
+          left: !isLoading && <CheckIcon />,
+          isLoading,
         },
       ]}
       onSubmit={async (e) => {

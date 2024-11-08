@@ -13,16 +13,9 @@ export const useInteractionInfo = (cleanUp?: () => void) => {
   };
 
   useEffect(() => {
-    return () => {
-      if (cleanUpRef.current) {
-        cleanUpRef.current();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     // Execute the clean-up function when closing window.
     const beforeunload = async () => {
+      console.log("beforeunload");
       if (cleanUpRef.current) {
         cleanUpRef.current();
       }
@@ -32,6 +25,10 @@ export const useInteractionInfo = (cleanUp?: () => void) => {
     return () => {
       removeEventListener("beforeunload", beforeunload);
     };
+  }, []);
+
+  useEffect(() => {
+    // TODO: 현재 페이지에서 뒤로가기를 했을 때 이를 감지하고 cleanUp 함수를 실행하는 로직이 필요함.
   }, []);
 
   return useMemo(() => {

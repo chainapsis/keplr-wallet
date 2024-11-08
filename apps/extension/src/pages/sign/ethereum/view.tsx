@@ -51,6 +51,7 @@ import { MemoryKVStore } from "@keplr-wallet/common";
 import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { Image } from "../../../components/image";
 import { Column, Columns } from "../../../components/column";
+import { CheckIcon, XMarkIcon } from "../../../components/icon";
 import { useNavigate } from "react-router";
 
 /**
@@ -342,6 +343,11 @@ export const EthereumSigningView: FunctionComponent<{
   const [isUnknownContractExecution, setIsUnknownContractExecution] =
     useState(false);
 
+  const isLoading =
+    signEthereumInteractionStore.isObsoleteInteraction(interactionData.id) ||
+    isLedgerInteracting ||
+    isKeystoneInteracting;
+
   return (
     <HeaderLayout
       title={intl.formatMessage({
@@ -357,25 +363,41 @@ export const EthereumSigningView: FunctionComponent<{
       }
       bottomButtons={[
         {
-          text: intl.formatMessage({
-            id: "button.reject",
-          }),
+          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
           size: "large",
           color: "secondary",
-          onClick: () => {
-            navigate("/", { replace: true });
+          style: {
+            width: "3.25rem",
+          },
+          onClick: async () => {
+            await signEthereumInteractionStore.rejectWithProceedNext(
+              interactionData.id,
+              async (proceedNext) => {
+                if (!proceedNext) {
+                  if (
+                    interactionInfo.interaction &&
+                    !interactionInfo.interactionInternal
+                  ) {
+                    handleExternalInteractionWithNoProceedNext();
+                  } else if (
+                    interactionInfo.interaction &&
+                    interactionInfo.interactionInternal
+                  ) {
+                    window.history.length > 1 ? navigate(-1) : navigate("/");
+                  } else {
+                    navigate("/", { replace: true });
+                  }
+                }
+              }
+            );
           },
         },
         {
           text: intl.formatMessage({ id: "button.approve" }),
           color: "primary",
           size: "large",
-          isLoading:
-            signEthereumInteractionStore.isObsoleteInteraction(
-              interactionData.id
-            ) ||
-            isLedgerInteracting ||
-            isKeystoneInteracting,
+          left: !isLoading && <CheckIcon />,
+          isLoading,
           onClick: async () => {
             try {
               let signature;

@@ -188,7 +188,6 @@ export const HeaderLayout: FunctionComponent<
   left,
   right,
   bottomButtons,
-  bottomButtonsContainerStyle,
   displayFlex,
   fixedHeight,
   fixedMinHeight,
@@ -225,7 +224,6 @@ export const HeaderLayout: FunctionComponent<
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // TODO: 버튼이 여러개일때의 처리를 해야한다.
   const bottomPadding = (() => {
     if (!hasBottomButton) {
       return "0";
@@ -249,17 +247,12 @@ export const HeaderLayout: FunctionComponent<
     index: number
   ) => {
     if (button.isSpecial) {
-      // isSpecial is not used.
-      const { isSpecial, ...other } = button;
-      return <SpecialButton key={index} {...other} />;
+      return <SpecialButton key={index} {...button} />;
     }
-
-    // isSpecial is not used.
-    const { isSpecial, ...other } = button;
 
     return (
       <Skeleton isNotReady={isNotReady} type="button" key={index}>
-        <Button {...other} />
+        <Button {...button} />
       </Skeleton>
     );
   };
@@ -317,10 +310,9 @@ export const HeaderLayout: FunctionComponent<
             bottom: additionalPaddingBottom || "0",
             display: hasMultipleBottomButton ? "grid" : undefined,
             gridTemplateColumns: hasMultipleBottomButton
-              ? `repeat(${bottomButtons.length}, 1fr)`
+              ? `${"auto ".repeat(bottomButtons.length - 1)}1fr` // 마지막 버튼이 남은 공간을 다 채우도록 함
               : undefined,
             gap: hasMultipleBottomButton ? "0.75rem" : undefined,
-            ...bottomButtonsContainerStyle,
           }}
         >
           {/*

@@ -7,10 +7,11 @@ import { useInteractionInfo } from "../../hooks";
 import { InteractionWaitingData } from "@keplr-wallet/background";
 import { ChainInfo } from "@keplr-wallet/types";
 import { FormattedMessage, useIntl } from "react-intl";
-import { ArrowLeftIcon } from "../../components/icon";
+import { ArrowLeftIcon, CheckIcon, XMarkIcon } from "../../components/icon";
 import { Box } from "../../components/box";
 import { handleExternalInteractionWithNoProceedNext } from "../../utils";
 import { dispatchGlobalEventExceptSelf } from "../../utils/global-events";
+import { ColorPalette } from "../../styles";
 import { useNavigate } from "react-router";
 
 export const SuggestChainPage: FunctionComponent = observer(() => {
@@ -44,14 +45,15 @@ const SuggestChainPageImpl: FunctionComponent<{
   const [updateFromRepoDisabled, setUpdateFromRepoDisabled] = useState(false);
 
   const intl = useIntl();
-  const interactionInfo = useInteractionInfo();
-
   const navigate = useNavigate();
+  const interactionInfo = useInteractionInfo();
 
   const queryCommunityChainInfo = chainSuggestStore.getCommunityChainInfo(
     waitingData.data.chainInfo.chainId
   );
   const communityChainInfo = queryCommunityChainInfo.chainInfo;
+
+  const isLoading = permissionStore.isObsoleteInteraction(waitingData.id);
 
   useEffect(() => {
     if (!queryCommunityChainInfo.isLoading) {
@@ -98,20 +100,41 @@ const SuggestChainPageImpl: FunctionComponent<{
       }
       bottomButtons={[
         {
-          text: intl.formatMessage({
-            id: "button.reject",
-          }),
+          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
           size: "large",
           color: "secondary",
-          onClick: () => {
-            navigate("/", { replace: true });
+          style: {
+            width: "3.25rem",
+          },
+          onClick: async () => {
+            await chainSuggestStore.rejectWithProceedNext(
+              waitingData.id,
+              async (proceedNext) => {
+                if (!proceedNext) {
+                  if (
+                    interactionInfo.interaction &&
+                    !interactionInfo.interactionInternal
+                  ) {
+                    handleExternalInteractionWithNoProceedNext();
+                  } else if (
+                    interactionInfo.interaction &&
+                    interactionInfo.interactionInternal
+                  ) {
+                    window.history.length > 1 ? navigate(-1) : navigate("/");
+                  } else {
+                    navigate("/", { replace: true });
+                  }
+                }
+              }
+            );
           },
         },
         {
           text: intl.formatMessage({ id: "button.approve" }),
           size: "large",
           color: "primary",
-          isLoading: permissionStore.isObsoleteInteraction(waitingData.id),
+          left: !isLoading && <CheckIcon />,
+          isLoading,
           onClick: async () => {
             const chainInfo =
               communityChainInfo && !updateFromRepoDisabled

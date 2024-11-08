@@ -343,16 +343,6 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          text: intl.formatMessage({
-            id: "button.reject",
-          }),
-          size: "large",
-          color: "secondary",
-          onClick: () => {
-            navigate("/", { replace: true });
-          },
-        },
-        {
           disabled:
             starknetAccount.isDeployingAccount ||
             (!isAccountNotDeployed && txConfigsValidate.interactionBlocked),

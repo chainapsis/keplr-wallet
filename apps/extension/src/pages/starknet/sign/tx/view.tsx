@@ -25,7 +25,11 @@ import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
 import { useTheme } from "styled-components";
 import { H5 } from "../../../../components/typography";
-import { ArrowDropDownIcon } from "../../../../components/icon";
+import {
+  ArrowDropDownIcon,
+  CheckIcon,
+  XMarkIcon,
+} from "../../../../components/icon";
 import { Column, Columns } from "../../../../components/column";
 import SimpleBar from "simplebar-react";
 import { XAxis } from "../../../../components/axis";
@@ -44,12 +48,12 @@ export const SignStarknetTxView: FunctionComponent<{
   } = useStore();
 
   const theme = useTheme();
-  const navigate = useNavigate();
-
   const { chainStore } = useStore();
 
   const intl = useIntl();
   const interactionInfo = useInteractionInfo();
+
+  const navigate = useNavigate();
 
   const chainId = interactionData.data.chainId;
 
@@ -213,6 +217,9 @@ export const SignStarknetTxView: FunctionComponent<{
   });
 
   const buttonDisabled = txConfigsValidate.interactionBlocked;
+  const isLoading = signStarknetTxInteractionStore.isObsoleteInteraction(
+    interactionData.id
+  );
 
   const approve = async () => {
     try {
@@ -349,23 +356,42 @@ export const SignStarknetTxView: FunctionComponent<{
       // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
       bottomButtons={[
         {
-          text: intl.formatMessage({
-            id: "button.reject",
-          }),
+          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
           size: "large",
           color: "secondary",
-          onClick: () => {
-            navigate("/", { replace: true });
+          style: {
+            width: "3.25rem",
+          },
+          onClick: async () => {
+            await signStarknetTxInteractionStore.rejectWithProceedNext(
+              interactionData.id,
+              (proceedNext) => {
+                if (!proceedNext) {
+                  if (
+                    interactionInfo.interaction &&
+                    !interactionInfo.interactionInternal
+                  ) {
+                    handleExternalInteractionWithNoProceedNext();
+                  } else if (
+                    interactionInfo.interaction &&
+                    interactionInfo.interactionInternal
+                  ) {
+                    window.history.length > 1 ? navigate(-1) : navigate("/");
+                  } else {
+                    navigate("/", { replace: true });
+                  }
+                }
+              }
+            );
           },
         },
         {
           isSpecial: true,
           text: intl.formatMessage({ id: "button.approve" }),
           size: "large",
+          left: !isLoading && <CheckIcon />,
           disabled: buttonDisabled,
-          isLoading: signStarknetTxInteractionStore.isObsoleteInteraction(
-            interactionData.id
-          ),
+          isLoading,
           onClick: approve,
         },
       ]}

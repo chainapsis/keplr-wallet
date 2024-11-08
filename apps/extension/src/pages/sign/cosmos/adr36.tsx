@@ -22,7 +22,11 @@ import { KeystoneSign } from "../components/keystone";
 import { useTheme } from "styled-components";
 import { KeyRingService } from "@keplr-wallet/background";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
-import { MessageAdr36Icon } from "../../../components/icon";
+import {
+  CheckIcon,
+  MessageAdr36Icon,
+  XMarkIcon,
+} from "../../../components/icon";
 import { ItemLogo } from "../../main/token-detail/msg-items/logo";
 import { KeystoneUSBBox } from "../components/keystone-usb-box";
 import { useNavigate } from "react-router";
@@ -31,7 +35,6 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
   const { chainStore, signInteractionStore, uiConfigStore } = useStore();
   const intl = useIntl();
   const theme = useTheme();
-
   const navigate = useNavigate();
 
   const [isViewData, setIsViewData] = useState(false);
@@ -124,6 +127,13 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     Error | undefined
   >(undefined);
 
+  const isLoading =
+    signInteractionStore.isObsoleteInteraction(
+      signInteractionStore.waitingData?.id
+    ) ||
+    isLedgerInteracting ||
+    isKeystoneInteracting;
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.sign.adr36.title" })}
@@ -137,26 +147,44 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          text: intl.formatMessage({
-            id: "button.reject",
-          }),
+          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
           size: "large",
           color: "secondary",
-          onClick: () => {
-            navigate("/", { replace: true });
+          style: {
+            width: "3.25rem",
+          },
+          onClick: async () => {
+            if (signInteractionStore.waitingData) {
+              signInteractionStore.rejectWithProceedNext(
+                signInteractionStore.waitingData.id,
+                (proceedNext) => {
+                  if (!proceedNext) {
+                    if (
+                      interactionInfo.interaction &&
+                      !interactionInfo.interactionInternal
+                    ) {
+                      handleExternalInteractionWithNoProceedNext();
+                    } else if (
+                      interactionInfo.interaction &&
+                      interactionInfo.interactionInternal
+                    ) {
+                      window.history.length > 1 ? navigate(-1) : navigate("/");
+                    } else {
+                      navigate("/", { replace: true });
+                    }
+                  }
+                }
+              );
+            }
           },
         },
         {
           text: intl.formatMessage({ id: "button.approve" }),
           color: "primary",
           size: "large",
+          left: !isLoading && <CheckIcon />,
           disabled: signInteractionStore.waitingData == null,
-          isLoading:
-            signInteractionStore.isObsoleteInteraction(
-              signInteractionStore.waitingData?.id
-            ) ||
-            isLedgerInteracting ||
-            isKeystoneInteracting,
+          isLoading,
           onClick: async () => {
             if (signInteractionStore.waitingData) {
               const signDocWrapper =

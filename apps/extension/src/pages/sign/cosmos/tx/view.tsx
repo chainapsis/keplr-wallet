@@ -47,7 +47,8 @@ import { FeeSummary } from "../../components/fee-summary";
 import { FeeControl } from "../../../../components/input/fee-control";
 import { HighFeeWarning } from "../../components/high-fee-warning";
 import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
+import { CheckIcon, XMarkIcon } from "../../../../components/icon";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -73,7 +74,6 @@ export const CosmosTxView: FunctionComponent<{
 
   const intl = useIntl();
   const theme = useTheme();
-
   const navigate = useNavigate();
 
   const [isViewData, setIsViewData] = useState(false);
@@ -490,6 +490,11 @@ export const CosmosTxView: FunctionComponent<{
     }
   })();
 
+  const isLoading =
+    signInteractionStore.isObsoleteInteraction(interactionData.id) ||
+    isLedgerInteracting ||
+    isKeystoneInteracting;
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.sign.cosmos.tx.title" })}
@@ -501,27 +506,45 @@ export const CosmosTxView: FunctionComponent<{
           }
         />
       }
-      // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
       bottomButtons={[
         {
-          text: intl.formatMessage({
-            id: "button.reject",
-          }),
+          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
           size: "large",
           color: "secondary",
-          onClick: () => {
-            navigate("/", { replace: true });
+          style: {
+            width: "3.25rem",
+          },
+          onClick: async () => {
+            await signInteractionStore.rejectWithProceedNext(
+              interactionData.id,
+              (proceedNext) => {
+                if (!proceedNext) {
+                  if (
+                    interactionInfo.interaction &&
+                    !interactionInfo.interactionInternal
+                  ) {
+                    handleExternalInteractionWithNoProceedNext();
+                  } else if (
+                    interactionInfo.interaction &&
+                    interactionInfo.interactionInternal
+                  ) {
+                    window.history.length > 1 ? navigate(-1) : navigate("/");
+                  } else {
+                    navigate("/", { replace: true });
+                  }
+                }
+              }
+            );
           },
         },
+        // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
         {
           isSpecial: true,
           text: intl.formatMessage({ id: "button.approve" }),
           size: "large",
+          left: !isLoading && <CheckIcon />,
           disabled: buttonDisabled,
-          isLoading:
-            signInteractionStore.isObsoleteInteraction(interactionData.id) ||
-            isLedgerInteracting ||
-            isKeystoneInteracting,
+          isLoading,
           onClick: approve,
         },
       ]}
