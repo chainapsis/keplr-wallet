@@ -5,6 +5,7 @@ import {
   Call,
   DeployAccountSignerDetails,
   InvocationsSignerDetails,
+  TypedData as StarknetTypedData,
 } from "starknet";
 
 export class GetStarknetKeyMsg extends Message<{
@@ -112,6 +113,51 @@ export class RequestSignStarknetTx extends Message<{
 
     if (!this.details) {
       throw new Error("details are not set");
+    }
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestSignStarknetTx.type();
+  }
+}
+
+export class RequestSignStarknetMessage extends Message<string[]> {
+  public static type() {
+    return "request-sign-starknet-message";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly message: StarknetTypedData
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chainId is not set");
+    }
+
+    if (!this.signer) {
+      throw new Error("signer is not set");
+    }
+
+    if (!this.message) {
+      throw new Error("message is not set");
+    }
+
+    // Validate signer address.
+    if (!this.signer.match(/^0x[0-9A-Fa-f]*$/) || this.signer.length !== 66) {
+      throw new Error("signer is not valid hex address");
     }
   }
 

@@ -12,7 +12,7 @@ import { useTheme } from "styled-components";
 export const StakedBalance: FunctionComponent<{
   chainId: string;
 }> = observer(({ chainId }) => {
-  const { queriesStore, accountStore, chainStore } = useStore();
+  const { queriesStore, accountStore, chainStore, uiConfigStore } = useStore();
 
   const theme = useTheme();
 
@@ -196,12 +196,15 @@ export const StakedBalance: FunctionComponent<{
                       }
                     >
                       {queryDelegation.total
-                        ? queryDelegation.total
-                            .maxDecimals(6)
-                            .shrink(true)
-                            .inequalitySymbol(true)
-                            .trim(true)
-                            .toString()
+                        ? uiConfigStore.hideStringIfPrivacyMode(
+                            queryDelegation.total
+                              .maxDecimals(6)
+                              .shrink(true)
+                              .inequalitySymbol(true)
+                              .trim(true)
+                              .toString(),
+                            2
+                          )
                         : "-"}
                     </Subtitle3>
                   </React.Fragment>

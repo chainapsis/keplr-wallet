@@ -904,11 +904,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 // IBC Send일때는 어차피 밑에서 cex로 보내지 말라고 경고가 뜬다.
                 // 근데 memo의 placeholder는 cex로 보낼때 메모를 꼭 확인하라고 하니 서로 모순이라 이상하다.
                 // 그래서 IBC Send일때는 memo의 placeholder를 없앤다.
-                isIBCTransfer
-                  ? undefined
-                  : intl.formatMessage({
-                      id: "page.send.amount.memo-placeholder",
-                    })
+                intl.formatMessage({
+                  id: isIBCTransfer
+                    ? "components.input.memo-input.optional-placeholder"
+                    : "page.send.amount.memo-placeholder",
+                })
               }
             />
           )}
