@@ -32,7 +32,14 @@ export const SignStarknetMessageView: FunctionComponent<{
   const { chainStore } = useStore();
 
   const intl = useIntl();
-  const interactionInfo = useInteractionInfo();
+  const interactionInfo = useInteractionInfo({
+    onUnmount: async () => {
+      await signStarknetMessageInteractionStore.rejectWithProceedNext(
+        interactionData.id,
+        () => {}
+      );
+    },
+  });
 
   const chainId = interactionData.data.chainId;
 

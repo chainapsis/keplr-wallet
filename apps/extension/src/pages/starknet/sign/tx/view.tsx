@@ -51,7 +51,14 @@ export const SignStarknetTxView: FunctionComponent<{
   const { chainStore } = useStore();
 
   const intl = useIntl();
-  const interactionInfo = useInteractionInfo();
+  const interactionInfo = useInteractionInfo({
+    onUnmount: async () => {
+      await signStarknetTxInteractionStore.rejectWithProceedNext(
+        interactionData.id,
+        () => {}
+      );
+    },
+  });
 
   const navigate = useNavigate();
 

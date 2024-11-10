@@ -17,8 +17,10 @@ import { useNavigate } from "react-router";
 export const SuggestChainPage: FunctionComponent = observer(() => {
   const { chainSuggestStore } = useStore();
 
-  useInteractionInfo(async () => {
-    await chainSuggestStore.rejectAll();
+  useInteractionInfo({
+    onWindowClose: async () => {
+      await chainSuggestStore.rejectAll();
+    },
   });
 
   const waitingData = chainSuggestStore.waitingSuggestedChainInfo;
@@ -46,7 +48,11 @@ const SuggestChainPageImpl: FunctionComponent<{
 
   const intl = useIntl();
   const navigate = useNavigate();
-  const interactionInfo = useInteractionInfo();
+  const interactionInfo = useInteractionInfo({
+    onUnmount: async () => {
+      await chainSuggestStore.rejectWithProceedNext(waitingData.id, () => {});
+    },
+  });
 
   const queryCommunityChainInfo = chainSuggestStore.getCommunityChainInfo(
     waitingData.data.chainInfo.chainId

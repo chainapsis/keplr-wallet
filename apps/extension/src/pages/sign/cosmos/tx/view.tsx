@@ -315,7 +315,11 @@ export const CosmosTxView: FunctionComponent<{
 
   const preferNoSetMemo = interactionData.data.signOptions.preferNoSetMemo;
 
-  const interactionInfo = useInteractionInfo();
+  const interactionInfo = useInteractionInfo({
+    onUnmount: async () => {
+      signInteractionStore.rejectWithProceedNext(interactionData.id, () => {});
+    },
+  });
 
   const [unmountPromise] = useState(() => {
     let resolver: () => void;

@@ -26,7 +26,11 @@ export const PermissionBasicAccessForStarknetPage: FunctionComponent<{
   const theme = useTheme();
   const navigate = useNavigate();
 
-  const interactionInfo = useInteractionInfo();
+  const interactionInfo = useInteractionInfo({
+    onUnmount: async () => {
+      await permissionStore.rejectPermissionWithProceedNext(data.ids, () => {});
+    },
+  });
 
   const [currentChainIdForStarknet, setCurrentChainIdForStarknet] =
     useState<string>(data.chainIds[0]);

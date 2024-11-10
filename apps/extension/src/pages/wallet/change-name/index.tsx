@@ -53,10 +53,14 @@ export const WalletChangeNamePage: FunctionComponent = observer(() => {
     },
   });
 
+  const handleRejectChangeKeyRingName = () =>
+    interactionStore.rejectAll("change-keyring-name");
+
   // 이 페이지는 외부에서 changeKeyRingName api로 접근할 수도 있으므로
   // 인터렉션이 필요한 경우 따로 처리를 해줘야한다.
-  const interactionInfo = useInteractionInfo(() => {
-    interactionStore.rejectAll("change-keyring-name");
+  const interactionInfo = useInteractionInfo({
+    onWindowClose: handleRejectChangeKeyRingName,
+    onUnmount: handleRejectChangeKeyRingName,
   });
   const interactionData: InteractionWaitingData | undefined =
     interactionStore.getAllData("change-keyring-name")[0];

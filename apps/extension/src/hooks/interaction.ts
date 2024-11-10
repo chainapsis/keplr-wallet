@@ -1,11 +1,20 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 
-export const useInteractionInfo = (cleanUp?: () => void) => {
+export const useInteractionInfo = ({
+  onUnmount,
+  onWindowClose,
+}: {
+  onUnmount?: () => void;
+  onWindowClose?: () => void;
+}) => {
   const [searchParams] = useSearchParams();
 
-  const cleanUpRef = useRef<(() => void) | undefined>(cleanUp);
-  cleanUpRef.current = cleanUp;
+  const onUnmountRef = useRef<(() => void) | undefined>(onUnmount);
+  onUnmountRef.current = onUnmount;
+
+  const onWindowCloseRef = useRef<(() => void) | undefined>(onWindowClose);
+  onWindowCloseRef.current = onWindowClose;
 
   const result = {
     interaction: searchParams.get("interaction") === "true",
@@ -13,11 +22,19 @@ export const useInteractionInfo = (cleanUp?: () => void) => {
   };
 
   useEffect(() => {
+    // Execute the clean-up function when unmounting.
+    return () => {
+      if (onUnmountRef.current) {
+        onUnmountRef.current();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     // Execute the clean-up function when closing window.
     const beforeunload = async () => {
-      console.log("beforeunload");
-      if (cleanUpRef.current) {
-        cleanUpRef.current();
+      if (onWindowCloseRef.current) {
+        onWindowCloseRef.current();
       }
     };
 
@@ -25,10 +42,6 @@ export const useInteractionInfo = (cleanUp?: () => void) => {
     return () => {
       removeEventListener("beforeunload", beforeunload);
     };
-  }, []);
-
-  useEffect(() => {
-    // TODO: 현재 페이지에서 뒤로가기를 했을 때 이를 감지하고 cleanUp 함수를 실행하는 로직이 필요함.
   }, []);
 
   return useMemo(() => {

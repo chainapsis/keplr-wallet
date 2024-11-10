@@ -21,8 +21,18 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
   const theme = useTheme();
   const navigate = useNavigate();
 
-  const interactionInfo = useInteractionInfo(() => {
-    icnsInteractionStore.rejectAll();
+  const interactionInfo = useInteractionInfo({
+    onWindowClose: () => {
+      icnsInteractionStore.rejectAll();
+    },
+    onUnmount: async () => {
+      if (icnsInteractionStore.waitingData) {
+        await icnsInteractionStore.rejectWithProceedNext(
+          icnsInteractionStore.waitingData.id,
+          () => {}
+        );
+      }
+    },
   });
 
   const isLoading = (() => {

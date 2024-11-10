@@ -26,7 +26,11 @@ export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
   const theme = useTheme();
   const navigate = useNavigate();
 
-  const interactionInfo = useInteractionInfo();
+  const interactionInfo = useInteractionInfo({
+    onUnmount: async () => {
+      await permissionStore.rejectPermissionWithProceedNext(data.id, () => {});
+    },
+  });
 
   const isLoading = permissionStore.isObsoleteInteraction(data.id);
 

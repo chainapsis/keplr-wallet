@@ -39,8 +39,18 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
 
   const [isViewData, setIsViewData] = useState(false);
 
-  const interactionInfo = useInteractionInfo(() => {
-    signInteractionStore.rejectAll();
+  const interactionInfo = useInteractionInfo({
+    onWindowClose: () => {
+      signInteractionStore.rejectAll();
+    },
+    onUnmount: async () => {
+      if (signInteractionStore.waitingData) {
+        signInteractionStore.rejectWithProceedNext(
+          signInteractionStore.waitingData.id,
+          () => {}
+        );
+      }
+    },
   });
 
   if (
