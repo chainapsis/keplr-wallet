@@ -16,6 +16,8 @@ import { XAxis, YAxis } from "../../../../components/axis";
 import { Gutter } from "../../../../components/gutter";
 import { Image } from "../../../../components/image";
 import SimpleBar from "simplebar-react";
+import { CheckIcon, XMarkIcon } from "../../../../components/icon";
+import { useNavigate } from "react-router";
 
 export const SignStarknetMessageView: FunctionComponent<{
   interactionData: NonNullable<
@@ -25,11 +27,19 @@ export const SignStarknetMessageView: FunctionComponent<{
   const { signStarknetMessageInteractionStore } = useStore();
 
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const { chainStore } = useStore();
 
   const intl = useIntl();
-  const interactionInfo = useInteractionInfo();
+  const interactionInfo = useInteractionInfo({
+    onUnmount: async () => {
+      await signStarknetMessageInteractionStore.rejectWithProceedNext(
+        interactionData.id,
+        () => {}
+      );
+    },
+  });
 
   const chainId = interactionData.data.chainId;
 
@@ -105,13 +115,46 @@ export const SignStarknetMessageView: FunctionComponent<{
           }
         />
       }
-      // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
-      bottomButton={{
-        isSpecial: true,
-        text: intl.formatMessage({ id: "button.approve" }),
-        size: "large",
-        onClick: approve,
-      }}
+      bottomButtons={[
+        {
+          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
+          size: "large",
+          color: "secondary",
+          style: {
+            width: "3.25rem",
+          },
+          onClick: async () => {
+            await signStarknetMessageInteractionStore.rejectWithProceedNext(
+              interactionData.id,
+              (proceedNext) => {
+                if (!proceedNext) {
+                  if (
+                    interactionInfo.interaction &&
+                    !interactionInfo.interactionInternal
+                  ) {
+                    handleExternalInteractionWithNoProceedNext();
+                  } else if (
+                    interactionInfo.interaction &&
+                    interactionInfo.interactionInternal
+                  ) {
+                    window.history.length > 1 ? navigate(-1) : navigate("/");
+                  } else {
+                    navigate("/", { replace: true });
+                  }
+                }
+              }
+            );
+          },
+        },
+        // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
+        {
+          isSpecial: true,
+          text: intl.formatMessage({ id: "button.approve" }),
+          size: "large",
+          left: <CheckIcon />,
+          onClick: approve,
+        },
+      ]}
     >
       <Box
         height="100%"

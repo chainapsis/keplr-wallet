@@ -179,14 +179,16 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
         id: "page.setting.general.authz.revoke.title",
       })}
       left={<BackButton />}
-      bottomButton={{
-        text: intl.formatMessage({
-          id: "page.setting.general.authz.revoke.revoke-button",
-        }),
-        color: "danger",
-        size: "large",
-        onClick: () => onClickRevokeButton(state.grant),
-      }}
+      bottomButtons={[
+        {
+          text: intl.formatMessage({
+            id: "page.setting.general.authz.revoke.revoke-button",
+          }),
+          color: "danger",
+          size: "large",
+          onClick: () => onClickRevokeButton(state.grant),
+        },
+      ]}
     >
       <Box paddingX="0.75rem">
         <Stack gutter="0.5rem">

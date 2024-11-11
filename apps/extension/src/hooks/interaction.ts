@@ -1,11 +1,20 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 
-export const useInteractionInfo = (cleanUp?: () => void) => {
+export const useInteractionInfo = ({
+  onUnmount,
+  onWindowClose,
+}: {
+  onUnmount?: () => void;
+  onWindowClose?: () => void;
+}) => {
   const [searchParams] = useSearchParams();
 
-  const cleanUpRef = useRef<(() => void) | undefined>(cleanUp);
-  cleanUpRef.current = cleanUp;
+  const onUnmountRef = useRef<(() => void) | undefined>(onUnmount);
+  onUnmountRef.current = onUnmount;
+
+  const onWindowCloseRef = useRef<(() => void) | undefined>(onWindowClose);
+  onWindowCloseRef.current = onWindowClose;
 
   const result = {
     interaction: searchParams.get("interaction") === "true",
@@ -13,9 +22,10 @@ export const useInteractionInfo = (cleanUp?: () => void) => {
   };
 
   useEffect(() => {
+    // Execute the clean-up function when unmounting.
     return () => {
-      if (cleanUpRef.current) {
-        cleanUpRef.current();
+      if (onUnmountRef.current) {
+        onUnmountRef.current();
       }
     };
   }, []);
@@ -23,8 +33,8 @@ export const useInteractionInfo = (cleanUp?: () => void) => {
   useEffect(() => {
     // Execute the clean-up function when closing window.
     const beforeunload = async () => {
-      if (cleanUpRef.current) {
-        cleanUpRef.current();
+      if (onWindowCloseRef.current) {
+        onWindowCloseRef.current();
       }
     };
 

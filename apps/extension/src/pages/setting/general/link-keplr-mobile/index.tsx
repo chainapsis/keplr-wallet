@@ -168,15 +168,18 @@ const EnterPasswordView: FunctionComponent<{
         id: "page.setting.general.link-kpelr-mobile-title",
       })}
       left={<BackButton />}
-      bottomButton={{
-        color: "secondary",
-        text: intl.formatMessage({
-          id: "button.confirm",
-        }),
-        size: "large",
-        isLoading,
-        disabled: password.length === 0,
-      }}
+      bottomButtons={[
+        {
+          color: "secondary",
+          text: intl.formatMessage({
+            id: "button.confirm",
+          }),
+          size: "large",
+          type: "submit",
+          isLoading,
+          disabled: password.length === 0,
+        },
+      ]}
       onSubmit={async (e) => {
         e.preventDefault();
 

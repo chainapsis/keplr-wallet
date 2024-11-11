@@ -8,8 +8,10 @@ import { Splash } from "../../../../components/splash";
 export const SignCosmosTxPage: FunctionComponent = observer(() => {
   const { signInteractionStore } = useStore();
 
-  useInteractionInfo(() => {
-    signInteractionStore.rejectAll();
+  useInteractionInfo({
+    onWindowClose: () => {
+      signInteractionStore.rejectAll();
+    },
   });
 
   return (

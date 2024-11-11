@@ -25,13 +25,18 @@ import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
 import { useTheme } from "styled-components";
 import { H5 } from "../../../../components/typography";
-import { ArrowDropDownIcon } from "../../../../components/icon";
+import {
+  ArrowDropDownIcon,
+  CheckIcon,
+  XMarkIcon,
+} from "../../../../components/icon";
 import { Column, Columns } from "../../../../components/column";
 import SimpleBar from "simplebar-react";
 import { XAxis } from "../../../../components/axis";
 import { ViewDataButton } from "../../../sign/components/view-data-button";
 import { AccountActivationModal } from "../../components/account-activation-modal";
 import { Modal } from "../../../../components/modal";
+import { useNavigate } from "react-router";
 
 export const SignStarknetTxView: FunctionComponent<{
   interactionData: NonNullable<SignStarknetTxInteractionStore["waitingData"]>;
@@ -43,11 +48,19 @@ export const SignStarknetTxView: FunctionComponent<{
   } = useStore();
 
   const theme = useTheme();
-
   const { chainStore } = useStore();
 
   const intl = useIntl();
-  const interactionInfo = useInteractionInfo();
+  const interactionInfo = useInteractionInfo({
+    onUnmount: async () => {
+      await signStarknetTxInteractionStore.rejectWithProceedNext(
+        interactionData.id,
+        () => {}
+      );
+    },
+  });
+
+  const navigate = useNavigate();
 
   const chainId = interactionData.data.chainId;
 
@@ -211,6 +224,9 @@ export const SignStarknetTxView: FunctionComponent<{
   });
 
   const buttonDisabled = txConfigsValidate.interactionBlocked;
+  const isLoading = signStarknetTxInteractionStore.isObsoleteInteraction(
+    interactionData.id
+  );
 
   const approve = async () => {
     try {
@@ -345,16 +361,47 @@ export const SignStarknetTxView: FunctionComponent<{
         />
       }
       // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
-      bottomButton={{
-        isSpecial: true,
-        text: intl.formatMessage({ id: "button.approve" }),
-        size: "large",
-        disabled: buttonDisabled,
-        isLoading: signStarknetTxInteractionStore.isObsoleteInteraction(
-          interactionData.id
-        ),
-        onClick: approve,
-      }}
+      bottomButtons={[
+        {
+          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
+          size: "large",
+          color: "secondary",
+          style: {
+            width: "3.25rem",
+          },
+          onClick: async () => {
+            await signStarknetTxInteractionStore.rejectWithProceedNext(
+              interactionData.id,
+              (proceedNext) => {
+                if (!proceedNext) {
+                  if (
+                    interactionInfo.interaction &&
+                    !interactionInfo.interactionInternal
+                  ) {
+                    handleExternalInteractionWithNoProceedNext();
+                  } else if (
+                    interactionInfo.interaction &&
+                    interactionInfo.interactionInternal
+                  ) {
+                    window.history.length > 1 ? navigate(-1) : navigate("/");
+                  } else {
+                    navigate("/", { replace: true });
+                  }
+                }
+              }
+            );
+          },
+        },
+        {
+          isSpecial: true,
+          text: intl.formatMessage({ id: "button.approve" }),
+          size: "large",
+          left: !isLoading && <CheckIcon />,
+          disabled: buttonDisabled,
+          isLoading,
+          onClick: approve,
+        },
+      ]}
     >
       <Box
         height="100%"
