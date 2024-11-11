@@ -13,6 +13,8 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { Dropdown } from "../../../components/dropdown";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
+import { CheckIcon, XMarkIcon } from "../../../components/icon";
+import { useNavigate } from "react-router";
 
 export const PermissionBasicAccessForEVMPage: FunctionComponent<{
   data: {
@@ -22,12 +24,24 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
   const { chainStore, permissionStore } = useStore();
   const intl = useIntl();
   const theme = useTheme();
+  const navigate = useNavigate();
 
-  const interactionInfo = useInteractionInfo();
+  const interactionInfo = useInteractionInfo({
+    onUnmount: async () => {
+      await permissionStore.rejectPermissionWithProceedNext(data.ids, () => {});
+    },
+  });
 
   const [currentChainIdForEVM, setCurrentChainIdForEVM] = useState<string>(
     data.chainIds[0]
   );
+
+  const isLoading = (() => {
+    const obsolete = data.ids.find((id) => {
+      return permissionStore.isObsoleteInteraction(id);
+    });
+    return !!obsolete;
+  })();
 
   // 페이지가 언마운트 되지 않고 data만 바뀌는 경우가 있어서 이렇게 처리함
   useEffect(() => {
@@ -38,18 +52,47 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
     <HeaderLayout
       title=""
       fixedHeight={true}
-      bottomButton={{
-        text: intl.formatMessage({
-          id: "button.approve",
-        }),
-        size: "large",
-        isLoading: (() => {
-          const obsolete = data.ids.find((id) => {
-            return permissionStore.isObsoleteInteraction(id);
-          });
-          return !!obsolete;
-        })(),
-      }}
+      bottomButtons={[
+        {
+          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
+          size: "large",
+          color: "secondary",
+          style: {
+            width: "3.25rem",
+          },
+          onClick: async () => {
+            await permissionStore.rejectPermissionWithProceedNext(
+              data.ids,
+              (proceedNext) => {
+                if (!proceedNext) {
+                  if (
+                    interactionInfo.interaction &&
+                    !interactionInfo.interactionInternal
+                  ) {
+                    handleExternalInteractionWithNoProceedNext();
+                  } else if (
+                    interactionInfo.interaction &&
+                    interactionInfo.interactionInternal
+                  ) {
+                    window.history.length > 1 ? navigate(-1) : navigate("/");
+                  } else {
+                    navigate("/", { replace: true });
+                  }
+                }
+              }
+            );
+          },
+        },
+        {
+          text: intl.formatMessage({
+            id: "button.approve",
+          }),
+          size: "large",
+          type: "submit",
+          left: !isLoading && <CheckIcon />,
+          isLoading,
+        },
+      ]}
       onSubmit={async (e) => {
         e.preventDefault();
 

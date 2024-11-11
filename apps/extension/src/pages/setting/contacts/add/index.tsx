@@ -154,17 +154,20 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
 
         navigate(-1);
       }}
-      bottomButton={{
-        text: intl.formatMessage({
-          id: "button.confirm",
-        }),
-        color: "secondary",
-        size: "large",
-        disabled:
-          (isStarknet
-            ? txConfigsValidateForStarknet.interactionBlocked
-            : txConfigsValidate.interactionBlocked) || name === "",
-      }}
+      bottomButtons={[
+        {
+          text: intl.formatMessage({
+            id: "button.confirm",
+          }),
+          color: "secondary",
+          size: "large",
+          type: "submit",
+          disabled:
+            (isStarknet
+              ? txConfigsValidateForStarknet.interactionBlocked
+              : txConfigsValidate.interactionBlocked) || name === "",
+        },
+      ]}
     >
       <Styles.Container gutter="1rem">
         <TextInput

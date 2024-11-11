@@ -100,12 +100,17 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     }
   });
 
-  // secret20은 서명 페이지로 넘어가야하기 때문에 막아야함...
-  const blockRejectAll = useRef(false);
-  const interactionInfo = useInteractionInfo(() => {
+  const handleRejectTokens = () => {
     if (!blockRejectAll.current) {
       tokensStore.rejectAllSuggestedTokens();
     }
+  };
+
+  // secret20은 서명 페이지로 넘어가야하기 때문에 막아야함...
+  const blockRejectAll = useRef(false);
+  const interactionInfo = useInteractionInfo({
+    onWindowClose: handleRejectTokens,
+    onUnmount: handleRejectTokens,
   });
 
   useLayoutEffect(() => {
@@ -233,17 +238,20 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           }
         />
       }
-      bottomButton={{
-        text: intl.formatMessage({
-          id: "page.setting.token.add.confirm-button",
-        }),
-        color: "secondary",
-        size: "large",
-        disabled:
-          contractAddress.length === 0 ||
-          !queryContract.tokenInfo ||
-          (isSecretWasm && !accountStore.getAccount(chainId).isReadyToSendTx),
-      }}
+      bottomButtons={[
+        {
+          text: intl.formatMessage({
+            id: "page.setting.token.add.confirm-button",
+          }),
+          color: "secondary",
+          size: "large",
+          type: "submit",
+          disabled:
+            contractAddress.length === 0 ||
+            !queryContract.tokenInfo ||
+            (isSecretWasm && !accountStore.getAccount(chainId).isReadyToSendTx),
+        },
+      ]}
       onSubmit={handleSubmit(async (data) => {
         if (queryContract.tokenInfo) {
           let currency: AppCurrency;

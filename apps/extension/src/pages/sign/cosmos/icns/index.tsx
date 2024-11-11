@@ -12,35 +12,86 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
+import { CheckIcon, XMarkIcon } from "../../../../components/icon";
+import { useNavigate } from "react-router";
 
 export const SignCosmosICNSPage: FunctionComponent = observer(() => {
   const { icnsInteractionStore } = useStore();
   const intl = useIntl();
   const theme = useTheme();
+  const navigate = useNavigate();
 
-  const interactionInfo = useInteractionInfo(() => {
-    icnsInteractionStore.rejectAll();
+  const interactionInfo = useInteractionInfo({
+    onWindowClose: () => {
+      icnsInteractionStore.rejectAll();
+    },
+    onUnmount: async () => {
+      if (icnsInteractionStore.waitingData) {
+        await icnsInteractionStore.rejectWithProceedNext(
+          icnsInteractionStore.waitingData.id,
+          () => {}
+        );
+      }
+    },
   });
+
+  const isLoading = (() => {
+    if (
+      icnsInteractionStore.waitingData &&
+      icnsInteractionStore.isObsoleteInteraction(
+        icnsInteractionStore.waitingData.id
+      )
+    ) {
+      return true;
+    }
+  })();
 
   return (
     <HeaderLayout
       title=""
       fixedHeight={true}
-      bottomButton={{
-        text: intl.formatMessage({ id: "button.approve" }),
-        size: "large",
-        isLoading: (() => {
-          if (
-            icnsInteractionStore.waitingData &&
-            icnsInteractionStore.isObsoleteInteraction(
-              icnsInteractionStore.waitingData.id
-            )
-          ) {
-            return true;
-          }
-        })(),
-        disabled: icnsInteractionStore.waitingData == null,
-      }}
+      bottomButtons={[
+        {
+          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
+          size: "large",
+          color: "secondary",
+          style: {
+            width: "3.25rem",
+          },
+          onClick: async () => {
+            if (icnsInteractionStore.waitingData) {
+              await icnsInteractionStore.rejectWithProceedNext(
+                icnsInteractionStore.waitingData.id,
+                (proceedNext) => {
+                  if (!proceedNext) {
+                    if (
+                      interactionInfo.interaction &&
+                      !interactionInfo.interactionInternal
+                    ) {
+                      handleExternalInteractionWithNoProceedNext();
+                    } else if (
+                      interactionInfo.interaction &&
+                      interactionInfo.interactionInternal
+                    ) {
+                      window.history.length > 1 ? navigate(-1) : navigate("/");
+                    } else {
+                      navigate("/", { replace: true });
+                    }
+                  }
+                }
+              );
+            }
+          },
+        },
+        {
+          text: intl.formatMessage({ id: "button.approve" }),
+          size: "large",
+          type: "submit",
+          left: !isLoading && <CheckIcon />,
+          isLoading,
+          disabled: icnsInteractionStore.waitingData == null,
+        },
+      ]}
       onSubmit={async (e) => {
         e.preventDefault();
 
