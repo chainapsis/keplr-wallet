@@ -152,7 +152,6 @@ export const SignStarknetMessageView: FunctionComponent<{
           text: intl.formatMessage({ id: "button.approve" }),
           size: "large",
           left: <CheckIcon />,
-          // CHECK: isLoading이 들어가야하는지 확인
           onClick: approve,
         },
       ]}

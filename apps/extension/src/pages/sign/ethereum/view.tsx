@@ -76,9 +76,6 @@ export const EthereumSigningView: FunctionComponent<{
   const navigate = useNavigate();
 
   const interactionInfo = useInteractionInfo({
-    onWindowClose: () => {
-      signEthereumInteractionStore.rejectAll();
-    },
     onUnmount: async () => {
       await signEthereumInteractionStore.rejectWithProceedNext(
         interactionData.id,

@@ -285,9 +285,6 @@ export const Styles = {
     display: flex;
     align-items: center;
     margin-right: 0.25rem;
-    svg {
-      fill: ${ColorPalette["transparent"]};
-    }
   `,
   Right: styled.span`
     height: 100%;
@@ -307,8 +304,5 @@ export const Styles = {
     align-items: center;
 
     position: absolute;
-    svg {
-      fill: none;
-    }
   `,
 };

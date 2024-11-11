@@ -20,6 +20,7 @@ export const CheckIcon: FunctionComponent<IconProps> = ({
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+        fill="none"
       />
     </svg>
   );

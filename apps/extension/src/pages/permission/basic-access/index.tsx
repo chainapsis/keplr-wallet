@@ -71,7 +71,7 @@ export const PermissionBasicAccessPage: FunctionComponent<{
                     // 내부 인터렉션의 경우 reject만 하고 페이지를 벗어나지 않기 때문에 페이지를 벗어나도록 한다.
                     window.history.length > 1 ? navigate(-1) : navigate("/");
                   } else {
-                    // 예상치 못한 상황이므로 홈으로 초기화한다. (홈으로 초기화하는 것이 맞는지는 논의가 필요함)
+                    // 예상치 못한 상황이므로 홈으로 초기화한다.
                     navigate("/", { replace: true });
                   }
                 }
