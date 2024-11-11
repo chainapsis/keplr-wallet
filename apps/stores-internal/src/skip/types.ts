@@ -85,6 +85,10 @@ export interface RouteResponse {
     name: string;
     chain_id: string;
   };
+  swap_venues?: {
+    name: string;
+    chain_id: string;
+  }[];
   txs_required: number;
 }
 
