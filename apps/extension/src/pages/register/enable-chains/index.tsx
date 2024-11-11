@@ -14,7 +14,7 @@ import {
   useSceneEvents,
   useSceneTransition,
 } from "../../../components/transition";
-import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import { ModularChainInfo } from "@keplr-wallet/types";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { Box } from "../../../components/box";
 import { Column, Columns } from "../../../components/column";
@@ -66,6 +66,7 @@ export const EnableChainsScene: FunctionComponent<{
   skipWelcome?: boolean;
   initialSearchValue?: string;
   fallbackEthereumLedgerApp?: boolean;
+  fallbackStarknetLedgerApp?: boolean;
   stepPrevious: number;
   stepTotal: number;
 }> = observer(
@@ -74,6 +75,7 @@ export const EnableChainsScene: FunctionComponent<{
     candidateAddresses: propCandiateAddresses,
     isFresh,
     fallbackEthereumLedgerApp,
+    fallbackStarknetLedgerApp,
     stepPrevious,
     stepTotal,
     skipWelcome,
@@ -530,9 +532,13 @@ export const EnableChainsScene: FunctionComponent<{
                 return false;
               }
             }
+            // fallbackStarknetLedgerApp가 true이면 Starknet app이 필요없는 체인은 이전에 다 처리된 것이다.
+            // 그러므로 Starknet만 남기도록 한다.
+            if (fallbackStarknetLedgerApp) {
+              return false;
+            }
           } else if ("starknet" in modularChainInfo) {
-            // TODO: Starknet ledger app 지원이 필요하면 여기에 로직을 추가한다.
-            return false;
+            return fallbackStarknetLedgerApp;
           }
 
           return true;
@@ -572,7 +578,13 @@ export const EnableChainsScene: FunctionComponent<{
           }
         });
       }
-    }, [chainStore, fallbackEthereumLedgerApp, keyType, search]);
+    }, [
+      chainStore,
+      fallbackEthereumLedgerApp,
+      fallbackStarknetLedgerApp,
+      keyType,
+      search,
+    ]);
 
     const modularChainInfos = preSortModularChainInfos.sort(
       (aModularChainInfo, bModularChainInfo) => {
@@ -730,6 +742,11 @@ export const EnableChainsScene: FunctionComponent<{
 
           if (keyType === "ledger") {
             if (
+              fallbackStarknetLedgerApp &&
+              "starknet" in enabledModularChainInfo
+            ) {
+              numSelected++;
+            } else if (
               (fallbackEthereumLedgerApp && isEthermintLike) ||
               (!fallbackEthereumLedgerApp && !isEthermintLike)
             ) {
@@ -745,6 +762,7 @@ export const EnableChainsScene: FunctionComponent<{
       chainStore.modularChainInfos,
       enabledChainIdentifiers,
       fallbackEthereumLedgerApp,
+      fallbackStarknetLedgerApp,
       keyType,
     ]);
 
@@ -892,46 +910,78 @@ export const EnableChainsScene: FunctionComponent<{
                 />
               );
             })}
-
-            {!fallbackEthereumLedgerApp &&
+            {!fallbackStarknetLedgerApp &&
+              !fallbackEthereumLedgerApp &&
               keyType === "ledger" &&
-              chainStore.chainInfos
-                .filter((chainInfo) => {
+              chainStore.modularChainInfos
+                .filter((modularChainInfo) => {
                   const trimSearch = search.trim();
-                  return (
-                    chainInfo.chainName
-                      .toLowerCase()
-                      .includes(trimSearch.toLowerCase()) ||
-                    (
-                      chainInfo.stakeCurrency || chainInfo.currencies[0]
-                    ).coinDenom
-                      .toLowerCase()
-                      .includes(trimSearch.toLowerCase())
-                  );
-                })
-                .map((chainInfo) => {
-                  const isEthermintLike =
-                    chainInfo.bip44.coinType === 60 ||
-                    !!chainInfo.features?.includes("eth-address-gen") ||
-                    !!chainInfo.features?.includes("eth-key-sign");
+                  const trimSearchLowerCase = trimSearch.toLowerCase();
 
-                  const supported = (() => {
-                    try {
-                      // 처리가능한 체인만 true를 반환한다.
-                      KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
-                        chainInfo.chainId
+                  const isChainNameSearch = modularChainInfo.chainName
+                    .toLowerCase()
+                    .includes(trimSearchLowerCase);
+                  const isCoinDenomSearch = (() => {
+                    if ("cosmos" in modularChainInfo) {
+                      const chainInfo = chainStore.getChain(
+                        modularChainInfo.cosmos.chainId
                       );
-                      return true;
-                    } catch {
-                      return false;
+                      return (
+                        chainInfo.stakeCurrency || chainInfo.currencies[0]
+                      ).coinDenom
+                        .toLowerCase()
+                        .includes(trimSearchLowerCase);
+                    } else if ("starknet" in modularChainInfo) {
+                      return (
+                        modularChainInfo.starknet.currencies[0] ||
+                        modularChainInfo.starknet.currencies[1]
+                      ).coinDenom
+                        .toLowerCase()
+                        .includes(trimSearchLowerCase);
                     }
+
+                    return false;
                   })();
 
-                  if (isEthermintLike && supported) {
+                  return isChainNameSearch || isCoinDenomSearch;
+                })
+                .map((modularChainInfo) => {
+                  if ("cosmos" in modularChainInfo) {
+                    const chainInfo = chainStore.getChain(
+                      modularChainInfo.chainId
+                    );
+                    const isEthermintLike =
+                      chainInfo.bip44.coinType === 60 ||
+                      !!chainInfo.features?.includes("eth-address-gen") ||
+                      !!chainInfo.features?.includes("eth-key-sign");
+
+                    const isLedgerSupported = (() => {
+                      try {
+                        // 처리가능한 체인만 true를 반환한다.
+                        KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+                          chainInfo.chainId
+                        );
+                        return true;
+                      } catch {
+                        return false;
+                      }
+                    })();
+
+                    if (isEthermintLike && isLedgerSupported) {
+                      return (
+                        <NextStepChainItem
+                          key={modularChainInfo.chainId}
+                          modularChainInfo={modularChainInfo}
+                          tagText="EVM"
+                        />
+                      );
+                    }
+                  } else if ("starknet" in modularChainInfo) {
                     return (
-                      <NextStepEvmChainItem
-                        key={chainInfo.chainId}
-                        chainInfo={chainInfo}
+                      <NextStepChainItem
+                        key={modularChainInfo.chainId}
+                        modularChainInfo={modularChainInfo}
+                        tagText="Starknet"
                       />
                     );
                   }
@@ -1363,9 +1413,10 @@ const ChainItem: FunctionComponent<{
   }
 );
 
-const NextStepEvmChainItem: FunctionComponent<{
-  chainInfo: ChainInfo;
-}> = ({ chainInfo }) => {
+const NextStepChainItem: FunctionComponent<{
+  modularChainInfo: ModularChainInfo;
+  tagText: string;
+}> = ({ modularChainInfo, tagText }) => {
   return (
     <Box
       paddingX="1rem"
@@ -1375,17 +1426,17 @@ const NextStepEvmChainItem: FunctionComponent<{
     >
       <Columns sum={1}>
         <XAxis alignY="center">
-          <ChainImageFallback chainInfo={chainInfo} size="3rem" />
+          <ChainImageFallback chainInfo={modularChainInfo} size="3rem" />
 
           <Gutter size="0.5rem" />
 
           <YAxis>
             <XAxis alignY="center">
-              <Subtitle2>{chainInfo.chainName}</Subtitle2>
+              <Subtitle2>{modularChainInfo.chainName}</Subtitle2>
 
               <Gutter size="0.375rem" />
 
-              <Tag text="EVM" />
+              <Tag text={tagText} />
             </XAxis>
 
             <Gutter size="0.25rem" />
