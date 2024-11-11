@@ -22,14 +22,11 @@ import { KeystoneSign } from "../components/keystone";
 import { useTheme } from "styled-components";
 import { KeyRingService } from "@keplr-wallet/background";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
-import {
-  CheckIcon,
-  MessageAdr36Icon,
-  XMarkIcon,
-} from "../../../components/icon";
+import { MessageAdr36Icon, XMarkIcon } from "../../../components/icon";
 import { ItemLogo } from "../../main/token-detail/msg-items/logo";
 import { KeystoneUSBBox } from "../components/keystone-usb-box";
 import { useNavigate } from "react-router";
+import { ApproveIcon } from "../../../components/button";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
   const { chainStore, signInteractionStore, uiConfigStore } = useStore();
@@ -192,7 +189,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
           text: intl.formatMessage({ id: "button.approve" }),
           color: "primary",
           size: "large",
-          left: !isLoading && <CheckIcon />,
+          left: !isLoading && <ApproveIcon />,
           disabled: signInteractionStore.waitingData == null,
           isLoading,
           onClick: async () => {

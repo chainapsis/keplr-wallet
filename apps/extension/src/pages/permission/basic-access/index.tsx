@@ -13,8 +13,9 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
 import SimpleBar from "simplebar-react";
-import { CheckIcon, XMarkIcon } from "../../../components/icon";
+import { XMarkIcon } from "../../../components/icon";
 import { useNavigate } from "react-router";
+import { ApproveIcon } from "../../../components/button";
 
 export const PermissionBasicAccessPage: FunctionComponent<{
   data: {
@@ -83,7 +84,7 @@ export const PermissionBasicAccessPage: FunctionComponent<{
           text: intl.formatMessage({
             id: "button.approve",
           }),
-          left: !isLoading && <CheckIcon />,
+          left: !isLoading && <ApproveIcon />,
           type: "submit",
           size: "large",
           isLoading,

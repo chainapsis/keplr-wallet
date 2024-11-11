@@ -12,8 +12,9 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
-import { CheckIcon, XMarkIcon } from "../../../../components/icon";
+import { XMarkIcon } from "../../../../components/icon";
 import { useNavigate } from "react-router";
+import { ApproveIcon } from "../../../../components/button";
 
 export const SignCosmosICNSPage: FunctionComponent = observer(() => {
   const { icnsInteractionStore } = useStore();
@@ -87,7 +88,7 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
           text: intl.formatMessage({ id: "button.approve" }),
           size: "large",
           type: "submit",
-          left: !isLoading && <CheckIcon />,
+          left: !isLoading && <ApproveIcon />,
           isLoading,
           disabled: icnsInteractionStore.waitingData == null,
         },

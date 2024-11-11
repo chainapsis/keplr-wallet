@@ -48,7 +48,8 @@ import { FeeControl } from "../../../../components/input/fee-control";
 import { HighFeeWarning } from "../../components/high-fee-warning";
 import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
 import { useNavigate } from "react-router-dom";
-import { CheckIcon, XMarkIcon } from "../../../../components/icon";
+import { XMarkIcon } from "../../../../components/icon";
+import { ApproveIcon } from "../../../../components/button";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -546,7 +547,7 @@ export const CosmosTxView: FunctionComponent<{
           isSpecial: true,
           text: intl.formatMessage({ id: "button.approve" }),
           size: "large",
-          left: !isLoading && <CheckIcon />,
+          left: !isLoading && <ApproveIcon />,
           disabled: buttonDisabled,
           isLoading,
           onClick: approve,

@@ -16,8 +16,9 @@ import { XAxis, YAxis } from "../../../../components/axis";
 import { Gutter } from "../../../../components/gutter";
 import { Image } from "../../../../components/image";
 import SimpleBar from "simplebar-react";
-import { CheckIcon, XMarkIcon } from "../../../../components/icon";
+import { XMarkIcon } from "../../../../components/icon";
 import { useNavigate } from "react-router";
+import { ApproveIcon } from "../../../../components/button";
 
 export const SignStarknetMessageView: FunctionComponent<{
   interactionData: NonNullable<
@@ -151,7 +152,7 @@ export const SignStarknetMessageView: FunctionComponent<{
           isSpecial: true,
           text: intl.formatMessage({ id: "button.approve" }),
           size: "large",
-          left: <CheckIcon />,
+          left: <ApproveIcon />,
           onClick: approve,
         },
       ]}
