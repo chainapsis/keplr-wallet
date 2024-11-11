@@ -725,7 +725,24 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
                 await receiverAccount.init();
               }
+
               if (!receiverAccount.bech32Address) {
+                const receiverChainInfo =
+                  chainStore.hasChain(receiverChainId) &&
+                  chainStore.getChain(receiverChainId);
+                if (
+                  receiverAccount.isNanoLedger &&
+                  receiverChainInfo &&
+                  (receiverChainInfo.bip44.coinType === 60 ||
+                    receiverChainInfo.features.includes("eth-address-gen") ||
+                    receiverChainInfo.features.includes("eth-key-sign") ||
+                    receiverChainInfo.evm != null)
+                ) {
+                  throw new Error(
+                    "Please connect Ethereum app on Ledger with Keplr to get the address"
+                  );
+                }
+
                 throw new Error("receiverAccount.bech32Address is undefined");
               }
               swapReceiver.push(receiverAccount.bech32Address);
