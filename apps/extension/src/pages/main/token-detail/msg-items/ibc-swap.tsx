@@ -83,17 +83,27 @@ export const MsgRelationIBCSwap: FunctionComponent<{
         return chainStore.getChain("osmosis");
       }
 
+      // legacy 코드임.
       const swapVenue = msg.meta["swapVenue"];
       if (swapVenue) {
         const swapVenueChainId = SwapVenues.find(
           (venue) => venue.name === swapVenue
         )?.chainId;
 
-        if (swapVenueChainId) {
-          return chainStore.hasChain(swapVenueChainId)
-            ? chainStore.getChain(swapVenueChainId)
-            : undefined;
+        if (swapVenueChainId && chainStore.hasChain(swapVenueChainId)) {
+          return chainStore.getChain(swapVenueChainId);
         }
+      }
+
+      // 나중에 satellite backend에서 swapVenueChainIdentifier meta field가 추가됨.
+      // msg.meta["swapVenue"]로 찾을 수 없을 경우 이걸 사용함.
+      const swapVenueChainIdentifier = msg.meta["swapVenueChainIdentifier"];
+      if (
+        typeof swapVenueChainIdentifier === "string" &&
+        swapVenueChainIdentifier &&
+        chainStore.hasChain(swapVenueChainIdentifier)
+      ) {
+        return chainStore.getChain(swapVenueChainIdentifier);
       }
 
       return undefined;
