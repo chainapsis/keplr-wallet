@@ -37,7 +37,13 @@ export class InteractionStore implements InteractionForegroundHandler {
   // (특히 서명 페이지에서 문제가 될 수 있음)
   // 기존의 로직과의 호환성을 위해서 아예 분리되었음.
   @observable.shallow
-  protected obsoleteData = new Map<string, boolean>();
+  protected obsoleteData = new Map<
+    string,
+    {
+      obsolete: boolean;
+      approved: boolean;
+    }
+  >();
 
   constructor(
     protected readonly router: Router,
@@ -150,7 +156,7 @@ export class InteractionStore implements InteractionForegroundHandler {
       return;
     }
 
-    this.markAsObsolete(id);
+    this.markAsObsolete(id, true);
     yield this.msgRequester.sendMessage(
       BACKGROUND_PORT,
       new ApproveInteractionMsg(id, result)
@@ -197,7 +203,7 @@ export class InteractionStore implements InteractionForegroundHandler {
         continue;
       }
 
-      this.markAsObsolete(id);
+      this.markAsObsolete(id, true);
 
       fresh.push(id);
     }
@@ -343,7 +349,20 @@ export class InteractionStore implements InteractionForegroundHandler {
     if (!id) {
       return false;
     }
-    return this.obsoleteData.get(id) ?? false;
+    return this.obsoleteData.get(id)?.obsolete ?? false;
+  }
+
+  isObsoleteInteractionApproved(id: string | undefined): boolean {
+    if (!id) {
+      return false;
+    }
+
+    const data = this.obsoleteData.get(id);
+    if (!data) {
+      return false;
+    }
+
+    return data.obsolete && data.approved;
   }
 
   @action
@@ -359,9 +378,12 @@ export class InteractionStore implements InteractionForegroundHandler {
   }
 
   @action
-  protected markAsObsolete(id: string) {
+  protected markAsObsolete(id: string, approved: boolean = false) {
     if (this.getData(id)) {
-      this.obsoleteData.set(id, true);
+      this.obsoleteData.set(id, {
+        obsolete: true,
+        approved,
+      });
     }
   }
 

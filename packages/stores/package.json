@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/stores",
-  "version": "0.12.154",
+  "version": "0.12.155-rc.3",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -16,17 +16,17 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "devDependencies": {
-    "@keplr-wallet/provider-mock": "0.12.154"
+    "@keplr-wallet/provider-mock": "0.12.155-rc.3"
   },
   "dependencies": {
-    "@keplr-wallet/common": "0.12.154",
-    "@keplr-wallet/cosmos": "0.12.154",
-    "@keplr-wallet/crypto": "0.12.154",
-    "@keplr-wallet/mobx-utils": "0.12.154",
-    "@keplr-wallet/proto-types": "0.12.154",
-    "@keplr-wallet/simple-fetch": "0.12.154",
-    "@keplr-wallet/types": "0.12.154",
-    "@keplr-wallet/unit": "0.12.154",
+    "@keplr-wallet/common": "0.12.155-rc.3",
+    "@keplr-wallet/cosmos": "0.12.155-rc.3",
+    "@keplr-wallet/crypto": "0.12.155-rc.3",
+    "@keplr-wallet/mobx-utils": "0.12.155-rc.3",
+    "@keplr-wallet/proto-types": "0.12.155-rc.3",
+    "@keplr-wallet/simple-fetch": "0.12.155-rc.3",
+    "@keplr-wallet/types": "0.12.155-rc.3",
+    "@keplr-wallet/unit": "0.12.155-rc.3",
     "buffer": "^6.0.3",
     "deepmerge": "^4.2.2",
     "eventemitter3": "^4.0.7",

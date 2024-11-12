@@ -41,9 +41,11 @@ const UnknownGlobalPermissionPage: FunctionComponent<{
 export const PermissionPage: FunctionComponent = observer(() => {
   const { permissionStore } = useStore();
 
-  useInteractionInfo(() => {
-    permissionStore.rejectPermissionAll();
-    permissionStore.rejectGlobalPermissionAll();
+  useInteractionInfo({
+    onWindowClose: () => {
+      permissionStore.rejectPermissionAll();
+      permissionStore.rejectGlobalPermissionAll();
+    },
   });
 
   const mergedData = permissionStore.waitingPermissionMergedData;

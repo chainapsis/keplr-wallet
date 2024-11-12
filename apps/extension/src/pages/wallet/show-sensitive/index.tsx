@@ -89,7 +89,7 @@ export const WalletShowSensitivePage: FunctionComponent = observer(() => {
       })()}
       left={<BackButton />}
       fixedHeight={true}
-      bottomButton={
+      bottomButtons={[
         sensitive === ""
           ? {
               color: "secondary",
@@ -111,8 +111,8 @@ export const WalletShowSensitivePage: FunctionComponent = observer(() => {
                   replace: true,
                 });
               },
-            }
-      }
+            },
+      ]}
       onSubmit={
         sensitive === ""
           ? handleSubmit(async (data) => {

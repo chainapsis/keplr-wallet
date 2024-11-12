@@ -140,115 +140,121 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
           <ArrowLeftIcon />
         </Box>
       }
-      bottomButton={{
-        text: intl.formatMessage({ id: "button.next" }),
-        size: "large",
-        onClick: async () => {
-          if (isSelectChannelPhase) {
-            setPhase("amount");
-          } else {
-            if (ibcTransferConfigs.channelConfig.channels.length === 1) {
-              try {
-                const tx = accountInfo.cosmos.makeIBCTransferTx(
-                  ibcTransferConfigs.channelConfig.channels[0],
-                  ibcTransferConfigs.amountConfig.amount[0].toDec().toString(),
-                  ibcTransferConfigs.amountConfig.amount[0].currency,
-                  ibcTransferConfigs.recipientConfig.recipient
-                );
+      bottomButtons={[
+        {
+          text: intl.formatMessage({ id: "button.next" }),
+          size: "large",
+          onClick: async () => {
+            if (isSelectChannelPhase) {
+              setPhase("amount");
+            } else {
+              if (ibcTransferConfigs.channelConfig.channels.length === 1) {
+                try {
+                  const tx = accountInfo.cosmos.makeIBCTransferTx(
+                    ibcTransferConfigs.channelConfig.channels[0],
+                    ibcTransferConfigs.amountConfig.amount[0]
+                      .toDec()
+                      .toString(),
+                    ibcTransferConfigs.amountConfig.amount[0].currency,
+                    ibcTransferConfigs.recipientConfig.recipient
+                  );
 
-                await tx.send(
-                  ibcTransferConfigs.feeConfig.toStdFee(),
-                  ibcTransferConfigs.memoConfig.memo,
-                  {
-                    preferNoSetFee: true,
-                    preferNoSetMemo: true,
-                    sendTx: async (chainId, tx, mode) => {
-                      const msg = new SendTxAndRecordMsg(
-                        historyType,
-                        chainId,
-                        ibcTransferConfigs.recipientConfig.chainId,
-                        tx,
-                        mode,
-                        false,
-                        ibcTransferConfigs.senderConfig.sender,
-                        ibcTransferConfigs.recipientConfig.recipient,
-                        ibcTransferConfigs.amountConfig.amount.map((amount) => {
-                          return {
-                            amount: DecUtils.getTenExponentN(
-                              amount.currency.coinDecimals
-                            )
-                              .mul(amount.toDec())
-                              .toString(),
-                            denom: amount.currency.coinMinimalDenom,
-                          };
-                        }),
-                        ibcTransferConfigs.memoConfig.memo
-                      );
-                      return await new InExtensionMessageRequester().sendMessage(
-                        BACKGROUND_PORT,
-                        msg
-                      );
+                  await tx.send(
+                    ibcTransferConfigs.feeConfig.toStdFee(),
+                    ibcTransferConfigs.memoConfig.memo,
+                    {
+                      preferNoSetFee: true,
+                      preferNoSetMemo: true,
+                      sendTx: async (chainId, tx, mode) => {
+                        const msg = new SendTxAndRecordMsg(
+                          historyType,
+                          chainId,
+                          ibcTransferConfigs.recipientConfig.chainId,
+                          tx,
+                          mode,
+                          false,
+                          ibcTransferConfigs.senderConfig.sender,
+                          ibcTransferConfigs.recipientConfig.recipient,
+                          ibcTransferConfigs.amountConfig.amount.map(
+                            (amount) => {
+                              return {
+                                amount: DecUtils.getTenExponentN(
+                                  amount.currency.coinDecimals
+                                )
+                                  .mul(amount.toDec())
+                                  .toString(),
+                                denom: amount.currency.coinMinimalDenom,
+                              };
+                            }
+                          ),
+                          ibcTransferConfigs.memoConfig.memo
+                        );
+                        return await new InExtensionMessageRequester().sendMessage(
+                          BACKGROUND_PORT,
+                          msg
+                        );
+                      },
                     },
-                  },
-                  {
-                    onBroadcasted: () => {
-                      chainStore.enableVaultsWithCosmosAddress(
-                        ibcTransferConfigs.recipientConfig.chainId,
-                        ibcTransferConfigs.recipientConfig.recipient
-                      );
-                    },
-                    onFulfill: (tx) => {
-                      if (tx.code != null && tx.code !== 0) {
-                        console.log(tx.log ?? tx.raw_log);
+                    {
+                      onBroadcasted: () => {
+                        chainStore.enableVaultsWithCosmosAddress(
+                          ibcTransferConfigs.recipientConfig.chainId,
+                          ibcTransferConfigs.recipientConfig.recipient
+                        );
+                      },
+                      onFulfill: (tx) => {
+                        if (tx.code != null && tx.code !== 0) {
+                          console.log(tx.log ?? tx.raw_log);
+                          notification.show(
+                            "failed",
+                            intl.formatMessage({
+                              id: "error.transaction-failed",
+                            }),
+                            ""
+                          );
+                          return;
+                        }
                         notification.show(
-                          "failed",
+                          "success",
                           intl.formatMessage({
-                            id: "error.transaction-failed",
+                            id: "notification.transaction-success",
                           }),
                           ""
                         );
-                        return;
-                      }
-                      notification.show(
-                        "success",
-                        intl.formatMessage({
-                          id: "notification.transaction-success",
-                        }),
-                        ""
-                      );
-                    },
-                  }
-                );
-              } catch (e) {
-                if (e.message === "Request rejected") {
-                  if (location.pathname === "/ibc-transfer") {
+                      },
+                    }
+                  );
+                } catch (e) {
+                  if (e.message === "Request rejected") {
+                    if (location.pathname === "/ibc-transfer") {
+                      return;
+                    }
+
+                    navigate(-1);
                     return;
                   }
 
-                  navigate(-1);
-                  return;
+                  notification.show(
+                    "failed",
+                    intl.formatMessage({
+                      id: "error.transaction-failed",
+                    }),
+                    ""
+                  );
                 }
 
-                notification.show(
-                  "failed",
-                  intl.formatMessage({
-                    id: "error.transaction-failed",
-                  }),
-                  ""
-                );
+                navigate("/", {
+                  replace: true,
+                });
               }
-
-              navigate("/", {
-                replace: true,
-              });
             }
-          }
+          },
+          disabled: isSelectChannelPhase
+            ? isSelectChannelInteractionBlocked
+            : isAmountInteractionBlocked,
+          isLoading: accountInfo.isSendingMsg === "ibcTransfer",
         },
-        disabled: isSelectChannelPhase
-          ? isSelectChannelInteractionBlocked
-          : isAmountInteractionBlocked,
-        isLoading: accountInfo.isSendingMsg === "ibcTransfer",
-      }}
+      ]}
     >
       <Box height="100%">
         {isSelectChannelPhase ? (

@@ -13,6 +13,8 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
 import SimpleBar from "simplebar-react";
+import { useNavigate } from "react-router";
+import { ApproveIcon, CancelIcon } from "../../../components/button";
 
 export const PermissionBasicAccessPage: FunctionComponent<{
   data: {
@@ -22,25 +24,71 @@ export const PermissionBasicAccessPage: FunctionComponent<{
   const { chainStore, permissionStore } = useStore();
   const intl = useIntl();
   const theme = useTheme();
+  const navigate = useNavigate();
 
-  const interactionInfo = useInteractionInfo();
+  const interactionInfo = useInteractionInfo({
+    onUnmount: async () => {
+      await permissionStore.rejectPermissionWithProceedNext(data.ids, () => {
+        // 뒤로가기 버튼 클릭, macOS의 뒤로가기 제스처 등으로 페이지를 벗어나는 경우에 대한 처리이므로
+        // 다음 요청으로 넘어가는 것 외에 추가적인 처리를 하지 않는다.
+      });
+    },
+  });
+
+  const isLoading = (() => {
+    const obsolete = data.ids.find((id) => {
+      return permissionStore.isObsoleteInteractionApproved(id);
+    });
+    return !!obsolete;
+  })();
 
   return (
     <HeaderLayout
       title=""
       fixedHeight={true}
-      bottomButton={{
-        text: intl.formatMessage({
-          id: "button.approve",
-        }),
-        size: "large",
-        isLoading: (() => {
-          const obsolete = data.ids.find((id) => {
-            return permissionStore.isObsoleteInteraction(id);
-          });
-          return !!obsolete;
-        })(),
-      }}
+      bottomButtons={[
+        {
+          textOverrideIcon: <CancelIcon color={ColorPalette["gray-200"]} />,
+          size: "large",
+          color: "secondary",
+          style: {
+            width: "3.25rem",
+          },
+          onClick: async () => {
+            await permissionStore.rejectPermissionWithProceedNext(
+              data.ids,
+              (proceedNext) => {
+                if (!proceedNext) {
+                  if (
+                    interactionInfo.interaction &&
+                    !interactionInfo.interactionInternal
+                  ) {
+                    handleExternalInteractionWithNoProceedNext();
+                  } else if (
+                    interactionInfo.interaction &&
+                    interactionInfo.interactionInternal
+                  ) {
+                    // 내부 인터렉션의 경우 reject만 하고 페이지를 벗어나지 않기 때문에 페이지를 벗어나도록 한다.
+                    window.history.length > 1 ? navigate(-1) : navigate("/");
+                  } else {
+                    // 예상치 못한 상황이므로 홈으로 초기화한다.
+                    navigate("/", { replace: true });
+                  }
+                }
+              }
+            );
+          },
+        },
+        {
+          text: intl.formatMessage({
+            id: "button.approve",
+          }),
+          left: !isLoading && <ApproveIcon />,
+          type: "submit",
+          size: "large",
+          isLoading,
+        },
+      ]}
       onSubmit={async (e) => {
         e.preventDefault();
 

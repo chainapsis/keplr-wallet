@@ -1,26 +1,25 @@
 import React, { FunctionComponent } from "react";
-import { IconProps } from "./types";
+import { IconProps } from "../icon/types";
 
-export const CheckIcon: FunctionComponent<IconProps> = ({
+export const CancelIcon: FunctionComponent<IconProps> = ({
   width = "1.5rem",
   height = "1.5rem",
   color,
 }) => {
   return (
     <svg
+      xmlns="http://www.w3.org/2000/svg"
       width={width}
       height={height}
       viewBox="0 0 24 24"
       fill="none"
-      xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        d="M4.5 12.75L10.5 18.75L19.5 5.25"
+        d="M6 18L18 6M6 6L18 18"
         stroke={color || "currentColor"}
-        strokeWidth="2.5"
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        fill="none"
       />
     </svg>
   );

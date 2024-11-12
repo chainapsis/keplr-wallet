@@ -341,24 +341,27 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
           </Box>
         )
       }
-      bottomButton={{
-        disabled:
-          starknetAccount.isDeployingAccount ||
-          (!isAccountNotDeployed && txConfigsValidate.interactionBlocked),
-        left: starknetAccount.isDeployingAccount ? (
-          <Box marginRight="0.25rem">
-            <LoadingIcon width="1rem" height="1rem" />
-          </Box>
-        ) : undefined,
-        text: starknetAccount.isDeployingAccount
-          ? `${intl.formatMessage({ id: "button.activating" })}...`
-          : isAccountNotDeployed
-          ? intl.formatMessage({ id: "button.activate-account" })
-          : intl.formatMessage({ id: "button.next" }),
-        color: "primary",
-        size: "large",
-        isLoading,
-      }}
+      bottomButtons={[
+        {
+          disabled:
+            starknetAccount.isDeployingAccount ||
+            (!isAccountNotDeployed && txConfigsValidate.interactionBlocked),
+          left: starknetAccount.isDeployingAccount ? (
+            <Box marginRight="0.25rem">
+              <LoadingIcon width="1rem" height="1rem" />
+            </Box>
+          ) : undefined,
+          text: starknetAccount.isDeployingAccount
+            ? `${intl.formatMessage({ id: "button.activating" })}...`
+            : isAccountNotDeployed
+            ? intl.formatMessage({ id: "button.activate-account" })
+            : intl.formatMessage({ id: "button.next" }),
+          color: "primary",
+          size: "large",
+          type: "submit",
+          isLoading,
+        },
+      ]}
       onSubmit={async (e) => {
         e.preventDefault();
 

@@ -47,6 +47,8 @@ import { FeeSummary } from "../../components/fee-summary";
 import { FeeControl } from "../../../../components/input/fee-control";
 import { HighFeeWarning } from "../../components/high-fee-warning";
 import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
+import { useNavigate } from "react-router-dom";
+import { ApproveIcon, CancelIcon } from "../../../../components/button";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -72,6 +74,7 @@ export const CosmosTxView: FunctionComponent<{
 
   const intl = useIntl();
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const [isViewData, setIsViewData] = useState(false);
 
@@ -312,7 +315,11 @@ export const CosmosTxView: FunctionComponent<{
 
   const preferNoSetMemo = interactionData.data.signOptions.preferNoSetMemo;
 
-  const interactionInfo = useInteractionInfo();
+  const interactionInfo = useInteractionInfo({
+    onUnmount: async () => {
+      signInteractionStore.rejectWithProceedNext(interactionData.id, () => {});
+    },
+  });
 
   const [unmountPromise] = useState(() => {
     let resolver: () => void;
@@ -487,6 +494,11 @@ export const CosmosTxView: FunctionComponent<{
     }
   })();
 
+  const isLoading =
+    signInteractionStore.isObsoleteInteractionApproved(interactionData.id) ||
+    isLedgerInteracting ||
+    isKeystoneInteracting;
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.sign.cosmos.tx.title" })}
@@ -498,18 +510,48 @@ export const CosmosTxView: FunctionComponent<{
           }
         />
       }
-      // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
-      bottomButton={{
-        isSpecial: true,
-        text: intl.formatMessage({ id: "button.approve" }),
-        size: "large",
-        disabled: buttonDisabled,
-        isLoading:
-          signInteractionStore.isObsoleteInteraction(interactionData.id) ||
-          isLedgerInteracting ||
-          isKeystoneInteracting,
-        onClick: approve,
-      }}
+      bottomButtons={[
+        {
+          textOverrideIcon: <CancelIcon color={ColorPalette["gray-200"]} />,
+          size: "large",
+          color: "secondary",
+          style: {
+            width: "3.25rem",
+          },
+          onClick: async () => {
+            await signInteractionStore.rejectWithProceedNext(
+              interactionData.id,
+              (proceedNext) => {
+                if (!proceedNext) {
+                  if (
+                    interactionInfo.interaction &&
+                    !interactionInfo.interactionInternal
+                  ) {
+                    handleExternalInteractionWithNoProceedNext();
+                  } else if (
+                    interactionInfo.interaction &&
+                    interactionInfo.interactionInternal
+                  ) {
+                    window.history.length > 1 ? navigate(-1) : navigate("/");
+                  } else {
+                    navigate("/", { replace: true });
+                  }
+                }
+              }
+            );
+          },
+        },
+        // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
+        {
+          isSpecial: true,
+          text: intl.formatMessage({ id: "button.approve" }),
+          size: "large",
+          left: !isLoading && <ApproveIcon />,
+          disabled: buttonDisabled,
+          isLoading,
+          onClick: approve,
+        },
+      ]}
     >
       <Box
         height="100%"
