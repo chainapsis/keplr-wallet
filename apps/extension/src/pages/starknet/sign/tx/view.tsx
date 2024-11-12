@@ -25,11 +25,7 @@ import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
 import { useTheme } from "styled-components";
 import { H5 } from "../../../../components/typography";
-import {
-  ArrowDropDownIcon,
-  CheckIcon,
-  XMarkIcon,
-} from "../../../../components/icon";
+import { ArrowDropDownIcon, XMarkIcon } from "../../../../components/icon";
 import { Column, Columns } from "../../../../components/column";
 import SimpleBar from "simplebar-react";
 import { XAxis } from "../../../../components/axis";
@@ -37,6 +33,7 @@ import { ViewDataButton } from "../../../sign/components/view-data-button";
 import { AccountActivationModal } from "../../components/account-activation-modal";
 import { Modal } from "../../../../components/modal";
 import { useNavigate } from "react-router";
+import { ApproveIcon } from "../../../../components/button";
 
 export const SignStarknetTxView: FunctionComponent<{
   interactionData: NonNullable<SignStarknetTxInteractionStore["waitingData"]>;
@@ -396,7 +393,7 @@ export const SignStarknetTxView: FunctionComponent<{
           isSpecial: true,
           text: intl.formatMessage({ id: "button.approve" }),
           size: "large",
-          left: !isLoading && <CheckIcon />,
+          left: !isLoading && <ApproveIcon />,
           disabled: buttonDisabled,
           isLoading,
           onClick: approve,

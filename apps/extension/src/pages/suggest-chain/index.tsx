@@ -7,12 +7,13 @@ import { useInteractionInfo } from "../../hooks";
 import { InteractionWaitingData } from "@keplr-wallet/background";
 import { ChainInfo } from "@keplr-wallet/types";
 import { FormattedMessage, useIntl } from "react-intl";
-import { ArrowLeftIcon, CheckIcon, XMarkIcon } from "../../components/icon";
+import { ArrowLeftIcon, XMarkIcon } from "../../components/icon";
 import { Box } from "../../components/box";
 import { handleExternalInteractionWithNoProceedNext } from "../../utils";
 import { dispatchGlobalEventExceptSelf } from "../../utils/global-events";
 import { ColorPalette } from "../../styles";
 import { useNavigate } from "react-router";
+import { ApproveIcon } from "../../components/button";
 
 export const SuggestChainPage: FunctionComponent = observer(() => {
   const { chainSuggestStore } = useStore();
@@ -139,7 +140,7 @@ const SuggestChainPageImpl: FunctionComponent<{
           text: intl.formatMessage({ id: "button.approve" }),
           size: "large",
           color: "primary",
-          left: !isLoading && <CheckIcon />,
+          left: !isLoading && <ApproveIcon />,
           isLoading,
           onClick: async () => {
             const chainInfo =

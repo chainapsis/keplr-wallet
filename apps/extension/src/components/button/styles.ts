@@ -304,5 +304,8 @@ export const Styles = {
     align-items: center;
 
     position: absolute;
+    svg {
+      fill: none;
+    }
   `,
 };
