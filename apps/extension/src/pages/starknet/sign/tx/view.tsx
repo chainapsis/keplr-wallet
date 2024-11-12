@@ -221,9 +221,10 @@ export const SignStarknetTxView: FunctionComponent<{
   });
 
   const buttonDisabled = txConfigsValidate.interactionBlocked;
-  const isLoading = signStarknetTxInteractionStore.isObsoleteInteraction(
-    interactionData.id
-  );
+  const isLoading =
+    signStarknetTxInteractionStore.isObsoleteInteractionApproved(
+      interactionData.id
+    );
 
   const approve = async () => {
     try {

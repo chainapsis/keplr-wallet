@@ -39,7 +39,7 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
   const isLoading = (() => {
     if (
       icnsInteractionStore.waitingData &&
-      icnsInteractionStore.isObsoleteInteraction(
+      icnsInteractionStore.isObsoleteInteractionApproved(
         icnsInteractionStore.waitingData.id
       )
     ) {

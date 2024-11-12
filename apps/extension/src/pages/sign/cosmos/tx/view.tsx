@@ -496,7 +496,7 @@ export const CosmosTxView: FunctionComponent<{
   })();
 
   const isLoading =
-    signInteractionStore.isObsoleteInteraction(interactionData.id) ||
+    signInteractionStore.isObsoleteInteractionApproved(interactionData.id) ||
     isLedgerInteracting ||
     isKeystoneInteracting;
 

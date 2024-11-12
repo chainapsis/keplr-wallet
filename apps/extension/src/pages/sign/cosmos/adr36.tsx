@@ -135,7 +135,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
   >(undefined);
 
   const isLoading =
-    signInteractionStore.isObsoleteInteraction(
+    signInteractionStore.isObsoleteInteractionApproved(
       signInteractionStore.waitingData?.id
     ) ||
     isLedgerInteracting ||

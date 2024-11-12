@@ -33,7 +33,7 @@ export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
     },
   });
 
-  const isLoading = permissionStore.isObsoleteInteraction(data.id);
+  const isLoading = permissionStore.isObsoleteInteractionApproved(data.id);
 
   return (
     <HeaderLayout

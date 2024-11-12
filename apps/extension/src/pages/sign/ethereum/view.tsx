@@ -350,7 +350,9 @@ export const EthereumSigningView: FunctionComponent<{
     useState(false);
 
   const isLoading =
-    signEthereumInteractionStore.isObsoleteInteraction(interactionData.id) ||
+    signEthereumInteractionStore.isObsoleteInteractionApproved(
+      interactionData.id
+    ) ||
     isLedgerInteracting ||
     isKeystoneInteracting;
 

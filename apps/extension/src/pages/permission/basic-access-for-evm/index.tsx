@@ -39,7 +39,7 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
 
   const isLoading = (() => {
     const obsolete = data.ids.find((id) => {
-      return permissionStore.isObsoleteInteraction(id);
+      return permissionStore.isObsoleteInteractionApproved(id);
     });
     return !!obsolete;
   })();

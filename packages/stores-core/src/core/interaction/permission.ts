@@ -221,6 +221,10 @@ export class PermissionStore {
     return this.interactionStore.isObsoleteInteraction(id);
   }
 
+  isObsoleteInteractionApproved(id: string | undefined): boolean {
+    return this.interactionStore.isObsoleteInteractionApproved(id);
+  }
+
   async getOriginPermittedChains(
     origin: string,
     type: string

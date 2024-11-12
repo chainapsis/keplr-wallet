@@ -60,7 +60,9 @@ const SuggestChainPageImpl: FunctionComponent<{
   );
   const communityChainInfo = queryCommunityChainInfo.chainInfo;
 
-  const isLoading = permissionStore.isObsoleteInteraction(waitingData.id);
+  const isLoading = permissionStore.isObsoleteInteractionApproved(
+    waitingData.id
+  );
 
   useEffect(() => {
     if (!queryCommunityChainInfo.isLoading) {
