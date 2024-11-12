@@ -51,9 +51,8 @@ import { MemoryKVStore } from "@keplr-wallet/common";
 import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { Image } from "../../../components/image";
 import { Column, Columns } from "../../../components/column";
-import { XMarkIcon } from "../../../components/icon";
 import { useNavigate } from "react-router";
-import { ApproveIcon } from "../../../components/button";
+import { ApproveIcon, CancelIcon } from "../../../components/button";
 
 /**
  * CosmosTxView의 주석을 꼭 참고하셈
@@ -371,7 +370,7 @@ export const EthereumSigningView: FunctionComponent<{
       }
       bottomButtons={[
         {
-          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
+          textOverrideIcon: <CancelIcon color={ColorPalette["gray-200"]} />,
           size: "large",
           color: "secondary",
           style: {

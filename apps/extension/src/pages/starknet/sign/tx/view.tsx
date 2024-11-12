@@ -25,7 +25,7 @@ import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
 import { useTheme } from "styled-components";
 import { H5 } from "../../../../components/typography";
-import { ArrowDropDownIcon, XMarkIcon } from "../../../../components/icon";
+import { ArrowDropDownIcon } from "../../../../components/icon";
 import { Column, Columns } from "../../../../components/column";
 import SimpleBar from "simplebar-react";
 import { XAxis } from "../../../../components/axis";
@@ -33,7 +33,7 @@ import { ViewDataButton } from "../../../sign/components/view-data-button";
 import { AccountActivationModal } from "../../components/account-activation-modal";
 import { Modal } from "../../../../components/modal";
 import { useNavigate } from "react-router";
-import { ApproveIcon } from "../../../../components/button";
+import { ApproveIcon, CancelIcon } from "../../../../components/button";
 
 export const SignStarknetTxView: FunctionComponent<{
   interactionData: NonNullable<SignStarknetTxInteractionStore["waitingData"]>;
@@ -361,7 +361,7 @@ export const SignStarknetTxView: FunctionComponent<{
       // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
       bottomButtons={[
         {
-          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
+          textOverrideIcon: <CancelIcon color={ColorPalette["gray-200"]} />,
           size: "large",
           color: "secondary",
           style: {

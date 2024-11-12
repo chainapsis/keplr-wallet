@@ -22,11 +22,11 @@ import { KeystoneSign } from "../components/keystone";
 import { useTheme } from "styled-components";
 import { KeyRingService } from "@keplr-wallet/background";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
-import { MessageAdr36Icon, XMarkIcon } from "../../../components/icon";
+import { MessageAdr36Icon } from "../../../components/icon";
 import { ItemLogo } from "../../main/token-detail/msg-items/logo";
 import { KeystoneUSBBox } from "../components/keystone-usb-box";
 import { useNavigate } from "react-router";
-import { ApproveIcon } from "../../../components/button";
+import { ApproveIcon, CancelIcon } from "../../../components/button";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
   const { chainStore, signInteractionStore, uiConfigStore } = useStore();
@@ -154,7 +154,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
+          textOverrideIcon: <CancelIcon color={ColorPalette["gray-200"]} />,
           size: "large",
           color: "secondary",
           style: {

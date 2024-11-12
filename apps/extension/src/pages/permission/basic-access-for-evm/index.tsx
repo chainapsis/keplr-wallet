@@ -13,9 +13,8 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { Dropdown } from "../../../components/dropdown";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
-import { XMarkIcon } from "../../../components/icon";
 import { useNavigate } from "react-router";
-import { ApproveIcon } from "../../../components/button";
+import { ApproveIcon, CancelIcon } from "../../../components/button";
 
 export const PermissionBasicAccessForEVMPage: FunctionComponent<{
   data: {
@@ -55,7 +54,7 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
       fixedHeight={true}
       bottomButtons={[
         {
-          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
+          textOverrideIcon: <CancelIcon color={ColorPalette["gray-200"]} />,
           size: "large",
           color: "secondary",
           style: {
