@@ -12,9 +12,8 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { handleExternalInteractionWithNoProceedNext } from "../../../../utils";
-import { XMarkIcon } from "../../../../components/icon";
 import { useNavigate } from "react-router";
-import { ApproveIcon } from "../../../../components/button";
+import { ApproveIcon, CancelIcon } from "../../../../components/button";
 
 export const SignCosmosICNSPage: FunctionComponent = observer(() => {
   const { icnsInteractionStore } = useStore();
@@ -39,7 +38,7 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
   const isLoading = (() => {
     if (
       icnsInteractionStore.waitingData &&
-      icnsInteractionStore.isObsoleteInteraction(
+      icnsInteractionStore.isObsoleteInteractionApproved(
         icnsInteractionStore.waitingData.id
       )
     ) {
@@ -53,7 +52,7 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
       fixedHeight={true}
       bottomButtons={[
         {
-          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
+          textOverrideIcon: <CancelIcon color={ColorPalette["gray-200"]} />,
           size: "large",
           color: "secondary",
           style: {

@@ -16,9 +16,8 @@ import { XAxis, YAxis } from "../../../../components/axis";
 import { Gutter } from "../../../../components/gutter";
 import { Image } from "../../../../components/image";
 import SimpleBar from "simplebar-react";
-import { XMarkIcon } from "../../../../components/icon";
 import { useNavigate } from "react-router";
-import { ApproveIcon } from "../../../../components/button";
+import { ApproveIcon, CancelIcon } from "../../../../components/button";
 
 export const SignStarknetMessageView: FunctionComponent<{
   interactionData: NonNullable<
@@ -118,7 +117,7 @@ export const SignStarknetMessageView: FunctionComponent<{
       }
       bottomButtons={[
         {
-          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
+          textOverrideIcon: <CancelIcon color={ColorPalette["gray-200"]} />,
           size: "large",
           color: "secondary",
           style: {

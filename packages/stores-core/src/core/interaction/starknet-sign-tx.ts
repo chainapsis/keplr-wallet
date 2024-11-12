@@ -68,4 +68,8 @@ export class SignStarknetTxInteractionStore {
   isObsoleteInteraction(id: string | undefined): boolean {
     return this.interactionStore.isObsoleteInteraction(id);
   }
+
+  isObsoleteInteractionApproved(id: string | undefined): boolean {
+    return this.interactionStore.isObsoleteInteractionApproved(id);
+  }
 }

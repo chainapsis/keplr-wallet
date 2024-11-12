@@ -13,9 +13,8 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { Dropdown } from "../../../components/dropdown";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
-import { XMarkIcon } from "../../../components/icon";
 import { useNavigate } from "react-router";
-import { ApproveIcon } from "../../../components/button";
+import { ApproveIcon, CancelIcon } from "../../../components/button";
 
 export const PermissionBasicAccessForStarknetPage: FunctionComponent<{
   data: {
@@ -38,7 +37,7 @@ export const PermissionBasicAccessForStarknetPage: FunctionComponent<{
 
   const isLoading = (() => {
     const obsolete = data.ids.find((id) => {
-      return permissionStore.isObsoleteInteraction(id);
+      return permissionStore.isObsoleteInteractionApproved(id);
     });
     return !!obsolete;
   })();
@@ -54,7 +53,7 @@ export const PermissionBasicAccessForStarknetPage: FunctionComponent<{
       fixedHeight={true}
       bottomButtons={[
         {
-          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
+          textOverrideIcon: <CancelIcon color={ColorPalette["gray-200"]} />,
           size: "large",
           color: "secondary",
           style: {

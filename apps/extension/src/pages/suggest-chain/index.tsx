@@ -7,13 +7,13 @@ import { useInteractionInfo } from "../../hooks";
 import { InteractionWaitingData } from "@keplr-wallet/background";
 import { ChainInfo } from "@keplr-wallet/types";
 import { FormattedMessage, useIntl } from "react-intl";
-import { ArrowLeftIcon, XMarkIcon } from "../../components/icon";
+import { ArrowLeftIcon } from "../../components/icon";
 import { Box } from "../../components/box";
 import { handleExternalInteractionWithNoProceedNext } from "../../utils";
 import { dispatchGlobalEventExceptSelf } from "../../utils/global-events";
 import { ColorPalette } from "../../styles";
 import { useNavigate } from "react-router";
-import { ApproveIcon } from "../../components/button";
+import { ApproveIcon, CancelIcon } from "../../components/button";
 
 export const SuggestChainPage: FunctionComponent = observer(() => {
   const { chainSuggestStore } = useStore();
@@ -60,7 +60,9 @@ const SuggestChainPageImpl: FunctionComponent<{
   );
   const communityChainInfo = queryCommunityChainInfo.chainInfo;
 
-  const isLoading = permissionStore.isObsoleteInteraction(waitingData.id);
+  const isLoading = permissionStore.isObsoleteInteractionApproved(
+    waitingData.id
+  );
 
   useEffect(() => {
     if (!queryCommunityChainInfo.isLoading) {
@@ -107,7 +109,7 @@ const SuggestChainPageImpl: FunctionComponent<{
       }
       bottomButtons={[
         {
-          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
+          textOverrideIcon: <CancelIcon color={ColorPalette["gray-200"]} />,
           size: "large",
           color: "secondary",
           style: {

@@ -15,9 +15,8 @@ import { ColorPalette } from "../../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
-import { XMarkIcon } from "../../../components/icon";
 import { useNavigate } from "react-router";
-import { ApproveIcon } from "../../../components/button";
+import { ApproveIcon, CancelIcon } from "../../../components/button";
 
 export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
   data: InteractionWaitingData<GlobalPermissionData>;
@@ -33,7 +32,7 @@ export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
     },
   });
 
-  const isLoading = permissionStore.isObsoleteInteraction(data.id);
+  const isLoading = permissionStore.isObsoleteInteractionApproved(data.id);
 
   return (
     <HeaderLayout
@@ -41,7 +40,7 @@ export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
       fixedHeight={true}
       bottomButtons={[
         {
-          textOverrideIcon: <XMarkIcon color={ColorPalette["gray-200"]} />,
+          textOverrideIcon: <CancelIcon color={ColorPalette["gray-200"]} />,
           size: "large",
           color: "secondary",
           style: {
