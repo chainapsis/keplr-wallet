@@ -237,7 +237,6 @@ export class SecretAccountImpl {
           ? {
               type: this.msgOpts.executeSecretWasm.type,
               value: {
-                sender_address: this.base.bech32Address,
                 sender: Buffer.from(
                   Bech32Address.fromBech32(this.base.bech32Address).address
                 ).toString("base64"),
@@ -269,7 +268,6 @@ export class SecretAccountImpl {
               value: MsgExecuteContractV1.encode(
                 MsgExecuteContractV1.fromPartial({
                   sender: Buffer.from(msg.value.sender, "base64"),
-                  senderAddress: msg.value.sender_address,
                   contract: Buffer.from(msg.value.contract, "base64"),
                   msg: Buffer.from(msg.value.msg, "base64"),
                   sentFunds: msg.value.sent_funds,
@@ -340,7 +338,6 @@ export class SecretAccountImpl {
           ? {
               type: this.msgOpts.executeSecretWasm.type,
               value: {
-                sender_address: this.base.bech32Address,
                 sender: Buffer.from(
                   Bech32Address.fromBech32(this.base.bech32Address).address
                 ).toString("base64"),
@@ -372,7 +369,6 @@ export class SecretAccountImpl {
               value: MsgExecuteContractV1.encode(
                 MsgExecuteContractV1.fromPartial({
                   sender: Buffer.from(msg.value.sender, "base64"),
-                  senderAddress: msg.value.sender_address,
                   contract: Buffer.from(msg.value.contract, "base64"),
                   msg: Buffer.from(msg.value.msg, "base64"),
                   sentFunds: msg.value.sent_funds,
