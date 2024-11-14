@@ -537,11 +537,13 @@ export const EnableChainsScene: FunctionComponent<{
             if (fallbackStarknetLedgerApp) {
               return false;
             }
+
+            return true;
           } else if ("starknet" in modularChainInfo) {
             return fallbackStarknetLedgerApp;
+          } else {
+            return false;
           }
-
-          return true;
         });
       }
 
@@ -1234,16 +1236,43 @@ export const EnableChainsScene: FunctionComponent<{
                 // (ledger에서는 coin type이 app당 할당되기 때문에...)
                 if (keyType === "ledger") {
                   if (!fallbackEthereumLedgerApp) {
-                    sceneTransition.push("enable-chains", {
-                      vaultId,
-                      keyType,
-                      candidateAddresses: [],
-                      isFresh: false,
-                      skipWelcome,
-                      fallbackEthereumLedgerApp: true,
-                      stepPrevious: stepPrevious,
-                      stepTotal: stepTotal,
-                    });
+                    if (fallbackStarknetLedgerApp) {
+                      const keyInfo = keyRingStore.keyInfos.find(
+                        (keyInfo) => keyInfo.id === vaultId
+                      );
+
+                      if (!keyInfo) {
+                        throw new Error("KeyInfo not found");
+                      }
+                      const bip44Path = keyInfo.insensitive["bip44Path"];
+                      if (!bip44Path) {
+                        throw new Error("bip44Path not found");
+                      }
+                      sceneTransition.replaceAll("connect-ledger", {
+                        name: "",
+                        password: "",
+                        app: "Starknet",
+                        bip44Path,
+
+                        appendModeInfo: {
+                          vaultId,
+                          afterEnableChains: ledgerEthereumAppNeeds,
+                        },
+                        stepPrevious: stepPrevious,
+                        stepTotal: stepTotal,
+                      });
+                    } else {
+                      sceneTransition.push("enable-chains", {
+                        vaultId,
+                        keyType,
+                        candidateAddresses: [],
+                        isFresh: false,
+                        skipWelcome,
+                        fallbackEthereumLedgerApp: true,
+                        stepPrevious: stepPrevious,
+                        stepTotal: stepTotal,
+                      });
+                    }
                   } else if (ledgerEthereumAppNeeds.length > 0) {
                     const keyInfo = keyRingStore.keyInfos.find(
                       (keyInfo) => keyInfo.id === vaultId
@@ -1288,14 +1317,27 @@ export const EnableChainsScene: FunctionComponent<{
               }
             }}
           />
-          {fallbackEthereumLedgerApp ? (
+          {fallbackEthereumLedgerApp || fallbackStarknetLedgerApp ? (
             <React.Fragment>
               <Gutter size="0.75rem" />
               <TextButton
                 text={intl.formatMessage({
                   id: "pages.register.enable-chains.skip-button",
                 })}
-                onClick={() => replaceToWelcomePage()}
+                onClick={() =>
+                  fallbackEthereumLedgerApp
+                    ? sceneTransition.push("enable-chains", {
+                        vaultId,
+                        keyType: "ledger",
+                        candidateAddresses: [],
+                        isFresh: false,
+                        skipWelcome: true,
+                        fallbackStarknetLedgerApp: true,
+                        stepPrevious: stepPrevious,
+                        stepTotal: stepTotal,
+                      })
+                    : replaceToWelcomePage()
+                }
               />
             </React.Fragment>
           ) : null}

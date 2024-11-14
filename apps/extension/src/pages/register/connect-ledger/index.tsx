@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { Fragment, FunctionComponent, useState } from "react";
 import { RegisterSceneBox } from "../components/register-scene-box";
 import {
   useSceneEvents,
@@ -19,6 +19,7 @@ import Transport from "@ledgerhq/hw-transport";
 import { useStore } from "../../../stores";
 import { useNavigate } from "react-router";
 import Eth from "@ledgerhq/hw-app-eth";
+import { LedgerError, StarknetClient } from "@ledgerhq/hw-app-starknet";
 import { Buffer } from "buffer/";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { LedgerUtils } from "../../../utils";
@@ -33,7 +34,7 @@ type Step = "unknown" | "connected" | "app";
 export const ConnectLedgerScene: FunctionComponent<{
   name: string;
   password: string;
-  app: App | "Ethereum";
+  app: App | "Ethereum" | "Starknet";
   bip44Path: {
     account: number;
     change: number;
@@ -59,7 +60,11 @@ export const ConnectLedgerScene: FunctionComponent<{
   }) => {
     const intl = useIntl();
 
-    if (!Object.keys(AppHRP).includes(propApp) && propApp !== "Ethereum") {
+    if (
+      !Object.keys(AppHRP).includes(propApp) &&
+      propApp !== "Ethereum" &&
+      propApp !== "Starknet"
+    ) {
       throw new Error(`Unsupported app: ${propApp}`);
     }
 
@@ -98,32 +103,35 @@ export const ConnectLedgerScene: FunctionComponent<{
       let transport: Transport;
 
       try {
-        transport = uiConfigStore.useWebHIDLedger
-          ? await TransportWebHID.create()
-          : await TransportWebUSB.create();
-      } catch {
+        transport =
+          // XXX: Use WebHID for Starknet because WebUSB doesn't work for Starknet app.
+          uiConfigStore.useWebHIDLedger || propApp === "Starknet"
+            ? await TransportWebHID.create()
+            : await TransportWebUSB.create();
+      } catch (e) {
+        console.log(e);
         setStep("unknown");
         setIsLoading(false);
         return;
       }
 
-      if (propApp === "Ethereum") {
-        let ethApp = new Eth(transport);
+      switch (propApp) {
+        case "Cosmos":
+        case "Terra":
+        case "Secret": {
+          let app = new CosmosApp(propApp, transport);
 
-        // Ensure that the keplr can connect to ethereum app on ledger.
-        // getAppConfiguration() works even if the ledger is on screen saver mode.
-        // To detect the screen saver mode, we should request the address before using.
-        try {
-          await ethApp.getAddress(`m/44'/60'/'0/0/0`);
-        } catch (e) {
-          // Device is locked or user is in home sceen or other app.
-          if (
-            e?.message.includes("(0x6b0c)") ||
-            e?.message.includes("(0x6511)") ||
-            e?.message.includes("(0x6e00)")
-          ) {
+          try {
+            const version = await app.getVersion();
+            if (version.device_locked) {
+              throw new Error("Device is locked");
+            }
+
+            // XXX: You must not check "error_message".
+            //      If "error_message" is not "No errors",
+            //      probably it doesn't mean that the device is not connected.
             setStep("connected");
-          } else {
+          } catch (e) {
             console.log(e);
             setStep("unknown");
             await transport.close();
@@ -131,121 +139,185 @@ export const ConnectLedgerScene: FunctionComponent<{
             setIsLoading(false);
             return;
           }
-        }
 
-        transport = await LedgerUtils.tryAppOpen(transport, propApp);
-        ethApp = new Eth(transport);
+          await LedgerUtils.tryAppOpen(transport, propApp);
+          app = new CosmosApp(propApp, transport);
 
-        try {
-          const res = await ethApp.getAddress(
-            `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`
+          const res = await app.getPublicKey(
+            bip44Path.account,
+            bip44Path.change,
+            bip44Path.addressIndex
           );
+          if (res.error_message === "No errors") {
+            setStep("app");
 
-          const pubKey = new PubKeySecp256k1(Buffer.from(res.publicKey, "hex"));
-
-          setStep("app");
-
-          if (appendModeInfo) {
-            await keyRingStore.appendLedgerKeyApp(
-              appendModeInfo.vaultId,
-              pubKey.toBytes(true),
-              propApp
-            );
-            await chainStore.enableChainInfoInUI(
-              ...appendModeInfo.afterEnableChains
-            );
-            navigate("/welcome", {
-              replace: true,
-            });
+            if (appendModeInfo) {
+              await keyRingStore.appendLedgerKeyApp(
+                appendModeInfo.vaultId,
+                res.compressed_pk,
+                propApp
+              );
+              await chainStore.enableChainInfoInUI(
+                ...appendModeInfo.afterEnableChains
+              );
+              navigate("/welcome", {
+                replace: true,
+              });
+            } else {
+              sceneTransition.replaceAll("finalize-key", {
+                name,
+                password,
+                ledger: {
+                  pubKey: res.compressed_pk,
+                  app: propApp,
+                  bip44Path,
+                },
+                stepPrevious: stepPrevious + 1,
+                stepTotal: stepTotal,
+              });
+            }
           } else {
-            sceneTransition.replaceAll("finalize-key", {
-              name,
-              password,
-              ledger: {
-                pubKey: pubKey.toBytes(),
-                app: propApp,
-                bip44Path,
-              },
-              stepPrevious: stepPrevious + 1,
-              stepTotal: stepTotal,
-            });
+            setStep("connected");
           }
-        } catch (e) {
-          console.log(e);
-          setStep("connected");
+
+          await transport.close();
+
+          setIsLoading(false);
+
+          return;
         }
+        case "Ethereum": {
+          let ethApp = new Eth(transport);
 
-        await transport.close();
+          // Ensure that the keplr can connect to ethereum app on ledger.
+          // getAppConfiguration() works even if the ledger is on screen saver mode.
+          // To detect the screen saver mode, we should request the address before using.
+          try {
+            await ethApp.getAddress(`m/44'/60'/'0/0/0`);
+          } catch (e) {
+            // Device is locked or user is in home sceen or other app.
+            if (
+              e?.message.includes("(0x6b0c)") ||
+              e?.message.includes("(0x6511)") ||
+              e?.message.includes("(0x6e00)")
+            ) {
+              setStep("connected");
+            } else {
+              console.log(e);
+              setStep("unknown");
+              await transport.close();
 
-        setIsLoading(false);
+              setIsLoading(false);
+              return;
+            }
+          }
 
-        return;
-      }
+          await LedgerUtils.tryAppOpen(transport, propApp);
+          ethApp = new Eth(transport);
 
-      let app = new CosmosApp(propApp, transport);
+          try {
+            const res = await ethApp.getAddress(
+              `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`
+            );
 
-      try {
-        const version = await app.getVersion();
-        if (version.device_locked) {
-          throw new Error("Device is locked");
+            const pubKey = new PubKeySecp256k1(
+              Buffer.from(res.publicKey, "hex")
+            );
+
+            setStep("app");
+
+            if (appendModeInfo) {
+              await keyRingStore.appendLedgerKeyApp(
+                appendModeInfo.vaultId,
+                pubKey.toBytes(true),
+                propApp
+              );
+              await chainStore.enableChainInfoInUI(
+                ...appendModeInfo.afterEnableChains
+              );
+
+              sceneTransition.push("enable-chains", {
+                vaultId: appendModeInfo.vaultId,
+                keyType: "ledger",
+                candidateAddresses: [],
+                isFresh: false,
+                skipWelcome: true,
+                fallbackStarknetLedgerApp: true,
+                stepPrevious: stepPrevious,
+                stepTotal: stepTotal,
+              });
+              // navigate("/welcome", {
+              //   replace: true,
+              // });
+            } else {
+              sceneTransition.replaceAll("finalize-key", {
+                name,
+                password,
+                ledger: {
+                  pubKey: pubKey.toBytes(),
+                  app: propApp,
+                  bip44Path,
+                },
+                stepPrevious: stepPrevious + 1,
+                stepTotal: stepTotal,
+              });
+            }
+          } catch (e) {
+            console.log(e);
+            setStep("connected");
+          }
+
+          await transport.close();
+
+          setIsLoading(false);
+
+          return;
         }
-
-        // XXX: You must not check "error_message".
-        //      If "error_message" is not "No errors",
-        //      probably it doesn't mean that the device is not connected.
-        setStep("connected");
-      } catch (e) {
-        console.log(e);
-        setStep("unknown");
-        await transport.close();
-
-        setIsLoading(false);
-        return;
-      }
-
-      transport = await LedgerUtils.tryAppOpen(transport, propApp);
-      app = new CosmosApp(propApp, transport);
-
-      const res = await app.getPublicKey(
-        bip44Path.account,
-        bip44Path.change,
-        bip44Path.addressIndex
-      );
-      if (res.error_message === "No errors") {
-        setStep("app");
-
-        if (appendModeInfo) {
-          await keyRingStore.appendLedgerKeyApp(
-            appendModeInfo.vaultId,
-            res.compressed_pk,
-            propApp
+        case "Starknet": {
+          transport = await LedgerUtils.tryAppOpen(transport, propApp);
+          const starknetApp = new StarknetClient(transport);
+          const res = await starknetApp.getPubKey(
+            `m/2645'/579218131'/1393043893'/0'/0'/0`
           );
-          await chainStore.enableChainInfoInUI(
-            ...appendModeInfo.afterEnableChains
-          );
-          navigate("/welcome", {
-            replace: true,
-          });
-        } else {
-          sceneTransition.replaceAll("finalize-key", {
-            name,
-            password,
-            ledger: {
-              pubKey: res.compressed_pk,
-              app: propApp,
-              bip44Path,
-            },
-            stepPrevious: stepPrevious + 1,
-            stepTotal: stepTotal,
-          });
+          switch (res.returnCode) {
+            case LedgerError.BadCla:
+            case LedgerError.BadIns:
+              setIsLoading(false);
+              setStep("connected");
+
+              await transport.close();
+
+              return;
+            case LedgerError.NoError:
+              const pubKey = new PubKeySecp256k1(res.publicKey);
+
+              if (appendModeInfo) {
+                await keyRingStore.appendLedgerKeyApp(
+                  appendModeInfo.vaultId,
+                  pubKey.toBytes(true),
+                  propApp
+                );
+                await chainStore.enableChainInfoInUI(
+                  ...appendModeInfo.afterEnableChains
+                );
+              }
+
+              setIsLoading(false);
+              setStep("app");
+
+              await transport.close();
+
+              return;
+            default:
+              setIsLoading(false);
+              setStep("unknown");
+
+              await transport.close();
+
+              return;
+          }
         }
-      } else {
-        setStep("connected");
       }
-
-      await transport.close();
-
-      setIsLoading(false);
     };
 
     return (
@@ -291,40 +363,44 @@ export const ConnectLedgerScene: FunctionComponent<{
           />
         </Stack>
 
-        <Gutter size="1.25rem" />
-        <YAxis alignX="center">
-          <XAxis alignY="center">
-            <Checkbox
-              checked={uiConfigStore.useWebHIDLedger}
-              onChange={async (checked) => {
-                if (checked && !window.navigator.hid) {
-                  await confirm.confirm(
-                    intl.formatMessage({
-                      id: "pages.register.connect-ledger.use-hid-confirm-title",
-                    }),
-                    intl.formatMessage({
-                      id: "pages.register.connect-ledger.use-hid-confirm-paragraph",
-                    }),
-                    {
-                      forceYes: true,
+        {propApp !== "Starknet" && (
+          <Fragment>
+            <Gutter size="1.25rem" />
+            <YAxis alignX="center">
+              <XAxis alignY="center">
+                <Checkbox
+                  checked={uiConfigStore.useWebHIDLedger}
+                  onChange={async (checked) => {
+                    if (checked && !window.navigator.hid) {
+                      await confirm.confirm(
+                        intl.formatMessage({
+                          id: "pages.register.connect-ledger.use-hid-confirm-title",
+                        }),
+                        intl.formatMessage({
+                          id: "pages.register.connect-ledger.use-hid-confirm-paragraph",
+                        }),
+                        {
+                          forceYes: true,
+                        }
+                      );
+                      await browser.tabs.create({
+                        url: "chrome://flags/#enable-experimental-web-platform-features",
+                      });
+                      window.close();
+                      return;
                     }
-                  );
-                  await browser.tabs.create({
-                    url: "chrome://flags/#enable-experimental-web-platform-features",
-                  });
-                  window.close();
-                  return;
-                }
 
-                uiConfigStore.setUseWebHIDLedger(checked);
-              }}
-            />
-            <Gutter size="0.5rem" />
-            <Subtitle2 color={ColorPalette["gray-300"]}>
-              <FormattedMessage id="pages.register.connect-ledger.use-hid-text" />
-            </Subtitle2>
-          </XAxis>
-        </YAxis>
+                    uiConfigStore.setUseWebHIDLedger(checked);
+                  }}
+                />
+                <Gutter size="0.5rem" />
+                <Subtitle2 color={ColorPalette["gray-300"]}>
+                  <FormattedMessage id="pages.register.connect-ledger.use-hid-text" />
+                </Subtitle2>
+              </XAxis>
+            </YAxis>
+          </Fragment>
+        )}
 
         <Gutter size="1.25rem" />
 
