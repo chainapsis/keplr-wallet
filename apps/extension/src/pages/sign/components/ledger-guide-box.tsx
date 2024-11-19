@@ -19,6 +19,7 @@ export const LedgerGuideBox: FunctionComponent<{
   data: {
     keyInsensitive: PlainObject;
     isEthereum: boolean;
+    isStarknet?: boolean;
   };
   isLedgerInteracting: boolean;
   ledgerInteractingError: Error | undefined;
@@ -175,9 +176,33 @@ export const LedgerGuideBox: FunctionComponent<{
                         title={intl.formatMessage({
                           id: "page.sign.components.ledger-guide.box.error-title",
                         })}
-                        paragraph={intl.formatMessage({
-                          id: "page.sign.components.ledger-guide.box.initialize-ethereum-app-first-paragraph",
+                        paragraph={intl.formatMessage(
+                          {
+                            id: "page.sign.components.ledger-guide.box.initialize-app-first-paragraph",
+                          },
+                          { app }
+                        )}
+                      />
+                    );
+                  }
+                }
+
+                if (data.isStarknet) {
+                  if (appData["Starknet"]) {
+                    app = "Starknet";
+                  } else {
+                    return (
+                      <GuideBox
+                        color="warning"
+                        title={intl.formatMessage({
+                          id: "page.sign.components.ledger-guide.box.error-title",
                         })}
+                        paragraph={intl.formatMessage(
+                          {
+                            id: "page.sign.components.ledger-guide.box.initialize-app-first-paragraph",
+                          },
+                          { app }
+                        )}
                       />
                     );
                   }

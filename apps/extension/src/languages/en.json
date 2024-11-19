@@ -494,7 +494,7 @@
   "page.sign.components.ledger-guide.box.usb-permission-unknown-paragraph-2": "this page",
   "page.sign.components.ledger-guide.box.usb-permission-unknown-paragraph-3": " to regain the permission.",
   "page.sign.components.ledger-guide.box.unlock-ledger-paragraph": "Unlock your Ledger device.",
-  "page.sign.components.ledger-guide.box.initialize-ethereum-app-first-paragraph": "Please initialize ethereum app first",
+  "page.sign.components.ledger-guide.box.initialize-app-first-paragraph": "Please initialize {app} app first",
   "page.sign.components.ledger-guide.box.open-app-on-ledger-paragraph": "Open the {app} app on Ledger and try again.",
   "page.sign.components.ledger-guide.box.try-again-with-same-ledger-paragraph": "Please try again with the same ledger device/account that you've connected with this wallet.",
   "page.sign.components.ledger-guide.box.rejected-signing-on-ledger-paragraph": "You've rejected signing the transaction on Ledger.",

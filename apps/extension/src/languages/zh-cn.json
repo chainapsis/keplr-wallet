@@ -462,7 +462,7 @@
   "page.sign.components.ledger-guide.box.usb-permission-unknown-paragraph-2": "此页面",
   "page.sign.components.ledger-guide.box.usb-permission-unknown-paragraph-3": "重新授权。",
   "page.sign.components.ledger-guide.box.unlock-ledger-paragraph": "解锁你的Ledger设备。",
-  "page.sign.components.ledger-guide.box.initialize-ethereum-app-first-paragraph": "请先初始化以太坊应用程序。",
+  "page.sign.components.ledger-guide.box.initialize-app-first-paragraph": "请先初始化{app}应用程序。",
   "page.sign.components.ledger-guide.box.open-app-on-ledger-paragraph": "在Ledger上打开{app}应用程序并重试。",
   "page.sign.components.ledger-guide.box.try-again-with-same-ledger-paragraph": "请用你与此钱包连接的同一个Ledger设备或帐户重试。",
   "page.sign.components.ledger-guide.box.rejected-signing-on-ledger-paragraph": "你已拒绝在Ledger上签名交易。",
