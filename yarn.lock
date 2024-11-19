@@ -8690,7 +8690,6 @@ __metadata:
     "@ledgerhq/hw-transport-webusb": ^6.29.4
     "@noble/hashes": 1.0.0
     "@types/aes-js": ^3.1.0
-    "@types/ledgerhq__hw-transport-webusb": ^4.70.1
     "@types/secp256k1": ^4.0.1
     "@types/w3c-web-hid": ^1.0.2
     "@types/w3c-web-usb": ^1.0.5
@@ -14784,25 +14783,6 @@ __metadata:
   version: 0.0.29
   resolution: "@types/json5@npm:0.0.29"
   checksum: e60b153664572116dfea673c5bda7778dbff150498f44f998e34b5886d8afc47f16799280e4b6e241c0472aef1bc36add771c569c68fc5125fc2ae519a3eb9ac
-  languageName: node
-  linkType: hard
-
-"@types/ledgerhq__hw-transport-webusb@npm:^4.70.1":
-  version: 4.70.1
-  resolution: "@types/ledgerhq__hw-transport-webusb@npm:4.70.1"
-  dependencies:
-    "@types/ledgerhq__hw-transport": "*"
-    "@types/node": "*"
-  checksum: b261df71b24f5fb9857cd9822a10848ab25186a3a4d29163b5687feacbbc6b7d85c162bd582cf0ff0dcf93c1a6a1ddcce4420894f9cdb905971609f3508b217a
-  languageName: node
-  linkType: hard
-
-"@types/ledgerhq__hw-transport@npm:*":
-  version: 4.21.3
-  resolution: "@types/ledgerhq__hw-transport@npm:4.21.3"
-  dependencies:
-    "@types/node": "*"
-  checksum: 1f64b4bc4982bc5af80244b10d83ff0ccca7ab40a62464a807066f9f8ceede7489b824da5973e4eccb13261e36e0ceba230d1b3d376eba15b9c07ca76f97fd03
   languageName: node
   linkType: hard
 
