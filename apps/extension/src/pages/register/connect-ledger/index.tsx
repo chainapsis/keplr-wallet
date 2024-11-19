@@ -21,7 +21,7 @@ import { useNavigate } from "react-router";
 import Eth from "@ledgerhq/hw-app-eth";
 import { LedgerError, StarknetClient } from "@ledgerhq/hw-app-starknet";
 import { Buffer } from "buffer/";
-import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
+import { PubKeySecp256k1, PubKeyStarknet } from "@keplr-wallet/crypto";
 import { LedgerUtils } from "../../../utils";
 import { Checkbox } from "../../../components/checkbox";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
@@ -288,19 +288,30 @@ export const ConnectLedgerScene: FunctionComponent<{
               await transport.close();
 
               return;
+            case LedgerError.UserRejected:
+              setIsLoading(false);
+              setStep("app");
+
+              await transport.close();
+
+              return;
             case LedgerError.NoError:
-              const pubKey = new PubKeySecp256k1(res.publicKey);
+              const pubKey = new PubKeyStarknet(res.publicKey);
 
               if (appendModeInfo) {
                 await keyRingStore.appendLedgerKeyApp(
                   appendModeInfo.vaultId,
-                  pubKey.toBytes(true),
+                  pubKey.toBytes(),
                   propApp
                 );
                 await chainStore.enableChainInfoInUI(
                   ...appendModeInfo.afterEnableChains
                 );
               }
+
+              navigate("/welcome", {
+                replace: true,
+              });
 
               setIsLoading(false);
               setStep("app");

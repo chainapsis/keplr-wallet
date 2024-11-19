@@ -1197,6 +1197,26 @@ export const EnableChainsScene: FunctionComponent<{
                 }
               }
 
+              const ledgerStarknetAppNeeds: string[] = [];
+              for (let i = 0; i < enables.length; i++) {
+                if (!fallbackStarknetLedgerApp) {
+                  break;
+                }
+
+                const enable = enables[i];
+                const modularChainInfo = chainStore.getModularChain(enable);
+
+                if ("starknet" in modularChainInfo) {
+                  // Remove enable from enables
+                  enables.splice(i, 1);
+                  i--;
+                  // And push it disables
+                  disables.push(enable);
+
+                  ledgerStarknetAppNeeds.push(enable);
+                }
+              }
+
               await Promise.all([
                 (async () => {
                   if (enables.length > 0) {
@@ -1248,6 +1268,7 @@ export const EnableChainsScene: FunctionComponent<{
                       if (!bip44Path) {
                         throw new Error("bip44Path not found");
                       }
+
                       sceneTransition.replaceAll("connect-ledger", {
                         name: "",
                         password: "",
@@ -1256,7 +1277,7 @@ export const EnableChainsScene: FunctionComponent<{
 
                         appendModeInfo: {
                           vaultId,
-                          afterEnableChains: ledgerEthereumAppNeeds,
+                          afterEnableChains: ledgerStarknetAppNeeds,
                         },
                         stepPrevious: stepPrevious,
                         stepTotal: stepTotal,
