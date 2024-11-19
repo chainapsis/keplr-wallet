@@ -42,6 +42,59 @@ export class PrivKeySecp256k1 {
   }
 }
 
+export class PubKeyStarknet {
+  constructor(protected readonly pubKey: Uint8Array) {
+    if (pubKey.length !== 64) {
+      throw new Error(`Invalid length of public key: ${pubKey.length}`);
+    }
+  }
+
+  toBytes(): Uint8Array {
+    return new Uint8Array(this.pubKey);
+  }
+
+  getStarknetAddress(salt: Uint8Array, classHash: Uint8Array): Uint8Array {
+    const { xLow, xHigh, yLow, yHigh } = this.getStarknetAddressParams();
+
+    let calculated = starknetHash
+      .calculateContractAddressFromHash(
+        "0x" + Buffer.from(salt).toString("hex"),
+        "0x" + Buffer.from(classHash).toString("hex"),
+        [
+          "0x" + Buffer.from(xLow).toString("hex"),
+          "0x" + Buffer.from(xHigh).toString("hex"),
+          "0x" + Buffer.from(yLow).toString("hex"),
+          "0x" + Buffer.from(yHigh).toString("hex"),
+        ],
+        "0x00"
+      )
+      .replace("0x", "");
+
+    const padZero = 64 - calculated.length;
+    if (padZero > 0) {
+      calculated = "0".repeat(padZero) + calculated;
+    } else if (padZero < 0) {
+      throw new Error("Invalid length of calculated address");
+    }
+
+    return new Uint8Array(Buffer.from(calculated, "hex"));
+  }
+
+  getStarknetAddressParams(): {
+    readonly xLow: Uint8Array;
+    readonly xHigh: Uint8Array;
+    readonly yLow: Uint8Array;
+    readonly yHigh: Uint8Array;
+  } {
+    return {
+      xLow: this.pubKey.slice(16, 32),
+      xHigh: this.pubKey.slice(0, 16),
+      yLow: this.pubKey.slice(48, 64),
+      yHigh: this.pubKey.slice(32, 48),
+    };
+  }
+}
+
 export class PubKeySecp256k1 {
   constructor(protected readonly pubKey: Uint8Array) {
     if (pubKey.length !== 33 && pubKey.length !== 65) {
