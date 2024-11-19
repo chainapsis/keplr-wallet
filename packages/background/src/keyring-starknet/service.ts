@@ -38,6 +38,8 @@ import { Hash } from "@keplr-wallet/crypto";
 
 const AccountClassHash =
   "06cc43e9a4a0036cd09d8a997c61df18d7e4fa9459c907a4664b4e56b679d187";
+const StarknetAccountUpgradableClassHash =
+  "06d4b80c0f3c3ea9e98252403a83f8a6bacf7f7362e9ac0a8824854dca31f8a8";
 
 export class KeyRingStarknetService {
   constructor(
@@ -156,22 +158,39 @@ export class KeyRingStarknetService {
     if (!("starknet" in chainInfo)) {
       throw new Error("Chain is not a starknet chain");
     }
-    const pubKey = await this.keyRingService.getPubKey(chainId, vaultId);
 
     const vault = this.vaultService.getVault("keyRing", vaultId);
     if (!vault) {
       throw new Error("Vault not found");
     }
-    const sig = await this.keyRingService.signWithVault(
-      vault,
-      9004,
-      Buffer.from("starknet_key_salt"),
-      "sha256",
-      chainInfo
-    );
-    const salt = Hash.sha256(Buffer.concat([sig.r, sig.s])).slice(0, 24);
-    const classHash = Buffer.from(AccountClassHash, "hex");
+    const isLedger = vault.insensitive["keyRingType"] === "ledger";
+
+    const { pubKey, salt, classHash } = await (async () => {
+      if (isLedger) {
+        return {
+          pubKey: await this.keyRingService.getPubKeyStarknet(chainId, vaultId),
+          salt: Buffer.from("starknet_key_salt"),
+          classHash: Buffer.from(StarknetAccountUpgradableClassHash, "hex"),
+        };
+      } else {
+        const sig = await this.keyRingService.signWithVault(
+          vault,
+          9004,
+          Buffer.from("starknet_key_salt"),
+          "sha256",
+          chainInfo
+        );
+
+        return {
+          pubKey: await this.keyRingService.getPubKey(chainId, vaultId),
+          salt: Hash.sha256(Buffer.concat([sig.r, sig.s])).slice(0, 24),
+          classHash: Buffer.from(AccountClassHash, "hex"),
+        };
+      }
+    })();
+
     const address = pubKey.getStarknetAddress(salt, classHash);
+
     const addressParams = pubKey.getStarknetAddressParams();
 
     return {
