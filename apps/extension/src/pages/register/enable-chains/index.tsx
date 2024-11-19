@@ -1255,8 +1255,8 @@ export const EnableChainsScene: FunctionComponent<{
                 // 어차피 bip44 coin type selection과 ethereum ledger app이 동시에 필요한 경우는 없다.
                 // (ledger에서는 coin type이 app당 할당되기 때문에...)
                 if (keyType === "ledger") {
-                  if (!fallbackEthereumLedgerApp) {
-                    if (fallbackStarknetLedgerApp) {
+                  if (fallbackStarknetLedgerApp) {
+                    if (ledgerStarknetAppNeeds.length > 0) {
                       const keyInfo = keyRingStore.keyInfos.find(
                         (keyInfo) => keyInfo.id === vaultId
                       );
@@ -1264,24 +1264,83 @@ export const EnableChainsScene: FunctionComponent<{
                       if (!keyInfo) {
                         throw new Error("KeyInfo not found");
                       }
-                      const bip44Path = keyInfo.insensitive["bip44Path"];
-                      if (!bip44Path) {
-                        throw new Error("bip44Path not found");
+                      if (keyInfo.insensitive["Starknet"]) {
+                        await chainStore.enableChainInfoInUI(
+                          ...ledgerStarknetAppNeeds
+                        );
+                        dispatchGlobalEventExceptSelf(
+                          "keplr_enabled_chain_changed",
+                          keyInfo.id
+                        );
+                        replaceToWelcomePage();
+                      } else {
+                        const bip44Path = keyInfo.insensitive["bip44Path"];
+                        if (!bip44Path) {
+                          throw new Error("bip44Path not found");
+                        }
+
+                        sceneTransition.replaceAll("connect-ledger", {
+                          name: "",
+                          password: "",
+                          app: "Starknet",
+                          bip44Path,
+
+                          appendModeInfo: {
+                            vaultId,
+                            afterEnableChains: ledgerStarknetAppNeeds,
+                          },
+                          stepPrevious: stepPrevious,
+                          stepTotal: stepTotal,
+                        });
                       }
-
-                      sceneTransition.replaceAll("connect-ledger", {
-                        name: "",
-                        password: "",
-                        app: "Starknet",
-                        bip44Path,
-
-                        appendModeInfo: {
+                    } else {
+                      replaceToWelcomePage();
+                    }
+                  } else if (fallbackEthereumLedgerApp) {
+                    if (ledgerEthereumAppNeeds.length > 0) {
+                      const keyInfo = keyRingStore.keyInfos.find(
+                        (keyInfo) => keyInfo.id === vaultId
+                      );
+                      if (!keyInfo) {
+                        throw new Error("KeyInfo not found");
+                      }
+                      if (keyInfo.insensitive["Ethereum"]) {
+                        await chainStore.enableChainInfoInUI(
+                          ...ledgerEthereumAppNeeds
+                        );
+                        dispatchGlobalEventExceptSelf(
+                          "keplr_enabled_chain_changed",
+                          keyInfo.id
+                        );
+                        sceneTransition.push("enable-chains", {
                           vaultId,
-                          afterEnableChains: ledgerStarknetAppNeeds,
-                        },
-                        stepPrevious: stepPrevious,
-                        stepTotal: stepTotal,
-                      });
+                          keyType,
+                          candidateAddresses: [],
+                          isFresh: false,
+                          skipWelcome,
+                          fallbackStarknetLedgerApp: true,
+                          stepPrevious: stepPrevious,
+                          stepTotal: stepTotal,
+                        });
+                      } else {
+                        const bip44Path = keyInfo.insensitive["bip44Path"];
+                        if (!bip44Path) {
+                          throw new Error("bip44Path not found");
+                        }
+                        sceneTransition.replaceAll("connect-ledger", {
+                          name: "",
+                          password: "",
+                          app: "Ethereum",
+                          bip44Path,
+
+                          appendModeInfo: {
+                            vaultId,
+                            afterEnableChains: ledgerEthereumAppNeeds,
+                          },
+                          stepPrevious: stepPrevious,
+                          stepTotal: stepTotal,
+                        });
+                      }
                     } else {
                       sceneTransition.push("enable-chains", {
                         vaultId,
@@ -1289,48 +1348,22 @@ export const EnableChainsScene: FunctionComponent<{
                         candidateAddresses: [],
                         isFresh: false,
                         skipWelcome,
-                        fallbackEthereumLedgerApp: true,
-                        stepPrevious: stepPrevious,
-                        stepTotal: stepTotal,
-                      });
-                    }
-                  } else if (ledgerEthereumAppNeeds.length > 0) {
-                    const keyInfo = keyRingStore.keyInfos.find(
-                      (keyInfo) => keyInfo.id === vaultId
-                    );
-                    if (!keyInfo) {
-                      throw new Error("KeyInfo not found");
-                    }
-                    if (keyInfo.insensitive["Ethereum"]) {
-                      await chainStore.enableChainInfoInUI(
-                        ...ledgerEthereumAppNeeds
-                      );
-                      dispatchGlobalEventExceptSelf(
-                        "keplr_enabled_chain_changed",
-                        keyInfo.id
-                      );
-                      replaceToWelcomePage();
-                    } else {
-                      const bip44Path = keyInfo.insensitive["bip44Path"];
-                      if (!bip44Path) {
-                        throw new Error("bip44Path not found");
-                      }
-                      sceneTransition.replaceAll("connect-ledger", {
-                        name: "",
-                        password: "",
-                        app: "Ethereum",
-                        bip44Path,
-
-                        appendModeInfo: {
-                          vaultId,
-                          afterEnableChains: ledgerEthereumAppNeeds,
-                        },
+                        fallbackStarknetLedgerApp: true,
                         stepPrevious: stepPrevious,
                         stepTotal: stepTotal,
                       });
                     }
                   } else {
-                    replaceToWelcomePage();
+                    sceneTransition.push("enable-chains", {
+                      vaultId,
+                      keyType,
+                      candidateAddresses: [],
+                      isFresh: false,
+                      skipWelcome,
+                      fallbackEthereumLedgerApp: true,
+                      stepPrevious: stepPrevious,
+                      stepTotal: stepTotal,
+                    });
                   }
                 } else {
                   replaceToWelcomePage();
