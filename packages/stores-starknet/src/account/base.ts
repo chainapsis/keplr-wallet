@@ -1,7 +1,14 @@
 import { ChainGetter } from "@keplr-wallet/stores";
 import { ERC20Currency, Keplr } from "@keplr-wallet/types";
 import { action, makeObservable, observable } from "mobx";
-import { uint256, Call, RawArgs, DeployContractResponse, num } from "starknet";
+import {
+  uint256,
+  Call,
+  RawArgs,
+  DeployContractResponse,
+  num,
+  DeployAccountSignerDetails,
+} from "starknet";
 import { StoreAccount } from "./internal";
 import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
 
@@ -127,7 +134,11 @@ export class StarknetAccountBase {
           type: "STRK";
           gas: string;
           maxGasPrice: string;
-        }
+        },
+    preSigned?: {
+      transaction: DeployAccountSignerDetails;
+      signature: string[];
+    }
   ) {
     const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
     if (!("starknet" in modularChainInfo)) {
@@ -148,9 +159,9 @@ export class StarknetAccountBase {
           constructorCalldata,
           addressSalt,
         },
-        fee
+        fee,
+        preSigned
       );
-
       return res;
     } catch (e) {
       throw e;
