@@ -1,19 +1,116 @@
-import { IRecipientConfig, UIProperties } from "./types";
+import {
+  IRecipientConfig,
+  IRecipientConfigWithStarknetID,
+  UIProperties,
+} from "./types";
 import { TxChainSetter } from "./chain";
 import { ChainGetter } from "@keplr-wallet/stores";
-import { action, computed, makeObservable, observable } from "mobx";
-import { EmptyAddressError, InvalidHexError } from "./errors";
+import {
+  action,
+  computed,
+  makeObservable,
+  observable,
+  runInAction,
+} from "mobx";
+import {
+  EmptyAddressError,
+  InvalidHexError,
+  StarknetIDFailedToFetchError,
+  StarknetIDIsFetchingError,
+} from "./errors";
 import { useState } from "react";
 import { Buffer } from "buffer/";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
-export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
+interface StarknetIDFetchData {
+  isFetching: boolean;
+  starknetHexaddress?: string;
+  error?: Error;
+}
+
+export class RecipientConfig
+  extends TxChainSetter
+  implements IRecipientConfig, IRecipientConfigWithStarknetID
+{
   @observable
   protected _value: string = "";
+
+  // Key is {chain identifier}/{starknet username}
+  @observable.shallow
+  protected _starknetIDFetchDataMap = new Map<string, StarknetIDFetchData>();
 
   constructor(chainGetter: ChainGetter, initialChainId: string) {
     super(chainGetter, initialChainId);
 
     makeObservable(this);
+  }
+
+  protected getStarknetIDFetchData(username: string): StarknetIDFetchData {
+    if (!this.chainGetter.hasModularChain(this.chainId)) {
+      throw new Error(`Can't find chain: ${this.chainId}`);
+    }
+
+    const key = `${this.chainId}/${username}`;
+
+    if (!this._starknetIDFetchDataMap.has(key)) {
+      runInAction(() => {
+        this._starknetIDFetchDataMap.set(key, {
+          isFetching: true,
+        });
+      });
+
+      simpleFetch<{
+        addr: string;
+        domain_expiry: number;
+      }>("https://api.starknet.id", `domain_to_addr?domain=${username}`)
+        .then((response) => {
+          if (response.status !== 200) {
+            throw new StarknetIDIsFetchingError("Failed to fetch the address");
+          }
+
+          const data = response.data;
+          const addr = data.addr;
+          if (!addr) {
+            throw new StarknetIDIsFetchingError("no address found");
+          }
+
+          runInAction(() => {
+            this._starknetIDFetchDataMap.set(key, {
+              isFetching: false,
+              starknetHexaddress: addr,
+            });
+          });
+        })
+        .catch((error) => {
+          runInAction(() => {
+            this._starknetIDFetchDataMap.set(key, {
+              isFetching: false,
+              error,
+            });
+          });
+        });
+    }
+
+    return this._starknetIDFetchDataMap.get(key) ?? { isFetching: false };
+  }
+
+  @computed
+  get isStarknetID(): boolean {
+    const parsed = this.value.trim().split(".");
+    return parsed.length > 1 && parsed[parsed.length - 1] === "stark";
+  }
+
+  @computed
+  get isStarknetIDFetching(): boolean {
+    if (!this.isStarknetID) {
+      return false;
+    }
+
+    return this.getStarknetIDFetchData(this.value.trim()).isFetching;
+  }
+
+  get starknetExpectedDomain(): string {
+    return "stark";
   }
 
   get recipient(): string {
@@ -22,6 +119,16 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
     const modularChainInfo = this.modularChainInfo;
     if (!("starknet" in modularChainInfo)) {
       throw new Error("Chain doesn't support the starknet");
+    }
+
+    if (this.isStarknetID) {
+      try {
+        return (
+          this.getStarknetIDFetchData(rawRecipient).starknetHexaddress || ""
+        );
+      } catch {
+        return "";
+      }
     }
 
     return rawRecipient;
@@ -35,6 +142,42 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
       return {
         error: new EmptyAddressError("Address is empty"),
       };
+    }
+
+    if (this.isStarknetID) {
+      try {
+        const fetched = this.getStarknetIDFetchData(rawRecipient);
+
+        if (fetched.isFetching) {
+          return {
+            loadingState: "loading-block",
+          };
+        }
+
+        if (!fetched.starknetHexaddress) {
+          return {
+            error: new StarknetIDFailedToFetchError(
+              "Failed to fetch the address from Starknet ID"
+            ),
+            loadingState: fetched.isFetching ? "loading-block" : undefined,
+          };
+        }
+
+        if (fetched.error) {
+          return {
+            error: new StarknetIDFailedToFetchError(
+              "Failed to fetch the address from Starknet ID"
+            ),
+            loadingState: fetched.isFetching ? "loading-block" : undefined,
+          };
+        }
+
+        return {};
+      } catch (e) {
+        return {
+          error: e,
+        };
+      }
     }
 
     if (!rawRecipient.startsWith("0x")) {

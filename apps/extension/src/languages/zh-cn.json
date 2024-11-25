@@ -581,6 +581,7 @@
   "components.empty-view.text": "还没{subject}",
   "components.input.recipient-input.wallet-address-label": "钱包地址或者ICNS",
   "components.input.recipient-input.wallet-address-label-ens": "钱包地址或者ENS",
+  "components.input.recipient-input.wallet-address-label-starknet.id": "钱包地址或者StarkNet ID",
   "components.input.recipient-input.wallet-address-label-icns-ens": "钱包地址或者ICNS或者ENS",
   "components.input.amount-input.amount-label": "金额",
   "components.input.amount-input.max-button": "最大",

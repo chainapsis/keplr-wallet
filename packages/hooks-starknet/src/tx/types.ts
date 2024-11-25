@@ -64,6 +64,12 @@ export interface IRecipientConfig extends ITxChainSetter {
   uiProperties: UIProperties;
 }
 
+export interface IRecipientConfigWithStarknetID extends IRecipientConfig {
+  readonly isStarknetID: boolean;
+  readonly starknetExpectedDomain: string;
+  readonly isStarknetIDFetching: boolean;
+}
+
 export interface IAmountConfig extends ITxChainSetter {
   amount: CoinPretty[];
 
