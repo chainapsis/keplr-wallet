@@ -32,6 +32,8 @@ interface StarknetIDFetchData {
 const networkToNamingContractAddress = {
   [constants.NetworkName.SN_MAIN]:
     "0x6ac597f8116f886fa1c97a23fa4e08299975ecaf6b598873ca6792b9bbfb678",
+  [constants.NetworkName.SN_SEPOLIA]:
+    "0x0707f09bc576bd7cfee59694846291047e965f4184fe13dac62c56759b3b6fa7",
 };
 
 const basicAlphabet = "abcdefghijklmnopqrstuvwxyz0123456789-";
@@ -159,7 +161,7 @@ export class RecipientConfig
 
     // Only support the mainnet for now.
     const networkName = split[1] as constants.NetworkName;
-    if (!networkName || !(networkName === constants.NetworkName.SN_MAIN)) {
+    if (!networkName) {
       return;
     }
 
@@ -246,7 +248,7 @@ export class RecipientConfig
           const addr = "0x" + rawHexAddr.replace("0x", "").padStart(64, "0");
 
           if (!isStarknetHexaddress(addr)) {
-            throw new InvalidHexError("Invalid hex address for chain");
+            throw new StarknetIDIsFetchingError("no address found");
           }
 
           runInAction(() => {
