@@ -579,6 +579,7 @@
   "page.ledger-grant.title": "允许浏览器连接Ledger",
   "page.ledger-grant.paragraph": "你需要重新检查与Ledger的连接。选择正确的应用程序，在成功连接到你的Ledger设备后，关闭此页面并重试你以前的交易（签名中）。",
   "components.empty-view.text": "还没{subject}",
+  "components.input.recipient-input.wallet-address-only-label": "钱包地址",
   "components.input.recipient-input.wallet-address-label": "钱包地址或者ICNS",
   "components.input.recipient-input.wallet-address-label-ens": "钱包地址或者ENS",
   "components.input.recipient-input.wallet-address-label-starknet.id": "钱包地址或者StarkNet ID",

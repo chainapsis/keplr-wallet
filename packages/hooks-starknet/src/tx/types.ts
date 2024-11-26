@@ -65,6 +65,7 @@ export interface IRecipientConfig extends ITxChainSetter {
 }
 
 export interface IRecipientConfigWithStarknetID extends IRecipientConfig {
+  readonly isStarknetIDEnabled: boolean;
   readonly isStarknetID: boolean;
   readonly starknetExpectedDomain: string;
   readonly isStarknetIDFetching: boolean;

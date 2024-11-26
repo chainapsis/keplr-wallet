@@ -49,6 +49,14 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
     const [isAddressBookModalOpen, setIsAddressBookModalOpen] =
       React.useState(false);
 
+    const isStarknetIDEnabled: boolean = (() => {
+      if ("isStarknetIDEnabled" in recipientConfig) {
+        return recipientConfig.isStarknetIDEnabled;
+      }
+
+      return false;
+    })();
+
     const isStarknetID: boolean = (() => {
       if ("isStarknetID" in recipientConfig) {
         return recipientConfig.isStarknetID;
@@ -70,7 +78,9 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
         <TextInput
           ref={ref}
           label={intl.formatMessage({
-            id: "components.input.recipient-input.wallet-address-label-starknet.id",
+            id: isStarknetIDEnabled
+              ? "components.input.recipient-input.wallet-address-label-starknet.id"
+              : "components.input.recipient-input.wallet-address-only-label",
           })}
           value={recipientConfig.value}
           autoComplete="off"
@@ -78,7 +88,8 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
             let value = e.target.value;
 
             if (
-              "isStarknetID" in recipientConfig &&
+              "isStarknetIDEnabled" in recipientConfig &&
+              isStarknetIDEnabled &&
               value.length > 0 &&
               value[value.length - 1] === "." &&
               numOfCharacter(value, ".") === 1 &&
