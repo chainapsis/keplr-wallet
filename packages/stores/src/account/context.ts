@@ -101,6 +101,7 @@ export class AccountSharedContext {
         hexAddress: string;
         pubKey: Uint8Array;
         address: Uint8Array;
+        isNanoLedger: boolean;
       }
   >(0, async (requests) => {
     const keplr = await this.getKeplr();
@@ -226,6 +227,7 @@ export class AccountSharedContext {
             hexAddress: string;
             pubKey: Uint8Array;
             address: Uint8Array;
+            isNanoLedger: boolean;
           }
       >
     ) => void

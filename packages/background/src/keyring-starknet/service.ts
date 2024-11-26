@@ -100,6 +100,7 @@ export class KeyRingStarknetService {
     hexAddress: string;
     pubKey: Uint8Array;
     address: Uint8Array;
+    isNanoLedger: boolean;
   }> {
     return await this.getStarknetKey(
       this.keyRingService.selectedVaultId,
@@ -115,18 +116,26 @@ export class KeyRingStarknetService {
     hexAddress: string;
     pubKey: Uint8Array;
     address: Uint8Array;
+    isNanoLedger: boolean;
   }> {
     const params = await this.getStarknetKeyParams(vaultId, chainId);
+    const keyInfo = this.keyRingService.getKeyInfo(vaultId);
+    if (!keyInfo) {
+      throw new Error("Null key info");
+    }
+
     return {
       name: this.keyRingService.getKeyRingName(vaultId),
       hexAddress: `0x${Buffer.from(params.address).toString("hex")}`,
       pubKey: params.pubKey,
       address: params.address,
+      isNanoLedger: keyInfo.type === "ledger",
     };
   }
 
   async getStarknetKeyParamsSelected(chainId: string): Promise<{
     pubKey: Uint8Array;
+    starknetPubKey: Uint8Array;
     address: Uint8Array;
     salt: Uint8Array;
     classHash: Uint8Array;
@@ -146,6 +155,7 @@ export class KeyRingStarknetService {
     chainId: string
   ): Promise<{
     pubKey: Uint8Array;
+    starknetPubKey: Uint8Array;
     address: Uint8Array;
     salt: Uint8Array;
     classHash: Uint8Array;
@@ -163,13 +173,14 @@ export class KeyRingStarknetService {
     if (!vault) {
       throw new Error("Vault not found");
     }
+
     const isLedger = vault.insensitive["keyRingType"] === "ledger";
 
     const { pubKey, salt, classHash } = await (async () => {
       if (isLedger) {
         return {
           pubKey: await this.keyRingService.getPubKeyStarknet(chainId, vaultId),
-          salt: Buffer.from("starknet_key_salt"),
+          salt: Hash.sha256(Buffer.from("starknet_key_salt")).slice(0, 24),
           classHash: Buffer.from(StarknetAccountUpgradableClassHash, "hex"),
         };
       } else {
@@ -190,11 +201,11 @@ export class KeyRingStarknetService {
     })();
 
     const address = pubKey.getStarknetAddress(salt, classHash);
-
     const addressParams = pubKey.getStarknetAddressParams();
 
     return {
       pubKey: pubKey.toBytes(),
+      starknetPubKey: pubKey.getStarknetPubKey(),
       address,
       salt,
       classHash,
@@ -564,6 +575,11 @@ export class KeyRingStarknetService {
 
     const key = await this.getStarknetKeySelected(chainId);
 
+    const keyInfo = this.keyRingService.getKeyInfo(vaultId);
+    if (!keyInfo) {
+      throw new Error("Null key info");
+    }
+
     return await this.interactionService.waitApproveV2(
       env,
       "/sign-starknet-tx",
@@ -576,10 +592,13 @@ export class KeyRingStarknetService {
         transactions,
         details,
         noChangeTx,
+        keyType: keyInfo.type,
+        keyInsensitive: keyInfo.insensitive,
       },
       async (res: {
         transactions: Call[];
         details: InvocationsSignerDetails;
+        signature: Uint8Array | undefined;
       }) => {
         const { transactions, details } = res;
         const compiledCalldata = starknetTransactionUtils.getExecuteCalldata(

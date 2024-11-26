@@ -183,7 +183,7 @@ export class AccountSetBase {
           this._bech32Address = "";
           this._ethereumHexAddress = "";
           this._starknetHexAddress = key.hexAddress;
-          this._isNanoLedger = false;
+          this._isNanoLedger = key.isNanoLedger;
           this._isKeystone = false;
           this._name = key.name;
           this._pubKey = key.pubKey;
