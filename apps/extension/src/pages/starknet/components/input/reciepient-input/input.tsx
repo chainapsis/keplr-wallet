@@ -123,7 +123,14 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
           isLoading={isStarknetIDFetching}
           paragraph={(() => {
             if (isStarknetID && !recipientConfig.uiProperties.error) {
-              return recipientConfig.recipient;
+              if (isStarknetIDFetching) {
+                return undefined;
+              }
+
+              return `${recipientConfig.recipient.slice(
+                0,
+                10
+              )}...${recipientConfig.recipient.slice(56)}`;
             }
           })()}
           bottom={props.bottom}

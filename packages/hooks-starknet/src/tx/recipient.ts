@@ -25,7 +25,7 @@ import { CallData, constants } from "starknet";
 
 interface StarknetIDFetchData {
   isFetching: boolean;
-  starknetHexaddress?: string;
+  starknetHexAddress?: string;
   error?: Error;
 }
 
@@ -109,7 +109,7 @@ function encode(decoded: string | undefined): bigint {
   return encoded;
 }
 
-function isStarknetHexaddress(address: string): boolean {
+function isStarknetHexAddress(address: string): boolean {
   if (!address.startsWith("0x")) {
     return false;
   }
@@ -247,14 +247,14 @@ export class RecipientConfig
 
           const addr = "0x" + rawHexAddr.replace("0x", "").padStart(64, "0");
 
-          if (!isStarknetHexaddress(addr)) {
+          if (!isStarknetHexAddress(addr)) {
             throw new StarknetIDIsFetchingError("no address found");
           }
 
           runInAction(() => {
             this._starknetIDFetchDataMap.set(key, {
               isFetching: false,
-              starknetHexaddress: addr,
+              starknetHexAddress: addr,
             });
           });
         })
@@ -309,7 +309,7 @@ export class RecipientConfig
     if (this.isStarknetIDEnabled && this.isStarknetID) {
       try {
         return (
-          this.getStarknetIDFetchData(rawRecipient).starknetHexaddress || ""
+          this.getStarknetIDFetchData(rawRecipient).starknetHexAddress || ""
         );
       } catch {
         return "";
@@ -339,7 +339,7 @@ export class RecipientConfig
           };
         }
 
-        if (!fetched.starknetHexaddress) {
+        if (!fetched.starknetHexAddress) {
           return {
             error: new StarknetIDFailedToFetchError(
               "Failed to fetch the address from Starknet ID"
@@ -365,7 +365,7 @@ export class RecipientConfig
       }
     }
 
-    if (!isStarknetHexaddress(rawRecipient)) {
+    if (!isStarknetHexAddress(rawRecipient)) {
       return {
         error: new InvalidHexError("Invalid hex address for chain"),
       };
