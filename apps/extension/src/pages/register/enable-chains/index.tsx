@@ -732,27 +732,29 @@ export const EnableChainsScene: FunctionComponent<{
           enabledChainIdentifier
         );
         if (enabledModularChainInfo) {
-          const isEthermintLike =
-            "cosmos" in enabledModularChainInfo &&
-            (enabledModularChainInfo.cosmos.bip44.coinType === 60 ||
-              !!enabledModularChainInfo.cosmos.features?.includes(
-                "eth-address-gen"
-              ) ||
-              !!enabledModularChainInfo.cosmos.features?.includes(
-                "eth-key-sign"
-              ));
-
           if (keyType === "ledger") {
-            if (
-              fallbackStarknetLedgerApp &&
-              "starknet" in enabledModularChainInfo
-            ) {
-              numSelected++;
-            } else if (
-              (fallbackEthereumLedgerApp && isEthermintLike) ||
-              (!fallbackEthereumLedgerApp && !isEthermintLike)
-            ) {
-              numSelected++;
+            const isEthereumAppNeed =
+              "cosmos" in enabledModularChainInfo &&
+              (enabledModularChainInfo.cosmos.bip44.coinType === 60 ||
+                !!enabledModularChainInfo.cosmos.features?.includes(
+                  "eth-address-gen"
+                ) ||
+                !!enabledModularChainInfo.cosmos.features?.includes(
+                  "eth-key-sign"
+                ));
+
+            if (fallbackStarknetLedgerApp) {
+              if ("starknet" in enabledModularChainInfo) {
+                numSelected++;
+              }
+            } else if (fallbackEthereumLedgerApp) {
+              if (isEthereumAppNeed) {
+                numSelected++;
+              }
+            } else {
+              if (!isEthereumAppNeed) {
+                numSelected++;
+              }
             }
           } else {
             numSelected++;
@@ -1279,7 +1281,7 @@ export const EnableChainsScene: FunctionComponent<{
                           throw new Error("bip44Path not found");
                         }
 
-                        sceneTransition.replaceAll("connect-ledger", {
+                        sceneTransition.push("connect-ledger", {
                           name: "",
                           password: "",
                           app: "Starknet",
@@ -1319,7 +1321,7 @@ export const EnableChainsScene: FunctionComponent<{
                           isFresh: false,
                           skipWelcome,
                           fallbackStarknetLedgerApp: true,
-                          stepPrevious: stepPrevious,
+                          stepPrevious: stepPrevious + 1,
                           stepTotal: stepTotal,
                         });
                       } else {
@@ -1327,7 +1329,7 @@ export const EnableChainsScene: FunctionComponent<{
                         if (!bip44Path) {
                           throw new Error("bip44Path not found");
                         }
-                        sceneTransition.replaceAll("connect-ledger", {
+                        sceneTransition.push("connect-ledger", {
                           name: "",
                           password: "",
                           app: "Ethereum",
@@ -1349,7 +1351,7 @@ export const EnableChainsScene: FunctionComponent<{
                         isFresh: false,
                         skipWelcome,
                         fallbackStarknetLedgerApp: true,
-                        stepPrevious: stepPrevious,
+                        stepPrevious: stepPrevious + 1,
                         stepTotal: stepTotal,
                       });
                     }
@@ -1361,7 +1363,7 @@ export const EnableChainsScene: FunctionComponent<{
                       isFresh: false,
                       skipWelcome,
                       fallbackEthereumLedgerApp: true,
-                      stepPrevious: stepPrevious,
+                      stepPrevious: stepPrevious + 1,
                       stepTotal: stepTotal,
                     });
                   }
@@ -1387,7 +1389,7 @@ export const EnableChainsScene: FunctionComponent<{
                         isFresh: false,
                         skipWelcome: true,
                         fallbackStarknetLedgerApp: true,
-                        stepPrevious: stepPrevious,
+                        stepPrevious: stepPrevious + 1,
                         stepTotal: stepTotal,
                       })
                     : replaceToWelcomePage()
@@ -1538,7 +1540,11 @@ const NextStepChainItem: FunctionComponent<{
             <Gutter size="0.25rem" />
 
             <Subtitle4 color={ColorPalette["gray-300"]}>
-              <FormattedMessage id="pages.register.enable-chains.guide.can-select-evm-next-step" />
+              {"starknet" in modularChainInfo ? (
+                <FormattedMessage id="pages.register.enable-chains.guide.can-select-starknet-next-step" />
+              ) : (
+                <FormattedMessage id="pages.register.enable-chains.guide.can-select-evm-next-step" />
+              )}
             </Subtitle4>
           </YAxis>
         </XAxis>
