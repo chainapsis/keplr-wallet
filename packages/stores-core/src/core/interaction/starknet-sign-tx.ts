@@ -41,7 +41,7 @@ export class SignStarknetTxInteractionStore {
     id: string,
     transactions: Call[],
     details: InvocationsSignerDetails,
-    signature: Uint8Array | undefined,
+    signature: string[] | undefined,
     afterFn: (proceedNext: boolean) => void | Promise<void>,
     options: {
       preDelay?: number;
@@ -52,6 +52,7 @@ export class SignStarknetTxInteractionStore {
       {
         transactions,
         details,
+        signature,
       },
       afterFn,
       options

@@ -8,7 +8,9 @@ import {
   LedgerOptions,
 } from "./ledger-types";
 import {
+  Call,
   DeployAccountContractPayload,
+  InvocationsSignerDetails,
   num,
   hash as starknetHash,
   shortString,
@@ -27,6 +29,8 @@ import {
   DeployAccountV1Fields,
   LedgerError,
   StarknetClient,
+  TxFields,
+  TxV1Fields,
 } from "@ledgerhq/hw-app-starknet";
 
 export const connectAndDeployAccountTxWithLedger = async (
@@ -210,14 +214,10 @@ export const connectAndDeployAccountTxWithLedger = async (
               throw new Error("Invalid fee type");
           }
         })();
-        const signature = stark.signatureToDecimalArray([
-          encode.addHexPrefix(encode.buf2hex(r)),
-          encode.addHexPrefix(encode.buf2hex(s)),
-        ]);
 
         return {
           transaction,
-          signature,
+          signature: formatStarknetSignature({ r, s }),
         };
       default:
         throw new KeplrError(
@@ -229,7 +229,7 @@ export const connectAndDeployAccountTxWithLedger = async (
   } catch (e) {
     await transport.close();
 
-    if (e.message.includes("0x5515")) {
+    if (e.message?.includes("0x5515")) {
       throw new KeplrError(
         ErrModuleLedgerSign,
         ErrCodeDeviceLocked,
@@ -241,4 +241,118 @@ export const connectAndDeployAccountTxWithLedger = async (
   } finally {
     await transport.close();
   }
+};
+
+export const connectAndSignStarknetTxWithLedger = async (
+  transactions: Call[],
+  details: InvocationsSignerDetails,
+  options: LedgerOptions = { useWebHID: true }
+): Promise<string[]> => {
+  let transport: Transport;
+  try {
+    transport = options?.useWebHID
+      ? await TransportWebHID.create()
+      : await TransportWebUSB.create();
+  } catch (e) {
+    throw new KeplrError(
+      ErrModuleLedgerSign,
+      ErrFailedInit,
+      "Failed to init transport"
+    );
+  }
+
+  const txFields: TxFields | TxV1Fields = (() => {
+    switch (details.version) {
+      case "0x1":
+        return {
+          accountAddress: details.walletAddress,
+          chainId: details.chainId,
+          nonce: details.nonce,
+          max_fee: details.maxFee,
+        };
+      case "0x3":
+        return {
+          accountAddress: details.walletAddress,
+          chainId: details.chainId,
+          nonce: details.nonce,
+          tip: details.tip,
+          resourceBounds: details.resourceBounds,
+          paymaster_data: details.paymasterData,
+          nonceDataAvailabilityMode: details.nonceDataAvailabilityMode,
+          feeDataAvailabilityMode: details.feeDataAvailabilityMode,
+          account_deployment_data: details.accountDeploymentData,
+        };
+      default:
+        throw new Error("Invalid version");
+    }
+  })();
+
+  try {
+    const starknetApp = new StarknetClient(transport);
+    const res =
+      "resourceBounds" in txFields
+        ? await starknetApp.signTx(
+            `m/2645'/579218131'/1393043893'/1'/0'/0`,
+            transactions,
+            txFields
+          )
+        : await starknetApp.signTxV1(
+            `m/2645'/579218131'/1393043893'/1'/0'/0`,
+            transactions,
+            txFields
+          );
+
+    switch (res.returnCode) {
+      case LedgerError.BadCla:
+      case LedgerError.BadIns:
+        throw new KeplrError(
+          ErrModuleLedgerSign,
+          ErrCodeUnsupportedApp,
+          "Unsupported app"
+        );
+      case LedgerError.UserRejected:
+        throw new KeplrError(
+          ErrModuleLedgerSign,
+          ErrSignRejected,
+          "User rejected signing"
+        );
+      case LedgerError.NoError:
+        const { r, s } = res;
+
+        return formatStarknetSignature({ r, s });
+      default:
+        throw new KeplrError(
+          ErrModuleLedgerSign,
+          ErrFailedSign,
+          res.errorMessage ?? "Failed to sign"
+        );
+    }
+  } catch (e) {
+    await transport.close();
+
+    if (e.message?.includes("0x5515")) {
+      throw new KeplrError(
+        ErrModuleLedgerSign,
+        ErrCodeDeviceLocked,
+        "Device is locked"
+      );
+    } else {
+      throw e;
+    }
+  } finally {
+    await transport.close();
+  }
+};
+
+const formatStarknetSignature = ({
+  r,
+  s,
+}: {
+  r: Uint8Array;
+  s: Uint8Array;
+}): string[] => {
+  return stark.signatureToDecimalArray([
+    encode.addHexPrefix(encode.buf2hex(r)),
+    encode.addHexPrefix(encode.buf2hex(s)),
+  ]);
 };

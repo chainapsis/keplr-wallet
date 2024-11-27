@@ -602,9 +602,18 @@ export class KeyRingStarknetService {
       async (res: {
         transactions: Call[];
         details: InvocationsSignerDetails;
-        signature: Uint8Array | undefined;
+        signature: string[] | undefined;
       }) => {
-        const { transactions, details } = res;
+        const { transactions, details, signature } = res;
+
+        if (signature != null) {
+          return {
+            transactions,
+            details,
+            signature,
+          };
+        }
+
         const compiledCalldata = starknetTransactionUtils.getExecuteCalldata(
           transactions,
           details.cairoVersion
