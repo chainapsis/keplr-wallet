@@ -18,7 +18,7 @@ import {
   DeployAccountSignerDetails,
   CallData,
   encode,
-  stark,
+  TypedData,
 } from "starknet";
 import Transport from "@ledgerhq/hw-transport";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
@@ -33,7 +33,7 @@ import {
   TxV1Fields,
 } from "@ledgerhq/hw-app-starknet";
 
-export const connectAndDeployAccountTxWithLedger = async (
+export const connectAndSignDeployAccountTxWithLedger = async (
   chainId: string,
   {
     classHash,
@@ -243,7 +243,7 @@ export const connectAndDeployAccountTxWithLedger = async (
   }
 };
 
-export const connectAndSignStarknetTxWithLedger = async (
+export const connectAndSignInvokeTxWithLedger = async (
   transactions: Call[],
   details: InvocationsSignerDetails,
   options: LedgerOptions = { useWebHID: true }
@@ -344,6 +344,74 @@ export const connectAndSignStarknetTxWithLedger = async (
   }
 };
 
+export const connectAndSignMessageWithLedger = async (
+  message: TypedData,
+  signer: string,
+  options: LedgerOptions = { useWebHID: true }
+): Promise<string[]> => {
+  let transport: Transport;
+  try {
+    transport = options?.useWebHID
+      ? await TransportWebHID.create()
+      : await TransportWebUSB.create();
+  } catch (e) {
+    throw new KeplrError(
+      ErrModuleLedgerSign,
+      ErrFailedInit,
+      "Failed to init transport"
+    );
+  }
+
+  try {
+    const starknetApp = new StarknetClient(transport);
+    const res = await starknetApp.signMessage(
+      `m/2645'/579218131'/1393043893'/1'/0'/0`,
+      message,
+      signer
+    );
+
+    switch (res.returnCode) {
+      case LedgerError.BadCla:
+      case LedgerError.BadIns:
+        throw new KeplrError(
+          ErrModuleLedgerSign,
+          ErrCodeUnsupportedApp,
+          "Unsupported app"
+        );
+      case LedgerError.UserRejected:
+        throw new KeplrError(
+          ErrModuleLedgerSign,
+          ErrSignRejected,
+          "User rejected signing"
+        );
+      case LedgerError.NoError:
+        const { r, s } = res;
+
+        return formatStarknetSignature({ r, s });
+      default:
+        throw new KeplrError(
+          ErrModuleLedgerSign,
+          ErrFailedSign,
+          res.errorMessage ?? "Failed to sign"
+        );
+    }
+  } catch (e) {
+    await transport.close();
+
+    if (e.message?.includes("0x5515")) {
+      throw new KeplrError(
+        ErrModuleLedgerSign,
+        ErrCodeDeviceLocked,
+        "Device is locked"
+      );
+    } else {
+      throw e;
+    }
+  } finally {
+    await transport.close();
+  }
+};
+
 const formatStarknetSignature = ({
   r,
   s,
@@ -351,8 +419,8 @@ const formatStarknetSignature = ({
   r: Uint8Array;
   s: Uint8Array;
 }): string[] => {
-  return stark.signatureToDecimalArray([
+  return [
     encode.addHexPrefix(encode.buf2hex(r)),
     encode.addHexPrefix(encode.buf2hex(s)),
-  ]);
+  ];
 };

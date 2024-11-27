@@ -29,7 +29,7 @@ import { ExtensionKVStore, sleep } from "@keplr-wallet/common";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { num } from "starknet";
 import { useNotification } from "../../../../hooks/notification";
-import { connectAndDeployAccountTxWithLedger } from "../../../sign/utils/handle-starknet-sign";
+import { connectAndSignDeployAccountTxWithLedger } from "../../../sign/utils/handle-starknet-sign";
 
 const Styles = {
   Container: styled.div`
@@ -353,7 +353,7 @@ export const AccountActivationModal: FunctionComponent<{
                           }
                         })(),
                         account.isNanoLedger
-                          ? await connectAndDeployAccountTxWithLedger(
+                          ? await connectAndSignDeployAccountTxWithLedger(
                               chainId,
                               {
                                 addressSalt,

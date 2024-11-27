@@ -508,9 +508,20 @@ export class KeyRingStarknetService {
         chainId,
         signer,
         message: typedData,
+        keyType: keyInfo.type,
+        keyInsensitive: keyInfo.insensitive,
       },
-      async () => {
-        let msgHash = starknetTypedDataUtils.getMessageHash(typedData, signer);
+      async (res: {
+        message: StarknetTypedData;
+        signature: string[] | undefined;
+      }) => {
+        const { message, signature } = res;
+
+        if (signature != null) {
+          return signature;
+        }
+
+        let msgHash = starknetTypedDataUtils.getMessageHash(message, signer);
 
         msgHash = msgHash.replace("0x", "");
         const padZero = 64 - msgHash.length;

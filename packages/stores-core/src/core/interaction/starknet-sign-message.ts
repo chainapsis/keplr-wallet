@@ -1,3 +1,4 @@
+import { PlainObject } from "@keplr-wallet/background";
 import { InteractionStore } from "./interaction";
 import { computed, makeObservable } from "mobx";
 import { TypedData as StarknetTypedData } from "starknet";
@@ -8,6 +9,8 @@ export type SignStarknetMessageInteractionData = {
   chainId: string;
   signer: string;
   message: StarknetTypedData;
+  keyType: string;
+  keyInsensitive: PlainObject;
 };
 
 export class SignStarknetMessageInteractionStore {
@@ -35,6 +38,7 @@ export class SignStarknetMessageInteractionStore {
   async approveWithProceedNext(
     id: string,
     message: StarknetTypedData,
+    signature: string[] | undefined,
     afterFn: (proceedNext: boolean) => void | Promise<void>,
     options: {
       preDelay?: number;
@@ -44,6 +48,7 @@ export class SignStarknetMessageInteractionStore {
       id,
       {
         message,
+        signature,
       },
       afterFn,
       options

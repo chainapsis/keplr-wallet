@@ -18,7 +18,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 export const LedgerGuideBox: FunctionComponent<{
   data: {
     keyInsensitive: PlainObject;
-    isEthereum: boolean;
+    isEthereum?: boolean;
     isStarknet?: boolean;
   };
   isLedgerInteracting: boolean;

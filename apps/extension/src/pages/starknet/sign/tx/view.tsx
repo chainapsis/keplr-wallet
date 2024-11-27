@@ -32,7 +32,7 @@ import { XAxis } from "../../../../components/axis";
 import { ViewDataButton } from "../../../sign/components/view-data-button";
 import { AccountActivationModal } from "../../components/account-activation-modal";
 import { Modal } from "../../../../components/modal";
-import { connectAndSignStarknetTxWithLedger } from "../../../sign/utils/handle-starknet-sign";
+import { connectAndSignInvokeTxWithLedger } from "../../../sign/utils/handle-starknet-sign";
 import { KeplrError } from "@keplr-wallet/router";
 import { ErrModuleLedgerSign } from "../../../sign/utils/ledger-types";
 import { LedgerGuideBox } from "../../../sign/components/ledger-guide-box";
@@ -308,7 +308,7 @@ export const SignStarknetTxView: FunctionComponent<{
       if (interactionData.data.keyType === "ledger") {
         setIsLedgerInteracting(true);
         setLedgerInteractingError(undefined);
-        signature = await connectAndSignStarknetTxWithLedger(
+        signature = await connectAndSignInvokeTxWithLedger(
           interactionData.data.transactions,
           details,
           {
@@ -500,7 +500,7 @@ export const SignStarknetTxView: FunctionComponent<{
         <LedgerGuideBox
           data={{
             keyInsensitive: interactionData.data.keyInsensitive,
-            isEthereum: true,
+            isStarknet: true,
           }}
           isLedgerInteracting={isLedgerInteracting}
           ledgerInteractingError={ledgerInteractingError}
