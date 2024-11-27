@@ -164,24 +164,75 @@ export const SignStarknetTxView: FunctionComponent<{
         }> => {
           noop(gasSimulationRefresher.count);
 
-          const res = await starknetAccountStore
+          const estimateResult = await starknetAccountStore
             .getAccount(chainId)
             .estimateInvokeFee(sender, interactionData.data.transactions, type);
 
-          // gas adjustment = 1.2, signature verification = 700
-          const gasConsumed = new Dec(res.gas_consumed);
-          const gasMax = gasConsumed.mul(new Dec(1.2)).add(new Dec(700));
-          const gasPrice = new CoinPretty(feeCurrency, res.gas_price);
-          const maxGasPrice = gasPrice.mul(new Dec(1.2));
+          const {
+            gas_consumed,
+            data_gas_consumed,
+            gas_price,
+            overall_fee,
+            resourceBounds,
+            unit,
+          } = estimateResult;
 
-          feeConfig.setGasPrice({
-            gasPrice: gasPrice,
-            maxGasPrice: maxGasPrice,
-          });
+          const isETH = feeConfig.type === "ETH" && unit === "WEI";
 
-          return {
-            gasUsed: parseInt(gasMax.truncate().toString()),
-          };
+          const gasConsumed = new Dec(gas_consumed);
+          const gasPriceDec = new Dec(gas_price);
+          const sigVerificationGasConsumed = new Dec(700);
+
+          if (isETH) {
+            // overall_fee = gas_consumed * gas_price + data_gas_consumed * data_gas_price
+            // fee_with_signature_verification = overall_fee + 700 * gas_price
+            const signatureVerificationFee =
+              sigVerificationGasConsumed.mul(gasPriceDec);
+            const feeWithSigVerification = new Dec(overall_fee).add(
+              signatureVerificationFee
+            );
+
+            const dataGasConsumed = new Dec(data_gas_consumed);
+
+            const totalGasConsumed = gasConsumed
+              .add(dataGasConsumed)
+              .add(sigVerificationGasConsumed);
+
+            // adjusted_gas_price = fee_with_sig_verification / total_gas_consumed
+            const adjustedGasPrice =
+              feeWithSigVerification.quo(totalGasConsumed);
+
+            const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
+            const maxGasPrice = gasPrice.mul(new Dec(1.2));
+
+            feeConfig.setGasPrice({
+              gasPrice,
+              maxGasPrice,
+            });
+
+            // maxFee = gasUsed * gasPrice * 1.2 = gasUsed * maxGasPrice
+            return {
+              gasUsed: parseInt(totalGasConsumed.truncate().toString()),
+            };
+          } else {
+            const l1Gas = resourceBounds.l1_gas;
+            const maxAmount = new Dec(num.hexToDecimalString(l1Gas.max_amount)); // signature verification gas is not included in the max amount
+            const maxPricePerUnit = new CoinPretty(
+              feeCurrency,
+              num.hexToDecimalString(l1Gas.max_price_per_unit)
+            );
+
+            const totalGasConsumed = maxAmount.add(sigVerificationGasConsumed);
+
+            feeConfig.setGasPrice({
+              gasPrice: new CoinPretty(feeCurrency, gasPriceDec),
+              maxGasPrice: maxPricePerUnit,
+            });
+
+            return {
+              gasUsed: parseInt(totalGasConsumed.truncate().toString()),
+            };
+          }
         },
       };
     }
@@ -264,7 +315,6 @@ export const SignStarknetTxView: FunctionComponent<{
             chainId: interactionData.data.details.chainId,
             cairoVersion: interactionData.data.details.cairoVersion,
             skipValidate: false,
-
             maxFee: feeConfig.maxFee
               ? num.toHex(feeConfig.maxFee.toCoin().amount)
               : "0x0",
@@ -277,7 +327,6 @@ export const SignStarknetTxView: FunctionComponent<{
             chainId: interactionData.data.details.chainId,
             cairoVersion: interactionData.data.details.cairoVersion,
             skipValidate: false,
-
             resourceBounds: {
               l1_gas: {
                 max_amount: num.toHex(gasConfig.gas.toString()),
