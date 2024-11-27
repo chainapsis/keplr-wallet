@@ -1,8 +1,8 @@
 import { observer, useLocalObservable } from "mobx-react-lite";
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useStore } from "../../../../stores";
 import { FormattedMessage, useIntl } from "react-intl";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { Box } from "../../../../components/box";
 import { Body2, Subtitle1 } from "../../../../components/typography";
@@ -23,13 +23,15 @@ import {
   GetStarknetKeyParamsSelectedMsg,
 } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
-import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { BACKGROUND_PORT, KeplrError } from "@keplr-wallet/router";
 import { FeeControl } from "../input/fee-control";
 import { ExtensionKVStore, sleep } from "@keplr-wallet/common";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { num } from "starknet";
 import { useNotification } from "../../../../hooks/notification";
 import { connectAndSignDeployAccountTxWithLedger } from "../../../sign/utils/handle-starknet-sign";
+import { ErrModuleLedgerSign } from "../../../sign/utils/ledger-types";
+import { LedgerGuideBox } from "../../../sign/components/ledger-guide-box";
 
 const Styles = {
   Container: styled.div`
@@ -61,6 +63,8 @@ export const AccountActivationModal: FunctionComponent<{
     starknetQueriesStore,
     starknetAccountStore,
   } = useStore();
+
+  const theme = useTheme();
 
   const intl = useIntl();
   const account = accountStore.getAccount(chainId);
@@ -203,6 +207,11 @@ export const AccountActivationModal: FunctionComponent<{
     gasSimulator,
   });
 
+  const [isLedgerInteracting, setIsLedgerInteracting] = useState(false);
+  const [ledgerInteractingError, setLedgerInteractingError] = useState<
+    Error | undefined
+  >(undefined);
+
   const notification = useNotification();
 
   const starknetAccount = starknetAccountStore.getAccount(chainId);
@@ -250,6 +259,16 @@ export const AccountActivationModal: FunctionComponent<{
           gasSimulator={gasSimulator}
           disableClick
         />
+        <LedgerGuideBox
+          isLedgerInteracting={isLedgerInteracting}
+          ledgerInteractingError={ledgerInteractingError}
+          isInternal={true}
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette["gray-50"]
+              : ColorPalette["gray-650"]
+          }
+        />
         <Columns sum={1} gutter="0.75rem">
           <Column weight={1}>
             <Button
@@ -279,7 +298,9 @@ export const AccountActivationModal: FunctionComponent<{
               }
               size="large"
               disabled={
-                interactionBlocked || starknetAccount.isDeployingAccount
+                interactionBlocked ||
+                starknetAccount.isDeployingAccount ||
+                isLedgerInteracting
               }
               onClick={async () => {
                 if (feeConfig.maxFee && feeConfig.maxGasPrice) {
@@ -315,6 +336,12 @@ export const AccountActivationModal: FunctionComponent<{
                       "0x" + Buffer.from(params.salt).toString("hex");
                     const classHash =
                       "0x" + Buffer.from(params.classHash).toString("hex");
+
+                    if (account.isNanoLedger) {
+                      setIsLedgerInteracting(true);
+                      setLedgerInteractingError(undefined);
+                    }
+
                     const constructorCalldata = account.isNanoLedger
                       ? [
                           "0x" +
@@ -326,6 +353,35 @@ export const AccountActivationModal: FunctionComponent<{
                           "0x" + Buffer.from(params.yLow).toString("hex"),
                           "0x" + Buffer.from(params.yHigh).toString("hex"),
                         ];
+                    const preSigned = account.isNanoLedger
+                      ? await connectAndSignDeployAccountTxWithLedger(
+                          chainId,
+                          {
+                            addressSalt,
+                            classHash,
+                            constructorCalldata,
+                            contractAddress: account.starknetHexAddress,
+                          },
+                          (() => {
+                            if (type === "ETH") {
+                              return {
+                                type: "ETH",
+                                maxFee: feeConfig.maxFee.toCoin().amount,
+                              };
+                            } else if (type === "STRK") {
+                              return {
+                                type: "STRK",
+                                gas: gasConfig.gas.toString(),
+                                maxGasPrice: num.toHex(
+                                  feeConfig.maxGasPrice.toCoin().amount
+                                ),
+                              };
+                            } else {
+                              throw new Error("Invalid fee type");
+                            }
+                          })()
+                        )
+                      : undefined;
 
                     const { transaction_hash: txHash } =
                       await starknetAccount.deployAccountWithFee(
@@ -352,35 +408,7 @@ export const AccountActivationModal: FunctionComponent<{
                             throw new Error("Invalid fee type");
                           }
                         })(),
-                        account.isNanoLedger
-                          ? await connectAndSignDeployAccountTxWithLedger(
-                              chainId,
-                              {
-                                addressSalt,
-                                classHash,
-                                constructorCalldata,
-                                contractAddress: account.starknetHexAddress,
-                              },
-                              (() => {
-                                if (type === "ETH") {
-                                  return {
-                                    type: "ETH",
-                                    maxFee: feeConfig.maxFee.toCoin().amount,
-                                  };
-                                } else if (type === "STRK") {
-                                  return {
-                                    type: "STRK",
-                                    gas: gasConfig.gas.toString(),
-                                    maxGasPrice: num.toHex(
-                                      feeConfig.maxGasPrice.toCoin().amount
-                                    ),
-                                  };
-                                } else {
-                                  throw new Error("Invalid fee type");
-                                }
-                              })()
-                            )
-                          : undefined
+                        preSigned
                       );
 
                     new InExtensionMessageRequester()
@@ -467,8 +495,19 @@ export const AccountActivationModal: FunctionComponent<{
                   } catch (e) {
                     starknetAccount.setIsDeployingAccount(false);
 
-                    goBack();
-                    console.log(e);
+                    if (
+                      e instanceof KeplrError &&
+                      e.module === ErrModuleLedgerSign
+                    ) {
+                      setLedgerInteractingError(e);
+                    } else {
+                      setLedgerInteractingError(undefined);
+
+                      goBack();
+                      console.log(e);
+                    }
+                  } finally {
+                    setIsLedgerInteracting(false);
                   }
                 }
               }}
