@@ -283,6 +283,8 @@ export const AccountActivationModal: FunctionComponent<{
               }
               onClick={async () => {
                 if (feeConfig.maxFee && feeConfig.maxGasPrice) {
+                  starknetAccount.setIsDeployingAccount(true);
+
                   try {
                     const msg = new GetStarknetKeyParamsSelectedMsg(
                       senderConfig.chainId
@@ -309,283 +311,162 @@ export const AccountActivationModal: FunctionComponent<{
                       throw new Error("Can't find fee currency");
                     }
 
-                    starknetAccount.setIsDeployingAccount(true);
-                    if (account.isNanoLedger) {
-                      const classHash =
-                        "0x" + Buffer.from(params.classHash).toString("hex");
-                      const constructorCalldata = [
-                        "0x" +
-                          Buffer.from(params.pubKey.slice(0, 32)).toString(
-                            "hex"
-                          ),
-                      ];
-                      const addressSalt =
-                        "0x" + Buffer.from(params.salt).toString("hex");
-                      const contractAddress = account.starknetHexAddress;
+                    const addressSalt =
+                      "0x" + Buffer.from(params.salt).toString("hex");
+                    const classHash =
+                      "0x" + Buffer.from(params.classHash).toString("hex");
+                    const constructorCalldata = account.isNanoLedger
+                      ? [
+                          "0x" +
+                            Buffer.from(params.starknetPubKey).toString("hex"),
+                        ]
+                      : [
+                          "0x" + Buffer.from(params.xLow).toString("hex"),
+                          "0x" + Buffer.from(params.xHigh).toString("hex"),
+                          "0x" + Buffer.from(params.yLow).toString("hex"),
+                          "0x" + Buffer.from(params.yHigh).toString("hex"),
+                        ];
 
-                      try {
-                        const preSigned =
-                          await connectAndDeployAccountTxWithLedger(
-                            chainId,
-                            {
-                              classHash,
-                              constructorCalldata,
-                              addressSalt,
-                              contractAddress,
-                            },
-                            (() => {
-                              if (type === "ETH") {
-                                return {
-                                  type: "ETH",
-                                  maxFee: feeConfig.maxFee.toCoin().amount,
-                                };
-                              } else if (type === "STRK") {
-                                return {
-                                  type: "STRK",
-                                  gas: gasConfig.gas.toString(),
-                                  maxGasPrice: num.toHex(
-                                    feeConfig.maxGasPrice.toCoin().amount
-                                  ),
-                                };
-                              } else {
-                                throw new Error("Invalid fee type");
-                              }
-                            })()
-                          );
-
-                        const { transaction_hash: txHash } =
-                          await starknetAccount.deployAccountWithFee(
-                            contractAddress,
-                            classHash,
-                            constructorCalldata,
-                            addressSalt,
-                            (() => {
-                              if (type === "ETH") {
-                                return {
-                                  type: "ETH",
-                                  maxFee: feeConfig.maxFee.toCoin().amount,
-                                };
-                              } else if (type === "STRK") {
-                                return {
-                                  type: "STRK",
-                                  gas: gasConfig.gas.toString(),
-                                  maxGasPrice: num.toHex(
-                                    feeConfig.maxGasPrice.toCoin().amount
-                                  ),
-                                };
-                              } else {
-                                throw new Error("Invalid fee type");
-                              }
-                            })(),
-                            preSigned
-                          );
-
-                        new InExtensionMessageRequester()
-                          .sendMessage(
-                            BACKGROUND_PORT,
-                            new SubmitStarknetTxHashMsg(chainId, txHash)
-                          )
-                          .then(() => {
-                            notification.show(
-                              "success",
-                              intl.formatMessage({
-                                id: "notification.transaction-success",
-                              }),
-                              ""
-                            );
-                            const starknetQueries =
-                              starknetQueriesStore.get(chainId);
-
-                            (async () => {
-                              // tx commit 이후의 state sync 시점이 이싱해서 일단 성공할때까지 2초 쉬면서 refresh 해본다.
-                              const maxRetry = 15;
-                              let retry = 0;
-                              while (retry < maxRetry) {
-                                const res =
-                                  await starknetQueries.queryAccountNonce
-                                    .getNonce(account.starknetHexAddress)
-                                    .waitFreshResponse();
-                                if (res?.data) {
-                                  starknetAccount.setIsDeployingAccount(false);
-
-                                  const modularChainInfo =
-                                    chainStore.getModularChain(chainId);
-                                  if ("starknet" in modularChainInfo) {
-                                    const starknet = modularChainInfo.starknet;
-                                    const ethCurrency =
-                                      starknet.currencies.find(
-                                        (cur) =>
-                                          cur.coinMinimalDenom ===
-                                          `erc20:${starknet.ethContractAddress}`
-                                      );
-                                    const strkCurrency =
-                                      starknet.currencies.find(
-                                        (cur) =>
-                                          cur.coinMinimalDenom ===
-                                          `erc20:${starknet.strkContractAddress}`
-                                      );
-                                    if (ethCurrency) {
-                                      starknetQueries.queryStarknetERC20Balance
-                                        .getBalance(
-                                          chainId,
-                                          chainStore,
-                                          account.starknetHexAddress,
-                                          ethCurrency.coinMinimalDenom
-                                        )
-                                        ?.fetch();
-                                    }
-                                    if (strkCurrency) {
-                                      starknetQueries.queryStarknetERC20Balance
-                                        .getBalance(
-                                          chainId,
-                                          chainStore,
-                                          account.starknetHexAddress,
-                                          strkCurrency.coinMinimalDenom
-                                        )
-                                        ?.fetch();
-                                    }
-                                  }
-
-                                  if (onAccountDeployed) {
-                                    onAccountDeployed();
-                                  }
-                                  close();
-                                  break;
+                    const { transaction_hash: txHash } =
+                      await starknetAccount.deployAccountWithFee(
+                        accountStore.getAccount(senderConfig.chainId)
+                          .starknetHexAddress,
+                        classHash,
+                        constructorCalldata,
+                        addressSalt,
+                        (() => {
+                          if (type === "ETH") {
+                            return {
+                              type: "ETH",
+                              maxFee: feeConfig.maxFee.toCoin().amount,
+                            };
+                          } else if (type === "STRK") {
+                            return {
+                              type: "STRK",
+                              gas: gasConfig.gas.toString(),
+                              maxGasPrice: num.toHex(
+                                feeConfig.maxGasPrice.toCoin().amount
+                              ),
+                            };
+                          } else {
+                            throw new Error("Invalid fee type");
+                          }
+                        })(),
+                        account.isNanoLedger
+                          ? await connectAndDeployAccountTxWithLedger(
+                              chainId,
+                              {
+                                addressSalt,
+                                classHash,
+                                constructorCalldata,
+                                contractAddress: account.starknetHexAddress,
+                              },
+                              (() => {
+                                if (type === "ETH") {
+                                  return {
+                                    type: "ETH",
+                                    maxFee: feeConfig.maxFee.toCoin().amount,
+                                  };
+                                } else if (type === "STRK") {
+                                  return {
+                                    type: "STRK",
+                                    gas: gasConfig.gas.toString(),
+                                    maxGasPrice: num.toHex(
+                                      feeConfig.maxGasPrice.toCoin().amount
+                                    ),
+                                  };
+                                } else {
+                                  throw new Error("Invalid fee type");
                                 }
+                              })()
+                            )
+                          : undefined
+                      );
 
-                                retry++;
-
-                                await sleep(2000);
-                              }
-                            })();
-                          })
-                          .catch((e) => {
-                            starknetAccount.setIsDeployingAccount(false);
-                            goBack();
-                            console.log(e);
-                          });
-                      } catch (e) {
-                        console.error(e);
-                        starknetAccount.setIsDeployingAccount(false);
-                      }
-                    } else {
-                      const { transaction_hash: txHash } =
-                        await starknetAccount.deployAccountWithFee(
-                          accountStore.getAccount(senderConfig.chainId)
-                            .starknetHexAddress,
-                          "0x" + Buffer.from(params.classHash).toString("hex"),
-                          [
-                            "0x" + Buffer.from(params.xLow).toString("hex"),
-                            "0x" + Buffer.from(params.xHigh).toString("hex"),
-                            "0x" + Buffer.from(params.yLow).toString("hex"),
-                            "0x" + Buffer.from(params.yHigh).toString("hex"),
-                          ],
-                          "0x" + Buffer.from(params.salt).toString("hex"),
-                          (() => {
-                            if (type === "ETH") {
-                              return {
-                                type: "ETH",
-                                maxFee: feeConfig.maxFee.toCoin().amount,
-                              };
-                            } else if (type === "STRK") {
-                              return {
-                                type: "STRK",
-                                gas: gasConfig.gas.toString(),
-                                maxGasPrice: num.toHex(
-                                  feeConfig.maxGasPrice.toCoin().amount
-                                ),
-                              };
-                            } else {
-                              throw new Error("Invalid fee type");
-                            }
-                          })()
+                    new InExtensionMessageRequester()
+                      .sendMessage(
+                        BACKGROUND_PORT,
+                        new SubmitStarknetTxHashMsg(chainId, txHash)
+                      )
+                      .then(() => {
+                        notification.show(
+                          "success",
+                          intl.formatMessage({
+                            id: "notification.transaction-success",
+                          }),
+                          ""
                         );
+                        const starknetQueries =
+                          starknetQueriesStore.get(chainId);
 
-                      new InExtensionMessageRequester()
-                        .sendMessage(
-                          BACKGROUND_PORT,
-                          new SubmitStarknetTxHashMsg(chainId, txHash)
-                        )
-                        .then(() => {
-                          notification.show(
-                            "success",
-                            intl.formatMessage({
-                              id: "notification.transaction-success",
-                            }),
-                            ""
-                          );
-                          const starknetQueries =
-                            starknetQueriesStore.get(chainId);
+                        (async () => {
+                          // tx commit 이후의 state sync 시점이 이싱해서 일단 성공할때까지 2초 쉬면서 refresh 해본다.
+                          const maxRetry = 15;
+                          let retry = 0;
+                          while (retry < maxRetry) {
+                            const res = await starknetQueries.queryAccountNonce
+                              .getNonce(account.starknetHexAddress)
+                              .waitFreshResponse();
+                            if (res?.data) {
+                              starknetAccount.setIsDeployingAccount(false);
 
-                          (async () => {
-                            // tx commit 이후의 state sync 시점이 이싱해서 일단 성공할때까지 2초 쉬면서 refresh 해본다.
-                            const maxRetry = 15;
-                            let retry = 0;
-                            while (retry < maxRetry) {
-                              const res =
-                                await starknetQueries.queryAccountNonce
-                                  .getNonce(account.starknetHexAddress)
-                                  .waitFreshResponse();
-                              if (res?.data) {
-                                starknetAccount.setIsDeployingAccount(false);
-
-                                const modularChainInfo =
-                                  chainStore.getModularChain(chainId);
-                                if ("starknet" in modularChainInfo) {
-                                  const starknet = modularChainInfo.starknet;
-                                  const ethCurrency = starknet.currencies.find(
-                                    (cur) =>
-                                      cur.coinMinimalDenom ===
-                                      `erc20:${starknet.ethContractAddress}`
-                                  );
-                                  const strkCurrency = starknet.currencies.find(
-                                    (cur) =>
-                                      cur.coinMinimalDenom ===
-                                      `erc20:${starknet.strkContractAddress}`
-                                  );
-                                  if (ethCurrency) {
-                                    starknetQueries.queryStarknetERC20Balance
-                                      .getBalance(
-                                        chainId,
-                                        chainStore,
-                                        account.starknetHexAddress,
-                                        ethCurrency.coinMinimalDenom
-                                      )
-                                      ?.fetch();
-                                  }
-                                  if (strkCurrency) {
-                                    starknetQueries.queryStarknetERC20Balance
-                                      .getBalance(
-                                        chainId,
-                                        chainStore,
-                                        account.starknetHexAddress,
-                                        strkCurrency.coinMinimalDenom
-                                      )
-                                      ?.fetch();
-                                  }
+                              const modularChainInfo =
+                                chainStore.getModularChain(chainId);
+                              if ("starknet" in modularChainInfo) {
+                                const starknet = modularChainInfo.starknet;
+                                const ethCurrency = starknet.currencies.find(
+                                  (cur) =>
+                                    cur.coinMinimalDenom ===
+                                    `erc20:${starknet.ethContractAddress}`
+                                );
+                                const strkCurrency = starknet.currencies.find(
+                                  (cur) =>
+                                    cur.coinMinimalDenom ===
+                                    `erc20:${starknet.strkContractAddress}`
+                                );
+                                if (ethCurrency) {
+                                  starknetQueries.queryStarknetERC20Balance
+                                    .getBalance(
+                                      chainId,
+                                      chainStore,
+                                      account.starknetHexAddress,
+                                      ethCurrency.coinMinimalDenom
+                                    )
+                                    ?.fetch();
                                 }
-
-                                if (onAccountDeployed) {
-                                  onAccountDeployed();
+                                if (strkCurrency) {
+                                  starknetQueries.queryStarknetERC20Balance
+                                    .getBalance(
+                                      chainId,
+                                      chainStore,
+                                      account.starknetHexAddress,
+                                      strkCurrency.coinMinimalDenom
+                                    )
+                                    ?.fetch();
                                 }
-                                close();
-                                break;
                               }
 
-                              retry++;
-
-                              await sleep(2000);
+                              if (onAccountDeployed) {
+                                onAccountDeployed();
+                              }
+                              close();
+                              break;
                             }
-                          })();
-                        })
-                        .catch((e) => {
-                          starknetAccount.setIsDeployingAccount(false);
-                          goBack();
-                          console.log(e);
-                        });
-                    }
+
+                            retry++;
+
+                            await sleep(2000);
+                          }
+                        })();
+                      })
+                      .catch((e) => {
+                        starknetAccount.setIsDeployingAccount(false);
+                        goBack();
+                        console.log(e);
+                      });
                   } catch (e) {
                     starknetAccount.setIsDeployingAccount(false);
+
                     goBack();
                     console.log(e);
                   }

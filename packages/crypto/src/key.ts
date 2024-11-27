@@ -53,19 +53,18 @@ export class PubKeyStarknet {
     return new Uint8Array(this.pubKey);
   }
 
+  getStarknetPubKey(): Uint8Array {
+    return this.pubKey.slice(0, 32);
+  }
+
   getStarknetAddress(salt: Uint8Array, classHash: Uint8Array): Uint8Array {
-    const { xLow, xHigh, yLow, yHigh } = this.getStarknetAddressParams();
+    const starknetPubKey = this.getStarknetPubKey();
 
     let calculated = starknetHash
       .calculateContractAddressFromHash(
         "0x" + Buffer.from(salt).toString("hex"),
         "0x" + Buffer.from(classHash).toString("hex"),
-        [
-          "0x" + Buffer.from(xLow).toString("hex"),
-          "0x" + Buffer.from(xHigh).toString("hex"),
-          "0x" + Buffer.from(yLow).toString("hex"),
-          "0x" + Buffer.from(yHigh).toString("hex"),
-        ],
+        ["0x" + Buffer.from(starknetPubKey).toString("hex")],
         "0x00"
       )
       .replace("0x", "");
@@ -184,6 +183,10 @@ export class PubKeySecp256k1 {
       yLow: pubBytes.slice(48, 64),
       yHigh: pubBytes.slice(32, 48),
     };
+  }
+
+  getStarknetPubKey(): Uint8Array {
+    return this.pubKey.slice(1);
   }
 
   verifyDigest32(digest: Uint8Array, signature: Uint8Array): boolean {

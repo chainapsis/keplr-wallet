@@ -8,13 +8,15 @@ import {
   LedgerOptions,
 } from "./ledger-types";
 import {
-  CallData,
   DeployAccountContractPayload,
   num,
   hash as starknetHash,
   shortString,
   constants,
   DeployAccountSignerDetails,
+  CallData,
+  encode,
+  stark,
 } from "starknet";
 import Transport from "@ledgerhq/hw-transport";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
@@ -26,7 +28,6 @@ import {
   LedgerError,
   StarknetClient,
 } from "@ledgerhq/hw-app-starknet";
-import { LedgerUtils } from "../../../utils";
 
 export const connectAndDeployAccountTxWithLedger = async (
   chainId: string,
@@ -51,19 +52,32 @@ export const connectAndDeployAccountTxWithLedger = async (
   transaction: DeployAccountSignerDetails;
   signature: string[];
 }> => {
-  const nonce = 0; // DEPLOY_ACCOUNT transaction will have a nonce zero as it is the first transaction in the account
+  let transport: Transport;
+  try {
+    transport = options.useWebHID
+      ? await TransportWebHID.create()
+      : await TransportWebUSB.create();
+  } catch (e) {
+    console.error(e);
+    throw new KeplrError(
+      ErrModuleLedgerSign,
+      ErrFailedInit,
+      "Failed to init transport"
+    );
+  }
 
-  const compiledCalldata = CallData.compile(constructorCalldata);
+  const nonce = 0; // DEPLOY_ACCOUNT transaction will have a nonce zero as it is the first transaction in the account
   const contractAddress =
     providedContractAddress ??
     starknetHash.calculateContractAddressFromHash(
       addressSalt,
       classHash,
-      compiledCalldata,
+      constructorCalldata,
       0
     );
+  const compiledConstructorCalldata = CallData.compile(constructorCalldata);
   const starknetChainId = shortString.encodeShortString(
-    chainId
+    chainId.replace("starknet:", "")
   ) as constants.StarknetChainId;
 
   const deployAccountFields: DeployAccountFields | DeployAccountV1Fields =
@@ -73,7 +87,7 @@ export const connectAndDeployAccountTxWithLedger = async (
           // V1
           return {
             class_hash: classHash,
-            constructor_calldata: compiledCalldata,
+            constructor_calldata: compiledConstructorCalldata,
             contractAddress,
             contract_address_salt: addressSalt,
             nonce: nonce,
@@ -84,7 +98,7 @@ export const connectAndDeployAccountTxWithLedger = async (
         case "STRK":
           return {
             class_hash: classHash,
-            constructor_calldata: compiledCalldata,
+            constructor_calldata: compiledConstructorCalldata,
             contractAddress,
             contract_address_salt: addressSalt,
             nonce: nonce,
@@ -109,63 +123,42 @@ export const connectAndDeployAccountTxWithLedger = async (
       }
     })();
 
-  let transport: Transport;
   try {
-    transport = options.useWebHID
-      ? await TransportWebHID.create()
-      : await TransportWebUSB.create();
-  } catch (e) {
-    throw new KeplrError(
-      ErrModuleLedgerSign,
-      ErrFailedInit,
-      "Failed to init transport"
-    );
-  }
-
-  try {
-    transport = await LedgerUtils.tryAppOpen(transport, "Starknet");
     const starknetApp = new StarknetClient(transport);
     const res =
-      "tip" in deployAccountFields
+      "resourceBounds" in deployAccountFields
         ? await starknetApp.signDeployAccount(
-            `m/2645'/579218131'/1393043893'/0'/0'/0`,
+            `m/2645'/579218131'/1393043893'/1'/0'/0`,
             deployAccountFields
           )
         : await starknetApp.signDeployAccountV1(
-            `m/2645'/579218131'/1393043893'/0'/0'/0`,
+            `m/2645'/579218131'/1393043893'/1'/0'/0`,
             deployAccountFields
           );
-
-    console.log("res", res);
-    console.log("contractAddress", contractAddress);
 
     switch (res.returnCode) {
       case LedgerError.BadCla:
       case LedgerError.BadIns:
-        await transport.close();
-
         throw new KeplrError(
           ErrModuleLedgerSign,
           ErrCodeUnsupportedApp,
           "Unsupported app"
         );
       case LedgerError.UserRejected:
-        await transport.close();
-
         throw new KeplrError(
           ErrModuleLedgerSign,
           ErrSignRejected,
           "User rejected signing"
         );
       case LedgerError.NoError:
-        const { h, errorMessage, returnCode, ...signature } = res;
+        const { r, s } = res;
 
-        const signerDetails: DeployAccountSignerDetails = (() => {
+        const transaction: DeployAccountSignerDetails = (() => {
           switch (fee.type) {
             case "ETH":
               return {
                 classHash,
-                constructorCalldata: compiledCalldata,
+                constructorCalldata: compiledConstructorCalldata,
                 contractAddress,
                 addressSalt,
                 version: "0x1",
@@ -191,7 +184,7 @@ export const connectAndDeployAccountTxWithLedger = async (
             case "STRK":
               return {
                 classHash,
-                constructorCalldata: compiledCalldata,
+                constructorCalldata: compiledConstructorCalldata,
                 contractAddress,
                 addressSalt,
                 version: "0x3",
@@ -217,15 +210,16 @@ export const connectAndDeployAccountTxWithLedger = async (
               throw new Error("Invalid fee type");
           }
         })();
+        const signature = stark.signatureToDecimalArray([
+          encode.addHexPrefix(encode.buf2hex(r)),
+          encode.addHexPrefix(encode.buf2hex(s)),
+        ]);
 
         return {
-          transaction: signerDetails,
-          signature: starknetSignatureToBytes(signature),
+          transaction,
+          signature,
         };
-
       default:
-        await transport.close();
-
         throw new KeplrError(
           ErrModuleLedgerSign,
           ErrFailedSign,
@@ -244,17 +238,7 @@ export const connectAndDeployAccountTxWithLedger = async (
     } else {
       throw e;
     }
+  } finally {
+    await transport.close();
   }
-};
-
-export const starknetSignatureToBytes = (signature: {
-  r: Uint8Array;
-  s: Uint8Array;
-  v: number;
-}): string[] => {
-  return [
-    "0x1",
-    "0x" + Buffer.from(signature.r).toString("hex"),
-    "0x" + Buffer.from(signature.s).toString("hex"),
-  ];
 };

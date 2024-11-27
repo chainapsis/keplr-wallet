@@ -277,7 +277,8 @@ export const ConnectLedgerScene: FunctionComponent<{
           transport = await LedgerUtils.tryAppOpen(transport, propApp);
           const starknetApp = new StarknetClient(transport);
           const res = await starknetApp.getPubKey(
-            `m/2645'/579218131'/1393043893'/0'/0'/0`
+            `m/2645'/579218131'/1393043893'/0'/0'/0`,
+            false
           );
           switch (res.returnCode) {
             case LedgerError.BadCla:

@@ -39,7 +39,7 @@ import { Hash } from "@keplr-wallet/crypto";
 const AccountClassHash =
   "06cc43e9a4a0036cd09d8a997c61df18d7e4fa9459c907a4664b4e56b679d187";
 const StarknetAccountUpgradableClassHash =
-  "06d4b80c0f3c3ea9e98252403a83f8a6bacf7f7362e9ac0a8824854dca31f8a8";
+  "04a444ef8caf8fa0db05da60bf0ad9bae264c73fa7e32c61d245406f5523174b";
 
 export class KeyRingStarknetService {
   constructor(
@@ -178,9 +178,13 @@ export class KeyRingStarknetService {
 
     const { pubKey, salt, classHash } = await (async () => {
       if (isLedger) {
+        const pubkeyStarknet = await this.keyRingService.getPubKeyStarknet(
+          chainId,
+          vaultId
+        );
         return {
-          pubKey: await this.keyRingService.getPubKeyStarknet(chainId, vaultId),
-          salt: Hash.sha256(Buffer.from("starknet_key_salt")).slice(0, 24),
+          pubKey: pubkeyStarknet,
+          salt: pubkeyStarknet.getStarknetPubKey(),
           classHash: Buffer.from(StarknetAccountUpgradableClassHash, "hex"),
         };
       } else {

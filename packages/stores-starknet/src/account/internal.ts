@@ -211,23 +211,18 @@ export class StoreAccount extends Account {
         }
       );
     } else {
-      console.log(
-        "preSigned",
-        preSigned,
-        "constructorCalldata",
-        constructorCalldata
-      );
+      const {
+        transaction: { classHash, addressSalt, constructorCalldata },
+        signature,
+      } = preSigned;
       return this.deployAccountContract(
         {
           classHash,
           addressSalt,
           constructorCalldata,
-          signature: preSigned.signature,
+          signature,
         },
-        {
-          ...stark.v3Details(preSigned.transaction),
-          ...preSigned.transaction,
-        }
+        preSigned.transaction
       );
     }
   }
