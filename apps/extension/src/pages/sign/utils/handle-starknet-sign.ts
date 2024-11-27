@@ -33,6 +33,9 @@ import {
   TxV1Fields,
 } from "@ledgerhq/hw-app-starknet";
 
+export const STARKNET_LEDGER_DERIVATION_PATH =
+  "m/2645'/1195502025'/1148870696'/0'/0'/1";
+
 export const connectAndSignDeployAccountTxWithLedger = async (
   chainId: string,
   {
@@ -132,11 +135,11 @@ export const connectAndSignDeployAccountTxWithLedger = async (
     const res =
       "resourceBounds" in deployAccountFields
         ? await starknetApp.signDeployAccount(
-            `m/2645'/579218131'/1393043893'/1'/0'/0`,
+            STARKNET_LEDGER_DERIVATION_PATH,
             deployAccountFields
           )
         : await starknetApp.signDeployAccountV1(
-            `m/2645'/579218131'/1393043893'/1'/0'/0`,
+            STARKNET_LEDGER_DERIVATION_PATH,
             deployAccountFields
           );
 
@@ -292,12 +295,12 @@ export const connectAndSignInvokeTxWithLedger = async (
     const res =
       "resourceBounds" in txFields
         ? await starknetApp.signTx(
-            `m/2645'/579218131'/1393043893'/1'/0'/0`,
+            STARKNET_LEDGER_DERIVATION_PATH,
             transactions,
             txFields
           )
         : await starknetApp.signTxV1(
-            `m/2645'/579218131'/1393043893'/1'/0'/0`,
+            STARKNET_LEDGER_DERIVATION_PATH,
             transactions,
             txFields
           );
@@ -365,7 +368,7 @@ export const connectAndSignMessageWithLedger = async (
   try {
     const starknetApp = new StarknetClient(transport);
     const res = await starknetApp.signMessage(
-      `m/2645'/579218131'/1393043893'/1'/0'/0`,
+      STARKNET_LEDGER_DERIVATION_PATH,
       message,
       signer
     );

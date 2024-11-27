@@ -28,6 +28,7 @@ import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import { useConfirm } from "../../../hooks/confirm";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
+import { STARKNET_LEDGER_DERIVATION_PATH } from "../../sign/utils/handle-starknet-sign";
 
 type Step = "unknown" | "connected" | "app";
 
@@ -277,7 +278,7 @@ export const ConnectLedgerScene: FunctionComponent<{
           transport = await LedgerUtils.tryAppOpen(transport, propApp);
           const starknetApp = new StarknetClient(transport);
           const res = await starknetApp.getPubKey(
-            `m/2645'/579218131'/1393043893'/0'/0'/0`,
+            STARKNET_LEDGER_DERIVATION_PATH,
             false
           );
           switch (res.returnCode) {
