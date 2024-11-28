@@ -8,8 +8,10 @@ import { Splash } from "../../../components/splash";
 export const SignEthereumTxPage: FunctionComponent = observer(() => {
   const { signEthereumInteractionStore } = useStore();
 
-  useInteractionInfo(() => {
-    signEthereumInteractionStore.rejectAll();
+  useInteractionInfo({
+    onWindowClose: () => {
+      signEthereumInteractionStore.rejectAll();
+    },
   });
 
   return (

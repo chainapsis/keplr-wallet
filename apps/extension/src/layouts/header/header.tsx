@@ -9,10 +9,15 @@ import { HeaderProps } from "./types";
 import { Subtitle1 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
 import { Box } from "../../components/box";
-import { Button, getButtonHeightRem } from "../../components/button";
+import {
+  Button,
+  ButtonProps,
+  getButtonHeightRem,
+} from "../../components/button";
 import { Skeleton } from "../../components/skeleton";
 import {
   SpecialButton,
+  SpecialButtonProps,
   getSpecialButtonHeightRem,
 } from "../../components/special-button";
 
@@ -182,7 +187,7 @@ export const HeaderLayout: FunctionComponent<
   title,
   left,
   right,
-  bottomButton,
+  bottomButtons,
   displayFlex,
   fixedHeight,
   fixedMinHeight,
@@ -196,6 +201,9 @@ export const HeaderLayout: FunctionComponent<
 }) => {
   const [height, setHeight] = React.useState(() => pxToRem(600));
   const lastSetHeight = useRef(-1);
+
+  const hasBottomButton = bottomButtons && bottomButtons.length > 0;
+  const hasMultipleBottomButton = bottomButtons && bottomButtons.length > 1;
 
   useLayoutEffect(() => {
     function handleResize() {
@@ -217,22 +225,37 @@ export const HeaderLayout: FunctionComponent<
   }, []);
 
   const bottomPadding = (() => {
-    if (!bottomButton) {
+    if (!hasBottomButton) {
       return "0";
     }
 
-    if (bottomButton.isSpecial) {
-      return (
-        bottomButtonPaddingRem * 2 +
-        getSpecialButtonHeightRem(bottomButton.size) +
-        "rem"
-      );
+    const buttonHeights = bottomButtons.map((button) => {
+      return button.isSpecial
+        ? getSpecialButtonHeightRem(button.size)
+        : getButtonHeightRem(button.size);
+    });
+
+    const maxButtonHeightRem = Math.max(...buttonHeights);
+
+    return `${bottomButtonPaddingRem * 2 + maxButtonHeightRem}rem`;
+  })();
+
+  const renderButton = (
+    button:
+      | ({ isSpecial?: false } & ButtonProps)
+      | ({ isSpecial: true } & SpecialButtonProps),
+    index: number
+  ) => {
+    if (button.isSpecial) {
+      return <SpecialButton key={index} {...button} />;
     }
 
     return (
-      bottomButtonPaddingRem * 2 + getButtonHeightRem(bottomButton.size) + "rem"
+      <Skeleton isNotReady={isNotReady} type="button" key={index}>
+        <Button {...button} />
+      </Skeleton>
     );
-  })();
+  };
 
   return (
     <Styles.Container as={onSubmit ? "form" : undefined} onSubmit={onSubmit}>
@@ -277,7 +300,7 @@ export const HeaderLayout: FunctionComponent<
         {children}
       </Styles.ContentContainer>
 
-      {bottomButton ? (
+      {hasBottomButton ? (
         <Box
           padding={bottomButtonPaddingRem + "rem"}
           position="fixed"
@@ -285,6 +308,11 @@ export const HeaderLayout: FunctionComponent<
             left: 0,
             right: 0,
             bottom: additionalPaddingBottom || "0",
+            display: hasMultipleBottomButton ? "grid" : undefined,
+            gridTemplateColumns: hasMultipleBottomButton
+              ? `${"auto ".repeat(bottomButtons.length - 1)}1fr` // 마지막 버튼이 남은 공간을 다 채우도록 함
+              : undefined,
+            gap: hasMultipleBottomButton ? "0.75rem" : undefined,
           }}
         >
           {/*
@@ -304,30 +332,7 @@ export const HeaderLayout: FunctionComponent<
               }}
             />
           ) : null}
-          {(() => {
-            if (bottomButton.isSpecial) {
-              // isSpecial is not used.
-              const { isSpecial, ...other } = bottomButton;
-              return <SpecialButton {...other} />;
-            } else {
-              // isSpecial is not used.
-              const { isSpecial, type, ...other } = bottomButton;
-
-              // onSubmit prop이 존재한다면 기본적으로 type="submit"으로 설정한다
-              // TODO: 만약에 bottomButton이 배열을 받을 수 있도록 수정된다면 이 부분도 수정되어야함.
-
-              const props = {
-                ...other,
-                type: type || onSubmit ? ("submit" as const) : undefined,
-              };
-
-              return (
-                <Skeleton isNotReady={isNotReady} type="button">
-                  <Button {...props} />
-                </Skeleton>
-              );
-            }
-          })()}
+          {bottomButtons.map(renderButton)}
         </Box>
       ) : null}
     </Styles.Container>

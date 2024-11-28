@@ -91,7 +91,6 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
         return chainStore.getChain("osmosis");
       }
 
-      // legacy 코드임.
       const swapVenue = msg.meta["swapVenue"];
       if (swapVenue) {
         const swapVenueChainId = SwapVenues.find(
@@ -103,17 +102,6 @@ export const MsgRelationIBCSwapReceive: FunctionComponent<{
             ? chainStore.getChain(swapVenueChainId)
             : undefined;
         }
-      }
-
-      // 나중에 satellite backend에서 swapVenueChainIdentifier meta field가 추가됨.
-      // msg.meta["swapVenue"]로 찾을 수 없을 경우 이걸 사용함.
-      const swapVenueChainIdentifier = msg.meta["swapVenueChainIdentifier"];
-      if (
-        typeof swapVenueChainIdentifier === "string" &&
-        swapVenueChainIdentifier &&
-        chainStore.hasChain(swapVenueChainIdentifier)
-      ) {
-        return chainStore.getChain(swapVenueChainIdentifier);
       }
 
       return undefined;

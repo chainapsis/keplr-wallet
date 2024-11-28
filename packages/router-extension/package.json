@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/router-extension",
-  "version": "0.12.155-rc.0",
+  "version": "0.12.156",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -16,7 +16,7 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr-wallet/popup": "0.12.155-rc.0",
-    "@keplr-wallet/router": "0.12.155-rc.0"
+    "@keplr-wallet/popup": "0.12.156",
+    "@keplr-wallet/router": "0.12.156"
   }
 }

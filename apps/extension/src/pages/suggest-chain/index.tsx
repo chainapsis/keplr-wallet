@@ -11,12 +11,17 @@ import { ArrowLeftIcon } from "../../components/icon";
 import { Box } from "../../components/box";
 import { handleExternalInteractionWithNoProceedNext } from "../../utils";
 import { dispatchGlobalEventExceptSelf } from "../../utils/global-events";
+import { ColorPalette } from "../../styles";
+import { useNavigate } from "react-router";
+import { ApproveIcon, CancelIcon } from "../../components/button";
 
 export const SuggestChainPage: FunctionComponent = observer(() => {
   const { chainSuggestStore } = useStore();
 
-  useInteractionInfo(async () => {
-    await chainSuggestStore.rejectAll();
+  useInteractionInfo({
+    onWindowClose: async () => {
+      await chainSuggestStore.rejectAll();
+    },
   });
 
   const waitingData = chainSuggestStore.waitingSuggestedChainInfo;
@@ -43,12 +48,21 @@ const SuggestChainPageImpl: FunctionComponent<{
   const [updateFromRepoDisabled, setUpdateFromRepoDisabled] = useState(false);
 
   const intl = useIntl();
-  const interactionInfo = useInteractionInfo();
+  const navigate = useNavigate();
+  const interactionInfo = useInteractionInfo({
+    onUnmount: async () => {
+      await chainSuggestStore.rejectWithProceedNext(waitingData.id, () => {});
+    },
+  });
 
   const queryCommunityChainInfo = chainSuggestStore.getCommunityChainInfo(
     waitingData.data.chainInfo.chainId
   );
   const communityChainInfo = queryCommunityChainInfo.chainInfo;
+
+  const isLoading = permissionStore.isObsoleteInteractionApproved(
+    waitingData.id
+  );
 
   useEffect(() => {
     if (!queryCommunityChainInfo.isLoading) {
@@ -93,52 +107,85 @@ const SuggestChainPageImpl: FunctionComponent<{
           </Box>
         ) : undefined
       }
-      bottomButton={{
-        text: intl.formatMessage({ id: "button.approve" }),
-        size: "large",
-        color: "primary",
-        isLoading: permissionStore.isObsoleteInteraction(waitingData.id),
-        onClick: async () => {
-          const chainInfo =
-            communityChainInfo && !updateFromRepoDisabled
-              ? communityChainInfo
-              : waitingData.data.chainInfo;
-
-          const ids = new Set([waitingData.id]);
-          for (const data of chainSuggestStore.waitingSuggestedChainInfos) {
-            if (
-              data.data.chainInfo.chainId ===
-                waitingData.data.chainInfo.chainId &&
-              data.data.origin === waitingData.data.origin
-            ) {
-              ids.add(data.id);
-            }
-          }
-          await chainSuggestStore.approveWithProceedNext(
-            Array.from(ids),
-            {
-              ...chainInfo,
-              updateFromRepoDisabled,
-            },
-            async (proceedNext) => {
-              await keyRingStore.refreshKeyRingStatus();
-              await chainStore.updateChainInfosFromBackground();
-              await chainStore.updateEnabledChainIdentifiersFromBackground();
-
-              dispatchGlobalEventExceptSelf("keplr_suggested_chain_added");
-
-              if (!proceedNext) {
-                if (
-                  interactionInfo.interaction &&
-                  !interactionInfo.interactionInternal
-                ) {
-                  handleExternalInteractionWithNoProceedNext();
+      bottomButtons={[
+        {
+          textOverrideIcon: <CancelIcon color={ColorPalette["gray-200"]} />,
+          size: "large",
+          color: "secondary",
+          style: {
+            width: "3.25rem",
+          },
+          onClick: async () => {
+            await chainSuggestStore.rejectWithProceedNext(
+              waitingData.id,
+              async (proceedNext) => {
+                if (!proceedNext) {
+                  if (
+                    interactionInfo.interaction &&
+                    !interactionInfo.interactionInternal
+                  ) {
+                    handleExternalInteractionWithNoProceedNext();
+                  } else if (
+                    interactionInfo.interaction &&
+                    interactionInfo.interactionInternal
+                  ) {
+                    window.history.length > 1 ? navigate(-1) : navigate("/");
+                  } else {
+                    navigate("/", { replace: true });
+                  }
                 }
               }
-            }
-          );
+            );
+          },
         },
-      }}
+        {
+          text: intl.formatMessage({ id: "button.approve" }),
+          size: "large",
+          color: "primary",
+          left: !isLoading && <ApproveIcon />,
+          isLoading,
+          onClick: async () => {
+            const chainInfo =
+              communityChainInfo && !updateFromRepoDisabled
+                ? communityChainInfo
+                : waitingData.data.chainInfo;
+
+            const ids = new Set([waitingData.id]);
+            for (const data of chainSuggestStore.waitingSuggestedChainInfos) {
+              if (
+                data.data.chainInfo.chainId ===
+                  waitingData.data.chainInfo.chainId &&
+                data.data.origin === waitingData.data.origin
+              ) {
+                ids.add(data.id);
+              }
+            }
+            await chainSuggestStore.approveWithProceedNext(
+              Array.from(ids),
+              {
+                ...chainInfo,
+                updateFromRepoDisabled,
+              },
+              async (proceedNext) => {
+                await keyRingStore.refreshKeyRingStatus();
+                await chainStore.updateChainInfosFromBackground();
+                await chainStore.updateEnabledChainIdentifiersFromBackground();
+
+                dispatchGlobalEventExceptSelf("keplr_suggested_chain_added");
+
+                if (!proceedNext) {
+                  if (
+                    interactionInfo.interaction &&
+                    !interactionInfo.interactionInternal
+                  ) {
+                    handleExternalInteractionWithNoProceedNext();
+                  }
+                }
+              }
+            );
+          },
+        },
+      ]}
     >
       {(() => {
         if (isLoadingPlaceholder) {

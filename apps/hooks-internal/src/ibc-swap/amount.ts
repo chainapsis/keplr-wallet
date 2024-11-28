@@ -183,16 +183,37 @@ export class IBCSwapAmountConfig extends AmountConfig {
         destinationAccount.bech32Address;
     }
 
-    for (const swapVenue of queryIBCSwap.swapVenues) {
-      const swapAccount = this.accountStore.getAccount(swapVenue.chainId);
-      if (swapAccount.walletStatus === WalletStatus.NotInit) {
-        await swapAccount.init();
-      }
-      if (!swapAccount.bech32Address) {
-        throw new Error("Swap account is not set");
-      }
+    for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
+      queryRouteResponse.data.swap_venue,
+    ]) {
+      if (swapVenue) {
+        const swapAccount = this.accountStore.getAccount(swapVenue.chain_id);
 
-      chainIdsToAddresses[swapVenue.chainId] = swapAccount.bech32Address;
+        if (swapAccount.walletStatus === WalletStatus.NotInit) {
+          await swapAccount.init();
+        }
+        if (!swapAccount.bech32Address) {
+          const swapVenueChainInfo =
+            this.chainGetter.hasChain(swapVenue.chain_id) &&
+            this.chainGetter.getChain(swapVenue.chain_id);
+          if (
+            swapAccount.isNanoLedger &&
+            swapVenueChainInfo &&
+            (swapVenueChainInfo.bip44.coinType === 60 ||
+              swapVenueChainInfo.features.includes("eth-address-gen") ||
+              swapVenueChainInfo.features.includes("eth-key-sign") ||
+              swapVenueChainInfo.evm != null)
+          ) {
+            throw new Error(
+              "Please connect Ethereum app on Ledger with Keplr to get the address"
+            );
+          }
+
+          throw new Error("Swap account is not set");
+        }
+
+        chainIdsToAddresses[swapVenue.chain_id] = swapAccount.bech32Address;
+      }
     }
 
     const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(
@@ -306,16 +327,20 @@ export class IBCSwapAmountConfig extends AmountConfig {
         destinationAccount.bech32Address;
     }
 
-    for (const swapVenue of queryIBCSwap.swapVenues) {
-      const swapAccount = this.accountStore.getAccount(swapVenue.chainId);
-      if (swapAccount.walletStatus === WalletStatus.NotInit) {
-        swapAccount.init();
-      }
+    for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
+      queryRouteResponse.data.swap_venue,
+    ]) {
+      if (swapVenue) {
+        const swapAccount = this.accountStore.getAccount(swapVenue.chain_id);
+        if (swapAccount.walletStatus === WalletStatus.NotInit) {
+          swapAccount.init();
+        }
 
-      if (!swapAccount.bech32Address) {
-        return;
+        if (!swapAccount.bech32Address) {
+          return;
+        }
+        chainIdsToAddresses[swapVenue.chain_id] = swapAccount.bech32Address;
       }
-      chainIdsToAddresses[swapVenue.chainId] = swapAccount.bech32Address;
     }
 
     const queryMsgsDirect = queryIBCSwap.getQueryMsgsDirect(

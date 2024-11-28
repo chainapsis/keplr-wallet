@@ -8,8 +8,10 @@ import { observer } from "mobx-react-lite";
 export const SignStarknetMessagePage: FunctionComponent = observer(() => {
   const { signStarknetMessageInteractionStore } = useStore();
 
-  useInteractionInfo(() => {
-    signStarknetMessageInteractionStore.rejectAll();
+  useInteractionInfo({
+    onWindowClose: () => {
+      signStarknetMessageInteractionStore.rejectAll();
+    },
   });
 
   return (

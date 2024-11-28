@@ -36,6 +36,8 @@ import { connectAndSignInvokeTxWithLedger } from "../../../sign/utils/handle-sta
 import { KeplrError } from "@keplr-wallet/router";
 import { ErrModuleLedgerSign } from "../../../sign/utils/ledger-types";
 import { LedgerGuideBox } from "../../../sign/components/ledger-guide-box";
+import { useNavigate } from "react-router";
+import { ApproveIcon, CancelIcon } from "../../../../components/button";
 
 export const SignStarknetTxView: FunctionComponent<{
   interactionData: NonNullable<SignStarknetTxInteractionStore["waitingData"]>;
@@ -48,11 +50,19 @@ export const SignStarknetTxView: FunctionComponent<{
   } = useStore();
 
   const theme = useTheme();
-
   const { chainStore } = useStore();
 
   const intl = useIntl();
-  const interactionInfo = useInteractionInfo();
+  const interactionInfo = useInteractionInfo({
+    onUnmount: async () => {
+      await signStarknetTxInteractionStore.rejectWithProceedNext(
+        interactionData.id,
+        () => {}
+      );
+    },
+  });
+
+  const navigate = useNavigate();
 
   const chainId = interactionData.data.chainId;
 
@@ -159,24 +169,84 @@ export const SignStarknetTxView: FunctionComponent<{
         }> => {
           noop(gasSimulationRefresher.count);
 
-          const res = await starknetAccountStore
+          const estimateResult = await starknetAccountStore
             .getAccount(chainId)
             .estimateInvokeFee(sender, interactionData.data.transactions, type);
 
-          // gas adjustment = 1.2, signature verification = 700
-          const gasConsumed = new Dec(res.gas_consumed);
-          const gasMax = gasConsumed.mul(new Dec(1.2)).add(new Dec(700));
-          const gasPrice = new CoinPretty(feeCurrency, res.gas_price);
-          const maxGasPrice = gasPrice.mul(new Dec(1.2));
+          const {
+            gas_consumed,
+            data_gas_consumed,
+            gas_price,
+            overall_fee,
+            resourceBounds,
+            unit,
+          } = estimateResult;
 
-          feeConfig.setGasPrice({
-            gasPrice: gasPrice,
-            maxGasPrice: maxGasPrice,
-          });
+          const gasMargin = new Dec(1.2);
+          const gasPriceMargin = new Dec(1.5);
 
-          return {
-            gasUsed: parseInt(gasMax.truncate().toString()),
-          };
+          const isV1Tx = feeConfig.type === "ETH" && unit === "WEI";
+
+          const gasConsumed = new Dec(gas_consumed);
+          const dataGasConsumed = new Dec(data_gas_consumed);
+          const sigVerificationGasConsumed = new Dec(583);
+          const totalGasConsumed = gasConsumed
+            .add(dataGasConsumed)
+            .add(sigVerificationGasConsumed);
+
+          const gasPriceDec = new Dec(gas_price);
+
+          // overall_fee = gas_consumed * gas_price + data_gas_consumed * data_gas_price
+          const overallFee = new Dec(overall_fee);
+
+          const signatureVerificationFee =
+            sigVerificationGasConsumed.mul(gasPriceDec);
+
+          // adjusted_overall_fee = overall_fee + signature_verification_gas_consumed * gas_price
+          const adjustedOverallFee = overallFee.add(signatureVerificationFee);
+
+          // adjusted_gas_price = adjusted_overall_fee / total_gas_consumed
+          const adjustedGasPrice = adjustedOverallFee.quo(totalGasConsumed);
+
+          const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
+
+          if (isV1Tx) {
+            const maxGasPrice = gasPrice.mul(gasPriceMargin);
+            const maxGas = totalGasConsumed.mul(gasMargin);
+
+            feeConfig.setGasPrice({
+              gasPrice,
+              maxGasPrice,
+            });
+
+            return {
+              gasUsed: parseInt(maxGas.truncate().toString()),
+            };
+          } else {
+            const l1Gas = resourceBounds.l1_gas;
+
+            const maxGas = adjustedOverallFee.quo(gasPriceDec).mul(gasMargin);
+            const maxGasPrice = gasPrice.mul(gasPriceMargin);
+
+            const maxPricePerUnit = new CoinPretty(
+              feeCurrency,
+              num.hexToDecimalString(l1Gas.max_price_per_unit)
+            );
+
+            feeConfig.setGasPrice({
+              gasPrice: new CoinPretty(feeCurrency, gasPriceDec),
+              maxGasPrice: maxPricePerUnit
+                .sub(maxGasPrice)
+                .toDec()
+                .gt(new Dec(0))
+                ? maxPricePerUnit
+                : maxGasPrice,
+            });
+
+            return {
+              gasUsed: parseInt(maxGas.truncate().toString()),
+            };
+          }
         },
       };
     }
@@ -221,6 +291,10 @@ export const SignStarknetTxView: FunctionComponent<{
   });
 
   const buttonDisabled = txConfigsValidate.interactionBlocked;
+  const isLoading =
+    signStarknetTxInteractionStore.isObsoleteInteractionApproved(
+      interactionData.id
+    ) || isLedgerInteracting;
 
   const approve = async () => {
     try {
@@ -260,7 +334,6 @@ export const SignStarknetTxView: FunctionComponent<{
             chainId: interactionData.data.details.chainId,
             cairoVersion: interactionData.data.details.cairoVersion,
             skipValidate: false,
-
             maxFee: feeConfig.maxFee
               ? num.toHex(feeConfig.maxFee.toCoin().amount)
               : "0x0",
@@ -273,7 +346,6 @@ export const SignStarknetTxView: FunctionComponent<{
             chainId: interactionData.data.details.chainId,
             cairoVersion: interactionData.data.details.cairoVersion,
             skipValidate: false,
-
             resourceBounds: {
               l1_gas: {
                 max_amount: num.toHex(gasConfig.gas.toString()),
@@ -381,17 +453,47 @@ export const SignStarknetTxView: FunctionComponent<{
         />
       }
       // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
-      bottomButton={{
-        isSpecial: true,
-        text: intl.formatMessage({ id: "button.approve" }),
-        size: "large",
-        disabled: buttonDisabled,
-        isLoading:
-          signStarknetTxInteractionStore.isObsoleteInteraction(
-            interactionData.id
-          ) || isLedgerInteracting,
-        onClick: approve,
-      }}
+      bottomButtons={[
+        {
+          textOverrideIcon: <CancelIcon color={ColorPalette["gray-200"]} />,
+          size: "large",
+          color: "secondary",
+          style: {
+            width: "3.25rem",
+          },
+          onClick: async () => {
+            await signStarknetTxInteractionStore.rejectWithProceedNext(
+              interactionData.id,
+              (proceedNext) => {
+                if (!proceedNext) {
+                  if (
+                    interactionInfo.interaction &&
+                    !interactionInfo.interactionInternal
+                  ) {
+                    handleExternalInteractionWithNoProceedNext();
+                  } else if (
+                    interactionInfo.interaction &&
+                    interactionInfo.interactionInternal
+                  ) {
+                    window.history.length > 1 ? navigate(-1) : navigate("/");
+                  } else {
+                    navigate("/", { replace: true });
+                  }
+                }
+              }
+            );
+          },
+        },
+        {
+          isSpecial: true,
+          text: intl.formatMessage({ id: "button.approve" }),
+          size: "large",
+          left: !isLoading && <ApproveIcon />,
+          disabled: buttonDisabled,
+          isLoading,
+          onClick: approve,
+        },
+      ]}
     >
       <Box
         height="100%"

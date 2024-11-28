@@ -264,30 +264,91 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
         }> => {
           noop(gasSimulationRefresher.count);
 
-          const res = await starknetAccount.estimateInvokeFeeForSendTokenTx(
-            {
-              currency: currency,
-              amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
-              sender: sendConfigs.senderConfig.sender,
-              recipient: sendConfigs.recipientConfig.recipient,
-            },
-            type
-          );
+          const estimateResult =
+            await starknetAccount.estimateInvokeFeeForSendTokenTx(
+              {
+                currency: currency,
+                amount: sendConfigs.amountConfig.amount[0].toDec().toString(),
+                sender: sendConfigs.senderConfig.sender,
+                recipient: sendConfigs.recipientConfig.recipient,
+              },
+              type
+            );
 
-          // gas adjustment = 1.2, signature verification = 700
-          const gasConsumed = new Dec(res.gas_consumed);
-          const gasMax = gasConsumed.mul(new Dec(1.2)).add(new Dec(700));
-          const gasPrice = new CoinPretty(feeCurrency, res.gas_price);
-          const maxGasPrice = gasPrice.mul(new Dec(1.2));
+          const {
+            gas_consumed,
+            data_gas_consumed,
+            gas_price,
+            overall_fee,
+            resourceBounds,
+            unit,
+          } = estimateResult;
 
-          sendConfigs.feeConfig.setGasPrice({
-            gasPrice: gasPrice,
-            maxGasPrice: maxGasPrice,
-          });
+          const gasMargin = new Dec(1.2);
+          const gasPriceMargin = new Dec(1.5);
 
-          return {
-            gasUsed: parseInt(gasMax.truncate().toString()),
-          };
+          const isV1Tx = sendConfigs.feeConfig.type === "ETH" && unit === "WEI";
+
+          const gasConsumed = new Dec(gas_consumed);
+          const dataGasConsumed = new Dec(data_gas_consumed);
+          const sigVerificationGasConsumed = new Dec(583);
+          const totalGasConsumed = gasConsumed
+            .add(dataGasConsumed)
+            .add(sigVerificationGasConsumed);
+
+          const gasPriceDec = new Dec(gas_price);
+
+          // overall_fee = gas_consumed * gas_price + data_gas_consumed * data_gas_price
+          const overallFee = new Dec(overall_fee);
+
+          const signatureVerificationFee =
+            sigVerificationGasConsumed.mul(gasPriceDec);
+
+          // adjusted_overall_fee = overall_fee + signature_verification_gas_consumed * gas_price
+          const adjustedOverallFee = overallFee.add(signatureVerificationFee);
+
+          // adjusted_gas_price = adjusted_overall_fee / total_gas_consumed
+          const adjustedGasPrice = adjustedOverallFee.quo(totalGasConsumed);
+
+          const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
+
+          if (isV1Tx) {
+            const maxGasPrice = gasPrice.mul(gasPriceMargin);
+            const maxGas = totalGasConsumed.mul(gasMargin);
+
+            sendConfigs.feeConfig.setGasPrice({
+              gasPrice,
+              maxGasPrice,
+            });
+
+            return {
+              gasUsed: parseInt(maxGas.truncate().toString()),
+            };
+          } else {
+            const l1Gas = resourceBounds.l1_gas;
+
+            const maxGas = adjustedOverallFee.quo(gasPriceDec).mul(gasMargin);
+            const maxGasPrice = gasPrice.mul(gasPriceMargin);
+
+            const maxPricePerUnit = new CoinPretty(
+              feeCurrency,
+              num.hexToDecimalString(l1Gas.max_price_per_unit)
+            );
+
+            sendConfigs.feeConfig.setGasPrice({
+              gasPrice: new CoinPretty(feeCurrency, gasPriceDec),
+              maxGasPrice: maxPricePerUnit
+                .sub(maxGasPrice)
+                .toDec()
+                .gt(new Dec(0))
+                ? maxPricePerUnit
+                : maxGasPrice,
+            });
+
+            return {
+              gasUsed: parseInt(maxGas.truncate().toString()),
+            };
+          }
         },
       };
     }
@@ -341,24 +402,27 @@ export const StarknetSendPage: FunctionComponent = observer(() => {
           </Box>
         )
       }
-      bottomButton={{
-        disabled:
-          starknetAccount.isDeployingAccount ||
-          (!isAccountNotDeployed && txConfigsValidate.interactionBlocked),
-        left: starknetAccount.isDeployingAccount ? (
-          <Box marginRight="0.25rem">
-            <LoadingIcon width="1rem" height="1rem" />
-          </Box>
-        ) : undefined,
-        text: starknetAccount.isDeployingAccount
-          ? `${intl.formatMessage({ id: "button.activating" })}...`
-          : isAccountNotDeployed
-          ? intl.formatMessage({ id: "button.activate-account" })
-          : intl.formatMessage({ id: "button.next" }),
-        color: "primary",
-        size: "large",
-        isLoading,
-      }}
+      bottomButtons={[
+        {
+          disabled:
+            starknetAccount.isDeployingAccount ||
+            (!isAccountNotDeployed && txConfigsValidate.interactionBlocked),
+          left: starknetAccount.isDeployingAccount ? (
+            <Box marginRight="0.25rem">
+              <LoadingIcon width="1rem" height="1rem" />
+            </Box>
+          ) : undefined,
+          text: starknetAccount.isDeployingAccount
+            ? `${intl.formatMessage({ id: "button.activating" })}...`
+            : isAccountNotDeployed
+            ? intl.formatMessage({ id: "button.activate-account" })
+            : intl.formatMessage({ id: "button.next" }),
+          color: "primary",
+          size: "large",
+          type: "submit",
+          isLoading,
+        },
+      ]}
       onSubmit={async (e) => {
         e.preventDefault();
 

@@ -193,10 +193,6 @@ export const SwapVenues: {
     chainId: "injective-1",
   },
   {
-    name: "injective-hallswap",
-    chainId: "injective-1",
-  },
-  {
     name: "neutron-drop",
     chainId: "neutron-1",
   },

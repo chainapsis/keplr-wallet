@@ -48,7 +48,7 @@ export const MainHeaderLayout = observer<
     Pick<
       HeaderProps,
       | "isNotReady"
-      | "bottomButton"
+      | "bottomButtons"
       | "fixedHeight"
       | "additionalPaddingBottom"
       | "onSubmit"
