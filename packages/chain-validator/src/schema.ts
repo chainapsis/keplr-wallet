@@ -161,7 +161,7 @@ export const EIP155ChainIdSchema = Joi.string().custom((value: string) => {
 });
 
 export const ChainIdSchema = Joi.alternatives().try(
-  Joi.string().min(1).max(30),
+  Joi.string().min(1).max(36),
   EIP155ChainIdSchema
 );
 

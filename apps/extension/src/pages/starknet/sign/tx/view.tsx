@@ -164,24 +164,84 @@ export const SignStarknetTxView: FunctionComponent<{
         }> => {
           noop(gasSimulationRefresher.count);
 
-          const res = await starknetAccountStore
+          const estimateResult = await starknetAccountStore
             .getAccount(chainId)
             .estimateInvokeFee(sender, interactionData.data.transactions, type);
 
-          // gas adjustment = 1.2, signature verification = 700
-          const gasConsumed = new Dec(res.gas_consumed);
-          const gasMax = gasConsumed.mul(new Dec(1.2)).add(new Dec(700));
-          const gasPrice = new CoinPretty(feeCurrency, res.gas_price);
-          const maxGasPrice = gasPrice.mul(new Dec(1.2));
+          const {
+            gas_consumed,
+            data_gas_consumed,
+            gas_price,
+            overall_fee,
+            resourceBounds,
+            unit,
+          } = estimateResult;
 
-          feeConfig.setGasPrice({
-            gasPrice: gasPrice,
-            maxGasPrice: maxGasPrice,
-          });
+          const gasMargin = new Dec(1.2);
+          const gasPriceMargin = new Dec(1.5);
 
-          return {
-            gasUsed: parseInt(gasMax.truncate().toString()),
-          };
+          const isV1Tx = feeConfig.type === "ETH" && unit === "WEI";
+
+          const gasConsumed = new Dec(gas_consumed);
+          const dataGasConsumed = new Dec(data_gas_consumed);
+          const sigVerificationGasConsumed = new Dec(583);
+          const totalGasConsumed = gasConsumed
+            .add(dataGasConsumed)
+            .add(sigVerificationGasConsumed);
+
+          const gasPriceDec = new Dec(gas_price);
+
+          // overall_fee = gas_consumed * gas_price + data_gas_consumed * data_gas_price
+          const overallFee = new Dec(overall_fee);
+
+          const signatureVerificationFee =
+            sigVerificationGasConsumed.mul(gasPriceDec);
+
+          // adjusted_overall_fee = overall_fee + signature_verification_gas_consumed * gas_price
+          const adjustedOverallFee = overallFee.add(signatureVerificationFee);
+
+          // adjusted_gas_price = adjusted_overall_fee / total_gas_consumed
+          const adjustedGasPrice = adjustedOverallFee.quo(totalGasConsumed);
+
+          const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
+
+          if (isV1Tx) {
+            const maxGasPrice = gasPrice.mul(gasPriceMargin);
+            const maxGas = totalGasConsumed.mul(gasMargin);
+
+            feeConfig.setGasPrice({
+              gasPrice,
+              maxGasPrice,
+            });
+
+            return {
+              gasUsed: parseInt(maxGas.truncate().toString()),
+            };
+          } else {
+            const l1Gas = resourceBounds.l1_gas;
+
+            const maxGas = adjustedOverallFee.quo(gasPriceDec).mul(gasMargin);
+            const maxGasPrice = gasPrice.mul(gasPriceMargin);
+
+            const maxPricePerUnit = new CoinPretty(
+              feeCurrency,
+              num.hexToDecimalString(l1Gas.max_price_per_unit)
+            );
+
+            feeConfig.setGasPrice({
+              gasPrice: new CoinPretty(feeCurrency, gasPriceDec),
+              maxGasPrice: maxPricePerUnit
+                .sub(maxGasPrice)
+                .toDec()
+                .gt(new Dec(0))
+                ? maxPricePerUnit
+                : maxGasPrice,
+            });
+
+            return {
+              gasUsed: parseInt(maxGas.truncate().toString()),
+            };
+          }
         },
       };
     }
@@ -264,7 +324,6 @@ export const SignStarknetTxView: FunctionComponent<{
             chainId: interactionData.data.details.chainId,
             cairoVersion: interactionData.data.details.cairoVersion,
             skipValidate: false,
-
             maxFee: feeConfig.maxFee
               ? num.toHex(feeConfig.maxFee.toCoin().amount)
               : "0x0",
@@ -277,7 +336,6 @@ export const SignStarknetTxView: FunctionComponent<{
             chainId: interactionData.data.details.chainId,
             cairoVersion: interactionData.data.details.cairoVersion,
             skipValidate: false,
-
             resourceBounds: {
               l1_gas: {
                 max_amount: num.toHex(gasConfig.gas.toString()),
