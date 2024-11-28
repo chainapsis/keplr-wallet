@@ -177,60 +177,69 @@ export const SignStarknetTxView: FunctionComponent<{
             unit,
           } = estimateResult;
 
-          const isETH = feeConfig.type === "ETH" && unit === "WEI";
+          const gasMargin = new Dec(1.2);
+          const gasPriceMargin = new Dec(1.5);
+
+          const isV1Tx = feeConfig.type === "ETH" && unit === "WEI";
 
           const gasConsumed = new Dec(gas_consumed);
+          const dataGasConsumed = new Dec(data_gas_consumed);
+          const sigVerificationGasConsumed = new Dec(583);
+          const totalGasConsumed = gasConsumed
+            .add(dataGasConsumed)
+            .add(sigVerificationGasConsumed);
+
           const gasPriceDec = new Dec(gas_price);
-          const sigVerificationGasConsumed = new Dec(700);
 
-          if (isETH) {
-            // overall_fee = gas_consumed * gas_price + data_gas_consumed * data_gas_price
-            // fee_with_signature_verification = overall_fee + 700 * gas_price
-            const signatureVerificationFee =
-              sigVerificationGasConsumed.mul(gasPriceDec);
-            const feeWithSigVerification = new Dec(overall_fee).add(
-              signatureVerificationFee
-            );
+          // overall_fee = gas_consumed * gas_price + data_gas_consumed * data_gas_price
+          const overallFee = new Dec(overall_fee);
 
-            const dataGasConsumed = new Dec(data_gas_consumed);
+          const signatureVerificationFee =
+            sigVerificationGasConsumed.mul(gasPriceDec);
 
-            const totalGasConsumed = gasConsumed
-              .add(dataGasConsumed)
-              .add(sigVerificationGasConsumed);
+          // adjusted_overall_fee = overall_fee + signature_verification_gas_consumed * gas_price
+          const adjustedOverallFee = overallFee.add(signatureVerificationFee);
 
-            // adjusted_gas_price = fee_with_sig_verification / total_gas_consumed
-            const adjustedGasPrice =
-              feeWithSigVerification.quo(totalGasConsumed);
+          // adjusted_gas_price = adjusted_overall_fee / total_gas_consumed
+          const adjustedGasPrice = adjustedOverallFee.quo(totalGasConsumed);
 
-            const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
-            const maxGasPrice = gasPrice.mul(new Dec(1.2));
+          const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
+
+          if (isV1Tx) {
+            const maxGasPrice = gasPrice.mul(gasPriceMargin);
+            const maxGas = totalGasConsumed.mul(gasMargin);
 
             feeConfig.setGasPrice({
               gasPrice,
               maxGasPrice,
             });
 
-            // maxFee = gasUsed * gasPrice * 1.2 = gasUsed * maxGasPrice
             return {
-              gasUsed: parseInt(totalGasConsumed.truncate().toString()),
+              gasUsed: parseInt(maxGas.truncate().toString()),
             };
           } else {
             const l1Gas = resourceBounds.l1_gas;
-            const maxAmount = new Dec(num.hexToDecimalString(l1Gas.max_amount)); // signature verification gas is not included in the max amount
+
+            const maxGas = adjustedOverallFee.quo(gasPriceDec).mul(gasMargin);
+            const maxGasPrice = gasPrice.mul(gasPriceMargin);
+
             const maxPricePerUnit = new CoinPretty(
               feeCurrency,
               num.hexToDecimalString(l1Gas.max_price_per_unit)
             );
 
-            const totalGasConsumed = maxAmount.add(sigVerificationGasConsumed);
-
             feeConfig.setGasPrice({
               gasPrice: new CoinPretty(feeCurrency, gasPriceDec),
-              maxGasPrice: maxPricePerUnit,
+              maxGasPrice: maxPricePerUnit
+                .sub(maxGasPrice)
+                .toDec()
+                .gt(new Dec(0))
+                ? maxPricePerUnit
+                : maxGasPrice,
             });
 
             return {
-              gasUsed: parseInt(totalGasConsumed.truncate().toString()),
+              gasUsed: parseInt(maxGas.truncate().toString()),
             };
           }
         },
