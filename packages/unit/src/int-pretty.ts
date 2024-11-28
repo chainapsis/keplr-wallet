@@ -1,4 +1,3 @@
-import { Int } from "./int";
 import { Dec } from "./decimal";
 import { DecUtils } from "./dec-utils";
 import { CoinUtils } from "./coin-utils";
@@ -46,18 +45,24 @@ export class IntPretty {
       return;
     }
 
-    let dec = num;
-    let decPrecision = 0;
-    for (let i = 0; i < 18; i++) {
-      if (
-        !dec.truncate().equals(new Int(0)) &&
-        dec.equals(new Dec(dec.truncate()))
-      ) {
-        break;
-      }
-      dec = dec.mul(new Dec(10));
-      decPrecision++;
+    // Get string representation and find decimal position
+    const decStr = num.toString();
+    const decimalIndex = decStr.indexOf('.');
+    
+    // If no decimal point no precision needed
+    if (decimalIndex === -1) {
+      this.dec = num;
+      this._options.maxDecimals = 0;
+      return;
     }
+  
+    // Count significant digits by walking backwards until non-zero digit
+    const decimalPart = decStr.slice(decimalIndex + 1);
+    let trailingZeros = 0;
+    for (let i = decimalPart.length - 1; i >= 0 && decimalPart[i] === '0'; i--) {
+      trailingZeros++;
+    }
+    const decPrecision = decimalPart.length - trailingZeros;
 
     this.dec = num;
     this._options.maxDecimals = decPrecision;
@@ -291,12 +296,11 @@ export class IntPretty {
   }
 
   clone(): IntPretty {
-    const pretty = new IntPretty(this.dec);
-    pretty.dec = this.dec;
-    pretty.floatingDecimalPointRight = this.floatingDecimalPointRight;
-    pretty._options = {
-      ...this._options,
-    };
-    return pretty;
+    // Clone is often in hot-paths for int-pretty, and the function constructor has overhead.
+    // Thus we do a direct clone.
+    return Object.setPrototypeOf(
+      { dec: this.dec, floatingDecimalPointRight: this.floatingDecimalPointRight, _options: { ...this._options } },
+      IntPretty.prototype
+    );
   }
 }
