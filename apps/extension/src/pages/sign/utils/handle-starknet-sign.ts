@@ -34,7 +34,7 @@ import {
 } from "@ledgerhq/hw-app-starknet";
 
 export const STARKNET_LEDGER_DERIVATION_PATH =
-  "m/2645'/1195502025'/1148870696'/0'/0'/1";
+  "m/2645'/1195502025'/1148870696'/0'/0'/0";
 
 export const connectAndSignDeployAccountTxWithLedger = async (
   chainId: string,

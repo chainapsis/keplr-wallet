@@ -36,10 +36,10 @@ import { BackgroundTxService } from "../tx";
 import { VaultService } from "../vault";
 import { Hash } from "@keplr-wallet/crypto";
 
-const AccountClassHash =
+const EthAccountUpgradeableClassHash =
   "06cc43e9a4a0036cd09d8a997c61df18d7e4fa9459c907a4664b4e56b679d187";
-const StarknetAccountUpgradableClassHash =
-  "04a444ef8caf8fa0db05da60bf0ad9bae264c73fa7e32c61d245406f5523174b";
+const AccountUpgradableClassHash =
+  "06d4b80c0f3c3ea9e98252403a83f8a6bacf7f7362e9ac0a8824854dca31f8a8";
 
 export class KeyRingStarknetService {
   constructor(
@@ -185,7 +185,7 @@ export class KeyRingStarknetService {
         return {
           pubKey: pubkeyStarknet,
           salt: pubkeyStarknet.getStarknetPubKey(),
-          classHash: Buffer.from(StarknetAccountUpgradableClassHash, "hex"),
+          classHash: Buffer.from(AccountUpgradableClassHash, "hex"),
         };
       } else {
         const sig = await this.keyRingService.signWithVault(
@@ -199,7 +199,7 @@ export class KeyRingStarknetService {
         return {
           pubKey: await this.keyRingService.getPubKey(chainId, vaultId),
           salt: Hash.sha256(Buffer.concat([sig.r, sig.s])).slice(0, 24),
-          classHash: Buffer.from(AccountClassHash, "hex"),
+          classHash: Buffer.from(EthAccountUpgradeableClassHash, "hex"),
         };
       }
     })();
