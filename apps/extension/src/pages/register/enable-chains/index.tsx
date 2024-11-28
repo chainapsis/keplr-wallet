@@ -364,6 +364,14 @@ export const EnableChainsScene: FunctionComponent<{
           ) {
             enabledChainIdentifiers.push("eip155:1");
           }
+
+          if (
+            chainStore.modularChainInfos.find(
+              (m) => "starknet" in m && m.chainId === "starknet:SN_MAIN"
+            )
+          ) {
+            enabledChainIdentifiers.push("starknet:SN_MAIN");
+          }
         }
 
         // 스타크넷 관련 체인들은 `candidateAddresses`에 추가되지 않으므로 여기서 enable 할지 판단한다.
@@ -1541,7 +1549,7 @@ const NextStepChainItem: FunctionComponent<{
 
             <Subtitle4 color={ColorPalette["gray-300"]}>
               {"starknet" in modularChainInfo ? (
-                <FormattedMessage id="pages.register.enable-chains.guide.can-select-starknet-next-step" />
+                <FormattedMessage id="pages.register.enable-chains.guide.can-select-starknet-later-step" />
               ) : (
                 <FormattedMessage id="pages.register.enable-chains.guide.can-select-evm-next-step" />
               )}
