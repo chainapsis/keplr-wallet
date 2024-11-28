@@ -1057,6 +1057,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       hexAddress: string;
       pubKey: Uint8Array;
       address: Uint8Array;
+      isNanoLedger: boolean;
     }>
   > {
     return new Promise((resolve, reject) => {

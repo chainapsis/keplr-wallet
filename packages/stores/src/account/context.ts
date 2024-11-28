@@ -135,6 +135,7 @@ export class AccountSharedContext {
             hexAddress: string;
             pubKey: Uint8Array;
             address: Uint8Array;
+            isNanoLedger: boolean;
           }
       >
     >();

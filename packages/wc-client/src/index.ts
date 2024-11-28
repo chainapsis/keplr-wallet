@@ -884,6 +884,7 @@ export class KeplrWalletConnectV2 implements Keplr {
       hexAddress: string;
       pubKey: Uint8Array;
       address: Uint8Array;
+      isNanoLedger: boolean;
     }>
   > {
     throw new Error("Not yet implemented");

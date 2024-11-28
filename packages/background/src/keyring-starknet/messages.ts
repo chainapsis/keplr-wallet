@@ -248,6 +248,7 @@ export class GetStarknetKeysForEachVaultSettledMsg extends Message<
       hexAddress: string;
       pubKey: Uint8Array;
       address: Uint8Array;
+      isNanoLedger: boolean;
     } & {
       vaultId: string;
     }

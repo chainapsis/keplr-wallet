@@ -988,6 +988,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
       hexAddress: string;
       pubKey: Uint8Array;
       address: Uint8Array;
+      isNanoLedger: boolean;
     }>
   > {
     return await this.requestMethod("getStarknetKeysSettled", [chainIds]);

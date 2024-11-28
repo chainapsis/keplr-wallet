@@ -413,6 +413,7 @@ export class MockKeplr implements Keplr {
       hexAddress: string;
       pubKey: Uint8Array;
       address: Uint8Array;
+      isNanoLedger: boolean;
     }>
   > {
     throw new Error("Not implemented");
