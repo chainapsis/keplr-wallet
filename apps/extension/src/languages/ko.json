@@ -602,6 +602,7 @@
   "components.input.recipient-input.wallet-address-only-label": "지갑 주소",
   "components.input.recipient-input.wallet-address-label": "지갑 주소 혹은 ICNS",
   "components.input.recipient-input.wallet-address-label-ens": "지갑 주소 혹은 ENS",
+  "components.input.recipient-input.wallet-address-label-starknet.id": "지갑 주소 혹은 Starknet ID",
   "components.input.recipient-input.wallet-address-label-icns-ens": "지갑 주소 혹은 ICNS 혹은 ENS",
   "components.input.amount-input.amount-label": "수량",
   "components.input.amount-input.max-button": "최대",

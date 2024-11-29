@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite";
 import {
   EmptyAddressError,
   IRecipientConfig,
+  IRecipientConfigWithStarknetID,
 } from "@keplr-wallet/hooks-starknet";
 import { ProfileIcon } from "../../../../../components/icon";
 import { Box } from "../../../../../components/box";
@@ -16,7 +17,7 @@ import { useTheme } from "styled-components";
 
 export interface RecipientInputWithAddressBookProps {
   historyType: string;
-  recipientConfig: IRecipientConfig;
+  recipientConfig: IRecipientConfig | IRecipientConfigWithStarknetID;
 
   permitAddressBookSelfKeyInfo?: boolean;
 }
@@ -34,6 +35,10 @@ export type RecipientInputProps = (
   bottom?: React.ReactNode;
 };
 
+function numOfCharacter(str: string, c: string): number {
+  return str.split(c).length - 1;
+}
+
 export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
   (props, ref) => {
     const { analyticsStore } = useStore();
@@ -44,17 +49,55 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
     const [isAddressBookModalOpen, setIsAddressBookModalOpen] =
       React.useState(false);
 
+    const isStarknetIDEnabled: boolean = (() => {
+      if ("isStarknetIDEnabled" in recipientConfig) {
+        return recipientConfig.isStarknetIDEnabled;
+      }
+
+      return false;
+    })();
+
+    const isStarknetID: boolean = (() => {
+      if ("isStarknetID" in recipientConfig) {
+        return recipientConfig.isStarknetID;
+      }
+
+      return false;
+    })();
+
+    const isStarknetIDFetching: boolean = (() => {
+      if ("isStarknetIDFetching" in recipientConfig) {
+        return recipientConfig.isStarknetIDFetching;
+      }
+
+      return false;
+    })();
+
     return (
       <Box>
         <TextInput
           ref={ref}
           label={intl.formatMessage({
-            id: "components.input.recipient-input.wallet-address-only-label",
+            id: isStarknetIDEnabled
+              ? "components.input.recipient-input.wallet-address-label-starknet.id"
+              : "components.input.recipient-input.wallet-address-only-label",
           })}
           value={recipientConfig.value}
           autoComplete="off"
           onChange={(e) => {
-            const value = e.target.value;
+            let value = e.target.value;
+
+            if (
+              "isStarknetIDEnabled" in recipientConfig &&
+              isStarknetIDEnabled &&
+              value.length > 0 &&
+              value[value.length - 1] === "." &&
+              numOfCharacter(value, ".") === 1 &&
+              numOfCharacter(recipientConfig.value, ".") === 0
+            ) {
+              value = value + recipientConfig.starknetExpectedDomain;
+            }
+
             recipientConfig.setValue(value);
 
             e.preventDefault();
@@ -77,6 +120,19 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
               </IconButton>
             ) : null
           }
+          isLoading={isStarknetIDFetching}
+          paragraph={(() => {
+            if (isStarknetID && !recipientConfig.uiProperties.error) {
+              if (isStarknetIDFetching) {
+                return undefined;
+              }
+
+              return `${recipientConfig.recipient.slice(
+                0,
+                10
+              )}...${recipientConfig.recipient.slice(56)}`;
+            }
+          })()}
           bottom={props.bottom}
           error={(() => {
             const uiProperties = recipientConfig.uiProperties;

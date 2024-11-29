@@ -138,7 +138,10 @@ export const AddressBookModal: FunctionComponent<{
             })
             .filter((contact) => {
               // 이 체크 필요없어보이지만 그냥 원래 있었기 때문에 남김
-              if (!contact.address.startsWith("0x")) {
+              if (
+                !contact.address.startsWith("0x") &&
+                !contact.address.endsWith(".stark")
+              ) {
                 return false;
               }
 
