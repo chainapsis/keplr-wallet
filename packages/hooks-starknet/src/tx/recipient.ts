@@ -42,6 +42,13 @@ const bigAlphabet = "这来";
 const basicAlphabetSize = BigInt(basicAlphabet.length);
 const bigAlphabetSize = BigInt(bigAlphabet.length);
 
+// Reference: https://github.com/lfglabs-dev/starknetid.js/blob/main/packages/core/src/utils.ts
+function isStarkDomain(domain: string): boolean {
+  return /^(?:[a-z0-9-]{1,48}(?:[a-z0-9-]{1,48}[a-z0-9-])?\.)*[a-z0-9-]{1,48}\.stark$/.test(
+    domain
+  );
+}
+
 function encodeDomain(domain: string | undefined | null): bigint[] {
   if (!domain) return [BigInt(0)];
 
@@ -159,7 +166,6 @@ export class RecipientConfig
       return;
     }
 
-    // Only support the mainnet for now.
     const networkName = split[1] as constants.NetworkName;
     if (!networkName) {
       return;
@@ -186,6 +192,13 @@ export class RecipientConfig
       throw new Error("Starknet ID is not set");
     }
 
+    if (!isStarkDomain(username)) {
+      return {
+        isFetching: false,
+        error: new Error("Invalid domain for Starknet ID"),
+      };
+    }
+
     const key = `${this.chainId}/${username}`;
 
     if (!this._starknetIDFetchDataMap.has(key)) {
@@ -205,31 +218,27 @@ export class RecipientConfig
           code?: number;
           message?: string;
         };
-      }>(
-        "https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/Dd-R0QOJGtrWsePbiXmZl2QSBX5nk3vD",
-        "",
-        {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({
-            jsonrpc: "2.0",
-            id: "1",
-            method: "starknet_call",
-            params: [
-              {
-                contract_address: this._starknetID.namingContractAddress,
-                calldata: CallData.toHex({ domain, hint: [] }),
-                entry_point_selector:
-                  "0x2e269d930f6d7ab92b15ce8ff9f5e63709391617e3465fff79ba6baf278ce60", // selector.getSelectorFromName("domain_to_address"),
-              },
-              "latest",
-            ],
-          }),
-          signal: new AbortController().signal,
-        }
-      )
+      }>(modularChainInfo.starknet.rpc, "", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: "1",
+          method: "starknet_call",
+          params: [
+            {
+              contract_address: this._starknetID.namingContractAddress,
+              calldata: CallData.toHex({ domain, hint: [] }),
+              entry_point_selector:
+                "0x2e269d930f6d7ab92b15ce8ff9f5e63709391617e3465fff79ba6baf278ce60", // selector.getSelectorFromName("domain_to_address"),
+            },
+            "latest",
+          ],
+        }),
+        signal: new AbortController().signal,
+      })
         .then((resp) => {
           if (resp.data.error && resp.data.error.message) {
             throw new StarknetIDIsFetchingError(resp.data.error.message);
@@ -339,16 +348,22 @@ export class RecipientConfig
           };
         }
 
-        if (!fetched.starknetHexAddress) {
+        if (fetched.error) {
+          if (fetched.error instanceof StarknetIDIsFetchingError) {
+            return {
+              error: new StarknetIDFailedToFetchError(
+                "Failed to fetch the address from Starknet ID"
+              ),
+              loadingState: fetched.isFetching ? "loading-block" : undefined,
+            };
+          }
+
           return {
-            error: new StarknetIDFailedToFetchError(
-              "Failed to fetch the address from Starknet ID"
-            ),
-            loadingState: fetched.isFetching ? "loading-block" : undefined,
+            error: fetched.error,
           };
         }
 
-        if (fetched.error) {
+        if (!fetched.starknetHexAddress) {
           return {
             error: new StarknetIDFailedToFetchError(
               "Failed to fetch the address from Starknet ID"
