@@ -416,6 +416,7 @@ export const AccountActivationModal: FunctionComponent<{
                     const preSigned = account.isNanoLedger
                       ? await connectAndSignDeployAccountTxWithLedger(
                           chainId,
+                          params.pubKey,
                           {
                             addressSalt,
                             classHash,

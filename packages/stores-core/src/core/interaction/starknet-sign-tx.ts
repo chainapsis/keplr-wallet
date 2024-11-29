@@ -8,6 +8,7 @@ export type SignStarknetTxInteractionData = {
   vaultId: string;
   chainId: string;
   signer: string;
+  pubKey: Uint8Array;
   transactions: Call[];
   details: InvocationsSignerDetails;
   noChangeTx: boolean;

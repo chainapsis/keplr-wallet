@@ -8,6 +8,7 @@ export type SignStarknetMessageInteractionData = {
   vaultId: string;
   chainId: string;
   signer: string;
+  pubKey: Uint8Array;
   message: StarknetTypedData;
   keyType: string;
   keyInsensitive: PlainObject;

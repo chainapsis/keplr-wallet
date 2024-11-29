@@ -4,6 +4,7 @@ import {
   ErrFailedInit,
   ErrFailedSign,
   ErrModuleLedgerSign,
+  ErrPublicKeyUnmatched,
   ErrSignRejected,
   LedgerOptions,
 } from "./ledger-types";
@@ -28,16 +29,21 @@ import {
   DeployAccountFields,
   DeployAccountV1Fields,
   LedgerError,
+  ResponseHashSign,
+  ResponsePublicKey,
+  ResponseTxSign,
   StarknetClient,
   TxFields,
   TxV1Fields,
 } from "@ledgerhq/hw-app-starknet";
+import { PubKeyStarknet } from "@keplr-wallet/crypto";
 
 export const STARKNET_LEDGER_DERIVATION_PATH =
   "m/2645'/1195502025'/1148870696'/0'/0'/0";
 
 export const connectAndSignDeployAccountTxWithLedger = async (
   chainId: string,
+  expectedPubKey: Uint8Array,
   {
     classHash,
     constructorCalldata = [],
@@ -72,6 +78,8 @@ export const connectAndSignDeployAccountTxWithLedger = async (
       "Failed to init transport"
     );
   }
+
+  await checkStarknetPubKey(transport, expectedPubKey);
 
   const nonce = 0; // DEPLOY_ACCOUNT transaction will have a nonce zero as it is the first transaction in the account
   const contractAddress =
@@ -143,92 +151,72 @@ export const connectAndSignDeployAccountTxWithLedger = async (
             deployAccountFields
           );
 
-    switch (res.returnCode) {
-      case LedgerError.BadCla:
-      case LedgerError.BadIns:
-        throw new KeplrError(
-          ErrModuleLedgerSign,
-          ErrCodeUnsupportedApp,
-          "Unsupported app"
-        );
-      case LedgerError.UserRejected:
-        throw new KeplrError(
-          ErrModuleLedgerSign,
-          ErrSignRejected,
-          "User rejected signing"
-        );
-      case LedgerError.NoError:
-        const { r, s } = res;
+    return handleLedgerResponse(res, () => {
+      const { r, s } = res;
 
-        const transaction: DeployAccountSignerDetails = (() => {
-          switch (fee.type) {
-            case "ETH":
-              return {
-                classHash,
-                constructorCalldata: compiledConstructorCalldata,
-                contractAddress,
-                addressSalt,
-                version: "0x1",
-                nonce: nonce,
-                chainId: starknetChainId,
-                maxFee: num.toHex(fee.maxFee),
-                resourceBounds: {
-                  l1_gas: {
-                    max_amount: "0x0",
-                    max_price_per_unit: "0x0",
-                  },
-                  l2_gas: {
-                    max_amount: "0x0",
-                    max_price_per_unit: "0x0",
-                  },
+      const transaction: DeployAccountSignerDetails = (() => {
+        switch (fee.type) {
+          case "ETH":
+            return {
+              classHash,
+              constructorCalldata: compiledConstructorCalldata,
+              contractAddress,
+              addressSalt,
+              version: "0x1",
+              nonce: nonce,
+              chainId: starknetChainId,
+              maxFee: num.toHex(fee.maxFee),
+              resourceBounds: {
+                l1_gas: {
+                  max_amount: "0x0",
+                  max_price_per_unit: "0x0",
                 },
-                tip: "0x0",
-                paymasterData: [],
-                accountDeploymentData: [],
-                nonceDataAvailabilityMode: "L1",
-                feeDataAvailabilityMode: "L1",
-              };
-            case "STRK":
-              return {
-                classHash,
-                constructorCalldata: compiledConstructorCalldata,
-                contractAddress,
-                addressSalt,
-                version: "0x3",
-                nonce: nonce,
-                chainId: starknetChainId,
-                resourceBounds: {
-                  l1_gas: {
-                    max_amount: num.toHex(fee.gas),
-                    max_price_per_unit: num.toHex(fee.maxGasPrice),
-                  },
-                  l2_gas: {
-                    max_amount: "0x0",
-                    max_price_per_unit: "0x0",
-                  },
+                l2_gas: {
+                  max_amount: "0x0",
+                  max_price_per_unit: "0x0",
                 },
-                tip: "0x0",
-                paymasterData: [],
-                accountDeploymentData: [],
-                nonceDataAvailabilityMode: "L1",
-                feeDataAvailabilityMode: "L1",
-              };
-            default:
-              throw new Error("Invalid fee type");
-          }
-        })();
+              },
+              tip: "0x0",
+              paymasterData: [],
+              accountDeploymentData: [],
+              nonceDataAvailabilityMode: "L1",
+              feeDataAvailabilityMode: "L1",
+            };
+          case "STRK":
+            return {
+              classHash,
+              constructorCalldata: compiledConstructorCalldata,
+              contractAddress,
+              addressSalt,
+              version: "0x3",
+              nonce: nonce,
+              chainId: starknetChainId,
+              resourceBounds: {
+                l1_gas: {
+                  max_amount: num.toHex(fee.gas),
+                  max_price_per_unit: num.toHex(fee.maxGasPrice),
+                },
+                l2_gas: {
+                  max_amount: "0x0",
+                  max_price_per_unit: "0x0",
+                },
+              },
+              tip: "0x0",
+              paymasterData: [],
+              accountDeploymentData: [],
+              nonceDataAvailabilityMode: "L1",
+              feeDataAvailabilityMode: "L1",
+            };
+          default:
+            throw new Error("Invalid fee type");
+        }
+      })();
 
-        return {
-          transaction,
-          signature: formatStarknetSignature({ r, s }),
-        };
-      default:
-        throw new KeplrError(
-          ErrModuleLedgerSign,
-          ErrFailedSign,
-          res.errorMessage ?? "Failed to sign"
-        );
-    }
+      return {
+        transaction,
+        signature: formatStarknetSignature({ r, s }),
+      };
+    });
   } catch (e) {
     await transport.close();
 
@@ -247,6 +235,7 @@ export const connectAndSignDeployAccountTxWithLedger = async (
 };
 
 export const connectAndSignInvokeTxWithLedger = async (
+  expectedPubKey: Uint8Array,
   transactions: Call[],
   details: InvocationsSignerDetails,
   options: LedgerOptions = { useWebHID: true }
@@ -263,6 +252,8 @@ export const connectAndSignInvokeTxWithLedger = async (
       "Failed to init transport"
     );
   }
+
+  await checkStarknetPubKey(transport, expectedPubKey);
 
   const txFields: TxFields | TxV1Fields = (() => {
     switch (details.version) {
@@ -305,31 +296,10 @@ export const connectAndSignInvokeTxWithLedger = async (
             txFields
           );
 
-    switch (res.returnCode) {
-      case LedgerError.BadCla:
-      case LedgerError.BadIns:
-        throw new KeplrError(
-          ErrModuleLedgerSign,
-          ErrCodeUnsupportedApp,
-          "Unsupported app"
-        );
-      case LedgerError.UserRejected:
-        throw new KeplrError(
-          ErrModuleLedgerSign,
-          ErrSignRejected,
-          "User rejected signing"
-        );
-      case LedgerError.NoError:
-        const { r, s } = res;
-
-        return formatStarknetSignature({ r, s });
-      default:
-        throw new KeplrError(
-          ErrModuleLedgerSign,
-          ErrFailedSign,
-          res.errorMessage ?? "Failed to sign"
-        );
-    }
+    return handleLedgerResponse(res, () => {
+      const { r, s } = res;
+      return formatStarknetSignature({ r, s });
+    });
   } catch (e) {
     await transport.close();
 
@@ -348,6 +318,7 @@ export const connectAndSignInvokeTxWithLedger = async (
 };
 
 export const connectAndSignMessageWithLedger = async (
+  expectedPubKey: Uint8Array,
   message: TypedData,
   signer: string,
   options: LedgerOptions = { useWebHID: true }
@@ -365,6 +336,8 @@ export const connectAndSignMessageWithLedger = async (
     );
   }
 
+  await checkStarknetPubKey(transport, expectedPubKey);
+
   try {
     const starknetApp = new StarknetClient(transport);
     const res = await starknetApp.signMessage(
@@ -373,31 +346,10 @@ export const connectAndSignMessageWithLedger = async (
       signer
     );
 
-    switch (res.returnCode) {
-      case LedgerError.BadCla:
-      case LedgerError.BadIns:
-        throw new KeplrError(
-          ErrModuleLedgerSign,
-          ErrCodeUnsupportedApp,
-          "Unsupported app"
-        );
-      case LedgerError.UserRejected:
-        throw new KeplrError(
-          ErrModuleLedgerSign,
-          ErrSignRejected,
-          "User rejected signing"
-        );
-      case LedgerError.NoError:
-        const { r, s } = res;
-
-        return formatStarknetSignature({ r, s });
-      default:
-        throw new KeplrError(
-          ErrModuleLedgerSign,
-          ErrFailedSign,
-          res.errorMessage ?? "Failed to sign"
-        );
-    }
+    return handleLedgerResponse(res, () => {
+      const { r, s } = res;
+      return formatStarknetSignature({ r, s });
+    });
   } catch (e) {
     await transport.close();
 
@@ -427,3 +379,62 @@ const formatStarknetSignature = ({
     encode.addHexPrefix(encode.buf2hex(s)),
   ];
 };
+
+function handleLedgerResponse<R>(
+  res: ResponsePublicKey | ResponseHashSign | ResponseTxSign,
+  onNoError: () => R
+): R {
+  switch (res.returnCode) {
+    case LedgerError.BadCla:
+    case LedgerError.BadIns:
+      throw new KeplrError(
+        ErrModuleLedgerSign,
+        ErrCodeUnsupportedApp,
+        "Unsupported app"
+      );
+    case LedgerError.UserRejected:
+      throw new KeplrError(
+        ErrModuleLedgerSign,
+        ErrSignRejected,
+        "User rejected signing"
+      );
+    case LedgerError.NoError:
+      return onNoError();
+    default:
+      throw new KeplrError(
+        ErrModuleLedgerSign,
+        ErrFailedSign,
+        res.errorMessage ?? "Failed to sign"
+      );
+  }
+}
+
+async function checkStarknetPubKey(
+  transport: Transport,
+  expectedPubKey: Uint8Array
+) {
+  const starknetApp = new StarknetClient(transport);
+
+  const res = await starknetApp.getPubKey(
+    STARKNET_LEDGER_DERIVATION_PATH,
+    false
+  );
+
+  handleLedgerResponse(res, () => {
+    const { publicKey } = res;
+
+    if (
+      Buffer.from(new PubKeyStarknet(expectedPubKey).toBytes()).toString(
+        "hex"
+      ) !== Buffer.from(new PubKeyStarknet(publicKey).toBytes()).toString("hex")
+    ) {
+      transport.close();
+
+      throw new KeplrError(
+        ErrModuleLedgerSign,
+        ErrPublicKeyUnmatched,
+        "Public key unmatched"
+      );
+    }
+  });
+}

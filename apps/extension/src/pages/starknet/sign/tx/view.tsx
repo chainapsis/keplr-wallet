@@ -381,6 +381,7 @@ export const SignStarknetTxView: FunctionComponent<{
         setIsLedgerInteracting(true);
         setLedgerInteractingError(undefined);
         signature = await connectAndSignInvokeTxWithLedger(
+          interactionData.data.pubKey,
           interactionData.data.transactions,
           details,
           {

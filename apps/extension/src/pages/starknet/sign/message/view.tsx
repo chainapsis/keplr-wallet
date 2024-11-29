@@ -79,6 +79,7 @@ export const SignStarknetMessageView: FunctionComponent<{
       setIsLedgerInteracting(true);
       setLedgerInteractingError(undefined);
       signature = await connectAndSignMessageWithLedger(
+        interactionData.data.pubKey,
         interactionData.data.message,
         interactionData.data.signer,
         {
