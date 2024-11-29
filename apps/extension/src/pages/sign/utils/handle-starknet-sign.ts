@@ -1,6 +1,6 @@
 import {
   ErrCodeDeviceLocked,
-  ErrCodeUnsupportedApp,
+  ErrFailedGetPublicKey,
   ErrFailedInit,
   ErrFailedSign,
   ErrModuleLedgerSign,
@@ -389,8 +389,8 @@ function handleLedgerResponse<R>(
     case LedgerError.BadIns:
       throw new KeplrError(
         ErrModuleLedgerSign,
-        ErrCodeUnsupportedApp,
-        "Unsupported app"
+        ErrFailedGetPublicKey,
+        "Failed to get public key"
       );
     case LedgerError.UserRejected:
       throw new KeplrError(

@@ -193,6 +193,10 @@ export const LedgerGuideBox: FunctionComponent<{
                   }
                 }
 
+                if (appData["Starknet"]) {
+                  app = "Starknet";
+                }
+
                 return (
                   <GuideBox
                     color="warning"
