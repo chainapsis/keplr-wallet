@@ -601,6 +601,9 @@ export const SignStarknetTxView: FunctionComponent<{
         />
 
         <LedgerGuideBox
+          data={{
+            keyInsensitive: interactionData.data.keyInsensitive,
+          }}
           isLedgerInteracting={isLedgerInteracting}
           ledgerInteractingError={ledgerInteractingError}
           isInternal={interactionData.isInternal}

@@ -62,6 +62,7 @@ export const AccountActivationModal: FunctionComponent<{
     accountStore,
     starknetQueriesStore,
     starknetAccountStore,
+    keyRingStore,
   } = useStore();
 
   const theme = useTheme();
@@ -319,16 +320,21 @@ export const AccountActivationModal: FunctionComponent<{
           gasSimulator={gasSimulator}
           disableClick
         />
-        <LedgerGuideBox
-          isLedgerInteracting={isLedgerInteracting}
-          ledgerInteractingError={ledgerInteractingError}
-          isInternal={true}
-          backgroundColor={
-            theme.mode === "light"
-              ? ColorPalette["gray-50"]
-              : ColorPalette["gray-650"]
-          }
-        />
+        {keyRingStore.selectedKeyInfo && (
+          <LedgerGuideBox
+            data={{
+              keyInsensitive: keyRingStore.selectedKeyInfo.insensitive,
+            }}
+            isLedgerInteracting={isLedgerInteracting}
+            ledgerInteractingError={ledgerInteractingError}
+            isInternal={true}
+            backgroundColor={
+              theme.mode === "light"
+                ? ColorPalette["gray-50"]
+                : ColorPalette["gray-650"]
+            }
+          />
+        )}
         <Columns sum={1} gutter="0.75rem">
           <Column weight={1}>
             <Button
