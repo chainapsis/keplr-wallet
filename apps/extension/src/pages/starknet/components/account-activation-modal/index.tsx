@@ -21,6 +21,7 @@ import { Column, Columns } from "../../../../components/column";
 import {
   SubmitStarknetTxHashMsg,
   GetStarknetKeyParamsSelectedMsg,
+  PlainObject,
 } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT, KeplrError } from "@keplr-wallet/router";
@@ -56,12 +57,18 @@ export const AccountActivationModal: FunctionComponent<{
   chainId: string;
 
   onAccountDeployed?: () => void;
-}> = observer(({ close, goBack, chainId, onAccountDeployed }) => {
+
+  data?: {
+    keyInsensitive: PlainObject;
+    isEthereum: boolean;
+  };
+}> = observer(({ close, goBack, chainId, onAccountDeployed, data }) => {
   const {
     chainStore,
     accountStore,
     starknetQueriesStore,
     starknetAccountStore,
+    keyRingStore,
   } = useStore();
 
   const theme = useTheme();
@@ -320,6 +327,12 @@ export const AccountActivationModal: FunctionComponent<{
           disableClick
         />
         <LedgerGuideBox
+          data={
+            data || {
+              keyInsensitive: keyRingStore.selectedKeyInfo!.insensitive,
+              isEthereum: false,
+            }
+          }
           isLedgerInteracting={isLedgerInteracting}
           ledgerInteractingError={ledgerInteractingError}
           isInternal={true}
