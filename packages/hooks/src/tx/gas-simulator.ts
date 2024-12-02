@@ -277,7 +277,7 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
   @action
   setGasAdjustmentValue(gasAdjustment: string | number) {
     if (typeof gasAdjustment === "number") {
-      if (gasAdjustment < 0 || gasAdjustment > 2) {
+      if (gasAdjustment < 0 || gasAdjustment > 3) {
         return;
       }
 
@@ -295,7 +295,7 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     }
 
     const num = parseFloat(gasAdjustment);
-    if (Number.isNaN(num) || num < 0 || num > 2) {
+    if (Number.isNaN(num) || num < 0 || num > 3) {
       return;
     }
 
