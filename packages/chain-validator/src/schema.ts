@@ -161,7 +161,7 @@ export const EIP155ChainIdSchema = Joi.string().custom((value: string) => {
 });
 
 export const ChainIdSchema = Joi.alternatives().try(
-  Joi.string().min(1).max(36),
+  Joi.string().min(1).max(50),
   EIP155ChainIdSchema
 );
 
@@ -214,7 +214,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
     website: Joi.string().uri(),
   }),
   chainId: ChainIdSchema.required(),
-  chainName: Joi.string().required().min(1).max(30),
+  chainName: Joi.string().required().min(1).max(36),
   stakeCurrency: CurrencySchema,
   walletUrl: Joi.string().uri(),
   walletUrlForStaking: Joi.string().uri(),
