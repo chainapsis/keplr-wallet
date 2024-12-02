@@ -6,8 +6,8 @@ import semver from "semver";
 const version = require("../package.json").version;
 (async () => {
   try {
-    const sementic = semver.parse(version);
-    const versionWithoutPrerelease = `${sementic.major}.${sementic.minor}.${sementic.patch}`;
+    const semantic = semver.parse(version);
+    const versionWithoutPrerelease = `${semantic.major}.${semantic.minor}.${semantic.patch}`;
 
     const versionPath = path.join(__dirname, "../src/version.ts");
     //export const BUILD_VERSION = "0.12.90";

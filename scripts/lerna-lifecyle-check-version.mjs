@@ -7,8 +7,8 @@ import fs from "fs";
 const version = require("../lerna.json").version;
 (async () => {
   try {
-    const sementic = semver.parse(version);
-    if (sementic.prerelease.length === 0) {
+    const semantic = semver.parse(version);
+    if (semantic.prerelease.length === 0) {
       const packages = [];
       const _packages = fs.readdirSync(`${__dirname}/../packages/`);
       for (const dir of _packages) {
