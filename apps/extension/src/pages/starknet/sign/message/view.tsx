@@ -289,9 +289,6 @@ export const SignStarknetMessageView: FunctionComponent<{
         <div style={{ marginTop: "0.75rem", flex: 1 }} />
 
         <LedgerGuideBox
-          data={{
-            keyInsensitive: interactionData.data.keyInsensitive,
-          }}
           isLedgerInteracting={isLedgerInteracting}
           ledgerInteractingError={ledgerInteractingError}
           isInternal={interactionData.isInternal}

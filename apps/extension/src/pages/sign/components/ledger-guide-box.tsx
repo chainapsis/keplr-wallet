@@ -16,9 +16,9 @@ import { PlainObject } from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
 
 export const LedgerGuideBox: FunctionComponent<{
-  data: {
+  data?: {
     keyInsensitive: PlainObject;
-    isEthereum?: boolean;
+    isEthereum: boolean;
   };
   isLedgerInteracting: boolean;
   ledgerInteractingError: Error | undefined;
