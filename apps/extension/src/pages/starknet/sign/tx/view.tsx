@@ -601,6 +601,10 @@ export const SignStarknetTxView: FunctionComponent<{
         />
 
         <LedgerGuideBox
+          data={{
+            keyInsensitive: interactionData.data.keyInsensitive,
+            isEthereum: false,
+          }}
           isLedgerInteracting={isLedgerInteracting}
           ledgerInteractingError={ledgerInteractingError}
           isInternal={interactionData.isInternal}
@@ -616,6 +620,10 @@ export const SignStarknetTxView: FunctionComponent<{
         }}
       >
         <AccountActivationModal
+          data={{
+            keyInsensitive: interactionData.data.keyInsensitive,
+            isEthereum: false,
+          }}
           close={() => setIsAccountActivationModalOpen(false)}
           onAccountDeployed={() => {
             // account가 deploy 되었을때 gas simulator를 refresh한다.
