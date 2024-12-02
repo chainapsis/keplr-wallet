@@ -34,10 +34,7 @@ import {
 import Base from "@keystonehq/hw-app-base";
 import { PlainObject } from "@keplr-wallet/background";
 import { KeplrError } from "@keplr-wallet/router";
-
-export interface LedgerOptions {
-  useWebHID: boolean;
-}
+import { LedgerOptions } from "./ledger-types";
 
 export interface KeystoneOptions {
   isEthSigning: boolean;

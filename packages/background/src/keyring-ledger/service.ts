@@ -1,6 +1,6 @@
 import { PlainObject, Vault } from "../vault";
 import { Buffer } from "buffer/";
-import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
+import { PubKeySecp256k1, PubKeyStarknet } from "@keplr-wallet/crypto";
 import { KeplrError } from "@keplr-wallet/router";
 import { ModularChainInfo } from "@keplr-wallet/types";
 import { KeyRingService } from "../keyring";
@@ -44,7 +44,7 @@ export class KeyRingLedgerService {
   ): PubKeySecp256k1 {
     if ("starknet" in modularChainInfo) {
       throw new Error(
-        "Ledger support is not provided for this chain on Keplr yet"
+        "'getPubKeyStarknet' should be called for Starknet chain"
       );
     }
     if (!("cosmos" in modularChainInfo)) {
@@ -87,6 +87,30 @@ export class KeyRingLedgerService {
       "hex"
     );
     return new PubKeySecp256k1(bytes);
+  }
+
+  getPubKeyStarknet(
+    vault: Vault,
+    modularChainInfo: ModularChainInfo
+  ): PubKeyStarknet {
+    if (!("starknet" in modularChainInfo)) {
+      throw new Error("'modularChainInfo' should have Starknet chain info");
+    }
+
+    if (!vault.insensitive["Starknet"]) {
+      throw new KeplrError(
+        "keyring",
+        901,
+        "No Starknet public key. Initialize Starknet app on Ledger by selecting the chain in the extension"
+      );
+    }
+
+    const bytes = Buffer.from(
+      (vault.insensitive["Starknet"] as any)["pubKey"] as string,
+      "hex"
+    );
+
+    return new PubKeyStarknet(bytes);
   }
 
   sign(): {

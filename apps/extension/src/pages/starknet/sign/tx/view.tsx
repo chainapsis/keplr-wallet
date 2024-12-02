@@ -32,6 +32,10 @@ import { XAxis } from "../../../../components/axis";
 import { ViewDataButton } from "../../../sign/components/view-data-button";
 import { AccountActivationModal } from "../../components/account-activation-modal";
 import { Modal } from "../../../../components/modal";
+import { connectAndSignInvokeTxWithLedger } from "../../../sign/utils/handle-starknet-sign";
+import { KeplrError } from "@keplr-wallet/router";
+import { ErrModuleLedgerSign } from "../../../sign/utils/ledger-types";
+import { LedgerGuideBox } from "../../../sign/components/ledger-guide-box";
 import { useNavigate } from "react-router";
 import { ApproveIcon, CancelIcon } from "../../../../components/button";
 
@@ -39,6 +43,7 @@ export const SignStarknetTxView: FunctionComponent<{
   interactionData: NonNullable<SignStarknetTxInteractionStore["waitingData"]>;
 }> = observer(({ interactionData }) => {
   const {
+    uiConfigStore,
     signStarknetTxInteractionStore,
     starknetAccountStore,
     starknetQueriesStore,
@@ -261,6 +266,11 @@ export const SignStarknetTxView: FunctionComponent<{
 
   const [isViewData, setIsViewData] = useState(false);
 
+  const [isLedgerInteracting, setIsLedgerInteracting] = useState(false);
+  const [ledgerInteractingError, setLedgerInteractingError] = useState<
+    Error | undefined
+  >(undefined);
+
   const isAccountNotDeployed =
     senderConfig.uiProperties.error instanceof AccountNotDeployed;
   const [isAccountActivationModalOpen, setIsAccountActivationModalOpen] =
@@ -284,7 +294,7 @@ export const SignStarknetTxView: FunctionComponent<{
   const isLoading =
     signStarknetTxInteractionStore.isObsoleteInteractionApproved(
       interactionData.id
-    );
+    ) || isLedgerInteracting;
 
   const approve = async () => {
     try {
@@ -366,10 +376,25 @@ export const SignStarknetTxView: FunctionComponent<{
         }
       })();
 
+      let signature: string[] | undefined = undefined;
+      if (interactionData.data.keyType === "ledger") {
+        setIsLedgerInteracting(true);
+        setLedgerInteractingError(undefined);
+        signature = await connectAndSignInvokeTxWithLedger(
+          interactionData.data.pubKey,
+          interactionData.data.transactions,
+          details,
+          {
+            useWebHID: uiConfigStore.useWebHIDLedger,
+          }
+        );
+      }
+
       await signStarknetTxInteractionStore.approveWithProceedNext(
         interactionData.id,
         interactionData.data.transactions,
         details,
+        signature,
         async (proceedNext) => {
           if (!proceedNext) {
             if (
@@ -402,6 +427,18 @@ export const SignStarknetTxView: FunctionComponent<{
       );
     } catch (e) {
       console.log(e);
+
+      if (e instanceof KeplrError) {
+        if (e.module === ErrModuleLedgerSign) {
+          setLedgerInteractingError(e);
+        } else {
+          setLedgerInteractingError(undefined);
+        }
+      } else {
+        setLedgerInteractingError(undefined);
+      }
+    } finally {
+      setIsLedgerInteracting(false);
     }
   };
 
@@ -461,11 +498,12 @@ export const SignStarknetTxView: FunctionComponent<{
     >
       <Box
         height="100%"
+        padding="0.75rem 0.75rem 0"
         style={{
           overflow: "auto",
         }}
       >
-        <Box padding="0.75rem 0.75rem 0" marginBottom="0.5rem">
+        <Box marginBottom="0.5rem">
           <Columns sum={1} alignY="center">
             <XAxis>
               <H5
@@ -508,16 +546,14 @@ export const SignStarknetTxView: FunctionComponent<{
               flex: "0 1 auto",
               overflowY: "auto",
               overflowX: "hidden",
-
               boxShadow:
                 theme.mode === "light"
                   ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
                   : "none",
-
-              margin: "0 0.75rem",
-
               height: "fit-content",
               maxHeight: "23rem",
+
+              borderRadius: "0.375rem",
             }}
           >
             <Box
@@ -562,6 +598,12 @@ export const SignStarknetTxView: FunctionComponent<{
           feeConfig={feeConfig}
           gasConfig={gasConfig}
           gasSimulator={gasSimulator}
+        />
+
+        <LedgerGuideBox
+          isLedgerInteracting={isLedgerInteracting}
+          ledgerInteractingError={ledgerInteractingError}
+          isInternal={interactionData.isInternal}
         />
       </Box>
 
@@ -634,7 +676,6 @@ const DataByTransactionView: FunctionComponent<{
         display: "flex",
         flexDirection: "column",
         flex: "0 1 auto",
-        margin: "0 0.75rem",
 
         overflowY: "auto",
         overflowX: "hidden",

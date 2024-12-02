@@ -255,6 +255,7 @@ export interface Keplr {
     hexAddress: string;
     pubKey: Uint8Array;
     address: Uint8Array;
+    isNanoLedger: boolean;
   }>;
   getStarknetKeysSettled(chainIds: string[]): Promise<
     SettledResponses<{
@@ -262,6 +263,7 @@ export interface Keplr {
       hexAddress: string;
       pubKey: Uint8Array;
       address: Uint8Array;
+      isNanoLedger: boolean;
     }>
   >;
   signStarknetDeployAccountTransaction(

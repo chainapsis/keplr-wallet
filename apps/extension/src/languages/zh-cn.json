@@ -153,6 +153,7 @@
   "pages.register.enable-chains.chain-selected-count": "已选择{numSelected}条链",
   "pages.register.enable-chains.skip-button": "跳过",
   "pages.register.enable-chains.guide.can-select-evm-next-step": "你可以在下一步中选择EVM链。",
+  "pages.register.enable-chains.guide.can-select-starknet-later-step": "您可以在稍後的步驟中選擇Starknet鏈。",
 
   "pages.register.select-derivation-path.title": "选择账户派生路径",
   "pages.register.select-derivation-path.paragraph": "要使用这两个路径，你需要执行两次导入过程。",
@@ -462,7 +463,7 @@
   "page.sign.components.ledger-guide.box.usb-permission-unknown-paragraph-2": "此页面",
   "page.sign.components.ledger-guide.box.usb-permission-unknown-paragraph-3": "重新授权。",
   "page.sign.components.ledger-guide.box.unlock-ledger-paragraph": "解锁你的Ledger设备。",
-  "page.sign.components.ledger-guide.box.initialize-ethereum-app-first-paragraph": "请先初始化以太坊应用程序。",
+  "page.sign.components.ledger-guide.box.initialize-app-first-paragraph": "请先初始化{app}应用程序。",
   "page.sign.components.ledger-guide.box.open-app-on-ledger-paragraph": "在Ledger上打开{app}应用程序并重试。",
   "page.sign.components.ledger-guide.box.try-again-with-same-ledger-paragraph": "请用你与此钱包连接的同一个Ledger设备或帐户重试。",
   "page.sign.components.ledger-guide.box.rejected-signing-on-ledger-paragraph": "你已拒绝在Ledger上签名交易。",

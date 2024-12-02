@@ -111,8 +111,28 @@ export class StoreAccount extends Account {
           type: "STRK";
           gas: string;
           maxGasPrice: string;
-        }
+        },
+    preSigned?: {
+      transaction: DeployAccountSignerDetails;
+      signature: string[];
+    }
   ): Promise<DeployContractResponse> {
+    if (preSigned) {
+      const {
+        transaction: { classHash, addressSalt, constructorCalldata },
+        signature,
+      } = preSigned;
+      return this.deployAccountContract(
+        {
+          classHash,
+          addressSalt,
+          constructorCalldata,
+          signature,
+        },
+        preSigned.transaction
+      );
+    }
+
     const nonce = 0; // DEPLOY_ACCOUNT transaction will have a nonce zero as it is the first transaction in the account
     const chainId = await this.getChainId();
 

@@ -17,7 +17,6 @@
   },
   "devDependencies": {
     "@types/aes-js": "^3.1.0",
-    "@types/ledgerhq__hw-transport-webusb": "^4.70.1",
     "@types/secp256k1": "^4.0.1",
     "@types/w3c-web-hid": "^1.0.2",
     "@types/w3c-web-usb": "^1.0.5"
@@ -40,10 +39,11 @@
     "@keplr-wallet/simple-fetch": "0.12.157",
     "@keplr-wallet/types": "0.12.157",
     "@keplr-wallet/unit": "0.12.157",
-    "@ledgerhq/hw-app-eth": "^6.29.3",
-    "@ledgerhq/hw-transport": "^6.20.0",
-    "@ledgerhq/hw-transport-webhid": "^6.20.0",
-    "@ledgerhq/hw-transport-webusb": "^6.20.0",
+    "@ledgerhq/hw-app-eth": "^6.40.3",
+    "@ledgerhq/hw-app-starknet": "^2.4.0",
+    "@ledgerhq/hw-transport": "^6.31.4",
+    "@ledgerhq/hw-transport-webhid": "^6.29.4",
+    "@ledgerhq/hw-transport-webusb": "^6.29.4",
     "@noble/hashes": "1.0.0",
     "aes-js": "^3.1.2",
     "big-integer": "^1.6.48",
