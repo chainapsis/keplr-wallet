@@ -31,6 +31,11 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
         title: intl.formatMessage({
           id: "pages.register.name-password-hardware.title",
         }),
+        paragraphs: [
+          intl.formatMessage({
+            id: "pages.register.connect-ledger.paragraph",
+          }),
+        ],
         stepCurrent: 1,
         stepTotal: type === "keystone" ? 4 : 5,
       });

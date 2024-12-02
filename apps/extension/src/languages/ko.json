@@ -124,7 +124,7 @@
   "pages.register.back-up-private-key.import-button": "확인",
 
   "pages.register.connect-ledger.title": "하드웨어 지갑을 연결해주세요.",
-  "pages.register.connect-ledger.paragraph": "EVM 체인(Injective, Evmos)을 케플러에서 사용하실 분들은 이후 단계에서 이더리움 앱을 연결하실 수 있습니다.",
+  "pages.register.connect-ledger.paragraph": "케플러는 코스모스 앱체인, Ethereum, Injective와 Evmos를 포함한 모든 EVM 호환 체인, 그리고 Starknet을 지원합니다. Ledger 연결은 코스모스, EVM, Starknet 순서로 진행됩니다.",
   "pages.register.connect-ledger.step-text": "{step} 단계",
   "pages.register.connect-ledger.connect-ledger-step-paragraph": "렛저를 연결하고 잠금을 해제하세요.",
   "pages.register.connect-ledger.open-app-step-paragraph": "렛저에서 {app} 앱을 열어주세요.",
