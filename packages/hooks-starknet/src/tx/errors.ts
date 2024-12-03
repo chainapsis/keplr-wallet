@@ -125,3 +125,19 @@ export class MemoSuspectMnemonicInclusion extends Error {
     Object.setPrototypeOf(this, MemoSuspectMnemonicInclusion.prototype);
   }
 }
+
+export class StarknetIDIsFetchingError extends Error {
+  constructor(m: string) {
+    super(m);
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, StarknetIDIsFetchingError.prototype);
+  }
+}
+
+export class StarknetIDFailedToFetchError extends Error {
+  constructor(m: string) {
+    super(m);
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, StarknetIDFailedToFetchError.prototype);
+  }
+}

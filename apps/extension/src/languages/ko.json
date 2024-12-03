@@ -124,7 +124,7 @@
   "pages.register.back-up-private-key.import-button": "확인",
 
   "pages.register.connect-ledger.title": "하드웨어 지갑을 연결해주세요.",
-  "pages.register.connect-ledger.paragraph": "EVM 체인(Injective, Evmos)을 케플러에서 사용하실 분들은 이후 단계에서 이더리움 앱을 연결하실 수 있습니다.",
+  "pages.register.connect-ledger.paragraph": "케플러는 코스모스 앱체인, Ethereum, Injective와 Evmos를 포함한 모든 EVM 호환 체인, 그리고 Starknet을 지원합니다. Ledger 연결은 코스모스, EVM, Starknet 순서로 진행됩니다.",
   "pages.register.connect-ledger.step-text": "{step} 단계",
   "pages.register.connect-ledger.connect-ledger-step-paragraph": "렛저를 연결하고 잠금을 해제하세요.",
   "pages.register.connect-ledger.open-app-step-paragraph": "렛저에서 {app} 앱을 열어주세요.",
@@ -159,6 +159,7 @@
   "pages.register.enable-chains.chain-selected-count": "{numSelected}개의 체인이 선택됨",
   "pages.register.enable-chains.skip-button": "스킵",
   "pages.register.enable-chains.guide.can-select-evm-next-step": "EVM 체인 선택은 다음 단계에서 진행할 수 있습니다.",
+  "pages.register.enable-chains.guide.can-select-starknet-later-step": "Starknet 체인 선택은 추후의 단계에서 진행할 수 있습니다.",
   "pages.register.enable-chains.guide.starknet.title": "스타크넷 유저를 위한 안내",
   "pages.register.enable-chains.guide.starknet.paragraph": "Argent, Braavos 등의 타 지갑 서비스에서 계정을 불러와도 서로 다른 새로운 계정이 생성됩니다.",
 
@@ -477,7 +478,7 @@
   "page.sign.components.ledger-guide.box.usb-permission-unknown-paragraph-2": "이 웹사이트를 ",
   "page.sign.components.ledger-guide.box.usb-permission-unknown-paragraph-3": "방문하여 권한을 복구하세요.",
   "page.sign.components.ledger-guide.box.unlock-ledger-paragraph": "렛저의 잠금을 해제하세요",
-  "page.sign.components.ledger-guide.box.initialize-ethereum-app-first-paragraph": "먼저 이더리움 앱을 초기 셋팅해야 합니다.",
+  "page.sign.components.ledger-guide.box.initialize-app-first-paragraph": "먼저 {app} 앱을 초기 셋팅해야 합니다.",
   "page.sign.components.ledger-guide.box.open-app-on-ledger-paragraph": "렛저에서 {app} 앱을 열고 다시 시도해보세요.",
   "page.sign.components.ledger-guide.box.try-again-with-same-ledger-paragraph": "이 지갑과 연결했던 렛저 장치와 렛저 계정으로 다시 시도하세요.",
   "page.sign.components.ledger-guide.box.rejected-signing-on-ledger-paragraph": "렛저에서 트랜잭션에 서명하는 것을 거절했습니다.",
@@ -602,6 +603,7 @@
   "components.input.recipient-input.wallet-address-only-label": "지갑 주소",
   "components.input.recipient-input.wallet-address-label": "지갑 주소 혹은 ICNS",
   "components.input.recipient-input.wallet-address-label-ens": "지갑 주소 혹은 ENS",
+  "components.input.recipient-input.wallet-address-label-starknet.id": "지갑 주소 혹은 Starknet ID",
   "components.input.recipient-input.wallet-address-label-icns-ens": "지갑 주소 혹은 ICNS 혹은 ENS",
   "components.input.amount-input.amount-label": "수량",
   "components.input.amount-input.max-button": "최대",

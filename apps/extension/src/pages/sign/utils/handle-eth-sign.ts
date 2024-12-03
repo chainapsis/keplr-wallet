@@ -13,6 +13,7 @@ import {
   ErrModuleLedgerSign,
   ErrPublicKeyUnmatched,
   ErrSignRejected,
+  LedgerOptions,
 } from "./ledger-types";
 import Eth from "@ledgerhq/hw-app-eth";
 import { LedgerUtils } from "../../../utils";
@@ -39,11 +40,6 @@ import {
   createKeystoneTransport,
   handleKeystoneUSBError,
 } from "../../../utils/keystone";
-
-export interface LedgerOptions {
-  useWebHID: boolean;
-}
-
 export interface KeystoneOptions {
   displayQRCode: (ur: { type: string; cbor: string }) => Promise<void>;
   scanQRCode: () => Promise<KeystoneUR>;

@@ -577,6 +577,7 @@ export class Keplr implements IKeplr {
     hexAddress: string;
     pubKey: Uint8Array;
     address: Uint8Array;
+    isNanoLedger: boolean;
   }> {
     return await Keplr.requestMethod("getStarknetKey", [chainId]);
   }
@@ -587,6 +588,7 @@ export class Keplr implements IKeplr {
       hexAddress: string;
       pubKey: Uint8Array;
       address: Uint8Array;
+      isNanoLedger: boolean;
     }>
   > {
     return await Keplr.requestMethod("getStarknetKeysSettled", [chainIds]);

@@ -7,7 +7,7 @@ import {
   KeyRingStatus,
 } from "./types";
 import { Env, WEBPAGE_PORT } from "@keplr-wallet/router";
-import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
+import { PubKeySecp256k1, PubKeyStarknet } from "@keplr-wallet/crypto";
 import { ChainsService } from "../chains";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
@@ -1059,6 +1059,22 @@ export class KeyRingService {
     return this.getPubKeyWithVault(vault, coinType, modularChainInfo);
   }
 
+  getPubKeyStarknet(chainId: string, vaultId: string): Promise<PubKeyStarknet> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const modularChainInfo =
+      this.chainsService.getModularChainInfoOrThrow(chainId);
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    return this.getStarknetPubKeyWithVault(vault, modularChainInfo);
+  }
+
   getPubKeyWithNotFinalizedCoinType(
     chainId: string,
     vaultId: string,
@@ -1168,6 +1184,23 @@ export class KeyRingService {
     }
 
     return signature;
+  }
+
+  getStarknetPubKeyWithVault(
+    vault: Vault,
+    modularChainInfo: ModularChainInfo
+  ): Promise<PubKeyStarknet> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const keyRing = this.getVaultKeyRing(vault);
+
+    if (typeof keyRing.getPubKeyStarknet !== "function") {
+      throw new Error("This keyring doesn't support 'getPubKeyStarknet'");
+    }
+
+    return Promise.resolve(keyRing.getPubKeyStarknet(vault, modularChainInfo));
   }
 
   getPubKeyWithVault(

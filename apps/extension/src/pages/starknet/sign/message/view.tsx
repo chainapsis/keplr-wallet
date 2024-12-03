@@ -16,6 +16,10 @@ import { XAxis, YAxis } from "../../../../components/axis";
 import { Gutter } from "../../../../components/gutter";
 import { Image } from "../../../../components/image";
 import SimpleBar from "simplebar-react";
+import { connectAndSignMessageWithLedger } from "../../../sign/utils/handle-starknet-sign";
+import { ErrModuleLedgerSign } from "../../../sign/utils/ledger-types";
+import { KeplrError } from "@keplr-wallet/router";
+import { LedgerGuideBox } from "../../../sign/components/ledger-guide-box";
 import { useNavigate } from "react-router";
 import { ApproveIcon, CancelIcon } from "../../../../components/button";
 
@@ -60,15 +64,32 @@ export const SignStarknetMessageView: FunctionComponent<{
     };
   });
 
+  const [isLedgerInteracting, setIsLedgerInteracting] = useState(false);
+  const [ledgerInteractingError, setLedgerInteractingError] = useState<
+    Error | undefined
+  >(undefined);
+
   useUnmount(() => {
     unmountPromise.resolver();
   });
 
   const approve = async () => {
+    let signature: string[] | undefined = undefined;
+    if (interactionData.data.keyType === "ledger") {
+      setIsLedgerInteracting(true);
+      setLedgerInteractingError(undefined);
+      signature = await connectAndSignMessageWithLedger(
+        interactionData.data.pubKey,
+        interactionData.data.message,
+        interactionData.data.signer
+      );
+    }
+
     try {
       await signStarknetMessageInteractionStore.approveWithProceedNext(
         interactionData.id,
         interactionData.data.message,
+        signature,
         async (proceedNext) => {
           if (!proceedNext) {
             if (
@@ -101,6 +122,18 @@ export const SignStarknetMessageView: FunctionComponent<{
       );
     } catch (e) {
       console.log(e);
+
+      if (e instanceof KeplrError) {
+        if (e.module === ErrModuleLedgerSign) {
+          setLedgerInteractingError(e);
+        } else {
+          setLedgerInteractingError(undefined);
+        }
+      } else {
+        setLedgerInteractingError(undefined);
+      }
+    } finally {
+      setIsLedgerInteracting(false);
     }
   };
 
@@ -123,6 +156,7 @@ export const SignStarknetMessageView: FunctionComponent<{
           style: {
             width: "3.25rem",
           },
+          isLoading: isLedgerInteracting,
           onClick: async () => {
             await signStarknetMessageInteractionStore.rejectWithProceedNext(
               interactionData.id,
@@ -248,6 +282,18 @@ export const SignStarknetMessageView: FunctionComponent<{
             {JSON.stringify(interactionData.data.message, null, 2)}
           </Box>
         </SimpleBar>
+
+        <div style={{ marginTop: "0.75rem", flex: 1 }} />
+
+        <LedgerGuideBox
+          data={{
+            keyInsensitive: interactionData.data.keyInsensitive,
+            isStarknet: true,
+          }}
+          isLedgerInteracting={isLedgerInteracting}
+          ledgerInteractingError={ledgerInteractingError}
+          isInternal={interactionData.isInternal}
+        />
       </Box>
     </HeaderLayout>
   );
