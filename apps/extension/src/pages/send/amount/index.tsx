@@ -254,12 +254,22 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
   );
 
+  const currentFeeCurrencyCoinMinimalDenom =
+    sendConfigs.feeConfig.fees[0]?.currency.coinMinimalDenom;
   useEffect(() => {
-    if (chainStore.getChain(chainId).hasFeature("feemarket")) {
-      // feemarket 이상하게 만들어서 simulate하면 더 적은 gas가 나온다 귀찮아서 대충 처리.
-      gasSimulator.setGasAdjustmentValue("1.6");
+    const chainInfo = chainStore.getChain(chainId);
+    // feemarket 이상하게 만들어서 simulate하면 더 적은 gas가 나온다 귀찮아서 대충 처리.
+    if (chainInfo.hasFeature("feemarket")) {
+      if (
+        currentFeeCurrencyCoinMinimalDenom !==
+        chainInfo.currencies[0].coinMinimalDenom
+      ) {
+        gasSimulator.setGasAdjustmentValue("2");
+      } else {
+        gasSimulator.setGasAdjustmentValue("1.6");
+      }
     }
-  }, [chainId, chainStore, gasSimulator]);
+  }, [chainId, chainStore, gasSimulator, currentFeeCurrencyCoinMinimalDenom]);
 
   useEffect(() => {
     if (isEvmChain) {
