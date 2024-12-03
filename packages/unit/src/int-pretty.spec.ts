@@ -24,7 +24,6 @@ describe("Test IntPretty", () => {
     expect(new IntPretty(0.003).maxDecimals(2).toString()).toBe("0.00");
     expect(new IntPretty(0.00003456).toString()).toBe("0.00003456");
 
-
     expect(new IntPretty(new Int(1)).toDec().equals(new Dec("1.0"))).toBe(true);
     expect(new IntPretty(new Int(1)).maxDecimals(2).toString()).toBe("1.00");
   });
