@@ -36,6 +36,8 @@ import "simplebar-react/dist/simplebar.min.css";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTheme } from "styled-components";
 import { RoutePageAnalytics } from "./route-page-analytics";
+import { LedgerError, StarknetClient } from "@ledgerhq/hw-app-starknet";
+import { STARKNET_LEDGER_DERIVATION_PATH } from "./pages/sign/utils/handle-starknet-sign";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -370,6 +372,54 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
                         } finally {
                           transport?.close().catch(console.log);
 
+                          setAppIsLoading("");
+                        }
+                      }}
+                    />
+                    <Button
+                      color="secondary"
+                      text="Starknet app"
+                      isLoading={appIsLoading === "Starknet"}
+                      disabled={!!appIsLoading && appIsLoading !== "Starknet"}
+                      onClick={async () => {
+                        if (appIsLoading) {
+                          return;
+                        }
+                        setAppIsLoading("Starknet");
+
+                        try {
+                          const transport = await TransportWebHID.create();
+
+                          try {
+                            const starknetApp = new StarknetClient(transport);
+
+                            const res = await starknetApp.getPubKey(
+                              STARKNET_LEDGER_DERIVATION_PATH,
+                              false
+                            );
+                            switch (res.returnCode) {
+                              case LedgerError.NoError:
+                                setStatus("success");
+
+                                return;
+                              default:
+                                setStatus("failed");
+
+                                return;
+                            }
+                          } catch (e) {
+                            console.log(e);
+                            // noop
+                          } finally {
+                            setAppIsLoading("");
+
+                            await transport.close();
+                          }
+                        } catch (e) {
+                          console.log(e);
+
+                          setStatus("failed");
+                        } finally {
                           setAppIsLoading("");
                         }
                       }}

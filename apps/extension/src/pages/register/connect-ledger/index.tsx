@@ -82,14 +82,6 @@ export const ConnectLedgerScene: FunctionComponent<{
           title: intl.formatMessage({
             id: "pages.register.connect-ledger.title",
           }),
-          paragraphs:
-            propApp !== "Ethereum" && propApp !== "Starknet"
-              ? [
-                  intl.formatMessage({
-                    id: "pages.register.connect-ledger.paragraph",
-                  }),
-                ]
-              : undefined,
           stepCurrent: stepPrevious + 1,
           stepTotal: stepTotal,
         });

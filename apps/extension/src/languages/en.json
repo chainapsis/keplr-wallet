@@ -124,7 +124,7 @@
   "pages.register.back-up-private-key.import-button": "Got it",
 
   "pages.register.connect-ledger.title": "Please connect your Hardware wallet",
-  "pages.register.connect-ledger.paragraph": "To use EVM-compatible chains (Injective, Evmos) with Keplr, you'll be prompted to connect to Ethereum app in the next steps.",
+  "pages.register.connect-ledger.paragraph": "Keplr supports Cosmos app chains, all EVM compatible chains including Ethereum, Injective and Evmos, and Starknet. Ledger connection will guide you through Cosmos, EVM, and Starknet in order.",
   "pages.register.connect-ledger.step-text": "Step {step}",
   "pages.register.connect-ledger.connect-ledger-step-paragraph": "Connect and unlock your Ledger.",
   "pages.register.connect-ledger.open-app-step-paragraph": "Open the {app} app on your Ledger device.",

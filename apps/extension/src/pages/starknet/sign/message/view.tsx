@@ -28,7 +28,7 @@ export const SignStarknetMessageView: FunctionComponent<{
     SignStarknetMessageInteractionStore["waitingData"]
   >;
 }> = observer(({ interactionData }) => {
-  const { signStarknetMessageInteractionStore, uiConfigStore } = useStore();
+  const { signStarknetMessageInteractionStore } = useStore();
 
   const theme = useTheme();
   const navigate = useNavigate();
@@ -81,10 +81,7 @@ export const SignStarknetMessageView: FunctionComponent<{
       signature = await connectAndSignMessageWithLedger(
         interactionData.data.pubKey,
         interactionData.data.message,
-        interactionData.data.signer,
-        {
-          useWebHID: uiConfigStore.useWebHIDLedger,
-        }
+        interactionData.data.signer
       );
     }
 

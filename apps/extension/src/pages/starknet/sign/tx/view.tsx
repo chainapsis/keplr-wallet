@@ -43,7 +43,6 @@ export const SignStarknetTxView: FunctionComponent<{
   interactionData: NonNullable<SignStarknetTxInteractionStore["waitingData"]>;
 }> = observer(({ interactionData }) => {
   const {
-    uiConfigStore,
     signStarknetTxInteractionStore,
     starknetAccountStore,
     starknetQueriesStore,
@@ -383,10 +382,7 @@ export const SignStarknetTxView: FunctionComponent<{
         signature = await connectAndSignInvokeTxWithLedger(
           interactionData.data.pubKey,
           interactionData.data.transactions,
-          details,
-          {
-            useWebHID: uiConfigStore.useWebHIDLedger,
-          }
+          details
         );
       }
 

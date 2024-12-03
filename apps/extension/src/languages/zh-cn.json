@@ -118,7 +118,7 @@
   "pages.register.back-up-private-key.import-button": "导入",
 
   "pages.register.connect-ledger.title": "请连接你的硬件钱包",
-  "pages.register.connect-ledger.paragraph": "要将EVM兼容链（Injective、Evmos）与Keplr一起使用，将在后续步骤中提示你连接到以太坊应用程序。",
+  "pages.register.connect-ledger.paragraph": "Keplr 支援 Cosmos 應用程式鏈、所有 EVM 相容鏈，包括 Ethereum、Injective 和 Evmos，以及 Starknet。Ledger connection 會引導您依序瀏覽 Cosmos、EVM 和 Starknet。",
   "pages.register.connect-ledger.step-text": "步骤 {step}",
   "pages.register.connect-ledger.connect-ledger-step-paragraph": "连接并解锁你的Ledger。",
   "pages.register.connect-ledger.open-app-step-paragraph": "在你的Ledger设备上打开{app}应用。",
