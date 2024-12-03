@@ -330,7 +330,7 @@ export const AccountActivationModal: FunctionComponent<{
           data={
             data || {
               keyInsensitive: keyRingStore.selectedKeyInfo!.insensitive,
-              isEthereum: false,
+              isStarknet: true,
             }
           }
           isLedgerInteracting={isLedgerInteracting}

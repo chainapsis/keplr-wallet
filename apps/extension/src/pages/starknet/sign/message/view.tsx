@@ -288,7 +288,7 @@ export const SignStarknetMessageView: FunctionComponent<{
         <LedgerGuideBox
           data={{
             keyInsensitive: interactionData.data.keyInsensitive,
-            isEthereum: false,
+            isStarknet: true,
           }}
           isLedgerInteracting={isLedgerInteracting}
           ledgerInteractingError={ledgerInteractingError}
