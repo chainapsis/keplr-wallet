@@ -65,6 +65,8 @@ export const connectAndSignDeployAccountTxWithLedger = async (
   transaction: DeployAccountSignerDetails;
   signature: string[];
 }> => {
+  await checkStarknetPubKey(expectedPubKey, options);
+
   let transport: Transport;
   try {
     transport = options.useWebHID
@@ -78,8 +80,6 @@ export const connectAndSignDeployAccountTxWithLedger = async (
       "Failed to init transport"
     );
   }
-
-  await checkStarknetPubKey(transport, expectedPubKey);
 
   const nonce = 0; // DEPLOY_ACCOUNT transaction will have a nonce zero as it is the first transaction in the account
   const contractAddress =
@@ -218,8 +218,6 @@ export const connectAndSignDeployAccountTxWithLedger = async (
       };
     });
   } catch (e) {
-    await transport.close();
-
     if (e.message?.includes("0x5515")) {
       throw new KeplrError(
         ErrModuleLedgerSign,
@@ -227,7 +225,7 @@ export const connectAndSignDeployAccountTxWithLedger = async (
         "Device is locked"
       );
     } else {
-      throw e;
+      throw new KeplrError(ErrModuleLedgerSign, 9999, e.message);
     }
   } finally {
     await transport.close();
@@ -240,20 +238,21 @@ export const connectAndSignInvokeTxWithLedger = async (
   details: InvocationsSignerDetails,
   options: LedgerOptions = { useWebHID: true }
 ): Promise<string[]> => {
+  await checkStarknetPubKey(expectedPubKey, options);
+
   let transport: Transport;
   try {
     transport = options?.useWebHID
       ? await TransportWebHID.create()
       : await TransportWebUSB.create();
   } catch (e) {
+    console.error(e);
     throw new KeplrError(
       ErrModuleLedgerSign,
       ErrFailedInit,
       "Failed to init transport"
     );
   }
-
-  await checkStarknetPubKey(transport, expectedPubKey);
 
   const txFields: TxFields | TxV1Fields = (() => {
     switch (details.version) {
@@ -301,8 +300,6 @@ export const connectAndSignInvokeTxWithLedger = async (
       return formatStarknetSignature({ r, s });
     });
   } catch (e) {
-    await transport.close();
-
     if (e.message?.includes("0x5515")) {
       throw new KeplrError(
         ErrModuleLedgerSign,
@@ -310,7 +307,7 @@ export const connectAndSignInvokeTxWithLedger = async (
         "Device is locked"
       );
     } else {
-      throw e;
+      throw new KeplrError(ErrModuleLedgerSign, 9999, e.message);
     }
   } finally {
     await transport.close();
@@ -323,20 +320,21 @@ export const connectAndSignMessageWithLedger = async (
   signer: string,
   options: LedgerOptions = { useWebHID: true }
 ): Promise<string[]> => {
+  await checkStarknetPubKey(expectedPubKey, options);
+
   let transport: Transport;
   try {
     transport = options?.useWebHID
       ? await TransportWebHID.create()
       : await TransportWebUSB.create();
   } catch (e) {
+    console.error(e);
     throw new KeplrError(
       ErrModuleLedgerSign,
       ErrFailedInit,
       "Failed to init transport"
     );
   }
-
-  await checkStarknetPubKey(transport, expectedPubKey);
 
   try {
     const starknetApp = new StarknetClient(transport);
@@ -351,8 +349,6 @@ export const connectAndSignMessageWithLedger = async (
       return formatStarknetSignature({ r, s });
     });
   } catch (e) {
-    await transport.close();
-
     if (e.message?.includes("0x5515")) {
       throw new KeplrError(
         ErrModuleLedgerSign,
@@ -360,7 +356,7 @@ export const connectAndSignMessageWithLedger = async (
         "Device is locked"
       );
     } else {
-      throw e;
+      throw new KeplrError(ErrModuleLedgerSign, 9999, e.message);
     }
   } finally {
     await transport.close();
@@ -410,31 +406,59 @@ function handleLedgerResponse<R>(
 }
 
 async function checkStarknetPubKey(
-  transport: Transport,
-  expectedPubKey: Uint8Array
+  expectedPubKey: Uint8Array,
+  options: LedgerOptions = { useWebHID: true }
 ) {
-  const starknetApp = new StarknetClient(transport);
+  let transport: Transport;
+  try {
+    transport = options?.useWebHID
+      ? await TransportWebHID.create()
+      : await TransportWebUSB.create();
+  } catch (e) {
+    throw new KeplrError(
+      ErrModuleLedgerSign,
+      ErrFailedInit,
+      "Failed to init transport"
+    );
+  }
 
-  const res = await starknetApp.getPubKey(
-    STARKNET_LEDGER_DERIVATION_PATH,
-    false
-  );
+  try {
+    const starknetApp = new StarknetClient(transport);
 
-  handleLedgerResponse(res, () => {
-    const { publicKey } = res;
+    const res = await starknetApp.getPubKey(
+      STARKNET_LEDGER_DERIVATION_PATH,
+      false
+    );
 
-    if (
-      Buffer.from(new PubKeyStarknet(expectedPubKey).toBytes()).toString(
-        "hex"
-      ) !== Buffer.from(new PubKeyStarknet(publicKey).toBytes()).toString("hex")
-    ) {
-      transport.close();
+    return handleLedgerResponse(res, () => {
+      const { publicKey } = res;
 
+      if (
+        Buffer.from(new PubKeyStarknet(expectedPubKey).toBytes()).toString(
+          "hex"
+        ) !==
+        Buffer.from(new PubKeyStarknet(publicKey).toBytes()).toString("hex")
+      ) {
+        throw new KeplrError(
+          ErrModuleLedgerSign,
+          ErrPublicKeyUnmatched,
+          "Public key unmatched"
+        );
+      } else {
+        return publicKey;
+      }
+    });
+  } catch (e) {
+    if (e.message?.includes("0x5515")) {
       throw new KeplrError(
         ErrModuleLedgerSign,
-        ErrPublicKeyUnmatched,
-        "Public key unmatched"
+        ErrCodeDeviceLocked,
+        "Device is locked"
       );
+    } else {
+      throw new KeplrError(ErrModuleLedgerSign, 9999, e.message);
     }
-  });
+  } finally {
+    await transport.close();
+  }
 }

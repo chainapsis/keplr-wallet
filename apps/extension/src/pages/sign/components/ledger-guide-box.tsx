@@ -18,7 +18,8 @@ import { FormattedMessage, useIntl } from "react-intl";
 export const LedgerGuideBox: FunctionComponent<{
   data: {
     keyInsensitive: PlainObject;
-    isEthereum: boolean;
+    isEthereum?: boolean;
+    isStarknet?: boolean;
   };
   isLedgerInteracting: boolean;
   ledgerInteractingError: Error | undefined;
@@ -172,7 +173,7 @@ export const LedgerGuideBox: FunctionComponent<{
                   app = "Secret";
                 }
 
-                if (data?.isEthereum) {
+                if (data.isEthereum) {
                   if (appData["Ethereum"]) {
                     app = "Ethereum";
                   } else {
@@ -193,7 +194,7 @@ export const LedgerGuideBox: FunctionComponent<{
                   }
                 }
 
-                if (appData["Starknet"]) {
+                if (data.isStarknet && appData["Starknet"]) {
                   app = "Starknet";
                 }
 
