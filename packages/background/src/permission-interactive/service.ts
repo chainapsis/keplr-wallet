@@ -58,6 +58,33 @@ export class PermissionInteractiveService {
     }
   }
 
+  async ensureKeyRingLedgerAppConnected(
+    env: Env,
+    app: "Ethereum" | "Starknet"
+  ): Promise<void> {
+    if (typeof browser !== "undefined") {
+      const selectedKeyInfo = this.keyRingService.getKeyInfo(
+        this.keyRingService.selectedVaultId
+      );
+      if (
+        !env.isInternalMsg &&
+        selectedKeyInfo &&
+        selectedKeyInfo.insensitive["keyRingType"] === "ledger" &&
+        selectedKeyInfo.insensitive[app] == null
+      ) {
+        if (Date.now() - this.lastOpenRegisterPageTimestamp > 1000 * 30) {
+          runInAction(() => {
+            this.lastOpenRegisterPageTimestamp = Date.now();
+          });
+
+          await browser.tabs.create({
+            url: `/register.html#?route=enable-chains&vaultId=${this.keyRingService.selectedVaultId}&skipWelcome=true&fallback${app}LedgerApp=true`,
+          });
+        }
+      }
+    }
+  }
+
   async ensureEnabled(
     env: Env,
     chainIds: string[],
@@ -76,6 +103,8 @@ export class PermissionInteractiveService {
 
   async ensureEnabledForEVM(env: Env, origin: string): Promise<void> {
     await this.keyRingService.ensureUnlockInteractive(env);
+
+    await this.ensureKeyRingLedgerAppConnected(env, "Ethereum");
 
     const currentChainIdForEVM =
       this.permissionService.getCurrentChainIdForEVM(origin) ??
@@ -106,6 +135,8 @@ export class PermissionInteractiveService {
 
   async ensureEnabledForStarknet(env: Env, origin: string): Promise<void> {
     await this.keyRingService.ensureUnlockInteractive(env);
+
+    await this.ensureKeyRingLedgerAppConnected(env, "Starknet");
 
     // TODO: 런칭 전에 메인넷으로 수정해야함.
     const currentChainIdForStarknet =
