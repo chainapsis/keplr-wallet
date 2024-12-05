@@ -10,7 +10,7 @@ Please check the [How to detect Keplr](./README.md#how-to-detect-keplr) first be
 ## Connecting with SecretJS
 
 SecretJS link: [https://www.npmjs.com/package/secretjs](https://www.npmjs.com/package/secretjs)
-The basics of using SecretJS is similar to CosmJS. Refer to the [Use with CosmJs](./cosmjs) section for more information.  
+The basics of using SecretJS are similar to CosmJS. Refer to the [Use with CosmJs](./cosmjs) section for more information.  
   
 One difference between CosmJS and SecretJS is that we recommend using Keplr's `EnigmaUtils`.
 By using Keplr's `EnigmaUtils`, you can use Keplr to encrypt/decrypt, and the decrypted transaction messages are shown to the user in a human-readable format.
@@ -18,7 +18,7 @@ By using Keplr's `EnigmaUtils`, you can use Keplr to encrypt/decrypt, and the de
 ```javascript
 // Enabling before using the Keplr is recommended.
 // This method will ask the user whether or not to allow access if they haven't visited this website.
-// Also, it will request user to unlock the wallet if the wallet is locked.
+// Also, it will request the user to unlock the wallet if the wallet is locked.
 await window.keplr.enable(chainId);
 
 const offlineSigner = window.getOfflineSigner(chainId);
