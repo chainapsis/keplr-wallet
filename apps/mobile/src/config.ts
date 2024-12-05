@@ -2247,6 +2247,60 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ['cosmwasm'],
   },
+  {
+    rpc: 'https://rpc-xion.keplr.app',
+    rest: 'https://lcd-xion.keplr.app',
+    chainId: 'xion-mainnet-1',
+    chainName: 'Xion',
+    chainSymbolImageUrl:
+      'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/xion-mainnet/chain.png',
+    walletUrlForStaking: 'https://wallet.keplr.app/chains/xion',
+    stakeCurrency: {
+      coinDenom: 'XION',
+      coinMinimalDenom: 'uxion',
+      coinDecimals: 6,
+      coinGeckoId: 'xion-2',
+      coinImageUrl:
+        'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/xion-mainnet/chain.png',
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: 'xion',
+      bech32PrefixAccPub: 'xionpub',
+      bech32PrefixValAddr: 'xionvaloper',
+      bech32PrefixValPub: 'xionvaloperpub',
+      bech32PrefixConsAddr: 'xionvalcons',
+      bech32PrefixConsPub: 'xionvalconspub',
+    },
+    currencies: [
+      {
+        coinDenom: 'XION',
+        coinMinimalDenom: 'uxion',
+        coinDecimals: 6,
+        coinGeckoId: 'xion-2',
+        coinImageUrl:
+          'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/xion-mainnet/chain.png',
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: 'XION',
+        coinMinimalDenom: 'uxion',
+        coinDecimals: 6,
+        coinGeckoId: 'xion-2',
+        coinImageUrl:
+          'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/xion-mainnet/chain.png',
+        gasPriceStep: {
+          low: 0.0005,
+          average: 0.001,
+          high: 0.002,
+        },
+      },
+    ],
+    features: ['cosmwasm'],
+  },
 ];
 
 // TODO: 원격으로 변경할 수 있도록 나중에 네트워크에서 이 정보를 가져오는 방식으로 변경될 수 있음
