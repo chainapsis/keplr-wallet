@@ -52,7 +52,15 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
       fixedHeight={true}
       bottomButtons={[
         {
-          textOverrideIcon: <CancelIcon color={ColorPalette["gray-200"]} />,
+          textOverrideIcon: (
+            <CancelIcon
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["blue-400"]
+                  : ColorPalette["gray-200"]
+              }
+            />
+          ),
           size: "large",
           color: "secondary",
           style: {
