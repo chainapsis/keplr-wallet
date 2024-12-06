@@ -8907,8 +8907,8 @@ __metadata:
     "@react-navigation/drawer": ^6.6.7
     "@react-navigation/native": ^6.1.10
     "@react-navigation/stack": ^6.3.21
-    "@toruslabs/fetch-node-details": =11.0.1
-    "@toruslabs/torus.js": =6.4.1
+    "@toruslabs/fetch-node-details": =14.2.0
+    "@toruslabs/torus.js": =15.1.1
     "@types/color": ^3.0.3
     "@types/react-test-renderer": ^18.0.0
     "@types/semver": ^7
@@ -10490,6 +10490,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/curves@npm:1.4.2, @noble/curves@npm:~1.4.0":
+  version: 1.4.2
+  resolution: "@noble/curves@npm:1.4.2"
+  dependencies:
+    "@noble/hashes": 1.4.0
+  checksum: c475a83c4263e2c970eaba728895b9b5d67e0ca880651e9c6e3efdc5f6a4f07ceb5b043bf71c399fc80fada0b8706e69d0772bffdd7b9de2483b988973a34cba
+  languageName: node
+  linkType: hard
+
 "@noble/hashes@npm:1.0.0":
   version: 1.0.0
   resolution: "@noble/hashes@npm:1.0.0"
@@ -10501,6 +10510,13 @@ __metadata:
   version: 1.3.0
   resolution: "@noble/hashes@npm:1.3.0"
   checksum: d7ddb6d7c60f1ce1f87facbbef5b724cdea536fc9e7f59ae96e0fc9de96c8f1a2ae2bdedbce10f7dcc621338dfef8533daa73c873f2b5c87fa1a4e05a95c2e2e
+  languageName: node
+  linkType: hard
+
+"@noble/hashes@npm:1.4.0, @noble/hashes@npm:~1.4.0":
+  version: 1.4.0
+  resolution: "@noble/hashes@npm:1.4.0"
+  checksum: 8ba816ae26c90764b8c42493eea383716396096c5f7ba6bea559993194f49d80a73c081f315f4c367e51bd2d5891700bcdfa816b421d24ab45b41cb03e4f3342
   languageName: node
   linkType: hard
 
@@ -12503,6 +12519,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@scure/base@npm:~1.1.6":
+  version: 1.1.9
+  resolution: "@scure/base@npm:1.1.9"
+  checksum: 120820a37dfe9dfe4cab2b7b7460552d08e67dee8057ed5354eb68d8e3440890ae983ce3bee957d2b45684950b454a2b6d71d5ee77c1fd3fddc022e2a510337f
+  languageName: node
+  linkType: hard
+
 "@scure/bip32@npm:1.3.0":
   version: 1.3.0
   resolution: "@scure/bip32@npm:1.3.0"
@@ -12514,6 +12537,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@scure/bip32@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@scure/bip32@npm:1.4.0"
+  dependencies:
+    "@noble/curves": ~1.4.0
+    "@noble/hashes": ~1.4.0
+    "@scure/base": ~1.1.6
+  checksum: eff491651cbf2bea8784936de75af5fc020fc1bbb9bcb26b2cfeefbd1fb2440ebfaf30c0733ca11c0ae1e272a2ef4c3c34ba5c9fb3e1091c3285a4272045b0c6
+  languageName: node
+  linkType: hard
+
 "@scure/bip39@npm:1.2.0":
   version: 1.2.0
   resolution: "@scure/bip39@npm:1.2.0"
@@ -12521,6 +12555,16 @@ __metadata:
     "@noble/hashes": ~1.3.0
     "@scure/base": ~1.1.0
   checksum: 980d761f53e63de04a9e4db840eb13bfb1bd1b664ecb04a71824c12c190f4972fd84146f3ed89b2a8e4c6bd2c17c15f8b592b7ac029e903323b0f9e2dae6916b
+  languageName: node
+  linkType: hard
+
+"@scure/bip39@npm:1.3.0":
+  version: 1.3.0
+  resolution: "@scure/bip39@npm:1.3.0"
+  dependencies:
+    "@noble/hashes": ~1.4.0
+    "@scure/base": ~1.1.6
+  checksum: dbb0b27df753eb6c6380010b25cc9a9ea31f9cb08864fc51e69e5880ff7e2b8f85b72caea1f1f28af165e83b72c48dd38617e43fc632779d025b50ba32ea759e
   languageName: node
   linkType: hard
 
@@ -13830,6 +13874,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@toruslabs/bs58@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@toruslabs/bs58@npm:1.0.0"
+  peerDependencies:
+    "@babel/runtime": 7.x
+  checksum: 3d980f94755b17b4b5d1b07346d32f3285873fa4366cb6fae14f82f053ecf43df1a042ea854c130adcf954b1f22559177b6e8d281fd5457f2736cf88eecac89f
+  languageName: node
+  linkType: hard
+
 "@toruslabs/constants@npm:^11.0.0":
   version: 11.0.0
   resolution: "@toruslabs/constants@npm:11.0.0"
@@ -13839,12 +13892,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@toruslabs/constants@npm:^14.0.0, @toruslabs/constants@npm:^14.2.0":
+  version: 14.2.0
+  resolution: "@toruslabs/constants@npm:14.2.0"
+  peerDependencies:
+    "@babel/runtime": 7.x
+  checksum: f0c58db7e77a28e36deb881c9726a247bc3ba9d8c3159146f3a8bc80109a7f769e2c0ef2b1663c31718c7e5228ec217b063b2fa2fc38a4a3ac8161ed431189dc
+  languageName: node
+  linkType: hard
+
 "@toruslabs/eccrypto@npm:^2.0.0":
   version: 2.2.1
   resolution: "@toruslabs/eccrypto@npm:2.2.1"
   dependencies:
     elliptic: ^6.5.4
   checksum: c2feda44a626b2640a29cf1a041a92c45cf3b203ac88a5d18966de802de6083119744c7ba54ace275293dbe7cf804723b52ad5a71f40dc48b270756c34e30082
+  languageName: node
+  linkType: hard
+
+"@toruslabs/eccrypto@npm:^5.0.4":
+  version: 5.0.4
+  resolution: "@toruslabs/eccrypto@npm:5.0.4"
+  dependencies:
+    elliptic: ^6.5.5
+  checksum: e433b98687d5d1c354c6cc1068da0991ebcfa9552e811d71a8e1fdf920bba5133fa254ab90453214fad64bfe7192441193aabad8c22bace5bd1330bd2e8af1fa
   languageName: node
   linkType: hard
 
@@ -13862,6 +13933,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@toruslabs/fetch-node-details@npm:=14.2.0":
+  version: 14.2.0
+  resolution: "@toruslabs/fetch-node-details@npm:14.2.0"
+  dependencies:
+    "@toruslabs/constants": ^14.2.0
+    "@toruslabs/fnd-base": ^14.2.0
+    "@toruslabs/http-helpers": ^7.0.0
+    loglevel: ^1.9.2
+  peerDependencies:
+    "@babel/runtime": 7.x
+  checksum: 8c04098809c5d8906c3efba3d1e3324c9114b8aec0d4322cb4764a2c5b56ceadfab1c75032d694066c134b425760e400c36d6a36ff9f27ecd08ee7f136a49c4b
+  languageName: node
+  linkType: hard
+
 "@toruslabs/fnd-base@npm:^11.0.1":
   version: 11.0.1
   resolution: "@toruslabs/fnd-base@npm:11.0.1"
@@ -13870,6 +13955,17 @@ __metadata:
   peerDependencies:
     "@babel/runtime": 7.x
   checksum: c3fc1d61b41dda6eca5037b7df0f270c22ad79dd479476bd77d55cdd3f0b2dc1643c7815e85a89d3a07f9b6e5867a31feb990de97d1e49ace3352c38e74e8a45
+  languageName: node
+  linkType: hard
+
+"@toruslabs/fnd-base@npm:^14.2.0":
+  version: 14.2.0
+  resolution: "@toruslabs/fnd-base@npm:14.2.0"
+  dependencies:
+    "@toruslabs/constants": ^14.2.0
+  peerDependencies:
+    "@babel/runtime": 7.x
+  checksum: 121894226b8b81ef88789b0511baa3978e9e2188cbf5bc06f13cb7220bc850947e647e9d68cf29c131b2a38ac1cd99714a93069a5b5a5aba9b1d042313ce1796
   languageName: node
   linkType: hard
 
@@ -13902,6 +13998,41 @@ __metadata:
     "@sentry/types":
       optional: true
   checksum: dab9ffb559e053e599723d85454bf087b3a9c7f8f063983103e5061a6958d2838fc70937f058953013c7db0643b0c78ca092c55ac7b69f1bca08e51232c185bd
+  languageName: node
+  linkType: hard
+
+"@toruslabs/http-helpers@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "@toruslabs/http-helpers@npm:7.0.0"
+  dependencies:
+    deepmerge: ^4.3.1
+    loglevel: ^1.9.1
+  peerDependencies:
+    "@babel/runtime": ^7.x
+    "@sentry/types": ^8.x
+  peerDependenciesMeta:
+    "@sentry/types":
+      optional: true
+  checksum: 5c58012e1ae22600e03a6bffc709dafa5ada940e31679067793063da0260371392176c85bd6cbdb4eaf8342f3dcc29b87d31aaa3a244b51b2717a9e3151fe30a
+  languageName: node
+  linkType: hard
+
+"@toruslabs/torus.js@npm:=15.1.1":
+  version: 15.1.1
+  resolution: "@toruslabs/torus.js@npm:15.1.1"
+  dependencies:
+    "@toruslabs/bs58": ^1.0.0
+    "@toruslabs/constants": ^14.0.0
+    "@toruslabs/eccrypto": ^5.0.4
+    "@toruslabs/http-helpers": ^7.0.0
+    bn.js: ^5.2.1
+    elliptic: ^6.5.7
+    ethereum-cryptography: ^2.2.1
+    json-stable-stringify: ^1.1.1
+    loglevel: ^1.9.2
+  peerDependencies:
+    "@babel/runtime": 7.x
+  checksum: 2e11e29bd6e50d1549258461ef6d41f31ea6bb2b9ff3313704b482fd04646feac00e835bd4ed9896601f5b8633873746954ed1fbc5d8ab00fac249c9c613323d
   languageName: node
   linkType: hard
 
@@ -21222,7 +21353,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"deepmerge@npm:^4.3.0":
+"deepmerge@npm:^4.3.0, deepmerge@npm:^4.3.1":
   version: 4.3.1
   resolution: "deepmerge@npm:4.3.1"
   checksum: 2024c6a980a1b7128084170c4cf56b0fd58a63f2da1660dcfe977415f27b17dbe5888668b59d0b063753f3220719d5e400b7f113609489c90160bb9a5518d052
@@ -22081,6 +22212,21 @@ __metadata:
     minimalistic-assert: ^1.0.0
     minimalistic-crypto-utils: ^1.0.0
   checksum: fe1e546ed35ff69622130eb56abd3df8b4e9f009922ec2f1a4437d9c752a026d570a9863751912076effa1060f559bee8d816d6e89835fe8111834694e812165
+  languageName: node
+  linkType: hard
+
+"elliptic@npm:^6.5.5, elliptic@npm:^6.5.7":
+  version: 6.6.1
+  resolution: "elliptic@npm:6.6.1"
+  dependencies:
+    bn.js: ^4.11.9
+    brorand: ^1.1.0
+    hash.js: ^1.0.0
+    hmac-drbg: ^1.0.1
+    inherits: ^2.0.4
+    minimalistic-assert: ^1.0.1
+    minimalistic-crypto-utils: ^1.0.1
+  checksum: 27b14a52f68bbbc0720da259f712cb73e953f6d2047958cd02fb0d0ade2e83849dc39fb4af630889c67df8817e24237428cf59c4f4c07700f755b401149a7375
   languageName: node
   linkType: hard
 
@@ -23427,6 +23573,18 @@ __metadata:
     "@scure/bip32": 1.3.0
     "@scure/bip39": 1.2.0
   checksum: 958f8aab2d1b32aa759fb27a27877b3647410e8bb9aca7d65d1d477db4864cf7fc46b918eb52a1e246c25e98ee0a35a632c88b496aeaefa13469ee767a76c8db
+  languageName: node
+  linkType: hard
+
+"ethereum-cryptography@npm:^2.2.1":
+  version: 2.2.1
+  resolution: "ethereum-cryptography@npm:2.2.1"
+  dependencies:
+    "@noble/curves": 1.4.2
+    "@noble/hashes": 1.4.0
+    "@scure/bip32": 1.4.0
+    "@scure/bip39": 1.3.0
+  checksum: 1466e4c417b315a6ac67f95088b769fafac8902b495aada3c6375d827e5a7882f9e0eea5f5451600d2250283d9198b8a3d4d996e374e07a80a324e29136f25c6
   languageName: node
   linkType: hard
 
@@ -29161,6 +29319,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"json-stable-stringify@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "json-stable-stringify@npm:1.1.1"
+  dependencies:
+    call-bind: ^1.0.5
+    isarray: ^2.0.5
+    jsonify: ^0.0.1
+    object-keys: ^1.1.1
+  checksum: e1ba06600fd278767eeff53f28e408e29c867e79abf564e7aadc3ce8f31f667258f8db278ef28831e45884dd687388fa1910f46e599fc19fb94c9afbbe3a4de8
+  languageName: node
+  linkType: hard
+
 "json-stringify-safe@npm:^5.0.1, json-stringify-safe@npm:~5.0.1":
   version: 5.0.1
   resolution: "json-stringify-safe@npm:5.0.1"
@@ -30100,6 +30270,13 @@ __metadata:
   version: 1.8.1
   resolution: "loglevel@npm:1.8.1"
   checksum: a1a62db40291aaeaef2f612334c49e531bff71cc1d01a2acab689ab80d59e092f852ab164a5aedc1a752fdc46b7b162cb097d8a9eb2cf0b299511106c29af61d
+  languageName: node
+  linkType: hard
+
+"loglevel@npm:^1.9.1, loglevel@npm:^1.9.2":
+  version: 1.9.2
+  resolution: "loglevel@npm:1.9.2"
+  checksum: 896c67b90a507bfcfc1e9a4daa7bf789a441dd70d95cd13b998d6dd46233a3bfadfb8fadb07250432bbfb53bf61e95f2520f9b11f9d3175cc460e5c251eca0af
   languageName: node
   linkType: hard
 
