@@ -108,10 +108,6 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
     const route = searchParams.get("route");
     const vaultId = searchParams.get("vaultId");
     const skipWelcome = searchParams.get("skipWelcome") === "true";
-    const fallbackEthereumLedgerApp =
-      searchParams.get("fallbackEthereumLedgerApp") === "true";
-    const fallbackStarknetLedgerApp =
-      searchParams.get("fallbackStarknetLedgerApp") === "true";
 
     if (vaultId) {
       // 이 시점에서 chainStore가 초기화 되어있는게 보장된다.
@@ -140,8 +136,6 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
             stepTotal: 0,
             skipWelcome,
             initialSearchValue,
-            fallbackEthereumLedgerApp,
-            fallbackStarknetLedgerApp,
           },
         },
       };
@@ -161,6 +155,35 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
             chainIds: chainIds.split(",").map((chainId) => chainId.trim()),
             totalCount: chainIds.split(",").length,
             skipWelcome,
+          },
+        },
+      };
+    }
+
+    const ledgerApp = searchParams.get("ledgerApp");
+    if (
+      route === "connect-ledger" &&
+      (ledgerApp === "Starknet" || ledgerApp === "Ethereum")
+    ) {
+      return {
+        header: {
+          mode: "direct" as const,
+        },
+        scene: {
+          name: "connect-ledger",
+          props: {
+            name: "",
+            password: "",
+            app: ledgerApp,
+
+            appendModeInfo: {
+              vaultId,
+              // 이더리움 렛저 앱을 연결하면 이더리움 메인넷을 자동으로 enable 하고
+              // 스타크넷 렛저 앱을 연결하면 스타크넷 메인넷을 자동으로 enable 한다.
+              afterEnableChains: [
+                ledgerApp === "Ethereum" ? "eip155:1" : "starknet:SN_MAIN",
+              ],
+            },
           },
         },
       };

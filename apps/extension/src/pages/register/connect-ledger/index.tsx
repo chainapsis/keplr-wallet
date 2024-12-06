@@ -37,7 +37,7 @@ export const ConnectLedgerScene: FunctionComponent<{
   name: string;
   password: string;
   app: App | "Ethereum" | "Starknet";
-  bip44Path: {
+  bip44Path?: {
     account: number;
     change: number;
     addressIndex: number;
@@ -48,8 +48,8 @@ export const ConnectLedgerScene: FunctionComponent<{
     vaultId: string;
     afterEnableChains: string[];
   };
-  stepPrevious: number;
-  stepTotal: number;
+  stepPrevious?: number;
+  stepTotal?: number;
 }> = observer(
   ({
     name,
@@ -72,19 +72,30 @@ export const ConnectLedgerScene: FunctionComponent<{
       throw new Error(`Unsupported app: ${propApp}`);
     }
 
+    const isDirected = stepPrevious === undefined || stepTotal === undefined;
+
     const sceneTransition = useSceneTransition();
 
     const header = useRegisterHeader();
     useSceneEvents({
       onWillVisible: () => {
-        header.setHeader({
-          mode: "step",
-          title: intl.formatMessage({
-            id: "pages.register.connect-ledger.title",
-          }),
-          stepCurrent: stepPrevious + 1,
-          stepTotal: stepTotal,
-        });
+        header.setHeader(
+          isDirected
+            ? {
+                mode: "direct",
+                title: intl.formatMessage({
+                  id: "pages.register.connect-ledger.title",
+                }),
+              }
+            : {
+                mode: "step",
+                title: intl.formatMessage({
+                  id: "pages.register.connect-ledger.title",
+                }),
+                stepCurrent: stepPrevious + 1,
+                stepTotal,
+              }
+        );
       },
     });
 
@@ -118,6 +129,10 @@ export const ConnectLedgerScene: FunctionComponent<{
         case "Cosmos":
         case "Terra":
         case "Secret": {
+          if (!bip44Path) {
+            throw new Error("bip44Path not found");
+          }
+
           let app = new CosmosApp(propApp, transport);
 
           try {
@@ -163,17 +178,19 @@ export const ConnectLedgerScene: FunctionComponent<{
                 replace: true,
               });
             } else {
-              sceneTransition.replaceAll("finalize-key", {
-                name,
-                password,
-                ledger: {
-                  pubKey: res.compressed_pk,
-                  app: propApp,
-                  bip44Path,
-                },
-                stepPrevious: stepPrevious + 1,
-                stepTotal: stepTotal,
-              });
+              if (!isDirected) {
+                sceneTransition.replaceAll("finalize-key", {
+                  name,
+                  password,
+                  ledger: {
+                    pubKey: res.compressed_pk,
+                    app: propApp,
+                    bip44Path,
+                  },
+                  stepPrevious: stepPrevious + 1,
+                  stepTotal: stepTotal,
+                });
+              }
             }
           } else {
             setStep("connected");
@@ -186,6 +203,10 @@ export const ConnectLedgerScene: FunctionComponent<{
           return;
         }
         case "Ethereum": {
+          if (!bip44Path) {
+            throw new Error("bip44Path not found");
+          }
+
           let ethApp = new Eth(transport);
 
           // Ensure that the keplr can connect to ethereum app on ledger.
@@ -249,17 +270,19 @@ export const ConnectLedgerScene: FunctionComponent<{
               //   replace: true,
               // });
             } else {
-              sceneTransition.replaceAll("finalize-key", {
-                name,
-                password,
-                ledger: {
-                  pubKey: pubKey.toBytes(),
-                  app: propApp,
-                  bip44Path,
-                },
-                stepPrevious: stepPrevious + 1,
-                stepTotal: stepTotal,
-              });
+              if (!isDirected) {
+                sceneTransition.replaceAll("finalize-key", {
+                  name,
+                  password,
+                  ledger: {
+                    pubKey: pubKey.toBytes(),
+                    app: propApp,
+                    bip44Path,
+                  },
+                  stepPrevious: stepPrevious + 1,
+                  stepTotal: stepTotal,
+                });
+              }
             }
           } catch (e) {
             console.log(e);
