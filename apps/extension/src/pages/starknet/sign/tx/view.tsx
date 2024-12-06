@@ -452,7 +452,15 @@ export const SignStarknetTxView: FunctionComponent<{
       // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
       bottomButtons={[
         {
-          textOverrideIcon: <CancelIcon color={ColorPalette["gray-200"]} />,
+          textOverrideIcon: (
+            <CancelIcon
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["blue-400"]
+                  : ColorPalette["gray-200"]
+              }
+            />
+          ),
           size: "large",
           color: "secondary",
           style: {
