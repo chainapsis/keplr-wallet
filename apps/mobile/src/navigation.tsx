@@ -605,8 +605,10 @@ const DrawerBottomTabLabel: FunctionComponent<{
 };
 
 const HomeScreenHeaderTitleFunc = () => <HomeScreenHeaderTitle />;
-export const MainTabNavigation: FunctionComponent = () => {
+export const MainTabNavigation: FunctionComponent = observer(() => {
   const style = useStyle();
+
+  const {uiConfigStore} = useStore();
 
   const navigation = useNavigation();
 
@@ -678,14 +680,16 @@ export const MainTabNavigation: FunctionComponent = () => {
         }}
         component={HomeScreen}
       />
-      <Tab.Screen
-        name="Swap"
-        options={{
-          headerTitle: HomeScreenHeaderTitleFunc,
-          ...homeHeaderOptions,
-        }}
-        component={IBCSwapScreen}
-      />
+      {!uiConfigStore.swapDisabledConfig.disabled ? (
+        <Tab.Screen
+          name="Swap"
+          options={{
+            headerTitle: HomeScreenHeaderTitleFunc,
+            ...homeHeaderOptions,
+          }}
+          component={IBCSwapScreen}
+        />
+      ) : null}
       <Tab.Screen
         name="WebTab"
         options={{headerShown: false}}
@@ -706,7 +710,7 @@ export const MainTabNavigation: FunctionComponent = () => {
       />
     </Tab.Navigator>
   );
-};
+});
 
 const WebNavigation = () => {
   const intl = useIntl();

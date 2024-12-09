@@ -436,6 +436,7 @@ export class RootStore {
       this.chainStore,
       this.keyRingStore,
       this.priceStore,
+      this.queriesStore,
       ICNSInfo,
     );
 
