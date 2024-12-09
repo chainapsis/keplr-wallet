@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/stores-ibc",
-  "version": "0.12.160-rc.0",
+  "version": "0.12.160",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -16,11 +16,11 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr-wallet/common": "0.12.160-rc.0",
-    "@keplr-wallet/cosmos": "0.12.160-rc.0",
-    "@keplr-wallet/stores": "0.12.160-rc.0",
-    "@keplr-wallet/stores-eth": "0.12.160-rc.0",
-    "@keplr-wallet/types": "0.12.160-rc.0"
+    "@keplr-wallet/common": "0.12.160",
+    "@keplr-wallet/cosmos": "0.12.160",
+    "@keplr-wallet/stores": "0.12.160",
+    "@keplr-wallet/stores-eth": "0.12.160",
+    "@keplr-wallet/types": "0.12.160"
   },
   "peerDependencies": {
     "mobx": "^6",
