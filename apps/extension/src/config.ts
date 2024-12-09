@@ -2817,6 +2817,60 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     ],
     features: ["cosmwasm"],
   },
+  {
+    chainId: "jackal-1",
+    chainName: "Jackal",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/jackal/chain.png",
+    rpc: "https://rpc-jackal.keplr.app",
+    rest: "https://lcd-jackal.keplr.app",
+    walletUrlForStaking: "https://wallet.keplr.app/chains/jackal",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "jkl",
+      bech32PrefixAccPub: "jklpub",
+      bech32PrefixValAddr: "jklvaloper",
+      bech32PrefixValPub: "jklvaloperpub",
+      bech32PrefixConsAddr: "jklvalcons",
+      bech32PrefixConsPub: "jklvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "JKL",
+        coinMinimalDenom: "ujkl",
+        coinDecimals: 6,
+        coinGeckoId: "jackal-protocol",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/jackal/chain.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "JKL",
+        coinMinimalDenom: "ujkl",
+        coinDecimals: 6,
+        coinGeckoId: "jackal-protocol",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/jackal/chain.png",
+        gasPriceStep: {
+          low: 0.002,
+          average: 0.004,
+          high: 0.02,
+        },
+      },
+    ],
+    stakeCurrency: {
+      coinDenom: "JKL",
+      coinMinimalDenom: "ujkl",
+      coinDecimals: 6,
+      coinGeckoId: "jackal-protocol",
+      coinImageUrl:
+        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/jackal/chain.png",
+    },
+    features: ["cosmwasm"],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
