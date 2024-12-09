@@ -154,7 +154,15 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          textOverrideIcon: <CancelIcon color={ColorPalette["gray-200"]} />,
+          textOverrideIcon: (
+            <CancelIcon
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["blue-400"]
+                  : ColorPalette["gray-200"]
+              }
+            />
+          ),
           size: "large",
           color: "secondary",
           style: {

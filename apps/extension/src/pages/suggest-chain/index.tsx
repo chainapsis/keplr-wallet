@@ -14,6 +14,7 @@ import { dispatchGlobalEventExceptSelf } from "../../utils/global-events";
 import { ColorPalette } from "../../styles";
 import { useNavigate } from "react-router";
 import { ApproveIcon, CancelIcon } from "../../components/button";
+import { useTheme } from "styled-components";
 
 export const SuggestChainPage: FunctionComponent = observer(() => {
   const { chainSuggestStore } = useStore();
@@ -48,6 +49,7 @@ const SuggestChainPageImpl: FunctionComponent<{
   const [updateFromRepoDisabled, setUpdateFromRepoDisabled] = useState(false);
 
   const intl = useIntl();
+  const theme = useTheme();
   const navigate = useNavigate();
   const interactionInfo = useInteractionInfo({
     onUnmount: async () => {
@@ -109,7 +111,15 @@ const SuggestChainPageImpl: FunctionComponent<{
       }
       bottomButtons={[
         {
-          textOverrideIcon: <CancelIcon color={ColorPalette["gray-200"]} />,
+          textOverrideIcon: (
+            <CancelIcon
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["blue-400"]
+                  : ColorPalette["gray-200"]
+              }
+            />
+          ),
           size: "large",
           color: "secondary",
           style: {
