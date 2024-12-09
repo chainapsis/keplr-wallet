@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -11,6 +11,7 @@ import {
   Caption1,
   Subtitle1,
   Subtitle3,
+  Subtitle4,
 } from "../../../../components/typography";
 import { Gutter } from "../../../../components/gutter";
 import { SearchTextInput } from "../../../../components/input";
@@ -18,6 +19,7 @@ import SimpleBar from "simplebar-react";
 import { ChainImageFallback, Image } from "../../../../components/image";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import {
+  ArrowTopRightOnSquareIcon,
   CheckToggleIcon,
   CopyOutlineIcon,
   QRCodeIcon,
@@ -28,7 +30,7 @@ import {
   useSceneEvents,
   useSceneTransition,
 } from "../../../../components/transition";
-import { ModularChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 
 export const CopyAddressScene: FunctionComponent<{
   close: () => void;
@@ -39,6 +41,7 @@ export const CopyAddressScene: FunctionComponent<{
     keyRingStore,
     uiConfigStore,
     analyticsStore,
+    queriesStore,
   } = useStore();
 
   const intl = useIntl();
@@ -208,7 +211,114 @@ export const CopyAddressScene: FunctionComponent<{
       return 0;
     });
 
+  const hasAddresses = addresses.length > 0;
+
   const [blockInteraction, setBlockInteraction] = useState(false);
+
+  const queryChains = queriesStore.simpleQuery.queryGet<{
+    chains: ChainInfo[];
+  }>(
+    "http://localhost:3000",
+    `/chains?filterOption=chainName&searchText=${search.trim()}`
+  );
+
+  const { invisibleChainInfos, invisibleNativeChainInfos } = useMemo(() => {
+    if (queryChains.isFetching || queryChains.response?.data == undefined) {
+      return {
+        invisibleChainInfos: [],
+        invisibleNativeChainInfos: [],
+        invisibleNonNativeChainInfos: [],
+      };
+    }
+
+    const queriedChainInfos = queryChains.response.data.chains;
+    const modularChainInfos = chainStore.modularChainInfosInUI;
+
+    const filteredChainInfos = queriedChainInfos.filter((chainInfo) => {
+      return !modularChainInfos.some(
+        (modularChainInfo) => modularChainInfo.chainId === chainInfo.chainId
+      );
+    });
+
+    const { invisibleChainInfos, nativeChainInfos, nonNativeChainInfos } =
+      filteredChainInfos.reduce(
+        (acc, chainInfo) => {
+          try {
+            const isNative = chainStore.getChain(chainInfo.chainId).embedded
+              .embedded;
+
+            if (isNative) {
+              acc.invisibleChainInfos.push({
+                isNative: true,
+                chainInfo,
+              });
+              acc.nativeChainInfos.push(chainInfo);
+            } else {
+              // TODO: Add filter by non-native chain
+              acc.invisibleChainInfos.push({
+                isNative: false,
+                chainInfo,
+              });
+              acc.nonNativeChainInfos.push(chainInfo);
+            }
+          } catch (e) {
+            acc.invisibleChainInfos.push({
+              isNative: false,
+              chainInfo,
+            });
+            acc.nonNativeChainInfos.push(chainInfo);
+          }
+
+          return acc;
+        },
+        {
+          invisibleChainInfos: [],
+          nativeChainInfos: [],
+          nonNativeChainInfos: [],
+        } as {
+          invisibleChainInfos: {
+            isNative: boolean;
+            chainInfo: ChainInfo;
+          }[];
+          nativeChainInfos: ChainInfo[];
+          nonNativeChainInfos: ChainInfo[];
+        }
+      );
+
+    const sortFunc = (a: ChainInfo, b: ChainInfo) => {
+      const aChainIdentifier = ChainIdHelper.parse(a.chainId).identifier;
+      const bChainIdentifier = ChainIdHelper.parse(b.chainId).identifier;
+
+      const aPriority = sortPriorities[aChainIdentifier];
+      const bPriority = sortPriorities[bChainIdentifier];
+
+      if (aPriority && bPriority) {
+        return 0;
+      }
+      if (aPriority) {
+        return -1;
+      }
+      if (bPriority) {
+        return 1;
+      }
+      return 0;
+    };
+
+    return {
+      invisibleChainInfos,
+      invisibleNativeChainInfos: nativeChainInfos.sort(sortFunc),
+      invisibleNonNativeChainInfos: nonNativeChainInfos.sort(sortFunc),
+    };
+  }, [
+    queryChains.isFetching,
+    queryChains.response?.data,
+    chainStore,
+    sortPriorities,
+  ]);
+
+  const hasInvisibleChains =
+    (search.trim().length === 0 && invisibleNativeChainInfos.length > 0) ||
+    (search.trim().length > 0 && invisibleChainInfos.length > 0);
 
   return (
     <Box
@@ -256,7 +366,8 @@ export const CopyAddressScene: FunctionComponent<{
           height: "21.5rem",
         }}
       >
-        {addresses.length === 0 ? (
+        {/* TODO: Update guide content */}
+        {!hasAddresses && !hasInvisibleChains && !queryChains.isFetching && (
           <Box
             alignX="center"
             alignY="center"
@@ -312,7 +423,7 @@ export const CopyAddressScene: FunctionComponent<{
               />
             </Subtitle3>
           </Box>
-        ) : null}
+        )}
 
         <Box paddingX="0.75rem">
           {addresses
@@ -353,6 +464,34 @@ export const CopyAddressScene: FunctionComponent<{
               );
             })}
         </Box>
+        {hasAddresses && hasInvisibleChains && <Gutter size="1.25rem" />}
+        {hasInvisibleChains && (
+          <Box paddingX="0.75rem">
+            <Subtitle4 color={ColorPalette["gray-300"]}>
+              <FormattedMessage id="page.main.components.deposit-modal.look-for-chains" />
+            </Subtitle4>
+            <Gutter size="0.75rem" />
+            {search.trim().length > 0
+              ? invisibleChainInfos.map((chainInfo) => {
+                  return (
+                    <EnableChainItem
+                      key={chainInfo.chainInfo.chainId}
+                      chainInfo={chainInfo.chainInfo}
+                      isNative={chainInfo.isNative}
+                    />
+                  );
+                })
+              : invisibleNativeChainInfos.map((chainInfo) => {
+                  return (
+                    <EnableChainItem
+                      key={chainInfo.chainId}
+                      chainInfo={chainInfo}
+                      isNative={true}
+                    />
+                  );
+                })}
+          </Box>
+        )}
       </SimpleBar>
     </Box>
   );
@@ -366,7 +505,6 @@ const CopyAddressItem: FunctionComponent<{
     starknetAddress?: string;
   };
   close: () => void;
-
   blockInteraction: boolean;
   setBlockInteraction: (block: boolean) => void;
   setSortPriorities: (
@@ -658,3 +796,107 @@ const CopyAddressItem: FunctionComponent<{
     );
   }
 );
+
+const EnableChainItem: FunctionComponent<{
+  chainInfo: ChainInfo;
+  isNative: boolean;
+}> = observer(({ chainInfo, isNative }) => {
+  const { analyticsStore, keyRingStore } = useStore();
+  const theme = useTheme();
+  const [isContainerHover, setIsContainerHover] = useState(false);
+
+  return (
+    <Box
+      height="4rem"
+      borderRadius="0.375rem"
+      alignY="center"
+      marginBottom="0.75rem"
+    >
+      <Box
+        height="4rem"
+        borderRadius="0.375rem"
+        alignY="center"
+        backgroundColor={
+          isContainerHover
+            ? theme.mode === "light"
+              ? ColorPalette["gray-50"]
+              : ColorPalette["gray-500"]
+            : theme.mode === "light"
+            ? ColorPalette["gray-10"]
+            : ColorPalette["gray-550"]
+        }
+        onHoverStateChange={(isHover) => {
+          setIsContainerHover(isHover);
+        }}
+        cursor="pointer"
+        paddingX="1rem"
+        onClick={() => {
+          if (isNative) {
+            if (keyRingStore.selectedKeyInfo) {
+              analyticsStore.logEvent("click_enableChain", {
+                chainId: chainInfo.chainId,
+                chainName: chainInfo.chainName,
+              });
+
+              browser.tabs.create({
+                url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true&initialSearchValue=${chainInfo.chainName}`,
+              });
+            }
+          } else {
+            browser.tabs.create({
+              url: "https://chains.keplr.app/",
+            });
+          }
+        }}
+      >
+        <XAxis alignY="center">
+          <ChainImageFallback chainInfo={chainInfo} size="2rem" />
+          <Gutter size="0.5rem" />
+          <Subtitle3
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-700"]
+                : ColorPalette["gray-10"]
+            }
+          >
+            {chainInfo.chainName}
+          </Subtitle3>
+          <div
+            style={{
+              flex: 1,
+            }}
+          />
+          <XAxis alignY="center">
+            <Subtitle3
+              color={
+                isContainerHover
+                  ? theme.mode === "light"
+                    ? ColorPalette["blue-200"]
+                    : ColorPalette["gray-100"]
+                  : theme.mode === "light"
+                  ? ColorPalette["blue-400"]
+                  : ColorPalette["gray-200"]
+              }
+            >
+              <FormattedMessage id="page.main.components.deposit-modal.enable-chain" />
+            </Subtitle3>
+            <Gutter size="0.25rem" />
+            <ArrowTopRightOnSquareIcon
+              width="1.125rem"
+              height="1.125rem"
+              color={
+                isContainerHover
+                  ? theme.mode === "light"
+                    ? ColorPalette["blue-200"]
+                    : ColorPalette["gray-100"]
+                  : theme.mode === "light"
+                  ? ColorPalette["blue-400"]
+                  : ColorPalette["gray-200"]
+              }
+            />
+          </XAxis>
+        </XAxis>
+      </Box>
+    </Box>
+  );
+});
