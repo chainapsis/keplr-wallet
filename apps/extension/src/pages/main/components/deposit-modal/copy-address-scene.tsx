@@ -41,7 +41,6 @@ export const CopyAddressScene: FunctionComponent<{
     accountStore,
     keyRingStore,
     uiConfigStore,
-    analyticsStore,
     queriesStore,
   } = useStore();
 
@@ -339,10 +338,12 @@ export const CopyAddressScene: FunctionComponent<{
       invisibleNativeChainInfos: nativeChainInfos.sort(sortFunc),
       invisibleNonNativeChainInfos: nonNativeChainInfos.sort(sortFunc),
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     queryChains.isFetching,
     queryChains.response?.data,
     chainStore,
+    chainStore.modularChainInfosInUI,
     sortPriorities,
   ]);
 
@@ -397,13 +398,7 @@ export const CopyAddressScene: FunctionComponent<{
         }}
       >
         {!hasAddresses && !hasInvisibleChains && !queryChains.isFetching && (
-          <Box
-            alignX="center"
-            alignY="center"
-            paddingX="1.625rem"
-            paddingTop="3.1rem"
-            paddingBottom="3.2rem"
-          >
+          <Box alignX="center" alignY="center" paddingY="1.875rem">
             <FolderMinusIcon
               width="4.5rem"
               height="4.5rem"
@@ -421,7 +416,10 @@ export const CopyAddressScene: FunctionComponent<{
                   ? ColorPalette["gray-200"]
                   : ColorPalette["gray-400"]
               }
-              style={{ textAlign: "center" }}
+              style={{
+                textAlign: "center",
+                width: "17.25rem",
+              }}
             >
               <FormattedMessage id="page.main.components.deposit-modal.empty-text" />
             </Subtitle3>
