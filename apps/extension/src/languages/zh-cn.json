@@ -567,7 +567,7 @@
   "page.main.components.deposit-modal.search-placeholder": "搜索链",
   "page.main.components.deposit-modal.look-for-chains": "查找链",
   "page.main.components.deposit-modal.enable-chain": "启用链",
-  "page.main.components.deposit-modal.empty-text": "要使用某个链上的地址，你需要先访问侧边栏菜单中的<link>“管理链可见性”</link>，并使链在你的钱包中可见。",
+  "page.main.components.deposit-modal.empty-text": "如果搜索结果中未显示该链，则 Keplr 还不支持该链。",
   "page.main.components.buy-crypto-modal.title": "买币",
   "page.main.components.looking-for-chains.title": "查找一个链？",
   "page.main.components.looking-for-chains.enable-button": "管理",
