@@ -16,7 +16,7 @@ import {
 import { Gutter } from "../../../../components/gutter";
 import { SearchTextInput } from "../../../../components/input";
 import SimpleBar from "simplebar-react";
-import { ChainImageFallback, Image } from "../../../../components/image";
+import { ChainImageFallback } from "../../../../components/image";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import {
   ArrowTopRightOnSquareIcon,
@@ -31,6 +31,7 @@ import {
   useSceneTransition,
 } from "../../../../components/transition";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import { FolderMinusIcon } from "../../../../components/icon/folder-minus";
 
 export const CopyAddressScene: FunctionComponent<{
   close: () => void;
@@ -243,31 +244,36 @@ export const CopyAddressScene: FunctionComponent<{
     const { invisibleChainInfos, nativeChainInfos, nonNativeChainInfos } =
       filteredChainInfos.reduce(
         (acc, chainInfo) => {
-          try {
-            const isNative = chainStore.getChain(chainInfo.chainId).embedded
-              .embedded;
+          let isNative: boolean | undefined = false;
+          let isInStore: boolean = true;
 
-            if (isNative) {
-              acc.invisibleChainInfos.push({
-                isNative: true,
-                chainInfo,
-              });
-              acc.nativeChainInfos.push(chainInfo);
-            } else {
-              // TODO: Add filter by non-native chain
-              acc.invisibleChainInfos.push({
-                isNative: false,
-                chainInfo,
-              });
-              acc.nonNativeChainInfos.push(chainInfo);
-            }
+          try {
+            isNative = chainStore.getChain(chainInfo.chainId).embedded.embedded;
           } catch (e) {
-            acc.invisibleChainInfos.push({
-              isNative: false,
+            // chainInfo is not in the chain store.
+            isNative = undefined;
+            isInStore = false;
+          }
+
+          if (isNative) {
+            acc.nativeChainInfos.push({
+              isNative: true,
+              isInStore,
               chainInfo,
             });
-            acc.nonNativeChainInfos.push(chainInfo);
+          } else {
+            acc.nonNativeChainInfos.push({
+              isNative: false,
+              isInStore,
+              chainInfo,
+            });
           }
+
+          acc.invisibleChainInfos.push({
+            isNative: !!isNative,
+            isInStore,
+            chainInfo,
+          });
 
           return acc;
         },
@@ -278,16 +284,40 @@ export const CopyAddressScene: FunctionComponent<{
         } as {
           invisibleChainInfos: {
             isNative: boolean;
+            isInStore: boolean;
             chainInfo: ChainInfo;
           }[];
-          nativeChainInfos: ChainInfo[];
-          nonNativeChainInfos: ChainInfo[];
+          nativeChainInfos: {
+            isNative: boolean;
+            isInStore: boolean;
+            chainInfo: ChainInfo;
+          }[];
+          nonNativeChainInfos: {
+            isNative: boolean;
+            isInStore: boolean;
+            chainInfo: ChainInfo;
+          }[];
         }
       );
 
-    const sortFunc = (a: ChainInfo, b: ChainInfo) => {
-      const aChainIdentifier = ChainIdHelper.parse(a.chainId).identifier;
-      const bChainIdentifier = ChainIdHelper.parse(b.chainId).identifier;
+    const sortFunc = (
+      a: {
+        isNative: boolean;
+        isInStore: boolean;
+        chainInfo: ChainInfo;
+      },
+      b: {
+        isNative: boolean;
+        isInStore: boolean;
+        chainInfo: ChainInfo;
+      }
+    ) => {
+      const aChainIdentifier = ChainIdHelper.parse(
+        a.chainInfo.chainId
+      ).identifier;
+      const bChainIdentifier = ChainIdHelper.parse(
+        b.chainInfo.chainId
+      ).identifier;
 
       const aPriority = sortPriorities[aChainIdentifier];
       const bPriority = sortPriorities[bChainIdentifier];
@@ -305,7 +335,7 @@ export const CopyAddressScene: FunctionComponent<{
     };
 
     return {
-      invisibleChainInfos,
+      invisibleChainInfos: invisibleChainInfos.sort(sortFunc),
       invisibleNativeChainInfos: nativeChainInfos.sort(sortFunc),
       invisibleNonNativeChainInfos: nonNativeChainInfos.sort(sortFunc),
     };
@@ -366,7 +396,6 @@ export const CopyAddressScene: FunctionComponent<{
           height: "21.5rem",
         }}
       >
-        {/* TODO: Update guide content */}
         {!hasAddresses && !hasInvisibleChains && !queryChains.isFetching && (
           <Box
             alignX="center"
@@ -375,52 +404,26 @@ export const CopyAddressScene: FunctionComponent<{
             paddingTop="3.1rem"
             paddingBottom="3.2rem"
           >
-            <Image
-              width="140px"
-              height="160px"
-              src={require(theme.mode === "light"
-                ? "../../../../public/assets/img/copy-address-no-search-result-light.png"
-                : "../../../../public/assets/img/copy-address-no-search-result.png")}
-              alt="copy-address-no-search-result-image"
+            <FolderMinusIcon
+              width="4.5rem"
+              height="4.5rem"
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-200"]
+                  : ColorPalette["gray-400"]
+              }
             />
             <Gutter size="0.75rem" />
 
             <Subtitle3
-              color={ColorPalette["gray-300"]}
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-200"]
+                  : ColorPalette["gray-400"]
+              }
               style={{ textAlign: "center" }}
             >
-              <FormattedMessage
-                id="page.main.components.deposit-modal.empty-text"
-                values={{
-                  link: (chunks) => (
-                    <Subtitle3
-                      as="a"
-                      style={{
-                        cursor: "pointer",
-                        textDecoration: "underline",
-                      }}
-                      onClick={(e) => {
-                        e.preventDefault();
-
-                        if (keyRingStore.selectedKeyInfo) {
-                          analyticsStore.logEvent(
-                            "click_menu_manageChainVisibility"
-                          );
-                          browser.tabs
-                            .create({
-                              url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true`,
-                            })
-                            .then(() => {
-                              window.close();
-                            });
-                        }
-                      }}
-                    >
-                      {chunks}
-                    </Subtitle3>
-                  ),
-                }}
-              />
+              <FormattedMessage id="page.main.components.deposit-modal.empty-text" />
             </Subtitle3>
           </Box>
         )}
@@ -467,26 +470,34 @@ export const CopyAddressScene: FunctionComponent<{
         {hasAddresses && hasInvisibleChains && <Gutter size="1.25rem" />}
         {hasInvisibleChains && (
           <Box paddingX="0.75rem">
-            <Subtitle4 color={ColorPalette["gray-300"]}>
+            <Subtitle4
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-500"]
+                  : ColorPalette["gray-200"]
+              }
+            >
               <FormattedMessage id="page.main.components.deposit-modal.look-for-chains" />
             </Subtitle4>
             <Gutter size="0.75rem" />
             {search.trim().length > 0
-              ? invisibleChainInfos.map((chainInfo) => {
+              ? invisibleChainInfos.map((chainData) => {
                   return (
                     <EnableChainItem
-                      key={chainInfo.chainInfo.chainId}
-                      chainInfo={chainInfo.chainInfo}
-                      isNative={chainInfo.isNative}
+                      key={chainData.chainInfo.chainId}
+                      chainInfo={chainData.chainInfo}
+                      isNative={chainData.isNative}
+                      isInStore={chainData.isInStore}
                     />
                   );
                 })
-              : invisibleNativeChainInfos.map((chainInfo) => {
+              : invisibleNativeChainInfos.map((chainData) => {
                   return (
                     <EnableChainItem
-                      key={chainInfo.chainId}
-                      chainInfo={chainInfo}
+                      key={chainData.chainInfo.chainId}
+                      chainInfo={chainData.chainInfo}
                       isNative={true}
+                      isInStore={chainData.isInStore}
                     />
                   );
                 })}
@@ -800,7 +811,8 @@ const CopyAddressItem: FunctionComponent<{
 const EnableChainItem: FunctionComponent<{
   chainInfo: ChainInfo;
   isNative: boolean;
-}> = observer(({ chainInfo, isNative }) => {
+  isInStore: boolean;
+}> = observer(({ chainInfo, isNative, isInStore }) => {
   const { analyticsStore, keyRingStore } = useStore();
   const theme = useTheme();
   const [isContainerHover, setIsContainerHover] = useState(false);
@@ -831,7 +843,7 @@ const EnableChainItem: FunctionComponent<{
         cursor="pointer"
         paddingX="1rem"
         onClick={() => {
-          if (isNative) {
+          if (isNative || (!isNative && isInStore)) {
             if (keyRingStore.selectedKeyInfo) {
               analyticsStore.logEvent("click_enableChain", {
                 chainId: chainInfo.chainId,
