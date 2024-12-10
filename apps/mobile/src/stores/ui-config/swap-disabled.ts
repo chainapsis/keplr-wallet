@@ -1,6 +1,7 @@
 import {IQueriesStore} from '@keplr-wallet/stores';
 import {autorun, makeObservable, observable, runInAction} from 'mobx';
 import {APP_VERSION} from '../../../constants.ts';
+import {Platform} from 'react-native';
 
 export class SwapDisabledConfig {
   @observable
@@ -13,6 +14,13 @@ export class SwapDisabledConfig {
   }
 
   init() {
+    if (Platform.OS === 'android') {
+      runInAction(() => {
+        this.disabled = false;
+      });
+      return;
+    }
+
     autorun(() => {
       const res = this.queriesStore.simpleQuery.queryGet<{
         [version: string]:
