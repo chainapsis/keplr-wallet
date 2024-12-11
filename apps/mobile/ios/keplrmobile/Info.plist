@@ -97,10 +97,10 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
     <false/>
 	<key>NSCameraUsageDescription</key>
-    <string>$(PRODUCT_NAME) uses camera for uploading images</string>
+    <string>Keplr uses camera for scanning QR codes</string>
     <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>$(PRODUCT_NAME) uses photo library for uploading images</string>
+    <string>Keplr uses camera for scanning QR codes</string>
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>$(PRODUCT_NAME) uses photo library for uploading images</string>
+    <string>Keplr uses camera for scanning QR codes</string>
 </dict>
 </plist>
