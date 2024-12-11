@@ -199,6 +199,9 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
         cumulative_affiliate_fee_bps: this.affiliateFeeBps.toString(),
         swap_venues: this.swapVenues,
         allow_unsafe: true,
+        smart_swap_options: {
+          evm_swaps: true,
+        },
       }),
       signal: abortController.signal,
     });

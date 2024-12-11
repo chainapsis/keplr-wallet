@@ -22,6 +22,8 @@ export interface AssetsResponse {
             chain_id: string;
             origin_denom: string;
             origin_chain_id: string;
+            is_evm: boolean;
+            token_contract?: string;
           }[];
         }
       | undefined;
@@ -97,5 +99,6 @@ export interface ChainsResponse {
     chain_id: string;
     pfm_enabled: boolean;
     supports_memo?: boolean;
+    chain_type: string;
   }[];
 }

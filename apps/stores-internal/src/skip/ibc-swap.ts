@@ -348,9 +348,20 @@ export class ObservableQueryIbcSwap extends HasMapStore<ObservableQueryIBCSwapIn
         }
       }
     } else {
-      // 현재 CW20같은 얘들은 처리할 수 없다.
-      if (!("type" in currency)) {
-        return this.queryChains.isSupportsMemo(chainId);
+      if ("type" in currency) {
+        switch (currency.type) {
+          case "erc20":
+            return true;
+          // 현재 CW20같은 얘들은 처리할 수 없다.
+
+          default:
+            return false;
+        }
+      } else {
+        return (
+          this.queryChains.isChainTypeEVM(chainId) ||
+          this.queryChains.isSupportsMemo(chainId)
+        );
       }
     }
     return false;

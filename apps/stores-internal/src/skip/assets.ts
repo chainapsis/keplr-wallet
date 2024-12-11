@@ -20,6 +20,8 @@ const Schema = Joi.object<AssetsResponse>({
           chain_id: Joi.string().required(),
           origin_denom: Joi.string().required(),
           origin_chain_id: Joi.string().required(),
+          is_evm: Joi.boolean().required(),
+          token_contract: Joi.string().optional(),
         }).unknown(true)
       ),
     }).unknown(true)
@@ -37,7 +39,10 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
     super(
       sharedContext,
       skipURL,
-      `/v2/fungible/assets?chain_id=${chainId}&native_only=false`
+      `/v2/fungible/assets?chain_id=${chainId.replace(
+        "eip155:",
+        ""
+      )}&native_only=false&include_evm_assets=true`
     );
 
     makeObservable(this);
@@ -68,7 +73,9 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
     }
 
     const assetsInResponse =
-      this.response.data.chain_to_assets_map[chainInfo.chainId];
+      this.response.data.chain_to_assets_map[
+        this.chainId.replace("eip155:", "")
+      ];
     if (assetsInResponse) {
       const res: {
         denom: string;
@@ -78,26 +85,42 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
       }[] = [];
 
       for (const asset of assetsInResponse.assets) {
+        const chainId = asset.is_evm
+          ? `eip155:${asset.chain_id}`
+          : asset.chain_id;
+        const originChainId = asset.is_evm
+          ? `eip155:${asset.origin_chain_id}`
+          : asset.origin_chain_id;
         if (
-          this.chainStore.hasChain(asset.chain_id) &&
-          this.chainStore.hasChain(asset.origin_chain_id)
+          this.chainStore.hasChain(chainId) &&
+          this.chainStore.hasChain(originChainId)
         ) {
           // IBC asset일 경우 그냥 넣는다.
           if (asset.denom.startsWith("ibc/")) {
             res.push({
               denom: asset.denom,
-              chainId: asset.chain_id,
+              chainId: chainId,
               originDenom: asset.origin_denom,
-              originChainId: asset.origin_chain_id,
+              originChainId: originChainId,
             });
             // IBC asset이 아니라면 알고있는 currency만 넣는다.
-          } else if (chainInfo.findCurrencyWithoutReaction(asset.denom)) {
-            res.push({
-              denom: asset.denom,
-              chainId: asset.chain_id,
-              originDenom: asset.origin_denom,
-              originChainId: asset.origin_chain_id,
-            });
+          } else {
+            const coinMinimalDenom =
+              asset.is_evm && asset.token_contract != null
+                ? `erc20:${asset.denom}`
+                : asset.denom;
+            const originCoinMinimalDenom =
+              asset.is_evm && asset.token_contract != null
+                ? `erc20:${asset.origin_denom}`
+                : asset.denom;
+            if (chainInfo.findCurrencyWithoutReaction(coinMinimalDenom)) {
+              res.push({
+                denom: coinMinimalDenom,
+                chainId: chainId,
+                originDenom: originCoinMinimalDenom,
+                originChainId: originChainId,
+              });
+            }
           }
         }
       }
