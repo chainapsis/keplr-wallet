@@ -55,3 +55,4 @@ export * from "./msg-adr36";
 export * from "./msg-receive";
 export * from "./msg-swap";
 export * from "./msg-cancel-undelegate";
+export * from "./folder-minus";
