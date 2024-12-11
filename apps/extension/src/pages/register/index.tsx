@@ -161,6 +161,9 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
     }
 
     const ledgerApp = searchParams.get("ledgerApp");
+    const account = searchParams.get("account");
+    const change = searchParams.get("change");
+    const addressIndex = searchParams.get("addressIndex");
     if (
       route === "connect-ledger" &&
       (ledgerApp === "Starknet" || ledgerApp === "Ethereum")
@@ -175,7 +178,11 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
             name: "",
             password: "",
             app: ledgerApp,
-
+            bip44Path: {
+              account,
+              change,
+              addressIndex,
+            },
             appendModeInfo: {
               vaultId,
               // 이더리움 렛저 앱을 연결하면 이더리움 메인넷을 자동으로 enable 하고

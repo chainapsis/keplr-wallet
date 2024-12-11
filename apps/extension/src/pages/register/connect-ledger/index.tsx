@@ -37,7 +37,7 @@ export const ConnectLedgerScene: FunctionComponent<{
   name: string;
   password: string;
   app: App | "Ethereum" | "Starknet";
-  bip44Path?: {
+  bip44Path: {
     account: number;
     change: number;
     addressIndex: number;
@@ -72,7 +72,7 @@ export const ConnectLedgerScene: FunctionComponent<{
       throw new Error(`Unsupported app: ${propApp}`);
     }
 
-    const isStepMode = stepPrevious !== undefined && stepTotal !== undefined;
+    const isStepMode = stepPrevious != null && stepTotal != null;
 
     const sceneTransition = useSceneTransition();
 
@@ -100,7 +100,14 @@ export const ConnectLedgerScene: FunctionComponent<{
                   }
                 ),
                 paragraphs: [
-                  "This window only appears for users who have previously been using Keplr with their Ledger account but haven’t connected the StarkNet app. It will NOT appear for any other users.",
+                  intl.formatMessage(
+                    {
+                      id: "pages.register.connect-ledger.direct.paragraph",
+                    },
+                    {
+                      app: propApp,
+                    }
+                  ),
                 ],
               }
         );

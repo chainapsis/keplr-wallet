@@ -126,6 +126,7 @@
   "pages.register.connect-ledger.title": "Please connect your Hardware wallet",
   "pages.register.connect-ledger.direct.title": "Connect Keplr to {app} on Ledger",
   "pages.register.connect-ledger.paragraph": "Keplr supports Cosmos app chains, all EVM compatible chains including Ethereum, Injective and Evmos, and Starknet. Ledger connection will guide you through Cosmos, EVM, and Starknet in order.",
+  "pages.register.connect-ledger.direct.paragraph": "This window only appears for users who have previously been using Keplr with their Ledger account but haven’t connected the {app} app. It will NOT appear for any other users.",
   "pages.register.connect-ledger.step-text": "Step {step}",
   "pages.register.connect-ledger.connect-ledger-step-paragraph": "Connect and unlock your Ledger.",
   "pages.register.connect-ledger.open-app-step-paragraph": "Open the {app} app on your Ledger device.",

@@ -1,4 +1,4 @@
-import { KeyRingService } from "../keyring";
+import { BIP44HDPath, KeyRingService } from "../keyring";
 import { Env } from "@keplr-wallet/router";
 import { PermissionService } from "../permission";
 import { ChainsService } from "../chains";
@@ -66,19 +66,29 @@ export class PermissionInteractiveService {
       const selectedKeyInfo = this.keyRingService.getKeyInfo(
         this.keyRingService.selectedVaultId
       );
+      if (selectedKeyInfo == null) {
+        throw new Error("Key info is not found");
+      }
+
+      const isNanoLedger =
+        selectedKeyInfo.insensitive["keyRingType"] === "ledger";
+      const isLedgerAppNotConnected = selectedKeyInfo.insensitive[app] == null;
+      const bip44Path = selectedKeyInfo.insensitive["bip44Path"];
       if (
         !env.isInternalMsg &&
-        selectedKeyInfo &&
-        selectedKeyInfo.insensitive["keyRingType"] === "ledger" &&
-        selectedKeyInfo.insensitive[app] == null
+        isNanoLedger &&
+        isLedgerAppNotConnected &&
+        typeof bip44Path === "object"
       ) {
         if (Date.now() - this.lastOpenRegisterPageTimestamp > 1000 * 30) {
           runInAction(() => {
             this.lastOpenRegisterPageTimestamp = Date.now();
           });
 
+          const { account, change, addressIndex } = bip44Path as BIP44HDPath;
+
           await browser.tabs.create({
-            url: `/register.html#?route=connect-ledger&ledgerApp=${app}&vaultId=${this.keyRingService.selectedVaultId}`,
+            url: `/register.html#?route=connect-ledger&ledgerApp=${app}&vaultId=${this.keyRingService.selectedVaultId}&account=${account}&change=${change}&addressIndex=${addressIndex}`,
           });
         }
       }
@@ -138,7 +148,6 @@ export class PermissionInteractiveService {
 
     await this.ensureKeyRingLedgerAppConnected(env, "Starknet");
 
-    // TODO: 런칭 전에 메인넷으로 수정해야함.
     const currentChainIdForStarknet =
       this.permissionService.getCurrentChainIdForStarknet(origin) ??
       "starknet:SN_MAIN";

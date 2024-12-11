@@ -120,6 +120,7 @@
   "pages.register.connect-ledger.title": "请连接你的硬件钱包",
   "pages.register.connect-ledger.direct.title": "렛저 {app} 將 Keplr 連接到應用程式。",
   "pages.register.connect-ledger.paragraph": "Keplr 支援 Cosmos 應用程式鏈、所有 EVM 相容鏈，包括 Ethereum、Injective 和 Evmos，以及 Starknet。Ledger connection 會引導您依序瀏覽 Cosmos、EVM 和 Starknet。",
+  "pages.register.connect-ledger.direct.paragraph": "此視窗僅對之前使用 Keplr 與 Ledger 帳戶但未連接 {app} 應用程式的使用者可見。其他使用者則無法看到。",
   "pages.register.connect-ledger.step-text": "步骤 {step}",
   "pages.register.connect-ledger.connect-ledger-step-paragraph": "连接并解锁你的Ledger。",
   "pages.register.connect-ledger.open-app-step-paragraph": "在你的Ledger设备上打开{app}应用。",
