@@ -32,6 +32,8 @@ import {
 } from "../../../../components/transition";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { FolderMinusIcon } from "../../../../components/icon/folder-minus";
+import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
+import { isRunningInSidePanel } from "../../../../utils";
 
 export const CopyAddressScene: FunctionComponent<{
   close: () => void;
@@ -47,6 +49,7 @@ export const CopyAddressScene: FunctionComponent<{
   const intl = useIntl();
   const theme = useTheme();
   const [search, setSearch] = useState("");
+  const runInSidePanel = isRunningInSidePanel();
 
   const searchRef = useFocusOnMount<HTMLInputElement>();
 
@@ -86,6 +89,25 @@ export const CopyAddressScene: FunctionComponent<{
     }
     return res;
   });
+
+  const sortChainsByPriority = (aChainId: string, bChainId: string) => {
+    const aChainIdentifier = ChainIdHelper.parse(aChainId).identifier;
+    const bChainIdentifier = ChainIdHelper.parse(bChainId).identifier;
+
+    const aPriority = sortPriorities[aChainIdentifier];
+    const bPriority = sortPriorities[bChainIdentifier];
+
+    if (aPriority && bPriority) {
+      return 0;
+    }
+    if (aPriority) {
+      return -1;
+    }
+    if (bPriority) {
+      return 1;
+    }
+    return 0;
+  };
 
   const addresses: {
     modularChainInfo: ModularChainInfo;
@@ -189,37 +211,19 @@ export const CopyAddressScene: FunctionComponent<{
       }
     })
     .sort((a, b) => {
-      const aChainIdentifier = ChainIdHelper.parse(
-        a.modularChainInfo.chainId
-      ).identifier;
-      const bChainIdentifier = ChainIdHelper.parse(
+      return sortChainsByPriority(
+        a.modularChainInfo.chainId,
         b.modularChainInfo.chainId
-      ).identifier;
-
-      const aPriority = sortPriorities[aChainIdentifier];
-      const bPriority = sortPriorities[bChainIdentifier];
-
-      if (aPriority && bPriority) {
-        return 0;
-      }
-      if (aPriority) {
-        return -1;
-      }
-      if (bPriority) {
-        return 1;
-      }
-      return 0;
+      );
     });
-
-  const hasAddresses = addresses.length > 0;
 
   const [blockInteraction, setBlockInteraction] = useState(false);
 
   const queryChains = queriesStore.simpleQuery.queryGet<{
     chains: ChainInfo[];
   }>(
-    "http://localhost:3000",
-    `/chains?filterOption=chainName&searchText=${search.trim()}`
+    "https://7v6zjsr36fqrqcaeuqbhyrq46a0qndzt.lambda-url.us-west-2.on.aws",
+    `/chains?filterOption=chain&searchText=${search.trim()}`
   );
 
   const { invisibleChainInfos, invisibleNativeChainInfos } = useMemo(() => {
@@ -232,111 +236,113 @@ export const CopyAddressScene: FunctionComponent<{
     }
 
     const queriedChainInfos = queryChains.response.data.chains;
-    const modularChainInfos = chainStore.modularChainInfosInUI;
+    const enabledModularChainInfos = chainStore.modularChainInfosInUI;
 
-    const filteredChainInfos = queriedChainInfos.filter((chainInfo) => {
-      return !modularChainInfos.some(
-        (modularChainInfo) => modularChainInfo.chainId === chainInfo.chainId
-      );
-    });
+    let disabledChainInfos: (ChainInfo | ModularChainInfo)[] =
+      queriedChainInfos.filter((chainInfo) => {
+        return !enabledModularChainInfos.some(
+          (modularChainInfo) => modularChainInfo.chainId === chainInfo.chainId
+        );
+      });
 
-    const { invisibleChainInfos, nativeChainInfos, nonNativeChainInfos } =
-      filteredChainInfos.reduce(
-        (acc, chainInfo) => {
-          let isNative: boolean | undefined = false;
-          let isInStore: boolean = true;
+    const trimmedSearch = search.trim().toLowerCase();
 
-          try {
-            isNative = chainStore.getChain(chainInfo.chainId).embedded.embedded;
-          } catch (e) {
-            // chainInfo is not in the chain store.
-            isNative = undefined;
-            isInStore = false;
-          }
+    // starknet is not in the queryChains response. So, we need to add it manually
+    // only if it is not enabled and it matches the search.
+    const disabledStarknetChainInfos = chainStore.modularChainInfos.filter(
+      (modularChainInfo) =>
+        "starknet" in modularChainInfo &&
+        !chainStore.isEnabledChain(modularChainInfo.chainId) &&
+        (trimmedSearch.length === 0 ||
+          modularChainInfo.chainId.toLowerCase().includes(trimmedSearch) ||
+          modularChainInfo.chainName.toLowerCase().includes(trimmedSearch))
+    );
 
-          if (isNative) {
-            acc.nativeChainInfos.push({
-              isNative: true,
-              isInStore,
-              chainInfo,
-            });
+    disabledChainInfos = [...disabledStarknetChainInfos, ...disabledChainInfos];
+
+    const {
+      invisibleChainInfos: unSortedInvisible,
+      nativeChainInfos: unSortedNative,
+      nonNativeChainInfos: unSortedNonNative,
+    } = disabledChainInfos.reduce(
+      (acc, chainInfo) => {
+        let embedded: boolean | undefined = false;
+        let addedInStore: boolean = true;
+
+        const isStarknet = "starknet" in chainInfo;
+
+        try {
+          if (isStarknet) {
+            embedded = true;
           } else {
-            acc.nonNativeChainInfos.push({
-              isNative: false,
-              isInStore,
-              chainInfo,
-            });
+            const chainInfoInStore = chainStore.getChain(chainInfo.chainId);
+
+            if (!chainInfoInStore) {
+              addedInStore = false;
+            } else {
+              if (chainInfoInStore.hideInUI) {
+                return acc;
+              }
+
+              addedInStore = true;
+              embedded = chainInfoInStore.embedded?.embedded;
+            }
           }
-
-          acc.invisibleChainInfos.push({
-            isNative: !!isNative,
-            isInStore,
-            chainInfo,
-          });
-
-          return acc;
-        },
-        {
-          invisibleChainInfos: [],
-          nativeChainInfos: [],
-          nonNativeChainInfos: [],
-        } as {
-          invisibleChainInfos: {
-            isNative: boolean;
-            isInStore: boolean;
-            chainInfo: ChainInfo;
-          }[];
-          nativeChainInfos: {
-            isNative: boolean;
-            isInStore: boolean;
-            chainInfo: ChainInfo;
-          }[];
-          nonNativeChainInfos: {
-            isNative: boolean;
-            isInStore: boolean;
-            chainInfo: ChainInfo;
-          }[];
+        } catch (e) {
+          // got an error while getting chain info
+          embedded = undefined;
+          addedInStore = false;
         }
-      );
 
-    const sortFunc = (
-      a: {
-        isNative: boolean;
-        isInStore: boolean;
-        chainInfo: ChainInfo;
+        const chainItem = {
+          embedded: !!embedded,
+          addedInStore,
+          chainInfo,
+        };
+
+        acc.invisibleChainInfos.push(chainItem);
+
+        if (embedded) {
+          acc.nativeChainInfos.push(chainItem);
+        } else {
+          acc.nonNativeChainInfos.push(chainItem);
+        }
+
+        return acc;
       },
-      b: {
-        isNative: boolean;
-        isInStore: boolean;
-        chainInfo: ChainInfo;
+      {
+        invisibleChainInfos: [],
+        nativeChainInfos: [],
+        nonNativeChainInfos: [],
+      } as {
+        invisibleChainInfos: {
+          embedded: boolean;
+          addedInStore: boolean;
+          chainInfo: ChainInfo | ModularChainInfo;
+        }[];
+        nativeChainInfos: {
+          embedded: boolean;
+          addedInStore: boolean;
+          chainInfo: ChainInfo | ModularChainInfo;
+        }[];
+        nonNativeChainInfos: {
+          embedded: boolean;
+          addedInStore: boolean;
+          chainInfo: ChainInfo | ModularChainInfo;
+        }[];
       }
-    ) => {
-      const aChainIdentifier = ChainIdHelper.parse(
-        a.chainInfo.chainId
-      ).identifier;
-      const bChainIdentifier = ChainIdHelper.parse(
-        b.chainInfo.chainId
-      ).identifier;
-
-      const aPriority = sortPriorities[aChainIdentifier];
-      const bPriority = sortPriorities[bChainIdentifier];
-
-      if (aPriority && bPriority) {
-        return 0;
-      }
-      if (aPriority) {
-        return -1;
-      }
-      if (bPriority) {
-        return 1;
-      }
-      return 0;
-    };
+    );
 
     return {
-      invisibleChainInfos: invisibleChainInfos.sort(sortFunc),
-      invisibleNativeChainInfos: nativeChainInfos.sort(sortFunc),
-      invisibleNonNativeChainInfos: nonNativeChainInfos.sort(sortFunc),
+      invisibleChainInfos: unSortedInvisible.sort((a, b) =>
+        sortChainsByPriority(a.chainInfo.chainId, b.chainInfo.chainId)
+      ),
+      invisibleNativeChainInfos: unSortedNative.sort((a, b) =>
+        sortChainsByPriority(a.chainInfo.chainId, b.chainInfo.chainId)
+      ),
+      invisibleNonNativeChainInfos: unSortedNonNative.sort((a, b) =>
+        sortChainsByPriority(a.chainInfo.chainId, b.chainInfo.chainId)
+      ),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -347,6 +353,7 @@ export const CopyAddressScene: FunctionComponent<{
     sortPriorities,
   ]);
 
+  const hasAddresses = addresses.length > 0;
   const hasInvisibleChains =
     (search.trim().length === 0 && invisibleNativeChainInfos.length > 0) ||
     (search.trim().length > 0 && invisibleChainInfos.length > 0);
@@ -357,6 +364,7 @@ export const CopyAddressScene: FunctionComponent<{
       backgroundColor={
         theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
       }
+      height={runInSidePanel ? "70vh" : undefined}
     >
       <YAxis alignX="center">
         <Subtitle1
@@ -394,36 +402,11 @@ export const CopyAddressScene: FunctionComponent<{
           display: "flex",
           flexDirection: "column",
           overflowY: "auto",
-          height: "21.5rem",
+          height: runInSidePanel ? "" : "21.5rem",
         }}
       >
         {!hasAddresses && !hasInvisibleChains && !queryChains.isFetching && (
-          <Box alignX="center" alignY="center" paddingY="1.875rem">
-            <FolderMinusIcon
-              width="4.5rem"
-              height="4.5rem"
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-200"]
-                  : ColorPalette["gray-400"]
-              }
-            />
-            <Gutter size="0.75rem" />
-
-            <Subtitle3
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-200"]
-                  : ColorPalette["gray-400"]
-              }
-              style={{
-                textAlign: "center",
-                width: "17.25rem",
-              }}
-            >
-              <FormattedMessage id="page.main.components.deposit-modal.empty-text" />
-            </Subtitle3>
-          </Box>
+          <NoResultBox />
         )}
 
         <Box paddingX="0.75rem">
@@ -477,15 +460,14 @@ export const CopyAddressScene: FunctionComponent<{
             >
               <FormattedMessage id="page.main.components.deposit-modal.look-for-chains" />
             </Subtitle4>
-            <Gutter size="0.75rem" />
             {search.trim().length > 0
               ? invisibleChainInfos.map((chainData) => {
                   return (
                     <EnableChainItem
                       key={chainData.chainInfo.chainId}
                       chainInfo={chainData.chainInfo}
-                      isNative={chainData.isNative}
-                      isInStore={chainData.isInStore}
+                      embedded={chainData.embedded}
+                      addedInStore={chainData.addedInStore}
                     />
                   );
                 })
@@ -494,13 +476,14 @@ export const CopyAddressScene: FunctionComponent<{
                     <EnableChainItem
                       key={chainData.chainInfo.chainId}
                       chainInfo={chainData.chainInfo}
-                      isNative={true}
-                      isInStore={chainData.isInStore}
+                      embedded={true}
+                      addedInStore={chainData.addedInStore}
                     />
                   );
                 })}
           </Box>
         )}
+        <Gutter size="0.75rem" />
       </SimpleBar>
     </Box>
   );
@@ -807,11 +790,11 @@ const CopyAddressItem: FunctionComponent<{
 );
 
 const EnableChainItem: FunctionComponent<{
-  chainInfo: ChainInfo;
-  isNative: boolean;
-  isInStore: boolean;
-}> = observer(({ chainInfo, isNative, isInStore }) => {
-  const { analyticsStore, keyRingStore } = useStore();
+  chainInfo: ChainInfo | ModularChainInfo;
+  embedded: boolean;
+  addedInStore: boolean;
+}> = observer(({ chainInfo, embedded, addedInStore }) => {
+  const { analyticsStore, chainStore, keyRingStore } = useStore();
   const theme = useTheme();
   const [isContainerHover, setIsContainerHover] = useState(false);
 
@@ -820,7 +803,7 @@ const EnableChainItem: FunctionComponent<{
       height="4rem"
       borderRadius="0.375rem"
       alignY="center"
-      marginBottom="0.75rem"
+      marginTop="0.75rem"
     >
       <Box
         height="4rem"
@@ -840,21 +823,32 @@ const EnableChainItem: FunctionComponent<{
         }}
         cursor="pointer"
         paddingX="1rem"
-        onClick={() => {
-          if (isNative || (!isNative && isInStore)) {
-            if (keyRingStore.selectedKeyInfo) {
-              analyticsStore.logEvent("click_enableChain", {
-                chainId: chainInfo.chainId,
-                chainName: chainInfo.chainName,
-              });
+        onClick={async () => {
+          // If the chain is not embedded and not added to the store,
+          // add the chain internally and refresh the store.
+          if (!embedded && !addedInStore) {
+            try {
+              await window.keplr?.experimentalSuggestChain(
+                chainInfo as ChainInfo
+              );
+              await keyRingStore.refreshKeyRingStatus();
+              await chainStore.updateChainInfosFromBackground();
+              await chainStore.updateEnabledChainIdentifiersFromBackground();
 
-              browser.tabs.create({
-                url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true&initialSearchValue=${chainInfo.chainName}`,
-              });
+              dispatchGlobalEventExceptSelf("keplr_suggested_chain_added");
+            } catch {
+              return;
             }
-          } else {
+          }
+
+          if (keyRingStore.selectedKeyInfo) {
+            analyticsStore.logEvent("click_enableChain", {
+              chainId: chainInfo.chainId,
+              chainName: chainInfo.chainName,
+            });
+
             browser.tabs.create({
-              url: "https://chains.keplr.app/",
+              url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true&initialSearchValue=${chainInfo.chainName}`,
             });
           }
         }}
@@ -868,45 +862,82 @@ const EnableChainItem: FunctionComponent<{
                 ? ColorPalette["gray-700"]
                 : ColorPalette["gray-10"]
             }
+            style={{
+              display: "-webkit-box",
+              WebkitBoxOrient: "vertical",
+              WebkitLineClamp: 1,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
           >
             {chainInfo.chainName}
           </Subtitle3>
-          <div
-            style={{
-              flex: 1,
-            }}
-          />
-          <XAxis alignY="center">
-            <Subtitle3
-              color={
-                isContainerHover
-                  ? theme.mode === "light"
-                    ? ColorPalette["blue-200"]
-                    : ColorPalette["gray-100"]
-                  : theme.mode === "light"
-                  ? ColorPalette["blue-400"]
-                  : ColorPalette["gray-200"]
-              }
-            >
-              <FormattedMessage id="page.main.components.deposit-modal.enable-chain" />
-            </Subtitle3>
-            <Gutter size="0.25rem" />
-            <ArrowTopRightOnSquareIcon
-              width="1.125rem"
-              height="1.125rem"
-              color={
-                isContainerHover
-                  ? theme.mode === "light"
-                    ? ColorPalette["blue-200"]
-                    : ColorPalette["gray-100"]
-                  : theme.mode === "light"
-                  ? ColorPalette["blue-400"]
-                  : ColorPalette["gray-200"]
-              }
-            />
-          </XAxis>
+          <div style={{ flex: 1 }} />
+          <Box minWidth="8.5rem">
+            <XAxis alignY="center">
+              <Subtitle3
+                color={
+                  isContainerHover
+                    ? theme.mode === "light"
+                      ? ColorPalette["blue-200"]
+                      : ColorPalette["gray-100"]
+                    : theme.mode === "light"
+                    ? ColorPalette["blue-400"]
+                    : ColorPalette["gray-200"]
+                }
+              >
+                <FormattedMessage id="page.main.components.deposit-modal.enable-chain" />
+              </Subtitle3>
+              <Gutter size="0.25rem" />
+              <ArrowTopRightOnSquareIcon
+                width="1.125rem"
+                height="1.125rem"
+                color={
+                  isContainerHover
+                    ? theme.mode === "light"
+                      ? ColorPalette["blue-200"]
+                      : ColorPalette["gray-100"]
+                    : theme.mode === "light"
+                    ? ColorPalette["blue-400"]
+                    : ColorPalette["gray-200"]
+                }
+              />
+            </XAxis>
+          </Box>
         </XAxis>
       </Box>
     </Box>
   );
 });
+
+const NoResultBox: FunctionComponent = () => {
+  const theme = useTheme();
+
+  return (
+    <Box alignX="center" alignY="center" paddingY="1.875rem">
+      <FolderMinusIcon
+        width="4.5rem"
+        height="4.5rem"
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-200"]
+            : ColorPalette["gray-400"]
+        }
+      />
+      <Gutter size="0.75rem" />
+      <Subtitle3
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-200"]
+            : ColorPalette["gray-400"]
+        }
+        style={{
+          textAlign: "center",
+          width: "17.25rem",
+        }}
+      >
+        <FormattedMessage id="page.main.components.deposit-modal.empty-text" />
+      </Subtitle3>
+    </Box>
+  );
+};
