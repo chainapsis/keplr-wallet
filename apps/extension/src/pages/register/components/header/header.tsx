@@ -76,6 +76,20 @@ export const RegisterHeader: FunctionComponent<{
           }
           break;
         }
+        case "direct": {
+          if (headerSceneRef.current.currentScene !== "direct") {
+            headerSceneRef.current.replace("direct", {
+              title: header.title,
+              paragraphs: header.paragraphs,
+            });
+          } else {
+            headerSceneRef.current.setCurrentSceneProps({
+              title: header.title,
+              paragraphs: header.paragraphs,
+            });
+          }
+          break;
+        }
       }
     }
   }, [header]);
@@ -151,9 +165,13 @@ export const RegisterHeader: FunctionComponent<{
             name: "step",
             element: HeaderStep,
           },
+          {
+            name: "direct",
+            element: HeaderDirect,
+          },
         ]}
         initialSceneProps={{
-          name: "intro",
+          name: header.mode,
         }}
         transitionAlign="center"
         transitionMode="opacity"
@@ -251,6 +269,65 @@ const HeaderStep: FunctionComponent<{
           </React.Fragment>
         )}
 
+        <RegisterH3>{title}</RegisterH3>
+      </YAxis>
+      <Box width="29.5rem" marginX="auto">
+        <VerticalResizeTransition>
+          {paragraphs && paragraphs.length > 0 ? (
+            <Gutter size="1.25rem" />
+          ) : null}
+        </VerticalResizeTransition>
+        <VerticalResizeTransition transitionAlign="top">
+          {(() => {
+            if (paragraphs && paragraphs.length > 0) {
+              if (paragraphs.length === 1) {
+                return (
+                  <Body1
+                    color={ColorPalette["gray-300"]}
+                    style={{
+                      textAlign: "center",
+                    }}
+                  >
+                    {paragraphs[0]}
+                  </Body1>
+                );
+              }
+
+              return (
+                <YAxis alignX="center">
+                  <ul>
+                    {paragraphs.map((paragraph, i) => {
+                      return (
+                        <Body1
+                          key={i}
+                          as="li"
+                          color={ColorPalette["gray-300"]}
+                          style={{ marginTop: i > 0 ? "0.5rem" : "0" }}
+                        >
+                          {paragraph}
+                        </Body1>
+                      );
+                    })}
+                  </ul>
+                </YAxis>
+              );
+            }
+
+            return null;
+          })()}
+        </VerticalResizeTransition>
+      </Box>
+    </Box>
+  );
+};
+
+const HeaderDirect: FunctionComponent<{
+  title: string;
+  paragraphs?: (string | ReactNode)[];
+}> = ({ title, paragraphs }) => {
+  return (
+    <Box position="relative">
+      <YAxis alignX="center">
         <RegisterH3>{title}</RegisterH3>
       </YAxis>
       <Box width="29.5rem" marginX="auto">

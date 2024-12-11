@@ -48,8 +48,8 @@ export const ConnectLedgerScene: FunctionComponent<{
     vaultId: string;
     afterEnableChains: string[];
   };
-  stepPrevious: number;
-  stepTotal: number;
+  stepPrevious?: number;
+  stepTotal?: number;
 }> = observer(
   ({
     name,
@@ -72,19 +72,45 @@ export const ConnectLedgerScene: FunctionComponent<{
       throw new Error(`Unsupported app: ${propApp}`);
     }
 
+    const isStepMode = stepPrevious != null && stepTotal != null;
+
     const sceneTransition = useSceneTransition();
 
     const header = useRegisterHeader();
     useSceneEvents({
       onWillVisible: () => {
-        header.setHeader({
-          mode: "step",
-          title: intl.formatMessage({
-            id: "pages.register.connect-ledger.title",
-          }),
-          stepCurrent: stepPrevious + 1,
-          stepTotal: stepTotal,
-        });
+        header.setHeader(
+          isStepMode
+            ? {
+                mode: "step",
+                title: intl.formatMessage({
+                  id: "pages.register.connect-ledger.title",
+                }),
+                stepCurrent: stepPrevious + 1,
+                stepTotal,
+              }
+            : {
+                mode: "direct",
+                title: intl.formatMessage(
+                  {
+                    id: "pages.register.connect-ledger.direct.title",
+                  },
+                  {
+                    app: propApp,
+                  }
+                ),
+                paragraphs: [
+                  intl.formatMessage(
+                    {
+                      id: "pages.register.connect-ledger.direct.paragraph",
+                    },
+                    {
+                      app: propApp,
+                    }
+                  ),
+                ],
+              }
+        );
       },
     });
 
@@ -118,6 +144,10 @@ export const ConnectLedgerScene: FunctionComponent<{
         case "Cosmos":
         case "Terra":
         case "Secret": {
+          if (!bip44Path) {
+            throw new Error("bip44Path not found");
+          }
+
           let app = new CosmosApp(propApp, transport);
 
           try {
@@ -163,17 +193,19 @@ export const ConnectLedgerScene: FunctionComponent<{
                 replace: true,
               });
             } else {
-              sceneTransition.replaceAll("finalize-key", {
-                name,
-                password,
-                ledger: {
-                  pubKey: res.compressed_pk,
-                  app: propApp,
-                  bip44Path,
-                },
-                stepPrevious: stepPrevious + 1,
-                stepTotal: stepTotal,
-              });
+              if (isStepMode) {
+                sceneTransition.replaceAll("finalize-key", {
+                  name,
+                  password,
+                  ledger: {
+                    pubKey: res.compressed_pk,
+                    app: propApp,
+                    bip44Path,
+                  },
+                  stepPrevious: stepPrevious + 1,
+                  stepTotal: stepTotal,
+                });
+              }
             }
           } else {
             setStep("connected");
@@ -186,6 +218,10 @@ export const ConnectLedgerScene: FunctionComponent<{
           return;
         }
         case "Ethereum": {
+          if (!bip44Path) {
+            throw new Error("bip44Path not found");
+          }
+
           let ethApp = new Eth(transport);
 
           // Ensure that the keplr can connect to ethereum app on ledger.
@@ -235,31 +271,34 @@ export const ConnectLedgerScene: FunctionComponent<{
                 ...appendModeInfo.afterEnableChains
               );
 
-              sceneTransition.push("enable-chains", {
-                vaultId: appendModeInfo.vaultId,
-                keyType: "ledger",
-                candidateAddresses: [],
-                isFresh: false,
-                skipWelcome: true,
-                fallbackStarknetLedgerApp: true,
-                stepPrevious: stepPrevious,
-                stepTotal: stepTotal,
-              });
-              // navigate("/welcome", {
-              //   replace: true,
-              // });
+              if (isStepMode) {
+                sceneTransition.push("enable-chains", {
+                  vaultId: appendModeInfo.vaultId,
+                  keyType: "ledger",
+                  candidateAddresses: [],
+                  isFresh: false,
+                  skipWelcome: true,
+                  fallbackStarknetLedgerApp: true,
+                  stepPrevious: stepPrevious,
+                  stepTotal: stepTotal,
+                });
+              } else {
+                window.close();
+              }
             } else {
-              sceneTransition.replaceAll("finalize-key", {
-                name,
-                password,
-                ledger: {
-                  pubKey: pubKey.toBytes(),
-                  app: propApp,
-                  bip44Path,
-                },
-                stepPrevious: stepPrevious + 1,
-                stepTotal: stepTotal,
-              });
+              if (isStepMode) {
+                sceneTransition.replaceAll("finalize-key", {
+                  name,
+                  password,
+                  ledger: {
+                    pubKey: pubKey.toBytes(),
+                    app: propApp,
+                    bip44Path,
+                  },
+                  stepPrevious: stepPrevious + 1,
+                  stepTotal: stepTotal,
+                });
+              }
             }
           } catch (e) {
             console.log(e);
@@ -296,6 +335,11 @@ export const ConnectLedgerScene: FunctionComponent<{
 
               return;
             case LedgerError.NoError:
+              setIsLoading(false);
+              setStep("app");
+
+              await transport.close();
+
               const pubKey = new PubKeyStarknet(res.publicKey);
 
               if (appendModeInfo) {
@@ -307,17 +351,15 @@ export const ConnectLedgerScene: FunctionComponent<{
                 await chainStore.enableChainInfoInUI(
                   ...appendModeInfo.afterEnableChains
                 );
+
+                if (isStepMode) {
+                  navigate("/welcome", {
+                    replace: true,
+                  });
+                } else {
+                  window.close();
+                }
               }
-
-              navigate("/welcome", {
-                replace: true,
-              });
-
-              setIsLoading(false);
-              setStep("app");
-
-              await transport.close();
-
               return;
             default:
               setIsLoading(false);
@@ -349,10 +391,21 @@ export const ConnectLedgerScene: FunctionComponent<{
           />
           <StepView
             step={2}
-            paragraph={intl.formatMessage(
-              { id: "pages.register.connect-ledger.open-app-step-paragraph" },
-              { app: propApp }
-            )}
+            paragraph={
+              isStepMode
+                ? intl.formatMessage(
+                    {
+                      id: "pages.register.connect-ledger.open-app-step-paragraph",
+                    },
+                    { app: propApp }
+                  )
+                : intl.formatMessage(
+                    {
+                      id: "pages.register.connect-ledger.direct.open-app-step-paragraph",
+                    },
+                    { app: propApp }
+                  )
+            }
             icon={
               <Box style={{ opacity: step !== "connected" ? 0.5 : 1 }}>
                 {(() => {
@@ -812,13 +865,23 @@ const StarknetIcon: FunctionComponent = () => {
       <path
         fillRule="evenodd"
         clipRule="evenodd"
-        d="M29.345 33.5692L29.9867 31.3661C30.1172 30.918 30.4355 30.5694 30.8402 30.4319L32.8325 29.7511C33.1083 29.6575 33.1106 29.2251 32.837 29.1266L30.8536 28.4135C30.4511 28.2686 30.1373 27.9149 30.0128 27.4652L29.4009 25.2514C29.3167 24.9458 28.9276 24.9424 28.8389 25.2472L28.1971 27.4503C28.0667 27.8975 27.7484 28.2462 27.3437 28.3845L25.3513 29.0645C25.0756 29.1589 25.0726 29.5904 25.3469 29.689L27.3303 30.402C27.7328 30.547 28.0466 30.9015 28.171 31.3512L28.783 33.5642C28.8672 33.8706 29.2563 33.8739 29.345 33.5692Z"
+        d="M29.3453 33.5692L29.987 31.3661C30.1174 30.918 30.4357 30.5694 30.8404 30.4319L32.8328 29.7511C33.1086 29.6575 33.1108 29.2251 32.8373 29.1266L30.8539 28.4135C30.4514 28.2686 30.1375 27.9149 30.0131 27.4652L29.4011 25.2514C29.3169 24.9458 28.9278 24.9424 28.8391 25.2472L28.1974 27.4503C28.0669 27.8975 27.7487 28.2462 27.3439 28.3845L25.3516 29.0645C25.0758 29.1589 25.0728 29.5904 25.3471 29.689L27.3305 30.402C27.733 30.547 28.0468 30.9015 28.1713 31.3512L28.7832 33.5642C28.8675 33.8706 29.2565 33.8739 29.3453 33.5692Z"
         fill="#FAFAFA"
       />
+      <mask id="path-3-inside-1_13610_34339" fill="white">
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M62 32.1347C61.1468 31.1857 58.795 29.2191 57.5 29C56.1948 28.7896 55.0409 28.7724 53.7524 29.0001C51.145 29.4386 49.5809 31.981 47.5149 33.3053C46.442 33.9552 45.527 34.7073 44.5791 35.4732C44.1224 35.8605 43.706 36.273 43.2724 36.6796L42.0874 37.8518C40.7999 39.19 39.5308 40.4089 38.3029 41.4191C37.07 42.4248 35.9174 43.1885 34.7815 43.7218C33.6463 44.258 32.4317 44.5733 30.8484 44.6237C29.2791 44.6788 27.4225 44.3971 25.4365 43.9323C23.4398 43.4695 21.343 42.8099 19 42.2423C19.8175 44.4974 21.0487 46.4903 22.6293 48.3119C24.2284 50.102 26.2253 51.7337 28.7905 52.8068C31.3187 53.9036 34.4958 54.2974 37.4665 53.7034C40.4451 53.1332 43.0589 51.7626 45.1717 50.1779C47.2899 48.5768 49.0037 46.753 50.4484 44.8566C50.8471 44.3328 51.0581 44.0396 51.3467 43.6301L52.1445 42.4552C52.6988 41.7285 53.2035 40.901 53.7524 40.181C54.8282 38.673 55.8886 37.1668 57.121 35.7791C57.7413 35.0752 58.3955 34.402 59.1676 33.755C59.553 33.4392 59.9688 33.1301 60.4297 32.8517C60.8975 32.5514 61.3917 32.3164 62 32.1347Z"
+        />
+      </mask>
       <path
-        d="M53.9183 29.9862L53.9182 29.9862C52.8992 30.1576 52.0315 30.746 51.0903 31.5721C50.8533 31.7801 50.6031 32.0127 50.3418 32.2555C49.6436 32.9045 48.8667 33.6266 48.0545 34.1472L48.0438 34.154L48.033 34.1606C47.0766 34.74 46.2507 35.4077 45.3434 36.1412C45.3015 36.1751 45.2594 36.2092 45.2171 36.2433C44.906 36.5077 44.6222 36.7775 44.3149 37.0697C44.2027 37.1765 44.0872 37.2863 43.9662 37.3998L42.7994 38.5541C41.4998 39.9045 40.2041 41.1499 38.9382 42.1913L38.935 42.194C37.6605 43.2336 36.4387 44.0483 35.2078 44.6264C33.944 45.2232 32.5947 45.5684 30.8815 45.6232C29.1831 45.6825 27.2277 45.3785 25.2096 44.9062C25.2093 44.9062 25.2089 44.9061 25.2086 44.906L25.4365 43.9323C24.4095 43.6943 23.3561 43.4042 22.2563 43.1013C21.5852 42.9165 20.897 42.727 20.1869 42.5416L53.9183 29.9862ZM53.9183 29.9862L53.9264 29.9848C55.0891 29.7794 56.1282 29.7921 57.3363 29.9865C57.4952 30.0141 57.7675 30.1148 58.1455 30.3239C58.5104 30.5256 58.9137 30.7944 59.3185 31.0957C59.6332 31.33 59.9377 31.5758 60.2146 31.813M53.9183 29.9862L60.2146 31.813M60.2146 31.813C60.1085 31.8736 60.0042 31.9369 59.9011 32.0027C59.3927 32.3108 58.941 32.6478 58.5338 32.9815L58.5337 32.9814L58.5253 32.9885C57.7041 33.6766 57.0142 34.3879 56.3723 35.1161C56.3726 35.1158 56.3729 35.1154 56.3733 35.115L60.2146 31.813ZM52.9473 39.5876C52.6613 39.9638 52.3895 40.3628 52.1344 40.7375L52.124 40.7527C51.8572 41.1444 51.6075 41.5104 51.3494 41.8488L51.3327 41.8707L51.3172 41.8935L50.5244 43.0611C50.244 43.4588 50.0404 43.7417 49.6527 44.251C48.2525 46.0888 46.6018 47.8431 44.5701 49.3791C42.5484 50.8952 40.0731 52.1862 37.2785 52.7212L37.2785 52.7212L37.2704 52.7228C34.5029 53.2762 31.5329 52.9065 29.1885 51.8894L29.1886 51.8893L29.1764 51.8842C26.7813 50.8823 24.903 49.3549 23.3798 47.651C22.3157 46.4239 21.4242 45.1235 20.721 43.7182C21.1513 43.8342 21.5755 43.9511 21.9956 44.0668L52.9473 39.5876Z"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M62 32.1347C61.1468 31.1857 58.795 29.2191 57.5 29C56.1948 28.7896 55.0409 28.7724 53.7524 29.0001C51.145 29.4386 49.5809 31.981 47.5149 33.3053C46.442 33.9552 45.527 34.7073 44.5791 35.4732C44.1224 35.8605 43.706 36.273 43.2724 36.6796L42.0874 37.8518C40.7999 39.19 39.5308 40.4089 38.3029 41.4191C37.07 42.4248 35.9174 43.1885 34.7815 43.7218C33.6463 44.258 32.4317 44.5733 30.8484 44.6237C29.2791 44.6788 27.4225 44.3971 25.4365 43.9323C23.4398 43.4695 21.343 42.8099 19 42.2423C19.8175 44.4974 21.0487 46.4903 22.6293 48.3119C24.2284 50.102 26.2253 51.7337 28.7905 52.8068C31.3187 53.9036 34.4958 54.2974 37.4665 53.7034C40.4451 53.1332 43.0589 51.7626 45.1717 50.1779C47.2899 48.5768 49.0037 46.753 50.4484 44.8566C50.8471 44.3328 51.0581 44.0396 51.3467 43.6301L52.1445 42.4552C52.6988 41.7285 53.2035 40.901 53.7524 40.181C54.8282 38.673 55.8886 37.1668 57.121 35.7791C57.7413 35.0752 58.3955 34.402 59.1676 33.755C59.553 33.4392 59.9688 33.1301 60.4297 32.8517C60.8975 32.5514 61.3917 32.3164 62 32.1347Z"
         stroke="white"
-        strokeWidth="2"
+        strokeWidth="4"
+        mask="url(#path-3-inside-1_13610_34339)"
       />
       <path
         fillRule="evenodd"
@@ -829,7 +892,7 @@ const StarknetIcon: FunctionComponent = () => {
       <path
         fillRule="evenodd"
         clipRule="evenodd"
-        d="M51.4695 50.9081C51.4695 52.6039 52.8455 53.9795 54.5418 53.9795C56.2383 53.9795 57.6123 52.6039 57.6123 50.9081C57.6123 49.2123 56.2383 47.8367 54.5418 47.8367C52.8455 47.8367 51.4695 49.2123 51.4695 50.9081Z"
+        d="M51.4692 50.9081C51.4692 52.6039 52.8453 53.9795 54.5415 53.9795C56.2381 53.9795 57.6121 52.6039 57.6121 50.9081C57.6121 49.2123 56.2381 47.8367 54.5415 47.8367C52.8453 47.8367 51.4692 49.2123 51.4692 50.9081Z"
         fill="white"
       />
     </svg>
