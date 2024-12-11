@@ -19,9 +19,9 @@ import SimpleBar from "simplebar-react";
 import { ChainImageFallback } from "../../../../components/image";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import {
-  ArrowTopRightOnSquareIcon,
   CheckToggleIcon,
   CopyOutlineIcon,
+  FolderMinusIcon,
   QRCodeIcon,
   StarIcon,
 } from "../../../../components/icon";
@@ -31,9 +31,9 @@ import {
   useSceneTransition,
 } from "../../../../components/transition";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
-import { FolderMinusIcon } from "../../../../components/icon/folder-minus";
 import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
 import { isRunningInSidePanel } from "../../../../utils";
+import { IconProps } from "../../../../components/icon/types";
 
 export const CopyAddressScene: FunctionComponent<{
   close: () => void;
@@ -919,5 +919,30 @@ const NoResultBox: FunctionComponent = () => {
         <FormattedMessage id="page.main.components.deposit-modal.empty-text" />
       </Subtitle3>
     </Box>
+  );
+};
+
+const ArrowTopRightOnSquareIcon: FunctionComponent<IconProps> = ({
+  width = "1.5rem",
+  height = "1.5rem",
+  color,
+}) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      viewBox="0 0 18 18"
+      fill="none"
+    >
+      <path
+        d="M3.8248 4.95029C3.45201 4.95029 3.1498 5.2525 3.1498 5.62529V13.2753C3.1498 13.6481 3.45201 13.9503 3.82481 13.9503H11.4748C11.8476 13.9503 12.1498 13.6481 12.1498 13.2753V9.67529C12.1498 9.3025 12.452 9.00029 12.8248 9.00029C13.1976 9.00029 13.4998 9.3025 13.4998 9.67529V13.2753C13.4998 14.3937 12.5932 15.3003 11.4748 15.3003H3.82481C2.70643 15.3003 1.7998 14.3937 1.7998 13.2753V5.62529C1.7998 4.50692 2.70643 3.60029 3.8248 3.60029H8.3248C8.6976 3.60029 8.9998 3.9025 8.9998 4.27529C8.9998 4.64809 8.6976 4.95029 8.3248 4.95029H3.8248Z"
+        fill={color}
+      />
+      <path
+        d="M5.57427 11.4782C5.82438 11.7546 6.25123 11.7759 6.52767 11.5258L14.8498 3.99628V6.52529C14.8498 6.89809 15.152 7.20029 15.5248 7.20029C15.8976 7.20029 16.1998 6.89809 16.1998 6.52529V2.47529C16.1998 2.1025 15.8976 1.80029 15.5248 1.80029H11.4748C11.102 1.80029 10.7998 2.1025 10.7998 2.47529C10.7998 2.84808 11.102 3.15029 11.4748 3.15029H13.7727L5.62194 10.5248C5.3455 10.7749 5.32416 11.2017 5.57427 11.4782Z"
+        fill={color}
+      />
+    </svg>
   );
 };
