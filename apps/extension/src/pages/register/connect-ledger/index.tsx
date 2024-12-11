@@ -72,7 +72,7 @@ export const ConnectLedgerScene: FunctionComponent<{
       throw new Error(`Unsupported app: ${propApp}`);
     }
 
-    const isDirected = stepPrevious === undefined || stepTotal === undefined;
+    const isStepMode = stepPrevious !== undefined && stepTotal !== undefined;
 
     const sceneTransition = useSceneTransition();
 
@@ -80,20 +80,28 @@ export const ConnectLedgerScene: FunctionComponent<{
     useSceneEvents({
       onWillVisible: () => {
         header.setHeader(
-          isDirected
+          isStepMode
             ? {
-                mode: "direct",
-                title: intl.formatMessage({
-                  id: "pages.register.connect-ledger.title",
-                }),
-              }
-            : {
                 mode: "step",
                 title: intl.formatMessage({
                   id: "pages.register.connect-ledger.title",
                 }),
                 stepCurrent: stepPrevious + 1,
                 stepTotal,
+              }
+            : {
+                mode: "direct",
+                title: intl.formatMessage(
+                  {
+                    id: "pages.register.connect-ledger.direct.title",
+                  },
+                  {
+                    app: propApp,
+                  }
+                ),
+                paragraphs: [
+                  "This window only appears for users who have previously been using Keplr with their Ledger account but haven’t connected the StarkNet app. It will NOT appear for any other users.",
+                ],
               }
         );
       },
@@ -178,7 +186,7 @@ export const ConnectLedgerScene: FunctionComponent<{
                 replace: true,
               });
             } else {
-              if (!isDirected) {
+              if (isStepMode) {
                 sceneTransition.replaceAll("finalize-key", {
                   name,
                   password,
@@ -256,21 +264,22 @@ export const ConnectLedgerScene: FunctionComponent<{
                 ...appendModeInfo.afterEnableChains
               );
 
-              sceneTransition.push("enable-chains", {
-                vaultId: appendModeInfo.vaultId,
-                keyType: "ledger",
-                candidateAddresses: [],
-                isFresh: false,
-                skipWelcome: true,
-                fallbackStarknetLedgerApp: true,
-                stepPrevious: stepPrevious,
-                stepTotal: stepTotal,
-              });
-              // navigate("/welcome", {
-              //   replace: true,
-              // });
+              if (isStepMode) {
+                sceneTransition.push("enable-chains", {
+                  vaultId: appendModeInfo.vaultId,
+                  keyType: "ledger",
+                  candidateAddresses: [],
+                  isFresh: false,
+                  skipWelcome: true,
+                  fallbackStarknetLedgerApp: true,
+                  stepPrevious: stepPrevious,
+                  stepTotal: stepTotal,
+                });
+              } else {
+                window.close();
+              }
             } else {
-              if (!isDirected) {
+              if (isStepMode) {
                 sceneTransition.replaceAll("finalize-key", {
                   name,
                   password,
@@ -319,6 +328,11 @@ export const ConnectLedgerScene: FunctionComponent<{
 
               return;
             case LedgerError.NoError:
+              setIsLoading(false);
+              setStep("app");
+
+              await transport.close();
+
               const pubKey = new PubKeyStarknet(res.publicKey);
 
               if (appendModeInfo) {
@@ -330,17 +344,15 @@ export const ConnectLedgerScene: FunctionComponent<{
                 await chainStore.enableChainInfoInUI(
                   ...appendModeInfo.afterEnableChains
                 );
+
+                if (isStepMode) {
+                  navigate("/welcome", {
+                    replace: true,
+                  });
+                } else {
+                  window.close();
+                }
               }
-
-              navigate("/welcome", {
-                replace: true,
-              });
-
-              setIsLoading(false);
-              setStep("app");
-
-              await transport.close();
-
               return;
             default:
               setIsLoading(false);
@@ -372,10 +384,21 @@ export const ConnectLedgerScene: FunctionComponent<{
           />
           <StepView
             step={2}
-            paragraph={intl.formatMessage(
-              { id: "pages.register.connect-ledger.open-app-step-paragraph" },
-              { app: propApp }
-            )}
+            paragraph={
+              isStepMode
+                ? intl.formatMessage(
+                    {
+                      id: "pages.register.connect-ledger.open-app-step-paragraph",
+                    },
+                    { app: propApp }
+                  )
+                : intl.formatMessage(
+                    {
+                      id: "pages.register.connect-ledger.direct.open-app-step-paragraph",
+                    },
+                    { app: propApp }
+                  )
+            }
             icon={
               <Box style={{ opacity: step !== "connected" ? 0.5 : 1 }}>
                 {(() => {

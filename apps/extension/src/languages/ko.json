@@ -124,10 +124,13 @@
   "pages.register.back-up-private-key.import-button": "확인",
 
   "pages.register.connect-ledger.title": "하드웨어 지갑을 연결해주세요.",
+  "pages.register.connect-ledger.direct.title": "렛저 {app} 앱에 케플러를 연결하세요.",
   "pages.register.connect-ledger.paragraph": "케플러는 코스모스 앱체인, Ethereum, Injective와 Evmos를 포함한 모든 EVM 호환 체인, 그리고 Starknet을 지원합니다. Ledger 연결은 코스모스, EVM, Starknet 순서로 진행됩니다.",
   "pages.register.connect-ledger.step-text": "{step} 단계",
   "pages.register.connect-ledger.connect-ledger-step-paragraph": "렛저를 연결하고 잠금을 해제하세요.",
   "pages.register.connect-ledger.open-app-step-paragraph": "렛저에서 {app} 앱을 열어주세요.",
+
+  "pages.register.connect-ledger.direct.open-app-step-paragraph": "렛저에서 {app} 앱을 열어주세요. 이 과정 이후에 {app} Dapp 페이지는 새로고침 해주세요.",
   "pages.register.connect-ledger.use-hid-text": " 다른 USB 연결방식 사용하기 (HID)",
   "pages.register.connect-ledger.use-hid-confirm-title": "웹 HID를 사용할 수 없습니다.",
   "pages.register.connect-ledger.use-hid-confirm-paragraph": "웹 HID를 사용하시려면, ‘실험적 웹 플랫폼 기능’을 활성화해야 합니다.",

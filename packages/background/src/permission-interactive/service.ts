@@ -78,7 +78,7 @@ export class PermissionInteractiveService {
           });
 
           await browser.tabs.create({
-            url: `/register.html#?route=connect-ledger&ledgerApp=${app}`,
+            url: `/register.html#?route=connect-ledger&ledgerApp=${app}&vaultId=${this.keyRingService.selectedVaultId}`,
           });
         }
       }
