@@ -226,12 +226,11 @@ export const CopyAddressScene: FunctionComponent<{
     `/chains?filterOption=chain&searchText=${search.trim()}`
   );
 
-  const { invisibleChainInfos, invisibleNativeChainInfos } = useMemo(() => {
+  const { invisibleChainInfos, storedInvisibleChainInfos } = useMemo(() => {
     if (queryChains.isFetching || queryChains.response?.data == undefined) {
       return {
         invisibleChainInfos: [],
-        invisibleNativeChainInfos: [],
-        invisibleNonNativeChainInfos: [],
+        storedInvisibleChainInfos: [],
       };
     }
 
@@ -262,12 +261,11 @@ export const CopyAddressScene: FunctionComponent<{
 
     const {
       invisibleChainInfos: unSortedInvisible,
-      nativeChainInfos: unSortedNative,
-      nonNativeChainInfos: unSortedNonNative,
+      storedInvisibleChainInfos: unSortedStoredInvisible,
     } = disabledChainInfos.reduce(
       (acc, chainInfo) => {
         let embedded: boolean | undefined = false;
-        let addedInStore: boolean = true;
+        let stored: boolean = true;
 
         const isStarknet = "starknet" in chainInfo;
 
@@ -278,56 +276,48 @@ export const CopyAddressScene: FunctionComponent<{
             const chainInfoInStore = chainStore.getChain(chainInfo.chainId);
 
             if (!chainInfoInStore) {
-              addedInStore = false;
+              stored = false;
             } else {
               if (chainInfoInStore.hideInUI) {
                 return acc;
               }
 
-              addedInStore = true;
+              stored = true;
               embedded = chainInfoInStore.embedded?.embedded;
             }
           }
         } catch (e) {
           // got an error while getting chain info
           embedded = undefined;
-          addedInStore = false;
+          stored = false;
         }
 
         const chainItem = {
           embedded: !!embedded,
-          addedInStore,
+          stored,
           chainInfo,
         };
 
         acc.invisibleChainInfos.push(chainItem);
 
-        if (embedded) {
-          acc.nativeChainInfos.push(chainItem);
-        } else {
-          acc.nonNativeChainInfos.push(chainItem);
+        if (stored) {
+          acc.storedInvisibleChainInfos.push(chainItem);
         }
 
         return acc;
       },
       {
         invisibleChainInfos: [],
-        nativeChainInfos: [],
-        nonNativeChainInfos: [],
+        storedInvisibleChainInfos: [],
       } as {
         invisibleChainInfos: {
           embedded: boolean;
-          addedInStore: boolean;
+          stored: boolean;
           chainInfo: ChainInfo | ModularChainInfo;
         }[];
-        nativeChainInfos: {
+        storedInvisibleChainInfos: {
           embedded: boolean;
-          addedInStore: boolean;
-          chainInfo: ChainInfo | ModularChainInfo;
-        }[];
-        nonNativeChainInfos: {
-          embedded: boolean;
-          addedInStore: boolean;
+          stored: boolean;
           chainInfo: ChainInfo | ModularChainInfo;
         }[];
       }
@@ -337,10 +327,7 @@ export const CopyAddressScene: FunctionComponent<{
       invisibleChainInfos: unSortedInvisible.sort((a, b) =>
         sortChainsByPriority(a.chainInfo.chainId, b.chainInfo.chainId)
       ),
-      invisibleNativeChainInfos: unSortedNative.sort((a, b) =>
-        sortChainsByPriority(a.chainInfo.chainId, b.chainInfo.chainId)
-      ),
-      invisibleNonNativeChainInfos: unSortedNonNative.sort((a, b) =>
+      storedInvisibleChainInfos: unSortedStoredInvisible.sort((a, b) =>
         sortChainsByPriority(a.chainInfo.chainId, b.chainInfo.chainId)
       ),
     };
@@ -355,7 +342,7 @@ export const CopyAddressScene: FunctionComponent<{
 
   const hasAddresses = addresses.length > 0;
   const hasInvisibleChains =
-    (search.trim().length === 0 && invisibleNativeChainInfos.length > 0) ||
+    (search.trim().length === 0 && storedInvisibleChainInfos.length > 0) ||
     (search.trim().length > 0 && invisibleChainInfos.length > 0);
 
   return (
@@ -467,17 +454,17 @@ export const CopyAddressScene: FunctionComponent<{
                       key={chainData.chainInfo.chainId}
                       chainInfo={chainData.chainInfo}
                       embedded={chainData.embedded}
-                      addedInStore={chainData.addedInStore}
+                      stored={chainData.stored}
                     />
                   );
                 })
-              : invisibleNativeChainInfos.map((chainData) => {
+              : storedInvisibleChainInfos.map((chainData) => {
                   return (
                     <EnableChainItem
                       key={chainData.chainInfo.chainId}
                       chainInfo={chainData.chainInfo}
-                      embedded={true}
-                      addedInStore={chainData.addedInStore}
+                      embedded={chainData.embedded}
+                      stored={chainData.stored}
                     />
                   );
                 })}
@@ -792,8 +779,8 @@ const CopyAddressItem: FunctionComponent<{
 const EnableChainItem: FunctionComponent<{
   chainInfo: ChainInfo | ModularChainInfo;
   embedded: boolean;
-  addedInStore: boolean;
-}> = observer(({ chainInfo, embedded, addedInStore }) => {
+  stored: boolean;
+}> = observer(({ chainInfo, embedded, stored }) => {
   const { analyticsStore, chainStore, keyRingStore } = useStore();
   const theme = useTheme();
   const [isContainerHover, setIsContainerHover] = useState(false);
@@ -826,7 +813,7 @@ const EnableChainItem: FunctionComponent<{
         onClick={async () => {
           // If the chain is not embedded and not added to the store,
           // add the chain internally and refresh the store.
-          if (!embedded && !addedInStore) {
+          if (!embedded && !stored) {
             try {
               await window.keplr?.experimentalSuggestChain(
                 chainInfo as ChainInfo
