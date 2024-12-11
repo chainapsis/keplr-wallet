@@ -862,18 +862,11 @@ const EnableChainItem: FunctionComponent<{
                 ? ColorPalette["gray-700"]
                 : ColorPalette["gray-10"]
             }
-            style={{
-              display: "-webkit-box",
-              WebkitBoxOrient: "vertical",
-              WebkitLineClamp: 1,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
           >
             {chainInfo.chainName}
           </Subtitle3>
-          <div style={{ flex: 1 }} />
-          <Box minWidth="8.5rem">
+          <div style={{ flex: 1, minWidth: "1rem" }} />
+          <Box>
             <XAxis alignY="center">
               <Subtitle3
                 color={
