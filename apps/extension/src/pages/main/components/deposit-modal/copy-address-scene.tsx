@@ -90,25 +90,6 @@ export const CopyAddressScene: FunctionComponent<{
     return res;
   });
 
-  const sortChainsByPriority = (aChainId: string, bChainId: string) => {
-    const aChainIdentifier = ChainIdHelper.parse(aChainId).identifier;
-    const bChainIdentifier = ChainIdHelper.parse(bChainId).identifier;
-
-    const aPriority = sortPriorities[aChainIdentifier];
-    const bPriority = sortPriorities[bChainIdentifier];
-
-    if (aPriority && bPriority) {
-      return 0;
-    }
-    if (aPriority) {
-      return -1;
-    }
-    if (bPriority) {
-      return 1;
-    }
-    return 0;
-  };
-
   const addresses: {
     modularChainInfo: ModularChainInfo;
     bech32Address?: string;
@@ -211,71 +192,94 @@ export const CopyAddressScene: FunctionComponent<{
       }
     })
     .sort((a, b) => {
-      return sortChainsByPriority(
-        a.modularChainInfo.chainId,
+      const aChainIdentifier = ChainIdHelper.parse(
+        a.modularChainInfo.chainId
+      ).identifier;
+      const bChainIdentifier = ChainIdHelper.parse(
         b.modularChainInfo.chainId
-      );
+      ).identifier;
+
+      const aPriority = sortPriorities[aChainIdentifier];
+      const bPriority = sortPriorities[bChainIdentifier];
+
+      if (aPriority && bPriority) {
+        return 0;
+      }
+      if (aPriority) {
+        return -1;
+      }
+      if (bPriority) {
+        return 1;
+      }
+      return 0;
     });
 
   const [blockInteraction, setBlockInteraction] = useState(false);
 
-  const queryChains = queriesStore.simpleQuery.queryGet<{
-    chains: ChainInfo[];
-  }>(
-    "https://7v6zjsr36fqrqcaeuqbhyrq46a0qndzt.lambda-url.us-west-2.on.aws",
-    `/chains?filterOption=chain&searchText=${search.trim()}`
-  );
+  const trimmedSearch = search.trim().toLowerCase();
+
+  const queryChains =
+    trimmedSearch.length > 0
+      ? queriesStore.simpleQuery.queryGet<{
+          chains: ChainInfo[];
+        }>(
+          "https://7v6zjsr36fqrqcaeuqbhyrq46a0qndzt.lambda-url.us-west-2.on.aws",
+          `/chains?filterOption=chain&searchText=${trimmedSearch}`
+        )
+      : null;
 
   const [searchedChainInfos, setSearchedChainInfos] = useState<ChainInfo[]>([]);
 
   useEffect(() => {
-    if (queryChains.isFetching) {
+    if (!queryChains || queryChains.isFetching) {
       return;
     }
 
     if (queryChains.response?.data) {
       setSearchedChainInfos(queryChains.response.data.chains);
+    } else {
+      setSearchedChainInfos([]);
     }
-  }, [search, queryChains.isFetching, queryChains.response?.data]);
+  }, [queryChains, queryChains?.isFetching, queryChains?.response?.data]);
 
   const { invisibleChainInfos, storedInvisibleChainInfos } = useMemo(() => {
-    // at initial modal open, searchedChainInfos is empty and queryChains is fetching.
-    // starknet shouldn't be shown alone, so just return empty array.
-    if (searchedChainInfos.length === 0 && queryChains.isFetching) {
-      return {
-        invisibleChainInfos: [],
-        storedInvisibleChainInfos: [],
-      };
-    }
-
     const enabledModularChainInfos = chainStore.modularChainInfosInUI;
 
-    let disabledChainInfos: (ChainInfo | ModularChainInfo)[] =
-      searchedChainInfos.filter((chainInfo) => {
+    let disabledChainInfos: (ChainInfo | ModularChainInfo)[] = [];
+
+    // If the search is not empty, query the chain infos from the server.
+    // Else, just use the stored but not enabled chain infos.
+    if (trimmedSearch.length > 0) {
+      disabledChainInfos = searchedChainInfos.filter((chainInfo) => {
         return !enabledModularChainInfos.some(
           (modularChainInfo) => modularChainInfo.chainId === chainInfo.chainId
         );
       });
 
-    const trimmedSearch = search.trim().toLowerCase();
+      const disabledStarknetChainInfos = chainStore.modularChainInfos.filter(
+        (modularChainInfo) =>
+          "starknet" in modularChainInfo &&
+          !chainStore.isEnabledChain(modularChainInfo.chainId) &&
+          (trimmedSearch.length === 0 ||
+            modularChainInfo.chainId.toLowerCase().includes(trimmedSearch) ||
+            modularChainInfo.chainName.toLowerCase().includes(trimmedSearch))
+      );
 
-    // starknet is not in the queryChains response. So, we need to add it manually
-    // only if it is not enabled and it matches the search.
-    const disabledStarknetChainInfos = chainStore.modularChainInfos.filter(
-      (modularChainInfo) =>
-        "starknet" in modularChainInfo &&
-        !chainStore.isEnabledChain(modularChainInfo.chainId) &&
-        (trimmedSearch.length === 0 ||
-          modularChainInfo.chainId.toLowerCase().includes(trimmedSearch) ||
-          modularChainInfo.chainName.toLowerCase().includes(trimmedSearch))
-    );
+      disabledChainInfos = [
+        ...disabledChainInfos,
+        ...disabledStarknetChainInfos,
+      ].sort((a, b) => a.chainName.localeCompare(b.chainName));
+    } else {
+      disabledChainInfos = chainStore.modularChainInfos.filter(
+        (modularChainInfo) =>
+          !enabledModularChainInfos.some(
+            (enabledModularChainInfo) =>
+              enabledModularChainInfo.chainId === modularChainInfo.chainId
+          )
+      );
+    }
 
-    disabledChainInfos = [...disabledStarknetChainInfos, ...disabledChainInfos];
-
-    const {
-      invisibleChainInfos: unSortedInvisible,
-      storedInvisibleChainInfos: unSortedStoredInvisible,
-    } = disabledChainInfos.reduce(
+    return disabledChainInfos.reduce(
       (acc, chainInfo) => {
         let embedded: boolean | undefined = false;
         let stored: boolean = true;
@@ -335,27 +339,18 @@ export const CopyAddressScene: FunctionComponent<{
         }[];
       }
     );
-
-    return {
-      invisibleChainInfos: unSortedInvisible.sort((a, b) =>
-        sortChainsByPriority(a.chainInfo.chainId, b.chainInfo.chainId)
-      ),
-      storedInvisibleChainInfos: unSortedStoredInvisible.sort((a, b) =>
-        sortChainsByPriority(a.chainInfo.chainId, b.chainInfo.chainId)
-      ),
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    trimmedSearch,
     searchedChainInfos,
     chainStore,
     chainStore.modularChainInfosInUI,
-    sortPriorities,
   ]);
 
   const hasAddresses = addresses.length > 0;
   const hasInvisibleChains =
-    (search.trim().length === 0 && storedInvisibleChainInfos.length > 0) ||
-    (search.trim().length > 0 && invisibleChainInfos.length > 0);
+    (trimmedSearch.length === 0 && storedInvisibleChainInfos.length > 0) ||
+    (trimmedSearch.length > 0 && invisibleChainInfos.length > 0);
 
   return (
     <Box
@@ -404,9 +399,7 @@ export const CopyAddressScene: FunctionComponent<{
           height: runInSidePanel ? "" : "21.5rem",
         }}
       >
-        {!hasAddresses && !hasInvisibleChains && !queryChains.isFetching && (
-          <NoResultBox />
-        )}
+        {!hasAddresses && !hasInvisibleChains && <NoResultBox />}
 
         <Box paddingX="0.75rem">
           {addresses
@@ -459,7 +452,7 @@ export const CopyAddressScene: FunctionComponent<{
             >
               <FormattedMessage id="page.main.components.deposit-modal.look-for-chains" />
             </Subtitle4>
-            {search.trim().length > 0
+            {trimmedSearch.length > 0
               ? invisibleChainInfos.map((chainData) => {
                   return (
                     <EnableChainItem
