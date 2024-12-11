@@ -361,22 +361,27 @@ export class KeyRingEthereumService {
     const currentChainEVMInfo =
       this.chainsService.getEVMInfoOrThrow(currentChainId);
 
-    const pubkey = await this.keyRingService.getPubKeySelected(
-      currentChainInfo.chainId
-    );
-    const selectedAddress = `0x${Buffer.from(pubkey.getEthAddress()).toString(
-      "hex"
-    )}`;
-
     const result = (await (async () => {
       switch (method) {
         case "keplr_initProviderState":
         case "keplr_connect": {
-          return {
-            currentEvmChainId: currentChainEVMInfo.chainId,
-            currentChainId: currentChainInfo.chainId,
-            selectedAddress,
-          };
+          try {
+            const pubkey = await this.keyRingService.getPubKeySelected(
+              currentChainInfo.chainId
+            );
+            const selectedAddress = `0x${Buffer.from(
+              pubkey.getEthAddress()
+            ).toString("hex")}`;
+
+            return {
+              currentEvmChainId: currentChainEVMInfo.chainId,
+              currentChainId: currentChainInfo.chainId,
+              selectedAddress,
+            };
+          } catch (e) {
+            console.error(e);
+            return null;
+          }
         }
         case "keplr_disconnect": {
           return this.permissionService.removeAllTypePermission([origin]);
@@ -389,6 +394,13 @@ export class KeyRingEthereumService {
         }
         case "eth_accounts":
         case "eth_requestAccounts": {
+          const pubkey = await this.keyRingService.getPubKeySelected(
+            currentChainInfo.chainId
+          );
+          const selectedAddress = `0x${Buffer.from(
+            pubkey.getEthAddress()
+          ).toString("hex")}`;
+
           return [selectedAddress];
         }
         case "eth_sendTransaction": {
@@ -425,6 +437,13 @@ export class KeyRingEthereumService {
               );
             }
           }
+
+          const pubkey = await this.keyRingService.getPubKeySelected(
+            currentChainInfo.chainId
+          );
+          const selectedAddress = `0x${Buffer.from(
+            pubkey.getEthAddress()
+          ).toString("hex")}`;
 
           const transactionCount = await this.request(
             env,
@@ -509,6 +528,13 @@ export class KeyRingEthereumService {
               );
             }
           }
+
+          const pubkey = await this.keyRingService.getPubKeySelected(
+            currentChainInfo.chainId
+          );
+          const selectedAddress = `0x${Buffer.from(
+            pubkey.getEthAddress()
+          ).toString("hex")}`;
 
           const transactionCount = await this.request(
             env,

@@ -1139,10 +1139,10 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     }
   }
 
-  protected _requestMethod = async (
+  protected _requestMethod = async <T = unknown>(
     method: keyof IEthereumProvider,
     args: Record<string, any>
-  ): Promise<any> => {
+  ): Promise<T> => {
     const bytes = new Uint8Array(8);
     const id: string = Array.from(crypto.getRandomValues(bytes))
       .map((value) => {
@@ -1205,7 +1205,11 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
   };
 
   protected _initProviderState = async () => {
-    const initialProviderState = await this._requestMethod("request", {
+    const initialProviderState = await this._requestMethod<{
+      currentEvmChainId: number;
+      currentChainId: string;
+      selectedAddress: string;
+    } | null>("request", {
       method: "keplr_initProviderState",
     });
 
@@ -1294,7 +1298,7 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
       return (this.selectedAddress ? [this.selectedAddress] : []) as T;
     }
 
-    return await this._requestMethod("request", {
+    return await this._requestMethod<T>("request", {
       method,
       params,
       providerId: this.eip6963ProviderInfo?.uuid,
