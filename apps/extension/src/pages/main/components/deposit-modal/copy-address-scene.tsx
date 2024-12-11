@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -226,19 +226,32 @@ export const CopyAddressScene: FunctionComponent<{
     `/chains?filterOption=chain&searchText=${search.trim()}`
   );
 
+  const [searchedChainInfos, setSearchedChainInfos] = useState<ChainInfo[]>([]);
+
+  useEffect(() => {
+    if (queryChains.isFetching) {
+      return;
+    }
+
+    if (queryChains.response?.data) {
+      setSearchedChainInfos(queryChains.response.data.chains);
+    }
+  }, [search, queryChains.isFetching, queryChains.response?.data]);
+
   const { invisibleChainInfos, storedInvisibleChainInfos } = useMemo(() => {
-    if (queryChains.isFetching || queryChains.response?.data == undefined) {
+    // at initial modal open, searchedChainInfos is empty and queryChains is fetching.
+    // starknet shouldn't be shown alone, so just return empty array.
+    if (searchedChainInfos.length === 0 && queryChains.isFetching) {
       return {
         invisibleChainInfos: [],
         storedInvisibleChainInfos: [],
       };
     }
 
-    const queriedChainInfos = queryChains.response.data.chains;
     const enabledModularChainInfos = chainStore.modularChainInfosInUI;
 
     let disabledChainInfos: (ChainInfo | ModularChainInfo)[] =
-      queriedChainInfos.filter((chainInfo) => {
+      searchedChainInfos.filter((chainInfo) => {
         return !enabledModularChainInfos.some(
           (modularChainInfo) => modularChainInfo.chainId === chainInfo.chainId
         );
@@ -333,8 +346,7 @@ export const CopyAddressScene: FunctionComponent<{
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    queryChains.isFetching,
-    queryChains.response?.data,
+    searchedChainInfos,
     chainStore,
     chainStore.modularChainInfosInUI,
     sortPriorities,
