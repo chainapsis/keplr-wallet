@@ -80,7 +80,10 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
       for (const asset of assetsInResponse.assets) {
         if (
           this.chainStore.hasChain(asset.chain_id) &&
-          this.chainStore.hasChain(asset.origin_chain_id)
+          (this.chainStore.hasChain(asset.origin_chain_id) ||
+            (asset.chain_id === "osmosis-1" &&
+              asset.denom ===
+                "ibc/0FA9232B262B89E77D1335D54FB1E1F506A92A7E4B51524B400DC69C68D28372"))
         ) {
           // IBC asset일 경우 그냥 넣는다.
           if (asset.denom.startsWith("ibc/")) {
