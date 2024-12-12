@@ -421,6 +421,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   protected canFeeMarketTxFeesAndReady(): boolean {
+    if (this.chainInfo.chainId.startsWith("cheqd-mainnet-")) {
+      return false;
+    }
     if (this.chainInfo.hasFeature("feemarket")) {
       const queries = this.queriesStore.get(this.chainId);
       if (!queries.cosmos) {
