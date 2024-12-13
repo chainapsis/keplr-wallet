@@ -103,7 +103,7 @@ export const AvailableTabView: FunctionComponent<{
     const trimmedSearch = search.trim().toLowerCase();
 
     const queryChains =
-      trimmedSearch.length > 0
+      trimmedSearch.length >= 3
         ? queriesStore.simpleQuery.queryGet<{
             chains: ChainInfo[];
           }>(
@@ -150,9 +150,11 @@ export const AvailableTabView: FunctionComponent<{
           (modularChainInfo) =>
             "starknet" in modularChainInfo &&
             !chainStore.isEnabledChain(modularChainInfo.chainId) &&
-            (trimmedSearch.length === 0 ||
-              modularChainInfo.chainId.toLowerCase().includes(trimmedSearch) ||
-              modularChainInfo.chainName.toLowerCase().includes(trimmedSearch))
+            (modularChainInfo.chainId.toLowerCase().includes(trimmedSearch) ||
+              modularChainInfo.chainName
+                .toLowerCase()
+                .includes(trimmedSearch) ||
+              trimmedSearch === "eth")
         );
 
         disabledChainInfos = [
