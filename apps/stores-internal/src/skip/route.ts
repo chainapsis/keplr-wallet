@@ -201,6 +201,7 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
         allow_unsafe: true,
         smart_swap_options: {
           evm_swaps: true,
+          split_routes: true,
         },
       }),
       signal: abortController.signal,
