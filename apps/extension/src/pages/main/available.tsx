@@ -108,7 +108,7 @@ export const AvailableTabView: FunctionComponent<{
             chains: ChainInfo[];
           }>(
             "https://7v6zjsr36fqrqcaeuqbhyrq46a0qndzt.lambda-url.us-west-2.on.aws",
-            `/chains?filterOption=all&searchText=${trimmedSearch}`
+            `/chains?filterOption=chainNameAndToken&searchText=${trimmedSearch}`
           )
         : null;
 
@@ -117,7 +117,6 @@ export const AvailableTabView: FunctionComponent<{
     );
 
     useEffect(() => {
-      // If the search is empty, reset the searched chain infos.
       if (!queryChains) {
         setSearchedChainInfos([]);
         return;
@@ -135,17 +134,16 @@ export const AvailableTabView: FunctionComponent<{
     }, [queryChains, queryChains?.isFetching, queryChains?.response?.data]);
 
     const lookingForChains = useMemo(() => {
-      const enabledModularChainInfos = chainStore.modularChainInfosInUI;
-
       let disabledChainInfos: (ChainInfo | ModularChainInfo)[] = [];
 
       if (searchedChainInfos.length > 0) {
-        disabledChainInfos = searchedChainInfos.filter((chainInfo) => {
-          return !enabledModularChainInfos.some(
-            (modularChainInfo) => modularChainInfo.chainId === chainInfo.chainId
-          );
-        });
+        disabledChainInfos = searchedChainInfos.filter(
+          (chainInfo) => !chainStore.isEnabledChain(chainInfo.chainId)
+        );
+      }
 
+      // Starknet chain is not in queryChains, so search it manually here.
+      if (trimmedSearch.length >= 3) {
         const disabledStarknetChainInfos = chainStore.modularChainInfos.filter(
           (modularChainInfo) =>
             "starknet" in modularChainInfo &&
@@ -160,55 +158,57 @@ export const AvailableTabView: FunctionComponent<{
         disabledChainInfos = [
           ...disabledChainInfos,
           ...disabledStarknetChainInfos,
-        ].sort((a, b) => a.chainName.localeCompare(b.chainName));
+        ];
       }
 
-      return disabledChainInfos.reduce(
-        (acc, chainInfo) => {
-          let embedded: boolean | undefined = false;
-          let stored: boolean = true;
+      return disabledChainInfos
+        .sort((a, b) => a.chainName.localeCompare(b.chainName))
+        .reduce(
+          (acc, chainInfo) => {
+            let embedded: boolean | undefined = false;
+            let stored: boolean = true;
 
-          const isStarknet = "starknet" in chainInfo;
+            const isStarknet = "starknet" in chainInfo;
 
-          try {
-            if (isStarknet) {
-              embedded = true;
-            } else {
-              const chainInfoInStore = chainStore.getChain(chainInfo.chainId);
-
-              if (!chainInfoInStore) {
-                stored = false;
+            try {
+              if (isStarknet) {
+                embedded = true;
               } else {
-                if (chainInfoInStore.hideInUI) {
-                  return acc;
+                const chainInfoInStore = chainStore.getChain(chainInfo.chainId);
+
+                if (!chainInfoInStore) {
+                  stored = false;
+                } else {
+                  if (chainInfoInStore.hideInUI) {
+                    return acc;
+                  }
+
+                  stored = true;
+                  embedded = chainInfoInStore.embedded?.embedded;
                 }
-
-                stored = true;
-                embedded = chainInfoInStore.embedded?.embedded;
               }
+            } catch (e) {
+              // got an error while getting chain info
+              embedded = undefined;
+              stored = false;
             }
-          } catch (e) {
-            // got an error while getting chain info
-            embedded = undefined;
-            stored = false;
-          }
 
-          const chainItem = {
-            embedded: !!embedded,
-            stored,
-            chainInfo,
-          };
+            const chainItem = {
+              embedded: !!embedded,
+              stored,
+              chainInfo,
+            };
 
-          acc.push(chainItem);
+            acc.push(chainItem);
 
-          return acc;
-        },
-        [] as {
-          embedded: boolean;
-          stored: boolean;
-          chainInfo: ChainInfo | ModularChainInfo;
-        }[]
-      );
+            return acc;
+          },
+          [] as {
+            embedded: boolean;
+            stored: boolean;
+            chainInfo: ChainInfo | ModularChainInfo;
+          }[]
+        );
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
       chainStore,

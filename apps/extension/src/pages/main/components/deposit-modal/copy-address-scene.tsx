@@ -243,18 +243,14 @@ export const CopyAddressScene: FunctionComponent<{
   }, [queryChains, queryChains?.isFetching, queryChains?.response?.data]);
 
   const { invisibleChainInfos, storedInvisibleChainInfos } = useMemo(() => {
-    const enabledModularChainInfos = chainStore.modularChainInfosInUI;
-
     let disabledChainInfos: (ChainInfo | ModularChainInfo)[] = [];
 
     // If the search is not empty, query the chain infos from the server.
     // Else, just use the stored but not enabled chain infos.
     if (trimmedSearch.length > 0) {
-      disabledChainInfos = searchedChainInfos.filter((chainInfo) => {
-        return !enabledModularChainInfos.some(
-          (modularChainInfo) => modularChainInfo.chainId === chainInfo.chainId
-        );
-      });
+      disabledChainInfos = searchedChainInfos.filter(
+        (chainInfo) => !chainStore.isEnabledChain(chainInfo.chainId)
+      );
 
       const disabledStarknetChainInfos = chainStore.modularChainInfos.filter(
         (modularChainInfo) =>
@@ -272,10 +268,7 @@ export const CopyAddressScene: FunctionComponent<{
     } else {
       disabledChainInfos = chainStore.modularChainInfos.filter(
         (modularChainInfo) =>
-          !enabledModularChainInfos.some(
-            (enabledModularChainInfo) =>
-              enabledModularChainInfo.chainId === modularChainInfo.chainId
-          )
+          !chainStore.isEnabledChain(modularChainInfo.chainId)
       );
     }
 
