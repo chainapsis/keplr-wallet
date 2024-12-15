@@ -131,7 +131,7 @@ export class BIP44PathState {
         return false;
       }
     } else {
-      if (validated > 2147483647) {
+      if (validated > 4294967295) {
         return false;
       }
     }

@@ -160,7 +160,7 @@ export const Bip44PathView: FunctionComponent<{
             if (
               isLedger
                 ? addressIndexNumber > 100
-                : addressIndexNumber > 2147483647
+                : addressIndexNumber > 4294967295
             ) {
               return;
             }
