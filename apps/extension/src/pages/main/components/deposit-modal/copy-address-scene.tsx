@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -34,17 +34,12 @@ import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
 import { isRunningInSidePanel } from "../../../../utils";
 import { IconProps } from "../../../../components/icon/types";
+import { useGetChains } from "../../../../hooks/use-get-chains";
 
 export const CopyAddressScene: FunctionComponent<{
   close: () => void;
 }> = observer(({ close }) => {
-  const {
-    chainStore,
-    accountStore,
-    keyRingStore,
-    uiConfigStore,
-    queriesStore,
-  } = useStore();
+  const { chainStore, accountStore, keyRingStore, uiConfigStore } = useStore();
 
   const intl = useIntl();
   const theme = useTheme();
@@ -216,38 +211,20 @@ export const CopyAddressScene: FunctionComponent<{
 
   const [blockInteraction, setBlockInteraction] = useState(false);
 
-  const trimmedSearch = search.trim().toLowerCase();
-
-  const queryChains =
-    trimmedSearch.length > 0
-      ? queriesStore.simpleQuery.queryGet<{
-          chains: ChainInfo[];
-        }>(
-          "https://7v6zjsr36fqrqcaeuqbhyrq46a0qndzt.lambda-url.us-west-2.on.aws",
-          `/chains?filterOption=chain&searchText=${trimmedSearch}`
-        )
-      : null;
-
-  const [searchedChainInfos, setSearchedChainInfos] = useState<ChainInfo[]>([]);
-
-  useEffect(() => {
-    if (!queryChains || queryChains.isFetching) {
-      return;
-    }
-
-    if (queryChains.response?.data) {
-      setSearchedChainInfos(queryChains.response.data.chains);
-    } else {
-      setSearchedChainInfos([]);
-    }
-  }, [queryChains, queryChains?.isFetching, queryChains?.response?.data]);
+  const { trimSearch, searchedChainInfos } = useGetChains({
+    search,
+    searchOption: "all",
+    filterOption: "chain",
+    minSearchLength: 1,
+    clearResultsOnEmptySearch: false,
+  });
 
   const { invisibleChainInfos, storedInvisibleChainInfos } = useMemo(() => {
     let disabledChainInfos: (ChainInfo | ModularChainInfo)[] = [];
 
     // If the search is not empty, query the chain infos from the server.
     // Else, just use the stored but not enabled chain infos.
-    if (trimmedSearch.length > 0) {
+    if (trimSearch.length > 0) {
       disabledChainInfos = searchedChainInfos.filter(
         (chainInfo) => !chainStore.isEnabledChain(chainInfo.chainId)
       );
@@ -256,9 +233,9 @@ export const CopyAddressScene: FunctionComponent<{
         (modularChainInfo) =>
           "starknet" in modularChainInfo &&
           !chainStore.isEnabledChain(modularChainInfo.chainId) &&
-          (trimmedSearch.length === 0 ||
-            modularChainInfo.chainId.toLowerCase().includes(trimmedSearch) ||
-            modularChainInfo.chainName.toLowerCase().includes(trimmedSearch))
+          (trimSearch.length === 0 ||
+            modularChainInfo.chainId.toLowerCase().includes(trimSearch) ||
+            modularChainInfo.chainName.toLowerCase().includes(trimSearch))
       );
 
       disabledChainInfos = [
@@ -334,7 +311,7 @@ export const CopyAddressScene: FunctionComponent<{
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    trimmedSearch,
+    trimSearch,
     searchedChainInfos,
     chainStore,
     chainStore.modularChainInfosInUI,
@@ -342,8 +319,9 @@ export const CopyAddressScene: FunctionComponent<{
 
   const hasAddresses = addresses.length > 0;
   const hasInvisibleChains =
-    (trimmedSearch.length === 0 && storedInvisibleChainInfos.length > 0) ||
-    (trimmedSearch.length > 0 && invisibleChainInfos.length > 0);
+    (trimSearch.length === 0 && storedInvisibleChainInfos.length > 0) ||
+    (trimSearch.length > 0 && invisibleChainInfos.length > 0);
+  const isShowNoResult = !(hasAddresses || hasInvisibleChains);
 
   return (
     <Box
@@ -392,7 +370,7 @@ export const CopyAddressScene: FunctionComponent<{
           height: runInSidePanel ? "" : "21.5rem",
         }}
       >
-        {!hasAddresses && !hasInvisibleChains && <NoResultBox />}
+        {isShowNoResult && <NoResultBox />}
 
         <Box paddingX="0.75rem">
           {addresses
@@ -445,7 +423,7 @@ export const CopyAddressScene: FunctionComponent<{
             >
               <FormattedMessage id="page.main.components.deposit-modal.look-for-chains" />
             </Subtitle4>
-            {trimmedSearch.length > 0
+            {trimSearch.length > 0
               ? invisibleChainInfos.map((chainData) => {
                   return (
                     <EnableChainItem

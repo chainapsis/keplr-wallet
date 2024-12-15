@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { CollapsibleList } from "../../components/collapsible-list";
 import {
   LookingForChains,
@@ -30,6 +30,7 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { TokenDetailModal } from "./token-detail";
 import { useSearchParams } from "react-router-dom";
 import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import { useGetChains } from "../../hooks/use-get-chains";
 
 const zeroDec = new Dec(0);
 
@@ -59,15 +60,18 @@ export const AvailableTabView: FunctionComponent<{
   onMoreTokensClosed: () => void;
 }> = observer(
   ({ search, isNotReady, onClickGetStarted, onMoreTokensClosed }) => {
-    const {
-      hugeQueriesStore,
-      queriesStore,
-      chainStore,
-      accountStore,
-      uiConfigStore,
-    } = useStore();
+    const { hugeQueriesStore, chainStore, accountStore, uiConfigStore } =
+      useStore();
     const intl = useIntl();
     const theme = useTheme();
+
+    const { trimSearch, searchedChainInfos } = useGetChains({
+      search,
+      searchOption: "all",
+      filterOption: "chainNameAndToken",
+      minSearchLength: 3,
+      clearResultsOnEmptySearch: true,
+    });
 
     const allBalances = hugeQueriesStore.getAllBalances(true);
     const allBalancesNonZero = useMemo(() => {
@@ -77,16 +81,12 @@ export const AvailableTabView: FunctionComponent<{
     }, [allBalances]);
 
     const isFirstTime = allBalancesNonZero.length === 0;
-    const trimSearch = search.trim();
+
     const _allBalancesSearchFiltered = useMemo(() => {
       return allBalances.filter((token) => {
         return (
-          token.chainInfo.chainName
-            .toLowerCase()
-            .includes(trimSearch.toLowerCase()) ||
-          token.token.currency.coinDenom
-            .toLowerCase()
-            .includes(trimSearch.toLowerCase())
+          token.chainInfo.chainName.toLowerCase().includes(trimSearch) ||
+          token.token.currency.coinDenom.toLowerCase().includes(trimSearch)
         );
       });
     }, [allBalances, trimSearch]);
@@ -100,39 +100,6 @@ export const AvailableTabView: FunctionComponent<{
         ? lowBalanceFilteredAllBalancesSearchFiltered
         : _allBalancesSearchFiltered;
 
-    const trimmedSearch = search.trim().toLowerCase();
-
-    const queryChains =
-      trimmedSearch.length >= 3
-        ? queriesStore.simpleQuery.queryGet<{
-            chains: ChainInfo[];
-          }>(
-            "https://7v6zjsr36fqrqcaeuqbhyrq46a0qndzt.lambda-url.us-west-2.on.aws",
-            `/chains?filterOption=chainNameAndToken&searchText=${trimmedSearch}`
-          )
-        : null;
-
-    const [searchedChainInfos, setSearchedChainInfos] = useState<ChainInfo[]>(
-      []
-    );
-
-    useEffect(() => {
-      if (!queryChains) {
-        setSearchedChainInfos([]);
-        return;
-      }
-
-      if (queryChains.isFetching) {
-        return;
-      }
-
-      if (queryChains.response?.data) {
-        setSearchedChainInfos(queryChains.response.data.chains);
-      } else {
-        setSearchedChainInfos([]);
-      }
-    }, [queryChains, queryChains?.isFetching, queryChains?.response?.data]);
-
     const lookingForChains = useMemo(() => {
       let disabledChainInfos: (ChainInfo | ModularChainInfo)[] = [];
 
@@ -143,16 +110,14 @@ export const AvailableTabView: FunctionComponent<{
       }
 
       // Starknet chain is not in queryChains, so search it manually here.
-      if (trimmedSearch.length >= 3) {
+      if (trimSearch.length >= 3) {
         const disabledStarknetChainInfos = chainStore.modularChainInfos.filter(
           (modularChainInfo) =>
             "starknet" in modularChainInfo &&
             !chainStore.isEnabledChain(modularChainInfo.chainId) &&
-            (modularChainInfo.chainId.toLowerCase().includes(trimmedSearch) ||
-              modularChainInfo.chainName
-                .toLowerCase()
-                .includes(trimmedSearch) ||
-              trimmedSearch === "eth")
+            (modularChainInfo.chainId.toLowerCase().includes(trimSearch) ||
+              modularChainInfo.chainName.toLowerCase().includes(trimSearch) ||
+              trimSearch === "eth")
         );
 
         disabledChainInfos = [
@@ -214,7 +179,7 @@ export const AvailableTabView: FunctionComponent<{
       chainStore,
       chainStore.modularChainInfosInUI,
       searchedChainInfos,
-      trimmedSearch,
+      trimSearch,
     ]);
 
     const TokenViewData: {
