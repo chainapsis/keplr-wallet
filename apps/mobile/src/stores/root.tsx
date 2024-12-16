@@ -462,6 +462,7 @@ export class RootStore {
     this.keychainStore = new KeychainStore(
       new AsyncKVStore('store_keychain'),
       this.keyRingStore,
+      this.uiConfigStore,
     );
 
     this.webpageStore = new WebpageStore(new AsyncKVStore('store_webpage'), {

@@ -5,6 +5,7 @@ import {KVStore, toGenerator} from '@keplr-wallet/common';
 import {KeyRingStore} from '@keplr-wallet/stores-core';
 import * as LocalAuthentication from 'expo-local-authentication';
 import {Platform} from 'react-native';
+import {UIConfigStore} from '../ui-config';
 
 export class KeychainStore {
   @observable
@@ -26,6 +27,7 @@ export class KeychainStore {
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly keyRingStore: KeyRingStore,
+    protected readonly uiConfigStore: UIConfigStore,
   ) {
     makeObservable(this);
 
@@ -41,6 +43,32 @@ export class KeychainStore {
   }
 
   async getPasswordWithBiometry(): Promise<string> {
+    if (!this.isBiometryOn) {
+      throw new Error('Biometry is off');
+    }
+
+    if (Platform.OS === 'android') {
+      const res = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Biometric Authentication',
+        disableDeviceFallback: true,
+        cancelLabel: 'Cancel',
+      });
+
+      if (!res.success) {
+        throw new Error('Failed to authenticate');
+      }
+    }
+    const credentials = await Keychain.getGenericPassword(
+      KeychainStore.defaultOptions,
+    );
+    if (credentials) {
+      return credentials.password;
+    } else {
+      throw new Error('Failed to get credentials from keychain');
+    }
+  }
+
+  async getPasswordWithBiometryV2(): Promise<string> {
     if (!this.isBiometryOn) {
       throw new Error('Biometry is off');
     }
@@ -89,6 +117,8 @@ export class KeychainStore {
     );
     if (credentials) {
       yield this.keyRingStore.unlock(credentials.password);
+      this.uiConfigStore.setUserPassword(credentials.password);
+      return credentials.password;
     } else {
       throw new Error('Failed to get credentials from keychain');
     }

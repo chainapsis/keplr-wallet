@@ -58,7 +58,8 @@ const waitAccountInit = async (
 };
 
 export const UnlockScreen: FunctionComponent = observer(() => {
-  const {keyRingStore, keychainStore, accountStore, chainStore} = useStore();
+  const {keyRingStore, keychainStore, accountStore, chainStore, uiConfigStore} =
+    useStore();
 
   const intl = useIntl();
   const style = useStyle();
@@ -136,6 +137,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
       // So to make sure that the loading state changes, just wait very short time.
       await delay(10);
       await keyRingStore.unlock(password);
+      uiConfigStore.setUserPassword(password);
       await waitAccountInit(chainStore, accountStore, keyRingStore);
       navigation.replace('Home');
     } catch (e) {

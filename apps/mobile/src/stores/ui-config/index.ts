@@ -44,6 +44,9 @@ export interface LanguageOption {
 export class UIConfigStore {
   protected readonly kvStore: KVStore;
 
+  @observable
+  protected _userPassword = '';
+
   public readonly copyAddressConfig: CopyAddressConfig;
   public readonly addressBookConfig: AddressBookConfig;
   public readonly autoLockConfig: AutoLockConfig;
@@ -325,6 +328,15 @@ export class UIConfigStore {
 
   get icnsInfo() {
     return this._icnsInfo;
+  }
+
+  get userPassword(): string {
+    return this._userPassword;
+  }
+
+  @action
+  setUserPassword(value: string) {
+    this._userPassword = value;
   }
 
   async removeStatesWhenErrorOccurredDuringRending() {

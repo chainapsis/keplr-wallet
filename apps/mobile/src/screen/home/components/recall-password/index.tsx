@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {registerCardModal} from '../../../../components/modal/card';
-import {Text, View} from 'react-native';
+import {Platform, Text, View} from 'react-native';
 import {HorizontalSimpleScene} from '../../../../components/transition';
 import {observer} from 'mobx-react-lite';
 import {Box} from '../../../../components/box';
@@ -13,12 +13,14 @@ import {useStore} from '../../../../stores';
 import {Button} from '../../../../components/button';
 import {RectButton} from '../../../../components/rect-button';
 import Svg, {Mask, Path, Rect, G} from 'react-native-svg';
+import * as Clipboard from 'expo-clipboard';
 
 export const RecallPasswordModal = registerCardModal<{
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  passwordConfirmed: () => void;
 }>(
-  ({isOpen, setIsOpen}) => {
+  ({isOpen, setIsOpen, passwordConfirmed}) => {
     const [currentScene, setCurrentScene] = useState('first');
 
     return (
@@ -38,6 +40,7 @@ export const RecallPasswordModal = registerCardModal<{
         sharedProps={{
           isOpen,
           setIsOpen,
+          passwordConfirmed,
           currentScene,
           setCurrentScene,
         }}
@@ -52,8 +55,9 @@ export const RecallPasswordModal = registerCardModal<{
 
 const FirstScene = observer<{
   setCurrentScene: (key: string) => void;
-}>(({setCurrentScene}) => {
-  const {keyRingStore} = useStore();
+  passwordConfirmed: () => void;
+}>(({setCurrentScene, passwordConfirmed}) => {
+  const {keyRingStore, keychainStore} = useStore();
 
   const style = useStyle();
   const intl = useIntl();
@@ -66,7 +70,12 @@ const FirstScene = observer<{
     try {
       setIsLoading(true);
 
-      await keyRingStore.checkPassword(password);
+      if (!(await keyRingStore.checkPassword(password))) {
+        throw new Error('Password unmatched');
+      }
+      setError(undefined);
+      passwordConfirmed();
+      await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (e) {
       console.log(e);
 
@@ -188,13 +197,51 @@ const FirstScene = observer<{
         }
       />
       <Gutter size={20} />
-      <Button text="Confirm Password" size="large" />
+      <Button
+        text="Confirm Password"
+        size="large"
+        loading={isLoading}
+        onPress={onPressSubmit}
+      />
       <Gutter size={12} />
       <Button
         text="I forgot my password"
         size="large"
         color="secondary"
-        onPress={() => {
+        leftIcon={
+          keychainStore.isBiometrySupported && keychainStore.isBiometryOn ? (
+            Platform.OS === 'ios' ? (
+              <Svg width="21" height="20" viewBox="0 0 21 20" fill="none">
+                <Path
+                  d="M6.33333 2.5H4.66667C4.22464 2.5 3.80072 2.67559 3.48816 2.98816C3.17559 3.30072 3 3.72464 3 4.16667V5.83333M14.6667 2.5H16.3333C16.7754 2.5 17.1993 2.67559 17.5118 2.98816C17.8244 3.30072 18 3.72464 18 4.16667V5.83333M13.8333 6.66667V8.33333M7.16667 6.66667V8.33333M8 13.3333C8 13.3333 8.83333 14.1667 10.5 14.1667C12.1667 14.1667 13 13.3333 13 13.3333M10.5 6.66667V10.8333H9.66667M6.33333 17.5H4.66667C4.22464 17.5 3.80072 17.3244 3.48816 17.0118C3.17559 16.6993 3 16.2754 3 15.8333V14.1667M14.6667 17.5H16.3333C16.7754 17.5 17.1993 17.3244 17.5118 17.0118C17.8244 16.6993 18 16.2754 18 15.8333V14.1667"
+                  stroke={style.get('color-white').color}
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            ) : (
+              <Svg width="21" height="20" viewBox="0 0 21 20" fill="none">
+                <Path
+                  d="M6.33333 2.5H4.66667C4.22464 2.5 3.80072 2.67559 3.48816 2.98816C3.17559 3.30072 3 3.72464 3 4.16667V5.83333M14.6667 2.5H16.3333C16.7754 2.5 17.1993 2.67559 17.5118 2.98816C17.8244 3.30072 18 3.72464 18 4.16667V5.83333M13.8333 6.66667V8.33333M7.16667 6.66667V8.33333M8 13.3333C8 13.3333 8.83333 14.1667 10.5 14.1667C12.1667 14.1667 13 13.3333 13 13.3333M10.5 6.66667V10.8333H9.66667M6.33333 17.5H4.66667C4.22464 17.5 3.80072 17.3244 3.48816 17.0118C3.17559 16.6993 3 16.2754 3 15.8333V14.1667M14.6667 17.5H16.3333C16.7754 17.5 17.1993 17.3244 17.5118 17.0118C17.8244 16.6993 18 16.2754 18 15.8333V14.1667"
+                  stroke={style.get('color-white').color}
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            )
+          ) : undefined
+        }
+        onPress={async () => {
+          if (keychainStore.isBiometrySupported && keychainStore.isBiometryOn) {
+            try {
+              await keychainStore.getPasswordWithBiometryV2();
+            } catch (e) {
+              console.log(e);
+            }
+          }
+
           setCurrentScene('second');
         }}
       />
@@ -205,7 +252,11 @@ const FirstScene = observer<{
 const SecondScene = observer<{
   setCurrentScene: (key: string) => void;
 }>(({setCurrentScene}) => {
+  const {uiConfigStore} = useStore();
   const style = useStyle();
+
+  const [isShowPassword, setIsShowPassword] = useState(false);
+  const [passwordCopied, setPasswordCopied] = useState(false);
 
   return (
     <Box paddingX={22} paddingTop={35} paddingBottom={20}>
@@ -214,9 +265,62 @@ const SecondScene = observer<{
         Keplr Mobile password
       </Text>
       <Gutter size={41} />
-      <Text style={style.flatten(['subtitle2', 'color-white'])}>
-        Your Password
-      </Text>
+      <XAxis>
+        <Svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <Path
+            d="M13.125 4.375C14.5057 4.375 15.625 5.49429 15.625 6.875M18.125 6.875C18.125 9.63642 15.8864 11.875 13.125 11.875C12.8327 11.875 12.5463 11.8499 12.2677 11.8018C11.7986 11.7207 11.3017 11.8233 10.965 12.16L8.75 14.375H6.875V16.25H5V18.125H1.875V15.7767C1.875 15.2794 2.07254 14.8025 2.42417 14.4508L7.84 9.035C8.17668 8.69832 8.27927 8.20144 8.1982 7.73225C8.15008 7.45372 8.125 7.16729 8.125 6.875C8.125 4.11358 10.3636 1.875 13.125 1.875C15.8864 1.875 18.125 4.11358 18.125 6.875Z"
+            stroke={style.get('color-green-400').color}
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </Svg>
+        <Gutter size={16} />
+        <Text style={style.flatten(['subtitle2', 'color-white'])}>
+          Your Password
+        </Text>
+      </XAxis>
+      <Gutter size={30} />
+      <Box position="relative" width="100%">
+        <Box
+          position="absolute"
+          alignX="center"
+          alignY="center"
+          style={{
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            opacity: isShowPassword ? 0 : 1,
+          }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              gap: 8,
+            }}>
+            {[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((_, i) => {
+              return (
+                <Box
+                  key={i}
+                  width={6}
+                  height={6}
+                  borderRadius={999}
+                  backgroundColor={style.get('color-white').color}
+                />
+              );
+            })}
+          </View>
+        </Box>
+        <Text
+          style={{
+            ...style.flatten(['subtitle2', 'color-white', 'text-center']),
+            opacity: isShowPassword ? 1 : 0,
+          }}>
+          {uiConfigStore.userPassword}
+        </Text>
+      </Box>
+      <Gutter size={25} />
       <Box height={1} backgroundColor={style.get('color-gray-400').color} />
       <Gutter size={16} />
       <XAxis>
@@ -224,7 +328,7 @@ const SecondScene = observer<{
         <RectButton
           style={style.flatten(['border-radius-6'])}
           onPress={() => {
-            // TODO
+            setIsShowPassword(v => !v);
           }}>
           <Box
             style={style.flatten([
@@ -234,16 +338,52 @@ const SecondScene = observer<{
               'justify-center',
               'padding-x-12',
             ])}>
-            <Text style={style.flatten(['text-button1', 'color-gray-50'])}>
-              Show
-            </Text>
+            <XAxis>
+              <Text style={style.flatten(['text-button1', 'color-gray-50'])}>
+                {isShowPassword ? 'Hide' : 'Show'}
+              </Text>
+              <Gutter size={4} />
+              {isShowPassword ? (
+                <Svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <Path
+                    d="M2.98495 6.16693C2.29262 6.98537 1.76431 7.94701 1.45077 9.00111C2.41924 12.2535 5.43233 14.625 8.99932 14.625C9.74376 14.625 10.4641 14.5217 11.1467 14.3287M4.67072 4.67072C5.91291 3.85169 7.40078 3.375 8.99999 3.375C12.567 3.375 15.5801 5.74654 16.5485 8.99889C16.0146 10.7939 14.8579 12.3208 13.329 13.329M4.67072 4.67072L2.25 2.25M4.67072 4.67072L7.40901 7.40901M13.329 13.329L15.75 15.75M13.329 13.329L10.591 10.591M10.591 10.591C10.9982 10.1838 11.25 9.62132 11.25 9C11.25 7.75736 10.2426 6.75 9 6.75C8.37868 6.75 7.81618 7.00184 7.40901 7.40901M10.591 10.591L7.40901 7.40901"
+                    stroke={style.get('color-white').color}
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+              ) : (
+                <Svg width="19" height="18" viewBox="0 0 19 18" fill="none">
+                  <Path
+                    d="M2.1494 9.2418C2.09759 9.08635 2.09754 8.91805 2.14926 8.76257C3.19053 5.63229 6.14333 3.375 9.62334 3.375C13.1017 3.375 16.0534 5.63019 17.096 8.7582C17.1478 8.91365 17.1478 9.08195 17.0961 9.23743C16.0548 12.3677 13.102 14.625 9.62203 14.625C6.14363 14.625 3.19196 12.3698 2.1494 9.2418Z"
+                    stroke={style.get('color-white').color}
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Path
+                    d="M11.8727 9C11.8727 10.2426 10.8654 11.25 9.62274 11.25C8.3801 11.25 7.37274 10.2426 7.37274 9C7.37274 7.75736 8.3801 6.75 9.62274 6.75C10.8654 6.75 11.8727 7.75736 11.8727 9Z"
+                    stroke={style.get('color-white').color}
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+              )}
+            </XAxis>
           </Box>
         </RectButton>
         <Gutter size={16} />
         <RectButton
           style={style.flatten(['border-radius-6'])}
-          onPress={() => {
-            // TODO
+          onPress={async () => {
+            await Clipboard.setStringAsync(uiConfigStore.userPassword);
+
+            setPasswordCopied(true);
+            setTimeout(() => {
+              setPasswordCopied(false);
+            }, 1000);
           }}>
           <Box
             style={style.flatten([
@@ -253,9 +393,38 @@ const SecondScene = observer<{
               'justify-center',
               'padding-x-12',
             ])}>
-            <Text style={style.flatten(['text-button1', 'color-gray-50'])}>
-              Copy Password
-            </Text>
+            <XAxis>
+              <Text style={style.flatten(['text-button1', 'color-gray-50'])}>
+                {passwordCopied ? 'Copied' : 'Copy Password'}
+              </Text>
+              <Gutter size={4} />
+              {passwordCopied ? (
+                <Svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <Path
+                    d="M6.75001 12.1275L3.62251 9L2.55751 10.0575L6.75001 14.25L15.75 5.25L14.6925 4.1925L6.75001 12.1275Z"
+                    fill={style.get('color-white').color}
+                  />
+                </Svg>
+              ) : (
+                <Svg width="19" height="18" viewBox="0 0 19 18" fill="none">
+                  <Path
+                    d="M12.6227 3H6.02274C4.69726 3 3.62274 4.07452 3.62274 5.4V12"
+                    stroke={style.get('color-white').color}
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                  <Rect
+                    x="6.62274"
+                    y="6"
+                    width="9"
+                    height="9"
+                    rx="1.65"
+                    stroke={style.get('color-white').color}
+                    strokeWidth="1.5"
+                  />
+                </Svg>
+              )}
+            </XAxis>
           </Box>
         </RectButton>
         <View style={{flex: 1}} />
@@ -336,6 +505,7 @@ const SecondScene = observer<{
           </Svg>
         }
         onPress={() => {
+          setIsShowPassword(false);
           setCurrentScene('first');
         }}
       />

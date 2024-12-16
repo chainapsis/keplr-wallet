@@ -510,7 +510,10 @@ export const HomeScreen: FunctionComponent = observer(() => {
       <RecallPasswordModal
         isOpen={true}
         setIsOpen={() => {
-          // TODO
+          // noop
+        }}
+        passwordConfirmed={() => {
+          console.log('!!!');
         }}
       />
     </PageWithScrollView>
