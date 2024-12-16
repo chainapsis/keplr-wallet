@@ -151,51 +151,86 @@ export class IBCSwapAmountConfig extends AmountConfig {
     }
 
     const chainIdsToAddresses: Record<string, string> = {};
+
     const sourceAccount = this.accountStore.getAccount(this.chainId);
-    const destinationChainIds = queryRouteResponse.data.chain_ids;
     if (sourceAccount.walletStatus === WalletStatus.NotInit) {
       await sourceAccount.init();
     }
+
+    const isSourceAccountEVMOnly = this.chainId.startsWith("eip155:");
+    if (
+      isSourceAccountEVMOnly
+        ? !sourceAccount.ethereumHexAddress
+        : !sourceAccount.bech32Address
+    ) {
+      throw new Error("Source account is not set");
+    }
+    chainIdsToAddresses[this.chainId.replace("eip155:", "")] =
+      isSourceAccountEVMOnly
+        ? sourceAccount.ethereumHexAddress
+        : sourceAccount.bech32Address;
+
+    const destinationChainIds = queryRouteResponse.data.chain_ids.map(
+      (chainId) => {
+        const evmLikeChainId = Number(chainId);
+        const isEVMChainId =
+          !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
+        if (isEVMChainId) {
+          return `eip155:${chainId}`;
+        }
+        return chainId;
+      }
+    );
     for (const destinationChainId of destinationChainIds) {
       const destinationAccount =
         this.accountStore.getAccount(destinationChainId);
       if (destinationAccount.walletStatus === WalletStatus.NotInit) {
         await destinationAccount.init();
       }
-    }
 
-    if (!sourceAccount.bech32Address) {
-      throw new Error("Source account is not set");
-    }
-    for (const destinationChainId of destinationChainIds) {
-      const destinationAccount =
-        this.accountStore.getAccount(destinationChainId);
-      if (!destinationAccount.bech32Address) {
+      const isDestinationChainEVMOnly =
+        destinationChainId.startsWith("eip155:");
+      if (
+        isDestinationChainEVMOnly
+          ? !destinationAccount.ethereumHexAddress
+          : !destinationAccount.bech32Address
+      ) {
         throw new Error("Destination account is not set");
       }
-    }
-
-    chainIdsToAddresses[this.chainId] = sourceAccount.bech32Address;
-    for (const destinationChainId of destinationChainIds) {
-      const destinationAccount =
-        this.accountStore.getAccount(destinationChainId);
-      chainIdsToAddresses[destinationChainId] =
-        destinationAccount.bech32Address;
+      chainIdsToAddresses[destinationChainId.replace("eip155", "")] =
+        isDestinationChainEVMOnly
+          ? destinationAccount.ethereumHexAddress
+          : destinationAccount.bech32Address;
     }
 
     for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
       queryRouteResponse.data.swap_venue,
     ]) {
       if (swapVenue) {
-        const swapAccount = this.accountStore.getAccount(swapVenue.chain_id);
+        const swapVenueChainId = (() => {
+          const evmLikeChainId = Number(swapVenue.chain_id);
+          const isEVMChainId =
+            !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
+          if (isEVMChainId) {
+            return `eip155:${swapVenue.chain_id}`;
+          }
 
+          return swapVenue.chain_id;
+        })();
+        const swapAccount = this.accountStore.getAccount(swapVenueChainId);
         if (swapAccount.walletStatus === WalletStatus.NotInit) {
           await swapAccount.init();
         }
-        if (!swapAccount.bech32Address) {
+
+        const isSwapVenueChainEVMOnly = swapVenueChainId.startsWith("eip155:");
+        if (
+          isSwapVenueChainEVMOnly
+            ? !swapAccount.ethereumHexAddress
+            : !swapAccount.bech32Address
+        ) {
           const swapVenueChainInfo =
-            this.chainGetter.hasChain(swapVenue.chain_id) &&
-            this.chainGetter.getChain(swapVenue.chain_id);
+            this.chainGetter.hasChain(swapVenueChainId) &&
+            this.chainGetter.getChain(swapVenueChainId);
           if (
             swapAccount.isNanoLedger &&
             swapVenueChainInfo &&
@@ -211,8 +246,10 @@ export class IBCSwapAmountConfig extends AmountConfig {
 
           throw new Error("Swap account is not set");
         }
-
-        chainIdsToAddresses[swapVenue.chain_id] = swapAccount.bech32Address;
+        chainIdsToAddresses[swapVenueChainId.replace("eip155:", "")] =
+          isSwapVenueChainEVMOnly
+            ? swapAccount.ethereumHexAddress
+            : swapAccount.bech32Address;
       }
     }
 
@@ -294,52 +331,90 @@ export class IBCSwapAmountConfig extends AmountConfig {
     }
 
     const chainIdsToAddresses: Record<string, string> = {};
-    const sourceAccount = this.accountStore.getAccount(this.chainId);
-    const destinationChainIds = queryRouteResponse.data.chain_ids;
 
+    const sourceAccount = this.accountStore.getAccount(this.chainId);
     if (sourceAccount.walletStatus === WalletStatus.NotInit) {
       sourceAccount.init();
     }
+
+    const isSourceAccountEVMOnly = this.chainId.startsWith("eip155:");
+    if (
+      isSourceAccountEVMOnly
+        ? !sourceAccount.ethereumHexAddress
+        : !sourceAccount.bech32Address
+    ) {
+      return;
+    }
+    chainIdsToAddresses[this.chainId.replace("eip155:", "")] =
+      isSourceAccountEVMOnly
+        ? sourceAccount.ethereumHexAddress
+        : sourceAccount.bech32Address;
+
+    const destinationChainIds = queryRouteResponse.data.chain_ids.map(
+      (chainId) => {
+        const evmLikeChainId = Number(chainId);
+        const isEVMChainId =
+          !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
+        if (isEVMChainId) {
+          return `eip155:${chainId}`;
+        }
+        return chainId;
+      }
+    );
     for (const destinationChainId of destinationChainIds) {
       const destinationAccount =
         this.accountStore.getAccount(destinationChainId);
+
       if (destinationAccount.walletStatus === WalletStatus.NotInit) {
         destinationAccount.init();
       }
-    }
 
-    if (!sourceAccount.bech32Address) {
-      return;
-    }
-    for (const destinationChainId of destinationChainIds) {
-      const destinationAccount =
-        this.accountStore.getAccount(destinationChainId);
-      if (!destinationAccount.bech32Address) {
+      const isDestinationChainEVMOnly =
+        destinationChainId.startsWith("eip155:");
+      if (
+        isDestinationChainEVMOnly
+          ? !destinationAccount.ethereumHexAddress
+          : !destinationAccount.bech32Address
+      ) {
         return;
       }
-    }
-
-    chainIdsToAddresses[this.chainId] = sourceAccount.bech32Address;
-    for (const destinationChainId of destinationChainIds) {
-      const destinationAccount =
-        this.accountStore.getAccount(destinationChainId);
-      chainIdsToAddresses[destinationChainId] =
-        destinationAccount.bech32Address;
+      chainIdsToAddresses[destinationChainId.replace("eip155:", "")] =
+        isDestinationChainEVMOnly
+          ? destinationAccount.ethereumHexAddress
+          : destinationAccount.bech32Address;
     }
 
     for (const swapVenue of queryRouteResponse.data.swap_venues ?? [
       queryRouteResponse.data.swap_venue,
     ]) {
       if (swapVenue) {
-        const swapAccount = this.accountStore.getAccount(swapVenue.chain_id);
+        const swapVenueChainId = (() => {
+          const evmLikeChainId = Number(swapVenue.chain_id);
+          const isEVMChainId =
+            !Number.isNaN(evmLikeChainId) && evmLikeChainId !== 0;
+          if (isEVMChainId) {
+            return `eip155:${swapVenue.chain_id}`;
+          }
+
+          return swapVenue.chain_id;
+        })();
+        const swapAccount = this.accountStore.getAccount(swapVenueChainId);
         if (swapAccount.walletStatus === WalletStatus.NotInit) {
           swapAccount.init();
         }
 
-        if (!swapAccount.bech32Address) {
+        const isSwapVenueChainEVMOnly = swapVenueChainId.startsWith("eip155:");
+        if (
+          isSwapVenueChainEVMOnly
+            ? !swapAccount.ethereumHexAddress
+            : !swapAccount.bech32Address
+        ) {
           return;
         }
-        chainIdsToAddresses[swapVenue.chain_id] = swapAccount.bech32Address;
+        chainIdsToAddresses[swapVenueChainId.replace("eip155:", "")] =
+          isSwapVenueChainEVMOnly
+            ? swapAccount.ethereumHexAddress
+            : swapAccount.bech32Address;
       }
     }
 

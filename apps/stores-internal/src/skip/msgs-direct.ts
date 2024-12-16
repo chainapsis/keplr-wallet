@@ -193,9 +193,9 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
         },
         body: JSON.stringify({
           source_asset_denom: this.amountInDenom,
-          source_asset_chain_id: this.sourceAssetChainId,
+          source_asset_chain_id: this.sourceAssetChainId.replace("eip155:", ""),
           dest_asset_denom: this.destAssetDenom,
-          dest_asset_chain_id: this.destAssetChainId,
+          dest_asset_chain_id: this.destAssetChainId.replace("eip155:", ""),
           amount_in: this.amountInAmount,
           chain_ids_to_addresses: this.chainIdsToAddresses,
           slippage_tolerance_percent: this.slippageTolerancePercent.toString(),
@@ -208,8 +208,14 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
                   },
                 ]
               : [],
-          swap_venues: this.swapVenues,
+          swap_venues: this.swapVenues.map((swapVenue) => ({
+            ...swapVenue,
+            chainId: swapVenue.chainId.replace("eip155:", ""),
+          })),
           allow_unsafe: true,
+          smart_relay: true,
+          go_fast: true,
+          experimental_features: ["hyperlane"],
           smart_swap_options: {
             evm_swaps: true,
             split_routes: true,
@@ -225,10 +231,7 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
 
     const validated = Schema.validate(result.data);
     if (validated.error) {
-      console.log(
-        "Failed to validate assets from source response",
-        validated.error
-      );
+      console.log("Failed to validate msgs direct response", validated.error);
       throw validated.error;
     }
 

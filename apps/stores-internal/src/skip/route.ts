@@ -56,6 +56,48 @@ const Schema = Joi.object<RouteResponse>({
         })
           .required()
           .unknown(true),
+      }).unknown(true),
+      Joi.object({
+        evm_swap: Joi.object({
+          amount_in: Joi.string().required(),
+          amount_out: Joi.string().required(),
+          denom_in: Joi.string().required(),
+          denom_out: Joi.string().required(),
+          from_chain_id: Joi.string().required(),
+          swap_calldata: Joi.string().required(),
+          swap_venues: Joi.array()
+            .items(
+              Joi.object({
+                name: Joi.string().required(),
+                chain_id: Joi.string().required(),
+                logo_uri: Joi.string().required(),
+              }).unknown(true)
+            )
+            .required(),
+        })
+          .required()
+          .unknown(true),
+      }).unknown(true),
+      Joi.object({
+        cctp_transfer: Joi.object({
+          bridge_id: Joi.string().required(),
+          burn_token: Joi.string().required(),
+          denom_in: Joi.string().required(),
+          denom_out: Joi.string().required(),
+          from_chain_id: Joi.string().required(),
+          to_chain_id: Joi.string().required(),
+          smart_relay: Joi.boolean().required(),
+          smart_relay_fee_quote: Joi.object({
+            fee_amount: Joi.string().required(),
+            fee_denom: Joi.string().required(),
+            relayer_address: Joi.string().required(),
+            expiration: Joi.string().required(),
+          })
+            .required()
+            .unknown(true),
+        })
+          .required()
+          .unknown(true),
       }).unknown(true)
     )
     .required(),
@@ -193,12 +235,18 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
       body: JSON.stringify({
         amount_in: this.sourceAmount,
         source_asset_denom: this.sourceDenom,
-        source_asset_chain_id: this.sourceChainId,
+        source_asset_chain_id: this.sourceChainId.replace("eip155:", ""),
         dest_asset_denom: this.destDenom,
-        dest_asset_chain_id: this.destChainId,
+        dest_asset_chain_id: this.destChainId.replace("eip155:", ""),
         cumulative_affiliate_fee_bps: this.affiliateFeeBps.toString(),
-        swap_venues: this.swapVenues,
+        swap_venues: this.swapVenues.map((swapVenue) => ({
+          ...swapVenue,
+          chainId: swapVenue.chainId.replace("eip155:", ""),
+        })),
         allow_unsafe: true,
+        smart_relay: true,
+        go_fast: true,
+        experimental_features: ["hyperlane"],
         smart_swap_options: {
           evm_swaps: true,
           split_routes: true,
@@ -212,11 +260,9 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
     };
 
     const validated = Schema.validate(result.data);
+
     if (validated.error) {
-      console.log(
-        "Failed to validate assets from source response",
-        validated.error
-      );
+      console.log("Failed to validate route response", validated.error);
       throw validated.error;
     }
 
@@ -230,9 +276,9 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
     return `${super.getCacheKey()}-${JSON.stringify({
       amount_in: this.sourceAmount,
       source_asset_denom: this.sourceDenom,
-      source_asset_chain_id: this.sourceChainId,
+      source_asset_chain_id: this.sourceChainId.replace("eip155:", ""),
       dest_asset_denom: this.destDenom,
-      dest_asset_chain_id: this.destChainId,
+      dest_asset_chain_id: this.destChainId.replace("eip155:", ""),
       affiliateFeeBps: this.affiliateFeeBps,
       swap_venue: this.swapVenues,
     })}`;

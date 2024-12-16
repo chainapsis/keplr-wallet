@@ -161,13 +161,18 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   // ----
 
   const [swapFeeBps, setSwapFeeBps] = useState(SwapFeeBps.value);
+  const isInChainEVMOnly = chainStore.isEvmOnlyChain(inChainId);
+  const inChainAccount = accountStore.getAccount(inChainId);
+
   const ibcSwapConfigs = useIBCSwapConfig(
     chainStore,
     queriesStore,
     accountStore,
     skipQueriesStore,
     inChainId,
-    accountStore.getAccount(inChainId).bech32Address,
+    isInChainEVMOnly
+      ? inChainAccount.ethereumHexAddress
+      : inChainAccount.bech32Address,
     // TODO: config로 빼기
     200000,
     outChainId,

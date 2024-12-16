@@ -78,6 +78,34 @@ export interface RouteResponse {
           estimated_affiliate_fee: string;
         };
       }
+    | {
+        evm_swap: {
+          amount_in: string;
+          amount_out: string;
+          denom_in: string;
+          denom_out: string;
+          from_chain_id: string;
+          input_token: string;
+          swap_calldata: string;
+        };
+      }
+    | {
+        cctp_transfer: {
+          bridge_id: string;
+          burn_token: string;
+          denom_in: string;
+          denom_out: string;
+          from_chain_id: string;
+          to_chain_id: string;
+          smart_relay: boolean;
+          smart_relay_fee_quote: {
+            fee_amount: string;
+            fee_denom: string;
+            relayer_address: string;
+            expiration: string;
+          };
+        };
+      }
   )[];
   chain_ids: string[];
   does_swap?: boolean;
