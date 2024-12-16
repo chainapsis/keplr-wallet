@@ -34,7 +34,7 @@ import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
 import { isRunningInSidePanel } from "../../../../utils";
 import { IconProps } from "../../../../components/icon/types";
-import { useGetChains } from "../../../../hooks/use-get-chains";
+import { useGetSearchChains } from "../../../../hooks/use-get-search-chains";
 
 export const CopyAddressScene: FunctionComponent<{
   close: () => void;
@@ -211,43 +211,41 @@ export const CopyAddressScene: FunctionComponent<{
 
   const [blockInteraction, setBlockInteraction] = useState(false);
 
-  const { trimSearch, searchedChainInfos } = useGetChains({
+  const initialLookingForChains = useMemo(
+    () =>
+      chainStore.modularChainInfos.filter(
+        (modularChainInfo) =>
+          !chainStore.isEnabledChain(modularChainInfo.chainId)
+      ),
+    [chainStore]
+  );
+
+  const { trimSearch, searchedChainInfos } = useGetSearchChains({
     search,
     searchOption: "all",
     filterOption: "chain",
+    initialChainInfos: initialLookingForChains,
     minSearchLength: 1,
-    clearResultsOnEmptySearch: false,
   });
 
-  const { invisibleChainInfos, storedInvisibleChainInfos } = useMemo(() => {
-    let disabledChainInfos: (ChainInfo | ModularChainInfo)[] = [];
-
-    // If the search is not empty, query the chain infos from the server.
-    // Else, just use the stored but not enabled chain infos.
-    if (trimSearch.length > 0) {
-      disabledChainInfos = searchedChainInfos.filter(
+  const lookingForChains = useMemo(() => {
+    let disabledChainInfos: (ChainInfo | ModularChainInfo)[] =
+      searchedChainInfos.filter(
         (chainInfo) => !chainStore.isEnabledChain(chainInfo.chainId)
       );
 
-      const disabledStarknetChainInfos = chainStore.modularChainInfos.filter(
-        (modularChainInfo) =>
-          "starknet" in modularChainInfo &&
-          !chainStore.isEnabledChain(modularChainInfo.chainId) &&
-          (trimSearch.length === 0 ||
-            modularChainInfo.chainId.toLowerCase().includes(trimSearch) ||
-            modularChainInfo.chainName.toLowerCase().includes(trimSearch))
-      );
+    const disabledStarknetChainInfos = chainStore.modularChainInfos.filter(
+      (modularChainInfo) =>
+        "starknet" in modularChainInfo &&
+        !chainStore.isEnabledChain(modularChainInfo.chainId) &&
+        (trimSearch.length === 0 ||
+          modularChainInfo.chainId.toLowerCase().includes(trimSearch) ||
+          modularChainInfo.chainName.toLowerCase().includes(trimSearch))
+    );
 
-      disabledChainInfos = [
-        ...disabledChainInfos,
-        ...disabledStarknetChainInfos,
-      ].sort((a, b) => a.chainName.localeCompare(b.chainName));
-    } else {
-      disabledChainInfos = chainStore.modularChainInfos.filter(
-        (modularChainInfo) =>
-          !chainStore.isEnabledChain(modularChainInfo.chainId)
-      );
-    }
+    disabledChainInfos = [
+      ...new Set([...disabledChainInfos, ...disabledStarknetChainInfos]),
+    ].sort((a, b) => a.chainName.localeCompare(b.chainName));
 
     return disabledChainInfos.reduce(
       (acc, chainInfo) => {
@@ -285,29 +283,15 @@ export const CopyAddressScene: FunctionComponent<{
           chainInfo,
         };
 
-        acc.invisibleChainInfos.push(chainItem);
-
-        if (stored) {
-          acc.storedInvisibleChainInfos.push(chainItem);
-        }
+        acc.push(chainItem);
 
         return acc;
       },
-      {
-        invisibleChainInfos: [],
-        storedInvisibleChainInfos: [],
-      } as {
-        invisibleChainInfos: {
-          embedded: boolean;
-          stored: boolean;
-          chainInfo: ChainInfo | ModularChainInfo;
-        }[];
-        storedInvisibleChainInfos: {
-          embedded: boolean;
-          stored: boolean;
-          chainInfo: ChainInfo | ModularChainInfo;
-        }[];
-      }
+      [] as {
+        embedded: boolean;
+        stored: boolean;
+        chainInfo: ChainInfo | ModularChainInfo;
+      }[]
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -318,10 +302,8 @@ export const CopyAddressScene: FunctionComponent<{
   ]);
 
   const hasAddresses = addresses.length > 0;
-  const hasInvisibleChains =
-    (trimSearch.length === 0 && storedInvisibleChainInfos.length > 0) ||
-    (trimSearch.length > 0 && invisibleChainInfos.length > 0);
-  const isShowNoResult = !(hasAddresses || hasInvisibleChains);
+  const hasLookingForChains = lookingForChains.length > 0;
+  const isShowNoResult = !(hasAddresses || hasLookingForChains);
 
   return (
     <Box
@@ -411,8 +393,9 @@ export const CopyAddressScene: FunctionComponent<{
               );
             })}
         </Box>
-        {hasAddresses && hasInvisibleChains && <Gutter size="1.25rem" />}
-        {hasInvisibleChains && (
+
+        {hasAddresses && hasLookingForChains && <Gutter size="1.25rem" />}
+        {hasLookingForChains && (
           <Box paddingX="0.75rem">
             <Subtitle4
               color={
@@ -423,27 +406,16 @@ export const CopyAddressScene: FunctionComponent<{
             >
               <FormattedMessage id="page.main.components.deposit-modal.look-for-chains" />
             </Subtitle4>
-            {trimSearch.length > 0
-              ? invisibleChainInfos.map((chainData) => {
-                  return (
-                    <EnableChainItem
-                      key={chainData.chainInfo.chainId}
-                      chainInfo={chainData.chainInfo}
-                      embedded={chainData.embedded}
-                      stored={chainData.stored}
-                    />
-                  );
-                })
-              : storedInvisibleChainInfos.map((chainData) => {
-                  return (
-                    <EnableChainItem
-                      key={chainData.chainInfo.chainId}
-                      chainInfo={chainData.chainInfo}
-                      embedded={chainData.embedded}
-                      stored={chainData.stored}
-                    />
-                  );
-                })}
+            {lookingForChains.map((chainData) => {
+              return (
+                <EnableChainItem
+                  key={chainData.chainInfo.chainId}
+                  chainInfo={chainData.chainInfo}
+                  embedded={chainData.embedded}
+                  stored={chainData.stored}
+                />
+              );
+            })}
           </Box>
         )}
         <Gutter size="0.75rem" />
