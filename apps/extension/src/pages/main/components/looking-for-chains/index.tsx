@@ -28,14 +28,13 @@ export const LookingForChains: FunctionComponent<{
 
   return (
     <Box>
-      <TokenTitleView
-        title={intl.formatMessage({
-          id: "page.main.components.looking-for-chains.title",
-        })}
-      />
-
-      <Gutter size="0.5rem" />
-
+      <Box marginBottom="0.5rem" paddingX="0.375rem">
+        <TokenTitleView
+          title={intl.formatMessage({
+            id: "page.main.components.looking-for-chains.title",
+          })}
+        />
+      </Box>
       <Stack gutter="0.5rem">
         {lookingForChains.map((chainData) => (
           <LookingForChainItem
