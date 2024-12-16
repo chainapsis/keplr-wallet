@@ -97,7 +97,9 @@ export const LookingForChainItem: FunctionComponent<{
           <Gutter size="0.25rem" />
 
           <Body3 color={Color(ColorPalette["gray-300"]).alpha(0.6).string()}>
-            Not Enabled
+            {intl.formatMessage({
+              id: "page.main.components.looking-for-chains.not-enabled",
+            })}
           </Body3>
         </YAxis>
 
