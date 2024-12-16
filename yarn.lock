@@ -8909,6 +8909,7 @@ __metadata:
   dependencies:
     "@keplr-wallet/hooks": 0.12.160
     "@keplr-wallet/stores": 0.12.160
+    "@keplr-wallet/stores-eth": 0.12.160
     "@keplr-wallet/stores-internal": 0.12.160
     "@keplr-wallet/types": 0.12.160
     "@keplr-wallet/unit": 0.12.160

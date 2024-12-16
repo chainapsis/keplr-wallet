@@ -98,6 +98,40 @@ const Schema = Joi.object<RouteResponse>({
         })
           .required()
           .unknown(true),
+      }).unknown(true),
+      Joi.object({
+        go_fast_transfer: Joi.object({
+          from_chain_id: Joi.string().required(),
+          to_chain_id: Joi.string().required(),
+          fee: Joi.object({
+            fee_asset: Joi.object({
+              denom: Joi.string().required(),
+              chain_id: Joi.string().required(),
+              is_cw20: Joi.boolean().required(),
+              is_evm: Joi.boolean().required(),
+              is_svm: Joi.boolean().required(),
+              symbol: Joi.string().required(),
+              decimals: Joi.number().required(),
+            })
+              .required()
+              .unknown(true),
+            bps_fee: Joi.string().required(),
+            bps_fee_amount: Joi.string().required(),
+            bps_fee_usd: Joi.string().required(),
+            source_chain_fee_amount: Joi.string().required(),
+            source_chain_fee_usd: Joi.string().required(),
+            destination_chain_fee_amount: Joi.string().required(),
+            destination_chain_fee_usd: Joi.string().required(),
+          })
+            .required()
+            .unknown(true),
+          denom_in: Joi.string().required(),
+          denom_out: Joi.string().required(),
+          source_domain: Joi.string().required(),
+          destination_domain: Joi.string().required(),
+        })
+          .required()
+          .unknown(true),
       }).unknown(true)
     )
     .required(),
@@ -234,9 +268,9 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
       },
       body: JSON.stringify({
         amount_in: this.sourceAmount,
-        source_asset_denom: this.sourceDenom,
+        source_asset_denom: this.sourceDenom.replace("erc20:", ""),
         source_asset_chain_id: this.sourceChainId.replace("eip155:", ""),
-        dest_asset_denom: this.destDenom,
+        dest_asset_denom: this.destDenom.replace("erc20:", ""),
         dest_asset_chain_id: this.destChainId.replace("eip155:", ""),
         cumulative_affiliate_fee_bps: this.affiliateFeeBps.toString(),
         swap_venues: this.swapVenues.map((swapVenue) => ({
@@ -275,9 +309,9 @@ export class ObservableQueryRouteInner extends ObservableQuery<RouteResponse> {
   protected override getCacheKey(): string {
     return `${super.getCacheKey()}-${JSON.stringify({
       amount_in: this.sourceAmount,
-      source_asset_denom: this.sourceDenom,
+      source_asset_denom: this.sourceDenom.replace("erc20:", ""),
       source_asset_chain_id: this.sourceChainId.replace("eip155:", ""),
-      dest_asset_denom: this.destDenom,
+      dest_asset_denom: this.destDenom.replace("erc20:", ""),
       dest_asset_chain_id: this.destChainId.replace("eip155:", ""),
       affiliateFeeBps: this.affiliateFeeBps,
       swap_venue: this.swapVenues,

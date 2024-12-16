@@ -18,6 +18,7 @@ import {
   SkipQueries,
   ObservableQueryIBCSwapInner,
 } from "@keplr-wallet/stores-internal";
+import { EthereumAccountStore } from "@keplr-wallet/stores-eth";
 
 export class IBCSwapAmountConfig extends AmountConfig {
   @observable
@@ -33,6 +34,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
     protected readonly accountStore: IAccountStoreWithInjects<
       [CosmosAccount, CosmwasmAccount]
     >,
+    public readonly ethereumAccountStore: EthereumAccountStore,
     protected readonly skipQueries: SkipQueries,
     initialChainId: string,
     senderConfig: ISenderConfig,
@@ -451,6 +453,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
       );
       tx.ui.overrideType("ibc-swap");
       return tx;
+    } else if (msg.type === "evmTx") {
     }
   }
 
@@ -476,70 +479,72 @@ export class IBCSwapAmountConfig extends AmountConfig {
     let key = "";
 
     for (const msg of response.msgs) {
-      if (
-        msg.multi_chain_msg.msg_type_url ===
-        "/ibc.applications.transfer.v1.MsgTransfer"
-      ) {
-        const memo = JSON.parse(msg.multi_chain_msg.msg).memo;
-        if (memo) {
-          const obj = JSON.parse(memo);
-          const wasms: any = [];
+      if (msg.multi_chain_msg) {
+        if (
+          msg.multi_chain_msg.msg_type_url ===
+          "/ibc.applications.transfer.v1.MsgTransfer"
+        ) {
+          const memo = JSON.parse(msg.multi_chain_msg.msg).memo;
+          if (memo) {
+            const obj = JSON.parse(memo);
+            const wasms: any = [];
 
-          if (obj.wasm) {
-            wasms.push(obj.wasm);
-          }
+            if (obj.wasm) {
+              wasms.push(obj.wasm);
+            }
 
-          let forward = obj.forward;
-          if (forward) {
-            while (true) {
-              if (forward) {
-                if (forward.memo) {
-                  const obj = JSON.parse(forward.memo);
-                  if (obj.wasm) {
-                    wasms.push(obj.wasm);
+            let forward = obj.forward;
+            if (forward) {
+              while (true) {
+                if (forward) {
+                  if (forward.memo) {
+                    const obj = JSON.parse(forward.memo);
+                    if (obj.wasm) {
+                      wasms.push(obj.wasm);
+                    }
                   }
-                }
 
-                if (forward.wasm) {
-                  wasms.push(forward.wasm);
-                }
+                  if (forward.wasm) {
+                    wasms.push(forward.wasm);
+                  }
 
-                if (forward.next) {
-                  const obj =
-                    typeof forward.next === "string"
-                      ? JSON.parse(forward.next)
-                      : forward.next;
+                  if (forward.next) {
+                    const obj =
+                      typeof forward.next === "string"
+                        ? JSON.parse(forward.next)
+                        : forward.next;
 
-                  if (obj.forward) {
-                    forward = obj.forward;
+                    if (obj.forward) {
+                      forward = obj.forward;
+                    } else {
+                      forward = obj;
+                    }
                   } else {
-                    forward = obj;
+                    break;
                   }
                 } else {
                   break;
                 }
-              } else {
-                break;
+              }
+            }
+
+            for (const wasm of wasms) {
+              for (const operation of wasm.msg.swap_and_action.user_swap
+                .swap_exact_asset_in.operations) {
+                key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;
               }
             }
           }
-
-          for (const wasm of wasms) {
-            for (const operation of wasm.msg.swap_and_action.user_swap
-              .swap_exact_asset_in.operations) {
-              key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;
-            }
-          }
         }
-      }
-      if (
-        msg.multi_chain_msg.msg_type_url ===
-        "/cosmwasm.wasm.v1.MsgExecuteContract"
-      ) {
-        const obj = JSON.parse(msg.multi_chain_msg.msg);
-        for (const operation of obj.msg.swap_and_action.user_swap
-          .swap_exact_asset_in.operations) {
-          key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;
+        if (
+          msg.multi_chain_msg.msg_type_url ===
+          "/cosmwasm.wasm.v1.MsgExecuteContract"
+        ) {
+          const obj = JSON.parse(msg.multi_chain_msg.msg);
+          for (const operation of obj.msg.swap_and_action.user_swap
+            .swap_exact_asset_in.operations) {
+            key += `/${operation.pool}/${operation.denom_in}/${operation.denom_out}`;
+          }
         }
       }
     }
@@ -651,6 +656,7 @@ export const useIBCSwapAmountConfig = (
   chainGetter: ChainGetter,
   queriesStore: IQueriesStore,
   accountStore: IAccountStoreWithInjects<[CosmosAccount, CosmwasmAccount]>,
+  ethereumAccountStore: EthereumAccountStore,
   skipQueries: SkipQueries,
   chainId: string,
   senderConfig: ISenderConfig,
@@ -664,6 +670,7 @@ export const useIBCSwapAmountConfig = (
         chainGetter,
         queriesStore,
         accountStore,
+        ethereumAccountStore,
         skipQueries,
         chainId,
         senderConfig,

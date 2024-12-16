@@ -32,11 +32,19 @@ export interface AssetsResponse {
 
 export interface MsgsDirectResponse {
   msgs: {
-    multi_chain_msg: {
+    multi_chain_msg?: {
       chain_id: string;
       path: string[];
       msg: string;
       msg_type_url: string;
+    };
+    evm_tx?: {
+      chain_id: string;
+      data: string;
+      required_erc20_approvals: string[];
+      signer_address: string;
+      to: string;
+      value: string;
     };
   }[];
   route: RouteResponse;
@@ -104,6 +112,34 @@ export interface RouteResponse {
             relayer_address: string;
             expiration: string;
           };
+        };
+      }
+    | {
+        go_fast_transfer: {
+          from_chain_id: string;
+          to_chain_id: string;
+          fee: {
+            fee_asset: {
+              denom: string;
+              chain_id: string;
+              is_cw20: boolean;
+              is_evm: boolean;
+              is_svm: boolean;
+              symbol: string;
+              decimals: number;
+            };
+            bps_fee: string;
+            bps_fee_amount: string;
+            bps_fee_usd: string;
+            source_chain_fee_amount: string;
+            source_chain_fee_usd: string;
+            destination_chain_fee_amount: string;
+            destination_chain_fee_usd: string;
+          };
+          denom_in: string;
+          denom_out: string;
+          source_domain: string;
+          destination_domain: string;
         };
       }
   )[];

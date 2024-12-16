@@ -109,6 +109,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     chainStore,
     queriesStore,
     accountStore,
+    ethereumAccountStore,
     skipQueriesStore,
     uiConfigStore,
     keyRingStore,
@@ -168,6 +169,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     chainStore,
     queriesStore,
     accountStore,
+    ethereumAccountStore,
     skipQueriesStore,
     inChainId,
     isInChainEVMOnly

@@ -20,6 +20,14 @@ const Schema = Joi.object<MsgsDirectResponse>({
           msg: Joi.string().required(),
           msg_type_url: Joi.string().required(),
         }).unknown(true),
+        evm_tx: Joi.object({
+          chain_id: Joi.string().required(),
+          data: Joi.string().required(),
+          required_erc20_approvals: Joi.array().items(Joi.string()).required(),
+          signer_address: Joi.string().required(),
+          to: Joi.string().required(),
+          value: Joi.string().required(),
+        }).unknown(true),
       }).unknown(true)
     )
     .required(),
@@ -67,6 +75,10 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
         contract: string;
         msg: object;
       }
+    | {
+        type: "evmTx";
+        chainId: string;
+      }
     | undefined {
     if (!this.response) {
       return;
@@ -81,56 +93,67 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
     }
 
     const msg = this.response.data.msgs[0];
-    if (
-      msg.multi_chain_msg.msg_type_url !==
-        "/ibc.applications.transfer.v1.MsgTransfer" &&
-      msg.multi_chain_msg.msg_type_url !==
-        "/cosmwasm.wasm.v1.MsgExecuteContract"
-    ) {
-      return;
+    if (msg.evm_tx) {
+      return {
+        type: "evmTx",
+        chainId: `eip155:${msg.evm_tx.chain_id}`,
+      };
     }
 
-    const chainMsg = JSON.parse(msg.multi_chain_msg.msg);
-    if (
-      msg.multi_chain_msg.msg_type_url ===
-      "/cosmwasm.wasm.v1.MsgExecuteContract"
-    ) {
-      return {
-        type: "MsgExecuteContract",
-        funds: chainMsg.funds.map((fund: { denom: string; amount: string }) => {
-          return new CoinPretty(
-            this.chainGetter
-              .getChain(msg.multi_chain_msg.chain_id)
-              .forceFindCurrency(fund.denom),
-            fund.amount
-          );
-        }),
-        contract: chainMsg.contract,
-        msg: chainMsg.msg,
-      };
-    } else if (
-      msg.multi_chain_msg.msg_type_url ===
-      "/ibc.applications.transfer.v1.MsgTransfer"
-    ) {
-      if (msg.multi_chain_msg.path.length < 2) {
+    if (msg.multi_chain_msg) {
+      if (
+        msg.multi_chain_msg.msg_type_url !==
+          "/ibc.applications.transfer.v1.MsgTransfer" &&
+        msg.multi_chain_msg.msg_type_url !==
+          "/cosmwasm.wasm.v1.MsgExecuteContract"
+      ) {
         return;
       }
 
-      return {
-        type: "MsgTransfer",
-        receiver: chainMsg.receiver,
-        sourcePort: chainMsg.source_port,
-        sourceChannel: chainMsg.source_channel,
-        counterpartyChainId: msg.multi_chain_msg.path[1],
-        timeoutTimestamp: chainMsg.timeout_timestamp,
-        token: new CoinPretty(
-          this.chainGetter
-            .getChain(msg.multi_chain_msg.chain_id)
-            .forceFindCurrency(chainMsg.token.denom),
-          chainMsg.token.amount
-        ),
-        memo: chainMsg.memo,
-      };
+      const chainMsg = JSON.parse(msg.multi_chain_msg.msg);
+      if (
+        msg.multi_chain_msg.msg_type_url ===
+        "/cosmwasm.wasm.v1.MsgExecuteContract"
+      ) {
+        return {
+          type: "MsgExecuteContract",
+          funds: chainMsg.funds.map(
+            (fund: { denom: string; amount: string }) => {
+              return new CoinPretty(
+                this.chainGetter
+                  .getChain(msg.multi_chain_msg!.chain_id)
+                  .forceFindCurrency(fund.denom),
+                fund.amount
+              );
+            }
+          ),
+          contract: chainMsg.contract,
+          msg: chainMsg.msg,
+        };
+      } else if (
+        msg.multi_chain_msg.msg_type_url ===
+        "/ibc.applications.transfer.v1.MsgTransfer"
+      ) {
+        if (msg.multi_chain_msg.path.length < 2) {
+          return;
+        }
+
+        return {
+          type: "MsgTransfer",
+          receiver: chainMsg.receiver,
+          sourcePort: chainMsg.source_port,
+          sourceChannel: chainMsg.source_channel,
+          counterpartyChainId: msg.multi_chain_msg.path[1],
+          timeoutTimestamp: chainMsg.timeout_timestamp,
+          token: new CoinPretty(
+            this.chainGetter
+              .getChain(msg.multi_chain_msg.chain_id)
+              .forceFindCurrency(chainMsg.token.denom),
+            chainMsg.token.amount
+          ),
+          memo: chainMsg.memo,
+        };
+      }
     }
 
     throw new Error("Unknown error");
@@ -151,7 +174,12 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
         funds: CoinPretty[];
         contract: string;
         msg: object;
-      } {
+      }
+    | {
+        type: "evmTx";
+        chainId: string;
+      }
+    | undefined {
     if (!this.response) {
       throw new Error("Response is empty");
     }
@@ -192,9 +220,9 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
           })(),
         },
         body: JSON.stringify({
-          source_asset_denom: this.amountInDenom,
+          source_asset_denom: this.amountInDenom.replace("erc20:", ""),
           source_asset_chain_id: this.sourceAssetChainId.replace("eip155:", ""),
-          dest_asset_denom: this.destAssetDenom,
+          dest_asset_denom: this.destAssetDenom.replace("erc20:", ""),
           dest_asset_chain_id: this.destAssetChainId.replace("eip155:", ""),
           amount_in: this.amountInAmount,
           chain_ids_to_addresses: this.chainIdsToAddresses,
@@ -243,11 +271,11 @@ export class ObservableQueryMsgsDirectInner extends ObservableQuery<MsgsDirectRe
 
   protected override getCacheKey(): string {
     return `${super.getCacheKey()}-${JSON.stringify({
-      amountInDenom: this.amountInDenom,
+      amountInDenom: this.amountInDenom.replace("erc20:", ""),
       amountInAmount: this.amountInAmount,
-      sourceAssetChainId: this.sourceAssetChainId,
-      destAssetDenom: this.destAssetDenom,
-      destAssetChainId: this.destAssetChainId,
+      sourceAssetChainId: this.sourceAssetChainId.replace("eip155:", ""),
+      destAssetDenom: this.destAssetDenom.replace("erc20:", ""),
+      destAssetChainId: this.destAssetChainId.replace("eip155:", ""),
       chainIdsToAddresses: this.chainIdsToAddresses,
       slippageTolerancePercent: this.slippageTolerancePercent,
       affiliateFeeBps: this.affiliateFeeBps,
