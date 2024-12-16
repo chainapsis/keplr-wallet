@@ -361,14 +361,14 @@ export const AvailableTabView: FunctionComponent<{
                 }
               )}
             </Stack>
-
-            {lookingForChains.length > 0 ? (
+            {lookingForChains.length > 0 && (
               <React.Fragment>
-                <Gutter size="0.5rem" direction="vertical" />
+                {allBalancesSearchFiltered.length > 0 && (
+                  <Gutter size="1rem" direction="vertical" />
+                )}
                 <LookingForChains lookingForChains={lookingForChains} />
               </React.Fragment>
-            ) : null}
-
+            )}
             {isShowNotFound ? (
               <Box marginY="2rem">
                 <EmptyView>
@@ -414,7 +414,6 @@ export const AvailableTabView: FunctionComponent<{
                 }
               />
             ) : null}
-
             {numFoundToken > 0 ? (
               <Box padding="0.75rem">
                 <YAxis alignX="center">
