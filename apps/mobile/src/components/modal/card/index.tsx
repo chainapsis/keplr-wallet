@@ -17,6 +17,8 @@ type CardBaseModalOption = {
   disabledSafeArea?: boolean;
   isDetached?: boolean;
   disableGesture?: boolean;
+
+  headerBorderRadius?: number;
 };
 
 export const registerCardModal: <P>(
@@ -202,6 +204,8 @@ export const CardModalBase: FunctionComponent<
       };
     }
     return {
+      borderTopLeftRadius: options?.headerBorderRadius ?? 0,
+      borderTopRightRadius: options?.headerBorderRadius ?? 0,
       paddingBottom:
         Math.max(
           (options?.disabledSafeArea ? 0 : safeAreaInsets.bottom) -
@@ -216,7 +220,7 @@ export const CardModalBase: FunctionComponent<
   return (
     <GestureDetector gesture={panGesture}>
       <Reanimated.View style={innerContainerStyle}>
-        {!options?.isDetached ? (
+        {!options?.isDetached && !options?.disableGesture ? (
           <View
             style={style.flatten([
               'items-center',

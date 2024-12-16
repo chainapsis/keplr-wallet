@@ -48,6 +48,7 @@ import {NewChainModal} from './components/new-chain-modal';
 import {useBuy} from '../../hooks/use-buy.ts';
 import {BuyModal} from './buy-modal.tsx';
 import {CopyAddressModal} from '../../components/modal';
+import {RecallPasswordModal} from './components/recall-password';
 
 export interface ViewToken {
   token: CoinPretty;
@@ -505,6 +506,13 @@ export const HomeScreen: FunctionComponent = observer(() => {
           setIsOpen={setIsCopyAddressModalOpen}
         />
       ) : null}
+
+      <RecallPasswordModal
+        isOpen={true}
+        setIsOpen={() => {
+          // TODO
+        }}
+      />
     </PageWithScrollView>
   );
 });
