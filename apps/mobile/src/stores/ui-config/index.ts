@@ -25,6 +25,7 @@ import {ChangelogConfig} from './changelog.ts';
 import {APP_VERSION} from '../../../constants.ts';
 import {NewChainSuggestionConfig} from './new-chain.ts';
 import {SwapDisabledConfig} from './swap-disabled';
+import {RecallPasswordConfig} from './recall-password.ts';
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
@@ -55,6 +56,7 @@ export class UIConfigStore {
   public readonly changelogConfig: ChangelogConfig;
   public readonly newChainSuggestionConfig: NewChainSuggestionConfig;
   public readonly swapDisabledConfig: SwapDisabledConfig;
+  public readonly recallPasswordConfig: RecallPasswordConfig;
 
   @observable
   protected _isInitialized: boolean = false;
@@ -129,6 +131,10 @@ export class UIConfigStore {
       this.changelogConfig,
     );
     this.swapDisabledConfig = new SwapDisabledConfig(queriesStore);
+    this.recallPasswordConfig = new RecallPasswordConfig(
+      queriesStore,
+      kvStores.kvStore,
+    );
 
     this._icnsInfo = _icnsInfo;
 
@@ -224,6 +230,7 @@ export class UIConfigStore {
         this._installedVersion,
         this._currentVersion,
       ),
+      this.recallPasswordConfig.init(),
     ]);
 
     runInAction(() => {

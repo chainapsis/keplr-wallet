@@ -13,7 +13,6 @@ import {useStore} from '../../../../stores';
 import {Button} from '../../../../components/button';
 import {RectButton} from '../../../../components/rect-button';
 import Svg, {Mask, Path, Rect, G} from 'react-native-svg';
-import * as Clipboard from 'expo-clipboard';
 
 export const RecallPasswordModal = registerCardModal<{
   isOpen: boolean;
@@ -223,11 +222,10 @@ const FirstScene = observer<{
             ) : (
               <Svg width="21" height="20" viewBox="0 0 21 20" fill="none">
                 <Path
-                  d="M6.33333 2.5H4.66667C4.22464 2.5 3.80072 2.67559 3.48816 2.98816C3.17559 3.30072 3 3.72464 3 4.16667V5.83333M14.6667 2.5H16.3333C16.7754 2.5 17.1993 2.67559 17.5118 2.98816C17.8244 3.30072 18 3.72464 18 4.16667V5.83333M13.8333 6.66667V8.33333M7.16667 6.66667V8.33333M8 13.3333C8 13.3333 8.83333 14.1667 10.5 14.1667C12.1667 14.1667 13 13.3333 13 13.3333M10.5 6.66667V10.8333H9.66667M6.33333 17.5H4.66667C4.22464 17.5 3.80072 17.3244 3.48816 17.0118C3.17559 16.6993 3 16.2754 3 15.8333V14.1667M14.6667 17.5H16.3333C16.7754 17.5 17.1993 17.3244 17.5118 17.0118C17.8244 16.6993 18 16.2754 18 15.8333V14.1667"
-                  stroke={style.get('color-white').color}
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M10.5 2.5C9.19048 2.5 7.97351 2.88645 6.95417 3.55132C6.60723 3.77761 6.14254 3.6798 5.91625 3.33287C5.68996 2.98593 5.78777 2.52123 6.1347 2.29494C7.39037 1.47594 8.89074 1 10.5 1C14.9183 1 18.5 4.58172 18.5 9C18.5 11.573 18.0678 14.0467 17.2714 16.3514C17.1361 16.7429 16.7091 16.9506 16.3176 16.8153C15.9261 16.6801 15.7184 16.253 15.8537 15.8615C16.5963 13.7123 17 11.4041 17 9C17 5.41015 14.0898 2.5 10.5 2.5ZM4.83285 4.41627C5.17979 4.64256 5.27759 5.10725 5.0513 5.45419C4.38644 6.47353 3.99999 7.69049 3.99999 9C3.99999 10.6078 3.52489 12.107 2.70721 13.362C2.48109 13.709 2.01645 13.807 1.6694 13.5809C1.32235 13.3548 1.22432 12.8902 1.45043 12.5431C2.11422 11.5243 2.49999 10.3084 2.49999 9C2.49999 7.39075 2.97592 5.89038 3.79493 4.63472C4.02122 4.28778 4.48591 4.18998 4.83285 4.41627ZM10.5 6.12C8.84313 6.12 7.49999 7.46314 7.49999 9.12C7.49999 9.13378 7.49961 9.14748 7.49888 9.16108C7.46101 11.9169 6.45296 14.4401 4.80164 16.4018C4.53489 16.7187 4.06176 16.7593 3.74487 16.4926C3.42798 16.2258 3.38733 15.7527 3.65408 15.4358C5.11842 13.6962 5.99999 11.452 5.99999 9C5.99999 8.97218 6.0015 8.94471 6.00445 8.91767C6.11027 6.52628 8.08251 4.62 10.5 4.62C12.9174 4.62 14.8896 6.52613 14.9955 8.91754C14.9985 8.94516 15 8.97323 15 9.00166L14.9998 9.0815L15 9.11633C15 9.12755 14.9998 9.13872 14.9994 9.14983C14.9986 9.24922 14.9971 9.34844 14.9948 9.44749C14.9852 9.86159 14.6418 10.1895 14.2277 10.1799C13.8136 10.1704 13.4856 9.8269 13.4952 9.4128C13.4977 9.30372 13.4993 9.19439 13.4998 9.08481C13.481 7.44426 12.1451 6.12 10.5 6.12ZM10.5 8.25C10.9142 8.25 11.25 8.58579 11.25 9C11.25 12.5103 10.063 15.7455 8.069 18.3232C7.81556 18.6509 7.34451 18.711 7.01688 18.4576C6.68925 18.2041 6.62912 17.7331 6.88256 17.4054C8.68049 15.0812 9.74999 12.1666 9.74999 9C9.74999 8.58579 10.0858 8.25 10.5 8.25ZM14.0288 11.9478C14.4346 12.0309 14.6962 12.4273 14.613 12.8331C14.1842 14.9261 13.4112 16.8937 12.3562 18.6738C12.145 19.0302 11.6849 19.1478 11.3286 18.9366C10.9723 18.7254 10.8546 18.2654 11.0658 17.9091C12.0374 16.2697 12.7488 14.4585 13.1436 12.532C13.2267 12.1262 13.623 11.8646 14.0288 11.9478Z"
+                  fill={style.get('color-white').color}
                 />
               </Svg>
             )
@@ -256,7 +254,6 @@ const SecondScene = observer<{
   const style = useStyle();
 
   const [isShowPassword, setIsShowPassword] = useState(false);
-  const [passwordCopied, setPasswordCopied] = useState(false);
 
   return (
     <Box paddingX={22} paddingTop={35} paddingBottom={20}>
@@ -340,7 +337,7 @@ const SecondScene = observer<{
             ])}>
             <XAxis>
               <Text style={style.flatten(['text-button1', 'color-gray-50'])}>
-                {isShowPassword ? 'Hide' : 'Show'}
+                {isShowPassword ? 'Hide Password' : 'Show Password'}
               </Text>
               <Gutter size={4} />
               {isShowPassword ? (
@@ -368,59 +365,6 @@ const SecondScene = observer<{
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                  />
-                </Svg>
-              )}
-            </XAxis>
-          </Box>
-        </RectButton>
-        <Gutter size={16} />
-        <RectButton
-          style={style.flatten(['border-radius-6'])}
-          onPress={async () => {
-            await Clipboard.setStringAsync(uiConfigStore.userPassword);
-
-            setPasswordCopied(true);
-            setTimeout(() => {
-              setPasswordCopied(false);
-            }, 1000);
-          }}>
-          <Box
-            style={style.flatten([
-              'border-radius-6',
-              'height-40',
-              'items-center',
-              'justify-center',
-              'padding-x-12',
-            ])}>
-            <XAxis>
-              <Text style={style.flatten(['text-button1', 'color-gray-50'])}>
-                {passwordCopied ? 'Copied' : 'Copy Password'}
-              </Text>
-              <Gutter size={4} />
-              {passwordCopied ? (
-                <Svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <Path
-                    d="M6.75001 12.1275L3.62251 9L2.55751 10.0575L6.75001 14.25L15.75 5.25L14.6925 4.1925L6.75001 12.1275Z"
-                    fill={style.get('color-white').color}
-                  />
-                </Svg>
-              ) : (
-                <Svg width="19" height="18" viewBox="0 0 19 18" fill="none">
-                  <Path
-                    d="M12.6227 3H6.02274C4.69726 3 3.62274 4.07452 3.62274 5.4V12"
-                    stroke={style.get('color-white').color}
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  />
-                  <Rect
-                    x="6.62274"
-                    y="6"
-                    width="9"
-                    height="9"
-                    rx="1.65"
-                    stroke={style.get('color-white').color}
-                    strokeWidth="1.5"
                   />
                 </Svg>
               )}
