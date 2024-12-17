@@ -237,6 +237,7 @@ const FirstScene = observer<{
               await keychainStore.getPasswordWithBiometryV2();
             } catch (e) {
               console.log(e);
+              return;
             }
           }
 
